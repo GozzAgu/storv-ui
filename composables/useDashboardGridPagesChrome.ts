@@ -3,7 +3,7 @@ import { useDashboardPageChrome } from '~/composables/useDashboardPageChrome'
 import { useDashboardTableChrome } from '~/composables/useDashboardTableChrome'
 
 /**
- * Grid-heavy dashboard pages — inventory categories, departments, similar directory views.
+ * Grid-heavy dashboard pages - inventory categories, departments, similar directory views.
  */
 export function useDashboardGridPagesChrome() {
   const home = useDashboardHomeChrome()

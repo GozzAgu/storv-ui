@@ -49,7 +49,7 @@ export default defineEventHandler(async (event) => {
           channel: payload.data?.channel,
         })
       } catch (err) {
-        // Log but still 200 — Paystack retries on non-2xx; we don't want infinite retries on a settle bug.
+        // Log but still 200 - Paystack retries on non-2xx; we don't want infinite retries on a settle bug.
         console.error('[paystack/webhook] settle failed', err)
       }
     }

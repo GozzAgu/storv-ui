@@ -91,7 +91,7 @@
               <p class="m-0 leading-snug">
                 <span :class="itemTitleClass">{{ notification.title }}</span>
                 <span :class="itemMessageClass">
-                  — {{ formatMessageWithAccountCurrency(notification.message) }}
+                  - {{ formatMessageWithAccountCurrency(notification.message) }}
                 </span>
               </p>
               <p :class="itemTimeClass">{{ formatTime(notification.createdAt) }}</p>

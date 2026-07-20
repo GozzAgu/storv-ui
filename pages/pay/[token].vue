@@ -224,7 +224,7 @@ const pay = async () => {
 onMounted(async () => {
   const reference = String(route.query.reference || route.query.trxref || '')
   if (reference) {
-    // Returning from Paystack — confirm before showing status.
+    // Returning from Paystack - confirm before showing status.
     verifying.value = true
     try {
       const res = (await $fetch(`/api/pay/${token.value}/verify`, { query: { reference } })) as {

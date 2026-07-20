@@ -1,4 +1,4 @@
-/* App-wide buttons — match SaaS landing `.landing-pill-cta` (pill shape, Storvv navy) */
+/* App-wide buttons - match SaaS landing `.landing-pill-cta` (pill shape, Storvv navy) */
 
 :root {
   --app-btn-primary-bg: #143f8d;
@@ -156,7 +156,7 @@ html.dark .btn-outline:hover:not(:disabled) {
   border-radius: var(--app-btn-radius) !important;
 }
 
-/* `<Button />` and legacy btn-* utilities — pill wins over scattered rounded overrides */
+/* `<Button />` and legacy btn-* utilities - pill wins over scattered rounded overrides */
 button.btn-primary,
 button.btn-secondary,
 button.btn-outline,

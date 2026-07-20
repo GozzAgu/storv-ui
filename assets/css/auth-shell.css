@@ -1,4 +1,4 @@
-/* Auth screens — aligned with Storvv SaaS landing (portfolio dark theme) */
+/* Auth screens - aligned with Storvv SaaS landing (portfolio dark theme) */
 
 html:has([data-auth-shell]),
 html:has([data-auth-shell]) body {
@@ -93,7 +93,7 @@ html:not(.dark) [data-auth-shell] {
   color: var(--auth-muted);
 }
 
-/* ── Brand panel (always dark — text stays light regardless of app theme) ── */
+/* ── Brand panel (always dark - text stays light regardless of app theme) ── */
 .auth-shell__brand {
   --auth-brand-ink: #f8fafc;
   --auth-brand-muted: #94a3b8;

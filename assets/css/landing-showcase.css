@@ -14,7 +14,7 @@
   --storvv-blue-rgb: 20, 63, 141;
   --storvv-blue-mid-rgb: 72, 118, 199;
   --storvv-blue-light-rgb: 110, 148, 214;
-  /* Shared type scale — tightened for a cleaner, more professional feel */
+  /* Shared type scale - tightened for a cleaner, more professional feel */
   --landing-text-min: 0.8125rem;
   --landing-text-body: 0.875rem;
   --landing-text-lead: 0.9375rem;
@@ -1446,7 +1446,7 @@ html.dark .landing-about-section .landing-label--blue {
   font-size: clamp(2.25rem, 6vw, 3.5rem);
 }
 
-/* Who uses Storvv — clean layout */
+/* Who uses Storvv - clean layout */
 .landing-who-uses-section {
   position: relative;
   overflow: hidden;

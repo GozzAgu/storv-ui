@@ -56,7 +56,7 @@ export default defineEventHandler(async (event) => {
       { method: 'GET', secretKey }
     )
   } catch {
-    // Settlements may be unavailable (e.g. test mode) — degrade gracefully.
+    // Settlements may be unavailable (e.g. test mode) - degrade gracefully.
     return { success: true, settlements: [], pendingTotal: 0, settledTotal: 0, lastSettledAtMs: 0 }
   }
 

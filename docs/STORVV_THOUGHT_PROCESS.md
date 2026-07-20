@@ -1,8 +1,8 @@
-# Storvv — Thought Process & Product Journey
+# Storvv - Thought Process & Product Journey
 
 A narrative of how Storvv evolved: what you were trying to build, how your thinking shifted, and the principles that kept showing up in every decision.
 
-_Derived from product conversations, feature work, and design iterations through May–June 2026._
+_Derived from product conversations, feature work, and design iterations through May-June 2026._
 
 ---
 
@@ -18,7 +18,7 @@ The product was never meant to be “another POS” or “another inventory app.
 2. What did we sell, and to whom?
 3. Who changed what?
 
-That framing shaped everything: inventory folders, receipts, returns, customers, departments, multi-store switching, and later payment links. Each feature had to earn its place by helping answer one of those questions — or by helping the business **sell more reliably**.
+That framing shaped everything: inventory folders, receipts, returns, customers, departments, multi-store switching, and later payment links. Each feature had to earn its place by helping answer one of those questions - or by helping the business **sell more reliably**.
 
 ---
 
@@ -26,7 +26,7 @@ That framing shaped everything: inventory folders, receipts, returns, customers,
 
 Early marketing leaned gadget/phone-shop language. You corrected that quickly:
 
-> _“Storvv is for any kind of business — cars, spare parts, furniture, clothing, not just gadgets.”_
+> _“Storvv is for any kind of business - cars, spare parts, furniture, clothing, not just gadgets.”_
 
 That was an important product decision. Storvv is **vertical-agnostic retail ops software**:
 
@@ -37,7 +37,7 @@ That was an important product decision. Storvv is **vertical-agnostic retail ops
 | Auto parts & procurement teams | Multi-branch, departments, manager oversight            |
 | Growing chains                 | Analytics, activity logs, multi-store sync (Enterprise) |
 
-The landing page, demo copy, and “who it is for” sections were repeatedly tuned to feel **broad but serious** — not niche, not toy-like.
+The landing page, demo copy, and “who it is for” sections were repeatedly tuned to feel **broad but serious** - not niche, not toy-like.
 
 ---
 
@@ -45,7 +45,7 @@ The landing page, demo copy, and “who it is for” sections were repeatedly tu
 
 Across auth screens, dashboard, landing page, and iOS, the same standards appeared again and again:
 
-### 3.1 Professional and clean — never “AI slop”
+### 3.1 Professional and clean - never “AI slop”
 
 You consistently pushed back on UIs that felt generated or over-decorated:
 
@@ -60,8 +60,8 @@ You consistently pushed back on UIs that felt generated or over-decorated:
 There was a real tension between “modern = small type” and “readable = normal type.” You landed on:
 
 - **Landing:** brief but explanatory; later pass reduced font sizes for a more professional feel, but you still rejected tiny illegible text when it caused stress
-- **App:** uniform text sizes on iOS — inputs, tables, labels all proportioned consistently
-- **No clutter:** dashboard info density questioned directly — _“is info on dashboard too much?”_
+- **App:** uniform text sizes on iOS - inputs, tables, labels all proportioned consistently
+- **No clutter:** dashboard info density questioned directly - _“is info on dashboard too much?”_
 
 ### 3.3 Mobile is not an afterthought
 
@@ -70,12 +70,12 @@ The Capacitor app had to feel like a **real native product**, not a website in a
 - Face ID / Touch ID for saved login
 - No black letterboxing at top and bottom
 - Drawers and panels **inside the app shell**, not floating over the OS chrome
-- Floating glass bottom nav (Instagram / Meta style) with side padding — not edge-to-edge
+- Floating glass bottom nav (Instagram / Meta style) with side padding - not edge-to-edge
 - Uniform typography and spacing across every screen
 
 ### 3.4 Trust and calm
 
-Whether onboarding, Paystack settlement UI, or security copy — you wanted users to feel:
+Whether onboarding, Paystack settlement UI, or security copy - you wanted users to feel:
 
 > _“This system is serious. My money and my stock are handled properly.”_
 
@@ -93,7 +93,7 @@ flowchart TB
     D --> E[Launch discipline<br/>web live, native coming soon]
 ```
 
-### Phase A — Core operations (foundation)
+### Phase A - Core operations (foundation)
 
 **Belief:** If daily shop work isn’t solid, nothing else matters.
 
@@ -106,7 +106,7 @@ Built and refined:
 - Multi-store context in the header
 - Activity logs, analytics, stock loans (Enterprise)
 
-### Phase B — Polish & native app
+### Phase B - Polish & native app
 
 **Belief:** Merchants will judge Storvv on how it _feels_ on the phone they carry every day.
 
@@ -117,7 +117,7 @@ Priorities:
 3. Biometric login (with real debugging when Keychain save failed)
 4. Side panels and modals that respect the app frame
 
-### Phase C — Marketing & demo-first acquisition
+### Phase C - Marketing & demo-first acquisition
 
 **Belief:** People shouldn’t have to sign up blind.
 
@@ -129,9 +129,9 @@ You wanted:
 - Interactive hero, capabilities explorer (dark full-screen tabs), contact & security sections with life
 - Slack-inspired neat/light aesthetic (light-dominant with selective dark bands)
 
-### Phase D — Payment links (biggest feature bet)
+### Phase D - Payment links (biggest feature bet)
 
-**Belief:** Remote selling is how many Nigerian retailers already work — WhatsApp, Instagram, DM — but payments are informal and stock doesn’t update.
+**Belief:** Remote selling is how many Nigerian retailers already work - WhatsApp, Instagram, DM - but payments are informal and stock doesn’t update.
 
 #### 4.1 Exploration
 
@@ -173,15 +173,15 @@ You hit real-world Paystack questions:
 - T+1 settlement (not instant bank credit)
 - KYC, live keys, bank connected before payment
 
-**Thought process:** Build trust in the UI even when rails are async — show settlement state honestly rather than promising instant bank deposits.
+**Thought process:** Build trust in the UI even when rails are async - show settlement state honestly rather than promising instant bank deposits.
 
-### Phase E — Launch discipline (current)
+### Phase E - Launch discipline (current)
 
 **Belief:** Ship confidently on web; don’t expose half-baked native flows.
 
 When settlement and mobile polish weren’t fully trusted yet:
 
-- **Website:** “Payment links — in progress” (marketing honesty)
+- **Website:** “Payment links - in progress” (marketing honesty)
 - **iOS/Android app:** Coming soon screen (no broken Paystack setup)
 - **Backend:** APIs and `/pay/[token]` checkout still work for web merchants
 - **Nav:** Promote “Links” tab on native so the feature is visible, not buried in More
@@ -209,11 +209,11 @@ This is pragmatic product thinking: **gate the experience, not necessarily the i
 
 You rarely accept “it works in code.” Done means:
 
-1. **Looks right** — screenshot compared to rest of app; dimensions match other pages
-2. **Feels right on iOS** — rebuilt Capacitor bundle, tested installed app
-3. **Reads right** — no tiny text, no jargon, no em dashes
-4. **Behaves right** — scroll isn’t trapped, overlays don’t block nav, drawers stay in-app
-5. **Explains right** — user knows what to click (capabilities tabs, demo CTA, payment link status)
+1. **Looks right** - screenshot compared to rest of app; dimensions match other pages
+2. **Feels right on iOS** - rebuilt Capacitor bundle, tested installed app
+3. **Reads right** - no tiny text, no jargon, no em dashes
+4. **Behaves right** - scroll isn’t trapped, overlays don’t block nav, drawers stay in-app
+5. **Explains right** - user knows what to click (capabilities tabs, demo CTA, payment link status)
 
 ---
 
@@ -241,7 +241,7 @@ You rarely accept “it works in code.” Done means:
 
 **One sentence you’ve been circling for months:**
 
-> Storvv is the workspace where stock, sales, and people stay aligned — in the shop, across branches, and increasingly over WhatsApp and payment links.
+> Storvv is the workspace where stock, sales, and people stay aligned - in the shop, across branches, and increasingly over WhatsApp and payment links.
 
 ---
 
@@ -249,23 +249,23 @@ You rarely accept “it works in code.” Done means:
 
 These are the open threads in your thinking (as of June 2026):
 
-1. **Native payment links** — flip `PAYMENT_LINKS_NATIVE_COMING_SOON` when iOS flow is trusted
-2. **Paystack operations** — live mode checklist for real merchant settlements
-3. **Landing balance** — clean/modern vs. readable; mobile nav overlay fixes
-4. **Dashboard signal-to-noise** — payment link cards without overload
-5. **Brand consistency** — logo blue, uniform type, glass nav, no “template” feel
+1. **Native payment links** - flip `PAYMENT_LINKS_NATIVE_COMING_SOON` when iOS flow is trusted
+2. **Paystack operations** - live mode checklist for real merchant settlements
+3. **Landing balance** - clean/modern vs. readable; mobile nav overlay fixes
+4. **Dashboard signal-to-noise** - payment link cards without overload
+5. **Brand consistency** - logo blue, uniform type, glass nav, no “template” feel
 
 ---
 
 ## 9. Principles to keep (your product north star)
 
-1. **Solve daily shop work first** — everything else is a multiplier
-2. **Show, don’t tell** — demo and interactive landing beat feature lists
-3. **Narrow features aggressively** — storefront out; payment link in
-4. **Design is trust** — especially for money and inventory
-5. **Mobile parity matters** — rebuild, test installed, fix chrome
-6. **Be honest in UI** — “in progress,” settlement timing, failed payments visible
-7. **Any business, not one niche** — copy and templates should feel universal
+1. **Solve daily shop work first** - everything else is a multiplier
+2. **Show, don’t tell** - demo and interactive landing beat feature lists
+3. **Narrow features aggressively** - storefront out; payment link in
+4. **Design is trust** - especially for money and inventory
+5. **Mobile parity matters** - rebuild, test installed, fix chrome
+6. **Be honest in UI** - “in progress,” settlement timing, failed payments visible
+7. **Any business, not one niche** - copy and templates should feel universal
 
 ---
 

@@ -1,6 +1,6 @@
 /**
  * Resolve when `promise` settles or after `ms` (whichever comes first).
- * On timeout, resolves `undefined` and logs a warning — never blocks the UI forever.
+ * On timeout, resolves `undefined` and logs a warning - never blocks the UI forever.
  */
 export function withTimeout<T>(
   promise: Promise<T>,

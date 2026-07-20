@@ -1,4 +1,4 @@
-/* Portfolio dark theme for Storvv landing — goz-portfolio-app.vercel.app */
+/* Portfolio dark theme for Storvv landing - goz-portfolio-app.vercel.app */
 
 .landing-page--portfolio {
   width: 100%;
@@ -417,7 +417,7 @@
   color: var(--portfolio-muted) !important;
 }
 
-/* Card body copy — slightly brighter for readability */
+/* Card body copy - slightly brighter for readability */
 .landing-page--portfolio .landing-who-card-desc,
 .landing-page--portfolio .landing-core__card-desc,
 .landing-page--portfolio .landing-promo-card__lede {

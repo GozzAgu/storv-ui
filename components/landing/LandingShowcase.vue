@@ -511,7 +511,7 @@ const coreFeatures = [
     icon: CreditCardIcon,
     title: 'Payment links',
     description:
-      'Send a secure Paystack link from the web app. Customer pays on their phone—you get a receipt and stock updates automatically. Mobile app support coming soon.',
+      'Send a secure Paystack link from the web app. Customer pays on their phone, you get a receipt and stock updates automatically. Mobile app support coming soon.',
     badge: 'On web now',
     wide: true,
   },

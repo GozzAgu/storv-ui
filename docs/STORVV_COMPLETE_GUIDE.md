@@ -1,4 +1,4 @@
-# Storvv — Complete Product & Technical Guide
+# Storvv - Complete Product & Technical Guide
 
 This is the **master reference** for Storvv: what the product is, who it serves, how every module works, how data is stored, how access is enforced, and how the codebase is organized.
 
@@ -23,11 +23,11 @@ This is the **master reference** for Storvv: what the product is, who it serves,
 3. [Subscription plans and billing](#3-subscription-plans-and-billing)
 4. [Roles, permissions, and access control](#4-roles-permissions-and-access-control)
 5. [Core concepts every user should know](#5-core-concepts-every-user-should-know)
-6. [Session lifecycle — from open app to logout](#6-session-lifecycle--from-open-app-to-logout)
+6. [Session lifecycle - from open app to logout](#6-session-lifecycle--from-open-app-to-logout)
 7. [Dashboard shell and navigation](#7-dashboard-shell-and-navigation)
 8. [Onboarding and first-time setup](#8-onboarding-and-first-time-setup)
-9. [Inventory — folders, items, and stock](#9-inventory--folders-items-and-stock)
-10. [Sales — receipts, customers, and POS flows](#10-sales--receipts-customers-and-pos-flows)
+9. [Inventory - folders, items, and stock](#9-inventory--folders-items-and-stock)
+10. [Sales - receipts, customers, and POS flows](#10-sales--receipts-customers-and-pos-flows)
 11. [Returns and refunds](#11-returns-and-refunds)
 12. [Customer balance (Medium+)](#12-customer-balance-medium)
 13. [Analytics and reporting (Medium+)](#13-analytics-and-reporting-medium)
@@ -38,7 +38,7 @@ This is the **master reference** for Storvv: what the product is, who it serves,
 18. [Payment links](#18-payment-links)
 19. [Notifications and help center](#19-notifications-and-help-center)
 20. [Settings, profile, and branding](#20-settings-profile-and-branding)
-21. [Public pages — shared receipts and payment checkout](#21-public-pages--shared-receipts-and-payment-checkout)
+21. [Public pages - shared receipts and payment checkout](#21-public-pages--shared-receipts-and-payment-checkout)
 22. [WhatsApp and email delivery](#22-whatsapp-and-email-delivery)
 23. [Demo mode](#23-demo-mode)
 24. [Data model (Firestore)](#24-data-model-firestore)
@@ -59,9 +59,9 @@ This is the **master reference** for Storvv: what the product is, who it serves,
 
 Storvv is a **retail operations platform** for businesses that need to track:
 
-1. **What is in stock** — organized inventory with custom fields per product category.
-2. **What was sold** — receipts (sales records) with line items, payments, and customers.
-3. **Who did what** — roles, activity logs, and notifications for operational visibility.
+1. **What is in stock** - organized inventory with custom fields per product category.
+2. **What was sold** - receipts (sales records) with line items, payments, and customers.
+3. **Who did what** - roles, activity logs, and notifications for operational visibility.
 
 It is aimed at store owners, managers, and front-line staff. A single **account owner** (super admin) can run one store on Micro or scale to multiple branches on Medium and Enterprise.
 
@@ -144,15 +144,15 @@ Plans unlock **features** and **numeric caps**. Source of truth: `types/subscrip
 | Settings, profile, notifications, help, onboarding | ✓ | ✓ | ✓ |
 | WhatsApp messaging | ✓ (capped) | ✓ | ✓ |
 | Payment links (nav; see §18 for launch status) | ✓ | ✓ | ✓ |
-| Analytics & exports | — | ✓ | ✓ |
-| Activity logs | — | ✓ | ✓ |
-| Departments (multi-dept teams) | — | ✓ | ✓ |
-| Customer balance / credit ledger | — | ✓ | ✓ |
-| Duplicate category (same branch) | — | ✓ | ✓ |
-| Multi-store sync & transfers | — | — | ✓ |
-| Copy from branch (templates) | — | — | ✓ |
-| Stock loans | — | — | ✓ |
-| Priority support | — | — | ✓ |
+| Analytics & exports | - | ✓ | ✓ |
+| Activity logs | - | ✓ | ✓ |
+| Departments (multi-dept teams) | - | ✓ | ✓ |
+| Customer balance / credit ledger | - | ✓ | ✓ |
+| Duplicate category (same branch) | - | ✓ | ✓ |
+| Multi-store sync & transfers | - | - | ✓ |
+| Copy from branch (templates) | - | - | ✓ |
+| Stock loans | - | - | ✓ |
+| Priority support | - | - | ✓ |
 
 ### Never paywalled (all plans)
 
@@ -209,7 +209,7 @@ Access is a function of **role**, **subscription plan**, and **active store**.
 | `staff` | Day-to-day selling and viewing |
 | `intern` | Limited staff tier |
 
-**Special flag:** `canManageInventory: boolean` — owner-granted full inventory edit without super-admin login.
+**Special flag:** `canManageInventory: boolean` - owner-granted full inventory edit without super-admin login.
 
 ### Client permissions (`usePermissions.ts`)
 
@@ -229,11 +229,11 @@ Access is a function of **role**, **subscription plan**, and **active store**.
 
 | Nav item | Plan feature | Extra role gate |
 | -------- | ------------ | --------------- |
-| Dashboard, Inventory, Receipts, Help, Settings, Profile | respective feature | — |
-| Payment links | `payment_links` | — |
+| Dashboard, Inventory, Receipts, Help, Settings, Profile | respective feature | - |
+| Payment links | `payment_links` | - |
 | Stock loans | `seller_loans` | Manager or super admin |
 | Departments | `departments` | Manager or super admin |
-| Analytics | `analytics` | — |
+| Analytics | `analytics` | - |
 | Activity logs | `activity_logs` | Manager or super admin |
 | Multi-Store Sync | `multi_store_sync` | Super admin only |
 
@@ -254,14 +254,14 @@ When the active store changes, Pinia stores refetch folders, items, receipts, cu
 
 Two levels:
 
-1. **Folders (categories)** — define a **template**: custom columns (brand, serial, price, color, …).
-2. **Items** — rows inside a folder; one row per product or per serial line.
+1. **Folders (categories)** - define a **template**: custom columns (brand, serial, price, color, …).
+2. **Items** - rows inside a folder; one row per product or per serial line.
 
 **Serial mode** (`hasSerialNumbers: true`): each serial is its own row; bulk add accepts many serials at once.
 
 **Quantity mode** (`hasSerialNumbers: false`): a quantity field tracks stock count.
 
-Stock is driven primarily by **sales, returns, balance-due completion, loans, and transfers** — not silent manual quantity drift.
+Stock is driven primarily by **sales, returns, balance-due completion, loans, and transfers** - not silent manual quantity drift.
 
 ### Receipts (sales)
 
@@ -289,7 +289,7 @@ Departments organize teams. Folders can restrict access via `allowedDepartments[
 
 ---
 
-## 6. Session lifecycle — from open app to logout
+## 6. Session lifecycle - from open app to logout
 
 ```mermaid
 flowchart TD
@@ -308,13 +308,13 @@ flowchart TD
 
 **Step detail:**
 
-1. **Bootstrap** — `stores/auth.ts` listens to Firebase Auth.
-2. **Middleware** — `auth.global.ts` blocks dashboard routes if unauthenticated.
-3. **Profile** — `stores/user.ts` loads role, subscription, onboarding flags.
-4. **Store context** — `stores/stores.ts` → `initializeCurrentStore()`.
-5. **Staff password** — if `mustChangePassword`, redirect to `/dashboard/change-password`.
-6. **Parallel fetch** — folders, receipts, departments, staff (role-dependent).
-7. **Logout** — clears session; store caches cleared.
+1. **Bootstrap** - `stores/auth.ts` listens to Firebase Auth.
+2. **Middleware** - `auth.global.ts` blocks dashboard routes if unauthenticated.
+3. **Profile** - `stores/user.ts` loads role, subscription, onboarding flags.
+4. **Store context** - `stores/stores.ts` → `initializeCurrentStore()`.
+5. **Staff password** - if `mustChangePassword`, redirect to `/dashboard/change-password`.
+6. **Parallel fetch** - folders, receipts, departments, staff (role-dependent).
+7. **Logout** - clears session; store caches cleared.
 
 ---
 
@@ -324,15 +324,15 @@ flowchart TD
 
 ### Web layout
 
-- **Sidebar** — collapsible (icon rail ~72px or full ~256px).
-- **Top nav** — store switcher (super admin), global search (⌘K / Ctrl+K), notifications bell, theme toggle, profile menu.
-- **Main content** — page slot with dashboard card/table styling.
+- **Sidebar** - collapsible (icon rail ~72px or full ~256px).
+- **Top nav** - store switcher (super admin), global search (⌘K / Ctrl+K), notifications bell, theme toggle, profile menu.
+- **Main content** - page slot with dashboard card/table styling.
 
 ### Native layout (Capacitor)
 
-- **Bottom navigation** — `DashboardNativeBottomNav.vue`.
-- **No sidebar drawer** — primary routes in tab bar; "More" sheet for secondary items.
-- **Overlay host** — `#dashboard-native-overlay-host` for modals and side drawers.
+- **Bottom navigation** - `DashboardNativeBottomNav.vue`.
+- **No sidebar drawer** - primary routes in tab bar; "More" sheet for secondary items.
+- **Overlay host** - `#dashboard-native-overlay-host` for modals and side drawers.
 
 ### Sidebar shortcuts
 
@@ -355,8 +355,8 @@ flowchart TD
 
 **Two steps:**
 
-1. **Locale** — currency and country (drives money/date formatting app-wide).
-2. **First branch** — store name, address, phone, email, description.
+1. **Locale** - currency and country (drives money/date formatting app-wide).
+2. **First branch** - store name, address, phone, email, description.
 
 On completion:
 
@@ -366,7 +366,7 @@ On completion:
 
 ---
 
-## 9. Inventory — folders, items, and stock
+## 9. Inventory - folders, items, and stock
 
 ### Routes
 
@@ -381,8 +381,8 @@ On completion:
 
 - Create / edit category (side drawer).
 - Delete / bulk delete categories.
-- **Duplicate category** (Medium+, same branch) — clones template settings.
-- **Copy from branch** (Enterprise, super admin, ≥2 stores) — see below.
+- **Duplicate category** (Medium+, same branch) - clones template settings.
+- **Copy from branch** (Enterprise, super admin, ≥2 stores) - see below.
 - Import/export Excel templates (where enabled).
 
 **Views:** grid cards or table; search, department filter, sort, pagination.
@@ -394,7 +394,7 @@ On completion:
 - Name, type (general, electronics, clothing, automotive, …), description.
 - **Use serial numbers** toggle.
 - **Department access** (optional checkboxes; empty = all departments).
-- **Table template** — column definitions with types: `text`, `number`, `date`, `select`, `boolean`, `currency`.
+- **Table template** - column definitions with types: `text`, `number`, `date`, `select`, `boolean`, `currency`.
 
 **Template field shape:**
 
@@ -428,8 +428,8 @@ On completion:
 
 Shared `SidePanel` for add and edit:
 
-- **Single item mode** — all template fields in a grid.
-- **Bulk serial mode** — shared product details + list of serial numbers; each serial creates one item.
+- **Single item mode** - all template fields in a grid.
+- **Bulk serial mode** - shared product details + list of serial numbers; each serial creates one item.
 - Footer: Cancel + Add Product / Update Product.
 
 **System fields (not editable in form):** `id`, `folderId`, `dateIn`, `dateOut`, loan fields, discount metadata, audit timestamps.
@@ -456,7 +456,7 @@ Shared `SidePanel` for add and edit:
 
 ---
 
-## 10. Sales — receipts, customers, and POS flows
+## 10. Sales - receipts, customers, and POS flows
 
 ### Route
 
@@ -472,7 +472,7 @@ Legacy `/dashboard/customers` may redirect or mirror customer views.
 
 - **New receipt** → `CreateReceiptModal` (3-step side drawer).
 - **Quick Sale** → `QuickSaleModal` (centered modal POS).
-- Bulk actions where permitted (delete — super admin only).
+- Bulk actions where permitted (delete - super admin only).
 
 ### Create New Receipt (3 steps)
 
@@ -482,9 +482,9 @@ Legacy `/dashboard/customers` may redirect or mirror customer views.
 | ---- | ------- |
 | 1 | Select inventory **category** (folder); search categories |
 | 2 | Select **items** and quantities; serial lines individually |
-| 3 | **Receipt details** — customer, payment method, status, notes, swap-in, split payments |
+| 3 | **Receipt details** - customer, payment method, status, notes, swap-in, split payments |
 
-**Sell screen note:** branch-level banner from store settings (`sellScreenNote`) shown on steps 2–3 and Quick Sale.
+**Sell screen note:** branch-level banner from store settings (`sellScreenNote`) shown on steps 2-3 and Quick Sale.
 
 **After save:**
 
@@ -538,11 +538,11 @@ Customer docs updated on receipt creation (`stores/customers.ts`).
 
 1. Open return on a specific receipt.
 2. Confirm reason and items.
-3. `inventoryStore.returnItemsToStock()` — serial vs quantity restore logic.
+3. `inventoryStore.returnItemsToStock()` - serial vs quantity restore logic.
 4. Receipt updated: `status: 'refunded'`, `refundReason`, notes prefixed `Returned:`.
 5. Filter receipts by **Refunded** for audit.
 
-Returns are always tied to an original receipt — no free-floating refunds.
+Returns are always tied to an original receipt - no free-floating refunds.
 
 ---
 
@@ -746,7 +746,7 @@ Content in `pages/dashboard/help.vue` is the in-app source for operator document
 
 ## 20. Settings, profile, and branding
 
-### Settings (`/dashboard/settings`) — super admin
+### Settings (`/dashboard/settings`) - super admin
 
 - Branch create/edit/delete (plan limits apply).
 - Subscription and Paystack billing.
@@ -763,13 +763,13 @@ Content in `pages/dashboard/help.vue` is the in-app source for operator document
 
 ### Theming
 
-**Store:** `stores/theme.ts` — light / dark / system.
+**Store:** `stores/theme.ts` - light / dark / system.
 
 Receipt PDF capture forces light theme for readable output.
 
 ---
 
-## 21. Public pages — shared receipts and payment checkout
+## 21. Public pages - shared receipts and payment checkout
 
 | Route | Auth | Purpose |
 | ----- | ---- | ------- |
@@ -983,7 +983,7 @@ Capacitor builds set `NUXT_PUBLIC_API_BASE` to hosted origin (e.g. `https://app.
 | Storage | `upload-account-logo.post` |
 | Utility | `proxy-image.get`, `proxy-image.post` |
 
-**Auth:** `server/utils/store-auth.ts` — `requireAuth`, `requireStoreManageAccess` with Firebase ID token verification.
+**Auth:** `server/utils/store-auth.ts` - `requireAuth`, `requireStoreManageAccess` with Firebase ID token verification.
 
 ---
 
@@ -1027,7 +1027,7 @@ Dashboard SaaS styling lives in imported CSS modules (`assets/css/main.css`):
 
 ### Buttons
 
-**Component:** `components/ui/Button.vue` — pill shape, landing-page navy primary.
+**Component:** `components/ui/Button.vue` - pill shape, landing-page navy primary.
 
 ---
 
@@ -1043,7 +1043,7 @@ Dashboard SaaS styling lives in imported CSS modules (`assets/css/main.css`):
 ### Mobile (Capacitor)
 
 - **Build:** `npm run cap:build` → `npm run cap:open:ios` / Android.
-- **Config:** `capacitor.config.ts` — `appId: com.storv.app`, `appName: Storvv`.
+- **Config:** `capacitor.config.ts` - `appId: com.storv.app`, `appName: Storvv`.
 - Same static bundle as web; bottom nav instead of sidebar.
 
 ### Deployment (Vercel)
@@ -1106,4 +1106,4 @@ When shipping a feature:
 
 ---
 
-*Last expanded: June 2026 — reflects `storv-ui` codebase including side drawer overlay system, unified drawer width, and payment links coming-soon flags.*
+*Last expanded: June 2026 - reflects `storv-ui` codebase including side drawer overlay system, unified drawer width, and payment links coming-soon flags.*

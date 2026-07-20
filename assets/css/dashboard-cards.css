@@ -1,4 +1,4 @@
-/* Dashboard content cards — aligned with Storvv SaaS shell tokens */
+/* Dashboard content cards - aligned with Storvv SaaS shell tokens */
 
 main[data-dashboard-main] {
   --dash-card-ink: var(--dash-ink, #0f172a);

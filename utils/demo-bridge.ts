@@ -141,7 +141,7 @@ export function getDemoSellerLoans(storeId: string): SellerLoanOut[] {
       status: 'active',
       partyName: 'Emeka Traders',
       partyPhone: '0803 555 0101',
-      partyNotes: 'Reseller — settles weekly',
+      partyNotes: 'Reseller - settles weekly',
       lines: [{ inventoryItemId: first.id, folderId: first.folderId, itemSummary: first.name }],
       createdAt: new Date(now - day * 3),
       updatedAt: new Date(now - day * 3),

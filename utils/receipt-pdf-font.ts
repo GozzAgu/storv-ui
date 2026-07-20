@@ -1,6 +1,6 @@
 import type { jsPDF } from 'jspdf'
 
-/** jsPDF built-in monospace — closest match to receipt UI without embedding custom fonts */
+/** jsPDF built-in monospace - closest match to receipt UI without embedding custom fonts */
 export const RECEIPT_PDF_FONT = 'courier'
 
 export type ReceiptPdfFontStyle = 'normal' | 'bold' | 'italic' | 'bolditalic'

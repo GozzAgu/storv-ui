@@ -5,7 +5,7 @@ import { useDashboardTableChrome } from '~/composables/useDashboardTableChrome'
 import { APP_FIELD_CLASS, APP_FIELD_TEXTAREA_CLASS } from '~/utils/app-chrome'
 
 /**
- * Multi-Store Sync page — dashboard SaaS tokens for transfers, reports, and history.
+ * Multi-Store Sync page - dashboard SaaS tokens for transfers, reports, and history.
  */
 export function useDashboardMultiStoreChrome() {
   const home = useDashboardHomeChrome()

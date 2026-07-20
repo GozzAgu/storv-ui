@@ -18,7 +18,7 @@ function pasteHint(): string {
 
 /**
  * Opens the customer's WhatsApp chat (wa.me) and prepares the receipt file.
- * Does not use the system share sheet — WhatsApp is rarely listed there on desktop.
+ * Does not use the system share sheet - WhatsApp is rarely listed there on desktop.
  */
 export async function deliverReceiptViaClientWhatsApp(params: {
   file: File

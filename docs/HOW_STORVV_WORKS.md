@@ -12,9 +12,9 @@ For step-by-step user journeys and module behavior, see [STORVV_APP_FLOW.md](./S
 
 Storvv helps retail and similar businesses answer three questions every day:
 
-1. **What do we have in stock?** — Organized inventory with custom fields per product category.
-2. **What did we sell?** — Receipts (sales records) tied to line items, payments, and customers.
-3. **Who did what?** — Roles, activity logs, and notifications for operational visibility.
+1. **What do we have in stock?** - Organized inventory with custom fields per product category.
+2. **What did we sell?** - Receipts (sales records) tied to line items, payments, and customers.
+3. **Who did what?** - Roles, activity logs, and notifications for operational visibility.
 
 The product is aimed at store owners, managers, and front-line staff. A single **account owner** (super admin) can run one store on the Micro plan or scale to multiple branches on Medium and Enterprise plans.
 
@@ -68,8 +68,8 @@ When the active store changes, lists and forms refetch data for that branch so i
 
 Inventory is two levels:
 
-- **Folders** — Categories with a **template** (custom fields: brand, serial, price, color, etc.). Example: “Phones” or “Vehicle parts.”
-- **Items** — Rows inside a folder; each row is a product or serial line.
+- **Folders** - Categories with a **template** (custom fields: brand, serial, price, color, etc.). Example: “Phones” or “Vehicle parts.”
+- **Items** - Rows inside a folder; each row is a product or serial line.
 
 Stock levels are driven primarily by **sales and returns**, not arbitrary manual edits, so quantities stay aligned with receipts.
 
@@ -87,7 +87,7 @@ Business data lives under the **account owner’s** Firestore path, not under ea
 
 ## System Architecture
 
-Storvv is a **Nuxt 4** single-page application (Vue 3) with **no SSR** — it is generated as static files for web and wrapped in **Capacitor** for iOS and Android. Business data is stored in **Firebase** (Auth, Firestore, Storage). Privileged or cross-tenant operations run on **Nuxt server routes** (Nitro) with **Firebase Admin**.
+Storvv is a **Nuxt 4** single-page application (Vue 3) with **no SSR** - it is generated as static files for web and wrapped in **Capacitor** for iOS and Android. Business data is stored in **Firebase** (Auth, Firestore, Storage). Privileged or cross-tenant operations run on **Nuxt server routes** (Nitro) with **Firebase Admin**.
 
 ```mermaid
 flowchart TB
@@ -242,8 +242,8 @@ Server endpoints live under `server/api/` (receipts, Paystack, stores, inventory
 
 ### Web
 
-- **Marketing** — Landing, pricing, legal (`pages/index.vue`, `/privacy`, `/terms`). Often served on `www.storvv.com` or configured marketing hosts.
-- **App** — Authenticated product on `app.storvv.com` (subdomain routing in `middleware/00-subdomain.global.ts`).
+- **Marketing** - Landing, pricing, legal (`pages/index.vue`, `/privacy`, `/terms`). Often served on `www.storvv.com` or configured marketing hosts.
+- **App** - Authenticated product on `app.storvv.com` (subdomain routing in `middleware/00-subdomain.global.ts`).
 
 ### Mobile (Capacitor)
 
@@ -263,9 +263,9 @@ Key environment patterns are documented in `.env.example` and `nuxt.config.ts` `
 
 Access is a function of **role**, **subscription plan**, and **store context**:
 
-- **Role** — What actions you can perform (create folders, approve refunds, open multi-store tools).
-- **Plan** — Which sidebar modules exist and numeric limits (stores, departments, staff).
-- **Store** — Which branch’s data you read and write; without a store, many pages cannot load meaningful data.
+- **Role** - What actions you can perform (create folders, approve refunds, open multi-store tools).
+- **Plan** - Which sidebar modules exist and numeric limits (stores, departments, staff).
+- **Store** - Which branch’s data you read and write; without a store, many pages cannot load meaningful data.
 
 Example: **Copy from branch** requires super admin + Enterprise + at least two stores. **Analytics** requires Medium or Enterprise.
 
@@ -292,7 +292,7 @@ Example: **Copy from branch** requires super admin + Enterprise + at least two s
 
 | Document                                               | Contents                                                         |
 | ------------------------------------------------------ | ---------------------------------------------------------------- |
-| [STORVV_COMPLETE_GUIDE.md](./STORVV_COMPLETE_GUIDE.md) | **Master guide** — full product & technical reference            |
+| [STORVV_COMPLETE_GUIDE.md](./STORVV_COMPLETE_GUIDE.md) | **Master guide** - full product & technical reference            |
 | [STORVV_APP_FLOW.md](./STORVV_APP_FLOW.md)             | Detailed user flows, module behavior, scenarios, file references |
 | [SUBSCRIPTION_FEATURES.md](./SUBSCRIPTION_FEATURES.md) | Micro / Medium / Enterprise feature matrix                       |
 | [STORAGE_SETUP.md](./STORAGE_SETUP.md)                 | Firebase Storage for images                                      |

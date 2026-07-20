@@ -10,7 +10,7 @@ export type InventoryAvailabilityStatus =
 export interface InventoryAvailabilityBadge {
   status: InventoryAvailabilityStatus
   label: string
-  /** Secondary line (e.g. receipt number) — kept out of the pill label for a clean single-line badge */
+  /** Secondary line (e.g. receipt number) - kept out of the pill label for a clean single-line badge */
   meta?: string
   dotClass: string
   class: string
@@ -36,7 +36,7 @@ export function isItemOnStockLoan(item: InventoryItem): boolean {
   return id != null && String(id).trim() !== ''
 }
 
-/** Reserved on an outstanding (balance-due) receipt — not sold until paid in full. */
+/** Reserved on an outstanding (balance-due) receipt - not sold until paid in full. */
 export function isItemAwaitingPayment(item: InventoryItem): boolean {
   return !!getPendingSaleReceiptId(item) && !isItemSold(item)
 }

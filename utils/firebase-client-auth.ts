@@ -14,7 +14,7 @@ import { isCapacitorNative } from '~/utils/capacitor-env'
 export { isCapacitorNative }
 
 function initAuthForApp(app: FirebaseApp): Auth {
-  // IndexedDB persistence can hang on Capacitor WKWebView — use localStorage only on native.
+  // IndexedDB persistence can hang on Capacitor WKWebView - use localStorage only on native.
   const persistence = isCapacitorNative()
     ? browserLocalPersistence
     : [indexedDBLocalPersistence, browserLocalPersistence]
@@ -48,7 +48,7 @@ export function getFirebaseClientAuth(): Auth | null {
   return primaryAuth
 }
 
-/** Secondary app auth (e.g. staff creation) — separate FirebaseApp instance. */
+/** Secondary app auth (e.g. staff creation) - separate FirebaseApp instance. */
 export function getFirebaseClientAuthForApp(app: FirebaseApp): Auth {
   try {
     return initializeAuth(app, {

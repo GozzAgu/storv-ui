@@ -8,7 +8,7 @@ export function useDashboardPageChrome() {
   const { isNativeApp } = useCapacitorNativeApp()
   const native = computed(() => isNativeApp.value)
 
-  /** Elevated surfaces (sections, panels) — no outer border */
+  /** Elevated surfaces (sections, panels) - no outer border */
   const dashboardCardClass = APP_CARD_CLASS
 
   const dashboardCardPaddedClass = 'dash-card dash-card--padded'

@@ -174,7 +174,7 @@ async function persistBiometricLogin(email: string, password: string) {
     if (form.value.enableFaceId) {
       const saved = await saveLogin(email, password)
       if (!saved) {
-        console.warn('[SignIn] Face ID save failed — Keychain write or verify failed')
+        console.warn('[SignIn] Face ID save failed - Keychain write or verify failed')
       }
     } else {
       await clearSavedLogin()

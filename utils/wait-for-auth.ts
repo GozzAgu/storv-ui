@@ -26,7 +26,7 @@ export function waitForAuthStore(store: AuthStore, maxMs = DEFAULT_MAX_MS): Prom
 
     const finish = (reason: 'ready' | 'timeout') => {
       if (reason === 'timeout' && store.loading) {
-        console.warn('[Auth] Initialization timeout — unblocking UI (Capacitor-safe fallback)')
+        console.warn('[Auth] Initialization timeout - unblocking UI (Capacitor-safe fallback)')
         store.loading = false
       }
       resolve()

@@ -3,7 +3,7 @@ import { useDashboardPageChrome } from '~/composables/useDashboardPageChrome'
 import { useDashboardTableChrome } from '~/composables/useDashboardTableChrome'
 
 /**
- * Analytics page — reuses dashboard home card/grid tokens with analytics-specific layout.
+ * Analytics page - reuses dashboard home card/grid tokens with analytics-specific layout.
  */
 export function useDashboardAnalyticsChrome() {
   const home = useDashboardHomeChrome()

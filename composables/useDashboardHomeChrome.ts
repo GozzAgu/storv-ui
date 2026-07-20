@@ -1,5 +1,5 @@
 /**
- * Dashboard home page — semantic class names aligned with dashboard-shell SaaS tokens.
+ * Dashboard home page - semantic class names aligned with dashboard-shell SaaS tokens.
  */
 export function useDashboardHomeChrome() {
   const pageClass = 'dash-home'

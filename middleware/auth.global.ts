@@ -26,7 +26,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     return
   }
 
-  // Native shell: never load marketing `/` — go straight to sign-in (app.html + plugin also redirect).
+  // Native shell: never load marketing `/` - go straight to sign-in (app.html + plugin also redirect).
   if (isCapacitorNative() && isCapacitorMarketingRoot(to.path)) {
     return navigateTo('/signin', { replace: true })
   }

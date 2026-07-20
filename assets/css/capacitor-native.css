@@ -1,5 +1,5 @@
 /**
- * Capacitor iOS/Android shell — edge-to-edge layout, unified typography.
+ * Capacitor iOS/Android shell - edge-to-edge layout, unified typography.
  * Scoped to html.capacitor-native so the web app is unchanged.
  */
 
@@ -12,12 +12,12 @@ html.capacitor-native {
   --cap-surface-bg: #ffffff;
 
   /* Uniform type scale */
-  --cap-text-2xs: 0.75rem; /* 12px — eyebrows, nav labels, captions */
-  --cap-text-xs: 0.8125rem; /* 13px — meta, table headers */
-  --cap-text-sm: 0.9375rem; /* 15px — default body in dashboard */
-  --cap-text-base: 1rem; /* 16px — inputs, emphasized values */
-  --cap-text-lg: 1.125rem; /* 18px — page titles */
-  --cap-text-xl: 1.25rem; /* 20px — rare emphasis only */
+  --cap-text-2xs: 0.75rem; /* 12px - eyebrows, nav labels, captions */
+  --cap-text-xs: 0.8125rem; /* 13px - meta, table headers */
+  --cap-text-sm: 0.9375rem; /* 15px - default body in dashboard */
+  --cap-text-base: 1rem; /* 16px - inputs, emphasized values */
+  --cap-text-lg: 1.125rem; /* 18px - page titles */
+  --cap-text-xl: 1.25rem; /* 20px - rare emphasis only */
 
   --cap-leading-tight: 1.3;
   --cap-leading-normal: 1.45;
@@ -107,7 +107,7 @@ html.capacitor-native[data-native-drawer-open] .dashboard-native-main {
   overflow: hidden !important;
 }
 
-/* Only the page body scrolls — header + bottom nav stay fixed */
+/* Only the page body scrolls - header + bottom nav stay fixed */
 html.capacitor-native .dashboard-native-main {
   flex: 1 1 auto;
   min-height: 0 !important;
@@ -141,7 +141,7 @@ html.capacitor-native.dark .dashboard-native-shell .dashboard-top-nav {
   background-color: rgb(7 8 12 / 0.94) !important;
 }
 
-/* Wrapper is transparent — only the floating pill is visible */
+/* Wrapper is transparent - only the floating pill is visible */
 html.capacitor-native .dashboard-native-bottom-nav {
   background-color: transparent;
 }

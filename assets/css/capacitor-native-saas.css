@@ -1,5 +1,5 @@
 /**
- * Capacitor iOS/Android — parity with web SaaS dashboard (cards, tables, overlays, toasts, buttons).
+ * Capacitor iOS/Android - parity with web SaaS dashboard (cards, tables, overlays, toasts, buttons).
  * Loaded after dashboard-overlays.css; scoped to html.capacitor-native.
  */
 
@@ -282,7 +282,7 @@ html.capacitor-native .dash-toast {
   border-radius: 1rem;
 }
 
-/* ── Pill buttons — iOS touch targets ── */
+/* ── Pill buttons - iOS touch targets ── */
 html.capacitor-ios.capacitor-native .btn-primary,
 html.capacitor-ios.capacitor-native .btn-secondary,
 html.capacitor-ios.capacitor-native .btn-outline,

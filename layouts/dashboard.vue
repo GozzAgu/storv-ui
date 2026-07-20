@@ -23,7 +23,7 @@
         : 'min-h-screen',
     ]"
   >
-    <!-- Sidebar (web / tablet — native app uses bottom nav) -->
+    <!-- Sidebar (web / tablet - native app uses bottom nav) -->
     <aside
       v-if="!isNativeApp"
       class="dashboard-sidebar dash-sidebar"
@@ -942,7 +942,7 @@ watch(notificationsOpen, async (isOpen) => {
   requestAnimationFrame(() => positionNotificationsPanel())
 })
 
-/** Never block the whole shell on auth — show UI with a short gate only (Capacitor-safe). */
+/** Never block the whole shell on auth - show UI with a short gate only (Capacitor-safe). */
 const checkingAuth = ref(false)
 
 // Track store switching state

@@ -257,7 +257,7 @@ export const useStaff = () => {
     }
   }
 
-  // Deactivate staff (use Pinia staff store — soft-delete + disable Auth)
+  // Deactivate staff (use Pinia staff store - soft-delete + disable Auth)
   const deleteStaff = async (staffId: string): Promise<Staff> => {
     const staffStore = useStaffStore()
     return staffStore.deleteStaff(staffId)

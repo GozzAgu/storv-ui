@@ -14,7 +14,7 @@ This document is the source of truth for **marketing**, **Help center**, and **`
 | **Medium**     | Growing business, second branch, real team | Visibility (analytics), accountability (activity logs), scale (staff/depts) |
 | **Enterprise** | Multi-location operators                   | Central control across branches (sync, template copy, stock loans)          |
 
-**Principle:** Micro must feel **complete for one store**. Paid tiers unlock **scale, insight, and multi-location** — not receipts or inventory basics.
+**Principle:** Micro must feel **complete for one store**. Paid tiers unlock **scale, insight, and multi-location** - not receipts or inventory basics.
 
 ---
 
@@ -32,15 +32,15 @@ This document is the source of truth for **marketing**, **Help center**, and **`
 | Settings & profile               |     ✓      |     ✓     |     ✓      |
 | Help center & onboarding         |     ✓      |     ✓     |     ✓      |
 | WhatsApp receipts                | 10 / month | Unlimited | Unlimited  |
-| Analytics & reports              |     —      |     ✓     |     ✓      |
-| Activity logs                    |     —      |     ✓     |     ✓      |
-| Departments (multi-dept teams)   |     —      |     ✓     |     ✓      |
-| Customer balance / credit ledger |     —      |     ✓     |     ✓      |
-| Duplicate category (same branch) |     —      |     ✓     |     ✓      |
-| Multi-store sync & transfers     |     —      |     —     |     ✓      |
-| Copy from branch (templates)     |     —      |     —     |     ✓      |
-| Stock loans                      |     —      |     —     |     ✓      |
-| Priority support                 |     —      |     —     |     ✓      |
+| Analytics & reports              |     -      |     ✓     |     ✓      |
+| Activity logs                    |     -      |     ✓     |     ✓      |
+| Departments (multi-dept teams)   |     -      |     ✓     |     ✓      |
+| Customer balance / credit ledger |     -      |     ✓     |     ✓      |
+| Duplicate category (same branch) |     -      |     ✓     |     ✓      |
+| Multi-store sync & transfers     |     -      |     -     |     ✓      |
+| Copy from branch (templates)     |     -      |     -     |     ✓      |
+| Stock loans                      |     -      |     -     |     ✓      |
+| Priority support                 |     -      |     -     |     ✓      |
 
 ---
 
@@ -51,15 +51,15 @@ This document is the source of truth for **marketing**, **Help center**, and **`
 ### Included
 
 - **1 store**, **1 department**, **up to 2 staff**
-- **Dashboard** — overview, inventory health, quick stats
-- **Inventory** — categories (folders), products, serial or bulk modes
-- **Receipts** — create & manage sales
-- **Returns** — process refunds
-- **Customers** — list & purchase history (Sales screen)
-- **Notifications** — in-app alerts
-- **Settings & profile** — account, theme, security
-- **Help center** — searchable guides
-- **WhatsApp** — share receipts ( **10 sends per calendar month** )
+- **Dashboard** - overview, inventory health, quick stats
+- **Inventory** - categories (folders), products, serial or bulk modes
+- **Receipts** - create & manage sales
+- **Returns** - process refunds
+- **Customers** - list & purchase history (Sales screen)
+- **Notifications** - in-app alerts
+- **Settings & profile** - account, theme, security
+- **Help center** - searchable guides
+- **WhatsApp** - share receipts ( **10 sends per calendar month** )
 
 ### Not included (upgrade triggers)
 
@@ -74,7 +74,7 @@ This document is the source of truth for **marketing**, **Help center**, and **`
 
 ## Storvv Medium
 
-**Aimed at:** Growing business — second location, managers, and reporting.
+**Aimed at:** Growing business - second location, managers, and reporting.
 
 Includes **everything in Micro**, plus:
 
@@ -101,7 +101,7 @@ Includes **everything in Micro**, plus:
 
 ## Storvv Enterprise
 
-**Aimed at:** Larger operations — many branches, central HQ, serial inventory on loan.
+**Aimed at:** Larger operations - many branches, central HQ, serial inventory on loan.
 
 Includes **everything in Medium**, plus:
 
@@ -111,7 +111,7 @@ Includes **everything in Medium**, plus:
 | **Departments**      | **Unlimited** per store                                                                                           |
 | **Staff**            | **Unlimited** per store                                                                                           |
 | **Multi-Store Sync** | Transfer items between stores, transfer history, consolidated reporting                                           |
-| **Copy from branch** | Copy selected **category templates** from one branch to another (names, fields, serial mode — not live stock qty) |
+| **Copy from branch** | Copy selected **category templates** from one branch to another (names, fields, serial mode - not live stock qty) |
 | **Stock loans**      | Lend serial-tracked inventory to borrowers until sold or returned                                                 |
 | **Support**          | Priority support                                                                                                  |
 
@@ -164,8 +164,8 @@ Show upgrade prompts when users **hit a limit**, not at random:
 
 ## Implementation
 
-- **Feature flags:** `types/subscription.ts` — `FEATURES_BY_PLAN`, `LIMITS_BY_PLAN`, `SUBSCRIPTION_FEATURE_SUMMARY`
-- **Usage:** `useSubscriptionFeatures()` — `canUse(feature)`, `limits`, `featureSummary`
+- **Feature flags:** `types/subscription.ts` - `FEATURES_BY_PLAN`, `LIMITS_BY_PLAN`, `SUBSCRIPTION_FEATURE_SUMMARY`
+- **Usage:** `useSubscriptionFeatures()` - `canUse(feature)`, `limits`, `featureSummary`
 - **Nav:** Sidebar hides Analytics (Micro), Activity logs (Micro), Multi-Store Sync & Stock loans (Micro & Medium)
 - **Routes:** Analytics and Multi-Store Sync guard access by plan
 - **Duplicate category:** Medium+ via plan check in `inventory/index.vue` and `inventory/[id].vue` (not a separate feature flag)

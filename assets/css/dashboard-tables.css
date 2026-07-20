@@ -1,4 +1,4 @@
-/* Unified dashboard table UI — hairline dividers, SaaS shell tokens */
+/* Unified dashboard table UI - hairline dividers, SaaS shell tokens */
 
 main[data-dashboard-main],
 [data-dashboard-teleport] {
@@ -246,7 +246,7 @@ main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell) .dashboard-t
   padding: 0.125rem;
 }
 
-/* Activity logs — slightly roomier */
+/* Activity logs - slightly roomier */
 main[data-dashboard-main] .activity-log-shell .dashboard-table thead th {
   padding-top: 0.8125rem;
   padding-bottom: 0.8125rem;

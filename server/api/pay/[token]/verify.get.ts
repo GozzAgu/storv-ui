@@ -10,7 +10,7 @@ import { settlePaymentLink } from '~/server/utils/payment-link-settle'
 
 /**
  * Public (no auth): verify a transaction after the Paystack redirect and settle
- * the link (deduct stock + create receipt). Idempotent — the webhook may also settle.
+ * the link (deduct stock + create receipt). Idempotent - the webhook may also settle.
  */
 export default defineEventHandler(async (event) => {
   const token = (getRouterParam(event, 'token') || '').trim()

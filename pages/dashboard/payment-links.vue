@@ -511,7 +511,7 @@ const settlementNote = (inv: PaymentLinkListItem) => {
 const formatDate = (ms: number) =>
   ms
     ? new Date(ms).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })
-    : '—'
+    : ', '
 
 const settlementBadgeClass = (status: string) =>
   status === 'success' || status === 'completed'

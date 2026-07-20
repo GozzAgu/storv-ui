@@ -25,10 +25,14 @@
           <button
             type="button"
             class="landing-pill-cta landing-user-guide__btn"
-            @click="previewOpen = true"
+            @click="openPreview"
           >
-            <EyeIcon class="landing-user-guide__btn-icon" aria-hidden="true" />
-            Preview guide
+            <component
+              :is="supportsInlinePdf ? EyeIcon : ArrowTopRightOnSquareIcon"
+              class="landing-user-guide__btn-icon"
+              aria-hidden="true"
+            />
+            {{ previewButtonLabel }}
           </button>
           <a
             :href="pdfUrl"
@@ -48,7 +52,7 @@
           type="button"
           class="landing-user-guide__preview-card"
           aria-label="Open full preview of Storvv User Guide"
-          @click="previewOpen = true"
+          @click="openPreview"
         >
           <div class="landing-user-guide__preview-chrome">
             <span class="landing-user-guide__preview-dot" />
@@ -59,16 +63,32 @@
           </div>
           <div class="landing-user-guide__preview-frame">
             <iframe
+              v-if="supportsInlinePdf"
               :src="`${pdfUrl}#view=FitH&toolbar=0&navpanes=0`"
               title="Storvv User Guide preview"
               class="landing-user-guide__iframe"
               tabindex="-1"
             />
+            <div v-else class="landing-user-guide__preview-cover" aria-hidden="true">
+              <img
+                src="/storvv logo.png"
+                alt=""
+                class="landing-user-guide__preview-cover-logo"
+                width="56"
+                height="56"
+              />
+              <p class="landing-user-guide__preview-cover-title">Storvv User Guide</p>
+              <p class="landing-user-guide__preview-cover-meta">Complete product guide</p>
+            </div>
             <div class="landing-user-guide__preview-fade" aria-hidden="true" />
             <div class="landing-user-guide__preview-hover">
               <span class="landing-user-guide__preview-hover-pill">
-                <ArrowsPointingOutIcon class="h-4 w-4" aria-hidden="true" />
-                Open preview
+                <component
+                  :is="supportsInlinePdf ? ArrowsPointingOutIcon : ArrowTopRightOnSquareIcon"
+                  class="h-4 w-4"
+                  aria-hidden="true"
+                />
+                {{ previewButtonLabel }}
               </span>
             </div>
           </div>
@@ -79,7 +99,7 @@
     <Teleport to="body">
       <Transition name="landing-guide-modal">
         <div
-          v-if="previewOpen"
+          v-if="previewOpen && supportsInlinePdf"
           class="landing-user-guide-modal"
           role="dialog"
           aria-modal="true"
@@ -135,10 +155,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onUnmounted } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import {
   ArrowDownTrayIcon,
   ArrowsPointingOutIcon,
+  ArrowTopRightOnSquareIcon,
   EyeIcon,
   XMarkIcon,
 } from '@heroicons/vue/24/outline'
@@ -152,6 +173,38 @@ const highlights = [
 ] as const
 
 const previewOpen = ref(false)
+const supportsInlinePdf = ref(false)
+
+const previewButtonLabel = computed(() =>
+  supportsInlinePdf.value ? 'Preview guide' : 'Open guide'
+)
+
+function canEmbedPdfInline(): boolean {
+  if (!import.meta.client) return false
+
+  const ua = navigator.userAgent
+  const isIOS =
+    /iPad|iPhone|iPod/.test(ua) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+
+  if (isIOS) return false
+  if (window.matchMedia('(max-width: 767px)').matches) return false
+
+  return true
+}
+
+function openPreview() {
+  if (supportsInlinePdf.value) {
+    previewOpen.value = true
+    return
+  }
+
+  window.open(pdfUrl, '_blank', 'noopener,noreferrer')
+}
+
+onMounted(() => {
+  supportsInlinePdf.value = canEmbedPdfInline()
+})
 
 watch(previewOpen, (open) => {
   if (!import.meta.client) return

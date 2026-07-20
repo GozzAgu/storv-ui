@@ -392,7 +392,7 @@ export const usePreferences = () => {
     return formatDate(date, { includeTime: true })
   }
 
-  /** Local storage only — safe for Capacitor cold start (no network). */
+  /** Local storage only - safe for Capacitor cold start (no network). */
   const initializeLocalOnly = () => {
     loadFromLocalStorage()
   }

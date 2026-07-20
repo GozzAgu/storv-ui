@@ -50,7 +50,7 @@ async function readStoredLogin(): Promise<StoredLogin | null> {
   if (!isNativeMobile()) return null
 
   try {
-    // Prefer raw string read — avoids edge cases in object round-trip on iOS
+    // Prefer raw string read - avoids edge cases in object round-trip on iOS
     const raw = await SecureStorage.getItem(STORAGE_KEY)
     if (raw) {
       return normalizeStoredLogin(raw)

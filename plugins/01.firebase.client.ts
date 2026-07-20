@@ -77,7 +77,7 @@ export default defineNuxtPlugin(() => {
         app = getApps()[0]
       }
 
-      // Analytics can hang or fail in Capacitor WKWebView — skip on native shells
+      // Analytics can hang or fail in Capacitor WKWebView - skip on native shells
       if (typeof window !== 'undefined' && !isCapacitorNative()) {
         try {
           analytics = getAnalytics(app)

@@ -142,7 +142,7 @@ export function usePaymentLinks() {
     error.value = null
     try {
       await Promise.all([loadPayout(), loadLinks()])
-      // Settlements are best-effort (empty in test mode) — never block the page.
+      // Settlements are best-effort (empty in test mode) - never block the page.
       loadSettlements().catch(() => {})
     } catch (e) {
       error.value = (e as Error)?.message || 'Failed to load payment links'

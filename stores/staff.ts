@@ -371,7 +371,7 @@ export const useStaffStore = defineStore('staff', {
       }
     },
 
-    /** Inactive (removed) staff for a department — owner roster / reactivation */
+    /** Inactive (removed) staff for a department - owner roster / reactivation */
     async fetchInactiveStaffByDepartment(departmentId: string): Promise<Staff[]> {
       const { isDemoModeActive } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) return []

@@ -35,7 +35,7 @@
       auto-create receipts when customers pay.
     </p>
     <p v-if="!compact" class="mx-auto mt-3 max-w-md text-xs text-gray-500 dark:text-gray-500">
-      We're finishing the last pieces — check back soon.
+      We're finishing the last pieces - check back soon.
     </p>
   </section>
 </template>

@@ -1,6 +1,6 @@
-# Storvv — Product Explanation
+# Storvv - Product Explanation
 
-**Storvv** is a cloud-based platform for retail and store operations. It helps businesses track **inventory**, record **sales**, handle **returns**, manage **customers**, and coordinate **teams** across one or more store locations — from a web browser or mobile app.
+**Storvv** is a cloud-based platform for retail and store operations. It helps businesses track **inventory**, record **sales**, handle **returns**, manage **customers**, and coordinate **teams** across one or more store locations - from a web browser or mobile app.
 
 - **Website:** [storvv.com](https://www.storvv.com)
 - **App:** [app.storvv.com](https://app.storvv.com)
@@ -10,7 +10,7 @@
 
 ## What problem does Storvv solve?
 
-Most small and mid-size retailers juggle stock in spreadsheets, sales in notebooks or separate POS tools, and customer details in memory or WhatsApp chats. When something goes wrong — a refund, a missing item, a second branch opening — it is hard to answer three basic questions:
+Most small and mid-size retailers juggle stock in spreadsheets, sales in notebooks or separate POS tools, and customer details in memory or WhatsApp chats. When something goes wrong - a refund, a missing item, a second branch opening - it is hard to answer three basic questions:
 
 1. **What do we have in stock right now?**
 2. **What did we sell, and to whom?**
@@ -29,7 +29,7 @@ Storvv puts those answers in one place, tied to your actual store (or stores), w
 | **Front-line staff**         | Create receipts, look up inventory, and serve customers at the counter                    |
 | **Multi-location operators** | Run several branches, copy category templates between stores, and sync stock (Enterprise) |
 
-Storvv is built for **retail and similar operations** — phone shops, fashion, auto parts, general merchandise, procurement-led teams with multiple counters, and any business that needs structured inventory plus sales records.
+Storvv is built for **retail and similar operations** - phone shops, fashion, auto parts, general merchandise, procurement-led teams with multiple counters, and any business that needs structured inventory plus sales records.
 
 ---
 
@@ -81,11 +81,11 @@ Storvv is built for **retail and similar operations** — phone shops, fashion, 
 
 ## How a typical day works
 
-1. **Sign in** — You or your team open the app (web or iOS/Android). Firebase handles secure login.
-2. **Choose your store** — Owners with multiple branches pick the active store in the header. Staff usually work in their assigned branch.
-3. **Sell** — Create a receipt: pick a category (folder), add items, enter customer and payment details, complete the sale. Inventory updates according to your rules.
-4. **Follow up** — Share the receipt, handle a return if needed, check notifications or analytics.
-5. **Manage** — Owners adjust folders, invite staff, upgrade the plan, or open a second branch when the business grows.
+1. **Sign in** - You or your team open the app (web or iOS/Android). Firebase handles secure login.
+2. **Choose your store** - Owners with multiple branches pick the active store in the header. Staff usually work in their assigned branch.
+3. **Sell** - Create a receipt: pick a category (folder), add items, enter customer and payment details, complete the sale. Inventory updates according to your rules.
+4. **Follow up** - Share the receipt, handle a return if needed, check notifications or analytics.
+5. **Manage** - Owners adjust folders, invite staff, upgrade the plan, or open a second branch when the business grows.
 
 ```mermaid
 flowchart LR
@@ -137,7 +137,7 @@ For the full feature matrix and limits (staff counts, departments, etc.), see [S
 
 For developers and technical stakeholders:
 
-- **Frontend:** Nuxt 4, Vue 3, Pinia — static SPA deployed on Vercel.
+- **Frontend:** Nuxt 4, Vue 3, Pinia - static SPA deployed on Vercel.
 - **Backend data:** Firebase (Auth, Firestore, Storage).
 - **Server APIs:** Nuxt Nitro routes for Paystack, receipt email, WhatsApp, and admin tasks.
 - **Mobile:** Capacitor wraps the same web app (`com.storv.app`).

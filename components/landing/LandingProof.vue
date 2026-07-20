@@ -70,7 +70,7 @@ const proofCards = [
     metric: 'Sales',
     title: 'Receipts and customers together',
     description:
-      'Every sale saved with items and payment—including Paystack links when customers pay remotely.',
+      'Every sale saved with items and payment, including Paystack links when customers pay remotely.',
   },
 ] as const
 </script>

@@ -105,7 +105,7 @@ const HIDDEN_RECEIPT_DETAIL_KEYS = new Set<string>(['swapIn', 'swapInReceiptId']
 /** Shown as the swap-in headline; omit from repeated detail rows. */
 const INVENTORY_PRIMARY_NAME_KEYS = new Set(['name', 'title', 'productName', 'itemName'])
 
-/** Fields already shown as line-item columns — omit from detail chips in receipt tables. */
+/** Fields already shown as line-item columns - omit from detail chips in receipt tables. */
 const LINE_ITEM_TABLE_HIDDEN_KEYS = new Set<string>([
   'name',
   'itemName',
