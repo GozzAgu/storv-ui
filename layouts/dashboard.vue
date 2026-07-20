@@ -733,43 +733,45 @@
     <!-- Sign out confirmation -->
     <Modal
       :model-value="showLogoutConfirm"
-      size="sm"
+      size="xs"
       :show-close="false"
       :close-on-backdrop="!loggingOut"
+      content-padding="px-5 pt-6 pb-5 sm:px-6 sm:pt-7 sm:pb-6"
       @update:model-value="(value: boolean) => { if (!value) cancelSignOut() }"
     >
       <div class="flex flex-col items-center text-center">
         <div
-          class="flex h-11 w-11 items-center justify-center rounded-full bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400"
+          class="flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-red-600 ring-1 ring-red-100 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/20"
         >
           <ArrowRightOnRectangleIcon class="h-5 w-5" stroke-width="1.75" />
         </div>
-        <h3 class="mt-3 text-base font-semibold text-gray-900 dark:text-gray-50">Sign out?</h3>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        <h3 class="mt-4 text-base font-semibold text-gray-900 dark:text-gray-50">Sign out?</h3>
+        <p class="mt-1.5 max-w-[16rem] text-sm leading-relaxed text-gray-500 dark:text-gray-400">
           You'll need to sign in again to access your dashboard.
         </p>
-      </div>
 
-      <template #footer>
-        <div class="flex w-full gap-2">
-          <button
-            type="button"
+        <div class="mt-6 flex w-full flex-col-reverse gap-2.5 sm:flex-row sm:justify-center">
+          <Button
+            variant="outline"
+            size="sm"
             :disabled="loggingOut"
-            class="btn-secondary flex-1"
+            class="w-full sm:min-w-[7.5rem] sm:w-auto"
             @click="cancelSignOut"
           >
             Cancel
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="danger"
+            size="sm"
             :disabled="loggingOut"
-            class="btn-danger flex-1"
+            :loading="loggingOut"
+            class="w-full sm:min-w-[7.5rem] sm:w-auto"
             @click="confirmSignOut"
           >
-            {{ loggingOut ? 'Signing out…' : 'Sign out' }}
-          </button>
+            Sign out
+          </Button>
         </div>
-      </template>
+      </div>
     </Modal>
 
     <!-- Global Search -->
@@ -828,6 +830,7 @@ import {
   CreditCardIcon as CreditCardIconSolid,
 } from '@heroicons/vue/24/solid'
 import Modal from '~/components/ui/Modal.vue'
+import Button from '~/components/ui/Button.vue'
 import ThemeToggle from '~/components/ui/ThemeToggle.vue'
 import DashboardHoverTooltip from '~/components/ui/DashboardHoverTooltip.vue'
 import DemoModeBanner from '~/components/demo/DemoModeBanner.vue'

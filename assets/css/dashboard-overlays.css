@@ -43,9 +43,30 @@ html.dark .dash-overlay-backdrop {
 }
 
 .dash-overlay-modal {
-  width: 100%;
+  width: min(100%, var(--dash-overlay-modal-max, 32rem));
+  max-width: min(100%, var(--dash-overlay-modal-max, 32rem));
   border-radius: 1rem;
   max-height: min(92dvh, calc(100dvh - 2rem));
+}
+
+.dash-overlay-modal--xs {
+  --dash-overlay-modal-max: 20rem;
+}
+
+.dash-overlay-modal--sm {
+  --dash-overlay-modal-max: 24rem;
+}
+
+.dash-overlay-modal--md {
+  --dash-overlay-modal-max: 32rem;
+}
+
+.dash-overlay-modal--lg {
+  --dash-overlay-modal-max: 42rem;
+}
+
+.dash-overlay-modal--xl {
+  --dash-overlay-modal-max: 56rem;
 }
 
 .dash-overlay-drawer {

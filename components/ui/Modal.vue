@@ -96,7 +96,7 @@ interface Props {
   title?: string
   subtitle?: string
   eyebrow?: string
-  size?: 'sm' | 'md' | 'lg' | 'xl'
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
   showClose?: boolean
   closeOnBackdrop?: boolean
   contentPadding?: string
@@ -144,10 +144,11 @@ const describedBy = computed(() => (props.subtitle ? subtitleId : undefined))
 
 const sizeClasses = computed(() => {
   const sizeMap = {
-    sm: 'w-full max-w-[100%] sm:mx-4 sm:max-w-md',
-    md: 'w-full max-w-[100%] sm:mx-4 sm:max-w-lg',
-    lg: 'w-full max-w-[100%] sm:mx-4 sm:max-w-2xl',
-    xl: 'w-full max-w-[100%] sm:mx-4 sm:max-w-4xl',
+    xs: 'dash-overlay-modal--xs mx-auto w-full',
+    sm: 'dash-overlay-modal--sm mx-auto w-full',
+    md: 'dash-overlay-modal--md mx-auto w-full',
+    lg: 'dash-overlay-modal--lg mx-auto w-full',
+    xl: 'dash-overlay-modal--xl mx-auto w-full',
   }
   return sizeMap[props.size]
 })
