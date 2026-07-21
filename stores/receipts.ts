@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import {
   collection,
   doc,
@@ -163,7 +164,7 @@ export const useReceiptsStore = defineStore('receipts', {
 
         const db = useFirestore().getFirestoreInstance()
         if (!db) {
-          this.error = 'Firestore not initialized'
+          this.error = CLOUD_UNAVAILABLE_MESSAGE
           this.loading = false
           return
         }
@@ -322,7 +323,7 @@ export const useReceiptsStore = defineStore('receipts', {
 
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        throw new Error('Firestore not initialized')
+        throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
       }
 
       const authStore = useAuthStore()
@@ -386,7 +387,7 @@ export const useReceiptsStore = defineStore('receipts', {
 
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        throw new Error('Firestore not initialized')
+        throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
       }
 
       const authStore = useAuthStore()
@@ -510,7 +511,7 @@ export const useReceiptsStore = defineStore('receipts', {
 
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        throw new Error('Firestore not initialized')
+        throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
       }
 
       const authStore = useAuthStore()
@@ -583,7 +584,7 @@ export const useReceiptsStore = defineStore('receipts', {
       payment: { amount: number; method: string }
     ): Promise<{ completed: boolean }> {
       const db = useFirestore().getFirestoreInstance()
-      if (!db) throw new Error('Firestore not initialized')
+      if (!db) throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
 
       const authStore = useAuthStore()
       if (!authStore.currentUser) throw new Error('User must be authenticated')
@@ -712,7 +713,7 @@ export const useReceiptsStore = defineStore('receipts', {
 
     async cancelBalanceDueReceipt(receiptId: string): Promise<void> {
       const db = useFirestore().getFirestoreInstance()
-      if (!db) throw new Error('Firestore not initialized')
+      if (!db) throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
 
       const authStore = useAuthStore()
       if (!authStore.currentUser) throw new Error('User must be authenticated')

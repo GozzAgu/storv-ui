@@ -11,6 +11,7 @@ import {
 import { FirebaseError } from 'firebase/app'
 import { getFirebaseClientAuth } from '~/utils/firebase-client-auth'
 import { useFirebase } from './useFirebase'
+import { UPLOAD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 
 /** Allowed image MIME types */
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
@@ -48,7 +49,7 @@ export function getFirebaseStorageErrorMessage(error: unknown): string {
       case 'storage/unknown':
         return raw
           ? `Upload failed (${error.code}): ${raw}`
-          : 'Upload failed (storage/unknown). The app will retry via the server if possible. Also verify NUXT_PUBLIC_FIREBASE_STORAGE_BUCKET in Firebase Console → Project settings, Storage enabled, rules deployed, and FIREBASE_SERVICE_ACCOUNT_JSON for local API uploads.'
+          : 'Upload failed. The app will retry via the server if possible. Check your connection and try again.'
       default:
         return error.message || 'Upload failed.'
     }
@@ -103,7 +104,7 @@ export const useFirebaseStorage = () => {
     const app = getApp()
     const storage = getStorageInstance()
     if (!storage || !app) {
-      throw new Error('Firebase Storage not initialized')
+      throw new Error(UPLOAD_UNAVAILABLE_MESSAGE)
     }
 
     const auth = getFirebaseClientAuth()
@@ -165,7 +166,7 @@ export const useFirebaseStorage = () => {
   const getImageUrl = async (path: string): Promise<string> => {
     const storage = getStorageInstance()
     if (!storage) {
-      throw new Error('Firebase Storage not initialized')
+      throw new Error(UPLOAD_UNAVAILABLE_MESSAGE)
     }
 
     const storageRef = ref(storage, path)
@@ -178,7 +179,7 @@ export const useFirebaseStorage = () => {
   const deleteImage = async (path: string): Promise<void> => {
     const storage = getStorageInstance()
     if (!storage) {
-      throw new Error('Firebase Storage not initialized')
+      throw new Error(UPLOAD_UNAVAILABLE_MESSAGE)
     }
 
     const storageRef = ref(storage, path)

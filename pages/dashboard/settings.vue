@@ -1140,9 +1140,7 @@ async function uploadAccountLogoWithFallback(
         throw new Error(BILLING_BLOCKED_USER_MESSAGE)
       }
       throw new Error(
-        `Could not complete upload (${serverHint}). ` +
-          'If this is not a billing issue: for local dev set FIREBASE_SERVICE_ACCOUNT_PATH or FIREBASE_SERVICE_ACCOUNT_JSON in .env and restart. ' +
-          'Set NUXT_PUBLIC_FIREBASE_STORAGE_BUCKET to the exact value from Firebase Console → Project settings.'
+        `Could not complete upload (${serverHint}). Please try again or contact Storvv support if this continues.`
       )
     }
   }

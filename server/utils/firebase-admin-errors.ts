@@ -13,7 +13,7 @@ export function rethrowFirebaseAdminSetupError(
     const verb = action === 'remove' ? 'Staff removal' : 'Staff reactivation'
     throw createError({
       statusCode: 503,
-      message: `${verb} requires Firebase Admin on the server. Set FIREBASE_SERVICE_ACCOUNT_JSON (or FIREBASE_SERVICE_ACCOUNT_PATH locally) in .env, then restart the dev server.`,
+      message: `${verb} is temporarily unavailable on the server. Please try again later or contact Storvv support.`,
     })
   }
   throw err

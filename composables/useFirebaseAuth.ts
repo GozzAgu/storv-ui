@@ -15,6 +15,7 @@ import {
   type Auth,
   type ConfirmationResult,
 } from 'firebase/auth'
+import { AUTH_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import { getFirebaseClientAuth } from '~/utils/firebase-client-auth'
 import { sendUserEmailVerification } from '~/utils/emailVerification'
 
@@ -40,7 +41,7 @@ export const useFirebaseAuth = () => {
   const signIn = async (email: string, password: string) => {
     const auth = getAuthInstance()
     if (!auth) {
-      throw new Error('Firebase Auth not initialized')
+      throw new Error(AUTH_UNAVAILABLE_MESSAGE)
     }
 
     try {
@@ -59,7 +60,7 @@ export const useFirebaseAuth = () => {
   ): Promise<{ user: User; verificationEmailSent: boolean }> => {
     const auth = getAuthInstance()
     if (!auth) {
-      throw new Error('Firebase Auth not initialized')
+      throw new Error(AUTH_UNAVAILABLE_MESSAGE)
     }
 
     try {
@@ -89,7 +90,7 @@ export const useFirebaseAuth = () => {
   const signOut = async () => {
     const auth = getAuthInstance()
     if (!auth) {
-      throw new Error('Firebase Auth not initialized')
+      throw new Error(AUTH_UNAVAILABLE_MESSAGE)
     }
 
     try {
@@ -107,7 +108,7 @@ export const useFirebaseAuth = () => {
   const resetPassword = async (email: string) => {
     const auth = getAuthInstance()
     if (!auth) {
-      throw new Error('Firebase Auth not initialized')
+      throw new Error(AUTH_UNAVAILABLE_MESSAGE)
     }
 
     try {
@@ -121,7 +122,7 @@ export const useFirebaseAuth = () => {
   const sendVerificationEmail = async (user?: User) => {
     const auth = getAuthInstance()
     if (!auth) {
-      throw new Error('Firebase Auth not initialized')
+      throw new Error(AUTH_UNAVAILABLE_MESSAGE)
     }
 
     const targetUser = user || auth.currentUser
@@ -160,7 +161,7 @@ export const useFirebaseAuth = () => {
 
       const auth = getAuthInstance()
       if (!auth) {
-        reject(new Error('Firebase Auth not initialized'))
+        reject(new Error(AUTH_UNAVAILABLE_MESSAGE))
         return
       }
 
@@ -201,7 +202,7 @@ export const useFirebaseAuth = () => {
   ): Promise<ConfirmationResult> => {
     const auth = getAuthInstance()
     if (!auth) {
-      throw new Error('Firebase Auth not initialized')
+      throw new Error(AUTH_UNAVAILABLE_MESSAGE)
     }
 
     try {
@@ -286,7 +287,7 @@ export const useFirebaseAuth = () => {
   const updateUserPassword = async (currentPassword: string, newPassword: string) => {
     const auth = getAuthInstance()
     if (!auth) {
-      throw new Error('Firebase Auth not initialized')
+      throw new Error(AUTH_UNAVAILABLE_MESSAGE)
     }
 
     const user = auth.currentUser
@@ -350,7 +351,7 @@ export const useFirebaseAuth = () => {
   const save2FASecret = async (secret: string, method: 'totp' | 'phone') => {
     const auth = getAuthInstance()
     if (!auth) {
-      throw new Error('Firebase Auth not initialized')
+      throw new Error(AUTH_UNAVAILABLE_MESSAGE)
     }
 
     const user = auth.currentUser
@@ -375,7 +376,7 @@ export const useFirebaseAuth = () => {
   const verifyTOTPCode = async (code: string): Promise<boolean> => {
     const auth = getAuthInstance()
     if (!auth) {
-      throw new Error('Firebase Auth not initialized')
+      throw new Error(AUTH_UNAVAILABLE_MESSAGE)
     }
 
     const user = auth.currentUser
@@ -436,7 +437,7 @@ export const useFirebaseAuth = () => {
   const disable2FA = async (password: string) => {
     const auth = getAuthInstance()
     if (!auth) {
-      throw new Error('Firebase Auth not initialized')
+      throw new Error(AUTH_UNAVAILABLE_MESSAGE)
     }
 
     const user = auth.currentUser

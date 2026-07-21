@@ -11,7 +11,7 @@ import {
   orderBy,
   serverTimestamp,
 } from 'firebase/firestore'
-import { useFirestore } from './useFirestore'
+import { PERMISSION_DENIED_MESSAGE, CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import { useFirebaseAuth } from './useFirebaseAuth'
 
 export interface Department {
@@ -62,7 +62,7 @@ export const useDepartments = () => {
 
     const db = getFirestoreInstance()
     if (!db) {
-      throw new Error('Firestore not initialized')
+      throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
     }
 
     // Don't throw error if user is not authenticated - let the page handle it
@@ -112,7 +112,7 @@ export const useDepartments = () => {
       // Provide helpful error messages
       if (error.code === 'permission-denied' || error.message?.includes('permission')) {
         throw new Error(
-          'Missing or insufficient permissions. Please check your Firestore security rules.'
+          PERMISSION_DENIED_MESSAGE
         )
       }
 
@@ -124,7 +124,7 @@ export const useDepartments = () => {
   const getDepartment = async (departmentId: string): Promise<Department | null> => {
     const db = getFirestoreInstance()
     if (!db) {
-      throw new Error('Firestore not initialized')
+      throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
     }
 
     try {
@@ -151,7 +151,7 @@ export const useDepartments = () => {
   ): Promise<string> => {
     const db = getFirestoreInstance()
     if (!db) {
-      throw new Error('Firestore not initialized')
+      throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
     }
 
     if (!currentUser.value) {
@@ -185,7 +185,7 @@ export const useDepartments = () => {
   ): Promise<void> => {
     const db = getFirestoreInstance()
     if (!db) {
-      throw new Error('Firestore not initialized')
+      throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
     }
 
     try {
@@ -204,7 +204,7 @@ export const useDepartments = () => {
   const deleteDepartment = async (departmentId: string): Promise<void> => {
     const db = getFirestoreInstance()
     if (!db) {
-      throw new Error('Firestore not initialized')
+      throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
     }
 
     try {
@@ -231,7 +231,7 @@ export const useDepartments = () => {
   const updateStaffCount = async (departmentId: string, count: number): Promise<void> => {
     const db = getFirestoreInstance()
     if (!db) {
-      throw new Error('Firestore not initialized')
+      throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
     }
 
     try {

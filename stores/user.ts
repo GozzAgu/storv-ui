@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import {
   collection,
   doc,
@@ -57,7 +58,7 @@ export const useUserStore = defineStore('user', {
 
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        this.error = 'Firestore not initialized'
+        this.error = CLOUD_UNAVAILABLE_MESSAGE
         this.loading = false
         return
       }
@@ -222,7 +223,7 @@ export const useUserStore = defineStore('user', {
     ) {
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        throw new Error('Firestore not initialized')
+        throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
       }
 
       const authStore = useAuthStore()
@@ -257,7 +258,7 @@ export const useUserStore = defineStore('user', {
     ) {
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        throw new Error('Firestore not initialized')
+        throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
       }
 
       try {
@@ -284,7 +285,7 @@ export const useUserStore = defineStore('user', {
     async updateStoreDetails(userId: string, storeDetails: StoreDetails) {
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        throw new Error('Firestore not initialized')
+        throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
       }
 
       try {

@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import {
   doc,
   setDoc,
@@ -137,7 +138,7 @@ export const useNotificationsStore = defineStore('notifications', {
 
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        console.error('Firestore not initialized')
+        console.error(CLOUD_UNAVAILABLE_MESSAGE)
         return
       }
 
@@ -211,7 +212,7 @@ export const useNotificationsStore = defineStore('notifications', {
 
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        this.error = 'Firestore not initialized'
+        this.error = CLOUD_UNAVAILABLE_MESSAGE
         this.loading = false
         return
       }
@@ -354,7 +355,7 @@ export const useNotificationsStore = defineStore('notifications', {
     async markAsRead(notificationId: string) {
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        this.error = 'Firestore not initialized'
+        this.error = CLOUD_UNAVAILABLE_MESSAGE
         return
       }
 
@@ -394,7 +395,7 @@ export const useNotificationsStore = defineStore('notifications', {
     async markAllAsRead() {
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        this.error = 'Firestore not initialized'
+        this.error = CLOUD_UNAVAILABLE_MESSAGE
         return
       }
 

@@ -42,5 +42,4 @@ export function extractUploadFailureMessage(apiErr: unknown): string {
   return 'Upload failed'
 }
 
-export const BILLING_BLOCKED_USER_MESSAGE =
-  'Your Firebase / Google Cloud project cannot use Storage right now because billing is disabled or overdue (delinquent). This is not an app bug. Open https://console.cloud.google.com/billing, then select your billing account, update the payment method or pay any outstanding balance, then wait a few minutes and try the upload again. Until billing is active, uploads will keep failing.'
+export { BILLING_BLOCKED_USER_MESSAGE } from '~/utils/cloud-user-messages'

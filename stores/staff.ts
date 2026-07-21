@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import { initializeApp, getApps, type FirebaseApp } from 'firebase/app'
 import { createUserWithEmailAndPassword, signOut } from 'firebase/auth'
 import { getFirebaseClientAuthForApp } from '~/utils/firebase-client-auth'
@@ -54,7 +55,7 @@ function parseStaffLifecycleApiError(error: any, fallback: string): Error {
   if (status === 503) {
     return new Error(
       dataMessage ||
-        'This action requires Firebase Admin on the server. Set FIREBASE_SERVICE_ACCOUNT_JSON in .env and restart.'
+        'This action is temporarily unavailable. Please try again later or contact Storvv support.'
     )
   }
   if (status === 403) {
@@ -132,7 +133,7 @@ export const useStaffStore = defineStore('staff', {
 
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        this.error = 'Firestore not initialized'
+        this.error = CLOUD_UNAVAILABLE_MESSAGE
         this.loading = false
         return
       }
@@ -282,7 +283,7 @@ export const useStaffStore = defineStore('staff', {
 
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        this.error = 'Firestore not initialized'
+        this.error = CLOUD_UNAVAILABLE_MESSAGE
         this.loading = false
         return
       }
@@ -438,7 +439,7 @@ export const useStaffStore = defineStore('staff', {
 
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        throw new Error('Firestore not initialized')
+        throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
       }
 
       const authStore = useAuthStore()
@@ -613,7 +614,7 @@ export const useStaffStore = defineStore('staff', {
 
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        throw new Error('Firestore not initialized')
+        throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
       }
 
       const superAdminUid = authStore.currentUser.uid
@@ -705,7 +706,7 @@ export const useStaffStore = defineStore('staff', {
     // Clear mustChangePassword for the currently signed-in staff (after they set a new password)
     async clearMustChangePassword() {
       const db = useFirestore().getFirestoreInstance()
-      if (!db) throw new Error('Firestore not initialized')
+      if (!db) throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
       const authStore = useAuthStore()
       if (!authStore.currentUser) throw new Error('User must be authenticated')
       const uid = authStore.currentUser.uid
@@ -726,7 +727,7 @@ export const useStaffStore = defineStore('staff', {
     ) {
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        throw new Error('Firestore not initialized')
+        throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
       }
 
       const authStore = useAuthStore()

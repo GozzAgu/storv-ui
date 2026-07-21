@@ -1,5 +1,9 @@
 import { collection, doc, setDoc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { useFirestore } from './useFirestore'
+import {
+  PERMISSION_DENIED_MESSAGE,
+  CLOUD_UNAVAILABLE_MESSAGE,
+} from '~/utils/cloud-user-messages'
 import type { SubscriptionPlan } from '~/types/subscription'
 import type { UserPreferences } from '~/composables/usePreferences'
 
@@ -82,7 +86,7 @@ export const useUser = () => {
 
     const db = getFirestoreInstance()
     if (!db) {
-      throw new Error('Firestore not initialized. Please ensure Firebase is properly configured.')
+      throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
     }
 
     try {
@@ -120,13 +124,11 @@ export const useUser = () => {
     } catch (error: any) {
       // Handle Firestore permission errors specifically
       if (error.code === 'permission-denied') {
-        throw new Error(
-          'PERMISSION_DENIED: Firestore security rules are blocking access. Please:\n1. Go to Firebase Console → Firestore Database → Rules\n2. Copy the rules from firestore.rules file\n3. Paste and click Publish\n\nSee FIRESTORE_SETUP.md for detailed instructions.'
-        )
+        throw new Error(`PERMISSION_DENIED: ${PERMISSION_DENIED_MESSAGE}`)
       }
-      // Handle other Firestore errors
+      // Handle other database errors
       if (error.code) {
-        throw new Error(`Firestore error (${error.code}): ${error.message}`)
+        throw new Error(`Cloud error (${error.code}): ${error.message}`)
       }
       throw error
     }
@@ -142,7 +144,7 @@ export const useUser = () => {
 
     const db = getFirestoreInstance()
     if (!db) {
-      console.warn('Firestore not initialized')
+      console.warn(CLOUD_UNAVAILABLE_MESSAGE)
       return null
     }
 
@@ -179,7 +181,7 @@ export const useUser = () => {
 
     const db = getFirestoreInstance()
     if (!db) {
-      throw new Error('Firestore not initialized')
+      throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
     }
 
     const userRef = doc(db, 'users', uid)

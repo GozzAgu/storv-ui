@@ -159,21 +159,14 @@
         </AuthField>
 
         <AuthAlert v-if="errorMessage" :message="errorMessage">
-          <template v-if="errorMessage.includes('Firestore')" #actions>
-            <a
-              href="https://console.firebase.google.com/project/storv-ux/firestore/rules"
-              target="_blank"
-              class="inline-flex items-center gap-2 rounded-lg bg-red-600 px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-red-700"
-            >
-              Open Firestore Rules in Firebase Console →
-            </a>
+          <template v-if="errorMessage.includes('PERMISSION_DENIED')" #actions>
             <div class="flex items-center gap-2">
               <button
                 type="button"
                 class="inline-flex items-center gap-2 rounded-lg bg-gray-600 px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-gray-700"
                 @click="copyRulesToClipboard"
               >
-                Copy Rules to Clipboard
+                Copy setup rules
               </button>
               <span v-if="rulesCopied" class="text-[11px] text-green-600 dark:text-green-400"
                 >Copied!</span
@@ -353,7 +346,7 @@ service cloud.firestore {
     }, 3000)
   } catch (err) {
     console.error('Failed to copy:', err)
-    alert('Failed to copy rules. Please copy them manually from firestore.rules file.')
+    alert('Could not copy setup rules. Please contact support@storvv.com if sign-up keeps failing.')
   }
 }
 

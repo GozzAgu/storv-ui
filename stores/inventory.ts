@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import {
   collection,
   doc,
@@ -238,7 +239,7 @@ export const useInventoryStore = defineStore('inventory', {
 
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        this.error = 'Firestore not initialized'
+        this.error = CLOUD_UNAVAILABLE_MESSAGE
         this.loading = false
         return
       }
@@ -565,7 +566,7 @@ export const useInventoryStore = defineStore('inventory', {
      */
     async fetchFolderTemplatesForStore(storeId: string): Promise<InventoryFolder[]> {
       const db = useFirestore().getFirestoreInstance()
-      if (!db) throw new Error('Firestore not initialized')
+      if (!db) throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
       const authStore = useAuthStore()
       if (!authStore.currentUser) throw new Error('You must be signed in.')
       const userStore = useUserStore()
@@ -617,7 +618,7 @@ export const useInventoryStore = defineStore('inventory', {
       }
 
       const db = useFirestore().getFirestoreInstance()
-      if (!db) throw new Error('Firestore not initialized')
+      if (!db) throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
       const authStore = useAuthStore()
       if (!authStore.currentUser) throw new Error('You must be signed in.')
       const userStore = useUserStore()
@@ -765,7 +766,7 @@ export const useInventoryStore = defineStore('inventory', {
 
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        throw new Error('Firestore not initialized')
+        throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
       }
 
       const authStore = useAuthStore()
@@ -928,7 +929,7 @@ export const useInventoryStore = defineStore('inventory', {
 
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        throw new Error('Firestore not initialized')
+        throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
       }
 
       const authStore = useAuthStore()
@@ -1015,7 +1016,7 @@ export const useInventoryStore = defineStore('inventory', {
     ) {
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        throw new Error('Firestore not initialized')
+        throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
       }
 
       const authStore = useAuthStore()
@@ -1099,7 +1100,7 @@ export const useInventoryStore = defineStore('inventory', {
 
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        throw new Error('Firestore not initialized')
+        throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
       }
 
       const authStore = useAuthStore()
@@ -1186,7 +1187,7 @@ export const useInventoryStore = defineStore('inventory', {
     /** Store-wide inventory items path (no per-folder access gate). */
     async _prepareStoreInventoryItemsContext() {
       const db = useFirestore().getFirestoreInstance()
-      if (!db) throw new Error('Firestore not initialized')
+      if (!db) throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
 
       const authStore = useAuthStore()
       if (!authStore.currentUser) throw new Error('User must be authenticated')
@@ -1210,7 +1211,7 @@ export const useInventoryStore = defineStore('inventory', {
     /** Shared auth/path setup for inventory item queries. */
     async _prepareItemsQueryContext(folderId: string) {
       const db = useFirestore().getFirestoreInstance()
-      if (!db) throw new Error('Firestore not initialized')
+      if (!db) throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
 
       const authStore = useAuthStore()
       if (!authStore.currentUser) throw new Error('User must be authenticated')
@@ -1433,7 +1434,7 @@ export const useInventoryStore = defineStore('inventory', {
 
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        throw new Error('Firestore not initialized')
+        throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
       }
 
       const authStore = useAuthStore()
@@ -1591,7 +1592,7 @@ export const useInventoryStore = defineStore('inventory', {
 
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        throw new Error('Firestore not initialized')
+        throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
       }
 
       const authStore = useAuthStore()
@@ -1760,7 +1761,7 @@ export const useInventoryStore = defineStore('inventory', {
 
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        throw new Error('Firestore not initialized')
+        throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
       }
 
       const authStore = useAuthStore()
@@ -1874,7 +1875,7 @@ export const useInventoryStore = defineStore('inventory', {
 
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        throw new Error('Firestore not initialized')
+        throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
       }
 
       const authStore = useAuthStore()
@@ -1948,7 +1949,7 @@ export const useInventoryStore = defineStore('inventory', {
       }
 
       const db = useFirestore().getFirestoreInstance()
-      if (!db) throw new Error('Firestore not initialized')
+      if (!db) throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
 
       const authStore = useAuthStore()
       if (!authStore.currentUser) throw new Error('Not authenticated')
@@ -1978,7 +1979,7 @@ export const useInventoryStore = defineStore('inventory', {
     async updateItemCount(folderId: string) {
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        throw new Error('Firestore not initialized')
+        throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
       }
 
       const authStore = useAuthStore()
@@ -2177,7 +2178,7 @@ export const useInventoryStore = defineStore('inventory', {
      */
     async reserveInventoryForBalanceDue(receiptId: string, itemIds: string[]) {
       const db = useFirestore().getFirestoreInstance()
-      if (!db) throw new Error('Firestore not initialized')
+      if (!db) throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
 
       const authStore = useAuthStore()
       if (!authStore.currentUser) throw new Error('User must be authenticated')
@@ -2216,7 +2217,7 @@ export const useInventoryStore = defineStore('inventory', {
 
     async releaseInventoryReservation(receiptId: string, itemIds: string[]) {
       const db = useFirestore().getFirestoreInstance()
-      if (!db) throw new Error('Firestore not initialized')
+      if (!db) throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
 
       const userId = await getQueryUserId()
       if (!userId) throw new Error('User ID not available')
@@ -2273,7 +2274,7 @@ export const useInventoryStore = defineStore('inventory', {
 
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        throw new Error('Firestore not initialized')
+        throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
       }
 
       const authStore = useAuthStore()
@@ -2403,7 +2404,7 @@ export const useInventoryStore = defineStore('inventory', {
     ) {
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        throw new Error('Firestore not initialized')
+        throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
       }
 
       const authStore = useAuthStore()
@@ -2573,7 +2574,7 @@ export const useInventoryStore = defineStore('inventory', {
     async updateItemsDateOut(folderId: string, itemIds: string[]) {
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        throw new Error('Firestore not initialized')
+        throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
       }
 
       const authStore = useAuthStore()
@@ -2656,7 +2657,7 @@ export const useInventoryStore = defineStore('inventory', {
     ) {
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        throw new Error('Firestore not initialized')
+        throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
       }
 
       const authStore = useAuthStore()
@@ -2795,7 +2796,7 @@ export const useInventoryStore = defineStore('inventory', {
     ) {
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        throw new Error('Firestore not initialized')
+        throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
       }
 
       const authStore = useAuthStore()
@@ -2920,7 +2921,7 @@ export const useInventoryStore = defineStore('inventory', {
     ) {
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        throw new Error('Firestore not initialized')
+        throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
       }
 
       const authStore = useAuthStore()
@@ -3057,7 +3058,7 @@ export const useInventoryStore = defineStore('inventory', {
     async removeDiscount(folderId: string, itemId: string) {
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        throw new Error('Firestore not initialized')
+        throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
       }
 
       const authStore = useAuthStore()
@@ -3141,7 +3142,7 @@ export const useInventoryStore = defineStore('inventory', {
     async removeBulkDiscount(folderId: string, itemIds: string[]) {
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        throw new Error('Firestore not initialized')
+        throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
       }
 
       const authStore = useAuthStore()

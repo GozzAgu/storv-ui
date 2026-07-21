@@ -23,6 +23,7 @@ import {
   getQueryUserId,
 } from '~/composables/useFirestorePaths'
 import { getPlanLimits } from '~/types/subscription'
+import { PERMISSION_DENIED_MESSAGE, CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import type { SubscriptionPlan } from '~/types/subscription'
 import type { Department } from '~/composables/useDepartments'
 // CORE_DEPARTMENTS should be imported directly from '~/composables/useDepartments' to avoid duplication
@@ -67,7 +68,7 @@ export const useDepartmentsStore = defineStore('departments', {
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
         console.error('[DepartmentsStore] Firestore not initialized')
-        this.error = 'Firestore not initialized'
+        this.error = CLOUD_UNAVAILABLE_MESSAGE
         this.loading = false
         return
       }
@@ -210,8 +211,7 @@ export const useDepartmentsStore = defineStore('departments', {
         this.error = error.message || 'Failed to fetch departments'
 
         if (error.code === 'permission-denied' || error.message?.includes('permission')) {
-          this.error =
-            'Missing or insufficient permissions. Please check your Firestore security rules.'
+          this.error = PERMISSION_DENIED_MESSAGE
         }
       } finally {
         this.loading = false
@@ -228,7 +228,7 @@ export const useDepartmentsStore = defineStore('departments', {
 
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        throw new Error('Firestore not initialized')
+        throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
       }
 
       const authStore = useAuthStore()
@@ -322,7 +322,7 @@ export const useDepartmentsStore = defineStore('departments', {
 
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        throw new Error('Firestore not initialized')
+        throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
       }
 
       const authStore = useAuthStore()
@@ -413,7 +413,7 @@ export const useDepartmentsStore = defineStore('departments', {
 
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        throw new Error('Firestore not initialized')
+        throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
       }
 
       const authStore = useAuthStore()
@@ -477,7 +477,7 @@ export const useDepartmentsStore = defineStore('departments', {
 
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        throw new Error('Firestore not initialized')
+        throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
       }
 
       const authStore = useAuthStore()
@@ -541,7 +541,7 @@ export const useDepartmentsStore = defineStore('departments', {
     async updateStaffCount(departmentId: string, count: number, storeId?: string) {
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
-        throw new Error('Firestore not initialized')
+        throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
       }
 
       const authStore = useAuthStore()

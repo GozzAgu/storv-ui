@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { AUTH_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -74,7 +75,7 @@ export const useAuthStore = defineStore('auth', {
     // Sign in with email and password
     async signIn(email: string, password: string) {
       const auth = this.getAuthInstance()
-      if (!auth) throw new Error('Firebase Auth not initialized')
+      if (!auth) throw new Error(AUTH_UNAVAILABLE_MESSAGE)
 
       try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password)
@@ -88,7 +89,7 @@ export const useAuthStore = defineStore('auth', {
     // Sign up with email and password
     async signUp(email: string, password: string, sendVerificationEmail: boolean = true) {
       const auth = this.getAuthInstance()
-      if (!auth) throw new Error('Firebase Auth not initialized')
+      if (!auth) throw new Error(AUTH_UNAVAILABLE_MESSAGE)
 
       try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password)
@@ -114,7 +115,7 @@ export const useAuthStore = defineStore('auth', {
     // Sign out
     async signOut() {
       const auth = this.getAuthInstance()
-      if (!auth) throw new Error('Firebase Auth not initialized')
+      if (!auth) throw new Error(AUTH_UNAVAILABLE_MESSAGE)
 
       try {
         await firebaseSignOut(auth)
@@ -127,7 +128,7 @@ export const useAuthStore = defineStore('auth', {
     // Send password reset email
     async resetPassword(email: string) {
       const auth = this.getAuthInstance()
-      if (!auth) throw new Error('Firebase Auth not initialized')
+      if (!auth) throw new Error(AUTH_UNAVAILABLE_MESSAGE)
 
       try {
         await sendPasswordResetEmail(auth, email)
@@ -139,7 +140,7 @@ export const useAuthStore = defineStore('auth', {
     // Send email verification
     async sendVerificationEmail(user?: User) {
       const auth = this.getAuthInstance()
-      if (!auth) throw new Error('Firebase Auth not initialized')
+      if (!auth) throw new Error(AUTH_UNAVAILABLE_MESSAGE)
 
       const targetUser = user || this.currentUser
       if (!targetUser) {
@@ -171,7 +172,7 @@ export const useAuthStore = defineStore('auth', {
 
       const auth = this.getAuthInstance()
       if (!auth) {
-        throw new Error('Firebase Auth not initialized')
+        throw new Error(AUTH_UNAVAILABLE_MESSAGE)
       }
 
       try {
@@ -201,7 +202,7 @@ export const useAuthStore = defineStore('auth', {
       containerId: string = 'recaptcha-container'
     ): Promise<ConfirmationResult> {
       const auth = this.getAuthInstance()
-      if (!auth) throw new Error('Firebase Auth not initialized')
+      if (!auth) throw new Error(AUTH_UNAVAILABLE_MESSAGE)
 
       try {
         if (!this.recaptchaVerifier) {
@@ -283,7 +284,7 @@ export const useAuthStore = defineStore('auth', {
     // Update password
     async updateUserPassword(currentPassword: string, newPassword: string) {
       const auth = this.getAuthInstance()
-      if (!auth) throw new Error('Firebase Auth not initialized')
+      if (!auth) throw new Error(AUTH_UNAVAILABLE_MESSAGE)
 
       const user = auth.currentUser
       if (!user || !user.email) {

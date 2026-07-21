@@ -16,8 +16,8 @@ export default defineNuxtPlugin(() => {
       // Validate that required Firebase config values are present
       if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
         const errorMessage =
-          'Firebase configuration is missing. Please set NUXT_PUBLIC_FIREBASE_API_KEY and NUXT_PUBLIC_FIREBASE_PROJECT_ID environment variables.'
-        console.error('[Firebase]', errorMessage)
+          'Storvv cloud configuration is missing. Required environment variables are not set.'
+        console.error('[Storvv cloud]', errorMessage)
 
         // Show user-friendly error in browser
         if (typeof window !== 'undefined') {
@@ -39,23 +39,12 @@ export default defineNuxtPlugin(() => {
  `
           errorOverlay.innerHTML = `
  <div style="background: white; padding: 30px; border-radius: 12px; max-width: 600px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
- <h2 style="color: #dc2626; font-size: 24px; font-weight: bold; margin-bottom: 16px;">Firebase Configuration Error</h2>
+ <h2 style="color: #dc2626; font-size: 24px; font-weight: bold; margin-bottom: 16px;">Configuration error</h2>
  <p style="color: #374151; font-size: 16px; margin-bottom: 20px; line-height: 1.6;">
- Firebase API key or project ID is missing. The application cannot function without proper Firebase configuration.
+ Storvv could not start because required cloud settings are missing. Please contact support if this persists.
  </p>
- <div style="background: #f3f4f6; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
- <p style="color: #6b7280; font-size: 14px; margin-bottom: 12px; font-weight: 600;">Required Environment Variables:</p>
- <ul style="color: #4b5563; font-size: 14px; list-style: disc; padding-left: 20px; line-height: 1.8;">
- <li>NUXT_PUBLIC_FIREBASE_API_KEY</li>
- <li>NUXT_PUBLIC_FIREBASE_PROJECT_ID</li>
- <li>NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN</li>
- <li>NUXT_PUBLIC_FIREBASE_STORAGE_BUCKET</li>
- <li>NUXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID</li>
- <li>NUXT_PUBLIC_FIREBASE_APP_ID</li>
- </ul>
- </div>
  <p style="color: #6b7280; font-size: 14px; line-height: 1.6;">
- Please configure these environment variables in your deployment platform (Vercel, Netlify, Firebase Hosting, etc.) and rebuild the application.
+ Configure the required Storvv cloud settings in your deployment platform and rebuild the application. Contact support if you need help.
  </p>
  </div>
  `
@@ -86,7 +75,7 @@ export default defineNuxtPlugin(() => {
         }
       }
     } catch (error: any) {
-      console.error('[Firebase] Initialization error:', error)
+      console.error('[Storvv cloud] Initialization error:', error)
 
       // Show error overlay if Firebase fails to initialize
       if (typeof window !== 'undefined' && error?.code !== 'app/duplicate-app') {
@@ -107,9 +96,9 @@ export default defineNuxtPlugin(() => {
  `
         errorOverlay.innerHTML = `
  <div style="background: white; padding: 30px; border-radius: 12px; max-width: 600px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
- <h2 style="color: #dc2626; font-size: 24px; font-weight: bold; margin-bottom: 16px;">Firebase Initialization Error</h2>
+ <h2 style="color: #dc2626; font-size: 24px; font-weight: bold; margin-bottom: 16px;">Unable to start Storvv</h2>
  <p style="color: #374151; font-size: 16px; margin-bottom: 20px; line-height: 1.6;">
- Failed to initialize Firebase. Please check your configuration and try again.
+ Storvv could not connect to cloud services. Please check your configuration and try again.
  </p>
  <div style="background: #f3f4f6; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
  <p style="color: #6b7280; font-size: 14px; font-family: monospace; word-break: break-all;">

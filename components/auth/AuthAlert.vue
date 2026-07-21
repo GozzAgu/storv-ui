@@ -10,7 +10,7 @@
       target="_blank"
       class="auth-link mt-2 inline-block text-[11px] underline underline-offset-2"
     >
-      View Quick Fix Guide →
+      View setup guide →
     </NuxtLink>
     <div v-if="$slots.actions" class="mt-2.5 space-y-1.5">
       <slot name="actions" />

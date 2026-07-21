@@ -144,8 +144,7 @@
               <ul class="list-disc pl-6 mb-4 space-y-2">
                 <li>
                   <strong>Infrastructure providers:</strong> We host the Service and store most
-                  operational data using Google Firebase (including Firebase Authentication and
-                  Cloud Firestore) and related Google Cloud services, which process data as
+                  operational data with secure cloud infrastructure providers, which process data as
                   described in their terms and privacy documentation.
                 </li>
                 <li>

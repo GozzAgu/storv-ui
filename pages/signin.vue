@@ -77,7 +77,7 @@
         <AuthAlert
           v-if="errorMessage"
           :message="errorMessage"
-          :show-firestore-guide="errorMessage.includes('Firestore')"
+          :show-firestore-guide="errorMessage.includes('PERMISSION_DENIED')"
         />
 
         <Button

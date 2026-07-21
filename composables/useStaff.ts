@@ -10,6 +10,7 @@ import {
   orderBy,
   serverTimestamp,
 } from 'firebase/firestore'
+import { CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import { useFirestore } from './useFirestore'
 import { useFirebaseAuth } from './useFirebaseAuth'
 import { useDepartments } from './useDepartments'
@@ -51,7 +52,7 @@ export const useStaff = () => {
   const getStaff = async (): Promise<Staff[]> => {
     const db = getFirestoreInstance()
     if (!db) {
-      throw new Error('Firestore not initialized')
+      throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
     }
 
     try {
@@ -86,7 +87,7 @@ export const useStaff = () => {
   const getStaffByDepartment = async (departmentId: string): Promise<Staff[]> => {
     const db = getFirestoreInstance()
     if (!db) {
-      throw new Error('Firestore not initialized')
+      throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
     }
 
     try {
@@ -124,7 +125,7 @@ export const useStaff = () => {
   const getStaffMember = async (staffId: string): Promise<Staff | null> => {
     const db = getFirestoreInstance()
     if (!db) {
-      throw new Error('Firestore not initialized')
+      throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
     }
 
     try {
@@ -158,7 +159,7 @@ export const useStaff = () => {
   ): Promise<string> => {
     const db = getFirestoreInstance()
     if (!db) {
-      throw new Error('Firestore not initialized')
+      throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
     }
 
     if (!currentUser.value) {
@@ -211,7 +212,7 @@ export const useStaff = () => {
   ): Promise<void> => {
     const db = getFirestoreInstance()
     if (!db) {
-      throw new Error('Firestore not initialized')
+      throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
     }
 
     try {

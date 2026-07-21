@@ -1,4 +1,5 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import { useFirestore } from './useFirestore'
 import {
   collection,
@@ -145,7 +146,7 @@ export const useOfflineMode = () => {
   // Create document (with offline support)
   const createDoc = async (collectionName: string, data: any, docId?: string) => {
     if (!db) {
-      throw new Error('Firestore not initialized')
+      throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
     }
 
     try {
@@ -179,7 +180,7 @@ export const useOfflineMode = () => {
   // Update document (with offline support)
   const updateDoc = async (collectionName: string, docId: string, data: any) => {
     if (!db) {
-      throw new Error('Firestore not initialized')
+      throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
     }
 
     try {
@@ -209,7 +210,7 @@ export const useOfflineMode = () => {
   // Delete document (with offline support)
   const deleteDoc = async (collectionName: string, docId: string) => {
     if (!db) {
-      throw new Error('Firestore not initialized')
+      throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
     }
 
     try {

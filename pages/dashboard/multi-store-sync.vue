@@ -474,6 +474,7 @@ import { usePermissions } from '~/composables/usePermissions'
 import { usePreferences } from '~/composables/usePreferences'
 import { useAppToast } from '~/composables/useAppToast'
 import { useFirestore } from '~/composables/useFirestore'
+import { CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import { tableMoneyClass } from '~/utils/table-money-styles'
 
 definePageMeta({
@@ -814,7 +815,7 @@ const requestTransfer = async () => {
       throw new Error('Only super admins can transfer items')
 
     const db = useFirestore().getFirestoreInstance()
-    if (!db) throw new Error('Firestore not initialized')
+    if (!db) throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
 
     const sourceFolder = sourceFolders.value.find((f) => f.id === transferForm.value.folderId)
     const hasSerialNumbers = sourceFolder?.hasSerialNumbers || false
@@ -913,7 +914,7 @@ const executeTransfer = async (transfer: any) => {
   if (!userId) throw new Error('User not authenticated')
 
   const db = useFirestore().getFirestoreInstance()
-  if (!db) throw new Error('Firestore not initialized')
+  if (!db) throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
 
   const { getDoc, setDoc, updateDoc, serverTimestamp, query, where, getDocs, collection, doc } =
     await import('firebase/firestore')
@@ -1444,11 +1445,11 @@ const loadTransferHistory = async () => {
         // Don't show error toast if it's just that there are no transfers yet
         if (queryError.message?.includes('index')) {
           throw new Error(
-            'Firestore index required. Please create a composite index for storeTransfers collection on createdAt field.'
+            'A database index is required for transfer history. Please contact Storvv support if this persists.'
           )
         }
         throw new Error(
-          'Permission denied. Please ensure you are logged in as a super admin and Firestore rules are properly configured.'
+          'Permission denied. Please ensure you are logged in as a super admin.'
         )
       }
       // If it's an index error, try without orderBy
@@ -1502,7 +1503,7 @@ const loadConsolidatedReports = async () => {
     // Get Firestore instance
     const db = useFirestore().getFirestoreInstance()
     if (!db) {
-      console.error('Firestore not initialized')
+      console.error(CLOUD_UNAVAILABLE_MESSAGE)
       return
     }
 
