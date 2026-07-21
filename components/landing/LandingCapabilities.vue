@@ -178,8 +178,7 @@ import {
   Square2StackIcon,
   UserGroupIcon,
   UsersIcon,
-} from '@heroicons/vue/24/outline'
-
+} from '~/utils/app-icons'
 const emit = defineEmits<{
   navigate: [sectionId: string]
 }>()

@@ -1,18 +1,33 @@
 <template>
   <header :class="pageHeaderClass">
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <div class="min-w-0">
+    <div class="flex flex-col gap-3">
+      <div v-if="$slots.eyebrow" class="min-w-0">
         <slot name="eyebrow" />
-        <slot name="title" />
-        <slot name="description" />
       </div>
-      <div v-if="$slots.actions" class="flex shrink-0 items-center gap-2 sm:justify-end">
-        <slot name="actions" />
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div class="min-w-0">
+          <slot name="title" />
+          <slot name="description" />
+        </div>
+        <div v-if="$slots.actions" class="flex w-full shrink-0 flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
+          <slot name="actions" />
+        </div>
       </div>
     </div>
-    <div v-if="$slots.toolbar" :class="toolbarDividerClass">
+    <div
+      v-if="$slots.toolbar || $slots.filters || $slots.bulk"
+      :class="toolbarDividerClass"
+    >
       <DashboardToolbarRow>
-        <slot name="toolbar" />
+        <template v-if="$slots.filters" #filters>
+          <slot name="filters" />
+        </template>
+        <template v-if="!$slots.filters && $slots.toolbar">
+          <slot name="toolbar" />
+        </template>
+        <template v-if="$slots.bulk" #bulk>
+          <slot name="bulk" />
+        </template>
       </DashboardToolbarRow>
     </div>
   </header>

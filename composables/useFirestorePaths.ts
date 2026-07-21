@@ -140,6 +140,27 @@ export function getSellerLoanOutDocument(
 }
 
 /**
+ * Customer buybacks: store purchases inventory from a customer (standalone, not tied to a sale).
+ * users/{userId}/stores/{storeId}/customerBuybacks/{buybackId}
+ */
+export function getCustomerBuybacksCollection(
+  db: Firestore,
+  userId: string,
+  storeId: string
+): CollectionReference {
+  return collection(db, 'users', userId, 'stores', storeId, 'customerBuybacks')
+}
+
+export function getCustomerBuybackDocument(
+  db: Firestore,
+  userId: string,
+  storeId: string,
+  buybackId: string
+): DocumentReference {
+  return doc(db, 'users', userId, 'stores', storeId, 'customerBuybacks', buybackId)
+}
+
+/**
  * Get receipts collection path: users/{userId}/stores/{storeId}/receipts
  */
 export function getReceiptsCollection(

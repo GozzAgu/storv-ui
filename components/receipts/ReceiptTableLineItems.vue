@@ -1,7 +1,13 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { ReceiptItem } from '~/stores/receipts'
+import type { InventoryItem } from '~/stores/inventory'
 import { getProductDetailLines } from '~/composables/useReceiptProductDetails'
 import { formatDiscountPercent } from '~/utils/format-discount'
+import { usePermissions } from '~/composables/usePermissions'
+import { useInventoryStore } from '~/stores/inventory'
+import { usePreferences } from '~/composables/usePreferences'
+import { resolveReceiptLineUnitCost } from '~/utils/inventory-item-cost'
 
 const props = withDefaults(
   defineProps<{
@@ -12,7 +18,29 @@ const props = withDefaults(
   { compact: false, itemsCountFallback: 0 }
 )
 
+const { canViewProfitAndCost } = usePermissions()
+const inventoryStore = useInventoryStore()
 const { formatCurrency } = usePreferences()
+
+const showProfitHints = computed(() => canViewProfitAndCost.value)
+
+function lookupInventoryItem(itemId: string): InventoryItem | null {
+  for (const list of Object.values(inventoryStore.items)) {
+    const hit = list.find((i) => i.id === itemId)
+    if (hit) return hit
+  }
+  return null
+}
+
+function lineProfitHint(item: ReceiptItem): string | null {
+  if (!showProfitHints.value) return null
+  const inv = lookupInventoryItem(item.itemId)
+  const unitCost = resolveReceiptLineUnitCost(item, inv)
+  if (unitCost <= 0) return null
+  const profit = lineTotal(item) - unitCost * item.quantity
+  const prefix = profit >= 0 ? '+' : ''
+  return `${prefix}${formatCurrency(profit)} profit`
+}
 
 function lineTotal(item: ReceiptItem) {
   return item.price * item.quantity
@@ -127,6 +155,12 @@ function discountLabel(item: ReceiptItem): string | null {
             </span>
             <span class="font-semibold text-gray-900 dark:text-gray-50">
               {{ formatCurrency(lineTotal(item)) }}
+            </span>
+            <span
+              v-if="lineProfitHint(item)"
+              class="mt-0.5 block text-[9px] tabular-nums text-emerald-700 dark:text-emerald-400/90"
+            >
+              {{ lineProfitHint(item) }}
             </span>
           </td>
         </tr>

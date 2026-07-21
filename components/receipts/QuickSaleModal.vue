@@ -334,7 +334,7 @@ import {
   PlusIcon,
   TrashIcon,
   ChevronDownIcon,
-} from '@heroicons/vue/24/outline'
+} from '~/utils/app-icons'
 import Modal from '~/components/ui/Modal.vue'
 import SellScreenNoteBanner from '~/components/receipts/SellScreenNoteBanner.vue'
 import PaymentMethodSelect from '~/components/receipts/PaymentMethodSelect.vue'

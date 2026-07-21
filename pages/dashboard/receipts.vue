@@ -515,9 +515,12 @@
                                   />
                                 </div>
                                 <div class="mt-1.5 flex items-center justify-between gap-2">
-                                  <span class="text-xs" :class="tableMoneyClass()">{{
-                                    formatCurrency(receipt.total)
-                                  }}</span>
+                                  <div class="min-w-0">
+                                    <span class="text-xs" :class="tableMoneyClass()">{{
+                                      formatCurrency(receipt.total)
+                                    }}</span>
+                                    <ReceiptProfitHint :receipt="receipt" class="mt-0.5" />
+                                  </div>
                                   <ReceiptStatusBadge :badge="receiptStatusBadge(receipt)" />
                                 </div>
                               </div>
@@ -941,6 +944,7 @@
                                     <span class="text-xs" :class="tableMoneyClass()">
                                       {{ formatCurrency(receipt.total) }}
                                     </span>
+                                    <ReceiptProfitHint :receipt="receipt" class="mt-0.5" />
                                   </td>
                                   <td class="whitespace-nowrap px-3 py-2.5 align-middle sm:px-4">
                                     <span class="text-xs text-gray-700 dark:text-gray-300">
@@ -1784,7 +1788,7 @@ import {
   ClipboardDocumentIcon,
   ArrowsPointingOutIcon,
   EllipsisVerticalIcon,
-} from '@heroicons/vue/24/outline'
+} from '~/utils/app-icons'
 import Button from '~/components/ui/Button.vue'
 import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
 import Modal from '~/components/ui/Modal.vue'

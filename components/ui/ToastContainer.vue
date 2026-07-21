@@ -59,7 +59,7 @@ import {
   ExclamationTriangleIcon,
   InformationCircleIcon,
   XCircleIcon,
-} from '@heroicons/vue/24/outline'
+} from '~/utils/app-icons'
 import { useAppToast, type Toast, type ToastType } from '~/composables/useAppToast'
 
 const { toasts, removeToast } = useAppToast()

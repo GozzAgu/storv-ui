@@ -351,7 +351,7 @@ import {
   ClockIcon,
   ArrowUpIcon,
   ArrowDownIcon,
-} from '@heroicons/vue/24/outline'
+} from '~/utils/app-icons'
 import { useSearchStore, type SearchEntityType } from '~/stores/search'
 import { useInventoryStore } from '~/stores/inventory'
 import { useUserStore } from '~/stores/user'

@@ -91,15 +91,11 @@
                   class="flex min-w-0 flex-1 items-center gap-2.5"
                   :class="{ 'pointer-events-none opacity-50': switchingStore }"
                 >
-                  <component
-                    :is="isActive(item.href) ? item.iconSolid : item.icon"
-                    :class="[
-                      'w-4 h-4 shrink-0 transition-colors',
-                      isActive(item.href)
-                        ? 'text-gray-900 dark:text-gray-100'
-                        : 'text-gray-500 group-hover:text-gray-800 dark:text-gray-400 dark:group-hover:text-gray-100',
-                    ]"
-                    :stroke-width="isActive(item.href) ? undefined : 1.5"
+                  <DashboardNavIcon
+                    :name="item.iconKey"
+                    :active="isActive(item.href)"
+                    size="md"
+                    class="shrink-0 transition-colors"
                   />
                   <span
                     class="truncate text-[13px] leading-snug"
@@ -149,14 +145,10 @@
                     { 'pointer-events-none opacity-50': switchingStore },
                   ]"
                 >
-                  <FolderIcon
-                    v-if="route.params.id !== folder.id"
-                    class="w-3.5 h-3.5 shrink-0 text-gray-500 group-hover:text-gray-700 dark:text-gray-500 dark:group-hover:text-gray-200"
-                    :stroke-width="1.75"
-                  />
-                  <FolderIconSolid
-                    v-else
-                    class="w-3.5 h-3.5 shrink-0 text-gray-900 dark:text-gray-100"
+                  <DashboardNavIcon
+                    :name="route.params.id === folder.id ? 'folder-open' : 'folder'"
+                    :active="route.params.id === folder.id"
+                    size="sm"
                   />
                   <span
                     class="flex-1 truncate leading-snug"
@@ -192,16 +184,11 @@
                 { 'pointer-events-none opacity-50': switchingStore },
               ]"
             >
-              <component
-                :is="isActive(item.href) ? item.iconSolid : item.icon"
-                :class="[
-                  'w-4 h-4 shrink-0 transition-colors',
-                  effectiveSidebarCollapsed ? '' : 'mr-0',
-                  isActive(item.href)
-                    ? 'text-gray-900 dark:text-gray-100'
-                    : 'text-gray-500 group-hover:text-gray-800 dark:text-gray-400 dark:group-hover:text-gray-100',
-                ]"
-                :stroke-width="isActive(item.href) ? undefined : 1.75"
+              <DashboardNavIcon
+                :name="item.iconKey"
+                :active="isActive(item.href)"
+                size="md"
+                class="shrink-0 transition-colors"
               />
               <span
                 v-if="!effectiveSidebarCollapsed"
@@ -267,26 +254,14 @@
                     }"
                     @click.prevent="store.id !== storesStore.currentStoreId ? null : null"
                   >
-                    <BuildingStorefrontIcon
-                      v-if="
-                        !(
-                          route.params.storeId === store.id &&
-                          route.path.startsWith('/dashboard/stores/') &&
-                          route.path.includes('/departments')
-                        )
+                    <DashboardNavIcon
+                      name="branch"
+                      :active="
+                        route.params.storeId === store.id &&
+                        route.path.startsWith('/dashboard/stores/') &&
+                        route.path.includes('/departments')
                       "
-                      class="h-4 w-4 shrink-0"
-                      :class="
-                        currentStore?.id === store.id
-                          ? 'text-gray-900 dark:text-gray-100'
-                          : 'text-gray-500 dark:text-gray-500 group-hover:text-gray-800 dark:group-hover:text-gray-200'
-                      "
-                      :stroke-width="1.75"
-                      aria-hidden="true"
-                    />
-                    <BuildingStorefrontIconSolid
-                      v-else
-                      class="h-4 w-4 shrink-0 text-gray-900 dark:text-gray-100"
+                      size="md"
                       aria-hidden="true"
                     />
                     <span
@@ -351,19 +326,13 @@
                           { 'pointer-events-none opacity-50': switchingStore },
                         ]"
                       >
-                        <BuildingOfficeIcon
-                          v-if="
-                            !(
-                              route.params.id === department.id &&
-                              route.path.startsWith('/dashboard/departments')
-                            )
+                        <DashboardNavIcon
+                          name="departments"
+                          :active="
+                            route.params.id === department.id &&
+                            route.path.startsWith('/dashboard/departments')
                           "
-                          class="w-3.5 h-3.5 shrink-0 text-gray-500 group-hover:text-gray-700 dark:text-gray-500 dark:group-hover:text-gray-200"
-                          :stroke-width="1.75"
-                        />
-                        <BuildingOfficeIconSolid
-                          v-else
-                          class="w-3.5 h-3.5 shrink-0 text-gray-900 dark:text-gray-100"
+                          size="sm"
                         />
                         <span
                           class="flex-1 truncate leading-snug"
@@ -475,7 +444,7 @@
             effectiveSidebarCollapsed ? 'relative group' : '',
           ]"
         >
-          <ArrowRightOnRectangleIcon class="h-4 w-4 shrink-0 opacity-80" stroke-width="1.75" />
+          <DashboardNavIcon name="sign-out" size="md" class="shrink-0 opacity-80" />
           <span v-if="!effectiveSidebarCollapsed">Sign out</span>
           <DashboardHoverTooltip v-if="effectiveSidebarCollapsed">
             Sign out
@@ -558,8 +527,8 @@
             />
           </button>
 
-          <!-- Native: Storvv logo (links home) -->
-          <div v-if="isNativeApp" class="flex min-w-0 flex-1 items-center">
+          <!-- Native: logo + current workspace page -->
+          <div v-if="isNativeApp" class="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
             <NuxtLink
               :to="dashPath('')"
               class="flex shrink-0 items-center rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/35"
@@ -567,24 +536,35 @@
             >
               <img
                 src="/storvv logo mobile.png"
-                alt="Storv"
-                class="h-8 w-8 object-contain"
-                width="32"
-                height="32"
+                alt=""
+                class="h-7 w-7 object-contain"
+                width="28"
+                height="28"
                 decoding="async"
               />
             </NuxtLink>
+            <div
+              class="native-topnav-page flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden border-l border-gray-200/90 pl-2 dark:border-white/10"
+            >
+              <DashboardNavIcon
+                :name="currentPageIconKey"
+                size="sm"
+                class="shrink-0 text-gray-400 dark:text-gray-500"
+              />
+              <p class="native-topnav-page__title truncate text-[13px] font-semibold leading-tight text-gray-900 dark:text-gray-100">
+                {{ currentPageName }}
+              </p>
+            </div>
           </div>
 
           <!-- Page title -->
           <div v-else class="hidden min-w-0 shrink-0 md:block lg:min-w-[7.5rem]">
             <p class="dash-topnav__eyebrow">Workspace</p>
             <div class="mt-0.5 flex min-w-0 items-center gap-1.5">
-              <component
-                :is="currentPageIcon"
-                class="h-3.5 w-3.5 shrink-0 text-gray-400 dark:text-gray-500"
-                stroke-width="1.75"
-                aria-hidden="true"
+              <DashboardNavIcon
+                :name="currentPageIconKey"
+                size="sm"
+                class="text-gray-400 dark:text-gray-500"
               />
               <h1 class="dash-topnav__title">{{ currentPageName }}</h1>
             </div>
@@ -594,15 +574,16 @@
           <button
             v-if="!isNativeApp"
             type="button"
-            class="dash-topnav__search dashboard-topnav-search group relative hidden h-8 min-w-0 flex-1 items-center gap-2 px-2.5 md:flex md:max-w-[16rem] lg:max-w-[18rem] xl:max-w-[20rem]"
+            class="dash-topnav__search dashboard-topnav-search group relative hidden h-8 w-[min(100%,12rem)] shrink-0 items-center gap-2 px-2.5 sm:w-[min(100%,14rem)] md:flex lg:w-[min(100%,16rem)] xl:w-[min(100%,18rem)]"
             @click="searchStore.openSearch()"
           >
             <MagnifyingGlassIcon
-              class="h-3.5 w-3.5 shrink-0 text-gray-400 dark:text-gray-500"
+              class="block h-3.5 w-3.5 shrink-0 text-gray-400 dark:text-gray-500"
+              :size="14"
               stroke-width="1.75"
             />
             <span
-              class="flex-1 truncate text-left text-[11px] font-medium text-gray-500 dark:text-gray-400"
+              class="min-w-0 flex-1 truncate text-left text-[11px] font-medium text-gray-500 dark:text-gray-400"
             >
               Search workspace
             </span>
@@ -613,11 +594,13 @@
             </kbd>
           </button>
 
-          <div class="flex-1 md:hidden" aria-hidden="true" />
+          <div class="hidden min-w-0 flex-1 md:block" aria-hidden="true" />
+
+          <div class="min-w-0 flex-1 md:hidden" aria-hidden="true" />
 
           <!-- Actions toolbar -->
           <div
-            class="dash-topnav__actions dashboard-topnav-actions relative z-10 ml-auto flex shrink-0 items-center"
+            class="dash-topnav__actions dashboard-topnav-actions relative z-10 flex shrink-0 items-center"
           >
             <button
               type="button"
@@ -625,7 +608,7 @@
               aria-label="Search"
               @click="searchStore.openSearch()"
             >
-              <MagnifyingGlassIcon class="h-4 w-4" stroke-width="1.75" />
+              <MagnifyingGlassIcon class="block h-4 w-4 shrink-0" :size="16" stroke-width="1.75" />
             </button>
 
             <span class="dash-topnav__divider hidden md:block" aria-hidden="true" />
@@ -791,48 +774,18 @@
 import { ref, reactive, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
 import {
   XMarkIcon,
-  HomeIcon,
-  CubeIcon,
-  ReceiptPercentIcon,
-  UsersIcon,
-  BuildingOfficeIcon,
-  Cog6ToothIcon,
-  UserCircleIcon,
   BellIcon,
   MagnifyingGlassIcon,
   ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   ArrowRightOnRectangleIcon,
-  FolderIcon,
-  ChartBarIcon,
-  ArrowsRightLeftIcon,
-  ClipboardDocumentListIcon,
-  BookOpenIcon,
-  BuildingStorefrontIcon,
-  BanknotesIcon,
-  CreditCardIcon,
-} from '@heroicons/vue/24/outline'
-import {
-  HomeIcon as HomeIconSolid,
-  CubeIcon as CubeIconSolid,
-  ReceiptPercentIcon as ReceiptPercentIconSolid,
-  ChartBarIcon as ChartBarIconSolid,
-  ClipboardDocumentListIcon as ClipboardDocumentListIconSolid,
-  ArrowsRightLeftIcon as ArrowsRightLeftIconSolid,
-  BookOpenIcon as BookOpenIconSolid,
-  Cog6ToothIcon as Cog6ToothIconSolid,
-  UserCircleIcon as UserCircleIconSolid,
-  FolderIcon as FolderIconSolid,
-  BuildingStorefrontIcon as BuildingStorefrontIconSolid,
-  BuildingOfficeIcon as BuildingOfficeIconSolid,
-  BanknotesIcon as BanknotesIconSolid,
-  CreditCardIcon as CreditCardIconSolid,
-} from '@heroicons/vue/24/solid'
+} from '~/utils/app-icons'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import ThemeToggle from '~/components/ui/ThemeToggle.vue'
 import DashboardHoverTooltip from '~/components/ui/DashboardHoverTooltip.vue'
+import DashboardNavIcon from '~/components/dashboard/DashboardNavIcon.vue'
 import DemoModeBanner from '~/components/demo/DemoModeBanner.vue'
 import DashboardNativeBottomNav from '~/components/dashboard/DashboardNativeBottomNav.vue'
 import DashboardProfileMenu from '~/components/dashboard/DashboardProfileMenu.vue'
@@ -843,6 +796,7 @@ import {
   NATIVE_PRIMARY_ORDER_WITH_PAYMENT_LINKS,
   type DashboardNavItem,
 } from '~/utils/dashboard-native-nav'
+import type { DashboardNavIconKey } from '~/utils/dashboard-nav-icons'
 import { isPaymentLinksNativeComingSoon } from '~/utils/payment-links-launch'
 import { resolveStoreDepartmentsPath } from '~/utils/department-routes'
 import StoreSelector from '~/components/ui/StoreSelector.vue'
@@ -1007,8 +961,7 @@ const navigation: Array<{
   name: string
   segment: string
   href?: string
-  icon: any
-  iconSolid: any
+  iconKey: DashboardNavIconKey
   requiresSuperAdmin?: boolean
   requiresManagerOrSuperAdmin?: boolean
   subscriptionFeature?: SubscriptionFeature
@@ -1016,83 +969,79 @@ const navigation: Array<{
   {
     name: 'Dashboard',
     segment: '',
-    icon: HomeIcon,
-    iconSolid: HomeIconSolid,
+    iconKey: 'dashboard',
     subscriptionFeature: 'dashboard',
   },
   {
     name: 'Inventory',
     segment: '/inventory',
-    icon: CubeIcon,
-    iconSolid: CubeIconSolid,
+    iconKey: 'inventory',
     subscriptionFeature: 'inventory',
+  },
+  {
+    name: 'Customer buybacks',
+    segment: '/buybacks',
+    iconKey: 'buybacks',
+    subscriptionFeature: 'inventory',
+    requiresSuperAdmin: true,
   },
   {
     name: 'Stock loans',
     segment: '/seller-loans',
-    icon: BanknotesIcon,
-    iconSolid: BanknotesIconSolid,
+    iconKey: 'loans',
     subscriptionFeature: 'seller_loans',
     requiresManagerOrSuperAdmin: true,
   },
   {
     name: 'Receipts',
     segment: '/receipts',
-    icon: ReceiptPercentIcon,
-    iconSolid: ReceiptPercentIconSolid,
+    iconKey: 'receipts',
     subscriptionFeature: 'receipts',
   },
   {
     name: 'Payment links',
     segment: '/payment-links',
-    icon: CreditCardIcon,
-    iconSolid: CreditCardIconSolid,
+    iconKey: 'payment-links',
     subscriptionFeature: 'payment_links',
   },
   {
     name: 'Departments',
     segment: '/departments',
-    icon: BuildingOfficeIcon,
-    iconSolid: BuildingOfficeIconSolid,
+    iconKey: 'departments',
     requiresManagerOrSuperAdmin: true,
     subscriptionFeature: 'departments',
   },
   {
     name: 'Analytics',
     segment: '/analytics',
-    icon: ChartBarIcon,
-    iconSolid: ChartBarIconSolid,
+    iconKey: 'analytics',
     subscriptionFeature: 'analytics',
   },
   {
     name: 'Activity Logs',
     segment: '/activity',
-    icon: ClipboardDocumentListIcon,
-    iconSolid: ClipboardDocumentListIconSolid,
+    iconKey: 'activity',
     subscriptionFeature: 'activity_logs',
     requiresManagerOrSuperAdmin: true,
   },
   {
     name: 'Multi-Store Sync',
     segment: '/multi-store-sync',
-    icon: ArrowsRightLeftIcon,
-    iconSolid: ArrowsRightLeftIconSolid,
+    iconKey: 'sync',
     requiresSuperAdmin: true,
     subscriptionFeature: 'multi_store_sync',
   },
-  { name: 'Help center', segment: '/help', icon: BookOpenIcon, iconSolid: BookOpenIconSolid },
+  { name: 'Help center', segment: '/help', iconKey: 'help' },
   {
     name: 'Settings',
     segment: '/settings',
-    icon: Cog6ToothIcon,
-    iconSolid: Cog6ToothIconSolid,
+    iconKey: 'settings',
     subscriptionFeature: 'settings',
   },
   {
     name: 'Profile',
     segment: '/profile',
-    icon: UserCircleIcon,
-    iconSolid: UserCircleIconSolid,
+    iconKey: 'profile',
     subscriptionFeature: 'profile',
   },
 ]
@@ -1133,8 +1082,7 @@ const nativeNavigationItems = computed((): DashboardNavItem[] => {
     {
       name: 'Payment links',
       href: dashPath('/payment-links'),
-      icon: CreditCardIcon,
-      iconSolid: CreditCardIconSolid,
+      iconKey: 'payment-links',
     },
   ]
 })
@@ -1165,8 +1113,8 @@ const currentPageName = computed(() => {
   return currentPage.value?.name || 'Dashboard'
 })
 
-const currentPageIcon = computed(() => {
-  return currentPage.value?.icon || HomeIcon
+const currentPageIconKey = computed((): DashboardNavIconKey => {
+  return currentPage.value?.iconKey || 'dashboard'
 })
 
 // Folder navigation for Inventory
@@ -1357,11 +1305,13 @@ watch(
   { immediate: true }
 )
 
-// Open folder list while on inventory; collapse when navigating away (keeps sidenav tidy)
+// Collapse folder list when leaving inventory; expand only via chevron (not link click)
 watch(
   () => route.path,
   (path) => {
-    inventoryExpanded.value = path.startsWith('/dashboard/inventory')
+    if (!path.startsWith('/dashboard/inventory')) {
+      inventoryExpanded.value = false
+    }
   },
   { immediate: true }
 )

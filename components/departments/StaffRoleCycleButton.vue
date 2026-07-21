@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { ArrowPathIcon } from '@heroicons/vue/24/outline'
+import {
+  ArrowPathIcon,
+} from '~/utils/app-icons'
 import { getNextStaffRoleLabel, normalizeStaffRole } from '~/utils/staff-role'
 
 const props = withDefaults(

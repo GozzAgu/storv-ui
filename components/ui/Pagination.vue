@@ -77,7 +77,10 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/vue/24/outline'
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from '~/utils/app-icons'
 import { getPaginationIndices, getTotalPages, getVisiblePageNumbers } from '~/utils/pagination'
 
 const props = withDefaults(

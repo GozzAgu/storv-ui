@@ -120,7 +120,9 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { BellIcon } from '@heroicons/vue/24/outline'
+import {
+  BellIcon,
+} from '~/utils/app-icons'
 import { useNotificationsStore, type Notification } from '~/stores/notifications'
 import { useRouter } from 'vue-router'
 import { useAppToast } from '~/composables/useAppToast'

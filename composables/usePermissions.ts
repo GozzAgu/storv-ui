@@ -56,6 +56,9 @@ export const usePermissions = () => {
   /** Super admin can grant inventory editor rights to chosen managers. */
   const canGrantInventoryAccess = computed(() => userStore.isSuperAdmin)
 
+  /** Unit cost, margin, COGS, and gross profit — super admin only. */
+  const canViewProfitAndCost = computed(() => userStore.isSuperAdmin)
+
   return {
     isStaff,
     isManager,
@@ -71,5 +74,6 @@ export const usePermissions = () => {
     canRemoveStaff,
     canMoveStaff,
     canGrantInventoryAccess,
+    canViewProfitAndCost,
   }
 }

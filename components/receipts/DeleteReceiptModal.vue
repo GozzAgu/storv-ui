@@ -217,7 +217,10 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { TrashIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
+import {
+  TrashIcon,
+  ExclamationTriangleIcon,
+} from '~/utils/app-icons'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'

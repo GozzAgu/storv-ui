@@ -59,6 +59,8 @@ export interface ReceiptItem {
   discountPercentage?: number // Discount percentage applied
   discountAmount?: number // Discount amount applied
   hasDiscount?: boolean // Flag to indicate if discount was applied
+  /** Acquisition cost snapshot at time of sale (for gross profit). */
+  unitCost?: number
 }
 
 export interface Receipt {

@@ -1144,7 +1144,7 @@ import {
   TableCellsIcon,
   ArrowUpTrayIcon,
   ArrowsRightLeftIcon,
-} from '@heroicons/vue/24/outline'
+} from '~/utils/app-icons'
 import Modal from '~/components/ui/Modal.vue'
 import SidePanel from '~/components/ui/SidePanel.vue'
 import Button from '~/components/ui/Button.vue'

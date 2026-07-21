@@ -80,7 +80,7 @@ import {
   ClipboardDocumentIcon,
   CheckCircleIcon,
   TrashIcon,
-} from '@heroicons/vue/24/outline'
+} from '~/utils/app-icons'
 import { useStaffInvitePasswordsStore } from '~/stores/staffInvitePasswords'
 
 const props = defineProps<{

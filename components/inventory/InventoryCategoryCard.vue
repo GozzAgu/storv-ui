@@ -83,7 +83,11 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { BuildingOffice2Icon, FolderIcon, TagIcon } from '@heroicons/vue/24/outline'
+import {
+  BuildingOffice2Icon,
+  FolderIcon,
+  TagIcon,
+} from '~/utils/app-icons'
 import {
   categoryDepartmentAccessLabel,
   categoryDescriptionText,

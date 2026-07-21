@@ -167,7 +167,7 @@ import {
   Cog6ToothIcon,
   UserCircleIcon,
   RocketLaunchIcon,
-} from '@heroicons/vue/24/outline'
+} from '~/utils/app-icons'
 definePageMeta({
   layout: 'dashboard',
 })

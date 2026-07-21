@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { BookmarkSquareIcon } from '@heroicons/vue/24/outline'
+import {
+  BookmarkSquareIcon,
+} from '~/utils/app-icons'
 import { useStoresStore } from '~/stores/stores'
 
 const storesStore = useStoresStore()

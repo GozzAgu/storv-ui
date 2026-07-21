@@ -16,8 +16,9 @@
 </template>
 
 <script setup lang="ts">
-import { ChevronDownIcon } from '@heroicons/vue/24/outline'
-
+import {
+  ChevronDownIcon,
+} from '~/utils/app-icons'
 defineOptions({ inheritAttrs: false })
 
 const model = defineModel<string | number>({ default: '' })

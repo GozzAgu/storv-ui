@@ -209,6 +209,11 @@ main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-
   min-width: 10.75rem;
 }
 
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table th.dashboard-table__col-source,
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table td.dashboard-table__col-source {
+  min-width: 8.5rem;
+}
+
 main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table th.dashboard-table__col-price,
 main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table td.dashboard-table__col-price {
   min-width: 8.5rem;

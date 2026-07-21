@@ -173,8 +173,9 @@
 
 <script setup lang="ts">
 import { computed, watch, onMounted, onUnmounted, useId } from 'vue'
-import { XMarkIcon } from '@heroicons/vue/24/outline'
-
+import {
+  XMarkIcon,
+} from '~/utils/app-icons'
 interface Props {
   modelValue: boolean
   title?: string

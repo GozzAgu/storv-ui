@@ -15,10 +15,10 @@
           @click="moreOpen = false"
         >
           <span v-if="isActive(item.href)" :class="tabIndicatorClass" aria-hidden="true" />
-          <component
-            :is="isActive(item.href) ? item.iconSolid : item.icon"
-            class="h-[1.375rem] w-[1.375rem] shrink-0"
-            :stroke-width="isActive(item.href) ? undefined : 1.75"
+          <DashboardNavIcon
+            :name="item.iconKey"
+            :active="isActive(item.href)"
+            size="lg"
           />
           <span
             class="relative max-w-full truncate text-xs font-medium leading-none tracking-tight"
@@ -43,10 +43,10 @@
           @click="moreOpen = !moreOpen"
         >
           <span v-if="moreOpen || moreHasActive" :class="tabIndicatorClass" aria-hidden="true" />
-          <component
-            :is="moreOpen || moreHasActive ? Squares2X2IconSolid : Squares2X2Icon"
-            class="h-[1.375rem] w-[1.375rem] shrink-0"
-            :stroke-width="moreOpen || moreHasActive ? undefined : 1.75"
+          <DashboardNavIcon
+            name="more"
+            :active="moreOpen || moreHasActive"
+            size="lg"
           />
           <span
             class="text-xs font-medium leading-none tracking-tight"
@@ -110,10 +110,10 @@
                 <span
                   :class="[sheetIconWrapClass, isActive(item.href) ? sheetIconWrapActiveClass : '']"
                 >
-                  <component
-                    :is="isActive(item.href) ? item.iconSolid : item.icon"
-                    class="h-[1.125rem] w-[1.125rem]"
-                    :stroke-width="isActive(item.href) ? undefined : 1.75"
+                  <DashboardNavIcon
+                    :name="item.iconKey"
+                    :active="isActive(item.href)"
+                    size="sm"
                   />
                 </span>
                 <span class="min-w-0 flex-1 text-sm font-medium leading-snug">{{ item.name }}</span>
@@ -142,7 +142,7 @@
               <span
                 class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-50/90 text-red-600 dark:bg-red-500/10 dark:text-red-400"
               >
-                <ArrowRightOnRectangleIcon class="h-[1.125rem] w-[1.125rem]" stroke-width="1.75" />
+                <DashboardNavIcon name="sign-out" size="sm" />
               </span>
               <span class="text-sm font-medium">Sign out</span>
             </button>
@@ -156,8 +156,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { Squares2X2Icon, ArrowRightOnRectangleIcon } from '@heroicons/vue/24/outline'
-import { Squares2X2Icon as Squares2X2IconSolid } from '@heroicons/vue/24/solid'
+import DashboardNavIcon from '~/components/dashboard/DashboardNavIcon.vue'
 import {
   isDashboardNavActive,
   nativeNavShortLabel,

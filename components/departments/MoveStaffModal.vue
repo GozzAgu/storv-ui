@@ -94,7 +94,9 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { ArrowsRightLeftIcon } from '@heroicons/vue/24/outline'
+import {
+  ArrowsRightLeftIcon,
+} from '~/utils/app-icons'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'

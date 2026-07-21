@@ -13,7 +13,7 @@
         :style="currentStore ? iconSurfaceStyleFor(currentStore) : undefined"
         aria-hidden="true"
       >
-        <BuildingStorefrontIcon stroke-width="1.6" />
+        <BuildingStorefrontIcon :size="14" stroke-width="1.6" />
       </span>
       <span v-else :class="triggerSpinnerClass" aria-hidden="true">
         <svg class="animate-spin" fill="none" viewBox="0 0 24 24">
@@ -118,7 +118,7 @@
                   :style="iconSurfaceStyleFor(store)"
                   aria-hidden="true"
                 >
-                  <BuildingStorefrontIcon stroke-width="1.6" />
+                  <BuildingStorefrontIcon :size="14" stroke-width="1.6" />
                 </span>
                 <div class="min-w-0 flex-1">
                   <p :class="rowNameClass">
@@ -171,7 +171,9 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
-import { BuildingStorefrontIcon } from '@heroicons/vue/24/outline'
+import {
+  BuildingStorefrontIcon,
+} from '~/utils/app-icons'
 import { iconSurfaceStyleFor } from '~/utils/storeIconBadge'
 import { useStoresStore } from '~/stores/stores'
 import { useUserStore } from '~/stores/user'

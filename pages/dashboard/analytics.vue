@@ -138,6 +138,19 @@
           :subtext="`${formatCurrency(refundAmount)} · ${refundRateText}`"
           subtext-class="danger"
         />
+        <StatCard
+          v-if="canViewProfitAndCost"
+          label="Gross profit"
+          :value="formatCurrency(periodGrossProfit)"
+          :subtext="grossProfitSubtext"
+          :change-positive="periodGrossProfit >= 0"
+        />
+        <StatCard
+          v-if="canViewProfitAndCost"
+          label="Cost of goods sold"
+          :value="formatCurrency(periodCogs)"
+          subtext="Sold items with unit cost recorded"
+        />
       </div>
 
       <div :class="chartsGridClass">
@@ -491,7 +504,11 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { ArrowDownTrayIcon, BuildingStorefrontIcon, ClockIcon } from '@heroicons/vue/24/outline'
+import {
+  ArrowDownTrayIcon,
+  BuildingStorefrontIcon,
+  ClockIcon,
+} from '~/utils/app-icons'
 import { useReceiptsStore } from '~/stores/receipts'
 import { useInventoryStore } from '~/stores/inventory'
 import { useCustomersStore } from '~/stores/customers'
@@ -511,6 +528,15 @@ import {
   apexTheme,
   createChartCurrencyAxisFormatter,
 } from '~/utils/analytics-charts'
+import type { InventoryItem } from '~/stores/inventory'
+import {
+  formatMarginPercent,
+  receiptLineRevenue,
+  sumReceiptCogs,
+  sumReceiptGrossProfit,
+} from '~/utils/inventory-item-cost'
+
+const { canViewProfitAndCost } = usePermissions()
 
 definePageMeta({
   layout: 'dashboard',
@@ -1072,6 +1098,37 @@ const recentReturns = computed(() =>
 const completedReceiptsInPeriod = computed(() =>
   filteredReceipts.value.filter((r) => r.status === 'completed')
 )
+
+function lookupInventoryItem(itemId: string): InventoryItem | null {
+  for (const list of Object.values(inventoryStore.items)) {
+    const hit = list.find((i) => i.id === itemId)
+    if (hit) return hit
+  }
+  return null
+}
+
+const periodSalesRevenue = computed(() =>
+  completedReceiptsInPeriod.value.reduce((sum, receipt) => sum + receiptLineRevenue(receipt), 0)
+)
+
+const periodCogs = computed(() =>
+  sumReceiptCogs(completedReceiptsInPeriod.value, lookupInventoryItem)
+)
+
+const periodGrossProfit = computed(() =>
+  sumReceiptGrossProfit(completedReceiptsInPeriod.value, lookupInventoryItem)
+)
+
+const grossProfitMarginPercent = computed(() => {
+  if (periodSalesRevenue.value <= 0) return null
+  return (periodGrossProfit.value / periodSalesRevenue.value) * 100
+})
+
+const grossProfitSubtext = computed(() => {
+  const margin = grossProfitMarginPercent.value
+  if (margin === null) return 'Add unit costs on inventory items'
+  return `${formatMarginPercent(margin)} gross margin on line revenue`
+})
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const HOUR_LABELS = Array.from({ length: 24 }, (_, i) => {

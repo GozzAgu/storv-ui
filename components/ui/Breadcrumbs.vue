@@ -37,8 +37,9 @@
 </template>
 
 <script setup lang="ts">
-import { ChevronRightIcon } from '@heroicons/vue/24/outline'
-
+import {
+  ChevronRightIcon,
+} from '~/utils/app-icons'
 interface BreadcrumbItem {
   label: string
   href?: string

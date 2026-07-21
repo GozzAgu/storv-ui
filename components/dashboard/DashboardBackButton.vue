@@ -10,7 +10,9 @@
 </template>
 
 <script setup lang="ts">
-import { ChevronLeftIcon } from '@heroicons/vue/24/outline'
+import {
+  ChevronLeftIcon,
+} from '~/utils/app-icons'
 import type { RouteLocationRaw } from 'vue-router'
 
 const props = withDefaults(

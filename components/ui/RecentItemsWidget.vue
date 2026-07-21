@@ -8,7 +8,7 @@ import {
   CubeIcon,
   FolderIcon,
   XMarkIcon,
-} from '@heroicons/vue/24/outline'
+} from '~/utils/app-icons'
 import DashboardHoverTooltip from '~/components/ui/DashboardHoverTooltip.vue'
 
 const { recentItems, removeRecentItem } = useRecentItems()

@@ -16,8 +16,9 @@
 </template>
 
 <script setup lang="ts">
-import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline'
-
+import {
+  MagnifyingGlassIcon,
+} from '~/utils/app-icons'
 defineProps<{
   modelValue: string
   placeholder?: string

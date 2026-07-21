@@ -6,17 +6,16 @@ import {
 } from '~/utils/dashboard-native-nav'
 
 const items = [
-  { name: 'Dashboard', href: '/dashboard', icon: null, iconSolid: null },
-  { name: 'Inventory', href: '/dashboard/inventory', icon: null, iconSolid: null },
-  { name: 'Receipts', href: '/dashboard/receipts', icon: null, iconSolid: null },
+  { name: 'Dashboard', href: '/dashboard', iconKey: 'dashboard' as const },
+  { name: 'Inventory', href: '/dashboard/inventory', iconKey: 'inventory' as const },
+  { name: 'Receipts', href: '/dashboard/receipts', iconKey: 'receipts' as const },
   {
     name: 'Departments',
     href: '/dashboard/stores/store-1/departments',
-    icon: null,
-    iconSolid: null,
+    iconKey: 'departments' as const,
   },
-  { name: 'Analytics', href: '/dashboard/analytics', icon: null, iconSolid: null },
-  { name: 'Settings', href: '/dashboard/settings', icon: null, iconSolid: null },
+  { name: 'Analytics', href: '/dashboard/analytics', iconKey: 'analytics' as const },
+  { name: 'Settings', href: '/dashboard/settings', iconKey: 'settings' as const },
 ]
 
 describe('splitNativeBottomNav', () => {

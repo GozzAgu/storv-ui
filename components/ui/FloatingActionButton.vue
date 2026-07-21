@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { PlusIcon, XMarkIcon } from '@heroicons/vue/24/outline'
-
+import {
+  PlusIcon,
+  XMarkIcon,
+} from '~/utils/app-icons'
 interface Action {
   id: string
   label: string

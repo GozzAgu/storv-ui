@@ -232,7 +232,11 @@
 
 <script setup lang="ts">
 import { ref, onMounted, nextTick, computed } from 'vue'
-import { GlobeAltIcon, ArrowRightIcon, BuildingStorefrontIcon } from '@heroicons/vue/24/outline'
+import {
+  GlobeAltIcon,
+  ArrowRightIcon,
+  BuildingStorefrontIcon,
+} from '~/utils/app-icons'
 import Button from '~/components/ui/Button.vue'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useUser, type StoreDetails } from '~/composables/useUser'

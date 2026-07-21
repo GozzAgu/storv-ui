@@ -37,8 +37,10 @@
 
 <script setup lang="ts">
 import { computed, ref, useAttrs } from 'vue'
-import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline'
-
+import {
+  EyeIcon,
+  EyeSlashIcon,
+} from '~/utils/app-icons'
 defineOptions({ inheritAttrs: false })
 
 const props = withDefaults(

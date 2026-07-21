@@ -104,7 +104,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { ArrowRightIcon, FingerPrintIcon } from '@heroicons/vue/24/outline'
+import {
+  ArrowRightIcon,
+  FingerPrintIcon,
+} from '~/utils/app-icons'
 import { BiometryError } from '@aparajita/capacitor-biometric-auth'
 import AuthShell from '~/components/auth/AuthShell.vue'
 import AuthPageHeader from '~/components/auth/AuthPageHeader.vue'

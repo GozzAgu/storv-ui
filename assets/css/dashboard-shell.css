@@ -57,6 +57,43 @@ html:not(.dark) .dash-sidebar__logo-bar {
   padding-block: 0.25rem;
 }
 
+.dash-nav-icon {
+  flex-shrink: 0;
+  color: currentColor;
+  transition:
+    color 180ms ease,
+    transform 180ms ease,
+    opacity 180ms ease;
+}
+
+.dash-nav-icon--xs {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.dash-nav-icon--sm {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.dash-nav-icon--md {
+  width: 1rem;
+  height: 1rem;
+}
+
+.dash-nav-icon--lg {
+  width: 1.375rem;
+  height: 1.375rem;
+}
+
+.dash-nav-icon--active {
+  transform: scale(1.04);
+}
+
+.group:hover .dash-nav-icon:not(.dash-nav-icon--active) {
+  opacity: 0.92;
+}
+
 /* Primary nav links */
 html.dark .dashboard-sidebar nav > a.rounded-lg.text-gray-900 {
   background: rgb(255 255 255 / 0.08);
@@ -264,6 +301,7 @@ html.dark .dash-topnav.dashboard-top-nav {
 
 .dash-topnav__search.dashboard-topnav-search {
   height: 2rem;
+  min-width: 0;
   border: 1px solid transparent;
   border-radius: 9999px;
   background: rgb(15 23 42 / 0.04);
@@ -272,6 +310,11 @@ html.dark .dash-topnav.dashboard-top-nav {
     border-color 0.18s ease,
     background-color 0.18s ease,
     box-shadow 0.18s ease;
+}
+
+.dash-topnav__search.dashboard-topnav-search svg {
+  display: block;
+  flex-shrink: 0;
 }
 
 html.dark .dash-topnav__search.dashboard-topnav-search {
@@ -297,6 +340,12 @@ html:not(.dark) .dash-topnav__search.dashboard-topnav-search:focus-visible {
   border-radius: 9999px;
   background: rgb(255 255 255 / 0.04);
   padding: 0.125rem;
+  flex-shrink: 0;
+}
+
+.dash-topnav__actions.dashboard-topnav-actions svg.lucide {
+  display: block;
+  flex-shrink: 0;
 }
 
 html:not(.dark) .dash-topnav__actions.dashboard-topnav-actions {

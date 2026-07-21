@@ -292,7 +292,7 @@ import {
   FolderIcon,
   MagnifyingGlassIcon,
   Squares2X2Icon,
-} from '@heroicons/vue/24/outline'
+} from '~/utils/app-icons'
 import type { ActivityAction, ActivityEntityType, ActivityLog } from '~/composables/useActivityLog'
 import {
   ACTIVITY_LOGS_FETCH_LIMIT,

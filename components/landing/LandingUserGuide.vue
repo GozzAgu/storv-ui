@@ -162,8 +162,7 @@ import {
   ArrowTopRightOnSquareIcon,
   EyeIcon,
   XMarkIcon,
-} from '@heroicons/vue/24/outline'
-
+} from '~/utils/app-icons'
 const pdfUrl = '/docs/Storvv-User-Guide.pdf'
 const fileSizeLabel = '~230 KB'
 

@@ -1176,7 +1176,7 @@ import {
   KeyIcon,
   ArrowUpIcon,
   ChevronUpIcon,
-} from '@heroicons/vue/24/outline'
+} from '~/utils/app-icons'
 import { useThemeStore } from '~/stores/theme'
 /** Light wordmark for setup panel (white background). */
 const marketingLogoSrc = '/storvv logo 2.png'

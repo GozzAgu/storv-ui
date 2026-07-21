@@ -178,6 +178,12 @@ export interface InventoryItem {
   pendingSaleAt?: Date | string
   swapIn?: boolean // Indicates if this item was swapped in by a customer
   swapInReceiptId?: string // Receipt ID associated with this swap-in
+  /** Standalone buyback from a customer (store paid cash/credit for the unit). */
+  buyback?: boolean
+  buybackId?: string
+  buybackPrice?: number
+  /** Store acquisition cost (COGS basis). Auto-set for buybacks; editable on all items. */
+  unitCost?: number
   // Discount fields
   discountPercentage?: number // Percentage discount (e.g., 10 for 10%)
   discountAmount?: number // Fixed discount amount

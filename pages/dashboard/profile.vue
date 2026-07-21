@@ -1102,7 +1102,7 @@ import {
   Cog6ToothIcon,
   EyeIcon,
   ClipboardDocumentListIcon,
-} from '@heroicons/vue/24/outline'
+} from '~/utils/app-icons'
 import type { FunctionalComponent } from 'vue'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useUser, type StoreDetails } from '~/composables/useUser'

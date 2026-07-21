@@ -103,7 +103,9 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
-import { SparklesIcon } from '@heroicons/vue/24/outline'
+import {
+  SparklesIcon,
+} from '~/utils/app-icons'
 import SidePanel from '~/components/ui/SidePanel.vue'
 import Button from '~/components/ui/Button.vue'
 import { useDepartmentsStore } from '~/stores/departments'

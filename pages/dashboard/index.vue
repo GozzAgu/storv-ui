@@ -39,7 +39,7 @@
       </div>
 
       <div :class="kpiGridClass">
-        <div v-for="i in 5" :key="`kpi-${i}`" class="dash-skeleton dash-skeleton--kpi" />
+        <div v-for="i in nativeKpiSkeletonCount" :key="`kpi-${i}`" class="dash-skeleton dash-skeleton--kpi" />
       </div>
 
       <div :class="chartsGridClass">
@@ -101,7 +101,7 @@
         </li>
       </ul>
 
-      <div :class="kpiGridClass">
+      <div :class="kpiGridClassResolved">
         <StatCard
           label="Total revenue"
           :value="formatCurrency(totalRevenue)"
@@ -132,6 +132,19 @@
           :value="formatCurrency(outstandingBalanceTotal)"
           :subtext="`${outstandingCount} open balance${outstandingCount === 1 ? '' : 's'}`"
           :subtext-class="outstandingCount > 0 ? 'warning' : ''"
+        />
+        <StatCard
+          v-if="canViewProfitAndCost"
+          label="Gross profit"
+          :value="formatCurrency(dashboardGrossProfit)"
+          :subtext="dashboardGrossProfitSubtext"
+          :change-positive="dashboardGrossProfit >= 0"
+        />
+        <StatCard
+          v-if="canViewProfitAndCost"
+          label="Cost of goods sold"
+          :value="formatCurrency(dashboardCogs)"
+          subtext="Completed sales with unit cost"
         />
       </div>
 
@@ -212,6 +225,12 @@
             <dt>{{ row.label }}</dt>
             <dd :class="numClass">{{ row.value }}</dd>
           </div>
+          <div v-if="canViewProfitAndCost" :class="metricRowClass">
+            <dt>Gross profit</dt>
+            <dd :class="[numClass, 'text-emerald-700 dark:text-emerald-400/90']">
+              {{ formatCurrency(dashboardGrossProfit) }}
+            </dd>
+          </div>
         </dl>
       </section>
 
@@ -236,7 +255,14 @@
                   <span>{{ tx.time }}</span>
                 </p>
               </div>
-              <p :class="['dash-list__value', numClass]">{{ tx.amount }}</p>
+              <div class="shrink-0 text-right">
+                <p :class="['dash-list__value', numClass]">{{ tx.amount }}</p>
+                <ReceiptProfitHint
+                  v-if="getRecentReceiptById(tx.id)"
+                  :receipt="getRecentReceiptById(tx.id)!"
+                  class="mt-0.5"
+                />
+              </div>
             </li>
           </ul>
         </section>
@@ -337,7 +363,7 @@ import {
   Cog6ToothIcon,
   HomeIcon,
   ReceiptPercentIcon,
-} from '@heroicons/vue/24/outline'
+} from '~/utils/app-icons'
 import StatCard from '~/components/ui/StatCard.vue'
 import PaymentLinksSummaryCard from '~/components/payments/PaymentLinksSummaryCard.vue'
 import Tutorial from '~/components/Tutorial.vue'
@@ -363,7 +389,15 @@ import {
   type ActivityLog,
 } from '~/composables/useActivityLog'
 import { useSubscriptionFeatures } from '~/composables/useSubscriptionFeatures'
+import { usePermissions } from '~/composables/usePermissions'
+import { useCapacitorNativeApp } from '~/composables/useCapacitorNativeApp'
 import type { InventoryItem } from '~/stores/inventory'
+import {
+  formatMarginPercent,
+  receiptLineRevenue,
+  sumReceiptCogs,
+  sumReceiptGrossProfit,
+} from '~/utils/inventory-item-cost'
 
 definePageMeta({
   layout: 'dashboard',
@@ -459,6 +493,8 @@ const themeStore = useThemeStore()
 const { preferences } = usePreferences()
 const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
 const { showNativeComingSoon } = usePaymentLinksLaunch()
+const { canViewProfitAndCost } = usePermissions()
+const { isNativeApp } = useCapacitorNativeApp()
 
 const currencySymbol = computed(() => preferences.value.currencySymbol || '$')
 const dashboardFolderItems = ref<Record<string, InventoryItem[]>>({})
@@ -510,6 +546,14 @@ const {
   salesMetrics,
 } = insights
 
+const nativeKpiSkeletonCount = computed(() =>
+  canViewProfitAndCost.value ? 7 : 5
+)
+
+const kpiGridClassResolved = computed(() =>
+  isNativeApp.value ? `${kpiGridClass} dash-kpi-grid--compact` : kpiGridClass
+)
+
 function topN<T>(items: T[], limit = DASHBOARD_LIST_TOP): T[] {
   return items.slice(0, limit)
 }
@@ -517,6 +561,11 @@ function topN<T>(items: T[], limit = DASHBOARD_LIST_TOP): T[] {
 const attentionItemsTop = computed(() => topN(attentionItems.value))
 const paymentMethodsTop = computed(() => topN(paymentMethodBreakdown.value))
 const businessMetricsTop = computed(() => [...salesMetrics.value, ...operationsMetrics.value])
+
+function getRecentReceiptById(id: string) {
+  return receiptsStore.receipts.find((r) => r.id === id) ?? null
+}
+
 const recentReceiptsTop = computed(() => topN(recentReceipts.value))
 const topProductsTop = computed(() => topN(topSellingItems.value))
 const lowStockItemsTop = computed(() => topN(lowStockItems.value))
@@ -539,6 +588,40 @@ const isManager = computed(
 const canViewActivity = computed(
   () => (userStore.isSuperAdmin || isManager.value) && canUseSubscriptionFeature('activity_logs')
 )
+
+function lookupInventoryItemForProfit(itemId: string): InventoryItem | null {
+  for (const list of Object.values(inventoryStore.items)) {
+    const hit = list.find((i) => i.id === itemId)
+    if (hit) return hit
+  }
+  for (const list of Object.values(dashboardFolderItems.value)) {
+    const hit = list.find((i) => i.id === itemId)
+    if (hit) return hit
+  }
+  return null
+}
+
+const completedReceiptsForProfit = computed(() =>
+  receiptsStore.receipts.filter((r) => r.status === 'completed')
+)
+
+const dashboardSalesRevenue = computed(() =>
+  completedReceiptsForProfit.value.reduce((sum, receipt) => sum + receiptLineRevenue(receipt), 0)
+)
+
+const dashboardCogs = computed(() =>
+  sumReceiptCogs(completedReceiptsForProfit.value, lookupInventoryItemForProfit)
+)
+
+const dashboardGrossProfit = computed(() =>
+  sumReceiptGrossProfit(completedReceiptsForProfit.value, lookupInventoryItemForProfit)
+)
+
+const dashboardGrossProfitSubtext = computed(() => {
+  if (dashboardSalesRevenue.value <= 0) return 'Add unit costs on inventory items'
+  const margin = (dashboardGrossProfit.value / dashboardSalesRevenue.value) * 100
+  return `${formatMarginPercent(margin)} gross margin on line revenue`
+})
 
 const needsStoreSelection = computed(() => !storesStore.currentStoreId)
 

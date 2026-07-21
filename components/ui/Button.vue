@@ -32,8 +32,9 @@
 
 <script setup lang="ts">
 import { computed, useAttrs } from 'vue'
-import { ArrowPathIcon } from '@heroicons/vue/24/outline'
-
+import {
+  ArrowPathIcon,
+} from '~/utils/app-icons'
 defineOptions({ inheritAttrs: false })
 
 const attrs = useAttrs()

@@ -349,7 +349,7 @@ import {
   CheckBadgeIcon,
   CreditCardIcon,
   ShieldCheckIcon,
-} from '@heroicons/vue/24/outline'
+} from '~/utils/app-icons'
 import Button from '~/components/ui/Button.vue'
 import DashboardPageHeader from '~/components/dashboard/DashboardPageHeader.vue'
 import type { ShareableLink } from '~/components/payments/SharePaymentLinkModal.vue'

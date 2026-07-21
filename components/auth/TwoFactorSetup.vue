@@ -343,7 +343,11 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted } from 'vue'
-import { ShieldCheckIcon, DevicePhoneMobileIcon, CheckCircleIcon } from '@heroicons/vue/24/outline'
+import {
+  ShieldCheckIcon,
+  DevicePhoneMobileIcon,
+  CheckCircleIcon,
+} from '~/utils/app-icons'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import QRCode from 'qrcode'

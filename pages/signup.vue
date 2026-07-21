@@ -221,7 +221,10 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
-import { ArrowRightIcon, EnvelopeIcon } from '@heroicons/vue/24/outline'
+import {
+  ArrowRightIcon,
+  EnvelopeIcon,
+} from '~/utils/app-icons'
 import AuthShell from '~/components/auth/AuthShell.vue'
 import AuthPageHeader from '~/components/auth/AuthPageHeader.vue'
 import AuthCard from '~/components/auth/AuthCard.vue'

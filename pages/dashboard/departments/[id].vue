@@ -726,7 +726,7 @@ import {
   XMarkIcon,
   EllipsisVerticalIcon,
   ClipboardDocumentIcon,
-} from '@heroicons/vue/24/outline'
+} from '~/utils/app-icons'
 import Button from '~/components/ui/Button.vue'
 import Breadcrumbs from '~/components/ui/Breadcrumbs.vue'
 import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'

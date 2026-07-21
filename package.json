@@ -32,6 +32,7 @@
     "@capacitor/cli": "^8.0.1",
     "@capacitor/core": "^8.0.1",
     "@capacitor/ios": "^8.0.1",
+    "@lucide/vue": "^1.25.0",
     "@pinia/nuxt": "^0.11.3",
     "apexcharts": "^5.3.6",
     "firebase": "^12.6.0",
@@ -51,7 +52,6 @@
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^5.0.0",
-    "@heroicons/vue": "^2.2.0",
     "@nuxt/ui": "^4.4.0",
     "@playwright/test": "^1.48.0",
     "@types/node": "^25.4.0",

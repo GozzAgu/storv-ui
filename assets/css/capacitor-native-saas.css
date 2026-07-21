@@ -342,3 +342,69 @@ html.capacitor-native.dark .auth-card {
 html.capacitor-ios.capacitor-native .auth-form .auth-btn {
   min-height: 3rem;
 }
+
+/* ── Native top bar page title ── */
+html.capacitor-native .native-topnav-page__title {
+  letter-spacing: -0.01em;
+}
+
+/* ── Dashboard KPI grid (incl. gross profit cards for super admin) ── */
+html.capacitor-native .dash-kpi-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.625rem;
+}
+
+html.capacitor-native .dash-kpi-grid--wide,
+html.capacitor-native .dash-kpi-grid--compact {
+  max-width: none;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+html.capacitor-native .dash-stat-card__body {
+  padding: 0.75rem 0.875rem;
+}
+
+html.capacitor-native .dash-stat-card__value {
+  font-size: 1.125rem;
+}
+
+html.capacitor-native .dash-stat-card__label {
+  font-size: 0.625rem;
+}
+
+html.capacitor-native .dash-stat-card__subtext {
+  font-size: 0.625rem;
+  line-height: 1.35;
+}
+
+/* ── Profit / cost UI ── */
+html.capacitor-native .text-emerald-700,
+html.capacitor-native .dark .text-emerald-400\/90 {
+  -webkit-font-smoothing: antialiased;
+}
+
+html.capacitor-native .receipt-items-table-wrap {
+  -webkit-overflow-scrolling: touch;
+}
+
+html.capacitor-native .receipt-items-table-wrap table th,
+html.capacitor-native .receipt-items-table-wrap table td {
+  white-space: nowrap;
+}
+
+html.capacitor-native .receipt-items-table-wrap table td:first-child,
+html.capacitor-native .receipt-items-table-wrap table th:first-child {
+  white-space: normal;
+  min-width: 7rem;
+}
+
+/* ── Inventory source badges on native cards ── */
+html.capacitor-native .inventory-categories-page .dashboard-table__col-source,
+html.capacitor-native [data-dashboard-main] .dashboard-table__col-source {
+  min-width: 5.5rem;
+}
+
+html.capacitor-native .dash-home .dash-kpi-grid .dash-stat-card:nth-child(n + 6) {
+  /* Keep extra KPI rows balanced when super admin sees profit cards */
+  grid-column: span 1;
+}

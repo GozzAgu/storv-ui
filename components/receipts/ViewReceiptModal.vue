@@ -117,12 +117,19 @@
         <!-- Items -->
         <div class="receipt-section px-6 py-4 border-b border-gray-100">
           <p class="receipt-section-label mb-2 text-gray-500">Items</p>
-          <table class="w-full">
+          <div class="receipt-items-table-wrap -mx-1 overflow-x-auto px-1">
+          <table class="w-full min-w-[20rem]">
             <thead class="bg-gray-50">
               <tr class="border-b border-gray-200">
                 <th class="receipt-section-label py-2 text-left text-gray-600">Product</th>
                 <th class="receipt-section-label w-12 py-2 text-center text-gray-600">Qty</th>
                 <th class="receipt-section-label py-2 text-right text-gray-600">Price</th>
+                <th
+                  v-if="canViewProfitAndCost"
+                  class="receipt-section-label py-2 text-right text-gray-600"
+                >
+                  Cost
+                </th>
                 <th class="receipt-section-label py-2 text-right text-gray-600">Total</th>
               </tr>
             </thead>
@@ -165,6 +172,15 @@
                   </template>
                   <span v-else>{{ formatCurrency(item.price) }}</span>
                 </td>
+                <td
+                  v-if="canViewProfitAndCost"
+                  class="py-2 text-right text-[12px] tabular-nums text-gray-700"
+                >
+                  <span v-if="receiptLineUnitCost(item) > 0">
+                    {{ formatCurrency(receiptLineUnitCost(item)) }}
+                  </span>
+                  <span v-else class="text-gray-400">—</span>
+                </td>
                 <td class="py-2 text-right text-[12px] font-medium tabular-nums text-gray-900">
                   <template v-if="item.hasDiscount && item.originalPrice">
                     <span
@@ -180,6 +196,7 @@
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <!-- Totals -->
@@ -206,6 +223,24 @@
                 <div class="flex justify-between text-[12px] leading-tight">
                   <span class="text-gray-500">Swap credit (trade-in)</span>
                   <span class="text-gray-600">-{{ formatCurrency(swapCreditAmount) }}</span>
+                </div>
+              </template>
+              <template v-if="canViewProfitAndCost && receipt.status === 'completed'">
+                <div class="flex justify-between text-[12px] leading-tight">
+                  <span class="text-gray-500">Cost of goods sold</span>
+                  <span>{{ formatCurrency(receiptCogs) }}</span>
+                </div>
+                <div class="flex justify-between text-[12px] leading-tight">
+                  <span class="text-gray-500">Gross profit</span>
+                  <span
+                    :class="
+                      receiptGrossProfitAmount >= 0
+                        ? 'text-emerald-700 dark:text-emerald-400/90'
+                        : 'text-gray-900'
+                    "
+                  >
+                    {{ formatCurrency(receiptGrossProfitAmount) }}
+                  </span>
                 </div>
               </template>
               <div
@@ -394,7 +429,11 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch, onMounted, nextTick, shallowRef } from 'vue'
-import { PrinterIcon, EnvelopeIcon, ClipboardDocumentIcon } from '@heroicons/vue/24/outline'
+import {
+  PrinterIcon,
+  EnvelopeIcon,
+  ClipboardDocumentIcon,
+} from '~/utils/app-icons'
 import Modal from '~/components/ui/Modal.vue'
 import WhatsAppIcon from '~/components/icons/WhatsAppIcon.vue'
 import SendWhatsAppModal from '~/components/whatsapp/SendWhatsAppModal.vue'
@@ -417,6 +456,12 @@ import { formatReceiptDateForWhatsApp } from '~/utils/whatsapp'
 import { base64ToBlob } from '~/utils/file-share'
 import { setReceiptPdfFont } from '~/utils/receipt-pdf-font'
 import { useReceiptPaperHeader } from '~/composables/useReceiptPaperHeader'
+import { usePermissions } from '~/composables/usePermissions'
+import {
+  receiptGrossProfit,
+  receiptLineCogs,
+  resolveReceiptLineUnitCost,
+} from '~/utils/inventory-item-cost'
 
 interface Props {
   modelValue: boolean
@@ -445,6 +490,7 @@ const copyReceiptNumber = (receiptNumber: string) => {
   copyToClipboard(receiptNumber, 'Receipt number')
 }
 const userStore = useUserStore()
+const { canViewProfitAndCost } = usePermissions()
 const { getUserDocument } = useUser()
 
 const receiptPolicies = reactive({
@@ -476,6 +522,28 @@ async function loadReceiptPoliciesForView() {
 }
 const inventoryStore = useInventoryStore()
 const { formatCurrency } = usePreferences()
+
+function lookupInventoryItemForReceipt(itemId: string): InventoryItem | null {
+  for (const list of Object.values(inventoryStore.items)) {
+    const hit = list.find((i) => i.id === itemId)
+    if (hit) return hit
+  }
+  return null
+}
+
+function receiptLineUnitCost(line: ReceiptItem): number {
+  return resolveReceiptLineUnitCost(line, lookupInventoryItemForReceipt(line.itemId))
+}
+
+const receiptCogs = computed(() => {
+  if (!props.receipt || !canViewProfitAndCost.value) return 0
+  return receiptLineCogs(props.receipt, lookupInventoryItemForReceipt)
+})
+
+const receiptGrossProfitAmount = computed(() => {
+  if (!props.receipt || !canViewProfitAndCost.value) return 0
+  return receiptGrossProfit(props.receipt, lookupInventoryItemForReceipt)
+})
 
 function receiptItemDetailLines(item: ReceiptItem) {
   return getProductDetailLines(item, { formatMoney: (n) => formatCurrency(n) })
@@ -1171,6 +1239,10 @@ async function receiptElementToJsPdf(el: HTMLElement) {
   }
   if (showSwapCreditLine.value) {
     writeTotalRow('Swap credit (trade-in)', `-${formatPdfCurrency(swapCreditAmount.value)}`)
+  }
+  if (canViewProfitAndCost.value && receipt.status === 'completed') {
+    writeTotalRow('Cost of goods sold', formatPdfCurrency(receiptCogs.value))
+    writeTotalRow('Gross profit', formatPdfCurrency(receiptGrossProfitAmount.value))
   }
   if (receipt.splitPayments?.length) {
     receipt.splitPayments.forEach((sp) => {

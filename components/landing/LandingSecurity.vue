@@ -58,8 +58,11 @@
 
 <script setup lang="ts">
 import type { Component } from 'vue'
-import { KeyIcon, LockClosedIcon, ShieldCheckIcon } from '@heroicons/vue/24/outline'
-
+import {
+  KeyIcon,
+  LockClosedIcon,
+  ShieldCheckIcon,
+} from '~/utils/app-icons'
 const pillars = [
   'Safe when you sign in',
   'Each person sees what they need',

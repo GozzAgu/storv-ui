@@ -1,10 +1,11 @@
 <template>
   <div
     class="relative min-w-0 w-full shrink-0"
-    :class="[wide ? 'xl:max-w-[min(100%,16rem)]' : 'sm:max-w-[min(100%,14rem)]', wrapperClass]"
+    :class="[wide ? 'sm:max-w-[min(100%,16rem)] lg:max-w-[min(100%,14rem)]' : 'sm:max-w-[min(100%,14rem)]', wrapperClass]"
   >
     <MagnifyingGlassIcon
-      class="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400 dark:text-gray-500"
+      class="pointer-events-none absolute left-2.5 top-1/2 block h-3.5 w-3.5 -translate-y-1/2 shrink-0 text-gray-400 dark:text-gray-500"
+      :size="14"
       aria-hidden="true"
     />
     <input
@@ -28,8 +29,9 @@
 </template>
 
 <script setup lang="ts">
-import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline'
-
+import {
+  MagnifyingGlassIcon,
+} from '~/utils/app-icons'
 defineOptions({ inheritAttrs: false })
 
 const model = defineModel<string>({ default: '' })

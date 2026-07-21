@@ -165,7 +165,11 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { CheckIcon, LockClosedIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
+import {
+  CheckIcon,
+  LockClosedIcon,
+  ExclamationTriangleIcon,
+} from '~/utils/app-icons'
 import { formatNaira } from '~/utils/naira'
 
 definePageMeta({ layout: false })

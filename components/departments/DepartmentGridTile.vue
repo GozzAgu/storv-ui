@@ -45,8 +45,9 @@
 </template>
 
 <script setup lang="ts">
-import { BuildingOfficeIcon } from '@heroicons/vue/24/outline'
-
+import {
+  BuildingOfficeIcon,
+} from '~/utils/app-icons'
 withDefaults(
   defineProps<{
     name: string

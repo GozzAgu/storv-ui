@@ -898,7 +898,7 @@ import {
   PencilSquareIcon,
   PlusIcon,
   TrashIcon,
-} from '@heroicons/vue/24/outline'
+} from '~/utils/app-icons'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useUser } from '~/composables/useUser'
 import { useFirestore } from '~/composables/useFirestore'

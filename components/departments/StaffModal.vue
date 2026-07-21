@@ -273,7 +273,11 @@
 
 <script setup lang="ts">
 import { ref, watch, computed, onMounted } from 'vue'
-import { CheckCircleIcon, ClipboardDocumentIcon, ArrowPathIcon } from '@heroicons/vue/24/outline'
+import {
+  CheckCircleIcon,
+  ClipboardDocumentIcon,
+  ArrowPathIcon,
+} from '~/utils/app-icons'
 import SidePanel from '~/components/ui/SidePanel.vue'
 import Button from '~/components/ui/Button.vue'
 import type { Staff } from '~/composables/useStaff'

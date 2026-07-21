@@ -768,7 +768,7 @@ import {
   MagnifyingGlassIcon,
   XMarkIcon,
   EnvelopeIcon,
-} from '@heroicons/vue/24/outline'
+} from '~/utils/app-icons'
 import Modal from '~/components/ui/Modal.vue'
 import SidePanel from '~/components/ui/SidePanel.vue'
 import DashboardDrawerStepper from '~/components/dashboard/DashboardDrawerStepper.vue'
@@ -778,8 +778,9 @@ import PaymentMethodSelect from '~/components/receipts/PaymentMethodSelect.vue'
 import Button from '~/components/ui/Button.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import { useInventoryStore, type InventoryFolder, type InventoryItem } from '~/stores/inventory'
-import { useSellerLoanOutsStore } from '~/stores/sellerLoanOuts'
 import { useReceiptsStore, type ReceiptItem } from '~/stores/receipts'
+import { useSellerLoanOutsStore } from '~/stores/sellerLoanOuts'
+import { resolveItemUnitCost } from '~/utils/inventory-item-cost'
 import { useCustomersStore } from '~/stores/customers'
 import { useStoresStore } from '~/stores/stores'
 import { useAuthStore } from '~/stores/auth'
@@ -1459,6 +1460,7 @@ const handleCreateReceipt = async () => {
         quantity: itemQuantity,
         price: effectivePrice, // Final price after discount
         itemName: getItemDisplayName(si.item),
+        unitCost: resolveItemUnitCost(si.item),
         serialNo:
           getItemField(si.item, 'serialNo') ||
           getItemField(si.item, 'serialNumber') ||
@@ -1503,6 +1505,7 @@ const handleCreateReceipt = async () => {
         const swapInItemData: Record<string, any> = {
           ...swapInItemForm.value,
           swapIn: true, // Mark as swap-in item
+          unitCost: swapInCreditAmount.value > 0 ? swapInCreditAmount.value : undefined,
         }
 
         // Create the swap-in inventory item

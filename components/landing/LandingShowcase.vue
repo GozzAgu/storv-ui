@@ -402,7 +402,7 @@ import {
   PlusIcon,
   ShoppingBagIcon,
   UserIcon,
-} from '@heroicons/vue/24/outline'
+} from '~/utils/app-icons'
 import { computed } from 'vue'
 
 const props = defineProps<{

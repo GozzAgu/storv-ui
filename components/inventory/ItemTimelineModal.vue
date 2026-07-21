@@ -93,7 +93,7 @@ import {
   FolderIcon,
   CubeIcon,
   WrenchScrewdriverIcon,
-} from '@heroicons/vue/24/outline'
+} from '~/utils/app-icons'
 import Modal from '~/components/ui/Modal.vue'
 import { useItemTimeline, type TimelineEventType } from '~/composables/useItemTimeline'
 import type { InventoryItem } from '~/stores/inventory'

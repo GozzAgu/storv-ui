@@ -1,10 +1,10 @@
 import { isDepartmentsAreaPath, isDepartmentsNavHref } from '~/utils/department-routes'
+import type { DashboardNavIconKey } from '~/utils/dashboard-nav-icons'
 
 export type DashboardNavItem = {
   name: string
   href: string
-  icon: unknown
-  iconSolid: unknown
+  iconKey: DashboardNavIconKey
 }
 
 export const NATIVE_PRIMARY_ORDER = ['Dashboard', 'Inventory', 'Receipts', 'Departments'] as const
@@ -45,6 +45,7 @@ export function nativeNavShortLabel(name: string): string {
     Analytics: 'Insights',
     'Payment links': 'Links',
     'Stock loans': 'Loans',
+    'Customer buybacks': 'Buybacks',
     'Activity Logs': 'Activity',
     'Multi-Store Sync': 'Sync',
     'Help center': 'Help',

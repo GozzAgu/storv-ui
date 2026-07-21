@@ -41,8 +41,9 @@
 </template>
 
 <script setup lang="ts">
-import { CreditCardIcon } from '@heroicons/vue/24/outline'
-
+import {
+  CreditCardIcon,
+} from '~/utils/app-icons'
 withDefaults(
   defineProps<{
     compact?: boolean

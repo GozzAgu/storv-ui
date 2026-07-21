@@ -44,49 +44,53 @@
           New department
         </Button>
       </template>
-      <template v-if="store && !departmentsStore.loading && !storesLoading" #toolbar>
+      <template v-if="store && !departmentsStore.loading && !storesLoading" #filters>
         <DashboardToolbarSearch v-model="searchQuery" placeholder="Search departments…" />
-        <div class="flex min-w-0 flex-1 flex-wrap items-center gap-2">
-          <DashboardToolbarIconButton aria-label="Reset filters" @click="resetFilters">
-            <ArrowPathIcon class="h-4 w-4" />
-          </DashboardToolbarIconButton>
-          <DashboardToolbarMeta>
-            {{ filteredDepartments.length }} dept{{ filteredDepartments.length === 1 ? '' : 's' }}
-          </DashboardToolbarMeta>
-        </div>
-        <div
-          v-if="canManageDepartments && paginatedDepartments.length > 0"
-          :class="bulkActionsClass"
+        <DashboardToolbarIconButton aria-label="Reset filters" @click="resetFilters">
+          <ArrowPathIcon class="h-4 w-4" :size="16" />
+        </DashboardToolbarIconButton>
+        <DashboardToolbarMeta :hidden-on-mobile="false">
+          {{ filteredDepartments.length }} dept{{ filteredDepartments.length === 1 ? '' : 's' }}
+        </DashboardToolbarMeta>
+      </template>
+      <template
+        v-if="
+          store &&
+          !departmentsStore.loading &&
+          !storesLoading &&
+          canManageDepartments &&
+          paginatedDepartments.length > 0
+        "
+        #bulk
+      >
+        <Checkbox
+          :model-value="allDepartmentsOnPageSelected"
+          size="sm"
+          wrapper-class="!h-8 items-center"
+          label-class="!text-xs !ml-2 !font-normal !leading-none text-gray-500 dark:text-gray-500"
+          @update:model-value="setSelectAllDepartmentsBulk"
         >
-          <Checkbox
-            :model-value="allDepartmentsOnPageSelected"
-            size="sm"
-            wrapper-class="!h-8 items-center"
-            label-class="!text-xs !ml-2 !font-normal !leading-none text-gray-500 dark:text-gray-500"
-            @update:model-value="setSelectAllDepartmentsBulk"
+          {{ allDepartmentsOnPageSelected ? 'All selected' : 'Select all' }}
+        </Checkbox>
+        <template v-if="selectedDepartmentsForBulk.length > 0">
+          <span
+            class="inline-flex h-8 items-center text-xs font-medium tabular-nums text-gray-600 dark:text-gray-400"
           >
-            {{ allDepartmentsOnPageSelected ? 'All selected' : 'Select all' }}
-          </Checkbox>
-          <template v-if="selectedDepartmentsForBulk.length > 0">
-            <span
-              class="inline-flex h-8 items-center text-xs font-medium tabular-nums text-gray-600 dark:text-gray-400"
-            >
-              {{ selectedDepartmentsForBulk.length }} selected
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              :icon="TrashIcon"
-              :extra-class="
-                headerBtnClass +
-                '-red-200/70 !text-red-600 hover:!bg-red-50/80 dark:!border-red-900/40 dark:!text-red-400 dark:hover:!bg-red-950/30'
-              "
-              @click="openBulkDeleteDepartmentsModal"
-            >
-              Delete
-            </Button>
-          </template>
-        </div>
+            {{ selectedDepartmentsForBulk.length }} selected
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            :icon="TrashIcon"
+            :extra-class="
+              headerBtnClass +
+              '-red-200/70 !text-red-600 hover:!bg-red-50/80 dark:!border-red-900/40 dark:!text-red-400 dark:hover:!bg-red-950/30'
+            "
+            @click="openBulkDeleteDepartmentsModal"
+          >
+            Delete
+          </Button>
+        </template>
       </template>
     </DashboardPageHeader>
 
@@ -333,7 +337,7 @@ import {
   PencilSquareIcon,
   TrashIcon,
   EllipsisVerticalIcon,
-} from '@heroicons/vue/24/outline'
+} from '~/utils/app-icons'
 import Button from '~/components/ui/Button.vue'
 import Breadcrumbs from '~/components/ui/Breadcrumbs.vue'
 import Pagination from '~/components/ui/Pagination.vue'

@@ -12,6 +12,7 @@ export type TimelineEventType =
   | 'returned'
   | 'transferred_in'
   | 'swap_in'
+  | 'buyback_received'
   | 'restocked'
   | 'maintenance'
   | 'updated'
@@ -93,6 +94,26 @@ export function useItemTimeline(item: Ref<InventoryItem | null>, folderName?: Re
         date: swapDate,
         receiptId: i.swapInReceiptId,
         receiptNumber: swapReceipt?.receiptNumber,
+      })
+    }
+
+    // 4b. Buyback - customer sold item to the store
+    if (i.buyback && i.buybackId) {
+      const buybackDate = i.updatedAt
+        ? i.updatedAt instanceof Date
+          ? i.updatedAt
+          : new Date(i.updatedAt)
+        : createdAt
+      const paid =
+        typeof i.buybackPrice === 'number' && i.buybackPrice > 0
+          ? `Store paid ${i.buybackPrice}`
+          : 'Customer buyback recorded'
+      events.push({
+        type: 'buyback_received',
+        label: 'Buyback received',
+        description: paid,
+        date: buybackDate,
+        metadata: { buybackId: i.buybackId },
       })
     }
 

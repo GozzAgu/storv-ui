@@ -551,6 +551,12 @@
                           >
                             {{ getItemPrimaryLabel(item) }}
                           </p>
+                          <InventorySourceBadge
+                            v-if="getItemSourceBadge(item)"
+                            :badge="getItemSourceBadge(item)!"
+                            :inline-meta="false"
+                            class="mt-1"
+                          />
                           <div class="mt-0.5 flex flex-wrap items-center justify-between gap-1.5">
                             <span
                               class="text-xs font-semibold tabular-nums text-gray-900 dark:text-gray-100"
@@ -573,6 +579,7 @@
                           >
                             {{ item.sku || item.serialNumber || item.serialNo }}
                           </p>
+                          <InventoryProfitHint :item="item" class="mt-0.5" />
                         </div>
                       </div>
                       <div class="flex shrink-0 flex-col items-center gap-0.5" @click.stop>
@@ -639,6 +646,7 @@
                             :key="column.key"
                             :class="[
                               column.key === 'availability' && 'dashboard-table__col-status',
+                              column.key === 'source' && 'dashboard-table__col-source',
                               (column.type === 'currency' ||
                                 column.key.toLowerCase().includes('price')) &&
                                 'dashboard-table__col-price',
@@ -690,6 +698,7 @@
                             :key="column.key"
                             :class="[
                               column.key === 'availability' && 'dashboard-table__col-status',
+                              column.key === 'source' && 'dashboard-table__col-source',
                               (column.type === 'currency' ||
                                 column.key.toLowerCase().includes('price')) &&
                                 'dashboard-table__col-price',
@@ -774,10 +783,12 @@
                                         formatCurrency(item.originalPrice || item[column.key] || 0)
                                       }}
                                     </span>
+                                    <InventoryProfitHint :item="item" class="mt-0.5" />
                                   </div>
                                   <span v-else :class="tableMoneyClass()">
                                     {{ formatCurrency(item[column.key] || 0) }}
                                   </span>
+                                  <InventoryProfitHint :item="item" class="mt-0.5" />
                                 </div>
                                 <div
                                   v-else-if="'type' in column && column.type === 'number'"
@@ -804,6 +815,31 @@
                                     {{ formatItemDate(item[column.key]) }}
                                   </span>
                                   <span v-else class="text-gray-400 dark:text-gray-500"> - </span>
+                                </div>
+                                <div v-else-if="column.key === 'unitCost'">
+                                  <span v-if="getItemCostForDisplay(item) !== undefined" :class="tableMoneyClass()">
+                                    {{ formatCurrency(getItemCostForDisplay(item)!) }}
+                                  </span>
+                                  <span v-else class="dashboard-table__muted italic">—</span>
+                                </div>
+                                <div v-else-if="column.key === 'margin'">
+                                  <span
+                                    :class="[
+                                      'text-[11px] tabular-nums',
+                                      getItemGrossProfit(item) !== null && getItemGrossProfit(item)! >= 0
+                                        ? 'text-emerald-700 dark:text-emerald-400/90'
+                                        : 'text-gray-500 dark:text-gray-400',
+                                    ]"
+                                  >
+                                    {{ getItemMarginLabel(item) }}
+                                  </span>
+                                </div>
+                                <div v-else-if="column.key === 'source'">
+                                  <InventorySourceBadge
+                                    v-if="getItemSourceBadge(item)"
+                                    :badge="getItemSourceBadge(item)!"
+                                  />
+                                  <span v-else class="dashboard-table__muted italic">Stock</span>
                                 </div>
                                 <div v-else-if="column.key === 'availability'">
                                   <InventoryStatusBadge :badge="getItemAvailability(item)" />
@@ -1017,6 +1053,22 @@
                   }}</span>
                   <span v-else class="text-gray-400 dark:text-gray-500">-</span>
                 </div>
+                <div v-else-if="column.key === 'unitCost'">
+                  <span v-if="getItemCostForDisplay(mobileDetailItem) !== undefined">
+                    {{ formatCurrency(getItemCostForDisplay(mobileDetailItem)!) }}
+                  </span>
+                  <span v-else class="text-gray-400 italic dark:text-gray-500">—</span>
+                </div>
+                <div v-else-if="column.key === 'margin'">
+                  {{ getItemMarginLabel(mobileDetailItem) }}
+                </div>
+                <div v-else-if="column.key === 'source'">
+                  <InventorySourceBadge
+                    v-if="getItemSourceBadge(mobileDetailItem)"
+                    :badge="getItemSourceBadge(mobileDetailItem)!"
+                  />
+                  <span v-else class="text-gray-400 italic dark:text-gray-500">Stock</span>
+                </div>
                 <div v-else-if="column.key === 'availability'">
                   <InventoryStatusBadge :badge="getItemAvailability(mobileDetailItem)" />
                 </div>
@@ -1180,6 +1232,13 @@
                 </div>
               </template>
             </div>
+            <div v-if="canViewProfitAndCost" class="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <InventoryUnitCostField
+                :model-value="itemForm.unitCost ?? null"
+                :sell-price="getItemSellPrice(itemForm as InventoryItem)"
+                @update:model-value="(value) => (itemForm.unitCost = value)"
+              />
+            </div>
           </div>
 
           <!-- Serial Numbers -->
@@ -1305,6 +1364,13 @@
                   />
                 </div>
               </template>
+            </div>
+            <div v-if="canViewProfitAndCost" class="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <InventoryUnitCostField
+                :model-value="itemForm.unitCost ?? null"
+                :sell-price="getItemSellPrice(itemForm as InventoryItem)"
+                @update:model-value="(value) => (itemForm.unitCost = value)"
+              />
             </div>
           </div>
           <div v-else class="text-center py-6 text-sm text-gray-500 dark:text-gray-400">
@@ -1682,7 +1748,7 @@ import {
   ClockIcon,
   DocumentDuplicateIcon,
   ArrowTopRightOnSquareIcon,
-} from '@heroicons/vue/24/outline'
+} from '~/utils/app-icons'
 import Button from '~/components/ui/Button.vue'
 import Breadcrumbs from '~/components/ui/Breadcrumbs.vue'
 import Modal from '~/components/ui/Modal.vue'
@@ -1716,6 +1782,14 @@ import {
   formatAvailabilityLabel,
   isItemAwaitingPayment,
 } from '~/utils/inventory-availability'
+import { getInventorySourceBadge } from '~/utils/inventory-acquisition-source'
+import {
+  formatMarginPercent,
+  getItemGrossProfit,
+  getItemMarginPercent,
+  getItemSellPrice,
+  resolveItemUnitCost,
+} from '~/utils/inventory-item-cost'
 import { formatDiscountPercent } from '~/utils/format-discount'
 import { tableMoneyClass } from '~/utils/table-money-styles'
 import * as XLSX from 'xlsx'
@@ -1746,7 +1820,7 @@ const receiptsStore = useReceiptsStore()
 const authStore = useAuthStore()
 const userStore = useUserStore()
 const storesStore = useStoresStore()
-const { canManageInventoryItems, canManage } = usePermissions()
+const { canManageInventoryItems, canManage, canViewProfitAndCost } = usePermissions()
 const subscriptionFeaturesUi = useSubscriptionFeatures()
 const toast = useAppToast()
 
@@ -2106,7 +2180,7 @@ watch(
 )
 
 const isColumnEditable = (column: { key: string; type?: string }) => {
-  return !['availability', 'dateIn', 'dateOut'].includes(column.key)
+  return !['availability', 'source', 'margin', 'dateIn', 'dateOut'].includes(column.key)
 }
 
 const isEditingCell = (item: InventoryItem, columnKey: string) => {
@@ -2182,7 +2256,11 @@ const saveInlineEdit = async () => {
   ) {
     const num = parseFloat(rawValue)
     parsedValue = isNaN(num) ? rawValue : num
-  } else if (colType === 'currency' || columnKey.toLowerCase().includes('price')) {
+  } else if (
+    colType === 'currency' ||
+    columnKey.toLowerCase().includes('price') ||
+    columnKey === 'unitCost'
+  ) {
     const num = parseFloat(rawValue.replace(/[^0-9.-]/g, ''))
     parsedValue = isNaN(num) ? 0 : num
   } else if (colType === 'boolean') {
@@ -2345,7 +2423,16 @@ const columns = computed(() => {
   // Always add Date In, Date Out, and Availability columns at the end
   templateColumns.push(
     { key: 'dateIn', label: 'Date In', sortable: true, type: 'date' },
-    { key: 'dateOut', label: 'Date Out', sortable: true, type: 'date' },
+    { key: 'dateOut', label: 'Date Out', sortable: true, type: 'date' }
+  )
+  if (canViewProfitAndCost.value) {
+    templateColumns.push(
+      { key: 'unitCost', label: 'Unit cost', sortable: true, type: 'currency' },
+      { key: 'margin', label: 'Margin', sortable: false, type: 'margin' }
+    )
+  }
+  templateColumns.push(
+    { key: 'source', label: 'Source', sortable: false, type: 'source' },
     { key: 'availability', label: 'Availability', sortable: true, type: 'availability' }
   )
 
@@ -2503,6 +2590,41 @@ const getItemAvailability = (item: InventoryItem) => {
   }
 
   return availabilityBadgeForAvailable()
+}
+
+const getItemSourceBadge = (item: InventoryItem) => {
+  let receiptNumber: string | undefined
+  if (item.swapIn && item.swapInReceiptId) {
+    receiptNumber = receiptsStore.receipts.find((r) => r.id === item.swapInReceiptId)?.receiptNumber
+  }
+  return getInventorySourceBadge(item, {
+    receiptNumber,
+    formatPrice: formatCurrency,
+  })
+}
+
+const getItemCostForDisplay = (item: InventoryItem) => resolveItemUnitCost(item)
+
+const getItemMarginLabel = (item: InventoryItem) => {
+  const profit = getItemGrossProfit(item)
+  if (profit === null) return '—'
+  const margin = getItemMarginPercent(item)
+  const profitPrefix = profit >= 0 ? '+' : ''
+  return `${profitPrefix}${formatCurrency(profit)} · ${formatMarginPercent(margin)}`
+}
+
+function normalizeUnitCostPayload(payload: Record<string, any>) {
+  if (!canViewProfitAndCost.value) {
+    delete payload.unitCost
+    return
+  }
+  if (payload.unitCost === '' || payload.unitCost === null || payload.unitCost === undefined) {
+    delete payload.unitCost
+    return
+  }
+  const n = Number(payload.unitCost)
+  if (!Number.isFinite(n) || n < 0) delete payload.unitCost
+  else payload.unitCost = Math.round(n * 100) / 100
 }
 
 const filteredItems = computed(() => {
@@ -2872,6 +2994,7 @@ const openAddItemModal = () => {
   if (folder.value?.hasSerialNumbers && folderTitle && fields.some((f) => f.name === 'name')) {
     itemForm.name = folderTitle
   }
+  itemForm.unitCost = null
   showAddItemModal.value = true
 }
 
@@ -3187,6 +3310,7 @@ const handleSaveItem = async () => {
       const currentFolderId = folderId.value
       const updates = { ...itemForm }
       normalizeNonSerialItemPayload(updates)
+      normalizeUnitCostPayload(updates)
       // Close modal immediately for better UX
       handleCancelItem()
       toast.success('Updating product...')
@@ -3243,6 +3367,7 @@ const handleSaveItem = async () => {
         const baseItemData = { ...itemForm }
         // Remove serialNo from base data if it exists (we'll add it per item)
         delete baseItemData.serialNo
+        normalizeUnitCostPayload(baseItemData)
 
         // Close modal immediately for better UX
         handleCancelItem()
@@ -3277,6 +3402,7 @@ const handleSaveItem = async () => {
         // Create single item (normal mode); snapshot form BEFORE cancel clears it
         const newItemPayload = { ...itemForm }
         normalizeNonSerialItemPayload(newItemPayload)
+        normalizeUnitCostPayload(newItemPayload)
         handleCancelItem()
 
         await inventoryStore.createItem(folderId.value, newItemPayload)

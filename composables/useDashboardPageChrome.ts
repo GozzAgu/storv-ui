@@ -16,7 +16,7 @@ export function useDashboardPageChrome() {
   const pageHeaderClass = 'dash-page-header'
   const toolbarDividerClass = 'dash-page-header__toolbar'
 
-  const toolbarRowClass = 'flex flex-col gap-2.5 xl:flex-row xl:items-center xl:gap-3'
+  const toolbarRowClass = 'flex flex-col gap-2.5 lg:flex-row lg:items-center lg:gap-3'
 
   const fieldClass = `${APP_FIELD_COMPACT_CLASS} bg-white dark:!bg-dashboard-card`
 
@@ -50,7 +50,7 @@ export function useDashboardPageChrome() {
   )
 
   const bulkActionsClass =
-    'flex flex-wrap items-center gap-2 border-t border-gray-100/90 pt-2.5 dark:border-gray-800/80 xl:ml-auto xl:border-t-0 xl:border-l xl:pl-3 xl:pt-0 dark:xl:border-gray-700/80'
+    'flex flex-wrap items-center gap-2 border-t border-gray-100/90 pt-2.5 dark:border-gray-800/80 lg:ml-auto lg:shrink-0 lg:border-t-0 lg:border-l lg:pl-3 lg:pt-0 dark:lg:border-gray-700/80'
 
   /** Footer bar wrapping Pagination (matches unified table shell). */
   const paginationBarClass = 'dash-table-pagination'

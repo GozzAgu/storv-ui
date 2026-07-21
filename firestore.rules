@@ -366,6 +366,27 @@ service cloud.firestore {
           allow delete: if false;
         }
 
+        // Customer buybacks: store buys items from customers into inventory.
+        match /customerBuybacks/{buybackId} {
+          allow read: if canAccessStoreData(userId, storeId) &&
+                         resourceMatchesStore(storeId);
+
+          allow create: if canManageInventoryStructure(userId, storeId) &&
+                           request.resource.data.storeId == storeId &&
+                           request.resource.data.createdBy == request.auth.uid &&
+                           request.resource.data.status == 'completed' &&
+                           request.resource.data.inventoryItemId is string &&
+                           request.resource.data.folderId is string &&
+                           request.resource.data.purchasePrice is number &&
+                           request.resource.data.purchasePrice > 0;
+
+          allow update: if canManageInventoryStructure(userId, storeId) &&
+                           resourceMatchesStore(storeId) &&
+                           requestMatchesStore(storeId);
+
+          allow delete: if false;
+        }
+
         match /customers/{customerId} {
           allow read: if canAccessStoreData(userId, storeId);
           

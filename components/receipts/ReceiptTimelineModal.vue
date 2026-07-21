@@ -72,7 +72,11 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { ClockIcon, PlusCircleIcon, ArrowPathIcon } from '@heroicons/vue/24/outline'
+import {
+  ClockIcon,
+  PlusCircleIcon,
+  ArrowPathIcon,
+} from '~/utils/app-icons'
 import Modal from '~/components/ui/Modal.vue'
 import { useReceiptTimeline, type ReceiptTimelineEventType } from '~/composables/useReceiptTimeline'
 import type { Receipt } from '~/stores/receipts'

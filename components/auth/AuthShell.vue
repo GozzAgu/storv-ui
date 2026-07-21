@@ -67,8 +67,11 @@ import { computed, onMounted, type Component } from 'vue'
 import ThemeToggle from '~/components/ui/ThemeToggle.vue'
 import { authEntranceClass } from '~/utils/auth-entrance'
 import { markCapacitorDocument } from '~/utils/capacitor-env'
-import { ChartBarSquareIcon, CubeIcon, ShieldCheckIcon } from '@heroicons/vue/24/outline'
-
+import {
+  ChartBarSquareIcon,
+  CubeIcon,
+  ShieldCheckIcon,
+} from '~/utils/app-icons'
 interface AuthShellFeature {
   icon: Component
   text: string

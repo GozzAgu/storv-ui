@@ -68,7 +68,10 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { CheckCircleIcon, ArrowRightIcon } from '@heroicons/vue/24/outline'
+import {
+  CheckCircleIcon,
+  ArrowRightIcon,
+} from '~/utils/app-icons'
 import AuthShell from '~/components/auth/AuthShell.vue'
 import AuthPageHeader from '~/components/auth/AuthPageHeader.vue'
 import AuthCard from '~/components/auth/AuthCard.vue'

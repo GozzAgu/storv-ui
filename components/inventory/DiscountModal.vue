@@ -167,7 +167,9 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { TagIcon } from '@heroicons/vue/24/outline'
+import {
+  TagIcon,
+} from '~/utils/app-icons'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import { useInventoryStore, type InventoryItem } from '~/stores/inventory'

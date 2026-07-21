@@ -145,7 +145,7 @@ import {
   BookOpenIcon,
   ClipboardDocumentListIcon,
   ArrowRightOnRectangleIcon,
-} from '@heroicons/vue/24/outline'
+} from '~/utils/app-icons'
 import { useStoresStore } from '~/stores/stores'
 import { useUserStore } from '~/stores/user'
 import { useStaffStore } from '~/stores/staff'

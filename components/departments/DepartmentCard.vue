@@ -91,7 +91,12 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { ArrowPathIcon, BuildingOffice2Icon, TagIcon, UserIcon } from '@heroicons/vue/24/outline'
+import {
+  ArrowPathIcon,
+  BuildingOffice2Icon,
+  TagIcon,
+  UserIcon,
+} from '~/utils/app-icons'
 import { formatCategoryDate, formatCategoryDisplayName } from '~/utils/inventory-category-card'
 import {
   departmentDescriptionText,
