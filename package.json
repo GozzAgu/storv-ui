@@ -14,7 +14,7 @@
     "test:ui": "playwright test --ui",
     "test:headed": "playwright test --headed",
     "test:debug": "playwright test --debug",
-    "test:unit": "vitest run tests/server tests/integration tests/unit",
+    "marketing:screenshots": "node scripts/capture-marketing-screenshots.mjs",
     "test:rules": "node scripts/run-rules-tests.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

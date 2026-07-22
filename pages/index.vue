@@ -167,6 +167,8 @@
 
     <LandingDemo :app-url="appOriginUrl" />
 
+    <LandingAppScreenshots :app-url="appOriginUrl" />
+
     <LandingProof @navigate="scrollToSection" />
 
     <!-- Pricing -->
