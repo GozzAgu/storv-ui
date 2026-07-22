@@ -34,26 +34,38 @@
             <span class="landing-demo__window-title">Demo mode</span>
           </div>
           <div class="landing-demo__window-body">
-            <div class="landing-demo__stat">
-              <span class="landing-demo__stat-label">Today</span>
-              <span class="landing-demo__stat-value">₦25,000</span>
-            </div>
-            <div class="landing-demo__stat">
-              <span class="landing-demo__stat-label">Stock value</span>
-              <span class="landing-demo__stat-value">₦1.2M</span>
-            </div>
-            <div class="landing-demo__list">
-              <div class="landing-demo__row">
-                <span>iPhone 13 128GB</span>
-                <span class="landing-demo__pill">4 left</span>
+            <aside class="landing-demo__nav">
+              <span
+                v-for="item in previewNav"
+                :key="item.name"
+                class="landing-demo__nav-item"
+                :class="{ 'landing-demo__nav-item--active': item.active }"
+              >
+                <DashboardNavIcon :name="item.iconKey" :active="item.active" size="sm" />
+              </span>
+            </aside>
+            <div class="landing-demo__main">
+              <div class="landing-demo__stat">
+                <span class="landing-demo__stat-label">Today</span>
+                <span class="landing-demo__stat-value">₦25,000</span>
               </div>
-              <div class="landing-demo__row">
-                <span>Silicone phone case</span>
-                <span class="landing-demo__pill landing-demo__pill--warn">Low</span>
+              <div class="landing-demo__stat">
+                <span class="landing-demo__stat-label">Stock value</span>
+                <span class="landing-demo__stat-value">₦1.2M</span>
               </div>
-              <div class="landing-demo__row">
-                <span>DEMO-1003 · Walk-in</span>
-                <span>₦25,000</span>
+              <div class="landing-demo__list">
+                <div class="landing-demo__row">
+                  <span>iPhone 13 128GB</span>
+                  <span class="landing-demo__pill">4 left</span>
+                </div>
+                <div class="landing-demo__row">
+                  <span>Silicone phone case</span>
+                  <span class="landing-demo__pill landing-demo__pill--warn">Low</span>
+                </div>
+                <div class="landing-demo__row">
+                  <span>DEMO-1003 · Walk-in</span>
+                  <span>₦25,000</span>
+                </div>
               </div>
             </div>
           </div>
@@ -64,6 +76,9 @@
 </template>
 
 <script setup lang="ts">
+import DashboardNavIcon from '~/components/dashboard/DashboardNavIcon.vue'
+import type { DashboardNavIconKey } from '~/utils/dashboard-nav-icons'
+
 defineProps<{
   appUrl: string
 }>()
@@ -73,6 +88,14 @@ const points = [
   'Record sales, check low stock, browse receipts',
   'Multi-store sync and consolidated reports (Enterprise preview)',
   'Reset sample data anytime',
+]
+
+const previewNav: Array<{ name: string; iconKey: DashboardNavIconKey; active?: boolean }> = [
+  { name: 'Dashboard', iconKey: 'dashboard', active: true },
+  { name: 'Inventory', iconKey: 'inventory' },
+  { name: 'Receipts', iconKey: 'receipts' },
+  { name: 'Analytics', iconKey: 'analytics' },
+  { name: 'Settings', iconKey: 'settings' },
 ]
 </script>
 
@@ -187,7 +210,7 @@ const points = [
 }
 
 .landing-demo__window {
-  width: min(100%, 22rem);
+  width: min(100%, 24rem);
   border-radius: 0.75rem;
   overflow: hidden;
   box-shadow: 0 24px 48px rgba(20, 63, 141, 0.15);
@@ -219,7 +242,38 @@ const points = [
 }
 
 .landing-demo__window-body {
-  padding: 1rem;
+  display: flex;
+  min-height: 14rem;
+}
+
+.landing-demo__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: 2.75rem;
+  padding: 0.65rem 0.45rem;
+  background: #0f172a;
+}
+
+.landing-demo__nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.85rem;
+  height: 1.85rem;
+  margin: 0 auto;
+  border-radius: 0.5rem;
+  color: #94a3b8;
+}
+
+.landing-demo__nav-item--active {
+  background: rgba(72, 118, 199, 0.22);
+  color: #dbeafe;
+}
+
+.landing-demo__main {
+  flex: 1;
+  padding: 0.85rem 0.9rem;
 }
 
 .landing-demo__stat {
@@ -249,7 +303,7 @@ const points = [
   display: flex;
   justify-content: space-between;
   gap: 0.5rem;
-  font-size: 0.9375rem;
+  font-size: 0.8125rem;
   padding: 0.5rem;
   border-radius: 0.375rem;
   background: #f8fafc;
@@ -257,7 +311,7 @@ const points = [
 }
 
 .landing-demo__pill {
-  font-size: 0.9375rem;
+  font-size: 0.75rem;
   font-weight: 700;
   padding: 0.1rem 0.4rem;
   border-radius: 999px;

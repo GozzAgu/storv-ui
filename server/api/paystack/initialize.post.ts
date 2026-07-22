@@ -1,4 +1,6 @@
 import type { SubscriptionPlan } from '~/types/subscription'
+import type { SubscriptionBillingCycle } from '~/types/subscription-billing'
+import { isSubscriptionBillingCycle } from '~/types/subscription-billing'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
 import {
   getExpectedPlanAmount,
@@ -10,11 +12,16 @@ import {
 export default defineEventHandler(async (event) => {
   try {
     const body = await readBody(event)
-    const { planId, email, userId } = body as {
+    const { planId, email, userId, billingCycle: billingCycleRaw } = body as {
       planId?: SubscriptionPlan
       email?: string
       userId?: string
+      billingCycle?: SubscriptionBillingCycle
     }
+
+    const billingCycle: SubscriptionBillingCycle = isSubscriptionBillingCycle(billingCycleRaw)
+      ? billingCycleRaw
+      : 'monthly'
 
     if (!planId || !email || !userId) {
       throw createError({
@@ -39,7 +46,7 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    const amount = getExpectedPlanAmount(planId, config as Record<string, unknown>)
+    const amount = getExpectedPlanAmount(planId, config as Record<string, unknown>, billingCycle)
 
     const normalizedEmail = email.trim().toLowerCase()
     const reference = `storvv_${planId}_${userId}_${Date.now()}`
@@ -61,6 +68,7 @@ export default defineEventHandler(async (event) => {
         metadata: {
           userId,
           planId,
+          billingCycle,
         },
       },
     })) as {
@@ -82,6 +90,7 @@ export default defineEventHandler(async (event) => {
       {
         userId,
         planId,
+        billingCycle,
         email: normalizedEmail,
         amount,
         currency: PAYSTACK_CURRENCY,

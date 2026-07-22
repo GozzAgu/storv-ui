@@ -1,4 +1,5 @@
 import type { SubscriptionPlan } from '~/types/subscription'
+import type { SubscriptionBillingCycle } from '~/types/subscription-billing'
 
 export type PaystackInitializeResponse = {
   success: boolean
@@ -21,7 +22,12 @@ export type PaystackInitializeFetcher = (
  * When `NUXT_PUBLIC_API_BASE` is set (separate API origin), the request goes to `{apiBase}/api/paystack/initialize`.
  */
 export async function initializePaystackSubscription(
-  params: { planId: SubscriptionPlan; email: string; userId: string },
+  params: {
+    planId: SubscriptionPlan
+    email: string
+    userId: string
+    billingCycle?: SubscriptionBillingCycle
+  },
   fetcher: PaystackInitializeFetcher,
   apiBaseUrl?: string
 ): Promise<InitializeSubscriptionResult> {
@@ -34,6 +40,7 @@ export async function initializePaystackSubscription(
         planId: params.planId,
         email: params.email,
         userId: params.userId,
+        billingCycle: params.billingCycle || 'monthly',
       },
     })
     if (res.success && res.authorization_url) {

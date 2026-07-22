@@ -85,7 +85,7 @@
           style="--hero-i: 6"
         >
           <span class="landing-hero__scroll-hint-text">Scroll</span>
-          <span class="landing-hero__scroll-hint-icon" aria-hidden="true">↓</span>
+          <ChevronDownIcon class="landing-hero__scroll-hint-icon h-4 w-4" aria-hidden="true" />
         </a>
       </div>
     </section>
@@ -204,7 +204,9 @@
             </p>
             <ul class="landing-promo-card__list">
               <li v-for="item in variantHighlights" :key="item">
-                <span class="landing-promo-card__list-icon" aria-hidden="true">✓</span>
+                <span class="landing-promo-card__list-icon" aria-hidden="true">
+                  <CheckIcon class="h-3.5 w-3.5" stroke-width="2.5" />
+                </span>
                 {{ item }}
               </li>
             </ul>
@@ -223,7 +225,7 @@
           >
             <div class="landing-core__card-top">
               <span class="landing-core__card-icon" aria-hidden="true">
-                <component :is="feature.icon" class="h-5 w-5" stroke-width="1.5" />
+                <MarketingFeatureIcon :name="feature.iconKey" size="md" />
               </span>
               <span class="landing-core__card-num">{{ feature.num }}</span>
             </div>
@@ -319,7 +321,7 @@
               class="landing-multistore__feature"
             >
               <span class="landing-multistore__feature-icon" aria-hidden="true">
-                <component :is="item.icon" class="h-4 w-4" stroke-width="2" />
+                <MarketingFeatureIcon :name="item.iconKey" size="sm" />
               </span>
               <p class="landing-multistore__feature-title">{{ item.title }}</p>
               <p class="landing-multistore__feature-desc">{{ item.description }}</p>
@@ -391,18 +393,8 @@
 </template>
 
 <script setup lang="ts">
-import {
-  ArchiveBoxIcon,
-  ArrowPathIcon,
-  ArrowRightIcon,
-  ChartBarIcon,
-  CheckIcon,
-  CreditCardIcon,
-  DocumentTextIcon,
-  PlusIcon,
-  ShoppingBagIcon,
-  UserIcon,
-} from '~/utils/app-icons'
+import { CheckIcon, ChevronDownIcon } from '~/utils/app-icons'
+import type { MarketingFeatureIconKey } from '~/utils/marketing-feature-icons'
 import { computed } from 'vue'
 
 const props = defineProps<{
@@ -473,10 +465,17 @@ const painPoints = [
   },
 ] as const
 
-const coreFeatures = [
+const coreFeatures: Array<{
+  num: string
+  iconKey: MarketingFeatureIconKey
+  title: string
+  description: string
+  badge: string
+  wide: boolean
+}> = [
   {
     num: '01',
-    icon: ArchiveBoxIcon,
+    iconKey: 'inventory',
     title: 'Inventory',
     description: 'Live stock per branch. Low-stock signals so you reorder before you lose margin.',
     badge: 'Stop stockouts',
@@ -484,7 +483,7 @@ const coreFeatures = [
   },
   {
     num: '02',
-    icon: DocumentTextIcon,
+    iconKey: 'receipts',
     title: 'Receipts',
     description: 'Sales, payments, and history in one search, not scattered across WhatsApp.',
     badge: 'One record',
@@ -492,7 +491,7 @@ const coreFeatures = [
   },
   {
     num: '03',
-    icon: ArrowPathIcon,
+    iconKey: 'returns',
     title: 'Returns',
     description: 'Refund against the original receipt. Stock restores automatically.',
     badge: 'Stock restored',
@@ -500,7 +499,7 @@ const coreFeatures = [
   },
   {
     num: '04',
-    icon: UserIcon,
+    iconKey: 'customers',
     title: 'Customers',
     description: 'Names, phones, and spend history linked to receipts at every branch.',
     badge: 'Know buyers',
@@ -508,14 +507,14 @@ const coreFeatures = [
   },
   {
     num: '05',
-    icon: CreditCardIcon,
+    iconKey: 'payment-links',
     title: 'Payment links',
     description:
       'Send a secure Paystack link from the web app. Customer pays on their phone, you get a receipt and stock updates automatically. Mobile app support coming soon.',
     badge: 'On web now',
     wide: true,
   },
-] as const
+]
 
 const setupSteps = [
   {
@@ -541,21 +540,25 @@ const setupSteps = [
   },
 ] as const
 
-const multiStoreFeatures = [
+const multiStoreFeatures: Array<{
+  iconKey: MarketingFeatureIconKey
+  title: string
+  description: string
+}> = [
   {
-    icon: PlusIcon,
+    iconKey: 'branch',
     title: 'Separate data per branch',
     description: 'Inventory and sales never mix between locations.',
   },
   {
-    icon: ArrowRightIcon,
+    iconKey: 'sync',
     title: 'Switch stores in one click',
     description: 'One login across every location you run.',
   },
   {
-    icon: ChartBarIcon,
+    iconKey: 'analytics',
     title: 'Reports per branch',
     description: 'See performance store by store.',
   },
-] as const
+]
 </script>

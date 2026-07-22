@@ -33,10 +33,26 @@ export default defineNuxtConfig({
   runtimeConfig: {
     // Private keys (only available on server-side)
     paystackSecretKey: process.env.PAYSTACK_SECRET_KEY || '',
-    // Plan amounts in kobo (NGN) - override via env: PAYSTACK_PLAN_MICRO_AMOUNT, etc.
+    // Plan amounts in kobo (NGN) — monthly base; optional Quarterly/Yearly overrides via env.
     paystackPlanMicroAmount: parseInt(process.env.PAYSTACK_PLAN_MICRO_AMOUNT || '0', 10),
     paystackPlanMediumAmount: parseInt(process.env.PAYSTACK_PLAN_MEDIUM_AMOUNT || '0', 10),
     paystackPlanEnterpriseAmount: parseInt(process.env.PAYSTACK_PLAN_ENTERPRISE_AMOUNT || '0', 10),
+    paystackPlanMediumAmountQuarterly: parseInt(
+      process.env.PAYSTACK_PLAN_MEDIUM_AMOUNT_QUARTERLY || '0',
+      10
+    ),
+    paystackPlanEnterpriseAmountQuarterly: parseInt(
+      process.env.PAYSTACK_PLAN_ENTERPRISE_AMOUNT_QUARTERLY || '0',
+      10
+    ),
+    paystackPlanMediumAmountYearly: parseInt(
+      process.env.PAYSTACK_PLAN_MEDIUM_AMOUNT_YEARLY || '0',
+      10
+    ),
+    paystackPlanEnterpriseAmountYearly: parseInt(
+      process.env.PAYSTACK_PLAN_ENTERPRISE_AMOUNT_YEARLY || '0',
+      10
+    ),
     // Platform fee (%) retained by Storvv on each payment-link sale (Paystack subaccount percentage_charge).
     paymentLinkPlatformFeePercent: parseFloat(process.env.PAYMENT_LINK_PLATFORM_FEE_PERCENT || '0'),
     firebaseServiceAccount: process.env.FIREBASE_SERVICE_ACCOUNT_JSON || '',

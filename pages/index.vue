@@ -165,6 +165,8 @@
       :app-url="appOriginUrl"
     />
 
+    <LandingDemo :app-url="appOriginUrl" />
+
     <LandingProof @navigate="scrollToSection" />
 
     <!-- Pricing -->
@@ -196,43 +198,36 @@
         <p class="mt-2 text-center text-base text-gray-600 dark:text-gray-400">
           Showing prices in {{ pricing.currency }} based on your region.
         </p>
-        <div class="flex items-center justify-center gap-3 mt-7">
-          <span
-            :class="[
-              'text-sm font-medium',
-              !isYearly ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-500',
-            ]"
-            >Monthly</span
-          >
+        <div
+          class="mt-7 flex flex-wrap items-center justify-center gap-2"
+          role="group"
+          aria-label="Billing cycle"
+        >
           <button
-            @click="isYearly = !isYearly"
+            v-for="cycle in SUBSCRIPTION_BILLING_CYCLES"
+            :key="cycle"
+            type="button"
             :class="[
-              'relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2 dark:focus:ring-offset-slate-950',
-              isYearly ? 'bg-primary-500' : 'bg-gray-300 dark:bg-gray-600',
+              'rounded-full px-4 py-1.5 text-sm font-medium transition-colors',
+              selectedBillingCycle === cycle
+                ? 'bg-primary-500 text-white shadow-sm'
+                : 'bg-white/70 text-gray-600 hover:bg-white dark:bg-white/10 dark:text-gray-300 dark:hover:bg-white/15',
             ]"
-            role="switch"
-            :aria-checked="isYearly"
+            :aria-pressed="selectedBillingCycle === cycle"
+            @click="selectedBillingCycle = cycle"
           >
+            {{ BILLING_CYCLE_LABELS[cycle] }}
             <span
-              :class="[
-                'inline-block h-5 w-5 rounded-full bg-white transition-transform',
-                isYearly ? 'translate-x-6' : 'translate-x-1',
-              ]"
-            />
-          </button>
-          <span
-            :class="[
-              'text-sm font-medium flex items-center gap-2',
-              isYearly ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-500',
-            ]"
-          >
-            Yearly
-            <span
-              v-if="isYearly"
-              class="text-sm font-medium bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300 px-2.5 py-1 rounded-full"
+              v-if="cycle === 'yearly'"
+              class="ml-1.5 rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-semibold text-green-800 dark:bg-green-900/40 dark:text-green-300"
               >Save 15%</span
             >
-          </span>
+            <span
+              v-else-if="cycle === 'quarterly'"
+              class="ml-1.5 rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-semibold text-sky-800 dark:bg-sky-900/40 dark:text-sky-300"
+              >Save 10%</span
+            >
+          </button>
         </div>
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-12 max-w-5xl mx-auto">
           <!-- Micro: single store, 1 dept, 2 staff. No analytics, no multi-store sync. -->
@@ -245,7 +240,7 @@
               Single store, solo or very small team
             </p>
             <p class="mt-4 text-2xl font-bold text-gray-900 dark:text-gray-100">FREE</p>
-            <p class="text-sm text-gray-500">{{ isYearly ? '/ year' : '/ month' }}</p>
+            <p class="text-sm text-gray-500">{{ BILLING_CYCLE_PERIOD_SUFFIX[selectedBillingCycle] }}</p>
             <ul class="mt-6 space-y-2 flex-1 text-base text-gray-600 dark:text-gray-400">
               <li class="flex items-center gap-2">
                 <CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />1 store · 1 department · up
@@ -289,13 +284,13 @@
             </p>
             <div class="mt-4 flex items-baseline gap-2">
               <span class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{
-                isYearly ? mediumYearlyPrice : mediumMonthlyPrice
+                formatPlanPrice('medium')
               }}</span>
-              <span v-if="isYearly" class="text-sm text-gray-400 line-through">{{
-                mediumYearlyListPrice
+              <span v-if="planListPrice('medium')" class="text-sm text-gray-400 line-through">{{
+                planListPrice('medium')
               }}</span>
             </div>
-            <p class="text-sm text-gray-500">{{ isYearly ? '/ year' : '/ month' }}</p>
+            <p class="text-sm text-gray-500">{{ BILLING_CYCLE_PERIOD_SUFFIX[selectedBillingCycle] }}</p>
             <ul class="mt-6 space-y-2 flex-1 text-base text-gray-600 dark:text-gray-400">
               <li class="flex items-center gap-2">
                 <CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Everything in Micro
@@ -338,13 +333,13 @@
             </p>
             <div class="mt-4 flex items-baseline gap-2">
               <span class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{
-                isYearly ? enterpriseYearlyPrice : enterpriseMonthlyPrice
+                formatPlanPrice('enterprise')
               }}</span>
-              <span v-if="isYearly" class="text-sm text-gray-400 line-through">{{
-                enterpriseYearlyListPrice
+              <span v-if="planListPrice('enterprise')" class="text-sm text-gray-400 line-through">{{
+                planListPrice('enterprise')
               }}</span>
             </div>
-            <p class="text-sm text-gray-500">{{ isYearly ? '/ year' : '/ month' }}</p>
+            <p class="text-sm text-gray-500">{{ BILLING_CYCLE_PERIOD_SUFFIX[selectedBillingCycle] }}</p>
             <ul class="mt-6 space-y-2 flex-1 text-base text-gray-600 dark:text-gray-400">
               <li class="flex items-center gap-2">
                 <CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Everything in Medium
@@ -519,7 +514,7 @@
               <div
                 class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-md bg-white/70 backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.08]"
               >
-                <ChartBarIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
+                <MarketingFeatureIcon name="analytics" size="sm" class="text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
                 <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-50 pr-8">
@@ -563,7 +558,7 @@
               <div
                 class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-md bg-white/70 backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.08]"
               >
-                <FolderIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
+                <MarketingFeatureIcon name="folder" size="sm" class="text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
                 <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-50 pr-8">
@@ -608,7 +603,7 @@
               <div
                 class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-md bg-white/70 backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.08]"
               >
-                <DocumentTextIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
+                <MarketingFeatureIcon name="inventory" size="sm" class="text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
                 <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-50 pr-8">
@@ -652,7 +647,7 @@
               <div
                 class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-md bg-white/70 backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.08]"
               >
-                <UsersIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
+                <MarketingFeatureIcon name="customers" size="sm" class="text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
                 <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-50 pr-8">
@@ -696,7 +691,7 @@
               <div
                 class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-md bg-white/70 backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.08]"
               >
-                <ArrowPathIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
+                <MarketingFeatureIcon name="returns" size="sm" class="text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
                 <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-50 pr-8">
@@ -740,7 +735,7 @@
               <div
                 class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-md bg-white/70 backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.08]"
               >
-                <KeyIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
+                <MarketingFeatureIcon name="departments" size="sm" class="text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
                 <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-50 pr-8">
@@ -830,7 +825,7 @@
               <div
                 class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-md bg-white/70 backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.08]"
               >
-                <BuildingOfficeIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
+                <MarketingFeatureIcon name="branch" size="sm" class="text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
                 <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-50 pr-8">
@@ -918,7 +913,7 @@
               <div
                 class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-md bg-white/70 backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.08]"
               >
-                <BanknotesIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
+                <MarketingFeatureIcon name="loans" size="sm" class="text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
                 <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-50 pr-8">
@@ -1158,22 +1153,23 @@
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import Modal from '~/components/ui/Modal.vue'
 import MarketingSyncLoader from '~/components/marketing/MarketingSyncLoader.vue'
+import MarketingFeatureIcon from '~/components/marketing/MarketingFeatureIcon.vue'
+import {
+  BILLING_CYCLE_LABELS,
+  BILLING_CYCLE_PERIOD_SUFFIX,
+  SUBSCRIPTION_BILLING_CYCLES,
+  deriveBillingAmount,
+  deriveBillingListAmount,
+  type SubscriptionBillingCycle,
+} from '~/utils/subscription-billing'
 import {
   Bars3Icon,
   XMarkIcon,
   CheckIcon,
-  UsersIcon,
-  ChartBarIcon,
-  BuildingOfficeIcon,
-  ArrowPathIcon,
   ShieldCheckIcon,
-  DocumentTextIcon,
-  BanknotesIcon,
-  FolderIcon,
   BellAlertIcon,
   SparklesIcon,
   ClockIcon,
-  KeyIcon,
   ArrowUpIcon,
   ChevronUpIcon,
 } from '~/utils/app-icons'
@@ -1219,7 +1215,7 @@ watch(mobileMenuOpen, (open) => {
   document.body.style.overflow = open ? 'hidden' : ''
 })
 const showBackToTop = ref(false)
-const isYearly = ref(false)
+const selectedBillingCycle = ref<SubscriptionBillingCycle>('monthly')
 const locale = ref('en-NG')
 const pricingRegion = ref<'NG' | 'US' | 'GB' | 'EU'>('NG')
 const showLaunchModal = ref(false)
@@ -1293,12 +1289,23 @@ const formatPrice = (amount: number) =>
     maximumFractionDigits: 0,
   }).format(amount)
 
-const mediumMonthlyPrice = computed(() => formatPrice(pricing.value.medium.monthly))
-const mediumYearlyPrice = computed(() => formatPrice(pricing.value.medium.yearly))
-const mediumYearlyListPrice = computed(() => formatPrice(pricing.value.medium.yearlyList))
-const enterpriseMonthlyPrice = computed(() => formatPrice(pricing.value.enterprise.monthly))
-const enterpriseYearlyPrice = computed(() => formatPrice(pricing.value.enterprise.yearly))
-const enterpriseYearlyListPrice = computed(() => formatPrice(pricing.value.enterprise.yearlyList))
+type PaidPlan = 'medium' | 'enterprise'
+
+const formatPlanPrice = (plan: PaidPlan) => {
+  const monthly = pricing.value[plan].monthly
+  if (selectedBillingCycle.value === 'yearly') {
+    return formatPrice(pricing.value[plan].yearly)
+  }
+  return formatPrice(deriveBillingAmount(monthly, selectedBillingCycle.value))
+}
+
+const planListPrice = (plan: PaidPlan): string | null => {
+  if (selectedBillingCycle.value === 'monthly') return null
+  if (selectedBillingCycle.value === 'yearly') {
+    return formatPrice(pricing.value[plan].yearlyList)
+  }
+  return formatPrice(deriveBillingListAmount(pricing.value[plan].monthly, 'quarterly'))
+}
 
 const detectPricingRegion = () => {
   const browserLocale = Intl.DateTimeFormat().resolvedOptions().locale || 'en-NG'

@@ -5,6 +5,7 @@ import {
   CLOUD_UNAVAILABLE_MESSAGE,
 } from '~/utils/cloud-user-messages'
 import type { SubscriptionPlan } from '~/types/subscription'
+import type { SubscriptionBillingCycle } from '~/types/subscription-billing'
 import type { UserPreferences } from '~/composables/usePreferences'
 
 export interface StoreSettings {
@@ -42,6 +43,7 @@ export interface UserData {
   name: string
   role: 'superAdmin' | 'admin' | 'user' | 'staff'
   subscription: SubscriptionPlan
+  subscriptionBillingCycle?: SubscriptionBillingCycle
   photoURL?: string
   storeLogoUrl?: string // Account logo - applies to all stores, shown on receipts
   storeDetails?: StoreDetails

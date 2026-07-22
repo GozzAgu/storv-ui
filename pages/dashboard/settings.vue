@@ -85,6 +85,22 @@
             </div>
             <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
               <div class="min-w-0 flex-1">
+                <label :class="labelClass">Billing cycle</label>
+                <select
+                  v-model="selectedBillingCycle"
+                  :disabled="!canEditSettings || isUpgradingSubscription"
+                  :class="inputClass(canEditSettings && !isUpgradingSubscription)"
+                >
+                  <option
+                    v-for="cycle in SUBSCRIPTION_BILLING_CYCLES"
+                    :key="cycle"
+                    :value="cycle"
+                  >
+                    {{ BILLING_CYCLE_LABELS[cycle] }}
+                  </option>
+                </select>
+              </div>
+              <div class="min-w-0 flex-1">
                 <label :class="labelClass">Upgrade to</label>
                 <select
                   v-model="selectedUpgradePlan"
@@ -121,7 +137,8 @@
               </Button>
             </div>
             <p class="text-[10px] leading-relaxed text-gray-500 dark:text-gray-400">
-              Paystack checkout · plan updates after payment completes.
+              Paystack checkout · {{ BILLING_CYCLE_LABELS[selectedBillingCycle].toLowerCase() }}
+              billing · plan updates after payment completes.
             </p>
             <details class="group rounded-lg bg-gray-50/50 px-3 py-2 dark:bg-white/[0.02]">
               <summary
@@ -918,6 +935,11 @@ import {
   type SubscriptionPlan,
 } from '~/types/subscription'
 import {
+  BILLING_CYCLE_LABELS,
+  SUBSCRIPTION_BILLING_CYCLES,
+  type SubscriptionBillingCycle,
+} from '~/types/subscription-billing'
+import {
   initializePaystackSubscription,
   type PaystackInitializeFetcher,
 } from '~/utils/paystack-upgrade'
@@ -1010,6 +1032,7 @@ const upgradeOptions = computed(() => {
   return SUBSCRIPTION_PLANS.filter((p) => subscriptionOrder.indexOf(p.id) > currentIdx)
 })
 const selectedUpgradePlan = ref<SubscriptionPlan | ''>('')
+const selectedBillingCycle = ref<SubscriptionBillingCycle>('monthly')
 const isUpgradingSubscription = ref(false)
 
 const handleUpgradeSubscription = async () => {
@@ -1030,6 +1053,7 @@ const handleUpgradeSubscription = async () => {
         planId: selectedUpgradePlan.value,
         email: currentUser.value.email || '',
         userId: currentUser.value.uid,
+        billingCycle: selectedBillingCycle.value,
       },
       $fetch as PaystackInitializeFetcher,
       useRuntimeConfig().public.apiBase || undefined

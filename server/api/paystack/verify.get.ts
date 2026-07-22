@@ -1,4 +1,6 @@
 import type { SubscriptionPlan } from '~/types/subscription'
+import type { SubscriptionBillingCycle } from '~/types/subscription-billing'
+import { isSubscriptionBillingCycle } from '~/types/subscription-billing'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
 import {
   VALID_PLANS,
@@ -44,7 +46,7 @@ export default defineEventHandler(async (event) => {
         reference: string
         amount?: number
         currency?: string
-        metadata?: { userId?: string; planId?: string }
+        metadata?: { userId?: string; planId?: string; billingCycle?: string }
       }
       message?: string
     }
@@ -67,6 +69,11 @@ export default defineEventHandler(async (event) => {
 
     const userId = data.metadata?.userId as string | undefined
     const planId = data.metadata?.planId as SubscriptionPlan | undefined
+    const billingCycle: SubscriptionBillingCycle = isSubscriptionBillingCycle(
+      data.metadata?.billingCycle
+    )
+      ? data.metadata.billingCycle
+      : 'monthly'
 
     if (!userId || !planId || !VALID_PLANS.includes(planId)) {
       return {
@@ -76,7 +83,11 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    const expectedAmount = getExpectedPlanAmount(planId, config as Record<string, unknown>)
+    const expectedAmount = getExpectedPlanAmount(
+      planId,
+      config as Record<string, unknown>,
+      billingCycle
+    )
     const paymentValidity = validatePaidAmountAndCurrency(
       data.amount ?? 0,
       data.currency,
@@ -111,6 +122,7 @@ export default defineEventHandler(async (event) => {
       const pending = pendingSnap.data() as {
         status?: string
         planId?: SubscriptionPlan
+        billingCycle?: SubscriptionBillingCycle
         amount?: number
         currency?: string
         userId?: string
@@ -119,6 +131,7 @@ export default defineEventHandler(async (event) => {
       if (
         pending.userId !== userId ||
         pending.planId !== planId ||
+        (pending.billingCycle || 'monthly') !== billingCycle ||
         pending.amount !== expectedAmount ||
         (pending.currency || '').toUpperCase() !== PAYSTACK_CURRENCY
       ) {
@@ -136,6 +149,7 @@ export default defineEventHandler(async (event) => {
         userRef,
         {
           subscription: planId,
+          subscriptionBillingCycle: billingCycle,
           subscriptionUpdatedAt: new Date().toISOString(),
           lastPaystackReference: data.reference,
         },

@@ -1,18 +1,52 @@
 import { describe, expect, it } from 'vitest'
 import {
   getExpectedPlanAmount,
+  getPlanAmountConfigKey,
   validatePaidAmountAndCurrency,
 } from '~/server/utils/paystack-validation'
 
 describe('paystack validation utils', () => {
-  it('resolves expected amount for plan', () => {
-    const amount = getExpectedPlanAmount('storvv_medium', {
-      paystackPlanMediumAmount: 500000,
-    })
+  const config = {
+    paystackPlanMediumAmount: 500000,
+    paystackPlanMediumAmountQuarterly: 1350000,
+    paystackPlanMediumAmountYearly: 5100000,
+  }
+
+  it('resolves expected monthly amount for plan', () => {
+    const amount = getExpectedPlanAmount('storvv_medium', config, 'monthly')
     expect(amount).toBe(500000)
   })
 
-  it('throws when amount config is invalid', () => {
+  it('resolves explicit quarterly amount for plan', () => {
+    const amount = getExpectedPlanAmount('storvv_medium', config, 'quarterly')
+    expect(amount).toBe(1350000)
+  })
+
+  it('derives quarterly amount when env override is unset', () => {
+    const amount = getExpectedPlanAmount('storvv_medium', {
+      paystackPlanMediumAmount: 500000,
+    }, 'quarterly')
+    expect(amount).toBe(1350000)
+  })
+
+  it('derives yearly amount when env override is unset', () => {
+    const amount = getExpectedPlanAmount('storvv_medium', {
+      paystackPlanMediumAmount: 500000,
+    }, 'yearly')
+    expect(amount).toBe(5100000)
+  })
+
+  it('builds config keys per billing cycle', () => {
+    expect(getPlanAmountConfigKey('storvv_medium', 'monthly')).toBe('paystackPlanMediumAmount')
+    expect(getPlanAmountConfigKey('storvv_medium', 'quarterly')).toBe(
+      'paystackPlanMediumAmountQuarterly'
+    )
+    expect(getPlanAmountConfigKey('storvv_enterprise', 'yearly')).toBe(
+      'paystackPlanEnterpriseAmountYearly'
+    )
+  })
+
+  it('throws when monthly amount config is invalid', () => {
     expect(() => getExpectedPlanAmount('storvv_enterprise', {})).toThrow()
   })
 

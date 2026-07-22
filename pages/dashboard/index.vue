@@ -16,7 +16,11 @@
     </header>
 
     <div v-if="needsStoreSelection && !isLoading" :class="stateCardClass">
-      <BuildingStorefrontIcon class="mx-auto mb-3 h-8 w-8 text-[#4876c7] dark:text-[#9ab5e3]" stroke-width="1.5" />
+      <MarketingFeatureIcon
+        name="branch"
+        size="lg"
+        class="mx-auto mb-3 text-[#4876c7] dark:text-[#9ab5e3]"
+      />
       <p :class="['dash-state-card__title', pageTitleClass, '!text-sm']">
         Select a store to load your dashboard
       </p>
@@ -169,7 +173,7 @@
           </div>
           <div :class="['dash-chart-wrap', chartData.length === 0 ? 'flex items-center justify-center' : '']">
             <div v-if="chartData.length === 0" class="text-center">
-              <ChartBarIcon class="mx-auto mb-2 h-8 w-8 opacity-40" stroke-width="1.5" />
+              <MarketingFeatureIcon name="analytics" size="lg" class="mx-auto mb-2 opacity-40" />
               <p :class="cardTitleClass">No revenue data yet</p>
               <p :class="cardDescClass">Completed receipts will populate this chart</p>
             </div>
@@ -356,14 +360,8 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
-import {
-  BuildingStorefrontIcon,
-  ChartBarIcon,
-  CubeIcon,
-  Cog6ToothIcon,
-  HomeIcon,
-  ReceiptPercentIcon,
-} from '~/utils/app-icons'
+import { MARKETING_FEATURE_ICONS } from '~/utils/marketing-feature-icons'
+import MarketingFeatureIcon from '~/components/marketing/MarketingFeatureIcon.vue'
 import StatCard from '~/components/ui/StatCard.vue'
 import PaymentLinksSummaryCard from '~/components/payments/PaymentLinksSummaryCard.vue'
 import Tutorial from '~/components/Tutorial.vue'
@@ -448,35 +446,35 @@ const tutorialSteps = [
     title: 'Welcome to Your Dashboard',
     description:
       'Your command center summarizes revenue, inventory health, outstanding balances, and recent receipts for the active store.',
-    icon: HomeIcon,
+    icon: MARKETING_FEATURE_ICONS.dashboard,
     targetSelector: '[data-tutorial="dashboard"]',
   },
   {
     title: 'Manage Your Inventory',
     description:
       'Inventory folders track serial or quantity-based stock. Low-stock signals and sell-through rates appear here automatically.',
-    icon: CubeIcon,
+    icon: MARKETING_FEATURE_ICONS.inventory,
     targetSelector: '[data-tutorial="inventory"]',
   },
   {
     title: 'Create and Track Receipts',
     description:
       'Receipts drive revenue charts, customer counts, and payment-method breakdowns. Balance-due sales surface under Needs attention.',
-    icon: ReceiptPercentIcon,
+    icon: MARKETING_FEATURE_ICONS.receipts,
     targetSelector: '[data-tutorial="receipts"]',
   },
   {
     title: 'View Analytics & Reports',
     description:
       'Open Analytics for deeper period comparisons, exports, and product-level charts beyond this overview.',
-    icon: ChartBarIcon,
+    icon: MARKETING_FEATURE_ICONS.analytics,
     targetSelector: '[data-tutorial="analytics"]',
   },
   {
     title: 'Configure Your Settings',
     description:
       'Settings is where you manage stores, departments, staff roles, and inventory thresholds that shape dashboard alerts.',
-    icon: Cog6ToothIcon,
+    icon: MARKETING_FEATURE_ICONS.settings,
     targetSelector: '[data-tutorial="settings"]',
   },
 ]

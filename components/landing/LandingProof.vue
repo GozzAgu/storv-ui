@@ -19,6 +19,9 @@
 
       <div class="landing-proof__grid">
         <article v-for="card in proofCards" :key="card.title" class="landing-proof__card">
+          <span class="landing-proof__card-icon" aria-hidden="true">
+            <MarketingFeatureIcon :name="card.iconKey" size="md" />
+          </span>
           <p class="landing-proof__metric">{{ card.metric }}</p>
           <h3 class="landing-proof__card-title">{{ card.title }}</h3>
           <p class="landing-proof__card-desc">{{ card.description }}</p>
@@ -49,30 +52,40 @@
 </template>
 
 <script setup lang="ts">
+import type { MarketingFeatureIconKey } from '~/utils/marketing-feature-icons'
+
 const emit = defineEmits<{
   navigate: [sectionId: string]
 }>()
 
-const proofCards = [
+const proofCards: Array<{
+  metric: string
+  iconKey: MarketingFeatureIconKey
+  title: string
+  description: string
+}> = [
   {
     metric: 'Stock',
+    iconKey: 'inventory',
     title: 'Fewer “it’s finished” surprises',
     description:
       'Live counts per branch. Low-stock alerts before a customer walks away empty-handed.',
   },
   {
     metric: 'Branches',
+    iconKey: 'branch',
     title: 'Every branch, one login',
     description:
       'Switch branches in a click. See sales and inventory per location without merged spreadsheets.',
   },
   {
     metric: 'Sales',
+    iconKey: 'receipts',
     title: 'Receipts and customers together',
     description:
       'Every sale saved with items and payment, including Paystack links when customers pay remotely.',
   },
-] as const
+]
 </script>
 
 <style scoped>
@@ -132,6 +145,18 @@ const proofCards = [
   border: 1px solid rgba(20, 63, 141, 0.1);
   background: linear-gradient(180deg, #f8fafc 0%, #fff 100%);
   padding: 1.25rem 1.35rem;
+}
+
+.landing-proof__card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  margin-bottom: 0.75rem;
+  border-radius: 0.625rem;
+  background: rgba(20, 63, 141, 0.08);
+  color: #143f8d;
 }
 
 .landing-proof__metric {
