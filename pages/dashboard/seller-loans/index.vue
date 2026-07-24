@@ -77,7 +77,7 @@
         </nav>
 
         <div class="data-table-shell mt-1 flex min-h-0 flex-1 flex-col overflow-hidden sm:mt-2">
-          <DataTableToolbar>
+          <DataTableToolbar native-table-key="seller-loans">
             <template #heading>
               <div class="min-w-0">
                 <h2

@@ -43,7 +43,9 @@ export function annotateDashboardTableForCards(table: HTMLTableElement): void {
   table.querySelectorAll('tbody tr').forEach((tr) => {
     tr.classList.remove('dash-native-table__detail-row', 'dash-native-table__card-row')
 
-    const cells = Array.from(tr.querySelectorAll(':scope > td'))
+    const cells = Array.from(tr.children).filter(
+      (el): el is HTMLTableCellElement => el.tagName === 'TD'
+    )
     const isDetailRow = cells.some((td) => td.colSpan > 1) || cells.length === 1
 
     if (isDetailRow) {
@@ -60,7 +62,12 @@ export function annotateDashboardTableForCards(table: HTMLTableElement): void {
       td.classList.remove(
         'dash-native-table__cell--full',
         'dash-native-table__cell--checkbox',
-        'dash-native-table__cell--actions'
+        'dash-native-table__cell--actions',
+        'dash-native-table__cell--primary',
+        'dash-native-table__cell--secondary',
+        'dash-native-table__cell--meta',
+        'dash-native-table__cell--status',
+        'dash-native-table__cell--when'
       )
 
       if (td.colSpan > 1) {
@@ -70,14 +77,28 @@ export function annotateDashboardTableForCards(table: HTMLTableElement): void {
       }
 
       const label = labels[index] ?? ''
+      const labelLower = label.toLowerCase()
       td.dataset.nativeLabel = label
 
-      if (!label && td.querySelector('input[type="checkbox"]')) {
+      if (index === 0) {
+        td.dataset.nativeLabel = ''
+        td.classList.add('dash-native-table__cell--primary')
+      } else if (labelLower === 'when' || labelLower === 'date') {
+        td.dataset.nativeLabel = ''
+        td.classList.add('dash-native-table__cell--when')
+      } else if (labelLower === 'item' || labelLower === 'details') {
+        td.dataset.nativeLabel = ''
+        td.classList.add('dash-native-table__cell--secondary')
+      } else if (td.classList.contains('dashboard-table__col-status')) {
+        td.dataset.nativeLabel = ''
+        td.classList.add('dash-native-table__cell--status')
+      } else if (!label && td.querySelector('input[type="checkbox"]')) {
         td.classList.add('dash-native-table__cell--checkbox')
-      }
-      if (td.classList.contains('dashboard-table__col-actions')) {
+      } else if (td.classList.contains('dashboard-table__col-actions')) {
         td.classList.add('dash-native-table__cell--actions')
-        if (!td.dataset.nativeLabel) td.dataset.nativeLabel = 'Actions'
+        td.dataset.nativeLabel = 'Actions'
+      } else {
+        td.classList.add('dash-native-table__cell--meta')
       }
     })
   })

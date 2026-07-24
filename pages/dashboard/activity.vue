@@ -79,7 +79,7 @@
         <div
           class="activity-log-shell data-table-shell flex min-h-0 flex-1 flex-col overflow-hidden"
         >
-          <DataTableToolbar>
+          <DataTableToolbar native-table-key="activity-log">
             <template #heading>
               <div class="min-w-0">
                 <h2 class="text-sm font-semibold tracking-tight text-gray-900 dark:text-gray-50">

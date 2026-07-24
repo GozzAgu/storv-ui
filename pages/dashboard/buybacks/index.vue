@@ -51,7 +51,7 @@
 
       <template v-else>
         <div class="data-table-shell flex min-h-0 flex-1 flex-col overflow-hidden">
-          <DataTableToolbar>
+          <DataTableToolbar native-table-key="buybacks">
             <template #heading>
               <div class="min-w-0">
                 <h2
