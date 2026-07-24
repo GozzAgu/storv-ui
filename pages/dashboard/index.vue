@@ -443,6 +443,8 @@ const {
 
 /** Max rows shown in dashboard list cards (no in-card scrolling). */
 const DASHBOARD_LIST_TOP = 5
+/** Recent activity rows are taller (badge + two lines) — show fewer to match card height. */
+const DASHBOARD_ACTIVITY_TOP = 3
 
 const tutorialSteps: TutorialStep[] = [
   {
@@ -574,7 +576,7 @@ function getRecentReceiptById(id: string) {
 const recentReceiptsTop = computed(() => topN(recentReceipts.value))
 const topProductsTop = computed(() => topN(topSellingItems.value))
 const lowStockItemsTop = computed(() => topN(lowStockItems.value))
-const recentActivityLogsTop = computed(() => topN(recentActivityLogs.value))
+const recentActivityLogsTop = computed(() => topN(recentActivityLogs.value, DASHBOARD_ACTIVITY_TOP))
 const quickLinksTop = computed(() => topN(quickLinks.value))
 
 const isLoading = ref(true)
@@ -834,7 +836,7 @@ const loadDashboardData = async () => {
     }
 
     if (canViewActivity.value) {
-      recentActivityLogs.value = await fetchActivityLogs(DASHBOARD_LIST_TOP)
+      recentActivityLogs.value = await fetchActivityLogs(DASHBOARD_ACTIVITY_TOP)
     } else {
       recentActivityLogs.value = []
     }
