@@ -454,3 +454,164 @@ html.capacitor-ios.capacitor-native .data-table-shell th,
 html.capacitor-ios.capacitor-native .dash-stat-card__label {
   letter-spacing: 0.08em;
 }
+
+/* ── Native table ↔ card layout toggle ── */
+html.capacitor-ios.capacitor-native .data-table-shell.dash-native-table--cards,
+html.capacitor-ios.capacitor-native .dash-table-shell.dash-native-table--cards,
+html.capacitor-ios.capacitor-native .activity-log-shell.dash-native-table--cards {
+  overflow: visible;
+}
+
+html.capacitor-ios.capacitor-native .dash-native-table--cards .overflow-x-auto {
+  overflow: visible !important;
+}
+
+html.capacitor-ios.capacitor-native .data-table-shell:not(.dash-native-table--cards) .sm\:hidden,
+html.capacitor-ios.capacitor-native .dash-table-shell:not(.dash-native-table--cards) .sm\:hidden {
+  display: none !important;
+}
+
+html.capacitor-ios.capacitor-native .data-table-shell:not(.dash-native-table--cards) .hidden.sm\:flex,
+html.capacitor-ios.capacitor-native .dash-table-shell:not(.dash-native-table--cards) .hidden.sm\:flex {
+  display: flex !important;
+}
+
+html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table {
+  min-width: 0 !important;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 0.625rem;
+}
+
+html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table thead {
+  display: none;
+}
+
+html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table tbody {
+  display: block;
+}
+
+html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table tbody tr.dash-native-table__card-row {
+  display: block;
+  overflow: hidden;
+  border: 1px solid var(--dash-card-border);
+  border-radius: var(--cap-ios-radius);
+  background: var(--cap-ios-glass);
+  -webkit-backdrop-filter: blur(16px) saturate(1.12);
+  backdrop-filter: blur(16px) saturate(1.12);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.28),
+    0 10px 28px -18px rgb(15 23 42 / 0.22);
+}
+
+html.capacitor-ios.capacitor-native.dark .dash-native-table--cards .dashboard-table tbody tr.dash-native-table__card-row {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.05),
+    0 12px 32px -16px rgb(0 0 0 / 0.45);
+}
+
+html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table tbody tr.dash-native-table__detail-row {
+  display: block;
+  margin-top: -0.5rem;
+  margin-bottom: 0.625rem;
+  overflow: hidden;
+  border: 1px solid var(--dash-card-border);
+  border-top: 0;
+  border-radius: 0 0 var(--cap-ios-radius) var(--cap-ios-radius);
+  background: rgb(248 250 252 / 0.55);
+}
+
+html.capacitor-ios.capacitor-native.dark .dash-native-table--cards .dashboard-table tbody tr.dash-native-table__detail-row {
+  background: rgb(255 255 255 / 0.03);
+}
+
+html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table td {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100% !important;
+  max-width: none !important;
+  padding: 0.5625rem 0.875rem;
+  border: 0;
+  border-bottom: 1px solid rgb(15 23 42 / 0.06);
+  text-align: right !important;
+  white-space: normal !important;
+}
+
+html.capacitor-ios.capacitor-native.dark .dash-native-table--cards .dashboard-table td {
+  border-bottom-color: rgb(255 255 255 / 0.06);
+}
+
+html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table tr.dash-native-table__card-row td:last-child {
+  border-bottom: 0;
+}
+
+html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table td::before {
+  content: attr(data-native-label);
+  flex: 0 0 38%;
+  padding-top: 0.0625rem;
+  text-align: left;
+  font-size: var(--cap-ios-caption);
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--dash-card-muted);
+}
+
+html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table td[data-native-label='']::before,
+html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table td.dash-native-table__cell--full::before {
+  display: none;
+}
+
+html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table td.dash-native-table__cell--checkbox {
+  justify-content: flex-start;
+  padding-bottom: 0.25rem;
+  border-bottom: 0;
+}
+
+html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table td.dash-native-table__cell--actions {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.5rem;
+  padding-top: 0.625rem;
+}
+
+html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table td.dash-native-table__cell--actions::before {
+  margin-bottom: 0.125rem;
+}
+
+html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table td.dash-native-table__cell--actions > * {
+  width: 100%;
+  justify-content: flex-end;
+}
+
+html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table td.dash-native-table__cell--full {
+  display: block;
+  padding: 0.75rem 0.875rem;
+  border-bottom: 0;
+  text-align: left !important;
+}
+
+html.capacitor-ios.capacitor-native .dash-native-table-toggle-anchor {
+  width: 100%;
+}
+
+html.capacitor-ios.capacitor-native .dash-table-toolbar + .dash-native-table-toggle-anchor {
+  margin-top: -0.375rem;
+}
+
+html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table__primary {
+  font-size: var(--cap-ios-body);
+}
+
+html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table__muted,
+html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table__numeric {
+  font-size: var(--cap-ios-caption);
+}
+
+html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table__money {
+  font-size: var(--cap-ios-title);
+  font-weight: 600;
+}
+

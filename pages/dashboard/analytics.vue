@@ -339,7 +339,7 @@
 
       <div :class="tripleGridClass">
         <div :class="[tableShellClass, 'flex min-h-0 flex-col overflow-hidden']">
-          <DataTableToolbar>
+          <DataTableToolbar native-table-key="analytics-top-products">
             <template #heading>
               <div class="min-w-0">
                 <p :class="tableEyebrowClass">Top products</p>
@@ -373,7 +373,7 @@
         </div>
 
         <div :class="[tableShellClass, 'flex min-h-0 flex-col overflow-hidden']">
-          <DataTableToolbar>
+          <DataTableToolbar native-table-key="analytics-top-customers">
             <template #heading>
               <div class="min-w-0">
                 <p :class="tableEyebrowClass">Top customers</p>
@@ -412,7 +412,7 @@
         </div>
 
         <div :class="[tableShellClass, 'flex min-h-0 flex-col overflow-hidden']">
-          <DataTableToolbar>
+          <DataTableToolbar native-table-key="analytics-recent-returns">
             <template #heading>
               <div class="min-w-0">
                 <p :class="tableEyebrowClass">Recent returns</p>
@@ -453,7 +453,7 @@
       </div>
 
       <div :class="[tableShellClass, 'flex min-h-0 flex-col overflow-hidden']">
-        <DataTableToolbar>
+        <DataTableToolbar native-table-key="analytics-low-stock">
           <template #heading>
             <div class="min-w-0">
               <p :class="tableEyebrowClass">Low stock</p>

@@ -285,7 +285,7 @@
           </dl>
 
           <div :class="[tableShellClass, 'overflow-hidden']">
-            <DataTableToolbar>
+            <DataTableToolbar native-table-key="sync-store-breakdown">
               <template #heading>
                 <div class="min-w-0">
                   <p :class="tableEyebrowClass">Store breakdown</p>
@@ -320,7 +320,7 @@
       </div>
 
       <div v-if="activeTab === 'history'" :class="[tableShellClass, 'overflow-hidden']">
-        <DataTableToolbar>
+        <DataTableToolbar native-table-key="sync-transfer-history">
           <template #heading>
             <div class="min-w-0">
               <h2 :class="sectionTitleClass">Transfer history</h2>

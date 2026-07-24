@@ -242,7 +242,10 @@
                   ]"
                 >
                   <!-- Toolbar: search + filters (left), primary action (right) -->
-                  <DataTableToolbar v-if="!receiptsStore.loading && !isReceiptsFullscreen">
+                  <DataTableToolbar
+                    v-if="!receiptsStore.loading && !isReceiptsFullscreen"
+                    native-table-key="receipts-main"
+                  >
                     <template #heading>
                       <div class="min-w-0 flex-1">
                         <h2
@@ -1116,7 +1119,7 @@
           <!-- Outstanding (balance due) tab -->
           <template v-else-if="activeTab === 'outstanding'">
             <div class="data-table-shell flex min-h-0 flex-1 flex-col overflow-hidden">
-              <DataTableToolbar v-if="!receiptsStore.loading">
+              <DataTableToolbar v-if="!receiptsStore.loading" native-table-key="receipts-outstanding">
                 <template #heading>
                   <div class="min-w-0 flex-1">
                     <h2
@@ -1232,7 +1235,7 @@
           <!-- Customers tab -->
           <template v-else-if="activeTab === 'customers'">
             <div class="data-table-shell flex min-h-0 flex-1 flex-col overflow-hidden">
-              <DataTableToolbar v-if="!receiptsStore.loading">
+              <DataTableToolbar v-if="!receiptsStore.loading" native-table-key="receipts-customers">
                 <template #heading>
                   <div class="min-w-0 flex-1">
                     <h2

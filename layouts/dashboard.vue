@@ -761,6 +761,8 @@
     <!-- Global Search -->
     <GlobalSearch />
 
+    <DashboardNativeTableLayoutSync v-if="isNativeApp" />
+
     <!-- Native app bottom navigation (CSS fallback via html.capacitor-native) -->
     <DashboardNativeBottomNav
       class="dashboard-native-bottom-nav-host"
@@ -789,6 +791,7 @@ import DashboardHoverTooltip from '~/components/ui/DashboardHoverTooltip.vue'
 import DashboardNavIcon from '~/components/dashboard/DashboardNavIcon.vue'
 import DemoModeBanner from '~/components/demo/DemoModeBanner.vue'
 import DashboardNativeBottomNav from '~/components/dashboard/DashboardNativeBottomNav.vue'
+import DashboardNativeTableLayoutSync from '~/components/dashboard/DashboardNativeTableLayoutSync.vue'
 import DashboardProfileMenu from '~/components/dashboard/DashboardProfileMenu.vue'
 import {
   splitNativeBottomNav,
