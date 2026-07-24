@@ -615,7 +615,7 @@ export function getDemoUserDocument(uid?: string): UserData | null {
 export async function applyDemoCreateFolder(
   folderData: Pick<
     InventoryFolder,
-    'name' | 'description' | 'type' | 'color' | 'hasSerialNumbers' | 'template'
+    'name' | 'description' | 'type' | 'color' | 'hasSerialNumbers' | 'template' | 'trackProfit'
   >
 ): Promise<string> {
   const id = useDemoAppStore().addFolder(folderData.name)

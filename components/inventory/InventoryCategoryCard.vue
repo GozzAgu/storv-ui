@@ -70,9 +70,19 @@
             {{ lowStockCount }} low
           </p>
         </div>
-        <p class="dash-grid-card__value" :title="`Value ${formattedValue}`">
-          {{ formattedValue }}
-        </p>
+        <div class="dash-grid-card__metrics shrink-0 text-right">
+          <p class="dash-grid-card__value" :title="`Value ${formattedValue}`">
+            {{ formattedValue }}
+          </p>
+          <p
+            v-if="showProfit && formattedProfit"
+            class="dash-grid-card__profit"
+            :class="profitClass"
+            :title="profitTitle"
+          >
+            {{ formattedProfit }}
+          </p>
+        </div>
         <div v-if="hasOverlays" class="shrink-0 self-center" @click.stop>
           <slot name="checkbox" />
         </div>
@@ -114,6 +124,9 @@ const props = withDefaults(
     availabilityStats?: FolderAvailabilityStats | null
     statsLoading?: boolean
     hasOverlays?: boolean
+    trackProfit?: boolean
+    grossProfitOnHand?: number | null
+    showProfit?: boolean
   }>(),
   {
     description: '',
@@ -126,6 +139,9 @@ const props = withDefaults(
     availabilityStats: null,
     statsLoading: false,
     hasOverlays: true,
+    trackProfit: false,
+    grossProfitOnHand: null,
+    showProfit: false,
   }
 )
 
@@ -189,5 +205,35 @@ const formattedValue = computed(() => {
   if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}M`
   if (v >= 1_000) return `${(v / 1_000).toFixed(1)}k`
   return new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(v)
+})
+
+const formattedProfit = computed(() => {
+  if (!props.showProfit || !props.trackProfit) return null
+  const profit = props.grossProfitOnHand
+  if (profit === null || profit === undefined) return '…'
+  const abs = Math.abs(profit)
+  if (abs >= 1_000_000) {
+    const sign = profit < 0 ? '−' : '+'
+    return `${sign}${(abs / 1_000_000).toFixed(1)}M`
+  }
+  if (abs >= 1_000) {
+    const sign = profit < 0 ? '−' : '+'
+    return `${sign}${(abs / 1_000).toFixed(1)}k`
+  }
+  const prefix = profit >= 0 ? '+' : '−'
+  return `${prefix}${new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(abs)}`
+})
+
+const profitClass = computed(() => {
+  const profit = props.grossProfitOnHand
+  if (profit === null || profit === undefined || profit === 0) return ''
+  return profit > 0 ? 'dash-grid-card__profit--positive' : 'dash-grid-card__profit--negative'
+})
+
+const profitTitle = computed(() => {
+  if (props.grossProfitOnHand === null || props.grossProfitOnHand === undefined) {
+    return 'Gross profit on available stock'
+  }
+  return `Gross profit on available stock: ${props.grossProfitOnHand}`
 })
 </script>

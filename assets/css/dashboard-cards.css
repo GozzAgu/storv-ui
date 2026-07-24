@@ -1765,6 +1765,41 @@ html.dark .dash-grid-card__stat-hint--warning {
   color: var(--dash-card-ink);
 }
 
+.dash-grid-card__metrics {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.125rem;
+}
+
+.dash-grid-card__metrics .dash-grid-card__value {
+  flex-shrink: unset;
+}
+
+.dash-grid-card__profit {
+  font-size: 0.5625rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  color: var(--dash-card-muted);
+}
+
+.dash-grid-card__profit--positive {
+  color: #059669;
+}
+
+html.dark .dash-grid-card__profit--positive {
+  color: #34d399;
+}
+
+.dash-grid-card__profit--negative {
+  color: #dc2626;
+}
+
+html.dark .dash-grid-card__profit--negative {
+  color: #f87171;
+}
+
 .dash-skeleton--grid-card {
   height: 8.5rem;
   border-radius: 0.875rem;

@@ -302,7 +302,15 @@ html.capacitor-ios.capacitor-native .dash-card {
     transform 0.15s var(--cap-ios-ease);
 }
 
-html.capacitor-ios.capacitor-native .dash-grid-card:active,
+html.capacitor-ios.capacitor-native .inv-category-card .dash-grid-card__profit {
+  font-size: var(--cap-ios-caption);
+  letter-spacing: -0.01em;
+}
+
+html.capacitor-ios.capacitor-native .inv-category-card .dash-grid-card__metrics {
+  gap: 0.1875rem;
+}
+
 html.capacitor-ios.capacitor-native .inv-category-card:active {
   transform: scale(0.985);
 }

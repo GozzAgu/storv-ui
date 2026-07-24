@@ -1232,7 +1232,7 @@
                 </div>
               </template>
             </div>
-            <div v-if="canViewProfitAndCost" class="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <div v-if="showStandaloneUnitCostField" class="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2">
               <InventoryUnitCostField
                 :model-value="itemForm.unitCost ?? null"
                 :sell-price="getItemSellPrice(itemForm as InventoryItem)"
@@ -1365,7 +1365,7 @@
                 </div>
               </template>
             </div>
-            <div v-if="canViewProfitAndCost" class="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <div v-if="showStandaloneUnitCostField" class="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2">
               <InventoryUnitCostField
                 :model-value="itemForm.unitCost ?? null"
                 :sell-price="getItemSellPrice(itemForm as InventoryItem)"
@@ -1790,6 +1790,7 @@ import {
   getItemSellPrice,
   resolveItemUnitCost,
 } from '~/utils/inventory-item-cost'
+import { templateHasCostPriceField } from '~/utils/inventory-folder-profit'
 import { formatDiscountPercent } from '~/utils/format-discount'
 import { tableMoneyClass } from '~/utils/table-money-styles'
 import * as XLSX from 'xlsx'
@@ -1821,6 +1822,12 @@ const authStore = useAuthStore()
 const userStore = useUserStore()
 const storesStore = useStoresStore()
 const { canManageInventoryItems, canManage, canViewProfitAndCost } = usePermissions()
+const canShowProfitAndCost = computed(
+  () => canViewProfitAndCost.value && folder.value?.trackProfit === true
+)
+const showStandaloneUnitCostField = computed(
+  () => canShowProfitAndCost.value && !templateHasCostPriceField(folder.value?.template?.fields)
+)
 const subscriptionFeaturesUi = useSubscriptionFeatures()
 const toast = useAppToast()
 
@@ -2328,6 +2335,9 @@ const effectiveTemplateFields = computed((): TemplateField[] => {
   const raw = folder.value?.template?.fields
   if (!raw?.length) return []
   let fields = raw.map((f) => ({ ...f }))
+  if (!canShowProfitAndCost.value) {
+    fields = fields.filter((f) => f.name !== 'unitCost')
+  }
 
   if (folder.value?.hasSerialNumbers) {
     return fields.filter(
@@ -2393,6 +2403,7 @@ const columns = computed(() => {
   if (fieldSource.length > 0) {
     const mapped = fieldSource
       .filter((field) => field.name !== 'model')
+      .filter((field) => !(field.name === 'unitCost' && !canShowProfitAndCost.value))
       .map((field) => ({
         key: field.name,
         label:
@@ -2425,11 +2436,13 @@ const columns = computed(() => {
     { key: 'dateIn', label: 'Date In', sortable: true, type: 'date' },
     { key: 'dateOut', label: 'Date Out', sortable: true, type: 'date' }
   )
-  if (canViewProfitAndCost.value) {
-    templateColumns.push(
-      { key: 'unitCost', label: 'Unit cost', sortable: true, type: 'currency' },
-      { key: 'margin', label: 'Margin', sortable: false, type: 'margin' }
-    )
+  if (canShowProfitAndCost.value) {
+    if (!templateHasCostPriceField(fieldSource)) {
+      templateColumns.push(
+        { key: 'unitCost', label: 'Unit cost', sortable: true, type: 'currency' }
+      )
+    }
+    templateColumns.push({ key: 'margin', label: 'Margin', sortable: false, type: 'margin' })
   }
   templateColumns.push(
     { key: 'source', label: 'Source', sortable: false, type: 'source' },
@@ -2614,7 +2627,7 @@ const getItemMarginLabel = (item: InventoryItem) => {
 }
 
 function normalizeUnitCostPayload(payload: Record<string, any>) {
-  if (!canViewProfitAndCost.value) {
+  if (!canShowProfitAndCost.value) {
     delete payload.unitCost
     return
   }

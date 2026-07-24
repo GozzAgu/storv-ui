@@ -18,7 +18,7 @@ export function folderAvailabilityPercent(stats: FolderAvailabilityStats): numbe
   return Math.round((stats.available / stats.total) * 100)
 }
 
-function quantityFieldName(folder: Pick<InventoryFolder, 'template'>): string | undefined {
+export function quantityFieldName(folder: Pick<InventoryFolder, 'template'>): string | undefined {
   return folder.template?.fields?.find((f) => {
     const n = f.name.toLowerCase()
     return n === 'quantity' || n === 'qty' || n === 'stock'
@@ -33,7 +33,7 @@ function readQuantityValue(item: InventoryItem, key: string): number {
   return Number.isFinite(n) && n > 0 ? n : 0
 }
 
-function unitsForItem(
+export function unitsForItem(
   item: InventoryItem,
   hasSerialNumbers: boolean,
   quantityField?: string

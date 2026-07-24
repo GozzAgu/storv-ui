@@ -52,6 +52,11 @@ import {
   computeFolderTotalValue,
   type FolderAvailabilityStats,
 } from '~/utils/inventory-folder-availability'
+import {
+  computeFolderGrossProfitOnHand,
+  sumFolderGrossProfitOnHand,
+  type FolderProfitStats,
+} from '~/utils/inventory-folder-profit'
 
 export { INVENTORY_FIRESTORE_PAGE_SIZE }
 
@@ -118,6 +123,7 @@ function mapFirestoreDocToInventoryFolder(
       : new Date(data.updatedAt) || undefined,
     createdBy: data.createdBy || fallbackUserId,
     allowedDepartments: data.allowedDepartments || undefined,
+    trackProfit: data.trackProfit === true,
   } as InventoryFolder
 }
 
@@ -165,6 +171,8 @@ export interface InventoryFolder {
   updatedAt?: Date | any
   createdBy: string
   allowedDepartments?: string[] // Array of department IDs that have access to this folder
+  /** When true, category tracks cost price and gross profit (super admin only). */
+  trackProfit?: boolean
 }
 
 export interface InventoryItem {
@@ -208,6 +216,7 @@ export const useInventoryStore = defineStore('inventory', {
     itemsLoading: {} as Record<string, boolean>, // Keyed by folderId
     /** Per-folder unit breakdown for category cards (available / sold / on loan). */
     folderAvailabilityStats: {} as Record<string, FolderAvailabilityStats>,
+    folderProfitStats: {} as Record<string, FolderProfitStats>,
     availabilityStatsLoading: false,
     error: null as string | null,
   }),
@@ -216,7 +225,9 @@ export const useInventoryStore = defineStore('inventory', {
     totalFolders: (state) => state.folders.length,
     totalItems: (state) => state.folders.reduce((sum, folder) => sum + folder.itemCount, 0),
     totalValue: (state) => state.folders.reduce((sum, folder) => sum + folder.totalValue, 0),
+    totalGrossProfitOnHand: (state) => sumFolderGrossProfitOnHand(state.folderProfitStats),
     lowStockFolders: (state) => state.folders.filter((folder) => folder.lowStockCount > 0),
+    getFolderProfitStats: (state) => (folderId: string) => state.folderProfitStats[folderId],
     getFolderById: (state) => (id: string) => state.folders.find((f) => f.id === id),
     getFolderAvailabilityStats: (state) => (folderId: string) =>
       state.folderAvailabilityStats[folderId],
@@ -469,6 +480,7 @@ export const useInventoryStore = defineStore('inventory', {
     async fetchFolderAvailabilityStats() {
       if (this.folders.length === 0) {
         this.folderAvailabilityStats = {}
+        this.folderProfitStats = {}
         return
       }
 
@@ -496,18 +508,24 @@ export const useInventoryStore = defineStore('inventory', {
         }
 
         const next: Record<string, FolderAvailabilityStats> = {}
+        const profitNext: Record<string, FolderProfitStats> = {}
         for (const folder of this.folders) {
           const queried = itemsByFolder.get(folder.id) ?? []
           const cached = this.items[folder.id] ?? []
           const items = queried.length >= cached.length ? queried : cached.length ? cached : queried
           next[folder.id] = computeFolderAvailabilityStats(items, folder)
           const totalValue = computeFolderTotalValue(items, folder)
+          const profitStats = computeFolderGrossProfitOnHand(items, folder)
+          if (profitStats) {
+            profitNext[folder.id] = profitStats
+          }
           const folderIndex = this.folders.findIndex((f) => f.id === folder.id)
           if (folderIndex > -1 && this.folders[folderIndex]) {
             this.folders[folderIndex].totalValue = totalValue
           }
         }
         this.folderAvailabilityStats = { ...next }
+        this.folderProfitStats = { ...profitNext }
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : String(error)
         console.warn('[InventoryStore] fetchFolderAvailabilityStats failed:', message)

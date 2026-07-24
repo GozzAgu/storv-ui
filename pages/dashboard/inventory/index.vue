@@ -90,6 +90,12 @@
         :subtext="`${formatCurrency(inventoryStore.totalValue)} store total`"
       />
       <StatCard
+        v-if="canViewProfitAndCost"
+        label="Total profit"
+        :value="formatCurrency(filteredFoldersTotalProfit)"
+        :subtext="profitKpiSubtext"
+      />
+      <StatCard
         label="Low stock"
         :value="String(inventoryStore.lowStockFolders.length)"
         :subtext="
@@ -241,6 +247,9 @@
             :resolve-department-name="getDepartmentName"
             :availability-stats="inventoryStore.folderAvailabilityStats[folder.id] ?? null"
             :stats-loading="inventoryStore.availabilityStatsLoading"
+            :track-profit="folder.trackProfit === true"
+            :gross-profit-on-hand="folderGrossProfitOnHand(folder.id)"
+            :show-profit="canViewProfitAndCost && folder.trackProfit === true"
             :has-overlays="canCreateInventoryFolders"
             @click="navigateToFolder(folder.id)"
           >
@@ -290,6 +299,13 @@
                   <th scope="col" class="hidden sm:table-cell">Type</th>
                   <th scope="col" class="text-right">Products</th>
                   <th scope="col" class="hidden sm:table-cell text-right">Value</th>
+                  <th
+                    v-if="canViewProfitAndCost"
+                    scope="col"
+                    class="hidden md:table-cell text-right"
+                  >
+                    Profit
+                  </th>
                   <th scope="col" class="hidden md:table-cell dashboard-table__col-status">
                     Tracking
                   </th>
@@ -360,6 +376,16 @@
                     <span class="dashboard-table__money">{{
                       formatCurrency(folder.totalValue ?? 0)
                     }}</span>
+                  </td>
+                  <td v-if="canViewProfitAndCost" class="hidden md:table-cell text-right">
+                    <span
+                      v-if="folder.trackProfit"
+                      class="dashboard-table__money"
+                      :class="folderProfitTableClass(folder.id)"
+                    >
+                      {{ formatFolderProfit(folder.id) }}
+                    </span>
+                    <span v-else class="dashboard-table__muted text-xs">—</span>
                   </td>
                   <td class="hidden md:table-cell dashboard-table__col-status">
                     <span
@@ -627,6 +653,24 @@
           </Checkbox>
         </section>
 
+        <section v-if="canViewProfitAndCost" :class="drawerSectionClass">
+          <Checkbox
+            v-model="folderForm.trackProfit"
+            size="sm"
+            wrapper-class="items-start gap-2.5"
+          >
+            <div class="min-w-0 flex-1">
+              <span class="text-xs font-medium text-gray-800 dark:text-gray-200"
+                >Track profit</span
+              >
+              <p :class="[drawerHintClass, 'mt-0.5']">
+                Adds a cost price column and shows gross profit per category and for the store.
+                Profit is sell price minus cost on available stock.
+              </p>
+            </div>
+          </Checkbox>
+        </section>
+
         <section v-if="canCreateInventoryFolders" :class="drawerSectionClass">
           <p :class="sectionLabelClass">
             Department access
@@ -820,6 +864,48 @@
         </Button>
       </template>
     </SidePanel>
+
+    <Modal
+      v-model="showProfitSkipConfirmModal"
+      title="Create without profit tracking?"
+      subtitle="You can turn this on later, but cost and margin won't be tracked until you do."
+      size="md"
+    >
+      <div class="space-y-3 text-sm text-gray-600 dark:text-gray-300">
+        <p>
+          <strong class="font-medium text-gray-900 dark:text-gray-100">Track profit</strong>
+          adds a <strong class="font-medium">Cost price</strong> column to this category and
+          calculates gross profit (unit price minus cost) for each product.
+        </p>
+        <p>
+          You'll see per-category profit on category cards, a store-wide
+          <strong class="font-medium">Total profit</strong> summary, and margin on item rows —
+          visible only to super admins.
+        </p>
+        <p>
+          Without it, you can still record selling prices, but Storvv won't calculate margins or
+          roll up profit for this category.
+        </p>
+      </div>
+      <template #footer>
+        <Button
+          variant="outline"
+          size="sm"
+          :extra-class="footerBtnOutlineClass"
+          @click="showProfitSkipConfirmModal = false"
+        >
+          Go back
+        </Button>
+        <Button
+          variant="primary"
+          size="sm"
+          :extra-class="footerBtnPrimaryClass"
+          @click="confirmCreateWithoutProfitTracking"
+        >
+          Continue without profit
+        </Button>
+      </template>
+    </Modal>
 
     <!-- Duplicate category -->
     <SidePanel
@@ -1170,6 +1256,11 @@ import { usePreferences } from '~/composables/usePreferences'
 import { useAppToast } from '~/composables/useAppToast'
 import { getVisibleMenuAnchorElement, computeFixedAnchoredMenuStyle } from '~/utils/menuAnchor'
 import { parseTemplateFieldsFromExcelArrayBuffer } from '~/utils/inventory-template-from-excel'
+import {
+  COST_PRICE_FIELD_NAME,
+  ensureCostPriceTemplateField,
+  removeCostPriceTemplateField,
+} from '~/utils/inventory-folder-profit'
 
 definePageMeta({
   layout: 'dashboard',
@@ -1217,6 +1308,8 @@ const {
 const searchQuery = ref('')
 const sortBy = ref('name')
 const showCreateFolderModal = ref(false)
+const showProfitSkipConfirmModal = ref(false)
+const profitSkipConfirmed = ref(false)
 const editingFolder = ref<InventoryFolder | null>(null)
 const showDeleteFolderModal = ref(false)
 const selectedFolderForDelete = ref<InventoryFolder | null>(null)
@@ -1419,7 +1512,7 @@ async function handleExportReorderList() {
     toast.error(message)
   }
 }
-const { canCreateInventoryFolders } = usePermissions()
+const { canCreateInventoryFolders, canViewProfitAndCost } = usePermissions()
 const { formatCurrency, preferences } = usePreferences()
 const currencySymbol = computed(() => preferences.value?.currencySymbol || '$')
 
@@ -1611,6 +1704,7 @@ const folderForm = reactive({
   type: '',
   color: '#3B82F6',
   hasSerialNumbers: false,
+  trackProfit: false,
   allowedDepartments: [] as string[], // Array of department IDs
 })
 
@@ -1645,6 +1739,7 @@ const LOCKED_TEMPLATE_FIELD_NAMES = new Set([
   'quantity',
   'stock',
   'qty',
+  COST_PRICE_FIELD_NAME,
 ])
 
 const STOCK_LIKE_FIELD_NAMES = new Set(['stock', 'quantity', 'qty'])
@@ -1724,6 +1819,8 @@ watch(
   (isOpen) => {
     if (isOpen && !editingFolder.value) {
       // Reset to default fields for new folder
+      folderForm.trackProfit = false
+      profitSkipConfirmed.value = false
       editableFields.value = getDefaultFields()
       selectedTemplateId.value = 'custom'
 
@@ -1756,6 +1853,17 @@ watch(
       } else {
         ensureBulkQuantityTemplateField(editableFields.value)
       }
+    }
+  }
+)
+
+watch(
+  () => folderForm.trackProfit,
+  (trackProfit) => {
+    if (trackProfit) {
+      ensureCostPriceTemplateField(editableFields.value)
+    } else {
+      editableFields.value = removeCostPriceTemplateField(editableFields.value)
     }
   }
 )
@@ -1859,6 +1967,47 @@ const filteredFolders = computed(() => {
 const filteredFoldersTotalValue = computed(() =>
   filteredFolders.value.reduce((sum, folder) => sum + (folder.totalValue ?? 0), 0)
 )
+
+const profitTrackingFolderCount = computed(
+  () => filteredFolders.value.filter((folder) => folder.trackProfit === true).length
+)
+
+const filteredFoldersTotalProfit = computed(() =>
+  filteredFolders.value.reduce((sum, folder) => {
+    if (!folder.trackProfit) return sum
+    return sum + (inventoryStore.folderProfitStats[folder.id]?.grossProfitOnHand ?? 0)
+  }, 0)
+)
+
+const profitKpiSubtext = computed(() => {
+  const tracking = profitTrackingFolderCount.value
+  if (tracking === 0) return 'Enable on categories to track margin'
+  const storeTotal = inventoryStore.totalGrossProfitOnHand
+  if (filteredFolders.value.length === inventoryStore.folders.length) {
+    return `${tracking} categor${tracking === 1 ? 'y' : 'ies'} · available stock`
+  }
+  return `${formatCurrency(storeTotal)} store · ${tracking} tracking`
+})
+
+function folderGrossProfitOnHand(folderId: string): number | null {
+  const folder = inventoryStore.getFolderById(folderId)
+  if (!folder?.trackProfit) return null
+  return inventoryStore.folderProfitStats[folderId]?.grossProfitOnHand ?? null
+}
+
+function formatFolderProfit(folderId: string): string {
+  const profit = folderGrossProfitOnHand(folderId)
+  if (profit === null) return '—'
+  return formatCurrency(profit)
+}
+
+function folderProfitTableClass(folderId: string): string {
+  const profit = folderGrossProfitOnHand(folderId)
+  if (profit === null || profit === 0) return ''
+  return profit > 0
+    ? 'text-emerald-700 dark:text-emerald-300'
+    : 'text-red-600 dark:text-red-400'
+}
 
 const folderForOpenMenu = computed(() => {
   const id = openFolderMenuId.value
@@ -2026,7 +2175,10 @@ const openCreateFolderModal = () => {
   folderForm.type = ''
   folderForm.color = '#3B82F6'
   folderForm.hasSerialNumbers = false
+  folderForm.trackProfit = false
+  profitSkipConfirmed.value = false
   editableFields.value = getDefaultFields()
+  ensureBulkQuantityTemplateField(editableFields.value)
   showCreateFolderModal.value = true
 }
 
@@ -2100,6 +2252,7 @@ const handleConfirmDuplicateFolder = async () => {
         type: source.type || '',
         color: source.color || '#3B82F6',
         hasSerialNumbers: source.hasSerialNumbers ?? false,
+        trackProfit: source.trackProfit === true,
         template: template as Template | undefined,
         allowedDepartments,
       })
@@ -2121,6 +2274,7 @@ const handleEditFolder = (folder: InventoryFolder) => {
   folderForm.type = folder.type || ''
   folderForm.color = folder.color || '#3B82F6'
   folderForm.hasSerialNumbers = folder.hasSerialNumbers || false
+  folderForm.trackProfit = folder.trackProfit === true
   folderForm.allowedDepartments = folder.allowedDepartments ? [...folder.allowedDepartments] : []
   if (folder.template) {
     editableFields.value = folder.template.fields.map((f) => ({ ...f }))
@@ -2189,6 +2343,13 @@ const handleEditFolder = (folder: InventoryFolder) => {
       editableFields.value.push(brandField)
     }
   }
+
+  if (folderForm.trackProfit) {
+    ensureCostPriceTemplateField(editableFields.value)
+  } else {
+    editableFields.value = removeCostPriceTemplateField(editableFields.value)
+  }
+
   nextTick(() => {
     editableFields.value.forEach((f) => {
       if (!isLockedTemplateField(f)) syncTemplateFieldNameFromLabel(f)
@@ -2319,6 +2480,24 @@ const handleSaveFolder = async () => {
     return
   }
 
+  if (
+    !editingFolder.value &&
+    canViewProfitAndCost.value &&
+    !folderForm.trackProfit &&
+    !profitSkipConfirmed.value
+  ) {
+    showProfitSkipConfirmModal.value = true
+    return
+  }
+
+  if (folderForm.trackProfit) {
+    ensureCostPriceTemplateField(editableFields.value)
+  } else {
+    editableFields.value = removeCostPriceTemplateField(editableFields.value)
+  }
+
+  const trackProfit = canViewProfitAndCost.value ? folderForm.trackProfit : false
+
   const template: Template = {
     id: 'custom',
     name: 'Custom Template',
@@ -2340,10 +2519,12 @@ const handleSaveFolder = async () => {
         type: folderForm.type,
         color: folderForm.color,
         hasSerialNumbers: folderForm.hasSerialNumbers,
+        trackProfit,
         template: template,
         allowedDepartments,
       })
       handleCancelFolder()
+      await inventoryStore.fetchFolderAvailabilityStats()
     } else {
       // Create new folder
       await inventoryStore.createFolder({
@@ -2352,10 +2533,12 @@ const handleSaveFolder = async () => {
         type: folderForm.type,
         color: folderForm.color,
         hasSerialNumbers: folderForm.hasSerialNumbers,
+        trackProfit,
         template: template,
         allowedDepartments,
       })
       handleCancelFolder()
+      await inventoryStore.fetchFolderAvailabilityStats()
     }
   } catch (error: any) {
     alert(error.message || 'Failed to save folder')
@@ -2364,14 +2547,23 @@ const handleSaveFolder = async () => {
 
 const handleCancelFolder = () => {
   showCreateFolderModal.value = false
+  showProfitSkipConfirmModal.value = false
+  profitSkipConfirmed.value = false
   editingFolder.value = null
   folderForm.name = ''
   folderForm.description = ''
   folderForm.type = ''
   folderForm.color = '#3B82F6'
   folderForm.hasSerialNumbers = false
+  folderForm.trackProfit = false
   folderForm.allowedDepartments = []
   editableFields.value = getDefaultFields()
+}
+
+const confirmCreateWithoutProfitTracking = () => {
+  profitSkipConfirmed.value = true
+  showProfitSkipConfirmModal.value = false
+  void handleSaveFolder()
 }
 
 const folderTemplateExcelInput = ref<HTMLInputElement | null>(null)
