@@ -153,7 +153,10 @@
       </div>
 
       <div :class="chartsGridClass">
-        <section :class="[cardFlushClass, 'dash-charts-grid__main overflow-hidden']">
+        <section
+          :class="[cardFlushClass, 'dash-charts-grid__main overflow-hidden']"
+          data-tutorial="analytics-preview"
+        >
           <div :class="[cardHeaderClass, 'dash-card__header--compact !mb-0 px-4 py-3 sm:flex-row sm:items-center']">
             <div>
               <h2 :class="cardTitleClass">Revenue performance</h2>
@@ -364,7 +367,7 @@ import { MARKETING_FEATURE_ICONS } from '~/utils/marketing-feature-icons'
 import MarketingFeatureIcon from '~/components/marketing/MarketingFeatureIcon.vue'
 import StatCard from '~/components/ui/StatCard.vue'
 import PaymentLinksSummaryCard from '~/components/payments/PaymentLinksSummaryCard.vue'
-import Tutorial from '~/components/Tutorial.vue'
+import Tutorial, { type TutorialStep } from '~/components/Tutorial.vue'
 import { useDashboardHomeChrome } from '~/composables/useDashboardHomeChrome'
 import { useReceiptsStore } from '~/stores/receipts'
 import { useInventoryStore } from '~/stores/inventory'
@@ -441,7 +444,7 @@ const {
 /** Max rows shown in dashboard list cards (no in-card scrolling). */
 const DASHBOARD_LIST_TOP = 5
 
-const tutorialSteps = [
+const tutorialSteps: TutorialStep[] = [
   {
     title: 'Welcome to Your Dashboard',
     description:
@@ -467,8 +470,12 @@ const tutorialSteps = [
     title: 'View Analytics & Reports',
     description:
       'Open Analytics for deeper period comparisons, exports, and product-level charts beyond this overview.',
+    lockedDescription:
+      'Full Analytics and exports are on Storvv Medium and Enterprise. Your dashboard still shows revenue and payment trends in the preview below.',
     icon: MARKETING_FEATURE_ICONS.analytics,
     targetSelector: '[data-tutorial="analytics"]',
+    fallbackTargetSelector: '[data-tutorial="analytics-preview"]',
+    subscriptionFeature: 'analytics',
   },
   {
     title: 'Configure Your Settings',

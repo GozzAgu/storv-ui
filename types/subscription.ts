@@ -113,6 +113,16 @@ export function planHasFeature(plan: SubscriptionPlan, feature: SubscriptionFeat
   return FEATURES_BY_PLAN[plan]?.includes(feature) ?? false
 }
 
+/** Lowest plan tier that includes the feature (for upgrade copy). */
+export function getMinimumPlanForFeature(feature: SubscriptionFeature): SubscriptionPlan | null {
+  const order: SubscriptionPlan[] = ['storvv_micro', 'storvv_medium', 'storvv_enterprise']
+  return order.find((plan) => planHasFeature(plan, feature)) ?? null
+}
+
+export function getPlanDisplayName(plan: SubscriptionPlan): string {
+  return SUBSCRIPTION_PLANS.find((entry) => entry.id === plan)?.name ?? plan
+}
+
 /** Returns limits for the plan. */
 export function getPlanLimits(plan: SubscriptionPlan): SubscriptionLimits {
   return LIMITS_BY_PLAN[plan] ?? LIMITS_BY_PLAN.storvv_micro

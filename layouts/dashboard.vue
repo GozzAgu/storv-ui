@@ -88,6 +88,7 @@
               >
                 <NuxtLink
                   :to="item.href"
+                  data-tutorial="inventory"
                   class="flex min-w-0 flex-1 items-center gap-2.5"
                   :class="{ 'pointer-events-none opacity-50': switchingStore }"
                 >
