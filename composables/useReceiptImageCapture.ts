@@ -1,10 +1,9 @@
 import { nextTick } from 'vue'
 import { blobToDataUrl } from '~/utils/file-share'
+import { fetchProxiedImageDataUrl } from '~/utils/proxy-image-fetch'
 
 const TRANSPARENT_1X1_GIF =
   'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
-
-const PROXY_MAX_GET_STRING_CHARS = 1800
 
 function resolveImgHttpUrl(src: string): string | null {
   const trimmed = src.trim()
@@ -60,25 +59,6 @@ function prepareHtml2CanvasClone(cloneDocument: Document, cloneRoot: HTMLElement
   forcePrintThemeOnClone(cloneDocument, cloneRoot)
 }
 
-async function fetchProxyImageDataUrl(absoluteUrl: string): Promise<string> {
-  const usePost = absoluteUrl.length > PROXY_MAX_GET_STRING_CHARS
-  const res = usePost
-    ? await fetch('/api/proxy-image', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: absoluteUrl }),
-      })
-    : await fetch(`/api/proxy-image?url=${encodeURIComponent(absoluteUrl)}`)
-  if (!res.ok) throw new Error(`Image proxy ${res.status}`)
-  const blob = await res.blob()
-  return await new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(reader.result as string)
-    reader.onerror = () => reject(reader.error)
-    reader.readAsDataURL(blob)
-  })
-}
-
 async function injectDataUrlsForImages(el: HTMLElement): Promise<void> {
   const images = el.querySelectorAll<HTMLImageElement>('img')
   await Promise.all(
@@ -87,7 +67,7 @@ async function injectDataUrlsForImages(el: HTMLElement): Promise<void> {
       const url = resolveImgHttpUrl(attr || img.currentSrc || img.src)
       if (!url) return
       try {
-        img.src = await fetchProxyImageDataUrl(url)
+        img.src = await fetchProxiedImageDataUrl(url)
         try {
           await img.decode()
         } catch {

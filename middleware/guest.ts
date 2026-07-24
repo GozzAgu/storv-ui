@@ -19,6 +19,7 @@ function hashLooksLikeFirebaseAction(hash: string): boolean {
 
 function shouldStayOnSigninWhileAuthed(to: RouteLocationNormalized): boolean {
   if (to.path !== '/signin') return false
+  if (to.query.verify2fa === '1') return true
   if (isFirebaseEmailActionQuery(to.query)) return true
   if (hashLooksLikeFirebaseAction(to.hash || '')) return true
   if (!import.meta.client) return false

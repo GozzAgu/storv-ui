@@ -2,6 +2,7 @@ import { SIGNIN_ALLOW_WHILE_AUTHED_KEY } from './guest'
 import { getAuthWaitMs, waitForAuthStore } from '~/utils/wait-for-auth'
 import { isCapacitorNative } from '~/utils/capacitor-env'
 import { isCapacitorMarketingRoot } from '~/utils/capacitor-root-path'
+import { isTwoFactorSessionVerified } from '~/utils/two-factor-session'
 
 export default defineNuxtRouteMiddleware(async (to, from) => {
   // Only run on client side (Firebase Auth is client-only)
@@ -43,9 +44,25 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
     await waitForAuthStore(authStore, getAuthWaitMs())
 
-    // Redirect to signin if not authenticated
     if (!authStore.loading && !authStore.currentUser) {
       return navigateTo('/signin')
+    }
+
+    if (authStore.currentUser) {
+      const userStore = useUserStore()
+      if (!userStore.userData && !userStore.loading) {
+        try {
+          await userStore.fetchUserData(authStore.currentUser.uid)
+        } catch {
+          /* ignore */
+        }
+      }
+      if (
+        userStore.userData?.twoFactorEnabled &&
+        !isTwoFactorSessionVerified(authStore.currentUser.uid)
+      ) {
+        return navigateTo('/signin?verify2fa=1')
+      }
     }
   }
 })

@@ -1,34 +1,28 @@
 <template>
   <div :class="pageWithFooterClass">
-    <Breadcrumbs :items="storeDepartmentsBreadcrumbs" />
-
     <DashboardPageHeader>
       <template #eyebrow>
-        <p :class="eyebrowClass">Settings</p>
+        <nav :class="eyebrowClass" aria-label="Breadcrumb">
+          <NuxtLink
+            to="/dashboard/settings"
+            class="transition-colors hover:text-primary-500 dark:hover:text-primary-400"
+          >
+            Settings
+          </NuxtLink>
+          <span class="mx-1.5 text-gray-300 dark:text-gray-600">/</span>
+          <span class="text-gray-600 dark:text-gray-400">{{ store?.name || 'Store' }}</span>
+        </nav>
       </template>
       <template #title>
-        <div class="flex min-w-0 items-center gap-2">
-          <DashboardBackButton to="/dashboard/settings" label="Back to settings" />
-          <h1 :class="[pageTitleClass, 'min-w-0 truncate']">
-            Departments in {{ store?.name || 'Store' }}
-          </h1>
+        <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+          <h1 :class="titleClass">Departments</h1>
+          <span
+            v-if="currentStore?.id === store?.id"
+            class="inline-flex items-center rounded-full border border-emerald-200/80 bg-emerald-50/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-800 dark:border-emerald-500/25 dark:bg-emerald-500/10 dark:text-emerald-300/90"
+          >
+            Current branch
+          </span>
         </div>
-      </template>
-      <template #description>
-        <p :class="descriptionClass">
-          Manage departments and staff for this store.
-          <template v-if="store && !departmentsStore.loading && !storesLoading">
-            <span class="tabular-nums font-medium text-gray-600 dark:text-gray-300">
-              {{ storeDepartments.length }} dept{{ storeDepartments.length === 1 ? '' : 's' }}
-            </span>
-            <span class="text-gray-300 dark:text-gray-600"> · </span>
-            <span class="tabular-nums">{{ totalStaffForStore }} staff</span>
-            <template v-if="currentStore?.id === store.id">
-              <span class="text-gray-300 dark:text-gray-600"> · </span>
-              <span class="text-emerald-700 dark:text-emerald-400/90">Current branch</span>
-            </template>
-          </template>
-        </p>
       </template>
       <template #actions>
         <Button
@@ -38,61 +32,41 @@
           :icon="PlusIcon"
           :disabled="!canAddDepartmentForStore"
           :title="canAddDepartmentForStore ? 'Create new department' : departmentLimitMessage"
-          :extra-class="headerBtnClass + ' w-full sm:w-auto'"
+          :extra-class="headerBtnClass"
           @click="openCreateDepartmentModal"
         >
           New department
         </Button>
       </template>
-      <template v-if="store && !departmentsStore.loading && !storesLoading" #filters>
-        <DashboardToolbarSearch v-model="searchQuery" placeholder="Search departments…" />
-        <DashboardToolbarIconButton aria-label="Reset filters" @click="resetFilters">
-          <ArrowPathIcon class="h-4 w-4" :size="16" />
-        </DashboardToolbarIconButton>
-        <DashboardToolbarMeta :hidden-on-mobile="false">
-          {{ filteredDepartments.length }} dept{{ filteredDepartments.length === 1 ? '' : 's' }}
-        </DashboardToolbarMeta>
-      </template>
-      <template
-        v-if="
-          store &&
-          !departmentsStore.loading &&
-          !storesLoading &&
-          canManageDepartments &&
-          paginatedDepartments.length > 0
-        "
-        #bulk
-      >
-        <Checkbox
-          :model-value="allDepartmentsOnPageSelected"
-          size="sm"
-          wrapper-class="!h-8 items-center"
-          label-class="!text-xs !ml-2 !font-normal !leading-none text-gray-500 dark:text-gray-500"
-          @update:model-value="setSelectAllDepartmentsBulk"
-        >
-          {{ allDepartmentsOnPageSelected ? 'All selected' : 'Select all' }}
-        </Checkbox>
-        <template v-if="selectedDepartmentsForBulk.length > 0">
-          <span
-            class="inline-flex h-8 items-center text-xs font-medium tabular-nums text-gray-600 dark:text-gray-400"
-          >
-            {{ selectedDepartmentsForBulk.length }} selected
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            :icon="TrashIcon"
-            :extra-class="
-              headerBtnClass +
-              '-red-200/70 !text-red-600 hover:!bg-red-50/80 dark:!border-red-900/40 dark:!text-red-400 dark:hover:!bg-red-950/30'
-            "
-            @click="openBulkDeleteDepartmentsModal"
-          >
-            Delete
-          </Button>
-        </template>
-      </template>
     </DashboardPageHeader>
+
+    <div v-if="headerStatsReady && storeDepartments.length > 0" :class="kpiGridClass">
+      <StatCard
+        label="Departments"
+        :value="String(storeDepartments.length)"
+        :subtext="`${filteredDepartments.length} shown`"
+      />
+      <StatCard
+        label="Staff"
+        :value="String(totalStaffForStore)"
+        subtext="Across all departments"
+      />
+      <StatCard
+        label="Active"
+        :value="String(activeDepartmentsCount)"
+        :subtext="
+          inactiveDepartmentsCount > 0
+            ? `${inactiveDepartmentsCount} inactive`
+            : 'All departments active'
+        "
+      />
+      <StatCard
+        label="Inactive"
+        :value="String(inactiveDepartmentsCount)"
+        :subtext="inactiveDepartmentsCount > 0 ? 'Needs review' : 'Within thresholds'"
+        :subtext-class="inactiveDepartmentsCount > 0 ? 'warning' : ''"
+      />
+    </div>
 
     <div
       v-if="departmentsStore.error && !departmentsStore.loading"
@@ -101,7 +75,7 @@
       <div class="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/30">
         <BuildingOfficeIcon class="h-5 w-5 text-red-600 dark:text-red-400" />
       </div>
-      <h3 :class="['dash-state-card__title', pageTitleClass, '!text-sm']">
+      <h3 :class="['dash-state-card__title', titleClass, '!text-sm']">
         Error loading departments
       </h3>
       <p :class="['dash-state-card__desc', cardDescClass, 'mx-auto max-w-md']">
@@ -117,7 +91,64 @@
     </div>
 
     <div v-else-if="!departmentsStore.error">
-      <div v-if="paginatedDepartments.length > 0" :class="gridClass">
+      <div
+        v-if="storeDepartments.length > 0"
+        :class="[gridShellClass, 'dash-grid-shell--grid']"
+      >
+        <div class="shrink-0" :class="[tableShellClass, 'overflow-hidden rounded-xl']">
+          <DataTableToolbar>
+            <template #heading>
+              <div class="min-w-0">
+                <h2 :class="toolbarTitleClass">All departments</h2>
+                <p :class="toolbarDescClass">
+                  Browse and manage departments for {{ store?.name || 'this store' }}
+                </p>
+              </div>
+            </template>
+            <template #filters>
+              <DashboardToolbarSearch
+                v-model="searchQuery"
+                placeholder="Search departments…"
+                input-class="sm:w-52"
+              />
+              <DashboardToolbarIconButton aria-label="Reset filters" @click="resetFilters">
+                <ArrowPathIcon class="h-4 w-4" :size="16" />
+              </DashboardToolbarIconButton>
+            </template>
+            <template v-if="canManageDepartments && paginatedDepartments.length > 0" #bulk>
+              <Checkbox
+                :model-value="allDepartmentsOnPageSelected"
+                size="sm"
+                wrapper-class="!h-8 items-center"
+                label-class="!text-xs !ml-2 !font-normal !leading-none text-gray-500 dark:text-gray-400"
+                @update:model-value="setSelectAllDepartmentsBulk"
+              >
+                {{ allDepartmentsOnPageSelected ? 'All selected' : 'Select all' }}
+              </Checkbox>
+              <template v-if="selectedDepartmentsForBulk.length > 0">
+                <span
+                  class="inline-flex h-8 items-center text-xs font-medium tabular-nums text-gray-600 dark:text-gray-400"
+                >
+                  {{ selectedDepartmentsForBulk.length }} selected
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  :icon="TrashIcon"
+                  :extra-class="
+                    headerBtnClass +
+                    ' !border-red-200/70 !text-red-600 hover:!bg-red-50/80 dark:!border-red-900/40 dark:!text-red-400 dark:hover:!bg-red-950/30'
+                  "
+                  @click="openBulkDeleteDepartmentsModal"
+                >
+                  Delete
+                </Button>
+              </template>
+            </template>
+          </DataTableToolbar>
+        </div>
+
+        <div v-if="paginatedDepartments.length > 0" :class="gridClass">
         <DepartmentCard
           v-for="department in paginatedDepartments"
           :key="department.id"
@@ -156,10 +187,27 @@
             </div>
           </template>
         </DepartmentCard>
+        </div>
+
+        <DashboardTableEmptyState
+          v-if="paginatedDepartments.length === 0 && filteredDepartments.length === 0"
+          :icon="BuildingOfficeIcon"
+          :title="searchQuery ? 'No departments found' : 'No departments on this page'"
+          :description="
+            searchQuery
+              ? 'Try a different search term.'
+              : 'Adjust filters or go to another page.'
+          "
+          :tips="[
+            'Search matches department names',
+            'Clear search to see every department in this store',
+          ]"
+          :fill="false"
+        />
       </div>
 
       <DashboardTableEmptyState
-        v-if="paginatedDepartments.length === 0 && filteredDepartments.length === 0"
+        v-else-if="storeDepartments.length === 0"
         :icon="BuildingOfficeIcon"
         :title="searchQuery ? 'No departments found' : 'No departments yet'"
         :description="
@@ -330,17 +378,15 @@ import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import {
   PlusIcon,
   BuildingOfficeIcon,
-  Cog6ToothIcon,
-  UsersIcon,
-  UserCircleIcon,
   ArrowPathIcon,
   PencilSquareIcon,
   TrashIcon,
   EllipsisVerticalIcon,
 } from '~/utils/app-icons'
 import Button from '~/components/ui/Button.vue'
-import Breadcrumbs from '~/components/ui/Breadcrumbs.vue'
 import Pagination from '~/components/ui/Pagination.vue'
+import StatCard from '~/components/ui/StatCard.vue'
+import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
 import DashboardFixedFooter from '~/components/ui/DashboardFixedFooter.vue'
 import Modal from '~/components/ui/Modal.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
@@ -366,12 +412,15 @@ useHead({
 const {
   pageWithFooterClass,
   eyebrowClass,
-  pageTitleClass,
-  descriptionClass,
+  titleClass,
   cardDescClass,
   headerBtnClass,
-  bulkActionsClass,
+  kpiGridClass,
+  gridShellClass,
+  tableShellClass,
   gridClass,
+  toolbarTitleClass,
+  toolbarDescClass,
   menuBtnClass,
   errorCardClass,
 } = useDashboardGridPagesChrome()
@@ -476,10 +525,9 @@ const departmentLimitMessage = computed(() => {
     : `Your plan allows up to ${max} departments per store. Upgrade for more.`
 })
 
-const storeDepartmentsBreadcrumbs = computed(() => [
-  { label: 'Settings', href: '/dashboard/settings', icon: Cog6ToothIcon },
-  { label: store.value?.name || 'Store', icon: BuildingOfficeIcon },
-])
+const headerStatsReady = computed(
+  () => !!store.value && !departmentsStore.loading && !storesLoading.value
+)
 
 // Filter departments by storeId
 const storeDepartments = computed(() => {
@@ -489,6 +537,14 @@ const storeDepartments = computed(() => {
 const totalStaffForStore = computed(() => {
   return storeDepartments.value.reduce((sum, dept) => sum + (dept.staffCount || 0), 0)
 })
+
+const activeDepartmentsCount = computed(
+  () => storeDepartments.value.filter((dept) => dept.isActive !== false).length
+)
+
+const inactiveDepartmentsCount = computed(
+  () => storeDepartments.value.filter((dept) => dept.isActive === false).length
+)
 
 const filteredDepartments = computed(() => {
   if (!searchQuery.value) return storeDepartments.value
@@ -819,13 +875,6 @@ const allDepartmentsOnPageSelected = computed(
     paginatedDepartments.value.length > 0 &&
     selectedDepartmentsForBulk.value.length === paginatedDepartments.value.length
 )
-const toggleSelectAllDepartments = () => {
-  if (allDepartmentsOnPageSelected.value) {
-    selectedDepartmentsForBulk.value = []
-  } else {
-    selectedDepartmentsForBulk.value = [...paginatedDepartments.value]
-  }
-}
 
 /** Checkbox "Select all" in header (Inventory Folders pattern) */
 const setSelectAllDepartmentsBulk = (checked: boolean) => {

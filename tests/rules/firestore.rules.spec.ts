@@ -59,4 +59,61 @@ describe('firestore.rules', () => {
     const db = testEnv.unauthenticatedContext().firestore()
     await assertFails(getDoc(doc(db, 'users/u1/stores/s1')))
   })
+
+  it('allows owner to read own user doc', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await setDoc(doc(context.firestore(), 'users/u1'), {
+        uid: 'u1',
+        email: 'a@b.com',
+        name: 'Owner',
+        role: 'superAdmin',
+        subscription: 'storvv_micro',
+        hasCompletedOnboarding: true,
+        hasCompletedTutorial: false,
+      })
+    })
+
+    const db = testEnv.authenticatedContext('u1').firestore()
+    await assertSucceeds(getDoc(doc(db, 'users/u1')))
+  })
+
+  it('denies other users from reading owner user doc', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await setDoc(doc(context.firestore(), 'users/u1'), {
+        uid: 'u1',
+        email: 'a@b.com',
+        name: 'Owner',
+        role: 'superAdmin',
+        subscription: 'storvv_micro',
+        hasCompletedOnboarding: true,
+        hasCompletedTutorial: false,
+      })
+    })
+
+    const db = testEnv.authenticatedContext('u2').firestore()
+    await assertFails(getDoc(doc(db, 'users/u1')))
+  })
+
+  it('denies client updates to subscription field', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await setDoc(doc(context.firestore(), 'users/u1'), {
+        uid: 'u1',
+        email: 'a@b.com',
+        name: 'Owner',
+        role: 'superAdmin',
+        subscription: 'storvv_micro',
+        hasCompletedOnboarding: true,
+        hasCompletedTutorial: false,
+      })
+    })
+
+    const db = testEnv.authenticatedContext('u1').firestore()
+    await assertFails(
+      setDoc(
+        doc(db, 'users/u1'),
+        { subscription: 'storvv_enterprise' },
+        { merge: true }
+      )
+    )
+  })
 })

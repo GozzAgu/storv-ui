@@ -1,7 +1,9 @@
 import type { SubscriptionPlan } from '~/types/subscription'
 import type { SubscriptionBillingCycle } from '~/types/subscription-billing'
 import { isSubscriptionBillingCycle } from '~/types/subscription-billing'
+import { createError, defineEventHandler, getQuery } from 'h3'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
+import { requireAuth } from '~/server/utils/store-auth'
 import {
   VALID_PLANS,
   PAYSTACK_CURRENCY,
@@ -12,6 +14,7 @@ import {
 
 export default defineEventHandler(async (event) => {
   try {
+    const auth = await requireAuth(event)
     const query = getQuery(event)
     const reference = query.reference as string
 
@@ -81,6 +84,10 @@ export default defineEventHandler(async (event) => {
         message: 'Invalid transaction metadata or plan',
         paid: false,
       }
+    }
+
+    if (auth.uid !== userId) {
+      throw createError({ statusCode: 403, message: 'Cannot verify payment for another user' })
     }
 
     const expectedAmount = getExpectedPlanAmount(

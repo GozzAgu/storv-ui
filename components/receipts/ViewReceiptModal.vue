@@ -457,6 +457,8 @@ import { base64ToBlob } from '~/utils/file-share'
 import { setReceiptPdfFont } from '~/utils/receipt-pdf-font'
 import { useReceiptPaperHeader } from '~/composables/useReceiptPaperHeader'
 import { usePermissions } from '~/composables/usePermissions'
+import { useAuthenticatedFetch } from '~/composables/useAuthenticatedFetch'
+import { fetchProxiedImageDataUrl } from '~/utils/proxy-image-fetch'
 import {
   receiptGrossProfit,
   receiptLineCogs,
@@ -767,8 +769,6 @@ const TRANSPARENT_1X1_GIF =
 
 const RECEIPT_PDF_IMAGE_FORMAT: 'PNG' | 'JPEG' = 'PNG'
 const RECEIPT_PDF_JPEG_QUALITY = 0.96
-/** Long signed URLs (e.g. Firebase) can exceed max GET length; use POST instead */
-const PROXY_MAX_GET_STRING_CHARS = 1800
 const H2C_SCALES: readonly [number, number, number] = [2, 1.75, 1.5]
 
 /**
@@ -848,24 +848,7 @@ function prepareHtml2CanvasClone(cloneDocument: Document, cloneRoot: HTMLElement
 }
 
 async function fetchProxyImageDataUrl(absoluteUrl: string): Promise<string> {
-  const usePost = absoluteUrl.length > PROXY_MAX_GET_STRING_CHARS
-  const res = usePost
-    ? await fetch('/api/proxy-image', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: absoluteUrl }),
-      })
-    : await fetch(`/api/proxy-image?url=${encodeURIComponent(absoluteUrl)}`)
-  if (!res.ok) {
-    throw new Error(`Image proxy ${res.status}`)
-  }
-  const blob = await res.blob()
-  return await new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(reader.result as string)
-    reader.onerror = () => reject(reader.error)
-    reader.readAsDataURL(blob)
-  })
+  return fetchProxiedImageDataUrl(absoluteUrl)
 }
 
 async function getReceiptLogoDataUrl(src: string): Promise<string | null> {
@@ -1371,15 +1354,17 @@ const handleSendEmail = async () => {
 
   isSendingEmail.value = true
   try {
-    // Generate PDF first
+    const ownerUserId = (await getQueryUserId()) || useAuthStore().currentUser?.uid || ''
+    const storeId = props.receipt.storeId || ''
     const pdfBase64 = await generateReceiptPDF()
 
-    // Send email with PDF attachment
     const response = await authFetch<{ success: boolean; error?: string; message?: string }>(
       '/api/receipts/send-email',
       {
         method: 'POST',
         body: {
+          ownerUserId,
+          storeId,
           receiptId: props.receipt.id,
           receiptNumber: props.receipt.receiptNumber,
           customerEmail: emailToSend.value,

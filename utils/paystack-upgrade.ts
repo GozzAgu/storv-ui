@@ -29,13 +29,15 @@ export async function initializePaystackSubscription(
     billingCycle?: SubscriptionBillingCycle
   },
   fetcher: PaystackInitializeFetcher,
-  apiBaseUrl?: string
+  apiBaseUrl?: string,
+  authHeaders?: Record<string, string>
 ): Promise<InitializeSubscriptionResult> {
   try {
     const base = (apiBaseUrl || '').replace(/\/$/, '')
     const url = base ? `${base}/api/paystack/initialize` : '/api/paystack/initialize'
     const res = await fetcher(url, {
       method: 'POST',
+      headers: authHeaders,
       body: {
         planId: params.planId,
         email: params.email,

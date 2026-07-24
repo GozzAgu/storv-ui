@@ -1,4 +1,5 @@
 import { createError, setHeader, type H3Event } from 'h3'
+import { assertAllowedProxyUrl } from '~/server/utils/proxy-image-url'
 
 function sniffImageMime(buffer: Buffer): string | null {
   if (buffer.length < 12) {
@@ -35,19 +36,7 @@ function sniffImageMime(buffer: Buffer): string | null {
 export async function getProxiedImageForUrl(
   url: string
 ): Promise<{ buffer: Buffer; contentType: string }> {
-  if (!url || typeof url !== 'string') {
-    throw createError({ statusCode: 400, message: 'url is required' })
-  }
-
-  let parsed: URL
-  try {
-    parsed = new URL(url)
-  } catch {
-    throw createError({ statusCode: 400, message: 'Invalid url' })
-  }
-  if (!['http:', 'https:'].includes(parsed.protocol)) {
-    throw createError({ statusCode: 400, message: 'Only http(s) URLs are allowed' })
-  }
+  assertAllowedProxyUrl(url)
 
   const response = await fetch(url, {
     headers: {

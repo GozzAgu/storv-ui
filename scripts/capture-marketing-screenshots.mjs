@@ -56,7 +56,7 @@ async function waitForCaptureReady(page, slug) {
       await waitForPageTitle(main, 'Payment links')
       return
     case 'departments':
-      await main.locator('h1').filter({ hasText: /Departments in/i }).first().waitFor({ timeout: 60_000 })
+      await main.locator('h1').filter({ hasText: /^Departments$/i }).first().waitFor({ timeout: 60_000 })
       return
     case 'analytics':
       await main.locator('h1').filter({ hasText: /Analytics/i }).first().waitFor({ timeout: 60_000 })

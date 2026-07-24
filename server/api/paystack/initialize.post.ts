@@ -1,7 +1,9 @@
 import type { SubscriptionPlan } from '~/types/subscription'
 import type { SubscriptionBillingCycle } from '~/types/subscription-billing'
 import { isSubscriptionBillingCycle } from '~/types/subscription-billing'
+import { createError, defineEventHandler, readBody } from 'h3'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
+import { requireAuth } from '~/server/utils/store-auth'
 import {
   getExpectedPlanAmount,
   PAYSTACK_CURRENCY,
@@ -11,6 +13,7 @@ import {
 
 export default defineEventHandler(async (event) => {
   try {
+    const auth = await requireAuth(event)
     const body = await readBody(event)
     const { planId, email, userId, billingCycle: billingCycleRaw } = body as {
       planId?: SubscriptionPlan
@@ -28,6 +31,10 @@ export default defineEventHandler(async (event) => {
         statusCode: 400,
         message: 'planId, email, and userId are required',
       })
+    }
+
+    if (auth.uid !== userId) {
+      throw createError({ statusCode: 403, message: 'Cannot initialize payment for another user' })
     }
 
     if (!VALID_PLANS.includes(planId)) {

@@ -80,6 +80,9 @@ export function useWhatsAppMessaging() {
     caption?: string
     receiptNumber?: string
     receiptData?: Record<string, unknown>
+    ownerUserId?: string
+    storeId?: string
+    receiptId?: string
   }): Promise<DeliverReceiptResult> {
     if (!hasFeature.value) {
       toast.error('Receipt messaging is not available on your plan.')
@@ -88,6 +91,16 @@ export function useWhatsAppMessaging() {
 
     const headers = await getAuthHeaders()
     const attachmentBase64 = await blobToBase64(params.file)
+    const ownerUserId =
+      params.ownerUserId ||
+      (params.receiptData?.ownerUserId as string | undefined) ||
+      (await import('~/composables/useFirestorePaths').then((m) => m.getQueryUserId())) ||
+      authStore.currentUser?.uid ||
+      ''
+    const storeId =
+      params.storeId || (params.receiptData?.storeId as string | undefined) || ''
+    const receiptId =
+      params.receiptId || (params.receiptData?.id as string | undefined) || ''
 
     let data: DeliverReceiptApiResponse
 
@@ -96,6 +109,9 @@ export function useWhatsAppMessaging() {
         method: 'POST',
         headers,
         body: {
+          ownerUserId,
+          storeId,
+          receiptId,
           contact: params.contact.trim(),
           attachmentBase64,
           attachmentMimeType: params.file.type || 'image/png',

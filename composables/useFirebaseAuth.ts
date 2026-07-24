@@ -18,6 +18,8 @@ import {
 import { AUTH_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import { getFirebaseClientAuth } from '~/utils/firebase-client-auth'
 import { sendUserEmailVerification } from '~/utils/emailVerification'
+import { clearAllTwoFactorSessionFlags, clearTwoFactorSessionVerified } from '~/utils/two-factor-session'
+import { resolveApiPath } from '~/utils/api-url'
 
 /**
  * Composable for Firebase Authentication
@@ -94,8 +96,13 @@ export const useFirebaseAuth = () => {
     }
 
     try {
+      const uid = auth.currentUser?.uid
       await firebaseSignOut(auth)
       if (import.meta.client) {
+        if (uid) {
+          clearTwoFactorSessionVerified(uid)
+        }
+        clearAllTwoFactorSessionFlags()
         const { clearNativeBiometricLogin } = await import('~/composables/useNativeBiometricLogin')
         await clearNativeBiometricLogin()
       }
@@ -347,68 +354,35 @@ export const useFirebaseAuth = () => {
     }
   }
 
-  // Save 2FA secret to Firestore
-  const save2FASecret = async (secret: string, method: 'totp' | 'phone') => {
+  // Save 2FA secret via server (stored outside client-readable Firestore fields).
+  const save2FASecret = async (secret: string, method: 'totp' | 'phone', code: string) => {
     const auth = getAuthInstance()
-    if (!auth) {
-      throw new Error(AUTH_UNAVAILABLE_MESSAGE)
-    }
-
-    const user = auth.currentUser
-    if (!user) {
+    if (!auth?.currentUser) {
       throw new Error('No authenticated user found')
     }
 
-    try {
-      const { updateUserDocument } = useUser()
-      await updateUserDocument(user.uid, {
-        twoFactorEnabled: true,
-        twoFactorMethod: method,
-        twoFactorSecret: secret, // In production, encrypt this
-        twoFactorEnabledAt: new Date().toISOString(),
-      })
-    } catch (error: any) {
-      throw new Error(error.message || 'Failed to save 2FA settings')
-    }
+    const token = await auth.currentUser.getIdToken()
+    await $fetch(resolveApiPath('/api/auth/2fa/setup'), {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: { secret, method, code },
+    })
   }
 
-  // Verify TOTP code
+  // Verify TOTP code (server reads secret from admin-only storage).
   const verifyTOTPCode = async (code: string): Promise<boolean> => {
     const auth = getAuthInstance()
-    if (!auth) {
-      throw new Error(AUTH_UNAVAILABLE_MESSAGE)
-    }
-
-    const user = auth.currentUser
-    if (!user) {
+    if (!auth?.currentUser) {
       throw new Error('No authenticated user found')
     }
 
-    try {
-      // Get user's 2FA secret from Firestore
-      const { getUserDocument } = useUser()
-      const userData = await getUserDocument(user.uid)
-
-      if (!userData?.twoFactorSecret) {
-        throw new Error('2FA not set up')
-      }
-
-      // Import TOTP dynamically
-      const { TOTP } = await import('otpauth')
-
-      const totp = new TOTP({
-        secret: userData.twoFactorSecret,
-        digits: 6,
-        period: 30,
-        algorithm: 'SHA1',
-      })
-
-      const isValid = totp.validate({ token: code, window: 2 })
-      return isValid !== null
-    } catch (error: any) {
-      console.error('Error verifying TOTP:', error)
-      throw new Error(error.message || 'Failed to verify code')
-    }
+    const token = await auth.currentUser.getIdToken()
+    await $fetch(resolveApiPath('/api/auth/2fa/verify'), {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: { code },
+    })
+    return true
   }
 
   // Check if 2FA is enabled for user
@@ -450,14 +424,12 @@ export const useFirebaseAuth = () => {
       const credential = EmailAuthProvider.credential(user.email, password)
       await reauthenticateWithCredential(user, credential)
 
-      // Remove 2FA from Firestore
-      const { updateUserDocument } = useUser()
-      await updateUserDocument(user.uid, {
-        twoFactorEnabled: false,
-        twoFactorMethod: null,
-        twoFactorSecret: null,
-        twoFactorEnabledAt: null,
+      const token = await user.getIdToken()
+      await $fetch(resolveApiPath('/api/auth/2fa/disable'), {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
       })
+      clearTwoFactorSessionVerified(user.uid)
     } catch (error: any) {
       if (error.code === 'auth/wrong-password') {
         throw new Error('Incorrect password')

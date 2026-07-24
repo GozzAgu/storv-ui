@@ -7,6 +7,7 @@ import {
 import type { SubscriptionPlan } from '~/types/subscription'
 import type { SubscriptionBillingCycle } from '~/types/subscription-billing'
 import type { UserPreferences } from '~/composables/usePreferences'
+import { sanitizeUserData } from '~/utils/sanitize-user-data'
 
 export interface StoreSettings {
   inventory?: {
@@ -121,7 +122,7 @@ export const useUser = () => {
         })
 
         const updatedDoc = await getDoc(userRef)
-        return updatedDoc.data() as UserData
+        return sanitizeUserData(updatedDoc.data() as UserData)
       }
     } catch (error: any) {
       // Handle Firestore permission errors specifically
@@ -158,7 +159,7 @@ export const useUser = () => {
         return null
       }
 
-      return userDoc.data() as UserData
+      return sanitizeUserData(userDoc.data() as UserData)
     } catch (error: any) {
       // Log error but don't throw - allow auth to proceed even if Firestore fails
       console.error('Error getting user document:', error)

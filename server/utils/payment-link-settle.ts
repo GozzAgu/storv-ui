@@ -37,6 +37,10 @@ export async function settlePaymentLink(
     }
     const link = linkSnap.data() as PaymentLinkDoc
 
+    if (link.reference && link.reference !== opts.reference) {
+      return { settled: false, alreadyProcessed: false }
+    }
+
     // Idempotency: webhook + verify may both fire.
     if (link.status === 'paid' && link.inventoryApplied) {
       return { settled: true, alreadyProcessed: true, receiptId: link.receiptId }

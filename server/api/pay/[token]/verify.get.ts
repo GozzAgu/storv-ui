@@ -24,8 +24,13 @@ export default defineEventHandler(async (event) => {
   if (!linkSnap.exists) throw createError({ statusCode: 404, message: 'Payment link not found' })
   const link = linkSnap.data() as PaymentLinkDoc
 
-  // Anti-tamper: the reference must match the one we issued for this link.
-  if (link.reference && link.reference !== reference) {
+  if (!link.reference) {
+    throw createError({
+      statusCode: 409,
+      message: 'No payment has been initiated for this invoice yet',
+    })
+  }
+  if (link.reference !== reference) {
     throw createError({ statusCode: 409, message: 'Reference does not match this invoice' })
   }
 
@@ -36,13 +41,19 @@ export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
   const secretKey = getPaystackSecret(config)
 
-  const data = await paystackRequest<{ status?: string; amount?: number; channel?: string }>(
-    `/transaction/verify/${encodeURIComponent(reference)}`,
-    { method: 'GET', secretKey }
-  )
+  const data = await paystackRequest<{
+    status?: string
+    amount?: number
+    channel?: string
+    metadata?: { token?: string; invoiceNumber?: string }
+  }>(`/transaction/verify/${encodeURIComponent(reference)}`, { method: 'GET', secretKey })
+
+  const metadataToken = data.metadata?.token?.trim()
+  if (metadataToken && metadataToken !== token) {
+    throw createError({ statusCode: 409, message: 'Transaction does not belong to this invoice' })
+  }
 
   if (data?.status !== 'success') {
-    // A definitive failure marks the link failed; "abandoned"/pending stay unpaid so the customer can retry.
     if (data?.status === 'failed') {
       await adminDb
         .collection('paymentLinks')

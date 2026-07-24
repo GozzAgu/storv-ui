@@ -1,4 +1,4 @@
-import { randomBytes, createHmac } from 'node:crypto'
+import { randomBytes, createHmac, timingSafeEqual } from 'node:crypto'
 import { createError } from 'h3'
 import { resolvePaystackSecretKey } from '~/server/utils/paystack-validation'
 
@@ -132,5 +132,10 @@ export function isValidPaystackSignature(
 ): boolean {
   if (!signature) return false
   const hash = createHmac('sha512', secretKey).update(rawBody).digest('hex')
-  return hash === signature
+  if (hash.length !== signature.length) return false
+  try {
+    return timingSafeEqual(Buffer.from(hash, 'utf8'), Buffer.from(signature, 'utf8'))
+  } catch {
+    return false
+  }
 }

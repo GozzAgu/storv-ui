@@ -6,8 +6,13 @@ import { sendReceiptAttachmentEmail } from '~/server/utils/receipt-delivery-emai
 import { isResendConfigured } from '~/server/utils/delivery-config'
 import { isWhatsAppCloudConfigured, sendWhatsAppCloudMedia } from '~/server/utils/whatsapp-cloud'
 import { assertWhatsAppSendAllowed, incrementWhatsAppUsage } from '~/server/utils/whatsapp-usage'
+import { assertReceiptDeliveryAccess } from '~/server/utils/receipt-access'
+import { assertRateLimit } from '~/server/utils/rate-limit'
 
 interface DeliverBody {
+  ownerUserId?: string
+  storeId?: string
+  receiptId?: string
   contact?: string
   attachmentBase64?: string
   attachmentMimeType?: string
@@ -19,6 +24,13 @@ interface DeliverBody {
 
 export default defineEventHandler(async (event) => {
   const auth = await requireAuth(event)
+  assertRateLimit(event, {
+    id: 'receipts:deliver',
+    limit: 20,
+    windowMs: 60_000,
+    uid: auth.uid,
+  })
+
   const body = await readBody<DeliverBody>(event)
 
   const contact = body.contact?.trim()
@@ -39,6 +51,14 @@ export default defineEventHandler(async (event) => {
       message: 'attachmentMimeType and attachmentFilename are required',
     })
   }
+
+  await assertReceiptDeliveryAccess({
+    authUid: auth.uid,
+    ownerUserId: body.ownerUserId || '',
+    storeId: body.storeId || '',
+    receiptId: body.receiptId || '',
+    receiptNumber: body.receiptNumber,
+  })
 
   const channel = detectContactChannel(contact)
   if (!channel) {

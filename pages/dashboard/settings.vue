@@ -1004,7 +1004,7 @@ const { getFirestoreInstance } = useFirestore()
 const userStore = useUserStore()
 const storesStore = useStoresStore()
 const authStore = useAuthStore()
-const { authFetch } = useAuthenticatedFetch()
+const { authFetch, getAuthHeaders } = useAuthenticatedFetch()
 const inventoryStore = useInventoryStore()
 const toast = useAppToast()
 const { limits } = useSubscriptionFeatures()
@@ -1048,6 +1048,7 @@ const handleUpgradeSubscription = async () => {
 
   isUpgradingSubscription.value = true
   try {
+    const headers = await getAuthHeaders()
     const result = await initializePaystackSubscription(
       {
         planId: selectedUpgradePlan.value,
@@ -1056,7 +1057,8 @@ const handleUpgradeSubscription = async () => {
         billingCycle: selectedBillingCycle.value,
       },
       $fetch as PaystackInitializeFetcher,
-      useRuntimeConfig().public.apiBase || undefined
+      useRuntimeConfig().public.apiBase || undefined,
+      headers
     )
     if (result.ok) {
       window.location.href = result.authorizationUrl
@@ -1529,7 +1531,7 @@ onMounted(async () => {
     route.query.paystack_callback === '1' || (refParam && String(refParam).startsWith('storvv_'))
   if (currentUser.value && refParam && isPaystackCallback) {
     try {
-      const verify = (await $fetch(
+      const verify = (await authFetch(
         `/api/paystack/verify?reference=${encodeURIComponent(refParam)}`
       )) as {
         success?: boolean

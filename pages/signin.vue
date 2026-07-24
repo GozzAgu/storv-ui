@@ -11,7 +11,7 @@
 
     <AuthCard>
       <Button
-        v-if="hasSavedLogin && isSupported"
+        v-if="hasSavedLogin && isSupported && !awaitingTwoFactor"
         type="button"
         variant="outline"
         size="md"
@@ -26,53 +26,55 @@
 
       <form
         class="auth-form space-y-5"
-        :class="{ 'mt-5': hasSavedLogin && isSupported }"
-        @submit.prevent="handleSignIn"
+        :class="{ 'mt-5': hasSavedLogin && isSupported && !awaitingTwoFactor }"
+        @submit.prevent="awaitingTwoFactor ? submitTwoFactorCode() : handleSignIn()"
       >
-        <AuthField
-          v-model="form.email"
-          input-id="email"
-          label="Email address"
-          type="email"
-          autocomplete="username"
-          placeholder="Enter your email"
-          required
-        />
+        <template v-if="!awaitingTwoFactor">
+          <AuthField
+            v-model="form.email"
+            input-id="email"
+            label="Email address"
+            type="email"
+            autocomplete="username"
+            placeholder="Enter your email"
+            required
+          />
 
-        <AuthField
-          v-model="form.password"
-          input-id="password"
-          label="Password"
-          autocomplete="current-password"
-          placeholder="Enter your password"
-          password-toggle
-          required
-        >
-          <template #label-right>
-            <NuxtLink to="/forgot-password" class="auth-link shrink-0 text-xs">
-              Forgot?
-            </NuxtLink>
-          </template>
-        </AuthField>
+          <AuthField
+            v-model="form.password"
+            input-id="password"
+            label="Password"
+            autocomplete="current-password"
+            placeholder="Enter your password"
+            password-toggle
+            required
+          >
+            <template #label-right>
+              <NuxtLink to="/forgot-password" class="auth-link shrink-0 text-xs">
+                Forgot?
+              </NuxtLink>
+            </template>
+          </AuthField>
 
-        <Checkbox
-          v-if="isSupported"
-          v-model="form.enableFaceId"
-          size="sm"
-          wrapper-class="!items-center"
-          label-class="!ml-2.5 !text-xs !font-normal !text-gray-600 dark:!text-gray-400"
-        >
-          Use {{ biometryLabel }} next time on this device
-        </Checkbox>
+          <Checkbox
+            v-if="isSupported"
+            v-model="form.enableFaceId"
+            size="sm"
+            wrapper-class="!items-center"
+            label-class="!ml-2.5 !text-xs !font-normal !text-gray-600 dark:!text-gray-400"
+          >
+            Use {{ biometryLabel }} next time on this device
+          </Checkbox>
 
-        <Checkbox
-          v-model="form.rememberMe"
-          size="sm"
-          wrapper-class="!items-center"
-          label-class="!ml-2.5 !text-xs !font-normal !text-gray-600 dark:!text-gray-400"
-        >
-          Remember me
-        </Checkbox>
+          <Checkbox
+            v-model="form.rememberMe"
+            size="sm"
+            wrapper-class="!items-center"
+            label-class="!ml-2.5 !text-xs !font-normal !text-gray-600 dark:!text-gray-400"
+          >
+            Remember me
+          </Checkbox>
+        </template>
 
         <AuthAlert
           v-if="errorMessage"
@@ -80,18 +82,56 @@
           :show-firestore-guide="errorMessage.includes('PERMISSION_DENIED')"
         />
 
-        <Button
-          type="submit"
-          :disabled="isLoading || isBiometricLoading"
-          :loading="isLoading"
-          variant="primary"
-          size="md"
-          :icon="ArrowRightIcon"
-          icon-right
-          extra-class="auth-btn auth-btn--primary !w-full"
-        >
-          Sign in
-        </Button>
+        <div v-if="awaitingTwoFactor" class="space-y-4">
+          <p class="text-sm text-gray-600 dark:text-gray-400">
+            Enter the 6-digit code from your authenticator app to finish signing in.
+          </p>
+          <AuthField
+            v-model="twoFactorCode"
+            input-id="twoFactorCode"
+            label="Authentication code"
+            type="text"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+            placeholder="000000"
+            maxlength="6"
+            required
+          />
+          <Button
+            type="button"
+            :disabled="isVerifyingTwoFactor || twoFactorCode.length !== 6"
+            :loading="isVerifyingTwoFactor"
+            variant="primary"
+            size="md"
+            extra-class="auth-btn auth-btn--primary !w-full"
+            @click="submitTwoFactorCode"
+          >
+            Verify and continue
+          </Button>
+          <button
+            type="button"
+            class="auth-link text-xs"
+            :disabled="isVerifyingTwoFactor"
+            @click="cancelTwoFactorSignIn"
+          >
+            Use a different account
+          </button>
+        </div>
+
+        <template v-else>
+          <Button
+            type="submit"
+            :disabled="isLoading || isBiometricLoading"
+            :loading="isLoading"
+            variant="primary"
+            size="md"
+            :icon="ArrowRightIcon"
+            icon-right
+            extra-class="auth-btn auth-btn--primary !w-full"
+          >
+            Sign in
+          </Button>
+        </template>
       </form>
 
       <template #footer>
@@ -117,11 +157,17 @@ import AuthAlert from '~/components/auth/AuthAlert.vue'
 import Button from '~/components/ui/Button.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
-import { useAdminCredentials } from '~/composables/useAdminCredentials'
 import { useNativeBiometricLogin } from '~/composables/useNativeBiometricLogin'
 import { useUserStore } from '~/stores/user'
+import { useAuthenticatedFetch } from '~/composables/useAuthenticatedFetch'
 import { markCapacitorDocument } from '~/utils/capacitor-env'
 import { getErrorMessage } from '~/utils/error-message'
+import { getAuthWaitMs, waitForAuthStore } from '~/utils/wait-for-auth'
+import {
+  isTwoFactorSessionVerified,
+  markTwoFactorSessionVerified,
+  clearTwoFactorSessionVerified,
+} from '~/utils/two-factor-session'
 
 definePageMeta({
   layout: false,
@@ -137,6 +183,10 @@ const form = ref({
 
 const isLoading = ref(false)
 const isBiometricLoading = ref(false)
+const isVerifyingTwoFactor = ref(false)
+const awaitingTwoFactor = ref(false)
+const twoFactorCode = ref('')
+const pendingSignIn = ref<{ email: string; password: string } | null>(null)
 const errorMessage = ref('')
 
 const route = useRoute()
@@ -160,15 +210,33 @@ onMounted(() => {
   if (typeof email === 'string' && email.trim()) {
     form.value.email = decodeURIComponent(email).trim()
   }
-  void refreshAvailability().then(() => {
+  void refreshAvailability().then(async () => {
     if (hasSavedLogin.value) {
       form.value.enableFaceId = true
+    }
+    if (route.query.verify2fa === '1') {
+      await resumePendingTwoFactorSignIn()
     }
   })
 })
 
-const { signIn } = useFirebaseAuth()
-const { storeCredentials } = useAdminCredentials()
+async function resumePendingTwoFactorSignIn() {
+  const authStore = useAuthStore()
+  await waitForAuthStore(authStore, getAuthWaitMs())
+  if (!authStore.currentUser) return
+  try {
+    await userStore.fetchUserData(authStore.currentUser.uid)
+  } catch {
+    return
+  }
+  if (userStore.userData?.twoFactorEnabled && !isTwoFactorSessionVerified(authStore.currentUser.uid)) {
+    awaitingTwoFactor.value = true
+    form.value.email = authStore.currentUser.email || form.value.email
+  }
+}
+
+const { signIn, signOut } = useFirebaseAuth()
+const { authFetch } = useAuthenticatedFetch()
 const userStore = useUserStore()
 
 async function persistBiometricLogin(email: string, password: string) {
@@ -187,29 +255,13 @@ async function persistBiometricLogin(email: string, password: string) {
   }
 }
 
-async function completeSignIn(email: string, password: string) {
-  const user = await signIn(email, password)
-
-  if (!user) return
-
-  try {
-    await userStore.fetchUserData(user.uid)
-  } catch (error) {
-    throw new Error(getErrorMessage(error) || 'Failed to load your account')
-  }
-
+async function finishAuthenticatedSession(email: string, password: string) {
   const userData = userStore.userData
-
   if (!userData) {
     errorMessage.value = 'Account not found. Please contact your administrator.'
     return
   }
 
-  if (userData.role === 'superAdmin') {
-    storeCredentials(email, password)
-  }
-
-  // Save to Keychain before leaving sign-in (async after navigate often never finishes on iOS)
   await persistBiometricLogin(email, password)
 
   let destination = '/dashboard'
@@ -220,6 +272,88 @@ async function completeSignIn(email: string, password: string) {
   }
 
   await navigateTo(destination)
+}
+
+async function completeSignIn(email: string, password: string) {
+  const user = await signIn(email, password)
+  if (!user) return
+
+  try {
+    await userStore.fetchUserData(user.uid)
+  } catch (error) {
+    throw new Error(getErrorMessage(error) || 'Failed to load your account')
+  }
+
+  const userData = userStore.userData
+  if (!userData) {
+    errorMessage.value = 'Account not found. Please contact your administrator.'
+    return
+  }
+
+  if (userData.twoFactorEnabled && !isTwoFactorSessionVerified(user.uid)) {
+    pendingSignIn.value = { email, password }
+    awaitingTwoFactor.value = true
+    twoFactorCode.value = ''
+    errorMessage.value = ''
+    if (route.query.verify2fa !== '1') {
+      await navigateTo('/signin?verify2fa=1', { replace: true })
+    }
+    return
+  }
+
+  await finishAuthenticatedSession(email, password)
+}
+
+async function submitTwoFactorCode() {
+  if (twoFactorCode.value.length !== 6) {
+    errorMessage.value = 'Enter the 6-digit code from your authenticator app'
+    return
+  }
+
+  const authStore = useAuthStore()
+  if (!authStore.currentUser) {
+    errorMessage.value = 'Session expired. Sign in again.'
+    awaitingTwoFactor.value = false
+    return
+  }
+
+  isVerifyingTwoFactor.value = true
+  errorMessage.value = ''
+
+  try {
+    await authFetch('/api/auth/2fa/verify', {
+      method: 'POST',
+      body: { code: twoFactorCode.value },
+    })
+    markTwoFactorSessionVerified(authStore.currentUser.uid)
+    awaitingTwoFactor.value = false
+    const pending = pendingSignIn.value
+    pendingSignIn.value = null
+    await finishAuthenticatedSession(
+      pending?.email || form.value.email,
+      pending?.password || form.value.password
+    )
+  } catch (error: unknown) {
+    errorMessage.value = getErrorMessage(error) || 'Invalid verification code'
+  } finally {
+    isVerifyingTwoFactor.value = false
+  }
+}
+
+async function cancelTwoFactorSignIn() {
+  awaitingTwoFactor.value = false
+  twoFactorCode.value = ''
+  pendingSignIn.value = null
+  errorMessage.value = ''
+  const authStore = useAuthStore()
+  if (authStore.currentUser) {
+    clearTwoFactorSessionVerified(authStore.currentUser.uid)
+  }
+  try {
+    await signOut()
+  } catch {
+    /* ignore */
+  }
 }
 
 function mapSignInError(error: unknown) {

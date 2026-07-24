@@ -13,6 +13,7 @@ import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from './auth'
 import type { UserData, StoreDetails } from '~/composables/useUser'
 import type { Staff } from '~/composables/useStaff'
+import { sanitizeUserData } from '~/utils/sanitize-user-data'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -69,10 +70,10 @@ export const useUserStore = defineStore('user', {
         const userSnap = await getDoc(userRef)
 
         if (userSnap.exists()) {
-          const fetchedData = {
+          const fetchedData = sanitizeUserData({
             uid: userSnap.id,
             ...userSnap.data(),
-          } as UserData
+          } as UserData)
 
           // During staff creation, only update if this is the super admin's data
           // Don't update if it's staff data (preserve super admin's profile info)

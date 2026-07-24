@@ -307,6 +307,8 @@ const handleSend = async () => {
         props.receiptForCapture?.receiptNumber ||
         props.templateVars?.receiptNumber,
       receiptData: receiptData as Record<string, unknown> | undefined,
+      storeId: props.receiptForCapture?.storeId,
+      receiptId: props.receiptForCapture?.id,
     })
 
     if (result.success) {

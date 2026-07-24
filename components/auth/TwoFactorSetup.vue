@@ -511,7 +511,7 @@ const verifyCode = async () => {
       if (delta !== null) {
         // Code is valid, save to Firestore
         const { save2FASecret } = useFirebaseAuth()
-        await save2FASecret(secretKey.value, selectedMethod.value)
+        await save2FASecret(secretKey.value, selectedMethod.value, verificationCode.value)
 
         // Generate backup codes
         backupCodes.value = generateBackupCodes()

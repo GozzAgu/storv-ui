@@ -485,35 +485,23 @@
                                 >
                                   {{ getReceiptLineItemsPreview(receipt) }}
                                 </p>
-                                <button
+                                <ReceiptLineItemsToggle
                                   v-if="getReceiptLineItemsCount(receipt) > 0"
-                                  type="button"
-                                  class="mt-1 inline-flex items-center gap-0.5 text-[11px] font-medium text-primary-600 dark:text-primary-400"
-                                  @click.stop="toggleReceiptLineItemsExpand(receipt.id)"
-                                >
-                                  <ChevronDownIcon
-                                    class="h-3 w-3 shrink-0 transition-transform duration-200"
-                                    :class="
-                                      expandedReceiptLineItems[receipt.id] ? 'rotate-180' : ''
-                                    "
-                                    stroke-width="2"
-                                  />
-                                  {{
-                                    expandedReceiptLineItems[receipt.id]
-                                      ? 'Hide details'
-                                      : 'View details'
-                                  }}
-                                </button>
-                                <div
+                                  :expanded="!!expandedReceiptLineItems[receipt.id]"
+                                  :item-count="getReceiptLineItemsCount(receipt)"
+                                  @toggle="toggleReceiptLineItemsExpand(receipt.id)"
+                                />
+                                <ReceiptLineItemsDetailPanel
                                   v-if="expandedReceiptLineItems[receipt.id]"
-                                  class="mt-2 overflow-hidden rounded-sm bg-gray-50/80 dark:bg-white/[0.03]"
+                                  compact
+                                  :item-count="getReceiptLineItemsCount(receipt)"
                                 >
                                   <ReceiptTableLineItems
                                     :items="receipt.items"
                                     :items-count-fallback="receipt.itemsCount"
                                     compact
                                   />
-                                </div>
+                                </ReceiptLineItemsDetailPanel>
                                 <div class="mt-1.5 flex items-center justify-between gap-2">
                                   <div class="min-w-0">
                                     <span class="text-xs" :class="tableMoneyClass()">{{
@@ -839,11 +827,14 @@
                                   :data-receipt-flash="
                                     flashReceiptId === receipt.id ? '' : undefined
                                   "
-                                  :class="
+                                  :class="[
                                     flashReceiptId === receipt.id
                                       ? '!bg-primary-500/[0.06] dark:!bg-primary-500/12'
-                                      : ''
-                                  "
+                                      : '',
+                                    expandedReceiptLineItems[receipt.id]
+                                      ? 'bg-gray-50/50 dark:bg-white/[0.02]'
+                                      : '',
+                                  ]"
                                 >
                                   <td
                                     v-if="canDeleteReceipts"
@@ -919,26 +910,12 @@
                                       {{ getReceiptLineItemsPreview(receipt) }}
                                     </p>
                                     <p v-else class="text-xs text-gray-500">{{ EMPTY_CELL }}</p>
-                                    <button
+                                    <ReceiptLineItemsToggle
                                       v-if="getReceiptLineItemsCount(receipt) > 0"
-                                      type="button"
-                                      class="mt-0.5 inline-flex items-center gap-0.5 text-[11px] font-medium text-primary-600 transition-colors hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
-                                      :aria-expanded="!!expandedReceiptLineItems[receipt.id]"
-                                      @click.stop="toggleReceiptLineItemsExpand(receipt.id)"
-                                    >
-                                      <ChevronDownIcon
-                                        class="h-3 w-3 shrink-0 transition-transform duration-200"
-                                        :class="
-                                          expandedReceiptLineItems[receipt.id] ? 'rotate-180' : ''
-                                        "
-                                        stroke-width="2"
-                                      />
-                                      {{
-                                        expandedReceiptLineItems[receipt.id]
-                                          ? 'Hide details'
-                                          : 'View details'
-                                      }}
-                                    </button>
+                                      :expanded="!!expandedReceiptLineItems[receipt.id]"
+                                      :item-count="getReceiptLineItemsCount(receipt)"
+                                      @toggle="toggleReceiptLineItemsExpand(receipt.id)"
+                                    />
                                   </td>
                                   <td class="whitespace-nowrap px-3 py-2.5 align-middle sm:px-4">
                                     <span class="text-xs" :class="tableMoneyClass()">
@@ -984,19 +961,23 @@
                                 </tr>
                                 <tr
                                   v-if="expandedReceiptLineItems[receipt.id]"
-                                  class="bg-gray-50/60 dark:bg-white/[0.02]"
+                                  class="bg-gray-50/40 dark:bg-white/[0.015]"
                                 >
                                   <td
                                     :colspan="receiptLineItemsDetailColspan"
-                                    class="px-3 py-2 sm:px-4"
+                                    class="border-t-0 px-3 pb-3 pt-0 sm:px-4"
                                   >
                                     <div
-                                      class="overflow-hidden rounded-sm bg-white dark:bg-gray-900/40"
+                                      class="border-l-2 border-primary-400/70 pl-3 dark:border-primary-500/50"
                                     >
-                                      <ReceiptTableLineItems
-                                        :items="receipt.items"
-                                        :items-count-fallback="receipt.itemsCount"
-                                      />
+                                      <ReceiptLineItemsDetailPanel
+                                        :item-count="getReceiptLineItemsCount(receipt)"
+                                      >
+                                        <ReceiptTableLineItems
+                                          :items="receipt.items"
+                                          :items-count-fallback="receipt.itemsCount"
+                                        />
+                                      </ReceiptLineItemsDetailPanel>
                                     </div>
                                   </td>
                                 </tr>
@@ -1259,34 +1240,46 @@
                     >
                       Customers
                     </h2>
-                    <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
-                      <span class="tabular-nums font-medium text-gray-600 dark:text-gray-300"
-                        >{{ uniqueCustomers.length }} customers</span
+                    <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+                      Lifetime purchase history across all receipts. Expand a row to see orders and
+                      line items.
+                    </p>
+                    <div
+                      v-if="uniqueCustomers.length > 0"
+                      class="mt-2.5 flex flex-wrap items-center gap-2"
+                    >
+                      <span
+                        class="inline-flex items-center gap-1.5 rounded-full border border-gray-200/90 bg-gray-50/90 px-2.5 py-1 text-[11px] font-medium tabular-nums text-gray-700 dark:border-gray-700/70 dark:bg-white/[0.04] dark:text-gray-300"
                       >
-                      <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
-                      <span class="tabular-nums"
-                        >{{ formatCurrency(customersTotalRevenue) }} lifetime revenue</span
+                        <UsersIcon class="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
+                        {{ uniqueCustomers.length }}
+                        {{ uniqueCustomers.length === 1 ? 'customer' : 'customers' }}
+                      </span>
+                      <span
+                        class="inline-flex items-center rounded-full border border-gray-200/90 bg-gray-50/90 px-2.5 py-1 text-[11px] font-medium tabular-nums text-gray-700 dark:border-gray-700/70 dark:bg-white/[0.04] dark:text-gray-300"
                       >
-                      <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
-                      <span class="tabular-nums"
-                        >{{ formatCurrency(customersAverageOrderValue) }} avg order</span
+                        {{ formatCurrency(customersTotalRevenue) }} revenue
+                      </span>
+                      <span
+                        class="inline-flex items-center rounded-full border border-gray-200/90 bg-gray-50/90 px-2.5 py-1 text-[11px] font-medium tabular-nums text-gray-700 dark:border-gray-700/70 dark:bg-white/[0.04] dark:text-gray-300"
                       >
-                      <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
-                      <span class="tabular-nums">{{ customersTotalOrders }} orders</span>
-                      <template
+                        {{ formatCurrency(customersAverageOrderValue) }} avg order
+                      </span>
+                      <span
+                        class="inline-flex items-center rounded-full border border-gray-200/90 bg-gray-50/90 px-2.5 py-1 text-[11px] font-medium tabular-nums text-gray-700 dark:border-gray-700/70 dark:bg-white/[0.04] dark:text-gray-300"
+                      >
+                        {{ customersTotalOrders }} orders
+                      </span>
+                      <span
                         v-if="
                           customersSearchQuery.trim() &&
                           filteredCustomers.length !== uniqueCustomers.length
                         "
+                        class="inline-flex items-center rounded-full border border-primary-200/70 bg-primary-50/80 px-2.5 py-1 text-[11px] font-medium tabular-nums text-primary-800 dark:border-primary-500/25 dark:bg-primary-500/10 dark:text-primary-200/90"
                       >
-                        <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
-                        <span>{{ filteredCustomers.length }} shown</span>
-                      </template>
-                      <template v-if="uniqueCustomers.length > 0">
-                        <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
-                        <span>Expand a row for receipts</span>
-                      </template>
-                    </p>
+                        {{ filteredCustomers.length }} shown
+                      </span>
+                    </div>
                   </div>
                 </template>
                 <template #filters>
@@ -1394,29 +1387,24 @@
                     </thead>
                     <tbody>
                       <template v-for="customer in paginatedCustomers" :key="customer.id">
-                        <tr>
+                        <tr
+                          :class="
+                            expandedCustomers[customer.id]
+                              ? 'bg-gray-50/50 dark:bg-white/[0.02]'
+                              : ''
+                          "
+                        >
                           <td class="px-3 py-2.5 align-middle sm:px-4">
-                            <button
-                              @click="toggleCustomerExpanded(customer.id)"
-                              type="button"
-                              :class="[
-                                'group inline-flex items-center gap-1 rounded-sm px-1 py-0.5 text-[11px] font-medium transition-colors',
-                                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/35 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900',
-                                expandedCustomers[customer.id]
-                                  ? 'text-primary-600 dark:text-primary-400'
-                                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100',
-                              ]"
-                            >
-                              <ChevronRightIcon
-                                :class="[
-                                  'w-3.5 h-3.5 shrink-0 transition-transform duration-200',
-                                  expandedCustomers[customer.id] ? 'rotate-90' : '',
-                                  !expandedCustomers[customer.id] &&
-                                    'text-gray-400 group-hover:text-gray-600 dark:text-gray-500 dark:group-hover:text-gray-300',
-                                ]"
-                              />
-                              <span>{{ expandedCustomers[customer.id] ? 'Hide' : 'View' }}</span>
-                            </button>
+                            <ReceiptLineItemsToggle
+                              v-if="getCustomerReceipts(customer.id).length > 0"
+                              :expanded="!!expandedCustomers[customer.id]"
+                              :item-count="getCustomerReceipts(customer.id).length"
+                              noun="receipt"
+                              hide-text="Hide orders"
+                              no-top-margin
+                              @toggle="toggleCustomerExpanded(customer.id)"
+                            />
+                            <span v-else class="text-[10px] text-gray-400 dark:text-gray-500">—</span>
                           </td>
                           <td class="px-3 py-2.5 sm:px-4">
                             <div class="flex items-center gap-2">
@@ -1496,91 +1484,64 @@
                         </tr>
                         <tr
                           v-if="expandedCustomers[customer.id]"
-                          class="bg-gray-50/80 dark:bg-gray-800/60"
+                          class="bg-gray-50/40 dark:bg-white/[0.015]"
                         >
-                          <td :colspan="hasBalanceFeature ? 8 : 7" class="px-3 py-2.5 sm:px-4">
-                            <p
-                              class="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5"
-                            >
-                              Purchased items
-                            </p>
+                          <td :colspan="hasBalanceFeature ? 8 : 7" class="border-t-0 px-3 pb-3 pt-0 sm:px-4">
                             <div
-                              class="rounded-sm bg-white/90 dark:!bg-dashboard-card/40 divide-y divide-gray-100 dark:divide-gray-700/80 overflow-hidden"
+                              class="border-l-2 border-primary-400/70 pl-3 dark:border-primary-500/50"
                             >
-                              <button
-                                v-for="receipt in getCustomerReceipts(customer.id)"
-                                :key="receipt.id"
-                                type="button"
-                                class="w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 transition-colors hover:bg-gray-50/90 dark:hover:bg-gray-800/55 focus:outline-none focus-visible:bg-gray-50/90 dark:focus-visible:bg-gray-800/55 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-400/35"
-                                :aria-label="`Open receipt ${receipt.receiptNumber} in receipts list`"
-                                @click="goToReceiptFromCustomer(receipt)"
+                              <ReceiptLineItemsDetailPanel
+                                title="Order history"
+                                count-noun="receipt"
+                                :item-count="getCustomerReceipts(customer.id).length"
                               >
-                                <div
-                                  class="flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5"
-                                >
-                                  <p
-                                    class="text-[10px] leading-tight text-gray-600 dark:text-gray-300 min-w-0"
+                                <div class="space-y-2">
+                                  <article
+                                    v-for="receipt in getCustomerReceipts(customer.id)"
+                                    :key="receipt.id"
+                                    class="overflow-hidden rounded-md border border-gray-200/80 bg-white dark:border-gray-700/50 dark:bg-gray-900/40"
                                   >
-                                    <span class="font-semibold text-gray-900 dark:text-gray-100"
-                                      >#{{ receipt.receiptNumber }}</span
+                                    <button
+                                      type="button"
+                                      class="flex w-full flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-gray-100 px-3 py-2 text-left transition-colors hover:bg-gray-50/90 dark:border-gray-800/80 dark:hover:bg-white/[0.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-400/35"
+                                      :aria-label="`Open receipt ${receipt.receiptNumber} in receipts list`"
+                                      @click="goToReceiptFromCustomer(receipt)"
                                     >
-                                    <span class="text-gray-300 dark:text-gray-600 mx-1">·</span>
-                                    <span
-                                      >{{ formatDate(receipt.date) }},
-                                      {{ formatTime(receipt.date) }}</span
-                                    >
-                                  </p>
-                                  <div class="flex items-center gap-2 shrink-0">
-                                    <span class="text-[10px]" :class="tableMoneyClass()">
-                                      {{ formatCurrency(receipt.total) }}
-                                    </span>
-                                    <span
-                                      :class="[
-                                        'inline-flex items-center rounded px-1 py-px text-[8px] font-medium leading-none',
-                                        receipt.status === 'completed'
-                                          ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400'
-                                          : receipt.status === 'pending'
-                                          ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300'
-                                          : 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300',
-                                      ]"
-                                    >
-                                      {{
-                                        receipt.status.charAt(0).toUpperCase() +
-                                        receipt.status.slice(1)
-                                      }}
-                                    </span>
-                                  </div>
-                                </div>
-                                <ul
-                                  v-if="receipt.items?.length"
-                                  class="mt-1.5 space-y-0.5 border-t border-gray-200/70 pt-1.5 text-[10px] text-gray-600 dark:text-gray-400"
-                                >
-                                  <li
-                                    v-for="(item, itemIdx) in receipt.items"
-                                    :key="itemIdx"
-                                    class="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0"
-                                  >
-                                    <span
-                                      class="min-w-0 truncate text-gray-800 dark:text-gray-200"
-                                      >{{ item.itemName }}</span
-                                    >
-                                    <span
-                                      class="shrink-0 tabular-nums text-gray-600 dark:text-gray-400"
-                                    >
-                                      {{ item.quantity }}× {{ formatCurrency(item.price) }}
-                                      <span :class="tableMoneyClass()">
-                                        · {{ formatCurrency(item.price * item.quantity) }}</span
+                                      <div class="min-w-0">
+                                        <p class="text-xs font-semibold tabular-nums text-gray-900 dark:text-gray-50">
+                                          #{{ receipt.receiptNumber }}
+                                        </p>
+                                        <p class="mt-0.5 text-[10px] tabular-nums text-gray-500 dark:text-gray-400">
+                                          {{ formatDate(receipt.date) }}, {{ formatTime(receipt.date) }}
+                                        </p>
+                                      </div>
+                                      <div class="flex shrink-0 items-center gap-2">
+                                        <span class="text-xs" :class="tableMoneyClass()">
+                                          {{ formatCurrency(receipt.total) }}
+                                        </span>
+                                        <ReceiptStatusBadge :badge="receiptStatusBadge(receipt)" />
+                                      </div>
+                                    </button>
+                                    <div class="px-1 py-1">
+                                      <ReceiptTableLineItems
+                                        v-if="receipt.items?.length"
+                                        :items="receipt.items"
+                                        :items-count-fallback="receipt.itemsCount"
+                                        compact
+                                      />
+                                      <p
+                                        v-else
+                                        class="px-2 py-2 text-[11px] text-gray-500 dark:text-gray-400"
                                       >
-                                    </span>
-                                  </li>
-                                </ul>
-                                <p v-else class="mt-1 text-[10px] text-gray-500 dark:text-gray-500">
-                                  {{ receipt.itemsCount }} item{{
-                                    receipt.itemsCount === 1 ? '' : 's'
-                                  }}
-                                  · open in Receipts for full details
-                                </p>
-                              </button>
+                                        {{ receipt.itemsCount }} item{{
+                                          receipt.itemsCount === 1 ? '' : 's'
+                                        }}
+                                        · open in Receipts for full details
+                                      </p>
+                                    </div>
+                                  </article>
+                                </div>
+                              </ReceiptLineItemsDetailPanel>
                             </div>
                           </td>
                         </tr>
@@ -1798,6 +1759,8 @@ import CreateReceiptModal from '~/components/receipts/CreateReceiptModal.vue'
 // @ts-ignore
 import ViewReceiptModal from '~/components/receipts/ViewReceiptModal.vue'
 import ReceiptTableLineItems from '~/components/receipts/ReceiptTableLineItems.vue'
+import ReceiptLineItemsToggle from '~/components/receipts/ReceiptLineItemsToggle.vue'
+import ReceiptLineItemsDetailPanel from '~/components/receipts/ReceiptLineItemsDetailPanel.vue'
 import { getReceiptStatusBadge } from '~/utils/receipt-status'
 // @ts-ignore
 import ReturnReceiptModal from '~/components/receipts/ReturnReceiptModal.vue'

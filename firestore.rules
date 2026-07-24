@@ -138,20 +138,62 @@ service cloud.firestore {
     function requestMatchesStore(storeId) {
       return !request.resource.data.keys().hasAny(['storeId']) || request.resource.data.storeId == storeId;
     }
+
+    function userSelfServiceUpdateKeys() {
+      return [
+        'name',
+        'email',
+        'photoURL',
+        'storeLogoUrl',
+        'storeDetails',
+        'preferences',
+        'hasCompletedOnboarding',
+        'hasCompletedTutorial',
+        'twoFactorEnabled',
+        'twoFactorMethod',
+        'twoFactorEnabledAt',
+        'updatedAt',
+      ];
+    }
+
+    function userSelfServiceCreateKeys() {
+      return userSelfServiceUpdateKeys().concat(['uid', 'role', 'subscription', 'createdAt']);
+    }
+
+    function userSelfServiceUpdateAllowed() {
+      let changed = request.resource.data.diff(resource.data).changedKeys();
+      return changed.hasOnly(userSelfServiceUpdateKeys())
+        && !changed.hasAny([
+          'role',
+          'subscription',
+          'subscriptionBillingCycle',
+          'subscriptionUpdatedAt',
+          'lastPaystackReference',
+          'twoFactorSecret',
+          'uid',
+          'createdAt',
+          'mustChangePassword',
+        ]);
+    }
     
-    // Users collection - users can read/write their own document
+    // Users collection - owner-only read; whitelisted self-service updates
     match /users/{userId} {
-      // Allow read if authenticated (required for staff/superadmin profile flows)
-      allow read: if isAuthenticated();
+      allow read: if isOwner(userId);
       
-      // Allow create if user is creating their own document
-      allow create: if isOwner(userId);
+      allow create: if isOwner(userId)
+        && request.resource.data.keys().hasOnly(userSelfServiceCreateKeys());
       
-      // Allow update if user is updating their own document
-      allow update: if isOwner(userId);
+      allow update: if isOwner(userId) && userSelfServiceUpdateAllowed();
       
-      // Only allow delete by the document owner
       allow delete: if isOwner(userId);
+
+      match /security/{docId} {
+        allow read, write: if false;
+      }
+
+      match /pendingCheckouts/{checkoutId} {
+        allow read, write: if false;
+      }
       
       // Store transfers subcollection: users/{userId}/storeTransfers/{transferId}
       // This collection stores transfer history for multi-store operations

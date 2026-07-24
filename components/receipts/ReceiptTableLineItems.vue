@@ -69,84 +69,89 @@ function discountLabel(item: ReceiptItem): string | null {
   }
   return null
 }
+
+const textSize = computed(() => (props.compact ? 'text-[11px]' : 'text-xs'))
+const metaSize = computed(() => (props.compact ? 'text-[10px]' : 'text-[11px]'))
 </script>
 
 <template>
-  <div v-if="items && items.length > 0" class="overflow-x-auto">
-    <table class="w-full min-w-[28rem] border-separate border-spacing-0 text-left">
-      <thead>
-        <tr class="border-b border-gray-200/80 bg-gray-50/95 dark:bg-gray-900/50">
-          <th
-            class="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-gray-500 dark:text-gray-400"
-            :class="compact ? 'pl-2' : ''"
+  <div v-if="items && items.length > 0">
+    <div
+      class="hidden grid-cols-[minmax(0,1fr)_2.5rem_5rem_5.5rem] gap-x-2 border-b border-gray-100 px-2 pb-1.5 pt-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-gray-400 dark:border-gray-800/80 dark:text-gray-500 sm:grid"
+      :class="compact ? 'sm:grid-cols-[minmax(0,1fr)_2rem_4.5rem_5rem]' : ''"
+    >
+      <span>Product</span>
+      <span class="text-center">Qty</span>
+      <span class="text-right">Unit</span>
+      <span class="text-right">Total</span>
+    </div>
+
+    <ul class="divide-y divide-gray-100 dark:divide-gray-800/70">
+      <li
+        v-for="(item, idx) in items"
+        :key="idx"
+        class="grid grid-cols-1 gap-2 px-2 py-2.5 sm:grid-cols-[minmax(0,1fr)_2.5rem_5rem_5.5rem] sm:items-start sm:gap-x-2 sm:py-2"
+        :class="compact ? 'sm:grid-cols-[minmax(0,1fr)_2rem_4.5rem_5rem]' : ''"
+      >
+        <div class="min-w-0">
+          <p
+            class="font-medium leading-snug text-gray-900 dark:text-gray-50"
+            :class="textSize"
           >
-            Product
-          </th>
-          <th
-            class="w-12 px-2 py-1.5 text-center text-[10px] font-semibold uppercase tracking-[0.1em] text-gray-500 dark:text-gray-400"
+            {{ item.itemName }}
+          </p>
+          <p
+            v-if="detailSummary(item)"
+            class="mt-0.5 leading-snug text-gray-500 dark:text-gray-400"
+            :class="metaSize"
           >
+            {{ detailSummary(item) }}
+          </p>
+          <p
+            v-if="discountLabel(item)"
+            class="mt-0.5 font-medium text-emerald-700 dark:text-emerald-400/90"
+            :class="metaSize"
+          >
+            {{ discountLabel(item) }}
+          </p>
+        </div>
+
+        <div
+          class="flex items-center justify-between gap-3 sm:block sm:text-center"
+        >
+          <span class="text-[10px] font-medium uppercase tracking-wide text-gray-400 sm:hidden">
             Qty
-          </th>
-          <th
-            class="w-24 px-2 py-1.5 text-right text-[10px] font-semibold uppercase tracking-[0.1em] text-gray-500 dark:text-gray-400"
-          >
-            Unit
-          </th>
-          <th
-            class="w-28 px-3 py-1.5 text-right text-[10px] font-semibold uppercase tracking-[0.1em] text-gray-500 dark:text-gray-400"
-          >
-            Line total
-          </th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-gray-100/90 dark:divide-gray-800/70">
-        <tr v-for="(item, idx) in items" :key="idx" class="bg-white/60 dark:bg-transparent">
-          <td class="px-3 py-2 align-top" :class="compact ? 'pl-2' : ''">
-            <p
-              class="font-medium leading-snug text-gray-900 dark:text-gray-50"
-              :class="compact ? 'text-[11px]' : 'text-xs'"
-            >
-              {{ item.itemName }}
-            </p>
-            <p
-              v-if="detailSummary(item)"
-              class="mt-0.5 leading-snug text-gray-500 dark:text-gray-400"
-              :class="compact ? 'text-[9px]' : 'text-[10px]'"
-            >
-              {{ detailSummary(item) }}
-            </p>
-            <p
-              v-if="discountLabel(item)"
-              class="mt-0.5 font-medium text-emerald-700 dark:text-emerald-400/90"
-              :class="compact ? 'text-[9px]' : 'text-[10px]'"
-            >
-              {{ discountLabel(item) }}
-            </p>
-          </td>
-          <td
-            class="px-2 py-2 text-center tabular-nums text-gray-700 dark:text-gray-300"
-            :class="compact ? 'text-[11px]' : 'text-xs'"
+          </span>
+          <span
+            class="tabular-nums text-gray-700 dark:text-gray-300"
+            :class="textSize"
           >
             {{ item.quantity }}
-          </td>
-          <td
-            class="px-2 py-2 text-right tabular-nums"
-            :class="compact ? 'text-[11px]' : 'text-xs'"
-          >
+          </span>
+        </div>
+
+        <div class="flex items-center justify-between gap-3 sm:block sm:text-right">
+          <span class="text-[10px] font-medium uppercase tracking-wide text-gray-400 sm:hidden">
+            Unit
+          </span>
+          <div class="tabular-nums" :class="textSize">
             <span
               v-if="item.hasDiscount && item.originalPrice != null"
-              class="text-gray-400 line-through dark:text-gray-500"
+              class="mr-1 text-gray-400 line-through dark:text-gray-500"
             >
               {{ formatCurrency(item.originalPrice) }}
             </span>
             <span class="font-medium text-gray-900 dark:text-gray-100">
               {{ formatCurrency(item.price) }}
             </span>
-          </td>
-          <td
-            class="px-3 py-2 text-right tabular-nums"
-            :class="compact ? 'text-[11px]' : 'text-xs'"
-          >
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between gap-3 sm:block sm:text-right">
+          <span class="text-[10px] font-medium uppercase tracking-wide text-gray-400 sm:hidden">
+            Total
+          </span>
+          <div class="tabular-nums" :class="textSize">
             <span
               v-if="item.hasDiscount && item.originalPrice != null"
               class="mr-1 text-gray-400 line-through dark:text-gray-500"
@@ -158,16 +163,20 @@ function discountLabel(item: ReceiptItem): string | null {
             </span>
             <span
               v-if="lineProfitHint(item)"
-              class="mt-0.5 block text-[9px] tabular-nums text-emerald-700 dark:text-emerald-400/90"
+              class="mt-0.5 block text-[10px] tabular-nums text-emerald-700 dark:text-emerald-400/90"
             >
               {{ lineProfitHint(item) }}
             </span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+          </div>
+        </div>
+      </li>
+    </ul>
   </div>
-  <p v-else class="text-gray-500 dark:text-gray-400" :class="compact ? 'text-[10px]' : 'text-xs'">
-    {{ itemsCountFallback }} item{{ itemsCountFallback === 1 ? '' : 's' }} (details unavailable)
+  <p
+    v-else
+    class="px-2 py-2 text-gray-500 dark:text-gray-400"
+    :class="compact ? 'text-[11px]' : 'text-xs'"
+  >
+    {{ itemsCountFallback }} item{{ itemsCountFallback === 1 ? '' : 's' }} — details unavailable
   </p>
 </template>
