@@ -34,16 +34,16 @@
     </div>
 
     <template v-else-if="isLoading">
+      <div :class="kpiGridClass">
+        <div v-for="i in nativeKpiSkeletonCount" :key="`kpi-${i}`" class="dash-skeleton dash-skeleton--kpi" />
+      </div>
+
       <div :class="cardPaddedClass">
         <div class="mb-3 flex items-center justify-between">
           <div class="dash-skeleton h-3 w-32" />
           <div class="dash-skeleton h-3 w-20" />
         </div>
-        <div class="dash-skeleton dash-skeleton--bar" />
-      </div>
-
-      <div :class="kpiGridClass">
-        <div v-for="i in nativeKpiSkeletonCount" :key="`kpi-${i}`" class="dash-skeleton dash-skeleton--kpi" />
+        <div class="dash-skeleton dash-skeleton--bar !h-1" />
       </div>
 
       <div :class="chartsGridClass">
@@ -57,42 +57,6 @@
     </template>
 
     <template v-else>
-      <section :class="cardPaddedClass">
-        <div :class="cardHeaderClass">
-          <div>
-            <p :class="eyebrowClass">Inventory health</p>
-            <p :class="cardDescClass">
-              <span :class="numClass">{{ inStockCount }}</span> available units ·
-              <span :class="numClass">{{ outOfStockCount }}</span> sold ·
-              <span :class="numClass">{{ lowStockItems.length }}</span> low-stock lines
-            </p>
-          </div>
-          <NuxtLink to="/dashboard/inventory" :class="cardLinkClass">Open inventory</NuxtLink>
-        </div>
-        <div :class="progressClass">
-          <div
-            class="dash-progress__segment--available transition-all"
-            :style="{ width: `${inStockPercentage}%` }"
-            title="Available"
-          />
-          <div
-            class="dash-progress__segment--low transition-all"
-            :style="{ width: `${lowStockPercentage}%` }"
-            title="Low stock"
-          />
-          <div
-            class="dash-progress__segment--sold transition-all"
-            :style="{ width: `${soldPercentage}%` }"
-            title="Sold"
-          />
-        </div>
-        <div :class="progressLegendClass">
-          <span :class="numClass">{{ inStockPercentage }}% available</span>
-          <span :class="numClass">{{ soldPercentage }}% sold through</span>
-          <span :class="numClass">{{ formatCurrency(inventoryTotalValue) }} on hand (book)</span>
-        </div>
-      </section>
-
       <ul v-if="attentionItems.length > 0" :class="alertListClass">
         <li v-for="alert in attentionItemsTop" :key="alert.id" :class="alertClass(alert.level)">
           <span class="dash-alert__text">
@@ -105,52 +69,92 @@
         </li>
       </ul>
 
-      <div :class="kpiGridClassResolved">
-        <StatCard
-          label="Total revenue"
-          :value="formatCurrency(totalRevenue)"
-          :subtext="revenueChangeText"
-          :change="revenueChangePercent"
-          :change-positive="revenueChangePositive"
-          :sparkline-data="statCardRevenueSparkline.length > 1 ? statCardRevenueSparkline : undefined"
-        />
-        <StatCard
-          label="Orders today"
-          :value="todayReceiptsCount.toString()"
-          :subtext="`${formatCurrency(todaySales)} revenue`"
-        />
-        <StatCard
-          label="Customers"
-          :value="totalCustomers.toString()"
-          :subtext="`${newCustomersToday} active today`"
-          :subtext-class="newCustomersToday > 0 ? 'success' : ''"
-        />
-        <StatCard
-          label="Low stock signals"
-          :value="lowStockItems.length.toString()"
-          :subtext="lowStockItems.length > 0 ? 'Review restocking' : 'Within thresholds'"
-          :subtext-class="lowStockItems.length > 0 ? 'warning' : ''"
-        />
-        <StatCard
-          label="Outstanding"
-          :value="formatCurrency(outstandingBalanceTotal)"
-          :subtext="`${outstandingCount} open balance${outstandingCount === 1 ? '' : 's'}`"
-          :subtext-class="outstandingCount > 0 ? 'warning' : ''"
-        />
-        <StatCard
-          v-if="canViewProfitAndCost"
-          label="Gross profit"
-          :value="formatCurrency(dashboardGrossProfit)"
-          :subtext="dashboardGrossProfitSubtext"
-          :change-positive="dashboardGrossProfit >= 0"
-        />
-        <StatCard
-          v-if="canViewProfitAndCost"
-          label="Cost of goods sold"
-          :value="formatCurrency(dashboardCogs)"
-          subtext="Completed sales with unit cost"
-        />
+      <div class="dash-home-kpi">
+        <div :class="kpiGridClassResolved">
+          <StatCard
+            label="Total revenue"
+            :value="formatCurrency(totalRevenue)"
+            :subtext="revenueChangeText"
+            :change="revenueChangePercent"
+            :change-positive="revenueChangePositive"
+          />
+          <StatCard
+            label="Orders today"
+            :value="todayReceiptsCount.toString()"
+            :subtext="`${formatCurrency(todaySales)} revenue`"
+          />
+          <StatCard
+            label="Customers"
+            :value="totalCustomers.toString()"
+            :subtext="`${newCustomersToday} active today`"
+            :subtext-class="newCustomersToday > 0 ? 'success' : ''"
+          />
+          <StatCard
+            label="Low stock signals"
+            :value="lowStockItems.length.toString()"
+            :subtext="lowStockItems.length > 0 ? 'Review restocking' : 'Within thresholds'"
+            :subtext-class="lowStockItems.length > 0 ? 'warning' : ''"
+          />
+          <StatCard
+            label="Outstanding"
+            :value="formatCurrency(outstandingBalanceTotal)"
+            :subtext="`${outstandingCount} open balance${outstandingCount === 1 ? '' : 's'}`"
+            :subtext-class="outstandingCount > 0 ? 'warning' : ''"
+          />
+        </div>
+
+        <div v-if="canViewProfitAndCost" :class="[kpiGridClassResolved, 'dash-kpi-grid--pair']">
+          <StatCard
+            label="Gross profit"
+            :value="formatCurrency(dashboardGrossProfit)"
+            :subtext="dashboardGrossProfitSubtext"
+            :change-positive="dashboardGrossProfit >= 0"
+          />
+          <StatCard
+            label="Cost of goods sold"
+            :value="formatCurrency(dashboardCogs)"
+            subtext="Completed sales with unit cost"
+          />
+        </div>
       </div>
+
+      <section :class="[cardPaddedClass, 'dash-inventory-health']">
+        <div :class="[cardHeaderClass, 'dash-card__header--compact dash-inventory-health__header']">
+          <div>
+            <p :class="eyebrowClass">Inventory health</p>
+            <p :class="cardDescClass">
+              <span :class="numClass">{{ inStockCount }}</span> available units ·
+              <span :class="numClass">{{ outOfStockCount }}</span> sold ·
+              <span :class="numClass">{{ lowStockItems.length }}</span> low-stock lines
+            </p>
+          </div>
+          <NuxtLink to="/dashboard/inventory" :class="cardLinkClass">Open inventory</NuxtLink>
+        </div>
+        <div class="dash-inventory-health__footer">
+          <div :class="[progressClass, 'dash-progress--slim']">
+            <div
+              class="dash-progress__segment--available transition-all"
+              :style="{ width: `${inStockPercentage}%` }"
+              title="Available"
+            />
+            <div
+              class="dash-progress__segment--low transition-all"
+              :style="{ width: `${lowStockPercentage}%` }"
+              title="Low stock"
+            />
+            <div
+              class="dash-progress__segment--sold transition-all"
+              :style="{ width: `${soldPercentage}%` }"
+              title="Sold"
+            />
+          </div>
+          <div :class="[progressLegendClass, 'dash-progress__legend--compact']">
+            <span :class="numClass">{{ inStockPercentage }}% available</span>
+            <span :class="numClass">{{ soldPercentage }}% sold through</span>
+            <span :class="numClass">{{ formatCurrency(inventoryTotalValue) }} on hand (book)</span>
+          </div>
+        </div>
+      </section>
 
       <div :class="chartsGridClass">
         <section
@@ -541,7 +545,6 @@ const {
   monthlyRevenueData,
   revenueChangePercent,
   revenueChangePositive,
-  statCardRevenueSparkline,
   revenueChangeText,
   topSellingItems,
   lowStockItems,
@@ -553,9 +556,7 @@ const {
   salesMetrics,
 } = insights
 
-const nativeKpiSkeletonCount = computed(() =>
-  canViewProfitAndCost.value ? 7 : 5
-)
+const nativeKpiSkeletonCount = computed(() => (canViewProfitAndCost.value ? 7 : 5))
 
 const kpiGridClassResolved = computed(() =>
   isNativeApp.value ? `${kpiGridClass} dash-kpi-grid--compact` : kpiGridClass
