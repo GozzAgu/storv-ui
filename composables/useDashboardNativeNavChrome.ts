@@ -21,7 +21,7 @@ export function useDashboardNativeNavChrome() {
   const sheetHeaderClass = 'native-more-sheet__header'
   const sheetHandleClass = 'native-more-sheet__handle'
   const sheetEyebrowClass = 'dash-overlay-eyebrow'
-  const sheetTitleClass = 'dash-overlay-title !text-sm'
+  const sheetTitleClass = 'dash-overlay-title native-more-sheet__title'
   const sheetListClass =
     'native-bottom-nav__sheet-list min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-2'
   const sheetFooterClass = 'native-more-sheet__footer'

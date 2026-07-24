@@ -15,6 +15,7 @@
 @import './app-buttons.css';
 @import './dashboard-overlays.css';
 @import './capacitor-native-saas.css';
+@import './capacitor-ios.css';
 @import './receipt-typography.css';
 
 /* Dropdowns, modals, command palette: solid frosted glass (not fully transparent) */

@@ -552,7 +552,7 @@
                 size="sm"
                 class="shrink-0 text-gray-400 dark:text-gray-500"
               />
-              <p class="native-topnav-page__title truncate text-[13px] font-semibold leading-tight text-gray-900 dark:text-gray-100">
+              <p class="native-topnav-page__title truncate text-sm font-semibold leading-tight text-gray-900 dark:text-gray-100">
                 {{ currentPageName }}
               </p>
             </div>

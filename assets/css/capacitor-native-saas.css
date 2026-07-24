@@ -365,7 +365,7 @@ html.capacitor-native .dash-stat-card__body {
 }
 
 html.capacitor-native .dash-stat-card__value {
-  font-size: 1.125rem;
+  font-size: 1rem;
 }
 
 html.capacitor-native .dash-stat-card__label {
@@ -375,6 +375,13 @@ html.capacitor-native .dash-stat-card__label {
 html.capacitor-native .dash-stat-card__subtext {
   font-size: 0.625rem;
   line-height: 1.35;
+}
+
+/* iOS uses tighter uniform scale — see capacitor-ios.css */
+html.capacitor-ios.capacitor-native .dash-stat-card__value,
+html.capacitor-ios.capacitor-native .dash-stat-card__label,
+html.capacitor-ios.capacitor-native .dash-stat-card__subtext {
+  font-size: unset;
 }
 
 /* ── Profit / cost UI ── */

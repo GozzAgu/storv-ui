@@ -36,13 +36,11 @@ export function useDashboardPageChrome() {
   )
 
   const titleClass = computed(() =>
-    native.value
-      ? 'dash-page-title !text-lg'
-      : 'dash-page-title !text-lg sm:!text-xl'
+    native.value ? 'dash-page-title' : 'dash-page-title !text-lg sm:!text-xl'
   )
 
   const pageTitleClass = computed(() =>
-    native.value ? 'dash-page-title !text-lg' : 'dash-page-title'
+    native.value ? 'dash-page-title' : 'dash-page-title'
   )
 
   const descriptionClass = computed(() =>
