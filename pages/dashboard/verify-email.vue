@@ -1,13 +1,15 @@
 <template>
   <div class="dashboard-page-with-footer mx-auto flex min-h-[50vh] max-w-lg flex-col justify-center px-4 py-10">
-    <div class="rounded-2xl border border-gray-200/80 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#12141c] sm:p-8">
+    <div
+      class="verify-email-card rounded-2xl border border-gray-200/80 bg-white p-6 text-sm leading-relaxed shadow-sm dark:border-white/10 dark:bg-[#12141c] sm:p-8"
+    >
       <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary-50 text-primary-700 dark:bg-primary-500/10 dark:text-primary-300">
         <EnvelopeIcon class="h-5 w-5" stroke-width="1.75" />
       </div>
-      <h1 class="mt-4 text-center text-lg font-semibold text-gray-900 dark:text-gray-50">
+      <h1 class="mt-4 text-center font-semibold text-gray-900 dark:text-gray-50">
         Verify your email
       </h1>
-      <p class="mt-2 text-center text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+      <p class="mt-2 text-center text-gray-600 dark:text-gray-400">
         We sent a verification link to
         <span class="font-medium text-gray-900 dark:text-gray-200">{{ email }}</span>.
         Confirm your email to use billing, staff actions, and the full dashboard.
@@ -15,7 +17,7 @@
 
       <div
         v-if="message"
-        class="mt-4 rounded-xl border px-3 py-2.5 text-sm"
+        class="mt-4 rounded-xl border px-3 py-2.5"
         :class="
           messageTone === 'error'
             ? 'border-red-200 bg-red-50 text-red-800 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-200'
@@ -26,15 +28,28 @@
       </div>
 
       <div class="mt-6 flex flex-col gap-2.5">
-        <Button class="w-full" :loading="sending" @click="resendVerification">
+        <Button
+          class="w-full"
+          size="sm"
+          extra-class="!text-sm"
+          :loading="sending"
+          @click="resendVerification"
+        >
           Resend verification email
         </Button>
-        <Button variant="outline" class="w-full" :loading="checking" @click="checkVerified">
-          I've verified — refresh
+        <Button
+          variant="outline"
+          class="w-full"
+          size="sm"
+          extra-class="!text-sm"
+          :loading="checking"
+          @click="checkVerified"
+        >
+          I've verified, refresh
         </Button>
         <button
           type="button"
-          class="text-center text-sm font-medium text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+          class="verify-email-card__signout text-center font-medium text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
           @click="signOut"
         >
           Sign out
@@ -111,3 +126,9 @@ onMounted(async () => {
   }
 })
 </script>
+
+<style scoped>
+.verify-email-card__signout {
+  font-size: inherit;
+}
+</style>
