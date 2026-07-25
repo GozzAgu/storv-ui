@@ -107,7 +107,8 @@ export default defineNuxtConfig({
       meta: [
         {
           name: 'viewport',
-          content: 'width=device-width, initial-scale=1, viewport-fit=cover',
+          content:
+            'width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=overlays-content',
         },
       ],
       script: [

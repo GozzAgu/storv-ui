@@ -15,6 +15,12 @@ const config: CapacitorConfig = {
     contentInset: 'never',
     backgroundColor: '#f3f4f6',
   },
+  plugins: {
+    Keyboard: {
+      /** Keyboard overlays the WebView; drawer padding follows keyboard height in CSS. */
+      resize: 'none',
+    },
+  },
 }
 
 export default config

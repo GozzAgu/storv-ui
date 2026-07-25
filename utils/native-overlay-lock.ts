@@ -1,6 +1,12 @@
+import { clearNativeKeyboardInset } from '~/utils/native-keyboard-inset'
+
 /** Native overlay scroll lock + overlay host activation (iOS-safe). */
 export function setNativeOverlayLock(locked: boolean) {
   if (!import.meta.client) return
+
+  if (!locked) {
+    clearNativeKeyboardInset()
+  }
 
   const html = document.documentElement
   const host = document.getElementById('dashboard-native-overlay-host')

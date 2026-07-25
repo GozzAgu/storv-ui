@@ -66,4 +66,10 @@ The iOS app does **not** bundle Gemini. Assistant chat goes to your hosted API (
 
    The hosted API must allow Capacitor WebView origins (CORS). That ships with the app server code — **redeploy Vercel** after pulling updates if assistant status fails on device but works in Safari on `app.storvv.com`.
 
+4. **Keyboard:** The app uses `@capacitor/keyboard` with `resize: none` so the keyboard overlays the UI instead of pushing the whole screen. Drawer content lifts above the keyboard automatically. Rebuild iOS after pulling keyboard/drawer updates:
+
+   ```bash
+   npm run cap:build:ios
+   ```
+
 No separate iOS-only assistant UI branch is required.

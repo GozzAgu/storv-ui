@@ -1,0 +1,71 @@
+/* Native drawer motion + keyboard-aware layout (Capacitor iOS/Android) */
+
+html.capacitor-native {
+  --native-keyboard-inset: 0px;
+  --native-drawer-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --native-drawer-ease-in: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Shell enter/leave: backdrop fades, panel slides (transform-only on panel) ── */
+.native-drawer-shell-enter-active,
+.native-drawer-shell-leave-active {
+  pointer-events: auto;
+}
+
+.native-drawer-shell-enter-active .native-side-drawer-backdrop,
+.native-drawer-shell-leave-active .native-side-drawer-backdrop {
+  transition: opacity 320ms ease;
+}
+
+.native-drawer-shell-enter-from .native-side-drawer-backdrop,
+.native-drawer-shell-leave-to .native-side-drawer-backdrop {
+  opacity: 0;
+}
+
+.native-drawer-shell-enter-active .native-side-drawer-panel,
+.native-drawer-shell-leave-active .native-side-drawer-panel {
+  transition: transform 420ms var(--native-drawer-ease-out);
+  will-change: transform;
+}
+
+.native-drawer-shell-leave-active .native-side-drawer-panel {
+  transition-duration: 300ms;
+  transition-timing-function: var(--native-drawer-ease-in);
+}
+
+.native-drawer-shell-enter-from .native-side-drawer-panel,
+.native-drawer-shell-leave-to .native-side-drawer-panel {
+  transform: translate3d(100%, 0, 0);
+}
+
+.native-drawer-shell-enter-from .native-side-drawer-panel--compact,
+.native-drawer-shell-leave-to .native-side-drawer-panel--compact {
+  transform: translate3d(100%, 0, 0) scale(0.98);
+}
+
+/* Lift drawer content above keyboard without resizing the whole WebView */
+html.capacitor-native .native-side-drawer-panel {
+  padding-bottom: var(--native-keyboard-inset);
+  transition: padding-bottom 260ms var(--native-drawer-ease-out);
+}
+
+html.capacitor-native[data-native-keyboard-open] .dashboard-native-bottom-nav,
+html.capacitor-native[data-native-keyboard-open] .dashboard-assistant__fab--native {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease;
+}
+
+html.capacitor-native[data-native-keyboard-open] .dashboard-assistant__composer--native {
+  padding-bottom: 0.625rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .native-drawer-shell-enter-active .native-side-drawer-backdrop,
+  .native-drawer-shell-leave-active .native-side-drawer-backdrop,
+  .native-drawer-shell-enter-active .native-side-drawer-panel,
+  .native-drawer-shell-leave-active .native-side-drawer-panel,
+  html.capacitor-native .native-side-drawer-panel {
+    transition-duration: 45ms !important;
+  }
+}

@@ -96,22 +96,23 @@
       </div>
     </Transition>
 
-    <!-- Native: slide-in drawer from the right (no opacity transition — avoids iOS freeze) -->
-    <div v-else-if="modelValue" class="native-side-drawer-root" role="presentation">
-      <div
-        class="native-side-drawer-backdrop native-modal-backdrop absolute inset-0 bg-black/40"
-        aria-hidden="true"
-        @click="handleBackdropClick"
-      />
-      <div class="native-side-drawer-stage">
+    <!-- Native: slide-in drawer with backdrop fade + panel slide -->
+    <Transition v-if="nativeInApp" name="native-drawer-shell">
+      <div v-if="modelValue" class="native-side-drawer-root" role="presentation">
         <div
-          role="dialog"
-          aria-modal="true"
-          :aria-labelledby="labelledBy"
-          :aria-describedby="describedBy"
-          :class="panelDialogClass"
-          @click.stop
-        >
+          class="native-side-drawer-backdrop native-modal-backdrop absolute inset-0"
+          aria-hidden="true"
+          @click="handleBackdropClick"
+        />
+        <div class="native-side-drawer-stage">
+          <div
+            role="dialog"
+            aria-modal="true"
+            :aria-labelledby="labelledBy"
+            :aria-describedby="describedBy"
+            :class="panelDialogClass"
+            @click.stop
+          >
         <!-- Header -->
         <div
           v-if="title || subtitle || $slots.header || showClose"
@@ -162,9 +163,10 @@
         <div v-if="$slots.footer" :class="dense ? footerDenseClass : footerClass">
           <slot name="footer" />
         </div>
+          </div>
+        </div>
       </div>
-      </div>
-    </div>
+    </Transition>
   </Teleport>
 </template>
 
@@ -174,6 +176,7 @@ import {
   XMarkIcon,
 } from '~/utils/app-icons'
 import { setNativeOverlayLock } from '~/utils/native-overlay-lock'
+import { blurActiveElementIfNative } from '~/utils/native-focus'
 interface Props {
   modelValue: boolean
   title?: string
@@ -260,6 +263,7 @@ const panelDialogClass = computed(() =>
 )
 
 const handleClose = () => {
+  blurActiveElementIfNative(nativeInApp.value)
   emit('update:modelValue', false)
   emit('close')
 }
@@ -352,30 +356,9 @@ onUnmounted(() => {
   transform: translate3d(0, 0, 0);
 }
 
-/* Native: subtle fade within the content chrome */
-.side-panel-native-enter-active {
-  transition: opacity 280ms ease-out;
-}
-
-.side-panel-native-leave-active {
-  transition: opacity 220ms ease-in;
-}
-
-.side-panel-native-enter-from,
-.side-panel-native-leave-to {
-  opacity: 0;
-}
-
-.side-panel-native-enter-to,
-.side-panel-native-leave-from {
-  opacity: 1;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .side-panel-enter-active,
-  .side-panel-leave-active,
-  .side-panel-native-enter-active,
-  .side-panel-native-leave-active {
+  .side-panel-leave-active {
     transition-duration: 45ms !important;
   }
 }

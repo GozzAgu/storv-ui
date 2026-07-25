@@ -1,14 +1,70 @@
 <template>
   <Teleport :to="teleportTarget">
-    <div v-if="modelValue" :class="rootClass" role="presentation">
+    <!-- Native: right-edge drawer -->
+    <Transition v-if="nativeInApp" name="native-drawer-shell">
       <div
-        v-if="nativeInApp"
-        class="native-side-drawer-backdrop native-modal-backdrop absolute inset-0 bg-black/40"
-        aria-hidden="true"
-        @click="handleBackdropClick"
-      />
+        v-if="modelValue"
+        class="native-side-drawer-root pointer-events-auto relative flex h-full min-h-0 w-full overflow-hidden"
+        role="presentation"
+      >
+        <div
+          class="native-side-drawer-backdrop native-modal-backdrop absolute inset-0"
+          aria-hidden="true"
+          @click="handleBackdropClick"
+        />
+        <div
+          class="native-side-drawer-stage pointer-events-none relative z-10 flex h-full min-h-0 w-full justify-end"
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            :aria-labelledby="labelledBy"
+            :aria-describedby="describedBy"
+            :class="dialogClass"
+            @click.stop
+          >
+            <div v-if="title || subtitle || $slots.header || showClose" :class="headerClass">
+              <div class="flex min-w-0 flex-1 items-start gap-3 pr-1">
+                <slot name="header">
+                  <div v-if="title || subtitle" class="min-w-0">
+                    <p v-if="eyebrow" :class="eyebrowClass">
+                      {{ eyebrow }}
+                    </p>
+                    <h3 v-if="title" :id="titleId" :class="titleClass">
+                      {{ title }}
+                    </h3>
+                    <p v-if="subtitle" :id="subtitleId" :class="subtitleClass">
+                      {{ subtitle }}
+                    </p>
+                  </div>
+                </slot>
+              </div>
+              <button
+                v-if="showClose"
+                type="button"
+                :class="closeButtonClass"
+                aria-label="Close modal"
+                @click="handleClose"
+              >
+                <XMarkIcon class="h-4 w-4" stroke-width="1.75" />
+              </button>
+            </div>
+
+            <div :class="[bodyClass, 'modal-body-scroll', contentPadding]">
+              <slot />
+            </div>
+
+            <div v-if="$slots.footer" :class="footerClass">
+              <slot name="footer" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- Web: centered modal -->
+    <div v-else-if="modelValue" class="fixed inset-0 z-[105] overflow-y-auto" role="presentation">
       <div
-        v-else-if="!nativeInApp"
         :class="[
           'absolute inset-0 transition-opacity duration-300',
           backdropClass,
@@ -18,31 +74,16 @@
         @click="handleBackdropClick"
       />
 
-      <div :class="stageClass">
+      <div
+        class="pointer-events-none relative z-10 flex min-h-full w-full items-end justify-center p-3 sm:min-h-0 sm:h-full sm:items-center sm:p-4 md:p-5"
+      >
         <Transition
-          v-if="!nativeInApp"
-          :enter-active-class="
-            nativeInApp
-              ? 'modal-native-enter-active'
-              : 'transition duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]'
-          "
-          :leave-active-class="
-            nativeInApp ? 'modal-native-leave-active' : 'transition duration-200 ease-in'
-          "
-          :enter-from-class="
-            nativeInApp
-              ? 'modal-native-enter-from'
-              : 'opacity-0 translate-y-4 sm:translate-y-2 sm:scale-[0.98]'
-          "
-          :enter-to-class="
-            nativeInApp ? 'modal-native-enter-to' : 'opacity-100 translate-y-0 sm:scale-100'
-          "
-          :leave-from-class="
-            nativeInApp ? 'modal-native-leave-from' : 'opacity-100 translate-y-0 sm:scale-100'
-          "
-          :leave-to-class="
-            nativeInApp ? 'modal-native-leave-to' : 'opacity-0 translate-y-3 sm:scale-[0.99]'
-          "
+          enter-active-class="transition duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
+          leave-active-class="transition duration-200 ease-in"
+          enter-from-class="opacity-0 translate-y-4 sm:translate-y-2 sm:scale-[0.98]"
+          enter-to-class="opacity-100 translate-y-0 sm:scale-100"
+          leave-from-class="opacity-100 translate-y-0 sm:scale-100"
+          leave-to-class="opacity-0 translate-y-3 sm:scale-[0.99]"
         >
           <div
             v-if="modelValue"
@@ -89,51 +130,6 @@
             </div>
           </div>
         </Transition>
-
-        <div
-          v-else
-          role="dialog"
-          aria-modal="true"
-          :aria-labelledby="labelledBy"
-          :aria-describedby="describedBy"
-          :class="dialogClass"
-          @click.stop
-        >
-          <div v-if="title || subtitle || $slots.header || showClose" :class="headerClass">
-            <div class="flex min-w-0 flex-1 items-start gap-3 pr-1">
-              <slot name="header">
-                <div v-if="title || subtitle" class="min-w-0">
-                  <p v-if="eyebrow" :class="eyebrowClass">
-                    {{ eyebrow }}
-                  </p>
-                  <h3 v-if="title" :id="titleId" :class="titleClass">
-                    {{ title }}
-                  </h3>
-                  <p v-if="subtitle" :id="subtitleId" :class="subtitleClass">
-                    {{ subtitle }}
-                  </p>
-                </div>
-              </slot>
-            </div>
-            <button
-              v-if="showClose"
-              type="button"
-              :class="closeButtonClass"
-              aria-label="Close modal"
-              @click="handleClose"
-            >
-              <XMarkIcon class="h-4 w-4" stroke-width="1.75" />
-            </button>
-          </div>
-
-          <div :class="[bodyClass, 'modal-body-scroll', contentPadding]">
-            <slot />
-          </div>
-
-          <div v-if="$slots.footer" :class="footerClass">
-            <slot name="footer" />
-          </div>
-        </div>
       </div>
     </div>
   </Teleport>
@@ -145,6 +141,7 @@ import {
   XMarkIcon,
 } from '~/utils/app-icons'
 import { setNativeOverlayLock } from '~/utils/native-overlay-lock'
+import { blurActiveElementIfNative } from '~/utils/native-focus'
 interface Props {
   modelValue: boolean
   title?: string
@@ -218,18 +215,6 @@ const sizeClasses = computed(() => {
   return sizeMap[props.size]
 })
 
-const rootClass = computed(() =>
-  nativeInApp.value
-    ? 'native-side-drawer-root pointer-events-auto relative flex h-full min-h-0 w-full overflow-hidden'
-    : 'fixed inset-0 z-[105] overflow-y-auto'
-)
-
-const stageClass = computed(() =>
-  nativeInApp.value
-    ? 'native-side-drawer-stage pointer-events-none relative z-10 flex h-full min-h-0 w-full justify-end'
-    : 'pointer-events-none relative z-10 flex min-h-full w-full items-end justify-center p-3 sm:min-h-0 sm:h-full sm:items-center sm:p-4 md:p-5'
-)
-
 const nativeDrawerCompact = computed(() => nativeInApp.value && props.size === 'xs')
 
 const dialogClass = computed(() =>
@@ -251,6 +236,7 @@ const dialogClass = computed(() =>
 )
 
 const handleClose = () => {
+  blurActiveElementIfNative(nativeInApp.value)
   emit('update:modelValue', false)
   emit('close')
 }
@@ -315,32 +301,5 @@ onUnmounted(() => {
 
 .dark .modal-body-scroll::-webkit-scrollbar-thumb {
   background: rgb(255 255 255 / 0.12);
-}
-
-.modal-native-enter-active {
-  transition: opacity 280ms ease-out, transform 280ms ease-out;
-}
-
-.modal-native-leave-active {
-  transition: opacity 220ms ease-in, transform 220ms ease-in;
-}
-
-.modal-native-enter-from,
-.modal-native-leave-to {
-  opacity: 0;
-  transform: translate3d(0, 6px, 0) scale(0.99);
-}
-
-.modal-native-enter-to,
-.modal-native-leave-from {
-  opacity: 1;
-  transform: translate3d(0, 0, 0) scale(1);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .modal-native-enter-active,
-  .modal-native-leave-active {
-    transition-duration: 45ms !important;
-  }
 }
 </style>
