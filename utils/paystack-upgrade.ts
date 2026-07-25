@@ -27,6 +27,7 @@ export async function initializePaystackSubscription(
     email: string
     userId: string
     billingCycle?: SubscriptionBillingCycle
+    totpCode?: string
   },
   fetcher: PaystackInitializeFetcher,
   apiBaseUrl?: string,
@@ -43,6 +44,7 @@ export async function initializePaystackSubscription(
         email: params.email,
         userId: params.userId,
         billingCycle: params.billingCycle || 'monthly',
+        totpCode: params.totpCode,
       },
     })
     if (res.success && res.authorization_url) {

@@ -3,7 +3,7 @@ import type { SubscriptionBillingCycle } from '~/types/subscription-billing'
 import { isSubscriptionBillingCycle } from '~/types/subscription-billing'
 import { createError, defineEventHandler, readBody } from 'h3'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
-import { requireAuth } from '~/server/utils/store-auth'
+import { requireAuth, requireFreshTotp } from '~/server/utils/store-auth'
 import {
   getExpectedPlanAmount,
   PAYSTACK_CURRENCY,
@@ -13,14 +13,23 @@ import {
 
 export default defineEventHandler(async (event) => {
   try {
-    const auth = await requireAuth(event)
+    const auth = await requireAuth(event, { requireVerifiedEmail: true })
     const body = await readBody(event)
-    const { planId, email, userId, billingCycle: billingCycleRaw } = body as {
+    const {
+      planId,
+      email,
+      userId,
+      billingCycle: billingCycleRaw,
+      totpCode,
+    } = body as {
       planId?: SubscriptionPlan
       email?: string
       userId?: string
       billingCycle?: SubscriptionBillingCycle
+      totpCode?: string
     }
+
+    await requireFreshTotp(auth, totpCode)
 
     const billingCycle: SubscriptionBillingCycle = isSubscriptionBillingCycle(billingCycleRaw)
       ? billingCycleRaw

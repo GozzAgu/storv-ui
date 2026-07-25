@@ -2,24 +2,26 @@ import { createError, defineEventHandler, readBody } from 'h3'
 import { FieldValue } from 'firebase-admin/firestore'
 import { getAdminAuth, getAdminFirestore } from '~/server/utils/firebase-admin'
 import { rethrowFirebaseAdminSetupError } from '~/server/utils/firebase-admin-errors'
-import { requireAuth } from '~/server/utils/store-auth'
+import { requireAuth, requireFreshTotp } from '~/server/utils/store-auth'
 
 interface ReactivateStaffBody {
   ownerUserId?: string
   storeId?: string
   departmentId?: string
   staffId?: string
+  totpCode?: string
 }
 
 export default defineEventHandler(async (event) => {
   let auth: Awaited<ReturnType<typeof requireAuth>>
   try {
-    auth = await requireAuth(event)
+    auth = await requireAuth(event, { requireVerifiedEmail: true })
   } catch (err) {
     rethrowFirebaseAdminSetupError(err, 'reactivate')
   }
 
   const body = await readBody<ReactivateStaffBody>(event)
+  await requireFreshTotp(auth, body.totpCode)
   const ownerUserId = body.ownerUserId?.trim()
   const storeId = body.storeId?.trim()
   const departmentId = body.departmentId?.trim()

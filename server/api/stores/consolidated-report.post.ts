@@ -1,35 +1,23 @@
-import { defineEventHandler, readBody } from 'h3'
+import { createError, defineEventHandler, readBody } from 'h3'
+import { requireAuth, requireSelfUserId } from '~/server/utils/store-auth'
 
-/**
- * Consolidated Report API Endpoint
- *
- * Note: This endpoint should aggregate data from multiple stores.
- * For now, returns empty report - implement with Firebase Admin SDK or client-side.
- */
+/** Consolidated Report API Endpoint (stub) */
 export default defineEventHandler(async (event) => {
-  try {
-    const body = await readBody(event)
-    const { userId, dateRange, storeIds } = body
+  const auth = await requireAuth(event)
+  const body = await readBody(event)
+  const { userId } = body as { userId?: string }
 
-    if (!userId) {
-      return { success: false, error: 'User ID is required' }
-    }
+  requireSelfUserId(auth, userId)
 
-    // Return empty report for now
-    // Implement with Firebase Admin SDK or aggregate client-side
-    return {
-      success: true,
-      report: {
-        totalRevenue: 0,
-        totalSales: 0,
-        totalItems: 0,
-        avgOrderValue: 0,
-        storeBreakdown: [],
-      },
-      note: 'Consolidated report should be generated client-side by aggregating data from all stores',
-    }
-  } catch (error: any) {
-    console.error('Error generating consolidated report:', error)
-    return { success: false, error: error.message || 'Failed to generate report' }
+  return {
+    success: true,
+    report: {
+      totalRevenue: 0,
+      totalSales: 0,
+      totalItems: 0,
+      avgOrderValue: 0,
+      storeBreakdown: [],
+    },
+    note: 'Consolidated report should be generated client-side by aggregating data from all stores',
   }
 })

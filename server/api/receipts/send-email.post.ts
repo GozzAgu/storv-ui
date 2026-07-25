@@ -18,7 +18,7 @@ interface SendEmailBody {
 
 export default defineEventHandler(async (event) => {
   const auth = await requireAuth(event)
-  assertRateLimit(event, {
+  await assertRateLimit(event, {
     id: 'receipts:send-email',
     limit: 20,
     windowMs: 60_000,

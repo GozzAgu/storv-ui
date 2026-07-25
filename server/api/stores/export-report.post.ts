@@ -1,29 +1,18 @@
-import { defineEventHandler, readBody } from 'h3'
+import { createError, defineEventHandler, readBody } from 'h3'
+import { requireAuth, requireSelfUserId } from '~/server/utils/store-auth'
 
-/**
- * Export Report API Endpoint
- *
- * Note: This endpoint should generate and export reports (PDF/Excel).
- * For now, returns placeholder - implement with report generation library.
- */
+/** Export Report API Endpoint (stub) */
 export default defineEventHandler(async (event) => {
-  try {
-    const body = await readBody(event)
-    const { userId, dateRange, storeIds } = body
+  const auth = await requireAuth(event)
+  const body = await readBody(event)
+  const { userId } = body as { userId?: string }
 
-    if (!userId) {
-      return { success: false, error: 'User ID is required' }
-    }
+  requireSelfUserId(auth, userId)
 
-    // Return placeholder
-    return {
-      success: true,
-      message: 'Report export functionality will be implemented',
-      downloadUrl: null,
-      note: 'Implement report generation using jspdf, exceljs, or similar library',
-    }
-  } catch (error: any) {
-    console.error('Error exporting report:', error)
-    return { success: false, error: error.message || 'Failed to export report' }
+  return {
+    success: true,
+    message: 'Report export functionality will be implemented',
+    downloadUrl: null,
+    note: 'Implement report generation using jspdf, exceljs, or similar library',
   }
 })

@@ -338,6 +338,13 @@
 
       <CreatePaymentLinkModal v-model="showCreate" @created="onCreated" />
       <SharePaymentLinkModal v-model="showShare" :link="activeLink" />
+      <TotpConfirmModal
+        v-model="totpModalOpen"
+        title="Confirm bank connection"
+        description="Enter your authenticator code to connect a payout bank account."
+        @confirm="confirmTotp"
+        @cancel="cancelTotp"
+      />
     </template>
   </div>
 </template>
@@ -366,6 +373,9 @@ import { formatNaira } from '~/utils/naira'
 import { usePaymentLinks, type PaymentLinkListItem } from '~/composables/usePaymentLinks'
 import { useUserStore } from '~/stores/user'
 import PaymentLinksComingSoon from '~/components/payments/PaymentLinksComingSoon.vue'
+import TotpConfirmModal from '~/components/security/TotpConfirmModal.vue'
+import { useTotpConfirmModal } from '~/composables/useTotpConfirmModal'
+import { resolveTotpForSensitiveAction } from '~/utils/security-api-errors'
 
 definePageMeta({
   layout: 'dashboard',
@@ -391,6 +401,12 @@ const {
   resolveAccount,
   connectBank,
 } = usePaymentLinks()
+const {
+  open: totpModalOpen,
+  prompt: promptTotp,
+  confirm: confirmTotp,
+  cancel: cancelTotp,
+} = useTotpConfirmModal()
 
 const banks = ref<{ name: string; code: string }[]>([])
 const banksLoading = ref(false)
@@ -460,6 +476,7 @@ const connect = async () => {
   connecting.value = true
   connectError.value = ''
   try {
+    const totpCode = await resolveTotpForSensitiveAction(promptTotp)
     const bank = banks.value.find((b) => b.code === bankCode.value)
     await connectBank({
       bankCode: bankCode.value,
@@ -467,6 +484,7 @@ const connect = async () => {
       accountNumber: accountNumber.value,
       accountName: resolvedName.value,
       businessName: userStore.userData?.name || '',
+      totpCode,
     })
     editingBank.value = false
   } catch (e) {

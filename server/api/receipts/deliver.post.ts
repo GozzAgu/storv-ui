@@ -24,7 +24,7 @@ interface DeliverBody {
 
 export default defineEventHandler(async (event) => {
   const auth = await requireAuth(event)
-  assertRateLimit(event, {
+  await assertRateLimit(event, {
     id: 'receipts:deliver',
     limit: 20,
     windowMs: 60_000,

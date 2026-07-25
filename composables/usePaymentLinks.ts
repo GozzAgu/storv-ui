@@ -180,6 +180,7 @@ export function usePaymentLinks() {
     accountNumber: string
     accountName: string
     businessName?: string
+    totpCode?: string
   }) {
     if (await isDemo()) {
       const { connectDemoBank } = await import('~/utils/demo-payment-links')

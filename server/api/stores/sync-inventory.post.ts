@@ -1,42 +1,29 @@
-import { defineEventHandler, readBody } from 'h3'
+import { createError, defineEventHandler, readBody } from 'h3'
+import { requireAuth, requireSelfUserId } from '~/server/utils/store-auth'
 
-/**
- * Sync Inventory API Endpoint
- *
- * Note: This endpoint validates the request but the actual sync operations
- * should be performed client-side using Firebase SDK for security and simplicity.
- */
+/** Sync Inventory API Endpoint (stub) */
 export default defineEventHandler(async (event) => {
-  try {
-    const body = await readBody(event)
-    const {
-      userId,
-      sourceStoreId,
-      destinationStoreIds,
-      syncAllFolders,
-      createMissingFolders,
-      overwriteExisting,
-    } = body
+  const auth = await requireAuth(event)
+  const body = await readBody(event)
+  const { userId, sourceStoreId, destinationStoreIds } = body as {
+    userId?: string
+    sourceStoreId?: string
+    destinationStoreIds?: string[]
+  }
 
-    // Validate input
-    if (
-      !userId ||
-      !sourceStoreId ||
-      !destinationStoreIds ||
-      !Array.isArray(destinationStoreIds) ||
-      destinationStoreIds.length === 0
-    ) {
-      return { success: false, error: 'Missing required fields' }
-    }
+  requireSelfUserId(auth, userId)
 
-    // Return success - actual sync should be done client-side
-    return {
-      success: true,
-      message: 'Sync request validated. Please implement client-side sync logic.',
-      note: 'For security, implement Firebase Admin SDK on server-side or handle syncs client-side with proper validation.',
-    }
-  } catch (error: any) {
-    console.error('Error in sync-inventory API:', error)
-    return { success: false, error: error.message || 'Failed to process sync request' }
+  if (
+    !sourceStoreId ||
+    !destinationStoreIds ||
+    !Array.isArray(destinationStoreIds) ||
+    destinationStoreIds.length === 0
+  ) {
+    throw createError({ statusCode: 400, message: 'Missing required fields' })
+  }
+
+  return {
+    success: true,
+    message: 'Sync request validated. Please implement client-side sync logic.',
   }
 })

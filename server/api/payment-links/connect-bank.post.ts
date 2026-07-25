@@ -1,7 +1,7 @@
 import { createError, defineEventHandler, readBody } from 'h3'
 import { FieldValue } from 'firebase-admin/firestore'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
-import { requireAuth, requireStoreManageAccess } from '~/server/utils/store-auth'
+import { requireAuth, requireFreshTotp, requireStoreManageAccess } from '~/server/utils/store-auth'
 import { getPaystackSecret, paystackRequest, payoutDocId } from '~/server/utils/payment-links'
 
 interface Body {
@@ -12,6 +12,7 @@ interface Body {
   bankName?: string
   accountNumber?: string
   accountName?: string
+  totpCode?: string
 }
 
 const DEFAULT_PLATFORM_FEE_PERCENT = 0
@@ -22,8 +23,9 @@ const DEFAULT_PLATFORM_FEE_PERCENT = 0
  * straight to this account, minus the platform fee.
  */
 export default defineEventHandler(async (event) => {
-  const auth = await requireAuth(event)
+  const auth = await requireAuth(event, { requireVerifiedEmail: true })
   const body = await readBody<Body>(event)
+  await requireFreshTotp(auth, body.totpCode)
 
   const ownerUserId = (body.ownerUserId || '').trim()
   const storeId = (body.storeId || '').trim()

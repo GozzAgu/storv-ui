@@ -10,8 +10,8 @@ interface SetupBody {
 }
 
 export default defineEventHandler(async (event) => {
-  const auth = await requireAuth(event)
-  assertRateLimit(event, { id: 'auth-2fa-setup', limit: 10, windowMs: 60_000, uid: auth.uid })
+  const auth = await requireAuth(event, { allowPendingTwoFactor: true })
+  await assertRateLimit(event, { id: 'auth-2fa-setup', limit: 10, windowMs: 60_000, uid: auth.uid })
 
   const body = await readBody<SetupBody>(event)
   const secret = body.secret?.trim()

@@ -943,7 +943,7 @@ export const useStaffStore = defineStore('staff', {
     },
 
     // Deactivate staff (soft-delete roster + disable Firebase Auth login)
-    async deleteStaff(staffId: string): Promise<Staff> {
+    async deleteStaff(staffId: string, totpCode?: string): Promise<Staff> {
       const { isDemoModeActive } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) {
         const member = this.getStaffMember(staffId) || (await this.fetchStaffMember(staffId))
@@ -979,6 +979,7 @@ export const useStaffStore = defineStore('staff', {
             storeId,
             departmentId,
             staffId,
+            totpCode,
           },
         })
 
@@ -1011,7 +1012,7 @@ export const useStaffStore = defineStore('staff', {
     },
 
     // Reactivate removed staff (restore Firestore + enable Auth)
-    async reactivateStaff(staffId: string): Promise<Staff> {
+    async reactivateStaff(staffId: string, totpCode?: string): Promise<Staff> {
       const { isDemoModeActive } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) {
         const member = await this.fetchStaffMember(staffId)
@@ -1057,6 +1058,7 @@ export const useStaffStore = defineStore('staff', {
             storeId,
             departmentId: staffMember.departmentId,
             staffId,
+            totpCode,
           },
         })
 

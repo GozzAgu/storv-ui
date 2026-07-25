@@ -902,6 +902,14 @@
       </div>
     </div>
   </Modal>
+
+  <TotpConfirmModal
+    v-model="totpModalOpen"
+    title="Confirm upgrade"
+    description="Enter your authenticator code to start the subscription upgrade."
+    @confirm="confirmTotp"
+    @cancel="cancelTotp"
+  />
 </template>
 
 <script setup lang="ts">
@@ -944,6 +952,9 @@ import {
   type PaystackInitializeFetcher,
 } from '~/utils/paystack-upgrade'
 import { getEffectiveApiBase } from '~/utils/capacitor-api-base'
+import TotpConfirmModal from '~/components/security/TotpConfirmModal.vue'
+import { useTotpConfirmModal } from '~/composables/useTotpConfirmModal'
+import { resolveTotpForSensitiveAction } from '~/utils/security-api-errors'
 import {
   BILLING_BLOCKED_USER_MESSAGE,
   extractUploadFailureMessage,
@@ -1035,6 +1046,12 @@ const upgradeOptions = computed(() => {
 const selectedUpgradePlan = ref<SubscriptionPlan | ''>('')
 const selectedBillingCycle = ref<SubscriptionBillingCycle>('monthly')
 const isUpgradingSubscription = ref(false)
+const {
+  open: totpModalOpen,
+  prompt: promptTotp,
+  confirm: confirmTotp,
+  cancel: cancelTotp,
+} = useTotpConfirmModal()
 
 const handleUpgradeSubscription = async () => {
   if (!canEditSettings.value) {
@@ -1049,6 +1066,7 @@ const handleUpgradeSubscription = async () => {
 
   isUpgradingSubscription.value = true
   try {
+    const totpCode = await resolveTotpForSensitiveAction(promptTotp)
     const headers = await getAuthHeaders()
     const result = await initializePaystackSubscription(
       {
@@ -1056,6 +1074,7 @@ const handleUpgradeSubscription = async () => {
         email: currentUser.value.email || '',
         userId: currentUser.value.uid,
         billingCycle: selectedBillingCycle.value,
+        totpCode,
       },
       $fetch as PaystackInitializeFetcher,
       getEffectiveApiBase() || undefined,

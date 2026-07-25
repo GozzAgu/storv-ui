@@ -35,6 +35,7 @@
     "@capacitor/keyboard": "^8.0.5",
     "@lucide/vue": "^1.25.0",
     "@pinia/nuxt": "^0.11.3",
+    "@vercel/kv": "^3.0.0",
     "apexcharts": "^5.3.6",
     "firebase": "^12.6.0",
     "firebase-admin": "^13.7.0",

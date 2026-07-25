@@ -1,6 +1,7 @@
 import { createError, defineEventHandler, readBody } from 'h3'
-import { requireAuth } from '~/server/utils/store-auth'
+import { requireAuth, requireFreshTotp } from '~/server/utils/store-auth'
 import { verifyTotpCode } from '~/server/utils/two-factor'
+import { setTwoFactorVerifiedClaim } from '~/server/utils/two-factor-claims'
 import { assertRateLimit } from '~/server/utils/rate-limit'
 
 interface VerifyBody {
@@ -8,8 +9,8 @@ interface VerifyBody {
 }
 
 export default defineEventHandler(async (event) => {
-  const auth = await requireAuth(event)
-  assertRateLimit(event, { id: 'auth-2fa-verify', limit: 20, windowMs: 60_000, uid: auth.uid })
+  const auth = await requireAuth(event, { allowPendingTwoFactor: true })
+  await assertRateLimit(event, { id: 'auth-2fa-verify', limit: 20, windowMs: 60_000, uid: auth.uid })
 
   const body = await readBody<VerifyBody>(event)
   const code = body.code?.trim()
@@ -21,6 +22,8 @@ export default defineEventHandler(async (event) => {
   if (!valid) {
     throw createError({ statusCode: 401, message: 'Invalid verification code' })
   }
+
+  await setTwoFactorVerifiedClaim(auth.uid)
 
   return { success: true }
 })

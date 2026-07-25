@@ -259,14 +259,14 @@ export const useStaff = () => {
   }
 
   // Deactivate staff (use Pinia staff store - soft-delete + disable Auth)
-  const deleteStaff = async (staffId: string): Promise<Staff> => {
+  const deleteStaff = async (staffId: string, totpCode?: string): Promise<Staff> => {
     const staffStore = useStaffStore()
-    return staffStore.deleteStaff(staffId)
+    return staffStore.deleteStaff(staffId, totpCode)
   }
 
-  const reactivateStaff = async (staffId: string): Promise<Staff> => {
+  const reactivateStaff = async (staffId: string, totpCode?: string): Promise<Staff> => {
     const staffStore = useStaffStore()
-    return staffStore.reactivateStaff(staffId)
+    return staffStore.reactivateStaff(staffId, totpCode)
   }
 
   // Helper function to get department staff count

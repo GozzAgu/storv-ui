@@ -327,6 +327,7 @@ async function submitTwoFactorCode() {
       method: 'POST',
       body: { code: twoFactorCode.value },
     })
+    await authStore.currentUser.getIdToken(true)
     markTwoFactorSessionVerified(authStore.currentUser.uid)
     awaitingTwoFactor.value = false
     const pending = pendingSignIn.value

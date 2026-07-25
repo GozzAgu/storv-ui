@@ -1,6 +1,7 @@
 import { createError } from 'h3'
 import { FieldValue } from 'firebase-admin/firestore'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
+import { setTwoFactorEnabledClaims, clearTwoFactorClaims } from '~/server/utils/two-factor-claims'
 
 const SECURITY_DOC_ID = 'twoFactor'
 
@@ -48,6 +49,7 @@ export async function saveTwoFactorSecret(
     { merge: true }
   )
   await batch.commit()
+  await setTwoFactorEnabledClaims(uid, true)
 }
 
 export async function clearTwoFactor(uid: string): Promise<void> {
@@ -66,6 +68,7 @@ export async function clearTwoFactor(uid: string): Promise<void> {
     { merge: true }
   )
   await batch.commit()
+  await clearTwoFactorClaims(uid)
 }
 
 export async function verifyTotpCode(uid: string, code: string): Promise<boolean> {

@@ -14,7 +14,7 @@ import {
 
 export default defineEventHandler(async (event) => {
   try {
-    const auth = await requireAuth(event)
+    const auth = await requireAuth(event, { requireVerifiedEmail: true })
     const query = getQuery(event)
     const reference = query.reference as string
 

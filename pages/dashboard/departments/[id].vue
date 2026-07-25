@@ -706,6 +706,14 @@
       @success="handleStaffSuccess"
       @error="handleStaffError"
     />
+
+    <TotpConfirmModal
+      v-model="totpModalOpen"
+      title="Confirm with authenticator"
+      description="Enter your 6-digit code to confirm this staff action."
+      @confirm="confirmTotp"
+      @cancel="cancelTotp"
+    />
   </div>
 </template>
 
@@ -743,6 +751,9 @@ import ReactivateStaffModal from '~/components/departments/ReactivateStaffModal.
 import MoveStaffModal from '~/components/departments/MoveStaffModal.vue'
 import { getNextStaffRole, getNextStaffRoleLabel, normalizeStaffRole } from '~/utils/staff-role'
 import StaffInvitePasswordsPanel from '~/components/departments/StaffInvitePasswordsPanel.vue'
+import TotpConfirmModal from '~/components/security/TotpConfirmModal.vue'
+import { useTotpConfirmModal } from '~/composables/useTotpConfirmModal'
+import { resolveTotpForSensitiveAction } from '~/utils/security-api-errors'
 import { EMPTY_CELL } from '~/utils/ui-empty'
 import { useDepartmentsStore } from '~/stores/departments'
 import { useStaffStore } from '~/stores/staff'
@@ -833,6 +844,12 @@ const { isNativeApp, menuViewportPadding, menuTeleportTarget } = useDashboardFlo
 
 const departmentsStore = useDepartmentsStore()
 const staffStore = useStaffStore()
+const {
+  open: totpModalOpen,
+  prompt: promptTotp,
+  confirm: confirmTotp,
+  cancel: cancelTotp,
+} = useTotpConfirmModal()
 const authStore = useAuthStore()
 const userStore = useUserStore()
 const storesStore = useStoresStore()
@@ -1078,8 +1095,9 @@ async function handleConfirmDeactivateStaff() {
   const count = targets.length
 
   try {
+    const totpCode = await resolveTotpForSensitiveAction(promptTotp)
     for (const member of targets) {
-      const removed = await staffStore.deleteStaff(member.id)
+      const removed = await staffStore.deleteStaff(member.id, totpCode)
       applyStaffRemoved(removed)
     }
     selectedStaffForBulk.value = []
@@ -1146,7 +1164,8 @@ async function handleConfirmReactivateStaff() {
   const name = `${member.firstName} ${member.lastName}`.trim()
 
   try {
-    const reactivated = await staffStore.reactivateStaff(member.id)
+    const totpCode = await resolveTotpForSensitiveAction(promptTotp)
+    const reactivated = await staffStore.reactivateStaff(member.id, totpCode)
     applyStaffReactivated(reactivated)
     showReactivateStaffModal.value = false
     staffPendingReactivation.value = null

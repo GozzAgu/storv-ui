@@ -18,7 +18,7 @@ import {
 import { AUTH_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import { getFirebaseClientAuth } from '~/utils/firebase-client-auth'
 import { sendUserEmailVerification } from '~/utils/emailVerification'
-import { clearAllTwoFactorSessionFlags, clearTwoFactorSessionVerified } from '~/utils/two-factor-session'
+import { clearAllTwoFactorSessionFlags, clearTwoFactorSessionVerified, markTwoFactorSessionVerified } from '~/utils/two-factor-session'
 import { clearCachedUserProfile, markSignOutPending } from '~/utils/auth-sign-out'
 import { resolveApiPath } from '~/utils/api-url'
 
@@ -388,6 +388,8 @@ export const useFirebaseAuth = () => {
       headers: { Authorization: `Bearer ${token}` },
       body: { secret, method, code },
     })
+    await auth.currentUser.getIdToken(true)
+    markTwoFactorSessionVerified(auth.currentUser.uid)
   }
 
   // Verify TOTP code (server reads secret from admin-only storage).
@@ -403,6 +405,8 @@ export const useFirebaseAuth = () => {
       headers: { Authorization: `Bearer ${token}` },
       body: { code },
     })
+    await auth.currentUser.getIdToken(true)
+    markTwoFactorSessionVerified(auth.currentUser.uid)
     return true
   }
 
@@ -429,7 +433,7 @@ export const useFirebaseAuth = () => {
   }
 
   // Disable 2FA (requires re-authentication)
-  const disable2FA = async (password: string) => {
+  const disable2FA = async (password: string, totpCode: string) => {
     const auth = getAuthInstance()
     if (!auth) {
       throw new Error(AUTH_UNAVAILABLE_MESSAGE)
@@ -449,7 +453,9 @@ export const useFirebaseAuth = () => {
       await $fetch(resolveApiPath('/api/auth/2fa/disable'), {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
+        body: { totpCode: totpCode.trim() },
       })
+      await user.getIdToken(true)
       clearTwoFactorSessionVerified(user.uid)
     } catch (error: any) {
       if (error.code === 'auth/wrong-password') {

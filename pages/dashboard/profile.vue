@@ -1013,7 +1013,7 @@
   <Modal v-model="show2FADisableModal" title="Disable Two-Factor Authentication" size="md">
     <div class="space-y-4">
       <p class="text-xs text-gray-600 dark:text-gray-400">
-        Please enter your password to disable two-factor authentication.
+        Enter your password and authenticator code to disable two-factor authentication.
       </p>
       <div>
         <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
@@ -1024,6 +1024,21 @@
           type="password"
           class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 outline-none"
           placeholder="Enter your password"
+          @keyup.enter="handleDisable2FA"
+        />
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+          Authenticator code
+        </label>
+        <input
+          v-model="disable2FATotp"
+          type="text"
+          inputmode="numeric"
+          autocomplete="one-time-code"
+          maxlength="6"
+          class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 outline-none tracking-[0.25em]"
+          placeholder="6-digit code"
           @keyup.enter="handleDisable2FA"
         />
       </div>
@@ -1041,6 +1056,7 @@
           () => {
             show2FADisableModal = false
             disable2FAPassword = ''
+            disable2FATotp = ''
             disable2FAError = ''
           }
         "
@@ -1049,7 +1065,7 @@
       <Button
         variant="danger"
         @click="handleDisable2FA"
-        :disabled="isDisabling2FA || !disable2FAPassword"
+        :disabled="isDisabling2FA || !disable2FAPassword || disable2FATotp.trim().length !== 6"
       >
         <span v-if="isDisabling2FA" class="flex items-center gap-2">
           <svg
@@ -1909,6 +1925,7 @@ const showSessionsModal = ref(false)
 const show2FASetupModal = ref(false)
 const show2FADisableModal = ref(false)
 const disable2FAPassword = ref('')
+const disable2FATotp = ref('')
 const isDisabling2FA = ref(false)
 const disable2FAError = ref('')
 
@@ -2236,18 +2253,23 @@ const handleDisable2FA = async () => {
     disable2FAError.value = 'Please enter your password'
     return
   }
+  if (disable2FATotp.value.trim().length !== 6) {
+    disable2FAError.value = 'Enter the 6-digit code from your authenticator app'
+    return
+  }
 
   isDisabling2FA.value = true
   disable2FAError.value = ''
 
   try {
-    await disable2FA(disable2FAPassword.value)
+    await disable2FA(disable2FAPassword.value, disable2FATotp.value.trim())
     securitySettings.twoFactor = false
     if (import.meta.client) {
       localStorage.setItem('twoFactorEnabled', 'false')
     }
     show2FADisableModal.value = false
     disable2FAPassword.value = ''
+    disable2FATotp.value = ''
     toast.success('Two-factor authentication has been disabled')
   } catch (error: any) {
     disable2FAError.value = error.message || 'Failed to disable 2FA. Please try again.'
