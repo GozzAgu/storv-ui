@@ -96,78 +96,68 @@
       </div>
     </Transition>
 
-    <!-- Native: full-screen in-app drawer -->
-    <Transition
-      v-else
-      enter-active-class="side-panel-native-enter-active"
-      leave-active-class="side-panel-native-leave-active"
-      enter-from-class="side-panel-native-enter-from"
-      enter-to-class="side-panel-native-enter-to"
-      leave-from-class="side-panel-native-leave-from"
-      leave-to-class="side-panel-native-leave-to"
-    >
-      <div v-if="modelValue" :class="panelShellClass" role="presentation">
+    <!-- Native: in-app drawer (no transition — avoids iOS WKWebView opacity freeze) -->
+    <div v-else-if="modelValue" :class="panelShellClass" role="presentation">
+      <div
+        role="dialog"
+        aria-modal="true"
+        :aria-labelledby="labelledBy"
+        :aria-describedby="describedBy"
+        :class="panelDialogClass"
+        @click.stop
+      >
+        <!-- Header -->
         <div
-          role="dialog"
-          aria-modal="true"
-          :aria-labelledby="labelledBy"
-          :aria-describedby="describedBy"
-          :class="panelDialogClass"
-          @click.stop
+          v-if="title || subtitle || $slots.header || showClose"
+          :class="[dense ? headerDenseClass : headerClass]"
         >
-          <!-- Header -->
-          <div
-            v-if="title || subtitle || $slots.header || showClose"
-            :class="[dense ? headerDenseClass : headerClass]"
+          <div class="flex min-w-0 flex-1 items-start gap-3 pr-1">
+            <slot name="header">
+              <div v-if="title || subtitle" class="min-w-0">
+                <p v-if="eyebrow" :class="eyebrowClass">
+                  {{ eyebrow }}
+                </p>
+                <h3 v-if="title" :id="titleId" :class="dense ? titleDenseClass : titleClass">
+                  {{ title }}
+                </h3>
+                <p
+                  v-if="subtitle"
+                  :id="subtitleId"
+                  :class="dense ? subtitleDenseClass : subtitleClass"
+                >
+                  {{ subtitle }}
+                </p>
+              </div>
+            </slot>
+          </div>
+          <button
+            v-if="showClose"
+            type="button"
+            :class="closeButtonClass"
+            aria-label="Close panel"
+            @click="handleClose"
           >
-            <div class="flex min-w-0 flex-1 items-start gap-3 pr-1">
-              <slot name="header">
-                <div v-if="title || subtitle" class="min-w-0">
-                  <p v-if="eyebrow" :class="eyebrowClass">
-                    {{ eyebrow }}
-                  </p>
-                  <h3 v-if="title" :id="titleId" :class="dense ? titleDenseClass : titleClass">
-                    {{ title }}
-                  </h3>
-                  <p
-                    v-if="subtitle"
-                    :id="subtitleId"
-                    :class="dense ? subtitleDenseClass : subtitleClass"
-                  >
-                    {{ subtitle }}
-                  </p>
-                </div>
-              </slot>
-            </div>
-            <button
-              v-if="showClose"
-              type="button"
-              :class="closeButtonClass"
-              aria-label="Close panel"
-              @click="handleClose"
-            >
-              <XMarkIcon class="h-4 w-4" stroke-width="1.75" />
-            </button>
-          </div>
+            <XMarkIcon class="h-4 w-4" stroke-width="1.75" />
+          </button>
+        </div>
 
-          <!-- Body -->
-          <div
-            :class="[
-              bodyClass,
-              'side-panel-body-scroll flex min-h-0 flex-1 flex-col',
-              resolvedContentPadding,
-            ]"
-          >
-            <slot />
-          </div>
+        <!-- Body -->
+        <div
+          :class="[
+            bodyClass,
+            'side-panel-body-scroll flex min-h-0 flex-1 flex-col',
+            resolvedContentPadding,
+          ]"
+        >
+          <slot />
+        </div>
 
-          <!-- Footer -->
-          <div v-if="$slots.footer" :class="dense ? footerDenseClass : footerClass">
-            <slot name="footer" />
-          </div>
+        <!-- Footer -->
+        <div v-if="$slots.footer" :class="dense ? footerDenseClass : footerClass">
+          <slot name="footer" />
         </div>
       </div>
-    </Transition>
+    </div>
   </Teleport>
 </template>
 
@@ -176,6 +166,7 @@ import { computed, watch, onMounted, onUnmounted, useId } from 'vue'
 import {
   XMarkIcon,
 } from '~/utils/app-icons'
+import { setNativeOverlayLock } from '~/utils/native-overlay-lock'
 interface Props {
   modelValue: boolean
   title?: string
@@ -285,11 +276,7 @@ function setScrollLock(locked: boolean) {
   if (!import.meta.client) return
 
   if (nativeInApp.value) {
-    const main = document.querySelector<HTMLElement>('[data-dashboard-main]')
-    if (main) {
-      main.style.overflow = locked ? 'hidden' : ''
-    }
-    document.documentElement.toggleAttribute('data-native-drawer-open', locked)
+    setNativeOverlayLock(locked)
     return
   }
 

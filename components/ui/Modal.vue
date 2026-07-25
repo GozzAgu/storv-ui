@@ -2,7 +2,13 @@
   <Teleport :to="teleportTarget">
     <div v-if="modelValue" :class="rootClass" role="presentation">
       <div
-        v-if="!nativeInApp"
+        v-if="nativeInApp"
+        class="native-modal-backdrop absolute inset-0 bg-black/40"
+        aria-hidden="true"
+        @click="handleBackdropClick"
+      />
+      <div
+        v-else-if="!nativeInApp"
         :class="[
           'absolute inset-0 transition-opacity duration-300',
           backdropClass,
@@ -14,6 +20,7 @@
 
       <div :class="stageClass">
         <Transition
+          v-if="!nativeInApp"
           :enter-active-class="
             nativeInApp
               ? 'modal-native-enter-active'
@@ -82,6 +89,51 @@
             </div>
           </div>
         </Transition>
+
+        <div
+          v-else
+          role="dialog"
+          aria-modal="true"
+          :aria-labelledby="labelledBy"
+          :aria-describedby="describedBy"
+          :class="dialogClass"
+          @click.stop
+        >
+          <div v-if="title || subtitle || $slots.header || showClose" :class="headerClass">
+            <div class="flex min-w-0 flex-1 items-start gap-3 pr-1">
+              <slot name="header">
+                <div v-if="title || subtitle" class="min-w-0">
+                  <p v-if="eyebrow" :class="eyebrowClass">
+                    {{ eyebrow }}
+                  </p>
+                  <h3 v-if="title" :id="titleId" :class="titleClass">
+                    {{ title }}
+                  </h3>
+                  <p v-if="subtitle" :id="subtitleId" :class="subtitleClass">
+                    {{ subtitle }}
+                  </p>
+                </div>
+              </slot>
+            </div>
+            <button
+              v-if="showClose"
+              type="button"
+              :class="closeButtonClass"
+              aria-label="Close modal"
+              @click="handleClose"
+            >
+              <XMarkIcon class="h-4 w-4" stroke-width="1.75" />
+            </button>
+          </div>
+
+          <div :class="[bodyClass, 'modal-body-scroll', contentPadding]">
+            <slot />
+          </div>
+
+          <div v-if="$slots.footer" :class="footerClass">
+            <slot name="footer" />
+          </div>
+        </div>
       </div>
     </div>
   </Teleport>
@@ -92,6 +144,7 @@ import { computed, watch, onMounted, onUnmounted, useId } from 'vue'
 import {
   XMarkIcon,
 } from '~/utils/app-icons'
+import { setNativeOverlayLock } from '~/utils/native-overlay-lock'
 interface Props {
   modelValue: boolean
   title?: string
@@ -156,7 +209,7 @@ const sizeClasses = computed(() => {
 
 const rootClass = computed(() =>
   nativeInApp.value
-    ? 'modal-native-shell pointer-events-auto flex h-full min-h-0 w-full flex-col overflow-hidden'
+    ? 'modal-native-shell pointer-events-auto relative flex h-full min-h-0 w-full flex-col overflow-hidden'
     : 'fixed inset-0 z-[105] overflow-y-auto'
 )
 
@@ -203,11 +256,7 @@ function setScrollLock(locked: boolean) {
   if (!import.meta.client) return
 
   if (nativeInApp.value) {
-    const main = document.querySelector<HTMLElement>('[data-dashboard-main]')
-    if (main) {
-      main.style.overflow = locked ? 'hidden' : ''
-    }
-    document.documentElement.toggleAttribute('data-native-drawer-open', locked)
+    setNativeOverlayLock(locked)
     return
   }
 

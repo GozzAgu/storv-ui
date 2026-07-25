@@ -89,11 +89,12 @@ html.capacitor-native .dashboard-native-overlay-host {
   right: 0;
   top: var(--dashboard-native-top-chrome);
   bottom: calc(var(--dashboard-bottom-nav-height) + var(--cap-safe-bottom));
-  z-index: 52;
+  z-index: 55;
   pointer-events: none;
   overflow: hidden;
 }
 
+html.capacitor-native .dashboard-native-overlay-host--active,
 html.capacitor-native .dashboard-native-overlay-host:has(.side-panel-native-shell),
 html.capacitor-native .dashboard-native-overlay-host:has(.modal-native-shell) {
   pointer-events: auto;

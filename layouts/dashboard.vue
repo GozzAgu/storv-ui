@@ -595,6 +595,22 @@
             </kbd>
           </button>
 
+          <button
+            v-if="!isNativeApp"
+            type="button"
+            class="dash-topnav__assistant dashboard-topnav-assistant group relative hidden h-8 shrink-0 items-center gap-2 px-2.5 md:inline-flex"
+            aria-label="Open Storvv Assistant"
+            @click="openAssistant()"
+          >
+            <SparklesIcon
+              class="block h-3.5 w-3.5 shrink-0 text-primary-700 dark:text-primary-300"
+              stroke-width="1.75"
+            />
+            <span class="text-[11px] font-semibold text-primary-800 dark:text-primary-200">
+              Assistant
+            </span>
+          </button>
+
           <div class="hidden min-w-0 flex-1 md:block" aria-hidden="true" />
 
           <div class="min-w-0 flex-1 md:hidden" aria-hidden="true" />
@@ -603,6 +619,15 @@
           <div
             class="dash-topnav__actions dashboard-topnav-actions relative z-10 flex shrink-0 items-center"
           >
+            <button
+              type="button"
+              class="dash-topnav__icon-btn"
+              aria-label="Open Storvv Assistant"
+              @click="openAssistant()"
+            >
+              <SparklesIcon class="block h-4 w-4 shrink-0 text-primary-700 dark:text-primary-300" stroke-width="1.75" />
+            </button>
+
             <button
               type="button"
               class="dash-topnav__icon-btn md:hidden"
@@ -701,15 +726,16 @@
           <slot />
         </div>
       </main>
+    </div>
 
-      <!-- Native: forms/drawers render in-app (between top bar and bottom nav), not over the whole screen -->
+    <!-- Native overlays: host on body so fixed modals/drawers are not clipped by overflow-hidden shells (iOS WKWebView) -->
+    <Teleport v-if="isNativeApp" to="body">
       <div
-        v-if="isNativeApp"
         id="dashboard-native-overlay-host"
         class="dashboard-native-overlay-host"
         aria-hidden="true"
       />
-    </div>
+    </Teleport>
 
     <!-- Toast Notifications -->
     <ToastContainer />
@@ -761,6 +787,8 @@
     <!-- Global Search -->
     <GlobalSearch />
 
+    <DashboardAssistant />
+
     <DashboardNativeTableLayoutSync v-if="isNativeApp" />
 
     <!-- Native app bottom navigation (CSS fallback via html.capacitor-native) -->
@@ -779,6 +807,7 @@ import {
   XMarkIcon,
   BellIcon,
   MagnifyingGlassIcon,
+  SparklesIcon,
   ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -806,6 +835,7 @@ import { resolveStoreDepartmentsPath } from '~/utils/department-routes'
 import StoreSelector from '~/components/ui/StoreSelector.vue'
 import ToastContainer from '~/components/ui/ToastContainer.vue'
 import GlobalSearch from '~/components/search/GlobalSearch.vue'
+import DashboardAssistant from '~/components/dashboard/DashboardAssistant.vue'
 import RecentItemsWidget from '~/components/ui/RecentItemsWidget.vue'
 import NotificationsPanel from '~/components/notifications/NotificationsPanel.vue'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
@@ -820,7 +850,7 @@ import { useDepartmentsStore } from '~/stores/departments'
 import { useStoresStore } from '~/stores/stores'
 import { useStaffStore } from '~/stores/staff'
 import { useSearchStore } from '~/stores/search'
-import { getAuthWaitMs, waitForAuthStore } from '~/utils/wait-for-auth'
+import { clearNativeOverlayLock } from '~/utils/native-overlay-lock'
 
 const { actualTheme } = useTheme()
 
@@ -835,6 +865,7 @@ const departmentsStore = useDepartmentsStore()
 const storesStore = useStoresStore()
 const staffStore = useStaffStore()
 const searchStore = useSearchStore()
+const { openAssistant } = useDashboardAssistant()
 const { eligibleStores } = usePlanEligibleStores()
 // Fetch notifications on mount
 onMounted(() => {
@@ -1802,6 +1833,8 @@ const handleClickOutside = (event: MouseEvent) => {
 watch(
   () => route.path,
   () => {
+    clearNativeOverlayLock()
+    useAssistantStore().close()
     if (import.meta.client && sidebarOpen.value) {
       // Check if we're on mobile (screen width < 1024px which is lg breakpoint)
       if (window.innerWidth < 1024) {
@@ -2009,6 +2042,7 @@ onUnmounted(() => {
   if (import.meta.client) {
     window.removeEventListener('resize', onNotificationsScrollOrResize)
     window.removeEventListener('scroll', onNotificationsScrollOrResize, true)
+    clearNativeOverlayLock()
   }
 })
 </script>

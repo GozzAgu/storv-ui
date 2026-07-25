@@ -557,6 +557,62 @@ html.dark .dash-help-section__icon {
   color: var(--dash-muted, #64748b);
 }
 
+.dash-help-assistant-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 2.25rem;
+  border-radius: 9999px;
+  border: 1px solid rgb(20 63 141 / 0.16);
+  background: rgb(20 63 141 / 0.07);
+  padding: 0 0.875rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgb(20 63 141);
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.dash-help-assistant-cta:hover {
+  background: rgb(20 63 141 / 0.12);
+  border-color: rgb(20 63 141 / 0.24);
+}
+
+html.dark .dash-help-assistant-cta {
+  border-color: rgb(154 181 227 / 0.2);
+  background: rgb(20 63 141 / 0.18);
+  color: rgb(191 210 246);
+}
+
+.dash-help-assistant-link {
+  align-self: center;
+  border-radius: 9999px;
+  border: 1px solid rgb(20 63 141 / 0.12);
+  background: transparent;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: rgb(30 64 175);
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.dash-help-assistant-link:hover {
+  background: rgb(20 63 141 / 0.06);
+  border-color: rgb(20 63 141 / 0.2);
+}
+
+html.dark .dash-help-assistant-link {
+  border-color: rgb(154 181 227 / 0.16);
+  color: rgb(191 210 246);
+}
+
+html.dark .dash-help-assistant-link:hover {
+  background: rgb(20 63 141 / 0.16);
+}
+
 .dash-help-article {
   border: 1px solid var(--dash-border, rgb(15 23 42 / 0.08));
   border-radius: 0.875rem;

@@ -62,8 +62,12 @@ export default defineNuxtConfig({
     whatsappCloudAccessToken: process.env.WHATSAPP_CLOUD_ACCESS_TOKEN || '',
     whatsappCloudPhoneNumberId: process.env.WHATSAPP_CLOUD_PHONE_NUMBER_ID || '',
     whatsappCloudApiVersion: process.env.WHATSAPP_CLOUD_API_VERSION || 'v21.0',
+    geminiApiKey: process.env.GEMINI_API_KEY || process.env.NUXT_GEMINI_API_KEY || '',
+    geminiModel: process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite',
     // Public keys (exposed to client-side)
     public: {
+      /** Initial hint only; client refreshes via /api/assistant/status */
+      assistantConfigured: Boolean(process.env.GEMINI_API_KEY || process.env.NUXT_GEMINI_API_KEY),
       appVersion: '0.1',
       /** Comma-separated extra hostnames treated like www (marketing-only), e.g. preview domains */
       marketingHosts: (process.env.NUXT_PUBLIC_MARKETING_HOSTS || '')
