@@ -286,43 +286,78 @@ html.capacitor-native [data-auth-shell] {
   background-color: var(--cap-canvas-bg);
 }
 
+/* Tagline strip duplicates the header on phone; hide on native to reclaim vertical space. */
 html.capacitor-native [data-auth-shell] .auth-shell__mobile-strip {
-  padding-top: var(--cap-safe-top);
-  padding-bottom: 0.875rem;
-  padding-left: calc(1rem + var(--cap-safe-left));
-  padding-right: calc(1rem + var(--cap-safe-right));
+  display: none;
 }
 
-html.capacitor-native [data-auth-shell] .auth-shell__mobile-strip p {
-  font-size: var(--cap-text-sm) !important;
+html.capacitor-native [data-auth-shell] .auth-shell {
+  min-height: 0;
+}
+
+html.capacitor-native [data-auth-shell] .auth-shell__main {
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 html.capacitor-native [data-auth-shell] .auth-shell__main-scroll {
-  flex: 1;
+  flex: 1 1 auto;
   min-height: 0;
   width: 100%;
+  overflow-x: hidden;
   overflow-y: auto;
+  justify-content: flex-start;
+  align-items: stretch;
   padding-left: calc(1rem + var(--cap-safe-left));
   padding-right: calc(1rem + var(--cap-safe-right));
-  padding-top: calc(1.25rem + var(--cap-safe-top));
-  padding-bottom: calc(1.5rem + var(--cap-safe-bottom));
+  padding-top: calc(3rem + var(--cap-safe-top));
+  padding-bottom: calc(1.25rem + var(--cap-safe-bottom));
+}
+
+html.capacitor-native [data-auth-shell] .auth-shell__content {
+  margin-inline: auto;
+  max-width: 26rem;
 }
 
 html.capacitor-native [data-auth-shell] .auth-shell-theme-toggle {
-  top: calc(0.75rem + var(--cap-safe-top));
+  top: calc(0.625rem + var(--cap-safe-top));
   right: calc(0.75rem + var(--cap-safe-right));
+}
+
+html.capacitor-native [data-auth-shell] .auth-page-header {
+  margin-bottom: 1.25rem;
+  padding-top: 0.25rem;
+}
+
+html.capacitor-native [data-auth-shell] .auth-page-header__mobile-logo {
+  margin-bottom: 1rem;
+}
+
+html.capacitor-native [data-auth-shell] .auth-page-header__mobile-logo img {
+  height: 1.5rem;
+  max-width: 6.5rem;
 }
 
 html.capacitor-native [data-auth-shell] .auth-page-header__title {
   font-size: var(--cap-text-xl) !important;
+  line-height: 1.2;
 }
 
 html.capacitor-native [data-auth-shell] .auth-page-header__lede {
   font-size: var(--cap-text-sm) !important;
+  line-height: 1.5;
 }
 
 html.capacitor-native .auth-card {
   border-radius: 1rem;
+}
+
+html.capacitor-native .auth-card__inner {
+  padding: 1.25rem;
+}
+
+html.capacitor-native .auth-form {
+  gap: 1rem;
 }
 
 html.capacitor-native .auth-field__label {

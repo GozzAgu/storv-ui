@@ -19,6 +19,7 @@ import { AUTH_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import { getFirebaseClientAuth } from '~/utils/firebase-client-auth'
 import { sendUserEmailVerification } from '~/utils/emailVerification'
 import { clearAllTwoFactorSessionFlags, clearTwoFactorSessionVerified } from '~/utils/two-factor-session'
+import { clearCachedUserProfile, markSignOutPending } from '~/utils/auth-sign-out'
 import { resolveApiPath } from '~/utils/api-url'
 
 /**
@@ -96,16 +97,36 @@ export const useFirebaseAuth = () => {
     }
 
     try {
+      const authStore = useAuthStore()
       const uid = auth.currentUser?.uid
-      await firebaseSignOut(auth)
+
       if (import.meta.client) {
-        if (uid) {
-          clearTwoFactorSessionVerified(uid)
-        }
-        clearAllTwoFactorSessionFlags()
+        markSignOutPending()
+      }
+
+      // Drop local session immediately so native guest middleware cannot bounce back to dashboard.
+      authStore.currentUser = null
+      authStore.loading = false
+      currentUser.value = null
+      loading.value = false
+
+      if (uid) {
+        clearTwoFactorSessionVerified(uid)
+      }
+      clearAllTwoFactorSessionFlags()
+      clearCachedUserProfile()
+
+      if (import.meta.client) {
         const { clearNativeBiometricLogin } = await import('~/composables/useNativeBiometricLogin')
         await clearNativeBiometricLogin()
       }
+
+      await firebaseSignOut(auth)
+
+      authStore.currentUser = null
+      currentUser.value = null
+      authStore.loading = false
+      loading.value = false
     } catch (error: any) {
       throw new Error(error.message || 'Sign out failed')
     }

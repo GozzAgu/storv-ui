@@ -1761,13 +1761,23 @@ const confirmSignOut = async () => {
   try {
     userStore.clearUserData()
     clearCachedUser()
+    cachedUserName.value = null
+    cachedUserEmail.value = null
+    cachedUserId.value = null
+    authStore.currentUser = null
+    authStore.loading = false
     await signOut()
-    navigateTo('/signin')
+    await navigateTo('/signin', { replace: true })
   } catch (error) {
     console.error('Sign out error:', error)
     userStore.clearUserData()
     clearCachedUser()
-    navigateTo('/signin')
+    cachedUserName.value = null
+    cachedUserEmail.value = null
+    cachedUserId.value = null
+    authStore.currentUser = null
+    authStore.loading = false
+    await navigateTo('/signin', { replace: true })
   } finally {
     showLogoutConfirm.value = false
     loggingOut.value = false

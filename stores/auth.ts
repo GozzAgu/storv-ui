@@ -118,8 +118,26 @@ export const useAuthStore = defineStore('auth', {
       if (!auth) throw new Error(AUTH_UNAVAILABLE_MESSAGE)
 
       try {
+        const uid = auth.currentUser?.uid
+        if (import.meta.client) {
+          const { markSignOutPending, clearCachedUserProfile } = await import('~/utils/auth-sign-out')
+          markSignOutPending()
+          clearCachedUserProfile()
+          const { clearNativeBiometricLogin } = await import('~/composables/useNativeBiometricLogin')
+          await clearNativeBiometricLogin()
+        }
+        this.currentUser = null
+        this.loading = false
         await firebaseSignOut(auth)
         this.currentUser = null
+        this.loading = false
+        if (import.meta.client && uid) {
+          const { clearTwoFactorSessionVerified, clearAllTwoFactorSessionFlags } = await import(
+            '~/utils/two-factor-session'
+          )
+          clearTwoFactorSessionVerified(uid)
+          clearAllTwoFactorSessionFlags()
+        }
       } catch (error: any) {
         throw new Error(error.message || 'Sign out failed')
       }

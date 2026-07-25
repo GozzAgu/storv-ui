@@ -1,5 +1,6 @@
 import type { RouteLocationNormalized } from 'vue-router'
 import { getAuthWaitMs, waitForAuthStore } from '~/utils/wait-for-auth'
+import { clearSignOutPending, isSignOutPending } from '~/utils/auth-sign-out'
 
 /** Let verified users finish on /signin (and survive refresh) without guest → dashboard bounce. */
 export const SIGNIN_ALLOW_WHILE_AUTHED_KEY = 'storv_allow_signin_while_authed'
@@ -38,6 +39,11 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   const authStore = useAuthStore()
 
   await waitForAuthStore(authStore, getAuthWaitMs())
+
+  if (to.path === '/signin' && isSignOutPending()) {
+    clearSignOutPending()
+    return
+  }
 
   // Only redirect if auth has finished loading and user is authenticated
   if (!authStore.loading && authStore.currentUser) {

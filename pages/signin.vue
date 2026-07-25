@@ -161,6 +161,7 @@ import { useNativeBiometricLogin } from '~/composables/useNativeBiometricLogin'
 import { useUserStore } from '~/stores/user'
 import { useAuthenticatedFetch } from '~/composables/useAuthenticatedFetch'
 import { markCapacitorDocument } from '~/utils/capacitor-env'
+import { clearSignOutPending } from '~/utils/auth-sign-out'
 import { getErrorMessage } from '~/utils/error-message'
 import { getAuthWaitMs, waitForAuthStore } from '~/utils/wait-for-auth'
 import {
@@ -206,6 +207,7 @@ const biometricStaleMessage =
 
 onMounted(() => {
   markCapacitorDocument()
+  clearSignOutPending()
   const email = route.query.email
   if (typeof email === 'string' && email.trim()) {
     form.value.email = decodeURIComponent(email).trim()
