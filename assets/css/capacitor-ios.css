@@ -372,11 +372,15 @@ html.capacitor-ios.capacitor-native .native-more-sheet__row {
   transition: background-color 0.15s var(--cap-ios-ease);
 }
 
-html.capacitor-ios.capacitor-native .side-panel-native-dialog,
-html.capacitor-ios.capacitor-native .modal-native-shell .dash-overlay-modal {
-  border-radius: var(--cap-ios-radius-lg);
+html.capacitor-ios.capacitor-native .native-side-drawer-panel,
+html.capacitor-ios.capacitor-native .side-panel-native-dialog {
+  border-radius: var(--cap-ios-radius-lg) 0 0 var(--cap-ios-radius-lg);
   -webkit-backdrop-filter: blur(28px) saturate(1.2);
   backdrop-filter: blur(28px) saturate(1.2);
+}
+
+html.capacitor-ios.capacitor-native .native-side-drawer-panel--compact {
+  border-radius: var(--cap-ios-radius-lg);
 }
 
 html.capacitor-ios.capacitor-native .dash-toast {
@@ -792,7 +796,7 @@ html.capacitor-ios.capacitor-native .dash-help-assistant-link {
   min-height: 2.75rem;
 }
 
-html.capacitor-ios.capacitor-native .side-panel-native-shell .dashboard-assistant__messages {
+html.capacitor-ios.capacitor-native .native-side-drawer-panel .dashboard-assistant__messages {
   -webkit-overflow-scrolling: touch;
 }
 

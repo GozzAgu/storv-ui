@@ -96,16 +96,22 @@
       </div>
     </Transition>
 
-    <!-- Native: in-app drawer (no transition — avoids iOS WKWebView opacity freeze) -->
-    <div v-else-if="modelValue" :class="panelShellClass" role="presentation">
+    <!-- Native: slide-in drawer from the right (no opacity transition — avoids iOS freeze) -->
+    <div v-else-if="modelValue" class="native-side-drawer-root" role="presentation">
       <div
-        role="dialog"
-        aria-modal="true"
-        :aria-labelledby="labelledBy"
-        :aria-describedby="describedBy"
-        :class="panelDialogClass"
-        @click.stop
-      >
+        class="native-side-drawer-backdrop native-modal-backdrop absolute inset-0 bg-black/40"
+        aria-hidden="true"
+        @click="handleBackdropClick"
+      />
+      <div class="native-side-drawer-stage">
+        <div
+          role="dialog"
+          aria-modal="true"
+          :aria-labelledby="labelledBy"
+          :aria-describedby="describedBy"
+          :class="panelDialogClass"
+          @click.stop
+        >
         <!-- Header -->
         <div
           v-if="title || subtitle || $slots.header || showClose"
@@ -156,6 +162,7 @@
         <div v-if="$slots.footer" :class="dense ? footerDenseClass : footerClass">
           <slot name="footer" />
         </div>
+      </div>
       </div>
     </div>
   </Teleport>
@@ -239,13 +246,10 @@ const describedBy = computed(() => (props.subtitle ? subtitleId : undefined))
 
 const fitContent = computed(() => props.fitContent && !nativeInApp.value)
 
-const panelShellClass =
-  'side-panel-native-shell pointer-events-auto flex h-full min-h-0 w-full flex-col'
-
 const panelDialogClass = computed(() =>
   nativeInApp.value
     ? [
-        'side-panel-native-dialog flex h-full max-h-full min-h-0 w-full flex-col overflow-hidden',
+        'native-side-drawer-panel side-panel-native-dialog flex h-full max-h-full min-h-0 flex-col overflow-hidden',
         drawerShellClass,
       ]
     : [

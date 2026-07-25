@@ -42,10 +42,21 @@
             v-if="statusLoaded && isNativeApp && !apiBaseConfigured"
             class="dashboard-assistant__setup rounded-xl border border-amber-200/80 bg-amber-50 px-3 py-3 text-sm leading-relaxed text-amber-950 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-100"
           >
-            The iOS app needs a server URL to reach Storvv Assistant. Rebuild with
+            The iOS app could not reach the Storvv server. Set
             <code class="rounded bg-black/5 px-1 py-0.5 text-xs dark:bg-white/10">NUXT_PUBLIC_API_BASE=https://app.storvv.com</code>
-            in <code class="rounded bg-black/5 px-1 py-0.5 text-xs dark:bg-white/10">.env</code>, then run
+            in <code class="rounded bg-black/5 px-1 py-0.5 text-xs dark:bg-white/10">.env</code> and rebuild with
             <code class="rounded bg-black/5 px-1 py-0.5 text-xs dark:bg-white/10">npm run cap:build:ios</code>.
+          </div>
+
+          <div
+            v-else-if="statusLoaded && isNativeApp && !statusReachable"
+            class="dashboard-assistant__setup rounded-xl border border-amber-200/80 bg-amber-50 px-3 py-3 text-sm leading-relaxed text-amber-950 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-100"
+          >
+            Could not reach Storvv at
+            <code class="rounded bg-black/5 px-1 py-0.5 text-xs dark:bg-white/10">app.storvv.com</code>.
+            Rebuild the iOS app after pulling the latest code
+            (<code class="rounded bg-black/5 px-1 py-0.5 text-xs dark:bg-white/10">npm run cap:build:ios</code>),
+            then redeploy Vercel so Capacitor API access is enabled.
           </div>
 
           <div
@@ -175,7 +186,7 @@ import Button from '~/components/ui/Button.vue'
 import { useDashboardAssistant } from '~/composables/useDashboardAssistant'
 import type { AssistantMessage } from '~/stores/assistant'
 
-const { configured, statusLoaded, apiBaseConfigured, isNativeApp, assistantStore } =
+const { configured, statusLoaded, statusReachable, apiBaseConfigured, isNativeApp, assistantStore } =
   useDashboardAssistant()
 
 const draft = ref('')

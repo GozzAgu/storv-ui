@@ -943,6 +943,7 @@ import {
   initializePaystackSubscription,
   type PaystackInitializeFetcher,
 } from '~/utils/paystack-upgrade'
+import { getEffectiveApiBase } from '~/utils/capacitor-api-base'
 import {
   BILLING_BLOCKED_USER_MESSAGE,
   extractUploadFailureMessage,
@@ -1057,7 +1058,7 @@ const handleUpgradeSubscription = async () => {
         billingCycle: selectedBillingCycle.value,
       },
       $fetch as PaystackInitializeFetcher,
-      useRuntimeConfig().public.apiBase || undefined,
+      getEffectiveApiBase() || undefined,
       headers
     )
     if (result.ok) {

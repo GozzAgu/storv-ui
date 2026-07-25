@@ -4,11 +4,13 @@ The iOS app loads the same Nuxt dashboard from `dist/` (via `nuxt generate`). We
 
 ## Ship dashboard updates to iOS
 
-1. Ensure `.env` has Firebase public keys and, for staff remove/reactivate:
+1. Ensure `.env` has Firebase public keys. For staff remove/reactivate and Storvv Assistant API calls, set:
 
    ```bash
    NUXT_PUBLIC_API_BASE=https://app.storvv.com
    ```
+
+   If this is omitted, the iOS app falls back to `NUXT_PUBLIC_APP_ORIGIN` (default `https://app.storvv.com`) at runtime — explicit `NUXT_PUBLIC_API_BASE` is still recommended for production builds.
 
    (`updateStaff` / move department use Firestore on-device; deactivate/reactivate call this API.)
 
@@ -33,14 +35,14 @@ The iOS app loads the same Nuxt dashboard from `dist/` (via `nuxt generate`). We
 - Staff **Active / Removed** tabs, **⋮** actions menu, move/remove/reactivate modals
 - **Teams** bottom tab (departments list for current store; managers and owners)
 - Round profile avatars in top nav and sidebar
-- Modals and side panels render in `#dashboard-native-overlay-host` (teleported to `body` on iOS so they are not clipped by `overflow-hidden` shells)
-- **Storvv Assistant** (sparkle FAB above bottom nav, header shortcut, Help center “Ask assistant”) — calls hosted `/api/assistant/*` on `NUXT_PUBLIC_API_BASE`
+- Modals and side panels render as **right-edge drawers** in `#dashboard-native-overlay-host` (teleported to `body` on iOS so they are not clipped by `overflow-hidden` shells). Small confirmations (e.g. sign out) use a compact drawer.
+- **Storvv Assistant** (sparkle FAB above bottom nav, header shortcut, Help center “Ask assistant”) — calls hosted `/api/assistant/*` via `NUXT_PUBLIC_API_BASE` or `NUXT_PUBLIC_APP_ORIGIN` fallback
 
 ## Storvv Assistant on iOS
 
 The iOS app does **not** bundle Gemini. Assistant chat goes to your hosted API (same as staff deactivate/reactivate).
 
-1. **Build-time** (`.env` before `npm run cap:build:ios`):
+1. **Build-time** (`.env` before `npm run cap:build:ios`) — optional if `NUXT_PUBLIC_APP_ORIGIN` is already `https://app.storvv.com`:
 
    ```bash
    NUXT_PUBLIC_API_BASE=https://app.storvv.com
@@ -61,5 +63,7 @@ The iOS app does **not** bundle Gemini. Assistant chat goes to your hosted API (
    npm run cap:build:ios
    npm run cap:open:ios
    ```
+
+   The hosted API must allow Capacitor WebView origins (CORS). That ships with the app server code — **redeploy Vercel** after pulling updates if assistant status fails on device but works in Safari on `app.storvv.com`.
 
 No separate iOS-only assistant UI branch is required.

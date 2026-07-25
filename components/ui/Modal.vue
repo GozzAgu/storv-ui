@@ -3,7 +3,7 @@
     <div v-if="modelValue" :class="rootClass" role="presentation">
       <div
         v-if="nativeInApp"
-        class="native-modal-backdrop absolute inset-0 bg-black/40"
+        class="native-side-drawer-backdrop native-modal-backdrop absolute inset-0 bg-black/40"
         aria-hidden="true"
         @click="handleBackdropClick"
       />
@@ -197,6 +197,17 @@ const labelledBy = computed(() => (props.title ? titleId : undefined))
 const describedBy = computed(() => (props.subtitle ? subtitleId : undefined))
 
 const sizeClasses = computed(() => {
+  if (nativeInApp.value) {
+    const nativeSizeMap = {
+      xs: 'dash-overlay-modal--xs',
+      sm: 'dash-overlay-modal--sm',
+      md: 'dash-overlay-modal--md',
+      lg: 'dash-overlay-modal--lg native-side-drawer-panel--wide',
+      xl: 'dash-overlay-modal--xl native-side-drawer-panel--wide',
+    }
+    return nativeSizeMap[props.size]
+  }
+
   const sizeMap = {
     xs: 'dash-overlay-modal--xs mx-auto w-full',
     sm: 'dash-overlay-modal--sm mx-auto w-full',
@@ -209,21 +220,25 @@ const sizeClasses = computed(() => {
 
 const rootClass = computed(() =>
   nativeInApp.value
-    ? 'modal-native-shell pointer-events-auto relative flex h-full min-h-0 w-full flex-col overflow-hidden'
+    ? 'native-side-drawer-root pointer-events-auto relative flex h-full min-h-0 w-full overflow-hidden'
     : 'fixed inset-0 z-[105] overflow-y-auto'
 )
 
 const stageClass = computed(() =>
   nativeInApp.value
-    ? 'pointer-events-none relative z-10 flex h-full min-h-0 flex-1 items-center justify-center p-3'
+    ? 'native-side-drawer-stage pointer-events-none relative z-10 flex h-full min-h-0 w-full justify-end'
     : 'pointer-events-none relative z-10 flex min-h-full w-full items-end justify-center p-3 sm:min-h-0 sm:h-full sm:items-center sm:p-4 md:p-5'
 )
+
+const nativeDrawerCompact = computed(() => nativeInApp.value && props.size === 'xs')
 
 const dialogClass = computed(() =>
   nativeInApp.value
     ? [
-        'pointer-events-auto relative flex max-h-full w-full min-h-0 flex-col overflow-hidden',
+        'native-side-drawer-panel pointer-events-auto relative flex min-h-0 flex-col overflow-hidden',
+        nativeDrawerCompact.value ? 'native-side-drawer-panel--compact' : '',
         modalShellClass,
+        'dash-overlay-drawer',
         sizeClasses.value,
       ]
     : [

@@ -228,35 +228,91 @@ html.capacitor-native.dark .native-bottom-nav__backdrop {
   background: rgb(0 0 0 / 0.58) !important;
 }
 
-/* ── Modals & drawers inside native overlay host ── */
+/* ── Native side drawers (modals + SidePanel) inside overlay host ── */
+html.capacitor-native {
+  --dashboard-native-drawer-width: min(92vw, 22rem);
+  --dashboard-native-drawer-width-wide: min(92vw, 32rem);
+  --dashboard-native-drawer-width-compact: min(86vw, 17.5rem);
+}
+
+html.capacitor-native .native-side-drawer-root {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+html.capacitor-native .native-side-drawer-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+html.capacitor-native .native-side-drawer-stage {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  width: 100%;
+  justify-content: flex-end;
+  align-items: stretch;
+  pointer-events: none;
+}
+
+html.capacitor-native .native-side-drawer-panel {
+  pointer-events: auto;
+  height: 100%;
+  max-height: 100%;
+  min-height: 0;
+  width: var(--dashboard-native-drawer-width);
+  border: 0;
+  border-left: 1px solid var(--dash-overlay-border);
+  border-radius: 1rem 0 0 1rem;
+  box-shadow: var(--dash-overlay-shadow);
+}
+
+html.capacitor-native .native-side-drawer-panel--wide {
+  width: var(--dashboard-native-drawer-width-wide);
+}
+
+html.capacitor-native .native-side-drawer-panel--compact {
+  height: auto;
+  max-height: min(72dvh, calc(100% - 1.5rem));
+  width: var(--dashboard-native-drawer-width-compact);
+  align-self: center;
+  margin-right: 0.625rem;
+  border: 1px solid var(--dash-overlay-border);
+  border-radius: 1rem;
+}
+
 html.capacitor-native .dashboard-native-overlay-host .dash-overlay-shell {
   height: 100%;
   max-height: 100%;
   min-height: 0;
 }
 
+html.capacitor-native .native-side-drawer-panel.dash-overlay-drawer {
+  display: flex;
+  flex-direction: column;
+}
+
 html.capacitor-native .side-panel-native-dialog {
   height: 100%;
   max-height: 100%;
   min-height: 0;
-  border: 0;
-  border-radius: 1rem 1rem 0 0;
-  box-shadow: var(--dash-overlay-shadow);
 }
 
 html.capacitor-native .side-panel-native-dialog > :first-child {
   border-top: 0;
 }
 
-html.capacitor-native .modal-native-shell .dash-overlay-modal {
-  height: 100%;
-  max-height: 100%;
-  min-height: 0;
-  border-radius: 1rem;
-}
-
-html.capacitor-native .modal-native-shell {
-  padding: 0.75rem;
+html.capacitor-native .native-side-drawer-panel--compact.dash-overlay-modal {
+  height: auto;
+  max-height: min(72dvh, calc(100% - 1.5rem));
 }
 
 /* ── Toasts above bottom nav ── */
