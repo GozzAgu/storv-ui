@@ -7,6 +7,8 @@ html.capacitor-native {
   font-size: 16px;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  --app-font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', system-ui,
+    sans-serif;
 
   --cap-canvas-bg: #f4f6fb;
   --cap-surface-bg: #ffffff;

@@ -477,15 +477,15 @@ export const useInventoryStore = defineStore('inventory', {
     },
 
     /** Scan store inventory items and compute available / sold / on-loan units per category. */
-    async fetchFolderAvailabilityStats() {
+    async fetchFolderAvailabilityStats(): Promise<Record<string, InventoryItem[]>> {
       if (this.folders.length === 0) {
         this.folderAvailabilityStats = {}
         this.folderProfitStats = {}
-        return
+        return {}
       }
 
       const authStore = useAuthStore()
-      if (!authStore.currentUser) return
+      if (!authStore.currentUser) return {}
 
       this.availabilityStatsLoading = true
       try {
@@ -526,9 +526,16 @@ export const useInventoryStore = defineStore('inventory', {
         }
         this.folderAvailabilityStats = { ...next }
         this.folderProfitStats = { ...profitNext }
+
+        const grouped: Record<string, InventoryItem[]> = {}
+        for (const folder of this.folders) {
+          grouped[folder.id] = itemsByFolder.get(folder.id) ?? []
+        }
+        return grouped
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : String(error)
         console.warn('[InventoryStore] fetchFolderAvailabilityStats failed:', message)
+        return {}
       } finally {
         this.availabilityStatsLoading = false
       }

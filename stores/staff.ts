@@ -171,35 +171,43 @@ export const useStaffStore = defineStore('staff', {
 
         const allStaff: Staff[] = []
 
-        // Iterate through all departments and collect staff from each
-        for (const deptDoc of departmentsSnapshot.docs) {
-          const departmentId = deptDoc.id
-          const deptData = deptDoc.data()
+        const departmentStaffLists = await Promise.all(
+          departmentsSnapshot.docs.map(async (deptDoc) => {
+            const departmentId = deptDoc.id
+            const deptData = deptDoc.data()
 
-          // Only process departments created by this user
-          if (deptData.createdBy === userId) {
+            if (deptData.createdBy !== userId) return [] as Staff[]
+
             try {
               const staffRef = getStaffCollection(db, userId, storeId, departmentId)
               const staffSnapshot = await getDocs(staffRef)
+              const deptStaff: Staff[] = []
 
               staffSnapshot.forEach((staffDoc) => {
                 const staffData = staffDoc.data()
-                // Double-check that the staff belongs to this user
                 if (staffData.createdBy === userId) {
-                  allStaff.push({
+                  deptStaff.push({
                     id: staffDoc.id,
                     ...staffData,
-                    departmentId: departmentId, // Ensure departmentId is set
+                    departmentId,
                   } as Staff)
                 }
               })
-            } catch (error: any) {
+
+              return deptStaff
+            } catch (error: unknown) {
+              const message = error instanceof Error ? error.message : String(error)
               console.warn(
                 `[StaffStore] Error fetching staff for department ${departmentId}:`,
-                error.message
+                message
               )
+              return [] as Staff[]
             }
-          }
+          })
+        )
+
+        for (const list of departmentStaffLists) {
+          allStaff.push(...list)
         }
 
         // Sort by createdAt (newest first)

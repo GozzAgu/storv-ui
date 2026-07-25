@@ -185,7 +185,7 @@
               <p :class="cardDescClass">Completed receipts will populate this chart</p>
             </div>
             <ClientOnly v-else>
-              <apexchart type="area" :height="chartHeight" :options="chartOptions" :series="chartSeries" />
+              <LazyApexChart type="area" :height="chartHeight" :options="chartOptions" :series="chartSeries" />
               <template #fallback>
                 <div :class="emptyClass">Loading chart…</div>
               </template>
@@ -366,7 +366,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, defineAsyncComponent } from 'vue'
+
+const LazyApexChart = defineAsyncComponent(
+  () => import('~/components/charts/LazyApexChart.client.vue')
+)
 import { MARKETING_FEATURE_ICONS } from '~/utils/marketing-feature-icons'
 import MarketingFeatureIcon from '~/components/marketing/MarketingFeatureIcon.vue'
 import StatCard from '~/components/ui/StatCard.vue'
@@ -824,17 +828,7 @@ const loadDashboardData = async () => {
       departmentsStore.fetchDepartments(),
     ])
 
-    if (inventoryStore.folders.length > 0) {
-      const map: Record<string, InventoryItem[]> = {}
-      await Promise.all(
-        inventoryStore.folders.map(async (folder) => {
-          map[folder.id] = await inventoryStore.fetchItemsAllChunked(folder.id)
-        })
-      )
-      dashboardFolderItems.value = map
-    } else {
-      dashboardFolderItems.value = {}
-    }
+    dashboardFolderItems.value = await inventoryStore.fetchFolderAvailabilityStats()
 
     if (canViewActivity.value) {
       recentActivityLogs.value = await fetchActivityLogs(DASHBOARD_ACTIVITY_TOP)

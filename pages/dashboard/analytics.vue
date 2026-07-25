@@ -167,7 +167,7 @@
             </div>
           </div>
           <div :class="['dash-chart-wrap dash-chart-wrap--tall']">
-            <apexchart
+            <LazyApexChart
               type="line"
               height="300"
               :options="revenueChartOptions"
@@ -180,7 +180,7 @@
           <h2 :class="cardTitleClass">Top products</h2>
           <p :class="cardDescClass">Share of revenue (top 5)</p>
           <div class="mt-2 flex-1">
-            <apexchart
+            <LazyApexChart
               type="donut"
               height="300"
               :options="topProductsChartOptions"
@@ -204,7 +204,7 @@
           <div v-if="topFoldersBySales.length === 0" :class="emptyClass">
             No category sales in this period.
           </div>
-          <apexchart
+          <LazyApexChart
             v-else
             type="bar"
             :height="Math.max(240, topFoldersBySales.length * 40)"
@@ -225,7 +225,7 @@
           <div v-if="customerChartCustomers.length === 0" :class="emptyClass">
             No customer emails on receipts in this period.
           </div>
-          <apexchart
+          <LazyApexChart
             v-else
             type="bar"
             :height="Math.max(220, customerChartCustomers.length * 44)"
@@ -290,7 +290,7 @@
               <p :class="cardDescClass">Revenue by hour of day · hover for order count</p>
             </div>
           </div>
-          <apexchart
+          <LazyApexChart
             type="bar"
             height="260"
             :options="peakHoursChartOptions"
@@ -307,7 +307,7 @@
               <p :class="cardDescClass">Best and worst days</p>
             </div>
           </div>
-          <apexchart
+          <LazyApexChart
             type="bar"
             height="250"
             :options="salesByDayChartOptions"
@@ -322,7 +322,7 @@
               <p :class="cardDescClass">Revenue by day × hour</p>
             </div>
           </div>
-          <apexchart
+          <LazyApexChart
             type="heatmap"
             height="280"
             :options="heatmapChartOptions"
@@ -503,7 +503,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, defineAsyncComponent } from 'vue'
+
+const LazyApexChart = defineAsyncComponent(
+  () => import('~/components/charts/LazyApexChart.client.vue')
+)
 import {
   ArrowDownTrayIcon,
   BuildingStorefrontIcon,
@@ -520,7 +524,6 @@ import { useAppToast } from '~/composables/useAppToast'
 import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
 import StatCard from '~/components/ui/StatCard.vue'
 import PaymentLinksSummaryCard from '~/components/payments/PaymentLinksSummaryCard.vue'
-import jsPDF from 'jspdf'
 import { tableMoneyClass } from '~/utils/table-money-styles'
 import {
   truncateChartLabel,
@@ -1725,22 +1728,8 @@ const loadAnalytics = async () => {
     await Promise.all([receiptsStore.fetchReceipts(), inventoryStore.fetchFolders()])
     receipts.value = receiptsStore.receipts
 
-    const folders = inventoryStore.folders
-    const allItems: any[] = []
-    if (folders.length > 0) {
-      const results = await Promise.allSettled(
-        folders.map(async (folder) => {
-          const list = await inventoryStore.fetchItemsAllChunked(folder.id, { force: true })
-          allItems.push(...list)
-        })
-      )
-      results.forEach((result, i) => {
-        if (result.status === 'rejected' && folders[i]) {
-          console.error(`Error loading items for folder ${folders[i]!.id}:`, result.reason)
-        }
-      })
-    }
-    inventoryItems.value = allItems
+    const grouped = await inventoryStore.fetchFolderAvailabilityStats()
+    inventoryItems.value = Object.values(grouped).flat()
   } catch (error) {
     console.error('Error loading analytics:', error)
     toast.error('Failed to load analytics data')
@@ -1812,6 +1801,7 @@ const exportToExcel = async () => {
 
 const exportToPDF = async () => {
   try {
+    const { default: jsPDF } = await import('jspdf')
     const doc = new jsPDF()
 
     // Title

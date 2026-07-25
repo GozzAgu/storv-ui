@@ -55,7 +55,7 @@ export function useReorderListExport() {
       })
       const branchName = storesStore.currentStore?.name || ''
 
-      downloadReorderListExcel(rows, {
+      await downloadReorderListExcel(rows, {
         storeName: businessName,
         branchName,
       })

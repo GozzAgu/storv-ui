@@ -186,7 +186,7 @@ import Button from '~/components/ui/Button.vue'
 import { useDashboardAssistant } from '~/composables/useDashboardAssistant'
 import type { AssistantMessage } from '~/stores/assistant'
 
-const { configured, statusLoaded, statusReachable, apiBaseConfigured, isNativeApp, assistantStore } =
+const { configured, statusLoaded, statusReachable, apiBaseConfigured, isNativeApp, assistantStore, refreshStatus } =
   useDashboardAssistant()
 
 const draft = ref('')
@@ -241,6 +241,7 @@ watch(
   () => assistantStore.isOpen,
   (open) => {
     if (!open) return
+    void refreshStatus()
     const seed = assistantStore.takeDraftSeed()
     if (seed) draft.value = seed
     nextTick(() => inputEl.value?.focus())

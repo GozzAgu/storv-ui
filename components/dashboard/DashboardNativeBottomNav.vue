@@ -9,6 +9,7 @@
           v-for="item in primaryItems"
           :key="item.href"
           :to="item.href"
+          :prefetch="false"
           role="tab"
           :aria-selected="isActive(item.href)"
           :class="[tabClass, isActive(item.href) ? tabActiveClass : tabInactiveClass]"
@@ -101,6 +102,7 @@
             <li v-for="item in moreItems" :key="item.href">
               <NuxtLink
                 :to="item.href"
+                :prefetch="false"
                 :class="[
                   sheetRowClass,
                   isActive(item.href) ? sheetRowActiveClass : sheetRowInactiveClass,

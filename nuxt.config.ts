@@ -3,7 +3,7 @@ import { CAPACITOR_SHELL_INLINE_SCRIPT } from './utils/capacitor-shell-inline'
 
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
-  devtools: { enabled: true },
+  devtools: { enabled: process.env.NODE_ENV === 'development' },
   modules: ['@nuxt/ui', '@pinia/nuxt'],
   ui: {
     fonts: false,

@@ -6,6 +6,7 @@ import {
   redirectCapacitorRootToSignIn,
 } from '~/utils/capacitor-root-path'
 import { startNativeKeyboardHandling } from '~/composables/useNativeKeyboardInset'
+import { stripNativeWebFontLinks } from '~/utils/capacitor-native-perf'
 
 function detectNativeShell(): boolean {
   if (import.meta.server) return false
@@ -32,6 +33,7 @@ export default defineNuxtPlugin({
     if (!native) return
 
     markCapacitorDocument()
+    stripNativeWebFontLinks()
     void startNativeKeyboardHandling()
 
     if (redirectCapacitorRootToSignIn()) return

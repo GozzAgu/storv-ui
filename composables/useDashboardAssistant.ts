@@ -43,12 +43,6 @@ export function useDashboardAssistant() {
     await statusRequest
   }
 
-  if (import.meta.client) {
-    onMounted(() => {
-      void refreshStatus()
-    })
-  }
-
   function openAssistant(draft?: string) {
     assistantStore.open(draft)
     void refreshStatus()

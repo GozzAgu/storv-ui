@@ -4,8 +4,12 @@
  * - Restores `title` on leave/blur so dynamic bindings keep working
  * - Skip any element by adding `data-tooltip-skip`
  */
+import { isCapacitorNative } from '~/utils/capacitor-env'
+
 export default defineNuxtPlugin(() => {
   if (import.meta.server) return
+  // Touch-first native shell: skip hover tooltip listeners on iOS/Android.
+  if (isCapacitorNative()) return
 
   const activeTitles = new WeakMap<HTMLElement, string>()
   let activeEl: HTMLElement | null = null

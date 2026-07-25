@@ -1,10 +1,10 @@
-import * as XLSX from 'xlsx'
 import type { LowStockRow } from '~/utils/low-stock-items'
 
-export function buildReorderListWorkbook(
+export async function buildReorderListWorkbook(
   rows: LowStockRow[],
   meta?: { storeName?: string; branchName?: string }
 ) {
+  const XLSX = await import('xlsx')
   const header = [
     'Category',
     'Product',
@@ -52,11 +52,12 @@ export function buildReorderListWorkbook(
   return wb
 }
 
-export function downloadReorderListExcel(
+export async function downloadReorderListExcel(
   rows: LowStockRow[],
   meta?: { storeName?: string; branchName?: string }
 ) {
-  const wb = buildReorderListWorkbook(rows, meta)
+  const XLSX = await import('xlsx')
+  const wb = await buildReorderListWorkbook(rows, meta)
   const date = new Date().toISOString().split('T')[0]
   const filename = `reorder-list_${date}.xlsx`
   XLSX.writeFile(wb, filename)

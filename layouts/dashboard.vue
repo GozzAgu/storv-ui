@@ -576,7 +576,7 @@
             v-if="!isNativeApp"
             type="button"
             class="dash-topnav__search dashboard-topnav-search group relative hidden h-8 w-[min(100%,12rem)] shrink-0 items-center gap-2 px-2.5 sm:w-[min(100%,14rem)] md:flex lg:w-[min(100%,16rem)] xl:w-[min(100%,18rem)]"
-            @click="searchStore.openSearch()"
+            @click="openGlobalSearch()"
           >
             <MagnifyingGlassIcon
               class="block h-3.5 w-3.5 shrink-0 text-gray-400 dark:text-gray-500"
@@ -632,7 +632,7 @@
               type="button"
               class="dash-topnav__icon-btn md:hidden"
               aria-label="Search"
-              @click="searchStore.openSearch()"
+              @click="openGlobalSearch()"
             >
               <MagnifyingGlassIcon class="block h-4 w-4 shrink-0" :size="16" stroke-width="1.75" />
             </button>
@@ -784,10 +784,10 @@
       </div>
     </Modal>
 
-    <!-- Global Search -->
-    <GlobalSearch />
+    <!-- Global Search (deferred; especially on native to keep first paint lean) -->
+    <GlobalSearch v-if="searchShellReady" />
 
-    <DashboardAssistant />
+    <DashboardAssistant v-if="assistantShellReady" />
 
     <DashboardNativeTableLayoutSync v-if="isNativeApp" />
 
@@ -802,7 +802,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, computed, watch, nextTick, defineAsyncComponent } from 'vue'
 import {
   XMarkIcon,
   BellIcon,
@@ -834,10 +834,13 @@ import { isPaymentLinksNativeComingSoon } from '~/utils/payment-links-launch'
 import { resolveStoreDepartmentsPath } from '~/utils/department-routes'
 import StoreSelector from '~/components/ui/StoreSelector.vue'
 import ToastContainer from '~/components/ui/ToastContainer.vue'
-import GlobalSearch from '~/components/search/GlobalSearch.vue'
-import DashboardAssistant from '~/components/dashboard/DashboardAssistant.vue'
 import RecentItemsWidget from '~/components/ui/RecentItemsWidget.vue'
 import NotificationsPanel from '~/components/notifications/NotificationsPanel.vue'
+
+const GlobalSearch = defineAsyncComponent(() => import('~/components/search/GlobalSearch.vue'))
+const DashboardAssistant = defineAsyncComponent(
+  () => import('~/components/dashboard/DashboardAssistant.vue')
+)
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useTheme } from '~/composables/useTheme'
 import { useAuthStore } from '~/stores/auth'
@@ -851,6 +854,8 @@ import { useStoresStore } from '~/stores/stores'
 import { useStaffStore } from '~/stores/staff'
 import { useSearchStore } from '~/stores/search'
 import { clearNativeOverlayLock } from '~/utils/native-overlay-lock'
+import { isCapacitorNative } from '~/utils/capacitor-env'
+import { scheduleNativeIdleWork } from '~/utils/capacitor-native-perf'
 
 const { actualTheme } = useTheme()
 
@@ -865,12 +870,53 @@ const departmentsStore = useDepartmentsStore()
 const storesStore = useStoresStore()
 const staffStore = useStaffStore()
 const searchStore = useSearchStore()
-const { openAssistant } = useDashboardAssistant()
+const { openAssistant: openAssistantPanel } = useDashboardAssistant()
+const searchShellReady = ref(false)
+const assistantShellReady = ref(false)
+
+function mountSearchShell() {
+  if (!searchShellReady.value) searchShellReady.value = true
+}
+
+function mountAssistantShell() {
+  if (!assistantShellReady.value) assistantShellReady.value = true
+}
+
+function mountShellWidgets() {
+  mountSearchShell()
+  mountAssistantShell()
+}
+
+function openAssistant(draft?: string) {
+  mountAssistantShell()
+  openAssistantPanel(draft)
+}
+
+function openGlobalSearch() {
+  mountSearchShell()
+  nextTick(() => searchStore.openSearch())
+}
+
+function handleGlobalSearchShortcut(e: KeyboardEvent) {
+  if (isCapacitorNative()) return
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+    e.preventDefault()
+    mountSearchShell()
+    nextTick(() => searchStore.toggleSearch())
+  }
+}
 const { eligibleStores } = usePlanEligibleStores()
-// Fetch notifications on mount
+// Fetch notifications after shell is interactive (native defers further).
+function scheduleNotificationsFetch() {
+  if (!authStore.currentUser) return
+  notificationsStore.fetchNotifications()
+}
+
 onMounted(() => {
-  if (authStore.currentUser) {
-    notificationsStore.fetchNotifications()
+  if (isCapacitorNative()) {
+    scheduleNativeIdleWork(scheduleNotificationsFetch, 2000)
+  } else if (authStore.currentUser) {
+    scheduleNotificationsFetch()
   }
 })
 
@@ -879,7 +925,11 @@ watch(
   () => authStore.currentUser,
   (newUser) => {
     if (newUser) {
-      notificationsStore.fetchNotifications()
+      if (isCapacitorNative()) {
+        scheduleNativeIdleWork(scheduleNotificationsFetch, 1500)
+      } else {
+        scheduleNotificationsFetch()
+      }
     }
   }
 )
@@ -1200,16 +1250,10 @@ watch(
       await storesStore.initializeCurrentStore()
       await Promise.all([
         departmentsStore.fetchDepartments(),
-        staffStore.fetchStaff().catch((err) => {
-          console.warn('[Dashboard] Error fetching staff:', err)
-        }),
-      ])
-      // Inventory item lists are loaded on-demand (folder page, dashboard home, search), avoiding N queries on every route.
-      await Promise.all([inventoryStore.fetchFolders(), receiptsStore.fetchReceipts()]).catch(
-        (err) => {
-          console.warn('[Dashboard] Error fetching inventory/receipts:', err)
-        }
-      )
+        inventoryStore.fetchFolders(),
+      ]).catch((err) => {
+        console.warn('[Dashboard] Error fetching shell data:', err)
+      })
       // Auto-expand current store
       if (storesStore.currentStoreId) {
         expandedStores[storesStore.currentStoreId] = true
@@ -1239,11 +1283,9 @@ watch(
       }
       await storesStore.initializeCurrentStore()
       await departmentsStore.fetchDepartments()
-      await Promise.all([inventoryStore.fetchFolders(), receiptsStore.fetchReceipts()]).catch(
-        (err) => {
-          console.warn('[Dashboard] Error fetching inventory/receipts:', err)
-        }
-      )
+      await inventoryStore.fetchFolders().catch((err) => {
+        console.warn('[Dashboard] Error fetching inventory folders:', err)
+      })
       // Auto-expand current store for staff
       if (storesStore.currentStoreId) {
         expandedStores[storesStore.currentStoreId] = true
@@ -1901,6 +1943,15 @@ onMounted(async () => {
   if (import.meta.client) {
     window.addEventListener('resize', onNotificationsScrollOrResize)
     window.addEventListener('scroll', onNotificationsScrollOrResize, true)
+    if (!isCapacitorNative()) {
+      window.addEventListener('keydown', handleGlobalSearchShortcut)
+    }
+    if (isCapacitorNative()) {
+      assistantShellReady.value = true
+      scheduleNativeIdleWork(() => mountSearchShell(), 3500)
+    } else {
+      scheduleNativeIdleWork(() => mountShellWidgets(), 2500)
+    }
     await checkAuth()
 
     // Initialize cache from localStorage after auth loads
@@ -2042,6 +2093,9 @@ onUnmounted(() => {
   if (import.meta.client) {
     window.removeEventListener('resize', onNotificationsScrollOrResize)
     window.removeEventListener('scroll', onNotificationsScrollOrResize, true)
+    if (!isCapacitorNative()) {
+      window.removeEventListener('keydown', handleGlobalSearchShortcut)
+    }
     clearNativeOverlayLock()
   }
 })

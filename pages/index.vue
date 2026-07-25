@@ -1152,6 +1152,7 @@
 </template>
 
 <script setup lang="ts">
+import '~/assets/css/landing.css'
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import Modal from '~/components/ui/Modal.vue'
 import MarketingSyncLoader from '~/components/marketing/MarketingSyncLoader.vue'
