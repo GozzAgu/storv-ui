@@ -8,5 +8,10 @@
 	"ios": {
 		"contentInset": "never",
 		"backgroundColor": "#f3f4f6"
+	},
+	"plugins": {
+		"Keyboard": {
+			"resize": "none"
+		}
 	}
 }

@@ -50,6 +50,23 @@ html.capacitor-native.dark .inv-category-card {
     0 12px 32px rgb(0 0 0 / 0.18);
 }
 
+html.capacitor-native .dash-page-header.dash-page-header--unified {
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 0 !important;
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+html.capacitor-native .dash-page-header--unified .dash-page-header__description {
+  width: 100%;
+}
+
+html.capacitor-native .dash-page-header--unified .dash-page-metrics {
+  width: 100%;
+  grid-template-columns: repeat(auto-fit, minmax(3.75rem, 1fr));
+}
+
 html.capacitor-native .dash-page-header,
 html.capacitor-native .dash-home,
 html.capacitor-native .dash-analytics,
@@ -477,6 +494,16 @@ html.capacitor-native .receipt-items-table-wrap table th:first-child {
 html.capacitor-native .inventory-categories-page .dashboard-table__col-source,
 html.capacitor-native [data-dashboard-main] .dashboard-table__col-source {
   min-width: 5.5rem;
+}
+
+html.capacitor-native .dash-home .dash-kpi-grid--compact,
+html.capacitor-native .dash-home .dash-kpi-grid--pair {
+  max-width: none;
+  width: 100%;
+}
+
+html.capacitor-native .dash-home .dash-home-kpi {
+  width: 100%;
 }
 
 html.capacitor-native .dash-home .dash-kpi-grid .dash-stat-card:nth-child(n + 6) {

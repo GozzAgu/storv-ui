@@ -6,5 +6,9 @@
 	{
 		"pkg": "@aparajita/capacitor-secure-storage",
 		"classpath": "com.aparajita.capacitor.securestorage.SecureStorage"
+	},
+	{
+		"pkg": "@capacitor/keyboard",
+		"classpath": "com.capacitorjs.plugins.keyboard.KeyboardPlugin"
 	}
 ]

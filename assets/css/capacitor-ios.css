@@ -231,6 +231,83 @@ html.capacitor-ios.capacitor-native.dark .dash-page-header {
     0 16px 40px -20px rgb(0 0 0 / 0.45);
 }
 
+/* Unified header — full-width metrics row (matches web) */
+html.capacitor-ios.capacitor-native .dash-page-header.dash-page-header--unified {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 0 !important;
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+html.capacitor-ios.capacitor-native .dash-page-header--unified > .flex.flex-col.gap-3 {
+  gap: 0.5rem;
+  padding: 0.75rem 0.875rem 0.5rem;
+}
+
+html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-header__description {
+  width: 100%;
+  padding-inline: 0.875rem;
+  padding-bottom: 0.5rem;
+}
+
+html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-header__description .dash-page-metrics {
+  margin-top: 0;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(3.5rem, 1fr));
+  gap: 0.375rem 0.5rem;
+  padding: 0.5625rem 0.625rem;
+  border-radius: var(--cap-ios-radius);
+  border-color: var(--dash-card-border);
+  background: rgb(255 255 255 / 0.42);
+  -webkit-backdrop-filter: blur(12px) saturate(1.1);
+  backdrop-filter: blur(12px) saturate(1.1);
+}
+
+html.capacitor-ios.capacitor-native.dark
+  .dash-page-header--unified
+  .dash-page-header__description
+  .dash-page-metrics {
+  background: rgb(255 255 255 / 0.04);
+}
+
+html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-metric__label {
+  font-size: var(--cap-ios-caption) !important;
+  letter-spacing: 0.06em;
+  line-height: 1.25;
+}
+
+html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-metric__value {
+  font-size: var(--cap-ios-title) !important;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-header__toolbar {
+  margin-top: 0;
+  padding: 0.5625rem 0.875rem;
+  border-top: 1px solid var(--dash-card-border);
+  background: rgb(255 255 255 / 0.28);
+  -webkit-backdrop-filter: blur(10px) saturate(1.08);
+  backdrop-filter: blur(10px) saturate(1.08);
+}
+
+html.capacitor-ios.capacitor-native.dark .dash-page-header--unified .dash-page-header__toolbar {
+  background: rgb(255 255 255 / 0.03);
+}
+
+html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-header__bulk {
+  width: 100%;
+  justify-content: flex-end;
+}
+
+html.capacitor-ios.capacitor-native .dash-page--unified,
+html.capacitor-ios.capacitor-native .dash-grid-page.dash-page--unified {
+  gap: 0.625rem;
+}
+
 html.capacitor-ios.capacitor-native .dash-grid-page,
 html.capacitor-ios.capacitor-native .dash-home,
 html.capacitor-ios.capacitor-native .dash-analytics {
@@ -275,6 +352,44 @@ html.capacitor-ios.capacitor-native .dash-stat-card__value {
 html.capacitor-ios.capacitor-native .dash-stat-card__label,
 html.capacitor-ios.capacitor-native .dash-stat-card__subtext {
   font-size: var(--cap-ios-caption) !important;
+}
+
+/* Dashboard home — StatCard KPI grid (welcome header stays a glass card) */
+html.capacitor-ios.capacitor-native .dash-home {
+  gap: 0.625rem;
+}
+
+html.capacitor-ios.capacitor-native .dash-home > .dash-page-header {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 0.875rem 1rem;
+}
+
+html.capacitor-ios.capacitor-native .dash-home .dash-home-kpi {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+html.capacitor-ios.capacitor-native .dash-home .dash-kpi-grid,
+html.capacitor-ios.capacitor-native .dash-home .dash-kpi-grid--compact,
+html.capacitor-ios.capacitor-native .dash-home .dash-kpi-grid--pair {
+  width: 100%;
+  max-width: none;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.625rem;
+}
+
+html.capacitor-ios.capacitor-native .dash-home .dash-stat-card {
+  min-width: 0;
+  height: 100%;
+}
+
+html.capacitor-ios.capacitor-native .dash-home .dash-inventory-health,
+html.capacitor-ios.capacitor-native .dash-home .dash-card {
+  border-radius: var(--cap-ios-radius-lg);
 }
 
 /* ── Tables & toolbars ── */
