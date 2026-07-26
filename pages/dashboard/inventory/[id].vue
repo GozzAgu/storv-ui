@@ -1,6 +1,6 @@
 <template>
   <div
-    class="dashboard-page-with-footer w-full max-w-none space-y-5 overflow-x-hidden pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:space-y-6 sm:pb-32"
+    class="dashboard-page-with-footer flex min-h-[calc(100svh-4rem)] w-full max-w-none flex-col space-y-5 overflow-x-hidden pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:space-y-6 sm:pb-32"
   >
     <Breadcrumbs
       :items="inventoryBreadcrumbs"
@@ -158,15 +158,15 @@
     </div>
 
     <!-- Enhanced Items Table (teleport to body in expanded view; same pattern as receipts) -->
-    <template v-if="!isLoadingFolder">
-      <Teleport to="body" :disabled="!isFullscreen">
+    <div v-if="!isLoadingFolder" class="flex min-h-0 flex-1 flex-col">
+    <Teleport to="body" :disabled="!isFullscreen">
         <div
           data-dashboard-teleport
           :class="[
             'transition-colors duration-200 ease-out',
             isFullscreen
               ? 'fixed inset-0 z-[100] flex min-h-0 flex-col overflow-hidden bg-white dark:!bg-dashboard-card'
-              : 'relative',
+              : 'relative flex min-h-0 flex-1 flex-col',
           ]"
         >
           <!-- Fullscreen header -->
@@ -500,8 +500,7 @@
                       'Serialized items can be lent via Stock loans',
                     ]
               "
-              :fill="false"
-              extra-class="mx-3 mb-4 min-h-[min(50vh,22rem)] sm:mx-5"
+              extra-class="mx-3 mb-4 sm:mx-5"
             >
               <Button
                 v-if="canManageInventoryItems && !searchQuery"
@@ -917,6 +916,7 @@
             <!-- Fullscreen: pagination pinned inside overlay -->
             <DashboardTablePagination
               v-if="isFullscreen && paginationTotal > 0"
+              :pin-to-viewport="false"
               class="shrink-0"
               style="padding-bottom: env(safe-area-inset-bottom, 0px)"
               :current-page="currentPage"
@@ -927,7 +927,7 @@
           </div>
         </div>
       </Teleport>
-    </template>
+    </div>
 
     <!-- Hidden file input for import -->
     <input

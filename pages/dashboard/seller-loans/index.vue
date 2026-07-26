@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full max-w-none space-y-5 pb-6 sm:space-y-6 sm:pb-8">
+  <div :class="pageWithFixedFooterClass">
     <DashboardPageHeader>
       <template #eyebrow>
         <p :class="eyebrowClass">Inventory</p>
@@ -27,18 +27,17 @@
     <template v-else-if="canAccessSellerLoansPlan">
       <div
         v-if="!storesStore.currentStoreId && !sellerLoansStore.loading"
-        class="rounded-sm bg-white/90 dark:!bg-dashboard-card sm:px-10"
+        class="dash-table-shell flex flex-1 flex-col overflow-hidden rounded-xl"
       >
         <DashboardTableEmptyState
           :icon="BuildingStorefrontIcon"
           title="Select a store"
           description="Use the store selector in the top bar to view stock loans for a branch."
           :tips="['Loans are tracked per store', 'Only serialized inventory can be lent out']"
-          :fill="false"
         />
       </div>
 
-      <template v-else>
+      <div v-else class="flex min-h-0 flex-1 flex-col gap-5 sm:gap-6">
         <nav class="flex flex-wrap gap-8" aria-label="Stock loan views">
           <button
             v-for="tab in loanStatusTabs"
@@ -293,7 +292,7 @@
             />
           </div>
         </div>
-      </template>
+      </div>
     </template>
 
     <div v-else class="rounded-sm bg-amber-50/90 px-4 py-4 dark:bg-amber-950/25 sm:px-5 sm:py-5">
@@ -456,7 +455,7 @@ definePageMeta({
   layout: 'dashboard',
 })
 
-const { eyebrowClass, pageTitleClass, descriptionClass } = useDashboardPageChrome()
+const { eyebrowClass, pageTitleClass, descriptionClass, pageWithFixedFooterClass } = useDashboardPageChrome()
 
 const sellerLoansStore = useSellerLoanOutsStore()
 const storesStore = useStoresStore()

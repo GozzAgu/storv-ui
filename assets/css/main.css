@@ -1266,7 +1266,8 @@ html.capacitor-native .dashboard-inline-footer {
 
 html.capacitor-native .dashboard-page-with-footer {
   padding-bottom: calc(
-    var(--dashboard-bottom-nav-height) + var(--cap-safe-bottom) + 0.5rem
+    var(--dashboard-bottom-nav-height) + var(--dashboard-fixed-footer-height) +
+      var(--cap-safe-bottom) + 0.75rem
   ) !important;
 }
 

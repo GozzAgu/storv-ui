@@ -1002,6 +1002,7 @@
                   <!-- Fullscreen: pagination pinned inside overlay -->
                   <DashboardTablePagination
                     v-if="isReceiptsFullscreen && sortedFilteredReceipts.length > 0"
+                    :pin-to-viewport="false"
                     class="shrink-0"
                     style="padding-bottom: env(safe-area-inset-bottom, 0px)"
                     :current-page="currentPage"

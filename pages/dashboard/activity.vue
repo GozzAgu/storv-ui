@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full max-w-none space-y-5 pb-6 sm:space-y-6 sm:pb-8">
+  <div :class="pageWithFixedFooterClass">
     <DashboardPageHeader>
       <template #eyebrow>
         <p :class="eyebrowClass">Audit trail</p>
@@ -40,7 +40,10 @@
     </div>
 
     <template v-else>
-      <div v-if="!storeId && !loading" :class="dashboardCardPaddedClass">
+      <div
+        v-if="!storeId && !loading"
+        class="dash-table-shell flex flex-1 flex-col overflow-hidden rounded-xl"
+      >
         <DashboardTableEmptyState
           :icon="BuildingStorefrontIcon"
           title="Select a store to view activity"
@@ -49,11 +52,10 @@
             'Logs are scoped to the active store',
             'Inventory create, update, and delete events appear here',
           ]"
-          :fill="false"
         />
       </div>
 
-      <template v-else>
+      <div v-else class="flex min-h-0 flex-1 flex-col gap-5 sm:gap-6">
         <!-- Summary metrics -->
         <div v-if="!loading && allLogs.length > 0" class="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <div
@@ -277,7 +279,7 @@
             />
           </div>
         </div>
-      </template>
+      </div>
     </template>
   </div>
 </template>
@@ -306,7 +308,7 @@ import {
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
 import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
 
-const { eyebrowClass, pageTitleClass, descriptionClass, dashboardCardPaddedClass } =
+const { eyebrowClass, pageTitleClass, descriptionClass, dashboardCardPaddedClass, pageWithFixedFooterClass } =
   useDashboardPageChrome()
 
 const userStore = useUserStore()

@@ -241,7 +241,6 @@
               'Managers can invite staff and set permissions',
               'Staff sign in with the email and temporary password you provide',
             ]"
-            extra-class="min-h-[min(280px,calc(100svh-14rem))]"
           >
             <Button
               v-if="canCreateNewStaff"
@@ -261,7 +260,6 @@
             eyebrow="Removed staff"
             title="No removed staff"
             description="When you remove someone from this department, they appear here. You can reactivate them to restore sign-in access."
-            extra-class="min-h-[min(280px,calc(100svh-14rem))]"
           >
             <Button
               variant="outline"
@@ -580,6 +578,7 @@
             <!-- Fullscreen: pagination pinned inside overlay -->
             <DashboardTablePagination
               v-if="isStaffFullscreen && rosterPaginationTotal > 0"
+              :pin-to-viewport="false"
               class="shrink-0"
               style="padding-bottom: env(safe-area-inset-bottom, 0px)"
               :current-page="staffCurrentPage"

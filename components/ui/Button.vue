@@ -132,8 +132,9 @@ const variantFocusRingClasses = computed(() => {
 const variantTextClasses = computed(() => '')
 
 const handleClick = (event: MouseEvent) => {
-  if (!props.disabled && !props.loading) {
-    emit('click', event)
-  }
+  if (props.disabled || props.loading) return
+  // Submit buttons rely on native form submit; emitting click as well causes double saves (common on iOS).
+  if (props.type === 'submit') return
+  emit('click', event)
 }
 </script>

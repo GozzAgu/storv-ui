@@ -78,6 +78,47 @@ html.dark [data-dashboard-teleport] .data-table-shell {
   }
 }
 
+/* Viewport-pinned pagination footer */
+.dashboard-fixed-footer {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+}
+
+html.capacitor-native .dashboard-fixed-footer--native {
+  bottom: calc(var(--dashboard-bottom-nav-height) + var(--cap-safe-bottom) + 0.35rem);
+  padding-bottom: 0;
+}
+
+.dashboard-page-with-footer {
+  --dash-empty-fill-min: calc(100svh - 15rem);
+}
+
+html.capacitor-native .dashboard-page-with-footer {
+  --dash-empty-fill-min: calc(
+    100svh - var(--dashboard-native-top-chrome) - var(--dashboard-bottom-nav-height) -
+      var(--dashboard-fixed-footer-height) - 7rem
+  );
+}
+
+.dash-table-empty-state--fill {
+  flex: 1 1 auto;
+  min-height: var(--dash-empty-fill-min);
+}
+
+.dashboard-page-with-footer > .dash-table-empty-state--fill,
+.dashboard-page-with-footer > .dash-table-shell:has(> .dash-table-empty-state--fill),
+main[data-dashboard-main] .data-table-shell.flex.flex-col:has(> .dash-table-empty-state--fill),
+main[data-dashboard-main] .dash-table-shell.flex.flex-col:has(> .dash-table-empty-state--fill),
+[data-dashboard-teleport] .data-table-shell.flex.flex-col:has(> .dash-table-empty-state--fill) {
+  flex: 1 1 auto;
+  min-height: var(--dash-empty-fill-min);
+}
+
+.dash-grid-shell:has(> .shrink-0 + .dash-table-empty-state--fill),
+.dash-grid-shell:has(> .dash-table-empty-state--fill) {
+  flex: 1 1 auto;
+  min-height: var(--dash-empty-fill-min);
+}
+
 /* Core table */
 main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table,
 main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell) table.min-w-full,

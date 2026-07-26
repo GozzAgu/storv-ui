@@ -53,6 +53,10 @@ export function useDashboardPageChrome() {
   /** Footer bar wrapping Pagination (matches unified table shell). */
   const paginationBarClass = 'dash-table-pagination'
 
+  /** Page root when pagination is pinned to the viewport bottom. */
+  const pageWithFixedFooterClass =
+    'dashboard-page-with-footer flex min-h-[calc(100svh-4rem)] w-full max-w-none flex-1 flex-col space-y-5 pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:space-y-6 sm:pb-32'
+
   return {
     dashboardCardClass,
     dashboardCardPaddedClass,
@@ -69,5 +73,6 @@ export function useDashboardPageChrome() {
     descriptionClass,
     bulkActionsClass,
     paginationBarClass,
+    pageWithFixedFooterClass,
   }
 }

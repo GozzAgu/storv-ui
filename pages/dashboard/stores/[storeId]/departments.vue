@@ -202,7 +202,6 @@
             'Search matches department names',
             'Clear search to see every department in this store',
           ]"
-          :fill="false"
         />
       </div>
 
@@ -226,21 +225,17 @@
                 'Open a department to add members and manage roles',
               ]
         "
-        extra-class="dash-table-shell sm:min-h-[min(48vh,22rem)]"
+        extra-class="dash-table-shell rounded-xl"
       />
     </div>
 
-    <DashboardFixedFooter
+    <DashboardTablePagination
       v-if="filteredDepartments.length > 0"
-      :sidebar-collapsed="sidebarCollapsed"
-    >
-      <Pagination
-        :current-page="currentPage"
-        :items-per-page="itemsPerPage"
-        :total="filteredDepartments.length"
-        @page-change="handlePageChange"
-      />
-    </DashboardFixedFooter>
+      :current-page="currentPage"
+      :items-per-page="itemsPerPage"
+      :total="filteredDepartments.length"
+      @page-change="handlePageChange"
+    />
 
     <!-- Bulk Delete Departments Modal -->
     <Modal
@@ -384,10 +379,9 @@ import {
   EllipsisVerticalIcon,
 } from '~/utils/app-icons'
 import Button from '~/components/ui/Button.vue'
-import Pagination from '~/components/ui/Pagination.vue'
 import StatCard from '~/components/ui/StatCard.vue'
 import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
-import DashboardFixedFooter from '~/components/ui/DashboardFixedFooter.vue'
+import DashboardTablePagination from '~/components/dashboard/DashboardTablePagination.vue'
 import Modal from '~/components/ui/Modal.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import DepartmentModal from '~/components/departments/DepartmentModal.vue'
@@ -470,44 +464,7 @@ const userStore = useUserStore()
 const staffStore = useStaffStore()
 const storesStore = useStoresStore()
 const toast = useAppToast()
-const sidebarCollapsed = ref(false)
 
-// Load sidebar state from localStorage
-if (import.meta.client) {
-  try {
-    const savedState = localStorage.getItem('sidebarCollapsed')
-    if (savedState !== null) {
-      sidebarCollapsed.value = savedState === 'true'
-    }
-  } catch (e) {
-    // Ignore localStorage errors
-  }
-}
-
-// Watch for sidebar state changes
-if (import.meta.client) {
-  window.addEventListener('storage', (e) => {
-    if (e.key === 'sidebarCollapsed' && e.newValue !== null) {
-      sidebarCollapsed.value = e.newValue === 'true'
-    }
-  })
-  // Also check periodically for changes (since storage event doesn't fire on same window)
-  setInterval(() => {
-    try {
-      const savedState = localStorage.getItem('sidebarCollapsed')
-      if (savedState !== null) {
-        const newValue = savedState === 'true'
-        if (newValue !== sidebarCollapsed.value) {
-          sidebarCollapsed.value = newValue
-        }
-      }
-    } catch (e) {
-      // Ignore
-    }
-  }, 100)
-}
-
-// Check if current user is staff (limited permissions)
 const isStaff = computed(() => userStore.userData?.role === 'staff')
 const canManageDepartments = computed(() => !isStaff.value) // Only non-staff can manage
 

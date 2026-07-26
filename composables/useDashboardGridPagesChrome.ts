@@ -12,7 +12,7 @@ export function useDashboardGridPagesChrome() {
 
   const pageClass = 'dash-grid-page'
   const pageWithFooterClass =
-    'dash-grid-page dashboard-page-with-footer flex min-h-[calc(100svh-4rem)] flex-col pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:pb-32'
+    'dash-grid-page dashboard-page-with-footer flex min-h-[calc(100svh-4rem)] flex-1 flex-col pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:pb-32'
   const kpiGridClass = 'dash-kpi-grid'
   const gridShellClass = 'dash-grid-shell'
   const gridClass = 'dash-grid'

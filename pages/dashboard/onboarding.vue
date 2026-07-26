@@ -109,7 +109,20 @@
               >
                 Head store branch <span class="text-red-500">*</span>
               </label>
+              <select
+                v-if="availableCities.length > 0"
+                id="storeName"
+                v-model="storeDetails.storeName"
+                required
+                class="onboarding-input app-field w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 rounded-sm focus:ring-2 focus:ring-primary-400/30 outline-none text-gray-900 dark:text-gray-100"
+              >
+                <option value="" disabled>Choose a city...</option>
+                <option v-for="city in availableCities" :key="city" :value="city">
+                  {{ city }}
+                </option>
+              </select>
               <input
+                v-else
                 id="storeName"
                 v-model="storeDetails.storeName"
                 type="text"
@@ -117,6 +130,9 @@
                 class="onboarding-input app-field w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 rounded-sm focus:ring-2 focus:ring-primary-400/30 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                 placeholder="Enter head store branch"
               />
+              <p class="mt-1.5 text-[11px] leading-snug text-gray-500 dark:text-gray-400">
+                Cities in {{ selectedRegionLabel }} based on your country selection.
+              </p>
             </div>
 
             <!-- Store Address -->
@@ -231,7 +247,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick, computed } from 'vue'
+import { ref, onMounted, nextTick, computed, watch } from 'vue'
 import {
   GlobeAltIcon,
   ArrowRightIcon,
@@ -242,6 +258,7 @@ import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useUser, type StoreDetails } from '~/composables/useUser'
 import { usePreferences, currencies, regions } from '~/composables/usePreferences'
 import { useStoresStore } from '~/stores/stores'
+import { getCitiesForRegion, isCityInRegion } from '~/utils/region-cities'
 
 definePageMeta({
   layout: 'dashboard',
@@ -272,6 +289,22 @@ const storeDetails = ref<StoreDetails>({
 const selectedCurrencySymbol = computed(() => {
   const currency = currencies.find((c) => c.code === selectedCurrency.value)
   return currency?.symbol || '$'
+})
+
+const selectedRegionLabel = computed(() => {
+  const region = regions.find((r) => r.code === selectedCountry.value)
+  return region ? `${region.flag} ${region.name}` : 'your country'
+})
+
+const availableCities = computed(() => getCitiesForRegion(selectedCountry.value))
+
+watch(selectedCountry, () => {
+  if (
+    storeDetails.value.storeName &&
+    !isCityInRegion(storeDetails.value.storeName, selectedCountry.value)
+  ) {
+    storeDetails.value.storeName = ''
+  }
 })
 
 const canContinue = computed(() => {

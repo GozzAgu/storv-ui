@@ -136,6 +136,8 @@ export interface DuplicateFolderTemplatesBetweenStoresResult {
 
 const inventoryItemsPageInflight = new Map<string, Promise<InventoryItem[]>>()
 const inventoryItemsAllInflight = new Map<string, Promise<InventoryItem[]>>()
+/** Coalesce duplicate createFolder calls (e.g. iOS double-tap / submit+click). */
+let createFolderInflight: { key: string; promise: Promise<string> } | null = null
 
 export interface TemplateField {
   id: string
@@ -982,55 +984,71 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('No store selected. Please select a store first.')
       }
 
+      const userId = authStore.currentUser.uid
+      const foldersRef = getInventoryFoldersCollection(db, userId, storeId)
+      const dedupeKey = `${storeId}:${folderData.name.trim().toLowerCase()}`
+      if (createFolderInflight?.key === dedupeKey) {
+        return createFolderInflight.promise
+      }
+
+      const createPromise = (async (): Promise<string> => {
+        try {
+          const newFolderRef = doc(foldersRef)
+
+          const newFolder: Omit<InventoryFolder, 'id'> = {
+            ...folderData,
+            storeId, // Add storeId to the folder
+            itemCount: 0,
+            totalValue: 0,
+            lowStockCount: 0,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+            createdBy: authStore.currentUser.uid,
+          }
+
+          await setDoc(newFolderRef, newFolder)
+
+          // Add to local state with actual Date objects
+          const now = new Date()
+          const folderForState: InventoryFolder = {
+            id: newFolderRef.id,
+            ...folderData,
+            storeId, // Add storeId to local state
+            itemCount: 0,
+            totalValue: 0,
+            lowStockCount: 0,
+            createdAt: now,
+            updatedAt: now,
+            createdBy: authStore.currentUser.uid,
+          }
+          this.folders.unshift(folderForState)
+
+          const userDisplayNameForFolder = await getCurrentUserDisplayName().catch(() => 'Unknown')
+          await logActivity({
+            action: 'created',
+            entityType: 'folder',
+            entityId: newFolderRef.id,
+            entityName: folderData.name,
+            storeId,
+            userId: authStore.currentUser!.uid,
+            userDisplayName: userDisplayNameForFolder,
+          }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
+
+          return newFolderRef.id
+        } catch (error: unknown) {
+          const message = error instanceof Error ? error.message : String(error)
+          console.error('Error creating folder:', error)
+          throw new Error(message || 'Failed to create folder')
+        }
+      })()
+
+      createFolderInflight = { key: dedupeKey, promise: createPromise }
       try {
-        // Use hierarchical path: users/{userId}/stores/{storeId}/inventoryFolders
-        const userId = authStore.currentUser.uid
-        const foldersRef = getInventoryFoldersCollection(db, userId, storeId)
-        const newFolderRef = doc(foldersRef)
-
-        const newFolder: Omit<InventoryFolder, 'id'> = {
-          ...folderData,
-          storeId, // Add storeId to the folder
-          itemCount: 0,
-          totalValue: 0,
-          lowStockCount: 0,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-          createdBy: authStore.currentUser.uid,
+        return await createPromise
+      } finally {
+        if (createFolderInflight?.promise === createPromise) {
+          createFolderInflight = null
         }
-
-        await setDoc(newFolderRef, newFolder)
-
-        // Add to local state with actual Date objects
-        const now = new Date()
-        const folderForState: InventoryFolder = {
-          id: newFolderRef.id,
-          ...folderData,
-          storeId, // Add storeId to local state
-          itemCount: 0,
-          totalValue: 0,
-          lowStockCount: 0,
-          createdAt: now,
-          updatedAt: now,
-          createdBy: authStore.currentUser.uid,
-        }
-        this.folders.unshift(folderForState)
-
-        const userDisplayNameForFolder = await getCurrentUserDisplayName().catch(() => 'Unknown')
-        await logActivity({
-          action: 'created',
-          entityType: 'folder',
-          entityId: newFolderRef.id,
-          entityName: folderData.name,
-          storeId,
-          userId: authStore.currentUser!.uid,
-          userDisplayName: userDisplayNameForFolder,
-        }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
-
-        return newFolderRef.id
-      } catch (error: any) {
-        console.error('Error creating folder:', error)
-        throw new Error(error.message || 'Failed to create folder')
       }
     },
 

@@ -213,7 +213,6 @@
           'Clear search or department filter to see more',
           'Create a category with New category',
         ]"
-        :fill="false"
       >
         <Button
           v-if="selectedDepartmentId"
@@ -426,26 +425,16 @@
               </tbody>
             </table>
           </div>
-          <DashboardTablePagination
-            :current-page="currentPage"
-            :items-per-page="itemsPerPage"
-            :total="filteredFolders.length"
-            @page-change="handlePageChange"
-          />
         </div>
       </Transition>
 
-      <div
-        v-if="paginatedFolders.length > 0 && foldersViewMode === 'grid'"
-        :class="[gridFooterClass, tableShellClass]"
-      >
-        <DashboardTablePagination
-          :current-page="currentPage"
-          :items-per-page="itemsPerPage"
-          :total="filteredFolders.length"
-          @page-change="handlePageChange"
-        />
-      </div>
+      <DashboardTablePagination
+        v-if="paginatedFolders.length > 0"
+        :current-page="currentPage"
+        :items-per-page="itemsPerPage"
+        :total="filteredFolders.length"
+        @page-change="handlePageChange"
+      />
     </div>
 
     <!-- Empty state (no categories at all) -->
@@ -482,7 +471,7 @@
               'Use departments to control who sees each category',
             ]
       "
-      extra-class="rounded-sm bg-white dark:!bg-dashboard-card sm:min-h-[min(48vh,22rem)]"
+      extra-class="dash-table-shell rounded-xl bg-white dark:!bg-dashboard-card"
     >
       <Button
         v-if="selectedDepartmentId"
@@ -854,9 +843,9 @@
         <Button
           variant="primary"
           size="sm"
-          type="submit"
-          form="folder-drawer-form"
-          :disabled="!isFolderDrawerValid"
+          type="button"
+          :loading="isSavingFolder"
+          :disabled="!isFolderDrawerValid || isSavingFolder"
           :extra-class="footerBtnPrimaryClass"
           @click="handleSaveFolder"
         >
@@ -1308,6 +1297,7 @@ const {
 const searchQuery = ref('')
 const sortBy = ref('name')
 const showCreateFolderModal = ref(false)
+const isSavingFolder = ref(false)
 const showProfitSkipConfirmModal = ref(false)
 const profitSkipConfirmed = ref(false)
 const editingFolder = ref<InventoryFolder | null>(null)
@@ -2425,6 +2415,8 @@ const isFolderDrawerValid = computed(() => {
 })
 
 const handleSaveFolder = async () => {
+  if (isSavingFolder.value) return
+
   if (!folderForm.name.trim()) {
     alert('Please enter a folder name')
     return
@@ -2490,6 +2482,9 @@ const handleSaveFolder = async () => {
     return
   }
 
+  if (isSavingFolder.value) return
+  isSavingFolder.value = true
+
   if (folderForm.trackProfit) {
     ensureCostPriceTemplateField(editableFields.value)
   } else {
@@ -2506,7 +2501,6 @@ const handleSaveFolder = async () => {
   }
 
   try {
-    // [] = all departments (same as omitting field). Non-empty = restrict to listed departments.
     // Use [] not undefined so Firestore updates clear a previous restriction when user unchecks all.
     const allowedDepartments =
       folderForm.allowedDepartments.length > 0 ? [...folderForm.allowedDepartments] : []
@@ -2542,6 +2536,8 @@ const handleSaveFolder = async () => {
     }
   } catch (error: any) {
     alert(error.message || 'Failed to save folder')
+  } finally {
+    isSavingFolder.value = false
   }
 }
 
@@ -2549,6 +2545,7 @@ const handleCancelFolder = () => {
   showCreateFolderModal.value = false
   showProfitSkipConfirmModal.value = false
   profitSkipConfirmed.value = false
+  isSavingFolder.value = false
   editingFolder.value = null
   folderForm.name = ''
   folderForm.description = ''
