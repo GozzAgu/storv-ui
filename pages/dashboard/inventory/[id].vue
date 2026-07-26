@@ -127,7 +127,7 @@
             v-if="canManageInventoryItems"
             variant="primary"
             class="shrink-0 !rounded-xl !px-2 !py-2 text-xs sm:!rounded-2xl sm:!px-3 sm:!py-2.5 sm:text-sm"
-            :icon="PlusIcon"
+            :icon="PlusCircleIcon"
             aria-label="Add product"
             @click="openAddItemModal"
           >
@@ -311,7 +311,7 @@
                     <Button
                       variant="primary"
                       size="sm"
-                      :icon="PlusIcon"
+                      :icon="PlusCircleIcon"
                       extra-class="!rounded-2xl"
                       aria-label="Add product"
                       @click="openAddItemModal"
@@ -460,7 +460,7 @@
                   v-if="canManageInventoryItems"
                   variant="primary"
                   size="sm"
-                  :icon="PlusIcon"
+                  :icon="PlusCircleIcon"
                   aria-label="Add product"
                   extra-class="!rounded-2xl max-sm:!px-2 max-sm:!py-1.5"
                   @click="openAddItemModal"
@@ -497,7 +497,7 @@
                 v-if="canManageInventoryItems && !searchQuery"
                 variant="primary"
                 size="sm"
-                :icon="PlusIcon"
+                :icon="PlusCircleIcon"
                 extra-class="!rounded-2xl"
                 @click="openAddItemModal"
               >
@@ -1225,7 +1225,6 @@
               <Button
                 variant="outline"
                 size="sm"
-                :icon="PlusIcon"
                 @click="addSerialNumber"
                 class="!py-1.5 !text-xs"
               >
@@ -1522,7 +1521,6 @@
               variant="outline"
               size="sm"
               type="button"
-              :icon="PlusIcon"
               @click="addDuplicateSerialNumber"
               class="!rounded-2xl"
             >
@@ -1714,7 +1712,6 @@
 <script setup lang="ts">
 import { ref, computed, reactive, onMounted, onBeforeUnmount, onActivated, watch, nextTick } from 'vue'
 import {
-  PlusIcon,
   CubeIcon,
   FolderIcon,
   ExclamationTriangleIcon,

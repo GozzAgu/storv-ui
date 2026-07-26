@@ -10,7 +10,7 @@
           @click="showCreateModal = true"
           class="flex-shrink-0 px-2.5 py-1 text-xs font-medium text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-sm transition-colors"
         >
-          + Save Current
+          Save current
         </button>
       </div>
     </template>

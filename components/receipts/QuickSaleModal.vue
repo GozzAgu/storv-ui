@@ -246,7 +246,7 @@
               class="w-full px-3 py-1.5 text-xs text-primary-500 dark:text-primary-400 border-0 dark:border-primary-600 rounded-sm"
               @click="addSplitPayment"
             >
-              + Add payment line
+              Add payment line
             </button>
             <div
               class="rounded-sm border p-2.5 space-y-1.5"

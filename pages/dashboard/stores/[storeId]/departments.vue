@@ -35,7 +35,6 @@
           v-if="canManageDepartments"
           variant="primary"
           size="sm"
-          :icon="PlusIcon"
           :disabled="!canAddDepartmentForStore"
           :title="canAddDepartmentForStore ? 'Create new department' : departmentLimitMessage"
           :extra-class="headerBtnClass"
@@ -339,7 +338,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import {
-  PlusIcon,
   BuildingOfficeIcon,
   ArrowPathIcon,
   PencilSquareIcon,

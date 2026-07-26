@@ -234,7 +234,6 @@
                           v-if="canCreate"
                           variant="primary"
                           size="sm"
-                          :icon="PlusIcon"
                           aria-label="New receipt"
                           extra-class="!rounded-2xl ml-auto shrink-0 max-sm:!px-2 max-sm:!py-1.5"
                           @click="openCreateReceiptModal"
@@ -297,7 +296,6 @@
                         v-if="canCreate"
                         variant="primary"
                         size="sm"
-                        :icon="PlusIcon"
                         aria-label="New receipt"
                         :extra-class="headerBtnClass"
                         @click="openCreateReceiptModal"
@@ -1650,7 +1648,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import {
-  PlusIcon,
   ReceiptPercentIcon,
   MagnifyingGlassIcon,
   ArrowPathIcon,

@@ -72,7 +72,7 @@
           <Button
             variant="primary"
             size="sm"
-            :icon="PlusIcon"
+            :icon="PlusCircleIcon"
             :extra-class="headerBtnClass"
             @click="openCreateFolderModal"
           >
@@ -864,13 +864,14 @@
             >Category name(s)</label
           >
           <Button
+            type="button"
             variant="outline"
             size="sm"
-            type="button"
+            :icon="PlusCircleIcon"
             @click="addDuplicateFolderName"
             extra-class="!rounded-2xl"
           >
-            + Add name
+            Add name
           </Button>
         </div>
         <div class="space-y-2 max-h-48 overflow-y-auto">
@@ -878,7 +879,7 @@
             v-if="duplicateFolderNames.length === 0"
             class="text-center py-4 text-sm text-gray-500 dark:text-gray-400 rounded-sm bg-gray-50/50 dark:bg-gray-800/30"
           >
-            Click "+ Add name" to enter category name(s)
+            Click "Add name" to enter category name(s)
           </div>
           <div
             v-for="(name, index) in duplicateFolderNames"
@@ -1162,7 +1163,7 @@ import { ref, computed, reactive, watch, onMounted, onBeforeUnmount, nextTick } 
 import type { Store } from '~/composables/useStores'
 import {
   FolderIcon,
-  PlusIcon,
+  PlusCircleIcon,
   CubeIcon,
   PencilSquareIcon,
   TrashIcon,

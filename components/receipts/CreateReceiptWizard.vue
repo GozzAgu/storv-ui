@@ -390,7 +390,7 @@
                   type="button"
                   class="w-full px-3 py-1.5 text-xs text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-sm border-0 dark:border-primary-600 transition-colors"
                 >
-                  + Add Payment Method
+                  Add payment method
                 </button>
                 <div
                   class="rounded-sm border p-2.5 space-y-1.5"

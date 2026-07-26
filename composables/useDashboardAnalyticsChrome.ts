@@ -18,7 +18,7 @@ export function useDashboardAnalyticsChrome() {
   const tableEyebrowClass = 'dash-table-eyebrow'
   const tableMetaClass = 'dash-table-meta'
   const exportBtnSecondaryClass = 'dash-export-btn dash-export-btn--secondary'
-  const exportBtnSuccessClass = 'dash-export-btn dash-export-btn--success'
+  const exportBtnSuccessClass = 'dash-export-btn dash-export-btn--secondary'
   const metricCellsClass = 'dash-metric-cells'
   const metricCellClass = 'dash-metric-cell'
 

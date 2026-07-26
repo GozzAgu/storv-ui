@@ -1051,33 +1051,29 @@ html.dark .dash-metric-cell {
   opacity: 0.55;
 }
 
-.dash-export-btn--secondary {
-  background: var(--dash-card-surface);
-  color: var(--dash-card-ink);
-}
-
-.dash-export-btn--secondary:hover:not(:disabled) {
-  background: rgb(15 23 42 / 0.03);
-}
-
-html.dark .dash-export-btn--secondary:hover:not(:disabled) {
-  background: rgb(255 255 255 / 0.05);
-}
-
+.dash-export-btn--secondary,
 .dash-export-btn--success {
-  border-color: rgb(52 211 153 / 0.35);
-  background: rgb(52 211 153 / 0.1);
-  color: #059669;
+  background: transparent;
+  color: var(--dash-card-ink);
+  border-color: rgb(20 63 141 / 0.35);
 }
 
-html.dark .dash-export-btn--success {
-  border-color: rgb(52 211 153 / 0.25);
-  background: rgb(52 211 153 / 0.08);
-  color: #34d399;
-}
-
+.dash-export-btn--secondary:hover:not(:disabled),
 .dash-export-btn--success:hover:not(:disabled) {
-  background: rgb(52 211 153 / 0.16);
+  background: rgb(20 63 141 / 0.06);
+  border-color: rgb(20 63 141);
+}
+
+html.dark .dash-export-btn--secondary,
+html.dark .dash-export-btn--success {
+  color: rgb(226 232 240);
+  border-color: rgb(255 255 255 / 0.14);
+}
+
+html.dark .dash-export-btn--secondary:hover:not(:disabled),
+html.dark .dash-export-btn--success:hover:not(:disabled) {
+  background: rgb(255 255 255 / 0.06);
+  border-color: rgb(255 255 255 / 0.22);
 }
 
 .dash-table-shell {

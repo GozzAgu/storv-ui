@@ -32,7 +32,7 @@ export function useDashboardMultiStoreChrome() {
   const formActionsClass = 'dash-form-actions'
   const fieldClass = APP_FIELD_CLASS
   const textareaClass = APP_FIELD_TEXTAREA_CLASS
-  const exportBtnClass = 'dash-export-btn dash-export-btn--success'
+  const exportBtnClass = 'dash-export-btn dash-export-btn--secondary'
   const itemsTableShellClass = 'dash-items-picker'
 
   const statusBadgeClass = (status: string) => {

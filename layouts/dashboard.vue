@@ -606,10 +606,10 @@
             @click="openAssistant()"
           >
             <SparklesIcon
-              class="block h-3.5 w-3.5 shrink-0 text-primary-700 dark:text-primary-300"
+              class="block h-3.5 w-3.5 shrink-0 text-gray-700 dark:text-gray-200"
               stroke-width="1.75"
             />
-            <span class="text-[11px] font-semibold text-primary-800 dark:text-primary-200">
+            <span class="text-[11px] font-semibold text-gray-800 dark:text-gray-100">
               Assistant
             </span>
           </button>

@@ -336,9 +336,9 @@ html:not(.dark) .dash-topnav__search.dashboard-topnav-search:focus-visible {
 
 .dash-topnav__assistant.dashboard-topnav-assistant {
   height: 2rem;
-  border: 1px solid rgb(20 63 141 / 0.14);
+  border: 1.5px solid rgb(20 63 141 / 0.35);
   border-radius: 9999px;
-  background: rgb(20 63 141 / 0.06);
+  background: transparent;
   color: rgb(20 63 141);
   transition:
     border-color 0.18s ease,
@@ -347,21 +347,23 @@ html:not(.dark) .dash-topnav__search.dashboard-topnav-search:focus-visible {
 }
 
 html.dark .dash-topnav__assistant.dashboard-topnav-assistant {
-  border-color: rgb(154 181 227 / 0.18);
-  background: rgb(20 63 141 / 0.16);
+  border-color: rgb(255 255 255 / 0.14);
+  background: transparent;
+  color: rgb(226 232 240);
 }
 
 .dash-topnav__assistant.dashboard-topnav-assistant:hover,
 .dash-topnav__assistant.dashboard-topnav-assistant:focus-visible {
-  border-color: rgb(20 63 141 / 0.28);
-  background: rgb(20 63 141 / 0.1);
+  border-color: rgb(20 63 141);
+  background: rgb(20 63 141 / 0.06);
   outline: none;
-  box-shadow: 0 0 0 3px rgb(20 63 141 / 0.12);
+  box-shadow: none;
 }
 
 html.dark .dash-topnav__assistant.dashboard-topnav-assistant:hover,
 html.dark .dash-topnav__assistant.dashboard-topnav-assistant:focus-visible {
-  background: rgb(20 63 141 / 0.22);
+  border-color: rgb(255 255 255 / 0.22);
+  background: rgb(255 255 255 / 0.06);
 }
 
 .dash-topnav__actions.dashboard-topnav-actions {

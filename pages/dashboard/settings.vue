@@ -177,7 +177,6 @@
             variant="outline"
             size="sm"
             :class="headerBtnClass"
-            :icon="PlusIcon"
             :title="canAddStore ? 'Create branch' : 'Upgrade to add more stores'"
             :disabled="!canAddStore"
             @click="openCreateStoreModal"
@@ -919,7 +918,6 @@ import {
   CameraIcon,
   CheckIcon,
   PencilSquareIcon,
-  PlusIcon,
   TrashIcon,
 } from '~/utils/app-icons'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'

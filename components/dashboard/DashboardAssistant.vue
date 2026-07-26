@@ -279,23 +279,32 @@ watch(
   width: 3.25rem;
   height: 3.25rem;
   border-radius: 9999px;
-  border: 1px solid rgb(20 63 141 / 0.12);
-  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border: 1.5px solid rgb(20 63 141 / 0.35);
+  background: transparent;
   color: rgb(20 63 141);
-  box-shadow: 0 16px 40px rgb(15 23 42 / 0.14);
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  box-shadow: none;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    background-color 0.18s ease;
 }
 
 .dashboard-assistant__fab:hover {
   transform: translateY(-1px);
-  box-shadow: 0 20px 44px rgb(15 23 42 / 0.18);
+  border-color: rgb(20 63 141);
+  background: rgb(20 63 141 / 0.06);
 }
 
 html.dark .dashboard-assistant__fab {
-  border-color: rgb(255 255 255 / 0.1);
-  background: linear-gradient(180deg, rgb(24 28 38) 0%, rgb(18 20 28) 100%);
-  color: rgb(154 181 227);
-  box-shadow: 0 18px 44px rgb(0 0 0 / 0.45);
+  border-color: rgb(255 255 255 / 0.14);
+  background: transparent;
+  color: rgb(226 232 240);
+  box-shadow: none;
+}
+
+html.dark .dashboard-assistant__fab:hover {
+  border-color: rgb(255 255 255 / 0.22);
+  background: rgb(255 255 255 / 0.06);
 }
 
 .dashboard-assistant__panel {
