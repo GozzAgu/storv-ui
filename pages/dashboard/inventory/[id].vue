@@ -547,15 +547,22 @@
                             class="mt-1"
                           />
                           <div class="mt-0.5 flex flex-wrap items-center justify-between gap-1.5">
-                            <span
-                              class="text-xs font-semibold tabular-nums text-gray-900 dark:text-gray-100"
-                            >
-                              {{
-                                item.discountedPrice !== undefined
-                                  ? formatCurrency(item.discountedPrice)
-                                  : formatCurrency(item.price ?? item.originalPrice ?? 0)
-                              }}
-                            </span>
+                            <div class="flex min-w-0 flex-wrap items-baseline gap-x-1.5 gap-y-0">
+                              <span
+                                class="text-xs font-semibold tabular-nums text-gray-900 dark:text-gray-100"
+                              >
+                                {{
+                                  item.discountedPrice !== undefined
+                                    ? formatCurrency(item.discountedPrice)
+                                    : formatCurrency(item.price ?? item.originalPrice ?? 0)
+                                }}
+                              </span>
+                              <InventoryProfitHint
+                                v-if="canShowProfitAndCost"
+                                :item="item"
+                                inline
+                              />
+                            </div>
                             <InventoryStatusBadge
                               :badge="getItemAvailability(item)"
                               :inline-meta="false"
@@ -568,7 +575,6 @@
                           >
                             {{ item.sku || item.serialNumber || item.serialNo }}
                           </p>
-                          <InventoryProfitHint :item="item" class="mt-0.5" />
                         </div>
                       </div>
                       <div class="flex shrink-0 flex-col items-center gap-0.5" @click.stop>
@@ -742,20 +748,23 @@
                                 </span>
                               </template>
                               <template v-else>
-                                <!-- Check if column is a price field (by key or type) -->
-                                <div
-                                  v-if="
-                                    ('type' in column && column.type === 'currency') ||
-                                    column.key.toLowerCase() === 'price' ||
-                                    column.key.toLowerCase().includes('price')
-                                  "
-                                >
+                                <div v-if="isInventoryUnitCostColumn(column)">
+                                  <span
+                                    v-if="getItemCostForDisplay(item) !== undefined"
+                                    class="dashboard-table__numeric"
+                                  >
+                                    {{ formatCurrency(getItemCostForDisplay(item)!) }}
+                                  </span>
+                                  <span v-else class="dashboard-table__muted italic">—</span>
+                                </div>
+                                <!-- Sell price (unit price) — amount only; margin lives in Margin column -->
+                                <div v-else-if="isInventorySellPriceColumn(column)">
                                   <div
                                     v-if="item.discountedPrice !== undefined"
                                     class="flex flex-col gap-0.5"
                                   >
                                     <div class="flex flex-wrap items-baseline gap-x-1.5 gap-y-0">
-                                      <span :class="tableMoneyClass()">
+                                      <span class="dashboard-table__numeric">
                                         {{ formatCurrency(item.discountedPrice) }}
                                       </span>
                                       <span
@@ -772,12 +781,10 @@
                                         formatCurrency(item.originalPrice || item[column.key] || 0)
                                       }}
                                     </span>
-                                    <InventoryProfitHint :item="item" class="mt-0.5" />
                                   </div>
-                                  <span v-else :class="tableMoneyClass()">
+                                  <span v-else class="dashboard-table__numeric">
                                     {{ formatCurrency(item[column.key] || 0) }}
                                   </span>
-                                  <InventoryProfitHint :item="item" class="mt-0.5" />
                                 </div>
                                 <div
                                   v-else-if="'type' in column && column.type === 'number'"
@@ -805,21 +812,8 @@
                                   </span>
                                   <span v-else class="text-gray-400 dark:text-gray-500"> - </span>
                                 </div>
-                                <div v-else-if="column.key === 'unitCost'">
-                                  <span v-if="getItemCostForDisplay(item) !== undefined" :class="tableMoneyClass()">
-                                    {{ formatCurrency(getItemCostForDisplay(item)!) }}
-                                  </span>
-                                  <span v-else class="dashboard-table__muted italic">—</span>
-                                </div>
                                 <div v-else-if="column.key === 'margin'">
-                                  <span
-                                    :class="[
-                                      'text-[11px] tabular-nums',
-                                      getItemGrossProfit(item) !== null && getItemGrossProfit(item)! >= 0
-                                        ? 'text-emerald-700 dark:text-emerald-400/90'
-                                        : 'text-gray-500 dark:text-gray-400',
-                                    ]"
-                                  >
+                                  <span :class="inventoryMarginClass(item)">
                                     {{ getItemMarginLabel(item) }}
                                   </span>
                                 </div>
@@ -983,17 +977,16 @@
                 <span class="font-medium">{{ getItemPrimaryLabel(mobileDetailItem) }}</span>
               </template>
               <template v-else>
-                <div
-                  v-if="
-                    ('type' in column && column.type === 'currency') ||
-                    column.key.toLowerCase() === 'price' ||
-                    column.key.toLowerCase().includes('price')
-                  "
-                  class="space-y-0.5"
-                >
+                <div v-if="isInventoryUnitCostColumn(column)">
+                  <span v-if="getItemCostForDisplay(mobileDetailItem) !== undefined">
+                    {{ formatCurrency(getItemCostForDisplay(mobileDetailItem)!) }}
+                  </span>
+                  <span v-else class="text-gray-400 italic dark:text-gray-500">—</span>
+                </div>
+                <div v-else-if="isInventorySellPriceColumn(column)" class="space-y-0.5">
                   <template v-if="mobileDetailItem.discountedPrice !== undefined">
                     <div class="flex flex-wrap items-baseline gap-x-2">
-                      <span :class="tableMoneyClass()">
+                      <span class="font-medium tabular-nums">
                         {{ formatCurrency(mobileDetailItem.discountedPrice) }}
                       </span>
                       <span
@@ -1013,11 +1006,9 @@
                       }}
                     </span>
                   </template>
-                  <span v-else class="font-semibold">
-                    <span :class="tableMoneyClass()">{{
-                      formatCurrency(mobileDetailItem[column.key] || 0)
-                    }}</span>
-                  </span>
+                  <span v-else class="font-medium tabular-nums">{{
+                    formatCurrency(mobileDetailItem[column.key] || 0)
+                  }}</span>
                 </div>
                 <div
                   v-else-if="'type' in column && column.type === 'number'"
@@ -1043,14 +1034,10 @@
                   }}</span>
                   <span v-else class="text-gray-400 dark:text-gray-500">-</span>
                 </div>
-                <div v-else-if="column.key === 'unitCost'">
-                  <span v-if="getItemCostForDisplay(mobileDetailItem) !== undefined">
-                    {{ formatCurrency(getItemCostForDisplay(mobileDetailItem)!) }}
-                  </span>
-                  <span v-else class="text-gray-400 italic dark:text-gray-500">—</span>
-                </div>
                 <div v-else-if="column.key === 'margin'">
-                  {{ getItemMarginLabel(mobileDetailItem) }}
+                  <span :class="inventoryMarginClass(mobileDetailItem)">
+                    {{ getItemMarginLabel(mobileDetailItem) }}
+                  </span>
                 </div>
                 <div v-else-if="column.key === 'source'">
                   <InventorySourceBadge
@@ -1105,7 +1092,7 @@
       "
       content-padding="p-3"
     >
-      <form @submit.prevent="handleSaveItem" class="space-y-2">
+      <form id="inventory-item-form" @submit.prevent="handleSaveItem" class="space-y-2">
         <!-- Bulk Add Mode for Serial Numbers -->
         <div v-if="folder?.hasSerialNumbers && !editingItem" class="space-y-2">
           <div
@@ -1382,15 +1369,26 @@
             variant="primary"
             size="sm"
             type="submit"
-            :disabled="!isItemDrawerValid"
-            @click="handleSaveItem"
+            form="inventory-item-form"
+            :disabled="!isItemDrawerValid || isSavingItem"
+            :loading="isSavingItem"
             class="w-full sm:w-auto"
           >
             {{
               editingItem
-                ? 'Update Product'
+                ? isSavingItem
+                  ? 'Updating…'
+                  : 'Update Product'
                 : folder?.hasSerialNumbers && !editingItem
-                ? `Add ${serialNumbers.length || 0} Product${serialNumbers.length !== 1 ? 's' : ''}`
+                ? isSavingItem
+                  ? `Adding ${validBulkSerialNumbers.length}…`
+                  : validBulkSerialNumbers.length > 0
+                  ? `Add ${validBulkSerialNumbers.length} Product${
+                      validBulkSerialNumbers.length !== 1 ? 's' : ''
+                    }`
+                  : 'Add Products'
+                : isSavingItem
+                ? 'Adding…'
                 : 'Add Product'
             }}
           </Button>
@@ -1512,7 +1510,7 @@
       title="Duplicate product"
       subtitle="Add one or more new serial numbers. Each will create a copy of this product; serial numbers must be unique."
       size="sm"
-      @update:model-value="(v: boolean) => { if (!v) clearDuplicateModal() }"
+      @update:model-value="(v: boolean) => { showDuplicateModal = v }"
     >
       <form @submit.prevent="handleConfirmDuplicate" class="space-y-4">
         <div class="space-y-2">
@@ -1714,7 +1712,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
+import { ref, computed, reactive, onMounted, onBeforeUnmount, onActivated, watch, nextTick } from 'vue'
 import {
   PlusIcon,
   CubeIcon,
@@ -1782,7 +1780,10 @@ import {
 } from '~/utils/inventory-item-cost'
 import { templateHasCostPriceField } from '~/utils/inventory-folder-profit'
 import { formatDiscountPercent } from '~/utils/format-discount'
-import { tableMoneyClass } from '~/utils/table-money-styles'
+import {
+  resolveSerialProductLine,
+  serialProductCompositeKey,
+} from '~/utils/inventory-serial-validation'
 import * as XLSX from 'xlsx'
 import DiscountModal from '~/components/inventory/DiscountModal.vue'
 import BulkDiscountModal from '~/components/inventory/BulkDiscountModal.vue'
@@ -1803,8 +1804,7 @@ const inventoryBreadcrumbs = computed(() => [
   { label: folder.value?.name || 'Category', icon: FolderIcon },
 ])
 
-// Import InventoryItem from store
-import type { InventoryItem } from '~/stores/inventory'
+import type { InventoryFolder, InventoryItem } from '~/stores/inventory'
 
 const inventoryStore = useInventoryStore()
 const receiptsStore = useReceiptsStore()
@@ -1833,6 +1833,41 @@ const isLoadingFolder = ref(true)
 const isLoadingItems = ref(false)
 const { headerBtnClass } = useDashboardPageChrome()
 
+function applyFolderSnapshot(next: InventoryFolder) {
+  folder.value = {
+    ...(folder.value ?? {}),
+    ...next,
+    template: next.template
+      ? {
+          ...next.template,
+          fields: next.template.fields?.map((field) => ({ ...field })),
+        }
+      : undefined,
+  } as InventoryFolder
+}
+
+/** Pull latest category settings (e.g. track profit + cost column) from Pinia or Firestore. */
+async function refreshFolderMetadata(forceFetch = false) {
+  const id = folderId.value
+  if (!id) return
+
+  if (!forceFetch) {
+    const cached = inventoryStore.getFolderById(id)
+    if (cached) {
+      applyFolderSnapshot(cached)
+      return
+    }
+  }
+
+  try {
+    const fetched = await inventoryStore.fetchFolder(id)
+    if (fetched) applyFolderSnapshot(fetched)
+  } catch {
+    const cached = inventoryStore.getFolderById(id)
+    if (cached) applyFolderSnapshot(cached)
+  }
+}
+
 const searchQuery = ref('')
 /** Full folder list for search filter (client-side); not stored in Pinia. */
 const folderSearchItems = ref<InventoryItem[] | null>(null)
@@ -1846,6 +1881,15 @@ const isSearchActive = computed(() => searchQuery.value.trim().length > 0)
 
 const sortBy = ref('name')
 const showAddItemModal = ref(false)
+const preserveItemDrawerDraft = ref(false)
+const itemDrawerClosingViaCancel = ref(false)
+
+watch(showAddItemModal, (isOpen) => {
+  if (isOpen) return
+  if (itemDrawerClosingViaCancel.value) return
+  preserveItemDrawerDraft.value =
+    Object.keys(itemForm).length > 0 || serialNumbers.value.length > 0
+})
 
 /** Mobile list: slide-over with the same fields as the desktop table */
 const showMobileItemDetailPanel = ref(false)
@@ -2055,6 +2099,25 @@ watch(isFullscreen, (fullscreen) => {
 
 const itemForm = reactive<Record<string, any>>({})
 const serialNumbers = ref<string[]>([])
+const isSavingItem = ref(false)
+
+const validBulkSerialNumbers = computed(() =>
+  serialNumbers.value.map((sn) => sn?.trim()).filter(Boolean)
+)
+
+function isEmptyItemFormValue(value: unknown): boolean {
+  if (value === undefined || value === null) return true
+  if (typeof value === 'boolean') return false
+  if (typeof value === 'number') return !Number.isFinite(value)
+  return String(value).trim() === ''
+}
+
+function normalizeSerialItemPayload(payload: Record<string, any>) {
+  const productLine = resolveSerialProductLine(payload.model, payload.name)
+  if (productLine && !String(payload.model ?? '').trim()) {
+    payload.model = productLine
+  }
+}
 
 const isItemDrawerValid = computed(() => {
   const fieldsToValidate =
@@ -2079,16 +2142,13 @@ const isItemDrawerValid = computed(() => {
     )
 
     for (const field of requiredFields) {
-      const value = itemForm[field.name]
-      if (value === undefined || value === null) return false
-      if (typeof value === 'string' && value.trim() === '') return false
+      if (isEmptyItemFormValue(itemForm[field.name])) return false
     }
   }
 
   // Serial-number bulk add requires at least one non-empty serial.
   if (folder.value?.hasSerialNumbers && !editingItem.value) {
-    const validSerials = serialNumbers.value.filter((sn) => sn && sn.trim() !== '')
-    if (validSerials.length === 0) return false
+    if (validBulkSerialNumbers.value.length === 0) return false
   }
 
   return true
@@ -2480,9 +2540,9 @@ const totalUnitsInFolder = computed(() => {
   }, 0)
 })
 
-/** Composite key: serial + product (brand + model). Same serial can exist for different product models. */
-const getSerialProductKey = (serial: string, brand: string, model: string) =>
-  `${String(serial).trim()}|${String(brand ?? '').trim()}|${String(model ?? '').trim()}`
+/** Composite key: serial + product (brand + product line). Same serial can exist for different product models. */
+const getSerialProductKey = (serial: string, brand?: string, model?: string, name?: string) =>
+  serialProductCompositeKey(serial, brand, model, name)
 
 /** Set of (serial + product model) keys that already exist in this folder. Used to block duplicate/add when same serial + product exists. */
 const existingSerialProductKeysInFolder = computed(() => {
@@ -2491,7 +2551,7 @@ const existingSerialProductKeysInFolder = computed(() => {
   folderItems.forEach((item: InventoryItem) => {
     const serial = item.serialNo ?? item.serialNumber
     if (serial != null && String(serial).trim() !== '') {
-      set.add(getSerialProductKey(String(serial), item.brand, item.model))
+      set.add(getSerialProductKey(String(serial), item.brand, item.model, item.name))
     }
   })
   return set
@@ -2607,6 +2667,28 @@ const getItemSourceBadge = (item: InventoryItem) => {
 }
 
 const getItemCostForDisplay = (item: InventoryItem) => resolveItemUnitCost(item)
+
+function isInventoryUnitCostColumn(column: { key: string; type?: string }): boolean {
+  return column.key === 'unitCost'
+}
+
+function isInventorySellPriceColumn(column: { key: string; type?: string }): boolean {
+  if (isInventoryUnitCostColumn(column) || column.key === 'margin') return false
+  const key = column.key.toLowerCase()
+  return (
+    column.type === 'currency' ||
+    key === 'price' ||
+    (key.includes('price') && key !== 'unitcost')
+  )
+}
+
+function inventoryMarginClass(item: InventoryItem): string {
+  const profit = getItemGrossProfit(item)
+  const base = 'text-[11px] tabular-nums'
+  if (profit === null) return `${base} dashboard-table__muted`
+  if (profit < 0) return `${base} text-red-600/75 dark:text-red-400/75`
+  return `${base} text-gray-500 dark:text-gray-400`
+}
 
 const getItemMarginLabel = (item: InventoryItem) => {
   const profit = getItemGrossProfit(item)
@@ -2962,19 +3044,18 @@ watch(
   { immediate: false }
 )
 
-const openAddItemModal = () => {
+function initializeItemForm() {
   editingItem.value = null
-  serialNumbers.value = []
-  // Reset form
   Object.keys(itemForm).forEach((key) => delete itemForm[key])
 
-  // If serial numbers are enabled, initialize brand and model fields by default
   if (folder.value?.hasSerialNumbers) {
     itemForm.brand = ''
     itemForm.model = ''
+    serialNumbers.value = ['']
+  } else {
+    serialNumbers.value = []
   }
 
-  // Initialize form for template + injected Quantity (stock) on bulk folders
   const fields = effectiveTemplateFields.value.length
     ? effectiveTemplateFields.value
     : folder.value?.template?.fields ?? []
@@ -2998,6 +3079,13 @@ const openAddItemModal = () => {
     itemForm.name = folderTitle
   }
   itemForm.unitCost = null
+}
+
+const openAddItemModal = async () => {
+  await refreshFolderMetadata(true)
+  if (!preserveItemDrawerDraft.value) {
+    initializeItemForm()
+  }
   showAddItemModal.value = true
 }
 
@@ -3006,6 +3094,7 @@ const handleEditItem = (item: InventoryItem) => {
     toast.error('Cannot edit a product while it is sold or on a stock loan')
     return
   }
+  preserveItemDrawerDraft.value = false
   showMobileItemDetailPanel.value = false
   mobileDetailItem.value = null
   cancelInlineEdit()
@@ -3146,9 +3235,11 @@ const handleConfirmDuplicate = async () => {
     return
   }
   const existing = existingSerialProductKeysInFolder.value
-  const productLabel = [source.brand, source.model].filter(Boolean).join(' ') || 'this product'
+  const productLabel =
+    [source.brand, resolveSerialProductLine(source.model, source.name)].filter(Boolean).join(' ') ||
+    'this product'
   const alreadyExist = serials.filter((sn) =>
-    existing.has(getSerialProductKey(sn, source.brand, source.model))
+    existing.has(getSerialProductKey(sn, source.brand, source.model, source.name))
   )
   if (alreadyExist.length > 0) {
     toast.error(
@@ -3276,6 +3367,8 @@ const removeSerialNumber = (index: number) => {
 }
 
 const handleSaveItem = async () => {
+  if (isSavingItem.value) return
+
   // Validate brand and model when serial numbers are enabled
   if (folder.value?.hasSerialNumbers && !editingItem.value) {
     if (!itemForm.brand || itemForm.brand.toString().trim() === '') {
@@ -3299,13 +3392,14 @@ const handleSaveItem = async () => {
         f.id !== SYNTH_STOCK_FIELD_ID
     )
     for (const field of requiredFields) {
-      if (!itemForm[field.name] || itemForm[field.name].toString().trim() === '') {
+      if (isEmptyItemFormValue(itemForm[field.name])) {
         toast.warning(`Please fill in the required field: ${field.label || field.name}`)
         return
       }
     }
   }
 
+  isSavingItem.value = true
   try {
     if (editingItem.value) {
       // Capture id, folder, and form snapshot before closing modal (handleCancelItem clears editingItem and itemForm)
@@ -3332,8 +3426,7 @@ const handleSaveItem = async () => {
     } else {
       // Check if we're in bulk add mode (hasSerialNumbers and serialNumbers array has items)
       if (folder.value?.hasSerialNumbers && serialNumbers.value.length > 0) {
-        // Validate serial numbers
-        const validSerialNumbers = serialNumbers.value.filter((sn) => sn && sn.trim() !== '')
+        const validSerialNumbers = validBulkSerialNumbers.value
         if (validSerialNumbers.length === 0) {
           toast.warning('Please add at least one serial number')
           return
@@ -3350,11 +3443,12 @@ const handleSaveItem = async () => {
 
         // Check that none of the (serial + product model) combinations already exist in this folder
         const existing = existingSerialProductKeysInFolder.value
+        const productLine = resolveSerialProductLine(itemForm.model, itemForm.name)
         const productLabel =
-          [itemForm.brand, itemForm.model].filter(Boolean).join(' ') || 'this product'
-        const alreadyExist = validSerialNumbers
-          .map((sn) => sn.trim())
-          .filter((sn) => existing.has(getSerialProductKey(sn, itemForm.brand, itemForm.model)))
+          [itemForm.brand, productLine].filter(Boolean).join(' ') || 'this product'
+        const alreadyExist = validSerialNumbers.filter((sn) =>
+          existing.has(getSerialProductKey(sn, itemForm.brand, itemForm.model, itemForm.name))
+        )
         if (alreadyExist.length > 0) {
           toast.error(
             alreadyExist.length === 1
@@ -3370,10 +3464,8 @@ const handleSaveItem = async () => {
         const baseItemData = { ...itemForm }
         // Remove serialNo from base data if it exists (we'll add it per item)
         delete baseItemData.serialNo
+        normalizeSerialItemPayload(baseItemData)
         normalizeUnitCostPayload(baseItemData)
-
-        // Close modal immediately for better UX
-        handleCancelItem()
 
         // Create items in batch for much better performance
         const itemsToCreate = validSerialNumbers.map((serialNo) => ({
@@ -3381,7 +3473,6 @@ const handleSaveItem = async () => {
           serialNo: serialNo.trim(),
         }))
 
-        // CRITICAL: Wait for item creation to complete (ensures data is saved to Firestore)
         await inventoryStore.createItemsBatch(folderId.value, itemsToCreate)
 
         // Update folder stats locally (optimistic update)
@@ -3389,11 +3480,11 @@ const handleSaveItem = async () => {
           folder.value.itemCount = (folder.value.itemCount || 0) + validSerialNumbers.length
         }
 
+        handleCancelItem()
+
         // Refresh items list in background (non-blocking) - only for UI sync
-        // Item is already in local state, so this is just to ensure consistency
         refreshCurrentItemsPage().catch((err) => {
           console.warn('Background items refresh failed (non-critical):', err)
-          // Item is already created and in local state, so this is just a sync issue
         })
 
         toast.success(
@@ -3427,14 +3518,21 @@ const handleSaveItem = async () => {
     }
   } catch (error: any) {
     toast.error(error.message || 'Failed to save product')
+  } finally {
+    isSavingItem.value = false
   }
 }
 
 const handleCancelItem = () => {
+  itemDrawerClosingViaCancel.value = true
+  preserveItemDrawerDraft.value = false
   showAddItemModal.value = false
   editingItem.value = null
   serialNumbers.value = []
   Object.keys(itemForm).forEach((key) => delete itemForm[key])
+  nextTick(() => {
+    itemDrawerClosingViaCancel.value = false
+  })
 }
 
 // Discount handlers
@@ -4189,6 +4287,7 @@ onMounted(async () => {
   // Add keyboard listener for ESC key
   if (import.meta.client) {
     window.addEventListener('keydown', handleKeyDown)
+    document.addEventListener('visibilitychange', handlePageVisible)
   }
 
   // Wait for auth to be ready
@@ -4223,10 +4322,21 @@ onMounted(async () => {
   // Items will be loaded by loadFolderData
 })
 
+onActivated(() => {
+  void refreshFolderMetadata()
+})
+
+function handlePageVisible() {
+  if (import.meta.client && document.visibilityState === 'visible') {
+    void refreshFolderMetadata()
+  }
+}
+
 // Cleanup keyboard listener and restore body overflow
 onBeforeUnmount(() => {
   if (import.meta.client) {
     window.removeEventListener('keydown', handleKeyDown)
+    document.removeEventListener('visibilitychange', handlePageVisible)
     document.removeEventListener('mousedown', handleClickOutsideInlineEdit)
     removeItemMenuOutsideListener()
     removeItemMenuPositionListeners()
@@ -4262,6 +4372,23 @@ watch(
   { immediate: false }
 )
 
+watch(
+  () => {
+    const id = folderId.value
+    if (!id) return ''
+    const storeFolder = inventoryStore.getFolderById(id)
+    if (!storeFolder) return ''
+    const fieldNames = storeFolder.template?.fields?.map((field) => field.name).join(',') ?? ''
+    return `${storeFolder.trackProfit}:${String(storeFolder.updatedAt ?? '')}:${fieldNames}`
+  },
+  () => {
+    const id = folderId.value
+    if (!id) return
+    const storeFolder = inventoryStore.getFolderById(id)
+    if (storeFolder) applyFolderSnapshot(storeFolder)
+  }
+)
+
 // Watch for store changes and redirect to folders list (only when user actually switches store, not on initial load/refresh)
 watch(
   () => storesStore.currentStoreId,
@@ -4287,7 +4414,7 @@ const loadFolderData = async () => {
   try {
     const fetchedFolder = await inventoryStore.fetchFolder(folderId.value)
     if (fetchedFolder) {
-      folder.value = fetchedFolder
+      applyFolderSnapshot(fetchedFolder)
       useHead({
         title: `${folder.value?.name || 'Folder'} - Inventory - Storvv`,
       })
@@ -4295,7 +4422,7 @@ const loadFolderData = async () => {
       await loadItems()
       await inventoryStore.recomputeFolderTotalValue(folderId.value).catch(() => {})
       const refreshed = inventoryStore.getFolderById(folderId.value)
-      if (refreshed) folder.value = { ...refreshed }
+      if (refreshed) applyFolderSnapshot(refreshed)
     } else {
       // Folder not found, show error and redirect back
       toast.error('Folder not found or you do not have access to this folder')
@@ -4339,7 +4466,7 @@ const loadItems = async () => {
     if (folder.value) {
       const updatedFolder = inventoryStore.getFolderById(folderId.value)
       if (updatedFolder) {
-        folder.value = updatedFolder
+        applyFolderSnapshot(updatedFolder)
       }
     }
   } catch (error: any) {

@@ -37,7 +37,7 @@ import {
   getSellerLoanOutDocument,
 } from '~/composables/useFirestorePaths'
 import { logActivity, getCurrentUserDisplayName } from '~/composables/useActivityLog'
-import { duplicateSerialExistsViaApi } from '~/utils/inventory-serial-validation'
+import { duplicateSerialExistsViaApi, resolveSerialProductLine } from '~/utils/inventory-serial-validation'
 import {
   INVENTORY_FIRESTORE_PAGE_SIZE,
   getInventoryItemsPage,
@@ -54,11 +54,34 @@ import {
 } from '~/utils/inventory-folder-availability'
 import {
   computeFolderGrossProfitOnHand,
+  folderTracksProfit,
   sumFolderGrossProfitOnHand,
   type FolderProfitStats,
 } from '~/utils/inventory-folder-profit'
 
 export { INVENTORY_FIRESTORE_PAGE_SIZE }
+
+/** Keep folderProfitStats in sync when track profit is toggled or folder totals change. */
+function syncFolderProfitStatsEntry(
+  state: {
+    folders: InventoryFolder[]
+    items: Record<string, InventoryItem[]>
+    folderProfitStats: Record<string, FolderProfitStats>
+  },
+  folderId: string
+): Record<string, FolderProfitStats> {
+  const folder = state.folders.find((f) => f.id === folderId)
+  if (!folder) return state.folderProfitStats
+
+  const next = { ...state.folderProfitStats }
+  const stats = computeFolderGrossProfitOnHand(state.items[folderId] ?? [], folder)
+  if (stats) {
+    next[folderId] = stats
+  } else {
+    delete next[folderId]
+  }
+  return next
+}
 
 /** Firestore rejects `undefined` field values on set()/batch writes. */
 function stripUndefinedFirestoreValues<T extends Record<string, unknown>>(data: T): T {
@@ -517,9 +540,12 @@ export const useInventoryStore = defineStore('inventory', {
           const items = queried.length >= cached.length ? queried : cached.length ? cached : queried
           next[folder.id] = computeFolderAvailabilityStats(items, folder)
           const totalValue = computeFolderTotalValue(items, folder)
-          const profitStats = computeFolderGrossProfitOnHand(items, folder)
-          if (profitStats) {
-            profitNext[folder.id] = profitStats
+          if (folderTracksProfit(folder)) {
+            profitNext[folder.id] =
+              computeFolderGrossProfitOnHand(items, folder) ?? {
+                grossProfitOnHand: 0,
+                unitsWithCost: 0,
+              }
           }
           const folderIndex = this.folders.findIndex((f) => f.id === folder.id)
           if (folderIndex > -1 && this.folders[folderIndex]) {
@@ -871,30 +897,27 @@ export const useInventoryStore = defineStore('inventory', {
           throw new Error('Folder not found')
         }
 
-        return {
-          id: folderSnap.id,
-          name: data.name || '',
-          description: data.description || '',
-          type: data.type || '',
-          color: data.color || '#3B82F6',
-          hasSerialNumbers: data.hasSerialNumbers || false,
-          template: data.template || undefined,
-          itemCount: data.itemCount || 0,
-          totalValue: data.totalValue || 0,
-          lowStockCount: data.lowStockCount || 0,
-          createdAt: data.createdAt?.toDate
-            ? data.createdAt.toDate()
-            : new Date(data.createdAt) || new Date(),
-          updatedAt: data.updatedAt?.toDate
-            ? data.updatedAt.toDate()
-            : new Date(data.updatedAt) || undefined,
-          createdBy: data.createdBy || authStore.currentUser.uid,
-          allowedDepartments: data.allowedDepartments || undefined,
-        } as InventoryFolder
+        const folder = mapFirestoreDocToInventoryFolder(
+          folderSnap as QueryDocumentSnapshot,
+          userId
+        )
+        this.upsertFolderInState(folder)
+        return folder
       } catch (error: any) {
         console.error('Error fetching folder:', error)
         throw new Error(error.message || 'Failed to fetch folder')
       }
+    },
+
+    /** Merge a folder snapshot into Pinia (e.g. after fetchFolder). */
+    upsertFolderInState(folder: InventoryFolder) {
+      const index = this.folders.findIndex((f) => f.id === folder.id)
+      if (index > -1) {
+        this.folders[index] = { ...this.folders[index], ...folder }
+      } else {
+        this.folders.push(folder)
+      }
+      this.folderProfitStats = syncFolderProfitStatsEntry(this, folder.id)
     },
 
     /** Single-item fetch (e.g. swap-in trade-in row on receipts). Uses receipt.storeId when provided. */
@@ -1022,6 +1045,7 @@ export const useInventoryStore = defineStore('inventory', {
             createdBy: authStore.currentUser.uid,
           }
           this.folders.unshift(folderForState)
+          this.folderProfitStats = syncFolderProfitStatsEntry(this, newFolderRef.id)
 
           const userDisplayNameForFolder = await getCurrentUserDisplayName().catch(() => 'Unknown')
           await logActivity({
@@ -1113,6 +1137,7 @@ export const useInventoryStore = defineStore('inventory', {
             ...updates,
             updatedAt: new Date(),
           } as InventoryFolder
+          this.folderProfitStats = syncFolderProfitStatsEntry(this, folderId)
         }
 
         const folderName = (updates as { name?: string }).name ?? folder?.name ?? folderId
@@ -1516,14 +1541,15 @@ export const useInventoryStore = defineStore('inventory', {
         }
       }
 
-      // Check for duplicate serial number if item has serial number, brand, and model
-      if (itemData.serialNo && itemData.brand && itemData.model) {
+      // Check for duplicate serial number if item has serial number, brand, and product line
+      const productLine = resolveSerialProductLine(itemData.model, itemData.name)
+      if (itemData.serialNo && itemData.brand && productLine) {
         const isDuplicate = await this.checkDuplicateSerialNumber(
           storeId,
           folderId,
           itemData.serialNo,
           itemData.brand,
-          itemData.model,
+          productLine,
           createdByUid,
           userStore.userData?.role
         )
@@ -1673,25 +1699,27 @@ export const useInventoryStore = defineStore('inventory', {
       }
 
       // Check for duplicate serial numbers in the batch
-      const itemsWithSerialNumbers = itemsData.filter(
-        (item) => item.serialNo && item.brand && item.model
-      )
+      const itemsWithSerialNumbers = itemsData.filter((item) => {
+        const productLine = resolveSerialProductLine(item.model, item.name)
+        return item.serialNo && item.brand && productLine
+      })
       if (itemsWithSerialNumbers.length > 0) {
         // Check each item for duplicates
         for (const item of itemsWithSerialNumbers) {
+          const productLine = resolveSerialProductLine(item.model, item.name)
           const isDuplicate = await this.checkDuplicateSerialNumber(
             storeId,
             folderId,
             item.serialNo,
             item.brand,
-            item.model,
+            productLine,
             createdByUid,
             userStore.userData?.role
           )
 
           if (isDuplicate) {
             throw new Error(
-              `An item with serial number "${item.serialNo}" already exists for ${item.brand} ${item.model}. Please use a different serial number.`
+              `An item with serial number "${item.serialNo}" already exists for ${item.brand} ${productLine}. Please use a different serial number.`
             )
           }
         }
@@ -1699,13 +1727,14 @@ export const useInventoryStore = defineStore('inventory', {
         // Check for duplicates within the batch itself
         const serialNumberMap = new Map<string, { brand: string; model: string }>()
         for (const item of itemsWithSerialNumbers) {
-          const key = `${item.serialNo.trim()}-${item.brand.trim()}-${item.model.trim()}`
+          const productLine = resolveSerialProductLine(item.model, item.name)
+          const key = `${item.serialNo.trim()}-${item.brand.trim()}-${productLine}`
           if (serialNumberMap.has(key)) {
             throw new Error(
-              `Duplicate serial number "${item.serialNo}" for ${item.brand} ${item.model} found in the items you're trying to add. Each serial number must be unique.`
+              `Duplicate serial number "${item.serialNo}" for ${item.brand} ${productLine} found in the items you're trying to add. Each serial number must be unique.`
             )
           }
-          serialNumberMap.set(key, { brand: item.brand, model: item.model })
+          serialNumberMap.set(key, { brand: item.brand, model: productLine })
         }
       }
 

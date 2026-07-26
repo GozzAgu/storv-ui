@@ -248,41 +248,134 @@ html.capacitor-ios.capacitor-native .dash-page-header--unified > .flex.flex-col.
 
 html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-header__description {
   width: 100%;
-  padding-inline: 0.875rem;
-  padding-bottom: 0.5rem;
+  margin-top: 0.375rem;
+  padding-inline: 0;
+  padding-bottom: 0;
 }
 
 html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-header__description .dash-page-metrics {
   margin-top: 0;
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(3.5rem, 1fr));
-  gap: 0.375rem 0.5rem;
-  padding: 0.5625rem 0.625rem;
-  border-radius: var(--cap-ios-radius);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  padding: 1px;
+  overflow: hidden;
+  border-radius: 0;
+  border-width: 1px 0 0;
   border-color: var(--dash-card-border);
-  background: rgb(255 255 255 / 0.42);
-  -webkit-backdrop-filter: blur(12px) saturate(1.1);
-  backdrop-filter: blur(12px) saturate(1.1);
+  background: var(--dash-card-border);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 
 html.capacitor-ios.capacitor-native.dark
   .dash-page-header--unified
   .dash-page-header__description
   .dash-page-metrics {
-  background: rgb(255 255 255 / 0.04);
+  background: rgb(255 255 255 / 0.08);
+}
+
+html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-metric {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.1875rem;
+  padding: 0.625rem 0.4375rem;
+  border: none;
+  background: rgb(255 255 255 / 0.42);
+  -webkit-backdrop-filter: blur(12px) saturate(1.1);
+  backdrop-filter: blur(12px) saturate(1.1);
+}
+
+html.capacitor-ios.capacitor-native.dark .dash-page-header--unified .dash-page-metric {
+  background: rgb(18 20 28 / 0.92);
 }
 
 html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-metric__label {
-  font-size: var(--cap-ios-caption) !important;
-  letter-spacing: 0.06em;
+  font-size: 0.5625rem !important;
+  font-weight: 600;
+  letter-spacing: 0.07em;
   line-height: 1.25;
+  text-align: center;
+  text-wrap: balance;
 }
 
 html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-metric__value {
-  font-size: var(--cap-ios-title) !important;
+  font-size: 0.875rem !important;
   font-weight: 600;
+  line-height: 1.2;
   letter-spacing: -0.02em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Inventory categories — counts first, money second */
+html.capacitor-ios.capacitor-native
+  .dash-page-metrics:has([data-metric-key='categories'])
+  [data-metric-key='categories'] {
+  order: 1;
+}
+
+html.capacitor-ios.capacitor-native
+  .dash-page-metrics:has([data-metric-key='categories'])
+  [data-metric-key='products'] {
+  order: 2;
+}
+
+html.capacitor-ios.capacitor-native
+  .dash-page-metrics:has([data-metric-key='categories'])
+  [data-metric-key='low-stock'] {
+  order: 3;
+}
+
+html.capacitor-ios.capacitor-native
+  .dash-page-metrics:has([data-metric-key='categories'])
+  [data-metric-key='value'] {
+  order: 4;
+}
+
+html.capacitor-ios.capacitor-native
+  .dash-page-metrics:has([data-metric-key='categories'])
+  [data-metric-key='profit'] {
+  order: 5;
+}
+
+html.capacitor-ios.capacitor-native
+  .dash-page-metrics:has([data-metric-key='categories']):has([data-metric-key='profit'])
+  [data-metric-key='value'] {
+  grid-column: span 2;
+}
+
+html.capacitor-ios.capacitor-native
+  .dash-page-metrics:has([data-metric-key='categories']):not(:has([data-metric-key='profit']))
+  [data-metric-key='value'] {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-inline: 0.875rem;
+}
+
+html.capacitor-ios.capacitor-native
+  .dash-page-metrics:has([data-metric-key='categories']):not(:has([data-metric-key='profit']))
+  [data-metric-key='value']
+  .dash-page-metric__label,
+html.capacitor-ios.capacitor-native
+  .dash-page-metrics:has([data-metric-key='categories']):not(:has([data-metric-key='profit']))
+  [data-metric-key='value']
+  .dash-page-metric__value {
+  text-align: left;
+}
+
+html.capacitor-ios.capacitor-native
+  .dash-page-metrics:has([data-metric-key='categories']):not(:has([data-metric-key='profit']))
+  [data-metric-key='value']
+  .dash-page-metric__value {
+  margin-left: auto;
+  text-align: right;
 }
 
 html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-header__toolbar {

@@ -208,7 +208,9 @@ const formattedValue = computed(() => {
 const formattedProfit = computed(() => {
   if (!props.showProfit || !props.trackProfit) return null
   const profit = props.grossProfitOnHand
-  if (profit === null || profit === undefined) return '…'
+  if (profit === null || profit === undefined) {
+    return props.itemCount <= 0 ? '+0' : '…'
+  }
   const abs = Math.abs(profit)
   if (abs >= 1_000_000) {
     const sign = profit < 0 ? '−' : '+'

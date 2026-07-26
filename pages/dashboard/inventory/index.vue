@@ -856,7 +856,7 @@
       title="Duplicate category"
       subtitle="Create copies with the same template and settings. Enter one or more category names."
       size="md"
-      @update:model-value="(v: boolean) => { if (!v) clearDuplicateFolderModal() }"
+      @update:model-value="(v: boolean) => { showDuplicateFolderModal = v }"
     >
       <form @submit.prevent="handleConfirmDuplicateFolder" class="space-y-4">
         <div class="flex items-center justify-between">
@@ -1246,6 +1246,8 @@ const {
 const searchQuery = ref('')
 const sortBy = ref('name')
 const showCreateFolderModal = ref(false)
+const preserveFolderDrawerDraft = ref(false)
+const folderDrawerClosingViaCancel = ref(false)
 const isSavingFolder = ref(false)
 const showProfitSkipConfirmModal = ref(false)
 const profitSkipConfirmed = ref(false)
@@ -1752,49 +1754,30 @@ const selectedTemplate = computed(() => {
   }
 })
 
-// Initialize with default fields for custom template
-watch(
-  () => showCreateFolderModal.value,
-  (isOpen) => {
-    if (isOpen && !editingFolder.value) {
-      // Reset to default fields for new folder
-      folderForm.trackProfit = false
-      profitSkipConfirmed.value = false
-      editableFields.value = getDefaultFields()
-      selectedTemplateId.value = 'custom'
+function resetNewFolderFormDefaults() {
+  folderForm.name = ''
+  folderForm.description = ''
+  folderForm.type = ''
+  folderForm.color = '#3B82F6'
+  folderForm.hasSerialNumbers = false
+  folderForm.trackProfit = false
+  folderForm.allowedDepartments = []
+  profitSkipConfirmed.value = false
+  editableFields.value = getDefaultFields()
+  selectedTemplateId.value = 'custom'
+  ensureBulkQuantityTemplateField(editableFields.value)
+}
 
-      if (folderForm.hasSerialNumbers) {
-        editableFields.value = stripStockLikeTemplateFields(editableFields.value)
-        const brandFieldExists = editableFields.value.some((f) => f.name === 'brand')
-        const serialNoFieldExists = editableFields.value.some(
-          (f) => f.name === 'serialNo' || f.name === 'serialNumber'
-        )
-
-        if (!serialNoFieldExists) {
-          editableFields.value.push({
-            id: `field-serialNo-${Date.now()}`,
-            name: 'serialNo',
-            label: 'Serial Number',
-            type: 'text',
-            required: true,
-          })
-        }
-
-        if (!brandFieldExists) {
-          editableFields.value.push({
-            id: `field-brand-${Date.now()}`,
-            name: 'brand',
-            label: 'Product model',
-            type: 'text',
-            required: true,
-          })
-        }
-      } else {
-        ensureBulkQuantityTemplateField(editableFields.value)
-      }
+watch(showCreateFolderModal, (isOpen) => {
+  if (isOpen) {
+    if (!editingFolder.value && !preserveFolderDrawerDraft.value) {
+      resetNewFolderFormDefaults()
     }
+    return
   }
-)
+  if (folderDrawerClosingViaCancel.value || editingFolder.value) return
+  preserveFolderDrawerDraft.value = true
+})
 
 watch(
   () => folderForm.trackProfit,
@@ -1961,7 +1944,10 @@ const categoryHeaderMetrics = computed(() => {
 function folderGrossProfitOnHand(folderId: string): number | null {
   const folder = inventoryStore.getFolderById(folderId)
   if (!folder?.trackProfit) return null
-  return inventoryStore.folderProfitStats[folderId]?.grossProfitOnHand ?? null
+  const stats = inventoryStore.folderProfitStats[folderId]
+  if (stats) return stats.grossProfitOnHand
+  if ((folder.itemCount ?? 0) === 0) return 0
+  return null
 }
 
 function formatFolderProfit(folderId: string): string {
@@ -2139,15 +2125,9 @@ const navigateToFolder = (folderId: string) => {
 
 const openCreateFolderModal = () => {
   editingFolder.value = null
-  folderForm.name = ''
-  folderForm.description = ''
-  folderForm.type = ''
-  folderForm.color = '#3B82F6'
-  folderForm.hasSerialNumbers = false
-  folderForm.trackProfit = false
-  profitSkipConfirmed.value = false
-  editableFields.value = getDefaultFields()
-  ensureBulkQuantityTemplateField(editableFields.value)
+  if (!preserveFolderDrawerDraft.value) {
+    resetNewFolderFormDefaults()
+  }
   showCreateFolderModal.value = true
 }
 
@@ -2237,6 +2217,7 @@ const handleConfirmDuplicateFolder = async () => {
 }
 
 const handleEditFolder = (folder: InventoryFolder) => {
+  preserveFolderDrawerDraft.value = false
   editingFolder.value = folder
   folderForm.name = folder.name
   folderForm.description = folder.description || ''
@@ -2521,19 +2502,17 @@ const handleSaveFolder = async () => {
 }
 
 const handleCancelFolder = () => {
+  folderDrawerClosingViaCancel.value = true
+  preserveFolderDrawerDraft.value = false
   showCreateFolderModal.value = false
   showProfitSkipConfirmModal.value = false
   profitSkipConfirmed.value = false
   isSavingFolder.value = false
   editingFolder.value = null
-  folderForm.name = ''
-  folderForm.description = ''
-  folderForm.type = ''
-  folderForm.color = '#3B82F6'
-  folderForm.hasSerialNumbers = false
-  folderForm.trackProfit = false
-  folderForm.allowedDepartments = []
-  editableFields.value = getDefaultFields()
+  resetNewFolderFormDefaults()
+  nextTick(() => {
+    folderDrawerClosingViaCancel.value = false
+  })
 }
 
 const confirmCreateWithoutProfitTracking = () => {

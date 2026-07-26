@@ -9,6 +9,7 @@ interface ValidateSerialBody {
   serialNo?: string
   brand?: string
   model?: string
+  name?: string
 }
 
 export default defineEventHandler(async (event) => {
@@ -21,11 +22,13 @@ export default defineEventHandler(async (event) => {
   const serialNo = body.serialNo?.trim()
   const brand = body.brand?.trim()
   const model = body.model?.trim()
+  const name = body.name?.trim()
+  const productLine = model || name
 
-  if (!ownerUserId || !storeId || !folderId || !serialNo || !brand || !model) {
+  if (!ownerUserId || !storeId || !folderId || !serialNo || !brand || !productLine) {
     throw createError({
       statusCode: 400,
-      message: 'ownerUserId, storeId, folderId, serialNo, brand and model are required',
+      message: 'ownerUserId, storeId, folderId, serialNo, brand and product line are required',
     })
   }
 
@@ -46,8 +49,9 @@ export default defineEventHandler(async (event) => {
     .get()
 
   const duplicateExists = snapshot.docs.some((doc) => {
-    const data = doc.data() as { brand?: string; model?: string }
-    return (data.brand || '').trim() === brand && (data.model || '').trim() === model
+    const data = doc.data() as { brand?: string; model?: string; name?: string }
+    const existingLine = (data.model || data.name || '').trim()
+    return (data.brand || '').trim() === brand && existingLine === productLine
   })
 
   return {
