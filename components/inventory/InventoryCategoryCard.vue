@@ -11,10 +11,10 @@
       </div>
     </div>
 
-    <h3 class="dash-grid-card__title" :title="displayName">
+    <h3 class="dash-grid-card__title">
       {{ displayName }}
     </h3>
-    <p class="dash-grid-card__desc" :title="descriptionText">
+    <p class="dash-grid-card__desc">
       {{ descriptionText }}
     </p>
 
@@ -29,7 +29,7 @@
           stroke-width="1.5"
           aria-hidden="true"
         />
-        <span class="min-w-0 truncate" :title="departmentLabel">{{ departmentLabel }}</span>
+        <span class="min-w-0 truncate">{{ departmentLabel }}</span>
       </div>
     </div>
 
@@ -59,7 +59,6 @@
           <p
             v-if="availabilityHint"
             class="dash-grid-card__stat-hint"
-            :title="availabilityHint"
           >
             {{ availabilityHint }}
           </p>
@@ -71,14 +70,13 @@
           </p>
         </div>
         <div class="dash-grid-card__metrics shrink-0 text-right">
-          <p class="dash-grid-card__value" :title="`Value ${formattedValue}`">
+          <p class="dash-grid-card__value">
             {{ formattedValue }}
           </p>
           <p
             v-if="showProfit && formattedProfit"
             class="dash-grid-card__profit"
             :class="profitClass"
-            :title="profitTitle"
           >
             {{ formattedProfit }}
           </p>

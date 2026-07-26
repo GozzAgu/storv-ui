@@ -5,13 +5,15 @@
         <slot name="eyebrow" />
       </div>
       <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div class="min-w-0">
+        <div class="min-w-0 flex-1">
           <slot name="title" />
-          <slot name="description" />
         </div>
         <div v-if="$slots.actions" class="flex w-full shrink-0 flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
           <slot name="actions" />
         </div>
+      </div>
+      <div v-if="$slots.description" class="dash-page-header__description min-w-0 w-full">
+        <slot name="description" />
       </div>
     </div>
     <div

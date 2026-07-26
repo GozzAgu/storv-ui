@@ -274,14 +274,12 @@
                   <div class="min-w-0 flex-1">
                     <p
                       class="truncate text-[11px] font-medium leading-tight text-gray-900 dark:text-gray-100"
-                      :title="store.name"
                     >
                       {{ store.name }}
                     </p>
                     <p
                       v-if="store.address || store.description"
                       class="mt-0.5 truncate text-[10px] leading-snug text-gray-500 dark:text-gray-400"
-                      :title="store.address || store.description"
                     >
                       {{ store.address || store.description }}
                     </p>

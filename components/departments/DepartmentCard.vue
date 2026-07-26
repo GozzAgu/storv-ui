@@ -26,10 +26,10 @@
       </div>
     </div>
 
-    <h3 class="dash-grid-card__title" :title="displayName">
+    <h3 class="dash-grid-card__title">
       {{ displayName }}
     </h3>
-    <p class="dash-grid-card__desc" :title="descriptionText">
+    <p class="dash-grid-card__desc">
       {{ descriptionText }}
     </p>
 
@@ -40,7 +40,7 @@
       </div>
       <div class="dash-grid-card__meta-row">
         <UserIcon class="dash-grid-card__meta-icon" stroke-width="1.5" aria-hidden="true" />
-        <span class="min-w-0 truncate" :title="managerLabel">{{ managerLabel }}</span>
+        <span class="min-w-0 truncate">{{ managerLabel }}</span>
       </div>
     </div>
 
@@ -77,7 +77,6 @@
         <p
           v-if="dateLabel"
           class="dash-grid-card__value"
-          :title="dateLabel"
         >
           {{ dateLabel }}
         </p>

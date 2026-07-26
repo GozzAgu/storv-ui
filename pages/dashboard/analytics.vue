@@ -1,14 +1,14 @@
 <template>
-  <div :class="pageClass">
-    <DashboardPageHeader>
+  <div :class="[pageClass, 'dash-page--unified']">
+    <DashboardPageHeader class="dash-page-header--unified">
       <template #eyebrow>
         <p :class="eyebrowClass">Analytics</p>
       </template>
       <template #title>
         <h1 :class="pageTitleClass">Analytics & Reports</h1>
       </template>
-      <template #description>
-        <p :class="descriptionClass">Track your sales, inventory, and customer insights</p>
+      <template v-if="!isLoading && !needsStoreSelection" #description>
+        <DashboardPageMetrics :metrics="analyticsHeaderMetrics" aria-label="Analytics summary" />
       </template>
       <template #actions>
         <div :class="segmentGroupClass" role="group" aria-label="Analytics period">
@@ -81,78 +81,6 @@
     </template>
 
     <template v-else>
-      <section :class="cardPaddedClass">
-        <p :class="summaryTextClass">{{ analyticsSummary }}</p>
-        <dl :class="metricGridClass">
-          <div :class="metricRowClass">
-            <dt>Completed sales</dt>
-            <dd :class="numClass">{{ completedReceiptsInPeriod.length }}</dd>
-          </div>
-          <div :class="metricRowClass">
-            <dt>Units sold</dt>
-            <dd :class="numClass">{{ itemsSoldInPeriod }}</dd>
-          </div>
-          <div :class="metricRowClass">
-            <dt>Customers</dt>
-            <dd :class="numClass">{{ uniqueCustomersInPeriod }}</dd>
-          </div>
-          <div :class="metricRowClass">
-            <dt>Repeat rate</dt>
-            <dd :class="numClass">{{ repeatPurchaseRate.toFixed(0) }}%</dd>
-          </div>
-        </dl>
-      </section>
-
-      <div :class="kpiGridWideClass">
-        <StatCard
-          label="Total revenue"
-          :value="formatCurrency(totalRevenue)"
-          subtext="vs previous period"
-          :change="revenueChangeBadge"
-          :change-positive="revenueChangePositive"
-        />
-        <StatCard
-          label="Completed revenue"
-          :value="formatCurrency(totalPeriodSales)"
-          :subtext="periodLabel"
-        />
-        <StatCard
-          label="Orders"
-          :value="totalOrders.toString()"
-          :subtext="`${completedReceiptsInPeriod.length} completed`"
-        />
-        <StatCard
-          label="Avg. order value"
-          :value="formatCurrency(averageOrderValue)"
-          subtext="Per completed sale"
-        />
-        <StatCard
-          label="Low stock"
-          :value="lowStockCount.toString()"
-          :subtext="lowStockCount > 0 ? 'Review inventory' : 'All stocked'"
-          :subtext-class="lowStockCount > 0 ? 'warning' : ''"
-        />
-        <StatCard
-          label="Refunds"
-          :value="refundedCount.toString()"
-          :subtext="`${formatCurrency(refundAmount)} · ${refundRateText}`"
-          subtext-class="danger"
-        />
-        <StatCard
-          v-if="canViewProfitAndCost"
-          label="Gross profit"
-          :value="formatCurrency(periodGrossProfit)"
-          :subtext="grossProfitSubtext"
-          :change-positive="periodGrossProfit >= 0"
-        />
-        <StatCard
-          v-if="canViewProfitAndCost"
-          label="Cost of goods sold"
-          :value="formatCurrency(periodCogs)"
-          subtext="Sold items with unit cost recorded"
-        />
-      </div>
-
       <div :class="chartsGridClass">
         <section :class="[cardFlushClass, 'dash-charts-grid__main overflow-hidden']">
           <div
@@ -437,7 +365,7 @@
                   <td class="py-1.5 px-2 text-right font-medium text-red-600 dark:text-red-400">
                     -{{ formatCurrency(ret.amount) }}
                   </td>
-                  <td class="max-w-[100px] truncate py-1.5 pl-2" :title="ret.reason">
+                  <td class="max-w-[100px] truncate py-1.5 pl-2">
                     {{ ret.reason }}
                   </td>
                 </tr>
@@ -522,7 +450,6 @@ import { useThemeStore } from '~/stores/theme'
 import { usePreferences } from '~/composables/usePreferences'
 import { useAppToast } from '~/composables/useAppToast'
 import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
-import StatCard from '~/components/ui/StatCard.vue'
 import PaymentLinksSummaryCard from '~/components/payments/PaymentLinksSummaryCard.vue'
 import { tableMoneyClass } from '~/utils/table-money-styles'
 import {
@@ -1131,6 +1058,66 @@ const grossProfitSubtext = computed(() => {
   const margin = grossProfitMarginPercent.value
   if (margin === null) return 'Add unit costs on inventory items'
   return `${formatMarginPercent(margin)} gross margin on line revenue`
+})
+
+const analyticsHeaderMetrics = computed(() => {
+  const metrics = [
+    {
+      key: 'revenue',
+      label: 'Total revenue',
+      value: formatCurrency(totalRevenue.value),
+    },
+    {
+      key: 'completed',
+      label: 'Completed',
+      value: formatCurrency(totalPeriodSales.value),
+    },
+    {
+      key: 'orders',
+      label: 'Orders',
+      value: String(totalOrders.value),
+    },
+    {
+      key: 'aov',
+      label: 'Avg. order',
+      value: formatCurrency(averageOrderValue.value),
+    },
+    {
+      key: 'customers',
+      label: 'Customers',
+      value: String(uniqueCustomersInPeriod.value),
+    },
+    {
+      key: 'low-stock',
+      label: 'Low stock',
+      value: String(lowStockCount.value),
+      tone: lowStockCount.value > 0 ? ('warning' as const) : undefined,
+    },
+    {
+      key: 'refunds',
+      label: 'Refunds',
+      value: String(refundedCount.value),
+      tone: refundedCount.value > 0 ? ('danger' as const) : undefined,
+    },
+  ]
+
+  if (canViewProfitAndCost.value) {
+    metrics.push(
+      {
+        key: 'profit',
+        label: 'Gross profit',
+        value: formatCurrency(periodGrossProfit.value),
+        tone: periodGrossProfit.value >= 0 ? ('success' as const) : ('danger' as const),
+      },
+      {
+        key: 'cogs',
+        label: 'COGS',
+        value: formatCurrency(periodCogs.value),
+      }
+    )
+  }
+
+  return metrics
 })
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']

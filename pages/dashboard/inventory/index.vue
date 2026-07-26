@@ -1,9 +1,9 @@
 <template>
   <div
     data-inventory-categories
-    :class="pageWithFooterClass"
+    :class="[pageWithFooterClass, 'dash-page--unified']"
   >
-    <DashboardPageHeader>
+    <DashboardPageHeader class="dash-page-header--unified">
       <template #eyebrow>
         <nav :class="eyebrowClass" aria-label="Breadcrumb">
           <span>Inventory</span>
@@ -12,12 +12,21 @@
         </nav>
       </template>
       <template #title>
-        <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+        <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
           <h1 :class="titleClass">Categories</h1>
           <DuplicateFeatureUpsellBanner
             :loading="inventoryStore.loading && inventoryStore.folders.length === 0"
           />
         </div>
+      </template>
+      <template
+        v-if="!inventoryStore.loading && inventoryStore.folders.length > 0"
+        #description
+      >
+        <DashboardPageMetrics
+          :metrics="categoryHeaderMetrics"
+          aria-label="Category summary"
+        />
       </template>
       <template #actions>
         <div :class="viewToggleClass" role="group" aria-label="Category layout">
@@ -71,39 +80,61 @@
           </Button>
         </template>
       </template>
+      <template v-if="!inventoryStore.loading && inventoryStore.folders.length > 0" #filters>
+        <DashboardToolbarSearch
+          v-model="searchQuery"
+          placeholder="Search categories…"
+          input-class="sm:w-52"
+        />
+        <DashboardToolbarSelect
+          v-model="selectedDepartmentId"
+          wrapper-class="min-w-[8.5rem] flex-1 sm:flex-none"
+        >
+          <option value="">All departments</option>
+          <option v-for="dept in currentStoreDepartments" :key="dept.id" :value="dept.id">
+            {{ dept.name }}
+          </option>
+        </DashboardToolbarSelect>
+        <DashboardToolbarSelect v-model="sortBy" min-width-class="min-w-[5.5rem]">
+          <option value="name">Name</option>
+          <option value="items">Products</option>
+          <option value="date">Date</option>
+        </DashboardToolbarSelect>
+        <div
+          v-if="canCreateInventoryFolders && paginatedFolders.length > 0"
+          class="dash-page-header__bulk ml-auto flex flex-wrap items-center gap-2"
+        >
+          <Checkbox
+            :model-value="allFoldersOnPageSelected"
+            size="sm"
+            wrapper-class="!h-8 items-center"
+            label-class="!text-xs !ml-2 !font-normal !leading-none text-gray-500 dark:text-gray-500"
+            @update:model-value="toggleSelectAllFolders"
+          >
+            {{ allFoldersOnPageSelected ? 'All selected' : 'Select all' }}
+          </Checkbox>
+          <template v-if="selectedFoldersForBulk.length > 0">
+            <span
+              class="inline-flex h-8 items-center text-xs font-medium tabular-nums text-gray-600 dark:text-gray-400"
+            >
+              {{ selectedFoldersForBulk.length }} selected
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              :icon="TrashIcon"
+              :extra-class="
+                headerBtnClass +
+                ' !border-red-200/70 !text-red-600 hover:!bg-red-50/80 dark:!border-red-900/40 dark:!text-red-400 dark:hover:!bg-red-950/30'
+              "
+              @click="openBulkDeleteFoldersModal"
+            >
+              Delete
+            </Button>
+          </template>
+        </div>
+      </template>
     </DashboardPageHeader>
-
-    <div v-if="!inventoryStore.loading && inventoryStore.folders.length > 0" :class="kpiGridClass">
-      <StatCard
-        label="Categories"
-        :value="String(inventoryStore.folders.length)"
-        :subtext="`${filteredFolders.length} shown`"
-      />
-      <StatCard
-        label="Products"
-        :value="String(inventoryStore.totalItems)"
-        subtext="Across all categories"
-      />
-      <StatCard
-        label="Total value"
-        :value="formatCurrency(filteredFoldersTotalValue)"
-        :subtext="`${formatCurrency(inventoryStore.totalValue)} store total`"
-      />
-      <StatCard
-        v-if="canViewProfitAndCost"
-        label="Total profit"
-        :value="formatCurrency(filteredFoldersTotalProfit)"
-        :subtext="profitKpiSubtext"
-      />
-      <StatCard
-        label="Low stock"
-        :value="String(inventoryStore.lowStockFolders.length)"
-        :subtext="
-          inventoryStore.lowStockFolders.length > 0 ? 'Needs attention' : 'Within thresholds'
-        "
-        :subtext-class="inventoryStore.lowStockFolders.length > 0 ? 'warning' : ''"
-      />
-    </div>
 
     <div
       v-if="inventoryStore.loading && inventoryStore.folders.length === 0"
@@ -121,77 +152,6 @@
           : 'dash-grid-shell--grid inventory-categories-shell--grid',
       ]"
     >
-      <div
-        class="shrink-0"
-        :class="foldersViewMode === 'grid' ? [tableShellClass, 'overflow-hidden rounded-xl'] : ''"
-      >
-        <DataTableToolbar>
-          <template #heading>
-            <div class="min-w-0">
-              <h2 :class="toolbarTitleClass">All categories</h2>
-              <p :class="toolbarDescClass">
-                Browse and manage product categories for this store
-              </p>
-            </div>
-          </template>
-          <template #filters>
-            <DashboardToolbarSearch
-              v-model="searchQuery"
-              placeholder="Search categories…"
-              input-class="sm:w-52"
-            />
-            <DashboardToolbarSelect
-              v-model="selectedDepartmentId"
-              wrapper-class="min-w-[8.5rem] flex-1 sm:flex-none"
-            >
-              <option value="">All departments</option>
-              <option v-for="dept in currentStoreDepartments" :key="dept.id" :value="dept.id">
-                {{ dept.name }}
-              </option>
-            </DashboardToolbarSelect>
-            <DashboardToolbarSelect v-model="sortBy" min-width-class="min-w-[5.5rem]">
-              <option value="name">Name</option>
-              <option value="items">Products</option>
-              <option value="date">Date</option>
-            </DashboardToolbarSelect>
-            <DashboardToolbarMeta>
-              {{ filteredFolders.length }}
-              {{ filteredFolders.length === 1 ? 'category' : 'categories' }}
-            </DashboardToolbarMeta>
-          </template>
-          <template v-if="canCreateInventoryFolders && paginatedFolders.length > 0" #bulk>
-            <Checkbox
-              :model-value="allFoldersOnPageSelected"
-              size="sm"
-              wrapper-class="!h-8 items-center"
-              label-class="!text-xs !ml-2 !font-normal !leading-none text-gray-500 dark:text-gray-500"
-              @update:model-value="toggleSelectAllFolders"
-            >
-              {{ allFoldersOnPageSelected ? 'All selected' : 'Select all' }}
-            </Checkbox>
-            <template v-if="selectedFoldersForBulk.length > 0">
-              <span
-                class="inline-flex h-8 items-center text-xs font-medium tabular-nums text-gray-600 dark:text-gray-400"
-              >
-                {{ selectedFoldersForBulk.length }} selected
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                :icon="TrashIcon"
-                :extra-class="
-                  headerBtnClass +
-                  ' !border-red-200/70 !text-red-600 hover:!bg-red-50/80 dark:!border-red-900/40 dark:!text-red-400 dark:hover:!bg-red-950/30'
-                "
-                @click="openBulkDeleteFoldersModal"
-              >
-                Delete
-              </Button>
-            </template>
-          </template>
-        </DataTableToolbar>
-      </div>
-
       <DashboardTableEmptyState
         v-if="paginatedFolders.length === 0"
         :icon="FolderIcon"
@@ -342,13 +302,10 @@
                         <FolderIcon class="h-4 w-4" />
                       </span>
                       <div class="min-w-0">
-                        <span class="dashboard-table__primary block truncate" :title="folder.name">
-                          {{ folder.name }}
-                        </span>
+                        <span class="dashboard-table__primary block truncate">{{ folder.name }}</span>
                         <span
                           v-if="folder.description?.trim()"
                           class="dashboard-table__muted mt-0.5 block truncate text-[10px]"
-                          :title="folder.description"
                         >
                           {{ folder.description }}
                         </span>
@@ -398,10 +355,7 @@
                       {{ folder.hasSerialNumbers ? 'Serial' : 'Quantity' }}
                     </span>
                   </td>
-                  <td
-                    class="hidden max-w-[12rem] lg:table-cell"
-                    :title="folderDepartmentsSummary(folder)"
-                  >
+                  <td class="hidden max-w-[12rem] lg:table-cell">
                     <span class="dashboard-table__muted block truncate text-xs">
                       {{ folderDepartmentsSummary(folder) }}
                     </span>
@@ -1226,9 +1180,7 @@ import Button from '~/components/ui/Button.vue'
 import DeleteFolderModal from '~/components/inventory/DeleteFolderModal.vue'
 import DuplicateFeatureUpsellBanner from '~/components/inventory/DuplicateFeatureUpsellBanner.vue'
 import InventoryCategoryCard from '~/components/inventory/InventoryCategoryCard.vue'
-import StatCard from '~/components/ui/StatCard.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
-import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
 import DashboardTablePagination from '~/components/dashboard/DashboardTablePagination.vue'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
@@ -1264,13 +1216,10 @@ const {
   eyebrowClass,
   titleClass,
   headerBtnClass,
-  kpiGridClass,
   tableShellClass,
   gridShellClass,
   gridClass,
   gridFooterClass,
-  toolbarTitleClass,
-  toolbarDescClass,
   menuBtnClass,
   viewToggleClass,
   viewToggleBtnClass,
@@ -1958,10 +1907,6 @@ const filteredFoldersTotalValue = computed(() =>
   filteredFolders.value.reduce((sum, folder) => sum + (folder.totalValue ?? 0), 0)
 )
 
-const profitTrackingFolderCount = computed(
-  () => filteredFolders.value.filter((folder) => folder.trackProfit === true).length
-)
-
 const filteredFoldersTotalProfit = computed(() =>
   filteredFolders.value.reduce((sum, folder) => {
     if (!folder.trackProfit) return sum
@@ -1969,14 +1914,48 @@ const filteredFoldersTotalProfit = computed(() =>
   }, 0)
 )
 
-const profitKpiSubtext = computed(() => {
-  const tracking = profitTrackingFolderCount.value
-  if (tracking === 0) return 'Enable on categories to track margin'
-  const storeTotal = inventoryStore.totalGrossProfitOnHand
-  if (filteredFolders.value.length === inventoryStore.folders.length) {
-    return `${tracking} categor${tracking === 1 ? 'y' : 'ies'} · available stock`
+const categoryHeaderMetrics = computed(() => {
+  const totalCategories = inventoryStore.folders.length
+  const shownCategories = filteredFolders.value.length
+  const categoriesValue =
+    shownCategories !== totalCategories
+      ? `${shownCategories} / ${totalCategories}`
+      : String(totalCategories)
+
+  const metrics: Array<{ key: string; label: string; value: string; tone?: string }> = [
+    {
+      key: 'categories',
+      label: shownCategories !== totalCategories ? 'Categories shown' : 'Categories',
+      value: categoriesValue,
+    },
+    {
+      key: 'products',
+      label: 'Products',
+      value: String(inventoryStore.totalItems),
+    },
+    {
+      key: 'value',
+      label: 'Total value',
+      value: formatCurrency(filteredFoldersTotalValue.value),
+    },
+  ]
+
+  if (canViewProfitAndCost.value) {
+    metrics.push({
+      key: 'profit',
+      label: 'Total profit',
+      value: formatCurrency(filteredFoldersTotalProfit.value),
+    })
   }
-  return `${formatCurrency(storeTotal)} store · ${tracking} tracking`
+
+  metrics.push({
+    key: 'low-stock',
+    label: 'Low stock',
+    value: String(inventoryStore.lowStockFolders.length),
+    tone: inventoryStore.lowStockFolders.length > 0 ? 'warning' : undefined,
+  })
+
+  return metrics
 })
 
 function folderGrossProfitOnHand(folderId: string): number | null {

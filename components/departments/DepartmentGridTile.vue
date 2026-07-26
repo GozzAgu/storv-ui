@@ -23,7 +23,6 @@
         <div class="min-w-0 flex-1">
           <p
             class="truncate text-xs font-semibold leading-tight tracking-tight text-gray-900 dark:text-gray-50"
-            :title="name"
           >
             {{ name }}
           </p>

@@ -30,7 +30,7 @@
               <h2 :class="profileCardNameClass">
                 {{ leftCardHeading }}
               </h2>
-              <p :class="profileCardMetaClass" :title="leftCardLine2 || ''">
+              <p :class="profileCardMetaClass">
                 {{ leftCardLine2 || '-' }}
               </p>
               <span :class="profileRoleBadgeClass">

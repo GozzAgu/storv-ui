@@ -95,7 +95,6 @@
               :icon="ArrowTopRightOnSquareIcon"
               class="shrink-0 !rounded-xl !px-2 !py-2 !text-[11px] sm:!rounded-2xl sm:!px-3 sm:!py-2.5 sm:!text-xs"
               :disabled="selectedItemsEligibleForSellerLoan.length === 0"
-              :title="sellerLoanButtonTitle"
               :aria-label="sellerLoanButtonTitle"
               @click="openCreateSellerLoanModal"
             >
@@ -111,7 +110,6 @@
             :loading="isImporting"
             :disabled="isExporting"
             aria-label="Import from Excel"
-            title="Import from Excel"
             @click="fileInputRef?.click()"
           />
           <Button
@@ -123,7 +121,6 @@
             :loading="isExporting"
             :disabled="isImporting || (folder?.itemCount ?? 0) === 0"
             aria-label="Export to Excel"
-            title="Export to Excel"
             @click="handleExportToExcel"
           />
           <Button
@@ -260,7 +257,6 @@
                       :icon="ArrowTopRightOnSquareIcon"
                       extra-class="!rounded-2xl"
                       :disabled="selectedItemsEligibleForSellerLoan.length === 0"
-                      :title="sellerLoanButtonTitle"
                       :aria-label="sellerLoanButtonTitle"
                       @click="openCreateSellerLoanModal"
                     >
@@ -294,7 +290,6 @@
                       :icon="ArrowDownTrayIcon"
                       :loading="isImporting"
                       :disabled="isExporting"
-                      title="Import from Excel"
                       extra-class="!rounded-2xl"
                       aria-label="Import from Excel"
                       @click="fileInputRef?.click()"
@@ -307,7 +302,6 @@
                       :icon="ArrowUpTrayIcon"
                       :loading="isExporting"
                       :disabled="isImporting || (folder?.itemCount ?? 0) === 0"
-                      title="Export to Excel"
                       extra-class="!rounded-2xl"
                       aria-label="Export to Excel"
                       @click="handleExportToExcel"
@@ -430,7 +424,6 @@
                     :icon="ArrowTopRightOnSquareIcon"
                     extra-class="!rounded-2xl max-sm:!px-2 max-sm:!py-1.5"
                     :disabled="selectedItemsEligibleForSellerLoan.length === 0"
-                    :title="sellerLoanButtonTitle"
                     :aria-label="sellerLoanButtonTitle"
                     @click="openCreateSellerLoanModal"
                   >
@@ -444,7 +437,6 @@
                   :icon="ArrowDownTrayIcon"
                   :loading="isImporting"
                   :disabled="isExporting"
-                  title="Import from Excel"
                   extra-class="!rounded-2xl max-sm:!px-2 max-sm:!py-1.5"
                   aria-label="Import from Excel"
                   @click="fileInputRef?.click()"
@@ -458,7 +450,6 @@
                   :icon="ArrowUpTrayIcon"
                   :loading="isExporting"
                   :disabled="isImporting || (folder?.itemCount ?? 0) === 0"
-                  title="Export to Excel"
                   extra-class="!rounded-2xl max-sm:!px-2 max-sm:!py-1.5"
                   aria-label="Export to Excel"
                   @click="handleExportToExcel"
@@ -546,7 +537,6 @@
                         <div class="min-w-0 flex-1">
                           <p
                             class="truncate text-[11px] font-semibold leading-snug text-gray-900 dark:text-gray-100"
-                            :title="getItemPrimaryLabel(item)"
                           >
                             {{ getItemPrimaryLabel(item) }}
                           </p>
@@ -862,7 +852,7 @@
                                       getItemDisplayValue(item[column.key]).length > 30
                                     "
                                     class="block truncate max-w-xs"
-                                    :title="getItemDisplayValue(item[column.key])"
+                                    :data-dashboard-tooltip="getItemDisplayValue(item[column.key])"
                                   >
                                     {{ getItemDisplayValue(item[column.key]) }}
                                   </span>

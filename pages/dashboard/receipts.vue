@@ -31,7 +31,19 @@
       </template>
 
       <template v-else>
-        <div class="flex w-full min-h-0 flex-1 flex-col gap-5 sm:gap-6">
+        <div class="flex w-full min-h-0 flex-1 flex-col gap-4 sm:gap-5 dash-page--unified">
+          <DashboardPageHeader class="dash-page-header--unified">
+            <template #eyebrow>
+              <p class="dash-eyebrow">Sales</p>
+            </template>
+            <template #title>
+              <h1 class="dash-page-title !text-lg sm:!text-xl">Receipts</h1>
+            </template>
+            <template v-if="!receiptsStore.loading" #description>
+              <DashboardPageMetrics :metrics="receiptsHeaderMetrics" aria-label="Sales summary" />
+            </template>
+          </DashboardPageHeader>
+
           <!-- Tabs -->
           <nav class="flex items-center justify-between gap-4" aria-label="Sales views">
             <div class="flex gap-8">
@@ -246,38 +258,6 @@
                     v-if="!receiptsStore.loading && !isReceiptsFullscreen"
                     native-table-key="receipts-main"
                   >
-                    <template #heading>
-                      <div class="min-w-0 flex-1">
-                        <h2
-                          class="text-[11px] font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm"
-                        >
-                          Receipts
-                        </h2>
-                        <p
-                          class="mt-0.5 text-[10px] leading-snug text-gray-500 dark:text-gray-400 sm:text-[11px]"
-                        >
-                          <span class="tabular-nums font-medium text-gray-600 dark:text-gray-300"
-                            >{{ receipts.length }} in store</span
-                          >
-                          <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
-                          <span class="tabular-nums"
-                            >{{ formatCurrency(totalSales) }} completed</span
-                          >
-                          <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
-                          <span class="tabular-nums"
-                            >Today {{ formatCurrency(todaySales) }} ({{ todayReceipts }})</span
-                          >
-                          <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
-                          <span class="tabular-nums"
-                            >Month {{ formatCurrency(monthSales) }} ({{ monthReceipts }})</span
-                          >
-                          <template v-if="sortedFilteredReceipts.length !== receipts.length">
-                            <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
-                            <span>{{ sortedFilteredReceipts.length }} shown</span>
-                          </template>
-                        </p>
-                      </div>
-                    </template>
                     <template #filters>
                       <DashboardToolbarSearch
                         v-model="searchQuery"
@@ -908,7 +888,6 @@
                                     <p
                                       v-if="getReceiptLineItemsPreview(receipt)"
                                       class="truncate text-xs text-gray-800 dark:text-gray-200"
-                                      :title="getReceiptLineItemsPreview(receipt)"
                                     >
                                       {{ getReceiptLineItemsPreview(receipt) }}
                                     </p>
@@ -1121,19 +1100,6 @@
           <template v-else-if="activeTab === 'outstanding'">
             <div class="data-table-shell flex min-h-0 flex-1 flex-col overflow-hidden">
               <DataTableToolbar v-if="!receiptsStore.loading" native-table-key="receipts-outstanding">
-                <template #heading>
-                  <div class="min-w-0 flex-1">
-                    <h2
-                      class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm"
-                    >
-                      Outstanding payments
-                    </h2>
-                    <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
-                      Deposits collected. Stock stays reserved until the balance is paid. Completed
-                      orders move to Receipts.
-                    </p>
-                  </div>
-                </template>
                 <template #filters>
                   <DashboardToolbarSearch
                     v-model="outstandingSearchQuery"
@@ -1237,55 +1203,6 @@
           <template v-else-if="activeTab === 'customers'">
             <div class="data-table-shell flex min-h-0 flex-1 flex-col overflow-hidden">
               <DataTableToolbar v-if="!receiptsStore.loading" native-table-key="receipts-customers">
-                <template #heading>
-                  <div class="min-w-0 flex-1">
-                    <h2
-                      class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm"
-                    >
-                      Customers
-                    </h2>
-                    <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
-                      Lifetime purchase history across all receipts. Expand a row to see orders and
-                      line items.
-                    </p>
-                    <div
-                      v-if="uniqueCustomers.length > 0"
-                      class="mt-2.5 flex flex-wrap items-center gap-2"
-                    >
-                      <span
-                        class="inline-flex items-center gap-1.5 rounded-full border border-gray-200/90 bg-gray-50/90 px-2.5 py-1 text-[11px] font-medium tabular-nums text-gray-700 dark:border-gray-700/70 dark:bg-white/[0.04] dark:text-gray-300"
-                      >
-                        <UsersIcon class="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
-                        {{ uniqueCustomers.length }}
-                        {{ uniqueCustomers.length === 1 ? 'customer' : 'customers' }}
-                      </span>
-                      <span
-                        class="inline-flex items-center rounded-full border border-gray-200/90 bg-gray-50/90 px-2.5 py-1 text-[11px] font-medium tabular-nums text-gray-700 dark:border-gray-700/70 dark:bg-white/[0.04] dark:text-gray-300"
-                      >
-                        {{ formatCurrency(customersTotalRevenue) }} revenue
-                      </span>
-                      <span
-                        class="inline-flex items-center rounded-full border border-gray-200/90 bg-gray-50/90 px-2.5 py-1 text-[11px] font-medium tabular-nums text-gray-700 dark:border-gray-700/70 dark:bg-white/[0.04] dark:text-gray-300"
-                      >
-                        {{ formatCurrency(customersAverageOrderValue) }} avg order
-                      </span>
-                      <span
-                        class="inline-flex items-center rounded-full border border-gray-200/90 bg-gray-50/90 px-2.5 py-1 text-[11px] font-medium tabular-nums text-gray-700 dark:border-gray-700/70 dark:bg-white/[0.04] dark:text-gray-300"
-                      >
-                        {{ customersTotalOrders }} orders
-                      </span>
-                      <span
-                        v-if="
-                          customersSearchQuery.trim() &&
-                          filteredCustomers.length !== uniqueCustomers.length
-                        "
-                        class="inline-flex items-center rounded-full border border-primary-200/70 bg-primary-50/80 px-2.5 py-1 text-[11px] font-medium tabular-nums text-primary-800 dark:border-primary-500/25 dark:bg-primary-500/10 dark:text-primary-200/90"
-                      >
-                        {{ filteredCustomers.length }} shown
-                      </span>
-                    </div>
-                  </div>
-                </template>
                 <template #filters>
                   <DashboardToolbarSearch
                     v-model="customersSearchQuery"
@@ -2486,6 +2403,86 @@ const receiptForOpenMenu = computed(() => {
   const id = openReceiptMenuId.value
   if (!id) return null
   return sortedFilteredReceipts.value.find((r) => r.id === id) ?? null
+})
+
+const receiptsHeaderMetrics = computed(() => {
+  if (activeTab.value === 'customers') {
+    const total = uniqueCustomers.value.length
+    const shown = filteredCustomers.value.length
+    return [
+      {
+        key: 'customers',
+        label: shown !== total ? 'Customers shown' : 'Customers',
+        value: shown !== total ? `${shown} / ${total}` : String(total),
+      },
+      {
+        key: 'revenue',
+        label: 'Revenue',
+        value: formatCurrency(customersTotalRevenue.value),
+      },
+      {
+        key: 'orders',
+        label: 'Orders',
+        value: String(customersTotalOrders.value),
+      },
+      {
+        key: 'aov',
+        label: 'Avg. order',
+        value: formatCurrency(customersAverageOrderValue.value),
+      },
+    ]
+  }
+
+  if (activeTab.value === 'outstanding') {
+    const rows = filteredOutstandingReceipts.value
+    const balanceTotal = rows.reduce((sum, row) => sum + outstandingBalanceDue(row), 0)
+    return [
+      {
+        key: 'open',
+        label: 'Open balances',
+        value: String(rows.length),
+        tone: rows.length > 0 ? ('warning' as const) : undefined,
+      },
+      {
+        key: 'due',
+        label: 'Balance due',
+        value: formatCurrency(balanceTotal),
+        tone: balanceTotal > 0 ? ('warning' as const) : undefined,
+      },
+    ]
+  }
+
+  const inStore = receipts.value.length
+  const shown = sortedFilteredReceipts.value.length
+
+  return [
+    {
+      key: 'in-store',
+      label: shown !== inStore ? 'Receipts shown' : 'In store',
+      value: shown !== inStore ? `${shown} / ${inStore}` : String(inStore),
+    },
+    {
+      key: 'completed',
+      label: 'Completed',
+      value: formatCurrency(totalSales.value),
+    },
+    {
+      key: 'today',
+      label: 'Today',
+      value: formatCurrency(todaySales.value),
+    },
+    {
+      key: 'month',
+      label: 'This month',
+      value: formatCurrency(monthSales.value),
+    },
+    {
+      key: 'outstanding',
+      label: 'Outstanding',
+      value: String(outstandingReceipts.value.length),
+      tone: outstandingReceipts.value.length > 0 ? ('warning' as const) : undefined,
+    },
+  ]
 })
 
 const receiptMenuFixedStyle = ref<Record<string, string> | null>(null)

@@ -57,7 +57,7 @@
                 <p :class="panelHeaderNameClass">{{ userName }}</p>
                 <p :class="panelHeaderEmailClass">{{ userEmail }}</p>
                 <div class="mt-1.5 flex flex-wrap items-center gap-1">
-                  <span v-if="storeLabel" :class="metaBadgeClass" :title="storeLabel">
+                  <span v-if="storeLabel" :class="metaBadgeClass">
                     {{ storeLabel }}
                   </span>
                   <span :class="roleBadgeClass">{{ roleLabel }}</span>
@@ -151,6 +151,7 @@ import { useUserStore } from '~/stores/user'
 import { useStaffStore } from '~/stores/staff'
 import { useNotificationsStore } from '~/stores/notifications'
 import { useSubscriptionFeatures } from '~/composables/useSubscriptionFeatures'
+import { getStoreBranchShortLabel } from '~/utils/store-branch-label'
 
 defineProps<{
   userName: string
@@ -209,7 +210,7 @@ type MenuLink = {
 }
 
 const storeLabel = computed(() => {
-  const name = storesStore.currentStore?.name?.trim()
+  const name = getStoreBranchShortLabel(storesStore.currentStore?.name)
   if (!name) return ''
   return name.length > 22 ? `${name.slice(0, 21)}…` : name
 })

@@ -50,7 +50,7 @@ html.capacitor-native .native-side-drawer-panel {
 }
 
 html.capacitor-native[data-native-keyboard-open] .dashboard-native-bottom-nav,
-html.capacitor-native[data-native-keyboard-open] .dashboard-assistant__fab--native {
+html.capacitor-native[data-native-keyboard-open] .dashboard-assistant__fab-mount {
   opacity: 0;
   pointer-events: none;
   transition: opacity 180ms ease;

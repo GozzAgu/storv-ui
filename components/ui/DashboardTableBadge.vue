@@ -1,5 +1,5 @@
 <template>
-  <span :class="badgeClass" :title="title">
+  <span :class="badgeClass">
     <slot>{{ label }}</slot>
   </span>
 </template>
@@ -8,6 +8,5 @@
 const props = defineProps<{
   badgeClass: string
   label?: string
-  title?: string
 }>()
 </script>

@@ -5,6 +5,7 @@
     :class="[
       anchorClasses,
       layout === 'column' ? 'flex flex-col items-end gap-1.5' : 'flex flex-row items-end gap-2',
+      extraClass,
     ]"
     :style="fabStyle"
   >
@@ -38,11 +39,14 @@ const props = withDefaults(
     layout?: 'row' | 'column'
     /** Tailwind classes for default anchor before first measure (bottom-right). */
     anchorClass?: string
+    /** Extra classes on the fixed root wrapper. */
+    extraClass?: string
   }>(),
   {
     layout: 'row',
     /** Clears fixed pagination bars (~48px) + safe area */
     anchorClass: 'bottom-32 right-4 sm:bottom-36 sm:right-6',
+    extraClass: '',
   }
 )
 

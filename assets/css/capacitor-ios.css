@@ -760,10 +760,6 @@ html.capacitor-ios.capacitor-native .activity-log-shell .grid.grid-cols-2 > div 
 
 /* ── Storvv Assistant (native) ── */
 html.capacitor-ios.capacitor-native .dashboard-assistant__fab {
-  position: fixed;
-  right: calc(var(--cap-safe-right, 0px) + 0.875rem);
-  bottom: calc(var(--dashboard-bottom-nav-height) + var(--cap-safe-bottom) + 0.625rem);
-  z-index: 56;
   width: 3.5rem;
   height: 3.5rem;
   box-shadow:

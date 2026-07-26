@@ -4,7 +4,13 @@
       type="button"
       :class="triggerClass"
       :aria-expanded="dropdownOpen"
-      :aria-label="switchingStore ? 'Switching store...' : currentStore?.name || 'Select store'"
+      :aria-label="
+        switchingStore
+          ? 'Switching store...'
+          : currentStore?.name
+          ? `${getStoreBranchShortLabel(currentStore.name)} (${currentStore.name})`
+          : 'Select store'
+      "
       @click="dropdownOpen = !dropdownOpen"
     >
       <span
@@ -34,8 +40,21 @@
       </span>
 
       <span :class="triggerNameClass">
-        <span class="truncate">
-          {{ switchingStore ? 'Switching…' : currentStore?.name || 'No store' }}
+        <span
+          class="truncate"
+          :data-dashboard-tooltip="
+            currentStore
+              ? storeBranchNavTooltip(currentStore.name, branchCodeLabel(currentStore.name))
+              : undefined
+          "
+        >
+          {{
+            switchingStore
+              ? 'Switching…'
+              : currentStore
+              ? branchCodeLabel(currentStore.name)
+              : 'No store'
+          }}
         </span>
         <span
           v-if="!switchingStore && currentStore"
@@ -122,7 +141,7 @@
                 </span>
                 <div class="min-w-0 flex-1">
                   <p :class="rowNameClass">
-                    {{ store.name || 'Unnamed store' }}
+                    {{ branchShortLabel(store.name) || 'Unnamed store' }}
                   </p>
                   <div
                     v-if="currentStore?.id === store.id || store.isActive === false"
@@ -179,6 +198,8 @@ import { useStoresStore } from '~/stores/stores'
 import { useUserStore } from '~/stores/user'
 import { useAppToast } from '~/composables/useAppToast'
 import { useDashboardStoreSwitchChrome } from '~/composables/useDashboardStoreSwitchChrome'
+import { getStoreBranchCodeLabel, getStoreBranchShortLabel } from '~/utils/store-branch-label'
+import { storeBranchNavTooltip } from '~/utils/dashboard-tooltip'
 
 const {
   triggerClass,
@@ -220,6 +241,14 @@ const stores = computed(() =>
 )
 const currentStore = computed(() => storesStore.currentStore)
 const isStaff = computed(() => userStore.userData?.role === 'staff')
+
+function branchShortLabel(name: string | null | undefined) {
+  return getStoreBranchShortLabel(name)
+}
+
+function branchCodeLabel(name: string | null | undefined) {
+  return getStoreBranchCodeLabel(name)
+}
 
 const handleClickOutside = (event: MouseEvent) => {
   if (dropdownRef.value && !dropdownRef.value.contains(event.target as Node)) {
@@ -278,7 +307,7 @@ const switchStore = async (storeId: string) => {
 
     await storesStore.setCurrentStore(storeId)
 
-    toast.success(`Switched to ${storesStore.getStoreById(storeId)?.name || 'store'}`)
+    toast.success(`Switched to ${branchShortLabel(storesStore.getStoreById(storeId)?.name) || 'store'}`)
   } catch (err: any) {
     console.error('Error switching store:', err)
     toast.error(err.message || 'Failed to switch store')

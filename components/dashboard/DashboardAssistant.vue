@@ -1,9 +1,35 @@
 <template>
   <div class="dashboard-assistant">
     <Teleport v-if="!isNativeApp" to="body">
+      <DraggableFabContainer
+        storage-key="storvv-assistant-fab"
+        layout="column"
+        extra-class="dashboard-assistant__fab-mount"
+        anchor-class="bottom-32 right-4 sm:bottom-36 sm:right-6"
+      >
+        <button
+          type="button"
+          class="dashboard-assistant__fab"
+          :aria-expanded="assistantStore.isOpen"
+          aria-controls="dashboard-assistant-panel"
+          aria-label="Open Storvv Assistant"
+          @click="assistantStore.toggle()"
+        >
+          <SparklesIcon class="h-5 w-5" stroke-width="1.75" />
+          <span class="sr-only">Storvv Assistant</span>
+        </button>
+      </DraggableFabContainer>
+    </Teleport>
+    <DraggableFabContainer
+      v-else
+      storage-key="storvv-assistant-fab-native"
+      layout="column"
+      extra-class="dashboard-assistant__fab-mount"
+      anchor-class="bottom-[calc(env(safe-area-inset-bottom,0px)+8.5rem)] right-4"
+    >
       <button
         type="button"
-        class="dashboard-assistant__fab"
+        class="dashboard-assistant__fab dashboard-assistant__fab--native"
         :aria-expanded="assistantStore.isOpen"
         aria-controls="dashboard-assistant-panel"
         aria-label="Open Storvv Assistant"
@@ -12,19 +38,7 @@
         <SparklesIcon class="h-5 w-5" stroke-width="1.75" />
         <span class="sr-only">Storvv Assistant</span>
       </button>
-    </Teleport>
-    <button
-      v-else
-      type="button"
-      class="dashboard-assistant__fab dashboard-assistant__fab--native"
-      :aria-expanded="assistantStore.isOpen"
-      aria-controls="dashboard-assistant-panel"
-      aria-label="Open Storvv Assistant"
-      @click="assistantStore.toggle()"
-    >
-      <SparklesIcon class="h-5 w-5" stroke-width="1.75" />
-      <span class="sr-only">Storvv Assistant</span>
-    </button>
+    </DraggableFabContainer>
 
     <SidePanel
       id="dashboard-assistant-panel"
@@ -183,6 +197,7 @@ import { computed, nextTick, ref, watch } from 'vue'
 import { SparklesIcon } from '~/utils/app-icons'
 import SidePanel from '~/components/ui/SidePanel.vue'
 import Button from '~/components/ui/Button.vue'
+import DraggableFabContainer from '~/components/ui/DraggableFabContainer.vue'
 import { useDashboardAssistant } from '~/composables/useDashboardAssistant'
 import type { AssistantMessage } from '~/stores/assistant'
 
@@ -258,10 +273,6 @@ watch(
 
 <style scoped>
 .dashboard-assistant__fab {
-  position: fixed;
-  right: 1rem;
-  bottom: 1rem;
-  z-index: 100;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -278,10 +289,6 @@ watch(
 .dashboard-assistant__fab:hover {
   transform: translateY(-1px);
   box-shadow: 0 20px 44px rgb(15 23 42 / 0.18);
-}
-
-.dashboard-assistant__fab--native {
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 4.75rem);
 }
 
 html.dark .dashboard-assistant__fab {

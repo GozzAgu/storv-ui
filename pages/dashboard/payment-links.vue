@@ -1,6 +1,6 @@
 <template>
-  <div class="flex w-full max-w-none flex-col gap-5 pb-10 sm:gap-6">
-    <DashboardPageHeader>
+  <div :class="['flex w-full max-w-none flex-col gap-5 pb-10 sm:gap-6', 'dash-page--unified']">
+    <DashboardPageHeader class="dash-page-header--unified">
       <template #eyebrow>
         <p :class="eyebrowClass">Payments</p>
       </template>
@@ -8,13 +8,14 @@
         <h1 :class="titleClass">Payment links</h1>
       </template>
       <template #description>
-        <p :class="descriptionClass">
-          {{
-            showPaymentLinksComingSoon
-              ? 'Pay-by-link checkout is coming soon.'
-              : 'Get paid for orders without the customer visiting your store.'
-          }}
+        <p v-if="showPaymentLinksComingSoon" class="dash-page-meta mt-1.5 max-w-2xl">
+          Pay-by-link checkout is coming soon.
         </p>
+        <DashboardPageMetrics
+          v-else-if="!loading"
+          :metrics="paymentLinksHeaderMetrics"
+          aria-label="Payment links summary"
+        />
       </template>
       <template v-if="!showPaymentLinksComingSoon" #actions>
         <Button
@@ -143,49 +144,6 @@
         </div>
         <button type="button" class="btn-secondary btn-sm" @click="startEditBank">Change</button>
       </section>
-
-      <!-- Stats -->
-      <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div
-          class="rounded-xl bg-white p-4 ring-1 ring-gray-100 dark:bg-dashboard-card dark:ring-white/[0.06]"
-        >
-          <p class="text-[10px] font-medium uppercase tracking-wider text-gray-400">Collected</p>
-          <p class="mt-1.5 text-xl font-semibold tabular-nums text-gray-900 dark:text-gray-50">
-            {{ formatNaira(stats.collected) }}
-          </p>
-        </div>
-        <div
-          class="rounded-xl bg-white p-4 ring-1 ring-gray-100 dark:bg-dashboard-card dark:ring-white/[0.06]"
-        >
-          <p class="text-[10px] font-medium uppercase tracking-wider text-gray-400">Paid</p>
-          <p class="mt-1.5 text-xl font-semibold tabular-nums text-gray-900 dark:text-gray-50">
-            {{ stats.paid }}
-          </p>
-        </div>
-        <div
-          class="rounded-xl bg-white p-4 ring-1 ring-gray-100 dark:bg-dashboard-card dark:ring-white/[0.06]"
-        >
-          <p class="text-[10px] font-medium uppercase tracking-wider text-gray-400">Unpaid</p>
-          <p class="mt-1.5 text-xl font-semibold tabular-nums text-gray-900 dark:text-gray-50">
-            {{ stats.unpaid }}
-          </p>
-        </div>
-        <div
-          class="rounded-xl bg-white p-4 ring-1 ring-gray-100 dark:bg-dashboard-card dark:ring-white/[0.06]"
-        >
-          <p class="text-[10px] font-medium uppercase tracking-wider text-gray-400">Failed</p>
-          <p
-            class="mt-1.5 text-xl font-semibold tabular-nums"
-            :class="
-              stats.failed > 0
-                ? 'text-red-600 dark:text-red-400'
-                : 'text-gray-900 dark:text-gray-50'
-            "
-          >
-            {{ stats.failed }}
-          </p>
-        </div>
-      </div>
 
       <!-- Settlement reassurance -->
       <div
@@ -384,8 +342,7 @@ definePageMeta({
 
 const { showPaymentLinksComingSoon } = usePaymentLinksLaunch()
 
-const { eyebrowClass, titleClass, descriptionClass, headerBtnClass, fieldClass } =
-  useDashboardPageChrome()
+const { eyebrowClass, titleClass, headerBtnClass, fieldClass } = useDashboardPageChrome()
 const { tableShellClass, tableSectionHeaderClass } = useDashboardTableChrome()
 const userStore = useUserStore()
 const {
@@ -401,6 +358,33 @@ const {
   resolveAccount,
   connectBank,
 } = usePaymentLinks()
+
+const paymentLinksHeaderMetrics = computed(() => [
+  {
+    key: 'collected',
+    label: 'Collected',
+    value: formatNaira(stats.value.collected),
+  },
+  {
+    key: 'paid',
+    label: 'Paid',
+    value: String(stats.value.paid),
+    tone: stats.value.paid > 0 ? ('success' as const) : undefined,
+  },
+  {
+    key: 'unpaid',
+    label: 'Unpaid',
+    value: String(stats.value.unpaid),
+    tone: stats.value.unpaid > 0 ? ('warning' as const) : undefined,
+  },
+  {
+    key: 'failed',
+    label: 'Failed',
+    value: String(stats.value.failed),
+    tone: stats.value.failed > 0 ? ('danger' as const) : undefined,
+  },
+])
+
 const {
   open: totpModalOpen,
   prompt: promptTotp,

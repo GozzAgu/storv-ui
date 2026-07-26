@@ -1,19 +1,22 @@
 <template>
-  <div :class="pageClass">
+  <div :class="[pageClass, 'dash-page--unified']">
     <Tutorial :tutorial-steps="tutorialSteps" @complete="onTutorialComplete" />
 
-    <header data-tutorial="dashboard" :class="pageHeaderClass">
-      <div class="min-w-0">
+    <DashboardPageHeader data-tutorial="dashboard" class="dash-page-header--unified">
+      <template #eyebrow>
         <p :class="eyebrowClass">Overview</p>
+      </template>
+      <template #title>
         <h1 :class="pageTitleClass">Welcome back, {{ userName }}</h1>
-        <p :class="pageMetaClass">
+      </template>
+      <template v-if="!needsStoreSelection && !isLoading" #description>
+        <p :class="[pageMetaClass, '!mt-0 !max-w-none']">
           <strong>{{ currentStoreLabel }}</strong>
           <span v-if="userRoleLabel"> · {{ userRoleLabel }}</span>
-          <span> · </span>
-          <span :class="numClass">{{ totalOrders }} receipts</span>
         </p>
-      </div>
-    </header>
+        <DashboardPageMetrics :metrics="homeHeaderMetrics" aria-label="Store summary" />
+      </template>
+    </DashboardPageHeader>
 
     <div v-if="needsStoreSelection && !isLoading" :class="stateCardClass">
       <MarketingFeatureIcon
@@ -34,10 +37,6 @@
     </div>
 
     <template v-else-if="isLoading">
-      <div :class="kpiGridClass">
-        <div v-for="i in nativeKpiSkeletonCount" :key="`kpi-${i}`" class="dash-skeleton dash-skeleton--kpi" />
-      </div>
-
       <div :class="cardPaddedClass">
         <div class="mb-3 flex items-center justify-between">
           <div class="dash-skeleton h-3 w-32" />
@@ -69,55 +68,6 @@
         </li>
       </ul>
 
-      <div class="dash-home-kpi">
-        <div :class="kpiGridClassResolved">
-          <StatCard
-            label="Total revenue"
-            :value="formatCurrency(totalRevenue)"
-            :subtext="revenueChangeText"
-            :change="revenueChangePercent"
-            :change-positive="revenueChangePositive"
-          />
-          <StatCard
-            label="Orders today"
-            :value="todayReceiptsCount.toString()"
-            :subtext="`${formatCurrency(todaySales)} revenue`"
-          />
-          <StatCard
-            label="Customers"
-            :value="totalCustomers.toString()"
-            :subtext="`${newCustomersToday} active today`"
-            :subtext-class="newCustomersToday > 0 ? 'success' : ''"
-          />
-          <StatCard
-            label="Low stock signals"
-            :value="lowStockItems.length.toString()"
-            :subtext="lowStockItems.length > 0 ? 'Review restocking' : 'Within thresholds'"
-            :subtext-class="lowStockItems.length > 0 ? 'warning' : ''"
-          />
-          <StatCard
-            label="Outstanding"
-            :value="formatCurrency(outstandingBalanceTotal)"
-            :subtext="`${outstandingCount} open balance${outstandingCount === 1 ? '' : 's'}`"
-            :subtext-class="outstandingCount > 0 ? 'warning' : ''"
-          />
-        </div>
-
-        <div v-if="canViewProfitAndCost" :class="[kpiGridClassResolved, 'dash-kpi-grid--pair']">
-          <StatCard
-            label="Gross profit"
-            :value="formatCurrency(dashboardGrossProfit)"
-            :subtext="dashboardGrossProfitSubtext"
-            :change-positive="dashboardGrossProfit >= 0"
-          />
-          <StatCard
-            label="Cost of goods sold"
-            :value="formatCurrency(dashboardCogs)"
-            subtext="Completed sales with unit cost"
-          />
-        </div>
-      </div>
-
       <section :class="[cardPaddedClass, 'dash-inventory-health']">
         <div :class="[cardHeaderClass, 'dash-card__header--compact dash-inventory-health__header']">
           <div>
@@ -135,17 +85,14 @@
             <div
               class="dash-progress__segment--available transition-all"
               :style="{ width: `${inStockPercentage}%` }"
-              title="Available"
             />
             <div
               class="dash-progress__segment--low transition-all"
               :style="{ width: `${lowStockPercentage}%` }"
-              title="Low stock"
             />
             <div
               class="dash-progress__segment--sold transition-all"
               :style="{ width: `${soldPercentage}%` }"
-              title="Sold"
             />
           </div>
           <div :class="[progressLegendClass, 'dash-progress__legend--compact']">
@@ -373,7 +320,6 @@ const LazyApexChart = defineAsyncComponent(
 )
 import { MARKETING_FEATURE_ICONS } from '~/utils/marketing-feature-icons'
 import MarketingFeatureIcon from '~/components/marketing/MarketingFeatureIcon.vue'
-import StatCard from '~/components/ui/StatCard.vue'
 import PaymentLinksSummaryCard from '~/components/payments/PaymentLinksSummaryCard.vue'
 import Tutorial, { type TutorialStep } from '~/components/Tutorial.vue'
 import { useDashboardHomeChrome } from '~/composables/useDashboardHomeChrome'
@@ -383,6 +329,7 @@ import { useDepartmentsStore } from '~/stores/departments'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useStoresStore } from '~/stores/stores'
+import { getStoreBranchShortLabel } from '~/utils/store-branch-label'
 import { useStaffStore } from '~/stores/staff'
 import { useThemeStore } from '~/stores/theme'
 import { usePreferences } from '~/composables/usePreferences'
@@ -417,7 +364,6 @@ const {
   pageClass,
   cardPaddedClass,
   cardFlushClass,
-  pageHeaderClass,
   eyebrowClass,
   pageTitleClass,
   pageMetaClass,
@@ -426,7 +372,6 @@ const {
   cardTitleClass,
   cardDescClass,
   cardLinkClass,
-  kpiGridClass,
   chartsGridClass,
   splitGridClass,
   tripleGridClass,
@@ -560,12 +505,6 @@ const {
   salesMetrics,
 } = insights
 
-const nativeKpiSkeletonCount = computed(() => (canViewProfitAndCost.value ? 7 : 5))
-
-const kpiGridClassResolved = computed(() =>
-  isNativeApp.value ? `${kpiGridClass} dash-kpi-grid--compact` : kpiGridClass
-)
-
 function topN<T>(items: T[], limit = DASHBOARD_LIST_TOP): T[] {
   return items.slice(0, limit)
 }
@@ -635,12 +574,67 @@ const dashboardGrossProfitSubtext = computed(() => {
   return `${formatMarginPercent(margin)} gross margin on line revenue`
 })
 
+const homeHeaderMetrics = computed(() => {
+  const metrics = [
+    {
+      key: 'revenue',
+      label: 'Total revenue',
+      value: formatCurrency(totalRevenue.value),
+    },
+    {
+      key: 'today',
+      label: 'Orders today',
+      value: String(todayReceiptsCount.value),
+    },
+    {
+      key: 'customers',
+      label: 'Customers',
+      value: String(totalCustomers.value),
+    },
+    {
+      key: 'low-stock',
+      label: 'Low stock',
+      value: String(lowStockItems.value.length),
+      tone: lowStockItems.value.length > 0 ? ('warning' as const) : undefined,
+    },
+    {
+      key: 'outstanding',
+      label: 'Outstanding',
+      value: formatCurrency(outstandingBalanceTotal.value),
+      tone: outstandingCount.value > 0 ? ('warning' as const) : undefined,
+    },
+    {
+      key: 'receipts',
+      label: 'Receipts',
+      value: String(totalOrders.value),
+    },
+  ]
+
+  if (canViewProfitAndCost.value) {
+    metrics.push(
+      {
+        key: 'profit',
+        label: 'Gross profit',
+        value: formatCurrency(dashboardGrossProfit.value),
+        tone: dashboardGrossProfit.value >= 0 ? ('success' as const) : ('danger' as const),
+      },
+      {
+        key: 'cogs',
+        label: 'COGS',
+        value: formatCurrency(dashboardCogs.value),
+      }
+    )
+  }
+
+  return metrics
+})
+
 const needsStoreSelection = computed(() => !storesStore.currentStoreId)
 
 const currentStoreLabel = computed(() => {
   const store = storesStore.currentStore
   if (!store) return 'No store selected'
-  return store.name || 'Active store'
+  return getStoreBranchShortLabel(store.name) || 'Active store'
 })
 
 const userRoleLabel = computed(() => {

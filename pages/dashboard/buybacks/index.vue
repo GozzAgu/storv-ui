@@ -1,19 +1,19 @@
 <template>
-  <div class="w-full max-w-none space-y-5 pb-6 sm:space-y-6 sm:pb-8">
-    <DashboardPageHeader>
+  <div :class="['w-full max-w-none space-y-5 pb-6 sm:space-y-6 sm:pb-8', 'dash-page--unified']">
+    <DashboardPageHeader class="dash-page-header--unified">
       <template #eyebrow>
         <p :class="eyebrowClass">Inventory</p>
       </template>
       <template #title>
         <h1 :class="pageTitleClass">Customer buybacks</h1>
       </template>
-      <template #description>
-        <p :class="descriptionClass">
-          Record when a customer sells an item to your store. The unit is added to inventory so you
-          can resell it on a receipt like any other product.
-        </p>
+      <template
+        v-if="canAccess && !buybacksStore.loading && buybacksStore.buybacks.length > 0"
+        #description
+      >
+        <DashboardPageMetrics :metrics="buybackHeaderMetrics" aria-label="Buyback summary" />
       </template>
-      <template #actions>
+      <template v-if="canAccess" #actions>
         <Button
           v-if="canAccess"
           variant="primary"
@@ -51,21 +51,6 @@
 
       <template v-else>
         <div class="data-table-shell flex min-h-0 flex-1 flex-col overflow-hidden">
-          <DataTableToolbar native-table-key="buybacks">
-            <template #heading>
-              <div class="min-w-0">
-                <h2
-                  class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm"
-                >
-                  Buyback history
-                </h2>
-                <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
-                  Cash and transfers paid to customers for purchased stock
-                </p>
-              </div>
-            </template>
-          </DataTableToolbar>
-
           <div
             v-if="buybacksStore.loading && buybacksStore.buybacks.length === 0"
             class="p-6 sm:p-8"
@@ -116,7 +101,7 @@
               <tbody>
                 <tr v-for="row in buybacksStore.buybacks" :key="row.id">
                   <td class="max-w-[14rem]">
-                    <span class="dashboard-table__primary block truncate" :title="row.customerName">
+                    <span class="dashboard-table__primary block truncate">
                       {{ row.customerName }}
                     </span>
                     <span
@@ -127,7 +112,7 @@
                     </span>
                   </td>
                   <td class="max-w-[16rem]">
-                    <span class="dashboard-table__primary block truncate" :title="row.itemSummary">
+                    <span class="dashboard-table__primary block truncate">
                       {{ row.itemSummary }}
                     </span>
                     <span class="dashboard-table__muted mt-0.5 block truncate text-[10px]">
@@ -168,7 +153,6 @@ import {
   InboxArrowDownIcon,
 } from '~/utils/app-icons'
 import Button from '~/components/ui/Button.vue'
-import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
 import CreateBuybackModal from '~/components/buybacks/CreateBuybackModal.vue'
 import { useCustomerBuybacksStore, type CustomerBuyback } from '~/stores/customerBuybacks'
 import { useInventoryStore } from '~/stores/inventory'
@@ -179,13 +163,30 @@ definePageMeta({
   layout: 'dashboard',
 })
 
-const { eyebrowClass, pageTitleClass, descriptionClass, headerBtnClass } = useDashboardPageChrome()
+const { eyebrowClass, pageTitleClass, headerBtnClass } = useDashboardPageChrome()
 
 const buybacksStore = useCustomerBuybacksStore()
 const inventoryStore = useInventoryStore()
 const storesStore = useStoresStore()
 const userStore = useUserStore()
 const { formatCurrency } = usePreferences()
+
+const buybackHeaderMetrics = computed(() => {
+  const rows = buybacksStore.buybacks
+  const totalPaid = rows.reduce((sum, row) => sum + (row.purchasePrice ?? 0), 0)
+  return [
+    {
+      key: 'count',
+      label: 'Buybacks',
+      value: String(rows.length),
+    },
+    {
+      key: 'paid',
+      label: 'Total paid',
+      value: formatCurrency(totalPaid),
+    },
+  ]
+})
 
 const showCreateModal = ref(false)
 

@@ -267,6 +267,9 @@
                     />
                     <span
                       class="truncate text-[13px] leading-snug"
+                      :data-dashboard-tooltip="
+                        storeBranchNavTooltip(store.name, getStoreBranchShortLabel(store.name))
+                      "
                       :class="
                         route.params.storeId === store.id &&
                         route.path.startsWith('/dashboard/stores/') &&
@@ -277,14 +280,14 @@
                           : 'font-normal text-gray-500 group-hover:text-gray-800 dark:text-gray-400 dark:group-hover:text-gray-100'
                       "
                     >
-                      {{ store.name }}
+                      {{ getStoreBranchShortLabel(store.name) }}
                     </span>
                     <span
                       v-if="
                         currentStore?.id === store.id || store.id === storesStore.currentStoreId
                       "
                       class="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500 ring-2 ring-emerald-500/25"
-                      title="Active store"
+                      aria-hidden="true"
                     ></span>
                     <span
                       v-if="store.id !== storesStore.currentStoreId"
@@ -621,15 +624,6 @@
           >
             <button
               type="button"
-              class="dash-topnav__icon-btn"
-              aria-label="Open Storvv Assistant"
-              @click="openAssistant()"
-            >
-              <SparklesIcon class="block h-4 w-4 shrink-0 text-primary-700 dark:text-primary-300" stroke-width="1.75" />
-            </button>
-
-            <button
-              type="button"
               class="dash-topnav__icon-btn md:hidden"
               aria-label="Search"
               @click="openGlobalSearch()"
@@ -832,6 +826,8 @@ import {
 import type { DashboardNavIconKey } from '~/utils/dashboard-nav-icons'
 import { isPaymentLinksNativeComingSoon } from '~/utils/payment-links-launch'
 import { resolveStoreDepartmentsPath } from '~/utils/department-routes'
+import { getStoreBranchShortLabel } from '~/utils/store-branch-label'
+import { storeBranchNavTooltip } from '~/utils/dashboard-tooltip'
 import StoreSelector from '~/components/ui/StoreSelector.vue'
 import ToastContainer from '~/components/ui/ToastContainer.vue'
 import RecentItemsWidget from '~/components/ui/RecentItemsWidget.vue'

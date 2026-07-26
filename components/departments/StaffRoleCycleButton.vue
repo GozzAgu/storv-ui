@@ -31,7 +31,6 @@ const iconClass = computed(() => (props.size === 'md' ? 'h-5 w-5' : 'h-3.5 w-3.5
     class="dashboard-table__action-btn staff-role-cycle-btn"
     :class="{ 'staff-role-cycle-btn--loading': loading }"
     :disabled="disabled || loading"
-    :title="`Change role from ${currentLabel} to ${nextLabel}`"
     :aria-label="`Change role from ${currentLabel} to ${nextLabel}`"
     @click="$emit('click')"
   >

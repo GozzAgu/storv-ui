@@ -18,7 +18,6 @@ const { viewToggleClass, viewToggleBtnClass, viewToggleBtnActiveClass } = useDas
       type="button"
       :class="[viewToggleBtnClass, model === 'cards' ? viewToggleBtnActiveClass : '']"
       :aria-pressed="model === 'cards'"
-      title="Card view"
       @click="model = 'cards'"
     >
       <Squares2X2Icon class="h-3.5 w-3.5" aria-hidden="true" />
@@ -28,7 +27,6 @@ const { viewToggleClass, viewToggleBtnClass, viewToggleBtnActiveClass } = useDas
       type="button"
       :class="[viewToggleBtnClass, model === 'table' ? viewToggleBtnActiveClass : '']"
       :aria-pressed="model === 'table'"
-      title="Table view"
       @click="model = 'table'"
     >
       <TableCellsIcon class="h-3.5 w-3.5" aria-hidden="true" />

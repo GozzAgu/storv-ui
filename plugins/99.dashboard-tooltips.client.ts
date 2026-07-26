@@ -1,17 +1,14 @@
 /**
- * Global tooltip enhancer:
- * - Converts native `title` hover/focus into styled app tooltip (`data-dashboard-tooltip`)
- * - Restores `title` on leave/blur so dynamic bindings keep working
- * - Skip any element by adding `data-tooltip-skip`
+ * Styled dashboard tooltips — opt-in only via `data-dashboard-tooltip`.
+ * Do not use native `title` for hover hints; it shows unstyled browser chrome and clutters the UI.
+ * Icon-only controls should use `aria-label`; truncated text can set `data-dashboard-tooltip` when needed.
  */
 import { isCapacitorNative } from '~/utils/capacitor-env'
 
 export default defineNuxtPlugin(() => {
   if (import.meta.server) return
-  // Touch-first native shell: skip hover tooltip listeners on iOS/Android.
   if (isCapacitorNative()) return
 
-  const activeTitles = new WeakMap<HTMLElement, string>()
   let activeEl: HTMLElement | null = null
 
   const tooltipEl = document.createElement('div')
@@ -33,18 +30,19 @@ export default defineNuxtPlugin(() => {
 
   const getEligibleElement = (target: EventTarget | null): HTMLElement | null => {
     if (!(target instanceof Element)) return null
-    const el = target.closest<HTMLElement>('[title], [data-dashboard-tooltip]')
+    const el = target.closest<HTMLElement>('[data-dashboard-tooltip]')
     if (!el) return null
     if (el.hasAttribute('data-tooltip-skip')) return null
+    const text = el.getAttribute('data-dashboard-tooltip')?.trim()
+    if (!text) return null
     return el
   }
 
-  /** After show we strip `title`, so `closest('[title]')` no longer finds the host; walk up for an active entry. */
   const findActiveTooltipHost = (target: EventTarget | null): HTMLElement | null => {
     if (!(target instanceof Element)) return null
     let el: Element | null = target
     while (el) {
-      if (el instanceof HTMLElement && activeTitles.has(el)) return el
+      if (el instanceof HTMLElement && el === activeEl) return el
       el = el.parentElement
     }
     return null
@@ -103,32 +101,21 @@ export default defineNuxtPlugin(() => {
   }
 
   const activate = (el: HTMLElement) => {
-    const title = el.getAttribute('title')
-    if (!title) return
+    const text = el.getAttribute('data-dashboard-tooltip')?.trim()
+    if (!text) return
     if (activeEl && activeEl !== el) {
       deactivate(activeEl)
     }
-    activeTitles.set(el, title)
-    el.removeAttribute('title')
     activeEl = el
-    showTooltip(title, el)
+    showTooltip(text, el)
   }
 
   const deactivate = (el: HTMLElement) => {
-    const cached = activeTitles.get(el)
-    if (!cached) return
-    el.setAttribute('title', cached)
-    activeTitles.delete(el)
-    if (activeEl === el) {
-      activeEl = null
-      hideTooltip()
-    }
+    if (activeEl !== el) return
+    activeEl = null
+    hideTooltip()
   }
 
-  /**
-   * Bubble phase: whenever the pointer enters *any* node, hide if we left the active host.
-   * (Title was removed from the host, so mouseout + closest('[title]') never matched; tooltips stuck open.)
-   */
   const onMouseOver = (event: MouseEvent) => {
     const target = event.target
     if (!(target instanceof Node)) return
@@ -138,12 +125,11 @@ export default defineNuxtPlugin(() => {
     }
 
     const el = getEligibleElement(event.target)
-    if (!el || !el.hasAttribute('title')) return
+    if (!el) return
     if (event.relatedTarget instanceof Node && el.contains(event.relatedTarget)) return
     activate(el)
   }
 
-  /** Leaving the document (relatedTarget null / outside root) without entering another element. */
   const onMouseOut = (event: MouseEvent) => {
     if (!activeEl) return
     const rt = event.relatedTarget
@@ -160,7 +146,7 @@ export default defineNuxtPlugin(() => {
 
   const onFocusIn = (event: FocusEvent) => {
     const el = getEligibleElement(event.target)
-    if (!el || !el.hasAttribute('title')) return
+    if (!el) return
     activate(el)
   }
 
@@ -173,7 +159,7 @@ export default defineNuxtPlugin(() => {
   }
 
   const onWindowChange = () => {
-    if (activeEl && activeTitles.has(activeEl)) {
+    if (activeEl) {
       positionTooltip(activeEl)
     }
   }

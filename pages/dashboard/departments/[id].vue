@@ -410,11 +410,9 @@
                         />
                       </td>
                       <td class="hidden md:table-cell">
-                        <span
-                          class="dashboard-table__muted block max-w-[12rem] truncate"
-                          :title="member.email"
-                          >{{ member.email }}</span
-                        >
+                        <span class="dashboard-table__muted block max-w-[12rem] truncate">{{
+                          member.email
+                        }}</span>
                       </td>
                       <td class="dashboard-table__col-status">
                         <DashboardTableBadge
@@ -488,7 +486,7 @@
                       type="button"
                       class="shrink-0 rounded-lg p-1.5 text-primary-600 transition-colors hover:bg-primary-50 disabled:opacity-50 dark:text-primary-400 dark:hover:bg-primary-900/25"
                       :disabled="reactivateBusyId === member.id"
-                      :title="reactivateBusyId === member.id ? 'Reactivating…' : 'Reactivate'"
+                      :aria-label="reactivateBusyId === member.id ? 'Reactivating…' : 'Reactivate'"
                       @click="openReactivateStaffModal(member)"
                     >
                       <ArrowUturnLeftIcon class="h-5 w-5" />
@@ -536,11 +534,9 @@
                         />
                       </td>
                       <td class="hidden md:table-cell">
-                        <span
-                          class="dashboard-table__muted block max-w-[12rem] truncate"
-                          :title="member.email"
-                          >{{ member.email }}</span
-                        >
+                        <span class="dashboard-table__muted block max-w-[12rem] truncate">{{
+                          member.email
+                        }}</span>
                       </td>
                       <td class="dashboard-table__col-status">
                         <DashboardTableBadge
@@ -554,7 +550,7 @@
                             type="button"
                             class="dashboard-table__action-btn text-primary-600 hover:!text-primary-700 dark:text-primary-400 dark:hover:!text-primary-300"
                             :disabled="reactivateBusyId === member.id"
-                            :title="reactivateBusyId === member.id ? 'Reactivating…' : 'Reactivate'"
+                            :aria-label="reactivateBusyId === member.id ? 'Reactivating…' : 'Reactivate'"
                             @click="openReactivateStaffModal(member)"
                           >
                             <ArrowUturnLeftIcon class="h-3.5 w-3.5 shrink-0" />

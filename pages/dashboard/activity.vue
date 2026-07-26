@@ -1,17 +1,41 @@
 <template>
-  <div :class="pageWithFixedFooterClass">
-    <DashboardPageHeader>
+  <div :class="[pageWithFixedFooterClass, 'dash-page--unified']">
+    <DashboardPageHeader class="dash-page-header--unified">
       <template #eyebrow>
         <p :class="eyebrowClass">Audit trail</p>
       </template>
       <template #title>
         <h1 :class="pageTitleClass">Activity Logs</h1>
       </template>
-      <template #description>
-        <p :class="descriptionClass">
-          A complete record of inventory changes by user, action, and time. Built for accountability
-          and security reviews.
-        </p>
+      <template v-if="canAccess && !loading && allLogs.length > 0" #description>
+        <DashboardPageMetrics :metrics="headerMetrics" aria-label="Activity summary" />
+      </template>
+      <template v-if="canAccess && storeId && !loading && allLogs.length > 0" #filters>
+        <nav
+          class="flex flex-wrap gap-1 rounded-lg bg-gray-100/80 p-0.5 dark:bg-white/[0.04]"
+          aria-label="Filter by action"
+        >
+          <button
+            v-for="tab in actionTabs"
+            :key="tab.value"
+            type="button"
+            class="rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors duration-150"
+            :class="
+              actionFilter === tab.value
+                ? 'bg-white text-gray-900 shadow-sm dark:bg-white/10 dark:text-gray-100'
+                : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
+            "
+            @click="actionFilter = tab.value"
+          >
+            {{ tab.label }}
+          </button>
+        </nav>
+        <DashboardToolbarSearch
+          v-model="searchQuery"
+          placeholder="Search user, item, or ID…"
+          :wide="false"
+          input-class="sm:w-52"
+        />
       </template>
     </DashboardPageHeader>
 
@@ -55,81 +79,16 @@
         />
       </div>
 
-      <div v-else class="flex min-h-0 flex-1 flex-col gap-5 sm:gap-6">
-        <!-- Summary metrics -->
-        <div v-if="!loading && allLogs.length > 0" class="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <div
-            v-for="stat in summaryStats"
-            :key="stat.key"
-            :class="dashboardCardPaddedClass"
-            class="!py-3 sm:!py-3.5"
-          >
-            <p
-              class="text-[10px] font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500"
-            >
-              {{ stat.label }}
-            </p>
-            <p
-              class="mt-1 text-xl font-semibold tabular-nums tracking-tight sm:text-2xl"
-              :class="stat.valueClass"
-            >
-              {{ stat.value }}
-            </p>
-          </div>
-        </div>
-
+      <div v-else class="flex min-h-0 flex-1 flex-col">
         <div
           class="activity-log-shell data-table-shell flex min-h-0 flex-1 flex-col overflow-hidden"
         >
-          <DataTableToolbar native-table-key="activity-log">
-            <template #heading>
-              <div class="min-w-0">
-                <h2 class="text-sm font-semibold tracking-tight text-gray-900 dark:text-gray-50">
-                  Event log
-                </h2>
-                <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-                  Inventory activity for this store
-                  <template v-if="reachedFetchCap">
-                    <span class="text-gray-300 dark:text-gray-600"> · </span>
-                    <span class="text-[11px]"
-                      >Showing newest {{ fetchLimit }}; use search to narrow</span
-                    >
-                  </template>
-                </p>
-              </div>
-            </template>
-            <template #filters>
-              <div
-                class="flex w-full min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center"
-              >
-                <nav
-                  class="flex flex-wrap gap-1 rounded-lg bg-gray-100/80 p-0.5 dark:bg-white/[0.04]"
-                  aria-label="Filter by action"
-                >
-                  <button
-                    v-for="tab in actionTabs"
-                    :key="tab.value"
-                    type="button"
-                    class="rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors duration-150"
-                    :class="
-                      actionFilter === tab.value
-                        ? 'bg-white text-gray-900 shadow-sm dark:bg-white/10 dark:text-gray-100'
-                        : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
-                    "
-                    @click="actionFilter = tab.value"
-                  >
-                    {{ tab.label }}
-                  </button>
-                </nav>
-                <DashboardToolbarSearch
-                  v-model="searchQuery"
-                  placeholder="Search user, item, or ID…"
-                  :wide="false"
-                  input-class="sm:w-52"
-                />
-              </div>
-            </template>
-          </DataTableToolbar>
+          <p
+            v-if="reachedFetchCap"
+            class="border-b border-gray-100/90 px-4 py-2 text-[11px] text-gray-500 dark:border-gray-800/80 dark:text-gray-400 sm:px-5"
+          >
+            Showing newest {{ fetchLimit }} events — use search to narrow results.
+          </p>
 
           <div v-if="loading" class="px-4 py-8 sm:px-6 sm:py-10">
             <div class="space-y-0 divide-y divide-gray-100/90 dark:divide-gray-800/80">
@@ -216,7 +175,6 @@
                         <span
                           class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold tracking-tight"
                           :class="avatarToneClass(log.userDisplayName)"
-                          :title="log.userDisplayName"
                         >
                           {{ getInitials(log.userDisplayName) }}
                         </span>
@@ -236,7 +194,7 @@
                       </span>
                     </td>
                     <td class="max-w-[min(24rem,42vw)]">
-                      <p class="dashboard-table__primary truncate" :title="displayEntityName(log)">
+                      <p class="dashboard-table__primary truncate">
                         {{ displayEntityName(log) }}
                       </p>
                       <div class="mt-1 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5">
@@ -253,7 +211,6 @@
                         <span
                           v-if="logDetailSubtitle(log)"
                           class="dashboard-table__muted min-w-0 truncate text-[10px] leading-snug"
-                          :title="logDetailSubtitle(log) || undefined"
                         >
                           {{ logDetailSubtitle(log) }}
                         </span>
@@ -306,9 +263,7 @@ import {
   normalizeActivityLogText,
 } from '~/composables/useActivityLog'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
-import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
-
-const { eyebrowClass, pageTitleClass, descriptionClass, dashboardCardPaddedClass, pageWithFixedFooterClass } =
+const { eyebrowClass, pageTitleClass, dashboardCardPaddedClass, pageWithFixedFooterClass } =
   useDashboardPageChrome()
 
 const userStore = useUserStore()
@@ -391,30 +346,29 @@ const deletedCount = computed(
   () => filteredLogs.value.filter((log) => log.action === 'deleted').length
 )
 
-const summaryStats = computed(() => [
+const headerMetrics = computed(() => [
   {
     key: 'total',
     label: 'Events',
-    value: filteredLogs.value.length,
-    valueClass: 'text-gray-900 dark:text-gray-50',
+    value: String(filteredLogs.value.length),
   },
   {
     key: 'created',
     label: 'Created',
-    value: createdCount.value,
-    valueClass: 'text-emerald-700 dark:text-emerald-300',
+    value: String(createdCount.value),
+    tone: 'success' as const,
   },
   {
     key: 'updated',
     label: 'Updated',
-    value: updatedCount.value,
-    valueClass: 'text-blue-700 dark:text-blue-300',
+    value: String(updatedCount.value),
+    tone: 'info' as const,
   },
   {
     key: 'deleted',
     label: 'Deleted',
-    value: deletedCount.value,
-    valueClass: 'text-rose-700 dark:text-rose-300',
+    value: String(deletedCount.value),
+    tone: deletedCount.value > 0 ? ('danger' as const) : undefined,
   },
 ])
 

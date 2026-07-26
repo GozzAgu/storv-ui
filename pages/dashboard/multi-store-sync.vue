@@ -1,14 +1,14 @@
 <template>
-  <div :class="pageClass">
-    <DashboardPageHeader>
+  <div :class="[pageClass, 'dash-page--unified']">
+    <DashboardPageHeader class="dash-page-header--unified">
       <template #eyebrow>
         <p :class="eyebrowClass">Enterprise</p>
       </template>
       <template #title>
         <h1 :class="pageTitleClass">Multi-Store Sync</h1>
       </template>
-      <template #description>
-        <p :class="descriptionClass">Transfer items between stores and view consolidated reports</p>
+      <template v-if="canAccess" #description>
+        <DashboardPageMetrics :metrics="syncHeaderMetrics" aria-label="Sync summary" />
       </template>
     </DashboardPageHeader>
 
@@ -29,19 +29,6 @@
     </div>
 
     <template v-else>
-      <div :class="kpiGridCompactClass">
-        <StatCard
-          label="Total stores"
-          :value="stores.length.toString()"
-          subtext="Connected branches"
-        />
-        <StatCard
-          label="Total transfers"
-          :value="transferHistory.length.toString()"
-          subtext="All time"
-        />
-      </div>
-
       <nav :class="segmentGroupClass" role="tablist" aria-label="Multi-store sync views">
         <button
           type="button"
@@ -465,7 +452,6 @@ import {
 import Button from '~/components/ui/Button.vue'
 import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
 import Modal from '~/components/ui/Modal.vue'
-import StatCard from '~/components/ui/StatCard.vue'
 import { useStoresStore } from '~/stores/stores'
 import { useInventoryStore } from '~/stores/inventory'
 import { useUserStore } from '~/stores/user'
@@ -489,9 +475,7 @@ const {
   pageClass,
   eyebrowClass,
   pageTitleClass,
-  descriptionClass,
   cardDescClass,
-  kpiGridCompactClass,
   segmentGroupClass,
   segmentBtnClass,
   segmentBtnActiveClass,
@@ -578,6 +562,18 @@ const consolidatedReport = ref({
 })
 
 // Computed
+const syncHeaderMetrics = computed(() => [
+  {
+    key: 'stores',
+    label: 'Stores',
+    value: String(stores.value.length),
+  },
+  {
+    key: 'transfers',
+    label: 'Transfers',
+    value: String(transferHistory.value.length),
+  },
+])
 const currentFolderHasSerialNumbers = computed(() => {
   const folder = sourceFolders.value.find((f) => f.id === transferForm.value.folderId)
   return folder?.hasSerialNumbers || false

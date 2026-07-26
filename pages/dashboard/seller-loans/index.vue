@@ -1,17 +1,17 @@
 <template>
-  <div :class="pageWithFixedFooterClass">
-    <DashboardPageHeader>
+  <div :class="[pageWithFixedFooterClass, 'dash-page--unified']">
+    <DashboardPageHeader class="dash-page-header--unified">
       <template #eyebrow>
         <p :class="eyebrowClass">Inventory</p>
       </template>
       <template #title>
         <h1 :class="pageTitleClass">Stock loans</h1>
       </template>
-      <template #description>
-        <p :class="descriptionClass">
-          Track serial items lent to a borrower. Mark sold when they sell outside your POS
-          (inventory shows sold), use a receipt to sell through the till, or return units to stock.
-        </p>
+      <template
+        v-if="canAccessByRole && canAccessSellerLoansPlan && !sellerLoansStore.loading && sellerLoansStore.loans.length > 0"
+        #description
+      >
+        <DashboardPageMetrics :metrics="loanHeaderMetrics" aria-label="Loan summary" />
       </template>
     </DashboardPageHeader>
 
@@ -37,7 +37,7 @@
         />
       </div>
 
-      <div v-else class="flex min-h-0 flex-1 flex-col gap-5 sm:gap-6">
+      <div v-else class="flex min-h-0 flex-1 flex-col gap-4 sm:gap-5">
         <nav class="flex flex-wrap gap-8" aria-label="Stock loan views">
           <button
             v-for="tab in loanStatusTabs"
@@ -75,47 +75,7 @@
           </button>
         </nav>
 
-        <div class="data-table-shell mt-1 flex min-h-0 flex-1 flex-col overflow-hidden sm:mt-2">
-          <DataTableToolbar native-table-key="seller-loans">
-            <template #heading>
-              <div class="min-w-0">
-                <h2
-                  class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm"
-                >
-                  Loans
-                </h2>
-                <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
-                  Track units lent until they sell or return to stock
-                </p>
-                <div
-                  v-if="!sellerLoansStore.loading && sellerLoansStore.loans.length > 0"
-                  class="mt-2 flex flex-wrap items-center gap-1.5"
-                >
-                  <span
-                    class="inline-flex items-center rounded-sm bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-300"
-                  >
-                    {{ filteredLoans.length }} shown
-                  </span>
-                  <span
-                    class="inline-flex items-center rounded-sm bg-indigo-50 px-1.5 py-0.5 text-[10px] font-medium text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300"
-                  >
-                    {{ loanCountByStatus.active }} on loan
-                  </span>
-                  <span
-                    class="inline-flex items-center rounded-sm bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300"
-                  >
-                    {{ loanCountByStatus.sold }} sold
-                  </span>
-                  <span
-                    class="inline-flex items-center rounded-sm bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-300"
-                  >
-                    {{ loanCountByStatus.returned }} returned
-                  </span>
-                </div>
-              </div>
-            </template>
-          </DataTableToolbar>
-
+        <div class="data-table-shell mt-1 flex min-h-0 flex-1 flex-col overflow-hidden sm:mt-0">
           <div
             v-if="sellerLoansStore.loading && sellerLoansStore.loans.length === 0"
             class="p-6 sm:p-8"
@@ -189,20 +149,18 @@
                 <tbody>
                   <tr v-for="loan in paginatedLoans" :key="loan.id">
                     <td class="max-w-[16rem] sm:max-w-xs">
-                      <span class="dashboard-table__primary block truncate" :title="loan.partyName">
+                      <span class="dashboard-table__primary block truncate">
                         {{ loan.partyName }}
                       </span>
                       <span
                         v-if="loan.partyPhone"
                         class="dashboard-table__muted mt-0.5 block truncate text-[10px]"
-                        :title="loan.partyPhone"
                       >
                         {{ loan.partyPhone }}
                       </span>
                       <span
                         v-if="loan.partyNotes && loan.status === 'active'"
                         class="dashboard-table__muted mt-1 block max-w-xs truncate text-[10px]"
-                        :title="loan.partyNotes"
                       >
                         {{ loan.partyNotes }}
                       </span>
@@ -441,7 +399,6 @@ import {
 } from '~/utils/app-icons'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
-import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
 import DashboardTableBadge from '~/components/ui/DashboardTableBadge.vue'
 import { formatSellerLoanStatusLabel, sellerLoanStatusBadgeClass } from '~/utils/table-badge-styles'
 import { useSellerLoanOutsStore, type SellerLoanOut } from '~/stores/sellerLoanOuts'
@@ -455,7 +412,7 @@ definePageMeta({
   layout: 'dashboard',
 })
 
-const { eyebrowClass, pageTitleClass, descriptionClass, pageWithFixedFooterClass } = useDashboardPageChrome()
+const { eyebrowClass, pageTitleClass, pageWithFixedFooterClass } = useDashboardPageChrome()
 
 const sellerLoansStore = useSellerLoanOutsStore()
 const storesStore = useStoresStore()
@@ -523,6 +480,37 @@ const filteredLoans = computed(() => {
   if (statusFilter.value === 'active') return rows.filter((l) => l.status === 'active')
   if (statusFilter.value === 'sold') return rows.filter((l) => l.status === 'sold')
   return rows.filter((l) => l.status === 'returned')
+})
+
+const loanHeaderMetrics = computed(() => {
+  const counts = loanCountByStatus.value
+  const total = sellerLoansStore.loans.length
+  const shown = filteredLoans.value.length
+
+  return [
+    {
+      key: 'shown',
+      label: statusFilter.value === 'all' ? 'Loans' : 'Shown',
+      value: statusFilter.value === 'all' ? String(total) : `${shown} / ${total}`,
+    },
+    {
+      key: 'active',
+      label: 'On loan',
+      value: String(counts.active),
+      tone: counts.active > 0 ? ('info' as const) : undefined,
+    },
+    {
+      key: 'sold',
+      label: 'Sold',
+      value: String(counts.sold),
+      tone: 'success' as const,
+    },
+    {
+      key: 'returned',
+      label: 'Returned',
+      value: String(counts.returned),
+    },
+  ]
 })
 
 const paginatedLoans = computed(() => {
