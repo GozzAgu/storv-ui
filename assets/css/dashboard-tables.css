@@ -256,8 +256,15 @@ main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-
 }
 
 main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table th.dashboard-table__col-price,
-main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table td.dashboard-table__col-price {
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table td.dashboard-table__col-price,
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table th.dashboard-table__col-cost,
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table td.dashboard-table__col-cost {
   min-width: 8.5rem;
+}
+
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table th.dashboard-table__col-margin,
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table td.dashboard-table__col-margin {
+  min-width: 7.5rem;
 }
 
 main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table th.dashboard-table__col-actions,

@@ -1,4 +1,4 @@
-/* App-wide buttons - match SaaS landing `.landing-pill-cta` (pill shape, Storvv navy) */
+/* App-wide buttons — pill shape; primary actions use clear outline style (Import/Export look) */
 
 :root {
   --app-btn-primary-bg: #143f8d;
@@ -48,25 +48,13 @@ html.dark {
   opacity: 0.5;
 }
 
-.btn-primary {
-  border: 0;
-  background: var(--app-btn-primary-bg);
-  color: #fff;
-  padding: 0.625rem 1.25rem;
-  font-size: 0.875rem;
-  box-shadow: var(--app-btn-primary-shadow);
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: var(--app-btn-primary-hover);
-}
-
-.btn-primary:active:not(:disabled) {
+.btn-primary:active:not(:disabled),
+.btn-outline:active:not(:disabled) {
   transform: scale(0.98);
 }
 
 .btn-primary-sm {
-  padding: 0.4375rem 0.875rem;
+  padding: calc(0.4375rem - 1.5px) calc(0.875rem - 1.5px);
   font-size: 0.75rem;
 }
 
@@ -96,6 +84,7 @@ html.dark .btn-secondary:hover:not(:disabled) {
   transform: scale(0.98);
 }
 
+.btn-primary,
 .btn-outline {
   border: 1.5px solid var(--app-btn-outline-border);
   background: transparent;
@@ -105,15 +94,18 @@ html.dark .btn-secondary:hover:not(:disabled) {
   box-shadow: none;
 }
 
+.btn-primary:hover:not(:disabled),
 .btn-outline:hover:not(:disabled) {
   background: var(--app-btn-outline-hover-bg);
   border-color: var(--app-btn-primary-bg);
 }
 
+html.dark .btn-primary,
 html.dark .btn-outline {
   color: rgb(226 232 240);
 }
 
+html.dark .btn-primary:hover:not(:disabled),
 html.dark .btn-outline:hover:not(:disabled) {
   border-color: rgb(255 255 255 / 0.22);
 }
@@ -148,6 +140,7 @@ html.dark .btn-outline:hover:not(:disabled) {
   font-size: 0.75rem;
 }
 
+.btn-primary.btn-sm,
 .btn-outline.btn-sm {
   padding: calc(0.4375rem - 1.5px) calc(0.875rem - 1.5px);
 }
@@ -171,7 +164,6 @@ button.group.relative.inline-flex.items-center.justify-center.overflow-hidden.bo
 .btn-danger:focus-visible {
   outline: none;
   box-shadow:
-    var(--app-btn-primary-shadow, none),
     0 0 0 2px rgb(255 255 255 / 0.95),
     0 0 0 4px rgb(20 63 141 / 0.35);
 }

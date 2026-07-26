@@ -20,7 +20,7 @@
       </button>
       <NuxtLink
         to="/signup"
-        class="rounded-lg bg-primary-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary-700"
+        class="rounded-full border border-[rgb(20_63_141/0.35)] bg-transparent px-3 py-1.5 text-xs font-semibold text-[#143f8d] hover:border-[#143f8d] hover:bg-[rgb(20_63_141/0.06)] dark:border-white/15 dark:text-gray-100 dark:hover:border-white/25 dark:hover:bg-white/[0.06]"
       >
         Create free account
       </NuxtLink>

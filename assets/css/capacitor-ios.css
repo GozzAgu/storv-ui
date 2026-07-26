@@ -552,11 +552,8 @@ html.capacitor-ios.capacitor-native .btn-danger {
     opacity 0.15s ease;
 }
 
-html.capacitor-ios.capacitor-native .btn-primary {
-  box-shadow: 0 8px 24px -8px rgb(20 63 141 / 0.45);
-}
-
-html.capacitor-ios.capacitor-native .btn-primary:active {
+html.capacitor-ios.capacitor-native .btn-primary:active,
+html.capacitor-ios.capacitor-native .btn-outline:active {
   transform: scale(0.98);
 }
 
@@ -929,14 +926,17 @@ html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table t
 
 html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table__muted,
 html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table__numeric {
-  font-size: var(--cap-ios-caption);
-  line-height: 1.35;
+  font-size: var(--cap-ios-body);
+  line-height: 1.3;
+  font-weight: 500;
+  color: var(--dash-card-ink);
 }
 
 html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table__money {
-  font-size: var(--cap-ios-title);
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  font-size: var(--cap-ios-body);
+  font-weight: 500;
+  letter-spacing: normal;
+  color: var(--dash-card-ink);
 }
 
 html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table td.dash-native-table__cell--meta .dashboard-table__money,
@@ -944,9 +944,69 @@ html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table t
   font-size: var(--cap-ios-body);
 }
 
+/* Inventory: use native card table on phone (same cells as desktop — neutral prices, margin column) */
+html.capacitor-ios.capacitor-native .data-table-shell.dash-native-table--cards .inventory-items-mobile-list {
+  display: none !important;
+}
+
+html.capacitor-ios.capacitor-native .data-table-shell.dash-native-table--cards .inventory-items-table-wrap {
+  display: flex !important;
+}
+
+/* Price / cost meta rows — single line, no stacked profit tint */
+html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table td.dash-native-table__cell--meta.dashboard-table__col-price,
+html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table td.dash-native-table__cell--meta.dashboard-table__col-cost {
+  align-items: center;
+  padding-block: 0.25rem;
+}
+
+html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table td.dash-native-table__cell--meta.dashboard-table__col-price .flex.flex-col,
+html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table td.dash-native-table__cell--meta.dashboard-table__col-cost .flex.flex-col {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.125rem 0.375rem;
+}
+
+html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table td.dash-native-table__cell--meta.dashboard-table__col-price .line-through,
+html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table td.dash-native-table__cell--meta.dashboard-table__col-cost .line-through {
+  font-size: var(--cap-ios-caption);
+}
+
+/* Margin meta row — muted, compact */
+html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table td.dash-native-table__cell--meta.dashboard-table__col-margin {
+  padding-block: 0.25rem;
+}
+
+html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table td.dash-native-table__cell--meta.dashboard-table__col-margin span {
+  font-size: var(--cap-ios-caption);
+  font-weight: 500;
+  color: var(--dash-card-muted);
+}
+
+html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table td.dash-native-table__cell--meta.dashboard-table__col-margin span.text-red-600\/75,
+html.capacitor-ios.capacitor-native.dark .dash-native-table--cards .dashboard-table td.dash-native-table__cell--meta.dashboard-table__col-margin span.text-red-600\/75 {
+  color: rgb(220 38 38 / 0.75);
+}
+
+html.capacitor-ios.capacitor-native.dark .dash-native-table--cards .dashboard-table td.dash-native-table__cell--meta.dashboard-table__col-margin span.text-red-400\/75 {
+  color: rgb(248 113 113 / 0.75);
+}
+
 html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table td.dash-native-table__cell--when .dashboard-table__primary,
 html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table td.dash-native-table__cell--when .dashboard-table__muted {
   text-align: right;
+}
+
+/* Inventory folder detail — mobile detail sheet profit line */
+html.capacitor-ios.capacitor-native .inventory-items-table-wrap .dashboard-table__numeric {
+  font-size: var(--cap-ios-body);
+  font-weight: 500;
+  color: var(--dash-card-ink);
+}
+
+html.capacitor-ios.capacitor-native .inventory-items-table-wrap .dashboard-table__col-margin span {
+  font-size: var(--cap-ios-caption);
 }
 
 /* Compact page chrome on inventory sub-pages */

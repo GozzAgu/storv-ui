@@ -512,9 +512,9 @@
                     : 'flex min-h-0 flex-1 flex-col'
                 "
               >
-                <!-- Mobile: card list when has items -->
+                <!-- Mobile: card list when has items (web; hidden on iOS native card table) -->
                 <div
-                  class="block space-y-2 sm:hidden"
+                  class="inventory-items-mobile-list block space-y-2 sm:hidden"
                   :class="
                     isFullscreen ? 'min-h-0 flex-1 overflow-y-auto px-4 pb-4 lg:px-8' : 'px-0'
                   "
@@ -609,9 +609,9 @@
                     </div>
                   </div>
                 </div>
-                <!-- Desktop: table when has items -->
+                <!-- Desktop / iOS native card table -->
                 <div
-                  class="hidden min-h-0 flex-1 flex-col sm:flex"
+                  class="inventory-items-table-wrap hidden min-h-0 flex-1 flex-col sm:flex"
                   :class="isFullscreen ? 'overflow-auto px-4 pb-2 pt-2 lg:px-8' : ''"
                 >
                   <div class="min-h-0 flex-1 overflow-x-auto">
@@ -642,9 +642,9 @@
                             :class="[
                               column.key === 'availability' && 'dashboard-table__col-status',
                               column.key === 'source' && 'dashboard-table__col-source',
-                              (column.type === 'currency' ||
-                                column.key.toLowerCase().includes('price')) &&
-                                'dashboard-table__col-price',
+                              column.key === 'unitCost' && 'dashboard-table__col-cost',
+                              column.key === 'margin' && 'dashboard-table__col-margin',
+                              isInventorySellPriceColumn(column) && 'dashboard-table__col-price',
                               column.sortable &&
                                 'cursor-pointer select-none hover:text-gray-800 dark:hover:text-gray-200',
                             ]"
@@ -694,9 +694,9 @@
                             :class="[
                               column.key === 'availability' && 'dashboard-table__col-status',
                               column.key === 'source' && 'dashboard-table__col-source',
-                              (column.type === 'currency' ||
-                                column.key.toLowerCase().includes('price')) &&
-                                'dashboard-table__col-price',
+                              column.key === 'unitCost' && 'dashboard-table__col-cost',
+                              column.key === 'margin' && 'dashboard-table__col-margin',
+                              isInventorySellPriceColumn(column) && 'dashboard-table__col-price',
                             ]"
                           >
                             <!-- Inline edit mode (large screens only); click outside saves -->
