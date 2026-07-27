@@ -21,7 +21,10 @@
       class="pointer-events-none absolute inset-0 bg-linear-to-br from-white/45 via-transparent to-transparent opacity-45 transition-opacity duration-300 group-hover:opacity-55 dark:from-white/10 dark:opacity-75 dark:group-hover:opacity-85"
       aria-hidden="true"
     />
-    <span class="relative z-10 inline-flex items-center gap-1.5 text-inherit sm:gap-2">
+    <span
+      class="relative z-10 inline-flex items-center text-inherit"
+      :class="iconOnlyIos ? 'gap-0' : 'gap-1.5 sm:gap-2'"
+    >
       <component v-if="loading" :is="loadingIcon" class="h-5 w-5 shrink-0 animate-spin" />
       <component
         v-else-if="icon && !iconRight"
@@ -29,7 +32,8 @@
         :class="iconSize"
         :stroke-width="1.75"
       />
-      <slot />
+      <span v-if="iconOnlyIos" class="sr-only"><slot /></span>
+      <slot v-else />
       <component v-if="icon && iconRight" :is="icon" :class="iconSize" :stroke-width="1.75" />
     </span>
   </button>
@@ -76,11 +80,22 @@ const emit = defineEmits<{
 
 const loadingIcon = ArrowPathIcon
 
+const { isCapacitorIos } = useIsCapacitorIos()
+const iconOnlyIos = computed(() => isCapacitorIos.value && !!props.icon && !props.loading)
+
 const radiusClass = '!rounded-full'
 
 const showGlassHighlight = computed(() => false)
 
 const sizeClasses = computed(() => {
+  if (iconOnlyIos.value) {
+    const iconOnlyMap = {
+      sm: '!h-8 !w-8 !min-w-8 !p-0',
+      md: '!h-10 !w-10 !min-w-10 !p-0',
+      lg: '!h-11 !w-11 !min-w-11 !p-0',
+    }
+    return iconOnlyMap[props.size]
+  }
   const sizeMap = {
     sm: 'px-3.5 py-1.5 text-xs sm:text-sm',
     md: 'px-5 py-2.5 text-sm',

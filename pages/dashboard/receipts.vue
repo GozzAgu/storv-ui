@@ -217,13 +217,6 @@
                         </select>
                         <button
                           type="button"
-                          class="rounded-sm bg-white p-2 text-gray-500 transition-colors hover:bg-gray-50 dark:!bg-dashboard-card dark:text-gray-400 dark:hover:bg-gray-800"
-                          @click="resetFilters"
-                        >
-                          <ArrowPathIcon class="h-5 w-5" />
-                        </button>
-                        <button
-                          type="button"
                           class="hidden rounded-sm border border-transparent p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-100 lg:inline-flex"
                           aria-label="Exit expanded view"
                           @click="isReceiptsFullscreen = false"
@@ -280,9 +273,6 @@
                         <option value="week">This Week</option>
                         <option value="month">This Month</option>
                       </DashboardToolbarSelect>
-                      <DashboardToolbarIconButton aria-label="Reset filters" @click="resetFilters">
-                        <ArrowPathIcon class="h-4 w-4" />
-                      </DashboardToolbarIconButton>
                       <DashboardToolbarIconButton
                         class="hidden lg:inline-flex"
                         :aria-label="isReceiptsFullscreen ? 'Exit expanded view' : 'Expand table'"

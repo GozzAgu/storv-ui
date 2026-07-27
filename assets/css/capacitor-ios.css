@@ -256,7 +256,7 @@ html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-header
   margin-top: 0;
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 1px;
   padding: 1px;
   overflow: hidden;
@@ -278,14 +278,51 @@ html.capacitor-ios.capacitor-native.dark
 html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-metric {
   display: flex;
   min-width: 0;
+  grid-column: span 2;
   flex-direction: column;
-  align-items: stretch;
+  align-items: center;
   gap: 0.1875rem;
   padding: 0.625rem 0.4375rem;
   border: none;
   background: rgb(255 255 255 / 0.42);
   -webkit-backdrop-filter: blur(12px) saturate(1.1);
   backdrop-filter: blur(12px) saturate(1.1);
+  text-align: center;
+}
+
+html.capacitor-ios.capacitor-native
+  .dash-page-header--unified
+  .dash-page-metrics:has(> .dash-page-metric:nth-child(2):last-child)
+  > .dash-page-metric {
+  grid-column: span 3;
+}
+
+html.capacitor-ios.capacitor-native
+  .dash-page-header--unified
+  .dash-page-metrics:has(> .dash-page-metric:nth-child(4):last-child)
+  > .dash-page-metric {
+  grid-column: span 3;
+}
+
+html.capacitor-ios.capacitor-native
+  .dash-page-header--unified
+  .dash-page-metrics:has(> .dash-page-metric:nth-child(5):last-child)
+  > .dash-page-metric:nth-child(-n + 3) {
+  grid-column: span 2;
+}
+
+html.capacitor-ios.capacitor-native
+  .dash-page-header--unified
+  .dash-page-metrics:has(> .dash-page-metric:nth-child(5):last-child)
+  > .dash-page-metric:nth-child(n + 4) {
+  grid-column: span 3;
+}
+
+html.capacitor-ios.capacitor-native
+  .dash-page-header--unified
+  .dash-page-metrics:has(> .dash-page-metric:nth-child(1):last-child)
+  > .dash-page-metric {
+  grid-column: 1 / -1;
 }
 
 html.capacitor-ios.capacitor-native.dark .dash-page-header--unified .dash-page-metric {
@@ -302,12 +339,21 @@ html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-metric
 }
 
 html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-metric__value {
-  font-size: 0.875rem !important;
+  font-size: 0.8125rem !important;
   font-weight: 600;
-  line-height: 1.2;
+  line-height: 1.25;
   letter-spacing: -0.02em;
   text-align: center;
   font-variant-numeric: tabular-nums;
+  word-break: break-word;
+}
+
+html.capacitor-ios.capacitor-native
+  .dash-page-header--unified
+  .dash-page-metrics:has(> .dash-page-metric:nth-child(5):last-child)
+  > .dash-page-metric:nth-child(-n + 3)
+  .dash-page-metric__value {
+  font-size: 0.75rem !important;
 }
 
 /* Inventory categories — counts first, money second */
@@ -339,42 +385,6 @@ html.capacitor-ios.capacitor-native
   .dash-page-metrics:has([data-metric-key='categories'])
   [data-metric-key='profit'] {
   order: 5;
-}
-
-html.capacitor-ios.capacitor-native
-  .dash-page-metrics:has([data-metric-key='categories']):has([data-metric-key='profit'])
-  [data-metric-key='value'] {
-  grid-column: span 2;
-}
-
-html.capacitor-ios.capacitor-native
-  .dash-page-metrics:has([data-metric-key='categories']):not(:has([data-metric-key='profit']))
-  [data-metric-key='value'] {
-  grid-column: 1 / -1;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding-inline: 0.875rem;
-}
-
-html.capacitor-ios.capacitor-native
-  .dash-page-metrics:has([data-metric-key='categories']):not(:has([data-metric-key='profit']))
-  [data-metric-key='value']
-  .dash-page-metric__label,
-html.capacitor-ios.capacitor-native
-  .dash-page-metrics:has([data-metric-key='categories']):not(:has([data-metric-key='profit']))
-  [data-metric-key='value']
-  .dash-page-metric__value {
-  text-align: left;
-}
-
-html.capacitor-ios.capacitor-native
-  .dash-page-metrics:has([data-metric-key='categories']):not(:has([data-metric-key='profit']))
-  [data-metric-key='value']
-  .dash-page-metric__value {
-  margin-left: auto;
-  text-align: right;
 }
 
 html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-header__toolbar {
@@ -607,13 +617,6 @@ html.capacitor-ios.capacitor-native
   opacity: 0.88;
 }
 
-html.capacitor-ios.capacitor-native [data-dashboard-main] .dash-page-header--unified .hidden.sm\:inline,
-html.capacitor-ios.capacitor-native [data-dashboard-main] .dash-table-toolbar .hidden.sm\:inline,
-html.capacitor-ios.capacitor-native [data-dashboard-main] .dash-page-header__toolbar .hidden.sm\:inline,
-html.capacitor-ios.capacitor-native [data-dashboard-main] .lg\:hidden .hidden.sm\:inline {
-  display: inline !important;
-}
-
 html.capacitor-ios.capacitor-native .dash-export-btn {
   gap: 0.375rem;
 }
@@ -630,6 +633,14 @@ html.capacitor-ios.capacitor-native [data-dashboard-main] button.inline-flex.ite
   height: 0.875rem;
   flex-shrink: 0;
   opacity: 0.85;
+}
+
+/* Icon-only dashboard buttons (label in sr-only) */
+html.capacitor-ios.capacitor-native
+  [data-dashboard-main]
+  button.group.relative.inline-flex.items-center.justify-center:has(.sr-only) {
+  min-width: 2rem;
+  padding-inline: 0 !important;
 }
 
 html.capacitor-ios.capacitor-native .receipt-line-items-panel,

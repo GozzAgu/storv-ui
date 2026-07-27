@@ -19,21 +19,13 @@
       </template>
       <template v-if="!showPaymentLinksComingSoon" #actions>
         <Button
-          variant="ghost"
-          size="sm"
-          :extra-class="headerBtnClass"
-          :loading="loading"
-          @click="refresh"
-        >
-          Refresh
-        </Button>
-        <Button
           variant="primary"
           size="sm"
           :icon="CreditCardIcon"
           :extra-class="headerBtnClass"
           :disabled="!payout.connected"
           :title="payout.connected ? '' : 'Connect a payout account first'"
+          aria-label="New payment link"
           @click="showCreate = true"
         >
           New payment link

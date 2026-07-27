@@ -1,6 +1,6 @@
 <template>
   <DashboardFixedFooter
-    v-if="pinToViewport && total > 0"
+    v-if="effectivePinToViewport && total > 0"
     :sidebar-collapsed="sidebarCollapsed"
   >
     <Pagination
@@ -47,4 +47,10 @@ defineEmits<{
 const attrs = useAttrs()
 const { paginationBarClass } = useDashboardPageChrome()
 const { sidebarCollapsed } = useDashboardSidebarCollapsed()
+const { isCapacitorIos } = useIsCapacitorIos()
+
+/** iOS: pagination flows with page content (not pinned above bottom nav). */
+const effectivePinToViewport = computed(
+  () => props.pinToViewport && !isCapacitorIos.value
+)
 </script>

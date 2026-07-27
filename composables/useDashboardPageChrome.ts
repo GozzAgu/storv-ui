@@ -6,6 +6,7 @@ import { APP_CARD_CLASS, APP_FIELD_COMPACT_CLASS } from '~/utils/app-chrome'
 
 export function useDashboardPageChrome() {
   const { isNativeApp } = useCapacitorNativeApp()
+  const { isCapacitorIos } = useIsCapacitorIos()
   const native = computed(() => isNativeApp.value)
 
   /** Elevated surfaces (sections, panels) - no outer border */
@@ -24,12 +25,15 @@ export function useDashboardPageChrome() {
     ? 'inline-flex h-8 shrink-0 items-center rounded-lg border-0 bg-gray-50/80 px-2.5 text-xs font-medium tabular-nums text-gray-600 dark:bg-white/[0.04] dark:text-gray-400'
     : 'inline-flex h-8 shrink-0 items-center rounded-lg border-0 bg-gray-50/80 px-2.5 text-xs font-medium tabular-nums text-gray-600 dark:bg-white/[0.04] dark:text-gray-400'
 
-  const headerBtnClass =
-    '!inline-flex !h-8 !min-h-8 !items-center !justify-center !rounded-full !px-3.5 !py-0 !text-xs shrink-0'
+  const headerBtnClass = computed(() =>
+    isCapacitorIos.value
+      ? '!inline-flex !h-8 !w-8 !min-h-8 !min-w-8 !items-center !justify-center !rounded-full !p-0 !text-xs shrink-0'
+      : '!inline-flex !h-8 !min-h-8 !items-center !justify-center !rounded-full !px-3.5 !py-0 !text-xs shrink-0'
+  )
 
-  /** On native, always show action button labels beside icons (no icon-only sm breakpoint). */
+  /** iOS header actions: icon-only (label stays for screen readers). */
   const headerBtnLabelClass = computed(() =>
-    native.value ? 'inline' : 'hidden sm:inline'
+    isCapacitorIos.value ? 'sr-only' : 'hidden sm:inline'
   )
 
   /** @deprecated Prefer `<DashboardBackButton />` for back navigation. */

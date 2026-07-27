@@ -1282,6 +1282,12 @@ html.capacitor-native .dashboard-page-with-footer {
   ) !important;
 }
 
+html.capacitor-ios.capacitor-native .dashboard-page-with-footer {
+  padding-bottom: calc(
+    var(--dashboard-bottom-nav-height) + var(--cap-safe-bottom) + 0.75rem
+  ) !important;
+}
+
 html.capacitor-native .capacitor-boot-splash {
   padding-top: var(--cap-safe-top);
   padding-bottom: var(--cap-safe-bottom);

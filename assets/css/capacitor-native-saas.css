@@ -64,7 +64,7 @@ html.capacitor-native .dash-page-header--unified .dash-page-header__description 
 
 html.capacitor-native .dash-page-header--unified .dash-page-metrics {
   width: 100%;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
 }
 
 html.capacitor-native .dash-page-header,

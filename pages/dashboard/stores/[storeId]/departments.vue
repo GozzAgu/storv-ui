@@ -68,6 +68,7 @@
           :disabled="!canAddDepartmentForStore"
           :title="canAddDepartmentForStore ? 'Create new department' : departmentLimitMessage"
           :extra-class="headerBtnClass"
+          aria-label="New department"
           @click="openCreateDepartmentModal"
         >
           New department
@@ -79,9 +80,6 @@
           placeholder="Search departments…"
           input-class="sm:w-52"
         />
-        <DashboardToolbarIconButton aria-label="Reset filters" @click="resetFilters">
-          <ArrowPathIcon class="h-4 w-4" :size="16" />
-        </DashboardToolbarIconButton>
         <div
           v-if="canManageDepartments && paginatedDepartments.length > 0"
           class="dash-page-header__bulk ml-auto flex flex-wrap items-center gap-2"

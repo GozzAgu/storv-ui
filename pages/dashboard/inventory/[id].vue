@@ -144,12 +144,6 @@
             <option value="dateIn">Date In</option>
             <option value="availability">Status</option>
           </select>
-          <Button
-            variant="outline"
-            class="shrink-0 !rounded-xl !p-2 sm:!rounded-2xl sm:!px-2.5 sm:!py-2.5"
-            :icon="ArrowPathIcon"
-            @click="resetFilters"
-          />
         </div>
       </div>
     </div>
@@ -235,13 +229,6 @@
                     <option value="dateIn">Date In</option>
                     <option value="availability">Status</option>
                   </select>
-                  <button
-                    type="button"
-                    class="rounded-sm bg-white p-2 text-gray-500 transition-colors hover:bg-gray-50 dark:!bg-dashboard-card dark:text-gray-400 dark:hover:bg-gray-800"
-                    @click="resetFilters"
-                  >
-                    <ArrowPathIcon class="h-5 w-5" />
-                  </button>
                   <button
                     type="button"
                     class="hidden rounded-sm border border-transparent p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-100 lg:inline-flex"
@@ -385,9 +372,6 @@
                   <option value="dateIn">Date In</option>
                   <option value="availability">Status</option>
                 </DashboardToolbarSelect>
-                <DashboardToolbarIconButton aria-label="Reset filters" @click="resetFilters">
-                  <ArrowPathIcon class="h-4 w-4" />
-                </DashboardToolbarIconButton>
                 <DashboardToolbarIconButton
                   class="hidden lg:inline-flex"
                   aria-label="Expand table"
