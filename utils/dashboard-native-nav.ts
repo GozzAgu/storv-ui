@@ -10,7 +10,7 @@ export type DashboardNavItem = {
 export const NATIVE_PRIMARY_ORDER = [
   'Dashboard',
   'Inventory',
-  'Receipts',
+  'Sales',
 ] as const
 
 /** Same primary tabs when payment links is promoted — links live under More. */
@@ -39,6 +39,7 @@ export function nativeNavShortLabel(name: string): string {
   const labels: Record<string, string> = {
     Dashboard: 'Home',
     Inventory: 'Stock',
+    Sales: 'Sales',
     Receipts: 'Sales',
     Departments: 'Teams',
     Analytics: 'Insights',

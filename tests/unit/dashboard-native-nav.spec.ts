@@ -8,7 +8,7 @@ import {
 const items = [
   { name: 'Dashboard', href: '/dashboard', iconKey: 'dashboard' as const },
   { name: 'Inventory', href: '/dashboard/inventory', iconKey: 'inventory' as const },
-  { name: 'Receipts', href: '/dashboard/receipts', iconKey: 'receipts' as const },
+  { name: 'Sales', href: '/dashboard/receipts', iconKey: 'receipts' as const },
   {
     name: 'Departments',
     href: '/dashboard/stores/store-1/departments',
@@ -21,7 +21,7 @@ const items = [
 describe('splitNativeBottomNav', () => {
   it('puts primary tabs in order and remainder in more', () => {
     const { primary, more } = splitNativeBottomNav(items)
-    expect(primary.map((i) => i.name)).toEqual(['Dashboard', 'Inventory', 'Receipts'])
+    expect(primary.map((i) => i.name)).toEqual(['Dashboard', 'Inventory', 'Sales'])
     expect(more.map((i) => i.name)).toEqual(['Departments', 'Analytics', 'Settings'])
   })
 
@@ -35,7 +35,7 @@ describe('splitNativeBottomNav', () => {
       },
     ]
     const { primary, more } = splitNativeBottomNav(withLinks)
-    expect(primary.map((i) => i.name)).toEqual(['Dashboard', 'Inventory', 'Receipts'])
+    expect(primary.map((i) => i.name)).toEqual(['Dashboard', 'Inventory', 'Sales'])
     expect(more.map((i) => i.name)).toContain('Payment links')
     expect(more.map((i) => i.name)).toContain('Departments')
   })

@@ -153,7 +153,7 @@ html.capacitor-native .dashboard-native-bottom-nav {
 html.capacitor-native .native-tabbar {
   position: relative;
   margin-inline: auto;
-  margin-bottom: max(0.6rem, var(--cap-safe-bottom));
+  margin-bottom: 0;
   width: 100%;
   max-width: 30rem;
   border-radius: 1.75rem;

@@ -25,7 +25,7 @@
       storage-key="storvv-assistant-fab-native"
       layout="column"
       extra-class="dashboard-assistant__fab-mount"
-      anchor-class="bottom-[calc(env(safe-area-inset-bottom,0px)+8.5rem)] right-4"
+      anchor-class="bottom-[calc(env(safe-area-inset-bottom,0px)+7.75rem)] right-4"
     >
       <button
         type="button"

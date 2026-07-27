@@ -281,7 +281,7 @@ html.capacitor-ios.capacitor-native .native-tabbar__tab {
 }
 
 html.capacitor-ios.capacitor-native .dashboard-native-bottom-nav {
-  padding-bottom: max(0.35rem, env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(var(--cap-safe-bottom) + 0.125rem);
 }
 
 html.capacitor-ios.capacitor-native .native-tabbar .text-primary-600,
