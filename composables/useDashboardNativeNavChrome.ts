@@ -8,13 +8,13 @@ export function useDashboardNativeNavChrome() {
   const barClass = 'native-tabbar pointer-events-auto'
 
   const tabClass =
-    'group relative flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-1 py-1.5 transition-colors duration-150 active:opacity-70'
+    'native-tabbar__tab group relative z-[1] flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-1 py-1.5 transition-[color,transform,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-[0.94] active:opacity-80'
 
   const tabInactiveClass = 'text-gray-500 dark:text-gray-400'
   const tabActiveClass = 'text-[#143f8d] dark:text-[#9ab5e3]'
 
-  const tabIndicatorClass =
-    'absolute top-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-[#143f8d] dark:bg-[#9ab5e3]'
+  const tabStripClass =
+    'native-tabbar__strip relative flex h-[3.25rem] items-stretch justify-around px-1.5'
 
   const sheet = useDashboardNativeSheetChrome('menu')
 
@@ -23,7 +23,7 @@ export function useDashboardNativeNavChrome() {
     tabClass,
     tabInactiveClass,
     tabActiveClass,
-    tabIndicatorClass,
+    tabStripClass,
     sheetBackdropClass: sheet.backdropClass,
     sheetClass: sheet.sheetClass,
     sheetHeaderClass: sheet.sheetHeaderClass,

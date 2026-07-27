@@ -27,6 +27,10 @@ html.capacitor-ios.capacitor-native {
 
   --cap-ios-glass: rgb(255 255 255 / 0.78);
   --cap-ios-glass-border: rgb(255 255 255 / 0.55);
+  --cap-ios-nav-glass: rgb(255 255 255 / 0.34);
+  --cap-ios-nav-glass-border: rgb(255 255 255 / 0.42);
+  --cap-ios-nav-indicator: rgb(255 255 255 / 0.58);
+  --cap-ios-nav-indicator-border: rgb(255 255 255 / 0.72);
   --cap-ios-glow: rgb(20 63 141 / 0.14);
   --cap-ios-sheen: linear-gradient(
     135deg,
@@ -49,6 +53,10 @@ html.capacitor-ios.capacitor-native {
 html.capacitor-ios.capacitor-native.dark {
   --cap-ios-glass: rgb(18 20 28 / 0.82);
   --cap-ios-glass-border: rgb(255 255 255 / 0.1);
+  --cap-ios-nav-glass: rgb(22 24 32 / 0.48);
+  --cap-ios-nav-glass-border: rgb(255 255 255 / 0.12);
+  --cap-ios-nav-indicator: rgb(255 255 255 / 0.14);
+  --cap-ios-nav-indicator-border: rgb(255 255 255 / 0.18);
   --cap-ios-glow: rgb(154 181 227 / 0.1);
   --cap-ios-sheen: linear-gradient(
     135deg,
@@ -182,24 +190,98 @@ html.capacitor-ios.capacitor-native .native-topnav-page__title {
   letter-spacing: -0.015em;
 }
 
-/* ── Bottom tab bar — futuristic pill ── */
+/* ── Bottom tab bar — floating glass pill ── */
 html.capacitor-ios.capacitor-native .native-tabbar {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   border-radius: var(--cap-ios-radius-pill);
-  border: 1px solid var(--cap-ios-glass-border);
-  background: var(--cap-ios-glass);
+  border: 1px solid var(--cap-ios-nav-glass-border);
+  background: var(--cap-ios-nav-glass);
   box-shadow:
-    0 16px 48px -10px rgb(15 23 42 / 0.28),
-    0 2px 8px rgb(15 23 42 / 0.08),
-    inset 0 1px 0 rgb(255 255 255 / 0.65);
-  -webkit-backdrop-filter: blur(32px) saturate(1.45);
-  backdrop-filter: blur(32px) saturate(1.45);
+    0 20px 56px -14px rgb(15 23 42 / 0.34),
+    0 4px 16px rgb(15 23 42 / 0.1),
+    inset 0 1px 0 rgb(255 255 255 / 0.55);
+  -webkit-backdrop-filter: blur(44px) saturate(1.85);
+  backdrop-filter: blur(44px) saturate(1.85);
+  transform: translateZ(0);
+}
+
+html.capacitor-ios.capacitor-native .native-tabbar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--cap-ios-sheen);
+  pointer-events: none;
+  z-index: 0;
+}
+
+html.capacitor-ios.capacitor-native .native-tabbar::after {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  border: 1px solid rgb(255 255 255 / 0.22);
+  pointer-events: none;
+  z-index: 0;
+  mask-image: linear-gradient(to bottom, rgb(0 0 0 / 0.55), transparent 55%);
 }
 
 html.capacitor-ios.capacitor-native.dark .native-tabbar {
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.08),
-    0 20px 56px -8px rgb(0 0 0 / 0.72),
-    0 0 0 1px rgb(154 181 227 / 0.06);
+    inset 0 1px 0 rgb(255 255 255 / 0.1),
+    0 24px 64px -12px rgb(0 0 0 / 0.78),
+    0 0 0 1px rgb(154 181 227 / 0.05);
+}
+
+html.capacitor-ios.capacitor-native.dark .native-tabbar::after {
+  border-color: rgb(255 255 255 / 0.08);
+}
+
+html.capacitor-ios.capacitor-native .native-tabbar__strip {
+  z-index: 1;
+}
+
+html.capacitor-ios.capacitor-native .native-tabbar__indicator {
+  position: absolute;
+  top: 0.3125rem;
+  bottom: 0.3125rem;
+  left: 0;
+  z-index: 0;
+  border-radius: 9999px;
+  border: 1px solid var(--cap-ios-nav-indicator-border);
+  background: var(--cap-ios-nav-indicator);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.65),
+    0 4px 14px rgb(15 23 42 / 0.1);
+  -webkit-backdrop-filter: blur(16px) saturate(1.35);
+  backdrop-filter: blur(16px) saturate(1.35);
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, width, opacity;
+  transition:
+    transform 0.52s var(--cap-ios-ease),
+    width 0.52s var(--cap-ios-ease),
+    opacity 0.24s ease;
+}
+
+html.capacitor-ios.capacitor-native .native-tabbar__indicator--visible {
+  opacity: 1;
+}
+
+html.capacitor-ios.capacitor-native.dark .native-tabbar__indicator {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.12),
+    0 6px 18px rgb(0 0 0 / 0.28);
+}
+
+html.capacitor-ios.capacitor-native .native-tabbar__tab {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html.capacitor-ios.capacitor-native .dashboard-native-bottom-nav {
+  padding-bottom: max(0.35rem, env(safe-area-inset-bottom, 0px));
 }
 
 html.capacitor-ios.capacitor-native .native-tabbar .text-primary-600,
