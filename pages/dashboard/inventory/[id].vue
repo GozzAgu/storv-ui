@@ -30,9 +30,7 @@
 
     <!-- Mobile / tablet toolbar -->
     <div v-else class="flex flex-col gap-2 lg:hidden">
-      <div
-        class="flex items-start gap-1.5 rounded-sm bg-white px-2.5 py-2 shadow-none dark:!bg-dashboard-card"
-      >
+      <div class="dash-page-context-bar">
         <DashboardBackButton
           to="/dashboard/inventory"
           label="Back to inventory"
@@ -40,21 +38,17 @@
         />
         <div class="min-w-0 flex-1">
           <div class="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
-            <h2
-              class="truncate text-[13px] font-semibold leading-tight tracking-tight text-gray-900 dark:text-gray-50"
-            >
+            <h2 class="dash-page-context-bar__title truncate">
               {{ folder?.name || 'Category' }}
             </h2>
             <DuplicateFeatureUpsellBanner :loading="isLoadingFolder" />
           </div>
-          <p class="mt-0.5 text-[10px] leading-snug text-gray-500 dark:text-gray-400">
-            <span class="tabular-nums font-medium text-gray-700 dark:text-gray-300"
-              >{{ folder?.itemCount ?? 0 }} items</span
-            >
-            <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
+          <p class="dash-page-context-bar__meta">
+            <span class="tabular-nums">{{ folder?.itemCount ?? 0 }} items</span>
+            <span class="dash-page-context-bar__sep">·</span>
             <span class="tabular-nums">{{ formatCurrency(totalInventoryValue) }} total value</span>
             <template v-if="isSearchActive && sortedFilteredItems.length !== baseItems.length">
-              <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
+              <span class="dash-page-context-bar__sep">·</span>
               <span>{{ sortedFilteredItems.length }} shown</span>
             </template>
           </p>

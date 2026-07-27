@@ -25,36 +25,11 @@ export function apexTheme(isDark: boolean) {
 /** Compact currency labels for chart axes (avoids ₦300,000,000.00 clutter). */
 export function createChartCurrencyAxisFormatter(
   formatCurrency: (amount: number) => string,
-  currencyCode: string,
-  locale = 'en-US'
+  _currencyCode: string,
+  _locale = 'en-US'
 ) {
   return (val: number) => {
     if (!Number.isFinite(val)) return '-'
-    const abs = Math.abs(val)
-    if (abs === 0) return formatCurrency(0)
-    if (abs >= 1_000_000) {
-      try {
-        return new Intl.NumberFormat(locale, {
-          style: 'currency',
-          currency: currencyCode,
-          notation: 'compact',
-          maximumFractionDigits: 1,
-        }).format(val)
-      } catch {
-        return formatCurrency(val)
-      }
-    }
-    if (abs >= 10_000) {
-      try {
-        return new Intl.NumberFormat(locale, {
-          style: 'currency',
-          currency: currencyCode,
-          maximumFractionDigits: 0,
-        }).format(val)
-      } catch {
-        return formatCurrency(val)
-      }
-    }
     return formatCurrency(val)
   }
 }

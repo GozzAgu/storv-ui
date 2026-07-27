@@ -4,6 +4,7 @@ import { useAuthStore } from '~/stores/auth'
 import { useUser } from '~/composables/useUser'
 import { useFirestore } from '~/composables/useFirestore'
 import { doc, getDoc } from 'firebase/firestore'
+import { formatCompactCurrency } from '~/utils/format-compact-currency'
 
 export interface UserPreferences {
   currency: string // Currency code (e.g., 'USD', 'NGN', 'EUR')
@@ -63,8 +64,12 @@ export const regions = [
 const PREFERENCES_KEY = 'userPreferences'
 const BASE_CURRENCY_KEY = 'baseCurrency'
 
-/** From this magnitude up, use compact currency (e.g. ₦1B) so long amounts fit in UI. */
-const CURRENCY_COMPACT_THRESHOLD = 1_000_000_000
+/** From this magnitude up, use compact currency (e.g. ₦1m, ₦1.3b). */
+const CURRENCY_COMPACT_THRESHOLD = 1_000_000
+
+function currencySymbolForCode(currency: string): string {
+  return currencies.find((c) => c.code === currency)?.symbol ?? currency
+}
 
 function formatCurrencyIntl(amount: number, locale: string, currency: string): string {
   const full: Intl.NumberFormatOptions = {
@@ -76,17 +81,11 @@ function formatCurrencyIntl(amount: number, locale: string, currency: string): s
   if (!Number.isFinite(amount)) {
     return new Intl.NumberFormat(locale, full).format(amount)
   }
-  if (Math.abs(amount) < CURRENCY_COMPACT_THRESHOLD) {
-    return new Intl.NumberFormat(locale, full).format(amount)
+  if (Math.abs(amount) >= CURRENCY_COMPACT_THRESHOLD) {
+    const compact = formatCompactCurrency(amount, currencySymbolForCode(currency))
+    if (compact) return compact
   }
-  return new Intl.NumberFormat(locale, {
-    style: 'currency',
-    currency,
-    notation: 'compact',
-    compactDisplay: 'short',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  }).format(amount)
+  return new Intl.NumberFormat(locale, full).format(amount)
 }
 
 // Reactive preferences (initialized from localStorage or defaults)
