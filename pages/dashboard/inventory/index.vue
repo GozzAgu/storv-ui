@@ -534,10 +534,10 @@
     >
       <form
         id="folder-drawer-form"
-        class="divide-y divide-gray-100/90 dark:divide-gray-800/80"
+        :class="[drawerFillClass, 'divide-y divide-gray-100/90 dark:divide-gray-800/80']"
         @submit.prevent="handleSaveFolder"
       >
-        <section :class="drawerSectionClass">
+        <section :class="[drawerSectionClass, drawerFillFixedClass]">
           <p :class="sectionLabelClass">Basic info</p>
           <div class="mt-2 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
             <div>
@@ -579,7 +579,7 @@
           </div>
         </section>
 
-        <section :class="drawerSectionClass">
+        <section :class="[drawerSectionClass, drawerFillFixedClass]">
           <Checkbox
             v-model="folderForm.hasSerialNumbers"
             size="sm"
@@ -596,7 +596,7 @@
           </Checkbox>
         </section>
 
-        <section v-if="canViewProfitAndCost" :class="drawerSectionClass">
+        <section v-if="canViewProfitAndCost" :class="[drawerSectionClass, drawerFillFixedClass]">
           <Checkbox
             v-model="folderForm.trackProfit"
             size="sm"
@@ -614,7 +614,7 @@
           </Checkbox>
         </section>
 
-        <section v-if="canCreateInventoryFolders" :class="drawerSectionClass">
+        <section v-if="canCreateInventoryFolders" :class="[drawerSectionClass, drawerFillFixedClass]">
           <p :class="sectionLabelClass">
             Department access
             <span class="font-normal text-gray-400 dark:text-gray-500">(optional)</span>
@@ -638,7 +638,7 @@
               Add departments →
             </NuxtLink>
           </div>
-          <div v-else :class="[pickListClass, 'mt-2 max-h-36']">
+          <div v-else :class="[pickListClass, 'mt-2']">
             <ul :class="pickListScrollClass">
               <li v-for="dept in currentStoreDepartments" :key="dept.id">
                 <label :class="[pickRowClass, 'cursor-pointer gap-2.5 !py-2']">
@@ -664,8 +664,8 @@
           </div>
         </section>
 
-        <section :class="drawerSectionClass">
-          <div class="flex flex-wrap items-center justify-between gap-2">
+        <section :class="[drawerSectionClass, 'flex min-h-0 flex-1 flex-col']">
+          <div :class="[drawerFillFixedClass, 'flex flex-wrap items-center justify-between gap-2']">
             <div>
               <p :class="sectionLabelClass">Table template</p>
               <p :class="[drawerHintClass, 'mt-0.5']">Columns for products in this category.</p>
@@ -705,17 +705,17 @@
 
           <div
             v-if="selectedTemplate && editableFields.length > 0"
-            class="mt-2.5 overflow-hidden rounded-lg dark:border-white/[0.06]"
+            class="mt-2.5 flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg dark:border-white/[0.06]"
           >
             <div
-              class="hidden grid-cols-12 gap-2 border-b border-gray-100/90 bg-gray-50/80 px-2.5 py-1.5 text-[10px] font-medium uppercase tracking-wide text-gray-400 dark:border-gray-800/80 dark:bg-white/[0.03] dark:text-gray-500 sm:grid"
+              class="hidden shrink-0 grid-cols-12 gap-2 border-b border-gray-100/90 bg-gray-50/80 px-2.5 py-1.5 text-[10px] font-medium uppercase tracking-wide text-gray-400 dark:border-gray-800/80 dark:bg-white/[0.03] dark:text-gray-500 sm:grid"
             >
               <span class="col-span-5">Label</span>
               <span class="col-span-3">Type</span>
               <span class="col-span-4 text-right">Options</span>
             </div>
             <div
-              class="max-h-52 divide-y divide-gray-100/90 overflow-y-auto dark:divide-gray-800/80"
+              :class="[drawerFillScrollClass, 'divide-y divide-gray-100/90 dark:divide-gray-800/80']"
             >
               <div
                 v-for="(field, index) in editableFields"
@@ -858,8 +858,11 @@
       size="md"
       @update:model-value="(v: boolean) => { showDuplicateFolderModal = v }"
     >
-      <form @submit.prevent="handleConfirmDuplicateFolder" class="space-y-4">
-        <div class="flex items-center justify-between">
+      <form
+        @submit.prevent="handleConfirmDuplicateFolder"
+        :class="[drawerFillClass, 'gap-4']"
+      >
+        <div :class="[drawerFillFixedClass, 'flex items-center justify-between']">
           <label class="block text-xs font-medium text-gray-700 dark:text-gray-300"
             >Category name(s)</label
           >
@@ -874,7 +877,7 @@
             Add name
           </Button>
         </div>
-        <div class="space-y-2 max-h-48 overflow-y-auto">
+        <div :class="[drawerFillScrollClass, 'space-y-2']">
           <div
             v-if="duplicateFolderNames.length === 0"
             class="text-center py-4 text-sm text-gray-500 dark:text-gray-400 rounded-sm bg-gray-50/50 dark:bg-gray-800/30"
@@ -902,7 +905,10 @@
             </button>
           </div>
         </div>
-        <p v-if="duplicateFolderNamesError" class="text-xs text-red-600 dark:text-red-400">
+        <p
+          v-if="duplicateFolderNamesError"
+          :class="[drawerFillFixedClass, 'text-xs text-red-600 dark:text-red-400']"
+        >
           {{ duplicateFolderNamesError }}
         </p>
       </form>
@@ -946,8 +952,8 @@
       subtitle="Pick a source branch, then select categories to copy into the branch you're viewing."
       size="lg"
     >
-      <div class="flex min-h-0 flex-col gap-4 text-left">
-        <div>
+      <div :class="[drawerFillClass, 'gap-4 text-left']">
+        <div :class="drawerFillFixedClass">
           <p :class="sectionLabelClass">Source branch</p>
           <select
             v-model="copyTemplatesSourceStoreId"
@@ -959,8 +965,8 @@
             </option>
           </select>
         </div>
-        <div v-if="copyTemplatesSourceStoreId" class="space-y-2">
-          <div class="flex flex-wrap items-center justify-between gap-2">
+        <div v-if="copyTemplatesSourceStoreId" :class="[drawerFillStepClass, 'gap-2']">
+          <div :class="[drawerFillFixedClass, 'flex flex-wrap items-center justify-between gap-2']">
             <p :class="sectionLabelClass">Categories to copy</p>
             <div class="flex items-center gap-2">
               <span class="text-[10px] tabular-nums text-gray-500 dark:text-gray-400">
@@ -1021,7 +1027,7 @@
                 want to copy, or create categories first on {{ copyTemplatesSourceBranchLabel }}.
               </p>
             </div>
-            <ul v-else :class="[pickListScrollClass, '!max-h-[min(40vh,22rem)]']">
+            <ul v-else :class="pickListScrollClass">
               <li
                 v-for="f in copyTemplatesSourceFoldersList"
                 :key="f.id"
@@ -1043,7 +1049,7 @@
             </ul>
           </div>
         </div>
-        <fieldset class="space-y-2">
+        <fieldset :class="[drawerFillFixedClass, 'space-y-2']">
           <legend :class="sectionLabelClass">When a category name already exists here</legend>
           <label
             class="flex cursor-pointer items-start gap-2 text-sm text-gray-600 dark:text-gray-400"
@@ -1240,6 +1246,9 @@ const {
   drawerInputClass,
   drawerTextareaClass,
   drawerHintClass,
+  drawerFillClass,
+  drawerFillFixedClass,
+  drawerFillScrollClass,
   footerBtnOutlineClass,
   footerBtnPrimaryClass,
 } = useDashboardDrawerChrome()

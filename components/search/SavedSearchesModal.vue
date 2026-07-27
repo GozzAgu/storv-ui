@@ -8,8 +8,9 @@
         </div>
         <button
           @click="showCreateModal = true"
-          class="flex-shrink-0 px-2.5 py-1 text-xs font-medium text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-sm transition-colors"
+          class="flex-shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-sm transition-colors"
         >
+          <BookmarkSquareIcon class="h-3.5 w-3.5 shrink-0 opacity-80" :stroke-width="1.75" />
           Save current
         </button>
       </div>
@@ -35,7 +36,7 @@
         <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">
           Save your frequently used searches for quick access
         </p>
-        <Button variant="primary" size="sm" @click="showCreateModal = true">
+        <Button variant="primary" size="sm" :icon="BookmarkSquareIcon" @click="showCreateModal = true">
           Save Current Search
         </Button>
       </div>
@@ -145,6 +146,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import {
+  BookmarkSquareIcon,
   MagnifyingGlassIcon,
   ArrowRightIcon,
   TrashIcon,

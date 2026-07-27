@@ -27,6 +27,11 @@ export function useDashboardPageChrome() {
   const headerBtnClass =
     '!inline-flex !h-8 !min-h-8 !items-center !justify-center !rounded-full !px-3.5 !py-0 !text-xs shrink-0'
 
+  /** On native, always show action button labels beside icons (no icon-only sm breakpoint). */
+  const headerBtnLabelClass = computed(() =>
+    native.value ? 'inline' : 'hidden sm:inline'
+  )
+
   /** @deprecated Prefer `<DashboardBackButton />` for back navigation. */
   const iconBtnClass =
     'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100/90 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/[0.06] dark:hover:text-gray-100'
@@ -66,6 +71,7 @@ export function useDashboardPageChrome() {
     fieldClass,
     metaClass,
     headerBtnClass,
+    headerBtnLabelClass,
     iconBtnClass,
     eyebrowClass,
     titleClass,

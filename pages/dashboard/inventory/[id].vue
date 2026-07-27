@@ -131,7 +131,7 @@
             aria-label="Add product"
             @click="openAddItemModal"
           >
-            <span class="hidden sm:inline">Add</span>
+            <span :class="headerBtnLabelClass">Add</span>
           </Button>
           <select
             v-model="sortBy"
@@ -465,7 +465,7 @@
                   extra-class="!rounded-2xl max-sm:!px-2 max-sm:!py-1.5"
                   @click="openAddItemModal"
                 >
-                  <span class="hidden sm:inline">Add product</span>
+                  <span :class="headerBtnLabelClass">Add product</span>
                 </Button>
               </template>
             </DataTableToolbar>
@@ -1092,11 +1092,20 @@
       "
       content-padding="p-3"
     >
-      <form id="inventory-item-form" @submit.prevent="handleSaveItem" class="space-y-2">
+      <form
+        id="inventory-item-form"
+        @submit.prevent="handleSaveItem"
+        :class="
+          folder?.hasSerialNumbers && !editingItem ? [drawerFillClass, 'gap-2'] : 'space-y-2'
+        "
+      >
         <!-- Bulk Add Mode for Serial Numbers -->
-        <div v-if="folder?.hasSerialNumbers && !editingItem" class="space-y-2">
+        <div
+          v-if="folder?.hasSerialNumbers && !editingItem"
+          class="flex min-h-0 flex-1 flex-col gap-2"
+        >
           <div
-            class="p-2 bg-primary-50 dark:bg-primary-900/20 ring-1 ring-primary-200/50 dark:ring-primary-800/40 rounded-sm"
+            class="shrink-0 p-2 bg-primary-50 dark:bg-primary-900/20 ring-1 ring-primary-200/50 dark:ring-primary-800/40 rounded-sm"
           >
             <p class="text-[11px] text-blue-800 dark:text-blue-200">
               <strong>Bulk Add Mode:</strong> Enter details once, then add serial numbers below.
@@ -1105,7 +1114,7 @@
           </div>
 
           <!-- Common Fields (shared); side by side -->
-          <div class="space-y-2">
+          <div class="shrink-0 space-y-2">
             <h4 class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
               Product details (shared)
             </h4>
@@ -1218,13 +1227,14 @@
             </div>
           </div>
 
-          <!-- Serial Numbers -->
-          <div class="space-y-2">
-            <div class="flex items-center justify-between gap-2">
+          <!-- Serial Numbers — fills remaining drawer height -->
+          <div class="flex min-h-0 flex-1 flex-col gap-2">
+            <div class="flex shrink-0 items-center justify-between gap-2">
               <h4 class="text-xs font-semibold text-gray-700 dark:text-gray-300">Serial numbers</h4>
               <Button
                 variant="outline"
                 size="sm"
+                :icon="PlusCircleIcon"
                 @click="addSerialNumber"
                 class="!py-1.5 !text-xs"
               >
@@ -1233,11 +1243,11 @@
             </div>
             <div
               v-if="serialNumbers.length === 0"
-              class="text-center py-2 text-[11px] text-gray-500 dark:text-gray-400 border border-dashed border-gray-300 rounded-sm"
+              class="flex min-h-0 flex-1 items-center justify-center rounded-sm border border-dashed border-gray-300 py-6 text-center text-[11px] text-gray-500 dark:border-gray-600 dark:text-gray-400"
             >
               No serial numbers added. Click "Add Serial Number" to start.
             </div>
-            <div v-else class="space-y-1.5 max-h-52 overflow-y-auto">
+            <div v-else :class="[drawerFillScrollClass, 'space-y-1.5 pr-0.5']">
               <div
                 v-for="(serial, index) in serialNumbers"
                 :key="index"
@@ -1511,8 +1521,8 @@
       size="sm"
       @update:model-value="(v: boolean) => { showDuplicateModal = v }"
     >
-      <form @submit.prevent="handleConfirmDuplicate" class="space-y-4">
-        <div class="space-y-2">
+      <form @submit.prevent="handleConfirmDuplicate" :class="[drawerFillClass, 'gap-4']">
+        <div :class="drawerFillFixedClass">
           <div class="flex items-center justify-between">
             <label class="text-xs font-medium text-gray-700 dark:text-gray-300"
               >New serial numbers</label
@@ -1521,19 +1531,24 @@
               variant="outline"
               size="sm"
               type="button"
+              :icon="PlusCircleIcon"
               @click="addDuplicateSerialNumber"
               class="!rounded-2xl"
             >
               Add
             </Button>
           </div>
-          <div
-            v-if="duplicateSerialNumbers.length === 0"
-            class="text-center py-3 text-xs text-gray-500 dark:text-gray-400 border border-dashed border-gray-300 rounded-sm"
-          >
-            No serial numbers. Click "Add" to enter one or more.
-          </div>
-          <div v-else class="space-y-2 max-h-48 overflow-y-auto">
+        </div>
+        <div
+          v-if="duplicateSerialNumbers.length === 0"
+          :class="[
+            drawerFillFixedClass,
+            'text-center py-3 text-xs text-gray-500 dark:text-gray-400 border border-dashed border-gray-300 rounded-sm',
+          ]"
+        >
+          No serial numbers. Click "Add" to enter one or more.
+        </div>
+        <div v-else :class="[drawerFillScrollClass, 'space-y-2']">
             <div
               v-for="(serial, index) in duplicateSerialNumbers"
               :key="index"
@@ -1554,8 +1569,7 @@
               </button>
             </div>
           </div>
-        </div>
-        <div class="flex justify-end gap-2">
+        <div :class="[drawerFillFixedClass, 'flex justify-end gap-2']">
           <Button
             variant="outline"
             size="sm"
@@ -1712,6 +1726,7 @@
 <script setup lang="ts">
 import { ref, computed, reactive, onMounted, onBeforeUnmount, onActivated, watch, nextTick } from 'vue'
 import {
+  PlusCircleIcon,
   CubeIcon,
   FolderIcon,
   ExclamationTriangleIcon,
@@ -1754,6 +1769,7 @@ import { usePermissions } from '~/composables/usePermissions'
 import { useSubscriptionFeatures } from '~/composables/useSubscriptionFeatures'
 import { useAppToast } from '~/composables/useAppToast'
 import { usePreferences } from '~/composables/usePreferences'
+import { useDashboardDrawerChrome } from '~/composables/useDashboardDrawerChrome'
 import { getVisibleMenuAnchorElement } from '~/utils/menuAnchor'
 import { computeFolderTotalValue } from '~/utils/inventory-folder-availability'
 import { getInventoryItemDisplayName } from '~/composables/useInventoryItemDisplay'
@@ -1824,11 +1840,12 @@ const canDuplicateByPlan = computed(() => {
   return sub === 'storvv_medium' || sub === 'storvv_enterprise'
 })
 const { formatCurrency, preferences } = usePreferences()
+const { drawerFillClass, drawerFillFixedClass, drawerFillScrollClass } = useDashboardDrawerChrome()
 const currencySymbol = computed(() => preferences.value?.currencySymbol || '$')
 const folder = ref<InventoryFolder | null>(null)
 const isLoadingFolder = ref(true)
 const isLoadingItems = ref(false)
-const { headerBtnClass } = useDashboardPageChrome()
+const { headerBtnClass, headerBtnLabelClass } = useDashboardPageChrome()
 
 function applyFolderSnapshot(next: InventoryFolder) {
   folder.value = {

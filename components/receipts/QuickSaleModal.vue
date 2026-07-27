@@ -243,9 +243,10 @@
             </div>
             <button
               type="button"
-              class="w-full px-3 py-1.5 text-xs text-primary-500 dark:text-primary-400 border-0 dark:border-primary-600 rounded-sm"
+              class="inline-flex w-full items-center justify-center gap-1.5 px-3 py-1.5 text-xs text-primary-500 dark:text-primary-400 border-0 dark:border-primary-600 rounded-sm"
               @click="addSplitPayment"
             >
+              <PlusCircleIcon class="h-3.5 w-3.5 shrink-0 opacity-80" :stroke-width="1.75" />
               Add payment line
             </button>
             <div
@@ -332,6 +333,7 @@ import {
   ShoppingBagIcon,
   MinusIcon,
   PlusIcon,
+  PlusCircleIcon,
   TrashIcon,
   ChevronDownIcon,
 } from '~/utils/app-icons'

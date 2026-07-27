@@ -9,6 +9,11 @@ import {
 export function useDashboardDrawerChrome() {
   const searchInputClass = `h-9 w-full pl-9 pr-3 ${APP_FIELD_ON_WHITE_CLASS} dark:!bg-dashboard-card`
 
+  const drawerFillClass = 'dash-drawer-fill'
+  const drawerFillFixedClass = 'dash-drawer-fill__fixed'
+  const drawerFillScrollClass = 'dash-drawer-fill__scroll'
+  const drawerFillStepClass = 'dash-drawer-fill-step'
+
   const pickListClass = 'dash-drawer-pick-list'
   const pickListScrollClass = 'dash-drawer-pick-scroll'
   const pickRowClass = 'dash-drawer-pick-row'
@@ -33,6 +38,10 @@ export function useDashboardDrawerChrome() {
 
   return {
     searchInputClass,
+    drawerFillClass,
+    drawerFillFixedClass,
+    drawerFillScrollClass,
+    drawerFillStepClass,
     pickListClass,
     pickListScrollClass,
     pickRowClass,

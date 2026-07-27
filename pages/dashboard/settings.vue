@@ -177,11 +177,12 @@
             variant="outline"
             size="sm"
             :class="headerBtnClass"
+            :icon="BuildingStorefrontIcon"
             :title="canAddStore ? 'Create branch' : 'Upgrade to add more stores'"
             :disabled="!canAddStore"
             @click="openCreateStoreModal"
           >
-            <span class="hidden sm:inline">Add branch</span>
+            <span :class="headerBtnLabelClass">Add branch</span>
           </Button>
         </template>
 
@@ -982,6 +983,7 @@ const {
   pageClass,
   pageStackClass,
   headerBtnClass,
+  headerBtnLabelClass,
   labelClass,
   inputClass,
   editLinkClass,

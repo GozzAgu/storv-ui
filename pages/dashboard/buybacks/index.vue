@@ -18,6 +18,7 @@
           v-if="canAccess"
           variant="primary"
           size="sm"
+          :icon="ArrowUturnLeftIcon"
           :extra-class="headerBtnClass"
           @click="showCreateModal = true"
         >
@@ -79,7 +80,7 @@
               'Use swap-in on a receipt when trade-in credit applies to a sale',
             ]"
           >
-            <Button variant="primary" size="sm" @click="showCreateModal = true">
+            <Button variant="primary" size="sm" :icon="ArrowUturnLeftIcon" @click="showCreateModal = true">
               Record buyback
             </Button>
           </DashboardTableEmptyState>
@@ -149,6 +150,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import {
+  ArrowUturnLeftIcon,
   BuildingStorefrontIcon,
   InboxArrowDownIcon,
 } from '~/utils/app-icons'

@@ -30,6 +30,7 @@
         <Button
           variant="primary"
           size="sm"
+          :icon="CreditCardIcon"
           :extra-class="headerBtnClass"
           :disabled="!payout.connected"
           :title="payout.connected ? '' : 'Connect a payout account first'"

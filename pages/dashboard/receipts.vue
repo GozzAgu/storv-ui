@@ -234,11 +234,12 @@
                           v-if="canCreate"
                           variant="primary"
                           size="sm"
+                          :icon="ReceiptPercentIcon"
                           aria-label="New receipt"
                           extra-class="!rounded-2xl ml-auto shrink-0 max-sm:!px-2 max-sm:!py-1.5"
                           @click="openCreateReceiptModal"
                         >
-                          <span class="hidden sm:inline">New receipt</span>
+                          <span :class="headerBtnLabelClass">New receipt</span>
                         </Button>
                       </div>
                     </div>
@@ -296,11 +297,12 @@
                         v-if="canCreate"
                         variant="primary"
                         size="sm"
+                        :icon="ReceiptPercentIcon"
                         aria-label="New receipt"
                         :extra-class="headerBtnClass"
                         @click="openCreateReceiptModal"
                       >
-                        <span class="hidden sm:inline">New receipt</span>
+                        <span :class="headerBtnLabelClass">New receipt</span>
                       </Button>
                     </template>
                   </DataTableToolbar>
@@ -1897,7 +1899,7 @@ watch(activeTab, (newTab) => {
 
 // Initialize loading state synchronously on client
 const isInitialLoading = ref(true)
-const { headerBtnClass } = useDashboardPageChrome()
+const { headerBtnClass, headerBtnLabelClass } = useDashboardPageChrome()
 
 const searchQuery = ref('')
 const statusFilter = ref('all')

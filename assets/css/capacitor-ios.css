@@ -111,7 +111,6 @@ html.capacitor-ios.capacitor-native .text-\[1\.35rem\],
 html.capacitor-ios.capacitor-native .dash-card__title,
 html.capacitor-ios.capacitor-native .dash-stat-card__value,
 html.capacitor-ios.capacitor-native button.text-sm,
-html.capacitor-ios.capacitor-native .btn-primary,
 html.capacitor-ios.capacitor-native .native-more-sheet__title {
   font-size: var(--cap-ios-title) !important;
   font-weight: 600;
@@ -555,6 +554,53 @@ html.capacitor-ios.capacitor-native .btn-danger {
 html.capacitor-ios.capacitor-native .btn-primary:active,
 html.capacitor-ios.capacitor-native .btn-outline:active {
   transform: scale(0.98);
+}
+
+/* Dashboard action buttons — clear outline + contextual icons */
+html.capacitor-ios.capacitor-native
+  [data-dashboard-main]
+  button.group.relative.inline-flex.items-center.justify-center.overflow-hidden.border-0.font-semibold.tracking-tight {
+  font-size: var(--cap-ios-body) !important;
+  line-height: var(--cap-ios-leading) !important;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  gap: 0.375rem;
+}
+
+html.capacitor-ios.capacitor-native
+  [data-dashboard-main]
+  button.group.relative.inline-flex.items-center.justify-center
+  > span.relative.z-10
+  svg {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  opacity: 0.88;
+}
+
+html.capacitor-ios.capacitor-native [data-dashboard-main] .dash-page-header--unified .hidden.sm\:inline,
+html.capacitor-ios.capacitor-native [data-dashboard-main] .dash-table-toolbar .hidden.sm\:inline,
+html.capacitor-ios.capacitor-native [data-dashboard-main] .dash-page-header__toolbar .hidden.sm\:inline,
+html.capacitor-ios.capacitor-native [data-dashboard-main] .lg\:hidden .hidden.sm\:inline {
+  display: inline !important;
+}
+
+html.capacitor-ios.capacitor-native .dash-export-btn {
+  gap: 0.375rem;
+}
+
+html.capacitor-ios.capacitor-native .dash-export-btn svg {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+html.capacitor-ios.capacitor-native [data-dashboard-main] button.inline-flex.items-center.gap-1\.5 svg {
+  width: 0.875rem;
+  height: 0.875rem;
+  flex-shrink: 0;
+  opacity: 0.85;
 }
 
 html.capacitor-ios.capacitor-native .receipt-line-items-panel,

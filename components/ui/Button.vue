@@ -23,9 +23,14 @@
     />
     <span class="relative z-10 inline-flex items-center gap-1.5 text-inherit sm:gap-2">
       <component v-if="loading" :is="loadingIcon" class="h-5 w-5 shrink-0 animate-spin" />
-      <component v-else-if="icon && !iconRight" :is="icon" :class="iconSize" />
+      <component
+        v-else-if="icon && !iconRight"
+        :is="icon"
+        :class="iconSize"
+        :stroke-width="1.75"
+      />
       <slot />
-      <component v-if="icon && iconRight" :is="icon" :class="iconSize" />
+      <component v-if="icon && iconRight" :is="icon" :class="iconSize" :stroke-width="1.75" />
     </span>
   </button>
 </template>

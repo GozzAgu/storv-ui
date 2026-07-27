@@ -7,13 +7,13 @@
     @update:model-value="(value: boolean) => emit('update:modelValue', value)"
   >
     <template #default>
-      <div class="flex min-h-0 flex-1 flex-col gap-4">
+      <div :class="[drawerFillClass, 'gap-4']">
         <DashboardDrawerStepper :steps="steps" :current-step="currentStep" />
 
         <SellScreenNoteBanner v-if="currentStep >= 1" />
 
         <!-- Step 1: Select category -->
-        <div v-if="currentStep === 0" class="flex min-h-0 flex-1 flex-col gap-3">
+        <div v-if="currentStep === 0" :class="[drawerFillStepClass, 'gap-3']">
           <p :class="sectionLabelClass">Inventory category</p>
           <DashboardDrawerSearch v-model="folderSearchQuery" placeholder="Search categories…" />
 
@@ -71,7 +71,7 @@
         </div>
 
         <!-- Step 2: Select Items -->
-        <div v-if="currentStep === 1" class="flex min-h-0 flex-1 flex-col gap-3">
+        <div v-if="currentStep === 1" :class="[drawerFillStepClass, 'gap-3']">
           <div class="flex shrink-0 items-center justify-between gap-2">
             <p :class="sectionLabelClass">Items · {{ selectedFolder?.name }}</p>
             <button
@@ -389,8 +389,9 @@
                 <button
                   @click="addSplitPayment"
                   type="button"
-                  class="w-full px-3 py-1.5 text-xs text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-smborder-0-300 dark:border-primary-600 transition-colors"
+                  class="inline-flex w-full items-center justify-center gap-1.5 px-3 py-1.5 text-xs text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-smborder-0-300 dark:border-primary-600 transition-colors"
                 >
+                  <PlusCircleIcon class="h-3.5 w-3.5 shrink-0 opacity-80" :stroke-width="1.75" />
                   Add payment method
                 </button>
                 <div
@@ -768,6 +769,7 @@ import {
   MagnifyingGlassIcon,
   XMarkIcon,
   EnvelopeIcon,
+  PlusCircleIcon,
 } from '~/utils/app-icons'
 import Modal from '~/components/ui/Modal.vue'
 import SidePanel from '~/components/ui/SidePanel.vue'
@@ -823,6 +825,8 @@ const {
   pickRowTitleClass,
   pickRowMetaClass,
   emptyStateClass,
+  drawerFillClass,
+  drawerFillStepClass,
   footerBtnOutlineClass,
   footerBtnPrimaryClass,
 } = useDashboardDrawerChrome()

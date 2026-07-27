@@ -35,6 +35,7 @@
           v-if="canManageDepartments"
           variant="primary"
           size="sm"
+          :icon="BuildingOfficeIcon"
           :disabled="!canAddDepartmentForStore"
           :title="canAddDepartmentForStore ? 'Create new department' : departmentLimitMessage"
           :extra-class="headerBtnClass"

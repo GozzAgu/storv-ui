@@ -65,6 +65,7 @@
                 v-if="canCreateNewStaff"
                 variant="primary"
                 size="sm"
+                :icon="UserIcon"
                 extra-class="!rounded-2xl"
                 @click="openCreateStaffModal"
               >
@@ -143,6 +144,7 @@
                 v-if="canCreateNewStaff"
                 variant="primary"
                 size="sm"
+                :icon="UserIcon"
                 :extra-class="headerBtnClass"
                 @click="openCreateStaffModal"
               >
@@ -244,6 +246,7 @@
               v-if="canCreateNewStaff"
               variant="primary"
               size="sm"
+              :icon="UserIcon"
               extra-class="!rounded-2xl"
               @click="openCreateStaffModal"
             >
@@ -712,6 +715,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import {
+  UserIcon,
   BuildingOfficeIcon,
   UsersIcon,
   ArrowPathIcon,
