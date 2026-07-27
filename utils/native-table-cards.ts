@@ -7,6 +7,15 @@ export function isCapacitorIosDocument(): boolean {
   return document.documentElement.classList.contains('capacitor-ios')
 }
 
+export function shouldUseMobileTableCards(): boolean {
+  if (import.meta.server || typeof window === 'undefined') return false
+  if (isCapacitorIosDocument()) return true
+  return window.matchMedia('(max-width: 639px)').matches
+}
+
+const MOBILE_TABLE_CHEVRON =
+  '<svg class="dash-mobile-table__chevron" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd"/></svg>'
+
 export function getNativeTableLayoutMode(key: string): NativeTableLayoutMode {
   if (import.meta.server) return 'cards'
   try {
@@ -58,6 +67,12 @@ export function annotateDashboardTableForCards(table: HTMLTableElement): void {
     }
 
     tr.classList.add('dash-native-table__card-row')
+    const hasLeadingCheckbox =
+      cells.length > 1 &&
+      Boolean(cells[0]?.querySelector('input[type="checkbox"]')) &&
+      !cells[0]?.classList.contains('dashboard-table__col-actions')
+    const primaryIndex = hasLeadingCheckbox ? 1 : 0
+
     cells.forEach((td, index) => {
       td.classList.remove(
         'dash-native-table__cell--full',
@@ -80,10 +95,11 @@ export function annotateDashboardTableForCards(table: HTMLTableElement): void {
       const labelLower = label.toLowerCase()
       td.dataset.nativeLabel = label
 
-      if (index === 0) {
+      if (index === primaryIndex) {
         td.dataset.nativeLabel = ''
+        td.dataset.nativeSummaryLabel = label
         td.classList.add('dash-native-table__cell--primary')
-      } else if (labelLower === 'when' || labelLower === 'date') {
+      } else if (labelLower === 'when' || labelLower === 'date' || labelLower === 'updated') {
         td.dataset.nativeLabel = ''
         td.classList.add('dash-native-table__cell--when')
       } else if (labelLower === 'item' || labelLower === 'details') {
@@ -104,6 +120,56 @@ export function annotateDashboardTableForCards(table: HTMLTableElement): void {
   })
 }
 
+export function setupMobileTableAccordion(table: HTMLTableElement): void {
+  if (!shouldUseMobileTableCards()) return
+
+  table.querySelectorAll('tbody tr.dash-native-table__card-row').forEach((row) => {
+    const tr = row as HTMLTableRowElement
+    if (tr.classList.contains('dash-mobile-table__accordion-row')) return
+
+    tr.classList.add('dash-mobile-table__accordion-row')
+
+    const primaryCell = tr.querySelector(
+      'td.dash-native-table__cell--primary'
+    ) as HTMLTableCellElement | null
+    if (!primaryCell) return
+
+    let toggle = primaryCell.querySelector(
+      '.dash-mobile-table__toggle'
+    ) as HTMLButtonElement | null
+    if (!toggle) {
+      toggle = document.createElement('button')
+      toggle.type = 'button'
+      toggle.className = 'dash-mobile-table__toggle'
+      toggle.setAttribute('aria-expanded', 'false')
+      toggle.setAttribute('aria-label', 'Expand row details')
+      toggle.innerHTML = MOBILE_TABLE_CHEVRON
+      primaryCell.insertBefore(toggle, primaryCell.firstChild)
+    }
+
+    const setExpanded = (expanded: boolean) => {
+      tr.classList.toggle('dash-mobile-table--expanded', expanded)
+      toggle!.setAttribute('aria-expanded', String(expanded))
+      toggle!.setAttribute(
+        'aria-label',
+        expanded ? 'Collapse row details' : 'Expand row details'
+      )
+    }
+
+    toggle.addEventListener('click', (event) => {
+      event.stopPropagation()
+      setExpanded(!tr.classList.contains('dash-mobile-table--expanded'))
+    })
+
+    tr.addEventListener('click', (event) => {
+      const target = event.target as Element
+      if (target.closest('button, a, input, label, [data-no-accordion-toggle]')) return
+      if (tr.classList.contains('dash-mobile-table--expanded')) return
+      setExpanded(true)
+    })
+  })
+}
+
 export function findNativeTableShell(table: HTMLTableElement): HTMLElement | null {
   return table.closest('.data-table-shell, .dash-table-shell, .activity-log-shell')
 }
@@ -118,6 +184,7 @@ export function applyNativeTableLayout(
   const table = shell.querySelector('table.dashboard-table')
   if (table instanceof HTMLTableElement && mode === 'cards') {
     annotateDashboardTableForCards(table)
+    setupMobileTableAccordion(table)
   }
 }
 
@@ -144,7 +211,11 @@ export function ensureNativeTableShellKey(
 
 export function syncNativeTableShellLayout(shell: HTMLElement, key: string): NativeTableLayoutMode {
   shell.setAttribute('data-native-table-key', key)
-  const mode = getNativeTableLayoutMode(key)
+  const mode = shouldUseMobileTableCards()
+    ? isCapacitorIosDocument()
+      ? getNativeTableLayoutMode(key)
+      : 'cards'
+    : 'table'
   applyNativeTableLayout(shell, mode)
   return mode
 }

@@ -18,7 +18,7 @@ html:has([data-auth-shell]) #__nuxt > * {
   --auth-bg: #050508;
   --auth-bg-soft: #0a0c14;
   --auth-ink: #f8fafc;
-  --auth-muted: #94a3b8;
+  --auth-muted: #cbd5e1;
   --auth-border: rgb(255 255 255 / 0.08);
   --auth-glass: rgb(255 255 255 / 0.04);
   --auth-glass-strong: rgb(255 255 255 / 0.07);
@@ -42,7 +42,7 @@ html:not(.dark) [data-auth-shell] {
   --auth-bg: #f4f6fb;
   --auth-bg-soft: #ffffff;
   --auth-ink: #0f172a;
-  --auth-muted: #64748b;
+  --auth-muted: #475569;
   --auth-border: rgb(15 23 42 / 0.08);
   --auth-glass: rgb(255 255 255 / 0.82);
   --auth-glass-strong: #ffffff;

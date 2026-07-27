@@ -125,11 +125,11 @@ html.dark .dash-page-metrics {
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgb(100 116 139 / 0.95);
+  color: var(--dash-muted, #475569);
 }
 
 html.dark .dash-page-metric__label {
-  color: rgb(148 163 184 / 0.85);
+  color: var(--dash-muted, #cbd5e1);
 }
 
 .dash-page-metric__value {
@@ -528,41 +528,81 @@ html.dark .dash-profile-role-badge {
 }
 
 .dash-profile-stats {
-  display: flex;
+  display: grid;
   width: 100%;
-  align-items: stretch;
-  overflow: hidden;
-  border-top: 1px solid var(--dash-border, rgb(15 23 42 / 0.08));
-  background: rgb(255 255 255 / 0.02);
-}
-
-html:not(.dark) .dash-profile-stats {
-  background: rgb(20 63 141 / 0.03);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-top: 1.25rem;
 }
 
 .dash-profile-stats__item {
-  flex: 1;
-  padding: 0.75rem 0.5rem;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.625rem 0.375rem;
   text-align: center;
+  border: 1px solid var(--dash-card-border, rgb(15 23 42 / 0.08));
+  border-radius: 0.875rem;
+  background: var(--dash-card-surface, #ffffff);
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+html.dark .dash-profile-stats__item {
+  background: rgb(255 255 255 / 0.02);
+  border-color: rgb(255 255 255 / 0.08);
+}
+
+.dash-profile-stats__item:hover {
+  border-color: rgb(154 181 227 / 0.22);
 }
 
 .dash-profile-stats__value {
   margin: 0;
   font-size: 0.875rem;
   font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
-  color: var(--dash-ink, #0f172a);
+  color: var(--dash-card-ink, #0f172a);
+}
+
+html.dark .dash-profile-stats__value {
+  color: rgb(248 250 252);
 }
 
 .dash-profile-stats__label {
-  margin: 0.125rem 0 0;
-  font-size: 0.625rem;
-  color: var(--dash-muted, #64748b);
+  margin: 0;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dash-card-muted, #475569);
+}
+
+@media (min-width: 640px) {
+  .dash-profile-stats {
+    gap: 0.625rem;
+  }
+
+  .dash-profile-stats__item {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .dash-profile-stats__label {
+    font-size: 0.625rem;
+  }
+
+  .dash-profile-stats__value {
+    font-size: 1rem;
+  }
 }
 
 .dash-profile-stats__divider {
-  width: 1px;
-  background: var(--dash-border, rgb(15 23 42 / 0.08));
+  display: none;
 }
 
 /* Branch cards (settings) */

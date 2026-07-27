@@ -1377,6 +1377,12 @@ const selectedDepartmentId = ref(getInitialDepartment())
 const getInitialFoldersView = (): 'grid' | 'table' => {
   if (import.meta.client) {
     try {
+      if (
+        document.documentElement.classList.contains('capacitor-ios') ||
+        window.matchMedia('(max-width: 639px)').matches
+      ) {
+        return 'table'
+      }
       const v = localStorage.getItem('inventory-folders-view')
       if (v === 'table' || v === 'grid') return v
     } catch {

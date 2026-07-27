@@ -80,12 +80,12 @@ html.dark main[data-dashboard-main] .ldg-card {
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgb(100 116 139 / 0.9);
+  color: var(--dash-muted, #475569);
 }
 
 html.dark .dash-eyebrow,
 html.dark .ldg-eyebrow {
-  color: rgb(148 163 184 / 0.85);
+  color: var(--dash-muted, #cbd5e1);
 }
 
 .dash-page-title,

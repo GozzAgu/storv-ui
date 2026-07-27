@@ -783,7 +783,7 @@
 
     <DashboardAssistant v-if="assistantShellReady" />
 
-    <DashboardNativeTableLayoutSync v-if="isNativeApp" />
+    <DashboardNativeTableLayoutSync />
 
     <!-- Native app bottom navigation (CSS fallback via html.capacitor-native) -->
     <DashboardNativeBottomNav

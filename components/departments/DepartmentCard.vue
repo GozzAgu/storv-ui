@@ -74,16 +74,16 @@
             Inactive
           </p>
         </div>
-        <p
-          v-if="dateLabel"
-          class="dash-grid-card__value"
-        >
-          {{ dateLabel }}
-        </p>
-        <div v-if="hasOverlays" class="shrink-0 self-center" @click.stop>
+        <div v-if="hasOverlays" class="ml-auto shrink-0 self-center" @click.stop>
           <slot name="checkbox" />
         </div>
       </div>
+      <p
+        v-if="dateLabel"
+        class="dash-grid-card__footer-date mt-1.5 text-right text-[10px] font-medium tabular-nums text-gray-500 dark:text-gray-400"
+      >
+        Updated {{ dateLabel }}
+      </p>
     </div>
   </article>
 </template>

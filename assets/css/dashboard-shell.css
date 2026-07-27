@@ -2,7 +2,7 @@
 
 .dashboard-layout-root {
   --dash-ink: #f8fafc;
-  --dash-muted: #94a3b8;
+  --dash-muted: #cbd5e1;
   --dash-border: rgb(255 255 255 / 0.08);
   --dash-surface: #12141c;
   --dash-canvas: #07080c;
@@ -12,7 +12,7 @@
 
 html:not(.dark) .dashboard-layout-root {
   --dash-ink: #0f172a;
-  --dash-muted: #64748b;
+  --dash-muted: #475569;
   --dash-border: rgb(15 23 42 / 0.08);
   --dash-surface: #ffffff;
   --dash-canvas: #f4f6fb;
@@ -1488,4 +1488,33 @@ html:not(.dark) .dash-profile-sign-out:hover {
   height: 1rem;
   width: 1rem;
   flex-shrink: 0;
+}
+
+/* Stronger secondary text in dashboard (web + native inherit layout root) */
+html:not(.dark) .dashboard-layout-root .text-gray-400 {
+  color: rgb(100 116 139);
+}
+
+html:not(.dark) .dashboard-layout-root .text-gray-500 {
+  color: rgb(71 85 105);
+}
+
+html.dark .dashboard-layout-root .text-gray-400 {
+  color: rgb(203 213 225);
+}
+
+html.dark .dashboard-layout-root .text-gray-500 {
+  color: rgb(148 163 184);
+}
+
+html:not(.dark) .dashboard-layout-root input::placeholder,
+html:not(.dark) .dashboard-layout-root textarea::placeholder {
+  color: rgb(100 116 139);
+  opacity: 1;
+}
+
+html.dark .dashboard-layout-root input::placeholder,
+html.dark .dashboard-layout-root textarea::placeholder {
+  color: rgb(148 163 184);
+  opacity: 1;
 }

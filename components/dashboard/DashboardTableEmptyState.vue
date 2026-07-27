@@ -63,11 +63,11 @@ const props = withDefaults(
 
 const rootClass = computed(() => {
   const classes = [
-    'dash-table-empty-state flex w-full min-w-0 flex-col items-center justify-center px-4 py-12 text-center sm:px-6 sm:py-16',
+    'dash-table-empty-state flex w-full min-w-0 flex-col items-center justify-center px-4 py-8 text-center sm:px-6 sm:py-10',
     props.extraClass,
   ]
   if (props.fill) {
-    classes.push('dash-table-empty-state--fill')
+    classes.push('dash-table-empty-state--fill min-h-0')
   }
   return classes
 })

@@ -1,5 +1,8 @@
-import { describe, expect, it } from 'vitest'
-import { annotateDashboardTableForCards } from '~/utils/native-table-cards'
+import { describe, expect, it, vi } from 'vitest'
+import {
+  annotateDashboardTableForCards,
+  setupMobileTableAccordion,
+} from '~/utils/native-table-cards'
 
 describe('annotateDashboardTableForCards', () => {
   it('labels cells from thead and marks detail rows', () => {
@@ -40,5 +43,43 @@ describe('annotateDashboardTableForCards', () => {
 
     const detailRow = table.querySelector('tr.dash-native-table__detail-row')
     expect(detailRow).toBeTruthy()
+  })
+})
+
+describe('setupMobileTableAccordion', () => {
+  it('adds toggle buttons and accordion classes on mobile', () => {
+    vi.stubGlobal('matchMedia', (query: string) => ({
+      matches: query.includes('639px'),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }))
+
+    document.body.innerHTML = `
+      <table class="dashboard-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="dashboard-table__primary">Widget</span></td>
+            <td class="dashboard-table__col-status">Active</td>
+          </tr>
+        </tbody>
+      </table>
+    `
+
+    const table = document.querySelector('table') as HTMLTableElement
+    annotateDashboardTableForCards(table)
+    setupMobileTableAccordion(table)
+
+    const row = table.querySelector('tr.dash-mobile-table__accordion-row')
+    expect(row).toBeTruthy()
+    expect(row?.querySelector('.dash-mobile-table__toggle')).toBeTruthy()
+    expect(row?.classList.contains('dash-mobile-table--expanded')).toBe(false)
+
+    vi.unstubAllGlobals()
   })
 })

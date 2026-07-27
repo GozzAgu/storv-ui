@@ -379,3 +379,57 @@ html.capacitor-native [role='dialog'] .text-sm,
 html.capacitor-native [data-dashboard-teleport] .text-sm {
   font-size: var(--cap-text-sm) !important;
 }
+
+/* ── Readability: lift faint Tailwind grays on native ── */
+html.capacitor-native [data-dashboard-main] .text-gray-400,
+html.capacitor-native .dashboard-native-main .text-gray-400,
+html.capacitor-native .dashboard-sidebar .text-gray-400,
+html.capacitor-native .dashboard-native-bottom-nav .text-gray-400,
+html.capacitor-native [data-auth-shell] .text-gray-400,
+html.capacitor-native [role='dialog'] .text-gray-400,
+html.capacitor-native [data-dashboard-teleport] .text-gray-400 {
+  color: rgb(100 116 139) !important;
+}
+
+html.capacitor-native [data-dashboard-main] .text-gray-500,
+html.capacitor-native .dashboard-native-main .text-gray-500,
+html.capacitor-native .dashboard-sidebar .text-gray-500,
+html.capacitor-native .dashboard-native-bottom-nav .text-gray-500,
+html.capacitor-native [data-auth-shell] .text-gray-500,
+html.capacitor-native [role='dialog'] .text-gray-500,
+html.capacitor-native [data-dashboard-teleport] .text-gray-500 {
+  color: rgb(71 85 105) !important;
+}
+
+html.capacitor-native.dark [data-dashboard-main] .text-gray-400,
+html.capacitor-native.dark .dashboard-native-main .text-gray-400,
+html.capacitor-native.dark .dashboard-sidebar .text-gray-400,
+html.capacitor-native.dark .dashboard-native-bottom-nav .text-gray-400,
+html.capacitor-native.dark [data-auth-shell] .text-gray-400,
+html.capacitor-native.dark [role='dialog'] .text-gray-400,
+html.capacitor-native.dark [data-dashboard-teleport] .text-gray-400 {
+  color: rgb(203 213 225) !important;
+}
+
+html.capacitor-native.dark [data-dashboard-main] .text-gray-500,
+html.capacitor-native.dark .dashboard-native-main .text-gray-500,
+html.capacitor-native.dark .dashboard-sidebar .text-gray-500,
+html.capacitor-native.dark .dashboard-native-bottom-nav .text-gray-500,
+html.capacitor-native.dark [data-auth-shell] .text-gray-500,
+html.capacitor-native.dark [role='dialog'] .text-gray-500,
+html.capacitor-native.dark [data-dashboard-teleport] .text-gray-500 {
+  color: rgb(148 163 184) !important;
+}
+
+html.capacitor-native
+  input:not([type='checkbox']):not([type='radio'])::placeholder,
+html.capacitor-native textarea::placeholder {
+  color: rgb(100 116 139) !important;
+  opacity: 1 !important;
+}
+
+html.capacitor-native.dark input:not([type='checkbox']):not([type='radio'])::placeholder,
+html.capacitor-native.dark textarea::placeholder {
+  color: rgb(148 163 184) !important;
+  opacity: 1 !important;
+}

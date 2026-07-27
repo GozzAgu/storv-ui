@@ -37,8 +37,8 @@ html.capacitor-ios.capacitor-native {
 
   font-family: var(--cap-ios-font);
   letter-spacing: var(--cap-ios-tracking);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
   text-rendering: optimizeLegibility;
 
   background:
@@ -446,6 +446,24 @@ html.capacitor-ios.capacitor-native .dash-stat-card__subtext {
   font-size: var(--cap-ios-caption) !important;
 }
 
+html.capacitor-ios.capacitor-native .dash-profile-stats__item {
+  border-radius: var(--cap-ios-radius);
+  border-color: var(--dash-card-border);
+  background: var(--cap-ios-glass);
+  -webkit-backdrop-filter: blur(16px) saturate(1.15);
+  backdrop-filter: blur(16px) saturate(1.15);
+}
+
+html.capacitor-ios.capacitor-native .dash-profile-stats__label {
+  font-size: var(--cap-ios-caption) !important;
+}
+
+html.capacitor-ios.capacitor-native .dash-profile-stats__value {
+  font-size: var(--cap-ios-title) !important;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
 /* Dashboard home — StatCard KPI grid (welcome header stays a glass card) */
 html.capacitor-ios.capacitor-native .dash-home {
   gap: 0.625rem;
@@ -493,6 +511,17 @@ html.capacitor-ios.capacitor-native .data-table-shell {
   -webkit-backdrop-filter: blur(18px) saturate(1.12);
   backdrop-filter: blur(18px) saturate(1.12);
   overflow: hidden;
+}
+
+html.capacitor-ios.capacitor-native .data-table-shell:has(> .dash-table-empty-state--fill),
+html.capacitor-ios.capacitor-native .dash-table-shell:has(> .dash-table-empty-state--fill),
+html.capacitor-ios.capacitor-native .dash-grid-shell:has(> .dash-table-empty-state--fill) {
+  min-height: 0;
+}
+
+html.capacitor-ios.capacitor-native .dash-table-empty-state--fill {
+  padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
 }
 
 html.capacitor-ios.capacitor-native .dash-grid-card,
@@ -744,6 +773,26 @@ html.capacitor-ios.capacitor-native .dash-table-shell:not(.dash-native-table--ca
   display: flex !important;
 }
 
+/* Card mode: hide hand-built mobile card lists; show annotated dashboard-table */
+html.capacitor-ios.capacitor-native .data-table-shell.dash-native-table--cards .inventory-items-mobile-list,
+html.capacitor-ios.capacitor-native .data-table-shell.dash-native-table--cards .receipts-mobile-list,
+html.capacitor-ios.capacitor-native .data-table-shell.dash-native-table--cards .dept-staff-mobile-list {
+  display: none !important;
+}
+
+html.capacitor-ios.capacitor-native .data-table-shell.dash-native-table--cards .inventory-items-table-wrap,
+html.capacitor-ios.capacitor-native .data-table-shell.dash-native-table--cards .receipts-table-wrap,
+html.capacitor-ios.capacitor-native .data-table-shell.dash-native-table--cards .dept-staff-table-wrap {
+  display: flex !important;
+}
+
+html.capacitor-ios.capacitor-native .data-table-shell.dash-native-table--cards .dept-staff-table-wrap {
+  display: block !important;
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-x: auto;
+}
+
 html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table {
   min-width: 0 !important;
   width: 100%;
@@ -820,6 +869,28 @@ html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table t
   display: none;
 }
 
+html.capacitor-ios.capacitor-native
+  .dash-native-table--cards
+  .dash-mobile-table__accordion-row:not(.dash-mobile-table--expanded)
+  td.dash-native-table__cell--primary::before {
+  display: inline;
+  content: attr(data-native-summary-label);
+  flex-shrink: 0;
+  font-size: var(--cap-ios-caption);
+  font-weight: 600;
+  color: var(--dash-muted);
+  margin-right: 0.125rem;
+}
+
+html.capacitor-ios.capacitor-native
+  .dash-native-table--cards
+  .dash-mobile-table__accordion-row.dash-mobile-table--expanded
+  td.dash-native-table__cell--primary {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
 html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table td.dash-native-table__cell--when {
   grid-column: 2;
   grid-row: 1;
@@ -859,10 +930,10 @@ html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table t
   padding-top: 0.0625rem;
   text-align: left;
   font-size: var(--cap-ios-caption);
-  font-weight: 500;
-  letter-spacing: 0.02em;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   text-transform: none;
-  color: var(--dash-card-muted);
+  color: var(--dash-muted);
 }
 
 html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table td.dash-native-table__cell--status {
@@ -990,15 +1061,6 @@ html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table t
   font-size: var(--cap-ios-body);
 }
 
-/* Inventory: use native card table on phone (same cells as desktop — neutral prices, margin column) */
-html.capacitor-ios.capacitor-native .data-table-shell.dash-native-table--cards .inventory-items-mobile-list {
-  display: none !important;
-}
-
-html.capacitor-ios.capacitor-native .data-table-shell.dash-native-table--cards .inventory-items-table-wrap {
-  display: flex !important;
-}
-
 /* Price / cost meta rows — single line, no stacked profit tint */
 html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table td.dash-native-table__cell--meta.dashboard-table__col-price,
 html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table td.dash-native-table__cell--meta.dashboard-table__col-cost {
@@ -1062,6 +1124,80 @@ html.capacitor-ios.capacitor-native [data-dashboard-main] .dash-page-header {
 
 html.capacitor-ios.capacitor-native .dash-native-table--cards .dash-table-toolbar {
   padding-bottom: 0.375rem;
+}
+
+/* Empty states — keep content above bottom nav + FAB */
+html.capacitor-ios.capacitor-native .data-table-shell .dash-table-empty-state--fill,
+html.capacitor-ios.capacitor-native .dash-table-shell .dash-table-empty-state--fill,
+html.capacitor-ios.capacitor-native .dash-grid-shell .dash-table-empty-state--fill {
+  padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+html.capacitor-ios.capacitor-native .dash-table-empty-state .text-gray-400,
+html.capacitor-ios.capacitor-native .dash-table-empty-state .text-gray-500,
+html.capacitor-ios.capacitor-native .dash-table-empty-state .dark\:text-gray-400,
+html.capacitor-ios.capacitor-native .dash-table-empty-state .dark\:text-gray-500 {
+  color: var(--dash-muted) !important;
+}
+
+/* Inventory product detail sheet — match native card meta rows */
+html.capacitor-ios.capacitor-native .dash-native-detail-dl > div {
+  display: grid;
+  grid-template-columns: minmax(4.25rem, 34%) minmax(0, 1fr);
+  gap: 0.375rem 0.5rem;
+  align-items: start;
+  padding: 0.4375rem 0;
+  border-bottom: 1px solid var(--dash-card-border);
+}
+
+html.capacitor-ios.capacitor-native .dash-native-detail-dl > div:last-child {
+  border-bottom: 0;
+}
+
+html.capacitor-ios.capacitor-native .dash-native-detail-dl dt {
+  font-size: var(--cap-ios-caption);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  color: var(--dash-muted);
+}
+
+html.capacitor-ios.capacitor-native .dash-native-detail-dl dd {
+  font-size: var(--cap-ios-body);
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--dash-card-ink);
+  text-align: right;
+}
+
+/* Department grid cards — prevent footer date overlap on narrow screens */
+html.capacitor-ios.capacitor-native .dept-grid-card .dash-grid-card__footer-row {
+  flex-wrap: wrap;
+  row-gap: 0.375rem;
+}
+
+html.capacitor-ios.capacitor-native .dept-grid-card .dash-grid-card__value {
+  margin-left: auto;
+  width: 100%;
+  text-align: right;
+  font-size: var(--cap-ios-caption);
+  font-weight: 500;
+  color: var(--dash-muted);
+}
+
+/* Departments list — hide grid on iOS when table shell is active */
+html.capacitor-ios.capacitor-native .departments-shell--table .departments-grid {
+  display: none !important;
+}
+
+html.capacitor-ios.capacitor-native .departments-shell--table .departments-table {
+  display: flex !important;
+}
+
+html.capacitor-ios.capacitor-native .departments-shell--grid .departments-table {
+  display: none !important;
 }
 
 html.capacitor-ios.capacitor-native .activity-log-shell .grid.grid-cols-2 {

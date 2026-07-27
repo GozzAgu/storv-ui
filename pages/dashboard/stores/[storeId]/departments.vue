@@ -31,6 +31,35 @@
         />
       </template>
       <template #actions>
+        <div
+          v-if="storeDepartments.length > 0"
+          :class="viewToggleClass"
+          role="group"
+          aria-label="Department layout"
+        >
+          <button
+            type="button"
+            :class="[
+              viewToggleBtnClass,
+              departmentsViewMode === 'grid' ? viewToggleBtnActiveClass : '',
+            ]"
+            :aria-pressed="departmentsViewMode === 'grid'"
+            @click="departmentsViewMode = 'grid'"
+          >
+            <Squares2X2Icon class="h-3.5 w-3.5" aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            :class="[
+              viewToggleBtnClass,
+              departmentsViewMode === 'table' ? viewToggleBtnActiveClass : '',
+            ]"
+            :aria-pressed="departmentsViewMode === 'table'"
+            @click="departmentsViewMode = 'table'"
+          >
+            <TableCellsIcon class="h-3.5 w-3.5" aria-hidden="true" />
+          </button>
+        </div>
         <Button
           v-if="canManageDepartments"
           variant="primary"
@@ -114,9 +143,16 @@
     <div v-else-if="!departmentsStore.error">
       <div
         v-if="storeDepartments.length > 0"
-        :class="[gridShellClass, 'dash-grid-shell--grid']"
+        :class="[
+          departmentsViewMode === 'table'
+            ? [tableShellClass, 'dash-grid-shell--table departments-shell--table']
+            : [gridShellClass, 'dash-grid-shell--grid departments-shell--grid'],
+        ]"
       >
-        <div v-if="paginatedDepartments.length > 0" :class="gridClass">
+        <div
+          v-if="paginatedDepartments.length > 0 && departmentsViewMode === 'grid'"
+          :class="[gridClass, 'departments-grid']"
+        >
         <DepartmentCard
           v-for="department in paginatedDepartments"
           :key="department.id"
@@ -155,6 +191,126 @@
             </div>
           </template>
         </DepartmentCard>
+        </div>
+
+        <div
+          v-else-if="paginatedDepartments.length > 0 && departmentsViewMode === 'table'"
+          class="departments-table flex min-h-0 flex-1 flex-col"
+        >
+          <div class="overflow-x-auto">
+            <table class="dashboard-table min-w-full">
+              <thead>
+                <tr>
+                  <th v-if="canManageDepartments" scope="col" class="w-11 text-center">
+                    <Checkbox
+                      :model-value="allDepartmentsOnPageSelected"
+                      size="sm"
+                      wrapper-class="justify-center"
+                      @update:model-value="setSelectAllDepartmentsBulk"
+                    />
+                  </th>
+                  <th scope="col">Department</th>
+                  <th scope="col" class="hidden sm:table-cell">Type</th>
+                  <th scope="col" class="text-right">Staff</th>
+                  <th scope="col" class="hidden md:table-cell">Manager</th>
+                  <th scope="col" class="dashboard-table__col-status">Status</th>
+                  <th scope="col" class="hidden lg:table-cell">Updated</th>
+                  <th
+                    v-if="canManageDepartments"
+                    scope="col"
+                    class="dashboard-table__col-actions"
+                  >
+                    <span class="sr-only">Actions</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="department in paginatedDepartments"
+                  :key="department.id"
+                  class="cursor-pointer"
+                  @click="navigateToDepartment(department.id)"
+                >
+                  <td v-if="canManageDepartments" class="text-center" @click.stop>
+                    <Checkbox
+                      :model-value="selectedDepartmentsForBulk.some((d) => d.id === department.id)"
+                      size="sm"
+                      wrapper-class="justify-center"
+                      @update:model-value="
+                        (checked) => toggleDepartmentSelection(department, checked)
+                      "
+                    />
+                  </td>
+                  <td class="max-w-[min(16rem,32vw)]">
+                    <div class="flex min-w-0 items-center gap-2.5">
+                      <span
+                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary-500/10 text-primary-700 dark:bg-primary-400/15 dark:text-primary-200"
+                        aria-hidden="true"
+                      >
+                        <BuildingOffice2Icon class="h-4 w-4" stroke-width="1.5" />
+                      </span>
+                      <div class="min-w-0">
+                        <span class="dashboard-table__primary block truncate">{{
+                          department.name
+                        }}</span>
+                        <span
+                          v-if="department.description?.trim()"
+                          class="dashboard-table__muted mt-0.5 block truncate text-[10px]"
+                        >
+                          {{ department.description }}
+                        </span>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="hidden sm:table-cell">
+                    <span
+                      class="inline-flex rounded-md bg-gray-100/90 px-1.5 py-0.5 text-[10px] font-medium text-gray-600 dark:bg-white/[0.05] dark:text-gray-400"
+                    >
+                      {{ formatDepartmentTypeLabel(department.departmentType) }}
+                    </span>
+                  </td>
+                  <td class="text-right">
+                    <span class="dashboard-table__numeric">{{ department.staffCount || 0 }}</span>
+                  </td>
+                  <td class="hidden max-w-[12rem] md:table-cell">
+                    <span class="dashboard-table__muted block truncate text-xs">
+                      {{ departmentManagerLabel(department.manager) }}
+                    </span>
+                  </td>
+                  <td class="dashboard-table__col-status">
+                    <span :class="departmentStatusPill(department.isActive === false).pillClass">
+                      <span class="dash-grid-card__pill-dot" aria-hidden="true" />
+                      {{ departmentStatusPill(department.isActive === false).label }}
+                    </span>
+                  </td>
+                  <td class="hidden lg:table-cell">
+                    <span class="dashboard-table__muted text-xs">
+                      {{
+                        formatCategoryDate(department.updatedAt) ??
+                        formatCategoryDate(department.createdAt) ??
+                        '—'
+                      }}
+                    </span>
+                  </td>
+                  <td
+                    v-if="canManageDepartments"
+                    class="dashboard-table__col-actions"
+                    @click.stop
+                  >
+                    <button
+                      type="button"
+                      class="dashboard-table__action-btn"
+                      :data-department-actions-anchor="department.id"
+                      aria-label="Department options"
+                      @click="toggleDepartmentMenu(department.id)"
+                    >
+                      <EllipsisVerticalIcon class="h-4 w-4" stroke-width="2" />
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
 
         <DashboardTableEmptyState
@@ -340,10 +496,13 @@
 import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import {
   BuildingOfficeIcon,
+  BuildingOffice2Icon,
   ArrowPathIcon,
   PencilSquareIcon,
   TrashIcon,
   EllipsisVerticalIcon,
+  Squares2X2Icon,
+  TableCellsIcon,
 } from '~/utils/app-icons'
 import Button from '~/components/ui/Button.vue'
 import DashboardTablePagination from '~/components/dashboard/DashboardTablePagination.vue'
@@ -378,7 +537,12 @@ const {
   gridClass,
   menuBtnClass,
   errorCardClass,
+  viewToggleClass,
+  viewToggleBtnClass,
+  viewToggleBtnActiveClass,
 } = useDashboardGridPagesChrome()
+
+const { tableShellClass } = useDashboardTableChrome()
 
 const showDepartmentModal = ref(false)
 const editingDepartment = ref<Department | null>(null)
@@ -393,6 +557,35 @@ const isBulkDeletingDepartments = ref(false)
 const deletingDepartmentId = ref<string | null>(null)
 
 const searchQuery = ref('')
+
+const getInitialDepartmentsView = (): 'grid' | 'table' => {
+  if (import.meta.client) {
+    try {
+      if (
+        document.documentElement.classList.contains('capacitor-ios') ||
+        window.matchMedia('(max-width: 639px)').matches
+      ) {
+        return 'table'
+      }
+      const saved = localStorage.getItem(`stores-${storeId.value}-departments-view`)
+      if (saved === 'table' || saved === 'grid') return saved
+    } catch {
+      /* ignore */
+    }
+  }
+  return 'grid'
+}
+
+const departmentsViewMode = ref<'grid' | 'table'>(getInitialDepartmentsView())
+watch(departmentsViewMode, (mode) => {
+  openDepartmentMenuId.value = null
+  if (!import.meta.client) return
+  try {
+    localStorage.setItem(`stores-${storeId.value}-departments-view`, mode)
+  } catch {
+    /* ignore */
+  }
+})
 
 // Load pagination state from localStorage
 const getInitialPage = (): number => {
@@ -417,6 +610,12 @@ import { useStaffStore } from '~/stores/staff'
 import { useStoresStore } from '~/stores/stores'
 import { useAppToast } from '~/composables/useAppToast'
 import { getVisibleMenuAnchorElement, computeFixedAnchoredMenuStyle } from '~/utils/menuAnchor'
+import { formatCategoryDate } from '~/utils/inventory-category-card'
+import {
+  departmentManagerLabel,
+  departmentStatusPill,
+  formatDepartmentTypeLabel,
+} from '~/utils/department-card'
 
 // Get store instances - only accessible on client
 const departmentsStore = useDepartmentsStore()

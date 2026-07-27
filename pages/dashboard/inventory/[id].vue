@@ -961,18 +961,16 @@
             {{ mobileDetailItem.sellerLoanPartyPhone }}
           </p>
         </div>
-        <dl class="divide-y divide-gray-100 dark:divide-gray-800">
+        <dl class="dash-native-detail-dl divide-y divide-gray-100 dark:divide-gray-800">
           <div
             v-for="(column, colIndex) in columns"
             :key="column.key"
-            class="flex flex-col gap-1 py-3 first:pt-0"
+            class="gap-1 py-3 first:pt-0"
           >
-            <dt
-              class="text-[10px] font-semibold uppercase tracking-[0.08em] text-gray-400 dark:text-gray-500"
-            >
+            <dt>
               {{ column.label }}
             </dt>
-            <dd class="min-w-0 text-[13px] leading-snug text-gray-900 dark:text-gray-100">
+            <dd class="min-w-0 leading-snug">
               <template v-if="colIndex === 0">
                 <span class="font-medium">{{ getItemPrimaryLabel(mobileDetailItem) }}</span>
               </template>

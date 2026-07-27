@@ -6,8 +6,8 @@ main[data-dashboard-main],
   --dash-table-divider-strong: rgb(15 23 42 / 0.08);
   --dash-table-head-bg: rgb(248 250 252 / 0.72);
   --dash-table-row-hover: rgb(248 250 252 / 0.9);
-  --dash-table-body-ink: rgb(51 65 85);
-  --dash-table-body-muted: rgb(100 116 139);
+  --dash-table-body-ink: rgb(30 41 59);
+  --dash-table-body-muted: rgb(71 85 105);
   --dash-table-pagination-bg: rgb(248 250 252 / 0.55);
 }
 
@@ -17,8 +17,8 @@ html.dark [data-dashboard-teleport] {
   --dash-table-divider-strong: rgb(255 255 255 / 0.08);
   --dash-table-head-bg: rgb(255 255 255 / 0.02);
   --dash-table-row-hover: rgb(255 255 255 / 0.035);
-  --dash-table-body-ink: rgb(226 232 240);
-  --dash-table-body-muted: rgb(148 163 184);
+  --dash-table-body-ink: rgb(248 250 252);
+  --dash-table-body-muted: rgb(203 213 225);
   --dash-table-pagination-bg: rgb(255 255 255 / 0.02);
 }
 
@@ -88,20 +88,14 @@ html.capacitor-native .dashboard-fixed-footer--native {
   padding-bottom: 0;
 }
 
-.dashboard-page-with-footer {
-  --dash-empty-fill-min: calc(100svh - 15rem);
-}
-
-html.capacitor-native .dashboard-page-with-footer {
-  --dash-empty-fill-min: calc(
-    100svh - var(--dashboard-native-top-chrome) - var(--dashboard-bottom-nav-height) -
-      var(--dashboard-fixed-footer-height) - 7rem
-  );
-}
-
+/* Empty states fill the remaining shell height — never add viewport min-height (causes page overflow). */
 .dash-table-empty-state--fill {
   flex: 1 1 auto;
-  min-height: var(--dash-empty-fill-min);
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .dashboard-page-with-footer > .dash-table-empty-state--fill,
@@ -110,13 +104,21 @@ main[data-dashboard-main] .data-table-shell.flex.flex-col:has(> .dash-table-empt
 main[data-dashboard-main] .dash-table-shell.flex.flex-col:has(> .dash-table-empty-state--fill),
 [data-dashboard-teleport] .data-table-shell.flex.flex-col:has(> .dash-table-empty-state--fill) {
   flex: 1 1 auto;
-  min-height: var(--dash-empty-fill-min);
+  min-height: 0;
 }
 
 .dash-grid-shell:has(> .shrink-0 + .dash-table-empty-state--fill),
 .dash-grid-shell:has(> .dash-table-empty-state--fill) {
   flex: 1 1 auto;
-  min-height: var(--dash-empty-fill-min);
+  min-height: 0;
+}
+
+.dashboard-page-with-footer .dash-page--unified {
+  min-height: 0;
+}
+
+.dashboard-page-with-footer .dash-page--unified > .relative.flex.min-h-0.flex-1.flex-col {
+  min-height: 0;
 }
 
 /* Core table */

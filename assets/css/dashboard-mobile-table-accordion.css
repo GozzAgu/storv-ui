@@ -1,0 +1,391 @@
+/**
+ * Mobile accordion table lists — dashboard tables as collapsible card rows.
+ * Applies on mobile web (<640px) and shares class hooks with iOS native cards.
+ */
+
+@media (max-width: 639px) {
+  main[data-dashboard-main] .data-table-shell.dash-native-table--cards,
+  main[data-dashboard-main] .dash-table-shell.dash-native-table--cards,
+  [data-dashboard-teleport] .data-table-shell.dash-native-table--cards,
+  [data-dashboard-teleport] .dash-table-shell.dash-native-table--cards,
+  main[data-dashboard-main] .activity-log-shell.dash-native-table--cards {
+    overflow: visible;
+  }
+
+  main[data-dashboard-main] .dash-native-table--cards .overflow-x-auto,
+  [data-dashboard-teleport] .dash-native-table--cards .overflow-x-auto {
+    overflow: visible !important;
+  }
+
+  /* Prefer annotated table over hand-built mobile card lists */
+  main[data-dashboard-main] .data-table-shell.dash-native-table--cards .inventory-items-mobile-list,
+  main[data-dashboard-main] .data-table-shell.dash-native-table--cards .receipts-mobile-list,
+  main[data-dashboard-main] .data-table-shell.dash-native-table--cards .dept-staff-mobile-list,
+  [data-dashboard-teleport] .data-table-shell.dash-native-table--cards .inventory-items-mobile-list,
+  [data-dashboard-teleport] .data-table-shell.dash-native-table--cards .receipts-mobile-list,
+  [data-dashboard-teleport] .data-table-shell.dash-native-table--cards .dept-staff-mobile-list {
+    display: none !important;
+  }
+
+  main[data-dashboard-main] .data-table-shell.dash-native-table--cards .inventory-items-table-wrap,
+  main[data-dashboard-main] .data-table-shell.dash-native-table--cards .receipts-table-wrap,
+  [data-dashboard-teleport] .data-table-shell.dash-native-table--cards .inventory-items-table-wrap,
+  [data-dashboard-teleport] .data-table-shell.dash-native-table--cards .receipts-table-wrap {
+    display: flex !important;
+  }
+
+  main[data-dashboard-main] .data-table-shell.dash-native-table--cards .dept-staff-table-wrap,
+  [data-dashboard-teleport] .data-table-shell.dash-native-table--cards .dept-staff-table-wrap {
+    display: block !important;
+    min-height: 0;
+    flex: 1 1 auto;
+    overflow-x: auto;
+  }
+
+  main[data-dashboard-main] .data-table-shell:not(.dash-native-table--cards) .sm\:hidden,
+  main[data-dashboard-main] .dash-table-shell:not(.dash-native-table--cards) .sm\:hidden,
+  [data-dashboard-teleport] .data-table-shell:not(.dash-native-table--cards) .sm\:hidden {
+    display: none !important;
+  }
+
+  main[data-dashboard-main] .data-table-shell:not(.dash-native-table--cards) .hidden.sm\:flex,
+  main[data-dashboard-main] .dash-table-shell:not(.dash-native-table--cards) .hidden.sm\:flex,
+  [data-dashboard-teleport] .data-table-shell:not(.dash-native-table--cards) .hidden.sm\:flex {
+    display: flex !important;
+  }
+
+  main[data-dashboard-main] .data-table-shell:not(.dash-native-table--cards) .md\:hidden,
+  [data-dashboard-teleport] .data-table-shell:not(.dash-native-table--cards) .md\:hidden {
+    display: none !important;
+  }
+
+  main[data-dashboard-main] .data-table-shell:not(.dash-native-table--cards) .hidden.md\:block,
+  [data-dashboard-teleport] .data-table-shell:not(.dash-native-table--cards) .hidden.md\:block {
+    display: block !important;
+  }
+
+  main[data-dashboard-main] .departments-shell--table .departments-grid,
+  [data-dashboard-teleport] .departments-shell--table .departments-grid {
+    display: none !important;
+  }
+
+  main[data-dashboard-main] .departments-shell--table .departments-table,
+  [data-dashboard-teleport] .departments-shell--table .departments-table {
+    display: flex !important;
+  }
+
+  main[data-dashboard-main] .dash-native-table--cards .dashboard-table,
+  [data-dashboard-teleport] .dash-native-table--cards .dashboard-table {
+    min-width: 0 !important;
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 0.625rem;
+  }
+
+  main[data-dashboard-main] .dash-native-table--cards .dashboard-table thead,
+  [data-dashboard-teleport] .dash-native-table--cards .dashboard-table thead {
+    display: none;
+  }
+
+  main[data-dashboard-main] .dash-native-table--cards .dashboard-table tbody,
+  [data-dashboard-teleport] .dash-native-table--cards .dashboard-table tbody {
+    display: block;
+    padding-bottom: 0.25rem;
+  }
+
+  main[data-dashboard-main] .dash-native-table--cards .dashboard-table tbody tr.dash-native-table__card-row,
+  [data-dashboard-teleport] .dash-native-table--cards .dashboard-table tbody tr.dash-native-table__card-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 0;
+    overflow: hidden;
+    border: 1px solid var(--dash-card-border);
+    border-radius: 0.875rem;
+    background: var(--dash-card-surface);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.35),
+      0 8px 24px -16px rgb(15 23 42 / 0.18);
+  }
+
+  html.dark main[data-dashboard-main] .dash-native-table--cards .dashboard-table tbody tr.dash-native-table__card-row,
+  html.dark [data-dashboard-teleport] .dash-native-table--cards .dashboard-table tbody tr.dash-native-table__card-row {
+    background: #12141c;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.04),
+      0 10px 28px -14px rgb(0 0 0 / 0.42);
+  }
+
+  main[data-dashboard-main] .dash-native-table--cards .dashboard-table td,
+  [data-dashboard-teleport] .dash-native-table--cards .dashboard-table td {
+    width: 100% !important;
+    max-width: none !important;
+    border: 0 !important;
+    white-space: normal !important;
+  }
+
+  main[data-dashboard-main] .dash-native-table--cards .dashboard-table td::before,
+  [data-dashboard-teleport] .dash-native-table--cards .dashboard-table td::before {
+    content: attr(data-native-label);
+  }
+
+  main[data-dashboard-main] .dash-native-table--cards .dashboard-table td.dash-native-table__cell--meta,
+  [data-dashboard-teleport] .dash-native-table--cards .dashboard-table td.dash-native-table__cell--meta {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: minmax(4.25rem, 34%) minmax(0, 1fr);
+    gap: 0.5rem;
+    align-items: start;
+    padding: 0.375rem 0.875rem;
+    text-align: left !important;
+    border-top: 1px solid var(--dash-table-divider);
+  }
+
+  main[data-dashboard-main] .dash-native-table--cards .dashboard-table td.dash-native-table__cell--meta::before,
+  [data-dashboard-teleport] .dash-native-table--cards .dashboard-table td.dash-native-table__cell--meta::before {
+    padding-top: 0.0625rem;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    text-transform: none;
+    color: var(--dash-muted);
+  }
+
+  main[data-dashboard-main] .dash-native-table--cards .dashboard-table td.dash-native-table__cell--meta + td.dash-native-table__cell--meta,
+  [data-dashboard-teleport] .dash-native-table--cards .dashboard-table td.dash-native-table__cell--meta + td.dash-native-table__cell--meta {
+    border-top: 0;
+  }
+
+  main[data-dashboard-main] .dash-native-table--cards .dashboard-table td.dash-native-table__cell--actions,
+  [data-dashboard-teleport] .dash-native-table--cards .dashboard-table td.dash-native-table__cell--actions {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding: 0.625rem 0.875rem 0.75rem;
+    border-top: 1px solid var(--dash-table-divider-strong);
+  }
+
+  main[data-dashboard-main] .dash-native-table--cards .dashboard-table td.dash-native-table__cell--actions::before,
+  [data-dashboard-teleport] .dash-native-table--cards .dashboard-table td.dash-native-table__cell--actions::before {
+    display: none;
+  }
+
+  main[data-dashboard-main] .dash-native-table--cards .dashboard-table td.dash-native-table__cell--status,
+  [data-dashboard-teleport] .dash-native-table--cards .dashboard-table td.dash-native-table__cell--status {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.875rem 0.625rem;
+    border-top: 1px solid var(--dash-table-divider);
+  }
+
+  main[data-dashboard-main] .dash-native-table--cards .dashboard-table td.dash-native-table__cell--status::before,
+  [data-dashboard-teleport] .dash-native-table--cards .dashboard-table td.dash-native-table__cell--status::before {
+    display: none;
+  }
+
+  main[data-dashboard-main] .dash-native-table--cards .dashboard-table td.dash-native-table__cell--checkbox,
+  [data-dashboard-teleport] .dash-native-table--cards .dashboard-table td.dash-native-table__cell--checkbox {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-start;
+    padding: 0.625rem 0.875rem 0.25rem;
+  }
+
+  main[data-dashboard-main] .dash-native-table--cards .dashboard-table td.dash-native-table__cell--checkbox::before,
+  [data-dashboard-teleport] .dash-native-table--cards .dashboard-table td.dash-native-table__cell--checkbox::before {
+    display: none;
+  }
+
+  main[data-dashboard-main] .dash-native-table--cards .dashboard-table td[data-native-label='']::before,
+  [data-dashboard-teleport] .dash-native-table--cards .dashboard-table td[data-native-label='']::before {
+    display: none;
+  }
+
+  main[data-dashboard-main] .data-table-shell .dash-table-empty-state--fill,
+  main[data-dashboard-main] .dash-table-shell .dash-table-empty-state--fill,
+  main[data-dashboard-main] .dash-grid-shell .dash-table-empty-state--fill {
+    padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0px));
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* ── Accordion collapse / expand (mobile web + iOS) ── */
+@media (max-width: 639px) {
+  main[data-dashboard-main] .dash-native-table--cards .dash-mobile-table__accordion-row:not(.dash-mobile-table--expanded),
+  [data-dashboard-teleport] .dash-native-table--cards .dash-mobile-table__accordion-row:not(.dash-mobile-table--expanded) {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  main[data-dashboard-main] .dash-native-table--cards .dash-mobile-table__accordion-row:not(.dash-mobile-table--expanded) td.dash-native-table__cell--meta,
+  main[data-dashboard-main] .dash-native-table--cards .dash-mobile-table__accordion-row:not(.dash-mobile-table--expanded) td.dash-native-table__cell--secondary,
+  main[data-dashboard-main] .dash-native-table--cards .dash-mobile-table__accordion-row:not(.dash-mobile-table--expanded) td.dash-native-table__cell--actions,
+  main[data-dashboard-main] .dash-native-table--cards .dash-mobile-table__accordion-row:not(.dash-mobile-table--expanded) td.dash-native-table__cell--checkbox,
+  [data-dashboard-teleport] .dash-native-table--cards .dash-mobile-table__accordion-row:not(.dash-mobile-table--expanded) td.dash-native-table__cell--meta,
+  [data-dashboard-teleport] .dash-native-table--cards .dash-mobile-table__accordion-row:not(.dash-mobile-table--expanded) td.dash-native-table__cell--secondary,
+  [data-dashboard-teleport] .dash-native-table--cards .dash-mobile-table__accordion-row:not(.dash-mobile-table--expanded) td.dash-native-table__cell--actions,
+  [data-dashboard-teleport] .dash-native-table--cards .dash-mobile-table__accordion-row:not(.dash-mobile-table--expanded) td.dash-native-table__cell--checkbox {
+    display: none !important;
+  }
+
+  main[data-dashboard-main] .dash-native-table--cards .dash-mobile-table__accordion-row:not(.dash-mobile-table--expanded) td.dash-native-table__cell--status,
+  [data-dashboard-teleport] .dash-native-table--cards .dash-mobile-table__accordion-row:not(.dash-mobile-table--expanded) td.dash-native-table__cell--status {
+    grid-column: 2;
+    grid-row: 1;
+    display: flex !important;
+    justify-content: flex-end;
+    padding: 0.75rem 0.875rem 0.75rem 0.25rem;
+    border-top: 0;
+  }
+
+  main[data-dashboard-main] .dash-native-table--cards .dash-mobile-table__accordion-row:not(.dash-mobile-table--expanded) td.dash-native-table__cell--when,
+  [data-dashboard-teleport] .dash-native-table--cards .dash-mobile-table__accordion-row:not(.dash-mobile-table--expanded) td.dash-native-table__cell--when {
+    grid-column: 2;
+    grid-row: 1;
+    display: block !important;
+    padding: 0.75rem 0.875rem 0.75rem 0.25rem;
+    text-align: right !important;
+    border-top: 0;
+  }
+}
+
+html.capacitor-ios.capacitor-native .dash-native-table--cards .dash-mobile-table__accordion-row:not(.dash-mobile-table--expanded) {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  cursor: pointer;
+}
+
+html.capacitor-ios.capacitor-native .dash-native-table--cards .dash-mobile-table__accordion-row:not(.dash-mobile-table--expanded) td.dash-native-table__cell--meta,
+html.capacitor-ios.capacitor-native .dash-native-table--cards .dash-mobile-table__accordion-row:not(.dash-mobile-table--expanded) td.dash-native-table__cell--secondary,
+html.capacitor-ios.capacitor-native .dash-native-table--cards .dash-mobile-table__accordion-row:not(.dash-mobile-table--expanded) td.dash-native-table__cell--actions,
+html.capacitor-ios.capacitor-native .dash-native-table--cards .dash-mobile-table__accordion-row:not(.dash-mobile-table--expanded) td.dash-native-table__cell--checkbox {
+  display: none !important;
+}
+
+html.capacitor-ios.capacitor-native .dash-native-table--cards .dash-mobile-table__accordion-row:not(.dash-mobile-table--expanded) td.dash-native-table__cell--status {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex !important;
+  justify-content: flex-end;
+  padding: 0.75rem 0.875rem 0.75rem 0.25rem;
+  border-top: 0;
+}
+
+html.capacitor-ios.capacitor-native .dash-native-table--cards .dash-mobile-table__accordion-row:not(.dash-mobile-table--expanded) td.dash-native-table__cell--when {
+  grid-column: 2;
+  grid-row: 1;
+  display: block !important;
+  padding: 0.75rem 0.875rem 0.75rem 0.25rem;
+  text-align: right !important;
+  border-top: 0;
+}
+
+/* Expanded rows show dividers between meta fields */
+.dash-native-table--cards .dash-mobile-table__accordion-row.dash-mobile-table--expanded td.dash-native-table__cell--meta {
+  border-top: 1px solid var(--dash-table-divider);
+}
+
+.dash-native-table--cards .dash-mobile-table__accordion-row.dash-mobile-table--expanded td.dash-native-table__cell--meta:first-of-type {
+  border-top: 1px solid var(--dash-table-divider-strong);
+}
+
+/* Summary header (collapsed + expanded top row) */
+.dash-native-table--cards .dash-mobile-table__accordion-row td.dash-native-table__cell--primary {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.8125rem 0.5rem 0.8125rem 0.875rem;
+  text-align: left !important;
+}
+
+.dash-native-table--cards .dash-mobile-table__accordion-row td.dash-native-table__cell--primary::before {
+  display: none;
+}
+
+.dash-native-table--cards .dash-mobile-table__accordion-row:not(.dash-mobile-table--expanded) td.dash-native-table__cell--primary::before {
+  display: inline;
+  content: attr(data-native-summary-label);
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--dash-muted);
+  margin-right: 0.125rem;
+}
+
+.dash-native-table--cards .dash-mobile-table__accordion-row:not(.dash-mobile-table--expanded) td.dash-native-table__cell--primary .dashboard-table__primary,
+.dash-native-table--cards .dash-mobile-table__accordion-row:not(.dash-mobile-table--expanded) td.dash-native-table__cell--primary .dashboard-table__money,
+.dash-native-table--cards .dash-mobile-table__accordion-row:not(.dash-mobile-table--expanded) td.dash-native-table__cell--primary .dashboard-table__numeric {
+  display: inline;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--dash-card-ink);
+}
+
+.dash-native-table--cards .dash-mobile-table__accordion-row.dash-mobile-table--expanded td.dash-native-table__cell--primary {
+  padding-bottom: 0.375rem;
+}
+
+.dash-native-table--cards .dash-mobile-table__accordion-row.dash-mobile-table--expanded td.dash-native-table__cell--primary::before {
+  display: none;
+}
+
+/* Chevron toggle */
+.dash-mobile-table__toggle {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  border-radius: 9999px;
+  background: rgb(72 118 199 / 0.12);
+  color: #4876c7;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    transform 0.2s ease;
+}
+
+html.dark .dash-mobile-table__toggle {
+  background: rgb(154 181 227 / 0.14);
+  color: #9ab5e3;
+}
+
+.dash-mobile-table__toggle:focus-visible {
+  outline: 2px solid rgb(72 118 199 / 0.45);
+  outline-offset: 2px;
+}
+
+.dash-mobile-table__chevron {
+  width: 1rem;
+  height: 1rem;
+  transition: transform 0.2s ease;
+}
+
+.dash-mobile-table__accordion-row.dash-mobile-table--expanded .dash-mobile-table__chevron {
+  transform: rotate(180deg);
+}
+
+.dash-native-table--cards .dash-mobile-table__accordion-row td.dash-native-table__cell--primary > .flex {
+  min-width: 0;
+  flex: 1;
+}
+
+.dash-native-table--cards .dashboard-table .truncate {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  word-break: break-word;
+}

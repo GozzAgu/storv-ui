@@ -49,27 +49,25 @@
 
             <div :class="profileStatBarClass">
               <div :class="profileStatItemClass">
-                <p v-if="isLoadingStats" class="dash-skeleton mx-auto h-5 w-8" />
+                <p :class="profileStatLabelClass">Orders</p>
+                <p v-if="isLoadingStats" class="dash-skeleton mx-auto mt-1 h-5 w-8" />
                 <p v-else :class="profileStatValueClass">
                   {{ totalOrders }}
                 </p>
-                <p :class="profileStatLabelClass">Orders</p>
               </div>
-              <div :class="profileStatDividerClass" />
               <div :class="profileStatItemClass">
-                <p v-if="isLoadingStats" class="dash-skeleton mx-auto h-5 w-8" />
+                <p :class="profileStatLabelClass">Products</p>
+                <p v-if="isLoadingStats" class="dash-skeleton mx-auto mt-1 h-5 w-8" />
                 <p v-else :class="profileStatValueClass">
                   {{ totalProducts }}
                 </p>
-                <p :class="profileStatLabelClass">Products</p>
               </div>
-              <div :class="profileStatDividerClass" />
               <div :class="profileStatItemClass">
-                <p v-if="isLoadingStats" class="dash-skeleton mx-auto h-5 w-8" />
+                <p :class="profileStatLabelClass">Customers</p>
+                <p v-if="isLoadingStats" class="dash-skeleton mx-auto mt-1 h-5 w-8" />
                 <p v-else :class="profileStatValueClass">
                   {{ totalCustomers }}
                 </p>
-                <p :class="profileStatLabelClass">Customers</p>
               </div>
             </div>
           </div>

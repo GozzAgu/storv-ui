@@ -141,7 +141,10 @@
             </template>
             <template #actions>
               <Button
-                v-if="canCreateNewStaff"
+                v-if="
+                  canCreateNewStaff &&
+                  !(rosterTab === 'active' && staff.length === 0 && !isLoadingStaff)
+                "
                 variant="primary"
                 size="sm"
                 :icon="UserIcon"
@@ -279,7 +282,7 @@
             ]"
           >
             <template v-if="rosterTab === 'active'">
-              <div v-if="!isStaffFullscreen" class="space-y-2.5 px-0.5 md:hidden">
+              <div v-if="!isStaffFullscreen" class="dept-staff-mobile-list space-y-2.5 px-0.5 md:hidden">
                 <div
                   v-for="member in paginatedStaff"
                   :key="`mobile-${member.id}`"
@@ -353,6 +356,7 @@
 
               <div
                 :class="[
+                  'dept-staff-table-wrap',
                   isStaffFullscreen
                     ? 'min-h-0 overflow-auto'
                     : 'hidden min-h-0 overflow-x-auto md:block',
@@ -442,7 +446,7 @@
             </template>
 
             <template v-else>
-              <div v-if="!isStaffFullscreen" class="space-y-2.5 px-0.5 md:hidden">
+              <div v-if="!isStaffFullscreen" class="dept-staff-mobile-list space-y-2.5 px-0.5 md:hidden">
                 <div
                   v-for="member in paginatedRemovedStaff"
                   :key="`removed-mobile-${member.id}`"
@@ -497,6 +501,7 @@
 
               <div
                 :class="[
+                  'dept-staff-table-wrap',
                   isStaffFullscreen
                     ? 'min-h-0 overflow-auto'
                     : 'hidden min-h-0 overflow-x-auto md:block',

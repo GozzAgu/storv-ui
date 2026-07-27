@@ -250,7 +250,7 @@
                   :class="[
                     isReceiptsFullscreen
                       ? 'flex min-h-0 flex-1 flex-col overflow-hidden'
-                      : 'data-table-shell flex min-h-[calc(100svh-20rem)] min-h-0 flex-1 flex-col overflow-hidden',
+                      : 'data-table-shell flex min-h-0 flex-1 flex-col overflow-hidden',
                   ]"
                 >
                   <!-- Toolbar: search + filters (left), primary action (right) -->
@@ -391,7 +391,7 @@
                     >
                       <!-- Mobile: card list (no horizontal scroll) -->
                       <div
-                        class="space-y-2 sm:hidden"
+                        class="receipts-mobile-list space-y-2 sm:hidden"
                         :class="
                           isReceiptsFullscreen
                             ? 'min-h-0 flex-1 overflow-y-auto px-4 pb-4 lg:px-8'
@@ -512,9 +512,9 @@
                           </div>
                         </div>
                       </div>
-                      <!-- Desktop: table -->
+                      <!-- Desktop / iOS native card table -->
                       <div
-                        class="hidden min-h-0 flex-1 flex-col sm:flex"
+                        class="receipts-table-wrap hidden min-h-0 flex-1 flex-col sm:flex"
                         :class="isReceiptsFullscreen ? 'overflow-auto px-4 pb-2 pt-2 lg:px-8' : ''"
                       >
                         <div class="min-h-0 flex-1 overflow-x-auto">

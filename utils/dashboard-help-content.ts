@@ -182,14 +182,14 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
         body: [
           'Sidebar label is Receipts, but the page title reads “Sales” with subtitle “Manage receipts, customers, and returns”. Two tabs exist: Receipts (default) and Customers.',
           'Receipts shows totals for receipt count, sales amount, today, and month, plus search, status filters (All, Completed, Pending, Refunded), and date filters (All dates, Today, This week, This month). Use fullscreen mode for dense lists; filters stay pinned at the top.',
-          'Use the “New receipt” button in the receipts table toolbar (top of the list) to open Create New Receipt.',
+          'Use the “New sale” button in the sales table toolbar to open Create New Sale.',
         ],
       },
       {
-        title: 'Create New Receipt (three steps)',
+        title: 'Create New Sale (three steps)',
         body: [
-          'The modal title is “Create New Receipt” with subtitle “Select folder, items, then enter receipt details.” Step 1: Select Folder (search folders; empty state tells you to create folders in Inventory first). Step 2: Select Items and quantities from that folder. Step 3: Receipt Details; customer fields, payment method, Completed or Pending status, and notes.',
-          'Serial folders can include lines on an active Stock loan: you may add them like other sellable SKUs. Completing the receipt marks them sold and updates the borrower loan in the background when your plan includes Stock loans (Enterprise).',
+          'The drawer title is “Create New Sale” with subtitle “Pick categories and items, then sale details.” Step 1: pick an inventory category. Step 2: select items and quantities; use “Add from another category” to keep your cart and add lines from more categories in one sale. Step 3: sale details — customer fields, payment method, paid in full or balance due, and notes.',
+          'Selected items are grouped by category before checkout. Serial folders can include lines on an active Stock loan: you may add them like other sellable SKUs. Completing the sale marks them sold and updates the borrower loan in the background when your plan includes Stock loans (Enterprise).',
           'After step 1, if your branch has a Sell screen note configured in Settings → create or edit branch, a short banner can appear at the top of the items and checkout steps with store-specific reminders (for example promos or price notes).',
           'Super admins can enable swap-in style lines inside the receipt flow when your business records trade-ins alongside standard SKUs.',
         ],

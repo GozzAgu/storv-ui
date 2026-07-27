@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { nextTick, onMounted, watch } from 'vue'
+import { nextTick, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import DashboardNativeTableViewToggle from '~/components/dashboard/DashboardNativeTableViewToggle.vue'
 import {
+  applyNativeTableLayout,
   ensureNativeTableShellKey,
   findDashboardTableShells,
   isCapacitorIosDocument,
   setNativeTableLayoutMode,
+  shouldUseMobileTableCards,
   syncNativeTableShellLayout,
   type NativeTableLayoutMode,
 } from '~/utils/native-table-cards'
@@ -19,19 +21,34 @@ type ToggleHost = {
 
 const route = useRoute()
 const toggleHosts = ref<ToggleHost[]>([])
+let resizeObserver: (() => void) | null = null
+
+function clearDesktopTableLayouts() {
+  if (!import.meta.client || shouldUseMobileTableCards()) return
+  findDashboardTableShells().forEach((shell) => applyNativeTableLayout(shell, 'table'))
+}
 
 function refreshNativeTableLayouts() {
-  if (!import.meta.client || !isCapacitorIosDocument()) {
+  if (!import.meta.client) {
     toggleHosts.value = []
+    return
+  }
+
+  if (!shouldUseMobileTableCards()) {
+    toggleHosts.value = []
+    clearDesktopTableLayouts()
     return
   }
 
   const hosts: ToggleHost[] = []
   const shells = findDashboardTableShells()
+  const showIosToggle = isCapacitorIosDocument()
 
   shells.forEach((shell, index) => {
     const key = ensureNativeTableShellKey(shell, route.path, index)
     const mode = syncNativeTableShellLayout(shell, key)
+
+    if (!showIosToggle) return
 
     if (shell.querySelector('[data-native-table-layout-toggle]')) return
 
@@ -71,6 +88,16 @@ function onHostLayoutChange(key: string, mode: NativeTableLayoutMode) {
 
 onMounted(() => {
   nextTick(refreshNativeTableLayouts)
+  if (import.meta.client) {
+    const mq = window.matchMedia('(max-width: 639px)')
+    const onViewportChange = () => nextTick(refreshNativeTableLayouts)
+    mq.addEventListener('change', onViewportChange)
+    resizeObserver = () => mq.removeEventListener('change', onViewportChange)
+  }
+})
+
+onUnmounted(() => {
+  resizeObserver?.()
 })
 
 watch(

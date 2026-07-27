@@ -7,6 +7,7 @@
 @import './dashboard-cards.css';
 @import './dashboard-pages.css';
 @import './dashboard-tables.css';
+@import './dashboard-mobile-table-accordion.css';
 @import './app-buttons.css';
 @import './dashboard-overlays.css';
 @import './capacitor-native-saas.css';
@@ -1490,8 +1491,15 @@ html.capacitor-native .inventory-categories-grid {
   }
 }
 
-html.capacitor-native .inventory-categories-shell--table.data-table-shell {
+html.capacitor-native
+  .inventory-categories-shell--table.data-table-shell:not(:has(.dash-table-empty-state--fill)) {
   min-height: min(62vh, calc(100dvh - 11rem));
+}
+
+html.capacitor-native
+  .inventory-categories-shell--table.data-table-shell:has(.dash-table-empty-state--fill) {
+  min-height: 0;
+  flex: 1 1 auto;
 }
 
 /* Modals & search overlay */
