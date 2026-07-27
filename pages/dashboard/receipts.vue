@@ -37,7 +37,7 @@
               <p class="dash-eyebrow">Sales</p>
             </template>
             <template #title>
-              <h1 class="dash-page-title !text-lg sm:!text-xl">Receipts</h1>
+              <h1 class="dash-page-title !text-lg sm:!text-xl">Sales</h1>
             </template>
             <template v-if="!receiptsStore.loading" #description>
               <DashboardPageMetrics :metrics="receiptsHeaderMetrics" aria-label="Sales summary" />
@@ -59,7 +59,7 @@
                 "
                 @click="activeTab = 'receipts'"
               >
-                Receipts
+                Sales
                 <span
                   class="absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-opacity"
                   :class="
@@ -161,7 +161,7 @@
                           <h2
                             class="text-base font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-lg"
                           >
-                            Receipts
+                            Sales
                           </h2>
                           <span class="text-xs tabular-nums text-gray-500 dark:text-gray-400">
                             {{ receipts.length }} in store ·
@@ -192,7 +192,7 @@
                         <input
                           v-model="searchQuery"
                           type="text"
-                          placeholder="Search receipts..."
+                          placeholder="Search sales..."
                           class="w-full rounded-sm bg-white py-2 pl-10 pr-3 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder:text-gray-500"
                         />
                       </div>
@@ -235,11 +235,11 @@
                           variant="primary"
                           size="sm"
                           :icon="ReceiptPercentIcon"
-                          aria-label="New receipt"
+                          aria-label="New sale"
                           extra-class="!rounded-2xl ml-auto shrink-0 max-sm:!px-2 max-sm:!py-1.5"
                           @click="openCreateReceiptModal"
                         >
-                          <span :class="headerBtnLabelClass">New receipt</span>
+                          <span :class="headerBtnLabelClass">New sale</span>
                         </Button>
                       </div>
                     </div>
@@ -261,7 +261,7 @@
                     <template #filters>
                       <DashboardToolbarSearch
                         v-model="searchQuery"
-                        placeholder="Search receipts…"
+                        placeholder="Search sales…"
                         :wide="false"
                         input-class="sm:w-48"
                       />
@@ -298,11 +298,11 @@
                         variant="primary"
                         size="sm"
                         :icon="ReceiptPercentIcon"
-                        aria-label="New receipt"
+                        aria-label="New sale"
                         :extra-class="headerBtnClass"
                         @click="openCreateReceiptModal"
                       >
-                        <span :class="headerBtnLabelClass">New receipt</span>
+                        <span :class="headerBtnLabelClass">New sale</span>
                       </Button>
                     </template>
                   </DataTableToolbar>
@@ -360,18 +360,18 @@
                     :icon="ReceiptPercentIcon"
                     :title="
                       searchQuery || statusFilter !== 'all' || dateFilter !== 'all'
-                        ? 'No receipts found'
-                        : 'No receipts yet'
+                        ? 'No sales found'
+                        : 'No sales yet'
                     "
                     :description="
                       searchQuery || statusFilter !== 'all' || dateFilter !== 'all'
                         ? 'Try adjusting your search, status, or date filters.'
-                        : 'Create your first receipt to record a sale and track payments.'
+                        : 'Create your first sale to record revenue and track payments.'
                     "
                     :tips="
                       searchQuery || statusFilter !== 'all' || dateFilter !== 'all'
                         ? [
-                            'Clear filters to see every receipt for this store',
+                            'Clear filters to see every sale for this store',
                             'Receipt numbers and customer names are searchable',
                           ]
                         : [
@@ -502,7 +502,7 @@
                                 :data-receipt-actions-anchor="receipt.id"
                                 @click="toggleReceiptMenu(receipt.id)"
                                 class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800/85 dark:hover:text-gray-100"
-                                aria-label="Receipt actions"
+                                aria-label="Sale actions"
                                 aria-haspopup="menu"
                                 :aria-expanded="openReceiptMenuId === receipt.id"
                               >
@@ -546,7 +546,7 @@
                                   "
                                 >
                                   <div class="flex items-center gap-1.5">
-                                    Receipt #
+                                    Sale #
                                     <template v-if="isColumnSortable('receiptNumber')">
                                       <ChevronUpIcon
                                         v-if="
@@ -932,7 +932,7 @@
                                         :data-receipt-actions-anchor="receipt.id"
                                         @click="toggleReceiptMenu(receipt.id)"
                                         class="inline-flex h-8 w-8 items-center justify-center rounded-xl text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800/85 dark:hover:text-gray-100"
-                                        aria-label="Receipt actions"
+                                        aria-label="Sale actions"
                                         aria-haspopup="menu"
                                         :aria-expanded="openReceiptMenuId === receipt.id"
                                       >
@@ -1025,10 +1025,10 @@
                   </div>
                   <div class="min-w-0">
                     <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                      Delete selected receipts
+                      Delete selected sales
                     </h3>
                     <p class="text-xs text-gray-500 dark:text-gray-400">
-                      {{ selectedReceiptsForBulk.length }} receipt{{
+                      {{ selectedReceiptsForBulk.length }} sale{{
                         selectedReceiptsForBulk.length !== 1 ? 's' : ''
                       }}
                       selected
@@ -1041,14 +1041,14 @@
                   class="p-3 bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40 rounded-sm"
                 >
                   <p class="text-xs text-red-800 dark:text-red-200">
-                    This will permanently delete the selected receipts. This action cannot be
+                    This will permanently delete the selected sales. This action cannot be
                     undone. Associated customer data may be affected.
                   </p>
                 </div>
                 <div class="rounded-sm bg-gray-50 p-2.5 dark:!bg-dashboard-card/35">
                   <Checkbox
                     v-model="bulkDeleteReceiptsConfirmed"
-                    label="I understand that these receipts will be permanently deleted."
+                    label="I understand that these sales will be permanently deleted."
                     size="sm"
                     wrapper-class="items-start"
                     label-class="text-xs text-gray-700 dark:text-gray-300"
@@ -1079,7 +1079,7 @@
                   {{
                     isBulkDeletingReceipts
                       ? 'Deleting...'
-                      : `Delete ${selectedReceiptsForBulk.length} receipt${
+                      : `Delete ${selectedReceiptsForBulk.length} sale${
                           selectedReceiptsForBulk.length !== 1 ? 's' : ''
                         }`
                   }}
@@ -1113,7 +1113,7 @@
                 v-if="filteredOutstandingReceipts.length === 0 && !receiptsStore.loading"
                 :icon="ClockIcon"
                 title="No outstanding payments"
-                description="Create a receipt with “Balance due” when a customer pays a deposit. It will appear here until paid in full."
+                description="Create a sale with “Balance due” when a customer pays a deposit. It will appear here until paid in full."
                 :tips="[
                   'Record partial payments from the Actions menu on each row',
                   'The balance clears automatically when paid in full',
@@ -1124,7 +1124,7 @@
                 <table class="dashboard-table min-w-full">
                   <thead>
                     <tr>
-                      <th class="text-left">Receipt</th>
+                      <th class="text-left">Sale</th>
                       <th class="text-left">Customer</th>
                       <th class="hidden text-left md:table-cell">Items</th>
                       <th class="text-right">Total</th>
@@ -1244,7 +1244,7 @@
                 :description="
                   customersSearchQuery
                     ? 'Try another name, phone number, or email.'
-                    : 'Customers are created automatically when you add them on a receipt.'
+                    : 'Customers are created automatically when you add them on a sale.'
                 "
                 :tips="
                   customersSearchQuery
@@ -1253,7 +1253,7 @@
                         'Clear search to see your full customer list',
                       ]
                     : [
-                        'Each receipt links to a customer profile',
+                        'Each sale links to a customer profile',
                         'Expand a row to see order history and totals',
                       ]
                 "
@@ -1266,7 +1266,7 @@
                         <th
                           class="min-w-[90px] px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:min-w-[100px] sm:px-4"
                         >
-                          Receipts
+                          Sales
                         </th>
                         <th
                           class="px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4"
@@ -1320,7 +1320,7 @@
                               v-if="getCustomerReceipts(customer.id).length > 0"
                               :expanded="!!expandedCustomers[customer.id]"
                               :item-count="getCustomerReceipts(customer.id).length"
-                              noun="receipt"
+                              noun="sale"
                               hide-text="Hide orders"
                               no-top-margin
                               @toggle="toggleCustomerExpanded(customer.id)"
@@ -1413,7 +1413,7 @@
                             >
                               <ReceiptLineItemsDetailPanel
                                 title="Order history"
-                                count-noun="receipt"
+                                count-noun="sale"
                                 :item-count="getCustomerReceipts(customer.id).length"
                               >
                                 <div class="space-y-2">
@@ -1425,7 +1425,7 @@
                                     <button
                                       type="button"
                                       class="flex w-full flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-gray-100 px-3 py-2 text-left transition-colors hover:bg-gray-50/90 dark:border-gray-800/80 dark:hover:bg-white/[0.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-400/35"
-                                      :aria-label="`Open receipt ${receipt.receiptNumber} in receipts list`"
+                                      :aria-label="`Open sale ${receipt.receiptNumber} in sales list`"
                                       @click="goToReceiptFromCustomer(receipt)"
                                     >
                                       <div class="min-w-0">
@@ -1457,7 +1457,7 @@
                                         {{ receipt.itemsCount }} item{{
                                           receipt.itemsCount === 1 ? '' : 's'
                                         }}
-                                        · open in Receipts for full details
+                                        · open in Sales for full details
                                       </p>
                                     </div>
                                   </article>
@@ -1531,7 +1531,7 @@
         class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85"
       >
         <EyeIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
-        <span>View receipt</span>
+        <span>View sale</span>
       </button>
       <button
         v-if="receiptForOpenMenu.status === 'completed' && canEditReceipts"
@@ -1589,7 +1589,7 @@
           class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500"
           stroke-width="1.75"
         />
-        <span>View receipts</span>
+        <span>View sales</span>
       </button>
       <button
         v-if="hasBalanceFeature"
@@ -1716,7 +1716,7 @@ definePageMeta({
 })
 
 useHead({
-  title: 'Receipts - Storvv',
+  title: 'Sales - Storvv',
 })
 
 const receiptsStore = useReceiptsStore()
@@ -1760,7 +1760,7 @@ function openCustomerBalance(customer: CustomerDisplay) {
 
 function openCustomerPaymentReminder(customer: CustomerDisplay) {
   if (!customer.phone && !customer.email) {
-    toast.error('Add a phone number or email on receipts for this customer first.')
+    toast.error('Add a phone number or email on sales for this customer first.')
     return
   }
   customerWhatsAppTarget.value = customer
@@ -1954,7 +1954,7 @@ const currentSort = ref<{ key: string; order: 'asc' | 'desc' }>({ key: 'date', o
 
 // Define sortable columns
 const sortableColumns = [
-  { key: 'receiptNumber', label: 'Receipt #' },
+  { key: 'receiptNumber', label: 'Sale #' },
   { key: 'customerName', label: 'Customer' },
   { key: 'date', label: 'Date' },
   { key: 'itemsCount', label: 'Items' },
@@ -2693,7 +2693,7 @@ async function goToReceiptFromCustomer(receipt: Receipt) {
     idx = sortedFilteredReceipts.value.findIndex((r) => r.id === receipt.id)
   }
   if (idx === -1) {
-    toast.error('Could not find this receipt in the list.')
+    toast.error('Could not find this sale in the list.')
     await router.replace({ query: { ...route.query, tab: 'receipts' } })
     return
   }
@@ -2814,9 +2814,9 @@ const handleConfirmBulkDeleteReceipts = async () => {
     bulkDeleteReceiptsConfirmed.value = false
     await receiptsStore.fetchReceipts()
     await loadCreatorNames()
-    toast.success(`${count} receipt${count !== 1 ? 's' : ''} deleted`)
+    toast.success(`${count} sale${count !== 1 ? 's' : ''} deleted`)
   } catch (error: any) {
-    toast.error(error.message || 'Failed to delete some receipts')
+    toast.error(error.message || 'Failed to delete some sales')
   } finally {
     isBulkDeletingReceipts.value = false
   }
@@ -2878,7 +2878,7 @@ const handleReceiptConfirmDelete = (receipt: Receipt) => {
         await receiptsStore.deleteReceipt(receipt.id)
         await loadCreatorNames()
       } catch (error: any) {
-        toast.error(error.message || 'Failed to delete receipt')
+        toast.error(error.message || 'Failed to delete sale')
       }
     },
     5000

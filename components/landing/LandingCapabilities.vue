@@ -211,7 +211,7 @@ const coreItems: CapabilityItem[] = [
   },
   {
     icon: ReceiptPercentIcon,
-    title: 'Receipts & sales',
+    title: 'Sales & receipts',
     description: 'Discounts, swaps, refunds, and split payments with stock kept in sync.',
   },
   {
@@ -264,7 +264,7 @@ const toolsItems: CapabilityItem[] = [
   },
   {
     icon: UsersIcon,
-    title: 'CRM from receipts',
+    title: 'CRM from sales',
     description: 'Customer profiles build from optional receipt fields.',
   },
   {
@@ -275,7 +275,7 @@ const toolsItems: CapabilityItem[] = [
   {
     icon: MagnifyingGlassIcon,
     title: 'Unified search',
-    description: 'One search across inventory, receipts, and customers, with saved searches.',
+    description: 'One search across inventory, sales, and customers, with saved searches.',
   },
   {
     icon: ChartBarIcon,
@@ -288,7 +288,7 @@ const enterpriseItems: CapabilityItem[] = [
   {
     icon: BanknotesIcon,
     title: 'Stock loans',
-    description: 'Lend serialized lines, then sell via receipts or borrower flows.',
+    description: 'Lend serialized lines, then sell via sales or borrower flows.',
   },
   {
     icon: ArrowPathIcon,
@@ -455,7 +455,7 @@ const moreSubcategories: MoreSubcategory[] = [
       {
         icon: GlobeAltIcon,
         title: 'Locales & currency',
-        description: 'Match receipts to how each market prices.',
+        description: 'Match sales to how each market prices.',
       },
       {
         icon: GlobeAltIcon,
@@ -486,7 +486,7 @@ const groups: CapabilityGroup[] = [
     id: 'core',
     label: 'Core',
     title: 'Core strengths',
-    description: 'Inventory, receipts, and how your team is organized.',
+    description: 'Inventory, sales, and how your team is organized.',
     items: coreItems,
   },
   {

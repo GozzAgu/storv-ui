@@ -13,7 +13,7 @@
         </div>
         <div>
           <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            Return/Refund Receipt
+            Return/Refund Sale
           </h3>
           <p class="text-sm text-gray-500 dark:text-gray-400">
             Receipt #{{ receipt?.receiptNumber }}
@@ -26,7 +26,7 @@
       <div
         class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"
       ></div>
-      <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading receipt...</p>
+      <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading sale...</p>
     </div>
 
     <div v-else class="max-h-[calc(100vh-16rem)] overflow-y-auto space-y-4">
@@ -43,7 +43,7 @@
               Confirm Return/Refund
             </p>
             <p class="mt-1 text-xs text-orange-700 dark:text-orange-300">
-              This action will mark the receipt as refunded and return all items to inventory. The
+              This action will mark the sale as refunded and return all items to inventory. The
               customer will be notified and the transaction will be recorded.
             </p>
           </div>
@@ -54,7 +54,7 @@
       <div class="space-y-3">
         <div>
           <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
-            Receipt Information
+            Sale Information
           </h4>
           <div class="bg-gray-50 dark:bg-gray-700/50 rounded-sm p-3 space-y-1.5">
             <div class="flex justify-between text-sm">
@@ -177,7 +177,7 @@
         <div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-sm">
           <Checkbox
             v-model="confirmed"
-            label="I confirm that I want to return/refund this receipt. All items will be returned to inventory and the receipt will be marked as refunded."
+            label="I confirm that I want to return/refund this sale. All items will be returned to inventory and the sale will be marked as refunded."
             size="sm"
             wrapper-class="items-start"
             label-class="text-sm text-gray-700 dark:text-gray-300"
@@ -220,6 +220,7 @@ import Button from '~/components/ui/Button.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import { useReceiptsStore, type Receipt } from '~/stores/receipts'
 import { useInventoryStore } from '~/stores/inventory'
+import { groupReceiptItemsByFolder, folderHasSerialNumbers } from '~/utils/receipt-multi-folder'
 
 interface Props {
   modelValue: boolean
@@ -275,38 +276,43 @@ const handleConfirmReturn = async () => {
 
   try {
     const receipt = props.receipt
-    const itemIds = receipt.itemIds || []
-    let folder = receipt.folderId ? inventoryStore.getFolderById(receipt.folderId) : undefined
-    if (receipt.folderId && !folder) {
-      try {
-        folder = (await inventoryStore.fetchFolder(receipt.folderId)) ?? undefined
-      } catch {
-        folder = undefined
-      }
-    }
-    const hasSerialNumbers = folder?.hasSerialNumbers ?? true
+    const receiptItems = receipt.items || []
+    const grouped = groupReceiptItemsByFolder(receiptItems, receipt.folderId)
 
-    if (itemIds.length > 0) {
+    if (grouped.size > 0) {
       try {
-        if (!hasSerialNumbers && receipt.items?.length) {
-          const restoreQuantities: Record<string, number> = {}
-          for (const line of receipt.items) {
-            if (!line.itemId) continue
-            restoreQuantities[line.itemId] =
-              (restoreQuantities[line.itemId] ?? 0) + (line.quantity ?? 0)
+        for (const [folderId, lines] of grouped) {
+          const itemIds = lines.map((line) => line.itemId).filter(Boolean)
+          if (itemIds.length === 0) continue
+
+          let folder = inventoryStore.getFolderById(folderId)
+          if (!folder) {
+            folder = (await inventoryStore.fetchFolder(folderId)) ?? undefined
           }
-          await inventoryStore.returnItemsToStock(itemIds, {
-            folderId: receipt.folderId,
-            hasSerialNumbers: false,
-            restoreQuantities,
-          })
-        } else {
-          await inventoryStore.returnItemsToStock(itemIds)
+          const hasSerialNumbers = folderHasSerialNumbers(folder)
+
+          if (!hasSerialNumbers) {
+            const restoreQuantities: Record<string, number> = {}
+            for (const line of lines) {
+              if (!line.itemId) continue
+              restoreQuantities[line.itemId] =
+                (restoreQuantities[line.itemId] ?? 0) + (line.quantity ?? 0)
+            }
+            await inventoryStore.returnItemsToStock(itemIds, {
+              folderId,
+              hasSerialNumbers: false,
+              restoreQuantities,
+            })
+          } else {
+            await inventoryStore.returnItemsToStock(itemIds)
+          }
         }
       } catch (error: any) {
         console.error('[ReturnReceiptModal] Error returning items to stock:', error)
         throw new Error('Failed to return items to inventory. Please try again.')
       }
+    } else if (receipt.itemIds?.length) {
+      await inventoryStore.returnItemsToStock(receipt.itemIds)
     }
 
     // 2. Update receipt status to refunded and store reason

@@ -612,6 +612,51 @@ export const useInventoryStore = defineStore('inventory', {
     },
 
     /**
+     * Load every inventory item in the current branch, grouped by category.
+     * Used for Excel export — scans the whole store collection (no createdBy filter for owners).
+     */
+    async fetchAllItemsByFolderForExport(): Promise<Record<string, InventoryItem[]>> {
+      if (this.folders.length === 0) {
+        await this.fetchFolders()
+      }
+
+      const { isDemoModeActive } = await import('~/utils/demo-mode')
+      if (isDemoModeActive()) {
+        const grouped: Record<string, InventoryItem[]> = {}
+        for (const folder of this.folders) {
+          grouped[folder.id] = await this.fetchItemsAllChunked(folder.id, { force: true })
+        }
+        return grouped
+      }
+
+      const ctx = await this._prepareStoreInventoryItemsContext()
+      const snapshot = await getDocs(query(ctx.itemsRef))
+      const grouped: Record<string, InventoryItem[]> = {}
+
+      for (const folder of this.folders) {
+        grouped[folder.id] = []
+      }
+
+      for (const docSnap of snapshot.docs) {
+        const data = docSnap.data()
+        const folderId = String(data.folderId || '')
+        if (!folderId || !(folderId in grouped)) continue
+        const item = docToInventoryItem(docSnap, folderId, ctx.queryUserId)
+        grouped[folderId].push(item)
+      }
+
+      for (const folderId of Object.keys(grouped)) {
+        grouped[folderId].sort((a, b) => {
+          const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt)
+          const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt)
+          return dateB.getTime() - dateA.getTime()
+        })
+      }
+
+      return grouped
+    },
+
+    /**
      * Load folder definitions for a branch without overwriting Pinia `folders`.
      * Super admin only. Lists every document under `users/{owner}/stores/{storeId}/inventoryFolders`
      * (same store subcollection shown in Inventory for that branch). No `createdBy` filter so older

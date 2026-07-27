@@ -572,7 +572,7 @@ export function useDashboardInsights(folderItems: Ref<Record<string, InventoryIt
       parts.push(
         `Month to date: ${formatCurrency(monthSales.value)} across ${
           completedReceiptsCount.value
-        } completed receipt${completedReceiptsCount.value === 1 ? '' : 's'}.`
+        } completed sale${completedReceiptsCount.value === 1 ? '' : 's'}.`
       )
     }
     if (outstandingCount.value > 0) {
@@ -606,7 +606,7 @@ export function useDashboardInsights(folderItems: Ref<Record<string, InventoryIt
         id: 'outstanding',
         level: 'critical',
         title: 'Outstanding balances',
-        description: `${outstandingCount.value} receipt${
+        description: `${outstandingCount.value} sale${
           outstandingCount.value === 1 ? '' : 's'
         } with ${formatCurrency(outstandingBalanceTotal.value)} still owed.`,
         href: '/dashboard/receipts?tab=outstanding',
@@ -617,12 +617,12 @@ export function useDashboardInsights(folderItems: Ref<Record<string, InventoryIt
       items.push({
         id: 'pending',
         level: 'warning',
-        title: 'Pending receipts',
-        description: `${pendingReceiptsCount.value} receipt${
+        title: 'Pending sales',
+        description: `${pendingReceiptsCount.value} sale${
           pendingReceiptsCount.value === 1 ? ' is' : 's are'
         } awaiting completion.`,
         href: '/dashboard/receipts',
-        cta: 'Open receipts',
+        cta: 'Open sales',
       })
     }
     if (lowStockItems.value.length > 0) {
@@ -643,9 +643,9 @@ export function useDashboardInsights(folderItems: Ref<Record<string, InventoryIt
         level: 'info',
         title: 'Get started',
         description:
-          'Create your first receipt to populate sales metrics, customer insights, and revenue trends.',
+          'Create your first sale to populate sales metrics, customer insights, and revenue trends.',
         href: '/dashboard/receipts',
-        cta: 'Create receipt',
+        cta: 'Create sale',
       })
     } else if (salesLast7Days.value === 0 && completedReceiptsCount.value > 0) {
       items.push({
@@ -663,7 +663,7 @@ export function useDashboardInsights(folderItems: Ref<Record<string, InventoryIt
 
   const quickLinks = computed((): DashboardQuickLink[] => [
     {
-      label: 'Receipts',
+      label: 'Sales',
       description: 'Create sales, returns, and customer records',
       href: '/dashboard/receipts',
     },
@@ -689,7 +689,7 @@ export function useDashboardInsights(folderItems: Ref<Record<string, InventoryIt
     },
     {
       label: 'Help center',
-      description: 'Guides for receipts, loans, and sync',
+      description: 'Guides for sales, loans, and sync',
       href: '/dashboard/help',
     },
   ])

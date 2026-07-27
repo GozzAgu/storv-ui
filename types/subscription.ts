@@ -166,7 +166,7 @@ export function getEligibleStoresForPlan<T extends { id: string; createdAt?: unk
 export const SUBSCRIPTION_FEATURE_SUMMARY: Record<SubscriptionPlan, string[]> = {
   storvv_micro: [
     '1 store · 1 department · up to 2 staff',
-    'Inventory, receipts, returns & customers',
+    'Inventory, sales, returns & customers',
     'Dashboard, notifications & help center',
     'WhatsApp receipts (10/month)',
     'Payment links (in progress)',

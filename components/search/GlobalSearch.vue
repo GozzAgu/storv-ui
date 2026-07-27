@@ -34,7 +34,7 @@
                   ref="searchInput"
                   v-model="searchStore.query"
                   type="text"
-                  placeholder="Search receipts, inventory, customers…"
+                  placeholder="Search sales, inventory, customers…"
                   class="app-field w-full rounded-lg py-0 pl-9 pr-12 text-sm placeholder:text-gray-400 dark:!bg-white/[0.04]"
                   @input="handleSearchInput"
                   @keydown.esc="searchStore.closeSearch()"
@@ -205,7 +205,7 @@
                     Search your workspace
                   </p>
                   <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    Receipts, inventory, customers, and more
+                    Sales, inventory, customers, and more
                   </p>
                 </div>
 
@@ -373,7 +373,7 @@ const isStaff = computed(() => userStore.userData?.role === 'staff')
 const entityTypes = computed(() => {
   const baseTypes: Array<{ value: SearchEntityType; label: string; icon: any }> = [
     { value: 'all', label: 'All', icon: MagnifyingGlassIcon },
-    { value: 'receipts', label: 'Receipts', icon: ReceiptPercentIcon },
+    { value: 'receipts', label: 'Sales', icon: ReceiptPercentIcon },
     { value: 'inventory', label: 'Inventory', icon: CubeIcon },
     { value: 'customers', label: 'Customers', icon: UserCircleIcon },
     { value: 'departments', label: 'Departments', icon: BuildingOfficeIcon },
@@ -528,7 +528,7 @@ const getEntityTypeBadgeColor = (type: SearchEntityType) => {
 
 const getEntityTypeLabel = (type: SearchEntityType) => {
   const labels: Record<string, string> = {
-    receipts: 'Receipt',
+    receipts: 'Sale',
     inventory: 'Product',
     customers: 'Customer',
     departments: 'Department',

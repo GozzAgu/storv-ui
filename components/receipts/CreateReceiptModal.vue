@@ -1,8 +1,8 @@
 <template>
   <SidePanel
     :model-value="props.modelValue"
-    title="Create New Receipt"
-    subtitle="Category → items → receipt details"
+    title="Create New Sale"
+    subtitle="Pick categories and items, then sale details"
     size="lg"
     @update:model-value="(value: boolean) => emit('update:modelValue', value)"
   >
@@ -58,6 +58,12 @@
                   <p :class="pickRowTitleClass">{{ folder.name }}</p>
                   <p :class="pickRowMetaClass">
                     {{ folder.itemCount }} {{ folder.itemCount === 1 ? 'item' : 'items' }}
+                    <span
+                      v-if="selectedCountForFolder(folder.id) > 0"
+                      class="text-primary-600 dark:text-primary-400"
+                    >
+                      · {{ selectedCountForFolder(folder.id) }} in this sale
+                    </span>
                   </p>
                 </div>
                 <CheckCircleIcon
@@ -72,15 +78,25 @@
 
         <!-- Step 2: Select Items -->
         <div v-if="currentStep === 1" :class="[drawerFillStepClass, 'gap-3']">
-          <div class="flex shrink-0 items-center justify-between gap-2">
+          <div class="flex shrink-0 flex-wrap items-center justify-between gap-2">
             <p :class="sectionLabelClass">Items · {{ selectedFolder?.name }}</p>
-            <button
-              type="button"
-              class="text-[11px] font-medium text-primary-600 hover:underline dark:text-primary-400"
-              @click="loadItems"
-            >
-              Refresh list
-            </button>
+            <div class="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                class="inline-flex items-center gap-1 text-[11px] font-medium text-primary-600 hover:underline dark:text-primary-400"
+                @click="addFromAnotherCategory"
+              >
+                <PlusCircleIcon class="h-3.5 w-3.5" stroke-width="2" />
+                Add from another category
+              </button>
+              <button
+                type="button"
+                class="text-[11px] font-medium text-gray-500 hover:text-gray-700 hover:underline dark:text-gray-400 dark:hover:text-gray-200"
+                @click="loadItems"
+              >
+                Refresh list
+              </button>
+            </div>
           </div>
           <DashboardDrawerSearch
             v-model="itemSearchQuery"
@@ -201,8 +217,7 @@
                 <div
                   v-if="
                     selectedItems.find((si) => si.id === item.id) &&
-                    !selectedFolder?.hasSerialNumbers &&
-                    !hasSerialNumberInTemplate
+                    !itemUsesSerialNumbers(item)
                   "
                   class="mt-2 w-full border-t border-gray-100/90 pt-2 dark:border-gray-800/80"
                   @click.stop
@@ -232,15 +247,48 @@
             class="shrink-0 rounded-lg bg-gray-50/80 px-3 py-2.5 dark:border-white/[0.06] dark:bg-white/[0.03]"
           >
             <p class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-              Selected Items ({{ totalSelectedQuantity }})
+              Selected ({{ totalSelectedQuantity }})
             </p>
+            <div class="space-y-2 mb-2">
+              <div
+                v-for="group in selectedItemsByFolder"
+                :key="group.folderId"
+                class="rounded-md border border-gray-200/80 bg-white/60 px-2 py-1.5 dark:border-white/[0.06] dark:bg-white/[0.02]"
+              >
+                <p class="text-[10px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                  {{ group.folderName }}
+                </p>
+                <ul class="mt-1 space-y-0.5">
+                  <li
+                    v-for="si in group.lines"
+                    :key="si.id"
+                    class="flex items-center justify-between gap-2 text-[11px] text-gray-700 dark:text-gray-300"
+                  >
+                    <span class="min-w-0 truncate">
+                      {{ getItemDisplayName(si.item) }}
+                      <span v-if="!itemUsesSerialNumbers(si.item) && si.quantity > 1">
+                        × {{ si.quantity }}
+                      </span>
+                    </span>
+                    <button
+                      type="button"
+                      class="shrink-0 text-gray-400 hover:text-red-600 dark:hover:text-red-400"
+                      aria-label="Remove item"
+                      @click.stop="removeSelectedItem(si.id)"
+                    >
+                      <XMarkIcon class="h-3.5 w-3.5" stroke-width="2" />
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            </div>
             <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">
               Total: {{ formatCurrency(itemsSubtotal) }}
             </p>
           </div>
         </div>
 
-        <!-- Step 3: Receipt Details -->
+        <!-- Step 3: Sale Details -->
         <div v-if="currentStep === 2" class="space-y-3">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div class="relative">
@@ -471,7 +519,7 @@
                 {{
                   paymentSettlement === 'balance_due'
                     ? 'Stock stays reserved until paid off. Order appears under Outstanding.'
-                    : 'Stock is marked sold when the receipt is created.'
+                    : 'Stock is marked sold when the sale is recorded.'
                 }}
               </p>
               <div
@@ -717,7 +765,7 @@
             :disabled="!isFormValid || isCreating"
             @click="handleCreateReceipt"
           >
-            {{ isCreating ? 'Creating…' : 'Create receipt' }}
+            {{ isCreating ? 'Creating…' : 'Create sale' }}
           </Button>
         </div>
       </div>
@@ -796,6 +844,11 @@ import {
   getInventoryItemField as getItemField,
   getFolderColorClass,
 } from '~/composables/useInventoryItemDisplay'
+import {
+  folderHasSerialNumbers,
+  getSelectedFolderIds,
+  groupSelectedSaleLinesByFolder,
+} from '~/utils/receipt-multi-folder'
 
 interface Props {
   modelValue: boolean
@@ -844,7 +897,7 @@ const lastCreatedReceiptData = ref<any>(null)
 const steps = [
   { id: 'folder', label: 'Select Folder' },
   { id: 'items', label: 'Select Items' },
-  { id: 'details', label: 'Receipt Details' },
+  { id: 'details', label: 'Sale details' },
 ]
 
 const currentStep = ref(0)
@@ -1095,6 +1148,72 @@ const totalSelectedQuantity = computed(() => {
   return selectedItems.value.reduce((sum, si) => sum + si.quantity, 0)
 })
 
+const selectedItemsByFolder = computed(() => {
+  const groups: Array<{
+    folderId: string
+    folderName: string
+    lines: Array<{ id: string; quantity: number; item: InventoryItem }>
+  }> = []
+  const indexByFolder = new Map<string, number>()
+
+  for (const line of selectedItems.value) {
+    const folderId = line.item.folderId
+    if (!folderId) continue
+    let groupIndex = indexByFolder.get(folderId)
+    if (groupIndex === undefined) {
+      const folder = inventoryStore.getFolderById(folderId)
+      groupIndex = groups.length
+      indexByFolder.set(folderId, groupIndex)
+      groups.push({
+        folderId,
+        folderName: folder?.name ?? 'Category',
+        lines: [],
+      })
+    }
+    groups[groupIndex]!.lines.push(line)
+  }
+
+  return groups
+})
+
+function itemUsesSerialNumbers(item: InventoryItem): boolean {
+  const folder = inventoryStore.getFolderById(item.folderId)
+  return folderHasSerialNumbers(folder)
+}
+
+function selectedCountForFolder(folderId: string): number {
+  return selectedItems.value
+    .filter((line) => line.item.folderId === folderId)
+    .reduce((sum, line) => sum + line.quantity, 0)
+}
+
+function addFromAnotherCategory() {
+  currentStep.value = 0
+}
+
+function removeSelectedItem(itemId: string) {
+  const index = selectedItems.value.findIndex((line) => line.id === itemId)
+  if (index > -1) selectedItems.value.splice(index, 1)
+}
+
+async function applySelectedItemsToInventory() {
+  const grouped = groupSelectedSaleLinesByFolder(selectedItems.value)
+  for (const [folderId, lines] of grouped) {
+    let folder = inventoryStore.getFolderById(folderId)
+    if (!folder) {
+      folder = (await inventoryStore.fetchFolder(folderId)) ?? undefined
+    }
+    const hasSerialNumbers = folderHasSerialNumbers(folder)
+    const saleLines = lines.map((line) => ({
+      itemId: line.id,
+      quantitySold: hasSerialNumbers ? 1 : line.quantity,
+    }))
+    await inventoryStore.applyReceiptSaleToInventory(folderId, saleLines, {
+      hasSerialNumbers,
+    })
+  }
+}
+
 // Watch for modal opening to reset state
 watch(
   () => props.modelValue,
@@ -1235,9 +1354,12 @@ const loadItems = async () => {
     // Only show items that haven't been sold yet (no dateOut)
     availableItems.value = items.filter((item) => !item.dateOut && !item.pendingSaleReceiptId)
 
-    selectedItems.value = selectedItems.value.filter((si) =>
-      availableItems.value.some((i) => i.id === si.id)
-    )
+    // Only drop selections from the category being refreshed that are no longer available
+    const currentFolderId = selectedFolder.value.id
+    selectedItems.value = selectedItems.value.filter((line) => {
+      if (line.item.folderId !== currentFolderId) return true
+      return availableItems.value.some((item) => item.id === line.id)
+    })
   } catch (error) {
     console.error('Error loading items:', error)
   } finally {
@@ -1246,8 +1368,7 @@ const loadItems = async () => {
 }
 
 const toggleItemSelection = (item: InventoryItem, checked?: boolean) => {
-  // Determine if quantity should be available (not for serial number items)
-  const hasSerialNumbers = selectedFolder.value?.hasSerialNumbers || hasSerialNumberInTemplate.value
+  const hasSerialNumbers = itemUsesSerialNumbers(item)
   const defaultQuantity = hasSerialNumbers ? 1 : 1
 
   // If called from checkbox component, use the checked value; otherwise toggle
@@ -1289,8 +1410,7 @@ const getSelectedItemQuantity = (itemId: string) => {
 const updateItemQuantity = (itemId: string, quantity: number) => {
   const selected = selectedItems.value.find((si) => si.id === itemId)
   if (selected) {
-    // If folder has serial numbers, quantity should always be 1
-    if (selectedFolder.value?.hasSerialNumbers || hasSerialNumberInTemplate.value) {
+    if (itemUsesSerialNumbers(selected.item)) {
       selected.quantity = 1
       return
     }
@@ -1441,26 +1561,31 @@ const handleCancel = () => {
 }
 
 const handleCreateReceipt = async () => {
-  if (!isFormValid.value || !selectedFolder.value) return
+  if (!isFormValid.value || selectedItems.value.length === 0) return
 
   isCreating.value = true
   try {
     // Generate receipt number
     const receiptNumber = `REC-${Date.now().toString().slice(-6)}`
 
+    const folderIds = getSelectedFolderIds(selectedItems.value)
+    const primaryFolderId = folderIds[0] || selectedFolder.value?.id || ''
+    const receiptHasSerialNumbers = selectedItems.value.some((line) =>
+      itemUsesSerialNumbers(line.item)
+    )
+
     // Create receipt items array
-    const hasSerialNumbers =
-      selectedFolder.value?.hasSerialNumbers || hasSerialNumberInTemplate.value
     const receiptItems: ReceiptItem[] = selectedItems.value.map((si) => {
+      const lineSerial = itemUsesSerialNumbers(si.item)
       const effectivePrice = getEffectivePrice(si.item)
       const originalPrice = getOriginalPrice(si.item)
       const hasDiscount = si.item.discountedPrice !== undefined && si.item.discountedPrice !== null
 
-      // Force quantity to 1 for serial number items
-      const itemQuantity = hasSerialNumbers ? 1 : si.quantity
+      const itemQuantity = lineSerial ? 1 : si.quantity
 
       return {
         itemId: si.id,
+        folderId: si.item.folderId,
         quantity: itemQuantity,
         price: effectivePrice, // Final price after discount
         itemName: getItemDisplayName(si.item),
@@ -1488,14 +1613,8 @@ const handleCreateReceipt = async () => {
     const total = calculateTotal()
     const deposit = roundMoney(Number(depositAmount.value) || 0)
 
-    if (!isBalanceDue && itemIds.length > 0 && selectedFolder.value) {
-      const saleLines = selectedItems.value.map((si) => ({
-        itemId: si.id,
-        quantitySold: hasSerialNumbers ? 1 : si.quantity,
-      }))
-      await inventoryStore.applyReceiptSaleToInventory(selectedFolder.value.id, saleLines, {
-        hasSerialNumbers,
-      })
+    if (!isBalanceDue && itemIds.length > 0) {
+      await applySelectedItemsToInventory()
       await useSellerLoanOutsStore()
         .fetchSellerLoanOuts(true)
         .catch(() => {})
@@ -1561,7 +1680,7 @@ const handleCreateReceipt = async () => {
       paymentMethod: useSplitPayment.value ? 'Split Payment' : receiptForm.value.paymentMethod,
       status: isBalanceDue ? 'balance_due' : 'completed',
       notes: receiptForm.value.notes || '',
-      hasSerialNumbers,
+      hasSerialNumbers: receiptHasSerialNumbers,
       ...(isBalanceDue && {
         amountPaid: deposit,
         balanceDue: computeBalanceDue(total, deposit),
@@ -1573,7 +1692,8 @@ const handleCreateReceipt = async () => {
           },
         ],
       }),
-      folderId: selectedFolder.value.id,
+      folderId: primaryFolderId,
+      folderIds: folderIds.length > 0 ? folderIds : primaryFolderId ? [primaryFolderId] : [],
       itemIds,
       storeId: currentStoreId, // Store ID where receipt was created
       storeBranchName, // Store branch name

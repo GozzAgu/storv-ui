@@ -10,7 +10,7 @@
           <strong>{{ currentStoreLabel }}</strong>
           <span v-if="userRoleLabel"> · {{ userRoleLabel }}</span>
           <span> · </span>
-          <span :class="numClass">{{ totalOrders }} receipts</span>
+          <span :class="numClass">{{ totalOrders }} sales</span>
         </p>
       </div>
     </header>
@@ -180,7 +180,7 @@
             <div v-if="chartData.length === 0" class="text-center">
               <MarketingFeatureIcon name="analytics" size="lg" class="mx-auto mb-2 opacity-40" />
               <p :class="cardTitleClass">No revenue data yet</p>
-              <p :class="cardDescClass">Completed receipts will populate this chart</p>
+              <p :class="cardDescClass">Completed sales will populate this chart</p>
             </div>
             <ClientOnly v-else>
               <LazyApexChart type="area" :height="chartHeight" :options="chartOptions" :series="chartSeries" />
@@ -193,7 +193,7 @@
 
         <section :class="[cardPaddedClass, 'dash-charts-grid__side flex flex-col']">
           <p :class="eyebrowClass">Payment methods</p>
-          <p :class="cardDescClass">Share of completed receipts by tender type</p>
+          <p :class="cardDescClass">Share of completed sales by tender type</p>
           <div v-if="paymentMethodBreakdown.length === 0" :class="['dash-empty', 'mt-4']">
             No completed sales to analyze yet.
           </div>
@@ -212,7 +212,7 @@
                 />
               </div>
               <p :class="['dash-bar-row__foot', numClass]">
-                {{ slice.count }} receipt{{ slice.count === 1 ? '' : 's' }}
+                {{ slice.count }} sale{{ slice.count === 1 ? '' : 's' }}
               </p>
             </li>
           </ul>
@@ -246,10 +246,10 @@
       <div :class="splitGridClass">
         <section :class="cardPaddedClass">
           <div :class="[cardHeaderClass, 'dash-card__header--compact']">
-            <h2 :class="cardTitleClass">Recent receipts</h2>
+            <h2 :class="cardTitleClass">Recent sales</h2>
             <NuxtLink to="/dashboard/receipts" :class="cardLinkClass">View all</NuxtLink>
           </div>
-          <div v-if="recentReceipts.length === 0" :class="emptyClass">No receipts yet.</div>
+          <div v-if="recentReceipts.length === 0" :class="emptyClass">No sales yet.</div>
           <ul v-else :class="listClass">
             <li v-for="tx in recentReceiptsTop" :key="tx.id" :class="listRowClass">
               <div class="min-w-0">
@@ -457,7 +457,7 @@ const tutorialSteps: TutorialStep[] = [
   {
     title: 'Welcome to Your Dashboard',
     description:
-      'Your command center summarizes revenue, inventory health, outstanding balances, and recent receipts for the active store.',
+      'Your command center summarizes revenue, inventory health, outstanding balances, and recent sales for the active store.',
     icon: MARKETING_FEATURE_ICONS.dashboard,
     targetSelector: '[data-tutorial="dashboard"]',
   },
@@ -469,9 +469,9 @@ const tutorialSteps: TutorialStep[] = [
     targetSelector: '[data-tutorial="inventory"]',
   },
   {
-    title: 'Create and Track Receipts',
+    title: 'Create and Track Sales',
     description:
-      'Receipts drive revenue charts, customer counts, and payment-method breakdowns. Balance-due sales surface under Needs attention.',
+      'Sales drive revenue charts, customer counts, and payment-method breakdowns. Balance-due sales surface under Needs attention.',
     icon: MARKETING_FEATURE_ICONS.receipts,
     targetSelector: '[data-tutorial="receipts"]',
   },

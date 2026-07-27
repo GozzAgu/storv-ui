@@ -12,7 +12,7 @@
           Try the <span class="landing-demo__accent">real dashboard</span> (no signup)
         </h2>
         <p class="landing-demo__lede">
-          Walk through inventory, receipts, multi-branch switching, and reports with sample store
+          Walk through inventory, sales, multi-branch switching, and reports with sample store
           data. Everything stays in your browser. No account required.
         </p>
         <ul class="landing-demo__points">
@@ -85,7 +85,7 @@ defineProps<{
 
 const points = [
   'Three sample branches with realistic stock and sales',
-  'Record sales, check low stock, browse receipts',
+  'Record sales, check low stock, browse sales history',
   'Multi-store sync and consolidated reports (Enterprise preview)',
   'Reset sample data anytime',
 ]
@@ -93,7 +93,7 @@ const points = [
 const previewNav: Array<{ name: string; iconKey: DashboardNavIconKey; active?: boolean }> = [
   { name: 'Dashboard', iconKey: 'dashboard', active: true },
   { name: 'Inventory', iconKey: 'inventory' },
-  { name: 'Receipts', iconKey: 'receipts' },
+  { name: 'Sales', iconKey: 'receipts' },
   { name: 'Analytics', iconKey: 'analytics' },
   { name: 'Settings', iconKey: 'settings' },
 ]

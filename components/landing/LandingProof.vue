@@ -81,7 +81,7 @@ const proofCards: Array<{
   {
     metric: 'Sales',
     iconKey: 'receipts',
-    title: 'Receipts and customers together',
+    title: 'Sales and customers together',
     description:
       'Every sale saved with items and payment, including Paystack links when customers pay remotely.',
   },

@@ -44,7 +44,7 @@
       id="dashboard-assistant-panel"
       v-model="assistantStore.isOpen"
       title="Storvv Assistant"
-      subtitle="Ask how to use inventory, receipts, roles, and plans."
+      subtitle="Ask how to use inventory, sales, roles, and plans."
       size="md"
       dense
       content-padding="p-0"
@@ -158,7 +158,7 @@
               v-model="draft"
               rows="2"
               class="app-field min-h-[2.75rem] flex-1 resize-none rounded-xl px-3 py-2 text-sm dark:!bg-white/[0.04]"
-              placeholder="Ask about receipts, inventory, staff roles…"
+              placeholder="Ask about sales, inventory, staff roles…"
               :disabled="!apiBaseConfigured || !statusLoaded || !configured || assistantStore.sending"
               @keydown.enter.exact.prevent="submitDraft"
             />
@@ -209,7 +209,7 @@ const messagesEl = ref<HTMLElement | null>(null)
 const inputEl = ref<HTMLTextAreaElement | null>(null)
 
 const suggestedPrompts = [
-  'How do I create a receipt?',
+  'How do I create a sale?',
   'What can store managers do?',
   'Which plan includes Analytics?',
   'How do stock loans work?',

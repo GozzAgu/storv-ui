@@ -33,7 +33,7 @@ const getIcon = (type: RecentItem['type']) => {
 const getTypeLabel = (type: RecentItem['type']) => {
   switch (type) {
     case 'receipt':
-      return 'Receipt'
+      return 'Sale'
     case 'customer':
       return 'Customer'
     case 'inventory':

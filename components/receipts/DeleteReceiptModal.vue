@@ -12,7 +12,7 @@
           <TrashIcon class="w-6 h-6 text-red-600 dark:text-red-400" />
         </div>
         <div>
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Delete Receipt</h3>
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Delete Sale</h3>
           <p class="text-sm text-gray-500 dark:text-gray-400">
             Receipt #{{ receipt?.receiptNumber }}
           </p>
@@ -24,7 +24,7 @@
       <div
         class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"
       ></div>
-      <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading receipt...</p>
+      <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading sale...</p>
     </div>
 
     <div v-else class="max-h-[calc(100vh-16rem)] overflow-y-auto space-y-4">
@@ -39,8 +39,8 @@
           <div>
             <p class="text-sm font-medium text-red-800 dark:text-red-200">Confirm Deletion</p>
             <p class="mt-1 text-xs text-red-700 dark:text-red-300">
-              This action cannot be undone. Deleting this receipt will also delete the associated
-              customer (if no other receipts exist) and return all items to inventory.
+              This action cannot be undone. Deleting this sale will also delete the associated
+              customer (if no other sales exist) and return all items to inventory.
             </p>
           </div>
         </div>
@@ -50,7 +50,7 @@
       <div class="space-y-3">
         <div>
           <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
-            Receipt Information
+            Sale Information
           </h4>
           <div class="bg-gray-50 dark:bg-gray-700/50 rounded-sm p-3 space-y-1.5">
             <div class="flex justify-between text-sm">
@@ -172,9 +172,9 @@
           <ul
             class="space-y-0.5 text-xs text-yellow-800 dark:text-yellow-200 list-disc list-inside"
           >
-            <li>All items from this receipt will be returned to inventory</li>
-            <li>The associated customer will be removed (if this was their only receipt)</li>
-            <li>This receipt will be permanently deleted</li>
+            <li>All items from this sale will be returned to inventory</li>
+            <li>The associated customer will be removed (if this was their only sale)</li>
+            <li>This sale will be permanently deleted</li>
             <li>This action cannot be undone</li>
           </ul>
         </div>
@@ -183,7 +183,7 @@
         <div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-sm">
           <Checkbox
             v-model="confirmed"
-            label="I understand that this action cannot be undone and will permanently delete this receipt and its associated data."
+            label="I understand that this action cannot be undone and will permanently delete this sale and its associated data."
             size="sm"
             wrapper-class="items-start"
             label-class="text-sm text-gray-700 dark:text-gray-300"
@@ -209,7 +209,7 @@
         :icon="TrashIcon"
         class="w-full sm:w-auto"
       >
-        {{ isProcessing ? 'Deleting...' : 'Delete Receipt' }}
+        {{ isProcessing ? 'Deleting...' : 'Delete Sale' }}
       </Button>
     </template>
   </Modal>

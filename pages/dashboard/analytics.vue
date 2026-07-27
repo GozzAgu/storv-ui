@@ -151,7 +151,7 @@
             </div>
           </div>
           <div v-if="customerChartCustomers.length === 0" :class="emptyClass">
-            No customer emails on receipts in this period.
+            No customer emails on sales in this period.
           </div>
           <LazyApexChart
             v-else
@@ -352,7 +352,7 @@
             <table class="dashboard-table min-w-full">
               <thead>
                 <tr>
-                  <th class="text-left">Receipt</th>
+                  <th class="text-left">Sale</th>
                   <th class="text-left">Date</th>
                   <th class="text-right">Amount</th>
                   <th class="text-left">Reason</th>

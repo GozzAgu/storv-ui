@@ -412,7 +412,7 @@ const heroStats = [
 const variantHighlights = [
   'Variant-level stock tracking',
   'Instant low-stock alerts',
-  'Receipts and returns, handled',
+  'Sales and returns, handled',
 ] as const
 
 const multiStoreStats = [
@@ -484,7 +484,7 @@ const coreFeatures: Array<{
   {
     num: '02',
     iconKey: 'receipts',
-    title: 'Receipts',
+    title: 'Sales',
     description: 'Sales, payments, and history in one search, not scattered across WhatsApp.',
     badge: 'One record',
     wide: false,
@@ -501,7 +501,7 @@ const coreFeatures: Array<{
     num: '04',
     iconKey: 'customers',
     title: 'Customers',
-    description: 'Names, phones, and spend history linked to receipts at every branch.',
+    description: 'Names, phones, and spend history linked to sales at every branch.',
     badge: 'Know buyers',
     wide: false,
   },

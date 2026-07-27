@@ -45,7 +45,7 @@ export function useReceiptTimeline(receipt: Ref<Receipt | null>) {
 
     events.push({
       type: 'created',
-      label: r.isSwapIn ? 'Swap-in received' : 'Receipt created',
+      label: r.isSwapIn ? 'Swap-in received' : 'Sale recorded',
       description: createdDescription,
       date: createdDate,
     })

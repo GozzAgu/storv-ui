@@ -1,8 +1,8 @@
 <template>
   <SidePanel
     :model-value="props.modelValue"
-    title="Create New Receipt"
-    subtitle="Category → items → receipt details"
+    title="Create New Sale"
+    subtitle="Category → items → sale details"
     size="lg"
     @update:model-value="(value: boolean) => emit('update:modelValue', value)"
   >
@@ -240,7 +240,7 @@
           </div>
         </div>
 
-        <!-- Step 3: Receipt Details -->
+        <!-- Step 3: Sale Details -->
         <div v-if="currentStep === 2" class="space-y-3">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div class="relative">
@@ -669,7 +669,7 @@
             :disabled="!isFormValid || isCreating"
             @click="handleCreateReceipt"
           >
-            {{ isCreating ? 'Creating…' : 'Create receipt' }}
+            {{ isCreating ? 'Creating…' : 'Create sale' }}
           </Button>
         </div>
       </div>
@@ -825,7 +825,7 @@ const lastCreatedReceiptData = ref<any>(null)
 const steps = [
   { id: 'folder', label: 'Select Folder' },
   { id: 'items', label: 'Select Items' },
-  { id: 'details', label: 'Receipt Details' },
+  { id: 'details', label: 'Sale details' },
 ]
 
 const currentStep = ref(0)

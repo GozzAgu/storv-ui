@@ -50,6 +50,8 @@ export interface ReceiptItem {
   quantity: number
   price: number // Final price after discount (if any)
   itemName: string
+  /** Inventory category for this line (supports multi-category sales). */
+  folderId?: string
   serialNo?: string
   brand?: string
   model?: string
@@ -88,6 +90,8 @@ export interface Receipt {
   notes?: string
   refundReason?: string // Reason for return/refund (when status is refunded)
   folderId: string
+  /** All categories included when a sale spans multiple inventory folders. */
+  folderIds?: string[]
   itemIds: string[] // Array of inventory item IDs that were sold
   storeId: string // Store this receipt belongs to
   storeBranchName?: string // Store branch name where receipt was generated
@@ -263,6 +267,11 @@ export const useReceiptsStore = defineStore('receipts', {
               status: data.status || 'completed',
               notes: data.notes || '',
               folderId: data.folderId || '',
+              folderIds: Array.isArray(data.folderIds)
+                ? (data.folderIds as string[])
+                : data.folderId
+                  ? [data.folderId]
+                  : [],
               itemIds: data.itemIds || [],
               storeId: data.storeId || '',
               storeBranchName: data.storeBranchName || '',
@@ -632,25 +641,50 @@ export const useReceiptsStore = defineStore('receipts', {
       let completed = false
 
       if (isBalanceFullyPaid(total, newPaid)) {
-        const folderId = String(data.folderId || '')
         const items = (data.items as ReceiptItem[]) || []
-        let hasSerialNumbers = data.hasSerialNumbers === true
-        if (!hasSerialNumbers && folderId) {
-          const folder = inventoryStore.getFolderById(folderId)
-          if (folder?.hasSerialNumbers) hasSerialNumbers = true
+        const fallbackFolderId = String(data.folderId || '')
+        const folderIdsFromReceipt = Array.isArray(data.folderIds)
+          ? (data.folderIds as string[]).filter(Boolean)
+          : fallbackFolderId
+            ? [fallbackFolderId]
+            : []
+
+        const { groupReceiptItemsByFolder } = await import('~/utils/receipt-multi-folder')
+        const grouped =
+          groupReceiptItemsByFolder(items, fallbackFolderId).size > 0
+            ? groupReceiptItemsByFolder(items, fallbackFolderId)
+            : new Map(
+                folderIdsFromReceipt.map((fid) => [
+                  fid,
+                  items.filter((line) => line.folderId === fid || !line.folderId),
+                ])
+              )
+
+        for (const [folderId, folderItems] of grouped) {
+          if (!folderId || folderItems.length === 0) continue
+          let folder = inventoryStore.getFolderById(folderId)
+          if (!folder) {
+            folder = (await inventoryStore.fetchFolder(folderId)) ?? undefined
+          }
+          let hasSerialNumbers = folder?.hasSerialNumbers === true
+          if (!hasSerialNumbers && folderId) {
+            const { folderHasSerialNumbers } = await import('~/utils/receipt-multi-folder')
+            hasSerialNumbers = folderHasSerialNumbers(folder)
+          }
+          const saleLines = folderItems
+            .filter((i) => i?.itemId)
+            .map((i) => ({
+              itemId: i.itemId,
+              quantitySold: hasSerialNumbers ? 1 : Number(i.quantity) || 1,
+            }))
+          if (saleLines.length > 0) {
+            await inventoryStore.finalizeBalanceDueInventorySale(folderId, receiptId, saleLines, {
+              hasSerialNumbers,
+              skipActivityLog: true,
+            })
+          }
         }
-        const saleLines = items
-          .filter((i) => i?.itemId)
-          .map((i) => ({
-            itemId: i.itemId,
-            quantitySold: hasSerialNumbers ? 1 : Number(i.quantity) || 1,
-          }))
-        if (folderId && saleLines.length > 0) {
-          await inventoryStore.finalizeBalanceDueInventorySale(folderId, receiptId, saleLines, {
-            hasSerialNumbers,
-            skipActivityLog: true,
-          })
-        }
+
         const paymentMethod =
           payment.method.trim() || String(data.paymentMethod || '').trim() || 'Cash'
         await updateDoc(receiptRef, {
@@ -664,17 +698,19 @@ export const useReceiptsStore = defineStore('receipts', {
         })
         completed = true
 
-        if (folderId && saleLines.length > 0) {
-          const receiptLabel = String(data.receiptNumber || receiptId)
-          const soldCount = saleLines.reduce(
-            (n, l) => n + (hasSerialNumbers ? 1 : Number(l.quantitySold) || 1),
-            0
-          )
+        const receiptLabel = String(data.receiptNumber || receiptId)
+        const allSaleLines = items.filter((i) => i?.itemId)
+        const soldCount = allSaleLines.reduce(
+          (n, line) => n + (Number(line.quantity) || 1),
+          0
+        )
+        if (allSaleLines.length > 0) {
           const userDisplayName = await getCurrentUserDisplayName().catch(() => 'Unknown')
+          const entityId = folderIdsFromReceipt[0] || fallbackFolderId || receiptId
           await logActivity({
             action: 'updated',
             entityType: 'items_batch',
-            entityId: folderId,
+            entityId,
             entityName: `${soldCount} item${
               soldCount !== 1 ? 's' : ''
             } marked as sold · ${receiptLabel}`,

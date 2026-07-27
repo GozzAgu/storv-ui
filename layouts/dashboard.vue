@@ -1060,6 +1060,12 @@ const navigation: Array<{
     subscriptionFeature: 'inventory',
   },
   {
+    name: 'Sales',
+    segment: '/receipts',
+    iconKey: 'receipts',
+    subscriptionFeature: 'receipts',
+  },
+  {
     name: 'Customer buybacks',
     segment: '/buybacks',
     iconKey: 'buybacks',
@@ -1072,12 +1078,6 @@ const navigation: Array<{
     iconKey: 'loans',
     subscriptionFeature: 'seller_loans',
     requiresManagerOrSuperAdmin: true,
-  },
-  {
-    name: 'Receipts',
-    segment: '/receipts',
-    iconKey: 'receipts',
-    subscriptionFeature: 'receipts',
   },
   {
     name: 'Payment links',

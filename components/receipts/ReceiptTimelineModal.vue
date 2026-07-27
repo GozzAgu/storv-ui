@@ -9,7 +9,7 @@
         <h3
           class="text-base font-semibold text-gray-900 dark:text-gray-100 truncate tracking-tight"
         >
-          Receipt History
+          Sale history
         </h3>
         <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 truncate">
           Receipt #{{ receipt?.receiptNumber || '-' }} · {{ receipt?.customerName || '' }}
@@ -26,7 +26,7 @@
         </div>
         <p class="mt-3 text-sm font-medium text-gray-700 dark:text-gray-300">No events yet</p>
         <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-          Activity for this receipt will appear here
+          Activity for this sale will appear here
         </p>
       </div>
 

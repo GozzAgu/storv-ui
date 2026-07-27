@@ -261,7 +261,7 @@ const popularTopics = [
   { label: "What's new", query: 'recent updates' },
   { label: 'Stock loans', query: 'stock loan' },
   { label: 'Staff & roles', query: 'staff' },
-  { label: 'Receipts & refunds', query: 'receipt' },
+  { label: 'Sales & refunds', query: 'receipt' },
   { label: 'Inventory & categories', query: 'inventory' },
   { label: 'Table view', query: 'table' },
   { label: 'Sell screen note', query: 'sell' },
@@ -274,7 +274,7 @@ const quickScreenLinks = [
   { label: 'Dashboard', to: '/dashboard' },
   { label: 'Inventory', to: '/dashboard/inventory' },
   { label: 'Stock loans', to: '/dashboard/seller-loans' },
-  { label: 'Receipts', to: '/dashboard/receipts' },
+  { label: 'Sales', to: '/dashboard/receipts' },
   { label: 'Settings', to: '/dashboard/settings' },
   { label: 'Profile', to: '/dashboard/profile' },
 ] as const

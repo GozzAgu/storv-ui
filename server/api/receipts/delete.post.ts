@@ -49,7 +49,7 @@ export default defineEventHandler(async (event) => {
 
     const receipt = receiptSnap.data() as {
       itemIds?: string[]
-      items?: Array<{ itemId?: string; quantity?: number }>
+      items?: Array<{ itemId?: string; quantity?: number; folderId?: string }>
       folderId?: string
       total?: number
       createdBy?: string
@@ -61,32 +61,26 @@ export default defineEventHandler(async (event) => {
     }
 
     const itemIds = Array.isArray(receipt.itemIds) ? receipt.itemIds : []
-
-    let folderData: Record<string, unknown> | undefined
-    if (receipt.folderId) {
-      const folderRef = adminDb
-        .collection('users')
-        .doc(ownerUserId)
-        .collection('stores')
-        .doc(storeId)
-        .collection('inventoryFolders')
-        .doc(receipt.folderId)
-      const folderSnap = await tx.get(folderRef)
-      if (folderSnap.exists) {
-        folderData = folderSnap.data() as Record<string, unknown>
-      }
-    }
-
-    const usesSerialNumbers = !!(folderData as { hasSerialNumbers?: boolean } | undefined)
-      ?.hasSerialNumbers
-
     const receiptLines = Array.isArray(receipt.items) ? receipt.items : []
-    const qtyRestoreByItem = new Map<string, number>()
+    const linesByFolder = new Map<string, Array<{ itemId: string; quantity: number }>>()
+
     for (const line of receiptLines) {
       if (!line?.itemId) continue
-      const q = Number(line.quantity ?? 0)
-      if (q <= 0) continue
-      qtyRestoreByItem.set(line.itemId, (qtyRestoreByItem.get(line.itemId) ?? 0) + q)
+      const folderId = (line.folderId || receipt.folderId || '').trim()
+      if (!folderId) continue
+      const bucket = linesByFolder.get(folderId) ?? []
+      bucket.push({
+        itemId: line.itemId,
+        quantity: Math.max(1, Number(line.quantity ?? 1) || 1),
+      })
+      linesByFolder.set(folderId, bucket)
+    }
+
+    if (linesByFolder.size === 0 && itemIds.length > 0 && receipt.folderId) {
+      linesByFolder.set(
+        receipt.folderId,
+        itemIds.map((itemId) => ({ itemId, quantity: 1 }))
+      )
     }
 
     const inventoryItemsCol = () =>
@@ -97,33 +91,49 @@ export default defineEventHandler(async (event) => {
         .doc(storeId)
         .collection('inventoryItems')
 
-    const templateFields = (
-      folderData as { template?: { fields?: Array<{ name?: string }> } } | undefined
-    )?.template?.fields
+    const foldersCol = () =>
+      adminDb
+        .collection('users')
+        .doc(ownerUserId)
+        .collection('stores')
+        .doc(storeId)
+        .collection('inventoryFolders')
 
-    if (!usesSerialNumbers && qtyRestoreByItem.size > 0) {
-      for (const [invItemId, addQty] of qtyRestoreByItem) {
-        const itemRef = inventoryItemsCol().doc(invItemId)
-        const itemSnap = await tx.get(itemRef)
-        if (!itemSnap.exists) continue
-        const raw = itemSnap.data() as Record<string, unknown>
-        const resolved = resolveBulkStockFieldAndValueFromMap(raw, templateFields)
-        if (!resolved) continue
-        tx.update(itemRef, {
-          [resolved.fieldKey]: resolved.value + addQty,
-          dateOut: FieldValue.delete(),
-          updatedAt: FieldValue.serverTimestamp(),
-        })
-      }
-    } else {
-      for (const itemId of itemIds) {
-        const itemRef = inventoryItemsCol().doc(itemId)
-        const itemSnap = await tx.get(itemRef)
-        if (!itemSnap.exists) continue
-        tx.update(itemRef, {
-          dateOut: FieldValue.delete(),
-          updatedAt: FieldValue.serverTimestamp(),
-        })
+    for (const [folderId, lines] of linesByFolder) {
+      const folderSnap = await tx.get(foldersCol().doc(folderId))
+      const folderData = folderSnap.exists
+        ? (folderSnap.data() as Record<string, unknown>)
+        : undefined
+      const usesSerialNumbers = !!(folderData as { hasSerialNumbers?: boolean } | undefined)
+        ?.hasSerialNumbers
+      const templateFields = (
+        folderData as { template?: { fields?: Array<{ name?: string }> } } | undefined
+      )?.template?.fields
+
+      if (!usesSerialNumbers) {
+        for (const line of lines) {
+          const itemRef = inventoryItemsCol().doc(line.itemId)
+          const itemSnap = await tx.get(itemRef)
+          if (!itemSnap.exists) continue
+          const raw = itemSnap.data() as Record<string, unknown>
+          const resolved = resolveBulkStockFieldAndValueFromMap(raw, templateFields)
+          if (!resolved) continue
+          tx.update(itemRef, {
+            [resolved.fieldKey]: resolved.value + line.quantity,
+            dateOut: FieldValue.delete(),
+            updatedAt: FieldValue.serverTimestamp(),
+          })
+        }
+      } else {
+        for (const line of lines) {
+          const itemRef = inventoryItemsCol().doc(line.itemId)
+          const itemSnap = await tx.get(itemRef)
+          if (!itemSnap.exists) continue
+          tx.update(itemRef, {
+            dateOut: FieldValue.delete(),
+            updatedAt: FieldValue.serverTimestamp(),
+          })
+        }
       }
     }
 

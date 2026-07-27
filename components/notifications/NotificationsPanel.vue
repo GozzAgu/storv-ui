@@ -71,7 +71,7 @@
         <p :class="emptyDescClass">
           {{
             activeTab === 'inbox'
-              ? 'Receipts, inventory, and team activity will show up here.'
+              ? 'Sales, inventory, and team activity will show up here.'
               : "Notifications you've read will appear here."
           }}
         </p>

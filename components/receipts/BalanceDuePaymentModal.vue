@@ -156,7 +156,7 @@ const canSubmit = computed(() => {
 
 const submitLabel = computed(() => {
   const amt = roundMoney(Number(paymentAmount.value) || 0)
-  if (amt >= balanceDue.value - 0.01) return 'Complete & move to receipts'
+  if (amt >= balanceDue.value - 0.01) return 'Complete & move to sales'
   return 'Record payment'
 })
 

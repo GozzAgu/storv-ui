@@ -9,7 +9,7 @@
       </template>
       <template #description>
         <p :class="descriptionClass">
-          Branches, business details, inventory defaults, and receipts, tuned to match how you work.
+          Branches, business details, inventory defaults, and sales, tuned to match how you work.
         </p>
       </template>
       <template #actions>
@@ -223,7 +223,7 @@
             v-else-if="eligibleStores.length === 0"
             :icon="BuildingStorefrontIcon"
             title="No branches yet"
-            description="Create your first branch to organize inventory, staff, and receipts by location."
+            description="Create your first branch to organize inventory, staff, and sales by location."
             :tips="[
               'Each branch has its own departments and stock',
               'Switch branches anytime from the sidebar or here',
@@ -547,7 +547,7 @@
       <!-- Payment methods at checkout -->
       <DashboardSettingsPanel
         title="Checkout payments"
-        subtitle="Tender types on receipts, including OPay, Moniepoint, transfer, and cash."
+        subtitle="Tender types on sales, including OPay, Moniepoint, transfer, and cash."
         compact
       >
         <template #actions>
@@ -609,7 +609,7 @@
 
       <!-- Receipt & invoice settings -->
       <DashboardSettingsPanel
-        title="Receipts & invoices"
+        title="Sales & receipts"
         subtitle="Numbering, prefixes, and print behavior."
         compact
       >
@@ -619,7 +619,7 @@
             variant="primary"
             size="sm"
             :class="headerBtnClass"
-            aria-label="Save receipt settings"
+            aria-label="Save sales and receipt settings"
             @click="saveReceiptSettings"
           >
             Save
@@ -687,6 +687,48 @@
                 class="w-8 h-4 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary-500"
               ></div>
             </label>
+          </div>
+        </div>
+      </DashboardSettingsPanel>
+
+      <!-- Data export -->
+      <DashboardSettingsPanel
+        title="Data export"
+        subtitle="Download Excel backups of inventory, sales, buybacks, and stock loans for this branch."
+        compact
+      >
+        <div class="space-y-4">
+          <p class="text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
+            Exports four separate Excel files for the branch you are viewing: inventory (one sheet
+            per category), sales, customer buybacks, and stock loans. Large stores may take a
+            moment to gather.
+          </p>
+
+          <ul class="grid gap-2 sm:grid-cols-2">
+            <li
+              v-for="item in dataExportItems"
+              :key="item.key"
+              class="rounded-lg bg-gray-50/70 px-3 py-2.5 text-[11px] text-gray-600 dark:bg-white/[0.03] dark:text-gray-400"
+            >
+              <p class="font-medium text-gray-800 dark:text-gray-200">{{ item.label }}</p>
+              <p class="mt-0.5">{{ item.description }}</p>
+            </li>
+          </ul>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              :class="headerBtnClass"
+              :disabled="dataExporting"
+              :loading="dataExporting && !dataExportStatus"
+              @click="handleExportAllStoreData"
+            >
+              {{ dataExporting && !dataExportStatus ? 'Exporting…' : 'Export all to Excel' }}
+            </Button>
+            <p v-if="dataExportStatus" class="text-[11px] text-gray-500 dark:text-gray-400">
+              {{ dataExportStatus }}
+            </p>
           </div>
         </div>
       </DashboardSettingsPanel>
@@ -823,7 +865,7 @@
         >?
       </p>
       <p class="text-xs text-red-600 dark:text-red-400">
-        All data associated with this store (departments, staff, inventory, receipts) will need to
+        All data associated with this store (departments, staff, inventory, sales) will need to
         be handled separately.
       </p>
     </div>
@@ -965,6 +1007,7 @@ import {
   type StaffWorkspaceContext,
 } from '~/composables/useStaffWorkspaceContext'
 import { DEFAULT_PAYMENT_TENDERS, normalizePaymentTenderList } from '~/utils/payment-tenders'
+import { useStoreDataExport } from '~/composables/useStoreDataExport'
 
 type AccountLogoUploadResult = { url: string; path: string }
 
@@ -1017,6 +1060,47 @@ const authStore = useAuthStore()
 const { authFetch, getAuthHeaders } = useAuthenticatedFetch()
 const inventoryStore = useInventoryStore()
 const toast = useAppToast()
+
+const {
+  exporting: dataExporting,
+  exportStatus: dataExportStatus,
+  exportAllStoreData,
+} = useStoreDataExport()
+
+const dataExportItems = [
+  {
+    key: 'inventory',
+    label: 'Inventory',
+    description: 'All products, grouped by category on separate sheets.',
+  },
+  {
+    key: 'receipts',
+    label: 'Sales',
+    description: 'Sales with line items, totals, and payment status.',
+  },
+  {
+    key: 'buybacks',
+    label: 'Customer buybacks',
+    description: 'Items bought from customers, prices, and payment method.',
+  },
+  {
+    key: 'stock-loans',
+    label: 'Stock loans',
+    description: 'Loaned inventory with borrower details and item lines.',
+  },
+] as const
+
+async function handleExportAllStoreData() {
+  try {
+    const summary = await exportAllStoreData()
+    toast.success(
+      `Exported 4 files: ${summary.inventory.items} product(s), ${summary.receipts.count} sale(s), ${summary.buybacks.count} buyback(s), ${summary.stockLoans.count} stock loan(s).`
+    )
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Export failed'
+    toast.error(message)
+  }
+}
 const { limits } = useSubscriptionFeatures()
 const { eligibleStores, hiddenStoreCount } = usePlanEligibleStores()
 const route = useRoute()

@@ -32,7 +32,7 @@
             </p>
             <p class="mt-0.5 text-xs text-red-700 dark:text-red-300">
               Removed staff cannot sign in. You can reactivate them later from the Removed tab. Past
-              receipts and activity logs will still show their name.
+              sales and activity logs will still show their name.
             </p>
           </div>
         </div>

@@ -1775,7 +1775,7 @@ const roleMetaItems = computed(() => {
 const roleCardDescription = computed(() => {
   if (isStaff.value) {
     if (isManager.value) {
-      return 'You can manage day-to-day operations in your assigned branch and department, including inventory and receipts where enabled.'
+      return 'You can manage day-to-day operations in your assigned branch and department, including inventory and sales where enabled.'
     }
     return 'You can view and work within your assigned branch and department. Your super admin controls what you can change.'
   }
@@ -1839,7 +1839,7 @@ const permissionCatalog = computed((): PermissionListItem[] => {
       'Manage team members and roles',
       'View and manage all inventory',
       'View and manage all customers',
-      'View and manage all receipts and sales',
+      'View and manage all sales',
       'View and manage all returns',
       'Access all reports and analytics',
       'Manage departments and staff',
@@ -1860,15 +1860,15 @@ const permissionCatalog = computed((): PermissionListItem[] => {
 
   const labels = [
     'View inventory products',
-    'View receipts',
+    'View sales',
     'View customer information',
     'Create and process sales',
   ]
   if (isManager.value) {
     labels.push(
       'Manage inventory products',
-      'Edit receipts',
-      'Delete receipts',
+      'Edit sales',
+      'Delete sales',
       'Create inventory folders',
       'Manage department operations'
     )
