@@ -161,7 +161,7 @@
 
           <nav
             v-if="canRemoveStaff && !isLoadingStaff && !isStaffFullscreen"
-            class="dash-roster-tabs flex gap-0 border-b border-gray-100/90 px-4 dark:border-gray-800/80 sm:px-5"
+            :class="segmentTabsClass"
             role="tablist"
             aria-label="Staff roster"
           >
@@ -169,47 +169,27 @@
               type="button"
               role="tab"
               :aria-selected="rosterTab === 'active'"
-              class="relative pb-2.5 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900 rounded-t"
-              :class="
-                rosterTab === 'active'
-                  ? 'text-gray-900 dark:text-gray-100 font-semibold'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
-              "
+              :class="[
+                segmentTabsBtnClass,
+                rosterTab === 'active' ? segmentTabsBtnActiveClass : '',
+              ]"
               @click="rosterTab = 'active'"
             >
               Active
               <span class="tabular-nums">({{ staff.length }})</span>
-              <span
-                class="absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-opacity"
-                :class="
-                  rosterTab === 'active' ? 'bg-primary-500 opacity-100' : 'bg-transparent opacity-0'
-                "
-                aria-hidden="true"
-              />
             </button>
             <button
               type="button"
               role="tab"
               :aria-selected="rosterTab === 'removed'"
-              class="relative pb-2.5 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900 rounded-t"
-              :class="
-                rosterTab === 'removed'
-                  ? 'text-gray-900 dark:text-gray-100 font-semibold'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
-              "
+              :class="[
+                segmentTabsBtnClass,
+                rosterTab === 'removed' ? segmentTabsBtnActiveClass : '',
+              ]"
               @click="rosterTab = 'removed'"
             >
               Removed
               <span class="tabular-nums">({{ removedStaff.length }})</span>
-              <span
-                class="absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-opacity"
-                :class="
-                  rosterTab === 'removed'
-                    ? 'bg-primary-500 opacity-100'
-                    : 'bg-transparent opacity-0'
-                "
-                aria-hidden="true"
-              />
             </button>
           </nav>
 
@@ -776,7 +756,13 @@ definePageMeta({
 })
 
 const route = useRoute()
-const { headerBtnClass, headerBtnLabelClass } = useDashboardPageChrome()
+const {
+  headerBtnClass,
+  headerBtnLabelClass,
+  segmentTabsClass,
+  segmentTabsBtnClass,
+  segmentTabsBtnActiveClass,
+} = useDashboardPageChrome()
 const departmentId = computed(() => route.params.id as string)
 
 const departmentBreadcrumbs = computed(() => {

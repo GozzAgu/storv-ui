@@ -21,13 +21,8 @@ const items = [
 describe('splitNativeBottomNav', () => {
   it('puts primary tabs in order and remainder in more', () => {
     const { primary, more } = splitNativeBottomNav(items)
-    expect(primary.map((i) => i.name)).toEqual([
-      'Dashboard',
-      'Inventory',
-      'Departments',
-      'Receipts',
-    ])
-    expect(more.map((i) => i.name)).toEqual(['Analytics', 'Settings'])
+    expect(primary.map((i) => i.name)).toEqual(['Dashboard', 'Inventory', 'Receipts'])
+    expect(more.map((i) => i.name)).toEqual(['Departments', 'Analytics', 'Settings'])
   })
 
   it('keeps payment links in more when not in primary order', () => {
@@ -40,13 +35,9 @@ describe('splitNativeBottomNav', () => {
       },
     ]
     const { primary, more } = splitNativeBottomNav(withLinks)
-    expect(primary.map((i) => i.name)).toEqual([
-      'Dashboard',
-      'Inventory',
-      'Departments',
-      'Receipts',
-    ])
+    expect(primary.map((i) => i.name)).toEqual(['Dashboard', 'Inventory', 'Receipts'])
     expect(more.map((i) => i.name)).toContain('Payment links')
+    expect(more.map((i) => i.name)).toContain('Departments')
   })
 })
 

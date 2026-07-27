@@ -36,9 +36,16 @@ export function useDashboardPageChrome() {
     isCapacitorIos.value ? 'sr-only' : 'hidden sm:inline'
   )
 
+  const segmentTabsClass = 'dash-segment-tabs'
+  const segmentTabsBtnClass = 'dash-segment-tabs__btn'
+  const segmentTabsBtnActiveClass = 'dash-segment-tabs__btn--active'
+
   /** @deprecated Prefer `<DashboardBackButton />` for back navigation. */
-  const iconBtnClass =
-    'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100/90 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/[0.06] dark:hover:text-gray-100'
+  const iconBtnClass = computed(() =>
+    isCapacitorIos.value
+      ? 'inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100/90 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/[0.06] dark:hover:text-gray-100 [&_svg]:h-[1.125rem] [&_svg]:w-[1.125rem]'
+      : 'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100/90 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/[0.06] dark:hover:text-gray-100'
+  )
 
   const eyebrowClass = computed(() =>
     native.value ? 'dash-eyebrow' : 'dash-eyebrow'
@@ -76,6 +83,9 @@ export function useDashboardPageChrome() {
     metaClass,
     headerBtnClass,
     headerBtnLabelClass,
+    segmentTabsClass,
+    segmentTabsBtnClass,
+    segmentTabsBtnActiveClass,
     iconBtnClass,
     eyebrowClass,
     titleClass,

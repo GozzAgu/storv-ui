@@ -90,7 +90,7 @@ const showGlassHighlight = computed(() => false)
 const sizeClasses = computed(() => {
   if (iconOnlyIos.value) {
     const iconOnlyMap = {
-      sm: '!h-8 !w-8 !min-w-8 !p-0',
+      sm: '!h-9 !w-9 !min-w-9 !p-0',
       md: '!h-10 !w-10 !min-w-10 !p-0',
       lg: '!h-11 !w-11 !min-w-11 !p-0',
     }
@@ -105,6 +105,14 @@ const sizeClasses = computed(() => {
 })
 
 const iconSize = computed(() => {
+  if (iconOnlyIos.value) {
+    const iconOnlyMap = {
+      sm: 'h-[1.125rem] w-[1.125rem]',
+      md: 'h-5 w-5',
+      lg: 'h-5 w-5',
+    }
+    return iconOnlyMap[props.size]
+  }
   const sizeMap = {
     sm: 'h-4 w-4',
     md: 'h-5 w-5',

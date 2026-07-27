@@ -97,7 +97,8 @@ html.capacitor-native .dashboard-native-overlay-host {
 }
 
 html.capacitor-native .dashboard-native-overlay-host--active,
-html.capacitor-native .dashboard-native-overlay-host:has(.native-side-drawer-root) {
+html.capacitor-native .dashboard-native-overlay-host:has(.native-side-drawer-root),
+html.capacitor-native .dashboard-native-overlay-host:has(.dashboard-native-sheet) {
   pointer-events: auto;
 }
 

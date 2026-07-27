@@ -1,5 +1,28 @@
 <template>
-  <Teleport :to="teleportTarget">
+  <DashboardNativeSheet
+    v-if="nativeIosSheet"
+    :model-value="modelValue"
+    :title="title"
+    :subtitle="subtitle"
+    :eyebrow="resolvedEyebrow"
+    :body-padding="contentPadding"
+    :show-close="showClose"
+    :close-on-backdrop="closeOnBackdrop"
+    variant="crud"
+    mount="overlay-host"
+    @update:model-value="emit('update:modelValue', $event)"
+    @close="emit('close')"
+  >
+    <template v-if="$slots.header" #header>
+      <slot name="header" />
+    </template>
+    <slot />
+    <template v-if="$slots.footer" #footer>
+      <slot name="footer" />
+    </template>
+  </DashboardNativeSheet>
+
+  <Teleport v-else :to="teleportTarget">
     <!-- Native: right-edge drawer -->
     <Transition v-if="nativeInApp" name="native-drawer-shell">
       <div
@@ -140,6 +163,7 @@ import { computed, watch, onMounted, onUnmounted, useId } from 'vue'
 import {
   XMarkIcon,
 } from '~/utils/app-icons'
+import DashboardNativeSheet from '~/components/dashboard/DashboardNativeSheet.vue'
 import { setNativeOverlayLock } from '~/utils/native-overlay-lock'
 import { blurActiveElementIfNative } from '~/utils/native-focus'
 interface Props {
@@ -169,7 +193,11 @@ const emit = defineEmits<{
 }>()
 
 const { isNativeApp } = useCapacitorNativeApp()
+const { isCapacitorIos } = useIsCapacitorIos()
 const nativeInApp = computed(() => isNativeApp.value)
+const nativeIosSheet = computed(() => isCapacitorIos.value)
+
+const resolvedEyebrow = computed(() => props.eyebrow || (props.title ? 'Details' : undefined))
 
 const teleportTarget = computed(() =>
   nativeInApp.value ? '#dashboard-native-overlay-host' : 'body'
@@ -255,6 +283,7 @@ const handleEscape = (event: KeyboardEvent) => {
 
 function setScrollLock(locked: boolean) {
   if (!import.meta.client) return
+  if (nativeIosSheet.value) return
 
   if (nativeInApp.value) {
     setNativeOverlayLock(locked)

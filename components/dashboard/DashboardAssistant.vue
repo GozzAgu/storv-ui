@@ -15,7 +15,7 @@
           aria-label="Open Storvv Assistant"
           @click="assistantStore.toggle()"
         >
-          <SparklesIcon class="h-5 w-5" stroke-width="1.75" />
+          <SparklesIcon class="h-6 w-6" stroke-width="1.75" />
           <span class="sr-only">Storvv Assistant</span>
         </button>
       </DraggableFabContainer>
@@ -35,7 +35,7 @@
         aria-label="Open Storvv Assistant"
         @click="assistantStore.toggle()"
       >
-        <SparklesIcon class="h-5 w-5" stroke-width="1.75" />
+        <SparklesIcon class="h-6 w-6" stroke-width="1.75" />
         <span class="sr-only">Storvv Assistant</span>
       </button>
     </DraggableFabContainer>
@@ -45,6 +45,8 @@
       v-model="assistantStore.isOpen"
       title="Storvv Assistant"
       subtitle="Ask how to use inventory, sales, roles, and plans."
+      eyebrow="Assistant"
+      native-sheet-variant="assistant"
       size="md"
       dense
       content-padding="p-0"

@@ -235,6 +235,54 @@ html.capacitor-native.dark .native-more-sheet__icon--active {
   color: #9ab5e3;
 }
 
+/* Unified bottom sheets — CRUD drawers, assistant, More menu (iOS) */
+html.capacitor-ios.capacitor-native .dashboard-native-sheet {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+html.capacitor-ios.capacitor-native .dashboard-native-sheet--menu {
+  z-index: 59;
+  max-height: min(72dvh, 520px);
+}
+
+html.capacitor-ios.capacitor-native .dashboard-native-sheet--crud {
+  max-height: min(92dvh, 720px);
+}
+
+html.capacitor-ios.capacitor-native .dashboard-native-sheet--assistant {
+  max-height: min(88dvh, 680px);
+}
+
+html.capacitor-ios.capacitor-native .dashboard-native-sheet__body {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable;
+}
+
+html.capacitor-ios.capacitor-native .dashboard-native-sheet__subtitle {
+  margin-top: 0.125rem;
+  font-size: var(--cap-ios-body);
+  line-height: var(--cap-ios-leading);
+  color: var(--dash-muted);
+}
+
+html.capacitor-ios.capacitor-native .dashboard-native-sheet__footer .dash-overlay-footer,
+html.capacitor-ios.capacitor-native .dashboard-native-sheet__footer .dash-overlay-footer--dense {
+  border: 0;
+  background: transparent;
+  padding: 0.25rem 0.5rem 0;
+}
+
+html.capacitor-ios.capacitor-native .dashboard-native-sheet__close {
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
 html.capacitor-native .native-bottom-nav__backdrop {
   background: rgb(15 23 42 / 0.38) !important;
   -webkit-backdrop-filter: blur(4px);

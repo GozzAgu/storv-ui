@@ -38,22 +38,20 @@
       </div>
 
       <div v-else class="flex min-h-0 flex-1 flex-col gap-4 sm:gap-5">
-        <nav class="flex flex-wrap gap-8" aria-label="Stock loan views">
+        <nav :class="segmentTabsClass" aria-label="Stock loan views" role="tablist">
           <button
             v-for="tab in loanStatusTabs"
             :key="tab.value"
             type="button"
             role="tab"
             :aria-selected="statusFilter === tab.value"
-            class="relative rounded-t pb-2.5 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900"
-            :class="
-              statusFilter === tab.value
-                ? 'font-semibold text-gray-900 dark:text-gray-100'
-                : 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
-            "
+            :class="[
+              segmentTabsBtnClass,
+              statusFilter === tab.value ? segmentTabsBtnActiveClass : '',
+            ]"
             @click="statusFilter = tab.value"
           >
-            <span class="inline-flex items-center gap-1.5">
+            <span class="inline-flex items-center justify-center gap-1.5">
               {{ tab.label }}
               <span
                 v-if="tab.badgeCount"
@@ -63,15 +61,6 @@
                 {{ tab.badgeCount }}
               </span>
             </span>
-            <span
-              class="absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-opacity"
-              :class="
-                statusFilter === tab.value
-                  ? 'bg-primary-500 opacity-100'
-                  : 'bg-transparent opacity-0'
-              "
-              aria-hidden="true"
-            />
           </button>
         </nav>
 
@@ -412,7 +401,14 @@ definePageMeta({
   layout: 'dashboard',
 })
 
-const { eyebrowClass, pageTitleClass, pageWithFixedFooterClass } = useDashboardPageChrome()
+const {
+  eyebrowClass,
+  pageTitleClass,
+  pageWithFixedFooterClass,
+  segmentTabsClass,
+  segmentTabsBtnClass,
+  segmentTabsBtnActiveClass,
+} = useDashboardPageChrome()
 
 const sellerLoansStore = useSellerLoanOutsStore()
 const storesStore = useStoresStore()

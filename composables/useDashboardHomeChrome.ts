@@ -27,9 +27,9 @@ export function useDashboardHomeChrome() {
   const progressClass = 'dash-progress'
   const progressLegendClass = 'dash-progress__legend'
 
-  const segmentGroupClass = 'dash-segment'
-  const segmentBtnClass = 'dash-segment__btn'
-  const segmentBtnActiveClass = 'dash-segment__btn--active'
+  const segmentGroupClass = 'dash-segment-tabs'
+  const segmentBtnClass = 'dash-segment-tabs__btn'
+  const segmentBtnActiveClass = 'dash-segment-tabs__btn--active'
 
   const listClass = 'dash-list'
   const listRowClass = 'dash-list__row'

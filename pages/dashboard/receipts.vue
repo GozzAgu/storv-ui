@@ -45,86 +45,51 @@
           </DashboardPageHeader>
 
           <!-- Tabs -->
-          <nav class="flex items-center justify-between gap-4" aria-label="Sales views">
-            <div class="flex gap-8">
-              <button
-                type="button"
-                role="tab"
-                :aria-selected="activeTab === 'receipts'"
-                class="relative pb-2.5 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900 rounded-t"
-                :class="
-                  activeTab === 'receipts'
-                    ? 'text-gray-900 dark:text-gray-100 font-semibold'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
-                "
-                @click="activeTab = 'receipts'"
-              >
-                Sales
+          <nav :class="segmentTabsClass" aria-label="Sales views" role="tablist">
+            <button
+              type="button"
+              role="tab"
+              :aria-selected="activeTab === 'receipts'"
+              :class="[
+                segmentTabsBtnClass,
+                activeTab === 'receipts' ? segmentTabsBtnActiveClass : '',
+              ]"
+              @click="activeTab = 'receipts'"
+            >
+              Sales
+            </button>
+            <button
+              type="button"
+              role="tab"
+              :aria-selected="activeTab === 'outstanding'"
+              :class="[
+                segmentTabsBtnClass,
+                activeTab === 'outstanding' ? segmentTabsBtnActiveClass : '',
+              ]"
+              @click="activeTab = 'outstanding'"
+            >
+              <span class="inline-flex items-center justify-center gap-1.5">
+                Outstanding
                 <span
-                  class="absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-opacity"
-                  :class="
-                    activeTab === 'receipts'
-                      ? 'bg-primary-500 opacity-100'
-                      : 'bg-transparent opacity-0'
-                  "
-                  aria-hidden="true"
-                />
-              </button>
-              <button
-                type="button"
-                role="tab"
-                :aria-selected="activeTab === 'outstanding'"
-                class="relative pb-2.5 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900 rounded-t"
-                :class="
-                  activeTab === 'outstanding'
-                    ? 'text-gray-900 dark:text-gray-100 font-semibold'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
-                "
-                @click="activeTab = 'outstanding'"
-              >
-                <span class="inline-flex items-center gap-1.5">
-                  Outstanding
-                  <span
-                    v-if="outstandingReceipts.length > 0"
-                    class="min-w-[1.125rem] rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-amber-900 dark:bg-amber-950/50 dark:text-amber-200"
-                  >
-                    {{ outstandingReceipts.length }}
-                  </span>
+                  v-if="outstandingReceipts.length > 0"
+                  class="min-w-[1.125rem] rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-amber-900 dark:bg-amber-950/50 dark:text-amber-200"
+                >
+                  {{ outstandingReceipts.length }}
                 </span>
-                <span
-                  class="absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-opacity"
-                  :class="
-                    activeTab === 'outstanding'
-                      ? 'bg-primary-500 opacity-100'
-                      : 'bg-transparent opacity-0'
-                  "
-                  aria-hidden="true"
-                />
-              </button>
-              <button
-                type="button"
-                role="tab"
-                :aria-selected="activeTab === 'customers'"
-                class="relative pb-2.5 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900 rounded-t"
-                :class="
-                  activeTab === 'customers'
-                    ? 'text-gray-900 dark:text-gray-100 font-semibold'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
-                "
-                @click="activeTab = 'customers'"
-              >
-                Customers
-                <span
-                  class="absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-opacity"
-                  :class="
-                    activeTab === 'customers'
-                      ? 'bg-primary-500 opacity-100'
-                      : 'bg-transparent opacity-0'
-                  "
-                  aria-hidden="true"
-                />
-              </button>
-            </div>
+              </span>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              :aria-selected="activeTab === 'customers'"
+              :class="[
+                segmentTabsBtnClass,
+                activeTab === 'customers' ? segmentTabsBtnActiveClass : '',
+              ]"
+              @click="activeTab = 'customers'"
+            >
+              Customers
+            </button>
           </nav>
 
           <!-- Receipts Tab Content -->
@@ -1889,7 +1854,13 @@ watch(activeTab, (newTab) => {
 
 // Initialize loading state synchronously on client
 const isInitialLoading = ref(true)
-const { headerBtnClass, headerBtnLabelClass } = useDashboardPageChrome()
+const {
+  headerBtnClass,
+  headerBtnLabelClass,
+  segmentTabsClass,
+  segmentTabsBtnClass,
+  segmentTabsBtnActiveClass,
+} = useDashboardPageChrome()
 
 const searchQuery = ref('')
 const statusFilter = ref('all')

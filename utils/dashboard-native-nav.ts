@@ -10,7 +10,6 @@ export type DashboardNavItem = {
 export const NATIVE_PRIMARY_ORDER = [
   'Dashboard',
   'Inventory',
-  'Departments',
   'Receipts',
 ] as const
 

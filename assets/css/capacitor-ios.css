@@ -254,7 +254,8 @@ html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-header
 
 html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-header__description .dash-page-metrics {
   margin-top: 0;
-  width: 100%;
+  width: calc(100% + 1.75rem);
+  margin-inline: -0.875rem;
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 0;
@@ -698,10 +699,26 @@ html.capacitor-ios.capacitor-native
   button.group.relative.inline-flex.items-center.justify-center
   > span.relative.z-10
   svg {
-  width: 1rem;
-  height: 1rem;
   flex-shrink: 0;
-  opacity: 0.88;
+  opacity: 0.92;
+}
+
+html.capacitor-ios.capacitor-native
+  [data-dashboard-main]
+  button.group.relative.inline-flex.items-center.justify-center:not(:has(.sr-only))
+  > span.relative.z-10
+  svg {
+  width: 1.0625rem;
+  height: 1.0625rem;
+}
+
+html.capacitor-ios.capacitor-native
+  [data-dashboard-main]
+  button.group.relative.inline-flex.items-center.justify-center:has(.sr-only)
+  > span.relative.z-10
+  svg {
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 html.capacitor-ios.capacitor-native .dash-export-btn {
@@ -709,24 +726,25 @@ html.capacitor-ios.capacitor-native .dash-export-btn {
 }
 
 html.capacitor-ios.capacitor-native .dash-export-btn svg {
+  width: 1.0625rem;
+  height: 1.0625rem;
+  flex-shrink: 0;
+  opacity: 0.92;
+}
+
+html.capacitor-ios.capacitor-native [data-dashboard-main] button.inline-flex.items-center.gap-1\.5:not(:has(.sr-only)) svg {
   width: 1rem;
   height: 1rem;
   flex-shrink: 0;
-  opacity: 0.85;
-}
-
-html.capacitor-ios.capacitor-native [data-dashboard-main] button.inline-flex.items-center.gap-1\.5 svg {
-  width: 0.875rem;
-  height: 0.875rem;
-  flex-shrink: 0;
-  opacity: 0.85;
+  opacity: 0.92;
 }
 
 /* Icon-only dashboard buttons (label in sr-only) */
 html.capacitor-ios.capacitor-native
   [data-dashboard-main]
   button.group.relative.inline-flex.items-center.justify-center:has(.sr-only) {
-  min-width: 2rem;
+  min-width: 2.25rem;
+  min-height: 2.25rem;
   padding-inline: 0 !important;
 }
 
@@ -1356,32 +1374,54 @@ html.capacitor-ios.capacitor-native .dash-dept-roster-toolbar .dash-page-context
   gap: 0.5rem;
 }
 
-/* Segmented roster tabs */
-html.capacitor-ios.capacitor-native .dash-roster-tabs {
-  gap: 0;
-  padding-inline: 0.875rem;
+/* Segmented tabs — full width inside shells and headers */
+html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-segment-tabs,
+html.capacitor-ios.capacitor-native .data-table-shell .dash-segment-tabs,
+html.capacitor-ios.capacitor-native .dash-table-toolbar .dash-segment-tabs {
+  width: 100%;
+  margin-inline: 0;
 }
 
-html.capacitor-ios.capacitor-native .dash-roster-tabs button[role='tab'] {
-  flex: 1;
-  padding: 0.625rem 0.75rem 0.6875rem;
-  font-size: var(--cap-ios-body) !important;
+html.capacitor-ios.capacitor-native .data-table-shell .dash-segment-tabs,
+html.capacitor-ios.capacitor-native .dash-table-toolbar + .dash-segment-tabs {
+  margin: 0 0.875rem 0.625rem;
+  width: calc(100% - 1.75rem);
+}
+
+html.capacitor-ios.capacitor-native .dash-segment-tabs__btn {
+  font-size: var(--cap-ios-caption) !important;
+  padding: 0.5rem 0.5rem;
+}
+
+html.capacitor-ios.capacitor-native .dash-card__header .dash-segment-tabs {
+  width: 100%;
+  margin-top: 0.375rem;
+}
+
+/* Legacy dash-segment → match segment-tabs on iOS */
+html.capacitor-ios.capacitor-native .dash-segment {
+  display: flex;
+  width: 100%;
+  max-width: none;
+  gap: 0.25rem;
+  border: 0;
+  border-radius: 0.625rem;
+  background: rgb(255 255 255 / 0.06);
+  padding: 0.1875rem;
+}
+
+html.capacitor-ios.capacitor-native .dash-segment__btn {
+  flex: 1 1 0;
+  min-width: 0;
+  border-radius: 0.4375rem;
+  padding: 0.5rem 0.625rem;
+  font-size: var(--cap-ios-caption) !important;
   text-align: center;
-  border-bottom: 2px solid transparent;
 }
 
-html.capacitor-ios.capacitor-native .dash-roster-tabs button[role='tab'] span[aria-hidden='true'] {
-  display: none;
-}
-
-html.capacitor-ios.capacitor-native .dash-roster-tabs button[role='tab'][aria-selected='true'] {
-  color: rgb(248 250 252);
-  font-weight: 600;
-  border-bottom-color: #4876c7;
-}
-
-html.capacitor-ios.capacitor-native .dash-roster-tabs button[role='tab'][aria-selected='false'] {
-  color: var(--dash-muted);
+html.capacitor-ios.capacitor-native .dash-segment__btn--active {
+  background: rgb(255 255 255 / 0.12);
+  box-shadow: none;
 }
 
 /* KPI / info metrics — 2×2 for four stats (Activity Logs style) */
@@ -1432,21 +1472,13 @@ html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-metric
   letter-spacing: -0.02em;
 }
 
-/* Filter pills in unified header */
-html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-header__toolbar nav[aria-label='Filter by action'],
-html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-header__toolbar nav[aria-label='Filter by action'] {
+/* Filter pills in unified header — same as dash-segment-tabs */
+html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-header__toolbar .dash-segment-tabs {
   width: 100%;
-  padding: 0.1875rem;
-  border-radius: 0.625rem;
-  background: rgb(255 255 255 / 0.06);
 }
 
-html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-header__toolbar nav[aria-label='Filter by action'] button {
-  flex: 1;
-  min-width: 0;
-  padding: 0.4375rem 0.5rem;
-  font-size: var(--cap-ios-caption) !important;
-  border-radius: 0.4375rem;
+html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-header__toolbar nav[aria-label='Filter by action'] {
+  width: 100%;
 }
 
 /* Icon buttons — proportional touch targets */
@@ -1498,8 +1530,28 @@ html.capacitor-ios.capacitor-native .dash-grid-menu-btn svg {
 
 html.capacitor-ios.capacitor-native .dash-page-header--unified button[class*='rounded-full'] svg,
 html.capacitor-ios.capacitor-native .dash-table-toolbar button[class*='rounded-full'] svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+html.capacitor-ios.capacitor-native .dash-topnav__actions.dashboard-topnav-actions svg.lucide,
+html.capacitor-ios.capacitor-native .dash-topnav__search.dashboard-topnav-search svg {
+  width: 1.125rem !important;
+  height: 1.125rem !important;
+}
+
+html.capacitor-ios.capacitor-native .dashboard-native-bottom-nav svg {
+  width: 1.375rem;
+  height: 1.375rem;
+}
+
+html.capacitor-ios.capacitor-native .dashboard-assistant__fab svg {
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+}
+
+html.capacitor-ios.capacitor-native .dashboard-assistant__fab-mount button[aria-label='Drag to reposition'] span span {
   width: 1.125rem;
-  height: 1.125rem;
 }
 
 html.capacitor-ios.capacitor-native .activity-log-shell .grid.grid-cols-2 {
@@ -1515,6 +1567,9 @@ html.capacitor-ios.capacitor-native .dashboard-assistant__fab {
   width: 3.5rem;
   height: 3.5rem;
   box-shadow: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 html.capacitor-ios.capacitor-native.dark .dashboard-assistant__fab {
@@ -1543,6 +1598,15 @@ html.capacitor-ios.capacitor-native .dashboard-assistant__prompt {
 html.capacitor-ios.capacitor-native .dash-help-assistant-cta,
 html.capacitor-ios.capacitor-native .dash-help-assistant-link {
   min-height: 2.75rem;
+}
+
+html.capacitor-ios.capacitor-native .dashboard-native-sheet {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px), var(--native-keyboard-inset, 0px));
+}
+
+html.capacitor-ios.capacitor-native .dashboard-native-sheet .dashboard-assistant__messages {
+  -webkit-overflow-scrolling: touch;
 }
 
 html.capacitor-ios.capacitor-native .native-side-drawer-panel .dashboard-assistant__messages {

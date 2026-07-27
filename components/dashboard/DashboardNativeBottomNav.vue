@@ -59,99 +59,69 @@
       </div>
     </div>
 
-    <Teleport to="body">
-      <Transition
-        enter-active-class="transition-opacity duration-200 ease-out"
-        enter-from-class="opacity-0"
-        enter-to-class="opacity-100"
-        leave-active-class="transition-opacity duration-150 ease-in"
-        leave-from-class="opacity-100"
-        leave-to-class="opacity-0"
-      >
-        <button
-          v-if="moreOpen"
-          type="button"
-          :class="sheetBackdropClass"
-          aria-label="Close menu"
-          @click="moreOpen = false"
-        />
-      </Transition>
-
-      <Transition
-        enter-active-class="transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
-        enter-from-class="opacity-0 translate-y-full"
-        enter-to-class="opacity-100 translate-y-0"
-        leave-active-class="transition-[transform,opacity] duration-200 ease-[cubic-bezier(0.4,0,1,1)]"
-        leave-from-class="opacity-100 translate-y-0"
-        leave-to-class="opacity-0 translate-y-full"
-      >
-        <div
-          v-if="moreOpen"
-          :class="sheetClass"
-          :style="{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }"
-          role="dialog"
-          aria-label="More navigation"
+    <DashboardNativeSheet
+      v-model="moreOpen"
+      title="More"
+      eyebrow="Menu"
+      variant="menu"
+      mount="body"
+      :show-close="false"
+      body-padding="p-0"
+      aria-label="More navigation"
+      backdrop-label="Close menu"
+    >
+      <ul :class="sheetListClass">
+        <li v-for="item in moreItems" :key="item.href">
+          <NuxtLink
+            :to="item.href"
+            :prefetch="false"
+            :class="[
+              sheetRowClass,
+              isActive(item.href) ? sheetRowActiveClass : sheetRowInactiveClass,
+            ]"
+            @click="moreOpen = false"
+          >
+            <span
+              :class="[sheetIconWrapClass, isActive(item.href) ? sheetIconWrapActiveClass : '']"
+            >
+              <DashboardNavIcon
+                :name="item.iconKey"
+                :active="isActive(item.href)"
+                size="sm"
+              />
+            </span>
+            <span class="min-w-0 flex-1 text-sm font-medium leading-snug">{{ item.name }}</span>
+            <span
+              v-if="showNativeComingSoon && item.name === 'Payment links'"
+              class="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-800 dark:bg-amber-500/15 dark:text-amber-300"
+            >
+              Soon
+            </span>
+          </NuxtLink>
+        </li>
+        <li
+          v-if="moreItems.length === 0"
+          class="px-3 py-8 text-center text-sm text-gray-500 dark:text-gray-400"
         >
-          <div :class="sheetHeaderClass">
-            <div :class="sheetHandleClass" aria-hidden="true" />
-            <p :class="sheetEyebrowClass">Menu</p>
-            <p :class="sheetTitleClass">More</p>
-          </div>
+          Main tabs cover everything here.
+        </li>
+      </ul>
 
-          <ul :class="sheetListClass">
-            <li v-for="item in moreItems" :key="item.href">
-              <NuxtLink
-                :to="item.href"
-                :prefetch="false"
-                :class="[
-                  sheetRowClass,
-                  isActive(item.href) ? sheetRowActiveClass : sheetRowInactiveClass,
-                ]"
-                @click="moreOpen = false"
-              >
-                <span
-                  :class="[sheetIconWrapClass, isActive(item.href) ? sheetIconWrapActiveClass : '']"
-                >
-                  <DashboardNavIcon
-                    :name="item.iconKey"
-                    :active="isActive(item.href)"
-                    size="sm"
-                  />
-                </span>
-                <span class="min-w-0 flex-1 text-sm font-medium leading-snug">{{ item.name }}</span>
-                <span
-                  v-if="showNativeComingSoon && item.name === 'Payment links'"
-                  class="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-800 dark:bg-amber-500/15 dark:text-amber-300"
-                >
-                  Soon
-                </span>
-              </NuxtLink>
-            </li>
-            <li
-              v-if="moreItems.length === 0"
-              class="px-3 py-8 text-center text-sm text-gray-500 dark:text-gray-400"
-            >
-              Main tabs cover everything here.
-            </li>
-          </ul>
-
-          <div :class="sheetFooterClass">
-            <button
-              type="button"
-              :class="[sheetRowClass, 'w-full text-red-600 dark:text-red-400']"
-              @click="onSignOut"
-            >
-              <span
-                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-50/90 text-red-600 dark:bg-red-500/10 dark:text-red-400"
-              >
-                <DashboardNavIcon name="sign-out" size="sm" />
-              </span>
-              <span class="text-sm font-medium">Sign out</span>
-            </button>
-          </div>
-        </div>
-      </Transition>
-    </Teleport>
+      <template #footer>
+        <button
+          type="button"
+          :class="[sheetRowClass, 'w-full text-red-600 dark:text-red-400']"
+          @click="onSignOut"
+        >
+          <span
+            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-50/90 text-red-600 dark:bg-red-500/10 dark:text-red-400"
+          >
+            <DashboardNavIcon name="sign-out" size="sm" />
+          </span>
+          <span class="text-sm font-medium">Sign out</span>
+        </button>
+      </template>
+    </DashboardNativeSheet>
   </nav>
 </template>
 
@@ -159,6 +129,7 @@
 import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import DashboardNavIcon from '~/components/dashboard/DashboardNavIcon.vue'
+import DashboardNativeSheet from '~/components/dashboard/DashboardNativeSheet.vue'
 import {
   isDashboardNavActive,
   nativeNavShortLabel,
@@ -180,12 +151,6 @@ const {
   tabInactiveClass,
   tabActiveClass,
   tabIndicatorClass,
-  sheetBackdropClass,
-  sheetClass,
-  sheetHeaderClass,
-  sheetHandleClass,
-  sheetEyebrowClass,
-  sheetTitleClass,
   sheetListClass,
   sheetFooterClass,
   sheetRowClass,

@@ -300,6 +300,71 @@ html.dark .dash-page-header--unified .dash-page-header__toolbar {
   background: transparent;
 }
 
+/* Segmented tabs — Activity Logs filter style (app-wide) */
+.dash-segment-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  width: 100%;
+  padding: 0.125rem;
+  border-radius: 0.625rem;
+  background: rgb(243 244 246 / 0.8);
+}
+
+html.dark .dash-segment-tabs {
+  background: rgb(255 255 255 / 0.04);
+}
+
+.dash-segment-tabs__btn {
+  flex: 1 1 0;
+  min-width: 0;
+  border: 0;
+  border-radius: 0.375rem;
+  padding: 0.4375rem 0.625rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1.25;
+  text-align: center;
+  color: rgb(75 85 99);
+  background: transparent;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+html.dark .dash-segment-tabs__btn {
+  color: rgb(156 163 175);
+}
+
+.dash-segment-tabs__btn:hover {
+  color: rgb(17 24 39);
+}
+
+html.dark .dash-segment-tabs__btn:hover {
+  color: rgb(243 244 246);
+}
+
+.dash-segment-tabs__btn--active,
+.dash-segment-tabs__btn[aria-selected='true'] {
+  background: rgb(255 255 255);
+  color: rgb(17 24 39);
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.06);
+}
+
+html.dark .dash-segment-tabs__btn--active,
+html.dark .dash-segment-tabs__btn[aria-selected='true'] {
+  background: rgb(255 255 255 / 0.1);
+  color: rgb(243 244 246);
+  box-shadow: none;
+}
+
+.dash-segment-tabs--inline {
+  width: auto;
+  flex: 1 1 auto;
+}
+
 /* Compact context bar — inventory folder, sub-pages */
 .dash-page-context-bar {
   display: flex;

@@ -1,5 +1,28 @@
 <template>
-  <Teleport :to="teleportTarget">
+  <DashboardNativeSheet
+    v-if="nativeIosSheet"
+    :model-value="modelValue"
+    :title="title"
+    :subtitle="subtitle"
+    :eyebrow="resolvedEyebrow"
+    :body-padding="resolvedContentPadding"
+    :show-close="showClose"
+    :close-on-backdrop="closeOnBackdrop"
+    :variant="nativeSheetVariant"
+    mount="overlay-host"
+    @update:model-value="emit('update:modelValue', $event)"
+    @close="emit('close')"
+  >
+    <template v-if="$slots.header" #header>
+      <slot name="header" />
+    </template>
+    <slot />
+    <template v-if="$slots.footer" #footer>
+      <slot name="footer" />
+    </template>
+  </DashboardNativeSheet>
+
+  <Teleport v-else :to="teleportTarget">
     <!-- Web: dimmed backdrop -->
     <Transition
       v-if="!nativeInApp"
@@ -96,7 +119,7 @@
       </div>
     </Transition>
 
-    <!-- Native: slide-in drawer with backdrop fade + panel slide -->
+    <!-- Native (Android): slide-in drawer -->
     <Transition v-if="nativeInApp" name="native-drawer-shell">
       <div v-if="modelValue" class="native-side-drawer-root" role="presentation">
         <div
@@ -175,6 +198,8 @@ import { computed, watch, onMounted, onUnmounted, useId } from 'vue'
 import {
   XMarkIcon,
 } from '~/utils/app-icons'
+import DashboardNativeSheet from '~/components/dashboard/DashboardNativeSheet.vue'
+import type { DashboardNativeSheetVariant } from '~/composables/useDashboardNativeSheetChrome'
 import { setNativeOverlayLock } from '~/utils/native-overlay-lock'
 import { blurActiveElementIfNative } from '~/utils/native-focus'
 interface Props {
@@ -195,6 +220,8 @@ interface Props {
   dense?: boolean
   /** Shrink drawer height to form content (web); avoids footer pinned to viewport bottom */
   fitContent?: boolean
+  /** iOS bottom sheet variant (More-menu chrome) */
+  nativeSheetVariant?: DashboardNativeSheetVariant
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -206,10 +233,15 @@ const props = withDefaults(defineProps<Props>(), {
   blurBackdrop: false,
   dense: false,
   fitContent: false,
+  nativeSheetVariant: 'crud',
 })
 
 const { isNativeApp } = useCapacitorNativeApp()
+const { isCapacitorIos } = useIsCapacitorIos()
 const nativeInApp = computed(() => isNativeApp.value)
+const nativeIosSheet = computed(() => isCapacitorIos.value)
+
+const resolvedEyebrow = computed(() => props.eyebrow || (props.title ? 'Details' : undefined))
 
 const teleportTarget = computed(() =>
   nativeInApp.value ? '#dashboard-native-overlay-host' : 'body'
@@ -250,7 +282,9 @@ const describedBy = computed(() => (props.subtitle ? subtitleId : undefined))
 const fitContent = computed(() => props.fitContent && !nativeInApp.value)
 
 const panelDialogClass = computed(() =>
-  nativeInApp.value
+  nativeIosSheet.value
+    ? []
+    : nativeInApp.value
     ? [
         'native-side-drawer-panel side-panel-native-dialog flex h-full max-h-full min-h-0 flex-col overflow-hidden',
         drawerShellClass,
@@ -282,6 +316,7 @@ const handleEscape = (event: KeyboardEvent) => {
 
 function setScrollLock(locked: boolean) {
   if (!import.meta.client) return
+  if (nativeIosSheet.value) return
 
   if (nativeInApp.value) {
     setNativeOverlayLock(locked)
