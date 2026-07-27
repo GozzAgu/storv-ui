@@ -7,15 +7,15 @@ export type DashboardNavItem = {
   iconKey: DashboardNavIconKey
 }
 
-export const NATIVE_PRIMARY_ORDER = ['Dashboard', 'Inventory', 'Receipts', 'Departments'] as const
-
-/** Primary tabs when payment links is promoted (coming-soon on native). */
-export const NATIVE_PRIMARY_ORDER_WITH_PAYMENT_LINKS = [
+export const NATIVE_PRIMARY_ORDER = [
   'Dashboard',
   'Inventory',
+  'Departments',
   'Receipts',
-  'Payment links',
 ] as const
+
+/** Same primary tabs when payment links is promoted — links live under More. */
+export const NATIVE_PRIMARY_ORDER_WITH_PAYMENT_LINKS = NATIVE_PRIMARY_ORDER
 
 export function splitNativeBottomNav(
   items: DashboardNavItem[],

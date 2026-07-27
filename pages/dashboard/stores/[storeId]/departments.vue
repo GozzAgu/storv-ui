@@ -32,7 +32,7 @@
       </template>
       <template #actions>
         <div
-          v-if="storeDepartments.length > 0"
+          v-if="storeDepartments.length > 0 && !isCapacitorIos"
           :class="viewToggleClass"
           role="group"
           aria-label="Department layout"
@@ -71,7 +71,7 @@
           aria-label="New department"
           @click="openCreateDepartmentModal"
         >
-          New department
+          <span :class="headerBtnLabelClass">New department</span>
         </Button>
       </template>
       <template v-if="headerStatsReady && storeDepartments.length > 0" #filters>
@@ -109,7 +109,7 @@
               "
               @click="openBulkDeleteDepartmentsModal"
             >
-              Delete
+              <span :class="headerBtnLabelClass">Delete</span>
             </Button>
           </template>
         </div>
@@ -143,7 +143,7 @@
         v-if="storeDepartments.length > 0"
         :class="[
           departmentsViewMode === 'table'
-            ? [tableShellClass, 'dash-grid-shell--table departments-shell--table']
+            ? [gridShellClass, tableShellClass, 'dash-grid-shell--table departments-shell--table']
             : [gridShellClass, 'dash-grid-shell--grid departments-shell--grid'],
         ]"
       >
@@ -309,6 +309,13 @@
               </tbody>
             </table>
           </div>
+          <DashboardTablePagination
+            v-if="filteredDepartments.length > 0"
+            :current-page="currentPage"
+            :items-per-page="itemsPerPage"
+            :total="filteredDepartments.length"
+            @page-change="handlePageChange"
+          />
         </div>
 
         <DashboardTableEmptyState
@@ -349,15 +356,15 @@
         "
         extra-class="dash-table-shell rounded-xl"
       />
-    </div>
 
-    <DashboardTablePagination
-      v-if="filteredDepartments.length > 0"
-      :current-page="currentPage"
-      :items-per-page="itemsPerPage"
-      :total="filteredDepartments.length"
-      @page-change="handlePageChange"
-    />
+      <DashboardTablePagination
+        v-if="filteredDepartments.length > 0 && departmentsViewMode === 'grid'"
+        :current-page="currentPage"
+        :items-per-page="itemsPerPage"
+        :total="filteredDepartments.length"
+        @page-change="handlePageChange"
+      />
+    </div>
 
     <!-- Bulk Delete Departments Modal -->
     <Modal
@@ -531,6 +538,7 @@ const {
   titleClass,
   cardDescClass,
   headerBtnClass,
+  headerBtnLabelClass,
   gridShellClass,
   gridClass,
   menuBtnClass,
@@ -541,6 +549,7 @@ const {
 } = useDashboardGridPagesChrome()
 
 const { tableShellClass } = useDashboardTableChrome()
+const { isCapacitorIos } = useIsCapacitorIos()
 
 const showDepartmentModal = ref(false)
 const editingDepartment = ref<Department | null>(null)

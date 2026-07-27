@@ -69,7 +69,7 @@
                 extra-class="!rounded-2xl"
                 @click="openCreateStaffModal"
               >
-                Add staff
+                <span :class="headerBtnLabelClass">Add staff</span>
               </Button>
               <button
                 type="button"
@@ -108,31 +108,27 @@
           </div>
 
           <!-- Table toolbar -->
-          <DataTableToolbar v-if="!isLoadingStaff && !isStaffFullscreen">
+          <DataTableToolbar v-if="!isLoadingStaff && !isStaffFullscreen" class="dash-dept-roster-toolbar">
             <template #heading>
-              <div class="flex min-w-0 flex-1 items-start gap-2">
+              <div class="dash-page-context-bar !border-0 !bg-transparent !p-0 !shadow-none">
                 <DashboardBackButton
                   v-if="departmentsListPath"
                   :to="departmentsListPath"
                   label="Back to departments"
-                  class="mt-0.5"
+                  class="mt-px shrink-0"
                 />
                 <div class="min-w-0 flex-1">
-                  <h2
-                    class="truncate text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm"
-                  >
+                  <h2 class="dash-page-context-bar__title truncate">
                     {{ department?.name || 'Department' }}
                   </h2>
-                  <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
-                    <span class="tabular-nums font-medium text-gray-600 dark:text-gray-300"
-                      >{{ staff.length }} members</span
-                    >
-                    <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
+                  <p class="dash-page-context-bar__meta">
+                    <span class="tabular-nums">{{ staff.length }} members</span>
+                    <span class="dash-page-context-bar__sep">·</span>
                     <span class="tabular-nums">{{ activeStaff }} active</span>
-                    <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
+                    <span class="dash-page-context-bar__sep">·</span>
                     <span class="tabular-nums">{{ totalManagers }} managers</span>
                     <template v-if="staff.length > 0">
-                      <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
+                      <span class="dash-page-context-bar__sep">·</span>
                       <span>{{ paginatedStaff.length }} on this page</span>
                     </template>
                   </p>
@@ -151,7 +147,7 @@
                 :extra-class="headerBtnClass"
                 @click="openCreateStaffModal"
               >
-                Add staff
+                <span :class="headerBtnLabelClass">Add staff</span>
               </Button>
               <DashboardToolbarIconButton
                 class="hidden lg:inline-flex"
@@ -165,7 +161,7 @@
 
           <nav
             v-if="canRemoveStaff && !isLoadingStaff && !isStaffFullscreen"
-            class="flex gap-6 border-b border-gray-100/90 px-4 dark:border-gray-800/80 sm:gap-8 sm:px-5"
+            class="dash-roster-tabs flex gap-0 border-b border-gray-100/90 px-4 dark:border-gray-800/80 sm:px-5"
             role="tablist"
             aria-label="Staff roster"
           >
@@ -780,7 +776,7 @@ definePageMeta({
 })
 
 const route = useRoute()
-const { headerBtnClass } = useDashboardPageChrome()
+const { headerBtnClass, headerBtnLabelClass } = useDashboardPageChrome()
 const departmentId = computed(() => route.params.id as string)
 
 const departmentBreadcrumbs = computed(() => {

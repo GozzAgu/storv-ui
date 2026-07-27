@@ -24,10 +24,29 @@ describe('splitNativeBottomNav', () => {
     expect(primary.map((i) => i.name)).toEqual([
       'Dashboard',
       'Inventory',
-      'Receipts',
       'Departments',
+      'Receipts',
     ])
     expect(more.map((i) => i.name)).toEqual(['Analytics', 'Settings'])
+  })
+
+  it('keeps payment links in more when not in primary order', () => {
+    const withLinks = [
+      ...items,
+      {
+        name: 'Payment links',
+        href: '/dashboard/payment-links',
+        iconKey: 'payment-links' as const,
+      },
+    ]
+    const { primary, more } = splitNativeBottomNav(withLinks)
+    expect(primary.map((i) => i.name)).toEqual([
+      'Dashboard',
+      'Inventory',
+      'Departments',
+      'Receipts',
+    ])
+    expect(more.map((i) => i.name)).toContain('Payment links')
   })
 })
 

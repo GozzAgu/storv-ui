@@ -42,7 +42,7 @@ function refreshNativeTableLayouts() {
 
   const hosts: ToggleHost[] = []
   const shells = findDashboardTableShells()
-  const showIosToggle = isCapacitorIosDocument()
+  const showIosToggle = false
 
   shells.forEach((shell, index) => {
     const key = ensureNativeTableShellKey(shell, route.path, index)

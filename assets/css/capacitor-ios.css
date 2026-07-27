@@ -1299,6 +1299,209 @@ html.capacitor-ios.capacitor-native .departments-shell--grid .departments-table 
   display: none !important;
 }
 
+/* ── iOS clean tables (Activity Logs reference) ── */
+html.capacitor-ios.capacitor-native .data-table-shell:not(.dash-native-table--cards) .dashboard-table,
+html.capacitor-ios.capacitor-native .activity-log-shell:not(.dash-native-table--cards) .dashboard-table {
+  border-collapse: collapse;
+}
+
+html.capacitor-ios.capacitor-native .data-table-shell:not(.dash-native-table--cards) .dashboard-table thead th,
+html.capacitor-ios.capacitor-native .activity-log-shell:not(.dash-native-table--cards) .dashboard-table thead th {
+  padding: 0.625rem 0.875rem;
+  font-size: 0.5625rem !important;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--dash-muted);
+  background: transparent;
+  border-bottom: 1px solid var(--dash-table-divider);
+}
+
+html.capacitor-ios.capacitor-native .data-table-shell:not(.dash-native-table--cards) .dashboard-table tbody td,
+html.capacitor-ios.capacitor-native .activity-log-shell:not(.dash-native-table--cards) .dashboard-table tbody td {
+  padding: 0.8125rem 0.875rem;
+  font-size: var(--cap-ios-body) !important;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--dash-table-divider);
+  background: transparent;
+}
+
+html.capacitor-ios.capacitor-native .data-table-shell:not(.dash-native-table--cards) .dashboard-table tbody tr:last-child td,
+html.capacitor-ios.capacitor-native .activity-log-shell:not(.dash-native-table--cards) .dashboard-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+html.capacitor-ios.capacitor-native .data-table-shell:not(.dash-native-table--cards) .dashboard-table tbody tr:hover td,
+html.capacitor-ios.capacitor-native .activity-log-shell:not(.dash-native-table--cards) .dashboard-table tbody tr:hover td {
+  background: rgb(255 255 255 / 0.02);
+}
+
+html.capacitor-ios.capacitor-native .departments-shell--table.data-table-shell,
+html.capacitor-ios.capacitor-native .activity-log-shell.data-table-shell {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+html.capacitor-ios.capacitor-native .dash-table-toolbar {
+  padding: 0.75rem 0.875rem 0.625rem;
+  border-bottom: 1px solid var(--dash-table-divider);
+  background: transparent;
+}
+
+html.capacitor-ios.capacitor-native .dash-dept-roster-toolbar.dash-table-toolbar {
+  padding-top: 0.875rem;
+}
+
+html.capacitor-ios.capacitor-native .dash-dept-roster-toolbar .dash-page-context-bar {
+  gap: 0.5rem;
+}
+
+/* Segmented roster tabs */
+html.capacitor-ios.capacitor-native .dash-roster-tabs {
+  gap: 0;
+  padding-inline: 0.875rem;
+}
+
+html.capacitor-ios.capacitor-native .dash-roster-tabs button[role='tab'] {
+  flex: 1;
+  padding: 0.625rem 0.75rem 0.6875rem;
+  font-size: var(--cap-ios-body) !important;
+  text-align: center;
+  border-bottom: 2px solid transparent;
+}
+
+html.capacitor-ios.capacitor-native .dash-roster-tabs button[role='tab'] span[aria-hidden='true'] {
+  display: none;
+}
+
+html.capacitor-ios.capacitor-native .dash-roster-tabs button[role='tab'][aria-selected='true'] {
+  color: rgb(248 250 252);
+  font-weight: 600;
+  border-bottom-color: #4876c7;
+}
+
+html.capacitor-ios.capacitor-native .dash-roster-tabs button[role='tab'][aria-selected='false'] {
+  color: var(--dash-muted);
+}
+
+/* KPI / info metrics — 2×2 for four stats (Activity Logs style) */
+html.capacitor-ios.capacitor-native
+  .dash-page-header--unified
+  .dash-page-metrics:has(> .dash-page-metric:nth-child(4):last-child) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+html.capacitor-ios.capacitor-native
+  .dash-page-header--unified
+  .dash-page-metrics:has(> .dash-page-metric:nth-child(4):last-child)
+  > .dash-page-metric {
+  grid-column: span 1;
+  padding: 0.75rem 0.5rem;
+}
+
+html.capacitor-ios.capacitor-native
+  .dash-page-header--unified
+  .dash-page-metrics:has(> .dash-page-metric:nth-child(4):last-child)
+  > .dash-page-metric:nth-child(2),
+html.capacitor-ios.capacitor-native
+  .dash-page-header--unified
+  .dash-page-metrics:has(> .dash-page-metric:nth-child(4):last-child)
+  > .dash-page-metric:nth-child(4) {
+  border-right: 0;
+}
+
+html.capacitor-ios.capacitor-native
+  .dash-page-header--unified
+  .dash-page-metrics:has(> .dash-page-metric:nth-child(4):last-child)
+  > .dash-page-metric:nth-child(3),
+html.capacitor-ios.capacitor-native
+  .dash-page-header--unified
+  .dash-page-metrics:has(> .dash-page-metric:nth-child(4):last-child)
+  > .dash-page-metric:nth-child(4) {
+  border-bottom: 0;
+}
+
+html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-metric__label {
+  font-size: 0.5625rem !important;
+  letter-spacing: 0.08em;
+}
+
+html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-metric__value {
+  font-size: 0.9375rem !important;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Filter pills in unified header */
+html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-header__toolbar nav[aria-label='Filter by action'],
+html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-header__toolbar nav[aria-label='Filter by action'] {
+  width: 100%;
+  padding: 0.1875rem;
+  border-radius: 0.625rem;
+  background: rgb(255 255 255 / 0.06);
+}
+
+html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-header__toolbar nav[aria-label='Filter by action'] button {
+  flex: 1;
+  min-width: 0;
+  padding: 0.4375rem 0.5rem;
+  font-size: var(--cap-ios-caption) !important;
+  border-radius: 0.4375rem;
+}
+
+/* Icon buttons — proportional touch targets */
+html.capacitor-ios.capacitor-native .dash-view-toggle {
+  padding: 0.1875rem;
+  border-radius: 0.625rem;
+  gap: 0.125rem;
+}
+
+html.capacitor-ios.capacitor-native .dash-view-toggle__btn {
+  display: inline-flex;
+  width: 2.25rem;
+  height: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.4375rem;
+}
+
+html.capacitor-ios.capacitor-native .dash-view-toggle__btn svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+html.capacitor-ios.capacitor-native .dashboard-table__action-btn {
+  width: 2.25rem;
+  height: 2.25rem;
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  border-radius: 9999px;
+}
+
+html.capacitor-ios.capacitor-native .dashboard-table__action-btn svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+html.capacitor-ios.capacitor-native .dash-grid-menu-btn {
+  width: 2.25rem;
+  height: 2.25rem;
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  border-radius: 9999px;
+}
+
+html.capacitor-ios.capacitor-native .dash-grid-menu-btn svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+html.capacitor-ios.capacitor-native .dash-page-header--unified button[class*='rounded-full'] svg,
+html.capacitor-ios.capacitor-native .dash-table-toolbar button[class*='rounded-full'] svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
 html.capacitor-ios.capacitor-native .activity-log-shell .grid.grid-cols-2 {
   gap: 0.5rem;
 }

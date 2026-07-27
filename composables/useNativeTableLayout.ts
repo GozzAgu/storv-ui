@@ -30,8 +30,8 @@ export function useNativeTableLayout(storageKey: Ref<string> | string) {
   function bindShell(shell: HTMLElement | null | undefined) {
     if (!shell || !isCapacitorIos.value) return
     shell.setAttribute('data-native-table-key', keyRef.value)
-    layoutMode.value = getNativeTableLayoutMode(keyRef.value)
-    applyNativeTableLayout(shell, layoutMode.value)
+    layoutMode.value = 'table'
+    applyNativeTableLayout(shell, 'table')
   }
 
   function setLayoutMode(mode: NativeTableLayoutMode) {

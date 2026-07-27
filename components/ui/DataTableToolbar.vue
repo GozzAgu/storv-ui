@@ -64,7 +64,7 @@ const storageKey = computed(() => props.nativeTableKey ?? route.path)
 const { isCapacitorIos, layoutMode, bindShell, setLayoutMode } = useNativeTableLayout(storageKey)
 
 const slots = useSlots()
-const showIosTableToggle = computed(() => isCapacitorIos.value)
+const showIosTableToggle = computed(() => false)
 const hasFilterRow = computed(() => !!(slots.filters || slots.bulk || slots.actions))
 
 function attachShell() {

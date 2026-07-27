@@ -1515,7 +1515,8 @@ html.capacitor-native [data-global-search-backdrop] {
 }
 
 html.capacitor-native .activity-log-shell.data-table-shell,
-html.capacitor-native .inventory-categories-shell--table.data-table-shell {
+html.capacitor-native .inventory-categories-shell--table.data-table-shell,
+html.capacitor-native .departments-shell--table.data-table-shell {
   margin-left: 0;
   margin-right: 0;
 }

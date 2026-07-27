@@ -27,7 +27,7 @@ export function useDashboardPageChrome() {
 
   const headerBtnClass = computed(() =>
     isCapacitorIos.value
-      ? '!inline-flex !h-8 !w-8 !min-h-8 !min-w-8 !items-center !justify-center !rounded-full !p-0 !text-xs shrink-0'
+      ? '!inline-flex !h-9 !w-9 !min-h-9 !min-w-9 !items-center !justify-center !rounded-full !p-0 !text-xs shrink-0'
       : '!inline-flex !h-8 !min-h-8 !items-center !justify-center !rounded-full !px-3.5 !py-0 !text-xs shrink-0'
   )
 
