@@ -59,13 +59,9 @@ export function useStoreDataExport() {
   async function exportInventoryExcel() {
     const meta = getExportMeta()
     const { folders, itemsByFolderId } = await gatherInventoryForExport()
-    const itemCount = Object.values(itemsByFolderId).reduce((sum, items) => sum + items.length, 0)
 
     if (folders.length === 0) {
       throw new Error('No inventory categories were found for this branch.')
-    }
-    if (itemCount === 0) {
-      throw new Error('No inventory products were found to export for this branch.')
     }
 
     return downloadInventoryExport(folders, itemsByFolderId, meta)

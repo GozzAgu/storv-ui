@@ -876,7 +876,7 @@ watch(canUseSwapInReceipt, (ok) => {
 const useSplitPayment = ref(false)
 const splitPayments = ref<Array<{ method: string; amount: number }>>([{ method: '', amount: 0 }])
 
-const folders = computed(() => inventoryStore.folders)
+const folders = computed(() => inventoryStore.leafFolders)
 
 const matchingCustomers = computed(() => {
   if (!receiptForm.value.customerName || receiptForm.value.customerName.trim().length < 1) {

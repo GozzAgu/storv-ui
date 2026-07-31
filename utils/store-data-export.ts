@@ -1,4 +1,8 @@
-import type { CustomerBuyback } from '~/stores/customerBuybacks'
+import {
+  getChildFolders,
+  getRootFolders,
+  normalizeParentId,
+} from '~/utils/inventory-folder-tree'
 import type { InventoryFolder, InventoryItem, TemplateField } from '~/stores/inventory'
 import type { Receipt } from '~/stores/receipts'
 import type { SellerLoanOut } from '~/stores/sellerLoanOuts'
@@ -36,7 +40,7 @@ const ITEM_META_KEYS = new Set([
 ])
 
 function exportDateSuffix(): string {
-  return new Date().toISOString().split('T')[0]
+  return new Date().toISOString().slice(0, 10)
 }
 
 function formatExportDate(value: unknown): string {
@@ -139,6 +143,15 @@ function getExportFieldsForFolder(folder: InventoryFolder, items: InventoryItem[
   }))
 }
 
+function buildFolderItemRows(
+  items: InventoryItem[],
+  fields: TemplateField[]
+): (string | number)[][] {
+  return items.map((item) =>
+    fields.map((field) => formatInventoryFieldValue(field, getItemFieldValue(item, field)))
+  )
+}
+
 function buildFolderInventoryRows(
   folder: InventoryFolder,
   items: InventoryItem[],
@@ -148,6 +161,165 @@ function buildFolderInventoryRows(
     folder.name,
     ...fields.map((field) => formatInventoryFieldValue(field, getItemFieldValue(item, field))),
   ])
+}
+
+/** Safe folder name for ZIP archives (one folder per inventory category). */
+export function sanitizeFolderPath(value: string): string {
+  return value.replace(/[\\/:*?"<>|]+/g, '_').replace(/\s+/g, ' ').trim() || 'Category'
+}
+
+export function uniqueFolderPath(base: string, used: Set<string>): string {
+  let name = sanitizeFolderPath(base)
+  if (!used.has(name)) {
+    used.add(name)
+    return name
+  }
+
+  for (let i = 2; i < 100; i++) {
+    const candidate = `${name}_${i}`
+    if (!used.has(candidate)) {
+      used.add(candidate)
+      return candidate
+    }
+  }
+
+  const fallback = `${name}_${used.size + 1}`
+  used.add(fallback)
+  return fallback
+}
+
+function buildExportInfoText(meta: StoreExportMeta | undefined, folders: number, items: number): string {
+  return [
+    'Storvv inventory export',
+    '=======================',
+    `Store: ${meta?.storeName || ''}`,
+    `Branch: ${meta?.branchName || ''}`,
+    `Generated: ${new Date().toLocaleString()}`,
+    `Categories: ${folders}`,
+    `Total items: ${items}`,
+    '',
+    'Structure:',
+    '- categories.xlsx — list of all categories (folders)',
+    '- {Category name}/items.xlsx — products in that category',
+  ].join('\n')
+}
+
+export async function buildFolderItemsWorkbook(
+  folder: InventoryFolder,
+  items: InventoryItem[]
+) {
+  const XLSX = await import('xlsx')
+  const fields = getExportFieldsForFolder(folder, items)
+  const headers = fields.map((field) => field.label || field.name)
+  const rows = buildFolderItemRows(items, fields)
+  const ws = XLSX.utils.aoa_to_sheet(
+    headers.length > 0 ? [headers, ...rows] : [['Note'], ['No template fields defined for this category.']]
+  )
+  ws['!cols'] = (headers.length > 0 ? headers : ['Note']).map((header) => ({
+    wch: Math.max(String(header).length, 14),
+  }))
+
+  const wb = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(wb, ws, 'Items')
+  return wb
+}
+
+export async function buildCategoriesIndexWorkbook(
+  folders: InventoryFolder[],
+  itemsByFolderId: Record<string, InventoryItem[]>,
+  meta?: StoreExportMeta
+) {
+  const XLSX = await import('xlsx')
+  const header = ['Category', 'Parent category', 'Description', 'Item count', 'Serial tracking', 'Fields']
+  const rows = folders.map((folder) => {
+    const items = itemsByFolderId[folder.id] || []
+    const fields = getExportFieldsForFolder(folder, items)
+    const parent = folders.find((entry) => entry.id === normalizeParentId(folder.parentId))
+    return [
+      folder.name,
+      parent?.name || '',
+      folder.description || '',
+      items.length,
+      folder.hasSerialNumbers ? 'Yes' : 'No',
+      fields.map((field) => field.label || field.name).join(', '),
+    ]
+  })
+
+  const ws = XLSX.utils.aoa_to_sheet([header, ...rows])
+  ws['!cols'] = header.map((col) => ({ wch: Math.max(col.length + 2, 14) }))
+
+  const wb = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(wb, ws, 'Categories')
+  appendInfoSheet(wb, meta, XLSX)
+  return wb
+}
+
+async function workbookToArrayBuffer(wb: import('xlsx').WorkBook): Promise<ArrayBuffer> {
+  const XLSX = await import('xlsx')
+  return XLSX.write(wb, { bookType: 'xlsx', type: 'array' }) as ArrayBuffer
+}
+
+function downloadBlob(blob: Blob, filename: string) {
+  if (!import.meta.client) return
+  const url = URL.createObjectURL(blob)
+  const anchor = document.createElement('a')
+  anchor.href = url
+  anchor.download = filename
+  anchor.click()
+  URL.revokeObjectURL(url)
+}
+
+export async function buildInventoryZip(
+  folders: InventoryFolder[],
+  itemsByFolderId: Record<string, InventoryItem[]>,
+  meta?: StoreExportMeta
+): Promise<{ blob: Blob; rootName: string; folderCount: number; itemCount: number }> {
+  const JSZip = (await import('jszip')).default
+  const zip = new JSZip()
+  const rootName = buildStoreExportFilename('inventory', meta?.branchName).replace(/\.xlsx$/, '')
+  const root = zip.folder(rootName)
+  if (!root) throw new Error('Could not create export archive.')
+
+  const usedTopLevelPaths = new Set<string>()
+  let itemCount = 0
+
+  const categoriesWb = await buildCategoriesIndexWorkbook(folders, itemsByFolderId, meta)
+  root.file('categories.xlsx', await workbookToArrayBuffer(categoriesWb))
+
+  for (const parentFolder of getRootFolders(folders)) {
+    const children = getChildFolders(folders, parentFolder.id)
+
+    if (children.length > 0) {
+      const parentPath = uniqueFolderPath(parentFolder.name || parentFolder.id, usedTopLevelPaths)
+      const parentZip = root.folder(parentPath)
+      if (!parentZip) continue
+
+      const usedChildPaths = new Set<string>()
+      for (const child of children) {
+        const items = itemsByFolderId[child.id] || []
+        itemCount += items.length
+        const childPath = uniqueFolderPath(child.name || child.id, usedChildPaths)
+        const childZip = parentZip.folder(childPath)
+        if (!childZip) continue
+        const itemsWb = await buildFolderItemsWorkbook(child, items)
+        childZip.file('items.xlsx', await workbookToArrayBuffer(itemsWb))
+      }
+      continue
+    }
+
+    const items = itemsByFolderId[parentFolder.id] || []
+    itemCount += items.length
+    const folderPath = uniqueFolderPath(parentFolder.name || parentFolder.id, usedTopLevelPaths)
+    const folderZip = root.folder(folderPath)
+    if (!folderZip) continue
+    const itemsWb = await buildFolderItemsWorkbook(parentFolder, items)
+    folderZip.file('items.xlsx', await workbookToArrayBuffer(itemsWb))
+  }
+
+  root.file('README.txt', buildExportInfoText(meta, folders.length, itemCount))
+
+  const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } })
+  return { blob, rootName, folderCount: folders.length, itemCount }
 }
 
 function appendInfoSheet(
@@ -423,16 +595,18 @@ export function buildStoreExportFilename(label: string, branchName?: string): st
   return `${branchPart}_${label}_${exportDateSuffix()}.xlsx`
 }
 
+export function buildStoreExportZipFilename(label: string, branchName?: string): string {
+  return buildStoreExportFilename(label, branchName).replace(/\.xlsx$/, '.zip')
+}
+
 export async function downloadInventoryExport(
   folders: InventoryFolder[],
   itemsByFolderId: Record<string, InventoryItem[]>,
   meta?: StoreExportMeta
 ) {
-  const wb = await buildInventoryWorkbook(folders, itemsByFolderId, meta)
-  const filename = buildStoreExportFilename('inventory', meta?.branchName)
-  await downloadWorkbook(wb, filename)
-  const itemCount = Object.values(itemsByFolderId).reduce((sum, items) => sum + items.length, 0)
-  const folderCount = folders.filter((folder) => (itemsByFolderId[folder.id]?.length ?? 0) > 0).length
+  const { blob, folderCount, itemCount } = await buildInventoryZip(folders, itemsByFolderId, meta)
+  const filename = buildStoreExportZipFilename('inventory', meta?.branchName)
+  downloadBlob(blob, filename)
   return { filename, folders: folderCount, items: itemCount }
 }
 

@@ -631,7 +631,7 @@
                     >
                       Yes! Storvv supports bulk import from Excel spreadsheets. Simply upload your
                       Excel file, and items will be automatically added to your inventory folders.
-                      You can also export your inventory data to Excel for backup or analysis.
+                      You can also export inventory by category folder (ZIP) for backup or analysis.
                     </p>
                   </div>
                 </div>

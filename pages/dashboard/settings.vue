@@ -694,14 +694,17 @@
       <!-- Data export -->
       <DashboardSettingsPanel
         title="Data export"
-        subtitle="Download Excel backups of inventory, sales, buybacks, and stock loans for this branch."
+        subtitle="Download Excel backups of inventory (by category folder), sales, buybacks, and stock loans for this branch."
         compact
       >
         <div class="space-y-4">
           <p class="text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
-            Exports four separate Excel files for the branch you are viewing: inventory (one sheet
-            per category), sales, customer buybacks, and stock loans. Large stores may take a
-            moment to gather.
+            Inventory exports as a ZIP: one folder per category, each with an
+            <code class="rounded bg-black/5 px-1 py-0.5 text-[10px] dark:bg-white/10">items.xlsx</code>
+            file, plus a
+            <code class="rounded bg-black/5 px-1 py-0.5 text-[10px] dark:bg-white/10">categories.xlsx</code>
+            index. Sales, buybacks, and stock loans download as separate Excel files. Large stores may
+            take a moment to gather.
           </p>
 
           <ul class="grid gap-2 sm:grid-cols-2">
@@ -1071,7 +1074,7 @@ const dataExportItems = [
   {
     key: 'inventory',
     label: 'Inventory',
-    description: 'All products, grouped by category on separate sheets.',
+    description: 'ZIP archive — one folder per category with items.xlsx inside.',
   },
   {
     key: 'receipts',
@@ -1094,7 +1097,7 @@ async function handleExportAllStoreData() {
   try {
     const summary = await exportAllStoreData()
     toast.success(
-      `Exported 4 files: ${summary.inventory.items} product(s), ${summary.receipts.count} sale(s), ${summary.buybacks.count} buyback(s), ${summary.stockLoans.count} stock loan(s).`
+      `Exported: inventory ZIP (${summary.inventory.folders} categories, ${summary.inventory.items} product(s)), ${summary.receipts.count} sale(s), ${summary.buybacks.count} buyback(s), ${summary.stockLoans.count} stock loan(s).`
     )
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Export failed'

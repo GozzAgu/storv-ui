@@ -7,9 +7,26 @@
       class="text-[11px] text-gray-500 dark:text-gray-400"
     />
 
-    <!-- Loading: table shell -->
+    <!-- Loading -->
     <template v-if="isLoadingFolder">
-      <div class="overflow-hidden rounded-sm bg-white dark:!bg-dashboard-card">
+      <template v-if="loadingShowsCategoryHub">
+        <div class="flex flex-wrap items-center gap-2">
+          <div class="h-8 w-8 animate-pulse rounded-lg bg-gray-200 dark:bg-white/10" />
+          <div class="h-5 w-36 max-w-[50vw] animate-pulse rounded-sm bg-gray-200 dark:bg-white/10" />
+        </div>
+        <div
+          class="dash-grid-shell dash-grid-shell--grid inventory-categories-shell--grid mt-4"
+        >
+          <div class="inventory-categories-grid dash-grid">
+            <div
+              v-for="i in 6"
+              :key="i"
+              class="dash-skeleton dash-skeleton--grid-card"
+            />
+          </div>
+        </div>
+      </template>
+      <div v-else class="overflow-hidden rounded-sm bg-white dark:!bg-dashboard-card">
         <div class="border-b border-gray-100/90 px-4 py-3 dark:border-gray-800/80 sm:px-5">
           <div class="flex flex-wrap gap-2">
             <div
@@ -29,11 +46,40 @@
     </template>
 
     <!-- Mobile / tablet toolbar -->
+    <div v-else-if="showCategoryHub" class="flex flex-col gap-2 lg:hidden">
+      <div class="dash-page-context-bar">
+        <DashboardBackButton
+          :to="inventoryBackTo"
+          :label="inventoryBackLabel"
+          class="mt-px shrink-0"
+        />
+        <div class="min-w-0 flex-1">
+          <h2 class="dash-page-context-bar__title truncate">{{ folder?.name || 'Category' }}</h2>
+          <p class="dash-page-context-bar__meta">
+            <template v-if="childFolders.length > 0">
+              {{ childFolders.length }} subcategor{{ childFolders.length === 1 ? 'y' : 'ies' }}
+            </template>
+            <template v-else>Organize with subcategories</template>
+          </p>
+        </div>
+      </div>
+      <Button
+        v-if="canAddSubcategories"
+        variant="primary"
+        size="sm"
+        :icon="PlusCircleIcon"
+        class="w-full shrink-0 !rounded-xl sm:!rounded-2xl"
+        @click="openCreateSubcategoryModal"
+      >
+        Add subcategory
+      </Button>
+    </div>
+
     <div v-else class="flex flex-col gap-2 lg:hidden">
       <div class="dash-page-context-bar">
         <DashboardBackButton
-          to="/dashboard/inventory"
-          label="Back to inventory"
+          :to="inventoryBackTo"
+          :label="inventoryBackLabel"
           class="mt-px shrink-0"
         />
         <div class="min-w-0 flex-1">
@@ -96,6 +142,16 @@
             </Button>
           </template>
           <Button
+            v-if="canAddSubcategories"
+            variant="outline"
+            size="sm"
+            :icon="FolderIcon"
+            class="shrink-0 !rounded-xl !px-2 !py-2 !text-[11px] sm:!rounded-2xl sm:!px-3 sm:!py-2.5 sm:!text-xs"
+            @click="openCreateSubcategoryModal"
+          >
+            <span class="hidden sm:inline">Add subcategory</span>
+          </Button>
+          <Button
             v-if="canManageInventoryItems"
             variant="outline"
             size="sm"
@@ -142,8 +198,92 @@
       </div>
     </div>
 
+    <!-- Category hub: subcategories live inside the parent folder -->
+    <template v-if="!isLoadingFolder && showCategoryHub">
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div class="min-w-0">
+          <div class="hidden items-center gap-2 lg:flex">
+            <DashboardBackButton
+              :to="inventoryBackTo"
+              :label="inventoryBackLabel"
+              class="shrink-0"
+            />
+            <h2 class="truncate text-sm font-semibold text-gray-900 dark:text-gray-100">
+              {{ folder?.name || 'Category' }}
+            </h2>
+          </div>
+          <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 lg:sr-only">
+            Subcategories
+          </h2>
+          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            Products live inside subcategories. Open one to add or manage stock.
+          </p>
+        </div>
+        <Button
+          v-if="canAddSubcategories"
+          variant="primary"
+          size="sm"
+          :icon="PlusCircleIcon"
+          extra-class="!rounded-2xl shrink-0"
+          @click="openCreateSubcategoryModal"
+        >
+          Add subcategory
+        </Button>
+      </div>
+      <DashboardTableEmptyState
+        v-if="childFolders.length === 0"
+        :icon="FolderIcon"
+        eyebrow="No subcategories yet"
+        :title="`Organize ${folder?.name || 'this category'} with subcategories`"
+        description="Create subcategories (e.g. Corolla, Camry under Toyota) and add products inside each one."
+        :tips="[
+          'Subcategories inherit this category’s columns and settings',
+          'Once products exist in this category, subcategories can’t be added',
+        ]"
+        extra-class="mt-4"
+      >
+        <Button
+          v-if="canAddSubcategories"
+          variant="primary"
+          size="sm"
+          :icon="PlusCircleIcon"
+          extra-class="!rounded-2xl"
+          @click="openCreateSubcategoryModal"
+        >
+          Add subcategory
+        </Button>
+      </DashboardTableEmptyState>
+      <div
+        v-else
+        class="dash-grid-shell dash-grid-shell--grid inventory-categories-shell--grid mt-4"
+      >
+        <div class="inventory-categories-grid dash-grid">
+          <InventoryCategoryCard
+            v-for="child in childFolders"
+            :key="child.id"
+            :name="child.name"
+            :description="child.description"
+            :type="child.type"
+            :item-count="subfolderDisplayStats(child).itemCount"
+            :low-stock-count="subfolderDisplayStats(child).lowStockCount"
+            :total-value="subfolderDisplayStats(child).totalValue"
+            :has-serial-numbers="child.hasSerialNumbers"
+            :allowed-department-ids="child.allowedDepartments"
+            :resolve-department-name="getDepartmentName"
+            :availability-stats="inventoryStore.folderAvailabilityStats[child.id] ?? null"
+            :stats-loading="inventoryStore.availabilityStatsLoading"
+            :track-profit="child.trackProfit === true"
+            :gross-profit-on-hand="subfolderGrossProfitOnHand(child.id)"
+            :show-profit="canViewProfitAndCost && child.trackProfit === true"
+            :has-overlays="false"
+            @click="navigateToSubfolder(child.id)"
+          />
+        </div>
+      </div>
+    </template>
+
     <!-- Enhanced Items Table (teleport to body in expanded view; same pattern as receipts) -->
-    <div v-if="!isLoadingFolder" class="flex min-h-0 flex-1 flex-col">
+    <div v-if="!isLoadingFolder && !showCategoryHub" class="flex min-h-0 flex-1 flex-col">
     <Teleport to="body" :disabled="!isFullscreen">
         <div
           data-dashboard-teleport
@@ -266,6 +406,16 @@
                       </Button>
                     </template>
                     <Button
+                      v-if="canAddSubcategories"
+                      variant="outline"
+                      size="sm"
+                      :icon="FolderIcon"
+                      extra-class="!rounded-2xl"
+                      @click="openCreateSubcategoryModal"
+                    >
+                      Add subcategory
+                    </Button>
+                    <Button
                       variant="outline"
                       size="sm"
                       :icon="ArrowDownTrayIcon"
@@ -317,8 +467,8 @@
               <template #heading>
                 <div class="flex min-w-0 flex-1 items-start gap-2">
                   <DashboardBackButton
-                    to="/dashboard/inventory"
-                    label="Back to inventory"
+                    :to="inventoryBackTo"
+                    :label="inventoryBackLabel"
                     class="mt-0.5 hidden lg:inline-flex"
                   />
                   <div class="min-w-0 flex-1">
@@ -408,6 +558,16 @@
                     <span class="hidden sm:inline">Stock loan</span>
                   </Button>
                 </template>
+                <Button
+                  v-if="canAddSubcategories"
+                  variant="outline"
+                  size="sm"
+                  :icon="FolderIcon"
+                  extra-class="!rounded-2xl max-sm:!px-2 max-sm:!py-1.5"
+                  @click="openCreateSubcategoryModal"
+                >
+                  <span class="hidden sm:inline">Add subcategory</span>
+                </Button>
                 <Button
                   v-if="canManageInventoryItems"
                   variant="outline"
@@ -1696,6 +1856,71 @@
         </button>
       </div>
     </Teleport>
+
+    <SidePanel
+      v-model="showCreateSubcategoryModal"
+      size="md"
+      dense
+      eyebrow="Inventory"
+      title="Add subcategory"
+      :subtitle="
+        subcategoryCreateParent
+          ? `Creates a subcategory inside ${subcategoryCreateParent.name}. Columns and settings are inherited.`
+          : 'Creates a subcategory inside this category.'
+      "
+    >
+      <form
+        id="subcategory-drawer-form"
+        :class="[drawerFillClass, 'divide-y divide-gray-100/90 dark:divide-gray-800/80']"
+        @submit.prevent="handleSaveSubcategory"
+      >
+        <section :class="[drawerSectionClass, drawerFillFixedClass]">
+          <div>
+            <label :class="drawerLabelClass">Subcategory name *</label>
+            <input
+              v-model="subcategoryForm.name"
+              type="text"
+              required
+              :class="drawerInputClass"
+              placeholder="e.g. Corolla"
+            />
+          </div>
+          <div class="mt-2.5">
+            <label :class="drawerLabelClass">Description</label>
+            <textarea
+              v-model="subcategoryForm.description"
+              rows="2"
+              :class="[drawerTextareaClass, 'resize-none']"
+              placeholder="Optional"
+            />
+          </div>
+        </section>
+      </form>
+      <template #footer>
+        <div class="flex justify-end gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            extra-class="!rounded-2xl"
+            :disabled="isSavingSubcategory"
+            @click="showCreateSubcategoryModal = false"
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            size="sm"
+            type="submit"
+            form="subcategory-drawer-form"
+            extra-class="!rounded-2xl"
+            :loading="isSavingSubcategory"
+            :disabled="!subcategoryForm.name.trim()"
+          >
+            Create subcategory
+          </Button>
+        </div>
+      </template>
+    </SidePanel>
   </div>
 </template>
 
@@ -1734,7 +1959,9 @@ import Checkbox from '~/components/ui/Checkbox.vue'
 import {
   useInventoryStore,
   type InventoryFolder,
+  type InventoryItem,
   type TemplateField,
+  type Template,
   INVENTORY_FIRESTORE_PAGE_SIZE,
 } from '~/stores/inventory'
 import { useReceiptsStore } from '~/stores/receipts'
@@ -1746,6 +1973,13 @@ import { useSubscriptionFeatures } from '~/composables/useSubscriptionFeatures'
 import { useAppToast } from '~/composables/useAppToast'
 import { usePreferences } from '~/composables/usePreferences'
 import { useDashboardDrawerChrome } from '~/composables/useDashboardDrawerChrome'
+import {
+  folderHasChildren,
+  getChildFolders,
+  getFolderParent,
+  isSubfolder,
+  rollupFolderStats,
+} from '~/utils/inventory-folder-tree'
 import { getVisibleMenuAnchorElement } from '~/utils/menuAnchor'
 import { computeFolderTotalValue } from '~/utils/inventory-folder-availability'
 import { getInventoryItemDisplayName } from '~/composables/useInventoryItemDisplay'
@@ -1780,6 +2014,8 @@ import DeleteItemModal from '~/components/inventory/DeleteItemModal.vue'
 import ItemTimelineModal from '~/components/inventory/ItemTimelineModal.vue'
 import DuplicateFeatureUpsellBanner from '~/components/inventory/DuplicateFeatureUpsellBanner.vue'
 import CreateSellerLoanModal from '~/components/seller-loans/CreateSellerLoanModal.vue'
+import InventoryCategoryCard from '~/components/inventory/InventoryCategoryCard.vue'
+import { useDepartmentsStore } from '~/stores/departments'
 
 definePageMeta({
   layout: 'dashboard',
@@ -1788,19 +2024,14 @@ definePageMeta({
 const route = useRoute()
 const folderId = computed(() => route.params.id as string)
 
-const inventoryBreadcrumbs = computed(() => [
-  { label: 'Inventory', href: '/dashboard/inventory', icon: CubeIcon },
-  { label: folder.value?.name || 'Category', icon: FolderIcon },
-])
-
-import type { InventoryFolder, InventoryItem } from '~/stores/inventory'
-
 const inventoryStore = useInventoryStore()
 const receiptsStore = useReceiptsStore()
 const authStore = useAuthStore()
 const userStore = useUserStore()
 const storesStore = useStoresStore()
-const { canManageInventoryItems, canManage, canViewProfitAndCost } = usePermissions()
+const departmentsStore = useDepartmentsStore()
+const { canManageInventoryItems, canManage, canViewProfitAndCost, canCreateInventoryFolders } =
+  usePermissions()
 const canShowProfitAndCost = computed(
   () => canViewProfitAndCost.value && folder.value?.trackProfit === true
 )
@@ -1816,12 +2047,153 @@ const canDuplicateByPlan = computed(() => {
   return sub === 'storvv_medium' || sub === 'storvv_enterprise'
 })
 const { formatCurrency, preferences } = usePreferences()
-const { drawerFillClass, drawerFillFixedClass, drawerFillScrollClass } = useDashboardDrawerChrome()
+const { drawerFillClass, drawerFillFixedClass, drawerFillScrollClass, drawerSectionClass, drawerLabelClass, drawerInputClass, drawerTextareaClass } = useDashboardDrawerChrome()
 const currencySymbol = computed(() => preferences.value?.currencySymbol || '$')
 const folder = ref<InventoryFolder | null>(null)
 const isLoadingFolder = ref(true)
 const isLoadingItems = ref(false)
 const { headerBtnClass, headerBtnLabelClass } = useDashboardPageChrome()
+
+const inventoryBreadcrumbs = computed(() => {
+  const crumbs = [{ label: 'Inventory', href: '/dashboard/inventory', icon: CubeIcon }]
+  const parent = folder.value ? getFolderParent(inventoryStore.folders, folder.value) : null
+  if (parent) {
+    crumbs.push({
+      label: parent.name,
+      href: `/dashboard/inventory/${parent.id}`,
+      icon: FolderIcon,
+    })
+  }
+  crumbs.push({
+    label: folder.value?.name || 'Category',
+    href: `/dashboard/inventory/${folderId.value}`,
+    icon: FolderIcon,
+  })
+  return crumbs
+})
+
+const folderParent = computed(() =>
+  folder.value ? getFolderParent(inventoryStore.folders, folder.value) : null
+)
+
+const inventoryBackTo = computed(() =>
+  folderParent.value
+    ? `/dashboard/inventory/${folderParent.value.id}`
+    : '/dashboard/inventory'
+)
+
+const inventoryBackLabel = computed(() =>
+  folderParent.value ? `Back to ${folderParent.value.name}` : 'Back to inventory'
+)
+
+const childFolders = computed(() =>
+  folder.value ? getChildFolders(inventoryStore.folders, folder.value.id) : []
+)
+
+function subfolderDisplayStats(child: InventoryFolder) {
+  return rollupFolderStats(child, inventoryStore.folders)
+}
+
+function subfolderGrossProfitOnHand(childId: string): number | null {
+  const child = inventoryStore.getFolderById(childId)
+  if (!child?.trackProfit) return null
+  const stats = inventoryStore.folderProfitStats[childId]
+  if (stats) return stats.grossProfitOnHand
+  if ((child.itemCount ?? 0) === 0) return 0
+  return null
+}
+
+function getDepartmentName(deptId: string) {
+  const dept = departmentsStore.getDepartmentById(deptId)
+  return dept?.name || deptId
+}
+
+function navigateToSubfolder(subfolderId: string) {
+  navigateTo(`/dashboard/inventory/${subfolderId}`)
+}
+
+function folderShowsCategoryHub(f: InventoryFolder | null | undefined): boolean {
+  if (!f || isSubfolder(f)) return false
+  const hasChildren = folderHasChildren(inventoryStore.folders, f.id)
+  const canAdd = canCreateInventoryFolders.value && (f.itemCount ?? 0) === 0
+  return hasChildren || canAdd
+}
+
+/** Parent folder used when creating a subcategory (hub page or sibling from a subcategory page). */
+const subcategoryCreateParent = computed((): InventoryFolder | null => {
+  if (!folder.value) return null
+  if (folderShowsCategoryHub(folder.value)) return folder.value
+  if (isSubfolder(folder.value)) {
+    return getFolderParent(inventoryStore.folders, folder.value)
+  }
+  return null
+})
+
+const canAddSubcategories = computed(() => {
+  const parent = subcategoryCreateParent.value
+  if (!parent || !canCreateInventoryFolders.value) return false
+  return (parent.itemCount ?? 0) === 0
+})
+
+const showCategoryHub = computed(() => folderShowsCategoryHub(folder.value))
+
+const loadingShowsCategoryHub = computed(() => {
+  if (!isLoadingFolder.value) return showCategoryHub.value
+  const cached =
+    folder.value ?? (folderId.value ? inventoryStore.getFolderById(folderId.value) : null)
+  return folderShowsCategoryHub(cached)
+})
+
+const showCreateSubcategoryModal = ref(false)
+const isSavingSubcategory = ref(false)
+const subcategoryForm = reactive({ name: '', description: '' })
+
+function openCreateSubcategoryModal() {
+  subcategoryForm.name = ''
+  subcategoryForm.description = ''
+  showCreateSubcategoryModal.value = true
+}
+
+async function handleSaveSubcategory() {
+  const parent = subcategoryCreateParent.value
+  if (!parent || isSavingSubcategory.value) return
+  if (!subcategoryForm.name.trim()) {
+    toast.error('Please enter a subcategory name')
+    return
+  }
+
+  isSavingSubcategory.value = true
+  try {
+    const template: Template | undefined = parent.template?.fields?.length
+      ? {
+          id: 'custom',
+          name: 'Custom Template',
+          description: 'Custom table structure',
+          fields: parent.template.fields.map((field) => ({ ...field })),
+        }
+      : undefined
+
+    await inventoryStore.createFolder({
+      name: subcategoryForm.name.trim(),
+      description: subcategoryForm.description.trim(),
+      type: parent.type || 'general',
+      color: parent.color || '#3B82F6',
+      hasSerialNumbers: parent.hasSerialNumbers || false,
+      trackProfit: parent.trackProfit === true,
+      allowedDepartments: parent.allowedDepartments ? [...parent.allowedDepartments] : [],
+      template,
+      parentId: parent.id,
+    })
+    toast.success('Subcategory created')
+    showCreateSubcategoryModal.value = false
+    await inventoryStore.fetchFolderAvailabilityStats()
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Failed to create subcategory'
+    toast.error(message)
+  } finally {
+    isSavingSubcategory.value = false
+  }
+}
 
 function applyFolderSnapshot(next: InventoryFolder) {
   folder.value = {

@@ -34,7 +34,13 @@
           <div>
             <p class="text-xs font-medium text-red-800 dark:text-red-200">Confirm deletion</p>
             <p class="mt-0.5 text-xs text-red-700 dark:text-red-300">
-              This action cannot be undone. The category and all
+              This action cannot be undone. The category
+              <template v-if="isParentFolder">
+                , its {{ childFolderCount }} subcategor{{
+                  childFolderCount === 1 ? 'y' : 'ies'
+                }},
+              </template>
+              and all
               {{ folder?.itemCount || 0 }} product{{ (folder?.itemCount || 0) !== 1 ? 's' : '' }}
               inside it will be permanently deleted.
             </p>
@@ -131,7 +137,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import {
   TrashIcon,
   ExclamationTriangleIcon,
@@ -140,6 +146,8 @@ import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import type { InventoryFolder } from '~/stores/inventory'
+import { useInventoryStore } from '~/stores/inventory'
+import { folderHasChildren, getChildFolders } from '~/utils/inventory-folder-tree'
 
 interface Props {
   modelValue: boolean
@@ -147,6 +155,15 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+const inventoryStore = useInventoryStore()
+
+const childFolderCount = computed(() =>
+  props.folder ? getChildFolders(inventoryStore.folders, props.folder.id).length : 0
+)
+
+const isParentFolder = computed(() =>
+  props.folder ? folderHasChildren(inventoryStore.folders, props.folder.id) : false
+)
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]
   deleted: [folder: InventoryFolder]

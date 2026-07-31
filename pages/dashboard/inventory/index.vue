@@ -196,11 +196,11 @@
             v-for="folder in paginatedFolders"
             :key="folder.id"
             :name="folder.name"
-            :description="folder.description"
+            :description="folderCategoryDescription(folder)"
             :type="folder.type"
-            :item-count="folder.itemCount"
-            :low-stock-count="folder.lowStockCount"
-            :total-value="folder.totalValue"
+            :item-count="folderDisplayStats(folder).itemCount"
+            :low-stock-count="folderDisplayStats(folder).lowStockCount"
+            :total-value="folderDisplayStats(folder).totalValue"
             :has-serial-numbers="folder.hasSerialNumbers"
             :allowed-department-ids="folder.allowedDepartments"
             :resolve-department-name="getDepartmentName"
@@ -304,10 +304,10 @@
                       <div class="min-w-0">
                         <span class="dashboard-table__primary block truncate">{{ folder.name }}</span>
                         <span
-                          v-if="folder.description?.trim()"
+                          v-if="folderCategoryDescription(folder)"
                           class="dashboard-table__muted mt-0.5 block truncate text-[10px]"
                         >
-                          {{ folder.description }}
+                          {{ folderCategoryDescription(folder) }}
                         </span>
                       </div>
                     </div>
@@ -320,17 +320,19 @@
                     </span>
                   </td>
                   <td class="text-right">
-                    <span class="dashboard-table__numeric">{{ folder.itemCount }}</span>
+                    <span class="dashboard-table__numeric">{{
+                      folderDisplayStats(folder).itemCount
+                    }}</span>
                     <span
-                      v-if="folder.lowStockCount > 0"
+                      v-if="folderDisplayStats(folder).lowStockCount > 0"
                       class="dashboard-table__muted mt-0.5 block text-[10px] tabular-nums"
                     >
-                      {{ folder.lowStockCount }} low stock
+                      {{ folderDisplayStats(folder).lowStockCount }} low stock
                     </span>
                   </td>
                   <td class="hidden sm:table-cell text-right">
                     <span class="dashboard-table__money">{{
-                      formatCurrency(folder.totalValue ?? 0)
+                      formatCurrency(folderDisplayStats(folder).totalValue ?? 0)
                     }}</span>
                   </td>
                   <td v-if="canViewProfitAndCost" class="hidden md:table-cell text-right">
@@ -386,7 +388,7 @@
         v-if="paginatedFolders.length > 0"
         :current-page="currentPage"
         :items-per-page="itemsPerPage"
-        :total="filteredFolders.length"
+        :total="foldersForCategoryList.length"
         @page-change="handlePageChange"
       />
     </div>
@@ -568,6 +570,13 @@
               </select>
             </div>
           </div>
+          <p v-if="editingFolder && isSubfolder(editingFolder)" :class="[drawerHintClass, 'mt-1']">
+            Subcategory of
+            {{
+              folders.find((entry) => entry.id === editingFolder?.parentId)?.name ||
+              'parent category'
+            }}.
+          </p>
           <div class="mt-2.5">
             <label :class="drawerLabelClass">Description</label>
             <textarea
@@ -579,7 +588,10 @@
           </div>
         </section>
 
-        <section :class="[drawerSectionClass, drawerFillFixedClass]">
+        <section
+          v-if="!(editingFolder && isSubfolder(editingFolder))"
+          :class="[drawerSectionClass, drawerFillFixedClass]"
+        >
           <Checkbox
             v-model="folderForm.hasSerialNumbers"
             size="sm"
@@ -596,7 +608,10 @@
           </Checkbox>
         </section>
 
-        <section v-if="canViewProfitAndCost" :class="[drawerSectionClass, drawerFillFixedClass]">
+        <section
+          v-if="canViewProfitAndCost && !isSubfolderDrawer"
+          :class="[drawerSectionClass, drawerFillFixedClass]"
+        >
           <Checkbox
             v-model="folderForm.trackProfit"
             size="sm"
@@ -614,7 +629,10 @@
           </Checkbox>
         </section>
 
-        <section v-if="canCreateInventoryFolders" :class="[drawerSectionClass, drawerFillFixedClass]">
+        <section
+          v-if="canCreateInventoryFolders && !isSubfolderDrawer"
+          :class="[drawerSectionClass, drawerFillFixedClass]"
+        >
           <p :class="sectionLabelClass">
             Department access
             <span class="font-normal text-gray-400 dark:text-gray-500">(optional)</span>
@@ -664,7 +682,7 @@
           </div>
         </section>
 
-        <section :class="[drawerSectionClass, 'flex min-h-0 flex-1 flex-col']">
+        <section v-if="!isSubfolderDrawer" :class="[drawerSectionClass, 'flex min-h-0 flex-1 flex-col']">
           <div :class="[drawerFillFixedClass, 'flex flex-wrap items-center justify-between gap-2']">
             <div>
               <p :class="sectionLabelClass">Table template</p>
@@ -1199,7 +1217,14 @@ import {
 } from '~/stores/inventory'
 import { useDepartmentsStore } from '~/stores/departments'
 import { useStoresStore } from '~/stores/stores'
-import { usePermissions } from '~/composables/usePermissions'
+import {
+  filterRootFolders,
+  folderHasChildren,
+  getChildFolders,
+  getRootFolders,
+  isSubfolder,
+  rollupFolderStats,
+} from '~/utils/inventory-folder-tree'
 import { usePreferences } from '~/composables/usePreferences'
 import { useAppToast } from '~/composables/useAppToast'
 import { getVisibleMenuAnchorElement, computeFixedAnchoredMenuStyle } from '~/utils/menuAnchor'
@@ -1662,7 +1687,8 @@ const folderForm = reactive({
   color: '#3B82F6',
   hasSerialNumbers: false,
   trackProfit: false,
-  allowedDepartments: [] as string[], // Array of department IDs
+  allowedDepartments: [] as string[],
+  parentId: '' as string,
 })
 
 // Default fields that should always be included
@@ -1778,11 +1804,16 @@ function resetNewFolderFormDefaults() {
   folderForm.hasSerialNumbers = false
   folderForm.trackProfit = false
   folderForm.allowedDepartments = []
+  folderForm.parentId = ''
   profitSkipConfirmed.value = false
   editableFields.value = getDefaultFields()
   selectedTemplateId.value = 'custom'
   ensureBulkQuantityTemplateField(editableFields.value)
 }
+
+const isSubfolderDrawer = computed(
+  () => !!editingFolder.value && isSubfolder(editingFolder.value)
+)
 
 watch(showCreateFolderModal, (isOpen) => {
   if (isOpen) {
@@ -1902,6 +1933,34 @@ const filteredFolders = computed(() => {
   return result
 })
 
+/** Top-level categories only — subcategories are opened inside their parent folder. */
+const foldersForCategoryList = computed(() => {
+  const all = filteredFolders.value
+  const query = searchQuery.value.trim()
+  if (query) return filterRootFolders(all, query)
+  return getRootFolders(all)
+})
+
+function folderDisplayStats(folder: InventoryFolder) {
+  if (folderHasChildren(folders.value, folder.id)) {
+    return rollupFolderStats(folder, folders.value)
+  }
+  return {
+    itemCount: folder.itemCount ?? 0,
+    totalValue: folder.totalValue ?? 0,
+    lowStockCount: folder.lowStockCount ?? 0,
+  }
+}
+
+function folderCategoryDescription(folder: InventoryFolder): string {
+  const subCount = getChildFolders(folders.value, folder.id).length
+  if (subCount > 0) {
+    const label = `${subCount} subcategor${subCount === 1 ? 'y' : 'ies'}`
+    return folder.description?.trim() ? `${label} · ${folder.description}` : label
+  }
+  return folder.description
+}
+
 const filteredFoldersTotalValue = computed(() =>
   filteredFolders.value.reduce((sum, folder) => sum + (folder.totalValue ?? 0), 0)
 )
@@ -1914,8 +1973,8 @@ const filteredFoldersTotalProfit = computed(() =>
 )
 
 const categoryHeaderMetrics = computed(() => {
-  const totalCategories = inventoryStore.folders.length
-  const shownCategories = filteredFolders.value.length
+  const totalCategories = getRootFolders(inventoryStore.folders).length
+  const shownCategories = foldersForCategoryList.value.length
   const categoriesValue =
     shownCategories !== totalCategories
       ? `${shownCategories} / ${totalCategories}`
@@ -1983,13 +2042,12 @@ function folderProfitTableClass(folderId: string): string {
 const folderForOpenMenu = computed(() => {
   const id = openFolderMenuId.value
   if (!id) return null
-  return filteredFolders.value.find((f) => f.id === id) ?? null
+  return foldersForCategoryList.value.find((f) => f.id === id) ?? null
 })
 
 const paginatedFolders = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage.value
-  const end = start + itemsPerPage.value
-  return filteredFolders.value.slice(start, end)
+  return foldersForCategoryList.value.slice(start, start + itemsPerPage.value)
 })
 
 const handlePageChange = (page: number) => {
@@ -2242,6 +2300,7 @@ const handleEditFolder = (folder: InventoryFolder) => {
   folderForm.hasSerialNumbers = folder.hasSerialNumbers || false
   folderForm.trackProfit = folder.trackProfit === true
   folderForm.allowedDepartments = folder.allowedDepartments ? [...folder.allowedDepartments] : []
+  folderForm.parentId = folder.parentId || ''
   if (folder.template) {
     editableFields.value = folder.template.fields.map((f) => ({ ...f }))
   } else {
@@ -2482,17 +2541,23 @@ const handleSaveFolder = async () => {
       folderForm.allowedDepartments.length > 0 ? [...folderForm.allowedDepartments] : []
 
     if (editingFolder.value) {
-      // Update existing folder
-      await inventoryStore.updateFolder(editingFolder.value.id, {
-        name: folderForm.name.trim(),
-        description: folderForm.description.trim(),
-        type: folderForm.type,
-        color: folderForm.color,
-        hasSerialNumbers: folderForm.hasSerialNumbers,
-        trackProfit,
-        template: template,
-        allowedDepartments,
-      })
+      const updates = isSubfolder(editingFolder.value)
+        ? {
+            name: folderForm.name.trim(),
+            description: folderForm.description.trim(),
+          }
+        : {
+            name: folderForm.name.trim(),
+            description: folderForm.description.trim(),
+            type: folderForm.type,
+            color: folderForm.color,
+            hasSerialNumbers: folderForm.hasSerialNumbers,
+            trackProfit,
+            template: template,
+            allowedDepartments,
+          }
+
+      await inventoryStore.updateFolder(editingFolder.value.id, updates)
       handleCancelFolder()
       await inventoryStore.fetchFolderAvailabilityStats()
     } else {
@@ -2506,6 +2571,7 @@ const handleSaveFolder = async () => {
         trackProfit,
         template: template,
         allowedDepartments,
+        parentId: null,
       })
       handleCancelFolder()
       await inventoryStore.fetchFolderAvailabilityStats()

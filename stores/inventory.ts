@@ -121,6 +121,13 @@ function clonePlain<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T
 }
 
+import {
+  folderHasChildren,
+  getLeafFolders,
+  normalizeParentId,
+  validateFolderParentId,
+} from '~/utils/inventory-folder-tree'
+
 function mapFirestoreDocToInventoryFolder(
   snapshot: QueryDocumentSnapshot,
   fallbackUserId: string
@@ -147,6 +154,7 @@ function mapFirestoreDocToInventoryFolder(
     createdBy: data.createdBy || fallbackUserId,
     allowedDepartments: data.allowedDepartments || undefined,
     trackProfit: data.trackProfit === true,
+    parentId: normalizeParentId(data.parentId as string | null | undefined),
   } as InventoryFolder
 }
 
@@ -198,6 +206,8 @@ export interface InventoryFolder {
   allowedDepartments?: string[] // Array of department IDs that have access to this folder
   /** When true, category tracks cost price and gross profit (super admin only). */
   trackProfit?: boolean
+  /** Top-level categories omit this; subcategories point to their parent folder. */
+  parentId?: string | null
 }
 
 export interface InventoryItem {
@@ -256,6 +266,7 @@ export const useInventoryStore = defineStore('inventory', {
     getFolderById: (state) => (id: string) => state.folders.find((f) => f.id === id),
     getFolderAvailabilityStats: (state) => (folderId: string) =>
       state.folderAvailabilityStats[folderId],
+    leafFolders: (state) => getLeafFolders(state.folders),
   },
 
   actions: {
@@ -385,30 +396,7 @@ export const useInventoryStore = defineStore('inventory', {
         // console.log('[InventoryStore] Found', allFolders.length, 'folders in store (userId:', userId, 'storeId:', currentStoreId, 'isStaff:', userStore.userData?.role === 'staff' + ')')
 
         // Process the results
-        let folders = allFolders.map((doc) => {
-          const data = doc.data()
-          return {
-            id: doc.id,
-            name: data.name || '',
-            description: data.description || '',
-            type: data.type || '',
-            color: data.color || '#3B82F6',
-            hasSerialNumbers: data.hasSerialNumbers || false,
-            template: data.template || undefined,
-            itemCount: data.itemCount || 0,
-            totalValue: data.totalValue || 0,
-            lowStockCount: data.lowStockCount || 0,
-            storeId: data.storeId || '', // Include storeId from data
-            createdAt: data.createdAt?.toDate
-              ? data.createdAt.toDate()
-              : new Date(data.createdAt) || new Date(),
-            updatedAt: data.updatedAt?.toDate
-              ? data.updatedAt.toDate()
-              : new Date(data.updatedAt) || undefined,
-            createdBy: data.createdBy || userId,
-            allowedDepartments: data.allowedDepartments || undefined,
-          } as InventoryFolder
-        })
+        let folders = allFolders.map((doc) => mapFirestoreDocToInventoryFolder(doc, userId))
 
         // For staff: Filter folders by department access
         if (userStore.userData?.role === 'staff' && staffDepartmentId) {
@@ -1054,7 +1042,9 @@ export const useInventoryStore = defineStore('inventory', {
 
       const userId = authStore.currentUser.uid
       const foldersRef = getInventoryFoldersCollection(db, userId, storeId)
-      const dedupeKey = `${storeId}:${folderData.name.trim().toLowerCase()}`
+      const parentKey = normalizeParentId(folderData.parentId) ?? 'root'
+      validateFolderParentId(this.folders, folderData.parentId)
+      const dedupeKey = `${storeId}:${parentKey}:${folderData.name.trim().toLowerCase()}`
       if (createFolderInflight?.key === dedupeKey) {
         return createFolderInflight.promise
       }
@@ -1065,6 +1055,7 @@ export const useInventoryStore = defineStore('inventory', {
 
           const newFolder: Omit<InventoryFolder, 'id'> = {
             ...folderData,
+            parentId: normalizeParentId(folderData.parentId),
             storeId, // Add storeId to the folder
             itemCount: 0,
             totalValue: 0,
@@ -1081,6 +1072,7 @@ export const useInventoryStore = defineStore('inventory', {
           const folderForState: InventoryFolder = {
             id: newFolderRef.id,
             ...folderData,
+            parentId: normalizeParentId(folderData.parentId),
             storeId, // Add storeId to local state
             itemCount: 0,
             totalValue: 0,
@@ -1242,6 +1234,13 @@ export const useInventoryStore = defineStore('inventory', {
       const folder = this.getFolderById(folderId)
       if (!folder || folder.createdBy !== authStore.currentUser.uid) {
         throw new Error('Folder not found or access denied')
+      }
+
+      const childFolders = this.folders.filter(
+        (entry) => normalizeParentId(entry.parentId) === folderId
+      )
+      for (const child of childFolders) {
+        await this.deleteFolder(child.id)
       }
 
       try {
@@ -1575,6 +1574,12 @@ export const useInventoryStore = defineStore('inventory', {
       const folder = this.getFolderById(folderId)
       if (!folder) {
         throw new Error('Folder not found')
+      }
+
+      if (folderHasChildren(this.folders, folderId)) {
+        throw new Error(
+          'Products belong in subcategories. Open a subcategory to add or edit products.'
+        )
       }
 
       // Get storeId from folder or current store

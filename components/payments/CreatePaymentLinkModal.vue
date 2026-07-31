@@ -44,7 +44,7 @@
           @change="onFolderChange"
         >
           <option value="">Select a category</option>
-          <option v-for="f in inventoryStore.folders" :key="f.id" :value="f.id">
+          <option v-for="f in inventoryStore.leafFolders" :key="f.id" :value="f.id">
             {{ f.name }}
           </option>
         </select>
@@ -298,7 +298,7 @@ watch(
       selectedFolderId.value = ''
       errorMsg.value = ''
       Object.keys(cart).forEach((k) => delete cart[k])
-      if (inventoryStore.folders.length === 0) {
+      if (inventoryStore.leafFolders.length === 0) {
         try {
           await inventoryStore.fetchFolders()
         } catch {
