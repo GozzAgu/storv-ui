@@ -2,6 +2,7 @@ export interface DemoFolder {
   id: string
   name: string
   storeId: string
+  parentId?: string | null
 }
 
 export interface DemoItem {
@@ -81,7 +82,7 @@ export interface DemoTransfer {
 }
 
 export interface DemoState {
-  version: 2 | 3
+  version: 2 | 3 | 4
   currentStoreId: string
   currencyCode: string
   currencySymbol: string

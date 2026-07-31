@@ -1,4 +1,4 @@
-import type { InventoryFolder } from '~/stores/inventory'
+import type { InventoryFolder, Template, TemplateField } from '~/stores/inventory'
 
 export type InventoryFolderDisplayRow = {
   folder: InventoryFolder
@@ -151,4 +151,87 @@ export function rollupFolderStats(
     },
     { itemCount: 0, totalValue: 0, lowStockCount: 0 }
   )
+}
+
+/** Settings subcategories inherit from their parent category. */
+export type InheritableFolderSettings = {
+  type: string
+  color: string
+  hasSerialNumbers: boolean
+  trackProfit: boolean
+  template: Template
+  allowedDepartments: string[]
+}
+
+function templateFieldsSignature(fields: TemplateField[] | undefined): string {
+  if (!fields?.length) return ''
+  return JSON.stringify(
+    fields.map((field) => ({
+      name: field.name,
+      label: field.label,
+      type: field.type,
+      required: field.required,
+      options: field.options,
+      placeholder: field.placeholder,
+    }))
+  )
+}
+
+function departmentsSignature(departments: string[] | undefined): string {
+  return [...(departments ?? [])].sort().join('\0')
+}
+
+export function getInheritableFolderSettingsFromFolder(
+  folder: InventoryFolder
+): InheritableFolderSettings {
+  return {
+    type: folder.type || 'general',
+    color: folder.color || '#3B82F6',
+    hasSerialNumbers: folder.hasSerialNumbers || false,
+    trackProfit: folder.trackProfit === true,
+    template: folder.template ?? {
+      id: 'custom',
+      name: 'Custom Template',
+      description: 'Custom table structure',
+      fields: [],
+    },
+    allowedDepartments: folder.allowedDepartments ? [...folder.allowedDepartments] : [],
+  }
+}
+
+export function inheritableFolderSettingsChanged(
+  original: InventoryFolder,
+  next: InheritableFolderSettings
+): boolean {
+  const previous = getInheritableFolderSettingsFromFolder(original)
+  if (previous.type !== next.type) return true
+  if (previous.color !== next.color) return true
+  if (previous.hasSerialNumbers !== next.hasSerialNumbers) return true
+  if (previous.trackProfit !== next.trackProfit) return true
+  if (
+    departmentsSignature(previous.allowedDepartments) !==
+    departmentsSignature(next.allowedDepartments)
+  ) {
+    return true
+  }
+  return (
+    templateFieldsSignature(previous.template.fields) !==
+    templateFieldsSignature(next.template.fields)
+  )
+}
+
+export function pickInheritableFolderUpdates(
+  settings: InheritableFolderSettings
+): InheritableFolderSettings {
+  return {
+    type: settings.type,
+    color: settings.color,
+    hasSerialNumbers: settings.hasSerialNumbers,
+    trackProfit: settings.trackProfit,
+    template: {
+      ...settings.template,
+      fields: settings.template.fields.map((field) => ({ ...field })),
+    },
+    allowedDepartments: [...settings.allowedDepartments],
+  }
 }

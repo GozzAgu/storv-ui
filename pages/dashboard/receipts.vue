@@ -190,6 +190,17 @@
                         </button>
                         <Button
                           v-if="canCreate"
+                          variant="outline"
+                          size="sm"
+                          :icon="QrCodeIcon"
+                          aria-label="Quick sale"
+                          extra-class="!rounded-2xl shrink-0 max-sm:!px-2 max-sm:!py-1.5"
+                          @click="openQuickSaleModal"
+                        >
+                          <span :class="headerBtnLabelClass">Quick sale</span>
+                        </Button>
+                        <Button
+                          v-if="canCreate"
                           variant="primary"
                           size="sm"
                           :icon="ReceiptPercentIcon"
@@ -248,6 +259,17 @@
                       </DashboardToolbarIconButton>
                     </template>
                     <template #actions>
+                      <Button
+                        v-if="canCreate"
+                        variant="outline"
+                        size="sm"
+                        :icon="QrCodeIcon"
+                        aria-label="Quick sale"
+                        :extra-class="headerBtnClass"
+                        @click="openQuickSaleModal"
+                      >
+                        <span :class="headerBtnLabelClass">Quick sale</span>
+                      </Button>
                       <Button
                         v-if="canCreate"
                         variant="primary"
@@ -954,6 +976,8 @@
               @receipt-created="handleReceiptCreated"
             />
 
+            <QuickSaleModal v-model="showQuickSaleModal" @sale-completed="handleQuickSaleCompleted" />
+
             <!-- View Receipt Modal -->
             <ViewReceiptModal v-model="showViewReceiptModal" :receipt="selectedReceipt" />
 
@@ -1624,6 +1648,7 @@ import {
   ClipboardDocumentIcon,
   ArrowsPointingOutIcon,
   EllipsisVerticalIcon,
+  QrCodeIcon,
 } from '~/utils/app-icons'
 import Button from '~/components/ui/Button.vue'
 import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
@@ -1631,6 +1656,8 @@ import Modal from '~/components/ui/Modal.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 // @ts-ignore
 import CreateReceiptModal from '~/components/receipts/CreateReceiptModal.vue'
+// @ts-ignore
+import QuickSaleModal from '~/components/receipts/QuickSaleModal.vue'
 // @ts-ignore
 import ViewReceiptModal from '~/components/receipts/ViewReceiptModal.vue'
 import ReceiptTableLineItems from '~/components/receipts/ReceiptTableLineItems.vue'
@@ -2723,9 +2750,20 @@ watch(customersCurrentPage, (newPage) => {
 })
 
 const showCreateReceiptModal = ref(false)
+const showQuickSaleModal = ref(false)
 
 const openCreateReceiptModal = () => {
   showCreateReceiptModal.value = true
+}
+
+const openQuickSaleModal = () => {
+  showQuickSaleModal.value = true
+}
+
+const handleQuickSaleCompleted = async () => {
+  showQuickSaleModal.value = false
+  await receiptsStore.fetchReceipts()
+  await loadCreatorNames()
 }
 
 const handleReceiptCreated = async (receipt: Receipt) => {

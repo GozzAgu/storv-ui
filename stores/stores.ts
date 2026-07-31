@@ -24,6 +24,7 @@ import { getPlanLimits, getEligibleStoresForPlan } from '~/types/subscription'
 import type { SubscriptionPlan } from '~/types/subscription'
 import type { Store, StoreWithStats } from '~/composables/useStores'
 import { clearInventoryItemQueryCaches } from '~/utils/inventory-items-firestore'
+import { normalizeEntityName } from '~/utils/capitalize-text'
 
 export const useStoresStore = defineStore('stores', {
   state: () => ({
@@ -668,6 +669,7 @@ export const useStoresStore = defineStore('stores', {
 
         const newStore: Omit<Store, 'id'> = {
           ...storeData,
+          name: normalizeEntityName(storeData.name),
           ownerId: authStore.currentUser.uid,
           isActive: storeData.isActive ?? true,
           createdAt: serverTimestamp(),
@@ -725,6 +727,7 @@ export const useStoresStore = defineStore('stores', {
         const storeRef = getStoreDocument(db, userId, storeId)
         await updateDoc(storeRef, {
           ...updates,
+          ...(updates.name !== undefined ? { name: normalizeEntityName(updates.name) } : {}),
           updatedAt: serverTimestamp(),
         })
 
@@ -734,6 +737,7 @@ export const useStoresStore = defineStore('stores', {
           this.stores[index] = {
             ...this.stores[index],
             ...updates,
+            ...(updates.name !== undefined ? { name: normalizeEntityName(updates.name) } : {}),
           } as Store
         }
       } catch (error: any) {

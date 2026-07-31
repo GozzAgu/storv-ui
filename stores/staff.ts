@@ -24,12 +24,12 @@ import { useAuthStore } from './auth'
 import { useUserStore } from './user'
 import { useDepartmentsStore } from './departments'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
-import {
-  getStaffCollection,
+import { getStaffCollection,
   getStaffDocument,
   getDepartmentDocument,
   getQueryUserId,
 } from '~/composables/useFirestorePaths'
+import { normalizeEntityName } from '~/utils/capitalize-text'
 import { getPlanLimits } from '~/types/subscription'
 import type { SubscriptionPlan } from '~/types/subscription'
 import type { Staff } from '~/composables/useStaff'
@@ -545,6 +545,8 @@ export const useStaffStore = defineStore('staff', {
         const demoMember: Staff = {
           id: staffId,
           ...fields,
+          firstName: normalizeEntityName(fields.firstName),
+          lastName: normalizeEntityName(fields.lastName),
           storeId,
           status: 'active',
           createdAt: now,
@@ -629,9 +631,12 @@ export const useStaffStore = defineStore('staff', {
       const staffRef = doc(getStaffCollection(db, superAdminUid, storeId, staffData.departmentId))
       const staffId = staffRef.id
 
+      const normalizedFirstName = normalizeEntityName(staffData.firstName)
+      const normalizedLastName = normalizeEntityName(staffData.lastName)
+
       const newStaff = {
-        firstName: staffData.firstName.trim(),
-        lastName: staffData.lastName.trim(),
+        firstName: normalizedFirstName,
+        lastName: normalizedLastName,
         email: normalizedEmail,
         ...(staffData.phone !== undefined &&
           staffData.phone !== '' && { phone: String(staffData.phone).trim() }),
@@ -679,7 +684,7 @@ export const useStaffStore = defineStore('staff', {
       )
       if (staffData.role === 'manager') {
         await departmentsStore.updateDepartment(staffData.departmentId, {
-          manager: `${staffData.firstName} ${staffData.lastName}`,
+          manager: `${normalizedFirstName} ${normalizedLastName}`,
           managerId: staffId,
         } as Partial<import('~/composables/useDepartments').Department>)
       }
@@ -689,6 +694,8 @@ export const useStaffStore = defineStore('staff', {
       const staffWithDept: Staff = {
         id: staffId,
         ...staffFields,
+        firstName: normalizedFirstName,
+        lastName: normalizedLastName,
         storeId,
         authUid: staffAuthUid,
         mustChangePassword: true,
@@ -762,14 +769,24 @@ export const useStaffStore = defineStore('staff', {
         }
         const departmentId = staffMember.departmentId
 
+        const normalizedUpdates = {
+          ...updates,
+          ...(updates.firstName !== undefined
+            ? { firstName: normalizeEntityName(updates.firstName) }
+            : {}),
+          ...(updates.lastName !== undefined
+            ? { lastName: normalizeEntityName(updates.lastName) }
+            : {}),
+        }
+
         // If department is being changed, verify new department belongs to user and update counts
-        if (updates.departmentId && updates.departmentId !== departmentId) {
+        if (normalizedUpdates.departmentId && normalizedUpdates.departmentId !== departmentId) {
           const departmentsStore = useDepartmentsStore()
 
           // Verify new department belongs to this user
           const newDept =
-            departmentsStore.getDepartmentById(updates.departmentId) ||
-            (await departmentsStore.fetchDepartment(updates.departmentId))
+            departmentsStore.getDepartmentById(normalizedUpdates.departmentId) ||
+            (await departmentsStore.fetchDepartment(normalizedUpdates.departmentId))
           if (!newDept || newDept.createdBy !== userId) {
             throw new Error('Department not found or access denied')
           }
@@ -787,7 +804,7 @@ export const useStaffStore = defineStore('staff', {
 
           // Increase new department count - pass storeId from new department
           await departmentsStore.updateStaffCount(
-            updates.departmentId,
+            normalizedUpdates.departmentId,
             newDept.staffCount + 1,
             newDept.storeId
           )
@@ -795,7 +812,13 @@ export const useStaffStore = defineStore('staff', {
           // If department changed, we need to move the staff document to the new department
           // Delete from old department and create in new department
           const oldStaffRef = getStaffDocument(db, userId, storeId, departmentId, staffId)
-          const newStaffRef = getStaffDocument(db, userId, storeId, updates.departmentId, staffId)
+          const newStaffRef = getStaffDocument(
+            db,
+            userId,
+            storeId,
+            normalizedUpdates.departmentId,
+            staffId
+          )
 
           // Get current staff data
           const currentStaffData = (await getDoc(oldStaffRef)).data()
@@ -803,8 +826,8 @@ export const useStaffStore = defineStore('staff', {
             // Create in new department
             await setDoc(newStaffRef, {
               ...currentStaffData,
-              ...updates,
-              departmentId: updates.departmentId,
+              ...normalizedUpdates,
+              departmentId: normalizedUpdates.departmentId,
               updatedAt: serverTimestamp(),
             })
             // Delete from old department
@@ -831,24 +854,24 @@ export const useStaffStore = defineStore('staff', {
         } else {
           // Use hierarchical path: users/{userId}/stores/{storeId}/departments/{departmentId}/staff/{staffId}
           const staffRef = getStaffDocument(db, userId, storeId, departmentId, staffId)
-          const mergedRole = updates.role ?? staffMember.role
+          const mergedRole = normalizedUpdates.role ?? staffMember.role
           const inventoryPatch =
-            mergedRole === 'manager' && updates.canManageInventory === true
+            mergedRole === 'manager' && normalizedUpdates.canManageInventory === true
               ? { canManageInventory: true }
-              : mergedRole !== 'manager' || updates.canManageInventory === false
+              : mergedRole !== 'manager' || normalizedUpdates.canManageInventory === false
               ? { canManageInventory: deleteField() }
               : {}
           await updateDoc(staffRef, {
-            ...updates,
+            ...normalizedUpdates,
             ...inventoryPatch,
             updatedAt: serverTimestamp(),
           })
         }
 
         // Keep store membership index in sync for security rules.
-        const mergedRole = updates.role ?? staffMember.role
-        const mergedStatus = updates.status ?? staffMember.status
-        const mergedDepartmentId = updates.departmentId ?? staffMember.departmentId
+        const mergedRole = normalizedUpdates.role ?? staffMember.role
+        const mergedStatus = normalizedUpdates.status ?? staffMember.status
+        const mergedDepartmentId = normalizedUpdates.departmentId ?? staffMember.departmentId
         if (!staffMember.authUid) {
           throw new Error('Staff member is missing auth UID')
         }
@@ -877,7 +900,7 @@ export const useStaffStore = defineStore('staff', {
           const existing = this.staff[index]
           this.staff[index] = {
             ...existing,
-            ...updates,
+            ...normalizedUpdates,
             departmentId: mergedDepartmentId,
             departmentName: deptForName?.name ?? existing?.departmentName,
           } as Staff
@@ -888,10 +911,10 @@ export const useStaffStore = defineStore('staff', {
         }
 
         // Handle role changes that affect department manager assignment
-        if (updates.role !== undefined) {
+        if (normalizedUpdates.role !== undefined) {
           // Get the old role before the update
           const oldRole = staffMember.role
-          const newRole = updates.role
+          const newRole = normalizedUpdates.role
 
           const departmentsStore = useDepartmentsStore()
           const dept = departmentsStore.getDepartmentById(mergedDepartmentId)

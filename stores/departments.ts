@@ -13,6 +13,7 @@ import {
   serverTimestamp,
 } from 'firebase/firestore'
 import { useFirestore } from '~/composables/useFirestore'
+import { normalizeEntityName } from '~/utils/capitalize-text'
 import { useAuthStore } from './auth'
 import { useUserStore } from './user'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
@@ -310,6 +311,7 @@ export const useDepartmentsStore = defineStore('departments', {
         const dept: Department = {
           id,
           ...departmentData,
+          name: normalizeEntityName(departmentData.name),
           staffCount: 0,
           storeId,
           createdAt: new Date(),
@@ -364,6 +366,7 @@ export const useDepartmentsStore = defineStore('departments', {
 
         const newDepartment: Omit<Department, 'id'> = {
           ...departmentData,
+          name: normalizeEntityName(departmentData.name),
           storeId,
           staffCount: 0,
           createdAt: serverTimestamp(),
@@ -378,6 +381,7 @@ export const useDepartmentsStore = defineStore('departments', {
         const departmentForState: Department = {
           id: newDepartmentRef.id,
           ...departmentData,
+          name: normalizeEntityName(departmentData.name),
           storeId,
           staffCount: 0,
           createdAt: now,
@@ -405,6 +409,7 @@ export const useDepartmentsStore = defineStore('departments', {
           this.departments[index] = {
             ...this.departments[index],
             ...updates,
+            ...(updates.name !== undefined ? { name: normalizeEntityName(updates.name) } : {}),
             updatedAt: new Date(),
           } as Department
         }
@@ -445,10 +450,15 @@ export const useDepartmentsStore = defineStore('departments', {
           throw new Error('No store selected')
         }
 
+        const normalizedUpdates = {
+          ...updates,
+          ...(updates.name !== undefined ? { name: normalizeEntityName(updates.name) } : {}),
+        }
+
         // Use hierarchical path: users/{userId}/stores/{storeId}/departments/{departmentId}
         const departmentRef = getDepartmentDocument(db, userId, storeId, departmentId)
         await updateDoc(departmentRef, {
-          ...updates,
+          ...normalizedUpdates,
           updatedAt: serverTimestamp(),
         })
 
@@ -457,7 +467,7 @@ export const useDepartmentsStore = defineStore('departments', {
         if (index > -1) {
           this.departments[index] = {
             ...this.departments[index],
-            ...updates,
+            ...normalizedUpdates,
           } as Department
         }
       } catch (error: any) {

@@ -7,6 +7,7 @@ function id(prefix: string) {
 
 function lagosStore(): DemoStoreRecord {
   const folderPhones = 'folder_lagos_phones'
+  const folderSmartphones = 'folder_lagos_smartphones'
   const folderAccessories = 'folder_lagos_accessories'
 
   return {
@@ -15,12 +16,18 @@ function lagosStore(): DemoStoreRecord {
     address: '12 Admiralty Way, Lekki, Lagos',
     folders: [
       { id: folderPhones, name: 'Phones', storeId: DEMO_STORE_LAGOS },
+      {
+        id: folderSmartphones,
+        name: 'Smartphones',
+        storeId: DEMO_STORE_LAGOS,
+        parentId: folderPhones,
+      },
       { id: folderAccessories, name: 'Accessories', storeId: DEMO_STORE_LAGOS },
     ],
     items: [
       {
         id: 'item_lagos_iphone',
-        folderId: folderPhones,
+        folderId: folderSmartphones,
         storeId: DEMO_STORE_LAGOS,
         name: 'iPhone 13 128GB',
         price: 485000,
@@ -30,7 +37,7 @@ function lagosStore(): DemoStoreRecord {
       },
       {
         id: 'item_lagos_samsung',
-        folderId: folderPhones,
+        folderId: folderSmartphones,
         storeId: DEMO_STORE_LAGOS,
         name: 'Samsung A54',
         price: 265000,
@@ -188,7 +195,7 @@ function seedReceipts(state: DemoState) {
       total: 485000,
       paymentMethod: 'Transfer',
       status: 'completed',
-      folderId: 'folder_lagos_phones',
+      folderId: 'folder_lagos_smartphones',
     },
     {
       id: 'rcpt_lagos_2',
@@ -226,7 +233,7 @@ function seedReceipts(state: DemoState) {
 
 export function createDemoSeedState(): DemoState {
   const state: DemoState = {
-    version: 3,
+    version: 4,
     currentStoreId: DEMO_STORE_LAGOS,
     currencyCode: 'NGN',
     currencySymbol: '₦',

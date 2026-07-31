@@ -6,6 +6,7 @@ import type {
   SettlementItem,
 } from '~/composables/usePaymentLinks'
 import { demoId } from '~/utils/demo-seed'
+import { normalizeEntityName } from '~/utils/capitalize-text'
 import { useDemoAppStore } from '~/stores/demoApp'
 
 const DEMO_PAYMENT_LINKS_KEY = 'storvv-demo-payment-links'
@@ -191,7 +192,7 @@ export function createDemoPaymentLink(input: {
   const link: PaymentLinkListItem = {
     token,
     invoiceNumber,
-    customerName: input.customerName || 'Walk-in customer',
+    customerName: normalizeEntityName(input.customerName) || input.customerName || 'Walk-in Customer',
     customerPhone: input.customerPhone ?? '',
     itemsCount,
     total,

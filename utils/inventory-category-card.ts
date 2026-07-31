@@ -1,5 +1,7 @@
 /** Visual helpers for inventory category grid cards (Firestore still uses "folder"). */
 
+import { capitalizeWords } from '~/utils/capitalize-text'
+
 /** Storvv primary-500 / primary-600 (tailwind.config.js) */
 export const PRIMARY_ACCENT = '#143f8d'
 export const PRIMARY_ACCENT_DARK = '#0f357a'
@@ -40,15 +42,7 @@ export function categoryDepartmentAccessLabel(
 
 /** Title-case each word for display (e.g. "acura" → "Acura", "alfa romeo" → "Alfa Romeo"). */
 export function formatCategoryDisplayName(name: string): string {
-  const trimmed = name?.trim()
-  if (!trimmed) return ''
-  return trimmed
-    .split(/\s+/)
-    .map((word) => {
-      if (!word) return word
-      return word.charAt(0).toUpperCase() + word.slice(1)
-    })
-    .join(' ')
+  return capitalizeWords(name ?? '')
 }
 
 export function formatCategoryTypeLabel(type: string | undefined): string {

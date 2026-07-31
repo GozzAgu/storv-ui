@@ -134,21 +134,38 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
   {
     id: 'inventory',
     title: 'Inventory',
-    blurb: 'Categories page (grid or table), category detail, items, and permissions.',
+    blurb: 'Categories page (grid or table), subcategories, category detail, items, and permissions.',
     articles: [
       {
         title: 'Categories list (/dashboard/inventory)',
         body: [
-          'The Inventory entry opens Folders: search folders, filter by department, sort by name / products / date, and paginate through the list. Super admins can create, rename, delete, and bulk-delete folders where the UI provides those actions.',
-          'Use the grid / table toggle next to the filters to switch layout. Grid shows folder cards; table matches the same styling as the product table inside a folder (striped rows, column alignment). Your choice is remembered on this browser.',
-          'In table view, columns include folder name, type, product count, serial vs quantity tracking, and department access summary; open a folder by clicking a row. Actions stay in the row menu where available.',
-          'Storvv Micro may show upsell messaging next to the title when folder limits apply; upgrade paths point toward Settings and higher plans.',
+          'The Inventory entry opens top-level categories only: search, filter by department, sort by name / products / date, and paginate. Subcategories (for example Corolla under Toyota) do not appear on this main list — open the parent category to see them.',
+          'Category cards show how many subcategories a parent has when applicable. Use the grid / table toggle next to the filters to switch layout. Grid shows category cards; table matches the same styling as the product table inside a category.',
+          'Super admins can create top-level categories with New category, rename, delete, and bulk-delete where the UI provides those actions. Storvv Micro may show upsell messaging when category limits apply.',
         ],
       },
       {
-        title: 'Inside a folder (/dashboard/inventory/[id])',
+        title: 'Subcategories (one level under a parent category)',
         body: [
-          'Each folder opens a table of items with the columns your account template defines. Use pagination and filters from the toolbar as needed.',
+          'Storvv supports one level of subcategories: a top-level category (parent) can contain subcategories, but subcategories cannot contain further nested folders. Example: Inventory → Toyota (parent) → Corolla, Camry (subcategories).',
+          'Open a parent category from /dashboard/inventory to reach its subcategory hub. The hub lists subcategory cards (same card style as top-level categories) and an Add subcategory button when the parent has no products directly in it.',
+          'Products always live in leaf categories: either a subcategory (Corolla) or a top-level category that has no subcategories. You cannot add products to a parent that still has subcategories — open a subcategory instead.',
+          'When creating a subcategory, it inherits the parent’s column template, serial vs quantity mode, profit tracking, department access, type, and color. You only enter a subcategory name and optional description.',
+          'Add subcategory from the parent hub, or from inside any subcategory under the same parent (Add subcategory adds a sibling). The main Categories page does not create subcategories — only top-level categories.',
+          'If a parent category already has products in it, you cannot add subcategories to that parent. Organize with subcategories before adding stock at the parent level, or use a fresh parent category.',
+          'When a super admin edits a parent category and changes columns, tracking, or access settings, Storvv asks whether to apply those changes to existing subcategories too (Parent only vs Apply to subcategories). Name and description of each subcategory are never overwritten by that sync.',
+          'Sales and Create New Sale only let you pick leaf categories (subcategories or categories without children). Data export (Settings → Data export) writes inventory ZIP folders as Parent/Subcategory/items.xlsx when subcategories exist.',
+        ],
+        bullets: [
+          'Breadcrumbs follow the path: Inventory → Toyota → Corolla. The back arrow on a subcategory page returns to its parent (Toyota), not always to the main Inventory list.',
+          'Deleting a parent category removes its subcategories and their products (with confirmation).',
+        ],
+      },
+      {
+        title: 'Inside a category (/dashboard/inventory/[id])',
+        body: [
+          'Parent categories with subcategories (or an empty parent ready for subcategories) show the subcategory hub instead of a product table.',
+          'Leaf categories — subcategories or top-level categories without children — open a table of products with the columns your template defines. Use pagination, search, and filters from the toolbar.',
           'Row actions (three-dot menu) include History (item timeline), Add discount / Discount for line-level pricing, and Edit item when the item is not locked. Items tied to completed sales can be restricted so catalog edits do not fight receipt history.',
         ],
       },
@@ -386,6 +403,7 @@ export function buildAssistantSystemPrompt(knowledgeBase: string): string {
     '- NEVER invent live store data (stock counts, prices, customer names, profits, receipt numbers). You cannot access the user account.',
     '- Keep answers concise (2-5 short paragraphs or bullets). Mention relevant routes like /dashboard/inventory when helpful.',
     '- Explain role and plan limits in general terms; remind users that missing controls may mean their role or plan does not include a feature.',
+    '- Inventory uses top-level categories plus optional one-level subcategories (not unlimited nesting). When users ask about subfolders or subcategories, describe the parent hub, leaf-only products, and inheritance rules from the knowledge base — do not say folders are strictly flat.',
     '',
     'Knowledge base:',
     knowledgeBase,

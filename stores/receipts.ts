@@ -27,6 +27,7 @@ import { useInventoryStore } from './inventory'
 import { logActivity, getCurrentUserDisplayName } from '~/composables/useActivityLog'
 import { useNotificationsStore } from './notifications'
 import { usePreferences } from '~/composables/usePreferences'
+import { normalizeEntityName } from '~/utils/capitalize-text'
 import {
   computeBalanceDue,
   isBalanceFullyPaid,
@@ -388,10 +389,15 @@ export const useReceiptsStore = defineStore('receipts', {
     async createReceipt(
       receiptData: Omit<Receipt, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'>
     ) {
+      let normalizedReceiptData = {
+        ...receiptData,
+        customerName: normalizeEntityName(receiptData.customerName) || receiptData.customerName.trim(),
+      }
+
       const { isDemoModeActive } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) {
         const { applyDemoCreateReceipt } = await import('~/utils/demo-bridge')
-        return applyDemoCreateReceipt(receiptData)
+        return applyDemoCreateReceipt(normalizedReceiptData)
       }
 
       const db = useFirestore().getFirestoreInstance()
@@ -412,8 +418,8 @@ export const useReceiptsStore = defineStore('receipts', {
       }
 
       // Ensure receiptData has storeId
-      if (!receiptData.storeId) {
-        receiptData.storeId = storeId
+      if (!normalizedReceiptData.storeId) {
+        normalizedReceiptData.storeId = storeId
       }
 
       const actualCreatorUid = authStore.currentUser.uid // Store actual creator for display
@@ -446,8 +452,8 @@ export const useReceiptsStore = defineStore('receipts', {
 
         // Build receipt object - strip undefined values (Firestore rejects undefined)
         const receiptPayload = {
-          ...receiptData,
-          date: receiptData.date || now,
+          ...normalizedReceiptData,
+          date: normalizedReceiptData.date || now,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
           createdBy: createdByUid,
@@ -462,8 +468,8 @@ export const useReceiptsStore = defineStore('receipts', {
         // Add to local state
         const receiptForState: Receipt = {
           id: newReceiptRef.id,
-          ...receiptData,
-          date: receiptData.date || now,
+          ...normalizedReceiptData,
+          date: normalizedReceiptData.date || now,
           createdAt: now,
           updatedAt: now,
           createdBy: createdByUid,
@@ -477,15 +483,15 @@ export const useReceiptsStore = defineStore('receipts', {
           const notificationsStore = useNotificationsStore()
           const preferences = usePreferences()
           await preferences.initialize()
-          const notificationType = receiptData.isSwapIn ? 'swap_in_completed' : 'receipt_created'
-          const notificationTitle = receiptData.isSwapIn
+          const notificationType = normalizedReceiptData.isSwapIn ? 'swap_in_completed' : 'receipt_created'
+          const notificationTitle = normalizedReceiptData.isSwapIn
             ? 'Swap-in Completed'
             : 'New Receipt Created'
-          const notificationMessage = receiptData.isSwapIn
-            ? `Swap-in receipt #${receiptData.receiptNumber} was created for ${receiptData.customerName}`
-            : `Receipt #${receiptData.receiptNumber} was created for ${
-                receiptData.customerName
-              } - Total: ${preferences.formatCurrency(receiptData.total)}`
+          const notificationMessage = normalizedReceiptData.isSwapIn
+            ? `Swap-in receipt #${normalizedReceiptData.receiptNumber} was created for ${normalizedReceiptData.customerName}`
+            : `Receipt #${normalizedReceiptData.receiptNumber} was created for ${
+                normalizedReceiptData.customerName
+              } - Total: ${preferences.formatCurrency(normalizedReceiptData.total)}`
 
           await notificationsStore.createNotification(
             notificationType,
@@ -511,10 +517,20 @@ export const useReceiptsStore = defineStore('receipts', {
       receiptId: string,
       updates: Partial<Omit<Receipt, 'id' | 'createdAt' | 'createdBy'>>
     ) {
+      const normalizedUpdates = {
+        ...updates,
+        ...(updates.customerName !== undefined
+          ? {
+              customerName:
+                normalizeEntityName(updates.customerName) || updates.customerName.trim(),
+            }
+          : {}),
+      }
+
       const { isDemoModeActive } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) {
         const { applyDemoReceiptUpdate } = await import('~/utils/demo-bridge')
-        await applyDemoReceiptUpdate(receiptId, updates as Partial<Receipt>)
+        await applyDemoReceiptUpdate(receiptId, normalizedUpdates as Partial<Receipt>)
         return
       }
 
@@ -569,7 +585,7 @@ export const useReceiptsStore = defineStore('receipts', {
         }
 
         await updateDoc(receiptRef, {
-          ...updates,
+          ...normalizedUpdates,
           updatedAt: serverTimestamp(),
         })
 
@@ -578,7 +594,7 @@ export const useReceiptsStore = defineStore('receipts', {
         if (index > -1 && this.receipts[index]) {
           this.receipts[index] = {
             ...this.receipts[index],
-            ...updates,
+            ...normalizedUpdates,
             updatedAt: new Date(),
           } as Receipt
         }

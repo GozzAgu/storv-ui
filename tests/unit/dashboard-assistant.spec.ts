@@ -17,6 +17,7 @@ describe('dashboard help content', () => {
   it('builds a knowledge base with article titles', () => {
     const kb = buildDashboardHelpKnowledgeBase()
     expect(kb).toContain('## Inventory')
+    expect(kb).toContain('Subcategories (one level under a parent category)')
     expect(kb).toContain('Create New Receipt')
   })
 
@@ -24,6 +25,7 @@ describe('dashboard help content', () => {
     const prompt = buildAssistantSystemPrompt('Sample knowledge')
     expect(prompt).toContain('Storvv Assistant')
     expect(prompt).toContain('NEVER invent live store data')
+    expect(prompt).toContain('subcategories')
     expect(prompt).toContain('Sample knowledge')
   })
 })

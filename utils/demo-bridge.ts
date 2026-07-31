@@ -13,6 +13,7 @@ import type { Notification } from '~/stores/notifications'
 import type { SavedSearch } from '~/stores/search'
 import { DEMO_SAVED_SEARCHES_KEY } from '~/utils/demo-mode'
 import { sanitizeDemoDisplayDashes } from '~/utils/demo-display-text'
+import { normalizeEntityName } from '~/utils/capitalize-text'
 import { demoId } from '~/utils/demo-seed'
 import { DEMO_USER_UID, isDemoModeActive, markDemoSessionActive } from '~/utils/demo-mode'
 import { useDemoAppStore } from '~/stores/demoApp'
@@ -364,6 +365,7 @@ function buildInventoryForStore(store: DemoStoreRecord) {
       color: '#143f8d',
       hasSerialNumbers: false,
       template: DEMO_PRODUCT_TEMPLATE,
+      parentId: f.parentId ?? null,
       itemCount: stats.itemCount,
       totalValue: stats.totalValue,
       lowStockCount: stats.lowStockCount,
@@ -531,7 +533,7 @@ export async function applyDemoInventoryItemCreate(
   const demo = useDemoAppStore()
   const item = demo.addInventoryItem({
     folderId,
-    name: String(itemData.name ?? 'New item'),
+    name: normalizeEntityName(String(itemData.name ?? 'New item')) || 'New Item',
     price: Number(itemData.price ?? 0),
     quantity: Number(itemData.quantity ?? 0),
     sku: itemData.sku ? String(itemData.sku) : undefined,
@@ -547,7 +549,9 @@ export async function applyDemoInventoryItemUpdate(
   const demo = useDemoAppStore()
   const item = demo.state.stores.flatMap((s) => s.items).find((i) => i.id === itemId)
   if (!item) return
-  if (updates.name !== undefined) item.name = String(updates.name)
+  if (updates.name !== undefined) {
+    item.name = normalizeEntityName(String(updates.name)) || String(updates.name).trim()
+  }
   if (updates.price !== undefined) item.price = Number(updates.price)
   if (updates.quantity !== undefined) {
     const available = Number(updates.quantity)
@@ -594,6 +598,10 @@ export async function applyDemoReceiptUpdate(receiptId: string, updates: Partial
   const demo = useDemoAppStore()
   const receipt = demo.currentStore.receipts.find((r) => r.id === receiptId)
   if (!receipt) throw new Error('Receipt not found')
+  if (updates.customerName !== undefined) {
+    receipt.customerName =
+      normalizeEntityName(updates.customerName) || updates.customerName.trim()
+  }
   if (updates.status === 'refunded') {
     demo.refundReceipt(receiptId)
   }
@@ -615,10 +623,21 @@ export function getDemoUserDocument(uid?: string): UserData | null {
 export async function applyDemoCreateFolder(
   folderData: Pick<
     InventoryFolder,
-    'name' | 'description' | 'type' | 'color' | 'hasSerialNumbers' | 'template' | 'trackProfit'
+    | 'name'
+    | 'description'
+    | 'type'
+    | 'color'
+    | 'hasSerialNumbers'
+    | 'template'
+    | 'trackProfit'
+    | 'parentId'
+    | 'allowedDepartments'
   >
 ): Promise<string> {
-  const id = useDemoAppStore().addFolder(folderData.name)
+  const id = useDemoAppStore().addFolder({
+    name: normalizeEntityName(folderData.name) || folderData.name.trim(),
+    parentId: folderData.parentId ?? null,
+  })
   await syncDemoToPinia()
   return id
 }

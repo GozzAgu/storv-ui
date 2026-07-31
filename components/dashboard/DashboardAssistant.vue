@@ -212,6 +212,7 @@ const inputEl = ref<HTMLTextAreaElement | null>(null)
 
 const suggestedPrompts = [
   'How do I create a sale?',
+  'How do subcategories work?',
   'What can store managers do?',
   'Which plan includes Analytics?',
   'How do stock loans work?',

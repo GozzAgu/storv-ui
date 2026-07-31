@@ -93,7 +93,7 @@
           >
             <option value="">Select a folder...</option>
             <option v-for="folder in folders" :key="folder.id" :value="folder.id">
-              {{ folder.name }}
+              {{ folderOptionLabel(folder) }}
             </option>
           </select>
         </div>
@@ -380,7 +380,14 @@ const {
   warning: showWarningToast,
 } = useAppToast()
 
-const folders = computed(() => inventoryStore.folders)
+const folders = computed(() => inventoryStore.leafFolders)
+
+function folderOptionLabel(folder: InventoryFolder): string {
+  const parent = inventoryStore.folders.find(
+    (entry) => entry.id === folder.parentId && folder.parentId
+  )
+  return parent ? `${folder.name} · ${parent.name}` : folder.name
+}
 const selectedFolderId = ref<string>('')
 const selectedFolder = computed(() =>
   selectedFolderId.value ? inventoryStore.getFolderById(selectedFolderId.value) : undefined
@@ -543,12 +550,13 @@ const searchByBarcode = async () => {
   try {
     const items = await loadFolderItems()
 
-    // Search for item by barcode (assuming barcode is stored in a field)
-    const barcodeField = 'barcode'
+    // Search for item by barcode, SKU, or serial number
     const foundItem: InventoryItem | undefined = items.find((item: InventoryItem) => {
-      const barcode =
-        (item as any)[barcodeField] || (item as any).serialNo || (item as any).serialNumber
-      return barcode?.toString().toLowerCase() === manualBarcode.value.toLowerCase()
+      const query = manualBarcode.value.trim().toLowerCase()
+      const barcode = String((item as any).barcode || '').toLowerCase()
+      const sku = String((item as any).sku || '').toLowerCase()
+      const serial = String((item as any).serialNo || (item as any).serialNumber || '').toLowerCase()
+      return barcode === query || sku === query || serial === query
     })
 
     if (!foundItem) {
@@ -600,16 +608,11 @@ const searchByBarcode = async () => {
         }
       }
 
-      // Get item price
-      const priceField = 'price'
-      const price = parseFloat((foundItem as any)[priceField] || '0')
-      const itemName = Object.keys(foundItem).find(
-        (key) =>
-          key.toLowerCase().includes('name') ||
-          key.toLowerCase().includes('item') ||
-          key.toLowerCase().includes('product')
-      )
-      const name = itemName ? (foundItem as any)[itemName] : `Product ${foundItem.id.slice(0, 8)}`
+      // Get item price and display name
+      const price = parseFloat(String((foundItem as any).price || (foundItem as any).Price || '0'))
+      const name =
+        String((foundItem as any).name || (foundItem as any).itemName || '').trim() ||
+        `Product ${foundItem.id.slice(0, 8)}`
 
       cartItems.value.push({
         id: foundItem.id,
@@ -752,6 +755,7 @@ const resetForm = () => {
   useSplitPayment.value = false
   splitPayments.value = [{ method: '', amount: 0 }]
   manualBarcode.value = ''
+  selectedFolderId.value = ''
   showCustomerInfo.value = false
   stopScanner()
 }
@@ -761,12 +765,14 @@ watch(
   (isOpen) => {
     if (isOpen) {
       inventoryStore.fetchFolders()
-      if (folders.value.length === 1 && folders.value[0]) {
-        selectedFolderId.value = folders.value[0].id
+      const leaf = inventoryStore.leafFolders
+      if (leaf.length === 1 && leaf[0]) {
+        selectedFolderId.value = leaf[0].id
         loadFolderItems()
       }
     } else {
       resetForm()
+      selectedFolderId.value = ''
     }
   }
 )

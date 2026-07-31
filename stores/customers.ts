@@ -19,6 +19,7 @@ import { useAuthStore } from './auth'
 import { useUserStore } from './user'
 import { useStaffStore } from './staff'
 import { getCustomersCollection, getCustomerDocument } from '~/composables/useFirestorePaths'
+import { normalizeEntityName } from '~/utils/capitalize-text'
 
 export interface Customer {
   id: string
@@ -211,11 +212,15 @@ export const useCustomersStore = defineStore('customers', {
         date: Date
       }
     ): Promise<string> {
+      const customerName =
+        normalizeEntityName(receiptData.customerName) || receiptData.customerName.trim()
+      const normalizedReceiptData = { ...receiptData, customerName }
+
       const { isDemoModeActive } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) {
         const { applyDemoCustomerFromReceipt } = await import('~/utils/demo-bridge')
         return applyDemoCustomerFromReceipt(receiptId, {
-          customerName: receiptData.customerName,
+          customerName: normalizedReceiptData.customerName,
           customerEmail: receiptData.customerEmail,
           customerPhone: receiptData.customerPhone,
           total: receiptData.total,
@@ -264,7 +269,7 @@ export const useCustomersStore = defineStore('customers', {
           // Use hierarchical path: users/{userId}/stores/{storeId}/customers/{customerId}
           const customerRef = getCustomerDocument(db, userId, storeId, existingCustomer.id)
           await updateDoc(customerRef, {
-            name: receiptData.customerName, // Update name in case it changed
+            name: customerName,
             email: receiptData.customerEmail || existingCustomer.email,
             phone: receiptData.customerPhone || existingCustomer.phone,
             address: receiptData.customerAddress || existingCustomer.address,
@@ -284,7 +289,7 @@ export const useCustomersStore = defineStore('customers', {
             const existing = this.customers[index]
             this.customers[index] = {
               ...existing,
-              name: receiptData.customerName,
+              name: customerName,
               email: receiptData.customerEmail || existing.email,
               phone: receiptData.customerPhone || existing.phone,
               address: receiptData.customerAddress || existing.address,
@@ -311,7 +316,7 @@ export const useCustomersStore = defineStore('customers', {
           const newCustomerRef = doc(customersRef)
 
           const newCustomer: Omit<Customer, 'id'> = {
-            name: receiptData.customerName,
+            name: customerName,
             email: receiptData.customerEmail?.toLowerCase().trim(),
             phone: receiptData.customerPhone?.trim(),
             address: receiptData.customerAddress?.trim(),

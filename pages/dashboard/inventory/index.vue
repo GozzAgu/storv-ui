@@ -868,6 +868,59 @@
       </template>
     </Modal>
 
+    <Modal
+      v-model="showSubfolderSyncModal"
+      title="Apply changes to subcategories?"
+      :subtitle="
+        subfolderSyncCount === 1
+          ? 'This category has 1 subcategory.'
+          : `This category has ${subfolderSyncCount} subcategories.`
+      "
+      size="md"
+      @update:model-value="
+        (open: boolean) => {
+          if (!open) pendingParentFolderSave = null
+        }
+      "
+    >
+      <div class="space-y-3 text-sm text-gray-600 dark:text-gray-300">
+        <p>
+          You changed columns, tracking, or access settings on
+          <strong class="font-medium text-gray-900 dark:text-gray-100">{{
+            editingFolder?.name || 'this category'
+          }}</strong
+          >.
+        </p>
+        <p>
+          Subcategories normally inherit these settings. Apply the same changes to all
+          subcategories, or keep this update on the parent category only.
+        </p>
+        <p class="text-xs text-gray-500 dark:text-gray-400">
+          Names and descriptions for each subcategory stay unchanged either way.
+        </p>
+      </div>
+      <template #footer>
+        <Button
+          variant="outline"
+          size="sm"
+          :extra-class="footerBtnOutlineClass"
+          :disabled="isSavingFolder"
+          @click="confirmParentFolderSave(false)"
+        >
+          Parent only
+        </Button>
+        <Button
+          variant="primary"
+          size="sm"
+          :extra-class="footerBtnPrimaryClass"
+          :loading="isSavingFolder"
+          @click="confirmParentFolderSave(true)"
+        >
+          Apply to subcategories
+        </Button>
+      </template>
+    </Modal>
+
     <!-- Duplicate category -->
     <SidePanel
       v-model="showDuplicateFolderModal"
@@ -1222,8 +1275,11 @@ import {
   folderHasChildren,
   getChildFolders,
   getRootFolders,
+  inheritableFolderSettingsChanged,
   isSubfolder,
+  pickInheritableFolderUpdates,
   rollupFolderStats,
+  type InheritableFolderSettings,
 } from '~/utils/inventory-folder-tree'
 import { usePreferences } from '~/composables/usePreferences'
 import { useAppToast } from '~/composables/useAppToast'
@@ -1286,6 +1342,12 @@ const folderDrawerClosingViaCancel = ref(false)
 const isSavingFolder = ref(false)
 const showProfitSkipConfirmModal = ref(false)
 const profitSkipConfirmed = ref(false)
+const showSubfolderSyncModal = ref(false)
+const pendingParentFolderSave = ref<{
+  name: string
+  description: string
+  inheritable: InheritableFolderSettings
+} | null>(null)
 const editingFolder = ref<InventoryFolder | null>(null)
 const showDeleteFolderModal = ref(false)
 const selectedFolderForDelete = ref<InventoryFolder | null>(null)
@@ -2045,6 +2107,12 @@ const folderForOpenMenu = computed(() => {
   return foldersForCategoryList.value.find((f) => f.id === id) ?? null
 })
 
+const subfolderSyncCount = computed(() => {
+  const id = editingFolder.value?.id
+  if (!id) return 0
+  return getChildFolders(folders.value, id).length
+})
+
 const paginatedFolders = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage.value
   return foldersForCategoryList.value.slice(start, start + itemsPerPage.value)
@@ -2517,9 +2585,6 @@ const handleSaveFolder = async () => {
     return
   }
 
-  if (isSavingFolder.value) return
-  isSavingFolder.value = true
-
   if (folderForm.trackProfit) {
     ensureCostPriceTemplateField(editableFields.value)
   } else {
@@ -2535,33 +2600,57 @@ const handleSaveFolder = async () => {
     fields: editableFields.value.map((f) => ({ ...f })),
   }
 
+  const allowedDepartments =
+    folderForm.allowedDepartments.length > 0 ? [...folderForm.allowedDepartments] : []
+
   try {
-    // Use [] not undefined so Firestore updates clear a previous restriction when user unchecks all.
-    const allowedDepartments =
-      folderForm.allowedDepartments.length > 0 ? [...folderForm.allowedDepartments] : []
-
     if (editingFolder.value) {
-      const updates = isSubfolder(editingFolder.value)
-        ? {
-            name: folderForm.name.trim(),
-            description: folderForm.description.trim(),
-          }
-        : {
-            name: folderForm.name.trim(),
-            description: folderForm.description.trim(),
-            type: folderForm.type,
-            color: folderForm.color,
-            hasSerialNumbers: folderForm.hasSerialNumbers,
-            trackProfit,
-            template: template,
-            allowedDepartments,
-          }
+      if (isSubfolder(editingFolder.value)) {
+        isSavingFolder.value = true
+        await inventoryStore.updateFolder(editingFolder.value.id, {
+          name: folderForm.name.trim(),
+          description: folderForm.description.trim(),
+        })
+        toast.success('Category updated')
+        handleCancelFolder()
+        await inventoryStore.fetchFolderAvailabilityStats()
+        return
+      }
 
-      await inventoryStore.updateFolder(editingFolder.value.id, updates)
-      handleCancelFolder()
-      await inventoryStore.fetchFolderAvailabilityStats()
+      const inheritable: InheritableFolderSettings = {
+        type: folderForm.type,
+        color: folderForm.color,
+        hasSerialNumbers: folderForm.hasSerialNumbers,
+        trackProfit,
+        template,
+        allowedDepartments,
+      }
+
+      const childCount = getChildFolders(folders.value, editingFolder.value.id).length
+      if (
+        childCount > 0 &&
+        inheritableFolderSettingsChanged(editingFolder.value, inheritable)
+      ) {
+        pendingParentFolderSave.value = {
+          name: folderForm.name.trim(),
+          description: folderForm.description.trim(),
+          inheritable,
+        }
+        showSubfolderSyncModal.value = true
+        return
+      }
+
+      isSavingFolder.value = true
+      await commitParentFolderSave(
+        {
+          name: folderForm.name.trim(),
+          description: folderForm.description.trim(),
+          inheritable,
+        },
+        false
+      )
     } else {
-      // Create new folder
+      isSavingFolder.value = true
       await inventoryStore.createFolder({
         name: folderForm.name.trim(),
         description: folderForm.description.trim(),
@@ -2583,11 +2672,65 @@ const handleSaveFolder = async () => {
   }
 }
 
+async function commitParentFolderSave(
+  payload: {
+    name: string
+    description: string
+    inheritable: InheritableFolderSettings
+  },
+  applyToSubfolders: boolean
+) {
+  const parent = editingFolder.value
+  if (!parent) return
+
+  const updates = {
+    name: payload.name,
+    description: payload.description,
+    ...pickInheritableFolderUpdates(payload.inheritable),
+  }
+
+  await inventoryStore.updateFolder(parent.id, updates)
+
+  if (applyToSubfolders) {
+    const children = getChildFolders(folders.value, parent.id)
+    const childUpdates = pickInheritableFolderUpdates(payload.inheritable)
+    for (const child of children) {
+      await inventoryStore.updateFolder(child.id, childUpdates)
+    }
+    toast.success(
+      `Updated category and ${children.length} subcategor${children.length === 1 ? 'y' : 'ies'}`
+    )
+  } else {
+    toast.success('Category updated')
+  }
+
+  handleCancelFolder()
+  await inventoryStore.fetchFolderAvailabilityStats()
+}
+
+async function confirmParentFolderSave(applyToSubfolders: boolean) {
+  const pending = pendingParentFolderSave.value
+  if (!pending || isSavingFolder.value) return
+
+  isSavingFolder.value = true
+  try {
+    await commitParentFolderSave(pending, applyToSubfolders)
+    pendingParentFolderSave.value = null
+    showSubfolderSyncModal.value = false
+  } catch (error: any) {
+    alert(error.message || 'Failed to save folder')
+  } finally {
+    isSavingFolder.value = false
+  }
+}
+
 const handleCancelFolder = () => {
   folderDrawerClosingViaCancel.value = true
   preserveFolderDrawerDraft.value = false
   showCreateFolderModal.value = false
   showProfitSkipConfirmModal.value = false
+  showSubfolderSyncModal.value = false
+  pendingParentFolderSave.value = null
   profitSkipConfirmed.value = false
   isSavingFolder.value = false
   editingFolder.value = null

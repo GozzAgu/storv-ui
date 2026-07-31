@@ -4,6 +4,8 @@ import {
   buildFolderDisplayRows,
   getLeafFolders,
   getRootFolders,
+  inheritableFolderSettingsChanged,
+  pickInheritableFolderUpdates,
   validateFolderParentId,
 } from '~/utils/inventory-folder-tree'
 
@@ -64,5 +66,46 @@ describe('inventory-folder-tree', () => {
     expect(() => validateFolderParentId(withProducts, 'phones')).toThrow(
       'already has products'
     )
+  })
+
+  it('detects inheritable folder setting changes', () => {
+    const parent = {
+      ...folder('phones', 'Phones'),
+      type: 'general',
+      hasSerialNumbers: false,
+      trackProfit: false,
+      template: {
+        id: 'custom',
+        name: 'Custom Template',
+        description: '',
+        fields: [
+          {
+            id: '1',
+            name: 'name',
+            label: 'Name',
+            type: 'text' as const,
+            required: true,
+          },
+        ],
+      },
+      allowedDepartments: ['dept-a'],
+    }
+
+    const unchanged = pickInheritableFolderUpdates({
+      type: 'general',
+      color: '#000',
+      hasSerialNumbers: false,
+      trackProfit: false,
+      template: parent.template!,
+      allowedDepartments: ['dept-a'],
+    })
+    expect(inheritableFolderSettingsChanged(parent, unchanged)).toBe(false)
+
+    expect(
+      inheritableFolderSettingsChanged(parent, {
+        ...unchanged,
+        hasSerialNumbers: true,
+      })
+    ).toBe(true)
   })
 })

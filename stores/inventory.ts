@@ -58,6 +58,11 @@ import {
   sumFolderGrossProfitOnHand,
   type FolderProfitStats,
 } from '~/utils/inventory-folder-profit'
+import {
+  normalizeEntityName,
+  normalizeFolderTemplate,
+  normalizeInventoryItemNamedFields,
+} from '~/utils/capitalize-text'
 
 export { INVENTORY_FIRESTORE_PAGE_SIZE }
 
@@ -495,6 +500,40 @@ export const useInventoryStore = defineStore('inventory', {
         this.folderAvailabilityStats = {}
         this.folderProfitStats = {}
         return {}
+      }
+
+      const { isDemoModeActive } = await import('~/utils/demo-mode')
+      if (isDemoModeActive()) {
+        this.availabilityStatsLoading = true
+        try {
+          const next: Record<string, FolderAvailabilityStats> = {}
+          const profitNext: Record<string, FolderProfitStats> = {}
+          const grouped: Record<string, InventoryItem[]> = {}
+
+          for (const folder of this.folders) {
+            const items = this.items[folder.id] ?? []
+            grouped[folder.id] = items
+            next[folder.id] = computeFolderAvailabilityStats(items, folder)
+            const totalValue = computeFolderTotalValue(items, folder)
+            if (folderTracksProfit(folder)) {
+              profitNext[folder.id] =
+                computeFolderGrossProfitOnHand(items, folder) ?? {
+                  grossProfitOnHand: 0,
+                  unitsWithCost: 0,
+                }
+            }
+            const folderIndex = this.folders.findIndex((f) => f.id === folder.id)
+            if (folderIndex > -1 && this.folders[folderIndex]) {
+              this.folders[folderIndex].totalValue = totalValue
+            }
+          }
+
+          this.folderAvailabilityStats = { ...next }
+          this.folderProfitStats = { ...profitNext }
+          return grouped
+        } finally {
+          this.availabilityStatsLoading = false
+        }
       }
 
       const authStore = useAuthStore()
@@ -1044,7 +1083,12 @@ export const useInventoryStore = defineStore('inventory', {
       const foldersRef = getInventoryFoldersCollection(db, userId, storeId)
       const parentKey = normalizeParentId(folderData.parentId) ?? 'root'
       validateFolderParentId(this.folders, folderData.parentId)
-      const dedupeKey = `${storeId}:${parentKey}:${folderData.name.trim().toLowerCase()}`
+      const normalizedFolderData = {
+        ...folderData,
+        name: normalizeEntityName(folderData.name),
+        template: normalizeFolderTemplate(folderData.template),
+      }
+      const dedupeKey = `${storeId}:${parentKey}:${normalizedFolderData.name.trim().toLowerCase()}`
       if (createFolderInflight?.key === dedupeKey) {
         return createFolderInflight.promise
       }
@@ -1054,8 +1098,8 @@ export const useInventoryStore = defineStore('inventory', {
           const newFolderRef = doc(foldersRef)
 
           const newFolder: Omit<InventoryFolder, 'id'> = {
-            ...folderData,
-            parentId: normalizeParentId(folderData.parentId),
+            ...normalizedFolderData,
+            parentId: normalizeParentId(normalizedFolderData.parentId),
             storeId, // Add storeId to the folder
             itemCount: 0,
             totalValue: 0,
@@ -1071,8 +1115,8 @@ export const useInventoryStore = defineStore('inventory', {
           const now = new Date()
           const folderForState: InventoryFolder = {
             id: newFolderRef.id,
-            ...folderData,
-            parentId: normalizeParentId(folderData.parentId),
+            ...normalizedFolderData,
+            parentId: normalizeParentId(normalizedFolderData.parentId),
             storeId, // Add storeId to local state
             itemCount: 0,
             totalValue: 0,
@@ -1089,7 +1133,7 @@ export const useInventoryStore = defineStore('inventory', {
             action: 'created',
             entityType: 'folder',
             entityId: newFolderRef.id,
-            entityName: folderData.name,
+            entityName: normalizedFolderData.name,
             storeId,
             userId: authStore.currentUser!.uid,
             userDisplayName: userDisplayNameForFolder,
@@ -1152,6 +1196,14 @@ export const useInventoryStore = defineStore('inventory', {
       }
 
       try {
+        const normalizedUpdates = {
+          ...updates,
+          ...(updates.name !== undefined ? { name: normalizeEntityName(updates.name) } : {}),
+          ...(updates.template !== undefined
+            ? { template: normalizeFolderTemplate(updates.template) }
+            : {}),
+        }
+
         // Get userId and storeId for hierarchical path
         const userId = authStore.currentUser.uid
         const storeId = await getCurrentStoreId()
@@ -1162,7 +1214,7 @@ export const useInventoryStore = defineStore('inventory', {
         // Use hierarchical path: users/{userId}/stores/{storeId}/inventoryFolders/{folderId}
         const folderRef = getInventoryFolderDocument(db, userId, storeId, folderId)
         await updateDoc(folderRef, {
-          ...updates,
+          ...normalizedUpdates,
           updatedAt: serverTimestamp(),
         })
 
@@ -1171,13 +1223,13 @@ export const useInventoryStore = defineStore('inventory', {
         if (index > -1) {
           this.folders[index] = {
             ...this.folders[index],
-            ...updates,
+            ...normalizedUpdates,
             updatedAt: new Date(),
           } as InventoryFolder
           this.folderProfitStats = syncFolderProfitStatsEntry(this, folderId)
         }
 
-        const folderName = (updates as { name?: string }).name ?? folder?.name ?? folderId
+        const folderName = (normalizedUpdates as { name?: string }).name ?? folder?.name ?? folderId
         const userDisplayNameForFolder = await getCurrentUserDisplayName().catch(() => 'Unknown')
         await logActivity({
           action: 'updated',
@@ -1582,6 +1634,10 @@ export const useInventoryStore = defineStore('inventory', {
         )
       }
 
+      const normalizedItemData = { ...itemData } as Record<string, unknown>
+      normalizeInventoryItemNamedFields(normalizedItemData)
+      const itemPayload = normalizedItemData as typeof itemData
+
       // Get storeId from folder or current store
       let storeId = folder.storeId
       if (!storeId) {
@@ -1592,13 +1648,13 @@ export const useInventoryStore = defineStore('inventory', {
       }
 
       // Check for duplicate serial number if item has serial number, brand, and product line
-      const productLine = resolveSerialProductLine(itemData.model, itemData.name)
-      if (itemData.serialNo && itemData.brand && productLine) {
+      const productLine = resolveSerialProductLine(itemPayload.model, itemPayload.name)
+      if (itemPayload.serialNo && itemPayload.brand && productLine) {
         const isDuplicate = await this.checkDuplicateSerialNumber(
           storeId,
           folderId,
-          itemData.serialNo,
-          itemData.brand,
+          itemPayload.serialNo,
+          itemPayload.brand,
           productLine,
           createdByUid,
           userStore.userData?.role
@@ -1606,7 +1662,7 @@ export const useInventoryStore = defineStore('inventory', {
 
         if (isDuplicate) {
           throw new Error(
-            `An item with serial number "${itemData.serialNo}" already exists for ${itemData.brand} ${itemData.model}. Please use a different serial number.`
+            `An item with serial number "${itemPayload.serialNo}" already exists for ${itemPayload.brand} ${itemPayload.model}. Please use a different serial number.`
           )
         }
       }
@@ -1619,7 +1675,7 @@ export const useInventoryStore = defineStore('inventory', {
 
         const now = new Date()
         const payloadBase = stripUndefinedFirestoreValues(
-          itemData as Record<string, unknown>
+          itemPayload as Record<string, unknown>
         ) as Omit<InventoryItem, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'folderId'>
         const newItem: Omit<InventoryItem, 'id'> = {
           ...payloadBase,
@@ -1670,9 +1726,9 @@ export const useInventoryStore = defineStore('inventory', {
         }
 
         const itemName =
-          (itemData as { name?: string; brand?: string; model?: string }).name ||
-          (itemData as { name?: string; brand?: string; model?: string }).brand ||
-          (itemData as { name?: string; brand?: string; model?: string }).model ||
+          (itemPayload as { name?: string; brand?: string; model?: string }).name ||
+          (itemPayload as { name?: string; brand?: string; model?: string }).brand ||
+          (itemPayload as { name?: string; brand?: string; model?: string }).model ||
           'Item'
         const userDisplayNameForItem = await getCurrentUserDisplayName().catch(() => 'Unknown')
         await logActivity({
@@ -1748,8 +1804,14 @@ export const useInventoryStore = defineStore('inventory', {
         }
       }
 
+      const normalizedItemsData = itemsData.map((item) => {
+        const copy = { ...item } as Record<string, unknown>
+        normalizeInventoryItemNamedFields(copy)
+        return copy as (typeof itemsData)[number]
+      })
+
       // Check for duplicate serial numbers in the batch
-      const itemsWithSerialNumbers = itemsData.filter((item) => {
+      const itemsWithSerialNumbers = normalizedItemsData.filter((item) => {
         const productLine = resolveSerialProductLine(item.model, item.name)
         return item.serialNo && item.brand && productLine
       })
@@ -1795,7 +1857,7 @@ export const useInventoryStore = defineStore('inventory', {
         const createdItems: InventoryItem[] = []
 
         // Add all items to batch
-        itemsData.forEach((itemData) => {
+        normalizedItemsData.forEach((itemData) => {
           const newItemRef = doc(itemsRef)
           const payloadBase = stripUndefinedFirestoreValues(
             itemData as Record<string, unknown>
@@ -1917,13 +1979,16 @@ export const useInventoryStore = defineStore('inventory', {
       }
 
       try {
+        const normalizedUpdates = { ...updates } as Record<string, unknown>
+        normalizeInventoryItemNamedFields(normalizedUpdates)
+
         // Use hierarchical path: users/{userId}/stores/{storeId}/inventoryItems/{itemId}
         const itemRef = getInventoryItemDocument(db, userId, storeId, itemId)
 
         // Filter out undefined values and system fields (dates are not user-editable)
         const systemFields = ['dateOut', 'dateIn', 'swapIn', 'swapInReceiptId']
         const cleanedUpdates = Object.fromEntries(
-          Object.entries(updates).filter(
+          Object.entries(normalizedUpdates).filter(
             ([key, value]) => value !== undefined && !systemFields.includes(key)
           )
         )

@@ -3,6 +3,7 @@ import { FieldValue } from 'firebase-admin/firestore'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
 import { requireAuth, requireStoreManageAccess } from '~/server/utils/store-auth'
 import { resolveBulkStockFieldAndValueFromMap } from '~/utils/inventory-bulk-quantity'
+import { normalizeEntityName } from '~/utils/capitalize-text'
 import {
   generatePaymentToken,
   nairaToKobo,
@@ -61,7 +62,7 @@ export default defineEventHandler(async (event) => {
 
   const ownerUserId = (body.ownerUserId || '').trim()
   const storeId = (body.storeId || '').trim()
-  const customerName = (body.customerName || '').trim()
+  const customerName = normalizeEntityName((body.customerName || '').trim())
   const customerPhone = (body.customerPhone || '').trim()
   const customerEmail = (body.customerEmail || '').trim()
   const incoming = Array.isArray(body.items) ? body.items : []

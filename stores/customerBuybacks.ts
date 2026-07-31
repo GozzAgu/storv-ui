@@ -13,6 +13,7 @@ import { getCurrentStoreId } from '~/composables/useCurrentStore'
 import { logActivity, getCurrentUserDisplayName } from '~/composables/useActivityLog'
 import { invalidateFolderItemCaches } from '~/utils/inventory-items-firestore'
 import { getInventoryItemDisplayName } from '~/composables/useInventoryItemDisplay'
+import { normalizeEntityName } from '~/utils/capitalize-text'
 
 export interface CustomerBuyback {
   id: string
@@ -140,7 +141,7 @@ export const useCustomerBuybacksStore = defineStore('customerBuybacks', {
       paymentMethod: string
       notes?: string
     }) {
-      const name = params.customerName.trim()
+      const name = normalizeEntityName(params.customerName) || params.customerName.trim()
       if (!name) throw new Error('Customer name is required')
 
       const purchasePrice = Number(params.purchasePrice)

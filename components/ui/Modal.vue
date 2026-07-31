@@ -85,8 +85,8 @@
       </div>
     </Transition>
 
-    <!-- Web: centered modal -->
-    <div v-else-if="modelValue" class="fixed inset-0 z-[105] overflow-y-auto" role="presentation">
+    <!-- Web: centered modal (above SidePanel drawer at z-[1111]) -->
+    <div v-else-if="modelValue" class="fixed inset-0 z-[1120] overflow-y-auto" role="presentation">
       <div
         :class="[
           'absolute inset-0 transition-opacity duration-300',

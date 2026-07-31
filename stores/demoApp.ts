@@ -11,6 +11,7 @@ import type {
 import { DEMO_STORAGE_KEY } from '~/utils/demo-mode'
 import { sanitizeDemoDisplayDashes } from '~/utils/demo-display-text'
 import { createDemoSeedState, demoId, nextDemoReceiptNumber } from '~/utils/demo-seed'
+import { normalizeEntityName } from '~/utils/capitalize-text'
 
 function normalizeDemoState(state: DemoState): DemoState {
   for (const store of state.stores) {
@@ -19,14 +20,21 @@ function normalizeDemoState(state: DemoState): DemoState {
       store.address = sanitizeDemoDisplayDashes(store.address)
     }
   }
-  state.version = 3
+  state.version = 4
+  for (const store of state.stores) {
+    for (const folder of store.folders) {
+      if (folder.parentId === undefined) {
+        folder.parentId = null
+      }
+    }
+  }
   return state
 }
 
 function isValidDemoState(value: unknown): value is DemoState {
   const state = value as DemoState
   return (
-    (state?.version === 2 || state?.version === 3) &&
+    (state?.version === 2 || state?.version === 3 || state?.version === 4) &&
     Array.isArray(state.stores) &&
     state.stores.length > 0
   )
@@ -38,13 +46,15 @@ function loadState(): DemoState {
     const raw = localStorage.getItem(DEMO_STORAGE_KEY)
     if (!raw) return createDemoSeedState()
     const parsed = JSON.parse(raw) as DemoState
-    if (!isValidDemoState(parsed)) {
-      return createDemoSeedState()
+    if (!isValidDemoState(parsed) || parsed.version < 4) {
+      const fresh = createDemoSeedState()
+      saveState(fresh)
+      return fresh
     }
     const namesBefore = parsed.stores.map((s) => s.name).join('\0')
     const state = normalizeDemoState(parsed)
     const namesAfter = state.stores.map((s) => s.name).join('\0')
-    if (parsed.version < 3 || namesBefore !== namesAfter) {
+    if (parsed.version < 4 || namesBefore !== namesAfter) {
       saveState(state)
     }
     return state
@@ -172,7 +182,7 @@ export const useDemoAppStore = defineStore('demoApp', {
     },
 
     findOrCreateCustomer(name: string, phone?: string) {
-      const trimmed = name.trim() || 'Walk-in customer'
+      const trimmed = normalizeEntityName(name) || name.trim() || 'Walk-in Customer'
       const existing = this.currentStore.customers.find(
         (c) => c.name.toLowerCase() === trimmed.toLowerCase() && (!phone || c.phone === phone)
       )
@@ -189,12 +199,29 @@ export const useDemoAppStore = defineStore('demoApp', {
       return customer
     },
 
-    addFolder(name: string) {
+    addFolder(payload: { name: string; parentId?: string | null }) {
+      const parentId = payload.parentId?.trim() ? payload.parentId.trim() : null
+      if (parentId) {
+        const parent = this.currentStore.folders.find((f) => f.id === parentId)
+        if (!parent) throw new Error('Parent category not found.')
+        if (parent.parentId) {
+          throw new Error(
+            'Subcategories cannot be nested further. Choose a top-level category as parent.'
+          )
+        }
+        const itemsInParent = this.currentStore.items.filter((i) => i.folderId === parentId)
+        if (itemsInParent.length > 0) {
+          throw new Error(
+            'This category already has products. Move or delete them before adding subcategories.'
+          )
+        }
+      }
+
       const folder = {
         id: demoId('folder'),
-        name: name.trim() || 'New folder',
-        description: '',
+        name: normalizeEntityName(payload.name) || payload.name.trim() || 'New Folder',
         storeId: this.state.currentStoreId,
+        parentId,
       }
       this.currentStore.folders.push(folder)
       this.persist()
@@ -210,6 +237,12 @@ export const useDemoAppStore = defineStore('demoApp', {
     },
 
     deleteFolder(folderId: string) {
+      const childIds = this.currentStore.folders
+        .filter((f) => f.parentId === folderId)
+        .map((f) => f.id)
+      for (const childId of childIds) {
+        this.deleteFolder(childId)
+      }
       this.currentStore.folders = this.currentStore.folders.filter((f) => f.id !== folderId)
       this.currentStore.items = this.currentStore.items.filter((i) => i.folderId !== folderId)
       this.persist()
@@ -226,7 +259,7 @@ export const useDemoAppStore = defineStore('demoApp', {
         id: demoId('item'),
         folderId: payload.folderId,
         storeId: this.state.currentStoreId,
-        name: payload.name.trim(),
+        name: normalizeEntityName(payload.name) || payload.name.trim(),
         price: Math.max(0, payload.price),
         quantity: Math.max(0, Math.floor(payload.quantity)),
         sold: 0,
@@ -292,7 +325,7 @@ export const useDemoAppStore = defineStore('demoApp', {
         id: demoId('rcpt'),
         storeId: receiptData.storeId || this.state.currentStoreId,
         receiptNumber: receiptData.receiptNumber,
-        customerName: receiptData.customerName,
+        customerName: normalizeEntityName(receiptData.customerName) || receiptData.customerName.trim(),
         customerPhone: receiptData.customerPhone,
         date: new Date(receiptData.date || Date.now()).toISOString(),
         items: receiptData.items.map((line) => ({

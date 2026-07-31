@@ -19,6 +19,7 @@ import {
 } from '~/composables/useFirestorePaths'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
 import { customerAccountDocId, getCustomerContactKey } from '~/utils/customer-key'
+import { normalizeEntityName } from '~/utils/capitalize-text'
 
 export type BalanceLedgerEntryType = 'charge' | 'payment' | 'adjustment' | 'receipt'
 
@@ -204,7 +205,9 @@ export const useCustomerAccountsStore = defineStore('customerAccounts', {
       email?: string
       phone?: string
     }): Promise<CustomerAccount> {
-      const contactKey = getCustomerContactKey(params)
+      const customerName = normalizeEntityName(params.customerName) || params.customerName.trim()
+      const normalizedParams = { ...params, customerName }
+      const contactKey = getCustomerContactKey(normalizedParams)
       const existing = this.accountsByContactKey[contactKey]
       if (existing) return existing
 
@@ -215,7 +218,7 @@ export const useCustomerAccountsStore = defineStore('customerAccounts', {
         const account: CustomerAccount = {
           id: accountId,
           contactKey,
-          customerName: params.customerName,
+          customerName: normalizedParams.customerName,
           email: params.email?.toLowerCase().trim(),
           phone: params.phone?.trim(),
           accountBalance: 0,
@@ -245,7 +248,7 @@ export const useCustomerAccountsStore = defineStore('customerAccounts', {
         const account: CustomerAccount = {
           id: snap.id,
           contactKey: (data.contactKey as string) || contactKey,
-          customerName: (data.customerName as string) || params.customerName,
+          customerName: (data.customerName as string) || customerName,
           email: data.email as string | undefined,
           phone: data.phone as string | undefined,
           accountBalance: Number(data.accountBalance) || 0,
@@ -262,7 +265,7 @@ export const useCustomerAccountsStore = defineStore('customerAccounts', {
 
       const account: Omit<CustomerAccount, 'id'> & { id?: string } = {
         contactKey,
-        customerName: params.customerName,
+        customerName,
         email: params.email?.toLowerCase().trim(),
         phone: params.phone?.trim(),
         accountBalance: 0,
@@ -291,13 +294,16 @@ export const useCustomerAccountsStore = defineStore('customerAccounts', {
       note?: string
       receiptId?: string
     }): Promise<CustomerAccount> {
+      const customerName = normalizeEntityName(params.customerName) || params.customerName.trim()
+      const accountParams = { ...params, customerName }
+
       const { isDemoModeActive } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) {
         const authStore = useAuthStore()
         if (!authStore.currentUser) throw new Error('Not authenticated')
         const userId = authStore.currentUser.uid
         const account = await this.ensureAccount({
-          customerName: params.customerName,
+          customerName: accountParams.customerName,
           email: params.email,
           phone: params.phone,
         })
@@ -326,7 +332,7 @@ export const useCustomerAccountsStore = defineStore('customerAccounts', {
       if (!storeId) throw new Error('No store selected')
 
       const account = await this.ensureAccount({
-        customerName: params.customerName,
+        customerName,
         email: params.email,
         phone: params.phone,
       })
@@ -353,7 +359,7 @@ export const useCustomerAccountsStore = defineStore('customerAccounts', {
       await updateDoc(ref, {
         accountBalance: newBalance,
         balanceLedger: arrayUnion(entry),
-        customerName: params.customerName,
+        customerName,
         email: params.email?.toLowerCase().trim() || account.email,
         phone: params.phone?.trim() || account.phone,
         updatedAt: serverTimestamp(),
