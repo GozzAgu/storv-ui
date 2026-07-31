@@ -2,7 +2,7 @@
   <SidePanel
     :model-value="props.modelValue"
     title="Create New Sale"
-    subtitle="Category → items → sale details"
+    subtitle="Category → subcategory → items → sale details"
     size="lg"
     @update:model-value="(value: boolean) => emit('update:modelValue', value)"
   >
@@ -10,11 +10,11 @@
       <div :class="[drawerFillClass, 'gap-4']">
         <DashboardDrawerStepper :steps="steps" :current-step="currentStep" />
 
-        <SellScreenNoteBanner v-if="currentStep >= 1" />
+        <SellScreenNoteBanner v-if="currentStep >= 2" />
 
-        <!-- Step 1: Select Folder -->
+        <!-- Step 1: Parent category -->
         <div v-if="currentStep === 0" :class="[drawerFillStepClass, 'gap-3']">
-          <p :class="sectionLabelClass">Inventory category</p>
+          <p :class="sectionLabelClass">Parent category</p>
           <DashboardDrawerSearch v-model="folderSearchQuery" placeholder="Search categories…" />
 
           <div v-if="loadingFolders" class="flex flex-1 flex-col items-center justify-center py-12">
@@ -23,7 +23,7 @@
             />
             <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Loading categories…</p>
           </div>
-          <div v-else-if="filteredFolders.length === 0" :class="emptyStateClass">
+          <div v-else-if="parentCategoryRows.length === 0" :class="emptyStateClass">
             <FolderIcon class="mb-2 h-8 w-8 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
             <p class="text-xs font-medium text-gray-800 dark:text-gray-200">
               {{ folderSearchQuery ? 'No categories found' : 'No categories yet' }}
@@ -37,14 +37,84 @@
           <div v-else :class="pickListClass">
             <div :class="pickListScrollClass">
               <button
-                v-for="folder in filteredFolders"
+                v-for="row in parentCategoryRows"
+                :key="`${row.depth}-${row.folder.id}`"
+                type="button"
+                :class="[
+                  pickRowClass,
+                  isParentRowSelected(row.folder) ? pickRowSelectedClass : '',
+                  row.depth === 1 ? 'ml-3 border-l-2 border-primary-500/20 pl-2' : '',
+                ]"
+                @click="onParentCategoryRowClick(row)"
+              >
+                <div
+                  :class="[
+                    'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg',
+                    getFolderColorClass(row.folder.color),
+                  ]"
+                >
+                  <FolderIcon class="h-4 w-4 text-white" stroke-width="1.75" />
+                </div>
+                <div class="min-w-0 flex-1">
+                  <p :class="pickRowTitleClass">
+                    {{ row.folder.name }}
+                    <span
+                      v-if="row.depth === 1 && row.parentName"
+                      class="font-normal text-gray-500 dark:text-gray-400"
+                    >
+                      · {{ row.parentName }}
+                    </span>
+                  </p>
+                  <p :class="pickRowMetaClass">{{ folderPickerMeta(row.folder) }}</p>
+                </div>
+                <ChevronRightIcon
+                  v-if="isCategoryHub(row.folder) && !isParentRowSelected(row.folder)"
+                  class="h-4 w-4 shrink-0 text-gray-400"
+                  stroke-width="2"
+                />
+                <CheckCircleIcon
+                  v-if="isParentRowSelected(row.folder)"
+                  class="h-4 w-4 shrink-0 text-primary-500"
+                  stroke-width="2"
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Subcategory -->
+        <div v-if="currentStep === 1" :class="[drawerFillStepClass, 'gap-3']">
+          <div class="flex shrink-0 flex-wrap items-center gap-2">
+            <p :class="sectionLabelClass">Subcategory · {{ selectedParentFolder?.name }}</p>
+            <button
+              type="button"
+              class="text-[11px] font-medium text-gray-500 hover:text-gray-700 hover:underline dark:text-gray-400 dark:hover:text-gray-200"
+              @click="goBackToParentCategories"
+            >
+              Change parent
+            </button>
+          </div>
+          <DashboardDrawerSearch
+            v-model="subcategorySearchQuery"
+            placeholder="Search subcategories…"
+          />
+          <div v-if="subcategoryFolders.length === 0" :class="emptyStateClass">
+            <FolderIcon class="mb-2 h-8 w-8 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
+            <p class="text-xs font-medium text-gray-800 dark:text-gray-200">
+              {{ subcategorySearchQuery ? 'No subcategories found' : 'No subcategories yet' }}
+            </p>
+          </div>
+          <div v-else :class="pickListClass">
+            <div :class="pickListScrollClass">
+              <button
+                v-for="folder in subcategoryFolders"
                 :key="folder.id"
                 type="button"
                 :class="[
                   pickRowClass,
-                  selectedFolder?.id === folder.id ? pickRowSelectedClass : '',
+                  isSubcategoryRowSelected(folder) ? pickRowSelectedClass : '',
                 ]"
-                @click="selectFolder(folder)"
+                @click="onSubcategoryPick(folder)"
               >
                 <div
                   :class="[
@@ -56,12 +126,10 @@
                 </div>
                 <div class="min-w-0 flex-1">
                   <p :class="pickRowTitleClass">{{ folder.name }}</p>
-                  <p :class="pickRowMetaClass">
-                    {{ folder.itemCount }} {{ folder.itemCount === 1 ? 'item' : 'items' }}
-                  </p>
+                  <p :class="pickRowMetaClass">{{ folderPickerMeta(folder) }}</p>
                 </div>
                 <CheckCircleIcon
-                  v-if="selectedFolder?.id === folder.id"
+                  v-if="isSubcategoryRowSelected(folder)"
                   class="h-4 w-4 shrink-0 text-primary-500"
                   stroke-width="2"
                 />
@@ -70,8 +138,8 @@
           </div>
         </div>
 
-        <!-- Step 2: Select Items -->
-        <div v-if="currentStep === 1" :class="[drawerFillStepClass, 'gap-3']">
+        <!-- Step 3: Select Items -->
+        <div v-if="currentStep === 2" :class="[drawerFillStepClass, 'gap-3']">
           <div class="flex shrink-0 items-center justify-between gap-2">
             <p :class="sectionLabelClass">Items · {{ selectedFolder?.name }}</p>
             <button
@@ -240,8 +308,8 @@
           </div>
         </div>
 
-        <!-- Step 3: Sale Details -->
-        <div v-if="currentStep === 2" class="space-y-3">
+        <!-- Step 4: Sale Details -->
+        <div v-if="currentStep === 3" class="space-y-3">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div class="relative">
               <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
@@ -479,7 +547,7 @@
                   ></div>
                 </div>
                 <div
-                  v-else-if="folders.length === 0"
+                  v-else-if="leafFolders.length === 0"
                   class="text-center py-4 px-3 border border-dashed border-gray-300 rounded-sm bg-gray-50/50 dark:bg-gray-800/50"
                 >
                   <div
@@ -496,7 +564,7 @@
                   class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/50"
                 >
                   <option value="">Select folder for swapped-in device</option>
-                  <option v-for="folder in folders" :key="folder.id" :value="folder.id">
+                  <option v-for="folder in leafFolders" :key="folder.id" :value="folder.id">
                     {{ folder.name }}
                   </option>
                 </select>
@@ -652,7 +720,7 @@
             Cancel
           </Button>
           <Button
-            v-if="currentStep < 2"
+            v-if="currentStep < 3"
             variant="primary"
             size="sm"
             :class="[footerBtnPrimaryClass, 'w-full sm:w-auto']"
@@ -750,6 +818,7 @@ import {
   XMarkIcon,
   EnvelopeIcon,
   PlusCircleIcon,
+  ChevronRightIcon,
 } from '~/utils/app-icons'
 import Modal from '~/components/ui/Modal.vue'
 import SendWhatsAppModal from '~/components/whatsapp/SendWhatsAppModal.vue'
@@ -823,19 +892,38 @@ const lastCreatedReceiptId = ref('')
 const lastCreatedReceiptData = ref<any>(null)
 
 const steps = [
-  { id: 'folder', label: 'Select Folder' },
-  { id: 'items', label: 'Select Items' },
+  { id: 'parent', label: 'Category' },
+  { id: 'subcategory', label: 'Subcategory' },
+  { id: 'items', label: 'Items' },
   { id: 'details', label: 'Sale details' },
 ]
+
+const {
+  selectedParentFolder,
+  selectedFolder,
+  folderSearchQuery,
+  subcategorySearchQuery,
+  skippedSubcategoryStep,
+  parentCategoryRows,
+  subcategoryFolders,
+  isCategoryHub,
+  folderPickerMeta,
+  isParentRowSelected,
+  isSubcategoryRowSelected,
+  onParentCategoryRowClick,
+  resetCategoryPicker,
+  canProceedParentStep,
+  canProceedSubcategoryStep,
+  nextStepFromParent,
+  previousStepFromItems,
+} = useReceiptCategoryPicker()
 
 const currentStep = ref(0)
 const loadingFolders = ref(false)
 const loadingItems = ref(false)
 const isCreating = ref(false)
-const selectedFolder = ref<InventoryFolder | null>(null)
 const selectedItems = ref<Array<{ id: string; quantity: number; item: InventoryItem }>>([])
 const availableItems = ref<InventoryItem[]>([])
-const folderSearchQuery = ref('')
 const itemSearchQuery = ref('')
 const showCustomerSuggestions = ref(false)
 const allCustomers = ref<
@@ -876,7 +964,7 @@ watch(canUseSwapInReceipt, (ok) => {
 const useSplitPayment = ref(false)
 const splitPayments = ref<Array<{ method: string; amount: number }>>([{ method: '', amount: 0 }])
 
-const folders = computed(() => inventoryStore.leafFolders)
+const leafFolders = computed(() => inventoryStore.leafFolders)
 
 const matchingCustomers = computed(() => {
   if (!receiptForm.value.customerName || receiptForm.value.customerName.trim().length < 1) {
@@ -893,20 +981,17 @@ const matchingCustomers = computed(() => {
     .slice(0, 5) // Limit to 5 suggestions
 })
 
-const filteredFolders = computed(() => {
-  const query = folderSearchQuery.value.trim().toLowerCase()
-  let list = folders.value
-  if (query) {
-    list = list.filter(
-      (folder) =>
-        folder.name.toLowerCase().includes(query) ||
-        folder.description.toLowerCase().includes(query)
-    )
+const canProceed = computed(() => {
+  if (currentStep.value === 0) {
+    return canProceedParentStep()
   }
-  return [...list].sort((a, b) => {
-    if (b.itemCount !== a.itemCount) return b.itemCount - a.itemCount
-    return a.name.localeCompare(b.name)
-  })
+  if (currentStep.value === 1) {
+    return canProceedSubcategoryStep()
+  }
+  if (currentStep.value === 2) {
+    return selectedItems.value.length > 0
+  }
+  return false
 })
 
 const hasSerialNumberInTemplate = computed(() => {
@@ -1004,16 +1089,6 @@ function swapInFieldPlaceholder(field: {
   if (field.type === 'currency') return '0.00'
   return field.placeholder || `Enter ${swapInFieldLabel(field)}`
 }
-
-const canProceed = computed(() => {
-  if (currentStep.value === 0) {
-    return selectedFolder.value !== null
-  }
-  if (currentStep.value === 1) {
-    return selectedItems.value.length > 0
-  }
-  return false
-})
 
 const isFormValid = computed(() => {
   const baseValid = receiptForm.value.customerName.trim() !== '' && selectedItems.value.length > 0
@@ -1174,6 +1249,16 @@ const selectCustomer = (customer: {
     receiptForm.value.customerAddress = customer.address
   }
   showCustomerSuggestions.value = false
+}
+
+function goBackToParentCategories() {
+  currentStep.value = 0
+  selectedFolder.value = null
+  subcategorySearchQuery.value = ''
+}
+
+async function onSubcategoryPick(folder: InventoryFolder) {
+  await selectFolder(folder)
 }
 
 const selectFolder = async (folder: InventoryFolder) => {
@@ -1347,13 +1432,25 @@ const removeSplitPayment = (index: number) => {
 // formatCurrency is now imported from usePreferences for currency conversion
 // getItemDisplayName, getItemField, getFolderColorClass from useInventoryItemDisplay
 
-const nextStep = () => {
-  if (canProceed.value && currentStep.value < steps.length - 1) {
+const nextStep = async () => {
+  if (!canProceed.value) return
+  if (currentStep.value === 0) {
+    currentStep.value = nextStepFromParent()
+    if (currentStep.value === 2 && selectedFolder.value) {
+      await loadItems()
+    }
+    return
+  }
+  if (currentStep.value < steps.length - 1) {
     currentStep.value++
   }
 }
 
 const previousStep = () => {
+  if (currentStep.value === 2) {
+    currentStep.value = previousStepFromItems()
+    return
+  }
   if (currentStep.value > 0) {
     currentStep.value--
   }
@@ -1361,7 +1458,7 @@ const previousStep = () => {
 
 const resetForm = () => {
   currentStep.value = 0
-  selectedFolder.value = null
+  resetCategoryPicker()
   selectedItems.value = []
   availableItems.value = []
   folderSearchQuery.value = ''

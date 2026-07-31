@@ -278,7 +278,8 @@ html.dark .dash-overlay-close:hover {
 
 /* Drawer / modal body: inner fill layout owns scrolling */
 .side-panel-body-scroll:has(> .dash-drawer-fill),
-.dash-overlay-body:has(> .dash-drawer-fill) {
+.dash-overlay-body:has(> .dash-drawer-fill),
+.dashboard-native-sheet__body:has(> .dash-drawer-fill) {
   display: flex;
   flex-direction: column;
   overflow: hidden;

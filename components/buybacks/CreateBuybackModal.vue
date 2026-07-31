@@ -66,7 +66,7 @@
         <select v-model="folderId" class="app-field w-full px-3 py-2 text-sm">
           <option value="">Select category</option>
           <option v-for="folder in folders" :key="folder.id" :value="folder.id">
-            {{ folder.name }}
+            {{ folderOptionLabel(folder) }}
           </option>
         </select>
       </div>
@@ -181,7 +181,14 @@ const { footerBtnOutlineClass, footerBtnPrimaryClass } = useDashboardOverlayChro
 const { preferences } = usePreferences()
 const currencySymbol = computed(() => preferences.value?.currencySymbol ?? '$')
 
-const folders = computed(() => inventoryStore.folders)
+const folders = computed(() => inventoryStore.leafFolders)
+
+function folderOptionLabel(folder: (typeof folders.value)[number]): string {
+  const parent = inventoryStore.folders.find(
+    (entry) => entry.id === folder.parentId && folder.parentId
+  )
+  return parent ? `${folder.name} · ${parent.name}` : folder.name
+}
 const {
   folderId,
   itemForm,

@@ -1,30 +1,19 @@
 <template>
   <Modal
     :model-value="modelValue"
-    @update:model-value="$emit('update:modelValue', $event)"
+    title="Quick Sale"
+    subtitle="Scan or search items, then complete payment"
     size="lg"
+    @update:model-value="$emit('update:modelValue', $event)"
   >
-    <template #header>
-      <div class="flex items-center justify-between">
-        <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Quick Sale</h2>
-        <button
-          @click="$emit('update:modelValue', false)"
-          class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm transition-colors"
-        >
-          <XMarkIcon class="w-5 h-5" />
-        </button>
-      </div>
-    </template>
-
-    <template #body>
-      <div class="space-y-4">
+    <div class="space-y-4">
         <SellScreenNoteBanner />
         <!-- Barcode Scanner Toggle -->
         <div
-          class="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-sm border border-blue-200 dark:border-blue-800"
+          class="flex items-center justify-between rounded-sm border border-gray-200/80 bg-gray-50/80 p-3 dark:border-white/[0.08] dark:bg-white/[0.03]"
         >
           <div class="flex items-center gap-3">
-            <QrCodeIcon class="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            <QrCodeIcon class="h-6 w-6 text-primary-600 dark:text-primary-400" />
             <div>
               <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Barcode Scanner</p>
               <p class="text-xs text-gray-600 dark:text-gray-400">Scan items quickly</p>
@@ -36,7 +25,7 @@
               'px-4 py-2 rounded-sm text-sm font-medium transition-colors',
               isScanning
                 ? 'bg-red-600 text-white hover:bg-red-700'
-                : 'bg-blue-600 text-white hover:bg-blue-700',
+                : 'bg-primary-500 text-white hover:bg-primary-600',
             ]"
           >
             {{ isScanning ? 'Stop Scanner' : 'Start Scanner' }}
@@ -75,35 +64,151 @@
               @keyup.enter="searchByBarcode"
               type="text"
               placeholder="Enter barcode..."
-              class="flex-1 px-4 py-2 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-400"
+              class="app-field flex-1 rounded-sm px-4 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-400/40 dark:!bg-dashboard-card dark:text-gray-100"
             />
             <Button @click="searchByBarcode" :loading="isSearching">Search</Button>
           </div>
         </div>
 
         <!-- Folder Selection -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Select Folder
-          </label>
-          <select
-            v-model="selectedFolderId"
-            @change="loadFolderItems"
-            class="w-full px-4 py-2 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-400"
+        <div class="space-y-2">
+          <div class="flex items-center justify-between gap-2">
+            <p :class="sectionLabelClass">Category</p>
+            <button
+              v-if="selectedFolder && !folderPickerExpanded"
+              type="button"
+              class="text-xs font-medium text-primary-600 transition-colors hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
+              @click="folderPickerExpanded = true"
+            >
+              Change
+            </button>
+          </div>
+
+          <div
+            v-if="selectedFolder && !folderPickerExpanded"
+            :class="[pickRowClass, pickRowSelectedClass, 'rounded-xl border border-gray-200/80 dark:border-white/[0.08]']"
           >
-            <option value="">Select a folder...</option>
-            <option v-for="folder in folders" :key="folder.id" :value="folder.id">
-              {{ folderOptionLabel(folder) }}
-            </option>
-          </select>
+            <div
+              :class="[
+                'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg',
+                getFolderColorClass(selectedFolder.color),
+              ]"
+            >
+              <FolderIcon class="h-4 w-4 text-white" stroke-width="1.75" />
+            </div>
+            <div class="min-w-0 flex-1">
+              <p :class="pickRowTitleClass">{{ selectedFolderLabel }}</p>
+              <p :class="pickRowMetaClass">{{ folderPickerMeta(selectedFolder) }}</p>
+            </div>
+          </div>
+
+          <template v-else>
+            <button
+              v-if="showSubcategoryList && selectedParentFolder"
+              type="button"
+              class="inline-flex items-center gap-1 text-xs font-medium text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+              @click="goBackToParentCategories"
+            >
+              <ChevronLeftIcon class="h-3.5 w-3.5" />
+              {{ selectedParentFolder.name }}
+            </button>
+
+            <DashboardDrawerSearch
+              v-model="folderPickerSearch"
+              :placeholder="showSubcategoryList ? 'Search subcategories…' : 'Search categories…'"
+            />
+
+            <div :class="pickListClass">
+              <div :class="[pickListScrollClass, 'max-h-48']">
+                <template v-if="showSubcategoryList">
+                  <button
+                    v-for="folder in subcategoryFolders"
+                    :key="folder.id"
+                    type="button"
+                    :class="[
+                      pickRowClass,
+                      isSubcategoryRowSelected(folder) ? pickRowSelectedClass : '',
+                    ]"
+                    @click="onSubcategoryPick(folder)"
+                  >
+                    <div
+                      :class="[
+                        'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg',
+                        getFolderColorClass(folder.color),
+                      ]"
+                    >
+                      <FolderIcon class="h-4 w-4 text-white" stroke-width="1.75" />
+                    </div>
+                    <div class="min-w-0 flex-1">
+                      <p :class="pickRowTitleClass">{{ folder.name }}</p>
+                      <p :class="pickRowMetaClass">{{ folderPickerMeta(folder) }}</p>
+                    </div>
+                    <CheckIcon
+                      v-if="isSubcategoryRowSelected(folder)"
+                      class="h-4 w-4 shrink-0 text-primary-500 dark:text-primary-400"
+                    />
+                  </button>
+                  <div v-if="subcategoryFolders.length === 0" :class="[emptyStateClass, '!min-h-[8rem]']">
+                    <p class="text-xs text-gray-500 dark:text-gray-400">No subcategories found</p>
+                  </div>
+                </template>
+                <template v-else>
+                  <button
+                    v-for="row in parentCategoryRows"
+                    :key="`${row.depth}-${row.folder.id}`"
+                    type="button"
+                    :class="[
+                      pickRowClass,
+                      isParentRowSelected(row.folder) ? pickRowSelectedClass : '',
+                      row.depth === 1 ? 'ml-3 border-l-2 border-primary-500/20 pl-2' : '',
+                    ]"
+                    @click="onParentCategoryPick(row)"
+                  >
+                    <div
+                      :class="[
+                        'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg',
+                        getFolderColorClass(row.folder.color),
+                      ]"
+                    >
+                      <FolderIcon class="h-4 w-4 text-white" stroke-width="1.75" />
+                    </div>
+                    <div class="min-w-0 flex-1">
+                      <p :class="pickRowTitleClass">
+                        {{ row.folder.name }}
+                        <span
+                          v-if="row.depth === 1 && row.parentName"
+                          class="font-normal text-gray-500 dark:text-gray-400"
+                        >
+                          · {{ row.parentName }}
+                        </span>
+                      </p>
+                      <p :class="pickRowMetaClass">{{ folderPickerMeta(row.folder) }}</p>
+                    </div>
+                    <ChevronRightIcon
+                      v-if="isCategoryHub(row.folder) && !isParentRowSelected(row.folder)"
+                      class="h-4 w-4 shrink-0 text-gray-400"
+                    />
+                    <CheckIcon
+                      v-if="!isCategoryHub(row.folder) && isParentRowSelected(row.folder)"
+                      class="h-4 w-4 shrink-0 text-primary-500 dark:text-primary-400"
+                    />
+                  </button>
+                  <div v-if="parentCategoryRows.length === 0" :class="[emptyStateClass, '!min-h-[8rem]']">
+                    <FolderIcon class="mb-2 h-7 w-7 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
+                    <p class="text-xs text-gray-500 dark:text-gray-400">No categories found</p>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </template>
         </div>
 
         <!-- Selected Items -->
-        <div class="border-t border-gray-200 pt-4">
+        <div class="border-t border-gray-200 pt-4 dark:border-white/[0.08]">
           <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Selected Items</h3>
           <div
             v-if="cartItems.length === 0"
-            class="text-center py-8 px-4 rounded-sm bg-gray-50/50 dark:bg-gray-800/30"
+            class="text-center py-8 px-4 rounded-sm bg-gray-50/50 dark:bg-white/[0.03]"
           >
             <div
               class="w-14 h-14 mx-auto mb-3 rounded-sm bg-green-50 dark:bg-green-900/20 flex items-center justify-center"
@@ -155,7 +260,7 @@
         </div>
 
         <!-- Customer Info (Collapsible) -->
-        <div class="border-t border-gray-200 pt-4">
+        <div class="border-t border-gray-200 pt-4 dark:border-white/[0.08]">
           <button
             @click="showCustomerInfo = !showCustomerInfo"
             class="flex items-center justify-between w-full text-left"
@@ -184,7 +289,7 @@
         </div>
 
         <!-- Payment -->
-        <div class="border-t border-gray-200 pt-4">
+        <div class="border-t border-gray-200 pt-4 dark:border-white/[0.08]">
           <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
             <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Payment</span>
             <Checkbox v-model="useSplitPayment" label="Split payment" size="sm" />
@@ -291,7 +396,7 @@
         </div>
 
         <!-- Total -->
-        <div class="border-t border-gray-200 pt-4">
+        <div class="border-t border-gray-200 pt-4 dark:border-white/[0.08]">
           <div class="flex items-center justify-between">
             <span class="text-lg font-semibold text-gray-900 dark:text-gray-100">Total</span>
             <span class="text-2xl font-bold text-primary-500 dark:text-primary-400">
@@ -300,7 +405,6 @@
           </div>
         </div>
       </div>
-    </template>
 
     <template #footer>
       <div class="flex gap-2 justify-end">
@@ -336,10 +440,15 @@ import {
   PlusCircleIcon,
   TrashIcon,
   ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  FolderIcon,
+  CheckIcon,
 } from '~/utils/app-icons'
 import Modal from '~/components/ui/Modal.vue'
 import SellScreenNoteBanner from '~/components/receipts/SellScreenNoteBanner.vue'
 import PaymentMethodSelect from '~/components/receipts/PaymentMethodSelect.vue'
+import DashboardDrawerSearch from '~/components/dashboard/DashboardDrawerSearch.vue'
 import Button from '~/components/ui/Button.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import { useInventoryStore, type InventoryFolder, type InventoryItem } from '~/stores/inventory'
@@ -353,6 +462,10 @@ import { usePreferences } from '~/composables/usePreferences'
 import { useAppToast } from '~/composables/useAppToast'
 import { getReceiptProductDetails } from '~/composables/useReceiptProductDetails'
 import { resolveBulkStockFieldAndValue } from '~/utils/inventory-bulk-quantity'
+import { useReceiptCategoryPicker } from '~/composables/useReceiptCategoryPicker'
+import { useDashboardDrawerChrome } from '~/composables/useDashboardDrawerChrome'
+import { getFolderColorClass } from '~/composables/useInventoryItemDisplay'
+import type { InventoryFolderDisplayRow } from '~/utils/inventory-folder-tree'
 
 interface Props {
   modelValue: boolean
@@ -380,18 +493,81 @@ const {
   warning: showWarningToast,
 } = useAppToast()
 
-const folders = computed(() => inventoryStore.leafFolders)
+const {
+  sectionLabelClass,
+  pickListClass,
+  pickListScrollClass,
+  pickRowClass,
+  pickRowSelectedClass,
+  pickRowTitleClass,
+  pickRowMetaClass,
+  emptyStateClass,
+} = useDashboardDrawerChrome()
 
-function folderOptionLabel(folder: InventoryFolder): string {
-  const parent = inventoryStore.folders.find(
-    (entry) => entry.id === folder.parentId && folder.parentId
-  )
-  return parent ? `${folder.name} · ${parent.name}` : folder.name
+const {
+  selectedParentFolder,
+  selectedFolder,
+  folderSearchQuery,
+  subcategorySearchQuery,
+  parentCategoryRows,
+  subcategoryFolders,
+  isCategoryHub,
+  folderPickerMeta,
+  isParentRowSelected,
+  isSubcategoryRowSelected,
+  onParentCategoryRowClick,
+  onSubcategoryClick,
+  selectLeafCategory,
+  resetCategoryPicker,
+} = useReceiptCategoryPicker()
+
+const folderPickerExpanded = ref(true)
+
+const showSubcategoryList = computed(() => {
+  const parent = selectedParentFolder.value
+  return parent !== null && isCategoryHub(parent) && !selectedFolder.value
+})
+
+const folderPickerSearch = computed({
+  get: () =>
+    showSubcategoryList.value ? subcategorySearchQuery.value : folderSearchQuery.value,
+  set: (value: string) => {
+    if (showSubcategoryList.value) {
+      subcategorySearchQuery.value = value
+    } else {
+      folderSearchQuery.value = value
+    }
+  },
+})
+
+const selectedFolderId = computed(() => selectedFolder.value?.id ?? '')
+
+const selectedFolderLabel = computed(() => {
+  const folder = selectedFolder.value
+  if (!folder) return ''
+  const parent = selectedParentFolder.value
+  return parent && parent.id !== folder.id ? `${folder.name} · ${parent.name}` : folder.name
+})
+
+function goBackToParentCategories() {
+  selectedParentFolder.value = null
+  subcategorySearchQuery.value = ''
 }
-const selectedFolderId = ref<string>('')
-const selectedFolder = computed(() =>
-  selectedFolderId.value ? inventoryStore.getFolderById(selectedFolderId.value) : undefined
-)
+
+async function onParentCategoryPick(row: InventoryFolderDisplayRow) {
+  onParentCategoryRowClick(row)
+  if (selectedFolder.value && !isCategoryHub(selectedFolder.value)) {
+    folderPickerExpanded.value = false
+    await loadFolderItems()
+  }
+}
+
+async function onSubcategoryPick(folder: InventoryFolder) {
+  onSubcategoryClick(folder)
+  folderPickerExpanded.value = false
+  await loadFolderItems()
+}
+
 const isScanning = ref(false)
 const scannerReady = ref(false)
 const scannerContainer = ref<HTMLElement | null>(null)
@@ -548,6 +724,9 @@ const searchByBarcode = async () => {
 
   isSearching.value = true
   try {
+    const folder = selectedFolder.value
+    if (!folder) return
+
     const items = await loadFolderItems()
 
     // Search for item by barcode, SKU, or serial number
@@ -568,11 +747,11 @@ const searchByBarcode = async () => {
     // Check if item is already in cart
     const existingIndex = cartItems.value.findIndex((ci) => ci.id === foundItem.id)
     if (existingIndex >= 0 && cartItems.value[existingIndex]) {
-      const usesSerial = selectedFolder.value?.hasSerialNumbers
+      const usesSerial = folder.hasSerialNumbers
       if (!usesSerial) {
         const stock = resolveBulkStockFieldAndValue(
           foundItem as Record<string, unknown>,
-          selectedFolder.value
+          folder
         )
         const maxQty = stock?.value ?? 0
         if (cartItems.value[existingIndex].quantity + 1 > maxQty) {
@@ -583,7 +762,7 @@ const searchByBarcode = async () => {
       }
       cartItems.value[existingIndex].quantity++
     } else {
-      const usesSerial = selectedFolder.value?.hasSerialNumbers
+      const usesSerial = folder.hasSerialNumbers
       if (usesSerial) {
         if (foundItem.dateOut) {
           showErrorToast('This product has already been sold')
@@ -598,7 +777,7 @@ const searchByBarcode = async () => {
       } else {
         const stock = resolveBulkStockFieldAndValue(
           foundItem as Record<string, unknown>,
-          selectedFolder.value
+          folder
         )
         const onHand = stock?.value ?? 0
         if (onHand <= 0) {
@@ -755,24 +934,27 @@ const resetForm = () => {
   useSplitPayment.value = false
   splitPayments.value = [{ method: '', amount: 0 }]
   manualBarcode.value = ''
-  selectedFolderId.value = ''
+  resetCategoryPicker()
+  folderPickerExpanded.value = true
   showCustomerInfo.value = false
   stopScanner()
 }
 
 watch(
   () => props.modelValue,
-  (isOpen) => {
+  async (isOpen) => {
     if (isOpen) {
-      inventoryStore.fetchFolders()
+      await inventoryStore.fetchFolders()
       const leaf = inventoryStore.leafFolders
       if (leaf.length === 1 && leaf[0]) {
-        selectedFolderId.value = leaf[0].id
-        loadFolderItems()
+        selectLeafCategory(leaf[0])
+        folderPickerExpanded.value = false
+        await loadFolderItems()
+      } else {
+        folderPickerExpanded.value = true
       }
     } else {
       resetForm()
-      selectedFolderId.value = ''
     }
   }
 )

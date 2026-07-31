@@ -260,9 +260,36 @@ html.capacitor-ios.capacitor-native .dashboard-native-sheet--assistant {
   max-height: min(88dvh, 680px);
 }
 
-html.capacitor-ios.capacitor-native .dashboard-native-sheet__body {
+html.capacitor-ios.capacitor-native .dashboard-native-sheet .dashboard-native-sheet__body {
   -webkit-overflow-scrolling: touch;
   scrollbar-gutter: stable;
+}
+
+/* Create New Sale / drawer flows: stepper + category lists inside iOS bottom sheets */
+html.capacitor-ios.capacitor-native .dashboard-native-sheet .dash-drawer-stepper ol {
+  gap: 0;
+}
+
+html.capacitor-ios.capacitor-native .dashboard-native-sheet .dash-drawer-stepper span.text-\[10px\] {
+  font-size: var(--cap-ios-caption, 0.6875rem);
+  line-height: 1.25;
+}
+
+html.capacitor-ios.capacitor-native .dashboard-native-sheet .dash-drawer-pick-scroll {
+  max-height: min(38dvh, 16rem);
+  -webkit-overflow-scrolling: touch;
+}
+
+html.capacitor-ios.capacitor-native .dashboard-native-sheet .dash-drawer-pick-row {
+  min-height: 2.75rem;
+}
+
+html.capacitor-ios.capacitor-native .dashboard-native-sheet .dash-drawer-pick-row:active {
+  background: rgb(255 255 255 / 0.05);
+}
+
+html.capacitor-ios.capacitor-native .dashboard-native-sheet .dash-drawer-label {
+  font-size: var(--cap-ios-caption, 0.6875rem);
 }
 
 html.capacitor-ios.capacitor-native .dashboard-native-sheet__subtitle {

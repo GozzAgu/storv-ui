@@ -203,18 +203,18 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
         ],
       },
       {
-        title: 'Create New Sale (three steps)',
+        title: 'Create New Sale (four steps)',
         body: [
-          'The drawer title is “Create New Sale” with subtitle “Pick categories and items, then sale details.” Step 1: pick an inventory category. Step 2: select items and quantities; use “Add from another category” to keep your cart and add lines from more categories in one sale. Step 3: sale details — customer fields, payment method, paid in full or balance due, and notes.',
+          'The drawer title is “Create New Sale” with subtitle “Pick category, subcategory, items, then sale details.” Step 1: pick a parent category (for example Toyota or Office Chairs). Step 2: pick a subcategory when the parent has children (for example Corolla under Toyota); leaf categories skip this step. Step 3: select items and quantities; use “Add from another category” to keep your cart and add lines from more categories in one sale. Step 4: sale details — customer fields, payment method, paid in full or balance due, and notes.',
           'Selected items are grouped by category before checkout. Serial folders can include lines on an active Stock loan: you may add them like other sellable SKUs. Completing the sale marks them sold and updates the borrower loan in the background when your plan includes Stock loans (Enterprise).',
-          'After step 1, if your branch has a Sell screen note configured in Settings → create or edit branch, a short banner can appear at the top of the items and checkout steps with store-specific reminders (for example promos or price notes).',
+          'After you reach the items step, if your branch has a Sell screen note configured in Settings → create or edit branch, a short banner can appear at the top of the items and checkout steps with store-specific reminders (for example promos or price notes).',
           'Super admins can enable swap-in style lines inside the receipt flow when your business records trade-ins alongside standard SKUs.',
         ],
       },
       {
         title: 'Quick Sale, split payment, and sell screen notes',
         body: [
-          'Quick Sale is a streamlined checkout view for scanning or adding products quickly in the active branch. When split payment is enabled, you can allocate amounts across multiple methods; the screen shows how much is assigned versus the total so you can balance the sale before completing.',
+          'Quick Sale is a streamlined checkout view for scanning or adding products quickly in the active branch. Pick a parent category, then a subcategory when needed (same hierarchy as Create New Sale), before scanning barcodes or searching SKUs. When split payment is enabled, you can allocate amounts across multiple methods; the screen shows how much is assigned versus the total so you can balance the sale before completing.',
           'Sell screen notes are short messages set per branch in Settings (Create / Edit Branch). They appear on Quick Sale and on Create New Receipt after you choose a folder, so cashiers see branch-specific reminders without opening Settings.',
         ],
       },
