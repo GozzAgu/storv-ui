@@ -11,6 +11,7 @@
 @import './app-buttons.css';
 @import './dashboard-overlays.css';
 @import './capacitor-native-saas.css';
+@import './ios-design-tokens.css';
 @import './capacitor-ios.css';
 @import './native-drawers.css';
 @import './receipt-typography.css';

@@ -11,6 +11,7 @@ export const NATIVE_PRIMARY_ORDER = [
   'Dashboard',
   'Inventory',
   'Sales',
+  'Analytics',
 ] as const
 
 /** Same primary tabs when payment links is promoted - links live under More. */
@@ -42,7 +43,7 @@ export function nativeNavShortLabel(name: string): string {
     Sales: 'Sales',
     Receipts: 'Sales',
     Departments: 'Teams',
-    Analytics: 'Insights',
+    Analytics: 'Analytics',
     'Payment links': 'Links',
     'Stock loans': 'Loans',
     'Customer buybacks': 'Buybacks',

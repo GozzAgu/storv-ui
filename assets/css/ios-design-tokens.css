@@ -1,0 +1,255 @@
+/**
+ * Storvv iOS premium design tokens — glass materials, typography, motion.
+ * Scoped to html.capacitor-native. See docs/IOS_PREMIUM_DESIGN_SYSTEM.md
+ */
+
+html.capacitor-native {
+  --ios-canvas: #f2f2f7;
+  --ios-glass-bg: rgb(255 255 255 / 0.72);
+  --ios-glass-elevated: rgb(255 255 255 / 0.82);
+  --ios-glass-border: rgb(255 255 255 / 0.8);
+  --ios-glass-highlight: inset 0 1px 0 rgb(255 255 255 / 0.6);
+  --ios-glass-shadow: 0 8px 32px rgb(0 0 0 / 0.06);
+  --ios-glass-blur: 24px;
+  --ios-surface-solid: #ffffff;
+  --ios-separator: rgb(60 60 67 / 0.12);
+  --ios-label: #000000;
+  --ios-label-secondary: rgb(60 60 67 / 0.6);
+  --ios-accent: #143f8d;
+  --ios-accent-soft: #4876c7;
+  --ios-accent-muted: rgb(20 63 141 / 0.12);
+  --ios-success: #34c759;
+  --ios-warning: #ff9500;
+  --ios-danger: #ff3b30;
+  --ios-radius-sm: 12px;
+  --ios-radius-md: 16px;
+  --ios-radius-lg: 20px;
+  --ios-radius-xl: 28px;
+  --ios-space-xs: 4px;
+  --ios-space-sm: 8px;
+  --ios-space-md: 16px;
+  --ios-space-lg: 24px;
+  --ios-space-xl: 32px;
+  --ios-spring: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --cap-canvas-bg: var(--ios-canvas);
+  --dash-card-surface: var(--ios-glass-bg);
+  --dash-card-border: rgb(255 255 255 / 0.55);
+}
+
+html.capacitor-native.dark {
+  --ios-canvas: #000000;
+  --ios-glass-bg: rgb(28 28 30 / 0.72);
+  --ios-glass-elevated: rgb(44 44 46 / 0.78);
+  --ios-glass-border: rgb(255 255 255 / 0.08);
+  --ios-glass-highlight: inset 0 1px 0 rgb(255 255 255 / 0.06);
+  --ios-glass-shadow: 0 12px 40px rgb(0 0 0 / 0.45);
+  --ios-surface-solid: #1c1c1e;
+  --ios-separator: rgb(84 84 88 / 0.65);
+  --ios-label: #ffffff;
+  --ios-label-secondary: rgb(235 235 245 / 0.6);
+  --ios-accent-soft: #9ab5e3;
+  --ios-accent-muted: rgb(20 63 141 / 0.28);
+
+  --cap-canvas-bg: var(--ios-canvas);
+  --cap-surface-bg: var(--ios-surface-solid);
+  --dash-card-surface: var(--ios-glass-bg);
+  --dash-card-border: rgb(255 255 255 / 0.1);
+}
+
+/* ── Glass card utility ── */
+html.capacitor-native .ios-glass-card {
+  background: var(--ios-glass-bg);
+  backdrop-filter: blur(var(--ios-glass-blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--ios-glass-blur)) saturate(180%);
+  border: 1px solid var(--ios-glass-border);
+  box-shadow: var(--ios-glass-shadow), var(--ios-glass-highlight);
+  border-radius: var(--ios-radius-lg);
+}
+
+html.capacitor-native .ios-glass-card--elevated {
+  background: var(--ios-glass-elevated);
+  box-shadow:
+    var(--ios-glass-shadow),
+    var(--ios-glass-highlight),
+    0 2px 8px rgb(0 0 0 / 0.04);
+}
+
+html.capacitor-native .ios-glass-card--pressable {
+  transition:
+    transform 0.12s var(--ios-spring),
+    opacity 0.12s ease;
+}
+
+html.capacitor-native .ios-glass-card--pressable:active {
+  transform: scale(0.98);
+  opacity: 0.92;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  html.capacitor-native .ios-glass-card,
+  html.capacitor-native .ios-glass-card--elevated {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--ios-surface-solid);
+  }
+}
+
+/* ── Stat numerals ── */
+html.capacitor-native .ios-stat-value {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  letter-spacing: -0.02em;
+  font-weight: 600;
+  color: var(--ios-label);
+}
+
+html.capacitor-native .ios-stat-value--hero {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+html.capacitor-native .ios-stat-value--compact {
+  font-size: 1.25rem;
+}
+
+html.capacitor-native .ios-stat-label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--ios-label-secondary);
+  line-height: 1.3;
+}
+
+html.capacitor-native .ios-stat-delta--up {
+  color: var(--ios-success);
+}
+
+html.capacitor-native .ios-stat-delta--down {
+  color: var(--ios-danger);
+}
+
+/* ── iOS grouped list (Settings-style) ── */
+html.capacitor-native .ios-grouped-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ios-space-sm);
+}
+
+html.capacitor-native .ios-grouped-section {
+  border-radius: var(--ios-radius-md);
+  overflow: hidden;
+  background: var(--ios-surface-solid);
+  border: 1px solid var(--ios-separator);
+}
+
+html.capacitor-native .ios-grouped-section__header {
+  padding: var(--ios-space-sm) var(--ios-space-md) var(--ios-space-xs);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ios-label-secondary);
+}
+
+html.capacitor-native .ios-native-list-row {
+  display: flex;
+  align-items: center;
+  gap: var(--ios-space-md);
+  min-height: 44px;
+  padding: 0.625rem var(--ios-space-md);
+  background: var(--ios-surface-solid);
+  color: var(--ios-label);
+  text-decoration: none;
+  transition: background 0.12s ease;
+}
+
+html.capacitor-native .ios-native-list-row + .ios-native-list-row {
+  border-top: 1px solid var(--ios-separator);
+}
+
+html.capacitor-native .ios-native-list-row:active {
+  background: rgb(0 0 0 / 0.04);
+}
+
+html.capacitor-native.dark .ios-native-list-row:active {
+  background: rgb(255 255 255 / 0.06);
+}
+
+html.capacitor-native .ios-native-list-row__chevron {
+  margin-left: auto;
+  color: var(--ios-label-secondary);
+  opacity: 0.45;
+}
+
+/* ── FAB ── */
+html.capacitor-native .ios-fab {
+  position: fixed;
+  z-index: 52;
+  right: var(--ios-space-md);
+  bottom: calc(var(--dashboard-bottom-nav-height, 4.5rem) + var(--cap-safe-bottom, 0px) + var(--ios-space-md));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 9999px;
+  border: none;
+  background: var(--ios-accent);
+  color: #ffffff;
+  box-shadow:
+    0 8px 24px rgb(20 63 141 / 0.35),
+    0 2px 8px rgb(0 0 0 / 0.12);
+  transition: transform 0.12s var(--ios-spring);
+}
+
+html.capacitor-native .ios-fab:active {
+  transform: scale(0.94);
+}
+
+html.capacitor-native.dark .ios-fab {
+  background: var(--ios-accent-soft);
+  box-shadow:
+    0 8px 32px rgb(0 0 0 / 0.5),
+    0 2px 8px rgb(0 0 0 / 0.3);
+}
+
+/* ── Apply glass to existing dashboard cards on native ── */
+html.capacitor-native .dash-card,
+html.capacitor-native .dash-stat-card,
+html.capacitor-native .dash-grid-card,
+html.capacitor-native .inv-category-card {
+  background: var(--ios-glass-bg);
+  backdrop-filter: blur(var(--ios-glass-blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--ios-glass-blur)) saturate(180%);
+  border-color: var(--ios-glass-border);
+  box-shadow: var(--ios-glass-shadow), var(--ios-glass-highlight);
+  border-radius: var(--ios-radius-lg);
+}
+
+html.capacitor-native.dark .dash-card,
+html.capacitor-native.dark .dash-stat-card,
+html.capacitor-native.dark .dash-grid-card,
+html.capacitor-native.dark .inv-category-card {
+  box-shadow: var(--ios-glass-shadow), var(--ios-glass-highlight);
+}
+
+html.capacitor-native .native-tabbar {
+  border-color: var(--ios-glass-border);
+  background: var(--ios-glass-bg);
+  box-shadow: var(--ios-glass-shadow), var(--ios-glass-highlight);
+  -webkit-backdrop-filter: blur(var(--ios-glass-blur)) saturate(180%);
+  backdrop-filter: blur(var(--ios-glass-blur)) saturate(180%);
+}
+
+html.capacitor-native.dark .native-tabbar {
+  background: var(--ios-glass-bg);
+  box-shadow: var(--ios-glass-shadow), var(--ios-glass-highlight);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.capacitor-native .ios-glass-card--pressable,
+  html.capacitor-native .ios-fab {
+    transition: none;
+  }
+}
