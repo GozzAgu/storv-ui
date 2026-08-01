@@ -36,6 +36,23 @@ export function useDashboardDrawerChrome() {
 
   const footerBtnPrimaryClass = footerBtnOutlineClass
 
+  /** Scroll pick lists with mouse wheel while hovered; at list edges, scroll passes to the modal. */
+  function scrollPickListOnWheel(event: WheelEvent) {
+    const el = event.currentTarget as HTMLElement | null
+    if (!el || el.scrollHeight <= el.clientHeight) return
+
+    const deltaY = event.deltaY
+    const atTop = el.scrollTop <= 0
+    const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 1
+
+    if ((deltaY < 0 && atTop) || (deltaY > 0 && atBottom)) {
+      return
+    }
+
+    event.preventDefault()
+    el.scrollTop += deltaY
+  }
+
   return {
     searchInputClass,
     drawerFillClass,
@@ -57,5 +74,6 @@ export function useDashboardDrawerChrome() {
     drawerHintClass,
     footerBtnOutlineClass,
     footerBtnPrimaryClass,
+    scrollPickListOnWheel,
   }
 }

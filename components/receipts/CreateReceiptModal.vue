@@ -286,13 +286,11 @@
                       </span>
                       <span
                         v-if="
-                          !selectedFolder?.hasSerialNumbers &&
-                          !hasSerialNumberInTemplate &&
-                          getItemField(item, 'stock')
+                          !itemUsesSerialNumbers(item) && getItemAvailableStock(item) !== null
                         "
                         class="text-gray-500 dark:text-gray-400"
                       >
-                        Stock: {{ getItemField(item, 'stock') }}
+                        Stock: {{ getItemAvailableStock(item) }}
                       </span>
                     </div>
                   </div>
@@ -311,9 +309,13 @@
                   <input
                     type="number"
                     :value="getSelectedItemQuantity(item.id)"
-                    class="h-8 w-20 rounded-lg bg-white px-2 text-xs dark:!bg-dashboard-card"
+                    :class="[
+                      'h-8 w-20 rounded-lg bg-white px-2 text-xs dark:!bg-dashboard-card',
+                      getSelectedItemQuantityError(item.id)
+                        ? 'ring-2 ring-red-500/70 focus:ring-red-500/70 dark:ring-red-400/60'
+                        : '',
+                    ]"
                     min="1"
-                    :max="getItemField(item, 'stock') || 1"
                     @input="
                       updateItemQuantity(
                         item.id,
@@ -321,6 +323,12 @@
                       )
                     "
                   />
+                  <p
+                    v-if="getSelectedItemQuantityError(item.id)"
+                    class="mt-1 text-[10px] font-medium text-red-600 dark:text-red-400"
+                  >
+                    {{ getSelectedItemQuantityError(item.id) }}
+                  </p>
                 </div>
               </div>
             </div>
@@ -347,10 +355,23 @@
                     :key="si.id"
                     class="flex items-center justify-between gap-2 text-[11px] text-gray-700 dark:text-gray-300"
                   >
-                    <span class="min-w-0 truncate">
+                    <span
+                      class="min-w-0 truncate"
+                      :class="
+                        getSelectedItemQuantityError(si.id)
+                          ? 'text-red-600 dark:text-red-400'
+                          : ''
+                      "
+                    >
                       {{ getItemDisplayName(si.item) }}
                       <span v-if="!itemUsesSerialNumbers(si.item) && si.quantity > 1">
                         × {{ si.quantity }}
+                      </span>
+                      <span
+                        v-if="getSelectedItemQuantityError(si.id)"
+                        class="block text-[10px] font-medium"
+                      >
+                        {{ getSelectedItemQuantityError(si.id) }}
                       </span>
                     </span>
                     <button
@@ -933,6 +954,7 @@ import {
   getSelectedFolderIds,
   groupSelectedSaleLinesByFolder,
 } from '~/utils/receipt-multi-folder'
+import { resolveBulkStockFieldAndValue } from '~/utils/inventory-bulk-quantity'
 
 interface Props {
   modelValue: boolean
@@ -1095,7 +1117,7 @@ const canProceed = computed(() => {
     return canProceedSubcategoryStep()
   }
   if (currentStep.value === 2) {
-    return selectedItems.value.length > 0
+    return selectedItems.value.length > 0 && !hasInvalidSelectedQuantities.value
   }
   return false
 })
@@ -1198,7 +1220,10 @@ function swapInFieldPlaceholder(field: {
 }
 
 const isFormValid = computed(() => {
-  const baseValid = receiptForm.value.customerName.trim() !== '' && selectedItems.value.length > 0
+  const baseValid =
+    receiptForm.value.customerName.trim() !== '' &&
+    selectedItems.value.length > 0 &&
+    !hasInvalidSelectedQuantities.value
 
   // Payment validation
   if (paymentSettlement.value === 'balance_due') {
@@ -1270,6 +1295,40 @@ function itemUsesSerialNumbers(item: InventoryItem): boolean {
   const folder = inventoryStore.getFolderById(item.folderId)
   return folderHasSerialNumbers(folder)
 }
+
+function getItemStockFolder(item: InventoryItem) {
+  return inventoryStore.getFolderById(item.folderId) ?? selectedFolder.value ?? undefined
+}
+
+function getItemAvailableStock(item: InventoryItem): number | null {
+  if (itemUsesSerialNumbers(item)) return 1
+  const resolved = resolveBulkStockFieldAndValue(
+    item as Record<string, unknown>,
+    getItemStockFolder(item)
+  )
+  if (resolved) return resolved.value
+  const stockField = getItemField(item, 'stock')
+  if (stockField) {
+    const parsed = parseInt(stockField, 10)
+    if (!Number.isNaN(parsed)) return parsed
+  }
+  return null
+}
+
+function getSelectedItemQuantityError(itemId: string): string | null {
+  const selected = selectedItems.value.find((si) => si.id === itemId)
+  if (!selected || itemUsesSerialNumbers(selected.item)) return null
+  const available = getItemAvailableStock(selected.item)
+  if (available === null) return null
+  if (selected.quantity > available) {
+    return `Only ${available} available`
+  }
+  return null
+}
+
+const hasInvalidSelectedQuantities = computed(() =>
+  selectedItems.value.some((si) => getSelectedItemQuantityError(si.id) !== null)
+)
 
 function selectedCountForFolder(folderId: string): number {
   return selectedItems.value
@@ -1518,8 +1577,7 @@ const updateItemQuantity = (itemId: string, quantity: number) => {
       selected.quantity = 1
       return
     }
-    const maxStock = getItemField(selected.item, 'stock')
-    selected.quantity = Math.max(1, Math.min(quantity, maxStock ? parseInt(maxStock) : quantity))
+    selected.quantity = Math.max(1, quantity)
   }
 }
 

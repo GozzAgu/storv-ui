@@ -25,9 +25,8 @@ export function useDashboardAssistant() {
     if (!statusRequest) {
       statusRequest = (async () => {
         try {
-          const result = (await $fetch(resolveApiPath('/api/assistant/status') as string)) as {
-            configured: boolean
-          }
+          const statusUrl: string = resolveApiPath('/api/assistant/status')
+          const result = (await $fetch(statusUrl)) as { configured: boolean }
           configured.value = Boolean(result.configured)
           statusReachable.value = true
         } catch (error) {

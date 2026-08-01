@@ -323,6 +323,15 @@ html.dark .dash-overlay-close:hover {
   overscroll-behavior: contain;
 }
 
+.dash-drawer-pick-scroll--hover-wheel {
+  scrollbar-gutter: stable;
+}
+
+/** Let wheel scroll pass to parent (e.g. modal body) when list hits top/bottom. */
+.dash-drawer-pick-scroll--chain {
+  overscroll-behavior-y: auto;
+}
+
 /* Pick lists grow to fill drawer height when inside a fill layout */
 .dash-drawer-fill .dash-drawer-pick-list,
 .dash-drawer-fill-step .dash-drawer-pick-list {

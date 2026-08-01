@@ -8,67 +8,6 @@
   >
     <div class="space-y-4">
         <SellScreenNoteBanner />
-        <!-- Barcode Scanner Toggle -->
-        <div
-          class="flex items-center justify-between rounded-sm border border-gray-200/80 bg-gray-50/80 p-3 dark:border-white/[0.08] dark:bg-white/[0.03]"
-        >
-          <div class="flex items-center gap-3">
-            <QrCodeIcon class="h-6 w-6 text-primary-600 dark:text-primary-400" />
-            <div>
-              <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Barcode Scanner</p>
-              <p class="text-xs text-gray-600 dark:text-gray-400">Scan items quickly</p>
-            </div>
-          </div>
-          <button
-            @click="toggleScanner"
-            :class="[
-              'px-4 py-2 rounded-sm text-sm font-medium transition-colors',
-              isScanning
-                ? 'bg-red-600 text-white hover:bg-red-700'
-                : 'bg-primary-500 text-white hover:bg-primary-600',
-            ]"
-          >
-            {{ isScanning ? 'Stop Scanner' : 'Start Scanner' }}
-          </button>
-        </div>
-
-        <!-- Scanner View -->
-        <div v-if="isScanning" class="relative">
-          <div
-            ref="scannerContainer"
-            id="scanner-container"
-            class="w-full h-64 bg-black rounded-sm overflow-hidden"
-          >
-            <div v-if="!scannerReady" class="flex items-center justify-center h-full text-white">
-              <div class="text-center">
-                <div
-                  class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-white mb-2"
-                ></div>
-                <p>Initializing camera...</p>
-              </div>
-            </div>
-          </div>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">
-            Point camera at barcode
-          </p>
-        </div>
-
-        <!-- Manual Barcode Input -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Or Enter Barcode Manually
-          </label>
-          <div class="flex gap-2">
-            <input
-              v-model="manualBarcode"
-              @keyup.enter="searchByBarcode"
-              type="text"
-              placeholder="Enter barcode..."
-              class="app-field flex-1 rounded-sm px-4 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-400/40 dark:!bg-dashboard-card dark:text-gray-100"
-            />
-            <Button @click="searchByBarcode" :loading="isSearching">Search</Button>
-          </div>
-        </div>
 
         <!-- Folder Selection -->
         <div class="space-y-2">
@@ -78,7 +17,7 @@
               v-if="selectedFolder && !folderPickerExpanded"
               type="button"
               class="text-xs font-medium text-primary-600 transition-colors hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
-              @click="folderPickerExpanded = true"
+              @click="openCategoryPicker"
             >
               Change
             </button>
@@ -119,7 +58,12 @@
             />
 
             <div :class="pickListClass">
-              <div :class="[pickListScrollClass, 'max-h-48']">
+              <div
+                :class="[
+                  pickListScrollClass,
+                  'dash-drawer-pick-scroll--chain max-h-48',
+                ]"
+              >
                 <template v-if="showSubcategoryList">
                   <button
                     v-for="folder in subcategoryFolders"
@@ -203,6 +147,124 @@
           </template>
         </div>
 
+        <!-- Barcode scan / search (after category is picked) -->
+        <div
+          v-if="selectedFolder && !folderPickerExpanded"
+          class="space-y-3 rounded-sm border border-gray-200/80 bg-gray-50/50 p-3 dark:border-white/[0.08] dark:bg-white/[0.02]"
+        >
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <QrCodeIcon class="h-6 w-6 text-primary-600 dark:text-primary-400" />
+              <div>
+                <p :class="sectionLabelClass">Scan or search</p>
+                <p class="text-[11px] text-gray-500 dark:text-gray-400">
+                  Barcode, SKU, or serial in {{ selectedFolder.name }}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              @click="toggleScanner"
+              :class="[
+                'px-3 py-1.5 rounded-sm text-xs font-medium transition-colors',
+                isScanning
+                  ? 'bg-red-600 text-white hover:bg-red-700'
+                  : 'bg-primary-500 text-white hover:bg-primary-600',
+              ]"
+            >
+              {{ isScanning ? 'Stop' : 'Scan' }}
+            </button>
+          </div>
+
+          <div v-if="isScanning" class="relative">
+            <div
+              ref="scannerContainer"
+              id="scanner-container"
+              class="h-64 w-full overflow-hidden rounded-sm bg-black"
+            >
+              <div
+                v-if="!scannerReady"
+                class="flex h-full items-center justify-center text-white"
+              >
+                <div class="text-center">
+                  <div
+                    class="mb-2 inline-block h-8 w-8 animate-spin rounded-full border-b-2 border-white"
+                  />
+                  <p class="text-sm">Initializing camera…</p>
+                </div>
+              </div>
+            </div>
+            <p class="mt-2 text-center text-xs text-gray-500 dark:text-gray-400">
+              Point camera at barcode or QR code
+            </p>
+          </div>
+
+          <div class="flex gap-2">
+            <input
+              v-model="manualBarcode"
+              type="text"
+              placeholder="Enter barcode, SKU, or serial…"
+              class="app-field flex-1 rounded-sm px-4 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-400/40 dark:!bg-dashboard-card dark:text-gray-100"
+              @keyup.enter="searchByBarcode"
+            />
+            <Button @click="searchByBarcode" :loading="isSearching">Search</Button>
+          </div>
+        </div>
+
+        <!-- Products in selected subfolder -->
+        <div v-if="selectedFolder && !folderPickerExpanded" class="space-y-2">
+          <p :class="sectionLabelClass">Products · {{ selectedFolder.name }}</p>
+          <DashboardDrawerSearch v-model="itemSearchQuery" placeholder="Search products…" />
+
+          <div v-if="loadingFolderItems" class="flex items-center justify-center py-6">
+            <div
+              class="inline-block h-5 w-5 animate-spin rounded-full border-b-2 border-primary-500"
+            />
+          </div>
+          <div v-else-if="availableFolderItems.length === 0" :class="[emptyStateClass, '!min-h-[6rem]']">
+            <p class="text-xs text-gray-500 dark:text-gray-400">
+              {{ itemSearchQuery ? 'No products found' : 'No products in this category' }}
+            </p>
+          </div>
+          <div v-else :class="pickListClass">
+            <div
+              :class="[pickListScrollClass, 'dash-drawer-pick-scroll--chain max-h-48']"
+            >
+              <button
+                v-for="item in availableFolderItems"
+                :key="item.id"
+                type="button"
+                :class="[
+                  pickRowClass,
+                  isItemInCart(item.id) ? pickRowSelectedClass : '',
+                  !canAddItemToCart(item) ? 'opacity-60' : '',
+                ]"
+                :disabled="!canAddItemToCart(item)"
+                @click="onPickFolderItem(item)"
+              >
+                <div class="min-w-0 flex-1 text-left">
+                  <p :class="pickRowTitleClass">{{ getItemDisplayName(item) }}</p>
+                  <p :class="pickRowMetaClass">
+                    <span v-if="getItemBarcodeLabel(item)">{{ getItemBarcodeLabel(item) }} · </span>
+                    <span v-if="getItemField(item, 'sku')">SKU: {{ getItemField(item, 'sku') }} · </span>
+                    <span v-if="getItemPriceLabel(item)">{{ getItemPriceLabel(item) }}</span>
+                    <span v-if="!selectedFolder?.hasSerialNumbers && getItemStockLabel(item) !== null">
+                      · Stock: {{ getItemStockLabel(item) }}
+                    </span>
+                    <span v-if="isItemInCart(item.id)" class="text-primary-600 dark:text-primary-400">
+                      · In cart
+                    </span>
+                  </p>
+                </div>
+                <PlusIcon
+                  v-if="canAddItemToCart(item)"
+                  class="h-4 w-4 shrink-0 text-primary-500 dark:text-primary-400"
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- Selected Items -->
         <div class="border-t border-gray-200 pt-4 dark:border-white/[0.08]">
           <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Selected Items</h3>
@@ -218,7 +280,7 @@
             <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Your cart is empty
             </p>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Scan or search to add products</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Pick a category, then scan or tap a product</p>
           </div>
           <div v-else class="space-y-2 max-h-64 overflow-y-auto">
             <div
@@ -430,7 +492,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import {
   XMarkIcon,
   QrCodeIcon,
@@ -464,7 +526,7 @@ import { getReceiptProductDetails } from '~/composables/useReceiptProductDetails
 import { resolveBulkStockFieldAndValue } from '~/utils/inventory-bulk-quantity'
 import { useReceiptCategoryPicker } from '~/composables/useReceiptCategoryPicker'
 import { useDashboardDrawerChrome } from '~/composables/useDashboardDrawerChrome'
-import { getFolderColorClass } from '~/composables/useInventoryItemDisplay'
+import { getFolderColorClass, getInventoryItemDisplayName as getItemDisplayName, getInventoryItemField as getItemField } from '~/composables/useInventoryItemDisplay'
 import type { InventoryFolderDisplayRow } from '~/utils/inventory-folder-tree'
 
 interface Props {
@@ -549,6 +611,21 @@ const selectedFolderLabel = computed(() => {
   return parent && parent.id !== folder.id ? `${folder.name} · ${parent.name}` : folder.name
 })
 
+function openCategoryPicker() {
+  stopScanner()
+  folderPickerExpanded.value = true
+  if (!selectedFolder.value) return
+  const parent = selectedParentFolder.value
+  if (parent && isCategoryHub(parent) && parent.id !== selectedFolder.value.id) {
+    selectedFolder.value = null
+    return
+  }
+  selectedFolder.value = null
+  selectedParentFolder.value = null
+  folderItems.value = []
+  itemSearchQuery.value = ''
+}
+
 function goBackToParentCategories() {
   selectedParentFolder.value = null
   subcategorySearchQuery.value = ''
@@ -573,6 +650,9 @@ const scannerReady = ref(false)
 const scannerContainer = ref<HTMLElement | null>(null)
 const manualBarcode = ref('')
 const isSearching = ref(false)
+const folderItems = ref<InventoryItem[]>([])
+const loadingFolderItems = ref(false)
+const itemSearchQuery = ref('')
 const cartItems = ref<
   Array<{ id: string; name: string; price: number; quantity: number; item: InventoryItem }>
 >([])
@@ -650,11 +730,18 @@ const toggleScanner = async () => {
 }
 
 const startScanner = async () => {
-  if (!scannerContainer.value) return
+  isScanning.value = true
+  scannerReady.value = false
+  await nextTick()
+
+  if (!scannerContainer.value) {
+    isScanning.value = false
+    showErrorToast('Could not open scanner')
+    return
+  }
 
   try {
-    // Dynamically import html5-qrcode
-    const { Html5Qrcode } = await import('html5-qrcode')
+    const { Html5Qrcode, Html5QrcodeSupportedFormats } = await import('html5-qrcode')
     const containerId = scannerContainer.value.id || 'scanner-container'
     html5QrCode = new Html5Qrcode(containerId)
 
@@ -662,16 +749,24 @@ const startScanner = async () => {
       fps: 10,
       qrbox: { width: 250, height: 250 },
       aspectRatio: 1.0,
+      formatsToSupport: [
+        Html5QrcodeSupportedFormats.QR_CODE,
+        Html5QrcodeSupportedFormats.EAN_13,
+        Html5QrcodeSupportedFormats.EAN_8,
+        Html5QrcodeSupportedFormats.UPC_A,
+        Html5QrcodeSupportedFormats.UPC_E,
+        Html5QrcodeSupportedFormats.CODE_128,
+        Html5QrcodeSupportedFormats.CODE_39,
+      ],
     }
 
     await html5QrCode.start(
-      { facingMode: 'environment' }, // Use back camera on mobile
+      { facingMode: 'environment' },
       config,
       onScanSuccess,
       onScanError
     )
 
-    isScanning.value = true
     scannerReady.value = true
   } catch (error: any) {
     console.error('Scanner error:', error)
@@ -707,12 +802,136 @@ const onScanError = (errorMessage: string) => {
 }
 
 const loadFolderItems = async (): Promise<InventoryItem[]> => {
-  if (!selectedFolderId.value) return []
+  if (!selectedFolderId.value) {
+    folderItems.value = []
+    return []
+  }
+  loadingFolderItems.value = true
   try {
-    return await inventoryStore.fetchItemsAllChunked(selectedFolderId.value, { force: true })
+    const items = await inventoryStore.fetchItemsAllChunked(selectedFolderId.value, { force: true })
+    folderItems.value = items
+    return items
   } catch (error: any) {
     showErrorToast('Failed to load folder items')
+    folderItems.value = []
     return []
+  } finally {
+    loadingFolderItems.value = false
+  }
+}
+
+const availableFolderItems = computed(() => {
+  let items = folderItems.value.filter((item) => !item.dateOut && !item.pendingSaleReceiptId)
+  const query = itemSearchQuery.value.trim().toLowerCase()
+  if (!query) return items
+  return items.filter((item) => {
+    const name = getItemDisplayName(item).toLowerCase()
+    const sku = getItemField(item, 'sku').toLowerCase()
+    const barcode = getItemField(item, 'barcode').toLowerCase()
+    const serial =
+      getItemField(item, 'serialNo').toLowerCase() ||
+      getItemField(item, 'serialNumber').toLowerCase()
+    return (
+      name.includes(query) ||
+      sku.includes(query) ||
+      barcode.includes(query) ||
+      serial.includes(query)
+    )
+  })
+})
+
+function getItemStockLabel(item: InventoryItem): number | null {
+  const folder = selectedFolder.value
+  if (!folder || folder.hasSerialNumbers) return null
+  const stock = resolveBulkStockFieldAndValue(item as Record<string, unknown>, folder)
+  return stock?.value ?? null
+}
+
+function getItemPriceLabel(item: InventoryItem): string {
+  const price = parseFloat(getItemField(item, 'price') || '0')
+  return `${currencySymbol.value}${formatCurrency(price)}`
+}
+
+function getItemBarcodeLabel(item: InventoryItem): string | null {
+  const barcode = getItemField(item, 'barcode').trim()
+  return barcode ? `Barcode: ${barcode}` : null
+}
+
+function isItemInCart(itemId: string): boolean {
+  return cartItems.value.some((ci) => ci.id === itemId)
+}
+
+function canAddItemToCart(item: InventoryItem): boolean {
+  const folder = selectedFolder.value
+  if (!folder) return false
+  if (folder.hasSerialNumbers) {
+    if (item.dateOut || item.pendingSaleReceiptId) return false
+    return !isItemInCart(item.id)
+  }
+  const stock = resolveBulkStockFieldAndValue(item as Record<string, unknown>, folder)
+  const onHand = stock?.value ?? 0
+  if (onHand <= 0) return false
+  const inCart = cartItems.value.find((ci) => ci.id === item.id)
+  return !inCart || inCart.quantity < onHand
+}
+
+function addItemToCart(foundItem: InventoryItem): boolean {
+  const folder = selectedFolder.value
+  if (!folder) return false
+
+  const existingIndex = cartItems.value.findIndex((ci) => ci.id === foundItem.id)
+  if (existingIndex >= 0 && cartItems.value[existingIndex]) {
+    if (folder.hasSerialNumbers) return false
+    const stock = resolveBulkStockFieldAndValue(
+      foundItem as Record<string, unknown>,
+      folder
+    )
+    const maxQty = stock?.value ?? 0
+    if (cartItems.value[existingIndex].quantity + 1 > maxQty) {
+      showWarningToast('Not enough stock')
+      return false
+    }
+    cartItems.value[existingIndex].quantity++
+    return true
+  }
+
+  if (folder.hasSerialNumbers) {
+    if (foundItem.dateOut) {
+      showErrorToast('This product has already been sold')
+      return false
+    }
+    if (foundItem.pendingSaleReceiptId) {
+      showErrorToast('This product is reserved on an outstanding order')
+      return false
+    }
+  } else {
+    const stock = resolveBulkStockFieldAndValue(foundItem as Record<string, unknown>, folder)
+    const onHand = stock?.value ?? 0
+    if (onHand <= 0) {
+      showErrorToast('This product is out of stock')
+      return false
+    }
+  }
+
+  const price = parseFloat(String((foundItem as any).price || (foundItem as any).Price || '0'))
+  const name =
+    String((foundItem as any).name || (foundItem as any).itemName || '').trim() ||
+    getItemDisplayName(foundItem)
+
+  cartItems.value.push({
+    id: foundItem.id,
+    name,
+    price,
+    quantity: 1,
+    item: foundItem,
+  })
+  return true
+}
+
+async function onPickFolderItem(item: InventoryItem) {
+  if (!canAddItemToCart(item)) return
+  if (addItemToCart(item)) {
+    showSuccessToast('Product added to cart')
   }
 }
 
@@ -744,66 +963,12 @@ const searchByBarcode = async () => {
       return
     }
 
-    // Check if item is already in cart
-    const existingIndex = cartItems.value.findIndex((ci) => ci.id === foundItem.id)
-    if (existingIndex >= 0 && cartItems.value[existingIndex]) {
-      const usesSerial = folder.hasSerialNumbers
-      if (!usesSerial) {
-        const stock = resolveBulkStockFieldAndValue(
-          foundItem as Record<string, unknown>,
-          folder
-        )
-        const maxQty = stock?.value ?? 0
-        if (cartItems.value[existingIndex].quantity + 1 > maxQty) {
-          showWarningToast('Not enough stock')
-          manualBarcode.value = ''
-          return
-        }
-      }
-      cartItems.value[existingIndex].quantity++
+    if (addItemToCart(foundItem)) {
+      manualBarcode.value = ''
+      showSuccessToast('Product added to cart')
     } else {
-      const usesSerial = folder.hasSerialNumbers
-      if (usesSerial) {
-        if (foundItem.dateOut) {
-          showErrorToast('This product has already been sold')
-          manualBarcode.value = ''
-          return
-        }
-        if (foundItem.pendingSaleReceiptId) {
-          showErrorToast('This product is reserved on an outstanding order')
-          manualBarcode.value = ''
-          return
-        }
-      } else {
-        const stock = resolveBulkStockFieldAndValue(
-          foundItem as Record<string, unknown>,
-          folder
-        )
-        const onHand = stock?.value ?? 0
-        if (onHand <= 0) {
-          showErrorToast('This product is out of stock')
-          manualBarcode.value = ''
-          return
-        }
-      }
-
-      // Get item price and display name
-      const price = parseFloat(String((foundItem as any).price || (foundItem as any).Price || '0'))
-      const name =
-        String((foundItem as any).name || (foundItem as any).itemName || '').trim() ||
-        `Product ${foundItem.id.slice(0, 8)}`
-
-      cartItems.value.push({
-        id: foundItem.id,
-        name,
-        price,
-        quantity: 1,
-        item: foundItem,
-      })
+      manualBarcode.value = ''
     }
-
-    manualBarcode.value = ''
-    showSuccessToast('Product added to cart')
   } catch (error: any) {
     showErrorToast('Error searching for product')
   } finally {
@@ -936,6 +1101,8 @@ const resetForm = () => {
   manualBarcode.value = ''
   resetCategoryPicker()
   folderPickerExpanded.value = true
+  folderItems.value = []
+  itemSearchQuery.value = ''
   showCustomerInfo.value = false
   stopScanner()
 }
