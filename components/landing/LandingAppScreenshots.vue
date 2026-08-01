@@ -10,14 +10,14 @@
 
     <div class="landing-screenshots__inner">
       <header class="landing-screenshots__header">
-        <p class="landing-label landing-label--blue">Inside Storvv</p>
+        <p class="landing-label landing-label--blue">Mobile app</p>
         <h2 id="landing-screenshots-heading" class="landing-screenshots__title">
-          The same dashboard you can
-          <span class="landing-screenshots__accent">try in the demo</span>
+          Manage your business
+          <span class="landing-screenshots__accent">anywhere.</span>
         </h2>
         <p class="landing-screenshots__lede">
-          Sample multi-branch data with inventory, receipts, analytics, and more. Tap a screen to
-          open fullscreen.
+          Dashboard, inventory, sales, and analytics on iPhone. The same Storvv experience in your
+          pocket.
         </p>
       </header>
 
@@ -115,7 +115,7 @@
       </div>
 
       <div class="landing-screenshots__cta">
-        <NuxtLink to="/demo/dashboard" class="landing-pill-cta">Open interactive demo</NuxtLink>
+        <NuxtLink to="/demo/dashboard" class="landing-pill-cta">Try demo</NuxtLink>
         <a :href="appUrl" class="landing-screenshots__secondary">Start free on Micro →</a>
       </div>
     </div>

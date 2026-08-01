@@ -16,19 +16,12 @@ test.describe('Landing Page', () => {
     await expect(heroSection).toBeVisible()
   })
 
-  test('should show "Launching Soon" modal when clicking sign in', async ({ page }) => {
+  test('should link sign in to the app', async ({ page }) => {
     await gotoLanding(page)
 
-    const signInButton = page
-      .getByRole('link', { name: /sign in/i })
-      .or(page.getByText(/sign in/i))
-      .first()
-    if (await signInButton.isVisible()) {
-      await signInButton.click()
-
-      const modal = page.locator('[role="dialog"]').or(page.locator('.modal')).first()
-      await expect(modal).toBeVisible({ timeout: 5000 })
-    }
+    const signInLink = page.getByRole('link', { name: /sign in/i }).first()
+    await expect(signInLink).toBeVisible()
+    await expect(signInLink).toHaveAttribute('href', /.+\/login|app\.|localhost/i)
   })
 
   test('should have navigation links', async ({ page }) => {

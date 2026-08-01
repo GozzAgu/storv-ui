@@ -80,20 +80,6 @@ html.capacitor-native .dashboard-native-main {
   padding-right: 0.875rem;
 }
 
-/* ── Top chrome ── */
-html.capacitor-native .dashboard-top-nav.dashboard-top-nav-native,
-html.capacitor-native .dashboard-native-shell .dashboard-top-nav {
-  border-bottom: 1px solid var(--dash-card-border) !important;
-  background: rgb(255 255 255 / 0.96) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(1.15);
-  backdrop-filter: blur(16px) saturate(1.15);
-}
-
-html.capacitor-native.dark .dashboard-top-nav.dashboard-top-nav-native,
-html.capacitor-native.dark .dashboard-native-shell .dashboard-top-nav {
-  background: rgb(7 8 12 / 0.96) !important;
-}
-
 /* ── Bottom tab bar ── */
 html.capacitor-native .native-tabbar {
   border-radius: 1.25rem;

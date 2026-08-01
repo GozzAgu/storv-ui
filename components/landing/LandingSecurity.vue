@@ -17,11 +17,11 @@
         </div>
         <p class="landing-label landing-label--blue">Peace of mind</p>
         <h2 id="landing-security-title" class="landing-security__title">
-          Security with <span class="landing-security__title-accent">backbone</span>
+          Your business data <span class="landing-security__title-accent">deserves protection.</span>
         </h2>
         <p class="landing-security__lede">
-          Stock, sales, and team access should feel safe without you needing a tech manual. Storvv
-          is built that way from the start.
+          Secure authentication, role-based permissions, and cloud infrastructure designed for
+          retail teams who cannot afford downtime or data loss.
         </p>
         <ul class="landing-security__pillars" aria-label="How we keep you safe">
           <li v-for="pillar in pillars" :key="pillar">{{ pillar }}</li>

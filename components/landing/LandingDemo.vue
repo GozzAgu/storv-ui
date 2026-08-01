@@ -20,7 +20,7 @@
         </ul>
         <div class="landing-demo__actions">
           <NuxtLink to="/demo/dashboard" class="landing-pill-cta landing-demo__cta">
-            Open interactive demo
+            Try demo
           </NuxtLink>
           <a :href="appUrl" class="landing-demo__secondary"
             >Ready to go live? Start free on Micro →</a

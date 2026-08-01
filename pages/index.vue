@@ -1,6 +1,9 @@
 <template>
   <div class="landing-page landing-page--portfolio min-h-screen antialiased">
-    <header class="landing-header" :class="{ 'landing-header--menu-open': mobileMenuOpen }">
+    <header
+      class="landing-header"
+      :class="{ 'landing-header--menu-open': mobileMenuOpen, 'landing-header--scrolled': headerScrolled }"
+    >
       <div class="landing-header__shell">
         <div class="landing-header__pill">
           <NuxtLink
@@ -19,34 +22,25 @@
           </NuxtLink>
 
           <nav class="landing-header__links landing-header__desktop" aria-label="Primary">
-            <a
-              href="#features"
-              class="landing-nav-link"
-              @click.prevent="scrollToSection('features')"
-              >Features</a
+            <a href="#product" class="landing-nav-link" @click.prevent="scrollToSection('inventory')"
+              >Product</a
             >
-            <NuxtLink to="/demo/dashboard" class="landing-nav-link">Demo</NuxtLink>
             <a href="#pricing" class="landing-nav-link" @click.prevent="scrollToSection('pricing')"
-              >Plans</a
+              >Pricing</a
             >
-            <a
-              href="#user-guide"
-              class="landing-nav-link"
-              @click.prevent="scrollToSection('user-guide')"
-              >Guide</a
-            >
-            <a href="#contact" class="landing-nav-link" @click.prevent="scrollToSection('contact')"
-              >Contact</a
+            <a href="#faq" class="landing-nav-link" @click.prevent="scrollToSection('faq')"
+              >Resources</a
             >
           </nav>
 
           <div class="landing-header__actions">
-            <a :href="appOriginUrl" class="landing-header__cta">Start free</a>
+            <a :href="appOriginUrl" class="landing-header__sign-in">Sign in</a>
+            <a :href="appOriginUrl" class="landing-header__cta">Get Started</a>
             <div class="landing-header__mobile">
               <NuxtLink
                 to="/demo/dashboard"
                 class="landing-header__cta landing-header__cta--compact"
-                >Demo</NuxtLink
+                >Try demo</NuxtLink
               >
               <button
                 type="button"
@@ -87,21 +81,15 @@
           >
             <nav class="landing-mobile-panel__nav" aria-label="Primary">
               <a
-                href="#features"
+                href="#product"
                 class="landing-mobile-nav-link"
                 @click.prevent="
                   () => {
-                    scrollToSection('features')
+                    scrollToSection('inventory')
                     mobileMenuOpen = false
                   }
                 "
-                >Features</a
-              >
-              <a
-                href="/demo/dashboard"
-                class="landing-mobile-nav-link"
-                @click.prevent="navigateFromMobileMenu('/demo/dashboard')"
-                >Demo</a
+                >Product</a
               >
               <a
                 href="#pricing"
@@ -112,39 +100,34 @@
                     mobileMenuOpen = false
                   }
                 "
-                >Plans</a
+                >Pricing</a
               >
               <a
-                href="#user-guide"
+                href="#faq"
                 class="landing-mobile-nav-link"
                 @click.prevent="
                   () => {
-                    scrollToSection('user-guide')
+                    scrollToSection('faq')
                     mobileMenuOpen = false
                   }
                 "
-                >Guide</a
+                >Resources</a
               >
               <a
-                href="#contact"
+                :href="appOriginUrl"
                 class="landing-mobile-nav-link"
-                @click.prevent="
-                  () => {
-                    scrollToSection('contact')
-                    mobileMenuOpen = false
-                  }
-                "
-                >Contact</a
+                @click="mobileMenuOpen = false"
+                >Sign in</a
               >
             </nav>
             <div class="landing-mobile-panel__cta-wrap">
-              <NuxtLink
-                to="/demo/dashboard"
+              <a
+                :href="appOriginUrl"
                 class="landing-header__cta landing-mobile-panel__cta"
                 @click="mobileMenuOpen = false"
               >
-                Explore the demo
-              </NuxtLink>
+                Get Started
+              </a>
               <a
                 :href="appOriginUrl"
                 class="landing-mobile-panel__secondary-cta"
@@ -165,11 +148,15 @@
       :app-url="appOriginUrl"
     />
 
-    <LandingDemo :app-url="appOriginUrl" />
+    <LandingProof class="landing-proof--premium" />
+
+    <LandingProductStories />
+
+    <LandingAiShowcase />
 
     <LandingAppScreenshots :app-url="appOriginUrl" />
 
-    <LandingProof @navigate="scrollToSection" />
+    <LandingSecurity />
 
     <!-- Pricing -->
     <section
@@ -181,7 +168,7 @@
         <h2
           class="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100 text-center"
         >
-          Plans that match your stage
+          Plans that scale with your business
         </h2>
         <p
           class="mt-4 text-base text-gray-600 dark:text-gray-400 text-center max-w-2xl mx-auto leading-relaxed"
@@ -193,7 +180,7 @@
         </p>
         <p class="mt-3 text-center text-base text-primary-700 dark:text-primary-300">
           <NuxtLink to="/demo/dashboard" class="font-semibold underline-offset-2 hover:underline"
-            >Try the demo first</NuxtLink
+            >Try demo</NuxtLink
           >
           (no signup required).
         </p>
@@ -372,601 +359,24 @@
       </div>
 
       <div
-        class="mx-auto mt-10 max-w-2xl border-t border-gray-200/90 pt-8 text-center dark:border-gray-800/80 sm:mt-12"
+        class="mx-auto mt-8 max-w-2xl border-t border-gray-200/90 pt-6 text-center dark:border-gray-800/80"
       >
-        <p class="text-base text-gray-600 dark:text-gray-400">
-          Running 2+ branches? We onboard a small founding cohort with hands-on setup.
-          <a
-            href="#contact"
-            class="font-semibold text-primary-700 underline-offset-2 hover:underline dark:text-primary-300"
-            @click.prevent="scrollToSection('contact')"
-            >Apply via contact</a
-          >.
-        </p>
-        <div class="mt-4 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <NuxtLink to="/demo/dashboard" class="landing-pill-cta w-full sm:w-auto">
-            Try the demo
-          </NuxtLink>
-          <a :href="appOriginUrl" class="landing-pill-cta landing-pill-cta--outline w-full sm:w-auto">
-            Start free on Micro
-          </a>
-        </div>
+        <NuxtLink to="/demo/dashboard" class="landing-pill-cta landing-pill-cta--outline w-full sm:w-auto">
+          Try demo
+        </NuxtLink>
       </div>
     </section>
 
-    <!-- FAQ -->
-    <section
-      id="faq"
-      data-section-id="faq"
-      class="scroll-animate scroll-animate-up scroll-mt-[4.75rem] bg-[#f5f7f9] py-20 dark:bg-slate-900/55 lg:scroll-mt-28 lg:py-28 sm:py-24"
-    >
-      <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <p
-          class="text-xs sm:text-[0.8125rem] uppercase tracking-[0.16em] font-semibold text-gray-600 dark:text-gray-300 text-center"
-        >
-          Frequently asked questions
-        </p>
-        <h2
-          class="mt-2 text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100 text-center"
-        >
-          Quick answers
-        </h2>
-        <p class="mt-2 text-center text-base text-gray-600 dark:text-gray-300">
-          Setup, plans, and how Storvv fits your store.
-        </p>
-        <div class="mt-10 space-y-3">
-          <div
-            data-section-id="faq-1"
-            class="scroll-animate scroll-animate-scale stagger-1 rounded-xl bg-white/55 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/40 overflow-hidden"
-          >
-            <button
-              @click="toggleFaq(0)"
-              class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group"
-            >
-              <div
-                class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-md bg-white/70 backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.08]"
-              >
-                <ClockIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
-              </div>
-              <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-50 pr-8">
-                  How quickly can I get started?
-                </h3>
-              </div>
-              <ChevronUpIcon
-                :class="[
-                  'w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none',
-                  openFaqItems.has(0) ? 'rotate-180' : '',
-                ]"
-              />
-            </button>
-            <div
-              class="grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none"
-              :class="openFaqItems.has(0) ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'"
-            >
-              <div class="min-h-0 overflow-hidden">
-                <div class="px-4 sm:px-5 pb-4 sm:pb-5">
-                  <div class="pl-11 sm:pl-12">
-                    <p
-                      class="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed"
-                    >
-                      Most stores are up and running within minutes. Create your store profile, set
-                      up your first inventory folder, and you're ready to start managing sales. No
-                      coding or technical expertise needed.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            data-section-id="faq-2"
-            class="scroll-animate scroll-animate-scale stagger-2 rounded-xl bg-white/55 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/40 overflow-hidden"
-          >
-            <button
-              @click="toggleFaq(1)"
-              class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group"
-            >
-              <div
-                class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-md bg-white/70 backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.08]"
-              >
-                <SparklesIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
-              </div>
-              <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-50 pr-8">
-                  Is Storvv difficult to learn?
-                </h3>
-              </div>
-              <ChevronUpIcon
-                :class="[
-                  'w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none',
-                  openFaqItems.has(1) ? 'rotate-180' : '',
-                ]"
-              />
-            </button>
-            <div
-              class="grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none"
-              :class="openFaqItems.has(1) ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'"
-            >
-              <div class="min-h-0 overflow-hidden">
-                <div class="px-4 sm:px-5 pb-4 sm:pb-5">
-                  <div class="pl-11 sm:pl-12">
-                    <p
-                      class="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed"
-                    >
-                      Not at all. Storvv is built with simplicity in mind. The interface is
-                      intuitive and straightforward: if you can use a smartphone, you can use
-                      Storvv. We've designed it specifically for store owners and managers.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            data-section-id="faq-3"
-            class="scroll-animate scroll-animate-scale stagger-3 rounded-xl bg-white/55 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/40 overflow-hidden"
-          >
-            <button
-              @click="toggleFaq(2)"
-              class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group"
-            >
-              <div
-                class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-md bg-white/70 backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.08]"
-              >
-                <MarketingFeatureIcon name="analytics" size="sm" class="text-gray-500 flex-shrink-0" />
-              </div>
-              <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-50 pr-8">
-                  Can I track in-store and online sales together?
-                </h3>
-              </div>
-              <ChevronUpIcon
-                :class="[
-                  'w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none',
-                  openFaqItems.has(2) ? 'rotate-180' : '',
-                ]"
-              />
-            </button>
-            <div
-              class="grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none"
-              :class="openFaqItems.has(2) ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'"
-            >
-              <div class="min-h-0 overflow-hidden">
-                <div class="px-4 sm:px-5 pb-4 sm:pb-5">
-                  <div class="pl-11 sm:pl-12">
-                    <p
-                      class="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed"
-                    >
-                      Absolutely. Storvv provides a unified view of all your sales channels. Whether
-                      transactions happen at your physical location or through other channels,
-                      everything is consolidated in one dashboard for complete visibility.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            class="rounded-xl bg-white/55 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/40 overflow-hidden"
-          >
-            <button
-              @click="toggleFaq(3)"
-              class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group"
-            >
-              <div
-                class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-md bg-white/70 backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.08]"
-              >
-                <MarketingFeatureIcon name="folder" size="sm" class="text-gray-500 flex-shrink-0" />
-              </div>
-              <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-50 pr-8">
-                  How do custom inventory folders work?
-                </h3>
-              </div>
-              <ChevronUpIcon
-                :class="[
-                  'w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none',
-                  openFaqItems.has(3) ? 'rotate-180' : '',
-                ]"
-              />
-            </button>
-            <div
-              class="grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none"
-              :class="openFaqItems.has(3) ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'"
-            >
-              <div class="min-h-0 overflow-hidden">
-                <div class="px-4 sm:px-5 pb-4 sm:pb-5">
-                  <div class="pl-11 sm:pl-12">
-                    <p
-                      class="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed"
-                    >
-                      Create unlimited inventory folders with custom templates. Define dynamic
-                      fields (text, numbers, dates, currency, select, boolean) that match your
-                      products. Each folder can have its own template, and you can enable serial
-                      number tracking for individual items.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            class="rounded-xl bg-white/55 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/40 overflow-hidden"
-          >
-            <button
-              @click="toggleFaq(4)"
-              class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group"
-            >
-              <div
-                class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-md bg-white/70 backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.08]"
-              >
-                <MarketingFeatureIcon name="inventory" size="sm" class="text-gray-500 flex-shrink-0" />
-              </div>
-              <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-50 pr-8">
-                  Can I import products from Excel?
-                </h3>
-              </div>
-              <ChevronUpIcon
-                :class="[
-                  'w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none',
-                  openFaqItems.has(4) ? 'rotate-180' : '',
-                ]"
-              />
-            </button>
-            <div
-              class="grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none"
-              :class="openFaqItems.has(4) ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'"
-            >
-              <div class="min-h-0 overflow-hidden">
-                <div class="px-4 sm:px-5 pb-4 sm:pb-5">
-                  <div class="pl-11 sm:pl-12">
-                    <p
-                      class="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed"
-                    >
-                      Yes! Storvv supports bulk import from Excel spreadsheets. Simply upload your
-                      Excel file, and items will be automatically added to your inventory folders.
-                      You can also export inventory by category folder (ZIP) for backup or analysis.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            class="rounded-xl bg-white/55 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/40 overflow-hidden"
-          >
-            <button
-              @click="toggleFaq(5)"
-              class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group"
-            >
-              <div
-                class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-md bg-white/70 backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.08]"
-              >
-                <MarketingFeatureIcon name="customers" size="sm" class="text-gray-500 flex-shrink-0" />
-              </div>
-              <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-50 pr-8">
-                  How does customer tracking work?
-                </h3>
-              </div>
-              <ChevronUpIcon
-                :class="[
-                  'w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none',
-                  openFaqItems.has(5) ? 'rotate-180' : '',
-                ]"
-              />
-            </button>
-            <div
-              class="grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none"
-              :class="openFaqItems.has(5) ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'"
-            >
-              <div class="min-h-0 overflow-hidden">
-                <div class="px-4 sm:px-5 pb-4 sm:pb-5">
-                  <div class="pl-11 sm:pl-12">
-                    <p
-                      class="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed"
-                    >
-                      Customers are automatically created when you generate receipts. They're
-                      tracked by email, phone, or address. View complete purchase history, total
-                      spending, and order counts for each customer, all without manual data entry.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            class="rounded-xl bg-white/55 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/40 overflow-hidden"
-          >
-            <button
-              @click="toggleFaq(6)"
-              class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group"
-            >
-              <div
-                class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-md bg-white/70 backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.08]"
-              >
-                <MarketingFeatureIcon name="returns" size="sm" class="text-gray-500 flex-shrink-0" />
-              </div>
-              <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-50 pr-8">
-                  What are swap-in transactions?
-                </h3>
-              </div>
-              <ChevronUpIcon
-                :class="[
-                  'w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none',
-                  openFaqItems.has(6) ? 'rotate-180' : '',
-                ]"
-              />
-            </button>
-            <div
-              class="grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none"
-              :class="openFaqItems.has(6) ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'"
-            >
-              <div class="min-h-0 overflow-hidden">
-                <div class="px-4 sm:px-5 pb-4 sm:pb-5">
-                  <div class="pl-11 sm:pl-12">
-                    <p
-                      class="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed"
-                    >
-                      Swap-in transactions allow customers to exchange items. When a customer swaps
-                      in an item, it's automatically added back to your inventory, and the
-                      transaction is tracked. Perfect for device exchanges, trade-ins, or returns.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            class="rounded-xl bg-white/55 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/40 overflow-hidden"
-          >
-            <button
-              @click="toggleFaq(7)"
-              class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group"
-            >
-              <div
-                class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-md bg-white/70 backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.08]"
-              >
-                <MarketingFeatureIcon name="departments" size="sm" class="text-gray-500 flex-shrink-0" />
-              </div>
-              <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-50 pr-8">
-                  How do role-based permissions work?
-                </h3>
-              </div>
-              <ChevronUpIcon
-                :class="[
-                  'w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none',
-                  openFaqItems.has(7) ? 'rotate-180' : '',
-                ]"
-              />
-            </button>
-            <div
-              class="grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none"
-              :class="openFaqItems.has(7) ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'"
-            >
-              <div class="min-h-0 overflow-hidden">
-                <div class="px-4 sm:px-5 pb-4 sm:pb-5">
-                  <div class="pl-11 sm:pl-12">
-                    <p
-                      class="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed"
-                    >
-                      Storvv supports three roles: Super Admin (full access), Manager (can manage
-                      assigned folders and staff), and Staff (limited access based on department).
-                      You can control folder access at the department level, ensuring staff only see
-                      relevant inventory.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            class="rounded-xl bg-white/55 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/40 overflow-hidden"
-          >
-            <button
-              @click="toggleFaq(8)"
-              class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group"
-            >
-              <div
-                class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-md bg-white/70 backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.08]"
-              >
-                <BellAlertIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
-              </div>
-              <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-50 pr-8">
-                  What are low stock alerts?
-                </h3>
-              </div>
-              <ChevronUpIcon
-                :class="[
-                  'w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none',
-                  openFaqItems.has(8) ? 'rotate-180' : '',
-                ]"
-              />
-            </button>
-            <div
-              class="grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none"
-              :class="openFaqItems.has(8) ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'"
-            >
-              <div class="min-h-0 overflow-hidden">
-                <div class="px-4 sm:px-5 pb-4 sm:pb-5">
-                  <div class="pl-11 sm:pl-12">
-                    <p
-                      class="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed"
-                    >
-                      Storvv automatically tracks low stock items based on your configured
-                      threshold. For serial number folders, it alerts when available items fall
-                      below the threshold. For bulk items, it counts individual items with low
-                      quantities. Get notified on your dashboard.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            class="rounded-xl bg-white/55 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/40 overflow-hidden"
-          >
-            <button
-              @click="toggleFaq(9)"
-              class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group"
-            >
-              <div
-                class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-md bg-white/70 backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.08]"
-              >
-                <MarketingFeatureIcon name="branch" size="sm" class="text-gray-500 flex-shrink-0" />
-              </div>
-              <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-50 pr-8">
-                  Can I manage multiple stores?
-                </h3>
-              </div>
-              <ChevronUpIcon
-                :class="[
-                  'w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none',
-                  openFaqItems.has(9) ? 'rotate-180' : '',
-                ]"
-              />
-            </button>
-            <div
-              class="grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none"
-              :class="openFaqItems.has(9) ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'"
-            >
-              <div class="min-h-0 overflow-hidden">
-                <div class="px-4 sm:px-5 pb-4 sm:pb-5">
-                  <div class="pl-11 sm:pl-12">
-                    <p
-                      class="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed"
-                    >
-                      Yes! Premium plans support multiple store locations. Each store has its own
-                      inventory folders, receipts, and staff. Manage everything from one centralized
-                      dashboard while keeping store data separate.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            class="rounded-xl bg-white/55 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/40 overflow-hidden"
-          >
-            <button
-              @click="toggleFaq(10)"
-              class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group"
-            >
-              <div
-                class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-md bg-white/70 backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.08]"
-              >
-                <ShieldCheckIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
-              </div>
-              <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-50 pr-8">
-                  Is my data secure?
-                </h3>
-              </div>
-              <ChevronUpIcon
-                :class="[
-                  'w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none',
-                  openFaqItems.has(10) ? 'rotate-180' : '',
-                ]"
-              />
-            </button>
-            <div
-              class="grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none"
-              :class="openFaqItems.has(10) ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'"
-            >
-              <div class="min-h-0 overflow-hidden">
-                <div class="px-4 sm:px-5 pb-4 sm:pb-5">
-                  <div class="pl-11 sm:pl-12">
-                    <p
-                      class="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed"
-                    >
-                      Yes, absolutely. Storvv uses enterprise-grade security to protect all your
-                      data. Your information is encrypted, and we never share your data without your
-                      explicit permission.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            class="rounded-xl bg-white/55 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/40 overflow-hidden"
-          >
-            <button
-              @click="toggleFaq(11)"
-              class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group"
-            >
-              <div
-                class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-md bg-white/70 backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.08]"
-              >
-                <MarketingFeatureIcon name="loans" size="sm" class="text-gray-500 flex-shrink-0" />
-              </div>
-              <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-50 pr-8">
-                  What’s the difference between Micro, Medium, and Enterprise?
-                </h3>
-              </div>
-              <ChevronUpIcon
-                :class="[
-                  'w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none',
-                  openFaqItems.has(11) ? 'rotate-180' : '',
-                ]"
-              />
-            </button>
-            <div
-              class="grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none"
-              :class="openFaqItems.has(11) ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'"
-            >
-              <div class="min-h-0 overflow-hidden">
-                <div class="px-4 sm:px-5 pb-4 sm:pb-5">
-                  <div class="pl-11 sm:pl-12">
-                    <p
-                      class="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed"
-                    >
-                      <strong>Micro (free):</strong> One store, one department, up to 2 staff. Full
-                      inventory, receipts, returns, and customers; dashboard, notifications, and
-                      help center. WhatsApp receipts (10/month). No analytics, activity logs,
-                      customer balance, or multi-store tools.<br /><br />
-                      <strong>Medium:</strong> Everything in Micro plus up to 2 stores, 10
-                      departments and 25 staff per store, analytics and reports, activity logs,
-                      customer balance ledger, unlimited WhatsApp, and duplicate categories within a
-                      branch. No stock transfers or copy-from-branch.<br /><br />
-                      <strong>Enterprise:</strong> Everything in Medium plus unlimited stores,
-                      departments, and staff; multi-store sync and stock transfers;
-                      <strong>Copy from branch</strong> for category templates across branches;
-                      <strong>Stock loans</strong> for serial inventory; and priority support.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+    <LandingFaq />
 
     <LandingContact @open-form="showContactFormModal = true" />
 
+    <LandingFinalCta :app-url="appOriginUrl" />
+
     <!-- Footer -->
-    <footer class="landing-footer">
+    <footer class="landing-footer landing-footer--premium">
       <div class="landing-footer__inner">
-        <div class="landing-footer__top">
+        <div class="landing-footer__top landing-footer__columns">
           <div>
             <NuxtLink to="/" class="landing-footer__brand">
               <img
@@ -978,44 +388,41 @@
               />
             </NuxtLink>
             <p class="landing-footer__tagline">
-              Store management for modern retailers. Inventory, receipts, customers, and teams in
-              one calm workspace.
+              The retail operating system for inventory, sales, customers, and multi-branch growth.
             </p>
           </div>
 
           <div>
-            <p class="landing-footer__heading">Explore</p>
+            <p class="landing-footer__col-title">Product</p>
             <div class="landing-footer__links">
-              <a
-                href="#features"
-                class="landing-footer__link"
-                @click.prevent="scrollToSection('features')"
-                >Features</a
+              <a href="#inventory" class="landing-footer__link" @click.prevent="scrollToSection('inventory')"
+                >Inventory</a
               >
-              <NuxtLink to="/demo/dashboard" class="landing-footer__link">Demo</NuxtLink>
-              <a
-                href="#pricing"
-                class="landing-footer__link"
-                @click.prevent="scrollToSection('pricing')"
-                >Plans</a
+              <a href="#sales" class="landing-footer__link" @click.prevent="scrollToSection('sales')"
+                >Sales</a
               >
-              <a
-                href="#faq"
-                class="landing-footer__link"
-                @click.prevent="scrollToSection('faq')"
-                >FAQ</a
+              <a href="#analytics" class="landing-footer__link" @click.prevent="scrollToSection('analytics')"
+                >Analytics</a
               >
-              <a
-                href="#contact"
-                class="landing-footer__link"
-                @click.prevent="scrollToSection('contact')"
+              <NuxtLink to="/demo/dashboard" class="landing-footer__link">Try demo</NuxtLink>
+            </div>
+          </div>
+
+          <div>
+            <p class="landing-footer__col-title">Resources</p>
+            <div class="landing-footer__links">
+              <a href="#pricing" class="landing-footer__link" @click.prevent="scrollToSection('pricing')"
+                >Pricing</a
+              >
+              <a href="#faq" class="landing-footer__link" @click.prevent="scrollToSection('faq')">FAQ</a>
+              <a href="#contact" class="landing-footer__link" @click.prevent="scrollToSection('contact')"
                 >Contact</a
               >
             </div>
           </div>
 
           <div>
-            <p class="landing-footer__heading">Connect</p>
+            <p class="landing-footer__col-title">Company</p>
             <div class="landing-footer__links">
               <a href="mailto:hello@storvv.com" class="landing-footer__link">hello@storvv.com</a>
               <a
@@ -1155,8 +562,6 @@
 import '~/assets/css/landing.css'
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import Modal from '~/components/ui/Modal.vue'
-import MarketingSyncLoader from '~/components/marketing/MarketingSyncLoader.vue'
-import MarketingFeatureIcon from '~/components/marketing/MarketingFeatureIcon.vue'
 import {
   BILLING_CYCLE_LABELS,
   BILLING_CYCLE_PERIOD_SUFFIX,
@@ -1169,12 +574,7 @@ import {
   Bars3Icon,
   XMarkIcon,
   CheckIcon,
-  ShieldCheckIcon,
-  BellAlertIcon,
-  SparklesIcon,
-  ClockIcon,
   ArrowUpIcon,
-  ChevronUpIcon,
 } from '~/utils/app-icons'
 import { useThemeStore } from '~/stores/theme'
 /** Light wordmark for setup panel (white background). */
@@ -1194,16 +594,12 @@ function applyLandingDocumentTheme() {
 }
 
 const mobileMenuOpen = ref(false)
+const headerScrolled = ref(false)
 const route = useRoute()
 
 let mobileMenuMql: MediaQueryList | null = null
 function closeMobileMenuIfDesktop() {
   if (mobileMenuMql?.matches) mobileMenuOpen.value = false
-}
-
-async function navigateFromMobileMenu(path: string) {
-  await navigateTo(path)
-  mobileMenuOpen.value = false
 }
 
 watch(
@@ -1355,14 +751,6 @@ const acceptCookies = () => {
 }
 
 const visibleSections = ref<Set<string>>(new Set())
-const openFaqItems = ref<Set<number>>(new Set())
-
-const toggleFaq = (index: number) => {
-  const next = new Set(openFaqItems.value)
-  if (next.has(index)) next.delete(index)
-  else next.add(index)
-  openFaqItems.value = next
-}
 
 const scrollToSection = (sectionId: string) => {
   const element = document.getElementById(sectionId)
@@ -1382,6 +770,7 @@ const scrollToTop = () => {
 }
 
 const handleScroll = () => {
+  headerScrolled.value = window.scrollY > 24
   showBackToTop.value = window.scrollY > 400
 }
 
@@ -1463,12 +852,12 @@ onUnmounted(() => {
 })
 
 useHead({
-  title: 'Storvv - Effortless Store Management for Ambitious Businesses',
+  title: 'Storvv - The retail operating system for modern businesses',
   meta: [
     {
       name: 'description',
       content:
-        'A complete store management platform with instant inventory setup, automated sales tracking, and AI-powered insights at your fingertips.',
+        'Manage inventory, sales, customers, and multiple stores with a modern retail operating system built for growing businesses.',
     },
   ],
 })

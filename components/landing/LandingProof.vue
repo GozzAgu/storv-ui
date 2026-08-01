@@ -7,15 +7,22 @@
   >
     <div class="landing-proof__inner">
       <header class="landing-proof__header">
-        <p class="landing-label landing-label--blue">Outcomes</p>
+        <p class="landing-label landing-label--blue">Trusted by modern retailers</p>
         <h2 id="landing-proof-heading" class="landing-proof__title">
-          What multi-branch shops fix first
+          Built for businesses that outgrow spreadsheets
         </h2>
         <p class="landing-proof__lede">
-          Early stores on Storvv, especially retailers and procurement-led teams with 2+ counters,
-          use the same three wins.
+          From single-store shops to multi-branch operators, Storvv gives teams one place to manage
+          stock, sales, and growth.
         </p>
       </header>
+
+      <div class="landing-proof__stats" aria-label="Platform highlights">
+        <div v-for="stat in proofStats" :key="stat.label">
+          <p class="landing-proof__stat-value">{{ stat.value }}</p>
+          <p class="landing-proof__stat-label">{{ stat.label }}</p>
+        </div>
+      </div>
 
       <div class="landing-proof__grid">
         <article v-for="card in proofCards" :key="card.title" class="landing-proof__card">
@@ -27,26 +34,6 @@
           <p class="landing-proof__card-desc">{{ card.description }}</p>
         </article>
       </div>
-
-      <aside class="landing-proof__founding" aria-labelledby="landing-founding-heading">
-        <div class="landing-proof__founding-copy">
-          <p class="landing-label landing-label--muted">Founding stores</p>
-          <h3 id="landing-founding-heading" class="landing-proof__founding-title">
-            Onboarding a small founding cohort
-          </h3>
-          <p class="landing-proof__founding-desc">
-            We work closely with a limited number of multi-branch shops (hands-on setup, feedback
-            calls, and case studies). Not a public “free for everyone” promo. Apply if you fit.
-          </p>
-        </div>
-        <a
-          href="#contact"
-          class="landing-pill-cta landing-pill-cta--outline-light landing-proof__founding-cta"
-          @click.prevent="emit('navigate', 'contact')"
-        >
-          Apply for founding onboarding
-        </a>
-      </aside>
     </div>
   </section>
 </template>
@@ -54,9 +41,11 @@
 <script setup lang="ts">
 import type { MarketingFeatureIconKey } from '~/utils/marketing-feature-icons'
 
-const emit = defineEmits<{
-  navigate: [sectionId: string]
-}>()
+const proofStats = [
+  { value: '10,000+', label: 'Products managed on the platform' },
+  { value: 'Multi-store', label: 'Ready for growing retailers' },
+  { value: 'Growing teams', label: 'Built for businesses that scale' },
+]
 
 const proofCards: Array<{
   metric: string

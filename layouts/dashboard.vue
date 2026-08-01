@@ -516,7 +516,9 @@
         <div
           :class="[
             'relative flex w-full items-center gap-2.5 px-3 sm:px-4 lg:gap-3 lg:px-5',
-            isNativeApp ? 'dashboard-top-nav-native-row h-11' : 'h-11 sm:h-12',
+            isNativeApp
+              ? 'native-topnav dashboard-top-nav-native-row h-11'
+              : 'h-11 sm:h-12',
           ]"
         >
           <!-- Mobile nav trigger (web drawer) -->
