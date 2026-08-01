@@ -10,7 +10,7 @@ export function useDashboardGridPagesChrome() {
   const page = useDashboardPageChrome()
   const table = useDashboardTableChrome()
 
-  const pageClass = 'dash-grid-page'
+  const pageClass = 'dash-grid-page dash-page--unified'
   const pageWithFooterClass =
     'dash-grid-page dashboard-page-with-footer flex min-h-[calc(100svh-4rem)] flex-1 flex-col pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:pb-32'
   const kpiGridClass = 'dash-kpi-grid'

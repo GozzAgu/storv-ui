@@ -13,7 +13,7 @@ export function useDashboardMultiStoreChrome() {
   const settings = useDashboardSettingsChrome()
   const table = useDashboardTableChrome()
 
-  const pageClass = 'dash-multi-store'
+  const pageClass = 'dash-multi-store dash-page--unified'
   const kpiGridCompactClass = 'dash-kpi-grid dash-kpi-grid--compact'
   const tableEyebrowClass = 'dash-table-eyebrow'
   const tableMetaClass = 'dash-table-meta'

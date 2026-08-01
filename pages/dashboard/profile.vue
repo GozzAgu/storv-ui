@@ -1,6 +1,6 @@
 <template>
   <div :class="pageClass">
-    <DashboardPageHeader>
+    <DashboardPageHeader class="dash-page-header--unified">
       <template #eyebrow>
         <p :class="eyebrowClass">Account</p>
       </template>

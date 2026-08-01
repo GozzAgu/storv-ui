@@ -2,12 +2,16 @@
   <div :class="pageClass">
     <Tutorial :tutorial-steps="tutorialSteps" @complete="onTutorialComplete" />
 
-    <header data-tutorial="dashboard" :class="pageHeaderClass">
-      <div class="min-w-0">
+    <DashboardPageHeader data-tutorial="dashboard" :class="pageHeaderClass">
+      <template #eyebrow>
         <p v-if="isNativeApp" :class="eyebrowClass">Overview</p>
+      </template>
+      <template #title>
         <h1 :class="isNativeApp ? pageTitleClass : 'saas-dashboard-greeting'">
           {{ isNativeApp ? `Welcome back, ${userName}` : formatGreeting(userName || 'User') }}
         </h1>
+      </template>
+      <template #description>
         <p v-if="!isNativeApp" class="saas-dashboard-branch">
           {{ currentStoreLabel }}
           <span v-if="userRoleLabel"> · {{ userRoleLabel }}</span>
@@ -18,8 +22,8 @@
           <span> · </span>
           <span :class="numClass">{{ totalOrders }} sales</span>
         </p>
-      </div>
-    </header>
+      </template>
+    </DashboardPageHeader>
 
     <div v-if="needsStoreSelection && !isLoading" :class="stateCardClass">
       <MarketingFeatureIcon
@@ -378,6 +382,7 @@ const LazyApexChart = defineAsyncComponent(
 import { MARKETING_FEATURE_ICONS } from '~/utils/marketing-feature-icons'
 import MarketingFeatureIcon from '~/components/marketing/MarketingFeatureIcon.vue'
 import StatCard from '~/components/ui/StatCard.vue'
+import DashboardPageHeader from '~/components/dashboard/DashboardPageHeader.vue'
 import PaymentLinksSummaryCard from '~/components/payments/PaymentLinksSummaryCard.vue'
 import Tutorial, { type TutorialStep } from '~/components/Tutorial.vue'
 import { useDashboardHomeChrome } from '~/composables/useDashboardHomeChrome'

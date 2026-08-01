@@ -7,7 +7,7 @@ import { APP_FIELD_CLASS } from '~/utils/app-chrome'
 export function useDashboardSettingsChrome() {
   const chrome = useDashboardPageChrome()
 
-  const pageClass = 'dash-page'
+  const pageClass = 'dash-page dash-page--unified'
   const pageStackClass = 'dash-page-stack'
   const profileGridClass = 'dash-page-grid dash-page-grid--profile'
   const profileSidebarClass = 'dash-page-grid--profile-sidebar lg:sticky lg:top-14 lg:self-start'

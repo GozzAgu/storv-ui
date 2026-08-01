@@ -2,12 +2,12 @@
  * Dashboard home page - semantic class names aligned with dashboard-shell SaaS tokens.
  */
 export function useDashboardHomeChrome() {
-  const pageClass = 'dash-home'
+  const pageClass = 'dash-home dash-page--unified'
   const cardClass = 'dash-card'
   const cardPaddedClass = 'dash-card dash-card--padded'
   const cardFlushClass = 'dash-card dash-card--flush'
 
-  const pageHeaderClass = 'dash-page-header'
+  const pageHeaderClass = 'dash-page-header dash-page-header--unified'
   const eyebrowClass = 'dash-eyebrow'
   const pageTitleClass = 'dash-page-title'
   const pageMetaClass = 'dash-page-meta'

@@ -1,6 +1,6 @@
 <template>
-  <div class="w-full max-w-none space-y-5 pb-6 sm:space-y-6 sm:pb-8">
-    <DashboardPageHeader>
+  <div class="dash-page dash-page--unified w-full max-w-none space-y-5 pb-6 sm:space-y-6 sm:pb-8">
+    <DashboardPageHeader class="dash-page-header--unified">
       <template #eyebrow>
         <p :class="eyebrowClass">Inbox</p>
       </template>

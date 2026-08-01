@@ -1,0 +1,156 @@
+/**
+ * Unified dashboard surface system — one visual language for cards, headers, tables, and grids.
+ * Platform glass (ios-design-tokens / web-design-tokens) layers on top of these tokens.
+ */
+
+main[data-dashboard-main],
+[data-dashboard-teleport] {
+  --dash-surface-radius: 1rem;
+  --dash-surface-radius-sm: 0.75rem;
+  --dash-surface-border: var(--dash-card-border);
+  --dash-surface-bg: var(--dash-card-surface);
+  --dash-surface-shadow: 0 1px 2px rgb(15 23 42 / 0.03);
+  --dash-surface-highlight: inset 0 1px 0 rgb(255 255 255 / 0.06);
+  --dash-surface-divider: var(--dash-table-divider, rgb(15 23 42 / 0.06));
+  --dash-surface-inset: var(--dash-table-head-bg, rgb(248 250 252 / 0.72));
+}
+
+html.dark main[data-dashboard-main],
+html.dark [data-dashboard-teleport] {
+  --dash-surface-shadow: 0 8px 24px rgb(0 0 0 / 0.14);
+  --dash-surface-highlight: inset 0 1px 0 rgb(255 255 255 / 0.04);
+}
+
+/* ── Shared elevated surfaces ── */
+main[data-dashboard-main]
+  :is(
+    .dash-card:not(.dash-card--plain),
+    .dash-page-header,
+    .dash-page-context-bar,
+    .dash-stat-card,
+    .dash-grid-card,
+    .inv-category-card,
+    .data-table-shell,
+    .dash-table-shell,
+    .dash-grid-shell--table
+  ),
+[data-dashboard-teleport] :is(.data-table-shell, .dash-table-shell) {
+  border: 1px solid var(--dash-surface-border);
+  border-radius: var(--dash-surface-radius);
+  background: var(--dash-surface-bg);
+  box-shadow: var(--dash-surface-shadow), var(--dash-surface-highlight);
+}
+
+html.dark
+  main[data-dashboard-main]
+  :is(
+    .dash-card:not(.dash-card--plain),
+    .dash-page-header,
+    .dash-page-context-bar,
+    .dash-stat-card,
+    .dash-grid-card,
+    .inv-category-card,
+    .data-table-shell,
+    .dash-table-shell,
+    .dash-grid-shell--table
+  ) {
+  background: var(--dash-surface-bg);
+}
+
+/* ── Page headers ── */
+main[data-dashboard-main] .dash-page-header {
+  padding: 1rem 1.125rem;
+}
+
+@media (min-width: 640px) {
+  main[data-dashboard-main] .dash-page-header {
+    padding: 1.125rem 1.25rem;
+  }
+}
+
+main[data-dashboard-main] .dash-page-header--unified {
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+main[data-dashboard-main] .dash-page-header--unified .dash-page-header__toolbar {
+  border-top: 1px solid var(--dash-surface-divider);
+  background: transparent;
+}
+
+/* ── Metrics strip (inset panel, all breakpoints) ── */
+main[data-dashboard-main] .dash-page-metrics {
+  gap: 0.5rem 0.75rem;
+  margin-top: 0.625rem;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--dash-surface-divider);
+  border-radius: var(--dash-surface-radius-sm);
+  background: var(--dash-surface-inset);
+}
+
+main[data-dashboard-main] .dash-page-header--unified .dash-page-header__description .dash-page-metrics {
+  margin-top: 0;
+}
+
+@media (max-width: 639px) {
+  main[data-dashboard-main] .dash-page-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem 0.625rem;
+    margin-inline: 0;
+    width: 100%;
+  }
+
+  main[data-dashboard-main] .dash-page-header--unified .dash-page-metrics {
+    margin-inline: 0;
+    width: 100%;
+  }
+
+  main[data-dashboard-main] .dash-page-metric {
+    grid-column: auto !important;
+    align-items: flex-start;
+    text-align: left;
+    padding: 0;
+    border: none !important;
+    background: transparent;
+  }
+}
+
+@media (min-width: 640px) {
+  main[data-dashboard-main] .dash-page-metrics {
+    grid-template-columns: repeat(auto-fit, minmax(5.5rem, 1fr));
+    gap: 0.625rem 1rem;
+    padding: 0.75rem 0.875rem;
+  }
+}
+
+/* ── Table chrome ── */
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell) :is(.dash-table-toolbar, .dash-table-section-header) {
+  border-bottom: 1px solid var(--dash-surface-divider);
+  background: var(--dash-surface-inset);
+}
+
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell) .dash-table-pagination {
+  border-top: 1px solid var(--dash-surface-divider);
+  background: var(--dash-surface-inset);
+}
+
+/* ── Grid cards match shell radius ── */
+main[data-dashboard-main] :is(.dash-grid-card, .inv-category-card) {
+  border-radius: var(--dash-surface-radius);
+}
+
+/* ── Stat cards ── */
+main[data-dashboard-main] .dash-stat-card {
+  border-radius: var(--dash-surface-radius);
+}
+
+main[data-dashboard-main] .dash-stat-card:hover,
+main[data-dashboard-main] .dash-grid-card:hover,
+main[data-dashboard-main] .inv-category-card:hover {
+  border-color: rgb(154 181 227 / 0.22);
+}
+
+html:not(.capacitor-native) main[data-dashboard-main] .dash-grid-card:hover,
+html:not(.capacitor-native) main[data-dashboard-main] .inv-category-card:hover {
+  box-shadow: var(--dash-surface-shadow), var(--dash-surface-highlight), 0 4px 16px rgb(15 23 42 / 0.06);
+}

@@ -27,7 +27,7 @@
     <template v-else-if="canAccessSellerLoansPlan">
       <div
         v-if="!storesStore.currentStoreId && !sellerLoansStore.loading"
-        class="dash-table-shell flex flex-1 flex-col overflow-hidden rounded-xl"
+        :class="tableShellFlexClass"
       >
         <DashboardTableEmptyState
           :icon="BuildingStorefrontIcon"
@@ -64,7 +64,7 @@
           </button>
         </nav>
 
-        <div class="data-table-shell mt-1 flex min-h-0 flex-1 flex-col overflow-hidden sm:mt-0">
+        <div :class="tableShellFlexClass">
           <div
             v-if="sellerLoansStore.loading && sellerLoansStore.loans.length === 0"
             class="p-6 sm:p-8"
@@ -409,6 +409,8 @@ const {
   segmentTabsBtnClass,
   segmentTabsBtnActiveClass,
 } = useDashboardPageChrome()
+
+const { tableShellFlexClass } = useDashboardTableChrome()
 
 const sellerLoansStore = useSellerLoanOutsStore()
 const storesStore = useStoresStore()

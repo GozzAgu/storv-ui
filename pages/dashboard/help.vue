@@ -1,6 +1,6 @@
 <template>
   <div :class="pageClass">
-    <DashboardPageHeader>
+    <DashboardPageHeader class="dash-page-header--unified">
       <template #eyebrow>
         <p :class="eyebrowClass">Help</p>
       </template>
@@ -206,9 +206,6 @@ const {
   eyebrowClass,
   pageTitleClass,
   descriptionClass,
-} = useDashboardPageChrome()
-
-const {
   pageClass,
   layoutClass,
   tocClass,

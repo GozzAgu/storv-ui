@@ -84,7 +84,7 @@ html.dark [data-dashboard-teleport] .data-table-shell {
 }
 
 html.capacitor-native .dashboard-fixed-footer--native {
-  bottom: calc(var(--dashboard-bottom-nav-height) + var(--cap-safe-bottom) + 0.35rem);
+  bottom: var(--dashboard-bottom-nav-stack, var(--dashboard-bottom-nav-height));
   padding-bottom: 0;
 }
 

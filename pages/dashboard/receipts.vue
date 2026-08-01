@@ -219,7 +219,7 @@
                   :class="[
                     isReceiptsFullscreen
                       ? 'flex min-h-0 flex-1 flex-col overflow-hidden'
-                      : 'data-table-shell flex min-h-0 flex-1 flex-col overflow-hidden',
+                      : tableShellFlexClass,
                   ]"
                 >
                   <!-- Toolbar: search + filters (left), primary action (right) -->
@@ -1077,7 +1077,7 @@
 
           <!-- Outstanding (balance due) tab -->
           <template v-else-if="activeTab === 'outstanding'">
-            <div class="data-table-shell flex min-h-0 flex-1 flex-col overflow-hidden">
+            <div :class="tableShellFlexClass">
               <DataTableToolbar v-if="!receiptsStore.loading" native-table-key="receipts-outstanding">
                 <template #filters>
                   <DashboardToolbarSearch
@@ -1180,7 +1180,7 @@
 
           <!-- Customers tab -->
           <template v-else-if="activeTab === 'customers'">
-            <div class="data-table-shell flex min-h-0 flex-1 flex-col overflow-hidden">
+            <div :class="tableShellFlexClass">
               <DataTableToolbar v-if="!receiptsStore.loading" native-table-key="receipts-customers">
                 <template #filters>
                   <DashboardToolbarSearch
@@ -1888,6 +1888,8 @@ const {
   segmentTabsBtnClass,
   segmentTabsBtnActiveClass,
 } = useDashboardPageChrome()
+
+const { tableShellFlexClass } = useDashboardTableChrome()
 
 const searchQuery = ref('')
 const statusFilter = ref('all')

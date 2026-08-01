@@ -211,59 +211,7 @@ html.capacitor-ios.capacitor-native .native-topnav-page__title {
   letter-spacing: -0.015em;
 }
 
-/* ── Bottom tab bar - floating glass pill ── */
-html.capacitor-ios.capacitor-native .native-tabbar {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  border-radius: var(--cap-ios-radius-pill);
-  border: 1px solid var(--cap-ios-nav-glass-border);
-  background: var(--cap-ios-nav-glass);
-  box-shadow:
-    0 20px 56px -14px rgb(15 23 42 / 0.34),
-    0 4px 16px rgb(15 23 42 / 0.1),
-    inset 0 1px 0 rgb(255 255 255 / 0.55);
-  -webkit-backdrop-filter: blur(44px) saturate(1.85);
-  backdrop-filter: blur(44px) saturate(1.85);
-  transform: translateZ(0);
-}
-
-html.capacitor-ios.capacitor-native .native-tabbar::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: var(--cap-ios-sheen);
-  pointer-events: none;
-  z-index: 0;
-}
-
-html.capacitor-ios.capacitor-native .native-tabbar::after {
-  content: '';
-  position: absolute;
-  inset: 1px;
-  border-radius: inherit;
-  border: 1px solid rgb(255 255 255 / 0.22);
-  pointer-events: none;
-  z-index: 0;
-  mask-image: linear-gradient(to bottom, rgb(0 0 0 / 0.55), transparent 55%);
-}
-
-html.capacitor-ios.capacitor-native.dark .native-tabbar {
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.1),
-    0 24px 64px -12px rgb(0 0 0 / 0.78),
-    0 0 0 1px rgb(154 181 227 / 0.05);
-}
-
-html.capacitor-ios.capacitor-native.dark .native-tabbar::after {
-  border-color: rgb(255 255 255 / 0.08);
-}
-
-html.capacitor-ios.capacitor-native .native-tabbar__strip {
-  z-index: 1;
-}
-
+/* ── Bottom tab bar - matches floating top nav pill ── */
 html.capacitor-ios.capacitor-native .native-tabbar__indicator {
   position: absolute;
   top: 0.3125rem;
@@ -299,10 +247,6 @@ html.capacitor-ios.capacitor-native.dark .native-tabbar__indicator {
 
 html.capacitor-ios.capacitor-native .native-tabbar__tab {
   -webkit-tap-highlight-color: transparent;
-}
-
-html.capacitor-ios.capacitor-native .dashboard-native-bottom-nav {
-  padding-bottom: calc(var(--cap-safe-bottom) + 0.125rem);
 }
 
 html.capacitor-ios.capacitor-native .native-tabbar .text-primary-600,
@@ -357,162 +301,14 @@ html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-header
 
 html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-header__description .dash-page-metrics {
   margin-top: 0;
-  width: calc(100% + 1.75rem);
-  margin-inline: -0.875rem;
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 0;
-  padding: 0;
-  overflow: hidden;
-  border-radius: 0;
-  border-width: 1px 0 0;
-  border-color: var(--dash-table-divider);
-  background: transparent;
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-}
-
-html.capacitor-ios.capacitor-native.dark
-  .dash-page-header--unified
-  .dash-page-header__description
-  .dash-page-metrics {
-  background: transparent;
-  border-color: rgb(255 255 255 / 0.08);
-}
-
-html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-metric {
-  display: flex;
-  min-width: 0;
-  grid-column: span 2;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.1875rem;
-  padding: 0.625rem 0.4375rem;
-  border: 0;
-  border-right: 1px solid var(--dash-table-divider);
-  border-bottom: 1px solid var(--dash-table-divider);
-  background: transparent;
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-  text-align: center;
-}
-
-html.capacitor-ios.capacitor-native
-  .dash-page-header--unified
-  .dash-page-metrics:has(> .dash-page-metric:nth-child(2):last-child)
-  > .dash-page-metric {
-  grid-column: span 3;
-}
-
-html.capacitor-ios.capacitor-native
-  .dash-page-header--unified
-  .dash-page-metrics:has(> .dash-page-metric:nth-child(4):last-child)
-  > .dash-page-metric {
-  grid-column: span 3;
-}
-
-html.capacitor-ios.capacitor-native
-  .dash-page-header--unified
-  .dash-page-metrics:has(> .dash-page-metric:nth-child(5):last-child)
-  > .dash-page-metric:nth-child(-n + 3) {
-  grid-column: span 2;
-}
-
-html.capacitor-ios.capacitor-native
-  .dash-page-header--unified
-  .dash-page-metrics:has(> .dash-page-metric:nth-child(5):last-child)
-  > .dash-page-metric:nth-child(n + 4) {
-  grid-column: span 3;
-}
-
-html.capacitor-ios.capacitor-native
-  .dash-page-header--unified
-  .dash-page-metrics:has(> .dash-page-metric:nth-child(1):last-child)
-  > .dash-page-metric {
-  grid-column: 1 / -1;
-}
-
-html.capacitor-ios.capacitor-native
-  .dash-page-header--unified
-  .dash-page-metrics:has(> .dash-page-metric:nth-child(3):last-child)
-  > .dash-page-metric:nth-child(2),
-html.capacitor-ios.capacitor-native
-  .dash-page-header--unified
-  .dash-page-metrics:has(> .dash-page-metric:nth-child(3):last-child)
-  > .dash-page-metric:nth-child(3),
-html.capacitor-ios.capacitor-native
-  .dash-page-header--unified
-  .dash-page-metrics:has(> .dash-page-metric:nth-child(5):last-child)
-  > .dash-page-metric:nth-child(3),
-html.capacitor-ios.capacitor-native
-  .dash-page-header--unified
-  .dash-page-metrics:has(> .dash-page-metric:nth-child(5):last-child)
-  > .dash-page-metric:nth-child(5),
-html.capacitor-ios.capacitor-native
-  .dash-page-header--unified
-  .dash-page-metrics:has(> .dash-page-metric:nth-child(4):last-child)
-  > .dash-page-metric:nth-child(2),
-html.capacitor-ios.capacitor-native
-  .dash-page-header--unified
-  .dash-page-metrics:has(> .dash-page-metric:nth-child(4):last-child)
-  > .dash-page-metric:nth-child(4),
-html.capacitor-ios.capacitor-native
-  .dash-page-header--unified
-  .dash-page-metrics:has(> .dash-page-metric:nth-child(2):last-child)
-  > .dash-page-metric:nth-child(2),
-html.capacitor-ios.capacitor-native
-  .dash-page-header--unified
-  .dash-page-metrics:has(> .dash-page-metric:nth-child(1):last-child)
-  > .dash-page-metric:nth-child(1),
-html.capacitor-ios.capacitor-native
-  .dash-page-header--unified
-  .dash-page-metrics:has(> .dash-page-metric:nth-child(6):last-child)
-  > .dash-page-metric:nth-child(3),
-html.capacitor-ios.capacitor-native
-  .dash-page-header--unified
-  .dash-page-metrics:has(> .dash-page-metric:nth-child(6):last-child)
-  > .dash-page-metric:nth-child(6) {
-  border-right: 0;
-}
-
-html.capacitor-ios.capacitor-native
-  .dash-page-header--unified
-  .dash-page-metrics:has(> .dash-page-metric:nth-child(3):last-child)
-  > .dash-page-metric:nth-child(3),
-html.capacitor-ios.capacitor-native
-  .dash-page-header--unified
-  .dash-page-metrics:has(> .dash-page-metric:nth-child(5):last-child)
-  > .dash-page-metric:nth-child(n + 4),
-html.capacitor-ios.capacitor-native
-  .dash-page-header--unified
-  .dash-page-metrics:has(> .dash-page-metric:nth-child(4):last-child)
-  > .dash-page-metric:nth-child(n + 3),
-html.capacitor-ios.capacitor-native
-  .dash-page-header--unified
-  .dash-page-metrics:has(> .dash-page-metric:nth-child(2):last-child)
-  > .dash-page-metric,
-html.capacitor-ios.capacitor-native
-  .dash-page-header--unified
-  .dash-page-metrics:has(> .dash-page-metric:nth-child(1):last-child)
-  > .dash-page-metric,
-html.capacitor-ios.capacitor-native
-  .dash-page-header--unified
-  .dash-page-metrics:has(> .dash-page-metric:nth-child(6):last-child)
-  > .dash-page-metric:nth-child(n + 4) {
-  border-bottom: 0;
-}
-
-html.capacitor-ios.capacitor-native.dark .dash-page-header--unified .dash-page-metric {
-  background: transparent;
+  margin-inline: 0;
+  width: 100%;
 }
 
 html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-metric__label {
   font-size: 0.5625rem !important;
-  font-weight: 600;
   letter-spacing: 0.07em;
   line-height: 1.25;
-  text-align: center;
-  text-wrap: balance;
 }
 
 html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-metric__value {
@@ -520,17 +316,7 @@ html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-metric
   font-weight: 600;
   line-height: 1.25;
   letter-spacing: -0.02em;
-  text-align: center;
   font-variant-numeric: tabular-nums;
-  word-break: break-word;
-}
-
-html.capacitor-ios.capacitor-native
-  .dash-page-header--unified
-  .dash-page-metrics:has(> .dash-page-metric:nth-child(5):last-child)
-  > .dash-page-metric:nth-child(-n + 3)
-  .dash-page-metric__value {
-  font-size: 0.75rem !important;
 }
 
 html.capacitor-ios.capacitor-native .dash-page-context-bar {

@@ -411,7 +411,7 @@ html.capacitor-native .dash-toast-stack {
   top: auto;
   right: 0.875rem;
   left: 0.875rem;
-  bottom: calc(var(--dashboard-bottom-nav-height) + var(--cap-safe-bottom) + 0.625rem);
+  bottom: calc(var(--dashboard-bottom-nav-stack, var(--dashboard-bottom-nav-height)) + 0.625rem);
   max-width: none;
   width: auto;
   padding: 0;

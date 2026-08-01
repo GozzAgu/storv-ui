@@ -10,7 +10,7 @@ export function useDashboardAnalyticsChrome() {
   const page = useDashboardPageChrome()
   const table = useDashboardTableChrome()
 
-  const pageClass = 'dash-analytics'
+  const pageClass = 'dash-analytics dash-page--unified'
   const kpiGridWideClass = 'dash-kpi-grid dash-kpi-grid--wide'
   const summaryTextClass = 'dash-summary-text'
   const insightIconClass = 'dash-insight-icon'

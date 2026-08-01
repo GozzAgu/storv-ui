@@ -63,7 +63,7 @@
     <template v-else>
       <div
         v-if="!storeId && !loading"
-        class="dash-table-shell flex flex-1 flex-col overflow-hidden rounded-xl"
+        :class="tableShellFlexClass"
       >
         <DashboardTableEmptyState
           :icon="BuildingStorefrontIcon"
@@ -77,9 +77,7 @@
       </div>
 
       <div v-else class="flex min-h-0 flex-1 flex-col">
-        <div
-          class="activity-log-shell data-table-shell flex min-h-0 flex-1 flex-col overflow-hidden"
-        >
+        <div :class="tableShellFlexClass">
           <p
             v-if="reachedFetchCap"
             class="border-b border-gray-100/90 px-4 py-2 text-[11px] text-gray-500 dark:border-gray-800/80 dark:text-gray-400 sm:px-5"
@@ -269,6 +267,8 @@ const {
   segmentTabsBtnClass,
   segmentTabsBtnActiveClass,
 } = useDashboardPageChrome()
+
+const { tableShellFlexClass } = useDashboardTableChrome()
 
 const userStore = useUserStore()
 const staffStore = useStaffStore()

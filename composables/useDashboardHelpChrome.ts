@@ -1,8 +1,10 @@
 /**
  * Shared layout tokens for the dashboard help center page.
  */
+import { useDashboardPageChrome } from '~/composables/useDashboardPageChrome'
+
 export function useDashboardHelpChrome() {
-  const pageClass = 'dash-page'
+  const pageClass = 'dash-page dash-page--unified'
   const layoutClass = 'dash-help-layout'
   const tocClass = 'dash-help-toc'
   const tocLabelClass = 'dash-help-toc__label'
@@ -22,6 +24,7 @@ export function useDashboardHelpChrome() {
   const backTopClass = 'dash-help-back-top'
 
   return {
+    ...useDashboardPageChrome(),
     pageClass,
     layoutClass,
     tocClass,

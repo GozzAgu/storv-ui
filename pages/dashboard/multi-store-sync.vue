@@ -1,5 +1,5 @@
 <template>
-  <div :class="[pageClass, 'dash-page--unified']">
+  <div :class="pageClass">
     <DashboardPageHeader class="dash-page-header--unified">
       <template #eyebrow>
         <p :class="eyebrowClass">Enterprise</p>

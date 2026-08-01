@@ -7,6 +7,7 @@
 @import './dashboard-cards.css';
 @import './dashboard-pages.css';
 @import './dashboard-tables.css';
+@import './dashboard-surfaces.css';
 @import './dashboard-mobile-table-accordion.css';
 @import './app-buttons.css';
 @import './dashboard-overlays.css';
@@ -1176,8 +1177,12 @@ html.capacitor-native {
     var(--cap-safe-top) + var(--ios-topnav-float-gap, 0.375rem) + var(--dashboard-native-top-bar) +
       var(--ios-topnav-stack-gap, 0.375rem)
   );
-  /* Floating glass tab bar: pill height (3.25rem) + minimal float gap */
-  --dashboard-bottom-nav-height: 3.5rem;
+  /* Floating glass tab bar: pill height + float gap below safe area */
+  --dashboard-bottom-nav-height: 3.25rem;
+  --dashboard-bottom-nav-stack: calc(
+    var(--dashboard-bottom-nav-height) + var(--ios-bottomnav-float-gap, 0.5rem) +
+      var(--cap-safe-bottom)
+  );
   --dashboard-fixed-footer-height: 2.75rem;
 }
 
@@ -1259,15 +1264,12 @@ html.capacitor-native .dashboard-inline-footer {
 
 html.capacitor-native .dashboard-page-with-footer {
   padding-bottom: calc(
-    var(--dashboard-bottom-nav-height) + var(--dashboard-fixed-footer-height) +
-      var(--cap-safe-bottom) + 0.75rem
+    var(--dashboard-bottom-nav-stack) + var(--dashboard-fixed-footer-height) + 0.75rem
   ) !important;
 }
 
 html.capacitor-ios.capacitor-native .dashboard-page-with-footer {
-  padding-bottom: calc(
-    var(--dashboard-bottom-nav-height) + var(--cap-safe-bottom) + 0.75rem
-  ) !important;
+  padding-bottom: calc(var(--dashboard-bottom-nav-stack) + 0.75rem) !important;
 }
 
 html.capacitor-native .capacitor-boot-splash {
@@ -1445,9 +1447,9 @@ html.capacitor-native .dashboard-native-main:has(.dashboard-page-with-footer) {
 }
 
 html.capacitor-native .dashboard-native-bottom-nav {
-  padding-left: calc(var(--cap-safe-left) + 0.75rem);
-  padding-right: calc(var(--cap-safe-right) + 0.75rem);
-  padding-bottom: calc(var(--cap-safe-bottom) + 0.125rem);
+  padding-left: calc(var(--cap-safe-left) + var(--ios-topnav-inset, 0.625rem));
+  padding-right: calc(var(--cap-safe-right) + var(--ios-topnav-inset, 0.625rem));
+  padding-bottom: calc(var(--cap-safe-bottom) + var(--ios-bottomnav-float-gap, 0.5rem));
 }
 
 /* ── iOS polish: spacing (surfaces/tables - see capacitor-native-saas.css) ── */
@@ -1459,7 +1461,7 @@ html.capacitor-native [data-dashboard-main] > .space-y-6 {
 
 html.capacitor-native [data-inventory-categories].dash-grid-page.dash-page--unified {
   padding-bottom: calc(
-    var(--dashboard-bottom-nav-height) + var(--cap-safe-bottom) + 0.75rem
+    var(--dashboard-bottom-nav-stack, var(--dashboard-bottom-nav-height)) + 0.75rem
   ) !important;
   gap: 0.625rem;
 }

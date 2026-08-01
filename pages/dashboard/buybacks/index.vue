@@ -39,7 +39,7 @@
     <template v-else>
       <div
         v-if="!storesStore.currentStoreId && !buybacksStore.loading"
-        class="dash-table-shell flex flex-1 flex-col overflow-hidden rounded-xl"
+        :class="tableShellFlexClass"
       >
         <DashboardTableEmptyState
           :icon="BuildingStorefrontIcon"
@@ -49,8 +49,7 @@
         />
       </div>
 
-      <div v-else class="flex min-h-0 flex-1 flex-col gap-4 sm:gap-5">
-        <div class="data-table-shell mt-1 flex min-h-0 flex-1 flex-col overflow-hidden sm:mt-0">
+      <div v-else :class="tableShellFlexClass">
           <div
             v-if="buybacksStore.loading && buybacksStore.buybacks.length === 0"
             class="p-6 sm:p-8"
@@ -134,7 +133,6 @@
               </tbody>
             </table>
           </div>
-        </div>
       </div>
     </template>
 
@@ -162,6 +160,7 @@ definePageMeta({
 
 const { eyebrowClass, pageTitleClass, headerBtnClass, pageWithFixedFooterClass } =
   useDashboardPageChrome()
+const { tableShellFlexClass } = useDashboardTableChrome()
 
 const buybacksStore = useCustomerBuybacksStore()
 const inventoryStore = useInventoryStore()

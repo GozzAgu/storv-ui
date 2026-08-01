@@ -160,9 +160,14 @@ html:not(.capacitor-native) .saas-glass-card--interactive:active {
 
 /* ── Apply glass to existing dashboard cards (web) ── */
 html:not(.capacitor-native) main[data-dashboard-main] .dash-card,
+html:not(.capacitor-native) main[data-dashboard-main] .dash-page-header,
+html:not(.capacitor-native) main[data-dashboard-main] .dash-page-context-bar,
 html:not(.capacitor-native) main[data-dashboard-main] .dash-stat-card,
 html:not(.capacitor-native) main[data-dashboard-main] .dash-grid-card,
 html:not(.capacitor-native) main[data-dashboard-main] .inv-category-card,
+html:not(.capacitor-native) main[data-dashboard-main] .data-table-shell,
+html:not(.capacitor-native) main[data-dashboard-main] .dash-table-shell,
+html:not(.capacitor-native) main[data-dashboard-main] .dash-grid-shell--table,
 html:not(.capacitor-native) main[data-dashboard-main] .ldg-card {
   background: var(--saas-glass-bg);
   backdrop-filter: blur(var(--saas-blur)) saturate(160%);

@@ -15,6 +15,8 @@ export function useDashboardPageChrome() {
   const dashboardCardPaddedClass = 'dash-card dash-card--padded'
 
   const pageHeaderClass = 'dash-page-header'
+  const unifiedHeaderClass = 'dash-page-header dash-page-header--unified'
+  const unifiedPageClass = 'dash-page--unified'
   const toolbarDividerClass = 'dash-page-header__toolbar'
 
   const toolbarRowClass = 'flex flex-col gap-2.5 lg:flex-row lg:items-center lg:gap-3'
@@ -51,13 +53,10 @@ export function useDashboardPageChrome() {
     native.value ? 'dash-eyebrow' : 'dash-eyebrow'
   )
 
-  const titleClass = computed(() =>
-    native.value ? 'dash-page-title' : 'dash-page-title !text-lg sm:!text-xl'
-  )
+  const pageTitleClass = computed(() => 'dash-page-title')
 
-  const pageTitleClass = computed(() =>
-    native.value ? 'dash-page-title' : 'dash-page-title'
-  )
+  /** @deprecated Use pageTitleClass */
+  const titleClass = pageTitleClass
 
   const descriptionClass = computed(() =>
     native.value ? 'dash-page-meta mt-1.5' : 'dash-page-meta mt-1.5 max-w-2xl'
@@ -77,6 +76,8 @@ export function useDashboardPageChrome() {
     dashboardCardClass,
     dashboardCardPaddedClass,
     pageHeaderClass,
+    unifiedHeaderClass,
+    unifiedPageClass,
     toolbarDividerClass,
     toolbarRowClass,
     fieldClass,
