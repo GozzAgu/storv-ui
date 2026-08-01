@@ -5,6 +5,7 @@
       <span
         class="dash-page-metric__value dash-num"
         :class="metric.tone && metric.tone !== 'default' ? `dash-page-metric__value--${metric.tone}` : ''"
+        :title="metric.value"
       >
         {{ metric.value }}
       </span>

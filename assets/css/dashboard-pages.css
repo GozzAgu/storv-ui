@@ -84,14 +84,13 @@ html.dark .dash-page-header {
 .dash-page-metrics {
   display: grid;
   width: 100%;
-  grid-template-columns: repeat(auto-fit, minmax(5.25rem, 1fr));
 }
 
 .dash-page-metric {
   display: flex;
   min-width: 0;
   flex-direction: column;
-  gap: 0.125rem;
+  gap: 0.3125rem;
 }
 
 .dash-page-metric__label {

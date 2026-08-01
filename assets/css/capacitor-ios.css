@@ -305,16 +305,20 @@ html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-header
   width: 100%;
 }
 
+html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-metric {
+  padding: 0.5625rem 0.6875rem;
+}
+
 html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-metric__label {
   font-size: 0.5625rem !important;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.08em;
   line-height: 1.25;
 }
 
 html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-metric__value {
-  font-size: 0.8125rem !important;
+  font-size: clamp(0.75rem, 3.1vw, 0.875rem) !important;
   font-weight: 600;
-  line-height: 1.25;
+  line-height: 1.2;
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
 }
@@ -1311,54 +1315,6 @@ html.capacitor-ios.capacitor-native .dash-segment__btn {
 html.capacitor-ios.capacitor-native .dash-segment__btn--active {
   background: rgb(255 255 255 / 0.12);
   box-shadow: none;
-}
-
-/* KPI / info metrics - 2×2 for four stats (Activity Logs style) */
-html.capacitor-ios.capacitor-native
-  .dash-page-header--unified
-  .dash-page-metrics:has(> .dash-page-metric:nth-child(4):last-child) {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-html.capacitor-ios.capacitor-native
-  .dash-page-header--unified
-  .dash-page-metrics:has(> .dash-page-metric:nth-child(4):last-child)
-  > .dash-page-metric {
-  grid-column: span 1;
-  padding: 0.75rem 0.5rem;
-}
-
-html.capacitor-ios.capacitor-native
-  .dash-page-header--unified
-  .dash-page-metrics:has(> .dash-page-metric:nth-child(4):last-child)
-  > .dash-page-metric:nth-child(2),
-html.capacitor-ios.capacitor-native
-  .dash-page-header--unified
-  .dash-page-metrics:has(> .dash-page-metric:nth-child(4):last-child)
-  > .dash-page-metric:nth-child(4) {
-  border-right: 0;
-}
-
-html.capacitor-ios.capacitor-native
-  .dash-page-header--unified
-  .dash-page-metrics:has(> .dash-page-metric:nth-child(4):last-child)
-  > .dash-page-metric:nth-child(3),
-html.capacitor-ios.capacitor-native
-  .dash-page-header--unified
-  .dash-page-metrics:has(> .dash-page-metric:nth-child(4):last-child)
-  > .dash-page-metric:nth-child(4) {
-  border-bottom: 0;
-}
-
-html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-metric__label {
-  font-size: 0.5625rem !important;
-  letter-spacing: 0.08em;
-}
-
-html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-metric__value {
-  font-size: 0.9375rem !important;
-  font-weight: 700;
-  letter-spacing: -0.02em;
 }
 
 /* Filter pills in unified header - same as dash-segment-tabs */
