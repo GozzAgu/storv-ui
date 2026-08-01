@@ -269,14 +269,15 @@ html.dark .dashboard-sidebar > button.absolute.top-10 {
 
 /* ── Top nav ── */
 .dash-topnav.dashboard-top-nav {
-  border-bottom: 1px solid var(--dash-border);
-  background: rgb(255 255 255 / 0.82);
-  backdrop-filter: blur(18px) saturate(1.25);
-  -webkit-backdrop-filter: blur(18px) saturate(1.25);
+  border-bottom: 1px solid var(--saas-topnav-border, var(--dash-border));
+  background: var(--saas-topnav-bg, rgb(255 255 255 / 0.82));
+  backdrop-filter: blur(var(--saas-topnav-blur, 18px)) saturate(1.25);
+  -webkit-backdrop-filter: blur(var(--saas-topnav-blur, 18px)) saturate(1.25);
+  box-shadow: var(--saas-topnav-shadow, none);
 }
 
 html.dark .dash-topnav.dashboard-top-nav {
-  background: rgb(7 8 12 / 0.88);
+  background: var(--saas-topnav-bg, rgb(7 8 12 / 0.88));
 }
 
 .dash-topnav__eyebrow {

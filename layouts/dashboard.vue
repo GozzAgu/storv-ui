@@ -18,6 +18,7 @@
     :class="[
       'dashboard-layout-root font-sans w-full overflow-x-clip relative bg-gray-100 dark:bg-[#07080c]',
       isDemoDashboard ? 'dashboard-layout-root--demo' : '',
+      !isNativeApp && effectiveSidebarCollapsed ? 'dashboard-layout-root--sidebar-collapsed' : '',
       isNativeApp
         ? 'dashboard-layout-root--native h-[100dvh] max-h-[100dvh] overflow-hidden'
         : 'min-h-screen',
@@ -77,7 +78,17 @@
         :class="effectiveSidebarCollapsed ? 'px-1.5' : 'px-2'"
       >
         <div class="min-h-0 space-y-0">
-          <template v-for="item in filteredNavigation" :key="item.name">
+          <template v-for="(item, navIndex) in filteredNavigation" :key="item.name">
+            <p
+              v-if="
+                !isNativeApp &&
+                !effectiveSidebarCollapsed &&
+                shouldShowWebNavSection(item.name, navIndex, filteredNavigation)
+              "
+              class="saas-nav-section-label"
+            >
+              {{ webNavSectionLabel(item.name) }}
+            </p>
             <!-- Inventory (expandable) -->
             <div v-if="item.name === 'Inventory' && !effectiveSidebarCollapsed" class="space-y-0.5">
               <div
@@ -483,7 +494,7 @@
         isNativeApp
           ? 'dashboard-native-shell flex h-full min-h-0 flex-col overflow-hidden'
           : [
-              'min-h-screen transition-[padding-left] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]',
+              'dashboard-main-shell min-h-screen transition-[padding-left] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]',
               sidebarCollapsed ? 'lg:pl-[72px]' : 'lg:pl-64',
             ],
       ]"
@@ -698,7 +709,11 @@
       <!-- Spacer so fixed nav never overlaps page content -->
       <div
         class="dashboard-top-nav-spacer shrink-0"
-        :class="isNativeApp ? 'dashboard-top-nav-spacer-native' : 'h-11 sm:h-12'"
+        :class="
+          isNativeApp
+            ? 'dashboard-top-nav-spacer-native'
+            : 'dashboard-top-nav-spacer--web h-11 sm:h-12'
+        "
         aria-hidden="true"
       />
 
@@ -823,6 +838,7 @@ import {
   NATIVE_PRIMARY_ORDER_WITH_PAYMENT_LINKS,
   type DashboardNavItem,
 } from '~/utils/dashboard-native-nav'
+import { shouldShowWebNavSection, webNavSectionLabel } from '~/utils/dashboard-web-nav-groups'
 import type { DashboardNavIconKey } from '~/utils/dashboard-nav-icons'
 import { isPaymentLinksNativeComingSoon } from '~/utils/payment-links-launch'
 import { resolveStoreDepartmentsPath } from '~/utils/department-routes'

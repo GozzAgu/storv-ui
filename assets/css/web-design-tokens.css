@@ -1,0 +1,408 @@
+/**
+ * Storvv Web SaaS premium design tokens.
+ * Scoped to web dashboard only — Capacitor native uses ios-design-tokens.css.
+ * See docs/WEB_PREMIUM_DESIGN_SYSTEM.md
+ */
+
+html:not(.capacitor-native) .dashboard-layout-root {
+  --saas-canvas: #f4f6fb;
+  --saas-surface: #ffffff;
+  --saas-glass-bg: rgb(255 255 255 / 0.78);
+  --saas-glass-border: rgb(15 23 42 / 0.08);
+  --saas-glass-highlight: inset 0 1px 0 rgb(255 255 255 / 0.65);
+  --saas-shadow-sm: 0 1px 2px rgb(15 23 42 / 0.04);
+  --saas-shadow-md: 0 4px 24px rgb(15 23 42 / 0.06);
+  --saas-shadow-lg: 0 12px 40px rgb(15 23 42 / 0.1);
+  --saas-blur: 20px;
+  --saas-accent: #143f8d;
+  --saas-accent-soft: rgb(20 63 141 / 0.08);
+  --saas-success: #34d399;
+  --saas-warning: #fbbf24;
+  --saas-danger: #f87171;
+  --saas-ink: #0f172a;
+  --saas-muted: #64748b;
+  --saas-sidebar-width: 16rem;
+  --saas-sidebar-rail: 4.5rem;
+  --saas-sidebar-inset: 0.75rem;
+  --saas-radius-lg: 1rem;
+  --saas-radius-xl: 1.25rem;
+  --saas-spring: cubic-bezier(0.22, 1, 0.36, 1);
+  --saas-topnav-bg: var(--saas-glass-bg);
+  --saas-topnav-border: var(--saas-glass-border);
+  --saas-topnav-shadow: var(--saas-shadow-lg), var(--saas-glass-highlight);
+  --saas-topnav-blur: var(--saas-blur);
+  --saas-topnav-height: 3rem;
+  --saas-topnav-stack: calc(var(--saas-sidebar-inset) + var(--saas-topnav-height) + 0.625rem);
+  --saas-topnav-control-bg: rgb(255 255 255 / 0.55);
+  --saas-topnav-control-border: rgb(15 23 42 / 0.07);
+
+  --dash-canvas: var(--saas-canvas);
+  --dash-surface: var(--saas-surface);
+  --dash-border: var(--saas-glass-border);
+  --dash-accent: var(--saas-accent);
+  --dash-accent-soft: var(--saas-accent-soft);
+  --dash-ink: var(--saas-ink);
+  --dash-muted: var(--saas-muted);
+}
+
+html:not(.capacitor-native).dark .dashboard-layout-root {
+  --saas-canvas: #07080c;
+  --saas-surface: #12141c;
+  --saas-glass-bg: rgb(18 20 28 / 0.82);
+  --saas-glass-border: rgb(255 255 255 / 0.08);
+  --saas-glass-highlight: inset 0 1px 0 rgb(255 255 255 / 0.05);
+  --saas-shadow-md: 0 8px 32px rgb(0 0 0 / 0.35);
+  --saas-shadow-lg: 0 16px 48px rgb(0 0 0 / 0.45);
+  --saas-accent: #9ab5e3;
+  --saas-accent-soft: rgb(154 181 227 / 0.12);
+  --saas-ink: #f8fafc;
+  --saas-muted: #94a3b8;
+  --saas-topnav-bg: var(--saas-glass-bg);
+  --saas-topnav-border: var(--saas-glass-border);
+  --saas-topnav-shadow: var(--saas-shadow-lg), var(--saas-glass-highlight);
+  --saas-topnav-control-bg: rgb(255 255 255 / 0.05);
+  --saas-topnav-control-border: rgb(255 255 255 / 0.08);
+}
+
+/* ── Floating glass sidebar (desktop) ── */
+@media (min-width: 1024px) {
+  html:not(.capacitor-native) .dashboard-layout-root .dashboard-sidebar.dash-sidebar {
+    top: var(--saas-sidebar-inset);
+    bottom: var(--saas-sidebar-inset);
+    left: var(--saas-sidebar-inset);
+    height: auto;
+    border-radius: var(--saas-radius-xl);
+    border: 1px solid var(--saas-glass-border);
+    box-shadow: var(--saas-shadow-lg), var(--saas-glass-highlight);
+    overflow: hidden;
+  }
+
+  html:not(.capacitor-native) .dashboard-layout-root .dashboard-sidebar > button.absolute.top-10 {
+    top: 2.75rem;
+    right: -0.75rem;
+  }
+
+  html:not(.capacitor-native) .dashboard-layout-root--sidebar-collapsed {
+    --saas-sidebar-width: var(--saas-sidebar-rail);
+  }
+
+  html:not(.capacitor-native) .dashboard-layout-root .dashboard-main-shell {
+    padding-left: calc(var(--saas-sidebar-width) + var(--saas-sidebar-inset) * 2) !important;
+    transition: padding-left 0.3s var(--saas-spring);
+  }
+}
+
+/* ── Floating glass top nav (matches sidebar) ── */
+html:not(.capacitor-native) .dash-topnav.dashboard-top-nav {
+  top: var(--saas-sidebar-inset) !important;
+  right: var(--saas-sidebar-inset) !important;
+  left: var(--saas-sidebar-inset) !important;
+  width: auto;
+  border-radius: var(--saas-radius-xl);
+  border: 1px solid var(--saas-topnav-border);
+  background: var(--saas-topnav-bg);
+  backdrop-filter: blur(var(--saas-topnav-blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--saas-topnav-blur)) saturate(180%);
+  box-shadow: var(--saas-topnav-shadow);
+  overflow: hidden;
+}
+
+@media (min-width: 1024px) {
+  html:not(.capacitor-native) .dashboard-layout-root .dashboard-top-nav {
+    left: calc(var(--saas-sidebar-width) + var(--saas-sidebar-inset) * 2) !important;
+    transition:
+      left 0.3s var(--saas-spring),
+      box-shadow 0.18s ease;
+  }
+}
+
+html:not(.capacitor-native) .dashboard-top-nav-spacer--web {
+  height: var(--saas-topnav-stack) !important;
+  min-height: var(--saas-topnav-stack);
+}
+
+/* ── Glass card utility ── */
+html:not(.capacitor-native) .saas-glass-card {
+  background: var(--saas-glass-bg);
+  backdrop-filter: blur(var(--saas-blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--saas-blur)) saturate(160%);
+  border: 1px solid var(--saas-glass-border);
+  border-radius: var(--saas-radius-lg);
+  box-shadow: var(--saas-shadow-md), var(--saas-glass-highlight);
+}
+
+html:not(.capacitor-native) .saas-glass-card--elevated {
+  box-shadow: var(--saas-shadow-lg), var(--saas-glass-highlight);
+}
+
+html:not(.capacitor-native) .saas-glass-card--interactive {
+  transition:
+    transform 0.18s var(--saas-spring),
+    box-shadow 0.18s ease;
+}
+
+html:not(.capacitor-native) .saas-glass-card--interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--saas-shadow-lg), var(--saas-glass-highlight);
+}
+
+html:not(.capacitor-native) .saas-glass-card--interactive:active {
+  transform: translateY(0) scale(0.995);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  html:not(.capacitor-native) .saas-glass-card {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--saas-surface);
+  }
+}
+
+/* ── Apply glass to existing dashboard cards (web) ── */
+html:not(.capacitor-native) main[data-dashboard-main] .dash-card,
+html:not(.capacitor-native) main[data-dashboard-main] .dash-stat-card,
+html:not(.capacitor-native) main[data-dashboard-main] .dash-grid-card,
+html:not(.capacitor-native) main[data-dashboard-main] .inv-category-card,
+html:not(.capacitor-native) main[data-dashboard-main] .ldg-card {
+  background: var(--saas-glass-bg);
+  backdrop-filter: blur(var(--saas-blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--saas-blur)) saturate(160%);
+  border-color: var(--saas-glass-border);
+  box-shadow: var(--saas-shadow-md), var(--saas-glass-highlight);
+  transition:
+    transform 0.18s var(--saas-spring),
+    box-shadow 0.18s ease;
+}
+
+html:not(.capacitor-native) main[data-dashboard-main] .dash-stat-card:hover,
+html:not(.capacitor-native) main[data-dashboard-main] .inv-category-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--saas-shadow-lg), var(--saas-glass-highlight);
+}
+
+/* ── Stat numerals ── */
+html:not(.capacitor-native) .saas-stat-value {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  letter-spacing: -0.02em;
+  font-weight: 600;
+  color: var(--saas-ink);
+}
+
+html:not(.capacitor-native) .saas-stat-value--hero {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+html:not(.capacitor-native) .saas-stat-label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--saas-muted);
+}
+
+html:not(.capacitor-native) .saas-stat-delta--up {
+  color: var(--saas-success);
+}
+
+html:not(.capacitor-native) .saas-stat-delta--down {
+  color: var(--saas-danger);
+}
+
+/* ── Sidebar nav section labels ── */
+html:not(.capacitor-native) .saas-nav-section-label {
+  margin: 0.875rem 0.5rem 0.25rem;
+  padding: 0 0.375rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--saas-muted);
+  opacity: 0.85;
+}
+
+html:not(.capacitor-native) .saas-nav-section-label:first-child {
+  margin-top: 0.25rem;
+}
+
+/* ── Top nav inner controls ── */
+html:not(.capacitor-native) .dash-topnav.dashboard-top-nav::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 0.08) 0%,
+    transparent 42%,
+    rgb(20 63 141 / 0.03) 100%
+  );
+}
+
+html:not(.capacitor-native) .dash-topnav.dashboard-top-nav > * {
+  position: relative;
+  z-index: 1;
+  min-height: var(--saas-topnav-height);
+}
+
+html:not(.capacitor-native).dark .dash-topnav.dashboard-top-nav::before {
+  background: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 0.04) 0%,
+    transparent 38%,
+    rgb(20 63 141 / 0.06) 100%
+  );
+}
+
+html:not(.capacitor-native) .dash-topnav__search.dashboard-topnav-search {
+  border: 1px solid var(--saas-topnav-control-border);
+  background: var(--saas-topnav-control-bg);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+}
+
+html:not(.capacitor-native).dark .dash-topnav__search.dashboard-topnav-search {
+  background: var(--saas-topnav-control-bg);
+}
+
+html:not(.capacitor-native) .dash-topnav__search.dashboard-topnav-search:hover,
+html:not(.capacitor-native) .dash-topnav__search.dashboard-topnav-search:focus-visible {
+  border-color: rgb(154 181 227 / 0.28);
+  background: rgb(255 255 255 / 0.08);
+  box-shadow: 0 0 0 3px var(--saas-accent-soft);
+}
+
+html:not(.capacitor-native):not(.dark) .dash-topnav__search.dashboard-topnav-search:hover,
+html:not(.capacitor-native):not(.dark) .dash-topnav__search.dashboard-topnav-search:focus-visible {
+  background: rgb(255 255 255 / 0.88);
+}
+
+html:not(.capacitor-native) .dash-topnav__assistant.dashboard-topnav-assistant {
+  border-color: var(--saas-topnav-control-border);
+  background: var(--saas-topnav-control-bg);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+}
+
+html:not(.capacitor-native) .dash-topnav__actions.dashboard-topnav-actions {
+  border-color: var(--saas-topnav-control-border);
+  background: var(--saas-topnav-control-bg);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
+}
+
+html:not(.capacitor-native):not(.dark) .dash-topnav__actions.dashboard-topnav-actions {
+  background: var(--saas-topnav-control-bg);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.65);
+}
+
+html:not(.capacitor-native) .dashboard-sidebar-open-trigger {
+  border-color: var(--saas-topnav-control-border);
+  background: var(--saas-topnav-control-bg);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  html:not(.capacitor-native) .dash-topnav.dashboard-top-nav {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--saas-surface);
+  }
+
+  html:not(.capacitor-native) .dash-topnav.dashboard-top-nav::before {
+    display: none;
+  }
+}
+
+/* ── Grouped settings sections ── */
+html:not(.capacitor-native) .saas-grouped-section {
+  border-radius: var(--saas-radius-lg);
+  border: 1px solid var(--saas-glass-border);
+  background: var(--saas-glass-bg);
+  overflow: hidden;
+}
+
+html:not(.capacitor-native) .saas-grouped-section__header {
+  padding: 0.5rem 1rem 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--saas-muted);
+}
+
+html:not(.capacitor-native) .saas-list-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 44px;
+  padding: 0.625rem 1rem;
+  color: var(--saas-ink);
+  text-decoration: none;
+  transition: background 0.12s ease;
+}
+
+html:not(.capacitor-native) .saas-list-row + .saas-list-row {
+  border-top: 1px solid var(--saas-glass-border);
+}
+
+html:not(.capacitor-native) .saas-list-row:hover {
+  background: rgb(15 23 42 / 0.03);
+}
+
+html:not(.capacitor-native).dark .saas-list-row:hover {
+  background: rgb(255 255 255 / 0.04);
+}
+
+/* ── Dashboard greeting ── */
+html:not(.capacitor-native) .saas-dashboard-greeting {
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  color: var(--saas-ink);
+}
+
+html:not(.capacitor-native) .saas-dashboard-branch {
+  margin-top: 0.25rem;
+  font-size: 0.9375rem;
+  color: var(--saas-muted);
+}
+
+/* ── Search bar ── */
+html:not(.capacitor-native) .saas-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0 1rem;
+  border-radius: 0.875rem;
+  border: 1px solid var(--saas-glass-border);
+  background: var(--saas-glass-bg);
+  color: var(--saas-muted);
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+html:not(.capacitor-native) .saas-search-bar:focus-within {
+  border-color: rgb(20 63 141 / 0.35);
+  box-shadow: 0 0 0 3px var(--saas-accent-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:not(.capacitor-native) .saas-glass-card--interactive,
+  html:not(.capacitor-native) main[data-dashboard-main] .dash-stat-card,
+  html:not(.capacitor-native) main[data-dashboard-main] .inv-category-card {
+    transition: none;
+  }
+
+  html:not(.capacitor-native) .saas-glass-card--interactive:hover,
+  html:not(.capacitor-native) main[data-dashboard-main] .dash-stat-card:hover {
+    transform: none;
+  }
+}

@@ -4,9 +4,15 @@
 
     <header data-tutorial="dashboard" :class="pageHeaderClass">
       <div class="min-w-0">
-        <p :class="eyebrowClass">Overview</p>
-        <h1 :class="pageTitleClass">Welcome back, {{ userName }}</h1>
-        <p :class="pageMetaClass">
+        <p v-if="isNativeApp" :class="eyebrowClass">Overview</p>
+        <h1 :class="isNativeApp ? pageTitleClass : 'saas-dashboard-greeting'">
+          {{ isNativeApp ? `Welcome back, ${userName}` : formatGreeting(userName || 'User') }}
+        </h1>
+        <p v-if="!isNativeApp" class="saas-dashboard-branch">
+          {{ currentStoreLabel }}
+          <span v-if="userRoleLabel"> · {{ userRoleLabel }}</span>
+        </p>
+        <p v-else :class="pageMetaClass">
           <strong>{{ currentStoreLabel }}</strong>
           <span v-if="userRoleLabel"> · {{ userRoleLabel }}</span>
           <span> · </span>
@@ -509,6 +515,7 @@ const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
 const { showNativeComingSoon } = usePaymentLinksLaunch()
 const { canViewProfitAndCost } = usePermissions()
 const { isNativeApp } = useCapacitorNativeApp()
+const { formatGreeting } = useTimeGreeting()
 
 const currencySymbol = computed(() => preferences.value.currencySymbol || '$')
 const dashboardFolderItems = ref<Record<string, InventoryItem[]>>({})
