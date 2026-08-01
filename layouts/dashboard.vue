@@ -1098,6 +1098,13 @@ const navigation: Array<{
     requiresManagerOrSuperAdmin: true,
   },
   {
+    name: 'Multi-Store Sync',
+    segment: '/multi-store-sync',
+    iconKey: 'sync',
+    requiresSuperAdmin: true,
+    subscriptionFeature: 'multi_store_sync',
+  },
+  {
     name: 'Payment links',
     segment: '/payment-links',
     iconKey: 'payment-links',
@@ -1122,13 +1129,6 @@ const navigation: Array<{
     iconKey: 'activity',
     subscriptionFeature: 'activity_logs',
     requiresManagerOrSuperAdmin: true,
-  },
-  {
-    name: 'Multi-Store Sync',
-    segment: '/multi-store-sync',
-    iconKey: 'sync',
-    requiresSuperAdmin: true,
-    subscriptionFeature: 'multi_store_sync',
   },
   { name: 'Help center', segment: '/help', iconKey: 'help' },
   {
