@@ -207,11 +207,11 @@ function extractCityFromBranchName(branchName: string): string {
     if (lower === cityLower) return city
     if (lower.startsWith(cityLower)) {
       const next = name[city.length]
-      if (!next || /[\s,|–—\-(/]/.test(next)) return city
+      if (!next || /[\s,|()\/\u2013\u2014-]/.test(next)) return city
     }
   }
 
-  return name.split(/\s*[,|–—\-]\s*/)[0]?.trim() || name
+  return name.split(/\s*[,|\u2013\u2014-]\s*/)[0]?.trim() || name
 }
 
 /**

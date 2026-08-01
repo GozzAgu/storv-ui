@@ -86,7 +86,8 @@ export const useCustomerBuybacksStore = defineStore('customerBuybacks', {
       if (isDemoModeActive()) {
         const storeId = (await getCurrentStoreId()) || ''
         if (force || this.buybacks.length === 0 || this.lastFetchedStoreId !== storeId) {
-          this.buybacks = []
+          const { getDemoBuybacks } = await import('~/utils/demo-bridge')
+          this.buybacks = getDemoBuybacks(storeId)
           this.lastFetchedStoreId = storeId
         }
         this.loading = false

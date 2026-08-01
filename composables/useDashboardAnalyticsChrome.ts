@@ -21,6 +21,7 @@ export function useDashboardAnalyticsChrome() {
   const exportBtnSuccessClass = 'dash-export-btn dash-export-btn--secondary'
   const metricCellsClass = 'dash-metric-cells'
   const metricCellClass = 'dash-metric-cell'
+  const featureInsightsGridClass = 'dash-feature-insights-grid'
 
   return {
     ...home,
@@ -37,5 +38,6 @@ export function useDashboardAnalyticsChrome() {
     exportBtnSuccessClass,
     metricCellsClass,
     metricCellClass,
+    featureInsightsGridClass,
   }
 }

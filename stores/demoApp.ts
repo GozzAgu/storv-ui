@@ -20,7 +20,7 @@ function normalizeDemoState(state: DemoState): DemoState {
       store.address = sanitizeDemoDisplayDashes(store.address)
     }
   }
-  state.version = 4
+  state.version = 5
   for (const store of state.stores) {
     for (const folder of store.folders) {
       if (folder.parentId === undefined) {
@@ -34,7 +34,10 @@ function normalizeDemoState(state: DemoState): DemoState {
 function isValidDemoState(value: unknown): value is DemoState {
   const state = value as DemoState
   return (
-    (state?.version === 2 || state?.version === 3 || state?.version === 4) &&
+    (state?.version === 2 ||
+      state?.version === 3 ||
+      state?.version === 4 ||
+      state?.version === 5) &&
     Array.isArray(state.stores) &&
     state.stores.length > 0
   )
@@ -46,7 +49,7 @@ function loadState(): DemoState {
     const raw = localStorage.getItem(DEMO_STORAGE_KEY)
     if (!raw) return createDemoSeedState()
     const parsed = JSON.parse(raw) as DemoState
-    if (!isValidDemoState(parsed) || parsed.version < 4) {
+    if (!isValidDemoState(parsed) || parsed.version < 5) {
       const fresh = createDemoSeedState()
       saveState(fresh)
       return fresh
@@ -54,7 +57,7 @@ function loadState(): DemoState {
     const namesBefore = parsed.stores.map((s) => s.name).join('\0')
     const state = normalizeDemoState(parsed)
     const namesAfter = state.stores.map((s) => s.name).join('\0')
-    if (parsed.version < 4 || namesBefore !== namesAfter) {
+    if (parsed.version < 5 || namesBefore !== namesAfter) {
       saveState(state)
     }
     return state

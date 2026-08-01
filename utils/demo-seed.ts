@@ -31,6 +31,7 @@ function lagosStore(): DemoStoreRecord {
         storeId: DEMO_STORE_LAGOS,
         name: 'iPhone 13 128GB',
         price: 485000,
+        unitCost: 380000,
         quantity: 4,
         sold: 2,
         sku: 'PH-13-128',
@@ -41,6 +42,7 @@ function lagosStore(): DemoStoreRecord {
         storeId: DEMO_STORE_LAGOS,
         name: 'Samsung A54',
         price: 265000,
+        unitCost: 210000,
         quantity: 6,
         sold: 1,
         sku: 'SM-A54',
@@ -51,6 +53,7 @@ function lagosStore(): DemoStoreRecord {
         storeId: DEMO_STORE_LAGOS,
         name: 'Silicone phone case',
         price: 8500,
+        unitCost: 4200,
         quantity: 24,
         sold: 8,
         sku: 'ACC-CASE',
@@ -61,6 +64,7 @@ function lagosStore(): DemoStoreRecord {
         storeId: DEMO_STORE_LAGOS,
         name: '20W USB-C charger',
         price: 12000,
+        unitCost: 6500,
         quantity: 15,
         sold: 3,
         sku: 'ACC-CHG',
@@ -102,6 +106,7 @@ function abujaStore(): DemoStoreRecord {
         storeId: DEMO_STORE_ABUJA,
         name: 'HP Laptop 15',
         price: 420000,
+        unitCost: 340000,
         quantity: 3,
         sold: 0,
         sku: 'HP-15',
@@ -212,6 +217,38 @@ function seedReceipts(state: DemoState) {
       status: 'completed',
       folderId: 'folder_lagos_accessories',
     },
+    {
+      id: 'rcpt_lagos_3',
+      storeId: DEMO_STORE_LAGOS,
+      receiptNumber: 'DEMO-1003',
+      customerName: 'Ada Okonkwo',
+      customerPhone: '0803 111 2233',
+      date: new Date(now - day * 4).toISOString(),
+      items: [
+        { itemId: 'item_lagos_samsung', itemName: 'Samsung A54', quantity: 1, price: 265000 },
+      ],
+      total: 265000,
+      paymentMethod: 'Transfer',
+      status: 'balance_due',
+      amountPaid: 145000,
+      balanceDue: 120000,
+      folderId: 'folder_lagos_smartphones',
+    },
+    {
+      id: 'rcpt_lagos_4',
+      storeId: DEMO_STORE_LAGOS,
+      receiptNumber: 'DEMO-1004',
+      customerName: 'Walk-in customer',
+      date: new Date(now - day * 6).toISOString(),
+      items: [
+        { itemId: 'item_lagos_case', itemName: 'Silicone phone case', quantity: 1, price: 8500 },
+      ],
+      total: 8500,
+      paymentMethod: 'Cash',
+      status: 'refunded',
+      refundReason: 'Wrong color',
+      folderId: 'folder_lagos_accessories',
+    },
   ]
 
   abuja.receipts = [
@@ -233,7 +270,7 @@ function seedReceipts(state: DemoState) {
 
 export function createDemoSeedState(): DemoState {
   const state: DemoState = {
-    version: 4,
+    version: 5,
     currentStoreId: DEMO_STORE_LAGOS,
     currencyCode: 'NGN',
     currencySymbol: '₦',

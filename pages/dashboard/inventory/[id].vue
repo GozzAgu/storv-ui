@@ -893,9 +893,9 @@
                                   >
                                     {{ formatCurrency(getItemCostForDisplay(item)!) }}
                                   </span>
-                                  <span v-else class="dashboard-table__muted italic">—</span>
+                                  <span v-else class="dashboard-table__muted italic">-</span>
                                 </div>
-                                <!-- Sell price (unit price) — amount only; margin lives in Margin column -->
+                                <!-- Sell price (unit price) - amount only; margin lives in Margin column -->
                                 <div v-else-if="isInventorySellPriceColumn(column)">
                                   <div
                                     v-if="item.discountedPrice !== undefined"
@@ -1117,7 +1117,7 @@
                   <span v-if="getItemCostForDisplay(mobileDetailItem) !== undefined">
                     {{ formatCurrency(getItemCostForDisplay(mobileDetailItem)!) }}
                   </span>
-                  <span v-else class="text-gray-400 italic dark:text-gray-500">—</span>
+                  <span v-else class="text-gray-400 italic dark:text-gray-500">-</span>
                 </div>
                 <div v-else-if="isInventorySellPriceColumn(column)" class="space-y-0.5">
                   <template v-if="mobileDetailItem.discountedPrice !== undefined">
@@ -1363,7 +1363,7 @@
             </div>
           </div>
 
-          <!-- Serial Numbers — fills remaining drawer height -->
+          <!-- Serial Numbers - fills remaining drawer height -->
           <div class="flex min-h-0 flex-1 flex-col gap-2">
             <div class="flex shrink-0 items-center justify-between gap-2">
               <h4 class="text-xs font-semibold text-gray-700 dark:text-gray-300">Serial numbers</h4>
@@ -3054,7 +3054,7 @@ function inventoryMarginClass(item: InventoryItem): string {
 
 const getItemMarginLabel = (item: InventoryItem) => {
   const profit = getItemGrossProfit(item)
-  if (profit === null) return '—'
+  if (profit === null) return '-'
   const margin = getItemMarginPercent(item)
   const profitPrefix = profit >= 0 ? '+' : ''
   return `${profitPrefix}${formatCurrency(profit)} · ${formatMarginPercent(margin)}`

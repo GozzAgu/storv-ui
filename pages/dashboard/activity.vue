@@ -84,7 +84,7 @@
             v-if="reachedFetchCap"
             class="border-b border-gray-100/90 px-4 py-2 text-[11px] text-gray-500 dark:border-gray-800/80 dark:text-gray-400 sm:px-5"
           >
-            Showing newest {{ fetchLimit }} events — use search to narrow results.
+            Showing newest {{ fetchLimit }} events - use search to narrow results.
           </p>
 
           <div v-if="loading" class="px-4 py-8 sm:px-6 sm:py-10">

@@ -7,7 +7,7 @@ import type { InventoryFolder } from '~/stores/inventory'
 describe('demo-seed', () => {
   it('seeds Lagos with Phones parent hub and Smartphones subcategory', () => {
     const state = createDemoSeedState()
-    expect(state.version).toBe(4)
+    expect(state.version).toBe(5)
 
     const lagos = state.stores.find((s) => s.id === DEMO_STORE_LAGOS)!
     const phones = lagos.folders.find((f) => f.id === 'folder_lagos_phones')!

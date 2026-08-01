@@ -177,6 +177,6 @@ const metaSize = computed(() => (props.compact ? 'text-[10px]' : 'text-[11px]'))
     class="px-2 py-2 text-gray-500 dark:text-gray-400"
     :class="compact ? 'text-[11px]' : 'text-xs'"
   >
-    {{ itemsCountFallback }} item{{ itemsCountFallback === 1 ? '' : 's' }} — details unavailable
+    {{ itemsCountFallback }} item{{ itemsCountFallback === 1 ? '' : 's' }} - details unavailable
   </p>
 </template>

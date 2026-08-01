@@ -1,5 +1,5 @@
 /**
- * Shared bottom-sheet chrome — More menu, CRUD drawers, assistant (iOS native).
+ * Shared bottom-sheet chrome - More menu, CRUD drawers, assistant (iOS native).
  */
 export type DashboardNativeSheetVariant = 'menu' | 'crud' | 'assistant'
 

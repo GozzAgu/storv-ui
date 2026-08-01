@@ -1,5 +1,5 @@
 <template>
-  <div :class="['w-full max-w-none space-y-5 pb-6 sm:space-y-6 sm:pb-8', 'dash-page--unified']">
+  <div :class="[pageWithFixedFooterClass, 'dash-page--unified']">
     <DashboardPageHeader class="dash-page-header--unified">
       <template #eyebrow>
         <p :class="eyebrowClass">Inventory</p>
@@ -39,19 +39,18 @@
     <template v-else>
       <div
         v-if="!storesStore.currentStoreId && !buybacksStore.loading"
-        class="rounded-sm bg-white/90 dark:!bg-dashboard-card sm:px-10"
+        class="dash-table-shell flex flex-1 flex-col overflow-hidden rounded-xl"
       >
         <DashboardTableEmptyState
           :icon="BuildingStorefrontIcon"
           title="Select a store"
           description="Use the store selector in the top bar to record buybacks for a branch."
           :tips="['Buybacks are tracked per store', 'Items appear in the category you choose']"
-          :fill="false"
         />
       </div>
 
-      <template v-else>
-        <div class="data-table-shell flex min-h-0 flex-1 flex-col overflow-hidden">
+      <div v-else class="flex min-h-0 flex-1 flex-col gap-4 sm:gap-5">
+        <div class="data-table-shell mt-1 flex min-h-0 flex-1 flex-col overflow-hidden sm:mt-0">
           <div
             v-if="buybacksStore.loading && buybacksStore.buybacks.length === 0"
             class="p-6 sm:p-8"
@@ -79,11 +78,7 @@
               'Items go into the inventory category you pick',
               'Use swap-in on a receipt when trade-in credit applies to a sale',
             ]"
-          >
-            <Button variant="primary" size="sm" :icon="ArrowUturnLeftIcon" @click="showCreateModal = true">
-              Record buyback
-            </Button>
-          </DashboardTableEmptyState>
+          />
 
           <div v-else class="overflow-x-auto">
             <table class="dashboard-table min-w-full">
@@ -140,7 +135,7 @@
             </table>
           </div>
         </div>
-      </template>
+      </div>
     </template>
 
     <CreateBuybackModal v-model="showCreateModal" />
@@ -165,7 +160,8 @@ definePageMeta({
   layout: 'dashboard',
 })
 
-const { eyebrowClass, pageTitleClass, headerBtnClass } = useDashboardPageChrome()
+const { eyebrowClass, pageTitleClass, headerBtnClass, pageWithFixedFooterClass } =
+  useDashboardPageChrome()
 
 const buybacksStore = useCustomerBuybacksStore()
 const inventoryStore = useInventoryStore()

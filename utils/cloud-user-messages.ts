@@ -1,4 +1,4 @@
-/** User-facing copy — avoid naming underlying cloud vendors in the product UI. */
+/** User-facing copy - avoid naming underlying cloud vendors in the product UI. */
 
 export const CLOUD_UNAVAILABLE_MESSAGE =
   'Unable to connect to Storvv cloud. Please refresh and try again.'

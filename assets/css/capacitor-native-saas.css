@@ -236,7 +236,7 @@ html.capacitor-native.dark .native-more-sheet__icon--active {
   color: #9ab5e3;
 }
 
-/* Unified bottom sheets — CRUD drawers, assistant, More menu (iOS) */
+/* Unified bottom sheets - CRUD drawers, assistant, More menu (iOS) */
 html.capacitor-ios.capacitor-native .dashboard-native-sheet {
   position: fixed;
   inset-inline: 0;
@@ -557,7 +557,7 @@ html.capacitor-native .dash-stat-card__subtext {
   line-height: 1.35;
 }
 
-/* iOS uses tighter uniform scale — see capacitor-ios.css */
+/* iOS uses tighter uniform scale - see capacitor-ios.css */
 html.capacitor-ios.capacitor-native .dash-stat-card__value,
 html.capacitor-ios.capacitor-native .dash-stat-card__label,
 html.capacitor-ios.capacitor-native .dash-stat-card__subtext {

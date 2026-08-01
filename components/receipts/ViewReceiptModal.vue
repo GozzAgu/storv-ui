@@ -179,7 +179,7 @@
                   <span v-if="receiptLineUnitCost(item) > 0">
                     {{ formatCurrency(receiptLineUnitCost(item)) }}
                   </span>
-                  <span v-else class="text-gray-400">—</span>
+                  <span v-else class="text-gray-400">-</span>
                 </td>
                 <td class="py-2 text-right text-[12px] font-medium tabular-nums text-gray-900">
                   <template v-if="item.hasDiscount && item.originalPrice">

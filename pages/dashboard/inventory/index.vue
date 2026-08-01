@@ -343,7 +343,7 @@
                     >
                       {{ formatFolderProfit(folder.id) }}
                     </span>
-                    <span v-else class="dashboard-table__muted text-xs">—</span>
+                    <span v-else class="dashboard-table__muted text-xs">-</span>
                   </td>
                   <td class="hidden md:table-cell dashboard-table__col-status">
                     <span
@@ -840,7 +840,7 @@
         </p>
         <p>
           You'll see per-category profit on category cards, a store-wide
-          <strong class="font-medium">Total profit</strong> summary, and margin on item rows —
+          <strong class="font-medium">Total profit</strong> summary, and margin on item rows -
           visible only to super admins.
         </p>
         <p>
@@ -1995,7 +1995,7 @@ const filteredFolders = computed(() => {
   return result
 })
 
-/** Top-level categories only — subcategories are opened inside their parent folder. */
+/** Top-level categories only - subcategories are opened inside their parent folder. */
 const foldersForCategoryList = computed(() => {
   const all = filteredFolders.value
   const query = searchQuery.value.trim()
@@ -2089,7 +2089,7 @@ function folderGrossProfitOnHand(folderId: string): number | null {
 
 function formatFolderProfit(folderId: string): string {
   const profit = folderGrossProfitOnHand(folderId)
-  if (profit === null) return '—'
+  if (profit === null) return '-'
   return formatCurrency(profit)
 }
 

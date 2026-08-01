@@ -33,7 +33,7 @@ export async function startNativeKeyboardHandling(): Promise<void> {
     }
     return
   } catch {
-    /* Keyboard plugin unavailable — fall back to visualViewport */
+    /* Keyboard plugin unavailable - fall back to visualViewport */
   }
 
   const syncFromViewport = () => {

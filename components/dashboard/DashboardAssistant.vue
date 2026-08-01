@@ -44,7 +44,7 @@
       id="dashboard-assistant-panel"
       v-model="assistantStore.isOpen"
       title="Storvv Assistant"
-      subtitle="Ask how to use inventory, sales, roles, and plans."
+      :subtitle="isDemoAssistant ? 'Demo mode: sample guidance only (no live AI or store data).' : 'Ask how to use inventory, sales, roles, and plans.'"
       eyebrow="Assistant"
       native-sheet-variant="assistant"
       size="md"
@@ -55,7 +55,7 @@
       <div class="dashboard-assistant__panel flex min-h-0 flex-1 flex-col">
         <div ref="messagesEl" class="dashboard-assistant__messages min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-5">
           <div
-            v-if="statusLoaded && isNativeApp && !apiBaseConfigured"
+            v-if="statusLoaded && isNativeApp && !apiBaseConfigured && !isDemoAssistant"
             class="dashboard-assistant__setup rounded-xl border border-amber-200/80 bg-amber-50 px-3 py-3 text-sm leading-relaxed text-amber-950 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-100"
           >
             The iOS app could not reach the Storvv server. Set
@@ -65,7 +65,7 @@
           </div>
 
           <div
-            v-else-if="statusLoaded && isNativeApp && !statusReachable"
+            v-else-if="statusLoaded && isNativeApp && !statusReachable && !isDemoAssistant"
             class="dashboard-assistant__setup rounded-xl border border-amber-200/80 bg-amber-50 px-3 py-3 text-sm leading-relaxed text-amber-950 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-100"
           >
             Could not reach Storvv at
@@ -76,7 +76,7 @@
           </div>
 
           <div
-            v-else-if="statusLoaded && !configured"
+            v-else-if="statusLoaded && !configured && !isDemoAssistant"
             class="dashboard-assistant__setup rounded-xl border border-amber-200/80 bg-amber-50 px-3 py-3 text-sm leading-relaxed text-amber-950 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-100"
           >
             <template v-if="isNativeApp">
@@ -98,8 +98,14 @@
 
           <div v-else-if="!assistantStore.hasConversation" class="dashboard-assistant__empty space-y-4">
             <p class="text-sm leading-relaxed text-gray-600 dark:text-gray-400">
-              I can explain Storvv screens, permissions, and workflows. I do not see your live stock,
-              sales, or customer data.
+              <template v-if="isDemoAssistant">
+                Demo assistant uses canned tips about buybacks, analytics insights, Quick Sale,
+                stock loans, and more. Sample numbers in charts are not your real store.
+              </template>
+              <template v-else>
+                I can explain Storvv screens, permissions, and workflows. I do not see your live stock,
+                sales, or customer data.
+              </template>
             </p>
             <div>
               <p class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
@@ -119,7 +125,7 @@
               </div>
             </div>
             <NuxtLink
-              to="/dashboard/help"
+              :to="dashPath('/help')"
               class="inline-flex text-sm font-medium text-primary-700 hover:text-primary-800 dark:text-primary-300 dark:hover:text-primary-200"
               @click="assistantStore.close()"
             >
@@ -161,7 +167,7 @@
               rows="2"
               class="app-field min-h-[2.75rem] flex-1 resize-none rounded-xl px-3 py-2 text-sm dark:!bg-white/[0.04]"
               placeholder="Ask about sales, inventory, staff roles…"
-              :disabled="!apiBaseConfigured || !statusLoaded || !configured || assistantStore.sending"
+              :disabled="assistantStore.sending || (!isDemoAssistant && (!apiBaseConfigured || !statusLoaded || !configured))"
               @keydown.enter.exact.prevent="submitDraft"
             />
             <Button
@@ -203,8 +209,9 @@ import DraggableFabContainer from '~/components/ui/DraggableFabContainer.vue'
 import { useDashboardAssistant } from '~/composables/useDashboardAssistant'
 import type { AssistantMessage } from '~/stores/assistant'
 
-const { configured, statusLoaded, statusReachable, apiBaseConfigured, isNativeApp, assistantStore, refreshStatus } =
+const { configured, statusLoaded, statusReachable, apiBaseConfigured, isNativeApp, isDemoAssistant, assistantStore, refreshStatus } =
   useDashboardAssistant()
+const { dashPath } = useDashboardPaths()
 
 const draft = ref('')
 const messagesEl = ref<HTMLElement | null>(null)
@@ -213,16 +220,14 @@ const inputEl = ref<HTMLTextAreaElement | null>(null)
 const suggestedPrompts = [
   'How do I create a sale?',
   'How do subcategories work?',
-  'What can store managers do?',
-  'Which plan includes Analytics?',
-  'How do stock loans work?',
+  'How do customer buybacks work?',
+  'What is in Analytics feature insights?',
+  'Which plan includes Payment links?',
 ] as const
 
 const canSend = computed(
   () =>
-    apiBaseConfigured.value &&
-    statusLoaded.value &&
-    configured.value &&
+    (isDemoAssistant.value || (apiBaseConfigured.value && statusLoaded.value && configured.value)) &&
     draft.value.trim().length > 0 &&
     !assistantStore.sending
 )

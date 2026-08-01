@@ -640,7 +640,7 @@ export const useInventoryStore = defineStore('inventory', {
 
     /**
      * Load every inventory item in the current branch, grouped by category.
-     * Used for Excel export — scans the whole store collection (no createdBy filter for owners).
+     * Used for Excel export - scans the whole store collection (no createdBy filter for owners).
      */
     async fetchAllItemsByFolderForExport(): Promise<Record<string, InventoryItem[]>> {
       if (this.folders.length === 0) {

@@ -89,7 +89,7 @@ export function sumReceiptCogs(
 }
 
 export function formatMarginPercent(value: number | null | undefined): string {
-  if (value === null || value === undefined || !Number.isFinite(value)) return '—'
+  if (value === null || value === undefined || !Number.isFinite(value)) return '-'
   return `${value.toFixed(0)}%`
 }
 

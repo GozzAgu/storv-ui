@@ -74,13 +74,13 @@
       <div v-if="folderId && folder" class="space-y-3 rounded-sm bg-gray-50/90 p-3 dark:bg-gray-900/40">
         <p class="text-xs font-semibold text-gray-800 dark:text-gray-200">Item details</p>
         <BuybackItemFields
-          :fields="displayFields"
+          :fields="buybackDisplayFields"
           :model-value="itemForm"
           :field-label="fieldLabel"
           :field-placeholder="fieldPlaceholder"
           @update:model-value="itemForm = $event"
         />
-        <p v-if="displayFields.length === 0" class="text-xs text-gray-500 dark:text-gray-400">
+        <p v-if="buybackDisplayFields.length === 0" class="text-xs text-gray-500 dark:text-gray-400">
           This category has no fields configured yet.
         </p>
       </div>
@@ -193,7 +193,7 @@ const {
   folderId,
   itemForm,
   folder,
-  displayFields,
+  buybackDisplayFields,
   fieldLabel,
   fieldPlaceholder,
   validateRequiredFields,
@@ -212,7 +212,7 @@ const submitting = ref(false)
 const canSubmit = computed(() => {
   if (!customerName.value.trim()) return false
   if (!folderId.value || !folder.value) return false
-  if (!validateRequiredFields()) return false
+  if (!validateRequiredFields({ excludeCostPrice: true })) return false
   const price = Number(purchasePrice.value)
   if (!Number.isFinite(price) || price <= 0) return false
   if (!paymentMethod.value.trim()) return false

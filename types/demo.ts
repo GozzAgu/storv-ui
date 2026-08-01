@@ -14,6 +14,8 @@ export interface DemoItem {
   quantity: number
   sold: number
   sku?: string
+  /** Unit cost for profit analytics in demo. */
+  unitCost?: number
 }
 
 export interface DemoCustomer {
@@ -43,8 +45,11 @@ export interface DemoReceipt {
   items: DemoReceiptLine[]
   total: number
   paymentMethod: string
-  status: 'completed' | 'refunded'
+  status: 'completed' | 'refunded' | 'balance_due' | 'pending'
   folderId: string
+  amountPaid?: number
+  balanceDue?: number
+  refundReason?: string
 }
 
 export interface DemoStoreRecord {
@@ -82,7 +87,7 @@ export interface DemoTransfer {
 }
 
 export interface DemoState {
-  version: 2 | 3 | 4
+  version: 2 | 3 | 4 | 5
   currentStoreId: string
   currencyCode: string
   currencySymbol: string

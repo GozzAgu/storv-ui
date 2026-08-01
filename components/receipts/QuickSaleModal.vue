@@ -1,10 +1,10 @@
 <template>
-  <Modal
+  <SidePanel
     :model-value="modelValue"
     title="Quick Sale"
     subtitle="Scan or search items, then complete payment"
     size="lg"
-    @update:model-value="$emit('update:modelValue', $event)"
+    @update:model-value="(value: boolean) => emit('update:modelValue', value)"
   >
     <div class="space-y-4">
         <SellScreenNoteBanner />
@@ -469,26 +469,28 @@
       </div>
 
     <template #footer>
-      <div class="flex gap-2 justify-end">
+      <div class="flex w-full flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-end">
         <Button
           variant="outline"
           size="sm"
-          @click="$emit('update:modelValue', false)"
-          extra-class="!rounded-2xl"
-          >Cancel</Button
+          :class="[footerBtnOutlineClass, 'w-full sm:w-auto']"
+          @click="handleCancel"
         >
+          Cancel
+        </Button>
         <Button
+          variant="primary"
           size="sm"
-          @click="completeSale"
+          :class="[footerBtnPrimaryClass, 'w-full sm:w-auto']"
           :loading="isProcessing"
           :disabled="!canCompleteQuickSale"
-          extra-class="!rounded-2xl"
+          @click="completeSale"
         >
           Complete Sale ({{ currencySymbol }}{{ formatCurrency(cartTotal) }})
         </Button>
       </div>
     </template>
-  </Modal>
+  </SidePanel>
 </template>
 
 <script setup lang="ts">
@@ -507,7 +509,7 @@ import {
   FolderIcon,
   CheckIcon,
 } from '~/utils/app-icons'
-import Modal from '~/components/ui/Modal.vue'
+import SidePanel from '~/components/ui/SidePanel.vue'
 import SellScreenNoteBanner from '~/components/receipts/SellScreenNoteBanner.vue'
 import PaymentMethodSelect from '~/components/receipts/PaymentMethodSelect.vue'
 import DashboardDrawerSearch from '~/components/dashboard/DashboardDrawerSearch.vue'
@@ -564,6 +566,8 @@ const {
   pickRowTitleClass,
   pickRowMetaClass,
   emptyStateClass,
+  footerBtnOutlineClass,
+  footerBtnPrimaryClass,
 } = useDashboardDrawerChrome()
 
 const {
@@ -610,6 +614,11 @@ const selectedFolderLabel = computed(() => {
   const parent = selectedParentFolder.value
   return parent && parent.id !== folder.id ? `${folder.name} · ${parent.name}` : folder.name
 })
+
+function handleCancel() {
+  stopScanner()
+  emit('update:modelValue', false)
+}
 
 function openCategoryPicker() {
   stopScanner()

@@ -199,8 +199,8 @@ function buildExportInfoText(meta: StoreExportMeta | undefined, folders: number,
     `Total items: ${items}`,
     '',
     'Structure:',
-    '- categories.xlsx — list of all categories (folders)',
-    '- {Category name}/items.xlsx — products in that category',
+    '- categories.xlsx - list of all categories (folders)',
+    '- {Category name}/items.xlsx - products in that category',
   ].join('\n')
 }
 

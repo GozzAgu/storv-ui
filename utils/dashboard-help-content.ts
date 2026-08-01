@@ -29,8 +29,38 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
   {
     id: 'recent-updates',
     title: 'Recent updates',
-    blurb: 'Highlights from the latest Storvv releases (May 2026).',
+    blurb: 'Highlights from recent Storvv releases.',
     articles: [
+      {
+        title: 'Customer buybacks',
+        body: [
+          'Super admins can record customer buybacks from Inventory → Customer buybacks (/dashboard/buybacks). Use this when someone sells an item to your store: you pay them, a new inventory row is created in the leaf category you pick, and the buyback appears in the list with customer, item, amount paid, and payment method.',
+          'Record buyback opens a side drawer: pick a leaf category (parent · subcategory labels when applicable), fill the item fields for that template, enter amount paid to the customer and payment method, then save. That amount becomes the item unit cost in inventory.',
+          'On Create New Sale, super admins can add swap-in / buyback credit lines when trade-in value applies to a sale. Buybacks are scoped to the active store in the header switcher.',
+        ],
+        bullets: [
+          'Only store owners (super admins) can record buybacks; managers and staff do not see this screen.',
+          'Use leaf categories only—the same rule as adding products or creating a sale.',
+        ],
+      },
+      {
+        title: 'Analytics feature insights',
+        body: [
+          'Analytics & Reports (/dashboard/analytics) on Storvv Medium and Enterprise now includes a Feature insights grid alongside charts and exports. After you pick Daily, Weekly, or Monthly, cards summarize sales, returns, outstanding balances, inventory health, customers, profit and cost (super admin), operations, buybacks, customer balance ledger, stock loans, and payment links where your plan includes them.',
+          'Inventory health shows available vs sold units, low-stock lines, and book value with the same progress bar as the dashboard home. Peak hours, sales by hour, day-of-week charts, and the traffic heatmap help you spot busy periods.',
+        ],
+        bullets: [
+          'Analytics requires a selected store; super admins use the header store switcher.',
+          'Export PDF and Export Excel download reports for the active period and branch.',
+        ],
+      },
+      {
+        title: 'Quick Sale side drawer',
+        body: [
+          'Quick Sale opens as a right-side drawer (not a centered modal) from the Sales page. Pick a parent category, then a subcategory when the parent has children, then scan barcodes or search products. External USB barcode scanners work as keyboard input when the scan field is focused.',
+          'Quick Sale shares the same category hierarchy and stock checks as Create New Sale. Over-quantity lines show an error and block checkout.',
+        ],
+      },
       {
         title: 'Stock loans (Enterprise)',
         body: [
@@ -69,7 +99,7 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
         body: [
           'Storvv is your operational workspace: inventory lives in folders and items, sales are recorded as receipts (with customers on the same Sales screen), and optional areas include Analytics, Activity Logs, Departments, and Multi-Store Sync depending on your subscription.',
           'Nearly all data is tied to the store that is active for your session. Super admins switch stores from the store selector in the header; managers and staff work inside the store they have been assigned.',
-          'The sidebar lists real product routes: Dashboard, Inventory, Stock loans (Enterprise, managers/super admins), Receipts, Analytics, Activity Logs, Multi-Store Sync, Help center, Settings, and Profile. Items such as Analytics, Stock loans, or Multi-Store Sync only appear when your plan and role include them.',
+          'The sidebar lists real product routes: Dashboard, Inventory, Customer buybacks (super admins), Stock loans (Enterprise, managers/super admins), Receipts, Analytics, Activity Logs, Multi-Store Sync, Payment links (when enabled), Help center, Settings, and Profile. Items such as Analytics, Stock loans, Payment links, or Multi-Store Sync only appear when your plan and role include them.',
         ],
       },
       {
@@ -139,7 +169,7 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
       {
         title: 'Categories list (/dashboard/inventory)',
         body: [
-          'The Inventory entry opens top-level categories only: search, filter by department, sort by name / products / date, and paginate. Subcategories (for example Corolla under Toyota) do not appear on this main list — open the parent category to see them.',
+          'The Inventory entry opens top-level categories only: search, filter by department, sort by name / products / date, and paginate. Subcategories (for example Corolla under Toyota) do not appear on this main list - open the parent category to see them.',
           'Category cards show how many subcategories a parent has when applicable. Use the grid / table toggle next to the filters to switch layout. Grid shows category cards; table matches the same styling as the product table inside a category.',
           'Super admins can create top-level categories with New category, rename, delete, and bulk-delete where the UI provides those actions. Storvv Micro may show upsell messaging when category limits apply.',
         ],
@@ -149,9 +179,9 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
         body: [
           'Storvv supports one level of subcategories: a top-level category (parent) can contain subcategories, but subcategories cannot contain further nested folders. Example: Inventory → Toyota (parent) → Corolla, Camry (subcategories).',
           'Open a parent category from /dashboard/inventory to reach its subcategory hub. The hub lists subcategory cards (same card style as top-level categories) and an Add subcategory button when the parent has no products directly in it.',
-          'Products always live in leaf categories: either a subcategory (Corolla) or a top-level category that has no subcategories. You cannot add products to a parent that still has subcategories — open a subcategory instead.',
+          'Products always live in leaf categories: either a subcategory (Corolla) or a top-level category that has no subcategories. You cannot add products to a parent that still has subcategories - open a subcategory instead.',
           'When creating a subcategory, it inherits the parent’s column template, serial vs quantity mode, profit tracking, department access, type, and color. You only enter a subcategory name and optional description.',
-          'Add subcategory from the parent hub, or from inside any subcategory under the same parent (Add subcategory adds a sibling). The main Categories page does not create subcategories — only top-level categories.',
+          'Add subcategory from the parent hub, or from inside any subcategory under the same parent (Add subcategory adds a sibling). The main Categories page does not create subcategories - only top-level categories.',
           'If a parent category already has products in it, you cannot add subcategories to that parent. Organize with subcategories before adding stock at the parent level, or use a fresh parent category.',
           'When a super admin edits a parent category and changes columns, tracking, or access settings, Storvv asks whether to apply those changes to existing subcategories too (Parent only vs Apply to subcategories). Name and description of each subcategory are never overwritten by that sync.',
           'Sales and Create New Sale only let you pick leaf categories (subcategories or categories without children). Data export (Settings → Data export) writes inventory ZIP folders as Parent/Subcategory/items.xlsx when subcategories exist.',
@@ -165,7 +195,7 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
         title: 'Inside a category (/dashboard/inventory/[id])',
         body: [
           'Parent categories with subcategories (or an empty parent ready for subcategories) show the subcategory hub instead of a product table.',
-          'Leaf categories — subcategories or top-level categories without children — open a table of products with the columns your template defines. Use pagination, search, and filters from the toolbar.',
+          'Leaf categories - subcategories or top-level categories without children - open a table of products with the columns your template defines. Use pagination, search, and filters from the toolbar.',
           'Row actions (three-dot menu) include History (item timeline), Add discount / Discount for line-level pricing, and Edit item when the item is not locked. Items tied to completed sales can be restricted so catalog edits do not fight receipt history.',
         ],
       },
@@ -174,6 +204,17 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
         body: [
           'Folder creation, item creation, and editing item definitions require a super admin. Managers and staff pick from the catalog when building receipts but cannot create folders or redefine items.',
           'Quantities typically move when receipts complete or refunds process; use those flows plus super-admin corrections rather than informal workarounds.',
+        ],
+      },
+      {
+        title: 'Customer buybacks (/dashboard/buybacks)',
+        body: [
+          'Customer buybacks is under Inventory in the sidebar for super admins only. Record when a customer sells stock to your branch: you capture item details in a leaf category, pay the customer, and Storvv adds the unit to inventory with that purchase price as unit cost.',
+          'The buybacks table lists customer, item summary, amount paid, payment method, and date. Open View in stock to jump to the inventory row. Swap-in credit on Create New Sale can apply buyback value toward a purchase when your workflow uses trade-ins.',
+        ],
+        bullets: [
+          'Managers and staff cannot open Customer buybacks; only the store owner account can.',
+          'Pick the correct leaf category before recording so columns and serial vs quantity mode match the item.',
         ],
       },
       {
@@ -205,17 +246,32 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
       {
         title: 'Create New Sale (four steps)',
         body: [
-          'The drawer title is “Create New Sale” with subtitle “Pick category, subcategory, items, then sale details.” Step 1: pick a parent category (for example Toyota or Office Chairs). Step 2: pick a subcategory when the parent has children (for example Corolla under Toyota); leaf categories skip this step. Step 3: select items and quantities; use “Add from another category” to keep your cart and add lines from more categories in one sale. Step 4: sale details — customer fields, payment method, paid in full or balance due, and notes.',
+          'The drawer title is “Create New Sale” with subtitle “Pick category, subcategory, items, then sale details.” Step 1: pick a parent category (for example Toyota or Office Chairs). Step 2: pick a subcategory when the parent has children (for example Corolla under Toyota); leaf categories skip this step. Step 3: select items and quantities; use “Add from another category” to keep your cart and add lines from more categories in one sale. Step 4: sale details - customer fields, payment method, paid in full or balance due, and notes.',
           'Selected items are grouped by category before checkout. Serial folders can include lines on an active Stock loan: you may add them like other sellable SKUs. Completing the sale marks them sold and updates the borrower loan in the background when your plan includes Stock loans (Enterprise).',
           'After you reach the items step, if your branch has a Sell screen note configured in Settings → create or edit branch, a short banner can appear at the top of the items and checkout steps with store-specific reminders (for example promos or price notes).',
           'Super admins can enable swap-in style lines inside the receipt flow when your business records trade-ins alongside standard SKUs.',
         ],
       },
       {
-        title: 'Quick Sale, split payment, and sell screen notes',
+        title: 'Quick Sale (side drawer)',
         body: [
-          'Quick Sale is a streamlined checkout view for scanning or adding products quickly in the active branch. Pick a parent category, then a subcategory when needed (same hierarchy as Create New Sale), before scanning barcodes or searching SKUs. When split payment is enabled, you can allocate amounts across multiple methods; the screen shows how much is assigned versus the total so you can balance the sale before completing.',
-          'Sell screen notes are short messages set per branch in Settings (Create / Edit Branch). They appear on Quick Sale and on Create New Receipt after you choose a folder, so cashiers see branch-specific reminders without opening Settings.',
+          'Quick Sale opens from the Sales page toolbar as a side drawer. Step through parent category → subcategory (when needed) → product list, then add lines to the cart. Barcode scanning and wedge scanners (keyboard input) work when the active category is selected and the scan field is focused.',
+          'Stock validation matches Create New Sale: you cannot add more quantity than available, and checkout stays disabled until the cart is valid. Quick Sale uses the same payment and customer fields as other checkout flows where shown.',
+          'Sell screen notes from Settings → branch profile appear at the top of Quick Sale and Create New Sale after you pick a category, so cashiers see branch reminders inline.',
+        ],
+      },
+      {
+        title: 'Payment links',
+        body: [
+          'Payment links (/dashboard/payment-links) let you create shareable Paystack checkout links for remote sales when your plan includes payment_links. Connect a payout account first, then create links with customer name, amount, and description.',
+          'The Payment links summary on Dashboard home and Analytics shows collected, paid, unpaid, and failed counts plus recent links. On native iOS/Android apps, payment links may show as coming soon depending on build configuration—use the web app for full setup when needed.',
+        ],
+      },
+      {
+        title: 'Customer balance and credit ledger',
+        body: [
+          'Storvv Medium and Enterprise include customer balance tracking on the Sales → Customers tab. When a sale is completed with balance due or credit applied, the customer ledger records charges and payments.',
+          'Open a customer row menu to view or adjust balance where your role allows. Payment reminders and WhatsApp nudges for outstanding balances follow your plan limits (Micro caps WhatsApp sends per month).',
         ],
       },
       {
@@ -254,13 +310,15 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
         body: [
           'Analytics & Reports (/dashboard/analytics) appears when your subscription exposes it in the sidebar (Storvv Medium and Enterprise include analytics navigation; Storvv Micro focuses on core sales and inventory).',
           'You must select a store first; the page shows a centered prompt with a link to Settings if nothing is selected.',
-          'Use the period picker: Daily, Weekly, or Monthly. Cards summarize total revenue (with % change vs previous), total sales and order counts, average order value, low stock count, and refund totals.',
+          'Use the period picker: Daily (last 30 days), Weekly (last 12 weeks), or Monthly (last 12 months). Header metrics summarize total revenue, completed revenue, orders, average order value, customers in period, low stock count, refunds, and gross profit / COGS when the owner can view cost data.',
+          'A period summary paragraph and Inventory health bar mirror the dashboard home. Feature insights cards break down sales, returns, outstanding balances, inventory, customers, profit, operations, buybacks, customer balance, and stock loans depending on role and plan.',
         ],
       },
       {
-        title: 'Charts and exports',
+        title: 'Charts, tables, and exports',
         body: [
-          'Charts include revenue trend visuals for the active period label.',
+          'Charts include revenue trends, top products (donut and table), sales by category, top customers, payment methods, peak hours, sales by hour and day of week, and a day × hour traffic heatmap.',
+          'Tables list top products, top customers, recent returns, and low stock with an export reorder list action. Payment links summary appears when your plan includes payment links.',
           'Export PDF and Export Excel buttons in the header download reports for the current store and period; they disable while an export is running.',
         ],
       },
@@ -401,9 +459,11 @@ export function buildAssistantSystemPrompt(knowledgeBase: string): string {
     '- Answer ONLY about how to use Storvv: navigation, roles, permissions, plans, and workflows.',
     '- Use the knowledge base below as your primary source. If unsure, say you are not sure and suggest the Help center (/dashboard/help).',
     '- NEVER invent live store data (stock counts, prices, customer names, profits, receipt numbers). You cannot access the user account.',
-    '- Keep answers concise (2-5 short paragraphs or bullets). Mention relevant routes like /dashboard/inventory when helpful.',
+    '- Keep answers concise (2-5 short paragraphs or bullet lists). Mention relevant routes like /dashboard/inventory when helpful.',
+    '- Use plain text only. Do NOT use Markdown bold (**text**), headings (#), or other Markdown formatting. For lists, use lines starting with "- " (hyphen and space).',
     '- Explain role and plan limits in general terms; remind users that missing controls may mean their role or plan does not include a feature.',
-    '- Inventory uses top-level categories plus optional one-level subcategories (not unlimited nesting). When users ask about subfolders or subcategories, describe the parent hub, leaf-only products, and inheritance rules from the knowledge base — do not say folders are strictly flat.',
+    '- Inventory uses top-level categories plus optional one-level subcategories (not unlimited nesting). When users ask about subfolders or subcategories, describe the parent hub, leaf-only products, and inheritance rules from the knowledge base - do not say folders are strictly flat.',
+    '- Customer buybacks (/dashboard/buybacks) are super-admin only. Quick Sale and Create New Sale use parent → subcategory → items → checkout. Analytics includes feature insight cards for sales, inventory, buybacks, loans, and balances when applicable.',
     '',
     'Knowledge base:',
     knowledgeBase,

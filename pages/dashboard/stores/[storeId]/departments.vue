@@ -286,7 +286,7 @@
                       {{
                         formatCategoryDate(department.updatedAt) ??
                         formatCategoryDate(department.createdAt) ??
-                        '—'
+                        '-'
                       }}
                     </span>
                   </td>

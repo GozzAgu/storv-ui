@@ -88,7 +88,7 @@ html.capacitor-native .dashboard-fixed-footer--native {
   padding-bottom: 0;
 }
 
-/* Empty states fill the remaining shell height — never add viewport min-height (causes page overflow). */
+/* Empty states fill the remaining shell height - never add viewport min-height (causes page overflow). */
 .dash-table-empty-state--fill {
   flex: 1 1 auto;
   min-height: 0;

@@ -1,6 +1,6 @@
 import { isCapacitorNative } from '~/utils/capacitor-env'
 
-/** Remove Google Fonts link tags — native uses system UI fonts for faster first paint. */
+/** Remove Google Fonts link tags - native uses system UI fonts for faster first paint. */
 export function stripNativeWebFontLinks(): void {
   if (typeof document === 'undefined') return
   document

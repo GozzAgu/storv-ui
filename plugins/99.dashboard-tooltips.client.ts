@@ -1,5 +1,5 @@
 /**
- * Styled dashboard tooltips — opt-in only via `data-dashboard-tooltip`.
+ * Styled dashboard tooltips - opt-in only via `data-dashboard-tooltip`.
  * Do not use native `title` for hover hints; it shows unstyled browser chrome and clutters the UI.
  * Icon-only controls should use `aria-label`; truncated text can set `data-dashboard-tooltip` when needed.
  */

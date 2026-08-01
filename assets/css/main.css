@@ -1106,7 +1106,7 @@ html.theme-transitioning .dashboard-global-tooltip-bubble {
     background-color: rgb(255 255 255 / 0.03);
   }
 
-  /* Inventory categories — unified header styles live in dashboard-pages.css */
+  /* Inventory categories - unified header styles live in dashboard-pages.css */
   [data-inventory-categories].dash-grid-page {
     gap: 0.875rem;
   }

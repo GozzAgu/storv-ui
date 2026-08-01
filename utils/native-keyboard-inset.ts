@@ -1,4 +1,4 @@
-/** Keyboard overlap (px) for native shells — used to lift drawer content above the keyboard. */
+/** Keyboard overlap (px) for native shells - used to lift drawer content above the keyboard. */
 export function computeVisualKeyboardInset(): number {
   if (typeof window === 'undefined' || !window.visualViewport) return 0
   const viewport = window.visualViewport

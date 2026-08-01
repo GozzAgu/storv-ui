@@ -1,5 +1,5 @@
 /**
- * Capacitor iOS — uniform typography, glass surfaces, futuristic polish.
+ * Capacitor iOS - uniform typography, glass surfaces, futuristic polish.
  * Scoped to html.capacitor-ios.capacitor-native (web + Android unchanged).
  */
 
@@ -8,12 +8,12 @@ html.capacitor-ios.capacitor-native {
     sans-serif;
   --cap-ios-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, monospace;
 
-  /* Four-tier type scale — no awkward jumps */
+  /* Four-tier type scale - no awkward jumps */
   --cap-ios-caption: 0.6875rem; /* 11px labels, eyebrows, table headers, meta */
   --cap-ios-body: 0.8125rem; /* 13px default UI copy */
   --cap-ios-title: 0.9375rem; /* 15px section titles, stat values, emphasis */
   --cap-ios-display: 1.0625rem; /* 17px page title only */
-  --cap-ios-input: 1rem; /* 16px fields — prevents iOS focus zoom */
+  --cap-ios-input: 1rem; /* 16px fields - prevents iOS focus zoom */
 
   --cap-ios-leading-tight: 1.32;
   --cap-ios-leading: 1.45;
@@ -162,7 +162,7 @@ html.capacitor-ios.capacitor-native [data-auth-shell] .auth-field__label {
   font-size: var(--cap-ios-body) !important;
 }
 
-/* ── Top chrome — floating glass ── */
+/* ── Top chrome - floating glass ── */
 html.capacitor-ios.capacitor-native .dashboard-top-nav.dashboard-top-nav-native,
 html.capacitor-ios.capacitor-native .dashboard-native-shell .dashboard-top-nav {
   border-bottom: 1px solid var(--cap-ios-glass-border) !important;
@@ -190,7 +190,7 @@ html.capacitor-ios.capacitor-native .native-topnav-page__title {
   letter-spacing: -0.015em;
 }
 
-/* ── Bottom tab bar — floating glass pill ── */
+/* ── Bottom tab bar - floating glass pill ── */
 html.capacitor-ios.capacitor-native .native-tabbar {
   position: relative;
   isolation: isolate;
@@ -293,7 +293,7 @@ html.capacitor-ios.capacitor-native.dark .native-tabbar .text-primary-400 {
   color: #b8c9eb !important;
 }
 
-/* ── Page header & KPI — glass cards ── */
+/* ── Page header & KPI - glass cards ── */
 html.capacitor-ios.capacitor-native .dash-page-header {
   border-radius: var(--cap-ios-radius-lg);
   border: 1px solid var(--dash-card-border);
@@ -312,7 +312,7 @@ html.capacitor-ios.capacitor-native.dark .dash-page-header {
     0 16px 40px -20px rgb(0 0 0 / 0.45);
 }
 
-/* Unified header — full-width metrics row (matches web) */
+/* Unified header - full-width metrics row (matches web) */
 html.capacitor-ios.capacitor-native .dash-page-header.dash-page-header--unified {
   display: flex !important;
   flex-direction: column !important;
@@ -526,7 +526,7 @@ html.capacitor-ios.capacitor-native.dark .dash-page-context-bar {
     0 12px 32px -16px rgb(0 0 0 / 0.42);
 }
 
-/* Inventory categories — counts first, money second */
+/* Inventory categories - counts first, money second */
 html.capacitor-ios.capacitor-native
   .dash-page-metrics:has([data-metric-key='categories'])
   [data-metric-key='categories'] {
@@ -644,7 +644,7 @@ html.capacitor-ios.capacitor-native .dash-profile-stats__value {
   letter-spacing: -0.02em;
 }
 
-/* Dashboard home — StatCard KPI grid (welcome header stays a glass card) */
+/* Dashboard home - StatCard KPI grid (welcome header stays a glass card) */
 html.capacitor-ios.capacitor-native .dash-home {
   gap: 0.625rem;
 }
@@ -765,7 +765,7 @@ html.capacitor-ios.capacitor-native .btn-outline:active {
   transform: scale(0.98);
 }
 
-/* Dashboard action buttons — clear outline + contextual icons */
+/* Dashboard action buttons - clear outline + contextual icons */
 html.capacitor-ios.capacitor-native
   [data-dashboard-main]
   button.group.relative.inline-flex.items-center.justify-center.overflow-hidden.border-0.font-semibold.tracking-tight {
@@ -1260,7 +1260,7 @@ html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table t
   font-size: var(--cap-ios-body);
 }
 
-/* Price / cost meta rows — single line, no stacked profit tint */
+/* Price / cost meta rows - single line, no stacked profit tint */
 html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table td.dash-native-table__cell--meta.dashboard-table__col-price,
 html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table td.dash-native-table__cell--meta.dashboard-table__col-cost {
   align-items: center;
@@ -1280,7 +1280,7 @@ html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table t
   font-size: var(--cap-ios-caption);
 }
 
-/* Margin meta row — muted, compact */
+/* Margin meta row - muted, compact */
 html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table td.dash-native-table__cell--meta.dashboard-table__col-margin {
   padding-block: 0.25rem;
 }
@@ -1305,7 +1305,7 @@ html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table t
   text-align: right;
 }
 
-/* Inventory folder detail — mobile detail sheet profit line */
+/* Inventory folder detail - mobile detail sheet profit line */
 html.capacitor-ios.capacitor-native .inventory-items-table-wrap .dashboard-table__numeric {
   font-size: var(--cap-ios-body);
   font-weight: 500;
@@ -1325,7 +1325,7 @@ html.capacitor-ios.capacitor-native .dash-native-table--cards .dash-table-toolba
   padding-bottom: 0.375rem;
 }
 
-/* Empty states — keep content above bottom nav + FAB */
+/* Empty states - keep content above bottom nav + FAB */
 html.capacitor-ios.capacitor-native .data-table-shell .dash-table-empty-state--fill,
 html.capacitor-ios.capacitor-native .dash-table-shell .dash-table-empty-state--fill,
 html.capacitor-ios.capacitor-native .dash-grid-shell .dash-table-empty-state--fill {
@@ -1341,7 +1341,7 @@ html.capacitor-ios.capacitor-native .dash-table-empty-state .dark\:text-gray-500
   color: var(--dash-muted) !important;
 }
 
-/* Inventory product detail sheet — match native card meta rows */
+/* Inventory product detail sheet - match native card meta rows */
 html.capacitor-ios.capacitor-native .dash-native-detail-dl > div {
   display: grid;
   grid-template-columns: minmax(4.25rem, 34%) minmax(0, 1fr);
@@ -1371,7 +1371,7 @@ html.capacitor-ios.capacitor-native .dash-native-detail-dl dd {
   text-align: right;
 }
 
-/* Department grid cards — prevent footer date overlap on narrow screens */
+/* Department grid cards - prevent footer date overlap on narrow screens */
 html.capacitor-ios.capacitor-native .dept-grid-card .dash-grid-card__footer-row {
   flex-wrap: wrap;
   row-gap: 0.375rem;
@@ -1386,7 +1386,7 @@ html.capacitor-ios.capacitor-native .dept-grid-card .dash-grid-card__value {
   color: var(--dash-muted);
 }
 
-/* Departments list — hide grid on iOS when table shell is active */
+/* Departments list - hide grid on iOS when table shell is active */
 html.capacitor-ios.capacitor-native .departments-shell--table .departments-grid {
   display: none !important;
 }
@@ -1456,7 +1456,7 @@ html.capacitor-ios.capacitor-native .dash-dept-roster-toolbar .dash-page-context
   gap: 0.5rem;
 }
 
-/* Segmented tabs — full width inside shells and headers */
+/* Segmented tabs - full width inside shells and headers */
 html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-segment-tabs,
 html.capacitor-ios.capacitor-native .data-table-shell .dash-segment-tabs,
 html.capacitor-ios.capacitor-native .dash-table-toolbar .dash-segment-tabs {
@@ -1506,7 +1506,7 @@ html.capacitor-ios.capacitor-native .dash-segment__btn--active {
   box-shadow: none;
 }
 
-/* KPI / info metrics — 2×2 for four stats (Activity Logs style) */
+/* KPI / info metrics - 2×2 for four stats (Activity Logs style) */
 html.capacitor-ios.capacitor-native
   .dash-page-header--unified
   .dash-page-metrics:has(> .dash-page-metric:nth-child(4):last-child) {
@@ -1554,7 +1554,7 @@ html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-metric
   letter-spacing: -0.02em;
 }
 
-/* Filter pills in unified header — same as dash-segment-tabs */
+/* Filter pills in unified header - same as dash-segment-tabs */
 html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-header__toolbar .dash-segment-tabs {
   width: 100%;
 }
@@ -1563,7 +1563,7 @@ html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-header
   width: 100%;
 }
 
-/* Icon buttons — proportional touch targets */
+/* Icon buttons - proportional touch targets */
 html.capacitor-ios.capacitor-native .dash-view-toggle {
   padding: 0.1875rem;
   border-radius: 0.625rem;

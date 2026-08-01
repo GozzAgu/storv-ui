@@ -450,7 +450,7 @@ const {
 
 /** Max rows shown in dashboard list cards (no in-card scrolling). */
 const DASHBOARD_LIST_TOP = 5
-/** Recent activity rows are taller (badge + two lines) — show fewer to match card height. */
+/** Recent activity rows are taller (badge + two lines) - show fewer to match card height. */
 const DASHBOARD_ACTIVITY_TOP = 3
 
 const tutorialSteps: TutorialStep[] = [

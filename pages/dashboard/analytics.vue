@@ -81,6 +81,74 @@
     </template>
 
     <template v-else>
+      <section v-if="analyticsSummary" :class="cardPaddedClass">
+        <p :class="summaryTextClass">{{ analyticsSummary }}</p>
+      </section>
+
+      <section :class="[cardPaddedClass, 'dash-inventory-health']">
+        <div :class="[cardHeaderClass, 'dash-card__header--compact dash-inventory-health__header']">
+          <div>
+            <p :class="eyebrowClass">Inventory health</p>
+            <p :class="cardDescClass">
+              <span :class="numClass">{{ featureInStockCount }}</span> available units ·
+              <span :class="numClass">{{ featureOutOfStockCount }}</span> sold ·
+              <span :class="numClass">{{ featureLowStockItems.length }}</span> low-stock lines
+            </p>
+          </div>
+          <NuxtLink to="/dashboard/inventory" :class="cardLinkClass">Open inventory</NuxtLink>
+        </div>
+        <div class="dash-inventory-health__footer">
+          <div :class="[progressClass, 'dash-progress--slim']">
+            <div
+              class="dash-progress__segment--available transition-all"
+              :style="{ width: `${featureInStockPercentage}%` }"
+            />
+            <div
+              class="dash-progress__segment--low transition-all"
+              :style="{ width: `${featureLowStockPercentage}%` }"
+            />
+            <div
+              class="dash-progress__segment--sold transition-all"
+              :style="{ width: `${featureSoldPercentage}%` }"
+            />
+          </div>
+          <div :class="[progressLegendClass, 'dash-progress__legend--compact']">
+            <span :class="numClass">{{ featureInStockPercentage }}% available</span>
+            <span :class="numClass">{{ featureSoldPercentage }}% sold through</span>
+            <span :class="numClass">{{ formatCurrency(featureInventoryTotalValue) }} on hand (book)</span>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div :class="[cardHeaderClass, 'dash-card__header--compact mb-3 px-0.5']">
+          <div>
+            <p :class="eyebrowClass">Feature insights</p>
+            <p :class="cardDescClass">
+              Snapshot across sales, inventory, customers, and add-on features ·
+              {{ periodLabel.toLowerCase() }}
+            </p>
+          </div>
+        </div>
+        <div :class="featureInsightsGridClass">
+          <AnalyticsFeatureInsightCard
+            v-for="insight in featureInsights"
+            :key="insight.id"
+            :insight="insight"
+            :card-class="cardPaddedClass"
+            :card-header-class="cardHeaderClass"
+            :card-title-class="cardTitleClass"
+            :card-desc-class="cardDescClass"
+            :card-link-class="cardLinkClass"
+            :insight-icon-class="insightIconClass"
+            :insight-highlight-class="insightHighlightClass"
+            :metric-cells-class="metricCellsClass"
+            :metric-cell-class="metricCellClass"
+            :num-class="numClass"
+          />
+        </div>
+      </section>
+
       <div :class="chartsGridClass">
         <section :class="[cardFlushClass, 'dash-charts-grid__main overflow-hidden']">
           <div
@@ -444,6 +512,10 @@ import {
 import { useReceiptsStore } from '~/stores/receipts'
 import { useInventoryStore } from '~/stores/inventory'
 import { useCustomersStore } from '~/stores/customers'
+import { useDepartmentsStore } from '~/stores/departments'
+import { useCustomerBuybacksStore } from '~/stores/customerBuybacks'
+import { useSellerLoanOutsStore } from '~/stores/sellerLoanOuts'
+import { useCustomerAccountsStore } from '~/stores/customerAccounts'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useThemeStore } from '~/stores/theme'
@@ -451,6 +523,8 @@ import { usePreferences } from '~/composables/usePreferences'
 import { useAppToast } from '~/composables/useAppToast'
 import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
 import PaymentLinksSummaryCard from '~/components/payments/PaymentLinksSummaryCard.vue'
+import AnalyticsFeatureInsightCard from '~/components/analytics/AnalyticsFeatureInsightCard.vue'
+import { useAnalyticsFeatureInsights } from '~/composables/useAnalyticsFeatureInsights'
 import { tableMoneyClass } from '~/utils/table-money-styles'
 import {
   truncateChartLabel,
@@ -523,6 +597,10 @@ function formatReturnDate(date: Date): string {
 const receiptsStore = useReceiptsStore()
 const inventoryStore = useInventoryStore()
 const customersStore = useCustomersStore()
+const departmentsStore = useDepartmentsStore()
+const buybacksStore = useCustomerBuybacksStore()
+const sellerLoansStore = useSellerLoanOutsStore()
+const customerAccountsStore = useCustomerAccountsStore()
 const userStore = useUserStore()
 const themeStore = useThemeStore()
 const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
@@ -569,6 +647,9 @@ const {
   exportBtnSuccessClass,
   metricCellsClass,
   metricCellClass,
+  featureInsightsGridClass,
+  progressClass,
+  progressLegendClass,
 } = useDashboardAnalyticsChrome()
 
 const analyticsPeriods = [
@@ -588,6 +669,18 @@ const needsStoreSelection = computed(() => {
 const receipts = ref<any[]>([])
 const inventoryItems = ref<any[]>([])
 const customers = ref<any[]>([])
+const analyticsFolderItems = ref<Record<string, InventoryItem[]>>({})
+
+const {
+  featureInsights,
+  inStockCount: featureInStockCount,
+  outOfStockCount: featureOutOfStockCount,
+  inStockPercentage: featureInStockPercentage,
+  soldPercentage: featureSoldPercentage,
+  lowStockPercentage: featureLowStockPercentage,
+  lowStockItems: featureLowStockItems,
+  inventoryTotalValue: featureInventoryTotalValue,
+} = useAnalyticsFeatureInsights(selectedPeriod, analyticsFolderItems)
 
 // Computed Metrics
 const periodLabel = computed(() => {
@@ -1711,12 +1804,28 @@ const customerChartOptions = computed(() => {
 const loadAnalytics = async () => {
   isLoading.value = true
   try {
-    // Fetch receipts and folders in parallel
-    await Promise.all([receiptsStore.fetchReceipts(), inventoryStore.fetchFolders()])
+    const tasks: Promise<unknown>[] = [
+      receiptsStore.fetchReceipts(),
+      inventoryStore.fetchFolders(),
+      departmentsStore.fetchDepartments(),
+    ]
+
+    if (userStore.isSuperAdmin) {
+      tasks.push(buybacksStore.fetchCustomerBuybacks(true))
+    }
+    if (canUseSubscriptionFeature('seller_loans')) {
+      tasks.push(sellerLoansStore.fetchSellerLoanOuts(true))
+    }
+    if (canUseSubscriptionFeature('customer_balance')) {
+      tasks.push(customerAccountsStore.fetchAccountsForStore())
+    }
+
+    await Promise.all(tasks)
     receipts.value = receiptsStore.receipts
 
     const grouped = await inventoryStore.fetchFolderAvailabilityStats()
     inventoryItems.value = Object.values(grouped).flat()
+    analyticsFolderItems.value = grouped
   } catch (error) {
     console.error('Error loading analytics:', error)
     toast.error('Failed to load analytics data')

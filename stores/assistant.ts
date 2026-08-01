@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { sanitizeAssistantReply } from '~/utils/assistant-chat'
 
 export type AssistantMessage = {
   id: string
@@ -69,6 +70,18 @@ export const useAssistantStore = defineStore('assistant', {
       this.sending = true
 
       try {
+        const { isDemoModeActive } = await import('~/utils/demo-mode')
+        if (isDemoModeActive()) {
+          const { generateDemoAssistantReply } = await import('~/utils/demo-assistant')
+          await new Promise((resolve) => setTimeout(resolve, 350))
+          this.messages.push({
+            id: createMessageId(),
+            role: 'assistant',
+            content: generateDemoAssistantReply(trimmed),
+          })
+          return
+        }
+
         const { authFetch } = useAuthenticatedFetch()
         const payload = {
           messages: this.messages.map((message) => ({
@@ -84,7 +97,7 @@ export const useAssistantStore = defineStore('assistant', {
         this.messages.push({
           id: createMessageId(),
           role: 'assistant',
-          content: result.reply,
+          content: sanitizeAssistantReply(result.reply),
         })
       } catch (error) {
         const err = error as {

@@ -8,6 +8,14 @@ export type AssistantChatTurn = {
 export const ASSISTANT_MAX_TURNS = 20
 export const ASSISTANT_MAX_MESSAGE_CHARS = 2000
 
+/** Strip Markdown bold markers so assistant replies stay plain text in the UI. */
+export function sanitizeAssistantReply(text: string): string {
+  return text
+    .replace(/\*\*(.+?)\*\*/gs, '$1')
+    .replace(/\*\*/g, '')
+    .trim()
+}
+
 export function normalizeAssistantChatTurns(raw: unknown): AssistantChatTurn[] {
   if (!Array.isArray(raw)) {
     throw new Error('messages must be an array')

@@ -94,7 +94,7 @@ const props = withDefaults(
     ariaLabel?: string
     backdropLabel?: string
     panelId?: string
-    /** Where to mount — overlay host for CRUD, body for menu-level sheets */
+    /** Where to mount - overlay host for CRUD, body for menu-level sheets */
     mount?: 'overlay-host' | 'body'
   }>(),
   {

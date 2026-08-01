@@ -1,5 +1,5 @@
 import { createError, defineEventHandler, readBody } from 'h3'
-import { normalizeAssistantChatTurns } from '~/utils/assistant-chat'
+import { normalizeAssistantChatTurns, sanitizeAssistantReply } from '~/utils/assistant-chat'
 import {
   buildAssistantSystemPrompt,
   buildDashboardHelpKnowledgeBase,
@@ -32,7 +32,7 @@ export default defineEventHandler(async (event) => {
 
   const model = getGeminiModel()
   const systemInstruction = buildAssistantSystemPrompt(buildDashboardHelpKnowledgeBase())
-  const reply = await generateGeminiAssistantReply(apiKey, model, systemInstruction, messages)
+  const rawReply = await generateGeminiAssistantReply(apiKey, model, systemInstruction, messages)
 
-  return { reply }
+  return { reply: sanitizeAssistantReply(rawReply) }
 })

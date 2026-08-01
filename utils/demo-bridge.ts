@@ -9,13 +9,14 @@ import type { Department } from '~/composables/useDepartments'
 import type { ActivityLog } from '~/composables/useActivityLog'
 import type { Staff } from '~/composables/useStaff'
 import type { SellerLoanOut } from '~/stores/sellerLoanOuts'
+import type { CustomerBuyback } from '~/stores/customerBuybacks'
 import type { Notification } from '~/stores/notifications'
 import type { SavedSearch } from '~/stores/search'
 import { DEMO_SAVED_SEARCHES_KEY } from '~/utils/demo-mode'
 import { sanitizeDemoDisplayDashes } from '~/utils/demo-display-text'
 import { normalizeEntityName } from '~/utils/capitalize-text'
 import { demoId } from '~/utils/demo-seed'
-import { DEMO_USER_UID, isDemoModeActive, markDemoSessionActive } from '~/utils/demo-mode'
+import { DEMO_USER_UID, isDemoModeActive, markDemoSessionActive, DEMO_STORE_LAGOS } from '~/utils/demo-mode'
 import { useDemoAppStore } from '~/stores/demoApp'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
@@ -120,6 +121,51 @@ function getDemoStaffMembers(storeId: string): Staff[] {
 /** Demo staff roster (exported for the staff store's demo branches). */
 export function getDemoStaff(storeId: string): Staff[] {
   return getDemoStaffMembers(storeId)
+}
+
+/** Dummy buyback records for demo analytics and buybacks page. */
+export function getDemoBuybacks(storeId: string): CustomerBuyback[] {
+  if (storeId !== DEMO_STORE_LAGOS) return []
+
+  const now = Date.now()
+  const day = 24 * 60 * 60 * 1000
+
+  return [
+    {
+      id: 'demo_buyback_1',
+      storeId,
+      status: 'completed',
+      customerName: 'Kemi Ade',
+      customerPhone: '0809 333 4455',
+      customerEmail: '',
+      folderId: 'folder_lagos_smartphones',
+      inventoryItemId: 'item_lagos_iphone',
+      purchasePrice: 180000,
+      paymentMethod: 'Transfer',
+      itemSummary: 'iPhone 12 64GB trade-in',
+      notes: 'Demo buyback',
+      createdAt: new Date(now - day * 8),
+      updatedAt: new Date(now - day * 8),
+      createdBy: DEMO_USER_UID,
+    },
+    {
+      id: 'demo_buyback_2',
+      storeId,
+      status: 'completed',
+      customerName: 'Tunde Bello',
+      customerPhone: '0805 444 5566',
+      customerEmail: '',
+      folderId: 'folder_lagos_accessories',
+      inventoryItemId: 'item_lagos_case',
+      purchasePrice: 3500,
+      paymentMethod: 'Cash',
+      itemSummary: 'Used silicone case bundle',
+      notes: 'Demo buyback',
+      createdAt: new Date(now - day * 2),
+      updatedAt: new Date(now - day * 2),
+      createdBy: DEMO_USER_UID,
+    },
+  ]
 }
 
 /** Dummy stock-loan records for the demo, built from the store's seeded inventory. */
@@ -275,12 +321,14 @@ function availableQty(item: DemoItem) {
 
 export function demoItemToInventoryItem(item: DemoItem): InventoryItem {
   const left = availableQty(item)
+  const unitCost = item.unitCost ?? Math.round(item.price * 0.65)
   return {
     id: item.id,
     folderId: item.folderId,
     storeId: item.storeId,
     name: item.name,
     price: item.price,
+    unitCost,
     quantity: left,
     sku: item.sku ?? '',
     createdAt: new Date(),
@@ -297,6 +345,14 @@ export function demoReceiptToReceipt(r: DemoReceipt): Receipt {
     price: line.price,
     sku: '',
   }))
+  const status: Receipt['status'] =
+    r.status === 'refunded'
+      ? 'refunded'
+      : r.status === 'balance_due'
+        ? 'balance_due'
+        : r.status === 'pending'
+          ? 'pending'
+          : 'completed'
   return {
     id: r.id,
     receiptNumber: r.receiptNumber,
@@ -308,7 +364,10 @@ export function demoReceiptToReceipt(r: DemoReceipt): Receipt {
     itemsCount: items.reduce((n, l) => n + l.quantity, 0),
     total: r.total,
     paymentMethod: r.paymentMethod,
-    status: r.status === 'refunded' ? 'refunded' : 'completed',
+    status,
+    amountPaid: r.amountPaid,
+    balanceDue: r.balanceDue,
+    refundReason: r.refundReason,
     folderId: r.folderId,
     itemIds: r.items.map((i) => i.itemId),
     storeId: r.storeId,

@@ -6,8 +6,9 @@
     <div class="min-w-0">
       <p class="text-sm font-semibold text-primary-900 dark:text-primary-100">Interactive demo</p>
       <p class="mt-0.5 text-xs text-gray-600 dark:text-gray-400">
-        You are using the real Storvv dashboard with sample data saved in this browser. No sign-up
-        required for the demo.
+        You are using the real Storvv dashboard with sample data saved in this browser. Try Analytics
+        feature insights, Customer buybacks, Stock loans, Payment links, and the demo Assistant (canned tips).
+        No sign-up required.
       </p>
     </div>
     <div class="flex shrink-0 flex-wrap gap-2">

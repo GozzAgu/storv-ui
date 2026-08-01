@@ -1,5 +1,6 @@
 import { computed, ref, watch, type Ref } from 'vue'
 import type { InventoryFolder } from '~/stores/inventory'
+import { COST_PRICE_FIELD_NAME } from '~/utils/inventory-folder-profit'
 
 const defaultTableColumnFields: Array<{
   id?: string
@@ -62,11 +63,23 @@ export function useInventoryItemCaptureForm(folders: Ref<InventoryFolder[]>) {
       }
     }
     const folderTitle = folder.value?.name?.trim()
-    if (folderTitle && 'name' in next && !String(next.name ?? '').trim()) {
+    if (folderTitle && 'name' in next) {
       next.name = folderTitle
     }
     itemForm.value = next
   }
+
+  function isCostPriceField(field: { name: string; label?: string }): boolean {
+    return (
+      field.name === COST_PRICE_FIELD_NAME ||
+      field.name.toLowerCase() === 'cost' ||
+      (field.label || '').toLowerCase().includes('cost price')
+    )
+  }
+
+  const buybackDisplayFields = computed(() =>
+    displayFields.value.filter((field) => !isCostPriceField(field))
+  )
 
   watch(folderId, (id) => {
     if (!id) {
@@ -76,9 +89,13 @@ export function useInventoryItemCaptureForm(folders: Ref<InventoryFolder[]>) {
     resetItemFormForFolder()
   })
 
-  function validateRequiredFields(): boolean {
+  function validateRequiredFields(options?: { excludeCostPrice?: boolean }): boolean {
     if (!folderId.value || !folder.value) return false
-    const requiredFields = displayFields.value.filter((f) => f.required)
+    let fields = displayFields.value
+    if (options?.excludeCostPrice) {
+      fields = fields.filter((field) => !isCostPriceField(field))
+    }
+    const requiredFields = fields.filter((f) => f.required)
     for (const field of requiredFields) {
       const value = itemForm.value[field.name]
       if (
@@ -106,6 +123,7 @@ export function useInventoryItemCaptureForm(folders: Ref<InventoryFolder[]>) {
     itemForm,
     folder,
     displayFields,
+    buybackDisplayFields,
     fieldLabel,
     fieldPlaceholder,
     validateRequiredFields,

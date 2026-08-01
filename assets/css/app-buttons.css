@@ -1,4 +1,4 @@
-/* App-wide buttons — pill shape; primary actions use clear outline style (Import/Export look) */
+/* App-wide buttons - pill shape; primary actions use clear outline style (Import/Export look) */
 
 :root {
   --app-btn-primary-bg: #143f8d;

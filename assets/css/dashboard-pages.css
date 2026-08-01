@@ -169,22 +169,22 @@ html.dark .dash-page-header {
     word-break: break-word;
   }
 
-  /* 1 metric — full width */
+  /* 1 metric - full width */
   .dash-page-metrics:has(> .dash-page-metric:nth-child(1):last-child) > .dash-page-metric {
     grid-column: 1 / -1;
   }
 
-  /* 2 metrics — equal halves */
+  /* 2 metrics - equal halves */
   .dash-page-metrics:has(> .dash-page-metric:nth-child(2):last-child) > .dash-page-metric {
     grid-column: span 3;
   }
 
-  /* 4 metrics — 2×2 */
+  /* 4 metrics - 2×2 */
   .dash-page-metrics:has(> .dash-page-metric:nth-child(4):last-child) > .dash-page-metric {
     grid-column: span 3;
   }
 
-  /* 5 metrics — 3 on top, 2 equal on bottom */
+  /* 5 metrics - 3 on top, 2 equal on bottom */
   .dash-page-metrics:has(> .dash-page-metric:nth-child(5):last-child) > .dash-page-metric:nth-child(-n + 3) {
     grid-column: span 2;
   }
@@ -193,7 +193,7 @@ html.dark .dash-page-header {
     grid-column: span 3;
   }
 
-  /* Long currency values — slightly smaller in the top row of five */
+  /* Long currency values - slightly smaller in the top row of five */
   .dash-page-metrics:has(> .dash-page-metric:nth-child(5):last-child)
     > .dash-page-metric:nth-child(-n + 3)
     .dash-page-metric__value {
@@ -201,7 +201,7 @@ html.dark .dash-page-header {
     line-height: 1.25;
   }
 
-  /* 6 metrics — 3×2 (default span 2) */
+  /* 6 metrics - 3×2 (default span 2) */
 }
 
 html.dark .dash-page-metrics {
@@ -300,7 +300,7 @@ html.dark .dash-page-header--unified .dash-page-header__toolbar {
   background: transparent;
 }
 
-/* Segmented tabs — Activity Logs filter style (app-wide) */
+/* Segmented tabs - Activity Logs filter style (app-wide) */
 .dash-segment-tabs {
   display: flex;
   flex-wrap: wrap;
@@ -365,7 +365,7 @@ html.dark .dash-segment-tabs__btn[aria-selected='true'] {
   flex: 1 1 auto;
 }
 
-/* Compact context bar — inventory folder, sub-pages */
+/* Compact context bar - inventory folder, sub-pages */
 .dash-page-context-bar {
   display: flex;
   align-items: flex-start;

@@ -29,6 +29,6 @@ If a secret may have been exposed (chat, screenshot, committed file, shared `.en
 
 ## Prevention
 
-- `.env` is in `.gitignore` — keep it that way.
+- `.env` is in `.gitignore` - keep it that way.
 - Do not paste live keys in Slack, email, or support tickets.
 - Use Vercel env for production; local `.env` for dev only.

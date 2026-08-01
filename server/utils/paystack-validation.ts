@@ -21,7 +21,7 @@ const PLAN_CYCLE_SUFFIX: Record<SubscriptionBillingCycle, string> = {
   yearly: 'Yearly',
 }
 
-/** @deprecated Use getPlanAmountConfigKey — kept for tests referencing the old monthly-only map. */
+/** @deprecated Use getPlanAmountConfigKey - kept for tests referencing the old monthly-only map. */
 export const PLAN_AMOUNT_KEYS: Record<SubscriptionPlan, string> = {
   storvv_micro: PLAN_BASE_KEYS.storvv_micro,
   storvv_medium: PLAN_BASE_KEYS.storvv_medium,

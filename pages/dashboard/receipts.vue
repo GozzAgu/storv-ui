@@ -1304,7 +1304,7 @@
                               no-top-margin
                               @toggle="toggleCustomerExpanded(customer.id)"
                             />
-                            <span v-else class="text-[10px] text-gray-400 dark:text-gray-500">—</span>
+                            <span v-else class="text-[10px] text-gray-400 dark:text-gray-500">-</span>
                           </td>
                           <td class="px-3 py-2.5 sm:px-4">
                             <div class="flex items-center gap-2">

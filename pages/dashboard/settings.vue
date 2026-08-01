@@ -1074,7 +1074,7 @@ const dataExportItems = [
   {
     key: 'inventory',
     label: 'Inventory',
-    description: 'ZIP archive — one folder per category with items.xlsx inside.',
+    description: 'ZIP archive - one folder per category with items.xlsx inside.',
   },
   {
     key: 'receipts',

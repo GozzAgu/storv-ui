@@ -1,5 +1,6 @@
 import { resolveApiPath } from '~/utils/api-url'
 import { isApiBaseConfigured } from '~/utils/capacitor-api-base'
+import { isDemoModeActive } from '~/utils/demo-mode'
 
 export function useDashboardAssistant() {
   const { isNativeApp } = useCapacitorNativeApp()
@@ -7,6 +8,7 @@ export function useDashboardAssistant() {
   const statusLoaded = useState('storvv-assistant-status-loaded', () => false)
   const statusReachable = useState('storvv-assistant-status-reachable', () => true)
   const assistantStore = useAssistantStore()
+  const isDemoAssistant = computed(() => import.meta.client && isDemoModeActive())
   let statusRequest: Promise<void> | null = null
 
   const apiBaseConfigured = computed(() => {
@@ -16,6 +18,12 @@ export function useDashboardAssistant() {
 
   async function refreshStatus() {
     if (!import.meta.client) return
+    if (isDemoModeActive()) {
+      configured.value = true
+      statusReachable.value = true
+      statusLoaded.value = true
+      return
+    }
     if (!apiBaseConfigured.value) {
       configured.value = false
       statusReachable.value = false
@@ -53,6 +61,7 @@ export function useDashboardAssistant() {
     statusReachable,
     apiBaseConfigured,
     isNativeApp,
+    isDemoAssistant,
     assistantStore,
     openAssistant,
     refreshStatus,
