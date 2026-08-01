@@ -32,6 +32,42 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
     blurb: 'Highlights from recent Storvv releases.',
     articles: [
       {
+        title: 'Optional subcategories when creating categories',
+        body: [
+          'When you create or edit a top-level category (Inventory → New category), Organize with subcategories is optional and off by default. Leave it off to add products directly in that category, like a simple flat folder.',
+          'Turn it on when you want a parent hub (for example Toyota with Corolla and Camry underneath). The parent opens a subcategory hub instead of a product table until you add subcategories. You cannot switch on subcategories after products already exist in that category.',
+          'Category cards on the main Inventory list show a subcategory count when a parent already has children. Add subcategories from the parent hub with Add subcategory; each subcategory inherits columns, serial vs quantity mode, profit tracking, and department access from the parent.',
+        ],
+        bullets: [
+          'Sales, Quick Sale, and buybacks only use leaf categories: subcategories or top-level categories without subcategories enabled.',
+          'Editing a parent and changing columns or tracking prompts you to apply the same settings to existing subcategories or keep changes on the parent only.',
+        ],
+      },
+      {
+        title: 'Copy from branch: optional subcategories (Enterprise)',
+        body: [
+          'On Inventory (/dashboard/inventory), super admins on Storvv Enterprise use Copy from branch when you have more than one active branch. Pick a source branch, then select top-level category templates to copy into the branch you are viewing in the header store switcher.',
+          'Each selected parent shows how many subcategories it has (for example Toyota · 3 subcategories). Check Also copy subcategories into selected folders when you want the full hierarchy copied, not just the parent shells. Parent categories are always included; subcategories copy only when that box is checked.',
+          'Only category templates copy: names, custom columns, serial vs bulk mode, and colors. Products, stock counts, and department restrictions do not copy. If a name already exists on the destination, skip it or create an automatic “(copy)” suffix.',
+        ],
+        bullets: [
+          'The category checklist lists top-level categories only; subcategory names appear in the preview when the include-subcategories option is on.',
+          'Duplicating a single category within one branch remains on Storvv Medium; cross-branch template copy is Enterprise only.',
+        ],
+      },
+      {
+        title: 'Branch names from your region (Settings)',
+        body: [
+          'When creating a branch in Settings → Branches → Create Branch, the branch name uses cities from your account region (the country you picked during onboarding), matching the head-store step in Account setup.',
+          'Choose a city from the dropdown (for example Lagos, Abuja, or Port Harcourt for Nigeria). Optionally add an area or neighborhood after the city (for example Lekki or GRA) so the branch displays as “Lagos, Lekki” in the sidebar and store switcher.',
+          'If your region has no preset city list, you can enter a custom branch name instead. Sell screen notes and contact fields remain optional on the same form.',
+        ],
+        bullets: [
+          'Branch limits follow your plan: Storvv Micro allows one store; Medium and Enterprise allow more.',
+          'Managers and staff cannot create branches; only the account owner (super admin) can.',
+        ],
+      },
+      {
         title: 'Customer buybacks',
         body: [
           'Super admins can record customer buybacks from Inventory → Customer buybacks (/dashboard/buybacks). Use this when someone sells an item to your store: you pay them, a new inventory row is created in the leaf category you pick, and the buyback appears in the list with customer, item, amount paid, and payment method.',
@@ -178,6 +214,7 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
         title: 'Subcategories (one level under a parent category)',
         body: [
           'Storvv supports one level of subcategories: a top-level category (parent) can contain subcategories, but subcategories cannot contain further nested folders. Example: Inventory → Toyota (parent) → Corolla, Camry (subcategories).',
+          'When creating a top-level category, turn on Organize with subcategories if you want a parent hub (for example Toyota with Corolla and Camry underneath). Leave it off to add products directly in that category.',
           'Open a parent category from /dashboard/inventory to reach its subcategory hub. The hub lists subcategory cards (same card style as top-level categories) and an Add subcategory button when the parent has no products directly in it.',
           'Products always live in leaf categories: either a subcategory (Corolla) or a top-level category that has no subcategories. You cannot add products to a parent that still has subcategories - open a subcategory instead.',
           'When creating a subcategory, it inherits the parent’s column template, serial vs quantity mode, profit tracking, department access, type, and color. You only enter a subcategory name and optional description.',
@@ -194,7 +231,7 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
       {
         title: 'Inside a category (/dashboard/inventory/[id])',
         body: [
-          'Parent categories with subcategories (or an empty parent ready for subcategories) show the subcategory hub instead of a product table.',
+          'Parent categories with subcategories enabled (or an empty parent that already has subcategories) show the subcategory hub instead of a product table.',
           'Leaf categories - subcategories or top-level categories without children - open a table of products with the columns your template defines. Use pagination, search, and filters from the toolbar.',
           'Row actions (three-dot menu) include History (item timeline), Add discount / Discount for line-level pricing, and Edit item when the item is not locked. Items tied to completed sales can be restricted so catalog edits do not fight receipt history.',
         ],
@@ -220,8 +257,10 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
       {
         title: 'Copy from branch (Enterprise)',
         body: [
-          'On the Folders page (/dashboard/inventory), super admins on Storvv Enterprise see a “Copy from branch” action next to “New folder” when you have more than one active branch.',
-          'It opens a dialog where you pick a source branch, then select which folder templates to copy into the branch you are currently viewing in the app (header / sidebar store switcher). Only folder definitions are copied: names, custom field templates, serial vs bulk mode, and colors. Products, quantities, and department restrictions are not copied (those IDs are per branch; re-apply access on the destination if you use them).',
+          'On the Categories page (/dashboard/inventory), super admins on Storvv Enterprise see a “Copy from branch” action next to “New category” when you have more than one active branch.',
+          'It opens a side drawer where you pick a source branch, then select top-level category templates to copy into the branch you are currently viewing in the app (header / sidebar store switcher). Each parent row shows its subcategory count when applicable.',
+          'Check Also copy subcategories into selected folders to copy the full hierarchy (for example Toyota plus Corolla, Camry, and Highlander). Leave it unchecked to copy only the selected parent category shells. Parent categories you select are always copied; subcategories copy only when that option is on.',
+          'Only folder definitions are copied: names, custom field templates, serial vs bulk mode, colors, and whether the parent uses subcategories. Products, quantities, and department restrictions are not copied (those IDs are per branch; re-apply access on the destination if you use them).',
           'If a folder name already exists on the destination, you can skip that folder or create a copy with an automatic “(copy)” suffix. Medium plan includes duplicating a single folder within one branch; copying selected templates across branches is Enterprise only.',
         ],
         bullets: [
@@ -391,7 +430,7 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
         body: [
           'Only super admins can edit Settings. Others see a View only banner while fields stay disabled.',
           'Super admins manage account logo, Paystack subscription upgrades between Storvv Micro, Medium, and Enterprise, store profile data (branch name, business type, contact fields), inventory defaults (low stock threshold, default category), and receipt numbering (prefix + next number).',
-          'When creating or editing a branch (Create Branch / Edit Branch), you can add an optional Sell screen note for that location. It is shown to people selling on Quick Sale and during Create New Receipt (items and receipt-details steps) for that branch only.',
+          'Branches: use Create Branch to add locations. Branch names use a city picker from your account region (same country as onboarding), with an optional area or neighborhood field (for example “Port Harcourt, GRA”). When creating or editing a branch, you can add an optional Sell screen note for that location. It is shown to people selling on Quick Sale and during Create New Receipt (items and receipt-details steps) for that branch only.',
         ],
       },
       {
@@ -462,7 +501,8 @@ export function buildAssistantSystemPrompt(knowledgeBase: string): string {
     '- Keep answers concise (2-5 short paragraphs or bullet lists). Mention relevant routes like /dashboard/inventory when helpful.',
     '- Use plain text only. Do NOT use Markdown bold (**text**), headings (#), or other Markdown formatting. For lists, use lines starting with "- " (hyphen and space).',
     '- Explain role and plan limits in general terms; remind users that missing controls may mean their role or plan does not include a feature.',
-    '- Inventory uses top-level categories plus optional one-level subcategories (not unlimited nesting). When users ask about subfolders or subcategories, describe the parent hub, leaf-only products, and inheritance rules from the knowledge base - do not say folders are strictly flat.',
+    '- Inventory uses top-level categories plus optional one-level subcategories (not unlimited nesting). When creating a category, Organize with subcategories is optional (off by default). When users ask about subfolders or subcategories, describe the parent hub, leaf-only products, inheritance rules, and the optional toggle from the knowledge base - do not say folders are strictly flat.',
+    '- Copy from branch (Enterprise, /dashboard/inventory): select top-level templates from another branch; optionally include subcategories with a checkbox. Branch creation (Settings): city picker from account region plus optional area suffix.',
     '- Customer buybacks (/dashboard/buybacks) are super-admin only. Quick Sale and Create New Sale use parent → subcategory → items → checkout. Analytics includes feature insight cards for sales, inventory, buybacks, loans, and balances when applicable.',
     '',
     'Knowledge base:',

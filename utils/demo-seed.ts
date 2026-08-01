@@ -15,7 +15,7 @@ function lagosStore(): DemoStoreRecord {
     name: 'Lagos, Lekki',
     address: '12 Admiralty Way, Lekki, Lagos',
     folders: [
-      { id: folderPhones, name: 'Phones', storeId: DEMO_STORE_LAGOS },
+      { id: folderPhones, name: 'Phones', storeId: DEMO_STORE_LAGOS, usesSubcategories: true },
       {
         id: folderSmartphones,
         name: 'Smartphones',
@@ -93,16 +93,27 @@ function lagosStore(): DemoStoreRecord {
 
 function abujaStore(): DemoStoreRecord {
   const folderElectronics = 'folder_abuja_electronics'
+  const folderLaptops = 'folder_abuja_laptops'
+  const folderAccessories = 'folder_abuja_accessories'
 
   return {
     id: DEMO_STORE_ABUJA,
     name: 'Abuja, Wuse',
     address: '22 Adetokunbo Ademola Crescent, Wuse II',
-    folders: [{ id: folderElectronics, name: 'Electronics', storeId: DEMO_STORE_ABUJA }],
+    folders: [
+      { id: folderElectronics, name: 'Electronics', storeId: DEMO_STORE_ABUJA, usesSubcategories: true },
+      { id: folderLaptops, name: 'Laptops', storeId: DEMO_STORE_ABUJA, parentId: folderElectronics },
+      {
+        id: folderAccessories,
+        name: 'Accessories',
+        storeId: DEMO_STORE_ABUJA,
+        parentId: folderElectronics,
+      },
+    ],
     items: [
       {
         id: 'item_abuja_hp',
-        folderId: folderElectronics,
+        folderId: folderLaptops,
         storeId: DEMO_STORE_ABUJA,
         name: 'HP Laptop 15',
         price: 420000,
@@ -113,7 +124,7 @@ function abujaStore(): DemoStoreRecord {
       },
       {
         id: 'item_abuja_earbuds',
-        folderId: folderElectronics,
+        folderId: folderAccessories,
         storeId: DEMO_STORE_ABUJA,
         name: 'Wireless earbuds',
         price: 18500,
@@ -137,14 +148,45 @@ function abujaStore(): DemoStoreRecord {
 }
 
 function phStore(): DemoStoreRecord {
+  const folderToyota = 'folder_ph_toyota'
+  const folderFurniture = 'folder_ph_furniture'
   const folderAccessories = 'folder_ph_accessories'
 
   return {
     id: DEMO_STORE_PH,
     name: 'Port Harcourt, GRA',
     address: '8 Harold Wilson Drive, Port Harcourt',
-    folders: [{ id: folderAccessories, name: 'Accessories', storeId: DEMO_STORE_PH }],
+    folders: [
+      { id: folderToyota, name: 'Toyota', storeId: DEMO_STORE_PH, usesSubcategories: true },
+      { id: 'folder_ph_corolla', name: 'Corolla', storeId: DEMO_STORE_PH, parentId: folderToyota },
+      { id: 'folder_ph_camry', name: 'Camry', storeId: DEMO_STORE_PH, parentId: folderToyota },
+      {
+        id: 'folder_ph_highlander',
+        name: 'Highlander',
+        storeId: DEMO_STORE_PH,
+        parentId: folderToyota,
+      },
+      { id: folderFurniture, name: 'Furniture', storeId: DEMO_STORE_PH, usesSubcategories: true },
+      { id: 'folder_ph_chairs', name: 'Chairs', storeId: DEMO_STORE_PH, parentId: folderFurniture },
+      {
+        id: 'folder_ph_office_chairs',
+        name: 'Office Chairs',
+        storeId: DEMO_STORE_PH,
+        parentId: folderFurniture,
+      },
+      { id: folderAccessories, name: 'Accessories', storeId: DEMO_STORE_PH },
+    ],
     items: [
+      {
+        id: 'item_ph_corolla',
+        folderId: 'folder_ph_corolla',
+        storeId: DEMO_STORE_PH,
+        name: 'Toyota Corolla 2022',
+        price: 12500000,
+        quantity: 2,
+        sold: 0,
+        sku: 'TOY-COR',
+      },
       {
         id: 'item_ph_powerbank',
         folderId: folderAccessories,
@@ -263,14 +305,14 @@ function seedReceipts(state: DemoState) {
       total: 420000,
       paymentMethod: 'Transfer',
       status: 'completed',
-      folderId: 'folder_abuja_electronics',
+      folderId: 'folder_abuja_laptops',
     },
   ]
 }
 
 export function createDemoSeedState(): DemoState {
   const state: DemoState = {
-    version: 5,
+    version: 7,
     currentStoreId: DEMO_STORE_LAGOS,
     currencyCode: 'NGN',
     currencySymbol: '₦',

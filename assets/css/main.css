@@ -258,7 +258,7 @@
 /**
  * Theme cross-fade (light ↔ dark): only while `theme-transitioning` is on <html>
  * (see `stores/theme.ts`). Durations stay aligned with `THEME_TRANSITION_MS` there.
- * Covers every route (dashboard, marketing, auth): no layout-specific hook required.
+ * Shell surfaces only — avoid transitioning every button/link (large DOM = jank).
  */
 html.theme-transitioning,
 body.theme-transitioning,
@@ -266,43 +266,28 @@ html.theme-transitioning aside,
 html.theme-transitioning header,
 html.theme-transitioning main,
 html.theme-transitioning nav,
-html.theme-transitioning section,
-html.theme-transitioning article,
 html.theme-transitioning [data-dashboard-main],
 html.theme-transitioning [data-dashboard-teleport],
-html.theme-transitioning .data-table-shell,
+html.theme-transitioning .dash-sidebar,
+html.theme-transitioning .dash-page-header,
 html.theme-transitioning .frosted-glass,
-html.theme-transitioning .dashboard-global-tooltip-bubble,
-html.theme-transitioning button,
-html.theme-transitioning a,
-html.theme-transitioning input,
-html.theme-transitioning select,
-html.theme-transitioning textarea {
-  /* Targeted list (instead of `*`) avoids stutter on very large tables. */
-  /* Omit filter/backdrop on bulk nodes (tables); see `.frosted-glass` block below. */
-  /* Do not include tr/td/th; see `.data-table-shell` row rule below (zebra + scroll). */
-  transition-property: background-color, background-image, color, border-color, outline-color,
-    box-shadow, text-decoration-color, fill, stroke, opacity, accent-color, caret-color,
-    column-rule-color !important;
-  transition-duration: 0.5s !important;
+html.theme-transitioning .dashboard-global-tooltip-bubble {
+  transition-property: background-color, color, border-color, box-shadow !important;
+  transition-duration: 0.16s !important;
   transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1) !important;
   transition-delay: 0s !important;
 }
 
-/* Categories page: smooth page shell + card cross-fade (no per-card hover transitions during toggle). */
+/* Categories page: card shells only (not every nested control). */
 html.theme-transitioning [data-inventory-categories],
-html.theme-transitioning [data-inventory-categories] header,
-html.theme-transitioning [data-inventory-categories] article.inv-category-card,
 html.theme-transitioning [data-inventory-categories] .inv-category-card,
 html.theme-transitioning [data-inventory-categories] .dash-grid-card {
-  transition-property: background-color, background-image, color, border-color, outline-color,
-    box-shadow, text-decoration-color, fill, stroke, opacity, accent-color, caret-color,
-    column-rule-color !important;
-  transition-duration: 0.5s !important;
+  transition-property: background-color, color, border-color, box-shadow !important;
+  transition-duration: 0.16s !important;
   transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1) !important;
 }
 
-/* Large striped tables: animating every cell causes crawl and “banding”; snap rows on theme toggle. */
+/* Large striped tables: never animate rows on theme toggle. */
 html.theme-transitioning .data-table-shell tr,
 html.theme-transitioning .data-table-shell td,
 html.theme-transitioning .data-table-shell th {
@@ -314,15 +299,13 @@ html.theme-transitioning .inv-folder-uisverse {
   transition: none !important;
 }
 
-/* Blur panels only: animating backdrop-filter on every <tr>/<td> is a major source of theme-toggle jank. */
+/* Blur panels: short backdrop transition only on glass surfaces. */
 html.theme-transitioning .frosted-glass,
 html.theme-transitioning .dashboard-global-tooltip-bubble {
-  transition-property: background-color, background-image, color, border-color, outline-color,
-    box-shadow, text-decoration-color, fill, stroke, opacity, filter, backdrop-filter,
-    -webkit-backdrop-filter, accent-color, caret-color, column-rule-color !important;
-  transition-duration: 0.5s !important;
+  transition-property: background-color, color, border-color, box-shadow, backdrop-filter,
+    -webkit-backdrop-filter !important;
+  transition-duration: 0.16s !important;
   transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1) !important;
-  transition-delay: 0s !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -332,22 +315,16 @@ html.theme-transitioning .dashboard-global-tooltip-bubble {
   html.theme-transitioning header,
   html.theme-transitioning main,
   html.theme-transitioning nav,
-  html.theme-transitioning section,
-  html.theme-transitioning article,
   html.theme-transitioning [data-dashboard-main],
   html.theme-transitioning [data-dashboard-teleport],
-  html.theme-transitioning .data-table-shell,
+  html.theme-transitioning .dash-sidebar,
+  html.theme-transitioning .dash-page-header,
   html.theme-transitioning .frosted-glass,
   html.theme-transitioning .dashboard-global-tooltip-bubble,
-  html.theme-transitioning button,
-  html.theme-transitioning a,
-  html.theme-transitioning input,
-  html.theme-transitioning select,
-  html.theme-transitioning textarea,
   html.theme-transitioning [data-inventory-categories],
   html.theme-transitioning [data-inventory-categories] .inv-category-card,
   html.theme-transitioning [data-inventory-categories] .dash-grid-card {
-    transition-duration: 0.11s !important;
+    transition-duration: 0.07s !important;
     transition-timing-function: ease-out !important;
   }
 }

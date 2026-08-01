@@ -536,9 +536,15 @@
     >
       <form
         id="folder-drawer-form"
-        :class="[drawerFillClass, 'divide-y divide-gray-100/90 dark:divide-gray-800/80']"
+        :class="drawerFillClass"
         @submit.prevent="handleSaveFolder"
       >
+        <div
+          :class="[
+            drawerFillScrollClass,
+            'divide-y divide-gray-100/90 dark:divide-gray-800/80 pb-2 sm:pb-3',
+          ]"
+        >
         <section :class="[drawerSectionClass, drawerFillFixedClass]">
           <p :class="sectionLabelClass">Basic info</p>
           <div class="mt-2 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
@@ -589,6 +595,29 @@
         </section>
 
         <section
+          v-if="showUsesSubcategoriesOption && !isSubfolderDrawer"
+          :class="[drawerSectionClass, drawerFillFixedClass]"
+        >
+          <Checkbox
+            v-model="folderForm.usesSubcategories"
+            size="sm"
+            :disabled="usesSubcategoriesLocked"
+            wrapper-class="items-start gap-2.5"
+            label-class="!ml-2.5 min-w-0 flex-1 block"
+          >
+            <div class="min-w-0 flex-1">
+              <span class="text-xs font-medium text-gray-800 dark:text-gray-200">
+                Organize with subcategories
+              </span>
+              <p :class="[drawerHintClass, 'mt-0.5']">
+                Products go inside subcategories (e.g. Corolla, Camry under Toyota) instead of
+                directly in this category. Leave off to add products here.
+              </p>
+            </div>
+          </Checkbox>
+        </section>
+
+        <section
           v-if="!(editingFolder && isSubfolder(editingFolder))"
           :class="[drawerSectionClass, drawerFillFixedClass]"
         >
@@ -596,6 +625,7 @@
             v-model="folderForm.hasSerialNumbers"
             size="sm"
             wrapper-class="items-start gap-2.5"
+            label-class="!ml-2.5 min-w-0 flex-1 block"
           >
             <div class="min-w-0 flex-1">
               <span class="text-xs font-medium text-gray-800 dark:text-gray-200"
@@ -616,6 +646,7 @@
             v-model="folderForm.trackProfit"
             size="sm"
             wrapper-class="items-start gap-2.5"
+            label-class="!ml-2.5 min-w-0 flex-1 block"
           >
             <div class="min-w-0 flex-1">
               <span class="text-xs font-medium text-gray-800 dark:text-gray-200"
@@ -658,32 +689,28 @@
           </div>
           <div v-else :class="[pickListClass, 'mt-2']">
             <ul :class="pickListScrollClass">
-              <li v-for="dept in currentStoreDepartments" :key="dept.id">
-                <label :class="[pickRowClass, 'cursor-pointer gap-2.5 !py-2']">
-                  <input
-                    type="checkbox"
-                    :checked="folderForm.allowedDepartments.includes(dept.id)"
-                    class="h-3.5 w-3.5 shrink-0 rounded border-gray-300 text-primary-600 focus:ring-primary-500/20"
-                    @change="
-                      toggleDepartmentAccess(dept.id, ($event.target as HTMLInputElement).checked)
-                    "
-                  />
-                  <span class="min-w-0 flex-1">
-                    <span :class="pickRowTitleClass">{{ dept.name }}</span>
-                    <span
-                      v-if="dept.description"
-                      :class="[pickRowMetaClass, 'mt-0.5 block truncate']"
-                      >{{ dept.description }}</span
-                    >
-                  </span>
-                </label>
+              <li v-for="dept in currentStoreDepartments" :key="dept.id" :class="pickRowClass">
+                <Checkbox
+                  :model-value="folderForm.allowedDepartments.includes(dept.id)"
+                  size="sm"
+                  wrapper-class="min-w-0 flex-1 w-full items-start gap-2.5"
+                  label-class="!ml-2.5 min-w-0 flex-1 block"
+                  @update:model-value="(checked) => toggleDepartmentAccess(dept.id, !!checked)"
+                >
+                  <span :class="pickRowTitleClass">{{ dept.name }}</span>
+                  <span
+                    v-if="dept.description"
+                    :class="[pickRowMetaClass, 'mt-0.5 block truncate']"
+                    >{{ dept.description }}</span
+                  >
+                </Checkbox>
               </li>
             </ul>
           </div>
         </section>
 
-        <section v-if="!isSubfolderDrawer" :class="[drawerSectionClass, 'flex min-h-0 flex-1 flex-col']">
-          <div :class="[drawerFillFixedClass, 'flex flex-wrap items-center justify-between gap-2']">
+        <section v-if="!isSubfolderDrawer" :class="drawerSectionClass">
+          <div class="flex flex-wrap items-center justify-between gap-2">
             <div>
               <p :class="sectionLabelClass">Table template</p>
               <p :class="[drawerHintClass, 'mt-0.5']">Columns for products in this category.</p>
@@ -723,7 +750,7 @@
 
           <div
             v-if="selectedTemplate && editableFields.length > 0"
-            class="mt-2.5 flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg dark:border-white/[0.06]"
+            class="mt-2.5 overflow-hidden rounded-lg dark:border-white/[0.06]"
           >
             <div
               class="hidden shrink-0 grid-cols-12 gap-2 border-b border-gray-100/90 bg-gray-50/80 px-2.5 py-1.5 text-[10px] font-medium uppercase tracking-wide text-gray-400 dark:border-gray-800/80 dark:bg-white/[0.03] dark:text-gray-500 sm:grid"
@@ -732,9 +759,7 @@
               <span class="col-span-3">Type</span>
               <span class="col-span-4 text-right">Options</span>
             </div>
-            <div
-              :class="[drawerFillScrollClass, 'divide-y divide-gray-100/90 dark:divide-gray-800/80']"
-            >
+            <div class="divide-y divide-gray-100/90 dark:divide-gray-800/80">
               <div
                 v-for="(field, index) in editableFields"
                 :key="field.id"
@@ -767,14 +792,13 @@
                   </select>
                 </div>
                 <div class="flex items-center justify-between gap-2 sm:col-span-4 sm:justify-end">
-                  <label class="flex cursor-pointer items-center gap-1.5">
-                    <input
-                      v-model="field.required"
-                      type="checkbox"
-                      class="h-3.5 w-3.5 rounded border-gray-300 text-primary-600 focus:ring-primary-500/20"
-                    />
-                    <span class="text-[11px] text-gray-500 dark:text-gray-400">Required</span>
-                  </label>
+                  <Checkbox
+                    v-model="field.required"
+                    size="sm"
+                    label="Required"
+                    wrapper-class="items-center gap-1.5"
+                    label-class="!ml-1.5 text-[11px] font-normal text-gray-500 dark:text-gray-400"
+                  />
                   <button
                     v-if="!isLockedTemplateField(field)"
                     type="button"
@@ -801,6 +825,7 @@
             <p :class="[drawerHintClass, 'mt-0.5']">Add a field or import from Excel</p>
           </div>
         </section>
+        </div>
       </form>
 
       <template #footer>
@@ -1020,7 +1045,7 @@
     <SidePanel
       v-model="showCopyFolderTemplatesModal"
       title="Copy category templates from another branch"
-      subtitle="Pick a source branch, then select categories to copy into the branch you're viewing."
+      subtitle="Pick a source branch, select top-level categories, then choose whether to include subcategories."
       size="lg"
     >
       <div :class="[drawerFillClass, 'gap-4 text-left']">
@@ -1047,7 +1072,7 @@
                 type="button"
                 class="text-[11px] font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 disabled:opacity-40"
                 :disabled="
-                  copyTemplatesSourceFoldersList.length === 0 || loadingCopyTemplatesSourceFolders
+                  copyTemplatesRootFoldersList.length === 0 || loadingCopyTemplatesSourceFolders
                 "
                 @click="selectAllCopyTemplatesFolders"
               >
@@ -1072,7 +1097,7 @@
               Loading categories…
             </div>
             <div
-              v-else-if="copyTemplatesSourceFoldersList.length === 0"
+              v-else-if="copyTemplatesRootFoldersList.length === 0"
               :class="[emptyStateClass, '!items-start !py-6 !text-left']"
             >
               <p>
@@ -1100,7 +1125,7 @@
             </div>
             <ul v-else :class="pickListScrollClass">
               <li
-                v-for="f in copyTemplatesSourceFoldersList"
+                v-for="f in copyTemplatesRootFoldersList"
                 :key="f.id"
                 :class="[
                   pickRowClass,
@@ -1115,10 +1140,34 @@
                   label-class="!ml-2.5 min-w-0"
                 >
                   <span :class="pickRowTitleClass">{{ f.name || 'Untitled' }}</span>
+                  <span
+                    v-if="copyTemplatesSubfolderCount(f.id) > 0"
+                    class="ml-1.5 text-[10px] font-normal text-gray-500 dark:text-gray-400"
+                  >
+                    · {{ copyTemplatesSubfolderCount(f.id) }}
+                    subcategor{{ copyTemplatesSubfolderCount(f.id) === 1 ? 'y' : 'ies' }}
+                  </span>
                 </Checkbox>
               </li>
             </ul>
           </div>
+          <Checkbox
+            v-if="copyTemplatesSelectedHasSubfolders"
+            v-model="copyTemplatesIncludeSubfolders"
+            size="sm"
+            wrapper-class="items-start gap-2.5"
+            label-class="!ml-2.5 min-w-0 flex-1 block text-sm text-gray-600 dark:text-gray-400"
+          >
+            <span>
+              Also copy subcategories into selected folders
+              <span
+                v-if="copyTemplatesIncludeSubfolders && copyTemplatesSubfolderPreview"
+                class="mt-1 block text-[11px] leading-relaxed text-gray-500 dark:text-gray-400"
+              >
+                Includes: {{ copyTemplatesSubfolderPreview }}
+              </span>
+            </span>
+          </Checkbox>
         </div>
         <fieldset :class="[drawerFillFixedClass, 'space-y-2']">
           <legend :class="sectionLabelClass">When a category name already exists here</legend>
@@ -1173,8 +1222,8 @@
           {{
             isCopyingFolderTemplates
               ? 'Copying…'
-              : `Copy ${copyTemplatesSelectedCount || 0} ${
-                  copyTemplatesSelectedCount === 1 ? 'category' : 'categories'
+              : `Copy ${copyTemplatesEffectiveCount || 0} ${
+                  copyTemplatesEffectiveCount === 1 ? 'category' : 'categories'
                 }`
           }}
         </Button>
@@ -1271,8 +1320,10 @@ import {
 import { useDepartmentsStore } from '~/stores/departments'
 import { useStoresStore } from '~/stores/stores'
 import {
+  expandFolderTemplatesToCopy,
   filterRootFolders,
   folderHasChildren,
+  folderUsesSubcategoryHub,
   getChildFolders,
   getRootFolders,
   inheritableFolderSettingsChanged,
@@ -1347,6 +1398,7 @@ const pendingParentFolderSave = ref<{
   name: string
   description: string
   inheritable: InheritableFolderSettings
+  usesSubcategories?: boolean
 } | null>(null)
 const editingFolder = ref<InventoryFolder | null>(null)
 const showDeleteFolderModal = ref(false)
@@ -1610,12 +1662,50 @@ const inventoryViewBranchLabel = computed(() => {
 const showCopyFolderTemplatesModal = ref(false)
 const copyTemplatesSourceStoreId = ref('')
 const copyTemplatesNameCollision = ref<'skip' | 'suffix'>('skip')
+const copyTemplatesIncludeSubfolders = ref(false)
 const isCopyingFolderTemplates = ref(false)
 const copyTemplatesSourceFoldersList = ref<InventoryFolder[]>([])
 const copyTemplatesSelectedFolderIds = ref<string[]>([])
 const loadingCopyTemplatesSourceFolders = ref(false)
 
+const copyTemplatesRootFoldersList = computed(() =>
+  getRootFolders(copyTemplatesSourceFoldersList.value)
+)
+
 const copyTemplatesSelectedCount = computed(() => copyTemplatesSelectedFolderIds.value.length)
+
+const copyTemplatesSelectedHasSubfolders = computed(() => {
+  const all = copyTemplatesSourceFoldersList.value
+  return copyTemplatesSelectedFolderIds.value.some((id) => folderHasChildren(all, id))
+})
+
+const copyTemplatesEffectiveCount = computed(() => {
+  const all = copyTemplatesSourceFoldersList.value
+  const expanded = expandFolderTemplatesToCopy(
+    all,
+    copyTemplatesSelectedFolderIds.value,
+    copyTemplatesIncludeSubfolders.value
+  )
+  return expanded.length
+})
+
+function copyTemplatesSubfolderCount(folderId: string): number {
+  return getChildFolders(copyTemplatesSourceFoldersList.value, folderId).length
+}
+
+const copyTemplatesSubfolderPreview = computed(() => {
+  if (!copyTemplatesIncludeSubfolders.value) return ''
+  const all = copyTemplatesSourceFoldersList.value
+  const names: string[] = []
+  for (const id of copyTemplatesSelectedFolderIds.value) {
+    for (const child of getChildFolders(all, id)) {
+      names.push(child.name || 'Untitled')
+    }
+  }
+  if (names.length === 0) return ''
+  if (names.length <= 6) return names.join(', ')
+  return `${names.slice(0, 6).join(', ')} +${names.length - 6} more`
+})
 
 async function refreshCopyTemplatesFolderList() {
   const storeId = copyTemplatesSourceStoreId.value
@@ -1629,7 +1719,7 @@ async function refreshCopyTemplatesFolderList() {
   try {
     const list = await inventoryStore.fetchFolderTemplatesForStore(storeId)
     copyTemplatesSourceFoldersList.value = list
-    copyTemplatesSelectedFolderIds.value = list.map((folder) => folder.id)
+    copyTemplatesSelectedFolderIds.value = getRootFolders(list).map((folder) => folder.id)
   } catch (error: unknown) {
     copyTemplatesSourceFoldersList.value = []
     copyTemplatesSelectedFolderIds.value = []
@@ -1651,7 +1741,7 @@ function setCopyTemplatesFolderChecked(folderId: string, checked: boolean) {
 }
 
 function selectAllCopyTemplatesFolders() {
-  copyTemplatesSelectedFolderIds.value = copyTemplatesSourceFoldersList.value.map((f) => f.id)
+  copyTemplatesSelectedFolderIds.value = copyTemplatesRootFoldersList.value.map((f) => f.id)
 }
 
 function clearCopyTemplatesFolderSelection() {
@@ -1675,6 +1765,7 @@ watch([showCopyFolderTemplatesModal, copyTemplatesSourceStoreId], async ([open, 
   if (!open) {
     copyTemplatesSourceFoldersList.value = []
     copyTemplatesSelectedFolderIds.value = []
+    copyTemplatesIncludeSubfolders.value = false
     return
   }
   if (!storeId) return
@@ -1695,6 +1786,7 @@ function openCopyFolderTemplatesFromBranchModal() {
     return
   }
   copyTemplatesNameCollision.value = 'skip'
+  copyTemplatesIncludeSubfolders.value = false
   copyTemplatesSourceStoreId.value = otherBranchesForTemplateCopy.value[0]?.id ?? ''
   if (!copyTemplatesSourceStoreId.value) {
     toast.warning('Could not find another branch to copy from.')
@@ -1714,6 +1806,7 @@ async function handleConfirmCopyFolderTemplates() {
       await inventoryStore.duplicateFolderTemplatesBetweenStores(sourceStoreId, targetStoreId, {
         onExistingName: copyTemplatesNameCollision.value,
         folderIds: selectedIds,
+        includeSubfolders: copyTemplatesIncludeSubfolders.value,
       })
     if (createdCount === 0) {
       if (skippedCount > 0) {
@@ -1751,6 +1844,7 @@ const folderForm = reactive({
   trackProfit: false,
   allowedDepartments: [] as string[],
   parentId: '' as string,
+  usesSubcategories: false,
 })
 
 // Default fields that should always be included
@@ -1867,6 +1961,7 @@ function resetNewFolderFormDefaults() {
   folderForm.trackProfit = false
   folderForm.allowedDepartments = []
   folderForm.parentId = ''
+  folderForm.usesSubcategories = false
   profitSkipConfirmed.value = false
   editableFields.value = getDefaultFields()
   selectedTemplateId.value = 'custom'
@@ -1876,6 +1971,20 @@ function resetNewFolderFormDefaults() {
 const isSubfolderDrawer = computed(
   () => !!editingFolder.value && isSubfolder(editingFolder.value)
 )
+
+const showUsesSubcategoriesOption = computed(() => {
+  if (isSubfolderDrawer.value) return false
+  if (editingFolder.value) {
+    if ((editingFolder.value.itemCount ?? 0) > 0) return false
+    return true
+  }
+  return true
+})
+
+const usesSubcategoriesLocked = computed(() => {
+  if (!editingFolder.value) return false
+  return getChildFolders(folders.value, editingFolder.value.id).length > 0
+})
 
 watch(showCreateFolderModal, (isOpen) => {
   if (isOpen) {
@@ -2015,6 +2124,14 @@ function folderDisplayStats(folder: InventoryFolder) {
 }
 
 function folderCategoryDescription(folder: InventoryFolder): string {
+  if (folderUsesSubcategoryHub(folder, folders.value)) {
+    const subCount = getChildFolders(folders.value, folder.id).length
+    if (subCount > 0) {
+      const label = `${subCount} subcategor${subCount === 1 ? 'y' : 'ies'}`
+      return folder.description?.trim() ? `${label} · ${folder.description}` : label
+    }
+    return folder.description?.trim() || 'Uses subcategories'
+  }
   const subCount = getChildFolders(folders.value, folder.id).length
   if (subCount > 0) {
     const label = `${subCount} subcategor${subCount === 1 ? 'y' : 'ies'}`
@@ -2369,6 +2486,9 @@ const handleEditFolder = (folder: InventoryFolder) => {
   folderForm.trackProfit = folder.trackProfit === true
   folderForm.allowedDepartments = folder.allowedDepartments ? [...folder.allowedDepartments] : []
   folderForm.parentId = folder.parentId || ''
+  folderForm.usesSubcategories =
+    folder.usesSubcategories === true ||
+    getChildFolders(folders.value, folder.id).length > 0
   if (folder.template) {
     editableFields.value = folder.template.fields.map((f) => ({ ...f }))
   } else {
@@ -2635,6 +2755,7 @@ const handleSaveFolder = async () => {
           name: folderForm.name.trim(),
           description: folderForm.description.trim(),
           inheritable,
+          usesSubcategories: folderForm.usesSubcategories,
         }
         showSubfolderSyncModal.value = true
         return
@@ -2646,6 +2767,7 @@ const handleSaveFolder = async () => {
           name: folderForm.name.trim(),
           description: folderForm.description.trim(),
           inheritable,
+          usesSubcategories: folderForm.usesSubcategories,
         },
         false
       )
@@ -2661,6 +2783,7 @@ const handleSaveFolder = async () => {
         template: template,
         allowedDepartments,
         parentId: null,
+        usesSubcategories: folderForm.usesSubcategories,
       })
       handleCancelFolder()
       await inventoryStore.fetchFolderAvailabilityStats()
@@ -2677,16 +2800,20 @@ async function commitParentFolderSave(
     name: string
     description: string
     inheritable: InheritableFolderSettings
+    usesSubcategories?: boolean
   },
   applyToSubfolders: boolean
 ) {
   const parent = editingFolder.value
   if (!parent) return
 
-  const updates = {
+  const updates: Record<string, unknown> = {
     name: payload.name,
     description: payload.description,
     ...pickInheritableFolderUpdates(payload.inheritable),
+  }
+  if (payload.usesSubcategories !== undefined) {
+    updates.usesSubcategories = payload.usesSubcategories
   }
 
   await inventoryStore.updateFolder(parent.id, updates)

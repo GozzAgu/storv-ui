@@ -3,8 +3,8 @@ import { defineStore } from 'pinia'
 export type Theme = 'light' | 'dark' | 'system'
 
 /** Keep in sync with `assets/css/main.css` (`html.theme-transitioning` duration). */
-const THEME_TRANSITION_MS = 500
-const THEME_TRANSITION_MS_REDUCED = 110
+const THEME_TRANSITION_MS = 160
+const THEME_TRANSITION_MS_REDUCED = 70
 
 /** Browser `setTimeout` id (avoid Node `Timeout` vs `number` mismatch in TS). */
 let themeTransitionTimer: number | null = null
@@ -89,13 +89,9 @@ export const useThemeStore = defineStore('theme', {
         }
 
         const endThemeTransition = () => {
-          requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-              html.classList.remove('theme-transitioning')
-              body.classList.remove('theme-transitioning')
-              themeTransitionTimer = null
-            })
-          })
+          html.classList.remove('theme-transitioning')
+          body.classList.remove('theme-transitioning')
+          themeTransitionTimer = null
         }
 
         if (shouldAnimate) {

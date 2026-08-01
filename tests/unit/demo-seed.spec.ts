@@ -7,7 +7,7 @@ import type { InventoryFolder } from '~/stores/inventory'
 describe('demo-seed', () => {
   it('seeds Lagos with Phones parent hub and Smartphones subcategory', () => {
     const state = createDemoSeedState()
-    expect(state.version).toBe(5)
+    expect(state.version).toBe(7)
 
     const lagos = state.stores.find((s) => s.id === DEMO_STORE_LAGOS)!
     const phones = lagos.folders.find((f) => f.id === 'folder_lagos_phones')!
@@ -45,5 +45,21 @@ describe('demo-seed', () => {
     const children = getChildFolders(foldersAsInventory, phones.id)
     expect(children).toHaveLength(1)
     expect(children[0]?.id).toBe(smartphones.id)
+  })
+
+  it('seeds Port Harcourt with parent categories and subcategories for copy demo', () => {
+    const state = createDemoSeedState()
+    const ph = state.stores.find((s) => s.name.includes('Port Harcourt'))!
+    const toyota = ph.folders.find((f) => f.name === 'Toyota')!
+    const furniture = ph.folders.find((f) => f.name === 'Furniture')!
+
+    expect(toyota.parentId ?? null).toBeNull()
+    expect(furniture.parentId ?? null).toBeNull()
+
+    const toyotaChildren = ph.folders.filter((f) => f.parentId === toyota.id)
+    expect(toyotaChildren.map((f) => f.name).sort()).toEqual(['Camry', 'Corolla', 'Highlander'])
+
+    const furnitureChildren = ph.folders.filter((f) => f.parentId === furniture.id)
+    expect(furnitureChildren.map((f) => f.name).sort()).toEqual(['Chairs', 'Office Chairs'])
   })
 })

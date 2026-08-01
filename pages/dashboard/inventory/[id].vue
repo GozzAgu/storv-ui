@@ -1975,6 +1975,7 @@ import { usePreferences } from '~/composables/usePreferences'
 import { useDashboardDrawerChrome } from '~/composables/useDashboardDrawerChrome'
 import {
   folderHasChildren,
+  folderShowsSubcategoryHub,
   getChildFolders,
   getFolderParent,
   isSubfolder,
@@ -2113,10 +2114,8 @@ function navigateToSubfolder(subfolderId: string) {
 }
 
 function folderShowsCategoryHub(f: InventoryFolder | null | undefined): boolean {
-  if (!f || isSubfolder(f)) return false
-  const hasChildren = folderHasChildren(inventoryStore.folders, f.id)
-  const canAdd = canCreateInventoryFolders.value && (f.itemCount ?? 0) === 0
-  return hasChildren || canAdd
+  if (!f) return false
+  return folderShowsSubcategoryHub(f, inventoryStore.folders)
 }
 
 /** Parent folder used when creating a subcategory (hub page or sibling from a subcategory page). */

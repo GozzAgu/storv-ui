@@ -218,11 +218,11 @@ const messagesEl = ref<HTMLElement | null>(null)
 const inputEl = ref<HTMLTextAreaElement | null>(null)
 
 const suggestedPrompts = [
-  'How do I create a sale?',
-  'How do subcategories work?',
+  'How do optional subcategories work?',
+  'How do I copy categories from another branch?',
+  'How do I create a branch with my region cities?',
   'How do customer buybacks work?',
   'What is in Analytics feature insights?',
-  'Which plan includes Payment links?',
 ] as const
 
 const canSend = computed(

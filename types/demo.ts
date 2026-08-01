@@ -3,6 +3,7 @@ export interface DemoFolder {
   name: string
   storeId: string
   parentId?: string | null
+  usesSubcategories?: boolean
 }
 
 export interface DemoItem {

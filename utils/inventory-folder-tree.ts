@@ -29,7 +29,30 @@ export function isSubfolder(folder: InventoryFolder): boolean {
 
 /** Categories that hold products (no child categories). */
 export function getLeafFolders(folders: InventoryFolder[]): InventoryFolder[] {
-  return folders.filter((folder) => !folderHasChildren(folders, folder.id))
+  return folders.filter((folder) => {
+    if (folderHasChildren(folders, folder.id)) return false
+    if (!isSubfolder(folder) && folderUsesSubcategoryHub(folder, folders)) return false
+    return true
+  })
+}
+
+/** Top-level category organized as a subcategory hub (opt-in or already has children). */
+export function folderUsesSubcategoryHub(
+  folder: InventoryFolder,
+  folders: InventoryFolder[]
+): boolean {
+  if (isSubfolder(folder)) return false
+  if (folderHasChildren(folders, folder.id)) return true
+  return folder.usesSubcategories === true
+}
+
+export function folderShowsSubcategoryHub(
+  folder: InventoryFolder,
+  folders: InventoryFolder[]
+): boolean {
+  if (!folderUsesSubcategoryHub(folder, folders)) return false
+  if (folderHasChildren(folders, folder.id)) return true
+  return (folder.itemCount ?? 0) === 0
 }
 
 export function getFolderParent(
@@ -234,4 +257,57 @@ export function pickInheritableFolderUpdates(
     },
     allowedDepartments: [...settings.allowedDepartments],
   }
+}
+
+/** Resolve selected folder ids for cross-branch copy: always includes ancestor folders. */
+export function expandFolderTemplatesToCopy(
+  allFolders: InventoryFolder[],
+  selectedIds: string[],
+  includeSubfolders: boolean
+): InventoryFolder[] {
+  const byId = new Map(allFolders.map((entry) => [entry.id, entry]))
+  const resultIds = new Set<string>()
+
+  for (const id of selectedIds) {
+    let current = byId.get(id)
+    while (current) {
+      resultIds.add(current.id)
+      const parent = getFolderParent(allFolders, current)
+      current = parent ?? undefined
+    }
+  }
+
+  if (includeSubfolders) {
+    const rootsToExpand = new Set<string>()
+    for (const id of resultIds) {
+      const entry = byId.get(id)
+      if (!entry) continue
+      if (!isSubfolder(entry)) {
+        rootsToExpand.add(id)
+        continue
+      }
+      const parent = getFolderParent(allFolders, entry)
+      if (parent) rootsToExpand.add(parent.id)
+    }
+    for (const rootId of rootsToExpand) {
+      for (const child of getChildFolders(allFolders, rootId)) {
+        resultIds.add(child.id)
+      }
+    }
+  }
+
+  return allFolders.filter((entry) => resultIds.has(entry.id))
+}
+
+export function partitionFoldersForCopy(folders: InventoryFolder[]): {
+  roots: InventoryFolder[]
+  children: InventoryFolder[]
+} {
+  const roots: InventoryFolder[] = []
+  const children: InventoryFolder[] = []
+  for (const entry of folders) {
+    if (isSubfolder(entry)) children.push(entry)
+    else roots.push(entry)
+  }
+  return { roots, children }
 }

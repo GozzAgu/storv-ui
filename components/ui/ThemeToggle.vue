@@ -84,8 +84,8 @@ onMounted(() => {
   border: 1px solid rgb(226 232 240 / 0.95);
   background: rgb(248 250 252);
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9), 0 1px 2px rgb(15 23 42 / 0.08);
-  transition: background 0.24s cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 0.24s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background 0.16s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.16s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.16s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .theme-clean-toggle--dark .theme-clean-toggle__track {
@@ -109,8 +109,8 @@ onMounted(() => {
   border: 1px solid rgb(253 230 138);
   background: linear-gradient(180deg, rgb(255 255 255), rgb(255 247 237));
   box-shadow: 0 1px 3px rgb(180 83 9 / 0.2);
-  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), color 0.24s ease,
-    border-color 0.24s ease, background 0.24s ease;
+  transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), color 0.16s ease,
+    border-color 0.16s ease, background 0.16s ease;
   transform: translateX(0);
 }
 

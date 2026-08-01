@@ -754,7 +754,29 @@
         <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
           Branch Name <span class="text-red-500">*</span>
         </label>
+        <template v-if="useRegionBranchPicker">
+          <select
+            v-model="branchCity"
+            required
+            class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500/30 outline-none"
+          >
+            <option value="" disabled>Choose a city...</option>
+            <option v-for="city in availableBranchCities" :key="city" :value="city">
+              {{ city }}
+            </option>
+          </select>
+          <input
+            v-model="branchLocality"
+            type="text"
+            class="mt-2 w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500/30 outline-none"
+            placeholder="Area or neighborhood (optional, e.g. Lekki, GRA)"
+          />
+          <p class="mt-1.5 text-[10px] leading-snug text-gray-500 dark:text-gray-400">
+            Cities in {{ branchRegionLabel }} based on your account region.
+          </p>
+        </template>
         <input
+          v-else
           v-model="storeForm.name"
           type="text"
           required
@@ -956,7 +978,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import {
   ArrowPathIcon,
@@ -1011,6 +1033,9 @@ import {
 } from '~/composables/useStaffWorkspaceContext'
 import { DEFAULT_PAYMENT_TENDERS, normalizePaymentTenderList } from '~/utils/payment-tenders'
 import { useStoreDataExport } from '~/composables/useStoreDataExport'
+import { usePreferences, regions } from '~/composables/usePreferences'
+import { getCitiesForRegion, isCityInRegion } from '~/utils/region-cities'
+import { formatBranchDisplayName, parseBranchDisplayName } from '~/utils/branch-name'
 
 type AccountLogoUploadResult = { url: string; path: string }
 
@@ -1220,6 +1245,51 @@ const storeForm = ref({
   email: '',
   isActive: true,
 })
+
+const { preferences } = usePreferences()
+const branchCity = ref('')
+const branchLocality = ref('')
+const useCustomBranchName = ref(false)
+
+const accountRegion = computed(() => preferences.value.region || 'US')
+const availableBranchCities = computed(() => getCitiesForRegion(accountRegion.value))
+const branchRegionLabel = computed(() => {
+  const region = regions.find((r) => r.code === accountRegion.value)
+  return region ? `${region.flag} ${region.name}` : 'your region'
+})
+const useRegionBranchPicker = computed(
+  () => availableBranchCities.value.length > 0 && !useCustomBranchName.value
+)
+
+watch([branchCity, branchLocality], () => {
+  if (!useRegionBranchPicker.value) return
+  storeForm.value.name = formatBranchDisplayName(branchCity.value, branchLocality.value)
+})
+
+function resetBranchNameFields() {
+  branchCity.value = ''
+  branchLocality.value = ''
+  useCustomBranchName.value = false
+}
+
+function loadBranchNameFields(name: string) {
+  resetBranchNameFields()
+  if (availableBranchCities.value.length === 0) {
+    storeForm.value.name = name
+    return
+  }
+
+  const parsed = parseBranchDisplayName(name)
+  if (isCityInRegion(parsed.city, accountRegion.value)) {
+    branchCity.value = parsed.city
+    branchLocality.value = parsed.locality
+    storeForm.value.name = formatBranchDisplayName(parsed.city, parsed.locality)
+    return
+  }
+
+  useCustomBranchName.value = true
+  storeForm.value.name = name
+}
 const accountLogoInput = ref<HTMLInputElement | null>(null)
 const isUploadingAccountLogo = ref(false)
 
@@ -1374,6 +1444,7 @@ const switchStore = async (storeId: string) => {
 const closeStoreModal = () => {
   showCreateModal.value = false
   editingStore.value = null
+  resetBranchNameFields()
   storeForm.value = {
     name: '',
     description: '',
@@ -1396,6 +1467,7 @@ const editStore = (store: Store) => {
     email: store.email || '',
     isActive: store.isActive,
   }
+  loadBranchNameFields(store.name)
   showCreateModal.value = true
 }
 
@@ -1406,6 +1478,7 @@ const openCreateStoreModal = () => {
     )
     return
   }
+  resetBranchNameFields()
   showCreateModal.value = true
 }
 

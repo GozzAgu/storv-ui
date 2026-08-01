@@ -259,13 +259,14 @@ const showBackToTop = ref(false)
 
 const popularTopics = [
   { label: "What's new", query: 'recent updates' },
+  { label: 'Subcategories', query: 'organize with subcategories' },
+  { label: 'Copy from branch', query: 'copy from branch' },
+  { label: 'Create branch', query: 'branch names region' },
   { label: 'Stock loans', query: 'stock loan' },
   { label: 'Staff & roles', query: 'staff' },
   { label: 'Sales & refunds', query: 'receipt' },
   { label: 'Inventory & categories', query: 'inventory' },
-  { label: 'Table view', query: 'table' },
   { label: 'Sell screen note', query: 'sell' },
-  { label: 'Copy from branch', query: 'copy from branch' },
   { label: 'Plans & billing', query: 'plan' },
   { label: 'Departments', query: 'department' },
 ] as const

@@ -20,11 +20,17 @@ function normalizeDemoState(state: DemoState): DemoState {
       store.address = sanitizeDemoDisplayDashes(store.address)
     }
   }
-  state.version = 5
+  state.version = 7
   for (const store of state.stores) {
     for (const folder of store.folders) {
       if (folder.parentId === undefined) {
         folder.parentId = null
+      }
+      const hasChildren = store.folders.some((entry) => entry.parentId === folder.id)
+      if (hasChildren) {
+        folder.usesSubcategories = true
+      } else if (folder.usesSubcategories === undefined) {
+        folder.usesSubcategories = false
       }
     }
   }
@@ -37,7 +43,9 @@ function isValidDemoState(value: unknown): value is DemoState {
     (state?.version === 2 ||
       state?.version === 3 ||
       state?.version === 4 ||
-      state?.version === 5) &&
+      state?.version === 5 ||
+      state?.version === 6 ||
+      state?.version === 7) &&
     Array.isArray(state.stores) &&
     state.stores.length > 0
   )
@@ -49,7 +57,7 @@ function loadState(): DemoState {
     const raw = localStorage.getItem(DEMO_STORAGE_KEY)
     if (!raw) return createDemoSeedState()
     const parsed = JSON.parse(raw) as DemoState
-    if (!isValidDemoState(parsed) || parsed.version < 5) {
+    if (!isValidDemoState(parsed) || parsed.version < 7) {
       const fresh = createDemoSeedState()
       saveState(fresh)
       return fresh
@@ -57,7 +65,7 @@ function loadState(): DemoState {
     const namesBefore = parsed.stores.map((s) => s.name).join('\0')
     const state = normalizeDemoState(parsed)
     const namesAfter = state.stores.map((s) => s.name).join('\0')
-    if (parsed.version < 5 || namesBefore !== namesAfter) {
+    if (parsed.version < 7 || namesBefore !== namesAfter) {
       saveState(state)
     }
     return state
@@ -202,7 +210,7 @@ export const useDemoAppStore = defineStore('demoApp', {
       return customer
     },
 
-    addFolder(payload: { name: string; parentId?: string | null }) {
+    addFolder(payload: { name: string; parentId?: string | null; usesSubcategories?: boolean }) {
       const parentId = payload.parentId?.trim() ? payload.parentId.trim() : null
       if (parentId) {
         const parent = this.currentStore.folders.find((f) => f.id === parentId)
@@ -225,6 +233,7 @@ export const useDemoAppStore = defineStore('demoApp', {
         name: normalizeEntityName(payload.name) || payload.name.trim() || 'New Folder',
         storeId: this.state.currentStoreId,
         parentId,
+        ...(payload.usesSubcategories === true && !parentId ? { usesSubcategories: true } : {}),
       }
       this.currentStore.folders.push(folder)
       this.persist()

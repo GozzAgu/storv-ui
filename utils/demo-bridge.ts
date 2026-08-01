@@ -425,6 +425,7 @@ function buildInventoryForStore(store: DemoStoreRecord) {
       hasSerialNumbers: false,
       template: DEMO_PRODUCT_TEMPLATE,
       parentId: f.parentId ?? null,
+      usesSubcategories: f.usesSubcategories === true,
       itemCount: stats.itemCount,
       totalValue: stats.totalValue,
       lowStockCount: stats.lowStockCount,
@@ -690,12 +691,14 @@ export async function applyDemoCreateFolder(
     | 'template'
     | 'trackProfit'
     | 'parentId'
+    | 'usesSubcategories'
     | 'allowedDepartments'
   >
 ): Promise<string> {
   const id = useDemoAppStore().addFolder({
     name: normalizeEntityName(folderData.name) || folderData.name.trim(),
     parentId: folderData.parentId ?? null,
+    usesSubcategories: folderData.usesSubcategories,
   })
   await syncDemoToPinia()
   return id
@@ -754,4 +757,128 @@ export function saveDemoSearch(
 
 export function deleteDemoSavedSearch(searchId: string) {
   persistDemoSavedSearches(loadDemoSavedSearches().filter((s) => s.id !== searchId))
+}
+
+export function getDemoFolderTemplatesForStore(storeId: string): InventoryFolder[] {
+  const demo = useDemoAppStore()
+  demo.hydrate()
+  const store = demo.getStore(storeId)
+  if (!store) throw new Error('Branch not found.')
+  return buildInventoryForStore(store).folders
+}
+
+export async function applyDemoDuplicateFolderTemplatesBetweenStores(
+  sourceStoreId: string,
+  targetStoreId: string,
+  options: {
+    folderIds: string[]
+    includeSubfolders?: boolean
+    onExistingName?: 'skip' | 'suffix'
+  }
+): Promise<{ createdCount: number; skippedCount: number }> {
+  if (sourceStoreId === targetStoreId) {
+    throw new Error('Choose a branch other than the current one.')
+  }
+
+  const demo = useDemoAppStore()
+  demo.hydrate()
+  const source = demo.getStore(sourceStoreId)
+  const target = demo.getStore(targetStoreId)
+  if (!source || !target) throw new Error('Branch not found.')
+
+  const { expandFolderTemplatesToCopy, normalizeParentId, partitionFoldersForCopy } =
+    await import('~/utils/inventory-folder-tree')
+
+  const onExistingName = options.onExistingName ?? 'skip'
+  const includeSubfolders = options.includeSubfolders ?? false
+  const requestedUnique = [...new Set(options.folderIds.filter(Boolean))]
+  if (requestedUnique.length === 0) {
+    throw new Error('Select at least one folder to copy.')
+  }
+
+  const sourceFolders = buildInventoryForStore(source).folders
+  const missing = requestedUnique.filter((id) => !sourceFolders.some((f) => f.id === id))
+  if (missing.length > 0) {
+    throw new Error(
+      'Some selected folders are no longer on the source branch. Refresh the list and try again.'
+    )
+  }
+
+  const foldersToCopy = expandFolderTemplatesToCopy(
+    sourceFolders,
+    requestedUnique,
+    includeSubfolders
+  )
+  if (foldersToCopy.length === 0) {
+    throw new Error('Select at least one folder to copy.')
+  }
+
+  const existingNamesLower = new Set(
+    target.folders.map((f) => f.name.trim().toLowerCase()).filter(Boolean)
+  )
+
+  const takeUniqueName = (baseRaw: string) => {
+    const base = (baseRaw || '').trim() || 'Folder'
+    let name = base
+    let n = 0
+    while (existingNamesLower.has(name.toLowerCase())) {
+      n += 1
+      name = n === 1 ? `${base} (copy)` : `${base} (copy ${n})`
+    }
+    existingNamesLower.add(name.toLowerCase())
+    return name
+  }
+
+  let skippedCount = 0
+  let createdCount = 0
+  const sourceIdToTargetId = new Map<string, string>()
+  const { roots, children } = partitionFoldersForCopy(foldersToCopy)
+
+  const queueFolderCopy = (src: InventoryFolder, parentId: string | null) => {
+    const candidate = (src.name || '').trim() || 'Folder'
+    const candLower = candidate.toLowerCase()
+    let finalName = candidate
+
+    if (existingNamesLower.has(candLower)) {
+      if (onExistingName === 'skip') {
+        skippedCount += 1
+        return
+      }
+      finalName = takeUniqueName(candidate)
+    } else {
+      existingNamesLower.add(candLower)
+    }
+
+    const newId = demoId('folder')
+    sourceIdToTargetId.set(src.id, newId)
+    target.folders.push({
+      id: newId,
+      name: finalName,
+      storeId: targetStoreId,
+      parentId: parentId ?? null,
+      ...(src.usesSubcategories === true && !parentId ? { usesSubcategories: true } : {}),
+    })
+    createdCount += 1
+  }
+
+  for (const src of roots) {
+    queueFolderCopy(src, null)
+  }
+  for (const src of children) {
+    const parentSourceId = normalizeParentId(src.parentId)
+    if (!parentSourceId) {
+      queueFolderCopy(src, null)
+      continue
+    }
+    const targetParentId = sourceIdToTargetId.get(parentSourceId)
+    if (!targetParentId) {
+      skippedCount += 1
+      continue
+    }
+    queueFolderCopy(src, targetParentId)
+  }
+
+  demo.persist()
+  await syncDemoToPinia()
+  return { createdCount, skippedCount }
 }

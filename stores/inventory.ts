@@ -127,9 +127,11 @@ function clonePlain<T>(value: T): T {
 }
 
 import {
+  expandFolderTemplatesToCopy,
   folderHasChildren,
   getLeafFolders,
   normalizeParentId,
+  partitionFoldersForCopy,
   validateFolderParentId,
 } from '~/utils/inventory-folder-tree'
 
@@ -160,6 +162,7 @@ function mapFirestoreDocToInventoryFolder(
     allowedDepartments: data.allowedDepartments || undefined,
     trackProfit: data.trackProfit === true,
     parentId: normalizeParentId(data.parentId as string | null | undefined),
+    usesSubcategories: data.usesSubcategories === true,
   } as InventoryFolder
 }
 
@@ -213,6 +216,8 @@ export interface InventoryFolder {
   trackProfit?: boolean
   /** Top-level categories omit this; subcategories point to their parent folder. */
   parentId?: string | null
+  /** When true on a top-level category, products live in subcategories instead of directly here. */
+  usesSubcategories?: boolean
 }
 
 export interface InventoryItem {
@@ -690,6 +695,12 @@ export const useInventoryStore = defineStore('inventory', {
      * folders missing that field, or synced/migrated folders, still appear for copying.
      */
     async fetchFolderTemplatesForStore(storeId: string): Promise<InventoryFolder[]> {
+      const { isDemoModeActive } = await import('~/utils/demo-mode')
+      if (isDemoModeActive()) {
+        const { getDemoFolderTemplatesForStore } = await import('~/utils/demo-bridge')
+        return getDemoFolderTemplatesForStore(storeId)
+      }
+
       const db = useFirestore().getFirestoreInstance()
       if (!db) throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
       const authStore = useAuthStore()
@@ -735,11 +746,29 @@ export const useInventoryStore = defineStore('inventory', {
     async duplicateFolderTemplatesBetweenStores(
       sourceStoreId: string,
       targetStoreId: string,
-      options?: { onExistingName?: 'skip' | 'suffix'; folderIds?: string[] }
+      options?: {
+        onExistingName?: 'skip' | 'suffix'
+        folderIds?: string[]
+        includeSubfolders?: boolean
+      }
     ): Promise<DuplicateFolderTemplatesBetweenStoresResult> {
       const onExistingName = options?.onExistingName ?? 'skip'
+      const includeSubfolders = options?.includeSubfolders ?? false
       if (sourceStoreId === targetStoreId) {
         throw new Error('Choose a branch other than the current one.')
+      }
+
+      const { isDemoModeActive } = await import('~/utils/demo-mode')
+      if (isDemoModeActive()) {
+        if (options?.folderIds === undefined || options.folderIds.length === 0) {
+          throw new Error('Select at least one folder to copy.')
+        }
+        const { applyDemoDuplicateFolderTemplatesBetweenStores } = await import('~/utils/demo-bridge')
+        return applyDemoDuplicateFolderTemplatesBetweenStores(sourceStoreId, targetStoreId, {
+          folderIds: options.folderIds,
+          includeSubfolders,
+          onExistingName: options?.onExistingName,
+        })
       }
 
       const db = useFirestore().getFirestoreInstance()
@@ -773,12 +802,19 @@ export const useInventoryStore = defineStore('inventory', {
         if (requestedUnique.length === 0) {
           throw new Error('Select at least one folder to copy.')
         }
-        const requestedSet = new Set(requestedUnique)
-        foldersToCopy = sourceFolders.filter((f) => requestedSet.has(f.id))
-        if (foldersToCopy.length !== requestedSet.size) {
+        const missing = requestedUnique.filter((id) => !sourceFolders.some((f) => f.id === id))
+        if (missing.length > 0) {
           throw new Error(
             'Some selected folders are no longer on the source branch. Refresh the list and try again.'
           )
+        }
+        foldersToCopy = expandFolderTemplatesToCopy(
+          sourceFolders,
+          requestedUnique,
+          includeSubfolders
+        )
+        if (foldersToCopy.length === 0) {
+          throw new Error('Select at least one folder to copy.')
         }
       }
 
@@ -803,8 +839,9 @@ export const useInventoryStore = defineStore('inventory', {
 
       let skippedCount = 0
       const payloads: Array<{ ref: ReturnType<typeof doc>; data: Record<string, unknown> }> = []
+      const sourceIdToTargetId = new Map<string, string>()
 
-      for (const src of foldersToCopy) {
+      const queueFolderCopy = (src: InventoryFolder, parentId: string | null) => {
         const candidate = (src.name || '').trim() || 'Folder'
         const candLower = candidate.toLowerCase()
         let finalName = candidate
@@ -812,7 +849,7 @@ export const useInventoryStore = defineStore('inventory', {
         if (existingNamesLower.has(candLower)) {
           if (onExistingName === 'skip') {
             skippedCount += 1
-            continue
+            return
           }
           finalName = takeUniqueName(candidate)
         } else {
@@ -836,14 +873,40 @@ export const useInventoryStore = defineStore('inventory', {
           createdBy: ownerUid,
           allowedDepartments: [],
         }
+        if (src.usesSubcategories === true && !parentId) {
+          basePayload.usesSubcategories = true
+        }
+        if (parentId) {
+          basePayload.parentId = parentId
+        }
         if (tpl !== undefined) {
           basePayload.template = tpl
         }
 
+        const ref = doc(foldersRefTarget)
+        sourceIdToTargetId.set(src.id, ref.id)
         payloads.push({
-          ref: doc(foldersRefTarget),
+          ref,
           data: stripUndefinedFirestoreValues(basePayload),
         })
+      }
+
+      const { roots, children } = partitionFoldersForCopy(foldersToCopy)
+      for (const src of roots) {
+        queueFolderCopy(src, null)
+      }
+      for (const src of children) {
+        const parentSourceId = normalizeParentId(src.parentId)
+        if (!parentSourceId) {
+          queueFolderCopy(src, null)
+          continue
+        }
+        const targetParentId = sourceIdToTargetId.get(parentSourceId)
+        if (!targetParentId) {
+          skippedCount += 1
+          continue
+        }
+        queueFolderCopy(src, targetParentId)
       }
 
       if (payloads.length === 0) {
