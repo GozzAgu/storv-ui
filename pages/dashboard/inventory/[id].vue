@@ -1,6 +1,10 @@
 <template>
   <div
-    class="dashboard-page-with-footer dash-page--unified flex min-h-[calc(100svh-4rem)] w-full max-w-none flex-col space-y-5 overflow-x-hidden pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:space-y-6 sm:pb-32"
+    :data-inventory-subcategory-hub="showCategoryHub ? '' : undefined"
+    :class="[
+      showCategoryHub ? pageWithFooterClass : pageWithFixedFooterClass,
+      'dash-page--unified w-full max-w-none flex-col space-y-5 overflow-x-hidden sm:space-y-6',
+    ]"
   >
     <Breadcrumbs
       :items="inventoryBreadcrumbs"
@@ -249,7 +253,7 @@
       >
         <div class="inventory-categories-grid dash-grid">
           <InventoryCategoryCard
-            v-for="child in childFolders"
+            v-for="child in paginatedChildFolders"
             :key="child.id"
             :name="child.name"
             :description="child.description"
@@ -284,6 +288,13 @@
           </InventoryCategoryCard>
         </div>
       </div>
+      <DashboardTablePagination
+        v-if="childFolders.length > 0"
+        :current-page="hubCurrentPage"
+        :items-per-page="hubItemsPerPage"
+        :total="childFolders.length"
+        @page-change="handleHubPageChange"
+      />
     </template>
 
     <!-- Enhanced Items Table (teleport to body in expanded view; same pattern as receipts) -->
@@ -2074,7 +2085,8 @@ const currencySymbol = computed(() => preferences.value?.currencySymbol || '$')
 const folder = ref<InventoryFolder | null>(null)
 const isLoadingFolder = ref(true)
 const isLoadingItems = ref(false)
-const { headerBtnClass, headerBtnLabelClass } = useDashboardPageChrome()
+const { headerBtnClass, headerBtnLabelClass, pageWithFixedFooterClass } = useDashboardPageChrome()
+const { pageWithFooterClass } = useDashboardGridPagesChrome()
 
 const inventoryBreadcrumbs = computed(() => {
   const crumbs = [{ label: 'Inventory', href: '/dashboard/inventory', icon: CubeIcon }]
@@ -2111,6 +2123,81 @@ const inventoryBackLabel = computed(() =>
 const childFolders = computed(() =>
   folder.value ? getChildFolders(inventoryStore.folders, folder.value.id) : []
 )
+
+const HUB_SUBFOLDERS_PER_PAGE = 24
+
+const getInitialHubPage = (): number => {
+  if (import.meta.client) {
+    try {
+      const id = route.params.id as string
+      if (id) {
+        const saved = localStorage.getItem(`inventory-hub-page-${id}`)
+        return saved ? parseInt(saved, 10) : 1
+      }
+    } catch {
+      return 1
+    }
+  }
+  return 1
+}
+
+const hubCurrentPage = ref(getInitialHubPage())
+const hubItemsPerPage = ref(HUB_SUBFOLDERS_PER_PAGE)
+
+const paginatedChildFolders = computed(() => {
+  const start = (hubCurrentPage.value - 1) * hubItemsPerPage.value
+  return childFolders.value.slice(start, start + hubItemsPerPage.value)
+})
+
+function scrollInventoryPageToTop() {
+  if (!import.meta.client) return
+  const main = document.querySelector('[data-dashboard-main]')
+  if (main instanceof HTMLElement) {
+    main.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+function handleHubPageChange(page: number) {
+  hubCurrentPage.value = page
+  openSubfolderMenuId.value = null
+  if (import.meta.client) {
+    try {
+      const id = route.params.id as string
+      if (id) {
+        localStorage.setItem(`inventory-hub-page-${id}`, page.toString())
+      }
+    } catch {
+      // ignore
+    }
+    scrollInventoryPageToTop()
+  }
+}
+
+watch(hubCurrentPage, (page) => {
+  openSubfolderMenuId.value = null
+  if (import.meta.client) {
+    try {
+      const id = route.params.id as string
+      if (id) {
+        localStorage.setItem(`inventory-hub-page-${id}`, page.toString())
+      }
+    } catch {
+      // ignore
+    }
+  }
+})
+
+watch(folderId, () => {
+  hubCurrentPage.value = getInitialHubPage()
+})
+
+watch(childFolders, () => {
+  const totalPages = Math.max(1, Math.ceil(childFolders.value.length / hubItemsPerPage.value))
+  if (hubCurrentPage.value > totalPages) {
+    hubCurrentPage.value = totalPages
+  }
+})
 
 function subfolderDisplayStats(child: InventoryFolder) {
   return rollupFolderStats(child, inventoryStore.folders)

@@ -123,6 +123,11 @@ html.capacitor-native .dashboard-native-main {
   padding-bottom: calc(var(--dashboard-bottom-nav-stack, var(--dashboard-bottom-nav-height))) !important;
 }
 
+/* Page roots with a viewport-pinned pagination footer manage their own bottom inset */
+html.capacitor-native .dashboard-native-main:has(> .dashboard-page-with-footer) {
+  padding-bottom: 0 !important;
+}
+
 html.capacitor-native .dashboard-native-main:has(.dashboard-page-with-footer) {
   padding-bottom: calc(
     var(--dashboard-bottom-nav-stack, var(--dashboard-bottom-nav-height)) + 0.25rem

@@ -309,6 +309,7 @@ html.capacitor-native.dark .native-tabbar::before {
 /* ── Floating pagination footer pill (native — teleported to body) ── */
 html.capacitor-native .dashboard-fixed-footer--native {
   isolation: isolate;
+  z-index: 56;
   border-radius: var(--ios-radius-xl, 28px);
   border: 1px solid var(--ios-topnav-border, var(--ios-glass-border));
   background: var(--ios-topnav-bg, var(--ios-glass-bg));
