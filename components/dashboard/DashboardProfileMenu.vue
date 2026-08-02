@@ -8,10 +8,6 @@
       @click="open = !open"
     >
       <div :class="[avatarClass, 'h-8 w-8 text-[11px]']">
-        <span
-          class="pointer-events-none absolute inset-0 bg-linear-to-t from-black/12 to-transparent"
-          aria-hidden="true"
-        />
         <span class="relative">{{ userInitials }}</span>
       </div>
       <div v-if="!compact" class="hidden min-w-0 flex-1 text-left md:block">
@@ -47,10 +43,6 @@
           <div :class="panelHeaderClass">
             <div class="flex min-w-0 items-center gap-2.5">
               <div :class="[avatarClass, 'h-9 w-9 text-[10px]']">
-                <span
-                  class="pointer-events-none absolute inset-0 bg-linear-to-t from-black/12 to-transparent"
-                  aria-hidden="true"
-                />
                 <span class="relative">{{ userInitials }}</span>
               </div>
               <div class="min-w-0 flex-1">

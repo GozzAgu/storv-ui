@@ -9,6 +9,12 @@ main[data-dashboard-main],
   --dash-table-body-ink: rgb(30 41 59);
   --dash-table-body-muted: rgb(71 85 105);
   --dash-table-pagination-bg: rgb(248 250 252 / 0.55);
+  --dash-table-pagination-glass-bg: rgb(255 255 255 / 0.5);
+  --dash-table-pagination-glass-border: rgb(15 23 42 / 0.08);
+  --dash-table-pagination-glass-blur: 18px;
+  --dash-table-pagination-glass-highlight: inset 0 1px 0 rgb(255 255 255 / 0.55);
+  --dash-table-pagination-glass-shadow: 0 4px 20px rgb(15 23 42 / 0.05);
+  --dash-table-pagination-radius: 1.25rem;
 }
 
 html.dark main[data-dashboard-main],
@@ -20,6 +26,11 @@ html.dark [data-dashboard-teleport] {
   --dash-table-body-ink: rgb(248 250 252);
   --dash-table-body-muted: rgb(203 213 225);
   --dash-table-pagination-bg: rgb(255 255 255 / 0.02);
+  --dash-table-pagination-glass-bg: rgb(18 20 28 / 0.58);
+  --dash-table-pagination-glass-border: rgb(255 255 255 / 0.1);
+  --dash-table-pagination-glass-blur: 20px;
+  --dash-table-pagination-glass-highlight: inset 0 1px 0 rgb(255 255 255 / 0.07);
+  --dash-table-pagination-glass-shadow: 0 8px 28px rgb(0 0 0 / 0.22);
 }
 
 /* Shell */
@@ -67,8 +78,11 @@ html.dark [data-dashboard-teleport] .data-table-shell {
 
 .dash-table-pagination {
   flex-shrink: 0;
-  border-top: 1px solid var(--dash-table-divider);
-  background: var(--dash-table-pagination-bg);
+  border-top: 1px solid var(--dash-table-pagination-glass-border, var(--dash-table-divider));
+  background: var(--dash-table-pagination-glass-bg, var(--dash-table-pagination-bg));
+  backdrop-filter: blur(var(--dash-table-pagination-glass-blur, 16px)) saturate(165%);
+  -webkit-backdrop-filter: blur(var(--dash-table-pagination-glass-blur, 16px)) saturate(165%);
+  box-shadow: var(--dash-table-pagination-glass-shadow, none), var(--dash-table-pagination-glass-highlight, none);
   padding: 0.625rem 0.75rem;
 }
 
@@ -166,14 +180,20 @@ html.dark [data-dashboard-teleport] .data-table-shell {
   align-items: center;
   gap: 0.1875rem;
   padding: 0.1875rem;
-  border: 1px solid var(--dash-table-divider);
-  border-radius: 0.75rem;
-  background: var(--dash-table-head-bg);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.04);
+  border: 1px solid var(--dash-table-pagination-glass-border, var(--dash-table-divider));
+  border-radius: 9999px;
+  background: var(--dash-table-pagination-glass-bg, var(--dash-table-head-bg));
+  backdrop-filter: blur(var(--dash-table-pagination-glass-blur, 16px)) saturate(165%);
+  -webkit-backdrop-filter: blur(var(--dash-table-pagination-glass-blur, 16px)) saturate(165%);
+  box-shadow:
+    var(--dash-table-pagination-glass-shadow, none),
+    var(--dash-table-pagination-glass-highlight, inset 0 1px 0 rgb(255 255 255 / 0.04));
 }
 
 html.dark .dash-pagination__pager {
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.03);
+  box-shadow:
+    var(--dash-table-pagination-glass-shadow, none),
+    var(--dash-table-pagination-glass-highlight, inset 0 1px 0 rgb(255 255 255 / 0.05));
 }
 
 .dash-pagination__nav {
@@ -184,7 +204,7 @@ html.dark .dash-pagination__pager {
   align-items: center;
   justify-content: center;
   border: 0;
-  border-radius: 0.5rem;
+  border-radius: 9999px;
   background: transparent;
   color: var(--dash-table-body-muted);
   transition:
@@ -194,8 +214,12 @@ html.dark .dash-pagination__pager {
 }
 
 .dash-pagination__nav:hover:not(:disabled) {
-  background: var(--dash-table-row-hover);
+  background: rgb(255 255 255 / 0.42);
   color: var(--dash-card-ink);
+}
+
+html.dark .dash-pagination__nav:hover:not(:disabled) {
+  background: rgb(255 255 255 / 0.08);
 }
 
 .dash-pagination__nav:disabled {
@@ -266,7 +290,7 @@ html.dark .dash-pagination__pager {
   justify-content: center;
   padding-inline: 0.375rem;
   border: 0;
-  border-radius: 0.4375rem;
+  border-radius: 9999px;
   background: transparent;
   font-size: 0.75rem;
   font-weight: 500;
@@ -280,20 +304,28 @@ html.dark .dash-pagination__pager {
 }
 
 .dash-pagination__page:hover:not(.dash-pagination__page--active) {
-  background: var(--dash-table-row-hover);
+  background: rgb(255 255 255 / 0.42);
   color: var(--dash-card-ink);
+}
+
+html.dark .dash-pagination__page:hover:not(.dash-pagination__page--active) {
+  background: rgb(255 255 255 / 0.08);
 }
 
 .dash-pagination__page--active {
   background: var(--dash-accent, #143f8d);
-  box-shadow: 0 1px 2px rgb(15 23 42 / 0.12);
+  box-shadow:
+    0 1px 2px rgb(15 23 42 / 0.12),
+    inset 0 1px 0 rgb(255 255 255 / 0.16);
   color: #fff;
   font-weight: 600;
 }
 
 html.dark .dash-pagination__page--active {
-  background: rgb(154 181 227 / 0.22);
-  box-shadow: inset 0 0 0 1px rgb(154 181 227 / 0.35);
+  background: rgb(154 181 227 / 0.24);
+  box-shadow:
+    inset 0 0 0 1px rgb(154 181 227 / 0.38),
+    inset 0 1px 0 rgb(255 255 255 / 0.08);
   color: #f8fafc;
 }
 
@@ -311,14 +343,72 @@ html.dark .dash-pagination__page--active {
   user-select: none;
 }
 
-/* Viewport-pinned pagination footer */
+/* Viewport-pinned pagination footer (teleported to body — tokens must not depend on main) */
 .dashboard-fixed-footer {
-  border-top: 1px solid var(--dash-table-divider);
-  background: var(--dash-table-pagination-bg);
-  padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+  position: fixed;
+  isolation: isolate;
+  width: auto;
+  border: 1px solid rgb(255 255 255 / 0.1);
+  border-radius: 1.25rem;
+  background: rgb(18 20 28 / 0.58);
+  backdrop-filter: blur(20px) saturate(165%);
+  -webkit-backdrop-filter: blur(20px) saturate(165%);
+  box-shadow:
+    0 8px 28px rgb(0 0 0 / 0.22),
+    inset 0 1px 0 rgb(255 255 255 / 0.07);
+  overflow: hidden;
+  padding-bottom: 0;
+}
+
+html:not(.dark) .dashboard-fixed-footer {
+  border-color: rgb(15 23 42 / 0.08);
+  background: rgb(255 255 255 / 0.5);
+  box-shadow:
+    0 4px 20px rgb(15 23 42 / 0.05),
+    inset 0 1px 0 rgb(255 255 255 / 0.55);
+}
+
+.dashboard-fixed-footer::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+  background: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 0.14) 0%,
+    transparent 42%,
+    rgb(20 63 141 / 0.04) 100%
+  );
+}
+
+html.dark .dashboard-fixed-footer::before {
+  background: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 0.06) 0%,
+    transparent 38%,
+    rgb(20 63 141 / 0.08) 100%
+  );
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .dash-table-pagination,
+  .dash-pagination__pager,
+  .dashboard-fixed-footer {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--dash-table-pagination-bg);
+  }
+
+  .dashboard-fixed-footer::before {
+    display: none;
+  }
 }
 
 .dashboard-fixed-footer__inner {
+  position: relative;
+  z-index: 1;
   margin-inline: auto;
   min-width: 0;
   max-width: 1600px;
@@ -341,8 +431,45 @@ html.dark .dash-pagination__page--active {
 }
 
 html.capacitor-native .dashboard-fixed-footer--native {
-  bottom: var(--dashboard-bottom-nav-stack, var(--dashboard-bottom-nav-height));
-  padding-bottom: 0;
+  left: calc(env(safe-area-inset-left, 0px) + var(--ios-topnav-inset, 0.625rem));
+  right: calc(env(safe-area-inset-right, 0px) + var(--ios-topnav-inset, 0.625rem));
+  bottom: calc(var(--dashboard-bottom-nav-stack, var(--dashboard-bottom-nav-height)) + 0.5rem);
+  width: auto;
+  border: 1px solid var(--ios-glass-border, rgb(255 255 255 / 0.08));
+  border-radius: var(--ios-radius-xl, 28px);
+  background: var(--ios-glass-bg, rgb(28 28 30 / 0.72));
+  backdrop-filter: blur(var(--ios-glass-blur, 24px)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--ios-glass-blur, 24px)) saturate(180%);
+  box-shadow: var(--ios-glass-shadow, 0 8px 32px rgb(0 0 0 / 0.06)), var(--ios-glass-highlight, inset 0 1px 0 rgb(255 255 255 / 0.06));
+  overflow: hidden;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+.dashboard-fixed-footer .dash-pagination__pager {
+  background: rgb(255 255 255 / 0.24);
+  border-color: rgb(255 255 255 / 0.34);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.28);
+}
+
+html.dark .dashboard-fixed-footer .dash-pagination__pager {
+  background: rgb(255 255 255 / 0.045);
+  border-color: rgb(255 255 255 / 0.1);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.05);
+}
+
+html.capacitor-native .dashboard-fixed-footer .dash-pagination__pager {
+  background: rgb(255 255 255 / 0.28);
+  border-color: var(--ios-glass-border, rgb(255 255 255 / 0.08));
+  border-radius: 9999px;
+  backdrop-filter: blur(16px) saturate(175%);
+  -webkit-backdrop-filter: blur(16px) saturate(175%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.4);
+}
+
+html.capacitor-native.dark .dashboard-fixed-footer .dash-pagination__pager {
+  background: rgb(255 255 255 / 0.045);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
 }
 
 /* Empty states fill the remaining shell height - never add viewport min-height (causes page overflow). */

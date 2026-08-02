@@ -14,7 +14,7 @@ const { isNativeApp } = useCapacitorNativeApp()
     <div
       role="region"
       aria-label="Table pagination"
-      class="dashboard-fixed-footer pointer-events-auto fixed inset-x-0 z-[52] min-w-0 transition-[left] duration-300"
+      class="dashboard-fixed-footer pointer-events-auto fixed z-[52] min-w-0 transition-[left] duration-300"
       :class="[
         isNativeApp
           ? 'dashboard-fixed-footer--native'

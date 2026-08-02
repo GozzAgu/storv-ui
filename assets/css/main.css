@@ -1183,12 +1183,12 @@ html.capacitor-native {
     var(--dashboard-bottom-nav-height) + var(--ios-bottomnav-float-gap, 0.5rem) +
       var(--cap-safe-bottom)
   );
-  --dashboard-fixed-footer-height: 3.25rem;
+  --dashboard-fixed-footer-height: calc(3.25rem + 0.5rem);
 }
 
 @media (min-width: 640px) {
   html.capacitor-native {
-    --dashboard-fixed-footer-height: 2.875rem;
+    --dashboard-fixed-footer-height: calc(2.875rem + 0.5rem);
   }
 }
 
@@ -1275,7 +1275,9 @@ html.capacitor-native .dashboard-page-with-footer {
 }
 
 html.capacitor-ios.capacitor-native .dashboard-page-with-footer {
-  padding-bottom: calc(var(--dashboard-bottom-nav-stack) + 0.75rem) !important;
+  padding-bottom: calc(
+    var(--dashboard-bottom-nav-stack) + var(--dashboard-fixed-footer-height) + 0.75rem
+  ) !important;
 }
 
 html.capacitor-native .capacitor-boot-splash {

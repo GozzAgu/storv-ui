@@ -198,8 +198,12 @@ main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell) :is(.dash-ta
 }
 
 main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell) .dash-table-pagination {
-  border-top: 1px solid var(--dash-surface-divider);
-  background: var(--dash-surface-inset);
+  border-top: 1px solid var(--dash-table-pagination-glass-border, var(--dash-surface-divider));
+  background: var(--dash-table-pagination-glass-bg, var(--dash-surface-inset));
+  backdrop-filter: blur(var(--dash-table-pagination-glass-blur, 16px)) saturate(165%);
+  -webkit-backdrop-filter: blur(var(--dash-table-pagination-glass-blur, 16px)) saturate(165%);
+  border-radius: 0 0 var(--dash-table-pagination-radius, 1rem) var(--dash-table-pagination-radius, 1rem);
+  box-shadow: var(--dash-table-pagination-glass-highlight, none);
 }
 
 /* ── Grid cards match shell radius ── */

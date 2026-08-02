@@ -4,6 +4,30 @@
  * See docs/WEB_PREMIUM_DESIGN_SYSTEM.md
  */
 
+/* Root-level tokens for teleported UI (pagination footer, modals) outside .dashboard-layout-root */
+html:not(.capacitor-native) {
+  --saas-sidebar-width: 16rem;
+  --saas-sidebar-rail: 4.5rem;
+  --saas-sidebar-inset: 0.75rem;
+  --saas-radius-lg: 1rem;
+  --saas-radius-xl: 1.25rem;
+  --saas-blur: 20px;
+  --saas-spring: cubic-bezier(0.22, 1, 0.36, 1);
+  --saas-glass-bg: rgb(255 255 255 / 0.78);
+  --saas-glass-border: rgb(15 23 42 / 0.08);
+  --saas-glass-highlight: inset 0 1px 0 rgb(255 255 255 / 0.65);
+  --saas-shadow-md: 0 4px 24px rgb(15 23 42 / 0.06);
+  --saas-surface: #ffffff;
+}
+
+html:not(.capacitor-native).dark {
+  --saas-glass-bg: rgb(18 20 28 / 0.82);
+  --saas-glass-border: rgb(255 255 255 / 0.08);
+  --saas-glass-highlight: inset 0 1px 0 rgb(255 255 255 / 0.05);
+  --saas-shadow-md: 0 8px 32px rgb(0 0 0 / 0.35);
+  --saas-surface: #12141c;
+}
+
 html:not(.capacitor-native) .dashboard-layout-root {
   --saas-canvas: #f4f6fb;
   --saas-surface: #ffffff;
@@ -424,25 +448,75 @@ html:not(.capacitor-native) .saas-search-bar:focus-within {
 /* ── Viewport pagination footer (web floating layout) ── */
 html:not(.capacitor-native) .dashboard-fixed-footer--web {
   top: auto;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  border-top: 1px solid var(--saas-glass-border);
-  border-bottom: none;
-  border-radius: 0;
-  background: var(--saas-glass-bg);
-  backdrop-filter: blur(var(--saas-blur)) saturate(160%);
-  -webkit-backdrop-filter: blur(var(--saas-blur)) saturate(160%);
-  box-shadow:
-    0 -4px 24px rgb(15 23 42 / 0.06),
-    inset 0 1px 0 rgb(255 255 255 / 0.05);
-  transition: left 0.3s var(--saas-spring);
+  left: var(--saas-sidebar-inset, 0.75rem);
+  right: var(--saas-sidebar-inset, 0.75rem);
+  bottom: max(0.625rem, env(safe-area-inset-bottom, 0px));
+  width: auto;
+  border: 1px solid var(--saas-glass-border, rgb(15 23 42 / 0.08));
+  border-radius: var(--saas-radius-xl, 1.25rem);
+  background: var(--saas-glass-bg, rgb(255 255 255 / 0.78));
+  backdrop-filter: blur(var(--saas-blur, 20px)) saturate(185%);
+  -webkit-backdrop-filter: blur(var(--saas-blur, 20px)) saturate(185%);
+  box-shadow: var(--saas-shadow-md, 0 4px 24px rgb(15 23 42 / 0.06)), var(--saas-glass-highlight, inset 0 1px 0 rgb(255 255 255 / 0.65));
+  overflow: hidden;
+  transition:
+    left 0.3s var(--saas-spring, cubic-bezier(0.22, 1, 0.36, 1)),
+    box-shadow 0.18s ease;
 }
 
 html:not(.capacitor-native).dark .dashboard-fixed-footer--web {
+  border-color: var(--saas-glass-border, rgb(255 255 255 / 0.08));
+  background: var(--saas-glass-bg, rgb(18 20 28 / 0.82));
+  box-shadow: var(--saas-shadow-md, 0 8px 32px rgb(0 0 0 / 0.35)), var(--saas-glass-highlight, inset 0 1px 0 rgb(255 255 255 / 0.05));
+}
+
+html:not(.capacitor-native) .dashboard-fixed-footer--web::before {
+  background: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 0.08) 0%,
+    transparent 42%,
+    rgb(20 63 141 / 0.03) 100%
+  );
+}
+
+html:not(.capacitor-native).dark .dashboard-fixed-footer--web::before {
+  background: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 0.04) 0%,
+    transparent 38%,
+    rgb(20 63 141 / 0.06) 100%
+  );
+}
+
+html:not(.capacitor-native) .dashboard-fixed-footer .dash-pagination__pager {
+  background: rgb(255 255 255 / 0.28);
+  border-color: var(--saas-glass-border);
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.45);
+}
+
+html:not(.capacitor-native).dark .dashboard-fixed-footer .dash-pagination__pager {
+  background: rgb(255 255 255 / 0.04);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
+}
+
+html:not(.capacitor-native) .dash-table-pagination .dash-pagination__pager {
+  background: rgb(255 255 255 / 0.38);
+  border-color: var(--saas-glass-border);
+  border-radius: 9999px;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   box-shadow:
-    0 -8px 32px rgb(0 0 0 / 0.28),
-    inset 0 1px 0 rgb(255 255 255 / 0.04);
+    0 2px 12px rgb(15 23 42 / 0.04),
+    inset 0 1px 0 rgb(255 255 255 / 0.62);
+}
+
+html:not(.capacitor-native).dark .dash-table-pagination .dash-pagination__pager {
+  background: rgb(255 255 255 / 0.035);
+  box-shadow:
+    0 4px 16px rgb(0 0 0 / 0.18),
+    inset 0 1px 0 rgb(255 255 255 / 0.06);
 }
 
 @media (min-width: 1024px) {
@@ -450,9 +524,7 @@ html:not(.capacitor-native).dark .dashboard-fixed-footer--web {
     left: calc(var(--saas-sidebar-width, 16rem) + var(--saas-sidebar-inset, 0.75rem) * 2);
     right: var(--saas-sidebar-inset, 0.75rem);
     bottom: var(--saas-sidebar-inset, 0.75rem);
-    border: 1px solid var(--saas-glass-border);
-    border-radius: var(--saas-radius-lg);
-    box-shadow: var(--saas-shadow-md), var(--saas-glass-highlight);
+    border-radius: var(--saas-radius-xl, 1.25rem);
   }
 
   html:not(.capacitor-native) .dashboard-fixed-footer--web-collapsed {
@@ -466,15 +538,26 @@ html:not(.capacitor-native).dark .dashboard-fixed-footer--web {
     -webkit-backdrop-filter: none;
     background: var(--saas-surface);
   }
+
+  html:not(.capacitor-native) .dashboard-fixed-footer--web::before {
+    display: none;
+  }
+
+  html:not(.capacitor-native) .dashboard-fixed-footer .dash-pagination__pager,
+  html:not(.capacitor-native) .dash-table-pagination .dash-pagination__pager {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--dash-table-pagination-bg);
+  }
 }
 
 html:not(.capacitor-native) {
-  --dashboard-fixed-footer-height: 4.75rem;
+  --dashboard-fixed-footer-height: calc(3.75rem + 0.625rem);
 }
 
 @media (min-width: 640px) {
   html:not(.capacitor-native) {
-    --dashboard-fixed-footer-height: 3.5rem;
+    --dashboard-fixed-footer-height: calc(3.25rem + 0.625rem);
   }
 }
 

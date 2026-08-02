@@ -47,10 +47,6 @@ defineEmits<{
 const attrs = useAttrs()
 const { paginationBarClass } = useDashboardPageChrome()
 const { sidebarCollapsed } = useDashboardSidebarCollapsed()
-const { isCapacitorIos } = useIsCapacitorIos()
 
-/** iOS: pagination flows with page content (not pinned above bottom nav). */
-const effectivePinToViewport = computed(
-  () => props.pinToViewport && !isCapacitorIos.value
-)
+const effectivePinToViewport = computed(() => props.pinToViewport)
 </script>
