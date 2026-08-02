@@ -7,9 +7,6 @@
       <template #title>
         <h1 :class="pageTitleClass">Analytics & Reports</h1>
       </template>
-      <template v-if="!isLoading && !needsStoreSelection" #description>
-        <DashboardPageMetrics :metrics="analyticsHeaderMetrics" aria-label="Analytics summary" />
-      </template>
       <template #actions>
         <div :class="segmentGroupClass" role="group" aria-label="Analytics period">
           <button
@@ -81,8 +78,18 @@
     </template>
 
     <template v-else>
-      <section v-if="analyticsSummary" :class="cardPaddedClass">
-        <p :class="summaryTextClass">{{ analyticsSummary }}</p>
+      <section class="dash-analytics-kpi-panel">
+        <header class="dash-analytics-kpi-panel__intro">
+          <p class="dash-analytics-kpi-panel__eyebrow">{{ periodLabel }}</p>
+          <p v-if="analyticsSummary" class="dash-analytics-kpi-panel__summary">
+            {{ analyticsSummary }}
+          </p>
+        </header>
+        <DashboardPageMetrics
+          metrics-class="dash-page-metrics--analytics"
+          :metrics="analyticsHeaderMetrics"
+          aria-label="Analytics summary"
+        />
       </section>
 
       <section :class="[cardPaddedClass, 'dash-inventory-health']">
@@ -637,7 +644,6 @@ const {
   numClass,
   emptyClass,
   stateCardClass,
-  summaryTextClass,
   insightIconClass,
   insightHighlightClass,
   tableShellClass,

@@ -11,7 +11,7 @@
           ? `${getStoreBranchShortLabel(currentStore.name)} (${currentStore.name})`
           : 'Select store'
       "
-      @click="dropdownOpen = !dropdownOpen"
+      @click.stop="toggleDropdown"
     >
       <span
         v-if="!switchingStore"
@@ -76,16 +76,23 @@
       </svg>
     </button>
 
-    <Transition
-      enter-active-class="transition duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
-      enter-from-class="translate-y-1 scale-[0.98] opacity-0"
-      enter-to-class="translate-y-0 scale-100 opacity-100"
-      leave-active-class="transition duration-150 ease-in"
-      leave-from-class="translate-y-0 scale-100 opacity-100"
-      leave-to-class="translate-y-1 scale-[0.98] opacity-0"
-    >
-      <div v-if="dropdownOpen" :class="panelClass" @click.stop>
-        <div :class="panelSurfaceClass">
+    <Teleport to="body">
+      <Transition
+        enter-active-class="transition duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        enter-from-class="translate-y-1 scale-[0.98] opacity-0"
+        enter-to-class="translate-y-0 scale-100 opacity-100"
+        leave-active-class="transition duration-150 ease-in"
+        leave-from-class="translate-y-0 scale-100 opacity-100"
+        leave-to-class="translate-y-1 scale-[0.98] opacity-0"
+      >
+        <div
+          v-if="dropdownOpen"
+          ref="panelRef"
+          :class="panelClass"
+          :style="panelStyle"
+          @click.stop
+        >
+          <div :class="panelSurfaceClass">
           <div :class="panelHeaderClass">
             <p :class="panelSectionLabelClass">
               {{ isStaff ? 'Your store' : 'Stores' }}
@@ -182,14 +189,15 @@
               Manage stores
             </NuxtLink>
           </div>
+          </div>
         </div>
-      </div>
-    </Transition>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import {
   BuildingStorefrontIcon,
 } from '~/utils/app-icons'
@@ -232,7 +240,45 @@ const toast = useAppToast()
 
 const dropdownOpen = ref(false)
 const dropdownRef = ref<HTMLElement | null>(null)
+const panelRef = ref<HTMLElement | null>(null)
+const panelStyle = ref<Record<string, string>>({})
 const switchingStore = ref(false)
+
+const PANEL_WIDTH_PX = 232
+const PANEL_MARGIN_PX = 12
+const PANEL_GAP_PX = 8
+
+function positionPanel() {
+  if (!import.meta.client || !dropdownOpen.value || !dropdownRef.value) return
+
+  const rect = dropdownRef.value.getBoundingClientRect()
+  const panelWidth = Math.min(PANEL_WIDTH_PX, window.innerWidth - PANEL_MARGIN_PX * 2)
+  let left =
+    window.innerWidth >= 640
+      ? rect.right - panelWidth
+      : (window.innerWidth - panelWidth) / 2
+  left = Math.max(
+    PANEL_MARGIN_PX,
+    Math.min(left, window.innerWidth - panelWidth - PANEL_MARGIN_PX)
+  )
+
+  panelStyle.value = {
+    position: 'fixed',
+    top: `${Math.round(rect.bottom + PANEL_GAP_PX)}px`,
+    left: `${Math.round(left)}px`,
+    width: `${Math.round(panelWidth)}px`,
+    maxWidth: `calc(100vw - ${PANEL_MARGIN_PX * 2}px)`,
+    zIndex: '140',
+  }
+}
+
+function onPanelScrollOrResize() {
+  if (dropdownOpen.value) positionPanel()
+}
+
+function toggleDropdown() {
+  dropdownOpen.value = !dropdownOpen.value
+}
 
 const loading = computed(() => storesStore.loading)
 const { eligibleStores } = usePlanEligibleStores()
@@ -251,12 +297,20 @@ function branchCodeLabel(name: string | null | undefined) {
 }
 
 const handleClickOutside = (event: MouseEvent) => {
-  if (dropdownRef.value && !dropdownRef.value.contains(event.target as Node)) {
+  const target = event.target as Node
+  const eventPath = typeof event.composedPath === 'function' ? event.composedPath() : []
+  const inDropdown =
+    dropdownRef.value?.contains(target) ||
+    panelRef.value?.contains(target) ||
+    eventPath.includes(dropdownRef.value as EventTarget) ||
+    eventPath.includes(panelRef.value as EventTarget)
+
+  if (!inDropdown) {
     dropdownOpen.value = false
   }
 }
 
-watch(dropdownOpen, (isOpen) => {
+watch(dropdownOpen, async (isOpen) => {
   if (typeof window !== 'undefined') {
     if (isOpen && window.innerWidth < 640) {
       document.body.style.overflow = 'hidden'
@@ -264,16 +318,25 @@ watch(dropdownOpen, (isOpen) => {
       document.body.style.overflow = ''
     }
   }
+
+  if (!import.meta.client || !isOpen) return
+  await nextTick()
+  positionPanel()
+  requestAnimationFrame(() => positionPanel())
 })
 
 onMounted(async () => {
   await storesStore.fetchStores()
   await storesStore.initializeCurrentStore()
   document.addEventListener('click', handleClickOutside)
+  window.addEventListener('scroll', onPanelScrollOrResize, true)
+  window.addEventListener('resize', onPanelScrollOrResize)
 })
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
+  window.removeEventListener('scroll', onPanelScrollOrResize, true)
+  window.removeEventListener('resize', onPanelScrollOrResize)
   document.body.style.overflow = ''
 })
 

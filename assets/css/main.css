@@ -1183,7 +1183,13 @@ html.capacitor-native {
     var(--dashboard-bottom-nav-height) + var(--ios-bottomnav-float-gap, 0.5rem) +
       var(--cap-safe-bottom)
   );
-  --dashboard-fixed-footer-height: 2.75rem;
+  --dashboard-fixed-footer-height: 3.25rem;
+}
+
+@media (min-width: 640px) {
+  html.capacitor-native {
+    --dashboard-fixed-footer-height: 2.875rem;
+  }
 }
 
 html.capacitor-native #__nuxt {

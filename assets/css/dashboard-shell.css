@@ -565,31 +565,11 @@ html:not(.dark) .dash-store-trigger:hover {
 }
 
 .dash-store-panel {
-  position: fixed;
-  left: 50%;
-  top: 4.5rem;
-  z-index: 50;
   display: flex;
-  max-height: calc(100vh - 6rem);
-  width: min(calc(100vw - 1.5rem), 14.5rem);
-  max-width: min(calc(100vw - 1.5rem), 14.5rem);
-  transform: translateX(-50%);
+  max-height: min(24rem, calc(100vh - 6rem));
   flex-direction: column;
   overflow: hidden;
-}
-
-@media (min-width: 640px) {
-  .dash-store-panel {
-    position: absolute;
-    left: auto;
-    right: 0;
-    top: 100%;
-    margin-top: 0.5rem;
-    height: auto;
-    width: min(14rem, calc(100vw - 1rem));
-    max-width: min(14rem, calc(100vw - 1rem));
-    transform: none;
-  }
+  pointer-events: auto;
 }
 
 .dash-store-panel__surface {
