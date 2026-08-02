@@ -84,7 +84,7 @@
         </ul>
         <p
           v-if="filteredCategories.length === 0"
-          class="py-2 text-xs text-gray-500 dark:text-gray-400"
+          class="py-2 text-sm leading-relaxed text-gray-500 dark:text-gray-400"
         >
           No topics match "{{ searchQuery }}". Try another word or clear the filter.
         </p>
@@ -142,7 +142,7 @@
                 ></p>
                 <ul
                   v-if="article.bullets?.length"
-                  class="list-disc space-y-1 pl-4 marker:text-gray-400 dark:marker:text-gray-500"
+                  class="list-disc space-y-1.5 pl-5 marker:text-gray-400 dark:marker:text-gray-500"
                 >
                   <li
                     v-for="(b, bIdx) in article.bullets"

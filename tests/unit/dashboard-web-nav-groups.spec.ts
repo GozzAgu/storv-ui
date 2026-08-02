@@ -14,7 +14,8 @@ describe('dashboard-web-nav-groups', () => {
     expect(webNavSectionLabel('Dashboard')).toBe('Overview')
     expect(webNavSectionLabel('Inventory')).toBe('Commerce')
     expect(webNavSectionLabel('Customer buybacks')).toBe('Stock operations')
-    expect(webNavSectionLabel('Analytics')).toBe('Insights')
+    expect(webNavSectionLabel('Departments')).toBe('Org · Insights')
+    expect(webNavSectionLabel('Analytics')).toBe('Org · Insights')
     expect(webNavSectionLabel('Settings')).toBe('Account')
   })
 

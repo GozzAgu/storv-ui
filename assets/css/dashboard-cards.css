@@ -106,8 +106,8 @@ html.dark .ldg-eyebrow {
 
 .dash-page-meta {
   margin: 0.375rem 0 0;
-  font-size: 0.875rem;
-  line-height: 1.45;
+  font-size: 0.9375rem;
+  line-height: 1.55;
   color: var(--dash-card-muted);
 }
 

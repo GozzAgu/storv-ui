@@ -11,8 +11,11 @@ export const WEB_NAV_SECTIONS = [
     label: 'Stock operations',
     items: ['Customer buybacks', 'Stock loans', 'Multi-Store Sync', 'Payment links'],
   },
-  { id: 'organization', label: 'Organization', items: ['Departments'] },
-  { id: 'insights', label: 'Insights', items: ['Analytics', 'Activity Logs'] },
+  {
+    id: 'organization-insights',
+    label: 'Org · Insights',
+    items: ['Departments', 'Analytics', 'Activity Logs'],
+  },
   { id: 'account', label: 'Account', items: ['Help center', 'Settings', 'Profile'] },
 ] as const
 
