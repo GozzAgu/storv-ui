@@ -142,16 +142,6 @@
             </Button>
           </template>
           <Button
-            v-if="canAddSubcategories"
-            variant="outline"
-            size="sm"
-            :icon="FolderIcon"
-            class="shrink-0 !rounded-xl !px-2 !py-2 !text-[11px] sm:!rounded-2xl sm:!px-3 sm:!py-2.5 sm:!text-xs"
-            @click="openCreateSubcategoryModal"
-          >
-            <span class="hidden sm:inline">Add subcategory</span>
-          </Button>
-          <Button
             v-if="canManageInventoryItems"
             variant="outline"
             size="sm"
@@ -275,9 +265,23 @@
             :track-profit="child.trackProfit === true"
             :gross-profit-on-hand="subfolderGrossProfitOnHand(child.id)"
             :show-profit="canViewProfitAndCost && child.trackProfit === true"
-            :has-overlays="false"
+            :has-overlays="canCreateInventoryFolders"
             @click="navigateToSubfolder(child.id)"
-          />
+          >
+            <template v-if="canCreateInventoryFolders" #menu>
+              <div data-inventory-subfolder-menu>
+                <button
+                  type="button"
+                  :data-folder-actions-anchor="child.id"
+                  class="inline-flex h-7 w-7 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700/80 dark:hover:text-gray-200"
+                  aria-label="Subcategory options"
+                  @click="toggleSubfolderMenu(child.id)"
+                >
+                  <EllipsisVerticalIcon class="h-3.5 w-3.5" stroke-width="2" />
+                </button>
+              </div>
+            </template>
+          </InventoryCategoryCard>
         </div>
       </div>
     </template>
@@ -405,16 +409,6 @@
                         Delete
                       </Button>
                     </template>
-                    <Button
-                      v-if="canAddSubcategories"
-                      variant="outline"
-                      size="sm"
-                      :icon="FolderIcon"
-                      extra-class="!rounded-2xl"
-                      @click="openCreateSubcategoryModal"
-                    >
-                      Add subcategory
-                    </Button>
                     <Button
                       variant="outline"
                       size="sm"
@@ -558,16 +552,6 @@
                     <span class="hidden sm:inline">Stock loan</span>
                   </Button>
                 </template>
-                <Button
-                  v-if="canAddSubcategories"
-                  variant="outline"
-                  size="sm"
-                  :icon="FolderIcon"
-                  extra-class="!rounded-2xl max-sm:!px-2 max-sm:!py-1.5"
-                  @click="openCreateSubcategoryModal"
-                >
-                  <span class="hidden sm:inline">Add subcategory</span>
-                </Button>
                 <Button
                   v-if="canManageInventoryItems"
                   variant="outline"
@@ -1857,16 +1841,52 @@
       </div>
     </Teleport>
 
+    <!-- Subcategory actions menu (hub view) -->
+    <Teleport to="body">
+      <div
+        v-if="openSubfolderMenuId && subfolderForOpenMenu && subfolderMenuFixedStyle"
+        data-inventory-subfolder-menu
+        class="frosted-glass fixed z-[1000] min-w-[120px] rounded-sm py-0.5"
+        :style="subfolderMenuFixedStyle"
+        @click.stop
+      >
+        <button
+          type="button"
+          class="flex w-full items-center gap-1.5 px-2.5 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800/85"
+          @click="handleEditSubfolderFromMenu"
+        >
+          <PencilSquareIcon class="h-3.5 w-3.5 shrink-0" />
+          Edit
+        </button>
+        <button
+          type="button"
+          class="flex w-full items-center gap-1.5 px-2.5 py-2 text-left text-xs text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/35"
+          @click="handleDeleteSubfolderFromMenu"
+        >
+          <TrashIcon class="h-3.5 w-3.5 shrink-0" />
+          Delete
+        </button>
+      </div>
+    </Teleport>
+
+    <DeleteFolderModal
+      v-model="showDeleteSubfolderModal"
+      :folder="selectedSubfolderForDelete"
+      @deleted="handleConfirmDeleteSubfolder"
+    />
+
     <SidePanel
-      v-model="showCreateSubcategoryModal"
+      v-model="showSubcategoryModal"
       size="md"
       dense
       eyebrow="Inventory"
-      title="Add subcategory"
+      :title="editingSubfolder ? 'Edit subcategory' : 'Add subcategory'"
       :subtitle="
-        subcategoryCreateParent
-          ? `Creates a subcategory inside ${subcategoryCreateParent.name}. Columns and settings are inherited.`
-          : 'Creates a subcategory inside this category.'
+        editingSubfolder
+          ? 'Update the name or description. Columns and settings stay inherited from the parent category.'
+          : subcategoryCreateParent
+            ? `Creates a subcategory inside ${subcategoryCreateParent.name}. Columns and settings are inherited.`
+            : 'Creates a subcategory inside this category.'
       "
     >
       <form
@@ -1903,7 +1923,7 @@
             size="sm"
             extra-class="!rounded-2xl"
             :disabled="isSavingSubcategory"
-            @click="showCreateSubcategoryModal = false"
+            @click="showSubcategoryModal = false"
           >
             Cancel
           </Button>
@@ -1916,7 +1936,7 @@
             :loading="isSavingSubcategory"
             :disabled="!subcategoryForm.name.trim()"
           >
-            Create subcategory
+            {{ editingSubfolder ? 'Save changes' : 'Create subcategory' }}
           </Button>
         </div>
       </template>
@@ -1981,7 +2001,7 @@ import {
   isSubfolder,
   rollupFolderStats,
 } from '~/utils/inventory-folder-tree'
-import { getVisibleMenuAnchorElement } from '~/utils/menuAnchor'
+import { computeFixedAnchoredMenuStyle, getVisibleMenuAnchorElement } from '~/utils/menuAnchor'
 import { computeFolderTotalValue } from '~/utils/inventory-folder-availability'
 import { getInventoryItemDisplayName } from '~/composables/useInventoryItemDisplay'
 import {
@@ -2012,6 +2032,7 @@ import * as XLSX from 'xlsx'
 import DiscountModal from '~/components/inventory/DiscountModal.vue'
 import BulkDiscountModal from '~/components/inventory/BulkDiscountModal.vue'
 import DeleteItemModal from '~/components/inventory/DeleteItemModal.vue'
+import DeleteFolderModal from '~/components/inventory/DeleteFolderModal.vue'
 import ItemTimelineModal from '~/components/inventory/ItemTimelineModal.vue'
 import DuplicateFeatureUpsellBanner from '~/components/inventory/DuplicateFeatureUpsellBanner.vue'
 import CreateSellerLoanModal from '~/components/seller-loans/CreateSellerLoanModal.vue'
@@ -2143,19 +2164,142 @@ const loadingShowsCategoryHub = computed(() => {
   return folderShowsCategoryHub(cached)
 })
 
-const showCreateSubcategoryModal = ref(false)
+const showSubcategoryModal = ref(false)
+const editingSubfolder = ref<InventoryFolder | null>(null)
 const isSavingSubcategory = ref(false)
 const subcategoryForm = reactive({ name: '', description: '' })
+const showDeleteSubfolderModal = ref(false)
+const selectedSubfolderForDelete = ref<InventoryFolder | null>(null)
+const openSubfolderMenuId = ref<string | null>(null)
+const subfolderMenuFixedStyle = ref<Record<string, string> | null>(null)
 
-function openCreateSubcategoryModal() {
-  subcategoryForm.name = ''
-  subcategoryForm.description = ''
-  showCreateSubcategoryModal.value = true
+let subfolderMenuOutsideHandler: ((e: MouseEvent) => void) | null = null
+
+function removeSubfolderMenuOutsideListener() {
+  if (subfolderMenuOutsideHandler && import.meta.client) {
+    document.removeEventListener('click', subfolderMenuOutsideHandler, true)
+    subfolderMenuOutsideHandler = null
+  }
 }
 
+const subfolderForOpenMenu = computed(() => {
+  const id = openSubfolderMenuId.value
+  if (!id) return null
+  return inventoryStore.getFolderById(id) ?? childFolders.value.find((f) => f.id === id) ?? null
+})
+
+const toggleSubfolderMenu = (subfolderId: string) => {
+  openSubfolderMenuId.value =
+    openSubfolderMenuId.value === subfolderId ? null : subfolderId
+}
+
+function updateSubfolderMenuPosition() {
+  const id = openSubfolderMenuId.value
+  if (!id || !import.meta.client) {
+    subfolderMenuFixedStyle.value = null
+    return
+  }
+  const el = getVisibleMenuAnchorElement('data-folder-actions-anchor', id)
+  if (!el) {
+    subfolderMenuFixedStyle.value = null
+    return
+  }
+  subfolderMenuFixedStyle.value = computeFixedAnchoredMenuStyle(el.getBoundingClientRect(), {
+    menuWidth: 120,
+    estimatedMenuHeight: 88,
+    margin: 4,
+    viewportPadding: 8,
+  })
+}
+
+function addSubfolderMenuPositionListeners() {
+  if (!import.meta.client) return
+  window.addEventListener('scroll', updateSubfolderMenuPosition, true)
+  window.addEventListener('resize', updateSubfolderMenuPosition)
+}
+
+function removeSubfolderMenuPositionListeners() {
+  if (!import.meta.client) return
+  window.removeEventListener('scroll', updateSubfolderMenuPosition, true)
+  window.removeEventListener('resize', updateSubfolderMenuPosition)
+}
+
+watch(openSubfolderMenuId, (id) => {
+  removeSubfolderMenuOutsideListener()
+  removeSubfolderMenuPositionListeners()
+  subfolderMenuFixedStyle.value = null
+  if (!id || !import.meta.client) return
+
+  nextTick(() => {
+    updateSubfolderMenuPosition()
+    addSubfolderMenuPositionListeners()
+  })
+
+  subfolderMenuOutsideHandler = (e: MouseEvent) => {
+    const t = e.target as Node | null
+    if (t && (t as Element).closest?.('[data-inventory-subfolder-menu]')) return
+    openSubfolderMenuId.value = null
+  }
+  setTimeout(() => {
+    if (openSubfolderMenuId.value && subfolderMenuOutsideHandler) {
+      document.addEventListener('click', subfolderMenuOutsideHandler, true)
+    }
+  }, 0)
+})
+
+function handleEditSubfolderFromMenu() {
+  const subfolder = subfolderForOpenMenu.value
+  if (!subfolder) return
+  openSubfolderMenuId.value = null
+  openEditSubcategoryModal(subfolder)
+}
+
+function handleDeleteSubfolderFromMenu() {
+  const subfolder = subfolderForOpenMenu.value
+  if (!subfolder) return
+  openSubfolderMenuId.value = null
+  handleDeleteSubfolder(subfolder)
+}
+
+function handleDeleteSubfolder(subfolder: InventoryFolder) {
+  selectedSubfolderForDelete.value = subfolder
+  showDeleteSubfolderModal.value = true
+}
+
+async function handleConfirmDeleteSubfolder(subfolder: InventoryFolder) {
+  try {
+    await inventoryStore.deleteFolder(subfolder.id)
+    toast.success('Subcategory deleted')
+    await inventoryStore.fetchFolderAvailabilityStats()
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Failed to delete subcategory'
+    toast.error(message)
+  } finally {
+    showDeleteSubfolderModal.value = false
+    selectedSubfolderForDelete.value = null
+  }
+}
+
+function openCreateSubcategoryModal() {
+  editingSubfolder.value = null
+  subcategoryForm.name = ''
+  subcategoryForm.description = ''
+  showSubcategoryModal.value = true
+}
+
+function openEditSubcategoryModal(subfolder: InventoryFolder) {
+  editingSubfolder.value = subfolder
+  subcategoryForm.name = subfolder.name
+  subcategoryForm.description = subfolder.description || ''
+  showSubcategoryModal.value = true
+}
+
+watch(showSubcategoryModal, (open) => {
+  if (!open) editingSubfolder.value = null
+})
+
 async function handleSaveSubcategory() {
-  const parent = subcategoryCreateParent.value
-  if (!parent || isSavingSubcategory.value) return
+  if (isSavingSubcategory.value) return
   if (!subcategoryForm.name.trim()) {
     toast.error('Please enter a subcategory name')
     return
@@ -2163,31 +2307,47 @@ async function handleSaveSubcategory() {
 
   isSavingSubcategory.value = true
   try {
-    const template: Template | undefined = parent.template?.fields?.length
-      ? {
-          id: 'custom',
-          name: 'Custom Template',
-          description: 'Custom table structure',
-          fields: parent.template.fields.map((field) => ({ ...field })),
-        }
-      : undefined
+    if (editingSubfolder.value) {
+      await inventoryStore.updateFolder(editingSubfolder.value.id, {
+        name: subcategoryForm.name.trim(),
+        description: subcategoryForm.description.trim(),
+      })
+      toast.success('Subcategory updated')
+    } else {
+      const parent = subcategoryCreateParent.value
+      if (!parent) return
 
-    await inventoryStore.createFolder({
-      name: subcategoryForm.name.trim(),
-      description: subcategoryForm.description.trim(),
-      type: parent.type || 'general',
-      color: parent.color || '#3B82F6',
-      hasSerialNumbers: parent.hasSerialNumbers || false,
-      trackProfit: parent.trackProfit === true,
-      allowedDepartments: parent.allowedDepartments ? [...parent.allowedDepartments] : [],
-      template,
-      parentId: parent.id,
-    })
-    toast.success('Subcategory created')
-    showCreateSubcategoryModal.value = false
+      const template: Template | undefined = parent.template?.fields?.length
+        ? {
+            id: 'custom',
+            name: 'Custom Template',
+            description: 'Custom table structure',
+            fields: parent.template.fields.map((field) => ({ ...field })),
+          }
+        : undefined
+
+      await inventoryStore.createFolder({
+        name: subcategoryForm.name.trim(),
+        description: subcategoryForm.description.trim(),
+        type: parent.type || 'general',
+        color: parent.color || '#3B82F6',
+        hasSerialNumbers: parent.hasSerialNumbers || false,
+        trackProfit: parent.trackProfit === true,
+        allowedDepartments: parent.allowedDepartments ? [...parent.allowedDepartments] : [],
+        template,
+        parentId: parent.id,
+      })
+      toast.success('Subcategory created')
+    }
+    showSubcategoryModal.value = false
     await inventoryStore.fetchFolderAvailabilityStats()
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Failed to create subcategory'
+    const message =
+      error instanceof Error
+        ? error.message
+        : editingSubfolder.value
+          ? 'Failed to update subcategory'
+          : 'Failed to create subcategory'
     toast.error(message)
   } finally {
     isSavingSubcategory.value = false
@@ -4701,6 +4861,8 @@ onBeforeUnmount(() => {
     document.removeEventListener('mousedown', handleClickOutsideInlineEdit)
     removeItemMenuOutsideListener()
     removeItemMenuPositionListeners()
+    removeSubfolderMenuOutsideListener()
+    removeSubfolderMenuPositionListeners()
     document.body.style.overflow = ''
   }
 })

@@ -11,12 +11,14 @@
       </div>
     </div>
 
-    <h3 class="dash-grid-card__title">
-      {{ displayName }}
-    </h3>
-    <p class="dash-grid-card__desc">
-      {{ descriptionText }}
-    </p>
+    <div class="dash-grid-card__intro">
+      <h3 class="dash-grid-card__title">
+        {{ displayName }}
+      </h3>
+      <p class="dash-grid-card__desc">
+        {{ descriptionText }}
+      </p>
+    </div>
 
     <div class="dash-grid-card__meta-block">
       <div class="dash-grid-card__meta-row">
