@@ -431,12 +431,12 @@ html.dark .dashboard-fixed-footer::before {
 }
 
 html.capacitor-native .dashboard-fixed-footer--native {
-  left: calc(env(safe-area-inset-left, 0px) + var(--ios-topnav-inset, 0.625rem));
-  right: calc(env(safe-area-inset-right, 0px) + var(--ios-topnav-inset, 0.625rem));
-  bottom: calc(var(--dashboard-bottom-nav-stack, var(--dashboard-bottom-nav-height)) + 0.5rem);
+  left: calc(env(safe-area-inset-left, 0px) + var(--ios-bottomnav-inset, 1rem));
+  right: calc(env(safe-area-inset-right, 0px) + var(--ios-bottomnav-inset, 1rem));
+  bottom: calc(var(--dashboard-bottom-nav-stack, var(--dashboard-bottom-nav-height)) + 0.375rem);
   width: auto;
   border: 1px solid var(--ios-glass-border, rgb(255 255 255 / 0.08));
-  border-radius: var(--ios-radius-xl, 28px);
+  border-radius: 9999px;
   background: var(--ios-glass-bg, rgb(28 28 30 / 0.72));
   backdrop-filter: blur(var(--ios-glass-blur, 24px)) saturate(180%);
   -webkit-backdrop-filter: blur(var(--ios-glass-blur, 24px)) saturate(180%);
@@ -459,17 +459,17 @@ html.dark .dashboard-fixed-footer .dash-pagination__pager {
 }
 
 html.capacitor-native .dashboard-fixed-footer .dash-pagination__pager {
-  background: rgb(255 255 255 / 0.28);
-  border-color: var(--ios-glass-border, rgb(255 255 255 / 0.08));
+  background: rgb(255 255 255 / 0.08);
+  border-color: rgb(255 255 255 / 0.1);
   border-radius: 9999px;
-  backdrop-filter: blur(16px) saturate(175%);
-  -webkit-backdrop-filter: blur(16px) saturate(175%);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.4);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
 }
 
 html.capacitor-native.dark .dashboard-fixed-footer .dash-pagination__pager {
-  background: rgb(255 255 255 / 0.045);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
+  background: rgb(255 255 255 / 0.06);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.04);
 }
 
 /* Empty states fill the remaining shell height - never add viewport min-height (causes page overflow). */

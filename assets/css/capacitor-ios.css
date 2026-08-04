@@ -272,6 +272,36 @@ html.capacitor-ios.capacitor-native .native-tabbar__label {
   line-height: 1 !important;
 }
 
+/* Compact viewport pagination on iOS */
+html.capacitor-ios.capacitor-native .dashboard-fixed-footer--native .dash-pagination__summary,
+html.capacitor-ios.capacitor-native .dashboard-fixed-footer--native .dash-pagination__compact-status {
+  font-size: 0.625rem !important;
+  line-height: 1.2 !important;
+}
+
+html.capacitor-ios.capacitor-native .dash-table-pagination .dash-pagination {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+html.capacitor-ios.capacitor-native .dash-table-pagination {
+  padding: 0.375rem 0.625rem;
+}
+
+html.capacitor-ios.capacitor-native .dash-table-pagination .dash-pagination__summary-label {
+  display: none;
+}
+
+html.capacitor-ios.capacitor-native .dash-table-pagination .dash-pagination__pages {
+  display: none !important;
+}
+
+html.capacitor-ios.capacitor-native .dash-table-pagination .dash-pagination__compact-status {
+  display: inline-flex !important;
+}
+
 /* ── Page header & KPI - glass cards ── */
 html.capacitor-ios.capacitor-native .dash-page-header {
   border-radius: var(--cap-ios-radius-lg);

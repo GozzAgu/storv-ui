@@ -1182,12 +1182,13 @@ html.capacitor-native {
   --dashboard-bottom-nav-stack: calc(
     var(--dashboard-bottom-nav-height) + var(--ios-bottomnav-edge-pad, 0.875rem)
   );
-  --dashboard-fixed-footer-height: calc(3.25rem + 0.5rem);
+  /* Compact floating pagination: single-row height + gap above tab bar */
+  --dashboard-fixed-footer-height: calc(2.375rem + 0.375rem);
 }
 
 @media (min-width: 640px) {
   html.capacitor-native {
-    --dashboard-fixed-footer-height: calc(2.875rem + 0.5rem);
+    --dashboard-fixed-footer-height: calc(2.375rem + 0.375rem);
   }
 }
 
