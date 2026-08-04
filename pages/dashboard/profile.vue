@@ -443,99 +443,69 @@
           title="Roles & permissions"
           subtitle="Your role and what you can access."
         >
-          <div class="space-y-6">
-            <div class="flex gap-3">
-              <component
-                :is="roleHeaderIcon"
-                class="mt-0.5 h-5 w-5 shrink-0 text-gray-400 dark:text-gray-500"
-                aria-hidden="true"
-              />
-              <div class="min-w-0 flex-1 space-y-2.5">
-                <div>
-                  <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
-                    {{ roleCardTitle }}
-                    <span
-                      v-if="roleBadgeLabel"
-                      class="font-normal text-gray-500 dark:text-gray-400"
-                    >
-                      · {{ roleBadgeLabel }}
-                    </span>
-                  </p>
-                  <p class="mt-1.5 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-                    {{ roleCardDescription }}
-                  </p>
+          <div class="dash-roles">
+            <div class="dash-roles__hero">
+              <div class="dash-roles__hero-icon" aria-hidden="true">
+                <component :is="roleHeaderIcon" />
+              </div>
+              <div class="dash-roles__hero-body">
+                <div class="dash-roles__hero-top">
+                  <p class="dash-roles__hero-title">{{ roleCardTitle }}</p>
+                  <span v-if="roleBadgeLabel" class="dash-roles__badge">{{ roleBadgeLabel }}</span>
                 </div>
-                <ul v-if="roleMetaItems.length > 0" class="space-y-1">
-                  <li
+                <p class="dash-roles__hero-desc">{{ roleCardDescription }}</p>
+                <div v-if="roleMetaItems.length > 0" class="dash-roles__meta">
+                  <span
                     v-for="meta in roleMetaItems"
                     :key="meta.key"
-                    class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400"
+                    class="dash-roles__meta-chip"
                   >
-                    <component
-                      :is="meta.icon"
-                      class="h-3.5 w-3.5 shrink-0 text-gray-400 dark:text-gray-500"
-                      aria-hidden="true"
-                    />
+                    <component :is="meta.icon" aria-hidden="true" />
                     {{ meta.text }}
-                  </li>
-                </ul>
+                  </span>
+                </div>
               </div>
             </div>
 
-            <div class="space-y-3">
-              <div class="flex items-center gap-2">
-                <ClipboardDocumentListIcon
-                  class="h-4 w-4 text-gray-400 dark:text-gray-500"
-                  aria-hidden="true"
-                />
-                <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Permissions</p>
-              </div>
-
-              <p
-                v-if="userPermissions.length === 0"
-                class="pl-6 text-xs text-gray-500 dark:text-gray-400"
-              >
-                Loading…
+            <div>
+              <p class="dash-roles__section-label">
+                <ClipboardDocumentListIcon aria-hidden="true" />
+                Permissions
               </p>
 
-              <div v-else class="space-y-4 pl-1">
+              <p v-if="userPermissions.length === 0" class="dash-roles__empty">
+                Loading your access list…
+              </p>
+
+              <div v-else class="dash-roles__groups">
                 <div v-for="group in permissionGroups" :key="group.id">
-                  <div
+                  <p
                     v-if="permissionGroups.length > 1"
-                    class="mb-2 flex items-center gap-1.5 pl-1"
+                    class="dash-roles__group-label"
                   >
-                    <component
-                      :is="group.icon"
-                      class="h-3.5 w-3.5 text-gray-400 dark:text-gray-500"
-                      aria-hidden="true"
-                    />
-                    <p class="text-[11px] font-medium text-gray-600 dark:text-gray-400">
-                      {{ group.label }}
-                    </p>
-                  </div>
-                  <ul class="space-y-1.5">
-                    <li v-for="item in group.items" :key="item.id" class="flex items-start gap-2">
-                      <span class="status-dot status-dot--muted mt-1.5" aria-hidden="true" />
-                      <component
-                        :is="item.icon"
-                        class="mt-0.5 h-3.5 w-3.5 shrink-0 text-gray-400 dark:text-gray-500"
-                        aria-hidden="true"
-                      />
-                      <span
-                        class="min-w-0 flex-1 text-xs leading-relaxed text-gray-700 dark:text-gray-300"
-                      >
-                        {{ item.label }}
+                    <component :is="group.icon" aria-hidden="true" />
+                    {{ group.label }}
+                  </p>
+                  <ul class="dash-roles__list">
+                    <li
+                      v-for="item in group.items"
+                      :key="item.id"
+                      class="dash-roles__item"
+                    >
+                      <span class="dash-roles__check" aria-hidden="true">
+                        <CheckIcon />
                       </span>
+                      <span class="dash-roles__item-text">{{ item.label }}</span>
                     </li>
                   </ul>
                 </div>
               </div>
             </div>
 
-            <p
-              class="flex items-start gap-2 text-xs leading-relaxed text-gray-500 dark:text-gray-400"
-            >
-              <span class="status-dot status-dot--muted mt-1.5" aria-hidden="true" />
+            <p class="dash-roles__footnote">
+              <span class="dash-roles__footnote-icon" aria-hidden="true">
+                <InformationCircleIcon />
+              </span>
               <span>
                 <template v-if="isStaff">
                   Contact your super admin in Settings if you need a different role or department.
@@ -1105,6 +1075,8 @@ import {
   ShieldCheckIcon,
   DevicePhoneMobileIcon,
   CheckCircleIcon,
+  CheckIcon,
+  InformationCircleIcon,
   GlobeAltIcon,
   CurrencyDollarIcon,
   ChevronRightIcon,

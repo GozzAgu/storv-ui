@@ -699,6 +699,330 @@ html.dark .dash-profile-stats__value {
   display: none;
 }
 
+/* ── Roles & permissions (Profile) ── */
+.dash-roles {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.dash-roles__hero {
+  display: flex;
+  gap: 0.875rem;
+  align-items: flex-start;
+  padding: 1rem;
+  border-radius: 1rem;
+  border: 1px solid var(--dash-border, rgb(15 23 42 / 0.08));
+  background:
+    linear-gradient(180deg, rgb(20 63 141 / 0.06) 0%, transparent 70%),
+    rgb(255 255 255 / 0.03);
+}
+
+html:not(.dark) .dash-roles__hero {
+  border-color: rgb(15 23 42 / 0.07);
+  background:
+    linear-gradient(180deg, rgb(20 63 141 / 0.05) 0%, transparent 72%),
+    rgb(248 250 252 / 0.9);
+}
+
+html.dark .dash-roles__hero {
+  border-color: rgb(255 255 255 / 0.08);
+  background:
+    linear-gradient(180deg, rgb(20 63 141 / 0.16) 0%, transparent 72%),
+    rgb(255 255 255 / 0.03);
+}
+
+.dash-roles__hero-icon {
+  display: flex;
+  height: 2.5rem;
+  width: 2.5rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.875rem;
+  border: 1px solid rgb(20 63 141 / 0.14);
+  background: rgb(20 63 141 / 0.1);
+  color: #143f8d;
+}
+
+html.dark .dash-roles__hero-icon {
+  border-color: rgb(154 181 227 / 0.18);
+  background: rgb(20 63 141 / 0.28);
+  color: #9ab5e3;
+}
+
+.dash-roles__hero-icon svg {
+  height: 1.25rem;
+  width: 1.25rem;
+}
+
+.dash-roles__hero-body {
+  min-width: 0;
+  flex: 1;
+}
+
+.dash-roles__hero-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.625rem;
+}
+
+.dash-roles__hero-title {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: rgb(15 23 42);
+}
+
+html.dark .dash-roles__hero-title {
+  color: rgb(248 250 252);
+}
+
+.dash-roles__badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  border: 1px solid rgb(20 63 141 / 0.14);
+  background: rgb(20 63 141 / 0.08);
+  padding: 0.125rem 0.5rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #143f8d;
+}
+
+html.dark .dash-roles__badge {
+  border-color: rgb(154 181 227 / 0.2);
+  background: rgb(20 63 141 / 0.22);
+  color: #b8c9eb;
+}
+
+.dash-roles__hero-desc {
+  margin: 0.5rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: rgb(100 116 139);
+}
+
+html.dark .dash-roles__hero-desc {
+  color: rgb(148 163 184);
+}
+
+.dash-roles__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-top: 0.75rem;
+}
+
+.dash-roles__meta-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 9999px;
+  border: 1px solid rgb(15 23 42 / 0.08);
+  background: rgb(255 255 255 / 0.55);
+  padding: 0.25rem 0.625rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: rgb(71 85 105);
+}
+
+html.dark .dash-roles__meta-chip {
+  border-color: rgb(255 255 255 / 0.08);
+  background: rgb(255 255 255 / 0.04);
+  color: rgb(203 213 225);
+}
+
+.dash-roles__meta-chip svg {
+  height: 0.875rem;
+  width: 0.875rem;
+  opacity: 0.7;
+}
+
+.dash-roles__section-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgb(100 116 139);
+}
+
+html.dark .dash-roles__section-label {
+  color: rgb(148 163 184);
+}
+
+.dash-roles__section-label svg {
+  height: 0.875rem;
+  width: 0.875rem;
+  opacity: 0.75;
+}
+
+.dash-roles__groups {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.dash-roles__group-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4375rem;
+  margin: 0 0 0.4375rem;
+  padding-inline: 0.125rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: rgb(71 85 105);
+}
+
+html.dark .dash-roles__group-label {
+  color: rgb(203 213 225);
+}
+
+.dash-roles__group-label svg {
+  height: 0.875rem;
+  width: 0.875rem;
+  opacity: 0.65;
+}
+
+.dash-roles__list {
+  margin: 0;
+  padding: 0.25rem 0;
+  list-style: none;
+  border-radius: 0.875rem;
+  border: 1px solid var(--dash-border, rgb(15 23 42 / 0.08));
+  background: rgb(255 255 255 / 0.035);
+  overflow: hidden;
+}
+
+html:not(.dark) .dash-roles__list {
+  background: rgb(248 250 252 / 0.72);
+  border-color: rgb(15 23 42 / 0.07);
+}
+
+html.dark .dash-roles__list {
+  border-color: rgb(255 255 255 / 0.07);
+  background: rgb(255 255 255 / 0.025);
+}
+
+.dash-roles__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  padding: 0.625rem 0.75rem;
+  border-top: 1px solid rgb(15 23 42 / 0.05);
+}
+
+.dash-roles__item:first-child {
+  border-top: 0;
+}
+
+html.dark .dash-roles__item {
+  border-top-color: rgb(255 255 255 / 0.05);
+}
+
+.dash-roles__check {
+  display: flex;
+  height: 1.125rem;
+  width: 1.125rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.0625rem;
+  border-radius: 9999px;
+  background: rgb(20 63 141 / 0.1);
+  color: #143f8d;
+}
+
+html.dark .dash-roles__check {
+  background: rgb(154 181 227 / 0.12);
+  color: #9ab5e3;
+}
+
+.dash-roles__check svg {
+  height: 0.75rem;
+  width: 0.75rem;
+  stroke-width: 2.25;
+}
+
+.dash-roles__item-text {
+  min-width: 0;
+  flex: 1;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: rgb(51 65 85);
+}
+
+html.dark .dash-roles__item-text {
+  color: rgb(226 232 240);
+}
+
+.dash-roles__empty {
+  margin: 0;
+  padding: 0.75rem 0.875rem;
+  border-radius: 0.875rem;
+  border: 1px dashed rgb(15 23 42 / 0.1);
+  font-size: 0.8125rem;
+  color: rgb(100 116 139);
+}
+
+html.dark .dash-roles__empty {
+  border-color: rgb(255 255 255 / 0.1);
+  color: rgb(148 163 184);
+}
+
+.dash-roles__footnote {
+  display: flex;
+  gap: 0.625rem;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0.75rem 0.875rem;
+  border-radius: 0.875rem;
+  border: 1px solid rgb(15 23 42 / 0.06);
+  background: rgb(15 23 42 / 0.02);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: rgb(100 116 139);
+}
+
+html.dark .dash-roles__footnote {
+  border-color: rgb(255 255 255 / 0.06);
+  background: rgb(255 255 255 / 0.03);
+  color: rgb(148 163 184);
+}
+
+.dash-roles__footnote-icon {
+  display: flex;
+  height: 1.25rem;
+  width: 1.25rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.0625rem;
+  border-radius: 9999px;
+  background: rgb(15 23 42 / 0.05);
+  color: rgb(100 116 139);
+}
+
+html.dark .dash-roles__footnote-icon {
+  background: rgb(255 255 255 / 0.06);
+  color: rgb(148 163 184);
+}
+
+.dash-roles__footnote-icon svg {
+  height: 0.75rem;
+  width: 0.75rem;
+}
+
 /* Branch cards (settings) */
 .dash-branch-card {
   position: relative;

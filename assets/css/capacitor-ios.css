@@ -468,6 +468,48 @@ html.capacitor-ios.capacitor-native .dash-profile-stats__value {
   letter-spacing: -0.02em;
 }
 
+/* Roles & permissions — native grouped list feel */
+html.capacitor-ios.capacitor-native .dash-roles {
+  gap: 1rem;
+}
+
+html.capacitor-ios.capacitor-native .dash-roles__hero {
+  border-radius: var(--cap-ios-radius-lg, 1rem);
+  border-color: var(--dash-card-border);
+  background: var(--cap-ios-glass, rgb(255 255 255 / 0.06));
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  backdrop-filter: blur(18px) saturate(1.2);
+  padding: 0.875rem;
+}
+
+html.capacitor-ios.capacitor-native .dash-roles__list {
+  border-radius: var(--cap-ios-radius, 0.875rem);
+  border-color: var(--dash-card-border);
+  background: var(--cap-ios-glass, rgb(255 255 255 / 0.04));
+}
+
+html.capacitor-ios.capacitor-native .dash-roles__item {
+  padding: 0.6875rem 0.8125rem;
+}
+
+html.capacitor-ios.capacitor-native .dash-roles__item-text {
+  font-size: var(--cap-ios-body, 0.8125rem) !important;
+}
+
+html.capacitor-ios.capacitor-native .dash-roles__hero-title {
+  font-size: var(--cap-ios-title, 0.9375rem) !important;
+}
+
+html.capacitor-ios.capacitor-native .dash-roles__hero-desc,
+html.capacitor-ios.capacitor-native .dash-roles__footnote {
+  font-size: var(--cap-ios-caption, 0.75rem) !important;
+}
+
+html.capacitor-ios.capacitor-native .dash-roles__footnote {
+  border-color: var(--dash-card-border);
+  background: rgb(255 255 255 / 0.03);
+}
+
 /* Dashboard home - StatCard KPI grid (welcome header stays a glass card) */
 html.capacitor-ios.capacitor-native .dash-home {
   gap: 0.625rem;
