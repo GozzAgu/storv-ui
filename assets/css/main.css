@@ -1180,7 +1180,7 @@ html.capacitor-native {
   /* Floating glass tab bar: pill height + tight edge pad (sits low for screen space) */
   --dashboard-bottom-nav-height: var(--ios-bottomnav-height, 3.375rem);
   --dashboard-bottom-nav-stack: calc(
-    var(--dashboard-bottom-nav-height) + var(--ios-bottomnav-edge-pad, 0.375rem)
+    var(--dashboard-bottom-nav-height) + var(--ios-bottomnav-edge-pad, 0.875rem)
   );
   --dashboard-fixed-footer-height: calc(3.25rem + 0.5rem);
 }
@@ -1458,7 +1458,7 @@ html.capacitor-native .dashboard-native-bottom-nav {
   padding-left: calc(var(--cap-safe-left, 0px) + var(--ios-bottomnav-inset, 1rem)) !important;
   padding-right: calc(var(--cap-safe-right, 0px) + var(--ios-bottomnav-inset, 1rem)) !important;
   /* Low pin: ignore full safe-area under the pill so the bar reclaim space */
-  padding-bottom: var(--ios-bottomnav-edge-pad, 0.375rem) !important;
+  padding-bottom: var(--ios-bottomnav-edge-pad, 0.875rem) !important;
 }
 
 /* ── iOS polish: spacing (surfaces/tables - see capacitor-native-saas.css) ── */

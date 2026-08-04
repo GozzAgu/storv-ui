@@ -324,6 +324,7 @@ function setScrollLock(locked: boolean) {
   }
 
   document.body.style.overflow = locked ? 'hidden' : ''
+  document.documentElement.toggleAttribute('data-drawer-open', locked)
 }
 
 watch(
