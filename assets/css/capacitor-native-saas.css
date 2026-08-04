@@ -79,41 +79,23 @@ html.capacitor-native .dashboard-native-main {
   padding-right: 0.875rem;
 }
 
-/* ── Bottom tab bar ── */
-html.capacitor-native .native-tabbar {
-  border-radius: 1.25rem;
-  background: rgb(255 255 255 / 0.38);
-  box-shadow:
-    0 16px 48px rgb(15 23 42 / 0.14),
-    inset 0 1px 0 rgb(255 255 255 / 0.55);
-  -webkit-backdrop-filter: blur(28px) saturate(1.35);
-  backdrop-filter: blur(28px) saturate(1.35);
-}
-
-html.capacitor-native.dark .native-tabbar {
-  border-color: rgb(255 255 255 / 0.1);
-  background: rgb(18 20 28 / 0.46);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.05),
-    0 16px 48px rgb(0 0 0 / 0.45);
-}
-
+/* ── Bottom tab bar surface: see ios-design-tokens.css (quiet glass capsule) ── */
 html.capacitor-native .native-tabbar .text-primary-600,
 html.capacitor-native .native-tabbar .text-primary-400 {
-  color: #143f8d !important;
+  color: var(--ios-accent, #143f8d) !important;
 }
 
 html.capacitor-native.dark .native-tabbar .text-primary-400 {
-  color: #9ab5e3 !important;
+  color: var(--ios-accent-soft, #9ab5e3) !important;
 }
 
 html.capacitor-native .native-tabbar .bg-primary-500,
 html.capacitor-native .native-tabbar .bg-primary-400 {
-  background: #143f8d !important;
+  background: var(--ios-accent, #143f8d) !important;
 }
 
 html.capacitor-native.dark .native-tabbar .bg-primary-400 {
-  background: #9ab5e3 !important;
+  background: var(--ios-accent-soft, #9ab5e3) !important;
 }
 
 /* ── Native more sheet ── */

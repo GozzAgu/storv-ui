@@ -104,7 +104,6 @@ html.capacitor-ios.capacitor-native .dash-page-meta,
 html.capacitor-ios.capacitor-native .data-table-shell td,
 html.capacitor-ios.capacitor-native .dashboard-table td,
 html.capacitor-ios.capacitor-native .native-topnav-page__title,
-html.capacitor-ios.capacitor-native .dashboard-native-bottom-nav span,
 html.capacitor-ios.capacitor-native button.text-xs,
 html.capacitor-ios.capacitor-native .btn-primary-sm {
   font-size: var(--cap-ios-body) !important;
@@ -211,28 +210,34 @@ html.capacitor-ios.capacitor-native .native-topnav-page__title {
   letter-spacing: -0.015em;
 }
 
-/* ── Bottom tab bar - matches floating top nav pill ── */
+/* ── Bottom tab bar - quiet capsule + soft selection pill ── */
+html.capacitor-ios.capacitor-native .dashboard-native-bottom-nav {
+  padding-left: calc(var(--cap-safe-left) + var(--ios-bottomnav-inset, 0.75rem));
+  padding-right: calc(var(--cap-safe-right) + var(--ios-bottomnav-inset, 0.75rem));
+  padding-bottom: calc(var(--cap-safe-bottom) + var(--ios-bottomnav-float-gap, 0.125rem));
+}
+
 html.capacitor-ios.capacitor-native .native-tabbar__indicator {
   position: absolute;
-  top: 0.3125rem;
-  bottom: 0.3125rem;
+  top: 0.25rem;
+  bottom: 0.25rem;
   left: 0;
   z-index: 0;
   border-radius: 9999px;
-  border: 1px solid var(--cap-ios-nav-indicator-border);
-  background: var(--cap-ios-nav-indicator);
+  border: 1px solid rgb(255 255 255 / 0.5);
+  background: rgb(255 255 255 / 0.62);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.65),
-    0 4px 14px rgb(15 23 42 / 0.1);
-  -webkit-backdrop-filter: blur(16px) saturate(1.35);
-  backdrop-filter: blur(16px) saturate(1.35);
+    inset 0 1px 0 rgb(255 255 255 / 0.78),
+    0 1px 2px rgb(15 23 42 / 0.05);
+  -webkit-backdrop-filter: blur(18px) saturate(1.45);
+  backdrop-filter: blur(18px) saturate(1.45);
   opacity: 0;
   pointer-events: none;
   will-change: transform, width, opacity;
   transition:
-    transform 0.52s var(--cap-ios-ease),
-    width 0.52s var(--cap-ios-ease),
-    opacity 0.24s ease;
+    transform 0.4s var(--cap-ios-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+    width 0.4s var(--cap-ios-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+    opacity 0.18s ease;
 }
 
 html.capacitor-ios.capacitor-native .native-tabbar__indicator--visible {
@@ -240,9 +245,11 @@ html.capacitor-ios.capacitor-native .native-tabbar__indicator--visible {
 }
 
 html.capacitor-ios.capacitor-native.dark .native-tabbar__indicator {
+  border-color: rgb(255 255 255 / 0.08);
+  background: rgb(255 255 255 / 0.1);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.12),
-    0 6px 18px rgb(0 0 0 / 0.28);
+    inset 0 1px 0 rgb(255 255 255 / 0.1),
+    0 2px 8px rgb(0 0 0 / 0.22);
 }
 
 html.capacitor-ios.capacitor-native .native-tabbar__tab {
@@ -251,11 +258,17 @@ html.capacitor-ios.capacitor-native .native-tabbar__tab {
 
 html.capacitor-ios.capacitor-native .native-tabbar .text-primary-600,
 html.capacitor-ios.capacitor-native .native-tabbar .text-primary-400 {
-  color: #143f8d !important;
+  color: var(--ios-accent, #143f8d) !important;
 }
 
 html.capacitor-ios.capacitor-native.dark .native-tabbar .text-primary-400 {
-  color: #b8c9eb !important;
+  color: var(--ios-accent-soft, #b8c9eb) !important;
+}
+
+html.capacitor-ios.capacitor-native .dashboard-native-bottom-nav span.native-tabbar__label,
+html.capacitor-ios.capacitor-native .native-tabbar__label {
+  font-size: 0.625rem !important;
+  line-height: 1 !important;
 }
 
 /* ── Page header & KPI - glass cards ── */
@@ -1386,8 +1399,8 @@ html.capacitor-ios.capacitor-native .dash-topnav__search.dashboard-topnav-search
 }
 
 html.capacitor-ios.capacitor-native .dashboard-native-bottom-nav svg {
-  width: 1.375rem;
-  height: 1.375rem;
+  width: 1.3125rem;
+  height: 1.3125rem;
 }
 
 html.capacitor-ios.capacitor-native .dashboard-assistant__fab svg {

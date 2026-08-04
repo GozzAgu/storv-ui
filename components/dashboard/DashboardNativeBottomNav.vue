@@ -26,17 +26,13 @@
           <DashboardNavIcon
             :name="item.iconKey"
             :active="isActive(item.href)"
-            size="lg"
+            size="md"
           />
-          <span
-            class="relative max-w-full truncate text-xs font-medium leading-none tracking-tight"
-          >
-            <span :class="isActive(item.href) ? 'font-semibold' : ''">
-              {{ shortLabel(item.name) }}
-            </span>
+          <span class="native-tabbar__label relative">
+            {{ shortLabel(item.name) }}
             <span
               v-if="showNativeComingSoon && item.name === 'Payment links'"
-              class="absolute -right-1 -top-1 h-1.5 w-1.5 rounded-full bg-amber-500 ring-2 ring-white dark:ring-gray-950"
+              class="absolute -right-1.5 -top-1 h-1.5 w-1.5 rounded-full bg-amber-500 ring-2 ring-white/80 dark:ring-black/40"
               aria-label="Coming soon"
             />
           </span>
@@ -54,14 +50,9 @@
           <DashboardNavIcon
             name="more"
             :active="moreOpen || moreHasActive"
-            size="lg"
+            size="md"
           />
-          <span
-            class="text-xs font-medium leading-none tracking-tight"
-            :class="moreOpen || moreHasActive ? 'font-semibold' : ''"
-          >
-            More
-          </span>
+          <span class="native-tabbar__label">More</span>
         </button>
       </div>
     </div>
