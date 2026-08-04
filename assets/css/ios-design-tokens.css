@@ -38,8 +38,9 @@ html.capacitor-native {
   --ios-topnav-border: var(--ios-glass-border);
   --ios-topnav-shadow: var(--ios-glass-shadow), var(--ios-glass-highlight);
   --ios-topnav-blur: var(--ios-glass-blur);
-  /* Sit low near the home indicator — almost flush, still tappable */
-  --ios-bottomnav-float-gap: 0.125rem;
+  /* Pin low: small edge inset only — do not stack the full home-indicator safe area under the pill */
+  --ios-bottomnav-float-gap: 0px;
+  --ios-bottomnav-edge-pad: 0.375rem;
   --ios-bottomnav-inset: 0.75rem;
   --ios-bottomnav-height: 3.375rem;
   --ios-bottomnav-blur: 40px;
