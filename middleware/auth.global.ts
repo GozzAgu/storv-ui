@@ -19,7 +19,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   // Define route categories
   const isDashboardRoute = to.path.startsWith('/dashboard')
   const isDemoRoute = to.path === '/demo' || to.path.startsWith('/demo/')
-  const isAuthRoute = ['/signin', '/signup', '/forgot-password'].includes(to.path)
+  const isAuthRoute = ['/signin', '/signup', '/forgot-password', '/auth/action'].includes(to.path)
   const isPublicRoute = ['/privacy', '/terms'].includes(to.path)
 
   // Allow public routes
@@ -30,6 +30,15 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   // Native shell: never load marketing `/` - go straight to sign-in (app.html + plugin also redirect).
   if (isCapacitorNative() && isCapacitorMarketingRoot(to.path)) {
     return navigateTo('/signin', { replace: true })
+  }
+
+  // Legacy Firebase links sometimes land on /signin with action params — route to the handler page.
+  if (to.path === '/signin' && (to.query.mode || to.query.oobCode)) {
+    return navigateTo({ path: '/auth/action', query: to.query, hash: to.hash || undefined })
+  }
+
+  if (to.path === '/signin' && to.hash && (to.hash.includes('oobCode') || to.hash.includes('mode='))) {
+    return navigateTo({ path: '/auth/action', hash: to.hash })
   }
 
   // For dashboard routes, check authentication

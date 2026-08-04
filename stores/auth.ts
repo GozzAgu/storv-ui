@@ -4,7 +4,6 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut as firebaseSignOut,
-  sendPasswordResetEmail,
   onAuthStateChanged,
   RecaptchaVerifier,
   signInWithPhoneNumber,
@@ -17,6 +16,7 @@ import {
 } from 'firebase/auth'
 import { getFirebaseClientAuth } from '~/utils/firebase-client-auth'
 import { sendUserEmailVerification } from '~/utils/emailVerification'
+import { sendUserPasswordResetEmail } from '~/utils/passwordResetEmail'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -149,7 +149,12 @@ export const useAuthStore = defineStore('auth', {
       if (!auth) throw new Error(AUTH_UNAVAILABLE_MESSAGE)
 
       try {
-        await sendPasswordResetEmail(auth, email)
+        const rc = useRuntimeConfig()
+        await sendUserPasswordResetEmail(
+          auth,
+          email,
+          (rc.public.appOrigin as string) || ''
+        )
       } catch (error: any) {
         throw new Error(error.message || 'Password reset failed')
       }

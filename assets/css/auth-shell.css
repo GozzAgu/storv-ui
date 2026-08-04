@@ -678,6 +678,129 @@ html:not(.dark) .auth-alert__body {
   color: var(--auth-muted);
 }
 
+/* ── Auth action handler (/auth/action) ── */
+.auth-action-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5rem 0.25rem 0.25rem;
+  text-align: center;
+}
+
+.auth-action-status__icon {
+  display: flex;
+  height: 3.25rem;
+  width: 3.25rem;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  border-radius: 9999px;
+  border: 1px solid var(--auth-border);
+  background: var(--auth-glass);
+  color: var(--auth-accent);
+}
+
+.auth-action-status__icon svg {
+  height: 1.5rem;
+  width: 1.5rem;
+}
+
+.auth-action-status--success .auth-action-status__icon {
+  border-color: rgb(20 63 141 / 0.18);
+  background: rgb(20 63 141 / 0.1);
+  color: var(--auth-accent);
+}
+
+.auth-action-status--error .auth-action-status__icon {
+  border-color: rgb(239 68 68 / 0.22);
+  background: rgb(239 68 68 / 0.08);
+  color: #f87171;
+}
+
+html:not(.dark) .auth-action-status--error .auth-action-status__icon {
+  color: #dc2626;
+}
+
+.auth-action-status__title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: var(--auth-ink);
+}
+
+.auth-action-status__body {
+  margin: 0.625rem 0 0;
+  max-width: 22rem;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--auth-muted);
+}
+
+.auth-action-status__actions {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 0.625rem;
+  margin-top: 1.5rem;
+}
+
+.auth-action-status__hint {
+  margin: 1rem 0 0;
+  max-width: 22rem;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--auth-muted);
+}
+
+.auth-action-status__hint a {
+  color: var(--auth-accent);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.auth-action-status__hint a:hover {
+  text-decoration: underline;
+}
+
+.auth-action-status__spinner {
+  width: 2.25rem;
+  height: 2.25rem;
+  margin-bottom: 1rem;
+  border-radius: 9999px;
+  border: 2px solid rgb(20 63 141 / 0.14);
+  border-top-color: var(--auth-accent);
+  animation: auth-action-spin 0.75s linear infinite;
+}
+
+html.dark .auth-action-status__spinner {
+  border-color: rgb(255 255 255 / 0.1);
+  border-top-color: var(--auth-accent);
+}
+
+@keyframes auth-action-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.auth-action-reset-intro {
+  margin: 0 0 1.25rem;
+  border-radius: 0.875rem;
+  border: 1px solid var(--auth-border);
+  background: var(--auth-glass);
+  padding: 0.875rem 1rem;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--auth-muted);
+}
+
+.auth-action-reset-intro strong {
+  color: var(--auth-ink);
+  font-weight: 600;
+}
+
 /* Checkbox labels in auth forms */
 .auth-form .checkbox-label,
 .auth-form [class*='label-class'] {

@@ -76,6 +76,11 @@
           </Checkbox>
         </template>
 
+        <AuthSuccessPanel v-if="actionSuccessTitle" :icon="CheckCircleIcon" class="mb-5">
+          <template #title>{{ actionSuccessTitle }}</template>
+          {{ actionSuccessBody }}
+        </AuthSuccessPanel>
+
         <AuthAlert
           v-if="errorMessage"
           :message="errorMessage"
@@ -143,10 +148,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import {
   ArrowRightIcon,
   FingerPrintIcon,
+  CheckCircleIcon,
 } from '~/utils/app-icons'
 import { BiometryError } from '@aparajita/capacitor-biometric-auth'
 import AuthShell from '~/components/auth/AuthShell.vue'
@@ -154,6 +160,7 @@ import AuthPageHeader from '~/components/auth/AuthPageHeader.vue'
 import AuthCard from '~/components/auth/AuthCard.vue'
 import AuthField from '~/components/auth/AuthField.vue'
 import AuthAlert from '~/components/auth/AuthAlert.vue'
+import AuthSuccessPanel from '~/components/auth/AuthSuccessPanel.vue'
 import Button from '~/components/ui/Button.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
@@ -175,6 +182,24 @@ definePageMeta({
   middleware: 'guest',
 })
 
+const route = useRoute()
+
+const actionSuccessTitle = computed(() => {
+  if (route.query.verified === '1') return 'Email verified'
+  if (route.query.reset === '1') return 'Password updated'
+  return ''
+})
+
+const actionSuccessBody = computed(() => {
+  if (route.query.verified === '1') {
+    return 'Your email is confirmed. Sign in below to open your Storvv workspace.'
+  }
+  if (route.query.reset === '1') {
+    return 'Your password was changed successfully. Sign in with your new password.'
+  }
+  return ''
+})
+
 const form = ref({
   email: '',
   password: '',
@@ -189,8 +214,6 @@ const awaitingTwoFactor = ref(false)
 const twoFactorCode = ref('')
 const pendingSignIn = ref<{ email: string; password: string } | null>(null)
 const errorMessage = ref('')
-
-const route = useRoute()
 
 const {
   isSupported,

@@ -2,7 +2,6 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut as firebaseSignOut,
-  sendPasswordResetEmail,
   onAuthStateChanged,
   RecaptchaVerifier,
   signInWithPhoneNumber,
@@ -18,6 +17,7 @@ import {
 import { AUTH_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import { getFirebaseClientAuth } from '~/utils/firebase-client-auth'
 import { sendUserEmailVerification } from '~/utils/emailVerification'
+import { sendUserPasswordResetEmail } from '~/utils/passwordResetEmail'
 import { clearAllTwoFactorSessionFlags, clearTwoFactorSessionVerified, markTwoFactorSessionVerified } from '~/utils/two-factor-session'
 import { clearCachedUserProfile, markSignOutPending } from '~/utils/auth-sign-out'
 import { resolveApiPath } from '~/utils/api-url'
@@ -140,7 +140,12 @@ export const useFirebaseAuth = () => {
     }
 
     try {
-      await sendPasswordResetEmail(auth, email)
+      const runtimeConfig = useRuntimeConfig()
+      await sendUserPasswordResetEmail(
+        auth,
+        email,
+        (runtimeConfig.public.appOrigin as string) || ''
+      )
     } catch (error: any) {
       throw new Error(error.message || 'Password reset failed')
     }
