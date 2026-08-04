@@ -38,10 +38,10 @@ html.capacitor-native {
   --ios-topnav-border: var(--ios-glass-border);
   --ios-topnav-shadow: var(--ios-glass-shadow), var(--ios-glass-highlight);
   --ios-topnav-blur: var(--ios-glass-blur);
-  /* Pin low: small edge inset only — do not stack the full home-indicator safe area under the pill */
+  /* Floating island: clear side gaps so the pill never kisses the screen edges */
   --ios-bottomnav-float-gap: 0px;
   --ios-bottomnav-edge-pad: 0.375rem;
-  --ios-bottomnav-inset: 0.75rem;
+  --ios-bottomnav-inset: 1rem;
   --ios-bottomnav-height: 3.375rem;
   --ios-bottomnav-blur: 40px;
 
@@ -260,7 +260,7 @@ html.capacitor-native.dark .dash-grid-shell--table {
 /* ── Floating tab bar — quiet glass capsule (matches top nav material) ── */
 html.capacitor-native .native-tabbar {
   position: relative;
-  margin-inline: auto;
+  margin-inline: 0;
   margin-bottom: 0;
   width: 100%;
   max-width: none;
