@@ -80,6 +80,7 @@ export {
   Share2 as ShareIcon,
   ShieldCheck as ShieldCheckIcon,
   ShoppingBag as ShoppingBagIcon,
+  Send as PaperAirplaneIcon,
   Sparkles as SparklesIcon,
   Layers2 as Square2StackIcon,
   LayoutGrid as Squares2X2Icon,
