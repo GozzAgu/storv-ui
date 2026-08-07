@@ -174,12 +174,8 @@ export const useUser = () => {
   const updateUserDocument = async (uid: string, updates: Partial<UserData>) => {
     const { isDemoModeActive } = await import('~/utils/demo-mode')
     if (isDemoModeActive()) {
-      const { syncDemoToPinia } = await import('~/utils/demo-bridge')
-      await syncDemoToPinia()
-      const { useUserStore } = await import('~/stores/user')
-      const current = useUserStore().userData
-      if (!current) return null
-      return { ...current, ...updates, updatedAt: new Date() } as UserData
+      const { applyDemoUserDocumentUpdate } = await import('~/utils/demo-bridge')
+      return applyDemoUserDocumentUpdate(updates)
     }
 
     const db = getFirestoreInstance()

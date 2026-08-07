@@ -175,10 +175,10 @@ export const useCustomerBuybacksStore = defineStore('customerBuybacks', {
           getInventoryItemDisplayName({ ...params.itemData, id: itemId, folderId } as never) ||
           folder.name
         const buybackId = `demo_buyback_${Math.random().toString(36).slice(2, 9)}`
-        this.buybacks.unshift({
+        const row = {
           id: buybackId,
           storeId: demoStoreId,
-          status: 'completed',
+          status: 'completed' as const,
           customerName: name,
           customerPhone: (params.customerPhone || '').trim(),
           customerEmail: (params.customerEmail || '').trim(),
@@ -191,7 +191,10 @@ export const useCustomerBuybacksStore = defineStore('customerBuybacks', {
           createdAt: new Date(),
           updatedAt: new Date(),
           createdBy: DEMO_USER_UID,
-        })
+        }
+        this.buybacks.unshift(row)
+        const { setDemoExtrasBuybacksForStore } = await import('~/utils/demo-extras')
+        setDemoExtrasBuybacksForStore(demoStoreId, this.buybacks)
         return buybackId
       }
 

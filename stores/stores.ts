@@ -628,6 +628,17 @@ export const useStoresStore = defineStore('stores', {
       },
       options?: { setAsCurrent?: boolean }
     ) {
+      const { isDemoModeActive } = await import('~/utils/demo-mode')
+      if (isDemoModeActive()) {
+        const { applyDemoCreateStore } = await import('~/utils/demo-bridge')
+        return applyDemoCreateStore({
+          name: storeData.name,
+          address: storeData.address,
+          phone: storeData.phone,
+          setAsCurrent: options?.setAsCurrent,
+        })
+      }
+
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
         throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
@@ -700,6 +711,17 @@ export const useStoresStore = defineStore('stores', {
       storeId: string,
       updates: Partial<Omit<Store, 'id' | 'ownerId' | 'createdAt'>>
     ) {
+      const { isDemoModeActive } = await import('~/utils/demo-mode')
+      if (isDemoModeActive()) {
+        const { applyDemoUpdateStore } = await import('~/utils/demo-bridge')
+        await applyDemoUpdateStore(storeId, {
+          name: updates.name,
+          address: updates.address,
+          phone: updates.phone,
+        })
+        return
+      }
+
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
         throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
@@ -765,6 +787,13 @@ export const useStoresStore = defineStore('stores', {
 
     // Delete a store
     async deleteStore(storeId: string) {
+      const { isDemoModeActive } = await import('~/utils/demo-mode')
+      if (isDemoModeActive()) {
+        const { applyDemoDeleteStore } = await import('~/utils/demo-bridge')
+        await applyDemoDeleteStore(storeId)
+        return
+      }
+
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
         throw new Error(CLOUD_UNAVAILABLE_MESSAGE)

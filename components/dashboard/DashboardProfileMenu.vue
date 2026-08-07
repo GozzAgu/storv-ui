@@ -217,33 +217,35 @@ const roleLabel = computed(() => {
   return 'User'
 })
 
+const { dashPath } = useDashboardPaths()
+
 const accountLinks = computed<MenuLink[]>(() => [
-  { to: '/dashboard/profile', label: 'Profile', icon: UserCircleIcon, match: '/dashboard/profile' },
+  { to: dashPath('/profile'), label: 'Profile', icon: UserCircleIcon, match: dashPath('/profile') },
   {
-    to: '/dashboard/settings',
+    to: dashPath('/settings'),
     label: 'Settings',
     icon: Cog6ToothIcon,
-    match: '/dashboard/settings',
+    match: dashPath('/settings'),
   },
   {
-    to: '/dashboard/notifications',
+    to: dashPath('/notifications'),
     label: 'Notifications',
     icon: BellIcon,
-    match: '/dashboard/notifications',
+    match: dashPath('/notifications'),
     badge: notificationsStore.unreadCount,
   },
 ])
 
 const supportLinks = computed<MenuLink[]>(() => {
   const links: MenuLink[] = [
-    { to: '/dashboard/help', label: 'Help center', icon: BookOpenIcon, match: '/dashboard/help' },
+    { to: dashPath('/help'), label: 'Help center', icon: BookOpenIcon, match: dashPath('/help') },
   ]
   if (canUse('activity_logs')) {
     links.push({
-      to: '/dashboard/activity',
+      to: dashPath('/activity'),
       label: 'Activity logs',
       icon: ClipboardDocumentListIcon,
-      match: '/dashboard/activity',
+      match: dashPath('/activity'),
     })
   }
   return links

@@ -383,7 +383,13 @@ export const useStaffStore = defineStore('staff', {
     /** Inactive (removed) staff for a department - owner roster / reactivation */
     async fetchInactiveStaffByDepartment(departmentId: string): Promise<Staff[]> {
       const { isDemoModeActive } = await import('~/utils/demo-mode')
-      if (isDemoModeActive()) return []
+      if (isDemoModeActive()) {
+        const storeId = (await getCurrentStoreId()) || ''
+        const { getDemoExtrasStaff } = await import('~/utils/demo-extras')
+        return getDemoExtrasStaff(storeId, 'inactive').filter(
+          (s) => s.departmentId === departmentId
+        )
+      }
 
       const db = useFirestore().getFirestoreInstance()
       if (!db) return []
@@ -441,8 +447,8 @@ export const useStaffStore = defineStore('staff', {
       const { isDemoModeActive } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) {
         const storeId = (await getCurrentStoreId()) || ''
-        const { getDemoStaff } = await import('~/utils/demo-bridge')
-        return getDemoStaff(storeId).find((s) => s.id === staffId) ?? null
+        const { getDemoExtrasStaff } = await import('~/utils/demo-extras')
+        return getDemoExtrasStaff(storeId, 'all').find((s) => s.id === staffId) ?? null
       }
 
       const db = useFirestore().getFirestoreInstance()
@@ -554,7 +560,11 @@ export const useStaffStore = defineStore('staff', {
           createdBy: DEMO_USER_UID,
           departmentName: department?.name || 'Unknown',
         }
-        this.staff.unshift(demoMember)
+        const { getDemoExtrasStaff, setDemoExtrasStaff } = await import('~/utils/demo-extras')
+        const all = getDemoExtrasStaff(storeId, 'all')
+        all.unshift(demoMember)
+        setDemoExtrasStaff(storeId, all)
+        this.staff = all.filter((s) => (s.status || 'active') === 'active')
         return { staffId, temporaryPassword: staffData.password }
       }
       if (!staffData.email?.trim()) {
@@ -977,10 +987,22 @@ export const useStaffStore = defineStore('staff', {
     async deleteStaff(staffId: string, totpCode?: string): Promise<Staff> {
       const { isDemoModeActive } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) {
+        const { DEMO_USER_UID } = await import('~/utils/demo-mode')
         const member = this.getStaffMember(staffId) || (await this.fetchStaffMember(staffId))
         if (!member) throw new Error('Staff member not found')
-        this.staff = this.staff.filter((s) => s.id !== staffId)
-        return { ...member, status: 'inactive' as const }
+        const storeId = member.storeId || (await getCurrentStoreId()) || ''
+        const inactive = {
+          ...member,
+          status: 'inactive' as const,
+          removedAt: new Date(),
+          removedBy: DEMO_USER_UID,
+        }
+        const { getDemoExtrasStaff, setDemoExtrasStaff } = await import('~/utils/demo-extras')
+        const all = getDemoExtrasStaff(storeId, 'all').map((s) => (s.id === staffId ? inactive : s))
+        if (!all.some((s) => s.id === staffId)) all.push(inactive)
+        setDemoExtrasStaff(storeId, all)
+        this.staff = all.filter((s) => (s.status || 'active') === 'active')
+        return inactive
       }
 
       const authStore = useAuthStore()
@@ -1046,7 +1068,10 @@ export const useStaffStore = defineStore('staff', {
     async reactivateStaff(staffId: string, totpCode?: string): Promise<Staff> {
       const { isDemoModeActive } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) {
-        const member = await this.fetchStaffMember(staffId)
+        const storeId = (await getCurrentStoreId()) || ''
+        const { getDemoExtrasStaff, setDemoExtrasStaff } = await import('~/utils/demo-extras')
+        const all = getDemoExtrasStaff(storeId, 'all')
+        const member = all.find((s) => s.id === staffId) || (await this.fetchStaffMember(staffId))
         if (!member) throw new Error('Staff member not found')
         const reactivated = {
           ...member,
@@ -1054,7 +1079,10 @@ export const useStaffStore = defineStore('staff', {
           removedAt: undefined,
           removedBy: undefined,
         }
-        if (!this.staff.some((s) => s.id === staffId)) this.staff.unshift(reactivated)
+        const next = all.map((s) => (s.id === staffId ? reactivated : s))
+        if (!next.some((s) => s.id === staffId)) next.unshift(reactivated)
+        setDemoExtrasStaff(storeId, next)
+        this.staff = next.filter((s) => (s.status || 'active') === 'active')
         return reactivated
       }
 

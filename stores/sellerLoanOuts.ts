@@ -170,6 +170,8 @@ export const useSellerLoanOutsStore = defineStore('sellerLoanOuts', {
           updatedAt: new Date(),
           createdBy: DEMO_USER_UID,
         })
+        const { setDemoExtrasLoansForStore } = await import('~/utils/demo-extras')
+        setDemoExtrasLoansForStore(demoStoreId, this.loans)
         return loanId
       }
 
@@ -259,6 +261,8 @@ export const useSellerLoanOutsStore = defineStore('sellerLoanOuts', {
         loan.status = 'returned'
         loan.returnedAt = new Date()
         loan.updatedAt = new Date()
+        const { setDemoExtrasLoansForStore } = await import('~/utils/demo-extras')
+        setDemoExtrasLoansForStore(loan.storeId, this.loans)
         return
       }
 
@@ -346,6 +350,8 @@ export const useSellerLoanOutsStore = defineStore('sellerLoanOuts', {
         loan.status = 'sold'
         loan.soldAt = new Date()
         loan.updatedAt = new Date()
+        const { setDemoExtrasLoansForStore } = await import('~/utils/demo-extras')
+        setDemoExtrasLoansForStore(loan.storeId, this.loans)
         return
       }
 

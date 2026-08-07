@@ -16,7 +16,17 @@ import { DEMO_SAVED_SEARCHES_KEY } from '~/utils/demo-mode'
 import { sanitizeDemoDisplayDashes } from '~/utils/demo-display-text'
 import { normalizeEntityName } from '~/utils/capitalize-text'
 import { demoId } from '~/utils/demo-seed'
-import { DEMO_USER_UID, isDemoModeActive, markDemoSessionActive, DEMO_STORE_LAGOS } from '~/utils/demo-mode'
+import { DEMO_USER_UID, isDemoModeActive, markDemoSessionActive } from '~/utils/demo-mode'
+import {
+  getDemoExtrasActivityLogs,
+  getDemoExtrasBuybacks,
+  getDemoExtrasLoans,
+  getDemoExtrasNotifications,
+  getDemoExtrasStaff,
+  getDemoUserOverrides,
+  patchDemoUserOverrides,
+  resetDemoExtras,
+} from '~/utils/demo-extras'
 import { useDemoAppStore } from '~/stores/demoApp'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
@@ -46,169 +56,23 @@ export const DEMO_PRODUCT_TEMPLATE: Template = {
   ],
 }
 
-function getDemoStaffMembers(storeId: string): Staff[] {
-  const base = {
-    storeId,
-    hireDate: '2025-01-15',
-    status: 'active' as const,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    createdBy: DEMO_USER_UID,
-  }
-  return [
-    {
-      ...base,
-      id: 'demo_staff_amaka',
-      firstName: 'Amaka',
-      lastName: 'Nwosu',
-      email: 'amaka@storvv.app',
-      phone: '0803 111 0001',
-      departmentId: 'demo_dept_sales',
-      departmentName: 'Sales',
-      position: 'Sales lead',
-      role: 'manager',
-      canManageInventory: true,
-    },
-    {
-      ...base,
-      id: 'demo_staff_chidi',
-      firstName: 'Chidi',
-      lastName: 'Eze',
-      email: 'chidi@storvv.app',
-      departmentId: 'demo_dept_sales',
-      departmentName: 'Sales',
-      position: 'Sales associate',
-      role: 'staff',
-    },
-    {
-      ...base,
-      id: 'demo_staff_bisi',
-      firstName: 'Bisi',
-      lastName: 'Adeyemi',
-      email: 'bisi@storvv.app',
-      departmentId: 'demo_dept_sales',
-      departmentName: 'Sales',
-      position: 'Cashier',
-      role: 'staff',
-    },
-    {
-      ...base,
-      id: 'demo_staff_ibrahim',
-      firstName: 'Ibrahim',
-      lastName: 'Kabir',
-      email: 'ibrahim@storvv.app',
-      phone: '0805 222 0002',
-      departmentId: 'demo_dept_ops',
-      departmentName: 'Operations',
-      position: 'Operations lead',
-      role: 'manager',
-      canManageInventory: true,
-    },
-    {
-      ...base,
-      id: 'demo_staff_femi',
-      firstName: 'Femi',
-      lastName: 'Johnson',
-      email: 'femi@storvv.app',
-      departmentId: 'demo_dept_ops',
-      departmentName: 'Operations',
-      position: 'Stock associate',
-      role: 'staff',
-    },
-  ]
-}
-
 /** Demo staff roster (exported for the staff store's demo branches). */
 export function getDemoStaff(storeId: string): Staff[] {
-  return getDemoStaffMembers(storeId)
+  return getDemoExtrasStaff(storeId, 'active')
+}
+
+function getDemoStaffMembers(storeId: string): Staff[] {
+  return getDemoStaff(storeId)
 }
 
 /** Dummy buyback records for demo analytics and buybacks page. */
 export function getDemoBuybacks(storeId: string): CustomerBuyback[] {
-  if (storeId !== DEMO_STORE_LAGOS) return []
-
-  const now = Date.now()
-  const day = 24 * 60 * 60 * 1000
-
-  return [
-    {
-      id: 'demo_buyback_1',
-      storeId,
-      status: 'completed',
-      customerName: 'Kemi Ade',
-      customerPhone: '0809 333 4455',
-      customerEmail: '',
-      folderId: 'folder_lagos_smartphones',
-      inventoryItemId: 'item_lagos_iphone',
-      purchasePrice: 180000,
-      paymentMethod: 'Transfer',
-      itemSummary: 'iPhone 12 64GB trade-in',
-      notes: 'Demo buyback',
-      createdAt: new Date(now - day * 8),
-      updatedAt: new Date(now - day * 8),
-      createdBy: DEMO_USER_UID,
-    },
-    {
-      id: 'demo_buyback_2',
-      storeId,
-      status: 'completed',
-      customerName: 'Tunde Bello',
-      customerPhone: '0805 444 5566',
-      customerEmail: '',
-      folderId: 'folder_lagos_accessories',
-      inventoryItemId: 'item_lagos_case',
-      purchasePrice: 3500,
-      paymentMethod: 'Cash',
-      itemSummary: 'Used silicone case bundle',
-      notes: 'Demo buyback',
-      createdAt: new Date(now - day * 2),
-      updatedAt: new Date(now - day * 2),
-      createdBy: DEMO_USER_UID,
-    },
-  ]
+  return getDemoExtrasBuybacks(storeId)
 }
 
-/** Dummy stock-loan records for the demo, built from the store's seeded inventory. */
+/** Dummy stock-loan records for the demo. */
 export function getDemoSellerLoans(storeId: string): SellerLoanOut[] {
-  const demo = useDemoAppStore()
-  demo.hydrate()
-  const store = demo.getStore(storeId) ?? demo.currentStore
-  const items = store?.items ?? []
-  if (items.length === 0) return []
-
-  const now = Date.now()
-  const day = 24 * 60 * 60 * 1000
-  const first = items[0]!
-  const second = items[1] ?? items[0]!
-
-  const loans: SellerLoanOut[] = [
-    {
-      id: 'demo_loan_active',
-      storeId,
-      status: 'active',
-      partyName: 'Emeka Traders',
-      partyPhone: '0803 555 0101',
-      partyNotes: 'Reseller - settles weekly',
-      lines: [{ inventoryItemId: first.id, folderId: first.folderId, itemSummary: first.name }],
-      createdAt: new Date(now - day * 3),
-      updatedAt: new Date(now - day * 3),
-      createdBy: DEMO_USER_UID,
-    },
-    {
-      id: 'demo_loan_returned',
-      storeId,
-      status: 'returned',
-      partyName: 'Gadget Hub',
-      partyPhone: '0805 555 0202',
-      partyNotes: 'Returned unsold units',
-      lines: [{ inventoryItemId: second.id, folderId: second.folderId, itemSummary: second.name }],
-      createdAt: new Date(now - day * 8),
-      updatedAt: new Date(now - day * 5),
-      returnedAt: new Date(now - day * 5),
-      createdBy: DEMO_USER_UID,
-    },
-  ]
-  return loans
+  return getDemoExtrasLoans(storeId)
 }
 
 function getDemoDepartments(storeId: string): Department[] {
@@ -269,10 +133,11 @@ export function initDemoAuth() {
 
 export function getDemoUserData(state: DemoState): UserData {
   const current = state.stores.find((s) => s.id === state.currentStoreId) ?? state.stores[0]
+  const overrides = getDemoUserOverrides()
   return {
     uid: DEMO_USER_UID,
     email: 'demo@storvv.app',
-    name: 'Demo User',
+    name: overrides.name || 'Demo User',
     role: 'superAdmin',
     subscription: 'storvv_enterprise',
     hasCompletedOnboarding: true,
@@ -287,12 +152,13 @@ export function getDemoUserData(state: DemoState): UserData {
       timeFormat: '24h',
     },
     storeDetails: {
-      storeName: current?.name ?? 'Demo store',
-      storePhone: '0800 000 0000',
-      settings: {
+      storeName: overrides.storeDetails?.storeName || current?.name || 'Demo store',
+      storePhone: overrides.storePhone || overrides.storeDetails?.storePhone || '0800 000 0000',
+      settings: overrides.storeDetails?.settings || {
         receipt: { prefix: 'DEMO', nextNumber: 1004 },
         payment: { paymentMethods: ['Cash', 'Transfer', 'Card'] },
       },
+      ...overrides.storeDetails,
     },
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -446,56 +312,28 @@ function buildInventoryForStore(store: DemoStoreRecord) {
 }
 
 export function getDemoSampleNotifications(): Notification[] {
-  const now = new Date()
-  return [
-    {
-      id: 'demo_notif_1',
-      type: 'receipt_created',
-      title: 'New receipt',
-      message: 'Receipt DEMO-1001 recorded for Ada Okonkwo',
-      userId: DEMO_USER_UID,
-      read: false,
-      createdAt: now,
-    },
-    {
-      id: 'demo_notif_2',
-      type: 'item_updated',
-      title: 'Low stock',
-      message: 'Silicone phone case is running low at Lagos',
-      userId: DEMO_USER_UID,
-      read: true,
-      createdAt: new Date(now.getTime() - 3600000),
-    },
-  ]
+  return getDemoExtrasNotifications()
 }
 
 export function getDemoActivityLogs(storeId: string): ActivityLog[] {
-  const store = useDemoAppStore().getStore(storeId)
-  const name = store?.name ?? 'store'
-  return [
-    {
-      id: 'demo_log_1',
-      userId: DEMO_USER_UID,
-      userDisplayName: 'Demo User',
-      action: 'created',
-      entityType: 'item',
-      entityId: 'rcpt_lagos_1',
-      entityName: 'Receipt DEMO-1001',
-      storeId,
-      createdAt: new Date(),
-    },
-    {
-      id: 'demo_log_2',
-      userId: DEMO_USER_UID,
-      userDisplayName: 'Demo User',
-      action: 'updated',
-      entityType: 'item',
-      entityId: 'item_lagos_case',
-      entityName: `Stock updated at ${name}`,
-      storeId,
-      createdAt: new Date(Date.now() - 7200000),
-    },
-  ]
+  return getDemoExtrasActivityLogs(storeId)
+}
+
+export function applyDemoUserDocumentUpdate(updates: Partial<UserData>) {
+  patchDemoUserOverrides({
+    name: updates.name,
+    storePhone: updates.storeDetails?.storePhone,
+    storeDetails: updates.storeDetails,
+  })
+  const demo = useDemoAppStore()
+  demo.hydrate()
+  const next = getDemoUserData(demo.state)
+  useUserStore().$patch({ userData: next })
+  return next
+}
+
+export function resetDemoExtrasData() {
+  resetDemoExtras()
 }
 
 export async function syncDemoToPinia() {
@@ -881,4 +719,41 @@ export async function applyDemoDuplicateFolderTemplatesBetweenStores(
   demo.persist()
   await syncDemoToPinia()
   return { createdCount, skippedCount }
+}
+
+export async function applyDemoCreateStore(payload: {
+  name: string
+  address?: string
+  phone?: string
+  setAsCurrent?: boolean
+}): Promise<string> {
+  const demo = useDemoAppStore()
+  demo.hydrate()
+  const id = demo.addStore({
+    name: payload.name,
+    address: payload.address,
+    phone: payload.phone,
+  })
+  if (payload.setAsCurrent) {
+    demo.setCurrentStore(id)
+  }
+  await syncDemoToPinia()
+  return id
+}
+
+export async function applyDemoUpdateStore(
+  storeId: string,
+  updates: { name?: string; address?: string; phone?: string }
+) {
+  const demo = useDemoAppStore()
+  demo.hydrate()
+  demo.updateStoreRecord(storeId, updates)
+  await syncDemoToPinia()
+}
+
+export async function applyDemoDeleteStore(storeId: string) {
+  const demo = useDemoAppStore()
+  demo.hydrate()
+  demo.removeStoreRecord(storeId)
+  await syncDemoToPinia()
 }

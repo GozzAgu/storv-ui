@@ -227,6 +227,7 @@ function seedReceipts(state: DemoState) {
   const day = 24 * 60 * 60 * 1000
   const lagos = state.stores.find((s) => s.id === DEMO_STORE_LAGOS)!
   const abuja = state.stores.find((s) => s.id === DEMO_STORE_ABUJA)!
+  const ph = state.stores.find((s) => s.id === DEMO_STORE_PH)!
 
   lagos.receipts = [
     {
@@ -308,11 +309,43 @@ function seedReceipts(state: DemoState) {
       folderId: 'folder_abuja_laptops',
     },
   ]
+
+  ph.receipts = [
+    {
+      id: 'rcpt_ph_1',
+      storeId: DEMO_STORE_PH,
+      receiptNumber: 'DEMO-3001',
+      customerName: 'Grace Etim',
+      customerPhone: '0807 222 3344',
+      date: new Date(now - day).toISOString(),
+      items: [
+        { itemId: 'item_ph_powerbank', itemName: 'Power bank 20,000mAh', quantity: 1, price: 22000 },
+      ],
+      total: 22000,
+      paymentMethod: 'Transfer',
+      status: 'completed',
+      folderId: 'folder_ph_accessories',
+    },
+    {
+      id: 'rcpt_ph_2',
+      storeId: DEMO_STORE_PH,
+      receiptNumber: 'DEMO-3002',
+      customerName: 'Walk-in customer',
+      date: new Date(now - day * 0.4).toISOString(),
+      items: [
+        { itemId: 'item_ph_cable', itemName: 'USB-C cable 2m', quantity: 3, price: 4500 },
+      ],
+      total: 13500,
+      paymentMethod: 'Cash',
+      status: 'completed',
+      folderId: 'folder_ph_accessories',
+    },
+  ]
 }
 
 export function createDemoSeedState(): DemoState {
   const state: DemoState = {
-    version: 7,
+    version: 8,
     currentStoreId: DEMO_STORE_LAGOS,
     currencyCode: 'NGN',
     currencySymbol: '₦',

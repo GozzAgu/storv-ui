@@ -88,7 +88,7 @@ export interface DemoTransfer {
 }
 
 export interface DemoState {
-  version: 2 | 3 | 4 | 5
+  version: 2 | 3 | 4 | 5 | 6 | 7 | 8
   currentStoreId: string
   currencyCode: string
   currencySymbol: string

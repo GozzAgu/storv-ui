@@ -133,8 +133,29 @@ export const useNotificationsStore = defineStore('notifications', {
       metadata?: Notification['metadata'],
       actorId?: string
     ) {
-      const { isDemoModeActive } = await import('~/utils/demo-mode')
-      if (isDemoModeActive()) return null
+      const { isDemoModeActive, DEMO_USER_UID } = await import('~/utils/demo-mode')
+      if (isDemoModeActive()) {
+        const { setDemoExtrasNotifications, getDemoExtrasNotifications } = await import(
+          '~/utils/demo-extras'
+        )
+        const id = `demo_notif_${Math.random().toString(36).slice(2, 9)}`
+        const notification: Notification = {
+          id,
+          type,
+          title,
+          message,
+          userId: DEMO_USER_UID,
+          actorId: actorId || DEMO_USER_UID,
+          read: false,
+          metadata: metadata || {},
+          createdAt: new Date(),
+        }
+        const next = [notification, ...getDemoExtrasNotifications()]
+        setDemoExtrasNotifications(next)
+        this.notifications = next
+        this.unreadCount = next.filter((n) => !n.read).length
+        return id
+      }
 
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
@@ -353,6 +374,17 @@ export const useNotificationsStore = defineStore('notifications', {
 
     // Mark notification as read
     async markAsRead(notificationId: string) {
+      const { isDemoModeActive } = await import('~/utils/demo-mode')
+      if (isDemoModeActive()) {
+        const { setDemoExtrasNotifications } = await import('~/utils/demo-extras')
+        this.notifications = this.notifications.map((n) =>
+          n.id === notificationId ? { ...n, read: true } : n
+        )
+        this.unreadCount = this.notifications.filter((n) => !n.read).length
+        setDemoExtrasNotifications(this.notifications)
+        return
+      }
+
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
         this.error = CLOUD_UNAVAILABLE_MESSAGE
@@ -393,6 +425,15 @@ export const useNotificationsStore = defineStore('notifications', {
 
     // Mark all notifications as read
     async markAllAsRead() {
+      const { isDemoModeActive } = await import('~/utils/demo-mode')
+      if (isDemoModeActive()) {
+        const { setDemoExtrasNotifications } = await import('~/utils/demo-extras')
+        this.notifications = this.notifications.map((n) => ({ ...n, read: true }))
+        this.unreadCount = 0
+        setDemoExtrasNotifications(this.notifications)
+        return
+      }
+
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
         this.error = CLOUD_UNAVAILABLE_MESSAGE

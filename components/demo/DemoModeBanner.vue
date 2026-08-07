@@ -6,9 +6,9 @@
     <div class="min-w-0">
       <p class="text-sm font-semibold text-primary-900 dark:text-primary-100">Interactive demo</p>
       <p class="mt-0.5 text-xs text-gray-600 dark:text-gray-400">
-        You are using the real Storvv dashboard with sample data saved in this browser. Try Analytics
-        feature insights, Customer buybacks, Stock loans, Payment links, and the demo Assistant (canned tips).
-        No sign-up required.
+        You are using the real Storvv dashboard with sample data saved in this browser. Explore every
+        Enterprise feature — inventory, sales, buybacks, stock loans, multi-store sync, payment links,
+        departments, analytics, activity logs, and the demo Assistant. No sign-up required.
       </p>
     </div>
     <div class="flex shrink-0 flex-wrap gap-2">
@@ -38,16 +38,17 @@
 
 <script setup lang="ts">
 import { clearDemoSession } from '~/utils/demo-mode'
-import { syncDemoToPinia } from '~/utils/demo-bridge'
+import { resetDemoExtrasData, syncDemoToPinia } from '~/utils/demo-bridge'
 
 function onExit() {
   clearDemoSession()
 }
 
-function onReset() {
+async function onReset() {
   if (!import.meta.client) return
   if (!window.confirm('Reset all demo data to the sample store?')) return
   useDemoAppStore().reset()
-  syncDemoToPinia()
+  resetDemoExtrasData()
+  await syncDemoToPinia()
 }
 </script>

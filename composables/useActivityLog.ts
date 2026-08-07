@@ -119,7 +119,19 @@ export function activityLogDetailSubtitle(
 export async function logActivity(params: LogActivityParams): Promise<void> {
   if (import.meta.server) return
   const { isDemoModeActive } = await import('~/utils/demo-mode')
-  if (isDemoModeActive()) return
+  if (isDemoModeActive()) {
+    const { appendDemoActivityLog } = await import('~/utils/demo-extras')
+    appendDemoActivityLog({
+      userId: params.userId,
+      userDisplayName: params.userDisplayName,
+      action: params.action,
+      entityType: params.entityType,
+      entityId: params.entityId,
+      entityName: params.entityName,
+      storeId: params.storeId,
+    })
+    return
+  }
 
   const db = useFirestore().getFirestoreInstance()
   if (!db) return

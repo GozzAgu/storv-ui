@@ -20,7 +20,7 @@ function normalizeDemoState(state: DemoState): DemoState {
       store.address = sanitizeDemoDisplayDashes(store.address)
     }
   }
-  state.version = 7
+  state.version = 8
   for (const store of state.stores) {
     for (const folder of store.folders) {
       if (folder.parentId === undefined) {
@@ -45,7 +45,8 @@ function isValidDemoState(value: unknown): value is DemoState {
       state?.version === 4 ||
       state?.version === 5 ||
       state?.version === 6 ||
-      state?.version === 7) &&
+      state?.version === 7 ||
+      state?.version === 8) &&
     Array.isArray(state.stores) &&
     state.stores.length > 0
   )
@@ -57,7 +58,7 @@ function loadState(): DemoState {
     const raw = localStorage.getItem(DEMO_STORAGE_KEY)
     if (!raw) return createDemoSeedState()
     const parsed = JSON.parse(raw) as DemoState
-    if (!isValidDemoState(parsed) || parsed.version < 7) {
+    if (!isValidDemoState(parsed) || parsed.version < 8) {
       const fresh = createDemoSeedState()
       saveState(fresh)
       return fresh
@@ -65,7 +66,7 @@ function loadState(): DemoState {
     const namesBefore = parsed.stores.map((s) => s.name).join('\0')
     const state = normalizeDemoState(parsed)
     const namesAfter = state.stores.map((s) => s.name).join('\0')
-    if (parsed.version < 7 || namesBefore !== namesAfter) {
+    if (parsed.version < 8 || namesBefore !== namesAfter) {
       saveState(state)
     }
     return state
@@ -177,6 +178,45 @@ export const useDemoAppStore = defineStore('demoApp', {
         throw new Error('Store not found')
       }
       this.state.currentStoreId = storeId
+      this.persist()
+    },
+
+    addStore(payload: { name: string; address?: string; phone?: string }) {
+      const id = demoId('store')
+      const record: DemoStoreRecord = {
+        id,
+        name: normalizeEntityName(payload.name) || payload.name.trim() || 'New branch',
+        address: payload.address?.trim() || '',
+        folders: [],
+        items: [],
+        customers: [],
+        receipts: [],
+      }
+      this.state.stores.push(record)
+      this.persist()
+      return id
+    },
+
+    updateStoreRecord(storeId: string, updates: { name?: string; address?: string }) {
+      const store = this.getStore(storeId)
+      if (!store) throw new Error('Store not found')
+      if (updates.name !== undefined) {
+        store.name = normalizeEntityName(updates.name) || updates.name.trim() || store.name
+      }
+      if (updates.address !== undefined) {
+        store.address = updates.address.trim()
+      }
+      this.persist()
+    },
+
+    removeStoreRecord(storeId: string) {
+      if (this.state.stores.length <= 1) {
+        throw new Error('Keep at least one branch in the demo.')
+      }
+      this.state.stores = this.state.stores.filter((s) => s.id !== storeId)
+      if (this.state.currentStoreId === storeId) {
+        this.state.currentStoreId = this.state.stores[0]!.id
+      }
       this.persist()
     },
 

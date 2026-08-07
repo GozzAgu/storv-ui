@@ -12,8 +12,8 @@
           Try the <span class="landing-demo__accent">real dashboard</span> (no signup)
         </h2>
         <p class="landing-demo__lede">
-          Walk through inventory, sales, multi-branch switching, and reports with sample store
-          data. Everything stays in your browser. No account required.
+          Open the full Storvv dashboard with sample store data — every Enterprise feature, no
+          account required. Changes stay in your browser until you reset.
         </p>
         <ul class="landing-demo__points">
           <li v-for="point in points" :key="point">{{ point }}</li>
@@ -84,17 +84,23 @@ defineProps<{
 }>()
 
 const points = [
-  'Three sample branches with realistic stock and sales',
-  'Record sales, check low stock, browse sales history',
-  'Multi-store sync and consolidated reports (Enterprise preview)',
-  'Reset sample data anytime',
+  'Full Enterprise dashboard: inventory, sales, analytics, and more',
+  'Three sample branches with stock, sales, buybacks, and stock loans',
+  'Departments, staff, payment links, multi-store sync, and activity logs',
+  'Reset sample data anytime — everything stays in your browser',
 ]
 
 const previewNav: Array<{ name: string; iconKey: DashboardNavIconKey; active?: boolean }> = [
   { name: 'Dashboard', iconKey: 'dashboard', active: true },
   { name: 'Inventory', iconKey: 'inventory' },
   { name: 'Sales', iconKey: 'receipts' },
+  { name: 'Buybacks', iconKey: 'buybacks' },
+  { name: 'Loans', iconKey: 'loans' },
+  { name: 'Sync', iconKey: 'sync' },
+  { name: 'Payments', iconKey: 'payment-links' },
+  { name: 'Departments', iconKey: 'departments' },
   { name: 'Analytics', iconKey: 'analytics' },
+  { name: 'Activity', iconKey: 'activity' },
   { name: 'Settings', iconKey: 'settings' },
 ]
 </script>
