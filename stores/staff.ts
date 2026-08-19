@@ -1172,291 +1172,50 @@ export const useStaffStore = defineStore('staff', {
         return null
       }
 
-      const userStore = useUserStore()
-      if (!userStore.userData) {
-        await userStore.fetchUserData(authStore.currentUser.uid)
+      const isStaffCreationInProgress = import.meta.client
+        ? sessionStorage.getItem('staff_creation_in_progress') === 'true'
+        : false
+      if (isStaffCreationInProgress) {
+        return null
       }
 
-      // For staff users, search through hierarchical structure
-      if (userStore.userData?.role === 'staff') {
-        // First check if staff member is already in local state (from fetchStaff)
-        const cachedStaff = this.getCurrentStaffMember
-        if (cachedStaff?.storeId && isActiveStaffStatus(cachedStaff.status)) {
-          return cachedStaff
-        }
-
-        // Check if staff creation is in progress - if so, skip this lookup
-        // During staff creation, the superadmin temporarily signs in as the new staff
-        // but the staff document may not be fully saved yet
-        const isStaffCreationInProgress = import.meta.client
-          ? sessionStorage.getItem('staff_creation_in_progress') === 'true'
-          : false
-
-        if (isStaffCreationInProgress) {
-          // console.log('[StaffStore] Staff creation in progress - skipping fetchCurrentStaffMember to avoid lookup during creation')
-          return null
-        }
-
-        // Get superadmin UID - try legacy collection first, then cache, then search hierarchically
-        let superadminUserId: string | null = null
-
-        // First try legacy collection
-        try {
-          const staffRef = collection(db, 'staff')
-          const staffQuery = query(staffRef, where('authUid', '==', authStore.currentUser.uid))
-          const staffSnapshot = await getDocs(staffQuery)
-
-          if (!staffSnapshot.empty && staffSnapshot.docs[0]) {
-            const staffData = staffSnapshot.docs[0].data()
-            if (staffData.createdBy) {
-              superadminUserId = staffData.createdBy
-              // console.log('[StaffStore] Found superadmin UID from legacy collection:', superadminUserId)
-            }
-          }
-        } catch (error: any) {
-          console.warn('[StaffStore] Could not fetch from legacy collection:', error.message)
-        }
-
-        // If not found, try cache - check all staff in local state, not just getCurrentStaffMember
-        if (!superadminUserId) {
-          // First try getCurrentStaffMember (faster)
-          const cachedStaff = this.getCurrentStaffMember
-          if (cachedStaff?.createdBy) {
-            superadminUserId = cachedStaff.createdBy
-            // console.log('[StaffStore] Found superadmin UID from getCurrentStaffMember cache:', superadminUserId)
-          } else {
-            // If not found, search all staff in local state
-            const foundStaff = this.staff.find((s) => s.authUid === authStore.currentUser?.uid)
-            if (foundStaff?.createdBy) {
-              superadminUserId = foundStaff.createdBy
-              // console.log('[StaffStore] Found superadmin UID from staff array cache:', superadminUserId)
-            }
-          }
-        }
-
-        // If still not found, use collection group query to search ALL staff collections
-        // This is more efficient and avoids permission issues with hierarchical paths
-        if (!superadminUserId) {
-          // console.log('[StaffStore] Superadmin UID not found in cache/legacy - using collection group query...')
-          try {
-            // Use collectionGroup to search across ALL staff collections regardless of path
-            // This avoids permission issues when querying other superadmins' collections
-            const { collectionGroup, query, where, getDocs } = await import('firebase/firestore')
-            const staffCollectionGroup = collectionGroup(db, 'staff')
-            const staffQuery = query(
-              staffCollectionGroup,
-              where('authUid', '==', authStore.currentUser.uid)
-            )
-            const staffSnapshot = await getDocs(staffQuery)
-
-            if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
-              // Found the staff member!
-              const staffDoc = staffSnapshot.docs[0]
-              if (!staffDoc) {
-                console.warn('[StaffStore] Collection group query returned empty document')
-                return null
-              }
-
-              const staffData = staffDoc.data()
-              if (!staffData) {
-                console.warn('[StaffStore] Staff document has no data')
-                return null
-              }
-
-              if (staffData.createdBy) {
-                superadminUserId = staffData.createdBy
-                // console.log('[StaffStore] Found staff member via collection group query, superadmin UID:', superadminUserId)
-
-                // Extract path information from the document reference
-                // Path format: users/{userId}/stores/{storeId}/departments/{departmentId}/staff/{staffId}
-                const pathParts = staffDoc.ref.path.split('/')
-                let extractedStoreId: string | undefined
-                let extractedDepartmentId: string | undefined
-
-                if (pathParts.length >= 6) {
-                  const extractedSuperadminId = pathParts[1] // users/{userId}
-                  extractedStoreId = pathParts[3] // stores/{storeId}
-                  extractedDepartmentId = pathParts[5] // departments/{departmentId}
-
-                  // console.log('[StaffStore] Extracted from path - superadmin:', extractedSuperadminId, 'store:', extractedStoreId, 'dept:', extractedDepartmentId)
-
-                  // Verify the extracted superadmin matches createdBy
-                  if (extractedSuperadminId === superadminUserId) {
-                    // console.log('[StaffStore] Path verification successful')
-                  } else {
-                    console.warn(
-                      '[StaffStore] Path superadmin ID does not match createdBy, using createdBy:',
-                      superadminUserId
-                    )
-                  }
-                }
-
-                // Build the staff object from the found document
-                const foundStaff: Staff = {
-                  id: staffDoc.id,
-                  firstName: staffData.firstName || '',
-                  lastName: staffData.lastName || '',
-                  email: staffData.email || '',
-                  phone: staffData.phone,
-                  departmentId: extractedDepartmentId || staffData.departmentId || '',
-                  storeId: extractedStoreId || staffData.storeId || '',
-                  position: staffData.position || '',
-                  role: staffData.role || 'staff',
-                  hireDate: staffData.hireDate || '',
-                  salary: staffData.salary,
-                  status: staffData.status || 'active',
-                  authUid: staffData.authUid,
-                  mustChangePassword: staffData.mustChangePassword ?? false,
-                  createdAt: staffData.createdAt,
-                  updatedAt: staffData.updatedAt,
-                  createdBy: staffData.createdBy || superadminUserId,
-                }
-
-                if (!isActiveStaffStatus(foundStaff.status)) {
-                  return null
-                }
-
-                // Get department name if available
-                if (foundStaff.departmentId) {
-                  const departmentsStore = useDepartmentsStore()
-                  const department = departmentsStore.getDepartmentById(foundStaff.departmentId)
-                  if (department) {
-                    foundStaff.departmentName = department.name
-                  }
-                }
-
-                // Add to local state for future lookups
-                const existingIndex = this.staff.findIndex((s) => s.id === foundStaff.id)
-                if (existingIndex === -1) {
-                  this.staff.push(foundStaff)
-                } else {
-                  // Update existing entry
-                  this.staff[existingIndex] = foundStaff
-                }
-
-                // console.log('[StaffStore] Staff member loaded and cached:', foundStaff.storeId)
-                return foundStaff
-              } else {
-                console.warn('[StaffStore] Staff document found but missing createdBy field')
-              }
-            } else {
-              console.warn('[StaffStore] Collection group query returned no results')
-            }
-          } catch (collectionGroupError: any) {
-            console.error(
-              '[StaffStore] Error with collection group query:',
-              collectionGroupError.message
-            )
-            if (collectionGroupError.code === 'permission-denied') {
-              console.error(
-                '[StaffStore] Permission denied on collection group query. Check Firestore rules allow collection group queries for staff.'
-              )
-            } else if (collectionGroupError.code === 'failed-precondition') {
-              // Extract index creation URL from error message
-              const indexUrlMatch = collectionGroupError.message?.match(/https:\/\/[^\s]+/)
-              const indexUrl = indexUrlMatch ? indexUrlMatch[0] : null
-
-              console.error('')
-              console.error('🚨 [StaffStore] COLLECTION GROUP INDEX MISSING 🚨')
-              console.error(
-                '[StaffStore] The query requires a COLLECTION_GROUP index for staff/authUid'
-              )
-              console.error('')
-
-              if (indexUrl) {
-                console.error('⚠️ ⚠️ ⚠️ ACTION REQUIRED ⚠️ ⚠️ ⚠️')
-                console.error('[StaffStore] Click this link to create the index automatically:')
-                console.error('')
-                console.error('👉', indexUrl)
-                console.error('')
-                console.error('[StaffStore] After clicking the link:')
-                console.error(' 1. Click "Create Index" in the Firebase Console')
-                console.error(' 2. Wait for the index to build (may take a few minutes)')
-                console.error(' 3. Refresh this page')
-                console.error('')
-              } else {
-                // Fallback: provide direct link to Firebase Console indexes
-                const config = useRuntimeConfig()
-                const projectId = config.public.firebase.projectId || 'storv-ux'
-                const fallbackUrl = `https://console.firebase.google.com/project/${projectId}/firestore/indexes`
-                console.error('[StaffStore] Go to Firebase Console > Firestore > Indexes:')
-                console.error('👉', fallbackUrl)
-                console.error('')
-                console.error('[StaffStore] Create a COLLECTION_GROUP index for:')
-                console.error(' - Collection Group: staff')
-                console.error(' - Field: authUid (Ascending)')
-                console.error(' - Query Scope: COLLECTION_GROUP')
-                console.error('')
-              }
-            }
-          }
-
-          if (!superadminUserId) {
-            console.error('[StaffStore] Could not find staff member via collection group query')
-            console.error("[StaffStore] This means the staff member's document either:")
-            console.error(' 1. Does not exist in Firestore')
-            console.error(' 2. Has incorrect authUid field')
-            console.error(' 3. Is blocked by Firestore rules')
-            console.error(' 4. Collection group index is missing (deploy firestore.indexes.json)')
-            return null
-          }
-
-          // If we found superadminUserId but didn't return the staff member above,
-          // it means the document was missing createdBy. This shouldn't happen, but handle it.
-          console.error('[StaffStore] Found superadminUserId but staff document was incomplete')
-          return null
-        }
+      const cachedStaff = this.getCurrentStaffMember
+      if (cachedStaff?.authUid === authStore.currentUser.uid && isActiveStaffStatus(cachedStaff.status)) {
+        return cachedStaff
       }
 
-      // For superadmin, search through all their stores and departments
-      const userId = authStore.currentUser.uid
       try {
-        const { getStoresCollection } = await import('~/composables/useFirestorePaths')
-        const storesRef = getStoresCollection(db, userId)
-        const storesSnapshot = await getDocs(storesRef)
+        const { lookupActiveStaffMemberByAuthUid } = await import('~/utils/staff-user-bootstrap')
+        const foundStaff = await lookupActiveStaffMemberByAuthUid(db, authStore.currentUser.uid)
+        if (!foundStaff) {
+          return null
+        }
 
-        for (const storeDoc of storesSnapshot.docs) {
-          const storeId = storeDoc.id
-          const { getDepartmentsCollection } = await import('~/composables/useFirestorePaths')
-          const departmentsRef = getDepartmentsCollection(db, userId, storeId)
-          const departmentsSnapshot = await getDocs(departmentsRef)
-
-          for (const deptDoc of departmentsSnapshot.docs) {
-            const departmentId = deptDoc.id
-            try {
-              const staffRef = getStaffCollection(db, userId, storeId, departmentId)
-              const staffSnapshot = await getDocs(staffRef)
-
-              for (const staffDoc of staffSnapshot.docs) {
-                const staffData = staffDoc.data()
-                if (staffData.authUid === authStore.currentUser.uid) {
-                  const foundStaff = {
-                    id: staffDoc.id,
-                    ...staffData,
-                    departmentId: departmentId,
-                    storeId: storeId,
-                  } as Staff
-
-                  // Get department name
-                  const departmentsStore = useDepartmentsStore()
-                  const department = departmentsStore.getDepartmentById(departmentId)
-                  if (department) {
-                    foundStaff.departmentName = department.name
-                  }
-
-                  return foundStaff
-                }
-              }
-            } catch (e) {
-              continue
-            }
+        if (foundStaff.departmentId) {
+          const departmentsStore = useDepartmentsStore()
+          const department = departmentsStore.getDepartmentById(foundStaff.departmentId)
+          if (department) {
+            foundStaff.departmentName = department.name
           }
         }
-      } catch (error: any) {
-        console.error('Error fetching current staff member:', error)
-      }
 
-      return null
+        const existingIndex = this.staff.findIndex((s) => s.id === foundStaff.id)
+        if (existingIndex === -1) {
+          this.staff.push(foundStaff)
+        } else {
+          this.staff[existingIndex] = foundStaff
+        }
+
+        return foundStaff
+      } catch (error: any) {
+        console.error('[StaffStore] Error fetching current staff member:', error)
+        if (error.code === 'failed-precondition') {
+          console.error(
+            '[StaffStore] Missing COLLECTION_GROUP index for staff.authUid. Deploy firestore.indexes.json.'
+          )
+        }
+        return null
+      }
     },
   },
 })

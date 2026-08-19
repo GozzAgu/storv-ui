@@ -68,7 +68,9 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
       }
 
       const emailVerifyExempt =
-        to.path === '/dashboard/verify-email' || to.path === '/dashboard/change-password'
+        userStore.userData?.role === 'staff' ||
+        to.path === '/dashboard/verify-email' ||
+        to.path === '/dashboard/change-password'
 
       if (!authStore.currentUser.emailVerified && !emailVerifyExempt) {
         return navigateTo('/dashboard/verify-email')

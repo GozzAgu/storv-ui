@@ -16,13 +16,13 @@
       <template #toolbar>
         <div class="flex w-full min-w-0 flex-col gap-3">
           <div class="flex w-full min-w-0 flex-wrap items-end gap-3">
-            <DashboardToolbarSearch
-              input-id="help-search"
-              v-model="searchQuery"
-              placeholder="Search help topics…"
-              :wide="false"
-              wrapper-class="max-w-md"
-            />
+          <DashboardToolbarSearch
+            input-id="help-search"
+            v-model="searchQuery"
+            placeholder="Search help topics…"
+            :wide="false"
+            wrapper-class="max-w-md"
+          />
             <button
               type="button"
               class="dash-help-assistant-cta"

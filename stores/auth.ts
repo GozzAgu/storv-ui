@@ -78,7 +78,8 @@ export const useAuthStore = defineStore('auth', {
       if (!auth) throw new Error(AUTH_UNAVAILABLE_MESSAGE)
 
       try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password)
+        const normalizedEmail = email.trim().toLowerCase()
+        const userCredential = await signInWithEmailAndPassword(auth, normalizedEmail, password)
         this.currentUser = userCredential.user
         return userCredential.user
       } catch (error: any) {

@@ -92,118 +92,65 @@ export const useUserStore = defineStore('user', {
             this.userData = fetchedData
           }
         } else {
-          // If not found in top-level users collection, try to find staff member in hierarchical structure
-          // Use the staff store's fetchCurrentStaffMember which is optimized for this
-          // But avoid circular dependency - fetchCurrentStaffMember might call fetchUserData
+          const cachedStaff = (await import('./staff')).useStaffStore().getCurrentStaffMember
+          if (cachedStaff?.authUid === userId) {
+            const { buildStaffUserData } = await import('~/utils/staff-user-bootstrap')
+            this.userData = buildStaffUserData(cachedStaff, userId)
+            return
+          }
+
           try {
-            const { useStaffStore } = await import('./staff')
-            const staffStore = useStaffStore()
+            const { lookupStaffMemberByAuthUid, buildStaffUserData } = await import(
+              '~/utils/staff-user-bootstrap'
+            )
+            const lookup = await lookupStaffMemberByAuthUid(db, userId)
 
-            // Try to get from cache first (faster and avoids circular dependency)
-            const cachedStaff = staffStore.getCurrentStaffMember
-            if (cachedStaff && cachedStaff.authUid === userId) {
-              // Found in cache, create userData from staff member
-              const staffUserData: UserData = {
-                uid: userId,
-                email: cachedStaff.email || '',
-                name:
-                  `${cachedStaff.firstName || ''} ${cachedStaff.lastName || ''}`.trim() ||
-                  'Staff Member',
-                role: 'staff',
-                subscription: 'storvv_micro',
-                hasCompletedOnboarding: true,
-                hasCompletedTutorial: false,
-                mustChangePassword: !!(cachedStaff as { mustChangePassword?: boolean })
-                  .mustChangePassword,
-                createdAt: cachedStaff.createdAt || null,
-                updatedAt: cachedStaff.updatedAt || null,
-              }
-              this.userData = staffUserData
-              // console.log('[UserStore] Found staff member in cache')
-              return
-            }
-
-            // Check if we're already fetching to avoid circular dependency
-            const isFetchingStaff = (staffStore as any).__fetchingStaffMember
-            if (isFetchingStaff) {
-              // console.log('[UserStore] Staff member fetch already in progress, skipping to avoid circular dependency')
-              // Set a basic staff userData to prevent errors
-              const authStore = useAuthStore()
-              this.userData = {
-                uid: userId,
-                email: authStore.currentUser?.email || '',
-                name: 'Staff Member',
-                role: 'staff',
-                subscription: 'storvv_micro',
-                hasCompletedOnboarding: true,
-                hasCompletedTutorial: false,
-                createdAt: null,
-                updatedAt: null,
-              } as UserData
-              return
-            }
-
-            // If not in cache and not already fetching, fetch it (this will search hierarchical structure)
-            try {
-              const staffStoreAny = staffStore as any
-              staffStoreAny.__fetchingStaffMember = true
-              // Access method through actions to avoid TypeScript inference issues
-              const staffMember = await staffStoreAny.fetchCurrentStaffMember()
-              staffStoreAny.__fetchingStaffMember = false
-
-              if (staffMember && staffMember.authUid === userId) {
-                // Found the staff member!
-                const staffUserData: UserData = {
-                  uid: userId,
-                  email: staffMember.email || '',
-                  name:
-                    `${staffMember.firstName || ''} ${staffMember.lastName || ''}`.trim() ||
-                    'Staff Member',
-                  role: 'staff',
-                  subscription: 'storvv_micro',
-                  hasCompletedOnboarding: true,
-                  hasCompletedTutorial: false,
-                  mustChangePassword: !!(staffMember as { mustChangePassword?: boolean })
-                    .mustChangePassword,
-                  createdAt: staffMember.createdAt || null,
-                  updatedAt: staffMember.updatedAt || null,
-                }
-
-                this.userData = staffUserData
-                // console.log('[UserStore] Found staff member via fetchCurrentStaffMember')
+            if (lookup.kind === 'active') {
+              const { useStaffStore } = await import('./staff')
+              const staffStore = useStaffStore()
+              const existingIndex = staffStore.staff.findIndex((s) => s.id === lookup.staff.id)
+              if (existingIndex === -1) {
+                staffStore.staff.push(lookup.staff)
               } else {
-                // Staff member not found - this might be normal if staff hasn't been created yet
-                // or if there's a permission issue. Don't clear userData immediately.
-                console.warn(
-                  '[UserStore] Staff member not found in hierarchical structure for userId:',
-                  userId
-                )
-                // Only clear userData if staff creation is not in progress
-                // Keep existing userData if available to prevent UI flickering
-                if (!isStaffCreationInProgress && !this.userData) {
-                  this.userData = null
-                }
+                staffStore.staff[existingIndex] = lookup.staff
               }
-            } catch (fetchError: any) {
-              ;(staffStore as any).__fetchingStaffMember = false
-              throw fetchError
+              this.userData = buildStaffUserData(lookup.staff, userId)
+              return
+            }
+
+            if (lookup.kind === 'inactive') {
+              this.error = 'Your staff access has been deactivated. Contact your store admin.'
+              if (!isStaffCreationInProgress) {
+                this.userData = null
+              }
+              return
+            }
+
+            if (lookup.kind === 'missing') {
+              this.error = 'Account not found. Please contact your administrator.'
+              console.warn('[UserStore] Staff member not found for auth uid:', userId)
+              if (!isStaffCreationInProgress && !this.userData) {
+                this.userData = null
+              }
+              return
             }
           } catch (staffError: any) {
             console.warn(
-              '[UserStore] Could not search hierarchical structure for staff member:',
+              '[UserStore] Could not resolve staff member for sign-in:',
               staffError.message
             )
-            // Check if it's a permission error
             if (
               staffError.message?.includes('permission') ||
               staffError.code === 'permission-denied'
             ) {
-              console.error(
-                '[UserStore] Permission denied when searching for staff member. Check Firestore rules.'
-              )
+              this.error =
+                'Could not load your staff profile. Ask your admin to confirm Firestore rules and indexes are deployed.'
+            } else if (staffError.code === 'failed-precondition') {
+              this.error =
+                'Could not load your staff profile. If this is a new account, wait a few minutes for Firestore indexes to finish building, then try again.'
+            } else if (!this.error) {
+              this.error = 'Account not found. Please contact your administrator.'
             }
-            // Only clear userData if staff creation is not in progress
-            // Keep existing userData if available to prevent UI flickering
             if (!isStaffCreationInProgress && !this.userData) {
               this.userData = null
             }

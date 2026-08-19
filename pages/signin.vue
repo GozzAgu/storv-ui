@@ -264,6 +264,10 @@ const { signIn, signOut } = useFirebaseAuth()
 const { authFetch } = useAuthenticatedFetch()
 const userStore = useUserStore()
 
+function normalizeSignInEmail(email: string): string {
+  return email.trim().toLowerCase()
+}
+
 async function persistBiometricLogin(email: string, password: string) {
   if (!isSupported.value) return
   try {
@@ -283,7 +287,13 @@ async function persistBiometricLogin(email: string, password: string) {
 async function finishAuthenticatedSession(email: string, password: string) {
   const userData = userStore.userData
   if (!userData) {
-    errorMessage.value = 'Account not found. Please contact your administrator.'
+    errorMessage.value =
+      userStore.error || 'Account not found. Please contact your administrator.'
+    try {
+      await signOut()
+    } catch {
+      /* ignore */
+    }
     return
   }
 
@@ -300,7 +310,8 @@ async function finishAuthenticatedSession(email: string, password: string) {
 }
 
 async function completeSignIn(email: string, password: string) {
-  const user = await signIn(email, password)
+  const normalizedEmail = normalizeSignInEmail(email)
+  const user = await signIn(normalizedEmail, password)
   if (!user) return
 
   try {
@@ -311,12 +322,18 @@ async function completeSignIn(email: string, password: string) {
 
   const userData = userStore.userData
   if (!userData) {
-    errorMessage.value = 'Account not found. Please contact your administrator.'
+    errorMessage.value =
+      userStore.error || 'Account not found. Please contact your administrator.'
+    try {
+      await signOut()
+    } catch {
+      /* ignore */
+    }
     return
   }
 
   if (userData.twoFactorEnabled && !isTwoFactorSessionVerified(user.uid)) {
-    pendingSignIn.value = { email, password }
+    pendingSignIn.value = { email: normalizedEmail, password }
     awaitingTwoFactor.value = true
     twoFactorCode.value = ''
     errorMessage.value = ''
@@ -326,7 +343,7 @@ async function completeSignIn(email: string, password: string) {
     return
   }
 
-  await finishAuthenticatedSession(email, password)
+  await finishAuthenticatedSession(normalizedEmail, password)
 }
 
 async function submitTwoFactorCode() {
@@ -409,7 +426,7 @@ const handleSignIn = async () => {
   errorMessage.value = ''
 
   try {
-    await completeSignIn(form.value.email, form.value.password)
+    await completeSignIn(normalizeSignInEmail(form.value.email), form.value.password)
   } catch (error: unknown) {
     console.error('Sign in error:', getErrorMessage(error) || error)
     mapSignInError(error)
