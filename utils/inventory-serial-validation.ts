@@ -20,6 +20,7 @@ export function serialProductCompositeKey(
  * Client-side duplicate serial check via the server API (fail-closed in the store on errors).
  */
 import { ofetch } from 'ofetch'
+import { resolveApiPath } from '~/utils/api-url'
 
 export type DuplicateSerialCheckBody = {
   ownerUserId: string
@@ -42,7 +43,7 @@ export async function duplicateSerialExistsViaApi(
   fetcher: SerialCheckFetcher = ofetch
 ): Promise<boolean> {
   const token = await getToken()
-  const response = await fetcher('/api/inventory/validate-serial', {
+  const response = await fetcher(resolveApiPath('/api/inventory/validate-serial'), {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}` },
     body,

@@ -35,6 +35,7 @@ import {
   paymentsForFirestore,
   roundMoney,
 } from '~/utils/receipt-balance'
+import { resolveApiPath } from '~/utils/api-url'
 
 /** Avoid duplicate concurrent fetchReceipts() (layout + dashboard home + watchers). */
 let fetchReceiptsInflight: Promise<void> | null = null
@@ -851,7 +852,7 @@ export const useReceiptsStore = defineStore('receipts', {
 
       try {
         const token = await authStore.currentUser.getIdToken()
-        await $fetch('/api/receipts/delete', {
+        await $fetch(resolveApiPath('/api/receipts/delete'), {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${token}`,

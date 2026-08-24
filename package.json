@@ -20,6 +20,7 @@
     "format:check": "prettier --check .",
     "cap:build": "nuxt generate && npx cap sync",
     "cap:build:ios": "nuxt generate && npx cap sync ios",
+    "cap:build:android": "nuxt generate && npx cap sync android",
     "cap:sync": "npx cap sync",
     "cap:copy": "npx cap copy",
     "cap:update": "npx cap update",
