@@ -6,13 +6,40 @@
     :subtitle="
       isEdit
         ? 'Update staff details.'
-        : 'Add a staff member with sign-in. A random password is generated; copy it to share with them (no one else sees it).'
+        : 'Add a staff member with sign-in. You can email their credentials or copy them yourself.'
     "
     size="lg"
   >
     <div class="space-y-4">
-      <!-- Success: show one-time password to copy and share (no email invite) -->
-      <div v-if="showTemporaryPassword" class="flex flex-col items-center text-center py-2">
+      <!-- Success: email sent -->
+      <div v-if="emailSentSuccess" class="flex flex-col items-center text-center py-2">
+        <div
+          class="w-12 h-12 rounded-full bg-emerald-500/10 dark:bg-emerald-400/10 flex items-center justify-center mb-4"
+        >
+          <CheckCircleIcon
+            class="w-6 h-6 text-emerald-600 dark:text-emerald-400"
+            stroke-width="2"
+          />
+        </div>
+        <h4 class="text-base font-semibold text-gray-900 dark:text-gray-100 tracking-tight mb-1">
+          Invite emailed
+        </h4>
+        <p class="text-sm text-gray-500 dark:text-gray-400 max-w-sm mb-6">
+          Sign-in details were sent to
+          <span class="font-medium text-gray-700 dark:text-gray-300">{{ formData.email }}</span>.
+          They can sign in and set a new password on first visit.
+        </p>
+        <Button
+          size="sm"
+          class="!rounded-2xl w-full sm:w-auto min-w-[120px]"
+          @click="closeAfterSuccess"
+        >
+          Done
+        </Button>
+      </div>
+
+      <!-- Success: show one-time password to copy and share -->
+      <div v-else-if="showTemporaryPassword" class="flex flex-col items-center text-center py-2">
         <div
           class="w-12 h-12 rounded-full bg-emerald-500/10 dark:bg-emerald-400/10 flex items-center justify-center mb-4"
         >
@@ -55,13 +82,24 @@
         <p class="text-xs text-gray-400 dark:text-gray-500 mb-3">
           Staff can change their password in Profile after signing in.
         </p>
-        <Button
-          size="sm"
-          class="!rounded-2xl w-full sm:w-auto min-w-[120px]"
-          @click="closeAfterSuccess"
-        >
-          Done
-        </Button>
+        <div class="flex w-full flex-col gap-2 sm:flex-row sm:justify-center">
+          <Button
+            variant="outline"
+            size="sm"
+            class="!rounded-2xl w-full sm:w-auto"
+            :disabled="isSendingInviteEmail"
+            @click="emailCredentialsAfterCreate"
+          >
+            {{ isSendingInviteEmail ? 'Sending…' : 'Email to staff instead' }}
+          </Button>
+          <Button
+            size="sm"
+            class="!rounded-2xl w-full sm:w-auto min-w-[120px]"
+            @click="closeAfterSuccess"
+          >
+            Done
+          </Button>
+        </div>
       </div>
 
       <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -104,18 +142,36 @@
           />
         </div>
 
-        <div v-if="!isEdit" class="md:col-span-2 flex items-center gap-3">
-          <p class="text-xs text-gray-500 dark:text-gray-400 flex-1">
-            A random password will be generated. You'll see it after the account is created so you
-            can copy and share it.
-          </p>
-          <button
-            type="button"
-            @click="regeneratePassword"
-            class="p-2 rounded-sm text-gray-500 dark:text-gray-400 hover:text-primary-500 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors shrink-0"
-          >
-            <ArrowPathIcon class="w-4 h-4" stroke-width="1.75" />
-          </button>
+        <div v-if="!isEdit" class="md:col-span-2 space-y-2">
+          <label class="flex cursor-pointer items-start gap-2.5 rounded-lg border border-gray-200/80 bg-gray-50/60 px-3 py-2.5 dark:border-white/10 dark:bg-white/[0.03]">
+            <input
+              v-model="emailCredentialsToStaff"
+              type="checkbox"
+              class="mt-0.5 rounded border-gray-300 text-primary-600 focus:ring-primary-500/40"
+            />
+            <span class="text-xs leading-relaxed text-gray-700 dark:text-gray-300">
+              <span class="font-medium text-gray-900 dark:text-gray-100">Email sign-in details</span>
+              — send the temporary password to their inbox instead of showing it here (requires
+              Resend email on the server).
+            </span>
+          </label>
+          <div class="flex items-center gap-3">
+            <p class="text-xs text-gray-500 dark:text-gray-400 flex-1">
+              {{
+                emailCredentialsToStaff
+                  ? 'A random password is generated and emailed when the account is created.'
+                  : "A random password will be generated. You'll see it after the account is created so you can copy and share it."
+              }}
+            </p>
+            <button
+              type="button"
+              @click="regeneratePassword"
+              class="p-2 rounded-sm text-gray-500 dark:text-gray-400 hover:text-primary-500 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors shrink-0"
+              aria-label="Regenerate password"
+            >
+              <ArrowPathIcon class="w-4 h-4" stroke-width="1.75" />
+            </button>
+          </div>
         </div>
 
         <div>
@@ -284,6 +340,11 @@ import type { Staff } from '~/composables/useStaff'
 import { useStaffStore } from '~/stores/staff'
 import { useDepartmentsStore } from '~/stores/departments'
 import { useStaffInvitePasswordsStore } from '~/stores/staffInvitePasswords'
+import { useStaffInviteEmail } from '~/composables/useStaffInviteEmail'
+import { useAuthStore } from '~/stores/auth'
+import { useUserStore } from '~/stores/user'
+import { useAppToast } from '~/composables/useAppToast'
+import { getApiErrorMessage } from '~/utils/api-error-message'
 
 interface Props {
   modelValue: boolean
@@ -302,6 +363,10 @@ const emit = defineEmits<{
 const staffStore = useStaffStore()
 const departmentsStore = useDepartmentsStore()
 const staffInvitePasswordsStore = useStaffInvitePasswordsStore()
+const { sendStaffInviteEmail } = useStaffInviteEmail()
+const authStore = useAuthStore()
+const userStore = useUserStore()
+const toast = useAppToast()
 const { canGrantInventoryAccess } = usePermissions()
 
 const formData = ref({
@@ -349,6 +414,15 @@ const errorMessage = ref('')
 const showTemporaryPassword = ref(false)
 const temporaryPasswordToShow = ref('')
 const copiedPassword = ref(false)
+const emailCredentialsToStaff = ref(true)
+const emailSentSuccess = ref(false)
+const isSendingInviteEmail = ref(false)
+
+const createdStaffMeta = ref<{
+  staffId: string
+  storeId: string
+  departmentName: string
+} | null>(null)
 
 const isEdit = computed(() => !!props.staff)
 
@@ -382,6 +456,8 @@ const resetForm = () => {
   showTemporaryPassword.value = false
   temporaryPasswordToShow.value = ''
   copiedPassword.value = false
+  emailSentSuccess.value = false
+  createdStaffMeta.value = null
 }
 
 const copyTemporaryPassword = async () => {
@@ -400,8 +476,61 @@ const copyTemporaryPassword = async () => {
 const closeAfterSuccess = () => {
   showTemporaryPassword.value = false
   temporaryPasswordToShow.value = ''
+  emailSentSuccess.value = false
+  createdStaffMeta.value = null
   emit('success')
   emit('update:modelValue', false)
+}
+
+async function emailStaffCredentials(params: {
+  staffId: string
+  storeId: string
+  departmentName: string
+  temporaryPassword: string
+}) {
+  const ownerUserId = authStore.currentUser?.uid
+  if (!ownerUserId) throw new Error('Sign in required')
+
+  await sendStaffInviteEmail({
+    ownerUserId,
+    storeId: params.storeId,
+    departmentId: props.departmentId,
+    staffId: params.staffId,
+    staffEmail: formData.value.email.trim().toLowerCase(),
+    staffName: `${formData.value.firstName} ${formData.value.lastName}`.trim(),
+    departmentName: params.departmentName,
+    businessName:
+      userStore.userData?.storeDetails?.storeName ||
+      userStore.userData?.name ||
+      'Storvv',
+    temporaryPassword: params.temporaryPassword,
+    mode: 'credentials',
+  })
+}
+
+async function emailCredentialsAfterCreate() {
+  const meta = createdStaffMeta.value
+  const password = temporaryPasswordToShow.value
+  if (!meta || !password) return
+
+  isSendingInviteEmail.value = true
+  try {
+    await emailStaffCredentials({
+      staffId: meta.staffId,
+      storeId: meta.storeId,
+      departmentName: meta.departmentName,
+      temporaryPassword: password,
+    })
+    toast.success(`Sign-in details emailed to ${formData.value.email}`)
+    showTemporaryPassword.value = false
+    temporaryPasswordToShow.value = ''
+    emailSentSuccess.value = true
+  } catch (error: unknown) {
+    const message = getApiErrorMessage(error, 'Could not send invite email')
+    toast.error(message)
+  } finally {
+    isSendingInviteEmail.value = false
+  }
 }
 
 watch(
@@ -487,18 +616,55 @@ const handleSubmit = async () => {
       })
       const created = result as { staffId: string; temporaryPassword?: string }
       if (created?.temporaryPassword) {
-        temporaryPasswordToShow.value = created.temporaryPassword
-        showTemporaryPassword.value = true
         const dept =
           departmentsStore.getDepartmentById(props.departmentId) ||
           (await departmentsStore.fetchDepartment(props.departmentId).catch(() => null))
-        staffInvitePasswordsStore.recordInvite({
-          staffEmail: formData.value.email.trim().toLowerCase(),
-          staffName: `${formData.value.firstName} ${formData.value.lastName}`.trim(),
-          password: created.temporaryPassword,
-          departmentId: props.departmentId,
-          departmentName: dept?.name || 'Department',
-        })
+        const departmentName = dept?.name || 'Department'
+        const storeId = dept?.storeId || ''
+
+        createdStaffMeta.value = {
+          staffId: created.staffId,
+          storeId,
+          departmentName,
+        }
+
+        if (emailCredentialsToStaff.value && storeId) {
+          isSendingInviteEmail.value = true
+          try {
+            await emailStaffCredentials({
+              staffId: created.staffId,
+              storeId,
+              departmentName,
+              temporaryPassword: created.temporaryPassword,
+            })
+            emailSentSuccess.value = true
+            toast.success(`Sign-in details emailed to ${formData.value.email}`)
+            return
+          } catch (error: unknown) {
+            const message = getApiErrorMessage(error, 'Could not send invite email')
+            toast.error(`${message}. You can copy the password below instead.`)
+          } finally {
+            isSendingInviteEmail.value = false
+          }
+        } else if (emailCredentialsToStaff.value && !storeId) {
+          toast.warning(
+            'Staff was created but email could not be sent — this department has no store assigned.'
+          )
+        }
+
+        temporaryPasswordToShow.value = created.temporaryPassword
+        showTemporaryPassword.value = true
+        if (!emailCredentialsToStaff.value) {
+          staffInvitePasswordsStore.recordInvite({
+            staffId: created.staffId,
+            storeId,
+            staffEmail: formData.value.email.trim().toLowerCase(),
+            staffName: `${formData.value.firstName} ${formData.value.lastName}`.trim(),
+            password: created.temporaryPassword,
+            departmentId: props.departmentId,
+            departmentName,
+          })
+        }
         return
       }
     }

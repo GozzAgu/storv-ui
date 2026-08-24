@@ -70,11 +70,8 @@ export const useStoresStore = defineStore('stores', {
         // Check if staff creation is in progress - if so, skip this initialization
         // During staff creation, the superadmin temporarily signs in as the new staff
         // but the staff document may not be fully saved yet
-        const isStaffCreationInProgress = import.meta.client
-          ? sessionStorage.getItem('staff_creation_in_progress') === 'true'
-          : false
-
-        if (isStaffCreationInProgress) {
+        const { isStaffCreationInProgress } = await import('~/utils/staff-creation-session')
+        if (isStaffCreationInProgress()) {
           // console.log('[StoresStore] Staff creation in progress - skipping initializeCurrentStore for staff')
           return
         }

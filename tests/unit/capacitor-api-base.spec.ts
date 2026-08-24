@@ -23,7 +23,10 @@ describe('capacitor api base', () => {
     vi.resetModules()
   })
 
-  it('prefers explicit NUXT_PUBLIC_API_BASE', async () => {
+  it('prefers explicit NUXT_PUBLIC_API_BASE on Capacitor native', async () => {
+    vi.doMock('~/utils/capacitor-env', () => ({
+      isCapacitorNative: () => true,
+    }))
     mockRuntimeConfig.mockReturnValue({
       public: {
         apiBase: 'https://api.example.com/',
@@ -32,6 +35,20 @@ describe('capacitor api base', () => {
     })
     const { getEffectiveApiBase } = await import('~/utils/capacitor-api-base')
     expect(getEffectiveApiBase()).toBe('https://api.example.com')
+  })
+
+  it('ignores explicit api base on web (same-origin /api)', async () => {
+    vi.doMock('~/utils/capacitor-env', () => ({
+      isCapacitorNative: () => false,
+    }))
+    mockRuntimeConfig.mockReturnValue({
+      public: {
+        apiBase: 'https://app.storvv.com',
+        appOrigin: 'https://app.storvv.com',
+      },
+    })
+    const { getEffectiveApiBase } = await import('~/utils/capacitor-api-base')
+    expect(getEffectiveApiBase()).toBe('')
   })
 
   it('falls back to app origin on Capacitor native client', async () => {

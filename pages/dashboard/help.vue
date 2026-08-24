@@ -31,6 +31,14 @@
               <SparklesIcon class="h-4 w-4 shrink-0" stroke-width="1.75" />
               Ask assistant
             </button>
+            <button
+              type="button"
+              class="dash-help-assistant-cta"
+              :disabled="isReplayingTour"
+              @click="replayDashboardTour"
+            >
+              {{ isReplayingTour ? 'Starting tour…' : 'Replay dashboard tour' }}
+            </button>
           </div>
           <div>
             <p :class="toolbarLabelClass">
@@ -189,6 +197,10 @@ import {
   buildAssistantTopicPrompt,
   useDashboardAssistant,
 } from '~/composables/useDashboardAssistant'
+import { useUser } from '~/composables/useUser'
+import { useAuthStore } from '~/stores/auth'
+import { useUserStore } from '~/stores/user'
+import { useAppToast } from '~/composables/useAppToast'
 import {
   dashboardHelpCategories,
   type DashboardHelpCategory,
@@ -227,6 +239,34 @@ const {
 } = useDashboardHelpChrome()
 
 const { openAssistant } = useDashboardAssistant()
+const { resetTutorial } = useUser()
+const authStore = useAuthStore()
+const userStore = useUserStore()
+const toast = useAppToast()
+const isReplayingTour = ref(false)
+
+async function replayDashboardTour() {
+  const uid = authStore.currentUser?.uid
+  if (!uid) return
+
+  isReplayingTour.value = true
+  try {
+    await resetTutorial(uid)
+    if (userStore.userData) {
+      userStore.userData = {
+        ...userStore.userData,
+        hasCompletedTutorial: false,
+      }
+    }
+    toast.success('Opening your dashboard tour')
+    await router.push('/dashboard?tutorial=replay')
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Could not restart the tour'
+    toast.error(message)
+  } finally {
+    isReplayingTour.value = false
+  }
+}
 
 type Category = DashboardHelpCategory & { icon: Component }
 

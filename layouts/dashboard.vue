@@ -587,45 +587,44 @@
             </div>
           </div>
 
-          <!-- Desktop search -->
-          <button
+          <!-- Desktop search + assistant -->
+          <div
             v-if="!isNativeApp"
-            type="button"
-            class="dash-topnav__search dashboard-topnav-search group relative hidden h-8 w-[min(100%,12rem)] shrink-0 items-center gap-2 px-2.5 sm:w-[min(100%,14rem)] md:flex lg:w-[min(100%,16rem)] xl:w-[min(100%,18rem)]"
-            @click="openGlobalSearch()"
+            class="dash-topnav__search-group dashboard-topnav-search-group group/search hidden h-8 w-[min(100%,12rem)] shrink-0 items-stretch sm:w-[min(100%,14rem)] md:flex lg:w-[min(100%,16rem)] xl:w-[min(100%,18rem)]"
           >
-            <MagnifyingGlassIcon
-              class="block h-3.5 w-3.5 shrink-0 text-gray-400 dark:text-gray-500"
-              :size="14"
-              stroke-width="1.75"
-            />
-            <span
-              class="min-w-0 flex-1 truncate text-left text-[11px] font-medium text-gray-500 dark:text-gray-400"
+            <button
+              type="button"
+              class="dash-topnav__search dashboard-topnav-search relative flex min-w-0 flex-1 items-center gap-2 px-2.5"
+              @click="openGlobalSearch()"
             >
-              Search workspace
-            </span>
-            <kbd
-              class="hidden shrink-0 rounded bg-white/90 px-1.5 py-px font-mono text-[9px] font-medium text-gray-400 dark:border-white/10 dark:bg-white/[0.06] dark:text-gray-500 lg:inline"
+              <MagnifyingGlassIcon
+                class="block h-3.5 w-3.5 shrink-0 text-gray-400 dark:text-gray-500"
+                :size="14"
+                stroke-width="1.75"
+              />
+              <span
+                class="min-w-0 flex-1 truncate text-left text-[11px] font-medium text-gray-500 dark:text-gray-400"
+              >
+                Search workspace
+              </span>
+              <kbd
+                class="hidden shrink-0 rounded bg-white/90 px-1.5 py-px font-mono text-[9px] font-medium text-gray-400 dark:border-white/10 dark:bg-white/[0.06] dark:text-gray-500 lg:inline"
+              >
+                ⌘K
+              </kbd>
+            </button>
+            <button
+              type="button"
+              class="dash-topnav__search-assistant dashboard-topnav-search-assistant shrink-0"
+              aria-label="Open Storvv Assistant"
+              @click="openAssistant()"
             >
-              ⌘K
-            </kbd>
-          </button>
-
-          <button
-            v-if="!isNativeApp"
-            type="button"
-            class="dash-topnav__assistant dashboard-topnav-assistant group relative hidden h-8 shrink-0 items-center gap-2 px-2.5 md:inline-flex"
-            aria-label="Open Storvv Assistant"
-            @click="openAssistant()"
-          >
-            <SparklesIcon
-              class="block h-3.5 w-3.5 shrink-0 text-gray-700 dark:text-gray-200"
-              stroke-width="1.75"
-            />
-            <span class="text-[11px] font-semibold text-gray-800 dark:text-gray-100">
-              Assistant
-            </span>
-          </button>
+              <SparklesIcon
+                class="block h-3.5 w-3.5 shrink-0 text-gray-700 dark:text-gray-200"
+                stroke-width="1.75"
+              />
+            </button>
+          </div>
 
           <div class="hidden min-w-0 flex-1 md:block" aria-hidden="true" />
 
@@ -642,6 +641,15 @@
               @click="openGlobalSearch()"
             >
               <MagnifyingGlassIcon class="block h-4 w-4 shrink-0" :size="16" stroke-width="1.75" />
+            </button>
+
+            <button
+              type="button"
+              class="dash-topnav__icon-btn md:hidden"
+              aria-label="Open Storvv Assistant"
+              @click="openAssistant()"
+            >
+              <SparklesIcon class="block h-4 w-4 shrink-0" :size="16" stroke-width="1.75" />
             </button>
 
             <span class="dash-topnav__divider hidden md:block" aria-hidden="true" />
@@ -842,10 +850,11 @@ import {
 } from '~/utils/dashboard-native-nav'
 import { shouldShowWebNavSection, webNavSectionLabel } from '~/utils/dashboard-web-nav-groups'
 import type { DashboardNavIconKey } from '~/utils/dashboard-nav-icons'
-import { isPaymentLinksNativeComingSoon } from '~/utils/payment-links-launch'
+import { isPaymentLinksNativeComingSoon, isPaymentLinksComingSoon } from '~/utils/payment-links-launch'
 import { resolveStoreDepartmentsPath } from '~/utils/department-routes'
 import { getStoreBranchShortLabel } from '~/utils/store-branch-label'
 import { storeBranchNavTooltip } from '~/utils/dashboard-tooltip'
+import { isStaffCreationInProgress } from '~/utils/staff-creation-session'
 import StoreSelector from '~/components/ui/StoreSelector.vue'
 import ToastContainer from '~/components/ui/ToastContainer.vue'
 import RecentItemsWidget from '~/components/ui/RecentItemsWidget.vue'
@@ -1152,6 +1161,7 @@ const filteredNavigation = computed(() => {
   const canSeeManagerOnlyFeatures = userStore.isSuperAdmin || isManager
   return navigation
     .filter((item) => {
+      if (item.segment === '/payment-links' && isPaymentLinksComingSoon()) return false
       if (item.requiresSuperAdmin && !userStore.isSuperAdmin) return false
       if (item.requiresManagerOrSuperAdmin && !canSeeManagerOnlyFeatures) return false
       if (item.subscriptionFeature && !canUseSubscriptionFeature(item.subscriptionFeature))
@@ -1198,6 +1208,7 @@ const nativeMoreNav = computed(() => nativeNavSplit.value.more)
 
 const route = useRoute()
 const { dashPath, isDemoDashboard, matchesDashboardPath } = useDashboardPaths()
+useDemoConversionNudge()
 
 const isActive = (href: string) => {
   const visibleHrefs = filteredNavigation.value.map((item) => item.href)
@@ -1236,19 +1247,14 @@ watch(
     if (!user || loading) return // Wait for auth to be ready
 
     // Check if staff creation is in progress - don't update userData during this time
-    const isStaffCreationInProgress = import.meta.client
-      ? sessionStorage.getItem('staff_creation_in_progress') === 'true'
-      : false
-
-    // During staff creation, don't fetch or update userData to preserve super admin's data
-    if (isStaffCreationInProgress) {
+    if (isStaffCreationInProgress()) {
       // console.log('[Dashboard] Staff creation in progress - skipping userData fetch to preserve super admin data')
       return
     }
 
     // Fetch user data if not loaded (only if not during staff creation)
     // IMPORTANT: Only fetch when auth is ready (not loading)
-    if (!userData && user && !isStaffCreationInProgress && !loading) {
+    if (!userData && user && !isStaffCreationInProgress() && !loading) {
       try {
         await userStore.fetchUserData(user.uid)
         // console.log('[Dashboard] User data fetched in stores watch:', userStore.userData)
@@ -1604,12 +1610,7 @@ watch(
   () => userStore.userData,
   (userData, oldUserData) => {
     // Check if staff creation is in progress - don't update cache during staff creation
-    const isStaffCreationInProgress = import.meta.client
-      ? sessionStorage.getItem('staff_creation_in_progress') === 'true'
-      : false
-
-    // During staff creation, preserve existing cache and don't update it
-    if (isStaffCreationInProgress && cachedUserName.value) {
+    if (isStaffCreationInProgress() && cachedUserName.value) {
       return
     }
 
@@ -1643,13 +1644,8 @@ const userName = computed(() => {
 
   const currentUserId = authStore.currentUser?.uid
 
-  // Check if staff creation is in progress - preserve cached super admin name
-  const isStaffCreationInProgress = import.meta.client
-    ? sessionStorage.getItem('staff_creation_in_progress') === 'true'
-    : false
-
   // During staff creation, always use cached name if available (preserve super admin name)
-  if (isStaffCreationInProgress && cachedUserName.value) {
+  if (isStaffCreationInProgress() && cachedUserName.value) {
     return cachedUserName.value
   }
 
@@ -1682,13 +1678,13 @@ const userName = computed(() => {
     const userRole = userStore.userData.role
 
     // During staff creation, if userData shows staff, ignore it and use cache
-    if (isStaffCreationInProgress && userRole === 'staff') {
+    if (isStaffCreationInProgress() && userRole === 'staff') {
       return cachedUserName.value || 'User'
     }
 
     // Only use and cache if it's the super admin (not staff)
     if (name && userRole === 'superAdmin') {
-      if (!isStaffCreationInProgress) {
+      if (!isStaffCreationInProgress()) {
         cachedUserName.value = name
         cachedUserId.value = currentUserId ?? null
         setCachedUserName(name, currentUserId ?? null)
@@ -1697,7 +1693,7 @@ const userName = computed(() => {
     }
   }
   // Fallback to Firebase Auth displayName
-  if (authStore.currentUser?.displayName && currentUserId && !isStaffCreationInProgress) {
+  if (authStore.currentUser?.displayName && currentUserId && !isStaffCreationInProgress()) {
     const name = authStore.currentUser.displayName ?? null
     if (name) {
       cachedUserName.value = name
@@ -1709,7 +1705,7 @@ const userName = computed(() => {
   // Fallback to email prefix (part before @) - but only if we don't have a cached name
   // This prevents overwriting a cached name with email prefix on refresh
   const currentEmail = authStore.currentUser?.email
-  if (currentEmail && currentUserId && !isStaffCreationInProgress) {
+  if (currentEmail && currentUserId && !isStaffCreationInProgress()) {
     // Only use email prefix if we don't have a cached name in localStorage
     const storedName = getCachedUserName()
     if (!storedName || getCachedUserId() !== currentUserId) {
@@ -1744,13 +1740,8 @@ const userEmail = computed(() => {
 
   const currentUserId = authStore.currentUser?.uid
 
-  // Check if staff creation is in progress - preserve cached super admin email
-  const isStaffCreationInProgress = import.meta.client
-    ? sessionStorage.getItem('staff_creation_in_progress') === 'true'
-    : false
-
   // During staff creation, always use cached email if available (preserve super admin email)
-  if (isStaffCreationInProgress && cachedUserEmail.value) {
+  if (isStaffCreationInProgress() && cachedUserEmail.value) {
     return cachedUserEmail.value
   }
 
@@ -1779,7 +1770,7 @@ const userEmail = computed(() => {
   const email = authStore.currentUser?.email || ''
 
   // Cache it for this user (only if not staff creation and it's super admin)
-  if (email && currentUserId && !isStaffCreationInProgress) {
+  if (email && currentUserId && !isStaffCreationInProgress()) {
     // Only cache if userStore indicates this is the current user (same uid) and is super admin (or we don't have userData yet)
     const isCurrentUserData = userStore.userData && userStore.userData.uid === currentUserId
     if ((isCurrentUserData && userStore.userData?.role === 'superAdmin') || !userStore.userData) {
@@ -1790,7 +1781,7 @@ const userEmail = computed(() => {
   }
 
   // During staff creation, if userData shows staff, ignore it and use cache
-  if (isStaffCreationInProgress && userStore.userData?.role === 'staff') {
+  if (isStaffCreationInProgress() && userStore.userData?.role === 'staff') {
     return cachedUserEmail.value || ''
   }
 
@@ -2033,12 +2024,8 @@ watch(
   () => authStore.currentUser,
   async (user, oldUser) => {
     // Check if staff creation is in progress - don't redirect or update user data during temporary sign-out
-    const isStaffCreationInProgress = import.meta.client
-      ? sessionStorage.getItem('staff_creation_in_progress') === 'true'
-      : false
-
     // Redirect to signin if user logs out (but not during staff creation)
-    if (import.meta.client && !authStore.loading && !user && !isStaffCreationInProgress) {
+    if (import.meta.client && !authStore.loading && !user && !isStaffCreationInProgress()) {
       if (isDemoDashboard.value) return
       // Prevent redirect loops
       const redirectKey = 'dashboard_watch_redirect'
@@ -2054,7 +2041,7 @@ watch(
     }
 
     // During staff creation, don't fetch or update userData to preserve super admin's profile info
-    if (isStaffCreationInProgress) {
+    if (isStaffCreationInProgress()) {
       // console.log('[Dashboard] Staff creation in progress - preserving super admin userData')
       return
     }
@@ -2068,7 +2055,7 @@ watch(
       const userChanged = oldUser?.uid !== user.uid
 
       // If user changed, clear old user data and cache so nav never shows previous user
-      if (userChanged && !isStaffCreationInProgress) {
+      if (userChanged && !isStaffCreationInProgress()) {
         userStore.clearUserData()
         cachedUserName.value = null
         cachedUserEmail.value = null
@@ -2089,7 +2076,7 @@ watch(
       // Only fetch if we don't have data for this user or if user actually changed
       // Don't fetch during staff creation to prevent overwriting super admin data
       // IMPORTANT: Always fetch when user is available and auth is ready
-      if ((!hasUserData || userChanged) && !isStaffCreationInProgress) {
+      if ((!hasUserData || userChanged) && !isStaffCreationInProgress()) {
         try {
           await userStore.fetchUserData(user.uid)
           // console.log('[Dashboard] User data fetched in watch:', userStore.userData)

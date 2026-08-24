@@ -208,11 +208,18 @@ export const useUser = () => {
     })
   }
 
+  const resetTutorial = async (uid: string) => {
+    return updateUserDocument(uid, {
+      hasCompletedTutorial: false,
+    })
+  }
+
   return {
     createUserDocument,
     getUserDocument,
     updateUserDocument,
     updateStoreDetails,
     completeTutorial,
+    resetTutorial,
   }
 }

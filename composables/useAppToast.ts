@@ -75,8 +75,38 @@ export const useAppToast = () => {
     return addToast(message, 'warning', duration || 5000)
   }
 
-  const info = (message: string, duration?: number) => {
-    return addToast(message, 'info', duration || 5000)
+  const info = (
+    message: string,
+    durationOrOptions?: number | { duration?: number; action?: ToastAction }
+  ) => {
+    if (import.meta.server) return ''
+
+    const options =
+      typeof durationOrOptions === 'number'
+        ? { duration: durationOrOptions }
+        : durationOrOptions ?? {}
+
+    const id = `toast-${++toastIdCounter}-${Date.now()}`
+    const toast: Toast = {
+      id,
+      message,
+      type: 'info',
+      duration: options.duration ?? 5000,
+      action: options.action,
+    }
+
+    toasts.value.push(toast)
+
+    const duration = toast.duration ?? 0
+    if (duration > 0) {
+      const timeoutId = setTimeout(() => {
+        removeToast(id)
+        toastTimeouts.delete(id)
+      }, duration)
+      toastTimeouts.set(id, timeoutId)
+    }
+
+    return id
   }
 
   const deletedWithUndo = (

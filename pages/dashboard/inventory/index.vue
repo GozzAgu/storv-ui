@@ -430,7 +430,17 @@
       extra-class="dash-table-shell rounded-xl bg-white dark:!bg-dashboard-card"
     >
       <Button
-        v-if="selectedDepartmentId"
+        v-if="canCreateInventoryFolders && !selectedDepartmentId && !searchQuery"
+        variant="primary"
+        size="sm"
+        :icon="PlusCircleIcon"
+        extra-class="!text-xs !py-1.5 !px-3"
+        @click="openCreateFolderModal"
+      >
+        New category
+      </Button>
+      <Button
+        v-else-if="selectedDepartmentId"
         variant="outline"
         size="sm"
         extra-class="!text-xs !py-1.5 !px-3"

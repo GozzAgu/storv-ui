@@ -350,6 +350,60 @@
         </DashboardSettingsPanel>
 
         <DashboardSettingsPanel
+          title="Help & onboarding"
+          subtitle="Replay the tour, open help, or ask the assistant."
+          compact
+        >
+          <div class="space-y-0">
+            <div :class="settingRowClass">
+              <div class="flex min-w-0 flex-1 items-center gap-3">
+                <SparklesIcon :class="settingRowIconClass" />
+                <div>
+                  <p :class="settingRowTitleClass">Dashboard tour</p>
+                  <p :class="settingRowDescClass">
+                    Walk through navigation and key screens again.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                :class="editLinkClass"
+                :disabled="isReplayingTour"
+                @click="replayDashboardTour"
+              >
+                {{ isReplayingTour ? 'Starting…' : 'Replay' }}
+              </button>
+            </div>
+            <div :class="settingRowClass">
+              <div class="flex min-w-0 flex-1 items-center gap-3">
+                <InformationCircleIcon :class="settingRowIconClass" />
+                <div>
+                  <p :class="settingRowTitleClass">Help center</p>
+                  <p :class="settingRowDescClass">
+                    Permissions, workflows, and plan limits.
+                  </p>
+                </div>
+              </div>
+              <NuxtLink to="/dashboard/help" :class="editLinkClass">Open</NuxtLink>
+            </div>
+            <div :class="[settingRowClass, '!border-0']">
+              <div class="flex min-w-0 flex-1 items-center gap-3">
+                <SparklesIcon :class="settingRowIconClass" />
+                <div>
+                  <p :class="settingRowTitleClass">Ask assistant</p>
+                  <p :class="settingRowDescClass">
+                    Get answers about Storvv features in plain language.
+                  </p>
+                </div>
+              </div>
+              <button type="button" :class="editLinkClass" @click="openAssistant()">
+                Ask
+              </button>
+            </div>
+          </div>
+        </DashboardSettingsPanel>
+
+        <DashboardSettingsPanel
           title="Preferences"
           subtitle="Language, region, currency, and display."
           compact
@@ -1088,7 +1142,9 @@ import {
   Cog6ToothIcon,
   EyeIcon,
   ClipboardDocumentListIcon,
+  SparklesIcon,
 } from '~/utils/app-icons'
+import { useDashboardAssistant } from '~/composables/useDashboardAssistant'
 import type { FunctionalComponent } from 'vue'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useUser, type StoreDetails } from '~/composables/useUser'
@@ -1209,8 +1265,10 @@ const isLoadingStats = ref(true)
 
 // Get user data
 const { currentUser, loading: authLoading } = useFirebaseAuth()
-const { getUserDocument, updateUserDocument } = useUser()
+const { getUserDocument, updateUserDocument, resetTutorial } = useUser()
 const authStore = useAuthStore()
+const { openAssistant } = useDashboardAssistant()
+const isReplayingTour = ref(false)
 const receiptsStore = useReceiptsStore()
 const inventoryStore = useInventoryStore()
 const customersStore = useCustomersStore()
@@ -2299,6 +2357,29 @@ const formatDate = (dateString: string) => {
     hour: '2-digit',
     minute: '2-digit',
   })
+}
+
+async function replayDashboardTour() {
+  const uid = authStore.currentUser?.uid
+  if (!uid) return
+
+  isReplayingTour.value = true
+  try {
+    await resetTutorial(uid)
+    if (userStore.userData) {
+      userStore.userData = {
+        ...userStore.userData,
+        hasCompletedTutorial: false,
+      }
+    }
+    toast.success('Tour starting on your dashboard')
+    await navigateTo('/dashboard?tutorial=replay')
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Could not restart the tour'
+    toast.error(message)
+  } finally {
+    isReplayingTour.value = false
+  }
 }
 
 // Timezone functions

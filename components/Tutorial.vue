@@ -120,6 +120,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { XMarkIcon } from '~/utils/app-icons'
 import { useUser } from '~/composables/useUser'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
@@ -152,6 +153,8 @@ const VIEWPORT_MARGIN = 16
 const { currentUser } = useFirebaseAuth()
 const { completeTutorial, getUserDocument } = useUser()
 const { canUse, plan } = useSubscriptionFeatures()
+const route = useRoute()
+const router = useRouter()
 
 const showTutorial = ref(false)
 const currentStep = ref(1)
@@ -381,14 +384,35 @@ function computeCardPlacement(
 async function checkTutorialStatus() {
   if (!currentUser.value) return
 
+  const forceReplay = route.query.tutorial === 'replay'
   const userData = await getUserDocument(currentUser.value.uid)
-  if (userData && !userData.hasCompletedTutorial && userData.hasCompletedOnboarding) {
+  const shouldShow =
+    forceReplay ||
+    Boolean(userData && !userData.hasCompletedTutorial && userData.hasCompletedOnboarding)
+
+  if (shouldShow) {
+    if (forceReplay && import.meta.client) {
+      const nextQuery = { ...route.query }
+      delete nextQuery.tutorial
+      router.replace({ path: route.path, query: nextQuery, hash: route.hash })
+    }
+
     window.setTimeout(() => {
+      currentStep.value = 1
       showTutorial.value = true
       updateSpotlightLayout()
-    }, 1000)
+    }, forceReplay ? 300 : 1000)
   }
 }
+
+/** Replay the tour without persisting completion until the user finishes or skips. */
+function startTutorial() {
+  currentStep.value = 1
+  showTutorial.value = true
+  updateSpotlightLayout()
+}
+
+defineExpose({ startTutorial })
 
 function previousStep() {
   if (currentStep.value > 1) {

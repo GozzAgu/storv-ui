@@ -8,7 +8,9 @@ export function getEffectiveApiBase(): string {
   const explicit = String(config.public.apiBase || '')
     .trim()
     .replace(/\/$/, '')
-  if (explicit) return explicit
+
+  // Static Capacitor shells call a hosted API; web (including local dev) uses same-origin `/api`.
+  if (explicit && isCapacitorNative()) return explicit
 
   if (isCapacitorNative()) {
     const origin = String(config.public.appOrigin || DEFAULT_NATIVE_API_BASE)

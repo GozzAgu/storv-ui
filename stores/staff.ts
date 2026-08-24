@@ -35,7 +35,6 @@ import type { SubscriptionPlan } from '~/types/subscription'
 import type { Staff } from '~/composables/useStaff'
 import type { Department } from '~/composables/useDepartments'
 import { getFirebaseConfig } from '~/config/firebase.config'
-import { sendUserEmailVerification } from '~/utils/emailVerification'
 import { resolveApiPath } from '~/utils/api-url'
 
 function isActiveStaffStatus(status: Staff['status'] | undefined): boolean {
@@ -567,6 +566,10 @@ export const useStaffStore = defineStore('staff', {
         this.staff = all.filter((s) => (s.status || 'active') === 'active')
         return { staffId, temporaryPassword: staffData.password }
       }
+
+      const { setStaffCreationInProgress } = await import('~/utils/staff-creation-session')
+      setStaffCreationInProgress(true)
+      try {
       if (!staffData.email?.trim()) {
         throw new Error('Staff email is required')
       }
@@ -624,12 +627,6 @@ export const useStaffStore = defineStore('staff', {
         password
       )
       const staffAuthUid = userCred.user.uid
-      try {
-        const rc = useRuntimeConfig()
-        await sendUserEmailVerification(userCred.user, (rc.public.appOrigin as string) || '')
-      } catch (err) {
-        console.warn('[staff] Could not send verification email for new staff account:', err)
-      }
       await signOut(authSecondary)
 
       const db = useFirestore().getFirestoreInstance()
@@ -726,6 +723,9 @@ export const useStaffStore = defineStore('staff', {
       }
 
       return { staffId, temporaryPassword: password }
+      } finally {
+        setStaffCreationInProgress(false)
+      }
     },
 
     // Clear mustChangePassword for the currently signed-in staff (after they set a new password)
@@ -1173,7 +1173,7 @@ export const useStaffStore = defineStore('staff', {
       }
 
       const isStaffCreationInProgress = import.meta.client
-        ? sessionStorage.getItem('staff_creation_in_progress') === 'true'
+        ? (await import('~/utils/staff-creation-session')).isStaffCreationInProgress()
         : false
       if (isStaffCreationInProgress) {
         return null

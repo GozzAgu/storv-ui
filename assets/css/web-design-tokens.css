@@ -293,6 +293,43 @@ html:not(.capacitor-native).dark .dash-topnav.dashboard-top-nav::before {
   );
 }
 
+html:not(.capacitor-native) .dash-topnav__search-group.dashboard-topnav-search-group {
+  border: 1px solid var(--saas-topnav-control-border);
+  background: var(--saas-topnav-control-bg);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+}
+
+html:not(.capacitor-native).dark .dash-topnav__search-group.dashboard-topnav-search-group {
+  background: var(--saas-topnav-control-bg);
+}
+
+html:not(.capacitor-native) .dash-topnav__search-group.dashboard-topnav-search-group:hover,
+html:not(.capacitor-native) .dash-topnav__search-group.dashboard-topnav-search-group:focus-within {
+  border-color: rgb(154 181 227 / 0.28);
+  background: rgb(255 255 255 / 0.08);
+  box-shadow: 0 0 0 3px var(--saas-accent-soft);
+}
+
+html:not(.capacitor-native):not(.dark) .dash-topnav__search-group.dashboard-topnav-search-group:hover,
+html:not(.capacitor-native):not(.dark) .dash-topnav__search-group.dashboard-topnav-search-group:focus-within {
+  background: rgb(255 255 255 / 0.88);
+}
+
+html:not(.capacitor-native) .dash-topnav__search-group .dash-topnav__search.dashboard-topnav-search {
+  border: 0;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+html:not(.capacitor-native) .dash-topnav__search-group .dash-topnav__search.dashboard-topnav-search:hover,
+html:not(.capacitor-native) .dash-topnav__search-group .dash-topnav__search.dashboard-topnav-search:focus-visible {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+
 html:not(.capacitor-native) .dash-topnav__search.dashboard-topnav-search {
   border: 1px solid var(--saas-topnav-control-border);
   background: var(--saas-topnav-control-bg);

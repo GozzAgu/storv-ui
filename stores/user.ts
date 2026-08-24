@@ -42,10 +42,7 @@ export const useUserStore = defineStore('user', {
 
       // Check if staff creation is in progress - don't update userData during staff creation
       // This prevents the profile card from showing staff name instead of super admin name
-      const isStaffCreationInProgress =
-        typeof window !== 'undefined'
-          ? sessionStorage.getItem('staff_creation_in_progress') === 'true'
-          : false
+      const isStaffCreationInProgress = (await import('~/utils/staff-creation-session')).isStaffCreationInProgress()
 
       // If staff creation is in progress and we already have super admin data, preserve it
       // Don't fetch staff data during creation process

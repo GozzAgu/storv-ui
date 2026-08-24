@@ -394,7 +394,7 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
       {
         title: 'Creating staff',
         body: [
-          'Super admins create staff logins with email and password (share credentials securely outside the app; there is no automated invite email in the default flow). Managers cannot create staff.',
+          'Super admins create staff logins with email and password. You can email sign-in details to staff (via Resend) or copy them manually until the staff member sets a new password. Managers cannot create staff.',
           'Assign each person as store manager or standard staff so receipt edits, refunds, and locked-down areas match their role.',
         ],
       },

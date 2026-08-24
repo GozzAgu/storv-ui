@@ -9,13 +9,13 @@
           class="text-sm font-semibold text-amber-900 dark:text-amber-100 flex items-center gap-2"
         >
           <LockClosedIcon class="w-4 h-4 shrink-0 text-amber-700 dark:text-amber-300" />
-          Saved staff sign-in passwords
+          Pending staff sign-in invites
         </h2>
         <p
           class="mt-0.5 text-[11px] text-amber-800/80 dark:text-amber-200/70 leading-snug max-w-xl"
         >
-          You can open this list anytime after closing the add-staff dialog. Passwords stay only in
-          this browser session until you clear them or leave the page.
+          Staff who have not changed their password yet. Email credentials to them or copy manually.
+          Entries disappear after they sign in and set a new password.
         </p>
       </div>
       <button
@@ -47,7 +47,25 @@
           <div class="flex items-center gap-1.5 shrink-0">
             <button
               type="button"
+              class="rounded-sm px-2 py-1 text-[10px] font-medium text-amber-900 hover:bg-amber-100/80 disabled:opacity-60 dark:text-amber-100 dark:hover:bg-amber-900/30"
+              :disabled="emailingId === entry.id"
+              title="Email sign-in details to staff"
+              @click="emailEntryToStaff(entry)"
+            >
+              {{ emailingId === entry.id ? 'Sending…' : 'Email to staff' }}
+            </button>
+            <button
+              type="button"
+              class="rounded-sm px-2 py-1 text-[10px] font-medium text-amber-900 hover:bg-amber-100/80 dark:text-amber-100 dark:hover:bg-amber-900/30"
+              title="Copy invite email"
+              @click="copyInviteEmail(entry)"
+            >
+              {{ copyInviteId === entry.id ? 'Copied' : 'Copy invite' }}
+            </button>
+            <button
+              type="button"
               class="p-1.5 rounded-sm text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800"
+              title="Copy password"
               @click="copyPassword(entry)"
             >
               <ClipboardDocumentIcon v-if="copyId !== entry.id" class="w-4 h-4" />
@@ -56,13 +74,14 @@
             <button
               type="button"
               class="p-1.5 rounded-sm text-gray-400 hover:text-red-600 dark:hover:text-red-400"
+              title="Remove saved invite"
               @click="removeInvite(entry.id)"
             >
               <TrashIcon class="w-4 h-4" />
             </button>
           </div>
         </div>
-        <div class="mt-2 pt-2 border-t border-gray-200/80">
+        <div class="mt-2 pt-2 border-t border-gray-200/80 dark:border-white/10">
           <code
             class="block text-xs font-mono text-gray-900 dark:text-gray-100 break-all select-all"
             >{{ entry.password }}</code
@@ -74,14 +93,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import {
   LockClosedIcon,
   ClipboardDocumentIcon,
   CheckCircleIcon,
   TrashIcon,
 } from '~/utils/app-icons'
-import { useStaffInvitePasswordsStore } from '~/stores/staffInvitePasswords'
+import {
+  useStaffInvitePasswordsStore,
+  type StaffInvitePasswordEntry,
+} from '~/stores/staffInvitePasswords'
+import { useStaffStore } from '~/stores/staff'
+import { useStaffInviteEmail } from '~/composables/useStaffInviteEmail'
+import { useAuthStore } from '~/stores/auth'
+import { useUserStore } from '~/stores/user'
+import { useDepartmentsStore } from '~/stores/departments'
+import { useAppToast } from '~/composables/useAppToast'
+import { getApiErrorMessage } from '~/utils/api-error-message'
 
 const props = defineProps<{
   departmentId: string
@@ -90,12 +119,129 @@ const props = defineProps<{
 }>()
 
 const inviteStore = useStaffInvitePasswordsStore()
+const staffStore = useStaffStore()
+const { sendStaffInviteEmail } = useStaffInviteEmail()
+const authStore = useAuthStore()
+const userStore = useUserStore()
+const departmentsStore = useDepartmentsStore()
+const toast = useAppToast()
 
 const filteredEntries = computed(() =>
-  inviteStore.entries.filter((e) => e.departmentId === props.departmentId)
+  inviteStore.entries.filter((entry) => entry.departmentId === props.departmentId)
+)
+
+const departmentStaff = computed(() =>
+  staffStore.staff.filter((member) => member.departmentId === props.departmentId)
+)
+
+async function syncInvitesWithStaff() {
+  inviteStore.hydrate()
+  await staffStore.fetchStaffByDepartment(props.departmentId)
+  inviteStore.pruneForStaff(departmentStaff.value)
+}
+
+onMounted(() => {
+  void syncInvitesWithStaff()
+})
+
+watch(
+  () => props.departmentId,
+  () => {
+    void syncInvitesWithStaff()
+  }
+)
+
+watch(
+  departmentStaff,
+  (staff) => {
+    inviteStore.pruneForStaff(staff)
+  },
+  { deep: true }
 )
 
 const copyId = ref<string | null>(null)
+const copyInviteId = ref<string | null>(null)
+const emailingId = ref<string | null>(null)
+
+function buildInviteEmail(entry: {
+  staffName: string
+  staffEmail: string
+  password: string
+  departmentName: string
+}) {
+  const origin = import.meta.client ? window.location.origin : 'https://app.storvv.com'
+  const name = entry.staffName || 'there'
+  return [
+    `Hi ${name},`,
+    '',
+    `You've been invited to Storvv (${entry.departmentName}). Sign in at ${origin}/signin`,
+    '',
+    `Email: ${entry.staffEmail}`,
+    `Temporary password: ${entry.password}`,
+    '',
+    'You will be asked to set a new password on first sign-in.',
+    '',
+    'Thanks',
+  ].join('\n')
+}
+
+async function emailEntryToStaff(entry: StaffInvitePasswordEntry) {
+  const ownerUserId = authStore.currentUser?.uid
+  if (!ownerUserId) {
+    toast.error('Sign in required')
+    return
+  }
+
+  const dept = departmentsStore.getDepartmentById(entry.departmentId)
+  const storeId = entry.storeId || dept?.storeId
+  if (!entry.staffId || !storeId) {
+    toast.error('Missing staff or store details for this invite')
+    return
+  }
+
+  emailingId.value = entry.id
+  try {
+    await sendStaffInviteEmail({
+      ownerUserId,
+      storeId,
+      departmentId: entry.departmentId,
+      staffId: entry.staffId,
+      staffEmail: entry.staffEmail,
+      staffName: entry.staffName,
+      departmentName: entry.departmentName,
+      businessName:
+        userStore.userData?.storeDetails?.storeName ||
+        userStore.userData?.name ||
+        'Storvv',
+      temporaryPassword: entry.password,
+      mode: 'credentials',
+    })
+    toast.success(`Sign-in details emailed to ${entry.staffEmail}`)
+  } catch (error: unknown) {
+    const message = getApiErrorMessage(error, 'Could not send invite email')
+    toast.error(message)
+  } finally {
+    emailingId.value = null
+  }
+}
+
+async function copyInviteEmail(entry: {
+  id: string
+  staffName: string
+  staffEmail: string
+  password: string
+  departmentName: string
+}) {
+  try {
+    await navigator.clipboard.writeText(buildInviteEmail(entry))
+    copyInviteId.value = entry.id
+    setTimeout(() => {
+      copyInviteId.value = null
+    }, 2000)
+  } catch {
+    // ignore
+  }
+}
 
 function removeInvite(id: string) {
   inviteStore.removeInvite(id)

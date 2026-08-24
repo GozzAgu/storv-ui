@@ -1,48 +1,6 @@
 <template>
   <div class="dashboard-assistant">
-    <Teleport v-if="!isNativeApp" to="body">
-      <DraggableFabContainer
-        v-show="!assistantStore.isOpen"
-        storage-key="storvv-assistant-fab"
-        layout="column"
-        extra-class="dashboard-assistant__fab-mount"
-        anchor-class="bottom-32 right-4 sm:bottom-36 sm:right-6"
-      >
-        <button
-          type="button"
-          class="dashboard-assistant__fab"
-          :aria-expanded="assistantStore.isOpen"
-          aria-controls="dashboard-assistant-panel"
-          aria-label="Open Storvv Assistant"
-          @click="assistantStore.toggle()"
-        >
-          <SparklesIcon class="h-6 w-6" stroke-width="1.75" />
-          <span class="sr-only">Storvv Assistant</span>
-        </button>
-      </DraggableFabContainer>
-    </Teleport>
-
-    <DraggableFabContainer
-      v-else
-      storage-key="storvv-assistant-fab-native"
-      layout="column"
-      extra-class="dashboard-assistant__fab-mount"
-      anchor-class="bottom-[calc(env(safe-area-inset-bottom,0px)+7.75rem)] right-4"
-    >
-      <button
-        type="button"
-        class="dashboard-assistant__fab dashboard-assistant__fab--native"
-        :aria-expanded="assistantStore.isOpen"
-        aria-controls="dashboard-assistant-panel"
-        aria-label="Open Storvv Assistant"
-        @click="assistantStore.toggle()"
-      >
-        <SparklesIcon class="h-6 w-6" stroke-width="1.75" />
-        <span class="sr-only">Storvv Assistant</span>
-      </button>
-    </DraggableFabContainer>
-
-    <!-- Native: keep sheet / side drawer -->
+    <!-- Native: sheet / side drawer -->
     <SidePanel
       v-if="isNativeApp"
       id="dashboard-assistant-panel"
@@ -98,51 +56,13 @@
 </template>
 
 <script setup lang="ts">
-import { SparklesIcon, XMarkIcon } from '~/utils/app-icons'
+import { XMarkIcon } from '~/utils/app-icons'
 import SidePanel from '~/components/ui/SidePanel.vue'
-import DraggableFabContainer from '~/components/ui/DraggableFabContainer.vue'
 import DashboardAssistantBody from '~/components/dashboard/DashboardAssistantBody.vue'
 import { useDashboardAssistant } from '~/composables/useDashboardAssistant'
 
 const { isNativeApp, isDemoAssistant, assistantStore } = useDashboardAssistant()
 </script>
-
-<style scoped>
-.dashboard-assistant__fab {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 3.25rem;
-  height: 3.25rem;
-  border-radius: 9999px;
-  border: 1.5px solid rgb(20 63 141 / 0.35);
-  background: transparent;
-  color: rgb(20 63 141);
-  box-shadow: none;
-  transition:
-    transform 0.18s ease,
-    border-color 0.18s ease,
-    background-color 0.18s ease;
-}
-
-.dashboard-assistant__fab:hover {
-  transform: translateY(-1px);
-  border-color: rgb(20 63 141);
-  background: rgb(20 63 141 / 0.06);
-}
-
-html.dark .dashboard-assistant__fab {
-  border-color: rgb(255 255 255 / 0.14);
-  background: transparent;
-  color: rgb(226 232 240);
-  box-shadow: none;
-}
-
-html.dark .dashboard-assistant__fab:hover {
-  border-color: rgb(255 255 255 / 0.22);
-  background: rgb(255 255 255 / 0.06);
-}
-</style>
 
 <style>
 /* Web floating widget — unscoped so Teleport styles apply */

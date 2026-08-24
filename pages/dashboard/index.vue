@@ -1,6 +1,8 @@
 <template>
   <div :class="pageClass">
-    <Tutorial :tutorial-steps="tutorialSteps" @complete="onTutorialComplete" />
+    <Tutorial ref="tutorialRef" :tutorial-steps="resolvedTutorialSteps" @complete="onTutorialComplete" />
+
+    <GettingStartedChecklist v-if="!needsStoreSelection && !isLoading" class="mb-4" />
 
     <DashboardPageHeader data-tutorial="dashboard" :class="pageHeaderClass">
       <template #eyebrow>
@@ -35,9 +37,10 @@
         Select a store to load your dashboard
       </p>
       <p :class="['dash-state-card__desc', cardDescClass]">
-        Choose a branch from the store selector in the top bar. Metrics, charts, and alerts are scoped to the active
-        store.
+        Choose a branch below or from the store selector in the top bar. Metrics, charts, and alerts
+        are scoped to the active store.
       </p>
+      <InlineStorePicker />
       <NuxtLink to="/dashboard/settings" :class="[linkClass, 'mt-4 inline-block']">
         Manage stores in Settings
       </NuxtLink>
@@ -385,6 +388,8 @@ import StatCard from '~/components/ui/StatCard.vue'
 import DashboardPageHeader from '~/components/dashboard/DashboardPageHeader.vue'
 import PaymentLinksSummaryCard from '~/components/payments/PaymentLinksSummaryCard.vue'
 import Tutorial, { type TutorialStep } from '~/components/Tutorial.vue'
+import GettingStartedChecklist from '~/components/dashboard/GettingStartedChecklist.vue'
+import InlineStorePicker from '~/components/dashboard/InlineStorePicker.vue'
 import { useDashboardHomeChrome } from '~/composables/useDashboardHomeChrome'
 import { useReceiptsStore } from '~/stores/receipts'
 import { useInventoryStore } from '~/stores/inventory'
@@ -506,6 +511,39 @@ const tutorialSteps: TutorialStep[] = [
   },
 ]
 
+const staffTutorialSteps: TutorialStep[] = [
+  {
+    title: 'Your dashboard',
+    description:
+      'See today’s sales, low-stock signals, and outstanding balances for your assigned store at a glance.',
+    icon: MARKETING_FEATURE_ICONS.dashboard,
+    targetSelector: '[data-tutorial="dashboard"]',
+  },
+  {
+    title: 'Find inventory',
+    description:
+      'Browse categories and products your role can access. Add or update stock when your manager grants permission.',
+    icon: MARKETING_FEATURE_ICONS.inventory,
+    targetSelector: '[data-tutorial="inventory"]',
+  },
+  {
+    title: 'Record sales',
+    description:
+      'Create receipts, take payments, and look up past sales for customers you serve.',
+    icon: MARKETING_FEATURE_ICONS.receipts,
+    targetSelector: '[data-tutorial="receipts"]',
+  },
+  {
+    title: 'Your profile',
+    description:
+      'Update your details, change your password, and review security settings from Profile.',
+    icon: MARKETING_FEATURE_ICONS.profile,
+    targetSelector: '[data-tutorial="profile"]',
+  },
+]
+
+const tutorialRef = ref<InstanceType<typeof Tutorial> | null>(null)
+
 const receiptsStore = useReceiptsStore()
 const inventoryStore = useInventoryStore()
 const departmentsStore = useDepartmentsStore()
@@ -514,6 +552,10 @@ const userStore = useUserStore()
 const storesStore = useStoresStore()
 const staffStore = useStaffStore()
 const themeStore = useThemeStore()
+
+const resolvedTutorialSteps = computed(() =>
+  userStore.userData?.role === 'staff' ? staffTutorialSteps : tutorialSteps
+)
 
 const { preferences } = usePreferences()
 const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()

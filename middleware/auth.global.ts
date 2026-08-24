@@ -3,6 +3,7 @@ import { getAuthWaitMs, waitForAuthStore } from '~/utils/wait-for-auth'
 import { isCapacitorNative } from '~/utils/capacitor-env'
 import { isCapacitorMarketingRoot } from '~/utils/capacitor-root-path'
 import { isTwoFactorSessionVerified } from '~/utils/two-factor-session'
+import { isOnboardingExemptDashboardPath } from '~/utils/onboarding-routes'
 
 export default defineNuxtRouteMiddleware(async (to, from) => {
   // Only run on client side (Firebase Auth is client-only)
@@ -81,6 +82,14 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
         !isTwoFactorSessionVerified(authStore.currentUser.uid)
       ) {
         return navigateTo('/signin?verify2fa=1')
+      }
+
+      const onboardingComplete = userStore.userData?.hasCompletedOnboarding ?? false
+      if (
+        !onboardingComplete &&
+        !isOnboardingExemptDashboardPath(to.path)
+      ) {
+        return navigateTo('/dashboard/onboarding')
       }
     }
   }

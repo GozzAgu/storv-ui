@@ -263,15 +263,15 @@ function setError(error: unknown) {
   phase.value = 'error'
 }
 
-async function reloadCurrentUserEmailVerified() {
+async function signOutExistingSession() {
   const auth = getFirebaseClientAuth()
   if (!auth?.currentUser) return
+
+  const authStore = useAuthStore()
+  const userStore = useUserStore()
   try {
-    await auth.currentUser.reload()
-    const authStore = useAuthStore()
-    if (authStore.currentUser?.uid === auth.currentUser.uid) {
-      authStore.currentUser = auth.currentUser
-    }
+    await authStore.signOut()
+    userStore.clearUserData()
   } catch {
     /* ignore */
   }
@@ -281,8 +281,10 @@ async function handleVerifyEmail(code: string) {
   const auth = getFirebaseClientAuth()
   if (!auth) throw new Error('Authentication is unavailable right now.')
 
+  // The link may be for a different account (e.g. staff) than whoever is signed in.
+  await signOutExistingSession()
+
   await applyActionCode(auth, code)
-  await reloadCurrentUserEmailVerified()
 
   successTitle.value = 'Your email is verified'
   successMessage.value = 'You can now sign in to your Storvv workspace.'
@@ -292,6 +294,8 @@ async function handleVerifyEmail(code: string) {
 async function handleRecoverEmail(code: string) {
   const auth = getFirebaseClientAuth()
   if (!auth) throw new Error('Authentication is unavailable right now.')
+
+  await signOutExistingSession()
 
   await applyActionCode(auth, code)
 
@@ -303,6 +307,8 @@ async function handleRecoverEmail(code: string) {
 async function preparePasswordReset(code: string) {
   const auth = getFirebaseClientAuth()
   if (!auth) throw new Error('Authentication is unavailable right now.')
+
+  await signOutExistingSession()
 
   resetEmail.value = await verifyPasswordResetCode(auth, code)
   phase.value = 'reset-form'

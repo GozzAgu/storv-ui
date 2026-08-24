@@ -357,7 +357,22 @@
                           ]
                     "
                     :extra-class="isReceiptsFullscreen ? 'min-h-0 flex-1' : ''"
-                  />
+                  >
+                    <Button
+                      v-if="
+                        canCreate &&
+                        !searchQuery &&
+                        statusFilter === 'all' &&
+                        dateFilter === 'all'
+                      "
+                      variant="primary"
+                      size="sm"
+                      extra-class="!text-xs !py-1.5 !px-3"
+                      @click="openCreateReceiptModal"
+                    >
+                      Create sale
+                    </Button>
+                  </DashboardTableEmptyState>
                   <template v-else>
                     <div
                       :class="

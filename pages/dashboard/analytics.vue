@@ -68,14 +68,24 @@
           Select a store to view analytics
         </p>
         <p :class="['dash-state-card__desc', cardDescClass]">
-          Choose a branch from the store selector in the top bar. Charts and reports are scoped to
-          the active store.
+          Choose a branch below or from the store selector in the top bar. Charts and reports are
+          scoped to the active store.
         </p>
+        <InlineStorePicker />
         <NuxtLink to="/dashboard/settings" :class="[linkClass, 'mt-4 inline-block']">
           Manage stores in Settings
         </NuxtLink>
       </div>
     </template>
+
+    <PlanUpgradePrompt
+      v-else-if="!canUseSubscriptionFeature('analytics')"
+      feature="analytics"
+      title="Analytics is on Medium and Enterprise"
+      description="Upgrade to unlock period comparisons, exports, and product-level charts for your store."
+      :title-class="pageTitleClass"
+      :desc-class="cardDescClass"
+    />
 
     <template v-else>
       <section class="dash-analytics-kpi-panel">
@@ -530,6 +540,8 @@ import { usePreferences } from '~/composables/usePreferences'
 import { useAppToast } from '~/composables/useAppToast'
 import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
 import PaymentLinksSummaryCard from '~/components/payments/PaymentLinksSummaryCard.vue'
+import InlineStorePicker from '~/components/dashboard/InlineStorePicker.vue'
+import PlanUpgradePrompt from '~/components/subscription/PlanUpgradePrompt.vue'
 import AnalyticsFeatureInsightCard from '~/components/analytics/AnalyticsFeatureInsightCard.vue'
 import { useAnalyticsFeatureInsights } from '~/composables/useAnalyticsFeatureInsights'
 import { tableMoneyClass } from '~/utils/table-money-styles'
@@ -2037,7 +2049,7 @@ const exportToPDF = async () => {
 onMounted(() => {
   const authStore = useAuthStore()
   if (!authStore.currentUser) {
-    navigateTo('/dashboard/settings?upgrade=1')
+    navigateTo('/signin')
     return
   }
   // Run in background so the page (loading skeleton) shows immediately
@@ -2048,7 +2060,7 @@ onMounted(() => {
     }
     await initPreferences()
     if (!canUseSubscriptionFeature('analytics')) {
-      navigateTo('/dashboard/settings?upgrade=1')
+      isLoading.value = false
       return
     }
     await loadAnalytics()
