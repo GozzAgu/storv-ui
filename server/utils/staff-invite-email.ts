@@ -71,7 +71,6 @@ export async function sendStaffCredentialsInviteEmail(params: {
   temporaryPassword: string
 }): Promise<void> {
   const name = escapeHtml(params.staffName || 'there')
-  const dept = escapeHtml(params.departmentName || 'your department')
   const business = escapeHtml(params.businessName || 'Storvv')
   const signInUrl = escapeHtml(params.signInUrl)
   const email = escapeHtml(params.toEmail.trim().toLowerCase())
@@ -79,7 +78,7 @@ export async function sendStaffCredentialsInviteEmail(params: {
 
   const html = `
     <p>Hi ${name},</p>
-    <p>You've been invited to <strong>${business}</strong> on Storvv (${dept}).</p>
+    <p>You've been invited to <strong>${business}</strong> on Storvv.</p>
     <p><strong>Sign in:</strong> <a href="${signInUrl}">${signInUrl}</a></p>
     <p><strong>Email:</strong> ${email}<br/>
     <strong>Temporary password:</strong> <code>${password}</code></p>
@@ -102,13 +101,12 @@ export async function sendStaffResetLinkInviteEmail(params: {
   resetLink: string
 }): Promise<void> {
   const name = escapeHtml(params.staffName || 'there')
-  const dept = escapeHtml(params.departmentName || 'your department')
   const business = escapeHtml(params.businessName || 'Storvv')
   const resetLink = escapeHtml(params.resetLink)
 
   const html = `
     <p>Hi ${name},</p>
-    <p>You've been invited to <strong>${business}</strong> on Storvv (${dept}).</p>
+    <p>You've been invited to <strong>${business}</strong> on Storvv.</p>
     <p><a href="${resetLink}">Set your password and sign in</a></p>
     <p>This link expires after a short time. If it stops working, ask your admin to send a new invite email.</p>
     <p>If you did not expect this email, you can ignore it.</p>
