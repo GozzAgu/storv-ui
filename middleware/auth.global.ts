@@ -85,8 +85,10 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
       }
 
       const onboardingComplete = userStore.userData?.hasCompletedOnboarding ?? false
+      const isStaffAccount = userStore.userData?.role === 'staff'
       if (
         !onboardingComplete &&
+        !isStaffAccount &&
         !isOnboardingExemptDashboardPath(to.path)
       ) {
         return navigateTo('/dashboard/onboarding')

@@ -258,6 +258,7 @@ import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useUser, type StoreDetails } from '~/composables/useUser'
 import { usePreferences, currencies, regions } from '~/composables/usePreferences'
 import { useStoresStore } from '~/stores/stores'
+import { useUserStore } from '~/stores/user'
 import { getCitiesForRegion, isCityInRegion } from '~/utils/region-cities'
 
 definePageMeta({
@@ -269,6 +270,7 @@ const { currentUser, loading: authLoading } = useFirebaseAuth()
 const { getUserDocument, updateUserDocument, updateStoreDetails } = useUser()
 const { updatePreferences } = usePreferences()
 const storesStore = useStoresStore()
+const userStore = useUserStore()
 
 const currentStep = ref(1)
 const totalSteps = 2
@@ -322,8 +324,17 @@ onMounted(async () => {
     return
   }
 
-  // Check if user has already completed onboarding
+  // Staff inherit the super admin setup — never show account setup wizard.
   if (currentUser.value) {
+    if (!userStore.userData) {
+      await userStore.fetchUserData(currentUser.value.uid)
+    }
+    const session = userStore.userData
+    if (session?.role === 'staff') {
+      navigateTo(session.mustChangePassword ? '/dashboard/change-password' : '/dashboard')
+      return
+    }
+
     const userData = await getUserDocument(currentUser.value.uid)
     if (userData?.hasCompletedOnboarding) {
       navigateTo('/dashboard')

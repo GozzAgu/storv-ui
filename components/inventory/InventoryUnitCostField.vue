@@ -22,7 +22,7 @@
         @input="onInput"
       />
     </div>
-    <p v-if="marginPreview !== null" class="mt-1 text-[10px] tabular-nums text-emerald-700 dark:text-emerald-400/90">
+    <p v-if="marginPreview !== null && showMarginPreview" class="mt-1 text-[10px] tabular-nums text-emerald-700 dark:text-emerald-400/90">
       Est. margin {{ marginPreview }}
     </p>
   </div>
@@ -32,6 +32,7 @@
 import { computed } from 'vue'
 import { formatMarginPercent, getItemGrossProfit, getItemSellPrice } from '~/utils/inventory-item-cost'
 import type { InventoryItem } from '~/stores/inventory'
+import { usePermissions } from '~/composables/usePermissions'
 
 const props = withDefaults(
   defineProps<{
@@ -53,6 +54,8 @@ const emit = defineEmits<{
 }>()
 
 const { currencySymbol } = usePreferences()
+const { canViewProfitAndCost } = usePermissions()
+const showMarginPreview = computed(() => canViewProfitAndCost.value)
 
 const marginPreview = computed(() => {
   const cost = props.modelValue

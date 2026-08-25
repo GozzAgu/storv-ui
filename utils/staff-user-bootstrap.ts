@@ -1,6 +1,7 @@
-import { collectionGroup, getDocs, query, where, type Firestore } from 'firebase/firestore'
+import { collectionGroup, doc, getDoc, getDocs, query, where, type Firestore } from 'firebase/firestore'
 import type { Staff } from '~/composables/useStaff'
 import type { UserData } from '~/composables/useUser'
+import { sanitizeUserData } from '~/utils/sanitize-user-data'
 
 function isActiveStaffStatus(status: Staff['status'] | undefined): boolean {
   return (status || 'active') === 'active'
@@ -52,10 +53,44 @@ export function buildStaffUserData(staff: Staff, authUid: string): UserData {
     role: 'staff',
     subscription: 'storvv_micro',
     hasCompletedOnboarding: true,
-    hasCompletedTutorial: false,
+    hasCompletedTutorial: true,
     mustChangePassword: Boolean(staff.mustChangePassword),
     createdAt: staff.createdAt || null,
     updatedAt: staff.updatedAt || null,
+  }
+}
+
+/** Staff inherit currency, subscription, and store settings from the owning super admin. */
+export async function buildStaffUserDataWithOwnerContext(
+  db: Firestore,
+  staff: Staff,
+  authUid: string
+): Promise<UserData> {
+  const base = buildStaffUserData(staff, authUid)
+  const ownerId = staff.createdBy?.trim()
+  if (!ownerId) return base
+
+  try {
+    const ownerSnap = await getDoc(doc(db, 'users', ownerId))
+    if (!ownerSnap.exists()) return base
+
+    const owner = sanitizeUserData({
+      uid: ownerSnap.id,
+      ...ownerSnap.data(),
+    } as UserData)
+
+    return {
+      ...base,
+      subscription: owner.subscription ?? base.subscription,
+      subscriptionBillingCycle: owner.subscriptionBillingCycle,
+      preferences: owner.preferences,
+      storeDetails: owner.storeDetails,
+      storeLogoUrl: owner.storeLogoUrl,
+      hasCompletedOnboarding: true,
+      hasCompletedTutorial: true,
+    }
+  } catch {
+    return base
   }
 }
 

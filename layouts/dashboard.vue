@@ -1131,6 +1131,7 @@ const navigation: Array<{
     segment: '/analytics',
     iconKey: 'analytics',
     subscriptionFeature: 'analytics',
+    requiresManagerOrSuperAdmin: true,
   },
   {
     name: 'Activity Logs',

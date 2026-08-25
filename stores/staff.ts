@@ -45,6 +45,27 @@ function isRemovedStaffStatus(status: Staff['status'] | undefined): boolean {
   return status === 'inactive'
 }
 
+/** Firestore rejects `undefined` — normalize optional staff fields before writes. */
+function prepareStaffFirestoreUpdates(
+  updates: Record<string, unknown>
+): Record<string, unknown> {
+  const prepared: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(updates)) {
+    if (value === undefined) continue
+    if (key === 'phone') {
+      const trimmed = String(value ?? '').trim()
+      prepared.phone = trimmed ? trimmed : deleteField()
+      continue
+    }
+    if (key === 'salary' && (value === null || value === '')) {
+      prepared.salary = deleteField()
+      continue
+    }
+    prepared[key] = value
+  }
+  return prepared
+}
+
 function parseStaffLifecycleApiError(error: any, fallback: string): Error {
   const dataMessage =
     error?.data?.message ||
@@ -779,7 +800,7 @@ export const useStaffStore = defineStore('staff', {
         }
         const departmentId = staffMember.departmentId
 
-        const normalizedUpdates = {
+        const normalizedUpdates = prepareStaffFirestoreUpdates({
           ...updates,
           ...(updates.firstName !== undefined
             ? { firstName: normalizeEntityName(updates.firstName) }
@@ -787,7 +808,9 @@ export const useStaffStore = defineStore('staff', {
           ...(updates.lastName !== undefined
             ? { lastName: normalizeEntityName(updates.lastName) }
             : {}),
-        }
+        } as Record<string, unknown>) as Partial<
+          Omit<Staff, 'id' | 'createdAt' | 'createdBy' | 'departmentName'>
+        >
 
         // If department is being changed, verify new department belongs to user and update counts
         if (normalizedUpdates.departmentId && normalizedUpdates.departmentId !== departmentId) {

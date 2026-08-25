@@ -589,7 +589,7 @@ const handleSubmit = async () => {
         firstName: formData.value.firstName,
         lastName: formData.value.lastName,
         email: formData.value.email,
-        phone: formData.value.phone || undefined,
+        phone: formData.value.phone.trim(),
         position: formData.value.position,
         role: formData.value.role,
         canManageInventory:
@@ -605,7 +605,7 @@ const handleSubmit = async () => {
         lastName: formData.value.lastName,
         email: formData.value.email,
         password: generatedPassword.value,
-        phone: formData.value.phone || undefined,
+        phone: formData.value.phone.trim() || undefined,
         position: formData.value.position,
         role: formData.value.role,
         canManageInventory:

@@ -544,6 +544,8 @@ import InlineStorePicker from '~/components/dashboard/InlineStorePicker.vue'
 import PlanUpgradePrompt from '~/components/subscription/PlanUpgradePrompt.vue'
 import AnalyticsFeatureInsightCard from '~/components/analytics/AnalyticsFeatureInsightCard.vue'
 import { useAnalyticsFeatureInsights } from '~/composables/useAnalyticsFeatureInsights'
+import { usePermissions } from '~/composables/usePermissions'
+import { useStaffStore } from '~/stores/staff'
 import { tableMoneyClass } from '~/utils/table-money-styles'
 import {
   truncateChartLabel,
@@ -559,7 +561,8 @@ import {
   sumReceiptGrossProfit,
 } from '~/utils/inventory-item-cost'
 
-const { canViewProfitAndCost } = usePermissions()
+const { canViewProfitAndCost, isStaff, isManager } = usePermissions()
+const staffStore = useStaffStore()
 
 definePageMeta({
   layout: 'dashboard',
@@ -2057,6 +2060,13 @@ onMounted(() => {
   ;(async () => {
     if (!userStore.userData) {
       await userStore.fetchUserData(uid)
+    }
+    if (isStaff.value && !isManager.value) {
+      await staffStore.fetchCurrentStaffMember().catch(() => null)
+      if (isStaff.value && !isManager.value) {
+        await navigateTo('/dashboard')
+        return
+      }
     }
     await initPreferences()
     if (!canUseSubscriptionFeature('analytics')) {

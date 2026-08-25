@@ -691,8 +691,9 @@
         </div>
       </DashboardSettingsPanel>
 
-      <!-- Data export -->
+      <!-- Data export (owner only — includes unit costs / COGS basis) -->
       <DashboardSettingsPanel
+        v-if="!isStaff"
         title="Data export"
         subtitle="Download Excel backups of inventory (by category folder), sales, buybacks, and stock loans for this branch."
         compact

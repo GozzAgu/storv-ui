@@ -300,8 +300,8 @@ async function finishAuthenticatedSession(email: string, password: string) {
   await persistBiometricLogin(email, password)
 
   let destination = '/dashboard'
-  if (userData.role === 'staff' && userData.mustChangePassword) {
-    destination = '/dashboard/change-password'
+  if (userData.role === 'staff') {
+    destination = userData.mustChangePassword ? '/dashboard/change-password' : '/dashboard'
   } else if (!userData.hasCompletedOnboarding) {
     destination = '/dashboard/onboarding'
   }

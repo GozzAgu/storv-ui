@@ -62,7 +62,41 @@ export const useUserStore = defineStore('user', {
       }
 
       try {
-        // First try top-level users collection (for superadmins)
+        if (!isStaffCreationInProgress) {
+          const cachedStaff = (await import('./staff')).useStaffStore().getCurrentStaffMember
+          if (cachedStaff?.authUid === userId) {
+            const { buildStaffUserDataWithOwnerContext } = await import(
+              '~/utils/staff-user-bootstrap'
+            )
+            this.userData = await buildStaffUserDataWithOwnerContext(db, cachedStaff, userId)
+            return
+          }
+
+          const { lookupStaffMemberByAuthUid, buildStaffUserDataWithOwnerContext } =
+            await import('~/utils/staff-user-bootstrap')
+          const lookup = await lookupStaffMemberByAuthUid(db, userId)
+
+          if (lookup.kind === 'active') {
+            const { useStaffStore } = await import('./staff')
+            const staffStore = useStaffStore()
+            const existingIndex = staffStore.staff.findIndex((s) => s.id === lookup.staff.id)
+            if (existingIndex === -1) {
+              staffStore.staff.push(lookup.staff)
+            } else {
+              staffStore.staff[existingIndex] = lookup.staff
+            }
+            this.userData = await buildStaffUserDataWithOwnerContext(db, lookup.staff, userId)
+            return
+          }
+
+          if (lookup.kind === 'inactive') {
+            this.error = 'Your staff access has been deactivated. Contact your store admin.'
+            this.userData = null
+            return
+          }
+        }
+
+        // Super admin / owner accounts use top-level users/{uid}.
         const userRef = doc(db, 'users', userId)
         const userSnap = await getDoc(userRef)
 
@@ -72,90 +106,43 @@ export const useUserStore = defineStore('user', {
             ...userSnap.data(),
           } as UserData)
 
-          // During staff creation, only update if this is the super admin's data
-          // Don't update if it's staff data (preserve super admin's profile info)
           if (isStaffCreationInProgress) {
-            // Only update if fetched data is for super admin or if we're fetching super admin's own data
             if (
               fetchedData.role === 'superAdmin' ||
               (this.userData?.role === 'superAdmin' && this.userData.uid === userId)
             ) {
               this.userData = fetchedData
-            } else {
-              // Don't overwrite super admin data with staff data during creation
-              // console.log('[UserStore] Ignoring staff data fetch during staff creation - preserving super admin data')
             }
           } else {
             this.userData = fetchedData
           }
-        } else {
-          const cachedStaff = (await import('./staff')).useStaffStore().getCurrentStaffMember
-          if (cachedStaff?.authUid === userId) {
-            const { buildStaffUserData } = await import('~/utils/staff-user-bootstrap')
-            this.userData = buildStaffUserData(cachedStaff, userId)
-            return
-          }
+          return
+        }
 
-          try {
-            const { lookupStaffMemberByAuthUid, buildStaffUserData } = await import(
-              '~/utils/staff-user-bootstrap'
-            )
-            const lookup = await lookupStaffMemberByAuthUid(db, userId)
-
-            if (lookup.kind === 'active') {
-              const { useStaffStore } = await import('./staff')
-              const staffStore = useStaffStore()
-              const existingIndex = staffStore.staff.findIndex((s) => s.id === lookup.staff.id)
-              if (existingIndex === -1) {
-                staffStore.staff.push(lookup.staff)
-              } else {
-                staffStore.staff[existingIndex] = lookup.staff
-              }
-              this.userData = buildStaffUserData(lookup.staff, userId)
-              return
-            }
-
-            if (lookup.kind === 'inactive') {
-              this.error = 'Your staff access has been deactivated. Contact your store admin.'
-              if (!isStaffCreationInProgress) {
-                this.userData = null
-              }
-              return
-            }
-
-            if (lookup.kind === 'missing') {
-              this.error = 'Account not found. Please contact your administrator.'
-              console.warn('[UserStore] Staff member not found for auth uid:', userId)
-              if (!isStaffCreationInProgress && !this.userData) {
-                this.userData = null
-              }
-              return
-            }
-          } catch (staffError: any) {
-            console.warn(
-              '[UserStore] Could not resolve staff member for sign-in:',
-              staffError.message
-            )
-            if (
-              staffError.message?.includes('permission') ||
-              staffError.code === 'permission-denied'
-            ) {
-              this.error =
-                'Could not load your staff profile. Ask your admin to confirm Firestore rules and indexes are deployed.'
-            } else if (staffError.code === 'failed-precondition') {
-              this.error =
-                'Could not load your staff profile. If this is a new account, wait a few minutes for Firestore indexes to finish building, then try again.'
-            } else if (!this.error) {
-              this.error = 'Account not found. Please contact your administrator.'
-            }
-            if (!isStaffCreationInProgress && !this.userData) {
-              this.userData = null
-            }
+        if (!isStaffCreationInProgress) {
+          this.error = 'Account not found. Please contact your administrator.'
+          console.warn('[UserStore] Staff member not found for auth uid:', userId)
+          if (!this.userData) {
+            this.userData = null
           }
         }
-      } catch (error: any) {
-        console.error('Error fetching user data:', error)
-        this.error = error.message || 'Failed to fetch user data'
+      } catch (staffError: any) {
+        console.warn('[UserStore] Could not resolve user for sign-in:', staffError.message)
+        if (
+          staffError.message?.includes('permission') ||
+          staffError.code === 'permission-denied'
+        ) {
+          this.error =
+            'Could not load your staff profile. Ask your admin to confirm Firestore rules and indexes are deployed.'
+        } else if (staffError.code === 'failed-precondition') {
+          this.error =
+            'Could not load your staff profile. If this is a new account, wait a few minutes for Firestore indexes to finish building, then try again.'
+        } else if (!this.error) {
+          this.error = 'Account not found. Please contact your administrator.'
+        }
+        if (!isStaffCreationInProgress && !this.userData) {
+          this.userData = null
+        }
       } finally {
         this.loading = false
       }
