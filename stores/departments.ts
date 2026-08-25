@@ -98,34 +98,8 @@ export const useDepartmentsStore = defineStore('departments', {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
 
-      let userId = authStore.currentUser.uid
-
-      // If the current user is staff, get the super admin UID from the staff document
-      if (userStore.userData?.role === 'staff') {
-        try {
-          // Find the staff document for this user
-          const staffRef = collection(db, 'staff')
-          const staffQuery = query(staffRef, where('authUid', '==', userId))
-          const staffSnapshot = await getDocs(staffQuery)
-
-          if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
-            const staffDoc = staffSnapshot.docs[0]
-            if (staffDoc) {
-              const staffData = staffDoc.data()
-              // Use the super admin's UID who created this staff member
-              if (staffData.createdBy) {
-                userId = staffData.createdBy
-                // console.log('[DepartmentsStore] Staff user detected, using super admin UID:', userId)
-              }
-            }
-          }
-        } catch (error: any) {
-          console.warn(
-            '[DepartmentsStore] Could not fetch staff document, using current user UID:',
-            error.message
-          )
-        }
-      }
+      const resolvedOwner = await getQueryUserId()
+      const userId = resolvedOwner ?? authStore.currentUser.uid
 
       try {
         // Use hierarchical path: users/{userId}/stores/{storeId}/departments

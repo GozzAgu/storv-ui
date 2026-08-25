@@ -636,6 +636,40 @@ main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-
   min-width: 10.75rem;
 }
 
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table th.dashboard-table__col-compact-status,
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table td.dashboard-table__col-compact-status {
+  width: 1%;
+  min-width: 5.75rem;
+  white-space: nowrap;
+}
+
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table th.dashboard-table__col-type,
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table td.dashboard-table__col-type {
+  width: 1%;
+  min-width: 5.5rem;
+  white-space: nowrap;
+}
+
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table th.dashboard-table__col-numeric,
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table td.dashboard-table__col-numeric,
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table th.dashboard-table__col-price,
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table td.dashboard-table__col-price,
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table th.dashboard-table__col-cost,
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table td.dashboard-table__col-cost,
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table th.dashboard-table__col-margin,
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table td.dashboard-table__col-margin,
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table thead th.text-right,
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table tbody td.text-right {
+  text-align: right;
+}
+
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table th.dashboard-table__col-numeric,
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table td.dashboard-table__col-numeric {
+  width: 1%;
+  min-width: 4.5rem;
+  white-space: nowrap;
+}
+
 main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table th.dashboard-table__col-source,
 main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table td.dashboard-table__col-source {
   min-width: 8.5rem;

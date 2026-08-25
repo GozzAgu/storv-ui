@@ -51,4 +51,13 @@ describe('usePermissions profit visibility', () => {
     const { usePermissions } = await import('~/composables/usePermissions')
     expect(usePermissions().canViewProfitAndCost.value).toBe(false)
   })
+
+  it('allows only super admin to manage billing', async () => {
+    const { usePermissions } = await import('~/composables/usePermissions')
+    expect(usePermissions().canManageBilling.value).toBe(true)
+
+    userData.value = { role: 'staff' }
+    staffMember.value = { role: 'manager' }
+    expect(usePermissions().canManageBilling.value).toBe(false)
+  })
 })

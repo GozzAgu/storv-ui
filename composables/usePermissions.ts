@@ -61,6 +61,9 @@ export const usePermissions = () => {
     () => !isStaff.value && userStore.userData?.role === 'superAdmin'
   )
 
+  /** Paystack upgrades, plan banners, and billing — super admin (account owner) only. */
+  const canManageBilling = computed(() => userStore.isSuperAdmin)
+
   return {
     isStaff,
     isManager,
@@ -77,5 +80,6 @@ export const usePermissions = () => {
     canMoveStaff,
     canGrantInventoryAccess,
     canViewProfitAndCost,
+    canManageBilling,
   }
 }

@@ -25,7 +25,7 @@
         <TagIcon class="dash-grid-card__meta-icon" stroke-width="1.5" aria-hidden="true" />
         <span class="min-w-0 truncate">{{ typeLabel }} · {{ trackingShort }}</span>
       </div>
-      <div class="dash-grid-card__meta-row">
+      <div v-if="showDepartments" class="dash-grid-card__meta-row">
         <BuildingOffice2Icon
           class="dash-grid-card__meta-icon"
           stroke-width="1.5"
@@ -127,6 +127,7 @@ const props = withDefaults(
     trackProfit?: boolean
     grossProfitOnHand?: number | null
     showProfit?: boolean
+    showDepartments?: boolean
   }>(),
   {
     description: '',
@@ -142,6 +143,7 @@ const props = withDefaults(
     trackProfit: false,
     grossProfitOnHand: null,
     showProfit: false,
+    showDepartments: true,
   }
 )
 

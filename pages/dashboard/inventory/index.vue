@@ -87,6 +87,7 @@
           input-class="sm:w-52"
         />
         <DashboardToolbarSelect
+          v-if="!isStaff"
           v-model="selectedDepartmentId"
           wrapper-class="min-w-[8.5rem] flex-1 sm:flex-none"
         >
@@ -157,7 +158,7 @@
         :icon="FolderIcon"
         :title="
           selectedDepartmentId
-            ? `No categories in ${getDepartmentName(selectedDepartmentId)}`
+            ? `No categories in ${getDepartmentName(selectedDepartmentId) ?? 'this department'}`
             : searchQuery
             ? 'No categories found'
             : 'No categories on this page'
@@ -204,6 +205,7 @@
             :has-serial-numbers="folder.hasSerialNumbers"
             :allowed-department-ids="folder.allowedDepartments"
             :resolve-department-name="getDepartmentName"
+            :show-departments="!isStaff"
             :availability-stats="inventoryStore.folderAvailabilityStats[folder.id] ?? null"
             :stats-loading="inventoryStore.availabilityStatsLoading"
             :track-profit="folder.trackProfit === true"
@@ -255,20 +257,20 @@
                     />
                   </th>
                   <th scope="col">Category</th>
-                  <th scope="col" class="hidden sm:table-cell">Type</th>
-                  <th scope="col" class="text-right">Products</th>
-                  <th scope="col" class="hidden sm:table-cell text-right">Value</th>
+                  <th scope="col" class="hidden sm:table-cell dashboard-table__col-type">Type</th>
+                  <th scope="col" class="dashboard-table__col-numeric">Products</th>
+                  <th scope="col" class="hidden sm:table-cell dashboard-table__col-numeric">Value</th>
                   <th
                     v-if="canViewProfitAndCost"
                     scope="col"
-                    class="hidden md:table-cell text-right"
+                    class="hidden md:table-cell dashboard-table__col-numeric"
                   >
                     Profit
                   </th>
-                  <th scope="col" class="hidden md:table-cell dashboard-table__col-status">
+                  <th scope="col" class="hidden md:table-cell dashboard-table__col-compact-status">
                     Tracking
                   </th>
-                  <th scope="col" class="hidden lg:table-cell">Departments</th>
+                  <th v-if="!isStaff" scope="col" class="hidden lg:table-cell">Departments</th>
                   <th
                     v-if="canCreateInventoryFolders"
                     scope="col"
@@ -312,14 +314,14 @@
                       </div>
                     </div>
                   </td>
-                  <td class="hidden sm:table-cell">
+                  <td class="hidden sm:table-cell dashboard-table__col-type">
                     <span
                       class="inline-flex rounded-md bg-gray-100/90 px-1.5 py-0.5 text-[10px] font-medium text-gray-600 dark:bg-white/[0.05] dark:text-gray-400"
                     >
                       {{ formatFolderTypeLabel(folder.type) }}
                     </span>
                   </td>
-                  <td class="text-right">
+                  <td class="dashboard-table__col-numeric">
                     <span class="dashboard-table__numeric">{{
                       folderDisplayStats(folder).itemCount
                     }}</span>
@@ -330,12 +332,12 @@
                       {{ folderDisplayStats(folder).lowStockCount }} low stock
                     </span>
                   </td>
-                  <td class="hidden sm:table-cell text-right">
+                  <td class="hidden sm:table-cell dashboard-table__col-numeric">
                     <span class="dashboard-table__money">{{
                       formatCurrency(folderDisplayStats(folder).totalValue ?? 0)
                     }}</span>
                   </td>
-                  <td v-if="canViewProfitAndCost" class="hidden md:table-cell text-right">
+                  <td v-if="canViewProfitAndCost" class="hidden md:table-cell dashboard-table__col-numeric">
                     <span
                       v-if="folder.trackProfit"
                       class="dashboard-table__money"
@@ -345,7 +347,7 @@
                     </span>
                     <span v-else class="dashboard-table__muted text-xs">-</span>
                   </td>
-                  <td class="hidden md:table-cell dashboard-table__col-status">
+                  <td class="hidden md:table-cell dashboard-table__col-compact-status">
                     <span
                       class="inline-flex rounded-md px-1.5 py-0.5 text-[10px] font-medium"
                       :class="
@@ -357,7 +359,7 @@
                       {{ folder.hasSerialNumbers ? 'Serial' : 'Quantity' }}
                     </span>
                   </td>
-                  <td class="hidden max-w-[12rem] lg:table-cell">
+                  <td v-if="!isStaff" class="hidden max-w-[12rem] lg:table-cell">
                     <span class="dashboard-table__muted block truncate text-xs">
                       {{ folderDepartmentsSummary(folder) }}
                     </span>
@@ -399,7 +401,7 @@
       :icon="FolderIcon"
       :title="
         selectedDepartmentId
-          ? `No categories in ${getDepartmentName(selectedDepartmentId)}`
+          ? `No categories in ${getDepartmentName(selectedDepartmentId) ?? 'this department'}`
           : searchQuery
           ? 'No categories found'
           : 'No categories yet'
@@ -671,7 +673,7 @@
         </section>
 
         <section
-          v-if="canCreateInventoryFolders && !isSubfolderDrawer"
+          v-if="canCreateInventoryFolders && !isSubfolderDrawer && !isStaff"
           :class="[drawerSectionClass, drawerFillFixedClass]"
         >
           <p :class="sectionLabelClass">
@@ -1618,7 +1620,12 @@ async function handleExportReorderList() {
     toast.error(message)
   }
 }
-const { canCreateInventoryFolders, canViewProfitAndCost } = usePermissions()
+const { canCreateInventoryFolders, canViewProfitAndCost, isStaff } = usePermissions()
+
+watch(isStaff, (staff) => {
+  if (staff) selectedDepartmentId.value = ''
+}, { immediate: true })
+
 const { formatCurrency, preferences } = usePreferences()
 const currencySymbol = computed(() => preferences.value?.currencySymbol || '$')
 
@@ -2073,8 +2080,8 @@ const currentStoreDepartments = computed(() => {
 const filteredFolders = computed(() => {
   let result = [...folders.value]
 
-  // Filter by selected department
-  if (selectedDepartmentId.value) {
+  // Filter by selected department (super admin / owner only)
+  if (!isStaff.value && selectedDepartmentId.value) {
     result = result.filter((folder) => {
       // If folder has no allowedDepartments, it's accessible to all departments
       if (!folder.allowedDepartments || folder.allowedDepartments.length === 0) {
@@ -2272,6 +2279,7 @@ watch(currentPage, (newPage) => {
 
 // Watch for department filter changes and persist
 watch(selectedDepartmentId, (newDeptId) => {
+  if (isStaff.value) return
   if (import.meta.client) {
     try {
       if (newDeptId) {
@@ -2317,7 +2325,7 @@ const getFolderGradient = (color: string) => {
 
 const getDepartmentName = (deptId: string) => {
   const dept = departmentsStore.getDepartmentById(deptId)
-  return dept?.name || deptId
+  return dept?.name
 }
 
 const formatFolderTypeLabel = (type: string | undefined) => {
@@ -2331,7 +2339,10 @@ const formatFolderTypeLabel = (type: string | undefined) => {
 const folderDepartmentsSummary = (folder: InventoryFolder) => {
   const allowed = folder.allowedDepartments
   if (!allowed || allowed.length === 0) return 'All departments'
-  const names = allowed.map((id) => getDepartmentName(id))
+  const names = allowed
+    .map((id) => getDepartmentName(id)?.trim())
+    .filter((name): name is string => Boolean(name))
+  if (names.length === 0) return 'All departments'
   if (names.length <= 2) return names.join(', ')
   return `${names[0]}, +${names.length - 1} more`
 }
@@ -2992,29 +3003,23 @@ onMounted(async () => {
     // Fetch user data first (needed to determine if staff)
     try {
       if (!userStore.userData) {
-        // console.log('[InventoryPage] Fetching user data...')
         await userStore.fetchUserData(authStore.currentUser.uid)
-        const userData = userStore.userData
-        // console.log('[InventoryPage] User data fetched:', userData ? (userData as any).role : 'unknown')
-      } else {
-        const userData = userStore.userData
+      }
 
-        // Load stores and departments when any store member needs filters (not only super admin)
-        if (authStore.currentUser) {
-          try {
-            // Initialize current store if not set
-            if (!storesStore.currentStoreId) {
-              await storesStore.initializeCurrentStore()
-            }
-            await departmentsStore.fetchDepartments()
-          } catch (error: any) {
-            console.warn(
-              '[InventoryPage] Error fetching stores/departments:',
-              error.message || error
-            )
+      if (authStore.currentUser) {
+        try {
+          if (!storesStore.currentStoreId) {
+            await storesStore.initializeCurrentStore()
           }
+          if (!isStaff.value) {
+            await departmentsStore.fetchDepartments()
+          }
+        } catch (error: any) {
+          console.warn(
+            '[InventoryPage] Error fetching stores/departments:',
+            error.message || error
+          )
         }
-        // console.log('[InventoryPage] User data already loaded:', userData ? (userData as any).role : 'unknown')
       }
 
       // Now fetch folders
@@ -3083,8 +3088,8 @@ watch(
         // Refetch folders for new store
         await inventoryStore.fetchFolders()
         await inventoryStore.fetchFolderAvailabilityStats()
-        // Refetch departments for new store
-        if (authStore.currentUser) {
+        // Refetch departments for new store (owner only)
+        if (authStore.currentUser && !isStaff.value) {
           await departmentsStore.fetchDepartments()
         }
         // console.log('[InventoryPage] Folders refetched after store change:', inventoryStore.folders.length)

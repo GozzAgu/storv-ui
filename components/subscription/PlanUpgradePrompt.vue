@@ -1,5 +1,5 @@
 <template>
-  <div :class="rootClass">
+  <div v-if="userStore.isSuperAdmin" :class="rootClass">
     <SparklesIcon class="mx-auto mb-3 h-8 w-8 text-amber-500/80 dark:text-amber-400/70" stroke-width="1.5" />
     <p :class="['dash-state-card__title', titleClass, '!text-sm']">
       {{ title }}
@@ -8,16 +8,9 @@
       {{ description }}
     </p>
     <div class="mt-4 flex flex-wrap items-center justify-center gap-2">
-      <NuxtLink
-        v-if="showUpgradeAction"
-        :to="upgradeHref"
-        class="btn-primary btn-primary-sm"
-      >
+      <NuxtLink :to="upgradeHref" class="btn-primary btn-primary-sm">
         View plans
       </NuxtLink>
-      <p v-else class="text-xs text-gray-500 dark:text-gray-400">
-        Ask your admin to upgrade the workspace plan.
-      </p>
       <NuxtLink
         v-if="helpHref"
         :to="helpHref"
@@ -26,6 +19,14 @@
         Learn more
       </NuxtLink>
     </div>
+  </div>
+  <div v-else :class="staffUnavailableClass">
+    <p :class="['dash-state-card__title', titleClass, '!text-sm']">
+      {{ staffTitle }}
+    </p>
+    <p :class="['dash-state-card__desc', descClass]">
+      {{ staffDescription }}
+    </p>
   </div>
 </template>
 
@@ -71,11 +72,19 @@ const description = computed(
     `This screen is included on ${requiredPlanLabel.value}. Upgrade to unlock it for your team.`
 )
 
-const showUpgradeAction = computed(() => userStore.isSuperAdmin)
 const upgradeHref = '/dashboard/settings?upgrade=1'
+
+const staffTitle = computed(() => 'Feature unavailable')
+
+const staffDescription = computed(() => 'This feature is not enabled for your workspace.')
 
 const rootClass = computed(() => [
   'dash-state-card rounded-xl border border-amber-200/60 bg-amber-50/40 px-6 py-8 text-center dark:border-amber-900/35 dark:bg-amber-950/20',
+  props.extraClass,
+])
+
+const staffUnavailableClass = computed(() => [
+  'dash-state-card rounded-xl border border-gray-200/60 bg-gray-50/40 px-6 py-8 text-center dark:border-gray-800/35 dark:bg-gray-950/20',
   props.extraClass,
 ])
 </script>
