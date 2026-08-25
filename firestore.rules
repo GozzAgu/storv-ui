@@ -109,6 +109,28 @@ service cloud.firestore {
              || changed.hasOnly(['dateOut', 'pendingSaleReceiptId', 'pendingSaleAt', 'sellerLoanOutId', 'sellerLoanPartyName', 'sellerLoanPartyPhone', 'sellerLoanOutAt', 'updatedAt']);
     }
 
+    // Bulk (non-serial) POS: decrement quantity/stock and clear pending-sale markers — not full item edits.
+    function inventoryItemBulkQuantitySaleChange() {
+      let changed = request.resource.data.diff(resource.data).changedKeys();
+      let blocked = [
+        'folderId', 'storeId', 'createdBy', 'createdAt',
+        'buyback', 'buybackPrice', 'unitCost', 'originalPrice',
+        'discountedPrice', 'discountPercentage', 'discountAmount',
+        'sellerLoanOutId', 'sellerLoanPartyName', 'sellerLoanPartyPhone', 'sellerLoanOutAt',
+        'swapInReceiptId', 'name', 'brand', 'model', 'sku', 'serialNo', 'serialNumber', 'serial',
+        'price', 'sellingPrice', 'cost', 'amount', 'value',
+      ];
+      if (changed.hasAny(blocked)) return false;
+      if (!changed.hasAny(['updatedAt'])) return false;
+      if (changed.size() > 6 || changed.size() < 2) return false;
+      return true;
+    }
+
+    function inventoryItemStaffSaleUpdate() {
+      return inventoryItemOnlySaleOrReturnFieldChange()
+        || inventoryItemBulkQuantitySaleChange();
+    }
+
     function receiptBalanceDuePaymentUpdate() {
       return resource.data.status == 'balance_due'
         && request.resource.data.status in ['balance_due', 'completed', 'cancelled']
@@ -349,12 +371,12 @@ service cloud.firestore {
           allow create: if canManageInventoryStructure(userId, storeId) &&
                          request.resource.data.storeId == storeId;
           
-          // Full update: super admin. Managers/staff: only dateOut/updatedAt (sale or return-to-stock).
+          // Full update: super admin. Managers/staff: serial sale (dateOut) or bulk quantity decrement.
           allow update: if (canManageInventoryStructure(userId, storeId) &&
                          resourceMatchesStore(storeId) &&
                          requestMatchesStore(storeId)) ||
                         ((isStoreManager(userId, storeId) || isStoreStaff(userId, storeId)) &&
-                         inventoryItemOnlySaleOrReturnFieldChange() &&
+                         inventoryItemStaffSaleUpdate() &&
                          resourceMatchesStore(storeId) &&
                          requestMatchesStore(storeId));
           
@@ -462,6 +484,43 @@ service cloud.firestore {
           allow create: if (canManageNonInventoryOps(userId, storeId) || isStoreStaff(userId, storeId)) &&
                          request.resource.data.storeId == storeId &&
                          (request.resource.data.userId == userId || request.resource.data.userId == request.auth.uid);
+          allow update, delete: if false;
+        }
+
+        // Social sales leads: track enquiries from WhatsApp, Instagram, etc. (no chat messages).
+        match /socialLeads/{leadId} {
+          allow read: if canAccessStoreData(userId, storeId) &&
+                         resourceMatchesStore(storeId);
+
+          allow create: if canCreateReceipt(userId, storeId) &&
+                           request.resource.data.storeId == storeId &&
+                           request.resource.data.createdBy == request.auth.uid &&
+                           request.resource.data.status == 'new' &&
+                           request.resource.data.customerName is string &&
+                           request.resource.data.productName is string &&
+                           request.resource.data.platform is string &&
+                           request.resource.data.estimatedValue is number;
+
+          allow update: if canCreateReceipt(userId, storeId) &&
+                           resourceMatchesStore(storeId) &&
+                           requestMatchesStore(storeId);
+
+          allow delete: if canManageNonInventoryOps(userId, storeId) &&
+                           resourceMatchesStore(storeId);
+        }
+
+        // Social sales timeline events (notes, status changes — append-only audit).
+        match /socialEvents/{eventId} {
+          allow read: if canAccessStoreData(userId, storeId) &&
+                         resourceMatchesStore(storeId);
+
+          allow create: if canCreateReceipt(userId, storeId) &&
+                           request.resource.data.storeId == storeId &&
+                           request.resource.data.createdBy == request.auth.uid &&
+                           request.resource.data.leadId is string &&
+                           request.resource.data.type is string &&
+                           request.resource.data.description is string;
+
           allow update, delete: if false;
         }
       }

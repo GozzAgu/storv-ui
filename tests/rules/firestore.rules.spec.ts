@@ -7,7 +7,7 @@ import {
   assertSucceeds,
   type RulesTestEnvironment,
 } from '@firebase/rules-unit-testing'
-import { doc, getDoc, setDoc } from 'firebase/firestore'
+import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
 
 describe('firestore.rules', () => {
   let testEnv: RulesTestEnvironment
@@ -114,6 +114,92 @@ describe('firestore.rules', () => {
         { subscription: 'storvv_enterprise' },
         { merge: true }
       )
+    )
+  })
+
+  it('allows staff to decrement bulk quantity during POS sale', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const adminDb = context.firestore()
+      await setDoc(doc(adminDb, 'users/u1/stores/s1'), { ownerId: 'u1', storeId: 's1' })
+      await setDoc(doc(adminDb, 'users/u1/stores/s1/members/staff1'), {
+        authUid: 'staff1',
+        role: 'staff',
+        status: 'active',
+        storeId: 's1',
+      })
+      await setDoc(doc(adminDb, 'users/u1/stores/s1/inventoryItems/item1'), {
+        storeId: 's1',
+        folderId: 'f1',
+        name: 'Opulent Dubai',
+        quantity: 10,
+        createdBy: 'u1',
+      })
+    })
+
+    const db = testEnv.authenticatedContext('staff1').firestore()
+    await assertSucceeds(
+      updateDoc(doc(db, 'users/u1/stores/s1/inventoryItems/item1'), {
+        quantity: 7,
+        updatedAt: serverTimestamp(),
+      })
+    )
+  })
+
+  it('denies staff from changing item price during sale-shaped update', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const adminDb = context.firestore()
+      await setDoc(doc(adminDb, 'users/u1/stores/s1'), { ownerId: 'u1', storeId: 's1' })
+      await setDoc(doc(adminDb, 'users/u1/stores/s1/members/staff1'), {
+        authUid: 'staff1',
+        role: 'staff',
+        status: 'active',
+        storeId: 's1',
+      })
+      await setDoc(doc(adminDb, 'users/u1/stores/s1/inventoryItems/item1'), {
+        storeId: 's1',
+        folderId: 'f1',
+        name: 'Opulent Dubai',
+        quantity: 10,
+        price: 30000,
+        createdBy: 'u1',
+      })
+    })
+
+    const db = testEnv.authenticatedContext('staff1').firestore()
+    await assertFails(
+      updateDoc(doc(db, 'users/u1/stores/s1/inventoryItems/item1'), {
+        quantity: 7,
+        price: 1,
+        updatedAt: serverTimestamp(),
+      })
+    )
+  })
+
+  it('allows staff to create a receipt for their store', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const adminDb = context.firestore()
+      await setDoc(doc(adminDb, 'users/u1/stores/s1'), { ownerId: 'u1', storeId: 's1' })
+      await setDoc(doc(adminDb, 'users/u1/stores/s1/members/staff1'), {
+        authUid: 'staff1',
+        role: 'staff',
+        status: 'active',
+        storeId: 's1',
+      })
+    })
+
+    const db = testEnv.authenticatedContext('staff1').firestore()
+    await assertSucceeds(
+      setDoc(doc(db, 'users/u1/stores/s1/receipts/rec1'), {
+        storeId: 's1',
+        receiptNumber: 'REC-001',
+        customerName: 'Walk-in Customer',
+        total: 66000,
+        status: 'completed',
+        createdBy: 'u1',
+        items: [],
+        itemIds: [],
+        folderId: 'f1',
+      })
     )
   })
 })

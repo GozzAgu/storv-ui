@@ -15,6 +15,7 @@ import {
   ReceiptText,
   RefreshCcwDot,
   ScrollText,
+  Share2,
   Settings2,
   Wallet,
   Store,
@@ -27,6 +28,7 @@ export type DashboardNavIconKey =
   | 'loans'
   | 'receipts'
   | 'payment-links'
+  | 'social-sales'
   | 'departments'
   | 'analytics'
   | 'activity'
@@ -47,6 +49,7 @@ export const DASHBOARD_NAV_ICONS: Record<DashboardNavIconKey, Component> = {
   loans: Wallet,
   receipts: ReceiptText,
   'payment-links': Link2,
+  'social-sales': Share2,
   departments: Building2,
   analytics: ChartNoAxesColumnIncreasing,
   activity: ScrollText,

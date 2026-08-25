@@ -57,6 +57,12 @@ export const DASHBOARD_NAV_DEFINITIONS: DashboardNavDefinition[] = [
     subscriptionFeature: 'payment_links',
   },
   {
+    name: 'Social Sales',
+    segment: '/social-sales',
+    iconKey: 'social-sales',
+    subscriptionFeature: 'social_sales',
+  },
+  {
     name: 'Departments',
     segment: '/departments',
     iconKey: 'departments',
@@ -98,6 +104,7 @@ const NATIVE_MORE_PRIORITY = [
   'Departments',
   'Multi-Store Sync',
   'Payment links',
+  'Social Sales',
   'Activity Logs',
   'Help center',
   'Settings',
