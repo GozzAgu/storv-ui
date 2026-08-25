@@ -62,7 +62,8 @@ npm run cap:build
 
 - Staff **Active / Removed** tabs, **⋮** actions menu, move/remove/reactivate modals
 - **Email sign-in details** when adding staff (Resend via hosted API)
-- **Teams** bottom tab (departments list for current store; managers and owners)
+- **Teams** bottom tab (departments list for current store; super admin only)
+- **Customer buybacks** and **Stock loans** in the **More** menu (same role rules as web: all staff can record buybacks; stock loans require manager or super admin on Enterprise)
 - Round profile avatars in top nav and sidebar
 - Modals and side panels render as **right-edge drawers** in `#dashboard-native-overlay-host`
 - **Storvv Assistant** — calls hosted `/api/assistant/*` via `NUXT_PUBLIC_API_BASE` or `NUXT_PUBLIC_APP_ORIGIN` fallback

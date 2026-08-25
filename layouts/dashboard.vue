@@ -848,6 +848,11 @@ import {
   NATIVE_PRIMARY_ORDER_WITH_PAYMENT_LINKS,
   type DashboardNavItem,
 } from '~/utils/dashboard-native-nav'
+import {
+  DASHBOARD_NAV_DEFINITIONS,
+  filterDashboardNavItems,
+  orderNativeMoreNavItems,
+} from '~/utils/dashboard-nav-filter'
 import { shouldShowWebNavSection, webNavSectionLabel } from '~/utils/dashboard-web-nav-groups'
 import type { DashboardNavIconKey } from '~/utils/dashboard-nav-icons'
 import { isPaymentLinksNativeComingSoon, isPaymentLinksComingSoon } from '~/utils/payment-links-launch'
@@ -868,7 +873,6 @@ import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useTheme } from '~/composables/useTheme'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
-import type { SubscriptionFeature } from '~/types/subscription'
 import { useNotificationsStore } from '~/stores/notifications'
 import { useInventoryStore } from '~/stores/inventory'
 import { useReceiptsStore } from '~/stores/receipts'
@@ -1065,117 +1069,26 @@ const sidebarLogoImgClass = computed(() => {
   ]
 })
 
-const navigation: Array<{
-  name: string
-  segment: string
-  href?: string
-  iconKey: DashboardNavIconKey
-  requiresSuperAdmin?: boolean
-  requiresManagerOrSuperAdmin?: boolean
-  subscriptionFeature?: SubscriptionFeature
-}> = [
-  {
-    name: 'Dashboard',
-    segment: '',
-    iconKey: 'dashboard',
-    subscriptionFeature: 'dashboard',
-  },
-  {
-    name: 'Inventory',
-    segment: '/inventory',
-    iconKey: 'inventory',
-    subscriptionFeature: 'inventory',
-  },
-  {
-    name: 'Sales',
-    segment: '/receipts',
-    iconKey: 'receipts',
-    subscriptionFeature: 'receipts',
-  },
-  {
-    name: 'Customer buybacks',
-    segment: '/buybacks',
-    iconKey: 'buybacks',
-    subscriptionFeature: 'inventory',
-  },
-  {
-    name: 'Stock loans',
-    segment: '/seller-loans',
-    iconKey: 'loans',
-    subscriptionFeature: 'seller_loans',
-    requiresManagerOrSuperAdmin: true,
-  },
-  {
-    name: 'Multi-Store Sync',
-    segment: '/multi-store-sync',
-    iconKey: 'sync',
-    requiresSuperAdmin: true,
-    subscriptionFeature: 'multi_store_sync',
-  },
-  {
-    name: 'Payment links',
-    segment: '/payment-links',
-    iconKey: 'payment-links',
-    subscriptionFeature: 'payment_links',
-  },
-  {
-    name: 'Departments',
-    segment: '/departments',
-    iconKey: 'departments',
-    requiresSuperAdmin: true,
-    subscriptionFeature: 'departments',
-  },
-  {
-    name: 'Analytics',
-    segment: '/analytics',
-    iconKey: 'analytics',
-    subscriptionFeature: 'analytics',
-    requiresManagerOrSuperAdmin: true,
-  },
-  {
-    name: 'Activity Logs',
-    segment: '/activity',
-    iconKey: 'activity',
-    subscriptionFeature: 'activity_logs',
-    requiresManagerOrSuperAdmin: true,
-  },
-  { name: 'Help center', segment: '/help', iconKey: 'help' },
-  {
-    name: 'Settings',
-    segment: '/settings',
-    iconKey: 'settings',
-    subscriptionFeature: 'settings',
-  },
-  {
-    name: 'Profile',
-    segment: '/profile',
-    iconKey: 'profile',
-    subscriptionFeature: 'profile',
-  },
-]
+const navigation = DASHBOARD_NAV_DEFINITIONS
 
-// Filter navigation based on user role and subscription plan
+// Filter navigation based on user role and subscription plan (web sidebar + iOS/Android bottom nav)
 const filteredNavigation = computed(() => {
   const isManager =
     userStore.userData?.role === 'staff' && staffStore.getCurrentStaffMember?.role === 'manager'
-  const canSeeManagerOnlyFeatures = userStore.isSuperAdmin || isManager
-  return navigation
-    .filter((item) => {
-      if (item.segment === '/payment-links' && isPaymentLinksComingSoon()) return false
-      if (item.requiresSuperAdmin && !userStore.isSuperAdmin) return false
-      if (item.requiresManagerOrSuperAdmin && !canSeeManagerOnlyFeatures) return false
-      if (item.subscriptionFeature && !canUseSubscriptionFeature(item.subscriptionFeature))
-        return false
-      return true
-    })
-    .map((item) => ({
-      ...item,
-      href:
-        item.name === 'Departments'
-          ? resolveStoreDepartmentsPath(storesStore.currentStoreId, storesStore.stores[0]?.id) ??
-            dashPath('/departments')
-          : dashPath(item.segment),
-    }))
+
+  return filterDashboardNavItems(navigation, {
+    isSuperAdmin: userStore.isSuperAdmin,
+    isManager,
+    canUseFeature: canUseSubscriptionFeature,
+    hidePaymentLinks: isPaymentLinksComingSoon(),
+  }).map((item) => ({
+    ...item,
+    href:
+      item.name === 'Departments'
+        ? resolveStoreDepartmentsPath(storesStore.currentStoreId, storesStore.stores[0]?.id) ??
+          dashPath('/departments')
+        : dashPath(item.segment),
+  }))
 })
 
 /**
@@ -1204,7 +1117,7 @@ const nativeNavSplit = computed(() =>
   splitNativeBottomNav(nativeNavigationItems.value, nativePrimaryOrder.value)
 )
 const nativePrimaryNav = computed(() => nativeNavSplit.value.primary)
-const nativeMoreNav = computed(() => nativeNavSplit.value.more)
+const nativeMoreNav = computed(() => orderNativeMoreNavItems(nativeNavSplit.value.more))
 
 const route = useRoute()
 const { dashPath, isDemoDashboard, matchesDashboardPath } = useDashboardPaths()
