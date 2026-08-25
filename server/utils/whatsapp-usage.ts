@@ -1,8 +1,14 @@
 import { createError } from 'h3'
 import { FieldValue } from 'firebase-admin/firestore'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
+import { whatsAppLimitMessage } from '~/utils/plan-gate-message'
 import { getPlanLimits } from '~/types/subscription'
 import type { SubscriptionPlan } from '~/types/subscription'
+
+export async function isStaffAccount(uid: string): Promise<boolean> {
+  const snap = await getAdminFirestore().collection('users').doc(uid).get()
+  return snap.data()?.role === 'staff'
+}
 
 function currentMonthKey(): string {
   const now = new Date()
@@ -31,9 +37,10 @@ export async function assertWhatsAppSendAllowed(uid: string): Promise<void> {
   const usageSnap = await usageRef.get()
   const count = usageSnap.exists ? Number(usageSnap.data()?.count) || 0 : 0
   if (count >= limit) {
+    const forStaff = await isStaffAccount(uid)
     throw createError({
       statusCode: 429,
-      message: `Monthly send limit reached (${count}/${limit}). Upgrade to Storvv Medium for unlimited sends.`,
+      message: whatsAppLimitMessage(count, limit, { forStaff }),
     })
   }
 }
@@ -52,9 +59,10 @@ export async function incrementWhatsAppUsage(uid: string): Promise<void> {
       const snap = await tx.get(usageRef)
       const count = snap.exists ? Number(snap.data()?.count) || 0 : 0
       if (count >= limit) {
+        const forStaff = await isStaffAccount(uid)
         throw createError({
           statusCode: 429,
-          message: `Monthly send limit reached (${count}/${limit}). Upgrade to Storvv Medium for unlimited sends.`,
+          message: whatsAppLimitMessage(count, limit, { forStaff }),
         })
       }
       tx.set(

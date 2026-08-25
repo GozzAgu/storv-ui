@@ -400,21 +400,30 @@
       v-if="!inventoryStore.loading && inventoryStore.folders.length === 0"
       :icon="FolderIcon"
       :title="
-        selectedDepartmentId
+        isStaff && !searchQuery
+          ? 'No categories in your department'
+          : selectedDepartmentId
           ? `No categories in ${getDepartmentName(selectedDepartmentId) ?? 'this department'}`
           : searchQuery
           ? 'No categories found'
           : 'No categories yet'
       "
       :description="
-        selectedDepartmentId
+        isStaff && !searchQuery
+          ? 'Categories shared with your department will appear here. Ask your admin if you need access to more.'
+          : selectedDepartmentId
           ? 'Try another department or clear the filter to see all categories.'
           : searchQuery
           ? 'Try a different search term.'
           : 'Categories group products so your team can find stock faster.'
       "
       :tips="
-        selectedDepartmentId
+        isStaff && !searchQuery
+          ? [
+              'Your view is limited to categories your department can access',
+              'Contact your admin if you expect to see more categories',
+            ]
+          : selectedDepartmentId
           ? [
               'Categories can be shared across departments or restricted',
               'Clear the department filter to browse everything',

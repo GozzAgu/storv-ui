@@ -244,10 +244,14 @@
 
     <div v-else class="rounded-sm bg-amber-50/90 px-4 py-4 dark:bg-amber-950/25 sm:px-5 sm:py-5">
       <p class="text-xs font-medium text-amber-900 dark:text-amber-100">
-        Stock loans are included on Storvv Enterprise: lend serial inventory until it sells or comes
-        back to the store. Upgrade in Settings when you are ready.
+        {{
+          isStaff
+            ? 'Stock loans are not enabled for your workspace.'
+            : 'Stock loans are included on Storvv Enterprise: lend serial inventory until it sells or comes back to the store. Upgrade in Settings when you are ready.'
+        }}
       </p>
       <NuxtLink
+        v-if="!isStaff"
         to="/dashboard/settings"
         class="mt-2 inline-block text-xs font-medium text-amber-900 underline underline-offset-2 dark:text-amber-200"
       >
@@ -414,7 +418,7 @@ const { tableShellFlexClass } = useDashboardTableChrome()
 
 const sellerLoansStore = useSellerLoanOutsStore()
 const storesStore = useStoresStore()
-const { canManage } = usePermissions()
+const { canManage, isStaff } = usePermissions()
 const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
 const toast = useAppToast()
 

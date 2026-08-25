@@ -48,11 +48,13 @@
         {{
           accessDeniedByRole
             ? 'Activity Logs are available to super admins and store managers only.'
-            : 'Activity Logs are included on Storvv Medium and Enterprise. Upgrade your plan to enable auditing.'
+            : isStaff
+              ? 'Activity Logs are not enabled for your workspace.'
+              : 'Activity Logs are included on Storvv Medium and Enterprise. Upgrade your plan to enable auditing.'
         }}
       </p>
       <NuxtLink
-        v-if="!accessDeniedByRole"
+        v-if="!accessDeniedByRole && userStore.isSuperAdmin"
         to="/dashboard/settings"
         class="mt-3 inline-flex text-xs font-medium text-primary-600 transition hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
       >
@@ -278,6 +280,7 @@ const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
 const isManager = computed(
   () => userStore.userData?.role === 'staff' && staffStore.getCurrentStaffMember?.role === 'manager'
 )
+const isStaff = computed(() => userStore.userData?.role === 'staff')
 const hasPlanAccess = computed(() => canUseSubscriptionFeature('activity_logs'))
 const canAccess = computed(() => (userStore.isSuperAdmin || isManager.value) && hasPlanAccess.value)
 const accessDeniedByRole = computed(() => !userStore.isSuperAdmin && !isManager.value)

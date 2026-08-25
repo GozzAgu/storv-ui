@@ -2,6 +2,8 @@ import { createError, defineEventHandler } from 'h3'
 import { FieldValue } from 'firebase-admin/firestore'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
 import { requireAuth } from '~/server/utils/store-auth'
+import { isStaffAccount } from '~/server/utils/whatsapp-usage'
+import { whatsAppLimitMessage } from '~/utils/plan-gate-message'
 import { getPlanLimits } from '~/types/subscription'
 import type { SubscriptionPlan } from '~/types/subscription'
 
@@ -64,9 +66,10 @@ export default defineEventHandler(async (event) => {
   })
 
   if (!result.success) {
+    const forStaff = await isStaffAccount(auth.uid)
     throw createError({
       statusCode: 429,
-      message: `Monthly WhatsApp limit reached (${result.count}/${result.limit}). Upgrade to Storvv Medium for unlimited sends.`,
+      message: whatsAppLimitMessage(result.count, result.limit, { forStaff }),
     })
   }
 

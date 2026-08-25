@@ -99,7 +99,7 @@ export function useAnalyticsFeatureInsights(
   const customerAccountsStore = useCustomerAccountsStore()
   const userStore = useUserStore()
   const { formatCurrency } = usePreferences()
-  const { canViewProfitAndCost } = usePermissions()
+  const { canViewProfitAndCost, isStaff } = usePermissions()
   const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
   const { dashPath } = useDashboardPaths()
 
@@ -341,7 +341,10 @@ export function useAnalyticsFeatureInsights(
         href: dashPath('/receipts?tab=customers'),
         linkLabel: 'View customers',
       },
-      {
+    ]
+
+    if (!isStaff.value) {
+      insights.push({
         id: 'operations',
         icon: ChartBarIcon,
         title: 'Operations',
@@ -357,11 +360,13 @@ export function useAnalyticsFeatureInsights(
         ],
         href: dashPath('/settings'),
         linkLabel: 'Settings',
-      },
-    ]
+      })
+    }
+
+    const insightsWithProfit: AnalyticsFeatureInsight[] = insights
 
     if (canViewProfitAndCost.value) {
-      insights.splice(5, 0, {
+      insightsWithProfit.splice(5, 0, {
         id: 'profit',
         icon: CurrencyDollarIcon,
         title: 'Profit & cost',
@@ -382,27 +387,25 @@ export function useAnalyticsFeatureInsights(
       })
     }
 
-    if (userStore.isSuperAdmin) {
-      insights.push({
-        id: 'buybacks',
-        icon: InboxArrowDownIcon,
-        title: 'Customer buybacks',
-        description: `Trade-ins recorded · ${periodText.value.toLowerCase()}`,
-        highlight:
-          buybacksInPeriod.value.length > 0
-            ? formatCurrency(buybackPaidInPeriod.value)
-            : 'No buybacks',
-        metrics: [
-          { label: 'Buybacks', value: String(buybacksInPeriod.value.length) },
-          { label: 'Total paid', value: formatCurrency(buybackPaidInPeriod.value) },
-        ],
-        href: dashPath('/buybacks'),
-        linkLabel: 'View buybacks',
-      })
-    }
+    insightsWithProfit.push({
+      id: 'buybacks',
+      icon: InboxArrowDownIcon,
+      title: 'Customer buybacks',
+      description: `Trade-ins recorded · ${periodText.value.toLowerCase()}`,
+      highlight:
+        buybacksInPeriod.value.length > 0
+          ? formatCurrency(buybackPaidInPeriod.value)
+          : 'No buybacks',
+      metrics: [
+        { label: 'Buybacks', value: String(buybacksInPeriod.value.length) },
+        { label: 'Total paid', value: formatCurrency(buybackPaidInPeriod.value) },
+      ],
+      href: dashPath('/buybacks'),
+      linkLabel: 'View buybacks',
+    })
 
     if (canUseSubscriptionFeature('customer_balance')) {
-      insights.push({
+      insightsWithProfit.push({
         id: 'customer-balance',
         icon: CurrencyDollarIcon,
         title: 'Customer balance',
@@ -421,7 +424,7 @@ export function useAnalyticsFeatureInsights(
     }
 
     if (canUseSubscriptionFeature('seller_loans')) {
-      insights.push({
+      insightsWithProfit.push({
         id: 'stock-loans',
         icon: ArchiveBoxIcon,
         title: 'Stock loans',
@@ -439,7 +442,7 @@ export function useAnalyticsFeatureInsights(
       })
     }
 
-    return insights
+    return insightsWithProfit
   })
 
   return {

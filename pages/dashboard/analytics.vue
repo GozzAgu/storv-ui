@@ -1831,7 +1831,7 @@ const loadAnalytics = async () => {
       departmentsStore.fetchDepartments(),
     ]
 
-    if (userStore.isSuperAdmin) {
+    if (userStore.userData) {
       tasks.push(buybacksStore.fetchCustomerBuybacks(true))
     }
     if (canUseSubscriptionFeature('seller_loans')) {

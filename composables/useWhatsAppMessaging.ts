@@ -3,6 +3,7 @@ import type { SubscriptionPlan } from '~/types/subscription'
 import { deliverReceiptViaClientWhatsApp } from '~/composables/useWhatsAppFileShare'
 import { blobToBase64 } from '~/utils/file-share'
 import { resolveApiPath } from '~/utils/api-url'
+import { planGateMessage, sanitizePlanGateErrorForStaff } from '~/utils/plan-gate-message'
 
 export interface WhatsAppUsageState {
   count: number
@@ -36,6 +37,7 @@ function fetchErrorMessage(e: unknown): string {
 
 export function useWhatsAppMessaging() {
   const authStore = useAuthStore()
+  const userStore = useUserStore()
   const { plan, canUse } = useSubscriptionFeatures()
   const toast = useAppToast()
   const config = useRuntimeConfig()
@@ -43,6 +45,7 @@ export function useWhatsAppMessaging() {
 
   const hasFeature = computed(() => canUse('whatsapp_messaging'))
   const hasBalanceFeature = computed(() => canUse('customer_balance'))
+  const isStaff = computed(() => userStore.userData?.role === 'staff')
 
   const usage = ref<WhatsAppUsageState | null>(null)
   const usageLoading = ref(false)
@@ -122,7 +125,9 @@ export function useWhatsAppMessaging() {
         },
       })) as DeliverReceiptApiResponse
     } catch (e: unknown) {
-      throw new Error(fetchErrorMessage(e))
+      throw new Error(
+        sanitizePlanGateErrorForStaff(fetchErrorMessage(e), isStaff.value)
+      )
     }
 
     await refreshUsage()
@@ -180,7 +185,10 @@ export function useWhatsAppMessaging() {
     ) {
       return ''
     }
-    return 'Upgrade to Storvv Medium for unlimited receipt delivery.'
+    return planGateMessage(
+      isStaff.value,
+      'Upgrade to Storvv Medium for unlimited receipt delivery.'
+    )
   }
 
   onMounted(() => {

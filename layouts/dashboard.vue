@@ -1097,7 +1097,6 @@ const navigation: Array<{
     segment: '/buybacks',
     iconKey: 'buybacks',
     subscriptionFeature: 'inventory',
-    requiresSuperAdmin: true,
   },
   {
     name: 'Stock loans',
@@ -1123,7 +1122,7 @@ const navigation: Array<{
     name: 'Departments',
     segment: '/departments',
     iconKey: 'departments',
-    requiresManagerOrSuperAdmin: true,
+    requiresSuperAdmin: true,
     subscriptionFeature: 'departments',
   },
   {

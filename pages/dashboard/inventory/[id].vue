@@ -264,6 +264,7 @@
             :has-serial-numbers="child.hasSerialNumbers"
             :allowed-department-ids="child.allowedDepartments"
             :resolve-department-name="getDepartmentName"
+            :show-departments="!isStaff"
             :availability-stats="inventoryStore.folderAvailabilityStats[child.id] ?? null"
             :stats-loading="inventoryStore.availabilityStatsLoading"
             :track-profit="child.trackProfit === true"
@@ -2000,6 +2001,7 @@ import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useStoresStore } from '~/stores/stores'
 import { usePermissions } from '~/composables/usePermissions'
+import { planGateMessage } from '~/utils/plan-gate-message'
 import { useSubscriptionFeatures } from '~/composables/useSubscriptionFeatures'
 import { useAppToast } from '~/composables/useAppToast'
 import { usePreferences } from '~/composables/usePreferences'
@@ -2063,7 +2065,7 @@ const authStore = useAuthStore()
 const userStore = useUserStore()
 const storesStore = useStoresStore()
 const departmentsStore = useDepartmentsStore()
-const { canManageInventoryItems, canManage, canViewProfitAndCost, canCreateInventoryFolders } =
+const { canManageInventoryItems, canManage, canViewProfitAndCost, canCreateInventoryFolders, isStaff } =
   usePermissions()
 const canShowProfitAndCost = computed(
   () => canViewProfitAndCost.value && folder.value?.trackProfit === true
@@ -3209,7 +3211,7 @@ const createSellerLoanModalItems = computed(
 
 const sellerLoansEnterpriseUnlocked = computed(() => subscriptionFeaturesUi.canUse('seller_loans'))
 
-/** Super admin / manager + Enterprise + serial-number folder; same gate as Stock loan toolbar and row menu */
+/** Managers / super admin + Enterprise + serial-number folder */
 const canLoanToSellerUi = computed(
   () => !!(canManage.value && sellerLoansEnterpriseUnlocked.value && folder.value?.hasSerialNumbers)
 )
@@ -4243,7 +4245,12 @@ const openBulkDiscountModal = () => {
 
 const openCreateSellerLoanModal = () => {
   if (!subscriptionFeaturesUi.canUse('seller_loans')) {
-    toast.error('Stock loans are included on Storvv Enterprise. Upgrade in Settings.')
+    toast.error(
+      planGateMessage(
+        isStaff.value,
+        'Stock loans are included on Storvv Enterprise. Upgrade in Settings.'
+      )
+    )
     return
   }
   if (!folder.value?.hasSerialNumbers) {
@@ -4262,7 +4269,12 @@ const handleLoanToSellerFromMenu = (item: InventoryItem) => {
   openItemMenuId.value = null
   if (!canManage.value) return
   if (!subscriptionFeaturesUi.canUse('seller_loans')) {
-    toast.error('Stock loans are included on Storvv Enterprise. Upgrade in Settings.')
+    toast.error(
+      planGateMessage(
+        isStaff.value,
+        'Stock loans are included on Storvv Enterprise. Upgrade in Settings.'
+      )
+    )
     return
   }
   if (!folder.value?.hasSerialNumbers) {

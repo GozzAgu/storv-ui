@@ -32,7 +32,7 @@
       class="rounded-sm bg-red-50/90 px-4 py-4 dark:bg-red-950/25 sm:px-5 sm:py-5"
     >
       <p class="text-xs font-medium text-red-800 dark:text-red-200">
-        Only store owners can record buybacks because new inventory rows are created.
+        Sign in to record customer buybacks for your branch.
       </p>
     </div>
 
@@ -152,7 +152,7 @@ import CreateBuybackModal from '~/components/buybacks/CreateBuybackModal.vue'
 import { useCustomerBuybacksStore, type CustomerBuyback } from '~/stores/customerBuybacks'
 import { useInventoryStore } from '~/stores/inventory'
 import { useStoresStore } from '~/stores/stores'
-import { useUserStore } from '~/stores/user'
+import { useAuthStore } from '~/stores/auth'
 
 definePageMeta({
   layout: 'dashboard',
@@ -165,7 +165,7 @@ const { tableShellFlexClass } = useDashboardTableChrome()
 const buybacksStore = useCustomerBuybacksStore()
 const inventoryStore = useInventoryStore()
 const storesStore = useStoresStore()
-const userStore = useUserStore()
+const authStore = useAuthStore()
 const { formatCurrency } = usePreferences()
 
 const buybackHeaderMetrics = computed(() => {
@@ -187,7 +187,7 @@ const buybackHeaderMetrics = computed(() => {
 
 const showCreateModal = ref(false)
 
-const canAccess = computed(() => userStore.isSuperAdmin)
+const canAccess = computed(() => !!authStore.currentUser)
 
 function folderName(folderId: string) {
   return inventoryStore.getFolderById(folderId)?.name || 'Inventory'
