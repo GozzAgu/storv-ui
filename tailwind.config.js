@@ -90,7 +90,7 @@ export default {
         sidenav: '0.125rem',
       },
       /**
-       * iOS typography aliases — authoritative styles live in ios-typography.css
+       * iOS typography aliases - authoritative styles live in ios-typography.css
        * (scoped to html.capacitor-ios.capacitor-native). These sizes mirror the
        * token scale for IDE hints and optional web preview; use useIosTypography()
        * in Vue for native-first components.

@@ -14,7 +14,7 @@ export type IosTextClassOptions = {
   secondary?: boolean
 }
 
-/** Pure helper — safe to unit test without Nuxt runtime. */
+/** Pure helper - safe to unit test without Nuxt runtime. */
 export function buildIosTextClass(
   role: IosTypographyRole,
   options?: IosTextClassOptions

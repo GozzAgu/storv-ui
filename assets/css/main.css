@@ -259,7 +259,7 @@
 /**
  * Theme cross-fade (light ↔ dark): only while `theme-transitioning` is on <html>
  * (see `stores/theme.ts`). Durations stay aligned with `THEME_TRANSITION_MS` there.
- * Shell surfaces only — avoid transitioning every button/link (large DOM = jank).
+ * Shell surfaces only - avoid transitioning every button/link (large DOM = jank).
  */
 html.theme-transitioning,
 body.theme-transitioning,

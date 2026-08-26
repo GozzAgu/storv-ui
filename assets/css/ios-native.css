@@ -1,5 +1,5 @@
 /**
- * iOS native styles — loaded only in Capacitor shell (see plugins/00.capacitor.client.ts).
+ * iOS native styles - loaded only in Capacitor shell (see plugins/00.capacitor.client.ts).
  * Keeps the main web bundle CSS smaller and faster to parse on first paint.
  */
 @import './ios-design-tokens.css';

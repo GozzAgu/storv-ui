@@ -37,13 +37,13 @@ For local testing, temporarily set:
 http://localhost:3000/auth/action
 ```
 
-Firebase allows one action URL per project — switch it when testing locally, then set it back for production.
+Firebase allows one action URL per project - switch it when testing locally, then set it back for production.
 
 ### 4. Email templates
 
 Open each template, set the subject, and paste HTML into the **message body**.
 
-**Hide the long URL:** use `%LINK%` only inside `href="..."`. The visible text should be **click here** or a button label — never paste `%LINK%` as plain text on its own line (that is what causes the ugly raw URL in Gmail).
+**Hide the long URL:** use `%LINK%` only inside `href="..."`. The visible text should be **click here** or a button label - never paste `%LINK%` as plain text on its own line (that is what causes the ugly raw URL in Gmail).
 
 Minimal copy-paste (recommended to start):
 
@@ -72,9 +72,9 @@ Example snippet for verification (paste in Firebase template editor):
 
 Firebase placeholders:
 
-- `%LINK%` — secure action URL (**href only**, not visible text)
-- `%EMAIL%` — recipient email
-- `%APP_NAME%` — public-facing project name
+- `%LINK%` - secure action URL (**href only**, not visible text)
+- `%EMAIL%` - recipient email
+- `%APP_NAME%` - public-facing project name
 
 Paste into the template editor and save. Request a **new** email to see the change.
 
@@ -88,8 +88,8 @@ For a custom **from** address (`noreply@storvv.com`), configure Firebase/Google 
 
 1. User clicks `%LINK%` → opens `https://app.storvv.com/auth/action?mode=…&oobCode=…`
 2. [`pages/auth/action.vue`](../pages/auth/action.vue) runs the Firebase action:
-   - `verifyEmail` → confirms address, then sends user to sign-in
-   - `resetPassword` → shows new-password form, then sign-in
+ - `verifyEmail` → confirms address, then sends user to sign-in
+ - `resetPassword` → shows new-password form, then sign-in
 3. Outbound emails use in-app handling via [`utils/firebase-auth-action.ts`](../utils/firebase-auth-action.ts) (`handleCodeInApp: true`).
 
 Legacy links that land on `/signin?mode=…` are redirected to `/auth/action` automatically.
@@ -109,7 +109,7 @@ NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN=storv-ux.firebaseapp.com
 
 1. Sign up or use **Resend verification** on `/dashboard/verify-email`
 2. Confirm the email uses the Storvv template and links to `app.storvv.com/auth/action`
-3. Complete verification — you should see the Storvv auth shell, not the Firebase default page
+3. Complete verification - you should see the Storvv auth shell, not the Firebase default page
 4. Repeat with **Forgot password** → set a new password on `/auth/action`
 
 ## Troubleshooting
@@ -120,5 +120,5 @@ NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN=storv-ux.firebaseapp.com
 | `auth/invalid-continue-uri` | Add your domain under **Authorized domains** |
 | Raw URL shown in email body | Edit Firebase template: replace standalone `%LINK%` with `<a href="%LINK%">click here</a>` |
 | Email in spam | Mark as not spam; add custom domain + SPF/DKIM; avoid raw URL-only templates |
-| White Firebase page (“Your email has been verified” + blue CONTINUE) | Set **Customize action URL** to `https://app.storvv.com/auth/action` and request a **new** email — old links still hit Firebase’s hosted page |
+| White Firebase page (“Your email has been verified” + blue CONTINUE) | Set **Customize action URL** to `https://app.storvv.com/auth/action` and request a **new** email - old links still hit Firebase’s hosted page |
 | Expired link | Request a fresh verification or reset email |

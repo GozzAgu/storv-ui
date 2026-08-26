@@ -1,5 +1,5 @@
 /**
- * Storvv iOS typography system — single source of truth for native text.
+ * Storvv iOS typography system - single source of truth for native text.
  * Scoped to html.capacitor-ios.capacitor-native only (no web impact).
  *
  * Usage:
@@ -89,13 +89,13 @@ html.capacitor-ios.capacitor-native {
   --ios-type-caption2-leading: var(--ios-type-leading-snug);
   --ios-type-caption2-tracking: var(--ios-type-tracking-loose);
 
-  /* Form fields — 16px minimum to prevent iOS focus zoom */
+  /* Form fields - 16px minimum to prevent iOS focus zoom */
   --ios-type-input-size: 1rem;
   --ios-type-input-weight: 400;
   --ios-type-input-leading: var(--ios-type-leading);
 }
 
-/* Role utilities — only active on Capacitor iOS */
+/* Role utilities - only active on Capacitor iOS */
 html.capacitor-ios.capacitor-native .text-ios-display,
 html.capacitor-ios.capacitor-native .ios-type-display {
   font-family: var(--ios-type-font-family);
@@ -237,7 +237,7 @@ html.capacitor-ios.capacitor-native .ios-type-tabular {
   font-feature-settings: 'tnum' 1;
 }
 
-/* Dynamic Type — modest scaling for accessibility (rem-based tokens) */
+/* Dynamic Type - modest scaling for accessibility (rem-based tokens) */
 @media (min-width: 20rem) {
   html.capacitor-ios.capacitor-native.ios-type-scale-large {
     font-size: 106.25%;

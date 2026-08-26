@@ -1,8 +1,8 @@
-# Storvv Marketing — Premium Landing Design System
+# Storvv Marketing - Premium Landing Design System
 
 **North star:** *"Apple launched an operating system for modern retailers."*
 
-**Scope:** Marketing site visual/UX only — no product or route changes.
+**Scope:** Marketing site visual/UX only - no product or route changes.
 
 **Companion:** [STORVV_PRODUCT_STATE.md](./STORVV_PRODUCT_STATE.md), [WEB_PREMIUM_DESIGN_SYSTEM.md](./WEB_PREMIUM_DESIGN_SYSTEM.md)
 
@@ -39,17 +39,17 @@
 
 ## Page structure
 
-1. **Nav** — Product · Solutions · Features · Pricing · Resources · Sign in · Get Started
-2. **Hero** — Headline + product showcase
-3. **Social proof** — Trusted by modern retailers (stats, categories)
-4. **Product stories** — Inventory · Sales · Multi-store · Analytics · Team
-5. **AI assistant** — Intelligent retail assistant
-6. **Demo + screenshots** — Existing components, refreshed copy
-7. **Security** — Trust section
-8. **Pricing** — Micro / Medium / Enterprise
+1. **Nav** - Product · Solutions · Features · Pricing · Resources · Sign in · Get Started
+2. **Hero** - Headline + product showcase
+3. **Social proof** - Trusted by modern retailers (stats, categories)
+4. **Product stories** - Inventory · Sales · Multi-store · Analytics · Team
+5. **AI assistant** - Intelligent retail assistant
+6. **Demo + screenshots** - Existing components, refreshed copy
+7. **Security** - Trust section
+8. **Pricing** - Micro / Medium / Enterprise
 9. **FAQ + Contact**
 10. **Final CTA**
-11. **Footer** — Product · Solutions · Resources · Company · Legal
+11. **Footer** - Product · Solutions · Resources · Company · Legal
 
 ---
 

@@ -34,7 +34,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     return navigateTo('/signin', { replace: true })
   }
 
-  // Legacy Firebase links sometimes land on /signin with action params — route to the handler page.
+  // Legacy Firebase links sometimes land on /signin with action params - route to the handler page.
   if (to.path === '/signin' && (to.query.mode || to.query.oobCode)) {
     return navigateTo({ path: '/auth/action', query: to.query, hash: to.hash || undefined })
   }
@@ -96,7 +96,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
         return navigateTo('/dashboard/onboarding')
       }
 
-      // Already completed setup in this session — skip onboarding while profile reloads.
+      // Already completed setup in this session - skip onboarding while profile reloads.
       if (
         !profileLoaded &&
         sessionOnboardingComplete &&

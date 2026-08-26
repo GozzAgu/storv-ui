@@ -1,5 +1,5 @@
 /**
- * Muted ApexCharts defaults for Capacitor iOS — calmer grid, no legend noise.
+ * Muted ApexCharts defaults for Capacitor iOS - calmer grid, no legend noise.
  */
 export function mergeIosApexChartTheme<T extends Record<string, unknown>>(
   options: T,

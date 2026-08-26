@@ -110,7 +110,7 @@ html.capacitor-native[data-native-drawer-open] .dashboard-native-main {
   overflow: hidden !important;
 }
 
-/* CRUD drawers sit above pagination — hide the footer while a drawer is open */
+/* CRUD drawers sit above pagination - hide the footer while a drawer is open */
 html.capacitor-native[data-native-drawer-open] .dashboard-fixed-footer,
 html[data-drawer-open] .dashboard-fixed-footer {
   opacity: 0;

@@ -6,9 +6,10 @@
     <div class="min-w-0">
       <p class="text-sm font-semibold text-primary-900 dark:text-primary-100">Interactive demo</p>
       <p class="mt-0.5 text-xs text-gray-600 dark:text-gray-400">
-        You are using the real Storvv dashboard with sample data saved in this browser. Explore every
-        Enterprise feature: inventory, sales, buybacks, stock loans, multi-store sync, payment links,
-        departments, analytics, activity logs, and the demo Assistant. No sign-up required.
+        Sandbox preview with fictional sample data stored only in this browser - not a live store or
+        signed-in account. Try Enterprise workflows: inventory, sales, buybacks, stock loans,
+        multi-store sync, payment links, departments, analytics, activity logs, and the demo
+        Assistant.
       </p>
     </div>
     <div class="flex shrink-0 flex-wrap gap-2">

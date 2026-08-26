@@ -1,4 +1,4 @@
-# Mobile app (Capacitor — iOS & Android)
+# Mobile app (Capacitor - iOS & Android)
 
 The native apps load the same Nuxt dashboard from `dist/` (via `nuxt generate`). Web changes are included after you regenerate and open Xcode or Android Studio.
 
@@ -11,7 +11,7 @@ The native apps load the same Nuxt dashboard from `dist/` (via `nuxt generate`).
    NUXT_PUBLIC_APP_ORIGIN=https://app.storvv.com
    ```
 
-   If `NUXT_PUBLIC_API_BASE` is omitted, the app falls back to `NUXT_PUBLIC_APP_ORIGIN` (default `https://app.storvv.com`) at runtime — explicit `NUXT_PUBLIC_API_BASE` is still recommended for production builds.
+   If `NUXT_PUBLIC_API_BASE` is omitted, the app falls back to `NUXT_PUBLIC_APP_ORIGIN` (default `https://app.storvv.com`) at runtime - explicit `NUXT_PUBLIC_API_BASE` is still recommended for production builds.
 
    **Note:** On web in the browser, API calls stay same-origin (`localhost` or `app.storvv.com`). Only the Capacitor shell uses the hosted API base above.
 
@@ -39,7 +39,7 @@ The native apps load the same Nuxt dashboard from `dist/` (via `nuxt generate`).
 Creating staff and **Email sign-in details** uses the same flow as web:
 
 1. App calls `POST /api/staff/send-invite-email` on your **hosted** API (`app.storvv.com`).
-2. Server sends via Resend — keys live on **Vercel**, not in the mobile bundle.
+2. Server sends via Resend - keys live on **Vercel**, not in the mobile bundle.
 
 **Vercel env (required for staff email on device):**
 
@@ -66,7 +66,7 @@ npm run cap:build
 - **Customer buybacks** and **Stock loans** in the **More** menu (same role rules as web: all staff can record buybacks; stock loans require manager or super admin on Enterprise)
 - Round profile avatars in top nav and sidebar
 - Modals and side panels render as **right-edge drawers** in `#dashboard-native-overlay-host`
-- **Storvv Assistant** — calls hosted `/api/assistant/*` via `NUXT_PUBLIC_API_BASE` or `NUXT_PUBLIC_APP_ORIGIN` fallback
+- **Storvv Assistant** - calls hosted `/api/assistant/*` via `NUXT_PUBLIC_API_BASE` or `NUXT_PUBLIC_APP_ORIGIN` fallback
 
 ## Storvv Assistant on mobile
 
@@ -89,7 +89,7 @@ The app does **not** bundle Gemini. Assistant chat goes to your hosted API (same
 
 3. Rebuild and run on device.
 
-   The hosted API must allow Capacitor WebView origins (CORS). That ships with the app server code — **redeploy Vercel** after pulling updates if assistant or staff email fails on device but works in Safari on `app.storvv.com`.
+   The hosted API must allow Capacitor WebView origins (CORS). That ships with the app server code - **redeploy Vercel** after pulling updates if assistant or staff email fails on device but works in Safari on `app.storvv.com`.
 
 4. **Keyboard:** The app uses `@capacitor/keyboard` with `resize: none`. Rebuild after keyboard/drawer updates.
 

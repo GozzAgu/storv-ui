@@ -192,6 +192,7 @@ import {
   Cog6ToothIcon,
   UserCircleIcon,
   RocketLaunchIcon,
+  DevicePhoneMobileIcon,
 } from '~/utils/app-icons'
 import {
   buildAssistantTopicPrompt,
@@ -272,6 +273,7 @@ type Category = DashboardHelpCategory & { icon: Component }
 
 const categoryIcons: Record<DashboardHelpCategoryId, Component> = {
   'recent-updates': RocketLaunchIcon,
+  'mobile-app': DevicePhoneMobileIcon,
   'getting-started': SparklesIcon,
   'navigation-search': Squares2X2Icon,
   inventory: CubeIcon,
@@ -296,23 +298,26 @@ const showBackToTop = ref(false)
 
 const popularTopics = [
   { label: "What's new", query: 'recent updates' },
+  { label: 'Mobile app', query: 'ios android native' },
+  { label: 'Sales leads', query: 'sales leads' },
   { label: 'Subcategories', query: 'organize with subcategories' },
   { label: 'Copy from branch', query: 'copy from branch' },
   { label: 'Create branch', query: 'branch names region' },
   { label: 'Stock loans', query: 'stock loan' },
+  { label: 'Pull to refresh', query: 'pull to refresh' },
   { label: 'Staff & roles', query: 'staff' },
   { label: 'Sales & refunds', query: 'receipt' },
   { label: 'Inventory & categories', query: 'inventory' },
-  { label: 'Sell screen note', query: 'sell' },
   { label: 'Plans & billing', query: 'plan' },
-  { label: 'Departments', query: 'department' },
 ] as const
 
 const quickScreenLinks = [
   { label: 'Dashboard', to: '/dashboard' },
   { label: 'Inventory', to: '/dashboard/inventory' },
+  { label: 'Sales leads', to: '/dashboard/leads' },
   { label: 'Stock loans', to: '/dashboard/seller-loans' },
   { label: 'Sales', to: '/dashboard/receipts' },
+  { label: 'Analytics', to: '/dashboard/analytics' },
   { label: 'Settings', to: '/dashboard/settings' },
   { label: 'Profile', to: '/dashboard/profile' },
 ] as const

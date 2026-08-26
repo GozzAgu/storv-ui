@@ -56,8 +56,8 @@
           :class="variant === 'float' ? '' : 'text-sm leading-relaxed text-gray-600 dark:text-gray-400'"
         >
           <template v-if="isDemoAssistant">
-            Demo assistant uses canned tips about buybacks, analytics insights, Quick Sale,
-            stock loans, and more. Sample numbers in charts are not your real store.
+            Demo assistant uses canned tips about the iOS app, sales leads, buybacks,
+            analytics, Quick Sale, stock loans, and more. Sample numbers in charts are not your real store.
           </template>
           <template v-else>
             I can explain Storvv screens, permissions, and workflows. I do not see your live stock,
@@ -262,10 +262,10 @@ const messagesEl = ref<HTMLElement | null>(null)
 const inputEl = ref<HTMLInputElement | HTMLTextAreaElement | null>(null)
 
 const suggestedPrompts = [
+  'What is new in the Storvv iOS app?',
+  'How do sales leads work?',
   'How do optional subcategories work?',
   'How do I copy categories from another branch?',
-  'How do I create a branch with my region cities?',
-  'How do customer buybacks work?',
   'What is in Analytics feature insights?',
 ] as const
 

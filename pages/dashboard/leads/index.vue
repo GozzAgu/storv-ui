@@ -104,7 +104,7 @@
             title="No leads yet"
             description="Log walk-ins, phone calls, and other enquiries here. Convert them to a sale when the customer buys."
             :tips="[
-              'Source is manual — no integrations required',
+              'Source is manual - no integrations required',
               'Use Create sale on a lead to open the receipt wizard',
             ]"
           />
@@ -160,7 +160,7 @@
                     {{
                       lead.estimatedValue && lead.estimatedValue > 0
                         ? formatCurrency(lead.estimatedValue)
-                        : '—'
+                        : ' - '
                     }}
                   </td>
                   <td class="whitespace-nowrap text-[11px]">

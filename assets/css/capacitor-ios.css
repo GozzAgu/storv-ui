@@ -1,5 +1,5 @@
 /**
- * Capacitor iOS — layout, glass chrome, legacy typography remaps.
+ * Capacitor iOS - layout, glass chrome, legacy typography remaps.
  * New typography: assets/css/ios-typography.css + useIosTypography().
  * Phase 1 will migrate remaps below to --ios-type-* tokens.
  * Scoped to html.capacitor-ios.capacitor-native (web + Android unchanged).
@@ -500,7 +500,7 @@ html.capacitor-ios.capacitor-native .dash-profile-stats__value {
   letter-spacing: -0.02em;
 }
 
-/* Roles & permissions — native grouped list feel */
+/* Roles & permissions - native grouped list feel */
 html.capacitor-ios.capacitor-native .dash-roles {
   gap: 1rem;
 }

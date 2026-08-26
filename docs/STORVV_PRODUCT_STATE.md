@@ -1,4 +1,4 @@
-# Storvv — Product & Engineering State (Snapshot)
+# Storvv - Product & Engineering State (Snapshot)
 
 **Purpose:** Feed this document to GPT (or any LLM) for accurate context on what Storvv is, what is built, what is partial, and how the app is structured.
 
@@ -23,7 +23,7 @@
 | Layer | Technology |
 |-------|------------|
 | Frontend | Nuxt 4, Vue 3, Pinia, Tailwind CSS 4, @nuxt/ui |
-| Rendering | SPA (`ssr: false`) — static export for Capacitor |
+| Rendering | SPA (`ssr: false`) - static export for Capacitor |
 | Mobile | Capacitor 8 (iOS primary), biometric auth, secure storage, keyboard handling |
 | Backend | Nitro server routes (`server/api/*`) |
 | Database | Firebase Firestore |
@@ -47,14 +47,14 @@ Three plans: **Storvv Micro**, **Storvv Medium**, **Storvv Enterprise**.
 | Settings, profile, notifications | ✓ | ✓ | ✓ |
 | WhatsApp messaging | ✓ (10/mo) | ✓ unlimited | ✓ unlimited |
 | Payment links (infra) | ✓ | ✓ | ✓ |
-| Analytics & reports | — | ✓ | ✓ |
-| Activity logs | — | ✓ | ✓ |
+| Analytics & reports | - | ✓ | ✓ |
+| Activity logs | - | ✓ | ✓ |
 | Departments & staff (limits) | 1 dept, 2 staff | 10 depts, 25 staff | unlimited |
-| Customer balance ledger | — | ✓ | ✓ |
-| Duplicate category (same branch) | — | ✓ | ✓ |
-| Copy category templates across branches | — | — | ✓ |
-| Stock loans | — | — | ✓ |
-| Multi-store sync & transfers | — | — | ✓ |
+| Customer balance ledger | - | ✓ | ✓ |
+| Duplicate category (same branch) | - | ✓ | ✓ |
+| Copy category templates across branches | - | - | ✓ |
+| Stock loans | - | - | ✓ |
+| Multi-store sync & transfers | - | - | ✓ |
 | Max branches | 1 | 2 | unlimited |
 
 Billing: Paystack, monthly / quarterly / yearly cycles.
@@ -124,7 +124,7 @@ Firestore rules enforce stricter server-side limits (e.g. folder CRUD often owne
 - **Department access:** Optional per-category ACL.
 - **Category detail:** Product table, discounts, item history, fullscreen mode, barcode/QR where applicable.
 - **Duplicate category** (same branch): Medium+.
-- **Copy from branch** (Enterprise): Side drawer — pick source branch, select **top-level** categories, optional **Also copy subcategories** checkbox; copies templates only (not stock).
+- **Copy from branch** (Enterprise): Side drawer - pick source branch, select **top-level** categories, optional **Also copy subcategories** checkbox; copies templates only (not stock).
 - **Data export:** Settings → ZIP (nested categories), Excel for sales/buybacks/loans.
 
 **Recent (2026):** Optional subcategories toggle; copy-from-branch hierarchy; region-based branch names in settings.
@@ -133,7 +133,7 @@ Firestore rules enforce stricter server-side limits (e.g. folder CRUD often owne
 
 **Status: Built**
 
-- **Create New Sale:** 4-step drawer — parent category → subcategory (if needed) → items → checkout (customer, payment, balance due).
+- **Create New Sale:** 4-step drawer - parent category → subcategory (if needed) → items → checkout (customer, payment, balance due).
 - **Quick Sale:** Side drawer from Sales page; barcode scanner support; same category hierarchy.
 - **Sell screen notes:** Per-branch note shown during sale flows (configured in Settings).
 - **Receipt statuses:** completed, balance_due, refunded, pending, cancelled.
@@ -185,7 +185,7 @@ Firestore rules enforce stricter server-side limits (e.g. folder CRUD often owne
 
 ### 6.8 Payment links
 
-**Status: Partial — infrastructure built, dashboard UI coming soon**
+**Status: Partial - infrastructure built, dashboard UI coming soon**
 
 - Paystack subaccounts, server APIs, public `/pay/[token]` page exist.
 - Dashboard page shows **coming soon** (`PAYMENT_LINKS_COMING_SOON = true`).
@@ -224,7 +224,7 @@ Firestore rules enforce stricter server-side limits (e.g. folder CRUD often owne
 - **Help center** (`/dashboard/help`): 10 categories, searchable articles, popular topics, quick screen links.
 - **Assistant:** Gemini-powered in production; opens from header and help page.
 - **Demo assistant:** Keyword-based canned replies (no API).
-- Knowledge base: `utils/dashboard-help-content.ts` — includes recent updates (subcategories, copy-from-branch, branch cities, buybacks, analytics insights, stock loans, Quick Sale drawer).
+- Knowledge base: `utils/dashboard-help-content.ts` - includes recent updates (subcategories, copy-from-branch, branch cities, buybacks, analytics insights, stock loans, Quick Sale drawer).
 - Replies sanitized to plain text (no Markdown bold).
 
 ### 6.13 Notifications & activity
@@ -247,7 +247,7 @@ Firestore rules enforce stricter server-side limits (e.g. folder CRUD often owne
 
 ## 7. Demo mode
 
-**Status: Built — comprehensive**
+**Status: Built - comprehensive**
 
 - Entry: `/demo` → `/demo/dashboard`.
 - LocalStorage seed v7: 3 branches (Lagos, Abuja, Port Harcourt) with realistic inventory hierarchy (e.g. Phones → Smartphones, Toyota → Corolla/Camry/Highlander).
@@ -279,7 +279,7 @@ Firestore rules enforce stricter server-side limits (e.g. folder CRUD often owne
 | Paystack | Subscriptions, payment links, webhooks |
 | Cloudinary | Account/store logos (unsigned upload preset) |
 | WhatsApp Cloud API | Receipt delivery, balance nudges |
-| Resend | Email receipts (partial — some UI still “coming soon”) |
+| Resend | Email receipts (partial - some UI still “coming soon”) |
 | Google Gemini | Dashboard assistant |
 | Vercel | Hosting preset, KV rate limits |
 
@@ -338,12 +338,12 @@ All operational data is **scoped to active branch** (`storeId`) except Enterpris
 
 ## 13. Known limitations & coming soon
 
-1. **Payment links dashboard** — flagged coming soon; backend largely ready.
-2. **Email receipts** — toast says “coming soon” in some flows; Resend infra exists.
-3. **Firestore vs UI permissions** — managers with inventory flag may hit rule mismatches on folder CRUD (owner-only in rules).
-4. **Payment links on native** — separate coming-soon flag.
-5. **Subcategory nesting** — intentionally one level only (parent → child, no deeper trees).
-6. **Assistant** — cannot access live store data; guidance only.
+1. **Payment links dashboard** - flagged coming soon; backend largely ready.
+2. **Email receipts** - toast says “coming soon” in some flows; Resend infra exists.
+3. **Firestore vs UI permissions** - managers with inventory flag may hit rule mismatches on folder CRUD (owner-only in rules).
+4. **Payment links on native** - separate coming-soon flag.
+5. **Subcategory nesting** - intentionally one level only (parent → child, no deeper trees).
+6. **Assistant** - cannot access live store data; guidance only.
 
 ---
 
@@ -362,7 +362,7 @@ Use this section to gauge “how far we’ve gone” in the latest iteration:
 | Demo | Seed v7 with subcategory hierarchies; copy-from-branch works locally; iOS build path |
 | UX | Category drawer scrollable; checkboxes styled consistently; faster theme toggle |
 | Content | Help center + assistant updated for subcategories, copy-from-branch, branch cities |
-| Polish | Em dash (`—`) removed app-wide (regex fix on profile page) |
+| Polish | Em dash (` - `) removed app-wide (regex fix on profile page) |
 
 ---
 
@@ -379,7 +379,7 @@ Use this section to gauge “how far we’ve gone” in the latest iteration:
 
 ## 16. One-paragraph pitch (for context)
 
-Storvv is a Firebase-backed, Paystack-billed retail OS for multi-location shops: track inventory in customizable categories (with optional one-level subcategories), ring up sales via wizard or Quick Sale, manage customers and balance ledgers, record buybacks and Enterprise stock loans, sync stock across branches, and report through Analytics with feature-level insights. It ships as a Nuxt SPA with an iOS app, in-app help, Gemini assistant, and a full demo mode—aimed at emerging markets (Nigeria-first) with region-aware branch naming and NGN pricing.
+Storvv is a Firebase-backed, Paystack-billed retail OS for multi-location shops: track inventory in customizable categories (with optional one-level subcategories), ring up sales via wizard or Quick Sale, manage customers and balance ledgers, record buybacks and Enterprise stock loans, sync stock across branches, and report through Analytics with feature-level insights. It ships as a Nuxt SPA with an iOS app, in-app help, Gemini assistant, and a full demo mode - aimed at emerging markets (Nigeria-first) with region-aware branch naming and NGN pricing.
 
 ---
 

@@ -41,7 +41,7 @@
 <script setup lang="ts">
 withDefaults(
   defineProps<{
-    /** Hide title/eyebrow/description — command header shows screen context on iOS. */
+    /** Hide title/eyebrow/description - command header shows screen context on iOS. */
     iosContextOnly?: boolean
   }>(),
   { iosContextOnly: false }

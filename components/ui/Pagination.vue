@@ -7,7 +7,7 @@
     >
       <span class="dash-pagination__summary-label">Showing</span>
       <span class="dash-pagination__summary-range dash-num">
-        {{ displayStart }}<span class="dash-pagination__summary-sep">–</span>{{ displayEnd }}
+        {{ displayStart }}<span class="dash-pagination__summary-sep">-</span>{{ displayEnd }}
       </span>
       <span class="dash-pagination__summary-of">of</span>
       <span class="dash-pagination__summary-total dash-num">{{ total }}</span>

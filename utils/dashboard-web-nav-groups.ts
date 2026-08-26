@@ -1,6 +1,6 @@
 /**
  * Visual grouping for web sidebar navigation.
- * Does not change routes, permissions, or item order — only section labels.
+ * Does not change routes, permissions, or item order - only section labels.
  */
 
 export const WEB_NAV_SECTIONS = [

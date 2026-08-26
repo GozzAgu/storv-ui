@@ -1,5 +1,5 @@
 /**
- * Storvv iOS premium design tokens — glass materials, typography, motion.
+ * Storvv iOS premium design tokens - glass materials, typography, motion.
  * Scoped to html.capacitor-native. See docs/IOS_PREMIUM_DESIGN_SYSTEM.md
  */
 
@@ -38,7 +38,7 @@ html.capacitor-native {
   --ios-topnav-border: var(--ios-glass-border);
   --ios-topnav-shadow: var(--ios-glass-shadow), var(--ios-glass-highlight);
   --ios-topnav-blur: var(--ios-glass-blur);
-  /* Slight lift above the home indicator — still low, not floating mid-screen */
+  /* Slight lift above the home indicator - still low, not floating mid-screen */
   --ios-bottomnav-float-gap: 0px;
   --ios-bottomnav-edge-pad: 0.875rem;
   --ios-bottomnav-inset: 1rem;
@@ -257,7 +257,7 @@ html.capacitor-native.dark .dash-grid-shell--table {
   box-shadow: var(--ios-glass-shadow), var(--ios-glass-highlight);
 }
 
-/* ── Floating tab bar — quiet glass capsule (matches top nav material) ── */
+/* ── Floating tab bar - quiet glass capsule (matches top nav material) ── */
 html.capacitor-native .native-tabbar {
   position: relative;
   margin-inline: 0;
@@ -377,7 +377,7 @@ html.capacitor-native .native-tabbar__tab[aria-selected='true'] svg {
   }
 }
 
-/* ── Floating pagination footer pill (native — teleported to body) ── */
+/* ── Floating pagination footer pill (native - teleported to body) ── */
 html.capacitor-native .dashboard-fixed-footer--native {
   isolation: isolate;
   /* Below CRUD drawers (overlay host z-58); above page content */
@@ -419,7 +419,7 @@ html.capacitor-native.dark .dashboard-fixed-footer--native::before {
   );
 }
 
-/* Compact single-row pagination — reclaim vertical space above the tab bar */
+/* Compact single-row pagination - reclaim vertical space above the tab bar */
 html.capacitor-native .dashboard-fixed-footer--native .dashboard-fixed-footer__inner {
   padding: 0.3125rem 0.5rem 0.3125rem 0.875rem;
   overflow: hidden;

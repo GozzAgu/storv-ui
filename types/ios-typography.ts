@@ -1,5 +1,5 @@
 /**
- * Storvv iOS typography roles — Apple semantic scale.
+ * Storvv iOS typography roles - Apple semantic scale.
  * Use via `useIosTypography()`; styles apply only under html.capacitor-ios.capacitor-native.
  * @see assets/css/ios-typography.css
  */

@@ -17,6 +17,9 @@ describe('dashboard help content', () => {
   it('builds a knowledge base with article titles', () => {
     const kb = buildDashboardHelpKnowledgeBase()
     expect(kb).toContain('## Inventory')
+    expect(kb).toContain('## Mobile app (iOS & Android)')
+    expect(kb).toContain('Storvv iOS app redesign')
+    expect(kb).toContain('Sales leads pipeline')
     expect(kb).toContain('Subcategories (one level under a parent category)')
     expect(kb).toContain('Optional subcategories when creating categories')
     expect(kb).toContain('Copy from branch: optional subcategories')
@@ -24,6 +27,7 @@ describe('dashboard help content', () => {
     expect(kb).toContain('Create New Sale')
     expect(kb).toContain('Customer buybacks')
     expect(kb).toContain('Feature insights')
+    expect(kb).toContain('Pull to refresh')
   })
 
   it('builds a system prompt with safety rules', () => {
@@ -32,6 +36,8 @@ describe('dashboard help content', () => {
     expect(prompt).toContain('NEVER invent live store data')
     expect(prompt).toContain('Organize with subcategories')
     expect(prompt).toContain('Copy from branch')
+    expect(prompt).toContain('Sales leads')
+    expect(prompt).toContain('Native iOS')
     expect(prompt).toContain('Do NOT use Markdown bold')
     expect(prompt).toContain('Sample knowledge')
   })

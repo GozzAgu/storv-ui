@@ -1,7 +1,7 @@
-# Storvv Web — Premium SaaS Design System & Redesign Spec
+# Storvv Web - Premium SaaS Design System & Redesign Spec
 
 **Role:** Senior SaaS product design + frontend architecture  
-**Scope:** Visual system, UX, layout, components — **no business logic, routes, permissions, or data changes**  
+**Scope:** Visual system, UX, layout, components - **no business logic, routes, permissions, or data changes**  
 **Platform:** Web dashboard (`html:not(.capacitor-native)`)  
 **Companion:** [STORVV_PRODUCT_STATE.md](./STORVV_PRODUCT_STATE.md), [IOS_PREMIUM_DESIGN_SYSTEM.md](./IOS_PREMIUM_DESIGN_SYSTEM.md)
 
@@ -45,7 +45,7 @@ Implemented in `assets/css/web-design-tokens.css` as `--saas-*` on `.dashboard-l
 | `--saas-ink` | `#0f172a` | `#f8fafc` | Primary text |
 | `--saas-muted` | `#64748b` | `#94a3b8` | Labels, meta |
 
-**Rule:** Color communicates status — never decorates empty space.
+**Rule:** Color communicates status - never decorates empty space.
 
 ### 2.2 Typography
 
@@ -67,9 +67,9 @@ Use `font-variant-numeric: tabular-nums` on all business numbers (class: `.saas-
 
 Three tiers:
 
-1. **Canvas** — flat background  
-2. **Glass card** — `.saas-glass-card` — blur 20px, subtle border, soft shadow  
-3. **Elevated** — `.saas-glass-card--elevated` — modals, command palette, assistant panel  
+1. **Canvas** - flat background  
+2. **Glass card** - `.saas-glass-card` - blur 20px, subtle border, soft shadow  
+3. **Elevated** - `.saas-glass-card--elevated` - modals, command palette, assistant panel  
 
 ```css
 .saas-glass-card {
@@ -168,7 +168,7 @@ Lagos · Lekki branch
 
 **Header actions:** + Add Product · + Create Category · Import · Export
 
-**Search:** Full-width `.saas-search-bar` — sticky below top nav on scroll
+**Search:** Full-width `.saas-search-bar` - sticky below top nav on scroll
 
 **Category grid:**
 - Glass cards with icon tile, name, product count, stock value, health dot
@@ -213,7 +213,7 @@ Receipt rows/cards show:
 - Feature insight grid (`AnalyticsFeatureInsightCard`)
 - Export bar (PDF / Excel)
 
-Chart theme: Apple Fitness / Stripe — muted axes, no chart junk.
+Chart theme: Apple Fitness / Stripe - muted axes, no chart junk.
 
 ### 4.6 Settings
 
@@ -255,7 +255,7 @@ Toggle switches: existing checkbox/toggle components, unified spacing.
 | `SidePanel` | `components/ui/SidePanel.vue` | Drawers / sale flow |
 | `DataTableToolbar` | existing | Table chrome |
 
-Native iOS equivalents live in `components/ios/` — do not mix scopes.
+Native iOS equivalents live in `components/ios/` - do not mix scopes.
 
 ---
 
@@ -279,8 +279,8 @@ Native iOS equivalents live in `components/ios/` — do not mix scopes.
 
 | Breakpoint | Sidebar | Metrics | Tables |
 |------------|---------|---------|--------|
-| `< lg` | Drawer | 1–2 col | Accordion rows |
-| `lg–xl` | Floating full | 2–3 col | Horizontal scroll |
+| `< lg` | Drawer | 1-2 col | Accordion rows |
+| `lg-xl` | Floating full | 2-3 col | Horizontal scroll |
 | `≥ xl` | Floating / collapsed | 4 col | Full table |
 
 ---
@@ -297,27 +297,27 @@ Native iOS equivalents live in `components/ios/` — do not mix scopes.
 
 ## 9. Implementation roadmap
 
-### Phase 1 — Foundation ✅ (started)
-- [x] `web-design-tokens.css` — tokens, glass cards, floating sidebar
+### Phase 1 - Foundation ✅ (started)
+- [x] `web-design-tokens.css` - tokens, glass cards, floating sidebar
 - [x] Sidebar nav section labels
 - [x] `SaasGlassCard`, `SaasMetricCard`, `SaasGroupedSection`, `SaasListRow`
 - [x] Time-based dashboard greeting (web)
 
-### Phase 2 — Shell polish
+### Phase 2 - Shell polish
 - [ ] Top nav visual refresh (search pill, action cluster)
 - [ ] Dashboard home metric grid with `SaasMetricCard`
 - [ ] Card hover animations globally
 
-### Phase 3 — Inventory & sales
+### Phase 3 - Inventory & sales
 - [ ] Category card redesign
 - [ ] Sticky inventory search
 - [ ] Sale wizard step chrome
 
-### Phase 4 — Analytics & settings
+### Phase 4 - Analytics & settings
 - [ ] Chart theme tokens for ApexCharts
 - [ ] Settings grouped layout with `SaasGroupedSection`
 
-### Phase 5 — Polish
+### Phase 5 - Polish
 - [ ] Page transitions
 - [ ] Enhanced empty states pass
 - [ ] Assistant panel glass treatment
@@ -351,7 +351,7 @@ Users should feel:
 - *I can manage everything easily*
 - *This product is worth paying for*
 
-Benchmark visually against Stripe Dashboard, Shopify Admin, and Linear — not generic admin templates.
+Benchmark visually against Stripe Dashboard, Shopify Admin, and Linear - not generic admin templates.
 
 ---
 

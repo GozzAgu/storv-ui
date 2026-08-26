@@ -7,6 +7,50 @@ type DemoAssistantRule = {
 
 const DEMO_ASSISTANT_RULES: DemoAssistantRule[] = [
   {
+    keywords: ['ios', 'iphone', 'ipad', 'android', 'mobile app', 'native app', 'capacitor', 'tab bar', 'more menu'],
+    reply: [
+      'The Storvv mobile app uses the same data as the web dashboard with native navigation.',
+      '',
+      '- Bottom tabs: Home, Stock, Sales, Analytics.',
+      '- More sheet: Operations (buybacks, stock loans, sales leads, payment links), Organization, Account.',
+      '- Command header with branch pill for super admins; sheets instead of centered modals.',
+      '- Pull to refresh on Home, Sales, Analytics, and Inventory.',
+      '- Sales: Quick Sale FAB, swipe receipts for View / Share / Refund.',
+      '',
+      'Rebuild with npm run cap:build after updates. Set NUXT_PUBLIC_API_BASE for assistant and staff email.',
+    ].join('\n'),
+  },
+  {
+    keywords: ['pull to refresh', 'pull-to-refresh', 'refresh list', 'swipe down'],
+    reply: [
+      'Pull to refresh is available on the iOS app for main lists.',
+      '',
+      '- Home, Sales, Analytics, inventory categories, and category detail.',
+      '- Pull down at the top to reload that screen after branch changes or teammate updates.',
+    ].join('\n'),
+  },
+  {
+    keywords: ['swipe', 'refund sale', 'share sale'],
+    reply: [
+      'On iOS Sales, swipe a receipt row left for quick actions.',
+      '',
+      '- View sale and Share sale are always available.',
+      '- Refund sale appears for completed receipts when managers or super admins can edit.',
+    ].join('\n'),
+  },
+  {
+    keywords: ['sales lead', 'sales leads', 'lead pipeline', 'walk-in', 'enquiry', 'inquiry'],
+    reply: [
+      'Sales leads (Medium and Enterprise) track enquiries before they become receipts.',
+      '',
+      '- Open /dashboard/leads or More → Sales leads on iOS.',
+      '- Add contact, product interest, source, and assignee; update status New → Contacted → Negotiating.',
+      '- Create sale opens the receipt wizard with customer prefilled; completing marks the lead Won.',
+      '',
+      'Demo includes sample leads with dummy contact info.',
+    ].join('\n'),
+  },
+  {
     keywords: ['buyback', 'trade-in', 'trade in', 'swap-in', 'swap in'],
     reply: [
       'Customer buybacks let super admins record trade-ins from customers.',
@@ -20,13 +64,13 @@ const DEMO_ASSISTANT_RULES: DemoAssistantRule[] = [
     ].join('\n'),
   },
   {
-    keywords: ['analytics', 'feature insight', 'report', 'export', 'chart'],
+    keywords: ['analytics', 'feature insight', 'report', 'export', 'chart', 'import spreadsheet'],
     reply: [
       'Analytics & Reports (Medium and Enterprise) includes charts plus Feature insights cards.',
       '',
-      '- Pick Daily, Weekly, or Monthly at the top.',
+      '- Pick Daily, Weekly, or Monthly at the top (segmented control on iOS).',
       '- Review period summary, inventory health, and insight cards for sales, returns, outstanding balances, customers, profit, buybacks, loans, and payment links.',
-      '- Export PDF or Excel from the header.',
+      '- Web: Export PDF or Excel from the toolbar. iOS: Export sheet for PDF or Excel; Import picks .xlsx/.csv (coming soon for full processing).',
       '',
       'Demo data is seeded locally; numbers are illustrative, not live.',
     ].join('\n'),
@@ -122,8 +166,8 @@ const DEMO_ASSISTANT_RULES: DemoAssistantRule[] = [
     reply: [
       'You are using Storvv Assistant in demo mode with canned guidance (no live AI or store data).',
       '',
-      '- Ask about sales, inventory subcategories, copy from branch, branch setup, buybacks, analytics, stock loans, or payment links.',
-      '- Open Help center from the sidebar for the full searchable guide.',
+      '- Ask about the iOS app, sales leads, subcategories, copy from branch, buybacks, analytics, stock loans, or payment links.',
+      '- Open Help center from the sidebar or More menu for the full searchable guide.',
       '- Sign up for a real account to use Gemini-powered assistant on your hosted workspace.',
     ].join('\n'),
   },
@@ -159,15 +203,14 @@ const DEMO_ASSISTANT_DEFAULT = [
   'I can explain Storvv workflows in this demo using sample guidance (not live AI).',
   '',
   'Try asking about:',
+  '- Storvv iOS app (tabs, More menu, pull to refresh)',
+  '- Sales leads pipeline',
   '- Organize with subcategories (optional)',
   '- Copy from branch with subcategories',
-  '- Create branch with region cities',
-  '- Customer buybacks',
-  '- Analytics feature insights',
-  '- Quick Sale or Create New Sale',
-  '- Stock loans or payment links',
+  '- Customer buybacks and Analytics feature insights',
+  '- Quick Sale, stock loans, or payment links',
   '',
-  'Open Help center from the sidebar for the full guide.',
+  'Open Help center from the sidebar or More menu for the full guide.',
 ].join('\n')
 
 function normalize(text: string): string {

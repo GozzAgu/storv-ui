@@ -30,6 +30,17 @@ describe('demo assistant', () => {
     expect(reply.toLowerCase()).toContain('organize')
   })
 
+  it('answers iOS app questions', () => {
+    const reply = generateDemoAssistantReply('How does the iOS app work?')
+    expect(reply.toLowerCase()).toContain('tab')
+    expect(reply.toLowerCase()).toContain('more')
+  })
+
+  it('answers sales leads questions', () => {
+    const reply = generateDemoAssistantReply('Tell me about sales leads')
+    expect(reply.toLowerCase()).toContain('lead')
+  })
+
   it('returns a default reply for unknown topics', () => {
     const reply = generateDemoAssistantReply('xyzzy unknown topic')
     expect(reply.toLowerCase()).toContain('demo')

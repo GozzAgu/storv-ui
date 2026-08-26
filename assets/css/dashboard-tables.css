@@ -343,7 +343,7 @@ html.dark .dash-pagination__page--active {
   user-select: none;
 }
 
-/* Viewport-pinned pagination footer (teleported to body — tokens must not depend on main) */
+/* Viewport-pinned pagination footer (teleported to body - tokens must not depend on main) */
 .dashboard-fixed-footer {
   position: fixed;
   isolation: isolate;

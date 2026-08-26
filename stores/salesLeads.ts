@@ -176,7 +176,7 @@ export const useSalesLeadsStore = defineStore('salesLeads', {
         authStore.currentUser?.email?.split('@')[0] ||
         'User'
       const entityName = detail
-        ? `${lead.customerName} — ${detail}`
+        ? `${lead.customerName} - ${detail}`
         : `Lead: ${lead.customerName}`
 
       await logActivity({

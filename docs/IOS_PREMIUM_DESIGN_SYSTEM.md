@@ -1,7 +1,7 @@
-# Storvv iOS — Premium Design System & Redesign Spec
+# Storvv iOS - Premium Design System & Redesign Spec
 
 **Role:** Senior iOS product design + Apple HIG alignment  
-**Scope:** Visual system, interaction patterns, native iOS UX — **no business logic changes**  
+**Scope:** Visual system, interaction patterns, native iOS UX - **no business logic changes**  
 **Platform:** Capacitor iOS shell (`html.capacitor-native`)  
 **Companion:** [STORVV_PRODUCT_STATE.md](./STORVV_PRODUCT_STATE.md), existing native CSS in `assets/css/capacitor-native*.css`
 
@@ -59,7 +59,7 @@ ACCOUNT
   Notifications          → /dashboard/notifications
 ```
 
-**Implementation hook:** Extend `utils/dashboard-native-nav.ts` — set `NATIVE_PRIMARY_ORDER` to `['Dashboard', 'Inventory', 'Sales', 'Analytics']` and map labels in `nativeNavShortLabel`.
+**Implementation hook:** Extend `utils/dashboard-native-nav.ts` - set `NATIVE_PRIMARY_ORDER` to `['Dashboard', 'Inventory', 'Sales', 'Analytics']` and map labels in `nativeNavShortLabel`.
 
 ### 2.2 Top chrome (native)
 
@@ -81,7 +81,7 @@ Replace minimal title bar with **command header**:
 
 ---
 
-## 3. Visual language — glass & depth
+## 3. Visual language - glass & depth
 
 Inspired by iOS 18 materials + Vision Pro restraint (professional, not sci-fi).
 
@@ -209,7 +209,7 @@ Support **Dynamic Type:** use `rem` + `@media` scaling; avoid fixed-height stat 
 | **Warning** | `#ff9500` | `#ff9f0a` | Low stock, balance due |
 | **Neutral metric** | label secondary | label secondary | Counts, labels |
 
-Do not color entire cards — use **left accent stripe** (4px) or **small badge** only.
+Do not color entire cards - use **left accent stripe** (4px) or **small badge** only.
 
 ---
 
@@ -233,10 +233,10 @@ Build under `components/ios/` (native-only via `v-if="isNativeApp"` or CSS scopi
 | `IosEmptyState` | Illustration + CTA | `DashboardTableEmptyState` |
 | `IosSkeleton` | Loading placeholders | spinners |
 
-**Sheets:** Continue `DashboardNativeSheet` — add variants:
-- `variant="glass"` — frosted large detent
-- `variant="checkout"` — sale flow steps
-- `variant="picker"` — branch/category selection
+**Sheets:** Continue `DashboardNativeSheet` - add variants:
+- `variant="glass"` - frosted large detent
+- `variant="checkout"` - sale flow steps
+- `variant="picker"` - branch/category selection
 
 ### 6.2 Tab bar redesign
 
@@ -244,15 +244,15 @@ Evolve `DashboardNativeBottomNav.vue`:
 
 - **Floating pill tab bar** inset 16px from bottom safe area (iOS 18 floating tab aesthetic)
 - Glass background, blur, subtle border
-- **Spring indicator** (existing `native-tabbar__indicator` — soften animation)
+- **Spring indicator** (existing `native-tabbar__indicator` - soften animation)
 - 4 primary tabs + More (5th)
-- Haptic: `UIImpactFeedbackGenerator.light` on tab change (Capacitor Haptics plugin — future)
+- Haptic: `UIImpactFeedbackGenerator.light` on tab change (Capacitor Haptics plugin - future)
 
 ### 6.3 FAB placement
 
 | Screen | FAB | Action |
 |--------|-----|--------|
-| Inventory | — | Search prominent in header |
+| Inventory | - | Search prominent in header |
 | Inventory detail | + | Add product |
 | Sales | + | Create New Sale |
 | Sales (alt) | Scan icon | Quick Sale / barcode |
@@ -271,7 +271,7 @@ FAB: 56×56, accent fill, white icon, shadow `--ios-glass-shadow`, bottom-right 
 ```
 [Command Header]
 
-[Revenue Hero Card — glass, full width]
+[Revenue Hero Card - glass, full width]
   Today's sales     ₦XXX,XXX
   vs yesterday      +12.4% ↑
   [sparkline 7-day mini chart]
@@ -281,10 +281,10 @@ FAB: 56×56, accent fill, white icon, shadow `--ios-glass-shadow`, bottom-right 
   3,420 items       |  ₦XXX due
   12 low stock      |  4 customers
 
-[Business health — horizontal scroll chips]
+[Business health - horizontal scroll chips]
   Recent sales · Stock moved · Buybacks · Loans
 
-[Widget row — optional Medium+]
+[Widget row - optional Medium+]
   Analytics preview card → tap opens Analytics tab
 
 [Activity snippet]
@@ -296,21 +296,21 @@ FAB: 56×56, accent fill, white icon, shadow `--ios-glass-shadow`, bottom-right 
 - Tap low stock → Inventory filtered view
 - Tap branch pill → branch sheet
 
-**Data:** Reuse existing dashboard composables/stores — no new APIs.
+**Data:** Reuse existing dashboard composables/stores - no new APIs.
 
 ### 7.2 Inventory (`/dashboard/inventory`)
 
 ```
-[Search bar — sticky glass]
+[Search bar - sticky glass]
 [Segmented: Categories | Low stock | Recent]  // optional phase 2
 
-[Stock health banner — only if alerts]
+[Stock health banner - only if alerts]
   "12 products need attention"
 
-[Category grid — 2 columns]
+[Category grid - 2 columns]
   Glass category cards:
-  - Name, item count, subcategory count
-  - Status dot (healthy / low / empty)
+ - Name, item count, subcategory count
+ - Status dot (healthy / low / empty)
 
 [Floating: none on list; + on detail]
 ```
@@ -326,9 +326,9 @@ FAB: 56×56, accent fill, white icon, shadow `--ios-glass-shadow`, bottom-right 
 - Large product name (Title 1)
 - Stat row: On hand · Price · Value
 - **Grouped list sections:**
-  - Details (custom fields)
-  - Timeline (history)
-  - Sales linked
+ - Details (custom fields)
+ - Timeline (history)
+ - Sales linked
 - **Toolbar actions:** Edit · Discount · More
 
 **Subcategory hub:** Same grid, breadcrumb in header, “Add subcategory” as inset grouped button.
@@ -338,10 +338,10 @@ FAB: 56×56, accent fill, white icon, shadow `--ios-glass-shadow`, bottom-right 
 **Native layout:**
 - Segmented control: Receipts | Returns | Customers (keep existing tabs, iOS styling)
 - **FAB:** New sale
-- Receipt rows: `IosProductRow` pattern — customer, amount, status pill, time
+- Receipt rows: `IosProductRow` pattern - customer, amount, status pill, time
 - Swipe actions (phase 2): View · Share · Refund (manager+)
 
-**Create Sale flow — bottom sheet stack:**
+**Create Sale flow - bottom sheet stack:**
 
 | Step | Sheet title | Content |
 |------|-------------|---------|
@@ -351,7 +351,7 @@ FAB: 56×56, accent fill, white icon, shadow `--ios-glass-shadow`, bottom-right 
 | 4 | Checkout | Customer, payment, balance due |
 | 5 | Done | Receipt preview, share, print |
 
-Reuse `CreateReceiptWizard` / `QuickSaleModal` logic — re-skin as sheet steps (`DashboardNativeSheet` multi-step).
+Reuse `CreateReceiptWizard` / `QuickSaleModal` logic - re-skin as sheet steps (`DashboardNativeSheet` multi-step).
 
 **Quick Sale:** Separate sheet with scan field pinned top (barcode wedge).
 
@@ -362,19 +362,19 @@ Reuse `CreateReceiptWizard` / `QuickSaleModal` logic — re-skin as sheet steps 
 ```
 [Period segmented: Day | Week | Month]
 
-[Hero revenue card + main chart — full bleed glass]
+[Hero revenue card + main chart - full bleed glass]
 
-[Insight cards — 2 column grid, scroll]
+[Insight cards - 2 column grid, scroll]
   Feature insights (existing data)
 
-[Charts stack — single column]
-  Each in glass card, 200–240px chart height
+[Charts stack - single column]
+  Each in glass card, 200-240px chart height
 
-[Export bar — sticky bottom inset]
+[Export bar - sticky bottom inset]
   PDF | Excel
 ```
 
-Charts: simplify ApexCharts theme for native — muted grid, accent stroke, no heavy legends.
+Charts: simplify ApexCharts theme for native - muted grid, accent stroke, no heavy legends.
 
 ### 7.5 More → Settings (`/dashboard/settings`)
 
@@ -407,7 +407,7 @@ Use `IosNativeListRow` with chevron, optional value on right.
 
 Template `IosEmptyState`:
 
-- Icon: SF Symbol–style line icon (existing Lucide, 48px, muted)
+- Icon: SF Symbol-style line icon (existing Lucide, 48px, muted)
 - Title: Title 3
 - Body: Subhead, max 2 lines
 - Primary button: filled accent
@@ -425,7 +425,7 @@ Copy examples:
 
 | Pattern | Spec |
 |---------|------|
-| Page push | iOS standard — slide from trailing edge (Vue `<Transition name="ios-push">`) |
+| Page push | iOS standard - slide from trailing edge (Vue `<Transition name="ios-push">`) |
 | Sheet present | Spring damping 0.86, duration ~0.45s |
 | Card press | Scale 0.98, opacity 0.92, 120ms |
 | Tab indicator | Spring follow (existing, tune easing) |
@@ -444,7 +444,7 @@ Copy examples:
 - Elevated shadows: deeper, no white inset on dark cards
 - Test contrast: WCAG AA for all stat text
 
-Toggle: existing `stores/theme.ts` — ensure native tab bar and glass tokens swap instantly (160ms theme transition already optimized).
+Toggle: existing `stores/theme.ts` - ensure native tab bar and glass tokens swap instantly (160ms theme transition already optimized).
 
 ---
 
@@ -460,35 +460,35 @@ Toggle: existing `stores/theme.ts` — ensure native tab bar and glass tokens sw
 
 ## 11. Implementation roadmap
 
-### Phase 1 — Foundation (1–2 weeks)
+### Phase 1 - Foundation (1-2 weeks)
 - [ ] Add `--ios-*` tokens to `capacitor-native.css` / new `ios-design-tokens.css`
 - [ ] `IosGlassCard`, `IosStatCard`, `IosNativeListRow`
 - [ ] Update tab bar to 4-tab + More; Analytics in primary
 - [ ] `NativeCommandHeader` on Home
 
-### Phase 2 — Home & Inventory (2–3 weeks)
+### Phase 2 - Home & Inventory (2-3 weeks)
 - [ ] Redesign `/dashboard` native layout with hero + stat grid
 - [ ] Inventory category grid glass cards
 - [ ] `IosSearchBar` sticky header
 - [ ] Product detail grouped lists
 
-### Phase 3 — Sales sheets (2–3 weeks)
+### Phase 3 - Sales sheets (2-3 weeks)
 - [ ] Create Sale as multi-step native sheet
 - [ ] Quick Sale scan-first sheet
 - [ ] FAB wiring
 
-### Phase 4 — Analytics & Settings (1–2 weeks)
+### Phase 4 - Analytics & Settings (1-2 weeks)
 - [ ] Analytics native executive layout
 - [ ] Settings grouped lists
 - [ ] Empty states pass
 
-### Phase 5 — Polish (ongoing)
+### Phase 5 - Polish (ongoing)
 - [ ] Pull-to-refresh
 - [ ] Skeleton loaders
 - [ ] Haptics
 - [ ] Swipe actions on receipts
 
-**Rule:** All changes scoped under `html.capacitor-native` or `components/ios/*` — **web dashboard unchanged**.
+**Rule:** All changes scoped under `html.capacitor-native` or `components/ios/*` - **web dashboard unchanged**.
 
 ---
 

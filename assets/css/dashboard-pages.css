@@ -1400,7 +1400,7 @@ html.dark .dash-help-back-top {
   padding-top: 1rem;
 }
 
-/* Analytics — KPI panel + metric grid */
+/* Analytics - KPI panel + metric grid */
 .dash-analytics {
   width: 100%;
   max-width: none;
@@ -1589,7 +1589,7 @@ main[data-dashboard-main] .dash-analytics .dash-page-metrics--analytics > .dash-
   grid-column: auto !important;
 }
 
-/* Hero metrics — revenue, completed, gross profit */
+/* Hero metrics - revenue, completed, gross profit */
 main[data-dashboard-main] .dash-analytics .dash-page-metrics--analytics .dash-page-metric[data-metric-key='revenue'],
 main[data-dashboard-main] .dash-analytics .dash-page-metrics--analytics .dash-page-metric[data-metric-key='completed'],
 main[data-dashboard-main] .dash-analytics .dash-page-metrics--analytics .dash-page-metric[data-metric-key='profit'] {
@@ -1653,7 +1653,7 @@ main[data-dashboard-main] .dash-analytics .dash-page-metrics--analytics .dash-pa
   border-color: rgb(52 211 153 / 0.2);
 }
 
-/* Feature insights — full-width on analytics */
+/* Feature insights - full-width on analytics */
 .dash-analytics .dash-feature-insights-grid {
   width: 100%;
   grid-template-columns: minmax(0, 1fr);

@@ -1,6 +1,6 @@
 /**
  * Storvv Web SaaS premium design tokens.
- * Scoped to web dashboard only — Capacitor native uses ios-design-tokens.css.
+ * Scoped to web dashboard only - Capacitor native uses ios-design-tokens.css.
  * See docs/WEB_PREMIUM_DESIGN_SYSTEM.md
  */
 
@@ -618,7 +618,7 @@ html:not(.capacitor-native) .dashboard-page-with-footer {
   }
 }
 
-/* ── Compact info cards (web desktop — iOS/native unchanged) ── */
+/* ── Compact info cards (web desktop - iOS/native unchanged) ── */
 
 @media (min-width: 768px) {
   html:not(.capacitor-native) main[data-dashboard-main] .dash-page-header {
@@ -698,7 +698,7 @@ html:not(.capacitor-native) .dashboard-page-with-footer {
     font-size: 0.875rem;
   }
 
-  /* Grid directory cards — tighter, flatter, more columns */
+  /* Grid directory cards - tighter, flatter, more columns */
   html:not(.capacitor-native) main[data-dashboard-main] .dash-grid {
     gap: 0.625rem;
     grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -795,7 +795,7 @@ html:not(.capacitor-native) .dashboard-page-with-footer {
     gap: 0.625rem;
   }
 
-  /* Home KPI tiles — slimmer on wide web */
+  /* Home KPI tiles - slimmer on wide web */
   html:not(.capacitor-native) main[data-dashboard-main] .dash-stat-card__body {
     padding: 0.625rem 0.75rem;
   }

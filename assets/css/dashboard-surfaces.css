@@ -1,5 +1,5 @@
 /**
- * Unified dashboard surface system — one visual language for cards, headers, tables, and grids.
+ * Unified dashboard surface system - one visual language for cards, headers, tables, and grids.
  * Platform glass (ios-design-tokens / web-design-tokens) layers on top of these tokens.
  */
 
@@ -78,7 +78,7 @@ main[data-dashboard-main] .dash-page-header--unified .dash-page-header__toolbar 
   background: transparent;
 }
 
-/* ── Metrics strip — tile grid (counts + currency, no overlap) ── */
+/* ── Metrics strip - tile grid (counts + currency, no overlap) ── */
 main[data-dashboard-main] .dash-page-metrics:not(.dash-page-metrics--analytics) {
   display: grid;
   width: 100%;
