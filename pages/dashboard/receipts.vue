@@ -31,21 +31,29 @@
       </template>
 
       <template v-else>
-        <div class="flex w-full min-h-0 flex-1 flex-col gap-4 sm:gap-5 dash-page--unified">
-          <DashboardPageHeader class="dash-page-header--unified">
+        <div class="flex w-full min-h-0 flex-1 flex-col gap-4 sm:gap-5 dash-page--unified" data-receipts-page>
+          <DashboardPageHeader class="dash-page-header--unified" :ios-context-only="isCapacitorIos">
             <template #eyebrow>
               <p class="dash-eyebrow">Sales</p>
             </template>
             <template #title>
-              <h1 class="dash-page-title !text-lg sm:!text-xl">Sales</h1>
+              <h1 :class="pageTitleClass">Sales</h1>
             </template>
             <template v-if="!receiptsStore.loading" #description>
               <DashboardPageMetrics :metrics="receiptsHeaderMetrics" aria-label="Sales summary" />
             </template>
           </DashboardPageHeader>
 
+          <IosSegmentedControl
+            v-if="isCapacitorIos"
+            v-model="activeTab"
+            role="tablist"
+            aria-label="Sales views"
+            :options="salesTabOptions"
+          />
+
           <!-- Tabs -->
-          <nav :class="segmentTabsClass" aria-label="Sales views" role="tablist">
+          <nav v-else :class="segmentTabsClass" aria-label="Sales views" role="tablist">
             <button
               type="button"
               role="tab"
@@ -189,7 +197,7 @@
                           <XMarkIcon class="h-5 w-5" />
                         </button>
                         <Button
-                          v-if="canCreate"
+                          v-if="canCreate && !isCapacitorIos"
                           variant="outline"
                           size="sm"
                           :icon="QrCodeIcon"
@@ -200,7 +208,7 @@
                           <span :class="headerBtnLabelClass">Quick sale</span>
                         </Button>
                         <Button
-                          v-if="canCreate"
+                          v-if="canCreate && !isCapacitorIos"
                           variant="primary"
                           size="sm"
                           :icon="ReceiptPercentIcon"
@@ -260,7 +268,7 @@
                     </template>
                     <template #actions>
                       <Button
-                        v-if="canCreate"
+                        v-if="canCreate && !isCapacitorIos"
                         variant="outline"
                         size="sm"
                         :icon="QrCodeIcon"
@@ -271,7 +279,7 @@
                         <span :class="headerBtnLabelClass">Quick sale</span>
                       </Button>
                       <Button
-                        v-if="canCreate"
+                        v-if="canCreate && !isCapacitorIos"
                         variant="primary"
                         size="sm"
                         :icon="ReceiptPercentIcon"
@@ -361,6 +369,7 @@
                     <Button
                       v-if="
                         canCreate &&
+                        !isCapacitorIos &&
                         !searchQuery &&
                         statusFilter === 'all' &&
                         dateFilter === 'all'
@@ -381,27 +390,32 @@
                           : 'contents'
                       "
                     >
-                      <!-- Mobile: card list (no horizontal scroll) -->
+                      <!-- Mobile: card list (no horizontal scroll); iOS adds swipe actions -->
                       <div
                         class="receipts-mobile-list space-y-2 sm:hidden"
-                        :class="
+                        :class="[
                           isReceiptsFullscreen
                             ? 'min-h-0 flex-1 overflow-y-auto px-4 pb-4 lg:px-8'
-                            : 'block px-0'
-                        "
+                            : 'block px-0',
+                          isCapacitorIos ? 'receipts-mobile-list--ios' : '',
+                        ]"
                       >
-                        <div
+                        <component
+                          :is="isCapacitorIos ? IosSwipeActions : 'div'"
                           v-for="receipt in paginatedReceipts"
                           :key="receipt.id"
-                          :data-receipt-row="receipt.id"
-                          :data-receipt-flash="flashReceiptId === receipt.id ? '' : undefined"
-                          class="rounded-lg bg-white p-2.5 shadow-none dark:!bg-dashboard-card"
-                          :class="
-                            flashReceiptId === receipt.id
-                              ? '!ring-2 !ring-primary-500/25 ring-offset-2 ring-offset-white dark:bg-gray-800/75 dark:!ring-offset-gray-900'
-                              : ''
-                          "
+                          v-bind="isCapacitorIos ? { actions: receiptSwipeActions(receipt) } : {}"
                         >
+                          <div
+                            :data-receipt-row="receipt.id"
+                            :data-receipt-flash="flashReceiptId === receipt.id ? '' : undefined"
+                            class="rounded-lg bg-white p-2.5 shadow-none dark:!bg-dashboard-card"
+                            :class="
+                              flashReceiptId === receipt.id
+                                ? '!ring-2 !ring-primary-500/25 ring-offset-2 ring-offset-white dark:bg-gray-800/75 dark:!ring-offset-gray-900'
+                                : ''
+                            "
+                          >
                           <div class="flex items-start justify-between gap-2">
                             <div class="min-w-0 flex-1 flex items-start gap-2">
                               <Checkbox
@@ -502,7 +516,8 @@
                               </button>
                             </div>
                           </div>
-                        </div>
+                          </div>
+                        </component>
                       </div>
                       <!-- Desktop / iOS native card table -->
                       <div
@@ -992,6 +1007,12 @@
             />
 
             <QuickSaleModal v-model="showQuickSaleModal" @sale-completed="handleQuickSaleCompleted" />
+
+            <IosSalesFab
+              v-if="isCapacitorIos && canCreate && activeTab === 'receipts' && !isReceiptsFullscreen"
+              @new-sale="openCreateReceiptModal"
+              @quick-sale="openQuickSaleModal"
+            />
 
             <!-- View Receipt Modal -->
             <ViewReceiptModal v-model="showViewReceiptModal" :receipt="selectedReceipt" />
@@ -1647,6 +1668,7 @@ import {
   ReceiptPercentIcon,
   MagnifyingGlassIcon,
   ArrowPathIcon,
+  ArrowDownTrayIcon,
   PrinterIcon,
   EyeIcon,
   UsersIcon,
@@ -1671,6 +1693,9 @@ import Modal from '~/components/ui/Modal.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 // @ts-ignore
 import CreateReceiptModal from '~/components/receipts/CreateReceiptModal.vue'
+import IosSalesFab from '~/components/ios/IosSalesFab.vue'
+import IosSwipeActions, { type IosSwipeAction } from '~/components/ios/IosSwipeActions.vue'
+import IosSegmentedControl from '~/components/ios/IosSegmentedControl.vue'
 // @ts-ignore
 import QuickSaleModal from '~/components/receipts/QuickSaleModal.vue'
 // @ts-ignore
@@ -1899,10 +1924,12 @@ const isInitialLoading = ref(true)
 const {
   headerBtnClass,
   headerBtnLabelClass,
+  pageTitleClass,
   segmentTabsClass,
   segmentTabsBtnClass,
   segmentTabsBtnActiveClass,
 } = useDashboardPageChrome()
+const { isCapacitorIos } = useIsCapacitorIos()
 
 const { tableShellFlexClass } = useDashboardTableChrome()
 
@@ -2230,6 +2257,16 @@ const outstandingReceipts = computed(() =>
     .filter((r) => r.status === 'balance_due')
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 )
+
+const salesTabOptions = computed(() => [
+  { value: 'receipts', label: 'Sales' },
+  {
+    value: 'outstanding',
+    label: 'Outstanding',
+    badge: outstandingReceipts.value.length || undefined,
+  },
+  { value: 'customers', label: 'Customers' },
+])
 
 const filteredOutstandingReceipts = computed(() => {
   const q = outstandingSearchQuery.value.trim().toLowerCase()
@@ -3080,6 +3117,39 @@ async function reloadReceiptsPage() {
   if (!authStore.currentUser) return
   await receiptsStore.fetchReceipts({ force: true })
   await loadCreatorNames()
+}
+
+useIosPullToRefreshRegister(reloadReceiptsPage)
+
+function receiptSwipeActions(receipt: Receipt): IosSwipeAction[] {
+  const actions: IosSwipeAction[] = [
+    {
+      id: 'view',
+      label: 'View sale',
+      shortLabel: 'View',
+      tone: 'primary',
+      icon: EyeIcon,
+      onSelect: () => handleViewReceipt(receipt),
+    },
+    {
+      id: 'share',
+      label: 'Share sale',
+      shortLabel: 'Share',
+      icon: ArrowDownTrayIcon,
+      onSelect: () => handleViewReceipt(receipt),
+    },
+  ]
+  if (receipt.status === 'completed' && canEditReceipts.value) {
+    actions.push({
+      id: 'refund',
+      label: 'Refund sale',
+      shortLabel: 'Refund',
+      tone: 'danger',
+      icon: ArrowPathIcon,
+      onSelect: () => handleRefundReceipt(receipt),
+    })
+  }
+  return actions
 }
 
 // Load receipts on mount

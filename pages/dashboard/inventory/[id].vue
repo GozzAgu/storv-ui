@@ -106,6 +106,7 @@
       </div>
       <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
         <DashboardToolbarSearch
+          v-if="!isCapacitorIos"
           v-model="searchQuery"
           placeholder="Search by name, SKU…"
           :wide="false"
@@ -168,7 +169,7 @@
             @click="handleExportToExcel"
           />
           <Button
-            v-if="canManageInventoryItems"
+            v-if="canManageInventoryItems && !isCapacitorIos"
             variant="primary"
             class="shrink-0 !rounded-xl !px-2 !py-2 text-xs sm:!rounded-2xl sm:!px-3 sm:!py-2.5 sm:text-sm"
             :icon="PlusCircleIcon"
@@ -190,6 +191,13 @@
           </select>
         </div>
       </div>
+    </div>
+
+    <div
+      v-if="isCapacitorIos && !isLoadingFolder && !showCategoryHub"
+      class="ios-search-bar-host ios-search-bar-host--sticky"
+    >
+      <IosSearchBar v-model="searchQuery" placeholder="Search by name, SKU…" />
     </div>
 
     <!-- Category hub: subcategories live inside the parent folder -->
@@ -506,6 +514,7 @@
               </template>
               <template #filters>
                 <DashboardToolbarSearch
+                  v-if="!isCapacitorIos"
                   v-model="searchQuery"
                   placeholder="Search…"
                   :wide="false"
@@ -1072,7 +1081,42 @@
       content-padding="p-4 sm:p-5"
       @close="mobileDetailItem = null"
     >
-      <div v-if="mobileDetailItem" class="space-y-4 pb-2">
+      <IosInventoryItemDetail
+        v-if="isCapacitorIos && mobileDetailItem"
+        :name="getItemPrimaryLabel(mobileDetailItem)"
+        :subtitle="`${folder?.name || 'Category'} · ${formatAvailabilityLabel(
+          getItemAvailability(mobileDetailItem)
+        )}`"
+        :stats="mobileDetailStats(mobileDetailItem)"
+        :detail-rows="mobileDetailRows(mobileDetailItem)"
+        :actions="mobileDetailActions(mobileDetailItem)"
+      >
+        <template #banner>
+          <div
+            v-if="isItemOutOnSellerLoan(mobileDetailItem)"
+            class="rounded-md border border-indigo-200/80 bg-indigo-50/80 px-3 py-2 dark:border-indigo-800/50 dark:bg-indigo-950/35"
+          >
+            <p
+              class="text-[10px] font-semibold uppercase tracking-wide text-indigo-800 dark:text-indigo-200"
+            >
+              Stock loan
+            </p>
+            <p
+              v-if="mobileDetailItem.sellerLoanPartyName"
+              class="mt-0.5 text-sm text-indigo-950 dark:text-indigo-50"
+            >
+              {{ mobileDetailItem.sellerLoanPartyName }}
+            </p>
+            <p
+              v-if="mobileDetailItem.sellerLoanPartyPhone"
+              class="text-xs tabular-nums text-indigo-800/90 dark:text-indigo-200/95"
+            >
+              {{ mobileDetailItem.sellerLoanPartyPhone }}
+            </p>
+          </div>
+        </template>
+      </IosInventoryItemDetail>
+      <div v-else-if="mobileDetailItem" class="space-y-4 pb-2">
         <div
           v-if="isItemOutOnSellerLoan(mobileDetailItem)"
           class="rounded-md border border-indigo-200/80 bg-indigo-50/80 px-3 py-2 dark:border-indigo-800/50 dark:bg-indigo-950/35"
@@ -1953,6 +1997,13 @@
         </div>
       </template>
     </SidePanel>
+
+    <div
+      v-if="isCapacitorIos && canManageInventoryItems && !showCategoryHub && !isLoadingFolder"
+      class="ios-inventory-fab-host"
+    >
+      <IosFab :icon="PlusCircleIcon" aria-label="Add product" @click="openAddItemModal" />
+    </div>
   </div>
 </template>
 
@@ -1986,6 +2037,13 @@ import Button from '~/components/ui/Button.vue'
 import Breadcrumbs from '~/components/ui/Breadcrumbs.vue'
 import Modal from '~/components/ui/Modal.vue'
 import SidePanel from '~/components/ui/SidePanel.vue'
+import IosSearchBar from '~/components/ios/IosSearchBar.vue'
+import IosFab from '~/components/ios/IosFab.vue'
+import IosInventoryItemDetail, {
+  type IosInventoryDetailAction,
+  type IosInventoryDetailRow,
+  type IosInventoryDetailStat,
+} from '~/components/ios/IosInventoryItemDetail.vue'
 import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import {
@@ -2062,6 +2120,7 @@ const folderId = computed(() => route.params.id as string)
 const inventoryStore = useInventoryStore()
 const receiptsStore = useReceiptsStore()
 const authStore = useAuthStore()
+const { isCapacitorIos } = useIsCapacitorIos()
 const userStore = useUserStore()
 const storesStore = useStoresStore()
 const departmentsStore = useDepartmentsStore()
@@ -2509,6 +2568,91 @@ function openMobileItemDetail(item: InventoryItem) {
   mobileDetailItem.value = item
   showMobileItemDetailPanel.value = true
 }
+
+function formatItemColumnForDetail(
+  item: InventoryItem,
+  column: { key: string; label: string; type?: string }
+): string {
+  if (isInventoryUnitCostColumn(column)) {
+    const cost = getItemCostForDisplay(item)
+    return cost !== undefined ? formatCurrency(cost) : '-'
+  }
+  if (isInventorySellPriceColumn(column)) {
+    if (item.discountedPrice !== undefined) {
+      const base = formatCurrency(item.discountedPrice)
+      const discount = getItemDiscountLabel(item)
+      return discount ? `${base} (${discount})` : base
+    }
+    return formatCurrency(item[column.key] || 0)
+  }
+  if (column.type === 'number') return formatNumber(item[column.key])
+  if (column.type === 'date' || column.key === 'dateIn' || column.key === 'dateOut') {
+    return item[column.key] ? formatItemDate(item[column.key]) : '-'
+  }
+  if (column.key === 'margin') return getItemMarginLabel(item)
+  if (column.key === 'source') {
+    const badge = getItemSourceBadge(item)
+    return badge?.label ?? 'Stock'
+  }
+  if (column.key === 'availability') return formatAvailabilityLabel(getItemAvailability(item))
+  if (column.type === 'boolean') return item[column.key] ? 'Yes' : 'No'
+  return String(getItemDisplayValue(item[column.key]))
+}
+
+function mobileDetailStats(item: InventoryItem): IosInventoryDetailStat[] {
+  const qk = quantityFieldKeyForFolder()
+  const onHand =
+    qk && item[qk] != null && item[qk] !== ''
+      ? formatNumber(item[qk])
+      : formatAvailabilityLabel(getItemAvailability(item))
+
+  const priceColumn = columns.value.find((col) => isInventorySellPriceColumn(col))
+  const priceKey = priceColumn?.key ?? 'price'
+  const unitPrice =
+    item.discountedPrice !== undefined ? item.discountedPrice : Number(item[priceKey] || 0)
+  const price = formatCurrency(unitPrice)
+
+  let value = price
+  if (qk && item[qk] != null && item[qk] !== '') {
+    value = formatCurrency(unitPrice * Number(item[qk]))
+  }
+
+  return [
+    { label: 'On hand', value: onHand },
+    { label: 'Price', value: price },
+    { label: 'Value', value: value },
+  ]
+}
+
+function mobileDetailRows(item: InventoryItem): IosInventoryDetailRow[] {
+  return columns.value
+    .slice(1)
+    .map((column) => ({
+      label: column.label,
+      value: formatItemColumnForDetail(item, column),
+    }))
+    .filter((row) => row.value !== '-')
+}
+
+function mobileDetailActions(item: InventoryItem): IosInventoryDetailAction[] {
+  const actions: IosInventoryDetailAction[] = [
+    {
+      id: 'timeline',
+      label: 'View timeline',
+      subtitle: 'Stock history and sales',
+      onSelect: () => handleViewTimeline(item),
+    },
+  ]
+  if (canManageInventoryItems.value && !isInventoryItemLocked(item)) {
+    actions.push({
+      id: 'edit',
+      label: 'Edit product',
+      onSelect: () => handleEditItem(item),
+    })
+  }
+  return actions
+}
+
 const editingItem = ref<InventoryItem | null>(null)
 // Load pagination state from localStorage - use folder ID in key for uniqueness
 const getInitialPage = (): number => {
@@ -5098,4 +5242,13 @@ const loadItems = async () => {
     isLoadingItems.value = false
   }
 }
+
+async function reloadInventoryDetailPage() {
+  if (!authStore.currentUser || !folderId.value) return
+  const fetched = await inventoryStore.fetchFolder(folderId.value)
+  if (fetched) applyFolderSnapshot(fetched)
+  await loadItems()
+}
+
+useIosPullToRefreshRegister(reloadInventoryDetailPage)
 </script>

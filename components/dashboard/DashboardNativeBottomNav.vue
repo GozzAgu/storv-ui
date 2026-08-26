@@ -21,14 +21,14 @@
           role="tab"
           :aria-selected="isActive(item.href)"
           :class="[tabClass, tabStateClass(isActive(item.href))]"
-          @click="moreOpen = false"
+          @click="onPrimaryTabClick"
         >
           <DashboardNavIcon
             :name="item.iconKey"
             :active="isActive(item.href)"
             size="md"
           />
-          <span class="native-tabbar__label relative">
+          <span class="native-tabbar__label text-ios-caption relative">
             {{ shortLabel(item.name) }}
             <span
               v-if="showNativeComingSoon && item.name === 'Payment links'"
@@ -45,14 +45,14 @@
           :aria-selected="moreOpen || moreHasActive"
           :aria-expanded="moreOpen"
           :class="[tabClass, tabStateClass(moreOpen || moreHasActive)]"
-          @click="moreOpen = !moreOpen"
+          @click="onMoreTabClick"
         >
           <DashboardNavIcon
             name="more"
             :active="moreOpen || moreHasActive"
             size="md"
           />
-          <span class="native-tabbar__label">More</span>
+          <span class="native-tabbar__label text-ios-caption">More</span>
         </button>
       </div>
     </div>
@@ -60,7 +60,6 @@
     <DashboardNativeSheet
       v-model="moreOpen"
       title="More"
-      eyebrow="Menu"
       variant="menu"
       mount="body"
       :show-close="false"
@@ -68,42 +67,52 @@
       aria-label="More navigation"
       backdrop-label="Close menu"
     >
-      <ul :class="sheetListClass">
-        <li v-for="item in moreItems" :key="item.href">
-          <NuxtLink
-            :to="item.href"
-            :prefetch="false"
-            :class="[
-              sheetRowClass,
-              isActive(item.href) ? sheetRowActiveClass : sheetRowInactiveClass,
-            ]"
-            @click="moreOpen = false"
-          >
-            <span
-              :class="[sheetIconWrapClass, isActive(item.href) ? sheetIconWrapActiveClass : '']"
-            >
-              <DashboardNavIcon
-                :name="item.iconKey"
-                :active="isActive(item.href)"
-                size="sm"
-              />
-            </span>
-            <span class="min-w-0 flex-1 text-sm font-medium leading-snug">{{ item.name }}</span>
-            <span
-              v-if="showNativeComingSoon && item.name === 'Payment links'"
-              class="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-800 dark:bg-amber-500/15 dark:text-amber-300"
-            >
-              Soon
-            </span>
-          </NuxtLink>
-        </li>
-        <li
-          v-if="moreItems.length === 0"
-          class="px-3 py-8 text-center text-sm text-gray-500 dark:text-gray-400"
+      <div :class="sheetListClass">
+        <section
+          v-for="group in moreGroups"
+          :key="group.id"
+          class="native-more-sheet__section"
+        >
+          <p :class="sheetSectionLabelClass">{{ group.label }}</p>
+          <ul class="native-bottom-nav__sheet-list px-2 pb-1">
+            <li v-for="item in group.items" :key="item.href">
+              <NuxtLink
+                :to="item.href"
+                :prefetch="false"
+                :class="[
+                  sheetRowClass,
+                  isActive(item.href) ? sheetRowActiveClass : sheetRowInactiveClass,
+                ]"
+                @click="moreOpen = false"
+              >
+                <span
+                  :class="[sheetIconWrapClass, isActive(item.href) ? sheetIconWrapActiveClass : '']"
+                >
+                  <DashboardNavIcon
+                    :name="item.iconKey"
+                    :active="isActive(item.href)"
+                    size="sm"
+                  />
+                </span>
+                <span :class="['min-w-0 flex-1', sheetRowLabelClass]">{{ item.name }}</span>
+                <span
+                  v-if="showNativeComingSoon && item.name === 'Payment links'"
+                  :class="sheetBadgeClass"
+                >
+                  Soon
+                </span>
+              </NuxtLink>
+            </li>
+          </ul>
+        </section>
+
+        <p
+          v-if="moreGroups.length === 0"
+          :class="[sheetRowLabelClass, 'px-3 py-8 text-center ios-type-secondary']"
         >
           Main tabs cover everything here.
-        </li>
-      </ul>
+        </p>
+      </div>
 
       <template #footer>
         <button
@@ -116,7 +125,7 @@
           >
             <DashboardNavIcon name="sign-out" size="sm" />
           </span>
-          <span class="text-sm font-medium">Sign out</span>
+          <span :class="sheetRowLabelClass">Sign out</span>
         </button>
       </template>
     </DashboardNativeSheet>
@@ -134,6 +143,8 @@ import {
   nativeNavShortLabel,
   type DashboardNavItem,
 } from '~/utils/dashboard-native-nav'
+import { groupNativeMoreNavItems } from '~/utils/dashboard-native-more-groups'
+import { useIosHaptics } from '~/composables/useIosHaptics'
 
 const props = defineProps<{
   primaryItems: DashboardNavItem[]
@@ -156,7 +167,14 @@ const {
   sheetRowInactiveClass,
   sheetIconWrapClass,
   sheetIconWrapActiveClass,
+  sheetSectionLabelClass,
+  sheetRowLabelClass,
+  sheetBadgeClass,
 } = useDashboardNativeNavChrome()
+
+const { impact } = useIosHaptics()
+
+const moreGroups = computed(() => groupNativeMoreNavItems(props.moreItems))
 
 const { showNativeComingSoon } = usePaymentLinksLaunch()
 
@@ -189,6 +207,16 @@ const activeTabIndex = computed(() => {
 
 function tabStateClass(active: boolean) {
   return active ? tabActiveClass : tabInactiveClass
+}
+
+function onPrimaryTabClick() {
+  moreOpen.value = false
+  void impact('light')
+}
+
+function onMoreTabClick() {
+  moreOpen.value = !moreOpen.value
+  void impact('light')
 }
 
 function setTabRef(el: Element | ComponentPublicInstance | null, index: number) {

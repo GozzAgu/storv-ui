@@ -20,7 +20,12 @@ export function useDashboardNativeSheetChrome(variant: DashboardNativeSheetVaria
   const sheetFooterClass = 'native-more-sheet__footer dashboard-native-sheet__footer'
 
   const sheetListClass =
-    'native-bottom-nav__sheet-list min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-2'
+    'native-bottom-nav__sheet-list min-h-0 flex-1 overflow-y-auto overscroll-contain py-2'
+
+  const sheetSectionLabelClass = 'native-more-sheet__section-label'
+  const sheetRowLabelClass = 'native-more-sheet__row-label'
+  const sheetBadgeClass =
+    'native-more-sheet__badge shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300'
 
   const sheetRowClass = 'native-more-sheet__row'
   const sheetRowActiveClass = 'native-more-sheet__row native-more-sheet__row--active'
@@ -43,6 +48,9 @@ export function useDashboardNativeSheetChrome(variant: DashboardNativeSheetVaria
     sheetBodyClass,
     sheetFooterClass,
     sheetListClass,
+    sheetSectionLabelClass,
+    sheetRowLabelClass,
+    sheetBadgeClass,
     sheetRowClass,
     sheetRowActiveClass,
     sheetRowInactiveClass,

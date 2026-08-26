@@ -14,18 +14,18 @@
     </span>
 
     <span class="min-w-0 flex-1">
-      <span class="block text-[17px] font-medium leading-snug text-gray-900 dark:text-gray-100">
+      <span :class="['block leading-snug text-gray-900 dark:text-gray-100', titleClass]">
         {{ title }}
       </span>
       <span
         v-if="subtitle"
-        class="mt-0.5 block text-sm leading-snug text-gray-500 dark:text-gray-400"
+        :class="['mt-0.5 block leading-snug', subtitleClass]"
       >
         {{ subtitle }}
       </span>
     </span>
 
-    <span v-if="value" class="shrink-0 text-sm text-gray-500 dark:text-gray-400">
+    <span v-if="value" :class="['shrink-0', valueClass]">
       {{ value }}
     </span>
 
@@ -48,6 +48,11 @@
 <script setup lang="ts">
 import { computed, resolveComponent } from 'vue'
 import type { Component } from 'vue'
+import { buildIosTextClass } from '~/composables/useIosTypography'
+
+const titleClass = buildIosTextClass('body')
+const subtitleClass = `${buildIosTextClass('footnote', { secondary: true })} text-gray-500 dark:text-gray-400`
+const valueClass = `${buildIosTextClass('footnote', { secondary: true })} text-gray-500 dark:text-gray-400`
 
 const props = withDefaults(
   defineProps<{

@@ -1,14 +1,15 @@
 <template>
   <SidePanel
     :model-value="props.modelValue"
-    title="Create New Sale"
-    subtitle="Pick category, subcategory, items, then sale details"
+    :title="sheetTitle"
+    :subtitle="sheetSubtitle"
+    :content-padding="sheetContentPadding"
     size="lg"
     @update:model-value="(value: boolean) => emit('update:modelValue', value)"
   >
     <template #default>
-      <div :class="[drawerFillClass, 'gap-4']">
-        <DashboardDrawerStepper :steps="steps" :current-step="currentStep" />
+      <div :class="[drawerFillClass, 'gap-4', isCapacitorIos ? 'ios-create-sale-sheet' : '']">
+        <DashboardDrawerStepper v-if="!isCapacitorIos" :steps="steps" :current-step="currentStep" />
 
         <div
           v-if="prefillItemMatchFailed"
@@ -1013,8 +1014,17 @@ const lastCreatedReceiptData = ref<any>(null)
 const steps = [
   { id: 'parent', label: 'Category' },
   { id: 'subcategory', label: 'Subcategory' },
-  { id: 'items', label: 'Items' },
-  { id: 'details', label: 'Sale details' },
+  { id: 'items', label: 'Products' },
+  { id: 'details', label: 'Checkout' },
+]
+
+const { isCapacitorIos } = useIsCapacitorIos()
+
+const sheetStepSubtitles = [
+  'Choose a parent category',
+  'Choose a subcategory',
+  'Add products to the sale',
+  'Customer, payment, and totals',
 ]
 
 const {
@@ -1039,6 +1049,21 @@ const {
 } = useReceiptCategoryPicker()
 
 const currentStep = ref(0)
+
+const sheetTitle = computed(() => {
+  if (!isCapacitorIos.value) return 'Create New Sale'
+  return steps[currentStep.value]?.label ?? 'Create New Sale'
+})
+
+const sheetSubtitle = computed(() => {
+  if (!isCapacitorIos.value) {
+    return 'Pick category, subcategory, items, then sale details'
+  }
+  return sheetStepSubtitles[currentStep.value] ?? ''
+})
+
+const sheetContentPadding = computed(() => (isCapacitorIos.value ? 'p-0' : ''))
+
 const loadingFolders = ref(false)
 const loadingItems = ref(false)
 const isCreating = ref(false)

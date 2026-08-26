@@ -400,13 +400,13 @@ export const useStoresStore = defineStore('stores', {
         // while this refresh runs, force bypasses returning that same promise (avoids deadlock).
         await Promise.all([
           departmentsStore
-            .fetchDepartments()
+            .fetchDepartments({ force: true })
             .catch((err) => console.warn('[StoresStore] Failed to fetch departments:', err)),
           staffStore
             .fetchStaff()
             .catch((err) => console.warn('[StoresStore] Failed to fetch staff:', err)),
           inventoryStore
-            .fetchFolders()
+            .fetchFolders({ force: true })
             .catch((err) => console.warn('[StoresStore] Failed to fetch inventory folders:', err)),
           receiptsStore
             .fetchReceipts({ force: true })

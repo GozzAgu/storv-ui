@@ -3,10 +3,11 @@
     :model-value="modelValue"
     title="Quick Sale"
     subtitle="Scan or search items, then complete payment"
+    :content-padding="quickSaleContentPadding"
     size="lg"
     @update:model-value="(value: boolean) => emit('update:modelValue', value)"
   >
-    <div class="space-y-4">
+    <div :class="['space-y-4', isCapacitorIos ? 'ios-quick-sale-sheet' : '']">
         <SellScreenNoteBanner />
 
         <!-- Folder Selection -->
@@ -150,7 +151,10 @@
         <!-- Barcode scan / search (after category is picked) -->
         <div
           v-if="selectedFolder && !folderPickerExpanded"
-          class="space-y-3 rounded-sm border border-gray-200/80 bg-gray-50/50 p-3 dark:border-white/[0.08] dark:bg-white/[0.02]"
+          :class="[
+            'space-y-3 rounded-sm border border-gray-200/80 bg-gray-50/50 p-3 dark:border-white/[0.08] dark:bg-white/[0.02]',
+            isCapacitorIos ? 'ios-quick-sale-sheet__scan' : '',
+          ]"
         >
           <div class="flex items-center justify-between gap-3">
             <div class="flex items-center gap-3">
@@ -569,6 +573,9 @@ const {
   footerBtnOutlineClass,
   footerBtnPrimaryClass,
 } = useDashboardDrawerChrome()
+
+const { isCapacitorIos } = useIsCapacitorIos()
+const quickSaleContentPadding = computed(() => (isCapacitorIos.value ? 'p-0' : ''))
 
 const {
   selectedParentFolder,

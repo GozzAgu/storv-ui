@@ -517,7 +517,10 @@
           :class="[
             'relative flex w-full items-center gap-2.5 px-3 sm:px-4 lg:gap-3 lg:px-5',
             isNativeApp
-              ? 'native-topnav dashboard-top-nav-native-row h-11'
+              ? [
+                  'native-topnav dashboard-top-nav-native-row',
+                  showNativeCommandHeader ? 'dashboard-top-nav-native-row--command' : 'h-11',
+                ]
               : 'h-11 sm:h-12',
           ]"
         >
@@ -544,8 +547,88 @@
             />
           </button>
 
-          <!-- Native: logo + current workspace page -->
-          <div v-if="isNativeApp" class="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
+          <!-- Native iOS: command header (greeting + branch + actions) -->
+          <NativeCommandHeader
+            v-if="showNativeCommandHeader"
+            class="min-w-0 w-full flex-1"
+            :greeting="commandHeaderGreeting"
+            :page-title="commandHeaderPageTitle"
+          >
+            <template #actions>
+              <button
+                type="button"
+                class="dash-topnav__icon-btn"
+                aria-label="Search"
+                @click="openGlobalSearch()"
+              >
+                <MagnifyingGlassIcon class="block h-4 w-4 shrink-0" :size="16" stroke-width="1.75" />
+              </button>
+
+              <button
+                type="button"
+                class="dash-topnav__icon-btn"
+                aria-label="Open Storvv Assistant"
+                @click="openAssistant()"
+              >
+                <SparklesIcon class="block h-4 w-4 shrink-0" :size="16" stroke-width="1.75" />
+              </button>
+
+              <ThemeToggle class="shrink-0" />
+
+              <div class="relative z-[130] h-8 w-8 shrink-0" ref="notificationsRef">
+                <button
+                  type="button"
+                  class="dash-topnav__icon-btn group relative inline-flex cursor-pointer"
+                  aria-label="Notifications"
+                  :aria-expanded="notificationsOpen"
+                  aria-haspopup="true"
+                  @click.stop.prevent="toggleNotifications"
+                >
+                  <BellIcon
+                    class="h-4 w-4 text-gray-600 transition-colors group-hover:text-gray-900 dark:text-gray-300 dark:group-hover:text-gray-100"
+                    stroke-width="1.75"
+                  />
+                  <span
+                    v-if="unreadNotificationCount > 0"
+                    class="pointer-events-none absolute right-0.5 top-0.5 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-red-500 px-0.5 text-[8px] font-bold leading-none text-white ring-2 ring-gray-50 dark:ring-[#0a0c12]"
+                  >
+                    {{ unreadNotificationCount > 99 ? '99+' : unreadNotificationCount }}
+                  </span>
+                </button>
+                <Transition
+                  enter-active-class="transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                  enter-from-class="opacity-0 translate-y-1 scale-[0.98]"
+                  enter-to-class="opacity-100 translate-y-0 scale-100"
+                  leave-active-class="transition-[opacity,transform] duration-150 ease-in"
+                  leave-from-class="opacity-100 translate-y-0 scale-100"
+                  leave-to-class="opacity-0 translate-y-0.5 scale-[0.99]"
+                >
+                  <Teleport to="body">
+                    <div
+                      v-if="notificationsOpen"
+                      ref="notificationsPanelRef"
+                      :style="notificationsPanelStyle"
+                      class="pointer-events-auto origin-top-right"
+                      @click.stop
+                    >
+                      <NotificationsPanel variant="dropdown" @close="notificationsOpen = false" />
+                    </div>
+                  </Teleport>
+                </Transition>
+              </div>
+
+              <DashboardProfileMenu
+                :user-name="userName"
+                :user-email="userEmail"
+                :user-initials="userInitials"
+                compact
+                @sign-out="handleSignOut"
+              />
+            </template>
+          </NativeCommandHeader>
+
+          <!-- Native (non-iOS): logo + current workspace page -->
+          <div v-else-if="isNativeApp" class="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
             <NuxtLink
               :to="dashPath('')"
               class="flex shrink-0 items-center rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/35"
@@ -626,12 +709,13 @@
             </button>
           </div>
 
-          <div class="hidden min-w-0 flex-1 md:block" aria-hidden="true" />
+          <div v-if="!showNativeCommandHeader" class="hidden min-w-0 flex-1 md:block" aria-hidden="true" />
 
-          <div class="min-w-0 flex-1 md:hidden" aria-hidden="true" />
+          <div v-if="!showNativeCommandHeader" class="min-w-0 flex-1 md:hidden" aria-hidden="true" />
 
           <!-- Actions toolbar -->
           <div
+            v-if="!showNativeCommandHeader"
             class="dash-topnav__actions dashboard-topnav-actions relative z-10 flex shrink-0 items-center"
           >
             <button
@@ -729,6 +813,7 @@
 
       <!-- Page Content (same soft entrance as auth pages; re-runs on route change) -->
       <main
+        ref="dashboardMainRef"
         data-dashboard-main
         :class="[
           'w-full min-w-0 max-w-full px-3 py-2.5 sm:px-4 sm:py-3 lg:px-5 lg:py-4',
@@ -737,9 +822,18 @@
             : 'overflow-x-clip overflow-y-visible',
         ]"
       >
+        <IosPullToRefreshHost
+          v-if="isCapacitorIos"
+          :scroll-target="dashboardMainRef"
+        />
         <div
           :key="route.path"
-          class="min-w-0 opacity-0 motion-reduce:animate-none motion-reduce:opacity-100 motion-reduce:transform-none animate-auth-fade-up [animation-delay:40ms]"
+          :class="[
+            'min-w-0',
+            isNativeApp
+              ? 'opacity-100'
+              : 'opacity-0 motion-reduce:animate-none motion-reduce:opacity-100 motion-reduce:transform-none animate-auth-fade-up [animation-delay:40ms]',
+          ]"
         >
           <DemoModeBanner v-if="isDemoDashboard" />
           <slot />
@@ -840,6 +934,8 @@ import DashboardNavIcon from '~/components/dashboard/DashboardNavIcon.vue'
 import DemoModeBanner from '~/components/demo/DemoModeBanner.vue'
 import DashboardNativeBottomNav from '~/components/dashboard/DashboardNativeBottomNav.vue'
 import DashboardNativeTableLayoutSync from '~/components/dashboard/DashboardNativeTableLayoutSync.vue'
+import NativeCommandHeader from '~/components/dashboard/NativeCommandHeader.vue'
+import IosPullToRefreshHost from '~/components/ios/IosPullToRefreshHost.vue'
 import DashboardProfileMenu from '~/components/dashboard/DashboardProfileMenu.vue'
 import {
   splitNativeBottomNav,
@@ -862,7 +958,10 @@ import { storeBranchNavTooltip } from '~/utils/dashboard-tooltip'
 import { isStaffCreationInProgress } from '~/utils/staff-creation-session'
 import StoreSelector from '~/components/ui/StoreSelector.vue'
 import ToastContainer from '~/components/ui/ToastContainer.vue'
-import RecentItemsWidget from '~/components/ui/RecentItemsWidget.vue'
+
+const RecentItemsWidget = defineAsyncComponent(
+  () => import('~/components/ui/RecentItemsWidget.vue')
+)
 import NotificationsPanel from '~/components/notifications/NotificationsPanel.vue'
 
 const GlobalSearch = defineAsyncComponent(() => import('~/components/search/GlobalSearch.vue'))
@@ -883,6 +982,7 @@ import { useSearchStore } from '~/stores/search'
 import { clearNativeOverlayLock } from '~/utils/native-overlay-lock'
 import { isCapacitorNative } from '~/utils/capacitor-env'
 import { scheduleNativeIdleWork } from '~/utils/capacitor-native-perf'
+import { runDashboardShellBootstrap } from '~/composables/useDashboardShellBootstrap'
 
 const { actualTheme } = useTheme()
 
@@ -964,6 +1064,9 @@ watch(
 // Computed unread count
 const unreadNotificationCount = computed(() => notificationsStore.unreadCount)
 const { isNativeApp } = useCapacitorNativeApp()
+const { isCapacitorIos } = useIsCapacitorIos()
+const showNativeCommandHeader = computed(() => isNativeApp.value && isCapacitorIos.value)
+const dashboardMainRef = ref<HTMLElement | null>(null)
 const sidebarOpen = ref(false)
 
 function closeMobileSidebarOverlay() {
@@ -1155,74 +1258,15 @@ const storesSectionCollapsed = ref(false)
 
 // Load stores and departments when user data is available
 watch(
-  [() => authStore.currentUser, () => userStore.userData, () => authStore.loading],
-  async ([user, userData, loading]) => {
-    if (!user || loading) return // Wait for auth to be ready
+  [() => authStore.currentUser, () => authStore.loading],
+  async ([user, loading]) => {
+    if (!user || loading) return
+    if (isStaffCreationInProgress()) return
 
-    // Check if staff creation is in progress - don't update userData during this time
-    if (isStaffCreationInProgress()) {
-      // console.log('[Dashboard] Staff creation in progress - skipping userData fetch to preserve super admin data')
-      return
-    }
+    await runDashboardShellBootstrap()
 
-    // Fetch user data if not loaded (only if not during staff creation)
-    // IMPORTANT: Only fetch when auth is ready (not loading)
-    if (!userData && user && !isStaffCreationInProgress() && !loading) {
-      try {
-        await userStore.fetchUserData(user.uid)
-        // console.log('[Dashboard] User data fetched in stores watch:', userStore.userData)
-      } catch (err) {
-        console.error('[Dashboard] Error fetching user data in stores watch:', err)
-      }
-    }
-
-    const finalUserData = userStore.userData
-
-    if (finalUserData?.role === 'superAdmin') {
-      await storesStore.fetchStores()
-      await storesStore.initializeCurrentStore()
-      await Promise.all([
-        departmentsStore.fetchDepartments(),
-        inventoryStore.fetchFolders(),
-      ]).catch((err) => {
-        console.warn('[Dashboard] Error fetching shell data:', err)
-      })
-      // Auto-expand current store
-      if (storesStore.currentStoreId) {
-        expandedStores[storesStore.currentStoreId] = true
-      }
-    } else if (finalUserData?.role === 'staff') {
-      // Fetch staff member data first to ensure getQueryUserId works correctly
-      // This is critical - without this, getQueryUserId will fail and data won't load
-      try {
-        const staffMember = await staffStore.fetchCurrentStaffMember()
-        if (!staffMember) {
-          console.error('[Dashboard] Staff member not found - this will cause data loading issues')
-          // Try to fetch all staff to see if we can find them
-          try {
-            await staffStore.fetchStaff()
-            const retryStaffMember = staffStore.getCurrentStaffMember
-            if (!retryStaffMember) {
-              console.error('[Dashboard] Staff member still not found after fetching all staff')
-            }
-          } catch (fetchErr) {
-            console.error('[Dashboard] Error fetching all staff:', fetchErr)
-          }
-        } else {
-          // console.log('[Dashboard] Staff member found:', staffMember.storeId)
-        }
-      } catch (err) {
-        console.error('[Dashboard] Error fetching staff member:', err)
-      }
-      await storesStore.initializeCurrentStore()
-      await departmentsStore.fetchDepartments()
-      await inventoryStore.fetchFolders().catch((err) => {
-        console.warn('[Dashboard] Error fetching inventory folders:', err)
-      })
-      // Auto-expand current store for staff
-      if (storesStore.currentStoreId) {
-        expandedStores[storesStore.currentStoreId] = true
-      }
+    if (storesStore.currentStoreId) {
+      expandedStores[storesStore.currentStoreId] = true
     }
   },
   { immediate: true }
@@ -1413,50 +1457,6 @@ const departmentsList = computed(() => {
   return departmentsStore.departments
 })
 
-// Fetch inventory folders when on inventory routes
-watch(
-  () => route.path,
-  async (path) => {
-    if (path.startsWith('/dashboard/inventory') && authStore.currentUser) {
-      try {
-        await inventoryStore.fetchFolders()
-      } catch (error) {
-        console.error('Error fetching inventory folders:', error)
-      }
-    }
-    if (path.startsWith('/dashboard/departments') && authStore.currentUser) {
-      try {
-        await departmentsStore.fetchDepartments()
-      } catch (error) {
-        console.error('Error fetching departments:', error)
-      }
-    }
-  },
-  { immediate: true }
-)
-
-// Also fetch folders when user is authenticated
-watch(
-  () => authStore.currentUser,
-  async (user) => {
-    if (user && isInventoryRoute.value) {
-      try {
-        await inventoryStore.fetchFolders()
-      } catch (error) {
-        console.error('Error fetching inventory folders:', error)
-      }
-    }
-    if (user && isDepartmentsRoute.value) {
-      try {
-        await departmentsStore.fetchDepartments()
-      } catch (error) {
-        console.error('Error fetching departments:', error)
-      }
-    }
-  },
-  { immediate: true }
-)
-
 // Cache user profile info to prevent UI flickering during staff creation (sign out/sign in process)
 // Store the super admin's info when they first load, and preserve it during staff creation
 // Persist to localStorage to survive page refreshes
@@ -1643,6 +1643,14 @@ const userName = computed(() => {
   }
 
   return 'User'
+})
+
+const { formatGreeting } = useTimeGreeting()
+const commandHeaderGreeting = computed(() => formatGreeting(userName.value || ''))
+const commandHeaderPageTitle = computed(() => {
+  const path = route.path
+  if (path === '/dashboard' || path === '/dashboard/') return ''
+  return currentPageName.value
 })
 
 const userEmail = computed(() => {
@@ -1872,6 +1880,10 @@ onMounted(async () => {
     }
     await checkAuth()
 
+    if (authStore.currentUser?.uid && !authStore.loading) {
+      await runDashboardShellBootstrap()
+    }
+
     // Initialize cache from localStorage after auth loads
     const currentUserId = authStore.currentUser?.uid
     if (currentUserId) {
@@ -1891,17 +1903,8 @@ onMounted(async () => {
       }
     }
 
-    // Fetch user data if authenticated and not already loaded
+    // Staff with temporary password must change it before using the app
     if (authStore.currentUser?.uid && !authStore.loading) {
-      if (!userStore.userData || userStore.userData.uid !== authStore.currentUser.uid) {
-        try {
-          await userStore.fetchUserData(authStore.currentUser.uid)
-          // console.log('[Dashboard] User data fetched successfully:', userStore.userData)
-        } catch (err) {
-          console.error('[Dashboard] Error fetching user data:', err)
-        }
-      }
-      // Staff with temporary password must change it before using the app
       const ud = userStore.userData
       if (
         ud?.role === 'staff' &&
@@ -1910,24 +1913,6 @@ onMounted(async () => {
       ) {
         await navigateTo('/dashboard/change-password')
       }
-    }
-  }
-
-  // Fetch inventory folders if on inventory route
-  if (authStore.currentUser && isInventoryRoute.value) {
-    try {
-      await inventoryStore.fetchFolders()
-    } catch (error) {
-      console.error('Error fetching inventory folders:', error)
-    }
-  }
-
-  // Fetch departments if on departments route
-  if (authStore.currentUser && isDepartmentsRoute.value) {
-    try {
-      await departmentsStore.fetchDepartments()
-    } catch (error) {
-      console.error('Error fetching departments:', error)
     }
   }
 })

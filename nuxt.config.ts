@@ -29,6 +29,22 @@ export default defineNuxtConfig({
     css: {
       devSourcemap: false,
     },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (!id.includes('node_modules')) return
+            if (id.includes('firebase')) return 'vendor-firebase'
+            if (id.includes('apexcharts') || id.includes('vue3-apexcharts')) return 'vendor-charts'
+            if (id.includes('/xlsx/') || id.includes('xlsx')) return 'vendor-xlsx'
+            if (id.includes('jspdf')) return 'vendor-jspdf'
+            if (id.includes('html5-qrcode')) return 'vendor-scanner'
+            if (id.includes('html2canvas')) return 'vendor-html2canvas'
+            if (id.includes('@nuxt/ui') || id.includes('@headlessui')) return 'vendor-ui'
+          },
+        },
+      },
+    },
   },
   runtimeConfig: {
     // Private keys (only available on server-side)
@@ -139,7 +155,7 @@ export default defineNuxtConfig({
         },
         {
           rel: 'stylesheet',
-          href: 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Quicksand:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Pixelify+Sans:wght@400;600;700&display=swap',
+          href: 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Pixelify+Sans:wght@400;600&display=swap',
           media: 'print',
           onload: 'this.media="all"',
         },

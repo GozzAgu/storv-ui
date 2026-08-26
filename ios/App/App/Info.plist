@@ -26,10 +26,10 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>com.storv.app</string>
+			<string>com.storvv.app</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.storv.app</string>
+				<string>com.storvv.app</string>
 			</array>
 		</dict>
 	</array>

@@ -15,8 +15,12 @@
     >
       <span
         v-if="!switchingStore"
-        :class="[triggerIconClass, !currentStore ? triggerIconEmptyClass : '']"
-        :style="currentStore ? iconSurfaceStyleFor(currentStore) : undefined"
+        :class="[
+          triggerIconClass,
+          props.variant === 'command-pill' ? 'native-command-header__branch-icon' : '',
+          !currentStore && props.variant !== 'command-pill' ? triggerIconEmptyClass : '',
+        ]"
+        :style="currentStore && props.variant !== 'command-pill' ? iconSurfaceStyleFor(currentStore) : undefined"
         aria-hidden="true"
       >
         <BuildingStorefrontIcon :size="14" stroke-width="1.6" />
@@ -39,7 +43,7 @@
         </svg>
       </span>
 
-      <span :class="triggerNameClass">
+      <span :class="triggerNameClassResolved">
         <span
           class="truncate"
           :data-dashboard-tooltip="
@@ -52,12 +56,14 @@
             switchingStore
               ? 'Switching…'
               : currentStore
-              ? branchCodeLabel(currentStore.name)
+              ? props.variant === 'command-pill'
+                ? getStoreBranchShortLabel(currentStore.name) || branchCodeLabel(currentStore.name)
+                : branchCodeLabel(currentStore.name)
               : 'No store'
           }}
         </span>
         <span
-          v-if="!switchingStore && currentStore"
+          v-if="!switchingStore && currentStore && props.variant !== 'command-pill'"
           class="status-dot status-dot--active shrink-0"
           aria-hidden="true"
         />
@@ -209,8 +215,15 @@ import { useDashboardStoreSwitchChrome } from '~/composables/useDashboardStoreSw
 import { getStoreBranchCodeLabel, getStoreBranchShortLabel } from '~/utils/store-branch-label'
 import { storeBranchNavTooltip } from '~/utils/dashboard-tooltip'
 
+const props = withDefaults(
+  defineProps<{
+    variant?: 'default' | 'command-pill'
+  }>(),
+  { variant: 'default' }
+)
+
 const {
-  triggerClass,
+  triggerClass: defaultTriggerClass,
   triggerIconClass,
   triggerIconEmptyClass,
   triggerNameClass,
@@ -233,6 +246,16 @@ const {
   loadingClass,
   emptyClass,
 } = useDashboardStoreSwitchChrome()
+
+const triggerClass = computed(() =>
+  props.variant === 'command-pill'
+    ? 'native-command-header__branch-trigger'
+    : defaultTriggerClass
+)
+
+const triggerNameClassResolved = computed(() =>
+  props.variant === 'command-pill' ? 'native-command-header__branch-name' : triggerNameClass
+)
 
 const storesStore = useStoresStore()
 const userStore = useUserStore()

@@ -1,7 +1,13 @@
 <template>
-  <IosGlassCard :elevated="hero" :padding="hero ? 'lg' : 'md'" :class="cardClass">
-    <p class="ios-stat-label">{{ label }}</p>
-    <div class="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+  <IosGlassCard
+    :elevated="hero"
+    :padding="hero ? 'lg' : 'md'"
+    :class="cardClass"
+    role="group"
+    :aria-label="accessibilityLabel"
+  >
+    <p class="ios-stat-label" aria-hidden="true">{{ label }}</p>
+    <div class="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5" aria-hidden="true">
       <p :class="valueClass">
         <slot name="value">{{ value }}</slot>
       </p>
@@ -12,10 +18,14 @@
         {{ change }}
       </span>
     </div>
-    <p v-if="subtext" class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+    <p v-if="subtext" class="mt-1 text-sm text-gray-500 dark:text-gray-400" aria-hidden="true">
       {{ subtext }}
     </p>
-    <div v-if="sparklineData && sparklineData.length > 1" class="mt-3 h-7 w-full opacity-80">
+    <div
+      v-if="sparklineData && sparklineData.length > 1"
+      class="mt-3 h-7 w-full opacity-80"
+      aria-hidden="true"
+    >
       <svg class="h-full w-full text-[#143f8d] dark:text-[#9ab5e3]" viewBox="0 0 200 28" preserveAspectRatio="none">
         <path :d="sparklineAreaPath" fill="currentColor" fill-opacity="0.12" />
         <path
@@ -35,6 +45,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import IosGlassCard from '~/components/ios/IosGlassCard.vue'
+import { buildIosStatAccessibilityLabel } from '~/utils/ios-stat-accessibility'
 
 const props = withDefaults(
   defineProps<{
@@ -74,6 +85,15 @@ const deltaClass = computed(() => {
   if (props.changePositive === false) return 'ios-stat-delta--down'
   return 'text-gray-500 dark:text-gray-400'
 })
+
+const accessibilityLabel = computed(() =>
+  buildIosStatAccessibilityLabel({
+    label: props.label,
+    value: props.value,
+    change: props.change,
+    subtext: props.subtext,
+  })
+)
 
 const sparklinePath = computed(() => buildSparklinePath(props.sparklineData ?? [], false))
 const sparklineAreaPath = computed(() => buildSparklinePath(props.sparklineData ?? [], true))

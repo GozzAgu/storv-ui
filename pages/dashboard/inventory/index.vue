@@ -3,7 +3,7 @@
     data-inventory-categories
     :class="[pageWithFooterClass, 'dash-page--unified']"
   >
-    <DashboardPageHeader class="dash-page-header--unified">
+    <DashboardPageHeader class="dash-page-header--unified" :ios-context-only="isCapacitorIos">
       <template #eyebrow>
         <nav :class="eyebrowClass" aria-label="Breadcrumb">
           <span>Inventory</span>
@@ -82,6 +82,7 @@
       </template>
       <template v-if="!inventoryStore.loading && inventoryStore.folders.length > 0" #filters>
         <DashboardToolbarSearch
+          v-if="!isCapacitorIos"
           v-model="searchQuery"
           placeholder="Search categories…"
           input-class="sm:w-52"
@@ -138,6 +139,21 @@
     </DashboardPageHeader>
 
     <div
+      v-if="isCapacitorIos && !inventoryStore.loading && inventoryStore.folders.length > 0"
+      class="ios-search-bar-host ios-search-bar-host--sticky"
+    >
+      <IosSearchBar v-model="searchQuery" placeholder="Search categories…" />
+    </div>
+
+    <IosSegmentedControl
+      v-if="isCapacitorIos && !inventoryStore.loading && inventoryStore.folders.length > 0"
+      v-model="categoryFilter"
+      class="ios-inventory-filter-tabs"
+      aria-label="Category filter"
+      :options="categoryFilterOptions"
+    />
+
+    <div
       v-if="inventoryStore.loading && inventoryStore.folders.length === 0"
       :class="gridClass"
     >
@@ -159,6 +175,8 @@
         :title="
           selectedDepartmentId
             ? `No categories in ${getDepartmentName(selectedDepartmentId) ?? 'this department'}`
+            : categoryFilter === 'low-stock'
+            ? 'No low-stock categories'
             : searchQuery
             ? 'No categories found'
             : 'No categories on this page'
@@ -166,6 +184,8 @@
         :description="
           selectedDepartmentId
             ? 'Try another department or clear the filter.'
+            : categoryFilter === 'low-stock'
+            ? 'All categories are above your low-stock threshold.'
             : searchQuery
             ? 'Try a different search term.'
             : 'Adjust filters or go to another page.'
@@ -1407,6 +1427,16 @@ const {
 } = useDashboardDrawerChrome()
 
 const searchQuery = ref('')
+const categoryFilter = ref<'all' | 'low-stock'>('all')
+
+const categoryFilterOptions = computed(() => [
+  { value: 'all', label: 'All categories' },
+  {
+    value: 'low-stock',
+    label: 'Low stock',
+    badge: inventoryStore.lowStockFolders.length || undefined,
+  },
+])
 const sortBy = ref('name')
 const showCreateFolderModal = ref(false)
 const preserveFolderDrawerDraft = ref(false)
@@ -1630,6 +1660,7 @@ async function handleExportReorderList() {
   }
 }
 const { canCreateInventoryFolders, canViewProfitAndCost, isStaff } = usePermissions()
+const { isCapacitorIos } = useIsCapacitorIos()
 
 watch(isStaff, (staff) => {
   if (staff) selectedDepartmentId.value = ''
@@ -2109,6 +2140,15 @@ const filteredFolders = computed(() => {
         folder.name.toLowerCase().includes(query) ||
         folder.description.toLowerCase().includes(query)
     )
+  }
+
+  if (categoryFilter.value === 'low-stock') {
+    result = result.filter((folder) => {
+      if (folderHasChildren(folders.value, folder.id)) {
+        return rollupFolderStats(folder, folders.value).lowStockCount > 0
+      }
+      return (folder.lowStockCount ?? 0) > 0
+    })
   }
 
   // Sort
@@ -2976,6 +3016,13 @@ const toggleDepartmentAccess = (departmentId: string, checked: boolean) => {
     }
   }
 }
+
+async function reloadInventoryCategories() {
+  if (!authStore.currentUser) return
+  await inventoryStore.fetchFolders()
+}
+
+useIosPullToRefreshRegister(reloadInventoryCategories)
 
 // Load folders on mount
 onMounted(async () => {

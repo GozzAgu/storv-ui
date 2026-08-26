@@ -4,13 +4,19 @@
 
     <GettingStartedChecklist v-if="!needsStoreSelection && !isLoading" class="mb-4" />
 
-    <DashboardPageHeader data-tutorial="dashboard" :class="pageHeaderClass">
+    <DashboardPageHeader v-if="!isCapacitorIos" data-tutorial="dashboard" :class="pageHeaderClass">
       <template #eyebrow>
         <p v-if="isNativeApp" :class="eyebrowClass">Overview</p>
       </template>
       <template #title>
         <h1 :class="isNativeApp ? pageTitleClass : 'saas-dashboard-greeting'">
-          {{ isNativeApp ? `Welcome back, ${userName}` : formatGreeting(userName || 'User') }}
+          {{
+            isCapacitorIos
+              ? 'Overview'
+              : isNativeApp
+                ? `Welcome back, ${userName}`
+                : formatGreeting(userName || 'User')
+          }}
         </h1>
       </template>
       <template #description>
@@ -84,54 +90,55 @@
 
       <div class="dash-home-kpi">
         <div :class="kpiGridClassResolved">
-          <StatCard
+          <DashboardStatTile
+            class="dash-kpi-hero"
             label="Total revenue"
             :value="formatCurrency(totalRevenue)"
             :subtext="revenueChangeText"
             :change="revenueChangePercent"
             :change-positive="revenueChangePositive"
             :sparkline-data="statCardRevenueSparkline.length > 1 ? statCardRevenueSparkline : undefined"
+            hero
           />
-          <StatCard
+          <DashboardStatTile
             label="Orders today"
             :value="todayReceiptsCount.toString()"
             :subtext="`${formatCurrency(todaySales)} revenue`"
           />
-          <StatCard
+          <DashboardStatTile
             label="Customers"
             :value="totalCustomers.toString()"
             :subtext="`${newCustomersToday} active today`"
             :subtext-class="newCustomersToday > 0 ? 'success' : ''"
           />
-          <StatCard
+          <DashboardStatTile
             label="Low stock signals"
             :value="lowStockItems.length.toString()"
             :subtext="lowStockItems.length > 0 ? 'Review restocking' : 'Within thresholds'"
             :subtext-class="lowStockItems.length > 0 ? 'warning' : ''"
           />
-          <StatCard
+          <DashboardStatTile
             label="Outstanding"
             :value="formatCurrency(outstandingBalanceTotal)"
             :subtext="`${outstandingCount} open balance${outstandingCount === 1 ? '' : 's'}`"
             :subtext-class="outstandingCount > 0 ? 'warning' : ''"
           />
-          <StatCard
+          <DashboardStatTile
             v-if="canAccessLeadsPlan"
             label="Open leads"
             :value="String(openLeadsCount)"
             :subtext="`${formatCurrency(openLeadsPipeline)} est. pipeline`"
-            :subtext-class="openLeadsCount > 0 ? '' : ''"
           />
         </div>
 
         <div v-if="canViewProfitAndCost" :class="[kpiGridClassResolved, 'dash-kpi-grid--pair']">
-          <StatCard
+          <DashboardStatTile
             label="Gross profit"
             :value="formatCurrency(dashboardGrossProfit)"
             :subtext="dashboardGrossProfitSubtext"
             :change-positive="dashboardGrossProfit >= 0"
           />
-          <StatCard
+          <DashboardStatTile
             label="Cost of goods sold"
             :value="formatCurrency(dashboardCogs)"
             subtext="Completed sales with unit cost"
@@ -389,18 +396,22 @@ import { ref, computed, onMounted, watch, defineAsyncComponent } from 'vue'
 const LazyApexChart = defineAsyncComponent(
   () => import('~/components/charts/LazyApexChart.client.vue')
 )
+const Tutorial = defineAsyncComponent(() => import('~/components/Tutorial.vue'))
+const GettingStartedChecklist = defineAsyncComponent(
+  () => import('~/components/dashboard/GettingStartedChecklist.vue')
+)
+import type { TutorialStep } from '~/components/Tutorial.vue'
 import { MARKETING_FEATURE_ICONS } from '~/utils/marketing-feature-icons'
 import MarketingFeatureIcon from '~/components/marketing/MarketingFeatureIcon.vue'
-import StatCard from '~/components/ui/StatCard.vue'
+import DashboardStatTile from '~/components/dashboard/DashboardStatTile.vue'
 import DashboardPageHeader from '~/components/dashboard/DashboardPageHeader.vue'
 import PaymentLinksSummaryCard from '~/components/payments/PaymentLinksSummaryCard.vue'
-import Tutorial, { type TutorialStep } from '~/components/Tutorial.vue'
-import GettingStartedChecklist from '~/components/dashboard/GettingStartedChecklist.vue'
 import InlineStorePicker from '~/components/dashboard/InlineStorePicker.vue'
+import { runDashboardShellBootstrap } from '~/composables/useDashboardShellBootstrap'
+import { scheduleNativeIdleWork } from '~/utils/capacitor-native-perf'
 import { useDashboardHomeChrome } from '~/composables/useDashboardHomeChrome'
 import { useReceiptsStore } from '~/stores/receipts'
 import { useInventoryStore } from '~/stores/inventory'
-import { useDepartmentsStore } from '~/stores/departments'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useStoresStore } from '~/stores/stores'
@@ -554,7 +565,6 @@ const tutorialRef = ref<InstanceType<typeof Tutorial> | null>(null)
 
 const receiptsStore = useReceiptsStore()
 const inventoryStore = useInventoryStore()
-const departmentsStore = useDepartmentsStore()
 const authStore = useAuthStore()
 const userStore = useUserStore()
 const storesStore = useStoresStore()
@@ -574,7 +584,11 @@ const openLeadsPipeline = computed(() => salesLeadsStore.openPipelineValue)
 const { showNativeComingSoon } = usePaymentLinksLaunch()
 const { canViewProfitAndCost } = usePermissions()
 const { isNativeApp } = useCapacitorNativeApp()
+const { isCapacitorIos } = useIsCapacitorIos()
 const { formatGreeting } = useTimeGreeting()
+useIosPullToRefreshRegister(async () => {
+  await loadDashboardData()
+})
 
 const currencySymbol = computed(() => preferences.value.currencySymbol || '$')
 const dashboardFolderItems = ref<Record<string, InventoryItem[]>>({})
@@ -872,38 +886,55 @@ function formatActivityTime(createdAt: ActivityLog['createdAt']): string {
 
 const onTutorialComplete = () => {}
 
+const loadRecentActivity = async () => {
+  if (!canViewActivity.value) {
+    recentActivityLogs.value = []
+    return
+  }
+  recentActivityLogs.value = await fetchActivityLogs(DASHBOARD_ACTIVITY_TOP)
+}
+
 const loadDashboardData = async () => {
   try {
-    if (authStore.loading) {
-      let attempts = 0
-      while (authStore.loading && attempts < 100) {
-        await new Promise((resolve) => setTimeout(resolve, 100))
-        attempts++
-      }
-    }
-
     if (!authStore.currentUser) return
 
-    if (!userStore.userData || userStore.userData.uid !== authStore.currentUser.uid) {
-      await userStore.fetchUserData(authStore.currentUser.uid)
-    }
+    await runDashboardShellBootstrap()
 
     await Promise.all([
       receiptsStore.fetchReceipts(),
-      inventoryStore.fetchFolders(),
-      departmentsStore.fetchDepartments(),
       canAccessLeadsPlan.value ? salesLeadsStore.fetchSalesLeads(true) : Promise.resolve(),
     ])
 
     dashboardFolderItems.value = await inventoryStore.fetchFolderAvailabilityStats()
 
-    if (canViewActivity.value) {
-      recentActivityLogs.value = await fetchActivityLogs(DASHBOARD_ACTIVITY_TOP)
+    if (isNativeApp.value) {
+      scheduleNativeIdleWork(() => {
+        void loadRecentActivity()
+      })
     } else {
-      recentActivityLogs.value = []
+      await loadRecentActivity()
     }
   } catch (error) {
     console.error('Error loading dashboard data:', error)
+  }
+}
+
+const refreshDashboardAfterStoreSwitch = async () => {
+  try {
+    await Promise.all([
+      receiptsStore.fetchReceipts(),
+      canAccessLeadsPlan.value ? salesLeadsStore.fetchSalesLeads(true) : Promise.resolve(),
+    ])
+    dashboardFolderItems.value = await inventoryStore.fetchFolderAvailabilityStats()
+    if (isNativeApp.value) {
+      scheduleNativeIdleWork(() => {
+        void loadRecentActivity()
+      })
+    } else {
+      await loadRecentActivity()
+    }
+  } catch (error) {
+    console.error('Error refreshing dashboard after store switch:', error)
   }
 }
 
@@ -916,11 +947,10 @@ onMounted(async () => {
 watch(
   () => storesStore.currentStoreId,
   async (id, prev) => {
-    if (id && id !== prev && authStore.currentUser) {
-      isLoading.value = true
-      await loadDashboardData()
-      isLoading.value = false
-    }
+    if (!id || !prev || id === prev || !authStore.currentUser) return
+    isLoading.value = true
+    await refreshDashboardAfterStoreSwitch()
+    isLoading.value = false
   }
 )
 

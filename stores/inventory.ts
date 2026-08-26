@@ -177,6 +177,7 @@ const inventoryItemsPageInflight = new Map<string, Promise<InventoryItem[]>>()
 const inventoryItemsAllInflight = new Map<string, Promise<InventoryItem[]>>()
 /** Coalesce duplicate createFolder calls (e.g. iOS double-tap / submit+click). */
 let createFolderInflight: { key: string; promise: Promise<string> } | null = null
+let fetchFoldersInflight: { key: string; promise: Promise<void> } | null = null
 
 export interface TemplateField {
   id: string
@@ -281,7 +282,7 @@ export const useInventoryStore = defineStore('inventory', {
 
   actions: {
     // Get all inventory folders
-    async fetchFolders() {
+    async fetchFolders(options?: { force?: boolean }) {
       const { isDemoModeActive } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) {
         const { syncDemoToPinia } = await import('~/utils/demo-bridge')
@@ -291,6 +292,14 @@ export const useInventoryStore = defineStore('inventory', {
         return
       }
 
+      const storeIdForKey = (await getCurrentStoreId()) ?? ''
+      if (options?.force) {
+        fetchFoldersInflight = null
+      } else if (fetchFoldersInflight?.key === storeIdForKey) {
+        return fetchFoldersInflight.promise
+      }
+
+      const run = (async () => {
       this.loading = true
       this.error = null
 
@@ -481,6 +490,12 @@ export const useInventoryStore = defineStore('inventory', {
           }
         }
 
+        const storeIdNow = await getCurrentStoreId()
+        if (storeIdNow !== currentStoreId) {
+          this.loading = false
+          return
+        }
+
         this.folders = folders
 
         // Sort by createdAt if orderBy failed
@@ -497,6 +512,17 @@ export const useInventoryStore = defineStore('inventory', {
         this.loading = false
         throw new Error(error.message || 'Failed to fetch inventory folders')
       }
+      })()
+
+      fetchFoldersInflight = {
+        key: storeIdForKey,
+        promise: run.finally(() => {
+          if (fetchFoldersInflight?.promise === run) {
+            fetchFoldersInflight = null
+          }
+        }),
+      }
+      return fetchFoldersInflight.promise
     },
 
     /** Scan store inventory items and compute available / sold / on-loan units per category. */

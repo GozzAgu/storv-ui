@@ -29,6 +29,8 @@ import type { SubscriptionPlan } from '~/types/subscription'
 import type { Department } from '~/composables/useDepartments'
 // CORE_DEPARTMENTS should be imported directly from '~/composables/useDepartments' to avoid duplication
 
+let fetchDepartmentsInflight: { key: string; promise: Promise<void> } | null = null
+
 export const useDepartmentsStore = defineStore('departments', {
   state: () => ({
     departments: [] as Department[],
@@ -51,7 +53,7 @@ export const useDepartmentsStore = defineStore('departments', {
 
   actions: {
     // Get all departments
-    async fetchDepartments() {
+    async fetchDepartments(options?: { force?: boolean }) {
       const { isDemoModeActive } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) {
         const { syncDemoToPinia } = await import('~/utils/demo-bridge')
@@ -61,6 +63,14 @@ export const useDepartmentsStore = defineStore('departments', {
         return
       }
 
+      const storeIdForKey = (await getCurrentStoreId()) ?? ''
+      if (options?.force) {
+        fetchDepartmentsInflight = null
+      } else if (fetchDepartmentsInflight?.key === storeIdForKey) {
+        return fetchDepartmentsInflight.promise
+      }
+
+      const run = (async () => {
       this.loading = true
       this.error = null
 
@@ -180,6 +190,12 @@ export const useDepartmentsStore = defineStore('departments', {
           }
         }
 
+        const storeIdNow = await getCurrentStoreId()
+        if (storeIdNow !== storeId) {
+          this.loading = false
+          return
+        }
+
         this.departments = visibleDepartments
       } catch (error: any) {
         console.error('[DepartmentsStore] Error fetching departments:', error.message || error)
@@ -191,6 +207,17 @@ export const useDepartmentsStore = defineStore('departments', {
       } finally {
         this.loading = false
       }
+      })()
+
+      fetchDepartmentsInflight = {
+        key: storeIdForKey,
+        promise: run.finally(() => {
+          if (fetchDepartmentsInflight?.promise === run) {
+            fetchDepartmentsInflight = null
+          }
+        }),
+      }
+      return fetchDepartmentsInflight.promise
     },
 
     // Get a single department

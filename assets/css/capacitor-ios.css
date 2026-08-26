@@ -1,8 +1,9 @@
 /**
- * Capacitor iOS - uniform typography, glass surfaces, futuristic polish.
+ * Capacitor iOS — layout, glass chrome, legacy typography remaps.
+ * New typography: assets/css/ios-typography.css + useIosTypography().
+ * Phase 1 will migrate remaps below to --ios-type-* tokens.
  * Scoped to html.capacitor-ios.capacitor-native (web + Android unchanged).
  */
-
 html.capacitor-ios.capacitor-native {
   --cap-ios-font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', system-ui,
     sans-serif;
@@ -547,6 +548,14 @@ html.capacitor-ios.capacitor-native .dash-home {
 }
 
 html.capacitor-ios.capacitor-native .dash-home > .dash-page-header {
+  display: none;
+}
+
+html.capacitor-ios.capacitor-native .dash-home .dash-kpi-hero {
+  grid-column: 1 / -1;
+}
+
+html.capacitor-ios.capacitor-native .dash-home > .dash-page-header.dash-page-header--visible {
   display: flex;
   flex-direction: column;
   align-items: stretch;

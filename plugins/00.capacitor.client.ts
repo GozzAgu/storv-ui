@@ -34,6 +34,7 @@ export default defineNuxtPlugin({
 
     markCapacitorDocument()
     stripNativeWebFontLinks()
+    void import('~/assets/css/ios-native.css')
     void startNativeKeyboardHandling()
 
     if (redirectCapacitorRootToSignIn()) return

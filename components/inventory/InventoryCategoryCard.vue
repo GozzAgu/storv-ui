@@ -12,10 +12,10 @@
     </div>
 
     <div class="dash-grid-card__intro">
-      <h3 class="dash-grid-card__title">
+      <h3 :class="['dash-grid-card__title', cardTitleClass]">
         {{ displayName }}
       </h3>
-      <p class="dash-grid-card__desc">
+      <p :class="['dash-grid-card__desc', cardDescClass]">
         {{ descriptionText }}
       </p>
     </div>
@@ -53,8 +53,8 @@
         </div>
         <div class="dash-grid-card__stat">
           <p class="dash-grid-card__stat-value">
-            {{ itemCount }}
-            <span class="dash-grid-card__stat-muted">
+            <span :class="statValueClass">{{ itemCount }}</span>
+            <span :class="['dash-grid-card__stat-muted', cardDescClass]">
               {{ itemCount === 1 ? 'item' : 'items' }}
             </span>
           </p>
@@ -72,7 +72,7 @@
           </p>
         </div>
         <div class="dash-grid-card__metrics shrink-0 text-right">
-          <p class="dash-grid-card__value">
+          <p :class="['dash-grid-card__value', statValueClass]">
             {{ formattedValue }}
           </p>
           <p
@@ -93,6 +93,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { buildIosTextClass } from '~/composables/useIosTypography'
 import {
   BuildingOffice2Icon,
   FolderIcon,
@@ -150,6 +151,10 @@ const props = withDefaults(
 defineEmits<{
   click: []
 }>()
+
+const cardTitleClass = buildIosTextClass('headline')
+const cardDescClass = buildIosTextClass('footnote', { secondary: true })
+const statValueClass = buildIosTextClass('body-emphasized', { tabular: true })
 
 const ringCircumference = 2 * Math.PI * 14
 

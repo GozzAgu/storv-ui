@@ -1,6 +1,6 @@
 <template>
   <div :class="pageClass">
-    <DashboardPageHeader class="dash-page-header--unified">
+    <DashboardPageHeader class="dash-page-header--unified" :ios-context-only="isCapacitorIos">
       <template #eyebrow>
         <p :class="eyebrowClass">Store & app</p>
       </template>
@@ -20,7 +20,7 @@
       </template>
     </DashboardPageHeader>
 
-    <div :class="pageStackClass">
+    <div :class="[pageStackClass, isCapacitorIos ? 'dash-page-stack--ios-settings' : '']">
       <!-- Account: logo + subscription -->
       <DashboardSettingsPanel
         v-if="userStore.isSuperAdmin"
@@ -1065,6 +1065,8 @@ const {
   storeBranchCardClass,
   storeBranchCardActiveClass,
 } = useDashboardSettingsChrome()
+
+const { isCapacitorIos } = useIsCapacitorIos()
 
 // Store information
 const storeInfo = reactive({

@@ -2,6 +2,7 @@
  * Shared layout tokens for dashboard page headers and toolbars (32px controls, aligned rows).
  */
 import { computed } from 'vue'
+import { buildIosTextClass } from '~/composables/useIosTypography'
 import { APP_CARD_CLASS, APP_FIELD_COMPACT_CLASS } from '~/utils/app-chrome'
 
 export function useDashboardPageChrome() {
@@ -49,17 +50,21 @@ export function useDashboardPageChrome() {
       : 'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100/90 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/[0.06] dark:hover:text-gray-100'
   )
 
-  const eyebrowClass = computed(() =>
-    native.value ? 'dash-eyebrow' : 'dash-eyebrow'
-  )
+  const iosCaption = buildIosTextClass('caption', { secondary: true })
+  const iosTitle = buildIosTextClass('title2')
+  const iosMeta = buildIosTextClass('footnote', { secondary: true })
 
-  const pageTitleClass = computed(() => 'dash-page-title')
+  const eyebrowClass = computed(() => `dash-eyebrow ${iosCaption}`)
+
+  const pageTitleClass = computed(() => `dash-page-title ${iosTitle}`)
 
   /** @deprecated Use pageTitleClass */
   const titleClass = pageTitleClass
 
   const descriptionClass = computed(() =>
-    native.value ? 'dash-page-meta mt-1.5' : 'dash-page-meta mt-1.5 max-w-2xl'
+    native.value
+      ? `dash-page-meta mt-1.5 ${iosMeta}`
+      : `dash-page-meta mt-1.5 max-w-2xl ${iosMeta}`
   )
 
   const bulkActionsClass =

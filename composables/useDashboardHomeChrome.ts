@@ -1,5 +1,8 @@
+import { buildIosTextClass } from '~/composables/useIosTypography'
+
 /**
  * Dashboard home page - semantic class names aligned with dashboard-shell SaaS tokens.
+ * iOS typography utilities are inert on web (scoped in ios-typography.css).
  */
 export function useDashboardHomeChrome() {
   const pageClass = 'dash-home dash-page--unified'
@@ -8,15 +11,15 @@ export function useDashboardHomeChrome() {
   const cardFlushClass = 'dash-card dash-card--flush'
 
   const pageHeaderClass = 'dash-page-header dash-page-header--unified'
-  const eyebrowClass = 'dash-eyebrow'
-  const pageTitleClass = 'dash-page-title'
-  const pageMetaClass = 'dash-page-meta'
+  const eyebrowClass = `dash-eyebrow ${buildIosTextClass('caption', { secondary: true })}`
+  const pageTitleClass = `dash-page-title ${buildIosTextClass('large-title')}`
+  const pageMetaClass = `dash-page-meta ${buildIosTextClass('footnote', { secondary: true })}`
   const linkClass = 'dash-link'
 
   const cardHeaderClass = 'dash-card__header'
-  const cardTitleClass = 'dash-card__title'
-  const cardDescClass = 'dash-card__desc'
-  const cardLinkClass = 'dash-card__link'
+  const cardTitleClass = `dash-card__title ${buildIosTextClass('headline')}`
+  const cardDescClass = `dash-card__desc ${buildIosTextClass('footnote', { secondary: true })}`
+  const cardLinkClass = `dash-card__link ${buildIosTextClass('subheadline')}`
 
   const kpiGridClass = 'dash-kpi-grid'
   const chartsGridClass = 'dash-charts-grid'
@@ -42,7 +45,7 @@ export function useDashboardHomeChrome() {
   const barTrackClass = 'dash-bar'
   const barFillClass = 'dash-bar__fill'
 
-  const numClass = 'dash-num'
+  const numClass = `dash-num ${buildIosTextClass('body-emphasized', { tabular: true })}`
   const emptyClass = 'dash-empty'
   const stateCardClass = 'dash-state-card'
 

@@ -1,0 +1,256 @@
+/**
+ * Storvv iOS typography system — single source of truth for native text.
+ * Scoped to html.capacitor-ios.capacitor-native only (no web impact).
+ *
+ * Usage:
+ *   class="text-ios-body"
+ *   class="text-ios-headline ios-type-tabular"
+ *   useIosTypography().textClass('body')
+ *
+ * Phase 0: defines tokens + utilities. Legacy --cap-ios-* remaps in capacitor-ios.css
+ * remain until Phase 1 migrates pages to these classes.
+ */
+
+html.capacitor-ios.capacitor-native {
+  --ios-type-font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display',
+    system-ui, sans-serif;
+  --ios-type-font-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, monospace;
+  --ios-type-tracking-tight: -0.022em;
+  --ios-type-tracking: -0.012em;
+  --ios-type-tracking-loose: -0.006em;
+  --ios-type-leading-tight: 1.2;
+  --ios-type-leading-snug: 1.32;
+  --ios-type-leading: 1.41;
+  --ios-type-leading-relaxed: 1.47;
+
+  /* Apple semantic scale (pt ≈ px at 1×) */
+  --ios-type-display-size: 2.125rem; /* 34 */
+  --ios-type-display-weight: 700;
+  --ios-type-display-leading: var(--ios-type-leading-tight);
+  --ios-type-display-tracking: var(--ios-type-tracking-tight);
+
+  --ios-type-large-title-size: 1.75rem; /* 28 */
+  --ios-type-large-title-weight: 700;
+  --ios-type-large-title-leading: var(--ios-type-leading-tight);
+  --ios-type-large-title-tracking: var(--ios-type-tracking-tight);
+
+  --ios-type-title-size: 1.375rem; /* 22 */
+  --ios-type-title-weight: 600;
+  --ios-type-title-leading: var(--ios-type-leading-snug);
+  --ios-type-title-tracking: var(--ios-type-tracking-tight);
+
+  --ios-type-title2-size: 1.25rem; /* 20 */
+  --ios-type-title2-weight: 600;
+  --ios-type-title2-leading: var(--ios-type-leading-snug);
+  --ios-type-title2-tracking: var(--ios-type-tracking);
+
+  --ios-type-title3-size: 1.0625rem; /* 17 */
+  --ios-type-title3-weight: 600;
+  --ios-type-title3-leading: var(--ios-type-leading-snug);
+  --ios-type-title3-tracking: var(--ios-type-tracking);
+
+  --ios-type-headline-size: 1.0625rem; /* 17 */
+  --ios-type-headline-weight: 600;
+  --ios-type-headline-leading: var(--ios-type-leading);
+  --ios-type-headline-tracking: var(--ios-type-tracking);
+
+  --ios-type-body-size: 1.0625rem; /* 17 */
+  --ios-type-body-weight: 400;
+  --ios-type-body-leading: var(--ios-type-leading);
+  --ios-type-body-tracking: var(--ios-type-tracking);
+
+  --ios-type-body-emphasized-size: 1.0625rem; /* 17 */
+  --ios-type-body-emphasized-weight: 600;
+  --ios-type-body-emphasized-leading: var(--ios-type-leading);
+  --ios-type-body-emphasized-tracking: var(--ios-type-tracking);
+
+  --ios-type-callout-size: 1rem; /* 16 */
+  --ios-type-callout-weight: 400;
+  --ios-type-callout-leading: var(--ios-type-leading);
+  --ios-type-callout-tracking: var(--ios-type-tracking-loose);
+
+  --ios-type-subheadline-size: 0.9375rem; /* 15 */
+  --ios-type-subheadline-weight: 400;
+  --ios-type-subheadline-leading: var(--ios-type-leading);
+  --ios-type-subheadline-tracking: var(--ios-type-tracking-loose);
+
+  --ios-type-footnote-size: 0.8125rem; /* 13 */
+  --ios-type-footnote-weight: 400;
+  --ios-type-footnote-leading: var(--ios-type-leading-snug);
+  --ios-type-footnote-tracking: var(--ios-type-tracking-loose);
+
+  --ios-type-caption-size: 0.75rem; /* 12 */
+  --ios-type-caption-weight: 400;
+  --ios-type-caption-leading: var(--ios-type-leading-snug);
+  --ios-type-caption-tracking: var(--ios-type-tracking-loose);
+
+  --ios-type-caption2-size: 0.6875rem; /* 11 */
+  --ios-type-caption2-weight: 400;
+  --ios-type-caption2-leading: var(--ios-type-leading-snug);
+  --ios-type-caption2-tracking: var(--ios-type-tracking-loose);
+
+  /* Form fields — 16px minimum to prevent iOS focus zoom */
+  --ios-type-input-size: 1rem;
+  --ios-type-input-weight: 400;
+  --ios-type-input-leading: var(--ios-type-leading);
+}
+
+/* Role utilities — only active on Capacitor iOS */
+html.capacitor-ios.capacitor-native .text-ios-display,
+html.capacitor-ios.capacitor-native .ios-type-display {
+  font-family: var(--ios-type-font-family);
+  font-size: var(--ios-type-display-size);
+  font-weight: var(--ios-type-display-weight);
+  line-height: var(--ios-type-display-leading);
+  letter-spacing: var(--ios-type-display-tracking);
+}
+
+html.capacitor-ios.capacitor-native .text-ios-large-title,
+html.capacitor-ios.capacitor-native .ios-type-large-title {
+  font-family: var(--ios-type-font-family);
+  font-size: var(--ios-type-large-title-size);
+  font-weight: var(--ios-type-large-title-weight);
+  line-height: var(--ios-type-large-title-leading);
+  letter-spacing: var(--ios-type-large-title-tracking);
+}
+
+html.capacitor-ios.capacitor-native .text-ios-title,
+html.capacitor-ios.capacitor-native .ios-type-title {
+  font-family: var(--ios-type-font-family);
+  font-size: var(--ios-type-title-size);
+  font-weight: var(--ios-type-title-weight);
+  line-height: var(--ios-type-title-leading);
+  letter-spacing: var(--ios-type-title-tracking);
+}
+
+html.capacitor-ios.capacitor-native .text-ios-title2,
+html.capacitor-ios.capacitor-native .ios-type-title2 {
+  font-family: var(--ios-type-font-family);
+  font-size: var(--ios-type-title2-size);
+  font-weight: var(--ios-type-title2-weight);
+  line-height: var(--ios-type-title2-leading);
+  letter-spacing: var(--ios-type-title2-tracking);
+}
+
+html.capacitor-ios.capacitor-native .text-ios-title3,
+html.capacitor-ios.capacitor-native .ios-type-title3 {
+  font-family: var(--ios-type-font-family);
+  font-size: var(--ios-type-title3-size);
+  font-weight: var(--ios-type-title3-weight);
+  line-height: var(--ios-type-title3-leading);
+  letter-spacing: var(--ios-type-title3-tracking);
+}
+
+html.capacitor-ios.capacitor-native .text-ios-headline,
+html.capacitor-ios.capacitor-native .ios-type-headline {
+  font-family: var(--ios-type-font-family);
+  font-size: var(--ios-type-headline-size);
+  font-weight: var(--ios-type-headline-weight);
+  line-height: var(--ios-type-headline-leading);
+  letter-spacing: var(--ios-type-headline-tracking);
+}
+
+html.capacitor-ios.capacitor-native .text-ios-body,
+html.capacitor-ios.capacitor-native .ios-type-body {
+  font-family: var(--ios-type-font-family);
+  font-size: var(--ios-type-body-size);
+  font-weight: var(--ios-type-body-weight);
+  line-height: var(--ios-type-body-leading);
+  letter-spacing: var(--ios-type-body-tracking);
+}
+
+html.capacitor-ios.capacitor-native .text-ios-body-emphasized,
+html.capacitor-ios.capacitor-native .ios-type-body-emphasized {
+  font-family: var(--ios-type-font-family);
+  font-size: var(--ios-type-body-emphasized-size);
+  font-weight: var(--ios-type-body-emphasized-weight);
+  line-height: var(--ios-type-body-emphasized-leading);
+  letter-spacing: var(--ios-type-body-emphasized-tracking);
+}
+
+html.capacitor-ios.capacitor-native .text-ios-callout,
+html.capacitor-ios.capacitor-native .ios-type-callout {
+  font-family: var(--ios-type-font-family);
+  font-size: var(--ios-type-callout-size);
+  font-weight: var(--ios-type-callout-weight);
+  line-height: var(--ios-type-callout-leading);
+  letter-spacing: var(--ios-type-callout-tracking);
+}
+
+html.capacitor-ios.capacitor-native .text-ios-subheadline,
+html.capacitor-ios.capacitor-native .ios-type-subheadline {
+  font-family: var(--ios-type-font-family);
+  font-size: var(--ios-type-subheadline-size);
+  font-weight: var(--ios-type-subheadline-weight);
+  line-height: var(--ios-type-subheadline-leading);
+  letter-spacing: var(--ios-type-subheadline-tracking);
+}
+
+html.capacitor-ios.capacitor-native .text-ios-footnote,
+html.capacitor-ios.capacitor-native .ios-type-footnote {
+  font-family: var(--ios-type-font-family);
+  font-size: var(--ios-type-footnote-size);
+  font-weight: var(--ios-type-footnote-weight);
+  line-height: var(--ios-type-footnote-leading);
+  letter-spacing: var(--ios-type-footnote-tracking);
+  color: inherit;
+}
+
+html.capacitor-ios.capacitor-native .text-ios-caption,
+html.capacitor-ios.capacitor-native .ios-type-caption {
+  font-family: var(--ios-type-font-family);
+  font-size: var(--ios-type-caption-size);
+  font-weight: var(--ios-type-caption-weight);
+  line-height: var(--ios-type-caption-leading);
+  letter-spacing: var(--ios-type-caption-tracking);
+}
+
+html.capacitor-ios.capacitor-native .text-ios-caption2,
+html.capacitor-ios.capacitor-native .ios-type-caption2 {
+  font-family: var(--ios-type-font-family);
+  font-size: var(--ios-type-caption2-size);
+  font-weight: var(--ios-type-caption2-weight);
+  line-height: var(--ios-type-caption2-leading);
+  letter-spacing: var(--ios-type-caption2-tracking);
+}
+
+html.capacitor-ios.capacitor-native .text-ios-input,
+html.capacitor-ios.capacitor-native .ios-type-input {
+  font-family: var(--ios-type-font-family);
+  font-size: var(--ios-type-input-size);
+  font-weight: var(--ios-type-input-weight);
+  line-height: var(--ios-type-input-leading);
+}
+
+/* Secondary label color for meta roles */
+html.capacitor-ios.capacitor-native .ios-type-secondary {
+  color: var(--ios-label-secondary, rgb(60 60 67 / 0.6));
+}
+
+html.dark.capacitor-ios.capacitor-native .ios-type-secondary {
+  color: var(--ios-label-secondary, rgb(235 235 245 / 0.6));
+}
+
+/* Business numerals */
+html.capacitor-ios.capacitor-native .ios-type-tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+/* Dynamic Type — modest scaling for accessibility (rem-based tokens) */
+@media (min-width: 20rem) {
+  html.capacitor-ios.capacitor-native.ios-type-scale-large {
+    font-size: 106.25%;
+  }
+
+  html.capacitor-ios.capacitor-native.ios-type-scale-xlarge {
+    font-size: 112.5%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.capacitor-ios.capacitor-native [class*='text-ios-'],
+  html.capacitor-ios.capacitor-native [class*='ios-type-'] {
+    transition: none;
+  }
+}

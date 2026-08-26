@@ -89,7 +89,67 @@ export default {
       borderRadius: {
         sidenav: '0.125rem',
       },
+      /**
+       * iOS typography aliases — authoritative styles live in ios-typography.css
+       * (scoped to html.capacitor-ios.capacitor-native). These sizes mirror the
+       * token scale for IDE hints and optional web preview; use useIosTypography()
+       * in Vue for native-first components.
+       */
+      fontSize: {
+        'ios-display': ['2.125rem', { lineHeight: '1.2', letterSpacing: '-0.022em', fontWeight: '700' }],
+        'ios-large-title': ['1.75rem', { lineHeight: '1.2', letterSpacing: '-0.022em', fontWeight: '700' }],
+        'ios-title': ['1.375rem', { lineHeight: '1.32', letterSpacing: '-0.022em', fontWeight: '600' }],
+        'ios-title2': ['1.25rem', { lineHeight: '1.32', letterSpacing: '-0.012em', fontWeight: '600' }],
+        'ios-title3': ['1.0625rem', { lineHeight: '1.32', letterSpacing: '-0.012em', fontWeight: '600' }],
+        'ios-headline': ['1.0625rem', { lineHeight: '1.41', letterSpacing: '-0.012em', fontWeight: '600' }],
+        'ios-body': ['1.0625rem', { lineHeight: '1.41', letterSpacing: '-0.012em', fontWeight: '400' }],
+        'ios-body-emphasized': [
+          '1.0625rem',
+          { lineHeight: '1.41', letterSpacing: '-0.012em', fontWeight: '600' },
+        ],
+        'ios-callout': ['1rem', { lineHeight: '1.41', letterSpacing: '-0.006em', fontWeight: '400' }],
+        'ios-subheadline': [
+          '0.9375rem',
+          { lineHeight: '1.41', letterSpacing: '-0.006em', fontWeight: '400' },
+        ],
+        'ios-footnote': ['0.8125rem', { lineHeight: '1.32', letterSpacing: '-0.006em', fontWeight: '400' }],
+        'ios-caption': ['0.75rem', { lineHeight: '1.32', letterSpacing: '-0.006em', fontWeight: '400' }],
+        'ios-caption2': ['0.6875rem', { lineHeight: '1.32', letterSpacing: '-0.006em', fontWeight: '400' }],
+        'ios-input': ['1rem', { lineHeight: '1.41', fontWeight: '400' }],
+      },
     },
   },
+  safelist: [
+    'text-ios-display',
+    'text-ios-large-title',
+    'text-ios-title',
+    'text-ios-title2',
+    'text-ios-title3',
+    'text-ios-headline',
+    'text-ios-body',
+    'text-ios-body-emphasized',
+    'text-ios-callout',
+    'text-ios-subheadline',
+    'text-ios-footnote',
+    'text-ios-caption',
+    'text-ios-caption2',
+    'text-ios-input',
+    'ios-type-display',
+    'ios-type-large-title',
+    'ios-type-title',
+    'ios-type-title2',
+    'ios-type-title3',
+    'ios-type-headline',
+    'ios-type-body',
+    'ios-type-body-emphasized',
+    'ios-type-callout',
+    'ios-type-subheadline',
+    'ios-type-footnote',
+    'ios-type-caption',
+    'ios-type-caption2',
+    'ios-type-tabular',
+    'ios-type-secondary',
+    'ios-type-input',
+  ],
   plugins: [],
 }

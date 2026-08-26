@@ -1,6 +1,6 @@
 <template>
-  <div :class="pageClass">
-    <DashboardPageHeader class="dash-page-header--unified">
+  <div :class="[pageClass, isCapacitorIos ? 'dash-analytics--ios' : '']">
+    <DashboardPageHeader class="dash-page-header--unified" :ios-context-only="isCapacitorIos">
       <template #eyebrow>
         <p :class="eyebrowClass">Analytics</p>
       </template>
@@ -8,7 +8,7 @@
         <h1 :class="pageTitleClass">Analytics & Reports</h1>
       </template>
       <template #actions>
-        <div :class="segmentGroupClass" role="group" aria-label="Analytics period">
+        <div v-if="!isCapacitorIos" :class="segmentGroupClass" role="group" aria-label="Analytics period">
           <button
             v-for="period in analyticsPeriods"
             :key="period.value"
@@ -25,6 +25,7 @@
           </button>
         </div>
         <button
+          v-if="!isCapacitorIos"
           type="button"
           :disabled="isExporting"
           :class="exportBtnSecondaryClass"
@@ -34,6 +35,7 @@
           <span>{{ isExporting ? 'Exporting…' : 'Export PDF' }}</span>
         </button>
         <button
+          v-if="!isCapacitorIos"
           type="button"
           :disabled="isExporting"
           :class="exportBtnSuccessClass"
@@ -88,6 +90,23 @@
     />
 
     <template v-else>
+      <IosAnalyticsActions
+        v-if="isCapacitorIos"
+        :is-exporting="isExporting"
+        @export="exportReport"
+        @import="onImportReport"
+      >
+        <template #period>
+          <IosSegmentedControl
+            v-model="selectedPeriod"
+            class="ios-analytics-period-tabs"
+            aria-label="Analytics period"
+            :options="analyticsPeriodOptions"
+            @change="loadAnalytics()"
+          />
+        </template>
+      </IosAnalyticsActions>
+
       <section class="dash-analytics-kpi-panel">
         <header class="dash-analytics-kpi-panel__intro">
           <p class="dash-analytics-kpi-panel__eyebrow">{{ periodLabel }}</p>
@@ -182,7 +201,7 @@
           <div :class="['dash-chart-wrap dash-chart-wrap--tall']">
             <LazyApexChart
               type="line"
-              height="300"
+              :height="primaryChartHeight"
               :options="revenueChartOptions"
               :series="revenueChartSeries"
             />
@@ -195,7 +214,7 @@
           <div class="mt-2 flex-1">
             <LazyApexChart
               type="donut"
-              height="300"
+              :height="secondaryChartHeight"
               :options="topProductsChartOptions"
               :series="topProductsChartSeries"
             />
@@ -511,12 +530,17 @@
           <p v-else :class="emptyClass">All stocked</p>
         </div>
       </div>
+
     </template>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, defineAsyncComponent } from 'vue'
+
+import { mergeIosApexChartTheme } from '~/utils/ios-apex-chart'
+import IosSegmentedControl from '~/components/ios/IosSegmentedControl.vue'
+import IosAnalyticsActions from '~/components/ios/IosAnalyticsActions.vue'
 
 const LazyApexChart = defineAsyncComponent(
   () => import('~/components/charts/LazyApexChart.client.vue')
@@ -673,11 +697,20 @@ const {
   progressLegendClass,
 } = useDashboardAnalyticsChrome()
 
+const { isCapacitorIos } = useIsCapacitorIos()
+const primaryChartHeight = computed(() => (isCapacitorIos.value ? 220 : 300))
+const secondaryChartHeight = computed(() => (isCapacitorIos.value ? 220 : 300))
+
 const analyticsPeriods = [
   { value: 'daily' as const, label: 'Daily' },
   { value: 'weekly' as const, label: 'Weekly' },
   { value: 'monthly' as const, label: 'Monthly' },
 ]
+
+const analyticsPeriodOptions = analyticsPeriods.map((period) => ({
+  value: period.value,
+  label: period.label,
+}))
 
 const selectedPeriod = ref<'daily' | 'weekly' | 'monthly'>('monthly')
 
@@ -1592,7 +1625,7 @@ const revenueChartOptions = computed(() => {
   void displayCurrencyDeps.value
   const isDark = themeStore.actualTheme === 'dark'
 
-  return {
+  const base = {
     chart: {
       type: 'line',
       toolbar: { show: false },
@@ -1658,6 +1691,8 @@ const revenueChartOptions = computed(() => {
       mode: isDark ? 'dark' : 'light',
     },
   }
+
+  return isCapacitorIos.value ? mergeIosApexChartTheme(base, isDark) : base
 })
 
 const topProductsChartSeries = computed(() => {
@@ -1853,6 +1888,12 @@ const loadAnalytics = async () => {
   } finally {
     isLoading.value = false
   }
+}
+
+useIosPullToRefreshRegister(loadAnalytics)
+
+function onImportReport(_file: File) {
+  toast.info('Import from spreadsheet is coming soon.')
 }
 
 const exportReport = async (format: 'pdf' | 'excel' = 'pdf') => {

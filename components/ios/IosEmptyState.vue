@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col items-center justify-center px-6 py-12 text-center">
+  <div class="ios-empty-state flex flex-col items-center justify-center px-6 py-12 text-center">
     <div
       class="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-gray-400"
     >
@@ -7,8 +7,8 @@
         <component :is="icon" v-if="icon" class="h-8 w-8" aria-hidden="true" />
       </slot>
     </div>
-    <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">{{ title }}</h3>
-    <p v-if="description" class="mt-2 max-w-sm text-[15px] leading-relaxed text-gray-500 dark:text-gray-400">
+    <h3 :class="['text-gray-900 dark:text-gray-100', titleClass]">{{ title }}</h3>
+    <p v-if="description" :class="['mt-2 max-w-sm leading-relaxed', descClass]">
       {{ description }}
     </p>
     <div v-if="$slots.action || actionLabel" class="mt-6">
@@ -28,6 +28,10 @@
 
 <script setup lang="ts">
 import type { Component } from 'vue'
+import { buildIosTextClass } from '~/composables/useIosTypography'
+
+const titleClass = buildIosTextClass('title3')
+const descClass = `${buildIosTextClass('body', { secondary: true })} text-gray-500 dark:text-gray-400`
 
 withDefaults(
   defineProps<{
