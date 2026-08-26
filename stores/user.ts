@@ -14,6 +14,10 @@ import { useAuthStore } from './auth'
 import type { UserData, StoreDetails } from '~/composables/useUser'
 import type { Staff } from '~/composables/useStaff'
 import { sanitizeUserData } from '~/utils/sanitize-user-data'
+import {
+  markOnboardingCompleteForSession,
+  clearOnboardingCompleteForSession,
+} from '~/utils/onboarding-session'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -145,6 +149,9 @@ export const useUserStore = defineStore('user', {
         }
       } finally {
         this.loading = false
+        if (this.userData?.uid === userId && this.userData.hasCompletedOnboarding) {
+          markOnboardingCompleteForSession(userId)
+        }
       }
     },
 
@@ -249,10 +256,12 @@ export const useUserStore = defineStore('user', {
       await this.updateUserDocument(userId, {
         hasCompletedOnboarding: true,
       })
+      markOnboardingCompleteForSession(userId)
     },
 
     // Clear user data
     clearUserData() {
+      clearOnboardingCompleteForSession(this.userData?.uid)
       this.userData = null
       this.error = null
     },

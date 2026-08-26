@@ -1,6 +1,18 @@
 <template>
   <div class="min-h-screen bg-gray-50 dark:!bg-dashboard-card">
-    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div
+      v-if="checkingProfile"
+      class="flex min-h-screen items-center justify-center px-4"
+    >
+      <div class="text-center">
+        <div
+          class="mx-auto mb-4 inline-block h-10 w-10 animate-spin rounded-full border-b-2 border-primary-500"
+        />
+        <p class="text-sm text-gray-600 dark:text-gray-400">Loading your account…</p>
+      </div>
+    </div>
+
+    <div v-else class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <!-- Progress Indicator -->
       <div class="mb-5 sm:mb-6">
         <div class="flex items-center justify-between mb-1.5">
@@ -275,6 +287,7 @@ const userStore = useUserStore()
 const currentStep = ref(1)
 const totalSteps = 2
 const isLoading = ref(false)
+const checkingProfile = ref(true)
 const errorMessage = ref('')
 const selectedCurrency = ref('')
 const selectedCountry = ref('')
@@ -317,28 +330,31 @@ const canContinue = computed(() => {
 })
 
 onMounted(async () => {
-  // Redirect if not authenticated
-  await nextTick()
-  if (!authLoading.value && !currentUser.value) {
-    navigateTo('/signin')
-    return
-  }
+  try {
+    await nextTick()
+    if (!authLoading.value && !currentUser.value) {
+      await navigateTo('/signin')
+      return
+    }
 
-  // Staff inherit the super admin setup — never show account setup wizard.
-  if (currentUser.value) {
+    if (!currentUser.value) return
+
     if (!userStore.userData) {
       await userStore.fetchUserData(currentUser.value.uid)
     }
+
     const session = userStore.userData
     if (session?.role === 'staff') {
-      navigateTo(session.mustChangePassword ? '/dashboard/change-password' : '/dashboard')
+      await navigateTo(session.mustChangePassword ? '/dashboard/change-password' : '/dashboard')
       return
     }
 
     const userData = await getUserDocument(currentUser.value.uid)
     if (userData?.hasCompletedOnboarding) {
-      navigateTo('/dashboard')
+      await navigateTo('/dashboard')
     }
+  } finally {
+    checkingProfile.value = false
   }
 })
 

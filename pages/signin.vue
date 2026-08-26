@@ -171,6 +171,7 @@ import { markCapacitorDocument } from '~/utils/capacitor-env'
 import { clearSignOutPending } from '~/utils/auth-sign-out'
 import { getErrorMessage } from '~/utils/error-message'
 import { getAuthWaitMs, waitForAuthStore } from '~/utils/wait-for-auth'
+import { markOnboardingCompleteForSession } from '~/utils/onboarding-session'
 import {
   isTwoFactorSessionVerified,
   markTwoFactorSessionVerified,
@@ -304,6 +305,8 @@ async function finishAuthenticatedSession(email: string, password: string) {
     destination = userData.mustChangePassword ? '/dashboard/change-password' : '/dashboard'
   } else if (!userData.hasCompletedOnboarding) {
     destination = '/dashboard/onboarding'
+  } else {
+    markOnboardingCompleteForSession(userData.uid)
   }
 
   await navigateTo(destination)

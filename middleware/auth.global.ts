@@ -1,5 +1,6 @@
 import { SIGNIN_ALLOW_WHILE_AUTHED_KEY } from './guest'
-import { getAuthWaitMs, waitForAuthStore } from '~/utils/wait-for-auth'
+import { getAuthWaitMs, waitForAuthStore, ensureUserProfileLoaded } from '~/utils/wait-for-auth'
+import { isOnboardingCompleteForSession } from '~/utils/onboarding-session'
 import { isCapacitorNative } from '~/utils/capacitor-env'
 import { isCapacitorMarketingRoot } from '~/utils/capacitor-root-path'
 import { isTwoFactorSessionVerified } from '~/utils/two-factor-session'
@@ -60,13 +61,10 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
     if (authStore.currentUser) {
       const userStore = useUserStore()
-      if (!userStore.userData && !userStore.loading) {
-        try {
-          await userStore.fetchUserData(authStore.currentUser.uid)
-        } catch {
-          /* ignore */
-        }
-      }
+      const userId = authStore.currentUser.uid
+      const waitMs = getAuthWaitMs()
+
+      await ensureUserProfileLoaded(userStore, userId, waitMs)
 
       const emailVerifyExempt =
         userStore.userData?.role === 'staff' ||
@@ -79,19 +77,32 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
       if (
         userStore.userData?.twoFactorEnabled &&
-        !isTwoFactorSessionVerified(authStore.currentUser.uid)
+        !isTwoFactorSessionVerified(userId)
       ) {
         return navigateTo('/signin?verify2fa=1')
       }
 
-      const onboardingComplete = userStore.userData?.hasCompletedOnboarding ?? false
       const isStaffAccount = userStore.userData?.role === 'staff'
+      const sessionOnboardingComplete = isOnboardingCompleteForSession(userId)
+      const profileLoaded = !!userStore.userData
+      const onboardingIncomplete =
+        profileLoaded && userStore.userData?.hasCompletedOnboarding === false
+
       if (
-        !onboardingComplete &&
+        onboardingIncomplete &&
         !isStaffAccount &&
         !isOnboardingExemptDashboardPath(to.path)
       ) {
         return navigateTo('/dashboard/onboarding')
+      }
+
+      // Already completed setup in this session — skip onboarding while profile reloads.
+      if (
+        !profileLoaded &&
+        sessionOnboardingComplete &&
+        to.path === '/dashboard/onboarding'
+      ) {
+        return navigateTo('/dashboard')
       }
     }
   }
