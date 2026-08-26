@@ -429,6 +429,41 @@ service cloud.firestore {
           allow delete: if false;
         }
 
+        // Sales leads: manual enquiry tracking (no external messaging APIs).
+        match /salesLeads/{leadId} {
+          allow read: if canAccessStoreData(userId, storeId) &&
+                         resourceMatchesStore(storeId);
+
+          allow create: if canCreateReceipt(userId, storeId) &&
+                           request.resource.data.storeId == storeId &&
+                           request.resource.data.createdBy == request.auth.uid &&
+                           request.resource.data.status == 'new' &&
+                           request.resource.data.customerName is string &&
+                           request.resource.data.productName is string &&
+                           request.resource.data.source is string;
+
+          allow update: if canCreateReceipt(userId, storeId) &&
+                           resourceMatchesStore(storeId) &&
+                           requestMatchesStore(storeId);
+
+          allow delete: if canManageNonInventoryOps(userId, storeId) &&
+                           resourceMatchesStore(storeId);
+        }
+
+        match /leadEvents/{eventId} {
+          allow read: if canAccessStoreData(userId, storeId) &&
+                         resourceMatchesStore(storeId);
+
+          allow create: if canCreateReceipt(userId, storeId) &&
+                           request.resource.data.storeId == storeId &&
+                           request.resource.data.createdBy == request.auth.uid &&
+                           request.resource.data.leadId is string &&
+                           request.resource.data.type is string &&
+                           request.resource.data.description is string;
+
+          allow update, delete: if false;
+        }
+
         match /customers/{customerId} {
           allow read: if canAccessStoreData(userId, storeId);
           

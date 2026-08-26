@@ -256,8 +256,11 @@ async function handleNotificationClick(notification: Notification) {
 
   const meta = notification.metadata
   if (meta) {
-    if (meta.receiptId) router.push('/dashboard/receipts')
-    else if (meta.folderId) router.push(`/dashboard/inventory/${meta.folderId}`)
+    if (meta.receiptId) {
+      router.push(`/dashboard/receipts?highlight=${encodeURIComponent(meta.receiptId)}`)
+    } else if (meta.leadId) {
+      router.push(`/dashboard/leads/${meta.leadId}`)
+    } else if (meta.folderId) router.push(`/dashboard/inventory/${meta.folderId}`)
     else if (meta.departmentId) router.push(`/dashboard/departments/${meta.departmentId}`)
     if (props.variant === 'dropdown') emit('close')
   }

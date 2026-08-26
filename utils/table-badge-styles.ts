@@ -45,3 +45,20 @@ export function formatSellerLoanStatusLabel(status: string): string {
   if (status === 'returned') return 'Returned'
   return status.charAt(0).toUpperCase() + status.slice(1)
 }
+
+export function salesLeadStatusBadgeClass(status: string): string {
+  switch (status) {
+    case 'new':
+      return `${badgeBase} border-sky-200/80 bg-sky-50/90 text-sky-800 ring-sky-500/15 dark:border-sky-500/25 dark:bg-sky-500/10 dark:text-sky-200 dark:ring-sky-400/20`
+    case 'contacted':
+      return `${badgeBase} border-indigo-200/80 bg-indigo-50/90 text-indigo-800 ring-indigo-500/15 dark:border-indigo-500/25 dark:bg-indigo-500/10 dark:text-indigo-200 dark:ring-indigo-400/20`
+    case 'negotiating':
+      return `${badgeBase} border-amber-200/80 bg-amber-50/90 text-amber-900 ring-amber-500/15 dark:border-amber-500/25 dark:bg-amber-500/10 dark:text-amber-100 dark:ring-amber-400/20`
+    case 'won':
+      return `${badgeBase} border-emerald-200/80 bg-emerald-50/90 text-emerald-800 ring-emerald-500/15 dark:border-emerald-500/25 dark:bg-emerald-500/10 dark:text-emerald-200 dark:ring-emerald-400/20`
+    case 'lost':
+      return `${badgeBase} border-red-200/80 bg-red-50/90 text-red-800 ring-red-500/15 dark:border-red-500/25 dark:bg-red-500/10 dark:text-red-200 dark:ring-red-400/20`
+    default:
+      return `${badgeBase} border-gray-200/80 bg-gray-50/90 text-gray-700 ring-gray-500/10/40 dark:bg-gray-500/10 dark:text-gray-200 dark:ring-gray-500/15`
+  }
+}

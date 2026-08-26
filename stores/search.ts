@@ -28,6 +28,7 @@ export type SearchEntityType =
   | 'customers'
   | 'departments'
   | 'staff'
+  | 'leads'
 
 /** Item-level inventory search needs typed text; avoids full-folder Firestore scans on filter-only. */
 const INVENTORY_ITEM_SEARCH_MIN_CHARS = 2
@@ -195,7 +196,7 @@ export const useSearchStore = defineStore('search', {
 
       // Filter entity types - remove departments and staff for staff users
       let entityTypes = this.filters.entityTypes.includes('all')
-        ? ['receipts', 'inventory', 'customers', 'departments', 'staff']
+        ? ['receipts', 'inventory', 'customers', 'departments', 'staff', 'leads']
         : (this.filters.entityTypes.filter((t) => t !== 'all') as string[])
 
       // Remove departments and staff from search for staff/intern (but keep customers)
@@ -462,6 +463,46 @@ export const useSearchStore = defineStore('search', {
               })
             }
           })
+        }
+
+        // Search open sales leads (Medium+)
+        if (entityTypes.includes('leads')) {
+          const { useSubscriptionFeatures } = await import('~/composables/useSubscriptionFeatures')
+          const { canUse } = useSubscriptionFeatures()
+          if (canUse('sales_leads')) {
+            const { useSalesLeadsStore } = await import('~/stores/salesLeads')
+            const salesLeadsStore = useSalesLeadsStore()
+            if (salesLeadsStore.leads.length === 0) {
+              await salesLeadsStore.fetchSalesLeads(true)
+            }
+
+            salesLeadsStore.leads
+              .filter((lead) => lead.status !== 'won' && lead.status !== 'lost')
+              .forEach((lead) => {
+                const matchesQuery =
+                  !searchQuery ||
+                  lead.customerName.toLowerCase().includes(searchQuery) ||
+                  lead.productName.toLowerCase().includes(searchQuery) ||
+                  (lead.customerPhone?.toLowerCase().includes(searchQuery) ?? false) ||
+                  (lead.customerEmail?.toLowerCase().includes(searchQuery) ?? false)
+
+                if (matchesQuery) {
+                  results.push({
+                    id: lead.id,
+                    type: 'leads',
+                    title: lead.customerName,
+                    subtitle: lead.productName,
+                    description: lead.customerPhone || lead.customerEmail || 'Open lead',
+                    icon: 'InboxIcon',
+                    url: `/dashboard/leads/${lead.id}`,
+                    metadata: {
+                      status: lead.status,
+                      estimatedValue: lead.estimatedValue,
+                    },
+                  })
+                }
+              })
+          }
         }
 
         // Sort results by relevance (exact matches first, then partial matches)

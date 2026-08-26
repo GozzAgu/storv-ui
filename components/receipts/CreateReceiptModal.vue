@@ -10,6 +10,14 @@
       <div :class="[drawerFillClass, 'gap-4']">
         <DashboardDrawerStepper :steps="steps" :current-step="currentStep" />
 
+        <div
+          v-if="prefillItemMatchFailed"
+          class="rounded-sm border border-amber-200/80 bg-amber-50/90 px-3 py-2 text-xs text-amber-900 dark:border-amber-800/40 dark:bg-amber-950/30 dark:text-amber-100"
+          role="status"
+        >
+          No matching in-stock product — pick category and items manually.
+        </div>
+
         <SellScreenNoteBanner v-if="currentStep >= 2" />
 
         <!-- Step 1: Parent category -->
@@ -955,9 +963,11 @@ import {
   groupSelectedSaleLinesByFolder,
 } from '~/utils/receipt-multi-folder'
 import { resolveBulkStockFieldAndValue } from '~/utils/inventory-bulk-quantity'
+import type { ReceiptCreationPrefill } from '~/types/receipt-prefill'
 
 interface Props {
   modelValue: boolean
+  prefill?: ReceiptCreationPrefill | null
 }
 
 const props = defineProps<Props>()
@@ -1020,6 +1030,7 @@ const {
   isParentRowSelected,
   isSubcategoryRowSelected,
   onParentCategoryRowClick,
+  selectLeafCategory,
   resetCategoryPicker,
   canProceedParentStep,
   canProceedSubcategoryStep,
@@ -1051,9 +1062,11 @@ const receiptForm = ref({
   customerEmail: '',
   customerPhone: '',
   customerAddress: '',
-  paymentMethod: '',
+  paymentMethod: 'Cash',
   notes: '',
 })
+
+const prefillItemMatchFailed = ref(false)
 
 /** paid_in_full = normal sale; balance_due = deposit now, stock held until paid off */
 const paymentSettlement = ref<'paid_in_full' | 'balance_due'>('paid_in_full')
@@ -1354,6 +1367,69 @@ async function onSubcategoryPick(folder: InventoryFolder) {
   await selectFolder(folder)
 }
 
+async function applyReceiptCreationPrefill(prefill: ReceiptCreationPrefill) {
+  prefillItemMatchFailed.value = false
+
+  if (prefill.customerName) receiptForm.value.customerName = prefill.customerName
+  if (prefill.customerPhone) receiptForm.value.customerPhone = prefill.customerPhone
+  if (prefill.customerEmail) receiptForm.value.customerEmail = prefill.customerEmail
+  if (prefill.notes) receiptForm.value.notes = prefill.notes
+
+  const itemId = prefill.inventoryItemId?.trim()
+  if (itemId) {
+    if (prefill.itemSearchQuery) itemSearchQuery.value = prefill.itemSearchQuery
+
+    const item = await inventoryStore.fetchInventoryItemById(itemId)
+    if (item && !item.dateOut && !item.pendingSaleReceiptId) {
+      let folder = inventoryStore.getFolderById(item.folderId)
+      if (!folder) {
+        folder = (await inventoryStore.fetchFolder(item.folderId)) ?? undefined
+      }
+      if (folder) {
+        selectLeafCategory(folder)
+        await loadItems()
+
+        const match =
+          availableItems.value.find((row) => row.id === itemId) ?? item
+        if (match && !match.dateOut && !match.pendingSaleReceiptId) {
+          toggleItemSelection(match, true)
+          if (!receiptForm.value.paymentMethod) {
+            receiptForm.value.paymentMethod = 'Cash'
+          }
+          currentStep.value = 3
+          return
+        }
+      }
+    }
+    prefillItemMatchFailed.value = true
+  }
+
+  const searchQuery = prefill.itemSearchQuery?.trim()
+  if (!searchQuery) return
+
+  itemSearchQuery.value = searchQuery
+
+  const { resolveLeadProductInventoryMatch } = await import(
+    '~/composables/leads/resolveLeadProductInventoryMatch'
+  )
+  const resolved = await resolveLeadProductInventoryMatch(searchQuery)
+  if (!resolved) {
+    prefillItemMatchFailed.value = true
+    return
+  }
+
+  selectLeafCategory(resolved.folder)
+  await loadItems()
+
+  const match =
+    availableItems.value.find((row) => row.id === resolved.item.id) ?? resolved.item
+  toggleItemSelection(match, true)
+  if (!receiptForm.value.paymentMethod) {
+    receiptForm.value.paymentMethod = 'Cash'
+  }
+  currentStep.value = 3
+}
+
 function removeSelectedItem(itemId: string) {
   const index = selectedItems.value.findIndex((line) => line.id === itemId)
   if (index > -1) selectedItems.value.splice(index, 1)
@@ -1383,8 +1459,11 @@ watch(
   async (isOpen) => {
     if (isOpen) {
       resetForm()
-      loadFolders()
+      await loadFolders()
       await loadCustomers()
+      if (props.prefill) {
+        await applyReceiptCreationPrefill(props.prefill)
+      }
     }
   }
 )
@@ -1708,12 +1787,13 @@ const resetForm = () => {
   availableItems.value = []
   folderSearchQuery.value = ''
   itemSearchQuery.value = ''
+  prefillItemMatchFailed.value = false
   receiptForm.value = {
     customerName: '',
     customerEmail: '',
     customerPhone: '',
     customerAddress: '',
-    paymentMethod: '',
+    paymentMethod: 'Cash',
     notes: '',
   }
   paymentSettlement.value = 'paid_in_full'

@@ -5,7 +5,7 @@
 
 export const WEB_NAV_SECTIONS = [
   { id: 'overview', label: 'Overview', items: ['Dashboard'] },
-  { id: 'commerce', label: 'Commerce', items: ['Inventory', 'Sales'] },
+  { id: 'commerce', label: 'Commerce', items: ['Inventory', 'Sales', 'Sales leads'] },
   {
     id: 'operations',
     label: 'Stock operations',

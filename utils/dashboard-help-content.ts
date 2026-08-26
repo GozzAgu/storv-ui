@@ -300,6 +300,18 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
         ],
       },
       {
+        title: 'Sales leads (/dashboard/leads)',
+        body: [
+          'Sales leads on Storvv Medium and Enterprise let you log walk-ins, phone calls, WhatsApp enquiries, and referrals before they become a receipt. Add a lead with customer contact, product interest, optional estimated value, and source.',
+          'Open a lead to update status (New → Contacted → Negotiating), assign it to a staff member, add notes, or use Create sale to open the existing receipt wizard with customer details prefilled. When the receipt completes, the lead is marked Won and links to that receipt.',
+          'If no in-stock SKU matches the product name, Create sale still opens with the customer filled in and a banner reminding you to pick category and items manually. Optionally link an inventory item when creating the lead so convert always finds the right SKU.',
+        ],
+        bullets: [
+          'Duplicate phone or email on an open lead suggests opening the existing record instead of creating another.',
+          'Managers and owners can delete leads; activity logs record lead created and converted events.',
+        ],
+      },
+      {
         title: 'Payment links',
         body: [
           'Payment links (/dashboard/payment-links) let you create shareable Paystack checkout links for remote sales when your plan includes payment_links. Connect a payout account first, then create links with customer name, amount, and description.',

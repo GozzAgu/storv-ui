@@ -1,0 +1,317 @@
+<template>
+  <SidePanel
+    :model-value="modelValue"
+    title="Add sales lead"
+    subtitle="Track a customer enquiry before it becomes a sale."
+    size="lg"
+    @update:model-value="(value: boolean) => emit('update:modelValue', value)"
+  >
+    <div class="space-y-4">
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div class="sm:col-span-2">
+          <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300"
+            >Customer name *</label
+          >
+          <input
+            v-model="customerName"
+            type="text"
+            maxlength="120"
+            autocomplete="name"
+            placeholder="Who is enquiring?"
+            class="app-field w-full px-3 py-2 text-sm"
+          />
+        </div>
+
+        <div>
+          <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300"
+            >Phone (optional)</label
+          >
+          <input
+            v-model="customerPhone"
+            type="tel"
+            maxlength="40"
+            autocomplete="tel"
+            placeholder="Contact number"
+            class="app-field w-full px-3 py-2 text-sm"
+            @blur="refreshDuplicateWarning"
+          />
+        </div>
+
+        <div>
+          <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300"
+            >Email (optional)</label
+          >
+          <input
+            v-model="customerEmail"
+            type="email"
+            maxlength="120"
+            autocomplete="email"
+            placeholder="Email address"
+            class="app-field w-full px-3 py-2 text-sm"
+            @blur="refreshDuplicateWarning"
+          />
+        </div>
+      </div>
+
+      <div
+        v-if="duplicateLead"
+        class="rounded-sm border border-amber-200/80 bg-amber-50/90 px-3 py-2 text-xs text-amber-900 dark:border-amber-800/40 dark:bg-amber-950/30 dark:text-amber-100"
+      >
+        An open lead already exists for this contact ({{ duplicateLead.customerName }}).
+        <NuxtLink
+          :to="dashPath(`/leads/${duplicateLead.id}`)"
+          class="font-medium underline underline-offset-2"
+          @click="emit('update:modelValue', false)"
+        >
+          Open existing lead
+        </NuxtLink>
+      </div>
+
+      <div>
+        <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300"
+          >Product interest *</label
+        >
+        <input
+          v-model="productName"
+          type="text"
+          maxlength="160"
+          placeholder="What are they looking for?"
+          class="app-field w-full px-3 py-2 text-sm"
+        />
+      </div>
+
+      <div>
+        <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300"
+          >Link inventory item (optional)</label
+        >
+        <div class="flex flex-wrap gap-2">
+          <input
+            v-model="inventorySearchQuery"
+            type="text"
+            maxlength="160"
+            placeholder="Search in-stock products…"
+            class="app-field min-w-0 flex-1 px-3 py-2 text-sm"
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            :loading="inventoryLinkLoading"
+            :disabled="!inventorySearchQuery.trim()"
+            @click="linkInventoryItem"
+          >
+            Find item
+          </Button>
+        </div>
+        <p v-if="linkedInventoryLabel" class="mt-1.5 text-xs text-gray-600 dark:text-gray-400">
+          Linked: {{ linkedInventoryLabel }}
+          <button
+            type="button"
+            class="ml-1 font-medium text-primary-600 hover:underline dark:text-primary-400"
+            @click="clearInventoryLink"
+          >
+            Clear
+          </button>
+        </p>
+      </div>
+
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300"
+            >Estimated value (optional)</label
+          >
+          <div class="relative">
+            <span
+              class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400"
+              >{{ currencySymbol }}</span
+            >
+            <input
+              v-model.number="estimatedValue"
+              type="number"
+              min="0"
+              step="0.01"
+              class="app-field w-full py-2 pl-7 pr-3 text-sm"
+              placeholder="0.00"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300"
+            >Source *</label
+          >
+          <select v-model="source" class="app-field w-full px-3 py-2 text-sm">
+            <option v-for="option in SALES_LEAD_SOURCES" :key="option" :value="option">
+              {{ SALES_LEAD_SOURCE_LABELS[option] }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300"
+          >Notes (optional)</label
+        >
+        <textarea
+          v-model="notes"
+          rows="3"
+          maxlength="500"
+          placeholder="Anything useful for follow-up"
+          class="app-field w-full px-3 py-2 text-sm"
+        />
+      </div>
+
+      <p v-if="errorMessage" class="text-xs text-red-600 dark:text-red-400">{{ errorMessage }}</p>
+    </div>
+
+    <template #footer>
+      <div class="flex justify-end gap-2">
+        <Button variant="outline" size="sm" :disabled="isSaving" @click="emit('update:modelValue', false)">
+          Cancel
+        </Button>
+        <Button variant="primary" size="sm" :loading="isSaving" :disabled="!canSave" @click="save">
+          Save lead
+        </Button>
+      </div>
+    </template>
+  </SidePanel>
+</template>
+
+<script setup lang="ts">
+import { computed, ref, watch } from 'vue'
+import SidePanel from '~/components/ui/SidePanel.vue'
+import Button from '~/components/ui/Button.vue'
+import { usePreferences } from '~/composables/usePreferences'
+import { useSalesLeadsStore } from '~/stores/salesLeads'
+import { findDuplicateOpenLead } from '~/composables/leads/findDuplicateOpenLead'
+import { resolveLeadProductInventoryMatch } from '~/composables/leads/resolveLeadProductInventoryMatch'
+import { getInventoryItemDisplayName } from '~/composables/useInventoryItemDisplay'
+import {
+  SALES_LEAD_SOURCES,
+  SALES_LEAD_SOURCE_LABELS,
+  type SalesLead,
+  type SalesLeadSource,
+} from '~/types/leads'
+
+const props = defineProps<{ modelValue: boolean }>()
+const emit = defineEmits<{
+  'update:modelValue': [value: boolean]
+  created: [leadId: string]
+}>()
+
+const salesLeadsStore = useSalesLeadsStore()
+const { dashPath } = useDashboardPaths()
+const { preferences } = usePreferences()
+const currencySymbol = computed(() => preferences.value.currencySymbol || '$')
+
+const customerName = ref('')
+const customerPhone = ref('')
+const customerEmail = ref('')
+const productName = ref('')
+const estimatedValue = ref<number | null>(null)
+const source = ref<SalesLeadSource>('walk_in')
+const notes = ref('')
+const inventoryItemId = ref('')
+const linkedInventoryLabel = ref('')
+const inventorySearchQuery = ref('')
+const inventoryLinkLoading = ref(false)
+const duplicateLead = ref<SalesLead | null>(null)
+const isSaving = ref(false)
+const errorMessage = ref('')
+
+const canSave = computed(
+  () => customerName.value.trim().length > 0 && productName.value.trim().length > 0
+)
+
+function resetForm() {
+  customerName.value = ''
+  customerPhone.value = ''
+  customerEmail.value = ''
+  productName.value = ''
+  estimatedValue.value = null
+  source.value = 'walk_in'
+  notes.value = ''
+  inventoryItemId.value = ''
+  linkedInventoryLabel.value = ''
+  inventorySearchQuery.value = ''
+  duplicateLead.value = null
+  errorMessage.value = ''
+}
+
+async function refreshDuplicateWarning() {
+  if (salesLeadsStore.leads.length === 0) {
+    await salesLeadsStore.fetchSalesLeads(true)
+  }
+  duplicateLead.value = findDuplicateOpenLead(salesLeadsStore.leads, {
+    phone: customerPhone.value,
+    email: customerEmail.value,
+  })
+}
+
+function clearInventoryLink() {
+  inventoryItemId.value = ''
+  linkedInventoryLabel.value = ''
+}
+
+async function linkInventoryItem() {
+  const query = inventorySearchQuery.value.trim() || productName.value.trim()
+  if (!query || inventoryLinkLoading.value) return
+  inventoryLinkLoading.value = true
+  errorMessage.value = ''
+  try {
+    const match = await resolveLeadProductInventoryMatch(query)
+    if (!match) {
+      errorMessage.value = 'No in-stock item matched that search.'
+      return
+    }
+    inventoryItemId.value = match.item.id
+    linkedInventoryLabel.value = getInventoryItemDisplayName(match.item)
+    if (!productName.value.trim()) {
+      productName.value = linkedInventoryLabel.value
+    }
+  } finally {
+    inventoryLinkLoading.value = false
+  }
+}
+
+watch(
+  () => props.modelValue,
+  async (open) => {
+    if (open) {
+      resetForm()
+      if (salesLeadsStore.leads.length === 0) {
+        await salesLeadsStore.fetchSalesLeads(true)
+      }
+    }
+  }
+)
+
+async function save() {
+  if (!canSave.value || isSaving.value) return
+  await refreshDuplicateWarning()
+  if (duplicateLead.value) {
+    errorMessage.value = 'An open lead already exists for this contact.'
+    return
+  }
+
+  isSaving.value = true
+  errorMessage.value = ''
+  try {
+    const leadId = await salesLeadsStore.createSalesLead({
+      customerName: customerName.value,
+      customerPhone: customerPhone.value,
+      customerEmail: customerEmail.value,
+      productName: productName.value,
+      inventoryItemId: inventoryItemId.value || undefined,
+      estimatedValue: estimatedValue.value ?? undefined,
+      source: source.value,
+      notes: notes.value,
+    })
+    emit('created', leadId)
+    emit('update:modelValue', false)
+  } catch (e: unknown) {
+    errorMessage.value = e instanceof Error ? e.message : 'Could not save lead'
+  } finally {
+    isSaving.value = false
+  }
+}
+</script>

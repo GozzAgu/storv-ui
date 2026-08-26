@@ -115,6 +115,13 @@
             :subtext="`${outstandingCount} open balance${outstandingCount === 1 ? '' : 's'}`"
             :subtext-class="outstandingCount > 0 ? 'warning' : ''"
           />
+          <StatCard
+            v-if="canAccessLeadsPlan"
+            label="Open leads"
+            :value="String(openLeadsCount)"
+            :subtext="`${formatCurrency(openLeadsPipeline)} est. pipeline`"
+            :subtext-class="openLeadsCount > 0 ? '' : ''"
+          />
         </div>
 
         <div v-if="canViewProfitAndCost" :class="[kpiGridClassResolved, 'dash-kpi-grid--pair']">
@@ -399,6 +406,7 @@ import { useUserStore } from '~/stores/user'
 import { useStoresStore } from '~/stores/stores'
 import { getStoreBranchShortLabel } from '~/utils/store-branch-label'
 import { useStaffStore } from '~/stores/staff'
+import { useSalesLeadsStore } from '~/stores/salesLeads'
 import { useThemeStore } from '~/stores/theme'
 import { usePreferences } from '~/composables/usePreferences'
 import { useDashboardInsights } from '~/composables/useDashboardInsights'
@@ -551,6 +559,7 @@ const authStore = useAuthStore()
 const userStore = useUserStore()
 const storesStore = useStoresStore()
 const staffStore = useStaffStore()
+const salesLeadsStore = useSalesLeadsStore()
 const themeStore = useThemeStore()
 
 const resolvedTutorialSteps = computed(() =>
@@ -559,6 +568,9 @@ const resolvedTutorialSteps = computed(() =>
 
 const { preferences } = usePreferences()
 const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
+const canAccessLeadsPlan = computed(() => canUseSubscriptionFeature('sales_leads'))
+const openLeadsCount = computed(() => salesLeadsStore.openLeadsCount)
+const openLeadsPipeline = computed(() => salesLeadsStore.openPipelineValue)
 const { showNativeComingSoon } = usePaymentLinksLaunch()
 const { canViewProfitAndCost } = usePermissions()
 const { isNativeApp } = useCapacitorNativeApp()
@@ -880,6 +892,7 @@ const loadDashboardData = async () => {
       receiptsStore.fetchReceipts(),
       inventoryStore.fetchFolders(),
       departmentsStore.fetchDepartments(),
+      canAccessLeadsPlan.value ? salesLeadsStore.fetchSalesLeads(true) : Promise.resolve(),
     ])
 
     dashboardFolderItems.value = await inventoryStore.fetchFolderAvailabilityStats()

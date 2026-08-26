@@ -27,6 +27,7 @@ export type DashboardNavIconKey =
   | 'loans'
   | 'receipts'
   | 'payment-links'
+  | 'sales-leads'
   | 'departments'
   | 'analytics'
   | 'activity'
@@ -47,6 +48,7 @@ export const DASHBOARD_NAV_ICONS: Record<DashboardNavIconKey, Component> = {
   loans: Wallet,
   receipts: ReceiptText,
   'payment-links': Link2,
+  'sales-leads': CircleUserRound,
   departments: Building2,
   analytics: ChartNoAxesColumnIncreasing,
   activity: ScrollText,

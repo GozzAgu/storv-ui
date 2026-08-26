@@ -246,6 +246,7 @@ import {
   ClipboardDocumentListIcon,
   CubeIcon,
   FolderIcon,
+  InboxIcon,
   MagnifyingGlassIcon,
   Squares2X2Icon,
 } from '~/utils/app-icons'
@@ -427,6 +428,7 @@ function displayEntityName(log: ActivityLog): string {
 function entityTypeIcon(type: ActivityEntityType) {
   if (type === 'folder') return FolderIcon
   if (type === 'items_batch') return Squares2X2Icon
+  if (type === 'lead') return InboxIcon
   return CubeIcon
 }
 

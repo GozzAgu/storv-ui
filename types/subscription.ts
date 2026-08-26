@@ -28,6 +28,8 @@ export type SubscriptionFeature =
   | 'customer_balance'
   /** Shareable Paystack payment links for remote sales (all plans; platform fee applies). */
   | 'payment_links'
+  /** Manual sales enquiry tracking and convert-to-sale (Medium+). */
+  | 'sales_leads'
 
 /** Max limits by plan (use -1 for unlimited where applicable). */
 interface SubscriptionLimits {
@@ -66,6 +68,7 @@ const FEATURES_BY_PLAN: Record<SubscriptionPlan, SubscriptionFeature[]> = {
     'whatsapp_messaging',
     'customer_balance',
     'payment_links',
+    'sales_leads',
   ],
   storvv_enterprise: [
     'dashboard',
@@ -84,6 +87,7 @@ const FEATURES_BY_PLAN: Record<SubscriptionPlan, SubscriptionFeature[]> = {
     'whatsapp_messaging',
     'customer_balance',
     'payment_links',
+    'sales_leads',
   ],
 }
 
@@ -175,6 +179,7 @@ export const SUBSCRIPTION_FEATURE_SUMMARY: Record<SubscriptionPlan, string[]> = 
     'Everything in Micro',
     'Up to 2 stores · 10 departments · 25 staff per store',
     'Analytics, activity logs & reports',
+    'Sales leads & enquiry tracking',
     'Customer balance / credit ledger',
     'Unlimited WhatsApp receipts',
     'Duplicate categories (same branch)',
@@ -185,6 +190,7 @@ export const SUBSCRIPTION_FEATURE_SUMMARY: Record<SubscriptionPlan, string[]> = 
     'Multi-store sync & stock transfers',
     'Copy from branch (category templates)',
     'Stock loans for serial inventory',
+    'Sales leads & enquiry tracking',
     'Priority support',
   ],
 }

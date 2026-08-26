@@ -19,7 +19,7 @@ import { getQueryUserId } from '~/composables/useFirestorePaths'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
 
 export type ActivityAction = 'created' | 'updated' | 'deleted'
-export type ActivityEntityType = 'folder' | 'item' | 'items_batch'
+export type ActivityEntityType = 'folder' | 'item' | 'items_batch' | 'lead'
 
 export interface ActivityLog {
   id: string
@@ -59,6 +59,7 @@ export function activityActionLabel(action: ActivityAction): string {
 export function activityEntityTypeLabel(type: ActivityEntityType): string {
   if (type === 'items_batch') return 'Batch'
   if (type === 'folder') return 'Folder'
+  if (type === 'lead') return 'Lead'
   return 'Item'
 }
 
@@ -110,6 +111,11 @@ export function activityLogDetailSubtitle(
   if (log.entityType === 'item') {
     if (name && name !== '-') return null
     return `${activityActionLabel(log.action)} inventory item`
+  }
+
+  if (log.entityType === 'lead') {
+    if (name && name !== '-') return null
+    return 'Sales lead'
   }
 
   return null

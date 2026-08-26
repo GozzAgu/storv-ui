@@ -8,6 +8,7 @@ import type { CustomerBuyback } from '~/stores/customerBuybacks'
 import type { SellerLoanOut } from '~/stores/sellerLoanOuts'
 import type { Staff } from '~/composables/useStaff'
 import type { UserData } from '~/composables/useUser'
+import type { SalesLead, SalesLeadSource, SalesLeadStatus } from '~/types/leads'
 import {
   DEMO_STORE_ABUJA,
   DEMO_STORE_LAGOS,
@@ -40,6 +41,11 @@ type IsoLoan = Omit<SellerLoanOut, 'createdAt' | 'updatedAt' | 'returnedAt' | 's
   soldAt?: string
 }
 
+type IsoSalesLead = Omit<SalesLead, 'createdAt' | 'updatedAt'> & {
+  createdAt: string
+  updatedAt: string
+}
+
 export interface DemoExtrasState {
   version: 1
   notifications: IsoNotification[]
@@ -47,6 +53,7 @@ export interface DemoExtrasState {
   staffByStore: Record<string, IsoStaff[]>
   buybacks: IsoBuyback[]
   loans: IsoLoan[]
+  salesLeads: IsoSalesLead[]
   userOverrides: {
     name?: string
     storePhone?: string
@@ -373,6 +380,88 @@ function seedLoans(): IsoLoan[] {
   ]
 }
 
+function seedSalesLeads(): IsoSalesLead[] {
+  const now = Date.now()
+  const day = 24 * 60 * 60 * 1000
+  return [
+    {
+      id: 'demo_lead_lagos_1',
+      storeId: DEMO_STORE_LAGOS,
+      customerName: 'Chidi Okoro',
+      customerPhone: '0803 555 7788',
+      customerEmail: '',
+      productName: 'iPhone 12 64GB',
+      inventoryItemId: 'item_lagos_iphone',
+      estimatedValue: 420000,
+      status: 'negotiating',
+      source: 'walk_in',
+      notes: 'Prefers midnight colour',
+      assignedTo: '',
+      createdBy: DEMO_USER_UID,
+      createdAt: new Date(now - day * 2).toISOString(),
+      updatedAt: new Date(now - day).toISOString(),
+    },
+    {
+      id: 'demo_lead_lagos_2',
+      storeId: DEMO_STORE_LAGOS,
+      customerName: 'Amina Hassan',
+      customerPhone: '0809 222 3344',
+      customerEmail: 'amina@example.com',
+      productName: 'Lattafa Opulent Dubai',
+      estimatedValue: 18500,
+      status: 'new',
+      source: 'whatsapp',
+      notes: 'Asked about gift wrap',
+      assignedTo: '',
+      createdBy: DEMO_USER_UID,
+      createdAt: new Date(now - day * 4).toISOString(),
+      updatedAt: new Date(now - day * 4).toISOString(),
+    },
+    {
+      id: 'demo_lead_lagos_won',
+      storeId: DEMO_STORE_LAGOS,
+      customerName: 'Kemi Ade',
+      customerPhone: '0809 333 4455',
+      productName: 'Silicone case bundle',
+      estimatedValue: 8500,
+      status: 'won',
+      source: 'phone',
+      receiptId: 'demo_receipt_lagos_1',
+      wonRevenue: 9000,
+      createdBy: DEMO_USER_UID,
+      createdAt: new Date(now - day * 10).toISOString(),
+      updatedAt: new Date(now - day * 8).toISOString(),
+    },
+    {
+      id: 'demo_lead_abuja_1',
+      storeId: DEMO_STORE_ABUJA,
+      customerName: 'Fatima Yusuf',
+      customerPhone: '0802 777 8899',
+      productName: 'HP Pavilion 15',
+      inventoryItemId: 'item_abuja_hp',
+      estimatedValue: 380000,
+      status: 'contacted',
+      source: 'referral',
+      createdBy: DEMO_USER_UID,
+      createdAt: new Date(now - day * 3).toISOString(),
+      updatedAt: new Date(now - day * 2).toISOString(),
+    },
+    {
+      id: 'demo_lead_ph_1',
+      storeId: DEMO_STORE_PH,
+      customerName: 'Grace Etim',
+      customerPhone: '0807 222 3344',
+      productName: 'USB-C cable 2m',
+      estimatedValue: 4500,
+      status: 'new',
+      source: 'walk_in',
+      createdBy: DEMO_USER_UID,
+      createdAt: new Date(now - day).toISOString(),
+      updatedAt: new Date(now - day).toISOString(),
+    },
+  ]
+}
+
 function createSeedExtras(): DemoExtrasState {
   return {
     version: 1,
@@ -385,6 +474,7 @@ function createSeedExtras(): DemoExtrasState {
     },
     buybacks: seedBuybacks(),
     loans: seedLoans(),
+    salesLeads: seedSalesLeads(),
     userOverrides: {},
   }
 }
@@ -434,6 +524,10 @@ export function loadDemoExtras(): DemoExtrasState {
       cache = createSeedExtras()
       saveDemoExtras(cache)
       return cache
+    }
+    if (!Array.isArray(parsed.salesLeads)) {
+      parsed.salesLeads = seedSalesLeads()
+      saveDemoExtras(parsed)
     }
     cache = parsed
     return cache
@@ -563,6 +657,79 @@ export function setDemoExtrasLoansForStore(storeId: string, loans: SellerLoanOut
       soldAt: l.soldAt ? new Date(l.soldAt as Date).toISOString() : undefined,
     })),
   ]
+  saveDemoExtras(extras)
+}
+
+function reviveSalesLead(row: IsoSalesLead): SalesLead {
+  return {
+    ...row,
+    createdAt: new Date(row.createdAt),
+    updatedAt: new Date(row.updatedAt),
+  }
+}
+
+export function getDemoExtrasSalesLeads(storeId: string): SalesLead[] {
+  return loadDemoExtras()
+    .salesLeads.filter((l) => l.storeId === storeId)
+    .map(reviveSalesLead)
+    .sort((a, b) => (b.updatedAt?.getTime() ?? 0) - (a.updatedAt?.getTime() ?? 0))
+}
+
+export function appendDemoSalesLead(
+  lead: Omit<IsoSalesLead, 'id' | 'createdAt' | 'updatedAt'> & {
+    status?: SalesLeadStatus
+    source?: SalesLeadSource
+  }
+): string {
+  const extras = loadDemoExtras()
+  const id = `demo_lead_${Math.random().toString(36).slice(2, 9)}`
+  const now = nowIso()
+  extras.salesLeads.unshift({
+    ...lead,
+    id,
+    status: lead.status ?? 'new',
+    source: lead.source ?? 'other',
+    createdAt: now,
+    updatedAt: now,
+  })
+  saveDemoExtras(extras)
+  return id
+}
+
+export function updateDemoSalesLead(
+  storeId: string,
+  leadId: string,
+  updates: Partial<
+    Pick<
+      IsoSalesLead,
+      | 'customerPhone'
+      | 'productName'
+      | 'estimatedValue'
+      | 'inventoryItemId'
+      | 'assignedTo'
+      | 'status'
+      | 'receiptId'
+      | 'wonRevenue'
+      | 'lostReason'
+    >
+  >
+) {
+  const extras = loadDemoExtras()
+  const idx = extras.salesLeads.findIndex((l) => l.id === leadId && l.storeId === storeId)
+  if (idx < 0) return
+  extras.salesLeads[idx] = {
+    ...extras.salesLeads[idx]!,
+    ...updates,
+    updatedAt: nowIso(),
+  }
+  saveDemoExtras(extras)
+}
+
+export function deleteDemoSalesLead(storeId: string, leadId: string) {
+  const extras = loadDemoExtras()
+  extras.salesLeads = extras.salesLeads.filter(
+    (l) => !(l.id === leadId && l.storeId === storeId)
+  )
   saveDemoExtras(extras)
 }
 

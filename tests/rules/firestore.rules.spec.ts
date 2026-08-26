@@ -116,4 +116,24 @@ describe('firestore.rules', () => {
       )
     )
   })
+
+  it('allows store owner to create a sales lead', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const adminDb = context.firestore()
+      await setDoc(doc(adminDb, 'users/u1/stores/s1'), { ownerId: 'u1', storeId: 's1' })
+    })
+
+    const db = testEnv.authenticatedContext('u1').firestore()
+    await assertSucceeds(
+      setDoc(doc(db, 'users/u1/stores/s1/salesLeads/lead1'), {
+        storeId: 's1',
+        customerName: 'Jane Doe',
+        productName: 'iPhone 15',
+        source: 'walk_in',
+        status: 'new',
+        estimatedValue: 0,
+        createdBy: 'u1',
+      })
+    )
+  })
 })

@@ -45,6 +45,8 @@ export type NotificationType =
   | 'import_completed'
   | 'export_completed'
   | 'swap_in_completed'
+  | 'lead_created'
+  | 'lead_converted'
 
 export interface Notification {
   id: string

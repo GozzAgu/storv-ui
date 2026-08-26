@@ -161,6 +161,48 @@ export function getCustomerBuybackDocument(
 }
 
 /**
+ * Sales leads: manual enquiry tracking before a sale is recorded.
+ * users/{userId}/stores/{storeId}/salesLeads/{leadId}
+ */
+export function getSalesLeadsCollection(
+  db: Firestore,
+  userId: string,
+  storeId: string
+): CollectionReference {
+  return collection(db, 'users', userId, 'stores', storeId, 'salesLeads')
+}
+
+export function getSalesLeadDocument(
+  db: Firestore,
+  userId: string,
+  storeId: string,
+  leadId: string
+): DocumentReference {
+  return doc(db, 'users', userId, 'stores', storeId, 'salesLeads', leadId)
+}
+
+/**
+ * Lead timeline events (notes, status changes).
+ * users/{userId}/stores/{storeId}/leadEvents/{eventId}
+ */
+export function getLeadEventsCollection(
+  db: Firestore,
+  userId: string,
+  storeId: string
+): CollectionReference {
+  return collection(db, 'users', userId, 'stores', storeId, 'leadEvents')
+}
+
+export function getLeadEventDocument(
+  db: Firestore,
+  userId: string,
+  storeId: string,
+  eventId: string
+): DocumentReference {
+  return doc(db, 'users', userId, 'stores', storeId, 'leadEvents', eventId)
+}
+
+/**
  * Get receipts collection path: users/{userId}/stores/{storeId}/receipts
  */
 export function getReceiptsCollection(

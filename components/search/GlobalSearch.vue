@@ -345,6 +345,7 @@ import {
   UserCircleIcon,
   BuildingOfficeIcon,
   UserIcon,
+  InboxIcon,
   FunnelIcon,
   ChevronDownIcon,
   ArrowRightIcon,
@@ -376,6 +377,7 @@ const entityTypes = computed(() => {
     { value: 'receipts', label: 'Sales', icon: ReceiptPercentIcon },
     { value: 'inventory', label: 'Inventory', icon: CubeIcon },
     { value: 'customers', label: 'Customers', icon: UserCircleIcon },
+    { value: 'leads', label: 'Leads', icon: InboxIcon },
     { value: 'departments', label: 'Departments', icon: BuildingOfficeIcon },
     { value: 'staff', label: 'Staff', icon: UserIcon },
   ]
@@ -500,6 +502,7 @@ const getEntityIcon = (iconName: string) => {
     UserCircleIcon,
     BuildingOfficeIcon,
     UserIcon,
+    InboxIcon,
   }
   return icons[iconName] || MagnifyingGlassIcon
 }
@@ -509,6 +512,7 @@ const getEntityTypeColor = (type: SearchEntityType) => {
     receipts: 'bg-green-500',
     inventory: 'bg-blue-500',
     customers: 'bg-primary-400',
+    leads: 'bg-violet-500',
     departments: 'bg-orange-500',
     staff: 'bg-pink-500',
   }
