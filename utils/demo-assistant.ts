@@ -60,7 +60,7 @@ const DEMO_ASSISTANT_RULES: DemoAssistantRule[] = [
       '- Open Inventory → Copy from branch when you have two or more branches.',
       '- Pick a source branch and select top-level categories to copy into the branch you are viewing.',
       '- Check Also copy subcategories into selected folders to include the full hierarchy (for example Toyota plus its model subcategories).',
-      '- Products and stock are not copied—only names, columns, and category settings.',
+      '- Products and stock are not copied. Only names, columns, and category settings.',
     ].join('\n'),
   },
   {

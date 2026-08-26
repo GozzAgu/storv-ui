@@ -150,8 +150,8 @@
               class="mt-0.5 rounded border-gray-300 text-primary-600 focus:ring-primary-500/40"
             />
             <span class="text-xs leading-relaxed text-gray-700 dark:text-gray-300">
-              <span class="font-medium text-gray-900 dark:text-gray-100">Email sign-in details</span>
-              — send the temporary password to their inbox instead of showing it here (requires
+              <span class="font-medium text-gray-900 dark:text-gray-100">Email sign-in details:</span>
+              send the temporary password to their inbox instead of showing it here (requires
               Resend email on the server).
             </span>
           </label>
@@ -648,7 +648,7 @@ const handleSubmit = async () => {
           }
         } else if (emailCredentialsToStaff.value && !storeId) {
           toast.warning(
-            'Staff was created but email could not be sent — this department has no store assigned.'
+            'Staff was created but email could not be sent. This department has no store assigned.'
           )
         }
 

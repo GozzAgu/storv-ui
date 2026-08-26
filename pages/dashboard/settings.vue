@@ -691,7 +691,7 @@
         </div>
       </DashboardSettingsPanel>
 
-      <!-- Data export (owner only — includes unit costs / COGS basis) -->
+      <!-- Data export (owner only; includes unit costs / COGS basis) -->
       <DashboardSettingsPanel
         v-if="!isStaff"
         title="Data export"

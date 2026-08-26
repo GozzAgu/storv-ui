@@ -76,7 +76,7 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
         ],
         bullets: [
           'Only store owners (super admins) can record buybacks; managers and staff do not see this screen.',
-          'Use leaf categories only—the same rule as adding products or creating a sale.',
+          'Use leaf categories only. The same rule applies when adding products or creating a sale.',
         ],
       },
       {
@@ -303,7 +303,7 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
         title: 'Payment links',
         body: [
           'Payment links (/dashboard/payment-links) let you create shareable Paystack checkout links for remote sales when your plan includes payment_links. Connect a payout account first, then create links with customer name, amount, and description.',
-          'The Payment links summary on Dashboard home and Analytics shows collected, paid, unpaid, and failed counts plus recent links. On native iOS/Android apps, payment links may show as coming soon depending on build configuration—use the web app for full setup when needed.',
+          'The Payment links summary on Dashboard home and Analytics shows collected, paid, unpaid, and failed counts plus recent links. On native iOS/Android apps, payment links may show as coming soon depending on build configuration. Use the web app for full setup when needed.',
         ],
       },
       {

@@ -56,12 +56,12 @@ export const usePermissions = () => {
   /** Super admin can grant inventory editor rights to chosen managers. */
   const canGrantInventoryAccess = computed(() => userStore.isSuperAdmin)
 
-  /** Unit cost, margin, COGS, gross profit, and P&L — store owner (super admin) only; never staff. */
+  /** Unit cost, margin, COGS, gross profit, and P&L. Store owner (super admin) only; never staff. */
   const canViewProfitAndCost = computed(
     () => !isStaff.value && userStore.userData?.role === 'superAdmin'
   )
 
-  /** Paystack upgrades, plan banners, and billing — super admin (account owner) only. */
+  /** Paystack upgrades, plan banners, and billing. Super admin (account owner) only. */
   const canManageBilling = computed(() => userStore.isSuperAdmin)
 
   return {

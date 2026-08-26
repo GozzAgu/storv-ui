@@ -12,7 +12,7 @@
           Try the <span class="landing-demo__accent">real dashboard</span> (no signup)
         </h2>
         <p class="landing-demo__lede">
-          Open the full Storvv dashboard with sample store data — every Enterprise feature, no
+          Open the full Storvv dashboard with sample store data: every Enterprise feature, no
           account required. Changes stay in your browser until you reset.
         </p>
         <ul class="landing-demo__points">
@@ -87,7 +87,7 @@ const points = [
   'Full Enterprise dashboard: inventory, sales, analytics, and more',
   'Three sample branches with stock, sales, buybacks, and stock loans',
   'Departments, staff, payment links, multi-store sync, and activity logs',
-  'Reset sample data anytime — everything stays in your browser',
+  'Reset sample data anytime. Everything stays in your browser',
 ]
 
 const previewNav: Array<{ name: string; iconKey: DashboardNavIconKey; active?: boolean }> = [

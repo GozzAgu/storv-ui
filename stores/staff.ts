@@ -45,7 +45,7 @@ function isRemovedStaffStatus(status: Staff['status'] | undefined): boolean {
   return status === 'inactive'
 }
 
-/** Firestore rejects `undefined` — normalize optional staff fields before writes. */
+/** Firestore rejects `undefined`. Normalize optional staff fields before writes. */
 function prepareStaffFirestoreUpdates(
   updates: Record<string, unknown>
 ): Record<string, unknown> {

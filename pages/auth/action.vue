@@ -195,7 +195,7 @@ const successCtaLabel = computed(() =>
 const shellCopy = computed(() => {
   if (phase.value === 'success') {
     return {
-      mobileLine: 'You are all set — sign in to open your workspace.',
+      mobileLine: 'You are all set. Sign in to open your workspace.',
       panelTitle: 'Welcome back to Storvv.',
       panelDescription: 'Your account is ready. Sign in to manage inventory, receipts, and branches.',
     }

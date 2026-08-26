@@ -65,7 +65,7 @@ const { isNativeApp, isDemoAssistant, assistantStore } = useDashboardAssistant()
 </script>
 
 <style>
-/* Web floating widget — unscoped so Teleport styles apply */
+/* Web floating widget. Unscoped so Teleport styles apply */
 .dashboard-assistant__float {
   position: fixed;
   z-index: 1150;

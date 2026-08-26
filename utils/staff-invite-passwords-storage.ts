@@ -39,7 +39,7 @@ export function saveStaffInvitePasswords(
   try {
     localStorage.setItem(staffInvitePasswordsStorageKey(ownerUid), JSON.stringify(entries))
   } catch {
-    // Quota or private mode — keep in-memory only for this session.
+    // Quota or private mode. Keep in-memory only for this session.
   }
 }
 
