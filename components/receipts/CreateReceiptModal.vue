@@ -955,11 +955,9 @@ import {
   groupSelectedSaleLinesByFolder,
 } from '~/utils/receipt-multi-folder'
 import { resolveBulkStockFieldAndValue } from '~/utils/inventory-bulk-quantity'
-import type { ReceiptCreationPrefill } from '~/types/receipt-prefill'
 
 interface Props {
   modelValue: boolean
-  prefill?: ReceiptCreationPrefill | null
 }
 
 const props = defineProps<Props>()
@@ -1022,7 +1020,6 @@ const {
   isParentRowSelected,
   isSubcategoryRowSelected,
   onParentCategoryRowClick,
-  selectLeafCategory,
   resetCategoryPicker,
   canProceedParentStep,
   canProceedSubcategoryStep,
@@ -1357,37 +1354,6 @@ async function onSubcategoryPick(folder: InventoryFolder) {
   await selectFolder(folder)
 }
 
-async function applyReceiptCreationPrefill(prefill: ReceiptCreationPrefill) {
-  if (prefill.customerName) receiptForm.value.customerName = prefill.customerName
-  if (prefill.customerPhone) receiptForm.value.customerPhone = prefill.customerPhone
-  if (prefill.customerEmail) receiptForm.value.customerEmail = prefill.customerEmail
-  if (prefill.notes) receiptForm.value.notes = prefill.notes
-  if (prefill.itemSearchQuery) itemSearchQuery.value = prefill.itemSearchQuery
-
-  const itemId = prefill.inventoryItemId?.trim()
-  if (!itemId) return
-
-  const item = await inventoryStore.fetchInventoryItemById(itemId)
-  if (!item || item.dateOut || item.pendingSaleReceiptId) return
-
-  let folder = inventoryStore.getFolderById(item.folderId)
-  if (!folder) {
-    folder = (await inventoryStore.fetchFolder(item.folderId)) ?? undefined
-  }
-  if (!folder) return
-
-  selectLeafCategory(folder)
-  await loadItems()
-
-  const match =
-    availableItems.value.find((row) => row.id === itemId) ??
-    (!item.dateOut && !item.pendingSaleReceiptId ? item : null)
-  if (!match) return
-
-  toggleItemSelection(match, true)
-  currentStep.value = 3
-}
-
 function removeSelectedItem(itemId: string) {
   const index = selectedItems.value.findIndex((line) => line.id === itemId)
   if (index > -1) selectedItems.value.splice(index, 1)
@@ -1419,9 +1385,6 @@ watch(
       resetForm()
       loadFolders()
       await loadCustomers()
-      if (props.prefill) {
-        await applyReceiptCreationPrefill(props.prefill)
-      }
     }
   }
 )

@@ -28,8 +28,6 @@ export type SubscriptionFeature =
   | 'customer_balance'
   /** Shareable Paystack payment links for remote sales (all plans; platform fee applies). */
   | 'payment_links'
-  /** Track WhatsApp / Instagram leads and social revenue (Medium+). */
-  | 'social_sales'
 
 /** Max limits by plan (use -1 for unlimited where applicable). */
 interface SubscriptionLimits {
@@ -68,7 +66,6 @@ const FEATURES_BY_PLAN: Record<SubscriptionPlan, SubscriptionFeature[]> = {
     'whatsapp_messaging',
     'customer_balance',
     'payment_links',
-    'social_sales',
   ],
   storvv_enterprise: [
     'dashboard',
@@ -87,7 +84,6 @@ const FEATURES_BY_PLAN: Record<SubscriptionPlan, SubscriptionFeature[]> = {
     'whatsapp_messaging',
     'customer_balance',
     'payment_links',
-    'social_sales',
   ],
 }
 
