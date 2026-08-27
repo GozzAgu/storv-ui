@@ -10,14 +10,14 @@
 
     <div class="landing-screenshots__inner">
       <header class="landing-screenshots__header">
-        <p class="landing-label landing-label--blue">Mobile app</p>
+        <p class="landing-label landing-label--blue">Product tour</p>
         <h2 id="landing-screenshots-heading" class="landing-screenshots__title">
-          Manage your business
-          <span class="landing-screenshots__accent">anywhere.</span>
+          See every major feature
+          <span class="landing-screenshots__accent">in the app.</span>
         </h2>
         <p class="landing-screenshots__lede">
-          Dashboard, inventory, buybacks, stock loans, sales, payment links, analytics, and help - the
-          same Storvv workspace on iPhone with native tabs, pull-to-refresh, and swipe actions.
+          Fresh captures from the Storvv demo: inventory, sales, leads, payment links, analytics,
+          multi-store sync, and more on web and iOS.
         </p>
       </header>
 

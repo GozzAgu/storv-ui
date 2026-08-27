@@ -32,7 +32,14 @@ async function waitForCaptureReady(page, slug) {
 
   switch (slug) {
     case 'dashboard':
-      await main.getByText('Welcome back').first().waitFor({ timeout: 60_000 })
+      await main
+        .locator('h1')
+        .filter({ hasText: /Good (morning|afternoon|evening)|Overview/i })
+        .first()
+        .waitFor({ timeout: 60_000 })
+      await main.getByText(/Total sales|Inventory health|Recent activity/i).first().waitFor({
+        timeout: 60_000,
+      })
       return
     case 'inventory':
       await waitForPageTitle(main, 'Categories')
@@ -44,16 +51,27 @@ async function waitForCaptureReady(page, slug) {
       await waitForPageTitle(main, 'Stock loans')
       return
     case 'receipts':
-      await main.getByRole('tab', { name: 'Receipts', exact: true }).waitFor({ timeout: 60_000 })
+      await waitForPageTitle(main, 'Sales')
+      await main.getByRole('tab', { name: 'Sales', exact: true }).waitFor({ timeout: 60_000 })
       return
     case 'receipts-outstanding':
-      await main.getByRole('tab', { name: /Outstanding/i }).waitFor({ timeout: 60_000 })
+      await main.getByRole('tab', { name: /Outstanding/i }).click({ timeout: 60_000 })
+      await main.getByText(/Outstanding|No outstanding payments/i).first().waitFor({ timeout: 60_000 })
       return
     case 'receipts-customers':
-      await main.getByRole('tab', { name: 'Customers', exact: true }).waitFor({ timeout: 60_000 })
+      await main.getByRole('tab', { name: 'Customers', exact: true }).click({ timeout: 60_000 })
+      await main.getByText(/Customers|No customers/i).first().waitFor({ timeout: 60_000 })
       return
     case 'payment-links':
       await waitForPageTitle(main, 'Payment links')
+      await main
+        .locator('text=Coming soon')
+        .first()
+        .waitFor({ state: 'hidden', timeout: 15_000 })
+        .catch(() => {})
+      return
+    case 'sales-leads':
+      await waitForPageTitle(main, 'Sales leads')
       return
     case 'departments':
       await main.locator('h1').filter({ hasText: /^Departments$/i }).first().waitFor({ timeout: 60_000 })
@@ -117,6 +135,7 @@ const CAPTURES = [
   { slug: 'receipts', path: '/demo/dashboard/receipts' },
   { slug: 'receipts-outstanding', path: '/demo/dashboard/receipts?tab=outstanding' },
   { slug: 'receipts-customers', path: '/demo/dashboard/receipts?tab=customers' },
+  { slug: 'sales-leads', path: '/demo/dashboard/leads' },
   { slug: 'payment-links', path: '/demo/dashboard/payment-links' },
   {
     slug: 'departments',
