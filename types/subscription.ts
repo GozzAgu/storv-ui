@@ -1,5 +1,15 @@
 export type SubscriptionPlan = 'storvv_micro' | 'storvv_medium' | 'storvv_enterprise'
 
+/** Normalize Firestore / legacy plan strings to canonical plan ids. */
+export function normalizeSubscriptionPlan(raw: unknown): SubscriptionPlan {
+  if (!raw || typeof raw !== 'string') return 'storvv_micro'
+  const value = raw.trim().toLowerCase()
+  if (value === 'storvv_enterprise' || value === 'enterprise') return 'storvv_enterprise'
+  if (value === 'storvv_medium' || value === 'medium') return 'storvv_medium'
+  if (value === 'storvv_micro' || value === 'micro') return 'storvv_micro'
+  return 'storvv_micro'
+}
+
 export const SUBSCRIPTION_PLANS: Array<{ id: SubscriptionPlan; name: string }> = [
   { id: 'storvv_micro', name: 'Storvv Micro' },
   { id: 'storvv_medium', name: 'Storvv Medium' },
@@ -47,6 +57,7 @@ const FEATURES_BY_PLAN: Record<SubscriptionPlan, SubscriptionFeature[]> = {
     'receipts',
     'returns',
     'customers',
+    'departments',
     'settings',
     'profile',
     'notifications',
@@ -170,27 +181,35 @@ export function getEligibleStoresForPlan<T extends { id: string; createdAt?: unk
 export const SUBSCRIPTION_FEATURE_SUMMARY: Record<SubscriptionPlan, string[]> = {
   storvv_micro: [
     '1 store · 1 department · up to 2 staff',
-    'Inventory, sales, returns & customers',
-    'Dashboard, notifications & help center',
-    'WhatsApp receipts (10/month)',
-    'Payment links (in progress)',
+    'Inventory (categories, subcategories, serial/bulk) & sales',
+    'Receipts, returns, customers, Quick Sale & Create New Sale',
+    'Dashboard, notifications, help center & Storvv Assistant',
+    'Paystack payment links',
+    'WhatsApp receipt sharing (10/month)',
+    'Web dashboard & iOS app',
   ],
   storvv_medium: [
     'Everything in Micro',
     'Up to 2 stores · 10 departments · 25 staff per store',
-    'Analytics, activity logs & reports',
-    'Sales leads & enquiry tracking',
+    'Analytics, activity logs & PDF/Excel exports',
+    'Sales leads (enquiry pipeline → receipt)',
     'Customer balance / credit ledger',
     'Unlimited WhatsApp receipts',
-    'Duplicate categories (same branch)',
+    'Duplicate categories within the same branch',
   ],
   storvv_enterprise: [
     'Everything in Medium',
     'Unlimited stores, departments & staff',
     'Multi-store sync & stock transfers',
-    'Copy from branch (category templates)',
-    'Stock loans for serial inventory',
-    'Sales leads & enquiry tracking',
+    'Copy from branch (category templates across stores)',
+    'Stock loans for serial-tracked inventory',
     'Priority support',
   ],
+}
+
+/** Short exclusion line for pricing cards (landing & upsell). */
+export const SUBSCRIPTION_PLAN_NOT_INCLUDED: Partial<Record<SubscriptionPlan, string>> = {
+  storvv_micro:
+    'No analytics, sales leads, activity logs, customer balance ledger, duplicate category, or multi-store tools',
+  storvv_medium: 'No stock transfers, copy-from-branch, or stock loans (Enterprise)',
 }

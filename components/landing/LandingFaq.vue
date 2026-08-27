@@ -16,7 +16,7 @@
         Quick answers
       </h2>
       <p class="mt-2 text-center text-base text-gray-600 dark:text-gray-300">
-        Setup, plans, and how Storvv fits your store.
+        Setup, plans, and what Storvv actually includes today.
       </p>
       <div class="mt-8 space-y-3">
         <div
@@ -79,6 +79,10 @@ import {
   SparklesIcon,
   BuildingStorefrontIcon,
   RocketLaunchIcon,
+  CreditCardIcon,
+  DevicePhoneMobileIcon,
+  UserGroupIcon,
+  ChartBarIcon,
 } from '~/utils/app-icons'
 
 const openFaqItems = ref<Set<number>>(new Set())
@@ -92,33 +96,57 @@ function toggleFaq(index: number) {
 
 const faqItems: Array<{ question: string; answer: string; icon: Component }> = [
   {
+    question: 'What does every plan include?',
+    answer:
+      'All plans include the dashboard, full inventory and sales for one active branch (Micro limits you to one store), receipts, returns, customers, notifications, settings, profile, Help center, Storvv Assistant, and Paystack payment links. Micro includes up to 2 staff, 1 department, and 10 WhatsApp receipt sends per month.',
+    icon: SparklesIcon,
+  },
+  {
     question: 'How quickly can I get started?',
     answer:
-      'Most stores are up and running within minutes. Create your store profile, set up your first inventory folder, and you are ready to sell. No coding required.',
+      'Most stores are running within minutes: create your account, complete onboarding (country, currency, first branch), add a category, and record your first sale. No coding required.',
     icon: ClockIcon,
   },
   {
-    question: 'Can I manage multiple stores?',
+    question: 'What are Micro, Medium, and Enterprise?',
     answer:
-      'Yes. Medium and Enterprise plans support multiple branches. Each store has its own inventory and receipts, managed from one dashboard.',
+      '<strong>Micro (free):</strong> 1 store, 1 department, 2 staff, full inventory and sales, payment links, no analytics or activity logs.<br><br><strong>Medium:</strong> 2 stores, 10 departments, 25 staff, analytics and exports, activity logs, sales leads, customer balance ledger, unlimited WhatsApp, duplicate category within a branch.<br><br><strong>Enterprise:</strong> Unlimited stores, staff, and departments; multi-store sync and stock transfers; copy-from-branch; stock loans for serial inventory; priority support.',
     icon: BuildingStorefrontIcon,
   },
   {
-    question: 'What are the plan differences?',
+    question: 'Can I use Storvv on my phone?',
     answer:
-      '<strong>Micro (free):</strong> One store, up to 2 staff, full inventory and sales.<br><br><strong>Medium:</strong> Two stores, analytics, activity logs, and customer balances.<br><br><strong>Enterprise:</strong> Unlimited stores, stock transfers, copy-from-branch, and stock loans.',
-    icon: SparklesIcon,
+      'Yes. Storvv runs in the browser at app.storvv.com and as a native iOS app (Capacitor) with bottom tabs for Home, Stock, Sales, and Analytics, plus a More menu for buybacks, leads, settings, and help. The same login and store data apply on web and mobile.',
+    icon: DevicePhoneMobileIcon,
+  },
+  {
+    question: 'Do you support payment links and remote sales?',
+    answer:
+      'Yes. All plans can create Paystack checkout links, connect payout accounts, and track link status. Dashboard and Analytics show a payment links summary. Remote customers pay online; you manage fulfillment in Sales.',
+    icon: CreditCardIcon,
+  },
+  {
+    question: 'What about buybacks, leads, and stock loans?',
+    answer:
+      '<strong>Customer buybacks:</strong> super admins record trade-ins that add inventory at purchase cost.<br><br><strong>Sales leads:</strong> Medium+ pipeline for enquiries before they become receipts.<br><br><strong>Stock loans:</strong> Enterprise only, for serial inventory lent to borrowers until sold or returned.',
+    icon: UserGroupIcon,
+  },
+  {
+    question: 'What analytics and reporting are included?',
+    answer:
+      'Analytics (Medium+) includes period summaries, feature insight cards, revenue and category charts, peak hours, traffic heatmaps, low-stock tables, and PDF/Excel export. Activity logs (Medium+) provide an audit trail of changes. Enterprise adds consolidated multi-store reporting and transfer history.',
+    icon: ChartBarIcon,
   },
   {
     question: 'Is my data secure?',
     answer:
-      'Storvv uses secure authentication, role-based permissions, and encrypted cloud infrastructure. Your business data stays private.',
+      'Storvv uses secure authentication, optional two-factor authentication, role-based permissions (super admin, manager, staff), and encrypted cloud infrastructure. The Assistant explains workflows but cannot read your live stock or sales data.',
     icon: ShieldCheckIcon,
   },
   {
     question: 'Can I try before signing up?',
     answer:
-      'Yes. Open the interactive demo with sample multi-branch data. No account required.',
+      'Yes. Open the interactive demo with fictional Enterprise sample data stored locally in your browser. Explore inventory, sales, buybacks, stock loans, analytics, and the demo Assistant without creating an account.',
     icon: RocketLaunchIcon,
   },
 ]

@@ -47,6 +47,28 @@ describe('filterDashboardNavItems', () => {
     expect(names).not.toContain('Departments')
   })
 
+  it('lets super admin on Micro see departments but not analytics', () => {
+    const microFeatures = new Set<SubscriptionFeature>([
+      'dashboard',
+      'inventory',
+      'receipts',
+      'departments',
+      'settings',
+      'profile',
+      'payment_links',
+    ])
+
+    const names = filterDashboardNavItems(DASHBOARD_NAV_DEFINITIONS, {
+      isSuperAdmin: true,
+      isManager: false,
+      canUseFeature: (feature) => microFeatures.has(feature),
+    }).map((item) => item.name)
+
+    expect(names).toContain('Departments')
+    expect(names).not.toContain('Analytics')
+    expect(names).not.toContain('Sales leads')
+  })
+
   it('lets super admin see departments and multi-store sync when plan allows', () => {
     const names = filterDashboardNavItems(DASHBOARD_NAV_DEFINITIONS, {
       isSuperAdmin: true,

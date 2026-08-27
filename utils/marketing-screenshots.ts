@@ -76,7 +76,8 @@ export const MARKETING_SCREENSHOTS: MarketingScreenshot[] = [
   {
     id: 'analytics',
     title: 'Analytics & reports',
-    description: 'Period comparisons, exports, and branch-level performance.',
+    description:
+      'Feature insights, period charts, peak hours, low stock, and PDF/Excel export (Medium+).',
     src: '/marketing/screenshots/analytics.png',
     iconKey: 'analytics',
   },

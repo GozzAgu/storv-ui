@@ -17,6 +17,8 @@ import { useFirestore } from '~/composables/useFirestore'
 import { getActivityLogsCollection } from '~/composables/useFirestorePaths'
 import { getQueryUserId } from '~/composables/useFirestorePaths'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
+import { normalizeSubscriptionPlan, planHasFeature } from '~/types/subscription'
+import type { SubscriptionPlan } from '~/types/subscription'
 
 export type ActivityAction = 'created' | 'updated' | 'deleted'
 export type ActivityEntityType = 'folder' | 'item' | 'items_batch' | 'lead'
@@ -121,6 +123,30 @@ export function activityLogDetailSubtitle(
   return null
 }
 
+/** Resolve the account owner's subscription plan (staff inherit super-admin tier). */
+async function resolveAccountSubscriptionPlan(): Promise<SubscriptionPlan> {
+  const ownerUserId = await getQueryUserId()
+  if (!ownerUserId) return 'storvv_micro'
+
+  const { useAuthStore } = await import('~/stores/auth')
+  const authStore = useAuthStore()
+
+  if (authStore.currentUser?.uid === ownerUserId) {
+    const { useUserStore } = await import('~/stores/user')
+    const userStore = useUserStore()
+    if (!userStore.userData) {
+      await userStore.fetchUserData(ownerUserId)
+    }
+    return normalizeSubscriptionPlan(userStore.userData?.subscription)
+  }
+
+  const db = useFirestore().getFirestoreInstance()
+  if (!db) return 'storvv_micro'
+  const { getDoc, doc } = await import('firebase/firestore')
+  const ownerSnap = await getDoc(doc(db, 'users', ownerUserId))
+  return normalizeSubscriptionPlan(ownerSnap.data()?.subscription)
+}
+
 /** Write an activity log (fire-and-forget; does not throw). */
 export async function logActivity(params: LogActivityParams): Promise<void> {
   if (import.meta.server) return
@@ -138,6 +164,9 @@ export async function logActivity(params: LogActivityParams): Promise<void> {
     })
     return
   }
+
+  const plan = await resolveAccountSubscriptionPlan()
+  if (!planHasFeature(plan, 'activity_logs')) return
 
   const db = useFirestore().getFirestoreInstance()
   if (!db) return

@@ -48,22 +48,21 @@
             <template v-else-if="story.visual === 'sales'">
               <div class="landing-story__mock-row">
                 <div>
-                  <p class="landing-story__mock-label">Checkout</p>
-                  <p class="landing-story__mock-meta">iPhone 15 Pro · 1 unit</p>
-                </div>
-                <span class="landing-story__mock-meta">₦890,000</span>
-              </div>
-              <div class="landing-story__mock-row">
-                <div>
-                  <p class="landing-story__mock-label">Customer</p>
-                  <p class="landing-story__mock-meta">Ada Okonkwo</p>
+                  <p class="landing-story__mock-label">Quick Sale</p>
+                  <p class="landing-story__mock-meta">iPhone 15 Pro · barcode scan</p>
                 </div>
                 <span class="landing-story__mock-pill">Paid</span>
               </div>
               <div class="landing-story__mock-row">
                 <div>
-                  <p class="landing-story__mock-label">Receipt</p>
-                  <p class="landing-story__mock-meta">RCP-1042 · WhatsApp sent</p>
+                  <p class="landing-story__mock-label">Lead · Ada O.</p>
+                  <p class="landing-story__mock-meta">WhatsApp enquiry · Negotiating</p>
+                </div>
+              </div>
+              <div class="landing-story__mock-row">
+                <div>
+                  <p class="landing-story__mock-label">Payment link</p>
+                  <p class="landing-story__mock-meta">₦890,000 · Paystack paid</p>
                 </div>
               </div>
             </template>
@@ -81,6 +80,20 @@
                 <span class="landing-story__mock-pill">{{ branch.status }}</span>
               </div>
             </template>
+
+            <template v-else-if="story.visual === 'analytics'">
+              <div
+                v-for="row in analyticsRows"
+                :key="row.label"
+                class="landing-story__mock-row"
+              >
+                <div>
+                  <p class="landing-story__mock-label">{{ row.label }}</p>
+                  <p class="landing-story__mock-meta">{{ row.meta }}</p>
+                </div>
+                <span class="landing-story__mock-pill">{{ row.status }}</span>
+              </div>
+            </template>
           </div>
         </div>
       </div>
@@ -93,38 +106,76 @@ const stories = [
   {
     id: 'inventory',
     eyebrow: 'Inventory',
-    title: 'Know exactly what you have.',
-    lede: 'Track products, categories, stock levels, and movement across every branch.',
-    bullets: ['Categories and subcategories', 'Serial and quantity tracking', 'Low stock alerts'],
+    title: 'Categories, serials, and stock you can trust.',
+    lede:
+      'Organize products in folders with optional subcategories, custom fields, and serial or quantity tracking per branch.',
+    bullets: [
+      'One-level subcategories (for example Toyota → Corolla)',
+      'Serial lines or bulk counts with low-stock alerts',
+      'Customer buybacks add trade-in stock at cost',
+      'Department-scoped folder access for staff',
+    ],
     visual: 'inventory' as const,
   },
   {
     id: 'sales',
-    eyebrow: 'Smart sales',
-    title: 'Turn every sale into a seamless experience.',
-    lede: 'Fast checkout, customer details, receipts, and payment tracking in one flow.',
-    bullets: ['Create sales in seconds', 'Customer balances', 'WhatsApp and PDF receipts'],
+    eyebrow: 'Sales & customers',
+    title: 'From enquiry to receipt in one workspace.',
+    lede:
+      'Ring up sales with the full wizard or Quick Sale, track customers and balances, and collect remotely with Paystack links.',
+    bullets: [
+      'Create New Sale and Quick Sale with barcode support',
+      'Sales leads pipeline (Medium+) before the receipt exists',
+      'Customer balance ledger, refunds, and WhatsApp receipts',
+      'Payment links on every plan for remote checkout',
+    ],
     visual: 'sales' as const,
   },
   {
     id: 'solutions',
     eyebrow: 'Multi-store',
-    title: 'One business. Multiple locations. Complete control.',
-    lede: 'Branch management, stock transfers, and reporting from a single login.',
-    bullets: ['Switch branches instantly', 'Stock transfers', 'Copy categories across branches'],
+    title: 'One business. Every branch. One login.',
+    lede:
+      'Switch stores instantly, transfer stock on Enterprise, and copy category templates across branches without copying live quantities.',
+    bullets: [
+      'Region-aware branch names from your onboarding country',
+      'Stock transfers with approval and transfer history',
+      'Copy from branch for Enterprise template rollout',
+      'Stock loans for serial inventory lent to borrowers',
+    ],
     visual: 'branches' as const,
+  },
+  {
+    id: 'analytics',
+    eyebrow: 'Insights & team',
+    title: 'Reports, audits, and help built in.',
+    lede:
+      'Medium and Enterprise unlock analytics, activity logs, and exports. Every plan includes Help center, onboarding, and Storvv Assistant.',
+    bullets: [
+      'Feature insights, charts, peak hours, and PDF/Excel export',
+      'Activity logs for managers and owners',
+      'Roles: super admin, manager, and staff with 2FA',
+      'Web dashboard plus native iOS app with the same data',
+    ],
+    visual: 'analytics' as const,
   },
 ]
 
 const inventoryRows = [
   { name: 'Smartphones', count: '320', status: 'Healthy', warn: false },
   { name: 'Accessories', count: '148', status: 'Low stock', warn: true },
-  { name: 'Laptops', count: '64', status: 'Healthy', warn: false },
+  { name: 'Toyota · 3 subcategories', count: '64', status: 'Healthy', warn: false },
 ]
 
 const branchRows = [
-  { name: 'Lagos, Lekki', meta: '142 products · ₦18.2M stock value', status: 'Active' },
-  { name: 'Abuja, Wuse', meta: '98 products · ₦11.4M stock value', status: 'Active' },
-  { name: 'Transfer pending', meta: '12 units · Lagos → Abuja', status: 'In transit' },
+  { name: 'Lagos, Lekki', meta: '142 products · active branch', status: 'Active' },
+  { name: 'Abuja, Wuse', meta: '98 products · active branch', status: 'Active' },
+  { name: 'Transfer #104', meta: '12 units · Lagos → Abuja', status: 'In transit' },
+]
+
+const analyticsRows = [
+  { label: 'Revenue (30d)', meta: '₦18.2M completed', status: 'Medium+' },
+  { label: 'Low stock', meta: '6 categories need restock', status: 'Alert' },
+  { label: 'Activity log', meta: 'Folder edited · 2h ago', status: 'Audit' },
 ]
 </script>

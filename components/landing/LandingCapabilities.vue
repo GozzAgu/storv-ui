@@ -12,10 +12,11 @@
       <header class="landing-capabilities__intro">
         <p class="landing-label landing-label--blue">Full product</p>
         <h2 id="landing-capabilities-title" class="landing-capabilities__title">
-          Everything else Storvv includes
+          Everything Storvv includes
         </h2>
         <p class="landing-capabilities__lede">
-          Core tools sit above. Click a category below to browse the rest.
+          Core daily ops on every plan. Analytics, leads, and multi-branch tools unlock as you grow.
+          Browse by category below.
         </p>
       </header>
 
@@ -143,8 +144,8 @@
           Read the FAQ
         </a>
         <span class="landing-capabilities__footer-sep" aria-hidden="true">·</span>
-        After sign-in, open <span class="landing-capabilities__footer-strong">Help</span> for
-        walkthroughs.
+        After sign-in, open <span class="landing-capabilities__footer-strong">Help</span> or
+        <span class="landing-capabilities__footer-strong">Ask assistant</span> for walkthroughs.
       </p>
     </div>
   </section>
@@ -167,6 +168,7 @@ import {
   CreditCardIcon,
   CubeIcon,
   CursorArrowRaysIcon,
+  DevicePhoneMobileIcon,
   DocumentTextIcon,
   FolderIcon,
   GlobeAltIcon,
@@ -175,10 +177,12 @@ import {
   ReceiptPercentIcon,
   ShareIcon,
   ShieldCheckIcon,
+  SparklesIcon,
   Square2StackIcon,
   UserGroupIcon,
   UsersIcon,
 } from '~/utils/app-icons'
+
 const emit = defineEmits<{
   navigate: [sectionId: string]
 }>()
@@ -206,18 +210,33 @@ interface MoreSubcategory {
 const coreItems: CapabilityItem[] = [
   {
     icon: FolderIcon,
-    title: 'Inventory tracking',
-    description: 'Serial lines or pooled counts. Search ties items, receipts, and alerts.',
+    title: 'Inventory categories',
+    description:
+      'Top-level folders with optional one-level subcategories (for example Toyota → Corolla). Serial or bulk quantity modes per category.',
+  },
+  {
+    icon: CubeIcon,
+    title: 'Custom product fields',
+    description:
+      'Text, number, date, currency, select, and boolean columns per category template. Profit and cost tracking where enabled.',
   },
   {
     icon: ReceiptPercentIcon,
-    title: 'Sales & receipts',
-    description: 'Discounts, swaps, refunds, and split payments with stock kept in sync.',
+    title: 'Sales, receipts & returns',
+    description:
+      'Create New Sale wizard, Quick Sale drawer, refunds, split payments, and stock kept in sync when receipts complete.',
   },
   {
     icon: UserGroupIcon,
-    title: 'Teams & departments',
-    description: 'Roles scoped to folders. Scale staff without retraining the floor.',
+    title: 'Roles & departments',
+    description:
+      'Super admin, store manager, and staff logins. Departments organize teams; folder access can be scoped by department.',
+  },
+  {
+    icon: ChartBarIcon,
+    title: 'Dashboard overview',
+    description:
+      'Revenue KPIs, low-stock signals, inventory health, payment links summary, and recent activity on the home screen.',
   },
 ]
 
@@ -225,62 +244,86 @@ const toolsItems: CapabilityItem[] = [
   {
     icon: CreditCardIcon,
     title: 'Payment links',
-    description: 'In progress: send a Paystack pay-by-link; stock and receipts update on payment.',
+    description:
+      'All plans: create Paystack checkout links, connect payout accounts, and track paid, unpaid, and failed links.',
   },
   {
-    icon: ShareIcon,
-    title: 'Receipt sharing',
-    description: 'Send receipts over WhatsApp, email, PDF, or a public link.',
+    icon: UsersIcon,
+    title: 'Sales leads',
+    description:
+      'Medium+: log walk-ins, phone, WhatsApp, and referrals; assign staff; convert to a sale with customer details prefilled.',
+  },
+  {
+    icon: BanknotesIcon,
+    title: 'Customer buybacks',
+    description:
+      'Super admins record trade-ins: pay the customer, add the unit to inventory at purchase cost, apply swap-in credit on sales.',
   },
   {
     icon: BoltIcon,
-    title: 'Quick sale',
-    description: 'Ring a fast over-the-counter sale without the full wizard.',
+    title: 'Quick Sale',
+    description:
+      'Fast checkout drawer with parent → subcategory → items, barcode scanning, and the same stock rules as the full wizard.',
+  },
+  {
+    icon: ShareIcon,
+    title: 'Receipt delivery',
+    description:
+      'WhatsApp (10/month on Micro, unlimited on Medium+), email, PDF, print, and shareable receipt links.',
+  },
+  {
+    icon: MagnifyingGlassIcon,
+    title: 'Global search',
+    description:
+      '⌘K / Ctrl+K across receipts, inventory, and customers. Saved searches for frequent filters.',
   },
   {
     icon: BellAlertIcon,
     title: 'Low-stock alerts',
-    description: 'Per-folder thresholds before shelves run empty.',
-  },
-  {
-    icon: CloudArrowUpIcon,
-    title: 'Offline mode',
-    description: 'Keep selling when the network drops; changes sync when back online.',
-  },
-  {
-    icon: DocumentTextIcon,
-    title: 'Excel import & export',
-    description: 'Bulk load spreadsheets and export catalogs for finance.',
-  },
-  {
-    icon: ArrowDownTrayIcon,
-    title: 'Reorder list export',
-    description: 'One-click low-stock reorder sheet for suppliers.',
-  },
-  {
-    icon: ShieldCheckIcon,
-    title: 'Activity logs',
-    description: 'Medium+: dated trails supervisors can review.',
-  },
-  {
-    icon: UsersIcon,
-    title: 'CRM from sales',
-    description: 'Customer profiles build from optional receipt fields.',
-  },
-  {
-    icon: BanknotesIcon,
-    title: 'Balance & credit ledger',
-    description: 'Medium+: track balance-due sales and customer credit over time.',
-  },
-  {
-    icon: MagnifyingGlassIcon,
-    title: 'Unified search',
-    description: 'One search across inventory, sales, and customers, with saved searches.',
+    description:
+      'Per-category thresholds on web and an All | Low stock filter on the iOS inventory list.',
   },
   {
     icon: ChartBarIcon,
     title: 'Analytics & exports',
-    description: 'Medium+: pacing, tops, busy hours, and CSV summaries.',
+    description:
+      'Medium+: daily, weekly, or monthly reports, feature insight cards, peak hours, heatmaps, PDF and Excel export.',
+  },
+  {
+    icon: ShieldCheckIcon,
+    title: 'Activity logs',
+    description:
+      'Medium+: dated audit trail of inventory, sales, and settings changes for super admins and managers.',
+  },
+  {
+    icon: BanknotesIcon,
+    title: 'Customer balance ledger',
+    description:
+      'Medium+: balance-due sales, credit applied, payment reminders, and outstanding balance on Analytics.',
+  },
+  {
+    icon: Square2StackIcon,
+    title: 'Duplicate category',
+    description:
+      'Medium+: clone a folder template within the same branch. Enterprise adds copy-from-branch across stores.',
+  },
+  {
+    icon: SparklesIcon,
+    title: 'Storvv Assistant',
+    description:
+      'In-app guide powered by Gemini on your server: workflows, permissions, and plan limits (no live store data).',
+  },
+  {
+    icon: DevicePhoneMobileIcon,
+    title: 'iOS native app',
+    description:
+      'Capacitor app with bottom tabs, pull-to-refresh, swipe actions on sales, native sheets, and the same data as web.',
+  },
+  {
+    icon: DocumentTextIcon,
+    title: 'Data export',
+    description:
+      'Export inventory ZIPs, reorder lists from low-stock reports, and analytics PDF/Excel on supported plans.',
   },
 ]
 
@@ -288,22 +331,32 @@ const enterpriseItems: CapabilityItem[] = [
   {
     icon: BanknotesIcon,
     title: 'Stock loans',
-    description: 'Lend serialized lines, then sell via sales or borrower flows.',
+    description:
+      'Lend serial-tracked units to borrowers; mark sold, returned, or complete via sales and loan actions.',
   },
   {
     icon: ArrowPathIcon,
-    title: 'Branch transfers',
-    description: 'Move units between locations with audit-friendly lineage.',
+    title: 'Multi-store sync & transfers',
+    description:
+      'Move stock between branches with request → approve → in transit → complete flows and transfer history.',
   },
   {
     icon: Square2StackIcon,
     title: 'Copy from branch',
-    description: 'Clone folder templates without overwriting live quantities.',
+    description:
+      'Copy category templates (names, columns, serial mode) from one branch to another; optional subcategory hierarchy.',
+  },
+  {
+    icon: ChartBarIcon,
+    title: 'Consolidated reporting',
+    description:
+      'Enterprise operators review performance and transfer history across all locations from one login.',
   },
   {
     icon: LockClosedIcon,
-    title: 'Permissions & audits',
-    description: 'Tighter governance across branches and roles.',
+    title: 'Priority support',
+    description:
+      'Enterprise includes priority support for multi-branch rollout, transfers, and stock-loan workflows.',
   },
 ]
 
@@ -313,29 +366,32 @@ const moreSubcategories: MoreSubcategory[] = [
     label: 'Inventory',
     items: [
       {
-        icon: CubeIcon,
-        title: 'Returns & swap-ins',
-        description: 'Walk back a receipt without orphaned stock.',
-      },
-      {
-        icon: CubeIcon,
-        title: 'Serial vs pooled',
-        description: 'Choose fidelity per gadget, apparel, or consumable folder.',
-      },
-      {
-        icon: CubeIcon,
-        title: 'Templates & duplicates',
-        description: 'Reuse folder shapes; Medium+ dedup helpers.',
-      },
-      {
         icon: FolderIcon,
-        title: 'Custom fields',
-        description: 'Text, number, date, currency, select, and boolean per folder.',
+        title: 'Subcategory hubs',
+        description:
+          'Optional Organize with subcategories when creating a category. Products live in leaf folders only.',
+      },
+      {
+        icon: CubeIcon,
+        title: 'Serial vs quantity',
+        description:
+          'Track individual serial lines or pooled counts per category. Stock loans apply to serial folders.',
       },
       {
         icon: ArrowDownTrayIcon,
         title: 'Reorder list export',
-        description: 'Export a low-stock reorder sheet for suppliers.',
+        description: 'Export a supplier-ready sheet from low-stock lines on Analytics or inventory views.',
+      },
+      {
+        icon: BellAlertIcon,
+        title: 'Department folder access',
+        description: 'Restrict categories to specific departments; staff only see allowed folders.',
+      },
+      {
+        icon: GlobeAltIcon,
+        title: 'Region-aware branches',
+        description:
+          'Branch names use cities from your onboarding country plus an optional area or neighborhood suffix.',
       },
     ],
   },
@@ -345,28 +401,32 @@ const moreSubcategories: MoreSubcategory[] = [
     items: [
       {
         icon: BoltIcon,
-        title: 'Quick sale',
-        description: 'Fast counter checkout for busy periods.',
+        title: 'Create New Sale',
+        description:
+          'Four steps: parent category, subcategory when needed, items and quantities, then customer and payment.',
+      },
+      {
+        icon: ReceiptPercentIcon,
+        title: 'Customers tab',
+        description:
+          'Customer directory on the Sales screen with search, pagination, and balance views on Medium+.',
       },
       {
         icon: ArrowPathIcon,
         title: 'Returns & refunds',
-        description: 'Reverse a receipt and return stock cleanly.',
+        description: 'Process refunds per receipt; filter by Refunded status to audit completed returns.',
       },
       {
-        icon: ReceiptPercentIcon,
-        title: 'Layouts & printers',
-        description: 'Readable labels for counter and auditors.',
+        icon: DocumentTextIcon,
+        title: 'Sell screen notes',
+        description:
+          'Optional branch reminders shown on Quick Sale and Create New Sale after a category is picked.',
       },
       {
-        icon: ReceiptPercentIcon,
-        title: 'Multi-payment tenders',
-        description: 'Combine cash, transfer, and POS cleanly.',
-      },
-      {
-        icon: ReceiptPercentIcon,
-        title: 'Customer capture',
-        description: 'Collect only what merchandising needs.',
+        icon: UsersIcon,
+        title: 'Lead → sale conversion',
+        description:
+          'Completing a sale from a lead marks it Won and links the receipt for follow-up reporting.',
       },
     ],
   },
@@ -376,23 +436,23 @@ const moreSubcategories: MoreSubcategory[] = [
     items: [
       {
         icon: CreditCardIcon,
-        title: 'Payment links',
-        description: 'In progress: collect online with a secure Paystack pay-by-link.',
+        title: 'Paystack checkout links',
+        description: 'Share a link; customer pays remotely. Summary cards on Dashboard and Analytics.',
       },
       {
         icon: BanknotesIcon,
-        title: 'Bank payouts & settlements',
-        description: 'Connect a bank account and track what has settled.',
+        title: 'Payout accounts',
+        description: 'Connect bank details and review settlements for payment-link collections.',
       },
       {
         icon: ShareIcon,
-        title: 'Receipt delivery',
-        description: 'WhatsApp, email, PDF, or a public share link per receipt.',
+        title: 'WhatsApp receipts',
+        description: 'Share receipts from the sales flow. Micro: 10 sends per month; Medium+: unlimited.',
       },
       {
         icon: BanknotesIcon,
         title: 'Balance due & credit',
-        description: 'Part-payments and a per-customer credit ledger.',
+        description: 'Record part-payments and track what each customer still owes over time.',
       },
     ],
   },
@@ -402,23 +462,25 @@ const moreSubcategories: MoreSubcategory[] = [
     items: [
       {
         icon: UserGroupIcon,
-        title: 'Invites & sessions',
-        description: 'Provision staff without shared master logins.',
+        title: 'Staff invites',
+        description:
+          'Super admins create logins and email sign-in details. Managers cannot create staff accounts.',
       },
       {
         icon: UserGroupIcon,
-        title: 'Department slices',
-        description: 'Mirror floor, back office, and ecommerce pods.',
+        title: 'Manager vs staff',
+        description:
+          'Managers edit receipts and refunds; standard staff create sales but cannot change catalog structure.',
       },
       {
         icon: BellAlertIcon,
-        title: 'Notifications',
-        description: 'Approve, restock, and nudge staff in-app.',
+        title: 'In-app notifications',
+        description: 'Bell dropdown and full notifications page for operational alerts.',
       },
       {
         icon: LockClosedIcon,
-        title: 'Role-based access',
-        description: 'Super admin, manager, and staff scoped to folders.',
+        title: '2FA & password',
+        description: 'Profile security: two-factor authentication, password change, and receipt terms for owners.',
       },
     ],
   },
@@ -428,18 +490,24 @@ const moreSubcategories: MoreSubcategory[] = [
     items: [
       {
         icon: ChartBarIcon,
-        title: 'Dashboard pulse',
-        description: 'Quick revenue and inventory health readouts.',
+        title: 'Feature insights',
+        description:
+          'Cards for sales, returns, outstanding balances, inventory health, buybacks, loans, and payment links.',
       },
       {
         icon: ChartBarIcon,
-        title: 'Exports',
-        description: 'CSV-friendly summaries on higher plans.',
+        title: 'Charts & heatmaps',
+        description: 'Revenue trends, top products, peak hours, sales by hour/day, and traffic heatmaps.',
       },
       {
-        icon: ChartBarIcon,
+        icon: ArrowDownTrayIcon,
+        title: 'PDF & Excel export',
+        description: 'Download period reports for the active branch. iOS uses an Export sheet for the same formats.',
+      },
+      {
+        icon: ArrowPathIcon,
         title: 'Transfer history',
-        description: 'Enterprise sync leaves an audit trail.',
+        description: 'Enterprise: audit past stock movements between branches.',
       },
     ],
   },
@@ -449,33 +517,35 @@ const moreSubcategories: MoreSubcategory[] = [
     items: [
       {
         icon: GlobeAltIcon,
+        title: 'Web + mobile',
+        description:
+          'Same account on app.storvv.com and the Capacitor iOS app (Android supported via the same build).',
+      },
+      {
+        icon: GlobeAltIcon,
         title: 'Stores per plan',
-        description: 'Micro: 1 · Medium: 2 · Enterprise: unlimited.',
+        description: 'Micro: 1 store · Medium: 2 · Enterprise: unlimited. Staff and department caps scale with plan.',
       },
       {
         icon: GlobeAltIcon,
-        title: 'Locales & currency',
-        description: 'Match sales to how each market prices.',
-      },
-      {
-        icon: GlobeAltIcon,
-        title: 'Profile & security',
-        description: 'Themes, 2FA, billing, and sessions in one hub.',
-      },
-      {
-        icon: CloudArrowUpIcon,
-        title: 'Offline mode',
-        description: 'Sell through outages; data syncs when you reconnect.',
+        title: 'Currency & onboarding',
+        description: 'Pick country and currency during setup; money fields and branch cities follow your region.',
       },
       {
         icon: ChatBubbleLeftRightIcon,
-        title: 'Help & onboarding',
-        description: 'Guided setup, tutorials, and an in-app help center.',
+        title: 'Help center',
+        description: 'Searchable guides for every screen, plan limits, and the iOS native layout.',
       },
       {
         icon: BookmarkSquareIcon,
-        title: 'Saved searches',
-        description: 'Pin frequent inventory and receipt queries.',
+        title: 'Dashboard tour',
+        description: 'Interactive tutorial on first visit; replay anytime from Help center.',
+      },
+      {
+        icon: CloudArrowUpIcon,
+        title: 'Interactive demo',
+        description:
+          'Try the full Enterprise dashboard with fictional sample data in your browser before signing up.',
       },
     ],
   },
@@ -485,22 +555,22 @@ const groups: CapabilityGroup[] = [
   {
     id: 'core',
     label: 'Core',
-    title: 'Core strengths',
-    description: 'Inventory, sales, and how your team is organized.',
+    title: 'Daily operations',
+    description: 'Inventory, sales, teams, and dashboard - included on every plan.',
     items: coreItems,
   },
   {
     id: 'tools',
-    label: 'Tools',
-    title: 'Supporting tools',
-    description: 'Helpful extras alongside your daily workflow.',
+    label: 'Growth',
+    title: 'Growth & automation',
+    description: 'Payment links on all plans; analytics, leads, and ledgers from Medium upward.',
     items: toolsItems,
   },
   {
     id: 'enterprise',
     label: 'Enterprise',
-    title: 'For chains & auditors',
-    description: 'Multi-branch governance aligned with Enterprise pricing.',
+    title: 'Multi-branch scale',
+    description: 'Stock loans, transfers, and template copy for operators with many locations.',
     items: enterpriseItems,
   },
   {

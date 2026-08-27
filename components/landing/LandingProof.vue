@@ -12,8 +12,8 @@
           Built for businesses that outgrow spreadsheets
         </h2>
         <p class="landing-proof__lede">
-          From single-store shops to multi-branch operators, Storvv gives teams one place to manage
-          stock, sales, and growth.
+          From solo shops on Micro to multi-branch Enterprise operators: inventory, sales, analytics,
+          and team permissions in one retail operating system.
         </p>
       </header>
 
@@ -42,9 +42,9 @@
 import type { MarketingFeatureIconKey } from '~/utils/marketing-feature-icons'
 
 const proofStats = [
-  { value: '10,000+', label: 'Products managed on the platform' },
-  { value: 'Multi-store', label: 'Ready for growing retailers' },
-  { value: 'Growing teams', label: 'Built for businesses that scale' },
+  { value: 'All plans', label: 'Inventory, sales, payment links & help' },
+  { value: 'Medium+', label: 'Analytics, leads & customer balances' },
+  { value: 'Enterprise', label: 'Transfers, stock loans & template copy' },
 ]
 
 const proofCards: Array<{
@@ -56,23 +56,44 @@ const proofCards: Array<{
   {
     metric: 'Stock',
     iconKey: 'inventory',
-    title: 'Fewer “it’s finished” surprises',
+    title: 'Live inventory per branch',
     description:
-      'Live counts per branch. Low-stock alerts before a customer walks away empty-handed.',
-  },
-  {
-    metric: 'Branches',
-    iconKey: 'branch',
-    title: 'Every branch, one login',
-    description:
-      'Switch branches in a click. See sales and inventory per location without merged spreadsheets.',
+      'Serial or quantity modes, subcategories, buybacks, and low-stock alerts before shelves run empty.',
   },
   {
     metric: 'Sales',
     iconKey: 'receipts',
-    title: 'Sales and customers together',
+    title: 'Receipts, leads & remote pay',
     description:
-      'Every sale saved with items and payment, including Paystack links when customers pay remotely.',
+      'Wizard or Quick Sale checkout, sales leads pipeline, customer ledger, and Paystack payment links.',
+  },
+  {
+    metric: 'Branches',
+    iconKey: 'branch',
+    title: 'Multi-store from one login',
+    description:
+      'Switch branches instantly. Enterprise adds transfers, copy-from-branch, and stock loans.',
+  },
+  {
+    metric: 'Insights',
+    iconKey: 'analytics',
+    title: 'Analytics & audit trail',
+    description:
+      'Feature insights, exports, peak-hour charts, and activity logs on Medium and Enterprise.',
+  },
+  {
+    metric: 'Team',
+    iconKey: 'departments',
+    title: 'Roles that match the floor',
+    description:
+      'Super admin, manager, and staff logins with department folder access and optional 2FA.',
+  },
+  {
+    metric: 'Mobile',
+    iconKey: 'dashboard',
+    title: 'Web + iOS native app',
+    description:
+      'Same data on desktop and iPhone: tabs, pull-to-refresh, swipe actions, and native sheets.',
   },
 ]
 </script>

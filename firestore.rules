@@ -78,6 +78,29 @@ service cloud.firestore {
       return isAuthenticated() && userId == request.auth.uid;
     }
 
+    // Subscription tier on the account owner doc (users/{userId}). Staff inherit owner plan.
+    function ownerSubscriptionRaw(userId) {
+      return exists(/databases/$(database)/documents/users/$(userId))
+        ? get(/databases/$(database)/documents/users/$(userId)).data.get('subscription', 'storvv_micro')
+        : 'storvv_micro';
+    }
+
+    function normalizedOwnerPlan(userId) {
+      let raw = ownerSubscriptionRaw(userId);
+      return raw == 'storvv_medium' || raw == 'medium'
+        ? 'storvv_medium'
+        : (raw == 'storvv_enterprise' || raw == 'enterprise' ? 'storvv_enterprise' : 'storvv_micro');
+    }
+
+    function planAtLeastMedium(userId) {
+      let plan = normalizedOwnerPlan(userId);
+      return plan == 'storvv_medium' || plan == 'storvv_enterprise';
+    }
+
+    function planIsEnterprise(userId) {
+      return normalizedOwnerPlan(userId) == 'storvv_enterprise';
+    }
+
     function canAccessStoreData(userId, storeId) {
       return (isAuthenticated() && userId == request.auth.uid) || isActiveStoreMember(userId, storeId);
     }
@@ -198,31 +221,27 @@ service cloud.firestore {
       // Store transfers subcollection: users/{userId}/storeTransfers/{transferId}
       // This collection stores transfer history for multi-store operations
       match /storeTransfers/{transferId} {
-        // Allow read if user is the super admin (userId in path matches auth.uid)
-        allow read: if isAuthenticated() && userId == request.auth.uid;
+        allow read: if isAuthenticated() && userId == request.auth.uid && planIsEnterprise(userId);
         
-        // Allow create if user is the super admin (userId in path matches auth.uid) creating transfer record
         allow create: if isAuthenticated() && 
                        userId == request.auth.uid && 
+                       planIsEnterprise(userId) &&
                        request.resource.data.createdBy == request.auth.uid;
         
-        // Allow update/delete if user is the super admin (userId in path matches auth.uid)
-        allow update, delete: if isAuthenticated() && userId == request.auth.uid;
+        allow update, delete: if isAuthenticated() && userId == request.auth.uid && planIsEnterprise(userId);
       }
       
       // Store syncs subcollection: users/{userId}/storeSyncs/{syncId}
       // This collection stores sync history for multi-store operations
       match /storeSyncs/{syncId} {
-        // Allow read if user is the super admin (userId in path matches auth.uid)
-        allow read: if isAuthenticated() && userId == request.auth.uid;
+        allow read: if isAuthenticated() && userId == request.auth.uid && planIsEnterprise(userId);
         
-        // Allow create if user is the super admin (userId in path matches auth.uid) creating sync record
         allow create: if isAuthenticated() && 
                        userId == request.auth.uid && 
+                       planIsEnterprise(userId) &&
                        request.resource.data.createdBy == request.auth.uid;
         
-        // Allow update/delete if user is the super admin (userId in path matches auth.uid)
-        allow update, delete: if isAuthenticated() && userId == request.auth.uid;
+        allow update, delete: if isAuthenticated() && userId == request.auth.uid && planIsEnterprise(userId);
       }
       
       // Stores subcollection: users/{userId}/stores/{storeId}
@@ -387,23 +406,26 @@ service cloud.firestore {
         // Customers subcollection: users/{userId}/stores/{storeId}/customers/{customerId}
         // Loan inventory to external seller / retailer (tracked; not marked sold until receipt).
         match /sellerLoanOuts/{loanId} {
-          allow read: if canAccessStoreData(userId, storeId) &&
+          allow read: if planIsEnterprise(userId) &&
+                         canAccessStoreData(userId, storeId) &&
                          resourceMatchesStore(storeId);
 
-          allow create: if canManageNonInventoryOps(userId, storeId) &&
+          allow create: if planIsEnterprise(userId) &&
+                           canManageNonInventoryOps(userId, storeId) &&
                            request.resource.data.storeId == storeId &&
                            request.resource.data.createdBy == request.auth.uid &&
                            request.resource.data.status == 'active' &&
                            request.resource.data.lines is list &&
                            request.resource.data.lines.size() > 0;
 
-          allow update: if (canManageNonInventoryOps(userId, storeId) &&
+          allow update: if planIsEnterprise(userId) &&
+                           ((canManageNonInventoryOps(userId, storeId) &&
                            resourceMatchesStore(storeId) &&
                            requestMatchesStore(storeId))
                         || (canCreateReceipt(userId, storeId) &&
                            sellerLoanSaleReconcileUpdate() &&
                            resourceMatchesStore(storeId) &&
-                           requestMatchesStore(storeId));
+                           requestMatchesStore(storeId)));
 
           allow delete: if false;
         }
@@ -431,10 +453,12 @@ service cloud.firestore {
 
         // Sales leads: manual enquiry tracking (no external messaging APIs).
         match /salesLeads/{leadId} {
-          allow read: if canAccessStoreData(userId, storeId) &&
+          allow read: if planAtLeastMedium(userId) &&
+                         canAccessStoreData(userId, storeId) &&
                          resourceMatchesStore(storeId);
 
-          allow create: if canCreateReceipt(userId, storeId) &&
+          allow create: if planAtLeastMedium(userId) &&
+                           canCreateReceipt(userId, storeId) &&
                            request.resource.data.storeId == storeId &&
                            request.resource.data.createdBy == request.auth.uid &&
                            request.resource.data.status == 'new' &&
@@ -442,19 +466,23 @@ service cloud.firestore {
                            request.resource.data.productName is string &&
                            request.resource.data.source is string;
 
-          allow update: if canCreateReceipt(userId, storeId) &&
+          allow update: if planAtLeastMedium(userId) &&
+                           canCreateReceipt(userId, storeId) &&
                            resourceMatchesStore(storeId) &&
                            requestMatchesStore(storeId);
 
-          allow delete: if canManageNonInventoryOps(userId, storeId) &&
+          allow delete: if planAtLeastMedium(userId) &&
+                           canManageNonInventoryOps(userId, storeId) &&
                            resourceMatchesStore(storeId);
         }
 
         match /leadEvents/{eventId} {
-          allow read: if canAccessStoreData(userId, storeId) &&
+          allow read: if planAtLeastMedium(userId) &&
+                         canAccessStoreData(userId, storeId) &&
                          resourceMatchesStore(storeId);
 
-          allow create: if canCreateReceipt(userId, storeId) &&
+          allow create: if planAtLeastMedium(userId) &&
+                           canCreateReceipt(userId, storeId) &&
                            request.resource.data.storeId == storeId &&
                            request.resource.data.createdBy == request.auth.uid &&
                            request.resource.data.leadId is string &&
@@ -475,10 +503,12 @@ service cloud.firestore {
 
         // Customer balance / credit ledger (Medium+ in product; rules allow all store roles to record payments).
         match /customerAccounts/{accountId} {
-          allow read: if canAccessStoreData(userId, storeId);
-          allow create: if canManageNonInventoryOps(userId, storeId) || isStoreStaff(userId, storeId);
-          allow update: if canManageNonInventoryOps(userId, storeId) || isStoreStaff(userId, storeId);
-          allow delete: if canManageNonInventoryOps(userId, storeId);
+          allow read: if planAtLeastMedium(userId) && canAccessStoreData(userId, storeId);
+          allow create: if planAtLeastMedium(userId) &&
+                           (canManageNonInventoryOps(userId, storeId) || isStoreStaff(userId, storeId));
+          allow update: if planAtLeastMedium(userId) &&
+                           (canManageNonInventoryOps(userId, storeId) || isStoreStaff(userId, storeId));
+          allow delete: if planAtLeastMedium(userId) && canManageNonInventoryOps(userId, storeId);
         }
         
         // Notifications subcollection: users/{userId}/stores/{storeId}/notifications/{notificationId}
@@ -493,8 +523,9 @@ service cloud.firestore {
         // Activity logs subcollection: users/{userId}/stores/{storeId}/activityLogs/{logId}
         // Security audit trail (who changed what in inventory)
         match /activityLogs/{logId} {
-          allow read: if canAccessStoreData(userId, storeId);
-          allow create: if (canManageNonInventoryOps(userId, storeId) || isStoreStaff(userId, storeId)) &&
+          allow read: if planAtLeastMedium(userId) && canAccessStoreData(userId, storeId);
+          allow create: if planAtLeastMedium(userId) &&
+                         (canManageNonInventoryOps(userId, storeId) || isStoreStaff(userId, storeId)) &&
                          request.resource.data.storeId == storeId &&
                          (request.resource.data.userId == userId || request.resource.data.userId == request.auth.uid);
           allow update, delete: if false;

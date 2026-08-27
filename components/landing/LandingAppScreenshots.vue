@@ -16,8 +16,8 @@
           <span class="landing-screenshots__accent">anywhere.</span>
         </h2>
         <p class="landing-screenshots__lede">
-          Dashboard, inventory, sales, and analytics on iPhone. The same Storvv experience in your
-          pocket.
+          Dashboard, inventory, buybacks, stock loans, sales, payment links, analytics, and help - the
+          same Storvv workspace on iPhone with native tabs, pull-to-refresh, and swipe actions.
         </p>
       </header>
 

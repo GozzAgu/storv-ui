@@ -573,9 +573,9 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
       {
         title: 'Plan tiers',
         body: [
-          'Storvv Micro: one store, one department, up to 2 staff. Core dashboard, inventory, Sales (receipts + customers + refunds), notifications, Help center, Profile. WhatsApp receipts capped at 10 per month.',
-          'Storvv Medium adds up to 2 stores, 10 departments and 25 staff per store, Analytics, Activity Logs, customer balance ledger, unlimited WhatsApp, and duplicate categories within the same branch.',
-          'Storvv Enterprise adds unlimited stores, departments, and staff; Multi-Store Sync and stock transfers; Copy from branch on Inventory (category templates across branches); Stock loans for serial inventory; and priority support.',
+          'Storvv Micro (free): one store, one department, up to 2 staff. Full inventory and sales (Quick Sale, Create New Sale, receipts, returns, customers), Paystack payment links, dashboard, notifications, help center, Storvv Assistant, and web + iOS. WhatsApp receipt sharing capped at 10 per month. No analytics, sales leads, activity logs, customer balance ledger, duplicate category, or multi-store tools.',
+          'Storvv Medium adds up to 2 stores, 10 departments and 25 staff per store, Analytics with PDF/Excel export, activity logs, sales leads, customer balance ledger, unlimited WhatsApp, and duplicate categories within the same branch.',
+          'Storvv Enterprise adds unlimited stores, departments, and staff; Multi-Store Sync and stock transfers; Copy from branch (category templates across stores); stock loans for serial inventory; and priority support. Customer buybacks are available to super admins on all plans (role-based, not plan-gated).',
         ],
       },
     ],

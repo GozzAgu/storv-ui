@@ -24,8 +24,8 @@
             class="landing-hero__role landing-hero__role--premium landing-hero__reveal"
             style="--hero-i: 3"
           >
-            Manage inventory, sales, customers, and multiple stores with a modern retail operating
-            system built for growing businesses.
+            Manage inventory, sales, customers, payment links, and multiple stores from one workspace -
+            on web and iOS.
           </p>
 
           <div class="landing-hero__actions landing-hero__reveal" style="--hero-i: 4">
@@ -60,9 +60,9 @@
                 <p class="landing-hero-mock__panel-title">Track, clear, and manage.</p>
                 <p class="landing-hero-mock__panel-sub">Every branch, one workspace</p>
                 <ul class="landing-hero-mock__panel-list">
-                  <li>Variant-level stock tracking</li>
-                  <li>Ditch complex spreadsheets</li>
-                  <li>Paystack links for remote sales</li>
+                  <li>Categories with optional subcategories</li>
+                  <li>Quick Sale, leads & Paystack links</li>
+                  <li>Web dashboard + native iOS app</li>
                 </ul>
                 <span class="landing-hero-mock__pill">Start free →</span>
               </div>
@@ -100,8 +100,8 @@ const props = defineProps<{
 }>()
 
 const heroStats = [
-  { value: '3×', label: 'Faster stock checks' },
-  { value: '0', label: 'Spreadsheets needed' },
+  { value: '15+', label: 'Product areas' },
+  { value: '3', label: 'Plans that scale' },
   { value: '1', label: 'Login, every store' },
 ] as const
 

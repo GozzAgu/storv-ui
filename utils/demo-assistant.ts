@@ -190,11 +190,11 @@ const DEMO_ASSISTANT_RULES: DemoAssistantRule[] = [
     reply: [
       'Storvv plans (Settings → subscription):',
       '',
-      '- Micro: one store, core sales and inventory, capped WhatsApp.',
-      '- Medium: Analytics, Activity logs, customer balance, second store.',
-      '- Enterprise: Multi-store sync, copy from branch, stock loans, unlimited stores.',
+      '- Micro (free): 1 store, 2 staff, full inventory & sales, payment links, assistant, 10 WhatsApp/month.',
+      '- Medium: 2 stores, analytics, activity logs, sales leads, customer balance, unlimited WhatsApp, duplicate category.',
+      '- Enterprise: unlimited stores, multi-store sync, copy-from-branch, stock loans, priority support.',
       '',
-      'This demo runs as Enterprise super admin so you can explore all areas.',
+      'Customer buybacks are super-admin only on every plan.',
     ].join('\n'),
   },
 ]

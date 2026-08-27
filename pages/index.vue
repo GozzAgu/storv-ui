@@ -25,6 +25,12 @@
             <a href="#product" class="landing-nav-link" @click.prevent="scrollToSection('inventory')"
               >Product</a
             >
+            <a
+              href="#capabilities-grid"
+              class="landing-nav-link"
+              @click.prevent="scrollToSection('capabilities-grid')"
+              >Features</a
+            >
             <a href="#pricing" class="landing-nav-link" @click.prevent="scrollToSection('pricing')"
               >Pricing</a
             >
@@ -92,6 +98,17 @@
                 >Product</a
               >
               <a
+                href="#capabilities-grid"
+                class="landing-mobile-nav-link"
+                @click.prevent="
+                  () => {
+                    scrollToSection('capabilities-grid')
+                    mobileMenuOpen = false
+                  }
+                "
+                >Features</a
+              >
+              <a
                 href="#pricing"
                 class="landing-mobile-nav-link"
                 @click.prevent="
@@ -152,6 +169,8 @@
 
     <LandingProductStories />
 
+    <LandingCapabilities @navigate="scrollToSection" />
+
     <LandingAiShowcase />
 
     <LandingAppScreenshots :app-url="appOriginUrl" />
@@ -175,8 +194,8 @@
         >
           Start on
           <strong class="font-semibold text-gray-800 dark:text-gray-200">Micro</strong> (free, one
-          store). Medium adds analytics and a second branch. Enterprise is for multi-store operators
-          who need sync and transfers.
+          store, full sales & inventory). Medium adds analytics, sales leads, and a second branch.
+          Enterprise adds transfers, stock loans, and unlimited stores.
         </p>
         <p class="mt-3 text-center text-base text-primary-700 dark:text-primary-300">
           <NuxtLink to="/demo/dashboard" class="font-semibold underline-offset-2 hover:underline"
@@ -231,23 +250,18 @@
             <p class="mt-4 text-2xl font-bold text-gray-900 dark:text-gray-100">FREE</p>
             <p class="text-sm text-gray-500">{{ BILLING_CYCLE_PERIOD_SUFFIX[selectedBillingCycle] }}</p>
             <ul class="mt-6 space-y-2 flex-1 text-base text-gray-600 dark:text-gray-400">
-              <li class="flex items-center gap-2">
-                <CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />1 store · 1 department · up
-                to 2 staff
+              <li
+                v-for="(line, i) in SUBSCRIPTION_FEATURE_SUMMARY.storvv_micro"
+                :key="i"
+                class="flex items-center gap-2"
+              >
+                <CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />{{ line }}
               </li>
-              <li class="flex items-center gap-2">
-                <CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Full inventory, receipts,
-                returns & customers
-              </li>
-              <li class="flex items-center gap-2">
-                <CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Dashboard, notifications &
-                help center
-              </li>
-              <li class="flex items-center gap-2">
-                <CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />WhatsApp receipts (10/month)
-              </li>
-              <li class="flex items-start gap-2 text-gray-500 dark:text-gray-500">
-                <span class="shrink-0">−</span> No analytics, activity logs, or multi-store tools
+              <li
+                v-if="SUBSCRIPTION_PLAN_NOT_INCLUDED.storvv_micro"
+                class="flex items-start gap-2 text-gray-500 dark:text-gray-500"
+              >
+                <span class="shrink-0">−</span> {{ SUBSCRIPTION_PLAN_NOT_INCLUDED.storvv_micro }}
               </li>
             </ul>
             <NuxtLink
@@ -281,30 +295,18 @@
             </div>
             <p class="text-sm text-gray-500">{{ BILLING_CYCLE_PERIOD_SUFFIX[selectedBillingCycle] }}</p>
             <ul class="mt-6 space-y-2 flex-1 text-base text-gray-600 dark:text-gray-400">
-              <li class="flex items-center gap-2">
-                <CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Everything in Micro
+              <li
+                v-for="(line, i) in SUBSCRIPTION_FEATURE_SUMMARY.storvv_medium"
+                :key="i"
+                class="flex items-center gap-2"
+              >
+                <CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />{{ line }}
               </li>
-              <li class="flex items-center gap-2">
-                <CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Up to 2 stores · 10
-                departments · 25 staff
-              </li>
-              <li class="flex items-center gap-2">
-                <CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Analytics, activity logs &
-                reports
-              </li>
-              <li class="flex items-center gap-2">
-                <CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Customer balance / credit
-                ledger
-              </li>
-              <li class="flex items-center gap-2">
-                <CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Unlimited WhatsApp receipts
-              </li>
-              <li class="flex items-center gap-2">
-                <CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Duplicate categories (same
-                branch)
-              </li>
-              <li class="flex items-start gap-2 text-gray-500 dark:text-gray-500">
-                <span class="shrink-0">−</span> No stock transfers or copy-from-branch (Enterprise)
+              <li
+                v-if="SUBSCRIPTION_PLAN_NOT_INCLUDED.storvv_medium"
+                class="flex items-start gap-2 text-gray-500 dark:text-gray-500"
+              >
+                <span class="shrink-0">−</span> {{ SUBSCRIPTION_PLAN_NOT_INCLUDED.storvv_medium }}
               </li>
             </ul>
             <a :href="appOriginUrl" class="landing-pill-cta mt-6 flex w-full">Get Started</a>
@@ -330,27 +332,12 @@
             </div>
             <p class="text-sm text-gray-500">{{ BILLING_CYCLE_PERIOD_SUFFIX[selectedBillingCycle] }}</p>
             <ul class="mt-6 space-y-2 flex-1 text-base text-gray-600 dark:text-gray-400">
-              <li class="flex items-center gap-2">
-                <CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Everything in Medium
-              </li>
-              <li class="flex items-center gap-2">
-                <CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Unlimited stores, departments
-                & staff
-              </li>
-              <li class="flex items-center gap-2">
-                <CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Multi-store sync & stock
-                transfers
-              </li>
-              <li class="flex items-center gap-2">
-                <CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Copy from branch (category
-                templates)
-              </li>
-              <li class="flex items-center gap-2">
-                <CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Stock loans for serial
-                inventory
-              </li>
-              <li class="flex items-center gap-2">
-                <CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Priority support
+              <li
+                v-for="(line, i) in SUBSCRIPTION_FEATURE_SUMMARY.storvv_enterprise"
+                :key="i"
+                class="flex items-center gap-2"
+              >
+                <CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />{{ line }}
               </li>
             </ul>
             <a :href="appOriginUrl" class="landing-pill-cta mt-6 flex w-full">Get Started</a>
@@ -388,7 +375,8 @@
               />
             </NuxtLink>
             <p class="landing-footer__tagline">
-              The retail operating system for inventory, sales, customers, and multi-branch growth.
+              Inventory, sales, payment links, analytics, and multi-branch tools for modern
+              retailers - on web and iOS.
             </p>
           </div>
 
@@ -400,6 +388,12 @@
               >
               <a href="#sales" class="landing-footer__link" @click.prevent="scrollToSection('sales')"
                 >Sales</a
+              >
+              <a
+                href="#capabilities-grid"
+                class="landing-footer__link"
+                @click.prevent="scrollToSection('capabilities-grid')"
+                >All features</a
               >
               <a href="#analytics" class="landing-footer__link" @click.prevent="scrollToSection('analytics')"
                 >Analytics</a
@@ -570,6 +564,10 @@ import {
   deriveBillingListAmount,
   type SubscriptionBillingCycle,
 } from '~/utils/subscription-billing'
+import {
+  SUBSCRIPTION_FEATURE_SUMMARY,
+  SUBSCRIPTION_PLAN_NOT_INCLUDED,
+} from '~/types/subscription'
 import {
   Bars3Icon,
   XMarkIcon,
@@ -857,7 +855,7 @@ useHead({
     {
       name: 'description',
       content:
-        'Manage inventory, sales, customers, and multiple stores with a modern retail operating system built for growing businesses.',
+        'Storvv: inventory with subcategories, Quick Sale, sales leads, Paystack payment links, analytics, buybacks, stock loans, and multi-store sync. Web dashboard and iOS app.',
     },
   ],
 })

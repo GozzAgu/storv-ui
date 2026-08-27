@@ -8,7 +8,7 @@ This document is the source of truth for **marketing**, **Help center**, and **`
 
 ## Plan strategy (why tiers are split this way)
 
-| Plan           | Who it’s for                               | Captivation goal                                                            |
+| Plan           | Who it's for                               | Captivation goal                                                            |
 | -------------- | ------------------------------------------ | --------------------------------------------------------------------------- |
 | **Micro**      | Single store, solo or tiny team            | Complete daily ops without paywalls on core selling                         |
 | **Medium**     | Growing business, second branch, real team | Visibility (analytics), accountability (activity logs), scale (staff/depts) |
@@ -27,20 +27,27 @@ This document is the source of truth for **marketing**, **Help center**, and **`
 | **Staff per store**              |     2      |    25     | Unlimited  |
 | Dashboard                        |     ✓      |     ✓     |     ✓      |
 | Inventory & categories           |     ✓      |     ✓     |     ✓      |
+| Subcategories (one level)        |     ✓      |     ✓     |     ✓      |
 | Receipts, returns, customers     |     ✓      |     ✓     |     ✓      |
+| Quick Sale & Create New Sale     |     ✓      |     ✓     |     ✓      |
 | Notifications                    |     ✓      |     ✓     |     ✓      |
 | Settings & profile               |     ✓      |     ✓     |     ✓      |
-| Help center & onboarding         |     ✓      |     ✓     |     ✓      |
+| Departments (nav & management)   |     ✓      |     ✓     |     ✓      |
+| Help center & Storvv Assistant   |     ✓      |     ✓     |     ✓      |
+| Web dashboard & iOS app          |     ✓      |     ✓     |     ✓      |
+| **Payment links** (Paystack)     |     ✓      |     ✓     |     ✓      |
 | WhatsApp receipts                | 10 / month | Unlimited | Unlimited  |
 | Analytics & reports              |     -      |     ✓     |     ✓      |
 | Activity logs                    |     -      |     ✓     |     ✓      |
-| Departments (multi-dept teams)   |     -      |     ✓     |     ✓      |
+| **Sales leads**                  |     -      |     ✓     |     ✓      |
 | Customer balance / credit ledger |     -      |     ✓     |     ✓      |
 | Duplicate category (same branch) |     -      |     ✓     |     ✓      |
 | Multi-store sync & transfers     |     -      |     -     |     ✓      |
 | Copy from branch (templates)     |     -      |     -     |     ✓      |
 | Stock loans                      |     -      |     -     |     ✓      |
 | Priority support                 |     -      |     -     |     ✓      |
+
+**Role-based (all plans):** Customer buybacks are **super admin only**, not plan-gated.
 
 ---
 
@@ -52,20 +59,20 @@ This document is the source of truth for **marketing**, **Help center**, and **`
 
 - **1 store**, **1 department**, **up to 2 staff**
 - **Dashboard** - overview, inventory health, quick stats
-- **Inventory** - categories (folders), products, serial or bulk modes
-- **Receipts** - create & manage sales
-- **Returns** - process refunds
-- **Customers** - list & purchase history (Sales screen)
+- **Inventory** - categories, optional subcategories, serial or bulk modes
+- **Sales** - Create New Sale, Quick Sale, receipts, returns, customers
+- **Payment links** - Paystack checkout links (all plans)
 - **Notifications** - in-app alerts
-- **Settings & profile** - account, theme, security
-- **Help center** - searchable guides
-- **WhatsApp** - share receipts ( **10 sends per calendar month** )
+- **Settings & profile** - account, theme, security, 2FA
+- **Help center & Storvv Assistant**
+- **Web + iOS** - same account on browser and native app
+- **WhatsApp** - share receipts (**10 sends per calendar month**)
 
 ### Not included (upgrade triggers)
 
-- Analytics & exports
+- Analytics & PDF/Excel exports
 - Activity logs
-- Multiple departments (beyond the single included dept)
+- Sales leads
 - Customer balance / credit ledger
 - Duplicate category within a branch
 - Multi-store sync, copy-from-branch, stock loans
@@ -78,14 +85,14 @@ This document is the source of truth for **marketing**, **Help center**, and **`
 
 Includes **everything in Micro**, plus:
 
-| Area                   | What’s included                                         |
+| Area                   | What's included                                         |
 | ---------------------- | ------------------------------------------------------- |
 | **Stores**             | Up to **2**                                             |
 | **Departments**        | Up to **10** per store                                  |
 | **Staff**              | Up to **25** per store                                  |
-| **Analytics**          | Reports, charts, revenue trends, busiest times, exports |
+| **Analytics**          | Feature insights, charts, peak hours, PDF/Excel export    |
 | **Activity logs**      | Who changed what, dated audit trail                     |
-| **Departments**        | Organize teams; folder access by department             |
+| **Sales leads**        | Enquiry pipeline with convert-to-sale                   |
 | **Customer balance**   | Credit ledger & payment reminders tied to balance       |
 | **WhatsApp**           | **Unlimited** receipt sharing & payment nudges          |
 | **Duplicate category** | Clone folder templates **within the same branch**       |
@@ -105,7 +112,7 @@ Includes **everything in Micro**, plus:
 
 Includes **everything in Medium**, plus:
 
-| Area                 | What’s included                                                                                                   |
+| Area                 | What's included                                                                                                   |
 | -------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | **Stores**           | **Unlimited**                                                                                                     |
 | **Departments**      | **Unlimited** per store                                                                                           |
@@ -122,11 +129,13 @@ Includes **everything in Medium**, plus:
 These build trust and word-of-mouth; keep them on every tier:
 
 - Create receipts, returns, and customers
-- Full inventory for the active branch
+- Full inventory for the active branch (within store/dept/staff caps)
+- Quick Sale and Create New Sale
+- Paystack payment links
 - Email receipt delivery (where configured)
 - Dark mode, web + mobile (Capacitor) apps
 - Security: sign-in, password change, 2FA (profile)
-- Help center & onboarding
+- Help center, onboarding tour, and Storvv Assistant
 
 ---
 
@@ -136,14 +145,16 @@ These build trust and word-of-mouth; keep them on every tier:
 | ------------------------------------- | ------------------- | -------------------------------------------------- |
 | Open Analytics                        | Medium              | `canUse('analytics')`, route guard                 |
 | View Activity logs                    | Medium              | `canUse('activity_logs')`                          |
-| Add 2nd+ department (beyond cap)      | Medium              | `canUse('departments')`, `canAddDepartment()`      |
+| Open Sales leads                      | Medium              | `canUse('sales_leads')`                            |
+| Add 2nd+ department (beyond cap)      | Medium              | `canAddDepartment()`, `maxDepartmentsPerStore`     |
 | Customer balance screens              | Medium              | `canUse('customer_balance')`                       |
 | Duplicate category                    | Medium              | `canDuplicateByPlan` in inventory pages            |
 | WhatsApp beyond cap                   | Medium              | `maxWhatsAppMessagesPerMonth` in limits            |
 | Multi-Store Sync                      | Enterprise          | `canUse('multi_store_sync')`                       |
-| Copy from branch                      | Enterprise          | `inventoryStore.copyFolderTemplates…`, super admin |
+| Copy from branch                      | Enterprise          | `canCopyFolderTemplatesFromBranchByPlan`, super admin |
 | Stock loans                           | Enterprise          | `canUse('seller_loans')`                           |
 | Add 2nd store (Micro) / 3rd+ (Medium) | Medium / Enterprise | `getEligibleStoresForPlan`, store creation         |
+| Payment links                         | All plans           | `canUse('payment_links')`                          |
 
 ---
 
@@ -153,22 +164,23 @@ Show upgrade prompts when users **hit a limit**, not at random:
 
 | Moment                     | Suggested message                                     |
 | -------------------------- | ----------------------------------------------------- |
-| Analytics nav (Micro)      | “See revenue trends and busiest hours on Medium”      |
-| 3rd staff invite (Micro)   | “Medium supports up to 25 staff per store”            |
-| 2nd store creation (Micro) | “Add a second branch on Medium”                       |
-| WhatsApp cap (Micro)       | “Unlimited WhatsApp receipts on Medium”               |
-| Copy from branch           | “Enterprise: copy category templates across branches” |
-| Stock loans nav            | “Enterprise: track inventory lent to resellers”       |
+| Analytics nav (Micro)      | "See revenue trends and busiest hours on Medium"      |
+| Sales leads nav (Micro)    | "Track enquiries before they become receipts on Medium" |
+| 3rd staff invite (Micro)   | "Medium supports up to 25 staff per store"            |
+| 2nd store creation (Micro) | "Add a second branch on Medium"                       |
+| WhatsApp cap (Micro)       | "Unlimited WhatsApp receipts on Medium"               |
+| Copy from branch           | "Enterprise: copy category templates across branches" |
+| Stock loans nav            | "Enterprise: track inventory lent to borrowers"       |
 
 ---
 
 ## Implementation
 
-- **Feature flags:** `types/subscription.ts` - `FEATURES_BY_PLAN`, `LIMITS_BY_PLAN`, `SUBSCRIPTION_FEATURE_SUMMARY`
+- **Feature flags:** `types/subscription.ts` - `FEATURES_BY_PLAN`, `LIMITS_BY_PLAN`, `SUBSCRIPTION_FEATURE_SUMMARY`, `SUBSCRIPTION_PLAN_NOT_INCLUDED`
 - **Usage:** `useSubscriptionFeatures()` - `canUse(feature)`, `limits`, `featureSummary`
-- **Nav:** Sidebar hides Analytics (Micro), Activity logs (Micro), Multi-Store Sync & Stock loans (Micro & Medium)
-- **Routes:** Analytics and Multi-Store Sync guard access by plan
+- **Nav:** Sidebar hides Analytics (Micro), Activity logs (Micro), Sales leads (Micro), Multi-Store Sync & Stock loans (Micro & Medium)
+- **Firestore rules:** `firestore.rules` - `planAtLeastMedium()` / `planIsEnterprise()` on sales leads, customer accounts, activity logs, stock loans, and multi-store sync collections
 - **Duplicate category:** Medium+ via plan check in `inventory/index.vue` and `inventory/[id].vue` (not a separate feature flag)
-- **Copy from branch:** Enterprise only in `stores/inventory.ts`
+- **Copy from branch:** Enterprise only in inventory pages
 
 Billing uses **Paystack** (NGN). Amounts: `server/utils/paystack-validation.ts`.
