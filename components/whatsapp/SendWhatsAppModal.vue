@@ -14,7 +14,12 @@
 
       <div v-else class="space-y-4">
         <p v-if="usage && !usage.unlimited" class="text-[11px] text-gray-500 dark:text-gray-400">
-          {{ usage.count }} / {{ usage.limit }} sends this month on Storvv Micro.
+          {{ usage.count }} / {{ usage.limit }} WhatsApp sends this month on Storvv Micro.
+          <LimitUpgradeHint
+            v-if="!usage.canSend"
+            message="Unlimited WhatsApp sends on Storvv Medium."
+            class="mt-1 block"
+          />
         </p>
 
         <p class="text-xs text-gray-600 dark:text-gray-400">
@@ -131,6 +136,7 @@ import {
 } from '~/composables/useReceiptImageCapture'
 import { generatePaymentReminderImage } from '~/utils/payment-reminder-image'
 import type { WhatsAppShareAttachmentFormat } from '~/composables/useWhatsAppFileShare'
+import LimitUpgradeHint from '~/components/subscription/LimitUpgradeHint.vue'
 
 const props = withDefaults(
   defineProps<{

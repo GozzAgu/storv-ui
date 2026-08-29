@@ -7,6 +7,10 @@ import {
 import type { SubscriptionPlan } from '~/types/subscription'
 import type { SubscriptionBillingCycle } from '~/types/subscription-billing'
 import type { UserPreferences } from '~/composables/usePreferences'
+import type {
+  BusinessCapability,
+  ExperienceMode,
+} from '~/types/business-experience'
 import { sanitizeUserData } from '~/utils/sanitize-user-data'
 
 export interface StoreSettings {
@@ -35,6 +39,12 @@ export interface StoreDetails {
   storePhone?: string
   storeEmail?: string
   storeDescription?: string
+  /** Adaptive experience: solo (simple) or business (full). Omit → business. */
+  experienceMode?: ExperienceMode
+  /** Progressive unlock for solo accounts (e.g. staffManagement). */
+  enabledCapabilities?: BusinessCapability[]
+  /** Set when a new account explicitly chose an experience during onboarding. */
+  onboardingExperienceChosen?: boolean
   settings?: StoreSettings
 }
 
@@ -45,6 +55,12 @@ export interface UserData {
   role: 'superAdmin' | 'admin' | 'user' | 'staff'
   subscription: SubscriptionPlan
   subscriptionBillingCycle?: SubscriptionBillingCycle
+  /** Paystack auto-renew lifecycle: active, past_due, canceled, none. */
+  subscriptionStatus?: 'active' | 'past_due' | 'canceled' | 'none'
+  /** ISO date when the current paid period ends (next Paystack charge). */
+  subscriptionCurrentPeriodEnd?: string
+  paystackSubscriptionCode?: string
+  paystackCustomerCode?: string
   photoURL?: string
   storeLogoUrl?: string // Account logo - applies to all stores, shown on receipts
   storeDetails?: StoreDetails

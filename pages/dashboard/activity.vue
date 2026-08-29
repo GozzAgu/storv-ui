@@ -37,29 +37,18 @@
     </DashboardPageHeader>
 
     <div v-if="!canAccess" :class="dashboardCardPaddedClass">
-      <p
-        class="text-sm font-medium leading-relaxed"
-        :class="
-          accessDeniedByRole
-            ? 'text-red-800 dark:text-red-200'
-            : 'text-amber-900 dark:text-amber-100'
-        "
-      >
-        {{
+      <FeatureGateCard
+        feature="activity_logs"
+        :title="accessDeniedByRole ? 'Managers only' : undefined"
+        :description="
           accessDeniedByRole
             ? 'Activity Logs are available to super admins and store managers only.'
             : isStaff
               ? 'Activity Logs are not enabled for your workspace.'
-              : 'Activity Logs are included on Storvv Medium and Enterprise. Upgrade your plan to enable auditing.'
-        }}
-      </p>
-      <NuxtLink
-        v-if="!accessDeniedByRole && userStore.isSuperAdmin"
-        to="/dashboard/settings"
-        class="mt-3 inline-flex text-xs font-medium text-primary-600 transition hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
-      >
-        View plans in Settings →
-      </NuxtLink>
+              : undefined
+        "
+        :secondary-href="accessDeniedByRole ? undefined : '/dashboard/help#settings-subscription'"
+      />
     </div>
 
     <template v-else>
@@ -261,6 +250,7 @@ import {
   normalizeActivityLogText,
 } from '~/composables/useActivityLog'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
+import FeatureGateCard from '~/components/subscription/FeatureGateCard.vue'
 const {
   eyebrowClass,
   pageTitleClass,

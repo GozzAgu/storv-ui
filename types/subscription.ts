@@ -10,6 +10,28 @@ export function normalizeSubscriptionPlan(raw: unknown): SubscriptionPlan {
   return 'storvv_micro'
 }
 
+/** UI/rules plan after canceled subscriptions pass their paid period. */
+export function resolveEffectiveSubscriptionPlan(
+  userData:
+    | {
+        subscription?: unknown
+        subscriptionStatus?: string
+        subscriptionCurrentPeriodEnd?: string
+      }
+    | null
+    | undefined
+): SubscriptionPlan {
+  const stored = normalizeSubscriptionPlan(userData?.subscription)
+  if (userData?.subscriptionStatus !== 'canceled') return stored
+  const periodEnd = userData.subscriptionCurrentPeriodEnd
+  if (!periodEnd) return stored
+  const endMs = new Date(periodEnd).getTime()
+  if (Number.isFinite(endMs) && Date.now() > endMs) {
+    return 'storvv_micro'
+  }
+  return stored
+}
+
 export const SUBSCRIPTION_PLANS: Array<{ id: SubscriptionPlan; name: string }> = [
   { id: 'storvv_micro', name: 'Storvv Micro' },
   { id: 'storvv_medium', name: 'Storvv Medium' },
@@ -50,7 +72,7 @@ interface SubscriptionLimits {
   maxWhatsAppMessagesPerMonth: number
 }
 
-const FEATURES_BY_PLAN: Record<SubscriptionPlan, SubscriptionFeature[]> = {
+export const FEATURES_BY_PLAN: Record<SubscriptionPlan, SubscriptionFeature[]> = {
   storvv_micro: [
     'dashboard',
     'inventory',

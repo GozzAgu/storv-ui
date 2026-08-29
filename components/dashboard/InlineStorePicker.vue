@@ -57,6 +57,7 @@ import { getStoreBranchShortLabel } from '~/utils/store-branch-label'
 const storesStore = useStoresStore()
 const userStore = useUserStore()
 const toast = useAppToast()
+const { canUse: canUseBusinessCapability } = useBusinessCapabilities()
 
 const switchingStoreId = ref<string | null>(null)
 
@@ -72,6 +73,15 @@ function branchLabel(name: string | null | undefined) {
 
 async function selectStore(storeId: string) {
   if (switchingStoreId.value) return
+
+  if (
+    userStore.userData?.role === 'superAdmin' &&
+    !canUseBusinessCapability('multiLocationAdmin') &&
+    storeId !== storesStore.currentStoreId
+  ) {
+    toast.error('Branches are not available on your workspace style.')
+    return
+  }
 
   try {
     switchingStoreId.value = storeId

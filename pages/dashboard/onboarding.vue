@@ -97,8 +97,29 @@
             </div>
           </div>
 
-          <!-- Step 2: Store Information -->
-          <div v-else key="step-2" class="space-y-3">
+          <!-- Step 2: Business experience -->
+          <div v-else-if="currentStep === 2" key="step-2" class="space-y-4 sm:space-y-5">
+            <div class="text-center mb-4 sm:mb-5">
+              <div
+                class="mx-auto flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 mb-2.5"
+              >
+                <UserIcon class="h-5 w-5 text-white" />
+              </div>
+              <h1 class="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                How do you run your business?
+              </h1>
+              <p class="text-xs text-gray-600 dark:text-gray-400 max-w-md mx-auto leading-relaxed">
+                Choose the setup that fits you. You can enable more features later in Settings.
+              </p>
+            </div>
+
+            <div class="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Business experience">
+              <ExperienceModePicker v-model="selectedExperienceMode" :show-changes="false" />
+            </div>
+          </div>
+
+          <!-- Step 3: Store Information -->
+          <div v-else key="step-3" class="space-y-3">
             <div class="text-center mb-4 sm:mb-5">
               <div
                 class="mx-auto flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 mb-2.5"
@@ -264,6 +285,7 @@ import {
   GlobeAltIcon,
   ArrowRightIcon,
   BuildingStorefrontIcon,
+  UserIcon,
 } from '~/utils/app-icons'
 import Button from '~/components/ui/Button.vue'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
@@ -272,6 +294,8 @@ import { usePreferences, currencies, regions } from '~/composables/usePreference
 import { useStoresStore } from '~/stores/stores'
 import { useUserStore } from '~/stores/user'
 import { getCitiesForRegion, isCityInRegion } from '~/utils/region-cities'
+import type { ExperienceMode } from '~/types/business-experience'
+import { withOnboardingExperienceChoice } from '~/utils/onboarding-experience'
 
 definePageMeta({
   layout: 'dashboard',
@@ -285,12 +309,13 @@ const storesStore = useStoresStore()
 const userStore = useUserStore()
 
 const currentStep = ref(1)
-const totalSteps = 2
+const totalSteps = 3
 const isLoading = ref(false)
 const checkingProfile = ref(true)
 const errorMessage = ref('')
 const selectedCurrency = ref('')
 const selectedCountry = ref('')
+const selectedExperienceMode = ref<ExperienceMode | ''>('')
 
 const storeDetails = ref<StoreDetails>({
   storeName: '',
@@ -325,6 +350,9 @@ watch(selectedCountry, () => {
 const canContinue = computed(() => {
   if (currentStep.value === 1) {
     return !!selectedCurrency.value && !!selectedCountry.value
+  }
+  if (currentStep.value === 2) {
+    return selectedExperienceMode.value === 'solo' || selectedExperienceMode.value === 'business'
   }
   return !!storeDetails.value.storeName?.trim()
 })
@@ -375,8 +403,20 @@ const nextStep = async () => {
     }
     currentStep.value++
     window.scrollTo({ top: 0, behavior: 'smooth' })
-  } else if (currentStep.value === totalSteps) {
-    // Complete onboarding
+    return
+  }
+
+  if (currentStep.value === 2) {
+    if (selectedExperienceMode.value !== 'solo' && selectedExperienceMode.value !== 'business') {
+      errorMessage.value = 'Please choose how you run your business to continue'
+      return
+    }
+    currentStep.value++
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+    return
+  }
+
+  if (currentStep.value === totalSteps) {
     await completeOnboarding()
   }
 }
@@ -417,8 +457,12 @@ const completeOnboarding = async () => {
       timeFormat: '12h',
     })
 
-    // Save store details
-    await updateStoreDetails(currentUser.value.uid, storeDetails.value)
+    // Save store details + explicit experience choice (new signups only)
+    const detailsToSave = withOnboardingExperienceChoice(
+      storeDetails.value,
+      selectedExperienceMode.value
+    )
+    await updateStoreDetails(currentUser.value.uid, detailsToSave)
 
     // Create the first store during onboarding and set it as the current/default store.
     // Existing users who already have stores keep their existing list.

@@ -47,10 +47,8 @@
       </template>
     </DashboardPageHeader>
 
-    <div v-if="!canAccessLeadsPlan" class="rounded-sm bg-amber-50/90 px-4 py-4 dark:bg-amber-950/25">
-      <p class="text-xs font-medium text-amber-900 dark:text-amber-100">
-        Sales leads require Storvv Medium or Enterprise.
-      </p>
+    <div v-if="!canAccessLeadsPlan" class="py-8">
+      <FeatureGateCard feature="sales_leads" />
     </div>
 
     <div
@@ -229,6 +227,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import Button from '~/components/ui/Button.vue'
+import FeatureGateCard from '~/components/subscription/FeatureGateCard.vue'
 import Modal from '~/components/ui/Modal.vue'
 import ConvertLeadToSaleButton from '~/components/leads/ConvertLeadToSaleButton.vue'
 import EditLeadModal from '~/components/leads/EditLeadModal.vue'

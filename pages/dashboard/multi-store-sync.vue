@@ -12,20 +12,17 @@
       </template>
     </DashboardPageHeader>
 
-    <div v-if="!canAccess" :class="restrictedClass">
-      <div :class="restrictedIconClass">
-        <ExclamationTriangleIcon class="h-5 w-5" stroke-width="1.75" />
-      </div>
-      <div>
-        <h3 :class="restrictedTitleClass">Access restricted</h3>
-        <p :class="restrictedDescClass">
-          {{
-            isStaff
-              ? 'Only super admins can access multi-store sync.'
-              : 'Multi-Store Sync is available on Storvv Enterprise. Upgrade in Settings to unlock.'
-          }}
-        </p>
-      </div>
+    <div v-if="!canAccess" class="py-8">
+      <FeatureGateCard
+        feature="multi_store_sync"
+        gate="custom"
+        :description="
+          isStaff
+            ? 'Only super admins can access multi-store sync.'
+            : undefined
+        "
+        :secondary-href="isStaff ? undefined : '/dashboard/help#settings-subscription'"
+      />
     </div>
 
     <template v-else>

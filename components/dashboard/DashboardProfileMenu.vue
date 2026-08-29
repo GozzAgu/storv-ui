@@ -52,7 +52,9 @@
                   <span v-if="storeLabel" :class="metaBadgeClass">
                     {{ storeLabel }}
                   </span>
+                  <span v-if="planLabel" :class="metaBadgeClass">{{ planLabel }}</span>
                   <span :class="roleBadgeClass">{{ roleLabel }}</span>
+                  <ExperienceModeBadge variant="profile" />
                 </div>
               </div>
             </div>
@@ -143,6 +145,7 @@ import { useUserStore } from '~/stores/user'
 import { useStaffStore } from '~/stores/staff'
 import { useNotificationsStore } from '~/stores/notifications'
 import { useSubscriptionFeatures } from '~/composables/useSubscriptionFeatures'
+import { getPlanDisplayName } from '~/types/subscription'
 import { getStoreBranchShortLabel } from '~/utils/store-branch-label'
 
 defineProps<{
@@ -186,7 +189,7 @@ const storesStore = useStoresStore()
 const userStore = useUserStore()
 const staffStore = useStaffStore()
 const notificationsStore = useNotificationsStore()
-const { canUse } = useSubscriptionFeatures()
+const { canUse, plan } = useSubscriptionFeatures()
 
 const open = ref(false)
 const menuRootRef = ref<HTMLElement | null>(null)
@@ -215,6 +218,11 @@ const roleLabel = computed(() => {
   const role = userStore.userData?.role
   if (role) return role.charAt(0).toUpperCase() + role.slice(1)
   return 'User'
+})
+
+const planLabel = computed(() => {
+  if (!userStore.isSuperAdmin) return ''
+  return getPlanDisplayName(plan.value)
 })
 
 const { dashPath } = useDashboardPaths()

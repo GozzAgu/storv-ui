@@ -242,21 +242,17 @@
       </div>
     </template>
 
-    <div v-else class="rounded-sm bg-amber-50/90 px-4 py-4 dark:bg-amber-950/25 sm:px-5 sm:py-5">
-      <p class="text-xs font-medium text-amber-900 dark:text-amber-100">
-        {{
+    <div v-else class="py-8">
+      <FeatureGateCard
+        feature="seller_loans"
+        gate="custom"
+        :description="
           isStaff
             ? 'Stock loans are not enabled for your workspace.'
-            : 'Stock loans are included on Storvv Enterprise: lend serial inventory until it sells or comes back to the store. Upgrade in Settings when you are ready.'
-        }}
-      </p>
-      <NuxtLink
-        v-if="!isStaff"
-        to="/dashboard/settings"
-        class="mt-2 inline-block text-xs font-medium text-amber-900 underline underline-offset-2 dark:text-amber-200"
-      >
-        Settings
-      </NuxtLink>
+            : undefined
+        "
+        :secondary-href="isStaff ? undefined : '/dashboard/help#settings-subscription'"
+      />
     </div>
 
     <Modal
@@ -392,6 +388,7 @@ import {
 } from '~/utils/app-icons'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
+import FeatureGateCard from '~/components/subscription/FeatureGateCard.vue'
 import DashboardTableBadge from '~/components/ui/DashboardTableBadge.vue'
 import { formatSellerLoanStatusLabel, sellerLoanStatusBadgeClass } from '~/utils/table-badge-styles'
 import { useSellerLoanOutsStore, type SellerLoanOut } from '~/stores/sellerLoanOuts'

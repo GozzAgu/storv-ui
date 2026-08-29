@@ -1644,6 +1644,7 @@ if (import.meta.client) {
 
 const authStore = useAuthStore()
 const userStore = useUserStore()
+const { canManageBranches } = useBusinessCapabilities()
 const inventoryStore = useInventoryStore()
 const departmentsStore = useDepartmentsStore()
 const storesStore = useStoresStore()
@@ -1681,6 +1682,7 @@ const canCopyFolderTemplatesFromBranchByPlan = computed(
 )
 
 const otherBranchesForTemplateCopy = computed(() => {
+  if (!canManageBranches.value) return [] as Store[]
   const id = storesStore.currentStoreId
   if (!id) return [] as Store[]
   return [...storesStore.stores]
@@ -1691,6 +1693,7 @@ const otherBranchesForTemplateCopy = computed(() => {
 const canShowCopyFolderTemplatesFromBranch = computed(
   () =>
     userStore.userData?.role === 'superAdmin' &&
+    canManageBranches.value &&
     canCopyFolderTemplatesFromBranchByPlan.value &&
     canCreateInventoryFolders.value &&
     storesStore.activeStores.length > 1

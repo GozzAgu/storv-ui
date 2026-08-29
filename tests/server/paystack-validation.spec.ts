@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   getExpectedPlanAmount,
   getPlanAmountConfigKey,
+  getPaystackPlanCode,
   validatePaidAmountAndCurrency,
 } from '~/server/utils/paystack-validation'
 
@@ -63,5 +64,16 @@ describe('paystack validation utils', () => {
   it('passes on valid amount and currency', () => {
     const result = validatePaidAmountAndCurrency(500000, 'NGN', 500000)
     expect(result.valid).toBe(true)
+  })
+
+  it('resolves Paystack plan code from runtime config', () => {
+    const code = getPaystackPlanCode('storvv_medium', 'monthly', {
+      paystackPlanCodeMediumMonthly: 'PLN_test_medium_monthly',
+    })
+    expect(code).toBe('PLN_test_medium_monthly')
+  })
+
+  it('throws when Paystack plan code env is missing', () => {
+    expect(() => getPaystackPlanCode('storvv_medium', 'monthly', {})).toThrow(/Missing Paystack plan code/)
   })
 })

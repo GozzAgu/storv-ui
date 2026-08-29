@@ -28,6 +28,27 @@
         subtitle="Logo and subscription for your whole account."
         :badge="`Plan: ${currentSubscriptionLabel}`"
       >
+        <div
+          v-if="userStore.isSuperAdmin"
+          class="mb-4 flex flex-wrap items-center gap-2 border-b border-gray-100 pb-4 dark:border-white/[0.06]"
+        >
+          <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Workspace style</span>
+          <ExperienceModeBadge variant="settings" />
+          <span class="text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
+            {{
+              isSoloExperience
+                ? 'Simple setup. Enable more in Advanced features below.'
+                : 'Full workspace with team and multi-location tools as your plan allows.'
+            }}
+          </span>
+        </div>
+        <p class="mb-3 text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
+          <span class="font-medium text-gray-700 dark:text-gray-300">Plan</span> is what you pay
+          for (Micro, Medium, Enterprise).
+          <span class="font-medium text-gray-700 dark:text-gray-300"> Workspace style</span> controls
+          how much of the app we show. You can change workspace style below without changing your
+          plan.
+        </p>
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
           <div class="flex items-start gap-4">
             <div class="relative shrink-0">
@@ -76,98 +97,97 @@
             </div>
           </div>
 
-          <div class="space-y-3">
-            <div>
-              <p class="text-xs font-semibold text-gray-900 dark:text-gray-100">Subscription</p>
-              <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
-                Upgrade to unlock more branches and features.
-              </p>
-            </div>
-            <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
-              <div class="min-w-0 flex-1">
-                <label :class="labelClass">Billing cycle</label>
-                <select
-                  v-model="selectedBillingCycle"
-                  :disabled="!canEditSettings || isUpgradingSubscription"
-                  :class="inputClass(canEditSettings && !isUpgradingSubscription)"
-                >
-                  <option
-                    v-for="cycle in SUBSCRIPTION_BILLING_CYCLES"
-                    :key="cycle"
-                    :value="cycle"
-                  >
-                    {{ BILLING_CYCLE_LABELS[cycle] }}
-                  </option>
-                </select>
-              </div>
-              <div class="min-w-0 flex-1">
-                <label :class="labelClass">Upgrade to</label>
-                <select
-                  v-model="selectedUpgradePlan"
-                  :disabled="
-                    !canEditSettings || isUpgradingSubscription || upgradeOptions.length === 0
-                  "
-                  :class="
-                    inputClass(
-                      canEditSettings && !isUpgradingSubscription && upgradeOptions.length > 0
-                    )
-                  "
-                >
-                  <option value="" disabled>
-                    {{ upgradeOptions.length === 0 ? 'No upgrades available' : 'Select a plan' }}
-                  </option>
-                  <option v-for="p in upgradeOptions" :key="p.id" :value="p.id">
-                    {{ p.name }}
-                  </option>
-                </select>
-              </div>
-              <Button
-                variant="primary"
-                size="sm"
-                :class="headerBtnClass"
-                :disabled="
-                  !canEditSettings ||
-                  !selectedUpgradePlan ||
-                  isUpgradingSubscription ||
-                  upgradeOptions.length === 0
-                "
-                @click="handleUpgradeSubscription"
-              >
-                {{ isUpgradingSubscription ? 'Upgrading…' : 'Upgrade' }}
-              </Button>
-            </div>
-            <p class="text-[10px] leading-relaxed text-gray-500 dark:text-gray-400">
-              Paystack checkout · {{ BILLING_CYCLE_LABELS[selectedBillingCycle].toLowerCase() }}
-              billing · plan updates after payment completes.
-            </p>
-            <details class="group rounded-lg bg-gray-50/50 px-3 py-2 dark:bg-white/[0.02]">
-              <summary
-                class="cursor-pointer list-none text-[11px] font-medium text-gray-600 dark:text-gray-400"
-              >
-                <span class="inline-block transition group-open:rotate-90">›</span> Compare plans
-              </summary>
-              <ul class="mt-2 space-y-2 /80 pl-3">
-                <li
-                  v-for="(plan, id) in SUBSCRIPTION_FEATURE_SUMMARY"
-                  :key="id"
-                  class="text-[10px]"
-                >
-                  <span class="font-medium text-gray-700 dark:text-gray-300">{{
-                    SUBSCRIPTION_PLANS.find((p) => p.id === id)?.name
-                  }}</span>
-                  <ul class="mt-0.5 list-inside list-disc text-gray-500 dark:text-gray-400">
-                    <li v-for="(line, i) in plan" :key="i">{{ line }}</li>
-                  </ul>
-                </li>
-              </ul>
-            </details>
+          <div id="settings-subscription">
+          <SubscriptionPlanPanel
+            :current-subscription-label="currentSubscriptionLabel"
+            :billing-cycle-label="currentBillingCycleLabel"
+            :current-price-label="currentPlanPriceLabel"
+            :status-label="subscriptionStatusBadgeLabel"
+            :status-badge-class="subscriptionStatusBadgeClass"
+            :plan-explainer="planWorkspaceExplainer"
+            :subscription-renewal-label="subscriptionRenewalLabel"
+            v-model:selected-billing-cycle="selectedBillingCycle"
+            v-model:selected-upgrade-plan="selectedUpgradePlan"
+            :upgrade-options="upgradeOptions"
+            :upgrade-price-preview="upgradePricePreview"
+            :pricing-loading="pricingLoading"
+            :can-cancel="canCancelSubscription"
+            :disabled="!canEditSettings"
+            :is-upgrading="isUpgradingSubscription"
+            :is-canceling="isCancelingSubscription"
+            :billing-history="billingHistory"
+            :label-class="labelClass"
+            :input-class="inputClass"
+            :header-btn-class="headerBtnClass"
+            @upgrade="handleUpgradeSubscription"
+            @cancel="openCancelConfirm"
+          />
           </div>
         </div>
       </DashboardSettingsPanel>
 
-      <!-- Stores -->
       <DashboardSettingsPanel
         v-if="userStore.isSuperAdmin"
+        title="Workspace style"
+        subtitle="Choose a simple or full workspace layout. Your subscription plan still controls paid features."
+        compact
+      >
+        <ExperienceModePicker
+          :model-value="selectedExperienceMode"
+          :disabled="!canEditSettings || isSavingExperienceMode"
+          @update:model-value="onExperienceModeChange"
+        />
+      </DashboardSettingsPanel>
+
+      <!-- Solo: progressive unlock for admin complexity -->
+      <div id="advanced-features">
+      <DashboardSettingsPanel
+        v-if="showProgressiveUnlockPanel"
+        title="Advanced features"
+        subtitle="You chose a simple setup. Turn on team and multi-location tools when you need them."
+        compact
+      >
+        <p class="mb-3 text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
+          Your plan and role permissions still apply. Turning a feature on adds it to navigation
+          where available.
+        </p>
+        <div class="divide-y divide-gray-100 dark:divide-white/[0.06]">
+          <div
+            v-for="(option, unlockIndex) in soloProgressiveUnlockOptions"
+            :key="option.capability"
+            :class="[
+              settingRowClass,
+              unlockIndex === soloProgressiveUnlockOptions.length - 1 ? '!border-0' : '',
+            ]"
+          >
+            <div class="flex-1 min-w-0">
+              <p class="text-xs font-medium text-gray-900 dark:text-gray-100">
+                {{ option.label }}
+              </p>
+              <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+                {{ option.description }}
+              </p>
+            </div>
+            <label class="relative inline-flex shrink-0 items-center cursor-pointer">
+              <input
+                :checked="isProgressiveCapabilityEnabled(option.capability, enabledCapabilities)"
+                type="checkbox"
+                class="sr-only peer"
+                :disabled="!canEditSettings || togglingProgressiveCapability === option.capability"
+                @change="onProgressiveCapabilityToggle(option.capability, ($event.target as HTMLInputElement).checked)"
+              />
+              <div
+                class="w-8 h-4 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary-500 peer-disabled:opacity-50"
+              />
+            </label>
+          </div>
+        </div>
+      </DashboardSettingsPanel>
+      </div>
+
+      <!-- Stores -->
+      <DashboardSettingsPanel
+        v-if="userStore.isSuperAdmin && canManageBranches"
         title="Branches"
         subtitle="Create, edit, and switch between store locations."
       >
@@ -198,6 +218,16 @@
         >
           {{ hiddenStoreCount }} {{ hiddenStoreCount === 1 ? 'branch is' : 'branches are' }} on your
           account but not on your current plan. Oldest branches stay available first.
+          <span v-if="hiddenStoreNames.length">
+            Hidden:
+            {{ hiddenStoreNames.join(', ') }}.
+          </span>
+          <NuxtLink
+            to="/dashboard/settings?upgrade=1"
+            class="ml-1 font-medium underline underline-offset-2"
+          >
+            Upgrade to restore
+          </NuxtLink>
         </p>
 
         <div class="relative">
@@ -971,15 +1001,41 @@
 
   <TotpConfirmModal
     v-model="totpModalOpen"
-    title="Confirm upgrade"
-    description="Enter your authenticator code to start the subscription upgrade."
+    :title="totpModalTitle"
+    :description="totpModalDescription"
     @confirm="confirmTotp"
     @cancel="cancelTotp"
   />
+
+  <Modal
+    v-model="cancelConfirmOpen"
+    title="Cancel auto-renew?"
+    :subtitle="cancelConfirmSubtitle"
+    size="sm"
+  >
+    <p class="text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+      Paystack will stop charging on your next billing date. You keep
+      {{ currentSubscriptionLabel }} until
+      {{
+        cancelGraceEndLabel ||
+        'the end of your current billing period'
+      }}, then your account moves to Storvv Micro.
+    </p>
+    <template #footer>
+      <div class="flex flex-wrap justify-end gap-2">
+        <Button variant="outline" size="sm" @click="cancelConfirmOpen = false">
+          Keep auto-renew
+        </Button>
+        <Button variant="danger" size="sm" @click="proceedCancelSubscription">
+          Cancel auto-renew
+        </Button>
+      </div>
+    </template>
+  </Modal>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import {
   ArrowPathIcon,
@@ -1004,18 +1060,31 @@ import type { Store } from '~/composables/useStores'
 import { collection, query, where, getDocs } from 'firebase/firestore'
 import {
   SUBSCRIPTION_PLANS,
-  SUBSCRIPTION_FEATURE_SUMMARY,
   type SubscriptionPlan,
+  resolveEffectiveSubscriptionPlan,
+  normalizeSubscriptionPlan,
 } from '~/types/subscription'
 import {
   BILLING_CYCLE_LABELS,
-  SUBSCRIPTION_BILLING_CYCLES,
   type SubscriptionBillingCycle,
 } from '~/types/subscription-billing'
 import {
   initializePaystackSubscription,
   type PaystackInitializeFetcher,
 } from '~/utils/paystack-upgrade'
+import {
+  cancelPaystackSubscription,
+  type PaystackCancelFetcher,
+} from '~/utils/paystack-cancel-subscription'
+import SubscriptionPlanPanel from '~/components/settings/SubscriptionPlanPanel.vue'
+import ExperienceModePicker from '~/components/settings/ExperienceModePicker.vue'
+import type { BillingHistoryEntry } from '~/server/api/paystack/billing-history.get'
+import {
+  subscriptionStatusLabel,
+} from '~/utils/subscription-billing-ui'
+import { formatUpgradeSuccessMessage } from '~/utils/subscription-upgrade-unlocks'
+import type { ExperienceMode } from '~/types/business-experience'
+import { normalizeExperienceMode } from '~/types/business-experience'
 import { getEffectiveApiBase } from '~/utils/capacitor-api-base'
 import TotpConfirmModal from '~/components/security/TotpConfirmModal.vue'
 import { useTotpConfirmModal } from '~/composables/useTotpConfirmModal'
@@ -1037,6 +1106,13 @@ import { useStoreDataExport } from '~/composables/useStoreDataExport'
 import { usePreferences, regions } from '~/composables/usePreferences'
 import { getCitiesForRegion, isCityInRegion } from '~/utils/region-cities'
 import { formatBranchDisplayName, parseBranchDisplayName } from '~/utils/branch-name'
+import type { BusinessCapability } from '~/types/business-experience'
+import {
+  SOLO_PROGRESSIVE_UNLOCK_OPTIONS,
+  applyEnabledCapabilitiesToStoreDetails,
+  isProgressiveCapabilityEnabled,
+  setProgressiveCapabilityEnabled,
+} from '~/utils/business-experience-settings'
 
 type AccountLogoUploadResult = { url: string; path: string }
 
@@ -1092,6 +1168,13 @@ const { authFetch, getAuthHeaders } = useAuthenticatedFetch()
 const inventoryStore = useInventoryStore()
 const toast = useAppToast()
 
+const { isSoloExperience, enabledCapabilities, canManageBranches } = useBusinessCapabilities()
+const soloProgressiveUnlockOptions = SOLO_PROGRESSIVE_UNLOCK_OPTIONS
+const showProgressiveUnlockPanel = computed(
+  () => userStore.isSuperAdmin && isSoloExperience.value
+)
+const togglingProgressiveCapability = ref<BusinessCapability | null>(null)
+
 const {
   exporting: dataExporting,
   exportStatus: dataExportStatus,
@@ -1133,7 +1216,14 @@ async function handleExportAllStoreData() {
   }
 }
 const { limits } = useSubscriptionFeatures()
-const { eligibleStores, hiddenStoreCount } = usePlanEligibleStores()
+const { eligibleStores, hiddenStores, hiddenStoreCount } = usePlanEligibleStores()
+const {
+  loadPricing,
+  formatUpgradePrice,
+  formatPlanPrice,
+  pricingLoading,
+} = useSubscriptionPlanPricing()
+const { syncSubscriptionStatus } = useSubscriptionBillingUi()
 const route = useRoute()
 
 // Check if user is super admin (only super admins can edit settings)
@@ -1156,9 +1246,126 @@ const upgradeOptions = computed(() => {
   const currentIdx = subscriptionOrder.indexOf(currentSubscription.value)
   return SUBSCRIPTION_PLANS.filter((p) => subscriptionOrder.indexOf(p.id) > currentIdx)
 })
+const hiddenStoreNames = computed(() =>
+  hiddenStores.value.map((store) => store.name).filter(Boolean)
+)
+
+const billingHistory = ref<BillingHistoryEntry[]>([])
+const cancelConfirmOpen = ref(false)
+const isSavingExperienceMode = ref(false)
+const selectedExperienceMode = ref<ExperienceMode>(
+  normalizeExperienceMode(userStore.userData?.storeDetails?.experienceMode)
+)
+
+watch(
+  () => userStore.userData?.storeDetails?.experienceMode,
+  (mode) => {
+    selectedExperienceMode.value = normalizeExperienceMode(mode)
+  }
+)
+
+const currentBillingCycleLabel = computed(() => {
+  const cycle = userStore.userData?.subscriptionBillingCycle
+  return cycle ? BILLING_CYCLE_LABELS[cycle] : null
+})
+
+const currentPlanPriceLabel = computed(() => {
+  const cycle = userStore.userData?.subscriptionBillingCycle || 'monthly'
+  return formatPlanPrice(currentSubscription.value, cycle)
+})
+
+const subscriptionStatusBadgeLabel = computed(() =>
+  subscriptionStatusLabel(
+    userStore.userData?.subscriptionStatus,
+    normalizeSubscriptionPlan(userStore.userData?.subscription),
+    resolveEffectiveSubscriptionPlan(userStore.userData)
+  )
+)
+
+const subscriptionStatusBadgeClass = computed(() => {
+  const status = userStore.userData?.subscriptionStatus
+  if (status === 'past_due') {
+    return 'bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-200'
+  }
+  if (status === 'canceled') {
+    return 'bg-amber-100 text-amber-900 dark:bg-amber-500/15 dark:text-amber-100'
+  }
+  if (currentSubscription.value === 'storvv_micro') {
+    return 'bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-gray-300'
+  }
+  return 'bg-emerald-100 text-emerald-900 dark:bg-emerald-500/15 dark:text-emerald-100'
+})
+
+const planWorkspaceExplainer =
+  'Plan controls paid features and branch limits. Workspace style controls navigation complexity.'
+
+const upgradePricePreview = computed(() => {
+  if (!selectedUpgradePlan.value) return null
+  return formatUpgradePrice(selectedUpgradePlan.value, selectedBillingCycle.value)
+})
+
+const cancelGraceEndLabel = computed(() => {
+  const iso = userStore.userData?.subscriptionCurrentPeriodEnd
+  if (!iso) return null
+  const date = new Date(iso)
+  if (!Number.isFinite(date.getTime())) return null
+  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+})
+
+const cancelConfirmSubtitle = computed(() =>
+  cancelGraceEndLabel.value
+    ? `Access continues until ${cancelGraceEndLabel.value}`
+    : 'Your paid period will remain active until it ends'
+)
+
 const selectedUpgradePlan = ref<SubscriptionPlan | ''>('')
 const selectedBillingCycle = ref<SubscriptionBillingCycle>('monthly')
 const isUpgradingSubscription = ref(false)
+
+const subscriptionRenewalLabel = computed(() => {
+  const status = userStore.userData?.subscriptionStatus
+  const cycle = userStore.userData?.subscriptionBillingCycle
+  const periodEnd = userStore.userData?.subscriptionCurrentPeriodEnd
+  if (!cycle || currentSubscription.value === 'storvv_micro') return null
+
+  const cycleLabel = BILLING_CYCLE_LABELS[cycle].toLowerCase()
+  if (status === 'past_due') {
+    return `Renewal payment failed. Update your card in Paystack or choose a plan below to resubscribe (${cycleLabel}).`
+  }
+  if (status === 'canceled') {
+    if (periodEnd) {
+      const formatted = new Date(periodEnd).toLocaleDateString(undefined, {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      })
+      return `Auto-renew is off. Your plan stays active until ${formatted}.`
+    }
+    return 'Auto-renew is off. Choose a plan below to subscribe again.'
+  }
+  if (periodEnd) {
+    const formatted = new Date(periodEnd).toLocaleDateString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    })
+    return `Auto-renew ${cycleLabel}. Next charge around ${formatted}.`
+  }
+  if (status === 'active') {
+    return `Auto-renew ${cycleLabel} via Paystack.`
+  }
+  return null
+})
+
+const canCancelSubscription = computed(() => {
+  if (!canEditSettings.value) return false
+  if (currentSubscription.value === 'storvv_micro') return false
+  return userStore.userData?.subscriptionStatus !== 'canceled'
+})
+
+const isCancelingSubscription = ref(false)
+const totpModalTitle = ref('Confirm upgrade')
+const totpModalDescription = ref('Enter your authenticator code to start the subscription upgrade.')
 const {
   open: totpModalOpen,
   prompt: promptTotp,
@@ -1177,6 +1384,9 @@ const handleUpgradeSubscription = async () => {
   }
   if (!selectedUpgradePlan.value) return
 
+  totpModalTitle.value = 'Confirm upgrade'
+  totpModalDescription.value =
+    'Enter your authenticator code to start the subscription upgrade.'
   isUpgradingSubscription.value = true
   try {
     const totpCode = await resolveTotpForSensitiveAction(promptTotp)
@@ -1200,6 +1410,107 @@ const handleUpgradeSubscription = async () => {
     toast.error(result.message)
   } finally {
     isUpgradingSubscription.value = false
+  }
+}
+
+async function loadBillingHistory() {
+  if (!canEditSettings.value) return
+  try {
+    const data = (await authFetch('/api/paystack/billing-history')) as {
+      entries?: BillingHistoryEntry[]
+    }
+    billingHistory.value = data.entries || []
+  } catch {
+    billingHistory.value = []
+  }
+}
+
+function openCancelConfirm() {
+  if (!canCancelSubscription.value) return
+  cancelConfirmOpen.value = true
+}
+
+async function proceedCancelSubscription() {
+  cancelConfirmOpen.value = false
+  await handleCancelSubscription()
+}
+
+async function onExperienceModeChange(mode: ExperienceMode) {
+  if (!currentUser.value || !canEditSettings.value) return
+  if (mode === selectedExperienceMode.value) return
+
+  isSavingExperienceMode.value = true
+  try {
+    const targetUserId = await getTargetUserId()
+    if (!targetUserId) return
+    const userData = await getUserDocument(targetUserId)
+    const currentStoreDetails = userData?.storeDetails
+    if (!currentStoreDetails?.storeName) {
+      toast.error('Store details are missing. Complete store setup first.')
+      selectedExperienceMode.value = normalizeExperienceMode(currentStoreDetails?.experienceMode)
+      return
+    }
+
+    await updateUserDocument(targetUserId, {
+      storeDetails: {
+        ...currentStoreDetails,
+        experienceMode: mode,
+        onboardingExperienceChosen: true,
+      },
+    })
+    selectedExperienceMode.value = mode
+    await userStore.fetchUserData(currentUser.value.uid)
+    toast.success(mode === 'solo' ? 'Switched to simple workspace' : 'Switched to full workspace')
+  } catch (error: unknown) {
+    toast.error(error instanceof Error ? error.message : 'Could not update workspace style')
+    selectedExperienceMode.value = normalizeExperienceMode(userStore.userData?.storeDetails?.experienceMode)
+  } finally {
+    isSavingExperienceMode.value = false
+  }
+}
+
+const handleCancelSubscription = async () => {
+  if (!canCancelSubscription.value) return
+  if (!currentUser.value) {
+    toast.error('You must be signed in to cancel')
+    return
+  }
+
+  totpModalTitle.value = 'Cancel auto-renew'
+  totpModalDescription.value =
+    'Enter your authenticator code to stop future Paystack charges. Your current plan stays active until the billing period ends.'
+
+  isCancelingSubscription.value = true
+  try {
+    const totpCode = await resolveTotpForSensitiveAction(promptTotp)
+    if (!totpCode) return
+
+    const headers = await getAuthHeaders()
+    const result = await cancelPaystackSubscription(
+      { totpCode },
+      $fetch as PaystackCancelFetcher,
+      getEffectiveApiBase() || undefined,
+      headers
+    )
+
+    if (!result.ok) {
+      toast.error(result.message)
+      return
+    }
+
+    await userStore.fetchUserData(currentUser.value.uid)
+
+    if (result.subscriptionCurrentPeriodEnd) {
+      const formatted = new Date(result.subscriptionCurrentPeriodEnd).toLocaleDateString(
+        undefined,
+        { month: 'short', day: 'numeric', year: 'numeric' }
+      )
+      toast.success(`Auto-renew canceled. Your plan stays active until ${formatted}.`)
+    } else {
+      toast.success('Auto-renew canceled.')
+    }
+  } finally {
+    isCancelingSubscription.value = false
   }
 }
 
@@ -1434,6 +1745,14 @@ function resetPaymentTendersToDefault() {
 }
 
 const switchStore = async (storeId: string) => {
+  if (
+    !canManageBranches.value &&
+    storeId !== storesStore.currentStoreId
+  ) {
+    toast.error('Branches are not available on your workspace style. Enable multi-location in Settings.')
+    return
+  }
+
   try {
     toast.info('Switching store...')
     await storesStore.setCurrentStore(storeId)
@@ -1651,6 +1970,9 @@ async function loadSettingsFromFirestore() {
     if (!userStore.userData) {
       await userStore.fetchUserData(currentUser.value.uid)
     }
+    if (userStore.userData?.subscriptionBillingCycle) {
+      selectedBillingCycle.value = userStore.userData.subscriptionBillingCycle
+    }
     if (userStore.isSuperAdmin) {
       await storesStore.fetchStores()
       await storesStore.initializeCurrentStore()
@@ -1722,12 +2044,10 @@ onMounted(async () => {
         message?: string
       }
       if (verify.paid && verify.userId === currentUser.value.uid && verify.planId) {
-        // Subscription is persisted server-side during verification; refresh local user data.
+        const previousPlan = currentSubscription.value
         await userStore.fetchUserData(currentUser.value.uid)
         toast.success(
-          `Upgraded to ${
-            SUBSCRIPTION_PLANS.find((p) => p.id === verify.planId)?.name || 'new plan'
-          }`
+          formatUpgradeSuccessMessage(verify.planId as SubscriptionPlan, previousPlan)
         )
         selectedUpgradePlan.value = ''
         if (import.meta.client && window.history.replaceState) {
@@ -1749,6 +2069,13 @@ onMounted(async () => {
 
   if (currentUser.value) {
     await loadSettingsFromFirestore()
+    await syncSubscriptionStatus()
+    await loadPricing()
+    await loadBillingHistory()
+    if (route.query.upgrade === '1' && import.meta.client) {
+      await nextTick()
+      document.querySelector('#settings-subscription')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
   } else {
     isLoadingStoreInfo.value = false
   }
@@ -1774,7 +2101,6 @@ const cancelEditing = (section: string) => {
   }
 }
 
-// Helper function to update store settings
 const updateStoreSettings = async (settings: any) => {
   if (!currentUser.value) {
     toast.error('You must be signed in to save settings')
@@ -1807,6 +2133,58 @@ const updateStoreSettings = async (settings: any) => {
   } catch (error: any) {
     console.error('Error saving settings:', error)
     toast.error(error.message || 'Failed to save settings. Please try again.')
+  }
+}
+
+const onProgressiveCapabilityToggle = async (
+  capability: BusinessCapability,
+  enabled: boolean
+) => {
+  if (!currentUser.value) {
+    toast.error('You must be signed in to save settings')
+    return
+  }
+
+  if (!canEditSettings.value) {
+    toast.error('Only super admins can edit settings')
+    return
+  }
+
+  togglingProgressiveCapability.value = capability
+  try {
+    const targetUserId = await getTargetUserId()
+    if (!targetUserId) {
+      toast.error('Unable to determine target user. Please try again.')
+      return
+    }
+
+    const userData = await getUserDocument(targetUserId)
+    const currentStoreDetails = userData?.storeDetails
+    if (!currentStoreDetails?.storeName) {
+      toast.error('Store details are missing. Complete store setup first.')
+      return
+    }
+
+    const nextEnabled = setProgressiveCapabilityEnabled(
+      currentStoreDetails.enabledCapabilities,
+      capability,
+      enabled
+    )
+
+    await updateUserDocument(targetUserId, {
+      storeDetails: applyEnabledCapabilitiesToStoreDetails(
+        currentStoreDetails,
+        nextEnabled
+      ),
+    })
+
+    await userStore.fetchUserData(currentUser.value.uid)
+    toast.success(enabled ? 'Feature enabled' : 'Feature turned off')
+  } catch (error: any) {
+    console.error('Error saving experience settings:', error)
+    toast.error(error.message || 'Failed to save experience settings. Please try again.')
+  } finally {
+    togglingProgressiveCapability.value = null
   }
 }
 

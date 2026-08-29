@@ -219,9 +219,9 @@
             </NuxtLink>
           </template>
 
-          <!-- Stores (super admins) -->
+          <!-- Stores (super admins with multi-location access) -->
           <div
-            v-if="userStore.isSuperAdmin && !effectiveSidebarCollapsed"
+            v-if="userStore.isSuperAdmin && canManageBranches && !effectiveSidebarCollapsed"
             class="dash-sidebar__branches mt-1.5 rounded-xl border-0 p-1.5"
           >
             <button
@@ -443,6 +443,7 @@
           <div v-if="!effectiveSidebarCollapsed" class="min-w-0 flex-1">
             <p class="dash-sidebar__user-name">{{ userName }}</p>
             <p class="dash-sidebar__user-email">{{ userEmail }}</p>
+            <ExperienceModeBadge variant="sidebar" />
           </div>
           <DashboardHoverTooltip v-if="effectiveSidebarCollapsed">
             {{ userName }}
@@ -739,7 +740,7 @@
             <span class="dash-topnav__divider hidden md:block" aria-hidden="true" />
 
             <StoreSelector
-              v-if="userStore.userData?.role === 'superAdmin'"
+              v-if="userStore.userData?.role === 'superAdmin' && canManageBranches"
               :class="isNativeApp ? 'max-w-[5.25rem] shrink' : 'shrink-0'"
             />
 
@@ -836,6 +837,7 @@
           ]"
         >
           <DemoModeBanner v-if="isDemoDashboard" />
+          <SubscriptionBillingBanner />
           <slot />
         </div>
       </main>
@@ -990,6 +992,7 @@ const appVersion = (useRuntimeConfig().public.appVersion as string) ?? '0.1'
 const authStore = useAuthStore()
 const userStore = useUserStore()
 const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
+const { canUse: canUseBusinessCapability, canManageBranches } = useBusinessCapabilities()
 const notificationsStore = useNotificationsStore()
 const inventoryStore = useInventoryStore()
 const receiptsStore = useReceiptsStore()
@@ -1033,6 +1036,7 @@ function handleGlobalSearchShortcut(e: KeyboardEvent) {
   }
 }
 const { eligibleStores } = usePlanEligibleStores()
+const { syncSubscriptionStatus } = useSubscriptionBillingUi()
 // Fetch notifications after shell is interactive (native defers further).
 function scheduleNotificationsFetch() {
   if (!authStore.currentUser) return
@@ -1183,6 +1187,7 @@ const filteredNavigation = computed(() => {
     isSuperAdmin: userStore.isSuperAdmin,
     isManager,
     canUseFeature: canUseSubscriptionFeature,
+    canUseBusinessCapability,
     hidePaymentLinks: isPaymentLinksComingSoon(),
   }).map((item) => ({
     ...item,
@@ -1196,12 +1201,13 @@ const filteredNavigation = computed(() => {
 
 /**
  * Native bottom nav is CSS-gated (html.capacitor-native), not isNativeApp.
- * Promote Payment links whenever native coming-soon is on.
+ * Promote Payment links on iOS/Android when native coming-soon is on (business experience only).
  */
 const nativeNavigationItems = computed((): DashboardNavItem[] => {
   const items = filteredNavigation.value
   if (!isPaymentLinksNativeComingSoon()) return items
   if (items.some((item) => item.name === 'Payment links')) return items
+  if (!canUseBusinessCapability('paymentLinks')) return items
   return [
     ...items,
     {
@@ -1882,6 +1888,7 @@ onMounted(async () => {
 
     if (authStore.currentUser?.uid && !authStore.loading) {
       await runDashboardShellBootstrap()
+      await syncSubscriptionStatus()
     }
 
     // Initialize cache from localStorage after auth loads

@@ -1439,6 +1439,60 @@ html:not(.dark) .dash-profile-badge--role {
   color: #143f8d;
 }
 
+.dash-experience-badge {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-radius: 9999px;
+  border: 1px solid var(--dash-border);
+  padding: 0.125rem 0.5rem;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  line-height: 1.35;
+}
+
+.dash-experience-badge__prefix {
+  margin-right: 0.25rem;
+  font-weight: 500;
+  opacity: 0.85;
+}
+
+.dash-experience-badge--solo {
+  border-color: rgb(120 113 108 / 0.35);
+  background: rgb(120 113 108 / 0.1);
+  color: rgb(87 83 78);
+}
+
+html:not(.dark) .dash-experience-badge--solo {
+  color: rgb(68 64 60);
+}
+
+.dash-experience-badge--business {
+  border-color: rgb(16 185 129 / 0.28);
+  background: rgb(16 185 129 / 0.1);
+  color: rgb(52 211 153);
+}
+
+html:not(.dark) .dash-experience-badge--business {
+  border-color: rgb(5 150 105 / 0.22);
+  background: rgb(16 185 129 / 0.08);
+  color: rgb(4 120 87);
+}
+
+.dash-experience-badge--sidebar {
+  margin-top: 0.25rem;
+  font-size: 0.625rem;
+}
+
+.dash-experience-badge--settings {
+  font-size: 0.6875rem;
+  padding: 0.1875rem 0.625rem;
+}
+
 .dash-profile-section-label {
   margin: 0;
   padding: 0.625rem 0.875rem 0.25rem;

@@ -361,6 +361,7 @@ import SavedSearchesModal from '~/components/search/SavedSearchesModal.vue'
 const router = useRouter()
 const searchStore = useSearchStore()
 const userStore = useUserStore()
+const { canUse: canUseBusinessCapability } = useBusinessCapabilities()
 const searchInput = ref<HTMLInputElement | null>(null)
 const showAdvancedFilters = ref(false)
 const showSavedSearchesModal = ref(false)
@@ -382,8 +383,12 @@ const entityTypes = computed(() => {
     { value: 'staff', label: 'Staff', icon: UserIcon },
   ]
 
-  // Remove departments and staff from search for staff users
+  // Remove departments and staff from search for staff users or solo/simple experience
   if (isStaff.value) {
+    return baseTypes.filter((t) => t.value !== 'departments' && t.value !== 'staff')
+  }
+
+  if (!canUseBusinessCapability('staffManagement')) {
     return baseTypes.filter((t) => t.value !== 'departments' && t.value !== 'staff')
   }
 

@@ -102,7 +102,16 @@
         </div>
       </div>
 
-      <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div v-else class="space-y-4">
+        <div v-if="staffLimitReached && !isEdit" class="rounded-sm bg-amber-50/90 px-3 py-3 dark:bg-amber-950/25">
+          <LimitUpgradeHint
+            message="Your plan staff limit is reached for this store."
+          />
+          <p class="mt-1 text-[11px] text-amber-900/90 dark:text-amber-100/90">
+            {{ staffLimitMessage }}
+          </p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div>
           <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
             First name <span class="text-red-500">*</span>
@@ -280,6 +289,7 @@
       >
         <p class="text-xs text-red-600 dark:text-red-400">{{ errorMessage }}</p>
       </div>
+      </div>
     </div>
 
     <template #footer>
@@ -294,7 +304,7 @@
         <Button
           size="sm"
           @click="handleSubmit"
-          :disabled="isSubmitting || !isFormValid"
+          :disabled="isSubmitting || !isFormValid || staffLimitReached"
           class="w-full sm:w-auto !rounded-2xl"
         >
           <span v-if="isSubmitting" class="flex items-center gap-1.5">
@@ -345,6 +355,8 @@ import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useAppToast } from '~/composables/useAppToast'
 import { getApiErrorMessage } from '~/utils/api-error-message'
+import LimitUpgradeHint from '~/components/subscription/LimitUpgradeHint.vue'
+import { getPlanDisplayName, getMinimumPlanForFeature } from '~/types/subscription'
 
 interface Props {
   modelValue: boolean
@@ -367,6 +379,7 @@ const { sendStaffInviteEmail } = useStaffInviteEmail()
 const authStore = useAuthStore()
 const userStore = useUserStore()
 const toast = useAppToast()
+const { canAddStaff, limits } = useSubscriptionFeatures()
 const { canGrantInventoryAccess } = usePermissions()
 
 const formData = ref({
@@ -425,6 +438,28 @@ const createdStaffMeta = ref<{
 } | null>(null)
 
 const isEdit = computed(() => !!props.staff)
+
+const storeStaffCount = computed(() => {
+  const dept = departmentsStore.getDepartmentById(props.departmentId)
+  const storeId = dept?.storeId
+  if (!storeId) return 0
+  return staffStore.staff.filter((member) => {
+    const memberDept = departmentsStore.getDepartmentById(member.departmentId)
+    return memberDept?.storeId === storeId && member.status !== 'inactive'
+  }).length
+})
+
+const staffLimitReached = computed(
+  () => !isEdit.value && !canAddStaff(storeStaffCount.value)
+)
+
+const staffLimitMessage = computed(() => {
+  const max = limits.value.maxStaffPerStore
+  if (max < 0) return ''
+  const upgradePlan = getMinimumPlanForFeature('analytics')
+  const planHint = upgradePlan ? ` Upgrade to ${getPlanDisplayName(upgradePlan)} for more.` : ''
+  return `Your plan includes up to ${max} staff per store.${planHint}`
+})
 
 const isFormValid = computed(() => {
   const base = !!(
@@ -575,6 +610,10 @@ const handleClose = () => {
 }
 
 const handleSubmit = async () => {
+  if (!isEdit.value && staffLimitReached.value) {
+    errorMessage.value = staffLimitMessage.value || 'Staff limit reached for your plan.'
+    return
+  }
   if (!isFormValid.value) {
     errorMessage.value = 'Please fill in all required fields correctly.'
     return

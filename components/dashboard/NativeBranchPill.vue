@@ -1,7 +1,11 @@
 <template>
-  <StoreSelector v-if="canSwitchStore" variant="command-pill" class="min-w-0 max-w-full" />
+  <StoreSelector
+    v-if="canSwitchStore"
+    variant="command-pill"
+    class="min-w-0 max-w-full"
+  />
   <div
-    v-else
+    v-else-if="showStaffBranchReadonly"
     class="native-command-header__branch-readonly"
     :title="storeLabel"
   >
@@ -20,8 +24,15 @@ import { getStoreBranchShortLabel } from '~/utils/store-branch-label'
 
 const storesStore = useStoresStore()
 const userStore = useUserStore()
+const { canManageBranches } = useBusinessCapabilities()
 
-const canSwitchStore = computed(() => userStore.userData?.role === 'superAdmin')
+const showStaffBranchReadonly = computed(
+  () => userStore.userData?.role === 'staff' && !!storesStore.currentStore
+)
+
+const canSwitchStore = computed(
+  () => userStore.userData?.role === 'superAdmin' && canManageBranches.value
+)
 
 const storeLabel = computed(() => {
   const store = storesStore.currentStore

@@ -199,17 +199,8 @@
       </div>
     </template>
 
-    <div v-else class="rounded-sm bg-amber-50/90 px-4 py-4 dark:bg-amber-950/25 sm:px-5 sm:py-5">
-      <p class="text-xs font-medium text-amber-900 dark:text-amber-100">
-        Sales leads are included on Storvv Medium and Enterprise. Track enquiries manually and
-        convert them through the existing sale flow. Upgrade in Settings when you are ready.
-      </p>
-      <NuxtLink
-        to="/dashboard/settings"
-        class="mt-2 inline-block text-xs font-medium text-amber-900 underline underline-offset-2 dark:text-amber-200"
-      >
-        Settings
-      </NuxtLink>
+    <div v-else class="py-8">
+      <FeatureGateCard feature="sales_leads" />
     </div>
 
     <CreateLeadModal v-model="showCreateModal" @created="onLeadCreated" />
@@ -225,6 +216,7 @@ import {
   PlusIcon,
 } from '~/utils/app-icons'
 import Button from '~/components/ui/Button.vue'
+import FeatureGateCard from '~/components/subscription/FeatureGateCard.vue'
 import CreateLeadModal from '~/components/leads/CreateLeadModal.vue'
 import LeadStatusBadge from '~/components/leads/LeadStatusBadge.vue'
 import { useSalesLeadsStore, SALES_LEAD_SOURCE_LABELS, SALES_LEAD_STATUS_LABELS } from '~/stores/salesLeads'

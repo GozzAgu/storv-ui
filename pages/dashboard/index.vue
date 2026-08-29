@@ -43,11 +43,18 @@
         Select a store to load your dashboard
       </p>
       <p :class="['dash-state-card__desc', cardDescClass]">
-        Choose a branch below or from the store selector in the top bar. Metrics, charts, and alerts
-        are scoped to the active store.
+        {{
+          canManageBranches
+            ? 'Choose a branch below or from the store selector in the top bar. Metrics, charts, and alerts are scoped to the active store.'
+            : 'Your dashboard loads for your store. If this takes a moment, we are connecting to your store data.'
+        }}
       </p>
-      <InlineStorePicker />
-      <NuxtLink to="/dashboard/settings" :class="[linkClass, 'mt-4 inline-block']">
+      <InlineStorePicker v-if="canManageBranches" />
+      <NuxtLink
+        v-if="canManageBranches"
+        to="/dashboard/settings"
+        :class="[linkClass, 'mt-4 inline-block']"
+      >
         Manage stores in Settings
       </NuxtLink>
     </div>
@@ -247,7 +254,7 @@
       </div>
 
       <PaymentLinksSummaryCard
-        v-if="canUseSubscriptionFeature('payment_links') || showNativeComingSoon"
+        v-if="canShowPaymentLinksSummary"
         card-class="dash-card dash-card--padded"
       />
 
@@ -581,7 +588,8 @@ const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
 const canAccessLeadsPlan = computed(() => canUseSubscriptionFeature('sales_leads'))
 const openLeadsCount = computed(() => salesLeadsStore.openLeadsCount)
 const openLeadsPipeline = computed(() => salesLeadsStore.openPipelineValue)
-const { showNativeComingSoon } = usePaymentLinksLaunch()
+const { canShowPaymentLinksSummary } = usePaymentLinksLaunch()
+const { canManageBranches } = useBusinessCapabilities()
 const { canViewProfitAndCost } = usePermissions()
 const { isNativeApp } = useCapacitorNativeApp()
 const { isCapacitorIos } = useIsCapacitorIos()

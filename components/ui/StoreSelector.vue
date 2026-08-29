@@ -266,6 +266,7 @@ const dropdownRef = ref<HTMLElement | null>(null)
 const panelRef = ref<HTMLElement | null>(null)
 const panelStyle = ref<Record<string, string>>({})
 const switchingStore = ref(false)
+const { canManageBranches } = useBusinessCapabilities()
 
 const PANEL_WIDTH_PX = 232
 const PANEL_MARGIN_PX = 12
@@ -365,6 +366,15 @@ onUnmounted(() => {
 
 const switchStore = async (storeId: string) => {
   if (switchingStore.value) return
+
+  if (
+    userStore.userData?.role === 'superAdmin' &&
+    !canManageBranches.value &&
+    storeId !== storesStore.currentStoreId
+  ) {
+    toast.error('Branches are not available on your workspace style. Enable multi-location in Settings.')
+    return
+  }
 
   try {
     switchingStore.value = true

@@ -70,11 +70,18 @@
           Select a store to view analytics
         </p>
         <p :class="['dash-state-card__desc', cardDescClass]">
-          Choose a branch below or from the store selector in the top bar. Charts and reports are
-          scoped to the active store.
+          {{
+            canManageBranches
+              ? 'Choose a branch below or from the store selector in the top bar. Charts and reports are scoped to the active store.'
+              : 'Analytics load for your store once it is connected.'
+          }}
         </p>
-        <InlineStorePicker />
-        <NuxtLink to="/dashboard/settings" :class="[linkClass, 'mt-4 inline-block']">
+        <InlineStorePicker v-if="canManageBranches" />
+        <NuxtLink
+          v-if="canManageBranches"
+          to="/dashboard/settings"
+          :class="[linkClass, 'mt-4 inline-block']"
+        >
           Manage stores in Settings
         </NuxtLink>
       </div>
@@ -364,7 +371,7 @@
       </div>
 
       <PaymentLinksSummaryCard
-        v-if="canUseSubscriptionFeature('payment_links')"
+        v-if="canShowPaymentLinksFeature"
         card-class="dash-card dash-card--padded"
         :limit="6"
       />
@@ -650,6 +657,8 @@ const customerAccountsStore = useCustomerAccountsStore()
 const userStore = useUserStore()
 const themeStore = useThemeStore()
 const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
+const { canShowPaymentLinksFeature } = usePaymentLinksLaunch()
+const { canManageBranches } = useBusinessCapabilities()
 
 // State
 const isLoading = ref(true)

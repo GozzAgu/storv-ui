@@ -4,6 +4,10 @@ import {
   filterDashboardNavItems,
   orderNativeMoreNavItems,
 } from '~/utils/dashboard-nav-filter'
+import {
+  buildBusinessCapabilityContext,
+  canUseBusinessCapability,
+} from '~/types/business-experience'
 import type { SubscriptionFeature } from '~/types/subscription'
 
 const enterpriseFeatures = new Set<SubscriptionFeature>([
@@ -79,6 +83,45 @@ describe('filterDashboardNavItems', () => {
 
     expect(names).toContain('Departments')
     expect(names).toContain('Multi-Store Sync')
+  })
+
+  it('hides admin-complexity nav for solo experience but keeps commerce routes', () => {
+    const soloContext = buildBusinessCapabilityContext({ experienceMode: 'solo' })
+    const canUseBusiness = (capability: Parameters<typeof canUseBusinessCapability>[0]) =>
+      canUseBusinessCapability(capability, soloContext)
+
+    const names = filterDashboardNavItems(DASHBOARD_NAV_DEFINITIONS, {
+      isSuperAdmin: true,
+      isManager: false,
+      canUseFeature: () => true,
+      canUseBusinessCapability: canUseBusiness,
+    }).map((item) => item.name)
+
+    expect(names).not.toContain('Departments')
+    expect(names).not.toContain('Payment links')
+    expect(names).not.toContain('Multi-Store Sync')
+    expect(names).toContain('Customer buybacks')
+    expect(names).toContain('Stock loans')
+    expect(names).toContain('Sales leads')
+    expect(names).toContain('Activity Logs')
+  })
+
+  it('keeps full admin nav for business experience and legacy accounts without experienceMode', () => {
+    for (const config of [{ experienceMode: 'business' as const }, {}]) {
+      const context = buildBusinessCapabilityContext(config)
+      const canUseBusiness = (capability: Parameters<typeof canUseBusinessCapability>[0]) =>
+        canUseBusinessCapability(capability, context)
+
+      const names = filterDashboardNavItems(DASHBOARD_NAV_DEFINITIONS, {
+        isSuperAdmin: true,
+        isManager: false,
+        canUseFeature: () => true,
+        canUseBusinessCapability: canUseBusiness,
+      }).map((item) => item.name)
+
+      expect(names).toContain('Departments')
+      expect(names).toContain('Multi-Store Sync')
+    }
   })
 })
 

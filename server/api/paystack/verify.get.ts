@@ -11,6 +11,10 @@ import {
   validatePaidAmountAndCurrency,
   resolvePaystackSecretKey,
 } from '~/server/utils/paystack-validation'
+import {
+  applySubscriptionToUser,
+  fetchActivePaystackSubscription,
+} from '~/server/utils/paystack-subscription'
 
 export default defineEventHandler(async (event) => {
   try {
@@ -50,6 +54,7 @@ export default defineEventHandler(async (event) => {
         amount?: number
         currency?: string
         metadata?: { userId?: string; planId?: string; billingCycle?: string }
+        customer?: { customer_code?: string }
       }
       message?: string
     }
@@ -108,7 +113,6 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    // Persist subscription change on server (source of truth) with idempotency and pending checkout validation.
     const adminDb = getAdminFirestore()
     const pendingRef = adminDb
       .collection('users')
@@ -158,6 +162,7 @@ export default defineEventHandler(async (event) => {
           subscription: planId,
           subscriptionBillingCycle: billingCycle,
           subscriptionUpdatedAt: new Date().toISOString(),
+          subscriptionStatus: 'active',
           lastPaystackReference: data.reference,
         },
         { merge: true }
@@ -178,6 +183,30 @@ export default defineEventHandler(async (event) => {
 
       return { alreadyProcessed: false }
     })
+
+    const customerCode = data.customer?.customer_code
+    if (customerCode) {
+      try {
+        const activeSub = await fetchActivePaystackSubscription(secretKey, customerCode)
+        if (activeSub?.subscription_code) {
+          await applySubscriptionToUser(adminDb, {
+            userId,
+            planId,
+            billingCycle,
+            reference: data.reference,
+            paystackSubscriptionCode: activeSub.subscription_code,
+            paystackSubscriptionEmailToken: activeSub.email_token,
+            paystackCustomerCode: customerCode,
+            subscriptionStatus: 'active',
+            subscriptionCurrentPeriodEnd: activeSub.next_payment_date
+              ? new Date(activeSub.next_payment_date).toISOString()
+              : undefined,
+          })
+        }
+      } catch (err) {
+        console.warn('[paystack/verify] could not attach Paystack subscription record', err)
+      }
+    }
 
     return {
       success: true,
