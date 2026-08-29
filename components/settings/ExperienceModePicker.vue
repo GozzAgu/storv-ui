@@ -1,5 +1,5 @@
 <template>
-  <div class="grid gap-3 sm:grid-cols-2" role="radiogroup" :aria-label="ariaLabel">
+  <div class="experience-mode-picker grid gap-3 sm:grid-cols-2" role="radiogroup" :aria-label="ariaLabel">
     <button
       v-for="option in options"
       :key="option.mode"

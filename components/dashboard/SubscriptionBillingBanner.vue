@@ -1,7 +1,8 @@
 <template>
   <div
     v-if="bannerContent && bannerVisible"
-    :class="rootClass"
+    :class="[rootClass, isCapacitorIos ? 'subscription-billing-banner--ios' : '']"
+    class="subscription-billing-banner"
     role="status"
     :aria-label="bannerContent.title"
   >
@@ -36,6 +37,7 @@
 import { XMarkIcon } from '~/utils/app-icons'
 
 const { bannerContent, bannerVisible, dismissBanner } = useSubscriptionBillingUi()
+const { isCapacitorIos } = useIsCapacitorIos()
 
 const rootClass = computed(() => {
   const variant = bannerContent.value?.variant

@@ -195,7 +195,11 @@
           Start on
           <strong class="font-semibold text-gray-800 dark:text-gray-200">Micro</strong> (free, one
           store, full sales & inventory). Medium adds analytics, sales leads, and a second branch.
-          Enterprise adds transfers, stock loans, and unlimited stores.
+          Enterprise adds transfers, stock loans, and unlimited stores. On signup, pick
+          <strong class="font-semibold text-gray-800 dark:text-gray-200">Solo</strong> for a focused
+          owner layout or <strong class="font-semibold text-gray-800 dark:text-gray-200">Business</strong>
+          for the full team workspace. Paid plans auto-renew through Paystack; cancel anytime and keep
+          access until your billing period ends.
         </p>
         <p class="mt-3 text-center text-base text-primary-700 dark:text-primary-300">
           <NuxtLink to="/demo/dashboard" class="font-semibold underline-offset-2 hover:underline"
@@ -237,6 +241,10 @@
             >
           </button>
         </div>
+        <p class="mt-3 text-center text-sm text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
+          Prices shown per billing cycle. Medium and Enterprise renew automatically until you cancel
+          in Settings.
+        </p>
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-12 max-w-5xl mx-auto">
           <!-- Micro: single store, 1 dept, 2 staff. No analytics, no multi-store sync. -->
           <div
@@ -245,7 +253,7 @@
           >
             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Storvv Micro</h3>
             <p class="mt-1 text-base text-gray-600 dark:text-gray-400">
-              Single store, solo or very small team
+              Single store, ideal with Solo workspace at signup
             </p>
             <p class="mt-4 text-2xl font-bold text-gray-900 dark:text-gray-100">FREE</p>
             <p class="text-sm text-gray-500">{{ BILLING_CYCLE_PERIOD_SUFFIX[selectedBillingCycle] }}</p>
@@ -294,6 +302,16 @@
               }}</span>
             </div>
             <p class="text-sm text-gray-500">{{ BILLING_CYCLE_PERIOD_SUFFIX[selectedBillingCycle] }}</p>
+            <p class="mt-0.5 text-xs text-gray-400">
+              Auto-renews
+              {{
+                selectedBillingCycle === 'yearly'
+                  ? 'yearly'
+                  : selectedBillingCycle === 'quarterly'
+                    ? 'each quarter'
+                    : 'monthly'
+              }}
+            </p>
             <ul class="mt-6 space-y-2 flex-1 text-base text-gray-600 dark:text-gray-400">
               <li
                 v-for="(line, i) in SUBSCRIPTION_FEATURE_SUMMARY.storvv_medium"
@@ -331,6 +349,16 @@
               }}</span>
             </div>
             <p class="text-sm text-gray-500">{{ BILLING_CYCLE_PERIOD_SUFFIX[selectedBillingCycle] }}</p>
+            <p class="mt-0.5 text-xs text-gray-400">
+              Auto-renews
+              {{
+                selectedBillingCycle === 'yearly'
+                  ? 'yearly'
+                  : selectedBillingCycle === 'quarterly'
+                    ? 'each quarter'
+                    : 'monthly'
+              }}
+            </p>
             <ul class="mt-6 space-y-2 flex-1 text-base text-gray-600 dark:text-gray-400">
               <li
                 v-for="(line, i) in SUBSCRIPTION_FEATURE_SUMMARY.storvv_enterprise"
@@ -342,6 +370,76 @@
             </ul>
             <a :href="appOriginUrl" class="landing-pill-cta mt-6 flex w-full">Get Started</a>
           </div>
+        </div>
+
+        <div
+          class="mt-10 max-w-4xl mx-auto rounded-2xl border border-gray-200/80 bg-white/80 p-6 text-left shadow-sm dark:border-white/10 dark:bg-slate-900/60 sm:p-8"
+        >
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            Solo vs Business workspace
+          </h3>
+          <p class="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+            Separate from your paid plan. Choose during onboarding or switch anytime in Settings.
+            Your Micro, Medium, or Enterprise limits still apply either way.
+          </p>
+          <div class="mt-5 grid gap-4 sm:grid-cols-2">
+            <div
+              class="rounded-xl border border-stone-200/80 bg-stone-50/60 p-4 dark:border-white/10 dark:bg-white/[0.03]"
+            >
+              <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">Solo · Just me</p>
+              <p class="mt-1.5 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                A focused workspace for running the shop yourself. Fewer menus up front: inventory,
+                sales, and customers stay front and center.
+              </p>
+              <ul class="mt-3 space-y-1.5 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+                <li>· Departments, branch switcher, and multi-store tools hidden until you need them</li>
+                <li>· Turn on team, branches, or payment links in Advanced features when ready</li>
+                <li>· Great for owner-operators on Micro who do not want admin clutter</li>
+              </ul>
+            </div>
+            <div
+              class="rounded-xl border border-primary-200/70 bg-primary-50/40 p-4 dark:border-primary-500/20 dark:bg-primary-500/5"
+            >
+              <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                Business · Growing business
+              </p>
+              <p class="mt-1.5 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                The full Storvv workspace with team, branches, and admin tools as your plan allows.
+              </p>
+              <ul class="mt-3 space-y-1.5 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+                <li>· Staff, departments, and multi-location navigation when your plan includes them</li>
+                <li>· Payment links and advanced screens visible by default</li>
+                <li>· Best when you already manage a team or multiple branches</li>
+              </ul>
+            </div>
+          </div>
+
+          <h4 class="mt-6 text-sm font-semibold text-gray-900 dark:text-gray-100">
+            Billing in Settings
+          </h4>
+          <p class="mt-1.5 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+            <strong class="font-medium text-gray-800 dark:text-gray-200">Plan</strong> is what you pay
+            for (Micro, Medium, Enterprise). Solo and Business only change how much of the app we
+            show, not your subscription price.
+          </p>
+          <ul class="mt-3 space-y-2 text-sm text-gray-600 dark:text-gray-400">
+            <li class="flex gap-2">
+              <CheckIcon class="mt-0.5 h-4 w-4 shrink-0 text-primary-500" />
+              Live price preview before Paystack checkout (monthly, quarterly, or yearly)
+            </li>
+            <li class="flex gap-2">
+              <CheckIcon class="mt-0.5 h-4 w-4 shrink-0 text-primary-500" />
+              Billing history, renewal status, and cancel auto-renew in Settings
+            </li>
+            <li class="flex gap-2">
+              <CheckIcon class="mt-0.5 h-4 w-4 shrink-0 text-primary-500" />
+              Clear upgrade prompts when you hit plan limits (staff, WhatsApp, gated screens)
+            </li>
+            <li class="flex gap-2">
+              <CheckIcon class="mt-0.5 h-4 w-4 shrink-0 text-primary-500" />
+              Solo, Business, and subscription tools on web and the native iOS app
+            </li>
+          </ul>
         </div>
       </div>
 

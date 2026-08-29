@@ -25,7 +25,8 @@
             style="--hero-i: 3"
           >
             Manage inventory, sales, customers, payment links, and multiple stores from one workspace -
-            on web and iOS.
+            on web and iOS. Start with <strong>Solo</strong> for a focused owner layout or
+            <strong>Business</strong> for the full team experience.
           </p>
 
           <div class="landing-hero__actions landing-hero__reveal" style="--hero-i: 4">
@@ -62,7 +63,8 @@
                 <ul class="landing-hero-mock__panel-list">
                   <li>Categories with optional subcategories</li>
                   <li>Quick Sale, leads & Paystack links</li>
-                  <li>Web dashboard + native iOS app</li>
+                  <li>Solo or Business workspace at signup</li>
+                  <li>Upgrade plans & billing in Settings (web + iOS)</li>
                 </ul>
                 <span class="landing-hero-mock__pill">Start free →</span>
               </div>

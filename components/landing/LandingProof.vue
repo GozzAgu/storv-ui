@@ -12,8 +12,8 @@
           Built for businesses that outgrow spreadsheets
         </h2>
         <p class="landing-proof__lede">
-          From solo shops on Micro to multi-branch Enterprise operators: inventory, sales, analytics,
-          and team permissions in one retail operating system.
+          From Solo owner-operators on Micro to multi-branch Enterprise teams: pick the workspace that
+          fits how you run the shop, then scale plans as you grow.
         </p>
       </header>
 
@@ -42,8 +42,8 @@
 import type { MarketingFeatureIconKey } from '~/utils/marketing-feature-icons'
 
 const proofStats = [
-  { value: 'All plans', label: 'Inventory, sales, payment links & help' },
-  { value: 'Medium+', label: 'Analytics, leads & customer balances' },
+  { value: 'Solo', label: 'Focused workspace for owner-operators' },
+  { value: 'Medium+', label: 'Analytics, leads & Paystack auto-renew' },
   { value: 'Enterprise', label: 'Transfers, stock loans & template copy' },
 ]
 
@@ -93,7 +93,7 @@ const proofCards: Array<{
     iconKey: 'dashboard',
     title: 'Web + iOS native app',
     description:
-      'Same data on desktop and iPhone: tabs, pull-to-refresh, swipe actions, and native sheets.',
+      'Same data on desktop and iPhone: tabs, pull-to-refresh, swipe actions, native sheets, and full subscription management in Settings.',
   },
 ]
 </script>

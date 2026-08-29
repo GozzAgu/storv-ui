@@ -49,7 +49,12 @@
           how much of the app we show. You can change workspace style below without changing your
           plan.
         </p>
-        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
+        <div
+          :class="[
+            'grid grid-cols-1 gap-6',
+            isCapacitorIos ? 'dash-settings-account-grid--ios' : 'lg:grid-cols-2 lg:gap-8',
+          ]"
+        >
           <div class="flex items-start gap-4">
             <div class="relative shrink-0">
               <div
@@ -1083,6 +1088,7 @@ import {
   subscriptionStatusLabel,
 } from '~/utils/subscription-billing-ui'
 import { formatUpgradeSuccessMessage } from '~/utils/subscription-upgrade-unlocks'
+import { scrollDashboardToElement } from '~/utils/native-dashboard-scroll'
 import type { ExperienceMode } from '~/types/business-experience'
 import { normalizeExperienceMode } from '~/types/business-experience'
 import { getEffectiveApiBase } from '~/utils/capacitor-api-base'
@@ -2074,7 +2080,7 @@ onMounted(async () => {
     await loadBillingHistory()
     if (route.query.upgrade === '1' && import.meta.client) {
       await nextTick()
-      document.querySelector('#settings-subscription')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      scrollDashboardToElement('#settings-subscription', { offset: 16 })
     }
   } else {
     isLoadingStoreInfo.value = false

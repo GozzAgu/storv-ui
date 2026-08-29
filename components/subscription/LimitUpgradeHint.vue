@@ -1,5 +1,5 @@
 <template>
-  <p v-if="message" class="text-[11px] leading-relaxed text-amber-800/90 dark:text-amber-200/90">
+  <p v-if="message" class="limit-upgrade-hint text-[11px] leading-relaxed text-amber-800/90 dark:text-amber-200/90">
     {{ message }}
     <NuxtLink
       v-if="showLink"

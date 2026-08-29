@@ -92,7 +92,7 @@ const resolvedDescription = computed(() => {
 })
 
 const rootClass = computed(() => [
-  'dash-state-card rounded-xl border border-amber-200/60 bg-amber-50/40 px-6 py-8 text-center dark:border-amber-900/35 dark:bg-amber-950/20',
+  'subscription-feature-gate dash-state-card rounded-xl border border-amber-200/60 bg-amber-50/40 px-6 py-8 text-center dark:border-amber-900/35 dark:bg-amber-950/20',
   props.extraClass,
 ])
 

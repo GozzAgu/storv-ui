@@ -33,10 +33,10 @@
 
 <script setup lang="ts">
 const chips = [
+  'What is Solo workspace?',
   'What is on the free Micro plan?',
+  'How do I upgrade my subscription?',
   'How do payment links work?',
   'Copy categories from another branch',
-  'Explain stock loans',
-  'Where is Quick Sale?',
 ]
 </script>

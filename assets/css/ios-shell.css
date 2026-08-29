@@ -524,6 +524,85 @@ html.capacitor-ios.capacitor-native .dash-page-stack--ios-settings .dash-setting
   padding-block: 0.625rem;
 }
 
+/* ── Subscription & billing (native parity) ── */
+html.capacitor-ios.capacitor-native .subscription-billing-banner {
+  margin-bottom: 0.625rem;
+  border-radius: var(--ios-radius-md, 0.75rem);
+}
+
+html.capacitor-ios.capacitor-native .subscription-billing-banner--ios {
+  gap: 0.75rem;
+}
+
+html.capacitor-ios.capacitor-native .subscription-billing-banner a,
+html.capacitor-ios.capacitor-native .subscription-billing-banner button {
+  min-height: 2.75rem;
+  min-width: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+html.capacitor-ios.capacitor-native .subscription-billing-banner a {
+  padding-inline: 0.875rem;
+}
+
+html.capacitor-ios.capacitor-native #settings-subscription {
+  scroll-margin-top: calc(var(--dashboard-command-header-height, 5.875rem) + 0.75rem);
+}
+
+html.capacitor-ios.capacitor-native .dash-settings-account-grid--ios {
+  gap: 1rem;
+}
+
+html.capacitor-ios.capacitor-native .dash-settings-account-grid--ios #settings-subscription {
+  margin-top: 0.25rem;
+}
+
+html.capacitor-ios.capacitor-native .subscription-plan-panel select,
+html.capacitor-ios.capacitor-native .subscription-plan-panel .btn-primary-sm,
+html.capacitor-ios.capacitor-native .subscription-plan-panel button[type='button'] {
+  min-height: 2.75rem;
+}
+
+html.capacitor-ios.capacitor-native .subscription-plan-panel .sm\\:flex-row {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+html.capacitor-ios.capacitor-native .subscription-plan-panel .sm\\:flex-row > .min-w-0 {
+  width: 100%;
+}
+
+html.capacitor-ios.capacitor-native .subscription-plan-panel .btn-primary-sm {
+  width: 100%;
+  justify-content: center;
+}
+
+html.capacitor-ios.capacitor-native .subscription-plan-panel details summary {
+  min-height: 2.75rem;
+  display: flex;
+  align-items: center;
+}
+
+html.capacitor-ios.capacitor-native .dash-page-stack--ios-settings .experience-mode-picker {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+html.capacitor-ios.capacitor-native .limit-upgrade-hint {
+  font-size: var(--cap-ios-body) !important;
+}
+
+html.capacitor-ios.capacitor-native .subscription-feature-gate {
+  padding-inline: 1rem;
+  padding-block: 1.75rem;
+}
+
+html.capacitor-ios.capacitor-native .subscription-feature-gate .btn-primary-sm {
+  min-height: 2.75rem;
+  padding-inline: 1rem;
+}
+
 html.capacitor-ios.capacitor-native .ios-empty-state .text-ios-title3 {
   font-weight: 600;
 }

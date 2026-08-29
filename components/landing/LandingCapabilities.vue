@@ -454,6 +454,12 @@ const moreSubcategories: MoreSubcategory[] = [
         title: 'Balance due & credit',
         description: 'Record part-payments and track what each customer still owes over time.',
       },
+      {
+        icon: CreditCardIcon,
+        title: 'Subscription billing',
+        description:
+          'Upgrade in Settings with live price preview. Paystack auto-renew (monthly, quarterly, yearly), billing history, and cancel anytime with grace until period end.',
+      },
     ],
   },
   {
@@ -517,9 +523,15 @@ const moreSubcategories: MoreSubcategory[] = [
     items: [
       {
         icon: GlobeAltIcon,
+        title: 'Solo vs Business workspace',
+        description:
+          'Solo (Just me): focused layout for owner-operators. Unlock team and branch tools in Advanced features when ready. Business: full navigation for staff and multi-location ops. Switch anytime in Settings.',
+      },
+      {
+        icon: GlobeAltIcon,
         title: 'Web + mobile',
         description:
-          'Same account on app.storvv.com and the Capacitor iOS app (Android supported via the same build).',
+          'Same account on app.storvv.com and the native iOS app. Solo/Business switcher, subscription upgrades, and billing history on both.',
       },
       {
         icon: GlobeAltIcon,

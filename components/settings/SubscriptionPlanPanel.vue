@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-4">
+  <div class="subscription-plan-panel space-y-4">
     <div
       class="rounded-lg border border-gray-200/80 bg-gray-50/60 px-3 py-3 dark:border-white/[0.08] dark:bg-white/[0.03] sm:px-4"
     >
