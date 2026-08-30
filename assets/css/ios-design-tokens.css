@@ -32,6 +32,19 @@ html.capacitor-native {
   --ios-space-xl: 32px;
   --ios-spring: cubic-bezier(0.22, 1, 0.36, 1);
   --ios-topnav-inset: 0.625rem;
+  /* Semantic aliases used across shell + components */
+  --ios-tint: var(--ios-accent);
+  --ios-tint-muted: var(--ios-accent-muted);
+  --ios-destructive: var(--ios-danger);
+  --ios-label-tertiary: rgb(60 60 67 / 0.28);
+  --ios-surface-grouped: var(--ios-canvas);
+  --ios-fill-secondary: rgb(120 120 128 / 0.16);
+  --ios-fill-tertiary: rgb(118 118 128 / 0.12);
+  --ios-aurora: radial-gradient(
+    ellipse 85% 55% at 50% -18%,
+    rgb(72 118 199 / 0.11),
+    transparent 58%
+  );
   --ios-topnav-float-gap: 0.375rem;
   --ios-topnav-stack-gap: 0.375rem;
   --ios-topnav-bg: var(--ios-glass-bg);
@@ -63,6 +76,14 @@ html.capacitor-native.dark {
   --ios-label-secondary: rgb(235 235 245 / 0.6);
   --ios-accent-soft: #9ab5e3;
   --ios-accent-muted: rgb(20 63 141 / 0.28);
+  --ios-label-tertiary: rgb(235 235 245 / 0.28);
+  --ios-fill-secondary: rgb(120 120 128 / 0.32);
+  --ios-fill-tertiary: rgb(118 118 128 / 0.2);
+  --ios-aurora: radial-gradient(
+    ellipse 80% 50% at 50% -12%,
+    rgb(154 181 227 / 0.12),
+    transparent 52%
+  );
 
   --cap-canvas-bg: var(--ios-canvas);
   --cap-surface-bg: var(--ios-surface-solid);

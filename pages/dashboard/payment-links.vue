@@ -305,7 +305,7 @@
       <button
         v-if="isNativeShell && payout.connected && !showPaymentLinksComingSoon"
         type="button"
-        class="payment-links-native-fab"
+        class="ios-fab payment-links-native-fab"
         aria-label="New payment link"
         @click="showCreate = true"
       >
@@ -557,21 +557,3 @@ onMounted(async () => {
   }
 })
 </script>
-
-<style scoped>
-html.capacitor-native .payment-links-native-fab {
-  position: fixed;
-  right: 1rem;
-  bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
-  z-index: 55;
-  display: flex;
-  height: 3.25rem;
-  width: 3.25rem;
-  align-items: center;
-  justify-content: center;
-  border-radius: 9999px;
-  background: rgb(var(--color-primary-600, 37 99 235));
-  color: white;
-  box-shadow: 0 8px 24px rgb(0 0 0 / 0.18);
-}
-</style>

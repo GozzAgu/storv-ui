@@ -83,7 +83,11 @@ const loadingIcon = ArrowPathIcon
 const { isCapacitorIos } = useIsCapacitorIos()
 const iconOnlyIos = computed(() => isCapacitorIos.value && !!props.icon && !props.loading)
 
-const radiusClass = '!rounded-full'
+const radiusClass = computed(() => {
+  if (iconOnlyIos.value) return '!rounded-full'
+  if (isCapacitorIos.value) return '!rounded-xl'
+  return '!rounded-full'
+})
 
 const showGlassHighlight = computed(() => false)
 

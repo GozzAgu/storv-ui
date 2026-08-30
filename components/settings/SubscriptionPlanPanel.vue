@@ -76,7 +76,7 @@
         <Button
           variant="primary"
           size="sm"
-          :class="headerBtnClass"
+          :class="headerTextBtnClass"
           :disabled="disabled || !selectedUpgradePlan || isUpgrading || upgradeOptions.length === 0"
           @click="emit('upgrade')"
         >
@@ -99,7 +99,7 @@
         <Button
           variant="secondary"
           size="sm"
-          :class="headerBtnClass"
+          :class="headerTextBtnClass"
           :disabled="isCanceling || isUpgrading"
           @click="emit('cancel')"
         >
@@ -190,7 +190,7 @@ const props = defineProps<{
   billingHistory: BillingHistoryEntry[]
   labelClass: string
   inputClass: (enabled: boolean) => string
-  headerBtnClass: string
+  headerTextBtnClass: string
 }>()
 
 const emit = defineEmits<{

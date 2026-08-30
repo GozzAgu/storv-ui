@@ -1,17 +1,15 @@
 <template>
   <div class="native-command-header">
-    <div class="native-command-header__row native-command-header__row--primary">
-      <div class="native-command-header__greeting min-w-0 flex-1">
-        <p :class="greetingClass">{{ greeting }}</p>
-        <p v-if="pageTitle" :class="pageContextClass">{{ pageTitle }}</p>
-      </div>
+    <div class="native-command-header__greeting-block min-w-0">
+      <p :class="greetingClass">{{ greeting }}</p>
+      <p v-if="pageTitle" :class="pageContextClass">{{ pageTitle }}</p>
+    </div>
+    <div class="native-command-header__row native-command-header__row--utility">
+      <NativeBranchPill v-if="canShowBranchRow" class="min-w-0 flex-1" />
+      <ExperienceModeBadge variant="ios" />
       <div class="native-command-header__actions shrink-0">
         <slot name="actions" />
       </div>
-    </div>
-    <div class="native-command-header__row native-command-header__row--branch">
-      <NativeBranchPill v-if="canShowBranchRow" class="min-w-0 flex-1" />
-      <ExperienceModeBadge variant="ios" />
     </div>
   </div>
 </template>

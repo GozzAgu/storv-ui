@@ -28,10 +28,25 @@ export function useDashboardPageChrome() {
     ? 'inline-flex h-8 shrink-0 items-center rounded-lg border-0 bg-gray-50/80 px-2.5 text-xs font-medium tabular-nums text-gray-600 dark:bg-white/[0.04] dark:text-gray-400'
     : 'inline-flex h-8 shrink-0 items-center rounded-lg border-0 bg-gray-50/80 px-2.5 text-xs font-medium tabular-nums text-gray-600 dark:bg-white/[0.04] dark:text-gray-400'
 
-  const headerBtnClass = computed(() =>
+  /** Icon-only header actions (toolbar / page header). */
+  const headerIconBtnClass = computed(() =>
     isCapacitorIos.value
       ? '!inline-flex !h-9 !w-9 !min-h-9 !min-w-9 !items-center !justify-center !rounded-full !p-0 !text-xs shrink-0'
       : '!inline-flex !h-8 !min-h-8 !items-center !justify-center !rounded-full !px-3.5 !py-0 !text-xs shrink-0'
+  )
+
+  /** Labeled header / panel actions — never forced into icon-only circles on iOS. */
+  const headerTextBtnClass = computed(() =>
+    isCapacitorIos.value
+      ? '!inline-flex !h-11 !min-h-11 !w-full !items-center !justify-center !rounded-xl !px-4 !py-0 !text-sm shrink-0 sm:!w-auto'
+      : '!inline-flex !h-8 !min-h-8 !items-center !justify-center !rounded-full !px-3.5 !py-0 !text-xs shrink-0'
+  )
+
+  /** @deprecated Prefer headerIconBtnClass or headerTextBtnClass explicitly. */
+  const headerBtnClass = headerIconBtnClass
+
+  const toolbarSelectClass = computed(() =>
+    isCapacitorIos.value ? 'ios-toolbar-select' : ''
   )
 
   /** iOS header actions: icon-only (label stays for screen readers). */
@@ -88,6 +103,9 @@ export function useDashboardPageChrome() {
     fieldClass,
     metaClass,
     headerBtnClass,
+    headerIconBtnClass,
+    headerTextBtnClass,
+    toolbarSelectClass,
     headerBtnLabelClass,
     segmentTabsClass,
     segmentTabsBtnClass,

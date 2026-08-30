@@ -126,7 +126,7 @@
             :billing-history="billingHistory"
             :label-class="labelClass"
             :input-class="inputClass"
-            :header-btn-class="headerBtnClass"
+            :header-text-btn-class="headerTextBtnClass"
             @upgrade="handleUpgradeSubscription"
             @cancel="openCancelConfirm"
           />
@@ -506,7 +506,7 @@
             v-if="canEditSettings"
             variant="primary"
             size="sm"
-            :class="headerBtnClass"
+            :class="headerTextBtnClass"
             aria-label="Save inventory settings"
             @click="saveInventorySettings"
           >
@@ -597,7 +597,7 @@
             v-if="canEditSettings"
             variant="primary"
             size="sm"
-            :class="headerBtnClass"
+            :class="headerTextBtnClass"
             aria-label="Save payment methods"
             @click="savePaymentSettings"
           >
@@ -660,7 +660,7 @@
             v-if="canEditSettings"
             variant="primary"
             size="sm"
-            :class="headerBtnClass"
+            :class="headerTextBtnClass"
             aria-label="Save sales and receipt settings"
             @click="saveReceiptSettings"
           >
@@ -765,7 +765,7 @@
             <Button
               variant="outline"
               size="sm"
-              :class="headerBtnClass"
+              :class="headerTextBtnClass"
               :disabled="dataExporting"
               :loading="dataExporting && !dataExportStatus"
               @click="handleExportAllStoreData"
@@ -1148,6 +1148,7 @@ const {
   pageClass,
   pageStackClass,
   headerBtnClass,
+  headerTextBtnClass,
   headerBtnLabelClass,
   labelClass,
   inputClass,
