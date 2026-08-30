@@ -42,6 +42,28 @@
             <template v-if="!receiptsStore.loading" #description>
               <DashboardPageMetrics :metrics="receiptsHeaderMetrics" aria-label="Sales summary" />
             </template>
+            <template v-if="canCreate && isCapacitorIos" #actions>
+              <Button
+                variant="outline"
+                size="sm"
+                :icon="QrCodeIcon"
+                aria-label="Quick sale"
+                :extra-class="headerBtnClass"
+                @click="openQuickSaleModal"
+              >
+                <span :class="headerBtnLabelClass">Quick sale</span>
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                :icon="ReceiptPercentIcon"
+                aria-label="New sale"
+                :extra-class="headerBtnClass"
+                @click="openCreateReceiptModal"
+              >
+                <span :class="headerBtnLabelClass">New sale</span>
+              </Button>
+            </template>
           </DashboardPageHeader>
 
           <IosSegmentedControl
@@ -51,6 +73,54 @@
             aria-label="Sales views"
             :options="salesTabOptions"
           />
+
+          <div
+            v-if="isCapacitorIos && !receiptsStore.loading && activeTab === 'receipts'"
+            class="ios-sales-chrome"
+          >
+            <div class="ios-search-bar-host">
+              <IosSearchBar v-model="searchQuery" placeholder="Search sales…" />
+            </div>
+            <IosSegmentedControl
+              v-model="statusFilter"
+              compact
+              aria-label="Filter by status"
+              :options="receiptStatusFilterOptions"
+            />
+            <IosSegmentedControl
+              v-model="dateFilter"
+              compact
+              aria-label="Filter by date"
+              :options="receiptDateFilterOptions"
+            />
+          </div>
+
+          <div
+            v-if="isCapacitorIos && !receiptsStore.loading && activeTab === 'outstanding'"
+            class="ios-sales-chrome"
+          >
+            <div class="ios-search-bar-host">
+              <IosSearchBar
+                v-model="outstandingSearchQuery"
+                placeholder="Search customer or receipt #…"
+              />
+            </div>
+          </div>
+
+          <div
+            v-if="isCapacitorIos && !receiptsStore.loading && activeTab === 'customers'"
+            class="ios-sales-chrome"
+          >
+            <div class="ios-search-bar-host">
+              <IosSearchBar v-model="customersSearchQuery" placeholder="Search customers…" />
+            </div>
+            <IosSegmentedControl
+              v-model="customersSortBy"
+              compact
+              aria-label="Sort customers"
+              :options="customerSortFilterOptions"
+            />
+          </div>
 
           <!-- Tabs -->
           <nav v-else :class="segmentTabsClass" aria-label="Sales views" role="tablist">
@@ -232,7 +302,7 @@
                 >
                   <!-- Toolbar: search + filters (left), primary action (right) -->
                   <DataTableToolbar
-                    v-if="!receiptsStore.loading && !isReceiptsFullscreen"
+                    v-if="!receiptsStore.loading && !isReceiptsFullscreen && !isCapacitorIos"
                     native-table-key="receipts-main"
                   >
                     <template #filters>
@@ -1008,12 +1078,6 @@
 
             <QuickSaleModal v-model="showQuickSaleModal" @sale-completed="handleQuickSaleCompleted" />
 
-            <IosSalesFab
-              v-if="isCapacitorIos && canCreate && activeTab === 'receipts' && !isReceiptsFullscreen"
-              @new-sale="openCreateReceiptModal"
-              @quick-sale="openQuickSaleModal"
-            />
-
             <!-- View Receipt Modal -->
             <ViewReceiptModal v-model="showViewReceiptModal" :receipt="selectedReceipt" />
 
@@ -1114,7 +1178,10 @@
           <!-- Outstanding (balance due) tab -->
           <template v-else-if="activeTab === 'outstanding'">
             <div :class="tableShellFlexClass">
-              <DataTableToolbar v-if="!receiptsStore.loading" native-table-key="receipts-outstanding">
+              <DataTableToolbar
+                v-if="!receiptsStore.loading && !isCapacitorIos"
+                native-table-key="receipts-outstanding"
+              >
                 <template #filters>
                   <DashboardToolbarSearch
                     v-model="outstandingSearchQuery"
@@ -1217,7 +1284,10 @@
           <!-- Customers tab -->
           <template v-else-if="activeTab === 'customers'">
             <div :class="tableShellFlexClass">
-              <DataTableToolbar v-if="!receiptsStore.loading" native-table-key="receipts-customers">
+              <DataTableToolbar
+                v-if="!receiptsStore.loading && !isCapacitorIos"
+                native-table-key="receipts-customers"
+              >
                 <template #filters>
                   <DashboardToolbarSearch
                     v-model="customersSearchQuery"
@@ -1693,7 +1763,7 @@ import Modal from '~/components/ui/Modal.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 // @ts-ignore
 import CreateReceiptModal from '~/components/receipts/CreateReceiptModal.vue'
-import IosSalesFab from '~/components/ios/IosSalesFab.vue'
+import IosSearchBar from '~/components/ios/IosSearchBar.vue'
 import IosSwipeActions, { type IosSwipeAction } from '~/components/ios/IosSwipeActions.vue'
 import IosSegmentedControl from '~/components/ios/IosSegmentedControl.vue'
 // @ts-ignore
@@ -2267,6 +2337,27 @@ const salesTabOptions = computed(() => [
   },
   { value: 'customers', label: 'Customers' },
 ])
+
+const receiptStatusFilterOptions = [
+  { value: 'all', label: 'All' },
+  { value: 'completed', label: 'Done' },
+  { value: 'pending', label: 'Pending' },
+  { value: 'refunded', label: 'Refund' },
+]
+
+const receiptDateFilterOptions = [
+  { value: 'all', label: 'All dates' },
+  { value: 'today', label: 'Today' },
+  { value: 'week', label: 'Week' },
+  { value: 'month', label: 'Month' },
+]
+
+const customerSortFilterOptions = [
+  { value: 'name', label: 'Name' },
+  { value: 'orders', label: 'Orders' },
+  { value: 'spent', label: 'Spent' },
+  { value: 'lastOrder', label: 'Recent' },
+]
 
 const filteredOutstandingReceipts = computed(() => {
   const q = outstandingSearchQuery.value.trim().toLowerCase()

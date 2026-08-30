@@ -480,6 +480,33 @@ html.capacitor-ios.capacitor-native .ios-segmented-control__badge {
   color: #c93400;
 }
 
+html.capacitor-ios.capacitor-native .ios-segmented-control--compact .ios-segmented-control__segment {
+  min-height: 1.875rem;
+  padding: 0.3125rem 0.4375rem;
+  font-size: var(--ios-type-caption-size, 0.75rem);
+  font-weight: 600;
+}
+
+html.capacitor-ios.capacitor-native .ios-segmented-control--compact .ios-segmented-control__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html.capacitor-ios.capacitor-native .ios-sales-chrome {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-sales-chrome .ios-search-bar-host {
+  margin: 0;
+}
+
+html.capacitor-ios.capacitor-native .dash-page-header--ios-context .dash-page-header__description {
+  display: none;
+}
+
 html.capacitor-ios.capacitor-native.dark .ios-segmented-control__badge {
   background: rgb(255 149 0 / 0.22);
   color: #ffb340;
