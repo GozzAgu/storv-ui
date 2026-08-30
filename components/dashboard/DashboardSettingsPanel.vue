@@ -1,5 +1,8 @@
 <template>
-  <section :class="[panelClass, iosGrouped ? 'dash-settings-panel--ios-grouped' : '']">
+  <section
+    :id="id"
+    :class="[panelClass, iosGrouped ? 'dash-settings-panel--ios-grouped' : '']"
+  >
     <header :class="panelHeaderClass">
       <div class="min-w-0 flex-1">
         <h2 :class="sectionTitleClass">{{ title }}</h2>
@@ -20,6 +23,7 @@
 import { computed } from 'vue'
 
 const props = defineProps<{
+  id?: string
   title: string
   subtitle?: string
   badge?: string

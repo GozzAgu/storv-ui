@@ -439,8 +439,8 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
       {
         title: 'Payment links',
         body: [
-          'Payment links (/dashboard/payment-links) let you create shareable Paystack checkout links for remote sales when your plan includes payment_links. Connect a payout account first, then create links with customer name, amount, and description.',
-          'The Payment links summary on Dashboard home and Analytics shows collected, paid, unpaid, and failed counts plus recent links. On native iOS/Android apps, payment links may show as coming soon depending on build configuration. Use the web app for full setup when needed.',
+          'Payment links (/dashboard/payment-links) let you create shareable Paystack checkout links for remote sales on web and in the iOS/Android app. Connect a payout account first, pick inventory items, then share the link on WhatsApp. When the customer pays, stock updates and a receipt is created automatically.',
+          'The Payment links summary on Dashboard home and Analytics shows collected, paid, unpaid, and failed counts plus recent links. On phone, use the Links tab or Share to WhatsApp after creating a link.',
         ],
       },
       {

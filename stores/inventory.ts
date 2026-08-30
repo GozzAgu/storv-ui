@@ -1763,6 +1763,7 @@ export const useInventoryStore = defineStore('inventory', {
         const newItemRef = doc(itemsRef)
 
         const now = new Date()
+        const useClientTimestamps = import.meta.client && !navigator.onLine
         const payloadBase = stripUndefinedFirestoreValues(
           itemPayload as Record<string, unknown>
         ) as Omit<InventoryItem, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'folderId'>
@@ -1771,12 +1772,13 @@ export const useInventoryStore = defineStore('inventory', {
           folderId,
           storeId, // Add storeId from folder
           dateIn: now, // Set dateIn from createdAt
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
+          createdAt: useClientTimestamps ? now : serverTimestamp(),
+          updatedAt: useClientTimestamps ? now : serverTimestamp(),
           createdBy: createdByUid, // Use super admin UID for managers
         }
 
-        await setDoc(newItemRef, newItem)
+        const { writeDocumentWithOfflineSupport } = await import('~/composables/useOfflineMode')
+        await writeDocumentWithOfflineSupport(newItemRef, newItem as Record<string, unknown>)
 
         // Add to local state
         const itemForState: InventoryItem = {
@@ -1829,6 +1831,14 @@ export const useInventoryStore = defineStore('inventory', {
           userId: createdByUid,
           userDisplayName: userDisplayNameForItem,
         }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
+
+        const wasFirstItem = this.totalItems <= 1
+        if (wasFirstItem) {
+          const { useFunnelAnalytics } = await import('~/composables/useFunnelAnalytics')
+          await useFunnelAnalytics()
+            .recordMilestone('firstInventoryItemAt', { store_id: storeId })
+            .catch(() => undefined)
+        }
 
         return newItemRef.id
       } catch (error: any) {
@@ -2118,6 +2128,29 @@ export const useInventoryStore = defineStore('inventory', {
           userId: authStore.currentUser!.uid,
           userDisplayName,
         }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
+
+        const auditFields: Array<{ key: keyof InventoryItem; field: 'price' | 'name' | 'cost' | 'quantity' }> = [
+          { key: 'price', field: 'price' },
+          { key: 'cost', field: 'cost' },
+          { key: 'name', field: 'name' },
+          { key: 'quantity', field: 'quantity' },
+        ]
+        const { logInventoryAudit } = await import('~/composables/useInventoryAuditLog')
+        for (const entry of auditFields) {
+          if (entry.key in cleanedUpdates && existingItem) {
+            await logInventoryAudit({
+              itemId,
+              itemName: String(finalItemName),
+              field: entry.field,
+              previousValue: (existingItem as Record<string, unknown>)[entry.key] as
+                | string
+                | number
+                | null,
+              newValue: cleanedUpdates[entry.key] as string | number | null,
+              storeId,
+            }).catch(() => undefined)
+          }
+        }
       } catch (error: any) {
         console.error('Error updating item:', error)
         throw new Error(error.message || 'Failed to update item')

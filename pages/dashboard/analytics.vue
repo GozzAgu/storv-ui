@@ -101,7 +101,6 @@
         v-if="isCapacitorIos"
         :is-exporting="isExporting"
         @export="exportReport"
-        @import="onImportReport"
       >
         <template #period>
           <IosSegmentedControl
@@ -591,6 +590,11 @@ import {
   sumReceiptCogs,
   sumReceiptGrossProfit,
 } from '~/utils/inventory-item-cost'
+import {
+  downloadAnalyticsCsv,
+  downloadAnalyticsPdf,
+  type AnalyticsReportSnapshot,
+} from '~/utils/analytics-report-export'
 
 const { canViewProfitAndCost, isStaff, isManager } = usePermissions()
 const staffStore = useStaffStore()
@@ -1901,8 +1905,40 @@ const loadAnalytics = async () => {
 
 useIosPullToRefreshRegister(loadAnalytics)
 
-function onImportReport(_file: File) {
-  toast.info('Import from spreadsheet is coming soon.')
+function buildAnalyticsSnapshot(): AnalyticsReportSnapshot {
+  return {
+    periodLabel: periodLabel.value,
+    selectedPeriod: selectedPeriod.value,
+    formatCurrency,
+    formatReturnDate,
+    totalRevenue: totalRevenue.value,
+    totalSales: totalSales.value,
+    totalOrders: totalOrders.value,
+    averageOrderValue: averageOrderValue.value,
+    lowStockCount: lowStockCount.value,
+    repeatPurchaseRate: repeatPurchaseRate.value,
+    refundedCount: refundedCount.value,
+    refundAmount: refundAmount.value,
+    refundRate: refundRate.value,
+    topProducts: topProducts.value,
+    topCustomers: topCustomers.value,
+    recentReturns: recentReturns.value,
+  }
+}
+
+const exportToExcel = async () => {
+  downloadAnalyticsCsv(buildAnalyticsSnapshot())
+  toast.success('Report exported to Excel successfully!')
+}
+
+const exportToPDF = async () => {
+  try {
+    await downloadAnalyticsPdf(buildAnalyticsSnapshot())
+    toast.success('Report exported successfully!')
+  } catch (error) {
+    console.error('Error exporting report:', error)
+    toast.error('Failed to export report')
+  }
 }
 
 const exportReport = async (format: 'pdf' | 'excel' = 'pdf') => {
@@ -1913,184 +1949,6 @@ const exportReport = async (format: 'pdf' | 'excel' = 'pdf') => {
     } else {
       await exportToPDF()
     }
-  } catch (error) {
-    console.error('Error exporting report:', error)
-    toast.error('Failed to export report')
-  } finally {
-    isExporting.value = false
-  }
-}
-
-const exportToExcel = async () => {
-  // Create CSV content
-  let csvContent = 'Analytics & Sales Report\n'
-  csvContent += `Period: ${periodLabel.value}\n`
-  csvContent += `Generated: ${new Date().toLocaleDateString()}\n\n`
-
-  // Key Metrics
-  csvContent += 'Key Metrics\n'
-  csvContent += 'Metric,Value\n'
-  csvContent += `Total Revenue,${totalRevenue.value}\n`
-  csvContent += `Total Sales,${totalSales.value}\n`
-  csvContent += `Total Orders,${totalOrders.value}\n`
-  csvContent += `Average Order Value,${averageOrderValue.value}\n`
-  csvContent += `Low Stock Items,${lowStockCount.value}\n`
-  csvContent += `Repeat Purchase Rate,${repeatPurchaseRate.value.toFixed(1)}%\n\n`
-
-  // Top Products
-  csvContent += 'Top Products\n'
-  csvContent += 'Product,Quantity,Revenue\n'
-  topProducts.value.slice(0, 10).forEach((p) => {
-    csvContent += `"${p.name}",${p.quantity},${p.revenue}\n`
-  })
-  csvContent += '\n'
-
-  // Top Customers
-  csvContent += 'Top Customers\n'
-  csvContent += 'Customer Name,Email,Orders,Total Spent\n'
-  topCustomers.value.slice(0, 10).forEach((c) => {
-    csvContent += `"${c.name}","${c.email}",${c.orders},${c.totalSpent}\n`
-  })
-
-  // Create blob and download
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-  const link = document.createElement('a')
-  const url = URL.createObjectURL(blob)
-  link.setAttribute('href', url)
-  link.setAttribute('download', `analytics-report-${selectedPeriod.value}-${Date.now()}.csv`)
-  link.style.visibility = 'hidden'
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-
-  toast.success('Report exported to Excel successfully!')
-}
-
-const exportToPDF = async () => {
-  try {
-    const { default: jsPDF } = await import('jspdf')
-    const doc = new jsPDF()
-
-    // Title
-    doc.setFontSize(18)
-    doc.text('Analytics & Sales Report', 14, 20)
-    doc.setFontSize(10)
-    doc.text(`Period: ${periodLabel.value}`, 14, 28)
-    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 34)
-
-    let yPos = 44
-
-    // Key Metrics
-    doc.setFontSize(14)
-    doc.text('Key Metrics', 14, yPos)
-    yPos += 8
-
-    doc.setFontSize(10)
-    const metrics = [
-      ['Total Revenue', formatCurrency(totalRevenue.value)],
-      ['Total Sales', totalSales.value.toString()],
-      ['Total Orders', totalOrders.value.toString()],
-      ['Average Order Value', formatCurrency(averageOrderValue.value)],
-      ['Low Stock Items', lowStockCount.value.toString()],
-      ['Refunded Count', refundedCount.value.toString()],
-      ['Refund Amount', formatCurrency(refundAmount.value)],
-      ['Refund Rate', `${refundRate.value.toFixed(1)}%`],
-      ['Repeat Purchase Rate', `${repeatPurchaseRate.value.toFixed(1)}%`],
-    ]
-
-    metrics.forEach(([label, value]) => {
-      doc.text(`${label}: ${value}`, 20, yPos)
-      yPos += 6
-    })
-
-    yPos += 4
-
-    // Top Products
-    if (topProducts.value.length > 0) {
-      doc.setFontSize(14)
-      doc.text('Top Products', 14, yPos)
-      yPos += 8
-
-      // Top Products Table
-      doc.setFontSize(12)
-      doc.text('Product', 20, yPos)
-      doc.text('Quantity', 100, yPos)
-      doc.text('Revenue', 150, yPos)
-      yPos += 6
-      doc.setFontSize(10)
-
-      topProducts.value.slice(0, 10).forEach((p, index) => {
-        if (yPos > 280) {
-          doc.addPage()
-          yPos = 20
-        }
-        doc.text(p.name.substring(0, 30), 20, yPos)
-        doc.text(p.quantity.toString(), 100, yPos)
-        doc.text(formatCurrency(p.revenue), 150, yPos)
-        yPos += 6
-      })
-
-      yPos += 4
-    }
-
-    // Top Customers
-    if (topCustomers.value.length > 0) {
-      doc.setFontSize(14)
-      doc.text('Top Customers', 14, yPos)
-      yPos += 8
-
-      // Top Customers Table
-      doc.setFontSize(12)
-      doc.text('Customer', 20, yPos)
-      doc.text('Orders', 100, yPos)
-      doc.text('Total Spent', 150, yPos)
-      yPos += 6
-      doc.setFontSize(10)
-
-      topCustomers.value.slice(0, 10).forEach((c, index) => {
-        if (yPos > 280) {
-          doc.addPage()
-          yPos = 20
-        }
-        doc.text(c.name.substring(0, 30), 20, yPos)
-        doc.text(c.orders.toString(), 100, yPos)
-        doc.text(formatCurrency(c.totalSpent), 150, yPos)
-        yPos += 6
-      })
-
-      yPos += 4
-    }
-
-    // Recent Returns
-    if (recentReturns.value.length > 0) {
-      doc.setFontSize(14)
-      doc.text('Recent Returns', 14, yPos)
-      yPos += 8
-
-      doc.setFontSize(12)
-      doc.text('Receipt #', 20, yPos)
-      doc.text('Date', 60, yPos)
-      doc.text('Amount', 110, yPos)
-      doc.text('Reason', 150, yPos)
-      yPos += 6
-      doc.setFontSize(10)
-
-      recentReturns.value.forEach((ret) => {
-        if (yPos > 280) {
-          doc.addPage()
-          yPos = 20
-        }
-        doc.text(ret.receiptNumber, 20, yPos)
-        doc.text(formatReturnDate(ret.date), 60, yPos)
-        doc.text('-' + formatCurrency(ret.amount), 110, yPos)
-        doc.text((ret.reason || '-').substring(0, 25), 150, yPos)
-        yPos += 6
-      })
-    }
-
-    // Save PDF
-    doc.save(`analytics-report-${selectedPeriod.value}-${Date.now()}.pdf`)
-    toast.success('Report exported successfully!')
   } catch (error) {
     console.error('Error exporting report:', error)
     toast.error('Failed to export report')

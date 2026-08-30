@@ -236,6 +236,7 @@ import {
   getPasswordStrength,
 } from '~/utils/passwordPolicy'
 import { markCapacitorDocument } from '~/utils/capacitor-env'
+import { useProductAnalytics } from '~/composables/useProductAnalytics'
 
 definePageMeta({
   layout: false,
@@ -275,6 +276,7 @@ watch(registrationComplete, (done) => {
 })
 
 const { signUp, signOut } = useFirebaseAuth()
+const { trackEvent } = useProductAnalytics()
 const { createUserDocument } = useUser()
 
 const passwordRuleChecks = computed(() => getPasswordRuleChecks(form.value.password))
@@ -393,7 +395,10 @@ const handleSignUp = async () => {
         subscription: 'storvv_micro',
         hasCompletedOnboarding: false,
         hasCompletedTutorial: false,
+        activationFunnel: { signedUpAt: new Date().toISOString() },
       })
+
+      trackEvent('sign_up', { method: 'email' })
 
       try {
         await signOut()

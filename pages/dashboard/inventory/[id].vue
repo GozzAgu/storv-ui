@@ -91,7 +91,6 @@
             <h2 class="dash-page-context-bar__title truncate">
               {{ folder?.name || 'Category' }}
             </h2>
-            <DuplicateFeatureUpsellBanner :loading="isLoadingFolder" />
           </div>
           <p class="dash-page-context-bar__meta">
             <span class="tabular-nums">{{ folder?.itemCount ?? 0 }} items</span>
@@ -492,7 +491,6 @@
                       >
                         {{ folder?.name || 'Category' }}
                       </h2>
-                      <DuplicateFeatureUpsellBanner :loading="isLoadingFolder" />
                     </div>
                     <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
                       <span class="tabular-nums font-medium text-gray-600 dark:text-gray-300"
@@ -2105,7 +2103,6 @@ import BulkDiscountModal from '~/components/inventory/BulkDiscountModal.vue'
 import DeleteItemModal from '~/components/inventory/DeleteItemModal.vue'
 import DeleteFolderModal from '~/components/inventory/DeleteFolderModal.vue'
 import ItemTimelineModal from '~/components/inventory/ItemTimelineModal.vue'
-import DuplicateFeatureUpsellBanner from '~/components/inventory/DuplicateFeatureUpsellBanner.vue'
 import CreateSellerLoanModal from '~/components/seller-loans/CreateSellerLoanModal.vue'
 import InventoryCategoryCard from '~/components/inventory/InventoryCategoryCard.vue'
 import { useDepartmentsStore } from '~/stores/departments'

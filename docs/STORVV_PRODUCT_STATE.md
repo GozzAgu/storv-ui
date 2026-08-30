@@ -12,7 +12,7 @@
 
 **Storvv** is a multi-branch retail operations platform for inventory, sales (receipts), customers, staff, and reporting. It targets Nigerian and international retailers (NGN-first pricing, region-based branch naming).
 
-**Maturity:** Production-capable web app with Firebase backend, Paystack billing, iOS Capacitor shell, demo mode, in-app help center, and Gemini-powered assistant (demo uses rule-based replies). Core retail loops (inventory → sale → receipt → analytics) are implemented end-to-end. Enterprise features (multi-store sync, stock loans, copy-from-branch) are built. Payment links UI exists but is flagged **coming soon** on dashboard/native.
+**Maturity:** Production-capable web app with Firebase backend, Paystack billing, iOS Capacitor shell, demo mode, in-app help center, and Gemini-powered assistant (demo uses rule-based replies). Core retail loops (inventory → sale → receipt → analytics) are implemented end-to-end. Enterprise features (multi-store sync, stock loans, copy-from-branch) are built. Payment links are live on web and native (see `utils/payment-links-launch.ts`).
 
 **What “done” means here:** Feature has UI, store/API wiring, plan/role gates, and help/assistant coverage unless marked partial.
 
@@ -94,7 +94,7 @@ Firestore rules enforce stricter server-side limits (e.g. folder CRUD often owne
 | `/dashboard/receipts` | Sales hub: Receipts, Returns, Customers tabs |
 | `/dashboard/buybacks` | Customer buybacks (trade-ins) |
 | `/dashboard/seller-loans` | Stock loans (Enterprise) |
-| `/dashboard/payment-links` | Paystack links (**coming soon** UI flag) |
+| `/dashboard/payment-links` | Paystack payment links (web + native) |
 | `/dashboard/analytics` | Charts, feature insights, PDF/Excel export |
 | `/dashboard/activity` | Activity logs (Medium+) |
 | `/dashboard/multi-store-sync` | Transfers, consolidated reports (Enterprise) |
@@ -185,11 +185,12 @@ Firestore rules enforce stricter server-side limits (e.g. folder CRUD often owne
 
 ### 6.8 Payment links
 
-**Status: Partial - infrastructure built, dashboard UI coming soon**
+**Status: Live on web and native**
 
-- Paystack subaccounts, server APIs, public `/pay/[token]` page exist.
-- Dashboard page shows **coming soon** (`PAYMENT_LINKS_COMING_SOON = true`).
-- Native app: separate coming-soon flag.
+- Paystack subaccounts, server APIs, public `/pay/[token]` page.
+- Full dashboard at `/dashboard/payment-links` (bank connect, create, share, settlements).
+- Native: **Links** primary tab, OS share sheet after create, dashboard home **New link** shortcut.
+- Rollback flags: `PAYMENT_LINKS_COMING_SOON`, `PAYMENT_LINKS_NATIVE_COMING_SOON` in `utils/payment-links-launch.ts`.
 
 ### 6.9 Departments & staff
 

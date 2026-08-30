@@ -838,6 +838,9 @@
         >
           <DemoModeBanner v-if="isDemoDashboard" />
           <SubscriptionBillingBanner />
+          <ClientOnly>
+            <OfflineStatusBanner class="mb-3" />
+          </ClientOnly>
           <slot />
         </div>
       </main>
@@ -854,6 +857,9 @@
 
     <!-- Toast Notifications -->
     <ToastContainer />
+    <ClientOnly>
+      <GrowthPromptsHost />
+    </ClientOnly>
 
     <!-- Sign out confirmation -->
     <Modal
@@ -942,8 +948,7 @@ import DashboardProfileMenu from '~/components/dashboard/DashboardProfileMenu.vu
 import {
   splitNativeBottomNav,
   isDashboardNavActive,
-  NATIVE_PRIMARY_ORDER,
-  NATIVE_PRIMARY_ORDER_WITH_PAYMENT_LINKS,
+  resolveNativePrimaryOrder,
   type DashboardNavItem,
 } from '~/utils/dashboard-native-nav'
 import {
@@ -953,7 +958,7 @@ import {
 } from '~/utils/dashboard-nav-filter'
 import { shouldShowWebNavSection, webNavSectionLabel } from '~/utils/dashboard-web-nav-groups'
 import type { DashboardNavIconKey } from '~/utils/dashboard-nav-icons'
-import { isPaymentLinksNativeComingSoon, isPaymentLinksComingSoon } from '~/utils/payment-links-launch'
+import { isPaymentLinksComingSoon, shouldPromoteNativePaymentLinksTab } from '~/utils/payment-links-launch'
 import { resolveStoreDepartmentsPath } from '~/utils/department-routes'
 import { getStoreBranchShortLabel } from '~/utils/store-branch-label'
 import { storeBranchNavTooltip } from '~/utils/dashboard-tooltip'
@@ -1200,26 +1205,19 @@ const filteredNavigation = computed(() => {
 })
 
 /**
- * Native bottom nav is CSS-gated (html.capacitor-native), not isNativeApp.
- * Promote Payment links on iOS/Android when native coming-soon is on (business experience only).
+ * Native bottom nav: promote Payment links to a primary tab when live on Capacitor.
  */
-const nativeNavigationItems = computed((): DashboardNavItem[] => {
-  const items = filteredNavigation.value
-  if (!isPaymentLinksNativeComingSoon()) return items
-  if (items.some((item) => item.name === 'Payment links')) return items
-  if (!canUseBusinessCapability('paymentLinks')) return items
-  return [
-    ...items,
-    {
-      name: 'Payment links',
-      href: dashPath('/payment-links'),
-      iconKey: 'payment-links',
-    },
-  ]
-})
+const promoteNativePaymentLinks = computed(
+  () =>
+    shouldPromoteNativePaymentLinksTab() &&
+    canUseBusinessCapability('paymentLinks') &&
+    canUseSubscriptionFeature('payment_links')
+)
+
+const nativeNavigationItems = computed((): DashboardNavItem[] => filteredNavigation.value)
 
 const nativePrimaryOrder = computed(() =>
-  isPaymentLinksNativeComingSoon() ? NATIVE_PRIMARY_ORDER_WITH_PAYMENT_LINKS : NATIVE_PRIMARY_ORDER
+  resolveNativePrimaryOrder({ promotePaymentLinks: promoteNativePaymentLinks.value })
 )
 
 const nativeNavSplit = computed(() =>

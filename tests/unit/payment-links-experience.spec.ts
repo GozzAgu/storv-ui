@@ -15,14 +15,14 @@ describe('payment-links-experience', () => {
     ).toBe(false)
   })
 
-  it('shows native teaser for business experience on iOS shell', () => {
+  it('hides native teaser when payment links are live on native', () => {
     expect(
       shouldShowNativePaymentLinksTeaser({
         canUsePaymentLinksExperience: true,
-        paymentLinksNativeComingSoon: true,
+        paymentLinksNativeComingSoon: false,
         isNativeShell: true,
       })
-    ).toBe(true)
+    ).toBe(false)
   })
 
   it('builds summary visibility from plan and native teaser', () => {

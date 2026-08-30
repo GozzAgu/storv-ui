@@ -450,6 +450,7 @@ import {
 } from '~/composables/useReceiptProductDetails'
 import { getInventoryItemDisplayName } from '~/composables/useInventoryItemDisplay'
 import { useAppToast } from '~/composables/useAppToast'
+import { useProductAnalytics } from '~/composables/useProductAnalytics'
 import { useUser } from '~/composables/useUser'
 import { getQueryUserId } from '~/composables/useFirestorePaths'
 import { formatReceiptDateForWhatsApp } from '~/utils/whatsapp'
@@ -485,6 +486,7 @@ const showWhatsAppModal = ref(false)
 const emailToSend = ref('')
 const { copyToClipboard } = useCopy()
 const toast = useAppToast()
+const { trackEvent } = useProductAnalytics()
 const { hasFeature: hasWhatsAppFeature } = useWhatsAppMessaging()
 const { authFetch } = useAuthenticatedFetch()
 
@@ -1338,7 +1340,10 @@ const generateReceiptPDF = async (): Promise<string> => {
 
 const handleEmailClick = () => {
   if (!props.receipt) return
-  toast.info('Email receipts are coming soon.')
+  if (props.receipt.customerEmail) {
+    emailToSend.value = props.receipt.customerEmail
+  }
+  showEmailModal.value = true
 }
 
 const handleSendEmail = async () => {
@@ -1388,6 +1393,7 @@ const handleSendEmail = async () => {
     }
 
     alert('Receipt sent to email successfully!')
+    trackEvent('receipt_email_sent', { receipt_id: props.receipt.id })
     showEmailModal.value = false
     emailToSend.value = ''
   } catch (error: any) {

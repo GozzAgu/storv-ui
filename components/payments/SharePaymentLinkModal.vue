@@ -7,6 +7,16 @@
     @update:model-value="(v: boolean) => emit('update:modelValue', v)"
   >
     <div v-if="link" class="space-y-4">
+      <!-- Primary share (native sheet on phone) -->
+      <button
+        type="button"
+        class="flex w-full items-center justify-center gap-2 rounded-xl bg-primary-600 px-4 py-3 text-sm font-semibold text-white hover:bg-primary-700 disabled:opacity-60"
+        :disabled="sharing"
+        @click="shareViaSystem"
+      >
+        {{ sharing ? 'Opening share…' : nativeShareLabel }}
+      </button>
+
       <!-- Link -->
       <div
         class="flex items-center gap-2 rounded-lg bg-gray-50 p-1.5 ring-1 ring-gray-200 dark:bg-white/[0.04] dark:ring-white/10"
@@ -44,13 +54,13 @@
 
       <!-- Share channels -->
       <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        <a
-          :href="whatsappUrl"
-          target="_blank"
-          rel="noopener"
+        <button
+          type="button"
           class="share-btn bg-[#25D366]/10 text-[#1a8c46] dark:text-[#34d77f]"
-          >WhatsApp</a
+          @click="shareWhatsApp"
         >
+          WhatsApp
+        </button>
         <a
           :href="telegramUrl"
           target="_blank"
@@ -103,6 +113,9 @@ import { ref, computed, watch } from 'vue'
 import QRCode from 'qrcode'
 import Modal from '~/components/ui/Modal.vue'
 import { formatNaira } from '~/utils/naira'
+import { buildPaymentLinkShareMessage } from '~/utils/payment-link-share'
+import { usePaymentLinkShare } from '~/composables/usePaymentLinkShare'
+import { isCapacitorNative } from '~/utils/capacitor-env'
 
 export interface ShareableLink {
   url: string
@@ -112,24 +125,25 @@ export interface ShareableLink {
   total: number
 }
 
-const props = defineProps<{ modelValue: boolean; link: ShareableLink | null }>()
-const emit = defineEmits<{ 'update:modelValue': [boolean] }>()
+const props = defineProps<{
+  modelValue: boolean
+  link: ShareableLink | null
+  autoShare?: boolean
+}>()
+const emit = defineEmits<{ 'update:modelValue': [boolean]; shared: ['system' | 'whatsapp' | 'clipboard'] }>()
 
 const copied = ref(false)
+const { sharing, share, shareWhatsApp: openWhatsAppShare } = usePaymentLinkShare()
+
+const nativeShareLabel = computed(() =>
+  isCapacitorNative() ? 'Share to WhatsApp or apps' : 'Share link'
+)
 
 const message = computed(() => {
   if (!props.link) return ''
-  const name = props.link.customerName ? `Hi ${props.link.customerName},\n\n` : ''
-  return `${name}Here is your invoice ${props.link.invoiceNumber} for ${formatNaira(
-    props.link.total
-  )}.\n\nPay securely here:\n${props.link.url}`
+  return buildPaymentLinkShareMessage(props.link)
 })
 
-const whatsappUrl = computed(() => {
-  const phone = (props.link?.customerPhone || '').replace(/\D/g, '')
-  const base = phone ? `https://wa.me/${phone}` : 'https://wa.me/'
-  return `${base}?text=${encodeURIComponent(message.value)}`
-})
 const telegramUrl = computed(
   () =>
     `https://t.me/share/url?url=${encodeURIComponent(
@@ -161,16 +175,39 @@ watch(
   { immediate: true }
 )
 
+async function shareViaSystem() {
+  if (!props.link) return
+  const result = await share(props.link)
+  if (result === 'system' || result === 'whatsapp' || result === 'clipboard') {
+    emit('shared', result)
+  }
+}
+
+function shareWhatsApp() {
+  if (!props.link) return
+  openWhatsAppShare(props.link)
+  emit('shared', 'whatsapp')
+}
+
 const copyLink = async () => {
   if (!props.link?.url) return
   try {
-    await navigator.clipboard.writeText(props.link.url)
+    await navigator.clipboard.writeText(message.value)
     copied.value = true
     setTimeout(() => (copied.value = false), 1600)
+    emit('shared', 'clipboard')
   } catch {
     /* ignore */
   }
 }
+
+watch(
+  () => [props.modelValue, props.link?.url, props.autoShare] as const,
+  async ([open, url, autoShare]) => {
+    if (!open || !url || !autoShare || !props.link) return
+    await shareViaSystem()
+  }
+)
 </script>
 
 <style scoped>

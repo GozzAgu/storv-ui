@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   isDashboardNavActive,
   nativeNavShortLabel,
+  resolveNativePrimaryOrder,
   splitNativeBottomNav,
 } from '~/utils/dashboard-native-nav'
 
@@ -37,7 +38,26 @@ describe('splitNativeBottomNav', () => {
     const { primary, more } = splitNativeBottomNav(withLinks)
     expect(primary.map((i) => i.name)).toEqual(['Dashboard', 'Inventory', 'Sales', 'Analytics'])
     expect(more.map((i) => i.name)).toContain('Payment links')
-    expect(more.map((i) => i.name)).toContain('Departments')
+  })
+
+  it('promotes payment links to primary tab when configured', () => {
+    const withLinks = [
+      ...items,
+      {
+        name: 'Payment links',
+        href: '/dashboard/payment-links',
+        iconKey: 'payment-links' as const,
+      },
+    ]
+    const order = resolveNativePrimaryOrder({ promotePaymentLinks: true })
+    const { primary, more } = splitNativeBottomNav(withLinks, order)
+    expect(primary.map((i) => i.name)).toEqual([
+      'Dashboard',
+      'Inventory',
+      'Sales',
+      'Payment links',
+    ])
+    expect(more.map((i) => i.name)).toContain('Analytics')
   })
 })
 

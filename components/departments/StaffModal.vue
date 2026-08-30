@@ -6,7 +6,7 @@
     :subtitle="
       isEdit
         ? 'Update staff details.'
-        : 'Add a staff member with sign-in. You can email their credentials or copy them yourself.'
+        : 'Send an email invite so they set their own password, then assign role and branch.'
     "
     size="lg"
   >
@@ -25,9 +25,9 @@
           Invite emailed
         </h4>
         <p class="text-sm text-gray-500 dark:text-gray-400 max-w-sm mb-6">
-          Sign-in details were sent to
+          We emailed a secure sign-in link to
           <span class="font-medium text-gray-700 dark:text-gray-300">{{ formData.email }}</span>.
-          They can sign in and set a new password on first visit.
+          They can set a password, then sign in with their role and branch.
         </p>
         <Button
           size="sm"
@@ -357,6 +357,7 @@ import { useAppToast } from '~/composables/useAppToast'
 import { getApiErrorMessage } from '~/utils/api-error-message'
 import LimitUpgradeHint from '~/components/subscription/LimitUpgradeHint.vue'
 import { getPlanDisplayName, getMinimumPlanForFeature } from '~/types/subscription'
+import { useProductAnalytics } from '~/composables/useProductAnalytics'
 
 interface Props {
   modelValue: boolean
@@ -539,8 +540,10 @@ async function emailStaffCredentials(params: {
       userStore.userData?.name ||
       'Storvv',
     temporaryPassword: params.temporaryPassword,
-    mode: 'credentials',
+    mode: 'reset_link',
   })
+  const { trackEvent } = useProductAnalytics()
+  trackEvent('staff_invite_sent', { mode: 'reset_link' })
 }
 
 async function emailCredentialsAfterCreate() {

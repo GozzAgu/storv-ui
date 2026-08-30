@@ -3,6 +3,7 @@
     <Tutorial ref="tutorialRef" :tutorial-steps="resolvedTutorialSteps" @complete="onTutorialComplete" />
 
     <GettingStartedChecklist v-if="!needsStoreSelection && !isLoading" class="mb-4" />
+    <FirstWinBanner v-if="!needsStoreSelection && !isLoading" class="mb-4" />
 
     <DashboardPageHeader v-if="!isCapacitorIos" data-tutorial="dashboard" :class="pageHeaderClass">
       <template #eyebrow>
@@ -256,6 +257,7 @@
       <PaymentLinksSummaryCard
         v-if="canShowPaymentLinksSummary"
         card-class="dash-card dash-card--padded"
+        @create-link="goCreatePaymentLink"
       />
 
       <section :class="cardPaddedClass">
@@ -589,6 +591,11 @@ const canAccessLeadsPlan = computed(() => canUseSubscriptionFeature('sales_leads
 const openLeadsCount = computed(() => salesLeadsStore.openLeadsCount)
 const openLeadsPipeline = computed(() => salesLeadsStore.openPipelineValue)
 const { canShowPaymentLinksSummary } = usePaymentLinksLaunch()
+const router = useRouter()
+
+function goCreatePaymentLink() {
+  router.push('/dashboard/payment-links?create=1')
+}
 const { canManageBranches } = useBusinessCapabilities()
 const { canViewProfitAndCost } = usePermissions()
 const { isNativeApp } = useCapacitorNativeApp()

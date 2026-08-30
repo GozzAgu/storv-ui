@@ -172,6 +172,7 @@ import { clearSignOutPending } from '~/utils/auth-sign-out'
 import { getErrorMessage } from '~/utils/error-message'
 import { getAuthWaitMs, waitForAuthStore } from '~/utils/wait-for-auth'
 import { markOnboardingCompleteForSession } from '~/utils/onboarding-session'
+import { useFunnelAnalytics } from '~/composables/useFunnelAnalytics'
 import {
   isTwoFactorSessionVerified,
   markTwoFactorSessionVerified,
@@ -299,6 +300,11 @@ async function finishAuthenticatedSession(email: string, password: string) {
   }
 
   await persistBiometricLogin(email, password)
+
+  if (userData.role === 'superAdmin') {
+    const { recordMilestone } = useFunnelAnalytics()
+    await recordMilestone('firstLoginAt', { role: userData.role })
+  }
 
   let destination = '/dashboard'
   if (userData.role === 'staff') {

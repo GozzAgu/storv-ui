@@ -450,13 +450,14 @@ export const useReceiptsStore = defineStore('receipts', {
         const newReceiptRef = doc(receiptsRef)
 
         const now = new Date()
+        const useClientTimestamps = import.meta.client && !navigator.onLine
 
         // Build receipt object - strip undefined values (Firestore rejects undefined)
         const receiptPayload = {
           ...normalizedReceiptData,
           date: normalizedReceiptData.date || now,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
+          createdAt: useClientTimestamps ? now : serverTimestamp(),
+          updatedAt: useClientTimestamps ? now : serverTimestamp(),
           createdBy: createdByUid,
           ...(actualCreatorUid !== createdByUid && { actualCreator: actualCreatorUid }),
         }
@@ -464,7 +465,8 @@ export const useReceiptsStore = defineStore('receipts', {
           Object.entries(receiptPayload).filter(([, v]) => v !== undefined)
         ) as Omit<Receipt, 'id'>
 
-        await setDoc(newReceiptRef, newReceipt)
+        const { writeDocumentWithOfflineSupport } = await import('~/composables/useOfflineMode')
+        const writeResult = await writeDocumentWithOfflineSupport(newReceiptRef, newReceipt)
 
         // Add to local state
         const receiptForState: Receipt = {
@@ -477,7 +479,19 @@ export const useReceiptsStore = defineStore('receipts', {
           ...(actualCreatorUid !== createdByUid && { actualCreator: actualCreatorUid }), // Only include if different
         }
 
+        if (writeResult === 'queued') {
+          ;(receiptForState as Receipt & { pendingSync?: boolean }).pendingSync = true
+        }
+
         this.receipts.unshift(receiptForState)
+
+        const wasFirstSale = this.receipts.length === 1
+        if (wasFirstSale) {
+          const { useFunnelAnalytics } = await import('~/composables/useFunnelAnalytics')
+          await useFunnelAnalytics()
+            .recordMilestone('firstSaleAt', { store_id: storeId })
+            .catch(() => undefined)
+        }
 
         // Create notification (use account currency for amounts)
         try {

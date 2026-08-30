@@ -11,6 +11,7 @@ import {
   maybeDowngradeExpiredSubscription,
 } from '~/server/utils/paystack-subscription'
 import { VALID_PLANS } from '~/server/utils/paystack-validation'
+import { logServerError } from '~/server/utils/log-server-error'
 
 type PaystackWebhookPayload = {
   event?: string
@@ -133,7 +134,7 @@ export default defineEventHandler(async (event) => {
         await maybeDowngradeExpiredSubscription(adminDb, userId, userSnap.data())
       }
     } catch (err) {
-      console.error('[paystack/webhook] subscription disable failed', err)
+      logServerError('paystack/webhook.subscription_disable', err)
     }
   }
 
@@ -153,7 +154,7 @@ export default defineEventHandler(async (event) => {
         )
       }
     } catch (err) {
-      console.error('[paystack/webhook] invoice payment failed handler error', err)
+      logServerError('paystack/webhook.invoice_payment_failed', err)
     }
   }
 

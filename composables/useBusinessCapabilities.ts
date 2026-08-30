@@ -5,6 +5,8 @@ import {
   normalizeEnabledCapabilities,
   resolveExperienceMode,
 } from '~/types/business-experience'
+import { resolveEffectiveSubscriptionPlan } from '~/types/subscription'
+import { isProgressiveUnlockAvailableForPlan } from '~/utils/business-experience-settings'
 
 /**
  * Business experience capabilities (Solo vs Business).
@@ -29,7 +31,12 @@ export function useBusinessCapabilities() {
   )
 
   const canUse = (capability: BusinessCapability): boolean => {
-    return canUseBusinessCapability(capability, capabilityContext.value)
+    if (!canUseBusinessCapability(capability, capabilityContext.value)) return false
+    if (experienceMode.value === 'solo') {
+      const plan = resolveEffectiveSubscriptionPlan(userStore.userData)
+      return isProgressiveUnlockAvailableForPlan(capability, plan)
+    }
+    return true
   }
 
   const isSoloExperience = computed(() => experienceMode.value === 'solo')

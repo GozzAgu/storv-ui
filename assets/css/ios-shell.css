@@ -547,6 +547,16 @@ html.capacitor-ios.capacitor-native .subscription-billing-banner a {
   padding-inline: 0.875rem;
 }
 
+html.capacitor-ios.capacitor-native .dash-page-stack--ios-settings .experience-mode-picker button {
+  min-height: 3.5rem;
+}
+
+html.capacitor-ios.capacitor-native .dash-page-stack--ios-settings #advanced-features .dash-setting-row label {
+  min-height: 2.75rem;
+  display: flex;
+  align-items: center;
+}
+
 html.capacitor-ios.capacitor-native #settings-subscription {
   scroll-margin-top: calc(var(--dashboard-command-header-height, 5.875rem) + 0.75rem);
 }

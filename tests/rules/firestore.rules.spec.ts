@@ -245,6 +245,26 @@ describe('firestore.rules', () => {
     )
   })
 
+  async function seedMember(
+    context: Parameters<RulesTestEnvironment['withSecurityRulesDisabled']>[0] extends (
+      c: infer C
+    ) => unknown
+      ? C
+      : never,
+    ownerId: string,
+    storeId: string,
+    memberUid: string,
+    role: string,
+    canManageInventory = false
+  ) {
+    await setDoc(doc(context.firestore(), `users/${ownerId}/stores/${storeId}/members/${memberUid}`), {
+      authUid: memberUid,
+      role,
+      status: 'active',
+      ...(canManageInventory ? { canManageInventory: true } : {}),
+    })
+  }
+
   it('allows Enterprise plan owner to create store transfers', async () => {
     await testEnv.withSecurityRulesDisabled(async (context) => {
       await seedOwner(context, 'u1', 'storvv_enterprise')
@@ -259,5 +279,119 @@ describe('firestore.rules', () => {
         toStoreId: 's2',
       })
     )
+  })
+
+  it('allows manager with canManageInventory to create inventory folder', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await seedOwner(context, 'u1', 'storvv_medium')
+      await seedStore(context, 'u1', 's1')
+      await seedMember(context, 'u1', 's1', 'mgr1', 'manager', true)
+    })
+
+    const db = testEnv.authenticatedContext('mgr1').firestore()
+    await assertSucceeds(
+      setDoc(doc(db, 'users/u1/stores/s1/inventoryFolders/f1'), {
+        storeId: 's1',
+        name: 'Phones',
+        createdBy: 'mgr1',
+      })
+    )
+  })
+
+  it('denies manager without canManageInventory from creating inventory folder', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await seedOwner(context, 'u1', 'storvv_medium')
+      await seedStore(context, 'u1', 's1')
+      await seedMember(context, 'u1', 's1', 'mgr1', 'manager', false)
+    })
+
+    const db = testEnv.authenticatedContext('mgr1').firestore()
+    await assertFails(
+      setDoc(doc(db, 'users/u1/stores/s1/inventoryFolders/f1'), {
+        storeId: 's1',
+        name: 'Phones',
+        createdBy: 'mgr1',
+      })
+    )
+  })
+
+  it('denies staff from creating inventory folder even with canManageInventory flag', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await seedOwner(context, 'u1', 'storvv_medium')
+      await seedStore(context, 'u1', 's1')
+      await seedMember(context, 'u1', 's1', 'staff1', 'staff', true)
+    })
+
+    const db = testEnv.authenticatedContext('staff1').firestore()
+    await assertFails(
+      setDoc(doc(db, 'users/u1/stores/s1/inventoryFolders/f1'), {
+        storeId: 's1',
+        name: 'Phones',
+        createdBy: 'staff1',
+      })
+    )
+  })
+
+  it('allows owner to update activationFunnel on own user doc', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await seedOwner(context, 'u1', 'storvv_micro')
+    })
+
+    const db = testEnv.authenticatedContext('u1').firestore()
+    await assertSucceeds(
+      setDoc(
+        doc(db, 'users/u1'),
+        {
+          activationFunnel: {
+            signedUpAt: '2026-01-01T00:00:00.000Z',
+            firstLoginAt: '2026-01-02T00:00:00.000Z',
+          },
+        },
+        { merge: true }
+      )
+    )
+  })
+
+  it('allows store member to create inventory audit log on Micro plan', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await seedOwner(context, 'u1', 'storvv_micro')
+      await seedStore(context, 'u1', 's1')
+      await seedMember(context, 'u1', 's1', 'staff1', 'staff', false)
+    })
+
+    const db = testEnv.authenticatedContext('staff1').firestore()
+    await assertSucceeds(
+      setDoc(doc(db, 'users/u1/stores/s1/inventoryAuditLogs/log1'), {
+        storeId: 's1',
+        userId: 'staff1',
+        action: 'price_change',
+        itemId: 'item1',
+        itemName: 'Widget',
+        field: 'price',
+        previousValue: 100,
+        newValue: 120,
+        createdAt: new Date().toISOString(),
+      })
+    )
+  })
+
+  it('denies non-member from reading inventory audit logs', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await seedOwner(context, 'u1', 'storvv_micro')
+      await seedStore(context, 'u1', 's1')
+      await setDoc(doc(context.firestore(), 'users/u1/stores/s1/inventoryAuditLogs/log1'), {
+        storeId: 's1',
+        userId: 'u1',
+        action: 'price_change',
+        itemId: 'item1',
+        itemName: 'Widget',
+        field: 'price',
+        previousValue: 100,
+        newValue: 120,
+      })
+    })
+
+    const db = testEnv.authenticatedContext('u2').firestore()
+    await assertFails(getDoc(doc(db, 'users/u1/stores/s1/inventoryAuditLogs/log1')))
   })
 })

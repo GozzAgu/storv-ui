@@ -14,8 +14,20 @@ export const NATIVE_PRIMARY_ORDER = [
   'Analytics',
 ] as const
 
-/** Same primary tabs when payment links is promoted - links live under More. */
+/** Phone-first tab bar when payment links are live on native. */
+export const NATIVE_PRIMARY_ORDER_PAYMENT_LINKS = [
+  'Dashboard',
+  'Inventory',
+  'Sales',
+  'Payment links',
+] as const
+
+/** @deprecated Use resolveNativePrimaryOrder instead. */
 export const NATIVE_PRIMARY_ORDER_WITH_PAYMENT_LINKS = NATIVE_PRIMARY_ORDER
+
+export function resolveNativePrimaryOrder(options: { promotePaymentLinks: boolean }): readonly string[] {
+  return options.promotePaymentLinks ? NATIVE_PRIMARY_ORDER_PAYMENT_LINKS : NATIVE_PRIMARY_ORDER
+}
 
 export function splitNativeBottomNav(
   items: DashboardNavItem[],

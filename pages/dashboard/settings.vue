@@ -43,6 +43,9 @@
           </span>
         </div>
         <p class="mb-3 text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
+          Questions about billing or your data? <GrowthSupportLink />
+        </p>
+        <p class="mb-3 text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
           <span class="font-medium text-gray-700 dark:text-gray-300">Plan</span> is what you pay
           for (Micro, Medium, Enterprise).
           <span class="font-medium text-gray-700 dark:text-gray-300"> Workspace style</span> controls
@@ -130,6 +133,10 @@
           </div>
         </div>
       </DashboardSettingsPanel>
+
+      <CancelDataPolicyPanel v-if="userStore.isSuperAdmin" />
+      <ScheduledBackupPanel v-if="userStore.isSuperAdmin" />
+      <InventoryAuditPanel v-if="userStore.isSuperAdmin" />
 
       <DashboardSettingsPanel
         v-if="userStore.isSuperAdmin"
@@ -1112,11 +1119,15 @@ import { useStoreDataExport } from '~/composables/useStoreDataExport'
 import { usePreferences, regions } from '~/composables/usePreferences'
 import { getCitiesForRegion, isCityInRegion } from '~/utils/region-cities'
 import { formatBranchDisplayName, parseBranchDisplayName } from '~/utils/branch-name'
-import type { BusinessCapability } from '~/types/business-experience'
+import { useProductAnalytics } from '~/composables/useProductAnalytics'
+import { useFunnelAnalytics } from '~/composables/useFunnelAnalytics'
+import { openChurnSurveyModal } from '~/composables/growth-prompts-state'
+import { useBackupPreferences } from '~/composables/useBackupPreferences'
 import {
-  SOLO_PROGRESSIVE_UNLOCK_OPTIONS,
   applyEnabledCapabilitiesToStoreDetails,
+  getProgressiveUnlockOptionsForPlan,
   isProgressiveCapabilityEnabled,
+  isProgressiveUnlockAvailableForPlan,
   setProgressiveCapabilityEnabled,
 } from '~/utils/business-experience-settings'
 
@@ -1150,6 +1161,7 @@ const {
 
 const { isCapacitorIos } = useIsCapacitorIos()
 
+
 // Store information
 const storeInfo = reactive({
   name: '',
@@ -1175,9 +1187,17 @@ const inventoryStore = useInventoryStore()
 const toast = useAppToast()
 
 const { isSoloExperience, enabledCapabilities, canManageBranches } = useBusinessCapabilities()
-const soloProgressiveUnlockOptions = SOLO_PROGRESSIVE_UNLOCK_OPTIONS
+const effectiveSubscriptionPlan = computed(() =>
+  resolveEffectiveSubscriptionPlan(userStore.userData)
+)
+const soloProgressiveUnlockOptions = computed(() =>
+  getProgressiveUnlockOptionsForPlan(effectiveSubscriptionPlan.value)
+)
 const showProgressiveUnlockPanel = computed(
-  () => userStore.isSuperAdmin && isSoloExperience.value
+  () =>
+    userStore.isSuperAdmin &&
+    isSoloExperience.value &&
+    soloProgressiveUnlockOptions.value.length > 0
 )
 const togglingProgressiveCapability = ref<BusinessCapability | null>(null)
 
@@ -1216,6 +1236,7 @@ async function handleExportAllStoreData() {
     toast.success(
       `Exported: inventory ZIP (${summary.inventory.folders} categories, ${summary.inventory.items} product(s)), ${summary.receipts.count} sale(s), ${summary.buybacks.count} buyback(s), ${summary.stockLoans.count} stock loan(s).`
     )
+    await markBackupExported()
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Export failed'
     toast.error(message)
@@ -1240,7 +1261,7 @@ const canEditSettings = computed(() => {
 // Subscription
 const subscriptionOrder: SubscriptionPlan[] = ['storvv_micro', 'storvv_medium', 'storvv_enterprise']
 const currentSubscription = computed<SubscriptionPlan>(() => {
-  return (userStore.userData?.subscription as SubscriptionPlan) || 'storvv_micro'
+  return resolveEffectiveSubscriptionPlan(userStore.userData)
 })
 const currentSubscriptionLabel = computed(() => {
   return SUBSCRIPTION_PLANS.find((p) => p.id === currentSubscription.value)?.name || 'Storvv Micro'
@@ -1328,6 +1349,21 @@ const selectedUpgradePlan = ref<SubscriptionPlan | ''>('')
 const selectedBillingCycle = ref<SubscriptionBillingCycle>('monthly')
 const isUpgradingSubscription = ref(false)
 
+watch(
+  upgradeOptions,
+  (options) => {
+    if (options.length === 0) {
+      selectedUpgradePlan.value = ''
+      return
+    }
+    const selectionStillValid = options.some((plan) => plan.id === selectedUpgradePlan.value)
+    if (!selectedUpgradePlan.value || !selectionStillValid) {
+      selectedUpgradePlan.value = options[0].id
+    }
+  },
+  { immediate: true }
+)
+
 const subscriptionRenewalLabel = computed(() => {
   const status = userStore.userData?.subscriptionStatus
   const cycle = userStore.userData?.subscriptionBillingCycle
@@ -1379,6 +1415,10 @@ const {
   cancel: cancelTotp,
 } = useTotpConfirmModal()
 
+const { trackEvent } = useProductAnalytics()
+const { recordMilestone } = useFunnelAnalytics()
+const { markBackupExported } = useBackupPreferences()
+
 const handleUpgradeSubscription = async () => {
   if (!canEditSettings.value) {
     toast.error('Only super admins can upgrade subscription')
@@ -1389,6 +1429,11 @@ const handleUpgradeSubscription = async () => {
     return
   }
   if (!selectedUpgradePlan.value) return
+
+  trackEvent('upgrade_started', {
+    plan: selectedUpgradePlan.value,
+    billing_cycle: selectedBillingCycle.value,
+  })
 
   totpModalTitle.value = 'Confirm upgrade'
   totpModalDescription.value =
@@ -1515,6 +1560,12 @@ const handleCancelSubscription = async () => {
     } else {
       toast.success('Auto-renew canceled.')
     }
+
+    await recordMilestone('subscriptionCanceledAt', {
+      plan: currentSubscription.value,
+      grace_end: result.subscriptionCurrentPeriodEnd,
+    })
+    openChurnSurveyModal()
   } finally {
     isCancelingSubscription.value = false
   }
@@ -2055,6 +2106,11 @@ onMounted(async () => {
         toast.success(
           formatUpgradeSuccessMessage(verify.planId as SubscriptionPlan, previousPlan)
         )
+        await recordMilestone('firstUpgradeSuccessAt', {
+          plan: verify.planId,
+          previous_plan: previousPlan,
+        })
+        trackEvent('upgrade_success', { plan: verify.planId, previous_plan: previousPlan })
         selectedUpgradePlan.value = ''
         if (import.meta.client && window.history.replaceState) {
           window.history.replaceState({}, '', '/dashboard/settings')
@@ -2153,6 +2209,12 @@ const onProgressiveCapabilityToggle = async (
 
   if (!canEditSettings.value) {
     toast.error('Only super admins can edit settings')
+    return
+  }
+
+  const plan = resolveEffectiveSubscriptionPlan(userStore.userData)
+  if (enabled && !isProgressiveUnlockAvailableForPlan(capability, plan)) {
+    toast.error('This feature is not included on your current plan.')
     return
   }
 

@@ -288,7 +288,12 @@
       </section>
 
       <CreatePaymentLinkModal v-model="showCreate" @created="onCreated" />
-      <SharePaymentLinkModal v-model="showShare" :link="activeLink" />
+      <SharePaymentLinkModal
+        v-model="showShare"
+        :link="activeLink"
+        :auto-share="autoShareAfterCreate"
+        @shared="onLinkShared"
+      />
       <TotpConfirmModal
         v-model="totpModalOpen"
         title="Confirm bank connection"
@@ -296,12 +301,23 @@
         @confirm="confirmTotp"
         @cancel="cancelTotp"
       />
+
+      <button
+        v-if="isNativeShell && payout.connected && !showPaymentLinksComingSoon"
+        type="button"
+        class="payment-links-native-fab"
+        aria-label="New payment link"
+        @click="showCreate = true"
+      >
+        <CreditCardIcon class="h-5 w-5" stroke-width="2" />
+      </button>
     </template>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, defineAsyncComponent } from 'vue'
+import { useRoute } from 'vue-router'
 import {
   BuildingLibraryIcon,
   CheckBadgeIcon,
@@ -325,6 +341,8 @@ import { usePaymentLinks, type PaymentLinkListItem } from '~/composables/usePaym
 import { useUserStore } from '~/stores/user'
 import PaymentLinksComingSoon from '~/components/payments/PaymentLinksComingSoon.vue'
 import TotpConfirmModal from '~/components/security/TotpConfirmModal.vue'
+import { usePaymentLinksLaunch } from '~/composables/usePaymentLinksLaunch'
+import { isCapacitorNative } from '~/utils/capacitor-env'
 import { useTotpConfirmModal } from '~/composables/useTotpConfirmModal'
 import { resolveTotpForSensitiveAction } from '~/utils/security-api-errors'
 
@@ -333,7 +351,9 @@ definePageMeta({
   middleware: 'auth',
 })
 
+const route = useRoute()
 const { showPaymentLinksComingSoon } = usePaymentLinksLaunch()
+const isNativeShell = computed(() => isCapacitorNative())
 
 const { eyebrowClass, titleClass, headerBtnClass, fieldClass } = useDashboardPageChrome()
 const { tableShellClass, tableSectionHeaderClass } = useDashboardTableChrome()
@@ -397,6 +417,7 @@ const editingBank = ref(false)
 
 const showCreate = ref(false)
 const showShare = ref(false)
+const autoShareAfterCreate = ref(false)
 const activeLink = ref<ShareableLink | null>(null)
 
 const canConnect = computed(() =>
@@ -476,8 +497,13 @@ const refresh = () => loadAll()
 
 const onCreated = async (link: ShareableLink) => {
   activeLink.value = link
+  autoShareAfterCreate.value = isNativeShell.value
   showShare.value = true
   await loadLinks()
+}
+
+const onLinkShared = () => {
+  autoShareAfterCreate.value = false
 }
 
 const share = (inv: PaymentLinkListItem) => {
@@ -488,6 +514,7 @@ const share = (inv: PaymentLinkListItem) => {
     customerPhone: inv.customerPhone,
     total: inv.total,
   }
+  autoShareAfterCreate.value = false
   showShare.value = true
 }
 
@@ -525,5 +552,26 @@ onMounted(async () => {
   if (showPaymentLinksComingSoon.value) return
   await loadAll()
   if (!payout.value.connected) await loadBanks()
+  if (route.query.create === '1' && payout.value.connected) {
+    showCreate.value = true
+  }
 })
 </script>
+
+<style scoped>
+html.capacitor-native .payment-links-native-fab {
+  position: fixed;
+  right: 1rem;
+  bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+  z-index: 55;
+  display: flex;
+  height: 3.25rem;
+  width: 3.25rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: rgb(var(--color-primary-600, 37 99 235));
+  color: white;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.18);
+}
+</style>

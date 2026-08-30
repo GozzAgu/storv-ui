@@ -12,12 +12,7 @@
         </nav>
       </template>
       <template #title>
-        <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <h1 :class="titleClass">Categories</h1>
-          <DuplicateFeatureUpsellBanner
-            :loading="inventoryStore.loading && inventoryStore.folders.length === 0"
-          />
-        </div>
+        <h1 :class="titleClass">Categories</h1>
       </template>
       <template
         v-if="!inventoryStore.loading && inventoryStore.folders.length > 0"
@@ -1346,7 +1341,6 @@ import Modal from '~/components/ui/Modal.vue'
 import SidePanel from '~/components/ui/SidePanel.vue'
 import Button from '~/components/ui/Button.vue'
 import DeleteFolderModal from '~/components/inventory/DeleteFolderModal.vue'
-import DuplicateFeatureUpsellBanner from '~/components/inventory/DuplicateFeatureUpsellBanner.vue'
 import InventoryCategoryCard from '~/components/inventory/InventoryCategoryCard.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import DashboardTablePagination from '~/components/dashboard/DashboardTablePagination.vue'
@@ -1670,7 +1664,6 @@ watch(isStaff, (staff) => {
 const { formatCurrency, preferences } = usePreferences()
 const currencySymbol = computed(() => preferences.value?.currencySymbol || '$')
 
-// Duplicate folders/items only on Storvv Medium and Enterprise
 const canDuplicateByPlan = computed(() => {
   const sub = userStore.userData?.subscription
   return sub === 'storvv_medium' || sub === 'storvv_enterprise'

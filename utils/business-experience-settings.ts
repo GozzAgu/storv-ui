@@ -5,6 +5,11 @@ import {
   normalizeEnabledCapabilities,
   type BusinessCapability,
 } from '~/types/business-experience'
+import {
+  getPlanLimits,
+  planHasFeature,
+  type SubscriptionPlan,
+} from '~/types/subscription'
 
 export type SoloProgressiveUnlockOption = {
   capability: BusinessCapability
@@ -40,6 +45,46 @@ export const SOLO_PROGRESSIVE_UNLOCK_OPTIONS: SoloProgressiveUnlockOption[] = [
     description: 'Show Payment links for shareable remote checkout.',
   },
 ]
+
+/** Whether a solo progressive-unlock toggle is meaningful on the given plan. */
+export function isProgressiveUnlockAvailableForPlan(
+  capability: BusinessCapability,
+  plan: SubscriptionPlan
+): boolean {
+  switch (capability) {
+    case 'staffManagement':
+    case 'rolesPermissionsAdmin':
+      return planHasFeature(plan, 'departments')
+    case 'paymentLinks':
+      return planHasFeature(plan, 'payment_links')
+    case 'multiLocationAdmin': {
+      const { maxStores } = getPlanLimits(plan)
+      return maxStores === -1 || maxStores > 1
+    }
+    case 'approvalWorkflows':
+      return planHasFeature(plan, 'multi_store_sync')
+    default:
+      return false
+  }
+}
+
+export function getProgressiveUnlockOptionsForPlan(
+  plan: SubscriptionPlan
+): SoloProgressiveUnlockOption[] {
+  return SOLO_PROGRESSIVE_UNLOCK_OPTIONS.filter((option) =>
+    isProgressiveUnlockAvailableForPlan(option.capability, plan)
+  )
+}
+
+/** Drop enabled capabilities that the current plan cannot use (e.g. after downgrade). */
+export function filterEnabledCapabilitiesForPlan(
+  capabilities: BusinessCapability[] | null | undefined,
+  plan: SubscriptionPlan
+): BusinessCapability[] {
+  return normalizeEnabledCapabilities(capabilities).filter((capability) =>
+    isProgressiveUnlockAvailableForPlan(capability, plan)
+  )
+}
 
 export function isProgressiveCapabilityEnabled(
   capability: BusinessCapability,

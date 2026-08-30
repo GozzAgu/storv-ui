@@ -8,26 +8,29 @@
           Payment links
         </p>
         <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
-          {{
-            showNativeComingSoon
-              ? 'Coming soon on mobile'
-              : 'Money collected through shareable links'
-          }}
+          Money collected through shareable links
         </p>
       </div>
-      <NuxtLink
-        v-if="!showNativeComingSoon"
-        to="/dashboard/payment-links"
-        class="shrink-0 text-[11px] font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
-      >
-        Open
-      </NuxtLink>
+      <div class="flex shrink-0 items-center gap-2">
+        <button
+          v-if="payout.connected && isNativeShell"
+          type="button"
+          class="rounded-full bg-primary-600 px-2.5 py-1 text-[10px] font-semibold text-white"
+          @click="openCreate"
+        >
+          New link
+        </button>
+        <NuxtLink
+          to="/dashboard/payment-links"
+          class="text-[11px] font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+        >
+          Open
+        </NuxtLink>
+      </div>
     </div>
 
-    <PaymentLinksComingSoon v-if="showNativeComingSoon" compact />
-
     <!-- Loading -->
-    <div v-else-if="loading && links.length === 0" class="space-y-2">
+    <div v-if="loading && links.length === 0" class="space-y-2">
       <div class="h-12 animate-pulse rounded-lg bg-gray-100 dark:bg-white/[0.06]" />
       <div class="h-10 animate-pulse rounded-lg bg-gray-100 dark:bg-white/[0.06]" />
     </div>
@@ -137,7 +140,9 @@ import { computed, onMounted, watch } from 'vue'
 import { formatNaira } from '~/utils/naira'
 import { usePaymentLinks, type PaymentLinkListItem } from '~/composables/usePaymentLinks'
 import { useStoresStore } from '~/stores/stores'
-import PaymentLinksComingSoon from '~/components/payments/PaymentLinksComingSoon.vue'
+import { isCapacitorNative } from '~/utils/capacitor-env'
+
+const emit = defineEmits<{ 'create-link': [] }>()
 
 const props = withDefaults(defineProps<{ cardClass?: string; limit?: number }>(), {
   cardClass: 'rounded-xl bg-white p-4 dark:bg-dashboard-card',
@@ -145,8 +150,12 @@ const props = withDefaults(defineProps<{ cardClass?: string; limit?: number }>()
 })
 
 const storesStore = useStoresStore()
-const { showNativeComingSoon } = usePaymentLinksLaunch()
 const { payout, links, stats, settlementSummary, loading, loadAll } = usePaymentLinks()
+const isNativeShell = computed(() => isCapacitorNative())
+
+function openCreate() {
+  emit('create-link')
+}
 
 const recentLinks = computed(() => links.value.slice(0, props.limit))
 
@@ -162,7 +171,6 @@ const statusClass = (s: PaymentLinkListItem['status']) =>
   }[s])
 
 const load = () => {
-  if (showNativeComingSoon.value) return
   loadAll().catch(() => {})
 }
 

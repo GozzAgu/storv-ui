@@ -74,6 +74,10 @@ export interface UserData {
   twoFactorEnabledAt?: string | null
   createdAt: any
   updatedAt: any
+  /** Funnel milestones for product analytics (owner accounts). */
+  activationFunnel?: import('~/types/growth').ActivationFunnel
+  growthFeedback?: import('~/types/growth').GrowthFeedback
+  backupPreferences?: import('~/types/growth').BackupPreferences
 }
 
 /**

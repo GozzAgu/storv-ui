@@ -296,6 +296,7 @@ import { useUserStore } from '~/stores/user'
 import { getCitiesForRegion, isCityInRegion } from '~/utils/region-cities'
 import type { ExperienceMode } from '~/types/business-experience'
 import { withOnboardingExperienceChoice } from '~/utils/onboarding-experience'
+import { useFunnelAnalytics } from '~/composables/useFunnelAnalytics'
 
 definePageMeta({
   layout: 'dashboard',
@@ -307,6 +308,7 @@ const { getUserDocument, updateUserDocument, updateStoreDetails } = useUser()
 const { updatePreferences } = usePreferences()
 const storesStore = useStoresStore()
 const userStore = useUserStore()
+const { recordMilestone } = useFunnelAnalytics()
 
 const currentStep = ref(1)
 const totalSteps = 3
@@ -480,8 +482,13 @@ const completeOnboarding = async () => {
       )
     }
 
-    // Redirect to dashboard (tutorial will start there)
-    await navigateTo('/dashboard')
+    // Redirect to dashboard with first-win banner
+    await recordMilestone('onboardingCompletedAt', {
+      experience_mode: selectedExperienceMode.value,
+      currency: selectedCurrency.value,
+      country: selectedCountry.value,
+    })
+    await navigateTo('/dashboard?welcome=1')
   } catch (error: any) {
     console.error('Onboarding error:', error)
     errorMessage.value = error.message || 'Failed to save information. Please try again.'

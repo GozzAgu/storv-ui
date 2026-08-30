@@ -452,6 +452,10 @@
       </div>
     </section>
 
+    <LandingMoat />
+    <LandingCaseStudies />
+    <LandingPartners />
+
     <LandingFaq />
 
     <LandingContact @open-form="showContactFormModal = true" />

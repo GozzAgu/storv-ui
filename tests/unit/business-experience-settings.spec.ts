@@ -1,13 +1,16 @@
 import { describe, expect, it } from 'vitest'
 import {
   applyEnabledCapabilitiesToStoreDetails,
+  filterEnabledCapabilitiesForPlan,
+  getProgressiveUnlockOptionsForPlan,
   isProgressiveCapabilityEnabled,
+  isProgressiveUnlockAvailableForPlan,
   setProgressiveCapabilityEnabled,
   SOLO_PROGRESSIVE_UNLOCK_OPTIONS,
 } from '~/utils/business-experience-settings'
 
 describe('business-experience-settings', () => {
-  it('lists all solo unlock options including payment links', () => {
+  it('lists all solo unlock options in catalog order', () => {
     expect(SOLO_PROGRESSIVE_UNLOCK_OPTIONS.map((option) => option.capability)).toEqual([
       'staffManagement',
       'multiLocationAdmin',
@@ -15,6 +18,51 @@ describe('business-experience-settings', () => {
       'approvalWorkflows',
       'paymentLinks',
     ])
+  })
+
+  it('filters progressive unlock options by subscription plan', () => {
+    expect(
+      getProgressiveUnlockOptionsForPlan('storvv_micro').map((option) => option.capability)
+    ).toEqual(['staffManagement', 'rolesPermissionsAdmin', 'paymentLinks'])
+
+    expect(
+      getProgressiveUnlockOptionsForPlan('storvv_medium').map((option) => option.capability)
+    ).toEqual([
+      'staffManagement',
+      'multiLocationAdmin',
+      'rolesPermissionsAdmin',
+      'paymentLinks',
+    ])
+
+    expect(
+      getProgressiveUnlockOptionsForPlan('storvv_enterprise').map((option) => option.capability)
+    ).toEqual([
+      'staffManagement',
+      'multiLocationAdmin',
+      'rolesPermissionsAdmin',
+      'approvalWorkflows',
+      'paymentLinks',
+    ])
+  })
+
+  it('maps plan requirements for each capability', () => {
+    expect(isProgressiveUnlockAvailableForPlan('staffManagement', 'storvv_micro')).toBe(true)
+    expect(isProgressiveUnlockAvailableForPlan('multiLocationAdmin', 'storvv_micro')).toBe(false)
+    expect(isProgressiveUnlockAvailableForPlan('multiLocationAdmin', 'storvv_medium')).toBe(true)
+    expect(isProgressiveUnlockAvailableForPlan('approvalWorkflows', 'storvv_medium')).toBe(false)
+    expect(isProgressiveUnlockAvailableForPlan('approvalWorkflows', 'storvv_enterprise')).toBe(
+      true
+    )
+    expect(isProgressiveUnlockAvailableForPlan('paymentLinks', 'storvv_micro')).toBe(true)
+  })
+
+  it('drops enabled capabilities that are unavailable on the plan', () => {
+    expect(
+      filterEnabledCapabilitiesForPlan(
+        ['staffManagement', 'multiLocationAdmin', 'approvalWorkflows'],
+        'storvv_micro'
+      )
+    ).toEqual(['staffManagement'])
   })
 
   it('toggles capabilities without duplicates or unknown keys', () => {

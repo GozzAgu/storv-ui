@@ -104,6 +104,8 @@ export default defineNuxtConfig({
       paystackPublicKey: process.env.NUXT_PUBLIC_PAYSTACK_PUBLIC_KEY || '',
       /** Optional: base URL for a separate API server when using a static frontend. Staff creation is client-side and does not require a server. */
       apiBase: process.env.NUXT_PUBLIC_API_BASE || '',
+      /** Optional Sentry DSN for client error reporting (https://sentry.io) */
+      sentryDsn: process.env.NUXT_PUBLIC_SENTRY_DSN || '',
       firebase: {
         apiKey: process.env.NUXT_PUBLIC_FIREBASE_API_KEY || '',
         authDomain: process.env.NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN || '',
