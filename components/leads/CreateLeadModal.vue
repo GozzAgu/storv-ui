@@ -164,14 +164,15 @@
     </div>
 
     <template #footer>
-      <div class="flex justify-end gap-2">
-        <Button variant="outline" size="sm" :disabled="isSaving" @click="emit('update:modelValue', false)">
-          Cancel
-        </Button>
-        <Button variant="primary" size="sm" :loading="isSaving" :disabled="!canSave" @click="save">
-          Save lead
-        </Button>
-      </div>
+      <IosDrawerActions
+        cancel-label="Cancel"
+        primary-label="Save lead"
+        :primary-loading="isSaving"
+        :primary-disabled="!canSave"
+        :cancel-disabled="isSaving"
+        @cancel="emit('update:modelValue', false)"
+        @primary="save"
+      />
     </template>
   </SidePanel>
 </template>
@@ -179,7 +180,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import SidePanel from '~/components/ui/SidePanel.vue'
-import Button from '~/components/ui/Button.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import { usePreferences } from '~/composables/usePreferences'
 import { useSalesLeadsStore } from '~/stores/salesLeads'
 import { findDuplicateOpenLead } from '~/composables/leads/findDuplicateOpenLead'

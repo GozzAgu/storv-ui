@@ -69,25 +69,14 @@
     </div>
 
     <template #footer>
-      <Button
-        variant="outline"
-        size="sm"
-        class="!rounded-2xl"
-        :disabled="isProcessing"
-        @click="handleCancel"
-      >
-        Cancel
-      </Button>
-      <Button
-        variant="primary"
-        size="sm"
-        class="!rounded-2xl"
-        :icon="ArrowsRightLeftIcon"
-        :disabled="!canSubmit"
-        @click="handleConfirm"
-      >
-        {{ isProcessing ? 'Moving…' : 'Move staff member' }}
-      </Button>
+      <IosDrawerActions
+        primary-label="Move staff member"
+        :primary-icon="ArrowsRightLeftIcon"
+        :primary-disabled="!canSubmit"
+        :primary-loading="isProcessing"
+        @cancel="handleCancel"
+        @primary="handleConfirm"
+      />
     </template>
   </Modal>
 </template>
@@ -98,7 +87,7 @@ import {
   ArrowsRightLeftIcon,
 } from '~/utils/app-icons'
 import Modal from '~/components/ui/Modal.vue'
-import Button from '~/components/ui/Button.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import type { Staff } from '~/composables/useStaff'
 import type { Department } from '~/composables/useDepartments'

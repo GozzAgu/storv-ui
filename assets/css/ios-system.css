@@ -154,21 +154,21 @@ html.capacitor-ios.capacitor-native .ios-action-btn--primary,
 html.capacitor-ios.capacitor-native .btn-primary,
 html.capacitor-ios.capacitor-native button.btn-primary {
   border-color: transparent !important;
-  background: var(--ios-accent) !important;
+  background: var(--storvv-navy, var(--ios-accent)) !important;
   color: #ffffff !important;
   box-shadow:
     0 1px 2px rgb(0 0 0 / 0.06),
-    0 4px 14px rgb(20 63 141 / 0.22);
+    0 4px 14px rgb(20 63 141 / 0.28);
 }
 
 html.capacitor-ios.capacitor-native.dark .ios-action-btn--primary,
 html.capacitor-ios.capacitor-native.dark .btn-primary,
 html.capacitor-ios.capacitor-native.dark button.btn-primary {
-  background: var(--ios-accent-soft) !important;
-  color: #0a1628 !important;
+  background: linear-gradient(180deg, var(--storvv-blue, #4876c7) 0%, var(--storvv-navy, #143f8d) 100%) !important;
+  color: #ffffff !important;
   box-shadow:
     0 1px 2px rgb(0 0 0 / 0.35),
-    0 6px 18px rgb(0 0 0 / 0.35);
+    0 6px 18px rgb(20 63 141 / 0.35);
 }
 
 html.capacitor-ios.capacitor-native .ios-action-btn--secondary,
@@ -176,9 +176,9 @@ html.capacitor-ios.capacitor-native .ios-action-btn--outline,
 html.capacitor-ios.capacitor-native .ios-action-btn--ghost,
 html.capacitor-ios.capacitor-native .btn-secondary,
 html.capacitor-ios.capacitor-native .btn-outline {
-  border: 1px solid var(--ios-separator) !important;
-  background: var(--ios-fill-tertiary) !important;
-  color: var(--ios-label) !important;
+  border: 1px solid rgb(20 63 141 / 0.28) !important;
+  background: rgb(20 63 141 / 0.06) !important;
+  color: var(--storvv-navy, var(--ios-accent)) !important;
   box-shadow: none !important;
 }
 
@@ -187,8 +187,9 @@ html.capacitor-ios.capacitor-native.dark .ios-action-btn--outline,
 html.capacitor-ios.capacitor-native.dark .ios-action-btn--ghost,
 html.capacitor-ios.capacitor-native.dark .btn-secondary,
 html.capacitor-ios.capacitor-native.dark .btn-outline {
-  background: rgb(118 118 128 / 0.18) !important;
-  color: var(--ios-label) !important;
+  border: 1px solid rgb(154 181 227 / 0.24) !important;
+  background: rgb(20 63 141 / 0.16) !important;
+  color: var(--storvv-blue-soft, var(--ios-accent-soft)) !important;
 }
 
 html.capacitor-ios.capacitor-native .ios-action-btn--danger,

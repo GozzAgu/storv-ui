@@ -57,10 +57,11 @@
       </div>
     </div>
 
-    <DashboardNativeSheet
+    <IosDrawer
       v-model="moreOpen"
       title="More"
       variant="menu"
+      footer-variant="menu"
       mount="body"
       :show-close="false"
       body-padding="p-0"
@@ -115,20 +116,18 @@
       </div>
 
       <template #footer>
-        <button
+        <Button
           type="button"
-          :class="[sheetRowClass, 'w-full text-red-600 dark:text-red-400']"
+          variant="outline"
+          size="sm"
+          extra-class="ios-drawer-sign-out"
           @click="onSignOut"
         >
-          <span
-            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-50/90 text-red-600 dark:bg-red-500/10 dark:text-red-400"
-          >
-            <DashboardNavIcon name="sign-out" size="sm" />
-          </span>
-          <span :class="sheetRowLabelClass">Sign out</span>
-        </button>
+          <DashboardNavIcon name="sign-out" size="sm" />
+          Sign out
+        </Button>
       </template>
-    </DashboardNativeSheet>
+    </IosDrawer>
   </nav>
 </template>
 
@@ -137,7 +136,8 @@ import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import type { ComponentPublicInstance } from 'vue'
 import { useRoute } from 'vue-router'
 import DashboardNavIcon from '~/components/dashboard/DashboardNavIcon.vue'
-import DashboardNativeSheet from '~/components/dashboard/DashboardNativeSheet.vue'
+import IosDrawer from '~/components/ios/IosDrawer.vue'
+import Button from '~/components/ui/Button.vue'
 import {
   isDashboardNavActive,
   nativeNavShortLabel,

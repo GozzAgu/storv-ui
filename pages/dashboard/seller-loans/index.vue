@@ -280,25 +280,14 @@
         </p>
       </template>
       <template #footer>
-        <Button
-          variant="outline"
-          size="sm"
-          extra-class="!rounded-2xl"
-          :disabled="confirmReturnLoading"
-          @click="closeReturnModal"
-        >
-          Cancel
-        </Button>
-        <Button
-          variant="primary"
-          size="sm"
-          extra-class="!rounded-2xl"
-          :loading="confirmReturnLoading"
-          :disabled="!loanPendingReturn"
-          @click="confirmReturn"
-        >
-          Return to store
-        </Button>
+        <IosDrawerActions
+          primary-label="Return to store"
+          :primary-loading="confirmReturnLoading"
+          :primary-disabled="!loanPendingReturn"
+          :cancel-disabled="confirmReturnLoading"
+          @cancel="closeReturnModal"
+          @primary="confirmReturn"
+        />
       </template>
     </Modal>
 
@@ -324,25 +313,14 @@
         </p>
       </template>
       <template #footer>
-        <Button
-          variant="outline"
-          size="sm"
-          extra-class="!rounded-2xl"
-          :disabled="confirmSoldLoading"
-          @click="closeSoldModal"
-        >
-          Cancel
-        </Button>
-        <Button
-          variant="primary"
-          size="sm"
-          extra-class="!rounded-2xl"
-          :loading="confirmSoldLoading"
-          :disabled="!loanPendingSold"
-          @click="confirmMarkSold"
-        >
-          Mark sold
-        </Button>
+        <IosDrawerActions
+          primary-label="Mark sold"
+          :primary-loading="confirmSoldLoading"
+          :primary-disabled="!loanPendingSold"
+          :cancel-disabled="confirmSoldLoading"
+          @cancel="closeSoldModal"
+          @primary="confirmMarkSold"
+        />
       </template>
     </Modal>
 
@@ -388,6 +366,7 @@ import {
 } from '~/utils/app-icons'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import FeatureGateCard from '~/components/subscription/FeatureGateCard.vue'
 import DashboardTableBadge from '~/components/ui/DashboardTableBadge.vue'
 import { formatSellerLoanStatusLabel, sellerLoanStatusBadgeClass } from '~/utils/table-badge-styles'

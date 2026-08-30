@@ -101,20 +101,15 @@
     </template>
 
     <template #footer>
-      <div class="flex w-full justify-end gap-2">
-        <button type="button" class="btn-secondary" @click="emit('update:modelValue', false)">
-          Close
-        </button>
-        <button
-          v-if="hasBalanceFeature"
-          type="button"
-          :disabled="saving || !amountInput || amountInput <= 0"
-          class="btn-primary disabled:opacity-50"
-          @click="handleSave"
-        >
-          {{ saving ? 'Saving…' : 'Save' }}
-        </button>
-      </div>
+      <IosDrawerActions
+        cancel-label="Close"
+        primary-label="Save"
+        :show-primary="hasBalanceFeature"
+        :primary-loading="saving"
+        :primary-disabled="!amountInput || amountInput <= 0"
+        @cancel="emit('update:modelValue', false)"
+        @primary="handleSave"
+      />
     </template>
   </Modal>
 </template>
@@ -122,6 +117,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import Modal from '~/components/ui/Modal.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import { useCustomerAccountsStore } from '~/stores/customerAccounts'
 import { getCustomerContactKey } from '~/utils/customer-key'
 import { tableMoneyClass, tableMoneyOwedClass } from '~/utils/table-money-styles'

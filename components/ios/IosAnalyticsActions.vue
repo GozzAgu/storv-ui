@@ -13,11 +13,11 @@
       </button>
     </div>
 
-    <DashboardNativeSheet
+    <IosDrawer
       v-model="showExportSheet"
       title="Export report"
       subtitle="Choose a format"
-      variant="picker"
+      variant="assistant"
       aria-label="Export report format"
     >
       <IosGroupedSection>
@@ -34,13 +34,13 @@
           @click="exportFormat('excel')"
         />
       </IosGroupedSection>
-    </DashboardNativeSheet>
+    </IosDrawer>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import DashboardNativeSheet from '~/components/dashboard/DashboardNativeSheet.vue'
+import IosDrawer from '~/components/ios/IosDrawer.vue'
 import IosGroupedSection from '~/components/ios/IosGroupedSection.vue'
 import IosNativeListRow from '~/components/ios/IosNativeListRow.vue'
 import { useIosHaptics } from '~/composables/useIosHaptics'

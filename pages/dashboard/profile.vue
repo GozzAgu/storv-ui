@@ -611,7 +611,11 @@
       </div>
     </div>
     <template #footer>
-      <Button variant="secondary" @click="showThemeModal = false">Close</Button>
+      <IosDrawerActions
+        :show-primary="false"
+        cancel-label="Close"
+        @cancel="showThemeModal = false"
+      />
     </template>
   </Modal>
 
@@ -647,7 +651,11 @@
       </div>
     </div>
     <template #footer>
-      <Button variant="secondary" @click="showLanguageModal = false">Close</Button>
+      <IosDrawerActions
+        :show-primary="false"
+        cancel-label="Close"
+        @cancel="showLanguageModal = false"
+      />
     </template>
   </Modal>
 
@@ -722,8 +730,11 @@
       </div>
     </div>
     <template #footer>
-      <Button variant="secondary" @click="showNotificationsModal = false">Cancel</Button>
-      <Button @click="saveNotificationSettings">Save Changes</Button>
+      <IosDrawerActions
+        primary-label="Save changes"
+        @cancel="showNotificationsModal = false"
+        @primary="saveNotificationSettings"
+      />
     </template>
   </Modal>
 
@@ -809,51 +820,24 @@
       </div>
     </div>
     <template #footer>
-      <Button
-        variant="secondary"
-        @click="
-          () => {
-            showPasswordModal = false
-            resetPasswordForm()
-          }
-        "
-        >Cancel</Button
-      >
-      <Button
-        @click="handlePasswordChange"
-        :disabled="
+      <IosDrawerActions
+        primary-label="Change password"
+        :primary-loading="isChangingPassword"
+        :primary-disabled="
           isChangingPassword ||
           !passwordForm.currentPassword ||
           !passwordForm.newPassword ||
           passwordForm.newPassword !== passwordForm.confirmPassword ||
           !isPasswordPolicyValid(passwordForm.newPassword)
         "
-      >
-        <span v-if="isChangingPassword" class="flex items-center gap-2">
-          <svg
-            class="animate-spin h-4 w-4"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              class="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              stroke-width="4"
-            ></circle>
-            <path
-              class="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            ></path>
-          </svg>
-          Changing...
-        </span>
-        <span v-else>Change Password</span>
-      </Button>
+        @cancel="
+          () => {
+            showPasswordModal = false
+            resetPasswordForm()
+          }
+        "
+        @primary="handlePasswordChange"
+      />
     </template>
   </Modal>
 
@@ -912,10 +896,14 @@
       </div>
     </div>
     <template #footer>
-      <Button variant="secondary" @click="showSessionsModal = false">Close</Button>
-      <Button variant="danger" @click="revokeAllSessions" v-if="activeSessions.length > 1"
-        >Revoke All Others</Button
-      >
+      <IosDrawerActions
+        cancel-label="Close"
+        primary-variant="danger"
+        primary-label="Revoke all others"
+        :show-primary="activeSessions.length > 1"
+        @cancel="showSessionsModal = false"
+        @primary="revokeAllSessions"
+      />
     </template>
   </Modal>
 
@@ -956,7 +944,11 @@
       </div>
     </div>
     <template #footer>
-      <Button variant="secondary" @click="showRegionModal = false">Close</Button>
+      <IosDrawerActions
+        :show-primary="false"
+        cancel-label="Close"
+        @cancel="showRegionModal = false"
+      />
     </template>
   </Modal>
 
@@ -996,7 +988,11 @@
       </div>
     </div>
     <template #footer>
-      <Button variant="secondary" @click="showCurrencyModal = false">Close</Button>
+      <IosDrawerActions
+        :show-primary="false"
+        cancel-label="Close"
+        @cancel="showCurrencyModal = false"
+      />
     </template>
   </Modal>
 
@@ -1019,8 +1015,11 @@
       </div>
     </div>
     <template #footer>
-      <Button variant="secondary" @click="showTimezoneModal = false">Cancel</Button>
-      <Button @click="saveTimezone">Save</Button>
+      <IosDrawerActions
+        primary-label="Save"
+        @cancel="showTimezoneModal = false"
+        @primary="saveTimezone"
+      />
     </template>
   </Modal>
 
@@ -1072,9 +1071,12 @@
       </div>
     </div>
     <template #footer>
-      <Button
-        variant="secondary"
-        @click="
+      <IosDrawerActions
+        primary-variant="danger"
+        primary-label="Disable 2FA"
+        :primary-loading="isDisabling2FA"
+        :primary-disabled="isDisabling2FA || !disable2FAPassword || disable2FATotp.trim().length !== 6"
+        @cancel="
           () => {
             show2FADisableModal = false
             disable2FAPassword = ''
@@ -1082,38 +1084,8 @@
             disable2FAError = ''
           }
         "
-        >Cancel</Button
-      >
-      <Button
-        variant="danger"
-        @click="handleDisable2FA"
-        :disabled="isDisabling2FA || !disable2FAPassword || disable2FATotp.trim().length !== 6"
-      >
-        <span v-if="isDisabling2FA" class="flex items-center gap-2">
-          <svg
-            class="animate-spin h-4 w-4"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              class="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              stroke-width="4"
-            ></circle>
-            <path
-              class="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            ></path>
-          </svg>
-          Disabling...
-        </span>
-        <span v-else>Disable 2FA</span>
-      </Button>
+        @primary="handleDisable2FA"
+      />
     </template>
   </Modal>
 </template>
@@ -1168,6 +1140,7 @@ import {
 } from '~/composables/useStaffWorkspaceContext'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import TwoFactorSetup from '~/components/auth/TwoFactorSetup.vue'
 import {
   PASSWORD_MIN_LENGTH,

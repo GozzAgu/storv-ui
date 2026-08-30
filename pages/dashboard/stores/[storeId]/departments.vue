@@ -412,35 +412,26 @@
         </div>
       </div>
       <template #footer>
-        <Button
-          variant="outline"
-          size="sm"
-          @click="
-            () => {
-              showBulkDeleteDepartmentsModal = false
-              bulkDeleteDepartmentsConfirmed = false
-            }
-          "
-          class="!rounded-2xl"
-          >Cancel</Button
-        >
-        <Button
-          variant="danger"
-          size="sm"
-          :disabled="!bulkDeleteDepartmentsConfirmed || isBulkDeletingDepartments"
-          :loading="isBulkDeletingDepartments"
-          :icon="TrashIcon"
-          class="!rounded-2xl"
-          @click="handleConfirmBulkDeleteDepartments"
-        >
-          {{
+        <IosDrawerActions
+          primary-variant="danger"
+          :primary-icon="TrashIcon"
+          :primary-label="
             isBulkDeletingDepartments
               ? 'Deleting...'
               : `Delete ${selectedDepartmentsForBulk.length} department${
                   selectedDepartmentsForBulk.length !== 1 ? 's' : ''
                 }`
-          }}
-        </Button>
+          "
+          :primary-loading="isBulkDeletingDepartments"
+          :primary-disabled="!bulkDeleteDepartmentsConfirmed || isBulkDeletingDepartments"
+          @cancel="
+            () => {
+              showBulkDeleteDepartmentsModal = false
+              bulkDeleteDepartmentsConfirmed = false
+            }
+          "
+          @primary="handleConfirmBulkDeleteDepartments"
+        />
       </template>
     </Modal>
 
@@ -510,6 +501,7 @@ import {
   TableCellsIcon,
 } from '~/utils/app-icons'
 import Button from '~/components/ui/Button.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import DashboardTablePagination from '~/components/dashboard/DashboardTablePagination.vue'
 import Modal from '~/components/ui/Modal.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'

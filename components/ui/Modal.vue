@@ -1,5 +1,5 @@
 <template>
-  <DashboardNativeSheet
+  <IosDrawer
     v-if="nativeIosSheet"
     :model-value="modelValue"
     :title="title"
@@ -17,10 +17,13 @@
       <slot name="header" />
     </template>
     <slot />
+    <template v-if="$slots.leading" #leading>
+      <slot name="leading" />
+    </template>
     <template v-if="$slots.footer" #footer>
       <slot name="footer" />
     </template>
-  </DashboardNativeSheet>
+  </IosDrawer>
 
   <Teleport v-else :to="teleportTarget">
     <!-- Native: right-edge drawer -->
@@ -163,7 +166,7 @@ import { computed, watch, onMounted, onUnmounted, useId } from 'vue'
 import {
   XMarkIcon,
 } from '~/utils/app-icons'
-import DashboardNativeSheet from '~/components/dashboard/DashboardNativeSheet.vue'
+import IosDrawer from '~/components/ios/IosDrawer.vue'
 import { setNativeOverlayLock } from '~/utils/native-overlay-lock'
 import { blurActiveElementIfNative } from '~/utils/native-focus'
 interface Props {

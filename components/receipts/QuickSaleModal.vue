@@ -473,26 +473,13 @@
       </div>
 
     <template #footer>
-      <div class="flex w-full flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-end">
-        <Button
-          variant="outline"
-          size="sm"
-          :class="[footerBtnOutlineClass, 'w-full sm:w-auto']"
-          @click="handleCancel"
-        >
-          Cancel
-        </Button>
-        <Button
-          variant="primary"
-          size="sm"
-          :class="[footerBtnPrimaryClass, 'w-full sm:w-auto']"
-          :loading="isProcessing"
-          :disabled="!canCompleteQuickSale"
-          @click="completeSale"
-        >
-          Complete Sale ({{ currencySymbol }}{{ formatCurrency(cartTotal) }})
-        </Button>
-      </div>
+      <IosDrawerActions
+        :primary-label="`Complete Sale (${currencySymbol}${formatCurrency(cartTotal)})`"
+        :primary-loading="isProcessing"
+        :primary-disabled="!canCompleteQuickSale"
+        @cancel="handleCancel"
+        @primary="completeSale"
+      />
     </template>
   </SidePanel>
 </template>
@@ -518,6 +505,7 @@ import SellScreenNoteBanner from '~/components/receipts/SellScreenNoteBanner.vue
 import PaymentMethodSelect from '~/components/receipts/PaymentMethodSelect.vue'
 import DashboardDrawerSearch from '~/components/dashboard/DashboardDrawerSearch.vue'
 import Button from '~/components/ui/Button.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import { useInventoryStore, type InventoryFolder, type InventoryItem } from '~/stores/inventory'
 import { useSellerLoanOutsStore } from '~/stores/sellerLoanOuts'
@@ -570,8 +558,6 @@ const {
   pickRowTitleClass,
   pickRowMetaClass,
   emptyStateClass,
-  footerBtnOutlineClass,
-  footerBtnPrimaryClass,
 } = useDashboardDrawerChrome()
 
 const { isCapacitorIos } = useIsCapacitorIos()

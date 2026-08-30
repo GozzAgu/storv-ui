@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import { ref, watch } from 'vue'
 import Modal from '~/components/ui/Modal.vue'
-import Button from '~/components/ui/Button.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 
 const props = defineProps<{
   modelValue: boolean
@@ -59,10 +60,14 @@ function submit() {
       @keyup.enter="submit"
     />
     <template #footer>
-      <Button variant="outline" size="sm" :disabled="loading" @click="close">Cancel</Button>
-      <Button size="sm" :loading="loading" :disabled="code.trim().length !== 6" @click="submit">
-        Confirm
-      </Button>
+      <IosDrawerActions
+        primary-label="Confirm"
+        :primary-loading="loading"
+        :primary-disabled="code.trim().length !== 6"
+        :cancel-disabled="loading"
+        @cancel="close"
+        @primary="submit"
+      />
     </template>
   </Modal>
 </template>

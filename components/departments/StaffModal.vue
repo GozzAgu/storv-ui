@@ -292,47 +292,14 @@
       </div>
     </div>
 
-    <template #footer>
-      <template v-if="!showTemporaryPassword">
-        <Button
-          variant="outline"
-          size="sm"
-          @click="handleClose"
-          class="w-full sm:w-auto !rounded-2xl"
-          >Cancel</Button
-        >
-        <Button
-          size="sm"
-          @click="handleSubmit"
-          :disabled="isSubmitting || !isFormValid || staffLimitReached"
-          class="w-full sm:w-auto !rounded-2xl"
-        >
-          <span v-if="isSubmitting" class="flex items-center gap-1.5">
-            <svg
-              class="animate-spin h-3.5 w-3.5"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                class="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                stroke-width="4"
-              ></circle>
-              <path
-                class="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              ></path>
-            </svg>
-            {{ isEdit ? 'Updating...' : 'Adding...' }}
-          </span>
-          <span v-else>{{ isEdit ? 'Update Staff' : 'Add Staff' }}</span>
-        </Button>
-      </template>
+    <template v-if="!showTemporaryPassword" #footer>
+      <IosDrawerActions
+        :primary-label="staffFooterPrimaryLabel"
+        :primary-loading="isSubmitting"
+        :primary-disabled="isSubmitting || !isFormValid || staffLimitReached"
+        @cancel="handleClose"
+        @primary="handleSubmit"
+      />
     </template>
   </SidePanel>
 </template>
@@ -346,6 +313,7 @@ import {
 } from '~/utils/app-icons'
 import SidePanel from '~/components/ui/SidePanel.vue'
 import Button from '~/components/ui/Button.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import type { Staff } from '~/composables/useStaff'
 import { useStaffStore } from '~/stores/staff'
 import { useDepartmentsStore } from '~/stores/departments'
@@ -439,6 +407,8 @@ const createdStaffMeta = ref<{
 } | null>(null)
 
 const isEdit = computed(() => !!props.staff)
+
+const staffFooterPrimaryLabel = computed(() => (isEdit.value ? 'Update staff' : 'Add staff'))
 
 const storeStaffCount = computed(() => {
   const dept = departmentsStore.getDepartmentById(props.departmentId)

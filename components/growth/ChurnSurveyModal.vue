@@ -22,12 +22,15 @@
       />
     </div>
     <template #footer>
-      <div class="flex justify-end gap-2">
-        <Button variant="ghost" size="sm" @click="skip">Skip</Button>
-        <Button variant="primary" size="sm" :disabled="!selected || submitting" @click="submit">
-          {{ submitting ? 'Sending…' : 'Send feedback' }}
-        </Button>
-      </div>
+      <IosDrawerActions
+        cancel-label="Skip"
+        cancel-variant="ghost"
+        primary-label="Send feedback"
+        :primary-loading="submitting"
+        :primary-disabled="!selected"
+        @cancel="skip"
+        @primary="submit"
+      />
     </template>
   </Modal>
 </template>
@@ -35,7 +38,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import Modal from '~/components/ui/Modal.vue'
-import Button from '~/components/ui/Button.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import { CHURN_SURVEY_REASONS } from '~/types/growth'
 
 const open = defineModel<boolean>({ required: true })

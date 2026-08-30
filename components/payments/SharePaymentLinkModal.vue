@@ -96,14 +96,12 @@
     </div>
 
     <template #footer>
-      <div class="flex w-full justify-end gap-2">
-        <button type="button" class="btn-secondary" @click="emit('update:modelValue', false)">
-          Close
-        </button>
-        <a v-if="link" class="btn-primary" :href="link.url" target="_blank" rel="noopener"
-          >Open checkout page</a
-        >
-      </div>
+      <Button variant="outline" size="sm" @click="emit('update:modelValue', false)">
+        Close
+      </Button>
+      <Button v-if="link" variant="primary" size="sm" @click="openCheckout">
+        Open checkout page
+      </Button>
     </template>
   </Modal>
 </template>
@@ -112,6 +110,7 @@
 import { ref, computed, watch } from 'vue'
 import QRCode from 'qrcode'
 import Modal from '~/components/ui/Modal.vue'
+import Button from '~/components/ui/Button.vue'
 import { formatNaira } from '~/utils/naira'
 import { buildPaymentLinkShareMessage } from '~/utils/payment-link-share'
 import { usePaymentLinkShare } from '~/composables/usePaymentLinkShare'
@@ -187,6 +186,11 @@ function shareWhatsApp() {
   if (!props.link) return
   openWhatsAppShare(props.link)
   emit('shared', 'whatsapp')
+}
+
+function openCheckout() {
+  if (!props.link?.url) return
+  window.open(props.link.url, '_blank', 'noopener,noreferrer')
 }
 
 const copyLink = async () => {

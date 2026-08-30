@@ -29,12 +29,15 @@
       />
     </div>
     <template #footer>
-      <div class="flex justify-end gap-2">
-        <Button variant="ghost" size="sm" @click="onDismiss">Not now</Button>
-        <Button variant="primary" size="sm" :disabled="selected == null || submitting" @click="onSubmit">
-          {{ submitting ? 'Sending…' : 'Submit' }}
-        </Button>
-      </div>
+      <IosDrawerActions
+        cancel-label="Not now"
+        cancel-variant="ghost"
+        primary-label="Submit"
+        :primary-loading="submitting"
+        :primary-disabled="selected == null"
+        @cancel="onDismiss"
+        @primary="onSubmit"
+      />
     </template>
   </Modal>
 </template>
@@ -42,7 +45,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import Modal from '~/components/ui/Modal.vue'
-import Button from '~/components/ui/Button.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 
 const open = defineModel<boolean>({ required: true })
 

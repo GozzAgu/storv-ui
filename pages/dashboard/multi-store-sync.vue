@@ -430,8 +430,11 @@
           </div>
         </div>
         <template #footer>
-          <Button variant="outline" size="sm" @click="showTrackingModal = false">Cancel</Button>
-          <Button variant="primary" size="sm" @click="saveTracking">Save</Button>
+          <IosDrawerActions
+            primary-label="Save"
+            @cancel="showTrackingModal = false"
+            @primary="saveTracking"
+          />
         </template>
       </Modal>
     </template>
@@ -447,6 +450,7 @@ import {
   TruckIcon,
 } from '~/utils/app-icons'
 import Button from '~/components/ui/Button.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
 import Modal from '~/components/ui/Modal.vue'
 import { useStoresStore } from '~/stores/stores'

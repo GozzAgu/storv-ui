@@ -1540,42 +1540,36 @@
       </form>
 
       <template #footer>
-        <div class="flex w-full flex-col gap-2 sm:flex-row sm:justify-end">
-          <Button
-            variant="outline"
-            size="sm"
-            @click="handleCancelItem"
-            class="w-full sm:w-auto"
-            >Cancel</Button
-          >
-          <Button
-            variant="primary"
-            size="sm"
-            type="submit"
-            form="inventory-item-form"
-            :disabled="!isItemDrawerValid || isSavingItem"
-            :loading="isSavingItem"
-            class="w-full sm:w-auto"
-          >
-            {{
-              editingItem
-                ? isSavingItem
-                  ? 'Updating…'
-                  : 'Update Product'
-                : folder?.hasSerialNumbers && !editingItem
-                ? isSavingItem
-                  ? `Adding ${validBulkSerialNumbers.length}…`
-                  : validBulkSerialNumbers.length > 0
-                  ? `Add ${validBulkSerialNumbers.length} Product${
-                      validBulkSerialNumbers.length !== 1 ? 's' : ''
-                    }`
-                  : 'Add Products'
-                : isSavingItem
-                ? 'Adding…'
-                : 'Add Product'
-            }}
-          </Button>
-        </div>
+        <IosDrawerActions @cancel="handleCancelItem">
+          <template #primary>
+            <Button
+              variant="primary"
+              size="sm"
+              type="submit"
+              form="inventory-item-form"
+              :disabled="!isItemDrawerValid || isSavingItem"
+              :loading="isSavingItem"
+            >
+              {{
+                editingItem
+                  ? isSavingItem
+                    ? 'Updating…'
+                    : 'Update Product'
+                  : folder?.hasSerialNumbers && !editingItem
+                  ? isSavingItem
+                    ? `Adding ${validBulkSerialNumbers.length}…`
+                    : validBulkSerialNumbers.length > 0
+                    ? `Add ${validBulkSerialNumbers.length} Product${
+                        validBulkSerialNumbers.length !== 1 ? 's' : ''
+                      }`
+                    : 'Add Products'
+                  : isSavingItem
+                  ? 'Adding…'
+                  : 'Add Product'
+              }}
+            </Button>
+          </template>
+        </IosDrawerActions>
       </template>
     </SidePanel>
 
@@ -1656,34 +1650,25 @@
         </div>
       </div>
       <template #footer>
-        <Button
-          variant="outline"
-          size="sm"
-          @click="
-            () => {
-              showBulkDeleteModal = false
-              bulkDeleteConfirmed = false
-            }
-          "
-          class="!rounded-2xl"
-          >Cancel</Button
-        >
-        <Button
-          variant="danger"
-          size="sm"
-          :disabled="!bulkDeleteConfirmed || isBulkDeleting"
-          :icon="TrashIcon"
-          class="!rounded-2xl"
-          @click="handleConfirmBulkDelete"
-        >
-          {{
+        <IosDrawerActions
+          primary-variant="danger"
+          :primary-icon="TrashIcon"
+          :primary-label="
             isBulkDeleting
               ? 'Deleting...'
               : `Delete ${selectedItemsForBulk.length} product${
                   selectedItemsForBulk.length !== 1 ? 's' : ''
                 }`
-          }}
-        </Button>
+          "
+          :primary-disabled="!bulkDeleteConfirmed || isBulkDeleting"
+          @cancel="
+            () => {
+              showBulkDeleteModal = false
+              bulkDeleteConfirmed = false
+            }
+          "
+          @primary="handleConfirmBulkDelete"
+        />
       </template>
     </Modal>
 
@@ -1971,28 +1956,20 @@
         </section>
       </form>
       <template #footer>
-        <div class="flex justify-end gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            extra-class="!rounded-2xl"
-            :disabled="isSavingSubcategory"
-            @click="showSubcategoryModal = false"
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            type="submit"
-            form="subcategory-drawer-form"
-            extra-class="!rounded-2xl"
-            :loading="isSavingSubcategory"
-            :disabled="!subcategoryForm.name.trim()"
-          >
-            {{ editingSubfolder ? 'Save changes' : 'Create subcategory' }}
-          </Button>
-        </div>
+        <IosDrawerActions @cancel="showSubcategoryModal = false">
+          <template #primary>
+            <Button
+              variant="primary"
+              size="sm"
+              type="submit"
+              form="subcategory-drawer-form"
+              :loading="isSavingSubcategory"
+              :disabled="!subcategoryForm.name.trim()"
+            >
+              {{ editingSubfolder ? 'Save changes' : 'Create subcategory' }}
+            </Button>
+          </template>
+        </IosDrawerActions>
       </template>
     </SidePanel>
 
@@ -2032,6 +2009,7 @@ import {
   ArrowTopRightOnSquareIcon,
 } from '~/utils/app-icons'
 import Button from '~/components/ui/Button.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import Breadcrumbs from '~/components/ui/Breadcrumbs.vue'
 import Modal from '~/components/ui/Modal.vue'
 import SidePanel from '~/components/ui/SidePanel.vue'

@@ -1135,34 +1135,25 @@
                 </div>
               </div>
               <template #footer>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  @click="
-                    () => {
-                      showBulkDeleteReceiptsModal = false
-                      bulkDeleteReceiptsConfirmed = false
-                    }
-                  "
-                  class="!rounded-2xl"
-                  >Cancel</Button
-                >
-                <Button
-                  variant="danger"
-                  size="sm"
-                  :disabled="!bulkDeleteReceiptsConfirmed || isBulkDeletingReceipts"
-                  :icon="TrashIcon"
-                  class="!rounded-2xl"
-                  @click="handleConfirmBulkDeleteReceipts"
-                >
-                  {{
+                <IosDrawerActions
+                  primary-variant="danger"
+                  :primary-icon="TrashIcon"
+                  :primary-label="
                     isBulkDeletingReceipts
                       ? 'Deleting...'
                       : `Delete ${selectedReceiptsForBulk.length} sale${
                           selectedReceiptsForBulk.length !== 1 ? 's' : ''
                         }`
-                  }}
-                </Button>
+                  "
+                  :primary-disabled="!bulkDeleteReceiptsConfirmed || isBulkDeletingReceipts"
+                  @cancel="
+                    () => {
+                      showBulkDeleteReceiptsModal = false
+                      bulkDeleteReceiptsConfirmed = false
+                    }
+                  "
+                  @primary="handleConfirmBulkDeleteReceipts"
+                />
               </template>
             </Modal>
             <DeleteReceiptModal
@@ -1758,6 +1749,7 @@ import {
   QrCodeIcon,
 } from '~/utils/app-icons'
 import Button from '~/components/ui/Button.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
 import Modal from '~/components/ui/Modal.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'

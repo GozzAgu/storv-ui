@@ -90,19 +90,13 @@
     </template>
 
     <template #footer>
-      <div class="flex w-full justify-end gap-2">
-        <button type="button" class="btn-secondary" @click="emit('update:modelValue', false)">
-          Cancel
-        </button>
-        <button
-          type="button"
-          :disabled="!canSubmit || submitting"
-          class="btn-primary"
-          @click="submit"
-        >
-          {{ submitting ? 'Saving…' : submitLabel }}
-        </button>
-      </div>
+      <IosDrawerActions
+        :primary-label="submitLabel"
+        :primary-loading="submitting"
+        :primary-disabled="!canSubmit"
+        @cancel="emit('update:modelValue', false)"
+        @primary="submit"
+      />
     </template>
   </Modal>
 </template>
@@ -110,6 +104,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import Modal from '~/components/ui/Modal.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import PaymentMethodSelect from '~/components/receipts/PaymentMethodSelect.vue'
 import type { Receipt } from '~/stores/receipts'
 import { receiptAmountPaid, receiptBalanceDue, roundMoney } from '~/utils/receipt-balance'

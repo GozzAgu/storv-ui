@@ -156,28 +156,12 @@
     </template>
 
     <template #footer>
-      <Button
-        variant="outline"
-        size="sm"
-        @click="handleCancel"
-        class="w-full sm:w-auto !rounded-2xl"
-        >Cancel</Button
-      >
-      <Button
-        variant="primary"
-        size="sm"
-        extra-class="!rounded-2xl"
-        @click="handleApplyBulkDiscount"
-        :disabled="!isValid || isApplying"
-        class="w-full sm:w-auto"
-      >
-        <span v-if="isApplying">Applying...</span>
-        <span v-else
-          >Apply to {{ selectedItems.length }} Product{{
-            selectedItems.length !== 1 ? 's' : ''
-          }}</span
-        >
-      </Button>
+      <IosDrawerActions
+        :primary-label="bulkDiscountPrimaryLabel"
+        :primary-disabled="!isValid || isApplying"
+        @cancel="handleCancel"
+        @primary="handleApplyBulkDiscount"
+      />
     </template>
   </Modal>
 </template>
@@ -185,7 +169,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import Modal from '~/components/ui/Modal.vue'
-import Button from '~/components/ui/Button.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import { useInventoryStore, type InventoryItem } from '~/stores/inventory'
 import { useAppToast } from '~/composables/useAppToast'
 
@@ -242,6 +226,12 @@ const isValid = computed(() => {
   } else {
     return discountValue.value >= 0
   }
+})
+
+const bulkDiscountPrimaryLabel = computed(() => {
+  if (isApplying.value) return 'Applying...'
+  const count = props.selectedItems.length
+  return `Apply to ${count} product${count !== 1 ? 's' : ''}`
 })
 
 const formatCurrency = (value: number) => {

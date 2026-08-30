@@ -129,27 +129,15 @@
     </div>
 
     <template #footer>
-      <div class="flex w-full flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-end">
-        <Button
-          variant="outline"
-          size="sm"
-          :class="[footerBtnOutlineClass, 'w-full sm:w-auto']"
-          :disabled="submitting"
-          @click="emit('update:modelValue', false)"
-        >
-          Cancel
-        </Button>
-        <Button
-          variant="primary"
-          size="sm"
-          :class="[footerBtnPrimaryClass, 'w-full sm:w-auto']"
-          :loading="submitting"
-          :disabled="!canSubmit"
-          @click="submit"
-        >
-          Record buyback
-        </Button>
-      </div>
+      <IosDrawerActions
+        primary-label="Record buyback"
+        :primary-loading="submitting"
+        :primary-disabled="!canSubmit"
+        :cancel-disabled="submitting"
+        @cancel="emit('update:modelValue', false)"
+        @primary="submit"
+      />
+    </template>
     </template>
   </SidePanel>
 </template>
@@ -157,7 +145,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import SidePanel from '~/components/ui/SidePanel.vue'
-import Button from '~/components/ui/Button.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import PaymentMethodSelect from '~/components/receipts/PaymentMethodSelect.vue'
 import BuybackItemFields from '~/components/buybacks/BuybackItemFields.vue'
 import { useInventoryStore } from '~/stores/inventory'

@@ -396,17 +396,16 @@
             @keyup.enter="handleSendEmail"
           />
         </div>
-        <div class="flex gap-2 justify-end">
-          <button @click="showEmailModal = false" class="btn-secondary">Cancel</button>
-          <button
-            @click="handleSendEmail"
-            :disabled="!emailToSend || !isValidEmail(emailToSend) || isSendingEmail"
-            class="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 rounded-sm transition-colors"
-          >
-            {{ isSendingEmail ? 'Sending...' : 'Send' }}
-          </button>
-        </div>
       </div>
+    </template>
+    <template #footer>
+      <IosDrawerActions
+        primary-label="Send"
+        :primary-loading="isSendingEmail"
+        :primary-disabled="!emailToSend || !isValidEmail(emailToSend)"
+        @cancel="showEmailModal = false"
+        @primary="handleSendEmail"
+      />
     </template>
   </Modal>
 
@@ -435,6 +434,7 @@ import {
   ClipboardDocumentIcon,
 } from '~/utils/app-icons'
 import Modal from '~/components/ui/Modal.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import WhatsAppIcon from '~/components/icons/WhatsAppIcon.vue'
 import SendWhatsAppModal from '~/components/whatsapp/SendWhatsAppModal.vue'
 import type { Receipt, ReceiptItem } from '~/stores/receipts'

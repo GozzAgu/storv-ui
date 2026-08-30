@@ -1,5 +1,5 @@
 <template>
-  <DashboardNativeSheet
+  <IosDrawer
     v-if="nativeIosSheet"
     :model-value="modelValue"
     :title="title"
@@ -9,6 +9,7 @@
     :show-close="showClose"
     :close-on-backdrop="closeOnBackdrop"
     :variant="nativeSheetVariant"
+    :footer-variant="footerVariant"
     mount="overlay-host"
     @update:model-value="emit('update:modelValue', $event)"
     @close="emit('close')"
@@ -17,10 +18,13 @@
       <slot name="header" />
     </template>
     <slot />
+    <template v-if="$slots.leading" #leading>
+      <slot name="leading" />
+    </template>
     <template v-if="$slots.footer" #footer>
       <slot name="footer" />
     </template>
-  </DashboardNativeSheet>
+  </IosDrawer>
 
   <Teleport v-else :to="teleportTarget">
     <!-- Web: dimmed backdrop -->
@@ -198,7 +202,7 @@ import { computed, watch, onMounted, onUnmounted, useId } from 'vue'
 import {
   XMarkIcon,
 } from '~/utils/app-icons'
-import DashboardNativeSheet from '~/components/dashboard/DashboardNativeSheet.vue'
+import IosDrawer from '~/components/ios/IosDrawer.vue'
 import type { DashboardNativeSheetVariant } from '~/composables/useDashboardNativeSheetChrome'
 import { setNativeOverlayLock } from '~/utils/native-overlay-lock'
 import { blurActiveElementIfNative } from '~/utils/native-focus'
@@ -222,6 +226,8 @@ interface Props {
   fitContent?: boolean
   /** iOS bottom sheet variant (More-menu chrome) */
   nativeSheetVariant?: DashboardNativeSheetVariant
+  /** iOS drawer footer layout */
+  footerVariant?: 'actions' | 'menu'
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -234,6 +240,7 @@ const props = withDefaults(defineProps<Props>(), {
   dense: false,
   fitContent: false,
   nativeSheetVariant: 'crud',
+  footerVariant: 'actions',
 })
 
 const { isNativeApp } = useCapacitorNativeApp()

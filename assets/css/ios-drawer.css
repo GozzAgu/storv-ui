@@ -1,0 +1,262 @@
+/**
+ * iOS drawer system — unified bottom sheets (CRUD, menu, assistant).
+ * Uses Storvv brand tokens (--storvv-navy, --storvv-blue, --storvv-blue-soft).
+ */
+
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet {
+  border-top-left-radius: var(--ios-radius-xl, 1.25rem);
+  border-top-right-radius: var(--ios-radius-xl, 1.25rem);
+  background: var(--ios-surface-solid);
+  border: 1px solid rgb(20 63 141 / 0.14);
+  border-bottom: 0;
+  box-shadow:
+    0 -8px 40px rgb(20 63 141 / 0.12),
+    0 -2px 0 rgb(72 118 199 / 0.08),
+    inset 0 1px 0 rgb(255 255 255 / 0.06);
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-drawer.dashboard-native-sheet {
+  border-color: rgb(154 181 227 / 0.14);
+  box-shadow:
+    0 -12px 48px rgb(0 0 0 / 0.55),
+    0 -2px 0 rgb(72 118 199 / 0.12),
+    inset 0 1px 0 rgb(255 255 255 / 0.05);
+}
+
+/* Grab handle — Storvv tint */
+html.capacitor-ios.capacitor-native .ios-drawer .native-more-sheet__handle,
+html.capacitor-ios.capacitor-native .ios-drawer .dashboard-native-sheet__header .native-more-sheet__handle {
+  background: rgb(20 63 141 / 0.22);
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-drawer .native-more-sheet__handle,
+html.capacitor-ios.capacitor-native.dark .ios-drawer .dashboard-native-sheet__header .native-more-sheet__handle {
+  background: rgb(154 181 227 / 0.28);
+}
+
+/* ── Header ── */
+html.capacitor-ios.capacitor-native .ios-drawer .dashboard-native-sheet__header {
+  padding: 0.75rem 1rem 0.875rem;
+  border-bottom: 1px solid rgb(20 63 141 / 0.08);
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-drawer .dashboard-native-sheet__header {
+  border-bottom-color: rgb(154 181 227 / 0.1);
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer .dash-overlay-eyebrow {
+  margin: 0 0 0.25rem;
+  font-size: var(--ios-type-caption2-size) !important;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--storvv-blue, var(--ios-accent-soft)) !important;
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-drawer .dash-overlay-eyebrow {
+  color: var(--storvv-blue-soft, var(--ios-accent-soft)) !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer .dash-overlay-title,
+html.capacitor-ios.capacitor-native .ios-drawer .native-more-sheet__title {
+  margin: 0;
+  font-size: var(--ios-type-title2-size) !important;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--ios-label) !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer .dashboard-native-sheet__subtitle {
+  margin-top: 0.25rem;
+  font-size: var(--ios-type-subheadline-size) !important;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--ios-label-secondary) !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer .dashboard-native-sheet__close {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  color: var(--storvv-blue, var(--ios-accent-soft));
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer .dashboard-native-sheet__close:active {
+  background: var(--ios-accent-muted);
+}
+
+/* ── Body ── */
+html.capacitor-ios.capacitor-native .ios-drawer .dashboard-native-sheet__body {
+  padding: 0 1rem 1rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--menu .dashboard-native-sheet__body {
+  padding: 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer__content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Form fields inside drawers */
+html.capacitor-ios.capacitor-native .ios-drawer label,
+html.capacitor-ios.capacitor-native .ios-drawer .dash-field-label,
+html.capacitor-ios.capacitor-native .ios-drawer .dash-drawer-label {
+  display: block;
+  margin-bottom: 0.375rem;
+  font-size: var(--ios-type-subheadline-size) !important;
+  font-weight: 500;
+  color: var(--ios-label) !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer .app-field,
+html.capacitor-ios.capacitor-native .ios-drawer input:not([type='checkbox']):not([type='radio']),
+html.capacitor-ios.capacitor-native .ios-drawer select,
+html.capacitor-ios.capacitor-native .ios-drawer textarea {
+  min-height: 2.75rem;
+  border-radius: var(--ios-radius-sm) !important;
+  border: 1px solid rgb(20 63 141 / 0.16) !important;
+  background: var(--ios-fill-tertiary) !important;
+  font-size: var(--ios-type-body-size) !important;
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-drawer .app-field,
+html.capacitor-ios.capacitor-native.dark .ios-drawer input:not([type='checkbox']):not([type='radio']),
+html.capacitor-ios.capacitor-native.dark .ios-drawer select,
+html.capacitor-ios.capacitor-native.dark .ios-drawer textarea {
+  border-color: rgb(154 181 227 / 0.16) !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer .app-field:focus,
+html.capacitor-ios.capacitor-native .ios-drawer input:not([type='checkbox']):not([type='radio']):focus,
+html.capacitor-ios.capacitor-native .ios-drawer select:focus,
+html.capacitor-ios.capacitor-native .ios-drawer textarea:focus {
+  border-color: rgb(72 118 199 / 0.55) !important;
+  box-shadow: 0 0 0 3px rgb(20 63 141 / 0.12);
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer textarea.app-field {
+  min-height: 5rem;
+  padding-block: 0.625rem;
+}
+
+/* ── Footer (sales-leads reference layout) ── */
+html.capacitor-ios.capacitor-native .ios-drawer-footer {
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer-footer__leading {
+  margin-right: auto;
+  min-width: 0;
+  font-size: var(--ios-type-subheadline-size);
+  color: var(--ios-label-secondary);
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer-footer__leading strong,
+html.capacitor-ios.capacitor-native .ios-drawer-footer__leading .font-semibold {
+  font-weight: 600;
+  color: var(--storvv-navy, var(--ios-accent));
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-drawer-footer__leading strong,
+html.capacitor-ios.capacitor-native.dark .ios-drawer-footer__leading .font-semibold {
+  color: var(--storvv-blue-soft, var(--ios-accent-soft));
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer-footer__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer-footer--menu {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer-footer--menu .ios-drawer-footer__actions {
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  margin-left: 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer .dashboard-native-sheet__footer,
+html.capacitor-ios.capacitor-native .ios-drawer .native-more-sheet__footer {
+  flex-shrink: 0;
+  border-top: 1px solid rgb(20 63 141 / 0.1);
+  background: var(--ios-surface-solid);
+  padding: 0.875rem 1rem calc(0.875rem + env(safe-area-inset-bottom, 0px));
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-drawer .dashboard-native-sheet__footer,
+html.capacitor-ios.capacitor-native.dark .ios-drawer .native-more-sheet__footer {
+  border-top-color: rgb(154 181 227 / 0.12);
+}
+
+/* Never stack action buttons full-width in CRUD drawers */
+html.capacitor-ios.capacitor-native .ios-drawer-footer:not(.ios-drawer-footer--menu) .ios-drawer-footer__actions .ios-action-btn,
+html.capacitor-ios.capacitor-native .ios-drawer-footer:not(.ios-drawer-footer--menu) .ios-drawer-footer__actions .btn-primary,
+html.capacitor-ios.capacitor-native .ios-drawer-footer:not(.ios-drawer-footer--menu) .ios-drawer-footer__actions .btn-secondary,
+html.capacitor-ios.capacitor-native .ios-drawer-footer:not(.ios-drawer-footer--menu) .ios-drawer-footer__actions .btn-outline,
+html.capacitor-ios.capacitor-native .ios-drawer-footer:not(.ios-drawer-footer--menu) .ios-drawer-footer__actions .flex {
+  width: auto !important;
+  flex: 0 0 auto;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer-footer:not(.ios-drawer-footer--menu) .ios-drawer-footer__actions .flex {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-left: 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer-footer:not(.ios-drawer-footer--menu) .ios-drawer-footer__actions > .ios-action-btn,
+html.capacitor-ios.capacitor-native .ios-drawer-footer:not(.ios-drawer-footer--menu) .ios-drawer-footer__actions > .btn-primary,
+html.capacitor-ios.capacitor-native .ios-drawer-footer:not(.ios-drawer-footer--menu) .ios-drawer-footer__actions > .btn-secondary,
+html.capacitor-ios.capacitor-native .ios-drawer-footer:not(.ios-drawer-footer--menu) .ios-drawer-footer__actions > .btn-outline {
+  min-width: 5.25rem;
+}
+
+/* Menu drawer: full-width destructive / list actions */
+html.capacitor-ios.capacitor-native .ios-drawer-footer--menu .ios-drawer-footer__actions > button,
+html.capacitor-ios.capacitor-native .ios-drawer-footer--menu .ios-drawer-footer__actions > .native-more-sheet__row {
+  width: 100%;
+  justify-content: flex-start;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer-footer--menu .ios-action-btn--danger,
+html.capacitor-ios.capacitor-native .ios-drawer .ios-drawer-sign-out {
+  width: 100% !important;
+  min-height: 2.75rem;
+  justify-content: flex-start;
+  gap: 0.75rem;
+  padding-inline: 0.75rem;
+  border-radius: var(--ios-radius-md) !important;
+  border: 1px solid rgb(255 59 48 / 0.22) !important;
+  background: rgb(255 59 48 / 0.08) !important;
+  color: var(--ios-destructive) !important;
+}
+
+/* Drawer backdrop — subtle Storvv navy wash */
+html.capacitor-ios.capacitor-native .native-bottom-nav__backdrop.dash-overlay-backdrop {
+  background: rgb(20 63 141 / 0.18) !important;
+}
+
+html.capacitor-ios.capacitor-native.dark .native-bottom-nav__backdrop.dash-overlay-backdrop {
+  background: rgb(0 0 0 / 0.58) !important;
+}

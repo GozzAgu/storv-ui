@@ -73,23 +73,13 @@
     </template>
 
     <template #footer>
-      <Button
-        variant="outline"
-        size="sm"
-        extra-class="!rounded-2xl"
-        @click="emit('update:modelValue', false)"
-        >Cancel</Button
-      >
-      <Button
-        variant="primary"
-        size="sm"
-        extra-class="!rounded-2xl"
-        :loading="submitting"
-        :disabled="!partyNameTrimmed"
-        @click="submit"
-      >
-        Confirm stock loan
-      </Button>
+      <IosDrawerActions
+        primary-label="Confirm stock loan"
+        :primary-loading="submitting"
+        :primary-disabled="!partyNameTrimmed"
+        @cancel="emit('update:modelValue', false)"
+        @primary="submit"
+      />
     </template>
   </Modal>
 </template>
@@ -97,7 +87,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import Modal from '~/components/ui/Modal.vue'
-import Button from '~/components/ui/Button.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import type { InventoryItem } from '~/stores/inventory'
 import { getInventoryItemDisplayName } from '~/composables/useInventoryItemDisplay'
 import { useSellerLoanOutsStore } from '~/stores/sellerLoanOuts'

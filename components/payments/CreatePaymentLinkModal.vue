@@ -118,28 +118,21 @@
       <p v-if="errorMsg" class="text-xs font-medium text-red-500">{{ errorMsg }}</p>
     </div>
 
+    <template #leading>
+      <span>
+        Total
+        <strong class="tabular-nums">{{ formatNaira(total) }}</strong>
+      </span>
+    </template>
+
     <template #footer>
-      <div class="flex w-full items-center justify-between gap-3">
-        <div class="text-sm">
-          <span class="text-gray-500 dark:text-gray-400">Total</span>
-          <span class="ml-2 font-semibold tabular-nums text-gray-900 dark:text-gray-50">{{
-            formatNaira(total)
-          }}</span>
-        </div>
-        <div class="flex gap-2">
-          <button type="button" class="btn-secondary" @click="emit('update:modelValue', false)">
-            Cancel
-          </button>
-          <button
-            type="button"
-            class="btn-primary"
-            :disabled="!canCreate || creating"
-            @click="create"
-          >
-            {{ creating ? 'Generating…' : 'Generate link' }}
-          </button>
-        </div>
-      </div>
+      <IosDrawerActions
+        :primary-loading="creating"
+        :primary-disabled="!canCreate"
+        primary-label="Generate link"
+        @cancel="emit('update:modelValue', false)"
+        @primary="create"
+      />
     </template>
   </Modal>
 </template>
@@ -147,6 +140,7 @@
 <script setup lang="ts">
 import { ref, computed, reactive, watch } from 'vue'
 import Modal from '~/components/ui/Modal.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import { formatNaira } from '~/utils/naira'
 import { useInventoryStore, type InventoryItem } from '~/stores/inventory'
 import { resolveBulkStockFieldAndValue } from '~/utils/inventory-bulk-quantity'

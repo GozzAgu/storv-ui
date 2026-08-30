@@ -103,21 +103,19 @@
     </template>
 
     <template #footer>
-      <div class="flex w-full flex-wrap justify-end gap-2">
-        <button type="button" class="btn-secondary" @click="emit('update:modelValue', false)">
-          Cancel
-        </button>
-        <button
-          v-if="hasFeature"
-          type="button"
-          :disabled="sendDisabled"
-          class="inline-flex items-center gap-2 rounded-sm bg-[#25D366] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#1da851] disabled:cursor-not-allowed disabled:opacity-50"
-          @click="handleSend"
-        >
-          <span v-if="sending || preparing">{{ preparing ? 'Preparing…' : 'Sending…' }}</span>
-          <span v-else>Send receipt</span>
-        </button>
-      </div>
+      <IosDrawerActions :show-primary="hasFeature" @cancel="emit('update:modelValue', false)">
+        <template #primary>
+          <Button
+            size="sm"
+            :disabled="sendDisabled"
+            extra-class="!rounded-[var(--ios-radius-md)] !border-0 !bg-[#25D366] !text-white hover:!bg-[#1da851]"
+            @click="handleSend"
+          >
+            <span v-if="sending || preparing">{{ preparing ? 'Preparing…' : 'Sending…' }}</span>
+            <span v-else>Send receipt</span>
+          </Button>
+        </template>
+      </IosDrawerActions>
     </template>
   </Modal>
 </template>
@@ -125,6 +123,8 @@
 <script setup lang="ts">
 import { ref, computed, watch, nextTick } from 'vue'
 import Modal from '~/components/ui/Modal.vue'
+import Button from '~/components/ui/Button.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import ReceiptShareSurface from '~/components/receipts/ReceiptShareSurface.vue'
 import type { Receipt } from '~/stores/receipts'
 import type { WhatsAppTemplateVars } from '~/types/whatsapp'

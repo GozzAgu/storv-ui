@@ -147,20 +147,12 @@
     </template>
 
     <template #footer>
-      <div class="flex items-center justify-end gap-2 w-full">
-        <Button variant="outline" size="sm" @click="handleCancel" class="!rounded-2xl"
-          >Cancel</Button
-        >
-        <Button
-          variant="primary"
-          size="sm"
-          class="!rounded-2xl"
-          @click="handleApplyDiscount"
-          :disabled="!isValid || isApplying"
-        >
-          {{ isApplying ? 'Applying…' : 'Apply discount' }}
-        </Button>
-      </div>
+      <IosDrawerActions
+        :primary-label="isApplying ? 'Applying…' : 'Apply discount'"
+        :primary-disabled="!isValid || isApplying"
+        @cancel="handleCancel"
+        @primary="handleApplyDiscount"
+      />
     </template>
   </Modal>
 </template>
@@ -171,7 +163,7 @@ import {
   TagIcon,
 } from '~/utils/app-icons'
 import Modal from '~/components/ui/Modal.vue'
-import Button from '~/components/ui/Button.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import { useInventoryStore, type InventoryItem } from '~/stores/inventory'
 import { useAppToast } from '~/composables/useAppToast'
 import { usePreferences } from '~/composables/usePreferences'

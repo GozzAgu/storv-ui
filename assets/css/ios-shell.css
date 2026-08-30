@@ -4,8 +4,8 @@
  */
 
 html.capacitor-ios.capacitor-native {
-  --dashboard-native-top-bar: 6.375rem;
-  --dashboard-command-header-height: 6.375rem;
+  --dashboard-native-top-bar: 6rem;
+  --dashboard-command-header-height: 6rem;
   --ios-sheet-snap-menu: min(72dvh, 520px);
   --ios-sheet-snap-crud: min(92dvh, 720px);
   --ios-sheet-snap-assistant: min(88dvh, 680px);
@@ -16,8 +16,9 @@ html.capacitor-ios.capacitor-native .native-command-header {
   display: flex;
   width: 100%;
   flex-direction: column;
+  justify-content: flex-start;
   gap: 0.5rem;
-  padding-block: 0.25rem 0.125rem;
+  padding-block: 0;
 }
 
 html.capacitor-ios.capacitor-native .native-command-header__greeting-block {
@@ -148,11 +149,14 @@ html.capacitor-ios.capacitor-native .dash-experience-badge--ios {
   letter-spacing: 0.01em;
 }
 
-html.capacitor-ios.capacitor-native .dashboard-top-nav-native-row--command {
-  height: auto;
-  min-height: var(--dashboard-native-top-bar);
-  align-items: stretch;
-  padding-block: 0 0.25rem;
+html.capacitor-ios.capacitor-native .dashboard-top-nav-native-row.native-topnav {
+  padding-inline: 1rem !important;
+  padding-block: 0.75rem !important;
+}
+
+html.capacitor-ios.capacitor-native .dashboard-top-nav-native-row--command.native-topnav {
+  align-items: flex-start;
+  padding-block: 0.875rem 0.75rem !important;
 }
 
 html.capacitor-ios.capacitor-native .dashboard-native-main {

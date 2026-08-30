@@ -123,21 +123,12 @@
       </div>
 
       <template #footer>
-        <Button
-          variant="outline"
-          size="sm"
-          @click="showCreateModal = false"
-          extra-class="!rounded-2xl"
-          >Cancel</Button
-        >
-        <Button
-          variant="primary"
-          size="sm"
-          @click="handleSave"
-          :disabled="!searchName.trim()"
-          extra-class="!rounded-2xl"
-          >Save</Button
-        >
+        <IosDrawerActions
+          primary-label="Save"
+          :primary-disabled="!searchName.trim()"
+          @cancel="showCreateModal = false"
+          @primary="handleSave"
+        />
       </template>
     </Modal>
   </Modal>
@@ -153,6 +144,7 @@ import {
 } from '~/utils/app-icons'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import { useSearchStore } from '~/stores/search'
 import { useAppToast } from '~/composables/useAppToast'
 

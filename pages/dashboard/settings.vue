@@ -906,17 +906,13 @@
     </div>
 
     <template #footer>
-      <Button variant="outline" size="sm" @click="closeStoreModal" extra-class="!rounded-2xl"
-        >Cancel</Button
-      >
-      <Button
-        size="sm"
-        @click="handleStoreSubmit"
-        :disabled="!storeForm.name || isSubmittingStore"
-        extra-class="!rounded-2xl"
-      >
-        {{ isSubmittingStore ? 'Saving...' : editingStore ? 'Update' : 'Create' }}
-      </Button>
+      <IosDrawerActions
+        :primary-label="isSubmittingStore ? 'Saving...' : editingStore ? 'Update' : 'Create'"
+        :primary-loading="isSubmittingStore"
+        :primary-disabled="!storeForm.name || isSubmittingStore"
+        @cancel="closeStoreModal"
+        @primary="handleStoreSubmit"
+      />
     </template>
   </SidePanel>
 
@@ -939,22 +935,13 @@
     </div>
 
     <template #footer>
-      <Button
-        variant="outline"
-        size="sm"
-        @click="showDeleteModal = false"
-        extra-class="!rounded-2xl"
-        >Cancel</Button
-      >
-      <Button
-        variant="danger"
-        size="sm"
-        @click="handleStoreDelete"
-        :disabled="isDeletingStore"
-        extra-class="!rounded-2xl"
-      >
-        {{ isDeletingStore ? 'Deleting...' : 'Delete' }}
-      </Button>
+      <IosDrawerActions
+        primary-variant="danger"
+        :primary-label="isDeletingStore ? 'Deleting...' : 'Delete'"
+        :primary-loading="isDeletingStore"
+        @cancel="showDeleteModal = false"
+        @primary="handleStoreDelete"
+      />
     </template>
   </Modal>
 
@@ -1034,14 +1021,13 @@
       }}, then your account moves to Storvv Micro.
     </p>
     <template #footer>
-      <div class="flex flex-wrap justify-end gap-2">
-        <Button variant="outline" size="sm" @click="cancelConfirmOpen = false">
-          Keep auto-renew
-        </Button>
-        <Button variant="danger" size="sm" @click="proceedCancelSubscription">
-          Cancel auto-renew
-        </Button>
-      </div>
+      <IosDrawerActions
+        cancel-label="Keep auto-renew"
+        primary-variant="danger"
+        primary-label="Cancel auto-renew"
+        @cancel="cancelConfirmOpen = false"
+        @primary="proceedCancelSubscription"
+      />
     </template>
   </Modal>
 </template>
@@ -1066,6 +1052,7 @@ import { useStoresStore } from '~/stores/stores'
 import { useInventoryStore } from '~/stores/inventory'
 import { useAppToast } from '~/composables/useAppToast'
 import Button from '~/components/ui/Button.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import Modal from '~/components/ui/Modal.vue'
 import SidePanel from '~/components/ui/SidePanel.vue'
 import type { Store } from '~/composables/useStores'

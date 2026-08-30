@@ -1249,6 +1249,11 @@ html.capacitor-native .dashboard-top-nav-native-row {
   min-height: var(--dashboard-native-top-bar);
 }
 
+html.capacitor-ios.capacitor-native .dashboard-top-nav-native-row--command {
+  height: auto !important;
+  min-height: 0 !important;
+}
+
 html.capacitor-native .dashboard-top-nav-native .store-switch-trigger,
 html.capacitor-native .dashboard-top-nav-native .dash-store-trigger {
   max-width: 5.5rem;

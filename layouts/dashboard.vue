@@ -516,7 +516,8 @@
       >
         <div
           :class="[
-            'relative flex w-full items-center gap-2.5 px-3 sm:px-4 lg:gap-3 lg:px-5',
+            'relative flex w-full gap-2.5 px-3 sm:px-4 lg:gap-3 lg:px-5',
+            showNativeCommandHeader ? 'items-start pt-2.5 pb-2' : 'items-center',
             isNativeApp
               ? [
                   'native-topnav dashboard-top-nav-native-row',

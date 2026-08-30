@@ -187,24 +187,13 @@
     </div>
 
     <template #footer>
-      <Button
-        variant="outline"
-        size="sm"
-        @click="handleCancel"
-        class="w-full sm:w-auto !rounded-2xl"
-        >Cancel</Button
-      >
-      <Button
-        variant="primary"
-        size="sm"
-        extra-class="!rounded-2xl"
-        :disabled="!confirmed || isProcessing"
-        @click="handleConfirmReturn"
-        :icon="ArrowPathIcon"
-        class="w-full sm:w-auto"
-      >
-        {{ isProcessing ? 'Processing...' : 'Confirm Return/Refund' }}
-      </Button>
+      <IosDrawerActions
+        :primary-label="isProcessing ? 'Processing...' : 'Confirm Return/Refund'"
+        :primary-icon="ArrowPathIcon"
+        :primary-disabled="!confirmed || isProcessing"
+        @cancel="handleCancel"
+        @primary="handleConfirmReturn"
+      />
     </template>
   </Modal>
 </template>
@@ -216,7 +205,7 @@ import {
   ExclamationTriangleIcon,
 } from '~/utils/app-icons'
 import Modal from '~/components/ui/Modal.vue'
-import Button from '~/components/ui/Button.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import { useReceiptsStore, type Receipt } from '~/stores/receipts'
 import { useInventoryStore } from '~/stores/inventory'

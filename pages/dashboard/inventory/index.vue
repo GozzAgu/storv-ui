@@ -520,34 +520,25 @@
         </div>
       </div>
       <template #footer>
-        <Button
-          variant="outline"
-          size="sm"
-          @click="
-            () => {
-              showBulkDeleteFoldersModal = false
-              bulkDeleteFoldersConfirmed = false
-            }
-          "
-          class="!rounded-2xl"
-          >Cancel</Button
-        >
-        <Button
-          variant="danger"
-          size="sm"
-          :disabled="!bulkDeleteFoldersConfirmed || isBulkDeletingFolders"
-          :icon="TrashIcon"
-          class="!rounded-2xl"
-          @click="handleConfirmBulkDeleteFolders"
-        >
-          {{
+        <IosDrawerActions
+          primary-variant="danger"
+          :primary-icon="TrashIcon"
+          :primary-label="
             isBulkDeletingFolders
               ? 'Deleting...'
               : `Delete ${selectedFoldersForBulk.length} ${
                   selectedFoldersForBulk.length === 1 ? 'category' : 'categories'
                 }`
-          }}
-        </Button>
+          "
+          :primary-disabled="!bulkDeleteFoldersConfirmed || isBulkDeletingFolders"
+          @cancel="
+            () => {
+              showBulkDeleteFoldersModal = false
+              bulkDeleteFoldersConfirmed = false
+            }
+          "
+          @primary="handleConfirmBulkDeleteFolders"
+        />
       </template>
     </Modal>
     <!-- Delete Folder Modal -->
@@ -865,25 +856,13 @@
       </form>
 
       <template #footer>
-        <Button
-          variant="outline"
-          size="sm"
-          :extra-class="footerBtnOutlineClass"
-          @click="handleCancelFolder"
-        >
-          Cancel
-        </Button>
-        <Button
-          variant="primary"
-          size="sm"
-          type="button"
-          :loading="isSavingFolder"
-          :disabled="!isFolderDrawerValid || isSavingFolder"
-          :extra-class="footerBtnPrimaryClass"
-          @click="handleSaveFolder"
-        >
-          {{ editingFolder ? 'Update' : 'Create' }} category
-        </Button>
+        <IosDrawerActions
+          :primary-label="`${editingFolder ? 'Update' : 'Create'} category`"
+          :primary-loading="isSavingFolder"
+          :primary-disabled="!isFolderDrawerValid || isSavingFolder"
+          @cancel="handleCancelFolder"
+          @primary="handleSaveFolder"
+        />
       </template>
     </SidePanel>
 
@@ -910,22 +889,12 @@
         </p>
       </div>
       <template #footer>
-        <Button
-          variant="outline"
-          size="sm"
-          :extra-class="footerBtnOutlineClass"
-          @click="showProfitSkipConfirmModal = false"
-        >
-          Go back
-        </Button>
-        <Button
-          variant="primary"
-          size="sm"
-          :extra-class="footerBtnPrimaryClass"
-          @click="confirmCreateWithoutProfitTracking"
-        >
-          Continue without profit
-        </Button>
+        <IosDrawerActions
+          cancel-label="Go back"
+          primary-label="Continue without profit"
+          @cancel="showProfitSkipConfirmModal = false"
+          @primary="confirmCreateWithoutProfitTracking"
+        />
       </template>
     </Modal>
 
@@ -961,24 +930,14 @@
         </p>
       </div>
       <template #footer>
-        <Button
-          variant="outline"
-          size="sm"
-          :extra-class="footerBtnOutlineClass"
-          :disabled="isSavingFolder"
-          @click="confirmParentFolderSave(false)"
-        >
-          Parent only
-        </Button>
-        <Button
-          variant="primary"
-          size="sm"
-          :extra-class="footerBtnPrimaryClass"
-          :loading="isSavingFolder"
-          @click="confirmParentFolderSave(true)"
-        >
-          Apply to subcategories
-        </Button>
+        <IosDrawerActions
+          cancel-label="Parent only"
+          primary-label="Apply to subcategories"
+          :primary-loading="isSavingFolder"
+          :cancel-disabled="isSavingFolder"
+          @cancel="confirmParentFolderSave(false)"
+          @primary="confirmParentFolderSave(true)"
+        />
       </template>
     </Modal>
 
@@ -1045,35 +1004,23 @@
         </p>
       </form>
       <template #footer>
-        <Button
-          variant="outline"
-          size="sm"
-          type="button"
-          :class="footerBtnOutlineClass"
-          @click="
-            () => {
-              showDuplicateFolderModal = false
-              clearDuplicateFolderModal()
-            }
-          "
-          >Cancel</Button
-        >
-        <Button
-          variant="primary"
-          size="sm"
-          type="button"
-          :class="footerBtnPrimaryClass"
-          @click="handleConfirmDuplicateFolder"
-          :disabled="isDuplicatingFolder || !hasValidDuplicateFolderNames"
-        >
-          {{
+        <IosDrawerActions
+          :primary-label="
             isDuplicatingFolder
               ? 'Duplicating…'
               : `Duplicate ${validDuplicateFolderNamesCount} ${
                   validDuplicateFolderNamesCount === 1 ? 'category' : 'categories'
                 }`
-          }}
-        </Button>
+          "
+          :primary-disabled="isDuplicatingFolder || !hasValidDuplicateFolderNames"
+          @cancel="
+            () => {
+              showDuplicateFolderModal = false
+              clearDuplicateFolderModal()
+            }
+          "
+          @primary="handleConfirmDuplicateFolder"
+        />
       </template>
     </SidePanel>
 
@@ -1232,37 +1179,24 @@
         </p>
       </div>
       <template #footer>
-        <Button
-          variant="outline"
-          size="sm"
-          type="button"
-          :class="footerBtnOutlineClass"
-          @click="showCopyFolderTemplatesModal = false"
-        >
-          Cancel
-        </Button>
-        <Button
-          variant="primary"
-          size="sm"
-          type="button"
-          :class="footerBtnPrimaryClass"
-          :disabled="
+        <IosDrawerActions
+          :primary-label="
+            isCopyingFolderTemplates
+              ? 'Copying…'
+              : `Copy ${copyTemplatesEffectiveCount || 0} ${
+                  copyTemplatesEffectiveCount === 1 ? 'category' : 'categories'
+                }`
+          "
+          :primary-disabled="
             isCopyingFolderTemplates ||
             !copyTemplatesSourceStoreId ||
             !storesStore.currentStoreId ||
             copyTemplatesSelectedCount === 0 ||
             loadingCopyTemplatesSourceFolders
           "
-          @click="handleConfirmCopyFolderTemplates"
-        >
-          {{
-            isCopyingFolderTemplates
-              ? 'Copying…'
-              : `Copy ${copyTemplatesEffectiveCount || 0} ${
-                  copyTemplatesEffectiveCount === 1 ? 'category' : 'categories'
-                }`
-          }}
-        </Button>
+          @cancel="showCopyFolderTemplatesModal = false"
+          @primary="handleConfirmCopyFolderTemplates"
+        />
       </template>
     </SidePanel>
 
@@ -1340,6 +1274,7 @@ import {
 import Modal from '~/components/ui/Modal.vue'
 import SidePanel from '~/components/ui/SidePanel.vue'
 import Button from '~/components/ui/Button.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import DeleteFolderModal from '~/components/inventory/DeleteFolderModal.vue'
 import InventoryCategoryCard from '~/components/inventory/InventoryCategoryCard.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'

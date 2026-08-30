@@ -696,51 +696,18 @@
       </div>
     </template>
 
+    <template v-if="currentStep > 0" #leading>
+      <Button variant="outline" size="sm" @click="previousStep">Back</Button>
+    </template>
+
     <template #footer>
-      <div
-        class="flex w-full flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between"
-      >
-        <Button
-          v-if="currentStep > 0"
-          variant="outline"
-          size="sm"
-          :class="[footerBtnOutlineClass, 'w-full sm:w-auto']"
-          @click="previousStep"
-        >
-          Back
-        </Button>
-        <div v-else class="hidden sm:block sm:min-w-[4rem]" />
-        <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-          <Button
-            variant="outline"
-            size="sm"
-            :class="[footerBtnOutlineClass, 'w-full sm:w-auto']"
-            @click="handleCancel"
-          >
-            Cancel
-          </Button>
-          <Button
-            v-if="currentStep < 3"
-            variant="primary"
-            size="sm"
-            :class="[footerBtnPrimaryClass, 'w-full sm:w-auto']"
-            :disabled="!canProceed"
-            @click="nextStep"
-          >
-            Next
-          </Button>
-          <Button
-            v-else
-            variant="primary"
-            size="sm"
-            :class="[footerBtnPrimaryClass, 'w-full sm:w-auto']"
-            :disabled="!isFormValid || isCreating"
-            @click="handleCreateReceipt"
-          >
-            {{ isCreating ? 'Creating…' : 'Create sale' }}
-          </Button>
-        </div>
-      </div>
+      <IosDrawerActions
+        :primary-label="receiptFooterPrimaryLabel"
+        :primary-loading="isCreating && currentStep >= 3"
+        :primary-disabled="receiptFooterPrimaryDisabled"
+        @cancel="handleCancel"
+        @primary="handleReceiptFooterPrimary"
+      />
     </template>
   </SidePanel>
 
@@ -771,25 +738,28 @@
             @keyup.enter="sendReceiptEmail(lastCreatedReceiptId, lastCreatedReceiptData)"
           />
         </div>
-        <div class="flex gap-2 justify-end">
-          <button @click="showEmailModal = false" class="btn-secondary">Skip</button>
-          <button
-            v-if="hasWhatsAppFeature && receiptForm.customerPhone"
-            type="button"
-            @click="openPostCreateWhatsApp"
-            class="px-4 py-2 text-sm font-medium text-[#128C7E] border border-[#25D366]/40 bg-[#25D366]/10 rounded-sm hover:bg-[#25D366]/20 transition-colors"
-          >
-            WhatsApp
-          </button>
-          <button
-            @click="sendReceiptEmail(lastCreatedReceiptId, lastCreatedReceiptData)"
-            :disabled="!emailToSend || !isValidEmail(emailToSend) || isSendingEmail"
-            class="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 rounded-sm transition-colors"
-          >
-            {{ isSendingEmail ? 'Sending...' : 'Send email' }}
-          </button>
-        </div>
       </div>
+    </template>
+    <template #footer>
+      <Button variant="outline" size="sm" @click="showEmailModal = false">Skip</Button>
+      <Button
+        v-if="hasWhatsAppFeature && receiptForm.customerPhone"
+        variant="outline"
+        size="sm"
+        extra-class="!text-[#128C7E] !border-[#25D366]/40 !bg-[#25D366]/10"
+        @click="openPostCreateWhatsApp"
+      >
+        WhatsApp
+      </Button>
+      <Button
+        variant="primary"
+        size="sm"
+        :loading="isSendingEmail"
+        :disabled="!emailToSend || !isValidEmail(emailToSend)"
+        @click="sendReceiptEmail(lastCreatedReceiptId, lastCreatedReceiptData)"
+      >
+        Send email
+      </Button>
     </template>
   </Modal>
 
@@ -828,6 +798,7 @@ import SidePanel from '~/components/ui/SidePanel.vue'
 import SellScreenNoteBanner from '~/components/receipts/SellScreenNoteBanner.vue'
 import PaymentMethodSelect from '~/components/receipts/PaymentMethodSelect.vue'
 import Button from '~/components/ui/Button.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import { useInventoryStore, type InventoryFolder, type InventoryItem } from '~/stores/inventory'
 import { useReceiptsStore, type ReceiptItem } from '~/stores/receipts'
@@ -993,6 +964,21 @@ const canProceed = computed(() => {
   }
   return false
 })
+
+const receiptFooterPrimaryLabel = computed(() => {
+  if (currentStep.value < 3) return 'Next'
+  return isCreating.value ? 'Creating…' : 'Create sale'
+})
+
+const receiptFooterPrimaryDisabled = computed(() => {
+  if (currentStep.value < 3) return !canProceed.value
+  return !isFormValid.value || isCreating.value
+})
+
+function handleReceiptFooterPrimary() {
+  if (currentStep.value < 3) nextStep()
+  else void handleCreateReceipt()
+}
 
 const hasSerialNumberInTemplate = computed(() => {
   if (!selectedFolder.value?.template?.fields) return false

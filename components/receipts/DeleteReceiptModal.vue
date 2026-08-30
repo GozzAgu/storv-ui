@@ -193,24 +193,14 @@
     </div>
 
     <template #footer>
-      <Button
-        variant="outline"
-        size="sm"
-        @click="handleCancel"
-        class="w-full sm:w-auto !rounded-2xl"
-        >Cancel</Button
-      >
-      <Button
-        variant="danger"
-        size="sm"
-        extra-class="!rounded-2xl"
-        :disabled="!confirmed || isProcessing"
-        @click="handleConfirmDelete"
-        :icon="TrashIcon"
-        class="w-full sm:w-auto"
-      >
-        {{ isProcessing ? 'Deleting...' : 'Delete Sale' }}
-      </Button>
+      <IosDrawerActions
+        primary-variant="danger"
+        :primary-label="isProcessing ? 'Deleting...' : 'Delete Sale'"
+        :primary-icon="TrashIcon"
+        :primary-disabled="!confirmed || isProcessing"
+        @cancel="handleCancel"
+        @primary="handleConfirmDelete"
+      />
     </template>
   </Modal>
 </template>
@@ -222,7 +212,7 @@ import {
   ExclamationTriangleIcon,
 } from '~/utils/app-icons'
 import Modal from '~/components/ui/Modal.vue'
-import Button from '~/components/ui/Button.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import type { Receipt } from '~/stores/receipts'
 
