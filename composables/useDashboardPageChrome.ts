@@ -35,12 +35,15 @@ export function useDashboardPageChrome() {
       : '!inline-flex !h-8 !min-h-8 !items-center !justify-center !rounded-full !px-3.5 !py-0 !text-xs shrink-0'
   )
 
-  /** Labeled header / panel actions — never forced into icon-only circles on iOS. */
+  /** Labeled header / panel / inline actions — sales-leads pill style on iOS. */
   const headerTextBtnClass = computed(() =>
     isCapacitorIos.value
-      ? '!inline-flex !h-11 !min-h-11 !w-full !items-center !justify-center !rounded-xl !px-4 !py-0 !text-sm shrink-0 sm:!w-auto'
+      ? 'ios-action-btn ios-action-btn--sm'
       : '!inline-flex !h-8 !min-h-8 !items-center !justify-center !rounded-full !px-3.5 !py-0 !text-xs shrink-0'
   )
+
+  /** Alias for inline dashboard actions (same as headerTextBtnClass). */
+  const actionBtnClass = headerTextBtnClass
 
   /** @deprecated Prefer headerIconBtnClass or headerTextBtnClass explicitly. */
   const headerBtnClass = headerIconBtnClass
@@ -105,6 +108,7 @@ export function useDashboardPageChrome() {
     headerBtnClass,
     headerIconBtnClass,
     headerTextBtnClass,
+    actionBtnClass,
     toolbarSelectClass,
     headerBtnLabelClass,
     segmentTabsClass,

@@ -473,7 +473,7 @@ html.capacitor-ios.capacitor-native .dash-stat-card__body {
 
 html.capacitor-ios.capacitor-native .dash-stat-card__value {
   font-size: var(--cap-ios-title) !important;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: -0.02em;
 }
 
@@ -656,7 +656,7 @@ html.capacitor-ios.capacitor-native .btn-primary,
 html.capacitor-ios.capacitor-native .btn-secondary,
 html.capacitor-ios.capacitor-native .btn-outline,
 html.capacitor-ios.capacitor-native .btn-danger {
-  border-radius: 9999px;
+  border-radius: var(--ios-radius-md) !important;
   font-size: var(--cap-ios-body) !important;
   font-weight: 600;
   letter-spacing: -0.01em;

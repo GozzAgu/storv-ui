@@ -46,7 +46,7 @@
           v-if="inventoryStore.lowStockFolders.length > 0"
           variant="outline"
           size="sm"
-          :extra-class="headerBtnClass"
+          :extra-class="headerTextBtnClass"
           :disabled="reorderExporting"
           @click="handleExportReorderList"
         >
@@ -1390,6 +1390,7 @@ const {
   eyebrowClass,
   titleClass,
   headerBtnClass,
+  headerTextBtnClass,
   tableShellClass,
   gridShellClass,
   gridClass,

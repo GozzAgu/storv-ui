@@ -7,6 +7,7 @@
       'group relative inline-flex items-center justify-center overflow-hidden border-0 font-semibold tracking-tight cursor-pointer transition-[background-color,color,box-shadow,transform,opacity] duration-200 ease-out',
       'focus:outline-none disabled:opacity-45 disabled:cursor-not-allowed',
       'active:scale-[0.98] motion-reduce:active:scale-100',
+      iosNativeClasses,
       radiusClass,
       sizeClasses,
       variantSurfaceClasses,
@@ -83,9 +84,17 @@ const loadingIcon = ArrowPathIcon
 const { isCapacitorIos } = useIsCapacitorIos()
 const iconOnlyIos = computed(() => isCapacitorIos.value && !!props.icon && !props.loading)
 
+const iosNativeClasses = computed(() => {
+  if (!isCapacitorIos.value) return ''
+  const parts = ['ios-action-btn']
+  if (iconOnlyIos.value) parts.push('ios-action-btn--icon-only')
+  else parts.push(`ios-action-btn--${props.variant}`)
+  return parts.join(' ')
+})
+
 const radiusClass = computed(() => {
   if (iconOnlyIos.value) return '!rounded-full'
-  if (isCapacitorIos.value) return '!rounded-xl'
+  if (isCapacitorIos.value) return '!rounded-[var(--ios-radius-md,0.75rem)]'
   return '!rounded-full'
 })
 
@@ -99,6 +108,14 @@ const sizeClasses = computed(() => {
       lg: '!h-11 !w-11 !min-w-11 !p-0',
     }
     return iconOnlyMap[props.size]
+  }
+  if (isCapacitorIos.value) {
+    const iosTextMap = {
+      sm: 'ios-action-btn--sm',
+      md: 'ios-action-btn--md',
+      lg: 'ios-action-btn--lg',
+    }
+    return iosTextMap[props.size]
   }
   const sizeMap = {
     sm: 'px-3.5 py-1.5 text-xs sm:text-sm',
@@ -129,6 +146,9 @@ const outlineSurfaceClasses =
   'border-[1.5px] border-[rgb(20_63_141/0.35)] bg-transparent text-[#143f8d] hover:border-[#143f8d] hover:bg-[rgb(20_63_141/0.06)] dark:border-white/15 dark:text-gray-100 dark:hover:border-white/25 dark:hover:bg-white/[0.06]'
 
 const variantSurfaceClasses = computed(() => {
+  if (isCapacitorIos.value) {
+    return 'shadow-none'
+  }
   const map = {
     primary: outlineSurfaceClasses,
     secondary:

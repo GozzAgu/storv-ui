@@ -63,15 +63,14 @@
     </div>
 
     <template #footer>
-      <Button variant="outline" size="sm" @click="handleClose" class="w-full sm:w-auto !rounded-2xl"
-        >Cancel</Button
-      >
-      <Button
-        size="sm"
-        @click="handleSubmit"
-        :disabled="isSubmitting || !formData.name || !formData.departmentType"
-        class="w-full sm:w-auto !rounded-2xl"
-      >
+      <div class="flex flex-wrap justify-end gap-2">
+        <Button variant="outline" size="sm" @click="handleClose">Cancel</Button>
+        <Button
+          size="sm"
+          variant="primary"
+          @click="handleSubmit"
+          :disabled="isSubmitting || !formData.name || !formData.departmentType"
+        >
         <span v-if="isSubmitting" class="flex items-center gap-1.5">
           <svg
             class="animate-spin h-3.5 w-3.5"
@@ -97,6 +96,7 @@
         </span>
         <span v-else>{{ isEdit ? 'Update Department' : 'Create Department' }}</span>
       </Button>
+      </div>
     </template>
   </SidePanel>
 </template>

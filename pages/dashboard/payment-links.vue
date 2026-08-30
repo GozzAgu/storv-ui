@@ -96,12 +96,12 @@
         </div>
         <p v-if="connectError" class="mt-3 text-xs font-medium text-red-500">{{ connectError }}</p>
 
-        <div class="mt-4 flex justify-end gap-2">
+        <div class="mt-4 flex flex-wrap justify-end gap-2">
           <Button
             v-if="editingBank"
-            variant="secondary"
+            variant="outline"
             size="sm"
-            :extra-class="headerBtnClass"
+            :extra-class="headerTextBtnClass"
             @click="editingBank = false"
           >
             Cancel
@@ -109,7 +109,7 @@
           <Button
             variant="primary"
             size="sm"
-            :extra-class="headerBtnClass"
+            :extra-class="headerTextBtnClass"
             :disabled="!canConnect || connecting"
             @click="connect"
           >
@@ -355,7 +355,8 @@ const route = useRoute()
 const { showPaymentLinksComingSoon } = usePaymentLinksLaunch()
 const isNativeShell = computed(() => isCapacitorNative())
 
-const { eyebrowClass, titleClass, headerBtnClass, fieldClass } = useDashboardPageChrome()
+const { eyebrowClass, titleClass, headerBtnClass, headerTextBtnClass, fieldClass } =
+  useDashboardPageChrome()
 const { tableShellClass, tableSectionHeaderClass } = useDashboardTableChrome()
 const userStore = useUserStore()
 const {
