@@ -6,49 +6,29 @@
     subtitle="Pick items from your inventory, add the customer, and generate a secure link."
     @update:model-value="(v: boolean) => emit('update:modelValue', v)"
   >
-    <div class="space-y-4">
-      <!-- Customer -->
-      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <div>
-          <label class="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-400"
-            >Customer name</label
-          >
-          <input
-            v-model="customerName"
-            type="text"
-            placeholder="e.g. Sarah Johnson"
-            class="w-full rounded-lg bg-white px-3 py-2 text-sm text-gray-900 ring-1 ring-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-400/40 dark:bg-white/[0.04] dark:text-gray-100 dark:ring-white/10"
-          />
-        </div>
-        <div>
-          <label class="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-400"
-            >Customer phone (WhatsApp)</label
-          >
-          <input
-            v-model="customerPhone"
-            type="tel"
-            placeholder="e.g. 080 1234 5678"
-            class="w-full rounded-lg bg-white px-3 py-2 text-sm text-gray-900 ring-1 ring-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-400/40 dark:bg-white/[0.04] dark:text-gray-100 dark:ring-white/10"
-          />
-        </div>
-      </div>
+    <IosForm layout="fill">
+      <IosFormSection title="Customer" fixed>
+        <IosFormField label="Customer name">
+          <IosFormInput v-model="customerName" placeholder="e.g. Sarah Johnson" />
+        </IosFormField>
+        <IosFormField label="Customer phone" hint="WhatsApp">
+          <IosFormInput v-model="customerPhone" type="tel" placeholder="e.g. 080 1234 5678" />
+        </IosFormField>
+      </IosFormSection>
 
-      <!-- Folder picker -->
-      <div>
-        <label class="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-400"
-          >Category</label
-        >
-        <select
-          v-model="selectedFolderId"
-          class="w-full rounded-lg bg-white px-3 py-2 text-sm text-gray-900 ring-1 ring-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-400/40 dark:bg-white/[0.04] dark:text-gray-100 dark:ring-white/10"
-          @change="onFolderChange"
-        >
-          <option value="">Select a category</option>
-          <option v-for="f in inventoryStore.leafFolders" :key="f.id" :value="f.id">
-            {{ f.name }}
-          </option>
-        </select>
-      </div>
+      <IosFormSection title="Items" fixed>
+        <IosFormField label="Category">
+          <IosFormSelect
+            v-model="selectedFolderId"
+            extra-class="cursor-pointer"
+            @change="onFolderChange"
+          >
+            <option value="">Select a category</option>
+            <option v-for="f in inventoryStore.leafFolders" :key="f.id" :value="f.id">
+              {{ f.name }}
+            </option>
+          </IosFormSelect>
+        </IosFormField>
 
       <!-- Items -->
       <div v-if="selectedFolderId">
@@ -114,9 +94,10 @@
           </div>
         </div>
       </div>
+      </IosFormSection>
 
-      <p v-if="errorMsg" class="text-xs font-medium text-red-500">{{ errorMsg }}</p>
-    </div>
+      <p v-if="errorMsg" class="ios-form__error">{{ errorMsg }}</p>
+    </IosForm>
 
     <template #leading>
       <span>
@@ -141,6 +122,13 @@
 import { ref, computed, reactive, watch } from 'vue'
 import Modal from '~/components/ui/Modal.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
+import {
+  IosForm,
+  IosFormSection,
+  IosFormField,
+  IosFormInput,
+  IosFormSelect,
+} from '~/components/ios/forms'
 import { formatNaira } from '~/utils/naira'
 import { useInventoryStore, type InventoryItem } from '~/stores/inventory'
 import { resolveBulkStockFieldAndValue } from '~/utils/inventory-bulk-quantity'

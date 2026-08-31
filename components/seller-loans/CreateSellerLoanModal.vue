@@ -7,69 +7,52 @@
     @update:model-value="(value: boolean) => emit('update:modelValue', value)"
   >
     <template #default>
-      <div class="space-y-4">
-        <div
-          class="rounded-sm border border-sky-200/80 bg-sky-50/90 p-3 text-xs text-sky-900 dark:border-sky-800/60 dark:bg-sky-950/35 dark:text-sky-100"
-        >
-          <strong>Not a sale:</strong>
-          Selected serial items are marked as on a stock loan to the borrower below. Selling on a
-          receipt or choosing Mark sold on Stock loans marks units sold and updates this loan.
-        </div>
+      <IosForm layout="fill">
+        <IosFormSection fixed>
+          <p
+            class="rounded-sm border border-sky-200/80 bg-sky-50/90 p-3 text-xs text-sky-900 dark:border-sky-800/60 dark:bg-sky-950/35 dark:text-sky-100"
+          >
+            <strong>Not a sale:</strong>
+            Selected serial items are marked as on a stock loan to the borrower below. Selling on
+            a receipt or choosing Mark sold on Stock loans marks units sold and updates this loan.
+          </p>
+        </IosFormSection>
 
-        <div>
-          <p class="text-xs font-medium text-gray-700 dark:text-gray-300">Products</p>
+        <IosFormSection title="Products" fixed>
           <ul
-            class="mt-1.5 max-h-44 space-y-1 overflow-y-auto rounded-sm bg-gray-50/90 px-2.5 py-2 text-[11px] text-gray-800 dark:bg-gray-900/40 dark:text-gray-200"
+            class="max-h-44 space-y-1 overflow-y-auto rounded-sm bg-gray-50/90 px-2.5 py-2 text-[11px] text-gray-800 dark:bg-gray-900/40 dark:text-gray-200"
           >
             <li v-for="it in items" :key="it.id" class="truncate">
               {{ getInventoryItemDisplayName(it) }}
             </li>
           </ul>
-          <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+          <p class="ios-form__hint dash-drawer-hint">
             {{ items.length }} item{{ items.length !== 1 ? 's' : '' }}
           </p>
-        </div>
+        </IosFormSection>
 
-        <div>
-          <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300"
-            >Borrower name *</label
-          >
-          <input
-            v-model="partyName"
-            type="text"
-            maxlength="120"
-            placeholder="Company or borrower name"
-            autocomplete="organization"
-            class="w-full rounded-sm bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:bg-gray-900 dark:text-gray-100"
-          />
-        </div>
-
-        <div>
-          <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300"
-            >Phone (optional)</label
-          >
-          <input
-            v-model="partyPhone"
-            type="tel"
-            maxlength="40"
-            placeholder="Contact number"
-            class="w-full rounded-sm bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:bg-gray-900 dark:text-gray-100"
-          />
-        </div>
-
-        <div>
-          <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300"
-            >Notes (optional)</label
-          >
-          <textarea
-            v-model="partyNotes"
-            rows="3"
-            maxlength="1000"
-            placeholder="SKU list, handshake details, pickup time…"
-            class="w-full resize-y rounded-sm bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:bg-gray-900 dark:text-gray-100"
-          />
-        </div>
-      </div>
+        <IosFormSection title="Borrower" fixed>
+          <IosFormField label="Borrower name" required>
+            <IosFormInput
+              v-model="partyName"
+              maxlength="120"
+              placeholder="Company or borrower name"
+              autocomplete="organization"
+            />
+          </IosFormField>
+          <IosFormField label="Phone" hint="Optional">
+            <IosFormInput v-model="partyPhone" type="tel" maxlength="40" placeholder="Contact number" />
+          </IosFormField>
+          <IosFormField label="Notes" hint="Optional">
+            <IosFormTextarea
+              v-model="partyNotes"
+              :rows="3"
+              maxlength="1000"
+              placeholder="SKU list, handshake details, pickup time…"
+            />
+          </IosFormField>
+        </IosFormSection>
+      </IosForm>
     </template>
 
     <template #footer>
@@ -88,6 +71,13 @@
 import { ref, computed, watch } from 'vue'
 import Modal from '~/components/ui/Modal.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
+import {
+  IosForm,
+  IosFormSection,
+  IosFormField,
+  IosFormInput,
+  IosFormTextarea,
+} from '~/components/ios/forms'
 import type { InventoryItem } from '~/stores/inventory'
 import { getInventoryItemDisplayName } from '~/composables/useInventoryItemDisplay'
 import { useSellerLoanOutsStore } from '~/stores/sellerLoanOuts'

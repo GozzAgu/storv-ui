@@ -95,6 +95,65 @@ describe('wait-for-auth profile helpers', () => {
     expect(store.fetchUserData).toHaveBeenCalledWith('u1')
   })
 
+  it('ensureUserProfileLoaded never blocks longer than maxMs, even when the fetch hangs', async () => {
+    const { ensureUserProfileLoaded } = await import('~/utils/wait-for-auth')
+    let resolveFetch: () => void = () => {}
+    const hangingFetch = new Promise<void>((resolve) => {
+      resolveFetch = resolve
+    })
+    const store = {
+      userData: null as { uid: string } | null,
+      loading: true,
+      fetchUserData: vi.fn().mockReturnValue(hangingFetch),
+    }
+
+    const start = Date.now()
+    await ensureUserProfileLoaded(store as any, 'u1', 100)
+    const elapsed = Date.now() - start
+
+    expect(elapsed).toBeLessThan(300)
+    expect(store.fetchUserData).toHaveBeenCalledWith('u1')
+    expect(store.loading).toBe(false)
+
+    // Cleanup: let the still-in-flight fetch resolve so it doesn't leak into other tests.
+    resolveFetch()
+  })
+
+  it('ensureUserProfileLoaded uses stale (but present) cache instantly instead of blocking', async () => {
+    const { ensureUserProfileLoaded } = await import('~/utils/wait-for-auth')
+    const almostAYearAgo = Date.now() - 100 * 24 * 60 * 60 * 1000
+    localStorage.setItem(
+      'storv_user_profile_v1',
+      JSON.stringify({ userId: 'u1', userData: sampleUser('u1'), cachedAt: almostAYearAgo })
+    )
+    // A 100-day-old entry is past the outer bound, so this should still miss and fall
+    // back to a capped live fetch - confirms the outer bound is actually enforced.
+    const missStore = {
+      userData: null as { uid: string } | null,
+      loading: false,
+      fetchUserData: vi.fn().mockResolvedValue(undefined),
+    }
+    await ensureUserProfileLoaded(missStore as any, 'u1', 100)
+    expect(missStore.userData).toBeNull()
+    expect(missStore.fetchUserData).toHaveBeenCalledWith('u1')
+
+    // A 30-day-old entry is within the outer bound - should hydrate instantly and
+    // refresh in the background rather than blocking.
+    const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000
+    localStorage.setItem(
+      'storv_user_profile_v1',
+      JSON.stringify({ userId: 'u1', userData: sampleUser('u1'), cachedAt: thirtyDaysAgo })
+    )
+    const hitStore = {
+      userData: null as { uid: string } | null,
+      loading: false,
+      fetchUserData: vi.fn().mockResolvedValue(undefined),
+    }
+    await ensureUserProfileLoaded(hitStore as any, 'u1', 100)
+    expect(hitStore.userData?.uid).toBe('u1')
+    expect(hitStore.fetchUserData).toHaveBeenCalledWith('u1')
+  })
+
   it('waitForUserStore resolves when loading finishes', async () => {
     const { waitForUserStore } = await import('~/utils/wait-for-auth')
     let loading = true

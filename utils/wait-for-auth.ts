@@ -91,7 +91,15 @@ export function waitForUserStore(store: UserStore, maxMs = DEFAULT_MAX_MS): Prom
   )
 }
 
-/** Ensure user profile is loaded (or fetch attempted) before onboarding redirects. */
+/**
+ * Ensure user profile is loaded (or fetch attempted) before onboarding redirects.
+ *
+ * Never blocks navigation on a live network read when we have *anything* cached for
+ * this user - stale data is shown instantly and refreshed in the background. Only a
+ * true cache miss (first-ever launch, or a brand-new account) waits on the network,
+ * and even then never longer than `maxMs` - the fetch keeps running in the background
+ * past that point and the dashboard shell picks up the result once it lands.
+ */
 export async function ensureUserProfileLoaded(
   userStore: UserStore,
   userId: string,
@@ -105,13 +113,17 @@ export async function ensureUserProfileLoaded(
     return
   }
 
-  try {
-    await userStore.fetchUserData(userId)
-  } catch {
-    /* ignore */
-  }
+  const fetchPromise = userStore.fetchUserData(userId).catch(() => {})
+  const timedOut = Symbol('timeout')
+  const timeoutPromise = new Promise<typeof timedOut>((resolve) => {
+    setTimeout(() => resolve(timedOut), maxMs)
+  })
 
-  if (!userStore.userData && userStore.loading) {
-    await waitForUserStore(userStore, maxMs)
+  const result = await Promise.race([fetchPromise.then(() => null), timeoutPromise])
+  if (result === timedOut) {
+    console.warn(
+      '[Auth] User profile fetch timed out - continuing without blocking navigation; fetch keeps running in the background'
+    )
+    if (userStore.loading) userStore.loading = false
   }
 }

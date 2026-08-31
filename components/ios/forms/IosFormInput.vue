@@ -18,8 +18,6 @@
 <script setup lang="ts">
 import { APP_FIELD_ON_WHITE_CLASS } from '~/utils/app-chrome'
 
-const model = defineModel<string | number | null>({ default: '' })
-
 const props = withDefaults(
   defineProps<{
     id?: string
@@ -39,6 +37,20 @@ const props = withDefaults(
     extraClass: '',
   }
 )
+
+// type="number" inputs emit strings from the DOM even without a `.number`
+// v-model modifier — coerce here so every numeric field bound through this
+// component (price, quantity, salary…) round-trips as an actual number
+// instead of silently failing strict `typeof === 'number'` checks upstream.
+const model = defineModel<string | number | null>({
+  default: '',
+  set(value) {
+    if (props.type !== 'number') return value
+    if (value === '' || value === null || value === undefined) return null
+    const num = Number(value)
+    return Number.isNaN(num) ? value : num
+  },
+})
 
 const inputClass = APP_FIELD_ON_WHITE_CLASS
 </script>

@@ -2,6 +2,7 @@
 import { ref, watch } from 'vue'
 import Modal from '~/components/ui/Modal.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
+import { IosFormField, IosFormInput } from '~/components/ios/forms'
 
 const props = defineProps<{
   modelValue: boolean
@@ -45,20 +46,19 @@ function submit() {
     size="sm"
     @update:model-value="(value: boolean) => { if (!value) close() }"
   >
-    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300" for="totp-confirm-code">
-      Authenticator code
-    </label>
-    <input
-      id="totp-confirm-code"
-      v-model="code"
-      type="text"
-      inputmode="numeric"
-      autocomplete="one-time-code"
-      maxlength="6"
-      class="app-field mt-1.5 w-full rounded-xl px-3 py-2 text-center text-lg tracking-[0.35em]"
-      placeholder="000000"
-      @keyup.enter="submit"
-    />
+    <IosFormField label="Authenticator code" for="totp-confirm-code">
+      <IosFormInput
+        id="totp-confirm-code"
+        v-model="code"
+        type="text"
+        inputmode="numeric"
+        autocomplete="one-time-code"
+        maxlength="6"
+        extra-class="rounded-xl text-center text-lg tracking-[0.35em]"
+        placeholder="000000"
+        @keyup.enter="submit"
+      />
+    </IosFormField>
     <template #footer>
       <IosDrawerActions
         primary-label="Confirm"

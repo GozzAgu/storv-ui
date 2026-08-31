@@ -623,102 +623,83 @@
 
   <!-- iOS: Edit profile -->
   <Modal v-model="showEditProfileModal" :title="isStaff ? 'Staff profile' : 'Business profile'" size="lg">
-    <div :class="[iosProfileSheetClass, 'space-y-4']">
-      <div v-if="!isStaff" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div class="sm:col-span-2">
-          <label :class="labelClass">Business name</label>
-          <input
+    <IosForm :class="iosProfileSheetClass" layout="fill">
+      <IosFormSection v-if="!isStaff" fixed>
+        <IosFormField label="Business name">
+          <IosFormInput
             v-model="profileData.businessName"
-            type="text"
             :disabled="!isEditingPersonalInfo"
-            :class="inputClass(isEditingPersonalInfo)"
             placeholder="Your business or store name"
           />
-        </div>
-        <div>
-          <label :class="labelClass">Email</label>
-          <input
+        </IosFormField>
+        <IosFormField label="Email">
+          <IosFormInput
             v-model="profileData.email"
             type="email"
             :disabled="!isEditingPersonalInfo"
-            :class="inputClass(isEditingPersonalInfo)"
             placeholder="Enter email"
           />
-        </div>
-        <div>
-          <label :class="labelClass">Phone</label>
-          <input
+        </IosFormField>
+        <IosFormField label="Phone">
+          <IosFormInput
             v-model="profileData.phone"
             type="tel"
             :disabled="!isEditingPersonalInfo"
-            :class="inputClass(isEditingPersonalInfo)"
             placeholder="Business phone"
           />
-        </div>
-        <div class="sm:col-span-2">
-          <label :class="labelClass">Bio</label>
-          <textarea
+        </IosFormField>
+        <IosFormField label="Bio">
+          <IosFormTextarea
             v-model="profileData.bio"
-            rows="3"
+            :rows="3"
             :disabled="!isEditingPersonalInfo"
-            :class="[inputClass(isEditingPersonalInfo), 'min-h-[5rem] resize-y']"
+            extra-class="min-h-[5rem] resize-y"
             placeholder="Tell customers about your business"
           />
-        </div>
-      </div>
-      <div v-else class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div>
-          <label :class="labelClass">First name</label>
-          <input
+        </IosFormField>
+      </IosFormSection>
+      <IosFormSection v-else fixed>
+        <IosFormField label="First name">
+          <IosFormInput
             v-model="profileData.firstName"
-            type="text"
             :disabled="!isEditingPersonalInfo"
-            :class="inputClass(isEditingPersonalInfo)"
             placeholder="First name"
           />
-        </div>
-        <div>
-          <label :class="labelClass">Last name</label>
-          <input
+        </IosFormField>
+        <IosFormField label="Last name">
+          <IosFormInput
             v-model="profileData.lastName"
-            type="text"
             :disabled="!isEditingPersonalInfo"
-            :class="inputClass(isEditingPersonalInfo)"
             placeholder="Last name"
           />
-        </div>
-        <div>
-          <label :class="labelClass">Email</label>
-          <input
+        </IosFormField>
+        <IosFormField label="Email">
+          <IosFormInput
             v-model="profileData.email"
             type="email"
             :disabled="!isEditingPersonalInfo"
-            :class="inputClass(isEditingPersonalInfo)"
             placeholder="Work email"
           />
-        </div>
-        <div>
-          <label :class="labelClass">Phone</label>
-          <input
+        </IosFormField>
+        <IosFormField label="Phone">
+          <IosFormInput
             v-model="profileData.phone"
             type="tel"
             :disabled="!isEditingPersonalInfo"
-            :class="inputClass(isEditingPersonalInfo)"
             placeholder="Phone"
           />
-        </div>
-        <div class="sm:col-span-2">
-          <label :class="labelClass">Bio</label>
-          <textarea
+        </IosFormField>
+        <IosFormField label="Bio">
+          <IosFormTextarea
             v-model="profileData.bio"
-            rows="3"
+            :rows="3"
             :disabled="!isEditingPersonalInfo"
-            :class="[inputClass(isEditingPersonalInfo), 'min-h-[5rem] resize-y']"
+            extra-class="min-h-[5rem] resize-y"
             placeholder="Optional note"
           />
-        </div>
-      </div>
-    </div>
+        </IosFormField>
+      </IosFormSection>
+    </IosForm>
     <template #footer>
       <IosDrawerActions
         primary-label="Save"
@@ -803,38 +784,37 @@
 
   <!-- iOS: Receipt policies -->
   <Modal v-model="showReceiptPoliciesModal" title="Receipt terms & policies" size="lg">
-    <div :class="[iosProfileSheetClass, 'space-y-4']">
-      <div>
-        <label :class="labelClass">Sales terms & conditions</label>
-        <textarea
-          v-model="receiptPoliciesForm.salesTerms"
-          rows="4"
-          :disabled="!isEditingReceiptPolicies"
-          :class="policyTextareaClass"
-          placeholder="e.g. All sales are final unless otherwise stated…"
-        />
-      </div>
-      <div>
-        <label :class="labelClass">Refund policy</label>
-        <textarea
-          v-model="receiptPoliciesForm.refundPolicy"
-          rows="4"
-          :disabled="!isEditingReceiptPolicies"
-          :class="policyTextareaClass"
-          placeholder="e.g. Refunds within 7 days with receipt…"
-        />
-      </div>
-      <div>
-        <label :class="labelClass">Warranty policy</label>
-        <textarea
-          v-model="receiptPoliciesForm.warrantyPolicy"
-          rows="4"
-          :disabled="!isEditingReceiptPolicies"
-          :class="policyTextareaClass"
-          placeholder="e.g. Manufacturer warranty applies…"
-        />
-      </div>
-    </div>
+    <IosForm :class="iosProfileSheetClass" layout="fill">
+      <IosFormSection fixed>
+        <IosFormField label="Sales terms & conditions">
+          <IosFormTextarea
+            v-model="receiptPoliciesForm.salesTerms"
+            :rows="4"
+            :disabled="!isEditingReceiptPolicies"
+            extra-class="min-h-[5rem] resize-y"
+            placeholder="e.g. All sales are final unless otherwise stated…"
+          />
+        </IosFormField>
+        <IosFormField label="Refund policy">
+          <IosFormTextarea
+            v-model="receiptPoliciesForm.refundPolicy"
+            :rows="4"
+            :disabled="!isEditingReceiptPolicies"
+            extra-class="min-h-[5rem] resize-y"
+            placeholder="e.g. Refunds within 7 days with receipt…"
+          />
+        </IosFormField>
+        <IosFormField label="Warranty policy">
+          <IosFormTextarea
+            v-model="receiptPoliciesForm.warrantyPolicy"
+            :rows="4"
+            :disabled="!isEditingReceiptPolicies"
+            extra-class="min-h-[5rem] resize-y"
+            placeholder="e.g. Manufacturer warranty applies…"
+          />
+        </IosFormField>
+      </IosFormSection>
+    </IosForm>
     <template #footer>
       <IosDrawerActions
         primary-label="Save"
@@ -928,7 +908,7 @@
           :class="[
             'w-full p-4 rounded-sm border-0 transition-all text-left',
             currentThemeValue === themeOption.value
-              ? 'bg-primary-50 dark:bg-primary-900/20'
+              ? 'bg-gray-100 dark:bg-white/[0.08]'
               : 'bg-gray-50/80 dark:bg-gray-800/50',
           ]"
         >
@@ -943,9 +923,9 @@
             </div>
             <div
               v-if="currentThemeValue === themeOption.value"
-              class="w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center"
+              class="w-5 h-5 rounded-full bg-gray-900 dark:bg-white flex items-center justify-center"
             >
-              <CheckCircleIcon class="w-4 h-4 text-white" />
+              <CheckCircleIcon class="w-4 h-4 text-white dark:text-gray-900" />
             </div>
           </div>
         </button>
@@ -972,7 +952,7 @@
           :class="[
             'w-full p-4 rounded-sm border-0 transition-all text-left',
             accountSettings.language === lang.name
-              ? 'bg-primary-50 dark:bg-primary-900/20'
+              ? 'bg-gray-100 dark:bg-white/[0.08]'
               : 'bg-gray-50/80 dark:bg-gray-800/50',
           ]"
         >
@@ -983,9 +963,9 @@
             </div>
             <div
               v-if="accountSettings.language === lang.name"
-              class="w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center"
+              class="w-5 h-5 rounded-full bg-gray-900 dark:bg-white flex items-center justify-center"
             >
-              <CheckCircleIcon class="w-4 h-4 text-white" />
+              <CheckCircleIcon class="w-4 h-4 text-white dark:text-gray-900" />
             </div>
           </div>
         </button>
@@ -1014,7 +994,7 @@
           <label class="relative inline-flex items-center cursor-pointer">
             <input v-model="notificationSettings.email" type="checkbox" class="sr-only peer" />
             <div
-              class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-500"
+              class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-gray-400/40 dark:peer-focus:ring-white/20 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-900 dark:peer-checked:bg-gray-200"
             ></div>
           </label>
         </div>
@@ -1034,7 +1014,7 @@
               @change="handlePushNotificationToggle"
             />
             <div
-              class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-500"
+              class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-gray-400/40 dark:peer-focus:ring-white/20 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-900 dark:peer-checked:bg-gray-200"
             ></div>
           </label>
         </div>
@@ -1049,7 +1029,7 @@
           <label class="relative inline-flex items-center cursor-pointer">
             <input v-model="notificationSettings.sms" type="checkbox" class="sr-only peer" />
             <div
-              class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-500"
+              class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-gray-400/40 dark:peer-focus:ring-white/20 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-900 dark:peer-checked:bg-gray-200"
             ></div>
           </label>
         </div>
@@ -1064,7 +1044,7 @@
           <label class="relative inline-flex items-center cursor-pointer">
             <input v-model="notificationSettings.inApp" type="checkbox" class="sr-only peer" />
             <div
-              class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-500"
+              class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-gray-400/40 dark:peer-focus:ring-white/20 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-900 dark:peer-checked:bg-gray-200"
             ></div>
           </label>
         </div>
@@ -1081,35 +1061,29 @@
 
   <!-- Password Change Modal -->
   <Modal v-model="showPasswordModal" title="Change Password" size="md">
-    <div :class="[iosProfileSheetClass, 'space-y-4']">
-      <p class="text-xs text-gray-600 dark:text-gray-400">
-        Enter your current password and choose a new one
-      </p>
-      <div class="space-y-4">
-        <div>
-          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-            Current Password
-          </label>
-          <input
+    <IosForm :class="iosProfileSheetClass" layout="fill">
+      <IosFormSection fixed>
+        <p class="ios-form__hint dash-drawer-hint">
+          Enter your current password and choose a new one
+        </p>
+
+        <IosFormField label="Current Password">
+          <IosFormInput
             v-model="passwordForm.currentPassword"
             type="password"
-            class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 outline-none"
             placeholder="Enter current password"
           />
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-            New Password
-          </label>
-          <input
+        </IosFormField>
+
+        <IosFormField label="New Password">
+          <IosFormInput
             v-model="passwordForm.newPassword"
             type="password"
             :minlength="PASSWORD_MIN_LENGTH"
             autocomplete="new-password"
-            class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 outline-none"
             placeholder="At least 12 characters, number and capital letter"
           />
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          <p class="ios-form__hint dash-drawer-hint">
             At least {{ PASSWORD_MIN_LENGTH }} characters, one number, one uppercase letter.
           </p>
           <ul
@@ -1130,15 +1104,12 @@
               <span>{{ rule.label }}</span>
             </li>
           </ul>
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-            Confirm New Password
-          </label>
-          <input
+        </IosFormField>
+
+        <IosFormField label="Confirm New Password">
+          <IosFormInput
             v-model="passwordForm.confirmPassword"
             type="password"
-            class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 outline-none"
             placeholder="Confirm new password"
           />
           <p
@@ -1151,15 +1122,16 @@
           >
             Passwords do not match
           </p>
-        </div>
-        <div
+        </IosFormField>
+
+        <p
           v-if="passwordError"
-          class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-sm"
+          class="rounded-sm border border-red-200 bg-red-50 p-3 text-xs text-red-600 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400"
         >
-          <p class="text-xs text-red-600 dark:text-red-400">{{ passwordError }}</p>
-        </div>
-      </div>
-    </div>
+          {{ passwordError }}
+        </p>
+      </IosFormSection>
+    </IosForm>
     <template #footer>
       <IosDrawerActions
         primary-label="Change password"
@@ -1215,7 +1187,7 @@
                 </p>
                 <span
                   v-if="session.current"
-                  class="px-2 py-0.5 text-xs font-medium bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 rounded-full"
+                  class="px-2 py-0.5 text-xs font-medium bg-gray-100 dark:bg-white/[0.08] text-gray-700 dark:text-gray-300 rounded-full"
                 >
                   Current
                 </span>
@@ -1260,7 +1232,7 @@
           :class="[
             'w-full p-4 rounded-sm border-0 transition-all text-left',
             accountSettings.region === region.name
-              ? 'bg-primary-50 dark:bg-primary-900/20'
+              ? 'bg-gray-100 dark:bg-white/[0.08]'
               : 'bg-gray-50/80 dark:bg-gray-800/50',
           ]"
         >
@@ -1276,9 +1248,9 @@
             </div>
             <div
               v-if="accountSettings.region === region.name"
-              class="w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center"
+              class="w-5 h-5 rounded-full bg-gray-900 dark:bg-white flex items-center justify-center"
             >
-              <CheckCircleIcon class="w-4 h-4 text-white" />
+              <CheckCircleIcon class="w-4 h-4 text-white dark:text-gray-900" />
             </div>
           </div>
         </button>
@@ -1305,7 +1277,7 @@
           :class="[
             'w-full p-4 rounded-sm border-0 transition-all text-left',
             accountSettings.currency === currency.code
-              ? 'bg-primary-50 dark:bg-primary-900/20'
+              ? 'bg-gray-100 dark:bg-white/[0.08]'
               : 'bg-gray-50/80 dark:bg-gray-800/50',
           ]"
         >
@@ -1320,9 +1292,9 @@
             </div>
             <div
               v-if="accountSettings.currency === currency.code"
-              class="w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center"
+              class="w-5 h-5 rounded-full bg-gray-900 dark:bg-white flex items-center justify-center"
             >
-              <CheckCircleIcon class="w-4 h-4 text-white" />
+              <CheckCircleIcon class="w-4 h-4 text-white dark:text-gray-900" />
             </div>
           </div>
         </button>
@@ -1347,7 +1319,7 @@
         </label>
         <select
           v-model="selectedTimezone"
-          class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 outline-none"
+          class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-gray-400/40 outline-none"
         >
           <option v-for="tz in timezones" :key="tz.value" :value="tz.value">
             {{ tz.label }}
@@ -1384,7 +1356,7 @@
         <input
           v-model="disable2FAPassword"
           type="password"
-          class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 outline-none"
+          class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-gray-400/40 outline-none"
           placeholder="Enter your password"
           @keyup.enter="handleDisable2FA"
         />
@@ -1399,7 +1371,7 @@
           inputmode="numeric"
           autocomplete="one-time-code"
           maxlength="6"
-          class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 outline-none tracking-[0.25em]"
+          class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-gray-400/40 outline-none tracking-[0.25em]"
           placeholder="6-digit code"
           @keyup.enter="handleDisable2FA"
         />
@@ -1483,6 +1455,13 @@ import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import IosProfileSettings from '~/components/ios/IosProfileSettings.vue'
+import {
+  IosForm,
+  IosFormSection,
+  IosFormField,
+  IosFormInput,
+  IosFormTextarea,
+} from '~/components/ios/forms'
 import TwoFactorSetup from '~/components/auth/TwoFactorSetup.vue'
 import { SUBSCRIPTION_PLANS, resolveEffectiveSubscriptionPlan } from '~/types/subscription'
 import {

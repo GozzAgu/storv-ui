@@ -79,7 +79,7 @@
               </div>
               <button
                 type="button"
-                class="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-primary-500 text-white shadow-sm transition hover:bg-primary-600 disabled:opacity-50"
+                class="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-gray-900 text-white shadow-sm transition hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100 disabled:opacity-50"
                 :disabled="isUploadingAccountLogo"
                 aria-label="Upload logo"
                 @click="accountLogoInput?.click()"
@@ -195,7 +195,7 @@
                 @change="onProgressiveCapabilityToggle(option.capability, ($event.target as HTMLInputElement).checked)"
               />
               <div
-                class="w-8 h-4 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary-500 peer-disabled:opacity-50"
+                class="w-8 h-4 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-gray-400/40 dark:peer-focus:ring-white/20 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-gray-900 dark:peer-checked:bg-gray-200 peer-disabled:opacity-50"
               />
             </label>
           </div>
@@ -254,7 +254,7 @@
             class="flex items-center gap-2 py-6 text-xs text-gray-500 dark:text-gray-400"
           >
             <div
-              class="h-4 w-4 animate-spin rounded-full border-0 border-primary-500/25 border-t-primary-500"
+              class="h-4 w-4 animate-spin rounded-full border-0 border-gray-300/40 border-t-gray-500 dark:border-white/15 dark:border-t-gray-300"
               aria-hidden="true"
             />
             Loading branches…
@@ -538,7 +538,7 @@
                 min="1"
                 :disabled="!canEditSettings"
                 :class="[
-                  'w-16 px-2.5 py-1.5 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30',
+                  'w-16 px-2.5 py-1.5 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-gray-400/40',
                   canEditSettings
                     ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100'
                     : 'bg-gray-100 dark:bg-gray-800/80 text-gray-500 cursor-not-allowed',
@@ -565,7 +565,7 @@
                 class="sr-only peer"
               />
               <div
-                class="w-8 h-4 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary-500"
+                class="w-8 h-4 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-gray-400/40 dark:peer-focus:ring-white/20 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-gray-900 dark:peer-checked:bg-gray-200"
               ></div>
             </label>
           </div>
@@ -688,7 +688,7 @@
               type="text"
               :disabled="!canEditSettings"
               :class="[
-                'w-24 px-2.5 py-1.5 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30',
+                'w-24 px-2.5 py-1.5 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-gray-400/40',
                 canEditSettings
                   ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100'
                   : 'bg-gray-100 dark:bg-gray-800/80 text-gray-500 cursor-not-allowed',
@@ -732,7 +732,7 @@
                 class="sr-only peer"
               />
               <div
-                class="w-8 h-4 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary-500"
+                class="w-8 h-4 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-gray-400/40 dark:peer-focus:ring-white/20 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-gray-900 dark:peer-checked:bg-gray-200"
               ></div>
             </label>
           </div>
@@ -798,118 +798,64 @@
     "
     size="lg"
   >
-    <div class="space-y-3">
-      <div>
-        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Branch Name <span class="text-red-500">*</span>
-        </label>
-        <template v-if="useRegionBranchPicker">
-          <select
-            v-model="branchCity"
-            required
-            class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500/30 outline-none"
-          >
-            <option value="" disabled>Choose a city...</option>
-            <option v-for="city in availableBranchCities" :key="city" :value="city">
-              {{ city }}
-            </option>
-          </select>
-          <input
-            v-model="branchLocality"
-            type="text"
-            class="mt-2 w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500/30 outline-none"
-            placeholder="Area or neighborhood (optional, e.g. Lekki, GRA)"
-          />
-          <p class="mt-1.5 text-[10px] leading-snug text-gray-500 dark:text-gray-400">
-            Cities in {{ branchRegionLabel }} based on your account region.
-          </p>
-        </template>
-        <input
-          v-else
-          v-model="storeForm.name"
-          type="text"
-          required
-          class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500/30 outline-none"
-          placeholder="My Branch"
-        />
-      </div>
+    <IosForm layout="fill">
+      <IosFormSection fixed>
+        <IosFormField label="Branch Name" required>
+          <template v-if="useRegionBranchPicker">
+            <IosFormSelect v-model="branchCity" required extra-class="cursor-pointer">
+              <option value="" disabled>Choose a city...</option>
+              <option v-for="city in availableBranchCities" :key="city" :value="city">
+                {{ city }}
+              </option>
+            </IosFormSelect>
+            <IosFormInput
+              v-model="branchLocality"
+              extra-class="mt-2"
+              placeholder="Area or neighborhood (optional, e.g. Lekki, GRA)"
+            />
+            <p class="ios-form__hint dash-drawer-hint">
+              Cities in {{ branchRegionLabel }} based on your account region.
+            </p>
+          </template>
+          <IosFormInput v-else v-model="storeForm.name" required placeholder="My Branch" />
+        </IosFormField>
 
-      <div>
-        <label class="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300"
-          >Description</label
+        <IosFormField label="Description">
+          <IosFormTextarea
+            v-model="storeForm.description"
+            :rows="2"
+            extra-class="resize-none"
+            placeholder="Store description..."
+          />
+        </IosFormField>
+
+        <IosFormField
+          label="Sell screen note"
+          hint="Shown on Quick Sale and when adding line items / checkout for this branch (e.g. today's promo, price list)."
         >
-        <textarea
-          v-model="storeForm.description"
-          rows="2"
-          class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500/30 outline-none resize-none"
-          placeholder="Store description..."
-        />
-      </div>
-
-      <div>
-        <label class="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
-          Sell screen note
-        </label>
-        <p class="mb-1.5 text-[10px] text-gray-500 dark:text-gray-400">
-          Shown on Quick Sale and when adding line items / checkout for this branch (e.g. today’s
-          promo, price list).
-        </p>
-        <textarea
-          v-model="storeForm.sellScreenNote"
-          rows="3"
-          class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500/30 outline-none resize-y"
-          placeholder="e.g. Promo: 10% off accessories today"
-        />
-      </div>
-
-      <div>
-        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
-          >Address</label
-        >
-        <input
-          v-model="storeForm.address"
-          type="text"
-          class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500/30 outline-none"
-          placeholder="123 Main St, City, State ZIP"
-        />
-      </div>
-
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >Phone</label
-          >
-          <input
-            v-model="storeForm.phone"
-            type="tel"
-            class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500/30 outline-none"
-            placeholder="+1234567890"
+          <IosFormTextarea
+            v-model="storeForm.sellScreenNote"
+            :rows="3"
+            placeholder="e.g. Promo: 10% off accessories today"
           />
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >Email</label
-          >
-          <input
-            v-model="storeForm.email"
-            type="email"
-            class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500/30 outline-none"
-            placeholder="store@example.com"
-          />
-        </div>
-      </div>
+        </IosFormField>
 
-      <div v-if="editingStore">
-        <label class="flex items-center gap-2">
-          <input
-            v-model="storeForm.isActive"
-            type="checkbox"
-            class="w-3.5 h-3.5 text-primary-500 border-gray-300 rounded focus:ring-primary-400"
-          />
-          <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Active</span>
-        </label>
-      </div>
-    </div>
+        <IosFormField label="Address">
+          <IosFormInput v-model="storeForm.address" placeholder="123 Main St, City, State ZIP" />
+        </IosFormField>
+
+        <IosFormField label="Phone">
+          <IosFormInput v-model="storeForm.phone" type="tel" placeholder="+1234567890" />
+        </IosFormField>
+        <IosFormField label="Email">
+          <IosFormInput v-model="storeForm.email" type="email" placeholder="store@example.com" />
+        </IosFormField>
+      </IosFormSection>
+
+      <IosFormSection v-if="editingStore" fixed>
+        <IosFormToggle v-model="storeForm.isActive" label="Active" />
+      </IosFormSection>
+    </IosForm>
 
     <template #footer>
       <IosDrawerActions
@@ -969,8 +915,8 @@
           class="w-full rounded-sm p-3 text-left transition-all"
           :class="
             newlyCreatedStoreId === store.id
-              ? 'bg-primary-50 dark:bg-primary-900/20'
-              : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
+              ? 'bg-gray-100 dark:bg-white/[0.08]'
+              : 'hover:bg-gray-50 dark:hover:bg-white/[0.04]'
           "
         >
           <div class="flex items-start justify-between">
@@ -988,7 +934,7 @@
             </div>
             <svg
               v-if="newlyCreatedStoreId === store.id"
-              class="w-4 h-4 text-primary-500 dark:text-primary-400 flex-shrink-0 ml-3"
+              class="w-4 h-4 text-gray-700 dark:text-gray-300 flex-shrink-0 ml-3"
               fill="currentColor"
               viewBox="0 0 20 20"
             >
@@ -1061,6 +1007,15 @@ import Button from '~/components/ui/Button.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import Modal from '~/components/ui/Modal.vue'
 import SidePanel from '~/components/ui/SidePanel.vue'
+import {
+  IosForm,
+  IosFormSection,
+  IosFormField,
+  IosFormInput,
+  IosFormSelect,
+  IosFormTextarea,
+  IosFormToggle,
+} from '~/components/ios/forms'
 import type { Store } from '~/composables/useStores'
 import { collection, query, where, getDocs } from 'firebase/firestore'
 import {

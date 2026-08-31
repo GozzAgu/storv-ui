@@ -17,7 +17,7 @@
             <button
               v-if="selectedFolder && !folderPickerExpanded"
               type="button"
-              class="text-xs font-medium text-primary-600 transition-colors hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
+              class="text-xs font-medium text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
               @click="openCategoryPicker"
             >
               Change
@@ -90,7 +90,7 @@
                     </div>
                     <CheckIcon
                       v-if="isSubcategoryRowSelected(folder)"
-                      class="h-4 w-4 shrink-0 text-primary-500 dark:text-primary-400"
+                      class="h-4 w-4 shrink-0 text-gray-700 dark:text-gray-300"
                     />
                   </button>
                   <div v-if="subcategoryFolders.length === 0" :class="[emptyStateClass, '!min-h-[8rem]']">
@@ -105,7 +105,7 @@
                     :class="[
                       pickRowClass,
                       isParentRowSelected(row.folder) ? pickRowSelectedClass : '',
-                      row.depth === 1 ? 'ml-3 border-l-2 border-primary-500/20 pl-2' : '',
+                      row.depth === 1 ? 'ml-3 border-l-2 border-gray-300/50 dark:border-white/10 pl-2' : '',
                     ]"
                     @click="onParentCategoryPick(row)"
                   >
@@ -135,7 +135,7 @@
                     />
                     <CheckIcon
                       v-if="!isCategoryHub(row.folder) && isParentRowSelected(row.folder)"
-                      class="h-4 w-4 shrink-0 text-primary-500 dark:text-primary-400"
+                      class="h-4 w-4 shrink-0 text-gray-700 dark:text-gray-300"
                     />
                   </button>
                   <div v-if="parentCategoryRows.length === 0" :class="[emptyStateClass, '!min-h-[8rem]']">
@@ -158,7 +158,7 @@
         >
           <div class="flex items-center justify-between gap-3">
             <div class="flex items-center gap-3">
-              <QrCodeIcon class="h-6 w-6 text-primary-600 dark:text-primary-400" />
+              <QrCodeIcon class="h-6 w-6 text-gray-700 dark:text-gray-300" />
               <div>
                 <p :class="sectionLabelClass">Scan or search</p>
                 <p class="text-[11px] text-gray-500 dark:text-gray-400">
@@ -173,7 +173,7 @@
                 'px-3 py-1.5 rounded-sm text-xs font-medium transition-colors',
                 isScanning
                   ? 'bg-red-600 text-white hover:bg-red-700'
-                  : 'bg-primary-500 text-white hover:bg-primary-600',
+                  : 'bg-gray-900 text-white hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100',
               ]"
             >
               {{ isScanning ? 'Stop' : 'Scan' }}
@@ -208,10 +208,10 @@
               v-model="manualBarcode"
               type="text"
               placeholder="Enter barcode, SKU, or serial…"
-              class="app-field flex-1 rounded-sm px-4 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-400/40 dark:!bg-dashboard-card dark:text-gray-100"
+              class="app-field flex-1 rounded-sm px-4 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400/40 dark:!bg-dashboard-card dark:text-gray-100"
               @keyup.enter="searchByBarcode"
             />
-            <Button @click="searchByBarcode" :loading="isSearching">Search</Button>
+            <Button variant="secondary" @click="searchByBarcode" :loading="isSearching">Search</Button>
           </div>
         </div>
 
@@ -222,7 +222,7 @@
 
           <div v-if="loadingFolderItems" class="flex items-center justify-center py-6">
             <div
-              class="inline-block h-5 w-5 animate-spin rounded-full border-b-2 border-primary-500"
+              class="inline-block h-5 w-5 animate-spin rounded-full border-b-2 border-gray-500"
             />
           </div>
           <div v-else-if="availableFolderItems.length === 0" :class="[emptyStateClass, '!min-h-[6rem]']">
@@ -255,14 +255,14 @@
                     <span v-if="!selectedFolder?.hasSerialNumbers && getItemStockLabel(item) !== null">
                       · Stock: {{ getItemStockLabel(item) }}
                     </span>
-                    <span v-if="isItemInCart(item.id)" class="text-primary-600 dark:text-primary-400">
+                    <span v-if="isItemInCart(item.id)" class="text-gray-700 dark:text-gray-300">
                       · In cart
                     </span>
                   </p>
                 </div>
                 <PlusIcon
                   v-if="canAddItemToCart(item)"
-                  class="h-4 w-4 shrink-0 text-primary-500 dark:text-primary-400"
+                  class="h-4 w-4 shrink-0 text-gray-700 dark:text-gray-300"
                 />
               </button>
             </div>
@@ -343,13 +343,13 @@
               v-model="customerName"
               type="text"
               placeholder="Customer Name"
-              class="w-full px-4 py-2 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-400"
+              class="w-full px-4 py-2 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400/40"
             />
             <input
               v-model="customerPhone"
               type="tel"
               placeholder="Phone (Optional)"
-              class="w-full px-4 py-2 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-400"
+              class="w-full px-4 py-2 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400/40"
             />
           </div>
         </div>
@@ -370,7 +370,7 @@
               :class="[
                 'px-4 py-2 rounded-sm text-sm font-medium transition-colors',
                 paymentMethod === method
-                  ? 'bg-primary-500 text-white'
+                  ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900'
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600',
               ]"
             >
@@ -414,7 +414,7 @@
             </div>
             <button
               type="button"
-              class="inline-flex w-full items-center justify-center gap-1.5 px-3 py-1.5 text-xs text-primary-500 dark:text-primary-400 border-0 dark:border-primary-600 rounded-sm"
+              class="inline-flex w-full items-center justify-center gap-1.5 px-3 py-1.5 text-xs text-gray-700 dark:text-gray-300 border-0 dark:border-white/10 rounded-sm"
               @click="addSplitPayment"
             >
               <PlusCircleIcon class="h-3.5 w-3.5 shrink-0 opacity-80" :stroke-width="1.75" />
@@ -465,7 +465,7 @@
         <div class="border-t border-gray-200 pt-4 dark:border-white/[0.08]">
           <div class="flex items-center justify-between">
             <span class="text-lg font-semibold text-gray-900 dark:text-gray-100">Total</span>
-            <span class="text-2xl font-bold text-primary-500 dark:text-primary-400">
+            <span class="text-2xl font-bold text-gray-700 dark:text-gray-300">
               {{ currencySymbol }}{{ formatCurrency(cartTotal) }}
             </span>
           </div>

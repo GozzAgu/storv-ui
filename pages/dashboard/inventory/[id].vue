@@ -204,7 +204,7 @@
           </Button>
           <select
             v-model="sortBy"
-            class="min-w-[6.5rem] flex-1 cursor-pointer rounded-sm bg-white px-2 py-2 text-xs font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:!bg-dashboard-card dark:text-gray-200 sm:min-w-[120px] sm:flex-none sm:px-3 sm:py-2.5 sm:text-sm"
+            class="min-w-[6.5rem] flex-1 cursor-pointer rounded-sm bg-white px-2 py-2 text-xs font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400/40 dark:!bg-dashboard-card dark:text-gray-200 sm:min-w-[120px] sm:flex-none sm:px-3 sm:py-2.5 sm:text-sm"
             @change="handleSortByChange"
           >
             <option value="name">Name</option>
@@ -595,13 +595,13 @@
                     v-model="searchQuery"
                     type="text"
                     placeholder="Search…"
-                    class="w-full rounded-sm bg-white py-2 pl-10 pr-3 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder:text-gray-500"
+                    class="w-full rounded-sm bg-white py-2 pl-10 pr-3 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400/40 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder:text-gray-500"
                   />
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
                   <select
                     v-model="sortBy"
-                    class="min-w-[7.5rem] cursor-pointer rounded-sm bg-white px-3 py-2 text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:!bg-dashboard-card dark:text-gray-200"
+                    class="min-w-[7.5rem] cursor-pointer rounded-sm bg-white px-3 py-2 text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400/40 dark:!bg-dashboard-card dark:text-gray-200"
                     @change="handleSortByChange"
                   >
                     <option value="name">Name</option>
@@ -1028,13 +1028,13 @@
                                   v-if="
                                     currentSort.key === column.key && currentSort.order === 'asc'
                                   "
-                                  class="w-3 h-3 text-primary-500 dark:text-primary-400"
+                                  class="w-3 h-3 text-gray-700 dark:text-gray-300"
                                 />
                                 <ChevronDownIcon
                                   v-else-if="
                                     currentSort.key === column.key && currentSort.order === 'desc'
                                   "
-                                  class="w-3 h-3 text-primary-500 dark:text-primary-400"
+                                  class="w-3 h-3 text-gray-700 dark:text-gray-300"
                                 />
                                 <BarsArrowUpIcon
                                   v-else
@@ -1093,7 +1093,7 @@
                                     ? 'decimal'
                                     : 'text'
                                 "
-                                class="w-full min-w-0 px-2 py-1 text-[10px] border-0 dark:border-primary-500/50 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-400/20 outline-none"
+                                class="w-full min-w-0 px-2 py-1 text-[10px] border-0 dark:border-white/10 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-gray-400/30 outline-none"
                                 @blur="saveInlineEdit"
                                 @keydown.enter="saveInlineEdit"
                                 @keydown.esc="cancelInlineEdit"
@@ -1509,9 +1509,9 @@
           class="flex min-h-0 flex-1 flex-col gap-2"
         >
           <div
-            class="shrink-0 p-2 bg-primary-50 dark:bg-primary-900/20 ring-1 ring-primary-200/50 dark:ring-primary-800/40 rounded-sm"
+            class="shrink-0 p-2 bg-gray-50 dark:bg-white/[0.04] ring-1 ring-gray-200/60 dark:ring-white/10 rounded-sm"
           >
-            <p class="text-[11px] text-blue-800 dark:text-blue-200">
+            <p class="text-[11px] text-gray-700 dark:text-gray-300">
               <strong>Bulk Add Mode:</strong> Enter details once, then add serial numbers below.
               Each serial creates a separate product.
             </p>
@@ -1532,7 +1532,7 @@
                   v-model="itemForm.brand"
                   type="text"
                   required
-                  class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 transition-all"
+                  class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
                   placeholder="Enter product model"
                 />
               </div>
@@ -1556,7 +1556,7 @@
                     v-model="itemForm[field.name]"
                     type="text"
                     :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 transition-all"
+                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
                     :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
                   />
                   <input
@@ -1564,7 +1564,7 @@
                     v-model.number="itemForm[field.name]"
                     type="number"
                     :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 transition-all"
+                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
                     :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
                   />
                   <div v-else-if="field.type === 'currency'" class="relative">
@@ -1578,7 +1578,7 @@
                       step="0.01"
                       min="0"
                       :required="field.required"
-                      class="w-full pl-7 pr-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 transition-all"
+                      class="w-full pl-7 pr-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
                       :placeholder="field.placeholder || '0.00'"
                     />
                   </div>
@@ -1586,7 +1586,7 @@
                     v-else-if="field.type === 'select' && field.options"
                     v-model="itemForm[field.name]"
                     :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/50 transition-all"
+                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
                   >
                     <option value="">Select {{ field.label || field.name }}</option>
                     <option v-for="option in field.options" :key="option" :value="option">
@@ -1598,7 +1598,7 @@
                     v-model="itemForm[field.name]"
                     type="text"
                     :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 transition-all"
+                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
                     :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
                   />
                 </div>
@@ -1611,7 +1611,7 @@
                     v-model="itemForm[field.name]"
                     type="date"
                     :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/50 transition-all"
+                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
                   />
                   <Checkbox
                     v-else-if="field.type === 'boolean'"
@@ -1661,7 +1661,7 @@
                   v-model="serialNumbers[index]"
                   type="text"
                   :placeholder="`Serial ${index + 1}`"
-                  class="flex-1 min-w-0 px-2 py-1 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-primary-500/50"
+                  class="flex-1 min-w-0 px-2 py-1 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400/50"
                 />
                 <button
                   type="button"
@@ -1689,7 +1689,7 @@
                     v-model="itemForm[field.name]"
                     type="text"
                     :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 transition-all"
+                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
                     :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
                   />
                   <input
@@ -1697,7 +1697,7 @@
                     v-model.number="itemForm[field.name]"
                     type="number"
                     :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 transition-all"
+                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
                     :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
                   />
                   <div v-else-if="field.type === 'currency'" class="relative">
@@ -1711,7 +1711,7 @@
                       step="0.01"
                       min="0"
                       :required="field.required"
-                      class="w-full pl-7 pr-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 transition-all"
+                      class="w-full pl-7 pr-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
                       :placeholder="field.placeholder || '0.00'"
                     />
                   </div>
@@ -1719,7 +1719,7 @@
                     v-else-if="field.type === 'select' && field.options"
                     v-model="itemForm[field.name]"
                     :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/50 transition-all"
+                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
                   >
                     <option value="">Select {{ field.label || field.name }}</option>
                     <option v-for="option in field.options" :key="option" :value="option">
@@ -1731,7 +1731,7 @@
                     v-model="itemForm[field.name]"
                     type="text"
                     :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 transition-all"
+                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
                     :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
                   />
                 </div>
@@ -1744,7 +1744,7 @@
                     v-model="itemForm[field.name]"
                     type="date"
                     :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/50 transition-all"
+                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
                   />
                   <Checkbox
                     v-else-if="field.type === 'boolean'"
@@ -1947,7 +1947,7 @@
                 v-model="duplicateSerialNumbers[index]"
                 type="text"
                 :placeholder="`Serial ${index + 1}`"
-                class="flex-1 px-2.5 py-1.5 text-sm rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-primary-500/50"
+                class="flex-1 px-2.5 py-1.5 text-sm rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400/50"
               />
               <button
                 type="button"

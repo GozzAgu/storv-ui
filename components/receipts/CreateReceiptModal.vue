@@ -34,7 +34,7 @@
 
           <div v-if="loadingFolders" class="flex flex-1 flex-col items-center justify-center py-12">
             <div
-              class="h-5 w-5 animate-spin rounded-full border-0 border-primary-500/30 border-t-primary-500"
+              class="h-5 w-5 animate-spin rounded-full border-0 border-gray-300/40 border-t-gray-500 dark:border-white/15 dark:border-t-gray-300"
             />
             <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Loading categories…</p>
           </div>
@@ -104,7 +104,7 @@
                 :class="[
                   pickRowClass,
                   isParentRowSelected(row.folder) ? pickRowSelectedClass : '',
-                  row.depth === 1 ? 'ml-3 border-l-2 border-primary-500/20 pl-2' : '',
+                  row.depth === 1 ? 'ml-3 border-l-2 border-gray-300/60 dark:border-white/15 pl-2' : '',
                 ]"
                 @click="onParentCategoryRowClick(row)"
               >
@@ -130,7 +130,7 @@
                     {{ folderPickerMeta(row.folder) }}
                     <span
                       v-if="!isCategoryHub(row.folder) && selectedCountForFolder(row.folder.id) > 0"
-                      class="text-primary-600 dark:text-primary-400"
+                      class="text-gray-700 dark:text-gray-300"
                     >
                       · {{ selectedCountForFolder(row.folder.id) }} in this sale
                     </span>
@@ -143,7 +143,7 @@
                 />
                 <CheckCircleIcon
                   v-if="isParentRowSelected(row.folder)"
-                  class="h-4 w-4 shrink-0 text-primary-500"
+                  class="h-4 w-4 shrink-0 text-gray-700 dark:text-gray-300"
                   stroke-width="2"
                 />
               </button>
@@ -248,7 +248,7 @@
                     {{ folderPickerMeta(folder) }}
                     <span
                       v-if="selectedCountForFolder(folder.id) > 0"
-                      class="text-primary-600 dark:text-primary-400"
+                      class="text-gray-700 dark:text-gray-300"
                     >
                       · {{ selectedCountForFolder(folder.id) }} in this sale
                     </span>
@@ -256,7 +256,7 @@
                 </div>
                 <CheckCircleIcon
                   v-if="isSubcategoryRowSelected(folder)"
-                  class="h-4 w-4 shrink-0 text-primary-500"
+                  class="h-4 w-4 shrink-0 text-gray-700 dark:text-gray-300"
                   stroke-width="2"
                 />
               </button>
@@ -271,7 +271,7 @@
             <div class="flex flex-wrap items-center gap-2">
               <button
                 type="button"
-                class="inline-flex items-center gap-1 text-[11px] font-medium text-primary-600 hover:underline dark:text-primary-400"
+                class="inline-flex items-center gap-1 text-[11px] font-medium text-gray-800 hover:underline dark:text-gray-200"
                 @click="addFromAnotherCategory"
               >
                 <PlusCircleIcon class="h-3.5 w-3.5" stroke-width="2" />
@@ -297,7 +297,7 @@
             class="flex min-h-0 flex-1 flex-col items-center justify-center py-8"
           >
             <div
-              class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-primary-500"
+              class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-gray-500"
             ></div>
             <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Loading items...</p>
           </div>
@@ -318,7 +318,7 @@
                   'cursor-pointer',
                   selectedItems.find((si) => si.id === item.id) ? pickRowSelectedClass : '',
                   itemIsOutOnSellerLoan(item) && !selectedItems.find((si) => si.id === item.id)
-                    ? 'bg-primary-50/50 dark:bg-primary-950/15'
+                    ? 'bg-amber-50/60 dark:bg-amber-950/20'
                     : '',
                 ]"
                 @click="onReceiptItemRowClick(item)"
@@ -336,7 +336,7 @@
                       class="text-xs font-medium text-gray-900 dark:text-gray-100"
                       :class="
                         itemIsOutOnSellerLoan(item) &&
-                        'font-semibold text-primary-900 dark:text-primary-50'
+                        'font-semibold text-amber-900 dark:text-amber-100'
                       "
                     >
                       {{ getItemDisplayName(item) }}
@@ -344,7 +344,7 @@
                     <div class="flex items-center gap-3 mt-0.5 text-[10px] sm:text-xs flex-wrap">
                       <span
                         v-if="itemIsOutOnSellerLoan(item)"
-                        class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide text-primary-900 bg-white/95 shadow-sm shadow-primary-900/10 ring-1 ring-primary-400/45 dark:bg-primary-800/90 dark:text-primary-50 dark:ring-primary-400/55 dark:shadow-md dark:shadow-black/40"
+                        class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide text-amber-900 bg-white/95 shadow-sm shadow-amber-900/10 ring-1 ring-amber-400/45 dark:bg-amber-900/80 dark:text-amber-100 dark:ring-amber-400/40 dark:shadow-md dark:shadow-black/40"
                       >
                         On stock loan<span v-if="item.sellerLoanPartyName"
                           >&nbsp;· {{ item.sellerLoanPartyName }}</span
@@ -512,7 +512,7 @@
                   @input="handleCustomerNameInput"
                   @focus="showCustomerSuggestions = true"
                   @blur="handleCustomerNameBlur"
-                  class="app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/40"
+                  class="app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/40"
                   placeholder="John Doe"
                 />
                 <MagnifyingGlassIcon
@@ -561,7 +561,7 @@
               <input
                 v-model="receiptForm.customerEmail"
                 type="email"
-                class="app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/40"
+                class="app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/40"
                 placeholder="john@example.com"
               />
             </div>
@@ -572,7 +572,7 @@
               <input
                 v-model="receiptForm.customerPhone"
                 type="tel"
-                class="app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/40"
+                class="app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/40"
                 placeholder="+1 234 567 8900"
               />
             </div>
@@ -583,7 +583,7 @@
               <input
                 v-model="receiptForm.customerAddress"
                 type="text"
-                class="app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/40"
+                class="app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/40"
                 placeholder="123 Main St, City, State"
               />
             </div>
@@ -615,7 +615,7 @@
                   <PaymentMethodSelect
                     v-model="payment.method"
                     required
-                    select-class="app-field flex-1 px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/40"
+                    select-class="app-field flex-1 px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/40"
                     placeholder="Select method"
                   />
                   <div class="relative w-28">
@@ -630,7 +630,7 @@
                       min="0"
                       :max="receiptTotal - splitPaymentsTotal + payment.amount"
                       required
-                      class="w-full pl-6 pr-2.5 py-2 text-xs rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
+                      class="w-full pl-6 pr-2.5 py-2 text-xs rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/60"
                       placeholder="0.00"
                     />
                   </div>
@@ -646,7 +646,7 @@
                 <button
                   @click="addSplitPayment"
                   type="button"
-                  class="inline-flex w-full items-center justify-center gap-1.5 px-3 py-1.5 text-xs text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-smborder-0-300 dark:border-primary-600 transition-colors"
+                  class="inline-flex w-full items-center justify-center gap-1.5 px-3 py-1.5 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/[0.06] rounded-sm border-0 transition-colors"
                 >
                   <PlusCircleIcon class="h-3.5 w-3.5 shrink-0 opacity-80" :stroke-width="1.75" />
                   Add payment method
@@ -762,7 +762,7 @@
             <textarea
               v-model="receiptForm.notes"
               rows="2"
-              class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/40 resize-none"
+              class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/40 resize-none"
               placeholder="Additional notes..."
             ></textarea>
           </div>
@@ -778,7 +778,7 @@
                 </label>
                 <div v-if="loadingFolders" class="text-center py-3">
                   <div
-                    class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-primary-500"
+                    class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-gray-500"
                   ></div>
                 </div>
                 <div
@@ -798,7 +798,7 @@
                   v-else
                   v-model="swapInFolderId"
                   required
-                  class="app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/40"
+                  class="app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/40"
                 >
                   <option value="">Select category for swapped-in device</option>
                   <option v-for="folder in leafFolders" :key="folder.id" :value="folder.id">
@@ -833,7 +833,7 @@
                       :required="field.required"
                       type="text"
                       :placeholder="swapInFieldPlaceholder(field)"
-                      class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-400/50"
+                      class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50"
                     />
                     <!-- Number Input -->
                     <input
@@ -842,7 +842,7 @@
                       :required="field.required"
                       type="number"
                       :placeholder="swapInFieldPlaceholder(field)"
-                      class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-400/50"
+                      class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50"
                     />
                     <!-- Currency Input -->
                     <div v-else-if="field.type === 'currency'" class="relative">
@@ -856,7 +856,7 @@
                         step="0.01"
                         min="0"
                         :required="field.required"
-                        class="w-full pl-7 pr-3 py-2 text-xs rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-400/50"
+                        class="w-full pl-7 pr-3 py-2 text-xs rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50"
                         placeholder="0.00"
                       />
                     </div>
@@ -866,14 +866,14 @@
                       v-model="swapInItemForm[field.name]"
                       :required="field.required"
                       type="date"
-                      class="app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/40"
+                      class="app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/40"
                     />
                     <!-- Select Input -->
                     <select
                       v-else-if="field.type === 'select' && field.options"
                       v-model="swapInItemForm[field.name]"
                       :required="field.required"
-                      class="app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/40"
+                      class="app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/40"
                     >
                       <option value="">Select {{ swapInFieldLabel(field) }}</option>
                       <option v-for="option in field.options" :key="option" :value="option">
@@ -966,7 +966,7 @@
             v-model="emailToSend"
             type="email"
             placeholder="Enter email address"
-            class="w-full px-3 py-2 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400"
+            class="w-full px-3 py-2 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/40"
             @keyup.enter="sendReceiptEmail(lastCreatedReceiptId, lastCreatedReceiptData)"
           />
         </div>
@@ -1161,7 +1161,7 @@ const paymentSettlement = ref<'paid_in_full' | 'balance_due'>('paid_in_full')
 const depositAmount = ref(0)
 
 const settlementActiveClass =
-  'rounded-smborder-0-500/50 bg-primary-50 px-3 py-2 text-xs font-medium text-primary-800 dark:bg-primary-950/40 dark:text-primary-200'
+  'rounded-sm border-0 bg-gray-900 px-3 py-2 text-xs font-medium text-white dark:bg-white dark:text-gray-900'
 const settlementInactiveClass =
   'rounded-sm bg-white px-3 py-2 text-xs font-medium text-gray-600 dark:!bg-dashboard-card dark:text-gray-400'
 

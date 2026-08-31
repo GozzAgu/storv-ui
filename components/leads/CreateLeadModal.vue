@@ -72,7 +72,7 @@
               extra-class="min-w-0 flex-1"
             />
             <Button
-              variant="outline"
+              variant="secondary"
               size="sm"
               :loading="inventoryLinkLoading"
               :disabled="!inventorySearchQuery.trim()"
@@ -85,7 +85,7 @@
             Linked: {{ linkedInventoryLabel }}
             <button
               type="button"
-              class="ml-1 font-medium text-primary-600 hover:underline dark:text-primary-400"
+              class="ml-1 font-medium text-gray-800 hover:underline dark:text-gray-200"
               @click="clearInventoryLink"
             >
               Clear

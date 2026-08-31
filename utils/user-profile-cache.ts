@@ -1,8 +1,14 @@
 import type { UserData } from '~/composables/useUser'
 
 const CACHE_KEY = 'storv_user_profile_v1'
-/** Profiles older than this are still shown instantly but refreshed from Firestore. */
-const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000
+/**
+ * Absolute outer bound - a cache this old is almost certainly a stale reinstall/test
+ * artifact rather than a real returning user, so it's not worth showing at all.
+ * Anything younger than this is shown instantly and refreshed from Firestore in the
+ * background - see `ensureUserProfileLoaded` - so staleness is only ever visible for
+ * as long as that background refresh takes, not for the age of the cache entry itself.
+ */
+const MAX_AGE_MS = 90 * 24 * 60 * 60 * 1000
 
 interface CachedProfile {
   userId: string

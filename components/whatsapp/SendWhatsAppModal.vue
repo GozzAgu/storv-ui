@@ -47,16 +47,12 @@
           </button>
         </div>
 
-        <div>
-          <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Phone number or email
-          </label>
-          <input
+        <IosFormField label="Phone number or email">
+          <IosFormInput
             v-model="contactInput"
             type="text"
             inputmode="email"
             placeholder="e.g. 08012345678 or customer@email.com"
-            class="w-full rounded-sm bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-primary-400 dark:!bg-dashboard-card dark:text-gray-100"
           />
           <p
             v-if="contactInput && !contactValid"
@@ -67,20 +63,11 @@
           <p v-else-if="detectedChannel" class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
             Will send via {{ detectedChannel === 'email' ? 'email' : 'WhatsApp' }}.
           </p>
-        </div>
+        </IosFormField>
 
-        <div>
-          <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Short message (optional)
-          </label>
-          <input
-            v-model="captionInput"
-            type="text"
-            maxlength="200"
-            :placeholder="defaultCaption"
-            class="w-full rounded-sm bg-white px-3 py-2 text-sm dark:!bg-dashboard-card dark:text-gray-100"
-          />
-        </div>
+        <IosFormField label="Short message" hint="Optional">
+          <IosFormInput v-model="captionInput" type="text" maxlength="200" :placeholder="defaultCaption" />
+        </IosFormField>
 
         <div
           v-if="isReceiptMode && receiptForCapture"
@@ -125,6 +112,7 @@ import { ref, computed, watch, nextTick } from 'vue'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
+import { IosFormField, IosFormInput } from '~/components/ios/forms'
 import ReceiptShareSurface from '~/components/receipts/ReceiptShareSurface.vue'
 import type { Receipt } from '~/stores/receipts'
 import type { WhatsAppTemplateVars } from '~/types/whatsapp'
@@ -191,7 +179,7 @@ const resolvedBusinessName = computed(
 const branchName = computed(() => props.branchName?.trim() || '')
 
 const activeFormatClass =
-  'rounded-sm border-0 bg-primary-50 px-3 py-2 text-xs font-medium text-primary-800 dark:bg-primary-950/40 dark:text-primary-200'
+  'rounded-sm border-0 bg-gray-900 px-3 py-2 text-xs font-medium text-white dark:bg-white dark:text-gray-900'
 const inactiveFormatClass =
   'rounded-sm bg-white px-3 py-2 text-xs font-medium text-gray-600 dark:!bg-dashboard-card dark:text-gray-400'
 

@@ -24,7 +24,7 @@
 
     <div v-if="!receipt" class="text-center py-12">
       <div
-        class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"
+        class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-500"
       ></div>
       <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading sale...</p>
     </div>
@@ -161,17 +161,14 @@
         </div>
 
         <!-- Return Reason (Optional) -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-            Return Reason <span class="text-gray-500 dark:text-gray-400">(Optional)</span>
-          </label>
-          <textarea
+        <IosFormField label="Return Reason" hint="Optional">
+          <IosFormTextarea
             v-model="returnReason"
-            rows="2"
-            class="w-full px-3 py-2 text-sm rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-400 resize-none"
+            :rows="2"
+            extra-class="resize-none"
             placeholder="Enter reason for return/refund..."
-          ></textarea>
-        </div>
+          />
+        </IosFormField>
 
         <!-- Confirmation Checkbox -->
         <div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-sm">
@@ -207,6 +204,7 @@ import {
 import Modal from '~/components/ui/Modal.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
+import { IosFormField, IosFormTextarea } from '~/components/ios/forms'
 import { useReceiptsStore, type Receipt } from '~/stores/receipts'
 import { useInventoryStore } from '~/stores/inventory'
 import { groupReceiptItemsByFolder, folderHasSerialNumbers } from '~/utils/receipt-multi-folder'

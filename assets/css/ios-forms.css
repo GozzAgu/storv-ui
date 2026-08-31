@@ -112,6 +112,14 @@ html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .io
   color: #ff3b30;
 }
 
+/* Read-only state (e.g. a field disabled until "Edit" is tapped) */
+.ios-form__input:disabled,
+.ios-form__textarea:disabled,
+.ios-form__select:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 /* Web: keep readable spacing without forcing iOS-only layout */
 html:not(.capacitor-ios) .ios-form__body,
 html:not(.capacitor-ios) .ios-form__grid {

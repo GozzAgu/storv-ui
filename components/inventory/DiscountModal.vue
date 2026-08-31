@@ -7,9 +7,9 @@
     <template #header>
       <div class="flex items-center gap-3">
         <div
-          class="w-10 h-10 rounded-sm bg-primary-500/10 dark:bg-primary-400/10 flex items-center justify-center"
+          class="w-10 h-10 rounded-sm bg-gray-100 dark:bg-white/[0.06] flex items-center justify-center"
         >
-          <TagIcon class="w-5 h-5 text-primary-500 dark:text-primary-400" stroke-width="1.75" />
+          <TagIcon class="w-5 h-5 text-gray-700 dark:text-gray-300" stroke-width="1.75" />
         </div>
         <div>
           <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 tracking-tight">
@@ -23,96 +23,99 @@
     </template>
 
     <template #default>
-      <div v-if="item" class="space-y-6">
-        <!-- Product summary -->
-        <div class="rounded-sm bg-gray-50/80 dark:bg-gray-800/50/50 p-4">
-          <p
-            class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
-          >
-            Product
-          </p>
-          <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">
-            {{ getItemName(item) }}
-          </p>
-          <p class="text-xs text-gray-600 dark:text-gray-400 mt-1.5">
-            Current price
-            <span class="font-semibold text-gray-900 dark:text-gray-100"
-              >{{ currencySymbol }}{{ formatCurrency(getOriginalPrice(item)) }}</span
+      <IosForm v-if="item" layout="fill">
+        <IosFormSection fixed>
+          <!-- Product summary -->
+          <div class="rounded-sm bg-gray-50/80 dark:bg-white/[0.03] p-4">
+            <p
+              class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
             >
-          </p>
-        </div>
-
-        <!-- Discount type -->
-        <div>
-          <p class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2.5">Discount type</p>
-          <div class="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              @click="discountType = 'percentage'"
-              :class="[
-                'py-2.5 px-3 rounded-sm border-0 text-left transition-all duration-200',
-                discountType === 'percentage'
-                  ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-300'
-                  : 'bg-gray-50/80 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50',
-              ]"
-            >
-              <span class="block text-sm font-medium">Percentage</span>
-              <span class="block text-[11px] opacity-80 mt-0.5">e.g. 10%</span>
-            </button>
-            <button
-              type="button"
-              @click="discountType = 'amount'"
-              :class="[
-                'py-2.5 px-3 rounded-sm border-0 text-left transition-all duration-200',
-                discountType === 'amount'
-                  ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-300'
-                  : 'bg-gray-50/80 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50',
-              ]"
-            >
-              <span class="block text-sm font-medium">Fixed amount</span>
-              <span class="block text-[11px] opacity-80 mt-0.5">e.g. {{ currencySymbol }}5.00</span>
-            </button>
+              Product
+            </p>
+            <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+              {{ getItemName(item) }}
+            </p>
+            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1.5">
+              Current price
+              <span class="font-semibold text-gray-900 dark:text-gray-100"
+                >{{ currencySymbol }}{{ formatCurrency(getOriginalPrice(item)) }}</span
+              >
+            </p>
           </div>
-        </div>
+        </IosFormSection>
 
-        <!-- Discount value -->
-        <div>
-          <p class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">Discount value</p>
-          <div class="relative">
-            <span
-              v-if="discountType === 'percentage'"
-              class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400 dark:text-gray-500 font-medium"
-              >%</span
-            >
-            <span
-              v-else
-              class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400 dark:text-gray-500 font-medium"
-              >{{ currencySymbol }}</span
-            >
-            <input
-              v-model.number="discountValue"
-              type="number"
-              :min="0"
-              :max="discountType === 'percentage' ? 100 : getOriginalPrice(item)"
-              step="any"
-              :placeholder="discountType === 'percentage' ? '0' : '0.00'"
-              class="w-full pl-9 pr-4 py-2.5 text-sm rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/25 transition-colors"
-            />
-          </div>
-          <p
-            v-if="discountType === 'percentage'"
-            class="text-[11px] text-gray-400 dark:text-gray-500 mt-1.5"
+        <IosFormSection title="Discount" fixed>
+          <IosFormField label="Discount type">
+            <div class="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                @click="discountType = 'percentage'"
+                :class="[
+                  'py-2.5 px-3 rounded-sm border-0 text-left transition-all duration-200',
+                  discountType === 'percentage'
+                    ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900'
+                    : 'bg-gray-50/80 text-gray-600 dark:bg-white/[0.04] dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/[0.08]',
+                ]"
+              >
+                <span class="block text-sm font-medium">Percentage</span>
+                <span class="block text-[11px] opacity-80 mt-0.5">e.g. 10%</span>
+              </button>
+              <button
+                type="button"
+                @click="discountType = 'amount'"
+                :class="[
+                  'py-2.5 px-3 rounded-sm border-0 text-left transition-all duration-200',
+                  discountType === 'amount'
+                    ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900'
+                    : 'bg-gray-50/80 text-gray-600 dark:bg-white/[0.04] dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/[0.08]',
+                ]"
+              >
+                <span class="block text-sm font-medium">Fixed amount</span>
+                <span class="block text-[11px] opacity-80 mt-0.5"
+                  >e.g. {{ currencySymbol }}5.00</span
+                >
+              </button>
+            </div>
+          </IosFormField>
+
+          <IosFormField
+            label="Discount value"
+            :hint="
+              discountType === 'percentage'
+                ? '0-100'
+                : `Max ${currencySymbol}${formatCurrency(getOriginalPrice(item))}`
+            "
           >
-            0-100
-          </p>
-          <p v-else class="text-[11px] text-gray-400 dark:text-gray-500 mt-1.5">
-            Max {{ currencySymbol }}{{ formatCurrency(getOriginalPrice(item)) }}
-          </p>
-        </div>
+            <div class="relative">
+              <span
+                v-if="discountType === 'percentage'"
+                class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400 dark:text-gray-500 font-medium"
+                >%</span
+              >
+              <span
+                v-else
+                class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400 dark:text-gray-500 font-medium"
+                >{{ currencySymbol }}</span
+              >
+              <IosFormInput
+                v-model="discountValue"
+                type="number"
+                :min="0"
+                :max="discountType === 'percentage' ? 100 : getOriginalPrice(item)"
+                step="any"
+                extra-class="pl-9"
+                :placeholder="discountType === 'percentage' ? '0' : '0.00'"
+              />
+            </div>
+          </IosFormField>
+        </IosFormSection>
 
         <!-- Preview -->
-        <div
+        <IosFormSection
           v-if="discountValue != null && discountValue > 0 && isValid"
+          fixed
+        >
+        <div
           class="rounded-sm bg-emerald-50/80 dark:bg-emerald-900/20 border border-emerald-200/60 dark:border-emerald-800/40 p-4"
         >
           <p class="text-xs font-medium text-emerald-800 dark:text-emerald-200 mb-3">Preview</p>
@@ -143,7 +146,8 @@
             </div>
           </div>
         </div>
-      </div>
+        </IosFormSection>
+      </IosForm>
     </template>
 
     <template #footer>
@@ -164,6 +168,7 @@ import {
 } from '~/utils/app-icons'
 import Modal from '~/components/ui/Modal.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
+import { IosForm, IosFormSection, IosFormField, IosFormInput } from '~/components/ios/forms'
 import { useInventoryStore, type InventoryItem } from '~/stores/inventory'
 import { useAppToast } from '~/composables/useAppToast'
 import { usePreferences } from '~/composables/usePreferences'

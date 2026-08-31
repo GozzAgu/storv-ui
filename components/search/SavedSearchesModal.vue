@@ -8,7 +8,7 @@
         </div>
         <button
           @click="showCreateModal = true"
-          class="flex-shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-sm transition-colors"
+          class="flex-shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/[0.06] rounded-sm transition-colors"
         >
           <BookmarkSquareIcon class="h-3.5 w-3.5 shrink-0 opacity-80" :stroke-width="1.75" />
           Save current
@@ -20,7 +20,7 @@
       <!-- Loading State -->
       <div v-if="searchStore.loading" class="text-center py-8">
         <div
-          class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"
+          class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-500"
         ></div>
         <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading...</p>
       </div>
@@ -28,15 +28,15 @@
       <!-- Empty State -->
       <div v-else-if="searchStore.savedSearches.length === 0" class="text-center py-8">
         <div
-          class="w-14 h-14 mx-auto mb-3 rounded-sm bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center"
+          class="w-14 h-14 mx-auto mb-3 rounded-sm bg-gray-100 dark:bg-white/[0.06] flex items-center justify-center"
         >
-          <MagnifyingGlassIcon class="w-7 h-7 text-primary-500 dark:text-primary-400" />
+          <MagnifyingGlassIcon class="w-7 h-7 text-gray-700 dark:text-gray-300" />
         </div>
         <p class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">No saved searches</p>
         <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">
           Save your frequently used searches for quick access
         </p>
-        <Button variant="primary" size="sm" :icon="BookmarkSquareIcon" @click="showCreateModal = true">
+        <Button variant="neutral" size="sm" :icon="BookmarkSquareIcon" @click="showCreateModal = true">
           Save Current Search
         </Button>
       </div>
@@ -46,7 +46,7 @@
         <div
           v-for="saved in searchStore.savedSearches"
           :key="saved.id"
-          class="group p-3 rounded-sm hover:border-primary-300 dark:hover:border-primary-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all"
+          class="group p-3 rounded-sm hover:bg-gray-50 dark:hover:bg-white/[0.04] transition-all"
         >
           <div class="flex items-start justify-between gap-3">
             <div class="flex-1 min-w-0">
@@ -72,7 +72,7 @@
             <div class="flex items-center gap-1 flex-shrink-0">
               <button
                 @click="$emit('load', saved.id)"
-                class="p-1.5 text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-sm transition-colors"
+                class="p-1.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/[0.06] rounded-sm transition-colors"
               >
                 <ArrowRightIcon class="w-4 h-4" />
               </button>
@@ -96,19 +96,14 @@
       size="sm"
     >
       <div class="space-y-3">
-        <div>
-          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >Search Name *</label
-          >
-          <input
+        <IosFormField label="Search Name" required>
+          <IosFormInput
             v-model="searchName"
-            type="text"
             placeholder="e.g., High-value customers"
-            class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
             @keydown.enter="handleSave"
           />
-        </div>
-        <div class="p-2.5 bg-gray-50 dark:bg-gray-800/50 rounded-sm">
+        </IosFormField>
+        <div class="p-2.5 bg-gray-50 dark:bg-white/[0.04] rounded-sm">
           <p class="text-xs text-gray-500 dark:text-gray-400 mb-0.5">Query</p>
           <p class="text-xs font-medium text-gray-900 dark:text-gray-100">
             {{ searchStore.query || '(empty)' }}
@@ -145,6 +140,7 @@ import {
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
+import { IosFormField, IosFormInput } from '~/components/ios/forms'
 import { useSearchStore } from '~/stores/search'
 import { useAppToast } from '~/composables/useAppToast'
 

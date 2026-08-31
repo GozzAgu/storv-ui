@@ -760,7 +760,7 @@
             <NuxtLink
               v-if="currentStoreId"
               :to="`/dashboard/stores/${currentStoreId}/departments`"
-              class="mt-1.5 inline-block text-[11px] font-medium text-primary-600 hover:underline dark:text-primary-400"
+              class="mt-1.5 inline-block text-[11px] font-medium text-gray-800 hover:underline dark:text-gray-200"
             >
               Add departments →
             </NuxtLink>
@@ -1032,7 +1032,7 @@
             <input
               v-model="duplicateFolderNames[index]"
               type="text"
-              class="flex-1 min-w-0 px-3 py-2 text-sm rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/25 transition-colors"
+              class="flex-1 min-w-0 px-3 py-2 text-sm rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400/40 transition-colors"
               placeholder="New category name"
             />
             <button
@@ -1085,7 +1085,7 @@
           <p :class="sectionLabelClass">Source branch</p>
           <select
             v-model="copyTemplatesSourceStoreId"
-            class="mt-1.5 w-full rounded-lg bg-white py-2 pl-3 pr-8 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500/15 dark:!bg-dashboard-card dark:text-gray-100"
+            class="mt-1.5 w-full rounded-lg bg-white py-2 pl-3 pr-8 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400/40 dark:!bg-dashboard-card dark:text-gray-100"
           >
             <option value="" disabled>Select a branch…</option>
             <option v-for="s in otherBranchesForTemplateCopy" :key="s.id" :value="s.id">
@@ -1102,7 +1102,7 @@
               </span>
               <button
                 type="button"
-                class="text-[11px] font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 disabled:opacity-40"
+                class="text-[11px] font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100 disabled:opacity-40"
                 :disabled="
                   copyTemplatesRootFoldersList.length === 0 || loadingCopyTemplatesSourceFolders
                 "

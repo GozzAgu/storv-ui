@@ -6,127 +6,105 @@
     size="lg"
     @update:model-value="(value: boolean) => emit('update:modelValue', value)"
   >
-    <div class="space-y-4">
-      <div
-        class="rounded-sm border border-emerald-200/80 bg-emerald-50/90 p-3 text-xs text-emerald-950 dark:border-emerald-800/50 dark:bg-emerald-950/30 dark:text-emerald-100"
-      >
-        <strong>Not a sale:</strong>
-        You pay the customer and the item goes straight into stock. Use swap-in on a receipt when
-        trade-in credit applies to a sale happening now.
-      </div>
+    <IosForm id="buyback-drawer-form" layout="fill" @submit="submit">
+      <IosFormSection fixed>
+        <p
+          class="rounded-sm border border-emerald-200/80 bg-emerald-50/90 p-3 text-xs text-emerald-950 dark:border-emerald-800/50 dark:bg-emerald-950/30 dark:text-emerald-100"
+        >
+          <strong>Not a sale:</strong>
+          You pay the customer and the item goes straight into stock. Use swap-in on a receipt
+          when trade-in credit applies to a sale happening now.
+        </p>
+      </IosFormSection>
 
-      <div class="grid gap-4 sm:grid-cols-2">
-        <div class="sm:col-span-2">
-          <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300"
-            >Customer name *</label
-          >
-          <input
+      <IosFormSection title="Customer" fixed>
+        <IosFormField label="Customer name" required>
+          <IosFormInput
             v-model="customerName"
-            type="text"
             maxlength="120"
             autocomplete="name"
             placeholder="Who sold this item?"
-            class="app-field w-full px-3 py-2 text-sm"
           />
-        </div>
-
-        <div>
-          <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300"
-            >Phone (optional)</label
-          >
-          <input
+        </IosFormField>
+        <IosFormField label="Phone" hint="Optional">
+          <IosFormInput
             v-model="customerPhone"
             type="tel"
             maxlength="40"
             autocomplete="tel"
             placeholder="Contact number"
-            class="app-field w-full px-3 py-2 text-sm"
           />
-        </div>
-
-        <div>
-          <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300"
-            >Email (optional)</label
-          >
-          <input
+        </IosFormField>
+        <IosFormField label="Email" hint="Optional">
+          <IosFormInput
             v-model="customerEmail"
             type="email"
             maxlength="120"
             autocomplete="email"
             placeholder="Email address"
-            class="app-field w-full px-3 py-2 text-sm"
           />
-        </div>
-      </div>
+        </IosFormField>
+      </IosFormSection>
 
-      <div>
-        <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300"
-          >Inventory category *</label
-        >
-        <select v-model="folderId" class="app-field w-full px-3 py-2 text-sm">
-          <option value="">Select category</option>
-          <option v-for="folder in folders" :key="folder.id" :value="folder.id">
-            {{ folderOptionLabel(folder) }}
-          </option>
-        </select>
-      </div>
+      <IosFormSection title="Item" fixed>
+        <IosFormField label="Inventory category" required>
+          <IosFormSelect v-model="folderId" required extra-class="cursor-pointer">
+            <option value="">Select category</option>
+            <option v-for="folder in folders" :key="folder.id" :value="folder.id">
+              {{ folderOptionLabel(folder) }}
+            </option>
+          </IosFormSelect>
+        </IosFormField>
 
-      <div v-if="folderId && folder" class="space-y-3 rounded-sm bg-gray-50/90 p-3 dark:bg-gray-900/40">
-        <p class="text-xs font-semibold text-gray-800 dark:text-gray-200">Item details</p>
-        <BuybackItemFields
-          :fields="buybackDisplayFields"
-          :model-value="itemForm"
-          :field-label="fieldLabel"
-          :field-placeholder="fieldPlaceholder"
-          @update:model-value="itemForm = $event"
-        />
-        <p v-if="buybackDisplayFields.length === 0" class="text-xs text-gray-500 dark:text-gray-400">
-          This category has no fields configured yet.
-        </p>
-      </div>
-
-      <div class="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300"
-            >Amount paid to customer *</label
+        <template v-if="folderId && folder">
+          <BuybackItemFields
+            :fields="buybackDisplayFields"
+            :model-value="itemForm"
+            :field-label="fieldLabel"
+            :field-placeholder="fieldPlaceholder"
+            @update:model-value="itemForm = $event"
+          />
+          <p
+            v-if="buybackDisplayFields.length === 0"
+            class="ios-form__hint dash-drawer-hint"
           >
+            This category has no fields configured yet.
+          </p>
+        </template>
+      </IosFormSection>
+
+      <IosFormSection title="Payment" fixed>
+        <IosFormField label="Amount paid to customer" required>
           <div class="relative">
             <span
               class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400"
               >{{ currencySymbol }}</span
             >
-            <input
-              v-model.number="purchasePrice"
+            <IosFormInput
+              v-model="purchasePrice"
               type="number"
               min="0"
               step="0.01"
-              class="app-field w-full py-2 pl-7 pr-3 text-sm"
+              extra-class="pl-7"
               placeholder="0.00"
             />
           </div>
-        </div>
+        </IosFormField>
 
-        <div>
-          <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300"
-            >Payment method *</label
-          >
+        <IosFormField label="Payment method" required>
           <PaymentMethodSelect v-model="paymentMethod" required />
-        </div>
-      </div>
+        </IosFormField>
 
-      <div>
-        <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300"
-          >Notes (optional)</label
-        >
-        <textarea
-          v-model="notes"
-          rows="2"
-          maxlength="1000"
-          placeholder="Condition, ID check, reference…"
-          class="app-field w-full resize-y px-3 py-2 text-sm"
-        />
-      </div>
-    </div>
+        <IosFormField label="Notes" hint="Optional">
+          <IosFormTextarea
+            v-model="notes"
+            :rows="2"
+            maxlength="1000"
+            placeholder="Condition, ID check, reference…"
+          />
+        </IosFormField>
+      </IosFormSection>
+    </IosForm>
 
     <template #footer>
       <IosDrawerActions
@@ -147,6 +125,14 @@ import SidePanel from '~/components/ui/SidePanel.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import PaymentMethodSelect from '~/components/receipts/PaymentMethodSelect.vue'
 import BuybackItemFields from '~/components/buybacks/BuybackItemFields.vue'
+import {
+  IosForm,
+  IosFormSection,
+  IosFormField,
+  IosFormInput,
+  IosFormSelect,
+  IosFormTextarea,
+} from '~/components/ios/forms'
 import { useInventoryStore } from '~/stores/inventory'
 import { useCustomerBuybacksStore } from '~/stores/customerBuybacks'
 import { useInventoryItemCaptureForm } from '~/composables/useInventoryItemCaptureForm'

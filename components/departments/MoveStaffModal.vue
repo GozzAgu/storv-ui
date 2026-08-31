@@ -7,9 +7,9 @@
     <template #header>
       <div class="flex items-center gap-2.5">
         <div
-          class="flex h-8 w-8 items-center justify-center rounded-sm bg-primary-100 dark:bg-primary-900/30"
+          class="flex h-8 w-8 items-center justify-center rounded-sm bg-gray-100 dark:bg-white/[0.06]"
         >
-          <ArrowsRightLeftIcon class="h-4 w-4 text-primary-600 dark:text-primary-400" />
+          <ArrowsRightLeftIcon class="h-4 w-4 text-gray-700 dark:text-gray-300" />
         </div>
         <div class="min-w-0">
           <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
@@ -35,27 +35,25 @@
         </p>
       </div>
 
-      <div v-if="staff">
-        <label class="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-400">
-          Destination department <span class="text-red-500">*</span>
-        </label>
-        <select
+      <IosFormField v-if="staff" label="Destination department" required>
+        <IosFormSelect
           v-model="targetDepartmentId"
-          class="w-full rounded-sm bg-white px-3 py-2 text-sm text-gray-900 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500/25 dark:!bg-dashboard-card dark:text-gray-100"
+          required
+          extra-class="cursor-pointer"
           :disabled="isProcessing || departmentOptions.length === 0"
         >
           <option value="" disabled>Select department</option>
           <option v-for="dept in departmentOptions" :key="dept.id" :value="dept.id">
             {{ dept.name }}
           </option>
-        </select>
+        </IosFormSelect>
         <p
           v-if="departmentOptions.length === 0"
           class="mt-1.5 text-xs text-amber-700 dark:text-amber-300"
         >
           No other departments in this store. Create another department first.
         </p>
-      </div>
+      </IosFormField>
 
       <div class="rounded-sm bg-gray-50 p-2.5 dark:!bg-dashboard-card/35">
         <Checkbox
@@ -89,6 +87,7 @@ import {
 import Modal from '~/components/ui/Modal.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
+import { IosFormField, IosFormSelect } from '~/components/ios/forms'
 import type { Staff } from '~/composables/useStaff'
 import type { Department } from '~/composables/useDepartments'
 

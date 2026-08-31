@@ -30,6 +30,7 @@
           They can set a password, then sign in with their role and branch.
         </p>
         <Button
+          variant="neutral"
           size="sm"
           class="!rounded-2xl w-full sm:w-auto min-w-[120px]"
           @click="closeAfterSuccess"
@@ -84,7 +85,7 @@
         </p>
         <div class="flex w-full flex-col gap-2 sm:flex-row sm:justify-center">
           <Button
-            variant="outline"
+            variant="secondary"
             size="sm"
             class="!rounded-2xl w-full sm:w-auto"
             :disabled="isSendingInviteEmail"
@@ -93,6 +94,7 @@
             {{ isSendingInviteEmail ? 'Sending…' : 'Email to staff instead' }}
           </Button>
           <Button
+            variant="neutral"
             size="sm"
             class="!rounded-2xl w-full sm:w-auto min-w-[120px]"
             @click="closeAfterSuccess"
@@ -102,61 +104,46 @@
         </div>
       </div>
 
-      <div v-else class="space-y-4">
-        <div v-if="staffLimitReached && !isEdit" class="rounded-sm bg-amber-50/90 px-3 py-3 dark:bg-amber-950/25">
-          <LimitUpgradeHint
-            message="Your plan staff limit is reached for this store."
-          />
-          <p class="mt-1 text-[11px] text-amber-900/90 dark:text-amber-100/90">
-            {{ staffLimitMessage }}
-          </p>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div>
-          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
-            First name <span class="text-red-500">*</span>
-          </label>
-          <input
-            v-model="formData.firstName"
-            type="text"
-            required
-            class="w-full px-3 py-2 text-sm rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 transition-colors"
-            placeholder="First name"
-          />
-        </div>
+      <IosForm v-else id="staff-drawer-form" layout="fill" @submit="handleSubmit">
+        <IosFormSection v-if="staffLimitReached && !isEdit" fixed>
+          <div class="rounded-sm bg-amber-50/90 px-3 py-3 dark:bg-amber-950/25">
+            <LimitUpgradeHint
+              message="Your plan staff limit is reached for this store."
+            />
+            <p class="mt-1 text-[11px] text-amber-900/90 dark:text-amber-100/90">
+              {{ staffLimitMessage }}
+            </p>
+          </div>
+        </IosFormSection>
 
-        <div>
-          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
-            Last name <span class="text-red-500">*</span>
-          </label>
-          <input
-            v-model="formData.lastName"
-            type="text"
-            required
-            class="w-full px-3 py-2 text-sm rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 transition-colors"
-            placeholder="Last name"
-          />
-        </div>
+        <IosFormSection title="Basic info" fixed>
+          <IosFormField label="First name" required>
+            <IosFormInput v-model="formData.firstName" required placeholder="First name" />
+          </IosFormField>
+          <IosFormField label="Last name" required>
+            <IosFormInput v-model="formData.lastName" required placeholder="Last name" />
+          </IosFormField>
+          <IosFormField label="Email" required>
+            <IosFormInput
+              v-model="formData.email"
+              type="email"
+              required
+              placeholder="email@example.com"
+            />
+          </IosFormField>
+          <IosFormField label="Phone" hint="Optional">
+            <IosFormInput v-model="formData.phone" type="tel" placeholder="+1234567890" />
+          </IosFormField>
+        </IosFormSection>
 
-        <div>
-          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
-            Email <span class="text-red-500">*</span>
-          </label>
-          <input
-            v-model="formData.email"
-            type="email"
-            required
-            class="w-full px-3 py-2 text-sm rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 transition-colors"
-            placeholder="email@example.com"
-          />
-        </div>
-
-        <div v-if="!isEdit" class="md:col-span-2 space-y-2">
-          <label class="flex cursor-pointer items-start gap-2.5 rounded-lg border border-gray-200/80 bg-gray-50/60 px-3 py-2.5 dark:border-white/10 dark:bg-white/[0.03]">
+        <IosFormSection v-if="!isEdit" fixed>
+          <label
+            class="flex cursor-pointer items-start gap-2.5 rounded-lg border border-gray-200/80 bg-gray-50/60 px-3 py-2.5 dark:border-white/10 dark:bg-white/[0.03]"
+          >
             <input
               v-model="emailCredentialsToStaff"
               type="checkbox"
-              class="mt-0.5 rounded border-gray-300 text-primary-600 focus:ring-primary-500/40"
+              class="mt-0.5 rounded border-gray-300 text-gray-800 focus:ring-gray-400/40 dark:border-gray-600 dark:text-gray-200"
             />
             <span class="text-xs leading-relaxed text-gray-700 dark:text-gray-300">
               <span class="font-medium text-gray-900 dark:text-gray-100">Email sign-in details:</span>
@@ -165,7 +152,7 @@
             </span>
           </label>
           <div class="flex items-center gap-3">
-            <p class="text-xs text-gray-500 dark:text-gray-400 flex-1">
+            <p class="ios-form__hint dash-drawer-hint flex-1">
               {{
                 emailCredentialsToStaff
                   ? 'A random password is generated and emailed when the account is created.'
@@ -175,63 +162,38 @@
             <button
               type="button"
               @click="regeneratePassword"
-              class="p-2 rounded-sm text-gray-500 dark:text-gray-400 hover:text-primary-500 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors shrink-0"
+              class="p-2 rounded-sm text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/[0.06] transition-colors shrink-0"
               aria-label="Regenerate password"
             >
               <ArrowPathIcon class="w-4 h-4" stroke-width="1.75" />
             </button>
           </div>
-        </div>
+        </IosFormSection>
 
-        <div>
-          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
-            Phone
-          </label>
-          <input
-            v-model="formData.phone"
-            type="tel"
-            class="w-full px-3 py-2 text-sm rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 transition-colors"
-            placeholder="+1234567890"
-          />
-        </div>
+        <IosFormSection title="Role" fixed>
+          <IosFormField label="Position" required>
+            <IosFormInput
+              v-model="formData.position"
+              required
+              placeholder="e.g. Sales Associate"
+            />
+          </IosFormField>
+          <IosFormField label="Role" required>
+            <IosFormSelect v-model="formData.role" required extra-class="cursor-pointer">
+              <option value="staff">Staff</option>
+              <option value="manager">Manager</option>
+              <option value="intern">Intern</option>
+            </IosFormSelect>
+          </IosFormField>
 
-        <div>
-          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
-            Position <span class="text-red-500">*</span>
-          </label>
-          <input
-            v-model="formData.position"
-            type="text"
-            required
-            class="w-full px-3 py-2 text-sm rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 transition-colors"
-            placeholder="e.g. Sales Associate"
-          />
-        </div>
-
-        <div>
-          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
-            Role <span class="text-red-500">*</span>
-          </label>
-          <select
-            v-model="formData.role"
-            required
-            class="w-full px-3 py-2 text-sm rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 transition-colors"
+          <label
+            v-if="canGrantInventoryAccess && formData.role === 'manager'"
+            class="flex cursor-pointer items-start gap-2.5 rounded-lg border border-gray-200/80 bg-gray-50/60 px-3 py-2.5 dark:border-white/10 dark:bg-white/[0.03]"
           >
-            <option value="staff">Staff</option>
-            <option value="manager">Manager</option>
-            <option value="intern">Intern</option>
-          </select>
-        </div>
-
-        <div
-          v-if="canGrantInventoryAccess && formData.role === 'manager'"
-          class="rounded-lg border border-primary-200/60 bg-primary-50/40 px-3 py-2.5 dark:border-primary-500/20 dark:bg-primary-950/20"
-        >
-          <label class="flex cursor-pointer items-start gap-2.5">
             <input
               v-model="formData.canManageInventory"
               type="checkbox"
-              class="mt-0.5 rounded border-gray-300 text-primary-600 focus:ring-primary-500/40"
+              class="mt-0.5 rounded border-gray-300 text-gray-800 focus:ring-gray-400/40 dark:border-gray-600 dark:text-gray-200"
             />
             <span class="text-xs leading-relaxed text-gray-700 dark:text-gray-300">
               <span class="font-medium text-gray-900 dark:text-gray-100">Inventory editor:</span>
@@ -239,57 +201,32 @@
               floor, not billing or staff admin).
             </span>
           </label>
-        </div>
+        </IosFormSection>
 
-        <div>
-          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
-            Hire date <span class="text-red-500">*</span>
-          </label>
-          <input
-            v-model="formData.hireDate"
-            type="date"
-            required
-            class="w-full px-3 py-2 text-sm rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 transition-colors"
-          />
-        </div>
+        <IosFormSection title="Employment" fixed>
+          <IosFormField label="Hire date" required>
+            <IosFormInput v-model="formData.hireDate" type="date" required />
+          </IosFormField>
+          <IosFormField label="Salary" hint="Optional">
+            <IosFormInput
+              v-model="formData.salary"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="0.00"
+            />
+          </IosFormField>
+          <IosFormField label="Status" required>
+            <IosFormSelect v-model="formData.status" required extra-class="cursor-pointer">
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+              <option value="on_leave">On Leave</option>
+            </IosFormSelect>
+          </IosFormField>
+        </IosFormSection>
 
-        <div>
-          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
-            Salary (optional)
-          </label>
-          <input
-            v-model.number="formData.salary"
-            type="number"
-            min="0"
-            step="0.01"
-            class="w-full px-3 py-2 text-sm rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 transition-colors"
-            placeholder="0.00"
-          />
-        </div>
-
-        <div>
-          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
-            Status <span class="text-red-500">*</span>
-          </label>
-          <select
-            v-model="formData.status"
-            required
-            class="w-full px-3 py-2 text-sm rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 transition-colors"
-          >
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-            <option value="on_leave">On Leave</option>
-          </select>
-        </div>
-      </div>
-
-      <div
-        v-if="errorMessage"
-        class="p-3 rounded-sm bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40"
-      >
-        <p class="text-xs text-red-600 dark:text-red-400">{{ errorMessage }}</p>
-      </div>
-      </div>
+        <p v-if="errorMessage" class="ios-form__error">{{ errorMessage }}</p>
+      </IosForm>
     </div>
 
     <template v-if="!showTemporaryPassword" #footer>
@@ -314,6 +251,13 @@ import {
 import SidePanel from '~/components/ui/SidePanel.vue'
 import Button from '~/components/ui/Button.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
+import {
+  IosForm,
+  IosFormSection,
+  IosFormField,
+  IosFormInput,
+  IosFormSelect,
+} from '~/components/ios/forms'
 import type { Staff } from '~/composables/useStaff'
 import { useStaffStore } from '~/stores/staff'
 import { useDepartmentsStore } from '~/stores/departments'
