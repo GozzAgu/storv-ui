@@ -13,19 +13,10 @@
           />
         </div>
 
-        <div
+        <IosTransactionListSkeleton
           v-if="sellerLoansStore.loading && sellerLoansStore.loans.length === 0"
-          class="ios-transaction-list-skeleton"
-        >
-          <div v-for="i in 8" :key="i" class="ios-transaction-list-skeleton__row">
-            <div class="ios-transaction-list-skeleton__icon" />
-            <div class="ios-transaction-list-skeleton__body">
-              <div class="ios-transaction-list-skeleton__line ios-transaction-list-skeleton__line--title" />
-              <div class="ios-transaction-list-skeleton__line ios-transaction-list-skeleton__line--subtitle" />
-            </div>
-            <div class="ios-transaction-list-skeleton__amount" />
-          </div>
-        </div>
+          :count="8"
+        />
 
         <DashboardTableEmptyState
           v-else-if="sellerLoansStore.error"
@@ -466,6 +457,7 @@ import Button from '~/components/ui/Button.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
 import IosQuickActionBar, { type IosQuickActionOption } from '~/components/ios/IosQuickActionBar.vue'
+import IosTransactionListSkeleton from '~/components/ios/IosTransactionListSkeleton.vue'
 import IosReceiptTransactionRow, {
   type ReceiptTransactionVariant,
 } from '~/components/ios/IosReceiptTransactionRow.vue'

@@ -32,7 +32,7 @@ withDefaults(
     cancelLabel?: string
     cancelVariant?: 'outline' | 'ghost' | 'secondary'
     primaryLabel?: string
-    primaryVariant?: 'primary' | 'danger' | 'success'
+    primaryVariant?: 'primary' | 'neutral' | 'danger' | 'success'
     primaryIcon?: Component
     primaryExtraClass?: string
     primaryLoading?: boolean
@@ -43,9 +43,9 @@ withDefaults(
   }>(),
   {
     cancelLabel: 'Cancel',
-    cancelVariant: 'outline',
+    cancelVariant: 'secondary',
     primaryLabel: 'Save',
-    primaryVariant: 'primary',
+    primaryVariant: 'neutral',
     primaryExtraClass: '',
     primaryLoading: false,
     primaryDisabled: false,

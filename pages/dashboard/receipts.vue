@@ -11,19 +11,11 @@
         <div v-if="isCapacitorIos" class="ios-sales-shell">
           <div class="ios-page-nav-bar" aria-hidden="true">
             <span class="ios-page-nav-bar__spacer" />
-            <div class="h-5 w-28 animate-pulse rounded bg-gray-200/80 dark:bg-white/10" />
+            <div class="ios-skeleton ios-nav-title-skeleton" />
             <span class="ios-page-nav-bar__spacer" />
           </div>
-          <div class="ios-transaction-list-skeleton">
-            <div v-for="i in 8" :key="i" class="ios-transaction-list-skeleton__row">
-              <div class="ios-transaction-list-skeleton__icon" />
-              <div class="ios-transaction-list-skeleton__body">
-                <div class="ios-transaction-list-skeleton__line ios-transaction-list-skeleton__line--title" />
-                <div class="ios-transaction-list-skeleton__line ios-transaction-list-skeleton__line--subtitle" />
-              </div>
-              <div class="ios-transaction-list-skeleton__amount" />
-            </div>
-          </div>
+          <IosQuickActionSkeleton :count="4" />
+          <IosTransactionListSkeleton :count="8" />
         </div>
         <div v-else class="overflow-hidden rounded-sm bg-white dark:!bg-dashboard-card">
           <div class="border-b border-gray-200/80 px-4 py-3 dark:border-gray-800">
@@ -63,30 +55,28 @@
           />
 
           <template v-if="activeTab === 'receipts'">
-            <div v-if="!receiptsStore.loading" class="ios-sales-chrome">
-              <div class="ios-search-bar-host ios-search-bar-host--sticky">
-                <IosSearchBar v-model="searchQuery" placeholder="Search sales…" />
+            <template v-if="receiptsStore.loading">
+              <div class="ios-search-bar-host">
+                <div class="ios-skeleton ios-search-skeleton" aria-hidden="true" />
               </div>
-              <IosQuickActionBar
-                v-model="statusFilter"
-                aria-label="Filter by status"
-                :options="receiptStatusQuickActionOptions"
-              />
-            </div>
+              <IosQuickActionSkeleton :count="4" />
+              <IosTransactionListSkeleton :count="8" />
+            </template>
 
-            <div v-if="receiptsStore.loading" class="ios-transaction-list-skeleton">
-              <div v-for="i in 8" :key="i" class="ios-transaction-list-skeleton__row">
-                <div class="ios-transaction-list-skeleton__icon" />
-                <div class="ios-transaction-list-skeleton__body">
-                  <div class="ios-transaction-list-skeleton__line ios-transaction-list-skeleton__line--title" />
-                  <div class="ios-transaction-list-skeleton__line ios-transaction-list-skeleton__line--subtitle" />
+            <template v-else>
+              <div class="ios-sales-chrome">
+                <div class="ios-search-bar-host ios-search-bar-host--sticky">
+                  <IosSearchBar v-model="searchQuery" placeholder="Search sales…" />
                 </div>
-                <div class="ios-transaction-list-skeleton__amount" />
+                <IosQuickActionBar
+                  v-model="statusFilter"
+                  aria-label="Filter by status"
+                  :options="receiptStatusQuickActionOptions"
+                />
               </div>
-            </div>
 
-            <DashboardTableEmptyState
-              v-else-if="sortedFilteredReceipts.length === 0"
+              <DashboardTableEmptyState
+                v-if="sortedFilteredReceipts.length === 0"
               :icon="ReceiptPercentIcon"
               :title="
                 searchQuery || statusFilter !== 'all' || dateFilter !== 'all'
@@ -98,32 +88,33 @@
                   ? 'Try adjusting your search, status, or date filters.'
                   : 'Create your first sale to record revenue and track payments.'
               "
-            />
-
-            <template v-else>
-              <div class="ios-receipt-transaction-list">
-                <IosReceiptTransactionRow
-                  v-for="(receipt, index) in paginatedReceipts"
-                  :key="receipt.id"
-                  :title="receipt.customerName || 'Walk-in customer'"
-                  :subtitle="getReceiptTransactionSubtitle(receipt)"
-                  :amount="getReceiptTransactionAmount(receipt).text"
-                  :amount-tone="getReceiptTransactionAmount(receipt).tone"
-                  :date="formatReceiptTransactionDate(receipt.date)"
-                  :variant="getReceiptTransactionVariant(receipt)"
-                  :last="index === paginatedReceipts.length - 1"
-                  show-menu
-                  :menu-id="receipt.id"
-                  @click="handleViewReceipt(receipt)"
-                  @menu="toggleReceiptMenu(receipt.id)"
-                />
-              </div>
-              <DashboardTablePagination
-                :current-page="currentPage"
-                :items-per-page="itemsPerPage"
-                :total="sortedFilteredReceipts.length"
-                @page-change="handlePageChange"
               />
+
+              <template v-else>
+                <div class="ios-receipt-transaction-list">
+                  <IosReceiptTransactionRow
+                    v-for="(receipt, index) in paginatedReceipts"
+                    :key="receipt.id"
+                    :title="receipt.customerName || 'Walk-in customer'"
+                    :subtitle="getReceiptTransactionSubtitle(receipt)"
+                    :amount="getReceiptTransactionAmount(receipt).text"
+                    :amount-tone="getReceiptTransactionAmount(receipt).tone"
+                    :date="formatReceiptTransactionDate(receipt.date)"
+                    :variant="getReceiptTransactionVariant(receipt)"
+                    :last="index === paginatedReceipts.length - 1"
+                    show-menu
+                    :menu-id="receipt.id"
+                    @click="handleViewReceipt(receipt)"
+                    @menu="toggleReceiptMenu(receipt.id)"
+                  />
+                </div>
+                <DashboardTablePagination
+                  :current-page="currentPage"
+                  :items-per-page="itemsPerPage"
+                  :total="sortedFilteredReceipts.length"
+                  @page-change="handlePageChange"
+                />
+              </template>
             </template>
           </template>
 
@@ -175,16 +166,7 @@
               />
             </div>
 
-            <div v-if="receiptsStore.loading" class="ios-transaction-list-skeleton">
-              <div v-for="i in 6" :key="i" class="ios-transaction-list-skeleton__row">
-                <div class="ios-transaction-list-skeleton__icon" />
-                <div class="ios-transaction-list-skeleton__body">
-                  <div class="ios-transaction-list-skeleton__line ios-transaction-list-skeleton__line--title" />
-                  <div class="ios-transaction-list-skeleton__line ios-transaction-list-skeleton__line--subtitle" />
-                </div>
-                <div class="ios-transaction-list-skeleton__amount" />
-              </div>
-            </div>
+            <IosTransactionListSkeleton v-if="receiptsStore.loading" :count="6" />
 
             <DashboardTableEmptyState
               v-else-if="filteredCustomers.length === 0"
@@ -255,37 +237,72 @@
             v-model="showSalesMoreSheet"
             title="Sales options"
             subtitle="Views and filters"
-            variant="assistant"
+            variant="menu"
+            footer-variant="menu"
+            body-padding="p-0"
             aria-label="Sales options"
           >
-            <IosGroupedSection>
-              <IosNativeListRow
-                v-if="canCreate"
-                title="Outstanding"
-                :subtitle="
-                  outstandingReceipts.length > 0
-                    ? `${outstandingReceipts.length} open balance${outstandingReceipts.length === 1 ? '' : 's'}`
-                    : 'No open balances'
-                "
-                :show-chevron="false"
-                @click="selectSalesTabFromSheet('outstanding')"
-              />
-              <IosNativeListRow
-                title="Customers"
-                subtitle="Browse customer profiles"
-                :show-chevron="false"
-                @click="selectSalesTabFromSheet('customers')"
-              />
-            </IosGroupedSection>
-            <IosGroupedSection v-if="activeTab === 'receipts'" header="Date range">
-              <IosNativeListRow
-                v-for="option in receiptDateFilterOptions"
-                :key="option.value"
-                :title="option.label"
-                :show-chevron="false"
-                @click="selectReceiptDateFilter(option.value)"
-              />
-            </IosGroupedSection>
+            <div class="ios-drawer-menu">
+              <section class="ios-drawer-menu__section">
+                <p class="ios-drawer-menu__section-label">Views</p>
+                <div class="ios-drawer-menu__group">
+                  <ul class="ios-drawer-menu__list">
+                    <li v-if="canCreate">
+                      <button
+                        type="button"
+                        class="ios-drawer-menu__row"
+                        @click="selectSalesTabFromSheet('outstanding')"
+                      >
+                        <span class="ios-drawer-menu__label">Outstanding</span>
+                        <span v-if="outstandingReceipts.length > 0" class="ios-drawer-menu__value">
+                          {{ outstandingReceipts.length }}
+                        </span>
+                        <CheckIcon
+                          v-if="activeTab === 'outstanding'"
+                          class="ios-drawer-menu__check"
+                          aria-hidden="true"
+                        />
+                      </button>
+                    </li>
+                    <li>
+                      <button
+                        type="button"
+                        class="ios-drawer-menu__row"
+                        @click="selectSalesTabFromSheet('customers')"
+                      >
+                        <span class="ios-drawer-menu__label">Customers</span>
+                        <CheckIcon
+                          v-if="activeTab === 'customers'"
+                          class="ios-drawer-menu__check"
+                          aria-hidden="true"
+                        />
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              </section>
+              <section v-if="activeTab === 'receipts'" class="ios-drawer-menu__section">
+                <p class="ios-drawer-menu__section-label">Date range</p>
+                <div class="ios-drawer-menu__group">
+                  <ul class="ios-drawer-menu__list">
+                    <li v-for="option in receiptDateFilterOptions" :key="option.value">
+                      <button
+                        type="button"
+                        class="ios-drawer-menu__row"
+                        @click="selectReceiptDateFilter(option.value)"
+                      >
+                        <span class="ios-drawer-menu__label">{{ option.label }}</span>
+                        <CheckIcon
+                          v-if="dateFilter === option.value"
+                          class="ios-drawer-menu__check"
+                          aria-hidden="true"
+                        />
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              </section>
+            </div>
           </IosDrawer>
 
           <CreateReceiptModal
@@ -1970,9 +1987,12 @@ import {
   ArrowTopRightOnSquareIcon,
   EllipsisVerticalIcon,
   QrCodeIcon,
+  CheckIcon,
 } from '~/utils/app-icons'
 import Button from '~/components/ui/Button.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
+import IosQuickActionSkeleton from '~/components/ios/IosQuickActionSkeleton.vue'
+import IosTransactionListSkeleton from '~/components/ios/IosTransactionListSkeleton.vue'
 import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
 import Modal from '~/components/ui/Modal.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
@@ -1982,8 +2002,6 @@ import IosQuickActionBar, {
   type IosQuickActionOption,
 } from '~/components/ios/IosQuickActionBar.vue'
 import IosDrawer from '~/components/ios/IosDrawer.vue'
-import IosGroupedSection from '~/components/ios/IosGroupedSection.vue'
-import IosNativeListRow from '~/components/ios/IosNativeListRow.vue'
 import IosSearchBar from '~/components/ios/IosSearchBar.vue'
 import IosSwipeActions, { type IosSwipeAction } from '~/components/ios/IosSwipeActions.vue'
 import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'

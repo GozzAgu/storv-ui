@@ -2,57 +2,43 @@
   <SidePanel
     :model-value="modelValue"
     title="Edit lead"
-    subtitle="Update contact details or product interest."
     size="lg"
     @update:model-value="(value: boolean) => emit('update:modelValue', value)"
   >
-    <div class="space-y-4">
-      <div>
-        <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300"
-          >Phone</label
-        >
-        <input
-          v-model="customerPhone"
-          type="tel"
-          maxlength="40"
-          autocomplete="tel"
-          class="app-field w-full px-3 py-2 text-sm"
-        />
-      </div>
-
-      <div>
-        <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300"
-          >Product interest *</label
-        >
-        <input
-          v-model="productName"
-          type="text"
-          maxlength="160"
-          class="app-field w-full px-3 py-2 text-sm"
-        />
-      </div>
-
-      <div>
-        <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300"
-          >Estimated value (optional)</label
-        >
-        <div class="relative">
-          <span
-            class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400"
-            >{{ currencySymbol }}</span
-          >
-          <input
-            v-model.number="estimatedValue"
-            type="number"
-            min="0"
-            step="0.01"
-            class="app-field w-full py-2 pl-7 pr-3 text-sm"
+    <IosForm @submit="save">
+      <IosFormSection>
+        <IosFormField label="Phone">
+          <IosFormInput
+            v-model="customerPhone"
+            type="tel"
+            maxlength="40"
+            autocomplete="tel"
           />
-        </div>
-      </div>
+        </IosFormField>
 
-      <p v-if="errorMessage" class="text-xs text-red-600 dark:text-red-400">{{ errorMessage }}</p>
-    </div>
+        <IosFormField label="Product interest" required>
+          <IosFormInput v-model="productName" maxlength="160" />
+        </IosFormField>
+
+        <IosFormField label="Estimated value" hint="Optional">
+          <div class="relative">
+            <span
+              class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400"
+              >{{ currencySymbol }}</span
+            >
+            <IosFormInput
+              v-model="estimatedValue"
+              type="number"
+              min="0"
+              step="0.01"
+              extra-class="pl-7"
+            />
+          </div>
+        </IosFormField>
+      </IosFormSection>
+
+      <p v-if="errorMessage" class="ios-form__error">{{ errorMessage }}</p>
+    </IosForm>
 
     <template #footer>
       <IosDrawerActions
@@ -71,6 +57,12 @@
 import { computed, ref, watch } from 'vue'
 import SidePanel from '~/components/ui/SidePanel.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
+import {
+  IosForm,
+  IosFormSection,
+  IosFormField,
+  IosFormInput,
+} from '~/components/ios/forms'
 import { usePreferences } from '~/composables/usePreferences'
 import { useSalesLeadsStore } from '~/stores/salesLeads'
 import type { SalesLead } from '~/types/leads'

@@ -56,7 +56,7 @@ const delegatedAttrs = computed(() => {
 })
 
 interface Props {
-  variant?: 'primary' | 'secondary' | 'danger' | 'success' | 'outline' | 'ghost'
+  variant?: 'primary' | 'secondary' | 'danger' | 'success' | 'outline' | 'ghost' | 'neutral'
   size?: 'sm' | 'md' | 'lg'
   type?: 'button' | 'submit' | 'reset'
   disabled?: boolean
@@ -88,7 +88,9 @@ const iosNativeClasses = computed(() => {
   if (!isCapacitorIos.value) return ''
   const parts = ['ios-action-btn']
   if (iconOnlyIos.value) parts.push('ios-action-btn--icon-only')
-  else parts.push(`ios-action-btn--${props.variant}`)
+  // 'neutral' has no native counterpart — reuse the primary native class, whose
+  // color is already neutralized (monochrome pill) inside CRUD drawer footers.
+  else parts.push(`ios-action-btn--${props.variant === 'neutral' ? 'primary' : props.variant}`)
   return parts.join(' ')
 })
 
@@ -160,6 +162,9 @@ const variantSurfaceClasses = computed(() => {
     outline: outlineSurfaceClasses,
     ghost:
       'border-0 bg-transparent text-gray-700 hover:bg-gray-900/[0.05] dark:text-gray-200 dark:hover:bg-white/[0.06]',
+    /** Monochrome pill — CRUD drawer primary action. No brand blue by design. */
+    neutral:
+      'border-0 bg-gray-900 text-white shadow-[0_2px_10px_rgb(0_0_0/0.15)] hover:bg-gray-800 active:bg-black dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100',
   }
   return map[props.variant]
 })
@@ -178,6 +183,8 @@ const variantFocusRingClasses = computed(() => {
     outline: outlineFocus,
     ghost:
       'focus-visible:ring-2 focus-visible:ring-gray-400/45 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[#0c0e14]',
+    neutral:
+      'focus-visible:ring-2 focus-visible:ring-gray-400/50 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[#0c0e14]',
   }
   return map[props.variant]
 })

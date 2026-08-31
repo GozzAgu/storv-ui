@@ -157,9 +157,18 @@
       </Button>
     </div>
 
-    <div v-else-if="departmentsStore.loading || storesLoading" :class="gridClass">
-      <div v-for="i in 12" :key="i" class="dash-skeleton dash-skeleton--grid-card" />
-    </div>
+    <template v-else-if="departmentsStore.loading || storesLoading">
+      <template v-if="isCapacitorIos">
+        <div class="ios-search-bar-host">
+          <div class="ios-skeleton ios-search-skeleton" aria-hidden="true" />
+        </div>
+        <IosQuickActionSkeleton :count="3" />
+        <IosGroupedListSkeleton :count="8" />
+      </template>
+      <div v-else :class="gridClass">
+        <div v-for="i in 12" :key="i" class="dash-skeleton dash-skeleton--grid-card" />
+      </div>
+    </template>
 
     <div v-else-if="!departmentsStore.error">
       <div
@@ -571,6 +580,8 @@ import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
 import IosSearchBar from '~/components/ios/IosSearchBar.vue'
 import IosQuickActionBar, { type IosQuickActionOption } from '~/components/ios/IosQuickActionBar.vue'
+import IosGroupedListSkeleton from '~/components/ios/IosGroupedListSkeleton.vue'
+import IosQuickActionSkeleton from '~/components/ios/IosQuickActionSkeleton.vue'
 import IosInventoryFolderRow from '~/components/ios/IosInventoryFolderRow.vue'
 import DashboardTablePagination from '~/components/dashboard/DashboardTablePagination.vue'
 import Modal from '~/components/ui/Modal.vue'

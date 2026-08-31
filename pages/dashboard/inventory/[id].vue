@@ -15,7 +15,30 @@
 
     <!-- Loading -->
     <template v-if="isLoadingFolder">
-      <template v-if="loadingShowsCategoryHub">
+      <template v-if="isCapacitorIos && loadingShowsCategoryHub">
+        <div class="ios-page-nav-bar" aria-hidden="true">
+          <span class="ios-page-nav-bar__spacer" />
+          <div class="ios-skeleton ios-nav-title-skeleton" />
+          <span class="ios-page-nav-bar__spacer" />
+        </div>
+        <div class="ios-skeleton ios-skeleton--line ios-skeleton--line-sm ios-nav-title-skeleton" style="width: 5rem; margin: -0.25rem auto 0" />
+        <IosQuickActionSkeleton :count="2" />
+        <IosGroupedListSkeleton :count="6" />
+      </template>
+      <template v-else-if="isCapacitorIos">
+        <div class="ios-page-nav-bar" aria-hidden="true">
+          <span class="ios-page-nav-bar__spacer" />
+          <div class="ios-skeleton ios-nav-title-skeleton" />
+          <span class="ios-page-nav-bar__spacer" />
+        </div>
+        <div class="ios-skeleton ios-skeleton--line ios-skeleton--line-sm ios-nav-title-skeleton" style="width: 4rem; margin: -0.25rem auto 0.5rem" />
+        <div class="ios-search-bar-host">
+          <div class="ios-skeleton ios-search-skeleton" aria-hidden="true" />
+        </div>
+        <IosQuickActionSkeleton :count="4" />
+        <IosTransactionListSkeleton :count="8" />
+      </template>
+      <template v-else-if="loadingShowsCategoryHub">
         <div class="flex flex-wrap items-center gap-2">
           <div class="h-8 w-8 animate-pulse rounded-lg bg-gray-200 dark:bg-white/10" />
           <div class="h-5 w-36 max-w-[50vw] animate-pulse rounded-sm bg-gray-200 dark:bg-white/10" />
@@ -218,31 +241,54 @@
         v-model="showProductMoreSheet"
         title="Product options"
         subtitle="Filters and tools"
-        variant="assistant"
+        variant="menu"
+        footer-variant="menu"
+        body-padding="p-0"
         aria-label="Product options"
       >
-        <IosGroupedSection header="Availability">
-          <IosNativeListRow
-            v-for="option in productMoreAvailabilityOptions"
-            :key="option.value"
-            :title="option.label"
-            :subtitle="option.badge != null ? String(option.badge) : undefined"
-            :show-chevron="false"
-            @click="selectAvailabilityFromSheet(option.value)"
-          />
-        </IosGroupedSection>
-        <IosGroupedSection v-if="canManageInventoryItems" header="Tools">
-          <IosNativeListRow
-            title="Import from Excel"
-            :show-chevron="false"
-            @click="triggerImportFromSheet"
-          />
-          <IosNativeListRow
-            title="Export to Excel"
-            :show-chevron="false"
-            @click="triggerExportFromSheet"
-          />
-        </IosGroupedSection>
+        <div class="ios-drawer-menu">
+          <section class="ios-drawer-menu__section">
+            <p class="ios-drawer-menu__section-label">Availability</p>
+            <div class="ios-drawer-menu__group">
+              <ul class="ios-drawer-menu__list">
+                <li v-for="option in productMoreAvailabilityOptions" :key="option.value">
+                  <button
+                    type="button"
+                    class="ios-drawer-menu__row"
+                    @click="selectAvailabilityFromSheet(option.value)"
+                  >
+                    <span class="ios-drawer-menu__label">{{ option.label }}</span>
+                    <span v-if="option.badge != null" class="ios-drawer-menu__value">
+                      {{ option.badge }}
+                    </span>
+                    <CheckIcon
+                      v-if="availabilityFilter === option.value"
+                      class="ios-drawer-menu__check"
+                      aria-hidden="true"
+                    />
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </section>
+          <section v-if="canManageInventoryItems" class="ios-drawer-menu__section">
+            <p class="ios-drawer-menu__section-label">Tools</p>
+            <div class="ios-drawer-menu__group">
+              <ul class="ios-drawer-menu__list">
+                <li>
+                  <button type="button" class="ios-drawer-menu__row" @click="triggerImportFromSheet">
+                    <span class="ios-drawer-menu__label">Import from Excel</span>
+                  </button>
+                </li>
+                <li>
+                  <button type="button" class="ios-drawer-menu__row" @click="triggerExportFromSheet">
+                    <span class="ios-drawer-menu__label">Export to Excel</span>
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </section>
+        </div>
       </IosDrawer>
 
       <DashboardTableEmptyState
@@ -286,28 +332,70 @@
     <!-- Category hub: subcategories live inside the parent folder -->
     <template v-if="!isLoadingFolder && showCategoryHub">
       <template v-if="isCapacitorIos">
-        <div class="dash-page-context-bar">
-          <DashboardBackButton
-            :to="inventoryBackTo"
-            :label="inventoryBackLabel"
-            class="mt-px shrink-0"
-          />
-          <div class="min-w-0 flex-1">
-            <h2 class="dash-page-context-bar__title truncate">{{ folder?.name || 'Category' }}</h2>
-            <p class="dash-page-context-bar__meta">
-              <template v-if="childFolders.length > 0">
-                {{ childFolders.length }} subcategor{{ childFolders.length === 1 ? 'y' : 'ies' }}
-              </template>
-              <template v-else>Organize with subcategories</template>
-            </p>
-          </div>
-        </div>
+        <IosPageNavBar
+          :title="folder?.name || 'Category'"
+          show-back
+          :back-to="inventoryBackTo"
+          :back-label="inventoryBackLabel"
+        />
+        <p class="ios-inventory-list-meta">
+          <template v-if="childFolders.length > 0">
+            {{ childFolders.length }} subcategor{{ childFolders.length === 1 ? 'y' : 'ies' }}
+          </template>
+          <template v-else>Organize with subcategories</template>
+        </p>
         <IosQuickActionBar
           v-if="subcategoryQuickActionOptions.length > 0"
           v-model="subcategoryActionStub"
           aria-label="Subcategory actions"
           :options="subcategoryQuickActionOptions"
         />
+        <IosDrawer
+          v-model="showSubcategoryMoreSheet"
+          title="Subcategory options"
+          variant="menu"
+          footer-variant="menu"
+          body-padding="p-0"
+          aria-label="Subcategory options"
+        >
+          <div class="ios-drawer-menu">
+            <section class="ios-drawer-menu__section">
+              <p class="ios-drawer-menu__section-label">Sort by</p>
+              <div class="ios-drawer-menu__group">
+                <ul class="ios-drawer-menu__list">
+                  <li>
+                    <button
+                      type="button"
+                      class="ios-drawer-menu__row"
+                      @click="selectHubSort('name')"
+                    >
+                      <span class="ios-drawer-menu__label">Name</span>
+                      <CheckIcon
+                        v-if="hubSortBy === 'name'"
+                        class="ios-drawer-menu__check"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      type="button"
+                      class="ios-drawer-menu__row"
+                      @click="selectHubSort('items')"
+                    >
+                      <span class="ios-drawer-menu__label">Products</span>
+                      <CheckIcon
+                        v-if="hubSortBy === 'items'"
+                        class="ios-drawer-menu__check"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            </section>
+          </div>
+        </IosDrawer>
         <DashboardTableEmptyState
           v-if="childFolders.length === 0"
           :icon="FolderIcon"
@@ -1910,162 +1998,108 @@
       :folder-name="folder?.name"
     />
 
-    <!-- Item actions menu (teleported; not clipped by table overflow) -->
-    <Teleport to="body">
-      <div
-        v-if="openItemMenuId && itemForOpenMenu && itemMenuFixedStyle"
-        data-inventory-item-menu
-        class="frosted-glass fixed z-[1000] min-w-[11rem] overflow-hidden rounded-sm py-1"
-        role="menu"
-        :style="itemMenuFixedStyle"
-      >
-        <button
-          type="button"
-          role="menuitem"
-          @click="
-            () => {
-              openMobileItemDetail(itemForOpenMenu)
-              openItemMenuId = null
-            }
-          "
-          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85"
-        >
-          <EyeIcon
-            class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500"
-            stroke-width="1.75"
-          />
-          <span>View details</span>
-        </button>
-        <button
-          type="button"
-          role="menuitem"
-          @click="
-            () => {
-              handleViewTimeline(itemForOpenMenu)
-              openItemMenuId = null
-            }
-          "
-          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85"
-        >
-          <ClockIcon
-            class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500"
-            stroke-width="1.75"
-          />
-          <span>History</span>
-        </button>
-        <button
-          type="button"
-          role="menuitem"
-          @click="
-            () => {
-              handleApplyDiscount(itemForOpenMenu)
-              openItemMenuId = null
-            }
-          "
-          :disabled="isInventoryItemLocked(itemForOpenMenu)"
-          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-primary-50/80 dark:text-gray-200 dark:hover:bg-primary-950/30 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          <TagIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
-          <span>{{
-            itemForOpenMenu.discountedPrice !== undefined ? 'Discount' : 'Add discount'
-          }}</span>
-        </button>
-        <button
-          type="button"
-          role="menuitem"
-          @click="
-            () => {
-              handleEditItem(itemForOpenMenu)
-              openItemMenuId = null
-            }
-          "
-          :disabled="isInventoryItemLocked(itemForOpenMenu)"
-          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          <PencilSquareIcon
-            class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500"
-            stroke-width="1.75"
-          />
-          <span>Edit</span>
-        </button>
-        <button
-          v-if="canLoanToSellerUi"
-          type="button"
-          role="menuitem"
-          @click="handleLoanToSellerFromMenu(itemForOpenMenu)"
-          :disabled="isInventoryItemLocked(itemForOpenMenu)"
-          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          <ArrowTopRightOnSquareIcon
-            class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500"
-            stroke-width="1.75"
-          />
-          <span>Stock loan</span>
-        </button>
-        <button
-          v-if="canDuplicateByPlan"
-          type="button"
-          role="menuitem"
-          @click="
-            () => {
-              handleDuplicateItem(itemForOpenMenu)
-              openItemMenuId = null
-            }
-          "
-          :disabled="isInventoryItemLocked(itemForOpenMenu)"
-          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          <DocumentDuplicateIcon
-            class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500"
-            stroke-width="1.75"
-          />
-          <span>Duplicate</span>
-        </button>
-        <button
-          type="button"
-          role="menuitem"
-          @click="
-            () => {
-              handleDeleteItem(itemForOpenMenu)
-              openItemMenuId = null
-            }
-          "
-          :disabled="isInventoryItemLocked(itemForOpenMenu)"
-          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/45 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          <TrashIcon class="h-4 w-4 shrink-0" stroke-width="1.75" />
-          <span>Delete</span>
-        </button>
-      </div>
-    </Teleport>
+    <IosContextMenu
+      :open="Boolean(openItemMenuId && itemForOpenMenu && itemMenuFixedStyle)"
+      :style="itemMenuFixedStyle"
+      menu-id="inventory-item"
+    >
+      <IosContextMenuItem
+        label="View details"
+        :icon="EyeIcon"
+        @click="
+          () => {
+            openMobileItemDetail(itemForOpenMenu!)
+            openItemMenuId = null
+          }
+        "
+      />
+      <IosContextMenuItem
+        label="History"
+        :icon="ClockIcon"
+        @click="
+          () => {
+            handleViewTimeline(itemForOpenMenu!)
+            openItemMenuId = null
+          }
+        "
+      />
+      <IosContextMenuItem
+        :label="itemForOpenMenu?.discountedPrice !== undefined ? 'Discount' : 'Add discount'"
+        :icon="TagIcon"
+        :disabled="!itemForOpenMenu || isInventoryItemLocked(itemForOpenMenu)"
+        @click="
+          () => {
+            if (!itemForOpenMenu) return
+            handleApplyDiscount(itemForOpenMenu)
+            openItemMenuId = null
+          }
+        "
+      />
+      <IosContextMenuItem
+        label="Edit"
+        :icon="PencilSquareIcon"
+        :disabled="!itemForOpenMenu || isInventoryItemLocked(itemForOpenMenu)"
+        @click="
+          () => {
+            if (!itemForOpenMenu) return
+            handleEditItem(itemForOpenMenu)
+            openItemMenuId = null
+          }
+        "
+      />
+      <IosContextMenuItem
+        v-if="canLoanToSellerUi"
+        label="Stock loan"
+        :icon="ArrowTopRightOnSquareIcon"
+        :disabled="!itemForOpenMenu || isInventoryItemLocked(itemForOpenMenu)"
+        @click="handleLoanToSellerFromMenu(itemForOpenMenu!)"
+      />
+      <IosContextMenuItem
+        v-if="canDuplicateByPlan"
+        label="Duplicate"
+        :icon="DocumentDuplicateIcon"
+        :disabled="!itemForOpenMenu || isInventoryItemLocked(itemForOpenMenu)"
+        @click="
+          () => {
+            if (!itemForOpenMenu) return
+            handleDuplicateItem(itemForOpenMenu)
+            openItemMenuId = null
+          }
+        "
+      />
+      <IosContextMenuItem
+        label="Delete"
+        :icon="TrashIcon"
+        danger
+        :disabled="!itemForOpenMenu || isInventoryItemLocked(itemForOpenMenu)"
+        @click="
+          () => {
+            if (!itemForOpenMenu) return
+            handleDeleteItem(itemForOpenMenu)
+            openItemMenuId = null
+          }
+        "
+      />
+    </IosContextMenu>
 
     <!-- Subcategory actions menu (hub view) -->
-    <Teleport to="body">
-      <div
-        v-if="openSubfolderMenuId && subfolderForOpenMenu && subfolderMenuFixedStyle"
-        data-inventory-subfolder-menu
-        class="frosted-glass fixed z-[1000] min-w-[120px] rounded-sm py-0.5"
-        :style="subfolderMenuFixedStyle"
-        @click.stop
-      >
-        <button
-          type="button"
-          class="flex w-full items-center gap-1.5 px-2.5 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800/85"
-          @click="handleEditSubfolderFromMenu"
-        >
-          <PencilSquareIcon class="h-3.5 w-3.5 shrink-0" />
-          Edit
-        </button>
-        <button
-          type="button"
-          class="flex w-full items-center gap-1.5 px-2.5 py-2 text-left text-xs text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/35"
-          @click="handleDeleteSubfolderFromMenu"
-        >
-          <TrashIcon class="h-3.5 w-3.5 shrink-0" />
-          Delete
-        </button>
-      </div>
-    </Teleport>
+    <IosContextMenu
+      :open="Boolean(openSubfolderMenuId && subfolderForOpenMenu && subfolderMenuFixedStyle)"
+      :style="subfolderMenuFixedStyle"
+      menu-id="inventory-subfolder"
+    >
+      <IosContextMenuItem
+        label="Edit"
+        :icon="PencilSquareIcon"
+        @click="handleEditSubfolderFromMenu"
+      />
+      <IosContextMenuItem
+        label="Delete"
+        :icon="TrashIcon"
+        danger
+        @click="handleDeleteSubfolderFromMenu"
+      />
+    </IosContextMenu>
 
     <DeleteFolderModal
       v-model="showDeleteSubfolderModal"
@@ -2077,48 +2111,36 @@
       v-model="showSubcategoryModal"
       size="md"
       dense
-      eyebrow="Inventory"
       :title="editingSubfolder ? 'Edit subcategory' : 'Add subcategory'"
-      :subtitle="
-        editingSubfolder
-          ? 'Update the name or description. Columns and settings stay inherited from the parent category.'
-          : subcategoryCreateParent
-            ? `Creates a subcategory inside ${subcategoryCreateParent.name}. Columns and settings are inherited.`
-            : 'Creates a subcategory inside this category.'
-      "
     >
-      <form
+      <IosForm
         id="subcategory-drawer-form"
-        :class="[drawerFillClass, 'divide-y divide-gray-100/90 dark:divide-gray-800/80']"
-        @submit.prevent="handleSaveSubcategory"
+        layout="fill"
+        @submit="handleSaveSubcategory"
       >
-        <section :class="[drawerSectionClass, drawerFillFixedClass]">
-          <div>
-            <label :class="drawerLabelClass">Subcategory name *</label>
-            <input
+        <IosFormSection fixed>
+          <IosFormField label="Subcategory name" required>
+            <IosFormInput
               v-model="subcategoryForm.name"
-              type="text"
               required
-              :class="drawerInputClass"
               placeholder="e.g. Corolla"
             />
-          </div>
-          <div class="mt-2.5">
-            <label :class="drawerLabelClass">Description</label>
-            <textarea
+          </IosFormField>
+          <IosFormField label="Description">
+            <IosFormTextarea
               v-model="subcategoryForm.description"
-              rows="2"
-              :class="[drawerTextareaClass, 'resize-none']"
+              :rows="2"
+              extra-class="resize-none"
               placeholder="Optional"
             />
-          </div>
-        </section>
-      </form>
+          </IosFormField>
+        </IosFormSection>
+      </IosForm>
       <template #footer>
         <IosDrawerActions @cancel="showSubcategoryModal = false">
           <template #primary>
             <Button
-              variant="primary"
+              variant="neutral"
               size="sm"
               type="submit"
               form="subcategory-drawer-form"
@@ -2161,18 +2183,29 @@ import {
   ClockIcon,
   DocumentDuplicateIcon,
   ArrowTopRightOnSquareIcon,
+  CheckIcon,
 } from '~/utils/app-icons'
 import Button from '~/components/ui/Button.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
+import IosDrawer from '~/components/ios/IosDrawer.vue'
+import {
+  IosForm,
+  IosFormSection,
+  IosFormField,
+  IosFormInput,
+  IosFormTextarea,
+} from '~/components/ios/forms'
+import IosGroupedListSkeleton from '~/components/ios/IosGroupedListSkeleton.vue'
+import IosQuickActionSkeleton from '~/components/ios/IosQuickActionSkeleton.vue'
+import IosTransactionListSkeleton from '~/components/ios/IosTransactionListSkeleton.vue'
+import IosContextMenu from '~/components/ios/IosContextMenu.vue'
+import IosContextMenuItem from '~/components/ios/IosContextMenuItem.vue'
 import Breadcrumbs from '~/components/ui/Breadcrumbs.vue'
 import Modal from '~/components/ui/Modal.vue'
 import SidePanel from '~/components/ui/SidePanel.vue'
 import IosQuickActionBar, {
   type IosQuickActionOption,
 } from '~/components/ios/IosQuickActionBar.vue'
-import IosDrawer from '~/components/ios/IosDrawer.vue'
-import IosGroupedSection from '~/components/ios/IosGroupedSection.vue'
-import IosNativeListRow from '~/components/ios/IosNativeListRow.vue'
 import IosSearchBar from '~/components/ios/IosSearchBar.vue'
 import IosInventoryFolderRow from '~/components/ios/IosInventoryFolderRow.vue'
 import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
@@ -2326,6 +2359,23 @@ const childFolders = computed(() =>
   folder.value ? getChildFolders(inventoryStore.folders, folder.value.id) : []
 )
 
+const hubSortBy = ref<'name' | 'items'>('name')
+const showSubcategoryMoreSheet = ref(false)
+
+const sortedChildFolders = computed(() => {
+  const list = [...childFolders.value]
+  if (hubSortBy.value === 'items') {
+    return list.sort((a, b) => (b.itemCount ?? 0) - (a.itemCount ?? 0))
+  }
+  return list.sort((a, b) => a.name.localeCompare(b.name))
+})
+
+function selectHubSort(value: 'name' | 'items') {
+  hubSortBy.value = value
+  showSubcategoryMoreSheet.value = false
+  hubCurrentPage.value = 1
+}
+
 const HUB_SUBFOLDERS_PER_PAGE = 24
 
 const getInitialHubPage = (): number => {
@@ -2348,7 +2398,7 @@ const hubItemsPerPage = ref(HUB_SUBFOLDERS_PER_PAGE)
 
 const paginatedChildFolders = computed(() => {
   const start = (hubCurrentPage.value - 1) * hubItemsPerPage.value
-  return childFolders.value.slice(start, start + hubItemsPerPage.value)
+  return sortedChildFolders.value.slice(start, start + hubItemsPerPage.value)
 })
 
 function scrollInventoryPageToTop() {
@@ -2467,7 +2517,9 @@ const subcategoryQuickActionOptions = computed((): IosQuickActionOption[] => {
       value: 'more',
       label: 'More',
       icon: EllipsisVerticalIcon,
-      action: () => {},
+      action: () => {
+        showSubcategoryMoreSheet.value = true
+      },
     },
   ]
 })

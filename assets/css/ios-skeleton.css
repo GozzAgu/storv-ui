@@ -1,0 +1,138 @@
+/**
+ * Unified iOS skeleton loaders — system fill tokens + shimmer.
+ */
+
+@keyframes ios-skeleton-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+html.capacitor-ios.capacitor-native .ios-skeleton {
+  border-radius: 0.5rem;
+  background: linear-gradient(
+    90deg,
+    var(--ios-fill-tertiary) 0%,
+    var(--ios-fill-secondary) 50%,
+    var(--ios-fill-tertiary) 100%
+  );
+  background-size: 200% 100%;
+  animation: ios-skeleton-shimmer 1.2s ease-in-out infinite;
+}
+
+html.capacitor-ios.capacitor-native .ios-skeleton--circle {
+  border-radius: 9999px;
+}
+
+html.capacitor-ios.capacitor-native .ios-skeleton--line {
+  height: 0.75rem;
+  border-radius: 0.375rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-skeleton--line-lg {
+  width: 55%;
+  height: 0.8125rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-skeleton--line-md {
+  width: 42%;
+}
+
+html.capacitor-ios.capacitor-native .ios-skeleton--line-sm {
+  width: 32%;
+  height: 0.625rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-skeleton--line-xs {
+  width: 2.75rem;
+  height: 0.5625rem;
+  margin-inline: auto;
+}
+
+html.capacitor-ios.capacitor-native .ios-skeleton--icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.5rem;
+  flex-shrink: 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-skeleton--value {
+  width: 3.25rem;
+  height: 0.75rem;
+  flex-shrink: 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-skeleton--menu-dot {
+  width: 1.125rem;
+  height: 1.125rem;
+  border-radius: 9999px;
+  flex-shrink: 0;
+}
+
+/* Quick action bar placeholder */
+html.capacitor-ios.capacitor-native .ios-quick-action-skeleton {
+  pointer-events: none;
+}
+
+html.capacitor-ios.capacitor-native .ios-quick-action-skeleton__item {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4375rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-quick-action-skeleton .ios-skeleton--circle {
+  width: 2.875rem;
+  height: 2.875rem;
+}
+
+/* Grouped folder list placeholder */
+html.capacitor-ios.capacitor-native .ios-grouped-list-skeleton__row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 3.25rem;
+  padding: 0.75rem 1rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-grouped-list-skeleton__row + .ios-grouped-list-skeleton__row {
+  border-top: 1px solid var(--ios-separator);
+}
+
+html.capacitor-ios.capacitor-native .ios-grouped-list-skeleton__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+/* Search bar placeholder */
+html.capacitor-ios.capacitor-native .ios-search-skeleton {
+  height: 2.75rem;
+  border-radius: 9999px;
+}
+
+/* Nav title placeholder */
+html.capacitor-ios.capacitor-native .ios-nav-title-skeleton {
+  width: 6.5rem;
+  height: 1.125rem;
+  margin-inline: auto;
+  border-radius: 0.375rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.capacitor-ios.capacitor-native .ios-skeleton,
+  html.capacitor-ios.capacitor-native .ios-home-skeleton,
+  html.capacitor-ios.capacitor-native .dash-skeleton,
+  html.capacitor-ios.capacitor-native .ios-transaction-list-skeleton__icon,
+  html.capacitor-ios.capacitor-native .ios-transaction-list-skeleton__line,
+  html.capacitor-ios.capacitor-native .ios-transaction-list-skeleton__amount {
+    animation: none;
+  }
+}

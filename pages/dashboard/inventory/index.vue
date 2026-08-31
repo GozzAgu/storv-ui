@@ -159,65 +159,102 @@
       v-model="showInventoryMoreSheet"
       title="Category options"
       subtitle="Sort and filter"
-      variant="assistant"
+      variant="menu"
+      footer-variant="menu"
+      body-padding="p-0"
       aria-label="Category options"
     >
-      <IosGroupedSection v-if="!isStaff" header="Department">
-        <button
-          type="button"
-          class="ios-native-list-row w-full text-left"
-          :class="{ 'opacity-60': !selectedDepartmentId }"
-          @click="selectInventoryDepartment('')"
+      <div class="ios-drawer-menu">
+        <section v-if="!isStaff" class="ios-drawer-menu__section">
+          <p class="ios-drawer-menu__section-label">Department</p>
+          <div class="ios-drawer-menu__group">
+            <ul class="ios-drawer-menu__list">
+              <li>
+                <button
+                  type="button"
+                  class="ios-drawer-menu__row"
+                  @click="selectInventoryDepartment('')"
+                >
+                  <span class="ios-drawer-menu__label">All departments</span>
+                  <CheckIcon
+                    v-if="!selectedDepartmentId"
+                    class="ios-drawer-menu__check"
+                    aria-hidden="true"
+                  />
+                </button>
+              </li>
+              <li v-for="dept in currentStoreDepartments" :key="dept.id">
+                <button
+                  type="button"
+                  class="ios-drawer-menu__row"
+                  @click="selectInventoryDepartment(dept.id)"
+                >
+                  <span class="ios-drawer-menu__label">{{ dept.name }}</span>
+                  <CheckIcon
+                    v-if="selectedDepartmentId === dept.id"
+                    class="ios-drawer-menu__check"
+                    aria-hidden="true"
+                  />
+                </button>
+              </li>
+            </ul>
+          </div>
+        </section>
+        <section class="ios-drawer-menu__section">
+          <p class="ios-drawer-menu__section-label">Sort by</p>
+          <div class="ios-drawer-menu__group">
+            <ul class="ios-drawer-menu__list">
+              <li v-for="option in inventorySortOptions" :key="option.value">
+                <button
+                  type="button"
+                  class="ios-drawer-menu__row"
+                  @click="selectInventorySort(option.value)"
+                >
+                  <span class="ios-drawer-menu__label">{{ option.label }}</span>
+                  <CheckIcon
+                    v-if="sortBy === option.value"
+                    class="ios-drawer-menu__check"
+                    aria-hidden="true"
+                  />
+                </button>
+              </li>
+            </ul>
+          </div>
+        </section>
+        <section
+          v-if="inventoryStore.lowStockFolders.length > 0"
+          class="ios-drawer-menu__section"
         >
-          <span class="min-w-0 flex-1">
-            <span class="block text-sm font-medium text-[var(--ios-label)]">All departments</span>
-          </span>
-        </button>
-        <button
-          v-for="dept in currentStoreDepartments"
-          :key="dept.id"
-          type="button"
-          class="ios-native-list-row w-full text-left"
-          @click="selectInventoryDepartment(dept.id)"
-        >
-          <span class="min-w-0 flex-1">
-            <span class="block text-sm font-medium text-[var(--ios-label)]">{{ dept.name }}</span>
-          </span>
-        </button>
-      </IosGroupedSection>
-      <IosGroupedSection header="Sort by">
-        <IosNativeListRow
-          title="Name"
-          :show-chevron="false"
-          @click="selectInventorySort('name')"
-        />
-        <IosNativeListRow
-          title="Products"
-          :show-chevron="false"
-          @click="selectInventorySort('items')"
-        />
-        <IosNativeListRow
-          title="Date"
-          :show-chevron="false"
-          @click="selectInventorySort('date')"
-        />
-      </IosGroupedSection>
-      <IosGroupedSection v-if="inventoryStore.lowStockFolders.length > 0">
-        <IosNativeListRow
-          title="Export reorder list"
-          subtitle="Low-stock categories"
-          :show-chevron="false"
-          @click="handleExportReorderFromSheet"
-        />
-      </IosGroupedSection>
+          <div class="ios-drawer-menu__group">
+            <ul class="ios-drawer-menu__list">
+              <li>
+                <button
+                  type="button"
+                  class="ios-drawer-menu__row"
+                  @click="handleExportReorderFromSheet"
+                >
+                  <span class="ios-drawer-menu__label">Export reorder list</span>
+                  <span class="ios-drawer-menu__meta">Low-stock categories</span>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </section>
+      </div>
     </IosDrawer>
 
-    <div
-      v-if="inventoryStore.loading && inventoryStore.folders.length === 0"
-      :class="gridClass"
-    >
-      <div v-for="i in 12" :key="i" class="dash-skeleton dash-skeleton--grid-card" />
-    </div>
+    <template v-if="inventoryStore.loading && inventoryStore.folders.length === 0">
+      <template v-if="isCapacitorIos">
+        <div class="ios-search-bar-host">
+          <div class="ios-skeleton ios-search-skeleton" aria-hidden="true" />
+        </div>
+        <IosQuickActionSkeleton :count="4" />
+        <IosGroupedListSkeleton :count="10" />
+      </template>
+      <div v-else :class="gridClass">
+        <div v-for="i in 12" :key="i" class="dash-skeleton dash-skeleton--grid-card" />
+      </div>
+    </template>
 
     <div
       v-if="!inventoryStore.loading && inventoryStore.folders.length > 0"
@@ -634,56 +671,25 @@
       v-model="showCreateFolderModal"
       size="xl"
       dense
-      eyebrow="Inventory"
       :title="editingFolder ? 'Edit category' : 'Create new category'"
-      :subtitle="
-        editingFolder
-          ? 'Update details and column template.'
-          : 'Name the category and define table columns.'
-      "
     >
-      <form
-        id="folder-drawer-form"
-        :class="drawerFillClass"
-        @submit.prevent="handleSaveFolder"
-      >
-        <div
-          :class="[
-            drawerFillScrollClass,
-            'divide-y divide-gray-100/90 dark:divide-gray-800/80 pb-2 sm:pb-3',
-          ]"
-        >
-        <section :class="[drawerSectionClass, drawerFillFixedClass]">
-          <p :class="sectionLabelClass">Basic info</p>
-          <div class="mt-2 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-            <div>
-              <label :class="drawerLabelClass">Category name *</label>
-              <input
-                v-model="folderForm.name"
-                type="text"
-                required
-                :class="drawerInputClass"
-                placeholder="e.g. Chairs"
-              />
-            </div>
-            <div>
-              <label :class="drawerLabelClass">Type *</label>
-              <select
-                v-model="folderForm.type"
-                required
-                :class="[drawerInputClass, 'cursor-pointer']"
-              >
-                <option value="">Select type</option>
-                <option value="general">General</option>
-                <option value="electronics">Electronics</option>
-                <option value="clothing">Clothing & Apparel</option>
-                <option value="automotive">Automotive</option>
-                <option value="food">Food & Beverage</option>
-                <option value="office">Office Supplies</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-          </div>
+      <IosForm id="folder-drawer-form" layout="fill" @submit="handleSaveFolder">
+        <IosFormSection title="Basic info" fixed>
+          <IosFormField label="Category name" required>
+            <IosFormInput v-model="folderForm.name" required placeholder="e.g. Chairs" />
+          </IosFormField>
+          <IosFormField label="Type" required>
+            <IosFormSelect v-model="folderForm.type" required extra-class="cursor-pointer">
+              <option value="">Select type</option>
+              <option value="general">General</option>
+              <option value="electronics">Electronics</option>
+              <option value="clothing">Clothing & Apparel</option>
+              <option value="automotive">Automotive</option>
+              <option value="food">Food & Beverage</option>
+              <option value="office">Office Supplies</option>
+              <option value="other">Other</option>
+            </IosFormSelect>
+          </IosFormField>
           <p v-if="editingFolder && isSubfolder(editingFolder)" :class="[drawerHintClass, 'mt-1']">
             Subcategory of
             {{
@@ -691,92 +697,56 @@
               'parent category'
             }}.
           </p>
-          <div class="mt-2.5">
-            <label :class="drawerLabelClass">Description</label>
-            <textarea
+          <IosFormField label="Description">
+            <IosFormTextarea
               v-model="folderForm.description"
-              rows="2"
-              :class="[drawerTextareaClass, 'resize-none']"
+              :rows="2"
+              extra-class="resize-none"
               placeholder="Optional: purpose of this category"
             />
-          </div>
-        </section>
+          </IosFormField>
+        </IosFormSection>
 
-        <section
+        <IosFormSection
           v-if="showUsesSubcategoriesOption && !isSubfolderDrawer"
-          :class="[drawerSectionClass, drawerFillFixedClass]"
+          fixed
         >
-          <Checkbox
+          <IosFormToggle
             v-model="folderForm.usesSubcategories"
-            size="sm"
+            label="Organize with subcategories"
+            hint="Products go inside subcategories (e.g. Corolla, Camry under Toyota) instead of directly in this category."
             :disabled="usesSubcategoriesLocked"
-            wrapper-class="items-start gap-2.5"
-            label-class="!ml-2.5 min-w-0 flex-1 block"
-          >
-            <div class="min-w-0 flex-1">
-              <span class="text-xs font-medium text-gray-800 dark:text-gray-200">
-                Organize with subcategories
-              </span>
-              <p :class="[drawerHintClass, 'mt-0.5']">
-                Products go inside subcategories (e.g. Corolla, Camry under Toyota) instead of
-                directly in this category. Leave off to add products here.
-              </p>
-            </div>
-          </Checkbox>
-        </section>
+          />
+        </IosFormSection>
 
-        <section
+        <IosFormSection
           v-if="!(editingFolder && isSubfolder(editingFolder))"
-          :class="[drawerSectionClass, drawerFillFixedClass]"
+          fixed
         >
-          <Checkbox
+          <IosFormToggle
             v-model="folderForm.hasSerialNumbers"
-            size="sm"
-            wrapper-class="items-start gap-2.5"
-            label-class="!ml-2.5 min-w-0 flex-1 block"
-          >
-            <div class="min-w-0 flex-1">
-              <span class="text-xs font-medium text-gray-800 dark:text-gray-200"
-                >Use serial numbers</span
-              >
-              <p :class="[drawerHintClass, 'mt-0.5']">
-                On: one row per serial. Off: quantity field tracks stock.
-              </p>
-            </div>
-          </Checkbox>
-        </section>
+            label="Use serial numbers"
+            hint="On: one row per serial. Off: quantity field tracks stock."
+          />
+        </IosFormSection>
 
-        <section
+        <IosFormSection
           v-if="canViewProfitAndCost && !isSubfolderDrawer"
-          :class="[drawerSectionClass, drawerFillFixedClass]"
+          fixed
         >
-          <Checkbox
+          <IosFormToggle
             v-model="folderForm.trackProfit"
-            size="sm"
-            wrapper-class="items-start gap-2.5"
-            label-class="!ml-2.5 min-w-0 flex-1 block"
-          >
-            <div class="min-w-0 flex-1">
-              <span class="text-xs font-medium text-gray-800 dark:text-gray-200"
-                >Track profit</span
-              >
-              <p :class="[drawerHintClass, 'mt-0.5']">
-                Adds a cost price column and shows gross profit per category and for the store.
-                Profit is sell price minus cost on available stock.
-              </p>
-            </div>
-          </Checkbox>
-        </section>
+            label="Track profit"
+            hint="Adds a cost price column and shows gross profit per category and for the store."
+          />
+        </IosFormSection>
 
-        <section
+        <IosFormSection
           v-if="canCreateInventoryFolders && !isSubfolderDrawer && !isStaff"
-          :class="[drawerSectionClass, drawerFillFixedClass]"
+          title="Department access"
+          fixed
         >
-          <p :class="sectionLabelClass">
-            Department access
-            <span class="font-normal text-gray-400 dark:text-gray-500">(optional)</span>
-          </p>
-          <p :class="[drawerHintClass, 'mt-1']">
+          <p :class="[drawerHintClass, 'mt-0']">
             Leave all unchecked for every department. Check to limit access.
           </p>
           <div v-if="departmentsStore.loading" :class="[drawerHintClass, 'mt-2']">
@@ -815,13 +785,12 @@
               </li>
             </ul>
           </div>
-        </section>
+        </IosFormSection>
 
-        <section v-if="!isSubfolderDrawer" :class="drawerSectionClass">
+        <IosFormSection v-if="!isSubfolderDrawer" title="Table template">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <p :class="sectionLabelClass">Table template</p>
-              <p :class="[drawerHintClass, 'mt-0.5']">Columns for products in this category.</p>
+              <p :class="[drawerHintClass, 'mt-0']">Columns for products in this category.</p>
             </div>
             <div v-if="selectedTemplate" class="flex flex-wrap items-center gap-1.5">
               <input
@@ -932,9 +901,8 @@
             <p class="text-xs font-medium text-gray-700 dark:text-gray-300">No fields yet</p>
             <p :class="[drawerHintClass, 'mt-0.5']">Add a field or import from Excel</p>
           </div>
-        </section>
-        </div>
-      </form>
+        </IosFormSection>
+      </IosForm>
 
       <template #footer>
         <IosDrawerActions
@@ -1282,56 +1250,44 @@
     </SidePanel>
 
     <!-- Folder actions menu (teleported; not clipped by grid/card overflow) -->
-    <Teleport to="body">
-      <div
-        v-if="openFolderMenuId && folderForOpenMenu && folderMenuFixedStyle"
-        data-inventory-folder-menu
-        class="frosted-glass fixed z-[1000] min-w-[120px] rounded-sm py-0.5"
-        :style="folderMenuFixedStyle"
-        @click.stop
-      >
-        <button
-          v-if="canDuplicateByPlan"
-          type="button"
-          @click="
-            () => {
-              handleDuplicateFolder(folderForOpenMenu)
-              openFolderMenuId = null
-            }
-          "
-          class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800/85 transition-colors"
-        >
-          <DocumentDuplicateIcon class="w-3.5 h-3.5 shrink-0 text-primary-500" />
-          Duplicate
-        </button>
-        <button
-          type="button"
-          @click="
-            () => {
-              handleEditFolder(folderForOpenMenu)
-              openFolderMenuId = null
-            }
-          "
-          class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800/85 transition-colors"
-        >
-          <PencilSquareIcon class="w-3.5 h-3.5 shrink-0" />
-          Edit
-        </button>
-        <button
-          type="button"
-          @click="
-            () => {
-              handleDeleteFolder(folderForOpenMenu)
-              openFolderMenuId = null
-            }
-          "
-          class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/35 transition-colors"
-        >
-          <TrashIcon class="w-3.5 h-3.5 shrink-0" />
-          Delete
-        </button>
-      </div>
-    </Teleport>
+    <IosContextMenu
+      :open="Boolean(openFolderMenuId && folderForOpenMenu && folderMenuFixedStyle)"
+      :style="folderMenuFixedStyle"
+      menu-id="inventory-folder"
+    >
+      <IosContextMenuItem
+        v-if="canDuplicateByPlan"
+        label="Duplicate"
+        :icon="DocumentDuplicateIcon"
+        @click="
+          () => {
+            handleDuplicateFolder(folderForOpenMenu!)
+            openFolderMenuId = null
+          }
+        "
+      />
+      <IosContextMenuItem
+        label="Edit"
+        :icon="PencilSquareIcon"
+        @click="
+          () => {
+            handleEditFolder(folderForOpenMenu!)
+            openFolderMenuId = null
+          }
+        "
+      />
+      <IosContextMenuItem
+        label="Delete"
+        :icon="TrashIcon"
+        danger
+        @click="
+          () => {
+            handleDeleteFolder(folderForOpenMenu!)
+            openFolderMenuId = null
+          }
+        "
+      />
+    </IosContextMenu>
   </div>
 </template>
 
@@ -1352,17 +1308,29 @@ import {
   TableCellsIcon,
   ArrowUpTrayIcon,
   ArrowsRightLeftIcon,
+  CheckIcon,
 } from '~/utils/app-icons'
 import Modal from '~/components/ui/Modal.vue'
 import SidePanel from '~/components/ui/SidePanel.vue'
 import Button from '~/components/ui/Button.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
+import {
+  IosForm,
+  IosFormSection,
+  IosFormField,
+  IosFormInput,
+  IosFormTextarea,
+  IosFormSelect,
+  IosFormToggle,
+} from '~/components/ios/forms'
 import IosQuickActionBar, {
   type IosQuickActionOption,
 } from '~/components/ios/IosQuickActionBar.vue'
+import IosGroupedListSkeleton from '~/components/ios/IosGroupedListSkeleton.vue'
+import IosQuickActionSkeleton from '~/components/ios/IosQuickActionSkeleton.vue'
+import IosContextMenu from '~/components/ios/IosContextMenu.vue'
+import IosContextMenuItem from '~/components/ios/IosContextMenuItem.vue'
 import IosDrawer from '~/components/ios/IosDrawer.vue'
-import IosGroupedSection from '~/components/ios/IosGroupedSection.vue'
-import IosNativeListRow from '~/components/ios/IosNativeListRow.vue'
 import IosInventoryFolderRow from '~/components/ios/IosInventoryFolderRow.vue'
 import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
 import IosSearchBar from '~/components/ios/IosSearchBar.vue'
@@ -1503,6 +1471,12 @@ function selectInventorySort(value: string) {
   sortBy.value = value
   showInventoryMoreSheet.value = false
 }
+
+const inventorySortOptions = [
+  { value: 'name', label: 'Name' },
+  { value: 'items', label: 'Products' },
+  { value: 'date', label: 'Date' },
+] as const
 
 function handleExportReorderFromSheet() {
   showInventoryMoreSheet.value = false

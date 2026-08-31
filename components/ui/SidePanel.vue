@@ -3,8 +3,8 @@
     v-if="nativeIosSheet"
     :model-value="modelValue"
     :title="title"
-    :subtitle="subtitle"
-    :eyebrow="resolvedEyebrow"
+    :subtitle="iosCrudSheet ? undefined : subtitle"
+    :eyebrow="iosCrudSheet ? undefined : resolvedEyebrow"
     :body-padding="resolvedContentPadding"
     :show-close="showClose"
     :close-on-backdrop="closeOnBackdrop"
@@ -247,6 +247,9 @@ const { isNativeApp } = useCapacitorNativeApp()
 const { isCapacitorIos } = useIsCapacitorIos()
 const nativeInApp = computed(() => isNativeApp.value)
 const nativeIosSheet = computed(() => isCapacitorIos.value)
+const iosCrudSheet = computed(
+  () => nativeIosSheet.value && props.nativeSheetVariant === 'crud'
+)
 
 const resolvedEyebrow = computed(() => props.eyebrow || (props.title ? 'Details' : undefined))
 
@@ -256,6 +259,7 @@ const teleportTarget = computed(() =>
 
 const resolvedContentPadding = computed(() => {
   if (props.contentPadding) return props.contentPadding
+  if (iosCrudSheet.value) return 'p-0'
   return props.dense ? 'p-0' : 'px-4 py-4 sm:px-5 sm:py-5'
 })
 

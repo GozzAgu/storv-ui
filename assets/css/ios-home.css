@@ -503,17 +503,9 @@ html.capacitor-ios.capacitor-native .ios-home-menu__row:active {
   background: var(--ios-fill-tertiary);
 }
 
-/* ── Skeleton ── */
+/* ── Skeleton (extends .ios-skeleton in ios-skeleton.css) ── */
 html.capacitor-ios.capacitor-native .ios-home-skeleton {
   border-radius: var(--ios-home-metric-radius);
-  background: linear-gradient(
-    90deg,
-    rgb(120 120 128 / 0.08) 0%,
-    rgb(120 120 128 / 0.14) 50%,
-    rgb(120 120 128 / 0.08) 100%
-  );
-  background-size: 200% 100%;
-  animation: ios-home-shimmer 1.2s ease-in-out infinite;
 }
 
 html.capacitor-ios.capacitor-native .ios-home-skeleton--logo {
@@ -542,13 +534,10 @@ html.capacitor-ios.capacitor-native .ios-home-skeleton--feed {
   border-radius: var(--ios-home-radius);
 }
 
-@keyframes ios-home-shimmer {
-  0% {
-    background-position: 100% 0;
-  }
-  100% {
-    background-position: -100% 0;
-  }
+html.capacitor-ios.capacitor-native .ios-home-skeleton--bar {
+  width: 100%;
+  height: 2.25rem;
+  border-radius: var(--ios-home-radius);
 }
 
 /* ── Tab bar: flat docked style lives in ios-tabbar-flat.css ── */

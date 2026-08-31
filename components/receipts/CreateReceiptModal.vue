@@ -22,8 +22,14 @@
         <SellScreenNoteBanner v-if="currentStep >= 2" />
 
         <!-- Step 1: Parent category -->
-        <div v-if="currentStep === 0" :class="[drawerFillStepClass, 'gap-3']">
-          <p :class="sectionLabelClass">Parent category</p>
+        <div
+          v-if="currentStep === 0"
+          :class="[drawerFillStepClass, isCapacitorIos ? 'ios-create-sale-step' : 'gap-3']"
+        >
+          <p v-if="isCapacitorIos" class="ios-create-sale-step__hint">
+            {{ sheetStepSubtitles[0] }}
+          </p>
+          <p v-else :class="sectionLabelClass">Parent category</p>
           <DashboardDrawerSearch v-model="folderSearchQuery" placeholder="Search categories…" />
 
           <div v-if="loadingFolders" class="flex flex-1 flex-col items-center justify-center py-12">
@@ -42,6 +48,52 @@
                 folderSearchQuery ? 'Try another search' : 'Create a category in Inventory first'
               }}
             </p>
+          </div>
+          <div v-else-if="isCapacitorIos" class="ios-create-sale-picker">
+            <div class="ios-create-sale-picker__scroll">
+              <button
+                v-for="row in parentCategoryRows"
+                :key="`${row.depth}-${row.folder.id}`"
+                type="button"
+                :class="[
+                  'ios-create-sale-picker__row',
+                  isParentRowSelected(row.folder) ? 'ios-create-sale-picker__row--selected' : '',
+                  row.depth === 1 ? 'ios-create-sale-picker__row--nested' : '',
+                ]"
+                @click="onParentCategoryRowClick(row)"
+              >
+                <span class="ios-create-sale-picker__icon">
+                  <FolderIcon stroke-width="1.75" />
+                </span>
+                <span class="ios-create-sale-picker__body">
+                  <p class="ios-create-sale-picker__title">
+                    {{ row.folder.name }}
+                    <span v-if="row.depth === 1 && row.parentName" class="font-normal text-gray-500">
+                      · {{ row.parentName }}
+                    </span>
+                  </p>
+                  <p class="ios-create-sale-picker__meta">
+                    {{ folderPickerMeta(row.folder) }}
+                    <span
+                      v-if="!isCategoryHub(row.folder) && selectedCountForFolder(row.folder.id) > 0"
+                      class="ios-create-sale-picker__meta-accent"
+                    >
+                      · {{ selectedCountForFolder(row.folder.id) }} in this sale
+                    </span>
+                  </p>
+                </span>
+                <ChevronRightIcon
+                  v-if="isCategoryHub(row.folder) && !isParentRowSelected(row.folder)"
+                  class="ios-create-sale-picker__chevron"
+                  stroke-width="2"
+                />
+                <CheckCircleIcon
+                  v-if="isParentRowSelected(row.folder)"
+                  class="ios-create-sale-picker__check"
+                  stroke-width="2"
+                />
+              </button>
+            </div>
           </div>
           <div v-else :class="pickListClass">
             <div :class="pickListScrollClass">
@@ -100,8 +152,17 @@
         </div>
 
         <!-- Step 2: Subcategory -->
-        <div v-if="currentStep === 1" :class="[drawerFillStepClass, 'gap-3']">
-          <div class="flex shrink-0 flex-wrap items-center gap-2">
+        <div
+          v-if="currentStep === 1"
+          :class="[drawerFillStepClass, isCapacitorIos ? 'ios-create-sale-step' : 'gap-3']"
+        >
+          <template v-if="isCapacitorIos">
+            <p class="ios-create-sale-step__hint">{{ sheetStepSubtitles[1] }}</p>
+            <button type="button" class="ios-create-sale-sheet__change-link" @click="goBackToParentCategories">
+              Change parent · {{ selectedParentFolder?.name }}
+            </button>
+          </template>
+          <div v-else class="flex shrink-0 flex-wrap items-center gap-2">
             <p :class="sectionLabelClass">
               Subcategory · {{ selectedParentFolder?.name }}
             </p>
@@ -125,6 +186,41 @@
             <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
               Add subcategories under this parent in Inventory
             </p>
+          </div>
+          <div v-else-if="isCapacitorIos" class="ios-create-sale-picker">
+            <div class="ios-create-sale-picker__scroll">
+              <button
+                v-for="folder in subcategoryFolders"
+                :key="folder.id"
+                type="button"
+                :class="[
+                  'ios-create-sale-picker__row',
+                  isSubcategoryRowSelected(folder) ? 'ios-create-sale-picker__row--selected' : '',
+                ]"
+                @click="onSubcategoryPick(folder)"
+              >
+                <span class="ios-create-sale-picker__icon">
+                  <FolderIcon stroke-width="1.75" />
+                </span>
+                <span class="ios-create-sale-picker__body">
+                  <p class="ios-create-sale-picker__title">{{ folder.name }}</p>
+                  <p class="ios-create-sale-picker__meta">
+                    {{ folderPickerMeta(folder) }}
+                    <span
+                      v-if="selectedCountForFolder(folder.id) > 0"
+                      class="ios-create-sale-picker__meta-accent"
+                    >
+                      · {{ selectedCountForFolder(folder.id) }} in this sale
+                    </span>
+                  </p>
+                </span>
+                <CheckCircleIcon
+                  v-if="isSubcategoryRowSelected(folder)"
+                  class="ios-create-sale-picker__check"
+                  stroke-width="2"
+                />
+              </button>
+            </div>
           </div>
           <div v-else :class="pickListClass">
             <div :class="pickListScrollClass">
@@ -837,16 +933,17 @@
       </div>
     </template>
 
-    <template v-if="currentStep > 0" #leading>
+    <template v-if="currentStep > 0 && !isCapacitorIos" #leading>
       <Button variant="outline" size="sm" @click="previousStep">Back</Button>
     </template>
 
     <template #footer>
       <IosDrawerActions
+        :cancel-label="isCapacitorIos && currentStep > 0 ? 'Back' : 'Cancel'"
         :primary-label="receiptFooterPrimaryLabel"
         :primary-loading="isCreating && currentStep >= 3"
         :primary-disabled="receiptFooterPrimaryDisabled"
-        @cancel="handleCancel"
+        @cancel="handleReceiptFooterCancel"
         @primary="handleReceiptFooterPrimary"
       />
     </template>
@@ -1024,10 +1121,8 @@ const sheetTitle = computed(() => {
 })
 
 const sheetSubtitle = computed(() => {
-  if (!isCapacitorIos.value) {
-    return 'Pick category, subcategory, items, then sale details'
-  }
-  return sheetStepSubtitles[currentStep.value] ?? ''
+  if (isCapacitorIos.value) return undefined
+  return 'Pick category, subcategory, items, then sale details'
 })
 
 const sheetContentPadding = computed(() => (isCapacitorIos.value ? 'p-0' : ''))
@@ -1141,6 +1236,14 @@ const receiptFooterPrimaryDisabled = computed(() => {
 function handleReceiptFooterPrimary() {
   if (currentStep.value < 3) nextStep()
   else void handleCreateReceipt()
+}
+
+function handleReceiptFooterCancel() {
+  if (isCapacitorIos.value && currentStep.value > 0) {
+    previousStep()
+    return
+  }
+  handleCancel()
 }
 
 const hasSerialNumberInTemplate = computed(() => {

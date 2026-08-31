@@ -299,8 +299,15 @@ html.capacitor-ios.capacitor-native input:focus,
 html.capacitor-ios.capacitor-native select:focus,
 html.capacitor-ios.capacitor-native textarea:focus {
   outline: none;
-  border-color: var(--ios-accent) !important;
-  box-shadow: 0 0 0 3px var(--ios-accent-muted);
+  border-color: rgb(120 120 128 / 0.4) !important;
+  box-shadow: 0 0 0 3px rgb(120 120 128 / 0.12);
+}
+
+html.capacitor-ios.capacitor-native.dark input:focus,
+html.capacitor-ios.capacitor-native.dark select:focus,
+html.capacitor-ios.capacitor-native.dark textarea:focus {
+  border-color: rgb(255 255 255 / 0.28) !important;
+  box-shadow: 0 0 0 3px rgb(255 255 255 / 0.08);
 }
 
 /* ── Tables → grouped card lists ── */

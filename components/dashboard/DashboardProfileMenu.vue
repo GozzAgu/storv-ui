@@ -34,12 +34,104 @@
         <div
           v-if="open"
           ref="menuPanelRef"
-          :class="panelClass"
+          :class="[panelClass, isCapacitorIos ? 'ios-profile-menu' : '']"
           :style="panelStyle"
           role="menu"
           aria-label="Account menu"
           @click.stop
         >
+          <template v-if="isCapacitorIos">
+            <div class="ios-profile-menu__hero">
+              <div :class="[avatarClass, 'ios-profile-menu__avatar']">
+                <span class="relative">{{ userInitials }}</span>
+              </div>
+              <div class="min-w-0 flex-1">
+                <p class="ios-profile-menu__name">{{ userName }}</p>
+                <p v-if="userEmail" class="ios-profile-menu__email">{{ userEmail }}</p>
+                <div class="ios-profile-menu__badges">
+                  <span v-if="storeLabel" class="ios-profile-menu__badge">{{ storeLabel }}</span>
+                  <span v-if="planLabel" class="ios-profile-menu__badge">{{ planLabel }}</span>
+                  <span class="ios-profile-menu__badge">{{ roleLabel }}</span>
+                  <ExperienceModeBadge variant="profile" />
+                </div>
+              </div>
+            </div>
+
+            <div class="ios-drawer-menu">
+              <section class="ios-drawer-menu__section">
+                <p class="ios-drawer-menu__section-label">Account</p>
+                <div class="ios-drawer-menu__group">
+                  <ul class="ios-drawer-menu__list">
+                    <li v-for="item in accountLinks" :key="item.to">
+                      <NuxtLink
+                        :to="item.to"
+                        role="menuitem"
+                        class="ios-drawer-menu__row"
+                        :class="{ 'ios-drawer-menu__row--active': isActive(item.match) }"
+                        @click="open = false"
+                      >
+                        <span class="ios-drawer-menu__icon">
+                          <component :is="item.icon" stroke-width="1.75" />
+                        </span>
+                        <span class="ios-drawer-menu__label">{{ item.label }}</span>
+                        <span v-if="item.badge && item.badge > 0" class="ios-drawer-menu__value">
+                          {{ item.badge > 9 ? '9+' : item.badge }}
+                        </span>
+                        <CheckIcon
+                          v-else-if="isActive(item.match)"
+                          class="ios-drawer-menu__check"
+                          aria-hidden="true"
+                        />
+                      </NuxtLink>
+                    </li>
+                  </ul>
+                </div>
+              </section>
+
+              <section class="ios-drawer-menu__section">
+                <p class="ios-drawer-menu__section-label">Support</p>
+                <div class="ios-drawer-menu__group">
+                  <ul class="ios-drawer-menu__list">
+                    <li v-for="item in supportLinks" :key="item.to">
+                      <NuxtLink
+                        :to="item.to"
+                        role="menuitem"
+                        class="ios-drawer-menu__row"
+                        :class="{ 'ios-drawer-menu__row--active': isActive(item.match) }"
+                        @click="open = false"
+                      >
+                        <span class="ios-drawer-menu__icon">
+                          <component :is="item.icon" stroke-width="1.75" />
+                        </span>
+                        <span class="ios-drawer-menu__label">{{ item.label }}</span>
+                        <CheckIcon
+                          v-if="isActive(item.match)"
+                          class="ios-drawer-menu__check"
+                          aria-hidden="true"
+                        />
+                      </NuxtLink>
+                    </li>
+                  </ul>
+                </div>
+              </section>
+
+              <div class="ios-drawer-menu__footer-card">
+                <button
+                  type="button"
+                  role="menuitem"
+                  class="ios-profile-menu__sign-out"
+                  @click="onSignOut"
+                >
+                  <span class="ios-profile-menu__sign-out-icon">
+                    <ArrowRightOnRectangleIcon stroke-width="1.75" />
+                  </span>
+                  <span>Sign out</span>
+                </button>
+              </div>
+            </div>
+          </template>
+
+          <template v-else>
           <div :class="panelHeaderClass">
             <div class="flex min-w-0 items-center gap-2.5">
               <div :class="[avatarClass, 'h-9 w-9 text-[10px]']">
@@ -121,6 +213,7 @@
               <span class="min-w-0 flex-1">Sign out</span>
             </button>
           </div>
+          </template>
         </div>
       </Transition>
     </Teleport>
@@ -133,6 +226,7 @@ import { useRoute } from 'vue-router'
 import type { Component } from 'vue'
 import {
   ChevronDownIcon,
+  CheckIcon,
   UserCircleIcon,
   Cog6ToothIcon,
   BellIcon,
@@ -190,6 +284,7 @@ const userStore = useUserStore()
 const staffStore = useStaffStore()
 const notificationsStore = useNotificationsStore()
 const { canUse, plan } = useSubscriptionFeatures()
+const { isCapacitorIos } = useIsCapacitorIos()
 
 const open = ref(false)
 const menuRootRef = ref<HTMLElement | null>(null)
@@ -267,8 +362,26 @@ function positionPanel() {
   if (!import.meta.client || !open.value || !menuRootRef.value) return
   const trigger = menuRootRef.value
   const rect = trigger.getBoundingClientRect()
-  const gap = 6
+  const gap = 8
   const margin = 12
+
+  if (isCapacitorIos.value) {
+    const insetRaw = getComputedStyle(document.documentElement)
+      .getPropertyValue('--ios-home-inset')
+      .trim()
+    const inset = insetRaw ? parseFloat(insetRaw) : 20
+    const widthPx = Math.min(288, window.innerWidth - inset * 2)
+    panelStyle.value = {
+      position: 'fixed',
+      top: `${Math.round(rect.bottom + gap)}px`,
+      right: `${Math.round(inset - 6)}px`,
+      left: 'auto',
+      width: `${Math.round(widthPx)}px`,
+      zIndex: '120',
+    }
+    return
+  }
+
   const panelWidth = 14 * 16
   const widthPx = Math.min(panelWidth, window.innerWidth - margin * 2)
   let right = window.innerWidth - rect.right

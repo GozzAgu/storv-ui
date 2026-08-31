@@ -21,16 +21,16 @@
         <SparklesIcon class="ios-global-top-bar__icon" aria-hidden="true" />
       </button>
 
+      <IosTabBarThemeButton class="ios-global-top-bar__theme" variant="topnav" />
+
       <DashboardProfileMenu
-        class="ios-global-top-bar__profile-menu"
+        class="ios-global-top-bar__profile-menu ios-global-top-bar__profile-menu--extreme"
         :user-name="userName"
         :user-email="userEmail"
         :user-initials="userInitials"
         compact
         @sign-out="$emit('sign-out')"
       />
-
-      <IosTabBarThemeButton class="ios-global-top-bar__theme" variant="topnav" />
     </div>
   </header>
 </template>

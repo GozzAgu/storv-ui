@@ -1,0 +1,19 @@
+/**
+ * iOS input zoom guard — focused fields must stay ≥16px or Safari zooms the viewport.
+ * Imported last in ios-native.css so it wins drawer/search typography remaps.
+ */
+html.capacitor-ios.capacitor-native
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='hidden']):not(
+    [type='button']
+  ):not([type='submit']):not([type='reset']),
+html.capacitor-ios.capacitor-native select,
+html.capacitor-ios.capacitor-native textarea,
+html.capacitor-ios.capacitor-native .app-field,
+html.capacitor-ios.capacitor-native .auth-field-input,
+html.capacitor-ios.capacitor-native .ios-form__input,
+html.capacitor-ios.capacitor-native .ios-form__select,
+html.capacitor-ios.capacitor-native .ios-form__textarea,
+html.capacitor-ios.capacitor-native .ios-search-bar__input,
+html.capacitor-ios.capacitor-native [contenteditable='true'] {
+  font-size: max(16px, var(--ios-type-input-size, var(--cap-ios-input, 1rem))) !important;
+}

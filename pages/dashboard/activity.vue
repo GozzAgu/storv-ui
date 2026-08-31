@@ -15,16 +15,7 @@
           />
         </div>
 
-        <div v-if="loading" class="ios-transaction-list-skeleton">
-          <div v-for="i in 8" :key="i" class="ios-transaction-list-skeleton__row">
-            <div class="ios-transaction-list-skeleton__icon" />
-            <div class="ios-transaction-list-skeleton__body">
-              <div class="ios-transaction-list-skeleton__line ios-transaction-list-skeleton__line--title" />
-              <div class="ios-transaction-list-skeleton__line ios-transaction-list-skeleton__line--subtitle" />
-            </div>
-            <div class="ios-transaction-list-skeleton__amount" />
-          </div>
-        </div>
+        <IosTransactionListSkeleton v-if="loading" :count="8" />
 
         <DashboardTableEmptyState
           v-else-if="fetchError"
@@ -358,6 +349,7 @@ import { getCurrentStoreId } from '~/composables/useCurrentStore'
 import FeatureGateCard from '~/components/subscription/FeatureGateCard.vue'
 import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
 import IosQuickActionBar, { type IosQuickActionOption } from '~/components/ios/IosQuickActionBar.vue'
+import IosTransactionListSkeleton from '~/components/ios/IosTransactionListSkeleton.vue'
 import IosSearchBar from '~/components/ios/IosSearchBar.vue'
 import IosReceiptTransactionRow, {
   type ReceiptTransactionVariant,

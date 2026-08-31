@@ -3,56 +3,36 @@
     :modelValue="props.modelValue"
     @update:modelValue="(value: boolean) => emit('update:modelValue', value)"
     :title="isEdit ? 'Edit Department' : 'Create New Department'"
-    :subtitle="
-      isEdit
-        ? 'Update department details.'
-        : 'Add a new department and set type, name, and description.'
-    "
     size="lg"
   >
-    <div class="space-y-4">
-      <div class="space-y-3">
-        <div>
-          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-            Department Type <span class="text-red-500">*</span>
-          </label>
-          <select
-            v-model="formData.departmentType"
-            required
-            class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-primary-500 outline-none"
-          >
+    <IosForm @submit="handleSubmit">
+      <IosFormSection>
+        <IosFormField label="Department Type" required>
+          <IosFormSelect v-model="formData.departmentType" required>
             <option value="">Select department type</option>
             <option v-for="deptType in coreDepartments" :key="deptType" :value="deptType">
               {{ deptType }}
             </option>
-          </select>
-        </div>
+          </IosFormSelect>
+        </IosFormField>
 
-        <div>
-          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-            Department Name <span class="text-red-500">*</span>
-          </label>
-          <input
+        <IosFormField label="Department Name" required>
+          <IosFormInput
             v-model="formData.name"
-            type="text"
             required
-            class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-primary-500 outline-none"
             placeholder="Enter department name"
           />
-        </div>
+        </IosFormField>
 
-        <div>
-          <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300">
-            Description
-          </label>
-          <textarea
+        <IosFormField label="Description">
+          <IosFormTextarea
             v-model="formData.description"
-            rows="3"
-            class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-primary-500 outline-none resize-none"
+            :rows="3"
+            extra-class="resize-none"
             placeholder="Brief description of the department..."
-          ></textarea>
-        </div>
-      </div>
+          />
+        </IosFormField>
+      </IosFormSection>
 
       <div
         v-if="errorMessage"
@@ -60,7 +40,7 @@
       >
         <p class="text-xs text-red-600 dark:text-red-400">{{ errorMessage }}</p>
       </div>
-    </div>
+    </IosForm>
 
     <template #footer>
       <IosDrawerActions
@@ -76,11 +56,16 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
-import {
-  SparklesIcon,
-} from '~/utils/app-icons'
 import SidePanel from '~/components/ui/SidePanel.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
+import {
+  IosForm,
+  IosFormSection,
+  IosFormField,
+  IosFormInput,
+  IosFormTextarea,
+  IosFormSelect,
+} from '~/components/ios/forms'
 import { useDepartmentsStore } from '~/stores/departments'
 import { useStoresStore } from '~/stores/stores'
 import { CORE_DEPARTMENTS } from '~/composables/useDepartments'
@@ -121,7 +106,6 @@ const errorMessage = ref('')
 
 const isEdit = computed(() => !!props.department)
 
-// Reset form when modal opens/closes
 watch(
   () => props.modelValue,
   (isOpen) => {
@@ -173,7 +157,6 @@ const handleSubmit = async () => {
       emit('success', 'update')
       emit('update:modelValue', false)
     } else {
-      // If storeId prop is provided, temporarily switch store context for creation
       const originalStoreId = storesStore.currentStoreId
       let shouldRestoreStore = false
 
@@ -192,12 +175,9 @@ const handleSubmit = async () => {
           description: formData.value.description || undefined,
           departmentType: formData.value.departmentType,
         })
-        // Department is automatically added to the store's local state
-        // No need to refetch since it's already in local state
         emit('success', 'create')
         emit('update:modelValue', false)
       } finally {
-        // Restore original store context if we switched it
         if (shouldRestoreStore && originalStoreId) {
           try {
             await storesStore.setCurrentStore(originalStoreId)

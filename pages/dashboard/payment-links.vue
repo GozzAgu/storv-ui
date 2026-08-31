@@ -93,16 +93,7 @@
           </div>
         </section>
 
-        <div v-if="loading && links.length === 0" class="ios-transaction-list-skeleton">
-          <div v-for="i in 6" :key="i" class="ios-transaction-list-skeleton__row">
-            <div class="ios-transaction-list-skeleton__icon" />
-            <div class="ios-transaction-list-skeleton__body">
-              <div class="ios-transaction-list-skeleton__line ios-transaction-list-skeleton__line--title" />
-              <div class="ios-transaction-list-skeleton__line ios-transaction-list-skeleton__line--subtitle" />
-            </div>
-            <div class="ios-transaction-list-skeleton__amount" />
-          </div>
-        </div>
+        <IosTransactionListSkeleton v-if="loading && links.length === 0" :count="6" />
 
         <DashboardTableEmptyState
           v-else-if="links.length === 0"
@@ -513,6 +504,7 @@ import {
 import Button from '~/components/ui/Button.vue'
 import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
 import IosQuickActionBar, { type IosQuickActionOption } from '~/components/ios/IosQuickActionBar.vue'
+import IosTransactionListSkeleton from '~/components/ios/IosTransactionListSkeleton.vue'
 import IosReceiptTransactionRow, {
   type ReceiptTransactionAmountTone,
   type ReceiptTransactionVariant,

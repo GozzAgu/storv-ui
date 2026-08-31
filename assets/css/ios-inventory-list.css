@@ -7,6 +7,7 @@ html.capacitor-ios.capacitor-native .ios-inventory-categories-page {
   flex-direction: column;
   gap: 0.75rem;
   min-height: 100%;
+  min-width: 0;
   padding:
     var(--ios-page-shell-pad-top, 0.375rem)
     var(--ios-home-inset, 20px)

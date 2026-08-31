@@ -77,12 +77,21 @@ html.capacitor-ios.capacitor-native .ios-inventory-items-page {
   flex-direction: column;
   gap: 0.75rem;
   min-height: 100%;
+  min-width: 0;
   padding:
     var(--ios-page-shell-pad-top, 0.375rem)
     var(--ios-home-inset, 20px)
     calc(var(--dashboard-bottom-nav-stack, 5rem) + 0.75rem);
   background: var(--ios-home-bg, #f3f3f5);
   font-weight: 400;
+}
+
+html.capacitor-ios.capacitor-native .ios-sales-shell > .ios-quick-actions,
+html.capacitor-ios.capacitor-native .ios-sales-chrome > .ios-quick-actions,
+html.capacitor-ios.capacitor-native .ios-inventory-categories-page > .ios-quick-actions,
+html.capacitor-ios.capacitor-native .ios-inventory-items-page > .ios-quick-actions {
+  min-width: 0;
+  align-self: stretch;
 }
 
 html.capacitor-ios.capacitor-native .ios-sales-fab-host {
@@ -114,8 +123,6 @@ html.capacitor-ios.capacitor-native .ios-transaction-list-skeleton__icon,
 html.capacitor-ios.capacitor-native .ios-transaction-list-skeleton__line,
 html.capacitor-ios.capacitor-native .ios-transaction-list-skeleton__amount {
   border-radius: 9999px;
-  background: rgb(120 120 128 / 0.12);
-  animation: ios-transaction-skeleton-pulse 1.2s ease-in-out infinite;
 }
 
 html.capacitor-ios.capacitor-native .ios-transaction-list-skeleton__icon {
@@ -148,15 +155,5 @@ html.capacitor-ios.capacitor-native .ios-transaction-list-skeleton__amount {
   width: 3.5rem;
   height: 0.875rem;
   flex-shrink: 0;
-}
-
-@keyframes ios-transaction-skeleton-pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 0.45;
-  }
+  border-radius: 0.375rem;
 }
