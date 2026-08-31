@@ -1,5 +1,5 @@
 /**
- * iOS Analytics — home-dashboard visual language with full chart/report depth.
+ * iOS Analytics — layout + chart shells (typography in ios-dashboard-type.css).
  */
 
 html.capacitor-ios.capacitor-native .ios-analytics-page {
@@ -20,9 +20,7 @@ html.capacitor-ios.capacitor-native .ios-analytics-dashboard {
 
 html.capacitor-ios.capacitor-native .ios-analytics-section__subtitle {
   margin: 0.25rem 0 0;
-  font-size: 0.8125rem;
   font-weight: 400;
-  line-height: 1.4;
   color: var(--ios-label-secondary);
 }
 
@@ -35,8 +33,6 @@ html.capacitor-ios.capacitor-native .ios-analytics-section__body {
 
 html.capacitor-ios.capacitor-native .ios-analytics-kpi__summary {
   margin: 0;
-  font-size: 0.8125rem;
-  line-height: 1.45;
   color: var(--ios-label-secondary);
 }
 
@@ -57,17 +53,16 @@ html.capacitor-ios.capacitor-native.dark .ios-analytics-card {
 }
 
 html.capacitor-ios.capacitor-native .ios-analytics-card--padded {
-  padding: 1rem;
+  padding: 0.875rem;
 }
 
 html.capacitor-ios.capacitor-native .ios-analytics-card--flush .ios-analytics-card__head {
-  padding: 0.875rem 1rem;
+  padding: 0.75rem 0.875rem;
   border-bottom: 1px solid var(--ios-separator);
 }
 
 html.capacitor-ios.capacitor-native .ios-analytics-card__title {
   margin: 0;
-  font-size: 0.9375rem;
   font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--ios-label);
@@ -75,8 +70,6 @@ html.capacitor-ios.capacitor-native .ios-analytics-card__title {
 
 html.capacitor-ios.capacitor-native .ios-analytics-card__desc {
   margin: 0.25rem 0 0;
-  font-size: 0.8125rem;
-  line-height: 1.4;
   color: var(--ios-label-secondary);
 }
 
@@ -128,13 +121,13 @@ html.capacitor-ios.capacitor-native .ios-analytics-dashboard .dash-chart-wrap--t
 }
 
 html.capacitor-ios.capacitor-native .ios-analytics-dashboard .dash-card__header--compact {
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.625rem;
   padding-inline: 0;
 }
 
 html.capacitor-ios.capacitor-native .ios-analytics-dashboard .dash-card__header--compact .dash-card__eyebrow,
 html.capacitor-ios.capacitor-native .ios-analytics-dashboard .dash-card__header--compact p:first-child {
-  font-size: 0.6875rem;
+  font-size: var(--ios-dash-micro-size);
   font-weight: 500;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -142,13 +135,12 @@ html.capacitor-ios.capacitor-native .ios-analytics-dashboard .dash-card__header-
 }
 
 html.capacitor-ios.capacitor-native .ios-analytics-dashboard .dash-card__header--compact h2 {
-  font-size: 0.9375rem;
   font-weight: 600;
   color: var(--ios-label);
 }
 
-html.capacitor-ios.capacitor-native .ios-analytics-dashboard .dash-bar-row__head {
-  font-size: 0.8125rem;
+html.capacitor-ios.capacitor-native .ios-analytics-dashboard .dash-bar-row__label {
+  line-height: var(--ios-dash-leading);
 }
 
 html.capacitor-ios.capacitor-native .ios-analytics-dashboard .dash-bar-row__track,
@@ -160,11 +152,12 @@ html.capacitor-ios.capacitor-native .ios-analytics-dashboard .dash-progress {
 html.capacitor-ios.capacitor-native .ios-analytics-dashboard .dash-metric-cells {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.625rem;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
 }
 
 html.capacitor-ios.capacitor-native .ios-analytics-dashboard .dash-metric-cell {
-  padding: 0.75rem;
+  padding: 0.5rem 0.625rem;
   border-radius: 14px;
   background: rgb(120 120 128 / 0.08);
 }
@@ -173,8 +166,27 @@ html.capacitor-ios.capacitor-native.dark .ios-analytics-dashboard .dash-metric-c
   background: rgb(255 255 255 / 0.06);
 }
 
-html.capacitor-ios.capacitor-native .ios-analytics-dashboard .dashboard-table {
-  font-size: 0.8125rem;
+html.capacitor-ios.capacitor-native .ios-analytics-dashboard .dash-insight-highlight {
+  margin-top: 0.5rem;
+  font-weight: 600;
+  line-height: var(--ios-dash-leading-tight);
+  overflow-wrap: anywhere;
+}
+
+html.capacitor-ios.capacitor-native .ios-analytics-dashboard .dash-insight-icon {
+  height: 1.75rem;
+  width: 1.75rem;
+  border-radius: 0.5rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-analytics-dashboard .dash-insight-icon svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-analytics-dashboard .dash-metric-cell dd {
+  font-weight: 600;
+  overflow-wrap: anywhere;
 }
 
 html.capacitor-ios.capacitor-native .ios-analytics-dashboard .dashboard-table thead {
@@ -184,7 +196,7 @@ html.capacitor-ios.capacitor-native .ios-analytics-dashboard .dashboard-table th
 html.capacitor-ios.capacitor-native .ios-analytics-dashboard .dashboard-table tbody tr {
   display: block;
   margin-bottom: 0.5rem;
-  padding: 0.75rem;
+  padding: 0.625rem 0.75rem;
   border-radius: 14px;
   background: rgb(120 120 128 / 0.06);
 }
@@ -204,7 +216,20 @@ html.capacitor-ios.capacitor-native .ios-analytics-dashboard .dashboard-table tb
 html.capacitor-ios.capacitor-native .ios-analytics-dashboard .dashboard-table tbody td::before {
   content: attr(data-label);
   color: var(--ios-label-secondary);
-  font-size: 0.75rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-analytics-dashboard .ios-home-dashboard__section-title {
+  font-weight: 500;
+}
+
+html.capacitor-ios.capacitor-native .ios-analytics-dashboard .ios-analytics-card--padded,
+html.capacitor-ios.capacitor-native .ios-analytics-dashboard .dash-card--padded {
+  padding: 0.875rem !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-analytics-dashboard .dash-inventory-health,
+html.capacitor-ios.capacitor-native .ios-analytics-dashboard .dash-summary-text {
+  line-height: var(--ios-dash-leading);
 }
 
 html.capacitor-ios.capacitor-native .ios-analytics-skeleton {

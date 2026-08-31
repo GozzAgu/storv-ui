@@ -53,69 +53,73 @@
       variant="menu"
       footer-variant="menu"
       mount="body"
-      :show-close="false"
+      :show-close="true"
       body-padding="p-0"
       aria-label="More navigation"
       backdrop-label="Close menu"
     >
-      <div :class="sheetListClass">
+      <div class="ios-drawer-menu">
         <section
           v-for="group in moreGroups"
           :key="group.id"
-          class="native-more-sheet__section"
+          class="ios-drawer-menu__section"
         >
-          <p :class="sheetSectionLabelClass">{{ group.label }}</p>
-          <ul class="native-bottom-nav__sheet-list px-2 pb-1">
-            <li v-for="item in group.items" :key="item.href">
-              <NuxtLink
-                :to="item.href"
-                :prefetch="false"
-                :class="[
-                  sheetRowClass,
-                  isActive(item.href) ? sheetRowActiveClass : sheetRowInactiveClass,
-                ]"
-                @click="moreOpen = false"
-              >
-                <span
-                  :class="[sheetIconWrapClass, isActive(item.href) ? sheetIconWrapActiveClass : '']"
+          <p class="ios-drawer-menu__section-label">{{ group.label }}</p>
+          <div class="ios-drawer-menu__group">
+            <ul class="ios-drawer-menu__list">
+              <li v-for="item in group.items" :key="item.href">
+                <NuxtLink
+                  :to="item.href"
+                  :prefetch="false"
+                  :class="[
+                    'ios-drawer-menu__row',
+                    sheetRowClass,
+                    isActive(item.href) ? 'ios-drawer-menu__row--active' : '',
+                    isActive(item.href) ? sheetRowActiveClass : sheetRowInactiveClass,
+                  ]"
+                  @click="moreOpen = false"
                 >
-                  <DashboardNavIcon
-                    :name="item.iconKey"
-                    :active="isActive(item.href)"
-                    size="sm"
-                  />
-                </span>
-                <span :class="['min-w-0 flex-1', sheetRowLabelClass]">{{ item.name }}</span>
-                <span
-                  v-if="showNativeComingSoon && item.name === 'Payment links'"
-                  :class="sheetBadgeClass"
-                >
-                  Soon
-                </span>
-              </NuxtLink>
-            </li>
-          </ul>
+                  <span
+                    :class="[sheetIconWrapClass, isActive(item.href) ? sheetIconWrapActiveClass : '']"
+                  >
+                    <DashboardNavIcon
+                      :name="item.iconKey"
+                      :active="isActive(item.href)"
+                      size="sm"
+                    />
+                  </span>
+                  <span :class="['ios-drawer-menu__label', sheetRowLabelClass]">{{ item.name }}</span>
+                  <span
+                    v-if="showNativeComingSoon && item.name === 'Payment links'"
+                    class="ios-drawer-menu__badge"
+                  >
+                    Soon
+                  </span>
+                  <ChevronRightIcon class="ios-drawer-menu__chevron" aria-hidden="true" />
+                </NuxtLink>
+              </li>
+            </ul>
+          </div>
         </section>
 
-        <p
-          v-if="moreGroups.length === 0"
-          :class="[sheetRowLabelClass, 'px-3 py-8 text-center ios-type-secondary']"
-        >
+        <p v-if="moreGroups.length === 0" class="ios-drawer-menu__empty">
           Main tabs cover everything here.
         </p>
       </div>
 
       <template #footer>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          extra-class="ios-drawer-sign-out"
-          @click="onSignOut"
-        >
-          <DashboardNavIcon name="sign-out" size="sm" />
-          Sign out
-        </Button>
+        <div class="ios-drawer-menu__footer-card">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            extra-class="ios-drawer-sign-out"
+            @click="onSignOut"
+          >
+            <DashboardNavIcon name="sign-out" size="sm" />
+            Sign out
+          </Button>
+        </div>
       </template>
     </IosDrawer>
   </nav>
@@ -125,6 +129,7 @@
 import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import DashboardNavIcon from '~/components/dashboard/DashboardNavIcon.vue'
+import { ChevronRightIcon } from '~/utils/app-icons'
 import IosDrawer from '~/components/ios/IosDrawer.vue'
 import Button from '~/components/ui/Button.vue'
 import {
@@ -152,15 +157,12 @@ const {
   tabInactiveClass,
   tabActiveClass,
   tabStripClass,
-  sheetListClass,
   sheetRowClass,
   sheetRowActiveClass,
   sheetRowInactiveClass,
   sheetIconWrapClass,
   sheetIconWrapActiveClass,
-  sheetSectionLabelClass,
   sheetRowLabelClass,
-  sheetBadgeClass,
 } = useDashboardNativeNavChrome()
 
 const { impact } = useIosHaptics()

@@ -1,0 +1,206 @@
+/**
+ * iOS drawer menu — Settings-style grouped lists (More tab, home menu, pickers).
+ */
+
+html.capacitor-ios.capacitor-native {
+  --ios-drawer-menu-canvas: var(--ios-home-bg, #f2f2f7);
+  --ios-drawer-menu-group: var(--ios-home-card, #ffffff);
+  --ios-drawer-menu-radius: 14px;
+}
+
+html.capacitor-ios.capacitor-native.dark {
+  --ios-drawer-menu-canvas: #000000;
+  --ios-drawer-menu-group: var(--ios-surface-solid, #1c1c1e);
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  padding-bottom: 0.25rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer-menu__section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer-menu__section + .ios-drawer-menu__section {
+  margin-top: 0.625rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer-menu__section-label {
+  margin: 0;
+  padding: 0 1.25rem 0.125rem;
+  font-size: var(--ios-dash-body-size, 0.6875rem);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  color: var(--ios-label-secondary);
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer-menu__group {
+  margin-inline: 1rem;
+  overflow: hidden;
+  border-radius: var(--ios-drawer-menu-radius);
+  background: var(--ios-drawer-menu-group);
+  box-shadow: 0 1px 0 rgb(0 0 0 / 0.03);
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-drawer-menu__group {
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.06);
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer-menu__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer-menu__row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 2.875rem;
+  padding: 0.625rem 0.875rem;
+  text-decoration: none;
+  color: var(--ios-label);
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s ease;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer-menu__row:active {
+  background: var(--ios-fill-tertiary);
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer-menu__list > li + li .ios-drawer-menu__row,
+html.capacitor-ios.capacitor-native .ios-drawer-menu__list > li + li .native-more-sheet__row {
+  border-top: 1px solid var(--ios-separator);
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer-menu__icon,
+html.capacitor-ios.capacitor-native .ios-drawer .ios-drawer-menu__group .native-more-sheet__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.875rem;
+  height: 1.875rem;
+  border-radius: 0.5rem;
+  background: rgb(120 120 128 / 0.1);
+  color: var(--ios-label-secondary);
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-drawer-menu__icon,
+html.capacitor-ios.capacitor-native.dark .ios-drawer .ios-drawer-menu__group .native-more-sheet__icon {
+  background: rgb(255 255 255 / 0.08);
+  color: var(--ios-label-secondary);
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer-menu__row--active .ios-drawer-menu__icon,
+html.capacitor-ios.capacitor-native .ios-drawer .native-more-sheet__row--active .native-more-sheet__icon {
+  background: rgb(20 63 141 / 0.12);
+  color: var(--ios-accent);
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-drawer-menu__row--active .ios-drawer-menu__icon,
+html.capacitor-ios.capacitor-native.dark .ios-drawer .native-more-sheet__row--active .native-more-sheet__icon {
+  background: rgb(154 181 227 / 0.14);
+  color: var(--ios-accent-soft);
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer-menu__icon svg,
+html.capacitor-ios.capacitor-native .ios-drawer .ios-drawer-menu__group .native-more-sheet__icon svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer-menu__label,
+html.capacitor-ios.capacitor-native .ios-drawer .ios-drawer-menu__group .native-more-sheet__row-label {
+  min-width: 0;
+  flex: 1;
+  font-size: var(--ios-dash-menu-size, 0.8125rem);
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer-menu__chevron {
+  flex-shrink: 0;
+  width: 0.875rem;
+  height: 0.875rem;
+  color: var(--ios-label-tertiary);
+  stroke-width: 2;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer-menu__badge,
+html.capacitor-ios.capacitor-native .ios-drawer .ios-drawer-menu__group .native-more-sheet__badge {
+  flex-shrink: 0;
+  padding: 0.125rem 0.4375rem;
+  border-radius: 9999px;
+  background: rgb(255 149 0 / 0.14);
+  font-size: var(--ios-dash-micro-size, 0.5625rem);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #ff9500;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer-menu__empty {
+  padding: 2rem 1.25rem;
+  text-align: center;
+  font-size: var(--ios-dash-secondary-size, 0.6875rem);
+  color: var(--ios-label-secondary);
+}
+
+/* Legacy row mapping inside grouped menu */
+html.capacitor-ios.capacitor-native .ios-drawer .ios-drawer-menu__group .native-more-sheet__row {
+  gap: 0.75rem;
+  min-height: 2.875rem;
+  padding: 0.625rem 0.875rem;
+  border-radius: 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer .ios-drawer-menu__group .native-more-sheet__row--active {
+  background: transparent;
+  color: var(--ios-label);
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer-menu__footer-card {
+  margin: 0.75rem 1rem 0;
+  overflow: hidden;
+  border-radius: var(--ios-drawer-menu-radius);
+  background: var(--ios-drawer-menu-group);
+  box-shadow: 0 1px 0 rgb(0 0 0 / 0.03);
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-drawer-menu__footer-card {
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.06);
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer .ios-drawer-sign-out {
+  display: flex !important;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.625rem;
+  width: 100% !important;
+  min-height: 2.875rem !important;
+  padding: 0.625rem 0.875rem !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-size: var(--ios-dash-menu-size, 0.8125rem) !important;
+  font-weight: 500 !important;
+  color: var(--ios-destructive) !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer .ios-drawer-sign-out:active {
+  background: rgb(255 59 48 / 0.08) !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer .ios-drawer-sign-out svg {
+  width: 1rem;
+  height: 1rem;
+}

@@ -7,10 +7,12 @@
 @import './ios-shell.css';
 @import './capacitor-ios.css';
 @import './ios-drawer.css';
+@import './ios-drawer-menu.css';
 @import './ios-system.css';
 @import './ios-page-chrome.css';
 @import './ios-global-top-bar.css';
 @import './ios-grouped-list.css';
+@import './ios-dashboard-type.css';
 @import './ios-home.css';
 @import './ios-profile.css';
 @import './ios-inventory-list.css';

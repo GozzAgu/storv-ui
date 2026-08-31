@@ -118,9 +118,9 @@ html.capacitor-ios.capacitor-native .ios-home-dashboard__greeting-row {
 
 html.capacitor-ios.capacitor-native .ios-home-dashboard__greeting {
   margin: 0;
-  font-size: clamp(1.5rem, 4.8vw, 1.75rem);
+  font-size: var(--ios-dash-page-title-size);
   font-weight: 400;
-  line-height: 1.12;
+  line-height: var(--ios-dash-leading-tight);
   letter-spacing: -0.02em;
   color: var(--ios-label);
 }
@@ -158,9 +158,9 @@ html.capacitor-ios.capacitor-native .ios-home-dashboard__icon-btn:active {
 
 html.capacitor-ios.capacitor-native .ios-home-dashboard__store {
   margin: 0.3125rem 0 0;
-  font-size: 0.8125rem;
+  font-size: var(--ios-dash-secondary-size);
   font-weight: 400;
-  line-height: 1.35;
+  line-height: var(--ios-dash-leading);
   color: var(--ios-label-secondary);
 }
 
@@ -176,12 +176,12 @@ html.capacitor-ios.capacitor-native .ios-home-dashboard__alerts {
 
 html.capacitor-ios.capacitor-native .ios-home-dashboard__alert {
   display: block;
-  padding: 0.875rem 1rem;
+  padding: 0.75rem 0.875rem;
   border-radius: var(--ios-home-metric-radius);
   background: var(--ios-home-card);
   box-shadow: var(--ios-home-card-shadow);
-  font-size: 0.8125rem;
-  line-height: 1.45;
+  font-size: var(--ios-dash-secondary-size);
+  line-height: var(--ios-dash-leading);
   color: var(--ios-label-secondary);
   text-decoration: none;
 }
@@ -189,8 +189,9 @@ html.capacitor-ios.capacitor-native .ios-home-dashboard__alert {
 html.capacitor-ios.capacitor-native .ios-home-dashboard__alert-title {
   display: block;
   margin-bottom: 0.125rem;
+  font-size: var(--ios-dash-card-title-size);
   color: var(--ios-label);
-  font-weight: 400;
+  font-weight: 500;
 }
 
 /* ── Sections ── */
@@ -209,8 +210,7 @@ html.capacitor-ios.capacitor-native .ios-home-dashboard__section-head {
 
 html.capacitor-ios.capacitor-native .ios-home-dashboard__section-title {
   margin: 0;
-  font-size: 1.0625rem;
-  font-weight: 400;
+  font-weight: 500;
   letter-spacing: -0.01em;
   color: var(--ios-label);
 }
@@ -262,17 +262,16 @@ html.capacitor-ios.capacitor-native .ios-home-dashboard__add-btn svg {
 }
 
 html.capacitor-ios.capacitor-native .ios-home-dashboard__section-link {
-  font-size: 0.875rem;
+  font-size: var(--ios-dash-link-size);
   font-weight: 400;
   color: var(--ios-label-secondary);
   text-decoration: none;
 }
 
-/* ── Metric grid ── */
+/* ── Metric grid (sizes in ios-dashboard-type.css) ── */
 html.capacitor-ios.capacitor-native .ios-home-dashboard__metrics-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
 }
 
 html.capacitor-ios.capacitor-native .ios-home-metric {
@@ -280,8 +279,6 @@ html.capacitor-ios.capacitor-native .ios-home-metric {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  min-height: 7.5rem;
-  padding: 1rem 1rem 1.125rem;
   border-radius: var(--ios-home-metric-radius);
   background: var(--ios-home-card);
   box-shadow: var(--ios-home-card-shadow);
@@ -295,33 +292,7 @@ html.capacitor-ios.capacitor-native .ios-home-metric:active {
   transform: scale(0.985);
 }
 
-html.capacitor-ios.capacitor-native .ios-home-metric__arrow {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  width: 0.875rem;
-  height: 0.875rem;
-  color: var(--ios-label-tertiary);
-  stroke-width: 1.75;
-}
-
-html.capacitor-ios.capacitor-native .ios-home-metric__value {
-  margin: 0;
-  font-size: clamp(1.75rem, 6vw, 2.125rem);
-  font-weight: 400;
-  line-height: 1;
-  letter-spacing: -0.03em;
-  color: var(--ios-label);
-}
-
-html.capacitor-ios.capacitor-native .ios-home-metric__label {
-  margin: 0.625rem 0 0;
-  max-width: 9rem;
-  font-size: 0.8125rem;
-  font-weight: 400;
-  line-height: 1.35;
-  color: var(--ios-label-secondary);
-}
+/* metric value/label sizes: ios-dashboard-type.css */
 
 /* ── Feed cards ── */
 html.capacitor-ios.capacitor-native .ios-home-dashboard__feed {
@@ -332,7 +303,7 @@ html.capacitor-ios.capacitor-native .ios-home-dashboard__feed {
 
 html.capacitor-ios.capacitor-native .ios-home-feed-card {
   display: block;
-  padding: 1.125rem 1.125rem 1rem;
+  padding: 0.875rem 0.875rem 0.75rem;
   border-radius: var(--ios-home-radius);
   background: var(--ios-home-card);
   box-shadow: var(--ios-home-card-shadow);
@@ -364,13 +335,13 @@ html.capacitor-ios.capacitor-native .ios-home-feed-card__avatar {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
+  width: 2.375rem;
+  height: 2.375rem;
   flex-shrink: 0;
   border-radius: 9999px;
   background: linear-gradient(145deg, #dfe5ef, #c8d2e3);
-  font-size: 0.875rem;
-  font-weight: 400;
+  font-size: var(--ios-dash-link-size);
+  font-weight: 500;
   letter-spacing: 0.02em;
   color: #334155;
 }
@@ -386,8 +357,8 @@ html.capacitor-ios.capacitor-native .ios-home-feed-card__identity {
 
 html.capacitor-ios.capacitor-native .ios-home-feed-card__name {
   margin: 0;
-  font-size: 1rem;
-  font-weight: 400;
+  font-size: var(--ios-dash-card-title-size);
+  font-weight: 500;
   letter-spacing: -0.01em;
   color: var(--ios-label);
   overflow: hidden;
@@ -397,7 +368,7 @@ html.capacitor-ios.capacitor-native .ios-home-feed-card__name {
 
 html.capacitor-ios.capacitor-native .ios-home-feed-card__role {
   margin: 0.125rem 0 0;
-  font-size: 0.8125rem;
+  font-size: var(--ios-dash-secondary-size);
   font-weight: 400;
   color: var(--ios-label-secondary);
   overflow: hidden;
@@ -413,11 +384,11 @@ html.capacitor-ios.capacitor-native .ios-home-feed-card__actions {
 }
 
 html.capacitor-ios.capacitor-native .ios-home-feed-card__badge {
-  padding: 0.1875rem 0.5rem;
+  padding: 0.125rem 0.4375rem;
   border-radius: 9999px;
   background: var(--ios-fill-secondary);
-  font-size: 0.6875rem;
-  font-weight: 400;
+  font-size: var(--ios-dash-micro-size);
+  font-weight: 500;
   letter-spacing: 0.02em;
   color: var(--ios-label-secondary);
 }
@@ -429,9 +400,9 @@ html.capacitor-ios.capacitor-native .ios-home-feed-card__menu {
 }
 
 html.capacitor-ios.capacitor-native .ios-home-feed-card__body {
-  margin: 0.875rem 0 0;
-  font-size: 0.875rem;
-  line-height: 1.5;
+  margin: 0.625rem 0 0;
+  font-size: var(--ios-dash-secondary-size);
+  line-height: var(--ios-dash-leading);
   color: var(--ios-label-secondary);
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -444,8 +415,8 @@ html.capacitor-ios.capacitor-native .ios-home-feed-card__foot {
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  margin-top: 1rem;
-  padding-top: 0.875rem;
+  margin-top: 0.75rem;
+  padding-top: 0.625rem;
   border-top: 1px solid var(--ios-separator);
 }
 
@@ -453,7 +424,7 @@ html.capacitor-ios.capacitor-native .ios-home-feed-card__meta {
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
-  font-size: 0.75rem;
+  font-size: var(--ios-dash-meta-size);
   font-weight: 400;
   color: var(--ios-label-tertiary);
 }
@@ -493,13 +464,13 @@ html.capacitor-ios.capacitor-native .ios-home-dashboard__feed-empty svg {
 
 html.capacitor-ios.capacitor-native .ios-home-dashboard__feed-empty p {
   margin: 0;
-  font-size: 0.9375rem;
-  font-weight: 400;
+  font-size: var(--ios-dash-card-title-size);
+  font-weight: 500;
   color: var(--ios-label);
 }
 
 html.capacitor-ios.capacitor-native .ios-home-dashboard__feed-empty-link {
-  font-size: 0.875rem;
+  font-size: var(--ios-dash-link-size);
   font-weight: 400;
   color: var(--ios-accent);
   text-decoration: none;
@@ -515,8 +486,8 @@ html.capacitor-ios.capacitor-native .ios-home-menu__row {
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  padding: 0.875rem 1rem;
-  font-size: 1rem;
+  padding: 0.75rem 1rem;
+  font-size: var(--ios-dash-menu-size);
   font-weight: 400;
   color: var(--ios-label);
   text-decoration: none;
@@ -563,7 +534,7 @@ html.capacitor-ios.capacitor-native .ios-home-skeleton--title {
 }
 
 html.capacitor-ios.capacitor-native .ios-home-skeleton--metric {
-  min-height: 7.5rem;
+  min-height: 5.75rem;
 }
 
 html.capacitor-ios.capacitor-native .ios-home-skeleton--feed {

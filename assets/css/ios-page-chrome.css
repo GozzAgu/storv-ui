@@ -37,10 +37,10 @@ html.capacitor-ios.capacitor-native .ios-page-nav-bar__spacer {
 
 html.capacitor-ios.capacitor-native .ios-page-nav-bar__title {
   margin: 0;
-  font-size: 1.0625rem;
+  font-size: var(--ios-dash-nav-title-size, 0.9375rem);
   font-weight: 600;
   letter-spacing: -0.02em;
-  line-height: 1.2;
+  line-height: var(--ios-dash-leading-tight, 1.15);
   text-align: center;
   color: var(--ios-label);
   overflow: hidden;

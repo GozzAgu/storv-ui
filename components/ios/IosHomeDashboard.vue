@@ -133,22 +133,29 @@
       variant="menu"
       footer-variant="menu"
       mount="body"
-      :show-close="false"
+      :show-close="true"
       body-padding="p-0"
       aria-label="Quick menu"
       backdrop-label="Close menu"
     >
-      <div class="ios-home-menu">
-        <NuxtLink
-          v-for="item in menuItems"
-          :key="item.href"
-          :to="item.href"
-          class="ios-home-menu__row"
-          @click="menuOpen = false"
-        >
-          <span class="ios-home-menu__label">{{ item.label }}</span>
-          <ChevronRightIcon aria-hidden="true" />
-        </NuxtLink>
+      <div class="ios-drawer-menu">
+        <section class="ios-drawer-menu__section">
+          <p class="ios-drawer-menu__section-label">Shortcuts</p>
+          <div class="ios-drawer-menu__group">
+            <ul class="ios-drawer-menu__list">
+              <li v-for="item in menuItems" :key="item.href">
+                <NuxtLink
+                  :to="item.href"
+                  class="ios-drawer-menu__row"
+                  @click="menuOpen = false"
+                >
+                  <span class="ios-drawer-menu__label">{{ item.label }}</span>
+                  <ChevronRightIcon class="ios-drawer-menu__chevron" aria-hidden="true" />
+                </NuxtLink>
+              </li>
+            </ul>
+          </div>
+        </section>
       </div>
     </IosDrawer>
   </div>
