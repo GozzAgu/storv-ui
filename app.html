@@ -16,22 +16,37 @@
         try {
           theme = localStorage.getItem('theme')
 
+          var loc = window.location
+          var p = loc.protocol
+          var h = (loc.hostname || '').toLowerCase()
+          var port = loc.port || ''
+          var href = loc.href || ''
+          var ua = navigator.userAgent || ''
+          var local = h === 'localhost' || h === '127.0.0.1'
+          var isNativeShell =
+            p === 'capacitor:' ||
+            href.indexOf('capacitor://') === 0 ||
+            (local && p === 'https:' && (!port || port === '443')) ||
+            (local && p === 'http:' && (!port || port === '80')) ||
+            /Capacitor/i.test(ua)
+
+          function prefersDarkMode() {
+            try {
+              return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
+            } catch (e) {
+              return false
+            }
+          }
+
           if (theme === 'dark') {
             isDark = true
           } else if (theme === 'light') {
             isDark = false
           } else if (theme === 'system') {
-            // User explicitly chose system - follow device preference
-            try {
-              if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                isDark = true
-              }
-            } catch (e) {
-              isDark = false
-            }
+            isDark = prefersDarkMode()
           } else {
-            // No saved theme (first-time user) - default to light until they change it
-            isDark = false
+            // No saved theme: native apps follow the device; web defaults to light.
+            isDark = isNativeShell ? prefersDarkMode() : false
           }
         } catch (e) {
           // localStorage access failed - default to light

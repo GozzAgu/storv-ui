@@ -1,5 +1,35 @@
 <template>
-  <div :class="pageClass">
+  <div :class="[pageClass, isCapacitorIos ? 'ios-home-page' : '']">
+    <template v-if="isCapacitorIos">
+      <IosEmptyState
+        v-if="needsStoreSelection && !isLoading"
+        :icon="BuildingStorefrontIcon"
+        title="Select a store"
+        :description="
+          canManageBranches
+            ? 'Choose a branch to load metrics, sales, and alerts for your dashboard.'
+            : 'Your dashboard loads for your store. If this takes a moment, we are connecting to your store data.'
+        "
+      >
+        <template v-if="canManageBranches" #action>
+          <InlineStorePicker />
+        </template>
+      </IosEmptyState>
+
+      <IosHomeDashboardSkeleton v-else-if="isLoading" />
+
+      <IosHomeDashboard
+        v-else
+        :display-name="iosDisplayName"
+        :store-label="iosStoreLabel"
+        :metrics="iosHomeMetrics"
+        :recent-sales="iosRecentSales"
+        :low-stock-preview="iosLowStockPreview"
+        :alerts="iosHomeAlerts"
+      />
+    </template>
+
+    <template v-else>
     <Tutorial ref="tutorialRef" :tutorial-steps="resolvedTutorialSteps" @complete="onTutorialComplete" />
 
     <GettingStartedChecklist v-if="!needsStoreSelection && !isLoading" class="mb-4" />
@@ -396,6 +426,7 @@
         </section>
       </div>
     </template>
+    </template>
   </div>
 </template>
 
@@ -450,6 +481,15 @@ import {
   sumReceiptCogs,
   sumReceiptGrossProfit,
 } from '~/utils/inventory-item-cost'
+import { BuildingStorefrontIcon } from '~/utils/app-icons'
+import IosEmptyState from '~/components/ios/IosEmptyState.vue'
+import IosHomeDashboard from '~/components/ios/IosHomeDashboard.vue'
+import IosHomeDashboardSkeleton from '~/components/ios/IosHomeDashboardSkeleton.vue'
+import type {
+  IosHomeAlert,
+  IosHomeFeedItem,
+  IosHomeMetric,
+} from '~/components/ios/IosHomeDashboard.vue'
 
 definePageMeta({
   layout: 'dashboard',
@@ -756,6 +796,134 @@ const userName = computed(() => {
   return 'User'
 })
 
+const iosDisplayName = computed((): string => {
+  if (userStore.userData?.name?.trim()) return userStore.userData.name.trim()
+  if (authStore.currentUser?.displayName?.trim()) return authStore.currentUser.displayName.trim()
+  return userName.value || 'User'
+})
+
+const iosStoreLabel = computed(() => {
+  const parts = [currentStoreLabel.value]
+  if (userRoleLabel.value) parts.push(userRoleLabel.value)
+  return parts.filter(Boolean).join(' · ')
+})
+
+function initialsFromName(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean)
+  if (parts.length === 0) return '?'
+  if (parts.length === 1) {
+    const first = parts[0] ?? ''
+    return first.slice(0, 2).toUpperCase()
+  }
+  const first = parts[0] ?? ''
+  const last = parts[parts.length - 1] ?? ''
+  return `${first[0] ?? ''}${last[0] ?? ''}`.toUpperCase()
+}
+
+function formatCompactNumber(value: number): string {
+  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`
+  if (value >= 10_000) return `${Math.round(value / 1000)}K`
+  if (value >= 1_000) return `${(value / 1000).toFixed(1).replace(/\.0$/, '')}K`
+  return String(value)
+}
+
+function formatCompactCurrency(value: number): string {
+  const symbol = currencySymbol.value || '$'
+  if (value >= 1_000_000) {
+    return `${symbol}${(value / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`
+  }
+  if (value >= 10_000) return `${symbol}${Math.round(value / 1000)}K`
+  if (value >= 1_000) return `${symbol}${(value / 1000).toFixed(1).replace(/\.0$/, '')}K`
+  return formatCurrency(value)
+}
+
+const iosHomeMetrics = computed((): IosHomeMetric[] => {
+  const metrics: IosHomeMetric[] = [
+    {
+      id: 'revenue',
+      label: 'Total revenue',
+      value: formatCompactCurrency(totalRevenue.value),
+      href: '/dashboard/analytics',
+    },
+    {
+      id: 'orders',
+      label: 'Orders today',
+      value: String(todayReceiptsCount.value),
+      href: '/dashboard/receipts',
+    },
+    {
+      id: 'customers',
+      label: 'Active customers',
+      value: formatCompactNumber(totalCustomers.value),
+      href: '/dashboard/receipts',
+    },
+    {
+      id: 'low-stock',
+      label: 'Low stock signals',
+      value: String(lowStockItems.value.length),
+      href: '/dashboard/inventory',
+    },
+  ]
+
+  if (outstandingCount.value > 0) {
+    metrics.push({
+      id: 'outstanding',
+      label: 'Outstanding balances',
+      value: formatCompactCurrency(outstandingBalanceTotal.value),
+      href: '/dashboard/receipts',
+    })
+  }
+
+  if (canAccessLeadsPlan.value) {
+    metrics.push({
+      id: 'leads',
+      label: 'Open leads',
+      value: String(openLeadsCount.value),
+      href: '/dashboard/leads',
+    })
+  }
+
+  return metrics.slice(0, 6)
+})
+
+const iosRecentSales = computed((): IosHomeFeedItem[] =>
+  recentReceiptsTop.value.map((receipt) => ({
+    id: receipt.id,
+    title: receipt.customerName,
+    subtitle: `Receipt ${receipt.receiptNumber}`,
+    body: `${receipt.paymentMethod} · ${receipt.statusLabel}`,
+    timeLabel: receipt.time,
+    valueLabel: receipt.amount,
+    initials: initialsFromName(receipt.customerName),
+    badge: receipt.status !== 'completed' ? receipt.statusLabel : undefined,
+    href: `/dashboard/receipts?receipt=${receipt.id}`,
+  }))
+)
+
+const iosLowStockPreview = computed((): IosHomeFeedItem[] =>
+  lowStockItemsTop.value.map((item) => ({
+    id: item.id,
+    title: item.name,
+    subtitle: item.folderName,
+    body: item.isSerialNumber
+      ? 'Serialized item below threshold'
+      : `${item.quantity} units left · threshold ${item.threshold}`,
+    timeLabel: 'Inventory',
+    valueLabel: item.isSerialNumber ? 'Serial' : `${item.quantity} left`,
+    initials: item.name.slice(0, 2).toUpperCase(),
+    href: `/dashboard/inventory/${item.folderId}`,
+  }))
+)
+
+const iosHomeAlerts = computed((): IosHomeAlert[] =>
+  attentionItemsTop.value.map((alert) => ({
+    id: alert.id,
+    title: alert.title,
+    description: alert.description,
+    href: alert.href,
+  }))
+)
+
 const chartData = computed(() => {
   switch (chartView.value) {
     case 'weekly':
@@ -920,7 +1088,15 @@ const loadDashboardData = async () => {
       canAccessLeadsPlan.value ? salesLeadsStore.fetchSalesLeads(true) : Promise.resolve(),
     ])
 
-    dashboardFolderItems.value = await inventoryStore.fetchFolderAvailabilityStats()
+    if (isNativeApp.value) {
+      scheduleNativeIdleWork(() => {
+        void inventoryStore.fetchFolderAvailabilityStats().then((grouped) => {
+          dashboardFolderItems.value = grouped
+        })
+      }, 600)
+    } else {
+      dashboardFolderItems.value = await inventoryStore.fetchFolderAvailabilityStats()
+    }
 
     if (isNativeApp.value) {
       scheduleNativeIdleWork(() => {
@@ -940,7 +1116,15 @@ const refreshDashboardAfterStoreSwitch = async () => {
       receiptsStore.fetchReceipts(),
       canAccessLeadsPlan.value ? salesLeadsStore.fetchSalesLeads(true) : Promise.resolve(),
     ])
-    dashboardFolderItems.value = await inventoryStore.fetchFolderAvailabilityStats()
+    if (isNativeApp.value) {
+      scheduleNativeIdleWork(() => {
+        void inventoryStore.fetchFolderAvailabilityStats().then((grouped) => {
+          dashboardFolderItems.value = grouped
+        })
+      }, 600)
+    } else {
+      dashboardFolderItems.value = await inventoryStore.fetchFolderAvailabilityStats()
+    }
     if (isNativeApp.value) {
       scheduleNativeIdleWork(() => {
         void loadRecentActivity()

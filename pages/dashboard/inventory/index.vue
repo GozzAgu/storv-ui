@@ -1,9 +1,15 @@
 <template>
   <div
     data-inventory-categories
-    :class="[pageWithFooterClass, 'dash-page--unified']"
+    :class="[
+      pageWithFooterClass,
+      'dash-page--unified',
+      isCapacitorIos ? 'ios-inventory-categories-page' : '',
+    ]"
   >
-    <DashboardPageHeader class="dash-page-header--unified" :ios-context-only="isCapacitorIos">
+    <IosPageNavBar v-if="isCapacitorIos" title="Categories" />
+
+    <DashboardPageHeader v-if="!isCapacitorIos" class="dash-page-header--unified">
       <template #eyebrow>
         <nav :class="eyebrowClass" aria-label="Breadcrumb">
           <span>Inventory</span>
@@ -140,13 +146,71 @@
       <IosSearchBar v-model="searchQuery" placeholder="Search categories…" />
     </div>
 
-    <IosSegmentedControl
+    <IosQuickActionBar
       v-if="isCapacitorIos && !inventoryStore.loading && inventoryStore.folders.length > 0"
       v-model="categoryFilter"
       class="ios-inventory-filter-tabs"
-      aria-label="Category filter"
-      :options="categoryFilterOptions"
+      aria-label="Category actions"
+      :options="categoryQuickActionOptions"
     />
+
+    <IosDrawer
+      v-if="isCapacitorIos"
+      v-model="showInventoryMoreSheet"
+      title="Category options"
+      subtitle="Sort and filter"
+      variant="assistant"
+      aria-label="Category options"
+    >
+      <IosGroupedSection v-if="!isStaff" header="Department">
+        <button
+          type="button"
+          class="ios-native-list-row w-full text-left"
+          :class="{ 'opacity-60': !selectedDepartmentId }"
+          @click="selectInventoryDepartment('')"
+        >
+          <span class="min-w-0 flex-1">
+            <span class="block text-sm font-medium text-[var(--ios-label)]">All departments</span>
+          </span>
+        </button>
+        <button
+          v-for="dept in currentStoreDepartments"
+          :key="dept.id"
+          type="button"
+          class="ios-native-list-row w-full text-left"
+          @click="selectInventoryDepartment(dept.id)"
+        >
+          <span class="min-w-0 flex-1">
+            <span class="block text-sm font-medium text-[var(--ios-label)]">{{ dept.name }}</span>
+          </span>
+        </button>
+      </IosGroupedSection>
+      <IosGroupedSection header="Sort by">
+        <IosNativeListRow
+          title="Name"
+          :show-chevron="false"
+          @click="selectInventorySort('name')"
+        />
+        <IosNativeListRow
+          title="Products"
+          :show-chevron="false"
+          @click="selectInventorySort('items')"
+        />
+        <IosNativeListRow
+          title="Date"
+          :show-chevron="false"
+          @click="selectInventorySort('date')"
+        />
+      </IosGroupedSection>
+      <IosGroupedSection v-if="inventoryStore.lowStockFolders.length > 0">
+        <IosNativeListRow
+          title="Export reorder list"
+          subtitle="Low-stock categories"
+          :show-chevron="false"
+          @click="handleExportReorderFromSheet"
+        />
+      </IosGroupedSection>
+    </IosDrawer>
 
     <div
       v-if="inventoryStore.loading && inventoryStore.folders.length === 0"
@@ -159,9 +223,11 @@
       v-if="!inventoryStore.loading && inventoryStore.folders.length > 0"
       :class="[
         gridShellClass,
-        foldersViewMode === 'table'
-          ? [tableShellClass, 'dash-grid-shell--table inventory-categories-shell--table']
-          : 'dash-grid-shell--grid inventory-categories-shell--grid',
+        isCapacitorIos
+          ? 'ios-inventory-categories-list-shell'
+          : effectiveFoldersViewMode === 'table'
+            ? [tableShellClass, 'dash-grid-shell--table inventory-categories-shell--table']
+            : 'dash-grid-shell--grid inventory-categories-shell--grid',
       ]"
     >
       <DashboardTableEmptyState
@@ -201,10 +267,25 @@
         </Button>
       </DashboardTableEmptyState>
 
+      <div v-else-if="isCapacitorIos" class="ios-grouped-list">
+        <IosInventoryFolderRow
+          v-for="(folder, index) in paginatedFolders"
+          :key="folder.id"
+          :name="folder.name"
+          :subtitle="folderCategoryDescription(folder)"
+          :value="formatFolderRowValue(folder)"
+          :last="index === paginatedFolders.length - 1"
+          :show-menu="canCreateInventoryFolders"
+          :menu-id="folder.id"
+          @click="navigateToFolder(folder.id)"
+          @menu="toggleFolderMenu(folder.id)"
+        />
+      </div>
+
       <Transition v-else name="folders-view" mode="out-in">
         <!-- Folders grid -->
         <div
-          v-if="paginatedFolders.length > 0 && foldersViewMode === 'grid'"
+          v-if="paginatedFolders.length > 0 && effectiveFoldersViewMode === 'grid'"
           key="grid"
           class="inventory-categories-grid dash-grid"
         >
@@ -255,7 +336,7 @@
 
         <!-- Categories table -->
         <div
-          v-else-if="paginatedFolders.length > 0 && foldersViewMode === 'table'"
+          v-else-if="paginatedFolders.length > 0 && effectiveFoldersViewMode === 'table'"
           key="table"
           class="inventory-categories-table flex min-h-0 flex-1 flex-col"
         >
@@ -402,7 +483,7 @@
       </Transition>
 
       <DashboardTablePagination
-        v-if="paginatedFolders.length > 0"
+        v-if="foldersForCategoryList.length > 0"
         :current-page="currentPage"
         :items-per-page="itemsPerPage"
         :total="foldersForCategoryList.length"
@@ -1265,6 +1346,7 @@ import {
   TrashIcon,
   DocumentDuplicateIcon,
   EllipsisVerticalIcon,
+  PlusIcon,
   ExclamationTriangleIcon,
   Squares2X2Icon,
   TableCellsIcon,
@@ -1275,6 +1357,15 @@ import Modal from '~/components/ui/Modal.vue'
 import SidePanel from '~/components/ui/SidePanel.vue'
 import Button from '~/components/ui/Button.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
+import IosQuickActionBar, {
+  type IosQuickActionOption,
+} from '~/components/ios/IosQuickActionBar.vue'
+import IosDrawer from '~/components/ios/IosDrawer.vue'
+import IosGroupedSection from '~/components/ios/IosGroupedSection.vue'
+import IosNativeListRow from '~/components/ios/IosNativeListRow.vue'
+import IosInventoryFolderRow from '~/components/ios/IosInventoryFolderRow.vue'
+import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
+import IosSearchBar from '~/components/ios/IosSearchBar.vue'
 import DeleteFolderModal from '~/components/inventory/DeleteFolderModal.vue'
 import InventoryCategoryCard from '~/components/inventory/InventoryCategoryCard.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
@@ -1311,6 +1402,8 @@ import {
   ensureCostPriceTemplateField,
   removeCostPriceTemplateField,
 } from '~/utils/inventory-folder-profit'
+import { runDashboardShellBootstrap } from '~/composables/useDashboardShellBootstrap'
+import { isNativePerfContext, scheduleNativeIdleWork } from '~/utils/capacitor-native-perf'
 
 definePageMeta({
   layout: 'dashboard',
@@ -1358,6 +1451,7 @@ const {
 
 const searchQuery = ref('')
 const categoryFilter = ref<'all' | 'low-stock'>('all')
+const showInventoryMoreSheet = ref(false)
 
 const categoryFilterOptions = computed(() => [
   { value: 'all', label: 'All categories' },
@@ -1367,6 +1461,53 @@ const categoryFilterOptions = computed(() => [
     badge: inventoryStore.lowStockFolders.length || undefined,
   },
 ])
+
+const categoryQuickActionOptions = computed((): IosQuickActionOption[] => {
+  const options: IosQuickActionOption[] = [
+    { value: 'all', label: 'All', icon: FolderIcon },
+    {
+      value: 'low-stock',
+      label: 'Low stock',
+      icon: ExclamationTriangleIcon,
+      badge: inventoryStore.lowStockFolders.length || undefined,
+    },
+  ]
+
+  if (canCreateInventoryFolders.value) {
+    options.push({
+      value: 'new',
+      label: 'New',
+      icon: PlusIcon,
+      action: openCreateFolderModal,
+    })
+  }
+
+  options.push({
+    value: 'more',
+    label: 'More',
+    icon: EllipsisVerticalIcon,
+    action: () => {
+      showInventoryMoreSheet.value = true
+    },
+  })
+
+  return options
+})
+
+function selectInventoryDepartment(departmentId: string) {
+  selectedDepartmentId.value = departmentId
+  showInventoryMoreSheet.value = false
+}
+
+function selectInventorySort(value: string) {
+  sortBy.value = value
+  showInventoryMoreSheet.value = false
+}
+
+function handleExportReorderFromSheet() {
+  showInventoryMoreSheet.value = false
+  void handleExportReorderList()
+}
 const sortBy = ref('name')
 const showCreateFolderModal = ref(false)
 const preserveFolderDrawerDraft = ref(false)
@@ -1592,6 +1733,10 @@ async function handleExportReorderList() {
 }
 const { canCreateInventoryFolders, canViewProfitAndCost, isStaff } = usePermissions()
 const { isCapacitorIos } = useIsCapacitorIos()
+
+const effectiveFoldersViewMode = computed(() =>
+  isCapacitorIos.value ? 'grid' : foldersViewMode.value
+)
 
 watch(isStaff, (staff) => {
   if (staff) selectedDepartmentId.value = ''
@@ -2119,6 +2264,13 @@ function folderDisplayStats(folder: InventoryFolder) {
     totalValue: folder.totalValue ?? 0,
     lowStockCount: folder.lowStockCount ?? 0,
   }
+}
+
+function formatFolderRowValue(folder: InventoryFolder): string {
+  const stats = folderDisplayStats(folder)
+  const countLabel = `${stats.itemCount} item${stats.itemCount === 1 ? '' : 's'}`
+  if (stats.itemCount === 0) return countLabel
+  return `${countLabel} · ${formatCurrency(stats.totalValue ?? 0)}`
 }
 
 function folderCategoryDescription(folder: InventoryFolder): string {
@@ -2958,71 +3110,22 @@ useIosPullToRefreshRegister(reloadInventoryCategories)
 
 // Load folders on mount
 onMounted(async () => {
-  // Only run on client
   if (import.meta.server) return
+  if (!authStore.currentUser) return
 
-  // console.log('[InventoryPage] onMounted - Starting load process')
-
-  const loadData = async () => {
-    // console.log('[InventoryPage] loadData - Checking auth state')
-
-    // Wait for auth to finish loading with timeout
-    let attempts = 0
-    while (authStore.loading && attempts < 100) {
-      await new Promise((resolve) => setTimeout(resolve, 100))
-      attempts++
-      if (attempts % 10 === 0) {
-        // console.log('[InventoryPage] Still waiting for auth...', attempts)
-      }
-    }
-
-    if (attempts >= 100) {
-      console.warn('[InventoryPage] Auth loading timeout, proceeding anyway')
-    }
-
-    // Check if user is authenticated
-    if (!authStore.currentUser) {
-      // console.log('[InventoryPage] No authenticated user, skipping fetch')
-      return
-    }
-
-    // console.log('[InventoryPage] User authenticated:', authStore.currentUser.uid)
-
-    // Fetch user data first (needed to determine if staff)
-    try {
-      if (!userStore.userData) {
-        await userStore.fetchUserData(authStore.currentUser.uid)
-      }
-
-      if (authStore.currentUser) {
-        try {
-          if (!storesStore.currentStoreId) {
-            await storesStore.initializeCurrentStore()
-          }
-          if (!isStaff.value) {
-            await departmentsStore.fetchDepartments()
-          }
-        } catch (error: any) {
-          console.warn(
-            '[InventoryPage] Error fetching stores/departments:',
-            error.message || error
-          )
-        }
-      }
-
-      // Now fetch folders
-      // console.log('[InventoryPage] Fetching folders...')
-      await inventoryStore.fetchFolders()
+  try {
+    await runDashboardShellBootstrap()
+    if (isNativePerfContext()) {
+      scheduleNativeIdleWork(() => {
+        void inventoryStore.fetchFolderAvailabilityStats()
+      }, 700)
+    } else {
       await inventoryStore.fetchFolderAvailabilityStats()
-      // console.log('[InventoryPage] Folders fetched:', inventoryStore.folders.length)
-    } catch (error: any) {
-      console.error('[InventoryPage] Error loading data:', error.message || error)
     }
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error)
+    console.error('[InventoryPage] Error loading data:', message)
   }
-
-  // Start loading after a small delay to ensure stores are initialized
-  await nextTick()
-  await loadData()
 })
 
 // Watch for user data changes and fetch folders when it becomes available
@@ -3075,7 +3178,13 @@ watch(
         selectedDepartmentId.value = ''
         // Refetch folders for new store
         await inventoryStore.fetchFolders()
-        await inventoryStore.fetchFolderAvailabilityStats()
+        if (isNativePerfContext()) {
+          scheduleNativeIdleWork(() => {
+            void inventoryStore.fetchFolderAvailabilityStats({ force: true })
+          }, 500)
+        } else {
+          await inventoryStore.fetchFolderAvailabilityStats({ force: true })
+        }
         // Refetch departments for new store (owner only)
         if (authStore.currentUser && !isStaff.value) {
           await departmentsStore.fetchDepartments()

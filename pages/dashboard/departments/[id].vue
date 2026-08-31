@@ -1,19 +1,111 @@
 <template>
   <div
-    class="dashboard-page-with-footer dash-page--unified flex min-h-[calc(100svh-4rem)] w-full max-w-none flex-col space-y-5 overflow-x-hidden pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:space-y-6 sm:pb-32"
+    :class="[
+      'dashboard-page-with-footer dash-page--unified flex min-h-[calc(100svh-4rem)] w-full max-w-none flex-col space-y-5 overflow-x-hidden pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:space-y-6 sm:pb-32',
+      isCapacitorIos ? 'ios-inventory-items-page' : '',
+    ]"
   >
     <Breadcrumbs
+      v-if="!isCapacitorIos"
       :items="departmentBreadcrumbs"
       class="text-[11px] text-gray-500 dark:text-gray-400"
     />
 
     <StaffInvitePasswordsPanel
-      v-if="departmentId"
+      v-if="departmentId && !isCapacitorIos"
       :department-id="departmentId"
       :can-show="canCreateNewStaff"
     />
 
-    <Teleport to="body" :disabled="!isStaffFullscreen">
+    <template v-if="isCapacitorIos">
+      <template v-if="isLoadingStaff">
+        <div class="ios-receipt-transaction-list">
+          <div v-for="i in 8" :key="i" class="dash-skeleton" style="height: 4.5rem; margin: 0.5rem 1rem" />
+        </div>
+      </template>
+
+      <template v-else>
+        <IosPageNavBar
+          :title="department?.name || 'Staff'"
+          show-back
+          :back-to="departmentsListPath || undefined"
+          back-label="Departments"
+        />
+        <p class="ios-inventory-list-meta">
+          {{ rosterPaginationTotal }} member{{ rosterPaginationTotal === 1 ? '' : 's' }}
+        </p>
+        <div class="ios-search-bar-host ios-search-bar-host--sticky">
+          <IosSearchBar v-model="staffSearchQuery" placeholder="Search staff…" />
+        </div>
+        <IosQuickActionBar
+          v-model="rosterTab"
+          class="ios-inventory-availability-tabs"
+          ariaLabel="Staff roster"
+          role="tablist"
+          :options="staffQuickActionOptions"
+        />
+
+        <DashboardTableEmptyState
+          v-if="rosterTab === 'active' && staff.length === 0"
+          :icon="UsersIcon"
+          title="No staff members yet"
+          description="Add people to this department to assign roles, track status, and control access."
+        >
+          <Button
+            v-if="canCreateNewStaff"
+            variant="primary"
+            size="sm"
+            :icon="UserIcon"
+            @click="openCreateStaffModal"
+          >
+            Add staff
+          </Button>
+        </DashboardTableEmptyState>
+
+        <DashboardTableEmptyState
+          v-else-if="rosterTab === 'removed' && removedStaff.length === 0"
+          :icon="UsersIcon"
+          title="No removed staff"
+          description="When you remove someone from this department, they appear here."
+        />
+
+        <DashboardTableEmptyState
+          v-else-if="rosterPaginationTotal === 0 && staffSearchQuery.trim()"
+          :icon="UsersIcon"
+          title="No staff found"
+          description="Try a different search term."
+        />
+
+        <div v-else class="ios-receipt-transaction-list">
+          <IosReceiptTransactionRow
+            v-for="(member, index) in iosPaginatedStaffRoster"
+            :key="member.id"
+            :title="`${member.firstName} ${member.lastName}`"
+            :subtitle="getStaffRowSubtitle(member)"
+            :amount="formatStaffRoleLabel(member.role)"
+            amount-tone="neutral"
+            :date="formatStaffStatusLabel(member.status)"
+            :variant="getStaffRowVariant(member)"
+            :last="index === iosPaginatedStaffRoster.length - 1"
+            :show-menu="rosterTab === 'active' ? canManageDepartments : canRemoveStaff"
+            menu-kind="staff"
+            :menu-id="member.id"
+            @click="handleIosStaffRowClick(member)"
+            @menu="toggleStaffMenu(member.id)"
+          />
+        </div>
+
+        <DashboardTablePagination
+          v-if="rosterPaginationTotal > 0"
+          :current-page="staffCurrentPage"
+          :items-per-page="staffItemsPerPage"
+          :total="rosterPaginationTotal"
+          @page-change="handleStaffPageChange"
+        />
+      </template>
+    </template>
+
+    <Teleport v-if="!isCapacitorIos" to="body" :disabled="!isStaffFullscreen">
       <div
         data-dashboard-teleport
         :class="[
@@ -605,6 +697,24 @@
         :style="staffMenuFixedStyle"
         @click.stop
       >
+        <template v-if="rosterTab === 'removed'">
+          <button
+            type="button"
+            role="menuitem"
+            class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-primary-600 transition-colors hover:bg-primary-50 dark:text-primary-400 dark:hover:bg-primary-950/35"
+            :disabled="reactivateBusyId === staffForOpenMenu.id"
+            @click="
+              () => {
+                openReactivateStaffModal(staffForOpenMenu)
+                openStaffMenuId = null
+              }
+            "
+          >
+            <ArrowUturnLeftIcon class="h-4 w-4 shrink-0" />
+            {{ reactivateBusyId === staffForOpenMenu.id ? 'Reactivating…' : 'Reactivate' }}
+          </button>
+        </template>
+        <template v-else>
         <button
           type="button"
           role="menuitem"
@@ -671,6 +781,7 @@
           <TrashIcon class="h-4 w-4 shrink-0" />
           Remove
         </button>
+        </template>
       </div>
     </Teleport>
     <!-- Staff Modal -->
@@ -710,11 +821,18 @@ import {
   XMarkIcon,
   EllipsisVerticalIcon,
   ClipboardDocumentIcon,
+  PlusIcon,
 } from '~/utils/app-icons'
 import Button from '~/components/ui/Button.vue'
 import Breadcrumbs from '~/components/ui/Breadcrumbs.vue'
 import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
 import DashboardTableBadge from '~/components/ui/DashboardTableBadge.vue'
+import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
+import IosSearchBar from '~/components/ios/IosSearchBar.vue'
+import IosQuickActionBar, { type IosQuickActionOption } from '~/components/ios/IosQuickActionBar.vue'
+import IosReceiptTransactionRow, {
+  type ReceiptTransactionVariant,
+} from '~/components/ios/IosReceiptTransactionRow.vue'
 import {
   formatStaffStatusLabel,
   staffRoleBadgeClass,
@@ -756,6 +874,7 @@ definePageMeta({
 })
 
 const route = useRoute()
+const { isCapacitorIos } = useIsCapacitorIos()
 const {
   headerBtnClass,
   headerBtnLabelClass,
@@ -805,6 +924,51 @@ const getStaffInitialPage = (): number => {
 }
 const staffCurrentPage = ref(getStaffInitialPage())
 const staffItemsPerPage = ref(100)
+const staffSearchQuery = ref('')
+
+function matchesStaffSearch(member: Staff, query: string): boolean {
+  const q = query.trim().toLowerCase()
+  if (!q) return true
+  return [member.firstName, member.lastName, member.email, member.position, member.role].some(
+    (value) => value?.toLowerCase().includes(q)
+  )
+}
+
+function filterStaffBySearch(list: Staff[]): Staff[] {
+  const q = staffSearchQuery.value.trim().toLowerCase()
+  if (!q) return list
+  return list.filter((member) => matchesStaffSearch(member, q))
+}
+
+function getStaffRowSubtitle(member: Staff): string {
+  const parts = [member.position, member.email].filter(Boolean)
+  return parts.join(' · ')
+}
+
+function formatStaffRoleLabel(role: string): string {
+  if (role === 'manager') return 'Manager'
+  if (role === 'intern') return 'Intern'
+  return 'Staff'
+}
+
+function getStaffRowVariant(member: Staff): ReceiptTransactionVariant {
+  if (rosterTab.value === 'removed') return 'cancelled'
+  if (member.status === 'active') return 'credit'
+  if (member.status === 'on_leave') return 'pending'
+  return 'cancelled'
+}
+
+const filteredStaffRoster = computed(() =>
+  rosterTab.value === 'active'
+    ? filterStaffBySearch(staff.value)
+    : filterStaffBySearch(removedStaff.value)
+)
+
+const iosPaginatedStaffRoster = computed(() => {
+  const start = (staffCurrentPage.value - 1) * staffItemsPerPage.value
+  const end = start + staffItemsPerPage.value
+  return filteredStaffRoster.value.slice(start, end)
+})
 
 // Staff modal
 const showStaffModal = ref(false)
@@ -854,7 +1018,13 @@ const toggleStaffMenu = (staffId: string) => {
 const staffForOpenMenu = computed(() => {
   const id = openStaffMenuId.value
   if (!id) return null
-  return paginatedStaff.value.find((s) => s.id === id) ?? null
+  return (
+    paginatedStaff.value.find((s) => s.id === id) ??
+    paginatedRemovedStaff.value.find((s) => s.id === id) ??
+    staff.value.find((s) => s.id === id) ??
+    removedStaff.value.find((s) => s.id === id) ??
+    null
+  )
 })
 
 const staffMenuFixedStyle = ref<Record<string, string> | null>(null)
@@ -970,20 +1140,24 @@ const canCreateNewStaff = computed(() => canCreateStaff.value)
 const currentStaffMember = ref<Staff | null>(null)
 
 const paginatedStaff = computed(() => {
+  const list = filterStaffBySearch(staff.value)
   const start = (staffCurrentPage.value - 1) * staffItemsPerPage.value
   const end = start + staffItemsPerPage.value
-  return staff.value.slice(start, end)
+  return list.slice(start, end)
 })
 
 const paginatedRemovedStaff = computed(() => {
+  const list = filterStaffBySearch(removedStaff.value)
   const start = (staffCurrentPage.value - 1) * staffItemsPerPage.value
   const end = start + staffItemsPerPage.value
-  return removedStaff.value.slice(start, end)
+  return list.slice(start, end)
 })
 
-const rosterPaginationTotal = computed(() =>
-  rosterTab.value === 'active' ? staff.value.length : removedStaff.value.length
-)
+const rosterPaginationTotal = computed(() => filteredStaffRoster.value.length)
+
+watch(staffSearchQuery, () => {
+  staffCurrentPage.value = 1
+})
 
 watch(rosterTab, () => {
   staffCurrentPage.value = 1
@@ -1264,6 +1438,47 @@ const openCreateStaffModal = () => {
 const handleEditStaff = (staffMember: Staff) => {
   editingStaff.value = staffMember
   showStaffModal.value = true
+}
+
+const staffQuickActionOptions = computed((): IosQuickActionOption[] => {
+  const options: IosQuickActionOption[] = [
+    {
+      value: 'active',
+      label: 'Active',
+      icon: UsersIcon,
+      badge: staff.value.length || undefined,
+    },
+  ]
+
+  if (canRemoveStaff.value) {
+    options.push({
+      value: 'removed',
+      label: 'Removed',
+      icon: TrashIcon,
+      badge: removedStaff.value.length || undefined,
+    })
+  }
+
+  if (canCreateNewStaff.value) {
+    options.push({
+      value: 'add',
+      label: 'Add',
+      icon: PlusIcon,
+      action: openCreateStaffModal,
+    })
+  }
+
+  return options
+})
+
+function handleIosStaffRowClick(member: Staff) {
+  if (rosterTab.value === 'removed') {
+    openReactivateStaffModal(member)
+    return
+  }
+  if (canManageDepartments.value) {
+    handleEditStaff(member)
+  }
 }
 
 function syncDepartmentManagerFromStaff() {

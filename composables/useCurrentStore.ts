@@ -1,3 +1,13 @@
+let cachedStoreId: string | null = null
+let cachedStoreIdAt = 0
+const STORE_ID_CACHE_MS = 8_000
+
+/** Drop cached store id after branch switch or explicit store updates. */
+export function invalidateCurrentStoreIdCache(): void {
+  cachedStoreId = null
+  cachedStoreIdAt = 0
+}
+
 /**
  * Helper function to get the current store ID based on user role
  * - For super admins: returns the currently selected store ID from stores store
@@ -6,6 +16,10 @@
  */
 export async function getCurrentStoreId(): Promise<string | null> {
   if (import.meta.server) return null
+
+  if (cachedStoreId && Date.now() - cachedStoreIdAt < STORE_ID_CACHE_MS) {
+    return cachedStoreId
+  }
 
   const { isDemoModeActive } = await import('~/utils/demo-mode')
   if (isDemoModeActive()) {
@@ -38,7 +52,12 @@ export async function getCurrentStoreId(): Promise<string | null> {
       staffMember = await staffStore.fetchCurrentStaffMember()
     }
 
-    return staffMember?.storeId || null
+    const storeId = staffMember?.storeId || null
+    if (storeId) {
+      cachedStoreId = storeId
+      cachedStoreIdAt = Date.now()
+    }
+    return storeId
   }
 
   // For super admin (or any non-staff: admin, etc.), get from stores store
@@ -53,5 +72,7 @@ export async function getCurrentStoreId(): Promise<string | null> {
     await storesStore.initializeCurrentStore()
   }
 
-  return storesStore.currentStoreId
+  cachedStoreId = storesStore.currentStoreId
+  cachedStoreIdAt = Date.now()
+  return cachedStoreId
 }

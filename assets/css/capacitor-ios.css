@@ -216,7 +216,7 @@ html.capacitor-ios.capacitor-native .dashboard-native-bottom-nav {
   box-sizing: border-box;
   padding-left: calc(var(--cap-safe-left, 0px) + var(--ios-bottomnav-inset, 1rem)) !important;
   padding-right: calc(var(--cap-safe-right, 0px) + var(--ios-bottomnav-inset, 1rem)) !important;
-  padding-bottom: var(--ios-bottomnav-edge-pad, 0.875rem) !important;
+  padding-bottom: calc(var(--cap-safe-bottom, 0px) + var(--ios-tabbar-float-gap, 20px)) !important;
 }
 
 html.capacitor-ios.capacitor-native .native-tabbar__indicator {

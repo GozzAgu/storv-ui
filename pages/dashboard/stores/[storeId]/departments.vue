@@ -1,6 +1,14 @@
 <template>
-  <div :class="[pageWithFooterClass, 'dash-page--unified']">
-    <DashboardPageHeader class="dash-page-header--unified">
+  <div
+    :class="[
+      pageWithFooterClass,
+      'dash-page--unified',
+      isCapacitorIos ? 'ios-inventory-categories-page' : '',
+    ]"
+  >
+    <IosPageNavBar v-if="isCapacitorIos" title="Departments" />
+
+    <DashboardPageHeader v-if="!isCapacitorIos" class="dash-page-header--unified">
       <template #eyebrow>
         <nav :class="eyebrowClass" aria-label="Breadcrumb">
           <NuxtLink
@@ -117,6 +125,21 @@
     </DashboardPageHeader>
 
     <div
+      v-if="isCapacitorIos && !departmentsStore.loading && !storesLoading && storeDepartments.length > 0"
+      class="ios-search-bar-host ios-search-bar-host--sticky"
+    >
+      <IosSearchBar v-model="searchQuery" placeholder="Search departments…" />
+    </div>
+
+    <IosQuickActionBar
+      v-if="isCapacitorIos && !departmentsStore.loading && !storesLoading && storeDepartments.length > 0"
+      v-model="departmentFilter"
+      class="ios-inventory-filter-tabs"
+      ariaLabel="Department filters"
+      :options="departmentQuickActionOptions"
+    />
+
+    <div
       v-if="departmentsStore.error && !departmentsStore.loading"
       :class="errorCardClass"
     >
@@ -142,13 +165,64 @@
       <div
         v-if="storeDepartments.length > 0"
         :class="[
-          departmentsViewMode === 'table'
+          departmentsViewMode === 'table' && !isCapacitorIos
             ? [gridShellClass, tableShellClass, 'dash-grid-shell--table departments-shell--table']
-            : [gridShellClass, 'dash-grid-shell--grid departments-shell--grid'],
+            : [gridShellClass, isCapacitorIos ? 'ios-inventory-categories-list-shell' : 'dash-grid-shell--grid departments-shell--grid'],
         ]"
       >
+        <DashboardTableEmptyState
+          v-if="paginatedDepartments.length === 0"
+          :icon="BuildingOfficeIcon"
+          :title="
+            departmentFilter === 'inactive'
+              ? 'No inactive departments'
+              : departmentFilter === 'active'
+                ? 'No active departments'
+                : searchQuery
+                  ? 'No departments found'
+                  : 'No departments on this page'
+          "
+          :description="
+            departmentFilter !== 'all'
+              ? 'Try another filter or clear search.'
+              : searchQuery
+                ? 'Try a different search term.'
+                : 'Adjust filters or go to another page.'
+          "
+          :tips="[
+            'Search matches department names',
+            'Clear search to see every department in this store',
+          ]"
+        >
+          <Button
+            v-if="departmentFilter !== 'all'"
+            variant="outline"
+            size="sm"
+            extra-class="!text-xs !py-1.5 !px-3"
+            @click="departmentFilter = 'all'"
+          >
+            Show all
+          </Button>
+        </DashboardTableEmptyState>
+
+        <div v-else-if="isCapacitorIos" class="ios-grouped-list">
+          <IosInventoryFolderRow
+            v-for="(department, index) in paginatedDepartments"
+            :key="department.id"
+            :name="department.name"
+            :subtitle="departmentRowSubtitle(department)"
+            :value="formatDepartmentRowValue(department)"
+            :last="index === paginatedDepartments.length - 1"
+            :show-menu="canManageDepartments"
+            menu-kind="department"
+            :menu-id="department.id"
+            @click="navigateToDepartment(department.id)"
+            @menu="toggleDepartmentMenu(department.id)"
+          />
+        </div>
+
         <div
-          v-if="paginatedDepartments.length > 0 && departmentsViewMode === 'grid'"
+          v-else-if="paginatedDepartments.length > 0 && departmentsViewMode === 'grid'"
           :class="[gridClass, 'departments-grid']"
         >
         <DepartmentCard
@@ -310,32 +384,29 @@
             </table>
           </div>
           <DashboardTablePagination
-            v-if="filteredDepartments.length > 0"
+            v-if="filteredDepartments.length > 0 && departmentsViewMode === 'table'"
             :current-page="currentPage"
             :items-per-page="itemsPerPage"
             :total="filteredDepartments.length"
             @page-change="handlePageChange"
           />
         </div>
-
-        <DashboardTableEmptyState
-          v-if="paginatedDepartments.length === 0 && filteredDepartments.length === 0"
-          :icon="BuildingOfficeIcon"
-          :title="searchQuery ? 'No departments found' : 'No departments on this page'"
-          :description="
-            searchQuery
-              ? 'Try a different search term.'
-              : 'Adjust filters or go to another page.'
-          "
-          :tips="[
-            'Search matches department names',
-            'Clear search to see every department in this store',
-          ]"
-        />
       </div>
 
+      <DashboardTablePagination
+        v-if="
+          storeDepartments.length > 0 &&
+          filteredDepartments.length > 0 &&
+          (isCapacitorIos || departmentsViewMode === 'grid')
+        "
+        :current-page="currentPage"
+        :items-per-page="itemsPerPage"
+        :total="filteredDepartments.length"
+        @page-change="handlePageChange"
+      />
+
       <DashboardTableEmptyState
-        v-else-if="storeDepartments.length === 0"
+        v-if="storeDepartments.length === 0"
         :icon="BuildingOfficeIcon"
         :title="searchQuery ? 'No departments found' : 'No departments yet'"
         :description="
@@ -355,14 +426,6 @@
               ]
         "
         extra-class="dash-table-shell rounded-xl"
-      />
-
-      <DashboardTablePagination
-        v-if="filteredDepartments.length > 0 && departmentsViewMode === 'grid'"
-        :current-page="currentPage"
-        :items-per-page="itemsPerPage"
-        :total="filteredDepartments.length"
-        @page-change="handlePageChange"
       />
     </div>
 
@@ -499,9 +562,16 @@ import {
   EllipsisVerticalIcon,
   Squares2X2Icon,
   TableCellsIcon,
+  CheckCircleIcon,
+  PlusIcon,
+  XMarkIcon,
 } from '~/utils/app-icons'
 import Button from '~/components/ui/Button.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
+import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
+import IosSearchBar from '~/components/ios/IosSearchBar.vue'
+import IosQuickActionBar, { type IosQuickActionOption } from '~/components/ios/IosQuickActionBar.vue'
+import IosInventoryFolderRow from '~/components/ios/IosInventoryFolderRow.vue'
 import DashboardTablePagination from '~/components/dashboard/DashboardTablePagination.vue'
 import Modal from '~/components/ui/Modal.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
@@ -556,6 +626,55 @@ const isBulkDeletingDepartments = ref(false)
 const deletingDepartmentId = ref<string | null>(null)
 
 const searchQuery = ref('')
+const departmentFilter = ref<'all' | 'active' | 'inactive'>('all')
+
+const departmentQuickActionOptions = computed((): IosQuickActionOption[] => {
+  const options: IosQuickActionOption[] = [
+    { value: 'all', label: 'All', icon: BuildingOfficeIcon },
+    {
+      value: 'active',
+      label: 'Active',
+      icon: CheckCircleIcon,
+      badge: activeDepartmentsCount.value || undefined,
+    },
+  ]
+
+  if (inactiveDepartmentsCount.value > 0) {
+    options.push({
+      value: 'inactive',
+      label: 'Inactive',
+      icon: XMarkIcon,
+      badge: inactiveDepartmentsCount.value,
+    })
+  }
+
+  if (canManageDepartments.value) {
+    options.push({
+      value: 'new',
+      label: 'New',
+      icon: PlusIcon,
+      action: openCreateDepartmentModal,
+    })
+  }
+
+  return options
+})
+
+function departmentRowSubtitle(department: Department): string {
+  const parts: string[] = []
+  if (department.departmentType) {
+    parts.push(formatDepartmentTypeLabel(department.departmentType))
+  }
+  const manager = departmentManagerLabel(department.manager)
+  if (manager && manager !== 'Not assigned') parts.push(manager)
+  if (department.isActive === false) parts.push('Inactive')
+  return parts.join(' · ')
+}
+
+function formatDepartmentRowValue(department: Department): string {
+  const count = department.staffCount || 0
+  return `${count} staff`
+}
 
 const getInitialDepartmentsView = (): 'grid' | 'table' => {
   if (import.meta.client) {
@@ -694,10 +813,18 @@ const departmentHeaderMetrics = computed(() => {
 })
 
 const filteredDepartments = computed(() => {
-  if (!searchQuery.value) return storeDepartments.value
+  let list = storeDepartments.value
+
+  if (departmentFilter.value === 'active') {
+    list = list.filter((dept) => dept.isActive !== false)
+  } else if (departmentFilter.value === 'inactive') {
+    list = list.filter((dept) => dept.isActive === false)
+  }
+
+  if (!searchQuery.value) return list
 
   const query = searchQuery.value.toLowerCase()
-  return storeDepartments.value.filter(
+  return list.filter(
     (dept: Department) =>
       dept.name.toLowerCase().includes(query) ||
       (dept.departmentType && dept.departmentType.toLowerCase().includes(query)) ||
@@ -711,8 +838,17 @@ const paginatedDepartments = computed(() => {
   return filteredDepartments.value.slice(start, end)
 })
 
+watch(departmentFilter, () => {
+  currentPage.value = 1
+})
+
+watch(searchQuery, () => {
+  currentPage.value = 1
+})
+
 const resetFilters = () => {
   searchQuery.value = ''
+  departmentFilter.value = 'all'
   currentPage.value = 1
   // Clear pagination from localStorage when filters are reset
   if (import.meta.client) {

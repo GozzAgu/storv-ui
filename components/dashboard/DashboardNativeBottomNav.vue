@@ -4,55 +4,45 @@
     aria-label="Main navigation"
   >
     <div :class="barClass" role="tablist">
-      <div ref="tabStripRef" :class="tabStripClass">
-        <span
-          class="native-tabbar__indicator"
-          :class="{ 'native-tabbar__indicator--visible': indicatorReady }"
-          :style="indicatorStyle"
-          aria-hidden="true"
-        />
-
+      <div :class="tabStripClass">
         <NuxtLink
-          v-for="(item, index) in primaryItems"
+          v-for="item in primaryItems"
           :key="item.href"
-          :ref="(el) => setTabRef(el, index)"
           :to="item.href"
           :prefetch="false"
           role="tab"
           :aria-selected="isActive(item.href)"
           :class="[tabClass, tabStateClass(isActive(item.href))]"
+          :aria-label="shortLabel(item.name)"
           @click="onPrimaryTabClick"
         >
-          <DashboardNavIcon
-            :name="item.iconKey"
-            :active="isActive(item.href)"
-            size="md"
-          />
-          <span class="native-tabbar__label text-ios-caption relative">
-            {{ shortLabel(item.name) }}
-            <span
-              v-if="showNativeComingSoon && item.name === 'Payment links'"
-              class="absolute -right-1.5 -top-1 h-1.5 w-1.5 rounded-full bg-amber-500 ring-2 ring-white/80 dark:ring-black/40"
-              aria-label="Coming soon"
+          <span class="native-tabbar__icon-wrap">
+            <DashboardNavIcon
+              :name="item.iconKey"
+              :active="isActive(item.href)"
+              size="md"
             />
           </span>
+          <span class="native-tabbar__label">{{ shortLabel(item.name) }}</span>
         </NuxtLink>
 
         <button
-          :ref="(el) => setTabRef(el, primaryItems.length)"
           type="button"
           role="tab"
           :aria-selected="moreOpen || moreHasActive"
           :aria-expanded="moreOpen"
           :class="[tabClass, tabStateClass(moreOpen || moreHasActive)]"
+          aria-label="More"
           @click="onMoreTabClick"
         >
-          <DashboardNavIcon
-            name="more"
-            :active="moreOpen || moreHasActive"
-            size="md"
-          />
-          <span class="native-tabbar__label text-ios-caption">More</span>
+          <span class="native-tabbar__icon-wrap">
+            <DashboardNavIcon
+              name="more"
+              :active="moreOpen || moreHasActive"
+              size="md"
+            />
+          </span>
+          <span class="native-tabbar__label">More</span>
         </button>
       </div>
     </div>
@@ -132,8 +122,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
-import type { ComponentPublicInstance } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import DashboardNavIcon from '~/components/dashboard/DashboardNavIcon.vue'
 import IosDrawer from '~/components/ios/IosDrawer.vue'
@@ -144,6 +133,8 @@ import {
   type DashboardNavItem,
 } from '~/utils/dashboard-native-nav'
 import { groupNativeMoreNavItems } from '~/utils/dashboard-native-more-groups'
+import { useDashboardNativeNavChrome } from '~/composables/useDashboardNativeNavChrome'
+import { usePaymentLinksLaunch } from '~/composables/usePaymentLinksLaunch'
 import { useIosHaptics } from '~/composables/useIosHaptics'
 
 const props = defineProps<{
@@ -173,20 +164,12 @@ const {
 } = useDashboardNativeNavChrome()
 
 const { impact } = useIosHaptics()
-
-const moreGroups = computed(() => groupNativeMoreNavItems(props.moreItems))
-
 const { showNativeComingSoon } = usePaymentLinksLaunch()
 
 const route = useRoute()
 const moreOpen = ref(false)
-const tabStripRef = ref<HTMLElement | null>(null)
-const tabRefs = ref<(HTMLElement | null)[]>([])
-const indicatorReady = ref(false)
-const indicatorStyle = ref({
-  transform: 'translate3d(0, 0, 0)',
-  width: '0px',
-})
+
+const moreGroups = computed(() => groupNativeMoreNavItems(props.moreItems))
 
 const visibleHrefs = computed(() =>
   [...props.primaryItems, ...props.moreItems].map((item) => item.href)
@@ -197,13 +180,6 @@ function isActive(href: string) {
 }
 
 const moreHasActive = computed(() => props.moreItems.some((item) => isActive(item.href)))
-
-const activeTabIndex = computed(() => {
-  const moreIndex = props.primaryItems.length
-  if (moreOpen.value || moreHasActive.value) return moreIndex
-  const idx = props.primaryItems.findIndex((item) => isActive(item.href))
-  return idx >= 0 ? idx : 0
-})
 
 function tabStateClass(active: boolean) {
   return active ? tabActiveClass : tabInactiveClass
@@ -217,38 +193,6 @@ function onPrimaryTabClick() {
 function onMoreTabClick() {
   moreOpen.value = !moreOpen.value
   void impact('light')
-}
-
-function setTabRef(el: Element | ComponentPublicInstance | null, index: number) {
-  const node = el instanceof HTMLElement ? el : (el as ComponentPublicInstance | null)?.$el
-  tabRefs.value[index] = node instanceof HTMLElement ? node : null
-}
-
-function updateIndicator() {
-  const tab = tabRefs.value[activeTabIndex.value]
-  const strip = tabStripRef.value
-  if (!tab || !strip) {
-    indicatorReady.value = false
-    return
-  }
-
-  const stripRect = strip.getBoundingClientRect()
-  const tabRect = tab.getBoundingClientRect()
-  const insetX = 4
-
-  indicatorStyle.value = {
-    transform: `translate3d(${tabRect.left - stripRect.left + insetX}px, 0, 0)`,
-    width: `${Math.max(0, tabRect.width - insetX * 2)}px`,
-  }
-  indicatorReady.value = true
-}
-
-let resizeObserver: ResizeObserver | undefined
-
-function scheduleIndicatorUpdate() {
-  nextTick(() => {
-    requestAnimationFrame(updateIndicator)
-  })
 }
 
 function shortLabel(name: string) {
@@ -266,24 +210,4 @@ watch(
     moreOpen.value = false
   }
 )
-
-watch([activeTabIndex, () => props.primaryItems.length], scheduleIndicatorUpdate)
-
-watch(moreOpen, scheduleIndicatorUpdate)
-
-onMounted(() => {
-  scheduleIndicatorUpdate()
-
-  if (typeof ResizeObserver !== 'undefined' && tabStripRef.value) {
-    resizeObserver = new ResizeObserver(scheduleIndicatorUpdate)
-    resizeObserver.observe(tabStripRef.value)
-  }
-
-  window.addEventListener('resize', scheduleIndicatorUpdate, { passive: true })
-})
-
-onUnmounted(() => {
-  resizeObserver?.disconnect()
-  window.removeEventListener('resize', scheduleIndicatorUpdate)
-})
 </script>

@@ -1,35 +1,33 @@
 <template>
-  <div :class="authEntranceClass(entranceDelay) + ' auth-page-header'">
+  <header class="auth-page-header">
     <a
-      v-if="showMobileLogo"
+      v-if="showLogo"
       href="https://www.storvv.com"
-      class="auth-page-header__mobile-logo lg:hidden"
+      class="auth-page-header__logo-wrap"
+      aria-label="Storvv home"
     >
-      <img :src="logoSource" alt="Storvv" width="140" height="40" />
+      <img :src="logoSource" alt="Storvv" class="auth-page-header__logo" width="120" height="36" />
     </a>
-    <p v-if="eyebrow" class="auth-page-header__eyebrow">{{ eyebrow }}</p>
     <h1 class="auth-page-header__title">{{ title }}</h1>
+    <p v-if="subtitle" class="auth-page-header__subtitle">{{ subtitle }}</p>
     <p v-if="$slots.default" class="auth-page-header__lede">
       <slot />
     </p>
-  </div>
+  </header>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useTheme } from '~/composables/useTheme'
-import { authEntranceClass } from '~/utils/auth-entrance'
 
 withDefaults(
   defineProps<{
-    eyebrow?: string
     title: string
-    showMobileLogo?: boolean
-    entranceDelay?: number
+    subtitle?: string
+    showLogo?: boolean
   }>(),
   {
-    showMobileLogo: true,
-    entranceDelay: 40,
+    showLogo: true,
   }
 )
 

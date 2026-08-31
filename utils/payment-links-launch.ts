@@ -9,7 +9,7 @@ export const PAYMENT_LINKS_NATIVE_COMING_SOON = false
 
 /** Native bottom tab promotes Payment links (Analytics moves to More) when live. */
 export function shouldPromoteNativePaymentLinksTab(): boolean {
-  return !PAYMENT_LINKS_COMING_SOON && !PAYMENT_LINKS_NATIVE_COMING_SOON
+  return false
 }
 
 export function isPaymentLinksComingSoon(): boolean {

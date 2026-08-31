@@ -1,5 +1,73 @@
 <template>
   <div :class="[pageWithFixedFooterClass, 'dash-page--unified']">
+    <div v-if="isCapacitorIos" class="ios-sales-shell" data-buybacks-page>
+      <IosPageNavBar title="Buybacks" />
+
+      <IosQuickActionBar
+        v-if="canAccess"
+        v-model="iosBuybackTab"
+        aria-label="Buyback actions"
+        :options="iosBuybackQuickActions"
+      />
+
+      <template v-if="canAccess && storesStore.currentStoreId">
+        <div
+          v-if="buybacksStore.loading && buybacksStore.buybacks.length === 0"
+          class="ios-transaction-list-skeleton"
+        >
+          <div v-for="i in 8" :key="i" class="ios-transaction-list-skeleton__row">
+            <div class="ios-transaction-list-skeleton__icon" />
+            <div class="ios-transaction-list-skeleton__body">
+              <div class="ios-transaction-list-skeleton__line ios-transaction-list-skeleton__line--title" />
+              <div class="ios-transaction-list-skeleton__line ios-transaction-list-skeleton__line--subtitle" />
+            </div>
+            <div class="ios-transaction-list-skeleton__amount" />
+          </div>
+        </div>
+
+        <DashboardTableEmptyState
+          v-else-if="buybacksStore.error"
+          :icon="InboxArrowDownIcon"
+          title="Could not load buybacks"
+          :description="buybacksStore.error"
+        />
+
+        <DashboardTableEmptyState
+          v-else-if="buybacksStore.buybacks.length === 0"
+          :icon="InboxArrowDownIcon"
+          title="No buybacks yet"
+          description="Record customer trade-ins here to add stock and track what you paid."
+        />
+
+        <div v-else class="ios-receipt-transaction-list">
+          <IosReceiptTransactionRow
+            v-for="(row, index) in buybacksStore.buybacks"
+            :key="row.id"
+            :title="row.customerName"
+            :subtitle="`${row.itemSummary} · ${folderName(row.folderId)}`"
+            :amount="formatBuybackAmount(row.purchasePrice)"
+            amount-tone="negative"
+            :date="formatWhenShort(row.createdAt)"
+            variant="debit"
+            :last="index === buybacksStore.buybacks.length - 1"
+            show-menu
+            menu-kind="buyback"
+            :menu-id="row.id"
+            @click="navigateTo(inventoryItemLink(row))"
+            @menu="toggleBuybackMenu(row.id)"
+          />
+        </div>
+      </template>
+
+      <DashboardTableEmptyState
+        v-else-if="canAccess && !storesStore.currentStoreId"
+        :icon="BuildingStorefrontIcon"
+        title="Select a store"
+        description="Use the store selector to record buybacks for a branch."
+      />
+    </div>
+
+    <template v-else>
     <DashboardPageHeader class="dash-page-header--unified">
       <template #eyebrow>
         <p :class="eyebrowClass">Inventory</p>
@@ -122,12 +190,15 @@
                     {{ formatWhen(row.createdAt) }}
                   </td>
                   <td class="dashboard-table__col-actions">
-                    <NuxtLink
-                      :to="inventoryItemLink(row)"
-                      class="text-xs font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
+                    <button
+                      type="button"
+                      class="dashboard-table__action-btn"
+                      :data-buyback-actions-anchor="row.id"
+                      aria-label="Buyback actions"
+                      @click="toggleBuybackMenu(row.id)"
                     >
-                      View in stock
-                    </NuxtLink>
+                      <EllipsisVerticalIcon class="h-4 w-4" stroke-width="2" />
+                    </button>
                   </td>
                 </tr>
               </tbody>
@@ -135,8 +206,34 @@
           </div>
       </div>
     </template>
+    </template>
 
     <CreateBuybackModal v-model="showCreateModal" />
+
+    <Teleport to="body">
+      <div
+        v-if="openBuybackMenuId && buybackForOpenMenu && buybackMenuFixedStyle"
+        data-buyback-menu
+        role="menu"
+        class="fixed z-[1000] min-w-[10rem] overflow-hidden rounded-lg bg-white/95 py-1 shadow-lg backdrop-blur-xl dark:bg-slate-950/95"
+        :style="buybackMenuFixedStyle"
+        @click.stop
+      >
+        <button
+          type="button"
+          role="menuitem"
+          class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85"
+          @click="
+            () => {
+              navigateTo(inventoryItemLink(buybackForOpenMenu))
+              closeBuybackMenu()
+            }
+          "
+        >
+          View in stock
+        </button>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -145,9 +242,13 @@ import { computed, onMounted, ref, watch } from 'vue'
 import {
   ArrowUturnLeftIcon,
   BuildingStorefrontIcon,
+  EllipsisVerticalIcon,
   InboxArrowDownIcon,
 } from '~/utils/app-icons'
 import Button from '~/components/ui/Button.vue'
+import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
+import IosQuickActionBar, { type IosQuickActionOption } from '~/components/ios/IosQuickActionBar.vue'
+import IosReceiptTransactionRow from '~/components/ios/IosReceiptTransactionRow.vue'
 import CreateBuybackModal from '~/components/buybacks/CreateBuybackModal.vue'
 import { useCustomerBuybacksStore, type CustomerBuyback } from '~/stores/customerBuybacks'
 import { useInventoryStore } from '~/stores/inventory'
@@ -161,6 +262,7 @@ definePageMeta({
 const { eyebrowClass, pageTitleClass, headerBtnClass, pageWithFixedFooterClass } =
   useDashboardPageChrome()
 const { tableShellFlexClass } = useDashboardTableChrome()
+const { isCapacitorIos } = useIsCapacitorIos()
 
 const buybacksStore = useCustomerBuybacksStore()
 const inventoryStore = useInventoryStore()
@@ -187,7 +289,53 @@ const buybackHeaderMetrics = computed(() => {
 
 const showCreateModal = ref(false)
 
+const {
+  openMenuId: openBuybackMenuId,
+  menuFixedStyle: buybackMenuFixedStyle,
+  toggleMenu: toggleBuybackMenu,
+  closeMenu: closeBuybackMenu,
+} = useAnchoredRowMenu({
+  anchorAttr: 'data-buyback-actions-anchor',
+  menuSelector: '[data-buyback-menu]',
+})
+
+const buybackForOpenMenu = computed(() => {
+  const id = openBuybackMenuId.value
+  if (!id) return null
+  return buybacksStore.buybacks.find((row) => row.id === id) ?? null
+})
+
+const iosBuybackTab = ref('list')
+
+const iosBuybackQuickActions = computed((): IosQuickActionOption[] => [
+  {
+    value: 'add',
+    label: 'Record',
+    icon: ArrowUturnLeftIcon,
+    action: () => {
+      showCreateModal.value = true
+    },
+  },
+  { value: 'list', label: 'Buybacks', icon: InboxArrowDownIcon },
+])
+
 const canAccess = computed(() => !!authStore.currentUser)
+
+function formatWhenShort(v: Date | undefined) {
+  if (!v) return ''
+  try {
+    const day = String(v.getDate()).padStart(2, '0')
+    const month = String(v.getMonth() + 1).padStart(2, '0')
+    const year = v.getFullYear()
+    return `${day}.${month}.${year}`
+  } catch {
+    return ''
+  }
+}
+
+function formatBuybackAmount(price: number) {
+  return formatCurrency(price).replace(/\.00$/, '')
+}
 
 function folderName(folderId: string) {
   return inventoryStore.getFolderById(folderId)?.name || 'Inventory'

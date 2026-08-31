@@ -4,39 +4,28 @@
     panel-title="Run your store with a calmer workflow."
     panel-description="Sign in to manage stock, ring up activity, and keep every branch aligned without jumping between tools."
   >
-    <AuthPageHeader eyebrow="Welcome back" title="Sign in to your workspace">
-      Enter your credentials to open the dashboard. New here?
-      <NuxtLink to="/signup" class="auth-link">Create an account</NuxtLink>
-    </AuthPageHeader>
+    <AuthPageHeader
+      title="Welcome back"
+      subtitle="Sign in to manage your store and products."
+    />
+
+    <AuthSegmentToggle mode="signin" />
 
     <AuthCard>
-      <Button
-        v-if="hasSavedLogin && isSupported && !awaitingTwoFactor"
-        type="button"
-        variant="outline"
-        size="md"
-        :icon="FingerPrintIcon"
-        :disabled="isLoading || isBiometricLoading"
-        :loading="isBiometricLoading"
-        extra-class="auth-btn auth-btn--outline !w-full"
-        @click="handleBiometricSignIn"
-      >
-        Sign in with {{ biometryLabel }}
-      </Button>
-
+      <div class="auth-form-panel">
       <form
-        class="auth-form space-y-5"
-        :class="{ 'mt-5': hasSavedLogin && isSupported && !awaitingTwoFactor }"
+        class="auth-form"
         @submit.prevent="awaitingTwoFactor ? submitTwoFactorCode() : handleSignIn()"
       >
         <template v-if="!awaitingTwoFactor">
           <AuthField
             v-model="form.email"
             input-id="email"
-            label="Email address"
+            label="Email"
             type="email"
             autocomplete="username"
-            placeholder="Enter your email"
+            placeholder="Your email"
+            :icon="EnvelopeIcon"
             required
           />
 
@@ -47,7 +36,12 @@
             autocomplete="current-password"
             placeholder="Enter your password"
             password-toggle
+            :icon="LockClosedIcon"
+            :biometric-autofill="isSupported && hasSavedLogin"
+            :biometric-label="`Autofill with ${biometryLabel}`"
             required
+            @focus="offerBiometricAutofillOnFocus"
+            @biometric-autofill="fillFromBiometric"
           >
             <template #label-right>
               <NuxtLink to="/forgot-password" class="auth-link shrink-0 text-xs">
@@ -56,27 +50,18 @@
             </template>
           </AuthField>
 
-          <Checkbox
-            v-if="isSupported"
-            v-model="form.enableFaceId"
-            size="sm"
-            wrapper-class="!items-center"
-            label-class="!ml-2.5 !text-xs !font-normal !text-gray-600 dark:!text-gray-400"
-          >
-            Use {{ biometryLabel }} next time on this device
-          </Checkbox>
+          <div v-if="isSupported" class="auth-checkbox-options">
+            <AuthCheckbox v-model="form.enableFaceId">
+              Use {{ biometryLabel }} next time on this device
+            </AuthCheckbox>
+          </div>
 
-          <Checkbox
-            v-model="form.rememberMe"
-            size="sm"
-            wrapper-class="!items-center"
-            label-class="!ml-2.5 !text-xs !font-normal !text-gray-600 dark:!text-gray-400"
-          >
-            Remember me
-          </Checkbox>
+          <div class="auth-checkbox-options">
+            <AuthCheckbox v-model="form.rememberMe">Remember me</AuthCheckbox>
+          </div>
         </template>
 
-        <AuthSuccessPanel v-if="actionSuccessTitle" :icon="CheckCircleIcon" class="mb-5">
+        <AuthSuccessPanel v-if="actionSuccessTitle" :icon="CheckCircleIcon" class="mb-4">
           <template #title>{{ actionSuccessTitle }}</template>
           {{ actionSuccessBody }}
         </AuthSuccessPanel>
@@ -102,17 +87,13 @@
             maxlength="6"
             required
           />
-          <Button
+          <AuthPrimaryButton
             type="button"
-            :disabled="isVerifyingTwoFactor || twoFactorCode.length !== 6"
+            label="Verify and continue"
             :loading="isVerifyingTwoFactor"
-            variant="primary"
-            size="md"
-            extra-class="auth-btn auth-btn--primary !w-full"
+            :disabled="isVerifyingTwoFactor || twoFactorCode.length !== 6"
             @click="submitTwoFactorCode"
-          >
-            Verify and continue
-          </Button>
+          />
           <button
             type="button"
             class="auth-link text-xs"
@@ -124,35 +105,29 @@
         </div>
 
         <template v-else>
-          <Button
-            type="submit"
-            :disabled="isLoading || isBiometricLoading"
+          <AuthPrimaryButton
+            label="Sign in"
             :loading="isLoading"
-            variant="primary"
-            size="md"
-            :icon="ArrowRightIcon"
-            icon-right
-            extra-class="auth-btn auth-btn--primary !w-full"
-          >
-            Sign in
-          </Button>
+            :disabled="isLoading || isBiometricFilling"
+          />
         </template>
       </form>
 
-      <template #footer>
-        Prefer to explore first?
-        <a href="https://www.storvv.com" class="auth-link">Back to home</a>
-      </template>
+      <p v-if="!awaitingTwoFactor" class="auth-auth-footer-link">
+        No account yet?
+        <NuxtLink to="/signup">Create one</NuxtLink>
+      </p>
+      </div>
     </AuthCard>
   </AuthShell>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import {
-  ArrowRightIcon,
-  FingerPrintIcon,
   CheckCircleIcon,
+  EnvelopeIcon,
+  LockClosedIcon,
 } from '~/utils/app-icons'
 import { BiometryError } from '@aparajita/capacitor-biometric-auth'
 import AuthShell from '~/components/auth/AuthShell.vue'
@@ -161,8 +136,9 @@ import AuthCard from '~/components/auth/AuthCard.vue'
 import AuthField from '~/components/auth/AuthField.vue'
 import AuthAlert from '~/components/auth/AuthAlert.vue'
 import AuthSuccessPanel from '~/components/auth/AuthSuccessPanel.vue'
-import Button from '~/components/ui/Button.vue'
-import Checkbox from '~/components/ui/Checkbox.vue'
+import AuthSegmentToggle from '~/components/auth/AuthSegmentToggle.vue'
+import AuthPrimaryButton from '~/components/auth/AuthPrimaryButton.vue'
+import AuthCheckbox from '~/components/auth/AuthCheckbox.vue'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useNativeBiometricLogin } from '~/composables/useNativeBiometricLogin'
 import { useUserStore } from '~/stores/user'
@@ -210,12 +186,13 @@ const form = ref({
 })
 
 const isLoading = ref(false)
-const isBiometricLoading = ref(false)
 const isVerifyingTwoFactor = ref(false)
 const awaitingTwoFactor = ref(false)
 const twoFactorCode = ref('')
 const pendingSignIn = ref<{ email: string; password: string } | null>(null)
 const errorMessage = ref('')
+const biometricAutofillOffered = ref(false)
+const isBiometricFilling = ref(false)
 
 const {
   isSupported,
@@ -224,11 +201,15 @@ const {
   saveLogin,
   clearSavedLogin,
   getLoginAfterBiometric,
-  refreshAvailability,
 } = useNativeBiometricLogin()
 
-const biometricStaleMessage =
-  'Saved Face ID login is out of date. Sign in with your password, keep "Use Face ID next time" checked, then try again.'
+watch(
+  hasSavedLogin,
+  (saved) => {
+    if (saved) form.value.enableFaceId = true
+  },
+  { immediate: true }
+)
 
 onMounted(() => {
   markCapacitorDocument()
@@ -237,15 +218,50 @@ onMounted(() => {
   if (typeof email === 'string' && email.trim()) {
     form.value.email = decodeURIComponent(email).trim()
   }
-  void refreshAvailability().then(async () => {
-    if (hasSavedLogin.value) {
-      form.value.enableFaceId = true
-    }
-    if (route.query.verify2fa === '1') {
-      await resumePendingTwoFactorSignIn()
-    }
-  })
+  if (route.query.verify2fa === '1') {
+    void resumePendingTwoFactorSignIn()
+  }
 })
+
+async function fillFromBiometric(options: { auto?: boolean } = {}) {
+  if (!isSupported.value || !hasSavedLogin.value || awaitingTwoFactor.value) return
+  if (isBiometricFilling.value || isLoading.value) return
+
+  if (options.auto) {
+    biometricAutofillOffered.value = true
+  }
+
+  isBiometricFilling.value = true
+  errorMessage.value = ''
+
+  try {
+    const saved = await getLoginAfterBiometric()
+    if (!saved) return
+
+    form.value.email = saved.email
+    form.value.password = saved.password
+    form.value.enableFaceId = true
+  } catch (error: unknown) {
+    if (error instanceof BiometryError) {
+      if (!options.auto) {
+        errorMessage.value = error.message || `${biometryLabel.value} autofill failed`
+      }
+      return
+    }
+    console.warn('[SignIn] Biometric autofill failed:', getErrorMessage(error) || error)
+  } finally {
+    isBiometricFilling.value = false
+  }
+}
+
+function offerBiometricAutofillOnFocus() {
+  if (biometricAutofillOffered.value) return
+  if (!isSupported.value || !hasSavedLogin.value) return
+  if (form.value.email && form.value.password) return
+
+  biometricAutofillOffered.value = true
+  void fillFromBiometric()
+}
 
 async function resumePendingTwoFactorSignIn() {
   const authStore = useAuthStore()
@@ -441,51 +457,6 @@ const handleSignIn = async () => {
     mapSignInError(error)
   } finally {
     isLoading.value = false
-  }
-}
-
-const handleBiometricSignIn = async () => {
-  isBiometricLoading.value = true
-  errorMessage.value = ''
-
-  try {
-    const saved = await getLoginAfterBiometric()
-    if (!saved) {
-      errorMessage.value =
-        'No saved login found. Sign in with your password and enable Face ID for next time.'
-      await refreshAvailability()
-      return
-    }
-
-    form.value.email = saved.email
-    form.value.password = saved.password
-    form.value.enableFaceId = true
-
-    try {
-      await completeSignIn(saved.email, saved.password)
-    } catch (signInError: unknown) {
-      const msg = getErrorMessage(signInError)
-      if (
-        msg.includes('wrong-password') ||
-        msg.includes('invalid-credential') ||
-        msg.includes('Incorrect password')
-      ) {
-        await clearSavedLogin()
-        await refreshAvailability()
-        errorMessage.value = biometricStaleMessage
-        return
-      }
-      throw signInError
-    }
-  } catch (error: unknown) {
-    console.error('Biometric sign in error:', getErrorMessage(error) || error)
-    if (error instanceof BiometryError) {
-      errorMessage.value = error.message || 'Biometric sign in failed'
-    } else {
-      mapSignInError(error)
-    }
-  } finally {
-    isBiometricLoading.value = false
   }
 }
 

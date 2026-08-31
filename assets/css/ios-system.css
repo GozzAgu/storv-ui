@@ -573,13 +573,6 @@ html.capacitor-ios.capacitor-native .dash-table-toolbar .relative:has(.ios-toolb
   opacity: 0.55;
 }
 
-html.capacitor-ios.capacitor-native .dash-table-toolbar input[type='search'] {
-  min-height: 2.25rem !important;
-  height: 2.25rem;
-  border-radius: 0.625rem !important;
-  font-size: var(--ios-type-subheadline-size) !important;
-}
-
 html.capacitor-ios.capacitor-native .dash-table-toolbar .flex-wrap.items-center.gap-2 {
   gap: 0.375rem;
 }

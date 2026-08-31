@@ -1,0 +1,162 @@
+/**
+ * Shared in-page iOS chrome (mockup-style nav bar, full-bleed pages).
+ */
+
+html.capacitor-ios.capacitor-native .dashboard-native-main--in-page {
+  padding: 0 !important;
+  background: var(--ios-home-bg, #f3f3f5);
+}
+
+html.capacitor-ios.capacitor-native .dashboard-top-nav-spacer-native--in-page {
+  height: var(--ios-global-top-bar-stack, calc(var(--cap-safe-top, 0px) + 2.5rem)) !important;
+  min-height: var(--ios-global-top-bar-stack, calc(var(--cap-safe-top, 0px) + 2.5rem)) !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-page-nav-bar {
+  display: grid;
+  grid-template-columns: 2.75rem 1fr 2.75rem;
+  align-items: center;
+  min-height: 2.75rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-page-nav-bar__side {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+html.capacitor-ios.capacitor-native .ios-page-nav-bar__side--trailing {
+  justify-content: flex-end;
+}
+
+html.capacitor-ios.capacitor-native .ios-page-nav-bar__spacer {
+  display: block;
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-page-nav-bar__title {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--ios-label);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html.capacitor-ios.capacitor-native .ios-page-nav-bar__icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  border-radius: 9999px;
+  background: transparent;
+  color: var(--ios-label);
+  -webkit-tap-highlight-color: transparent;
+}
+
+html.capacitor-ios.capacitor-native .ios-page-nav-bar__icon-btn svg {
+  width: 1.125rem;
+  height: 1.125rem;
+  stroke-width: 2;
+}
+
+html.capacitor-ios.capacitor-native .ios-page-nav-bar__icon-btn:active {
+  background: rgb(120 120 128 / 0.12);
+}
+
+html.capacitor-ios.capacitor-native .ios-sales-shell,
+html.capacitor-ios.capacitor-native .ios-inventory-items-page {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 100%;
+  padding:
+    var(--ios-page-shell-pad-top, 0.375rem)
+    var(--ios-home-inset, 20px)
+    calc(var(--dashboard-bottom-nav-stack, 5rem) + 0.75rem);
+  background: var(--ios-home-bg, #f3f3f5);
+  font-weight: 400;
+}
+
+html.capacitor-ios.capacitor-native .ios-sales-fab-host {
+  position: fixed;
+  z-index: 52;
+  right: var(--ios-home-inset, 20px);
+  bottom: calc(var(--dashboard-bottom-nav-stack, 4.5rem) + 0.75rem);
+}
+
+html.capacitor-ios.capacitor-native .ios-transaction-list-skeleton {
+  overflow: hidden;
+  border-radius: var(--ios-home-radius, 20px);
+  background: var(--ios-home-card, #fff);
+  box-shadow: var(--ios-home-card-shadow);
+}
+
+html.capacitor-ios.capacitor-native .ios-transaction-list-skeleton__row {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.875rem 1rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-transaction-list-skeleton__row:not(:last-child) {
+  border-bottom: 1px solid var(--ios-separator);
+}
+
+html.capacitor-ios.capacitor-native .ios-transaction-list-skeleton__icon,
+html.capacitor-ios.capacitor-native .ios-transaction-list-skeleton__line,
+html.capacitor-ios.capacitor-native .ios-transaction-list-skeleton__amount {
+  border-radius: 9999px;
+  background: rgb(120 120 128 / 0.12);
+  animation: ios-transaction-skeleton-pulse 1.2s ease-in-out infinite;
+}
+
+html.capacitor-ios.capacitor-native .ios-transaction-list-skeleton__icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-transaction-list-skeleton__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-transaction-list-skeleton__line {
+  height: 0.75rem;
+  border-radius: 0.375rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-transaction-list-skeleton__line--title {
+  width: 55%;
+}
+
+html.capacitor-ios.capacitor-native .ios-transaction-list-skeleton__line--subtitle {
+  width: 38%;
+}
+
+html.capacitor-ios.capacitor-native .ios-transaction-list-skeleton__amount {
+  width: 3.5rem;
+  height: 0.875rem;
+  flex-shrink: 0;
+}
+
+@keyframes ios-transaction-skeleton-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.45;
+  }
+}

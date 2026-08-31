@@ -1,6 +1,54 @@
 <template>
-  <div :class="pageClass">
-    <DashboardPageHeader class="dash-page-header--unified">
+  <div :class="[pageClass, isCapacitorIos ? 'ios-help-page' : '']">
+    <IosPageNavBar v-if="isCapacitorIos" title="Help center" />
+
+    <template v-if="isCapacitorIos">
+      <div class="ios-search-bar-host ios-search-bar-host--sticky">
+        <IosSearchBar v-model="searchQuery" placeholder="Search help topics…" />
+      </div>
+
+      <IosQuickActionBar
+        v-model="iosHelpActionTab"
+        ariaLabel="Help actions"
+        :options="iosHelpActionOptions"
+      />
+
+      <IosQuickActionBar
+        v-model="iosHelpTopicTab"
+        ariaLabel="Popular help topics"
+        :card="false"
+        :options="iosPopularTopicOptions"
+      />
+
+      <IosSettingsGroup v-if="filteredCategories.length" title="On this page">
+        <IosSettingsRow
+          v-for="(cat, index) in filteredCategories"
+          :key="cat.id"
+          :label="cat.title"
+          :last="index === filteredCategories.length - 1"
+          @click="scrollToSection(cat.id)"
+        />
+      </IosSettingsGroup>
+
+      <p
+        v-else-if="trimmedSearch"
+        class="px-1 text-sm leading-relaxed text-gray-500 dark:text-gray-400"
+      >
+        No topics match "{{ searchQuery }}". Try another word or clear the filter.
+      </p>
+
+      <IosSettingsGroup title="Common screens">
+        <IosSettingsRow
+          v-for="(link, index) in quickScreenLinks"
+          :key="link.to"
+          :label="link.label"
+          :to="link.to"
+          :last="index === quickScreenLinks.length - 1"
+        />
+      </IosSettingsGroup>
+    </template>
+
+    <DashboardPageHeader v-if="!isCapacitorIos" class="dash-page-header--unified">
       <template #eyebrow>
         <p :class="eyebrowClass">Help</p>
       </template>
@@ -75,8 +123,8 @@
       </template>
     </DashboardPageHeader>
 
-    <div :class="layoutClass">
-      <nav aria-label="Topics" :class="tocClass">
+    <div :class="[layoutClass, isCapacitorIos ? 'ios-help-layout--native' : '']">
+      <nav v-if="!isCapacitorIos" aria-label="Topics" :class="tocClass">
         <p :class="tocLabelClass">
           On this page
         </p>
@@ -239,6 +287,8 @@ const {
   backTopClass,
 } = useDashboardHelpChrome()
 
+const { isCapacitorIos } = useIsCapacitorIos()
+
 const { openAssistant } = useDashboardAssistant()
 const { resetTutorial } = useUser()
 const authStore = useAuthStore()
@@ -321,6 +371,36 @@ const quickScreenLinks = [
   { label: 'Settings', to: '/dashboard/settings' },
   { label: 'Profile', to: '/dashboard/profile' },
 ] as const
+
+const iosHelpActionTab = ref('assistant')
+const iosHelpTopicTab = ref('')
+
+const iosHelpActionOptions = computed(() => [
+  {
+    value: 'assistant',
+    label: 'Ask assistant',
+    icon: SparklesIcon,
+    action: () => openAssistant(),
+  },
+  {
+    value: 'tour',
+    label: isReplayingTour.value ? 'Starting tour…' : 'Replay tour',
+    icon: RocketLaunchIcon,
+    action: () => {
+      if (!isReplayingTour.value) void replayDashboardTour()
+    },
+  },
+])
+
+const iosPopularTopicOptions = computed(() =>
+  popularTopics.slice(0, 8).map((topic) => ({
+    value: topic.query,
+    label: topic.label,
+    action: () => {
+      searchQuery.value = topic.query
+    },
+  }))
+)
 
 const trimmedSearch = computed(() => searchQuery.value.trim())
 

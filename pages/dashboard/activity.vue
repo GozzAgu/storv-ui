@@ -1,5 +1,105 @@
 <template>
   <div :class="[pageWithFixedFooterClass, 'dash-page--unified']">
+    <div v-if="isCapacitorIos" class="ios-sales-shell" data-activity-page>
+      <IosPageNavBar title="Activity" />
+
+      <template v-if="canAccess && storeId">
+        <div v-if="!loading" class="ios-sales-chrome">
+          <div class="ios-search-bar-host ios-search-bar-host--sticky">
+            <IosSearchBar v-model="searchQuery" placeholder="Search user, item, or ID…" />
+          </div>
+          <IosQuickActionBar
+            v-model="actionFilter"
+            aria-label="Filter by action"
+            :options="iosActivityFilterOptions"
+          />
+        </div>
+
+        <div v-if="loading" class="ios-transaction-list-skeleton">
+          <div v-for="i in 8" :key="i" class="ios-transaction-list-skeleton__row">
+            <div class="ios-transaction-list-skeleton__icon" />
+            <div class="ios-transaction-list-skeleton__body">
+              <div class="ios-transaction-list-skeleton__line ios-transaction-list-skeleton__line--title" />
+              <div class="ios-transaction-list-skeleton__line ios-transaction-list-skeleton__line--subtitle" />
+            </div>
+            <div class="ios-transaction-list-skeleton__amount" />
+          </div>
+        </div>
+
+        <DashboardTableEmptyState
+          v-else-if="fetchError"
+          :icon="ClipboardDocumentListIcon"
+          title="Could not load activity"
+          :description="fetchError"
+        />
+
+        <DashboardTableEmptyState
+          v-else-if="allLogs.length === 0"
+          :icon="ClipboardDocumentListIcon"
+          title="No activity yet"
+          description="Changes to inventory folders and items will appear here automatically."
+        />
+
+        <DashboardTableEmptyState
+          v-else-if="filteredLogs.length === 0"
+          :icon="MagnifyingGlassIcon"
+          title="No matching events"
+          description="Adjust your search or filter to see more results."
+        >
+          <button
+            type="button"
+            class="text-xs font-medium text-primary-600 dark:text-primary-400"
+            @click="resetFilters()"
+          >
+            Clear filters
+          </button>
+        </DashboardTableEmptyState>
+
+        <template v-else>
+          <div class="ios-receipt-transaction-list">
+            <IosReceiptTransactionRow
+              v-for="(log, index) in paginatedLogs"
+              :key="log.id"
+              :title="displayEntityName(log)"
+              :subtitle="`${log.userDisplayName} · ${activityActionLabel(log.action)}`"
+              :amount="relativeTimeCompact(log.createdAt)"
+              amount-tone="neutral"
+              :date="formatDateShort(log.createdAt)"
+              :variant="iosActivityVariant(log.action)"
+              :last="index === paginatedLogs.length - 1"
+            />
+          </div>
+          <DashboardTablePagination
+            :current-page="currentPage"
+            :items-per-page="itemsPerPage"
+            :total="filteredLogs.length"
+            @page-change="handlePageChange"
+          />
+        </template>
+      </template>
+
+      <DashboardTableEmptyState
+        v-else-if="canAccess && !storeId && !loading"
+        :icon="BuildingStorefrontIcon"
+        title="Select a store"
+        description="Choose a branch from the store selector."
+      />
+
+      <FeatureGateCard
+        v-else-if="!canAccess"
+        feature="activity_logs"
+        :title="accessDeniedByRole ? 'Managers only' : undefined"
+        :description="
+          accessDeniedByRole
+            ? 'Activity Logs are available to super admins and store managers only.'
+            : isStaff
+              ? 'Activity Logs are not enabled for your workspace.'
+              : undefined
+        "
+      />
+    </div>
+
+    <template v-else>
     <DashboardPageHeader class="dash-page-header--unified">
       <template #eyebrow>
         <p :class="eyebrowClass">Audit trail</p>
@@ -224,6 +324,7 @@
         </div>
       </div>
     </template>
+    </template>
   </div>
 </template>
 
@@ -235,9 +336,13 @@ import {
   ClipboardDocumentListIcon,
   CubeIcon,
   FolderIcon,
+  FunnelIcon,
   InboxIcon,
   MagnifyingGlassIcon,
+  PencilSquareIcon,
+  PlusIcon,
   Squares2X2Icon,
+  TrashIcon,
 } from '~/utils/app-icons'
 import type { ActivityAction, ActivityEntityType, ActivityLog } from '~/composables/useActivityLog'
 import {
@@ -251,6 +356,12 @@ import {
 } from '~/composables/useActivityLog'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
 import FeatureGateCard from '~/components/subscription/FeatureGateCard.vue'
+import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
+import IosQuickActionBar, { type IosQuickActionOption } from '~/components/ios/IosQuickActionBar.vue'
+import IosSearchBar from '~/components/ios/IosSearchBar.vue'
+import IosReceiptTransactionRow, {
+  type ReceiptTransactionVariant,
+} from '~/components/ios/IosReceiptTransactionRow.vue'
 const {
   eyebrowClass,
   pageTitleClass,
@@ -262,6 +373,7 @@ const {
 } = useDashboardPageChrome()
 
 const { tableShellFlexClass } = useDashboardTableChrome()
+const { isCapacitorIos } = useIsCapacitorIos()
 
 const userStore = useUserStore()
 const staffStore = useStaffStore()
@@ -292,6 +404,37 @@ const actionTabs: Array<{ value: 'all' | ActivityAction; label: string }> = [
   { value: 'updated', label: 'Updated' },
   { value: 'deleted', label: 'Deleted' },
 ]
+
+const iosActivityFilterOptions = computed((): IosQuickActionOption[] =>
+  actionTabs.map((tab) => ({
+    value: tab.value,
+    label: tab.label,
+    icon:
+      tab.value === 'all'
+        ? FunnelIcon
+        : tab.value === 'created'
+          ? PlusIcon
+          : tab.value === 'updated'
+            ? PencilSquareIcon
+            : TrashIcon,
+  }))
+)
+
+function iosActivityVariant(action: ActivityAction): ReceiptTransactionVariant {
+  if (action === 'created') return 'credit'
+  if (action === 'deleted') return 'cancelled'
+  return 'pending'
+}
+
+function formatDateShort(d: Date | unknown): string {
+  if (!d) return ''
+  const date = d instanceof Date ? d : new Date(d as string | number)
+  if (Number.isNaN(date.getTime())) return ''
+  const day = String(date.getDate()).padStart(2, '0')
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const year = date.getFullYear()
+  return `${day}.${month}.${year}`
+}
 
 const AVATAR_TONES = [
   'bg-violet-100 text-violet-800 dark:bg-violet-500/20 dark:text-violet-200',
@@ -457,6 +600,24 @@ function relativeTime(d: Date | unknown): string {
   const days = Math.floor(hrs / 24)
   if (days < 7) return `${days}d ago`
   return formatDate(d)
+}
+
+/** Short relative label for iOS transaction rows (never full locale datetime). */
+function relativeTimeCompact(d: Date | unknown): string {
+  if (!d) return ''
+  const date = d instanceof Date ? d : new Date(d as string | number)
+  if (Number.isNaN(date.getTime())) return ''
+  const diffMs = Date.now() - date.getTime()
+  const mins = Math.floor(diffMs / 60000)
+  if (mins < 1) return 'Now'
+  if (mins < 60) return `${mins}m`
+  const hrs = Math.floor(mins / 60)
+  if (hrs < 24) return `${hrs}h`
+  const days = Math.floor(hrs / 24)
+  if (days < 7) return `${days}d`
+  if (days < 30) return `${Math.floor(days / 7)}w`
+  if (days < 365) return `${Math.floor(days / 30)}mo`
+  return `${Math.floor(days / 365)}y`
 }
 
 function getInitials(name: string): string {

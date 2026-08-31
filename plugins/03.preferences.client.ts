@@ -2,6 +2,7 @@ import { watch } from 'vue'
 import { isCapacitorNative } from '~/utils/capacitor-env'
 import { withTimeout } from '~/utils/with-timeout'
 import { isDemoModeActive } from '~/utils/demo-mode'
+import { scheduleNativeIdleWork } from '~/utils/capacitor-native-perf'
 
 export default defineNuxtPlugin(() => {
   if (import.meta.server) return
@@ -25,10 +26,15 @@ export default defineNuxtPlugin(() => {
       async ([user, loading]) => {
         if (loading) return
         if (user) {
+          const runInitialize = () =>
+            withTimeout(initialize(), isCapacitorNative() ? 8000 : 4000, 'preferences after auth')
+
           if (isCapacitorNative()) {
-            await withTimeout(initialize(), 8000, 'preferences after auth (native)')
+            scheduleNativeIdleWork(() => {
+              void runInitialize()
+            }, 1500)
           } else {
-            await withTimeout(initialize(), 4000, 'preferences after auth')
+            await runInitialize()
           }
         } else {
           initializeLocalOnly()

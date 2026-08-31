@@ -1,6 +1,12 @@
 <template>
-  <div :class="pageClass">
-    <DashboardPageHeader class="dash-page-header--unified" :ios-context-only="isCapacitorIos">
+  <div :class="[pageClass, isCapacitorIos ? 'ios-settings-page' : '']">
+    <IosPageNavBar v-if="isCapacitorIos" title="Settings">
+      <template v-if="!canEditSettings" #trailing>
+        <span class="ios-settings-view-only-badge">View only</span>
+      </template>
+    </IosPageNavBar>
+
+    <DashboardPageHeader v-if="!isCapacitorIos" class="dash-page-header--unified">
       <template #eyebrow>
         <p :class="eyebrowClass">Store & app</p>
       </template>

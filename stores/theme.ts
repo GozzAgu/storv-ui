@@ -1,6 +1,10 @@
 import { defineStore } from 'pinia'
+import { isCapacitorNative } from '~/utils/capacitor-env'
+import { getDefaultThemePreference, resolveStoredThemePreference } from '~/utils/theme-default'
 
 export type Theme = 'light' | 'dark' | 'system'
+
+const NATIVE_LEGACY_LIGHT_MIGRATION = 'theme-native-legacy-light-v1'
 
 /** Keep in sync with `assets/css/main.css` (`html.theme-transitioning` duration). */
 const THEME_TRANSITION_MS = 160
@@ -8,6 +12,7 @@ const THEME_TRANSITION_MS_REDUCED = 70
 
 /** Browser `setTimeout` id (avoid Node `Timeout` vs `number` mismatch in TS). */
 let themeTransitionTimer: number | null = null
+let systemThemeWatcherAttached = false
 
 function syncThemeColorMeta(isDark: boolean) {
   if (!import.meta.client) return
@@ -15,6 +20,17 @@ function syncThemeColorMeta(isDark: boolean) {
   if (el) {
     el.setAttribute('content', isDark ? '#07080c' : '#fafafa')
   }
+}
+
+function migrateLegacyNativeLightDefault(): void {
+  if (!import.meta.client || !isCapacitorNative()) return
+  if (localStorage.getItem(NATIVE_LEGACY_LIGHT_MIGRATION)) return
+
+  if (localStorage.getItem('theme') === 'light') {
+    localStorage.setItem('theme', 'system')
+  }
+
+  localStorage.setItem(NATIVE_LEGACY_LIGHT_MIGRATION, '1')
 }
 
 export const useThemeStore = defineStore('theme', {
@@ -39,14 +55,11 @@ export const useThemeStore = defineStore('theme', {
     // Initialize theme from localStorage
     initTheme() {
       if (import.meta.client && !this.initialized) {
-        // Get saved theme from localStorage
-        const savedTheme = localStorage.getItem('theme') as Theme | null
-        if (savedTheme && ['light', 'dark', 'system'].includes(savedTheme)) {
-          this.theme = savedTheme
-        } else {
-          // If no saved theme, default to light until the user changes it
-          this.theme = 'light'
-          localStorage.setItem('theme', 'light')
+        migrateLegacyNativeLightDefault()
+        const savedTheme = localStorage.getItem('theme')
+        this.theme = resolveStoredThemePreference(savedTheme)
+        if (!savedTheme) {
+          localStorage.setItem('theme', this.theme)
         }
 
         // Apply theme immediately to ensure consistency
@@ -119,21 +132,22 @@ export const useThemeStore = defineStore('theme', {
 
     // Watch for system theme changes
     watchSystemTheme() {
-      if (import.meta.client && this.theme === 'system') {
-        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-        const handleChange = () => {
-          if (this.theme === 'system') {
-            this.applyTheme()
-          }
-        }
+      if (!import.meta.client || systemThemeWatcherAttached) return
 
-        if (mediaQuery.addEventListener) {
-          mediaQuery.addEventListener('change', handleChange)
-        } else {
-          // Fallback for older browsers
-          mediaQuery.addListener(handleChange)
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+      const handleChange = () => {
+        if (this.theme === 'system') {
+          this.applyTheme()
         }
       }
+
+      if (mediaQuery.addEventListener) {
+        mediaQuery.addEventListener('change', handleChange)
+      } else {
+        mediaQuery.addListener(handleChange)
+      }
+
+      systemThemeWatcherAttached = true
     },
   },
 })

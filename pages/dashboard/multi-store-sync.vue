@@ -1,17 +1,5 @@
 <template>
-  <div :class="pageClass">
-    <DashboardPageHeader class="dash-page-header--unified">
-      <template #eyebrow>
-        <p :class="eyebrowClass">Enterprise</p>
-      </template>
-      <template #title>
-        <h1 :class="pageTitleClass">Multi-Store Sync</h1>
-      </template>
-      <template v-if="canAccess" #description>
-        <DashboardPageMetrics :metrics="syncHeaderMetrics" aria-label="Sync summary" />
-      </template>
-    </DashboardPageHeader>
-
+  <div :class="isCapacitorIos && canAccess ? '' : pageClass">
     <div v-if="!canAccess" class="py-8">
       <FeatureGateCard
         feature="multi_store_sync"
@@ -26,7 +14,29 @@
     </div>
 
     <template v-else>
-      <nav :class="segmentGroupClass" role="tablist" aria-label="Multi-store sync views">
+      <div :class="isCapacitorIos ? 'ios-sales-shell' : ''" data-multi-store-page>
+        <IosPageNavBar v-if="isCapacitorIos" title="Multi-store sync" />
+        <IosQuickActionBar
+          v-if="isCapacitorIos"
+          v-model="activeTab"
+          role="tablist"
+          aria-label="Multi-store sync views"
+          :options="iosSyncTabOptions"
+        />
+
+        <DashboardPageHeader v-if="!isCapacitorIos" class="dash-page-header--unified">
+      <template #eyebrow>
+        <p :class="eyebrowClass">Enterprise</p>
+      </template>
+      <template #title>
+        <h1 :class="pageTitleClass">Multi-Store Sync</h1>
+      </template>
+      <template v-if="canAccess" #description>
+        <DashboardPageMetrics :metrics="syncHeaderMetrics" aria-label="Sync summary" />
+      </template>
+    </DashboardPageHeader>
+
+      <nav v-if="!isCapacitorIos" :class="segmentGroupClass" role="tablist" aria-label="Multi-store sync views">
         <button
           type="button"
           role="tab"
@@ -56,7 +66,10 @@
         </button>
       </nav>
 
-      <section v-if="activeTab === 'transfer'" :class="panelClass">
+      <section
+        v-if="activeTab === 'transfer'"
+        :class="[panelClass, isCapacitorIos ? 'ios-multi-store-panel' : '']"
+      >
         <header :class="panelHeaderClass">
           <div>
             <h2 :class="sectionTitleClass">Move stock between branches</h2>
@@ -208,7 +221,7 @@
         </div>
       </section>
 
-      <div v-if="activeTab === 'reports'" :class="[tableShellClass, 'overflow-hidden']">
+      <div v-if="activeTab === 'reports'" :class="[tableShellClass, 'overflow-hidden', isCapacitorIos ? 'ios-multi-store-panel' : '']">
         <DataTableToolbar>
           <template #heading>
             <div class="min-w-0">
@@ -303,8 +316,11 @@
         </div>
       </div>
 
-      <div v-if="activeTab === 'history'" :class="[tableShellClass, 'overflow-hidden']">
-        <DataTableToolbar native-table-key="sync-transfer-history">
+      <div
+        v-if="activeTab === 'history'"
+        :class="[tableShellClass, 'overflow-hidden', isCapacitorIos ? 'ios-multi-store-panel ios-multi-store-panel--flush' : '']"
+      >
+        <DataTableToolbar v-if="!isCapacitorIos" native-table-key="sync-transfer-history">
           <template #heading>
             <div class="min-w-0">
               <h2 :class="sectionTitleClass">Transfer history</h2>
@@ -314,8 +330,16 @@
             </div>
           </template>
         </DataTableToolbar>
-        <div class="p-3 sm:p-4">
-          <div v-if="transferHistory.length === 0" :class="stateCardClass">
+        <div class="p-3 sm:p-4" :class="isCapacitorIos ? '!p-0' : ''">
+          <div v-if="transferHistory.length === 0" :class="isCapacitorIos ? '' : stateCardClass">
+            <template v-if="isCapacitorIos">
+              <DashboardTableEmptyState
+                :icon="ArrowsRightLeftIcon"
+                title="No transfer history"
+                description="Completed and pending transfers between branches will appear here."
+              />
+            </template>
+            <template v-else>
             <ArrowsRightLeftIcon
               class="mx-auto mb-3 h-8 w-8 text-[#4876c7] dark:text-[#9ab5e3]"
               stroke-width="1.5"
@@ -324,6 +348,25 @@
             <p :class="['dash-state-card__desc', cardDescClass]">
               Completed and pending transfers between branches will appear here.
             </p>
+            </template>
+          </div>
+
+          <div v-else-if="isCapacitorIos" class="ios-receipt-transaction-list">
+            <IosReceiptTransactionRow
+              v-for="(transfer, index) in transferHistory"
+              :key="transfer.id"
+              :title="`${getStoreName(transfer.sourceStoreId)} → ${getStoreName(transfer.destinationStoreId)}`"
+              :subtitle="`${getTransferStatusLabel(transfer.status)} · ${formatTransferProductSummary(transfer)}`"
+              :amount="`${transfer.items?.length ?? 0} item${(transfer.items?.length ?? 0) === 1 ? '' : 's'}`"
+              amount-tone="neutral"
+              :date="formatDateShort(transfer.createdAt)"
+              :variant="iosTransferVariant(transfer.status)"
+              :last="index === transferHistory.length - 1"
+              :show-menu="isTransferActionable(transfer)"
+              menu-kind="transfer"
+              :menu-id="transfer.id"
+              @menu="toggleTransferMenu(transfer.id)"
+            />
           </div>
 
           <ul v-else :class="transferListClass">
@@ -374,32 +417,16 @@
                   <span :class="statusBadgeClass(transfer.status)">
                     {{ getTransferStatusLabel(transfer.status) }}
                   </span>
-                  <div v-if="isTransferActionable(transfer)" :class="transferCardActionRowClass">
-                    <template v-if="transfer.status === 'pending_approval'">
-                      <Button variant="primary" size="sm" @click="approveTransfer(transfer)">
-                        Approve
-                      </Button>
-                      <Button variant="outline" size="sm" @click="cancelTransfer(transfer)">
-                        Cancel
-                      </Button>
-                    </template>
-                    <template v-else-if="transfer.status === 'in_transit'">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        :icon="TruckIcon"
-                        @click="openTrackingModal(transfer)"
-                      >
-                        Tracking
-                      </Button>
-                      <Button variant="primary" size="sm" @click="completeTransfer(transfer)">
-                        Complete
-                      </Button>
-                      <Button variant="outline" size="sm" @click="cancelTransfer(transfer)">
-                        Cancel
-                      </Button>
-                    </template>
-                  </div>
+                  <button
+                    v-if="isTransferActionable(transfer)"
+                    type="button"
+                    class="dashboard-table__action-btn"
+                    :data-transfer-actions-anchor="transfer.id"
+                    aria-label="Transfer actions"
+                    @click="toggleTransferMenu(transfer.id)"
+                  >
+                    <EllipsisVerticalIcon class="h-4 w-4" stroke-width="2" />
+                  </button>
                 </div>
               </div>
             </li>
@@ -437,6 +464,88 @@
           />
         </template>
       </Modal>
+
+      <Teleport to="body">
+        <div
+          v-if="openTransferMenuId && transferForOpenMenu && transferMenuFixedStyle"
+          data-transfer-menu
+          role="menu"
+          class="fixed z-[1000] min-w-[11rem] overflow-hidden rounded-lg bg-white/95 py-1 shadow-lg backdrop-blur-xl dark:bg-slate-950/95"
+          :style="transferMenuFixedStyle"
+          @click.stop
+        >
+          <template v-if="transferForOpenMenu.status === 'pending_approval'">
+            <button
+              type="button"
+              role="menuitem"
+              class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85"
+              @click="
+                () => {
+                  approveTransfer(transferForOpenMenu)
+                  closeTransferMenu()
+                }
+              "
+            >
+              Approve
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
+              @click="
+                () => {
+                  cancelTransfer(transferForOpenMenu)
+                  closeTransferMenu()
+                }
+              "
+            >
+              Cancel
+            </button>
+          </template>
+          <template v-else-if="transferForOpenMenu.status === 'in_transit'">
+            <button
+              type="button"
+              role="menuitem"
+              class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85"
+              @click="
+                () => {
+                  openTrackingModal(transferForOpenMenu)
+                  closeTransferMenu()
+                }
+              "
+            >
+              Tracking
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85"
+              @click="
+                () => {
+                  completeTransfer(transferForOpenMenu)
+                  closeTransferMenu()
+                }
+              "
+            >
+              Complete
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
+              @click="
+                () => {
+                  cancelTransfer(transferForOpenMenu)
+                  closeTransferMenu()
+                }
+              "
+            >
+              Cancel
+            </button>
+          </template>
+        </div>
+      </Teleport>
+      </div>
     </template>
   </div>
 </template>
@@ -447,10 +556,16 @@ import {
   ArrowsRightLeftIcon,
   ExclamationTriangleIcon,
   ArrowDownTrayIcon,
+  EllipsisVerticalIcon,
   TruckIcon,
 } from '~/utils/app-icons'
 import Button from '~/components/ui/Button.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
+import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
+import IosQuickActionBar, { type IosQuickActionOption } from '~/components/ios/IosQuickActionBar.vue'
+import IosReceiptTransactionRow, {
+  type ReceiptTransactionVariant,
+} from '~/components/ios/IosReceiptTransactionRow.vue'
 import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
 import Modal from '~/components/ui/Modal.vue'
 import { useStoresStore } from '~/stores/stores'
@@ -524,6 +639,30 @@ const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
 
 // Security check - only super admins with Enterprise plan can access
 const canAccess = computed(() => !isStaff.value && canUseSubscriptionFeature('multi_store_sync'))
+const { isCapacitorIos } = useIsCapacitorIos()
+
+const iosSyncTabOptions: IosQuickActionOption[] = [
+  { value: 'transfer', label: 'Transfer', icon: ArrowsRightLeftIcon },
+  { value: 'reports', label: 'Reports', icon: ArrowDownTrayIcon },
+  { value: 'history', label: 'History', icon: TruckIcon },
+]
+
+function iosTransferVariant(status: string): ReceiptTransactionVariant {
+  const s = (status || '').toLowerCase()
+  if (s === 'completed' || s === 'completed_partial' || s === 'partial') return 'credit'
+  if (s === 'cancelled') return 'cancelled'
+  return 'pending'
+}
+
+function formatDateShort(date: unknown) {
+  if (!date) return ''
+  const d =
+    date && typeof date === 'object' && 'toDate' in date
+      ? (date as { toDate: () => Date }).toDate()
+      : new Date(date as string | number)
+  if (Number.isNaN(d.getTime())) return ''
+  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+}
 
 // State
 const activeTab = ref<'transfer' | 'reports' | 'history'>('transfer')
@@ -1692,6 +1831,24 @@ const isTransferActionable = (transfer: any) => {
   const s = (transfer.status || '').toLowerCase()
   return s === 'pending_approval' || s === 'in_transit'
 }
+
+const {
+  openMenuId: openTransferMenuId,
+  menuFixedStyle: transferMenuFixedStyle,
+  toggleMenu: toggleTransferMenu,
+  closeMenu: closeTransferMenu,
+} = useAnchoredRowMenu({
+  anchorAttr: 'data-transfer-actions-anchor',
+  menuSelector: '[data-transfer-menu]',
+  menuWidth: 176,
+  estimatedMenuHeight: 132,
+})
+
+const transferForOpenMenu = computed(() => {
+  const id = openTransferMenuId.value
+  if (!id) return null
+  return transferHistory.value.find((transfer) => transfer.id === id) ?? null
+})
 
 const formatDate = (date: any) => {
   if (!date) return ''

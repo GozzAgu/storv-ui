@@ -3,6 +3,7 @@
 @import '@nuxt/ui';
 @import './capacitor-native.css';
 @import './auth-shell.css';
+@import './auth-modern.css';
 @import './dashboard-shell.css';
 @import './dashboard-cards.css';
 @import './dashboard-pages.css';

@@ -19,7 +19,7 @@ describe('resolveNativePrimaryOrder', () => {
 })
 
 describe('shouldPromoteNativePaymentLinksTab', () => {
-  it('is true while both coming-soon flags are off', () => {
-    expect(shouldPromoteNativePaymentLinksTab()).toBe(true)
+  it('is false so payment links stay in the More menu', () => {
+    expect(shouldPromoteNativePaymentLinksTab()).toBe(false)
   })
 })

@@ -20,6 +20,7 @@ export const NATIVE_PRIMARY_ORDER_PAYMENT_LINKS = [
   'Inventory',
   'Sales',
   'Payment links',
+  'Profile',
 ] as const
 
 /** @deprecated Use resolveNativePrimaryOrder instead. */
@@ -54,6 +55,7 @@ export function nativeNavShortLabel(name: string): string {
     Inventory: 'Stock',
     Sales: 'Sales',
     Receipts: 'Sales',
+    Profile: 'Profile',
     Departments: 'Teams',
     Analytics: 'Analytics',
     'Payment links': 'Links',

@@ -1,11 +1,31 @@
 <template>
   <ClientOnly>
     <div
-      class="dashboard-page-with-footer flex w-full max-w-none flex-col gap-5 pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:gap-6 sm:pb-32 min-h-[calc(100svh-4.5rem)]"
+      :class="[
+        'dashboard-page-with-footer flex w-full max-w-none flex-col min-h-[calc(100svh-4.5rem)]',
+        isCapacitorIos ? '' : 'gap-5 pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:gap-6 sm:pb-32',
+      ]"
     >
       <!-- Initial loading -->
       <template v-if="isInitialLoading">
-        <div class="overflow-hidden rounded-sm bg-white dark:!bg-dashboard-card">
+        <div v-if="isCapacitorIos" class="ios-sales-shell">
+          <div class="ios-page-nav-bar" aria-hidden="true">
+            <span class="ios-page-nav-bar__spacer" />
+            <div class="h-5 w-28 animate-pulse rounded bg-gray-200/80 dark:bg-white/10" />
+            <span class="ios-page-nav-bar__spacer" />
+          </div>
+          <div class="ios-transaction-list-skeleton">
+            <div v-for="i in 8" :key="i" class="ios-transaction-list-skeleton__row">
+              <div class="ios-transaction-list-skeleton__icon" />
+              <div class="ios-transaction-list-skeleton__body">
+                <div class="ios-transaction-list-skeleton__line ios-transaction-list-skeleton__line--title" />
+                <div class="ios-transaction-list-skeleton__line ios-transaction-list-skeleton__line--subtitle" />
+              </div>
+              <div class="ios-transaction-list-skeleton__amount" />
+            </div>
+          </div>
+        </div>
+        <div v-else class="overflow-hidden rounded-sm bg-white dark:!bg-dashboard-card">
           <div class="border-b border-gray-200/80 px-4 py-3 dark:border-gray-800">
             <div class="flex gap-8">
               <div class="h-4 w-20 animate-pulse rounded bg-gray-200 dark:bg-white/10"></div>
@@ -31,8 +51,265 @@
       </template>
 
       <template v-else>
-        <div class="flex w-full min-h-0 flex-1 flex-col gap-4 sm:gap-5 dash-page--unified" data-receipts-page>
-          <DashboardPageHeader class="dash-page-header--unified" :ios-context-only="isCapacitorIos">
+        <!-- iOS: mockup-style transactions UI (no tables, no layout top nav) -->
+        <div v-if="isCapacitorIos" class="ios-sales-shell" data-receipts-page>
+          <IosPageNavBar :title="iosSalesNavTitle" />
+
+          <IosQuickActionBar
+            v-model="activeTab"
+            role="tablist"
+            aria-label="Sales views and actions"
+            :options="salesQuickActionOptions"
+          />
+
+          <template v-if="activeTab === 'receipts'">
+            <div v-if="!receiptsStore.loading" class="ios-sales-chrome">
+              <div class="ios-search-bar-host ios-search-bar-host--sticky">
+                <IosSearchBar v-model="searchQuery" placeholder="Search sales…" />
+              </div>
+              <IosQuickActionBar
+                v-model="statusFilter"
+                aria-label="Filter by status"
+                :options="receiptStatusQuickActionOptions"
+              />
+            </div>
+
+            <div v-if="receiptsStore.loading" class="ios-transaction-list-skeleton">
+              <div v-for="i in 8" :key="i" class="ios-transaction-list-skeleton__row">
+                <div class="ios-transaction-list-skeleton__icon" />
+                <div class="ios-transaction-list-skeleton__body">
+                  <div class="ios-transaction-list-skeleton__line ios-transaction-list-skeleton__line--title" />
+                  <div class="ios-transaction-list-skeleton__line ios-transaction-list-skeleton__line--subtitle" />
+                </div>
+                <div class="ios-transaction-list-skeleton__amount" />
+              </div>
+            </div>
+
+            <DashboardTableEmptyState
+              v-else-if="sortedFilteredReceipts.length === 0"
+              :icon="ReceiptPercentIcon"
+              :title="
+                searchQuery || statusFilter !== 'all' || dateFilter !== 'all'
+                  ? 'No sales found'
+                  : 'No sales yet'
+              "
+              :description="
+                searchQuery || statusFilter !== 'all' || dateFilter !== 'all'
+                  ? 'Try adjusting your search, status, or date filters.'
+                  : 'Create your first sale to record revenue and track payments.'
+              "
+            />
+
+            <template v-else>
+              <div class="ios-receipt-transaction-list">
+                <IosReceiptTransactionRow
+                  v-for="(receipt, index) in paginatedReceipts"
+                  :key="receipt.id"
+                  :title="receipt.customerName || 'Walk-in customer'"
+                  :subtitle="getReceiptTransactionSubtitle(receipt)"
+                  :amount="getReceiptTransactionAmount(receipt).text"
+                  :amount-tone="getReceiptTransactionAmount(receipt).tone"
+                  :date="formatReceiptTransactionDate(receipt.date)"
+                  :variant="getReceiptTransactionVariant(receipt)"
+                  :last="index === paginatedReceipts.length - 1"
+                  show-menu
+                  :menu-id="receipt.id"
+                  @click="handleViewReceipt(receipt)"
+                  @menu="toggleReceiptMenu(receipt.id)"
+                />
+              </div>
+              <DashboardTablePagination
+                :current-page="currentPage"
+                :items-per-page="itemsPerPage"
+                :total="sortedFilteredReceipts.length"
+                @page-change="handlePageChange"
+              />
+            </template>
+          </template>
+
+          <template v-else-if="activeTab === 'outstanding'">
+            <div v-if="!receiptsStore.loading" class="ios-sales-chrome">
+              <div class="ios-search-bar-host ios-search-bar-host--sticky">
+                <IosSearchBar
+                  v-model="outstandingSearchQuery"
+                  placeholder="Search customer or receipt #…"
+                />
+              </div>
+            </div>
+
+            <DashboardTableEmptyState
+              v-if="filteredOutstandingReceipts.length === 0 && !receiptsStore.loading"
+              :icon="ClockIcon"
+              title="No outstanding payments"
+              description="Create a sale with “Balance due” when a customer pays a deposit. It will appear here until paid in full."
+            />
+
+            <div v-else-if="!receiptsStore.loading" class="ios-receipt-transaction-list">
+              <IosReceiptTransactionRow
+                v-for="(row, index) in filteredOutstandingReceipts"
+                :key="row.id"
+                :title="row.customerName || 'Walk-in customer'"
+                :subtitle="getOutstandingTransactionSubtitle(row)"
+                :amount="getOutstandingTransactionAmount(row).text"
+                :amount-tone="getOutstandingTransactionAmount(row).tone"
+                :date="formatReceiptTransactionDate(row.date)"
+                variant="pending"
+                :last="index === filteredOutstandingReceipts.length - 1"
+                show-menu
+                :menu-id="row.id"
+                @click="viewOutstandingReceipt(row)"
+                @menu="toggleReceiptMenu(row.id)"
+              />
+            </div>
+          </template>
+
+          <template v-else-if="activeTab === 'customers'">
+            <div v-if="!receiptsStore.loading" class="ios-sales-chrome">
+              <div class="ios-search-bar-host ios-search-bar-host--sticky">
+                <IosSearchBar v-model="customersSearchQuery" placeholder="Search customers…" />
+              </div>
+              <IosQuickActionBar
+                v-model="customersSortBy"
+                aria-label="Sort customers"
+                :options="customerSortQuickActionOptions"
+              />
+            </div>
+
+            <div v-if="receiptsStore.loading" class="ios-transaction-list-skeleton">
+              <div v-for="i in 6" :key="i" class="ios-transaction-list-skeleton__row">
+                <div class="ios-transaction-list-skeleton__icon" />
+                <div class="ios-transaction-list-skeleton__body">
+                  <div class="ios-transaction-list-skeleton__line ios-transaction-list-skeleton__line--title" />
+                  <div class="ios-transaction-list-skeleton__line ios-transaction-list-skeleton__line--subtitle" />
+                </div>
+                <div class="ios-transaction-list-skeleton__amount" />
+              </div>
+            </div>
+
+            <DashboardTableEmptyState
+              v-else-if="filteredCustomers.length === 0"
+              :icon="UsersIcon"
+              :title="customersSearchQuery ? 'No customers found' : 'No customers yet'"
+              :description="
+                customersSearchQuery
+                  ? 'Try another name, phone number, or email.'
+                  : 'Customers are created automatically when you add them on a sale.'
+              "
+            />
+
+            <template v-else>
+              <div class="ios-receipt-transaction-list">
+                <div
+                  v-for="(customer, customerIndex) in paginatedCustomers"
+                  :key="customer.id"
+                  class="ios-receipt-transaction-list__group"
+                  :class="{ 'ios-receipt-transaction-list__group--last': customerIndex === paginatedCustomers.length - 1 }"
+                >
+                  <IosReceiptTransactionRow
+                    :title="customer.name"
+                    :subtitle="getCustomerTransactionSubtitle(customer)"
+                    :amount="getCustomerTransactionAmount(customer).text"
+                    :amount-tone="getCustomerTransactionAmount(customer).tone"
+                    :date="formatReceiptTransactionDate(customer.lastOrderDate)"
+                    :variant="getCustomerTransactionVariant(customer)"
+                    show-menu
+                    menu-kind="customer"
+                    :menu-id="customer.id"
+                    @click="toggleCustomerExpanded(customer.id)"
+                    @menu="toggleCustomerMenu(customer.id)"
+                  />
+                  <div
+                    v-if="expandedCustomers[customer.id]"
+                    class="ios-receipt-transaction-list__nested"
+                  >
+                    <IosReceiptTransactionRow
+                      v-for="(receipt, receiptIndex) in getCustomerReceipts(customer.id)"
+                      :key="receipt.id"
+                      nested
+                      :title="receipt.receiptNumber"
+                      :subtitle="getReceiptTransactionSubtitle(receipt)"
+                      :amount="getReceiptTransactionAmount(receipt).text"
+                      :amount-tone="getReceiptTransactionAmount(receipt).tone"
+                      :date="formatReceiptTransactionDate(receipt.date)"
+                      :variant="getReceiptTransactionVariant(receipt)"
+                      :last="receiptIndex === getCustomerReceipts(customer.id).length - 1"
+                      show-menu
+                      :menu-id="receipt.id"
+                      @click="goToReceiptFromCustomer(receipt)"
+                      @menu="toggleReceiptMenu(receipt.id)"
+                    />
+                  </div>
+                </div>
+              </div>
+              <DashboardTablePagination
+                :current-page="customersCurrentPage"
+                :items-per-page="customersItemsPerPage"
+                :total="filteredCustomers.length"
+                @page-change="handleCustomersPageChange"
+              />
+            </template>
+          </template>
+
+          <IosDrawer
+            v-if="isCapacitorIos"
+            v-model="showSalesMoreSheet"
+            title="Sales options"
+            subtitle="Views and filters"
+            variant="assistant"
+            aria-label="Sales options"
+          >
+            <IosGroupedSection>
+              <IosNativeListRow
+                v-if="canCreate"
+                title="Outstanding"
+                :subtitle="
+                  outstandingReceipts.length > 0
+                    ? `${outstandingReceipts.length} open balance${outstandingReceipts.length === 1 ? '' : 's'}`
+                    : 'No open balances'
+                "
+                :show-chevron="false"
+                @click="selectSalesTabFromSheet('outstanding')"
+              />
+              <IosNativeListRow
+                title="Customers"
+                subtitle="Browse customer profiles"
+                :show-chevron="false"
+                @click="selectSalesTabFromSheet('customers')"
+              />
+            </IosGroupedSection>
+            <IosGroupedSection v-if="activeTab === 'receipts'" header="Date range">
+              <IosNativeListRow
+                v-for="option in receiptDateFilterOptions"
+                :key="option.value"
+                :title="option.label"
+                :show-chevron="false"
+                @click="selectReceiptDateFilter(option.value)"
+              />
+            </IosGroupedSection>
+          </IosDrawer>
+
+          <CreateReceiptModal
+            v-model="showCreateReceiptModal"
+            @receipt-created="handleReceiptCreated"
+          />
+          <QuickSaleModal v-model="showQuickSaleModal" @sale-completed="handleQuickSaleCompleted" />
+          <ViewReceiptModal v-model="showViewReceiptModal" :receipt="selectedReceipt" />
+          <ReturnReceiptModal
+            v-model="showReturnReceiptModal"
+            :receipt="selectedReceipt"
+            @returned="handleReceiptReturned"
+          />
+          <DeleteReceiptModal
+            v-model="showDeleteReceiptModal"
+            :receipt="selectedReceipt"
+            @confirmDelete="handleReceiptConfirmDelete"
+          />
+          <ReceiptTimelineModal v-model="showTimelineModal" :receipt="selectedReceipt" />
+        </div>
+
+        <!-- Web / desktop -->
+        <div v-else class="flex w-full min-h-0 flex-1 flex-col gap-4 sm:gap-5 dash-page--unified" data-receipts-page>
+          <DashboardPageHeader class="dash-page-header--unified">
             <template #eyebrow>
               <p class="dash-eyebrow">Sales</p>
             </template>
@@ -42,7 +319,7 @@
             <template v-if="!receiptsStore.loading" #description>
               <DashboardPageMetrics :metrics="receiptsHeaderMetrics" aria-label="Sales summary" />
             </template>
-            <template v-if="canCreate && isCapacitorIos" #actions>
+            <template v-if="canCreate" #actions>
               <Button
                 variant="outline"
                 size="sm"
@@ -66,64 +343,8 @@
             </template>
           </DashboardPageHeader>
 
-          <IosSegmentedControl
-            v-if="isCapacitorIos"
-            v-model="activeTab"
-            role="tablist"
-            aria-label="Sales views"
-            :options="salesTabOptions"
-          />
-
-          <div
-            v-if="isCapacitorIos && !receiptsStore.loading && activeTab === 'receipts'"
-            class="ios-sales-chrome"
-          >
-            <div class="ios-search-bar-host">
-              <IosSearchBar v-model="searchQuery" placeholder="Search sales…" />
-            </div>
-            <IosSegmentedControl
-              v-model="statusFilter"
-              compact
-              aria-label="Filter by status"
-              :options="receiptStatusFilterOptions"
-            />
-            <IosSegmentedControl
-              v-model="dateFilter"
-              compact
-              aria-label="Filter by date"
-              :options="receiptDateFilterOptions"
-            />
-          </div>
-
-          <div
-            v-if="isCapacitorIos && !receiptsStore.loading && activeTab === 'outstanding'"
-            class="ios-sales-chrome"
-          >
-            <div class="ios-search-bar-host">
-              <IosSearchBar
-                v-model="outstandingSearchQuery"
-                placeholder="Search customer or receipt #…"
-              />
-            </div>
-          </div>
-
-          <div
-            v-if="isCapacitorIos && !receiptsStore.loading && activeTab === 'customers'"
-            class="ios-sales-chrome"
-          >
-            <div class="ios-search-bar-host">
-              <IosSearchBar v-model="customersSearchQuery" placeholder="Search customers…" />
-            </div>
-            <IosSegmentedControl
-              v-model="customersSortBy"
-              compact
-              aria-label="Sort customers"
-              :options="customerSortFilterOptions"
-            />
-          </div>
-
           <!-- Tabs -->
-          <nav v-else :class="segmentTabsClass" aria-label="Sales views" role="tablist">
+          <nav :class="segmentTabsClass" aria-label="Sales views" role="tablist">
             <button
               type="button"
               role="tab"
@@ -460,21 +681,18 @@
                           : 'contents'
                       "
                     >
-                      <!-- Mobile: card list (no horizontal scroll); iOS adds swipe actions -->
+                      <!-- Mobile: card list (web only; iOS uses dedicated shell above) -->
                       <div
                         class="receipts-mobile-list space-y-2 sm:hidden"
-                        :class="[
+                        :class="
                           isReceiptsFullscreen
                             ? 'min-h-0 flex-1 overflow-y-auto px-4 pb-4 lg:px-8'
-                            : 'block px-0',
-                          isCapacitorIos ? 'receipts-mobile-list--ios' : '',
-                        ]"
+                            : 'block px-0'
+                        "
                       >
-                        <component
-                          :is="isCapacitorIos ? IosSwipeActions : 'div'"
+                        <div
                           v-for="receipt in paginatedReceipts"
                           :key="receipt.id"
-                          v-bind="isCapacitorIos ? { actions: receiptSwipeActions(receipt) } : {}"
                         >
                           <div
                             :data-receipt-row="receipt.id"
@@ -587,7 +805,7 @@
                             </div>
                           </div>
                           </div>
-                        </component>
+                        </div>
                       </div>
                       <!-- Desktop / iOS native card table -->
                       <div
@@ -1170,7 +1388,7 @@
           <template v-else-if="activeTab === 'outstanding'">
             <div :class="tableShellFlexClass">
               <DataTableToolbar
-                v-if="!receiptsStore.loading && !isCapacitorIos"
+                v-if="!receiptsStore.loading"
                 native-table-key="receipts-outstanding"
               >
                 <template #filters>
@@ -1193,7 +1411,7 @@
                 ]"
               />
 
-              <div v-else class="min-h-0 flex-1 overflow-x-auto">
+              <div v-else class="outstanding-table-wrap min-h-0 flex-1 overflow-x-auto">
                 <table class="dashboard-table min-w-full">
                   <thead>
                     <tr>
@@ -1276,7 +1494,7 @@
           <template v-else-if="activeTab === 'customers'">
             <div :class="tableShellFlexClass">
               <DataTableToolbar
-                v-if="!receiptsStore.loading && !isCapacitorIos"
+                v-if="!receiptsStore.loading"
                 native-table-key="receipts-customers"
               >
                 <template #filters>
@@ -1335,7 +1553,7 @@
                 "
               />
               <div v-else class="flex min-h-0 flex-1 flex-col">
-                <div class="min-h-0 flex-1 overflow-x-auto">
+                <div class="customers-table-wrap min-h-0 flex-1 overflow-x-auto">
                   <table class="dashboard-table min-w-full">
                     <thead>
                       <tr>
@@ -1727,6 +1945,10 @@
 import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import {
   ReceiptPercentIcon,
+  PlusIcon,
+  FunnelIcon,
+  ArrowUturnLeftIcon,
+  CurrencyDollarIcon,
   MagnifyingGlassIcon,
   ArrowPathIcon,
   ArrowDownTrayIcon,
@@ -1745,6 +1967,7 @@ import {
   BarsArrowUpIcon,
   ClipboardDocumentIcon,
   ArrowsPointingOutIcon,
+  ArrowTopRightOnSquareIcon,
   EllipsisVerticalIcon,
   QrCodeIcon,
 } from '~/utils/app-icons'
@@ -1755,9 +1978,20 @@ import Modal from '~/components/ui/Modal.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 // @ts-ignore
 import CreateReceiptModal from '~/components/receipts/CreateReceiptModal.vue'
+import IosQuickActionBar, {
+  type IosQuickActionOption,
+} from '~/components/ios/IosQuickActionBar.vue'
+import IosDrawer from '~/components/ios/IosDrawer.vue'
+import IosGroupedSection from '~/components/ios/IosGroupedSection.vue'
+import IosNativeListRow from '~/components/ios/IosNativeListRow.vue'
 import IosSearchBar from '~/components/ios/IosSearchBar.vue'
 import IosSwipeActions, { type IosSwipeAction } from '~/components/ios/IosSwipeActions.vue'
-import IosSegmentedControl from '~/components/ios/IosSegmentedControl.vue'
+import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
+import IosReceiptTransactionRow from '~/components/ios/IosReceiptTransactionRow.vue'
+import type {
+  ReceiptTransactionAmountTone,
+  ReceiptTransactionVariant,
+} from '~/components/ios/IosReceiptTransactionRow.vue'
 // @ts-ignore
 import QuickSaleModal from '~/components/receipts/QuickSaleModal.vue'
 // @ts-ignore
@@ -1785,6 +2019,7 @@ import { useCopy } from '~/composables/useCopy'
 import { usePreferences } from '~/composables/usePreferences'
 import { useAppToast } from '~/composables/useAppToast'
 import { getVisibleMenuAnchorElement, computeFixedAnchoredMenuStyle } from '~/utils/menuAnchor'
+import { scheduleNativeIdleWork } from '~/utils/capacitor-native-perf'
 import { EMPTY_CELL } from '~/utils/ui-empty'
 import { getCustomerContactKey } from '~/utils/customer-key'
 import { useCustomerAccountsStore } from '~/stores/customerAccounts'
@@ -1992,6 +2227,17 @@ const {
   segmentTabsBtnActiveClass,
 } = useDashboardPageChrome()
 const { isCapacitorIos } = useIsCapacitorIos()
+
+const iosSalesNavTitle = computed(() => {
+  switch (activeTab.value) {
+    case 'outstanding':
+      return 'Outstanding'
+    case 'customers':
+      return 'Customers'
+    default:
+      return 'Transactions'
+  }
+})
 
 const { tableShellFlexClass } = useDashboardTableChrome()
 
@@ -2330,11 +2576,67 @@ const salesTabOptions = computed(() => [
   { value: 'customers', label: 'Customers' },
 ])
 
+const showSalesMoreSheet = ref(false)
+
+const salesQuickActionOptions = computed((): IosQuickActionOption[] => {
+  if (canCreate.value) {
+    return [
+      {
+        value: 'new',
+        label: 'New sale',
+        icon: PlusIcon,
+        action: openCreateReceiptModal,
+      },
+      {
+        value: 'quick',
+        label: 'Quick sale',
+        icon: QrCodeIcon,
+        action: openQuickSaleModal,
+      },
+      { value: 'receipts', label: 'Sales', icon: ReceiptPercentIcon },
+      {
+        value: 'more',
+        label: 'More',
+        icon: EllipsisVerticalIcon,
+        action: () => {
+          showSalesMoreSheet.value = true
+        },
+      },
+    ]
+  }
+
+  return [
+    { value: 'receipts', label: 'Sales', icon: ReceiptPercentIcon },
+    {
+      value: 'outstanding',
+      label: 'Outstanding',
+      icon: ClockIcon,
+      badge: outstandingReceipts.value.length || undefined,
+    },
+    { value: 'customers', label: 'Customers', icon: UsersIcon },
+    {
+      value: 'more',
+      label: 'More',
+      icon: EllipsisVerticalIcon,
+      action: () => {
+        showSalesMoreSheet.value = true
+      },
+    },
+  ]
+})
+
+const receiptStatusQuickActionOptions: IosQuickActionOption[] = [
+  { value: 'all', label: 'All', icon: FunnelIcon },
+  { value: 'completed', label: 'Completed', icon: CheckCircleIcon },
+  { value: 'pending', label: 'Pending', icon: ClockIcon },
+  { value: 'refunded', label: 'Refunded', icon: ArrowUturnLeftIcon },
+]
+
 const receiptStatusFilterOptions = [
   { value: 'all', label: 'All' },
-  { value: 'completed', label: 'Done' },
+  { value: 'completed', label: 'Completed' },
   { value: 'pending', label: 'Pending' },
-  { value: 'refunded', label: 'Refund' },
+  { value: 'refunded', label: 'Refunded' },
 ]
 
 const receiptDateFilterOptions = [
@@ -2342,6 +2644,13 @@ const receiptDateFilterOptions = [
   { value: 'today', label: 'Today' },
   { value: 'week', label: 'Week' },
   { value: 'month', label: 'Month' },
+]
+
+const customerSortQuickActionOptions: IosQuickActionOption[] = [
+  { value: 'name', label: 'Name', icon: UserCircleIcon },
+  { value: 'orders', label: 'Orders', icon: ClipboardDocumentIcon },
+  { value: 'spent', label: 'Spent', icon: CurrencyDollarIcon },
+  { value: 'lastOrder', label: 'Recent', icon: ClockIcon },
 ]
 
 const customerSortFilterOptions = [
@@ -2786,6 +3095,90 @@ const formatDate = (date: string | Date) => {
   })
 }
 
+function formatReceiptTransactionDate(date: string | Date) {
+  const dateObj = date instanceof Date ? date : new Date(date)
+  const day = String(dateObj.getDate()).padStart(2, '0')
+  const month = String(dateObj.getMonth() + 1).padStart(2, '0')
+  const year = dateObj.getFullYear()
+  return `${day}.${month}.${year}`
+}
+
+function getReceiptTransactionSubtitle(receipt: Receipt): string {
+  const parts: string[] = []
+  if (receipt.paymentMethod?.trim()) parts.push(receipt.paymentMethod.trim())
+  parts.push(receipt.receiptNumber)
+  return parts.join(' · ')
+}
+
+function getReceiptTransactionVariant(receipt: Receipt): ReceiptTransactionVariant {
+  switch (receipt.status) {
+    case 'completed':
+      return 'credit'
+    case 'refunded':
+      return 'debit'
+    case 'cancelled':
+      return 'cancelled'
+    default:
+      return 'pending'
+  }
+}
+
+function getReceiptTransactionAmount(receipt: Receipt): {
+  text: string
+  tone: ReceiptTransactionAmountTone
+} {
+  const formatted = formatCurrency(receipt.total)
+  if (receipt.status === 'refunded') {
+    return { text: `- ${formatted}`, tone: 'negative' }
+  }
+  if (receipt.status === 'completed') {
+    return { text: `+ ${formatted}`, tone: 'positive' }
+  }
+  return { text: formatted, tone: 'neutral' }
+}
+
+function getOutstandingTransactionSubtitle(receipt: Receipt): string {
+  const paid = formatCurrency(outstandingAmountPaid(receipt))
+  return `${receipt.receiptNumber} · ${paid} paid`
+}
+
+function getOutstandingTransactionAmount(receipt: Receipt): {
+  text: string
+  tone: ReceiptTransactionAmountTone
+} {
+  return {
+    text: formatCurrency(outstandingBalanceDue(receipt)),
+    tone: 'warning',
+  }
+}
+
+function getCustomerTransactionSubtitle(customer: CustomerDisplay): string {
+  const parts: string[] = []
+  if (customer.email?.trim()) parts.push(customer.email.trim())
+  else if (customer.phone?.trim()) parts.push(customer.phone.trim())
+  const orderLabel = `${customer.receipts.length} order${customer.receipts.length === 1 ? '' : 's'}`
+  parts.push(orderLabel)
+  if (hasBalanceFeature.value && getCustomerBalance(customer) > 0) {
+    parts.push(`${formatCurrency(getCustomerBalance(customer))} owed`)
+  }
+  return parts.join(' · ')
+}
+
+function getCustomerTransactionVariant(customer: CustomerDisplay): ReceiptTransactionVariant {
+  if (hasBalanceFeature.value && getCustomerBalance(customer) > 0) return 'pending'
+  return 'customer'
+}
+
+function getCustomerTransactionAmount(customer: CustomerDisplay): {
+  text: string
+  tone: ReceiptTransactionAmountTone
+} {
+  return {
+    text: `+ ${formatCurrency(customer.totalSpent)}`,
+    tone: 'positive',
+  }
+}
+
 const formatTime = (date: string | Date) => {
   const dateObj = date instanceof Date ? date : new Date(date)
   return dateObj.toLocaleTimeString('en-US', {
@@ -2895,6 +3288,16 @@ const openCreateReceiptModal = () => {
 
 const openQuickSaleModal = () => {
   showQuickSaleModal.value = true
+}
+
+function selectSalesTabFromSheet(tab: 'receipts' | 'outstanding' | 'customers') {
+  activeTab.value = tab
+  showSalesMoreSheet.value = false
+}
+
+function selectReceiptDateFilter(value: string) {
+  dateFilter.value = value
+  showSalesMoreSheet.value = false
 }
 
 const handleQuickSaleCompleted = async () => {
@@ -3235,6 +3638,69 @@ function receiptSwipeActions(receipt: Receipt): IosSwipeAction[] {
   return actions
 }
 
+function outstandingSwipeActions(receipt: Receipt): IosSwipeAction[] {
+  const actions: IosSwipeAction[] = [
+    {
+      id: 'pay',
+      label: 'Record payment',
+      shortLabel: 'Pay',
+      tone: 'primary',
+      icon: CheckCircleIcon,
+      onSelect: () => openRecordPayment(receipt),
+    },
+    {
+      id: 'view',
+      label: 'View sale',
+      shortLabel: 'View',
+      icon: EyeIcon,
+      onSelect: () => viewOutstandingReceipt(receipt),
+    },
+  ]
+  if (canEditReceipts.value) {
+    actions.push({
+      id: 'cancel',
+      label: 'Cancel order',
+      shortLabel: 'Cancel',
+      tone: 'danger',
+      icon: XMarkIcon,
+      onSelect: () => cancelOutstandingReceipt(receipt),
+    })
+  }
+  return actions
+}
+
+function customerSwipeActions(customer: CustomerDisplay): IosSwipeAction[] {
+  const actions: IosSwipeAction[] = [
+    {
+      id: 'sales',
+      label: 'View sales',
+      shortLabel: 'Sales',
+      tone: 'primary',
+      icon: ReceiptPercentIcon,
+      onSelect: () => viewCustomerReceipts(customer),
+    },
+  ]
+  if (hasBalanceFeature.value) {
+    actions.push({
+      id: 'balance',
+      label: 'Manage balance',
+      shortLabel: 'Balance',
+      icon: UserCircleIcon,
+      onSelect: () => openCustomerBalance(customer),
+    })
+  }
+  if (hasWhatsAppFeature.value && (customer.phone || customer.email)) {
+    actions.push({
+      id: 'whatsapp',
+      label: 'Payment reminder',
+      shortLabel: 'WhatsApp',
+      icon: ArrowTopRightOnSquareIcon,
+      onSelect: () => openCustomerPaymentReminder(customer),
+    })
+  }
+  return actions
+}
+
 // Load receipts on mount
 onMounted(async () => {
   // Add keyboard listener for ESC key
@@ -3245,8 +3711,12 @@ onMounted(async () => {
   // Only run on client
   if (import.meta.server) return
 
-  // Set initial loading state
-  isInitialLoading.value = true
+  // Set initial loading state (skip skeleton when native already has warm receipts)
+  isInitialLoading.value = !(
+    isCapacitorIos.value &&
+    receiptsStore.receipts.length > 0 &&
+    !receiptsStore.loading
+  )
 
   // Wait for auth to finish loading before loading receipts
   if (authStore.loading) {
@@ -3278,15 +3748,21 @@ onMounted(async () => {
   if (authStore.currentUser) {
     try {
       await receiptsStore.fetchReceipts()
-      // Load creator names after receipts are loaded
-      await loadCreatorNames()
+      if (isCapacitorIos.value) {
+        scheduleNativeIdleWork(() => {
+          void loadCreatorNames()
+        }, 500)
+      } else {
+        await loadCreatorNames()
+      }
     } catch (error: any) {
       console.error('Error loading receipts:', error.message || error)
     }
   }
 
-  // Hide initial loading state after a minimum time to prevent flash
-  await new Promise((resolve) => setTimeout(resolve, 300))
+  if (!isCapacitorIos.value) {
+    await new Promise((resolve) => setTimeout(resolve, 300))
+  }
   isInitialLoading.value = false
 })
 

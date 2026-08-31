@@ -1,6 +1,14 @@
 <template>
+  <IosSearchBar
+    v-if="isCapacitorIos"
+    v-model="model"
+    :placeholder="placeholder"
+    :clearable="clearable"
+    :clear-label="clearLabel"
+  />
   <div
-    class="relative min-w-0 w-full shrink-0"
+    v-else
+    class="ios-search-input-wrap relative min-w-0 w-full shrink-0"
     :class="[wide ? 'sm:max-w-[min(100%,16rem)] lg:max-w-[min(100%,14rem)]' : 'sm:max-w-[min(100%,14rem)]', wrapperClass]"
   >
     <MagnifyingGlassIcon
@@ -29,9 +37,8 @@
 </template>
 
 <script setup lang="ts">
-import {
-  MagnifyingGlassIcon,
-} from '~/utils/app-icons'
+import { MagnifyingGlassIcon } from '~/utils/app-icons'
+
 defineOptions({ inheritAttrs: false })
 
 const model = defineModel<string>({ default: '' })
@@ -57,5 +64,6 @@ withDefaults(
   }
 )
 
+const { isCapacitorIos } = useIsCapacitorIos()
 const { fieldClass } = useDashboardPageChrome()
 </script>

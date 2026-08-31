@@ -1,5 +1,98 @@
 <template>
   <div :class="[pageWithFixedFooterClass, 'dash-page--unified']">
+    <div v-if="isCapacitorIos" class="ios-sales-shell" data-seller-loans-page>
+      <IosPageNavBar title="Stock loans" />
+
+      <template v-if="canAccessByRole && canAccessSellerLoansPlan && storesStore.currentStoreId">
+        <div v-if="!sellerLoansStore.loading" class="ios-sales-chrome">
+          <IosQuickActionBar
+            v-model="statusFilter"
+            role="tablist"
+            aria-label="Filter stock loans"
+            :options="iosLoanStatusOptions"
+          />
+        </div>
+
+        <div
+          v-if="sellerLoansStore.loading && sellerLoansStore.loans.length === 0"
+          class="ios-transaction-list-skeleton"
+        >
+          <div v-for="i in 8" :key="i" class="ios-transaction-list-skeleton__row">
+            <div class="ios-transaction-list-skeleton__icon" />
+            <div class="ios-transaction-list-skeleton__body">
+              <div class="ios-transaction-list-skeleton__line ios-transaction-list-skeleton__line--title" />
+              <div class="ios-transaction-list-skeleton__line ios-transaction-list-skeleton__line--subtitle" />
+            </div>
+            <div class="ios-transaction-list-skeleton__amount" />
+          </div>
+        </div>
+
+        <DashboardTableEmptyState
+          v-else-if="sellerLoansStore.error"
+          :icon="ArchiveBoxIcon"
+          title="Could not load stock loans"
+          :description="sellerLoansStore.error"
+        />
+
+        <DashboardTableEmptyState
+          v-else-if="sellerLoansStore.loans.length === 0"
+          :icon="ArchiveBoxIcon"
+          title="No stock loans yet"
+          description="Lend serialized inventory from a product page to track borrowers here."
+        />
+
+        <DashboardTableEmptyState
+          v-else-if="filteredLoans.length === 0"
+          :icon="MagnifyingGlassIcon"
+          title="No loans in this filter"
+          description="Switch tabs to see loans in another status."
+        />
+
+        <template v-else>
+          <div class="ios-receipt-transaction-list">
+            <IosReceiptTransactionRow
+              v-for="(loan, index) in paginatedLoans"
+              :key="loan.id"
+              :title="loan.partyName"
+              :subtitle="iosLoanSubtitle(loan)"
+              :amount="`${loan.lines.length} unit${loan.lines.length === 1 ? '' : 's'}`"
+              amount-tone="neutral"
+              :date="formatWhenShort(loan.createdAt)"
+              :variant="iosLoanVariant(loan.status)"
+              :last="index === paginatedLoans.length - 1"
+              :show-menu="loan.status === 'active'"
+              menu-kind="stock-loan"
+              :menu-id="loan.id"
+              @menu="toggleLoanMenu(loan.id)"
+            />
+          </div>
+          <DashboardTablePagination
+            :current-page="currentPage"
+            :items-per-page="itemsPerPage"
+            :total="filteredLoans.length"
+            @page-change="handlePageChange"
+          />
+        </template>
+      </template>
+
+      <DashboardTableEmptyState
+        v-else-if="canAccessByRole && canAccessSellerLoansPlan && !storesStore.currentStoreId"
+        :icon="BuildingStorefrontIcon"
+        title="Select a store"
+        description="Use the store selector to view stock loans for a branch."
+      />
+
+      <FeatureGateCard
+        v-else-if="!canAccessByRole || !canAccessSellerLoansPlan"
+        feature="seller_loans"
+        gate="custom"
+        :description="
+          isStaff ? 'Stock loans are not enabled for your workspace.' : undefined
+        "
+      />
+    </div>
+
+    <template v-else>
     <DashboardPageHeader class="dash-page-header--unified">
       <template #eyebrow>
         <p :class="eyebrowClass">Inventory</p>
@@ -254,6 +347,7 @@
         :secondary-href="isStaff ? undefined : '/dashboard/help#settings-subscription'"
       />
     </div>
+    </template>
 
     <Modal
       v-model="showReturnModal"
@@ -324,7 +418,6 @@
       </template>
     </Modal>
 
-    <!-- Row actions: not clipped by table overflow -->
     <Teleport to="body">
       <div
         v-if="openLoanMenuId && loanForOpenMenu && loanMenuFixedStyle"
@@ -359,14 +452,23 @@
 import { computed, ref, watch, onMounted, nextTick, onBeforeUnmount } from 'vue'
 import {
   ArchiveBoxIcon,
+  ArrowUturnLeftIcon,
   BuildingStorefrontIcon,
+  CheckCircleIcon,
   ChevronRightIcon,
+  ClockIcon,
   EllipsisVerticalIcon,
+  FunnelIcon,
   MagnifyingGlassIcon,
 } from '~/utils/app-icons'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
+import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
+import IosQuickActionBar, { type IosQuickActionOption } from '~/components/ios/IosQuickActionBar.vue'
+import IosReceiptTransactionRow, {
+  type ReceiptTransactionVariant,
+} from '~/components/ios/IosReceiptTransactionRow.vue'
 import FeatureGateCard from '~/components/subscription/FeatureGateCard.vue'
 import DashboardTableBadge from '~/components/ui/DashboardTableBadge.vue'
 import { formatSellerLoanStatusLabel, sellerLoanStatusBadgeClass } from '~/utils/table-badge-styles'
@@ -391,6 +493,7 @@ const {
 } = useDashboardPageChrome()
 
 const { tableShellFlexClass } = useDashboardTableChrome()
+const { isCapacitorIos } = useIsCapacitorIos()
 
 const sellerLoansStore = useSellerLoanOutsStore()
 const storesStore = useStoresStore()
@@ -429,6 +532,43 @@ const loanStatusTabs = computed(() => {
     { value: 'all' as const, label: 'All' },
   ]
 })
+
+const iosLoanStatusOptions = computed((): IosQuickActionOption[] =>
+  loanStatusTabs.value.map((tab) => ({
+    value: tab.value,
+    label: tab.label,
+    badge: tab.badgeCount,
+    icon:
+      tab.value === 'active'
+        ? ClockIcon
+        : tab.value === 'returned'
+          ? ArrowUturnLeftIcon
+          : tab.value === 'sold'
+            ? CheckCircleIcon
+            : FunnelIcon,
+  }))
+)
+
+function iosLoanSubtitle(loan: SellerLoanOut) {
+  const status = formatSellerLoanStatusLabel(loan.status)
+  const phone = loan.partyPhone ? ` · ${loan.partyPhone}` : ''
+  return `${status}${phone}`
+}
+
+function iosLoanVariant(status: SellerLoanOut['status']): ReceiptTransactionVariant {
+  if (status === 'active') return 'pending'
+  if (status === 'sold') return 'credit'
+  return 'cancelled'
+}
+
+function formatWhenShort(v: Date | undefined) {
+  if (!v) return ''
+  try {
+    return v.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+  } catch {
+    return ''
+  }
+}
 
 function toggleLoanLines(loanId: string) {
   const next = new Set(expandedLoanIds.value)

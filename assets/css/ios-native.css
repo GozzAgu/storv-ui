@@ -8,3 +8,15 @@
 @import './capacitor-ios.css';
 @import './ios-drawer.css';
 @import './ios-system.css';
+@import './ios-page-chrome.css';
+@import './ios-global-top-bar.css';
+@import './ios-grouped-list.css';
+@import './ios-home.css';
+@import './ios-profile.css';
+@import './ios-inventory-list.css';
+@import './ios-receipts-list.css';
+@import './ios-search.css';
+@import './ios-quick-actions.css';
+@import './ios-settings-help.css';
+@import './ios-analytics.css';
+@import './ios-tabbar-flat.css';

@@ -4,9 +4,11 @@
     :class="[
       showCategoryHub ? pageWithFooterClass : pageWithFixedFooterClass,
       'dash-page--unified w-full max-w-none flex-col space-y-5 overflow-x-hidden sm:space-y-6',
+      isCapacitorIos ? 'ios-inventory-items-page' : '',
     ]"
   >
     <Breadcrumbs
+      v-if="!isCapacitorIos"
       :items="inventoryBreadcrumbs"
       class="text-[11px] text-gray-500 dark:text-gray-400"
     />
@@ -50,7 +52,7 @@
     </template>
 
     <!-- Mobile / tablet toolbar -->
-    <div v-else-if="showCategoryHub" class="flex flex-col gap-2 lg:hidden">
+    <div v-else-if="showCategoryHub && !isCapacitorIos" class="flex flex-col gap-2 lg:hidden">
       <div class="dash-page-context-bar">
         <DashboardBackButton
           :to="inventoryBackTo"
@@ -79,7 +81,7 @@
       </Button>
     </div>
 
-    <div v-else class="flex flex-col gap-2 lg:hidden">
+    <div v-else-if="!isCapacitorIos" class="flex flex-col gap-2 lg:hidden">
       <div class="dash-page-context-bar">
         <DashboardBackButton
           :to="inventoryBackTo"
@@ -192,15 +194,148 @@
       </div>
     </div>
 
-    <div
-      v-if="isCapacitorIos && !isLoadingFolder && !showCategoryHub"
-      class="ios-search-bar-host ios-search-bar-host--sticky"
-    >
-      <IosSearchBar v-model="searchQuery" placeholder="Search by name, SKU…" />
-    </div>
+    <template v-if="isCapacitorIos && !isLoadingFolder && !showCategoryHub">
+      <IosPageNavBar
+        :title="folder?.name || 'Products'"
+        show-back
+        :back-to="inventoryBackTo"
+        :back-label="inventoryBackLabel"
+      />
+      <p class="ios-inventory-list-meta">
+        {{ paginationTotal }} item{{ paginationTotal === 1 ? '' : 's' }}
+      </p>
+      <div class="ios-search-bar-host ios-search-bar-host--sticky">
+        <IosSearchBar v-model="searchQuery" placeholder="Search products…" />
+      </div>
+      <IosQuickActionBar
+        v-model="availabilityFilter"
+        class="ios-inventory-availability-tabs"
+        aria-label="Product actions"
+        :options="availabilityQuickActionOptions"
+      />
+
+      <IosDrawer
+        v-model="showProductMoreSheet"
+        title="Product options"
+        subtitle="Filters and tools"
+        variant="assistant"
+        aria-label="Product options"
+      >
+        <IosGroupedSection header="Availability">
+          <IosNativeListRow
+            v-for="option in productMoreAvailabilityOptions"
+            :key="option.value"
+            :title="option.label"
+            :subtitle="option.badge != null ? String(option.badge) : undefined"
+            :show-chevron="false"
+            @click="selectAvailabilityFromSheet(option.value)"
+          />
+        </IosGroupedSection>
+        <IosGroupedSection v-if="canManageInventoryItems" header="Tools">
+          <IosNativeListRow
+            title="Import from Excel"
+            :show-chevron="false"
+            @click="triggerImportFromSheet"
+          />
+          <IosNativeListRow
+            title="Export to Excel"
+            :show-chevron="false"
+            @click="triggerExportFromSheet"
+          />
+        </IosGroupedSection>
+      </IosDrawer>
+
+      <DashboardTableEmptyState
+        v-if="sortedFilteredItems.length === 0"
+        :icon="CubeIcon"
+        :title="searchQuery ? 'No products found' : 'No products yet'"
+        :description="
+          searchQuery
+            ? 'Try a different search term.'
+            : 'Add your first product to this folder.'
+        "
+      />
+
+      <div v-else class="ios-receipt-transaction-list">
+        <IosReceiptTransactionRow
+          v-for="(item, index) in paginatedItems"
+          :key="item.id"
+          :title="getItemPrimaryLabel(item)"
+          :subtitle="getItemCardSubtitle(item) || getItemAvailability(item).label"
+          :amount="getItemDisplayPrice(item)"
+          amount-tone="neutral"
+          :date="getItemCardDate(item)"
+          :variant="getItemTransactionVariant(item)"
+          :last="index === paginatedItems.length - 1"
+          :show-menu="!isInventoryItemLocked(item)"
+          menu-kind="item"
+          :menu-id="item.id"
+          @click="openMobileItemDetail(item)"
+          @menu="toggleItemMenu(item.id)"
+        />
+      </div>
+
+      <DashboardTablePagination
+        :current-page="currentPage"
+        :items-per-page="itemsPerPage"
+        :total="paginationTotal"
+        @page-change="handlePageChange"
+      />
+    </template>
 
     <!-- Category hub: subcategories live inside the parent folder -->
     <template v-if="!isLoadingFolder && showCategoryHub">
+      <template v-if="isCapacitorIos">
+        <div class="dash-page-context-bar">
+          <DashboardBackButton
+            :to="inventoryBackTo"
+            :label="inventoryBackLabel"
+            class="mt-px shrink-0"
+          />
+          <div class="min-w-0 flex-1">
+            <h2 class="dash-page-context-bar__title truncate">{{ folder?.name || 'Category' }}</h2>
+            <p class="dash-page-context-bar__meta">
+              <template v-if="childFolders.length > 0">
+                {{ childFolders.length }} subcategor{{ childFolders.length === 1 ? 'y' : 'ies' }}
+              </template>
+              <template v-else>Organize with subcategories</template>
+            </p>
+          </div>
+        </div>
+        <IosQuickActionBar
+          v-if="subcategoryQuickActionOptions.length > 0"
+          v-model="subcategoryActionStub"
+          aria-label="Subcategory actions"
+          :options="subcategoryQuickActionOptions"
+        />
+        <DashboardTableEmptyState
+          v-if="childFolders.length === 0"
+          :icon="FolderIcon"
+          title="No subcategories yet"
+          description="Create subcategories to organize products inside this category."
+        />
+        <div v-else class="ios-grouped-list">
+          <IosInventoryFolderRow
+            v-for="(child, index) in paginatedChildFolders"
+            :key="child.id"
+            :name="child.name"
+            :subtitle="child.description?.trim() || undefined"
+            :value="formatSubfolderRowValue(child)"
+            :last="index === paginatedChildFolders.length - 1"
+            :show-menu="canCreateInventoryFolders"
+            :menu-id="child.id"
+            @click="navigateToSubfolder(child.id)"
+            @menu="toggleSubfolderMenu(child.id)"
+          />
+        </div>
+        <DashboardTablePagination
+          :current-page="hubCurrentPage"
+          :items-per-page="hubItemsPerPage"
+          :total="childFolders.length"
+          @page-change="handleHubPageChange"
+        />
+      </template>
+      <template v-else>
       <div class="flex flex-wrap items-start justify-between gap-3">
         <div class="min-w-0">
           <div class="hidden items-center gap-2 lg:flex">
@@ -303,10 +438,11 @@
         :total="childFolders.length"
         @page-change="handleHubPageChange"
       />
+      </template>
     </template>
 
     <!-- Enhanced Items Table (teleport to body in expanded view; same pattern as receipts) -->
-    <div v-if="!isLoadingFolder && !showCategoryHub" class="flex min-h-0 flex-1 flex-col">
+    <div v-if="!isLoadingFolder && !showCategoryHub && !isCapacitorIos" class="flex min-h-0 flex-1 flex-col">
     <Teleport to="body" :disabled="!isFullscreen">
         <div
           data-dashboard-teleport
@@ -653,13 +789,29 @@
                     : 'flex min-h-0 flex-1 flex-col'
                 "
               >
-                <!-- Mobile: card list when has items (web; hidden on iOS native card table) -->
+                <!-- Mobile: card list (iOS invoice-style; web compact cards) -->
                 <div
                   class="inventory-items-mobile-list block space-y-2 sm:hidden"
-                  :class="
-                    isFullscreen ? 'min-h-0 flex-1 overflow-y-auto px-4 pb-4 lg:px-8' : 'px-0'
-                  "
+                  :class="[
+                    isFullscreen ? 'min-h-0 flex-1 overflow-y-auto px-4 pb-4 lg:px-8' : 'px-0',
+                    isCapacitorIos ? 'inventory-items-mobile-list--ios' : '',
+                  ]"
                 >
+                  <template v-if="isCapacitorIos">
+                    <IosInventoryItemCard
+                      v-for="item in paginatedItems"
+                      :key="item.id"
+                      :title="getItemPrimaryLabel(item)"
+                      :subtitle="getItemCardSubtitle(item)"
+                      :price="getItemDisplayPrice(item)"
+                      :reference="getItemCardReference(item)"
+                      :status-label="getItemAvailability(item).label"
+                      :status="getItemAvailability(item).status"
+                      :date="getItemCardDate(item)"
+                      @click="openMobileItemDetail(item)"
+                    />
+                  </template>
+                  <template v-else>
                   <div
                     v-for="item in paginatedItems"
                     :key="item.id"
@@ -692,11 +844,7 @@
                               <span
                                 class="text-xs font-semibold tabular-nums text-gray-900 dark:text-gray-100"
                               >
-                                {{
-                                  item.discountedPrice !== undefined
-                                    ? formatCurrency(item.discountedPrice)
-                                    : formatCurrency(item.price ?? item.originalPrice ?? 0)
-                                }}
+                                {{ getItemDisplayPrice(item) }}
                               </span>
                               <InventoryProfitHint
                                 v-if="canShowProfitAndCost"
@@ -719,14 +867,6 @@
                         </div>
                       </div>
                       <div class="flex shrink-0 flex-col items-center gap-0.5" @click.stop>
-                        <button
-                          type="button"
-                          class="inline-flex h-7 w-7 items-center justify-center rounded-lg text-primary-600 transition-colors hover:bg-primary-50 dark:text-primary-400 dark:hover:bg-primary-950/50"
-                          aria-label="View details"
-                          @click="openMobileItemDetail(item)"
-                        >
-                          <EyeIcon class="h-4 w-4" stroke-width="1.75" />
-                        </button>
                         <div class="relative" data-inventory-item-menu>
                           <button
                             type="button"
@@ -739,7 +879,7 @@
                                 ? 'cursor-not-allowed opacity-40'
                                 : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/80 hover:text-gray-800 dark:hover:text-gray-200',
                             ]"
-                            aria-label="Item actions"
+                            aria-label="Product actions"
                             aria-haspopup="menu"
                             :aria-expanded="openItemMenuId === item.id"
                           >
@@ -749,9 +889,11 @@
                       </div>
                     </div>
                   </div>
+                  </template>
                 </div>
-                <!-- Desktop / iOS native card table -->
+                <!-- Desktop table (web only) -->
                 <div
+                  v-if="!isCapacitorIos"
                   class="inventory-items-table-wrap hidden min-h-0 flex-1 flex-col sm:flex"
                   :class="isFullscreen ? 'overflow-auto px-4 pb-2 pt-2 lg:px-8' : ''"
                 >
@@ -1782,6 +1924,23 @@
           role="menuitem"
           @click="
             () => {
+              openMobileItemDetail(itemForOpenMenu)
+              openItemMenuId = null
+            }
+          "
+          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85"
+        >
+          <EyeIcon
+            class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500"
+            stroke-width="1.75"
+          />
+          <span>View details</span>
+        </button>
+        <button
+          type="button"
+          role="menuitem"
+          @click="
+            () => {
               handleViewTimeline(itemForOpenMenu)
               openItemMenuId = null
             }
@@ -1972,13 +2131,6 @@
         </IosDrawerActions>
       </template>
     </SidePanel>
-
-    <div
-      v-if="isCapacitorIos && canManageInventoryItems && !showCategoryHub && !isLoadingFolder"
-      class="ios-inventory-fab-host"
-    >
-      <IosFab :icon="PlusCircleIcon" aria-label="Add product" @click="openAddItemModal" />
-    </div>
   </div>
 </template>
 
@@ -1986,6 +2138,8 @@
 import { ref, computed, reactive, onMounted, onBeforeUnmount, onActivated, watch, nextTick } from 'vue'
 import {
   PlusCircleIcon,
+  PlusIcon,
+  FunnelIcon,
   CubeIcon,
   FolderIcon,
   ExclamationTriangleIcon,
@@ -2013,8 +2167,18 @@ import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import Breadcrumbs from '~/components/ui/Breadcrumbs.vue'
 import Modal from '~/components/ui/Modal.vue'
 import SidePanel from '~/components/ui/SidePanel.vue'
+import IosQuickActionBar, {
+  type IosQuickActionOption,
+} from '~/components/ios/IosQuickActionBar.vue'
+import IosDrawer from '~/components/ios/IosDrawer.vue'
+import IosGroupedSection from '~/components/ios/IosGroupedSection.vue'
+import IosNativeListRow from '~/components/ios/IosNativeListRow.vue'
 import IosSearchBar from '~/components/ios/IosSearchBar.vue'
-import IosFab from '~/components/ios/IosFab.vue'
+import IosInventoryFolderRow from '~/components/ios/IosInventoryFolderRow.vue'
+import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
+import IosReceiptTransactionRow from '~/components/ios/IosReceiptTransactionRow.vue'
+import type { ReceiptTransactionVariant } from '~/components/ios/IosReceiptTransactionRow.vue'
+import IosInventoryItemCard from '~/components/ios/IosInventoryItemCard.vue'
 import IosInventoryItemDetail, {
   type IosInventoryDetailAction,
   type IosInventoryDetailRow,
@@ -2049,6 +2213,7 @@ import {
   rollupFolderStats,
 } from '~/utils/inventory-folder-tree'
 import { computeFixedAnchoredMenuStyle, getVisibleMenuAnchorElement } from '~/utils/menuAnchor'
+import { isNativePerfContext, scheduleNativeIdleWork } from '~/utils/capacitor-native-perf'
 import { computeFolderTotalValue } from '~/utils/inventory-folder-availability'
 import { getInventoryItemDisplayName } from '~/composables/useInventoryItemDisplay'
 import {
@@ -2060,6 +2225,7 @@ import {
   availabilityBadgeForStockLoan,
   formatAvailabilityLabel,
   isItemAwaitingPayment,
+  type InventoryAvailabilityStatus,
 } from '~/utils/inventory-availability'
 import { getInventorySourceBadge } from '~/utils/inventory-acquisition-source'
 import {
@@ -2239,6 +2405,13 @@ function subfolderDisplayStats(child: InventoryFolder) {
   return rollupFolderStats(child, inventoryStore.folders)
 }
 
+function formatSubfolderRowValue(child: InventoryFolder): string {
+  const stats = subfolderDisplayStats(child)
+  const countLabel = `${stats.itemCount} item${stats.itemCount === 1 ? '' : 's'}`
+  if (stats.itemCount === 0) return countLabel
+  return `${countLabel} · ${formatCurrency(stats.totalValue ?? 0)}`
+}
+
 function subfolderGrossProfitOnHand(childId: string): number | null {
   const child = inventoryStore.getFolderById(childId)
   if (!child?.trackProfit) return null
@@ -2276,6 +2449,27 @@ const canAddSubcategories = computed(() => {
   const parent = subcategoryCreateParent.value
   if (!parent || !canCreateInventoryFolders.value) return false
   return (parent.itemCount ?? 0) === 0
+})
+
+const subcategoryActionStub = ref('')
+
+const subcategoryQuickActionOptions = computed((): IosQuickActionOption[] => {
+  if (!canAddSubcategories.value) return []
+
+  return [
+    {
+      value: 'add',
+      label: 'Add',
+      icon: PlusIcon,
+      action: openCreateSubcategoryModal,
+    },
+    {
+      value: 'more',
+      label: 'More',
+      icon: EllipsisVerticalIcon,
+      action: () => {},
+    },
+  ]
 })
 
 const showCategoryHub = computed(() => folderShowsCategoryHub(folder.value))
@@ -2513,6 +2707,8 @@ async function refreshFolderMetadata(forceFetch = false) {
 }
 
 const searchQuery = ref('')
+const availabilityFilter = ref<'all' | InventoryAvailabilityStatus>('all')
+const showProductMoreSheet = ref(false)
 /** Full folder list for search filter (client-side); not stored in Pinia. */
 const folderSearchItems = ref<InventoryItem[] | null>(null)
 const isSearchItemsLoading = ref(false)
@@ -3444,6 +3640,12 @@ function normalizeUnitCostPayload(payload: Record<string, any>) {
 const filteredItems = computed(() => {
   let result = [...baseItems.value]
 
+  if (availabilityFilter.value !== 'all') {
+    result = result.filter(
+      (item) => getItemAvailability(item).status === availabilityFilter.value
+    )
+  }
+
   // Filter by search query - search across all template fields
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
@@ -3458,6 +3660,140 @@ const filteredItems = computed(() => {
 
   return result
 })
+
+const availabilityFilterOptions = computed(() => {
+  const list = baseItems.value
+  const countFor = (status: InventoryAvailabilityStatus | 'all') => {
+    if (status === 'all') return list.length
+    return list.filter((item) => getItemAvailability(item).status === status).length
+  }
+
+  return [
+    { value: 'all', label: 'All', badge: countFor('all') },
+    { value: 'available', label: 'Available', badge: countFor('available') },
+    { value: 'awaiting_payment', label: 'Awaiting', badge: countFor('awaiting_payment') },
+    { value: 'sold', label: 'Sold', badge: countFor('sold') },
+    { value: 'returned', label: 'Returned', badge: countFor('returned') },
+  ]
+})
+
+const availabilityQuickActionOptions = computed((): IosQuickActionOption[] => {
+  const list = baseItems.value
+  const countFor = (status: InventoryAvailabilityStatus | 'all') => {
+    if (status === 'all') return list.length
+    return list.filter((item) => getItemAvailability(item).status === status).length
+  }
+
+  const options: IosQuickActionOption[] = [
+    { value: 'all', label: 'All', icon: FunnelIcon, badge: countFor('all') || undefined },
+    {
+      value: 'available',
+      label: 'Available',
+      icon: CheckCircleIcon,
+      badge: countFor('available') || undefined,
+    },
+  ]
+
+  if (canManageInventoryItems.value) {
+    options.push({
+      value: 'add',
+      label: 'Add',
+      icon: PlusIcon,
+      action: openAddItemModal,
+    })
+  } else {
+    options.push({
+      value: 'sold',
+      label: 'Sold',
+      icon: TagIcon,
+      badge: countFor('sold') || undefined,
+    })
+  }
+
+  options.push({
+    value: 'more',
+    label: 'More',
+    icon: EllipsisVerticalIcon,
+    action: () => {
+      showProductMoreSheet.value = true
+    },
+  })
+
+  return options
+})
+
+const productMoreAvailabilityOptions = computed(() =>
+  availabilityFilterOptions.value.filter((option) => {
+    if (option.value === 'all' || option.value === 'available') return false
+    if (canManageInventoryItems.value && option.value === 'sold') return true
+    if (!canManageInventoryItems.value && option.value === 'sold') return false
+    return true
+  })
+)
+
+function selectAvailabilityFromSheet(value: string) {
+  availabilityFilter.value = value as 'all' | InventoryAvailabilityStatus
+  showProductMoreSheet.value = false
+}
+
+function triggerImportFromSheet() {
+  showProductMoreSheet.value = false
+  fileInputRef.value?.click()
+}
+
+function triggerExportFromSheet() {
+  showProductMoreSheet.value = false
+  void handleExportToExcel()
+}
+
+function getItemDisplayPrice(item: InventoryItem): string {
+  const amount =
+    item.discountedPrice !== undefined
+      ? item.discountedPrice
+      : (item.price ?? item.originalPrice ?? 0)
+  return formatCurrency(amount)
+}
+
+function getItemCardSubtitle(item: InventoryItem): string {
+  const brandModel = [item.brand, item.model].filter(Boolean).join(' · ')
+  if (brandModel) return brandModel
+  const source = getItemSourceBadge(item)
+  if (source?.label) return source.label
+  const secondColumn = columns.value[1]
+  if (secondColumn?.key) {
+    const value = item[secondColumn.key]
+    if (value !== undefined && value !== null && String(value).trim() !== '') {
+      return String(value)
+    }
+  }
+  return ''
+}
+
+function getItemCardReference(item: InventoryItem): string {
+  const serial = item.sku || item.serialNumber || item.serialNo
+  if (serial != null && String(serial).trim() !== '') return String(serial).trim()
+  return ''
+}
+
+function getItemCardDate(item: InventoryItem): string {
+  const raw = item.dateOut || item.dateIn
+  return raw ? formatItemDate(raw) : ''
+}
+
+function getItemTransactionVariant(item: InventoryItem): ReceiptTransactionVariant {
+  switch (getItemAvailability(item).status) {
+    case 'available':
+    case 'returned':
+      return 'credit'
+    case 'sold':
+      return 'cancelled'
+    case 'with_seller':
+    case 'awaiting_payment':
+      return 'pending'
+    default:
+      return 'pending'
+  }
+}
 
 // Display list: sorted list, with edited row kept at same position after inline save
 const displayItems = ref<InventoryItem[]>([])
@@ -3538,7 +3874,7 @@ const paginatedItems = computed(() => {
 })
 
 // Reset to first page when filters change; resync server page when not in search mode
-watch([searchQuery, currentSort], () => {
+watch([searchQuery, currentSort, availabilityFilter], () => {
   currentPage.value = 1
   const fid = folderId.value
   if (fid && !searchQuery.value.trim() && !isLoadingFolder.value) {
@@ -5187,28 +5523,35 @@ const refreshCurrentItemsPage = () => {
   return inventoryStore.fetchItemsPage(fid, currentPage.value, itemsPerPage.value, { force: true })
 }
 
-const loadItems = async () => {
+const loadItems = async (options?: { force?: boolean }) => {
   if (!folderId.value || typeof folderId.value !== 'string') {
     return
   }
 
   isLoadingItems.value = true
   try {
-    // Fetch items and receipts in parallel
-    await Promise.all([
-      inventoryStore.fetchItemsPage(folderId.value, currentPage.value, itemsPerPage.value, {
-        force: true,
-      }),
-      receiptsStore.fetchReceipts(),
-    ])
-    // Refresh folder list to update item counts
-    await inventoryStore.fetchFolders()
-    // Update local folder reference
-    if (folder.value) {
-      const updatedFolder = inventoryStore.getFolderById(folderId.value)
-      if (updatedFolder) {
-        applyFolderSnapshot(updatedFolder)
+    await inventoryStore.fetchItemsPage(folderId.value, currentPage.value, itemsPerPage.value, {
+      force: options?.force === true,
+    })
+
+    const warmReceipts = () => {
+      void receiptsStore.fetchReceipts()
+    }
+    const refreshFolderCounts = async () => {
+      await inventoryStore.fetchFolders()
+      if (folder.value) {
+        const updatedFolder = inventoryStore.getFolderById(folderId.value)
+        if (updatedFolder) applyFolderSnapshot(updatedFolder)
       }
+    }
+
+    if (isNativePerfContext()) {
+      scheduleNativeIdleWork(warmReceipts, 350)
+      scheduleNativeIdleWork(() => {
+        void refreshFolderCounts()
+      }, 900)
+    } else {
+      await Promise.all([receiptsStore.fetchReceipts(), refreshFolderCounts()])
     }
   } catch (error: any) {
     console.error('Error loading items:', error)
@@ -5222,7 +5565,7 @@ async function reloadInventoryDetailPage() {
   if (!authStore.currentUser || !folderId.value) return
   const fetched = await inventoryStore.fetchFolder(folderId.value)
   if (fetched) applyFolderSnapshot(fetched)
-  await loadItems()
+  await loadItems({ force: true })
 }
 
 useIosPullToRefreshRegister(reloadInventoryDetailPage)

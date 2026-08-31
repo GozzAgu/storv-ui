@@ -1,9 +1,5 @@
 <template>
-  <div data-auth-shell class="auth-shell">
-    <div class="auth-shell__mobile-strip lg:hidden">
-      <p>{{ mobileLine }}</p>
-    </div>
-
+  <div data-auth-shell class="auth-shell auth-shell--modern">
     <aside class="auth-shell__brand">
       <div class="auth-shell__brand-grid" aria-hidden="true" />
 
@@ -49,11 +45,10 @@
     </aside>
 
     <main class="auth-shell__main">
-      <div class="auth-shell__main-glow" aria-hidden="true" />
-      <div class="auth-shell__theme auth-shell-theme-toggle">
-        <ThemeToggle />
-      </div>
-      <div class="auth-shell__main-scroll">
+      <div
+        class="auth-shell__main-scroll"
+        @click="dismissKeyboardFromBackgroundTap"
+      >
         <div class="auth-shell__content" :class="contentWidthClass">
           <slot />
         </div>
@@ -64,9 +59,9 @@
 
 <script setup lang="ts">
 import { computed, onMounted, type Component } from 'vue'
-import ThemeToggle from '~/components/ui/ThemeToggle.vue'
 import { authEntranceClass } from '~/utils/auth-entrance'
 import { markCapacitorDocument } from '~/utils/capacitor-env'
+import { dismissKeyboardFromBackgroundTap } from '~/utils/native-focus'
 import {
   ChartBarSquareIcon,
   CubeIcon,

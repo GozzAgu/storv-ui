@@ -1,0 +1,145 @@
+/**
+ * iOS flat docked tab bar — icon + label, top hairline, no floating capsule.
+ * Matches profile-settings reference mockup (Home / Explore / … / Profile).
+ */
+
+html.capacitor-ios.capacitor-native {
+  --ios-tabbar-float-gap: 0px;
+  --ios-tabbar-float-inset: 0px;
+  --ios-tabbar-top-pad: 0.5rem;
+  --ios-bottomnav-content: 3.5625rem;
+  --ios-bottomnav-height: calc(var(--ios-bottomnav-content) + var(--ios-tabbar-top-pad));
+  --dashboard-bottom-nav-stack: calc(var(--ios-bottomnav-height) + var(--cap-safe-bottom, 0px));
+}
+
+html.capacitor-ios.capacitor-native .dashboard-native-bottom-nav {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+html.capacitor-ios.capacitor-native .native-tabbar {
+  position: relative;
+  margin-inline: 0 !important;
+  width: 100%;
+  max-width: none;
+  overflow: visible;
+  border-radius: 0 !important;
+  border: none !important;
+  border-top: 1px solid rgb(229 231 235) !important;
+  background: #ffffff !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transform: none;
+}
+
+html.capacitor-ios.capacitor-native.dark .native-tabbar {
+  border-top-color: rgb(255 255 255 / 0.12) !important;
+  background: #000000 !important;
+}
+
+html.capacitor-ios.capacitor-native .native-tabbar::before {
+  display: none !important;
+}
+
+html.capacitor-ios.capacitor-native .native-tabbar__strip {
+  min-height: var(--ios-bottomnav-height) !important;
+  height: auto !important;
+  padding-top: var(--ios-tabbar-top-pad) !important;
+  padding-inline: 0.25rem !important;
+  padding-bottom: var(--cap-safe-bottom, 0px);
+}
+
+html.capacitor-ios.capacitor-native .native-tabbar__indicator {
+  display: none !important;
+}
+
+html.capacitor-ios.capacitor-native .native-tabbar__tab {
+  min-width: 0;
+  flex: 1 1 0;
+  gap: 0.1875rem !important;
+  padding-block: 0.4375rem 0.3125rem !important;
+  color: rgb(142 142 147) !important;
+  transform: none !important;
+  opacity: 1 !important;
+}
+
+html.capacitor-ios.capacitor-native .native-tabbar__tab:active {
+  opacity: 0.72 !important;
+  transform: none !important;
+}
+
+html.capacitor-ios.capacitor-native .native-tabbar__icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.625rem;
+  height: 1.625rem;
+  color: inherit;
+}
+
+html.capacitor-ios.capacitor-native .native-tabbar__icon-wrap--filled {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 9999px;
+  background: #111111;
+  color: #ffffff;
+}
+
+html.capacitor-ios.capacitor-native.dark .native-tabbar__icon-wrap--filled {
+  background: #ffffff;
+  color: #111111;
+}
+
+html.capacitor-ios.capacitor-native .native-tabbar__tab svg {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+  stroke-width: 1.75 !important;
+  opacity: 1 !important;
+  color: inherit !important;
+}
+
+html.capacitor-ios.capacitor-native .native-tabbar__tab[aria-selected='true'] svg {
+  stroke-width: 2 !important;
+}
+
+html.capacitor-ios.capacitor-native .native-tabbar__label {
+  display: block !important;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  color: rgb(142 142 147);
+}
+
+html.capacitor-ios.capacitor-native .native-tabbar__tab[aria-selected='true'] {
+  color: #111111 !important;
+}
+
+html.capacitor-ios.capacitor-native .native-tabbar__tab[aria-selected='true'] .native-tabbar__label {
+  font-weight: 600;
+  color: #111111;
+}
+
+html.capacitor-ios.capacitor-native.dark .native-tabbar__tab {
+  color: rgb(142 142 147) !important;
+}
+
+html.capacitor-ios.capacitor-native.dark .native-tabbar__tab[aria-selected='true'],
+html.capacitor-ios.capacitor-native.dark .native-tabbar__tab[aria-selected='true'] .native-tabbar__label {
+  color: #ffffff !important;
+}
+
+html.capacitor-ios.capacitor-native.dark .native-tabbar__tab[aria-selected='true'] .native-tabbar__label {
+  color: #ffffff;
+}
+
+html.capacitor-ios.capacitor-native .native-tabbar .text-primary-600,
+html.capacitor-ios.capacitor-native .native-tabbar .text-primary-400 {
+  color: inherit !important;
+}

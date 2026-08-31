@@ -138,7 +138,6 @@
         @primary="submit"
       />
     </template>
-    </template>
   </SidePanel>
 </template>
 

@@ -503,6 +503,7 @@
     >
       <!-- Top Navigation (fixed so it stays visible when scrolling) -->
       <header
+        v-if="!(isCapacitorIos && isIosInPageChrome)"
         :class="[
           'dash-topnav dashboard-top-nav fixed top-0 right-0 isolate',
           isNativeApp
@@ -550,8 +551,12 @@
           </button>
 
           <!-- Native iOS: command header (greeting + branch + actions) -->
+        <div
+          v-if="showNativeCommandHeader && !isDashboardHome"
+          class="flex min-w-0 w-full flex-1 flex-col gap-2"
+        >
+          <IosTopNavBrandRow />
           <NativeCommandHeader
-            v-if="showNativeCommandHeader"
             class="min-w-0 w-full flex-1"
             :greeting="commandHeaderGreeting"
             :page-title="commandHeaderPageTitle"
@@ -574,8 +579,6 @@
               >
                 <SparklesIcon class="block h-4 w-4 shrink-0" :size="16" stroke-width="1.75" />
               </button>
-
-              <ThemeToggle class="shrink-0" />
 
               <div class="relative z-[130] h-8 w-8 shrink-0" ref="notificationsRef">
                 <button
@@ -628,6 +631,7 @@
               />
             </template>
           </NativeCommandHeader>
+        </div>
 
           <!-- Native (non-iOS): logo + current workspace page -->
           <div v-else-if="isNativeApp" class="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
@@ -802,12 +806,31 @@
         </div>
       </header>
 
+      <div
+        v-if="isCapacitorIos && isIosInPageChrome"
+        class="ios-global-top-bar-host"
+      >
+        <IosGlobalTopBar
+          :home-href="dashPath('')"
+          :user-name="userName"
+          :user-email="userEmail"
+          :user-initials="userInitials"
+          @open-assistant="openAssistant()"
+          @sign-out="handleSignOut"
+        />
+      </div>
+
       <!-- Spacer so fixed nav never overlaps page content -->
       <div
         class="dashboard-top-nav-spacer shrink-0"
         :class="
           isNativeApp
-            ? 'dashboard-top-nav-spacer-native'
+            ? [
+                'dashboard-top-nav-spacer-native',
+                isIosInPageChrome && isCapacitorIos
+                  ? 'dashboard-top-nav-spacer-native--global-bar'
+                  : '',
+              ]
             : 'dashboard-top-nav-spacer--web h-11 sm:h-12'
         "
         aria-hidden="true"
@@ -820,7 +843,10 @@
         :class="[
           'w-full min-w-0 max-w-full px-3 py-2.5 sm:px-4 sm:py-3 lg:px-5 lg:py-4',
           isNativeApp
-            ? 'dashboard-native-main min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain'
+            ? [
+                'dashboard-native-main min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain',
+                isIosInPageChrome && isCapacitorIos ? 'dashboard-native-main--in-page' : '',
+              ]
             : 'overflow-x-clip overflow-y-visible',
         ]"
       >
@@ -829,7 +855,7 @@
           :scroll-target="dashboardMainRef"
         />
         <div
-          :key="route.path"
+          :key="isNativeApp ? 'native-shell' : route.path"
           :class="[
             'min-w-0',
             isNativeApp
@@ -945,6 +971,7 @@ import DashboardNativeBottomNav from '~/components/dashboard/DashboardNativeBott
 import DashboardNativeTableLayoutSync from '~/components/dashboard/DashboardNativeTableLayoutSync.vue'
 import NativeCommandHeader from '~/components/dashboard/NativeCommandHeader.vue'
 import IosPullToRefreshHost from '~/components/ios/IosPullToRefreshHost.vue'
+import IosGlobalTopBar from '~/components/ios/IosGlobalTopBar.vue'
 import DashboardProfileMenu from '~/components/dashboard/DashboardProfileMenu.vue'
 import {
   splitNativeBottomNav,
@@ -1652,6 +1679,17 @@ const userName = computed(() => {
 
 const { formatGreeting } = useTimeGreeting()
 const commandHeaderGreeting = computed(() => formatGreeting(userName.value || ''))
+const isDashboardHome = computed(() => {
+  const path = route.path.replace(/\/$/, '')
+  return path === '/dashboard'
+})
+
+const isIosInPageChrome = computed(() => {
+  if (!isCapacitorIos.value) return false
+  const path = route.path.replace(/\/$/, '') || '/dashboard'
+  return path === '/dashboard' || path.startsWith('/dashboard/')
+})
+
 const commandHeaderPageTitle = computed(() => {
   const path = route.path
   if (path === '/dashboard' || path === '/dashboard/') return ''
@@ -1886,8 +1924,13 @@ onMounted(async () => {
     await checkAuth()
 
     if (authStore.currentUser?.uid && !authStore.loading) {
-      await runDashboardShellBootstrap()
-      await syncSubscriptionStatus()
+      if (isCapacitorNative()) {
+        scheduleNativeIdleWork(() => {
+          void syncSubscriptionStatus()
+        }, 2000)
+      } else {
+        await syncSubscriptionStatus()
+      }
     }
 
     // Initialize cache from localStorage after auth loads
@@ -1955,7 +1998,6 @@ watch(
     // 2. We don't have userData OR the user changed (not just signed back in)
     // 3. Staff creation is not in progress
     if (user?.uid && !authStore.loading) {
-      const hasUserData = userStore.userData && userStore.userData.uid === user.uid
       const userChanged = oldUser?.uid !== user.uid
 
       // If user changed, clear old user data and cache so nav never shows previous user
@@ -1965,7 +2007,6 @@ watch(
         cachedUserEmail.value = null
         cachedUserId.value = null
 
-        // Load new user's cache from localStorage (if they signed in before)
         const storedName = getCachedUserName()
         const storedEmail = getCachedUserEmail()
         const storedUserId = getCachedUserId()
@@ -1975,18 +2016,8 @@ watch(
           if (storedEmail) cachedUserEmail.value = storedEmail
           cachedUserId.value = storedUserId
         }
-      }
 
-      // Only fetch if we don't have data for this user or if user actually changed
-      // Don't fetch during staff creation to prevent overwriting super admin data
-      // IMPORTANT: Always fetch when user is available and auth is ready
-      if ((!hasUserData || userChanged) && !isStaffCreationInProgress()) {
-        try {
-          await userStore.fetchUserData(user.uid)
-          // console.log('[Dashboard] User data fetched in watch:', userStore.userData)
-        } catch (err) {
-          console.error('[Dashboard] Error fetching user data in watch:', err)
-        }
+        void runDashboardShellBootstrap({ force: true })
       }
     }
   },
