@@ -40,6 +40,7 @@ import { logActivity, getCurrentUserDisplayName } from '~/composables/useActivit
 import { duplicateSerialExistsViaApi, resolveSerialProductLine } from '~/utils/inventory-serial-validation'
 import {
   INVENTORY_FIRESTORE_PAGE_SIZE,
+  INVENTORY_FIRESTORE_ALL_CHUNK_SIZE,
   getInventoryItemsPage,
   fetchAllInventoryItemsChunked,
   clearInventoryItemQueryCaches,
@@ -1647,7 +1648,7 @@ export const useInventoryStore = defineStore('inventory', {
           folderId,
           queryUserId: ctx.queryUserId,
           isStaff: ctx.isStaff,
-          pageSize: INVENTORY_FIRESTORE_PAGE_SIZE,
+          pageSize: INVENTORY_FIRESTORE_ALL_CHUNK_SIZE,
           force,
         })
       })()
