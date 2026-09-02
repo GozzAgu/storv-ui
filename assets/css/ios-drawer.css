@@ -38,25 +38,20 @@ html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--menu {
   background: var(--ios-drawer-menu-canvas, var(--ios-home-bg, #f2f2f7));
 }
 
-/* Grab handle */
+/* Grab handle - purely decorative (no drag-to-dismiss gesture is wired up), so
+   it reads as a fake affordance rather than a real one. Dropped everywhere the
+   sheet already has an explicit close button. */
 html.capacitor-ios.capacitor-native .ios-drawer .native-more-sheet__handle,
 html.capacitor-ios.capacitor-native .ios-drawer .dashboard-native-sheet__header .native-more-sheet__handle {
-  width: 2.25rem;
-  height: 0.3125rem;
-  margin: 0.375rem auto 0.5rem;
-  border-radius: 9999px;
-  background: rgb(60 60 67 / 0.18);
-}
-
-html.capacitor-ios.capacitor-native.dark .ios-drawer .native-more-sheet__handle,
-html.capacitor-ios.capacitor-native.dark .ios-drawer .dashboard-native-sheet__header .native-more-sheet__handle {
-  background: rgb(255 255 255 / 0.2);
+  display: none;
 }
 
 /* ── Header ── */
 html.capacitor-ios.capacitor-native .ios-drawer .dashboard-native-sheet__header,
 html.capacitor-ios.capacitor-native .ios-drawer .native-more-sheet__header {
-  padding: 0 1rem 0.625rem;
+  /* Top inset used to come from the grab handle's own margins; restore it
+     now that the (non-functional) handle is gone. */
+  padding: 0.875rem 1rem 0.625rem;
   border-bottom: none;
   background: transparent;
 }
@@ -265,11 +260,13 @@ html.capacitor-ios.capacitor-native .ios-drawer-footer__actions {
 html.capacitor-ios.capacitor-native .ios-drawer-footer--menu {
   flex-direction: column;
   align-items: stretch;
+  padding: 0.75rem 1rem 0;
 }
 
 html.capacitor-ios.capacitor-native .ios-drawer-footer--menu .ios-drawer-footer__actions {
-  flex-direction: column;
-  align-items: stretch;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
   width: 100%;
   margin-left: 0;
 }

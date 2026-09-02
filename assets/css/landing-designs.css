@@ -71,56 +71,39 @@
   background: #f4f4f5;
 }
 
+/* A loosely fanned stack of folders - Storvv's own metaphor for inventory
+   categories - in their natural manila color, for a bit of warmth against the
+   otherwise monochrome hero. */
 .landing-hero-mock__box {
   position: absolute;
-  border-radius: 0.35rem;
-  border: 1px solid rgb(255 255 255 / 0.08);
-  box-shadow: 0 8px 24px rgb(0 0 0 / 0.35);
+  filter: drop-shadow(0 6px 14px rgb(0 0 0 / 0.22));
 }
 
 .landing-hero-mock__box--a {
-  top: 1.25rem;
-  left: 0.75rem;
-  width: 4.5rem;
-  height: 3rem;
-  background: #d4d4d8;
-  transform: rotate(-6deg);
-}
-
-.landing-hero-mock__box--a::after {
-  content: '';
-  position: absolute;
-  inset: 0.35rem 0.2rem auto;
-  height: 0.45rem;
-  border-radius: 0.125rem;
-  background: #a1a1aa;
+  top: 1.1rem;
+  left: 0.6rem;
+  width: 4.75rem;
+  height: 3.8rem;
+  fill: #e8c368;
+  transform: rotate(-8deg);
 }
 
 .landing-hero-mock__box--b {
-  top: 2.5rem;
-  left: 2.75rem;
-  width: 5rem;
-  height: 3.25rem;
-  background: #a1a1aa;
-  transform: rotate(4deg);
-}
-
-.landing-hero-mock__box--b::after {
-  content: '';
-  position: absolute;
-  inset: 0.4rem 0.25rem auto;
-  height: 0.5rem;
-  border-radius: 0.125rem;
-  background: #a1a1aa;
+  top: 2.35rem;
+  left: 2.6rem;
+  width: 5.25rem;
+  height: 4.2rem;
+  fill: #f3ac3c;
+  transform: rotate(5deg);
 }
 
 .landing-hero-mock__box--c {
-  bottom: 0.75rem;
-  left: 1.5rem;
-  width: 4.25rem;
-  height: 2.75rem;
-  background: #d4d4d8;
-  transform: rotate(-2deg);
+  bottom: 0.55rem;
+  left: 1.3rem;
+  width: 4.5rem;
+  height: 3.6rem;
+  fill: #ffc93c;
+  transform: rotate(-3deg);
 }
 
 .landing-hero-mock__overlay {

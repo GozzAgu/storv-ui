@@ -14,8 +14,9 @@
         aria-hidden="true"
       >
         <UserCircleIcon v-if="variant === 'customer'" />
-        <ArrowDownIcon v-else-if="variant === 'credit' || variant === 'pending'" />
-        <ArrowUpIcon v-else-if="variant === 'debit'" />
+        <CheckCircleIcon v-else-if="variant === 'credit'" />
+        <ClockIcon v-else-if="variant === 'pending'" />
+        <ArrowUturnLeftIcon v-else-if="variant === 'debit'" />
         <XMarkIcon v-else />
       </div>
       <div class="ios-receipt-transaction-row__body">
@@ -48,13 +49,21 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import {
-  ArrowDownIcon,
-  ArrowUpIcon,
+  ArrowUturnLeftIcon,
+  CheckCircleIcon,
+  ClockIcon,
   EllipsisVerticalIcon,
   UserCircleIcon,
   XMarkIcon,
 } from '~/utils/app-icons'
 
+/**
+ * `credit` = completed sale, `pending` = awaiting payment/balance due,
+ * `debit` = refunded, `cancelled` = cancelled, `customer` = a customer row
+ * rather than a receipt. The icon mirrors these exact states (matching the
+ * "Completed / Pending / Refunded" filter chips above the list) instead of a
+ * generic money-direction arrow.
+ */
 export type ReceiptTransactionVariant =
   | 'credit'
   | 'debit'

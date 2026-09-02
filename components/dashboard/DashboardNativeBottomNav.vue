@@ -108,18 +108,10 @@
       </div>
 
       <template #footer>
-        <div class="ios-drawer-menu__footer-card">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            extra-class="ios-drawer-sign-out"
-            @click="onSignOut"
-          >
-            <DashboardNavIcon name="sign-out" size="sm" />
-            Sign out
-          </Button>
-        </div>
+        <button type="button" class="ios-drawer-sign-out" @click="onSignOut">
+          <DashboardNavIcon name="sign-out" size="sm" />
+          Sign out
+        </button>
       </template>
     </IosDrawer>
   </nav>
@@ -131,7 +123,6 @@ import { useRoute } from 'vue-router'
 import DashboardNavIcon from '~/components/dashboard/DashboardNavIcon.vue'
 import { ChevronRightIcon } from '~/utils/app-icons'
 import IosDrawer from '~/components/ios/IosDrawer.vue'
-import Button from '~/components/ui/Button.vue'
 import {
   isDashboardNavActive,
   nativeNavShortLabel,

@@ -331,7 +331,7 @@
 
 .landing-ai__msg--ai {
   margin-right: 2rem;
-  background: #ffffff;
+  background: #eeeeef;
   color: var(--portfolio-muted, rgb(26 21 35 / 0.58));
   border-bottom-left-radius: 0.25rem;
 }

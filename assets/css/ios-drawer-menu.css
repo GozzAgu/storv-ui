@@ -210,24 +210,41 @@ html.capacitor-ios.capacitor-native.dark .ios-drawer-menu__footer-card {
 }
 
 html.capacitor-ios.capacitor-native .ios-drawer .ios-drawer-sign-out {
-  display: flex !important;
+  display: inline-flex;
   align-items: center;
-  justify-content: flex-start;
-  gap: 0.625rem;
-  width: 100% !important;
-  min-height: 2.875rem !important;
-  padding: 0.625rem 0.875rem !important;
-  border: none !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  font-size: var(--ios-dash-menu-size, 0.8125rem) !important;
-  font-weight: 500 !important;
-  color: var(--ios-destructive) !important;
+  align-self: flex-end;
+  justify-content: center;
+  gap: 0.4375rem;
+  width: auto;
+  min-height: 2.375rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 9999px;
+  background: rgb(255 59 48 / 0.12);
+  box-shadow: none;
+  font-size: var(--ios-dash-menu-size, 0.8125rem);
+  font-weight: 600;
+  color: var(--ios-destructive);
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.15s ease, transform 0.15s var(--ios-spring, ease);
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer .ios-drawer-sign-out svg {
+  height: 0.9375rem;
+  width: 0.9375rem;
 }
 
 html.capacitor-ios.capacitor-native .ios-drawer .ios-drawer-sign-out:active {
-  background: rgb(255 59 48 / 0.08) !important;
+  background: rgb(255 59 48 / 0.2);
+  transform: scale(0.96);
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-drawer .ios-drawer-sign-out {
+  background: rgb(255 59 48 / 0.16);
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-drawer .ios-drawer-sign-out:active {
+  background: rgb(255 59 48 / 0.26);
 }
 
 html.capacitor-ios.capacitor-native .ios-drawer-menu__meta {

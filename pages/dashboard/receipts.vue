@@ -86,7 +86,7 @@
                   <IosReceiptTransactionRow
                     v-for="(receipt, index) in paginatedReceipts"
                     :key="receipt.id"
-                    :title="receipt.customerName || 'Walk-in customer'"
+                    :title="getReceiptProductSummary(receipt)"
                     :subtitle="getReceiptTransactionSubtitle(receipt)"
                     :amount="getReceiptTransactionAmount(receipt).text"
                     :amount-tone="getReceiptTransactionAmount(receipt).tone"
@@ -199,7 +199,7 @@
                       v-for="(receipt, receiptIndex) in getCustomerReceipts(customer.id)"
                       :key="receipt.id"
                       nested
-                      :title="receipt.receiptNumber"
+                      :title="getReceiptProductSummary(receipt)"
                       :subtitle="getReceiptTransactionSubtitle(receipt)"
                       :amount="getReceiptTransactionAmount(receipt).text"
                       :amount-tone="getReceiptTransactionAmount(receipt).tone"
@@ -3140,6 +3140,15 @@ function getReceiptTransactionSubtitle(receipt: Receipt): string {
   if (receipt.paymentMethod?.trim()) parts.push(receipt.paymentMethod.trim())
   parts.push(receipt.receiptNumber)
   return parts.join(' · ')
+}
+
+/** What was actually sold, so the list reads product-first instead of customer-first. */
+function getReceiptProductSummary(receipt: Receipt): string {
+  const items = receipt.items ?? []
+  if (items.length === 0) return receipt.receiptNumber
+  const first = items[0]!.itemName || 'Item'
+  if (items.length === 1) return first
+  return `${first} +${items.length - 1} more`
 }
 
 function getReceiptTransactionVariant(receipt: Receipt): ReceiptTransactionVariant {

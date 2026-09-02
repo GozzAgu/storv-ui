@@ -468,14 +468,26 @@ html.dark .landing-page--portfolio .landing-ai__msg--user {
   color: #1a1523;
 }
 
-.landing-page--portfolio .landing-ai__msg--ai,
+/* AI bubble sits inside a `.landing-glass` panel of the same color as this
+   rule used to set - give it its own tint so the reply actually reads as a
+   bubble instead of floating text. */
+.landing-page--portfolio .landing-ai__msg--ai {
+  background: #eeeeef;
+  border-color: transparent;
+  color: var(--portfolio-muted);
+}
+
 .landing-page--portfolio .landing-ai__chip {
   background: #ffffff;
   border-color: transparent;
   color: var(--portfolio-muted);
 }
 
-html.dark .landing-page--portfolio .landing-ai__msg--ai,
+html.dark .landing-page--portfolio .landing-ai__msg--ai {
+  background: #2c2c2e;
+  color: rgb(255 255 255 / 0.75);
+}
+
 html.dark .landing-page--portfolio .landing-ai__chip {
   background: #1e1e1e;
 }

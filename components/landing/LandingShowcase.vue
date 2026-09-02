@@ -49,9 +49,30 @@
           <div class="landing-hero-mock__card">
             <div class="landing-hero-mock__split">
               <div class="landing-hero-mock__boxes" aria-hidden="true">
-                <span class="landing-hero-mock__box landing-hero-mock__box--a" />
-                <span class="landing-hero-mock__box landing-hero-mock__box--b" />
-                <span class="landing-hero-mock__box landing-hero-mock__box--c" />
+                <svg
+                  class="landing-hero-mock__box landing-hero-mock__box--a"
+                  viewBox="0 0 40 32"
+                >
+                  <path
+                    d="M2 6a2 2 0 0 1 2-2h8l3 3h19a2 2 0 0 1 2 2v17a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6z"
+                  />
+                </svg>
+                <svg
+                  class="landing-hero-mock__box landing-hero-mock__box--b"
+                  viewBox="0 0 40 32"
+                >
+                  <path
+                    d="M2 6a2 2 0 0 1 2-2h8l3 3h19a2 2 0 0 1 2 2v17a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6z"
+                  />
+                </svg>
+                <svg
+                  class="landing-hero-mock__box landing-hero-mock__box--c"
+                  viewBox="0 0 40 32"
+                >
+                  <path
+                    d="M2 6a2 2 0 0 1 2-2h8l3 3h19a2 2 0 0 1 2 2v17a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6z"
+                  />
+                </svg>
                 <div class="landing-hero-mock__overlay">
                   <strong>Dashboard overview</strong>
                   Three shops connected · One integrated view
