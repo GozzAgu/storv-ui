@@ -48,6 +48,7 @@
           :value="metric.value"
           :href="metric.href"
           :tone="metric.tone"
+          :icon="metric.icon"
         />
       </div>
     </section>
@@ -155,7 +156,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, type Component } from 'vue'
 import {
   ChevronRightIcon,
   EllipsisVerticalIcon,
@@ -183,6 +184,7 @@ export interface IosHomeMetric {
   value: string
   href?: string
   tone?: IosHomeMetricTone
+  icon?: Component
 }
 
 export interface IosHomeFeedItem {

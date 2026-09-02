@@ -144,6 +144,7 @@
             :label="metric.label"
             :value="metric.value"
             :tone="metric.tone"
+            :icon="metric.icon"
           />
         </div>
       </IosAnalyticsSection>
@@ -1576,38 +1577,45 @@ const analyticsHeaderMetrics = computed(() => {
       key: 'revenue',
       label: 'Total revenue',
       value: formatCurrency(totalRevenue.value),
+      icon: BanknotesIcon,
     },
     {
       key: 'completed',
       label: 'Completed',
       value: formatCurrency(totalPeriodSales.value),
+      icon: CheckCircleIcon,
     },
     {
       key: 'orders',
       label: 'Orders',
       value: String(totalOrders.value),
+      icon: ShoppingBagIcon,
     },
     {
       key: 'aov',
       label: 'Avg. order',
       value: formatCurrency(averageOrderValue.value),
+      icon: ReceiptPercentIcon,
     },
     {
       key: 'customers',
       label: 'Customers',
       value: String(uniqueCustomersInPeriod.value),
+      icon: UsersIcon,
     },
     {
       key: 'low-stock',
       label: 'Low stock',
       value: String(lowStockCount.value),
       tone: lowStockCount.value > 0 ? ('warning' as const) : undefined,
+      icon: ExclamationTriangleIcon,
     },
     {
       key: 'refunds',
       label: 'Refunds',
       value: String(refundedCount.value),
       tone: refundedCount.value > 0 ? ('danger' as const) : undefined,
+      icon: ArrowUturnLeftIcon,
     },
   ]
 
@@ -1618,11 +1626,13 @@ const analyticsHeaderMetrics = computed(() => {
         label: 'Gross profit',
         value: formatCurrency(periodGrossProfit.value),
         tone: periodGrossProfit.value >= 0 ? ('success' as const) : ('danger' as const),
+        icon: ChartBarIcon,
       },
       {
         key: 'cogs',
         label: 'COGS',
         value: formatCurrency(periodCogs.value),
+        icon: CubeIcon,
       }
     )
   }

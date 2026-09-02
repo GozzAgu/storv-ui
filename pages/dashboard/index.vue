@@ -913,18 +913,21 @@ const iosHomeMetrics = computed((): IosHomeMetric[] => {
       label: 'Total revenue',
       value: formatCompactCurrency(totalRevenue.value),
       href: '/dashboard/analytics',
+      icon: BanknotesIcon,
     },
     {
       id: 'orders',
       label: 'Orders today',
       value: String(todayReceiptsCount.value),
       href: '/dashboard/receipts',
+      icon: ShoppingBagIcon,
     },
     {
       id: 'customers',
       label: 'Active customers',
       value: formatCompactNumber(totalCustomers.value),
       href: '/dashboard/receipts',
+      icon: UsersIcon,
     },
     {
       id: 'low-stock',
@@ -932,6 +935,7 @@ const iosHomeMetrics = computed((): IosHomeMetric[] => {
       value: String(lowStockItems.value.length),
       href: '/dashboard/inventory',
       tone: 'warning',
+      icon: ExclamationTriangleIcon,
     },
   ]
 
@@ -941,6 +945,7 @@ const iosHomeMetrics = computed((): IosHomeMetric[] => {
       label: 'Outstanding balances',
       value: formatCompactCurrency(outstandingBalanceTotal.value),
       href: '/dashboard/receipts',
+      icon: CreditCardIcon,
     })
   }
 
@@ -950,6 +955,7 @@ const iosHomeMetrics = computed((): IosHomeMetric[] => {
       label: 'Open leads',
       value: String(openLeadsCount.value),
       href: '/dashboard/leads',
+      icon: UsersIcon,
     })
   }
 
