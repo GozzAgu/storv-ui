@@ -1,11 +1,10 @@
 <template>
-  <div class="dash-stat-card">
+  <div class="dash-stat-card" :class="tone !== 'default' ? `dash-stat-card--${tone}` : ''">
     <div class="dash-stat-card__body">
-      <p class="dash-stat-card__label">{{ label }}</p>
-      <div class="dash-stat-card__row">
-        <p class="dash-stat-card__value dash-num">
-          <slot name="value">{{ value }}</slot>
-        </p>
+      <div v-if="icon || change !== undefined" class="dash-stat-card__top">
+        <span v-if="icon" class="dash-stat-card__icon" aria-hidden="true">
+          <component :is="icon" class="h-4 w-4" stroke-width="1.75" />
+        </span>
         <span
           v-if="change !== undefined && change !== null"
           :class="[
@@ -20,6 +19,10 @@
           {{ change }}
         </span>
       </div>
+      <p class="dash-stat-card__label">{{ label }}</p>
+      <p class="dash-stat-card__value dash-num">
+        <slot name="value">{{ value }}</slot>
+      </p>
       <p
         v-if="(subtext !== undefined && subtext !== null && subtext !== '') || $slots.subtext"
         :class="['dash-stat-card__subtext', resolvedSubtextClass]"
@@ -44,6 +47,7 @@
 </template>
 
 <script setup lang="ts">
+import type { Component } from 'vue'
 import { computed } from 'vue'
 
 const props = withDefaults(
@@ -55,17 +59,17 @@ const props = withDefaults(
     change?: string | null
     changePositive?: boolean | null
     sparklineData?: number[]
-    icon?: any
-    iconClass?: string
-    iconBgClass?: string
+    /** Small icon shown in the top-left tile. */
+    icon?: Component
+    /** Drives the icon tile color (and sparkline accent when set to 'accent'). */
+    tone?: 'default' | 'accent' | 'success' | 'warning' | 'danger'
   }>(),
   {
     change: undefined,
     changePositive: null,
     sparklineData: undefined,
     icon: undefined,
-    iconClass: '',
-    iconBgClass: '',
+    tone: 'default',
   }
 )
 

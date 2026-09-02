@@ -155,11 +155,9 @@
             {{ analyticsSummary }}
           </p>
         </header>
-        <DashboardPageMetrics
-          metrics-class="dash-page-metrics--analytics"
-          :metrics="analyticsHeaderMetrics"
-          aria-label="Analytics summary"
-        />
+        <div class="analytics-kpi-grid" aria-label="Analytics summary">
+          <AnalyticsKpiCard v-for="card in analyticsKpiCards" :key="card.key" v-bind="card" />
+        </div>
       </section>
 
       <IosAnalyticsSection
@@ -872,7 +870,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, defineAsyncComponent } from 'vue'
+import { ref, computed, onMounted, defineAsyncComponent, type Component } from 'vue'
 
 import { mergeIosApexChartTheme } from '~/utils/ios-apex-chart'
 import IosSegmentedControl from '~/components/ios/IosSegmentedControl.vue'
@@ -883,9 +881,19 @@ const LazyApexChart = defineAsyncComponent(
 )
 import {
   ArrowDownTrayIcon,
+  ArrowUturnLeftIcon,
+  BanknotesIcon,
   BuildingStorefrontIcon,
+  ChartBarIcon,
+  CheckCircleIcon,
   ClockIcon,
+  CubeIcon,
+  ExclamationTriangleIcon,
+  ReceiptPercentIcon,
+  ShoppingBagIcon,
+  UsersIcon,
 } from '~/utils/app-icons'
+import AnalyticsKpiCard from '~/components/analytics/AnalyticsKpiCard.vue'
 import { useReceiptsStore } from '~/stores/receipts'
 import { useInventoryStore } from '~/stores/inventory'
 import { useCustomersStore } from '~/stores/customers'
@@ -1622,6 +1630,110 @@ const analyticsHeaderMetrics = computed(() => {
   return metrics
 })
 
+interface AnalyticsKpiCardData {
+  key: string
+  icon: Component
+  label: string
+  value: string
+  tone?: 'default' | 'accent' | 'success' | 'warning' | 'danger'
+  secondary?: string
+  trend?: { value: string; positive: boolean } | null
+  sparkline?: number[] | null
+  progress?: number | null
+}
+
+/** Visual KPI row: icon + real trend/sparkline/progress per metric, instead of bare numbers. */
+const analyticsKpiCards = computed(() => {
+  const cards: AnalyticsKpiCardData[] = [
+    {
+      key: 'revenue',
+      icon: BanknotesIcon,
+      label: 'Total revenue',
+      value: formatCurrency(totalRevenue.value),
+      tone: 'accent',
+      trend: revenueChangeBadge.value
+        ? { value: revenueChangeBadge.value, positive: revenueChangePositive.value === true }
+        : null,
+      // Real per-period revenue history - same series driving the Revenue trends chart.
+      sparkline: revenueChartSeries.value[0]?.data ?? null,
+    },
+    {
+      key: 'completed',
+      icon: CheckCircleIcon,
+      label: 'Completed',
+      value: formatCurrency(totalPeriodSales.value),
+      tone: 'success',
+      secondary: `${completedReceiptsInPeriod.value.length} sale${completedReceiptsInPeriod.value.length === 1 ? '' : 's'}`,
+    },
+    {
+      key: 'orders',
+      icon: ShoppingBagIcon,
+      label: 'Orders',
+      value: String(totalOrders.value),
+      secondary: `${itemsSoldInPeriod.value} item${itemsSoldInPeriod.value === 1 ? '' : 's'} sold`,
+    },
+    {
+      key: 'aov',
+      icon: ReceiptPercentIcon,
+      label: 'Avg. order',
+      value: formatCurrency(averageOrderValue.value),
+      secondary: `Across ${totalOrders.value} order${totalOrders.value === 1 ? '' : 's'}`,
+    },
+    {
+      key: 'customers',
+      icon: UsersIcon,
+      label: 'Customers',
+      value: String(uniqueCustomersInPeriod.value),
+      secondary:
+        uniqueCustomersInPeriod.value > 0
+          ? `${repeatPurchaseRate.value.toFixed(0)}% repeat`
+          : undefined,
+    },
+    {
+      key: 'low-stock',
+      icon: ExclamationTriangleIcon,
+      label: 'Low stock',
+      value: String(lowStockCount.value),
+      tone: lowStockCount.value > 0 ? 'warning' : 'default',
+      secondary: `${featureLowStockPercentage.value}% of inventory lines`,
+      progress: featureLowStockPercentage.value,
+    },
+    {
+      key: 'refunds',
+      icon: ArrowUturnLeftIcon,
+      label: 'Refunds',
+      value: String(refundedCount.value),
+      tone: refundedCount.value > 0 ? 'danger' : 'default',
+      secondary: refundRateText.value,
+    },
+  ]
+
+  if (canViewProfitAndCost.value) {
+    const revenueForCogsShare = totalRevenue.value
+    const cogsShare =
+      revenueForCogsShare > 0 ? Math.round((periodCogs.value / revenueForCogsShare) * 100) : null
+    cards.push(
+      {
+        key: 'profit',
+        icon: ChartBarIcon,
+        label: 'Gross profit',
+        value: formatCurrency(periodGrossProfit.value),
+        tone: periodGrossProfit.value >= 0 ? 'success' : 'danger',
+        secondary: grossProfitSubtext.value,
+      },
+      {
+        key: 'cogs',
+        icon: CubeIcon,
+        label: 'COGS',
+        value: formatCurrency(periodCogs.value),
+        secondary: cogsShare != null ? `${cogsShare}% of revenue` : undefined,
+      }
+    )
+  }
+
+  return cards
+})
+
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const HOUR_LABELS = Array.from({ length: 24 }, (_, i) => {
   if (i === 0) return '12am'
@@ -2334,3 +2446,31 @@ onMounted(() => {
   })()
 })
 </script>
+
+<style scoped>
+.analytics-kpi-grid {
+  display: grid;
+  width: 100%;
+  gap: 0.625rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 640px) {
+  .analytics-kpi-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .analytics-kpi-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .analytics-kpi-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+</style>

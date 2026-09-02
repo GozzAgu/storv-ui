@@ -181,36 +181,45 @@
             :change="revenueChangePercent"
             :change-positive="revenueChangePositive"
             :sparkline-data="statCardRevenueSparkline.length > 1 ? statCardRevenueSparkline : undefined"
+            :icon="BanknotesIcon"
+            tone="accent"
             hero
           />
           <DashboardStatTile
             label="Orders today"
             :value="todayReceiptsCount.toString()"
             :subtext="`${formatCurrency(todaySales)} revenue`"
+            :icon="ShoppingBagIcon"
           />
           <DashboardStatTile
             label="Customers"
             :value="totalCustomers.toString()"
             :subtext="`${newCustomersToday} active today`"
             :subtext-class="newCustomersToday > 0 ? 'success' : ''"
+            :icon="UsersIcon"
           />
           <DashboardStatTile
             label="Low stock signals"
             :value="lowStockItems.length.toString()"
             :subtext="lowStockItems.length > 0 ? 'Review restocking' : 'Within thresholds'"
             :subtext-class="lowStockItems.length > 0 ? 'warning' : ''"
+            :icon="ExclamationTriangleIcon"
+            :tone="lowStockItems.length > 0 ? 'warning' : 'default'"
           />
           <DashboardStatTile
             label="Outstanding"
             :value="formatCurrency(outstandingBalanceTotal)"
             :subtext="`${outstandingCount} open balance${outstandingCount === 1 ? '' : 's'}`"
             :subtext-class="outstandingCount > 0 ? 'warning' : ''"
+            :icon="CreditCardIcon"
+            :tone="outstandingCount > 0 ? 'warning' : 'default'"
           />
           <DashboardStatTile
             v-if="canAccessLeadsPlan"
             label="Open leads"
             :value="String(openLeadsCount)"
             :subtext="`${formatCurrency(openLeadsPipeline)} est. pipeline`"
+            :icon="UsersIcon"
           />
         </div>
 
@@ -220,11 +229,14 @@
             :value="formatCurrency(dashboardGrossProfit)"
             :subtext="dashboardGrossProfitSubtext"
             :change-positive="dashboardGrossProfit >= 0"
+            :icon="ChartBarIcon"
+            :tone="dashboardGrossProfit >= 0 ? 'success' : 'danger'"
           />
           <DashboardStatTile
             label="Cost of goods sold"
             :value="formatCurrency(dashboardCogs)"
             subtext="Completed sales with unit cost"
+            :icon="CubeIcon"
           />
         </div>
       </div>
@@ -528,7 +540,16 @@ import {
   sumReceiptCogs,
   sumReceiptGrossProfit,
 } from '~/utils/inventory-item-cost'
-import { BuildingStorefrontIcon } from '~/utils/app-icons'
+import {
+  BanknotesIcon,
+  BuildingStorefrontIcon,
+  ChartBarIcon,
+  CreditCardIcon,
+  CubeIcon,
+  ExclamationTriangleIcon,
+  ShoppingBagIcon,
+  UsersIcon,
+} from '~/utils/app-icons'
 import IosEmptyState from '~/components/ios/IosEmptyState.vue'
 import IosHomeDashboard from '~/components/ios/IosHomeDashboard.vue'
 import IosHomeDashboardSkeleton from '~/components/ios/IosHomeDashboardSkeleton.vue'

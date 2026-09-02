@@ -1,7 +1,7 @@
 import type { MarketingFeatureIconKey } from '~/utils/marketing-feature-icons'
 
 /** Bump when regenerating `public/marketing/screenshots/` so browsers pick up new PNGs. */
-export const MARKETING_SCREENSHOTS_VERSION = '2026-09-02'
+export const MARKETING_SCREENSHOTS_VERSION = '2026-09-02-3'
 
 export interface MarketingScreenshot {
   id: string
