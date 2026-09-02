@@ -11,9 +11,9 @@ export default defineNuxtPlugin(() => {
     if (savedTheme && ['light', 'dark', 'system'].includes(savedTheme)) {
       themeStore.theme = savedTheme
     } else {
-      // If no saved theme, default to light until the user changes it
-      themeStore.theme = 'light'
-      localStorage.setItem('theme', 'light')
+      // If no saved theme (first-time visitor), follow the device preference
+      themeStore.theme = 'system'
+      localStorage.setItem('theme', 'system')
     }
 
     // Initialize theme (applies to document and sets up watchers)

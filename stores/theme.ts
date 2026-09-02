@@ -44,9 +44,9 @@ export const useThemeStore = defineStore('theme', {
         if (savedTheme && ['light', 'dark', 'system'].includes(savedTheme)) {
           this.theme = savedTheme
         } else {
-          // If no saved theme, default to light until the user changes it
-          this.theme = 'light'
-          localStorage.setItem('theme', 'light')
+          // If no saved theme (first-time visitor), follow the device preference
+          this.theme = 'system'
+          localStorage.setItem('theme', 'system')
         }
 
         // Apply theme immediately to ensure consistency

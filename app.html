@@ -30,8 +30,14 @@
               isDark = false
             }
           } else {
-            // No saved theme (first-time user) - default to light until they change it
-            isDark = false
+            // No saved theme (first-time user) - follow device preference
+            try {
+              if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                isDark = true
+              }
+            } catch (e) {
+              isDark = false
+            }
           }
         } catch (e) {
           // localStorage access failed - default to light
