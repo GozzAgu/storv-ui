@@ -219,6 +219,13 @@
   position: fixed;
   inset: 0;
   z-index: 60;
+  /* Force this teleported overlay into its own opaque compositing layer. Without this,
+     some WebKit builds (notably during iOS screen recording/broadcast) have been seen
+     to under-composite a fixed-position portal layered over an animated page, letting
+     the page behind bleed through the panel's solid background. */
+  isolation: isolate;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
 }
 
 .landing-mobile-layer-enter-active,
@@ -261,6 +268,12 @@
   border-radius: 1.25rem;
   background: rgb(8 10 18 / 0.96);
   box-shadow: 0 24px 64px rgb(0 0 0 / 0.45);
+  /* Own compositing layer with an opaque backing so the panel paints fully solid
+     instead of any of the page behind it showing through (see .landing-mobile-layer). */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 .landing-mobile-panel__nav {
