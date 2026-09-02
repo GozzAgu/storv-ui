@@ -64,16 +64,18 @@
       </template>
     </DashboardPageHeader>
 
-    <div v-if="needsStoreSelection && !isLoading" :class="stateCardClass">
-      <MarketingFeatureIcon
-        name="branch"
-        size="lg"
-        class="mx-auto mb-3 text-[#4876c7] dark:text-[#9ab5e3]"
-      />
-      <p :class="['dash-state-card__title', pageTitleClass, '!text-sm']">
+    <div v-if="needsStoreSelection && !isLoading" :class="[stateCardClass, 'dash-empty-state']">
+      <div class="dash-empty-state__mark">
+        <MarketingFeatureIcon
+          name="branch"
+          size="md"
+          class="dash-empty-state__icon"
+        />
+      </div>
+      <p :class="['dash-empty-state__title', 'dash-state-card__title', pageTitleClass, '!text-sm']">
         Select a store to load your dashboard
       </p>
-      <p :class="['dash-state-card__desc', cardDescClass]">
+      <p :class="['dash-empty-state__desc', 'dash-state-card__desc', cardDescClass]">
         {{
           canManageBranches
             ? 'Choose a branch below or from the store selector in the top bar. Metrics, charts, and alerts are scoped to the active store.'
@@ -91,25 +93,68 @@
     </div>
 
     <template v-else-if="isLoading">
-      <div :class="kpiGridClass">
-        <div v-for="i in nativeKpiSkeletonCount" :key="`kpi-${i}`" class="dash-skeleton dash-skeleton--kpi" />
+      <div class="dash-home-kpi">
+        <div :class="kpiGridClassResolved">
+          <DashStatCardSkeleton
+            v-for="i in homeKpiSkeletonCount"
+            :key="`kpi-${i}`"
+            :hero="i === 1"
+          />
+        </div>
+        <div
+          v-if="canViewProfitAndCost"
+          :class="[kpiGridClassResolved, 'dash-kpi-grid--pair']"
+        >
+          <DashStatCardSkeleton v-for="i in 2" :key="`profit-${i}`" />
+        </div>
       </div>
 
-      <div :class="cardPaddedClass">
-        <div class="mb-3 flex items-center justify-between">
-          <div class="dash-skeleton h-3 w-32" />
-          <div class="dash-skeleton h-3 w-20" />
+      <section :class="[cardPaddedClass, 'dash-inventory-health']">
+        <div :class="[cardHeaderClass, 'dash-card__header--compact dash-inventory-health__header']">
+          <div class="space-y-2">
+            <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-label" />
+            <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-meta" />
+          </div>
+          <span class="dash-skeleton dash-skeleton--line" style="width: 5.5rem" />
         </div>
-        <div class="dash-skeleton dash-skeleton--bar !h-1" />
-      </div>
+        <div class="dash-inventory-health__footer">
+          <div class="dash-skeleton dash-skeleton--bar" />
+          <div class="mt-2 flex flex-wrap gap-3">
+            <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-meta" />
+            <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-meta" />
+            <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-meta" />
+          </div>
+        </div>
+      </section>
 
       <div :class="chartsGridClass">
-        <div class="dash-skeleton dash-skeleton--panel dash-charts-grid__main" />
-        <div class="dash-skeleton dash-skeleton--panel dash-charts-grid__side" />
+        <DashChartPanelSkeleton
+          extra-class="dash-charts-grid__main"
+          show-control
+        />
+        <DashChartPanelSkeleton extra-class="dash-charts-grid__side" variant="bars" />
       </div>
 
+      <div :class="splitGridClass">
+        <DashChartPanelSkeleton variant="list" leading="avatar" />
+        <DashChartPanelSkeleton variant="list" />
+      </div>
+
+      <section :class="cardPaddedClass">
+        <div :class="cardHeaderClass">
+          <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-label" />
+          <span class="dash-skeleton dash-skeleton--line" style="width: 5rem" />
+        </div>
+        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <div v-for="i in 6" :key="i" class="space-y-2">
+            <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-meta" />
+            <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-value" />
+          </div>
+        </div>
+      </section>
+
       <div :class="tripleGridClass">
-        <div v-for="i in 3" :key="`panel-${i}`" class="dash-skeleton dash-skeleton--panel" />
+        <DashChartPanelSkeleton v-for="i in 3" :key="`list-${i}`" variant="list" />
       </div>
     </template>
 
@@ -242,10 +287,12 @@
             </div>
           </div>
           <div :class="['dash-chart-wrap', chartData.length === 0 ? 'flex items-center justify-center' : '']">
-            <div v-if="chartData.length === 0" class="text-center">
-              <MarketingFeatureIcon name="analytics" size="lg" class="mx-auto mb-2 opacity-40" />
-              <p :class="cardTitleClass">No revenue data yet</p>
-              <p :class="cardDescClass">Completed sales will populate this chart</p>
+            <div v-if="chartData.length === 0" class="dash-empty-state dash-empty-state--compact">
+              <div class="dash-empty-state__mark">
+                <MarketingFeatureIcon name="analytics" size="sm" class="dash-empty-state__icon" />
+              </div>
+              <p class="dash-empty-state__title">No revenue data yet</p>
+              <p class="dash-empty-state__desc">Completed sales will populate this chart</p>
             </div>
             <ClientOnly v-else>
               <LazyApexChart type="area" :height="chartHeight" :options="chartOptions" :series="chartSeries" />
@@ -620,6 +667,7 @@ const storesStore = useStoresStore()
 const staffStore = useStaffStore()
 const salesLeadsStore = useSalesLeadsStore()
 const themeStore = useThemeStore()
+const chartIsDark = computed(() => themeStore.actualTheme === 'dark')
 
 const resolvedTutorialSteps = computed(() =>
   userStore.userData?.role === 'staff' ? staffTutorialSteps : tutorialSteps
@@ -695,7 +743,7 @@ const {
   statCardRevenueSparkline,
 } = insights
 
-const nativeKpiSkeletonCount = computed(() => (canViewProfitAndCost.value ? 7 : 5))
+const homeKpiSkeletonCount = computed(() => (canAccessLeadsPlan.value ? 6 : 5))
 
 const kpiGridClassResolved = computed(() =>
   isNativeApp.value ? `${kpiGridClass} dash-kpi-grid--compact` : kpiGridClass
@@ -862,6 +910,7 @@ const iosHomeMetrics = computed((): IosHomeMetric[] => {
       label: 'Low stock signals',
       value: String(lowStockItems.value.length),
       href: '/dashboard/inventory',
+      tone: 'warning',
     },
   ]
 
@@ -973,10 +1022,10 @@ if (import.meta.client) {
 const chartHeight = computed(() => (isMobile.value ? 176 : 220))
 
 const chartOptions = computed(() => {
-  const isDark = themeStore.actualTheme === 'dark'
-  const lineColor = isDark ? '#9ab5e3' : '#4876c7'
+  const isDark = chartIsDark.value
+  const lineColor = isDark ? '#e4e4e7' : '#4876c7'
   const gridColor = isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(15, 23, 42, 0.06)'
-  const labelColor = isDark ? '#94a3b8' : '#64748b'
+  const labelColor = isDark ? '#a1a1aa' : '#64748b'
 
   return {
     chart: {

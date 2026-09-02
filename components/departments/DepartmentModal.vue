@@ -2,12 +2,13 @@
   <SidePanel
     :modelValue="props.modelValue"
     @update:modelValue="(value: boolean) => emit('update:modelValue', value)"
-    :title="isEdit ? 'Edit Department' : 'Create New Department'"
+    :title="isEdit ? 'Edit department' : 'Create department'"
     size="lg"
+    dense
   >
-    <IosForm @submit="handleSubmit">
-      <IosFormSection>
-        <IosFormField label="Department Type" required>
+    <IosForm layout="fill" @submit="handleSubmit">
+      <IosFormSection fixed>
+        <IosFormField label="Department type" required>
           <IosFormSelect v-model="formData.departmentType" required>
             <option value="">Select department type</option>
             <option v-for="deptType in coreDepartments" :key="deptType" :value="deptType">
@@ -16,7 +17,7 @@
           </IosFormSelect>
         </IosFormField>
 
-        <IosFormField label="Department Name" required>
+        <IosFormField label="Department name" required>
           <IosFormInput
             v-model="formData.name"
             required
@@ -24,22 +25,17 @@
           />
         </IosFormField>
 
-        <IosFormField label="Description">
+        <IosFormField label="Description" hint="Optional">
           <IosFormTextarea
             v-model="formData.description"
             :rows="3"
             extra-class="resize-none"
-            placeholder="Brief description of the department..."
+            placeholder="Brief description of the department"
           />
         </IosFormField>
       </IosFormSection>
 
-      <div
-        v-if="errorMessage"
-        class="p-2.5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-sm"
-      >
-        <p class="text-xs text-red-600 dark:text-red-400">{{ errorMessage }}</p>
-      </div>
+      <p v-if="errorMessage" class="ios-form__error">{{ errorMessage }}</p>
     </IosForm>
 
     <template #footer>
@@ -70,7 +66,6 @@ import { useDepartmentsStore } from '~/stores/departments'
 import { useStoresStore } from '~/stores/stores'
 import { CORE_DEPARTMENTS } from '~/composables/useDepartments'
 import type { Department } from '~/composables/useDepartments'
-import { useAppToast } from '~/composables/useAppToast'
 
 interface Props {
   modelValue: boolean
@@ -91,7 +86,6 @@ const emit = defineEmits<{
 
 const departmentsStore = useDepartmentsStore()
 const storesStore = useStoresStore()
-const toast = useAppToast()
 
 const coreDepartments = CORE_DEPARTMENTS
 
@@ -187,8 +181,9 @@ const handleSubmit = async () => {
         }
       }
     }
-  } catch (error: any) {
-    errorMessage.value = error.message || 'Failed to save department. Please try again.'
+  } catch (error: unknown) {
+    errorMessage.value =
+      error instanceof Error ? error.message : 'Failed to save department. Please try again.'
     emit('error', errorMessage.value)
   } finally {
     isSubmitting.value = false

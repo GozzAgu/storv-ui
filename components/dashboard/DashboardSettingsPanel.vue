@@ -20,20 +20,21 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-
-const props = defineProps<{
+defineProps<{
   id?: string
   title: string
   subtitle?: string
   badge?: string
   compact?: boolean
-  /** iOS Settings-style grouped section (uppercase label + inset list). */
-  iosGrouped?: boolean
 }>()
 
 const { isCapacitorIos } = useIsCapacitorIos()
-const iosGrouped = computed(() => props.iosGrouped ?? isCapacitorIos.value)
+
+/**
+ * iOS renders Settings as grouped sections: an uppercase caption above an inset
+ * card, so the panel shell and subtitle are dropped in favour of the card body.
+ */
+const iosGrouped = isCapacitorIos
 
 const {
   panelClass,

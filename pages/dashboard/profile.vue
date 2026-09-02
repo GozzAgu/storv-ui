@@ -57,11 +57,13 @@
         <section :class="profileCardClass">
           <div :class="profileCardBodyClass">
             <div :class="profileAvatarClass">
-              {{ profileAvatarInitials }}
+              <AccountAvatar :initials="profileAvatarInitials" />
             </div>
-            <div v-if="isLoadingProfile" class="mx-auto mt-4 max-w-[180px] space-y-2">
-              <div class="dash-skeleton h-4 w-full" />
-              <div class="dash-skeleton h-3 w-3/4" />
+            <div v-if="isLoadingProfile" class="mx-auto mt-4 flex max-w-[180px] flex-col items-center space-y-2">
+              <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-label" />
+              <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-title" />
+              <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-meta" />
+              <span class="dash-skeleton dash-skeleton--chip" style="width: 4.75rem; height: 1.25rem" />
             </div>
             <template v-else-if="!isCapacitorIos">
               <p :class="profileCardEyebrowClass">Business</p>
@@ -99,21 +101,21 @@
             <div :class="profileStatBarClass">
               <div :class="profileStatItemClass">
                 <p :class="profileStatLabelClass">Orders</p>
-                <p v-if="isLoadingStats" class="dash-skeleton mx-auto mt-1 h-5 w-8" />
+                <p v-if="isLoadingStats" class="dash-skeleton dash-skeleton--line dash-skeleton--line-metric mx-auto mt-1" />
                 <p v-else :class="profileStatValueClass">
                   {{ totalOrders }}
                 </p>
               </div>
               <div :class="profileStatItemClass">
                 <p :class="profileStatLabelClass">Products</p>
-                <p v-if="isLoadingStats" class="dash-skeleton mx-auto mt-1 h-5 w-8" />
+                <p v-if="isLoadingStats" class="dash-skeleton dash-skeleton--line dash-skeleton--line-metric mx-auto mt-1" />
                 <p v-else :class="profileStatValueClass">
                   {{ totalProducts }}
                 </p>
               </div>
               <div :class="profileStatItemClass">
                 <p :class="profileStatLabelClass">Customers</p>
-                <p v-if="isLoadingStats" class="dash-skeleton mx-auto mt-1 h-5 w-8" />
+                <p v-if="isLoadingStats" class="dash-skeleton dash-skeleton--line dash-skeleton--line-metric mx-auto mt-1" />
                 <p v-else :class="profileStatValueClass">
                   {{ totalCustomers }}
                 </p>
@@ -251,9 +253,7 @@
           "
         >
           <div v-if="isLoadingProfile" class="space-y-4">
-            <div class="h-4 bg-gray-200 dark:bg-white/10 rounded-sm w-3/4 animate-pulse"></div>
-            <div class="h-4 bg-gray-200 dark:bg-white/10 rounded-sm w-1/2 animate-pulse"></div>
-            <div class="h-4 bg-gray-200 dark:bg-white/10 rounded-sm w-2/3 animate-pulse"></div>
+            <DashFieldGridSkeleton :count="isStaff ? 6 : 4" />
           </div>
           <div v-else-if="hasBusinessProfileContent" class="space-y-4">
             <div
@@ -1161,12 +1161,20 @@
         Manage devices where you're currently signed in
       </p>
       <div v-if="isLoadingSessions" class="space-y-3">
-        <div v-for="i in 3" :key="i" class="flex items-center justify-between p-4 rounded-sm">
-          <div class="flex-1 space-y-2">
-            <div class="h-4 bg-gray-200 dark:bg-white/10 rounded-sm w-1/3 animate-pulse"></div>
-            <div class="h-3 bg-gray-200 dark:bg-white/10 rounded-sm w-1/4 animate-pulse"></div>
+        <div
+          v-for="i in 3"
+          :key="i"
+          class="flex items-center justify-between p-4 rounded-sm"
+        >
+          <div class="flex min-w-0 flex-1 items-start gap-2">
+            <span class="dash-skeleton dash-skeleton--thumb mt-0.5" />
+            <div class="min-w-0 flex-1 space-y-1.5">
+              <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-title" />
+              <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-meta" />
+              <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-meta" />
+            </div>
           </div>
-          <div class="h-6 bg-gray-200 dark:bg-white/10 rounded-sm w-16 animate-pulse"></div>
+          <span class="dash-skeleton dash-skeleton--line dash-skeleton--select" />
         </div>
       </div>
       <div v-else-if="activeSessions.length === 0" class="text-center py-8">
@@ -1455,6 +1463,7 @@ import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import IosProfileSettings from '~/components/ios/IosProfileSettings.vue'
+import AccountAvatar from '~/components/ui/AccountAvatar.vue'
 import {
   IosForm,
   IosFormSection,

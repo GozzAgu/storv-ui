@@ -2,7 +2,6 @@
   <SidePanel
     :model-value="props.modelValue"
     :title="sheetTitle"
-    :subtitle="sheetSubtitle"
     :content-padding="sheetContentPadding"
     size="lg"
     @update:model-value="(value: boolean) => emit('update:modelValue', value)"
@@ -13,10 +12,10 @@
 
         <div
           v-if="prefillItemMatchFailed"
-          class="rounded-sm border border-amber-200/80 bg-amber-50/90 px-3 py-2 text-xs text-amber-900 dark:border-amber-800/40 dark:bg-amber-950/30 dark:text-amber-100"
+          class="dash-drawer-callout"
           role="status"
         >
-          No matching in-stock product - pick category and items manually.
+          No matching in-stock product — pick category and items manually.
         </div>
 
         <SellScreenNoteBanner v-if="currentStep >= 2" />
@@ -32,11 +31,22 @@
           <p v-else :class="sectionLabelClass">Parent category</p>
           <DashboardDrawerSearch v-model="folderSearchQuery" placeholder="Search categories…" />
 
-          <div v-if="loadingFolders" class="flex flex-1 flex-col items-center justify-center py-12">
+          <div v-if="loadingFolders && isCapacitorIos" class="flex flex-1 flex-col items-center justify-center py-12">
             <div
               class="h-5 w-5 animate-spin rounded-full border-0 border-gray-300/40 border-t-gray-500 dark:border-white/15 dark:border-t-gray-300"
             />
             <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Loading categories…</p>
+          </div>
+          <div v-else-if="loadingFolders" :class="pickListClass">
+            <div :class="pickListScrollClass">
+              <div v-for="i in 6" :key="i" :class="pickRowClass">
+                <span class="dash-skeleton dash-skeleton--thumb" />
+                <div class="min-w-0 flex-1 space-y-1.5">
+                  <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-title" />
+                  <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-meta" />
+                </div>
+              </div>
+            </div>
           </div>
           <div v-else-if="parentCategoryRows.length === 0" :class="emptyStateClass">
             <FolderIcon class="mb-2 h-8 w-8 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
@@ -293,13 +303,29 @@
             "
           />
           <div
-            v-if="loadingItems"
+            v-if="loadingItems && isCapacitorIos"
             class="flex min-h-0 flex-1 flex-col items-center justify-center py-8"
           >
             <div
               class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-gray-500"
             ></div>
             <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Loading items...</p>
+          </div>
+          <div
+            v-else-if="loadingItems"
+            :class="pickListClass"
+          >
+            <div :class="pickListScrollClass">
+              <div v-for="i in 6" :key="i" :class="pickRowClass">
+                <div class="flex w-full items-start gap-2.5">
+                  <span class="dash-skeleton dash-skeleton--chip mt-0.5" />
+                  <div class="min-w-0 flex-1 space-y-1.5">
+                    <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-title" />
+                    <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-meta" />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           <div v-else-if="availableItems.length === 0" :class="emptyStateClass">
             <CubeIcon class="mb-2 h-8 w-8 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
@@ -1118,11 +1144,6 @@ const currentStep = ref(0)
 const sheetTitle = computed(() => {
   if (!isCapacitorIos.value) return 'Create New Sale'
   return steps[currentStep.value]?.label ?? 'Create New Sale'
-})
-
-const sheetSubtitle = computed(() => {
-  if (isCapacitorIos.value) return undefined
-  return 'Pick category, subcategory, items, then sale details'
 })
 
 const sheetContentPadding = computed(() => (isCapacitorIos.value ? 'p-0' : ''))

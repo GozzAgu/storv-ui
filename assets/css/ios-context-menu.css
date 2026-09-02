@@ -9,9 +9,7 @@ html.capacitor-ios.capacitor-native .ios-context-menu {
   overflow: hidden;
   border-radius: 14px;
   background: var(--ios-home-card, #ffffff);
-  box-shadow:
-    0 8px 28px rgb(0 0 0 / 0.14),
-    0 2px 8px rgb(0 0 0 / 0.08);
+  box-shadow: var(--ios-float-shadow);
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
   padding: 0.25rem;
@@ -19,9 +17,7 @@ html.capacitor-ios.capacitor-native .ios-context-menu {
 
 html.capacitor-ios.capacitor-native.dark .ios-context-menu {
   background: var(--ios-surface-solid, #1c1c1e);
-  box-shadow:
-    0 12px 40px rgb(0 0 0 / 0.55),
-    inset 0 0 0 1px rgb(255 255 255 / 0.06);
+  box-shadow: var(--ios-float-shadow);
 }
 
 html.capacitor-ios.capacitor-native .ios-context-menu__item {

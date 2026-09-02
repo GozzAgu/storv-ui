@@ -101,7 +101,7 @@ const proofCards: Array<{
 <style scoped>
 .landing-proof {
   padding: clamp(4rem, 9vw, 7rem) 1.25rem;
-  background: #fff;
+  background: #f5f5f7;
 }
 
 .landing-proof__inner {
@@ -118,7 +118,7 @@ const proofCards: Array<{
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #143f8d;
+  color: rgb(26 21 35 / 0.55);
 }
 
 .landing-proof__title {
@@ -152,8 +152,8 @@ const proofCards: Array<{
 
 .landing-proof__card {
   border-radius: 1rem;
-  border: 1px solid rgba(20, 63, 141, 0.1);
-  background: linear-gradient(180deg, #f8fafc 0%, #fff 100%);
+  border: 0;
+  background: #ffffff;
   padding: 1.25rem 1.35rem;
 }
 
@@ -165,8 +165,8 @@ const proofCards: Array<{
   height: 2.25rem;
   margin-bottom: 0.75rem;
   border-radius: 0.625rem;
-  background: rgba(20, 63, 141, 0.08);
-  color: #143f8d;
+  background: #f4f4f5;
+  color: rgb(26 21 35 / 0.55);
 }
 
 .landing-proof__metric {
@@ -174,7 +174,7 @@ const proofCards: Array<{
   font-weight: 800;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #143f8d;
+  color: rgb(26 21 35 / 0.55);
 }
 
 .landing-proof__card-title {
@@ -198,8 +198,8 @@ const proofCards: Array<{
   gap: 1.25rem;
   align-items: flex-start;
   border-radius: 1rem;
-  border: 1px dashed rgba(20, 63, 141, 0.22);
-  background: rgba(239, 246, 255, 0.5);
+  border: 1px dashed rgb(26 21 35 / 0.08);
+  background: #ffffff;
   padding: 1.5rem 1.35rem;
 }
 
@@ -235,5 +235,28 @@ const proofCards: Array<{
 .landing-proof__founding-cta {
   flex-shrink: 0;
   white-space: nowrap;
+}
+
+html.dark .landing-proof {
+  background: #080808;
+}
+
+html.dark .landing-proof__card {
+  background: #1e1e1e;
+}
+
+html.dark .landing-proof__card-icon {
+  background: #282828;
+  color: rgb(255 255 255 / 0.62);
+}
+
+html.dark .landing-proof .landing-label,
+html.dark .landing-proof__metric {
+  color: rgb(255 255 255 / 0.62);
+}
+
+html.dark .landing-proof__founding {
+  border: 0;
+  background: #1e1e1e;
 }
 </style>

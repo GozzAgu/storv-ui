@@ -98,7 +98,8 @@ html.capacitor-native .dashboard-native-overlay-host {
 
 html.capacitor-native .dashboard-native-overlay-host--active,
 html.capacitor-native .dashboard-native-overlay-host:has(.native-side-drawer-root),
-html.capacitor-native .dashboard-native-overlay-host:has(.dashboard-native-sheet) {
+html.capacitor-native .dashboard-native-overlay-host:has(.dashboard-native-sheet),
+html.capacitor-native .dashboard-native-overlay-host:has(.ios-native-sheet-root) {
   pointer-events: auto;
 }
 
@@ -287,7 +288,7 @@ html.capacitor-native .app-field {
 html.capacitor-ios.capacitor-native
   input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='hidden']):not(
     [type='button']
-  ):not([type='submit']):not([type='reset']),
+  ):not([type='submit']):not([type='reset']):not(.ios-search-bar__input),
 html.capacitor-ios.capacitor-native select,
 html.capacitor-ios.capacitor-native textarea,
 html.capacitor-ios.capacitor-native .app-field,

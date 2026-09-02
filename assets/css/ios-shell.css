@@ -327,7 +327,7 @@ html.capacitor-native .ios-fab--secondary {
   background: var(--ios-glass-elevated);
   color: var(--ios-accent);
   border: 1px solid var(--ios-glass-border);
-  box-shadow: var(--ios-glass-shadow), var(--ios-glass-highlight);
+  box-shadow: none;
   backdrop-filter: blur(var(--ios-glass-blur)) saturate(180%);
   -webkit-backdrop-filter: blur(var(--ios-glass-blur)) saturate(180%);
 }
@@ -484,11 +484,11 @@ html.capacitor-ios.capacitor-native .ios-segmented-control__segment {
 
 html.capacitor-ios.capacitor-native .ios-segmented-control__segment--active {
   background: var(--ios-surface-solid);
-  box-shadow: 0 1px 3px rgb(0 0 0 / 0.08);
+  box-shadow: none;
 }
 
 html.capacitor-ios.capacitor-native.dark .ios-segmented-control__segment--active {
-  box-shadow: 0 1px 4px rgb(0 0 0 / 0.35);
+  box-shadow: none;
 }
 
 html.capacitor-ios.capacitor-native .ios-segmented-control__badge {

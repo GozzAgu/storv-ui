@@ -50,24 +50,24 @@ const stories = [
   }
 }
 .landing-story-card {
-  border-radius: 1rem;
-  border: 1px solid rgb(15 23 42 / 0.08);
+  border-radius: 1.5rem;
+  border: 0;
   padding: 1.25rem;
   background: #fff;
 }
 .landing-story-card__shop {
   font-weight: 600;
-  color: #0f172a;
+  color: #1a1523;
 }
 .landing-story-card__location {
   font-size: 0.75rem;
-  color: #64748b;
+  color: rgb(26 21 35 / 0.55);
 }
 .landing-story-card__quote {
   margin-top: 0.75rem;
   font-size: 0.875rem;
   line-height: 1.55;
-  color: #334155;
+  color: rgb(26 21 35 / 0.58);
 }
 .landing-story-card__result {
   margin-top: 0.75rem;
@@ -75,6 +75,17 @@ const stories = [
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #143f8d;
+  color: rgb(26 21 35 / 0.45);
+}
+html.dark .landing-story-card {
+  background: #1e1e1e;
+}
+html.dark .landing-story-card__shop {
+  color: #ffffff;
+}
+html.dark .landing-story-card__location,
+html.dark .landing-story-card__quote,
+html.dark .landing-story-card__result {
+  color: rgb(255 255 255 / 0.62);
 }
 </style>

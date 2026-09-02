@@ -67,7 +67,13 @@
         <h1 :class="pageTitleClass">Customer buybacks</h1>
       </template>
       <template
-        v-if="canAccess && !buybacksStore.loading && buybacksStore.buybacks.length > 0"
+        v-if="canAccess && buybacksStore.loading && buybacksStore.buybacks.length === 0"
+        #description
+      >
+        <DashPageMetricsSkeleton :count="2" />
+      </template>
+      <template
+        v-else-if="canAccess && !buybacksStore.loading && buybacksStore.buybacks.length > 0"
         #description
       >
         <DashboardPageMetrics :metrics="buybackHeaderMetrics" aria-label="Buyback summary" />
@@ -109,14 +115,21 @@
       </div>
 
       <div v-else :class="tableShellFlexClass">
-          <div
+          <DashTableSkeleton
             v-if="buybacksStore.loading && buybacksStore.buybacks.length === 0"
-            class="p-6 sm:p-8"
-          >
-            <div class="space-y-3">
-              <div v-for="i in 5" :key="i" class="h-10 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10" />
-            </div>
-          </div>
+            :columns="[
+              { label: 'Customer', lines: 2 },
+              { label: 'Item', lines: 2 },
+              { label: 'Paid', bone: '4.5rem' },
+              { label: 'Method', bone: '4.5rem' },
+              { label: 'Date', bone: '5.5rem' },
+              { label: 'Actions', class: 'dashboard-table__col-actions', bone: '1.5rem' },
+            ]"
+            :rows="8"
+            leading="none"
+            flush
+            aria-label="Loading buybacks"
+          />
 
           <div v-else-if="buybacksStore.error" class="px-4 py-10 text-center sm:px-6">
             <p class="text-sm font-medium text-red-600 dark:text-red-400">
@@ -201,30 +214,22 @@
 
     <CreateBuybackModal v-model="showCreateModal" />
 
-    <Teleport to="body">
-      <div
-        v-if="openBuybackMenuId && buybackForOpenMenu && buybackMenuFixedStyle"
-        data-buyback-menu
-        role="menu"
-        class="fixed z-[1000] min-w-[10rem] overflow-hidden rounded-lg bg-white/95 py-1 shadow-lg backdrop-blur-xl dark:bg-slate-950/95"
-        :style="buybackMenuFixedStyle"
-        @click.stop
-      >
-        <button
-          type="button"
-          role="menuitem"
-          class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85"
-          @click="
-            () => {
-              navigateTo(inventoryItemLink(buybackForOpenMenu))
-              closeBuybackMenu()
-            }
-          "
-        >
-          View in stock
-        </button>
-      </div>
-    </Teleport>
+    <IosContextMenu
+      :open="Boolean(openBuybackMenuId && buybackForOpenMenu && buybackMenuFixedStyle)"
+      :style="buybackMenuFixedStyle"
+      menu-id="buyback"
+    >
+      <IosContextMenuItem
+        label="View in stock"
+        :icon="BuildingStorefrontIcon"
+        @click="
+          () => {
+            navigateTo(inventoryItemLink(buybackForOpenMenu))
+            closeBuybackMenu()
+          }
+        "
+      />
+    </IosContextMenu>
   </div>
 </template>
 
@@ -237,6 +242,8 @@ import {
   InboxArrowDownIcon,
 } from '~/utils/app-icons'
 import Button from '~/components/ui/Button.vue'
+import IosContextMenu from '~/components/ios/IosContextMenu.vue'
+import IosContextMenuItem from '~/components/ios/IosContextMenuItem.vue'
 import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
 import IosQuickActionBar, { type IosQuickActionOption } from '~/components/ios/IosQuickActionBar.vue'
 import IosTransactionListSkeleton from '~/components/ios/IosTransactionListSkeleton.vue'
@@ -288,7 +295,6 @@ const {
   closeMenu: closeBuybackMenu,
 } = useAnchoredRowMenu({
   anchorAttr: 'data-buyback-actions-anchor',
-  menuSelector: '[data-buyback-menu]',
 })
 
 const buybackForOpenMenu = computed(() => {
@@ -304,6 +310,7 @@ const iosBuybackQuickActions = computed((): IosQuickActionOption[] => [
     value: 'add',
     label: 'Record',
     icon: ArrowUturnLeftIcon,
+    trailing: 'add',
     action: () => {
       showCreateModal.value = true
     },

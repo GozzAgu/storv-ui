@@ -6,6 +6,8 @@ html.capacitor-ios.capacitor-native {
   --ios-home-bg: #f3f3f5;
   --ios-home-card: #ffffff;
   --ios-home-card-shadow: 0 4px 14px rgb(15 23 42 / 0.06);
+  --ios-action-card-shadow: 0 6px 18px rgb(15 23 42 / 0.1), 0 1px 3px rgb(15 23 42 / 0.05);
+  --ios-float-shadow: 0 8px 24px rgb(0 0 0 / 0.14), 0 2px 6px rgb(0 0 0 / 0.08);
   --ios-home-radius: 20px;
   --ios-home-metric-radius: 18px;
   --ios-home-inset: 20px;
@@ -19,6 +21,8 @@ html.capacitor-ios.capacitor-native.dark {
   --ios-home-bg: #000000;
   --ios-home-card: #1c1c1e;
   --ios-home-card-shadow: 0 8px 24px rgb(0 0 0 / 0.35);
+  --ios-action-card-shadow: 0 8px 22px rgb(0 0 0 / 0.42);
+  --ios-float-shadow: 0 12px 32px rgb(0 0 0 / 0.55), 0 0 0 1px rgb(255 255 255 / 0.08);
 }
 
 html.capacitor-ios.capacitor-native .ios-home-page {
@@ -33,8 +37,8 @@ html.capacitor-ios.capacitor-native .dashboard-native-main--in-page {
 
 html.capacitor-ios.capacitor-native .dashboard-top-nav-spacer-native--home,
 html.capacitor-ios.capacitor-native .dashboard-top-nav-spacer-native--in-page {
-  height: var(--ios-global-top-bar-stack, calc(var(--cap-safe-top, 0px) + 2.5rem)) !important;
-  min-height: var(--ios-global-top-bar-stack, calc(var(--cap-safe-top, 0px) + 2.5rem)) !important;
+  height: var(--ios-global-top-bar-stack, calc(var(--cap-safe-top, 0px) + 3rem)) !important;
+  min-height: var(--ios-global-top-bar-stack, calc(var(--cap-safe-top, 0px) + 3rem)) !important;
 }
 
 /* ── Page shell ── */
@@ -68,12 +72,12 @@ html.capacitor-ios.capacitor-native .ios-topnav-brand-row {
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  min-height: 2.375rem;
+  min-height: 2.75rem;
 }
 
 html.capacitor-ios.capacitor-native .ios-topnav-brand-row__logo {
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 2.25rem;
+  height: 2.25rem;
   object-fit: contain;
 }
 
@@ -82,8 +86,8 @@ html.capacitor-ios.capacitor-native .ios-topnav-brand-row__theme {
 }
 
 html.capacitor-ios.capacitor-native .ios-tabbar-theme-btn--topnav {
-  width: 2.375rem;
-  height: 2.375rem;
+  width: 2.75rem;
+  height: 2.75rem;
   border-radius: 9999px;
   color: var(--ios-label);
 }
@@ -93,13 +97,13 @@ html.capacitor-ios.capacitor-native .ios-tabbar-theme-btn--topnav:active {
 }
 
 html.capacitor-ios.capacitor-native .ios-tabbar-theme-btn--topnav .ios-tabbar-theme-btn__icon {
-  width: 1.1875rem;
-  height: 1.1875rem;
+  width: 1.375rem;
+  height: 1.375rem;
 }
 
 html.capacitor-ios.capacitor-native .ios-home-dashboard__logo {
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 2.25rem;
+  height: 2.25rem;
   object-fit: contain;
 }
 
@@ -176,7 +180,7 @@ html.capacitor-ios.capacitor-native .ios-home-dashboard__alerts {
 
 html.capacitor-ios.capacitor-native .ios-home-dashboard__alert {
   display: block;
-  padding: 0.75rem 0.875rem;
+  padding: 0.5625rem 0.75rem;
   border-radius: var(--ios-home-metric-radius);
   background: var(--ios-home-card);
   box-shadow: var(--ios-home-card-shadow);
@@ -247,7 +251,7 @@ html.capacitor-ios.capacitor-native .ios-home-dashboard__add-btn {
   border-radius: 9999px;
   background: #111111;
   color: #ffffff;
-  box-shadow: 0 4px 12px rgb(0 0 0 / 0.18);
+  box-shadow: none;
 }
 
 html.capacitor-ios.capacitor-native.dark .ios-home-dashboard__add-btn {
@@ -292,18 +296,88 @@ html.capacitor-ios.capacitor-native .ios-home-metric:active {
   transform: scale(0.985);
 }
 
+html.capacitor-ios.capacitor-native .ios-home-metric--warning {
+  background: rgb(255 149 0 / 0.16);
+  box-shadow: none;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-metric--danger {
+  background: rgb(255 59 48 / 0.14);
+  box-shadow: none;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-metric--success {
+  background: rgb(52 199 89 / 0.14);
+  box-shadow: none;
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-home-metric--warning {
+  background: rgb(255 149 0 / 0.22);
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-home-metric--danger {
+  background: rgb(255 59 48 / 0.2);
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-home-metric--success {
+  background: rgb(52 199 89 / 0.2);
+}
+
+html.capacitor-ios.capacitor-native .ios-home-metric--warning .ios-home-metric__value {
+  color: #c2410c;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-metric--danger .ios-home-metric__value {
+  color: var(--ios-danger, #ff3b30);
+}
+
+html.capacitor-ios.capacitor-native .ios-home-metric--success .ios-home-metric__value {
+  color: #15803d;
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-home-metric--warning .ios-home-metric__value {
+  color: #ffb340;
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-home-metric--danger .ios-home-metric__value {
+  color: #ff6961;
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-home-metric--success .ios-home-metric__value {
+  color: #30d158;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-metric--warning .ios-home-metric__label,
+html.capacitor-ios.capacitor-native .ios-home-metric--danger .ios-home-metric__label,
+html.capacitor-ios.capacitor-native .ios-home-metric--success .ios-home-metric__label {
+  color: inherit;
+  opacity: 0.78;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-metric--warning .ios-home-metric__arrow {
+  color: var(--ios-warning, #ff9500);
+}
+
+html.capacitor-ios.capacitor-native .ios-home-metric--danger .ios-home-metric__arrow {
+  color: var(--ios-danger, #ff3b30);
+}
+
+html.capacitor-ios.capacitor-native .ios-home-metric--success .ios-home-metric__arrow {
+  color: var(--ios-success, #34c759);
+}
+
 /* metric value/label sizes: ios-dashboard-type.css */
 
 /* ── Feed cards ── */
 html.capacitor-ios.capacitor-native .ios-home-dashboard__feed {
   display: flex;
   flex-direction: column;
-  gap: 0.875rem;
+  gap: 0.625rem;
 }
 
 html.capacitor-ios.capacitor-native .ios-home-feed-card {
   display: block;
-  padding: 0.875rem 0.875rem 0.75rem;
+  padding: 0.6875rem 0.75rem 0.625rem;
   border-radius: var(--ios-home-radius);
   background: var(--ios-home-card);
   box-shadow: var(--ios-home-card-shadow);
@@ -335,8 +409,8 @@ html.capacitor-ios.capacitor-native .ios-home-feed-card__avatar {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2.375rem;
-  height: 2.375rem;
+  width: 2rem;
+  height: 2rem;
   flex-shrink: 0;
   border-radius: 9999px;
   background: linear-gradient(145deg, #dfe5ef, #c8d2e3);
@@ -509,8 +583,8 @@ html.capacitor-ios.capacitor-native .ios-home-skeleton {
 }
 
 html.capacitor-ios.capacitor-native .ios-home-skeleton--logo {
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 2.25rem;
+  height: 2.25rem;
   border-radius: 0.5rem;
 }
 

@@ -11,7 +11,7 @@ export interface InventorySourceBadge {
 }
 
 const badgeShell =
-  'inline-flex max-w-full items-center gap-1.5 whitespace-nowrap rounded-sm border px-2 py-0.5 text-[11px] font-medium leading-tight'
+  'inline-flex max-w-full items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-0.5 text-[11px] font-semibold leading-tight'
 
 export function isInventorySwapInItem(item: InventoryItem): boolean {
   return item.swapIn === true
@@ -28,7 +28,7 @@ export function inventorySourceBadgeForSwapIn(receiptNumber?: string): Inventory
     label: 'Swap-in',
     meta,
     dotClass: 'bg-sky-500 dark:bg-sky-400',
-    class: `${badgeShell} border-sky-200/90 bg-sky-50/90 text-sky-950 dark:border-sky-500/30 dark:bg-sky-500/10 dark:text-sky-100`,
+    class: `${badgeShell} bg-sky-50 text-sky-950 dark:bg-sky-500/15 dark:text-sky-100`,
   }
 }
 
@@ -38,7 +38,7 @@ export function inventorySourceBadgeForBuyback(paidLabel?: string): InventorySou
     label: 'Buyback',
     meta: paidLabel,
     dotClass: 'bg-cyan-500 dark:bg-cyan-400',
-    class: `${badgeShell} border-cyan-200/90 bg-cyan-50/90 text-cyan-950 dark:border-cyan-500/30 dark:bg-cyan-500/10 dark:text-cyan-100`,
+    class: `${badgeShell} bg-cyan-50 text-cyan-950 dark:bg-cyan-500/15 dark:text-cyan-100`,
   }
 }
 

@@ -2,6 +2,8 @@
   <Teleport to="body">
     <div
       v-if="open && style"
+      ref="panel"
+      v-bind="$attrs"
       :data-context-menu="menuId"
       class="ios-context-menu"
       role="menu"
@@ -14,7 +16,14 @@
 </template>
 
 <script setup lang="ts">
-import type { CSSProperties } from 'vue'
+import { ref, type CSSProperties } from 'vue'
+
+/**
+ * A `<Teleport>` root can't inherit fallthrough attributes, so the menu's
+ * `data-*-menu` hooks (used by the pages' outside-click handlers) are bound
+ * onto the card itself.
+ */
+defineOptions({ inheritAttrs: false })
 
 withDefaults(
   defineProps<{
@@ -27,4 +36,9 @@ withDefaults(
     menuId: 'menu',
   }
 )
+
+/** Exposed so callers can measure the rendered menu when positioning it */
+const panel = ref<HTMLElement | null>(null)
+
+defineExpose({ panel })
 </script>

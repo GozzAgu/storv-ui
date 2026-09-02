@@ -50,8 +50,8 @@ export default {
         },
         /** Elevated panels on dashboard canvas (matches layout dark shell) */
         dashboard: {
-          canvas: '#07080c',
-          card: '#12141c',
+          canvas: '#000000',
+          card: '#121212',
         },
       },
       animation: {

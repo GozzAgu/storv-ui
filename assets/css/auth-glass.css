@@ -1,0 +1,526 @@
+/**
+ * Web auth — glass card on a near-black canvas with a top-left light ray
+ * (not used in Capacitor native).
+ */
+
+html:not(.capacitor-native):has([data-auth-shell]) body {
+  background: #080808;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern {
+  --auth-glass-ink: #ffffff;
+  --auth-glass-muted: rgb(255 255 255 / 0.72);
+  --auth-glass-faint: rgb(255 255 255 / 0.48);
+  --auth-glass-line: rgb(255 255 255 / 0.16);
+  --auth-glass-fill: rgb(255 255 255 / 0.08);
+  --auth-glass-accent: #8b6ccf;
+  color: var(--auth-glass-ink);
+  background: #080808;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: radial-gradient(
+    ellipse 42% 36% at 0% 0%,
+    rgb(255 255 255 / 0.12),
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-shell__atmosphere {
+  display: block;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-shell__ray {
+  position: absolute;
+  top: -18%;
+  height: 140%;
+  border-radius: 0;
+  background: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 0.58) 0%,
+    rgb(255 255 255 / 0.2) 34%,
+    transparent 70%
+  );
+  clip-path: polygon(38% 0, 62% 0, 100% 100%, 0 100%);
+  transform-origin: 50% 0%;
+  mix-blend-mode: screen;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-shell__ray--1 {
+  left: 1%;
+  width: 3.6rem;
+  transform: rotate(32deg);
+  filter: blur(11px);
+  opacity: 1;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-shell__ray--2 {
+  left: 8%;
+  width: 2.55rem;
+  transform: rotate(38deg);
+  filter: blur(15px);
+  opacity: 0.62;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-shell__ray--3 {
+  left: 13%;
+  width: 3.35rem;
+  transform: rotate(44deg);
+  filter: blur(12px);
+  opacity: 0.9;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-shell__brand,
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-shell__mobile-strip {
+  display: none !important;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern.auth-shell {
+  flex-direction: column;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-shell__main {
+  background: transparent;
+  z-index: 1;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-shell__main-scroll {
+  justify-content: center;
+  align-items: center;
+  padding: 1.5rem 1rem 2rem;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-shell__content {
+  width: min(100%, 26.5rem);
+  max-width: 26.5rem;
+  margin-inline: auto;
+  padding: 2.125rem 1.625rem 1.625rem;
+  border: 1px solid var(--auth-glass-line);
+  border-radius: 2rem;
+  background: rgb(16 16 18 / 0.46);
+  box-shadow:
+    0 28px 80px rgb(0 0 0 / 0.38),
+    inset 0 1px 0 rgb(255 255 255 / 0.12);
+  backdrop-filter: blur(28px) saturate(1.45);
+  -webkit-backdrop-filter: blur(28px) saturate(1.45);
+}
+
+html:not(.capacitor-native).dark [data-auth-shell].auth-shell--modern .auth-shell__content {
+  border: 0;
+  background: #1e1e1e;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+@media (min-width: 640px) {
+  html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-shell__content {
+    padding: 2.5rem 2rem 1.875rem;
+  }
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-segment {
+  display: none;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-page-header {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-page-header__logo-wrap {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 1.125rem;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-page-header__logo {
+  height: 2.75rem;
+  width: 2.75rem;
+  max-width: none;
+  padding: 0;
+  object-fit: cover;
+  border-radius: 9999px;
+  border: 1px solid rgb(255 255 255 / 0.28);
+  background: #050508;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-page-header__title {
+  font-size: clamp(1.625rem, 4vw, 1.875rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--auth-glass-ink);
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-page-header__subtitle,
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-page-header__lede {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--auth-glass-muted);
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-card,
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-card--flat {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-card__inner {
+  padding: 0;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-form {
+  gap: 1.125rem;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-field__leading-icon {
+  display: none;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-field-input--with-icon {
+  padding-left: 1rem !important;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-field__label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--auth-glass-muted);
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-field-input {
+  min-height: 3rem !important;
+  border: 1px solid var(--auth-glass-line) !important;
+  border-radius: 0.75rem !important;
+  background: rgb(8 6 16 / 0.38) !important;
+  color: var(--auth-glass-ink) !important;
+  box-shadow: none !important;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-field-input::placeholder {
+  color: rgb(255 255 255 / 0.38);
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-field-input:focus {
+  border-color: rgb(255 255 255 / 0.45) !important;
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.18) !important;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-field-input:-webkit-autofill,
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-field-input:-webkit-autofill:hover,
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-field-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #ffffff;
+  caret-color: #ffffff;
+  box-shadow: 0 0 0 1000px rgb(12 8 22 / 0.92) inset !important;
+  transition: background-color 9999s ease-out;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-field__toggle,
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-field__clear,
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-field__biometric {
+  color: var(--auth-glass-muted);
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-form-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.125rem;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-form-meta .auth-checkbox {
+  align-items: center;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-checkbox__box {
+  width: 1.0625rem;
+  height: 1.0625rem;
+  margin-top: 0;
+  border-radius: 0.28rem;
+  border: 1.5px solid rgb(255 255 255 / 0.35);
+  background: rgb(255 255 255 / 0.08);
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-checkbox:has(.auth-checkbox__input:checked) .auth-checkbox__box {
+  border-color: var(--auth-glass-accent);
+  background: var(--auth-glass-accent);
+  color: #ffffff;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-checkbox__label {
+  font-size: 0.8125rem;
+  color: var(--auth-glass-muted);
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-checkbox__label a {
+  color: var(--auth-glass-ink);
+  text-decoration: underline;
+  text-underline-offset: 0.14em;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-link {
+  font-weight: 500;
+  color: var(--auth-glass-muted);
+  text-decoration: none;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-link:hover {
+  color: var(--auth-glass-ink);
+  opacity: 1;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-form-meta .auth-link {
+  font-size: 0.8125rem;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-primary-btn {
+  margin-top: 0.5rem;
+  min-height: 3.125rem;
+  border-radius: 9999px;
+  background: #f4f1ea;
+  color: #1a1523;
+  font-weight: 700;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-primary-btn:hover:not(:disabled) {
+  background: #ffffff;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-primary-btn__spinner {
+  border-color: rgb(26 21 35 / 0.18);
+  border-top-color: #1a1523;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-auth-footer-link {
+  margin-top: 1.25rem;
+  font-size: 0.8125rem;
+  color: var(--auth-glass-muted);
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-auth-footer-link a {
+  color: var(--auth-glass-ink);
+  font-weight: 600;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-checkbox-options {
+  gap: 0.75rem;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-alert {
+  border-color: rgb(255 140 140 / 0.28);
+  background: rgb(80 20 30 / 0.45);
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-alert__title,
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-alert__body {
+  color: #fecaca;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-success-panel {
+  border-color: var(--auth-glass-line);
+  background: rgb(255 255 255 / 0.08);
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-success-panel__title,
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-success-panel__body,
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-success-panel__foot,
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-action-status__title,
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-action-status__body,
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-action-reset-intro,
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-action-reset-intro strong {
+  color: var(--auth-glass-ink);
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-success-panel__body,
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-action-status__body,
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-action-reset-intro {
+  color: var(--auth-glass-muted);
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-success-panel__body .font-medium,
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .auth-success-panel__body a {
+  color: var(--auth-glass-ink) !important;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .text-sm.text-gray-600,
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .text-center.text-sm.text-gray-500 {
+  color: var(--auth-glass-muted) !important;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .text-gray-500,
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .text-gray-400 {
+  color: var(--auth-glass-faint) !important;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .bg-gray-200,
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern .bg-gray-300 {
+  background-color: rgb(255 255 255 / 0.16) !important;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern.auth-shell--compact .auth-shell__content {
+  padding: 1.35rem 1.5rem 1.15rem;
+}
+
+@media (min-width: 640px) {
+  html:not(.capacitor-native) [data-auth-shell].auth-shell--modern.auth-shell--compact .auth-shell__content {
+    padding: 1.5rem 1.75rem 1.25rem;
+  }
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern.auth-shell--compact .auth-page-header {
+  margin-bottom: 0.85rem;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern.auth-shell--compact .auth-page-header__logo-wrap {
+  margin-bottom: 0.55rem;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern.auth-shell--compact .auth-page-header__logo {
+  height: 2.25rem;
+  width: 2.25rem;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern.auth-shell--compact .auth-page-header__title {
+  font-size: 1.5rem;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern.auth-shell--compact .auth-page-header__subtitle,
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern.auth-shell--compact .auth-page-header__lede {
+  margin-top: 0.3rem;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern.auth-shell--compact .auth-form {
+  gap: 0.7rem;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern.auth-shell--compact .auth-field {
+  gap: 0.3rem;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern.auth-shell--compact .auth-field-input {
+  min-height: 2.625rem !important;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern.auth-shell--compact .auth-primary-btn {
+  margin-top: 0.15rem;
+  min-height: 2.75rem;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern.auth-shell--compact .auth-auth-footer-link {
+  margin-top: 0.8rem;
+}
+
+html:not(.capacitor-native) [data-auth-shell].auth-shell--modern.auth-shell--compact .auth-checkbox-options {
+  gap: 0.4rem;
+}
+
+@media (min-width: 640px) {
+  html:not(.capacitor-native) [data-auth-shell].auth-shell--modern.auth-shell--compact .auth-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.7rem 0.75rem;
+  }
+
+  html:not(.capacitor-native) [data-auth-shell].auth-shell--modern.auth-shell--compact .auth-form > * {
+    grid-column: 1 / -1;
+  }
+
+  html:not(.capacitor-native) [data-auth-shell].auth-shell--modern.auth-shell--compact .auth-form > .auth-field:nth-child(1),
+  html:not(.capacitor-native) [data-auth-shell].auth-shell--modern.auth-shell--compact .auth-form > .auth-field:nth-child(2) {
+    grid-column: auto;
+  }
+}
+
+/* Light mode — same glass pattern on the cream canvas */
+html:not(.capacitor-native):not(.dark):has([data-auth-shell]) body {
+  background: #f4f1ea;
+}
+
+html:not(.capacitor-native):not(.dark) [data-auth-shell].auth-shell--modern {
+  --auth-glass-ink: #1a1523;
+  --auth-glass-muted: rgb(26 21 35 / 0.62);
+  --auth-glass-faint: rgb(26 21 35 / 0.42);
+  --auth-glass-line: rgb(26 21 35 / 0.1);
+  --auth-glass-fill: rgb(255 255 255 / 0.55);
+  color: var(--auth-glass-ink);
+  background: #f4f1ea;
+}
+
+html:not(.capacitor-native):not(.dark) [data-auth-shell].auth-shell--modern::before {
+  background: radial-gradient(
+    ellipse 48% 40% at 0% 0%,
+    rgb(255 255 255 / 0.92),
+    transparent 72%
+  );
+}
+
+html:not(.capacitor-native):not(.dark) [data-auth-shell].auth-shell--modern .auth-shell__ray {
+  mix-blend-mode: overlay;
+  background: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 0.95) 0%,
+    rgb(255 255 255 / 0.4) 34%,
+    transparent 70%
+  );
+  opacity: 0.55;
+}
+
+html:not(.capacitor-native):not(.dark) [data-auth-shell].auth-shell--modern .auth-shell__content {
+  background: rgb(255 255 255 / 0.62);
+  box-shadow:
+    0 24px 60px rgb(26 21 35 / 0.08),
+    inset 0 1px 0 rgb(255 255 255 / 0.92);
+}
+
+html:not(.capacitor-native):not(.dark) [data-auth-shell].auth-shell--modern .auth-field-input {
+  background: rgb(255 255 255 / 0.72) !important;
+  color: #1a1523 !important;
+}
+
+html:not(.capacitor-native):not(.dark) [data-auth-shell].auth-shell--modern .auth-field-input::placeholder {
+  color: rgb(26 21 35 / 0.38);
+}
+
+html:not(.capacitor-native):not(.dark) [data-auth-shell].auth-shell--modern .auth-primary-btn {
+  background: #1a1523;
+  color: #f4f1ea;
+}
+
+html:not(.capacitor-native):not(.dark) [data-auth-shell].auth-shell--modern .auth-primary-btn:hover:not(:disabled) {
+  background: #000000;
+}
+
+html:not(.capacitor-native):not(.dark) [data-auth-shell].auth-shell--modern .auth-primary-btn__spinner {
+  border-color: rgb(244 241 234 / 0.25);
+  border-top-color: #f4f1ea;
+}
+
+html:not(.capacitor-native):not(.dark) [data-auth-shell].auth-shell--modern .auth-alert {
+  border-color: rgb(220 38 38 / 0.22);
+  background: rgb(254 226 226 / 0.72);
+}
+
+html:not(.capacitor-native):not(.dark) [data-auth-shell].auth-shell--modern .auth-alert__title,
+html:not(.capacitor-native):not(.dark) [data-auth-shell].auth-shell--modern .auth-alert__body {
+  color: #991b1b;
+}
+
+html:not(.capacitor-native):not(.dark) [data-auth-shell].auth-shell--modern .auth-success-panel {
+  background: rgb(255 255 255 / 0.55);
+}

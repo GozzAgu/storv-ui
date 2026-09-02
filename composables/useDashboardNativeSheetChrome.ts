@@ -4,8 +4,7 @@
 export type DashboardNativeSheetVariant = 'menu' | 'crud' | 'assistant'
 
 export function useDashboardNativeSheetChrome(variant: DashboardNativeSheetVariant = 'crud') {
-  const backdropClass =
-    'native-bottom-nav__backdrop dash-overlay-backdrop fixed inset-0'
+  const backdropClass = 'native-bottom-nav__backdrop dash-overlay-backdrop'
 
   const sheetBaseClass = 'native-more-sheet dashboard-native-sheet'
 

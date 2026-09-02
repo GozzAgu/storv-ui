@@ -54,14 +54,15 @@
 
     <template v-else-if="isLoading">
       <div :class="kpiGridWideClass">
-        <div v-for="i in 6" :key="i" class="dash-skeleton dash-skeleton--kpi" />
+        <DashStatCardSkeleton v-for="i in 6" :key="i" />
       </div>
       <div :class="chartsGridClass">
-        <div class="dash-skeleton dash-skeleton--panel dash-charts-grid__main" />
-        <div class="dash-skeleton dash-skeleton--panel dash-charts-grid__side" />
+        <DashChartPanelSkeleton extra-class="dash-charts-grid__main" show-control />
+        <DashChartPanelSkeleton extra-class="dash-charts-grid__side" variant="bars" />
       </div>
       <div :class="splitGridClass">
-        <div v-for="i in 2" :key="`panel-${i}`" class="dash-skeleton dash-skeleton--panel" />
+        <DashChartPanelSkeleton variant="bars" />
+        <DashChartPanelSkeleton variant="list" />
       </div>
     </template>
 
@@ -77,15 +78,17 @@
     </IosEmptyState>
 
     <template v-else-if="needsStoreSelection">
-      <div :class="stateCardClass">
-        <BuildingStorefrontIcon
-          class="mx-auto mb-3 h-8 w-8 text-[#4876c7] dark:text-[#9ab5e3]"
-          stroke-width="1.5"
-        />
-        <p :class="['dash-state-card__title', pageTitleClass, '!text-sm']">
+      <div :class="[stateCardClass, 'dash-empty-state']">
+        <div class="dash-empty-state__mark">
+          <BuildingStorefrontIcon
+            class="dash-empty-state__icon h-8 w-8 text-gray-400 dark:text-gray-500"
+            stroke-width="1.5"
+          />
+        </div>
+        <p :class="['dash-empty-state__title', 'dash-state-card__title', pageTitleClass, '!text-sm']">
           Select a store to view analytics
         </p>
-        <p :class="['dash-state-card__desc', cardDescClass]">
+        <p :class="['dash-empty-state__desc', 'dash-state-card__desc', cardDescClass]">
           {{
             canManageBranches
               ? 'Choose a branch below or from the store selector in the top bar. Charts and reports are scoped to the active store.'
@@ -140,7 +143,7 @@
             :key="metric.key"
             :label="metric.label"
             :value="metric.value"
-            :class="iosMetricToneClass(metric.tone)"
+            :tone="metric.tone"
           />
         </div>
       </IosAnalyticsSection>
@@ -922,6 +925,7 @@ import {
   downloadAnalyticsPdf,
   type AnalyticsReportSnapshot,
 } from '~/utils/analytics-report-export'
+import type { DashboardPageMetric } from '~/utils/dashboard-page-metrics'
 
 const { canViewProfitAndCost, isStaff, isManager } = usePermissions()
 const staffStore = useStaffStore()
@@ -987,6 +991,7 @@ const sellerLoansStore = useSellerLoanOutsStore()
 const customerAccountsStore = useCustomerAccountsStore()
 const userStore = useUserStore()
 const themeStore = useThemeStore()
+const chartIsDark = computed(() => themeStore.actualTheme === 'dark')
 const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
 const { canShowPaymentLinksFeature } = usePaymentLinksLaunch()
 const { canManageBranches } = useBusinessCapabilities()
@@ -1043,11 +1048,6 @@ const secondaryChartHeight = computed(() => (isCapacitorIos.value ? 240 : 300))
 const peakHoursChartHeight = computed(() => (isCapacitorIos.value ? 280 : 260))
 const salesByDayChartHeight = computed(() => (isCapacitorIos.value ? 260 : 250))
 const heatmapChartHeight = computed(() => (isCapacitorIos.value ? 340 : 280))
-
-function iosMetricToneClass(tone?: 'warning' | 'danger' | 'success' | undefined) {
-  if (!tone) return undefined
-  return `ios-analytics-metric--${tone}`
-}
 
 function customerInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean)
@@ -1563,7 +1563,7 @@ const grossProfitSubtext = computed(() => {
 })
 
 const analyticsHeaderMetrics = computed(() => {
-  const metrics = [
+  const metrics: DashboardPageMetric[] = [
     {
       key: 'revenue',
       label: 'Total revenue',
@@ -1731,12 +1731,12 @@ const peakHoursChartSeries = computed(() => [
 ])
 const peakHoursChartOptions = computed(() => {
   void displayCurrencyDeps.value
-  const isDark = themeStore.actualTheme === 'dark'
+  const isDark = chartIsDark.value
   const theme = apexTheme(isDark)
   const axisFmt = chartCurrencyAxis.value
   return {
     chart: { type: 'bar', toolbar: { show: false }, background: 'transparent' },
-    colors: [isDark ? '#9ab5e3' : '#4876c7'],
+    colors: [isDark ? '#e4e4e7' : '#4876c7'],
     plotOptions: {
       bar: { borderRadius: 3, columnWidth: '70%', dataLabels: { position: 'top' } },
     },
@@ -1794,7 +1794,7 @@ const salesByDayChartSeries = computed(() => [
 ])
 const salesByDayChartOptions = computed(() => {
   void displayCurrencyDeps.value
-  const isDark = themeStore.actualTheme === 'dark'
+  const isDark = chartIsDark.value
   const theme = apexTheme(isDark)
   const axisFmt = chartCurrencyAxis.value
   return {
@@ -1831,7 +1831,7 @@ const salesByDayChartOptions = computed(() => {
 
 const heatmapChartOptions = computed(() => {
   void displayCurrencyDeps.value
-  const isDark = themeStore.actualTheme === 'dark'
+  const isDark = chartIsDark.value
   const textColor = isDark ? '#E5E7EB' : '#1F2937'
   const mutedColor = isDark ? '#9CA3AF' : '#6B7280'
   const borderColor = isDark ? '#4B5563' : '#D1D5DB'
@@ -1978,7 +1978,7 @@ const revenueChartSeries = computed(() => {
 
 const revenueChartOptions = computed(() => {
   void displayCurrencyDeps.value
-  const isDark = themeStore.actualTheme === 'dark'
+  const isDark = chartIsDark.value
 
   const base = {
     chart: {
@@ -1987,7 +1987,7 @@ const revenueChartOptions = computed(() => {
       zoom: { enabled: false },
       background: 'transparent',
     },
-    colors: [isDark ? '#9ab5e3' : '#4876c7'],
+    colors: [isDark ? '#e4e4e7' : '#4876c7'],
     stroke: {
       curve: 'smooth',
       width: 2,
@@ -2056,7 +2056,7 @@ const topProductsChartSeries = computed(() => {
 
 const topProductsChartOptions = computed(() => {
   void displayCurrencyDeps.value
-  const isDark = themeStore.actualTheme === 'dark'
+  const isDark = chartIsDark.value
 
   return {
     chart: {
@@ -2064,7 +2064,7 @@ const topProductsChartOptions = computed(() => {
       background: 'transparent',
     },
     labels: topProducts.value.slice(0, 5).map((p) => truncateChartLabel(p.name, 20)),
-    colors: ['#4876c7', '#6e94d6', '#143f8d', '#9ab5e3', '#34d399'],
+    colors: [isDark ? '#e4e4e7' : '#d4d0c8', isDark ? '#a1a1aa' : '#a8a29e', isDark ? '#ffffff' : '#57534e', isDark ? '#71717a' : '#78716c', '#34d399'],
     legend: {
       position: 'bottom',
       labels: {
@@ -2092,7 +2092,7 @@ const categorySalesChartSeries = computed(() => [
 
 const categorySalesChartOptions = computed(() => {
   void displayCurrencyDeps.value
-  const isDark = themeStore.actualTheme === 'dark'
+  const isDark = chartIsDark.value
   const theme = apexTheme(isDark)
   const axisFmt = chartCurrencyAxis.value
   const folders = topFoldersBySales.value
@@ -2100,7 +2100,7 @@ const categorySalesChartOptions = computed(() => {
 
   return {
     chart: { type: 'bar', toolbar: { show: false }, background: 'transparent' },
-    colors: [isDark ? '#9ab5e3' : '#4876c7'],
+    colors: [isDark ? '#e4e4e7' : '#4876c7'],
     plotOptions: {
       bar: {
         horizontal: true,
@@ -2166,7 +2166,7 @@ const customerChartSeries = computed(() => [
 
 const customerChartOptions = computed(() => {
   void displayCurrencyDeps.value
-  const isDark = themeStore.actualTheme === 'dark'
+  const isDark = chartIsDark.value
   const theme = apexTheme(isDark)
   const axisFmt = chartCurrencyAxis.value
   const customers = customerChartCustomers.value

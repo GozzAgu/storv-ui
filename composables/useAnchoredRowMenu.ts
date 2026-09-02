@@ -1,11 +1,13 @@
 import { ref, watch, nextTick, onBeforeUnmount, type Ref } from 'vue'
-import { getVisibleMenuAnchorElement, computeFixedAnchoredMenuStyle } from '~/utils/menuAnchor'
+import {
+  getVisibleMenuAnchorElement,
+  computeFixedAnchoredMenuStyle,
+  isInsideAnchoredMenu,
+} from '~/utils/menuAnchor'
 
 type UseAnchoredRowMenuOptions = {
   anchorAttr: string
-  menuSelector?: string
   anchorSelector?: string
-  menuWidth?: number
   estimatedMenuHeight?: number
   viewportPadding?: number | Ref<number>
 }
@@ -14,9 +16,7 @@ type UseAnchoredRowMenuOptions = {
 export function useAnchoredRowMenu(options: UseAnchoredRowMenuOptions) {
   const {
     anchorAttr,
-    menuSelector,
     anchorSelector = `[${anchorAttr}]`,
-    menuWidth = 160,
     estimatedMenuHeight = 120,
     viewportPadding = 8,
   } = options
@@ -56,7 +56,6 @@ export function useAnchoredRowMenu(options: UseAnchoredRowMenuOptions) {
       typeof viewportPadding === 'number' ? viewportPadding : viewportPadding.value
     const r = el.getBoundingClientRect()
     menuFixedStyle.value = computeFixedAnchoredMenuStyle(r, {
-      menuWidth,
       estimatedMenuHeight,
       margin: 4,
       viewportPadding: padding,
@@ -88,7 +87,7 @@ export function useAnchoredRowMenu(options: UseAnchoredRowMenuOptions) {
 
     outsideHandler = (e: MouseEvent) => {
       const t = e.target as HTMLElement | null
-      if (menuSelector && t?.closest?.(menuSelector)) return
+      if (isInsideAnchoredMenu(t)) return
       if (t?.closest?.(anchorSelector)) return
       openMenuId.value = null
       removeOutsideListener()

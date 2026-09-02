@@ -56,14 +56,15 @@ html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .io
   resize: vertical;
 }
 
-/* Toggle rows — label left, control right */
+/* Toggle rows — label left, control right, on the same surface as the fields */
 html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__toggle {
   display: block;
   width: 100%;
   margin: 0;
-  padding: 0.875rem 0;
-  border-top: 1px solid var(--ios-separator);
-  border-bottom: 1px solid var(--ios-separator);
+  padding: var(--ios-field-pad-block, 0.875rem) var(--ios-field-pad-inline, 1rem);
+  border: 1px solid var(--ios-field-border, transparent);
+  border-radius: var(--ios-field-radius, 0.875rem);
+  background: var(--ios-field-bg, transparent);
 }
 
 html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__toggle .ios-form__toggle-control {
@@ -74,8 +75,9 @@ html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .io
   gap: 0.875rem;
   width: 100%;
   margin: 0;
-  padding: 0;
-  border: none;
+  /* The .ios-form__toggle card owns the padding — the row inside must not add more */
+  padding: 0 !important;
+  border: none !important;
 }
 
 html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__toggle-copy {
@@ -98,13 +100,6 @@ html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .io
   text-align: left;
 }
 
-html.capacitor-ios.capacitor-native
-  .ios-drawer.dashboard-native-sheet--crud
-  .ios-form__section:has(.ios-form__toggle)
-  + .ios-form__section:has(.ios-form__toggle)
-  .ios-form__toggle {
-  border-top: none;
-}
 
 html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__error {
   margin-top: 0.375rem;

@@ -32,7 +32,10 @@
           </span>
         </div>
       </template>
-      <template v-if="headerStatsReady && storeDepartments.length > 0" #description>
+      <template v-if="departmentsStore.loading || storesLoading" #description>
+        <DashPageMetricsSkeleton :count="4" />
+      </template>
+      <template v-else-if="headerStatsReady && storeDepartments.length > 0" #description>
         <DashboardPageMetrics
           :metrics="departmentHeaderMetrics"
           aria-label="Department summary"
@@ -82,7 +85,10 @@
           <span :class="headerBtnLabelClass">New department</span>
         </Button>
       </template>
-      <template v-if="headerStatsReady && storeDepartments.length > 0" #filters>
+      <template v-if="departmentsStore.loading || storesLoading" #filters>
+        <span class="dash-skeleton dash-skeleton--search" />
+      </template>
+      <template v-else-if="headerStatsReady && storeDepartments.length > 0" #filters>
         <DashboardToolbarSearch
           v-model="searchQuery"
           placeholder="Search departments…"
@@ -165,8 +171,16 @@
         <IosQuickActionSkeleton :count="3" />
         <IosGroupedListSkeleton :count="8" />
       </template>
-      <div v-else :class="gridClass">
-        <div v-for="i in 12" :key="i" class="dash-skeleton dash-skeleton--grid-card" />
+      <DashTableSkeleton
+        v-else-if="departmentsViewMode === 'table'"
+        :columns="departmentTableSkeletonColumns"
+        :rows="8"
+        leading="icon"
+        show-toolbar
+        aria-label="Loading departments"
+      />
+      <div v-else :class="[gridClass, 'departments-grid']">
+        <FolderCardSkeleton v-for="i in 8" :key="i" />
       </div>
     </template>
 
@@ -259,7 +273,7 @@
             />
           </template>
           <template v-if="canManageDepartments" #menu>
-            <div data-department-menu>
+            <div>
               <button
                 type="button"
                 :data-department-actions-anchor="department.id"
@@ -508,47 +522,35 @@
     </Modal>
 
     <!-- Department ⋮ menu (teleported; same as main Departments list + Inventory folders) -->
-    <Teleport to="body">
-      <div
-        v-if="openDepartmentMenuId && departmentForOpenMenu && departmentMenuFixedStyle"
-        data-department-menu
-        class="frosted-glass fixed z-[1000] min-w-[120px] rounded-sm py-0.5"
-        :style="departmentMenuFixedStyle"
-        @click.stop
-      >
-        <button
-          type="button"
-          @click="
-            () => {
-              handleEditDepartment(departmentForOpenMenu)
-              openDepartmentMenuId = null
-            }
-          "
-          class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800/85 transition-colors"
-        >
-          <PencilSquareIcon class="w-3.5 h-3.5 shrink-0" />
-          Edit
-        </button>
-        <button
-          type="button"
-          :disabled="deletingDepartmentId === departmentForOpenMenu.id"
-          class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/35 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          @click="
-            () => {
-              handleDeleteDepartment(departmentForOpenMenu)
-              openDepartmentMenuId = null
-            }
-          "
-        >
-          <ArrowPathIcon
-            v-if="deletingDepartmentId === departmentForOpenMenu.id"
-            class="w-3.5 h-3.5 shrink-0 animate-spin"
-          />
-          <TrashIcon v-else class="w-3.5 h-3.5 shrink-0" />
-          {{ deletingDepartmentId === departmentForOpenMenu.id ? 'Deleting...' : 'Delete' }}
-        </button>
-      </div>
-    </Teleport>
+    <IosContextMenu
+      :open="Boolean(openDepartmentMenuId && departmentForOpenMenu && departmentMenuFixedStyle)"
+      :style="departmentMenuFixedStyle"
+      menu-id="store-department"
+    >
+      <IosContextMenuItem
+        label="Edit"
+        :icon="PencilSquareIcon"
+        @click="
+          () => {
+            handleEditDepartment(departmentForOpenMenu!)
+            openDepartmentMenuId = null
+          }
+        "
+      />
+      <IosContextMenuItem
+        :label="deletingDepartmentId === departmentForOpenMenu?.id ? 'Deleting…' : 'Delete'"
+        :icon="deletingDepartmentId === departmentForOpenMenu?.id ? ArrowPathIcon : TrashIcon"
+        :icon-class="deletingDepartmentId === departmentForOpenMenu?.id ? 'animate-spin' : ''"
+        :disabled="deletingDepartmentId === departmentForOpenMenu?.id"
+        danger
+        @click="
+          () => {
+            handleDeleteDepartment(departmentForOpenMenu!)
+            openDepartmentMenuId = null
+          }
+        "
+      />
+    </IosContextMenu>
 
     <DepartmentModal
       v-model="showDepartmentModal"
@@ -583,6 +585,8 @@ import IosQuickActionBar, { type IosQuickActionOption } from '~/components/ios/I
 import IosGroupedListSkeleton from '~/components/ios/IosGroupedListSkeleton.vue'
 import IosQuickActionSkeleton from '~/components/ios/IosQuickActionSkeleton.vue'
 import IosInventoryFolderRow from '~/components/ios/IosInventoryFolderRow.vue'
+import IosContextMenu from '~/components/ios/IosContextMenu.vue'
+import IosContextMenuItem from '~/components/ios/IosContextMenuItem.vue'
 import DashboardTablePagination from '~/components/dashboard/DashboardTablePagination.vue'
 import Modal from '~/components/ui/Modal.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
@@ -664,6 +668,7 @@ const departmentQuickActionOptions = computed((): IosQuickActionOption[] => {
       value: 'new',
       label: 'New',
       icon: PlusIcon,
+      trailing: 'add',
       action: openCreateDepartmentModal,
     })
   }
@@ -716,6 +721,15 @@ watch(departmentsViewMode, (mode) => {
   }
 })
 
+const departmentTableSkeletonColumns = [
+  { label: 'Department' },
+  { label: 'Type', class: 'hidden sm:table-cell', bone: '4.5rem' },
+  { label: 'Staff', class: 'text-right', bone: '2rem' },
+  { label: 'Manager', class: 'hidden md:table-cell', bone: '5rem' },
+  { label: 'Status', class: 'dashboard-table__col-status', bone: '3.5rem' },
+  { label: 'Updated', class: 'hidden lg:table-cell', bone: '4rem' },
+]
+
 // Load pagination state from localStorage
 const getInitialPage = (): number => {
   if (import.meta.client) {
@@ -738,7 +752,11 @@ import { useUserStore } from '~/stores/user'
 import { useStaffStore } from '~/stores/staff'
 import { useStoresStore } from '~/stores/stores'
 import { useAppToast } from '~/composables/useAppToast'
-import { getVisibleMenuAnchorElement, computeFixedAnchoredMenuStyle } from '~/utils/menuAnchor'
+import {
+  getVisibleMenuAnchorElement,
+  computeFixedAnchoredMenuStyle,
+  isInsideAnchoredMenu,
+} from '~/utils/menuAnchor'
 import { formatCategoryDate } from '~/utils/inventory-category-card'
 import {
   departmentManagerLabel,
@@ -1066,7 +1084,6 @@ function updateDepartmentMenuPosition() {
   }
   const r = el.getBoundingClientRect()
   departmentMenuFixedStyle.value = computeFixedAnchoredMenuStyle(r, {
-    menuWidth: 120,
     estimatedMenuHeight: 88,
     margin: 4,
     viewportPadding: 8,
@@ -1107,7 +1124,8 @@ watch(openDepartmentMenuId, (id) => {
 
   departmentMenuOutsideHandler = (e: MouseEvent) => {
     const t = e.target as HTMLElement | null
-    if (t?.closest?.('[data-department-menu]')) return
+    if (isInsideAnchoredMenu(t)) return
+    if (t?.closest?.('[data-department-actions-anchor]')) return
     openDepartmentMenuId.value = null
     removeDepartmentMenuOutsideListener()
   }

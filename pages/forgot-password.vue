@@ -5,8 +5,8 @@
     panel-description="Request a reset link and choose a new password. Your store data stays safe, and you keep the same workspace."
   >
     <AuthPageHeader
-      title="Reset password"
-      subtitle="We'll send a secure link to your inbox."
+      title="Forgot password?"
+      subtitle="We'll email you a secure link so you can choose a new password."
     />
 
     <AuthCard>
@@ -17,7 +17,7 @@
           label="Email"
           type="email"
           autocomplete="email"
-          placeholder="Your email"
+          placeholder="Enter your email"
           :icon="EnvelopeIcon"
           show-clear
           required
@@ -51,7 +51,7 @@
 
       <p class="auth-auth-footer-link">
         Remembered it?
-        <NuxtLink to="/signin">Log in</NuxtLink>
+        <NuxtLink to="/signin">Log In</NuxtLink>
       </p>
     </AuthCard>
   </AuthShell>

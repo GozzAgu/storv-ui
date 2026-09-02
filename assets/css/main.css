@@ -4,6 +4,7 @@
 @import './capacitor-native.css';
 @import './auth-shell.css';
 @import './auth-modern.css';
+@import './auth-glass.css';
 @import './dashboard-shell.css';
 @import './dashboard-cards.css';
 @import './dashboard-pages.css';
@@ -14,6 +15,7 @@
 @import './dashboard-overlays.css';
 @import './capacitor-native-saas.css';
 @import './web-design-tokens.css';
+@import './web-glass-app.css';
 @import './native-drawers.css';
 @import './receipt-typography.css';
 
@@ -24,40 +26,78 @@
    * Tailwind’s generated rule order. Force elevated surfaces to the dashboard card color.
    * (Token-based selectors avoid matching `hover:bg-white` / `dark:bg-white` on toggles.)
    */
-  html.dark main[data-dashboard-main] [class~='bg-white'],
-  html.dark main[data-dashboard-main] [class~='!bg-white'],
-  html.dark main[data-dashboard-main] [class~='bg-white/90'],
-  html.dark main[data-dashboard-main] [class~='bg-white/95'],
-  html.dark main[data-dashboard-main] [class~='bg-white/80'],
-  html.dark main[data-dashboard-main] [class~='bg-white/70'],
-  html.dark main[data-dashboard-main] [class~='bg-white/60'],
-  html.dark main[data-dashboard-main] [class~='bg-white/50'],
-  html.dark main[data-dashboard-main] [class~='bg-white/40'],
-  html.dark main[data-dashboard-main] [class~='bg-white/35'],
-  html.dark main[data-dashboard-main] [class~='bg-white/30'],
-  html.dark main[data-dashboard-main] [class~='bg-white/25'],
-  html.dark main[data-dashboard-main] [class~='bg-white/20'],
-  html.dark main[data-dashboard-main] .ldg-card,
-  html.dark [data-dashboard-teleport] [class~='bg-white'],
-  html.dark [data-dashboard-teleport] [class~='!bg-white'],
-  html.dark [data-dashboard-teleport] [class~='bg-white/90'],
-  html.dark [data-dashboard-teleport] [class~='bg-white/95'],
-  html.dark [data-dashboard-teleport] [class~='bg-white/80'],
-  html.dark [data-dashboard-teleport] [class~='bg-white/70'],
-  html.dark [data-dashboard-teleport] [class~='bg-white/60'],
-  html.dark [data-dashboard-teleport] [class~='bg-white/50'],
-  html.dark [data-dashboard-teleport] [class~='bg-white/40'],
-  html.dark [data-dashboard-teleport] [class~='bg-white/35'],
-  html.dark [data-dashboard-teleport] [class~='bg-white/30'],
-  html.dark [data-dashboard-teleport] [class~='bg-white/25'],
-  html.dark [data-dashboard-teleport] [class~='bg-white/20'],
-  html.dark [data-dashboard-teleport] .ldg-card {
-    background-color: #12141c !important;
+  html.dark.capacitor-native main[data-dashboard-main] [class~='bg-white'],
+  html.dark.capacitor-native main[data-dashboard-main] [class~='!bg-white'],
+  html.dark.capacitor-native main[data-dashboard-main] [class~='bg-white/90'],
+  html.dark.capacitor-native main[data-dashboard-main] [class~='bg-white/95'],
+  html.dark.capacitor-native main[data-dashboard-main] [class~='bg-white/80'],
+  html.dark.capacitor-native main[data-dashboard-main] [class~='bg-white/70'],
+  html.dark.capacitor-native main[data-dashboard-main] [class~='bg-white/60'],
+  html.dark.capacitor-native main[data-dashboard-main] [class~='bg-white/50'],
+  html.dark.capacitor-native main[data-dashboard-main] [class~='bg-white/40'],
+  html.dark.capacitor-native main[data-dashboard-main] [class~='bg-white/35'],
+  html.dark.capacitor-native main[data-dashboard-main] [class~='bg-white/30'],
+  html.dark.capacitor-native main[data-dashboard-main] [class~='bg-white/25'],
+  html.dark.capacitor-native main[data-dashboard-main] [class~='bg-white/20'],
+  html.dark.capacitor-native main[data-dashboard-main] .ldg-card,
+  html.dark.capacitor-native [data-dashboard-teleport] [class~='bg-white'],
+  html.dark.capacitor-native [data-dashboard-teleport] [class~='!bg-white'],
+  html.dark.capacitor-native [data-dashboard-teleport] [class~='bg-white/90'],
+  html.dark.capacitor-native [data-dashboard-teleport] [class~='bg-white/95'],
+  html.dark.capacitor-native [data-dashboard-teleport] [class~='bg-white/80'],
+  html.dark.capacitor-native [data-dashboard-teleport] [class~='bg-white/70'],
+  html.dark.capacitor-native [data-dashboard-teleport] [class~='bg-white/60'],
+  html.dark.capacitor-native [data-dashboard-teleport] [class~='bg-white/50'],
+  html.dark.capacitor-native [data-dashboard-teleport] [class~='bg-white/40'],
+  html.dark.capacitor-native [data-dashboard-teleport] [class~='bg-white/35'],
+  html.dark.capacitor-native [data-dashboard-teleport] [class~='bg-white/30'],
+  html.dark.capacitor-native [data-dashboard-teleport] [class~='bg-white/25'],
+  html.dark.capacitor-native [data-dashboard-teleport] [class~='bg-white/20'],
+  html.dark.capacitor-native [data-dashboard-teleport] .ldg-card {
+    background-color: #121212 !important;
+  }
+
+  html.dark:not(.capacitor-native) main[data-dashboard-main] [class~='bg-white']:not(.receipt-content),
+  html.dark:not(.capacitor-native) main[data-dashboard-main] [class~='!bg-white']:not(.receipt-content),
+  html.dark:not(.capacitor-native) main[data-dashboard-main] [class~='bg-white/90'],
+  html.dark:not(.capacitor-native) main[data-dashboard-main] [class~='bg-white/95'],
+  html.dark:not(.capacitor-native) main[data-dashboard-main] [class~='bg-white/80'],
+  html.dark:not(.capacitor-native) main[data-dashboard-main] [class~='bg-white/70'],
+  html.dark:not(.capacitor-native) main[data-dashboard-main] [class~='bg-white/60'],
+  html.dark:not(.capacitor-native) main[data-dashboard-main] [class~='bg-white/50'],
+  html.dark:not(.capacitor-native) main[data-dashboard-main] [class~='bg-white/40'],
+  html.dark:not(.capacitor-native) main[data-dashboard-main] [class~='bg-white/35'],
+  html.dark:not(.capacitor-native) main[data-dashboard-main] [class~='bg-white/30'],
+  html.dark:not(.capacitor-native) main[data-dashboard-main] [class~='bg-white/25'],
+  html.dark:not(.capacitor-native) main[data-dashboard-main] [class~='bg-white/20'],
+  html.dark:not(.capacitor-native) main[data-dashboard-main] .ldg-card,
+  html.dark:not(.capacitor-native) [data-dashboard-teleport] [class~='bg-white']:not(.receipt-content),
+  html.dark:not(.capacitor-native) [data-dashboard-teleport] [class~='!bg-white']:not(.receipt-content),
+  html.dark:not(.capacitor-native) [data-dashboard-teleport] [class~='bg-white/90'],
+  html.dark:not(.capacitor-native) [data-dashboard-teleport] [class~='bg-white/95'],
+  html.dark:not(.capacitor-native) [data-dashboard-teleport] [class~='bg-white/80'],
+  html.dark:not(.capacitor-native) [data-dashboard-teleport] [class~='bg-white/70'],
+  html.dark:not(.capacitor-native) [data-dashboard-teleport] [class~='bg-white/60'],
+  html.dark:not(.capacitor-native) [data-dashboard-teleport] [class~='bg-white/50'],
+  html.dark:not(.capacitor-native) [data-dashboard-teleport] [class~='bg-white/40'],
+  html.dark:not(.capacitor-native) [data-dashboard-teleport] [class~='bg-white/35'],
+  html.dark:not(.capacitor-native) [data-dashboard-teleport] [class~='bg-white/30'],
+  html.dark:not(.capacitor-native) [data-dashboard-teleport] [class~='bg-white/25'],
+  html.dark:not(.capacitor-native) [data-dashboard-teleport] [class~='bg-white/20'],
+  html.dark:not(.capacitor-native) [data-dashboard-teleport] .ldg-card {
+    background-color: #1e1e1e !important;
+    border: 0 !important;
   }
 
   html.dark main[data-dashboard-main] .ldg-card,
   html.dark [data-dashboard-teleport] .ldg-card {
     border-color: rgb(255 255 255 / 0.08) !important;
+  }
+
+  html.dark:not(.capacitor-native) main[data-dashboard-main] .ldg-card,
+  html.dark:not(.capacitor-native) [data-dashboard-teleport] .ldg-card {
+    background-color: #1e1e1e !important;
+    border: 0 !important;
   }
 
   /** Borderless elevated surfaces */
@@ -78,23 +118,42 @@
    * Same ordering issue as `bg-white`: `bg-gray-50` on Card / panels can load after `dark:!bg-*`
    * and leave huge near-white slabs (dashboard skeletons, profile stats strip).
    */
-  html.dark main[data-dashboard-main] [class~='bg-gray-50'],
-  html.dark main[data-dashboard-main] [class~='bg-gray-50/95'],
-  html.dark main[data-dashboard-main] [class~='bg-gray-50/90'],
-  html.dark main[data-dashboard-main] [class~='bg-gray-50/80'],
-  html.dark main[data-dashboard-main] [class~='bg-gray-50/70'],
-  html.dark main[data-dashboard-main] [class~='bg-gray-50/60'],
-  html.dark main[data-dashboard-main] [class~='bg-gray-50/50'],
-  html.dark main[data-dashboard-main] [class~='bg-gray-50/40'],
-  html.dark [data-dashboard-teleport] [class~='bg-gray-50'],
-  html.dark [data-dashboard-teleport] [class~='bg-gray-50/95'],
-  html.dark [data-dashboard-teleport] [class~='bg-gray-50/90'],
-  html.dark [data-dashboard-teleport] [class~='bg-gray-50/80'],
-  html.dark [data-dashboard-teleport] [class~='bg-gray-50/70'],
-  html.dark [data-dashboard-teleport] [class~='bg-gray-50/60'],
-  html.dark [data-dashboard-teleport] [class~='bg-gray-50/50'],
-  html.dark [data-dashboard-teleport] [class~='bg-gray-50/40'] {
-    background-color: #12141c !important;
+  html.dark.capacitor-native main[data-dashboard-main] [class~='bg-gray-50'],
+  html.dark.capacitor-native main[data-dashboard-main] [class~='bg-gray-50/95'],
+  html.dark.capacitor-native main[data-dashboard-main] [class~='bg-gray-50/90'],
+  html.dark.capacitor-native main[data-dashboard-main] [class~='bg-gray-50/80'],
+  html.dark.capacitor-native main[data-dashboard-main] [class~='bg-gray-50/70'],
+  html.dark.capacitor-native main[data-dashboard-main] [class~='bg-gray-50/60'],
+  html.dark.capacitor-native main[data-dashboard-main] [class~='bg-gray-50/50'],
+  html.dark.capacitor-native main[data-dashboard-main] [class~='bg-gray-50/40'],
+  html.dark.capacitor-native [data-dashboard-teleport] [class~='bg-gray-50'],
+  html.dark.capacitor-native [data-dashboard-teleport] [class~='bg-gray-50/95'],
+  html.dark.capacitor-native [data-dashboard-teleport] [class~='bg-gray-50/90'],
+  html.dark.capacitor-native [data-dashboard-teleport] [class~='bg-gray-50/80'],
+  html.dark.capacitor-native [data-dashboard-teleport] [class~='bg-gray-50/70'],
+  html.dark.capacitor-native [data-dashboard-teleport] [class~='bg-gray-50/60'],
+  html.dark.capacitor-native [data-dashboard-teleport] [class~='bg-gray-50/50'],
+  html.dark.capacitor-native [data-dashboard-teleport] [class~='bg-gray-50/40'] {
+    background-color: #121212 !important;
+  }
+
+  html.dark:not(.capacitor-native) main[data-dashboard-main] [class~='bg-gray-50'],
+  html.dark:not(.capacitor-native) main[data-dashboard-main] [class~='bg-gray-50/95'],
+  html.dark:not(.capacitor-native) main[data-dashboard-main] [class~='bg-gray-50/90'],
+  html.dark:not(.capacitor-native) main[data-dashboard-main] [class~='bg-gray-50/80'],
+  html.dark:not(.capacitor-native) main[data-dashboard-main] [class~='bg-gray-50/70'],
+  html.dark:not(.capacitor-native) main[data-dashboard-main] [class~='bg-gray-50/60'],
+  html.dark:not(.capacitor-native) main[data-dashboard-main] [class~='bg-gray-50/50'],
+  html.dark:not(.capacitor-native) main[data-dashboard-main] [class~='bg-gray-50/40'],
+  html.dark:not(.capacitor-native) [data-dashboard-teleport] [class~='bg-gray-50'],
+  html.dark:not(.capacitor-native) [data-dashboard-teleport] [class~='bg-gray-50/95'],
+  html.dark:not(.capacitor-native) [data-dashboard-teleport] [class~='bg-gray-50/90'],
+  html.dark:not(.capacitor-native) [data-dashboard-teleport] [class~='bg-gray-50/80'],
+  html.dark:not(.capacitor-native) [data-dashboard-teleport] [class~='bg-gray-50/70'],
+  html.dark:not(.capacitor-native) [data-dashboard-teleport] [class~='bg-gray-50/60'],
+  html.dark:not(.capacitor-native) [data-dashboard-teleport] [class~='bg-gray-50/50'],
+  html.dark:not(.capacitor-native) [data-dashboard-teleport] [class~='bg-gray-50/40'] {
+    background-color: rgb(16 16 18 / 0.46) !important;
   }
 
   /**
@@ -102,9 +161,14 @@
    * (white). Scope fixes to dashboard main / teleported dashboard shell only, not body modals
    * (e.g. paper receipt preview must stay light.)
    */
-  html.dark main[data-dashboard-main] table thead th,
-  html.dark [data-dashboard-teleport] table thead th {
-    background-color: #12141c !important;
+  html.dark.capacitor-native main[data-dashboard-main] table thead th,
+  html.dark.capacitor-native [data-dashboard-teleport] table thead th {
+    background-color: #121212 !important;
+  }
+
+  html.dark:not(.capacitor-native) main[data-dashboard-main] table thead th,
+  html.dark:not(.capacitor-native) [data-dashboard-teleport] table thead th {
+    background-color: rgb(255 255 255 / 0.04) !important;
   }
 
   html:not(.dark) main[data-dashboard-main] table thead th,
@@ -205,9 +269,9 @@
     @apply flex flex-col overflow-hidden rounded-sm border-0 bg-white dark:bg-dashboard-card;
   }
 
-  /** `!` cannot be used with custom colors inside `@apply`; same as `theme.extend.colors.dashboard.card` (#12141c) */
+  /** `!` cannot be used with custom colors inside `@apply`; same as `theme.extend.colors.dashboard.card` (#121212) */
   html.dark .data-table-shell {
-    background-color: #12141c !important;
+    background-color: #121212 !important;
   }
 
   /** Rounded bullets - matches store switch status dots */
@@ -1356,7 +1420,7 @@ html.capacitor-native .dashboard-native-bottom-nav-host {
       [type='range']
     ):not([type='color']):not([type='submit']):not([type='button']):not([type='reset']):not(
       [type='image']
-    ),
+    ):not(.ios-search-bar__input),
   select,
   textarea {
     border-width: var(--app-field-border-width) !important;
@@ -1369,12 +1433,12 @@ html.capacitor-native .dashboard-native-bottom-nav-host {
       [type='range']
     ):not([type='color']):not([type='submit']):not([type='button']):not([type='reset']):not(
       [type='image']
-    ):focus,
+    ):not(.ios-search-bar__input):focus,
   input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='hidden']):not(
       [type='range']
     ):not([type='color']):not([type='submit']):not([type='button']):not([type='reset']):not(
       [type='image']
-    ):focus-visible,
+    ):not(.ios-search-bar__input):focus-visible,
   select:focus,
   select:focus-visible,
   textarea:focus,
@@ -1388,7 +1452,7 @@ html.capacitor-native .dashboard-native-bottom-nav-host {
       [type='range']
     ):not([type='color']):not([type='submit']):not([type='button']):not([type='reset']):not(
       [type='image']
-    ),
+    ):not(.ios-search-bar__input),
   html.dark select,
   html.dark textarea {
     border-color: var(--app-field-border-color-dark) !important;
@@ -1399,13 +1463,13 @@ html.capacitor-native .dashboard-native-bottom-nav-host {
       [type='range']
     ):not([type='color']):not([type='submit']):not([type='button']):not([type='reset']):not(
       [type='image']
-    ):focus,
+    ):not(.ios-search-bar__input):focus,
   html.dark
     input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='hidden']):not(
       [type='range']
     ):not([type='color']):not([type='submit']):not([type='button']):not([type='reset']):not(
       [type='image']
-    ):focus-visible,
+    ):not(.ios-search-bar__input):focus-visible,
   html.dark select:focus,
   html.dark select:focus-visible,
   html.dark textarea:focus,
@@ -1526,8 +1590,14 @@ html.capacitor-native .departments-shell--table.data-table-shell {
  * Ledger panels: unlayered dark override so raw `background: #fff` on `.ldg-card`
  * cannot win over Tailwind `dark:!bg-*` depending on generated rule order.
  */
-html.dark main[data-dashboard-main] .ldg-card,
-html.dark [data-dashboard-teleport] .ldg-card {
-  background-color: #12141c !important;
+html.dark:not(.capacitor-native) main[data-dashboard-main] .ldg-card,
+html.dark:not(.capacitor-native) [data-dashboard-teleport] .ldg-card {
+  background-color: #1e1e1e !important;
+  border: 0 !important;
+}
+
+html.dark.capacitor-native main[data-dashboard-main] .ldg-card,
+html.dark.capacitor-native [data-dashboard-teleport] .ldg-card {
+  background-color: #121212 !important;
   border-color: rgb(255 255 255 / 0.08) !important;
 }

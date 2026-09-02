@@ -1,25 +1,25 @@
 const badgeBase =
-  'inline-flex max-w-full items-center whitespace-nowrap rounded-sm border px-2 py-0.5 text-[11px] font-medium leading-tight ring-1 ring-inset'
+  'inline-flex max-w-full items-center whitespace-nowrap rounded-full px-2.5 py-0.5 text-[11px] font-semibold leading-tight'
 
 export function staffRoleBadgeClass(role: string): string {
   switch (role) {
     case 'manager':
-      return `${badgeBase} border-primary-200/80 bg-primary-50/90 text-primary-800 ring-primary-500/15 dark:border-primary-500/25 dark:bg-primary-500/10 dark:text-primary-200 dark:ring-primary-400/20`
+      return `${badgeBase} bg-gray-100 text-gray-800 dark:bg-white/10 dark:text-white`
     case 'intern':
-      return `${badgeBase} border-blue-200/80 bg-blue-50/90 text-blue-800 ring-blue-500/15 dark:border-blue-500/25 dark:bg-blue-500/10 dark:text-blue-200 dark:ring-blue-400/20`
+      return `${badgeBase} bg-blue-50 text-blue-800 dark:bg-blue-500/15 dark:text-blue-200`
     default:
-      return `${badgeBase} border-gray-200/80 bg-gray-50/90 text-gray-700 ring-gray-500/10/40 dark:bg-gray-500/10 dark:text-gray-200 dark:ring-gray-500/15`
+      return `${badgeBase} bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-gray-200`
   }
 }
 
 export function staffStatusBadgeClass(status: string): string {
   switch (status) {
     case 'active':
-      return `${badgeBase} border-emerald-200/80 bg-emerald-50/90 text-emerald-800 ring-emerald-500/15 dark:border-emerald-500/25 dark:bg-emerald-500/10 dark:text-emerald-200 dark:ring-emerald-400/20`
+      return `${badgeBase} bg-emerald-50 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-200`
     case 'on_leave':
-      return `${badgeBase} border-amber-200/80 bg-amber-50/90 text-amber-900 ring-amber-500/15 dark:border-amber-500/25 dark:bg-amber-500/10 dark:text-amber-100 dark:ring-amber-400/20`
+      return `${badgeBase} bg-amber-50 text-amber-900 dark:bg-amber-500/15 dark:text-amber-100`
     default:
-      return `${badgeBase} border-red-200/80 bg-red-50/90 text-red-800 ring-red-500/15 dark:border-red-500/25 dark:bg-red-500/10 dark:text-red-200 dark:ring-red-400/20`
+      return `${badgeBase} bg-red-50 text-red-800 dark:bg-red-500/15 dark:text-red-200`
   }
 }
 
@@ -31,11 +31,11 @@ export function formatStaffStatusLabel(status: string): string {
 export function sellerLoanStatusBadgeClass(status: string): string {
   switch (status) {
     case 'active':
-      return `${badgeBase} border-indigo-200/80 bg-indigo-50/90 text-indigo-800 ring-indigo-500/15 dark:border-indigo-500/25 dark:bg-indigo-500/10 dark:text-indigo-200 dark:ring-indigo-400/20`
+      return `${badgeBase} bg-indigo-50 text-indigo-800 dark:bg-indigo-500/15 dark:text-indigo-200`
     case 'sold':
-      return `${badgeBase} border-emerald-200/80 bg-emerald-50/90 text-emerald-800 ring-emerald-500/15 dark:border-emerald-500/25 dark:bg-emerald-500/10 dark:text-emerald-200 dark:ring-emerald-400/20`
+      return `${badgeBase} bg-emerald-50 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-200`
     default:
-      return `${badgeBase} border-gray-200/80 bg-gray-50/90 text-gray-700 ring-gray-500/10/40 dark:bg-gray-500/10 dark:text-gray-200 dark:ring-gray-500/15`
+      return `${badgeBase} bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-gray-200`
   }
 }
 
@@ -49,16 +49,16 @@ export function formatSellerLoanStatusLabel(status: string): string {
 export function salesLeadStatusBadgeClass(status: string): string {
   switch (status) {
     case 'new':
-      return `${badgeBase} border-sky-200/80 bg-sky-50/90 text-sky-800 ring-sky-500/15 dark:border-sky-500/25 dark:bg-sky-500/10 dark:text-sky-200 dark:ring-sky-400/20`
+      return `${badgeBase} bg-sky-50 text-sky-800 dark:bg-sky-500/15 dark:text-sky-200`
     case 'contacted':
-      return `${badgeBase} border-indigo-200/80 bg-indigo-50/90 text-indigo-800 ring-indigo-500/15 dark:border-indigo-500/25 dark:bg-indigo-500/10 dark:text-indigo-200 dark:ring-indigo-400/20`
+      return `${badgeBase} bg-indigo-50 text-indigo-800 dark:bg-indigo-500/15 dark:text-indigo-200`
     case 'negotiating':
-      return `${badgeBase} border-amber-200/80 bg-amber-50/90 text-amber-900 ring-amber-500/15 dark:border-amber-500/25 dark:bg-amber-500/10 dark:text-amber-100 dark:ring-amber-400/20`
+      return `${badgeBase} bg-amber-50 text-amber-900 dark:bg-amber-500/15 dark:text-amber-100`
     case 'won':
-      return `${badgeBase} border-emerald-200/80 bg-emerald-50/90 text-emerald-800 ring-emerald-500/15 dark:border-emerald-500/25 dark:bg-emerald-500/10 dark:text-emerald-200 dark:ring-emerald-400/20`
+      return `${badgeBase} bg-emerald-50 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-200`
     case 'lost':
-      return `${badgeBase} border-red-200/80 bg-red-50/90 text-red-800 ring-red-500/15 dark:border-red-500/25 dark:bg-red-500/10 dark:text-red-200 dark:ring-red-400/20`
+      return `${badgeBase} bg-red-50 text-red-800 dark:bg-red-500/15 dark:text-red-200`
     default:
-      return `${badgeBase} border-gray-200/80 bg-gray-50/90 text-gray-700 ring-gray-500/10/40 dark:bg-gray-500/10 dark:text-gray-200 dark:ring-gray-500/15`
+      return `${badgeBase} bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-gray-200`
   }
 }

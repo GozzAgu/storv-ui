@@ -15,14 +15,6 @@
           >
             <MagnifyingGlassIcon aria-hidden="true" />
           </button>
-          <button
-            type="button"
-            class="ios-home-dashboard__icon-btn"
-            aria-label="Open menu"
-            @click="menuOpen = true"
-          >
-            <Bars3Icon aria-hidden="true" />
-          </button>
         </div>
       </div>
     </header>
@@ -55,6 +47,7 @@
           :label="metric.label"
           :value="metric.value"
           :href="metric.href"
+          :tone="metric.tone"
         />
       </div>
     </section>
@@ -164,7 +157,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import {
-  Bars3Icon,
   ChevronRightIcon,
   EllipsisVerticalIcon,
   MagnifyingGlassIcon,
@@ -183,11 +175,14 @@ export interface IosHomeAlert {
   href: string
 }
 
+export type IosHomeMetricTone = 'warning' | 'danger' | 'success'
+
 export interface IosHomeMetric {
   id: string
   label: string
   value: string
   href?: string
+  tone?: IosHomeMetricTone
 }
 
 export interface IosHomeFeedItem {

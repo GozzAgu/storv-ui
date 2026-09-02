@@ -9,7 +9,9 @@
         </div>
       </div>
       <template v-else>
-        <div class="ios-profile-settings__hero-avatar">{{ avatarInitials }}</div>
+        <div class="ios-profile-settings__hero-avatar">
+          <AccountAvatar :initials="avatarInitials" />
+        </div>
         <div class="ios-profile-settings__hero-body">
           <p class="ios-profile-settings__hero-name">{{ displayName }}</p>
           <p class="ios-profile-settings__hero-email">{{ email || '—' }}</p>
@@ -168,6 +170,7 @@ import {
   SparklesIcon,
   UserCircleIcon,
 } from '~/utils/app-icons'
+import AccountAvatar from '~/components/ui/AccountAvatar.vue'
 
 const props = withDefaults(
   defineProps<{

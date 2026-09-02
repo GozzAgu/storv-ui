@@ -18,7 +18,7 @@ function syncThemeColorMeta(isDark: boolean) {
   if (!import.meta.client) return
   const el = document.getElementById('theme-color-meta')
   if (el) {
-    el.setAttribute('content', isDark ? '#07080c' : '#fafafa')
+    el.setAttribute('content', isDark ? '#080808' : '#f4f1ea')
   }
 }
 
@@ -75,6 +75,14 @@ export const useThemeStore = defineStore('theme', {
         const html = document.documentElement
         const body = document.body
         const isDark = this.actualTheme === 'dark'
+        const currentlyDark = html.classList.contains('dark')
+        const currentScheme = html.style.colorScheme || (currentlyDark ? 'dark' : 'light')
+
+        if (currentlyDark === isDark && currentScheme === (isDark ? 'dark' : 'light')) {
+          syncThemeColorMeta(isDark)
+          return
+        }
+
         // First paint during initTheme: apply class immediately (no transition) to avoid a long flash
         const shouldAnimate = this.initialized
         const reducedMotion =
@@ -98,6 +106,8 @@ export const useThemeStore = defineStore('theme', {
           syncThemeColorMeta(isDark)
           if (html.classList.contains('capacitor-native')) {
             body.style.backgroundColor = isDark ? '#07080c' : '#f3f4f6'
+          } else {
+            body.style.backgroundColor = ''
           }
         }
 

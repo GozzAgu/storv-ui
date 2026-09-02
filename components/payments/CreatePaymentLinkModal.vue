@@ -1,13 +1,13 @@
 <template>
-  <Modal
+  <SidePanel
     :model-value="modelValue"
     size="lg"
     title="New payment link"
-    subtitle="Pick items from your inventory, add the customer, and generate a secure link."
+    dense
     @update:model-value="(v: boolean) => emit('update:modelValue', v)"
   >
     <IosForm layout="fill">
-      <IosFormSection title="Customer" fixed>
+      <IosFormSection fixed>
         <IosFormField label="Customer name">
           <IosFormInput v-model="customerName" placeholder="e.g. Sarah Johnson" />
         </IosFormField>
@@ -16,7 +16,7 @@
         </IosFormField>
       </IosFormSection>
 
-      <IosFormSection title="Items" fixed>
+      <IosFormSection fixed>
         <IosFormField label="Category">
           <IosFormSelect
             v-model="selectedFolderId"
@@ -30,79 +30,76 @@
           </IosFormSelect>
         </IosFormField>
 
-      <!-- Items -->
-      <div v-if="selectedFolderId">
-        <label class="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-400"
-          >Items</label
-        >
-
-        <div v-if="itemsLoading" class="space-y-2">
-          <div
-            v-for="i in 3"
-            :key="i"
-            class="h-12 animate-pulse rounded-lg bg-gray-100 dark:bg-white/[0.05]"
-          />
-        </div>
-
-        <div
-          v-else-if="availableItems.length === 0"
-          class="rounded-lg bg-gray-50 px-3 py-6 text-center text-xs text-gray-500 dark:bg-white/[0.03] dark:text-gray-400"
-        >
-          No available items in this category.
-        </div>
-
-        <div
-          v-else
-          class="max-h-64 divide-y divide-gray-100 overflow-y-auto rounded-lg ring-1 ring-gray-200 dark:divide-white/[0.06] dark:ring-white/10"
-        >
-          <div
-            v-for="entry in availableItems"
-            :key="entry.itemId"
-            class="flex items-center justify-between gap-3 bg-white px-3 py-2.5 dark:bg-white/[0.02]"
-          >
-            <div class="min-w-0">
-              <p class="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
-                {{ entry.name }}
-              </p>
-              <p class="text-[11px] text-gray-500 dark:text-gray-400">
-                {{ formatNaira(entry.unitPrice) }}
-                <span v-if="entry.serial"> · serialized</span>
-                <span v-else> · {{ entry.max }} in stock</span>
-              </p>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <button
-                type="button"
-                class="flex h-7 w-7 items-center justify-center rounded-md text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50 disabled:opacity-40 dark:text-gray-300 dark:ring-white/10 dark:hover:bg-white/[0.06]"
-                :disabled="(cart[entry.itemId]?.quantity || 0) <= 0"
-                @click="dec(entry)"
+        <IosFormField v-if="selectedFolderId" label="Items">
+          <div v-if="itemsLoading" :class="pickListClass">
+            <div :class="pickListScrollClass">
+              <div
+                v-for="i in 3"
+                :key="i"
+                :class="[pickRowClass, '!cursor-default hover:!bg-transparent']"
               >
-                −
-              </button>
-              <span class="w-6 text-center text-sm tabular-nums text-gray-900 dark:text-gray-100">{{
-                cart[entry.itemId]?.quantity || 0
-              }}</span>
-              <button
-                type="button"
-                class="flex h-7 w-7 items-center justify-center rounded-md text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50 disabled:opacity-40 dark:text-gray-300 dark:ring-white/10 dark:hover:bg-white/[0.06]"
-                :disabled="(cart[entry.itemId]?.quantity || 0) >= entry.max"
-                @click="inc(entry)"
-              >
-                +
-              </button>
+                <div class="min-w-0 flex-1 space-y-1.5">
+                  <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-title" />
+                  <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-meta" />
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+
+          <div v-else-if="availableItems.length === 0" :class="emptyStateClass">
+            <p class="text-xs font-medium text-gray-700 dark:text-gray-300">No available items</p>
+            <p class="dash-drawer-hint mt-0.5">Try another category</p>
+          </div>
+
+          <div v-else :class="pickListClass">
+            <div :class="[pickListScrollClass, 'max-h-64']">
+              <div
+                v-for="entry in availableItems"
+                :key="entry.itemId"
+                :class="[pickRowClass, '!cursor-default hover:!bg-transparent']"
+              >
+                <div class="min-w-0 flex-1">
+                  <p :class="pickRowTitleClass">{{ entry.name }}</p>
+                  <p :class="pickRowMetaClass">
+                    {{ formatNaira(entry.unitPrice) }}
+                    <span v-if="entry.serial"> · serialized</span>
+                    <span v-else> · {{ entry.max }} in stock</span>
+                  </p>
+                </div>
+                <div class="flex shrink-0 items-center gap-1.5">
+                  <button
+                    type="button"
+                    class="flex h-7 w-7 items-center justify-center rounded-full text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50 disabled:opacity-40 dark:text-gray-300 dark:ring-white/10 dark:hover:bg-white/[0.06]"
+                    :disabled="(cart[entry.itemId]?.quantity || 0) <= 0"
+                    @click="dec(entry)"
+                  >
+                    −
+                  </button>
+                  <span class="w-6 text-center text-sm tabular-nums text-gray-900 dark:text-gray-100">{{
+                    cart[entry.itemId]?.quantity || 0
+                  }}</span>
+                  <button
+                    type="button"
+                    class="flex h-7 w-7 items-center justify-center rounded-full text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50 disabled:opacity-40 dark:text-gray-300 dark:ring-white/10 dark:hover:bg-white/[0.06]"
+                    :disabled="(cart[entry.itemId]?.quantity || 0) >= entry.max"
+                    @click="inc(entry)"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </IosFormField>
       </IosFormSection>
 
       <p v-if="errorMsg" class="ios-form__error">{{ errorMsg }}</p>
     </IosForm>
 
     <template #leading>
-      <span>
+      <span class="text-xs text-gray-600 dark:text-gray-400">
         Total
-        <strong class="tabular-nums">{{ formatNaira(total) }}</strong>
+        <strong class="tabular-nums text-gray-900 dark:text-gray-100">{{ formatNaira(total) }}</strong>
       </span>
     </template>
 
@@ -115,12 +112,12 @@
         @primary="create"
       />
     </template>
-  </Modal>
+  </SidePanel>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, reactive, watch } from 'vue'
-import Modal from '~/components/ui/Modal.vue'
+import SidePanel from '~/components/ui/SidePanel.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import {
   IosForm,
@@ -163,6 +160,14 @@ const emit = defineEmits<{ 'update:modelValue': [boolean]; created: [CreatedLink
 
 const inventoryStore = useInventoryStore()
 const { createLink } = usePaymentLinks()
+const {
+  pickListClass,
+  pickListScrollClass,
+  pickRowClass,
+  pickRowTitleClass,
+  pickRowMetaClass,
+  emptyStateClass,
+} = useDashboardDrawerChrome()
 
 const customerName = ref('')
 const customerPhone = ref('')

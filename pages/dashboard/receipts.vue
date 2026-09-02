@@ -17,28 +17,19 @@
           <IosQuickActionSkeleton :count="4" />
           <IosTransactionListSkeleton :count="8" />
         </div>
-        <div v-else class="overflow-hidden rounded-sm bg-white dark:!bg-dashboard-card">
-          <div class="border-b border-gray-200/80 px-4 py-3 dark:border-gray-800">
-            <div class="flex gap-8">
-              <div class="h-4 w-20 animate-pulse rounded bg-gray-200 dark:bg-white/10"></div>
-              <div class="h-4 w-24 animate-pulse rounded bg-gray-200 dark:bg-white/10"></div>
-            </div>
-          </div>
-          <div class="border-b border-gray-100/90 px-4 py-3 dark:border-gray-800/80 sm:px-5">
-            <div class="flex flex-wrap gap-2">
-              <div
-                class="h-9 flex-1 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10 sm:max-w-xs"
-              ></div>
-              <div class="h-9 w-24 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
-            </div>
-          </div>
-          <div class="space-y-2.5 p-4 sm:p-5">
-            <div v-for="i in 6" :key="i" class="flex gap-4">
-              <div class="h-4 flex-1 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
-              <div class="h-4 w-24 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
-              <div class="h-4 w-20 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
-            </div>
-          </div>
+        <div v-else class="flex min-h-0 flex-1 flex-col gap-4 sm:gap-5">
+          <nav :class="segmentTabsClass" aria-hidden="true">
+            <span class="dash-skeleton dash-skeleton--select" />
+            <span class="dash-skeleton dash-skeleton--select" />
+            <span class="dash-skeleton dash-skeleton--select" />
+          </nav>
+          <DashTableSkeleton
+            :columns="receiptsTableSkeletonColumns"
+            :rows="8"
+            leading="none"
+            show-toolbar
+            aria-label="Loading sales"
+          />
         </div>
       </template>
 
@@ -418,33 +409,29 @@
                 :class="[
                   'transition-colors duration-200 ease-out',
                   isReceiptsFullscreen
-                    ? 'fixed inset-0 z-[100] flex min-h-0 flex-col overflow-hidden bg-white dark:!bg-dashboard-card'
+                    ? `${tableExpandClass} fixed inset-0 z-[100] flex min-h-0 flex-col overflow-hidden`
                     : 'relative flex min-h-0 flex-1 flex-col',
                 ]"
               >
                 <!-- Fullscreen header -->
                 <div
                   v-if="isReceiptsFullscreen"
-                  class="shrink-0 border-b border-gray-200/80 bg-white/95 px-4 py-3 backdrop-blur-md dark:border-gray-800/80 dark:!bg-dashboard-card/95 sm:px-6 lg:px-8"
-                  style="padding-top: max(0.75rem, env(safe-area-inset-top, 0px))"
+                  :class="tableExpandHeaderClass"
+                  style="padding-top: max(1rem, env(safe-area-inset-top, 0px))"
                 >
                   <div
                     class="flex w-full flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-6"
                   >
                     <div class="flex min-w-0 items-start justify-between gap-3 lg:items-center">
                       <div class="min-w-0">
-                        <p
-                          class="text-[10px] font-medium uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
-                        >
+                        <p :class="tableExpandEyebrowClass">
                           Expanded view
                         </p>
                         <div class="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                          <h2
-                            class="text-base font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-lg"
-                          >
+                          <h2 :class="tableExpandTitleClass">
                             Sales
                           </h2>
-                          <span class="text-xs tabular-nums text-gray-500 dark:text-gray-400">
+                          <span :class="tableExpandMetaClass">
                             {{ receipts.length }} in store ·
                             {{ formatCurrency(totalSales) }} completed · Today
                             {{ formatCurrency(todaySales) }} ({{ todayReceipts }}) · Month
@@ -454,7 +441,8 @@
                       </div>
                       <button
                         type="button"
-                        class="shrink-0 rounded-sm border border-transparent p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-100 lg:hidden"
+                        class="inline-flex lg:hidden"
+                        :class="tableExpandCloseClass"
                         aria-label="Exit expanded view"
                         @click="isReceiptsFullscreen = false"
                       >
@@ -474,13 +462,15 @@
                           v-model="searchQuery"
                           type="text"
                           placeholder="Search sales..."
-                          class="w-full rounded-sm bg-white py-2 pl-10 pr-3 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder:text-gray-500"
+                          class="w-full py-2 pl-10 pr-3 text-sm"
+                          :class="tableExpandFieldClass"
                         />
                       </div>
                       <div class="flex flex-wrap items-center gap-2">
                         <select
                           v-model="statusFilter"
-                          class="min-w-[7.5rem] cursor-pointer rounded-sm bg-white px-3 py-2 text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:!bg-dashboard-card dark:text-gray-200"
+                          class="min-w-[7.5rem] cursor-pointer px-3 py-2 text-sm font-medium"
+                          :class="tableExpandFieldClass"
                         >
                           <option value="all">All Status</option>
                           <option value="completed">Completed</option>
@@ -489,7 +479,8 @@
                         </select>
                         <select
                           v-model="dateFilter"
-                          class="min-w-[7.5rem] cursor-pointer rounded-sm bg-white px-3 py-2 text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:!bg-dashboard-card dark:text-gray-200"
+                          class="min-w-[7.5rem] cursor-pointer px-3 py-2 text-sm font-medium"
+                          :class="tableExpandFieldClass"
                         >
                           <option value="all">All Dates</option>
                           <option value="today">Today</option>
@@ -498,7 +489,8 @@
                         </select>
                         <button
                           type="button"
-                          class="hidden rounded-sm border border-transparent p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-100 lg:inline-flex"
+                          class="hidden lg:inline-flex"
+                          :class="tableExpandCloseClass"
                           aria-label="Exit expanded view"
                           @click="isReceiptsFullscreen = false"
                         >
@@ -534,7 +526,7 @@
                 <div
                   :class="[
                     isReceiptsFullscreen
-                      ? 'flex min-h-0 flex-1 flex-col overflow-hidden'
+                      ? tableExpandBodyClass
                       : tableShellFlexClass,
                   ]"
                 >
@@ -602,7 +594,7 @@
                   <!-- Bulk actions (receipts) -->
                   <div
                     v-if="canDeleteReceipts && selectedReceiptsForBulk.length > 0"
-                    class="flex flex-wrap items-center gap-2 border-b border-gray-100/90 bg-gray-50/80 px-3 py-2 dark:border-gray-800/80 dark:!bg-dashboard-card/30 sm:px-5"
+                    class="dash-table-bulk-bar"
                   >
                     <span class="text-xs font-medium text-gray-700 dark:text-gray-300"
                       >{{ selectedReceiptsForBulk.length }} selected</span
@@ -626,26 +618,19 @@
                         : 'min-h-0 flex-1 overflow-x-auto'
                     "
                   >
-                    <table class="dashboard-table min-w-full">
-                      <thead>
-                        <tr>
-                          <th v-for="i in 6" :key="i" class="px-3 py-2">
-                            <div
-                              class="h-3 bg-gray-200 dark:bg-white/10 rounded-sm w-20 animate-pulse"
-                            ></div>
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr v-for="i in 5" :key="i">
-                          <td v-for="j in 6" :key="j">
-                            <div
-                              class="h-4 bg-gray-200 dark:bg-white/10 rounded-sm w-full animate-pulse"
-                            ></div>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
+                    <div class="receipts-mobile-list space-y-2 px-3 py-3 sm:hidden">
+                      <DashListCardSkeleton :count="6" />
+                    </div>
+                    <div class="hidden sm:block">
+                      <DashTableSkeleton
+                        :columns="receiptsTableSkeletonColumns"
+                        :rows="8"
+                        leading="none"
+                        show-toolbar
+                        flush
+                        aria-label="Loading sales"
+                      />
+                    </div>
                   </div>
                   <!-- Standalone empty state (same styling as customers empty state, no button) -->
                   <DashboardTableEmptyState
@@ -750,7 +735,7 @@
                                   </button>
                                   <span
                                     v-if="receipt.isSwapIn"
-                                    class="inline-flex items-center rounded-sm border border-sky-200/80 bg-sky-50/90 px-1.5 py-0.5 text-[9px] font-medium text-sky-800 dark:border-sky-500/30 dark:bg-sky-500/10 dark:text-sky-200"
+                                    class="inline-flex items-center rounded-full bg-sky-50 px-2 py-0.5 text-[9px] font-semibold text-sky-800 dark:bg-sky-500/15 dark:text-sky-200"
                                   >
                                     Swap
                                   </span>
@@ -807,7 +792,7 @@
                                 </div>
                               </div>
                             </div>
-                            <div class="relative shrink-0" data-receipt-menu @click.stop>
+                            <div class="relative shrink-0" @click.stop>
                               <button
                                 type="button"
                                 :data-receipt-actions-anchor="receipt.id"
@@ -1167,7 +1152,7 @@
                                       </button>
                                       <span
                                         v-if="receipt.isSwapIn"
-                                        class="inline-flex items-center rounded-sm border border-sky-200/80 bg-sky-50/90 px-1.5 py-0.5 text-[9px] font-medium text-sky-800 dark:border-sky-500/30 dark:bg-sky-500/10 dark:text-sky-200"
+                                        class="inline-flex items-center rounded-full bg-sky-50 px-2 py-0.5 text-[9px] font-semibold text-sky-800 dark:bg-sky-500/15 dark:text-sky-200"
                                         title="Swap-in transaction"
                                       >
                                         Swap
@@ -1236,7 +1221,6 @@
                                   <td class="px-4 py-2 text-right align-middle sm:px-5">
                                     <div
                                       class="relative inline-flex justify-end"
-                                      data-receipt-menu
                                       @click.stop
                                     >
                                       <button
@@ -1417,8 +1401,18 @@
                 </template>
               </DataTableToolbar>
 
+              <DashTableSkeleton
+                v-if="receiptsStore.loading"
+                :columns="outstandingTableSkeletonColumns"
+                :rows="8"
+                leading="none"
+                show-toolbar
+                flush
+                aria-label="Loading outstanding payments"
+              />
+
               <DashboardTableEmptyState
-                v-if="filteredOutstandingReceipts.length === 0 && !receiptsStore.loading"
+                v-else-if="filteredOutstandingReceipts.length === 0"
                 :icon="ClockIcon"
                 title="No outstanding payments"
                 description="Create a sale with “Balance due” when a customer pays a deposit. It will appear here until paid in full."
@@ -1531,23 +1525,15 @@
                   </DashboardToolbarSelect>
                 </template>
               </DataTableToolbar>
-              <div v-if="receiptsStore.loading" class="px-4 py-12 sm:px-6">
-                <div class="space-y-3">
-                  <div v-for="i in 5" :key="i" class="flex items-center gap-3">
-                    <div
-                      class="h-9 w-9 shrink-0 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"
-                    ></div>
-                    <div class="min-w-0 flex-1 space-y-2">
-                      <div
-                        class="h-3 w-1/3 animate-pulse rounded bg-gray-200 dark:bg-white/10"
-                      ></div>
-                      <div
-                        class="h-3 w-2/3 animate-pulse rounded bg-gray-200 dark:bg-white/10"
-                      ></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <DashTableSkeleton
+                v-if="receiptsStore.loading"
+                :columns="customersTableSkeletonColumns"
+                :rows="8"
+                leading="none"
+                show-toolbar
+                flush
+                aria-label="Loading customers"
+              />
               <DashboardTableEmptyState
                 v-else-if="filteredCustomers.length === 0"
                 :icon="UsersIcon"
@@ -1697,7 +1683,6 @@
                           <td class="px-3 py-2.5 sm:px-4 text-right">
                             <div
                               class="relative inline-flex justify-end"
-                              data-customer-menu
                               @click.stop
                             >
                               <button
@@ -1807,131 +1792,93 @@
   </ClientOnly>
 
   <!-- Receipt / customer actions (teleported; not clipped by table/card overflow) -->
-  <Teleport to="body">
-    <div
-      v-if="openReceiptMenuId && receiptForOpenMenu && receiptMenuFixedStyle"
-      ref="receiptMenuPanelRef"
-      data-receipt-menu
-      class="frosted-glass fixed z-[1000] min-w-[11rem] overflow-hidden rounded-sm py-1 text-left"
-      role="menu"
-      :style="receiptMenuFixedStyle"
-    >
-      <button
-        type="button"
-        role="menuitem"
-        @click="
-          () => {
-            handleViewReceiptTimeline(receiptForOpenMenu)
-            openReceiptMenuId = null
-          }
-        "
-        class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85"
-      >
-        <ClockIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
-        <span>History</span>
-      </button>
-      <button
-        type="button"
-        role="menuitem"
-        @click="
-          () => {
-            handleViewReceipt(receiptForOpenMenu)
-            openReceiptMenuId = null
-          }
-        "
-        class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85"
-      >
-        <EyeIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
-        <span>View sale</span>
-      </button>
-      <button
-        v-if="receiptForOpenMenu.status === 'completed' && canEditReceipts"
-        type="button"
-        role="menuitem"
-        @click="
-          () => {
-            handleRefundReceipt(receiptForOpenMenu)
-            openReceiptMenuId = null
-          }
-        "
-        class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-orange-600 transition-colors hover:bg-orange-50 dark:text-orange-400 dark:hover:bg-orange-950/30"
-      >
-        <ArrowPathIcon class="h-4 w-4 shrink-0" stroke-width="1.75" />
-        <span>Refund</span>
-      </button>
-      <button
-        v-if="canDeleteReceipts"
-        type="button"
-        role="menuitem"
-        @click="
-          () => {
-            handleDeleteReceipt(receiptForOpenMenu)
-            openReceiptMenuId = null
-          }
-        "
-        class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40"
-      >
-        <TrashIcon class="h-4 w-4 shrink-0" stroke-width="1.75" />
-        <span>Delete</span>
-      </button>
-    </div>
-  </Teleport>
-  <Teleport to="body">
-    <div
-      v-if="openCustomerMenuId && customerForOpenMenu && customerMenuFixedStyle"
-      ref="customerMenuPanelRef"
-      data-customer-menu
-      class="frosted-glass fixed z-[1000] min-w-[11rem] overflow-hidden rounded-sm py-1 text-left"
-      role="menu"
-      :style="customerMenuFixedStyle"
-    >
-      <button
-        type="button"
-        role="menuitem"
-        @click="
-          () => {
-            viewCustomerReceipts(customerForOpenMenu)
-            openCustomerMenuId = null
-          }
-        "
-        class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85"
-      >
-        <PrinterIcon
-          class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500"
-          stroke-width="1.75"
-        />
-        <span>View sales</span>
-      </button>
-      <button
-        v-if="hasBalanceFeature"
-        type="button"
-        role="menuitem"
-        @click="
-          () => {
-            openCustomerBalance(customerForOpenMenu)
-            openCustomerMenuId = null
-          }
-        "
-        class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85"
-      >
-        <span>Manage balance</span>
-      </button>
-      <button
-        v-if="hasWhatsAppFeature && (customerForOpenMenu.phone || customerForOpenMenu.email)"
-        type="button"
-        role="menuitem"
-        @click="
-          () => {
-            openCustomerPaymentReminder(customerForOpenMenu)
-            openCustomerMenuId = null
-          }
-        "
-        class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-[#128C7E] transition-colors hover:bg-emerald-50 dark:text-[#25D366] dark:hover:bg-emerald-950/30"
-      >
-        <span>WhatsApp payment reminder</span>
-      </button>
-    </div>
-  </Teleport>
+  <IosContextMenu
+    ref="receiptMenuPanelRef"
+    :open="Boolean(openReceiptMenuId && receiptForOpenMenu && receiptMenuFixedStyle)"
+    :style="receiptMenuFixedStyle"
+    menu-id="receipt"
+  >
+    <IosContextMenuItem
+      label="History"
+      :icon="ClockIcon"
+      @click="
+        () => {
+          handleViewReceiptTimeline(receiptForOpenMenu!)
+          openReceiptMenuId = null
+        }
+      "
+    />
+    <IosContextMenuItem
+      label="View sale"
+      :icon="EyeIcon"
+      @click="
+        () => {
+          handleViewReceipt(receiptForOpenMenu!)
+          openReceiptMenuId = null
+        }
+      "
+    />
+    <IosContextMenuItem
+      v-if="receiptForOpenMenu?.status === 'completed' && canEditReceipts"
+      label="Refund"
+      :icon="ArrowPathIcon"
+      @click="
+        () => {
+          handleRefundReceipt(receiptForOpenMenu!)
+          openReceiptMenuId = null
+        }
+      "
+    />
+    <IosContextMenuItem
+      v-if="canDeleteReceipts"
+      label="Delete"
+      :icon="TrashIcon"
+      danger
+      @click="
+        () => {
+          handleDeleteReceipt(receiptForOpenMenu!)
+          openReceiptMenuId = null
+        }
+      "
+    />
+  </IosContextMenu>
+  <IosContextMenu
+    ref="customerMenuPanelRef"
+    :open="Boolean(openCustomerMenuId && customerForOpenMenu && customerMenuFixedStyle)"
+    :style="customerMenuFixedStyle"
+    menu-id="customer"
+  >
+    <IosContextMenuItem
+      label="View sales"
+      :icon="PrinterIcon"
+      @click="
+        () => {
+          viewCustomerReceipts(customerForOpenMenu!)
+          openCustomerMenuId = null
+        }
+      "
+    />
+    <IosContextMenuItem
+      v-if="hasBalanceFeature"
+      label="Manage balance"
+      @click="
+        () => {
+          openCustomerBalance(customerForOpenMenu!)
+          openCustomerMenuId = null
+        }
+      "
+    />
+    <IosContextMenuItem
+      v-if="hasWhatsAppFeature && (customerForOpenMenu?.phone || customerForOpenMenu?.email)"
+      label="WhatsApp payment reminder"
+      @click="
+        () => {
+          openCustomerPaymentReminder(customerForOpenMenu!)
+          openCustomerMenuId = null
+        }
+      "
+    />
+  </IosContextMenu>
 
   <CustomerBalanceModal
     v-if="customerBalanceTarget"
@@ -2002,6 +1949,8 @@ import IosQuickActionBar, {
   type IosQuickActionOption,
 } from '~/components/ios/IosQuickActionBar.vue'
 import IosDrawer from '~/components/ios/IosDrawer.vue'
+import IosContextMenu from '~/components/ios/IosContextMenu.vue'
+import IosContextMenuItem from '~/components/ios/IosContextMenuItem.vue'
 import IosSearchBar from '~/components/ios/IosSearchBar.vue'
 import IosSwipeActions, { type IosSwipeAction } from '~/components/ios/IosSwipeActions.vue'
 import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
@@ -2036,7 +1985,11 @@ import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firesto
 import { useCopy } from '~/composables/useCopy'
 import { usePreferences } from '~/composables/usePreferences'
 import { useAppToast } from '~/composables/useAppToast'
-import { getVisibleMenuAnchorElement, computeFixedAnchoredMenuStyle } from '~/utils/menuAnchor'
+import {
+  getVisibleMenuAnchorElement,
+  computeFixedAnchoredMenuStyle,
+  isInsideAnchoredMenu,
+} from '~/utils/menuAnchor'
 import { scheduleNativeIdleWork } from '~/utils/capacitor-native-perf'
 import { EMPTY_CELL } from '~/utils/ui-empty'
 import { getCustomerContactKey } from '~/utils/customer-key'
@@ -2257,7 +2210,7 @@ const iosSalesNavTitle = computed(() => {
   }
 })
 
-const { tableShellFlexClass } = useDashboardTableChrome()
+const { tableShellFlexClass, tableExpandClass, tableExpandHeaderClass, tableExpandBodyClass, tableExpandCloseClass, tableExpandEyebrowClass, tableExpandTitleClass, tableExpandMetaClass, tableExpandFieldClass } = useDashboardTableChrome()
 
 const searchQuery = ref('')
 const statusFilter = ref('all')
@@ -2321,6 +2274,64 @@ const sortableColumns = [
   { key: 'status', label: 'Status' },
   { key: 'createdBy', label: 'Created By' },
 ]
+
+const receiptsTableSkeletonColumns = computed(() => {
+  const columns: Array<{
+    id?: string
+    label: string
+    class?: string
+    bone?: string
+    lines?: 1 | 2
+  }> = []
+  if (canDeleteReceipts.value) {
+    columns.push({ id: 'select', label: '', class: 'w-10 text-center', bone: '1rem' })
+  }
+  columns.push(
+    { label: 'Sale #', bone: '4.5rem' },
+    { label: 'Customer', lines: 2 },
+    { label: 'Date', bone: '4.5rem' },
+    { label: 'Items', bone: '7rem' },
+    { label: 'Total', bone: '4rem' },
+    { label: 'Payment', bone: '4.5rem' },
+    { label: 'Status', class: 'dashboard-table__col-status', bone: '4.5rem' },
+    { label: 'Created By', bone: '5.5rem' },
+    { label: 'Actions', class: 'w-12 text-right', bone: '1.5rem' }
+  )
+  return columns
+})
+
+const outstandingTableSkeletonColumns = [
+  { label: 'Sale', lines: 2 as const },
+  { label: 'Customer', lines: 2 as const },
+  { label: 'Items', class: 'hidden md:table-cell', bone: '7rem' },
+  { label: 'Total', class: 'text-right', bone: '4rem' },
+  { label: 'Paid', class: 'text-right', bone: '4rem' },
+  { label: 'Balance', class: 'text-right', bone: '4rem' },
+  { label: 'Actions', class: 'text-right', bone: '4.5rem' },
+]
+
+const customersTableSkeletonColumns = computed(() => {
+  const columns: Array<{
+    label: string
+    class?: string
+    bone?: string
+    lines?: 1 | 2
+  }> = [
+    { label: 'Sales', bone: '3.25rem' },
+    { label: 'Customer', bone: '7rem' },
+    { label: 'Contact', lines: 2 },
+    { label: 'Orders', bone: '2.5rem' },
+    { label: 'Total Spent', bone: '4.5rem' },
+  ]
+  if (hasBalanceFeature.value) {
+    columns.push({ label: 'Balance', bone: '4rem' })
+  }
+  columns.push(
+    { label: 'Last Order', bone: '5rem' },
+    { label: 'Actions', class: 'w-12 text-right', bone: '1.5rem' }
+  )
+  return columns
+})
 
 // Customers tab state
 const customersSearchQuery = ref('')
@@ -2603,6 +2614,7 @@ const salesQuickActionOptions = computed((): IosQuickActionOption[] => {
         value: 'new',
         label: 'New sale',
         icon: PlusIcon,
+        trailing: 'add',
         action: openCreateReceiptModal,
       },
       {
@@ -2616,6 +2628,7 @@ const salesQuickActionOptions = computed((): IosQuickActionOption[] => {
         value: 'more',
         label: 'More',
         icon: EllipsisVerticalIcon,
+        trailing: 'more',
         action: () => {
           showSalesMoreSheet.value = true
         },
@@ -2636,6 +2649,7 @@ const salesQuickActionOptions = computed((): IosQuickActionOption[] => {
       value: 'more',
       label: 'More',
       icon: EllipsisVerticalIcon,
+      trailing: 'more',
       action: () => {
         showSalesMoreSheet.value = true
       },
@@ -2938,8 +2952,10 @@ const receiptsHeaderMetrics = computed(() => {
 
 const receiptMenuFixedStyle = ref<Record<string, string> | null>(null)
 const customerMenuFixedStyle = ref<Record<string, string> | null>(null)
-const receiptMenuPanelRef = ref<HTMLElement | null>(null)
-const customerMenuPanelRef = ref<HTMLElement | null>(null)
+/** IosContextMenu exposes its rendered card as `panel` so we can measure it */
+type ContextMenuHandle = { panel: HTMLElement | null } | null
+const receiptMenuPanelRef = ref<ContextMenuHandle>(null)
+const customerMenuPanelRef = ref<ContextMenuHandle>(null)
 
 function updateReceiptMenuPosition() {
   const id = openReceiptMenuId.value
@@ -2953,10 +2969,8 @@ function updateReceiptMenuPosition() {
     return
   }
   const r = el.getBoundingClientRect()
-  const menuWidth = receiptMenuPanelRef.value?.offsetWidth || 176
-  const estimatedMenuHeight = receiptMenuPanelRef.value?.offsetHeight || 240
+  const estimatedMenuHeight = receiptMenuPanelRef.value?.panel?.offsetHeight || 240
   receiptMenuFixedStyle.value = computeFixedAnchoredMenuStyle(r, {
-    menuWidth,
     estimatedMenuHeight,
     margin: 4,
     viewportPadding: 8,
@@ -2975,10 +2989,8 @@ function updateCustomerMenuPosition() {
     return
   }
   const r = el.getBoundingClientRect()
-  const menuWidth = customerMenuPanelRef.value?.offsetWidth || 176
-  const estimatedMenuHeight = customerMenuPanelRef.value?.offsetHeight || 52
+  const estimatedMenuHeight = customerMenuPanelRef.value?.panel?.offsetHeight || 52
   customerMenuFixedStyle.value = computeFixedAnchoredMenuStyle(r, {
-    menuWidth,
     estimatedMenuHeight,
     margin: 4,
     viewportPadding: 8,
@@ -3039,7 +3051,8 @@ watch(openReceiptMenuId, (id) => {
 
   receiptMenuOutsideHandler = (e: MouseEvent) => {
     const t = e.target as HTMLElement | null
-    if (t?.closest?.('[data-receipt-menu]')) return
+    if (isInsideAnchoredMenu(t)) return
+    if (t?.closest?.('[data-receipt-actions-anchor]')) return
     openReceiptMenuId.value = null
     removeReceiptMenuOutsideListener()
   }
@@ -3068,7 +3081,8 @@ watch(openCustomerMenuId, (id) => {
 
   customerMenuOutsideHandler = (e: MouseEvent) => {
     const t = e.target as HTMLElement | null
-    if (t?.closest?.('[data-customer-menu]')) return
+    if (isInsideAnchoredMenu(t)) return
+    if (t?.closest?.('[data-customer-actions-anchor]')) return
     openCustomerMenuId.value = null
     removeCustomerMenuOutsideListener()
   }

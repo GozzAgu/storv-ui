@@ -40,38 +40,25 @@
       </template>
       <template v-else-if="loadingShowsCategoryHub">
         <div class="flex flex-wrap items-center gap-2">
-          <div class="h-8 w-8 animate-pulse rounded-lg bg-gray-200 dark:bg-white/10" />
-          <div class="h-5 w-36 max-w-[50vw] animate-pulse rounded-sm bg-gray-200 dark:bg-white/10" />
+          <span class="dash-skeleton dash-skeleton--thumb" />
+          <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-title" />
         </div>
         <div
           class="dash-grid-shell dash-grid-shell--grid inventory-categories-shell--grid mt-4"
         >
           <div class="inventory-categories-grid dash-grid">
-            <div
-              v-for="i in 6"
-              :key="i"
-              class="dash-skeleton dash-skeleton--grid-card"
-            />
+            <FolderCardSkeleton v-for="i in 6" :key="i" />
           </div>
         </div>
       </template>
-      <div v-else class="overflow-hidden rounded-sm bg-white dark:!bg-dashboard-card">
-        <div class="border-b border-gray-100/90 px-4 py-3 dark:border-gray-800/80 sm:px-5">
-          <div class="flex flex-wrap gap-2">
-            <div
-              class="h-9 flex-1 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10 sm:max-w-xs"
-            ></div>
-            <div class="h-9 w-24 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
-          </div>
-        </div>
-        <div class="space-y-2.5 p-4 sm:p-5">
-          <div v-for="i in 8" :key="i" class="flex gap-3">
-            <div class="h-4 flex-1 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
-            <div class="h-4 w-20 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
-            <div class="h-4 w-16 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
-          </div>
-        </div>
-      </div>
+      <DashTableSkeleton
+        v-else
+        :columns="inventoryItemTableSkeletonColumns"
+        :rows="8"
+        leading="icon"
+        show-toolbar
+        aria-label="Loading products"
+      />
     </template>
 
     <!-- Mobile / tablet toolbar -->
@@ -504,7 +491,7 @@
             @click="navigateToSubfolder(child.id)"
           >
             <template v-if="canCreateInventoryFolders" #menu>
-              <div data-inventory-subfolder-menu>
+              <div>
                 <button
                   type="button"
                   :data-folder-actions-anchor="child.id"
@@ -537,33 +524,29 @@
           :class="[
             'transition-colors duration-200 ease-out',
             isFullscreen
-              ? 'fixed inset-0 z-[100] flex min-h-0 flex-col overflow-hidden bg-white dark:!bg-dashboard-card'
+              ? `${tableExpandClass} fixed inset-0 z-[100] flex min-h-0 flex-col overflow-hidden`
               : 'relative flex min-h-0 flex-1 flex-col',
           ]"
         >
           <!-- Fullscreen header -->
           <div
             v-if="isFullscreen"
-            class="shrink-0 border-b border-gray-200/80 bg-white/95 px-4 py-3 backdrop-blur-md dark:border-gray-800/80 dark:!bg-dashboard-card/95 sm:px-6 lg:px-8"
-            style="padding-top: max(0.75rem, env(safe-area-inset-top, 0px))"
+            :class="tableExpandHeaderClass"
+            style="padding-top: max(1rem, env(safe-area-inset-top, 0px))"
           >
             <div
               class="flex w-full flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-6"
             >
               <div class="flex min-w-0 items-start justify-between gap-3 lg:items-center">
                 <div class="min-w-0">
-                  <p
-                    class="text-[10px] font-medium uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
-                  >
+                  <p :class="tableExpandEyebrowClass">
                     Expanded view
                   </p>
                   <div class="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                    <h2
-                      class="text-base font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-lg"
-                    >
+                    <h2 :class="tableExpandTitleClass">
                       {{ folder?.name || 'Inventory Products' }}
                     </h2>
-                    <span class="text-xs tabular-nums text-gray-500 dark:text-gray-400">
+                    <span :class="tableExpandMetaClass">
                       {{ folder?.itemCount ?? 0 }} items · {{ formatCurrency(totalInventoryValue) }}
                       <template
                         v-if="isSearchActive && sortedFilteredItems.length !== baseItems.length"
@@ -575,7 +558,8 @@
                 </div>
                 <button
                   type="button"
-                  class="shrink-0 rounded-sm border border-transparent p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-100 lg:hidden"
+                  class="inline-flex lg:hidden"
+                  :class="tableExpandCloseClass"
                   aria-label="Exit expanded view"
                   @click="isFullscreen = false"
                 >
@@ -595,13 +579,15 @@
                     v-model="searchQuery"
                     type="text"
                     placeholder="Search…"
-                    class="w-full rounded-sm bg-white py-2 pl-10 pr-3 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400/40 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder:text-gray-500"
+                    class="w-full py-2 pl-10 pr-3 text-sm"
+                    :class="tableExpandFieldClass"
                   />
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
                   <select
                     v-model="sortBy"
-                    class="min-w-[7.5rem] cursor-pointer rounded-sm bg-white px-3 py-2 text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400/40 dark:!bg-dashboard-card dark:text-gray-200"
+                    class="min-w-[7.5rem] cursor-pointer px-3 py-2 text-sm font-medium"
+                    :class="tableExpandFieldClass"
                     @change="handleSortByChange"
                   >
                     <option value="name">Name</option>
@@ -612,7 +598,8 @@
                   </select>
                   <button
                     type="button"
-                    class="hidden rounded-sm border border-transparent p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-100 lg:inline-flex"
+                    class="hidden lg:inline-flex"
+                    :class="tableExpandCloseClass"
                     aria-label="Exit expanded view"
                     @click="isFullscreen = false"
                   >
@@ -695,7 +682,7 @@
           <div
             :class="[
               isFullscreen
-                ? 'flex min-h-0 flex-1 flex-col overflow-hidden'
+                ? tableExpandBodyClass
                 : 'data-table-shell flex min-h-0 flex-1 flex-col overflow-hidden',
             ]"
           >
@@ -955,7 +942,7 @@
                         </div>
                       </div>
                       <div class="flex shrink-0 flex-col items-center gap-0.5" @click.stop>
-                        <div class="relative" data-inventory-item-menu>
+                        <div class="relative">
                           <button
                             type="button"
                             :data-item-actions-anchor="item.id"
@@ -1231,7 +1218,6 @@
                           <td v-if="canManageInventoryItems" class="dashboard-table__col-actions">
                             <div
                               class="relative inline-flex justify-end"
-                              data-inventory-item-menu
                               @click.stop
                             >
                               <button
@@ -2245,7 +2231,12 @@ import {
   isSubfolder,
   rollupFolderStats,
 } from '~/utils/inventory-folder-tree'
-import { computeFixedAnchoredMenuStyle, getVisibleMenuAnchorElement } from '~/utils/menuAnchor'
+import {
+  computeFixedAnchoredMenuStyle,
+  computeFixedMenuHorizontalStyle,
+  getVisibleMenuAnchorElement,
+  isInsideAnchoredMenu,
+} from '~/utils/menuAnchor'
 import { isNativePerfContext, scheduleNativeIdleWork } from '~/utils/capacitor-native-perf'
 import { computeFolderTotalValue } from '~/utils/inventory-folder-availability'
 import { getInventoryItemDisplayName } from '~/composables/useInventoryItemDisplay'
@@ -2303,6 +2294,13 @@ const { canManageInventoryItems, canManage, canViewProfitAndCost, canCreateInven
 const canShowProfitAndCost = computed(
   () => canViewProfitAndCost.value && folder.value?.trackProfit === true
 )
+
+const inventoryItemTableSkeletonColumns = [
+  { label: 'Product' },
+  { label: 'Qty', class: 'dashboard-table__col-numeric', bone: '2.5rem' },
+  { label: 'Price', class: 'dashboard-table__col-price', bone: '4rem' },
+  { label: 'Status', class: 'dashboard-table__col-status', bone: '4rem' },
+]
 const showStandaloneUnitCostField = computed(
   () => canShowProfitAndCost.value && !templateHasCostPriceField(folder.value?.template?.fields)
 )
@@ -2321,7 +2319,7 @@ const folder = ref<InventoryFolder | null>(null)
 const isLoadingFolder = ref(true)
 const isLoadingItems = ref(false)
 const { headerBtnClass, headerBtnLabelClass, pageWithFixedFooterClass } = useDashboardPageChrome()
-const { pageWithFooterClass } = useDashboardGridPagesChrome()
+const { pageWithFooterClass, tableExpandClass, tableExpandHeaderClass, tableExpandBodyClass, tableExpandCloseClass, tableExpandEyebrowClass, tableExpandTitleClass, tableExpandMetaClass, tableExpandFieldClass } = useDashboardGridPagesChrome()
 
 const inventoryBreadcrumbs = computed(() => {
   const crumbs = [{ label: 'Inventory', href: '/dashboard/inventory', icon: CubeIcon }]
@@ -2511,12 +2509,14 @@ const subcategoryQuickActionOptions = computed((): IosQuickActionOption[] => {
       value: 'add',
       label: 'Add',
       icon: PlusIcon,
+      trailing: 'add',
       action: openCreateSubcategoryModal,
     },
     {
       value: 'more',
       label: 'More',
       icon: EllipsisVerticalIcon,
+      trailing: 'more',
       action: () => {
         showSubcategoryMoreSheet.value = true
       },
@@ -2574,7 +2574,6 @@ function updateSubfolderMenuPosition() {
     return
   }
   subfolderMenuFixedStyle.value = computeFixedAnchoredMenuStyle(el.getBoundingClientRect(), {
-    menuWidth: 120,
     estimatedMenuHeight: 88,
     margin: 4,
     viewportPadding: 8,
@@ -2606,7 +2605,8 @@ watch(openSubfolderMenuId, (id) => {
 
   subfolderMenuOutsideHandler = (e: MouseEvent) => {
     const t = e.target as Node | null
-    if (t && (t as Element).closest?.('[data-inventory-subfolder-menu]')) return
+    if (isInsideAnchoredMenu(t)) return
+    if ((t as Element | null)?.closest?.('[data-folder-actions-anchor]')) return
     openSubfolderMenuId.value = null
   }
   setTimeout(() => {
@@ -2975,22 +2975,19 @@ function updateItemMenuPosition() {
     return
   }
   const r = el.getBoundingClientRect()
-  const vw = window.innerWidth
   const vh = window.innerHeight
   const viewportPadding = 8
   const sideGap = 6
-  const menuWidth = 176
   /** Enough for History + discount + edit + optional Duplicate + delete */
   const estimatedMenuHeight = canDuplicateByPlan.value ? 300 : 260
 
-  // Prefer opening beside the clicked action button (to the left on desktop right-edge tables).
-  let left = r.left - menuWidth - sideGap
-  // If not enough space on the left, open to the right.
-  if (left < viewportPadding) {
-    left = r.right + sideGap
-  }
-  // Keep inside viewport horizontally.
-  left = Math.max(viewportPadding, Math.min(left, vw - menuWidth - viewportPadding))
+  // Prefer opening beside the clicked action button (to the left on desktop
+  // right-edge tables), falling back to its right when that side is too tight.
+  const inline = computeFixedMenuHorizontalStyle({
+    rightEdge: r.left - sideGap,
+    fallbackLeftEdge: r.right + sideGap,
+    viewportPadding,
+  })
 
   // Vertically anchor around the clicked row/button.
   let top = r.top - 4
@@ -2999,7 +2996,9 @@ function updateItemMenuPosition() {
 
   itemMenuFixedStyle.value = {
     top: `${Math.round(top)}px`,
-    left: `${Math.round(left)}px`,
+    ...inline,
+    maxHeight: `${Math.round(Math.max(0, vh - top - viewportPadding))}px`,
+    overflowY: 'auto',
   }
 }
 
@@ -3028,7 +3027,8 @@ watch(openItemMenuId, (id) => {
 
   itemMenuOutsideHandler = (e: MouseEvent) => {
     const t = e.target as HTMLElement | null
-    if (t?.closest?.('[data-inventory-item-menu]')) return
+    if (isInsideAnchoredMenu(t)) return
+    if (t?.closest?.('[data-item-actions-anchor]')) return
     openItemMenuId.value = null
     removeItemMenuOutsideListener()
   }
@@ -3751,6 +3751,7 @@ const availabilityQuickActionOptions = computed((): IosQuickActionOption[] => {
       value: 'add',
       label: 'Add',
       icon: PlusIcon,
+      trailing: 'add',
       action: openAddItemModal,
     })
   } else {
@@ -3766,6 +3767,7 @@ const availabilityQuickActionOptions = computed((): IosQuickActionOption[] => {
     value: 'more',
     label: 'More',
     icon: EllipsisVerticalIcon,
+    trailing: 'more',
     action: () => {
       showProductMoreSheet.value = true
     },

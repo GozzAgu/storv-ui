@@ -2,6 +2,7 @@
   <button
     v-bind="delegatedAttrs"
     :type="type"
+    :data-btn-variant="variant"
     :disabled="disabled || loading"
     :class="[
       'group relative inline-flex items-center justify-center overflow-hidden border-0 font-semibold tracking-tight cursor-pointer transition-[background-color,color,box-shadow,transform,opacity] duration-200 ease-out',

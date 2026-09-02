@@ -21,7 +21,13 @@
         <h1 :class="titleClass">Categories</h1>
       </template>
       <template
-        v-if="!inventoryStore.loading && inventoryStore.folders.length > 0"
+        v-if="inventoryStore.loading && inventoryStore.folders.length === 0"
+        #description
+      >
+        <DashPageMetricsSkeleton :count="5" />
+      </template>
+      <template
+        v-else-if="!inventoryStore.loading && inventoryStore.folders.length > 0"
         #description
       >
         <DashboardPageMetrics
@@ -81,7 +87,12 @@
           </Button>
         </template>
       </template>
-      <template v-if="!inventoryStore.loading && inventoryStore.folders.length > 0" #filters>
+      <template v-if="inventoryStore.loading && inventoryStore.folders.length === 0" #filters>
+        <span class="dash-skeleton dash-skeleton--search" />
+        <span class="dash-skeleton dash-skeleton--select" />
+        <span class="dash-skeleton dash-skeleton--select" />
+      </template>
+      <template v-else-if="!inventoryStore.loading && inventoryStore.folders.length > 0" #filters>
         <DashboardToolbarSearch
           v-if="!isCapacitorIos"
           v-model="searchQuery"
@@ -251,8 +262,16 @@
         <IosQuickActionSkeleton :count="4" />
         <IosGroupedListSkeleton :count="10" />
       </template>
-      <div v-else :class="gridClass">
-        <div v-for="i in 12" :key="i" class="dash-skeleton dash-skeleton--grid-card" />
+      <DashTableSkeleton
+        v-else-if="effectiveFoldersViewMode === 'table'"
+        :columns="inventoryTableSkeletonColumns"
+        :rows="8"
+        leading="icon"
+        show-toolbar
+        aria-label="Loading categories"
+      />
+      <div v-else :class="[gridClass, 'inventory-categories-grid']">
+        <FolderCardSkeleton v-for="i in 8" :key="i" />
       </div>
     </template>
 
@@ -333,6 +352,7 @@
             :description="folderCategoryDescription(folder)"
             :type="folder.type"
             :item-count="folderDisplayStats(folder).itemCount"
+            :child-count="getChildFolders(folders, folder.id).length"
             :low-stock-count="folderDisplayStats(folder).lowStockCount"
             :total-value="folderDisplayStats(folder).totalValue"
             :has-serial-numbers="folder.hasSerialNumbers"
@@ -356,7 +376,7 @@
               />
             </template>
             <template v-if="canCreateInventoryFolders" #menu>
-              <div data-inventory-folder-menu>
+              <div>
                 <button
                   type="button"
                   :data-folder-actions-anchor="folder.id"
@@ -788,42 +808,16 @@
         </IosFormSection>
 
         <IosFormSection v-if="!isSubfolderDrawer" title="Table template">
-          <div class="flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <p :class="[drawerHintClass, 'mt-0']">Columns for products in this category.</p>
-            </div>
-            <div v-if="selectedTemplate" class="flex flex-wrap items-center gap-1.5">
-              <input
-                ref="folderTemplateExcelInput"
-                type="file"
-                accept=".xlsx,.xls,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                class="sr-only"
-                :disabled="importingFolderTemplate"
-                @change="handleImportFolderTemplateExcel"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                :icon="ArrowUpTrayIcon"
-                :loading="importingFolderTemplate"
-                :disabled="importingFolderTemplate"
-                :extra-class="headerBtnClass"
-                @click="triggerFolderTemplateExcelPicker"
-              >
-                Import Excel
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                :extra-class="headerBtnClass"
-                @click="handleAddField"
-              >
-                Add field
-              </Button>
-            </div>
-          </div>
+          <p :class="[drawerHintClass, 'mt-0']">Columns for products in this category.</p>
+          <input
+            v-if="selectedTemplate"
+            ref="folderTemplateExcelInput"
+            type="file"
+            accept=".xlsx,.xls,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            class="sr-only"
+            :disabled="importingFolderTemplate"
+            @change="handleImportFolderTemplateExcel"
+          />
 
           <div
             v-if="selectedTemplate && editableFields.length > 0"
@@ -899,7 +893,28 @@
           <div v-else-if="selectedTemplate" :class="[emptyStateClass, '!py-6']">
             <Squares2X2Icon class="mb-2 h-7 w-7 text-gray-400 dark:text-gray-500" />
             <p class="text-xs font-medium text-gray-700 dark:text-gray-300">No fields yet</p>
-            <p :class="[drawerHintClass, 'mt-0.5']">Add a field or import from Excel</p>
+            <p :class="[drawerHintClass, 'mt-0.5']">Add a column or import from Excel</p>
+          </div>
+
+          <div v-if="selectedTemplate" class="ios-form-add-stack">
+            <button type="button" class="ios-form-add-row" @click="handleAddField">
+              <PlusIcon class="ios-form-add-row__glyph" aria-hidden="true" />
+              Add column
+            </button>
+            <button
+              type="button"
+              class="ios-form-add-row ios-form-add-row--secondary"
+              :disabled="importingFolderTemplate"
+              @click="triggerFolderTemplateExcelPicker"
+            >
+              <ArrowPathIcon
+                v-if="importingFolderTemplate"
+                class="ios-form-add-row__glyph animate-spin"
+                aria-hidden="true"
+              />
+              <ArrowUpTrayIcon v-else class="ios-form-add-row__glyph" aria-hidden="true" />
+              {{ importingFolderTemplate ? 'Importing…' : 'Import Excel' }}
+            </button>
           </div>
         </IosFormSection>
       </IosForm>
@@ -1303,6 +1318,7 @@ import {
   DocumentDuplicateIcon,
   EllipsisVerticalIcon,
   PlusIcon,
+  ArrowPathIcon,
   ExclamationTriangleIcon,
   Squares2X2Icon,
   TableCellsIcon,
@@ -1363,7 +1379,11 @@ import {
 } from '~/utils/inventory-folder-tree'
 import { usePreferences } from '~/composables/usePreferences'
 import { useAppToast } from '~/composables/useAppToast'
-import { getVisibleMenuAnchorElement, computeFixedAnchoredMenuStyle } from '~/utils/menuAnchor'
+import {
+  getVisibleMenuAnchorElement,
+  computeFixedAnchoredMenuStyle,
+  isInsideAnchoredMenu,
+} from '~/utils/menuAnchor'
 import { parseTemplateFieldsFromExcelArrayBuffer } from '~/utils/inventory-template-from-excel'
 import {
   COST_PRICE_FIELD_NAME,
@@ -1446,6 +1466,7 @@ const categoryQuickActionOptions = computed((): IosQuickActionOption[] => {
       value: 'new',
       label: 'New',
       icon: PlusIcon,
+      trailing: 'add',
       action: openCreateFolderModal,
     })
   }
@@ -1454,6 +1475,7 @@ const categoryQuickActionOptions = computed((): IosQuickActionOption[] => {
     value: 'more',
     label: 'More',
     icon: EllipsisVerticalIcon,
+    trailing: 'more',
     action: () => {
       showInventoryMoreSheet.value = true
     },
@@ -1537,7 +1559,6 @@ function updateFolderMenuPosition() {
   const r = el.getBoundingClientRect()
   /** Enough for Duplicate + Edit + Delete (or Edit + Delete only) */
   folderMenuFixedStyle.value = computeFixedAnchoredMenuStyle(r, {
-    menuWidth: 120,
     estimatedMenuHeight: 132,
     margin: 4,
     viewportPadding: 8,
@@ -1569,7 +1590,8 @@ watch(openFolderMenuId, (id) => {
 
   folderMenuOutsideHandler = (e: MouseEvent) => {
     const t = e.target as HTMLElement | null
-    if (t?.closest?.('[data-inventory-folder-menu]')) return
+    if (isInsideAnchoredMenu(t)) return
+    if (t?.closest?.('[data-folder-actions-anchor]')) return
     openFolderMenuId.value = null
     removeFolderMenuOutsideListener()
   }
@@ -1711,6 +1733,33 @@ const { isCapacitorIos } = useIsCapacitorIos()
 const effectiveFoldersViewMode = computed(() =>
   isCapacitorIos.value ? 'grid' : foldersViewMode.value
 )
+
+const inventoryTableSkeletonColumns = computed(() => {
+  const cols: { label: string; class?: string; bone?: string }[] = [
+    { label: 'Category' },
+    { label: 'Type', class: 'hidden sm:table-cell dashboard-table__col-type', bone: '4.5rem' },
+    { label: 'Products', class: 'dashboard-table__col-numeric', bone: '2.5rem' },
+    { label: 'Value', class: 'hidden sm:table-cell dashboard-table__col-numeric', bone: '4rem' },
+  ]
+  if (canViewProfitAndCost.value) {
+    cols.push({
+      label: 'Profit',
+      class: 'hidden md:table-cell dashboard-table__col-numeric',
+      bone: '4rem',
+    })
+  }
+  cols.push(
+    {
+      label: 'Tracking',
+      class: 'hidden md:table-cell dashboard-table__col-compact-status',
+      bone: '3.5rem',
+    }
+  )
+  if (!isStaff.value) {
+    cols.push({ label: 'Departments', class: 'hidden lg:table-cell', bone: '5rem' })
+  }
+  return cols
+})
 
 watch(isStaff, (staff) => {
   if (staff) selectedDepartmentId.value = ''

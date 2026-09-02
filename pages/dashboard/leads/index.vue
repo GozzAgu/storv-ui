@@ -101,7 +101,13 @@
         <h1 :class="pageTitleClass">Sales leads</h1>
       </template>
       <template
-        v-if="canAccessLeadsPlan && !salesLeadsStore.loading && filteredLeads.length > 0"
+        v-if="canAccessLeadsPlan && salesLeadsStore.loading && salesLeadsStore.leads.length === 0"
+        #description
+      >
+        <DashPageMetricsSkeleton :count="2" />
+      </template>
+      <template
+        v-else-if="canAccessLeadsPlan && !salesLeadsStore.loading && filteredLeads.length > 0"
         #description
       >
         <DashboardPageMetrics :metrics="leadHeaderMetrics" aria-label="Lead summary" />
@@ -171,18 +177,22 @@
         />
 
         <div :class="tableShellFlexClass">
-          <div
+          <DashTableSkeleton
             v-if="salesLeadsStore.loading && salesLeadsStore.leads.length === 0"
-            class="p-6 sm:p-8"
-          >
-            <div class="space-y-3">
-              <div
-                v-for="i in 5"
-                :key="i"
-                class="h-10 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"
-              />
-            </div>
-          </div>
+            :columns="[
+              { label: 'Customer', lines: 2 },
+              { label: 'Product' },
+              { label: 'Est. value', bone: '4.5rem' },
+              { label: 'Source', bone: '4rem' },
+              { label: 'Status', class: 'dashboard-table__col-status', bone: '5.5rem' },
+              { label: 'Updated', bone: '6rem' },
+              { label: 'Actions', class: 'dashboard-table__col-actions', bone: '3.5rem' },
+            ]"
+            :rows="8"
+            leading="none"
+            flush
+            aria-label="Loading leads"
+          />
 
           <div v-else-if="salesLeadsStore.error" class="px-4 py-10 text-center sm:px-6">
             <p class="text-sm font-medium text-red-600 dark:text-red-400">Could not load leads.</p>
@@ -302,30 +312,22 @@
 
     <CreateLeadModal v-model="showCreateModal" @created="onLeadCreated" />
 
-    <Teleport to="body">
-      <div
-        v-if="openLeadMenuId && leadForOpenMenu && leadMenuFixedStyle"
-        data-lead-menu
-        role="menu"
-        class="fixed z-[1000] min-w-[10rem] overflow-hidden rounded-lg bg-white/95 py-1 shadow-lg backdrop-blur-xl dark:bg-slate-950/95"
-        :style="leadMenuFixedStyle"
-        @click.stop
-      >
-        <button
-          type="button"
-          role="menuitem"
-          class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85"
-          @click="
-            () => {
-              navigateTo(dashPath(`/leads/${leadForOpenMenu.id}`))
-              closeLeadMenu()
-            }
-          "
-        >
-          View lead
-        </button>
-      </div>
-    </Teleport>
+    <IosContextMenu
+      :open="Boolean(openLeadMenuId && leadForOpenMenu && leadMenuFixedStyle)"
+      :style="leadMenuFixedStyle"
+      menu-id="lead"
+    >
+      <IosContextMenuItem
+        label="View lead"
+        :icon="InboxIcon"
+        @click="
+          () => {
+            navigateTo(dashPath(`/leads/${leadForOpenMenu!.id}`))
+            closeLeadMenu()
+          }
+        "
+      />
+    </IosContextMenu>
   </div>
 </template>
 
@@ -345,6 +347,8 @@ import Button from '~/components/ui/Button.vue'
 import FeatureGateCard from '~/components/subscription/FeatureGateCard.vue'
 import CreateLeadModal from '~/components/leads/CreateLeadModal.vue'
 import LeadStatusBadge from '~/components/leads/LeadStatusBadge.vue'
+import IosContextMenu from '~/components/ios/IosContextMenu.vue'
+import IosContextMenuItem from '~/components/ios/IosContextMenuItem.vue'
 import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
 import IosQuickActionBar, { type IosQuickActionOption } from '~/components/ios/IosQuickActionBar.vue'
 import IosTransactionListSkeleton from '~/components/ios/IosTransactionListSkeleton.vue'
@@ -393,6 +397,7 @@ const iosLeadQuickActions = computed((): IosQuickActionOption[] => [
     value: 'add',
     label: 'Add lead',
     icon: PlusIcon,
+    trailing: 'add',
     action: () => {
       showCreateModal.value = true
     },
@@ -469,7 +474,6 @@ const {
   closeMenu: closeLeadMenu,
 } = useAnchoredRowMenu({
   anchorAttr: 'data-lead-actions-anchor',
-  menuSelector: '[data-lead-menu]',
 })
 
 const leadForOpenMenu = computed(() => {

@@ -1,5 +1,6 @@
 <template>
   <AuthShell
+    compact
     content-width-class="max-w-[440px]"
     mobile-line="Join Storvv: your store workspace, organized."
     panel-title="Open a workspace built for multi-branch retail."
@@ -7,8 +8,8 @@
   >
     <AuthPageHeader
       v-if="!registrationComplete"
-      title="Sign up"
-      subtitle="Create your account to manage inventory, sales, and branches."
+      title="Create your account"
+      subtitle="Set up a workspace for stock, sales, and branches."
     />
 
     <AuthPageHeader
@@ -55,10 +56,10 @@
         <AuthField
           v-model="form.name"
           input-id="business-name"
-          label="Business name"
+          label="Your business name"
           type="text"
           autocomplete="organization"
-          placeholder="Your business or store name"
+          placeholder="Your business name"
           :icon="BuildingStorefrontIcon"
           required
         />
@@ -69,7 +70,7 @@
           label="Email"
           type="email"
           autocomplete="email"
-          placeholder="Your email"
+          placeholder="Enter your email"
           :icon="EnvelopeIcon"
           required
         />
@@ -86,7 +87,7 @@
           required
         >
           <template #hint>
-            <div v-if="form.password.length > 0" class="mt-2.5 space-y-1.5" aria-live="polite">
+            <div v-if="form.password.length > 0" class="mt-1.5 space-y-1" aria-live="polite">
               <div class="flex items-center justify-between gap-2">
                 <span class="text-[10px] font-medium text-gray-500 dark:text-gray-400"
                   >Password strength</span
@@ -118,7 +119,7 @@
                 {{ strengthHint }}
               </p>
             </div>
-            <p class="mt-1.5 text-[10px] leading-snug text-gray-500 dark:text-gray-400">
+            <p class="mt-1 text-[10px] leading-snug text-gray-500 dark:text-gray-400">
               At least {{ PASSWORD_MIN_LENGTH }} characters, one number, and one uppercase letter.
             </p>
           </template>
@@ -171,7 +172,7 @@
         </div>
 
         <AuthPrimaryButton
-          label="Sign up"
+          label="Sign Up"
           :loading="isLoading"
           :disabled="
             isLoading ||
@@ -182,7 +183,7 @@
 
       <p class="auth-auth-footer-link">
         Already have an account?
-        <NuxtLink to="/signin">Log in</NuxtLink>
+        <NuxtLink to="/signin">Log In</NuxtLink>
       </p>
       </div>
     </AuthCard>

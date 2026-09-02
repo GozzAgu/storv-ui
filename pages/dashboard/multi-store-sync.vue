@@ -331,25 +331,12 @@
           </template>
         </DataTableToolbar>
         <div class="p-3 sm:p-4" :class="isCapacitorIos ? '!p-0' : ''">
-          <div v-if="transferHistory.length === 0" :class="isCapacitorIos ? '' : stateCardClass">
-            <template v-if="isCapacitorIos">
-              <DashboardTableEmptyState
-                :icon="ArrowsRightLeftIcon"
-                title="No transfer history"
-                description="Completed and pending transfers between branches will appear here."
-              />
-            </template>
-            <template v-else>
-            <ArrowsRightLeftIcon
-              class="mx-auto mb-3 h-8 w-8 text-[#4876c7] dark:text-[#9ab5e3]"
-              stroke-width="1.5"
-            />
-            <p :class="['dash-state-card__title', pageTitleClass, '!text-sm']">No transfer history</p>
-            <p :class="['dash-state-card__desc', cardDescClass]">
-              Completed and pending transfers between branches will appear here.
-            </p>
-            </template>
-          </div>
+          <DashboardTableEmptyState
+            v-if="transferHistory.length === 0"
+            :icon="ArrowsRightLeftIcon"
+            title="No transfer history"
+            description="Completed and pending transfers between branches will appear here."
+          />
 
           <div v-else-if="isCapacitorIos" class="ios-receipt-transaction-list">
             <IosReceiptTransactionRow
@@ -465,86 +452,68 @@
         </template>
       </Modal>
 
-      <Teleport to="body">
-        <div
-          v-if="openTransferMenuId && transferForOpenMenu && transferMenuFixedStyle"
-          data-transfer-menu
-          role="menu"
-          class="fixed z-[1000] min-w-[11rem] overflow-hidden rounded-lg bg-white/95 py-1 shadow-lg backdrop-blur-xl dark:bg-slate-950/95"
-          :style="transferMenuFixedStyle"
-          @click.stop
-        >
-          <template v-if="transferForOpenMenu.status === 'pending_approval'">
-            <button
-              type="button"
-              role="menuitem"
-              class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85"
-              @click="
-                () => {
-                  approveTransfer(transferForOpenMenu)
-                  closeTransferMenu()
-                }
-              "
-            >
-              Approve
-            </button>
-            <button
-              type="button"
-              role="menuitem"
-              class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
-              @click="
-                () => {
-                  cancelTransfer(transferForOpenMenu)
-                  closeTransferMenu()
-                }
-              "
-            >
-              Cancel
-            </button>
-          </template>
-          <template v-else-if="transferForOpenMenu.status === 'in_transit'">
-            <button
-              type="button"
-              role="menuitem"
-              class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85"
-              @click="
-                () => {
-                  openTrackingModal(transferForOpenMenu)
-                  closeTransferMenu()
-                }
-              "
-            >
-              Tracking
-            </button>
-            <button
-              type="button"
-              role="menuitem"
-              class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85"
-              @click="
-                () => {
-                  completeTransfer(transferForOpenMenu)
-                  closeTransferMenu()
-                }
-              "
-            >
-              Complete
-            </button>
-            <button
-              type="button"
-              role="menuitem"
-              class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
-              @click="
-                () => {
-                  cancelTransfer(transferForOpenMenu)
-                  closeTransferMenu()
-                }
-              "
-            >
-              Cancel
-            </button>
-          </template>
-        </div>
-      </Teleport>
+      <IosContextMenu
+        :open="Boolean(openTransferMenuId && transferForOpenMenu && transferMenuFixedStyle)"
+        :style="transferMenuFixedStyle"
+        menu-id="transfer"
+      >
+        <template v-if="transferForOpenMenu?.status === 'pending_approval'">
+          <IosContextMenuItem
+            label="Approve"
+            :icon="CheckCircleIcon"
+            @click="
+              () => {
+                approveTransfer(transferForOpenMenu)
+                closeTransferMenu()
+              }
+            "
+          />
+          <IosContextMenuItem
+            label="Cancel"
+            :icon="XCircleIcon"
+            danger
+            @click="
+              () => {
+                cancelTransfer(transferForOpenMenu)
+                closeTransferMenu()
+              }
+            "
+          />
+        </template>
+        <template v-else-if="transferForOpenMenu?.status === 'in_transit'">
+          <IosContextMenuItem
+            label="Tracking"
+            :icon="TruckIcon"
+            @click="
+              () => {
+                openTrackingModal(transferForOpenMenu)
+                closeTransferMenu()
+              }
+            "
+          />
+          <IosContextMenuItem
+            label="Complete"
+            :icon="CheckCircleIcon"
+            @click="
+              () => {
+                completeTransfer(transferForOpenMenu)
+                closeTransferMenu()
+              }
+            "
+          />
+          <IosContextMenuItem
+            label="Cancel"
+            :icon="XCircleIcon"
+            danger
+            @click="
+              () => {
+                cancelTransfer(transferForOpenMenu)
+                closeTransferMenu()
+              }
+            "
+          />
+        </template>
+      </IosContextMenu>
       </div>
     </template>
   </div>
@@ -554,13 +523,17 @@
 import { ref, computed, onMounted } from 'vue'
 import {
   ArrowsRightLeftIcon,
+  CheckCircleIcon,
   ExclamationTriangleIcon,
   ArrowDownTrayIcon,
   EllipsisVerticalIcon,
   TruckIcon,
+  XCircleIcon,
 } from '~/utils/app-icons'
 import Button from '~/components/ui/Button.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
+import IosContextMenu from '~/components/ios/IosContextMenu.vue'
+import IosContextMenuItem from '~/components/ios/IosContextMenuItem.vue'
 import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
 import IosQuickActionBar, { type IosQuickActionOption } from '~/components/ios/IosQuickActionBar.vue'
 import IosReceiptTransactionRow, {
@@ -625,7 +598,6 @@ const {
   transferItemClass,
   transferActionsClass,
   transferCardActionRowClass,
-  stateCardClass,
   statusBadgeClass,
 } = useDashboardMultiStoreChrome()
 
@@ -1839,8 +1811,6 @@ const {
   closeMenu: closeTransferMenu,
 } = useAnchoredRowMenu({
   anchorAttr: 'data-transfer-actions-anchor',
-  menuSelector: '[data-transfer-menu]',
-  menuWidth: 176,
   estimatedMenuHeight: 132,
 })
 

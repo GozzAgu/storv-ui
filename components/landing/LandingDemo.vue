@@ -109,7 +109,7 @@ const previewNav: Array<{ name: string; iconKey: DashboardNavIconKey; active?: b
 .landing-demo {
   position: relative;
   padding: clamp(4rem, 9vw, 7rem) 1.25rem;
-  background: linear-gradient(180deg, #f8fafc 0%, #eef2f8 100%);
+  background: #f5f5f7;
 }
 
 .landing-demo__inner {
@@ -132,7 +132,7 @@ const previewNav: Array<{ name: string; iconKey: DashboardNavIconKey; active?: b
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #143f8d;
+  color: rgb(26 21 35 / 0.55);
 }
 
 .landing-demo__title {
@@ -145,7 +145,7 @@ const previewNav: Array<{ name: string; iconKey: DashboardNavIconKey; active?: b
 }
 
 .landing-demo__accent {
-  color: var(--landing-section-accent, #143f8d);
+  color: var(--landing-section-accent, #1a1523);
   font-size: inherit;
   font-weight: inherit;
   line-height: inherit;
@@ -179,7 +179,7 @@ const previewNav: Array<{ name: string; iconKey: DashboardNavIconKey; active?: b
   content: '✓';
   flex-shrink: 0;
   font-weight: 700;
-  color: #143f8d;
+  color: rgb(26 21 35 / 0.45);
 }
 
 .landing-demo__actions {
@@ -194,20 +194,12 @@ const previewNav: Array<{ name: string; iconKey: DashboardNavIconKey; active?: b
   padding: 0.8125rem 1.75rem;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #fff !important;
-  background: #143f8d !important;
-  box-shadow: 0 4px 20px rgba(20, 63, 141, 0.25);
-}
-
-.landing-demo__cta:hover {
-  background: #0f357a !important;
-  color: #fff !important;
 }
 
 .landing-demo__secondary {
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--landing-section-accent, #143f8d);
+  color: var(--landing-section-accent, #1a1523);
 }
 
 .landing-demo__preview {
@@ -217,10 +209,10 @@ const previewNav: Array<{ name: string; iconKey: DashboardNavIconKey; active?: b
 
 .landing-demo__window {
   width: min(100%, 24rem);
-  border-radius: 0.75rem;
+  border-radius: 1.5rem;
   overflow: hidden;
-  box-shadow: 0 24px 48px rgba(20, 63, 141, 0.15);
-  border: 1px solid rgba(20, 63, 141, 0.12);
+  box-shadow: none;
+  border: 0;
   background: #fff;
 }
 
@@ -229,8 +221,8 @@ const previewNav: Array<{ name: string; iconKey: DashboardNavIconKey; active?: b
   align-items: center;
   gap: 0.35rem;
   padding: 0.5rem 0.75rem;
-  background: #f1f5f9;
-  border-bottom: 1px solid rgba(20, 63, 141, 0.08);
+  background: #f5f5f7;
+  border-bottom: 0;
 }
 
 .landing-demo__window-bar span:nth-child(-n + 3) {
@@ -258,7 +250,7 @@ const previewNav: Array<{ name: string; iconKey: DashboardNavIconKey; active?: b
   gap: 0.35rem;
   width: 2.75rem;
   padding: 0.65rem 0.45rem;
-  background: #0f172a;
+  background: #1a1523;
 }
 
 .landing-demo__nav-item {
@@ -273,8 +265,8 @@ const previewNav: Array<{ name: string; iconKey: DashboardNavIconKey; active?: b
 }
 
 .landing-demo__nav-item--active {
-  background: rgba(72, 118, 199, 0.22);
-  color: #dbeafe;
+  background: rgb(255 255 255 / 0.12);
+  color: #ffffff;
 }
 
 .landing-demo__main {
@@ -287,12 +279,12 @@ const previewNav: Array<{ name: string; iconKey: DashboardNavIconKey; active?: b
   justify-content: space-between;
   padding: 0.5rem 0;
   font-size: 0.9375rem;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid #f4f4f5;
 }
 
 .landing-demo__stat-value {
   font-weight: 700;
-  color: #143f8d;
+  color: #1a1523;
 }
 
 .landing-demo__stat-label {
@@ -312,8 +304,8 @@ const previewNav: Array<{ name: string; iconKey: DashboardNavIconKey; active?: b
   font-size: 0.8125rem;
   padding: 0.5rem;
   border-radius: 0.375rem;
-  background: #f8fafc;
-  color: #0f172a;
+  background: #f5f5f7;
+  color: #1a1523;
 }
 
 .landing-demo__pill {
@@ -328,5 +320,18 @@ const previewNav: Array<{ name: string; iconKey: DashboardNavIconKey; active?: b
 .landing-demo__pill--warn {
   background: #fffbeb;
   color: #b45309;
+}
+
+html.dark .landing-demo {
+  background: #080808;
+}
+
+html.dark .landing-demo__stat-value,
+html.dark .landing-demo__row {
+  color: #ffffff;
+}
+
+html.dark .landing-demo__nav {
+  background: #141414;
 }
 </style>

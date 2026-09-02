@@ -12,8 +12,8 @@ html.capacitor-ios.capacitor-native .ios-quick-actions--card {
   overflow: visible;
   border-radius: var(--ios-home-radius, 20px);
   background: var(--ios-home-card, #fff);
-  box-shadow: var(--ios-home-card-shadow);
-  padding: 0.75rem 0.5rem 0.625rem;
+  box-shadow: var(--ios-action-card-shadow);
+  padding: 0.625rem 0.5rem 0.5rem;
 }
 
 html.capacitor-ios.capacitor-native.dark .ios-quick-actions--card {
@@ -61,25 +61,26 @@ html.capacitor-ios.capacitor-native .ios-quick-actions__icon-wrap {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.875rem;
-  height: 2.875rem;
+  width: 2.5rem;
+  height: 2.5rem;
   border-radius: 9999px;
   background: var(--ios-fill-tertiary);
   color: var(--ios-label);
+  box-shadow: none;
   transition:
     background 0.15s ease,
-    color 0.15s ease,
-    box-shadow 0.15s ease;
+    color 0.15s ease;
 }
 
 html.capacitor-ios.capacitor-native.dark .ios-quick-actions__icon-wrap {
   background: rgb(255 255 255 / 0.08);
+  box-shadow: none;
 }
 
 html.capacitor-ios.capacitor-native .ios-quick-actions__item--active .ios-quick-actions__icon-wrap {
   background: var(--ios-label);
   color: var(--ios-home-bg, #f3f3f5);
-  box-shadow: 0 2px 10px rgb(0 0 0 / 0.08);
+  box-shadow: none;
 }
 
 html.capacitor-ios.capacitor-native.dark

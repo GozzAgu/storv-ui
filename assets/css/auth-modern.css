@@ -359,7 +359,7 @@ html.dark .auth-shell--modern .auth-field-input::placeholder {
   color: var(--auth-modern-ink);
 }
 
-.auth-checkbox__label :deep(a) {
+.auth-checkbox__label a {
   font-weight: 600;
   color: var(--auth-modern-ink);
   text-decoration: underline;
@@ -459,6 +459,13 @@ html.dark .auth-primary-btn__spinner {
   flex-direction: column;
   gap: 0.875rem;
   margin-top: 0.125rem;
+}
+
+.auth-shell--modern .auth-form-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
 /* ── Native overrides ── */

@@ -92,7 +92,13 @@
         <h1 :class="pageTitleClass">Stock loans</h1>
       </template>
       <template
-        v-if="canAccessByRole && canAccessSellerLoansPlan && !sellerLoansStore.loading && sellerLoansStore.loans.length > 0"
+        v-if="canAccessByRole && canAccessSellerLoansPlan && sellerLoansStore.loading && sellerLoansStore.loans.length === 0"
+        #description
+      >
+        <DashPageMetricsSkeleton :count="4" />
+      </template>
+      <template
+        v-else-if="canAccessByRole && canAccessSellerLoansPlan && !sellerLoansStore.loading && sellerLoansStore.loans.length > 0"
         #description
       >
         <DashboardPageMetrics :metrics="loanHeaderMetrics" aria-label="Loan summary" />
@@ -149,22 +155,20 @@
         </nav>
 
         <div :class="tableShellFlexClass">
-          <div
+          <DashTableSkeleton
             v-if="sellerLoansStore.loading && sellerLoansStore.loans.length === 0"
-            class="p-6 sm:p-8"
-          >
-            <div class="space-y-3">
-              <div v-for="i in 6" :key="i" class="flex items-center gap-3">
-                <div
-                  class="h-9 w-9 shrink-0 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"
-                />
-                <div class="min-w-0 flex-1 space-y-2">
-                  <div class="h-3 w-1/3 animate-pulse rounded bg-gray-200 dark:bg-white/10" />
-                  <div class="h-3 w-2/3 animate-pulse rounded bg-gray-200 dark:bg-white/10" />
-                </div>
-              </div>
-            </div>
-          </div>
+            :columns="[
+              { label: 'Borrower', lines: 2 },
+              { label: 'Units', bone: '2.5rem' },
+              { label: 'Started', bone: '5.5rem' },
+              { label: 'Status', class: 'dashboard-table__col-status', bone: '4.5rem' },
+              { label: 'Actions', class: 'dashboard-table__col-actions', bone: '4.5rem' },
+            ]"
+            :rows="8"
+            leading="none"
+            flush
+            aria-label="Loading stock loans"
+          />
 
           <div v-else-if="sellerLoansStore.error" class="px-4 py-10 text-center sm:px-6">
             <p class="text-sm font-medium text-red-600 dark:text-red-400">
@@ -280,7 +284,6 @@
                       <template v-if="loan.status === 'active'">
                         <div
                           class="inline-flex justify-end"
-                          data-stock-loan-actions-menu
                           @click.stop
                         >
                           <button
@@ -409,33 +412,22 @@
       </template>
     </Modal>
 
-    <Teleport to="body">
-      <div
-        v-if="openLoanMenuId && loanForOpenMenu && loanMenuFixedStyle"
-        data-stock-loan-actions-menu
-        class="frosted-glass fixed z-[1000] min-w-[11rem] rounded-sm py-0.5 shadow-sm"
-        :style="loanMenuFixedStyle"
-        role="menu"
-        @click.stop
-      >
-        <button
-          type="button"
-          role="menuitem"
-          class="flex w-full items-center gap-1.5 px-2.5 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800/85"
-          @click="handleLoanMenuMarkSold"
-        >
-          Mark sold (borrower)
-        </button>
-        <button
-          type="button"
-          role="menuitem"
-          class="flex w-full items-center gap-1.5 px-2.5 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800/85"
-          @click="handleLoanMenuReturnToStore"
-        >
-          Return to store
-        </button>
-      </div>
-    </Teleport>
+    <IosContextMenu
+      :open="Boolean(openLoanMenuId && loanForOpenMenu && loanMenuFixedStyle)"
+      :style="loanMenuFixedStyle"
+      menu-id="stock-loan"
+    >
+      <IosContextMenuItem
+        label="Mark sold (borrower)"
+        :icon="CheckCircleIcon"
+        @click="handleLoanMenuMarkSold"
+      />
+      <IosContextMenuItem
+        label="Return to store"
+        :icon="ArrowUturnLeftIcon"
+        @click="handleLoanMenuReturnToStore"
+      />
+    </IosContextMenu>
   </div>
 </template>
 
@@ -455,6 +447,8 @@ import {
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
+import IosContextMenu from '~/components/ios/IosContextMenu.vue'
+import IosContextMenuItem from '~/components/ios/IosContextMenuItem.vue'
 import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
 import IosQuickActionBar, { type IosQuickActionOption } from '~/components/ios/IosQuickActionBar.vue'
 import IosTransactionListSkeleton from '~/components/ios/IosTransactionListSkeleton.vue'
@@ -469,7 +463,11 @@ import { useStoresStore } from '~/stores/stores'
 import { usePermissions } from '~/composables/usePermissions'
 import { useSubscriptionFeatures } from '~/composables/useSubscriptionFeatures'
 import { useAppToast } from '~/composables/useAppToast'
-import { getVisibleMenuAnchorElement, computeFixedAnchoredMenuStyle } from '~/utils/menuAnchor'
+import {
+  getVisibleMenuAnchorElement,
+  computeFixedAnchoredMenuStyle,
+  isInsideAnchoredMenu,
+} from '~/utils/menuAnchor'
 
 definePageMeta({
   layout: 'dashboard',
@@ -727,7 +725,6 @@ function updateLoanMenuPosition() {
   }
   const r = el.getBoundingClientRect()
   loanMenuFixedStyle.value = computeFixedAnchoredMenuStyle(r, {
-    menuWidth: 176,
     estimatedMenuHeight: 88,
     margin: 4,
     viewportPadding: 8,
@@ -759,7 +756,8 @@ watch(openLoanMenuId, (id) => {
 
   loanMenuOutsideHandler = (e: MouseEvent) => {
     const t = e.target as HTMLElement | null
-    if (t?.closest?.('[data-stock-loan-actions-menu]')) return
+    if (isInsideAnchoredMenu(t)) return
+    if (t?.closest?.('[data-stock-loan-actions-anchor]')) return
     openLoanMenuId.value = null
     removeLoanMenuOutsideListener()
   }

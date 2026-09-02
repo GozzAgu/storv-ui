@@ -53,11 +53,11 @@ html.capacitor-ios.capacitor-native.dark .ios-analytics-card {
 }
 
 html.capacitor-ios.capacitor-native .ios-analytics-card--padded {
-  padding: 0.875rem;
+  padding: var(--ios-card-pad, 0.75rem);
 }
 
 html.capacitor-ios.capacitor-native .ios-analytics-card--flush .ios-analytics-card__head {
-  padding: 0.75rem 0.875rem;
+  padding: 0.625rem 0.75rem;
   border-bottom: 1px solid var(--ios-separator);
 }
 
@@ -251,16 +251,4 @@ html.capacitor-ios.capacitor-native .ios-analytics-skeleton__chart {
 html.capacitor-ios.capacitor-native .ios-home-skeleton--bar {
   height: 2.25rem;
   border-radius: 0.625rem;
-}
-
-html.capacitor-ios.capacitor-native .ios-analytics-metric--warning .ios-home-metric__value {
-  color: #ff9500;
-}
-
-html.capacitor-ios.capacitor-native .ios-analytics-metric--danger .ios-home-metric__value {
-  color: #ff3b30;
-}
-
-html.capacitor-ios.capacitor-native .ios-analytics-metric--success .ios-home-metric__value {
-  color: #34c759;
 }

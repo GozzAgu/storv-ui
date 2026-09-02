@@ -2,7 +2,6 @@
   <SidePanel
     :model-value="modelValue"
     title="Quick Sale"
-    subtitle="Scan or search items, then complete payment"
     :content-padding="quickSaleContentPadding"
     size="lg"
     @update:model-value="(value: boolean) => emit('update:modelValue', value)"
@@ -220,10 +219,21 @@
           <p :class="sectionLabelClass">Products · {{ selectedFolder.name }}</p>
           <DashboardDrawerSearch v-model="itemSearchQuery" placeholder="Search products…" />
 
-          <div v-if="loadingFolderItems" class="flex items-center justify-center py-6">
+          <div v-if="loadingFolderItems && isCapacitorIos" class="flex items-center justify-center py-6">
             <div
               class="inline-block h-5 w-5 animate-spin rounded-full border-b-2 border-gray-500"
             />
+          </div>
+          <div v-else-if="loadingFolderItems" :class="pickListClass">
+            <div :class="[pickListScrollClass, 'dash-drawer-pick-scroll--chain max-h-48']">
+              <div v-for="i in 5" :key="i" :class="pickRowClass">
+                <div class="min-w-0 flex-1 space-y-1.5">
+                  <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-title" />
+                  <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-meta" />
+                </div>
+                <span class="dash-skeleton dash-skeleton--line" style="width: 3.5rem" />
+              </div>
+            </div>
           </div>
           <div v-else-if="availableFolderItems.length === 0" :class="[emptyStateClass, '!min-h-[6rem]']">
             <p class="text-xs text-gray-500 dark:text-gray-400">
@@ -295,7 +305,7 @@
               <div class="flex-1">
                 <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ item.name }}</p>
                 <p class="text-xs text-gray-600 dark:text-gray-400">
-                  Qty: {{ item.quantity }} × {{ currencySymbol }}{{ formatCurrency(item.price) }}
+                  Qty: {{ item.quantity }} × {{ formatCurrency(item.price) }}
                 </p>
               </div>
               <div class="flex items-center gap-3">
@@ -466,7 +476,7 @@
           <div class="flex items-center justify-between">
             <span class="text-lg font-semibold text-gray-900 dark:text-gray-100">Total</span>
             <span class="text-2xl font-bold text-gray-700 dark:text-gray-300">
-              {{ currencySymbol }}{{ formatCurrency(cartTotal) }}
+              {{ formatCurrency(cartTotal) }}
             </span>
           </div>
         </div>
@@ -474,7 +484,7 @@
 
     <template #footer>
       <IosDrawerActions
-        :primary-label="`Complete Sale (${currencySymbol}${formatCurrency(cartTotal)})`"
+        :primary-label="`Complete Sale (${formatCurrency(cartTotal)})`"
         :primary-loading="isProcessing"
         :primary-disabled="!canCompleteQuickSale"
         @cancel="handleCancel"
@@ -851,7 +861,7 @@ function getItemStockLabel(item: InventoryItem): number | null {
 
 function getItemPriceLabel(item: InventoryItem): string {
   const price = parseFloat(getItemField(item, 'price') || '0')
-  return `${currencySymbol.value}${formatCurrency(price)}`
+  return formatCurrency(price)
 }
 
 function getItemBarcodeLabel(item: InventoryItem): string | null {

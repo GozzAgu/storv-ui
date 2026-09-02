@@ -1,0 +1,2070 @@
+/**
+ * Web product shell — glass language from the auth screens, light and dark.
+ * Capacitor native is excluded. Marketing landing is not scoped here.
+ */
+
+html:not(.capacitor-native) .dashboard-layout-root {
+  --saas-canvas: #f5f5f7;
+  --saas-surface: #ffffff;
+  --saas-glass-bg: #ffffff;
+  --saas-glass-border: transparent;
+  --saas-glass-highlight: none;
+  --saas-shadow-sm: none;
+  --saas-shadow-md: none;
+  --saas-shadow-lg: none;
+  --saas-blur: 28px;
+  --saas-accent: #1a1523;
+  --saas-accent-soft: rgb(26 21 35 / 0.06);
+  --saas-ink: #1a1523;
+  --saas-muted: rgb(26 21 35 / 0.58);
+  --saas-radius-lg: 1.5rem;
+  --saas-radius-xl: 2rem;
+  --saas-topnav-bg: #ffffff;
+  --saas-topnav-border: transparent;
+  --saas-topnav-control-bg: #f5f5f7;
+  --saas-topnav-control-border: transparent;
+  --dash-canvas: #f5f5f7;
+  --dash-surface: #ffffff;
+  --dash-border: transparent;
+  --dash-accent: #1a1523;
+  --dash-accent-soft: rgb(26 21 35 / 0.06);
+  --dash-ink: #1a1523;
+  --dash-muted: rgb(26 21 35 / 0.58);
+  --dash-avatar-bg: rgb(26 21 35 / 0.08);
+  --dash-avatar-fg: #1a1523;
+  --dash-avatar-border: transparent;
+  --dash-field-bg: #ffffff;
+  --dash-placeholder: rgb(26 21 35 / 0.38);
+  --dash-primary-btn: #1a1523;
+  --dash-primary-btn-fg: #ffffff;
+  --dash-primary-btn-hover: #000000;
+  --dash-outline-border: rgb(26 21 35 / 0.12);
+  --dash-overlay-bg: #ffffff;
+  --dash-thead-bg: rgb(26 21 35 / 0.035);
+  color: var(--saas-ink);
+  background: var(--saas-canvas);
+  color-scheme: light;
+}
+
+html:not(.capacitor-native).dark .dashboard-layout-root {
+  --saas-canvas: #080808;
+  --saas-surface: #1e1e1e;
+  --saas-glass-bg: #1e1e1e;
+  --saas-glass-border: transparent;
+  --saas-glass-highlight: none;
+  --saas-shadow-sm: none;
+  --saas-shadow-md: none;
+  --saas-shadow-lg: none;
+  --saas-accent: #ffffff;
+  --saas-accent-soft: rgb(255 255 255 / 0.08);
+  --saas-ink: #ffffff;
+  --saas-muted: rgb(255 255 255 / 0.72);
+  --saas-topnav-bg: #1e1e1e;
+  --saas-topnav-border: transparent;
+  --saas-topnav-control-bg: rgb(255 255 255 / 0.08);
+  --saas-topnav-control-border: transparent;
+  --dash-canvas: #080808;
+  --dash-surface: #1e1e1e;
+  --dash-border: transparent;
+  --dash-accent: #ffffff;
+  --dash-accent-soft: rgb(255 255 255 / 0.08);
+  --dash-ink: #ffffff;
+  --dash-muted: rgb(255 255 255 / 0.72);
+  --dash-avatar-bg: rgb(255 255 255 / 0.1);
+  --dash-avatar-fg: #ffffff;
+  --dash-avatar-border: rgb(255 255 255 / 0.16);
+  --dash-field-bg: rgb(8 6 16 / 0.38);
+  --dash-placeholder: rgb(255 255 255 / 0.38);
+  --dash-primary-btn: #f4f1ea;
+  --dash-primary-btn-fg: #1a1523;
+  --dash-primary-btn-hover: #ffffff;
+  --dash-outline-border: rgb(255 255 255 / 0.22);
+  --dash-overlay-bg: #1e1e1e;
+  --dash-thead-bg: rgb(255 255 255 / 0.04);
+  color: var(--saas-ink);
+  background: var(--saas-canvas);
+  color-scheme: dark;
+}
+
+html:not(.capacitor-native):not(.dark) .dashboard-atmosphere {
+  display: none;
+}
+
+html:not(.capacitor-native) .dashboard-layout-root .dash-sidebar.dashboard-sidebar {
+  background: var(--saas-glass-bg);
+  backdrop-filter: blur(28px) saturate(1.45);
+  -webkit-backdrop-filter: blur(28px) saturate(1.45);
+  border: 1px solid var(--saas-glass-border);
+  box-shadow: var(--saas-glass-highlight);
+}
+
+html:not(.capacitor-native):not(.dark) .dashboard-layout-root .dash-sidebar.dashboard-sidebar,
+html:not(.capacitor-native):not(.dark) .dash-topnav.dashboard-top-nav {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+}
+
+html:not(.capacitor-native):not(.dark) main[data-dashboard-main] .dash-page-metric {
+  border: 0;
+  background: #ffffff;
+}
+
+html:not(.capacitor-native) .dashboard-layout-root .dash-sidebar__logo-bar {
+  background: transparent;
+  border-bottom-color: var(--saas-glass-border);
+}
+
+html:not(.capacitor-native) .dash-topnav.dashboard-top-nav {
+  background: var(--saas-topnav-bg);
+  border-color: var(--saas-topnav-border);
+  backdrop-filter: blur(28px) saturate(1.45);
+  -webkit-backdrop-filter: blur(28px) saturate(1.45);
+}
+
+html:not(.capacitor-native) .dashboard-layout-root .dashboard-sidebar > button.absolute.top-10 {
+  background: var(--saas-glass-bg);
+  border: 1px solid var(--saas-glass-border);
+  color: var(--saas-ink);
+  box-shadow: var(--saas-shadow-sm);
+}
+
+html:not(.capacitor-native) .dashboard-layout-root main[data-dashboard-main] :is(
+  .dash-card,
+  .dash-page-header,
+  .dash-page-context-bar,
+  .dash-stat-card,
+  .dash-grid-card,
+  .dash-settings-panel,
+  .dash-state-card,
+  .inv-category-card,
+  .data-table-shell,
+  .dash-table-shell,
+  .dash-grid-shell--table,
+  .ldg-card,
+  .dash-analytics-kpi-panel,
+  .app-card,
+  .app-card-sm,
+  .verify-email-card
+) {
+  border-radius: 1.5rem !important;
+  border: 0 !important;
+  background: var(--saas-glass-bg) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html:not(.capacitor-native).dark .dashboard-layout-root main[data-dashboard-main] :is(
+  .dash-card,
+  .dash-page-header,
+  .dash-page-context-bar,
+  .dash-stat-card,
+  .dash-grid-card,
+  .dash-settings-panel,
+  .dash-state-card,
+  .inv-category-card,
+  .data-table-shell,
+  .dash-table-shell,
+  .dash-grid-shell--table,
+  .ldg-card,
+  .dash-analytics-kpi-panel,
+  .app-card,
+  .app-card-sm,
+  .verify-email-card
+) {
+  border: 0 !important;
+  box-shadow: none !important;
+  background: #1e1e1e !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html:not(.capacitor-native) .dashboard-layout-root main[data-dashboard-main] .dash-page-header--unified {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+html:not(.capacitor-native) .dashboard-layout-root main[data-dashboard-main] [class~='bg-white']:not(.receipt-content),
+html:not(.capacitor-native) .dashboard-layout-root main[data-dashboard-main] [class~='!bg-white']:not(.receipt-content),
+html:not(.capacitor-native) .dashboard-layout-root main[data-dashboard-main] [class~='bg-white/90'],
+html:not(.capacitor-native) .dashboard-layout-root main[data-dashboard-main] [class~='bg-white/95'],
+html:not(.capacitor-native) .dashboard-layout-root main[data-dashboard-main] [class~='bg-gray-50'],
+html:not(.capacitor-native) .dashboard-layout-root main[data-dashboard-main] [class~='bg-gray-50/95'],
+html:not(.capacitor-native) .dashboard-layout-root main[data-dashboard-main] [class~='bg-gray-50/90'],
+html:not(.capacitor-native) .dashboard-layout-root main[data-dashboard-main] [class~='bg-gray-50/80'],
+html:not(.capacitor-native) .dashboard-layout-root main[data-dashboard-main] [class~='bg-gray-50/70'],
+html:not(.capacitor-native) .dashboard-layout-root main[data-dashboard-main] [class~='bg-gray-50/60'],
+html:not(.capacitor-native) .dashboard-layout-root main[data-dashboard-main] [class~='bg-gray-50/50'],
+html:not(.capacitor-native) [data-dashboard-teleport] [class~='bg-white']:not(.receipt-content),
+html:not(.capacitor-native) [data-dashboard-teleport] [class~='!bg-white']:not(.receipt-content),
+html:not(.capacitor-native) [data-dashboard-teleport] [class~='bg-gray-50'] {
+  background-color: var(--saas-glass-bg) !important;
+  border-color: var(--saas-glass-border);
+}
+
+html:not(.capacitor-native) .dashboard-layout-root main[data-dashboard-main] table thead th,
+html:not(.capacitor-native) [data-dashboard-teleport] table thead th {
+  background-color: var(--dash-thead-bg) !important;
+  color: var(--saas-muted) !important;
+}
+
+html:not(.capacitor-native) .receipt-content,
+html:not(.capacitor-native) .receipt-content [class~='bg-white'],
+html:not(.capacitor-native) .receipt-content table thead th {
+  background-color: #ffffff !important;
+  color: inherit;
+}
+
+html:not(.capacitor-native) .dashboard-layout-root input:not(
+  .auth-field-input,
+  .ios-search-bar__input,
+  .sr-only,
+  [type='file'],
+  [type='checkbox'],
+  [type='radio'],
+  [type='range'],
+  [type='hidden'],
+  [type='button'],
+  [type='submit'],
+  [type='reset']
+),
+html:not(.capacitor-native) .dashboard-layout-root select:not(.ios-toolbar-select),
+html:not(.capacitor-native) .dashboard-layout-root textarea,
+html:not(.capacitor-native) .dashboard-layout-root .app-field,
+html:not(.capacitor-native) [data-dashboard-teleport] input:not(
+  .sr-only,
+  [type='file'],
+  [type='checkbox'],
+  [type='radio'],
+  [type='range'],
+  [type='hidden'],
+  [type='button'],
+  [type='submit'],
+  [type='reset']
+),
+html:not(.capacitor-native) [data-dashboard-teleport] select,
+html:not(.capacitor-native) [data-dashboard-teleport] textarea,
+html:not(.capacitor-native) [data-dashboard-teleport] .app-field {
+  min-height: 2.75rem;
+  border: 1px solid var(--saas-glass-border) !important;
+  border-radius: 0.75rem !important;
+  background: var(--dash-field-bg) !important;
+  color: var(--saas-ink) !important;
+  box-shadow: none !important;
+}
+
+html:not(.capacitor-native) .dashboard-layout-root input::placeholder,
+html:not(.capacitor-native) .dashboard-layout-root textarea::placeholder,
+html:not(.capacitor-native) [data-dashboard-teleport] input::placeholder,
+html:not(.capacitor-native) [data-dashboard-teleport] textarea::placeholder {
+  color: var(--dash-placeholder);
+}
+
+html:not(.capacitor-native) .dashboard-layout-root input:focus,
+html:not(.capacitor-native) .dashboard-layout-root select:focus,
+html:not(.capacitor-native) .dashboard-layout-root textarea:focus,
+html:not(.capacitor-native) .dashboard-layout-root .app-field:focus,
+html:not(.capacitor-native) [data-dashboard-teleport] input:focus,
+html:not(.capacitor-native) [data-dashboard-teleport] select:focus,
+html:not(.capacitor-native) [data-dashboard-teleport] textarea:focus {
+  border-color: rgb(26 21 35 / 0.28) !important;
+  box-shadow: 0 0 0 1px rgb(26 21 35 / 0.1) !important;
+  outline: none;
+}
+
+html:not(.capacitor-native).dark .dashboard-layout-root input:focus,
+html:not(.capacitor-native).dark .dashboard-layout-root select:focus,
+html:not(.capacitor-native).dark .dashboard-layout-root textarea:focus,
+html:not(.capacitor-native).dark .dashboard-layout-root .app-field:focus,
+html:not(.capacitor-native).dark [data-dashboard-teleport] input:focus,
+html:not(.capacitor-native).dark [data-dashboard-teleport] select:focus,
+html:not(.capacitor-native).dark [data-dashboard-teleport] textarea:focus {
+  border-color: rgb(255 255 255 / 0.45) !important;
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.18) !important;
+}
+
+html:not(.capacitor-native) .dashboard-layout-root .btn-primary,
+html:not(.capacitor-native) .dashboard-layout-root .btn-primary-sm,
+html:not(.capacitor-native) .dashboard-layout-root button[data-btn-variant='primary'],
+html:not(.capacitor-native) .dashboard-layout-root button[data-btn-variant='neutral'],
+html:not(.capacitor-native) [data-dashboard-teleport] .btn-primary,
+html:not(.capacitor-native) [data-dashboard-teleport] .btn-primary-sm,
+html:not(.capacitor-native) [data-dashboard-teleport] button[data-btn-variant='primary'],
+html:not(.capacitor-native) [data-dashboard-teleport] button[data-btn-variant='neutral'] {
+  background: var(--dash-primary-btn) !important;
+  border: 0 !important;
+  color: var(--dash-primary-btn-fg) !important;
+  box-shadow: none !important;
+}
+
+html:not(.capacitor-native) .dashboard-layout-root .btn-primary:hover:not(:disabled),
+html:not(.capacitor-native) .dashboard-layout-root .btn-primary-sm:hover:not(:disabled),
+html:not(.capacitor-native) .dashboard-layout-root button[data-btn-variant='primary']:hover:not(:disabled),
+html:not(.capacitor-native) .dashboard-layout-root button[data-btn-variant='neutral']:hover:not(:disabled),
+html:not(.capacitor-native) [data-dashboard-teleport] .btn-primary:hover:not(:disabled),
+html:not(.capacitor-native) [data-dashboard-teleport] .btn-primary-sm:hover:not(:disabled),
+html:not(.capacitor-native) [data-dashboard-teleport] button[data-btn-variant='primary']:hover:not(:disabled),
+html:not(.capacitor-native) [data-dashboard-teleport] button[data-btn-variant='neutral']:hover:not(:disabled) {
+  background: var(--dash-primary-btn-hover) !important;
+  color: var(--dash-primary-btn-fg) !important;
+}
+
+html:not(.capacitor-native) .dashboard-layout-root .btn-outline,
+html:not(.capacitor-native) .dashboard-layout-root button[data-btn-variant='outline'],
+html:not(.capacitor-native) [data-dashboard-teleport] .btn-outline,
+html:not(.capacitor-native) [data-dashboard-teleport] button[data-btn-variant='outline'] {
+  background: transparent !important;
+  border: 1.5px solid var(--dash-outline-border) !important;
+  color: var(--saas-ink) !important;
+}
+
+html:not(.capacitor-native) .dashboard-layout-root .btn-outline:hover:not(:disabled),
+html:not(.capacitor-native) .dashboard-layout-root button[data-btn-variant='outline']:hover:not(:disabled),
+html:not(.capacitor-native) [data-dashboard-teleport] .btn-outline:hover:not(:disabled),
+html:not(.capacitor-native) [data-dashboard-teleport] button[data-btn-variant='outline']:hover:not(:disabled) {
+  background: var(--saas-accent-soft) !important;
+  border-color: var(--saas-ink) !important;
+  color: var(--saas-ink) !important;
+}
+
+html:not(.capacitor-native) .dashboard-layout-root .btn-secondary,
+html:not(.capacitor-native) .dashboard-layout-root button[data-btn-variant='secondary'],
+html:not(.capacitor-native) .dashboard-layout-root button[data-btn-variant='ghost'] {
+  color: var(--saas-muted);
+}
+
+html:not(.capacitor-native) .dash-overlay-backdrop {
+  background: rgb(17 24 39 / 0.25);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+html:not(.capacitor-native).dark .dash-overlay-backdrop {
+  background: rgb(0 0 0 / 0.4);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+html:not(.capacitor-native) .dash-overlay-shell,
+html:not(.capacitor-native) [data-dashboard-teleport] .dash-overlay-shell {
+  background: var(--dash-overlay-bg);
+  border: 1px solid var(--saas-glass-border);
+  border-radius: 1.5rem;
+  backdrop-filter: blur(28px) saturate(1.45);
+  -webkit-backdrop-filter: blur(28px) saturate(1.45);
+  color: var(--saas-ink);
+}
+
+html:not(.capacitor-native) .dashboard-fixed-footer--web,
+html:not(.capacitor-native) .dash-pagination__pager {
+  background: var(--saas-glass-bg);
+  border-color: var(--saas-glass-border);
+  backdrop-filter: blur(28px) saturate(1.45);
+  -webkit-backdrop-filter: blur(28px) saturate(1.45);
+}
+
+html:not(.capacitor-native) .dash-pagination__page--active {
+  background: var(--saas-accent-soft) !important;
+  box-shadow: inset 0 0 0 1px var(--saas-glass-border) !important;
+  color: var(--saas-ink) !important;
+}
+
+html:not(.capacitor-native) main[data-dashboard-main] :is(h1, h2, h3) {
+  color: var(--saas-ink);
+}
+
+html:not(.capacitor-native) main[data-dashboard-main] .dash-card__title,
+html:not(.capacitor-native) main[data-dashboard-main] .dash-stat-card__value,
+html:not(.capacitor-native) main[data-dashboard-main] .dash-list__primary,
+html:not(.capacitor-native) main[data-dashboard-main] .dash-list__value,
+html:not(.capacitor-native) main[data-dashboard-main] .dash-page-title {
+  color: var(--saas-ink);
+}
+
+html:not(.capacitor-native) main[data-dashboard-main] .dash-card__desc,
+html:not(.capacitor-native) main[data-dashboard-main] .dash-stat-card__label,
+html:not(.capacitor-native) main[data-dashboard-main] .dash-stat-card__subtext,
+html:not(.capacitor-native) main[data-dashboard-main] .dash-list__secondary,
+html:not(.capacitor-native) main[data-dashboard-main] .dash-eyebrow,
+html:not(.capacitor-native) main[data-dashboard-main] .dash-page-header__description {
+  color: var(--saas-muted);
+}
+
+html:not(.capacitor-native) .dashboard-layout-root .dash-help-chip {
+  background: var(--saas-accent-soft);
+  border-color: var(--saas-glass-border);
+  color: var(--saas-muted);
+}
+
+html:not(.capacitor-native) .dashboard-layout-root .dash-help-chip:hover {
+  background: rgb(26 21 35 / 0.1);
+  border-color: rgb(26 21 35 / 0.2);
+  color: var(--saas-ink);
+}
+
+html:not(.capacitor-native).dark .dashboard-layout-root .dash-help-chip:hover {
+  background: rgb(255 255 255 / 0.12);
+  border-color: rgb(255 255 255 / 0.28);
+  color: #ffffff;
+}
+
+html:not(.capacitor-native) .dashboard-layout-root .text-primary-500,
+html:not(.capacitor-native) .dashboard-layout-root .text-primary-400,
+html:not(.capacitor-native) .dashboard-layout-root .text-primary-600 {
+  color: var(--saas-ink) !important;
+}
+
+html:not(.capacitor-native) .dashboard-layout-root .border-primary-400,
+html:not(.capacitor-native) .dashboard-layout-root .border-primary-500,
+html:not(.capacitor-native) .dashboard-layout-root .ring-primary-400\/30,
+html:not(.capacitor-native) .dashboard-layout-root .focus\:ring-primary-400\/30:focus {
+  border-color: var(--saas-glass-border) !important;
+}
+
+html:not(.capacitor-native) .dash-profile-panel,
+html:not(.capacitor-native) .dash-notify-panel,
+html:not(.capacitor-native) .dash-store-panel__surface {
+  background: var(--dash-overlay-bg);
+  border: 1px solid var(--saas-glass-border);
+  backdrop-filter: blur(28px) saturate(1.45);
+  -webkit-backdrop-filter: blur(28px) saturate(1.45);
+}
+
+html:not(.capacitor-native) .dash-profile-panel {
+  box-shadow:
+    0 18px 50px rgb(26 21 35 / 0.16),
+    0 4px 14px rgb(26 21 35 / 0.08);
+}
+
+html:not(.capacitor-native) .dash-notify-panel--dropdown {
+  box-shadow:
+    0 18px 50px rgb(26 21 35 / 0.16),
+    0 4px 14px rgb(26 21 35 / 0.08);
+}
+
+html:not(.capacitor-native) .dashboard-layout-root .dash-help-assistant-cta,
+html:not(.capacitor-native) .dashboard-layout-root .dash-help-assistant-link {
+  background: var(--saas-accent-soft);
+  border-color: var(--saas-glass-border);
+  color: var(--saas-ink);
+}
+
+html:not(.capacitor-native) .dashboard-layout-root .dash-help-assistant-cta:hover,
+html:not(.capacitor-native) .dashboard-layout-root .dash-help-assistant-link:hover {
+  background: rgb(26 21 35 / 0.1);
+  border-color: rgb(26 21 35 / 0.22);
+  color: var(--saas-ink);
+}
+
+html:not(.capacitor-native).dark .dashboard-layout-root .dash-help-assistant-cta:hover,
+html:not(.capacitor-native).dark .dashboard-layout-root .dash-help-assistant-link:hover {
+  background: rgb(255 255 255 / 0.14);
+  border-color: rgb(255 255 255 / 0.35);
+  color: #ffffff;
+}
+
+html:not(.capacitor-native) .dashboard-layout-root .dash-stat-card:hover {
+  border-color: rgb(26 21 35 / 0.2) !important;
+}
+
+html:not(.capacitor-native).dark .dashboard-layout-root .dash-stat-card:hover {
+  border: 0 !important;
+  background: #282828 !important;
+}
+
+html:not(.capacitor-native) .dashboard-layout-root label,
+html:not(.capacitor-native) [data-dashboard-teleport] label {
+  color: var(--saas-muted);
+}
+
+html:not(.capacitor-native):not(.dark) .dash-sidebar .group:has(.dash-nav-icon--active) {
+  background: linear-gradient(90deg, rgb(26 21 35 / 0.07), transparent 78%);
+}
+
+html:not(.capacitor-native):not(.dark) .dash-sidebar .font-bold {
+  color: #1a1523 !important;
+}
+
+html:not(.capacitor-native) .dash-home .saas-dashboard-greeting {
+  font-size: clamp(1.75rem, 3vw, 2.15rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+html:not(.capacitor-native) .dashboard-layout-root .dash-plan-badge {
+  background: var(--saas-accent-soft);
+  border-color: var(--saas-glass-border);
+  color: var(--saas-ink);
+}
+
+html:not(.capacitor-native).dark .dashboard-layout-root .dash-plan-badge {
+  border: 0;
+}
+
+html:not(.capacitor-native).dark .dashboard-layout-root .dash-sidebar.dashboard-sidebar,
+html:not(.capacitor-native).dark .dash-topnav.dashboard-top-nav,
+html:not(.capacitor-native).dark .dashboard-layout-root .dashboard-sidebar > button.absolute.top-10 {
+  border: 0 !important;
+  box-shadow: none !important;
+  background: #1e1e1e !important;
+}
+
+html:not(.capacitor-native).dark .dashboard-layout-root .dash-sidebar.dashboard-sidebar,
+html:not(.capacitor-native).dark .dashboard-layout-root .dash-sidebar.dashboard-sidebar :is(
+  a,
+  button,
+  span,
+  p,
+  .saas-nav-section-label,
+  .dash-nav-icon,
+  .dash-sidebar__user-name,
+  .dash-sidebar__user-email,
+  .dash-sidebar__sign-out,
+  .dash-sidebar__version
+) {
+  color: #ffffff !important;
+}
+
+html:not(.capacitor-native).dark .dash-overlay-shell,
+html:not(.capacitor-native).dark [data-dashboard-teleport] .dash-overlay-shell,
+html:not(.capacitor-native).dark .dash-store-panel__surface,
+html:not(.capacitor-native).dark .dashboard-fixed-footer--web,
+html:not(.capacitor-native).dark .dash-pagination__pager {
+  border: 0 !important;
+  box-shadow: none !important;
+  background: #1e1e1e !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html:not(.capacitor-native).dark .dash-store-panel :is(
+  .dash-store-section-label,
+  .dash-store-row__name,
+  .dash-store-footer-link,
+  .dash-store-loading,
+  .dash-store-empty
+) {
+  color: #ffffff !important;
+}
+
+html:not(.capacitor-native).dark .dash-store-row--active {
+  background: rgb(255 255 255 / 0.08);
+}
+
+html:not(.capacitor-native).dark .dash-profile-panel {
+  border: 0 !important;
+  background: #1e1e1e !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow:
+    0 28px 64px rgb(0 0 0 / 0.85),
+    0 10px 24px rgb(0 0 0 / 0.55),
+    0 0 0 1px rgb(255 255 255 / 0.16);
+}
+
+html:not(.capacitor-native) .dash-notify-panel__tabs {
+  gap: 0.25rem;
+  border-bottom: 0;
+  padding: 0.5rem 0.75rem 0.375rem;
+}
+
+html:not(.capacitor-native) .dash-notify-tab {
+  border-radius: 9999px;
+  border: 0;
+}
+
+html:not(.capacitor-native):not(.dark) .dash-notify-panel__header {
+  background: transparent;
+}
+
+html:not(.capacitor-native):not(.dark) .dash-notify-panel__link,
+html:not(.capacitor-native):not(.dark) .dash-notify-tab--active {
+  color: #1a1523;
+}
+
+html:not(.capacitor-native):not(.dark) .dash-notify-tab--active {
+  background: rgb(26 21 35 / 0.08);
+}
+
+html:not(.capacitor-native):not(.dark) .dash-notify-tab--active .dash-notify-tab__badge {
+  background: rgb(26 21 35 / 0.12);
+  color: #1a1523;
+}
+
+html:not(.capacitor-native):not(.dark) .dash-notify-item__dot {
+  background: #1a1523;
+}
+
+html:not(.capacitor-native).dark .dash-notify-panel {
+  border: 0 !important;
+  background: #1e1e1e !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none;
+}
+
+html:not(.capacitor-native).dark .dash-notify-panel--dropdown {
+  box-shadow:
+    0 28px 64px rgb(0 0 0 / 0.85),
+    0 10px 24px rgb(0 0 0 / 0.55),
+    0 0 0 1px rgb(255 255 255 / 0.16);
+}
+
+html:not(.capacitor-native).dark .dash-notify-panel__header,
+html:not(.capacitor-native).dark .dash-notify-panel__tabs,
+html:not(.capacitor-native).dark .dash-notify-item,
+html:not(.capacitor-native).dark .dash-notify-skeleton-row,
+html:not(.capacitor-native).dark .dash-notify-panel__footer {
+  border-color: rgb(255 255 255 / 0.06);
+  background: transparent;
+}
+
+html:not(.capacitor-native).dark .dash-notify-panel :is(
+  .dash-notify-panel__title,
+  .dash-notify-panel__action,
+  .dash-notify-panel__link,
+  .dash-notify-tab,
+  .dash-notify-tab--active,
+  .dash-notify-item__title,
+  .dash-notify-empty__title,
+  .dash-notify-panel__footer-action
+) {
+  color: #ffffff !important;
+}
+
+html:not(.capacitor-native).dark .dash-notify-panel :is(
+  .dash-notify-item__message,
+  .dash-notify-item__time,
+  .dash-notify-empty__desc,
+  .dash-notify-empty__icon,
+  .dash-notify-tab__badge
+) {
+  color: rgb(255 255 255 / 0.72) !important;
+}
+
+html:not(.capacitor-native).dark .dash-notify-tab--active {
+  background: rgb(255 255 255 / 0.1);
+}
+
+html:not(.capacitor-native).dark .dash-notify-tab--active .dash-notify-tab__badge {
+  background: rgb(255 255 255 / 0.16);
+  color: #ffffff !important;
+}
+
+html:not(.capacitor-native).dark .dash-notify-item--unread {
+  background: rgb(255 255 255 / 0.06);
+}
+
+html:not(.capacitor-native).dark .dash-notify-item--unread:hover {
+  background: rgb(255 255 255 / 0.1);
+}
+
+html:not(.capacitor-native).dark .dash-notify-item__dot {
+  background: #ffffff;
+}
+
+html:not(.capacitor-native).dark .dash-notify-item__avatar {
+  border: 0;
+  background: rgb(255 255 255 / 0.1);
+  color: #ffffff;
+  box-shadow: none;
+}
+
+html:not(.capacitor-native).dark .dashboard-layout-root main[data-dashboard-main] [class~='bg-white']:not(.receipt-content),
+html:not(.capacitor-native).dark .dashboard-layout-root main[data-dashboard-main] [class~='!bg-white']:not(.receipt-content),
+html:not(.capacitor-native).dark .dashboard-layout-root main[data-dashboard-main] [class~='bg-white/90'],
+html:not(.capacitor-native).dark .dashboard-layout-root main[data-dashboard-main] [class~='bg-white/95'],
+html:not(.capacitor-native).dark .dashboard-layout-root main[data-dashboard-main] [class~='bg-gray-50'],
+html:not(.capacitor-native).dark [data-dashboard-teleport] [class~='bg-white']:not(.receipt-content),
+html:not(.capacitor-native).dark [data-dashboard-teleport] [class~='bg-gray-50'] {
+  border: 0 !important;
+  background-color: #1e1e1e !important;
+}
+
+/* Neutralize leftover navy/blue fills in dark web (keep green/red/amber status). */
+html:not(.capacitor-native).dark :is(
+  .dash-notify-panel__action,
+  .dash-notify-panel__footer-action,
+  .dash-drawer-pick-row--selected,
+  .dash-state-card,
+  .dash-insight-icon,
+  .dash-status-badge--transit,
+  .dash-pill--accent,
+  .dash-help-section__icon,
+  .dash-help-assistant-cta,
+  .dash-help-chip:hover,
+  .dash-profile-badge--role,
+  .dash-profile-row--active,
+  .dash-profile-row--active .dash-profile-row__icon,
+  .dash-mobile-table__toggle
+) {
+  background: rgb(255 255 255 / 0.08) !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+}
+
+html:not(.capacitor-native).dark :is(
+  .dash-notify-panel__action:hover:not(:disabled),
+  .dash-notify-panel__footer-action:hover:not(:disabled),
+  .dash-help-assistant-cta:hover
+) {
+  background: rgb(255 255 255 / 0.14) !important;
+  color: #ffffff !important;
+}
+
+html:not(.capacitor-native).dark .dash-progress__segment--available,
+html:not(.capacitor-native).dark .dash-bar__fill,
+html:not(.capacitor-native).dark .dash-toast__progress-bar--info {
+  background: #f4f1ea !important;
+}
+
+html:not(.capacitor-native).dark .dash-pill--accent .dash-grid-card__pill-dot,
+html:not(.capacitor-native).dark .dash-notify-item__dot {
+  background: #ffffff !important;
+}
+
+html:not(.capacitor-native).dark .dash-stat-card__sparkline path[stroke],
+html:not(.capacitor-native).dark .dash-grid-card__ring-fill {
+  stroke: rgb(255 255 255 / 0.72) !important;
+}
+
+html:not(.capacitor-native).dark main[data-dashboard-main] .dash-analytics .dash-page-metrics--analytics .dash-page-metric[data-metric-key='revenue'],
+html:not(.capacitor-native).dark main[data-dashboard-main] .dash-analytics .dash-page-metrics--analytics .dash-page-metric[data-metric-key='completed'],
+html:not(.capacitor-native).dark main[data-dashboard-main] .dash-analytics .dash-page-metrics--analytics .dash-page-metric[data-metric-key='profit'] {
+  background: rgb(255 255 255 / 0.06) !important;
+  border-color: transparent !important;
+}
+
+html:not(.capacitor-native).dark main[data-dashboard-main] .dash-analytics .dash-page-metrics--analytics .dash-page-metric[data-metric-key='revenue']::before,
+html:not(.capacitor-native).dark main[data-dashboard-main] .dash-analytics .dash-page-metrics--analytics .dash-page-metric[data-metric-key='completed']::before,
+html:not(.capacitor-native).dark main[data-dashboard-main] .dash-analytics .dash-page-metrics--analytics .dash-page-metric[data-metric-key='profit']::before {
+  background: #f4f1ea !important;
+}
+
+html:not(.capacitor-native).dark :is(
+  .dashboard-assistant__float-logo,
+  .dashboard-assistant__avatar
+) {
+  background: rgb(255 255 255 / 0.12) !important;
+  color: #ffffff !important;
+}
+
+/* Web assistant float — ink/card surfaces (teleported outside layout root) */
+html:not(.capacitor-native) .dashboard-assistant__float {
+  background: #ffffff !important;
+  color: #1a1523 !important;
+  border-color: rgb(26 21 35 / 0.08) !important;
+}
+
+html:not(.capacitor-native).dark .dashboard-assistant__float {
+  background: #1e1e1e !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+}
+
+html:not(.capacitor-native) .dashboard-assistant__float-logo {
+  background: rgb(26 21 35 / 0.06) !important;
+  color: #1a1523 !important;
+}
+
+html:not(.capacitor-native).dark .dashboard-layout-root [class*='bg-primary'],
+html:not(.capacitor-native).dark .dashboard-layout-root [class*='bg-blue-'],
+html:not(.capacitor-native).dark .dashboard-layout-root [class*='bg-indigo-'],
+html:not(.capacitor-native).dark .dashboard-layout-root [class*='bg-sky-'],
+html:not(.capacitor-native).dark [data-dashboard-teleport] [class*='bg-primary'],
+html:not(.capacitor-native).dark [data-dashboard-teleport] [class*='bg-blue-'],
+html:not(.capacitor-native).dark [data-dashboard-teleport] [class*='bg-indigo-'],
+html:not(.capacitor-native).dark [data-dashboard-teleport] [class*='bg-sky-'] {
+  background-color: rgb(255 255 255 / 0.08) !important;
+}
+
+html:not(.capacitor-native).dark .dashboard-layout-root :is(
+  [class~='bg-primary-500'],
+  [class~='bg-primary-600'],
+  [class~='bg-primary-700'],
+  [class~='dark:bg-primary-500'],
+  [class~='dark:bg-primary-600'],
+  [class~='bg-blue-500'],
+  [class~='bg-blue-600'],
+  [class~='dark:bg-blue-500'],
+  [class~='bg-sky-500'],
+  [class~='bg-sky-600'],
+  [class~='dark:bg-sky-500'],
+  [class~='dark:bg-sky-600']
+),
+html:not(.capacitor-native).dark [data-dashboard-teleport] :is(
+  [class~='bg-primary-500'],
+  [class~='bg-primary-600'],
+  [class~='bg-primary-700'],
+  [class~='dark:bg-primary-500'],
+  [class~='dark:bg-primary-600'],
+  [class~='bg-blue-500'],
+  [class~='bg-blue-600'],
+  [class~='dark:bg-blue-500'],
+  [class~='bg-sky-500'],
+  [class~='bg-sky-600'],
+  [class~='dark:bg-sky-500'],
+  [class~='dark:bg-sky-600']
+),
+html:not(.capacitor-native).dark .dashboard-layout-root [class*='bg-[#143f8d]'],
+html:not(.capacitor-native).dark .dashboard-layout-root [class*='bg-[#4876c7]'] {
+  background-color: #f4f1ea !important;
+  color: #1a1523 !important;
+}
+
+html:not(.capacitor-native).dark .dashboard-layout-root button[data-btn-variant='primary'],
+html:not(.capacitor-native).dark .dashboard-layout-root button[data-btn-variant='neutral'],
+html:not(.capacitor-native).dark [data-dashboard-teleport] button[data-btn-variant='primary'],
+html:not(.capacitor-native).dark [data-dashboard-teleport] button[data-btn-variant='neutral'] {
+  background: var(--dash-primary-btn) !important;
+  color: var(--dash-primary-btn-fg) !important;
+}
+
+/* Folder directory cards — compact centered glass folder */
+html:not(.capacitor-native) main[data-dashboard-main] .dash-folder-card {
+  min-height: 7.5rem;
+  padding: 0.9rem 0.7rem 0.75rem !important;
+  transform: none;
+}
+
+html:not(.capacitor-native) main[data-dashboard-main] .dash-folder-card:hover {
+  transform: translateY(-1px);
+  background: #eeeeef !important;
+  border-color: transparent !important;
+}
+
+html:not(.capacitor-native).dark main[data-dashboard-main] .dash-folder-card:hover {
+  background: #282828 !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
+
+html:not(.capacitor-native) main[data-dashboard-main] .dash-folder-card__title {
+  color: var(--saas-ink);
+}
+
+html:not(.capacitor-native) main[data-dashboard-main] .dash-folder-card__meta {
+  color: var(--saas-muted);
+}
+
+html:not(.capacitor-native) main[data-dashboard-main] .dash-folder-card__mark {
+  width: 2.55rem;
+}
+
+html:not(.capacitor-native) main[data-dashboard-main] :is(
+  .inventory-categories-grid.dash-grid,
+  .departments-grid.dash-grid,
+  .departments-grid
+) {
+  gap: 0.75rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 640px) {
+  html:not(.capacitor-native) main[data-dashboard-main] :is(
+    .inventory-categories-grid.dash-grid,
+    .departments-grid.dash-grid,
+    .departments-grid
+  ) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  html:not(.capacitor-native) main[data-dashboard-main] :is(
+    .inventory-categories-grid.dash-grid,
+    .departments-grid.dash-grid,
+    .departments-grid
+  ) {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  html:not(.capacitor-native) main[data-dashboard-main] .dash-folder-card {
+    padding: 0.9rem 0.7rem 0.75rem !important;
+    min-height: 7.75rem;
+  }
+}
+
+@media (min-width: 1440px) {
+  html:not(.capacitor-native) main[data-dashboard-main] :is(
+    .inventory-categories-grid.dash-grid,
+    .departments-grid.dash-grid,
+    .departments-grid
+  ) {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+html:not(.capacitor-native) main[data-dashboard-main] :is(
+  .inventory-categories-grid,
+  .departments-grid
+) .dash-skeleton--grid-card {
+  min-height: 7.5rem;
+}
+
+/* ── Empty states (web only) ── */
+html:not(.capacitor-native) .dash-empty-state,
+html:not(.capacitor-native) .dash-table-empty-state {
+  padding: 2.75rem 1.5rem;
+}
+
+html:not(.capacitor-native) .dash-empty-state--compact {
+  padding: 1.5rem 1rem;
+}
+
+html:not(.capacitor-native) .dash-empty-state__mark {
+  width: 3.25rem;
+  height: 3.25rem;
+  margin-bottom: 1rem;
+  border-radius: 9999px;
+  background: #f4f4f5;
+  color: rgb(26 21 35 / 0.42);
+}
+
+html:not(.capacitor-native) .dash-empty-state--compact .dash-empty-state__mark {
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-bottom: 0.75rem;
+}
+
+html:not(.capacitor-native) .dash-empty-state__mark .dash-empty-state__icon,
+html:not(.capacitor-native) .dash-empty-state__mark svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0;
+  color: inherit;
+}
+
+html:not(.capacitor-native) .dash-empty-state--compact .dash-empty-state__mark .dash-empty-state__icon,
+html:not(.capacitor-native) .dash-empty-state--compact .dash-empty-state__mark svg {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+html:not(.capacitor-native) .dash-empty-state__eyebrow {
+  margin: 0 0 0.25rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: rgb(26 21 35 / 0.38);
+}
+
+html:not(.capacitor-native) .dash-empty-state__title,
+html:not(.capacitor-native) .dash-state-card__title {
+  margin: 0;
+  max-width: 22rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.022em;
+  color: var(--saas-ink, #1a1523);
+}
+
+html:not(.capacitor-native) .dash-empty-state__desc,
+html:not(.capacitor-native) .dash-state-card__desc {
+  margin: 0.375rem auto 0;
+  max-width: 22rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: rgb(26 21 35 / 0.52);
+}
+
+html:not(.capacitor-native) .dash-empty-state__tips {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  width: 100%;
+  max-width: 20rem;
+  margin: 1.125rem auto 0;
+  padding: 0;
+  list-style: none;
+}
+
+html:not(.capacitor-native) .dash-empty-state__tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.75rem;
+  background: #f4f4f5;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: rgb(26 21 35 / 0.58);
+  text-align: left;
+}
+
+html:not(.capacitor-native) .dash-empty-state__tip::before {
+  content: '';
+  width: 0.3125rem;
+  height: 0.3125rem;
+  margin-top: 0.4rem;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  background: rgb(161 161 170);
+}
+
+html:not(.capacitor-native) .dash-empty-state__actions {
+  margin-top: 1.125rem;
+}
+
+html:not(.capacitor-native) .dash-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 4.25rem;
+  margin: 0;
+  padding: 1.25rem 0.75rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: rgb(26 21 35 / 0.45);
+  text-align: center;
+}
+
+html:not(.capacitor-native) .dash-state-card:not(.subscription-feature-gate) {
+  border: 0;
+  background: var(--saas-glass-bg, #ffffff);
+  padding: 2.75rem 1.5rem;
+  box-shadow: none;
+}
+
+html:not(.capacitor-native) .dash-state-card:not(.subscription-feature-gate) > svg,
+html:not(.capacitor-native) .dash-state-card:not(.subscription-feature-gate) > .marketing-feature-icon {
+  box-sizing: border-box;
+  width: 3.25rem !important;
+  height: 3.25rem !important;
+  padding: 0.95rem;
+  margin: 0 auto 1rem;
+  border-radius: 9999px;
+  background: #f4f4f5;
+  color: rgb(26 21 35 / 0.42) !important;
+}
+
+html:not(.capacitor-native) .dash-state-card .dash-empty-state__mark {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+html:not(.capacitor-native) .subscription-feature-gate {
+  border: 0 !important;
+  background: var(--saas-glass-bg, #ffffff) !important;
+  box-shadow: none !important;
+  padding: 2.75rem 1.5rem;
+}
+
+html:not(.capacitor-native) .subscription-feature-gate > svg {
+  box-sizing: border-box;
+  width: 3.25rem !important;
+  height: 3.25rem !important;
+  padding: 0.95rem;
+  margin: 0 auto 1rem;
+  border-radius: 9999px;
+  background: #f4f4f5;
+  color: rgb(26 21 35 / 0.42) !important;
+}
+
+html:not(.capacitor-native) .subscription-feature-gate ul {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  width: 100%;
+  max-width: 20rem;
+  margin: 1.125rem auto 0;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+
+html:not(.capacitor-native) .subscription-feature-gate ul li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.75rem;
+  background: #f4f4f5;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: rgb(26 21 35 / 0.58);
+}
+
+html:not(.capacitor-native) .subscription-feature-gate ul li > span[aria-hidden] {
+  display: none;
+}
+
+html:not(.capacitor-native) .subscription-feature-gate ul li::before {
+  content: '';
+  width: 0.3125rem;
+  height: 0.3125rem;
+  margin-top: 0.4rem;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  background: rgb(161 161 170);
+}
+
+html:not(.capacitor-native) .dash-drawer-callout {
+  border: 0;
+  border-radius: 0.75rem;
+  background: #f4f4f5;
+  color: rgb(26 21 35 / 0.58);
+}
+
+html:not(.capacitor-native).dark .dash-drawer-callout {
+  background: rgb(255 255 255 / 0.05);
+  color: rgb(255 255 255 / 0.52);
+}
+
+html:not(.capacitor-native) .dash-drawer-empty {
+  border: 0;
+  background: transparent;
+  padding: 2rem 1.25rem;
+}
+
+html:not(.capacitor-native) .dash-drawer-empty > svg:first-child {
+  box-sizing: border-box;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0.75rem;
+  margin: 0 0 0.75rem;
+  border-radius: 9999px;
+  background: #f4f4f5;
+  color: rgb(26 21 35 / 0.42);
+}
+
+html:not(.capacitor-native) .dash-drawer-empty > p:first-of-type {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--saas-ink, #1a1523);
+}
+
+html:not(.capacitor-native) .dash-drawer-empty > p:nth-of-type(2),
+html:not(.capacitor-native) .dash-drawer-empty > p.dash-drawer-hint {
+  margin: 0.25rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: rgb(26 21 35 / 0.5);
+}
+
+html:not(.capacitor-native) .dash-notify-empty__icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  margin-bottom: 0.75rem;
+  background: #f4f4f5;
+  color: rgb(26 21 35 / 0.42);
+}
+
+html:not(.capacitor-native) .dash-notify-empty__icon svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+html:not(.capacitor-native) .dash-notify-empty__title {
+  font-size: 0.875rem;
+  letter-spacing: -0.015em;
+}
+
+html:not(.capacitor-native) .dash-notify-empty__desc {
+  max-width: 16rem;
+  margin-top: 0.3rem;
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+html:not(.capacitor-native) .dash-error-card {
+  border: 0;
+  background: var(--saas-glass-bg, #ffffff);
+  padding: 2.5rem 1.5rem;
+}
+
+html:not(.capacitor-native) .dash-error-card > div:first-child {
+  width: 3.25rem;
+  height: 3.25rem;
+  margin: 0 auto 1rem;
+  border-radius: 9999px;
+}
+
+html:not(.capacitor-native) .payment-links-coming-soon {
+  border: 0 !important;
+  background: var(--saas-glass-bg, #ffffff) !important;
+  box-shadow: none !important;
+}
+
+html:not(.capacitor-native) .payment-links-coming-soon .dash-empty-state__eyebrow {
+  color: rgb(26 21 35 / 0.38);
+}
+
+html:not(.capacitor-native) .payment-links-coming-soon:not(.dash-empty-state--compact) .dash-empty-state__title {
+  font-size: 1.125rem;
+}
+
+html:not(.capacitor-native) .dash-empty.py-2,
+html:not(.capacitor-native) .dash-empty.py-1 {
+  min-height: 0;
+  padding-block: 0.75rem;
+}
+
+html:not(.capacitor-native).dark .dash-empty-state__mark,
+html:not(.capacitor-native).dark .dash-state-card:not(.subscription-feature-gate) > svg,
+html:not(.capacitor-native).dark .dash-state-card:not(.subscription-feature-gate) > .marketing-feature-icon,
+html:not(.capacitor-native).dark .subscription-feature-gate > svg,
+html:not(.capacitor-native).dark .dash-drawer-empty > svg:first-child,
+html:not(.capacitor-native).dark .dash-notify-empty__icon {
+  background: #282828;
+  color: rgb(255 255 255 / 0.52) !important;
+}
+
+html:not(.capacitor-native).dark .dash-empty-state__title,
+html:not(.capacitor-native).dark .dash-state-card__title,
+html:not(.capacitor-native).dark .dash-drawer-empty > p:first-of-type,
+html:not(.capacitor-native).dark .dash-notify-empty__title {
+  color: #ffffff;
+}
+
+html:not(.capacitor-native).dark .dash-empty-state__eyebrow {
+  color: rgb(255 255 255 / 0.4);
+}
+
+html:not(.capacitor-native).dark .dash-empty-state__desc,
+html:not(.capacitor-native).dark .dash-state-card__desc,
+html:not(.capacitor-native).dark .dash-empty,
+html:not(.capacitor-native).dark .dash-drawer-empty > p:nth-of-type(2),
+html:not(.capacitor-native).dark .dash-notify-empty__desc {
+  color: rgb(255 255 255 / 0.55);
+}
+
+html:not(.capacitor-native).dark .dash-empty-state__tip,
+html:not(.capacitor-native).dark .subscription-feature-gate ul li {
+  background: #282828;
+  color: rgb(255 255 255 / 0.62);
+}
+
+html:not(.capacitor-native).dark .dash-empty-state__tip::before,
+html:not(.capacitor-native).dark .subscription-feature-gate ul li::before {
+  background: rgb(255 255 255 / 0.28);
+}
+
+html:not(.capacitor-native).dark .dash-state-card,
+html:not(.capacitor-native).dark .subscription-feature-gate,
+html:not(.capacitor-native).dark .dash-error-card,
+html:not(.capacitor-native).dark .payment-links-coming-soon {
+  background: #1e1e1e !important;
+  border: 0 !important;
+}
+
+html:not(.capacitor-native).dark .payment-links-coming-soon .dash-empty-state__eyebrow {
+  color: rgb(255 255 255 / 0.4);
+}
+
+html:not(.capacitor-native).dark .dash-drawer-empty {
+  background: transparent;
+  border: 0;
+}
+
+/* ── Web table pattern: airy rows, muted caps headers, hairline dividers ── */
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport]) {
+  --dash-table-divider: rgb(26 21 35 / 0.06);
+  --dash-table-divider-strong: rgb(26 21 35 / 0.08);
+  --dash-table-head-bg: transparent;
+  --dash-table-row-hover: #eeeeef;
+  --dash-table-row-selected: rgb(26 21 35 / 0.05);
+  --dash-table-body-ink: #1a1523;
+  --dash-table-body-muted: rgb(26 21 35 / 0.58);
+  --dash-thead-bg: transparent;
+  --dash-card-ink: #1a1523;
+}
+
+html:not(.capacitor-native).dark :is(main[data-dashboard-main], [data-dashboard-teleport]) {
+  --dash-table-divider: rgb(255 255 255 / 0.08);
+  --dash-table-divider-strong: rgb(255 255 255 / 0.1);
+  --dash-table-head-bg: transparent;
+  --dash-table-row-hover: #282828;
+  --dash-table-row-selected: rgb(255 255 255 / 0.08);
+  --dash-table-body-ink: #ffffff;
+  --dash-table-body-muted: rgb(255 255 255 / 0.62);
+  --dash-thead-bg: transparent;
+  --dash-card-ink: #ffffff;
+}
+
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  :is(.data-table-shell, .dash-table-shell, .activity-log-shell)
+  thead.sticky,
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  :is(.data-table-shell, .dash-table-shell, .activity-log-shell)
+  thead.sticky
+  th {
+  background: #ffffff !important;
+}
+
+html:not(.capacitor-native).dark :is(main[data-dashboard-main], [data-dashboard-teleport])
+  :is(.data-table-shell, .dash-table-shell, .activity-log-shell)
+  thead.sticky,
+html:not(.capacitor-native).dark :is(main[data-dashboard-main], [data-dashboard-teleport])
+  :is(.data-table-shell, .dash-table-shell, .activity-log-shell)
+  thead.sticky
+  th {
+  background: #1e1e1e !important;
+}
+
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  :is(.data-table-shell, .dash-table-shell)
+  .dash-table-toolbar,
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  :is(.data-table-shell, .dash-table-shell)
+  .dash-table-section-header {
+  background: transparent;
+  border-bottom: 1px solid var(--dash-table-divider);
+  padding: 0.875rem 1.25rem;
+}
+
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  :is(.data-table-shell, .dash-table-shell, .dash-items-picker, .activity-log-shell)
+  :is(.dashboard-table, table.min-w-full)
+  thead {
+  background: transparent;
+}
+
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  :is(.data-table-shell, .dash-table-shell, .dash-items-picker, .activity-log-shell)
+  :is(.dashboard-table, table.min-w-full)
+  thead
+  th {
+  padding: 0.75rem 1.125rem;
+  background: transparent !important;
+  border-bottom: 1px solid var(--dash-table-divider-strong) !important;
+  color: var(--dash-table-body-muted) !important;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  .dashboard-table__head-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  .dashboard-table__th--sortable:hover {
+  color: var(--dash-table-body-ink) !important;
+}
+
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  .dashboard-table__sort {
+  display: inline-flex;
+  flex-direction: column;
+  margin-top: -0.125rem;
+  color: rgb(26 21 35 / 0.28);
+}
+
+html:not(.capacitor-native).dark :is(main[data-dashboard-main], [data-dashboard-teleport])
+  .dashboard-table__sort {
+  color: rgb(255 255 255 / 0.28);
+}
+
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  .dashboard-table__sort-icon {
+  width: 0.7rem;
+  height: 0.7rem;
+}
+
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  .dashboard-table__sort-icon--down {
+  margin-top: -0.2rem;
+}
+
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  .dashboard-table__sort--active {
+  color: var(--dash-table-body-ink);
+}
+
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  .dashboard-table__sort--active:not(.dashboard-table__sort--desc)
+  .dashboard-table__sort-icon--down {
+  opacity: 0.28;
+}
+
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  .dashboard-table__sort--desc
+  .dashboard-table__sort-icon--up {
+  opacity: 0.28;
+}
+
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  :is(.data-table-shell, .dash-table-shell, .dash-items-picker, .activity-log-shell)
+  :is(.dashboard-table, table.min-w-full)
+  tbody
+  td {
+  padding: 1rem 1.125rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--dash-table-body-ink);
+  border-bottom: 0 !important;
+  box-shadow: inset 0 -1px 0 var(--dash-table-divider);
+}
+
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  :is(.data-table-shell, .dash-table-shell, .dash-items-picker, .activity-log-shell)
+  :is(.dashboard-table, table.min-w-full)
+  tbody
+  tr:last-child
+  td {
+  box-shadow: none;
+}
+
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  :is(.data-table-shell, .dash-table-shell, .dash-items-picker, .activity-log-shell)
+  :is(.dashboard-table, table.min-w-full)
+  tbody
+  tr:hover {
+  background: var(--dash-table-row-hover);
+}
+
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  :is(.data-table-shell, .dash-table-shell)
+  tbody
+  tr:has(input[type='checkbox']:checked),
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  :is(.data-table-shell, .dash-table-shell)
+  tbody
+  tr.is-selected,
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  :is(.data-table-shell, .dash-table-shell)
+  tbody
+  tr[aria-selected='true'] {
+  background: var(--dash-table-row-selected);
+}
+
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  .dashboard-table__primary {
+  font-weight: 600;
+  color: var(--dash-table-body-ink);
+}
+
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  .dashboard-table__muted,
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  .dashboard-table__muted.text-\[10px\],
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  .dashboard-table__muted.text-\[11px\] {
+  color: var(--dash-table-body-muted);
+}
+
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  .dashboard-table__numeric,
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  .dashboard-table__money {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  .dashboard-table__action-btn {
+  height: 2.25rem;
+  width: 2.25rem;
+  border-radius: 9999px;
+  color: var(--dash-table-body-muted);
+}
+
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  .dashboard-table__action-btn:hover {
+  background: var(--dash-table-row-hover);
+  color: var(--dash-table-body-ink);
+}
+
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  .dashboard-table__action-group {
+  border: 0;
+  background: #f5f5f7;
+  border-radius: 9999px;
+  padding: 0.125rem;
+}
+
+html:not(.capacitor-native).dark :is(main[data-dashboard-main], [data-dashboard-teleport])
+  .dashboard-table__action-group {
+  background: #282828;
+}
+
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  :is(.data-table-shell, .dash-table-shell)
+  .from-primary-400 {
+  background-image: none !important;
+  background-color: #1a1523 !important;
+}
+
+html:not(.capacitor-native).dark :is(main[data-dashboard-main], [data-dashboard-teleport])
+  :is(.data-table-shell, .dash-table-shell)
+  .from-primary-400 {
+  background-color: #ffffff !important;
+}
+
+html:not(.capacitor-native) .dash-segment-tabs {
+  width: fit-content;
+  max-width: 100%;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border-radius: 9999px;
+  background: #f5f5f7;
+}
+
+html:not(.capacitor-native).dark .dash-segment-tabs {
+  background: #282828;
+}
+
+html:not(.capacitor-native) .dash-segment-tabs__btn {
+  flex: 0 1 auto;
+  min-height: 2rem;
+  padding: 0.375rem 0.875rem;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--saas-muted);
+}
+
+html:not(.capacitor-native) .dash-segment-tabs__btn:hover {
+  color: var(--saas-ink);
+  background: rgb(255 255 255 / 0.65);
+}
+
+html:not(.capacitor-native).dark .dash-segment-tabs__btn:hover {
+  background: rgb(255 255 255 / 0.06);
+}
+
+html:not(.capacitor-native) .dash-segment-tabs__btn--active,
+html:not(.capacitor-native) .dash-segment-tabs__btn[aria-selected='true'] {
+  background: #ffffff;
+  color: #1a1523;
+  font-weight: 600;
+  box-shadow: none;
+}
+
+html:not(.capacitor-native).dark .dash-segment-tabs__btn--active,
+html:not(.capacitor-native).dark .dash-segment-tabs__btn[aria-selected='true'] {
+  background: #1e1e1e;
+  color: #ffffff;
+}
+
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  .dash-table-pagination {
+  border-top: 1px solid var(--dash-table-divider);
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+}
+
+html:not(.capacitor-native) .dash-pagination__pager {
+  border: 0;
+  background: #f5f5f7;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+html:not(.capacitor-native).dark .dash-pagination__pager {
+  background: #282828;
+}
+
+html:not(.capacitor-native) .dash-pagination__page--active {
+  background: #1a1523 !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+html:not(.capacitor-native).dark .dash-pagination__page--active {
+  background: #ffffff !important;
+  color: #1a1523 !important;
+}
+
+html:not(.capacitor-native) .dashboard-fixed-footer--web {
+  border: 0;
+  background: #ffffff;
+  box-shadow: 0 12px 40px rgb(26 21 35 / 0.1);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+html:not(.capacitor-native).dark .dashboard-fixed-footer--web {
+  background: #1e1e1e;
+  box-shadow: 0 12px 40px rgb(0 0 0 / 0.45);
+}
+
+html:not(.capacitor-native) .dashboard-fixed-footer::before {
+  display: none;
+}
+
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  :is(.data-table-shell, .dash-table-shell, .activity-log-shell)
+  tbody
+  .dash-status-badge {
+  border: 0 !important;
+  border-radius: 9999px !important;
+  box-shadow: none !important;
+}
+
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  .dash-status-badge {
+  padding: 0.2rem 0.625rem;
+  font-size: 0.6875rem;
+  letter-spacing: 0.01em;
+  text-transform: none;
+}
+
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  .dash-status-badge--transit {
+  background: rgb(26 21 35 / 0.06);
+  color: #1a1523;
+}
+
+html:not(.capacitor-native).dark :is(main[data-dashboard-main], [data-dashboard-teleport])
+  .dash-status-badge--transit {
+  background: rgb(255 255 255 / 0.1);
+  color: #ffffff;
+}
+
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  .dash-table-bulk-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-bottom: 1px solid var(--dash-table-divider);
+  background: #f5f5f7;
+}
+
+html:not(.capacitor-native).dark :is(main[data-dashboard-main], [data-dashboard-teleport])
+  .dash-table-bulk-bar {
+  background: #282828;
+}
+
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  .dash-table-bulk-bar > span {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--dash-table-body-ink);
+}
+
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  :is(.data-table-shell, .dash-table-shell, .activity-log-shell)
+  thead
+  .text-gray-400,
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  :is(.data-table-shell, .dash-table-shell, .activity-log-shell)
+  thead
+  .opacity-50 {
+  color: rgb(26 21 35 / 0.28) !important;
+}
+
+html:not(.capacitor-native).dark :is(main[data-dashboard-main], [data-dashboard-teleport])
+  :is(.data-table-shell, .dash-table-shell, .activity-log-shell)
+  thead
+  .text-gray-400,
+html:not(.capacitor-native).dark :is(main[data-dashboard-main], [data-dashboard-teleport])
+  :is(.data-table-shell, .dash-table-shell, .activity-log-shell)
+  thead
+  .opacity-50 {
+  color: rgb(255 255 255 / 0.28) !important;
+}
+
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  :is(.data-table-shell, .dash-table-shell, .activity-log-shell)
+  thead
+  .text-primary-500,
+html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
+  :is(.data-table-shell, .dash-table-shell, .activity-log-shell)
+  thead
+  .text-gray-700 {
+  color: var(--dash-table-body-ink) !important;
+}
+
+/* ── Dashboard tour (teleported to body) ── */
+html:not(.capacitor-native) .tutorial-root .tutorial-scrim {
+  background: rgb(26 21 35 / 0.4);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+html:not(.capacitor-native).dark .tutorial-root .tutorial-scrim {
+  background: rgb(0 0 0 / 0.64);
+}
+
+html:not(.capacitor-native) .tutorial-root .tutorial-ring {
+  border: 0;
+  border-radius: 1.25rem;
+  box-shadow:
+    0 0 0 2px #1a1523,
+    0 12px 32px rgb(26 21 35 / 0.16);
+}
+
+html:not(.capacitor-native).dark .tutorial-root .tutorial-ring {
+  box-shadow:
+    0 0 0 2px #ffffff,
+    0 12px 32px rgb(0 0 0 / 0.45);
+}
+
+html:not(.capacitor-native) .tutorial-root .tutorial-ring--locked {
+  box-shadow:
+    0 0 0 2px #b45309,
+    0 12px 32px rgb(180 83 9 / 0.18);
+}
+
+html:not(.capacitor-native).dark .tutorial-root .tutorial-ring--locked {
+  box-shadow:
+    0 0 0 2px #fbbf24,
+    0 12px 32px rgb(251 191 36 / 0.16);
+}
+
+html:not(.capacitor-native) .tutorial-root .tutorial-card {
+  border: 0;
+  border-radius: 1.5rem;
+  background: #ffffff;
+  color: #1a1523;
+  box-shadow: 0 18px 50px rgb(26 21 35 / 0.16);
+}
+
+html:not(.capacitor-native).dark .tutorial-root .tutorial-card {
+  background: #1e1e1e;
+  color: #ffffff;
+  box-shadow: 0 18px 50px rgb(0 0 0 / 0.5);
+}
+
+html:not(.capacitor-native) .tutorial-root .tutorial-card__arrow {
+  border: 0;
+  background: #ffffff;
+}
+
+html:not(.capacitor-native).dark .tutorial-root .tutorial-card__arrow {
+  background: #1e1e1e;
+}
+
+html:not(.capacitor-native) .tutorial-root .tutorial-card__header,
+html:not(.capacitor-native) .tutorial-root .tutorial-card__footer {
+  border: 0;
+  padding: 0.875rem 1.25rem;
+}
+
+html:not(.capacitor-native) .tutorial-root .tutorial-card__step {
+  color: rgb(26 21 35 / 0.4);
+  letter-spacing: 0.08em;
+}
+
+html:not(.capacitor-native).dark .tutorial-root .tutorial-card__step {
+  color: rgb(255 255 255 / 0.4);
+}
+
+html:not(.capacitor-native) .tutorial-root .tutorial-card__close {
+  border-radius: 9999px;
+  color: rgb(26 21 35 / 0.58);
+}
+
+html:not(.capacitor-native) .tutorial-root .tutorial-card__close:hover {
+  background: #eeeeef;
+  color: #1a1523;
+}
+
+html:not(.capacitor-native).dark .tutorial-root .tutorial-card__close {
+  color: rgb(255 255 255 / 0.62);
+}
+
+html:not(.capacitor-native).dark .tutorial-root .tutorial-card__close:hover {
+  background: #282828;
+  color: #ffffff;
+}
+
+html:not(.capacitor-native) .tutorial-root .tutorial-card__body {
+  padding: 0.25rem 1.25rem 1.125rem;
+}
+
+html:not(.capacitor-native) .tutorial-root .tutorial-card__icon {
+  height: 2.75rem;
+  width: 2.75rem;
+  border-radius: 9999px;
+  background: #f5f5f7;
+  color: #1a1523;
+}
+
+html:not(.capacitor-native).dark .tutorial-root .tutorial-card__icon {
+  background: #282828;
+  color: #ffffff;
+}
+
+html:not(.capacitor-native) .tutorial-root .tutorial-card__icon--locked {
+  background: rgb(245 158 11 / 0.16);
+  color: #b45309;
+}
+
+html:not(.capacitor-native).dark .tutorial-root .tutorial-card__icon--locked {
+  background: rgb(251 191 36 / 0.14);
+  color: #fbbf24;
+}
+
+html:not(.capacitor-native) .tutorial-root .tutorial-card__title {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #1a1523;
+}
+
+html:not(.capacitor-native).dark .tutorial-root .tutorial-card__title {
+  color: #ffffff;
+}
+
+html:not(.capacitor-native) .tutorial-root .tutorial-card__copy {
+  color: rgb(26 21 35 / 0.58);
+  font-size: 0.8125rem;
+  line-height: 1.55;
+}
+
+html:not(.capacitor-native).dark .tutorial-root .tutorial-card__copy {
+  color: rgb(255 255 255 / 0.62);
+}
+
+html:not(.capacitor-native) .tutorial-root .tutorial-card__lock {
+  border: 0;
+  border-radius: 1rem;
+  background: rgb(245 158 11 / 0.12);
+  padding: 0.625rem 0.75rem;
+}
+
+html:not(.capacitor-native).dark .tutorial-root .tutorial-card__lock {
+  background: rgb(251 191 36 / 0.12);
+}
+
+html:not(.capacitor-native) .tutorial-root .tutorial-card__lock-title {
+  color: #92400e;
+}
+
+html:not(.capacitor-native).dark .tutorial-root .tutorial-card__lock-title {
+  color: #fde68a;
+}
+
+html:not(.capacitor-native) .tutorial-root .tutorial-card__lock-copy {
+  color: rgb(146 64 14 / 0.82);
+}
+
+html:not(.capacitor-native).dark .tutorial-root .tutorial-card__lock-copy {
+  color: rgb(253 230 138 / 0.8);
+}
+
+html:not(.capacitor-native) .tutorial-root .tutorial-card__ghost {
+  border-radius: 9999px;
+  padding: 0.4375rem 0.875rem;
+  color: rgb(26 21 35 / 0.58);
+}
+
+html:not(.capacitor-native) .tutorial-root .tutorial-card__ghost:hover {
+  background: #eeeeef;
+  color: #1a1523;
+}
+
+html:not(.capacitor-native).dark .tutorial-root .tutorial-card__ghost {
+  color: rgb(255 255 255 / 0.62);
+}
+
+html:not(.capacitor-native).dark .tutorial-root .tutorial-card__ghost:hover {
+  background: #282828;
+  color: #ffffff;
+}
+
+html:not(.capacitor-native) .tutorial-root .tutorial-card__cta {
+  border: 0;
+  border-radius: 9999px;
+  background: #1a1523;
+  padding: 0.5rem 1rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+html:not(.capacitor-native) .tutorial-root .tutorial-card__cta:hover {
+  background: #000000;
+}
+
+html:not(.capacitor-native).dark .tutorial-root .tutorial-card__cta {
+  background: #ffffff;
+  color: #1a1523;
+}
+
+html:not(.capacitor-native).dark .tutorial-root .tutorial-card__cta:hover {
+  background: #f5f5f7;
+}
+
+/* ── Expanded table overlay (Sales, Inventory, Departments) ── */
+html:not(.capacitor-native) .dash-table-expand {
+  background: #f5f5f7 !important;
+}
+
+html:not(.capacitor-native).dark .dash-table-expand {
+  background: #080808 !important;
+}
+
+html:not(.capacitor-native) .dash-table-expand__header {
+  flex-shrink: 0;
+  border: 0 !important;
+  background: #f5f5f7 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  padding: 1rem 1.5rem 0.875rem;
+}
+
+html:not(.capacitor-native).dark .dash-table-expand__header {
+  background: #080808 !important;
+}
+
+html:not(.capacitor-native) .dash-table-expand__eyebrow {
+  margin: 0;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(26 21 35 / 0.4);
+}
+
+html:not(.capacitor-native).dark .dash-table-expand__eyebrow {
+  color: rgb(255 255 255 / 0.4);
+}
+
+html:not(.capacitor-native) .dash-table-expand__title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #1a1523;
+}
+
+html:not(.capacitor-native).dark .dash-table-expand__title {
+  color: #ffffff;
+}
+
+html:not(.capacitor-native) .dash-table-expand__meta {
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  color: rgb(26 21 35 / 0.58);
+}
+
+html:not(.capacitor-native).dark .dash-table-expand__meta {
+  color: rgb(255 255 255 / 0.62);
+}
+
+html:not(.capacitor-native) .dash-table-expand__close {
+  height: 2.25rem;
+  width: 2.25rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 9999px;
+  background: transparent;
+  color: rgb(26 21 35 / 0.58);
+}
+
+html:not(.capacitor-native) .dash-table-expand__close:hover {
+  background: #eeeeef;
+  color: #1a1523;
+}
+
+html:not(.capacitor-native).dark .dash-table-expand__close {
+  color: rgb(255 255 255 / 0.62);
+}
+
+html:not(.capacitor-native).dark .dash-table-expand__close:hover {
+  background: #282828;
+  color: #ffffff;
+}
+
+html:not(.capacitor-native) .dash-table-expand__field {
+  border: 0 !important;
+  border-radius: 0.75rem !important;
+  background: #ffffff !important;
+  color: #1a1523 !important;
+  box-shadow: none !important;
+}
+
+html:not(.capacitor-native) .dash-table-expand__field::placeholder {
+  color: rgb(26 21 35 / 0.38);
+}
+
+html:not(.capacitor-native) .dash-table-expand__field:focus {
+  outline: none;
+  box-shadow: 0 0 0 1px rgb(26 21 35 / 0.18) !important;
+}
+
+html:not(.capacitor-native).dark .dash-table-expand__field {
+  background: #1e1e1e !important;
+  color: #ffffff !important;
+}
+
+html:not(.capacitor-native).dark .dash-table-expand__field::placeholder {
+  color: rgb(255 255 255 / 0.38);
+}
+
+html:not(.capacitor-native).dark .dash-table-expand__field:focus {
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.22) !important;
+}
+
+html:not(.capacitor-native) .dash-table-expand .dash-table-expand__body,
+html:not(.capacitor-native) .dash-table-expand .data-table-shell {
+  margin: 0 1.25rem 1.25rem;
+  border: 0 !important;
+  border-radius: 1.5rem !important;
+  background: #ffffff !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html:not(.capacitor-native).dark .dash-table-expand .dash-table-expand__body,
+html:not(.capacitor-native).dark .dash-table-expand .data-table-shell {
+  background: #1e1e1e !important;
+}
+
+html:not(.capacitor-native) .dash-table-expand .dash-table-pagination {
+  border-top: 1px solid rgb(26 21 35 / 0.06);
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+html:not(.capacitor-native).dark .dash-table-expand .dash-table-pagination {
+  border-top-color: rgb(255 255 255 / 0.08);
+}
+
+html:not(.capacitor-native) .dash-table-expand thead.sticky,
+html:not(.capacitor-native) .dash-table-expand thead.sticky th {
+  background: #ffffff !important;
+}
+
+html:not(.capacitor-native).dark .dash-table-expand thead.sticky,
+html:not(.capacitor-native).dark .dash-table-expand thead.sticky th {
+  background: #1e1e1e !important;
+}
+
+html:not(.capacitor-native) .staff-invite-secret {
+  background: #f5f5f7;
+}
+
+html:not(.capacitor-native).dark .staff-invite-secret {
+  background: #282828;
+}
+
+html:not(.capacitor-native) .staff-invite-regen {
+  color: rgb(26 21 35 / 0.58);
+}
+
+html:not(.capacitor-native).dark .staff-invite-regen {
+  color: rgb(255 255 255 / 0.62);
+}
+
+html:not(.capacitor-native) .dash-overlay-shell .ios-form__toggle {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+

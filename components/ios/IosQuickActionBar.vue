@@ -7,7 +7,7 @@
   >
     <div class="ios-quick-actions__scroll">
       <button
-        v-for="option in options"
+        v-for="option in orderedOptions"
         :key="option.value"
         type="button"
         :role="role === 'tablist' && !option.action ? 'tab' : undefined"
@@ -36,7 +36,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Component } from 'vue'
+import { computed, type Component } from 'vue'
 import { FunnelIcon } from '~/utils/app-icons'
 import { useIosHaptics } from '~/composables/useIosHaptics'
 
@@ -49,11 +49,17 @@ export type IosQuickActionOption = {
   badge?: number
   /** Runs instead of updating v-model (e.g. open modal, navigate). */
   action?: () => void
+  /**
+   * Pins the option to the end of the row no matter where it sits in `options`:
+   * the create action is always the last button and the overflow menu the one
+   * before it, so those two tap targets never move between screens.
+   */
+  trailing?: 'add' | 'more'
 }
 
 const modelValue = defineModel<string>({ required: true })
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     options: IosQuickActionOption[]
     ariaLabel: string
@@ -65,6 +71,12 @@ withDefaults(
     card: true,
   }
 )
+
+const orderedOptions = computed(() => [
+  ...props.options.filter((option) => !option.trailing),
+  ...props.options.filter((option) => option.trailing === 'more'),
+  ...props.options.filter((option) => option.trailing === 'add'),
+])
 
 const emit = defineEmits<{
   change: [value: string]

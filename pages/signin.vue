@@ -5,8 +5,8 @@
     panel-description="Sign in to manage stock, ring up activity, and keep every branch aligned without jumping between tools."
   >
     <AuthPageHeader
-      title="Welcome back"
-      subtitle="Sign in to manage your store and products."
+      title="Welcome back!"
+      subtitle="Sign in to manage inventory, sales, and every branch from one workspace."
     />
 
     <AuthSegmentToggle mode="signin" />
@@ -24,7 +24,7 @@
             label="Email"
             type="email"
             autocomplete="username"
-            placeholder="Your email"
+            placeholder="Enter your email"
             :icon="EnvelopeIcon"
             required
           />
@@ -42,13 +42,7 @@
             required
             @focus="offerBiometricAutofillOnFocus"
             @biometric-autofill="fillFromBiometric"
-          >
-            <template #label-right>
-              <NuxtLink to="/forgot-password" class="auth-link shrink-0 text-xs">
-                Forgot?
-              </NuxtLink>
-            </template>
-          </AuthField>
+          />
 
           <div v-if="isSupported" class="auth-checkbox-options">
             <AuthCheckbox v-model="form.enableFaceId">
@@ -56,8 +50,9 @@
             </AuthCheckbox>
           </div>
 
-          <div class="auth-checkbox-options">
+          <div class="auth-form-meta">
             <AuthCheckbox v-model="form.rememberMe">Remember me</AuthCheckbox>
+            <NuxtLink to="/forgot-password" class="auth-link">Forgot password?</NuxtLink>
           </div>
         </template>
 
@@ -106,7 +101,7 @@
 
         <template v-else>
           <AuthPrimaryButton
-            label="Sign in"
+            label="Log In"
             :loading="isLoading"
             :disabled="isLoading || isBiometricFilling"
           />
@@ -114,8 +109,8 @@
       </form>
 
       <p v-if="!awaitingTwoFactor" class="auth-auth-footer-link">
-        No account yet?
-        <NuxtLink to="/signup">Create one</NuxtLink>
+        Don't have an account?
+        <NuxtLink to="/signup">Sign Up</NuxtLink>
       </p>
       </div>
     </AuthCard>

@@ -8,9 +8,7 @@ html.capacitor-ios.capacitor-native .ios-profile-menu {
   border: none;
   border-radius: 16px;
   background: var(--ios-home-bg, #f2f2f7);
-  box-shadow:
-    0 12px 40px rgb(0 0 0 / 0.18),
-    0 0 0 1px rgb(120 120 128 / 0.08);
+  box-shadow: var(--ios-float-shadow);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   padding: 0.5rem 0 0.625rem;
@@ -18,9 +16,7 @@ html.capacitor-ios.capacitor-native .ios-profile-menu {
 
 html.capacitor-ios.capacitor-native.dark .ios-profile-menu {
   background: #000000;
-  box-shadow:
-    0 16px 48px rgb(0 0 0 / 0.55),
-    0 0 0 1px rgb(255 255 255 / 0.08);
+  box-shadow: var(--ios-float-shadow);
 }
 
 html.capacitor-ios.capacitor-native .ios-profile-menu__hero {
@@ -41,6 +37,7 @@ html.capacitor-ios.capacitor-native.dark .ios-profile-menu__hero {
 
 html.capacitor-ios.capacitor-native .ios-profile-menu__avatar {
   flex-shrink: 0;
+  overflow: hidden;
   width: 2.5rem;
   height: 2.5rem;
   font-size: 0.6875rem;
@@ -149,4 +146,21 @@ html.capacitor-ios.capacitor-native .ios-profile-menu .ios-drawer-menu__check {
   height: 1rem;
   flex-shrink: 0;
   color: var(--ios-accent);
+}
+
+/* Store + notifications dropdowns */
+html.capacitor-ios.capacitor-native .dash-store-panel__surface,
+html.capacitor-ios.capacitor-native .dash-notify-panel--dropdown {
+  border: none;
+  border-radius: 16px;
+  background: var(--ios-home-card, #ffffff);
+  box-shadow: var(--ios-float-shadow);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+html.capacitor-ios.capacitor-native.dark .dash-store-panel__surface,
+html.capacitor-ios.capacitor-native.dark .dash-notify-panel--dropdown {
+  background: var(--ios-surface-solid, #1c1c1e);
+  box-shadow: var(--ios-float-shadow);
 }

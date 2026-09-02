@@ -35,7 +35,7 @@
         :badge="`Plan: ${currentSubscriptionLabel}`"
       >
         <div
-          v-if="userStore.isSuperAdmin"
+          v-if="userStore.isSuperAdmin && !isCapacitorIos"
           class="mb-4 flex flex-wrap items-center gap-2 border-b border-gray-100 pb-4 dark:border-white/[0.06]"
         >
           <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Workspace style</span>
@@ -48,10 +48,19 @@
             }}
           </span>
         </div>
-        <p class="mb-3 text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
+        <p
+          :class="[
+            'text-[11px] leading-relaxed text-gray-500 dark:text-gray-400',
+            isCapacitorIos ? 'dash-setting-row dash-setting-row--note' : 'mb-3',
+          ]"
+        >
           Questions about billing or your data? <GrowthSupportLink />
         </p>
-        <p class="mb-3 text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
+        <!-- Plan vs workspace style: the "Workspace style" panel below covers this on iOS -->
+        <p
+          v-if="!isCapacitorIos"
+          class="mb-3 text-[11px] leading-relaxed text-gray-500 dark:text-gray-400"
+        >
           <span class="font-medium text-gray-700 dark:text-gray-300">Plan</span> is what you pay
           for (Micro, Medium, Enterprise).
           <span class="font-medium text-gray-700 dark:text-gray-300"> Workspace style</span> controls
@@ -153,6 +162,7 @@
         <ExperienceModePicker
           :model-value="selectedExperienceMode"
           :disabled="!canEditSettings || isSavingExperienceMode"
+          :show-changes="!isCapacitorIos"
           @update:model-value="onExperienceModeChange"
         />
       </DashboardSettingsPanel>
@@ -186,18 +196,14 @@
                 {{ option.description }}
               </p>
             </div>
-            <label class="relative inline-flex shrink-0 items-center cursor-pointer">
-              <input
-                :checked="isProgressiveCapabilityEnabled(option.capability, enabledCapabilities)"
-                type="checkbox"
-                class="sr-only peer"
-                :disabled="!canEditSettings || togglingProgressiveCapability === option.capability"
-                @change="onProgressiveCapabilityToggle(option.capability, ($event.target as HTMLInputElement).checked)"
-              />
-              <div
-                class="w-8 h-4 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-gray-400/40 dark:peer-focus:ring-white/20 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-gray-900 dark:peer-checked:bg-gray-200 peer-disabled:opacity-50"
-              />
-            </label>
+            <Switch
+              :model-value="isProgressiveCapabilityEnabled(option.capability, enabledCapabilities)"
+              :disabled="!canEditSettings || togglingProgressiveCapability === option.capability"
+              :aria-label="option.label"
+              @update:model-value="
+                (checked: boolean) => onProgressiveCapabilityToggle(option.capability, checked)
+              "
+            />
           </div>
         </div>
       </DashboardSettingsPanel>
@@ -210,8 +216,18 @@
         subtitle="Create, edit, and switch between store locations."
       >
         <template #actions>
+          <button
+            v-if="isCapacitorIos && !isStaff"
+            type="button"
+            :class="editLinkClass"
+            :disabled="!canAddStore"
+            :title="canAddStore ? 'Create branch' : 'Upgrade to add more stores'"
+            @click="openCreateStoreModal"
+          >
+            Add
+          </button>
           <Button
-            v-if="!isStaff"
+            v-else-if="!isStaff"
             variant="outline"
             size="sm"
             :class="headerBtnClass"
@@ -279,14 +295,14 @@
             :fill="false"
             extra-class="py-8"
           >
-            <Button size="sm" @click="openCreateStoreModal" extra-class="!rounded-2xl"
-              >Create branch</Button
-            >
+            <Button variant="neutral" size="sm" extra-class="!rounded-2xl" @click="openCreateStoreModal">
+              Create branch
+            </Button>
           </DashboardTableEmptyState>
 
           <div
             v-else
-            class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+            class="dash-branch-grid grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
             role="list"
             aria-label="Branches"
           >
@@ -380,12 +396,8 @@
         title="Your assignment"
         subtitle="Store and department linked to your account."
       >
-        <div v-if="isLoadingStoreInfo" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div
-            v-for="i in 4"
-            :key="i"
-            class="h-10 animate-pulse rounded-sm bg-gray-200/80 dark:bg-white/10"
-          />
+        <div v-if="isLoadingStoreInfo">
+          <DashFieldGridSkeleton :count="4" />
         </div>
         <div v-else class="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
@@ -508,16 +520,15 @@
         compact
       >
         <template #actions>
-          <Button
+          <button
             v-if="canEditSettings"
-            variant="primary"
-            size="sm"
-            :class="headerTextBtnClass"
+            type="button"
+            :class="editLinkClass"
             aria-label="Save inventory settings"
             @click="saveInventorySettings"
           >
             Save
-          </Button>
+          </button>
           <span v-else :class="viewOnlyBadgeClass">View only</span>
         </template>
 
@@ -557,17 +568,11 @@
                 Create purchase orders when stock is low
               </p>
             </div>
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input
-                v-model="inventorySettings.autoReorder"
-                type="checkbox"
-                :disabled="!canEditSettings"
-                class="sr-only peer"
-              />
-              <div
-                class="w-8 h-4 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-gray-400/40 dark:peer-focus:ring-white/20 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-gray-900 dark:peer-checked:bg-gray-200"
-              ></div>
-            </label>
+            <Switch
+              v-model="inventorySettings.autoReorder"
+              :disabled="!canEditSettings"
+              aria-label="Auto-reorder enabled"
+            />
           </div>
 
           <div :class="[settingRowClass, '!border-0']">
@@ -599,21 +604,20 @@
         compact
       >
         <template #actions>
-          <Button
+          <button
             v-if="canEditSettings"
-            variant="primary"
-            size="sm"
-            :class="headerTextBtnClass"
+            type="button"
+            :class="editLinkClass"
             aria-label="Save payment methods"
             @click="savePaymentSettings"
           >
             Save
-          </Button>
+          </button>
           <span v-else :class="viewOnlyBadgeClass">View only</span>
         </template>
 
         <div class="space-y-3">
-          <p class="text-[11px] text-gray-500 dark:text-gray-400">
+          <p v-if="!isCapacitorIos" class="text-[11px] text-gray-500 dark:text-gray-400">
             These appear on new sales and balance payments. Add labels your staff use at the
             counter.
           </p>
@@ -643,10 +647,17 @@
               placeholder="e.g. OPay, Moniepoint"
               @keydown.enter.prevent="addPaymentTender"
             />
-            <Button variant="outline" size="sm" @click="addPaymentTender">Add</Button>
+            <Button
+              variant="neutral"
+              size="sm"
+              :extra-class="headerTextBtnClass"
+              @click="addPaymentTender"
+            >
+              Add
+            </Button>
             <button
               type="button"
-              class="text-[11px] font-medium text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+              :class="isCapacitorIos ? cancelLinkClass : 'text-[11px] font-medium text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'"
               @click="resetPaymentTendersToDefault"
             >
               Reset to defaults
@@ -662,16 +673,15 @@
         compact
       >
         <template #actions>
-          <Button
+          <button
             v-if="canEditSettings"
-            variant="primary"
-            size="sm"
-            :class="headerTextBtnClass"
+            type="button"
+            :class="editLinkClass"
             aria-label="Save sales and receipt settings"
             @click="saveReceiptSettings"
           >
             Save
-          </Button>
+          </button>
           <span v-else :class="viewOnlyBadgeClass">View only</span>
         </template>
 
@@ -724,17 +734,11 @@
                 Print receipt after sale
               </p>
             </div>
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input
-                v-model="receiptSettings.autoPrint"
-                type="checkbox"
-                :disabled="!canEditSettings"
-                class="sr-only peer"
-              />
-              <div
-                class="w-8 h-4 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-gray-400/40 dark:peer-focus:ring-white/20 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-gray-900 dark:peer-checked:bg-gray-200"
-              ></div>
-            </label>
+            <Switch
+              v-model="receiptSettings.autoPrint"
+              :disabled="!canEditSettings"
+              aria-label="Print receipt automatically"
+            />
           </div>
         </div>
       </DashboardSettingsPanel>
@@ -747,7 +751,7 @@
         compact
       >
         <div class="space-y-4">
-          <p class="text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
+          <p v-if="!isCapacitorIos" class="text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
             Inventory exports as a ZIP: one folder per category, each with an
             <code class="rounded bg-black/5 px-1 py-0.5 text-[10px] dark:bg-white/10">items.xlsx</code>
             file, plus a
@@ -769,9 +773,9 @@
 
           <div class="flex flex-wrap items-center gap-2">
             <Button
-              variant="outline"
+              variant="neutral"
               size="sm"
-              :class="headerTextBtnClass"
+              :extra-class="headerTextBtnClass"
               :disabled="dataExporting"
               :loading="dataExporting && !dataExportStatus"
               @click="handleExportAllStoreData"
@@ -1007,6 +1011,7 @@ import Button from '~/components/ui/Button.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import Modal from '~/components/ui/Modal.vue'
 import SidePanel from '~/components/ui/SidePanel.vue'
+import Switch from '~/components/ui/Switch.vue'
 import {
   IosForm,
   IosFormSection,

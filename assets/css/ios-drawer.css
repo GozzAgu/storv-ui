@@ -201,26 +201,15 @@ html.capacitor-ios.capacitor-native .ios-drawer .ios-drawer-menu__row--active {
   background: transparent;
 }
 
-/* Form fields — see ios-drawer-form.css for CRUD; base fallbacks below */
+/* Form fields — appearance lives in ios-fields.css (auth parity) */
 html.capacitor-ios.capacitor-native .ios-drawer:not(.dashboard-native-sheet--crud) label,
 html.capacitor-ios.capacitor-native .ios-drawer:not(.dashboard-native-sheet--crud) .dash-field-label,
 html.capacitor-ios.capacitor-native .ios-drawer:not(.dashboard-native-sheet--crud) .dash-drawer-label {
   display: block;
-  margin-bottom: 0.375rem;
-  font-size: var(--ios-dash-secondary-size, 0.6875rem) !important;
-  font-weight: 500;
-  color: var(--ios-label) !important;
-}
-
-html.capacitor-ios.capacitor-native .ios-drawer:not(.dashboard-native-sheet--crud) .app-field,
-html.capacitor-ios.capacitor-native .ios-drawer:not(.dashboard-native-sheet--crud) input:not([type='checkbox']):not([type='radio']),
-html.capacitor-ios.capacitor-native .ios-drawer:not(.dashboard-native-sheet--crud) select,
-html.capacitor-ios.capacitor-native .ios-drawer:not(.dashboard-native-sheet--crud) textarea {
-  min-height: 2.75rem;
-  border-radius: 12px !important;
-  border: 1px solid var(--ios-separator) !important;
-  background: var(--ios-fill-tertiary) !important;
-  font-size: var(--ios-dash-menu-size, 0.8125rem) !important;
+  margin-bottom: 0.5rem;
+  font-size: var(--ios-field-label-size, 0.8125rem) !important;
+  font-weight: 600;
+  color: var(--ios-field-ink) !important;
 }
 
 /* ── Footer ── */

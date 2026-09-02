@@ -6,5 +6,6 @@ describe('receipt-status', () => {
     expect(getReceiptStatusBadge('completed').label).toBe('Completed')
     expect(getReceiptStatusBadge('refunded').label).toBe('Refunded')
     expect(getReceiptStatusBadge('balance_due').label).toBe('Balance due')
+    expect(getReceiptStatusBadge('completed').class).toContain('rounded-full')
   })
 })

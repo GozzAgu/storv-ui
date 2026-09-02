@@ -1,32 +1,9 @@
 /**
- * iOS search fields — floating white pill (mockup style).
- * Applies to IosSearchBar, toolbar search, drawers, and global search overlay.
+ * iOS search — layout + inner-input reset.
+ * The chrome (radius, height, icon) lives in ios-fields.css. This file is
+ * unlayered so it can beat `@layer base` field borders that otherwise paint a
+ * second rectangle inside the rounded search wrapper.
  */
-
-html.capacitor-ios.capacitor-native {
-  --ios-search-bg: var(--ios-surface-solid, #ffffff);
-  --ios-search-shadow:
-    0 4px 20px rgb(15 23 42 / 0.07),
-    0 1px 3px rgb(15 23 42 / 0.04);
-  --ios-search-shadow-focus:
-    0 6px 24px rgb(15 23 42 / 0.1),
-    0 2px 6px rgb(15 23 42 / 0.05);
-  --ios-search-radius: 9999px;
-  --ios-search-height: 3rem;
-  --ios-search-pad-inline: 1rem;
-  --ios-search-icon-size: 1.125rem;
-  --ios-search-icon-gap: 0.625rem;
-}
-
-html.capacitor-ios.capacitor-native.dark {
-  --ios-search-bg: var(--ios-surface-solid, #1c1c1e);
-  --ios-search-shadow:
-    0 6px 24px rgb(0 0 0 / 0.32),
-    0 1px 3px rgb(0 0 0 / 0.2);
-  --ios-search-shadow-focus:
-    0 8px 28px rgb(0 0 0 / 0.4),
-    0 2px 6px rgb(0 0 0 / 0.24);
-}
 
 /* ── Sticky search host ── */
 html.capacitor-ios.capacitor-native .ios-search-bar-host {
@@ -50,69 +27,44 @@ html.capacitor-ios.capacitor-native .ios-search-bar-host--sticky {
   );
 }
 
-/* ── IosSearchBar component ── */
-html.capacitor-ios.capacitor-native .ios-search-bar {
-  display: flex;
-  align-items: center;
-  gap: var(--ios-search-icon-gap);
-  min-height: var(--ios-search-height);
-  padding: 0 var(--ios-search-pad-inline);
-  border-radius: var(--ios-search-radius);
+/* ── Wrapper internals ── */
+html.capacitor-ios.capacitor-native .ios-search-input-wrap > kbd {
+  display: none !important;
+}
+
+/*
+ * Nested search inputs must be borderless — the label.ios-search-bar is the
+ * visible field. Unlayered !important wins over the global @layer base
+ * `input { border-width: 1px }` rule.
+ */
+html.capacitor-ios.capacitor-native .ios-search-bar .ios-search-bar__input,
+html.capacitor-ios.capacitor-native .ios-search-bar .ios-search-bar__input:focus,
+html.capacitor-ios.capacitor-native .ios-search-bar .ios-search-bar__input:focus-visible {
   border: none !important;
+  border-width: 0 !important;
+  border-style: none !important;
+  border-color: transparent !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
   outline: none !important;
-  background: var(--ios-search-bg);
-  box-shadow: var(--ios-search-shadow);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  transition:
-    box-shadow 0.18s ease,
-    transform 0.12s var(--ios-spring, ease);
+  min-height: 0 !important;
+  height: auto !important;
+  padding: 0 !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
 }
 
-html.capacitor-ios.capacitor-native .ios-search-bar:focus,
-html.capacitor-ios.capacitor-native .ios-search-bar:focus-within {
-  border: none !important;
-  outline: none !important;
+html.capacitor-ios.capacitor-native .ios-search-bar input[type='search']::-webkit-search-decoration,
+html.capacitor-ios.capacitor-native .ios-search-bar input[type='search']::-webkit-search-cancel-button,
+html.capacitor-ios.capacitor-native .ios-search-bar input[type='search']::-webkit-search-results-button,
+html.capacitor-ios.capacitor-native .ios-search-bar input[type='search']::-webkit-search-results-decoration {
+  display: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
 }
 
-html.capacitor-ios.capacitor-native .ios-search-bar:focus-within {
-  box-shadow: var(--ios-search-shadow-focus);
-}
-
-html.capacitor-ios.capacitor-native .ios-search-bar--compact {
-  min-height: 2.625rem;
-}
-
-html.capacitor-ios.capacitor-native .ios-search-bar__icon {
-  width: var(--ios-search-icon-size);
-  height: var(--ios-search-icon-size);
-  flex-shrink: 0;
-  color: var(--ios-label-secondary);
-  opacity: 0.85;
-}
-
-html.capacitor-ios.capacitor-native .ios-search-bar__input {
-  min-width: 0;
-  flex: 1;
-  padding: 0;
-  font-size: var(--ios-type-input-size) !important;
-  line-height: 1.25;
-  color: var(--ios-label);
-  outline: none;
-  -webkit-appearance: none;
-  appearance: none;
-}
-
-html.capacitor-ios.capacitor-native .ios-search-bar__input::placeholder {
-  color: var(--ios-label-secondary);
-}
-
-html.capacitor-ios.capacitor-native .ios-search-bar__input::-webkit-search-decoration,
-html.capacitor-ios.capacitor-native .ios-search-bar__input::-webkit-search-cancel-button {
-  -webkit-appearance: none;
-  appearance: none;
-}
-
+/* ── Clear button ── */
 html.capacitor-ios.capacitor-native .ios-search-bar__clear {
   display: inline-flex;
   align-items: center;
@@ -123,10 +75,12 @@ html.capacitor-ios.capacitor-native .ios-search-bar__clear {
   padding: 0;
   border: none;
   border-radius: 9999px;
-  color: var(--ios-label-secondary);
+  color: var(--ios-field-muted);
   background: rgb(120 120 128 / 0.14);
   -webkit-tap-highlight-color: transparent;
-  transition: background 0.12s ease, opacity 0.12s ease;
+  transition:
+    background 0.12s ease,
+    opacity 0.12s ease;
 }
 
 html.capacitor-ios.capacitor-native.dark .ios-search-bar__clear {
@@ -135,188 +89,4 @@ html.capacitor-ios.capacitor-native.dark .ios-search-bar__clear {
 
 html.capacitor-ios.capacitor-native .ios-search-bar__clear:active {
   opacity: 0.72;
-}
-
-/* ── Toolbar / drawer / global search wrappers ── */
-html.capacitor-ios.capacitor-native .ios-search-input-wrap {
-  display: flex;
-  align-items: center;
-  gap: var(--ios-search-icon-gap);
-  min-height: var(--ios-search-height);
-  padding: 0 var(--ios-search-pad-inline);
-  border: none !important;
-  border-radius: var(--ios-search-radius);
-  background: var(--ios-search-bg);
-  box-shadow: var(--ios-search-shadow);
-  transition: box-shadow 0.18s ease;
-}
-
-html.capacitor-ios.capacitor-native .ios-search-input-wrap:focus-within {
-  box-shadow: var(--ios-search-shadow-focus);
-}
-
-html.capacitor-ios.capacitor-native .ios-search-input-wrap > svg,
-html.capacitor-ios.capacitor-native
-  .ios-search-input-wrap
-  > .pointer-events-none.absolute {
-  position: static !important;
-  left: auto !important;
-  top: auto !important;
-  transform: none !important;
-  width: var(--ios-search-icon-size) !important;
-  height: var(--ios-search-icon-size) !important;
-  color: var(--ios-label-secondary) !important;
-  opacity: 0.85;
-  flex-shrink: 0;
-}
-
-html.capacitor-ios.capacitor-native .ios-search-input-wrap > kbd {
-  display: none !important;
-}
-
-html.capacitor-ios.capacitor-native .ios-search-input-wrap > button[type='button'] {
-  position: static !important;
-  transform: none !important;
-  flex-shrink: 0;
-}
-
-/* ── All standalone search inputs ── */
-html.capacitor-ios.capacitor-native .ios-search-input-wrap input[type='search'],
-html.capacitor-ios.capacitor-native .ios-search-input-wrap input[type='text'].app-field {
-  min-height: 0 !important;
-  height: auto !important;
-  flex: 1;
-  min-width: 0;
-  padding: 0 !important;
-  border: none !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  outline: none !important;
-  font-size: var(--ios-type-input-size) !important;
-  color: var(--ios-label) !important;
-}
-
-html.capacitor-ios.capacitor-native .ios-search-input-wrap input[type='search']:focus,
-html.capacitor-ios.capacitor-native .ios-search-input-wrap input[type='search']:focus-visible,
-html.capacitor-ios.capacitor-native .ios-search-input-wrap input[type='text'].app-field:focus,
-html.capacitor-ios.capacitor-native .ios-search-input-wrap input[type='text'].app-field:focus-visible {
-  border: none !important;
-  outline: none !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-html.capacitor-ios.capacitor-native
-  input[type='search']:not([type='checkbox']):not([type='radio']):not([type='range']):not(
-    [type='hidden']
-  ):not([type='button']):not([type='submit']):not([type='reset']):not(.ios-search-bar__input):not(
-    .ios-search-input-wrap input
-  ),
-html.capacitor-ios.capacitor-native
-  input[type='search'].app-field:not([type='checkbox']):not([type='radio']):not([type='range']):not(
-    [type='hidden']
-  ):not([type='button']):not([type='submit']):not([type='reset']):not(.ios-search-input-wrap input),
-html.capacitor-ios.capacitor-native .dash-table-toolbar input[type='search']:not(.ios-search-input-wrap input),
-html.capacitor-ios.capacitor-native .dash-page-header input[type='search']:not(.ios-search-input-wrap input),
-html.capacitor-ios.capacitor-native .ios-drawer input[type='search']:not(.ios-search-input-wrap input) {
-  min-height: var(--ios-search-height) !important;
-  height: var(--ios-search-height);
-  padding-inline: calc(var(--ios-search-pad-inline) + var(--ios-search-icon-size) + var(--ios-search-icon-gap)) var(--ios-search-pad-inline) !important;
-  border: none !important;
-  border-radius: var(--ios-search-radius) !important;
-  background: var(--ios-search-bg) !important;
-  box-shadow: var(--ios-search-shadow) !important;
-  /* 16px minimum — prevents iOS WKWebView focus zoom */
-  font-size: var(--ios-type-input-size) !important;
-  color: var(--ios-label) !important;
-  transition: box-shadow 0.18s ease;
-}
-
-html.capacitor-ios.capacitor-native .ios-search-bar .ios-search-bar__input {
-  height: auto;
-  min-height: 0 !important;
-  padding: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-html.capacitor-ios.capacitor-native
-  input[type='search']:not([type='checkbox']):not([type='radio']):not([type='range']):not(
-    [type='hidden']
-  ):not([type='button']):not([type='submit']):not([type='reset']):not(.ios-search-bar__input):focus,
-html.capacitor-ios.capacitor-native
-  input[type='search']:not([type='checkbox']):not([type='radio']):not([type='range']):not(
-    [type='hidden']
-  ):not([type='button']):not([type='submit']):not([type='reset']):not(.ios-search-bar__input):focus-visible,
-html.capacitor-ios.capacitor-native input[type='search'].app-field:focus,
-html.capacitor-ios.capacitor-native input[type='search'].app-field:focus-visible,
-html.capacitor-ios.capacitor-native .ios-search-input-wrap input:focus,
-html.capacitor-ios.capacitor-native .ios-search-input-wrap input:focus-visible,
-html.capacitor-ios.capacitor-native .ios-search-bar .ios-search-bar__input:focus {
-  outline: none !important;
-  border: none !important;
-  box-shadow: none !important;
-  background: transparent !important;
-}
-
-html.capacitor-ios.capacitor-native
-  input[type='search']:not(.ios-search-bar__input):focus,
-html.capacitor-ios.capacitor-native
-  input[type='search']:not(.ios-search-bar__input):focus-visible,
-html.capacitor-ios.capacitor-native .ios-search-input-wrap input[type='search']:focus,
-html.capacitor-ios.capacitor-native .ios-search-input-wrap input[type='search']:focus-visible,
-html.capacitor-ios.capacitor-native .ios-search-input-wrap input[type='text'].app-field:focus,
-html.capacitor-ios.capacitor-native .ios-search-input-wrap input[type='text'].app-field:focus-visible {
-  background: var(--ios-search-bg) !important;
-  box-shadow: var(--ios-search-shadow-focus) !important;
-}
-
-html.capacitor-ios.capacitor-native .ios-search-bar:focus-within {
-  background: var(--ios-search-bg);
-}
-
-html.capacitor-ios.capacitor-native input[type='search']::-webkit-search-decoration,
-html.capacitor-ios.capacitor-native input[type='search']::-webkit-search-cancel-button {
-  -webkit-appearance: none;
-  appearance: none;
-}
-
-/* Global search overlay */
-html.capacitor-ios.capacitor-native
-  [data-global-search-backdrop]
-  ~ div
-  input.app-field:not([type='checkbox']):not([type='radio']):not([type='range']):not(
-    [type='hidden']
-  ):not([type='button']):not([type='submit']):not([type='reset']) {
-  min-height: var(--ios-search-height) !important;
-  height: var(--ios-search-height);
-  padding-inline: calc(var(--ios-search-pad-inline) + var(--ios-search-icon-size) + var(--ios-search-icon-gap)) var(--ios-search-pad-inline) !important;
-  border: none !important;
-  border-radius: var(--ios-search-radius) !important;
-  background: var(--ios-search-bg) !important;
-  box-shadow: var(--ios-search-shadow) !important;
-  font-size: var(--ios-type-input-size) !important;
-}
-
-html.capacitor-ios.capacitor-native [data-global-search-backdrop] ~ div input.app-field:focus,
-html.capacitor-ios.capacitor-native
-  [data-global-search-backdrop]
-  ~ div
-  input.app-field:focus-visible {
-  outline: none !important;
-  border: none !important;
-  background: var(--ios-search-bg) !important;
-  box-shadow: var(--ios-search-shadow-focus) !important;
-}
-
-@media (prefers-reduced-transparency: reduce) {
-  html.capacitor-ios.capacitor-native .ios-search-bar,
-  html.capacitor-ios.capacitor-native input[type='search']:not(.ios-search-bar__input),
-  html.capacitor-ios.capacitor-native input[type='search'].app-field,
-  html.capacitor-ios.capacitor-native .ios-search-input-wrap input,
-  html.capacitor-ios.capacitor-native [data-global-search-backdrop] ~ div input.app-field {
-    background: var(--ios-search-bg) !important;
-  }
 }

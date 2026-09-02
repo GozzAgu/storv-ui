@@ -30,6 +30,7 @@ export function useDashboardDrawerChrome() {
   const drawerInputClass = APP_FIELD_ON_WHITE_CLASS
   const drawerTextareaClass = APP_FIELD_TEXTAREA_CLASS
   const drawerHintClass = 'dash-drawer-hint'
+  const drawerCalloutClass = 'dash-drawer-callout'
 
   const footerBtnOutlineClass =
     '!inline-flex !h-9 !min-h-9 !items-center !justify-center !rounded-full !px-4 !py-0 !text-xs !font-semibold'
@@ -72,6 +73,7 @@ export function useDashboardDrawerChrome() {
     drawerInputClass,
     drawerTextareaClass,
     drawerHintClass,
+    drawerCalloutClass,
     footerBtnOutlineClass,
     footerBtnPrimaryClass,
     scrollPickListOnWheel,

@@ -112,78 +112,48 @@ html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud lab
 html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .dash-drawer-label:not(p),
 html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-drawer__content label[class*='text-xs'][class*='font-medium'] {
   display: block;
-  margin-bottom: 0.4375rem;
-  font-size: var(--ios-dash-secondary-size, 0.6875rem) !important;
-  font-weight: 500 !important;
-  letter-spacing: -0.01em !important;
+  margin-bottom: 0.5rem;
+  font-size: var(--ios-field-label-size, 0.8125rem) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
   text-transform: none !important;
-  color: var(--ios-label-secondary) !important;
+  color: var(--ios-field-ink) !important;
 }
 
-/* ── Inputs & selects ── */
-html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .app-field,
-html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud input:not([type='checkbox']):not([type='radio']),
+/* ── Inputs & selects — appearance lives in ios-fields.css (auth parity) ── */
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .app-field:not(.ios-search-bar__input),
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__input,
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__select,
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__textarea,
 html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud select,
 html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud textarea {
   width: 100%;
-  min-height: 2.875rem;
-  padding: 0.6875rem 0.875rem !important;
+}
+
+/**
+ * Repeater rows (e.g. the table-template columns in Create category) come from
+ * the web layout as a bordered, inset `divide-y` table. On iOS they are just
+ * stacked fields: drop the inset padding and the divider chrome.
+ */
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__section .divide-y,
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .dash-drawer-section .divide-y {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__section .divide-y > div,
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .dash-drawer-section .divide-y > div {
+  padding: 0 !important;
   border: none !important;
-  border-radius: var(--ios-drawer-form-radius) !important;
-  background: var(--ios-drawer-form-field-bg) !important;
-  box-shadow: inset 0 0 0 1px rgb(120 120 128 / 0.08) !important;
-  font-size: var(--ios-type-input-size, var(--cap-ios-input, 1rem)) !important;
-  font-weight: 400;
-  color: var(--ios-label) !important;
-  -webkit-appearance: none;
-  appearance: none;
 }
 
-html.capacitor-ios.capacitor-native.dark .ios-drawer.dashboard-native-sheet--crud input:not([type='checkbox']):not([type='radio']),
-html.capacitor-ios.capacitor-native.dark .ios-drawer.dashboard-native-sheet--crud select,
-html.capacitor-ios.capacitor-native.dark .ios-drawer.dashboard-native-sheet--crud textarea,
-html.capacitor-ios.capacitor-native.dark .ios-drawer.dashboard-native-sheet--crud .app-field {
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.06) !important;
-}
-
-html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud input::placeholder,
-html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud textarea::placeholder {
-  color: var(--ios-label-tertiary);
-}
-
-html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .app-field:focus,
-html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud input:not([type='checkbox']):not([type='radio']):focus,
-html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud select:focus,
-html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud textarea:focus {
-  border: none !important;
-  box-shadow:
-    inset 0 0 0 1px rgb(120 120 128 / 0.35),
-    0 0 0 3px rgb(120 120 128 / 0.12) !important;
-  outline: none;
-}
-
-html.capacitor-ios.capacitor-native.dark .ios-drawer.dashboard-native-sheet--crud .app-field:focus,
-html.capacitor-ios.capacitor-native.dark .ios-drawer.dashboard-native-sheet--crud input:not([type='checkbox']):not([type='radio']):focus,
-html.capacitor-ios.capacitor-native.dark .ios-drawer.dashboard-native-sheet--crud select:focus,
-html.capacitor-ios.capacitor-native.dark .ios-drawer.dashboard-native-sheet--crud textarea:focus {
-  box-shadow:
-    inset 0 0 0 1px rgb(255 255 255 / 0.28),
-    0 0 0 3px rgb(255 255 255 / 0.08) !important;
-}
-
-html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud textarea.app-field,
-html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud textarea {
-  min-height: 5.5rem;
-  padding-block: 0.75rem !important;
-  resize: vertical;
-}
-
-html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%238e8e93' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 0.75rem center;
-  background-size: 1rem;
-  padding-right: 2.25rem !important;
+/* Section toolbars (hint + actions) stack instead of overflowing the sheet */
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__section > .flex.flex-wrap.items-center.justify-between,
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .dash-drawer-section > .flex.flex-wrap.items-center.justify-between {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.625rem;
 }
 
 /* ── Hints & inline errors ── */
@@ -191,12 +161,12 @@ html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .da
 html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-drawer__content .text-xs.text-gray-600,
 html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-drawer__content .text-xs.text-gray-500 {
   margin-top: 0.375rem;
-  font-size: var(--ios-dash-micro-size, 0.5625rem) !important;
+  font-size: 0.75rem !important;
   font-weight: 400;
   line-height: 1.4;
   letter-spacing: 0;
   text-transform: none;
-  color: var(--ios-label-tertiary) !important;
+  color: var(--ios-field-muted) !important;
 }
 
 html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .text-xs.text-red-600,
@@ -235,13 +205,30 @@ html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .io
   width: 100%;
   margin: 0;
   padding: 0.875rem 0;
-  border-top: 1px solid var(--ios-separator);
-  border-bottom: 1px solid var(--ios-separator);
+  border: none;
   flex-direction: row-reverse;
 }
 
-html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .dash-drawer-section > label.group + label.group {
-  border-top: none;
+/* Pick-list rows already pad themselves — don't pad the checkbox label again */
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .dash-drawer-pick-row label.group {
+  padding: 0 !important;
+}
+
+/**
+ * A pick-list checkbox with no label of its own is a leading control, not a
+ * toggle row: the item's title and meta are siblings of the label rather than
+ * slot content. Left as a full-width reversed row it eats the whole row and
+ * squeezes that sibling text into a sliver that spills past the card.
+ */
+html.capacitor-ios.capacitor-native
+  .ios-drawer.dashboard-native-sheet--crud
+  .dash-drawer-pick-row
+  label.group:not(:has(> span)) {
+  flex: 0 0 auto !important;
+  flex-direction: row !important;
+  justify-content: flex-start !important;
+  gap: 0 !important;
+  width: auto !important;
 }
 
 html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud label.group > span.ml-3,
@@ -466,4 +453,49 @@ html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .io
 html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-drawer-footer__actions .btn-outline:only-child,
 html.capacitor-ios.capacitor-native .ios-drawer-footer--crud .ios-drawer-footer__actions .btn-outline:only-child {
   flex: 1 1 100% !important;
+}
+
+/* ── Add column / import rows in Create category ── */
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form-add-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  margin-top: 0.25rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form-add-row {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  width: 100%;
+  min-height: var(--ios-field-height, 3.25rem);
+  padding: var(--ios-field-pad-block, 0.875rem) var(--ios-field-pad-inline, 1rem);
+  border: 1px solid var(--ios-field-border, transparent);
+  border-radius: var(--ios-field-radius, 0.875rem);
+  background: var(--ios-field-bg, var(--ios-fill-tertiary));
+  font-family: var(--ios-type-font-family);
+  font-size: max(16px, var(--ios-field-size, 1rem));
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: var(--ios-field-ink, var(--ios-label));
+  box-shadow: none;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form-add-row:active:not(:disabled) {
+  transform: scale(0.98);
+  opacity: 0.92;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form-add-row--secondary {
+  border-color: transparent;
+  background: var(--ios-fill-tertiary);
+  font-weight: 500;
+  color: var(--ios-label-secondary);
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form-add-row__glyph {
+  width: 1.125rem;
+  height: 1.125rem;
 }

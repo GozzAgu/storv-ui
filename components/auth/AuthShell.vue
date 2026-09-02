@@ -1,5 +1,15 @@
 <template>
-  <div data-auth-shell class="auth-shell auth-shell--modern">
+  <div
+    data-auth-shell
+    class="auth-shell auth-shell--modern"
+    :class="{ 'auth-shell--compact': compact }"
+  >
+    <div class="auth-shell__atmosphere" aria-hidden="true">
+      <span class="auth-shell__ray auth-shell__ray--1" />
+      <span class="auth-shell__ray auth-shell__ray--2" />
+      <span class="auth-shell__ray auth-shell__ray--3" />
+    </div>
+
     <aside class="auth-shell__brand">
       <div class="auth-shell__brand-grid" aria-hidden="true" />
 
@@ -94,9 +104,11 @@ const props = withDefaults(
     panelDescription: string
     features?: AuthShellFeature[]
     contentWidthClass?: string
+    compact?: boolean
   }>(),
   {
     contentWidthClass: 'max-w-[420px]',
+    compact: false,
   }
 )
 

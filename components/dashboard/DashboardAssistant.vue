@@ -67,6 +67,17 @@ const { isNativeApp, isDemoAssistant, assistantStore } = useDashboardAssistant()
 <style>
 /* Web floating widget. Unscoped so Teleport styles apply */
 .dashboard-assistant__float {
+  --saas-surface: #ffffff;
+  --saas-ink: #1a1523;
+  --saas-muted: rgb(26 21 35 / 0.58);
+  --saas-accent: #1a1523;
+  --saas-accent-soft: rgb(26 21 35 / 0.06);
+  --dash-overlay-ink: #1a1523;
+  --dash-overlay-muted: rgb(26 21 35 / 0.58);
+  --dash-overlay-border: rgb(26 21 35 / 0.08);
+  --dash-overlay-divider: rgb(26 21 35 / 0.06);
+  --dash-field-bg: #f5f5f7;
+
   position: fixed;
   z-index: 1150;
   right: 1.5rem;
@@ -77,22 +88,27 @@ const { isNativeApp, isDemoAssistant, assistantStore } = useDashboardAssistant()
   height: min(36rem, calc(100dvh - 3rem));
   overflow: hidden;
   border-radius: 1.375rem;
-  background: #ffffff;
-  color: #0f172a;
+  background: var(--saas-surface);
+  color: var(--saas-ink);
   box-shadow:
-    0 4px 6px rgb(15 23 42 / 0.04),
-    0 16px 40px rgb(15 23 42 / 0.12);
-  border: 1px solid rgb(15 23 42 / 0.08);
+    0 4px 24px rgb(26 21 35 / 0.08),
+    0 1px 3px rgb(26 21 35 / 0.04);
+  border: 1px solid var(--dash-overlay-border);
 }
 
 html.dark .dashboard-assistant__float {
-  /* Match dashboard cards / --saas-surface (not slate navy) */
-  background: #12141c;
-  color: #f8fafc;
-  border-color: rgb(255 255 255 / 0.08);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.04),
-    0 24px 64px rgb(0 0 0 / 0.45);
+  --saas-surface: #1e1e1e;
+  --saas-ink: #ffffff;
+  --saas-muted: rgb(255 255 255 / 0.58);
+  --saas-accent: #ffffff;
+  --saas-accent-soft: rgb(255 255 255 / 0.08);
+  --dash-overlay-ink: #ffffff;
+  --dash-overlay-muted: rgb(255 255 255 / 0.58);
+  --dash-overlay-border: transparent;
+  --dash-overlay-divider: rgb(255 255 255 / 0.06);
+  --dash-field-bg: rgb(255 255 255 / 0.06);
+
+  box-shadow: 0 24px 64px rgb(0 0 0 / 0.45);
 }
 
 .dashboard-assistant__float-header {
@@ -102,11 +118,7 @@ html.dark .dashboard-assistant__float {
   justify-content: space-between;
   gap: 0.75rem;
   padding: 1rem 1.125rem 0.875rem;
-  border-bottom: 1px solid rgb(15 23 42 / 0.06);
-}
-
-html.dark .dashboard-assistant__float-header {
-  border-bottom-color: rgb(255 255 255 / 0.06);
+  border-bottom: 1px solid var(--dash-overlay-divider);
 }
 
 .dashboard-assistant__float-brand {
@@ -124,16 +136,11 @@ html.dark .dashboard-assistant__float-header {
   width: 2rem;
   height: 2rem;
   border-radius: 9999px;
-  background: #143f8d;
-  color: #fff;
+  background: var(--saas-accent-soft);
+  color: var(--saas-ink);
   font-size: 0.8125rem;
   font-weight: 700;
   letter-spacing: -0.02em;
-}
-
-html.dark .dashboard-assistant__float-logo {
-  background: rgb(154 181 227 / 0.18);
-  color: #9ab5e3;
 }
 
 .dashboard-assistant__float-title {
@@ -142,7 +149,7 @@ html.dark .dashboard-assistant__float-logo {
   font-weight: 700;
   line-height: 1.25;
   letter-spacing: -0.01em;
-  color: inherit;
+  color: var(--saas-ink);
 }
 
 .dashboard-assistant__float-close {
@@ -155,22 +162,13 @@ html.dark .dashboard-assistant__float-logo {
   border: 0;
   border-radius: 9999px;
   background: transparent;
-  color: #64748b;
+  color: var(--saas-muted);
   transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .dashboard-assistant__float-close:hover {
-  background: rgb(15 23 42 / 0.05);
-  color: #0f172a;
-}
-
-html.dark .dashboard-assistant__float-close {
-  color: #94a3b8;
-}
-
-html.dark .dashboard-assistant__float-close:hover {
-  background: rgb(255 255 255 / 0.08);
-  color: #f8fafc;
+  background: var(--saas-accent-soft);
+  color: var(--saas-ink);
 }
 
 .dashboard-assistant__panel--float {

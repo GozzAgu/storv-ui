@@ -8,7 +8,7 @@
       @click="open = !open"
     >
       <div :class="[avatarClass, 'h-8 w-8 text-[11px]']">
-        <span class="relative">{{ userInitials }}</span>
+        <AccountAvatar :initials="userInitials" />
       </div>
       <div v-if="!compact" class="hidden min-w-0 flex-1 text-left md:block">
         <p class="dash-profile-trigger__name">{{ userName }}</p>
@@ -43,7 +43,7 @@
           <template v-if="isCapacitorIos">
             <div class="ios-profile-menu__hero">
               <div :class="[avatarClass, 'ios-profile-menu__avatar']">
-                <span class="relative">{{ userInitials }}</span>
+                <AccountAvatar :initials="userInitials" />
               </div>
               <div class="min-w-0 flex-1">
                 <p class="ios-profile-menu__name">{{ userName }}</p>
@@ -135,7 +135,7 @@
           <div :class="panelHeaderClass">
             <div class="flex min-w-0 items-center gap-2.5">
               <div :class="[avatarClass, 'h-9 w-9 text-[10px]']">
-                <span class="relative">{{ userInitials }}</span>
+                <AccountAvatar :initials="userInitials" />
               </div>
               <div class="min-w-0 flex-1">
                 <p :class="panelHeaderNameClass">{{ userName }}</p>
@@ -241,6 +241,7 @@ import { useNotificationsStore } from '~/stores/notifications'
 import { useSubscriptionFeatures } from '~/composables/useSubscriptionFeatures'
 import { getPlanDisplayName } from '~/types/subscription'
 import { getStoreBranchShortLabel } from '~/utils/store-branch-label'
+import AccountAvatar from '~/components/ui/AccountAvatar.vue'
 
 defineProps<{
   userName: string

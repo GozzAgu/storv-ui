@@ -3,10 +3,11 @@
     :model-value="modelValue"
     title="Edit lead"
     size="lg"
+    dense
     @update:model-value="(value: boolean) => emit('update:modelValue', value)"
   >
-    <IosForm @submit="save">
-      <IosFormSection>
+    <IosForm layout="fill" @submit="save">
+      <IosFormSection fixed>
         <IosFormField label="Phone">
           <IosFormInput
             v-model="customerPhone"

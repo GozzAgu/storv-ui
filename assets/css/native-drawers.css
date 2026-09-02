@@ -65,7 +65,96 @@ html.capacitor-native[data-native-keyboard-open] .dashboard-assistant__composer-
   .native-drawer-shell-leave-active .native-side-drawer-backdrop,
   .native-drawer-shell-enter-active .native-side-drawer-panel,
   .native-drawer-shell-leave-active .native-side-drawer-panel,
-  html.capacitor-native .native-side-drawer-panel {
+  html.capacitor-native .native-side-drawer-panel,
+  .ios-native-sheet-enter-active .ios-native-sheet-backdrop,
+  .ios-native-sheet-leave-active .ios-native-sheet-backdrop,
+  .ios-native-sheet-enter-active .ios-native-sheet-panel,
+  .ios-native-sheet-leave-active .ios-native-sheet-panel {
     transition-duration: 45ms !important;
   }
+}
+
+/* ── iOS bottom sheets (DashboardNativeSheet / IosDrawer) ── */
+html.capacitor-ios.capacitor-native .ios-native-sheet-root {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+html.capacitor-ios.capacitor-native .ios-native-sheet-root--host {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+html.capacitor-ios.capacitor-native .ios-native-sheet-root--viewport {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+}
+
+html.capacitor-ios.capacitor-native .ios-native-sheet-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border: 0;
+  padding: 0;
+  cursor: default;
+  pointer-events: auto;
+}
+
+html.capacitor-ios.capacitor-native .ios-native-sheet-root--host .ios-native-sheet-panel,
+html.capacitor-ios.capacitor-native .ios-native-sheet-root--viewport .ios-native-sheet-panel {
+  position: relative;
+  inset: auto;
+  bottom: auto;
+  z-index: 1;
+  flex-shrink: 0;
+  width: 100%;
+  pointer-events: auto;
+}
+
+html.capacitor-ios.capacitor-native .ios-native-sheet-root--host .ios-native-sheet-panel {
+  max-height: 100%;
+}
+
+/* Sheets inside the transition root use flex layout — not viewport-fixed */
+html.capacitor-ios.capacitor-native .ios-native-sheet-root .dashboard-native-sheet {
+  position: relative;
+  inset: auto;
+  bottom: auto;
+  z-index: 1;
+}
+
+.ios-native-sheet-enter-active,
+.ios-native-sheet-leave-active {
+  pointer-events: auto;
+}
+
+.ios-native-sheet-enter-active .ios-native-sheet-backdrop,
+.ios-native-sheet-leave-active .ios-native-sheet-backdrop {
+  transition: opacity 320ms ease;
+}
+
+.ios-native-sheet-enter-from .ios-native-sheet-backdrop,
+.ios-native-sheet-leave-to .ios-native-sheet-backdrop {
+  opacity: 0;
+}
+
+.ios-native-sheet-enter-active .ios-native-sheet-panel,
+.ios-native-sheet-leave-active .ios-native-sheet-panel {
+  transition: transform 420ms var(--native-drawer-ease-out);
+  will-change: transform;
+}
+
+.ios-native-sheet-leave-active .ios-native-sheet-panel {
+  transition-duration: 300ms;
+  transition-timing-function: var(--native-drawer-ease-in);
+}
+
+.ios-native-sheet-enter-from .ios-native-sheet-panel,
+.ios-native-sheet-leave-to .ios-native-sheet-panel {
+  transform: translate3d(0, 100%, 0);
 }

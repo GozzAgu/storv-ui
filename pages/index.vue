@@ -13,7 +13,7 @@
             @click="mobileMenuOpen = false"
           >
             <img
-              :src="landingNavLogoSrc"
+              :src="landingLogoSrc"
               alt=""
               class="landing-header__logo"
               width="140"
@@ -40,6 +40,7 @@
           </nav>
 
           <div class="landing-header__actions">
+            <ThemeToggle />
             <a :href="appOriginUrl" class="landing-header__sign-in">Sign in</a>
             <a :href="appOriginUrl" class="landing-header__cta">Get Started</a>
             <div class="landing-header__mobile">
@@ -161,7 +162,7 @@
     <!-- Marketing showcase: hero → problems → features → setup → multi-store -->
     <LandingShowcase
       :logo-src="marketingLogoSrc"
-      :dark-logo-src="landingNavLogoSrc"
+      :dark-logo-src="landingLogoSrc"
       :app-url="appOriginUrl"
     />
 
@@ -181,7 +182,7 @@
     <section
       id="pricing"
       data-section-id="pricing"
-      class="scroll-animate scroll-animate-up scroll-mt-[4.75rem] bg-gradient-to-b from-white to-slate-50/65 py-20 dark:from-slate-950 dark:to-slate-900/80 lg:scroll-mt-28 lg:py-28 sm:py-24"
+      class="landing-pricing scroll-animate scroll-animate-up scroll-mt-[4.75rem] lg:scroll-mt-28"
     >
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2
@@ -201,7 +202,7 @@
           for the full team workspace. Paid plans auto-renew through Paystack; cancel anytime and keep
           access until your billing period ends.
         </p>
-        <p class="mt-3 text-center text-base text-primary-700 dark:text-primary-300">
+        <p class="mt-3 text-center text-base text-gray-700 dark:text-gray-300">
           <NuxtLink to="/demo/dashboard" class="font-semibold underline-offset-2 hover:underline"
             >Try demo</NuxtLink
           >
@@ -222,8 +223,8 @@
             :class="[
               'rounded-full px-4 py-1.5 text-sm font-medium transition-colors',
               selectedBillingCycle === cycle
-                ? 'bg-primary-500 text-white shadow-sm'
-                : 'bg-white/70 text-gray-600 hover:bg-white dark:bg-white/10 dark:text-gray-300 dark:hover:bg-white/15',
+                ? 'bg-[#1a1523] text-white dark:bg-white dark:text-[#1a1523]'
+                : 'bg-white text-gray-600 hover:bg-[#eeeeef] dark:bg-[#1e1e1e] dark:text-gray-300 dark:hover:bg-[#282828]',
             ]"
             :aria-pressed="selectedBillingCycle === cycle"
             @click="selectedBillingCycle = cycle"
@@ -249,7 +250,7 @@
           <!-- Micro: single store, 1 dept, 2 staff. No analytics, no multi-store sync. -->
           <div
             data-section-id="pricing-1"
-            class="scroll-animate scroll-animate-scale stagger-1 rounded-3xl bg-white dark:bg-slate-900 p-6 flex flex-col transition duration-200 ease-out"
+            class="scroll-animate scroll-animate-scale stagger-1 rounded-3xl bg-white dark:bg-[#1e1e1e] p-6 flex flex-col transition duration-200 ease-out"
           >
             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Storvv Micro</h3>
             <p class="mt-1 text-base text-gray-600 dark:text-gray-400">
@@ -263,7 +264,7 @@
                 :key="i"
                 class="flex items-center gap-2"
               >
-                <CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />{{ line }}
+                <CheckIcon class="w-4 h-4 text-zinc-400 dark:text-zinc-500 shrink-0" />{{ line }}
               </li>
               <li
                 v-if="SUBSCRIPTION_PLAN_NOT_INCLUDED.storvv_micro"
@@ -282,13 +283,9 @@
           <!-- Medium: 2 stores, 10 depts, 25 staff. Analytics, duplicate folders/items. No multi-store sync. -->
           <div
             data-section-id="pricing-2"
-            class="scroll-animate scroll-animate-scale stagger-2 relative rounded-3xl bg-primary-50/35 p-6 flex flex-col dark:bg-slate-900"
+            class="scroll-animate scroll-animate-scale stagger-2 relative rounded-3xl bg-white p-6 flex flex-col dark:bg-[#1e1e1e]"
           >
-            <p
-              class="absolute -top-3 right-5 rounded-full bg-primary-500 px-3 py-1 text-sm font-semibold text-white"
-            >
-              Most popular
-            </p>
+            <p class="landing-pricing__badge">Most popular</p>
             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Storvv Medium</h3>
             <p class="mt-1 text-base text-gray-600 dark:text-gray-400">
               Growing business, multiple locations or teams
@@ -318,7 +315,7 @@
                 :key="i"
                 class="flex items-center gap-2"
               >
-                <CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />{{ line }}
+                <CheckIcon class="w-4 h-4 text-zinc-400 dark:text-zinc-500 shrink-0" />{{ line }}
               </li>
               <li
                 v-if="SUBSCRIPTION_PLAN_NOT_INCLUDED.storvv_medium"
@@ -332,7 +329,7 @@
           <!-- Enterprise: unlimited. Multi-store sync, priority support. -->
           <div
             data-section-id="pricing-3"
-            class="scroll-animate scroll-animate-scale stagger-3 rounded-3xl bg-white dark:bg-slate-900 p-6 flex flex-col transition duration-200 ease-out"
+            class="scroll-animate scroll-animate-scale stagger-3 rounded-3xl bg-white dark:bg-[#1e1e1e] p-6 flex flex-col transition duration-200 ease-out"
           >
             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
               Storvv Enterprise
@@ -365,7 +362,7 @@
                 :key="i"
                 class="flex items-center gap-2"
               >
-                <CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />{{ line }}
+                <CheckIcon class="w-4 h-4 text-zinc-400 dark:text-zinc-500 shrink-0" />{{ line }}
               </li>
             </ul>
             <a :href="appOriginUrl" class="landing-pill-cta mt-6 flex w-full">Get Started</a>
@@ -373,7 +370,7 @@
         </div>
 
         <div
-          class="mt-10 max-w-4xl mx-auto rounded-2xl border border-gray-200/80 bg-white/80 p-6 text-left shadow-sm dark:border-white/10 dark:bg-slate-900/60 sm:p-8"
+          class="mt-10 max-w-4xl mx-auto rounded-2xl bg-white p-6 text-left dark:bg-[#1e1e1e] sm:p-8"
         >
           <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
             Solo vs Business workspace
@@ -384,7 +381,7 @@
           </p>
           <div class="mt-5 grid gap-4 sm:grid-cols-2">
             <div
-              class="rounded-xl border border-stone-200/80 bg-stone-50/60 p-4 dark:border-white/10 dark:bg-white/[0.03]"
+              class="rounded-xl bg-[#f5f5f7] p-4 dark:bg-[#282828]"
             >
               <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">Solo · Just me</p>
               <p class="mt-1.5 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
@@ -398,7 +395,7 @@
               </ul>
             </div>
             <div
-              class="rounded-xl border border-primary-200/70 bg-primary-50/40 p-4 dark:border-primary-500/20 dark:bg-primary-500/5"
+              class="rounded-xl bg-[#f5f5f7] p-4 dark:bg-[#282828]"
             >
               <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">
                 Business · Growing business
@@ -424,19 +421,19 @@
           </p>
           <ul class="mt-3 space-y-2 text-sm text-gray-600 dark:text-gray-400">
             <li class="flex gap-2">
-              <CheckIcon class="mt-0.5 h-4 w-4 shrink-0 text-primary-500" />
+              <CheckIcon class="mt-0.5 h-4 w-4 shrink-0 text-zinc-400 dark:text-zinc-500" />
               Live price preview before Paystack checkout (monthly, quarterly, or yearly)
             </li>
             <li class="flex gap-2">
-              <CheckIcon class="mt-0.5 h-4 w-4 shrink-0 text-primary-500" />
+              <CheckIcon class="mt-0.5 h-4 w-4 shrink-0 text-zinc-400 dark:text-zinc-500" />
               Billing history, renewal status, and cancel auto-renew in Settings
             </li>
             <li class="flex gap-2">
-              <CheckIcon class="mt-0.5 h-4 w-4 shrink-0 text-primary-500" />
+              <CheckIcon class="mt-0.5 h-4 w-4 shrink-0 text-zinc-400 dark:text-zinc-500" />
               Clear upgrade prompts when you hit plan limits (staff, WhatsApp, gated screens)
             </li>
             <li class="flex gap-2">
-              <CheckIcon class="mt-0.5 h-4 w-4 shrink-0 text-primary-500" />
+              <CheckIcon class="mt-0.5 h-4 w-4 shrink-0 text-zinc-400 dark:text-zinc-500" />
               Solo, Business, and subscription tools on web and the native iOS app
             </li>
           </ul>
@@ -444,7 +441,7 @@
       </div>
 
       <div
-        class="mx-auto mt-8 max-w-2xl border-t border-gray-200/90 pt-6 text-center dark:border-gray-800/80"
+        class="mx-auto mt-8 max-w-2xl pt-6 text-center"
       >
         <NuxtLink to="/demo/dashboard" class="landing-pill-cta landing-pill-cta--outline w-full sm:w-auto">
           Try demo
@@ -469,7 +466,7 @@
           <div>
             <NuxtLink to="/" class="landing-footer__brand">
               <img
-                :src="landingNavLogoSrc"
+                :src="landingLogoSrc"
                 alt="Storvv"
                 class="landing-footer__logo"
                 width="140"
@@ -586,7 +583,7 @@
       <button
         v-if="showBackToTop"
         @click="scrollToTop"
-        class="fixed bottom-6 right-6 z-50 w-11 h-11 rounded-full bg-gray-900 text-white hover:bg-gray-800 transition-colors flex items-center justify-center dark:bg-primary-600 dark:hover:bg-primary-500"
+        class="fixed bottom-6 right-6 z-50 w-11 h-11 rounded-full bg-[#1a1523] text-white hover:bg-[#111018] transition-colors flex items-center justify-center dark:bg-white dark:text-[#1a1523] dark:hover:bg-[#f4f4f5]"
         aria-label="Back to top"
       >
         <ArrowUpIcon class="w-5 h-5" />
@@ -658,6 +655,7 @@
 import '~/assets/css/landing.css'
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import Modal from '~/components/ui/Modal.vue'
+import ThemeToggle from '~/components/ui/ThemeToggle.vue'
 import {
   BILLING_CYCLE_LABELS,
   BILLING_CYCLE_PERIOD_SUFFIX,
@@ -677,20 +675,24 @@ import {
   ArrowUpIcon,
 } from '~/utils/app-icons'
 import { useThemeStore } from '~/stores/theme'
-/** Light wordmark for setup panel (white background). */
-const marketingLogoSrc = '/storvv logo 2.png'
-/** Dark wordmark for nav, footer, and dark landing panels. */
-const landingNavLogoSrc = '/storvv logo.png'
 
 const themeStore = useThemeStore()
 
+/** Light wordmark for light canvas. */
+const marketingLogoSrc = '/storvv logo 2.png'
+/** Wordmark that contrasts the current landing canvas. */
+const landingLogoSrc = computed(() =>
+  themeStore.actualTheme === 'dark' ? '/storvv logo.png' : '/storvv logo 2.png'
+)
+
 function applyLandingDocumentTheme() {
   if (!import.meta.client) return
+  themeStore.initTheme()
+  themeStore.applyTheme()
   const html = document.documentElement
-  html.classList.add('dark')
-  html.style.colorScheme = 'dark'
+  const isDark = html.classList.contains('dark')
   const meta = document.getElementById('theme-color-meta')
-  if (meta) meta.setAttribute('content', '#050508')
+  if (meta) meta.setAttribute('content', isDark ? '#080808' : '#f5f5f7')
 }
 
 const mobileMenuOpen = ref(false)
@@ -701,6 +703,11 @@ let mobileMenuMql: MediaQueryList | null = null
 function closeMobileMenuIfDesktop() {
   if (mobileMenuMql?.matches) mobileMenuOpen.value = false
 }
+
+watch(
+  () => themeStore.actualTheme,
+  () => applyLandingDocumentTheme()
+)
 
 watch(
   () => route.path,
@@ -966,23 +973,30 @@ useHead({
 <style scoped>
 /* Hero: unified glass surfaces (mobile sync strip + desktop floats) */
 .landing-hero-float-card {
-  border-radius: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.072);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1), border-color 300ms ease-out,
-    background-color 300ms ease-out;
+  border-radius: 1.5rem;
+  border: 0;
+  background: #ffffff;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  transition: background-color 300ms ease-out;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .landing-hero-float-card:hover {
-    transform: translateY(-1px);
-    border-color: rgba(255, 255, 255, 0.26);
-    background: rgba(255, 255, 255, 0.085);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    transform: none;
+    border-color: transparent;
+    background: #eeeeef;
+    box-shadow: none;
   }
+}
+
+html.dark .landing-hero-float-card {
+  background: #1e1e1e;
+}
+
+html.dark .landing-hero-float-card:hover {
+  background: #282828;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -995,8 +1009,8 @@ useHead({
 
 /* Hero: faint blueprint mesh (readable center, fades at edges) */
 .landing-hero-grid {
-  background-image: linear-gradient(rgba(147, 197, 253, 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(147, 197, 253, 0.07) 1px, transparent 1px);
+  background-image: linear-gradient(rgb(26 21 35 / 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(26 21 35 / 0.05) 1px, transparent 1px);
   background-size: 52px 52px;
   mask-image: radial-gradient(ellipse 110% 85% at 50% 32%, rgb(0 0 0) 22%, transparent 72%);
   -webkit-mask-image: radial-gradient(ellipse 110% 85% at 50% 32%, rgb(0 0 0) 22%, transparent 72%);

@@ -2,7 +2,6 @@
   <SidePanel
     :model-value="props.modelValue"
     title="Create New Sale"
-    subtitle="Category → subcategory → items → sale details"
     size="lg"
     @update:model-value="(value: boolean) => emit('update:modelValue', value)"
   >
@@ -17,11 +16,16 @@
           <p :class="sectionLabelClass">Parent category</p>
           <DashboardDrawerSearch v-model="folderSearchQuery" placeholder="Search categories…" />
 
-          <div v-if="loadingFolders" class="flex flex-1 flex-col items-center justify-center py-12">
-            <div
-              class="h-5 w-5 animate-spin rounded-full border-0 border-primary-500/30 border-t-primary-500"
-            />
-            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Loading categories…</p>
+          <div v-if="loadingFolders" :class="pickListClass">
+            <div :class="pickListScrollClass">
+              <div v-for="i in 6" :key="i" :class="pickRowClass">
+                <span class="dash-skeleton dash-skeleton--thumb" />
+                <div class="min-w-0 flex-1 space-y-1.5">
+                  <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-title" />
+                  <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-meta" />
+                </div>
+              </div>
+            </div>
           </div>
           <div v-else-if="parentCategoryRows.length === 0" :class="emptyStateClass">
             <FolderIcon class="mb-2 h-8 w-8 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
@@ -158,12 +162,19 @@
           />
           <div
             v-if="loadingItems"
-            class="flex min-h-0 flex-1 flex-col items-center justify-center py-8"
+            :class="pickListClass"
           >
-            <div
-              class="h-5 w-5 animate-spin rounded-full border-0 border-primary-500/30 border-t-primary-500"
-            />
-            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Loading items…</p>
+            <div :class="pickListScrollClass">
+              <div v-for="i in 6" :key="i" :class="pickRowClass">
+                <div class="flex w-full items-start gap-2.5">
+                  <span class="dash-skeleton dash-skeleton--chip mt-0.5" />
+                  <div class="min-w-0 flex-1 space-y-1.5">
+                    <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-title" />
+                    <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-meta" />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           <div v-else-if="availableItems.length === 0" :class="emptyStateClass">
             <CubeIcon class="mb-2 h-8 w-8 text-gray-400 dark:text-gray-500" stroke-width="1.5" />

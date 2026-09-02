@@ -98,10 +98,19 @@
       <template #title>
         <h1 :class="pageTitleClass">Activity Logs</h1>
       </template>
-      <template v-if="canAccess && !loading && allLogs.length > 0" #description>
+      <template v-if="canAccess && loading" #description>
+        <DashPageMetricsSkeleton :count="4" />
+      </template>
+      <template v-else-if="canAccess && !loading && allLogs.length > 0" #description>
         <DashboardPageMetrics :metrics="headerMetrics" aria-label="Activity summary" />
       </template>
-      <template v-if="canAccess && storeId && !loading && allLogs.length > 0" #filters>
+      <template v-if="canAccess && storeId && loading" #filters>
+        <nav :class="segmentTabsClass" aria-hidden="true">
+          <span v-for="tab in actionTabs" :key="tab.value" class="dash-skeleton dash-skeleton--select" />
+        </nav>
+        <span class="dash-skeleton dash-skeleton--line dash-skeleton--search" />
+      </template>
+      <template v-else-if="canAccess && storeId && !loading && allLogs.length > 0" #filters>
         <nav :class="segmentTabsClass" aria-label="Filter by action" role="tablist">
           <button
             v-for="tab in actionTabs"
@@ -167,24 +176,20 @@
             Showing newest {{ fetchLimit }} events - use search to narrow results.
           </p>
 
-          <div v-if="loading" class="px-4 py-8 sm:px-6 sm:py-10">
-            <div class="space-y-0 divide-y divide-gray-100/90 dark:divide-gray-800/80">
-              <div v-for="i in 8" :key="i" class="flex items-center gap-4 py-3.5">
-                <div
-                  class="h-9 w-9 shrink-0 animate-pulse rounded-full bg-gray-200/90 dark:bg-white/10"
-                />
-                <div class="min-w-0 flex-1 space-y-2">
-                  <div class="h-3 w-28 animate-pulse rounded-md bg-gray-200/90 dark:bg-white/10" />
-                  <div
-                    class="h-3 max-w-md animate-pulse rounded-md bg-gray-100 dark:bg-white/[0.06]"
-                  />
-                </div>
-                <div
-                  class="hidden h-3 w-16 animate-pulse rounded-md bg-gray-100 dark:bg-white/[0.06] sm:block"
-                />
-              </div>
-            </div>
-          </div>
+          <DashTableSkeleton
+            v-if="loading"
+            :columns="[
+              { label: 'User' },
+              { label: 'Action', class: 'dashboard-table__col-status', bone: '4.5rem' },
+              { label: 'Details', lines: 2 },
+              { label: 'When', class: 'whitespace-nowrap text-right', lines: 2 },
+            ]"
+            :rows="8"
+            leading="avatar"
+            :leading-meta="false"
+            flush
+            aria-label="Loading activity"
+          />
 
           <div v-else-if="fetchError" class="px-4 py-12 text-center sm:px-6">
             <p class="text-sm font-medium text-red-600 dark:text-red-400">

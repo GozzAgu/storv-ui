@@ -348,21 +348,27 @@
           <span class="text-xs text-gray-500 dark:text-gray-400">{{ links.length }} total</span>
         </div>
 
-        <div v-if="loading && links.length === 0" class="space-y-2 p-4 sm:p-5">
-          <div
-            v-for="i in 4"
-            :key="i"
-            class="h-12 animate-pulse rounded-lg bg-gray-100 dark:bg-white/[0.05]"
-          />
-        </div>
+        <DashTableSkeleton
+          v-if="loading && links.length === 0"
+          :columns="[
+            { label: 'Invoice', lines: 2 },
+            { label: 'Customer', lines: 2 },
+            { label: 'Total', class: 'text-right', bone: '4.5rem' },
+            { label: 'Status', class: 'dashboard-table__col-status', bone: '4.5rem' },
+            { label: 'Actions', class: 'dashboard-table__col-actions', bone: '4.5rem' },
+          ]"
+          :rows="6"
+          leading="none"
+          flush
+          aria-label="Loading payment links"
+        />
 
-        <div v-else-if="links.length === 0" class="px-4 py-12 text-center sm:px-5">
-          <CreditCardIcon class="mx-auto mb-2 h-8 w-8 text-gray-300 dark:text-gray-600" />
-          <p class="text-sm font-medium text-gray-700 dark:text-gray-200">No payment links yet</p>
-          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            Create your first link to start collecting.
-          </p>
-        </div>
+        <DashboardTableEmptyState
+          v-else-if="links.length === 0"
+          :icon="CreditCardIcon"
+          title="No payment links yet"
+          description="Create your first link to start collecting."
+        />
 
         <div v-else class="overflow-x-auto">
           <table class="dashboard-table min-w-full">
@@ -454,40 +460,28 @@
     </template>
     </template>
 
-    <Teleport to="body">
-      <div
-        v-if="openPaymentLinkMenuId && paymentLinkForOpenMenu && paymentLinkMenuFixedStyle"
-        data-payment-link-menu
-        role="menu"
-        class="fixed z-[1000] min-w-[10rem] overflow-hidden rounded-lg bg-white/95 py-1 shadow-lg backdrop-blur-xl dark:bg-slate-950/95"
-        :style="paymentLinkMenuFixedStyle"
-        @click.stop
-      >
-        <button
-          type="button"
-          role="menuitem"
-          class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85"
-          @click="
-            () => {
-              share(paymentLinkForOpenMenu)
-              closePaymentLinkMenu()
-            }
-          "
-        >
-          Share
-        </button>
-        <a
-          role="menuitem"
-          :href="paymentLinkForOpenMenu.url"
-          target="_blank"
-          rel="noopener"
-          class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85"
-          @click="closePaymentLinkMenu()"
-        >
-          Open link
-        </a>
-      </div>
-    </Teleport>
+    <IosContextMenu
+      :open="Boolean(openPaymentLinkMenuId && paymentLinkForOpenMenu && paymentLinkMenuFixedStyle)"
+      :style="paymentLinkMenuFixedStyle"
+      menu-id="payment-link"
+    >
+      <IosContextMenuItem
+        label="Share"
+        :icon="ShareIcon"
+        @click="
+          () => {
+            share(paymentLinkForOpenMenu!)
+            closePaymentLinkMenu()
+          }
+        "
+      />
+      <IosContextMenuItem
+        label="Open link"
+        :icon="ArrowTopRightOnSquareIcon"
+        :href="paymentLinkForOpenMenu?.url"
+        @click="closePaymentLinkMenu()"
+      />
+    </IosContextMenu>
   </div>
 </template>
 
@@ -495,13 +489,17 @@
 import { ref, computed, onMounted, defineAsyncComponent } from 'vue'
 import { useRoute } from 'vue-router'
 import {
+  ArrowTopRightOnSquareIcon,
   BuildingLibraryIcon,
   CheckBadgeIcon,
   CreditCardIcon,
   EllipsisVerticalIcon,
+  ShareIcon,
   ShieldCheckIcon,
 } from '~/utils/app-icons'
 import Button from '~/components/ui/Button.vue'
+import IosContextMenu from '~/components/ios/IosContextMenu.vue'
+import IosContextMenuItem from '~/components/ios/IosContextMenuItem.vue'
 import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
 import IosQuickActionBar, { type IosQuickActionOption } from '~/components/ios/IosQuickActionBar.vue'
 import IosTransactionListSkeleton from '~/components/ios/IosTransactionListSkeleton.vue'
@@ -546,6 +544,7 @@ const iosPaymentQuickActions = computed((): IosQuickActionOption[] => [
     value: 'new',
     label: 'New link',
     icon: CreditCardIcon,
+    trailing: 'add',
     action: () => {
       if (payout.value.connected) showCreate.value = true
     },
@@ -737,7 +736,6 @@ const {
   closeMenu: closePaymentLinkMenu,
 } = useAnchoredRowMenu({
   anchorAttr: 'data-payment-link-actions-anchor',
-  menuSelector: '[data-payment-link-menu]',
 })
 
 const paymentLinkForOpenMenu = computed(() => {

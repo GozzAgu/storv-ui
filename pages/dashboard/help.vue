@@ -13,11 +13,12 @@
         :options="iosHelpActionOptions"
       />
 
-      <IosQuickActionBar
-        v-model="iosHelpTopicTab"
+      <IosFilterChips
+        title="Popular topics"
         ariaLabel="Popular help topics"
-        :card="false"
         :options="iosPopularTopicOptions"
+        :selected="trimmedSearch"
+        @select="(query) => (searchQuery = query)"
       />
 
       <IosSettingsGroup v-if="filteredCategories.length" title="On this page">
@@ -373,7 +374,6 @@ const quickScreenLinks = [
 ] as const
 
 const iosHelpActionTab = ref('assistant')
-const iosHelpTopicTab = ref('')
 
 const iosHelpActionOptions = computed(() => [
   {
@@ -393,12 +393,9 @@ const iosHelpActionOptions = computed(() => [
 ])
 
 const iosPopularTopicOptions = computed(() =>
-  popularTopics.slice(0, 8).map((topic) => ({
+  popularTopics.map((topic) => ({
     value: topic.query,
     label: topic.label,
-    action: () => {
-      searchQuery.value = topic.query
-    },
   }))
 )
 

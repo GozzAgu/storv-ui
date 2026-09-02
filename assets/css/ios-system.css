@@ -11,15 +11,20 @@ html.capacitor-ios.capacitor-native {
   text-size-adjust: 100%;
 }
 
+html.capacitor-ios.capacitor-native,
+html.capacitor-ios.capacitor-native body,
+html.capacitor-ios.capacitor-native button,
+html.capacitor-ios.capacitor-native input,
+html.capacitor-ios.capacitor-native select,
+html.capacitor-ios.capacitor-native textarea {
+  font-family: var(--ios-type-font-family);
+}
+
 html.capacitor-ios.capacitor-native [data-dashboard-main],
 html.capacitor-ios.capacitor-native .dashboard-native-main {
   background: var(--ios-aurora), var(--ios-canvas) !important;
   color: var(--ios-label);
-}
-
-/* Align legacy cap-ios downsizing with Apple semantic scale (17px body) */
-html.capacitor-ios.capacitor-native [data-dashboard-main],
-html.capacitor-ios.capacitor-native .dashboard-native-main {
+  font-family: var(--ios-type-font-family);
   font-size: var(--ios-type-body-size);
   line-height: var(--ios-type-body-leading);
 }
@@ -156,9 +161,7 @@ html.capacitor-ios.capacitor-native button.btn-primary {
   border-color: transparent !important;
   background: var(--storvv-navy, var(--ios-accent)) !important;
   color: #ffffff !important;
-  box-shadow:
-    0 1px 2px rgb(0 0 0 / 0.06),
-    0 4px 14px rgb(20 63 141 / 0.28);
+  box-shadow: none !important;
 }
 
 html.capacitor-ios.capacitor-native.dark .ios-action-btn--primary,
@@ -166,9 +169,7 @@ html.capacitor-ios.capacitor-native.dark .btn-primary,
 html.capacitor-ios.capacitor-native.dark button.btn-primary {
   background: linear-gradient(180deg, var(--storvv-blue, #4876c7) 0%, var(--storvv-navy, #143f8d) 100%) !important;
   color: #ffffff !important;
-  box-shadow:
-    0 1px 2px rgb(0 0 0 / 0.35),
-    0 6px 18px rgb(20 63 141 / 0.35);
+  box-shadow: none !important;
 }
 
 html.capacitor-ios.capacitor-native .ios-action-btn--secondary,
@@ -271,44 +272,32 @@ html.capacitor-ios.capacitor-native [data-dashboard-main] .btn-outline {
   border-radius: var(--ios-radius-md) !important;
 }
 
-/* ── Form fields ── */
-html.capacitor-ios.capacitor-native
-  input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='hidden']):not(
-    [type='button']
-  ):not([type='submit']):not([type='reset']),
-html.capacitor-ios.capacitor-native select,
-html.capacitor-ios.capacitor-native textarea,
-html.capacitor-ios.capacitor-native .app-field {
-  min-height: 2.75rem;
-  border-radius: var(--ios-radius-sm) !important;
-  border: 1px solid var(--ios-separator) !important;
-  background: var(--ios-surface-solid) !important;
-  color: var(--ios-label) !important;
-  font-family: var(--ios-type-font-family);
-  font-size: var(--ios-type-input-size) !important;
-  line-height: var(--ios-type-body-leading) !important;
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.04);
+/* ── Toggle switch — 51×31pt platform switch ── */
+html.capacitor-ios.capacitor-native .dash-switch__track {
+  width: 3.1875rem;
+  height: 1.9375rem;
+  background: var(--ios-fill-secondary);
 }
 
-html.capacitor-ios.capacitor-native input::placeholder,
-html.capacitor-ios.capacitor-native textarea::placeholder {
-  color: var(--ios-label-tertiary);
+html.capacitor-ios.capacitor-native .dash-switch__thumb {
+  width: 1.6875rem;
+  height: 1.6875rem;
+  border: none;
+  box-shadow:
+    0 3px 8px rgb(0 0 0 / 0.15),
+    0 1px 1px rgb(0 0 0 / 0.16);
+  transition: transform 0.22s var(--ios-spring);
 }
 
-html.capacitor-ios.capacitor-native input:focus,
-html.capacitor-ios.capacitor-native select:focus,
-html.capacitor-ios.capacitor-native textarea:focus {
-  outline: none;
-  border-color: rgb(120 120 128 / 0.4) !important;
-  box-shadow: 0 0 0 3px rgb(120 120 128 / 0.12);
+html.capacitor-ios.capacitor-native .dash-switch__input:checked ~ .dash-switch__track {
+  background: var(--ios-success);
 }
 
-html.capacitor-ios.capacitor-native.dark input:focus,
-html.capacitor-ios.capacitor-native.dark select:focus,
-html.capacitor-ios.capacitor-native.dark textarea:focus {
-  border-color: rgb(255 255 255 / 0.28) !important;
-  box-shadow: 0 0 0 3px rgb(255 255 255 / 0.08);
+html.capacitor-ios.capacitor-native .dash-switch__input:checked ~ .dash-switch__track .dash-switch__thumb {
+  transform: translateX(1.25rem);
 }
+
+/* Form field appearance lives in ios-fields.css (auth parity). */
 
 /* ── Tables → grouped card lists ── */
 html.capacitor-ios.capacitor-native .data-table-shell,
@@ -466,29 +455,29 @@ html.capacitor-ios.capacitor-native .dash-home .dash-card__link {
 
 html.capacitor-ios.capacitor-native .dash-home .dash-list__row {
   align-items: flex-start;
-  gap: 0.875rem;
-  padding: 0.75rem 0;
+  gap: 0.625rem;
+  padding: var(--ios-list-row-pad-block, 0.5625rem) 0;
   border-bottom-color: var(--ios-separator);
 }
 
 html.capacitor-ios.capacitor-native .dash-home .dash-list__primary {
-  font-size: var(--ios-type-subheadline-size) !important;
-  font-weight: 400;
-  line-height: 1.35;
+  font-size: var(--ios-list-title-size) !important;
+  font-weight: 500;
+  line-height: 1.3;
   color: var(--ios-label) !important;
 }
 
 html.capacitor-ios.capacitor-native .dash-home .dash-list__secondary {
-  margin-top: 0.1875rem;
-  font-size: var(--ios-type-footnote-size) !important;
-  line-height: 1.35;
+  margin-top: 0.125rem;
+  font-size: var(--ios-list-subtitle-size) !important;
+  line-height: 1.3;
   color: var(--ios-label-secondary) !important;
 }
 
 html.capacitor-ios.capacitor-native .dash-home .dash-list__value {
-  font-size: var(--ios-type-body-size) !important;
-  font-weight: 500;
-  line-height: 1.3;
+  font-size: var(--ios-list-amount-size) !important;
+  font-weight: 600;
+  line-height: 1.25;
   color: var(--ios-label) !important;
 }
 
@@ -604,4 +593,29 @@ html.capacitor-ios.capacitor-native .subscription-plan-panel .flex.flex-col.gap-
 
 html.capacitor-ios.capacitor-native .subscription-plan-panel .flex.flex-col.gap-3.sm\:flex-row.sm\:items-end > .min-w-0.flex-1 {
   width: 100%;
+}
+
+/* Flat buttons — no drop shadows (keyboard focus rings preserved) */
+html.capacitor-ios.capacitor-native :is(
+  .ios-action-btn,
+  .btn-primary,
+  .btn-secondary,
+  .btn-outline,
+  .btn-danger,
+  .btn-primary-sm,
+  button.btn-primary,
+  .ios-fab,
+  .ios-fab--secondary,
+  .ios-home-dashboard__add-btn,
+  .ios-quick-actions__icon-wrap,
+  .payment-links-native-fab,
+  .dashboard-assistant__fab,
+  .ios-segmented-control__segment--active,
+  .auth-form .auth-btn,
+  .auth-segment__item--active,
+  [data-dashboard-main]
+    button.group.relative.inline-flex.items-center.justify-center.overflow-hidden.border-0.font-semibold.tracking-tight,
+  [data-btn-variant]
+):not(:focus-visible) {
+  box-shadow: none !important;
 }

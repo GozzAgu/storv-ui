@@ -1,6 +1,6 @@
 <template>
   <article
-    class="dash-grid-card dept-grid-card"
+    class="dash-grid-card dept-grid-card dash-folder-card"
     :class="[
       inactive ? 'dash-grid-card--disabled' : '',
       deleting ? 'pointer-events-none' : '',
@@ -15,76 +15,22 @@
       <ArrowPathIcon class="h-5 w-5 animate-spin text-white" aria-hidden="true" />
     </div>
 
-    <div class="dash-grid-card__head">
-      <BuildingOffice2Icon class="dash-grid-card__icon" stroke-width="1.5" aria-hidden="true" />
-      <span :class="statusPill.pillClass">
-        <span class="dash-grid-card__pill-dot" aria-hidden="true" />
-        <span class="truncate">{{ statusPill.label }}</span>
-      </span>
-      <div v-if="hasOverlays" class="-mr-0.5 shrink-0" @click.stop>
+    <div v-if="hasOverlays" class="dash-folder-card__chrome">
+      <div class="dash-folder-card__check" @click.stop>
+        <slot name="checkbox" />
+      </div>
+      <div class="dash-folder-card__menu" @click.stop>
         <slot name="menu" />
       </div>
     </div>
 
-    <div class="dash-grid-card__intro">
-      <h3 class="dash-grid-card__title">
-        {{ displayName }}
-      </h3>
-      <p class="dash-grid-card__desc">
-        {{ descriptionText }}
-      </p>
-    </div>
+    <GlassFolderMark class="dash-folder-card__mark" />
 
-    <div class="dash-grid-card__meta-block">
-      <div class="dash-grid-card__meta-row">
-        <TagIcon class="dash-grid-card__meta-icon" stroke-width="1.5" aria-hidden="true" />
-        <span class="min-w-0 truncate">{{ typeLabel }} · {{ storeLabel }}</span>
-      </div>
-      <div class="dash-grid-card__meta-row">
-        <UserIcon class="dash-grid-card__meta-icon" stroke-width="1.5" aria-hidden="true" />
-        <span class="min-w-0 truncate">{{ managerLabel }}</span>
-      </div>
-    </div>
-
-    <div class="dash-grid-card__footer">
-      <div class="dash-grid-card__footer-row">
-        <div class="dash-grid-card__ring">
-          <svg class="absolute inset-0 h-full w-full -rotate-90" viewBox="0 0 36 36" aria-hidden="true">
-            <circle class="dash-grid-card__ring-track" cx="18" cy="18" r="14" />
-            <circle
-              class="dash-grid-card__ring-fill"
-              cx="18"
-              cy="18"
-              r="14"
-              :stroke-dasharray="ringCircumference"
-              :stroke-dashoffset="ringOffset"
-            />
-          </svg>
-          <span class="dash-grid-card__ring-label">{{ staffCount }}</span>
-        </div>
-        <div class="dash-grid-card__stat">
-          <p class="dash-grid-card__stat-value">
-            {{ staffCount }}
-            <span class="dash-grid-card__stat-muted">
-              {{ staffCount === 1 ? 'member' : 'members' }}
-            </span>
-          </p>
-          <p
-            v-if="inactive"
-            class="dash-grid-card__stat-hint dash-grid-card__stat-hint--warning"
-          >
-            Inactive
-          </p>
-        </div>
-        <div v-if="hasOverlays" class="ml-auto shrink-0 self-center" @click.stop>
-          <slot name="checkbox" />
-        </div>
-      </div>
-      <p
-        v-if="dateLabel"
-        class="dash-grid-card__footer-date mt-1.5 text-right text-[10px] font-medium tabular-nums text-gray-500 dark:text-gray-400"
-      >
-        Updated {{ dateLabel }}
+    <div class="dash-folder-card__copy">
+      <h3 class="dash-folder-card__title">{{ displayName }}</h3>
+      <p class="dash-folder-card__meta">{{ metaLabel }}</p>
+      <p v-if="inactive" class="dash-folder-card__hint dash-folder-card__hint--warning">
+        Inactive
       </p>
     </div>
   </article>
@@ -92,20 +38,9 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import {
-  ArrowPathIcon,
-  BuildingOffice2Icon,
-  TagIcon,
-  UserIcon,
-} from '~/utils/app-icons'
-import { formatCategoryDate, formatCategoryDisplayName } from '~/utils/inventory-category-card'
-import {
-  departmentDescriptionText,
-  departmentManagerLabel,
-  departmentStaffRingPercent,
-  departmentStatusPill,
-  formatDepartmentTypeLabel,
-} from '~/utils/department-card'
+import { ArrowPathIcon } from '~/utils/app-icons'
+import GlassFolderMark from '~/components/ui/GlassFolderMark.vue'
+import { formatCategoryDisplayName } from '~/utils/inventory-category-card'
 
 const props = withDefaults(
   defineProps<{
@@ -139,27 +74,10 @@ defineEmits<{
   open: []
 }>()
 
-const ringCircumference = 2 * Math.PI * 14
-
 const displayName = computed(() => formatCategoryDisplayName(props.name))
 
-const descriptionText = computed(() => departmentDescriptionText(props.description))
-
-const typeLabel = computed(() => formatDepartmentTypeLabel(props.departmentType))
-
-const storeLabel = computed(() => props.storeName?.trim() || 'This store')
-
-const managerLabel = computed(() => departmentManagerLabel(props.manager))
-
-const statusPill = computed(() => departmentStatusPill(props.inactive))
-
-const dateLabel = computed(
-  () => formatCategoryDate(props.updatedAt) ?? formatCategoryDate(props.createdAt)
-)
-
-const ringPercent = computed(() =>
-  departmentStaffRingPercent(props.inactive, props.staffCount ?? 0)
-)
-
-const ringOffset = computed(() => ringCircumference * (1 - ringPercent.value / 100))
+const metaLabel = computed(() => {
+  const n = props.staffCount ?? 0
+  return `${n} ${n === 1 ? 'member' : 'members'}`
+})
 </script>

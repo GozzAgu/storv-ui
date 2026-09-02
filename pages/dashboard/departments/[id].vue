@@ -111,33 +111,29 @@
         :class="[
           'flex min-h-0 flex-col transition-colors duration-200 ease-out',
           isStaffFullscreen
-            ? 'fixed inset-0 z-[100] flex min-h-0 flex-col overflow-hidden bg-white dark:!bg-dashboard-card'
+            ? `${tableExpandClass} fixed inset-0 z-[100] flex min-h-0 flex-col overflow-hidden`
             : 'relative flex-1',
         ]"
       >
         <!-- Fullscreen header (same pattern as receipts) -->
         <div
           v-if="isStaffFullscreen"
-          class="shrink-0 border-b border-gray-200/80 bg-white/95 px-4 py-3 backdrop-blur-md dark:border-gray-800/80 dark:!bg-dashboard-card/95 sm:px-6 lg:px-8"
-          style="padding-top: max(0.75rem, env(safe-area-inset-top, 0px))"
+          :class="tableExpandHeaderClass"
+          style="padding-top: max(1rem, env(safe-area-inset-top, 0px))"
         >
           <div
             class="flex w-full flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-6"
           >
             <div class="flex min-w-0 items-start justify-between gap-3 lg:items-center">
               <div class="min-w-0">
-                <p
-                  class="text-[10px] font-medium uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
-                >
+                <p :class="tableExpandEyebrowClass">
                   Expanded view
                 </p>
                 <div class="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                  <h2
-                    class="text-base font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-lg"
-                  >
+                  <h2 :class="tableExpandTitleClass">
                     {{ department?.name || 'Department' }}
                   </h2>
-                  <span class="text-xs tabular-nums text-gray-500 dark:text-gray-400">
+                  <span :class="tableExpandMetaClass">
                     {{ staff.length }} members · {{ activeStaff }} active ·
                     {{ totalManagers }} managers
                   </span>
@@ -145,7 +141,8 @@
               </div>
               <button
                 type="button"
-                class="shrink-0 rounded-sm border border-transparent p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-100 lg:hidden"
+                class="inline-flex lg:hidden"
+                :class="tableExpandCloseClass"
                 aria-label="Exit expanded view"
                 @click="isStaffFullscreen = false"
               >
@@ -165,7 +162,8 @@
               </Button>
               <button
                 type="button"
-                class="hidden rounded-sm border border-transparent p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-100 lg:inline-flex"
+                class="hidden lg:inline-flex"
+                :class="tableExpandCloseClass"
                 aria-label="Exit expanded view"
                 @click="isStaffFullscreen = false"
               >
@@ -178,12 +176,12 @@
         <div
           :class="[
             'data-table-shell flex min-h-0 flex-col',
-            isStaffFullscreen ? 'min-h-0 flex-1 overflow-hidden' : 'overflow-hidden',
+            isStaffFullscreen ? `${tableExpandBodyClass}` : 'overflow-hidden',
           ]"
         >
           <div
             v-if="canRemoveStaff && rosterTab === 'active' && selectedStaffForBulk.length > 0"
-            class="flex flex-wrap items-center gap-2 border-b border-gray-100/90 bg-primary-50/60 px-4 py-2.5 dark:border-gray-800/80 dark:bg-primary-900/15 sm:px-5"
+            class="dash-table-bulk-bar"
           >
             <span class="text-xs font-medium text-gray-700 dark:text-gray-300"
               >{{ selectedStaffForBulk.length }} selected</span
@@ -289,16 +287,29 @@
             v-if="isLoadingStaff"
             class="min-h-[min(420px,calc(100svh-16rem))] flex-1 overflow-x-auto"
           >
-            <div class="space-y-3 p-4 sm:p-6">
-              <div v-for="i in 6" :key="i" class="flex items-center gap-4">
-                <div class="h-10 w-10 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
-                <div class="flex-1 space-y-2">
-                  <div
-                    class="h-4 w-1/3 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"
-                  ></div>
-                  <div class="h-3 w-1/4 animate-pulse rounded bg-gray-200 dark:bg-white/10"></div>
-                </div>
-              </div>
+            <div class="dash-table-skeleton__toolbar">
+              <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-title" />
+              <span class="dash-skeleton dash-skeleton--line dash-skeleton--search" />
+            </div>
+            <nav
+              v-if="canRemoveStaff"
+              :class="segmentTabsClass"
+              aria-hidden="true"
+            >
+              <span class="dash-skeleton dash-skeleton--select" />
+              <span class="dash-skeleton dash-skeleton--select" />
+            </nav>
+            <div class="dept-staff-mobile-list space-y-2.5 px-3 pb-4 md:hidden">
+              <DashListCardSkeleton :count="6" />
+            </div>
+            <div class="hidden md:block">
+              <DashTableSkeleton
+                :columns="staffTableSkeletonColumns"
+                :rows="8"
+                leading="none"
+                flush
+                aria-label="Loading staff"
+              />
             </div>
           </div>
 
@@ -685,105 +696,76 @@
     />
 
     <!-- Staff ⋮ menu (teleported so table overflow does not clip it) -->
-    <Teleport :to="menuTeleportTarget">
-      <div
-        v-if="openStaffMenuId && staffForOpenMenu && staffMenuFixedStyle"
-        data-staff-menu
-        role="menu"
-        :class="[
-          'fixed min-w-[10rem] overflow-hidden rounded-lg bg-white/95 py-1 shadow-lg backdrop-blur-xl dark:bg-slate-950/95',
-          isNativeApp ? 'z-[1100]' : 'z-[1000]',
-        ]"
-        :style="staffMenuFixedStyle"
-        @click.stop
-      >
-        <template v-if="rosterTab === 'removed'">
-          <button
-            type="button"
-            role="menuitem"
-            class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-primary-600 transition-colors hover:bg-primary-50 dark:text-primary-400 dark:hover:bg-primary-950/35"
-            :disabled="reactivateBusyId === staffForOpenMenu.id"
-            @click="
-              () => {
-                openReactivateStaffModal(staffForOpenMenu)
-                openStaffMenuId = null
-              }
-            "
-          >
-            <ArrowUturnLeftIcon class="h-4 w-4 shrink-0" />
-            {{ reactivateBusyId === staffForOpenMenu.id ? 'Reactivating…' : 'Reactivate' }}
-          </button>
-        </template>
-        <template v-else>
-        <button
-          type="button"
-          role="menuitem"
-          class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-blue-600 transition-colors hover:bg-blue-50 disabled:opacity-50 dark:text-blue-400 dark:hover:bg-blue-900/25"
-          :disabled="!!roleToggleBusyId && roleToggleBusyId !== staffForOpenMenu.id"
+    <IosContextMenu
+      :open="Boolean(openStaffMenuId && staffForOpenMenu && staffMenuFixedStyle)"
+      :style="staffMenuFixedStyle"
+      menu-id="staff"
+    >
+      <template v-if="rosterTab === 'removed'">
+        <IosContextMenuItem
+          :label="reactivateBusyId === staffForOpenMenu?.id ? 'Reactivating…' : 'Reactivate'"
+          :icon="ArrowUturnLeftIcon"
+          :disabled="reactivateBusyId === staffForOpenMenu?.id"
           @click="
             () => {
-              handleToggleStaffRole(staffForOpenMenu)
+              openReactivateStaffModal(staffForOpenMenu!)
               openStaffMenuId = null
             }
           "
-        >
-          <ArrowPathIcon
-            class="h-4 w-4 shrink-0"
-            :class="{ 'animate-spin': roleToggleBusyId === staffForOpenMenu.id }"
-          />
-          {{
-            roleToggleBusyId === staffForOpenMenu.id
+        />
+      </template>
+      <template v-else>
+        <IosContextMenuItem
+          :label="
+            roleToggleBusyId === staffForOpenMenu?.id
               ? 'Updating…'
-              : `Switch to ${getNextStaffRoleLabel(staffForOpenMenu.role)}`
-          }}
-        </button>
-        <button
-          type="button"
-          role="menuitem"
-          class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800/80"
+              : `Switch to ${getNextStaffRoleLabel(staffForOpenMenu?.role)}`
+          "
+          :icon="ArrowPathIcon"
+          :icon-class="roleToggleBusyId === staffForOpenMenu?.id ? 'animate-spin' : ''"
+          :disabled="!!roleToggleBusyId && roleToggleBusyId !== staffForOpenMenu?.id"
           @click="
             () => {
-              handleEditStaff(staffForOpenMenu)
+              handleToggleStaffRole(staffForOpenMenu!)
               openStaffMenuId = null
             }
           "
-        >
-          <PencilSquareIcon class="h-4 w-4 shrink-0" />
-          Edit
-        </button>
-        <button
+        />
+        <IosContextMenuItem
+          label="Edit"
+          :icon="PencilSquareIcon"
+          @click="
+            () => {
+              handleEditStaff(staffForOpenMenu!)
+              openStaffMenuId = null
+            }
+          "
+        />
+        <IosContextMenuItem
           v-if="canMoveStaff"
-          type="button"
-          role="menuitem"
-          class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-primary-700 transition-colors hover:bg-primary-50 dark:text-primary-300 dark:hover:bg-primary-950/35"
+          label="Move department"
+          :icon="ArrowsRightLeftIcon"
           @click="
             () => {
-              openMoveStaffModal(staffForOpenMenu)
+              openMoveStaffModal(staffForOpenMenu!)
               openStaffMenuId = null
             }
           "
-        >
-          <ArrowsRightLeftIcon class="h-4 w-4 shrink-0" />
-          Move department
-        </button>
-        <button
+        />
+        <IosContextMenuItem
           v-if="canRemoveStaff"
-          type="button"
-          role="menuitem"
-          class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/35"
+          label="Remove"
+          :icon="TrashIcon"
+          danger
           @click="
             () => {
-              openDeactivateStaffModal(staffForOpenMenu)
+              openDeactivateStaffModal(staffForOpenMenu!)
               openStaffMenuId = null
             }
           "
-        >
-          <TrashIcon class="h-4 w-4 shrink-0" />
-          Remove
-        </button>
-        </template>
-      </div>
-    </Teleport>
+        />
+      </template>
+    </IosContextMenu>
     <!-- Staff Modal -->
     <StaffModal
       v-if="departmentId"
@@ -828,6 +810,8 @@ import Breadcrumbs from '~/components/ui/Breadcrumbs.vue'
 import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
 import DashboardTableBadge from '~/components/ui/DashboardTableBadge.vue'
 import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
+import IosContextMenu from '~/components/ios/IosContextMenu.vue'
+import IosContextMenuItem from '~/components/ios/IosContextMenuItem.vue'
 import IosSearchBar from '~/components/ios/IosSearchBar.vue'
 import IosQuickActionBar, { type IosQuickActionOption } from '~/components/ios/IosQuickActionBar.vue'
 import IosReceiptTransactionRow, {
@@ -858,7 +842,11 @@ import type { Staff } from '~/composables/useStaff'
 import { usePermissions } from '~/composables/usePermissions'
 import { useAppToast } from '~/composables/useAppToast'
 import { useStoresStore } from '~/stores/stores'
-import { getVisibleMenuAnchorElement, computeFixedAnchoredMenuStyle } from '~/utils/menuAnchor'
+import {
+  getVisibleMenuAnchorElement,
+  computeFixedAnchoredMenuStyle,
+  isInsideAnchoredMenu,
+} from '~/utils/menuAnchor'
 import { useDashboardFloatingMenu } from '~/composables/useDashboardFloatingMenu'
 import {
   departmentDetailPath,
@@ -882,6 +870,15 @@ const {
   segmentTabsBtnClass,
   segmentTabsBtnActiveClass,
 } = useDashboardPageChrome()
+const {
+  tableExpandClass,
+  tableExpandHeaderClass,
+  tableExpandBodyClass,
+  tableExpandCloseClass,
+  tableExpandEyebrowClass,
+  tableExpandTitleClass,
+  tableExpandMetaClass,
+} = useDashboardTableChrome()
 const departmentId = computed(() => route.params.id as string)
 
 const departmentBreadcrumbs = computed(() => {
@@ -986,7 +983,7 @@ const staffPendingMove = ref<Staff | null>(null)
 const isMovingStaff = ref(false)
 const toast = useAppToast()
 
-const { isNativeApp, menuViewportPadding, menuTeleportTarget } = useDashboardFloatingMenu()
+const { menuViewportPadding } = useDashboardFloatingMenu()
 
 const departmentsStore = useDepartmentsStore()
 const staffStore = useStaffStore()
@@ -1043,7 +1040,6 @@ function updateStaffMenuPosition() {
   const r = el.getBoundingClientRect()
   const itemCount = 2 + (canMoveStaff.value ? 1 : 0) + (canRemoveStaff.value ? 1 : 0)
   staffMenuFixedStyle.value = computeFixedAnchoredMenuStyle(r, {
-    menuWidth: 160,
     estimatedMenuHeight: itemCount * 40 + 8,
     margin: 4,
     viewportPadding: menuViewportPadding.value,
@@ -1084,7 +1080,7 @@ watch(openStaffMenuId, (id) => {
 
   staffMenuOutsideHandler = (e: MouseEvent) => {
     const t = e.target as HTMLElement | null
-    if (t?.closest?.('[data-staff-menu]')) return
+    if (isInsideAnchoredMenu(t)) return
     if (t?.closest?.('[data-staff-actions-anchor]')) return
     openStaffMenuId.value = null
     removeStaffMenuOutsideListener()
@@ -1135,6 +1131,29 @@ const { canCreateStaff, canManage, canRemoveStaff, canMoveStaff } = usePermissio
 // Only super admins can create or remove staff (managers can edit roles/details)
 const canManageDepartments = computed(() => canManage.value)
 const canCreateNewStaff = computed(() => canCreateStaff.value)
+
+const staffTableSkeletonColumns = computed(() => {
+  const columns: Array<{
+    id?: string
+    label: string
+    class?: string
+    bone?: string
+  }> = []
+  if (canRemoveStaff.value) {
+    columns.push({ id: 'select', label: '', class: 'w-10 text-center', bone: '1rem' })
+  }
+  columns.push(
+    { label: 'Name' },
+    { label: 'Position', class: 'hidden sm:table-cell', bone: '5.5rem' },
+    { label: 'Role', bone: '4rem' },
+    { label: 'Email', class: 'hidden md:table-cell' },
+    { label: 'Status', class: 'dashboard-table__col-status', bone: '4.5rem' }
+  )
+  if (canManageDepartments.value) {
+    columns.push({ label: 'Actions', class: 'dashboard-table__col-actions', bone: '1.5rem' })
+  }
+  return columns
+})
 
 // Current staff member (for staff users and to check manager status)
 const currentStaffMember = ref<Staff | null>(null)
@@ -1464,6 +1483,7 @@ const staffQuickActionOptions = computed((): IosQuickActionOption[] => {
       value: 'add',
       label: 'Add',
       icon: PlusIcon,
+      trailing: 'add',
       action: openCreateStaffModal,
     })
   }

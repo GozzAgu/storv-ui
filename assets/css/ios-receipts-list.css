@@ -117,11 +117,11 @@ html.capacitor-ios.capacitor-native .ios-receipt-transaction-row {
 html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__main {
   display: flex;
   align-items: flex-start;
-  gap: 0.875rem;
+  gap: 0.625rem;
   min-width: 0;
   flex: 1;
   overflow: hidden;
-  padding: 0.875rem 1rem;
+  padding: var(--ios-list-row-pad-block, 0.5625rem) var(--ios-list-row-pad-inline, 0.875rem);
   border: none;
   background: transparent;
   text-align: left;
@@ -176,12 +176,12 @@ html.capacitor-ios.capacitor-native .ios-receipt-transaction-row--nested .ios-re
 }
 
 html.capacitor-ios.capacitor-native .ios-receipt-transaction-row--nested .ios-receipt-transaction-row__icon {
-  width: 2.125rem;
-  height: 2.125rem;
+  width: 1.875rem;
+  height: 1.875rem;
 }
 
 html.capacitor-ios.capacitor-native .ios-receipt-transaction-row--nested .ios-receipt-transaction-row__title {
-  font-size: 0.875rem;
+  font-size: var(--ios-list-subtitle-size, 0.6875rem);
   font-weight: 500;
 }
 
@@ -207,8 +207,8 @@ html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: var(--ios-list-icon-size, 2.125rem);
+  height: var(--ios-list-icon-size, 2.125rem);
   border-radius: 9999px;
   border: 1.5px solid var(--ios-separator);
   color: var(--ios-label-secondary);
@@ -247,9 +247,9 @@ html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__body {
 
 html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__title {
   margin: 0;
-  font-size: 0.9375rem;
+  font-size: var(--ios-list-title-size, 0.8125rem);
   font-weight: 500;
-  line-height: 1.3;
+  line-height: 1.25;
   color: var(--ios-label);
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -261,10 +261,10 @@ html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__title {
 }
 
 html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__subtitle {
-  margin: 0.1875rem 0 0;
-  font-size: 0.75rem;
+  margin: 0.125rem 0 0;
+  font-size: var(--ios-list-subtitle-size, 0.6875rem);
   font-weight: 400;
-  line-height: 1.35;
+  line-height: 1.3;
   color: var(--ios-label-secondary);
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -294,7 +294,7 @@ html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__amount {
   margin: 0;
   width: 100%;
   min-width: 0;
-  font-size: 0.8125rem;
+  font-size: var(--ios-list-amount-size, 0.75rem);
   font-weight: 600;
   line-height: 1.2;
   font-variant-numeric: tabular-nums;
@@ -313,7 +313,7 @@ html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__date {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 0.6875rem;
+  font-size: var(--ios-list-meta-size, 0.625rem);
   font-weight: 400;
   line-height: 1.2;
   color: var(--ios-label-secondary);

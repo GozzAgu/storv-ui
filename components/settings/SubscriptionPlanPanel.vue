@@ -74,9 +74,9 @@
           </select>
         </div>
         <Button
-          variant="primary"
+          variant="neutral"
           size="sm"
-          :class="headerTextBtnClass"
+          :extra-class="headerTextBtnClass"
           :disabled="disabled || !selectedUpgradePlan || isUpgrading || upgradeOptions.length === 0"
           @click="emit('upgrade')"
         >
@@ -99,7 +99,7 @@
         <Button
           variant="secondary"
           size="sm"
-          :class="headerTextBtnClass"
+          :extra-class="headerTextBtnClass"
           :disabled="isCanceling || isUpgrading"
           @click="emit('cancel')"
         >

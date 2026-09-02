@@ -468,6 +468,78 @@ html.dark .dash-action-link:hover {
   background: rgb(255 255 255 / 0.08);
 }
 
+.ios-form-add-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.ios-form-add-row {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 2.5rem;
+  margin: 0;
+  padding: 0.625rem 1rem;
+  border: 1px dashed rgb(15 23 42 / 0.16);
+  border-radius: 0.875rem;
+  background: transparent;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--dash-ink, #0f172a);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ios-form-add-row:hover {
+  background: rgb(15 23 42 / 0.04);
+}
+
+.ios-form-add-row:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.ios-form-add-row--secondary {
+  border-style: solid;
+  border-color: transparent;
+  background: rgb(15 23 42 / 0.04);
+  font-weight: 500;
+  color: var(--dash-muted, #64748b);
+}
+
+.ios-form-add-row--secondary:hover {
+  background: rgb(15 23 42 / 0.07);
+}
+
+html.dark .ios-form-add-row {
+  border-color: rgb(255 255 255 / 0.16);
+  color: #f8fafc;
+}
+
+html.dark .ios-form-add-row:hover {
+  background: rgb(255 255 255 / 0.05);
+}
+
+html.dark .ios-form-add-row--secondary {
+  background: rgb(255 255 255 / 0.05);
+  color: rgb(226 232 240 / 0.82);
+}
+
+html.dark .ios-form-add-row--secondary:hover {
+  background: rgb(255 255 255 / 0.08);
+}
+
+.ios-form-add-row__glyph {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
 .dash-action-link--cancel {
   color: var(--dash-muted, #64748b);
 }
@@ -519,6 +591,81 @@ html.dark .dash-action-link--cancel:hover {
   color: var(--dash-muted, #64748b);
 }
 
+/* Toggle switch (components/ui/Switch.vue) */
+.dash-switch {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  cursor: pointer;
+}
+
+.dash-switch--disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.dash-switch__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.dash-switch__track {
+  position: relative;
+  display: block;
+  width: 2rem;
+  height: 1rem;
+  border-radius: 9999px;
+  background: rgb(229 231 235);
+  transition: background-color 0.2s ease;
+}
+
+html.dark .dash-switch__track {
+  background: rgb(55 65 81);
+}
+
+.dash-switch__thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  display: block;
+  width: 0.75rem;
+  height: 0.75rem;
+  border: 1px solid rgb(209 213 219);
+  border-radius: 9999px;
+  background: #ffffff;
+  transition: transform 0.2s ease;
+}
+
+.dash-switch__input:checked ~ .dash-switch__track {
+  background: #0f172a;
+}
+
+html.dark .dash-switch__input:checked ~ .dash-switch__track {
+  background: rgb(229 231 235);
+}
+
+.dash-switch__input:checked ~ .dash-switch__track .dash-switch__thumb {
+  border-color: #ffffff;
+  transform: translateX(1rem);
+}
+
+.dash-switch__input:focus-visible ~ .dash-switch__track {
+  outline: 2px solid rgb(148 163 184 / 0.6);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dash-switch__track,
+  .dash-switch__thumb {
+    transition: none;
+  }
+}
+
 .dash-view-only-badge {
   display: inline-flex;
   height: 2rem;
@@ -568,6 +715,7 @@ html.dark .dash-profile-card {
   align-items: center;
   justify-content: center;
   margin-inline: auto;
+  overflow: hidden;
   border-radius: 9999px;
   border: 1px solid var(--dash-avatar-border);
   background: var(--dash-avatar-bg);

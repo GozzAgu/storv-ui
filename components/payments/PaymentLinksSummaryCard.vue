@@ -30,9 +30,15 @@
     </div>
 
     <!-- Loading -->
-    <div v-if="loading && links.length === 0" class="space-y-2">
-      <div class="h-12 animate-pulse rounded-lg bg-gray-100 dark:bg-white/[0.06]" />
-      <div class="h-10 animate-pulse rounded-lg bg-gray-100 dark:bg-white/[0.06]" />
+    <div v-if="loading && links.length === 0" class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+      <div
+        v-for="i in 4"
+        :key="i"
+        class="rounded-lg bg-gray-50/80 px-3 py-2 dark:bg-white/[0.03]"
+      >
+        <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-label" />
+        <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-value mt-1.5" />
+      </div>
     </div>
 
     <!-- Not connected -->
@@ -98,7 +104,7 @@
       </p>
 
       <div class="mt-3 border-t border-gray-100/90 pt-2.5 dark:border-gray-800/70">
-        <div v-if="recentLinks.length === 0" class="py-1 text-xs text-gray-500 dark:text-gray-400">
+        <div v-if="recentLinks.length === 0" class="dash-empty py-2">
           No payment links yet.
         </div>
         <ul v-else class="space-y-0">

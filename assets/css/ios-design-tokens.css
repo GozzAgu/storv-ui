@@ -237,9 +237,7 @@ html.capacitor-native .ios-fab {
   border: none;
   background: var(--ios-accent);
   color: #ffffff;
-  box-shadow:
-    0 8px 24px rgb(20 63 141 / 0.35),
-    0 2px 8px rgb(0 0 0 / 0.12);
+  box-shadow: none;
   transition: transform 0.12s var(--ios-spring);
 }
 
@@ -249,9 +247,7 @@ html.capacitor-native .ios-fab:active {
 
 html.capacitor-native.dark .ios-fab {
   background: var(--ios-accent-soft);
-  box-shadow:
-    0 8px 32px rgb(0 0 0 / 0.5),
-    0 2px 8px rgb(0 0 0 / 0.3);
+  box-shadow: none;
 }
 
 /* ── Apply glass to existing dashboard cards on native ── */

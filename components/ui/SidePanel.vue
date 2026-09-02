@@ -27,7 +27,7 @@
   </IosDrawer>
 
   <Teleport v-else :to="teleportTarget">
-    <!-- Web: dimmed backdrop -->
+    <!-- Web: frosted glass backdrop -->
     <Transition
       v-if="!nativeInApp"
       enter-active-class="transition-opacity duration-[400ms] ease-out"
@@ -42,7 +42,6 @@
         :class="[
           'fixed inset-0 z-[1100]',
           backdropClass,
-          blurBackdrop ? 'backdrop-blur-[3px]' : '',
         ]"
         aria-hidden="true"
         @click="handleBackdropClick"

@@ -89,12 +89,11 @@
     </Transition>
 
     <!-- Web: centered modal (above SidePanel drawer at z-[1111]) -->
-    <div v-else-if="modelValue" class="fixed inset-0 z-[1120] overflow-y-auto" role="presentation">
+    <div v-else-if="modelValue" class="fixed inset-0 z-[1120] overflow-y-auto" data-dashboard-teleport role="presentation">
       <div
         :class="[
           'absolute inset-0 transition-opacity duration-300',
           backdropClass,
-          blurBackdrop ? 'backdrop-blur-[3px]' : '',
         ]"
         aria-hidden="true"
         @click="handleBackdropClick"

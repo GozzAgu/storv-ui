@@ -1,236 +1,147 @@
 <template>
   <SidePanel
-    :modelValue="props.modelValue"
-    @update:modelValue="(value: boolean) => emit('update:modelValue', value)"
-    :title="isEdit ? 'Edit Staff Member' : 'Add Staff Member'"
-    :subtitle="
-      isEdit
-        ? 'Update staff details.'
-        : 'Send an email invite so they set their own password, then assign role and branch.'
-    "
+    :model-value="props.modelValue"
+    :title="isEdit ? 'Edit staff' : 'Add staff'"
     size="lg"
+    @update:model-value="(value: boolean) => emit('update:modelValue', value)"
   >
-    <div class="space-y-4">
-      <!-- Success: email sent -->
-      <div v-if="emailSentSuccess" class="flex flex-col items-center text-center py-2">
-        <div
-          class="w-12 h-12 rounded-full bg-emerald-500/10 dark:bg-emerald-400/10 flex items-center justify-center mb-4"
-        >
-          <CheckCircleIcon
-            class="w-6 h-6 text-emerald-600 dark:text-emerald-400"
-            stroke-width="2"
+    <div v-if="emailSentSuccess" class="dash-drawer-empty">
+      <CheckCircleIcon class="h-6 w-6" stroke-width="1.75" />
+      <p>Invite emailed</p>
+      <p class="dash-drawer-hint">
+        We sent a sign-in link to
+        <span class="font-medium">{{ formData.email }}</span>. They can set a password, then sign in.
+      </p>
+    </div>
+
+    <div v-else-if="showTemporaryPassword" class="dash-drawer-empty">
+      <CheckCircleIcon class="h-6 w-6" stroke-width="1.75" />
+      <p>Account created</p>
+      <p class="dash-drawer-hint">
+        Share this one-time password with
+        <span class="font-medium">{{ formData.email }}</span>. They can change it in Profile after signing in.
+      </p>
+      <div class="staff-invite-secret">
+        <code>{{ temporaryPasswordToShow }}</code>
+        <button type="button" class="staff-invite-secret__copy" @click="copyTemporaryPassword">
+          <ClipboardDocumentIcon
+            v-if="!copiedPassword"
+            class="h-4 w-4 shrink-0"
+            stroke-width="1.75"
           />
-        </div>
-        <h4 class="text-base font-semibold text-gray-900 dark:text-gray-100 tracking-tight mb-1">
-          Invite emailed
-        </h4>
-        <p class="text-sm text-gray-500 dark:text-gray-400 max-w-sm mb-6">
-          We emailed a secure sign-in link to
-          <span class="font-medium text-gray-700 dark:text-gray-300">{{ formData.email }}</span>.
-          They can set a password, then sign in with their role and branch.
-        </p>
-        <Button
-          variant="neutral"
-          size="sm"
-          class="!rounded-2xl w-full sm:w-auto min-w-[120px]"
-          @click="closeAfterSuccess"
-        >
-          Done
-        </Button>
+          <CheckCircleIcon v-else class="h-4 w-4 shrink-0" stroke-width="2" />
+          {{ copiedPassword ? 'Copied' : 'Copy' }}
+        </button>
       </div>
+    </div>
 
-      <!-- Success: show one-time password to copy and share -->
-      <div v-else-if="showTemporaryPassword" class="flex flex-col items-center text-center py-2">
-        <div
-          class="w-12 h-12 rounded-full bg-emerald-500/10 dark:bg-emerald-400/10 flex items-center justify-center mb-4"
-        >
-          <CheckCircleIcon
-            class="w-6 h-6 text-emerald-600 dark:text-emerald-400"
-            stroke-width="2"
-          />
-        </div>
-        <h4 class="text-base font-semibold text-gray-900 dark:text-gray-100 tracking-tight mb-1">
-          Account created
-        </h4>
-        <p class="text-sm text-gray-500 dark:text-gray-400 max-w-sm mb-5">
-          Share this one-time password with
-          <span class="font-medium text-gray-700 dark:text-gray-300">{{ formData.email }}</span
-          >. They sign in with email + this password, then can change it in Profile.
-        </p>
-        <div class="w-full flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-6">
-          <div
-            class="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-sm bg-gray-50 dark:!bg-dashboard-card/90/80"
-          >
-            <code
-              class="flex-1 text-sm font-mono text-gray-800 dark:text-gray-200 tracking-wide select-all truncate"
-              >{{ temporaryPasswordToShow }}</code
-            >
-            <button
-              type="button"
-              @click="copyTemporaryPassword"
-              class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-sm text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200/80 dark:hover:bg-gray-700/80 transition-colors"
-            >
-              <ClipboardDocumentIcon
-                v-if="!copiedPassword"
-                class="w-4 h-4 shrink-0"
-                stroke-width="1.75"
-              />
-              <CheckCircleIcon v-else class="w-4 h-4 shrink-0 text-emerald-500" stroke-width="2" />
-              {{ copiedPassword ? 'Copied' : 'Copy' }}
-            </button>
-          </div>
-        </div>
-        <p class="text-xs text-gray-400 dark:text-gray-500 mb-3">
-          Staff can change their password in Profile after signing in.
-        </p>
-        <div class="flex w-full flex-col gap-2 sm:flex-row sm:justify-center">
-          <Button
-            variant="secondary"
-            size="sm"
-            class="!rounded-2xl w-full sm:w-auto"
-            :disabled="isSendingInviteEmail"
-            @click="emailCredentialsAfterCreate"
-          >
-            {{ isSendingInviteEmail ? 'Sending…' : 'Email to staff instead' }}
-          </Button>
-          <Button
-            variant="neutral"
-            size="sm"
-            class="!rounded-2xl w-full sm:w-auto min-w-[120px]"
-            @click="closeAfterSuccess"
-          >
-            Done
-          </Button>
-        </div>
-      </div>
+    <IosForm v-else id="staff-drawer-form" layout="fill" @submit="handleSubmit">
+      <IosFormSection v-if="staffLimitReached && !isEdit" fixed>
+        <LimitUpgradeHint message="Your plan staff limit is reached for this store." />
+        <p class="ios-form__hint dash-drawer-hint">{{ staffLimitMessage }}</p>
+      </IosFormSection>
 
-      <IosForm v-else id="staff-drawer-form" layout="fill" @submit="handleSubmit">
-        <IosFormSection v-if="staffLimitReached && !isEdit" fixed>
-          <div class="rounded-sm bg-amber-50/90 px-3 py-3 dark:bg-amber-950/25">
-            <LimitUpgradeHint
-              message="Your plan staff limit is reached for this store."
-            />
-            <p class="mt-1 text-[11px] text-amber-900/90 dark:text-amber-100/90">
-              {{ staffLimitMessage }}
-            </p>
-          </div>
-        </IosFormSection>
-
-        <IosFormSection title="Basic info" fixed>
+      <IosFormSection fixed>
+        <div class="ios-form__grid sm:grid-cols-2">
           <IosFormField label="First name" required>
             <IosFormInput v-model="formData.firstName" required placeholder="First name" />
           </IosFormField>
           <IosFormField label="Last name" required>
             <IosFormInput v-model="formData.lastName" required placeholder="Last name" />
           </IosFormField>
-          <IosFormField label="Email" required>
-            <IosFormInput
-              v-model="formData.email"
-              type="email"
-              required
-              placeholder="email@example.com"
-            />
-          </IosFormField>
-          <IosFormField label="Phone" hint="Optional">
-            <IosFormInput v-model="formData.phone" type="tel" placeholder="+1234567890" />
-          </IosFormField>
-        </IosFormSection>
+        </div>
+        <IosFormField label="Email" required>
+          <IosFormInput
+            v-model="formData.email"
+            type="email"
+            required
+            placeholder="email@example.com"
+          />
+        </IosFormField>
+        <IosFormField label="Phone" hint="Optional">
+          <IosFormInput v-model="formData.phone" type="tel" placeholder="+1234567890" />
+        </IosFormField>
+      </IosFormSection>
 
-        <IosFormSection v-if="!isEdit" fixed>
-          <label
-            class="flex cursor-pointer items-start gap-2.5 rounded-lg border border-gray-200/80 bg-gray-50/60 px-3 py-2.5 dark:border-white/10 dark:bg-white/[0.03]"
-          >
-            <input
-              v-model="emailCredentialsToStaff"
-              type="checkbox"
-              class="mt-0.5 rounded border-gray-300 text-gray-800 focus:ring-gray-400/40 dark:border-gray-600 dark:text-gray-200"
-            />
-            <span class="text-xs leading-relaxed text-gray-700 dark:text-gray-300">
-              <span class="font-medium text-gray-900 dark:text-gray-100">Email sign-in details:</span>
-              send the temporary password to their inbox instead of showing it here (requires
-              Resend email on the server).
-            </span>
-          </label>
-          <div class="flex items-center gap-3">
-            <p class="ios-form__hint dash-drawer-hint flex-1">
-              {{
-                emailCredentialsToStaff
-                  ? 'A random password is generated and emailed when the account is created.'
-                  : "A random password will be generated. You'll see it after the account is created so you can copy and share it."
-              }}
-            </p>
-            <button
-              type="button"
-              @click="regeneratePassword"
-              class="p-2 rounded-sm text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/[0.06] transition-colors shrink-0"
-              aria-label="Regenerate password"
-            >
-              <ArrowPathIcon class="w-4 h-4" stroke-width="1.75" />
-            </button>
-          </div>
-        </IosFormSection>
+      <IosFormSection v-if="!isEdit" fixed>
+        <IosFormToggle
+          v-model="emailCredentialsToStaff"
+          label="Email sign-in details"
+          :hint="
+            emailCredentialsToStaff
+              ? 'A random password is generated and emailed when the account is created.'
+              : 'A random password is generated. You can copy it after the account is created.'
+          "
+        />
+        <button type="button" class="staff-invite-regen" @click="regeneratePassword">
+          <ArrowPathIcon class="h-4 w-4" stroke-width="1.75" />
+          Regenerate password
+        </button>
+      </IosFormSection>
 
-        <IosFormSection title="Role" fixed>
-          <IosFormField label="Position" required>
-            <IosFormInput
-              v-model="formData.position"
-              required
-              placeholder="e.g. Sales Associate"
-            />
-          </IosFormField>
-          <IosFormField label="Role" required>
-            <IosFormSelect v-model="formData.role" required extra-class="cursor-pointer">
-              <option value="staff">Staff</option>
-              <option value="manager">Manager</option>
-              <option value="intern">Intern</option>
-            </IosFormSelect>
-          </IosFormField>
+      <IosFormSection fixed>
+        <IosFormField label="Position" required>
+          <IosFormInput
+            v-model="formData.position"
+            required
+            placeholder="e.g. Sales Associate"
+          />
+        </IosFormField>
+        <IosFormField label="Role" required>
+          <IosFormSelect v-model="formData.role" required extra-class="cursor-pointer">
+            <option value="staff">Staff</option>
+            <option value="manager">Manager</option>
+            <option value="intern">Intern</option>
+          </IosFormSelect>
+        </IosFormField>
+        <IosFormToggle
+          v-if="canGrantInventoryAccess && formData.role === 'manager'"
+          v-model="formData.canManageInventory"
+          label="Inventory editor"
+          hint="Can add and edit categories, products, quantities, and prices."
+        />
+        <IosFormField label="Hire date" required>
+          <IosFormInput v-model="formData.hireDate" type="date" required />
+        </IosFormField>
+        <IosFormField label="Salary" hint="Optional">
+          <IosFormInput
+            v-model="formData.salary"
+            type="number"
+            min="0"
+            step="0.01"
+            placeholder="0.00"
+          />
+        </IosFormField>
+        <IosFormField label="Status" required>
+          <IosFormSelect v-model="formData.status" required extra-class="cursor-pointer">
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+            <option value="on_leave">On Leave</option>
+          </IosFormSelect>
+        </IosFormField>
+      </IosFormSection>
 
-          <label
-            v-if="canGrantInventoryAccess && formData.role === 'manager'"
-            class="flex cursor-pointer items-start gap-2.5 rounded-lg border border-gray-200/80 bg-gray-50/60 px-3 py-2.5 dark:border-white/10 dark:bg-white/[0.03]"
-          >
-            <input
-              v-model="formData.canManageInventory"
-              type="checkbox"
-              class="mt-0.5 rounded border-gray-300 text-gray-800 focus:ring-gray-400/40 dark:border-gray-600 dark:text-gray-200"
-            />
-            <span class="text-xs leading-relaxed text-gray-700 dark:text-gray-300">
-              <span class="font-medium text-gray-900 dark:text-gray-100">Inventory editor:</span>
-              can add and edit categories, products, quantities, and prices (same as owner on the
-              floor, not billing or staff admin).
-            </span>
-          </label>
-        </IosFormSection>
+      <p v-if="errorMessage" class="ios-form__error">{{ errorMessage }}</p>
+    </IosForm>
 
-        <IosFormSection title="Employment" fixed>
-          <IosFormField label="Hire date" required>
-            <IosFormInput v-model="formData.hireDate" type="date" required />
-          </IosFormField>
-          <IosFormField label="Salary" hint="Optional">
-            <IosFormInput
-              v-model="formData.salary"
-              type="number"
-              min="0"
-              step="0.01"
-              placeholder="0.00"
-            />
-          </IosFormField>
-          <IosFormField label="Status" required>
-            <IosFormSelect v-model="formData.status" required extra-class="cursor-pointer">
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-              <option value="on_leave">On Leave</option>
-            </IosFormSelect>
-          </IosFormField>
-        </IosFormSection>
-
-        <p v-if="errorMessage" class="ios-form__error">{{ errorMessage }}</p>
-      </IosForm>
-    </div>
-
-    <template v-if="!showTemporaryPassword" #footer>
+    <template #footer>
       <IosDrawerActions
+        v-if="emailSentSuccess"
+        cancel-label="Done"
+        :show-primary="false"
+        @cancel="closeAfterSuccess"
+      />
+      <IosDrawerActions
+        v-else-if="showTemporaryPassword"
+        cancel-label="Done"
+        primary-label="Email to staff instead"
+        :primary-loading="isSendingInviteEmail"
+        :primary-disabled="isSendingInviteEmail"
+        @cancel="closeAfterSuccess"
+        @primary="emailCredentialsAfterCreate"
+      />
+      <IosDrawerActions
+        v-else
         :primary-label="staffFooterPrimaryLabel"
         :primary-loading="isSubmitting"
         :primary-disabled="isSubmitting || !isFormValid || staffLimitReached"
@@ -249,7 +160,6 @@ import {
   ArrowPathIcon,
 } from '~/utils/app-icons'
 import SidePanel from '~/components/ui/SidePanel.vue'
-import Button from '~/components/ui/Button.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import {
   IosForm,
@@ -257,6 +167,7 @@ import {
   IosFormField,
   IosFormInput,
   IosFormSelect,
+  IosFormToggle,
 } from '~/components/ios/forms'
 import type { Staff } from '~/composables/useStaff'
 import { useStaffStore } from '~/stores/staff'
@@ -640,3 +551,60 @@ onMounted(() => {
   // Any initialization logic can go here
 })
 </script>
+
+<style scoped>
+.staff-invite-secret {
+  display: flex;
+  width: 100%;
+  max-width: 22rem;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+  padding: 0.75rem 0.875rem;
+  border-radius: 1rem;
+  background: rgb(244 244 245);
+  text-align: left;
+}
+
+.staff-invite-secret code {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.8125rem;
+  letter-spacing: 0.02em;
+}
+
+.staff-invite-secret__copy,
+.staff-invite-regen {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  color: inherit;
+}
+
+.staff-invite-secret__copy {
+  flex-shrink: 0;
+  border-radius: 9999px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.staff-invite-regen {
+  margin-top: 0.25rem;
+  padding: 0.125rem 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  opacity: 0.7;
+}
+
+.staff-invite-regen:hover,
+.staff-invite-secret__copy:hover {
+  opacity: 1;
+}
+</style>

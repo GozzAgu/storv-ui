@@ -46,20 +46,29 @@ const items = [
   }
 }
 .landing-moat-card {
-  border-radius: 1rem;
-  border: 1px solid rgb(20 63 141 / 0.12);
-  background: rgb(255 255 255 / 0.6);
+  border-radius: 1.5rem;
+  border: 0;
+  background: #ffffff;
   padding: 1.25rem;
 }
 .landing-moat-card__title {
   font-size: 1rem;
   font-weight: 600;
-  color: #0f172a;
+  color: #1a1523;
 }
 .landing-moat-card__body {
   margin-top: 0.5rem;
   font-size: 0.875rem;
   line-height: 1.55;
-  color: #475569;
+  color: rgb(26 21 35 / 0.58);
+}
+html.dark .landing-moat-card {
+  background: #1e1e1e;
+}
+html.dark .landing-moat-card__title {
+  color: #ffffff;
+}
+html.dark .landing-moat-card__body {
+  color: rgb(255 255 255 / 0.62);
 }
 </style>

@@ -8,8 +8,8 @@ html.capacitor-ios.capacitor-native .dashboard-native-main--in-page {
 }
 
 html.capacitor-ios.capacitor-native .dashboard-top-nav-spacer-native--in-page {
-  height: var(--ios-global-top-bar-stack, calc(var(--cap-safe-top, 0px) + 2.5rem)) !important;
-  min-height: var(--ios-global-top-bar-stack, calc(var(--cap-safe-top, 0px) + 2.5rem)) !important;
+  height: var(--ios-global-top-bar-stack, calc(var(--cap-safe-top, 0px) + 3rem)) !important;
+  min-height: var(--ios-global-top-bar-stack, calc(var(--cap-safe-top, 0px) + 3rem)) !important;
 }
 
 html.capacitor-ios.capacitor-native .ios-page-nav-bar {

@@ -1,33 +1,40 @@
 <template>
   <section
     :class="[
+      'payment-links-coming-soon dash-empty-state',
       compact
-        ? 'rounded-lg bg-gray-50/80 px-4 py-5 text-center dark:bg-white/[0.03]'
+        ? 'dash-empty-state--compact rounded-lg bg-gray-50/80 px-4 py-5 text-center dark:bg-white/[0.03]'
         : 'rounded-xl border border-dashed border-primary-200/80 bg-primary-50/35 px-6 py-12 text-center dark:border-primary-500/20 dark:bg-primary-500/[0.06]',
     ]"
   >
     <div
       :class="[
-        'mx-auto flex items-center justify-center rounded-full bg-primary-100 text-primary-600 dark:bg-primary-500/15 dark:text-primary-400',
+        'dash-empty-state__mark mx-auto flex items-center justify-center rounded-full bg-primary-100 text-primary-600 dark:bg-primary-500/15 dark:text-primary-400',
         compact ? 'h-10 w-10' : 'h-12 w-12',
       ]"
     >
-      <CreditCardIcon :class="compact ? 'h-5 w-5' : 'h-6 w-6'" aria-hidden="true" />
+      <CreditCardIcon
+        :class="['dash-empty-state__icon', compact ? 'h-5 w-5' : 'h-6 w-6']"
+        aria-hidden="true"
+      />
     </div>
     <p
       :class="[
-        'font-semibold uppercase tracking-[0.14em] text-primary-700 dark:text-primary-300',
+        'dash-empty-state__eyebrow font-semibold uppercase tracking-[0.14em] text-primary-700 dark:text-primary-300',
         compact ? 'mt-3 text-[10px]' : 'mt-4 text-xs',
       ]"
     >
       Coming soon
     </p>
-    <h2 v-if="!compact" class="mt-2 text-lg font-semibold text-gray-900 dark:text-gray-50">
+    <h2
+      v-if="!compact"
+      class="dash-empty-state__title mt-2 text-lg font-semibold text-gray-900 dark:text-gray-50"
+    >
       Payment links
     </h2>
     <p
       :class="[
-        'mx-auto leading-relaxed text-gray-600 dark:text-gray-400',
+        'dash-empty-state__desc mx-auto leading-relaxed text-gray-600 dark:text-gray-400',
         compact ? 'mt-2 max-w-sm text-xs' : 'mt-2 max-w-md text-sm',
       ]"
     >

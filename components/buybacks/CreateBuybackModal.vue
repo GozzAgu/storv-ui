@@ -2,22 +2,20 @@
   <SidePanel
     :model-value="modelValue"
     title="Record customer buyback"
-    subtitle="Purchase an item from a customer and add it to inventory for resale."
     size="lg"
+    dense
     @update:model-value="(value: boolean) => emit('update:modelValue', value)"
   >
     <IosForm id="buyback-drawer-form" layout="fill" @submit="submit">
       <IosFormSection fixed>
-        <p
-          class="rounded-sm border border-emerald-200/80 bg-emerald-50/90 p-3 text-xs text-emerald-950 dark:border-emerald-800/50 dark:bg-emerald-950/30 dark:text-emerald-100"
-        >
-          <strong>Not a sale:</strong>
-          You pay the customer and the item goes straight into stock. Use swap-in on a receipt
-          when trade-in credit applies to a sale happening now.
+        <p class="dash-drawer-callout">
+          <strong class="font-medium text-gray-900 dark:text-gray-100">Not a sale:</strong>
+          You pay the customer and the item goes straight into stock. Use swap-in on a receipt when
+          trade-in credit applies to a sale happening now.
         </p>
       </IosFormSection>
 
-      <IosFormSection title="Customer" fixed>
+      <IosFormSection fixed>
         <IosFormField label="Customer name" required>
           <IosFormInput
             v-model="customerName"
@@ -46,7 +44,7 @@
         </IosFormField>
       </IosFormSection>
 
-      <IosFormSection title="Item" fixed>
+      <IosFormSection fixed>
         <IosFormField label="Inventory category" required>
           <IosFormSelect v-model="folderId" required extra-class="cursor-pointer">
             <option value="">Select category</option>
@@ -73,7 +71,7 @@
         </template>
       </IosFormSection>
 
-      <IosFormSection title="Payment" fixed>
+      <IosFormSection fixed>
         <IosFormField label="Amount paid to customer" required>
           <div class="relative">
             <span
@@ -150,7 +148,6 @@ const emit = defineEmits<{
 const inventoryStore = useInventoryStore()
 const buybacksStore = useCustomerBuybacksStore()
 const toast = useAppToast()
-const { footerBtnOutlineClass, footerBtnPrimaryClass } = useDashboardOverlayChrome()
 const { preferences } = usePreferences()
 const currencySymbol = computed(() => preferences.value?.currencySymbol ?? '$')
 

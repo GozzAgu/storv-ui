@@ -2,6 +2,7 @@
  * iOS native styles - loaded only in Capacitor shell (see plugins/00.capacitor.client.ts).
  * Keeps the main web bundle CSS smaller and faster to parse on first paint.
  */
+@import './ios-fonts.css';
 @import './ios-design-tokens.css';
 @import './ios-typography.css';
 @import './ios-shell.css';
@@ -25,7 +26,8 @@
 @import './ios-receipts-list.css';
 @import './ios-search.css';
 @import './ios-quick-actions.css';
+@import './ios-filter-chips.css';
 @import './ios-settings-help.css';
 @import './ios-analytics.css';
 @import './ios-tabbar-flat.css';
-@import './ios-input-guard.css';
+@import './ios-fields.css';

@@ -17,7 +17,7 @@ export interface InventoryAvailabilityBadge {
 }
 
 const badgeShell =
-  'inline-flex max-w-full items-center gap-1.5 whitespace-nowrap rounded-sm border px-2 py-0.5 text-[11px] font-medium leading-tight'
+  'inline-flex max-w-full items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-0.5 text-[11px] font-semibold leading-tight'
 
 export function getPendingSaleReceiptId(item: InventoryItem): string | null {
   const id = item.pendingSaleReceiptId
@@ -50,7 +50,7 @@ export function availabilityBadgeForAwaitingPayment(
     label: 'Awaiting payment',
     meta,
     dotClass: 'bg-amber-500 dark:bg-amber-400',
-    class: `${badgeShell} border-amber-200/90 bg-amber-50/90 text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100`,
+    class: `${badgeShell} bg-amber-50 text-amber-950 dark:bg-amber-500/15 dark:text-amber-100`,
   }
 }
 
@@ -59,7 +59,7 @@ export function availabilityBadgeForSold(): InventoryAvailabilityBadge {
     status: 'sold',
     label: 'Sold',
     dotClass: 'bg-orange-500 dark:bg-orange-400',
-    class: `${badgeShell} border-orange-200/90 bg-orange-50/90 text-orange-950 dark:border-orange-500/30 dark:bg-orange-500/10 dark:text-orange-100`,
+    class: `${badgeShell} bg-orange-50 text-orange-950 dark:bg-orange-500/15 dark:text-orange-100`,
   }
 }
 
@@ -68,7 +68,7 @@ export function availabilityBadgeForAvailable(): InventoryAvailabilityBadge {
     status: 'available',
     label: 'Available',
     dotClass: 'bg-emerald-500 dark:bg-emerald-400',
-    class: `${badgeShell} border-emerald-200/90 bg-emerald-50/90 text-emerald-950 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-100`,
+    class: `${badgeShell} bg-emerald-50 text-emerald-950 dark:bg-emerald-500/15 dark:text-emerald-100`,
   }
 }
 
@@ -77,7 +77,7 @@ export function availabilityBadgeForStockLoan(): InventoryAvailabilityBadge {
     status: 'with_seller',
     label: 'On stock loan',
     dotClass: 'bg-violet-500 dark:bg-violet-400',
-    class: `${badgeShell} border-violet-200/90 bg-violet-50/90 text-violet-950 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-100`,
+    class: `${badgeShell} bg-violet-50 text-violet-950 dark:bg-violet-500/15 dark:text-violet-100`,
   }
 }
 
@@ -86,7 +86,7 @@ export function availabilityBadgeForReturned(): InventoryAvailabilityBadge {
     status: 'returned',
     label: 'Returned',
     dotClass: 'bg-slate-500 dark:bg-slate-400',
-    class: `${badgeShell} border-slate-200/90 bg-slate-50/90 text-slate-800 dark:border-slate-500/30 dark:bg-slate-500/10 dark:text-slate-200`,
+    class: `${badgeShell} bg-slate-100 text-slate-800 dark:bg-white/10 dark:text-slate-200`,
   }
 }
 

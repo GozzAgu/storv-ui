@@ -1,0 +1,269 @@
+/**
+ * iOS field system — one appearance for every input, select, textarea, and
+ * search bar in the native shell, matched to the auth screens
+ * (.auth-shell--modern .auth-field-input in auth-modern.css).
+ *
+ * Rules live in `@layer components` on purpose. Tailwind ships important
+ * utilities (`dark:!bg-dashboard-card`) in `@layer utilities`, and important
+ * declarations resolve layers in reverse order, so an unlayered `!important`
+ * here would lose to them. `components` sits before `utilities`, so these win.
+ *
+ * Exclusions are grouped in a single `:not(a, b, …)` so the base rule keeps a
+ * low specificity and the variants below (icon padding, prefixes) can override it.
+ *
+ * Auth screens are excluded (.auth-field-input) — they own their own rules.
+ */
+
+html.capacitor-ios.capacitor-native {
+  --ios-field-bg: #ffffff;
+  --ios-field-border: #e5e7eb;
+  --ios-field-ink: #111111;
+  --ios-field-muted: #6b7280;
+  --ios-field-placeholder: #9ca3af;
+  --ios-field-focus: #111111;
+  --ios-field-radius: 0.875rem;
+  --ios-field-height: 3.25rem;
+  --ios-field-pad-block: 0.875rem;
+  --ios-field-pad-inline: 1rem;
+  --ios-field-size: 1rem;
+  --ios-field-label-size: 0.8125rem;
+  --ios-field-icon: 1.125rem;
+  --ios-field-icon-inset: 0.875rem;
+  --ios-field-pad-icon: 2.75rem;
+  --ios-field-pad-prefix: 2.375rem;
+}
+
+html.capacitor-ios.capacitor-native.dark {
+  --ios-field-bg: #1c1c1e;
+  --ios-field-border: #3f3f46;
+  --ios-field-ink: #f5f5f7;
+  --ios-field-muted: #a1a1aa;
+  --ios-field-placeholder: #71717a;
+  --ios-field-focus: #ffffff;
+}
+
+@layer components {
+  /* ── Base field ── */
+  html.capacitor-ios.capacitor-native
+    input:not(
+      .auth-field-input,
+      .ios-search-bar__input,
+      .sr-only,
+      [type='file'],
+      [type='checkbox'],
+      [type='radio'],
+      [type='range'],
+      [type='hidden'],
+      [type='button'],
+      [type='submit'],
+      [type='reset']
+    ),
+  html.capacitor-ios.capacitor-native select:not(.auth-field-input, .ios-toolbar-select),
+  html.capacitor-ios.capacitor-native textarea:not(.auth-field-input),
+  html.capacitor-ios.capacitor-native .app-field:not(.auth-field-input, .ios-toolbar-select) {
+    min-height: var(--ios-field-height) !important;
+    height: auto !important;
+    padding: var(--ios-field-pad-block) var(--ios-field-pad-inline) !important;
+    border: 1px solid var(--ios-field-border) !important;
+    border-radius: var(--ios-field-radius) !important;
+    background-color: var(--ios-field-bg) !important;
+    background-image: none !important;
+    color: var(--ios-field-ink) !important;
+    font-family: var(--ios-type-font-family) !important;
+    /* 16px floor — anything smaller makes iOS zoom the viewport on focus */
+    font-size: max(16px, var(--ios-field-size)) !important;
+    font-weight: 400 !important;
+    line-height: 1.375 !important;
+    box-shadow: none !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  html.capacitor-ios.capacitor-native input:not(.auth-field-input)::placeholder,
+  html.capacitor-ios.capacitor-native textarea:not(.auth-field-input)::placeholder {
+    color: var(--ios-field-placeholder) !important;
+    opacity: 1;
+  }
+
+  html.capacitor-ios.capacitor-native input:not(.auth-field-input, .ios-search-bar__input):focus,
+  html.capacitor-ios.capacitor-native select:not(.auth-field-input):focus,
+  html.capacitor-ios.capacitor-native textarea:not(.auth-field-input):focus,
+  html.capacitor-ios.capacitor-native .app-field:not(.auth-field-input):focus {
+    outline: none !important;
+    border-color: var(--ios-field-focus) !important;
+    box-shadow: 0 0 0 1px var(--ios-field-focus) !important;
+  }
+
+  html.capacitor-ios.capacitor-native textarea:not(.auth-field-input) {
+    min-height: 6rem !important;
+    resize: vertical;
+  }
+
+  html.capacitor-ios.capacitor-native select:not(.auth-field-input, .ios-toolbar-select) {
+    padding-right: 2.5rem !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 0.875rem center !important;
+    background-size: 1.125rem !important;
+  }
+
+  html.capacitor-ios.capacitor-native.dark select:not(.auth-field-input, .ios-toolbar-select) {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%23a1a1aa' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E") !important;
+  }
+
+  html.capacitor-ios.capacitor-native input:not(.auth-field-input):disabled,
+  html.capacitor-ios.capacitor-native select:not(.auth-field-input):disabled,
+  html.capacitor-ios.capacitor-native textarea:not(.auth-field-input):disabled {
+    opacity: 0.55;
+  }
+
+  /* ── Field labels ── */
+  html.capacitor-ios.capacitor-native .ios-form__label,
+  html.capacitor-ios.capacitor-native .dash-drawer-label:not(p),
+  html.capacitor-ios.capacitor-native .dash-field-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: var(--ios-field-label-size) !important;
+    font-weight: 600 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+    color: var(--ios-field-ink) !important;
+  }
+
+  html.capacitor-ios.capacitor-native .ios-form__hint,
+  html.capacitor-ios.capacitor-native .dash-drawer-hint {
+    font-size: 0.75rem !important;
+    color: var(--ios-field-muted) !important;
+  }
+
+  /* ── Currency / unit prefix overlaid on a field ── */
+  html.capacitor-ios.capacitor-native span.absolute:has(+ input) {
+    left: var(--ios-field-pad-inline) !important;
+    right: auto !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    font-size: max(16px, var(--ios-field-size)) !important;
+    font-weight: 400 !important;
+    line-height: 1.375 !important;
+    color: var(--ios-field-muted) !important;
+  }
+
+  html.capacitor-ios.capacitor-native span.absolute:has(+ input) + input {
+    padding-left: var(--ios-field-pad-prefix) !important;
+  }
+
+  /* ── Search: the same field with a leading icon (mirrors AuthField) ── */
+
+  /* IosSearchBar wraps icon + input in a label, so the label is the field */
+  html.capacitor-ios.capacitor-native .ios-search-bar {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 0 !important;
+    width: 100% !important;
+    min-height: var(--ios-field-height) !important;
+    padding: 0 var(--ios-field-pad-inline) !important;
+    border: 1px solid var(--ios-field-border) !important;
+    border-radius: var(--ios-field-radius) !important;
+    background: var(--ios-field-bg) !important;
+    box-shadow: none !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  html.capacitor-ios.capacitor-native .ios-search-bar--compact {
+    min-height: 2.75rem !important;
+  }
+
+  html.capacitor-ios.capacitor-native .ios-search-bar:focus-within {
+    border-color: var(--ios-field-focus) !important;
+    box-shadow: 0 0 0 1px var(--ios-field-focus) !important;
+  }
+
+  html.capacitor-ios.capacitor-native .ios-search-bar__icon {
+    flex: 0 0 auto !important;
+    width: var(--ios-field-icon) !important;
+    height: var(--ios-field-icon) !important;
+    margin-right: 0.625rem !important;
+    color: var(--ios-field-muted) !important;
+    opacity: 1 !important;
+  }
+
+  html.capacitor-ios.capacitor-native .ios-search-bar .ios-search-bar__input,
+  html.capacitor-ios.capacitor-native .ios-search-bar .ios-search-bar__input:focus,
+  html.capacitor-ios.capacitor-native .ios-search-bar .ios-search-bar__input:focus-visible {
+    flex: 1 1 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 0 !important;
+    border: none !important;
+    border-width: 0 !important;
+    border-style: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+    font-family: var(--ios-type-font-family) !important;
+    font-size: max(16px, var(--ios-field-size)) !important;
+    color: var(--ios-field-ink) !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+  }
+
+  html.capacitor-ios.capacitor-native .ios-search-bar__input::placeholder {
+    color: var(--ios-field-placeholder) !important;
+  }
+
+  html.capacitor-ios.capacitor-native .ios-search-bar__clear {
+    margin-left: 0.5rem !important;
+  }
+
+  /* Toolbar / global search: absolute icon over a normal field */
+  html.capacitor-ios.capacitor-native .ios-search-input-wrap {
+    position: relative !important;
+    display: block !important;
+    width: 100% !important;
+  }
+
+  html.capacitor-ios.capacitor-native .ios-search-input-wrap > svg,
+  html.capacitor-ios.capacitor-native .ios-search-input-wrap > .pointer-events-none.absolute {
+    position: absolute !important;
+    left: var(--ios-field-icon-inset) !important;
+    top: 50% !important;
+    width: var(--ios-field-icon) !important;
+    height: var(--ios-field-icon) !important;
+    transform: translateY(-50%) !important;
+    color: var(--ios-field-muted) !important;
+    opacity: 1;
+    pointer-events: none;
+  }
+
+  html.capacitor-ios.capacitor-native .ios-search-input-wrap input,
+  html.capacitor-ios.capacitor-native [data-global-search-backdrop] ~ div input.app-field,
+  html.capacitor-ios.capacitor-native
+    input[type='search']:not(.ios-search-bar__input, .auth-field-input) {
+    width: 100% !important;
+    padding-left: var(--ios-field-pad-icon) !important;
+  }
+
+  html.capacitor-ios.capacitor-native input[type='search']::-webkit-search-decoration,
+  html.capacitor-ios.capacitor-native input[type='search']::-webkit-search-cancel-button,
+  html.capacitor-ios.capacitor-native input[type='search']::-webkit-search-results-button,
+  html.capacitor-ios.capacitor-native input[type='search']::-webkit-search-results-decoration {
+    display: none;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.capacitor-ios.capacitor-native input,
+  html.capacitor-ios.capacitor-native select,
+  html.capacitor-ios.capacitor-native textarea,
+  html.capacitor-ios.capacitor-native .ios-search-bar,
+  html.capacitor-ios.capacitor-native .ios-search-input-wrap {
+    transition: none;
+  }
+}

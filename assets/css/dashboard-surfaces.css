@@ -222,7 +222,14 @@ main[data-dashboard-main] .inv-category-card:hover {
   border-color: rgb(154 181 227 / 0.22);
 }
 
-html:not(.capacitor-native) main[data-dashboard-main] .dash-grid-card:hover,
-html:not(.capacitor-native) main[data-dashboard-main] .inv-category-card:hover {
-  box-shadow: var(--dash-surface-shadow), var(--dash-surface-highlight), 0 4px 16px rgb(15 23 42 / 0.06);
+main[data-dashboard-main] .dash-folder-card:hover {
+  border-color: var(--dash-card-border);
+}
+
+html:not(.capacitor-native):not(.dark) main[data-dashboard-main] .dash-stat-card:hover,
+html:not(.capacitor-native):not(.dark) main[data-dashboard-main] .dash-grid-card:hover,
+html:not(.capacitor-native):not(.dark) main[data-dashboard-main] .inv-category-card:hover,
+html:not(.capacitor-native):not(.dark) main[data-dashboard-main] .dash-folder-card:hover {
+  border-color: transparent;
+  box-shadow: none;
 }

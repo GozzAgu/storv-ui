@@ -3,10 +3,11 @@
     :model-value="modelValue"
     title="Add sales lead"
     size="lg"
+    dense
     @update:model-value="(value: boolean) => emit('update:modelValue', value)"
   >
-    <IosForm @submit="save">
-      <IosFormSection>
+    <IosForm layout="fill" @submit="save">
+      <IosFormSection fixed>
         <IosFormField label="Customer name" required>
           <IosFormInput
             v-model="customerName"
@@ -40,21 +41,18 @@
         </IosFormField>
       </IosFormSection>
 
-      <div
-        v-if="duplicateLead"
-        class="rounded-sm border border-amber-200/80 bg-amber-50/90 px-3 py-2 text-xs text-amber-900 dark:border-amber-800/40 dark:bg-amber-950/30 dark:text-amber-100"
-      >
+      <div v-if="duplicateLead" class="dash-drawer-callout">
         An open lead already exists for this contact ({{ duplicateLead.customerName }}).
         <NuxtLink
           :to="dashPath(`/leads/${duplicateLead.id}`)"
-          class="font-medium underline underline-offset-2"
+          class="font-medium text-gray-900 underline underline-offset-2 dark:text-gray-100"
           @click="emit('update:modelValue', false)"
         >
           Open existing lead
         </NuxtLink>
       </div>
 
-      <IosFormSection>
+      <IosFormSection fixed>
         <IosFormField label="Product interest" required>
           <IosFormInput
             v-model="productName"

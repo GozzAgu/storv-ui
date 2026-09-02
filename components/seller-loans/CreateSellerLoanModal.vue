@@ -1,59 +1,60 @@
 <template>
-  <Modal
+  <SidePanel
     :model-value="modelValue"
     title="Stock loan"
-    subtitle="Items stay in inventory until sold on a receipt, marked sold from Stock loans when the borrower sells, or returned here."
     size="lg"
+    dense
     @update:model-value="(value: boolean) => emit('update:modelValue', value)"
   >
-    <template #default>
-      <IosForm layout="fill">
-        <IosFormSection fixed>
-          <p
-            class="rounded-sm border border-sky-200/80 bg-sky-50/90 p-3 text-xs text-sky-900 dark:border-sky-800/60 dark:bg-sky-950/35 dark:text-sky-100"
-          >
-            <strong>Not a sale:</strong>
-            Selected serial items are marked as on a stock loan to the borrower below. Selling on
-            a receipt or choosing Mark sold on Stock loans marks units sold and updates this loan.
-          </p>
-        </IosFormSection>
+    <IosForm layout="fill">
+      <IosFormSection fixed>
+        <p class="dash-drawer-callout">
+          <strong class="font-medium text-gray-900 dark:text-gray-100">Not a sale:</strong>
+          Selected serial items are marked as on a stock loan to the borrower below. Selling on a
+          receipt or choosing Mark sold on Stock loans marks units sold and updates this loan.
+        </p>
+      </IosFormSection>
 
-        <IosFormSection title="Products" fixed>
-          <ul
-            class="max-h-44 space-y-1 overflow-y-auto rounded-sm bg-gray-50/90 px-2.5 py-2 text-[11px] text-gray-800 dark:bg-gray-900/40 dark:text-gray-200"
-          >
-            <li v-for="it in items" :key="it.id" class="truncate">
-              {{ getInventoryItemDisplayName(it) }}
+      <IosFormSection fixed>
+        <p class="dash-drawer-label">Products</p>
+        <div :class="pickListClass">
+          <ul :class="pickListScrollClass">
+            <li
+              v-for="it in items"
+              :key="it.id"
+              :class="[pickRowClass, '!cursor-default hover:!bg-transparent']"
+            >
+              <span :class="pickRowTitleClass">{{ getInventoryItemDisplayName(it) }}</span>
             </li>
           </ul>
-          <p class="ios-form__hint dash-drawer-hint">
-            {{ items.length }} item{{ items.length !== 1 ? 's' : '' }}
-          </p>
-        </IosFormSection>
+        </div>
+        <p class="ios-form__hint dash-drawer-hint">
+          {{ items.length }} item{{ items.length !== 1 ? 's' : '' }}
+        </p>
+      </IosFormSection>
 
-        <IosFormSection title="Borrower" fixed>
-          <IosFormField label="Borrower name" required>
-            <IosFormInput
-              v-model="partyName"
-              maxlength="120"
-              placeholder="Company or borrower name"
-              autocomplete="organization"
-            />
-          </IosFormField>
-          <IosFormField label="Phone" hint="Optional">
-            <IosFormInput v-model="partyPhone" type="tel" maxlength="40" placeholder="Contact number" />
-          </IosFormField>
-          <IosFormField label="Notes" hint="Optional">
-            <IosFormTextarea
-              v-model="partyNotes"
-              :rows="3"
-              maxlength="1000"
-              placeholder="SKU list, handshake details, pickup time…"
-            />
-          </IosFormField>
-        </IosFormSection>
-      </IosForm>
-    </template>
+      <IosFormSection fixed>
+        <IosFormField label="Borrower name" required>
+          <IosFormInput
+            v-model="partyName"
+            maxlength="120"
+            placeholder="Company or borrower name"
+            autocomplete="organization"
+          />
+        </IosFormField>
+        <IosFormField label="Phone" hint="Optional">
+          <IosFormInput v-model="partyPhone" type="tel" maxlength="40" placeholder="Contact number" />
+        </IosFormField>
+        <IosFormField label="Notes" hint="Optional">
+          <IosFormTextarea
+            v-model="partyNotes"
+            :rows="3"
+            maxlength="1000"
+            placeholder="SKU list, handshake details, pickup time…"
+          />
+        </IosFormField>
+      </IosFormSection>
+    </IosForm>
 
     <template #footer>
       <IosDrawerActions
@@ -64,12 +65,12 @@
         @primary="submit"
       />
     </template>
-  </Modal>
+  </SidePanel>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import Modal from '~/components/ui/Modal.vue'
+import SidePanel from '~/components/ui/SidePanel.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import {
   IosForm,
@@ -96,6 +97,12 @@ const emit = defineEmits<{
 
 const sellerLoansStore = useSellerLoanOutsStore()
 const toast = useAppToast()
+const {
+  pickListClass,
+  pickListScrollClass,
+  pickRowClass,
+  pickRowTitleClass,
+} = useDashboardDrawerChrome()
 
 const partyName = ref('')
 const partyPhone = ref('')

@@ -6,6 +6,15 @@ html.capacitor-ios.capacitor-native {
   --ios-drawer-menu-canvas: var(--ios-home-bg, #f2f2f7);
   --ios-drawer-menu-group: var(--ios-home-card, #ffffff);
   --ios-drawer-menu-radius: 14px;
+  /**
+   * Card inset from the sheet edge, row padding inside the card, and the leading
+   * icon box. Section captions and row hairlines are positioned off these so
+   * they stay aligned if the metrics change.
+   */
+  --ios-drawer-menu-inset: 1rem;
+  --ios-drawer-menu-row-pad: 0.875rem;
+  --ios-drawer-menu-gap: 0.75rem;
+  --ios-drawer-menu-icon: 1.875rem;
 }
 
 html.capacitor-ios.capacitor-native.dark {
@@ -17,7 +26,8 @@ html.capacitor-ios.capacitor-native .ios-drawer-menu {
   display: flex;
   flex-direction: column;
   gap: 0.125rem;
-  padding-bottom: 0.25rem;
+  /* Keeps the last card off the sheet's bottom edge / home indicator */
+  padding-bottom: 0.75rem;
 }
 
 html.capacitor-ios.capacitor-native .ios-drawer-menu__section {
@@ -32,7 +42,7 @@ html.capacitor-ios.capacitor-native .ios-drawer-menu__section + .ios-drawer-menu
 
 html.capacitor-ios.capacitor-native .ios-drawer-menu__section-label {
   margin: 0;
-  padding: 0 1.25rem 0.125rem;
+  padding: 0 calc(var(--ios-drawer-menu-inset) + 0.25rem) 0.125rem;
   font-size: var(--ios-dash-body-size, 0.6875rem);
   font-weight: 600;
   letter-spacing: -0.01em;
@@ -41,7 +51,7 @@ html.capacitor-ios.capacitor-native .ios-drawer-menu__section-label {
 }
 
 html.capacitor-ios.capacitor-native .ios-drawer-menu__group {
-  margin-inline: 1rem;
+  margin-inline: var(--ios-drawer-menu-inset);
   overflow: hidden;
   border-radius: var(--ios-drawer-menu-radius);
   background: var(--ios-drawer-menu-group);
@@ -59,11 +69,16 @@ html.capacitor-ios.capacitor-native .ios-drawer-menu__list {
 }
 
 html.capacitor-ios.capacitor-native .ios-drawer-menu__row {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--ios-drawer-menu-gap);
+  /* `<button>` rows shrink-wrap their label without this, taking the hairline
+     and the trailing value/check with them */
+  width: 100%;
   min-height: 2.875rem;
-  padding: 0.625rem 0.875rem;
+  padding: 0.625rem var(--ios-drawer-menu-row-pad);
+  text-align: left;
   text-decoration: none;
   color: var(--ios-label);
   -webkit-tap-highlight-color: transparent;
@@ -74,9 +89,24 @@ html.capacitor-ios.capacitor-native .ios-drawer-menu__row:active {
   background: var(--ios-fill-tertiary);
 }
 
-html.capacitor-ios.capacitor-native .ios-drawer-menu__list > li + li .ios-drawer-menu__row,
-html.capacitor-ios.capacitor-native .ios-drawer-menu__list > li + li .native-more-sheet__row {
-  border-top: 1px solid var(--ios-separator);
+/* Hairline drawn inside the row so it can start at the label, not the card edge */
+html.capacitor-ios.capacitor-native .ios-drawer-menu__list > li + li .ios-drawer-menu__row::before {
+  content: '';
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: var(--ios-drawer-menu-row-pad) 0;
+  height: 1px;
+  background: var(--ios-separator);
+}
+
+html.capacitor-ios.capacitor-native
+  .ios-drawer-menu__list
+  > li
+  + li
+  .ios-drawer-menu__row:has(.ios-drawer-menu__icon, .native-more-sheet__icon)::before {
+  inset-inline-start: calc(
+    var(--ios-drawer-menu-row-pad) + var(--ios-drawer-menu-icon) + var(--ios-drawer-menu-gap)
+  );
 }
 
 html.capacitor-ios.capacitor-native .ios-drawer-menu__icon,
@@ -85,8 +115,8 @@ html.capacitor-ios.capacitor-native .ios-drawer .ios-drawer-menu__group .native-
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 1.875rem;
-  height: 1.875rem;
+  width: var(--ios-drawer-menu-icon);
+  height: var(--ios-drawer-menu-icon);
   border-radius: 0.5rem;
   background: rgb(120 120 128 / 0.1);
   color: var(--ios-label-secondary);
@@ -156,9 +186,9 @@ html.capacitor-ios.capacitor-native .ios-drawer-menu__empty {
 
 /* Legacy row mapping inside grouped menu */
 html.capacitor-ios.capacitor-native .ios-drawer .ios-drawer-menu__group .native-more-sheet__row {
-  gap: 0.75rem;
+  gap: var(--ios-drawer-menu-gap);
   min-height: 2.875rem;
-  padding: 0.625rem 0.875rem;
+  padding: 0.625rem var(--ios-drawer-menu-row-pad);
   border-radius: 0;
 }
 

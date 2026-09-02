@@ -40,8 +40,8 @@ html.capacitor-ios.capacitor-native .ios-home-dashboard__metrics-grid {
 }
 
 html.capacitor-ios.capacitor-native .ios-home-metric {
-  min-height: 5.75rem;
-  padding: 0.75rem 0.75rem 0.875rem;
+  min-height: 4.75rem;
+  padding: 0.625rem 0.75rem 0.75rem;
 }
 
 html.capacitor-ios.capacitor-native .ios-home-metric__arrow {

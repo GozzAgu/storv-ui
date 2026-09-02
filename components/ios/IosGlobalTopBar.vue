@@ -5,8 +5,8 @@
         src="/storvv logo mobile.png"
         alt=""
         class="ios-global-top-bar__logo"
-        width="28"
-        height="28"
+        width="36"
+        height="36"
         decoding="async"
       />
     </NuxtLink>

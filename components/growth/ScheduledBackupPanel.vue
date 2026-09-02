@@ -4,28 +4,38 @@
     subtitle="Get reminded to export Excel backups on a schedule."
     compact
   >
-    <div class="space-y-3">
-      <label class="flex items-center justify-between gap-3">
-        <span class="text-xs text-gray-700 dark:text-gray-300">Email-style reminders in-app</span>
-        <input v-model="enabled" type="checkbox" class="rounded border-gray-300" @change="save" />
-      </label>
-      <div v-if="enabled">
-        <label class="mb-1 block text-[10px] font-medium uppercase tracking-wide text-gray-500">Frequency</label>
-        <select
-          v-model="frequency"
-          class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs dark:border-white/10 dark:bg-white/[0.03]"
-          @change="save"
-        >
+    <div class="space-y-0">
+      <div class="dash-setting-row">
+        <div class="min-w-0 flex-1">
+          <p class="text-xs font-medium text-gray-900 dark:text-gray-100">In-app reminders</p>
+          <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+            Get nudged to export Excel backups on a schedule.
+          </p>
+        </div>
+        <Switch
+          :model-value="enabled"
+          aria-label="Backup reminders"
+          @update:model-value="onEnabledChange"
+        />
+      </div>
+      <div v-if="enabled" class="dash-setting-row">
+        <div class="min-w-0 flex-1">
+          <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Frequency</p>
+        </div>
+        <select v-model="frequency" :class="[APP_FIELD_CLASS, 'min-w-[8rem] !w-auto']" @change="save">
           <option value="weekly">Weekly</option>
           <option value="monthly">Monthly</option>
         </select>
       </div>
-      <p v-if="dueReminder" class="rounded-lg bg-amber-500/10 px-3 py-2 text-[11px] text-amber-900 dark:text-amber-100">
+      <p
+        v-if="dueReminder"
+        class="dash-setting-row dash-setting-row--note rounded-lg bg-amber-500/10 px-3 py-2 text-[11px] text-amber-900 dark:text-amber-100"
+      >
         Reminder: export a backup from Data export below. Last export:
         {{ lastExportLabel }}.
       </p>
-      <p class="text-[10px] text-gray-500 dark:text-gray-400">
-        Storvv stores your data securely; scheduled exports are your offline safety copy for accountants and auditors.
+      <p class="dash-setting-row dash-setting-row--note text-[10px] text-gray-500 dark:text-gray-400">
+        Storvv stores your data securely; scheduled exports are your offline safety copy.
       </p>
     </div>
   </DashboardSettingsPanel>
@@ -34,7 +44,9 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import DashboardSettingsPanel from '~/components/dashboard/DashboardSettingsPanel.vue'
+import Switch from '~/components/ui/Switch.vue'
 import type { BackupPreferences } from '~/types/growth'
+import { APP_FIELD_CLASS } from '~/utils/app-chrome'
 import { useUserStore } from '~/stores/user'
 import { useAuthStore } from '~/stores/auth'
 import { useUser } from '~/composables/useUser'
@@ -69,6 +81,11 @@ const dueReminder = computed(() => {
   const threshold = frequency.value === 'weekly' ? 7 : 30
   return days >= threshold
 })
+
+function onEnabledChange(checked: boolean) {
+  enabled.value = checked
+  void save()
+}
 
 async function save() {
   const uid = authStore.currentUser?.uid

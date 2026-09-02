@@ -342,12 +342,12 @@ watch(
   margin: 0 0 1rem;
   font-size: 0.75rem;
   line-height: 1.55;
-  color: var(--dash-overlay-muted, var(--saas-muted, #64748b));
+  color: var(--dash-overlay-muted, var(--saas-muted, rgb(26 21 35 / 0.58)));
 }
 
 .dashboard-assistant__privacy-link {
   font-weight: 600;
-  color: var(--dash-overlay-ink, var(--saas-ink, #0f172a));
+  color: var(--dash-overlay-ink, var(--saas-ink, #1a1523));
   text-decoration: underline;
   text-underline-offset: 2px;
 }
@@ -355,34 +355,30 @@ watch(
 .dashboard-assistant__quick-replies {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  border: 1px solid var(--dash-overlay-border, var(--saas-glass-border, rgb(15 23 42 / 0.08)));
-  border-radius: 0.875rem;
-  background: transparent;
+  gap: 0.375rem;
 }
 
 .dashboard-assistant__quick-reply {
-  padding: 0.8125rem 1rem;
+  padding: 0.6875rem 0.875rem;
   text-align: left;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 500;
-  color: var(--dash-overlay-ink, var(--saas-ink, #0f172a));
-  background: transparent;
+  line-height: 1.4;
+  color: var(--dash-overlay-ink, var(--saas-ink, #1a1523));
+  background: var(--saas-accent-soft, rgb(26 21 35 / 0.06));
   border: 0;
-  border-bottom: 1px solid var(--dash-overlay-divider, rgb(15 23 42 / 0.06));
-  transition: background-color 0.15s ease;
-}
-
-.dashboard-assistant__quick-reply:last-child {
-  border-bottom: 0;
+  border-radius: 0.75rem;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .dashboard-assistant__quick-reply:hover:not(:disabled) {
-  background: rgb(15 23 42 / 0.04);
+  background: rgb(26 21 35 / 0.1);
 }
 
 html.dark .dashboard-assistant__quick-reply:hover:not(:disabled) {
-  background: rgb(255 255 255 / 0.05);
+  background: rgb(255 255 255 / 0.12);
 }
 
 .dashboard-assistant__quick-reply:disabled {
@@ -391,23 +387,26 @@ html.dark .dashboard-assistant__quick-reply:hover:not(:disabled) {
 
 .dashboard-assistant__prompt {
   border-radius: 9999px;
-  border: 1px solid rgb(20 63 141 / 0.12);
-  background: rgb(20 63 141 / 0.05);
+  border: 0;
+  background: var(--saas-accent-soft, rgb(26 21 35 / 0.06));
   padding: 0.375rem 0.75rem;
   font-size: 0.75rem;
   font-weight: 500;
-  color: rgb(30 58 95);
+  color: var(--saas-ink, #1a1523);
   transition: background-color 0.15s ease;
 }
 
 .dashboard-assistant__prompt:hover:not(:disabled) {
-  background: rgb(20 63 141 / 0.1);
+  background: rgb(26 21 35 / 0.1);
 }
 
 html.dark .dashboard-assistant__prompt {
-  border-color: rgb(255 255 255 / 0.1);
-  background: rgb(255 255 255 / 0.05);
-  color: rgb(226 232 240);
+  background: rgb(255 255 255 / 0.08);
+  color: #ffffff;
+}
+
+html.dark .dashboard-assistant__prompt:hover:not(:disabled) {
+  background: rgb(255 255 255 / 0.12);
 }
 
 .dashboard-assistant__thread--float {
@@ -448,16 +447,11 @@ html.dark .dashboard-assistant__prompt {
   width: 1.75rem;
   height: 1.75rem;
   border-radius: 9999px;
-  background: #143f8d;
-  color: #fff;
+  background: var(--saas-accent-soft, rgb(26 21 35 / 0.06));
+  color: var(--saas-ink, #1a1523);
   font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: -0.02em;
-}
-
-html.dark .dashboard-assistant__avatar {
-  background: rgb(154 181 227 / 0.18);
-  color: #9ab5e3;
 }
 
 .dashboard-assistant__bubble {
@@ -472,16 +466,22 @@ html.dark .dashboard-assistant__avatar {
 
 .dashboard-assistant__message--float.dashboard-assistant__message--assistant .dashboard-assistant__bubble {
   border-bottom-left-radius: 0.375rem;
-  background: rgb(15 23 42 / 0.04);
-}
-
-html.dark .dashboard-assistant__message--float.dashboard-assistant__message--assistant .dashboard-assistant__bubble {
-  background: rgb(255 255 255 / 0.06);
+  background: var(--saas-accent-soft, rgb(26 21 35 / 0.06));
 }
 
 .dashboard-assistant__message--float.dashboard-assistant__message--user .dashboard-assistant__bubble {
   border-bottom-right-radius: 0.375rem;
-  background: var(--saas-accent-soft, rgb(20 63 141 / 0.1));
+  background: var(--saas-ink, #1a1523);
+  color: var(--saas-surface, #ffffff);
+}
+
+.dashboard-assistant__message--float.dashboard-assistant__message--user .dashboard-assistant__message-body {
+  color: inherit;
+}
+
+html.dark .dashboard-assistant__message--float.dashboard-assistant__message--user .dashboard-assistant__bubble {
+  background: rgb(255 255 255 / 0.12);
+  color: #ffffff;
 }
 
 .dashboard-assistant__message--float.dashboard-assistant__message--error .dashboard-assistant__bubble {
@@ -496,7 +496,7 @@ html.dark .dashboard-assistant__message--float.dashboard-assistant__message--err
 
 .dashboard-assistant__message--user:not(.dashboard-assistant__message--float) {
   margin-left: 1.5rem;
-  background: rgb(20 63 141 / 0.08);
+  background: var(--saas-accent-soft, rgb(26 21 35 / 0.06));
 }
 
 .dashboard-assistant__message--assistant:not(.dashboard-assistant__message--float) {
@@ -511,7 +511,7 @@ html.dark .dashboard-assistant__message--float.dashboard-assistant__message--err
 }
 
 html.dark .dashboard-assistant__message--user:not(.dashboard-assistant__message--float) {
-  background: rgb(20 63 141 / 0.18);
+  background: rgb(255 255 255 / 0.1);
 }
 
 html.dark .dashboard-assistant__message--assistant:not(.dashboard-assistant__message--float) {
@@ -535,7 +535,7 @@ html.dark .dashboard-assistant__message--error:not(.dashboard-assistant__message
 .dashboard-assistant__message-body {
   font-size: 0.875rem;
   line-height: 1.55;
-  color: var(--dash-overlay-ink, var(--saas-ink, #0f172a));
+  color: var(--dash-overlay-ink, var(--saas-ink, #1a1523));
 }
 
 .dashboard-assistant__message--error .dashboard-assistant__message-body {
@@ -556,15 +556,10 @@ html.dark .dashboard-assistant__message--error:not(.dashboard-assistant__message
   align-items: center;
   gap: 0.375rem;
   min-height: 3rem;
-  padding: 0.375rem 0.5rem 0.375rem 1rem;
+  padding: 0.375rem 0.375rem 0.375rem 1rem;
   border-radius: 9999px;
-  background: #f3f4f6;
-  border: 1px solid rgb(15 23 42 / 0.08);
-}
-
-html.dark .dashboard-assistant__composer-pill {
-  background: rgb(255 255 255 / 0.05);
-  border-color: rgb(255 255 255 / 0.08);
+  background: var(--dash-field-bg, #f5f5f7);
+  border: 1px solid var(--dash-overlay-border, rgb(26 21 35 / 0.08));
 }
 
 .dashboard-assistant__composer-input {
@@ -575,7 +570,7 @@ html.dark .dashboard-assistant__composer-pill {
   padding: 0.5rem 0;
   font-size: 0.9375rem;
   line-height: 1.4;
-  color: var(--dash-overlay-ink, var(--saas-ink, #0f172a));
+  color: var(--dash-overlay-ink, var(--saas-ink, #1a1523));
   outline: none;
   pointer-events: auto;
   -webkit-user-select: text;
@@ -588,7 +583,7 @@ html.dark .dashboard-assistant__composer-pill {
 }
 
 .dashboard-assistant__composer-input::placeholder {
-  color: var(--dash-overlay-muted, var(--saas-muted, #94a3b8));
+  color: var(--dash-overlay-muted, var(--saas-muted, rgb(26 21 35 / 0.58)));
 }
 
 .dashboard-assistant__composer-send {
@@ -601,15 +596,25 @@ html.dark .dashboard-assistant__composer-pill {
   border: 0;
   border-radius: 9999px;
   background: transparent;
-  color: var(--dash-overlay-muted, #64748b);
+  color: var(--dash-overlay-muted, rgb(26 21 35 / 0.58));
   transition:
     color 0.15s ease,
-    background-color 0.15s ease;
+    background-color 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.dashboard-assistant__composer-send:not(:disabled) {
+  background: var(--saas-accent, #1a1523);
+  color: var(--saas-surface, #ffffff);
 }
 
 .dashboard-assistant__composer-send:hover:not(:disabled) {
-  color: var(--saas-accent, #143f8d);
-  background: var(--saas-accent-soft, rgb(20 63 141 / 0.08));
+  opacity: 0.88;
+}
+
+html.dark .dashboard-assistant__composer-send:not(:disabled) {
+  background: #ffffff;
+  color: #1a1523;
 }
 
 .dashboard-assistant__composer-send:disabled {
@@ -626,17 +631,14 @@ html.dark .dashboard-assistant__composer-pill {
 .dashboard-assistant__clear {
   font-size: 0.6875rem;
   font-weight: 500;
-  color: rgb(148 163 184);
+  color: var(--dash-overlay-muted, rgb(26 21 35 / 0.58));
   background: transparent;
   border: 0;
   padding: 0;
+  transition: color 0.15s ease;
 }
 
 .dashboard-assistant__clear:hover:not(:disabled) {
-  color: rgb(71 85 105);
-}
-
-html.dark .dashboard-assistant__clear:hover:not(:disabled) {
-  color: rgb(226 232 240);
+  color: var(--dash-overlay-ink, var(--saas-ink, #1a1523));
 }
 </style>
