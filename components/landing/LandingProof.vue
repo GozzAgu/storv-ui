@@ -7,14 +7,24 @@
   >
     <div class="landing-proof__inner">
       <header class="landing-proof__header">
-        <p class="landing-label landing-label--blue">Trusted by modern retailers</p>
-        <h2 id="landing-proof-heading" class="landing-proof__title">
-          Built for businesses that outgrow spreadsheets
-        </h2>
-        <p class="landing-proof__lede">
-          From Solo owner-operators on Micro to multi-branch Enterprise teams: pick the workspace that
-          fits how you run the shop, then scale plans as you grow.
-        </p>
+        <div class="landing-proof__header-copy">
+          <p class="landing-label landing-label--blue">Trusted by modern retailers</p>
+          <h2 id="landing-proof-heading" class="landing-proof__title">
+            Built for businesses that outgrow spreadsheets
+          </h2>
+          <p class="landing-proof__lede">
+            From Solo owner-operators on Micro to multi-branch Enterprise teams: pick the workspace
+            that fits how you run the shop, then scale plans as you grow.
+          </p>
+        </div>
+        <img
+          src="/marketing/illustrations/analytics-illustration.png"
+          alt="An analytics dashboard with revenue charts and a stopwatch, representing fast reporting"
+          class="landing-proof__header-visual"
+          loading="lazy"
+          width="360"
+          height="288"
+        />
       </header>
 
       <div class="landing-proof__stats" aria-label="Platform highlights">
@@ -110,7 +120,43 @@ const proofCards: Array<{
 }
 
 .landing-proof__header {
-  max-width: 40rem;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: flex-start;
+  gap: 1.75rem;
+}
+
+@media (min-width: 900px) {
+  .landing-proof__header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2.5rem;
+  }
+}
+
+.landing-proof__header-copy {
+  max-width: 34rem;
+}
+
+.landing-proof__header-visual {
+  flex: 0 0 auto;
+  width: 11rem;
+  height: auto;
+  border-radius: 1.25rem;
+  object-fit: contain;
+  background: #ffffff;
+  padding: 0.5rem;
+}
+
+@media (min-width: 900px) {
+  .landing-proof__header-visual {
+    width: 14rem;
+  }
+}
+
+html.dark .landing-proof__header-visual {
+  background: #1e1e1e;
 }
 
 .landing-proof .landing-label {

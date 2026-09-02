@@ -258,8 +258,8 @@
         </div>
       </IosAnalyticsSection>
 
-      <section v-else>
-        <div :class="[cardHeaderClass, 'dash-card__header--compact mb-3 px-0.5']">
+      <section v-else class="dash-analytics-features">
+        <div :class="[cardHeaderClass, 'dash-card__header--compact']">
           <div>
             <p :class="eyebrowClass">Feature insights</p>
             <p :class="cardDescClass">
