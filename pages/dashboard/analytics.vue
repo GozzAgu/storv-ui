@@ -1,6 +1,6 @@
 <template>
   <div :class="[pageClass, isCapacitorIos ? 'ios-analytics-page dash-analytics--ios' : '']">
-    <div :class="isCapacitorIos ? 'ios-analytics-dashboard' : undefined">
+    <div :class="isCapacitorIos ? 'ios-analytics-dashboard' : 'dash-analytics-body'">
       <IosPageNavBar v-if="isCapacitorIos" title="Analytics" />
 
       <DashboardPageHeader v-if="!isCapacitorIos" class="dash-page-header--unified">

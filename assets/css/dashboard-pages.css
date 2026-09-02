@@ -50,9 +50,9 @@ html.dark .dash-page-header {
   }
 }
 
-/* Analytics: KPI panel, inventory health, and feature insights sit right on
-   top of each other at the shared unified-page gap - give this page more
-   breathing room between its top-level sections. */
+/* Analytics: KPI panel, inventory health, feature insights, charts, and
+   tables sit right on top of each other at the shared unified-page gap -
+   give this page more breathing room between its top-level sections. */
 .dash-analytics.dash-page--unified {
   gap: 1.5rem;
 }
@@ -61,6 +61,16 @@ html.dark .dash-page-header {
   .dash-analytics.dash-page--unified {
     gap: 1.75rem;
   }
+}
+
+/* The web branch wraps every section in a plain (unclassed) div so the
+   template can share markup with the Capacitor iOS branch above it. That
+   wrapper sat between `.dash-analytics` and its sections as the only flex
+   child, so the gap above never reached the sections themselves - `display:
+   contents` removes it from layout entirely, letting its children act as
+   direct flex items of `.dash-analytics` again. */
+.dash-analytics-body {
+  display: contents;
 }
 
 .dash-page-header--unified {
