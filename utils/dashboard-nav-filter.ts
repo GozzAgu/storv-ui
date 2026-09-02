@@ -1,4 +1,5 @@
 import type { DashboardNavIconKey } from '~/utils/dashboard-nav-icons'
+import type { BusinessCapability } from '~/types/business-experience'
 import type { SubscriptionFeature } from '~/types/subscription'
 
 export type DashboardNavDefinition = {
@@ -8,6 +9,8 @@ export type DashboardNavDefinition = {
   requiresSuperAdmin?: boolean
   requiresManagerOrSuperAdmin?: boolean
   subscriptionFeature?: SubscriptionFeature
+  /** Solo experience hides admin-complexity routes (subscription + role gates still apply). */
+  businessCapability?: BusinessCapability
 }
 
 /** Canonical sidebar / native bottom-nav routes (web + iOS/Android Capacitor). */
@@ -49,12 +52,14 @@ export const DASHBOARD_NAV_DEFINITIONS: DashboardNavDefinition[] = [
     iconKey: 'sync',
     requiresSuperAdmin: true,
     subscriptionFeature: 'multi_store_sync',
+    businessCapability: 'multiLocationAdmin',
   },
   {
     name: 'Payment links',
     segment: '/payment-links',
     iconKey: 'payment-links',
     subscriptionFeature: 'payment_links',
+    businessCapability: 'paymentLinks',
   },
   {
     name: 'Sales leads',
@@ -68,6 +73,7 @@ export const DASHBOARD_NAV_DEFINITIONS: DashboardNavDefinition[] = [
     iconKey: 'departments',
     requiresSuperAdmin: true,
     subscriptionFeature: 'departments',
+    businessCapability: 'staffManagement',
   },
   {
     name: 'Analytics',
@@ -117,6 +123,7 @@ export function filterDashboardNavItems(
     isSuperAdmin: boolean
     isManager: boolean
     canUseFeature: (feature: SubscriptionFeature) => boolean
+    canUseBusinessCapability?: (capability: BusinessCapability) => boolean
     hidePaymentLinks?: boolean
   }
 ): DashboardNavDefinition[] {
@@ -127,6 +134,13 @@ export function filterDashboardNavItems(
     if (item.requiresSuperAdmin && !options.isSuperAdmin) return false
     if (item.requiresManagerOrSuperAdmin && !canSeeManagerOnlyFeatures) return false
     if (item.subscriptionFeature && !options.canUseFeature(item.subscriptionFeature)) return false
+    if (
+      item.businessCapability &&
+      options.canUseBusinessCapability &&
+      !options.canUseBusinessCapability(item.businessCapability)
+    ) {
+      return false
+    }
     return true
   })
 }

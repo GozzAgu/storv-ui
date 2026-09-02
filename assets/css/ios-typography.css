@@ -12,79 +12,80 @@
  */
 
 html.capacitor-ios.capacitor-native {
-  --ios-type-font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display',
-    system-ui, sans-serif;
+  --app-font-sans: 'Montserrat Variable', Montserrat, -apple-system, BlinkMacSystemFont, system-ui,
+    sans-serif;
+  --ios-type-font-family: var(--app-font-sans);
   --ios-type-font-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, monospace;
-  --ios-type-tracking-tight: -0.022em;
-  --ios-type-tracking: -0.012em;
-  --ios-type-tracking-loose: -0.006em;
-  --ios-type-leading-tight: 1.2;
-  --ios-type-leading-snug: 1.32;
-  --ios-type-leading: 1.41;
-  --ios-type-leading-relaxed: 1.47;
+  --ios-type-tracking-tight: -0.02em;
+  --ios-type-tracking: -0.01em;
+  --ios-type-tracking-loose: 0;
+  --ios-type-leading-tight: 1.18;
+  --ios-type-leading-snug: 1.28;
+  --ios-type-leading: 1.35;
+  --ios-type-leading-relaxed: 1.42;
 
-  /* Apple semantic scale (pt ≈ px at 1×) */
-  --ios-type-display-size: 2.125rem; /* 34 */
+  /* Compact Montserrat scale — dense lists without shrinking inputs below 16px */
+  --ios-type-display-size: 1.5rem; /* 24 */
   --ios-type-display-weight: 700;
   --ios-type-display-leading: var(--ios-type-leading-tight);
   --ios-type-display-tracking: var(--ios-type-tracking-tight);
 
-  --ios-type-large-title-size: 1.75rem; /* 28 */
+  --ios-type-large-title-size: 1.375rem; /* 22 */
   --ios-type-large-title-weight: 700;
   --ios-type-large-title-leading: var(--ios-type-leading-tight);
   --ios-type-large-title-tracking: var(--ios-type-tracking-tight);
 
-  --ios-type-title-size: 1.375rem; /* 22 */
+  --ios-type-title-size: 1.125rem; /* 18 */
   --ios-type-title-weight: 600;
   --ios-type-title-leading: var(--ios-type-leading-snug);
   --ios-type-title-tracking: var(--ios-type-tracking-tight);
 
-  --ios-type-title2-size: 1.25rem; /* 20 */
+  --ios-type-title2-size: 1.0625rem; /* 17 */
   --ios-type-title2-weight: 600;
   --ios-type-title2-leading: var(--ios-type-leading-snug);
   --ios-type-title2-tracking: var(--ios-type-tracking);
 
-  --ios-type-title3-size: 1.0625rem; /* 17 */
+  --ios-type-title3-size: 1rem; /* 16 */
   --ios-type-title3-weight: 600;
   --ios-type-title3-leading: var(--ios-type-leading-snug);
   --ios-type-title3-tracking: var(--ios-type-tracking);
 
-  --ios-type-headline-size: 1.0625rem; /* 17 */
+  --ios-type-headline-size: 0.9375rem; /* 15 */
   --ios-type-headline-weight: 600;
   --ios-type-headline-leading: var(--ios-type-leading);
   --ios-type-headline-tracking: var(--ios-type-tracking);
 
-  --ios-type-body-size: 1.0625rem; /* 17 */
+  --ios-type-body-size: 0.9375rem; /* 15 */
   --ios-type-body-weight: 400;
   --ios-type-body-leading: var(--ios-type-leading);
   --ios-type-body-tracking: var(--ios-type-tracking);
 
-  --ios-type-body-emphasized-size: 1.0625rem; /* 17 */
+  --ios-type-body-emphasized-size: 0.9375rem; /* 15 */
   --ios-type-body-emphasized-weight: 600;
   --ios-type-body-emphasized-leading: var(--ios-type-leading);
   --ios-type-body-emphasized-tracking: var(--ios-type-tracking);
 
-  --ios-type-callout-size: 1rem; /* 16 */
+  --ios-type-callout-size: 0.875rem; /* 14 */
   --ios-type-callout-weight: 400;
   --ios-type-callout-leading: var(--ios-type-leading);
   --ios-type-callout-tracking: var(--ios-type-tracking-loose);
 
-  --ios-type-subheadline-size: 0.9375rem; /* 15 */
-  --ios-type-subheadline-weight: 400;
+  --ios-type-subheadline-size: 0.8125rem; /* 13 */
+  --ios-type-subheadline-weight: 500;
   --ios-type-subheadline-leading: var(--ios-type-leading);
   --ios-type-subheadline-tracking: var(--ios-type-tracking-loose);
 
-  --ios-type-footnote-size: 0.8125rem; /* 13 */
+  --ios-type-footnote-size: 0.75rem; /* 12 */
   --ios-type-footnote-weight: 400;
   --ios-type-footnote-leading: var(--ios-type-leading-snug);
   --ios-type-footnote-tracking: var(--ios-type-tracking-loose);
 
-  --ios-type-caption-size: 0.75rem; /* 12 */
+  --ios-type-caption-size: 0.6875rem; /* 11 */
   --ios-type-caption-weight: 400;
   --ios-type-caption-leading: var(--ios-type-leading-snug);
   --ios-type-caption-tracking: var(--ios-type-tracking-loose);
 
-  --ios-type-caption2-size: 0.6875rem; /* 11 */
+  --ios-type-caption2-size: 0.625rem; /* 10 */
   --ios-type-caption2-weight: 400;
   --ios-type-caption2-leading: var(--ios-type-leading-snug);
   --ios-type-caption2-tracking: var(--ios-type-tracking-loose);
@@ -93,6 +94,18 @@ html.capacitor-ios.capacitor-native {
   --ios-type-input-size: 1rem;
   --ios-type-input-weight: 400;
   --ios-type-input-leading: var(--ios-type-leading);
+
+  /* List / card density */
+  --ios-list-title-size: 0.8125rem;
+  --ios-list-subtitle-size: 0.6875rem;
+  --ios-list-meta-size: 0.625rem;
+  --ios-list-amount-size: 0.75rem;
+  --ios-list-row-pad-block: 0.5625rem;
+  --ios-list-row-pad-inline: 0.875rem;
+  --ios-list-row-min-height: 2.75rem;
+  --ios-list-icon-size: 2.125rem;
+  --ios-list-gap: 0.5rem;
+  --ios-card-pad: 0.75rem;
 }
 
 /* Role utilities - only active on Capacitor iOS */

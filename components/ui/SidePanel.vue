@@ -1,14 +1,15 @@
 <template>
-  <DashboardNativeSheet
+  <IosDrawer
     v-if="nativeIosSheet"
     :model-value="modelValue"
     :title="title"
-    :subtitle="subtitle"
-    :eyebrow="resolvedEyebrow"
+    :subtitle="iosCrudSheet ? undefined : subtitle"
+    :eyebrow="iosCrudSheet ? undefined : resolvedEyebrow"
     :body-padding="resolvedContentPadding"
     :show-close="showClose"
     :close-on-backdrop="closeOnBackdrop"
     :variant="nativeSheetVariant"
+    :footer-variant="footerVariant"
     mount="overlay-host"
     @update:model-value="emit('update:modelValue', $event)"
     @close="emit('close')"
@@ -17,13 +18,16 @@
       <slot name="header" />
     </template>
     <slot />
+    <template v-if="$slots.leading" #leading>
+      <slot name="leading" />
+    </template>
     <template v-if="$slots.footer" #footer>
       <slot name="footer" />
     </template>
-  </DashboardNativeSheet>
+  </IosDrawer>
 
   <Teleport v-else :to="teleportTarget">
-    <!-- Web: dimmed backdrop -->
+    <!-- Web: frosted glass backdrop -->
     <Transition
       v-if="!nativeInApp"
       enter-active-class="transition-opacity duration-[400ms] ease-out"
@@ -38,7 +42,6 @@
         :class="[
           'fixed inset-0 z-[1100]',
           backdropClass,
-          blurBackdrop ? 'backdrop-blur-[3px]' : '',
         ]"
         aria-hidden="true"
         @click="handleBackdropClick"
@@ -198,7 +201,7 @@ import { computed, watch, onMounted, onUnmounted, useId } from 'vue'
 import {
   XMarkIcon,
 } from '~/utils/app-icons'
-import DashboardNativeSheet from '~/components/dashboard/DashboardNativeSheet.vue'
+import IosDrawer from '~/components/ios/IosDrawer.vue'
 import type { DashboardNativeSheetVariant } from '~/composables/useDashboardNativeSheetChrome'
 import { setNativeOverlayLock } from '~/utils/native-overlay-lock'
 import { blurActiveElementIfNative } from '~/utils/native-focus'
@@ -222,6 +225,8 @@ interface Props {
   fitContent?: boolean
   /** iOS bottom sheet variant (More-menu chrome) */
   nativeSheetVariant?: DashboardNativeSheetVariant
+  /** iOS drawer footer layout */
+  footerVariant?: 'actions' | 'menu'
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -234,12 +239,16 @@ const props = withDefaults(defineProps<Props>(), {
   dense: false,
   fitContent: false,
   nativeSheetVariant: 'crud',
+  footerVariant: 'actions',
 })
 
 const { isNativeApp } = useCapacitorNativeApp()
 const { isCapacitorIos } = useIsCapacitorIos()
 const nativeInApp = computed(() => isNativeApp.value)
 const nativeIosSheet = computed(() => isCapacitorIos.value)
+const iosCrudSheet = computed(
+  () => nativeIosSheet.value && props.nativeSheetVariant === 'crud'
+)
 
 const resolvedEyebrow = computed(() => props.eyebrow || (props.title ? 'Details' : undefined))
 
@@ -249,6 +258,7 @@ const teleportTarget = computed(() =>
 
 const resolvedContentPadding = computed(() => {
   if (props.contentPadding) return props.contentPadding
+  if (iosCrudSheet.value) return 'p-0'
   return props.dense ? 'p-0' : 'px-4 py-4 sm:px-5 sm:py-5'
 })
 

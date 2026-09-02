@@ -154,7 +154,7 @@ const stories = [
     bullets: [
       'Feature insights, charts, peak hours, and PDF/Excel export',
       'Activity logs for managers and owners',
-      'Roles: super admin, manager, and staff with 2FA',
+      'Solo or Business workspace plus subscription billing in Settings',
       'Web dashboard plus native iOS app with the same data',
     ],
     visual: 'analytics' as const,

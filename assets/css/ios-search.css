@@ -1,0 +1,92 @@
+/**
+ * iOS search — layout + inner-input reset.
+ * The chrome (radius, height, icon) lives in ios-fields.css. This file is
+ * unlayered so it can beat `@layer base` field borders that otherwise paint a
+ * second rectangle inside the rounded search wrapper.
+ */
+
+/* ── Sticky search host ── */
+html.capacitor-ios.capacitor-native .ios-search-bar-host {
+  margin-bottom: 0.625rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-sales-chrome .ios-search-bar-host {
+  margin: 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-search-bar-host--sticky {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  margin-inline: 0;
+  padding-block: 0.375rem 0.5rem;
+  background: linear-gradient(
+    to bottom,
+    var(--ios-canvas) 70%,
+    rgb(from var(--ios-canvas) r g b / 0)
+  );
+}
+
+/* ── Wrapper internals ── */
+html.capacitor-ios.capacitor-native .ios-search-input-wrap > kbd {
+  display: none !important;
+}
+
+/*
+ * Nested search inputs must be borderless — the label.ios-search-bar is the
+ * visible field. Unlayered !important wins over the global @layer base
+ * `input { border-width: 1px }` rule.
+ */
+html.capacitor-ios.capacitor-native .ios-search-bar .ios-search-bar__input,
+html.capacitor-ios.capacitor-native .ios-search-bar .ios-search-bar__input:focus,
+html.capacitor-ios.capacitor-native .ios-search-bar .ios-search-bar__input:focus-visible {
+  border: none !important;
+  border-width: 0 !important;
+  border-style: none !important;
+  border-color: transparent !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  min-height: 0 !important;
+  height: auto !important;
+  padding: 0 !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-search-bar input[type='search']::-webkit-search-decoration,
+html.capacitor-ios.capacitor-native .ios-search-bar input[type='search']::-webkit-search-cancel-button,
+html.capacitor-ios.capacitor-native .ios-search-bar input[type='search']::-webkit-search-results-button,
+html.capacitor-ios.capacitor-native .ios-search-bar input[type='search']::-webkit-search-results-decoration {
+  display: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+/* ── Clear button ── */
+html.capacitor-ios.capacitor-native .ios-search-bar__clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: none;
+  border-radius: 9999px;
+  color: var(--ios-field-muted);
+  background: rgb(120 120 128 / 0.14);
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background 0.12s ease,
+    opacity 0.12s ease;
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-search-bar__clear {
+  background: rgb(255 255 255 / 0.12);
+}
+
+html.capacitor-ios.capacitor-native .ios-search-bar__clear:active {
+  opacity: 0.72;
+}

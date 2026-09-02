@@ -1,11 +1,11 @@
 <template>
-  <DashboardNativeSheet
+  <IosDrawer
     v-if="nativeIosSheet"
     :model-value="modelValue"
     :title="title"
-    :subtitle="subtitle"
-    :eyebrow="resolvedEyebrow"
-    :body-padding="contentPadding"
+    :subtitle="undefined"
+    :eyebrow="undefined"
+    :body-padding="contentPadding || 'p-0'"
     :show-close="showClose"
     :close-on-backdrop="closeOnBackdrop"
     variant="crud"
@@ -17,10 +17,13 @@
       <slot name="header" />
     </template>
     <slot />
+    <template v-if="$slots.leading" #leading>
+      <slot name="leading" />
+    </template>
     <template v-if="$slots.footer" #footer>
       <slot name="footer" />
     </template>
-  </DashboardNativeSheet>
+  </IosDrawer>
 
   <Teleport v-else :to="teleportTarget">
     <!-- Native: right-edge drawer -->
@@ -86,12 +89,11 @@
     </Transition>
 
     <!-- Web: centered modal (above SidePanel drawer at z-[1111]) -->
-    <div v-else-if="modelValue" class="fixed inset-0 z-[1120] overflow-y-auto" role="presentation">
+    <div v-else-if="modelValue" class="fixed inset-0 z-[1120] overflow-y-auto" data-dashboard-teleport role="presentation">
       <div
         :class="[
           'absolute inset-0 transition-opacity duration-300',
           backdropClass,
-          blurBackdrop ? 'backdrop-blur-[3px]' : '',
         ]"
         aria-hidden="true"
         @click="handleBackdropClick"
@@ -163,7 +165,7 @@ import { computed, watch, onMounted, onUnmounted, useId } from 'vue'
 import {
   XMarkIcon,
 } from '~/utils/app-icons'
-import DashboardNativeSheet from '~/components/dashboard/DashboardNativeSheet.vue'
+import IosDrawer from '~/components/ios/IosDrawer.vue'
 import { setNativeOverlayLock } from '~/utils/native-overlay-lock'
 import { blurActiveElementIfNative } from '~/utils/native-focus'
 interface Props {

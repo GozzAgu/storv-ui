@@ -1,7 +1,13 @@
 <template>
-  <div data-auth-shell class="auth-shell">
-    <div class="auth-shell__mobile-strip lg:hidden">
-      <p>{{ mobileLine }}</p>
+  <div
+    data-auth-shell
+    class="auth-shell auth-shell--modern"
+    :class="{ 'auth-shell--compact': compact }"
+  >
+    <div class="auth-shell__atmosphere" aria-hidden="true">
+      <span class="auth-shell__ray auth-shell__ray--1" />
+      <span class="auth-shell__ray auth-shell__ray--2" />
+      <span class="auth-shell__ray auth-shell__ray--3" />
     </div>
 
     <aside class="auth-shell__brand">
@@ -49,11 +55,10 @@
     </aside>
 
     <main class="auth-shell__main">
-      <div class="auth-shell__main-glow" aria-hidden="true" />
-      <div class="auth-shell__theme auth-shell-theme-toggle">
-        <ThemeToggle />
-      </div>
-      <div class="auth-shell__main-scroll">
+      <div
+        class="auth-shell__main-scroll"
+        @click="dismissKeyboardFromBackgroundTap"
+      >
         <div class="auth-shell__content" :class="contentWidthClass">
           <slot />
         </div>
@@ -64,9 +69,9 @@
 
 <script setup lang="ts">
 import { computed, onMounted, type Component } from 'vue'
-import ThemeToggle from '~/components/ui/ThemeToggle.vue'
 import { authEntranceClass } from '~/utils/auth-entrance'
 import { markCapacitorDocument } from '~/utils/capacitor-env'
+import { dismissKeyboardFromBackgroundTap } from '~/utils/native-focus'
 import {
   ChartBarSquareIcon,
   CubeIcon,
@@ -99,9 +104,11 @@ const props = withDefaults(
     panelDescription: string
     features?: AuthShellFeature[]
     contentWidthClass?: string
+    compact?: boolean
   }>(),
   {
     contentWidthClass: 'max-w-[420px]',
+    compact: false,
   }
 )
 

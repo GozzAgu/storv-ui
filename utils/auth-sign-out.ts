@@ -41,4 +41,7 @@ export function clearCachedUserProfile(): void {
   localStorage.removeItem('cached_user_name')
   localStorage.removeItem('cached_user_email')
   localStorage.removeItem('cached_user_id')
+  void import('~/utils/user-profile-cache').then(({ clearUserProfileCache }) => {
+    clearUserProfileCache()
+  })
 }

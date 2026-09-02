@@ -1,23 +1,25 @@
 <template>
   <AuthShell
+    compact
     content-width-class="max-w-[440px]"
     mobile-line="Join Storvv: your store workspace, organized."
     panel-title="Open a workspace built for multi-branch retail."
     panel-description="Create your owner account, then invite managers and staff. Inventory, receipts, and structure stay connected."
   >
-    <AuthPageHeader v-if="!registrationComplete" eyebrow="Get started" title="Create your account">
-      Takes a minute. Already set up?
-      <NuxtLink to="/signin" class="auth-link">Sign in instead</NuxtLink>
-    </AuthPageHeader>
+    <AuthPageHeader
+      v-if="!registrationComplete"
+      title="Create your account"
+      subtitle="Set up a workspace for stock, sales, and branches."
+    />
 
     <AuthPageHeader
       v-else
-      eyebrow="One more step"
       title="Check your email"
-      :show-mobile-logo="false"
-    >
-      We need you to confirm your address before you sign in.
-    </AuthPageHeader>
+      subtitle="We need you to confirm your address before you sign in."
+      :show-logo="false"
+    />
+
+    <AuthSegmentToggle v-if="!registrationComplete" mode="signup" />
 
     <AuthCard>
       <div v-if="registrationComplete" class="space-y-4" role="status">
@@ -29,41 +31,47 @@
           <template v-if="registrationVerificationSent">
             We emailed
             <span class="font-medium text-gray-800 dark:text-gray-200">{{ registrationEmail }}</span
-            >. Check your <strong>inbox</strong> and your <strong>Spam</strong> or
-            <strong>Junk</strong> folder. Messages from new senders often land there.
+            >. Check your inbox and spam folder.
           </template>
           <template v-else>
             We could not send a verification email automatically. You can still
             <NuxtLink :to="signInLinkWithEmail" class="auth-link underline underline-offset-2">
               sign in
             </NuxtLink>
-            with the password you chose; verify your email from account settings when you can.
+            with the password you chose.
           </template>
           <template v-if="registrationVerificationSent" #footer>
-            Tap <strong>Verify email</strong> in that message, then come back here to sign in and
-            finish setting up your store.
+            Tap verify in that message, then sign in to finish setting up your store.
           </template>
         </AuthSuccessPanel>
+
+        <p class="auth-auth-footer-link">
+          Ready to continue?
+          <NuxtLink :to="signInLinkWithEmail">Log in</NuxtLink>
+        </p>
       </div>
 
-      <form v-else class="auth-form space-y-5" @submit.prevent="handleSignUp">
+      <div v-else class="auth-form-panel">
+      <form class="auth-form" @submit.prevent="handleSignUp">
         <AuthField
           v-model="form.name"
           input-id="business-name"
-          label="Business name"
+          label="Your business name"
           type="text"
           autocomplete="organization"
-          placeholder="Your business or store name"
+          placeholder="Your business name"
+          :icon="BuildingStorefrontIcon"
           required
         />
 
         <AuthField
           v-model="form.email"
           input-id="email"
-          label="Email address"
+          label="Email"
           type="email"
           autocomplete="email"
-          placeholder="you@example.com"
+          placeholder="Enter your email"
+          :icon="EnvelopeIcon"
           required
         />
 
@@ -72,13 +80,14 @@
           input-id="password"
           label="Password"
           autocomplete="new-password"
-          placeholder="At least 12 characters, with a number and capital letter"
+          placeholder="Enter your password"
           password-toggle
+          :icon="LockClosedIcon"
           :minlength="PASSWORD_MIN_LENGTH"
           required
         >
           <template #hint>
-            <div v-if="form.password.length > 0" class="mt-2.5 space-y-1.5" aria-live="polite">
+            <div v-if="form.password.length > 0" class="mt-1.5 space-y-1" aria-live="polite">
               <div class="flex items-center justify-between gap-2">
                 <span class="text-[10px] font-medium text-gray-500 dark:text-gray-400"
                   >Password strength</span
@@ -110,32 +119,9 @@
                 {{ strengthHint }}
               </p>
             </div>
-            <p class="mt-1.5 text-[10px] leading-snug text-gray-500 dark:text-gray-400">
-              Required: at least {{ PASSWORD_MIN_LENGTH }} characters, one number, and one uppercase
-              letter.
+            <p class="mt-1 text-[10px] leading-snug text-gray-500 dark:text-gray-400">
+              At least {{ PASSWORD_MIN_LENGTH }} characters, one number, and one uppercase letter.
             </p>
-            <ul
-              v-if="form.password.length > 0"
-              class="mt-2 space-y-1 text-[10px] leading-tight text-gray-600 dark:text-gray-400"
-              aria-label="Password requirements"
-            >
-              <li
-                v-for="rule in passwordRuleChecks"
-                :key="rule.id"
-                class="flex items-center gap-1.5"
-              >
-                <span
-                  :class="
-                    rule.ok
-                      ? 'text-green-600 dark:text-green-400'
-                      : 'text-gray-400 dark:text-gray-500'
-                  "
-                  aria-hidden="true"
-                  >{{ rule.ok ? '✓' : '○' }}</span
-                >
-                <span>{{ rule.label }}</span>
-              </li>
-            </ul>
           </template>
         </AuthField>
 
@@ -146,6 +132,7 @@
           autocomplete="new-password"
           placeholder="Re-enter your password"
           password-toggle
+          :icon="LockClosedIcon"
           required
         >
           <template #hint>
@@ -175,39 +162,30 @@
           </template>
         </AuthAlert>
 
-        <Checkbox
-          v-model="form.acceptTerms"
-          size="sm"
-          wrapper-class="!items-start"
-          label-class="!ml-2.5 !text-xs !font-normal !leading-snug !text-gray-600 dark:!text-gray-300"
-        >
-          I agree to the
-          <NuxtLink to="/terms" class="auth-link">Terms of Service</NuxtLink>
-          and
-          <NuxtLink to="/privacy" class="auth-link">Privacy Policy</NuxtLink>
-        </Checkbox>
+        <div class="auth-checkbox-options">
+          <AuthCheckbox v-model="form.acceptTerms">
+            I accept the
+            <NuxtLink to="/terms" class="auth-link">terms</NuxtLink>
+            and
+            <NuxtLink to="/privacy" class="auth-link">privacy policy</NuxtLink>
+          </AuthCheckbox>
+        </div>
 
-        <Button
-          type="submit"
+        <AuthPrimaryButton
+          label="Sign Up"
+          :loading="isLoading"
           :disabled="
             isLoading ||
             !!(form.password && form.confirmPassword && form.password !== form.confirmPassword)
           "
-          :loading="isLoading"
-          variant="primary"
-          size="md"
-          :icon="ArrowRightIcon"
-          icon-right
-          extra-class="auth-btn auth-btn--primary !w-full"
-        >
-          Create account
-        </Button>
+        />
       </form>
 
-      <template v-if="!registrationComplete" #footer>
-        Questions?
-        <a href="https://www.storvv.com" class="auth-link">Learn more on the homepage</a>
-      </template>
+      <p class="auth-auth-footer-link">
+        Already have an account?
+        <NuxtLink to="/signin">Log In</NuxtLink>
+      </p>
+      </div>
     </AuthCard>
   </AuthShell>
 </template>
@@ -215,8 +193,9 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
 import {
-  ArrowRightIcon,
   EnvelopeIcon,
+  LockClosedIcon,
+  BuildingStorefrontIcon,
 } from '~/utils/app-icons'
 import AuthShell from '~/components/auth/AuthShell.vue'
 import AuthPageHeader from '~/components/auth/AuthPageHeader.vue'
@@ -224,18 +203,20 @@ import AuthCard from '~/components/auth/AuthCard.vue'
 import AuthField from '~/components/auth/AuthField.vue'
 import AuthAlert from '~/components/auth/AuthAlert.vue'
 import AuthSuccessPanel from '~/components/auth/AuthSuccessPanel.vue'
-import Button from '~/components/ui/Button.vue'
-import Checkbox from '~/components/ui/Checkbox.vue'
+import AuthSegmentToggle from '~/components/auth/AuthSegmentToggle.vue'
+import AuthPrimaryButton from '~/components/auth/AuthPrimaryButton.vue'
+import AuthCheckbox from '~/components/auth/AuthCheckbox.vue'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useUser } from '~/composables/useUser'
 import {
   PASSWORD_MIN_LENGTH,
-  getPasswordRuleChecks,
   getPasswordPolicyErrors,
   isPasswordPolicyValid,
   getPasswordStrength,
 } from '~/utils/passwordPolicy'
 import { markCapacitorDocument } from '~/utils/capacitor-env'
+import { useProductAnalytics } from '~/composables/useProductAnalytics'
+import { useAppToast } from '~/composables/useAppToast'
 
 definePageMeta({
   layout: false,
@@ -245,6 +226,8 @@ definePageMeta({
 onMounted(() => {
   markCapacitorDocument()
 })
+
+const toast = useAppToast()
 
 const form = ref({
   name: '',
@@ -275,9 +258,9 @@ watch(registrationComplete, (done) => {
 })
 
 const { signUp, signOut } = useFirebaseAuth()
+const { trackEvent } = useProductAnalytics()
 const { createUserDocument } = useUser()
 
-const passwordRuleChecks = computed(() => getPasswordRuleChecks(form.value.password))
 const passwordStrength = computed(() => getPasswordStrength(form.value.password))
 
 const strengthLabelClass = computed(() => {
@@ -305,7 +288,7 @@ const strengthHint = computed(() => {
   const pwd = form.value.password
   if (!pwd.length) return ''
   if (!isPasswordPolicyValid(pwd)) {
-    return 'Meet all required checks below to continue.'
+    return 'Meet all required checks to continue.'
   }
   if (s.tier === 'strong') {
     return 'Great! This password looks strong.'
@@ -371,7 +354,7 @@ const handleSignUp = async () => {
   }
 
   if (!form.value.acceptTerms) {
-    errorMessage.value = 'Please accept the terms and conditions'
+    errorMessage.value = 'Please accept the terms and privacy policy'
     return
   }
 
@@ -393,7 +376,10 @@ const handleSignUp = async () => {
         subscription: 'storvv_micro',
         hasCompletedOnboarding: false,
         hasCompletedTutorial: false,
+        activationFunnel: { signedUpAt: new Date().toISOString() },
       })
+
+      trackEvent('sign_up', { method: 'email' })
 
       try {
         await signOut()
@@ -405,8 +391,6 @@ const handleSignUp = async () => {
       registrationVerificationSent.value = verificationEmailSent
       registrationComplete.value = true
 
-      const { useAppToast } = await import('~/composables/useAppToast')
-      const toast = useAppToast()
       if (verificationEmailSent) {
         toast.success('Check your email for the verification link.')
       } else {

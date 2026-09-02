@@ -47,10 +47,8 @@
       </template>
     </DashboardPageHeader>
 
-    <div v-if="!canAccessLeadsPlan" class="rounded-sm bg-amber-50/90 px-4 py-4 dark:bg-amber-950/25">
-      <p class="text-xs font-medium text-amber-900 dark:text-amber-100">
-        Sales leads require Storvv Medium or Enterprise.
-      </p>
+    <div v-if="!canAccessLeadsPlan" class="py-8">
+      <FeatureGateCard feature="sales_leads" />
     </div>
 
     <div
@@ -201,12 +199,12 @@
         placeholder="Price, timing, bought elsewhere…"
       />
       <template #footer>
-        <div class="flex justify-end gap-2">
-          <Button variant="outline" size="sm" @click="showLostModal = false">Cancel</Button>
-          <Button variant="primary" size="sm" :loading="statusSaving" @click="confirmLost">
-            Mark lost
-          </Button>
-        </div>
+        <IosDrawerActions
+          primary-label="Mark lost"
+          :primary-loading="statusSaving"
+          @cancel="showLostModal = false"
+          @primary="confirmLost"
+        />
       </template>
     </Modal>
 
@@ -215,12 +213,13 @@
         This removes {{ lead?.customerName }} from your leads list. This cannot be undone.
       </p>
       <template #footer>
-        <div class="flex justify-end gap-2">
-          <Button variant="outline" size="sm" @click="showDeleteConfirm = false">Cancel</Button>
-          <Button variant="primary" size="sm" :loading="deleteSaving" @click="confirmDelete">
-            Delete lead
-          </Button>
-        </div>
+        <IosDrawerActions
+          primary-variant="danger"
+          primary-label="Delete lead"
+          :primary-loading="deleteSaving"
+          @cancel="showDeleteConfirm = false"
+          @primary="confirmDelete"
+        />
       </template>
     </Modal>
   </div>
@@ -229,6 +228,8 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import Button from '~/components/ui/Button.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
+import FeatureGateCard from '~/components/subscription/FeatureGateCard.vue'
 import Modal from '~/components/ui/Modal.vue'
 import ConvertLeadToSaleButton from '~/components/leads/ConvertLeadToSaleButton.vue'
 import EditLeadModal from '~/components/leads/EditLeadModal.vue'

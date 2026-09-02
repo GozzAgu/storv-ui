@@ -25,7 +25,8 @@
             style="--hero-i: 3"
           >
             Manage inventory, sales, customers, payment links, and multiple stores from one workspace -
-            on web and iOS.
+            on web and iOS. Start with <strong>Solo</strong> for a focused owner layout or
+            <strong>Business</strong> for the full team experience.
           </p>
 
           <div class="landing-hero__actions landing-hero__reveal" style="--hero-i: 4">
@@ -48,9 +49,30 @@
           <div class="landing-hero-mock__card">
             <div class="landing-hero-mock__split">
               <div class="landing-hero-mock__boxes" aria-hidden="true">
-                <span class="landing-hero-mock__box landing-hero-mock__box--a" />
-                <span class="landing-hero-mock__box landing-hero-mock__box--b" />
-                <span class="landing-hero-mock__box landing-hero-mock__box--c" />
+                <svg
+                  class="landing-hero-mock__box landing-hero-mock__box--a"
+                  viewBox="0 0 40 32"
+                >
+                  <path
+                    d="M2 6a2 2 0 0 1 2-2h8l3 3h19a2 2 0 0 1 2 2v17a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6z"
+                  />
+                </svg>
+                <svg
+                  class="landing-hero-mock__box landing-hero-mock__box--b"
+                  viewBox="0 0 40 32"
+                >
+                  <path
+                    d="M2 6a2 2 0 0 1 2-2h8l3 3h19a2 2 0 0 1 2 2v17a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6z"
+                  />
+                </svg>
+                <svg
+                  class="landing-hero-mock__box landing-hero-mock__box--c"
+                  viewBox="0 0 40 32"
+                >
+                  <path
+                    d="M2 6a2 2 0 0 1 2-2h8l3 3h19a2 2 0 0 1 2 2v17a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6z"
+                  />
+                </svg>
                 <div class="landing-hero-mock__overlay">
                   <strong>Dashboard overview</strong>
                   Three shops connected · One integrated view
@@ -62,7 +84,8 @@
                 <ul class="landing-hero-mock__panel-list">
                   <li>Categories with optional subcategories</li>
                   <li>Quick Sale, leads & Paystack links</li>
-                  <li>Web dashboard + native iOS app</li>
+                  <li>Solo or Business workspace at signup</li>
+                  <li>Upgrade plans & billing in Settings (web + iOS)</li>
                 </ul>
                 <span class="landing-hero-mock__pill">Start free →</span>
               </div>

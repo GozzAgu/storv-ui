@@ -12,14 +12,14 @@
         </p>
         <NuxtLink
           to="/dashboard/settings?tab=subscription"
-          class="inline-flex text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400"
+          class="inline-flex text-sm font-medium text-gray-800 hover:text-gray-950 dark:text-gray-200"
         >
           View plans →
         </NuxtLink>
       </div>
 
       <div v-else class="space-y-4">
-        <div class="rounded-sm bg-gray-50/80 px-4 py-3 dark:bg-gray-900/30">
+        <div class="rounded-sm bg-gray-50/80 px-4 py-3 dark:bg-white/[0.04]">
           <p
             class="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400"
           >
@@ -48,30 +48,13 @@
           </button>
         </div>
 
-        <div>
-          <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300"
-            >Amount</label
-          >
-          <input
-            v-model.number="amountInput"
-            type="number"
-            min="0"
-            step="0.01"
-            class="w-full rounded-sm bg-white px-3 py-2 text-sm dark:!bg-dashboard-card dark:text-gray-100"
-          />
-        </div>
+        <IosFormField label="Amount">
+          <IosFormInput v-model="amountInput" type="number" min="0" step="0.01" />
+        </IosFormField>
 
-        <div>
-          <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300"
-            >Note (optional)</label
-          >
-          <input
-            v-model="noteInput"
-            type="text"
-            placeholder="e.g. Part payment for invoice"
-            class="w-full rounded-sm bg-white px-3 py-2 text-sm dark:!bg-dashboard-card dark:text-gray-100"
-          />
-        </div>
+        <IosFormField label="Note" hint="Optional">
+          <IosFormInput v-model="noteInput" type="text" placeholder="e.g. Part payment for invoice" />
+        </IosFormField>
 
         <div v-if="recentLedger.length" class="border-t border-gray-200 pt-3">
           <p
@@ -101,20 +84,15 @@
     </template>
 
     <template #footer>
-      <div class="flex w-full justify-end gap-2">
-        <button type="button" class="btn-secondary" @click="emit('update:modelValue', false)">
-          Close
-        </button>
-        <button
-          v-if="hasBalanceFeature"
-          type="button"
-          :disabled="saving || !amountInput || amountInput <= 0"
-          class="btn-primary disabled:opacity-50"
-          @click="handleSave"
-        >
-          {{ saving ? 'Saving…' : 'Save' }}
-        </button>
-      </div>
+      <IosDrawerActions
+        cancel-label="Close"
+        primary-label="Save"
+        :show-primary="hasBalanceFeature"
+        :primary-loading="saving"
+        :primary-disabled="!amountInput || amountInput <= 0"
+        @cancel="emit('update:modelValue', false)"
+        @primary="handleSave"
+      />
     </template>
   </Modal>
 </template>
@@ -122,6 +100,8 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import Modal from '~/components/ui/Modal.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
+import { IosFormField, IosFormInput } from '~/components/ios/forms'
 import { useCustomerAccountsStore } from '~/stores/customerAccounts'
 import { getCustomerContactKey } from '~/utils/customer-key'
 import { tableMoneyClass, tableMoneyOwedClass } from '~/utils/table-money-styles'
@@ -149,7 +129,7 @@ const noteInput = ref('')
 const saving = ref(false)
 
 const activeTabClass =
-  'rounded-sm border-0 bg-primary-50 px-3 py-2 text-xs font-medium text-primary-800 dark:bg-primary-950/40 dark:text-primary-200'
+  'rounded-sm border-0 bg-gray-900 px-3 py-2 text-xs font-medium text-white dark:bg-white dark:text-gray-900'
 const inactiveTabClass =
   'rounded-sm bg-white px-3 py-2 text-xs font-medium text-gray-600 dark:!bg-dashboard-card dark:text-gray-400'
 

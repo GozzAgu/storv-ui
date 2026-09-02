@@ -1,5 +1,5 @@
 <template>
-  <div :class="authEntranceClass(entranceDelay) + ' auth-card'">
+  <div :class="['auth-card', flat ? 'auth-card--flat' : '']">
     <div class="auth-card__inner">
       <slot />
       <div v-if="$slots.footer" class="auth-card__footer">
@@ -10,14 +10,12 @@
 </template>
 
 <script setup lang="ts">
-import { authEntranceClass } from '~/utils/auth-entrance'
-
 withDefaults(
   defineProps<{
-    entranceDelay?: number
+    flat?: boolean
   }>(),
   {
-    entranceDelay: 120,
+    flat: true,
   }
 )
 </script>

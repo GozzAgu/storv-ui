@@ -18,14 +18,19 @@
     </template>
 
     <div class="p-4 sm:p-5 max-h-[calc(100vh-14rem)] overflow-y-auto">
-      <div v-if="timeline.length === 0" class="py-10 text-center">
+      <div v-if="timeline.length === 0" class="dash-empty-state dash-empty-state--compact py-10">
         <div
-          class="w-10 h-10 mx-auto rounded-full bg-gray-100 dark:bg-gray-700/80 flex items-center justify-center"
+          class="dash-empty-state__mark w-10 h-10 mx-auto rounded-full bg-gray-100 dark:bg-gray-700/80"
         >
-          <ClockIcon class="w-5 h-5 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
+          <ClockIcon
+            class="dash-empty-state__icon w-5 h-5 text-gray-400 dark:text-gray-500"
+            stroke-width="1.5"
+          />
         </div>
-        <p class="mt-3 text-sm font-medium text-gray-700 dark:text-gray-300">No events yet</p>
-        <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+        <p class="dash-empty-state__title mt-0 text-sm font-medium text-gray-700 dark:text-gray-300">
+          No events yet
+        </p>
+        <p class="dash-empty-state__desc mt-0.5 text-xs text-gray-500 dark:text-gray-400">
           Activity for this item will appear here
         </p>
       </div>

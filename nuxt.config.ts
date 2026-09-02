@@ -69,6 +69,13 @@ export default defineNuxtConfig({
       process.env.PAYSTACK_PLAN_ENTERPRISE_AMOUNT_YEARLY || '0',
       10
     ),
+    /** Paystack subscription plan codes (PLN_xxx) for auto-renewing billing. Create matching plans in Paystack dashboard. */
+    paystackPlanCodeMediumMonthly: process.env.PAYSTACK_PLAN_CODE_MEDIUM_MONTHLY || '',
+    paystackPlanCodeMediumQuarterly: process.env.PAYSTACK_PLAN_CODE_MEDIUM_QUARTERLY || '',
+    paystackPlanCodeMediumYearly: process.env.PAYSTACK_PLAN_CODE_MEDIUM_YEARLY || '',
+    paystackPlanCodeEnterpriseMonthly: process.env.PAYSTACK_PLAN_CODE_ENTERPRISE_MONTHLY || '',
+    paystackPlanCodeEnterpriseQuarterly: process.env.PAYSTACK_PLAN_CODE_ENTERPRISE_QUARTERLY || '',
+    paystackPlanCodeEnterpriseYearly: process.env.PAYSTACK_PLAN_CODE_ENTERPRISE_YEARLY || '',
     // Platform fee (%) retained by Storvv on each payment-link sale (Paystack subaccount percentage_charge).
     paymentLinkPlatformFeePercent: parseFloat(process.env.PAYMENT_LINK_PLATFORM_FEE_PERCENT || '0'),
     firebaseServiceAccount: process.env.FIREBASE_SERVICE_ACCOUNT_JSON || '',
@@ -97,6 +104,8 @@ export default defineNuxtConfig({
       paystackPublicKey: process.env.NUXT_PUBLIC_PAYSTACK_PUBLIC_KEY || '',
       /** Optional: base URL for a separate API server when using a static frontend. Staff creation is client-side and does not require a server. */
       apiBase: process.env.NUXT_PUBLIC_API_BASE || '',
+      /** Optional Sentry DSN for client error reporting (https://sentry.io) */
+      sentryDsn: process.env.NUXT_PUBLIC_SENTRY_DSN || '',
       firebase: {
         apiKey: process.env.NUXT_PUBLIC_FIREBASE_API_KEY || '',
         authDomain: process.env.NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN || '',

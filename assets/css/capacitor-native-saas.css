@@ -410,7 +410,7 @@ html.capacitor-native .dash-toast {
   border-radius: 1rem;
 }
 
-/* ── Pill buttons - iOS touch targets ── */
+/* Pill buttons - iOS touch targets; radius unified in ios-system.css */
 html.capacitor-ios.capacitor-native .btn-primary,
 html.capacitor-ios.capacitor-native .btn-secondary,
 html.capacitor-ios.capacitor-native .btn-outline,

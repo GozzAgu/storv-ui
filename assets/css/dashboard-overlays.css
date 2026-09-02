@@ -12,9 +12,9 @@
 html.dark {
   --dash-overlay-border: rgb(255 255 255 / 0.08);
   --dash-overlay-divider: rgb(255 255 255 / 0.06);
-  --dash-overlay-surface: #12141c;
-  --dash-overlay-muted: #cbd5e1;
-  --dash-overlay-ink: #f8fafc;
+  --dash-overlay-surface: #121212;
+  --dash-overlay-muted: #a1a1aa;
+  --dash-overlay-ink: #ffffff;
   --dash-overlay-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.04),
     0 24px 64px rgb(0 0 0 / 0.45);
@@ -27,6 +27,18 @@ html.dark {
 
 html.dark .dash-overlay-backdrop {
   background: rgb(0 0 0 / 0.58);
+}
+
+html:not(.capacitor-native) .dash-overlay-backdrop {
+  background: rgb(17 24 39 / 0.25);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+html:not(.capacitor-native).dark .dash-overlay-backdrop {
+  background: rgb(0 0 0 / 0.4);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
 }
 
 /* Shared shell */
@@ -274,6 +286,19 @@ html.dark .dash-overlay-close:hover {
   font-size: 0.6875rem;
   line-height: 1.45;
   color: var(--dash-overlay-muted);
+}
+
+.dash-drawer-callout {
+  border-radius: 0.75rem;
+  background: rgb(248 250 252 / 0.7);
+  padding: 0.6875rem 0.875rem;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--dash-overlay-muted);
+}
+
+html.dark .dash-drawer-callout {
+  background: rgb(255 255 255 / 0.04);
 }
 
 /* Drawer / modal body: inner fill layout owns scrolling */
@@ -596,6 +621,92 @@ html.dark .frosted-glass {
   .frosted-glass {
     background: var(--dash-overlay-surface) !important;
   }
+}
+
+/**
+ * Row action menus (the 3-dot menus on list/table rows). These are the platform
+ * baseline: `ios-context-menu.css` restyles them into a solid iOS card on native
+ * and only loads there, so the look here has to stand on its own.
+ */
+.ios-context-menu {
+  position: fixed;
+  z-index: 1000;
+  min-width: 11.5rem;
+  overflow: hidden;
+  padding: 0.25rem;
+  border: 1px solid var(--dash-overlay-border);
+  border-radius: 0.875rem;
+  background: var(--dash-overlay-surface);
+  box-shadow: 0 12px 32px rgb(15 23 42 / 0.12);
+  backdrop-filter: blur(16px) saturate(1.15);
+  -webkit-backdrop-filter: blur(16px) saturate(1.15);
+}
+
+html.dark .ios-context-menu {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.04),
+    0 16px 40px rgb(0 0 0 / 0.35);
+}
+
+.ios-context-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  border-radius: 0.625rem;
+  background: transparent;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.25;
+  color: rgb(55 65 81);
+  transition: background-color 0.12s ease;
+}
+
+html.dark .ios-context-menu__item {
+  color: rgb(229 231 235);
+}
+
+/* Pointer-only so a tap doesn't leave the highlight stuck on touch devices */
+@media (hover: hover) {
+  .ios-context-menu__item:hover:not(:disabled) {
+    background: rgb(15 23 42 / 0.05);
+  }
+
+  html.dark .ios-context-menu__item:hover:not(:disabled) {
+    background: rgb(255 255 255 / 0.06);
+  }
+
+  .ios-context-menu__item--danger:hover:not(:disabled) {
+    background: rgb(220 38 38 / 0.08);
+  }
+}
+
+.ios-context-menu__item--danger {
+  color: rgb(220 38 38);
+}
+
+html.dark .ios-context-menu__item--danger {
+  color: rgb(248 113 113);
+}
+
+.ios-context-menu__item:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.ios-context-menu__icon {
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+  color: rgb(156 163 175);
+  stroke-width: 1.75;
+}
+
+.ios-context-menu__item--danger .ios-context-menu__icon {
+  color: currentcolor;
 }
 
 /* Notifications panel polish */

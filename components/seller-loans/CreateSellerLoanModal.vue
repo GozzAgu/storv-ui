@@ -1,103 +1,84 @@
 <template>
-  <Modal
+  <SidePanel
     :model-value="modelValue"
     title="Stock loan"
-    subtitle="Items stay in inventory until sold on a receipt, marked sold from Stock loans when the borrower sells, or returned here."
     size="lg"
+    dense
     @update:model-value="(value: boolean) => emit('update:modelValue', value)"
   >
-    <template #default>
-      <div class="space-y-4">
-        <div
-          class="rounded-sm border border-sky-200/80 bg-sky-50/90 p-3 text-xs text-sky-900 dark:border-sky-800/60 dark:bg-sky-950/35 dark:text-sky-100"
-        >
-          <strong>Not a sale:</strong>
+    <IosForm layout="fill">
+      <IosFormSection fixed>
+        <p class="dash-drawer-callout">
+          <strong class="font-medium text-gray-900 dark:text-gray-100">Not a sale:</strong>
           Selected serial items are marked as on a stock loan to the borrower below. Selling on a
           receipt or choosing Mark sold on Stock loans marks units sold and updates this loan.
-        </div>
+        </p>
+      </IosFormSection>
 
-        <div>
-          <p class="text-xs font-medium text-gray-700 dark:text-gray-300">Products</p>
-          <ul
-            class="mt-1.5 max-h-44 space-y-1 overflow-y-auto rounded-sm bg-gray-50/90 px-2.5 py-2 text-[11px] text-gray-800 dark:bg-gray-900/40 dark:text-gray-200"
-          >
-            <li v-for="it in items" :key="it.id" class="truncate">
-              {{ getInventoryItemDisplayName(it) }}
+      <IosFormSection fixed>
+        <p class="dash-drawer-label">Products</p>
+        <div :class="pickListClass">
+          <ul :class="pickListScrollClass">
+            <li
+              v-for="it in items"
+              :key="it.id"
+              :class="[pickRowClass, '!cursor-default hover:!bg-transparent']"
+            >
+              <span :class="pickRowTitleClass">{{ getInventoryItemDisplayName(it) }}</span>
             </li>
           </ul>
-          <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
-            {{ items.length }} item{{ items.length !== 1 ? 's' : '' }}
-          </p>
         </div>
+        <p class="ios-form__hint dash-drawer-hint">
+          {{ items.length }} item{{ items.length !== 1 ? 's' : '' }}
+        </p>
+      </IosFormSection>
 
-        <div>
-          <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300"
-            >Borrower name *</label
-          >
-          <input
+      <IosFormSection fixed>
+        <IosFormField label="Borrower name" required>
+          <IosFormInput
             v-model="partyName"
-            type="text"
             maxlength="120"
             placeholder="Company or borrower name"
             autocomplete="organization"
-            class="w-full rounded-sm bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:bg-gray-900 dark:text-gray-100"
           />
-        </div>
-
-        <div>
-          <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300"
-            >Phone (optional)</label
-          >
-          <input
-            v-model="partyPhone"
-            type="tel"
-            maxlength="40"
-            placeholder="Contact number"
-            class="w-full rounded-sm bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:bg-gray-900 dark:text-gray-100"
-          />
-        </div>
-
-        <div>
-          <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300"
-            >Notes (optional)</label
-          >
-          <textarea
+        </IosFormField>
+        <IosFormField label="Phone" hint="Optional">
+          <IosFormInput v-model="partyPhone" type="tel" maxlength="40" placeholder="Contact number" />
+        </IosFormField>
+        <IosFormField label="Notes" hint="Optional">
+          <IosFormTextarea
             v-model="partyNotes"
-            rows="3"
+            :rows="3"
             maxlength="1000"
             placeholder="SKU list, handshake details, pickup time…"
-            class="w-full resize-y rounded-sm bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:bg-gray-900 dark:text-gray-100"
           />
-        </div>
-      </div>
-    </template>
+        </IosFormField>
+      </IosFormSection>
+    </IosForm>
 
     <template #footer>
-      <Button
-        variant="outline"
-        size="sm"
-        extra-class="!rounded-2xl"
-        @click="emit('update:modelValue', false)"
-        >Cancel</Button
-      >
-      <Button
-        variant="primary"
-        size="sm"
-        extra-class="!rounded-2xl"
-        :loading="submitting"
-        :disabled="!partyNameTrimmed"
-        @click="submit"
-      >
-        Confirm stock loan
-      </Button>
+      <IosDrawerActions
+        primary-label="Confirm stock loan"
+        :primary-loading="submitting"
+        :primary-disabled="!partyNameTrimmed"
+        @cancel="emit('update:modelValue', false)"
+        @primary="submit"
+      />
     </template>
-  </Modal>
+  </SidePanel>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import Modal from '~/components/ui/Modal.vue'
-import Button from '~/components/ui/Button.vue'
+import SidePanel from '~/components/ui/SidePanel.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
+import {
+  IosForm,
+  IosFormSection,
+  IosFormField,
+  IosFormInput,
+  IosFormTextarea,
+} from '~/components/ios/forms'
 import type { InventoryItem } from '~/stores/inventory'
 import { getInventoryItemDisplayName } from '~/composables/useInventoryItemDisplay'
 import { useSellerLoanOutsStore } from '~/stores/sellerLoanOuts'
@@ -116,6 +97,12 @@ const emit = defineEmits<{
 
 const sellerLoansStore = useSellerLoanOutsStore()
 const toast = useAppToast()
+const {
+  pickListClass,
+  pickListScrollClass,
+  pickRowClass,
+  pickRowTitleClass,
+} = useDashboardDrawerChrome()
 
 const partyName = ref('')
 const partyPhone = ref('')

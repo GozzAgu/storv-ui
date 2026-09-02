@@ -3,7 +3,7 @@
     <select
       :id="selectId"
       v-model="model"
-      :class="[fieldClass, 'w-full cursor-pointer appearance-none pl-2.5 pr-8', minWidthClass]"
+      :class="[fieldClass, toolbarSelectClass, 'w-full cursor-pointer appearance-none pl-2.5 pr-8', minWidthClass]"
       v-bind="$attrs"
     >
       <slot />
@@ -36,5 +36,5 @@ withDefaults(
   }
 )
 
-const { fieldClass } = useDashboardPageChrome()
+const { fieldClass, toolbarSelectClass } = useDashboardPageChrome()
 </script>

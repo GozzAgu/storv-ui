@@ -20,10 +20,13 @@
     :change="change"
     :change-positive="changePositive"
     :sparkline-data="sparklineData"
+    :icon="icon"
+    :tone="tone"
   />
 </template>
 
 <script setup lang="ts">
+import type { Component } from 'vue'
 import { computed } from 'vue'
 import StatCard from '~/components/ui/StatCard.vue'
 import IosStatCard from '~/components/ios/IosStatCard.vue'
@@ -39,6 +42,10 @@ const props = withDefaults(
     changePositive?: boolean | null
     sparklineData?: number[]
     hero?: boolean
+    /** Small icon shown in the top-left tile (web only - the native card uses its own accent border). */
+    icon?: Component
+    /** Icon tile color; defaults to 'accent' automatically for the hero tile. */
+    tone?: 'default' | 'accent' | 'success' | 'warning' | 'danger'
   }>(),
   {
     value: '',
@@ -48,6 +55,8 @@ const props = withDefaults(
     changePositive: null,
     sparklineData: undefined,
     hero: false,
+    icon: undefined,
+    tone: undefined,
   }
 )
 
@@ -59,4 +68,6 @@ const iosAccent = computed(() => {
   if (props.subtextClass === 'success') return 'success'
   return 'default'
 })
+
+const tone = computed(() => props.tone ?? (props.hero ? 'accent' : 'default'))
 </script>

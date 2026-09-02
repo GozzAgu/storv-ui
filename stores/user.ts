@@ -18,6 +18,14 @@ import {
   markOnboardingCompleteForSession,
   clearOnboardingCompleteForSession,
 } from '~/utils/onboarding-session'
+import {
+  hydrateUserStoreFromCache,
+  writeUserProfileCache,
+  clearUserProfileCache,
+} from '~/utils/user-profile-cache'
+
+/** Dedupe parallel fetchUserData(uid) from middleware, layout, and sign-in. */
+const fetchUserDataInflight = new Map<string, Promise<void>>()
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -36,6 +44,21 @@ export const useUserStore = defineStore('user', {
   actions: {
     // Fetch user data from Firestore
     async fetchUserData(userId: string) {
+      const existing = fetchUserDataInflight.get(userId)
+      if (existing) return existing
+
+      const run = this.fetchUserDataOnce(userId)
+      fetchUserDataInflight.set(userId, run)
+      try {
+        await run
+      } finally {
+        if (fetchUserDataInflight.get(userId) === run) {
+          fetchUserDataInflight.delete(userId)
+        }
+      }
+    },
+
+    async fetchUserDataOnce(userId: string) {
       const { isDemoModeActive } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) {
         const { syncDemoToPinia } = await import('~/utils/demo-bridge')
@@ -55,7 +78,14 @@ export const useUserStore = defineStore('user', {
         return
       }
 
-      this.loading = true
+      if (!this.userData || this.userData.uid !== userId) {
+        hydrateUserStoreFromCache(this, userId)
+      }
+
+      const hadProfile = this.userData?.uid === userId
+      if (!hadProfile) {
+        this.loading = true
+      }
       this.error = null
 
       const db = useFirestore().getFirestoreInstance()
@@ -73,6 +103,7 @@ export const useUserStore = defineStore('user', {
               '~/utils/staff-user-bootstrap'
             )
             this.userData = await buildStaffUserDataWithOwnerContext(db, cachedStaff, userId)
+            writeUserProfileCache(userId, this.userData)
             return
           }
 
@@ -90,6 +121,7 @@ export const useUserStore = defineStore('user', {
               staffStore.staff[existingIndex] = lookup.staff
             }
             this.userData = await buildStaffUserDataWithOwnerContext(db, lookup.staff, userId)
+            writeUserProfileCache(userId, this.userData)
             return
           }
 
@@ -119,6 +151,9 @@ export const useUserStore = defineStore('user', {
             }
           } else {
             this.userData = fetchedData
+          }
+          if (this.userData) {
+            writeUserProfileCache(userId, this.userData)
           }
           return
         }
@@ -262,6 +297,7 @@ export const useUserStore = defineStore('user', {
     // Clear user data
     clearUserData() {
       clearOnboardingCompleteForSession(this.userData?.uid)
+      clearUserProfileCache()
       this.userData = null
       this.error = null
     },

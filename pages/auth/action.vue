@@ -6,12 +6,10 @@
   >
     <AuthPageHeader
       v-if="showPageHeader"
-      :eyebrow="headerCopy.eyebrow"
       :title="headerCopy.title"
-      :show-mobile-logo="phase !== 'loading'"
-    >
-      {{ headerCopy.lede }}
-    </AuthPageHeader>
+      :subtitle="headerCopy.lede"
+      :show-logo="phase !== 'loading'"
+    />
 
     <AuthCard>
       <div v-if="phase === 'loading'" class="auth-action-status auth-action-status--loading">

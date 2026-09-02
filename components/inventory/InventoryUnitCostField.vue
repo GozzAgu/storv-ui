@@ -17,7 +17,7 @@
         type="number"
         step="0.01"
         min="0"
-        class="w-full pl-7 pr-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 transition-all"
+        class="w-full pl-7 pr-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
         placeholder="0.00"
         @input="onInput"
       />

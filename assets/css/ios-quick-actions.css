@@ -1,0 +1,165 @@
+/**
+ * iOS quick action bar — circular icon buttons with labels (finance-app mockup style).
+ */
+
+html.capacitor-ios.capacitor-native .ios-quick-actions {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+html.capacitor-ios.capacitor-native .ios-quick-actions--card {
+  overflow: visible;
+  border-radius: var(--ios-home-radius, 20px);
+  background: var(--ios-home-card, #fff);
+  box-shadow: var(--ios-action-card-shadow);
+  padding: 0.625rem 0.5rem 0.5rem;
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-quick-actions--card {
+  background: var(--ios-surface-solid, rgb(28 28 30));
+}
+
+html.capacitor-ios.capacitor-native .ios-quick-actions__scroll {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.25rem;
+  min-width: 0;
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+html.capacitor-ios.capacitor-native .ios-quick-actions__scroll::-webkit-scrollbar {
+  display: none;
+}
+
+html.capacitor-ios.capacitor-native .ios-quick-actions__item {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--ios-label);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.12s var(--ios-spring, ease);
+}
+
+html.capacitor-ios.capacitor-native .ios-quick-actions__item:active {
+  transform: scale(0.96);
+}
+
+html.capacitor-ios.capacitor-native .ios-quick-actions__icon-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  background: var(--ios-fill-tertiary);
+  color: var(--ios-label);
+  box-shadow: none;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-quick-actions__icon-wrap {
+  background: rgb(255 255 255 / 0.08);
+  box-shadow: none;
+}
+
+html.capacitor-ios.capacitor-native .ios-quick-actions__item--active .ios-quick-actions__icon-wrap {
+  background: var(--ios-label);
+  color: var(--ios-home-bg, #f3f3f5);
+  box-shadow: none;
+}
+
+html.capacitor-ios.capacitor-native.dark
+  .ios-quick-actions__item--active
+  .ios-quick-actions__icon-wrap {
+  background: rgb(255 255 255 / 0.92);
+  color: rgb(28 28 30);
+}
+
+html.capacitor-ios.capacitor-native .ios-quick-actions__icon {
+  width: 1.125rem;
+  height: 1.125rem;
+  flex-shrink: 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-quick-actions__badge {
+  position: absolute;
+  top: -0.125rem;
+  right: -0.125rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.125rem;
+  height: 1.125rem;
+  padding-inline: 0.25rem;
+  border-radius: 9999px;
+  border: 2px solid var(--ios-home-card, #fff);
+  background: var(--ios-danger, #ff3b30);
+  font-size: 0.625rem;
+  font-weight: 600;
+  line-height: 1;
+  color: #fff;
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-quick-actions__badge {
+  border-color: var(--ios-surface-solid, rgb(28 28 30));
+}
+
+html.capacitor-ios.capacitor-native .ios-quick-actions__item--active .ios-quick-actions__badge {
+  border-color: var(--ios-label);
+}
+
+html.capacitor-ios.capacitor-native.dark
+  .ios-quick-actions__item--active
+  .ios-quick-actions__badge {
+  border-color: rgb(255 255 255 / 0.92);
+}
+
+html.capacitor-ios.capacitor-native .ios-quick-actions__label {
+  width: 100%;
+  max-width: 100%;
+  padding-inline: 0.125rem;
+  font-size: 0.625rem;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  text-align: center;
+  color: var(--ios-label-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html.capacitor-ios.capacitor-native .ios-quick-actions__item--active .ios-quick-actions__label {
+  color: var(--ios-label);
+  font-weight: 600;
+}
+
+/* Stacked action bars on sales / inventory pages */
+html.capacitor-ios.capacitor-native .ios-sales-shell .ios-quick-actions + .ios-quick-actions,
+html.capacitor-ios.capacitor-native .ios-sales-chrome .ios-quick-actions {
+  margin-top: 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-sales-shell > .ios-quick-actions {
+  margin-bottom: 0.125rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-inventory-categories-page .ios-quick-actions,
+html.capacitor-ios.capacitor-native .ios-inventory-items-page .ios-quick-actions {
+  margin-bottom: 0.625rem;
+}

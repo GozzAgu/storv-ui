@@ -1,5 +1,98 @@
 <template>
   <div :class="[pageWithFixedFooterClass, 'dash-page--unified']">
+    <!-- iOS: sales-style list UI -->
+    <div v-if="isCapacitorIos" class="ios-sales-shell" data-leads-page>
+      <IosPageNavBar title="Sales leads" />
+
+      <IosQuickActionBar
+        v-if="canAccessLeadsPlan"
+        v-model="iosLeadTab"
+        role="tablist"
+        aria-label="Lead actions and filters"
+        :options="iosLeadQuickActions"
+      />
+
+      <template v-if="canAccessLeadsPlan && storesStore.currentStoreId">
+        <div v-if="!salesLeadsStore.loading" class="ios-sales-chrome">
+          <div class="ios-search-bar-host ios-search-bar-host--sticky">
+            <IosSearchBar
+              v-model="listSearchQuery"
+              placeholder="Search customer, phone, or product…"
+            />
+          </div>
+          <IosQuickActionBar
+            v-model="statusFilter"
+            aria-label="Filter leads by status"
+            :options="iosLeadStatusOptions"
+          />
+        </div>
+
+        <IosTransactionListSkeleton
+          v-if="salesLeadsStore.loading && salesLeadsStore.leads.length === 0"
+          :count="8"
+        />
+
+        <DashboardTableEmptyState
+          v-else-if="salesLeadsStore.error"
+          :icon="InboxIcon"
+          title="Could not load leads"
+          :description="salesLeadsStore.error"
+        />
+
+        <DashboardTableEmptyState
+          v-else-if="salesLeadsStore.leads.length === 0"
+          :icon="InboxIcon"
+          title="No leads yet"
+          description="Log walk-ins, phone calls, and other enquiries here."
+        />
+
+        <DashboardTableEmptyState
+          v-else-if="filteredLeads.length === 0"
+          :icon="MagnifyingGlassIcon"
+          title="No leads match your search"
+          description="Try another status tab or clear the search box."
+        >
+          <button
+            type="button"
+            class="text-xs font-medium text-primary-600 underline decoration-primary-300 underline-offset-2 dark:text-primary-400"
+            @click="clearListFilters"
+          >
+            Clear filters
+          </button>
+        </DashboardTableEmptyState>
+
+        <div v-else class="ios-receipt-transaction-list">
+          <IosReceiptTransactionRow
+            v-for="(lead, index) in filteredLeads"
+            :key="lead.id"
+            :title="lead.customerName"
+            :subtitle="iosLeadSubtitle(lead)"
+            :amount="iosLeadAmount(lead)"
+            :amount-tone="iosLeadAmountTone(lead)"
+            :date="formatWhenShort(lead.updatedAt || lead.createdAt)"
+            :variant="iosLeadVariant(lead.status)"
+            :last="index === filteredLeads.length - 1"
+            show-menu
+            menu-kind="lead"
+            :menu-id="lead.id"
+            @click="navigateTo(dashPath(`/leads/${lead.id}`))"
+            @menu="toggleLeadMenu(lead.id)"
+          />
+        </div>
+      </template>
+
+      <DashboardTableEmptyState
+        v-else-if="canAccessLeadsPlan && !storesStore.currentStoreId"
+        :icon="BuildingStorefrontIcon"
+        title="Select a store"
+        description="Use the store selector to view leads for a branch."
+      />
+
+      <FeatureGateCard v-else-if="!canAccessLeadsPlan" feature="sales_leads" />
+    </div>
+
+    <!-- Web -->
+    <template v-else>
     <DashboardPageHeader class="dash-page-header--unified">
       <template #eyebrow>
         <p :class="eyebrowClass">Commerce</p>
@@ -8,7 +101,13 @@
         <h1 :class="pageTitleClass">Sales leads</h1>
       </template>
       <template
-        v-if="canAccessLeadsPlan && !salesLeadsStore.loading && filteredLeads.length > 0"
+        v-if="canAccessLeadsPlan && salesLeadsStore.loading && salesLeadsStore.leads.length === 0"
+        #description
+      >
+        <DashPageMetricsSkeleton :count="2" />
+      </template>
+      <template
+        v-else-if="canAccessLeadsPlan && !salesLeadsStore.loading && filteredLeads.length > 0"
         #description
       >
         <DashboardPageMetrics :metrics="leadHeaderMetrics" aria-label="Lead summary" />
@@ -78,18 +177,22 @@
         />
 
         <div :class="tableShellFlexClass">
-          <div
+          <DashTableSkeleton
             v-if="salesLeadsStore.loading && salesLeadsStore.leads.length === 0"
-            class="p-6 sm:p-8"
-          >
-            <div class="space-y-3">
-              <div
-                v-for="i in 5"
-                :key="i"
-                class="h-10 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"
-              />
-            </div>
-          </div>
+            :columns="[
+              { label: 'Customer', lines: 2 },
+              { label: 'Product' },
+              { label: 'Est. value', bone: '4.5rem' },
+              { label: 'Source', bone: '4rem' },
+              { label: 'Status', class: 'dashboard-table__col-status', bone: '5.5rem' },
+              { label: 'Updated', bone: '6rem' },
+              { label: 'Actions', class: 'dashboard-table__col-actions', bone: '3.5rem' },
+            ]"
+            :rows="8"
+            leading="none"
+            flush
+            aria-label="Loading leads"
+          />
 
           <div v-else-if="salesLeadsStore.error" class="px-4 py-10 text-center sm:px-6">
             <p class="text-sm font-medium text-red-600 dark:text-red-400">Could not load leads.</p>
@@ -184,12 +287,15 @@
                     {{ formatWhen(lead.updatedAt || lead.createdAt) }}
                   </td>
                   <td class="dashboard-table__col-actions">
-                    <NuxtLink
-                      :to="dashPath(`/leads/${lead.id}`)"
-                      class="text-xs font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400"
+                    <button
+                      type="button"
+                      class="dashboard-table__action-btn"
+                      :data-lead-actions-anchor="lead.id"
+                      aria-label="Lead actions"
+                      @click="toggleLeadMenu(lead.id)"
                     >
-                      View
-                    </NuxtLink>
+                      <EllipsisVerticalIcon class="h-4 w-4" stroke-width="2" />
+                    </button>
                   </td>
                 </tr>
               </tbody>
@@ -199,20 +305,29 @@
       </div>
     </template>
 
-    <div v-else class="rounded-sm bg-amber-50/90 px-4 py-4 dark:bg-amber-950/25 sm:px-5 sm:py-5">
-      <p class="text-xs font-medium text-amber-900 dark:text-amber-100">
-        Sales leads are included on Storvv Medium and Enterprise. Track enquiries manually and
-        convert them through the existing sale flow. Upgrade in Settings when you are ready.
-      </p>
-      <NuxtLink
-        to="/dashboard/settings"
-        class="mt-2 inline-block text-xs font-medium text-amber-900 underline underline-offset-2 dark:text-amber-200"
-      >
-        Settings
-      </NuxtLink>
+    <div v-else class="py-8">
+      <FeatureGateCard feature="sales_leads" />
     </div>
+    </template>
 
     <CreateLeadModal v-model="showCreateModal" @created="onLeadCreated" />
+
+    <IosContextMenu
+      :open="Boolean(openLeadMenuId && leadForOpenMenu && leadMenuFixedStyle)"
+      :style="leadMenuFixedStyle"
+      menu-id="lead"
+    >
+      <IosContextMenuItem
+        label="View lead"
+        :icon="InboxIcon"
+        @click="
+          () => {
+            navigateTo(dashPath(`/leads/${leadForOpenMenu!.id}`))
+            closeLeadMenu()
+          }
+        "
+      />
+    </IosContextMenu>
   </div>
 </template>
 
@@ -220,17 +335,32 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import {
   BuildingStorefrontIcon,
+  CheckCircleIcon,
+  EllipsisVerticalIcon,
+  FunnelIcon,
   InboxIcon,
   MagnifyingGlassIcon,
   PlusIcon,
+  XMarkIcon,
 } from '~/utils/app-icons'
 import Button from '~/components/ui/Button.vue'
+import FeatureGateCard from '~/components/subscription/FeatureGateCard.vue'
 import CreateLeadModal from '~/components/leads/CreateLeadModal.vue'
 import LeadStatusBadge from '~/components/leads/LeadStatusBadge.vue'
+import IosContextMenu from '~/components/ios/IosContextMenu.vue'
+import IosContextMenuItem from '~/components/ios/IosContextMenuItem.vue'
+import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
+import IosQuickActionBar, { type IosQuickActionOption } from '~/components/ios/IosQuickActionBar.vue'
+import IosTransactionListSkeleton from '~/components/ios/IosTransactionListSkeleton.vue'
+import IosSearchBar from '~/components/ios/IosSearchBar.vue'
+import IosReceiptTransactionRow, {
+  type ReceiptTransactionAmountTone,
+  type ReceiptTransactionVariant,
+} from '~/components/ios/IosReceiptTransactionRow.vue'
 import { useSalesLeadsStore, SALES_LEAD_SOURCE_LABELS, SALES_LEAD_STATUS_LABELS } from '~/stores/salesLeads'
 import { useStoresStore } from '~/stores/stores'
 import { useAuthStore } from '~/stores/auth'
-import type { SalesLeadStatus } from '~/types/leads'
+import type { SalesLead, SalesLeadStatus } from '~/types/leads'
 import { isOpenSalesLeadStatus } from '~/types/leads'
 
 definePageMeta({
@@ -250,6 +380,7 @@ const { tableShellFlexClass } = useDashboardTableChrome()
 const { dashPath } = useDashboardPaths()
 const { formatCurrency } = usePreferences()
 const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
+const { isCapacitorIos } = useIsCapacitorIos()
 
 const salesLeadsStore = useSalesLeadsStore()
 const storesStore = useStoresStore()
@@ -259,6 +390,53 @@ const showCreateModal = ref(false)
 const statusFilter = ref<'all' | 'open' | SalesLeadStatus>('open')
 const listSearchQuery = ref('')
 const rowStatusSaving = ref<string | null>(null)
+const iosLeadTab = ref('list')
+
+const iosLeadQuickActions = computed((): IosQuickActionOption[] => [
+  {
+    value: 'add',
+    label: 'Add lead',
+    icon: PlusIcon,
+    trailing: 'add',
+    action: () => {
+      showCreateModal.value = true
+    },
+  },
+  { value: 'list', label: 'Leads', icon: InboxIcon },
+])
+
+function iosLeadSubtitle(lead: SalesLead) {
+  const parts = [lead.productName, SALES_LEAD_SOURCE_LABELS[lead.source]]
+  if (lead.customerPhone) parts.push(lead.customerPhone)
+  return parts.filter(Boolean).join(' · ')
+}
+
+function iosLeadAmount(lead: SalesLead) {
+  return lead.estimatedValue && lead.estimatedValue > 0
+    ? formatCurrency(lead.estimatedValue)
+    : SALES_LEAD_STATUS_LABELS[lead.status]
+}
+
+function iosLeadAmountTone(lead: SalesLead): ReceiptTransactionAmountTone {
+  if (lead.status === 'won') return 'positive'
+  if (lead.status === 'lost') return 'negative'
+  return 'neutral'
+}
+
+function iosLeadVariant(status: SalesLeadStatus): ReceiptTransactionVariant {
+  if (status === 'won') return 'credit'
+  if (status === 'lost') return 'cancelled'
+  return 'pending'
+}
+
+function formatWhenShort(v: Date | undefined) {
+  if (!v) return ''
+  try {
+    return v.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+  } catch {
+    return ''
+  }
+}
 
 const openStatuses: SalesLeadStatus[] = ['new', 'contacted', 'negotiating']
 
@@ -289,6 +467,21 @@ const filteredLeads = computed(() => {
   })
 })
 
+const {
+  openMenuId: openLeadMenuId,
+  menuFixedStyle: leadMenuFixedStyle,
+  toggleMenu: toggleLeadMenu,
+  closeMenu: closeLeadMenu,
+} = useAnchoredRowMenu({
+  anchorAttr: 'data-lead-actions-anchor',
+})
+
+const leadForOpenMenu = computed(() => {
+  const id = openLeadMenuId.value
+  if (!id) return null
+  return filteredLeads.value.find((lead) => lead.id === id) ?? null
+})
+
 function clearListFilters() {
   listSearchQuery.value = ''
   statusFilter.value = 'all'
@@ -310,6 +503,22 @@ const statusTabs = computed(() => [
   { value: 'won' as const, label: 'Won', count: salesLeadsStore.leads.filter((l) => l.status === 'won').length },
   { value: 'lost' as const, label: 'Lost', count: salesLeadsStore.leads.filter((l) => l.status === 'lost').length },
 ])
+
+const iosLeadStatusOptions = computed((): IosQuickActionOption[] =>
+  statusTabs.value.map((tab) => ({
+    value: tab.value,
+    label: tab.label,
+    badge: tab.count || undefined,
+    icon:
+      tab.value === 'open'
+        ? InboxIcon
+        : tab.value === 'won'
+          ? CheckCircleIcon
+          : tab.value === 'lost'
+            ? XMarkIcon
+            : FunnelIcon,
+  }))
+)
 
 const leadHeaderMetrics = computed(() => {
   const open = salesLeadsStore.openLeads.length

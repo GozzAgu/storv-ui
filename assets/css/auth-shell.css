@@ -38,6 +38,10 @@ html:has([data-auth-shell]) #__nuxt > * {
   color: var(--auth-ink);
 }
 
+.auth-shell__atmosphere {
+  display: none;
+}
+
 html:not(.dark) [data-auth-shell] {
   --auth-bg: #f4f6fb;
   --auth-bg-soft: #ffffff;

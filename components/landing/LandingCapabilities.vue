@@ -67,14 +67,22 @@
               <h3 class="landing-capabilities__panel-title">{{ activeMeta.title }}</h3>
               <p class="landing-capabilities__panel-desc">{{ activeMeta.description }}</p>
             </div>
-            <a
+            <img
+              :key="activeGroup"
+              :src="activeMeta.illustration"
+              :alt="activeMeta.illustrationAlt"
+              class="landing-capabilities__panel-illustration"
+              loading="lazy"
+              width="88"
+              height="88"
+            />
+            <NuxtLink
               v-if="activeGroup === 'enterprise'"
-              href="#pricing"
+              to="/pricing"
               class="landing-capabilities__panel-link"
-              @click.prevent="emit('navigate', 'pricing')"
             >
               Compare plans
-            </a>
+            </NuxtLink>
           </div>
 
           <nav
@@ -198,6 +206,8 @@ interface CapabilityGroup {
   label: string
   title: string
   description: string
+  illustration: string
+  illustrationAlt: string
   items: CapabilityItem[]
 }
 
@@ -454,6 +464,12 @@ const moreSubcategories: MoreSubcategory[] = [
         title: 'Balance due & credit',
         description: 'Record part-payments and track what each customer still owes over time.',
       },
+      {
+        icon: CreditCardIcon,
+        title: 'Subscription billing',
+        description:
+          'Upgrade in Settings with live price preview. Paystack auto-renew (monthly, quarterly, yearly), billing history, and cancel anytime with grace until period end.',
+      },
     ],
   },
   {
@@ -517,9 +533,15 @@ const moreSubcategories: MoreSubcategory[] = [
     items: [
       {
         icon: GlobeAltIcon,
+        title: 'Solo vs Business workspace',
+        description:
+          'Solo (Just me): focused layout for owner-operators. Unlock team and branch tools in Advanced features when ready. Business: full navigation for staff and multi-location ops. Switch anytime in Settings.',
+      },
+      {
+        icon: GlobeAltIcon,
         title: 'Web + mobile',
         description:
-          'Same account on app.storvv.com and the Capacitor iOS app (Android supported via the same build).',
+          'Same account on app.storvv.com and the native iOS app. Solo/Business switcher, subscription upgrades, and billing history on both.',
       },
       {
         icon: GlobeAltIcon,
@@ -557,6 +579,8 @@ const groups: CapabilityGroup[] = [
     label: 'Core',
     title: 'Daily operations',
     description: 'Inventory, sales, teams, and dashboard - included on every plan.',
+    illustration: '/marketing/illustrations/category-tree-icon.png',
+    illustrationAlt: 'Folder tree showing nested inventory categories and subcategories',
     items: coreItems,
   },
   {
@@ -564,6 +588,8 @@ const groups: CapabilityGroup[] = [
     label: 'Growth',
     title: 'Growth & automation',
     description: 'Payment links on all plans; analytics, leads, and ledgers from Medium upward.',
+    illustration: '/marketing/illustrations/receipt-illustration.png',
+    illustrationAlt: 'A hand holding a paper receipt',
     items: toolsItems,
   },
   {
@@ -571,6 +597,8 @@ const groups: CapabilityGroup[] = [
     label: 'Enterprise',
     title: 'Multi-branch scale',
     description: 'Stock loans, transfers, and template copy for operators with many locations.',
+    illustration: '/marketing/illustrations/sync-icon.png',
+    illustrationAlt: 'Two connected devices syncing a shared folder of data',
     items: enterpriseItems,
   },
   {
@@ -578,6 +606,8 @@ const groups: CapabilityGroup[] = [
     label: 'More',
     title: 'More capabilities',
     description: 'Deeper options grouped by topic. Pick a filter below.',
+    illustration: '/marketing/illustrations/inventory-hexagon-icon.png',
+    illustrationAlt: 'A tracked inventory unit connected across the platform',
     items: [],
   },
 ]
@@ -587,7 +617,12 @@ const activeMoreSub = ref(moreSubcategories[0]!.id)
 
 const activeMeta = computed(() => {
   const group = groups.find((g) => g.id === activeGroup.value) ?? groups[0]!
-  return { title: group.title, description: group.description }
+  return {
+    title: group.title,
+    description: group.description,
+    illustration: group.illustration,
+    illustrationAlt: group.illustrationAlt,
+  }
 })
 
 const visibleItems = computed(() => {
@@ -615,3 +650,36 @@ function selectGroup(id: string) {
   }
 }
 </script>
+
+<style scoped>
+.landing-capabilities__panel-illustration {
+  width: 4.5rem;
+  height: 4.5rem;
+  object-fit: contain;
+  flex-shrink: 0;
+  animation: landing-cap-illustration-in 260ms ease-out;
+}
+
+@keyframes landing-cap-illustration-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 639px) {
+  .landing-capabilities__panel-illustration {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-capabilities__panel-illustration {
+    animation: none;
+  }
+}
+</style>

@@ -2,22 +2,32 @@
 
 ## Commands
 
-| Script               | What runs                                                                                            |
-| -------------------- | ---------------------------------------------------------------------------------------------------- |
-| `npm run test:unit`  | Vitest: `tests/server/**` + `tests/integration/**` + `tests/unit/**` (Vue SFC tests use `happy-dom`) |
-| `npm test`           | Playwright E2E: only root `tests/*.spec.ts` (see `playwright.config.ts` `testIgnore`)                |
-| `npm run test:rules` | Firebase emulators (Firestore + Storage) + Vitest on `tests/rules/**`                                |
+| Script | What runs |
+|--------|-----------|
+| `npm run test:unit` | Vitest: `tests/unit/**` + `tests/server/**` |
+| `npm run test:integration` | Vitest: `tests/integration/**` |
+| `npm run test:rules` | Firebase emulators + Vitest `tests/rules/**` (requires Java 21+) |
+| `npm run test:e2e` | Playwright: root `tests/*.spec.ts` (see `playwright.config.ts`) |
 
-`@firebase/rules-unit-testing` v5 expects emulator host/port (set automatically when using `firebase emulators:exec`). Use `test:rules` for rule tests; ensure **Java** is installed for the emulators.
+CI runs all of the above on every PR (see `.github/workflows/ci.yml`).
+
+## Authenticated E2E
+
+```bash
+E2E_TEST_EMAIL=you@example.com E2E_TEST_PASSWORD=secret npx playwright test tests/auth.setup.ts
+npx playwright test --project=authenticated
+```
+
+Saved session: `tests/.auth/user.json` (gitignored).
+
+Without credentials, dashboard specs still run in **skip-if-login** mode; landing smoke always runs.
 
 ## Layout
 
-- **`tests/server/`**: pure server/unit helpers (e.g. Paystack validation, receipt delete).
-- **`tests/integration/`**: client-side modules with injectable mocks (serial check, Paystack upgrade, inventory display helpers, **pagination + viewport clamp** pure functions).
-- **`tests/unit/`**: Vue component tests (e.g. `Pagination.vue` mounting + a11y).
-- **`tests/rules/`**: Firestore + Storage security rules (requires emulators).
-- **Root `tests/*.spec.ts`**: Playwright browser tests. Vitest-only specs must live under `tests/integration`, `tests/server`, `tests/unit`, or `tests/rules`.
+- **`tests/unit/`** — pure helpers, composables, components (happy-dom)
+- **`tests/server/`** — Paystack validation, subscription helpers
+- **`tests/integration/`** — modules with injectable mocks
+- **`tests/rules/`** — Firestore + Storage security rules (emulators)
+- **Root `tests/*.spec.ts`** — Playwright browser tests only
 
-## Auth in Playwright
-
-Many E2E specs **skip** when the login form is visible (no stored session). Configure `storageState` in `playwright.config.ts` or use a logged-in profile for full coverage.
+Vitest specs must live under `tests/{unit,server,integration,rules}/`, not the Playwright root.

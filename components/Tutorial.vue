@@ -25,27 +25,23 @@
 
       <div
         ref="tutorialCard"
-        class="tutorial-card pointer-events-auto fixed w-[min(100%,22rem)] overflow-hidden rounded-xl border border-gray-200/90 bg-white text-gray-900 shadow-2xl transition-[top,left,opacity] duration-300 ease-out dark:border-white/10 dark:bg-[#12141c] dark:text-gray-100 motion-reduce:transition-none"
+        class="tutorial-card pointer-events-auto fixed w-[min(100%,22rem)] overflow-hidden transition-[top,left,opacity] duration-300 ease-out motion-reduce:transition-none"
         :class="{ 'tutorial-card--visible': cardReady }"
         :style="cardPosition"
         @click.stop
       >
         <span
           v-if="arrowStyle"
-          class="tutorial-card__arrow pointer-events-none absolute h-3 w-3 rotate-45 border border-gray-200/90 bg-white dark:border-white/10 dark:bg-[#12141c]"
+          class="tutorial-card__arrow pointer-events-none absolute h-3 w-3 rotate-45"
           :style="arrowStyle"
           aria-hidden="true"
         />
 
-        <div
-          class="flex items-center justify-between gap-3 border-b border-gray-200/90 px-4 py-3 dark:border-white/10"
-        >
-          <p class="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500">
-            Step {{ currentStep }} of {{ totalSteps }}
-          </p>
+        <div class="tutorial-card__header">
+          <p class="tutorial-card__step">Step {{ currentStep }} of {{ totalSteps }}</p>
           <button
             type="button"
-            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-gray-100"
+            class="tutorial-card__close"
             aria-label="Skip tutorial"
             @click="skipTutorial"
           >
@@ -53,62 +49,50 @@
           </button>
         </div>
 
-        <div class="space-y-3 px-4 py-4">
+        <div class="tutorial-card__body">
           <div
-            class="mx-auto flex h-11 w-11 items-center justify-center rounded-lg"
-            :class="
-              currentStepLocked
-                ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300'
-                : 'bg-primary-600 dark:bg-primary-500 text-white'
-            "
+            class="tutorial-card__icon"
+            :class="{ 'tutorial-card__icon--locked': currentStepLocked }"
           >
-            <component :is="currentStepData?.icon" class="h-5 w-5" :class="currentStepLocked ? '' : 'text-white'" />
+            <component :is="currentStepData?.icon" class="h-5 w-5" />
           </div>
 
-          <h3 class="text-center text-sm font-semibold tracking-tight text-gray-900 dark:text-gray-100">
+          <h3 class="tutorial-card__title">
             {{ currentStepData?.title }}
           </h3>
 
           <div
             v-if="currentStepLocked"
-            class="rounded-lg border border-amber-500/35 bg-amber-500/10 px-3 py-2 text-center"
+            class="tutorial-card__lock"
             role="status"
           >
-            <p class="text-[11px] font-semibold text-amber-900 dark:text-amber-100">
-              Not included on {{ currentPlanLabel }}
-            </p>
-            <p class="mt-0.5 text-[10px] leading-relaxed text-amber-800/90 dark:text-amber-200/85">
+            <p class="tutorial-card__lock-title">Not included on {{ currentPlanLabel }}</p>
+            <p class="tutorial-card__lock-copy">
               Available on {{ requiredPlanLabel }}. Upgrade anytime in Settings.
             </p>
           </div>
 
-          <p class="text-center text-xs leading-relaxed text-gray-600 dark:text-gray-400">
+          <p class="tutorial-card__copy">
             {{ stepDescription }}
           </p>
         </div>
 
-        <div
-          class="flex items-center justify-between gap-2 border-t border-gray-200/90 px-4 py-3 dark:border-white/10"
-        >
+        <div class="tutorial-card__footer">
           <button
             v-if="currentStep > 1"
             type="button"
-            class="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/10 dark:hover:text-gray-100"
+            class="tutorial-card__ghost"
             @click="previousStep"
           >
             Previous
           </button>
           <div v-else />
 
-          <div class="flex items-center gap-2">
-            <button
-              type="button"
-              class="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/10 dark:hover:text-gray-100"
-              @click="skipTutorial"
-            >
+          <div class="tutorial-card__actions">
+            <button type="button" class="tutorial-card__ghost" @click="skipTutorial">
               Skip
             </button>
-            <button type="button" class="btn-primary btn-primary-sm" @click="nextStep">
+            <button type="button" class="tutorial-card__cta" @click="nextStep">
               {{ currentStep === totalSteps ? 'Get started' : 'Next' }}
             </button>
           </div>
@@ -192,8 +176,6 @@ const scrimStyle = computed(() => {
   if (!spotlightRect.value) return {}
   return {
     clipPath: buildScrimClipPath(spotlightRect.value, SPOTLIGHT_PADDING),
-    backgroundColor: 'rgba(2, 6, 23, 0.72)',
-    backdropFilter: 'blur(2px)',
   }
 })
 
@@ -473,6 +455,11 @@ watch(showTutorial, (open) => {
 </script>
 
 <style scoped>
+.tutorial-scrim {
+  background: rgb(2 6 23 / 0.72);
+  backdrop-filter: blur(2px);
+}
+
 .tutorial-ring {
   border: 2px solid rgb(110 148 214 / 0.95);
   border-radius: 0.65rem;
@@ -490,6 +477,11 @@ watch(showTutorial, (open) => {
 
 .tutorial-card {
   opacity: 0;
+  border: 1px solid rgb(229 231 235 / 0.9);
+  border-radius: 0.75rem;
+  background: #ffffff;
+  color: #111827;
+  box-shadow: 0 25px 50px rgb(15 23 42 / 0.18);
 }
 
 .tutorial-card--visible {
@@ -498,5 +490,173 @@ watch(showTutorial, (open) => {
 
 .tutorial-card__arrow {
   z-index: 0;
+  border: 1px solid rgb(229 231 235 / 0.9);
+  background: #ffffff;
+}
+
+.tutorial-card__header,
+.tutorial-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-color: rgb(229 231 235 / 0.9);
+}
+
+.tutorial-card__header {
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+}
+
+.tutorial-card__footer {
+  border-top-width: 1px;
+  border-top-style: solid;
+}
+
+.tutorial-card__step {
+  margin: 0;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #9ca3af;
+}
+
+.tutorial-card__close,
+.tutorial-card__ghost,
+.tutorial-card__cta {
+  border: 0;
+  cursor: pointer;
+  background: transparent;
+}
+
+.tutorial-card__close {
+  display: flex;
+  height: 2rem;
+  width: 2rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  color: #6b7280;
+}
+
+.tutorial-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+.tutorial-card__icon {
+  display: flex;
+  height: 2.75rem;
+  width: 2.75rem;
+  margin-inline: auto;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  background: #143f8d;
+  color: #ffffff;
+}
+
+.tutorial-card__icon--locked {
+  background: rgb(245 158 11 / 0.15);
+  color: #b45309;
+}
+
+.tutorial-card__title {
+  margin: 0;
+  text-align: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.tutorial-card__copy {
+  margin: 0;
+  text-align: center;
+  font-size: 0.75rem;
+  line-height: 1.6;
+  color: #4b5563;
+}
+
+.tutorial-card__lock {
+  border: 1px solid rgb(245 158 11 / 0.35);
+  border-radius: 0.5rem;
+  background: rgb(245 158 11 / 0.1);
+  padding: 0.5rem 0.75rem;
+  text-align: center;
+}
+
+.tutorial-card__lock-title {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #78350f;
+}
+
+.tutorial-card__lock-copy {
+  margin: 0.125rem 0 0;
+  font-size: 0.625rem;
+  line-height: 1.5;
+  color: rgb(146 64 14 / 0.9);
+}
+
+.tutorial-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tutorial-card__ghost {
+  border-radius: 0.5rem;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #4b5563;
+}
+
+.tutorial-card__cta {
+  border-radius: 9999px;
+  background: #143f8d;
+  padding: 0.4375rem 0.875rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+:global(html.dark) .tutorial-card {
+  border-color: rgb(255 255 255 / 0.1);
+  background: #12141c;
+  color: #f3f4f6;
+}
+
+:global(html.dark) .tutorial-card__arrow {
+  border-color: rgb(255 255 255 / 0.1);
+  background: #12141c;
+}
+
+:global(html.dark) .tutorial-card__header,
+:global(html.dark) .tutorial-card__footer {
+  border-color: rgb(255 255 255 / 0.1);
+}
+
+:global(html.dark) .tutorial-card__copy,
+:global(html.dark) .tutorial-card__ghost {
+  color: #9ca3af;
+}
+
+:global(html.dark) .tutorial-card__icon--locked {
+  color: #fcd34d;
+}
+
+:global(html.dark) .tutorial-card__lock-title {
+  color: #fef3c7;
+}
+
+:global(html.dark) .tutorial-card__lock-copy {
+  color: rgb(253 230 138 / 0.85);
 }
 </style>

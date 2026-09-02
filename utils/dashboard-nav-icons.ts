@@ -1,23 +1,24 @@
 import type { Component } from 'vue'
 import {
-  ArrowDownLeft,
   Building2,
   ChartNoAxesColumnIncreasing,
   CircleUserRound,
+  Ellipsis,
   Folder,
   FolderOpen,
+  HandCoins,
+  Handshake,
+  History,
   LayoutDashboard,
-  LayoutGrid,
   LifeBuoy,
   Link2,
   LogOut,
   Package,
   ReceiptText,
   RefreshCcwDot,
-  ScrollText,
   Settings2,
-  Wallet,
   Store,
+  UserPlus,
 } from '@lucide/vue'
 
 export type DashboardNavIconKey =
@@ -44,19 +45,24 @@ export type DashboardNavIconKey =
 export const DASHBOARD_NAV_ICONS: Record<DashboardNavIconKey, Component> = {
   dashboard: LayoutDashboard,
   inventory: Package,
-  buybacks: ArrowDownLeft,
-  loans: Wallet,
+  // Paying a customer for a trade-in - a coin changing hands reads clearer than a bare arrow.
+  buybacks: HandCoins,
+  // Lending stock out to a seller is an agreement, not a cash wallet.
+  loans: Handshake,
   receipts: ReceiptText,
   'payment-links': Link2,
-  'sales-leads': CircleUserRound,
+  // Distinct from `profile` below - a prospective customer, not the signed-in user.
+  'sales-leads': UserPlus,
   departments: Building2,
   analytics: ChartNoAxesColumnIncreasing,
-  activity: ScrollText,
+  // The conventional "history" glyph reads as an audit trail more instantly than a scroll.
+  activity: History,
   sync: RefreshCcwDot,
   help: LifeBuoy,
   settings: Settings2,
   profile: CircleUserRound,
-  more: LayoutGrid,
+  // Matches the platform convention for a tab-bar "More" overflow entry.
+  more: Ellipsis,
   folder: Folder,
   'folder-open': FolderOpen,
   branch: Store,

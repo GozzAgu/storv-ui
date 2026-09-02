@@ -65,11 +65,11 @@ onMounted(() => {
 .theme-clean-toggle:focus-visible {
   outline: none;
   border-radius: 9999px;
-  box-shadow: 0 0 0 2px rgb(255 255 255), 0 0 0 4px rgb(59 130 246 / 0.8);
+  box-shadow: 0 0 0 2px #f4f1ea, 0 0 0 4px rgb(26 21 35 / 0.35);
 }
 
 .theme-clean-toggle--dark:focus-visible {
-  box-shadow: 0 0 0 2px rgb(15 18 28), 0 0 0 4px rgb(96 165 250);
+  box-shadow: 0 0 0 2px #080808, 0 0 0 4px rgb(244 241 234 / 0.55);
 }
 
 .theme-clean-toggle__track {
@@ -81,17 +81,17 @@ onMounted(() => {
   height: 1.625rem;
   padding: 0.125rem;
   border-radius: 9999px;
-  border: 1px solid rgb(226 232 240 / 0.95);
-  background: rgb(248 250 252);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9), 0 1px 2px rgb(15 23 42 / 0.08);
+  border: 1px solid rgb(26 21 35 / 0.12);
+  background: rgb(255 255 255 / 0.72);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.95), 0 1px 2px rgb(26 21 35 / 0.06);
   transition: background 0.16s cubic-bezier(0.16, 1, 0.3, 1),
     box-shadow 0.16s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.16s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .theme-clean-toggle--dark .theme-clean-toggle__track {
-  border-color: rgb(255 255 255 / 0.12);
-  background: rgb(17 24 39);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06), 0 1px 2px rgb(0 0 0 / 0.4);
+  border-color: rgb(255 255 255 / 0.16);
+  background: rgb(16 16 18 / 0.72);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08), 0 1px 2px rgb(0 0 0 / 0.35);
 }
 
 .theme-clean-toggle__thumb {
@@ -105,10 +105,10 @@ onMounted(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: rgb(217 119 6);
-  border: 1px solid rgb(253 230 138);
-  background: linear-gradient(180deg, rgb(255 255 255), rgb(255 247 237));
-  box-shadow: 0 1px 3px rgb(180 83 9 / 0.2);
+  color: #1a1523;
+  border: 1px solid rgb(26 21 35 / 0.1);
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgb(26 21 35 / 0.12);
   transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), color 0.16s ease,
     border-color 0.16s ease, background 0.16s ease;
   transform: translateX(0);
@@ -116,10 +116,10 @@ onMounted(() => {
 
 .theme-clean-toggle--dark .theme-clean-toggle__thumb {
   transform: translateX(1.125rem);
-  color: rgb(226 232 240);
-  border-color: rgb(148 163 184 / 0.5);
-  background: linear-gradient(180deg, rgb(51 65 85), rgb(30 41 59));
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.1), 0 1px 2px rgb(0 0 0 / 0.35);
+  color: #1a1523;
+  border-color: transparent;
+  background: #f4f1ea;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.35);
 }
 
 .theme-clean-toggle__icon {

@@ -5,6 +5,7 @@ import { useDepartmentsStore } from '~/stores/departments'
 import { useInventoryStore } from '~/stores/inventory'
 import { useStaffStore } from '~/stores/staff'
 import { isStaffCreationInProgress } from '~/utils/staff-creation-session'
+import { isNativePerfContext, scheduleNativeIdleWork } from '~/utils/capacitor-native-perf'
 
 let shellBootstrapInflight: Promise<void> | null = null
 let shellBootstrapKey = ''
@@ -53,6 +54,13 @@ export function runDashboardShellBootstrap(options?: { force?: boolean }): Promi
         departmentsStore.fetchDepartments(),
         inventoryStore.fetchFolders(),
       ])
+      if (isNativePerfContext()) {
+        scheduleNativeIdleWork(() => {
+          void import('~/stores/receipts').then(({ useReceiptsStore }) => {
+            useReceiptsStore().fetchReceipts()
+          })
+        }, 400)
+      }
       return
     }
 
@@ -67,6 +75,13 @@ export function runDashboardShellBootstrap(options?: { force?: boolean }): Promi
         departmentsStore.fetchDepartments(),
         inventoryStore.fetchFolders(),
       ])
+      if (isNativePerfContext()) {
+        scheduleNativeIdleWork(() => {
+          void import('~/stores/receipts').then(({ useReceiptsStore }) => {
+            useReceiptsStore().fetchReceipts()
+          })
+        }, 400)
+      }
     }
   })()
 

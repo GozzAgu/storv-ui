@@ -14,7 +14,8 @@ describe('table-badge-styles', () => {
   })
 
   it('returns badge classes for role and status', () => {
-    expect(staffRoleBadgeClass('manager')).toContain('primary')
+    expect(staffRoleBadgeClass('manager')).toContain('rounded-full')
+    expect(staffRoleBadgeClass('intern')).toContain('blue')
     expect(staffStatusBadgeClass('active')).toContain('emerald')
   })
 

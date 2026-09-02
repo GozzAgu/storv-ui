@@ -2,50 +2,28 @@
   <section
     id="faq"
     data-section-id="faq"
-    class="scroll-animate scroll-animate-up scroll-mt-[4.75rem] bg-[#f5f7f9] py-16 dark:bg-slate-900/55 lg:scroll-mt-28 lg:py-20 sm:py-20"
+    class="landing-faq scroll-animate scroll-animate-up scroll-mt-[4.75rem] lg:scroll-mt-28"
   >
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-      <p
-        class="text-xs sm:text-[0.8125rem] uppercase tracking-[0.16em] font-semibold text-gray-600 dark:text-gray-300 text-center"
-      >
-        Resources
-      </p>
-      <h2
-        class="mt-2 text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100 text-center"
-      >
-        Quick answers
-      </h2>
-      <p class="mt-2 text-center text-base text-gray-600 dark:text-gray-300">
-        Setup, plans, and what Storvv actually includes today.
-      </p>
-      <div class="mt-8 space-y-3">
+      <p class="landing-faq__eyebrow">Resources</p>
+      <h2 class="landing-faq__title">Quick answers</h2>
+      <p class="landing-faq__lede">Setup, plans, and what Storvv actually includes today.</p>
+      <div class="landing-faq__list">
         <div
           v-for="(item, index) in faqItems"
           :key="item.question"
           :data-section-id="`faq-${index + 1}`"
-          class="scroll-animate scroll-animate-scale rounded-xl bg-white/55 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/40 overflow-hidden"
+          class="landing-faq__item scroll-animate scroll-animate-scale"
           :class="`stagger-${index + 1}`"
         >
-          <button
-            type="button"
-            class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group"
-            @click="toggleFaq(index)"
-          >
-            <div
-              class="shrink-0 flex h-8 w-8 items-center justify-center rounded-md bg-white/70 backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.08]"
-            >
-              <component :is="item.icon" class="w-4 h-4 text-gray-500 shrink-0" stroke-width="1.5" />
-            </div>
-            <div class="flex-1 min-w-0">
-              <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-50 pr-8">
-                {{ item.question }}
-              </h3>
-            </div>
+          <button type="button" class="landing-faq__q" @click="toggleFaq(index)">
+            <span class="landing-faq__icon">
+              <component :is="item.icon" class="w-4 h-4" stroke-width="1.5" />
+            </span>
+            <h3 class="landing-faq__question">{{ item.question }}</h3>
             <ChevronUpIcon
-              :class="[
-                'w-4 h-4 text-gray-400 shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none',
-                openFaqItems.has(index) ? 'rotate-180' : '',
-              ]"
+              class="landing-faq__chevron"
+              :class="{ 'landing-faq__chevron--open': openFaqItems.has(index) }"
             />
           </button>
           <div
@@ -53,14 +31,7 @@
             :class="openFaqItems.has(index) ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'"
           >
             <div class="min-h-0 overflow-hidden">
-              <div class="px-4 sm:px-5 pb-4 sm:pb-5">
-                <div class="pl-11 sm:pl-12">
-                  <p
-                    class="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed"
-                    v-html="item.answer"
-                  />
-                </div>
-              </div>
+              <div class="landing-faq__a" v-html="item.answer" />
             </div>
           </div>
         </div>
@@ -98,7 +69,7 @@ const faqItems: Array<{ question: string; answer: string; icon: Component }> = [
   {
     question: 'What does every plan include?',
     answer:
-      'All plans include the dashboard, full inventory and sales for one active branch (Micro limits you to one store), receipts, returns, customers, notifications, settings, profile, Help center, Storvv Assistant, and Paystack payment links. Micro includes up to 2 staff, 1 department, and 10 WhatsApp receipt sends per month.',
+      'All plans include the dashboard, full inventory and sales for one active branch (Micro limits you to one store), receipts, returns, customers, notifications, settings, profile, Help center, Storvv Assistant, and Paystack payment links. Micro includes up to 2 staff, 1 department, and 10 WhatsApp receipt sends per month. On signup you choose <strong>Solo</strong> (focused owner workspace) or <strong>Business</strong> (full team layout), independent from your paid plan.',
     icon: SparklesIcon,
   },
   {
@@ -110,13 +81,31 @@ const faqItems: Array<{ question: string; answer: string; icon: Component }> = [
   {
     question: 'What are Micro, Medium, and Enterprise?',
     answer:
-      '<strong>Micro (free):</strong> 1 store, 1 department, 2 staff, full inventory and sales, payment links, no analytics or activity logs.<br><br><strong>Medium:</strong> 2 stores, 10 departments, 25 staff, analytics and exports, activity logs, sales leads, customer balance ledger, unlimited WhatsApp, duplicate category within a branch.<br><br><strong>Enterprise:</strong> Unlimited stores, staff, and departments; multi-store sync and stock transfers; copy-from-branch; stock loans for serial inventory; priority support.',
+      '<strong>Micro (free):</strong> 1 store, 1 department, 2 staff, full inventory and sales, payment links, no analytics or activity logs. Upgrade anytime in Settings.<br><br><strong>Medium:</strong> 2 stores, 10 departments, 25 staff, analytics and exports, activity logs, sales leads, customer balance ledger, unlimited WhatsApp, duplicate category within a branch. Billed monthly, quarterly, or yearly through Paystack with auto-renew.<br><br><strong>Enterprise:</strong> Unlimited stores, staff, and departments; multi-store sync and stock transfers; copy-from-branch; stock loans for serial inventory; priority support. Same Paystack billing and renewal options as Medium.',
     icon: BuildingStorefrontIcon,
+  },
+  {
+    question: 'What is Solo vs Business workspace?',
+    answer:
+      '<strong>Solo (Just me)</strong> is a simplified workspace for owner-operators: inventory, sales, and customers stay front and center while team, branch, and multi-store admin screens stay tucked away until you turn them on in Advanced features. <strong>Business (Growing business)</strong> shows the full Storvv navigation: staff, departments, branches, payment links, and admin tools, as your plan allows.<br><br>Both are free to switch and independent from your paid plan. Pick Solo or Business during onboarding, or change anytime in Settings. Existing accounts default to Business; new accounts choose on signup.',
+    icon: SparklesIcon,
+  },
+  {
+    question: 'How does subscription billing work?',
+    answer:
+      'Super admins upgrade in Settings with a live price preview for the billing cycle you choose (monthly, quarterly, or yearly). Paystack handles checkout and auto-renewal. You can view billing history, see renewal status, and cancel auto-renew anytime. If you cancel, paid features stay active until the end of the current billing period, then your account moves to Micro. Past-due payments show a billing notice in the dashboard until resolved.',
+    icon: CreditCardIcon,
+  },
+  {
+    question: 'What is workspace style vs subscription plan?',
+    answer:
+      'Your <strong>plan</strong> (Micro, Medium, Enterprise) controls what you pay for: branch limits, analytics, leads, transfers, and other paid features. <strong>Solo</strong> and <strong>Business</strong> workspace styles control how much navigation we show, not what you pay. You can switch between Solo and Business in Settings without changing your plan. Solo hides admin complexity until you enable it; Business shows the full workspace when your plan includes those features.',
+    icon: UserGroupIcon,
   },
   {
     question: 'Can I use Storvv on my phone?',
     answer:
-      'Yes. Storvv runs in the browser at app.storvv.com and as a native iOS app (Capacitor) with bottom tabs for Home, Stock, Sales, and Analytics, plus a More menu for buybacks, leads, settings, and help. The same login and store data apply on web and mobile.',
+      'Yes. Storvv runs in the browser at app.storvv.com and as a native iOS app with bottom tabs for Home, Stock, Sales, and Analytics, plus a More menu for buybacks, leads, settings, and help. The same login, store data, Solo/Business workspace switcher, and subscription management work on web and iOS.',
     icon: DevicePhoneMobileIcon,
   },
   {

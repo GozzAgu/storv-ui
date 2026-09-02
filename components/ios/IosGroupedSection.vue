@@ -1,6 +1,6 @@
 <template>
   <section class="ios-grouped-list">
-    <p v-if="label" class="ios-grouped-section__header">{{ label }}</p>
+    <p v-if="sectionLabel" class="ios-grouped-section__header">{{ sectionLabel }}</p>
     <div class="ios-grouped-section">
       <slot />
     </div>
@@ -8,7 +8,12 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
+import { computed } from 'vue'
+
+const props = defineProps<{
   label?: string
+  header?: string
 }>()
+
+const sectionLabel = computed(() => props.header || props.label)
 </script>

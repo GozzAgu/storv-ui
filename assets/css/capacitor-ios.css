@@ -5,8 +5,7 @@
  * Scoped to html.capacitor-ios.capacitor-native (web + Android unchanged).
  */
 html.capacitor-ios.capacitor-native {
-  --cap-ios-font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', system-ui,
-    sans-serif;
+  --cap-ios-font: var(--ios-type-font-family, 'Montserrat Variable', Montserrat, sans-serif);
   --cap-ios-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, monospace;
 
   /* Four-tier type scale - no awkward jumps */
@@ -42,8 +41,8 @@ html.capacitor-ios.capacitor-native {
 
   font-family: var(--cap-ios-font);
   letter-spacing: var(--cap-ios-tracking);
-  -webkit-font-smoothing: auto;
-  -moz-osx-font-smoothing: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 
   background:
@@ -216,7 +215,7 @@ html.capacitor-ios.capacitor-native .dashboard-native-bottom-nav {
   box-sizing: border-box;
   padding-left: calc(var(--cap-safe-left, 0px) + var(--ios-bottomnav-inset, 1rem)) !important;
   padding-right: calc(var(--cap-safe-right, 0px) + var(--ios-bottomnav-inset, 1rem)) !important;
-  padding-bottom: var(--ios-bottomnav-edge-pad, 0.875rem) !important;
+  padding-bottom: calc(var(--cap-safe-bottom, 0px) + var(--ios-tabbar-float-gap, 20px)) !important;
 }
 
 html.capacitor-ios.capacitor-native .native-tabbar__indicator {
@@ -473,7 +472,7 @@ html.capacitor-ios.capacitor-native .dash-stat-card__body {
 
 html.capacitor-ios.capacitor-native .dash-stat-card__value {
   font-size: var(--cap-ios-title) !important;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: -0.02em;
 }
 
@@ -656,7 +655,7 @@ html.capacitor-ios.capacitor-native .btn-primary,
 html.capacitor-ios.capacitor-native .btn-secondary,
 html.capacitor-ios.capacitor-native .btn-outline,
 html.capacitor-ios.capacitor-native .btn-danger {
-  border-radius: 9999px;
+  border-radius: var(--ios-radius-md) !important;
   font-size: var(--cap-ios-body) !important;
   font-weight: 600;
   letter-spacing: -0.01em;

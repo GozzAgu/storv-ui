@@ -33,40 +33,31 @@
           </div>
         </div>
 
-        <div>
-          <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Payment amount
-          </label>
-          <input
-            v-model.number="paymentAmount"
+        <IosFormField label="Payment amount">
+          <IosFormInput
+            v-model="paymentAmount"
             type="number"
             min="0"
             step="0.01"
             :max="balanceDue"
-            class="w-full rounded-sm bg-white px-3 py-2 text-sm tabular-nums dark:!bg-dashboard-card dark:text-gray-100"
+            extra-class="tabular-nums"
           />
           <div class="mt-2 flex flex-wrap gap-2">
             <button
               v-for="preset in amountPresets"
               :key="preset.label"
               type="button"
-              class="rounded-sm px-2 py-1 text-[11px] font-medium text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
+              class="rounded-sm px-2 py-1 text-[11px] font-medium text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/[0.06]"
               @click="paymentAmount = preset.value"
             >
               {{ preset.label }}
             </button>
           </div>
-        </div>
+        </IosFormField>
 
-        <div>
-          <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Payment method
-          </label>
-          <PaymentMethodSelect
-            v-model="paymentMethod"
-            select-class="w-full rounded-sm bg-white px-3 py-2 text-sm dark:!bg-dashboard-card dark:text-gray-100"
-          />
-        </div>
+        <IosFormField label="Payment method">
+          <PaymentMethodSelect v-model="paymentMethod" />
+        </IosFormField>
 
         <div
           v-if="receipt.payments?.length"
@@ -90,19 +81,13 @@
     </template>
 
     <template #footer>
-      <div class="flex w-full justify-end gap-2">
-        <button type="button" class="btn-secondary" @click="emit('update:modelValue', false)">
-          Cancel
-        </button>
-        <button
-          type="button"
-          :disabled="!canSubmit || submitting"
-          class="btn-primary"
-          @click="submit"
-        >
-          {{ submitting ? 'Saving…' : submitLabel }}
-        </button>
-      </div>
+      <IosDrawerActions
+        :primary-label="submitLabel"
+        :primary-loading="submitting"
+        :primary-disabled="!canSubmit"
+        @cancel="emit('update:modelValue', false)"
+        @primary="submit"
+      />
     </template>
   </Modal>
 </template>
@@ -110,7 +95,9 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import Modal from '~/components/ui/Modal.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import PaymentMethodSelect from '~/components/receipts/PaymentMethodSelect.vue'
+import { IosFormField, IosFormInput } from '~/components/ios/forms'
 import type { Receipt } from '~/stores/receipts'
 import { receiptAmountPaid, receiptBalanceDue, roundMoney } from '~/utils/receipt-balance'
 import { usePreferences } from '~/composables/usePreferences'

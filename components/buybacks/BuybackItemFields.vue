@@ -1,26 +1,19 @@
 <template>
-  <div v-for="field in fields" :key="field.name" class="space-y-1">
-    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300">
-      {{ fieldLabel(field) }}
-      <span v-if="field.required" class="text-red-500">*</span>
-    </label>
-
-    <input
+  <IosFormField v-for="field in fields" :key="field.name" :label="fieldLabel(field)" :required="field.required">
+    <IosFormInput
       v-if="field.type === 'text'"
-      :value="String(modelValue[field.name] ?? '')"
+      :model-value="String(modelValue[field.name] ?? '')"
       type="text"
-      class="app-field w-full px-3 py-2 text-sm"
       :placeholder="fieldPlaceholder(field)"
-      @input="updateField(field.name, ($event.target as HTMLInputElement).value)"
+      @update:model-value="updateField(field.name, $event)"
     />
 
-    <input
+    <IosFormInput
       v-else-if="field.type === 'number'"
-      :value="Number(modelValue[field.name] ?? 0)"
+      :model-value="Number(modelValue[field.name] ?? 0)"
       type="number"
-      class="app-field w-full px-3 py-2 text-sm"
       :placeholder="fieldPlaceholder(field)"
-      @input="updateField(field.name, Number(($event.target as HTMLInputElement).value))"
+      @update:model-value="updateField(field.name, Number($event))"
     />
 
     <div v-else-if="field.type === 'currency'" class="relative">
@@ -28,34 +21,33 @@
         class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400"
         >{{ currencySymbol }}</span
       >
-      <input
-        :value="Number(modelValue[field.name] ?? 0)"
+      <IosFormInput
+        :model-value="Number(modelValue[field.name] ?? 0)"
         type="number"
         min="0"
         step="0.01"
-        class="app-field w-full py-2 pl-7 pr-3 text-sm"
+        extra-class="pl-7"
         :placeholder="fieldPlaceholder(field)"
-        @input="updateField(field.name, Number(($event.target as HTMLInputElement).value))"
+        @update:model-value="updateField(field.name, Number($event))"
       />
     </div>
 
-    <input
+    <IosFormInput
       v-else-if="field.type === 'date'"
-      :value="String(modelValue[field.name] ?? '')"
+      :model-value="String(modelValue[field.name] ?? '')"
       type="date"
-      class="app-field w-full px-3 py-2 text-sm"
-      @input="updateField(field.name, ($event.target as HTMLInputElement).value)"
+      @update:model-value="updateField(field.name, $event)"
     />
 
-    <select
+    <IosFormSelect
       v-else-if="field.type === 'select'"
-      :value="String(modelValue[field.name] ?? '')"
-      class="app-field w-full px-3 py-2 text-sm"
-      @change="updateField(field.name, ($event.target as HTMLSelectElement).value)"
+      :model-value="String(modelValue[field.name] ?? '')"
+      extra-class="cursor-pointer"
+      @update:model-value="updateField(field.name, $event)"
     >
       <option value="">Select {{ fieldLabel(field) }}</option>
       <option v-for="opt in field.options || []" :key="opt" :value="opt">{{ opt }}</option>
-    </select>
+    </IosFormSelect>
 
     <label
       v-else-if="field.type === 'boolean'"
@@ -64,16 +56,17 @@
       <input
         type="checkbox"
         :checked="Boolean(modelValue[field.name])"
-        class="rounded border-gray-300 text-primary-600 focus:ring-primary-500/30 dark:border-gray-600"
+        class="rounded border-gray-300 text-gray-800 focus:ring-gray-400/40 dark:border-gray-600 dark:text-gray-200"
         @change="updateField(field.name, ($event.target as HTMLInputElement).checked)"
       />
       {{ fieldLabel(field) }}
     </label>
-  </div>
+  </IosFormField>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { IosFormField, IosFormInput, IosFormSelect } from '~/components/ios/forms'
 
 const props = defineProps<{
   fields: Array<{

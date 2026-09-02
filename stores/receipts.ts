@@ -36,9 +36,19 @@ import {
   roundMoney,
 } from '~/utils/receipt-balance'
 import { resolveApiPath } from '~/utils/api-url'
+import {
+  isStoreListFetchFresh,
+  isStoreFetchStampFresh,
+  type StoreFetchStamp,
+} from '~/utils/store-data-cache'
 
 /** Avoid duplicate concurrent fetchReceipts() (layout + dashboard home + watchers). */
 let fetchReceiptsInflight: Promise<void> | null = null
+let receiptsFetchStamp: StoreFetchStamp | null = null
+
+export function resetReceiptsFetchStamp(): void {
+  receiptsFetchStamp = null
+}
 
 export interface ReceiptPayment {
   amount: number
@@ -165,20 +175,15 @@ export const useReceiptsStore = defineStore('receipts', {
           return
         }
 
-        this.loading = true
-        this.error = null
-
         const db = useFirestore().getFirestoreInstance()
         if (!db) {
           this.error = CLOUD_UNAVAILABLE_MESSAGE
-          this.loading = false
           return
         }
 
         const authStore = useAuthStore()
         if (!authStore.currentUser) {
           this.error = 'User must be authenticated'
-          this.loading = false
           return
         }
 
@@ -192,23 +197,24 @@ export const useReceiptsStore = defineStore('receipts', {
         const userId = await getQueryUserId()
         if (!userId) {
           this.error = 'User ID not available'
-          this.loading = false
           return
         }
-
-        // console.log('[ReceiptsStore] Using userId (superadmin UID for staff):', userId, 'isStaff:', userStore.userData?.role === 'staff')
 
         // Get current store ID to filter receipts
         const { getCurrentStoreId } = await import('~/composables/useCurrentStore')
         const storeId = await getCurrentStoreId()
 
-        // console.log('[ReceiptsStore] fetchReceipts - userId:', userId, 'storeId:', storeId, 'isStaff:', userStore.userData?.role === 'staff')
-
         if (!storeId) {
           this.error = 'No store selected. Please select a store first.'
-          this.loading = false
           return
         }
+
+        if (isStoreFetchStampFresh(receiptsFetchStamp, storeId, options?.force)) {
+          return
+        }
+
+        this.loading = true
+        this.error = null
 
         try {
           // Use hierarchical path: users/{userId}/stores/{storeId}/receipts
@@ -310,6 +316,7 @@ export const useReceiptsStore = defineStore('receipts', {
           })
 
           this.receipts = receipts
+          receiptsFetchStamp = { storeId, fetchedAt: Date.now() }
         } catch (error: any) {
           console.error('Error fetching receipts:', error)
           this.error = error.message || 'Failed to fetch receipts'
@@ -450,13 +457,14 @@ export const useReceiptsStore = defineStore('receipts', {
         const newReceiptRef = doc(receiptsRef)
 
         const now = new Date()
+        const useClientTimestamps = import.meta.client && !navigator.onLine
 
         // Build receipt object - strip undefined values (Firestore rejects undefined)
         const receiptPayload = {
           ...normalizedReceiptData,
           date: normalizedReceiptData.date || now,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
+          createdAt: useClientTimestamps ? now : serverTimestamp(),
+          updatedAt: useClientTimestamps ? now : serverTimestamp(),
           createdBy: createdByUid,
           ...(actualCreatorUid !== createdByUid && { actualCreator: actualCreatorUid }),
         }
@@ -464,7 +472,8 @@ export const useReceiptsStore = defineStore('receipts', {
           Object.entries(receiptPayload).filter(([, v]) => v !== undefined)
         ) as Omit<Receipt, 'id'>
 
-        await setDoc(newReceiptRef, newReceipt)
+        const { writeDocumentWithOfflineSupport } = await import('~/composables/useOfflineMode')
+        const writeResult = await writeDocumentWithOfflineSupport(newReceiptRef, newReceipt)
 
         // Add to local state
         const receiptForState: Receipt = {
@@ -477,7 +486,19 @@ export const useReceiptsStore = defineStore('receipts', {
           ...(actualCreatorUid !== createdByUid && { actualCreator: actualCreatorUid }), // Only include if different
         }
 
+        if (writeResult === 'queued') {
+          ;(receiptForState as Receipt & { pendingSync?: boolean }).pendingSync = true
+        }
+
         this.receipts.unshift(receiptForState)
+
+        const wasFirstSale = this.receipts.length === 1
+        if (wasFirstSale) {
+          const { useFunnelAnalytics } = await import('~/composables/useFunnelAnalytics')
+          await useFunnelAnalytics()
+            .recordMilestone('firstSaleAt', { store_id: storeId })
+            .catch(() => undefined)
+        }
 
         // Create notification (use account currency for amounts)
         try {

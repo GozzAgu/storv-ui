@@ -46,3 +46,31 @@ withDefaults(
   }
 )
 </script>
+
+<style scoped>
+/* Keep the nested input chrome-free even if global field borders win the cascade. */
+.ios-search-bar__input {
+  border: none !important;
+  border-width: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+.ios-search-bar__input:focus,
+.ios-search-bar__input:focus-visible {
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.ios-search-bar__input::-webkit-search-decoration,
+.ios-search-bar__input::-webkit-search-cancel-button,
+.ios-search-bar__input::-webkit-search-results-button,
+.ios-search-bar__input::-webkit-search-results-decoration {
+  display: none;
+  -webkit-appearance: none;
+}
+</style>

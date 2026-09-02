@@ -5,6 +5,7 @@ import { useAuthStore } from '~/stores/auth'
 import { getFirebaseClientAuth, isCapacitorNative } from '~/utils/firebase-client-auth'
 import { isDemoModeActive } from '~/utils/demo-mode'
 import { initDemoAuth } from '~/utils/demo-bridge'
+import { useUserStore } from '~/stores/user'
 
 export default defineNuxtPlugin(() => {
   if (import.meta.server) return
@@ -27,6 +28,12 @@ export default defineNuxtPlugin(() => {
     authStore.currentUser = user
     loading.value = false
     authStore.loading = false
+
+    if (user?.uid) {
+      void import('~/utils/user-profile-cache').then(({ hydrateUserStoreFromCache }) => {
+        hydrateUserStoreFromCache(useUserStore(), user.uid)
+      })
+    }
   }
 
   watch(

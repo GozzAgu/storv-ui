@@ -1,0 +1,621 @@
+/**
+ * Storvv iOS System UI — final polish layer (loads last in ios-native.css).
+ * Unifies typography, buttons, tables, forms, and colors on Capacitor iOS.
+ * See docs/IOS_PREMIUM_DESIGN_SYSTEM.md
+ */
+
+/* ── Canvas & base text ── */
+html.capacitor-ios.capacitor-native {
+  color: var(--ios-label);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+html.capacitor-ios.capacitor-native,
+html.capacitor-ios.capacitor-native body,
+html.capacitor-ios.capacitor-native button,
+html.capacitor-ios.capacitor-native input,
+html.capacitor-ios.capacitor-native select,
+html.capacitor-ios.capacitor-native textarea {
+  font-family: var(--ios-type-font-family);
+}
+
+html.capacitor-ios.capacitor-native [data-dashboard-main],
+html.capacitor-ios.capacitor-native .dashboard-native-main {
+  background: var(--ios-aurora), var(--ios-canvas) !important;
+  color: var(--ios-label);
+  font-family: var(--ios-type-font-family);
+  font-size: var(--ios-type-body-size);
+  line-height: var(--ios-type-body-leading);
+}
+
+html.capacitor-ios.capacitor-native .text-xs {
+  font-size: var(--ios-type-footnote-size) !important;
+  line-height: var(--ios-type-footnote-leading) !important;
+}
+
+html.capacitor-ios.capacitor-native .text-sm {
+  font-size: var(--ios-type-subheadline-size) !important;
+  line-height: var(--ios-type-subheadline-leading) !important;
+}
+
+html.capacitor-ios.capacitor-native .text-base {
+  font-size: var(--ios-type-body-size) !important;
+  line-height: var(--ios-type-body-leading) !important;
+}
+
+html.capacitor-ios.capacitor-native .text-lg {
+  font-size: var(--ios-type-title2-size) !important;
+  line-height: var(--ios-type-title2-leading) !important;
+  font-weight: 600;
+}
+
+html.capacitor-ios.capacitor-native .text-xl,
+html.capacitor-ios.capacitor-native .text-2xl {
+  font-size: var(--ios-type-title-size) !important;
+  line-height: var(--ios-type-title-leading) !important;
+  font-weight: 600;
+  letter-spacing: var(--ios-type-tracking-tight);
+}
+
+html.capacitor-ios.capacitor-native .text-\[10px\],
+html.capacitor-ios.capacitor-native .text-\[11px\] {
+  font-size: var(--ios-type-caption2-size) !important;
+  line-height: var(--ios-type-caption2-leading) !important;
+}
+
+html.capacitor-ios.capacitor-native .dash-eyebrow,
+html.capacitor-ios.capacitor-native .dash-page-meta {
+  font-size: var(--ios-type-caption-size) !important;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ios-label-secondary) !important;
+}
+
+html.capacitor-ios.capacitor-native .dash-page-title,
+html.capacitor-ios.capacitor-native .dash-page-header h1 {
+  font-size: var(--ios-type-large-title-size) !important;
+  font-weight: var(--ios-type-large-title-weight);
+  line-height: var(--ios-type-large-title-leading) !important;
+  letter-spacing: var(--ios-type-large-title-tracking);
+  color: var(--ios-label) !important;
+}
+
+/* Muted copy uses system secondary — never arbitrary gray-* on native */
+html.capacitor-ios.capacitor-native [data-dashboard-main] .text-gray-500,
+html.capacitor-ios.capacitor-native [data-dashboard-main] .text-gray-600,
+html.capacitor-ios.capacitor-native [data-dashboard-main] .text-gray-400 {
+  color: var(--ios-label-secondary) !important;
+}
+
+html.capacitor-ios.capacitor-native [data-dashboard-main] .text-gray-900,
+html.capacitor-ios.capacitor-native [data-dashboard-main] .text-gray-800,
+html.capacitor-ios.capacitor-native [data-dashboard-main] .text-gray-700 {
+  color: var(--ios-label) !important;
+}
+
+html.capacitor-ios.capacitor-native.dark [data-dashboard-main] .dark\:text-gray-100,
+html.capacitor-ios.capacitor-native.dark [data-dashboard-main] .dark\:text-gray-200,
+html.capacitor-ios.capacitor-native.dark [data-dashboard-main] .dark\:text-gray-300 {
+  color: var(--ios-label) !important;
+}
+
+html.capacitor-ios.capacitor-native.dark [data-dashboard-main] .dark\:text-gray-400,
+html.capacitor-ios.capacitor-native.dark [data-dashboard-main] .dark\:text-gray-500 {
+  color: var(--ios-label-secondary) !important;
+}
+
+/* ── Buttons: unified sales-leads pill style (<Button /> + btn-* utilities) ── */
+html.capacitor-ios.capacitor-native .ios-action-btn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  min-height: 2.75rem;
+  padding-inline: 1rem;
+  border: 1px solid transparent;
+  border-radius: var(--ios-radius-md) !important;
+  font-family: var(--ios-type-font-family);
+  font-size: var(--ios-type-subheadline-size) !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 0.12s var(--ios-spring),
+    opacity 0.12s ease,
+    background-color 0.12s ease,
+    border-color 0.12s ease;
+}
+
+html.capacitor-ios.capacitor-native .ios-action-btn--sm,
+html.capacitor-ios.capacitor-native .ios-action-btn.btn-sm,
+html.capacitor-ios.capacitor-native .btn-primary-sm {
+  min-height: 2.5rem;
+  padding-inline: 0.875rem;
+  font-size: var(--ios-type-subheadline-size) !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-action-btn--md {
+  min-height: 2.75rem;
+  padding-inline: 1.125rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-action-btn--lg {
+  min-height: 3rem;
+  padding-inline: 1.25rem;
+  font-size: var(--ios-type-body-size) !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-action-btn:not(.ios-action-btn--icon-only) {
+  width: auto !important;
+  min-width: 0 !important;
+  height: auto !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-action-btn--primary,
+html.capacitor-ios.capacitor-native .btn-primary,
+html.capacitor-ios.capacitor-native button.btn-primary {
+  border-color: transparent !important;
+  background: var(--storvv-navy, var(--ios-accent)) !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-action-btn--primary,
+html.capacitor-ios.capacitor-native.dark .btn-primary,
+html.capacitor-ios.capacitor-native.dark button.btn-primary {
+  background: linear-gradient(180deg, var(--storvv-blue, #4876c7) 0%, var(--storvv-navy, #143f8d) 100%) !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-action-btn--secondary,
+html.capacitor-ios.capacitor-native .ios-action-btn--outline,
+html.capacitor-ios.capacitor-native .ios-action-btn--ghost,
+html.capacitor-ios.capacitor-native .btn-secondary,
+html.capacitor-ios.capacitor-native .btn-outline {
+  border: 1px solid rgb(20 63 141 / 0.28) !important;
+  background: rgb(20 63 141 / 0.06) !important;
+  color: var(--storvv-navy, var(--ios-accent)) !important;
+  box-shadow: none !important;
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-action-btn--secondary,
+html.capacitor-ios.capacitor-native.dark .ios-action-btn--outline,
+html.capacitor-ios.capacitor-native.dark .ios-action-btn--ghost,
+html.capacitor-ios.capacitor-native.dark .btn-secondary,
+html.capacitor-ios.capacitor-native.dark .btn-outline {
+  border: 1px solid rgb(154 181 227 / 0.24) !important;
+  background: rgb(20 63 141 / 0.16) !important;
+  color: var(--storvv-blue-soft, var(--ios-accent-soft)) !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-action-btn--danger,
+html.capacitor-ios.capacitor-native .btn-danger {
+  border-color: transparent !important;
+  background: var(--ios-destructive) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-action-btn--success {
+  border-color: transparent !important;
+  background: rgb(52 199 89) !important;
+  color: #fff !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-action-btn--icon-only {
+  width: 2.25rem !important;
+  min-width: 2.25rem !important;
+  height: 2.25rem !important;
+  min-height: 2.25rem !important;
+  padding: 0 !important;
+  border-radius: 9999px !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-action-btn:active:not(:disabled),
+html.capacitor-ios.capacitor-native .btn-primary:active:not(:disabled),
+html.capacitor-ios.capacitor-native .btn-secondary:active:not(:disabled),
+html.capacitor-ios.capacitor-native .btn-outline:active:not(:disabled) {
+  transform: scale(0.98);
+  opacity: 0.92;
+}
+
+html.capacitor-ios.capacitor-native .ios-action-btn:disabled,
+html.capacitor-ios.capacitor-native .btn-primary:disabled,
+html.capacitor-ios.capacitor-native .btn-secondary:disabled,
+html.capacitor-ios.capacitor-native .btn-outline:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Sheet / modal footers — row layout like sales leads */
+html.capacitor-ios.capacitor-native .dashboard-native-sheet__footer,
+html.capacitor-ios.capacitor-native .native-more-sheet__footer {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
+}
+
+html.capacitor-ios.capacitor-native .dashboard-native-sheet__footer > .flex,
+html.capacitor-ios.capacitor-native .dashboard-native-sheet__footer .flex.justify-end,
+html.capacitor-ios.capacitor-native .dashboard-native-sheet__footer .flex.items-center {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+html.capacitor-ios.capacitor-native .dashboard-native-sheet__footer .w-full,
+html.capacitor-ios.capacitor-native .dashboard-native-sheet__footer .ios-action-btn,
+html.capacitor-ios.capacitor-native .dashboard-native-sheet__footer .btn-primary,
+html.capacitor-ios.capacitor-native .dashboard-native-sheet__footer .btn-secondary,
+html.capacitor-ios.capacitor-native .dashboard-native-sheet__footer .btn-outline {
+  width: auto !important;
+  flex: 0 0 auto;
+}
+
+html.capacitor-ios.capacitor-native [data-dashboard-main] .ios-action-btn,
+html.capacitor-ios.capacitor-native [data-dashboard-main] .btn-primary,
+html.capacitor-ios.capacitor-native [data-dashboard-main] .btn-secondary,
+html.capacitor-ios.capacitor-native [data-dashboard-main] .btn-outline {
+  border-radius: var(--ios-radius-md) !important;
+}
+
+/* ── Toggle switch — 51×31pt platform switch ── */
+html.capacitor-ios.capacitor-native .dash-switch__track {
+  width: 3.1875rem;
+  height: 1.9375rem;
+  background: var(--ios-fill-secondary);
+}
+
+html.capacitor-ios.capacitor-native .dash-switch__thumb {
+  width: 1.6875rem;
+  height: 1.6875rem;
+  border: none;
+  box-shadow:
+    0 3px 8px rgb(0 0 0 / 0.15),
+    0 1px 1px rgb(0 0 0 / 0.16);
+  transition: transform 0.22s var(--ios-spring);
+}
+
+html.capacitor-ios.capacitor-native .dash-switch__input:checked ~ .dash-switch__track {
+  background: var(--ios-success);
+}
+
+html.capacitor-ios.capacitor-native .dash-switch__input:checked ~ .dash-switch__track .dash-switch__thumb {
+  transform: translateX(1.25rem);
+}
+
+/* Form field appearance lives in ios-fields.css (auth parity). */
+
+/* ── Tables → grouped card lists ── */
+html.capacitor-ios.capacitor-native .data-table-shell,
+html.capacitor-ios.capacitor-native .dash-table-shell,
+html.capacitor-ios.capacitor-native .activity-log-shell {
+  border-radius: var(--ios-radius-md);
+  border: 1px solid var(--ios-separator);
+  background: var(--ios-surface-solid);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+  overflow: hidden;
+}
+
+html.capacitor-ios.capacitor-native .data-table-shell th,
+html.capacitor-ios.capacitor-native .dashboard-table th {
+  font-size: var(--ios-type-caption2-size) !important;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ios-label-secondary) !important;
+  background: var(--ios-fill-tertiary);
+  border-color: var(--ios-separator) !important;
+}
+
+html.capacitor-ios.capacitor-native .data-table-shell td,
+html.capacitor-ios.capacitor-native .dashboard-table td {
+  font-size: var(--ios-type-subheadline-size) !important;
+  color: var(--ios-label) !important;
+  border-color: var(--ios-separator) !important;
+}
+
+html.capacitor-ios.capacitor-native .dash-native-table--cards .dashboard-table tbody tr.dash-native-table__card-row {
+  border-radius: var(--ios-radius-sm);
+  border: 1px solid var(--ios-separator);
+  background: var(--ios-surface-solid);
+  box-shadow: none;
+}
+
+html.capacitor-ios.capacitor-native .receipts-mobile-list--ios .receipt-mobile-card,
+html.capacitor-ios.capacitor-native .inventory-items-mobile-list .inv-mobile-card {
+  border-radius: var(--ios-radius-sm);
+  border: 1px solid var(--ios-separator);
+  background: var(--ios-surface-solid);
+}
+
+/* Tabular money + counts */
+html.capacitor-ios.capacitor-native .tabular-nums,
+html.capacitor-ios.capacitor-native .dash-stat-card__value,
+html.capacitor-ios.capacitor-native .ios-stat-value {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+  letter-spacing: -0.02em;
+}
+
+/* ── Cards: solid grouped surfaces (readability over heavy glass) ── */
+html.capacitor-ios.capacitor-native .dash-card,
+html.capacitor-ios.capacitor-native .dash-stat-card,
+html.capacitor-ios.capacitor-native .dash-grid-card,
+html.capacitor-ios.capacitor-native .inv-category-card {
+  background: var(--ios-surface-solid);
+  border: 1px solid var(--ios-separator);
+  border-radius: var(--ios-radius-md);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+}
+
+html.capacitor-ios.capacitor-native .ios-glass-card {
+  background: var(--ios-glass-bg);
+  backdrop-filter: blur(var(--ios-glass-blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--ios-glass-blur)) saturate(180%);
+}
+
+html.capacitor-ios.capacitor-native .dash-page-header {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  padding-inline: 0;
+}
+
+/* ── Badges & status pills ── */
+html.capacitor-ios.capacitor-native [data-dashboard-main] .rounded-full[class*='bg-emerald'],
+html.capacitor-ios.capacitor-native [data-dashboard-main] .rounded-full[class*='bg-green'] {
+  font-size: var(--ios-type-caption2-size);
+  font-weight: 600;
+}
+
+/* ── Modals & sheets ── */
+html.capacitor-ios.capacitor-native .dashboard-native-sheet {
+  border-top-left-radius: var(--ios-radius-xl);
+  border-top-right-radius: var(--ios-radius-xl);
+}
+
+html.capacitor-ios.capacitor-native .dash-overlay-panel,
+html.capacitor-ios.capacitor-native .modal-panel {
+  border-radius: var(--ios-radius-lg);
+}
+
+/* ── Focus rings (keyboard / accessibility) ── */
+html.capacitor-ios.capacitor-native :focus-visible {
+  outline: 2px solid var(--ios-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  html.capacitor-ios.capacitor-native .dash-card,
+  html.capacitor-ios.capacitor-native .data-table-shell,
+  html.capacitor-ios.capacitor-native .dash-table-shell,
+  html.capacitor-ios.capacitor-native .inv-category-card,
+  html.capacitor-ios.capacitor-native .ios-glass-card {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: var(--ios-surface-solid) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.capacitor-ios.capacitor-native .btn-primary,
+  html.capacitor-ios.capacitor-native .ios-btn,
+  html.capacitor-ios.capacitor-native .ios-glass-card--pressable,
+  html.capacitor-ios.capacitor-native .payment-links-native-fab {
+    transition: none;
+  }
+}
+
+/* ── Dashboard home: readable grouped lists & metrics ── */
+html.capacitor-ios.capacitor-native .dash-home {
+  gap: 1rem;
+}
+
+html.capacitor-ios.capacitor-native .dash-home .dash-card--padded {
+  padding: 1rem 1.125rem;
+}
+
+html.capacitor-ios.capacitor-native .dash-home .dash-card__header {
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.625rem;
+  border-bottom-color: var(--ios-separator);
+}
+
+html.capacitor-ios.capacitor-native .dash-home .dash-card__title {
+  font-size: var(--ios-type-headline-size) !important;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ios-label) !important;
+}
+
+html.capacitor-ios.capacitor-native .dash-home .dash-card__link {
+  font-size: var(--ios-type-subheadline-size) !important;
+  font-weight: 500;
+  color: var(--ios-accent) !important;
+}
+
+html.capacitor-ios.capacitor-native .dash-home .dash-list__row {
+  align-items: flex-start;
+  gap: 0.625rem;
+  padding: var(--ios-list-row-pad-block, 0.5625rem) 0;
+  border-bottom-color: var(--ios-separator);
+}
+
+html.capacitor-ios.capacitor-native .dash-home .dash-list__primary {
+  font-size: var(--ios-list-title-size) !important;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--ios-label) !important;
+}
+
+html.capacitor-ios.capacitor-native .dash-home .dash-list__secondary {
+  margin-top: 0.125rem;
+  font-size: var(--ios-list-subtitle-size) !important;
+  line-height: 1.3;
+  color: var(--ios-label-secondary) !important;
+}
+
+html.capacitor-ios.capacitor-native .dash-home .dash-list__value {
+  font-size: var(--ios-list-amount-size) !important;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--ios-label) !important;
+}
+
+html.capacitor-ios.capacitor-native .dash-home .dash-metric-grid {
+  gap: 0.5rem 1rem;
+}
+
+html.capacitor-ios.capacitor-native .dash-home .dash-metric-row {
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0;
+  border-bottom-style: solid;
+  border-bottom-color: var(--ios-separator);
+}
+
+html.capacitor-ios.capacitor-native .dash-home .dash-metric-row dt {
+  font-size: var(--ios-type-subheadline-size) !important;
+  line-height: 1.35;
+  color: var(--ios-label-secondary) !important;
+}
+
+html.capacitor-ios.capacitor-native .dash-home .dash-metric-row dd {
+  font-size: var(--ios-type-body-size) !important;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--ios-label) !important;
+}
+
+html.capacitor-ios.capacitor-native .dash-home .dash-stat-card__label {
+  font-weight: 500 !important;
+}
+
+html.capacitor-ios.capacitor-native .dash-home .dash-stat-card__value {
+  font-weight: 500 !important;
+}
+
+html.capacitor-ios.capacitor-native .dash-home .dash-bar-row__label {
+  font-weight: 400 !important;
+}
+
+html.capacitor-ios.capacitor-native .dash-home .dash-num {
+  font-size: inherit;
+}
+
+html.capacitor-ios.capacitor-native .dash-home .dash-alert,
+html.capacitor-ios.capacitor-native .dash-home .dash-empty {
+  font-size: var(--ios-type-subheadline-size) !important;
+  line-height: 1.4;
+}
+
+html.capacitor-ios.capacitor-native .dash-home .dash-bar-row__head,
+html.capacitor-ios.capacitor-native .dash-home .dash-bar-row__label {
+  font-size: var(--ios-type-subheadline-size) !important;
+}
+
+html.capacitor-ios.capacitor-native .dash-home .dash-bar-row__meta,
+html.capacitor-ios.capacitor-native .dash-home .dash-bar-row__foot {
+  font-size: var(--ios-type-footnote-size) !important;
+}
+
+/* ── Table toolbar: pill filters aligned with branch / segment controls ── */
+html.capacitor-ios.capacitor-native .dash-table-toolbar .ios-toolbar-select {
+  min-height: 2.25rem !important;
+  height: 2.25rem;
+  width: auto !important;
+  min-width: 0;
+  flex: 0 1 auto;
+  border-radius: 9999px !important;
+  border: 1px solid var(--ios-separator) !important;
+  background: var(--ios-fill-tertiary) !important;
+  padding-inline: 0.75rem 1.75rem !important;
+  font-size: var(--ios-type-subheadline-size) !important;
+  font-weight: 500;
+  color: var(--ios-label) !important;
+  box-shadow: none;
+}
+
+html.capacitor-ios.capacitor-native .dash-table-toolbar .relative.shrink-0:has(.ios-toolbar-select) {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: calc(50% - 0.25rem);
+}
+
+html.capacitor-ios.capacitor-native .dash-table-toolbar .ios-toolbar-select + svg,
+html.capacitor-ios.capacitor-native .dash-table-toolbar .relative:has(.ios-toolbar-select) svg {
+  right: 0.625rem;
+  width: 0.875rem;
+  height: 0.875rem;
+  opacity: 0.55;
+}
+
+html.capacitor-ios.capacitor-native .dash-table-toolbar .flex-wrap.items-center.gap-2 {
+  gap: 0.375rem;
+}
+
+/* Settings subscription panel — legible type scale */
+html.capacitor-ios.capacitor-native .subscription-plan-panel .text-\[10px\] {
+  font-size: var(--ios-type-caption2-size) !important;
+}
+
+html.capacitor-ios.capacitor-native .subscription-plan-panel .text-\[11px\] {
+  font-size: var(--ios-type-caption-size) !important;
+}
+
+html.capacitor-ios.capacitor-native .subscription-plan-panel .text-sm {
+  font-size: var(--ios-type-subheadline-size) !important;
+}
+
+html.capacitor-ios.capacitor-native .subscription-plan-panel .flex.flex-col.gap-3.sm\:flex-row.sm\:items-end {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+html.capacitor-ios.capacitor-native .subscription-plan-panel .flex.flex-col.gap-3.sm\:flex-row.sm\:items-end > .min-w-0.flex-1 {
+  width: 100%;
+}
+
+/* Flat buttons — no drop shadows (keyboard focus rings preserved) */
+html.capacitor-ios.capacitor-native :is(
+  .ios-action-btn,
+  .btn-primary,
+  .btn-secondary,
+  .btn-outline,
+  .btn-danger,
+  .btn-primary-sm,
+  button.btn-primary,
+  .ios-fab,
+  .ios-fab--secondary,
+  .ios-home-dashboard__add-btn,
+  .ios-quick-actions__icon-wrap,
+  .payment-links-native-fab,
+  .dashboard-assistant__fab,
+  .ios-segmented-control__segment--active,
+  .auth-form .auth-btn,
+  .auth-segment__item--active,
+  [data-dashboard-main]
+    button.group.relative.inline-flex.items-center.justify-center.overflow-hidden.border-0.font-semibold.tracking-tight,
+  [data-btn-variant]
+):not(:focus-visible) {
+  box-shadow: none !important;
+}

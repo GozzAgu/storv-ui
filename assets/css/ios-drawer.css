@@ -1,0 +1,311 @@
+/**
+ * iOS drawer system — modern bottom sheets (menu, CRUD, assistant).
+ */
+
+html.capacitor-ios.capacitor-native {
+  --ios-drawer-radius: 1.75rem;
+  --ios-drawer-surface: var(--ios-surface-solid, #ffffff);
+  --ios-drawer-footer: var(--ios-surface-solid, #ffffff);
+}
+
+html.capacitor-ios.capacitor-native.dark {
+  --ios-drawer-surface: var(--ios-surface-solid, #1c1c1e);
+  --ios-drawer-footer: var(--ios-surface-solid, #1c1c1e);
+}
+
+/* ── Sheet shell ── */
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet,
+html.capacitor-ios.capacitor-native .ios-drawer.native-more-sheet {
+  border: none;
+  border-top-left-radius: var(--ios-drawer-radius);
+  border-top-right-radius: var(--ios-drawer-radius);
+  background: var(--ios-drawer-surface);
+  box-shadow:
+    0 -4px 24px rgb(0 0 0 / 0.08),
+    0 -1px 0 rgb(0 0 0 / 0.04);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-drawer.dashboard-native-sheet,
+html.capacitor-ios.capacitor-native.dark .ios-drawer.native-more-sheet {
+  box-shadow:
+    0 -8px 40px rgb(0 0 0 / 0.45),
+    0 -1px 0 rgb(255 255 255 / 0.06);
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--menu {
+  background: var(--ios-drawer-menu-canvas, var(--ios-home-bg, #f2f2f7));
+}
+
+/* Grab handle - purely decorative (no drag-to-dismiss gesture is wired up), so
+   it reads as a fake affordance rather than a real one. Dropped everywhere the
+   sheet already has an explicit close button. */
+html.capacitor-ios.capacitor-native .ios-drawer .native-more-sheet__handle,
+html.capacitor-ios.capacitor-native .ios-drawer .dashboard-native-sheet__header .native-more-sheet__handle {
+  display: none;
+}
+
+/* ── Header ── */
+html.capacitor-ios.capacitor-native .ios-drawer .dashboard-native-sheet__header,
+html.capacitor-ios.capacitor-native .ios-drawer .native-more-sheet__header {
+  /* Top inset used to come from the grab handle's own margins; restore it
+     now that the (non-functional) handle is gone. */
+  padding: 0.875rem 1rem 0.625rem;
+  border-bottom: none;
+  background: transparent;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--menu .dashboard-native-sheet__header {
+  padding-bottom: 0.5rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer .dash-drawer-label,
+html.capacitor-ios.capacitor-native .ios-drawer .dash-field-label {
+  text-transform: none;
+  letter-spacing: -0.01em;
+  font-weight: 500;
+}
+
+/* CRUD form polish lives in ios-drawer-form.css */
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud label,
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .dash-field-label,
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .dash-drawer-label {
+  display: block;
+  margin-bottom: 0.4375rem;
+  font-size: var(--ios-dash-secondary-size, 0.6875rem) !important;
+  font-weight: 500;
+  color: var(--ios-label-secondary) !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer .dash-overlay-eyebrow {
+  margin: 0 0 0.25rem;
+  font-size: var(--ios-dash-micro-size, 0.5625rem) !important;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ios-label-secondary) !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer .dashboard-native-sheet__footer > .flex,
+html.capacitor-ios.capacitor-native .ios-drawer .dashboard-native-sheet__footer .flex.justify-end,
+html.capacitor-ios.capacitor-native .ios-drawer .dashboard-native-sheet__footer .flex.items-center {
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0.625rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer .dash-overlay-title,
+html.capacitor-ios.capacitor-native .ios-drawer .native-more-sheet__title {
+  margin: 0;
+  font-size: var(--ios-dash-section-title-size, 0.9375rem) !important;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--ios-label) !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer .dashboard-native-sheet__subtitle {
+  margin-top: 0.25rem;
+  font-size: var(--ios-dash-secondary-size, 0.6875rem) !important;
+  font-weight: 400;
+  line-height: var(--ios-dash-leading, 1.35);
+  color: var(--ios-label-secondary) !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer .dashboard-native-sheet__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.875rem;
+  height: 1.875rem;
+  border-radius: 9999px;
+  border: none;
+  background: rgb(120 120 128 / 0.12);
+  color: var(--ios-label-secondary);
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-drawer .dashboard-native-sheet__close {
+  background: rgb(255 255 255 / 0.1);
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer .dashboard-native-sheet__close:active {
+  background: rgb(120 120 128 / 0.2);
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer .dashboard-native-sheet__close svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+/* ── Body ── */
+html.capacitor-ios.capacitor-native .ios-drawer .dashboard-native-sheet__body {
+  padding: 0 0 0.75rem;
+  background: transparent;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--menu .dashboard-native-sheet__body {
+  padding: 0;
+  background: var(--ios-drawer-menu-canvas, var(--ios-home-bg, #f2f2f7));
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--assistant .dashboard-native-sheet__footer {
+  border-top: none;
+  background: var(--ios-drawer-menu-canvas, var(--ios-home-bg, #f2f2f7));
+  padding: 0 0 calc(0.75rem + env(safe-area-inset-bottom, 0px));
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .dashboard-native-sheet__body {
+  /* padding owned by ios-drawer-form.css */
+  background: transparent;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--menu .ios-drawer__content {
+  gap: 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--menu .ios-drawer-menu {
+  padding-top: 0.125rem;
+}
+
+/* Beat legacy glass / SaaS chrome when ios-drawer is present */
+html.capacitor-ios.capacitor-native .ios-drawer.native-more-sheet {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer .native-more-sheet__header,
+html.capacitor-ios.capacitor-native .ios-drawer .native-more-sheet__footer {
+  border: none !important;
+  background: transparent !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer .ios-drawer-menu__group .native-more-sheet__row,
+html.capacitor-ios.capacitor-native .ios-drawer .ios-drawer-menu__row {
+  border-radius: 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer .ios-drawer-menu__group .native-more-sheet__row--active,
+html.capacitor-ios.capacitor-native .ios-drawer .ios-drawer-menu__row--active {
+  background: transparent;
+}
+
+/* Form fields — appearance lives in ios-fields.css (auth parity) */
+html.capacitor-ios.capacitor-native .ios-drawer:not(.dashboard-native-sheet--crud) label,
+html.capacitor-ios.capacitor-native .ios-drawer:not(.dashboard-native-sheet--crud) .dash-field-label,
+html.capacitor-ios.capacitor-native .ios-drawer:not(.dashboard-native-sheet--crud) .dash-drawer-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: var(--ios-field-label-size, 0.8125rem) !important;
+  font-weight: 600;
+  color: var(--ios-field-ink) !important;
+}
+
+/* ── Footer ── */
+html.capacitor-ios.capacitor-native .ios-drawer .dashboard-native-sheet__footer,
+html.capacitor-ios.capacitor-native .ios-drawer .native-more-sheet__footer {
+  flex-shrink: 0;
+  border-top: none;
+  background: transparent;
+  padding: 0 0 calc(0.75rem + env(safe-area-inset-bottom, 0px));
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--menu .dashboard-native-sheet__footer {
+  background: var(--ios-drawer-menu-canvas, var(--ios-home-bg, #f2f2f7));
+  padding: 0 0 calc(0.75rem + env(safe-area-inset-bottom, 0px));
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer-footer--menu .ios-drawer-menu__footer-card {
+  margin-bottom: 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .dashboard-native-sheet__footer,
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--assistant .dashboard-native-sheet__footer {
+  /* CRUD footer chrome owned by ios-drawer-form.css */
+  border-top: none;
+  background: var(--ios-drawer-footer);
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer-footer {
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer-footer__leading {
+  margin-right: auto;
+  min-width: 0;
+  font-size: var(--ios-dash-secondary-size, 0.6875rem);
+  color: var(--ios-label-secondary);
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer-footer__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer-footer--menu {
+  flex-direction: column;
+  align-items: stretch;
+  padding: 0.75rem 1rem 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer-footer--menu .ios-drawer-footer__actions {
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+  margin-left: 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer-footer--crud .ios-drawer-footer__actions {
+  flex-direction: row !important;
+  align-items: stretch;
+  justify-content: stretch;
+  gap: 0.625rem;
+  width: 100%;
+  margin-left: 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer-footer:not(.ios-drawer-footer--menu):not(.ios-drawer-footer--crud) .ios-drawer-footer__actions {
+  flex-direction: column-reverse;
+  align-items: stretch;
+  width: 100%;
+  margin-left: 0;
+  gap: 0.5rem;
+}
+
+/* Backdrop */
+html.capacitor-ios.capacitor-native .native-bottom-nav__backdrop.dash-overlay-backdrop {
+  background: rgb(0 0 0 / 0.32) !important;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+html.capacitor-ios.capacitor-native.dark .native-bottom-nav__backdrop.dash-overlay-backdrop {
+  background: rgb(0 0 0 / 0.52) !important;
+}
+
+/* Hide legacy section borders inside new menu layout */
+html.capacitor-ios.capacitor-native .ios-drawer .ios-drawer-menu .native-more-sheet__section + .native-more-sheet__section {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer .ios-drawer-menu .native-more-sheet__section-label {
+  display: none;
+}

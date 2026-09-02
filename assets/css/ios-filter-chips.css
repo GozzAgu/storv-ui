@@ -1,0 +1,85 @@
+/**
+ * iOS filter/suggestion chips — a single scrolling row of text pills.
+ *
+ * Use this instead of the quick action bar when there are more than ~5 options
+ * or when the options have no meaningful icon of their own: the action bar
+ * splits its width evenly, so a long list collapses into identical icons with
+ * ellipsised labels.
+ */
+
+html.capacitor-ios.capacitor-native .ios-filter-chips {
+  /* Chips scroll under the page gutter, so the row reads as continuous */
+  --ios-filter-chips-bleed: var(--ios-home-inset, 20px);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-filter-chips__title {
+  margin: 0;
+  padding-inline: 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ios-label-secondary);
+}
+
+html.capacitor-ios.capacitor-native .ios-filter-chips__scroll {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  margin-inline: calc(var(--ios-filter-chips-bleed) * -1);
+  padding-inline: var(--ios-filter-chips-bleed);
+  overflow-x: auto;
+  scroll-padding-inline: var(--ios-filter-chips-bleed);
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+html.capacitor-ios.capacitor-native .ios-filter-chips__scroll::-webkit-scrollbar {
+  display: none;
+}
+
+html.capacitor-ios.capacitor-native .ios-filter-chips__chip {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0.4375rem 0.875rem;
+  border: none;
+  border-radius: 9999px;
+  background: var(--ios-fill-tertiary);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  color: var(--ios-label);
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    transform 0.12s var(--ios-spring, ease);
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-filter-chips__chip {
+  background: rgb(255 255 255 / 0.08);
+}
+
+html.capacitor-ios.capacitor-native .ios-filter-chips__chip:active {
+  transform: scale(0.96);
+}
+
+html.capacitor-ios.capacitor-native .ios-filter-chips__chip--active {
+  background: var(--ios-label);
+  font-weight: 600;
+  color: var(--ios-home-bg, #f3f3f5);
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-filter-chips__chip--active {
+  background: rgb(255 255 255 / 0.92);
+  color: rgb(28 28 30);
+}
