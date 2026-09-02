@@ -1,6 +1,10 @@
 import { defineStore } from 'pinia'
+import { isCapacitorNative } from '~/utils/capacitor-env'
+import { getDefaultThemePreference, resolveStoredThemePreference } from '~/utils/theme-default'
 
 export type Theme = 'light' | 'dark' | 'system'
+
+const NATIVE_LEGACY_LIGHT_MIGRATION = 'theme-native-legacy-light-v1'
 
 /** Keep in sync with `assets/css/main.css` (`html.theme-transitioning` duration). */
 const THEME_TRANSITION_MS = 160
@@ -8,13 +12,25 @@ const THEME_TRANSITION_MS_REDUCED = 70
 
 /** Browser `setTimeout` id (avoid Node `Timeout` vs `number` mismatch in TS). */
 let themeTransitionTimer: number | null = null
+let systemThemeWatcherAttached = false
 
 function syncThemeColorMeta(isDark: boolean) {
   if (!import.meta.client) return
   const el = document.getElementById('theme-color-meta')
   if (el) {
-    el.setAttribute('content', isDark ? '#07080c' : '#fafafa')
+    el.setAttribute('content', isDark ? '#080808' : '#f4f1ea')
   }
+}
+
+function migrateLegacyNativeLightDefault(): void {
+  if (!import.meta.client || !isCapacitorNative()) return
+  if (localStorage.getItem(NATIVE_LEGACY_LIGHT_MIGRATION)) return
+
+  if (localStorage.getItem('theme') === 'light') {
+    localStorage.setItem('theme', 'system')
+  }
+
+  localStorage.setItem(NATIVE_LEGACY_LIGHT_MIGRATION, '1')
 }
 
 export const useThemeStore = defineStore('theme', {
@@ -39,14 +55,11 @@ export const useThemeStore = defineStore('theme', {
     // Initialize theme from localStorage
     initTheme() {
       if (import.meta.client && !this.initialized) {
-        // Get saved theme from localStorage
-        const savedTheme = localStorage.getItem('theme') as Theme | null
-        if (savedTheme && ['light', 'dark', 'system'].includes(savedTheme)) {
-          this.theme = savedTheme
-        } else {
-          // If no saved theme (first-time visitor), follow the device preference
-          this.theme = 'system'
-          localStorage.setItem('theme', 'system')
+        migrateLegacyNativeLightDefault()
+        const savedTheme = localStorage.getItem('theme')
+        this.theme = resolveStoredThemePreference(savedTheme)
+        if (!savedTheme) {
+          localStorage.setItem('theme', this.theme)
         }
 
         // Apply theme immediately to ensure consistency
@@ -62,6 +75,14 @@ export const useThemeStore = defineStore('theme', {
         const html = document.documentElement
         const body = document.body
         const isDark = this.actualTheme === 'dark'
+        const currentlyDark = html.classList.contains('dark')
+        const currentScheme = html.style.colorScheme || (currentlyDark ? 'dark' : 'light')
+
+        if (currentlyDark === isDark && currentScheme === (isDark ? 'dark' : 'light')) {
+          syncThemeColorMeta(isDark)
+          return
+        }
+
         // First paint during initTheme: apply class immediately (no transition) to avoid a long flash
         const shouldAnimate = this.initialized
         const reducedMotion =
@@ -85,6 +106,8 @@ export const useThemeStore = defineStore('theme', {
           syncThemeColorMeta(isDark)
           if (html.classList.contains('capacitor-native')) {
             body.style.backgroundColor = isDark ? '#07080c' : '#f3f4f6'
+          } else {
+            body.style.backgroundColor = ''
           }
         }
 
@@ -119,21 +142,22 @@ export const useThemeStore = defineStore('theme', {
 
     // Watch for system theme changes
     watchSystemTheme() {
-      if (import.meta.client && this.theme === 'system') {
-        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-        const handleChange = () => {
-          if (this.theme === 'system') {
-            this.applyTheme()
-          }
-        }
+      if (!import.meta.client || systemThemeWatcherAttached) return
 
-        if (mediaQuery.addEventListener) {
-          mediaQuery.addEventListener('change', handleChange)
-        } else {
-          // Fallback for older browsers
-          mediaQuery.addListener(handleChange)
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+      const handleChange = () => {
+        if (this.theme === 'system') {
+          this.applyTheme()
         }
       }
+
+      if (mediaQuery.addEventListener) {
+        mediaQuery.addEventListener('change', handleChange)
+      } else {
+        mediaQuery.addListener(handleChange)
+      }
+
+      systemThemeWatcherAttached = true
     },
   },
 })

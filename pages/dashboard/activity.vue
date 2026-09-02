@@ -1,5 +1,96 @@
 <template>
   <div :class="[pageWithFixedFooterClass, 'dash-page--unified']">
+    <div v-if="isCapacitorIos" class="ios-sales-shell" data-activity-page>
+      <IosPageNavBar title="Activity" />
+
+      <template v-if="canAccess && storeId">
+        <div v-if="!loading" class="ios-sales-chrome">
+          <div class="ios-search-bar-host ios-search-bar-host--sticky">
+            <IosSearchBar v-model="searchQuery" placeholder="Search user, item, or ID…" />
+          </div>
+          <IosQuickActionBar
+            v-model="actionFilter"
+            aria-label="Filter by action"
+            :options="iosActivityFilterOptions"
+          />
+        </div>
+
+        <IosTransactionListSkeleton v-if="loading" :count="8" />
+
+        <DashboardTableEmptyState
+          v-else-if="fetchError"
+          :icon="ClipboardDocumentListIcon"
+          title="Could not load activity"
+          :description="fetchError"
+        />
+
+        <DashboardTableEmptyState
+          v-else-if="allLogs.length === 0"
+          :icon="ClipboardDocumentListIcon"
+          title="No activity yet"
+          description="Changes to inventory folders and items will appear here automatically."
+        />
+
+        <DashboardTableEmptyState
+          v-else-if="filteredLogs.length === 0"
+          :icon="MagnifyingGlassIcon"
+          title="No matching events"
+          description="Adjust your search or filter to see more results."
+        >
+          <button
+            type="button"
+            class="text-xs font-medium text-primary-600 dark:text-primary-400"
+            @click="resetFilters()"
+          >
+            Clear filters
+          </button>
+        </DashboardTableEmptyState>
+
+        <template v-else>
+          <div class="ios-receipt-transaction-list">
+            <IosReceiptTransactionRow
+              v-for="(log, index) in paginatedLogs"
+              :key="log.id"
+              :title="displayEntityName(log)"
+              :subtitle="`${log.userDisplayName} · ${activityActionLabel(log.action)}`"
+              :amount="relativeTimeCompact(log.createdAt)"
+              amount-tone="neutral"
+              :date="formatDateShort(log.createdAt)"
+              :variant="iosActivityVariant(log.action)"
+              :last="index === paginatedLogs.length - 1"
+            />
+          </div>
+          <DashboardTablePagination
+            :current-page="currentPage"
+            :items-per-page="itemsPerPage"
+            :total="filteredLogs.length"
+            @page-change="handlePageChange"
+          />
+        </template>
+      </template>
+
+      <DashboardTableEmptyState
+        v-else-if="canAccess && !storeId && !loading"
+        :icon="BuildingStorefrontIcon"
+        title="Select a store"
+        description="Choose a branch from the store selector."
+      />
+
+      <FeatureGateCard
+        v-else-if="!canAccess"
+        feature="activity_logs"
+        :title="accessDeniedByRole ? 'Managers only' : undefined"
+        :description="
+          accessDeniedByRole
+            ? 'Activity Logs are available to super admins and store managers only.'
+            : isStaff
+              ? 'Activity Logs are not enabled for your workspace.'
+              : undefined
+        "
+      />
+    </div>
+
+    <template v-else>
     <DashboardPageHeader class="dash-page-header--unified">
       <template #eyebrow>
         <p :class="eyebrowClass">Audit trail</p>
@@ -7,10 +98,19 @@
       <template #title>
         <h1 :class="pageTitleClass">Activity Logs</h1>
       </template>
-      <template v-if="canAccess && !loading && allLogs.length > 0" #description>
+      <template v-if="canAccess && loading" #description>
+        <DashPageMetricsSkeleton :count="4" />
+      </template>
+      <template v-else-if="canAccess && !loading && allLogs.length > 0" #description>
         <DashboardPageMetrics :metrics="headerMetrics" aria-label="Activity summary" />
       </template>
-      <template v-if="canAccess && storeId && !loading && allLogs.length > 0" #filters>
+      <template v-if="canAccess && storeId && loading" #filters>
+        <nav :class="segmentTabsClass" aria-hidden="true">
+          <span v-for="tab in actionTabs" :key="tab.value" class="dash-skeleton dash-skeleton--select" />
+        </nav>
+        <span class="dash-skeleton dash-skeleton--line dash-skeleton--search" />
+      </template>
+      <template v-else-if="canAccess && storeId && !loading && allLogs.length > 0" #filters>
         <nav :class="segmentTabsClass" aria-label="Filter by action" role="tablist">
           <button
             v-for="tab in actionTabs"
@@ -37,29 +137,18 @@
     </DashboardPageHeader>
 
     <div v-if="!canAccess" :class="dashboardCardPaddedClass">
-      <p
-        class="text-sm font-medium leading-relaxed"
-        :class="
-          accessDeniedByRole
-            ? 'text-red-800 dark:text-red-200'
-            : 'text-amber-900 dark:text-amber-100'
-        "
-      >
-        {{
+      <FeatureGateCard
+        feature="activity_logs"
+        :title="accessDeniedByRole ? 'Managers only' : undefined"
+        :description="
           accessDeniedByRole
             ? 'Activity Logs are available to super admins and store managers only.'
             : isStaff
               ? 'Activity Logs are not enabled for your workspace.'
-              : 'Activity Logs are included on Storvv Medium and Enterprise. Upgrade your plan to enable auditing.'
-        }}
-      </p>
-      <NuxtLink
-        v-if="!accessDeniedByRole && userStore.isSuperAdmin"
-        to="/dashboard/settings"
-        class="mt-3 inline-flex text-xs font-medium text-primary-600 transition hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
-      >
-        View plans in Settings →
-      </NuxtLink>
+              : undefined
+        "
+        :secondary-href="accessDeniedByRole ? undefined : '/dashboard/help#settings-subscription'"
+      />
     </div>
 
     <template v-else>
@@ -87,24 +176,20 @@
             Showing newest {{ fetchLimit }} events - use search to narrow results.
           </p>
 
-          <div v-if="loading" class="px-4 py-8 sm:px-6 sm:py-10">
-            <div class="space-y-0 divide-y divide-gray-100/90 dark:divide-gray-800/80">
-              <div v-for="i in 8" :key="i" class="flex items-center gap-4 py-3.5">
-                <div
-                  class="h-9 w-9 shrink-0 animate-pulse rounded-full bg-gray-200/90 dark:bg-white/10"
-                />
-                <div class="min-w-0 flex-1 space-y-2">
-                  <div class="h-3 w-28 animate-pulse rounded-md bg-gray-200/90 dark:bg-white/10" />
-                  <div
-                    class="h-3 max-w-md animate-pulse rounded-md bg-gray-100 dark:bg-white/[0.06]"
-                  />
-                </div>
-                <div
-                  class="hidden h-3 w-16 animate-pulse rounded-md bg-gray-100 dark:bg-white/[0.06] sm:block"
-                />
-              </div>
-            </div>
-          </div>
+          <DashTableSkeleton
+            v-if="loading"
+            :columns="[
+              { label: 'User' },
+              { label: 'Action', class: 'dashboard-table__col-status', bone: '4.5rem' },
+              { label: 'Details', lines: 2 },
+              { label: 'When', class: 'whitespace-nowrap text-right', lines: 2 },
+            ]"
+            :rows="8"
+            leading="avatar"
+            :leading-meta="false"
+            flush
+            aria-label="Loading activity"
+          />
 
           <div v-else-if="fetchError" class="px-4 py-12 text-center sm:px-6">
             <p class="text-sm font-medium text-red-600 dark:text-red-400">
@@ -235,6 +320,7 @@
         </div>
       </div>
     </template>
+    </template>
   </div>
 </template>
 
@@ -246,9 +332,13 @@ import {
   ClipboardDocumentListIcon,
   CubeIcon,
   FolderIcon,
+  FunnelIcon,
   InboxIcon,
   MagnifyingGlassIcon,
+  PencilSquareIcon,
+  PlusIcon,
   Squares2X2Icon,
+  TrashIcon,
 } from '~/utils/app-icons'
 import type { ActivityAction, ActivityEntityType, ActivityLog } from '~/composables/useActivityLog'
 import {
@@ -261,6 +351,14 @@ import {
   normalizeActivityLogText,
 } from '~/composables/useActivityLog'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
+import FeatureGateCard from '~/components/subscription/FeatureGateCard.vue'
+import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
+import IosQuickActionBar, { type IosQuickActionOption } from '~/components/ios/IosQuickActionBar.vue'
+import IosTransactionListSkeleton from '~/components/ios/IosTransactionListSkeleton.vue'
+import IosSearchBar from '~/components/ios/IosSearchBar.vue'
+import IosReceiptTransactionRow, {
+  type ReceiptTransactionVariant,
+} from '~/components/ios/IosReceiptTransactionRow.vue'
 const {
   eyebrowClass,
   pageTitleClass,
@@ -272,6 +370,7 @@ const {
 } = useDashboardPageChrome()
 
 const { tableShellFlexClass } = useDashboardTableChrome()
+const { isCapacitorIos } = useIsCapacitorIos()
 
 const userStore = useUserStore()
 const staffStore = useStaffStore()
@@ -302,6 +401,37 @@ const actionTabs: Array<{ value: 'all' | ActivityAction; label: string }> = [
   { value: 'updated', label: 'Updated' },
   { value: 'deleted', label: 'Deleted' },
 ]
+
+const iosActivityFilterOptions = computed((): IosQuickActionOption[] =>
+  actionTabs.map((tab) => ({
+    value: tab.value,
+    label: tab.label,
+    icon:
+      tab.value === 'all'
+        ? FunnelIcon
+        : tab.value === 'created'
+          ? PlusIcon
+          : tab.value === 'updated'
+            ? PencilSquareIcon
+            : TrashIcon,
+  }))
+)
+
+function iosActivityVariant(action: ActivityAction): ReceiptTransactionVariant {
+  if (action === 'created') return 'credit'
+  if (action === 'deleted') return 'cancelled'
+  return 'pending'
+}
+
+function formatDateShort(d: Date | unknown): string {
+  if (!d) return ''
+  const date = d instanceof Date ? d : new Date(d as string | number)
+  if (Number.isNaN(date.getTime())) return ''
+  const day = String(date.getDate()).padStart(2, '0')
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const year = date.getFullYear()
+  return `${day}.${month}.${year}`
+}
 
 const AVATAR_TONES = [
   'bg-violet-100 text-violet-800 dark:bg-violet-500/20 dark:text-violet-200',
@@ -467,6 +597,24 @@ function relativeTime(d: Date | unknown): string {
   const days = Math.floor(hrs / 24)
   if (days < 7) return `${days}d ago`
   return formatDate(d)
+}
+
+/** Short relative label for iOS transaction rows (never full locale datetime). */
+function relativeTimeCompact(d: Date | unknown): string {
+  if (!d) return ''
+  const date = d instanceof Date ? d : new Date(d as string | number)
+  if (Number.isNaN(date.getTime())) return ''
+  const diffMs = Date.now() - date.getTime()
+  const mins = Math.floor(diffMs / 60000)
+  if (mins < 1) return 'Now'
+  if (mins < 60) return `${mins}m`
+  const hrs = Math.floor(mins / 60)
+  if (hrs < 24) return `${hrs}h`
+  const days = Math.floor(hrs / 24)
+  if (days < 7) return `${days}d`
+  if (days < 30) return `${Math.floor(days / 7)}w`
+  if (days < 365) return `${Math.floor(days / 30)}mo`
+  return `${Math.floor(days / 365)}y`
 }
 
 function getInitials(name: string): string {

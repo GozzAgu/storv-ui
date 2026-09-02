@@ -1,328 +1,153 @@
 <template>
   <SidePanel
-    :modelValue="props.modelValue"
-    @update:modelValue="(value: boolean) => emit('update:modelValue', value)"
-    :title="isEdit ? 'Edit Staff Member' : 'Add Staff Member'"
-    :subtitle="
-      isEdit
-        ? 'Update staff details.'
-        : 'Add a staff member with sign-in. You can email their credentials or copy them yourself.'
-    "
+    :model-value="props.modelValue"
+    :title="isEdit ? 'Edit staff' : 'Add staff'"
     size="lg"
+    @update:model-value="(value: boolean) => emit('update:modelValue', value)"
   >
-    <div class="space-y-4">
-      <!-- Success: email sent -->
-      <div v-if="emailSentSuccess" class="flex flex-col items-center text-center py-2">
-        <div
-          class="w-12 h-12 rounded-full bg-emerald-500/10 dark:bg-emerald-400/10 flex items-center justify-center mb-4"
-        >
-          <CheckCircleIcon
-            class="w-6 h-6 text-emerald-600 dark:text-emerald-400"
-            stroke-width="2"
+    <div v-if="emailSentSuccess" class="dash-drawer-empty">
+      <CheckCircleIcon class="h-6 w-6" stroke-width="1.75" />
+      <p>Invite emailed</p>
+      <p class="dash-drawer-hint">
+        We sent a sign-in link to
+        <span class="font-medium">{{ formData.email }}</span>. They can set a password, then sign in.
+      </p>
+    </div>
+
+    <div v-else-if="showTemporaryPassword" class="dash-drawer-empty">
+      <CheckCircleIcon class="h-6 w-6" stroke-width="1.75" />
+      <p>Account created</p>
+      <p class="dash-drawer-hint">
+        Share this one-time password with
+        <span class="font-medium">{{ formData.email }}</span>. They can change it in Profile after signing in.
+      </p>
+      <div class="staff-invite-secret">
+        <code>{{ temporaryPasswordToShow }}</code>
+        <button type="button" class="staff-invite-secret__copy" @click="copyTemporaryPassword">
+          <ClipboardDocumentIcon
+            v-if="!copiedPassword"
+            class="h-4 w-4 shrink-0"
+            stroke-width="1.75"
           />
-        </div>
-        <h4 class="text-base font-semibold text-gray-900 dark:text-gray-100 tracking-tight mb-1">
-          Invite emailed
-        </h4>
-        <p class="text-sm text-gray-500 dark:text-gray-400 max-w-sm mb-6">
-          Sign-in details were sent to
-          <span class="font-medium text-gray-700 dark:text-gray-300">{{ formData.email }}</span>.
-          They can sign in and set a new password on first visit.
-        </p>
-        <Button
-          size="sm"
-          class="!rounded-2xl w-full sm:w-auto min-w-[120px]"
-          @click="closeAfterSuccess"
-        >
-          Done
-        </Button>
-      </div>
-
-      <!-- Success: show one-time password to copy and share -->
-      <div v-else-if="showTemporaryPassword" class="flex flex-col items-center text-center py-2">
-        <div
-          class="w-12 h-12 rounded-full bg-emerald-500/10 dark:bg-emerald-400/10 flex items-center justify-center mb-4"
-        >
-          <CheckCircleIcon
-            class="w-6 h-6 text-emerald-600 dark:text-emerald-400"
-            stroke-width="2"
-          />
-        </div>
-        <h4 class="text-base font-semibold text-gray-900 dark:text-gray-100 tracking-tight mb-1">
-          Account created
-        </h4>
-        <p class="text-sm text-gray-500 dark:text-gray-400 max-w-sm mb-5">
-          Share this one-time password with
-          <span class="font-medium text-gray-700 dark:text-gray-300">{{ formData.email }}</span
-          >. They sign in with email + this password, then can change it in Profile.
-        </p>
-        <div class="w-full flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-6">
-          <div
-            class="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-sm bg-gray-50 dark:!bg-dashboard-card/90/80"
-          >
-            <code
-              class="flex-1 text-sm font-mono text-gray-800 dark:text-gray-200 tracking-wide select-all truncate"
-              >{{ temporaryPasswordToShow }}</code
-            >
-            <button
-              type="button"
-              @click="copyTemporaryPassword"
-              class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-sm text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200/80 dark:hover:bg-gray-700/80 transition-colors"
-            >
-              <ClipboardDocumentIcon
-                v-if="!copiedPassword"
-                class="w-4 h-4 shrink-0"
-                stroke-width="1.75"
-              />
-              <CheckCircleIcon v-else class="w-4 h-4 shrink-0 text-emerald-500" stroke-width="2" />
-              {{ copiedPassword ? 'Copied' : 'Copy' }}
-            </button>
-          </div>
-        </div>
-        <p class="text-xs text-gray-400 dark:text-gray-500 mb-3">
-          Staff can change their password in Profile after signing in.
-        </p>
-        <div class="flex w-full flex-col gap-2 sm:flex-row sm:justify-center">
-          <Button
-            variant="outline"
-            size="sm"
-            class="!rounded-2xl w-full sm:w-auto"
-            :disabled="isSendingInviteEmail"
-            @click="emailCredentialsAfterCreate"
-          >
-            {{ isSendingInviteEmail ? 'Sending…' : 'Email to staff instead' }}
-          </Button>
-          <Button
-            size="sm"
-            class="!rounded-2xl w-full sm:w-auto min-w-[120px]"
-            @click="closeAfterSuccess"
-          >
-            Done
-          </Button>
-        </div>
-      </div>
-
-      <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div>
-          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
-            First name <span class="text-red-500">*</span>
-          </label>
-          <input
-            v-model="formData.firstName"
-            type="text"
-            required
-            class="w-full px-3 py-2 text-sm rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 transition-colors"
-            placeholder="First name"
-          />
-        </div>
-
-        <div>
-          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
-            Last name <span class="text-red-500">*</span>
-          </label>
-          <input
-            v-model="formData.lastName"
-            type="text"
-            required
-            class="w-full px-3 py-2 text-sm rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 transition-colors"
-            placeholder="Last name"
-          />
-        </div>
-
-        <div>
-          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
-            Email <span class="text-red-500">*</span>
-          </label>
-          <input
-            v-model="formData.email"
-            type="email"
-            required
-            class="w-full px-3 py-2 text-sm rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 transition-colors"
-            placeholder="email@example.com"
-          />
-        </div>
-
-        <div v-if="!isEdit" class="md:col-span-2 space-y-2">
-          <label class="flex cursor-pointer items-start gap-2.5 rounded-lg border border-gray-200/80 bg-gray-50/60 px-3 py-2.5 dark:border-white/10 dark:bg-white/[0.03]">
-            <input
-              v-model="emailCredentialsToStaff"
-              type="checkbox"
-              class="mt-0.5 rounded border-gray-300 text-primary-600 focus:ring-primary-500/40"
-            />
-            <span class="text-xs leading-relaxed text-gray-700 dark:text-gray-300">
-              <span class="font-medium text-gray-900 dark:text-gray-100">Email sign-in details:</span>
-              send the temporary password to their inbox instead of showing it here (requires
-              Resend email on the server).
-            </span>
-          </label>
-          <div class="flex items-center gap-3">
-            <p class="text-xs text-gray-500 dark:text-gray-400 flex-1">
-              {{
-                emailCredentialsToStaff
-                  ? 'A random password is generated and emailed when the account is created.'
-                  : "A random password will be generated. You'll see it after the account is created so you can copy and share it."
-              }}
-            </p>
-            <button
-              type="button"
-              @click="regeneratePassword"
-              class="p-2 rounded-sm text-gray-500 dark:text-gray-400 hover:text-primary-500 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors shrink-0"
-              aria-label="Regenerate password"
-            >
-              <ArrowPathIcon class="w-4 h-4" stroke-width="1.75" />
-            </button>
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
-            Phone
-          </label>
-          <input
-            v-model="formData.phone"
-            type="tel"
-            class="w-full px-3 py-2 text-sm rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 transition-colors"
-            placeholder="+1234567890"
-          />
-        </div>
-
-        <div>
-          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
-            Position <span class="text-red-500">*</span>
-          </label>
-          <input
-            v-model="formData.position"
-            type="text"
-            required
-            class="w-full px-3 py-2 text-sm rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 transition-colors"
-            placeholder="e.g. Sales Associate"
-          />
-        </div>
-
-        <div>
-          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
-            Role <span class="text-red-500">*</span>
-          </label>
-          <select
-            v-model="formData.role"
-            required
-            class="w-full px-3 py-2 text-sm rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 transition-colors"
-          >
-            <option value="staff">Staff</option>
-            <option value="manager">Manager</option>
-            <option value="intern">Intern</option>
-          </select>
-        </div>
-
-        <div
-          v-if="canGrantInventoryAccess && formData.role === 'manager'"
-          class="rounded-lg border border-primary-200/60 bg-primary-50/40 px-3 py-2.5 dark:border-primary-500/20 dark:bg-primary-950/20"
-        >
-          <label class="flex cursor-pointer items-start gap-2.5">
-            <input
-              v-model="formData.canManageInventory"
-              type="checkbox"
-              class="mt-0.5 rounded border-gray-300 text-primary-600 focus:ring-primary-500/40"
-            />
-            <span class="text-xs leading-relaxed text-gray-700 dark:text-gray-300">
-              <span class="font-medium text-gray-900 dark:text-gray-100">Inventory editor:</span>
-              can add and edit categories, products, quantities, and prices (same as owner on the
-              floor, not billing or staff admin).
-            </span>
-          </label>
-        </div>
-
-        <div>
-          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
-            Hire date <span class="text-red-500">*</span>
-          </label>
-          <input
-            v-model="formData.hireDate"
-            type="date"
-            required
-            class="w-full px-3 py-2 text-sm rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 transition-colors"
-          />
-        </div>
-
-        <div>
-          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
-            Salary (optional)
-          </label>
-          <input
-            v-model.number="formData.salary"
-            type="number"
-            min="0"
-            step="0.01"
-            class="w-full px-3 py-2 text-sm rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 transition-colors"
-            placeholder="0.00"
-          />
-        </div>
-
-        <div>
-          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
-            Status <span class="text-red-500">*</span>
-          </label>
-          <select
-            v-model="formData.status"
-            required
-            class="w-full px-3 py-2 text-sm rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 transition-colors"
-          >
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-            <option value="on_leave">On Leave</option>
-          </select>
-        </div>
-      </div>
-
-      <div
-        v-if="errorMessage"
-        class="p-3 rounded-sm bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40"
-      >
-        <p class="text-xs text-red-600 dark:text-red-400">{{ errorMessage }}</p>
+          <CheckCircleIcon v-else class="h-4 w-4 shrink-0" stroke-width="2" />
+          {{ copiedPassword ? 'Copied' : 'Copy' }}
+        </button>
       </div>
     </div>
 
+    <IosForm v-else id="staff-drawer-form" layout="fill" @submit="handleSubmit">
+      <IosFormSection v-if="staffLimitReached && !isEdit" fixed>
+        <LimitUpgradeHint message="Your plan staff limit is reached for this store." />
+        <p class="ios-form__hint dash-drawer-hint">{{ staffLimitMessage }}</p>
+      </IosFormSection>
+
+      <IosFormSection fixed>
+        <div class="ios-form__grid sm:grid-cols-2">
+          <IosFormField label="First name" required>
+            <IosFormInput v-model="formData.firstName" required placeholder="First name" />
+          </IosFormField>
+          <IosFormField label="Last name" required>
+            <IosFormInput v-model="formData.lastName" required placeholder="Last name" />
+          </IosFormField>
+        </div>
+        <IosFormField label="Email" required>
+          <IosFormInput
+            v-model="formData.email"
+            type="email"
+            required
+            placeholder="email@example.com"
+          />
+        </IosFormField>
+        <IosFormField label="Phone" hint="Optional">
+          <IosFormInput v-model="formData.phone" type="tel" placeholder="+1234567890" />
+        </IosFormField>
+      </IosFormSection>
+
+      <IosFormSection v-if="!isEdit" fixed>
+        <IosFormToggle
+          v-model="emailCredentialsToStaff"
+          label="Email sign-in details"
+          :hint="
+            emailCredentialsToStaff
+              ? 'A random password is generated and emailed when the account is created.'
+              : 'A random password is generated. You can copy it after the account is created.'
+          "
+        />
+        <button type="button" class="staff-invite-regen" @click="regeneratePassword">
+          <ArrowPathIcon class="h-4 w-4" stroke-width="1.75" />
+          Regenerate password
+        </button>
+      </IosFormSection>
+
+      <IosFormSection fixed>
+        <IosFormField label="Position" required>
+          <IosFormInput
+            v-model="formData.position"
+            required
+            placeholder="e.g. Sales Associate"
+          />
+        </IosFormField>
+        <IosFormField label="Role" required>
+          <IosFormSelect v-model="formData.role" required extra-class="cursor-pointer">
+            <option value="staff">Staff</option>
+            <option value="manager">Manager</option>
+            <option value="intern">Intern</option>
+          </IosFormSelect>
+        </IosFormField>
+        <IosFormToggle
+          v-if="canGrantInventoryAccess && formData.role === 'manager'"
+          v-model="formData.canManageInventory"
+          label="Inventory editor"
+          hint="Can add and edit categories, products, quantities, and prices."
+        />
+        <IosFormField label="Hire date" required>
+          <IosFormInput v-model="formData.hireDate" type="date" required />
+        </IosFormField>
+        <IosFormField label="Salary" hint="Optional">
+          <IosFormInput
+            v-model="formData.salary"
+            type="number"
+            min="0"
+            step="0.01"
+            placeholder="0.00"
+          />
+        </IosFormField>
+        <IosFormField label="Status" required>
+          <IosFormSelect v-model="formData.status" required extra-class="cursor-pointer">
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+            <option value="on_leave">On Leave</option>
+          </IosFormSelect>
+        </IosFormField>
+      </IosFormSection>
+
+      <p v-if="errorMessage" class="ios-form__error">{{ errorMessage }}</p>
+    </IosForm>
+
     <template #footer>
-      <template v-if="!showTemporaryPassword">
-        <Button
-          variant="outline"
-          size="sm"
-          @click="handleClose"
-          class="w-full sm:w-auto !rounded-2xl"
-          >Cancel</Button
-        >
-        <Button
-          size="sm"
-          @click="handleSubmit"
-          :disabled="isSubmitting || !isFormValid"
-          class="w-full sm:w-auto !rounded-2xl"
-        >
-          <span v-if="isSubmitting" class="flex items-center gap-1.5">
-            <svg
-              class="animate-spin h-3.5 w-3.5"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                class="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                stroke-width="4"
-              ></circle>
-              <path
-                class="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              ></path>
-            </svg>
-            {{ isEdit ? 'Updating...' : 'Adding...' }}
-          </span>
-          <span v-else>{{ isEdit ? 'Update Staff' : 'Add Staff' }}</span>
-        </Button>
-      </template>
+      <IosDrawerActions
+        v-if="emailSentSuccess"
+        cancel-label="Done"
+        :show-primary="false"
+        @cancel="closeAfterSuccess"
+      />
+      <IosDrawerActions
+        v-else-if="showTemporaryPassword"
+        cancel-label="Done"
+        primary-label="Email to staff instead"
+        :primary-loading="isSendingInviteEmail"
+        :primary-disabled="isSendingInviteEmail"
+        @cancel="closeAfterSuccess"
+        @primary="emailCredentialsAfterCreate"
+      />
+      <IosDrawerActions
+        v-else
+        :primary-label="staffFooterPrimaryLabel"
+        :primary-loading="isSubmitting"
+        :primary-disabled="isSubmitting || !isFormValid || staffLimitReached"
+        @cancel="handleClose"
+        @primary="handleSubmit"
+      />
     </template>
   </SidePanel>
 </template>
@@ -335,7 +160,15 @@ import {
   ArrowPathIcon,
 } from '~/utils/app-icons'
 import SidePanel from '~/components/ui/SidePanel.vue'
-import Button from '~/components/ui/Button.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
+import {
+  IosForm,
+  IosFormSection,
+  IosFormField,
+  IosFormInput,
+  IosFormSelect,
+  IosFormToggle,
+} from '~/components/ios/forms'
 import type { Staff } from '~/composables/useStaff'
 import { useStaffStore } from '~/stores/staff'
 import { useDepartmentsStore } from '~/stores/departments'
@@ -345,6 +178,9 @@ import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useAppToast } from '~/composables/useAppToast'
 import { getApiErrorMessage } from '~/utils/api-error-message'
+import LimitUpgradeHint from '~/components/subscription/LimitUpgradeHint.vue'
+import { getPlanDisplayName, getMinimumPlanForFeature } from '~/types/subscription'
+import { useProductAnalytics } from '~/composables/useProductAnalytics'
 
 interface Props {
   modelValue: boolean
@@ -367,6 +203,7 @@ const { sendStaffInviteEmail } = useStaffInviteEmail()
 const authStore = useAuthStore()
 const userStore = useUserStore()
 const toast = useAppToast()
+const { canAddStaff, limits } = useSubscriptionFeatures()
 const { canGrantInventoryAccess } = usePermissions()
 
 const formData = ref({
@@ -425,6 +262,30 @@ const createdStaffMeta = ref<{
 } | null>(null)
 
 const isEdit = computed(() => !!props.staff)
+
+const staffFooterPrimaryLabel = computed(() => (isEdit.value ? 'Update staff' : 'Add staff'))
+
+const storeStaffCount = computed(() => {
+  const dept = departmentsStore.getDepartmentById(props.departmentId)
+  const storeId = dept?.storeId
+  if (!storeId) return 0
+  return staffStore.staff.filter((member) => {
+    const memberDept = departmentsStore.getDepartmentById(member.departmentId)
+    return memberDept?.storeId === storeId && member.status !== 'inactive'
+  }).length
+})
+
+const staffLimitReached = computed(
+  () => !isEdit.value && !canAddStaff(storeStaffCount.value)
+)
+
+const staffLimitMessage = computed(() => {
+  const max = limits.value.maxStaffPerStore
+  if (max < 0) return ''
+  const upgradePlan = getMinimumPlanForFeature('analytics')
+  const planHint = upgradePlan ? ` Upgrade to ${getPlanDisplayName(upgradePlan)} for more.` : ''
+  return `Your plan includes up to ${max} staff per store.${planHint}`
+})
 
 const isFormValid = computed(() => {
   const base = !!(
@@ -504,8 +365,10 @@ async function emailStaffCredentials(params: {
       userStore.userData?.name ||
       'Storvv',
     temporaryPassword: params.temporaryPassword,
-    mode: 'credentials',
+    mode: 'reset_link',
   })
+  const { trackEvent } = useProductAnalytics()
+  trackEvent('staff_invite_sent', { mode: 'reset_link' })
 }
 
 async function emailCredentialsAfterCreate() {
@@ -575,6 +438,10 @@ const handleClose = () => {
 }
 
 const handleSubmit = async () => {
+  if (!isEdit.value && staffLimitReached.value) {
+    errorMessage.value = staffLimitMessage.value || 'Staff limit reached for your plan.'
+    return
+  }
   if (!isFormValid.value) {
     errorMessage.value = 'Please fill in all required fields correctly.'
     return
@@ -684,3 +551,60 @@ onMounted(() => {
   // Any initialization logic can go here
 })
 </script>
+
+<style scoped>
+.staff-invite-secret {
+  display: flex;
+  width: 100%;
+  max-width: 22rem;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+  padding: 0.75rem 0.875rem;
+  border-radius: 1rem;
+  background: rgb(244 244 245);
+  text-align: left;
+}
+
+.staff-invite-secret code {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.8125rem;
+  letter-spacing: 0.02em;
+}
+
+.staff-invite-secret__copy,
+.staff-invite-regen {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  color: inherit;
+}
+
+.staff-invite-secret__copy {
+  flex-shrink: 0;
+  border-radius: 9999px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.staff-invite-regen {
+  margin-top: 0.25rem;
+  padding: 0.125rem 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  opacity: 0.7;
+}
+
+.staff-invite-regen:hover,
+.staff-invite-secret__copy:hover {
+  opacity: 1;
+}
+</style>

@@ -6,25 +6,27 @@ import {
 } from '~/utils/demo-mode'
 import { initDemoAuth, syncDemoToPinia } from '~/utils/demo-bridge'
 
+/**
+ * Demo routes share the same theme system as the signed-in dashboard.
+ * Only toggle a document hook for optional demo-specific CSS — never force dark/light here,
+ * or navigation fights `useThemeStore().applyTheme()` and the theme flips between pages.
+ */
 function applyDemoDocumentTheme(active: boolean) {
   if (!import.meta.client) return
   const html = document.documentElement
+  const wasActive = html.classList.contains('demo-dashboard')
   html.classList.toggle('demo-dashboard', active)
 
-  if (active) {
-    html.classList.add('dark')
-    html.style.colorScheme = 'dark'
-    const meta = document.getElementById('theme-color-meta')
-    if (meta) meta.setAttribute('content', '#050508')
-    return
-  }
+  if (wasActive === active) return
 
-  const themeStore = useThemeStore()
-  if (themeStore.initialized) {
-    themeStore.applyTheme()
-  } else {
-    html.classList.remove('dark')
-    html.style.colorScheme = 'light'
+  if (!active) {
+    const themeStore = useThemeStore()
+    if (themeStore.initialized) {
+      themeStore.applyTheme()
+    } else {
+      html.classList.remove('dark')
+      html.style.colorScheme = ''
+    }
   }
 }
 

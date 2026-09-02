@@ -33,7 +33,7 @@
         :aria-label="ariaLabel"
         :aria-labelledby="labelledBy"
         :aria-describedby="describedBy"
-        :class="sheetClass"
+        :class="[sheetClass, rootClass]"
         @click.stop
       >
         <div v-if="showHeader" :class="sheetHeaderClass">
@@ -96,6 +96,8 @@ const props = withDefaults(
     panelId?: string
     /** Where to mount - overlay host for CRUD, body for menu-level sheets */
     mount?: 'overlay-host' | 'body'
+    /** Extra class on sheet root (e.g. ios-drawer) */
+    rootClass?: string
   }>(),
   {
     variant: 'crud',
@@ -105,6 +107,7 @@ const props = withDefaults(
     bodyPadding: '',
     backdropLabel: 'Close',
     mount: 'overlay-host',
+    rootClass: '',
   }
 )
 

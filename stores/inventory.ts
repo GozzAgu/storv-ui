@@ -40,6 +40,7 @@ import { logActivity, getCurrentUserDisplayName } from '~/composables/useActivit
 import { duplicateSerialExistsViaApi, resolveSerialProductLine } from '~/utils/inventory-serial-validation'
 import {
   INVENTORY_FIRESTORE_PAGE_SIZE,
+  INVENTORY_FIRESTORE_ALL_CHUNK_SIZE,
   getInventoryItemsPage,
   fetchAllInventoryItemsChunked,
   clearInventoryItemQueryCaches,
@@ -63,6 +64,11 @@ import {
   normalizeFolderTemplate,
   normalizeInventoryItemNamedFields,
 } from '~/utils/capitalize-text'
+import {
+  isStoreFetchStampFresh,
+  isStoreListFetchFresh,
+  type StoreFetchStamp,
+} from '~/utils/store-data-cache'
 
 export { INVENTORY_FIRESTORE_PAGE_SIZE }
 
@@ -178,6 +184,15 @@ const inventoryItemsAllInflight = new Map<string, Promise<InventoryItem[]>>()
 /** Coalesce duplicate createFolder calls (e.g. iOS double-tap / submit+click). */
 let createFolderInflight: { key: string; promise: Promise<string> } | null = null
 let fetchFoldersInflight: { key: string; promise: Promise<void> } | null = null
+let foldersFetchStamp: StoreFetchStamp | null = null
+let availabilityStatsInflight: Promise<Record<string, InventoryItem[]>> | null = null
+let availabilityStatsStamp: StoreFetchStamp | null = null
+
+export function resetInventoryFetchStamps(): void {
+  foldersFetchStamp = null
+  availabilityStatsStamp = null
+  availabilityStatsInflight = null
+}
 
 export interface TemplateField {
   id: string
@@ -295,6 +310,9 @@ export const useInventoryStore = defineStore('inventory', {
       const storeIdForKey = (await getCurrentStoreId()) ?? ''
       if (options?.force) {
         fetchFoldersInflight = null
+        foldersFetchStamp = null
+      } else if (isStoreFetchStampFresh(foldersFetchStamp, storeIdForKey, options?.force)) {
+        return
       } else if (fetchFoldersInflight?.key === storeIdForKey) {
         return fetchFoldersInflight.promise
       }
@@ -341,24 +359,6 @@ export const useInventoryStore = defineStore('inventory', {
       }
 
       // console.log('[InventoryStore] fetchFolders - userId:', userId, 'currentStoreId:', currentStoreId, 'isStaff:', userStore.userData?.role === 'staff')
-
-      // If staff, also log their staff document info for debugging
-      if (userStore.userData?.role === 'staff') {
-        try {
-          const staffRef = collection(db, 'staff')
-          const staffQuery = query(staffRef, where('authUid', '==', authStore.currentUser.uid))
-          const staffSnapshot = await getDocs(staffQuery)
-          if (!staffSnapshot.empty) {
-            const staffDoc = staffSnapshot.docs[0]
-            if (staffDoc) {
-              const staffData = staffDoc.data()
-              // console.log('[InventoryStore] Staff document - storeId:', staffData.storeId, 'createdBy:', staffData.createdBy)
-            }
-          }
-        } catch (e) {
-          console.warn('[InventoryStore] Could not fetch staff doc for logging:', e)
-        }
-      }
 
       // Get staff departmentId if user is staff
       let staffDepartmentId: string | undefined
@@ -505,6 +505,7 @@ export const useInventoryStore = defineStore('inventory', {
           return dateB.getTime() - dateA.getTime()
         })
 
+        foldersFetchStamp = { storeId: currentStoreId, fetchedAt: Date.now() }
         this.loading = false
       } catch (error: any) {
         console.error('Error fetching inventory folders:', error)
@@ -526,12 +527,36 @@ export const useInventoryStore = defineStore('inventory', {
     },
 
     /** Scan store inventory items and compute available / sold / on-loan units per category. */
-    async fetchFolderAvailabilityStats(): Promise<Record<string, InventoryItem[]>> {
+    async fetchFolderAvailabilityStats(options?: {
+      force?: boolean
+    }): Promise<Record<string, InventoryItem[]>> {
       if (this.folders.length === 0) {
         this.folderAvailabilityStats = {}
         this.folderProfitStats = {}
         return {}
       }
+
+      const storeId = (await getCurrentStoreId()) ?? ''
+      const hasStats = Object.keys(this.folderAvailabilityStats).length > 0
+
+      if (
+        isStoreListFetchFresh(availabilityStatsStamp, storeId, hasStats, options?.force)
+      ) {
+        const grouped: Record<string, InventoryItem[]> = {}
+        for (const folder of this.folders) {
+          grouped[folder.id] = this.items[folder.id] ?? []
+        }
+        return grouped
+      }
+
+      if (options?.force) {
+        availabilityStatsInflight = null
+        availabilityStatsStamp = null
+      } else if (availabilityStatsInflight) {
+        return availabilityStatsInflight
+      }
+
+      const run = (async (): Promise<Record<string, InventoryItem[]>> => {
 
       const { isDemoModeActive } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) {
@@ -617,6 +642,9 @@ export const useInventoryStore = defineStore('inventory', {
         for (const folder of this.folders) {
           grouped[folder.id] = itemsByFolder.get(folder.id) ?? []
         }
+        if (storeId) {
+          availabilityStatsStamp = { storeId, fetchedAt: Date.now() }
+        }
         return grouped
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : String(error)
@@ -625,6 +653,14 @@ export const useInventoryStore = defineStore('inventory', {
       } finally {
         this.availabilityStatsLoading = false
       }
+      })()
+
+      availabilityStatsInflight = run.finally(() => {
+        if (availabilityStatsInflight === run) {
+          availabilityStatsInflight = null
+        }
+      })
+      return availabilityStatsInflight
     },
 
     /** Recompute and cache available stock value for one category (all items in folder). */
@@ -1612,7 +1648,7 @@ export const useInventoryStore = defineStore('inventory', {
           folderId,
           queryUserId: ctx.queryUserId,
           isStaff: ctx.isStaff,
-          pageSize: INVENTORY_FIRESTORE_PAGE_SIZE,
+          pageSize: INVENTORY_FIRESTORE_ALL_CHUNK_SIZE,
           force,
         })
       })()
@@ -1763,6 +1799,7 @@ export const useInventoryStore = defineStore('inventory', {
         const newItemRef = doc(itemsRef)
 
         const now = new Date()
+        const useClientTimestamps = import.meta.client && !navigator.onLine
         const payloadBase = stripUndefinedFirestoreValues(
           itemPayload as Record<string, unknown>
         ) as Omit<InventoryItem, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'folderId'>
@@ -1771,12 +1808,13 @@ export const useInventoryStore = defineStore('inventory', {
           folderId,
           storeId, // Add storeId from folder
           dateIn: now, // Set dateIn from createdAt
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
+          createdAt: useClientTimestamps ? now : serverTimestamp(),
+          updatedAt: useClientTimestamps ? now : serverTimestamp(),
           createdBy: createdByUid, // Use super admin UID for managers
         }
 
-        await setDoc(newItemRef, newItem)
+        const { writeDocumentWithOfflineSupport } = await import('~/composables/useOfflineMode')
+        await writeDocumentWithOfflineSupport(newItemRef, newItem as Record<string, unknown>)
 
         // Add to local state
         const itemForState: InventoryItem = {
@@ -1829,6 +1867,14 @@ export const useInventoryStore = defineStore('inventory', {
           userId: createdByUid,
           userDisplayName: userDisplayNameForItem,
         }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
+
+        const wasFirstItem = this.totalItems <= 1
+        if (wasFirstItem) {
+          const { useFunnelAnalytics } = await import('~/composables/useFunnelAnalytics')
+          await useFunnelAnalytics()
+            .recordMilestone('firstInventoryItemAt', { store_id: storeId })
+            .catch(() => undefined)
+        }
 
         return newItemRef.id
       } catch (error: any) {
@@ -2118,6 +2164,29 @@ export const useInventoryStore = defineStore('inventory', {
           userId: authStore.currentUser!.uid,
           userDisplayName,
         }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
+
+        const auditFields: Array<{ key: keyof InventoryItem; field: 'price' | 'name' | 'cost' | 'quantity' }> = [
+          { key: 'price', field: 'price' },
+          { key: 'cost', field: 'cost' },
+          { key: 'name', field: 'name' },
+          { key: 'quantity', field: 'quantity' },
+        ]
+        const { logInventoryAudit } = await import('~/composables/useInventoryAuditLog')
+        for (const entry of auditFields) {
+          if (entry.key in cleanedUpdates && existingItem) {
+            await logInventoryAudit({
+              itemId,
+              itemName: String(finalItemName),
+              field: entry.field,
+              previousValue: (existingItem as Record<string, unknown>)[entry.key] as
+                | string
+                | number
+                | null,
+              newValue: cleanedUpdates[entry.key] as string | number | null,
+              storeId,
+            }).catch(() => undefined)
+          }
+        }
       } catch (error: any) {
         console.error('Error updating item:', error)
         throw new Error(error.message || 'Failed to update item')

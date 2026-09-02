@@ -78,25 +78,14 @@
     </div>
 
     <template #footer>
-      <Button
-        variant="outline"
-        size="sm"
-        class="!rounded-2xl"
-        :disabled="isProcessing"
-        @click="handleCancel"
-      >
-        Cancel
-      </Button>
-      <Button
-        variant="primary"
-        size="sm"
-        class="!rounded-2xl"
-        :icon="ArrowUturnLeftIcon"
-        :disabled="!confirmed || isProcessing"
-        @click="handleConfirm"
-      >
-        {{ isProcessing ? 'Reactivating…' : 'Reactivate staff member' }}
-      </Button>
+      <IosDrawerActions
+        primary-label="Reactivate staff member"
+        :primary-icon="ArrowUturnLeftIcon"
+        :primary-disabled="!confirmed || isProcessing"
+        :primary-loading="isProcessing"
+        @cancel="handleCancel"
+        @primary="handleConfirm"
+      />
     </template>
   </Modal>
 </template>
@@ -108,7 +97,7 @@ import {
   CheckCircleIcon,
 } from '~/utils/app-icons'
 import Modal from '~/components/ui/Modal.vue'
-import Button from '~/components/ui/Button.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import type { Staff } from '~/composables/useStaff'
 

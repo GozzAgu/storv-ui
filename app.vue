@@ -25,6 +25,7 @@
 import { ref, onMounted } from 'vue'
 import ToastContainer from '~/components/ui/ToastContainer.vue'
 import { isCapacitorNative, markCapacitorDocument } from '~/utils/capacitor-env'
+import { captureException } from '~/utils/observability'
 
 const capacitorBooting = ref(false)
 
@@ -94,8 +95,9 @@ if (import.meta.client) {
       return
     }
 
-    // Log other unhandled rejections for debugging
+    // Log other unhandled rejections for debugging and observability
     console.warn('Unhandled promise rejection:', event.reason)
+    captureException(event.reason, { source: 'unhandledrejection' })
   })
 
   // Handle general errors

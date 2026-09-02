@@ -10,7 +10,7 @@
           Getting started
         </p>
         <h2 id="getting-started-heading" class="mt-1 text-sm font-semibold text-gray-900 dark:text-gray-100">
-          Set up your store in four steps
+          Set up your store in {{ steps.length }} steps
         </h2>
         <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">
           {{ completedCount }} of {{ steps.length }} complete
@@ -98,6 +98,7 @@ const inventoryStore = useInventoryStore()
 const receiptsStore = useReceiptsStore()
 const departmentsStore = useDepartmentsStore()
 const storesStore = useStoresStore()
+const { canUse: canUseBusinessCapability } = useBusinessCapabilities()
 
 const dismissed = ref(false)
 
@@ -131,46 +132,54 @@ const staffDepartmentsHref = computed(() => {
   return resolveStoreDepartmentsPath(storeId, storesStore.stores[0]?.id) ?? '/dashboard/settings'
 })
 
-const steps = computed((): ChecklistStep[] => [
-  {
-    id: 'category',
-    order: 1,
-    title: 'Create an inventory category',
-    description: 'Group products so your team can find stock quickly.',
-    href: '/dashboard/inventory',
-    cta: 'Add category',
-    done: hasCategory.value,
-  },
-  {
-    id: 'product',
-    order: 2,
-    title: 'Add your first product',
-    description: 'Open a category and add at least one item to sell.',
-    href: hasCategory.value
-      ? `/dashboard/inventory/${inventoryStore.folders[0]?.id ?? ''}`
-      : '/dashboard/inventory',
-    cta: 'Add product',
-    done: hasProduct.value,
-  },
-  {
-    id: 'sale',
-    order: 3,
-    title: 'Record a sale',
-    description: 'Create a receipt to start tracking revenue and payments.',
-    href: '/dashboard/receipts',
-    cta: 'Create sale',
-    done: hasSale.value,
-  },
-  {
-    id: 'staff',
-    order: 4,
-    title: 'Invite a team member',
-    description: 'Add staff to a department so they can sign in with their role.',
-    href: staffDepartmentsHref.value,
-    cta: 'Add staff',
-    done: hasStaff.value,
-  },
-])
+const steps = computed((): ChecklistStep[] => {
+  const allSteps: ChecklistStep[] = [
+    {
+      id: 'category',
+      order: 1,
+      title: 'Create an inventory category',
+      description: 'Group products so your team can find stock quickly.',
+      href: '/dashboard/inventory',
+      cta: 'Add category',
+      done: hasCategory.value,
+    },
+    {
+      id: 'product',
+      order: 2,
+      title: 'Add your first product',
+      description: 'Open a category and add at least one item to sell.',
+      href: hasCategory.value
+        ? `/dashboard/inventory/${inventoryStore.folders[0]?.id ?? ''}`
+        : '/dashboard/inventory',
+      cta: 'Add product',
+      done: hasProduct.value,
+    },
+    {
+      id: 'sale',
+      order: 3,
+      title: 'Record a sale',
+      description: 'Create a receipt to start tracking revenue and payments.',
+      href: '/dashboard/receipts',
+      cta: 'Create sale',
+      done: hasSale.value,
+    },
+    {
+      id: 'staff',
+      order: 4,
+      title: 'Invite a team member',
+      description: 'Add staff to a department so they can sign in with their role.',
+      href: staffDepartmentsHref.value,
+      cta: 'Add staff',
+      done: hasStaff.value,
+    },
+  ]
+
+  if (!canUseBusinessCapability('staffManagement')) {
+    return allSteps.filter((step) => step.id !== 'staff')
+  }
+
+  return allSteps
+})
 
 const completedCount = computed(() => steps.value.filter((step) => step.done).length)
 const allComplete = computed(() => completedCount.value === steps.value.length)

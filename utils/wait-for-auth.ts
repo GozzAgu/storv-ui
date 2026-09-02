@@ -14,6 +14,8 @@ export function getAuthWaitMs(): number {
   return isCapacitorNative() ? NATIVE_MAX_MS : DEFAULT_MAX_MS
 }
 
+let authWaitInflight: Promise<void> | null = null
+
 function waitForStoreLoading(
   isLoading: () => boolean,
   maxMs: number,
@@ -52,16 +54,29 @@ function waitForStoreLoading(
 /**
  * Wait for Pinia auth to finish initial restore. Always resolves within `maxMs`
  * so Capacitor never stays on a blank screen if `onAuthStateChanged` hangs.
+ * Dedupes parallel waits from stacked middleware.
  */
 export function waitForAuthStore(store: AuthStore, maxMs = DEFAULT_MAX_MS): Promise<void> {
-  return waitForStoreLoading(
+  if (import.meta.server || !store.loading) {
+    return Promise.resolve()
+  }
+
+  if (authWaitInflight) {
+    return authWaitInflight
+  }
+
+  authWaitInflight = waitForStoreLoading(
     () => store.loading,
     maxMs,
     () => {
       console.warn('[Auth] Initialization timeout - unblocking UI (Capacitor-safe fallback)')
       store.loading = false
     }
-  )
+  ).finally(() => {
+    authWaitInflight = null
+  })
+
+  return authWaitInflight
 }
 
 /** Wait for Firestore profile fetch to settle (or time out). */
@@ -76,7 +91,15 @@ export function waitForUserStore(store: UserStore, maxMs = DEFAULT_MAX_MS): Prom
   )
 }
 
-/** Ensure user profile is loaded (or fetch attempted) before onboarding redirects. */
+/**
+ * Ensure user profile is loaded (or fetch attempted) before onboarding redirects.
+ *
+ * Never blocks navigation on a live network read when we have *anything* cached for
+ * this user - stale data is shown instantly and refreshed in the background. Only a
+ * true cache miss (first-ever launch, or a brand-new account) waits on the network,
+ * and even then never longer than `maxMs` - the fetch keeps running in the background
+ * past that point and the dashboard shell picks up the result once it lands.
+ */
 export async function ensureUserProfileLoaded(
   userStore: UserStore,
   userId: string,
@@ -84,21 +107,23 @@ export async function ensureUserProfileLoaded(
 ): Promise<void> {
   if (userStore.userData?.uid === userId) return
 
-  if (!userStore.loading) {
-    try {
-      await userStore.fetchUserData(userId)
-    } catch {
-      /* ignore */
-    }
+  const { hydrateUserStoreFromCache } = await import('~/utils/user-profile-cache')
+  if (hydrateUserStoreFromCache(userStore, userId)) {
+    void userStore.fetchUserData(userId).catch(() => {})
+    return
   }
 
-  await waitForUserStore(userStore, maxMs)
+  const fetchPromise = userStore.fetchUserData(userId).catch(() => {})
+  const timedOut = Symbol('timeout')
+  const timeoutPromise = new Promise<typeof timedOut>((resolve) => {
+    setTimeout(() => resolve(timedOut), maxMs)
+  })
 
-  if (!userStore.userData && !userStore.loading) {
-    try {
-      await userStore.fetchUserData(userId)
-    } catch {
-      /* ignore */
-    }
+  const result = await Promise.race([fetchPromise.then(() => null), timeoutPromise])
+  if (result === timedOut) {
+    console.warn(
+      '[Auth] User profile fetch timed out - continuing without blocking navigation; fetch keeps running in the background'
+    )
+    if (userStore.loading) userStore.loading = false
   }
 }

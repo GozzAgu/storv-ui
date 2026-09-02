@@ -1,0 +1,396 @@
+/**
+ * iOS sales / receipt list — transaction-style rows (My Transactions mockup).
+ */
+
+html.capacitor-ios.capacitor-native .ios-sales-chrome {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-sales-shell .ios-filter-pills + .ios-filter-pills {
+  margin-top: -0.125rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-filter-pills {
+  margin-inline: -0.25rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-filter-pills__scroll {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 0.125rem 0.25rem 0.25rem;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+html.capacitor-ios.capacitor-native .ios-filter-pills__scroll::-webkit-scrollbar {
+  display: none;
+}
+
+html.capacitor-ios.capacitor-native .ios-filter-pills__pill {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: 2.125rem;
+  padding: 0.375rem 1rem;
+  border: none;
+  border-radius: 9999px;
+  background: rgb(120 120 128 / 0.12);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--ios-label);
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-filter-pills__pill {
+  background: rgb(255 255 255 / 0.08);
+}
+
+html.capacitor-ios.capacitor-native .ios-filter-pills__pill--active {
+  background: var(--ios-label);
+  color: var(--ios-home-bg, #f3f3f5);
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-filter-pills__pill--active {
+  background: rgb(255 255 255 / 0.92);
+  color: rgb(28 28 30);
+}
+
+html.capacitor-ios.capacitor-native .ios-filter-pills__pill:active {
+  transform: scale(0.97);
+}
+
+html.capacitor-ios.capacitor-native .ios-filter-pills__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.125rem;
+  height: 1.125rem;
+  padding-inline: 0.25rem;
+  border-radius: 9999px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  line-height: 1;
+  background: rgb(255 255 255 / 0.22);
+}
+
+html.capacitor-ios.capacitor-native .ios-filter-pills__pill--active .ios-filter-pills__badge {
+  background: rgb(0 0 0 / 0.12);
+}
+
+html.capacitor-ios.capacitor-native .receipts-mobile-list--ios,
+html.capacitor-ios.capacitor-native .outstanding-mobile-list--ios,
+html.capacitor-ios.capacitor-native .customers-mobile-list--ios {
+  display: block !important;
+  padding: 0 0 0.5rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-list {
+  overflow: hidden;
+  border-radius: var(--ios-home-radius, 20px);
+  background: var(--ios-home-card, #fff);
+  box-shadow: var(--ios-home-card-shadow);
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-receipt-transaction-list {
+  background: var(--ios-surface-solid, rgb(28 28 30));
+}
+
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  text-align: left;
+  color: inherit;
+}
+
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__main {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  padding: var(--ios-list-row-pad-block, 0.5625rem) var(--ios-list-row-pad-inline, 0.875rem);
+  border: none;
+  background: transparent;
+  text-align: left;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s ease;
+}
+
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-row--with-menu .ios-receipt-transaction-row__main {
+  padding-right: 0.25rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__menu {
+  align-self: center;
+  margin-right: 0.375rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-row:active,
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__main:active {
+  background: rgb(120 120 128 / 0.08);
+}
+
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-row:not(.ios-receipt-transaction-row--last):not(.ios-receipt-transaction-row--nested) {
+  border-bottom: 1px solid var(--ios-separator);
+}
+
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-list__group:not(.ios-receipt-transaction-list__group--last) {
+  border-bottom: 1px solid var(--ios-separator);
+}
+
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-list__nested {
+  background: rgb(120 120 128 / 0.06);
+  border-top: 1px solid var(--ios-separator);
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-receipt-transaction-list__nested {
+  background: rgb(255 255 255 / 0.04);
+}
+
+html.capacitor-ios.capacitor-native
+  .ios-receipt-transaction-list__nested
+  .ios-receipt-transaction-row:not(:last-child) {
+  border-bottom: 1px solid var(--ios-separator);
+}
+
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-row--nested {
+  padding-left: 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-row--nested .ios-receipt-transaction-row__main {
+  padding-left: 1.375rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-row--nested .ios-receipt-transaction-row__icon {
+  width: 1.875rem;
+  height: 1.875rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-row--nested .ios-receipt-transaction-row__title {
+  font-size: var(--ios-list-subtitle-size, 0.6875rem);
+  font-weight: 500;
+}
+
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__icon--customer {
+  border-color: rgb(0 122 255 / 0.45);
+  color: rgb(0 122 255);
+}
+
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__amount--warning {
+  color: rgb(255 149 0);
+}
+
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-row[data-receipt-flash] .ios-receipt-transaction-row__main {
+  background: rgb(0 122 255 / 0.08);
+}
+
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__main:active {
+  background: rgb(120 120 128 / 0.08);
+}
+
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--ios-list-icon-size, 2.125rem);
+  height: var(--ios-list-icon-size, 2.125rem);
+  border-radius: 9999px;
+  border: 1.5px solid var(--ios-separator);
+  color: var(--ios-label-secondary);
+}
+
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__icon svg {
+  width: 1rem;
+  height: 1rem;
+  stroke-width: 2;
+}
+
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__icon--credit {
+  border-color: rgb(52 199 89 / 0.55);
+  color: rgb(52 199 89);
+}
+
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__icon--debit {
+  border-color: rgb(255 59 48 / 0.55);
+  color: rgb(255 59 48);
+}
+
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__icon--pending {
+  border-color: rgb(255 149 0 / 0.55);
+  color: rgb(255 149 0);
+}
+
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__icon--cancelled {
+  border-color: rgb(142 142 147 / 0.55);
+  color: rgb(142 142 147);
+}
+
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__body {
+  min-width: 0;
+  flex: 1;
+}
+
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__title {
+  margin: 0;
+  font-size: var(--ios-list-title-size, 0.8125rem);
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--ios-label);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__subtitle {
+  margin: 0.125rem 0 0;
+  font-size: var(--ios-list-subtitle-size, 0.6875rem);
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--ios-label-secondary);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__meta {
+  flex: 0 0 6.25rem;
+  width: 6.25rem;
+  min-width: 0;
+  max-width: 6.25rem;
+  align-self: flex-start;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.1875rem;
+  overflow: hidden;
+  padding-top: 0.125rem;
+  text-align: right;
+}
+
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__amount {
+  margin: 0;
+  width: 100%;
+  min-width: 0;
+  font-size: var(--ios-list-amount-size, 0.75rem);
+  font-weight: 600;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+  letter-spacing: -0.02em;
+  color: var(--ios-label);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__date {
+  margin: 0;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--ios-list-meta-size, 0.625rem);
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--ios-label-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__amount--positive {
+  color: rgb(52 199 89);
+}
+
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__amount--negative,
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__amount--neutral {
+  color: var(--ios-label);
+}
+
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__amount--warning {
+  color: rgb(255 149 0);
+}
+
+html.capacitor-ios.capacitor-native .ios-sales-shell .dash-table-empty-state,
+html.capacitor-ios.capacitor-native .ios-inventory-items-page .dash-table-empty-state {
+  border-radius: var(--ios-home-radius, 20px);
+  background: var(--ios-home-card, #fff);
+  box-shadow: var(--ios-home-card-shadow);
+  border: none;
+}
+
+/* Multi-store sync panels inside sales shell */
+html.capacitor-ios.capacitor-native .ios-sales-shell .ios-multi-store-panel {
+  overflow: hidden;
+  border-radius: var(--ios-home-radius, 20px);
+  background: var(--ios-home-card, #fff);
+  box-shadow: var(--ios-home-card-shadow);
+  border: none !important;
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-sales-shell .ios-multi-store-panel {
+  background: var(--ios-surface-solid, rgb(28 28 30));
+}
+
+html.capacitor-ios.capacitor-native .ios-sales-shell .ios-multi-store-panel .dash-settings-panel__header {
+  padding: 1rem 1rem 0.625rem;
+  border: none;
+  background: transparent;
+  min-height: auto;
+}
+
+html.capacitor-ios.capacitor-native .ios-sales-shell .ios-multi-store-panel .dash-settings-panel__title {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-transform: none;
+  color: var(--ios-label);
+}
+
+html.capacitor-ios.capacitor-native .ios-sales-shell .ios-multi-store-panel .dash-settings-panel__subtitle {
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: var(--ios-label-secondary);
+}
+
+html.capacitor-ios.capacitor-native .ios-sales-shell .ios-multi-store-panel .dash-settings-panel__body {
+  padding: 0 1rem 1rem;
+  border: none;
+  background: transparent;
+  border-radius: 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-sales-shell .ios-multi-store-panel--flush > .p-3,
+html.capacitor-ios.capacitor-native .ios-sales-shell .ios-multi-store-panel--flush > .sm\\:p-4 {
+  padding: 0 !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-sales-shell .ios-multi-store-panel .dash-table-toolbar,
+html.capacitor-ios.capacitor-native .ios-sales-shell .ios-multi-store-panel .dash-table-shell {
+  border: none;
+  box-shadow: none;
+  background: transparent;
+}

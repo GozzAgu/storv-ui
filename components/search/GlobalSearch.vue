@@ -8,7 +8,7 @@
       leave-from-class="opacity-100"
       leave-to-class="opacity-0"
     >
-      <div v-if="searchStore.isOpen" class="fixed inset-0 z-[100]" role="presentation">
+      <div v-if="searchStore.isOpen" class="fixed inset-0 z-[100]" data-dashboard-teleport role="presentation">
         <!-- Dismiss on overlay click -->
         <div
           data-global-search-backdrop
@@ -26,7 +26,7 @@
           >
             <!-- Search -->
             <div class="shrink-0 px-4 pb-3 pt-4">
-              <div class="relative">
+              <div class="ios-search-input-wrap relative">
                 <MagnifyingGlassIcon
                   class="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500"
                 />
@@ -177,15 +177,19 @@
               <!-- No Results -->
               <div
                 v-else-if="!searchStore.hasResults && searchStore.query.trim()"
-                class="flex flex-col items-center justify-center px-6 py-14 text-center"
+                class="dash-empty-state dash-empty-state--compact flex flex-col items-center justify-center px-6 py-14 text-center"
               >
-                <MagnifyingGlassIcon
-                  class="mb-3 h-8 w-8 text-gray-300 dark:text-gray-600"
-                  stroke-width="1.5"
-                />
-                <p class="text-sm font-medium text-gray-900 dark:text-gray-100">No results found</p>
+                <div class="dash-empty-state__mark">
+                  <MagnifyingGlassIcon
+                    class="dash-empty-state__icon h-8 w-8 text-gray-300 dark:text-gray-600"
+                    stroke-width="1.5"
+                  />
+                </div>
+                <p class="dash-empty-state__title text-sm font-medium text-gray-900 dark:text-gray-100">
+                  No results found
+                </p>
                 <p
-                  class="mt-1 max-w-[16rem] text-xs leading-relaxed text-gray-500 dark:text-gray-400"
+                  class="dash-empty-state__desc mt-1 max-w-[16rem] text-xs leading-relaxed text-gray-500 dark:text-gray-400"
                 >
                   Try a different term or clear filters
                 </p>
@@ -196,15 +200,17 @@
                 v-else-if="!searchStore.query.trim() && !searchStore.hasActiveFilters"
                 class="px-4 py-4 sm:py-5"
               >
-                <div class="py-8 text-center">
-                  <MagnifyingGlassIcon
-                    class="mx-auto mb-3 h-8 w-8 text-primary-500/70 dark:text-primary-400/80"
-                    stroke-width="1.5"
-                  />
-                  <p class="text-sm font-medium tracking-tight text-gray-900 dark:text-gray-50">
+                <div class="dash-empty-state dash-empty-state--compact py-8 text-center">
+                  <div class="dash-empty-state__mark mx-auto">
+                    <MagnifyingGlassIcon
+                      class="dash-empty-state__icon h-8 w-8 text-gray-400 dark:text-gray-500"
+                      stroke-width="1.5"
+                    />
+                  </div>
+                  <p class="dash-empty-state__title text-sm font-medium tracking-tight text-gray-900 dark:text-gray-50">
                     Search your workspace
                   </p>
-                  <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  <p class="dash-empty-state__desc mt-1 text-xs text-gray-500 dark:text-gray-400">
                     Sales, inventory, customers, and more
                   </p>
                 </div>
@@ -361,6 +367,7 @@ import SavedSearchesModal from '~/components/search/SavedSearchesModal.vue'
 const router = useRouter()
 const searchStore = useSearchStore()
 const userStore = useUserStore()
+const { canUse: canUseBusinessCapability } = useBusinessCapabilities()
 const searchInput = ref<HTMLInputElement | null>(null)
 const showAdvancedFilters = ref(false)
 const showSavedSearchesModal = ref(false)
@@ -382,8 +389,12 @@ const entityTypes = computed(() => {
     { value: 'staff', label: 'Staff', icon: UserIcon },
   ]
 
-  // Remove departments and staff from search for staff users
+  // Remove departments and staff from search for staff users or solo/simple experience
   if (isStaff.value) {
+    return baseTypes.filter((t) => t.value !== 'departments' && t.value !== 'staff')
+  }
+
+  if (!canUseBusinessCapability('staffManagement')) {
     return baseTypes.filter((t) => t.value !== 'departments' && t.value !== 'staff')
   }
 

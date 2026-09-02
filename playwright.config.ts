@@ -1,10 +1,8 @@
 import { defineConfig, devices } from '@playwright/test'
+import { existsSync } from 'node:fs'
 
-/**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
- */
-// require('dotenv').config();
+const authFile = 'tests/.auth/user.json'
+const hasAuthState = existsSync(authFile)
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -40,8 +38,21 @@ export default defineConfig({
   /* Configure projects for major browsers */
   projects: [
     {
+      name: 'setup',
+      testMatch: /auth\.setup\.ts/,
+    },
+    {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'authenticated',
+      testMatch: /authenticated\.spec\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: authFile,
+      },
+      dependencies: hasAuthState ? [] : ['setup'],
     },
 
     {

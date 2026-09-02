@@ -1,4 +1,5 @@
 import { ref } from 'vue'
+import { useProductAnalytics } from '~/composables/useProductAnalytics'
 
 export interface PaymentLinkListItem {
   token: string
@@ -215,6 +216,8 @@ export function usePaymentLinks() {
       '/api/payment-links/create',
       { method: 'POST', body: { ownerUserId, storeId, ...input } }
     )
+    const { trackEvent } = useProductAnalytics()
+    trackEvent('payment_link_created', { item_count: input.items.length })
     return res
   }
 

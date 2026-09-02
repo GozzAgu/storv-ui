@@ -1,9 +1,15 @@
 <template>
   <div
     data-inventory-categories
-    :class="[pageWithFooterClass, 'dash-page--unified']"
+    :class="[
+      pageWithFooterClass,
+      'dash-page--unified',
+      isCapacitorIos ? 'ios-inventory-categories-page' : '',
+    ]"
   >
-    <DashboardPageHeader class="dash-page-header--unified" :ios-context-only="isCapacitorIos">
+    <IosPageNavBar v-if="isCapacitorIos" title="Categories" />
+
+    <DashboardPageHeader v-if="!isCapacitorIos" class="dash-page-header--unified">
       <template #eyebrow>
         <nav :class="eyebrowClass" aria-label="Breadcrumb">
           <span>Inventory</span>
@@ -12,15 +18,16 @@
         </nav>
       </template>
       <template #title>
-        <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <h1 :class="titleClass">Categories</h1>
-          <DuplicateFeatureUpsellBanner
-            :loading="inventoryStore.loading && inventoryStore.folders.length === 0"
-          />
-        </div>
+        <h1 :class="titleClass">Categories</h1>
       </template>
       <template
-        v-if="!inventoryStore.loading && inventoryStore.folders.length > 0"
+        v-if="inventoryStore.loading && inventoryStore.folders.length === 0"
+        #description
+      >
+        <DashPageMetricsSkeleton :count="5" />
+      </template>
+      <template
+        v-else-if="!inventoryStore.loading && inventoryStore.folders.length > 0"
         #description
       >
         <DashboardPageMetrics
@@ -51,7 +58,7 @@
           v-if="inventoryStore.lowStockFolders.length > 0"
           variant="outline"
           size="sm"
-          :extra-class="headerBtnClass"
+          :extra-class="headerTextBtnClass"
           :disabled="reorderExporting"
           @click="handleExportReorderList"
         >
@@ -80,7 +87,12 @@
           </Button>
         </template>
       </template>
-      <template v-if="!inventoryStore.loading && inventoryStore.folders.length > 0" #filters>
+      <template v-if="inventoryStore.loading && inventoryStore.folders.length === 0" #filters>
+        <span class="dash-skeleton dash-skeleton--search" />
+        <span class="dash-skeleton dash-skeleton--select" />
+        <span class="dash-skeleton dash-skeleton--select" />
+      </template>
+      <template v-else-if="!inventoryStore.loading && inventoryStore.folders.length > 0" #filters>
         <DashboardToolbarSearch
           v-if="!isCapacitorIos"
           v-model="searchQuery"
@@ -145,28 +157,133 @@
       <IosSearchBar v-model="searchQuery" placeholder="Search categories…" />
     </div>
 
-    <IosSegmentedControl
+    <IosQuickActionBar
       v-if="isCapacitorIos && !inventoryStore.loading && inventoryStore.folders.length > 0"
       v-model="categoryFilter"
       class="ios-inventory-filter-tabs"
-      aria-label="Category filter"
-      :options="categoryFilterOptions"
+      aria-label="Category actions"
+      :options="categoryQuickActionOptions"
     />
 
-    <div
-      v-if="inventoryStore.loading && inventoryStore.folders.length === 0"
-      :class="gridClass"
+    <IosDrawer
+      v-if="isCapacitorIos"
+      v-model="showInventoryMoreSheet"
+      title="Category options"
+      subtitle="Sort and filter"
+      variant="menu"
+      footer-variant="menu"
+      body-padding="p-0"
+      aria-label="Category options"
     >
-      <div v-for="i in 12" :key="i" class="dash-skeleton dash-skeleton--grid-card" />
-    </div>
+      <div class="ios-drawer-menu">
+        <section v-if="!isStaff" class="ios-drawer-menu__section">
+          <p class="ios-drawer-menu__section-label">Department</p>
+          <div class="ios-drawer-menu__group">
+            <ul class="ios-drawer-menu__list">
+              <li>
+                <button
+                  type="button"
+                  class="ios-drawer-menu__row"
+                  @click="selectInventoryDepartment('')"
+                >
+                  <span class="ios-drawer-menu__label">All departments</span>
+                  <CheckIcon
+                    v-if="!selectedDepartmentId"
+                    class="ios-drawer-menu__check"
+                    aria-hidden="true"
+                  />
+                </button>
+              </li>
+              <li v-for="dept in currentStoreDepartments" :key="dept.id">
+                <button
+                  type="button"
+                  class="ios-drawer-menu__row"
+                  @click="selectInventoryDepartment(dept.id)"
+                >
+                  <span class="ios-drawer-menu__label">{{ dept.name }}</span>
+                  <CheckIcon
+                    v-if="selectedDepartmentId === dept.id"
+                    class="ios-drawer-menu__check"
+                    aria-hidden="true"
+                  />
+                </button>
+              </li>
+            </ul>
+          </div>
+        </section>
+        <section class="ios-drawer-menu__section">
+          <p class="ios-drawer-menu__section-label">Sort by</p>
+          <div class="ios-drawer-menu__group">
+            <ul class="ios-drawer-menu__list">
+              <li v-for="option in inventorySortOptions" :key="option.value">
+                <button
+                  type="button"
+                  class="ios-drawer-menu__row"
+                  @click="selectInventorySort(option.value)"
+                >
+                  <span class="ios-drawer-menu__label">{{ option.label }}</span>
+                  <CheckIcon
+                    v-if="sortBy === option.value"
+                    class="ios-drawer-menu__check"
+                    aria-hidden="true"
+                  />
+                </button>
+              </li>
+            </ul>
+          </div>
+        </section>
+        <section
+          v-if="inventoryStore.lowStockFolders.length > 0"
+          class="ios-drawer-menu__section"
+        >
+          <div class="ios-drawer-menu__group">
+            <ul class="ios-drawer-menu__list">
+              <li>
+                <button
+                  type="button"
+                  class="ios-drawer-menu__row"
+                  @click="handleExportReorderFromSheet"
+                >
+                  <span class="ios-drawer-menu__label">Export reorder list</span>
+                  <span class="ios-drawer-menu__meta">Low-stock categories</span>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </section>
+      </div>
+    </IosDrawer>
+
+    <template v-if="inventoryStore.loading && inventoryStore.folders.length === 0">
+      <template v-if="isCapacitorIos">
+        <div class="ios-search-bar-host">
+          <div class="ios-skeleton ios-search-skeleton" aria-hidden="true" />
+        </div>
+        <IosQuickActionSkeleton :count="4" />
+        <IosGroupedListSkeleton :count="10" />
+      </template>
+      <DashTableSkeleton
+        v-else-if="effectiveFoldersViewMode === 'table'"
+        :columns="inventoryTableSkeletonColumns"
+        :rows="8"
+        leading="icon"
+        show-toolbar
+        aria-label="Loading categories"
+      />
+      <div v-else :class="[gridClass, 'inventory-categories-grid']">
+        <FolderCardSkeleton v-for="i in 8" :key="i" />
+      </div>
+    </template>
 
     <div
       v-if="!inventoryStore.loading && inventoryStore.folders.length > 0"
       :class="[
         gridShellClass,
-        foldersViewMode === 'table'
-          ? [tableShellClass, 'dash-grid-shell--table inventory-categories-shell--table']
-          : 'dash-grid-shell--grid inventory-categories-shell--grid',
+        isCapacitorIos
+          ? 'ios-inventory-categories-list-shell'
+          : effectiveFoldersViewMode === 'table'
+            ? [tableShellClass, 'dash-grid-shell--table inventory-categories-shell--table']
+            : 'dash-grid-shell--grid inventory-categories-shell--grid',
       ]"
     >
       <DashboardTableEmptyState
@@ -206,10 +323,25 @@
         </Button>
       </DashboardTableEmptyState>
 
+      <div v-else-if="isCapacitorIos" class="ios-grouped-list">
+        <IosInventoryFolderRow
+          v-for="(folder, index) in paginatedFolders"
+          :key="folder.id"
+          :name="folder.name"
+          :subtitle="folderCategoryDescription(folder)"
+          :value="formatFolderRowValue(folder)"
+          :last="index === paginatedFolders.length - 1"
+          :show-menu="canCreateInventoryFolders"
+          :menu-id="folder.id"
+          @click="navigateToFolder(folder.id)"
+          @menu="toggleFolderMenu(folder.id)"
+        />
+      </div>
+
       <Transition v-else name="folders-view" mode="out-in">
         <!-- Folders grid -->
         <div
-          v-if="paginatedFolders.length > 0 && foldersViewMode === 'grid'"
+          v-if="paginatedFolders.length > 0 && effectiveFoldersViewMode === 'grid'"
           key="grid"
           class="inventory-categories-grid dash-grid"
         >
@@ -220,6 +352,7 @@
             :description="folderCategoryDescription(folder)"
             :type="folder.type"
             :item-count="folderDisplayStats(folder).itemCount"
+            :child-count="getChildFolders(folders, folder.id).length"
             :low-stock-count="folderDisplayStats(folder).lowStockCount"
             :total-value="folderDisplayStats(folder).totalValue"
             :has-serial-numbers="folder.hasSerialNumbers"
@@ -243,7 +376,7 @@
               />
             </template>
             <template v-if="canCreateInventoryFolders" #menu>
-              <div data-inventory-folder-menu>
+              <div>
                 <button
                   type="button"
                   :data-folder-actions-anchor="folder.id"
@@ -260,7 +393,7 @@
 
         <!-- Categories table -->
         <div
-          v-else-if="paginatedFolders.length > 0 && foldersViewMode === 'table'"
+          v-else-if="paginatedFolders.length > 0 && effectiveFoldersViewMode === 'table'"
           key="table"
           class="inventory-categories-table flex min-h-0 flex-1 flex-col"
         >
@@ -407,7 +540,7 @@
       </Transition>
 
       <DashboardTablePagination
-        v-if="paginatedFolders.length > 0"
+        v-if="foldersForCategoryList.length > 0"
         :current-page="currentPage"
         :items-per-page="itemsPerPage"
         :total="foldersForCategoryList.length"
@@ -525,34 +658,25 @@
         </div>
       </div>
       <template #footer>
-        <Button
-          variant="outline"
-          size="sm"
-          @click="
-            () => {
-              showBulkDeleteFoldersModal = false
-              bulkDeleteFoldersConfirmed = false
-            }
-          "
-          class="!rounded-2xl"
-          >Cancel</Button
-        >
-        <Button
-          variant="danger"
-          size="sm"
-          :disabled="!bulkDeleteFoldersConfirmed || isBulkDeletingFolders"
-          :icon="TrashIcon"
-          class="!rounded-2xl"
-          @click="handleConfirmBulkDeleteFolders"
-        >
-          {{
+        <IosDrawerActions
+          primary-variant="danger"
+          :primary-icon="TrashIcon"
+          :primary-label="
             isBulkDeletingFolders
               ? 'Deleting...'
               : `Delete ${selectedFoldersForBulk.length} ${
                   selectedFoldersForBulk.length === 1 ? 'category' : 'categories'
                 }`
-          }}
-        </Button>
+          "
+          :primary-disabled="!bulkDeleteFoldersConfirmed || isBulkDeletingFolders"
+          @cancel="
+            () => {
+              showBulkDeleteFoldersModal = false
+              bulkDeleteFoldersConfirmed = false
+            }
+          "
+          @primary="handleConfirmBulkDeleteFolders"
+        />
       </template>
     </Modal>
     <!-- Delete Folder Modal -->
@@ -567,56 +691,25 @@
       v-model="showCreateFolderModal"
       size="xl"
       dense
-      eyebrow="Inventory"
       :title="editingFolder ? 'Edit category' : 'Create new category'"
-      :subtitle="
-        editingFolder
-          ? 'Update details and column template.'
-          : 'Name the category and define table columns.'
-      "
     >
-      <form
-        id="folder-drawer-form"
-        :class="drawerFillClass"
-        @submit.prevent="handleSaveFolder"
-      >
-        <div
-          :class="[
-            drawerFillScrollClass,
-            'divide-y divide-gray-100/90 dark:divide-gray-800/80 pb-2 sm:pb-3',
-          ]"
-        >
-        <section :class="[drawerSectionClass, drawerFillFixedClass]">
-          <p :class="sectionLabelClass">Basic info</p>
-          <div class="mt-2 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-            <div>
-              <label :class="drawerLabelClass">Category name *</label>
-              <input
-                v-model="folderForm.name"
-                type="text"
-                required
-                :class="drawerInputClass"
-                placeholder="e.g. Chairs"
-              />
-            </div>
-            <div>
-              <label :class="drawerLabelClass">Type *</label>
-              <select
-                v-model="folderForm.type"
-                required
-                :class="[drawerInputClass, 'cursor-pointer']"
-              >
-                <option value="">Select type</option>
-                <option value="general">General</option>
-                <option value="electronics">Electronics</option>
-                <option value="clothing">Clothing & Apparel</option>
-                <option value="automotive">Automotive</option>
-                <option value="food">Food & Beverage</option>
-                <option value="office">Office Supplies</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-          </div>
+      <IosForm id="folder-drawer-form" layout="fill" @submit="handleSaveFolder">
+        <IosFormSection title="Basic info" fixed>
+          <IosFormField label="Category name" required>
+            <IosFormInput v-model="folderForm.name" required placeholder="e.g. Chairs" />
+          </IosFormField>
+          <IosFormField label="Type" required>
+            <IosFormSelect v-model="folderForm.type" required extra-class="cursor-pointer">
+              <option value="">Select type</option>
+              <option value="general">General</option>
+              <option value="electronics">Electronics</option>
+              <option value="clothing">Clothing & Apparel</option>
+              <option value="automotive">Automotive</option>
+              <option value="food">Food & Beverage</option>
+              <option value="office">Office Supplies</option>
+              <option value="other">Other</option>
+            </IosFormSelect>
+          </IosFormField>
           <p v-if="editingFolder && isSubfolder(editingFolder)" :class="[drawerHintClass, 'mt-1']">
             Subcategory of
             {{
@@ -624,92 +717,56 @@
               'parent category'
             }}.
           </p>
-          <div class="mt-2.5">
-            <label :class="drawerLabelClass">Description</label>
-            <textarea
+          <IosFormField label="Description">
+            <IosFormTextarea
               v-model="folderForm.description"
-              rows="2"
-              :class="[drawerTextareaClass, 'resize-none']"
+              :rows="2"
+              extra-class="resize-none"
               placeholder="Optional: purpose of this category"
             />
-          </div>
-        </section>
+          </IosFormField>
+        </IosFormSection>
 
-        <section
+        <IosFormSection
           v-if="showUsesSubcategoriesOption && !isSubfolderDrawer"
-          :class="[drawerSectionClass, drawerFillFixedClass]"
+          fixed
         >
-          <Checkbox
+          <IosFormToggle
             v-model="folderForm.usesSubcategories"
-            size="sm"
+            label="Organize with subcategories"
+            hint="Products go inside subcategories (e.g. Corolla, Camry under Toyota) instead of directly in this category."
             :disabled="usesSubcategoriesLocked"
-            wrapper-class="items-start gap-2.5"
-            label-class="!ml-2.5 min-w-0 flex-1 block"
-          >
-            <div class="min-w-0 flex-1">
-              <span class="text-xs font-medium text-gray-800 dark:text-gray-200">
-                Organize with subcategories
-              </span>
-              <p :class="[drawerHintClass, 'mt-0.5']">
-                Products go inside subcategories (e.g. Corolla, Camry under Toyota) instead of
-                directly in this category. Leave off to add products here.
-              </p>
-            </div>
-          </Checkbox>
-        </section>
+          />
+        </IosFormSection>
 
-        <section
+        <IosFormSection
           v-if="!(editingFolder && isSubfolder(editingFolder))"
-          :class="[drawerSectionClass, drawerFillFixedClass]"
+          fixed
         >
-          <Checkbox
+          <IosFormToggle
             v-model="folderForm.hasSerialNumbers"
-            size="sm"
-            wrapper-class="items-start gap-2.5"
-            label-class="!ml-2.5 min-w-0 flex-1 block"
-          >
-            <div class="min-w-0 flex-1">
-              <span class="text-xs font-medium text-gray-800 dark:text-gray-200"
-                >Use serial numbers</span
-              >
-              <p :class="[drawerHintClass, 'mt-0.5']">
-                On: one row per serial. Off: quantity field tracks stock.
-              </p>
-            </div>
-          </Checkbox>
-        </section>
+            label="Use serial numbers"
+            hint="On: one row per serial. Off: quantity field tracks stock."
+          />
+        </IosFormSection>
 
-        <section
+        <IosFormSection
           v-if="canViewProfitAndCost && !isSubfolderDrawer"
-          :class="[drawerSectionClass, drawerFillFixedClass]"
+          fixed
         >
-          <Checkbox
+          <IosFormToggle
             v-model="folderForm.trackProfit"
-            size="sm"
-            wrapper-class="items-start gap-2.5"
-            label-class="!ml-2.5 min-w-0 flex-1 block"
-          >
-            <div class="min-w-0 flex-1">
-              <span class="text-xs font-medium text-gray-800 dark:text-gray-200"
-                >Track profit</span
-              >
-              <p :class="[drawerHintClass, 'mt-0.5']">
-                Adds a cost price column and shows gross profit per category and for the store.
-                Profit is sell price minus cost on available stock.
-              </p>
-            </div>
-          </Checkbox>
-        </section>
+            label="Track profit"
+            hint="Adds a cost price column and shows gross profit per category and for the store."
+          />
+        </IosFormSection>
 
-        <section
+        <IosFormSection
           v-if="canCreateInventoryFolders && !isSubfolderDrawer && !isStaff"
-          :class="[drawerSectionClass, drawerFillFixedClass]"
+          title="Department access"
+          fixed
         >
-          <p :class="sectionLabelClass">
-            Department access
-            <span class="font-normal text-gray-400 dark:text-gray-500">(optional)</span>
-          </p>
-          <p :class="[drawerHintClass, 'mt-1']">
+          <p :class="[drawerHintClass, 'mt-0']">
             Leave all unchecked for every department. Check to limit access.
           </p>
           <div v-if="departmentsStore.loading" :class="[drawerHintClass, 'mt-2']">
@@ -723,7 +780,7 @@
             <NuxtLink
               v-if="currentStoreId"
               :to="`/dashboard/stores/${currentStoreId}/departments`"
-              class="mt-1.5 inline-block text-[11px] font-medium text-primary-600 hover:underline dark:text-primary-400"
+              class="mt-1.5 inline-block text-[11px] font-medium text-gray-800 hover:underline dark:text-gray-200"
             >
               Add departments →
             </NuxtLink>
@@ -748,46 +805,19 @@
               </li>
             </ul>
           </div>
-        </section>
+        </IosFormSection>
 
-        <section v-if="!isSubfolderDrawer" :class="drawerSectionClass">
-          <div class="flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <p :class="sectionLabelClass">Table template</p>
-              <p :class="[drawerHintClass, 'mt-0.5']">Columns for products in this category.</p>
-            </div>
-            <div v-if="selectedTemplate" class="flex flex-wrap items-center gap-1.5">
-              <input
-                ref="folderTemplateExcelInput"
-                type="file"
-                accept=".xlsx,.xls,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                class="sr-only"
-                :disabled="importingFolderTemplate"
-                @change="handleImportFolderTemplateExcel"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                :icon="ArrowUpTrayIcon"
-                :loading="importingFolderTemplate"
-                :disabled="importingFolderTemplate"
-                :extra-class="headerBtnClass"
-                @click="triggerFolderTemplateExcelPicker"
-              >
-                Import Excel
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                :extra-class="headerBtnClass"
-                @click="handleAddField"
-              >
-                Add field
-              </Button>
-            </div>
-          </div>
+        <IosFormSection v-if="!isSubfolderDrawer" title="Table template">
+          <p :class="[drawerHintClass, 'mt-0']">Columns for products in this category.</p>
+          <input
+            v-if="selectedTemplate"
+            ref="folderTemplateExcelInput"
+            type="file"
+            accept=".xlsx,.xls,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            class="sr-only"
+            :disabled="importingFolderTemplate"
+            @change="handleImportFolderTemplateExcel"
+          />
 
           <div
             v-if="selectedTemplate && editableFields.length > 0"
@@ -863,32 +893,40 @@
           <div v-else-if="selectedTemplate" :class="[emptyStateClass, '!py-6']">
             <Squares2X2Icon class="mb-2 h-7 w-7 text-gray-400 dark:text-gray-500" />
             <p class="text-xs font-medium text-gray-700 dark:text-gray-300">No fields yet</p>
-            <p :class="[drawerHintClass, 'mt-0.5']">Add a field or import from Excel</p>
+            <p :class="[drawerHintClass, 'mt-0.5']">Add a column or import from Excel</p>
           </div>
-        </section>
-        </div>
-      </form>
+
+          <div v-if="selectedTemplate" class="ios-form-add-stack">
+            <button type="button" class="ios-form-add-row" @click="handleAddField">
+              <PlusIcon class="ios-form-add-row__glyph" aria-hidden="true" />
+              Add column
+            </button>
+            <button
+              type="button"
+              class="ios-form-add-row ios-form-add-row--secondary"
+              :disabled="importingFolderTemplate"
+              @click="triggerFolderTemplateExcelPicker"
+            >
+              <ArrowPathIcon
+                v-if="importingFolderTemplate"
+                class="ios-form-add-row__glyph animate-spin"
+                aria-hidden="true"
+              />
+              <ArrowUpTrayIcon v-else class="ios-form-add-row__glyph" aria-hidden="true" />
+              {{ importingFolderTemplate ? 'Importing…' : 'Import Excel' }}
+            </button>
+          </div>
+        </IosFormSection>
+      </IosForm>
 
       <template #footer>
-        <Button
-          variant="outline"
-          size="sm"
-          :extra-class="footerBtnOutlineClass"
-          @click="handleCancelFolder"
-        >
-          Cancel
-        </Button>
-        <Button
-          variant="primary"
-          size="sm"
-          type="button"
-          :loading="isSavingFolder"
-          :disabled="!isFolderDrawerValid || isSavingFolder"
-          :extra-class="footerBtnPrimaryClass"
-          @click="handleSaveFolder"
-        >
-          {{ editingFolder ? 'Update' : 'Create' }} category
-        </Button>
+        <IosDrawerActions
+          :primary-label="`${editingFolder ? 'Update' : 'Create'} category`"
+          :primary-loading="isSavingFolder"
+          :primary-disabled="!isFolderDrawerValid || isSavingFolder"
+          @cancel="handleCancelFolder"
+          @primary="handleSaveFolder"
+        />
       </template>
     </SidePanel>
 
@@ -915,22 +953,12 @@
         </p>
       </div>
       <template #footer>
-        <Button
-          variant="outline"
-          size="sm"
-          :extra-class="footerBtnOutlineClass"
-          @click="showProfitSkipConfirmModal = false"
-        >
-          Go back
-        </Button>
-        <Button
-          variant="primary"
-          size="sm"
-          :extra-class="footerBtnPrimaryClass"
-          @click="confirmCreateWithoutProfitTracking"
-        >
-          Continue without profit
-        </Button>
+        <IosDrawerActions
+          cancel-label="Go back"
+          primary-label="Continue without profit"
+          @cancel="showProfitSkipConfirmModal = false"
+          @primary="confirmCreateWithoutProfitTracking"
+        />
       </template>
     </Modal>
 
@@ -966,24 +994,14 @@
         </p>
       </div>
       <template #footer>
-        <Button
-          variant="outline"
-          size="sm"
-          :extra-class="footerBtnOutlineClass"
-          :disabled="isSavingFolder"
-          @click="confirmParentFolderSave(false)"
-        >
-          Parent only
-        </Button>
-        <Button
-          variant="primary"
-          size="sm"
-          :extra-class="footerBtnPrimaryClass"
-          :loading="isSavingFolder"
-          @click="confirmParentFolderSave(true)"
-        >
-          Apply to subcategories
-        </Button>
+        <IosDrawerActions
+          cancel-label="Parent only"
+          primary-label="Apply to subcategories"
+          :primary-loading="isSavingFolder"
+          :cancel-disabled="isSavingFolder"
+          @cancel="confirmParentFolderSave(false)"
+          @primary="confirmParentFolderSave(true)"
+        />
       </template>
     </Modal>
 
@@ -1029,7 +1047,7 @@
             <input
               v-model="duplicateFolderNames[index]"
               type="text"
-              class="flex-1 min-w-0 px-3 py-2 text-sm rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/25 transition-colors"
+              class="flex-1 min-w-0 px-3 py-2 text-sm rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400/40 transition-colors"
               placeholder="New category name"
             />
             <button
@@ -1050,35 +1068,23 @@
         </p>
       </form>
       <template #footer>
-        <Button
-          variant="outline"
-          size="sm"
-          type="button"
-          :class="footerBtnOutlineClass"
-          @click="
-            () => {
-              showDuplicateFolderModal = false
-              clearDuplicateFolderModal()
-            }
-          "
-          >Cancel</Button
-        >
-        <Button
-          variant="primary"
-          size="sm"
-          type="button"
-          :class="footerBtnPrimaryClass"
-          @click="handleConfirmDuplicateFolder"
-          :disabled="isDuplicatingFolder || !hasValidDuplicateFolderNames"
-        >
-          {{
+        <IosDrawerActions
+          :primary-label="
             isDuplicatingFolder
               ? 'Duplicating…'
               : `Duplicate ${validDuplicateFolderNamesCount} ${
                   validDuplicateFolderNamesCount === 1 ? 'category' : 'categories'
                 }`
-          }}
-        </Button>
+          "
+          :primary-disabled="isDuplicatingFolder || !hasValidDuplicateFolderNames"
+          @cancel="
+            () => {
+              showDuplicateFolderModal = false
+              clearDuplicateFolderModal()
+            }
+          "
+          @primary="handleConfirmDuplicateFolder"
+        />
       </template>
     </SidePanel>
 
@@ -1094,7 +1100,7 @@
           <p :class="sectionLabelClass">Source branch</p>
           <select
             v-model="copyTemplatesSourceStoreId"
-            class="mt-1.5 w-full rounded-lg bg-white py-2 pl-3 pr-8 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500/15 dark:!bg-dashboard-card dark:text-gray-100"
+            class="mt-1.5 w-full rounded-lg bg-white py-2 pl-3 pr-8 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400/40 dark:!bg-dashboard-card dark:text-gray-100"
           >
             <option value="" disabled>Select a branch…</option>
             <option v-for="s in otherBranchesForTemplateCopy" :key="s.id" :value="s.id">
@@ -1111,7 +1117,7 @@
               </span>
               <button
                 type="button"
-                class="text-[11px] font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 disabled:opacity-40"
+                class="text-[11px] font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100 disabled:opacity-40"
                 :disabled="
                   copyTemplatesRootFoldersList.length === 0 || loadingCopyTemplatesSourceFolders
                 "
@@ -1237,91 +1243,66 @@
         </p>
       </div>
       <template #footer>
-        <Button
-          variant="outline"
-          size="sm"
-          type="button"
-          :class="footerBtnOutlineClass"
-          @click="showCopyFolderTemplatesModal = false"
-        >
-          Cancel
-        </Button>
-        <Button
-          variant="primary"
-          size="sm"
-          type="button"
-          :class="footerBtnPrimaryClass"
-          :disabled="
+        <IosDrawerActions
+          :primary-label="
+            isCopyingFolderTemplates
+              ? 'Copying…'
+              : `Copy ${copyTemplatesEffectiveCount || 0} ${
+                  copyTemplatesEffectiveCount === 1 ? 'category' : 'categories'
+                }`
+          "
+          :primary-disabled="
             isCopyingFolderTemplates ||
             !copyTemplatesSourceStoreId ||
             !storesStore.currentStoreId ||
             copyTemplatesSelectedCount === 0 ||
             loadingCopyTemplatesSourceFolders
           "
-          @click="handleConfirmCopyFolderTemplates"
-        >
-          {{
-            isCopyingFolderTemplates
-              ? 'Copying…'
-              : `Copy ${copyTemplatesEffectiveCount || 0} ${
-                  copyTemplatesEffectiveCount === 1 ? 'category' : 'categories'
-                }`
-          }}
-        </Button>
+          @cancel="showCopyFolderTemplatesModal = false"
+          @primary="handleConfirmCopyFolderTemplates"
+        />
       </template>
     </SidePanel>
 
     <!-- Folder actions menu (teleported; not clipped by grid/card overflow) -->
-    <Teleport to="body">
-      <div
-        v-if="openFolderMenuId && folderForOpenMenu && folderMenuFixedStyle"
-        data-inventory-folder-menu
-        class="frosted-glass fixed z-[1000] min-w-[120px] rounded-sm py-0.5"
-        :style="folderMenuFixedStyle"
-        @click.stop
-      >
-        <button
-          v-if="canDuplicateByPlan"
-          type="button"
-          @click="
-            () => {
-              handleDuplicateFolder(folderForOpenMenu)
-              openFolderMenuId = null
-            }
-          "
-          class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800/85 transition-colors"
-        >
-          <DocumentDuplicateIcon class="w-3.5 h-3.5 shrink-0 text-primary-500" />
-          Duplicate
-        </button>
-        <button
-          type="button"
-          @click="
-            () => {
-              handleEditFolder(folderForOpenMenu)
-              openFolderMenuId = null
-            }
-          "
-          class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800/85 transition-colors"
-        >
-          <PencilSquareIcon class="w-3.5 h-3.5 shrink-0" />
-          Edit
-        </button>
-        <button
-          type="button"
-          @click="
-            () => {
-              handleDeleteFolder(folderForOpenMenu)
-              openFolderMenuId = null
-            }
-          "
-          class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/35 transition-colors"
-        >
-          <TrashIcon class="w-3.5 h-3.5 shrink-0" />
-          Delete
-        </button>
-      </div>
-    </Teleport>
+    <IosContextMenu
+      :open="Boolean(openFolderMenuId && folderForOpenMenu && folderMenuFixedStyle)"
+      :style="folderMenuFixedStyle"
+      menu-id="inventory-folder"
+    >
+      <IosContextMenuItem
+        v-if="canDuplicateByPlan"
+        label="Duplicate"
+        :icon="DocumentDuplicateIcon"
+        @click="
+          () => {
+            handleDuplicateFolder(folderForOpenMenu!)
+            openFolderMenuId = null
+          }
+        "
+      />
+      <IosContextMenuItem
+        label="Edit"
+        :icon="PencilSquareIcon"
+        @click="
+          () => {
+            handleEditFolder(folderForOpenMenu!)
+            openFolderMenuId = null
+          }
+        "
+      />
+      <IosContextMenuItem
+        label="Delete"
+        :icon="TrashIcon"
+        danger
+        @click="
+          () => {
+            handleDeleteFolder(folderForOpenMenu!)
+            openFolderMenuId = null
+          }
+        "
+      />
+    </IosContextMenu>
   </div>
 </template>
 
@@ -1336,17 +1317,40 @@ import {
   TrashIcon,
   DocumentDuplicateIcon,
   EllipsisVerticalIcon,
+  PlusIcon,
+  ArrowPathIcon,
   ExclamationTriangleIcon,
   Squares2X2Icon,
   TableCellsIcon,
   ArrowUpTrayIcon,
   ArrowsRightLeftIcon,
+  CheckIcon,
 } from '~/utils/app-icons'
 import Modal from '~/components/ui/Modal.vue'
 import SidePanel from '~/components/ui/SidePanel.vue'
 import Button from '~/components/ui/Button.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
+import {
+  IosForm,
+  IosFormSection,
+  IosFormField,
+  IosFormInput,
+  IosFormTextarea,
+  IosFormSelect,
+  IosFormToggle,
+} from '~/components/ios/forms'
+import IosQuickActionBar, {
+  type IosQuickActionOption,
+} from '~/components/ios/IosQuickActionBar.vue'
+import IosGroupedListSkeleton from '~/components/ios/IosGroupedListSkeleton.vue'
+import IosQuickActionSkeleton from '~/components/ios/IosQuickActionSkeleton.vue'
+import IosContextMenu from '~/components/ios/IosContextMenu.vue'
+import IosContextMenuItem from '~/components/ios/IosContextMenuItem.vue'
+import IosDrawer from '~/components/ios/IosDrawer.vue'
+import IosInventoryFolderRow from '~/components/ios/IosInventoryFolderRow.vue'
+import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
+import IosSearchBar from '~/components/ios/IosSearchBar.vue'
 import DeleteFolderModal from '~/components/inventory/DeleteFolderModal.vue'
-import DuplicateFeatureUpsellBanner from '~/components/inventory/DuplicateFeatureUpsellBanner.vue'
 import InventoryCategoryCard from '~/components/inventory/InventoryCategoryCard.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import DashboardTablePagination from '~/components/dashboard/DashboardTablePagination.vue'
@@ -1375,13 +1379,19 @@ import {
 } from '~/utils/inventory-folder-tree'
 import { usePreferences } from '~/composables/usePreferences'
 import { useAppToast } from '~/composables/useAppToast'
-import { getVisibleMenuAnchorElement, computeFixedAnchoredMenuStyle } from '~/utils/menuAnchor'
+import {
+  getVisibleMenuAnchorElement,
+  computeFixedAnchoredMenuStyle,
+  isInsideAnchoredMenu,
+} from '~/utils/menuAnchor'
 import { parseTemplateFieldsFromExcelArrayBuffer } from '~/utils/inventory-template-from-excel'
 import {
   COST_PRICE_FIELD_NAME,
   ensureCostPriceTemplateField,
   removeCostPriceTemplateField,
 } from '~/utils/inventory-folder-profit'
+import { runDashboardShellBootstrap } from '~/composables/useDashboardShellBootstrap'
+import { isNativePerfContext, scheduleNativeIdleWork } from '~/utils/capacitor-native-perf'
 
 definePageMeta({
   layout: 'dashboard',
@@ -1396,6 +1406,7 @@ const {
   eyebrowClass,
   titleClass,
   headerBtnClass,
+  headerTextBtnClass,
   tableShellClass,
   gridShellClass,
   gridClass,
@@ -1428,6 +1439,7 @@ const {
 
 const searchQuery = ref('')
 const categoryFilter = ref<'all' | 'low-stock'>('all')
+const showInventoryMoreSheet = ref(false)
 
 const categoryFilterOptions = computed(() => [
   { value: 'all', label: 'All categories' },
@@ -1437,6 +1449,61 @@ const categoryFilterOptions = computed(() => [
     badge: inventoryStore.lowStockFolders.length || undefined,
   },
 ])
+
+const categoryQuickActionOptions = computed((): IosQuickActionOption[] => {
+  const options: IosQuickActionOption[] = [
+    { value: 'all', label: 'All', icon: FolderIcon },
+    {
+      value: 'low-stock',
+      label: 'Low stock',
+      icon: ExclamationTriangleIcon,
+      badge: inventoryStore.lowStockFolders.length || undefined,
+    },
+  ]
+
+  if (canCreateInventoryFolders.value) {
+    options.push({
+      value: 'new',
+      label: 'New',
+      icon: PlusIcon,
+      trailing: 'add',
+      action: openCreateFolderModal,
+    })
+  }
+
+  options.push({
+    value: 'more',
+    label: 'More',
+    icon: EllipsisVerticalIcon,
+    trailing: 'more',
+    action: () => {
+      showInventoryMoreSheet.value = true
+    },
+  })
+
+  return options
+})
+
+function selectInventoryDepartment(departmentId: string) {
+  selectedDepartmentId.value = departmentId
+  showInventoryMoreSheet.value = false
+}
+
+function selectInventorySort(value: string) {
+  sortBy.value = value
+  showInventoryMoreSheet.value = false
+}
+
+const inventorySortOptions = [
+  { value: 'name', label: 'Name' },
+  { value: 'items', label: 'Products' },
+  { value: 'date', label: 'Date' },
+] as const
+
+function handleExportReorderFromSheet() {
+  showInventoryMoreSheet.value = false
+  void handleExportReorderList()
+}
 const sortBy = ref('name')
 const showCreateFolderModal = ref(false)
 const preserveFolderDrawerDraft = ref(false)
@@ -1492,7 +1559,6 @@ function updateFolderMenuPosition() {
   const r = el.getBoundingClientRect()
   /** Enough for Duplicate + Edit + Delete (or Edit + Delete only) */
   folderMenuFixedStyle.value = computeFixedAnchoredMenuStyle(r, {
-    menuWidth: 120,
     estimatedMenuHeight: 132,
     margin: 4,
     viewportPadding: 8,
@@ -1524,7 +1590,8 @@ watch(openFolderMenuId, (id) => {
 
   folderMenuOutsideHandler = (e: MouseEvent) => {
     const t = e.target as HTMLElement | null
-    if (t?.closest?.('[data-inventory-folder-menu]')) return
+    if (isInsideAnchoredMenu(t)) return
+    if (t?.closest?.('[data-folder-actions-anchor]')) return
     openFolderMenuId.value = null
     removeFolderMenuOutsideListener()
   }
@@ -1644,6 +1711,7 @@ if (import.meta.client) {
 
 const authStore = useAuthStore()
 const userStore = useUserStore()
+const { canManageBranches } = useBusinessCapabilities()
 const inventoryStore = useInventoryStore()
 const departmentsStore = useDepartmentsStore()
 const storesStore = useStoresStore()
@@ -1662,6 +1730,37 @@ async function handleExportReorderList() {
 const { canCreateInventoryFolders, canViewProfitAndCost, isStaff } = usePermissions()
 const { isCapacitorIos } = useIsCapacitorIos()
 
+const effectiveFoldersViewMode = computed(() =>
+  isCapacitorIos.value ? 'grid' : foldersViewMode.value
+)
+
+const inventoryTableSkeletonColumns = computed(() => {
+  const cols: { label: string; class?: string; bone?: string }[] = [
+    { label: 'Category' },
+    { label: 'Type', class: 'hidden sm:table-cell dashboard-table__col-type', bone: '4.5rem' },
+    { label: 'Products', class: 'dashboard-table__col-numeric', bone: '2.5rem' },
+    { label: 'Value', class: 'hidden sm:table-cell dashboard-table__col-numeric', bone: '4rem' },
+  ]
+  if (canViewProfitAndCost.value) {
+    cols.push({
+      label: 'Profit',
+      class: 'hidden md:table-cell dashboard-table__col-numeric',
+      bone: '4rem',
+    })
+  }
+  cols.push(
+    {
+      label: 'Tracking',
+      class: 'hidden md:table-cell dashboard-table__col-compact-status',
+      bone: '3.5rem',
+    }
+  )
+  if (!isStaff.value) {
+    cols.push({ label: 'Departments', class: 'hidden lg:table-cell', bone: '5rem' })
+  }
+  return cols
+})
+
 watch(isStaff, (staff) => {
   if (staff) selectedDepartmentId.value = ''
 }, { immediate: true })
@@ -1669,7 +1768,6 @@ watch(isStaff, (staff) => {
 const { formatCurrency, preferences } = usePreferences()
 const currencySymbol = computed(() => preferences.value?.currencySymbol || '$')
 
-// Duplicate folders/items only on Storvv Medium and Enterprise
 const canDuplicateByPlan = computed(() => {
   const sub = userStore.userData?.subscription
   return sub === 'storvv_medium' || sub === 'storvv_enterprise'
@@ -1681,6 +1779,7 @@ const canCopyFolderTemplatesFromBranchByPlan = computed(
 )
 
 const otherBranchesForTemplateCopy = computed(() => {
+  if (!canManageBranches.value) return [] as Store[]
   const id = storesStore.currentStoreId
   if (!id) return [] as Store[]
   return [...storesStore.stores]
@@ -1691,6 +1790,7 @@ const otherBranchesForTemplateCopy = computed(() => {
 const canShowCopyFolderTemplatesFromBranch = computed(
   () =>
     userStore.userData?.role === 'superAdmin' &&
+    canManageBranches.value &&
     canCopyFolderTemplatesFromBranchByPlan.value &&
     canCreateInventoryFolders.value &&
     storesStore.activeStores.length > 1
@@ -2187,6 +2287,13 @@ function folderDisplayStats(folder: InventoryFolder) {
     totalValue: folder.totalValue ?? 0,
     lowStockCount: folder.lowStockCount ?? 0,
   }
+}
+
+function formatFolderRowValue(folder: InventoryFolder): string {
+  const stats = folderDisplayStats(folder)
+  const countLabel = `${stats.itemCount} item${stats.itemCount === 1 ? '' : 's'}`
+  if (stats.itemCount === 0) return countLabel
+  return `${countLabel} · ${formatCurrency(stats.totalValue ?? 0)}`
 }
 
 function folderCategoryDescription(folder: InventoryFolder): string {
@@ -3026,71 +3133,22 @@ useIosPullToRefreshRegister(reloadInventoryCategories)
 
 // Load folders on mount
 onMounted(async () => {
-  // Only run on client
   if (import.meta.server) return
+  if (!authStore.currentUser) return
 
-  // console.log('[InventoryPage] onMounted - Starting load process')
-
-  const loadData = async () => {
-    // console.log('[InventoryPage] loadData - Checking auth state')
-
-    // Wait for auth to finish loading with timeout
-    let attempts = 0
-    while (authStore.loading && attempts < 100) {
-      await new Promise((resolve) => setTimeout(resolve, 100))
-      attempts++
-      if (attempts % 10 === 0) {
-        // console.log('[InventoryPage] Still waiting for auth...', attempts)
-      }
-    }
-
-    if (attempts >= 100) {
-      console.warn('[InventoryPage] Auth loading timeout, proceeding anyway')
-    }
-
-    // Check if user is authenticated
-    if (!authStore.currentUser) {
-      // console.log('[InventoryPage] No authenticated user, skipping fetch')
-      return
-    }
-
-    // console.log('[InventoryPage] User authenticated:', authStore.currentUser.uid)
-
-    // Fetch user data first (needed to determine if staff)
-    try {
-      if (!userStore.userData) {
-        await userStore.fetchUserData(authStore.currentUser.uid)
-      }
-
-      if (authStore.currentUser) {
-        try {
-          if (!storesStore.currentStoreId) {
-            await storesStore.initializeCurrentStore()
-          }
-          if (!isStaff.value) {
-            await departmentsStore.fetchDepartments()
-          }
-        } catch (error: any) {
-          console.warn(
-            '[InventoryPage] Error fetching stores/departments:',
-            error.message || error
-          )
-        }
-      }
-
-      // Now fetch folders
-      // console.log('[InventoryPage] Fetching folders...')
-      await inventoryStore.fetchFolders()
+  try {
+    await runDashboardShellBootstrap()
+    if (isNativePerfContext()) {
+      scheduleNativeIdleWork(() => {
+        void inventoryStore.fetchFolderAvailabilityStats()
+      }, 700)
+    } else {
       await inventoryStore.fetchFolderAvailabilityStats()
-      // console.log('[InventoryPage] Folders fetched:', inventoryStore.folders.length)
-    } catch (error: any) {
-      console.error('[InventoryPage] Error loading data:', error.message || error)
     }
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error)
+    console.error('[InventoryPage] Error loading data:', message)
   }
-
-  // Start loading after a small delay to ensure stores are initialized
-  await nextTick()
-  await loadData()
 })
 
 // Watch for user data changes and fetch folders when it becomes available
@@ -3143,7 +3201,13 @@ watch(
         selectedDepartmentId.value = ''
         // Refetch folders for new store
         await inventoryStore.fetchFolders()
-        await inventoryStore.fetchFolderAvailabilityStats()
+        if (isNativePerfContext()) {
+          scheduleNativeIdleWork(() => {
+            void inventoryStore.fetchFolderAvailabilityStats({ force: true })
+          }, 500)
+        } else {
+          await inventoryStore.fetchFolderAvailabilityStats({ force: true })
+        }
         // Refetch departments for new store (owner only)
         if (authStore.currentUser && !isStaff.value) {
           await departmentsStore.fetchDepartments()

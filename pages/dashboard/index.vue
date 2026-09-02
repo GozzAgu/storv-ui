@@ -1,8 +1,39 @@
 <template>
-  <div :class="pageClass">
+  <div :class="[pageClass, isCapacitorIos ? 'ios-home-page' : '']">
+    <template v-if="isCapacitorIos">
+      <IosEmptyState
+        v-if="needsStoreSelection && !isLoading"
+        :icon="BuildingStorefrontIcon"
+        title="Select a store"
+        :description="
+          canManageBranches
+            ? 'Choose a branch to load metrics, sales, and alerts for your dashboard.'
+            : 'Your dashboard loads for your store. If this takes a moment, we are connecting to your store data.'
+        "
+      >
+        <template v-if="canManageBranches" #action>
+          <InlineStorePicker />
+        </template>
+      </IosEmptyState>
+
+      <IosHomeDashboardSkeleton v-else-if="isLoading" />
+
+      <IosHomeDashboard
+        v-else
+        :display-name="iosDisplayName"
+        :store-label="iosStoreLabel"
+        :metrics="iosHomeMetrics"
+        :recent-sales="iosRecentSales"
+        :low-stock-preview="iosLowStockPreview"
+        :alerts="iosHomeAlerts"
+      />
+    </template>
+
+    <template v-else>
     <Tutorial ref="tutorialRef" :tutorial-steps="resolvedTutorialSteps" @complete="onTutorialComplete" />
 
     <GettingStartedChecklist v-if="!needsStoreSelection && !isLoading" class="mb-4" />
+    <FirstWinBanner v-if="!needsStoreSelection && !isLoading" class="mb-4" />
 
     <DashboardPageHeader v-if="!isCapacitorIos" data-tutorial="dashboard" :class="pageHeaderClass">
       <template #eyebrow>
@@ -33,45 +64,97 @@
       </template>
     </DashboardPageHeader>
 
-    <div v-if="needsStoreSelection && !isLoading" :class="stateCardClass">
-      <MarketingFeatureIcon
-        name="branch"
-        size="lg"
-        class="mx-auto mb-3 text-[#4876c7] dark:text-[#9ab5e3]"
-      />
-      <p :class="['dash-state-card__title', pageTitleClass, '!text-sm']">
+    <div v-if="needsStoreSelection && !isLoading" :class="[stateCardClass, 'dash-empty-state']">
+      <div class="dash-empty-state__mark">
+        <MarketingFeatureIcon
+          name="branch"
+          size="md"
+          class="dash-empty-state__icon"
+        />
+      </div>
+      <p :class="['dash-empty-state__title', 'dash-state-card__title', pageTitleClass, '!text-sm']">
         Select a store to load your dashboard
       </p>
-      <p :class="['dash-state-card__desc', cardDescClass]">
-        Choose a branch below or from the store selector in the top bar. Metrics, charts, and alerts
-        are scoped to the active store.
+      <p :class="['dash-empty-state__desc', 'dash-state-card__desc', cardDescClass]">
+        {{
+          canManageBranches
+            ? 'Choose a branch below or from the store selector in the top bar. Metrics, charts, and alerts are scoped to the active store.'
+            : 'Your dashboard loads for your store. If this takes a moment, we are connecting to your store data.'
+        }}
       </p>
-      <InlineStorePicker />
-      <NuxtLink to="/dashboard/settings" :class="[linkClass, 'mt-4 inline-block']">
+      <InlineStorePicker v-if="canManageBranches" />
+      <NuxtLink
+        v-if="canManageBranches"
+        to="/dashboard/settings"
+        :class="[linkClass, 'mt-4 inline-block']"
+      >
         Manage stores in Settings
       </NuxtLink>
     </div>
 
     <template v-else-if="isLoading">
-      <div :class="kpiGridClass">
-        <div v-for="i in nativeKpiSkeletonCount" :key="`kpi-${i}`" class="dash-skeleton dash-skeleton--kpi" />
+      <div class="dash-home-kpi">
+        <div :class="kpiGridClassResolved">
+          <DashStatCardSkeleton
+            v-for="i in homeKpiSkeletonCount"
+            :key="`kpi-${i}`"
+            :hero="i === 1"
+          />
+        </div>
+        <div
+          v-if="canViewProfitAndCost"
+          :class="[kpiGridClassResolved, 'dash-kpi-grid--pair']"
+        >
+          <DashStatCardSkeleton v-for="i in 2" :key="`profit-${i}`" />
+        </div>
       </div>
 
-      <div :class="cardPaddedClass">
-        <div class="mb-3 flex items-center justify-between">
-          <div class="dash-skeleton h-3 w-32" />
-          <div class="dash-skeleton h-3 w-20" />
+      <section :class="[cardPaddedClass, 'dash-inventory-health']">
+        <div :class="[cardHeaderClass, 'dash-card__header--compact dash-inventory-health__header']">
+          <div class="space-y-2">
+            <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-label" />
+            <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-meta" />
+          </div>
+          <span class="dash-skeleton dash-skeleton--line" style="width: 5.5rem" />
         </div>
-        <div class="dash-skeleton dash-skeleton--bar !h-1" />
-      </div>
+        <div class="dash-inventory-health__footer">
+          <div class="dash-skeleton dash-skeleton--bar" />
+          <div class="mt-2 flex flex-wrap gap-3">
+            <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-meta" />
+            <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-meta" />
+            <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-meta" />
+          </div>
+        </div>
+      </section>
 
       <div :class="chartsGridClass">
-        <div class="dash-skeleton dash-skeleton--panel dash-charts-grid__main" />
-        <div class="dash-skeleton dash-skeleton--panel dash-charts-grid__side" />
+        <DashChartPanelSkeleton
+          extra-class="dash-charts-grid__main"
+          show-control
+        />
+        <DashChartPanelSkeleton extra-class="dash-charts-grid__side" variant="bars" />
       </div>
 
+      <div :class="splitGridClass">
+        <DashChartPanelSkeleton variant="list" leading="avatar" />
+        <DashChartPanelSkeleton variant="list" />
+      </div>
+
+      <section :class="cardPaddedClass">
+        <div :class="cardHeaderClass">
+          <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-label" />
+          <span class="dash-skeleton dash-skeleton--line" style="width: 5rem" />
+        </div>
+        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <div v-for="i in 6" :key="i" class="space-y-2">
+            <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-meta" />
+            <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-value" />
+          </div>
+        </div>
+      </section>
+
       <div :class="tripleGridClass">
-        <div v-for="i in 3" :key="`panel-${i}`" class="dash-skeleton dash-skeleton--panel" />
+        <DashChartPanelSkeleton v-for="i in 3" :key="`list-${i}`" variant="list" />
       </div>
     </template>
 
@@ -98,36 +181,45 @@
             :change="revenueChangePercent"
             :change-positive="revenueChangePositive"
             :sparkline-data="statCardRevenueSparkline.length > 1 ? statCardRevenueSparkline : undefined"
+            :icon="BanknotesIcon"
+            tone="accent"
             hero
           />
           <DashboardStatTile
             label="Orders today"
             :value="todayReceiptsCount.toString()"
             :subtext="`${formatCurrency(todaySales)} revenue`"
+            :icon="ShoppingBagIcon"
           />
           <DashboardStatTile
             label="Customers"
             :value="totalCustomers.toString()"
             :subtext="`${newCustomersToday} active today`"
             :subtext-class="newCustomersToday > 0 ? 'success' : ''"
+            :icon="UsersIcon"
           />
           <DashboardStatTile
             label="Low stock signals"
             :value="lowStockItems.length.toString()"
             :subtext="lowStockItems.length > 0 ? 'Review restocking' : 'Within thresholds'"
             :subtext-class="lowStockItems.length > 0 ? 'warning' : ''"
+            :icon="ExclamationTriangleIcon"
+            :tone="lowStockItems.length > 0 ? 'warning' : 'default'"
           />
           <DashboardStatTile
             label="Outstanding"
             :value="formatCurrency(outstandingBalanceTotal)"
             :subtext="`${outstandingCount} open balance${outstandingCount === 1 ? '' : 's'}`"
             :subtext-class="outstandingCount > 0 ? 'warning' : ''"
+            :icon="CreditCardIcon"
+            :tone="outstandingCount > 0 ? 'warning' : 'default'"
           />
           <DashboardStatTile
             v-if="canAccessLeadsPlan"
             label="Open leads"
             :value="String(openLeadsCount)"
             :subtext="`${formatCurrency(openLeadsPipeline)} est. pipeline`"
+            :icon="UsersIcon"
           />
         </div>
 
@@ -137,11 +229,14 @@
             :value="formatCurrency(dashboardGrossProfit)"
             :subtext="dashboardGrossProfitSubtext"
             :change-positive="dashboardGrossProfit >= 0"
+            :icon="ChartBarIcon"
+            :tone="dashboardGrossProfit >= 0 ? 'success' : 'danger'"
           />
           <DashboardStatTile
             label="Cost of goods sold"
             :value="formatCurrency(dashboardCogs)"
             subtext="Completed sales with unit cost"
+            :icon="CubeIcon"
           />
         </div>
       </div>
@@ -204,10 +299,12 @@
             </div>
           </div>
           <div :class="['dash-chart-wrap', chartData.length === 0 ? 'flex items-center justify-center' : '']">
-            <div v-if="chartData.length === 0" class="text-center">
-              <MarketingFeatureIcon name="analytics" size="lg" class="mx-auto mb-2 opacity-40" />
-              <p :class="cardTitleClass">No revenue data yet</p>
-              <p :class="cardDescClass">Completed sales will populate this chart</p>
+            <div v-if="chartData.length === 0" class="dash-empty-state dash-empty-state--compact">
+              <div class="dash-empty-state__mark">
+                <MarketingFeatureIcon name="analytics" size="sm" class="dash-empty-state__icon" />
+              </div>
+              <p class="dash-empty-state__title">No revenue data yet</p>
+              <p class="dash-empty-state__desc">Completed sales will populate this chart</p>
             </div>
             <ClientOnly v-else>
               <LazyApexChart type="area" :height="chartHeight" :options="chartOptions" :series="chartSeries" />
@@ -247,8 +344,9 @@
       </div>
 
       <PaymentLinksSummaryCard
-        v-if="canUseSubscriptionFeature('payment_links') || showNativeComingSoon"
+        v-if="canShowPaymentLinksSummary"
         card-class="dash-card dash-card--padded"
+        @create-link="goCreatePaymentLink"
       />
 
       <section :class="cardPaddedClass">
@@ -387,6 +485,7 @@
         </section>
       </div>
     </template>
+    </template>
   </div>
 </template>
 
@@ -441,6 +540,24 @@ import {
   sumReceiptCogs,
   sumReceiptGrossProfit,
 } from '~/utils/inventory-item-cost'
+import {
+  BanknotesIcon,
+  BuildingStorefrontIcon,
+  ChartBarIcon,
+  CreditCardIcon,
+  CubeIcon,
+  ExclamationTriangleIcon,
+  ShoppingBagIcon,
+  UsersIcon,
+} from '~/utils/app-icons'
+import IosEmptyState from '~/components/ios/IosEmptyState.vue'
+import IosHomeDashboard from '~/components/ios/IosHomeDashboard.vue'
+import IosHomeDashboardSkeleton from '~/components/ios/IosHomeDashboardSkeleton.vue'
+import type {
+  IosHomeAlert,
+  IosHomeFeedItem,
+  IosHomeMetric,
+} from '~/components/ios/IosHomeDashboard.vue'
 
 definePageMeta({
   layout: 'dashboard',
@@ -571,6 +688,7 @@ const storesStore = useStoresStore()
 const staffStore = useStaffStore()
 const salesLeadsStore = useSalesLeadsStore()
 const themeStore = useThemeStore()
+const chartIsDark = computed(() => themeStore.actualTheme === 'dark')
 
 const resolvedTutorialSteps = computed(() =>
   userStore.userData?.role === 'staff' ? staffTutorialSteps : tutorialSteps
@@ -581,7 +699,13 @@ const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
 const canAccessLeadsPlan = computed(() => canUseSubscriptionFeature('sales_leads'))
 const openLeadsCount = computed(() => salesLeadsStore.openLeadsCount)
 const openLeadsPipeline = computed(() => salesLeadsStore.openPipelineValue)
-const { showNativeComingSoon } = usePaymentLinksLaunch()
+const { canShowPaymentLinksSummary } = usePaymentLinksLaunch()
+const router = useRouter()
+
+function goCreatePaymentLink() {
+  router.push('/dashboard/payment-links?create=1')
+}
+const { canManageBranches } = useBusinessCapabilities()
 const { canViewProfitAndCost } = usePermissions()
 const { isNativeApp } = useCapacitorNativeApp()
 const { isCapacitorIos } = useIsCapacitorIos()
@@ -640,7 +764,7 @@ const {
   statCardRevenueSparkline,
 } = insights
 
-const nativeKpiSkeletonCount = computed(() => (canViewProfitAndCost.value ? 7 : 5))
+const homeKpiSkeletonCount = computed(() => (canAccessLeadsPlan.value ? 6 : 5))
 
 const kpiGridClassResolved = computed(() =>
   isNativeApp.value ? `${kpiGridClass} dash-kpi-grid--compact` : kpiGridClass
@@ -741,6 +865,141 @@ const userName = computed(() => {
   return 'User'
 })
 
+const iosDisplayName = computed((): string => {
+  if (userStore.userData?.name?.trim()) return userStore.userData.name.trim()
+  if (authStore.currentUser?.displayName?.trim()) return authStore.currentUser.displayName.trim()
+  return userName.value || 'User'
+})
+
+const iosStoreLabel = computed(() => {
+  const parts = [currentStoreLabel.value]
+  if (userRoleLabel.value) parts.push(userRoleLabel.value)
+  return parts.filter(Boolean).join(' · ')
+})
+
+function initialsFromName(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean)
+  if (parts.length === 0) return '?'
+  if (parts.length === 1) {
+    const first = parts[0] ?? ''
+    return first.slice(0, 2).toUpperCase()
+  }
+  const first = parts[0] ?? ''
+  const last = parts[parts.length - 1] ?? ''
+  return `${first[0] ?? ''}${last[0] ?? ''}`.toUpperCase()
+}
+
+function formatCompactNumber(value: number): string {
+  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`
+  if (value >= 10_000) return `${Math.round(value / 1000)}K`
+  if (value >= 1_000) return `${(value / 1000).toFixed(1).replace(/\.0$/, '')}K`
+  return String(value)
+}
+
+function formatCompactCurrency(value: number): string {
+  const symbol = currencySymbol.value || '$'
+  if (value >= 1_000_000) {
+    return `${symbol}${(value / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`
+  }
+  if (value >= 10_000) return `${symbol}${Math.round(value / 1000)}K`
+  if (value >= 1_000) return `${symbol}${(value / 1000).toFixed(1).replace(/\.0$/, '')}K`
+  return formatCurrency(value)
+}
+
+const iosHomeMetrics = computed((): IosHomeMetric[] => {
+  const metrics: IosHomeMetric[] = [
+    {
+      id: 'revenue',
+      label: 'Total revenue',
+      value: formatCompactCurrency(totalRevenue.value),
+      href: '/dashboard/analytics',
+      icon: BanknotesIcon,
+    },
+    {
+      id: 'orders',
+      label: 'Orders today',
+      value: String(todayReceiptsCount.value),
+      href: '/dashboard/receipts',
+      icon: ShoppingBagIcon,
+    },
+    {
+      id: 'customers',
+      label: 'Active customers',
+      value: formatCompactNumber(totalCustomers.value),
+      href: '/dashboard/receipts',
+      icon: UsersIcon,
+    },
+    {
+      id: 'low-stock',
+      label: 'Low stock signals',
+      value: String(lowStockItems.value.length),
+      href: '/dashboard/inventory',
+      tone: 'warning',
+      icon: ExclamationTriangleIcon,
+    },
+  ]
+
+  if (outstandingCount.value > 0) {
+    metrics.push({
+      id: 'outstanding',
+      label: 'Outstanding balances',
+      value: formatCompactCurrency(outstandingBalanceTotal.value),
+      href: '/dashboard/receipts',
+      icon: CreditCardIcon,
+    })
+  }
+
+  if (canAccessLeadsPlan.value) {
+    metrics.push({
+      id: 'leads',
+      label: 'Open leads',
+      value: String(openLeadsCount.value),
+      href: '/dashboard/leads',
+      icon: UsersIcon,
+    })
+  }
+
+  return metrics.slice(0, 6)
+})
+
+const iosRecentSales = computed((): IosHomeFeedItem[] =>
+  recentReceiptsTop.value.map((receipt) => ({
+    id: receipt.id,
+    title: receipt.customerName,
+    subtitle: `Receipt ${receipt.receiptNumber}`,
+    body: `${receipt.paymentMethod} · ${receipt.statusLabel}`,
+    timeLabel: receipt.time,
+    valueLabel: receipt.amount,
+    initials: initialsFromName(receipt.customerName),
+    badge: receipt.status !== 'completed' ? receipt.statusLabel : undefined,
+    href: `/dashboard/receipts?receipt=${receipt.id}`,
+  }))
+)
+
+const iosLowStockPreview = computed((): IosHomeFeedItem[] =>
+  lowStockItemsTop.value.map((item) => ({
+    id: item.id,
+    title: item.name,
+    subtitle: item.folderName,
+    body: item.isSerialNumber
+      ? 'Serialized item below threshold'
+      : `${item.quantity} units left · threshold ${item.threshold}`,
+    timeLabel: 'Inventory',
+    valueLabel: item.isSerialNumber ? 'Serial' : `${item.quantity} left`,
+    initials: item.name.slice(0, 2).toUpperCase(),
+    href: `/dashboard/inventory/${item.folderId}`,
+  }))
+)
+
+const iosHomeAlerts = computed((): IosHomeAlert[] =>
+  attentionItemsTop.value.map((alert) => ({
+    id: alert.id,
+    title: alert.title,
+    description: alert.description,
+    href: alert.href,
+  }))
+)
+
 const chartData = computed(() => {
   switch (chartView.value) {
     case 'weekly':
@@ -790,10 +1049,10 @@ if (import.meta.client) {
 const chartHeight = computed(() => (isMobile.value ? 176 : 220))
 
 const chartOptions = computed(() => {
-  const isDark = themeStore.actualTheme === 'dark'
-  const lineColor = isDark ? '#9ab5e3' : '#4876c7'
+  const isDark = chartIsDark.value
+  const lineColor = isDark ? '#e4e4e7' : '#4876c7'
   const gridColor = isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(15, 23, 42, 0.06)'
-  const labelColor = isDark ? '#94a3b8' : '#64748b'
+  const labelColor = isDark ? '#a1a1aa' : '#64748b'
 
   return {
     chart: {
@@ -905,7 +1164,15 @@ const loadDashboardData = async () => {
       canAccessLeadsPlan.value ? salesLeadsStore.fetchSalesLeads(true) : Promise.resolve(),
     ])
 
-    dashboardFolderItems.value = await inventoryStore.fetchFolderAvailabilityStats()
+    if (isNativeApp.value) {
+      scheduleNativeIdleWork(() => {
+        void inventoryStore.fetchFolderAvailabilityStats().then((grouped) => {
+          dashboardFolderItems.value = grouped
+        })
+      }, 600)
+    } else {
+      dashboardFolderItems.value = await inventoryStore.fetchFolderAvailabilityStats()
+    }
 
     if (isNativeApp.value) {
       scheduleNativeIdleWork(() => {
@@ -925,7 +1192,15 @@ const refreshDashboardAfterStoreSwitch = async () => {
       receiptsStore.fetchReceipts(),
       canAccessLeadsPlan.value ? salesLeadsStore.fetchSalesLeads(true) : Promise.resolve(),
     ])
-    dashboardFolderItems.value = await inventoryStore.fetchFolderAvailabilityStats()
+    if (isNativeApp.value) {
+      scheduleNativeIdleWork(() => {
+        void inventoryStore.fetchFolderAvailabilityStats().then((grouped) => {
+          dashboardFolderItems.value = grouped
+        })
+      }, 600)
+    } else {
+      dashboardFolderItems.value = await inventoryStore.fetchFolderAvailabilityStats()
+    }
     if (isNativeApp.value) {
       scheduleNativeIdleWork(() => {
         void loadRecentActivity()

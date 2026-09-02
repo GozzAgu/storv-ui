@@ -473,6 +473,18 @@ html.capacitor-native.dark .dashboard-fixed-footer .dash-pagination__pager {
 }
 
 /* Empty states fill the remaining shell height - never add viewport min-height (causes page overflow). */
+.dash-empty-state__mark {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+}
+
+.dash-empty-state__icon {
+  display: block;
+}
+
 .dash-table-empty-state--fill {
   flex: 1 1 auto;
   min-height: 0;

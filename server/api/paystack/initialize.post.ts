@@ -6,10 +6,12 @@ import { getAdminFirestore } from '~/server/utils/firebase-admin'
 import { requireAuth, requireFreshTotp } from '~/server/utils/store-auth'
 import {
   getExpectedPlanAmount,
+  getPaystackPlanCode,
   PAYSTACK_CURRENCY,
   VALID_PLANS,
   resolvePaystackSecretKey,
 } from '~/server/utils/paystack-validation'
+import { disablePaystackSubscription } from '~/server/utils/paystack-subscription'
 
 export default defineEventHandler(async (event) => {
   try {
@@ -53,6 +55,13 @@ export default defineEventHandler(async (event) => {
       })
     }
 
+    if (planId === 'storvv_micro') {
+      throw createError({
+        statusCode: 400,
+        message: 'Micro is free; choose Medium or Enterprise to subscribe.',
+      })
+    }
+
     const config = useRuntimeConfig()
     const secretKey = resolvePaystackSecretKey(config)
     if (!secretKey) {
@@ -62,7 +71,40 @@ export default defineEventHandler(async (event) => {
       })
     }
 
+    let paystackPlanCode: string
+    try {
+      paystackPlanCode = getPaystackPlanCode(
+        planId,
+        billingCycle,
+        config as Record<string, unknown>
+      )
+    } catch (err: unknown) {
+      throw createError({
+        statusCode: 503,
+        message: err instanceof Error ? err.message : 'Paystack plan is not configured.',
+      })
+    }
+
     const amount = getExpectedPlanAmount(planId, config as Record<string, unknown>, billingCycle)
+
+    const adminDb = getAdminFirestore()
+    const userSnap = await adminDb.collection('users').doc(userId).get()
+    const existing = userSnap.data() as {
+      paystackSubscriptionCode?: string
+      paystackSubscriptionEmailToken?: string
+    } | undefined
+
+    if (existing?.paystackSubscriptionCode && existing?.paystackSubscriptionEmailToken) {
+      try {
+        await disablePaystackSubscription(
+          secretKey,
+          existing.paystackSubscriptionCode,
+          existing.paystackSubscriptionEmailToken
+        )
+      } catch (err) {
+        console.warn('[paystack/initialize] could not disable prior subscription', err)
+      }
+    }
 
     const normalizedEmail = email.trim().toLowerCase()
     const reference = `storvv_${planId}_${userId}_${Date.now()}`
@@ -78,6 +120,7 @@ export default defineEventHandler(async (event) => {
       body: {
         email: normalizedEmail,
         amount,
+        plan: paystackPlanCode,
         reference,
         currency: PAYSTACK_CURRENCY,
         callback_url: callbackUrl,
@@ -85,6 +128,7 @@ export default defineEventHandler(async (event) => {
           userId,
           planId,
           billingCycle,
+          paystackPlanCode,
         },
       },
     })) as {
@@ -100,13 +144,12 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Persist pending checkout server-side for later verification hard checks.
-    const adminDb = getAdminFirestore()
     await adminDb.collection('users').doc(userId).collection('pendingCheckouts').doc(reference).set(
       {
         userId,
         planId,
         billingCycle,
+        paystackPlanCode,
         email: normalizedEmail,
         amount,
         currency: PAYSTACK_CURRENCY,

@@ -9,32 +9,26 @@
             :key="column.key"
             :class="[
               column.sortable
-                ? 'cursor-pointer select-none hover:text-gray-800 dark:hover:text-gray-200'
+                ? 'dashboard-table__th--sortable cursor-pointer select-none'
                 : '',
               column.class || '',
               headerClass,
             ]"
             @click="column.sortable ? handleSort(column.key) : null"
           >
-            <div class="flex items-center gap-1.5">
+            <div class="dashboard-table__head-label">
               <span>{{ column.label }}</span>
-              <span v-if="column.sortable" class="flex flex-col">
-                <ChevronUpIcon
-                  :class="[
-                    'w-3 h-3',
-                    sortBy === column.key && sortOrder === 'asc'
-                      ? 'text-primary-500 dark:text-primary-400'
-                      : 'text-gray-300 dark:text-gray-600',
-                  ]"
-                />
-                <ChevronDownIcon
-                  :class="[
-                    'w-3 h-3 -mt-1',
-                    sortBy === column.key && sortOrder === 'desc'
-                      ? 'text-primary-500 dark:text-primary-400'
-                      : 'text-gray-300 dark:text-gray-600',
-                  ]"
-                />
+              <span
+                v-if="column.sortable"
+                class="dashboard-table__sort"
+                :class="{
+                  'dashboard-table__sort--active': sortBy === column.key,
+                  'dashboard-table__sort--desc': sortBy === column.key && sortOrder === 'desc',
+                }"
+                aria-hidden="true"
+              >
+                <ChevronUpIcon class="dashboard-table__sort-icon dashboard-table__sort-icon--up" />
+                <ChevronDownIcon class="dashboard-table__sort-icon dashboard-table__sort-icon--down" />
               </span>
             </div>
           </th>
@@ -59,23 +53,25 @@
           </td>
           <td
             v-if="showActions"
-            class="whitespace-nowrap px-3 py-2.5 text-right text-xs font-medium"
+            class="dashboard-table__col-actions"
           >
             <slot name="actions" :row="row" :index="index">
-              <div class="flex items-center justify-end gap-1.5">
+              <div class="dashboard-table__action-group">
                 <button
                   v-if="onEdit"
+                  type="button"
+                  class="dashboard-table__action-btn"
                   @click="handleEdit(row, index)"
-                  class="text-primary-500 dark:text-primary-400 hover:text-primary-600 dark:hover:text-primary-300"
                 >
-                  <PencilSquareIcon class="w-4 h-4" />
+                  <PencilSquareIcon class="h-4 w-4" />
                 </button>
                 <button
                   v-if="onDelete"
+                  type="button"
+                  class="dashboard-table__action-btn"
                   @click="handleDelete(row, index)"
-                  class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
                 >
-                  <TrashIcon class="w-4 h-4" />
+                  <TrashIcon class="h-4 w-4" />
                 </button>
               </div>
             </slot>

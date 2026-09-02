@@ -115,23 +115,14 @@
     </div>
 
     <template #footer>
-      <Button
-        variant="outline"
-        size="sm"
-        @click="handleCancel"
-        class="w-full sm:w-auto !rounded-2xl"
-        >Cancel</Button
-      >
-      <Button
-        variant="danger"
-        size="sm"
-        :disabled="!confirmed || isProcessing"
-        @click="handleConfirmDelete"
-        :icon="TrashIcon"
-        class="w-full sm:w-auto !rounded-2xl"
-      >
-        {{ isProcessing ? 'Deleting...' : 'Delete category' }}
-      </Button>
+      <IosDrawerActions
+        primary-variant="danger"
+        :primary-label="isProcessing ? 'Deleting...' : 'Delete category'"
+        :primary-icon="TrashIcon"
+        :primary-disabled="!confirmed || isProcessing"
+        @cancel="handleCancel"
+        @primary="handleConfirmDelete"
+      />
     </template>
   </Modal>
 </template>
@@ -143,7 +134,7 @@ import {
   ExclamationTriangleIcon,
 } from '~/utils/app-icons'
 import Modal from '~/components/ui/Modal.vue'
-import Button from '~/components/ui/Button.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import type { InventoryFolder } from '~/stores/inventory'
 import { useInventoryStore } from '~/stores/inventory'

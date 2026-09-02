@@ -12,12 +12,18 @@ export function isCloudinaryUrl(url: string): boolean {
 }
 
 /**
- * Insert a small-fit transform after /upload/ (no-op if not a standard Cloudinary image URL).
+ * Fill a square crop after /upload/ so avatars and logo tiles use cover, not letterbox.
  */
 export function optimizeCloudinaryLogo(url: string, size = 128): string {
   if (!url || !isCloudinaryUrl(url) || !url.includes('/upload/')) return url
-  const segment = `w_${size},h_${size},c_fit,f_auto,q_auto`
-  if (url.includes(`/${segment}/`) || url.match(/\/upload\/[^/]+\//)?.[0]?.includes('w_')) {
+  const segment = `w_${size},h_${size},c_fill,g_center,f_auto,q_auto`
+  if (url.includes(`/${segment}/`)) return url
+  const withFit = url.replace(
+    /\/upload\/w_\d+,h_\d+,c_fit(?:,g_\w+)?,f_auto,q_auto/,
+    `/upload/${segment}`
+  )
+  if (withFit !== url) return withFit
+  if (url.match(/\/upload\/[^/]+\//)?.[0]?.includes('w_')) {
     return url
   }
   return url.replace('/upload/', `/upload/${segment}/`)

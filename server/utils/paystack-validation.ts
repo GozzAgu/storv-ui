@@ -1,6 +1,9 @@
 import type { SubscriptionPlan } from '~/types/subscription'
 import type { SubscriptionBillingCycle } from '~/types/subscription-billing'
-import { isSubscriptionBillingCycle } from '~/types/subscription-billing'
+import {
+  getPaystackPlanCodeConfigKey,
+  isSubscriptionBillingCycle,
+} from '~/types/subscription-billing'
 
 export const VALID_PLANS: SubscriptionPlan[] = [
   'storvv_micro',
@@ -86,6 +89,25 @@ export function validatePaidAmountAndCurrency(
     return { valid: false, message: 'Payment currency is invalid.' }
   }
   return { valid: true }
+}
+
+/** Resolve Paystack plan code (PLN_xxx) for auto-renewing checkout. */
+export function getPaystackPlanCode(
+  planId: SubscriptionPlan,
+  billingCycle: SubscriptionBillingCycle,
+  config: Record<string, unknown>
+): string {
+  const key = getPaystackPlanCodeConfigKey(planId, billingCycle)
+  if (!key) {
+    throw new Error(`Plan ${planId} does not use Paystack subscription checkout.`)
+  }
+  const code = typeof config[key] === 'string' ? (config[key] as string).trim() : ''
+  if (!code) {
+    throw new Error(
+      `Missing Paystack plan code for ${planId} (${billingCycle}). Set ${key.toUpperCase()} in env.`
+    )
+  }
+  return code
 }
 
 /** Server-only: useRuntimeConfig first; `process.env` fallback matches Vercel runtime secrets. */

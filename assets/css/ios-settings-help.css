@@ -1,0 +1,646 @@
+/**
+ * iOS Settings & Help — grouped list page chrome (matches inventory/profile pages).
+ */
+
+html.capacitor-ios.capacitor-native .ios-settings-page,
+html.capacitor-ios.capacitor-native .ios-help-page {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 100%;
+  padding:
+    var(--ios-page-shell-pad-top, 0.375rem)
+    var(--ios-home-inset, 20px)
+    calc(var(--dashboard-bottom-nav-stack, 5rem) + 0.75rem);
+  background: var(--ios-home-bg, #f3f3f5);
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-page-stack--ios-settings {
+  gap: 1rem;
+  padding: 0;
+}
+
+/**
+ * Grouped sections mirror .ios-settings-group on the profile/More screens:
+ * an uppercase caption, a 0.5rem gap, then the inset card.
+ */
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-settings-panel--ios-grouped {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-settings-panel--ios-grouped .dash-settings-panel__body,
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-settings-panel--ios-grouped .dash-settings-panel__body--compact {
+  border: none;
+  border-radius: var(--ios-home-radius, 20px);
+  background: var(--ios-home-card, #fff);
+  box-shadow: var(--ios-home-card-shadow);
+  padding: 0.75rem 1rem;
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-settings-page .dash-settings-panel--ios-grouped .dash-settings-panel__body,
+html.capacitor-ios.capacitor-native.dark
+  .ios-settings-page
+  .dash-settings-panel--ios-grouped
+  .dash-settings-panel__body--compact {
+  background: var(--ios-surface-solid, rgb(28 28 30));
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-settings-panel--ios-grouped .dash-settings-panel__title {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ios-label-secondary);
+  /* The header supplies the 0.25rem caption inset for the title and actions alike */
+  padding-inline: 0;
+}
+
+/* Grouped section header sits just above its card (gap supplies the spacing) */
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-settings-panel--ios-grouped .dash-settings-panel__header {
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0;
+  padding: 0 0.25rem;
+}
+
+/* Row padding already supplies the vertical rhythm inside a card */
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-settings-panel__body:has(> .dash-setting-row),
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-settings-panel__body:has(> div > .dash-setting-row) {
+  padding-block: 0.25rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-setting-row {
+  flex-wrap: nowrap;
+  gap: 0.75rem;
+  min-height: var(--ios-list-row-min-height, 2.75rem);
+  padding-block: var(--ios-list-row-pad-block, 0.5625rem);
+  border-bottom-color: var(--ios-separator);
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-setting-row > div:first-child > p:first-child {
+  font-size: var(--ios-list-title-size, 0.8125rem) !important;
+  font-weight: 500 !important;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--ios-label) !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-setting-row > div:first-child > p:first-child + p {
+  margin-top: 0.125rem;
+  font-size: var(--ios-list-subtitle-size, 0.6875rem) !important;
+  line-height: 1.3;
+  color: var(--ios-label-secondary) !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-setting-row > span:first-child {
+  font-size: var(--ios-list-title-size, 0.8125rem) !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.01em;
+  color: var(--ios-label) !important;
+}
+
+/* A row that is only secondary copy (e.g. the billing support line) */
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-setting-row--note {
+  display: block;
+  font-size: 0.8125rem !important;
+  line-height: 1.45;
+  color: var(--ios-label-secondary) !important;
+}
+
+/* Small body copy inside cards — 11/10px is unreadable at arm's length */
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-settings-panel__body .text-\[11px\],
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-settings-panel__body .text-\[10px\] {
+  font-size: 0.8125rem !important;
+  line-height: 1.45;
+}
+
+/* ── Fields ── */
+/* Appearance comes from ios-fields.css; rows only constrain the width */
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-settings-panel__body .dash-setting-row input[type='text'],
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-settings-panel__body .dash-setting-row input[type='number'],
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-settings-panel__body .dash-setting-row select {
+  width: auto !important;
+  min-width: 6.5rem;
+  max-width: 11rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-settings-panel__body .dash-setting-row input[type='text'],
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-settings-panel__body .dash-setting-row input[type='number'] {
+  text-align: right;
+}
+
+/* ── Header actions: iOS Settings text, not navy pills ── */
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-action-link {
+  height: auto;
+  min-height: 2.25rem;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ios-label);
+  -webkit-tap-highlight-color: transparent;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-action-link:active {
+  opacity: 0.45;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-action-link:disabled {
+  opacity: 0.35;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-action-link--cancel {
+  font-weight: 500;
+  color: var(--ios-label-secondary);
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-plan-badge {
+  padding: 0.25rem 0.625rem;
+  border: none;
+  background: var(--ios-fill-tertiary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ios-label-secondary);
+}
+
+/* ── Chips (payment tenders) ── */
+html.capacitor-ios.capacitor-native .ios-settings-page li.inline-flex.rounded-full {
+  min-height: 2rem;
+  padding: 0.3125rem 0.75rem !important;
+  background: var(--ios-fill-tertiary) !important;
+  font-size: 0.8125rem !important;
+  font-weight: 500;
+  color: var(--ios-label) !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page li.inline-flex.rounded-full button {
+  padding-inline: 0.125rem;
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--ios-label-secondary);
+}
+
+/* ── Branch list ── */
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-branch-grid {
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 0.5rem !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-branch-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.875rem 1rem;
+  border: none !important;
+  border-radius: 14px;
+  background: var(--ios-fill-tertiary) !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-branch-card--active {
+  background: var(--ios-fill-secondary) !important;
+  box-shadow: none;
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-settings-page .dash-branch-card--active {
+  box-shadow: none;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-branch-card .h-7.w-7 {
+  width: 2.25rem !important;
+  height: 2.25rem !important;
+  border-radius: 0.625rem !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-branch-card .text-\[11px\] {
+  font-size: var(--ios-list-title-size, 0.8125rem) !important;
+  font-weight: 500 !important;
+  color: var(--ios-label) !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-branch-card .text-\[10px\] {
+  font-size: 0.8125rem !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-branch-card button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  min-height: 2rem;
+  border-radius: 9999px;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-branch-card button svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* ── Data export tiles + logo well ── */
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-settings-panel__body ul.grid > li {
+  padding: 0.75rem 0.875rem !important;
+  border-radius: 14px !important;
+  background: var(--ios-fill-tertiary) !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .h-\[4\.5rem\].w-\[4\.5rem\] {
+  border-radius: 18px !important;
+  background: var(--ios-fill-tertiary) !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-view-only-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+  padding: 0.125rem 0.625rem;
+  border-radius: 9999px;
+  background: rgb(255 149 0 / 0.12);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #ff9500;
+  white-space: nowrap;
+}
+
+/* ── Filled actions match CRUD drawers (black / white, not navy) ── */
+html.capacitor-ios.capacitor-native .ios-settings-page .ios-action-btn,
+html.capacitor-ios.capacitor-native .ios-settings-page .btn-primary,
+html.capacitor-ios.capacitor-native .ios-settings-page .btn-primary-sm,
+html.capacitor-ios.capacitor-native .ios-settings-page .btn-outline,
+html.capacitor-ios.capacitor-native .ios-settings-page .btn-secondary {
+  min-height: 3rem !important;
+  padding-inline: 1.125rem !important;
+  border: none !important;
+  border-radius: 9999px !important;
+  box-shadow: none !important;
+  font-size: 0.9375rem !important;
+  font-weight: 600 !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .ios-action-btn--primary,
+html.capacitor-ios.capacitor-native .ios-settings-page .btn-primary,
+html.capacitor-ios.capacitor-native .ios-settings-page .btn-primary-sm {
+  background: var(--ios-label) !important;
+  color: var(--ios-home-bg, #f3f3f5) !important;
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-settings-page .ios-action-btn--primary,
+html.capacitor-ios.capacitor-native.dark .ios-settings-page .btn-primary,
+html.capacitor-ios.capacitor-native.dark .ios-settings-page .btn-primary-sm {
+  background: rgb(255 255 255 / 0.92) !important;
+  color: #111111 !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .ios-action-btn--secondary,
+html.capacitor-ios.capacitor-native .ios-settings-page .ios-action-btn--outline,
+html.capacitor-ios.capacitor-native .ios-settings-page .btn-outline,
+html.capacitor-ios.capacitor-native .ios-settings-page .btn-secondary {
+  background: var(--ios-fill-tertiary) !important;
+  color: var(--ios-label) !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .subscription-plan-panel .ios-action-btn,
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-settings-panel__body > .flex > .ios-action-btn,
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-settings-panel__body .flex.flex-wrap > .ios-action-btn {
+  width: 100% !important;
+  justify-content: center;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-field-label {
+  margin-bottom: 0.375rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--ios-label-secondary);
+}
+
+/* Stack store-info fields instead of a cramped two-column grid */
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-settings-panel__body .grid {
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 0.875rem !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-settings-panel__body .grid input,
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-settings-panel__body .grid textarea,
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-settings-panel__body .grid select,
+html.capacitor-ios.capacitor-native .ios-settings-page .subscription-plan-panel select {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  text-align: left !important;
+}
+
+/* ── Plan card: inset fill, not a nested web card ── */
+html.capacitor-ios.capacitor-native .ios-settings-page .subscription-plan-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .subscription-plan-panel.space-y-4 > :not([hidden]) ~ :not([hidden]),
+html.capacitor-ios.capacitor-native .ios-settings-page .subscription-plan-panel .space-y-3 > :not([hidden]) ~ :not([hidden]) {
+  margin-top: 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .subscription-plan-panel > div:first-child {
+  padding: 1rem !important;
+  border: none !important;
+  border-radius: 14px !important;
+  background: var(--ios-fill-tertiary) !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .subscription-plan-panel > div:first-child p.border-t {
+  margin-top: 0.625rem;
+  padding-top: 0.625rem;
+  border-top-color: var(--ios-separator) !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .subscription-plan-panel > div:first-child p.text-sm {
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.03em;
+  color: var(--ios-label) !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .subscription-plan-panel details {
+  margin: 0;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .subscription-plan-panel details summary {
+  min-height: 2.75rem;
+  display: flex;
+  align-items: center;
+  font-size: 0.9375rem !important;
+  font-weight: 500 !important;
+  color: var(--ios-label) !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-settings-account-grid--ios {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-settings-account-grid--ios .flex.items-start.gap-4 {
+  align-items: center;
+  gap: 1rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .absolute.-bottom-1.-right-1 {
+  background: var(--ios-label) !important;
+  color: var(--ios-home-bg, #f3f3f5) !important;
+  box-shadow: none !important;
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-settings-page .absolute.-bottom-1.-right-1 {
+  background: rgb(255 255 255 / 0.92) !important;
+  color: #111111 !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .text-red-600,
+html.capacitor-ios.capacitor-native .ios-settings-page .dark\:text-red-400 {
+  color: var(--ios-destructive) !important;
+  font-size: 0.9375rem !important;
+  font-weight: 500 !important;
+}
+
+/* ── Workspace style picker: grouped rows, no blue cards ── */
+html.capacitor-ios.capacitor-native .ios-settings-page .experience-mode-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .experience-mode-picker button {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 1.25rem;
+  column-gap: 0.75rem;
+  align-items: start;
+  min-height: 3.25rem;
+  margin: 0;
+  padding: 0.875rem 0.125rem !important;
+  border: none !important;
+  border-bottom: 1px solid var(--ios-separator) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  text-align: left;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .experience-mode-picker button:last-child {
+  border-bottom: none !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .experience-mode-picker button > * {
+  grid-column: 1;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .experience-mode-picker button p:first-child {
+  font-size: 1.0625rem !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.02em;
+  color: var(--ios-label) !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .experience-mode-picker button p:first-child + p {
+  margin-top: 0.25rem;
+  font-size: 0.8125rem !important;
+  line-height: 1.4;
+  color: var(--ios-label-secondary) !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .experience-mode-picker button ul {
+  display: none;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .experience-mode-picker button[aria-checked='true']::after {
+  content: '';
+  grid-column: 2;
+  grid-row: 1 / span 8;
+  align-self: center;
+  width: 1.125rem;
+  height: 1.125rem;
+  background: var(--ios-label);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='black' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M5 13l4 4L19 7'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='black' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M5 13l4 4L19 7'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .experience-mode-picker button:active {
+  background: var(--ios-fill-secondary) !important;
+}
+
+/* ── Checkout tenders + export ── */
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-settings-panel__body .flex.flex-wrap.items-center.gap-2 {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.625rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-settings-panel__body .flex.flex-wrap.items-center.gap-2 .ios-action-btn {
+  width: 100% !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-settings-panel__body .flex.flex-wrap.items-center.gap-2 input[type='text'] {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  text-align: left !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-settings-panel__body ul.grid {
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 0.5rem !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-settings-panel__body ul.space-y-2 {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-settings-panel__body ul.space-y-2 > li {
+  padding-block: 0.75rem;
+  border-bottom: 1px solid var(--ios-separator);
+  font-size: 0.8125rem !important;
+  line-height: 1.45;
+  color: var(--ios-label-secondary) !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-settings-panel__body ul.space-y-2 > li:last-child {
+  border-bottom: none;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-settings-panel__body ul.space-y-2 > li > span {
+  display: block;
+  margin-bottom: 0.125rem;
+  font-size: 0.9375rem !important;
+  font-weight: 600 !important;
+  color: var(--ios-label) !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-settings-page .dash-settings-panel__body ul.divide-y > li {
+  padding-block: 0.75rem;
+  border-color: var(--ios-separator) !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-help-page .ios-help-layout--native {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-help-page .dash-help-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-help-page .dash-help-section {
+  overflow: hidden;
+  margin: 0;
+  padding: 1rem;
+  border: none;
+  border-radius: var(--ios-home-radius, 20px);
+  background: var(--ios-home-card, #fff);
+  box-shadow: var(--ios-home-card-shadow);
+  scroll-margin-top: calc(var(--dashboard-bottom-nav-stack, 5rem) + 1rem);
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-help-page .dash-help-section {
+  background: var(--ios-surface-solid, rgb(28 28 30));
+}
+
+html.capacitor-ios.capacitor-native .ios-help-page .dash-help-section + .dash-help-section {
+  margin-top: 0;
+  padding-top: 1rem;
+  border-top: none;
+}
+
+html.capacitor-ios.capacitor-native .ios-help-page .dash-help-section__head {
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-help-page .dash-help-section__icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 9999px;
+  border: 1.5px solid var(--ios-separator);
+  background: transparent;
+}
+
+html.capacitor-ios.capacitor-native .ios-help-page .dash-help-section__title {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ios-label);
+}
+
+html.capacitor-ios.capacitor-native .ios-help-page .dash-help-section__blurb {
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--ios-label-secondary);
+}
+
+html.capacitor-ios.capacitor-native .ios-help-page .dash-help-assistant-link {
+  min-height: 2.25rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 9999px;
+  background: rgb(0 122 255 / 0.1);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #007aff;
+}
+
+html.capacitor-ios.capacitor-native .ios-help-page .dash-help-article {
+  padding: 0.875rem;
+  border: none;
+  border-radius: 14px;
+  background: rgb(120 120 128 / 0.08);
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-help-page .dash-help-article {
+  background: rgb(255 255 255 / 0.06);
+}
+
+html.capacitor-ios.capacitor-native .ios-help-page .dash-help-article__title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--ios-label);
+}
+
+html.capacitor-ios.capacitor-native .ios-help-page .dash-help-article__body {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--ios-label-secondary);
+}
+
+html.capacitor-ios.capacitor-native .ios-help-page .dash-help-chip,
+html.capacitor-ios.capacitor-native .ios-help-page .dash-help-chip--link {
+  min-height: 2.125rem;
+  padding: 0.375rem 0.875rem;
+  border: none;
+  border-radius: 9999px;
+  background: rgb(120 120 128 / 0.12);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--ios-label);
+}
+
+html.capacitor-ios.capacitor-native .ios-help-page .dash-help-back-top {
+  right: var(--ios-home-inset, 20px);
+  bottom: calc(var(--dashboard-bottom-nav-stack, 5rem) + 0.5rem);
+  border: none;
+  background: var(--ios-home-card, #fff);
+  box-shadow: var(--ios-home-card-shadow);
+  color: var(--ios-label);
+}

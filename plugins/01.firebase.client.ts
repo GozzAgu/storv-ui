@@ -1,7 +1,36 @@
 import { initializeApp, getApps, type FirebaseApp } from 'firebase/app'
 import { getAnalytics, type Analytics } from 'firebase/analytics'
+import {
+  initializeFirestore,
+  persistentLocalCache,
+  persistentMultipleTabManager,
+} from 'firebase/firestore'
 import { getFirebaseConfig } from '~/config/firebase.config'
 import { isCapacitorNative } from '~/utils/firebase-client-auth'
+
+/**
+ * Turn on Firestore's on-device cache so reads can be served from disk instead of
+ * always round-tripping the network (big win for repeat launches and re-visiting
+ * already-fetched data). Must run before anything else touches Firestore for this
+ * app - `getFirestore(app)` after this just returns the instance configured here.
+ *
+ * Multi-tab manager because the same build also runs as a regular web app where a
+ * user can have several tabs open; Capacitor's single WKWebView tolerates it fine.
+ * Best-effort: if IndexedDB isn't available (private browsing, some in-app browsers)
+ * this throws and we silently fall back to the SDK's default memory-only cache -
+ * the app still works, it just won't benefit from the on-device cache.
+ */
+function initializeFirestorePersistence(app: FirebaseApp) {
+  try {
+    initializeFirestore(app, {
+      localCache: persistentLocalCache({
+        tabManager: persistentMultipleTabManager(),
+      }),
+    })
+  } catch (error) {
+    console.warn('[Storvv cloud] Firestore persistence unavailable, using in-memory cache:', error)
+  }
+}
 
 export default defineNuxtPlugin(() => {
   let app: FirebaseApp | undefined
@@ -62,6 +91,7 @@ export default defineNuxtPlugin(() => {
       // Initialize Firebase only if it hasn't been initialized
       if (!getApps().length) {
         app = initializeApp(firebaseConfig)
+        initializeFirestorePersistence(app)
       } else {
         app = getApps()[0]
       }

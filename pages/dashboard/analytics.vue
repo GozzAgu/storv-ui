@@ -1,6 +1,9 @@
 <template>
-  <div :class="[pageClass, isCapacitorIos ? 'dash-analytics--ios' : '']">
-    <DashboardPageHeader class="dash-page-header--unified" :ios-context-only="isCapacitorIos">
+  <div :class="[pageClass, isCapacitorIos ? 'ios-analytics-page dash-analytics--ios' : '']">
+    <div :class="isCapacitorIos ? 'ios-analytics-dashboard' : 'dash-analytics-body'">
+      <IosPageNavBar v-if="isCapacitorIos" title="Analytics" />
+
+      <DashboardPageHeader v-if="!isCapacitorIos" class="dash-page-header--unified">
       <template #eyebrow>
         <p :class="eyebrowClass">Analytics</p>
       </template>
@@ -47,34 +50,57 @@
       </template>
     </DashboardPageHeader>
 
-    <template v-if="isLoading">
+    <IosAnalyticsDashboardSkeleton v-if="isCapacitorIos && isLoading" />
+
+    <template v-else-if="isLoading">
       <div :class="kpiGridWideClass">
-        <div v-for="i in 6" :key="i" class="dash-skeleton dash-skeleton--kpi" />
+        <DashStatCardSkeleton v-for="i in 6" :key="i" />
       </div>
       <div :class="chartsGridClass">
-        <div class="dash-skeleton dash-skeleton--panel dash-charts-grid__main" />
-        <div class="dash-skeleton dash-skeleton--panel dash-charts-grid__side" />
+        <DashChartPanelSkeleton extra-class="dash-charts-grid__main" show-control />
+        <DashChartPanelSkeleton extra-class="dash-charts-grid__side" variant="bars" />
       </div>
       <div :class="splitGridClass">
-        <div v-for="i in 2" :key="`panel-${i}`" class="dash-skeleton dash-skeleton--panel" />
+        <DashChartPanelSkeleton variant="bars" />
+        <DashChartPanelSkeleton variant="list" />
       </div>
     </template>
 
+    <IosEmptyState
+      v-else-if="isCapacitorIos && needsStoreSelection"
+      :icon="BuildingStorefrontIcon"
+      title="Select a store"
+      description="Choose a branch to load charts, heatmaps, and reports for your store."
+    >
+      <template v-if="canManageBranches" #action>
+        <InlineStorePicker />
+      </template>
+    </IosEmptyState>
+
     <template v-else-if="needsStoreSelection">
-      <div :class="stateCardClass">
-        <BuildingStorefrontIcon
-          class="mx-auto mb-3 h-8 w-8 text-[#4876c7] dark:text-[#9ab5e3]"
-          stroke-width="1.5"
-        />
-        <p :class="['dash-state-card__title', pageTitleClass, '!text-sm']">
+      <div :class="[stateCardClass, 'dash-empty-state']">
+        <div class="dash-empty-state__mark">
+          <BuildingStorefrontIcon
+            class="dash-empty-state__icon h-8 w-8 text-gray-400 dark:text-gray-500"
+            stroke-width="1.5"
+          />
+        </div>
+        <p :class="['dash-empty-state__title', 'dash-state-card__title', pageTitleClass, '!text-sm']">
           Select a store to view analytics
         </p>
-        <p :class="['dash-state-card__desc', cardDescClass]">
-          Choose a branch below or from the store selector in the top bar. Charts and reports are
-          scoped to the active store.
+        <p :class="['dash-empty-state__desc', 'dash-state-card__desc', cardDescClass]">
+          {{
+            canManageBranches
+              ? 'Choose a branch below or from the store selector in the top bar. Charts and reports are scoped to the active store.'
+              : 'Analytics load for your store once it is connected.'
+          }}
         </p>
-        <InlineStorePicker />
-        <NuxtLink to="/dashboard/settings" :class="[linkClass, 'mt-4 inline-block']">
+        <InlineStorePicker v-if="canManageBranches" />
+        <NuxtLink
+          v-if="canManageBranches"
+          to="/dashboard/settings"
+          :class="[linkClass, 'mt-4 inline-block']"
+        >
           Manage stores in Settings
         </NuxtLink>
       </div>
@@ -94,34 +120,85 @@
         v-if="isCapacitorIos"
         :is-exporting="isExporting"
         @export="exportReport"
-        @import="onImportReport"
       >
         <template #period>
           <IosSegmentedControl
             v-model="selectedPeriod"
             class="ios-analytics-period-tabs"
-            aria-label="Analytics period"
+            ariaLabel="Analytics period"
             :options="analyticsPeriodOptions"
             @change="loadAnalytics()"
           />
         </template>
       </IosAnalyticsActions>
 
-      <section class="dash-analytics-kpi-panel">
+      <IosAnalyticsSection
+        v-if="isCapacitorIos"
+        :title="periodLabel"
+        :subtitle="analyticsSummary || undefined"
+      >
+        <div class="ios-home-dashboard__metrics-grid">
+          <IosHomeMetricCard
+            v-for="metric in analyticsHeaderMetrics"
+            :key="metric.key"
+            :label="metric.label"
+            :value="metric.value"
+            :tone="metric.tone"
+            :icon="metric.icon"
+          />
+        </div>
+      </IosAnalyticsSection>
+
+      <section v-else class="dash-analytics-kpi-panel">
         <header class="dash-analytics-kpi-panel__intro">
           <p class="dash-analytics-kpi-panel__eyebrow">{{ periodLabel }}</p>
           <p v-if="analyticsSummary" class="dash-analytics-kpi-panel__summary">
             {{ analyticsSummary }}
           </p>
         </header>
-        <DashboardPageMetrics
-          metrics-class="dash-page-metrics--analytics"
-          :metrics="analyticsHeaderMetrics"
-          aria-label="Analytics summary"
-        />
+        <div class="analytics-kpi-grid" aria-label="Analytics summary">
+          <AnalyticsKpiCard v-for="card in analyticsKpiCards" :key="card.key" v-bind="card" />
+        </div>
       </section>
 
-      <section :class="[cardPaddedClass, 'dash-inventory-health']">
+      <IosAnalyticsSection
+        v-if="isCapacitorIos"
+        title="Inventory health"
+        subtitle="Available, sold, and low-stock lines"
+        link-to="/dashboard/inventory"
+        link-label="Open inventory"
+      >
+        <div :class="[cardPaddedClass, 'dash-inventory-health ios-analytics-card ios-analytics-card--padded']">
+          <p :class="cardDescClass">
+            <span :class="numClass">{{ featureInStockCount }}</span> available units ·
+            <span :class="numClass">{{ featureOutOfStockCount }}</span> sold ·
+            <span :class="numClass">{{ featureLowStockItems.length }}</span> low-stock lines
+          </p>
+          <div class="dash-inventory-health__footer">
+            <div :class="[progressClass, 'dash-progress--slim']">
+              <div
+                class="dash-progress__segment--available transition-all"
+                :style="{ width: `${featureInStockPercentage}%` }"
+              />
+              <div
+                class="dash-progress__segment--low transition-all"
+                :style="{ width: `${featureLowStockPercentage}%` }"
+              />
+              <div
+                class="dash-progress__segment--sold transition-all"
+                :style="{ width: `${featureSoldPercentage}%` }"
+              />
+            </div>
+            <div :class="[progressLegendClass, 'dash-progress__legend--compact']">
+              <span :class="numClass">{{ featureInStockPercentage }}% available</span>
+              <span :class="numClass">{{ featureSoldPercentage }}% sold through</span>
+              <span :class="numClass">{{ formatCurrency(featureInventoryTotalValue) }} on hand (book)</span>
+            </div>
+          </div>
+        </div>
+      </IosAnalyticsSection>
+
+      <section v-else :class="[cardPaddedClass, 'dash-inventory-health']">
         <div :class="[cardHeaderClass, 'dash-card__header--compact dash-inventory-health__header']">
           <div>
             <p :class="eyebrowClass">Inventory health</p>
@@ -156,8 +233,32 @@
         </div>
       </section>
 
-      <section>
-        <div :class="[cardHeaderClass, 'dash-card__header--compact mb-3 px-0.5']">
+      <IosAnalyticsSection
+        v-if="isCapacitorIos"
+        title="Feature insights"
+        :subtitle="`Snapshot across sales, inventory, and add-ons · ${periodLabel.toLowerCase()}`"
+      >
+        <div :class="featureInsightsGridClass">
+          <AnalyticsFeatureInsightCard
+            v-for="insight in featureInsights"
+            :key="insight.id"
+            :insight="insight"
+            :card-class="`${cardPaddedClass} ios-analytics-card ios-analytics-card--padded`"
+            :card-header-class="cardHeaderClass"
+            :card-title-class="cardTitleClass"
+            :card-desc-class="cardDescClass"
+            :card-link-class="cardLinkClass"
+            :insight-icon-class="insightIconClass"
+            :insight-highlight-class="insightHighlightClass"
+            :metric-cells-class="metricCellsClass"
+            :metric-cell-class="metricCellClass"
+            :num-class="numClass"
+          />
+        </div>
+      </IosAnalyticsSection>
+
+      <section v-else class="dash-analytics-features">
+        <div :class="[cardHeaderClass, 'dash-card__header--compact']">
           <div>
             <p :class="eyebrowClass">Feature insights</p>
             <p :class="cardDescClass">
@@ -185,7 +286,37 @@
         </div>
       </section>
 
-      <div :class="chartsGridClass">
+      <IosAnalyticsSection
+        v-if="isCapacitorIos"
+        title="Revenue trends"
+        :subtitle="periodLabel"
+      >
+        <div class="ios-analytics-card ios-analytics-card--padded dash-chart-wrap dash-chart-wrap--tall">
+          <LazyApexChart
+            type="line"
+            :height="primaryChartHeight"
+            :options="revenueChartOptions"
+            :series="revenueChartSeries"
+          />
+        </div>
+      </IosAnalyticsSection>
+
+      <IosAnalyticsSection
+        v-if="isCapacitorIos"
+        title="Top products"
+        subtitle="Share of revenue (top 5)"
+      >
+        <div class="ios-analytics-card ios-analytics-card--padded">
+          <LazyApexChart
+            type="donut"
+            :height="secondaryChartHeight"
+            :options="topProductsChartOptions"
+            :series="topProductsChartSeries"
+          />
+        </div>
+      </IosAnalyticsSection>
+
+      <div v-if="!isCapacitorIos" :class="chartsGridClass">
         <section :class="[cardFlushClass, 'dash-charts-grid__main overflow-hidden']">
           <div
             :class="[
@@ -222,7 +353,46 @@
         </section>
       </div>
 
-      <div :class="splitGridClass">
+      <IosAnalyticsSection
+        v-if="isCapacitorIos"
+        title="Sales breakdown"
+        :subtitle="`Categories and customers · ${periodLabel.toLowerCase()}`"
+      >
+        <div class="flex flex-col gap-3">
+          <div class="ios-analytics-card ios-analytics-card--padded">
+            <p class="ios-analytics-card__title">Sales by category</p>
+            <p class="ios-analytics-card__desc">Top folders (max 8)</p>
+            <div v-if="topFoldersBySales.length === 0" :class="emptyClass">
+              No category sales in this period.
+            </div>
+            <LazyApexChart
+              v-else
+              type="bar"
+              :height="categoryChartHeight"
+              :options="categorySalesChartOptions"
+              :series="categorySalesChartSeries"
+            />
+          </div>
+          <div class="ios-analytics-card ios-analytics-card--padded">
+            <p class="ios-analytics-card__title">Top customers</p>
+            <p class="ios-analytics-card__desc">
+              By spend · {{ repeatPurchaseRate.toFixed(0) }}% repeat purchase rate
+            </p>
+            <div v-if="customerChartCustomers.length === 0" :class="emptyClass">
+              No customer emails on sales in this period.
+            </div>
+            <LazyApexChart
+              v-else
+              type="bar"
+              :height="customerChartHeight"
+              :options="customerChartOptions"
+              :series="customerChartSeries"
+            />
+          </div>
+        </div>
+      </IosAnalyticsSection>
+
+      <div v-if="!isCapacitorIos" :class="splitGridClass">
         <section :class="cardPaddedClass">
           <div :class="[cardHeaderClass, 'dash-card__header--compact']">
             <div>
@@ -267,7 +437,29 @@
         </section>
       </div>
 
-      <section v-if="paymentMethodBreakdown.length > 0" :class="cardPaddedClass">
+      <IosAnalyticsSection
+        v-if="isCapacitorIos && paymentMethodBreakdown.length > 0"
+        title="Payment methods"
+        subtitle="Completed sales by tender type"
+      >
+        <div :class="[cardPaddedClass, 'ios-analytics-card ios-analytics-card--padded']">
+          <ul :class="barListClass">
+            <li v-for="row in paymentMethodBreakdown.slice(0, 6)" :key="row.label">
+              <div :class="['dash-bar-row__head', numClass]">
+                <span :class="['dash-bar-row__label', cardTitleClass, '!text-xs']">{{ row.label }}</span>
+                <span :class="['dash-bar-row__meta', numClass]">
+                  {{ row.share }}% · {{ formatCurrency(row.revenue) }}
+                </span>
+              </div>
+              <div :class="barTrackClass">
+                <div :class="barFillClass" :style="{ width: `${Math.max(row.share, 3)}%` }" />
+              </div>
+            </li>
+          </ul>
+        </div>
+      </IosAnalyticsSection>
+
+      <section v-else-if="paymentMethodBreakdown.length > 0" :class="cardPaddedClass">
         <div :class="[cardHeaderClass, 'dash-card__header--compact']">
           <div>
             <h2 :class="cardTitleClass">Payment methods</h2>
@@ -289,7 +481,40 @@
         </ul>
       </section>
 
-      <div :class="tripleGridClass">
+      <IosAnalyticsSection
+        v-if="isCapacitorIos"
+        title="Peak hours"
+        :subtitle="busiestTimeSummary"
+      >
+        <div class="flex flex-col gap-3">
+          <div :class="[cardPaddedClass, 'ios-analytics-card ios-analytics-card--padded']">
+            <dl :class="metricCellsClass">
+              <div :class="metricCellClass">
+                <dt>Best day</dt>
+                <dd :class="numClass">{{ busiestDayName ?? '-' }}</dd>
+                <dd :class="numClass">{{ formatCurrency(peakDayRevenue) }}</dd>
+              </div>
+              <div :class="metricCellClass">
+                <dt>Best hour</dt>
+                <dd :class="numClass">{{ busiestHourLabel ?? '-' }}</dd>
+                <dd :class="numClass">{{ formatCurrency(peakHourRevenue) }}</dd>
+              </div>
+            </dl>
+          </div>
+          <div class="ios-analytics-card ios-analytics-card--padded">
+            <p class="ios-analytics-card__title">Sales by hour</p>
+            <p class="ios-analytics-card__desc">Revenue by hour of day</p>
+            <LazyApexChart
+              type="bar"
+              :height="peakHoursChartHeight"
+              :options="peakHoursChartOptions"
+              :series="peakHoursChartSeries"
+            />
+          </div>
+        </div>
+      </IosAnalyticsSection>
+
+      <div v-if="!isCapacitorIos" :class="tripleGridClass">
         <section :class="cardPaddedClass">
           <div class="flex items-start gap-2.5">
             <div :class="insightIconClass">
@@ -331,7 +556,36 @@
         </section>
       </div>
 
-      <div :class="splitGridClass">
+      <IosAnalyticsSection
+        v-if="isCapacitorIos"
+        title="Traffic patterns"
+        subtitle="Sales by day of week and hour-by-hour heatmap"
+      >
+        <div class="flex flex-col gap-3">
+          <div class="ios-analytics-card ios-analytics-card--padded">
+            <p class="ios-analytics-card__title">Sales by day of week</p>
+            <p class="ios-analytics-card__desc">Best and worst days</p>
+            <LazyApexChart
+              type="bar"
+              :height="salesByDayChartHeight"
+              :options="salesByDayChartOptions"
+              :series="salesByDayChartSeries"
+            />
+          </div>
+          <div class="ios-analytics-card ios-analytics-card--padded">
+            <p class="ios-analytics-card__title">Traffic heatmap</p>
+            <p class="ios-analytics-card__desc">Revenue by day × hour</p>
+            <LazyApexChart
+              type="heatmap"
+              :height="heatmapChartHeight"
+              :options="heatmapChartOptions"
+              :series="heatmapSeries"
+            />
+          </div>
+        </div>
+      </IosAnalyticsSection>
+
+      <div v-if="!isCapacitorIos" :class="splitGridClass">
         <section :class="cardPaddedClass">
           <div :class="[cardHeaderClass, 'dash-card__header--compact']">
             <div>
@@ -356,20 +610,100 @@
           </div>
           <LazyApexChart
             type="heatmap"
-            height="280"
+            :height="heatmapChartHeight"
             :options="heatmapChartOptions"
             :series="heatmapSeries"
           />
         </section>
       </div>
 
+      <IosAnalyticsSection
+        v-if="isCapacitorIos"
+        title="Top products"
+        :subtitle="periodLabel"
+      >
+        <div class="ios-home-dashboard__feed">
+          <IosHomeFeedCard
+            v-for="(product, index) in topProducts"
+            :key="product.id"
+            :title="product.name"
+            :subtitle="`#${index + 1} · ${product.quantity} sold`"
+            :time-label="periodLabel"
+            :value-label="formatCurrency(product.revenue)"
+            :initials="String(index + 1)"
+            href="/dashboard/inventory"
+          />
+          <p v-if="topProducts.length === 0" :class="emptyClass">No product sales in this period.</p>
+        </div>
+      </IosAnalyticsSection>
+
+      <IosAnalyticsSection
+        v-if="isCapacitorIos"
+        title="Top customers"
+        :subtitle="periodLabel"
+      >
+        <div class="ios-home-dashboard__feed">
+          <IosHomeFeedCard
+            v-for="(customer, index) in topCustomers"
+            :key="customer.email"
+            :title="customer.name"
+            :subtitle="customer.email"
+            :time-label="`${customer.orders} orders`"
+            :value-label="formatCurrency(customer.totalSpent)"
+            :initials="customerInitials(customer.name)"
+            href="/dashboard/receipts"
+          />
+          <p v-if="topCustomers.length === 0" :class="emptyClass">No customers in this period.</p>
+        </div>
+      </IosAnalyticsSection>
+
+      <IosAnalyticsSection
+        v-if="isCapacitorIos && recentReturns.length > 0"
+        title="Recent returns"
+        :subtitle="periodLabel"
+      >
+        <div class="ios-home-dashboard__feed">
+          <IosHomeFeedCard
+            v-for="ret in recentReturns"
+            :key="ret.id"
+            :title="ret.receiptNumber"
+            :subtitle="ret.reason || 'Return'"
+            :time-label="formatReturnDate(ret.date)"
+            :value-label="`-${formatCurrency(ret.amount)}`"
+            initials="R"
+            href="/dashboard/receipts"
+          />
+        </div>
+      </IosAnalyticsSection>
+
+      <IosAnalyticsSection
+        v-if="isCapacitorIos && lowStockItems.length > 0"
+        title="Low stock"
+        subtitle="Items at or below threshold"
+        link-to="/dashboard/inventory"
+        link-label="View inventory"
+      >
+        <div class="ios-home-dashboard__feed">
+          <IosHomeFeedCard
+            v-for="item in lowStockItems"
+            :key="item.id"
+            :title="item.name"
+            :subtitle="item.folderName"
+            :time-label="`${item.quantity}/${item.threshold}`"
+            value-label="Low"
+            :initials="item.name.slice(0, 2).toUpperCase()"
+            :href="item.folderId ? `/dashboard/inventory/${item.folderId}` : '/dashboard/inventory'"
+          />
+        </div>
+      </IosAnalyticsSection>
+
       <PaymentLinksSummaryCard
-        v-if="canUseSubscriptionFeature('payment_links')"
-        card-class="dash-card dash-card--padded"
+        v-if="canShowPaymentLinksFeature"
+        :card-class="isCapacitorIos ? 'ios-analytics-card ios-analytics-card--padded' : 'dash-card dash-card--padded'"
         :limit="6"
       />
 
-      <div :class="tripleGridClass">
+      <div v-if="!isCapacitorIos" :class="tripleGridClass">
         <div :class="[tableShellClass, 'flex min-h-0 flex-col overflow-hidden']">
           <DataTableToolbar native-table-key="analytics-top-products">
             <template #heading>
@@ -484,7 +818,7 @@
         </div>
       </div>
 
-      <div :class="[tableShellClass, 'flex min-h-0 flex-col overflow-hidden']">
+      <div v-if="!isCapacitorIos" :class="[tableShellClass, 'flex min-h-0 flex-col overflow-hidden']">
         <DataTableToolbar native-table-key="analytics-low-stock">
           <template #heading>
             <div class="min-w-0">
@@ -532,11 +866,12 @@
       </div>
 
     </template>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, defineAsyncComponent } from 'vue'
+import { ref, computed, onMounted, defineAsyncComponent, type Component } from 'vue'
 
 import { mergeIosApexChartTheme } from '~/utils/ios-apex-chart'
 import IosSegmentedControl from '~/components/ios/IosSegmentedControl.vue'
@@ -547,9 +882,19 @@ const LazyApexChart = defineAsyncComponent(
 )
 import {
   ArrowDownTrayIcon,
+  ArrowUturnLeftIcon,
+  BanknotesIcon,
   BuildingStorefrontIcon,
+  ChartBarIcon,
+  CheckCircleIcon,
   ClockIcon,
+  CubeIcon,
+  ExclamationTriangleIcon,
+  ReceiptPercentIcon,
+  ShoppingBagIcon,
+  UsersIcon,
 } from '~/utils/app-icons'
+import AnalyticsKpiCard from '~/components/analytics/AnalyticsKpiCard.vue'
 import { useReceiptsStore } from '~/stores/receipts'
 import { useInventoryStore } from '~/stores/inventory'
 import { useCustomersStore } from '~/stores/customers'
@@ -584,6 +929,12 @@ import {
   sumReceiptCogs,
   sumReceiptGrossProfit,
 } from '~/utils/inventory-item-cost'
+import {
+  downloadAnalyticsCsv,
+  downloadAnalyticsPdf,
+  type AnalyticsReportSnapshot,
+} from '~/utils/analytics-report-export'
+import type { DashboardPageMetric } from '~/utils/dashboard-page-metrics'
 
 const { canViewProfitAndCost, isStaff, isManager } = usePermissions()
 const staffStore = useStaffStore()
@@ -649,7 +1000,10 @@ const sellerLoansStore = useSellerLoanOutsStore()
 const customerAccountsStore = useCustomerAccountsStore()
 const userStore = useUserStore()
 const themeStore = useThemeStore()
+const chartIsDark = computed(() => themeStore.actualTheme === 'dark')
 const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
+const { canShowPaymentLinksFeature } = usePaymentLinksLaunch()
+const { canManageBranches } = useBusinessCapabilities()
 
 // State
 const isLoading = ref(true)
@@ -698,8 +1052,18 @@ const {
 } = useDashboardAnalyticsChrome()
 
 const { isCapacitorIos } = useIsCapacitorIos()
-const primaryChartHeight = computed(() => (isCapacitorIos.value ? 220 : 300))
-const secondaryChartHeight = computed(() => (isCapacitorIos.value ? 220 : 300))
+const primaryChartHeight = computed(() => (isCapacitorIos.value ? 240 : 300))
+const secondaryChartHeight = computed(() => (isCapacitorIos.value ? 240 : 300))
+const peakHoursChartHeight = computed(() => (isCapacitorIos.value ? 280 : 260))
+const salesByDayChartHeight = computed(() => (isCapacitorIos.value ? 260 : 250))
+const heatmapChartHeight = computed(() => (isCapacitorIos.value ? 340 : 280))
+
+function customerInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean)
+  if (parts.length === 0) return '?'
+  if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase()
+  return `${parts[0]![0] ?? ''}${parts[1]![0] ?? ''}`.toUpperCase()
+}
 
 const analyticsPeriods = [
   { value: 'daily' as const, label: 'Daily' },
@@ -1208,43 +1572,50 @@ const grossProfitSubtext = computed(() => {
 })
 
 const analyticsHeaderMetrics = computed(() => {
-  const metrics = [
+  const metrics: DashboardPageMetric[] = [
     {
       key: 'revenue',
       label: 'Total revenue',
       value: formatCurrency(totalRevenue.value),
+      icon: BanknotesIcon,
     },
     {
       key: 'completed',
       label: 'Completed',
       value: formatCurrency(totalPeriodSales.value),
+      icon: CheckCircleIcon,
     },
     {
       key: 'orders',
       label: 'Orders',
       value: String(totalOrders.value),
+      icon: ShoppingBagIcon,
     },
     {
       key: 'aov',
       label: 'Avg. order',
       value: formatCurrency(averageOrderValue.value),
+      icon: ReceiptPercentIcon,
     },
     {
       key: 'customers',
       label: 'Customers',
       value: String(uniqueCustomersInPeriod.value),
+      icon: UsersIcon,
     },
     {
       key: 'low-stock',
       label: 'Low stock',
       value: String(lowStockCount.value),
       tone: lowStockCount.value > 0 ? ('warning' as const) : undefined,
+      icon: ExclamationTriangleIcon,
     },
     {
       key: 'refunds',
       label: 'Refunds',
       value: String(refundedCount.value),
       tone: refundedCount.value > 0 ? ('danger' as const) : undefined,
+      icon: ArrowUturnLeftIcon,
     },
   ]
 
@@ -1255,16 +1626,122 @@ const analyticsHeaderMetrics = computed(() => {
         label: 'Gross profit',
         value: formatCurrency(periodGrossProfit.value),
         tone: periodGrossProfit.value >= 0 ? ('success' as const) : ('danger' as const),
+        icon: ChartBarIcon,
       },
       {
         key: 'cogs',
         label: 'COGS',
         value: formatCurrency(periodCogs.value),
+        icon: CubeIcon,
       }
     )
   }
 
   return metrics
+})
+
+interface AnalyticsKpiCardData {
+  key: string
+  icon: Component
+  label: string
+  value: string
+  tone?: 'default' | 'accent' | 'success' | 'warning' | 'danger'
+  secondary?: string
+  trend?: { value: string; positive: boolean } | null
+  sparkline?: number[] | null
+  progress?: number | null
+}
+
+/** Visual KPI row: icon + real trend/sparkline/progress per metric, instead of bare numbers. */
+const analyticsKpiCards = computed(() => {
+  const cards: AnalyticsKpiCardData[] = [
+    {
+      key: 'revenue',
+      icon: BanknotesIcon,
+      label: 'Total revenue',
+      value: formatCurrency(totalRevenue.value),
+      tone: 'accent',
+      trend: revenueChangeBadge.value
+        ? { value: revenueChangeBadge.value, positive: revenueChangePositive.value === true }
+        : null,
+      // Real per-period revenue history - same series driving the Revenue trends chart.
+      sparkline: revenueChartSeries.value[0]?.data ?? null,
+    },
+    {
+      key: 'completed',
+      icon: CheckCircleIcon,
+      label: 'Completed',
+      value: formatCurrency(totalPeriodSales.value),
+      tone: 'success',
+      secondary: `${completedReceiptsInPeriod.value.length} sale${completedReceiptsInPeriod.value.length === 1 ? '' : 's'}`,
+    },
+    {
+      key: 'orders',
+      icon: ShoppingBagIcon,
+      label: 'Orders',
+      value: String(totalOrders.value),
+      secondary: `${itemsSoldInPeriod.value} item${itemsSoldInPeriod.value === 1 ? '' : 's'} sold`,
+    },
+    {
+      key: 'aov',
+      icon: ReceiptPercentIcon,
+      label: 'Avg. order',
+      value: formatCurrency(averageOrderValue.value),
+      secondary: `Across ${totalOrders.value} order${totalOrders.value === 1 ? '' : 's'}`,
+    },
+    {
+      key: 'customers',
+      icon: UsersIcon,
+      label: 'Customers',
+      value: String(uniqueCustomersInPeriod.value),
+      secondary:
+        uniqueCustomersInPeriod.value > 0
+          ? `${repeatPurchaseRate.value.toFixed(0)}% repeat`
+          : undefined,
+    },
+    {
+      key: 'low-stock',
+      icon: ExclamationTriangleIcon,
+      label: 'Low stock',
+      value: String(lowStockCount.value),
+      tone: lowStockCount.value > 0 ? 'warning' : 'default',
+      secondary: `${featureLowStockPercentage.value}% of inventory lines`,
+      progress: featureLowStockPercentage.value,
+    },
+    {
+      key: 'refunds',
+      icon: ArrowUturnLeftIcon,
+      label: 'Refunds',
+      value: String(refundedCount.value),
+      tone: refundedCount.value > 0 ? 'danger' : 'default',
+      secondary: refundRateText.value,
+    },
+  ]
+
+  if (canViewProfitAndCost.value) {
+    const revenueForCogsShare = totalRevenue.value
+    const cogsShare =
+      revenueForCogsShare > 0 ? Math.round((periodCogs.value / revenueForCogsShare) * 100) : null
+    cards.push(
+      {
+        key: 'profit',
+        icon: ChartBarIcon,
+        label: 'Gross profit',
+        value: formatCurrency(periodGrossProfit.value),
+        tone: periodGrossProfit.value >= 0 ? 'success' : 'danger',
+        secondary: grossProfitSubtext.value,
+      },
+      {
+        key: 'cogs',
+        icon: CubeIcon,
+        label: 'COGS',
+        value: formatCurrency(periodCogs.value),
+        secondary: cogsShare != null ? `${cogsShare}% of revenue` : undefined,
+      }
+    )
+  }
+
+  return cards
 })
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -1376,12 +1853,12 @@ const peakHoursChartSeries = computed(() => [
 ])
 const peakHoursChartOptions = computed(() => {
   void displayCurrencyDeps.value
-  const isDark = themeStore.actualTheme === 'dark'
+  const isDark = chartIsDark.value
   const theme = apexTheme(isDark)
   const axisFmt = chartCurrencyAxis.value
   return {
     chart: { type: 'bar', toolbar: { show: false }, background: 'transparent' },
-    colors: [isDark ? '#9ab5e3' : '#4876c7'],
+    colors: [isDark ? '#e4e4e7' : '#4876c7'],
     plotOptions: {
       bar: { borderRadius: 3, columnWidth: '70%', dataLabels: { position: 'top' } },
     },
@@ -1439,7 +1916,7 @@ const salesByDayChartSeries = computed(() => [
 ])
 const salesByDayChartOptions = computed(() => {
   void displayCurrencyDeps.value
-  const isDark = themeStore.actualTheme === 'dark'
+  const isDark = chartIsDark.value
   const theme = apexTheme(isDark)
   const axisFmt = chartCurrencyAxis.value
   return {
@@ -1476,7 +1953,7 @@ const salesByDayChartOptions = computed(() => {
 
 const heatmapChartOptions = computed(() => {
   void displayCurrencyDeps.value
-  const isDark = themeStore.actualTheme === 'dark'
+  const isDark = chartIsDark.value
   const textColor = isDark ? '#E5E7EB' : '#1F2937'
   const mutedColor = isDark ? '#9CA3AF' : '#6B7280'
   const borderColor = isDark ? '#4B5563' : '#D1D5DB'
@@ -1623,7 +2100,7 @@ const revenueChartSeries = computed(() => {
 
 const revenueChartOptions = computed(() => {
   void displayCurrencyDeps.value
-  const isDark = themeStore.actualTheme === 'dark'
+  const isDark = chartIsDark.value
 
   const base = {
     chart: {
@@ -1632,7 +2109,7 @@ const revenueChartOptions = computed(() => {
       zoom: { enabled: false },
       background: 'transparent',
     },
-    colors: [isDark ? '#9ab5e3' : '#4876c7'],
+    colors: [isDark ? '#e4e4e7' : '#4876c7'],
     stroke: {
       curve: 'smooth',
       width: 2,
@@ -1701,7 +2178,7 @@ const topProductsChartSeries = computed(() => {
 
 const topProductsChartOptions = computed(() => {
   void displayCurrencyDeps.value
-  const isDark = themeStore.actualTheme === 'dark'
+  const isDark = chartIsDark.value
 
   return {
     chart: {
@@ -1709,7 +2186,7 @@ const topProductsChartOptions = computed(() => {
       background: 'transparent',
     },
     labels: topProducts.value.slice(0, 5).map((p) => truncateChartLabel(p.name, 20)),
-    colors: ['#4876c7', '#6e94d6', '#143f8d', '#9ab5e3', '#34d399'],
+    colors: [isDark ? '#e4e4e7' : '#d4d0c8', isDark ? '#a1a1aa' : '#a8a29e', isDark ? '#ffffff' : '#57534e', isDark ? '#71717a' : '#78716c', '#34d399'],
     legend: {
       position: 'bottom',
       labels: {
@@ -1737,7 +2214,7 @@ const categorySalesChartSeries = computed(() => [
 
 const categorySalesChartOptions = computed(() => {
   void displayCurrencyDeps.value
-  const isDark = themeStore.actualTheme === 'dark'
+  const isDark = chartIsDark.value
   const theme = apexTheme(isDark)
   const axisFmt = chartCurrencyAxis.value
   const folders = topFoldersBySales.value
@@ -1745,7 +2222,7 @@ const categorySalesChartOptions = computed(() => {
 
   return {
     chart: { type: 'bar', toolbar: { show: false }, background: 'transparent' },
-    colors: [isDark ? '#9ab5e3' : '#4876c7'],
+    colors: [isDark ? '#e4e4e7' : '#4876c7'],
     plotOptions: {
       bar: {
         horizontal: true,
@@ -1795,6 +2272,13 @@ const categorySalesChartOptions = computed(() => {
 
 const customerChartCustomers = computed(() => topCustomers.value.slice(0, 5))
 
+const categoryChartHeight = computed(() =>
+  Math.max(isCapacitorIos.value ? 260 : 240, topFoldersBySales.value.length * 40)
+)
+const customerChartHeight = computed(() =>
+  Math.max(isCapacitorIos.value ? 260 : 220, customerChartCustomers.value.length * 44)
+)
+
 const customerChartSeries = computed(() => [
   {
     name: 'Total spent',
@@ -1804,7 +2288,7 @@ const customerChartSeries = computed(() => [
 
 const customerChartOptions = computed(() => {
   void displayCurrencyDeps.value
-  const isDark = themeStore.actualTheme === 'dark'
+  const isDark = chartIsDark.value
   const theme = apexTheme(isDark)
   const axisFmt = chartCurrencyAxis.value
   const customers = customerChartCustomers.value
@@ -1892,8 +2376,40 @@ const loadAnalytics = async () => {
 
 useIosPullToRefreshRegister(loadAnalytics)
 
-function onImportReport(_file: File) {
-  toast.info('Import from spreadsheet is coming soon.')
+function buildAnalyticsSnapshot(): AnalyticsReportSnapshot {
+  return {
+    periodLabel: periodLabel.value,
+    selectedPeriod: selectedPeriod.value,
+    formatCurrency,
+    formatReturnDate,
+    totalRevenue: totalRevenue.value,
+    totalSales: totalSales.value,
+    totalOrders: totalOrders.value,
+    averageOrderValue: averageOrderValue.value,
+    lowStockCount: lowStockCount.value,
+    repeatPurchaseRate: repeatPurchaseRate.value,
+    refundedCount: refundedCount.value,
+    refundAmount: refundAmount.value,
+    refundRate: refundRate.value,
+    topProducts: topProducts.value,
+    topCustomers: topCustomers.value,
+    recentReturns: recentReturns.value,
+  }
+}
+
+const exportToExcel = async () => {
+  downloadAnalyticsCsv(buildAnalyticsSnapshot())
+  toast.success('Report exported to Excel successfully!')
+}
+
+const exportToPDF = async () => {
+  try {
+    await downloadAnalyticsPdf(buildAnalyticsSnapshot())
+    toast.success('Report exported successfully!')
+  } catch (error) {
+    console.error('Error exporting report:', error)
+    toast.error('Failed to export report')
+  }
 }
 
 const exportReport = async (format: 'pdf' | 'excel' = 'pdf') => {
@@ -1904,184 +2420,6 @@ const exportReport = async (format: 'pdf' | 'excel' = 'pdf') => {
     } else {
       await exportToPDF()
     }
-  } catch (error) {
-    console.error('Error exporting report:', error)
-    toast.error('Failed to export report')
-  } finally {
-    isExporting.value = false
-  }
-}
-
-const exportToExcel = async () => {
-  // Create CSV content
-  let csvContent = 'Analytics & Sales Report\n'
-  csvContent += `Period: ${periodLabel.value}\n`
-  csvContent += `Generated: ${new Date().toLocaleDateString()}\n\n`
-
-  // Key Metrics
-  csvContent += 'Key Metrics\n'
-  csvContent += 'Metric,Value\n'
-  csvContent += `Total Revenue,${totalRevenue.value}\n`
-  csvContent += `Total Sales,${totalSales.value}\n`
-  csvContent += `Total Orders,${totalOrders.value}\n`
-  csvContent += `Average Order Value,${averageOrderValue.value}\n`
-  csvContent += `Low Stock Items,${lowStockCount.value}\n`
-  csvContent += `Repeat Purchase Rate,${repeatPurchaseRate.value.toFixed(1)}%\n\n`
-
-  // Top Products
-  csvContent += 'Top Products\n'
-  csvContent += 'Product,Quantity,Revenue\n'
-  topProducts.value.slice(0, 10).forEach((p) => {
-    csvContent += `"${p.name}",${p.quantity},${p.revenue}\n`
-  })
-  csvContent += '\n'
-
-  // Top Customers
-  csvContent += 'Top Customers\n'
-  csvContent += 'Customer Name,Email,Orders,Total Spent\n'
-  topCustomers.value.slice(0, 10).forEach((c) => {
-    csvContent += `"${c.name}","${c.email}",${c.orders},${c.totalSpent}\n`
-  })
-
-  // Create blob and download
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-  const link = document.createElement('a')
-  const url = URL.createObjectURL(blob)
-  link.setAttribute('href', url)
-  link.setAttribute('download', `analytics-report-${selectedPeriod.value}-${Date.now()}.csv`)
-  link.style.visibility = 'hidden'
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-
-  toast.success('Report exported to Excel successfully!')
-}
-
-const exportToPDF = async () => {
-  try {
-    const { default: jsPDF } = await import('jspdf')
-    const doc = new jsPDF()
-
-    // Title
-    doc.setFontSize(18)
-    doc.text('Analytics & Sales Report', 14, 20)
-    doc.setFontSize(10)
-    doc.text(`Period: ${periodLabel.value}`, 14, 28)
-    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 34)
-
-    let yPos = 44
-
-    // Key Metrics
-    doc.setFontSize(14)
-    doc.text('Key Metrics', 14, yPos)
-    yPos += 8
-
-    doc.setFontSize(10)
-    const metrics = [
-      ['Total Revenue', formatCurrency(totalRevenue.value)],
-      ['Total Sales', totalSales.value.toString()],
-      ['Total Orders', totalOrders.value.toString()],
-      ['Average Order Value', formatCurrency(averageOrderValue.value)],
-      ['Low Stock Items', lowStockCount.value.toString()],
-      ['Refunded Count', refundedCount.value.toString()],
-      ['Refund Amount', formatCurrency(refundAmount.value)],
-      ['Refund Rate', `${refundRate.value.toFixed(1)}%`],
-      ['Repeat Purchase Rate', `${repeatPurchaseRate.value.toFixed(1)}%`],
-    ]
-
-    metrics.forEach(([label, value]) => {
-      doc.text(`${label}: ${value}`, 20, yPos)
-      yPos += 6
-    })
-
-    yPos += 4
-
-    // Top Products
-    if (topProducts.value.length > 0) {
-      doc.setFontSize(14)
-      doc.text('Top Products', 14, yPos)
-      yPos += 8
-
-      // Top Products Table
-      doc.setFontSize(12)
-      doc.text('Product', 20, yPos)
-      doc.text('Quantity', 100, yPos)
-      doc.text('Revenue', 150, yPos)
-      yPos += 6
-      doc.setFontSize(10)
-
-      topProducts.value.slice(0, 10).forEach((p, index) => {
-        if (yPos > 280) {
-          doc.addPage()
-          yPos = 20
-        }
-        doc.text(p.name.substring(0, 30), 20, yPos)
-        doc.text(p.quantity.toString(), 100, yPos)
-        doc.text(formatCurrency(p.revenue), 150, yPos)
-        yPos += 6
-      })
-
-      yPos += 4
-    }
-
-    // Top Customers
-    if (topCustomers.value.length > 0) {
-      doc.setFontSize(14)
-      doc.text('Top Customers', 14, yPos)
-      yPos += 8
-
-      // Top Customers Table
-      doc.setFontSize(12)
-      doc.text('Customer', 20, yPos)
-      doc.text('Orders', 100, yPos)
-      doc.text('Total Spent', 150, yPos)
-      yPos += 6
-      doc.setFontSize(10)
-
-      topCustomers.value.slice(0, 10).forEach((c, index) => {
-        if (yPos > 280) {
-          doc.addPage()
-          yPos = 20
-        }
-        doc.text(c.name.substring(0, 30), 20, yPos)
-        doc.text(c.orders.toString(), 100, yPos)
-        doc.text(formatCurrency(c.totalSpent), 150, yPos)
-        yPos += 6
-      })
-
-      yPos += 4
-    }
-
-    // Recent Returns
-    if (recentReturns.value.length > 0) {
-      doc.setFontSize(14)
-      doc.text('Recent Returns', 14, yPos)
-      yPos += 8
-
-      doc.setFontSize(12)
-      doc.text('Receipt #', 20, yPos)
-      doc.text('Date', 60, yPos)
-      doc.text('Amount', 110, yPos)
-      doc.text('Reason', 150, yPos)
-      yPos += 6
-      doc.setFontSize(10)
-
-      recentReturns.value.forEach((ret) => {
-        if (yPos > 280) {
-          doc.addPage()
-          yPos = 20
-        }
-        doc.text(ret.receiptNumber, 20, yPos)
-        doc.text(formatReturnDate(ret.date), 60, yPos)
-        doc.text('-' + formatCurrency(ret.amount), 110, yPos)
-        doc.text((ret.reason || '-').substring(0, 25), 150, yPos)
-        yPos += 6
-      })
-    }
-
-    // Save PDF
-    doc.save(`analytics-report-${selectedPeriod.value}-${Date.now()}.pdf`)
-    toast.success('Report exported successfully!')
   } catch (error) {
     console.error('Error exporting report:', error)
     toast.error('Failed to export report')
@@ -2118,3 +2456,31 @@ onMounted(() => {
   })()
 })
 </script>
+
+<style scoped>
+.analytics-kpi-grid {
+  display: grid;
+  width: 100%;
+  gap: 0.625rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 640px) {
+  .analytics-kpi-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .analytics-kpi-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .analytics-kpi-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+</style>

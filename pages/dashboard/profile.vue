@@ -1,5 +1,43 @@
 <template>
-  <div :class="pageClass">
+  <div :class="isCapacitorIos ? 'ios-profile-page' : pageClass">
+    <IosProfileSettings
+      v-if="isCapacitorIos"
+      :display-name="iosProfileDisplayName"
+      :email="profileData.email || leftCardLine2"
+      :avatar-initials="profileAvatarInitials"
+      :is-loading="isLoadingProfile"
+      :is-staff="isStaff"
+      :show-billing="!isStaff && userStore.isSuperAdmin"
+      :show-store-info="!isStaff && hasBusinessProfileContent"
+      :show-receipt-policies="!isStaff"
+      :subscription-label="iosSubscriptionLabel"
+      :store-summary="businessProfileDisplay.storeName || undefined"
+      :language="accountSettings.language"
+      :theme="accountSettings.theme"
+      :region="accountSettings.region"
+      :currency="accountSettings.currency"
+      :timezone="accountSettings.timezone"
+      :two-factor-enabled="securitySettings.twoFactor"
+      :session-count="securitySettings.activeSessions"
+      :role-label="roleBadgeLabel"
+      @edit-profile="openEditProfileModal"
+      @open-store-info="showStoreInfoModal = true"
+      @open-notifications="showNotificationsModal = true"
+      @open-language="showLanguageModal = true"
+      @open-theme="showThemeModal = true"
+      @open-region="showRegionModal = true"
+      @open-currency="showCurrencyModal = true"
+      @open-timezone="showTimezoneModal = true"
+      @open-password="showPasswordModal = true"
+      @toggle-two-factor="handle2FAToggle"
+      @open-sessions="showSessionsModal = true"
+      @open-roles="showRolesModal = true"
+      @open-receipt-policies="openReceiptPoliciesModal"
+      @replay-tour="replayDashboardTour"
+      @open-assistant="openAssistant()"
+    />
+
+    <template v-if="!isCapacitorIos">
     <DashboardPageHeader class="dash-page-header--unified">
       <template #eyebrow>
         <p :class="eyebrowClass">Account</p>
@@ -19,13 +57,15 @@
         <section :class="profileCardClass">
           <div :class="profileCardBodyClass">
             <div :class="profileAvatarClass">
-              {{ profileAvatarInitials }}
+              <AccountAvatar :initials="profileAvatarInitials" />
             </div>
-            <div v-if="isLoadingProfile" class="mx-auto mt-4 max-w-[180px] space-y-2">
-              <div class="dash-skeleton h-4 w-full" />
-              <div class="dash-skeleton h-3 w-3/4" />
+            <div v-if="isLoadingProfile" class="mx-auto mt-4 flex max-w-[180px] flex-col items-center space-y-2">
+              <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-label" />
+              <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-title" />
+              <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-meta" />
+              <span class="dash-skeleton dash-skeleton--chip" style="width: 4.75rem; height: 1.25rem" />
             </div>
-            <template v-else>
+            <template v-else-if="!isCapacitorIos">
               <p :class="profileCardEyebrowClass">Business</p>
               <h2 :class="profileCardNameClass">
                 {{ leftCardHeading }}
@@ -46,25 +86,36 @@
                 {{ leftCardBadgeExtra }}
               </p>
             </template>
+            <template v-else>
+              <span :class="profileRoleBadgeClass">
+                {{
+                  isStaff
+                    ? 'Staff'
+                    : profileData.role === 'superAdmin'
+                    ? 'Super Admin'
+                    : profileData.role || 'User'
+                }}
+              </span>
+            </template>
 
             <div :class="profileStatBarClass">
               <div :class="profileStatItemClass">
                 <p :class="profileStatLabelClass">Orders</p>
-                <p v-if="isLoadingStats" class="dash-skeleton mx-auto mt-1 h-5 w-8" />
+                <p v-if="isLoadingStats" class="dash-skeleton dash-skeleton--line dash-skeleton--line-metric mx-auto mt-1" />
                 <p v-else :class="profileStatValueClass">
                   {{ totalOrders }}
                 </p>
               </div>
               <div :class="profileStatItemClass">
                 <p :class="profileStatLabelClass">Products</p>
-                <p v-if="isLoadingStats" class="dash-skeleton mx-auto mt-1 h-5 w-8" />
+                <p v-if="isLoadingStats" class="dash-skeleton dash-skeleton--line dash-skeleton--line-metric mx-auto mt-1" />
                 <p v-else :class="profileStatValueClass">
                   {{ totalProducts }}
                 </p>
               </div>
               <div :class="profileStatItemClass">
                 <p :class="profileStatLabelClass">Customers</p>
-                <p v-if="isLoadingStats" class="dash-skeleton mx-auto mt-1 h-5 w-8" />
+                <p v-if="isLoadingStats" class="dash-skeleton dash-skeleton--line dash-skeleton--line-metric mx-auto mt-1" />
                 <p v-else :class="profileStatValueClass">
                   {{ totalCustomers }}
                 </p>
@@ -74,7 +125,7 @@
         </section>
       </aside>
 
-      <div :class="profileMainClass">
+      <div :class="[profileMainClass, isCapacitorIos ? 'dash-page-stack--ios-settings' : '']">
         <DashboardSettingsPanel
           :title="isStaff ? 'Staff profile' : 'Business profile'"
           :subtitle="
@@ -202,9 +253,7 @@
           "
         >
           <div v-if="isLoadingProfile" class="space-y-4">
-            <div class="h-4 bg-gray-200 dark:bg-white/10 rounded-sm w-3/4 animate-pulse"></div>
-            <div class="h-4 bg-gray-200 dark:bg-white/10 rounded-sm w-1/2 animate-pulse"></div>
-            <div class="h-4 bg-gray-200 dark:bg-white/10 rounded-sm w-2/3 animate-pulse"></div>
+            <DashFieldGridSkeleton :count="isStaff ? 6 : 4" />
           </div>
           <div v-else-if="hasBusinessProfileContent" class="space-y-4">
             <div
@@ -464,11 +513,7 @@
               </div>
               <button
                 type="button"
-                :class="
-                  securitySettings.twoFactor
-                    ? 'inline-flex h-8 items-center rounded-lg bg-red-600 px-3 text-xs font-medium text-white hover:bg-red-700'
-                    : editLinkClass
-                "
+                :class="securitySettings.twoFactor ? iosDangerBtnClass : editLinkClass"
                 @click="handle2FAToggle"
               >
                 {{ securitySettings.twoFactor ? 'Disable' : 'Enable' }}
@@ -573,11 +618,287 @@
         </DashboardSettingsPanel>
       </div>
     </div>
+    </template>
   </div>
+
+  <!-- iOS: Edit profile -->
+  <Modal v-model="showEditProfileModal" :title="isStaff ? 'Staff profile' : 'Business profile'" size="lg">
+    <IosForm :class="iosProfileSheetClass" layout="fill">
+      <IosFormSection v-if="!isStaff" fixed>
+        <IosFormField label="Business name">
+          <IosFormInput
+            v-model="profileData.businessName"
+            :disabled="!isEditingPersonalInfo"
+            placeholder="Your business or store name"
+          />
+        </IosFormField>
+        <IosFormField label="Email">
+          <IosFormInput
+            v-model="profileData.email"
+            type="email"
+            :disabled="!isEditingPersonalInfo"
+            placeholder="Enter email"
+          />
+        </IosFormField>
+        <IosFormField label="Phone">
+          <IosFormInput
+            v-model="profileData.phone"
+            type="tel"
+            :disabled="!isEditingPersonalInfo"
+            placeholder="Business phone"
+          />
+        </IosFormField>
+        <IosFormField label="Bio">
+          <IosFormTextarea
+            v-model="profileData.bio"
+            :rows="3"
+            :disabled="!isEditingPersonalInfo"
+            extra-class="min-h-[5rem] resize-y"
+            placeholder="Tell customers about your business"
+          />
+        </IosFormField>
+      </IosFormSection>
+      <IosFormSection v-else fixed>
+        <IosFormField label="First name">
+          <IosFormInput
+            v-model="profileData.firstName"
+            :disabled="!isEditingPersonalInfo"
+            placeholder="First name"
+          />
+        </IosFormField>
+        <IosFormField label="Last name">
+          <IosFormInput
+            v-model="profileData.lastName"
+            :disabled="!isEditingPersonalInfo"
+            placeholder="Last name"
+          />
+        </IosFormField>
+        <IosFormField label="Email">
+          <IosFormInput
+            v-model="profileData.email"
+            type="email"
+            :disabled="!isEditingPersonalInfo"
+            placeholder="Work email"
+          />
+        </IosFormField>
+        <IosFormField label="Phone">
+          <IosFormInput
+            v-model="profileData.phone"
+            type="tel"
+            :disabled="!isEditingPersonalInfo"
+            placeholder="Phone"
+          />
+        </IosFormField>
+        <IosFormField label="Bio">
+          <IosFormTextarea
+            v-model="profileData.bio"
+            :rows="3"
+            :disabled="!isEditingPersonalInfo"
+            extra-class="min-h-[5rem] resize-y"
+            placeholder="Optional note"
+          />
+        </IosFormField>
+      </IosFormSection>
+    </IosForm>
+    <template #footer>
+      <IosDrawerActions
+        primary-label="Save"
+        cancel-label="Cancel"
+        @cancel="cancelEditProfileModal"
+        @primary="savePersonalInfoAndCloseModal"
+      />
+    </template>
+  </Modal>
+
+  <!-- iOS: Store information -->
+  <Modal v-model="showStoreInfoModal" title="Store information" size="lg">
+    <div :class="[iosProfileSheetClass, 'space-y-4']">
+      <div v-if="isLoadingProfile" class="space-y-3">
+        <div class="h-4 w-3/4 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10" />
+        <div class="h-4 w-1/2 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10" />
+      </div>
+      <div v-else-if="hasBusinessProfileContent" class="space-y-4">
+        <div
+          v-if="
+            isStaff &&
+            (businessProfileDisplay.departmentName ||
+              businessProfileDisplay.position ||
+              businessProfileDisplay.staffRole)
+          "
+          class="grid grid-cols-1 gap-4 sm:grid-cols-2"
+        >
+          <div v-if="businessProfileDisplay.departmentName">
+            <p :class="labelClass">Department</p>
+            <p :class="readonlyValueClass">{{ businessProfileDisplay.departmentName }}</p>
+          </div>
+          <div v-if="businessProfileDisplay.position">
+            <p :class="labelClass">Position</p>
+            <p :class="readonlyValueClass">{{ businessProfileDisplay.position }}</p>
+          </div>
+          <div v-if="businessProfileDisplay.staffRole">
+            <p :class="labelClass">Team role</p>
+            <p :class="[readonlyValueClass, 'capitalize']">{{ businessProfileDisplay.staffRole }}</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div v-if="businessProfileDisplay.storeName">
+            <p :class="labelClass">Branch name</p>
+            <p :class="readonlyValueClass">{{ businessProfileDisplay.storeName }}</p>
+          </div>
+          <div v-if="businessProfileDisplay.storeDescription">
+            <p :class="labelClass">Business type</p>
+            <p :class="readonlyValueClass">{{ businessProfileDisplay.storeDescription }}</p>
+          </div>
+          <div v-if="businessProfileDisplay.storeEmail">
+            <p :class="labelClass">Store email</p>
+            <p :class="readonlyValueClass">{{ businessProfileDisplay.storeEmail }}</p>
+          </div>
+          <div v-if="businessProfileDisplay.storePhone">
+            <p :class="labelClass">Store phone</p>
+            <p :class="readonlyValueClass">{{ businessProfileDisplay.storePhone }}</p>
+          </div>
+        </div>
+        <div v-if="businessProfileDisplay.storeAddress">
+          <p :class="labelClass">Address</p>
+          <p :class="readonlyValueClass">{{ businessProfileDisplay.storeAddress }}</p>
+        </div>
+      </div>
+      <p v-else class="text-xs text-gray-500 dark:text-gray-400">
+        {{
+          isStaff
+            ? 'Your branch details are not available yet. Contact your administrator.'
+            : 'No store information available.'
+        }}
+      </p>
+    </div>
+    <template #footer>
+      <IosDrawerActions
+        :show-primary="!isStaff"
+        primary-label="Manage store"
+        cancel-label="Close"
+        @cancel="showStoreInfoModal = false"
+        @primary="navigateTo('/dashboard/settings')"
+      />
+    </template>
+  </Modal>
+
+  <!-- iOS: Receipt policies -->
+  <Modal v-model="showReceiptPoliciesModal" title="Receipt terms & policies" size="lg">
+    <IosForm :class="iosProfileSheetClass" layout="fill">
+      <IosFormSection fixed>
+        <IosFormField label="Sales terms & conditions">
+          <IosFormTextarea
+            v-model="receiptPoliciesForm.salesTerms"
+            :rows="4"
+            :disabled="!isEditingReceiptPolicies"
+            extra-class="min-h-[5rem] resize-y"
+            placeholder="e.g. All sales are final unless otherwise stated…"
+          />
+        </IosFormField>
+        <IosFormField label="Refund policy">
+          <IosFormTextarea
+            v-model="receiptPoliciesForm.refundPolicy"
+            :rows="4"
+            :disabled="!isEditingReceiptPolicies"
+            extra-class="min-h-[5rem] resize-y"
+            placeholder="e.g. Refunds within 7 days with receipt…"
+          />
+        </IosFormField>
+        <IosFormField label="Warranty policy">
+          <IosFormTextarea
+            v-model="receiptPoliciesForm.warrantyPolicy"
+            :rows="4"
+            :disabled="!isEditingReceiptPolicies"
+            extra-class="min-h-[5rem] resize-y"
+            placeholder="e.g. Manufacturer warranty applies…"
+          />
+        </IosFormField>
+      </IosFormSection>
+    </IosForm>
+    <template #footer>
+      <IosDrawerActions
+        primary-label="Save"
+        cancel-label="Cancel"
+        @cancel="cancelReceiptPoliciesModal"
+        @primary="saveReceiptPoliciesAndCloseModal"
+      />
+    </template>
+  </Modal>
+
+  <!-- iOS: Roles & permissions -->
+  <Modal v-model="showRolesModal" title="Roles & permissions" size="lg">
+    <div :class="iosProfileSheetClass">
+      <div class="dash-roles">
+        <div class="dash-roles__hero">
+          <div class="dash-roles__hero-icon" aria-hidden="true">
+            <component :is="roleHeaderIcon" />
+          </div>
+          <div class="dash-roles__hero-body">
+            <div class="dash-roles__hero-top">
+              <p class="dash-roles__hero-title">{{ roleCardTitle }}</p>
+              <span v-if="roleBadgeLabel" class="dash-roles__badge">{{ roleBadgeLabel }}</span>
+            </div>
+            <p class="dash-roles__hero-desc">{{ roleCardDescription }}</p>
+            <div v-if="roleMetaItems.length > 0" class="dash-roles__meta">
+              <span v-for="meta in roleMetaItems" :key="meta.key" class="dash-roles__meta-chip">
+                <component :is="meta.icon" aria-hidden="true" />
+                {{ meta.text }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <p class="dash-roles__section-label">
+            <ClipboardDocumentListIcon aria-hidden="true" />
+            Permissions
+          </p>
+
+          <p v-if="userPermissions.length === 0" class="dash-roles__empty">
+            Loading your access list…
+          </p>
+
+          <div v-else class="dash-roles__groups">
+            <div v-for="group in permissionGroups" :key="group.id">
+              <p v-if="permissionGroups.length > 1" class="dash-roles__group-label">
+                <component :is="group.icon" aria-hidden="true" />
+                {{ group.label }}
+              </p>
+              <ul class="dash-roles__list">
+                <li v-for="item in group.items" :key="item.id" class="dash-roles__item">
+                  <span class="dash-roles__check" aria-hidden="true">
+                    <CheckIcon />
+                  </span>
+                  <span class="dash-roles__item-text">{{ item.label }}</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <p class="dash-roles__footnote">
+          <span class="dash-roles__footnote-icon" aria-hidden="true">
+            <InformationCircleIcon />
+          </span>
+          <span>
+            <template v-if="isStaff">
+              Contact your super admin in Settings if you need a different role or department.
+            </template>
+            <template v-else>
+              Manage team access under Settings → Departments and staff.
+            </template>
+          </span>
+        </p>
+      </div>
+    </div>
+    <template #footer>
+      <IosDrawerActions :show-primary="false" cancel-label="Close" @cancel="showRolesModal = false" />
+    </template>
+  </Modal>
 
   <!-- Theme Change Modal -->
   <Modal v-model="showThemeModal" title="Change Theme" size="md">
-    <div class="space-y-4">
+    <div :class="[iosProfileSheetClass, 'space-y-4']">
       <p class="text-xs text-gray-600 dark:text-gray-400">Select your preferred theme</p>
       <div class="space-y-2">
         <button
@@ -587,7 +908,7 @@
           :class="[
             'w-full p-4 rounded-sm border-0 transition-all text-left',
             currentThemeValue === themeOption.value
-              ? 'bg-primary-50 dark:bg-primary-900/20'
+              ? 'bg-gray-100 dark:bg-white/[0.08]'
               : 'bg-gray-50/80 dark:bg-gray-800/50',
           ]"
         >
@@ -602,22 +923,26 @@
             </div>
             <div
               v-if="currentThemeValue === themeOption.value"
-              class="w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center"
+              class="w-5 h-5 rounded-full bg-gray-900 dark:bg-white flex items-center justify-center"
             >
-              <CheckCircleIcon class="w-4 h-4 text-white" />
+              <CheckCircleIcon class="w-4 h-4 text-white dark:text-gray-900" />
             </div>
           </div>
         </button>
       </div>
     </div>
     <template #footer>
-      <Button variant="secondary" @click="showThemeModal = false">Close</Button>
+      <IosDrawerActions
+        :show-primary="false"
+        cancel-label="Close"
+        @cancel="showThemeModal = false"
+      />
     </template>
   </Modal>
 
   <!-- Language Selection Modal -->
   <Modal v-model="showLanguageModal" title="Change Language" size="md">
-    <div class="space-y-4">
+    <div :class="[iosProfileSheetClass, 'space-y-4']">
       <p class="text-xs text-gray-600 dark:text-gray-400">Select your preferred language</p>
       <div class="space-y-2 max-h-96 overflow-y-auto">
         <button
@@ -627,7 +952,7 @@
           :class="[
             'w-full p-4 rounded-sm border-0 transition-all text-left',
             accountSettings.language === lang.name
-              ? 'bg-primary-50 dark:bg-primary-900/20'
+              ? 'bg-gray-100 dark:bg-white/[0.08]'
               : 'bg-gray-50/80 dark:bg-gray-800/50',
           ]"
         >
@@ -638,22 +963,26 @@
             </div>
             <div
               v-if="accountSettings.language === lang.name"
-              class="w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center"
+              class="w-5 h-5 rounded-full bg-gray-900 dark:bg-white flex items-center justify-center"
             >
-              <CheckCircleIcon class="w-4 h-4 text-white" />
+              <CheckCircleIcon class="w-4 h-4 text-white dark:text-gray-900" />
             </div>
           </div>
         </button>
       </div>
     </div>
     <template #footer>
-      <Button variant="secondary" @click="showLanguageModal = false">Close</Button>
+      <IosDrawerActions
+        :show-primary="false"
+        cancel-label="Close"
+        @cancel="showLanguageModal = false"
+      />
     </template>
   </Modal>
 
   <!-- Notifications Settings Modal -->
   <Modal v-model="showNotificationsModal" title="Notification Preferences" size="lg">
-    <div class="space-y-4 sm:space-y-5">
+    <div :class="[iosProfileSheetClass, 'space-y-4 sm:space-y-5']">
       <div class="space-y-4">
         <div class="flex items-center justify-between py-4 border-b border-gray-200">
           <div>
@@ -665,7 +994,7 @@
           <label class="relative inline-flex items-center cursor-pointer">
             <input v-model="notificationSettings.email" type="checkbox" class="sr-only peer" />
             <div
-              class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-500"
+              class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-gray-400/40 dark:peer-focus:ring-white/20 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-900 dark:peer-checked:bg-gray-200"
             ></div>
           </label>
         </div>
@@ -685,7 +1014,7 @@
               @change="handlePushNotificationToggle"
             />
             <div
-              class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-500"
+              class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-gray-400/40 dark:peer-focus:ring-white/20 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-900 dark:peer-checked:bg-gray-200"
             ></div>
           </label>
         </div>
@@ -700,7 +1029,7 @@
           <label class="relative inline-flex items-center cursor-pointer">
             <input v-model="notificationSettings.sms" type="checkbox" class="sr-only peer" />
             <div
-              class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-500"
+              class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-gray-400/40 dark:peer-focus:ring-white/20 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-900 dark:peer-checked:bg-gray-200"
             ></div>
           </label>
         </div>
@@ -715,49 +1044,46 @@
           <label class="relative inline-flex items-center cursor-pointer">
             <input v-model="notificationSettings.inApp" type="checkbox" class="sr-only peer" />
             <div
-              class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-500"
+              class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-gray-400/40 dark:peer-focus:ring-white/20 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-900 dark:peer-checked:bg-gray-200"
             ></div>
           </label>
         </div>
       </div>
     </div>
     <template #footer>
-      <Button variant="secondary" @click="showNotificationsModal = false">Cancel</Button>
-      <Button @click="saveNotificationSettings">Save Changes</Button>
+      <IosDrawerActions
+        primary-label="Save changes"
+        @cancel="showNotificationsModal = false"
+        @primary="saveNotificationSettings"
+      />
     </template>
   </Modal>
 
   <!-- Password Change Modal -->
   <Modal v-model="showPasswordModal" title="Change Password" size="md">
-    <div class="space-y-4">
-      <p class="text-xs text-gray-600 dark:text-gray-400">
-        Enter your current password and choose a new one
-      </p>
-      <div class="space-y-4">
-        <div>
-          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-            Current Password
-          </label>
-          <input
+    <IosForm :class="iosProfileSheetClass" layout="fill">
+      <IosFormSection fixed>
+        <p class="ios-form__hint dash-drawer-hint">
+          Enter your current password and choose a new one
+        </p>
+
+        <IosFormField label="Current Password">
+          <IosFormInput
             v-model="passwordForm.currentPassword"
             type="password"
-            class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 outline-none"
             placeholder="Enter current password"
           />
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-            New Password
-          </label>
-          <input
+        </IosFormField>
+
+        <IosFormField label="New Password">
+          <IosFormInput
             v-model="passwordForm.newPassword"
             type="password"
             :minlength="PASSWORD_MIN_LENGTH"
             autocomplete="new-password"
-            class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 outline-none"
             placeholder="At least 12 characters, number and capital letter"
           />
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          <p class="ios-form__hint dash-drawer-hint">
             At least {{ PASSWORD_MIN_LENGTH }} characters, one number, one uppercase letter.
           </p>
           <ul
@@ -778,15 +1104,12 @@
               <span>{{ rule.label }}</span>
             </li>
           </ul>
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-            Confirm New Password
-          </label>
-          <input
+        </IosFormField>
+
+        <IosFormField label="Confirm New Password">
+          <IosFormInput
             v-model="passwordForm.confirmPassword"
             type="password"
-            class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 outline-none"
             placeholder="Confirm new password"
           />
           <p
@@ -799,77 +1122,59 @@
           >
             Passwords do not match
           </p>
-        </div>
-        <div
+        </IosFormField>
+
+        <p
           v-if="passwordError"
-          class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-sm"
+          class="rounded-sm border border-red-200 bg-red-50 p-3 text-xs text-red-600 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400"
         >
-          <p class="text-xs text-red-600 dark:text-red-400">{{ passwordError }}</p>
-        </div>
-      </div>
-    </div>
+          {{ passwordError }}
+        </p>
+      </IosFormSection>
+    </IosForm>
     <template #footer>
-      <Button
-        variant="secondary"
-        @click="
-          () => {
-            showPasswordModal = false
-            resetPasswordForm()
-          }
-        "
-        >Cancel</Button
-      >
-      <Button
-        @click="handlePasswordChange"
-        :disabled="
+      <IosDrawerActions
+        primary-label="Change password"
+        :primary-loading="isChangingPassword"
+        :primary-disabled="
           isChangingPassword ||
           !passwordForm.currentPassword ||
           !passwordForm.newPassword ||
           passwordForm.newPassword !== passwordForm.confirmPassword ||
           !isPasswordPolicyValid(passwordForm.newPassword)
         "
-      >
-        <span v-if="isChangingPassword" class="flex items-center gap-2">
-          <svg
-            class="animate-spin h-4 w-4"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              class="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              stroke-width="4"
-            ></circle>
-            <path
-              class="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            ></path>
-          </svg>
-          Changing...
-        </span>
-        <span v-else>Change Password</span>
-      </Button>
+        @cancel="
+          () => {
+            showPasswordModal = false
+            resetPasswordForm()
+          }
+        "
+        @primary="handlePasswordChange"
+      />
     </template>
   </Modal>
 
   <!-- Active Sessions Modal -->
   <Modal v-model="showSessionsModal" title="Active Sessions" size="lg">
-    <div class="space-y-4">
+    <div :class="[iosProfileSheetClass, 'space-y-4']">
       <p class="text-xs text-gray-600 dark:text-gray-400">
         Manage devices where you're currently signed in
       </p>
       <div v-if="isLoadingSessions" class="space-y-3">
-        <div v-for="i in 3" :key="i" class="flex items-center justify-between p-4 rounded-sm">
-          <div class="flex-1 space-y-2">
-            <div class="h-4 bg-gray-200 dark:bg-white/10 rounded-sm w-1/3 animate-pulse"></div>
-            <div class="h-3 bg-gray-200 dark:bg-white/10 rounded-sm w-1/4 animate-pulse"></div>
+        <div
+          v-for="i in 3"
+          :key="i"
+          class="flex items-center justify-between p-4 rounded-sm"
+        >
+          <div class="flex min-w-0 flex-1 items-start gap-2">
+            <span class="dash-skeleton dash-skeleton--thumb mt-0.5" />
+            <div class="min-w-0 flex-1 space-y-1.5">
+              <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-title" />
+              <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-meta" />
+              <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-meta" />
+            </div>
           </div>
-          <div class="h-6 bg-gray-200 dark:bg-white/10 rounded-sm w-16 animate-pulse"></div>
+          <span class="dash-skeleton dash-skeleton--line dash-skeleton--select" />
         </div>
       </div>
       <div v-else-if="activeSessions.length === 0" class="text-center py-8">
@@ -890,7 +1195,7 @@
                 </p>
                 <span
                   v-if="session.current"
-                  class="px-2 py-0.5 text-xs font-medium bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 rounded-full"
+                  class="px-2 py-0.5 text-xs font-medium bg-gray-100 dark:bg-white/[0.08] text-gray-700 dark:text-gray-300 rounded-full"
                 >
                   Current
                 </span>
@@ -912,16 +1217,20 @@
       </div>
     </div>
     <template #footer>
-      <Button variant="secondary" @click="showSessionsModal = false">Close</Button>
-      <Button variant="danger" @click="revokeAllSessions" v-if="activeSessions.length > 1"
-        >Revoke All Others</Button
-      >
+      <IosDrawerActions
+        cancel-label="Close"
+        primary-variant="danger"
+        primary-label="Revoke all others"
+        :show-primary="activeSessions.length > 1"
+        @cancel="showSessionsModal = false"
+        @primary="revokeAllSessions"
+      />
     </template>
   </Modal>
 
   <!-- Region Selection Modal -->
   <Modal v-model="showRegionModal" title="Change Region" size="md">
-    <div class="space-y-4">
+    <div :class="[iosProfileSheetClass, 'space-y-4']">
       <p class="text-xs text-gray-600 dark:text-gray-400">Select your region</p>
       <div class="space-y-2 max-h-96 overflow-y-auto">
         <button
@@ -931,7 +1240,7 @@
           :class="[
             'w-full p-4 rounded-sm border-0 transition-all text-left',
             accountSettings.region === region.name
-              ? 'bg-primary-50 dark:bg-primary-900/20'
+              ? 'bg-gray-100 dark:bg-white/[0.08]'
               : 'bg-gray-50/80 dark:bg-gray-800/50',
           ]"
         >
@@ -947,22 +1256,26 @@
             </div>
             <div
               v-if="accountSettings.region === region.name"
-              class="w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center"
+              class="w-5 h-5 rounded-full bg-gray-900 dark:bg-white flex items-center justify-center"
             >
-              <CheckCircleIcon class="w-4 h-4 text-white" />
+              <CheckCircleIcon class="w-4 h-4 text-white dark:text-gray-900" />
             </div>
           </div>
         </button>
       </div>
     </div>
     <template #footer>
-      <Button variant="secondary" @click="showRegionModal = false">Close</Button>
+      <IosDrawerActions
+        :show-primary="false"
+        cancel-label="Close"
+        @cancel="showRegionModal = false"
+      />
     </template>
   </Modal>
 
   <!-- Currency Selection Modal -->
   <Modal v-model="showCurrencyModal" title="Change Currency" size="md">
-    <div class="space-y-4">
+    <div :class="[iosProfileSheetClass, 'space-y-4']">
       <p class="text-xs text-gray-600 dark:text-gray-400">Select your currency</p>
       <div class="space-y-2 max-h-96 overflow-y-auto">
         <button
@@ -972,7 +1285,7 @@
           :class="[
             'w-full p-4 rounded-sm border-0 transition-all text-left',
             accountSettings.currency === currency.code
-              ? 'bg-primary-50 dark:bg-primary-900/20'
+              ? 'bg-gray-100 dark:bg-white/[0.08]'
               : 'bg-gray-50/80 dark:bg-gray-800/50',
           ]"
         >
@@ -987,22 +1300,26 @@
             </div>
             <div
               v-if="accountSettings.currency === currency.code"
-              class="w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center"
+              class="w-5 h-5 rounded-full bg-gray-900 dark:bg-white flex items-center justify-center"
             >
-              <CheckCircleIcon class="w-4 h-4 text-white" />
+              <CheckCircleIcon class="w-4 h-4 text-white dark:text-gray-900" />
             </div>
           </div>
         </button>
       </div>
     </div>
     <template #footer>
-      <Button variant="secondary" @click="showCurrencyModal = false">Close</Button>
+      <IosDrawerActions
+        :show-primary="false"
+        cancel-label="Close"
+        @cancel="showCurrencyModal = false"
+      />
     </template>
   </Modal>
 
   <!-- Timezone Selection Modal -->
   <Modal v-model="showTimezoneModal" title="Change Timezone" size="md">
-    <div class="space-y-4">
+    <div :class="[iosProfileSheetClass, 'space-y-4']">
       <p class="text-xs text-gray-600 dark:text-gray-400">Select your timezone</p>
       <div>
         <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
@@ -1010,7 +1327,7 @@
         </label>
         <select
           v-model="selectedTimezone"
-          class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 outline-none"
+          class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-gray-400/40 outline-none"
         >
           <option v-for="tz in timezones" :key="tz.value" :value="tz.value">
             {{ tz.label }}
@@ -1019,8 +1336,11 @@
       </div>
     </div>
     <template #footer>
-      <Button variant="secondary" @click="showTimezoneModal = false">Cancel</Button>
-      <Button @click="saveTimezone">Save</Button>
+      <IosDrawerActions
+        primary-label="Save"
+        @cancel="showTimezoneModal = false"
+        @primary="saveTimezone"
+      />
     </template>
   </Modal>
 
@@ -1033,7 +1353,7 @@
 
   <!-- 2FA Disable Modal -->
   <Modal v-model="show2FADisableModal" title="Disable Two-Factor Authentication" size="md">
-    <div class="space-y-4">
+    <div :class="[iosProfileSheetClass, 'space-y-4']">
       <p class="text-xs text-gray-600 dark:text-gray-400">
         Enter your password and authenticator code to disable two-factor authentication.
       </p>
@@ -1044,7 +1364,7 @@
         <input
           v-model="disable2FAPassword"
           type="password"
-          class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 outline-none"
+          class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-gray-400/40 outline-none"
           placeholder="Enter your password"
           @keyup.enter="handleDisable2FA"
         />
@@ -1059,7 +1379,7 @@
           inputmode="numeric"
           autocomplete="one-time-code"
           maxlength="6"
-          class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 outline-none tracking-[0.25em]"
+          class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-gray-400/40 outline-none tracking-[0.25em]"
           placeholder="6-digit code"
           @keyup.enter="handleDisable2FA"
         />
@@ -1072,9 +1392,12 @@
       </div>
     </div>
     <template #footer>
-      <Button
-        variant="secondary"
-        @click="
+      <IosDrawerActions
+        primary-variant="danger"
+        primary-label="Disable 2FA"
+        :primary-loading="isDisabling2FA"
+        :primary-disabled="isDisabling2FA || !disable2FAPassword || disable2FATotp.trim().length !== 6"
+        @cancel="
           () => {
             show2FADisableModal = false
             disable2FAPassword = ''
@@ -1082,38 +1405,8 @@
             disable2FAError = ''
           }
         "
-        >Cancel</Button
-      >
-      <Button
-        variant="danger"
-        @click="handleDisable2FA"
-        :disabled="isDisabling2FA || !disable2FAPassword || disable2FATotp.trim().length !== 6"
-      >
-        <span v-if="isDisabling2FA" class="flex items-center gap-2">
-          <svg
-            class="animate-spin h-4 w-4"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              class="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              stroke-width="4"
-            ></circle>
-            <path
-              class="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            ></path>
-          </svg>
-          Disabling...
-        </span>
-        <span v-else>Disable 2FA</span>
-      </Button>
+        @primary="handleDisable2FA"
+      />
     </template>
   </Modal>
 </template>
@@ -1168,7 +1461,18 @@ import {
 } from '~/composables/useStaffWorkspaceContext'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
+import IosProfileSettings from '~/components/ios/IosProfileSettings.vue'
+import AccountAvatar from '~/components/ui/AccountAvatar.vue'
+import {
+  IosForm,
+  IosFormSection,
+  IosFormField,
+  IosFormInput,
+  IosFormTextarea,
+} from '~/components/ios/forms'
 import TwoFactorSetup from '~/components/auth/TwoFactorSetup.vue'
+import { SUBSCRIPTION_PLANS, resolveEffectiveSubscriptionPlan } from '~/types/subscription'
 import {
   PASSWORD_MIN_LENGTH,
   getPasswordRuleChecks,
@@ -1216,6 +1520,52 @@ const {
   inlineNoteClass,
   inlineDividerClass,
 } = useDashboardSettingsChrome()
+
+const { isCapacitorIos } = useIsCapacitorIos()
+const router = useRouter()
+
+const iosProfileSheetClass = computed(() => (isCapacitorIos.value ? 'ios-profile-sheet' : ''))
+const iosDangerBtnClass =
+  'inline-flex h-8 items-center rounded-full bg-red-500/10 px-3 text-sm font-normal text-red-600 dark:text-red-400'
+
+const showEditProfileModal = ref(false)
+const showStoreInfoModal = ref(false)
+const showReceiptPoliciesModal = ref(false)
+const showRolesModal = ref(false)
+
+function openEditProfileModal() {
+  enableEditing('personal')
+  showEditProfileModal.value = true
+}
+
+function openReceiptPoliciesModal() {
+  startEditingReceiptPolicies()
+  showReceiptPoliciesModal.value = true
+}
+
+function cancelEditProfileModal() {
+  cancelEditing('personal')
+  showEditProfileModal.value = false
+}
+
+function cancelReceiptPoliciesModal() {
+  cancelEditingReceiptPolicies()
+  showReceiptPoliciesModal.value = false
+}
+
+async function savePersonalInfoAndCloseModal() {
+  await savePersonalInfo()
+  if (!isEditingPersonalInfo.value) {
+    showEditProfileModal.value = false
+  }
+}
+
+async function saveReceiptPoliciesAndCloseModal() {
+  await saveReceiptPolicies()
+  if (!isEditingReceiptPolicies.value) {
+    showReceiptPoliciesModal.value = false
+  }
+}
 
 // Profile data: super admin uses businessName (maps to user `name`); staff uses firstName/lastName for person
 const profileData = reactive({
@@ -1275,6 +1625,11 @@ const customersStore = useCustomersStore()
 const staffStore = useStaffStore()
 const storesStore = useStoresStore()
 const userStore = useUserStore()
+
+const iosSubscriptionLabel = computed(() => {
+  const plan = resolveEffectiveSubscriptionPlan(userStore.userData)
+  return SUBSCRIPTION_PLANS.find((p) => p.id === plan)?.name || 'Storvv Micro'
+})
 
 /** Resolved staff record for signed-in staff (department, store, etc.) */
 const currentStaffMember = ref<Staff | null>(null)
@@ -1777,6 +2132,19 @@ const roleBadgeLabel = computed(() => {
   if (isStaff.value) return isManager.value ? 'Manager' : 'Staff'
   if (userStore.isSuperAdmin || profileData.role === 'superAdmin') return 'Super Admin'
   return profileData.role || 'User'
+})
+
+const iosProfileDisplayName = computed((): string => {
+  if (isStaff.value) {
+    const name = [profileData.firstName, profileData.lastName].filter(Boolean).join(' ').trim()
+    if (name) return name
+  }
+  return leftCardHeading.value || 'Profile'
+})
+
+const iosProfileSubtitle = computed((): string => {
+  const parts = [roleBadgeLabel.value, profileData.email || leftCardLine2.value].filter(Boolean)
+  return parts.join(' · ')
 })
 
 const roleCardTitle = computed(() => {

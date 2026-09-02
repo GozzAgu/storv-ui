@@ -10,6 +10,28 @@ export function normalizeSubscriptionPlan(raw: unknown): SubscriptionPlan {
   return 'storvv_micro'
 }
 
+/** UI/rules plan after canceled subscriptions pass their paid period. */
+export function resolveEffectiveSubscriptionPlan(
+  userData:
+    | {
+        subscription?: unknown
+        subscriptionStatus?: string
+        subscriptionCurrentPeriodEnd?: string
+      }
+    | null
+    | undefined
+): SubscriptionPlan {
+  const stored = normalizeSubscriptionPlan(userData?.subscription)
+  if (userData?.subscriptionStatus !== 'canceled') return stored
+  const periodEnd = userData.subscriptionCurrentPeriodEnd
+  if (!periodEnd) return stored
+  const endMs = new Date(periodEnd).getTime()
+  if (Number.isFinite(endMs) && Date.now() > endMs) {
+    return 'storvv_micro'
+  }
+  return stored
+}
+
 export const SUBSCRIPTION_PLANS: Array<{ id: SubscriptionPlan; name: string }> = [
   { id: 'storvv_micro', name: 'Storvv Micro' },
   { id: 'storvv_medium', name: 'Storvv Medium' },
@@ -50,7 +72,7 @@ interface SubscriptionLimits {
   maxWhatsAppMessagesPerMonth: number
 }
 
-const FEATURES_BY_PLAN: Record<SubscriptionPlan, SubscriptionFeature[]> = {
+export const FEATURES_BY_PLAN: Record<SubscriptionPlan, SubscriptionFeature[]> = {
   storvv_micro: [
     'dashboard',
     'inventory',
@@ -187,6 +209,8 @@ export const SUBSCRIPTION_FEATURE_SUMMARY: Record<SubscriptionPlan, string[]> = 
     'Paystack payment links',
     'WhatsApp receipt sharing (10/month)',
     'Web dashboard & iOS app',
+    'Solo workspace at signup (Just me) or full Business layout',
+    'Upgrade to paid plans anytime in Settings',
   ],
   storvv_medium: [
     'Everything in Micro',
@@ -196,6 +220,7 @@ export const SUBSCRIPTION_FEATURE_SUMMARY: Record<SubscriptionPlan, string[]> = 
     'Customer balance / credit ledger',
     'Unlimited WhatsApp receipts',
     'Duplicate categories within the same branch',
+    'Paystack auto-renew · billing history · cancel anytime in Settings',
   ],
   storvv_enterprise: [
     'Everything in Medium',
@@ -204,6 +229,7 @@ export const SUBSCRIPTION_FEATURE_SUMMARY: Record<SubscriptionPlan, string[]> = 
     'Copy from branch (category templates across stores)',
     'Stock loans for serial-tracked inventory',
     'Priority support',
+    'Paystack auto-renew · billing history · cancel anytime in Settings',
   ],
 }
 

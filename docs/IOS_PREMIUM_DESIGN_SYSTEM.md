@@ -461,10 +461,10 @@ Toggle: existing `stores/theme.ts` - ensure native tab bar and glass tokens swap
 ## 11. Implementation roadmap
 
 ### Phase 1 - Foundation (1-2 weeks)
-- [ ] Add `--ios-*` tokens to `capacitor-native.css` / new `ios-design-tokens.css`
-- [ ] `IosGlassCard`, `IosStatCard`, `IosNativeListRow`
-- [ ] Update tab bar to 4-tab + More; Analytics in primary
-- [ ] `NativeCommandHeader` on Home
+- [x] Add `--ios-*` tokens to `ios-design-tokens.css` / `ios-system.css`
+- [x] `IosGlassCard`, `IosStatCard`, `IosNativeListRow`
+- [x] Update tab bar to 4-tab + More; Payment links promoted when live
+- [x] `NativeCommandHeader` on Home
 
 ### Phase 2 - Home & Inventory (2-3 weeks)
 - [ ] Redesign `/dashboard` native layout with hero + stat grid
@@ -496,7 +496,8 @@ Toggle: existing `stores/theme.ts` - ensure native tab bar and glass tokens swap
 
 | Area | Files |
 |------|-------|
-| Tokens | `assets/css/ios-design-tokens.css` (new), import in `nuxt.config` after capacitor CSS |
+| Tokens | `assets/css/ios-design-tokens.css`, `assets/css/ios-system.css` (import in `ios-native.css`) |
+| Composables | `composables/useIosDesignSystem.ts`, `composables/useIosTypography.ts` |
 | Tab nav | `components/dashboard/DashboardNativeBottomNav.vue`, `utils/dashboard-native-nav.ts` |
 | Header | `components/ios/NativeCommandHeader.vue` (new), `layouts/dashboard.vue` |
 | Home | `pages/dashboard/index.vue` (+ native-only template block) |

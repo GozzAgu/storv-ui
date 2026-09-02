@@ -37,3 +37,13 @@ ios/App/App.xcodeproj/xcuserdata/
 ios/App/App.xcodeproj/project.xcworkspace/xcuserdata/
 *.xcuserstate
 *.xcuserdatad/
+
+# Capacitor Android generated web assets (from nuxt generate + cap sync)
+android/app/src/main/assets/public/_nuxt/
+
+# Playwright auth state (local credentials)
+tests/.auth/
+
+# Test reports
+playwright-report/
+test-results/

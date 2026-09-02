@@ -67,7 +67,7 @@ export function activityEntityTypeLabel(type: ActivityEntityType): string {
 
 export function activityActionBadgeClass(action: ActivityAction): string {
   const base =
-    'inline-flex shrink-0 items-center justify-center rounded px-1.5 py-0.5 text-[10px] font-medium leading-none'
+    'inline-flex shrink-0 items-center justify-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold leading-none'
   if (action === 'created') {
     return `${base} bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300`
   }

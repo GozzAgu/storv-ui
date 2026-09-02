@@ -1,0 +1,129 @@
+/**
+ * IosForm — Pinterest-style clean CRUD fields inside iOS bottom sheets.
+ * Pair with components/ios/forms/* and ios-drawer-form.css shell chrome.
+ */
+
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__body,
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__scroll {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__section {
+  padding: 0;
+  margin: 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__section-title {
+  display: none;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__section-body,
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__field {
+  min-width: 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__label {
+  display: block;
+  margin-bottom: 0.4375rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__required {
+  color: var(--ios-label-tertiary);
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__input,
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__textarea,
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__select {
+  width: 100%;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__textarea {
+  min-height: 5.5rem;
+  resize: vertical;
+}
+
+/* Toggle rows — label left, control right, on the same surface as the fields */
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__toggle {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: var(--ios-field-pad-block, 0.875rem) var(--ios-field-pad-inline, 1rem);
+  border: 1px solid var(--ios-field-border, transparent);
+  border-radius: var(--ios-field-radius, 0.875rem);
+  background: var(--ios-field-bg, transparent);
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__toggle .ios-form__toggle-control {
+  display: flex !important;
+  flex-direction: row-reverse;
+  align-items: center !important;
+  justify-content: space-between;
+  gap: 0.875rem;
+  width: 100%;
+  margin: 0;
+  /* The .ios-form__toggle card owns the padding — the row inside must not add more */
+  padding: 0 !important;
+  border: none !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__toggle-copy {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__toggle-title {
+  display: block;
+  font-size: var(--ios-dash-menu-size, 0.8125rem) !important;
+  font-weight: 500 !important;
+  color: var(--ios-label) !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__toggle .ios-form__toggle-copy {
+  margin-left: 0 !important;
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+
+
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__error {
+  margin-top: 0.375rem;
+  font-size: var(--ios-dash-secondary-size, 0.6875rem);
+  color: #ff3b30;
+}
+
+/* Read-only state (e.g. a field disabled until "Edit" is tapped) */
+.ios-form__input:disabled,
+.ios-form__textarea:disabled,
+.ios-form__select:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Web: keep readable spacing without forcing iOS-only layout */
+html:not(.capacitor-ios) .ios-form__body,
+html:not(.capacitor-ios) .ios-form__grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+html:not(.capacitor-ios) .ios-form__grid.sm\:grid-cols-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}

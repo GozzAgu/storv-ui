@@ -1,0 +1,617 @@
+/**
+ * iOS Home dashboard — reference-style layout (greeting, metric grid, feed cards).
+ */
+
+html.capacitor-ios.capacitor-native {
+  --ios-home-bg: #f3f3f5;
+  --ios-home-card: #ffffff;
+  --ios-home-card-shadow: 0 4px 14px rgb(15 23 42 / 0.06);
+  --ios-action-card-shadow: 0 6px 18px rgb(15 23 42 / 0.1), 0 1px 3px rgb(15 23 42 / 0.05);
+  --ios-float-shadow: 0 8px 24px rgb(0 0 0 / 0.14), 0 2px 6px rgb(0 0 0 / 0.08);
+  --ios-home-radius: 20px;
+  --ios-home-metric-radius: 18px;
+  --ios-home-inset: 20px;
+  --ios-home-section-gap: 24px;
+  --ios-tabbar-float-inset: 20px;
+  --ios-tabbar-float-gap: 0px;
+  --dashboard-bottom-nav-stack: calc(var(--ios-bottomnav-height, 4.0625rem) + var(--ios-tabbar-float-gap) + 0.625rem);
+}
+
+html.capacitor-ios.capacitor-native.dark {
+  --ios-home-bg: #000000;
+  --ios-home-card: #1c1c1e;
+  --ios-home-card-shadow: 0 8px 24px rgb(0 0 0 / 0.35);
+  --ios-action-card-shadow: 0 8px 22px rgb(0 0 0 / 0.42);
+  --ios-float-shadow: 0 12px 32px rgb(0 0 0 / 0.55), 0 0 0 1px rgb(255 255 255 / 0.08);
+}
+
+html.capacitor-ios.capacitor-native .ios-home-page {
+  background: var(--ios-home-bg);
+}
+
+html.capacitor-ios.capacitor-native .dashboard-native-main--home,
+html.capacitor-ios.capacitor-native .dashboard-native-main--in-page {
+  padding: 0 !important;
+  background: var(--ios-home-bg);
+}
+
+html.capacitor-ios.capacitor-native .dashboard-top-nav-spacer-native--home,
+html.capacitor-ios.capacitor-native .dashboard-top-nav-spacer-native--in-page {
+  height: var(--ios-global-top-bar-stack, calc(var(--cap-safe-top, 0px) + 3rem)) !important;
+  min-height: var(--ios-global-top-bar-stack, calc(var(--cap-safe-top, 0px) + 3rem)) !important;
+}
+
+/* ── Page shell ── */
+html.capacitor-ios.capacitor-native .ios-home-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ios-home-section-gap);
+  font-weight: 400;
+  padding:
+    var(--ios-page-shell-pad-top, 0.375rem)
+    var(--ios-home-inset)
+    calc(var(--dashboard-bottom-nav-stack, 5rem) + 0.75rem);
+  background: var(--ios-home-bg);
+  min-height: 100%;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-dashboard strong,
+html.capacitor-ios.capacitor-native .ios-home-dashboard b {
+  font-weight: 400;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-dashboard__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+/* ── Top nav brand row (logo + theme toggle) ── */
+html.capacitor-ios.capacitor-native .ios-topnav-brand-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 2.75rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-topnav-brand-row__logo {
+  width: 2.25rem;
+  height: 2.25rem;
+  object-fit: contain;
+}
+
+html.capacitor-ios.capacitor-native .ios-topnav-brand-row__theme {
+  flex-shrink: 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-tabbar-theme-btn--topnav {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 9999px;
+  color: var(--ios-label);
+}
+
+html.capacitor-ios.capacitor-native .ios-tabbar-theme-btn--topnav:active {
+  background: var(--ios-fill-secondary);
+}
+
+html.capacitor-ios.capacitor-native .ios-tabbar-theme-btn--topnav .ios-tabbar-theme-btn__icon {
+  width: 1.375rem;
+  height: 1.375rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-dashboard__logo {
+  width: 2.25rem;
+  height: 2.25rem;
+  object-fit: contain;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-dashboard__intro {
+  min-width: 0;
+  flex: 1;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-dashboard__greeting-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.625rem;
+  margin-top: 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-dashboard__greeting {
+  margin: 0;
+  font-size: var(--ios-dash-page-title-size);
+  font-weight: 400;
+  line-height: var(--ios-dash-leading-tight);
+  letter-spacing: -0.02em;
+  color: var(--ios-label);
+}
+
+html.capacitor-ios.capacitor-native .ios-home-dashboard__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  flex-shrink: 0;
+  padding-top: 0.125rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-dashboard__icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.375rem;
+  height: 2.375rem;
+  border: 0;
+  border-radius: 9999px;
+  background: transparent;
+  color: var(--ios-label);
+  -webkit-tap-highlight-color: transparent;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-dashboard__icon-btn svg {
+  width: 1.1875rem;
+  height: 1.1875rem;
+  stroke-width: 1.75;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-dashboard__icon-btn:active {
+  background: var(--ios-fill-secondary);
+}
+
+html.capacitor-ios.capacitor-native .ios-home-dashboard__store {
+  margin: 0.3125rem 0 0;
+  font-size: var(--ios-dash-secondary-size);
+  font-weight: 400;
+  line-height: var(--ios-dash-leading);
+  color: var(--ios-label-secondary);
+}
+
+/* ── Alerts ── */
+html.capacitor-ios.capacitor-native .ios-home-dashboard__alerts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: -0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-dashboard__alert {
+  display: block;
+  padding: 0.5625rem 0.75rem;
+  border-radius: var(--ios-home-metric-radius);
+  background: var(--ios-home-card);
+  box-shadow: var(--ios-home-card-shadow);
+  font-size: var(--ios-dash-secondary-size);
+  line-height: var(--ios-dash-leading);
+  color: var(--ios-label-secondary);
+  text-decoration: none;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-dashboard__alert-title {
+  display: block;
+  margin-bottom: 0.125rem;
+  font-size: var(--ios-dash-card-title-size);
+  color: var(--ios-label);
+  font-weight: 500;
+}
+
+/* ── Sections ── */
+html.capacitor-ios.capacitor-native .ios-home-dashboard__section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-dashboard__section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-dashboard__section-title {
+  margin: 0;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--ios-label);
+}
+
+html.capacitor-ios.capacitor-native .ios-home-dashboard__section-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-dashboard__section-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 0;
+  border-radius: 9999px;
+  background: transparent;
+  color: var(--ios-label-secondary);
+}
+
+html.capacitor-ios.capacitor-native .ios-home-dashboard__section-btn svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-dashboard__add-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 9999px;
+  background: #111111;
+  color: #ffffff;
+  box-shadow: none;
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-home-dashboard__add-btn {
+  background: #ffffff;
+  color: #111111;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-dashboard__add-btn svg {
+  width: 1.125rem;
+  height: 1.125rem;
+  stroke-width: 2.25;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-dashboard__section-link {
+  font-size: var(--ios-dash-link-size);
+  font-weight: 400;
+  color: var(--ios-label-secondary);
+  text-decoration: none;
+}
+
+/* ── Metric grid (sizes in ios-dashboard-type.css) ── */
+html.capacitor-ios.capacitor-native .ios-home-dashboard__metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+html.capacitor-ios.capacitor-native .ios-home-metric {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  border-radius: var(--ios-home-metric-radius);
+  background: var(--ios-home-card);
+  box-shadow: var(--ios-home-card-shadow);
+  text-decoration: none;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.18s var(--ios-spring);
+}
+
+html.capacitor-ios.capacitor-native .ios-home-metric:active {
+  transform: scale(0.985);
+}
+
+html.capacitor-ios.capacitor-native .ios-home-metric--warning {
+  background: rgb(255 149 0 / 0.16);
+  box-shadow: none;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-metric--danger {
+  background: rgb(255 59 48 / 0.14);
+  box-shadow: none;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-metric--success {
+  background: rgb(52 199 89 / 0.14);
+  box-shadow: none;
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-home-metric--warning {
+  background: rgb(255 149 0 / 0.22);
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-home-metric--danger {
+  background: rgb(255 59 48 / 0.2);
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-home-metric--success {
+  background: rgb(52 199 89 / 0.2);
+}
+
+html.capacitor-ios.capacitor-native .ios-home-metric--warning .ios-home-metric__value {
+  color: #c2410c;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-metric--danger .ios-home-metric__value {
+  color: var(--ios-danger, #ff3b30);
+}
+
+html.capacitor-ios.capacitor-native .ios-home-metric--success .ios-home-metric__value {
+  color: #15803d;
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-home-metric--warning .ios-home-metric__value {
+  color: #ffb340;
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-home-metric--danger .ios-home-metric__value {
+  color: #ff6961;
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-home-metric--success .ios-home-metric__value {
+  color: #30d158;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-metric--warning .ios-home-metric__label,
+html.capacitor-ios.capacitor-native .ios-home-metric--danger .ios-home-metric__label,
+html.capacitor-ios.capacitor-native .ios-home-metric--success .ios-home-metric__label {
+  color: inherit;
+  opacity: 0.78;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-metric--warning .ios-home-metric__arrow {
+  color: var(--ios-warning, #ff9500);
+}
+
+html.capacitor-ios.capacitor-native .ios-home-metric--danger .ios-home-metric__arrow {
+  color: var(--ios-danger, #ff3b30);
+}
+
+html.capacitor-ios.capacitor-native .ios-home-metric--success .ios-home-metric__arrow {
+  color: var(--ios-success, #34c759);
+}
+
+/* metric value/label sizes: ios-dashboard-type.css */
+
+/* ── Feed cards ── */
+html.capacitor-ios.capacitor-native .ios-home-dashboard__feed {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-feed-card {
+  display: block;
+  padding: 0.6875rem 0.75rem 0.625rem;
+  border-radius: var(--ios-home-radius);
+  background: var(--ios-home-card);
+  box-shadow: var(--ios-home-card-shadow);
+  text-decoration: none;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.18s var(--ios-spring);
+}
+
+html.capacitor-ios.capacitor-native .ios-home-feed-card:active {
+  transform: scale(0.99);
+}
+
+html.capacitor-ios.capacitor-native .ios-home-feed-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-feed-card__profile {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-feed-card__avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  background: linear-gradient(145deg, #dfe5ef, #c8d2e3);
+  font-size: var(--ios-dash-link-size);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: #334155;
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-home-feed-card__avatar {
+  background: linear-gradient(145deg, #3a3a3c, #2c2c2e);
+  color: #f2f2f7;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-feed-card__identity {
+  min-width: 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-feed-card__name {
+  margin: 0;
+  font-size: var(--ios-dash-card-title-size);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--ios-label);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-feed-card__role {
+  margin: 0.125rem 0 0;
+  font-size: var(--ios-dash-secondary-size);
+  font-weight: 400;
+  color: var(--ios-label-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-feed-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex-shrink: 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-feed-card__badge {
+  padding: 0.125rem 0.4375rem;
+  border-radius: 9999px;
+  background: var(--ios-fill-secondary);
+  font-size: var(--ios-dash-micro-size);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--ios-label-secondary);
+}
+
+html.capacitor-ios.capacitor-native .ios-home-feed-card__menu {
+  width: 1rem;
+  height: 1rem;
+  color: var(--ios-label-tertiary);
+}
+
+html.capacitor-ios.capacitor-native .ios-home-feed-card__body {
+  margin: 0.625rem 0 0;
+  font-size: var(--ios-dash-secondary-size);
+  line-height: var(--ios-dash-leading);
+  color: var(--ios-label-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-feed-card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  padding-top: 0.625rem;
+  border-top: 1px solid var(--ios-separator);
+}
+
+html.capacitor-ios.capacitor-native .ios-home-feed-card__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: var(--ios-dash-meta-size);
+  font-weight: 400;
+  color: var(--ios-label-tertiary);
+}
+
+html.capacitor-ios.capacitor-native .ios-home-feed-card__meta svg {
+  width: 0.875rem;
+  height: 0.875rem;
+  stroke-width: 1.75;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-feed-card__meta--value {
+  font-weight: 400;
+  color: var(--ios-label-secondary);
+}
+
+/* ── Empty feed ── */
+html.capacitor-ios.capacitor-native .ios-home-dashboard__feed-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 10rem;
+  padding: 2rem 1rem;
+  border-radius: var(--ios-home-radius);
+  background: var(--ios-home-card);
+  box-shadow: var(--ios-home-card-shadow);
+  text-align: center;
+  color: var(--ios-label-secondary);
+}
+
+html.capacitor-ios.capacitor-native .ios-home-dashboard__feed-empty svg {
+  width: 2rem;
+  height: 2rem;
+  opacity: 0.45;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-dashboard__feed-empty p {
+  margin: 0;
+  font-size: var(--ios-dash-card-title-size);
+  font-weight: 500;
+  color: var(--ios-label);
+}
+
+html.capacitor-ios.capacitor-native .ios-home-dashboard__feed-empty-link {
+  font-size: var(--ios-dash-link-size);
+  font-weight: 400;
+  color: var(--ios-accent);
+  text-decoration: none;
+}
+
+/* ── Quick menu drawer ── */
+html.capacitor-ios.capacitor-native .ios-home-menu {
+  padding: 0.25rem 0 0.5rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-menu__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  font-size: var(--ios-dash-menu-size);
+  font-weight: 400;
+  color: var(--ios-label);
+  text-decoration: none;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-menu__row svg {
+  width: 1rem;
+  height: 1rem;
+  color: var(--ios-label-tertiary);
+}
+
+html.capacitor-ios.capacitor-native .ios-home-menu__row:active {
+  background: var(--ios-fill-tertiary);
+}
+
+/* ── Skeleton (extends .ios-skeleton in ios-skeleton.css) ── */
+html.capacitor-ios.capacitor-native .ios-home-skeleton {
+  border-radius: var(--ios-home-metric-radius);
+}
+
+html.capacitor-ios.capacitor-native .ios-home-skeleton--logo {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.5rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-skeleton--greeting {
+  width: 72%;
+  height: 1.875rem;
+  margin-top: 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-skeleton--title {
+  width: 9rem;
+  height: 1.25rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-skeleton--metric {
+  min-height: 5.75rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-skeleton--feed {
+  min-height: 9.5rem;
+  border-radius: var(--ios-home-radius);
+}
+
+html.capacitor-ios.capacitor-native .ios-home-skeleton--bar {
+  width: 100%;
+  height: 2.25rem;
+  border-radius: var(--ios-home-radius);
+}
+
+/* ── Tab bar: flat docked style lives in ios-tabbar-flat.css ── */

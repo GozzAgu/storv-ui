@@ -4,53 +4,65 @@
     :class="[
       showCategoryHub ? pageWithFooterClass : pageWithFixedFooterClass,
       'dash-page--unified w-full max-w-none flex-col space-y-5 overflow-x-hidden sm:space-y-6',
+      isCapacitorIos ? 'ios-inventory-items-page' : '',
     ]"
   >
     <Breadcrumbs
+      v-if="!isCapacitorIos"
       :items="inventoryBreadcrumbs"
       class="text-[11px] text-gray-500 dark:text-gray-400"
     />
 
     <!-- Loading -->
     <template v-if="isLoadingFolder">
-      <template v-if="loadingShowsCategoryHub">
+      <template v-if="isCapacitorIos && loadingShowsCategoryHub">
+        <div class="ios-page-nav-bar" aria-hidden="true">
+          <span class="ios-page-nav-bar__spacer" />
+          <div class="ios-skeleton ios-nav-title-skeleton" />
+          <span class="ios-page-nav-bar__spacer" />
+        </div>
+        <div class="ios-skeleton ios-skeleton--line ios-skeleton--line-sm ios-nav-title-skeleton" style="width: 5rem; margin: -0.25rem auto 0" />
+        <IosQuickActionSkeleton :count="2" />
+        <IosGroupedListSkeleton :count="6" />
+      </template>
+      <template v-else-if="isCapacitorIos">
+        <div class="ios-page-nav-bar" aria-hidden="true">
+          <span class="ios-page-nav-bar__spacer" />
+          <div class="ios-skeleton ios-nav-title-skeleton" />
+          <span class="ios-page-nav-bar__spacer" />
+        </div>
+        <div class="ios-skeleton ios-skeleton--line ios-skeleton--line-sm ios-nav-title-skeleton" style="width: 4rem; margin: -0.25rem auto 0.5rem" />
+        <div class="ios-search-bar-host">
+          <div class="ios-skeleton ios-search-skeleton" aria-hidden="true" />
+        </div>
+        <IosQuickActionSkeleton :count="4" />
+        <IosTransactionListSkeleton :count="8" />
+      </template>
+      <template v-else-if="loadingShowsCategoryHub">
         <div class="flex flex-wrap items-center gap-2">
-          <div class="h-8 w-8 animate-pulse rounded-lg bg-gray-200 dark:bg-white/10" />
-          <div class="h-5 w-36 max-w-[50vw] animate-pulse rounded-sm bg-gray-200 dark:bg-white/10" />
+          <span class="dash-skeleton dash-skeleton--thumb" />
+          <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-title" />
         </div>
         <div
           class="dash-grid-shell dash-grid-shell--grid inventory-categories-shell--grid mt-4"
         >
           <div class="inventory-categories-grid dash-grid">
-            <div
-              v-for="i in 6"
-              :key="i"
-              class="dash-skeleton dash-skeleton--grid-card"
-            />
+            <FolderCardSkeleton v-for="i in 6" :key="i" />
           </div>
         </div>
       </template>
-      <div v-else class="overflow-hidden rounded-sm bg-white dark:!bg-dashboard-card">
-        <div class="border-b border-gray-100/90 px-4 py-3 dark:border-gray-800/80 sm:px-5">
-          <div class="flex flex-wrap gap-2">
-            <div
-              class="h-9 flex-1 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10 sm:max-w-xs"
-            ></div>
-            <div class="h-9 w-24 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
-          </div>
-        </div>
-        <div class="space-y-2.5 p-4 sm:p-5">
-          <div v-for="i in 8" :key="i" class="flex gap-3">
-            <div class="h-4 flex-1 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
-            <div class="h-4 w-20 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
-            <div class="h-4 w-16 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
-          </div>
-        </div>
-      </div>
+      <DashTableSkeleton
+        v-else
+        :columns="inventoryItemTableSkeletonColumns"
+        :rows="8"
+        leading="icon"
+        show-toolbar
+        aria-label="Loading products"
+      />
     </template>
 
     <!-- Mobile / tablet toolbar -->
-    <div v-else-if="showCategoryHub" class="flex flex-col gap-2 lg:hidden">
+    <div v-else-if="showCategoryHub && !isCapacitorIos" class="flex flex-col gap-2 lg:hidden">
       <div class="dash-page-context-bar">
         <DashboardBackButton
           :to="inventoryBackTo"
@@ -79,7 +91,7 @@
       </Button>
     </div>
 
-    <div v-else class="flex flex-col gap-2 lg:hidden">
+    <div v-else-if="!isCapacitorIos" class="flex flex-col gap-2 lg:hidden">
       <div class="dash-page-context-bar">
         <DashboardBackButton
           :to="inventoryBackTo"
@@ -91,7 +103,6 @@
             <h2 class="dash-page-context-bar__title truncate">
               {{ folder?.name || 'Category' }}
             </h2>
-            <DuplicateFeatureUpsellBanner :loading="isLoadingFolder" />
           </div>
           <p class="dash-page-context-bar__meta">
             <span class="tabular-nums">{{ folder?.itemCount ?? 0 }} items</span>
@@ -180,7 +191,7 @@
           </Button>
           <select
             v-model="sortBy"
-            class="min-w-[6.5rem] flex-1 cursor-pointer rounded-sm bg-white px-2 py-2 text-xs font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:!bg-dashboard-card dark:text-gray-200 sm:min-w-[120px] sm:flex-none sm:px-3 sm:py-2.5 sm:text-sm"
+            class="min-w-[6.5rem] flex-1 cursor-pointer rounded-sm bg-white px-2 py-2 text-xs font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400/40 dark:!bg-dashboard-card dark:text-gray-200 sm:min-w-[120px] sm:flex-none sm:px-3 sm:py-2.5 sm:text-sm"
             @change="handleSortByChange"
           >
             <option value="name">Name</option>
@@ -193,15 +204,213 @@
       </div>
     </div>
 
-    <div
-      v-if="isCapacitorIos && !isLoadingFolder && !showCategoryHub"
-      class="ios-search-bar-host ios-search-bar-host--sticky"
-    >
-      <IosSearchBar v-model="searchQuery" placeholder="Search by name, SKU…" />
-    </div>
+    <template v-if="isCapacitorIos && !isLoadingFolder && !showCategoryHub">
+      <IosPageNavBar
+        :title="folder?.name || 'Products'"
+        show-back
+        :back-to="inventoryBackTo"
+        :back-label="inventoryBackLabel"
+      />
+      <p class="ios-inventory-list-meta">
+        {{ paginationTotal }} item{{ paginationTotal === 1 ? '' : 's' }}
+      </p>
+      <div class="ios-search-bar-host ios-search-bar-host--sticky">
+        <IosSearchBar v-model="searchQuery" placeholder="Search products…" />
+      </div>
+      <IosQuickActionBar
+        v-model="availabilityFilter"
+        class="ios-inventory-availability-tabs"
+        aria-label="Product actions"
+        :options="availabilityQuickActionOptions"
+      />
+
+      <IosDrawer
+        v-model="showProductMoreSheet"
+        title="Product options"
+        subtitle="Filters and tools"
+        variant="menu"
+        footer-variant="menu"
+        body-padding="p-0"
+        aria-label="Product options"
+      >
+        <div class="ios-drawer-menu">
+          <section class="ios-drawer-menu__section">
+            <p class="ios-drawer-menu__section-label">Availability</p>
+            <div class="ios-drawer-menu__group">
+              <ul class="ios-drawer-menu__list">
+                <li v-for="option in productMoreAvailabilityOptions" :key="option.value">
+                  <button
+                    type="button"
+                    class="ios-drawer-menu__row"
+                    @click="selectAvailabilityFromSheet(option.value)"
+                  >
+                    <span class="ios-drawer-menu__label">{{ option.label }}</span>
+                    <span v-if="option.badge != null" class="ios-drawer-menu__value">
+                      {{ option.badge }}
+                    </span>
+                    <CheckIcon
+                      v-if="availabilityFilter === option.value"
+                      class="ios-drawer-menu__check"
+                      aria-hidden="true"
+                    />
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </section>
+          <section v-if="canManageInventoryItems" class="ios-drawer-menu__section">
+            <p class="ios-drawer-menu__section-label">Tools</p>
+            <div class="ios-drawer-menu__group">
+              <ul class="ios-drawer-menu__list">
+                <li>
+                  <button type="button" class="ios-drawer-menu__row" @click="triggerImportFromSheet">
+                    <span class="ios-drawer-menu__label">Import from Excel</span>
+                  </button>
+                </li>
+                <li>
+                  <button type="button" class="ios-drawer-menu__row" @click="triggerExportFromSheet">
+                    <span class="ios-drawer-menu__label">Export to Excel</span>
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </section>
+        </div>
+      </IosDrawer>
+
+      <DashboardTableEmptyState
+        v-if="sortedFilteredItems.length === 0"
+        :icon="CubeIcon"
+        :title="searchQuery ? 'No products found' : 'No products yet'"
+        :description="
+          searchQuery
+            ? 'Try a different search term.'
+            : 'Add your first product to this folder.'
+        "
+      />
+
+      <div v-else class="ios-receipt-transaction-list">
+        <IosReceiptTransactionRow
+          v-for="(item, index) in paginatedItems"
+          :key="item.id"
+          :title="getItemPrimaryLabel(item)"
+          :subtitle="getItemCardSubtitle(item) || getItemAvailability(item).label"
+          :amount="getItemDisplayPrice(item)"
+          amount-tone="neutral"
+          :date="getItemCardDate(item)"
+          :variant="getItemTransactionVariant(item)"
+          :last="index === paginatedItems.length - 1"
+          :show-menu="!isInventoryItemLocked(item)"
+          menu-kind="item"
+          :menu-id="item.id"
+          @click="openMobileItemDetail(item)"
+          @menu="toggleItemMenu(item.id)"
+        />
+      </div>
+
+      <DashboardTablePagination
+        :current-page="currentPage"
+        :items-per-page="itemsPerPage"
+        :total="paginationTotal"
+        @page-change="handlePageChange"
+      />
+    </template>
 
     <!-- Category hub: subcategories live inside the parent folder -->
     <template v-if="!isLoadingFolder && showCategoryHub">
+      <template v-if="isCapacitorIos">
+        <IosPageNavBar
+          :title="folder?.name || 'Category'"
+          show-back
+          :back-to="inventoryBackTo"
+          :back-label="inventoryBackLabel"
+        />
+        <p class="ios-inventory-list-meta">
+          <template v-if="childFolders.length > 0">
+            {{ childFolders.length }} subcategor{{ childFolders.length === 1 ? 'y' : 'ies' }}
+          </template>
+          <template v-else>Organize with subcategories</template>
+        </p>
+        <IosQuickActionBar
+          v-if="subcategoryQuickActionOptions.length > 0"
+          v-model="subcategoryActionStub"
+          aria-label="Subcategory actions"
+          :options="subcategoryQuickActionOptions"
+        />
+        <IosDrawer
+          v-model="showSubcategoryMoreSheet"
+          title="Subcategory options"
+          variant="menu"
+          footer-variant="menu"
+          body-padding="p-0"
+          aria-label="Subcategory options"
+        >
+          <div class="ios-drawer-menu">
+            <section class="ios-drawer-menu__section">
+              <p class="ios-drawer-menu__section-label">Sort by</p>
+              <div class="ios-drawer-menu__group">
+                <ul class="ios-drawer-menu__list">
+                  <li>
+                    <button
+                      type="button"
+                      class="ios-drawer-menu__row"
+                      @click="selectHubSort('name')"
+                    >
+                      <span class="ios-drawer-menu__label">Name</span>
+                      <CheckIcon
+                        v-if="hubSortBy === 'name'"
+                        class="ios-drawer-menu__check"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      type="button"
+                      class="ios-drawer-menu__row"
+                      @click="selectHubSort('items')"
+                    >
+                      <span class="ios-drawer-menu__label">Products</span>
+                      <CheckIcon
+                        v-if="hubSortBy === 'items'"
+                        class="ios-drawer-menu__check"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            </section>
+          </div>
+        </IosDrawer>
+        <DashboardTableEmptyState
+          v-if="childFolders.length === 0"
+          :icon="FolderIcon"
+          title="No subcategories yet"
+          description="Create subcategories to organize products inside this category."
+        />
+        <div v-else class="ios-grouped-list">
+          <IosInventoryFolderRow
+            v-for="(child, index) in paginatedChildFolders"
+            :key="child.id"
+            :name="child.name"
+            :subtitle="child.description?.trim() || undefined"
+            :value="formatSubfolderRowValue(child)"
+            :last="index === paginatedChildFolders.length - 1"
+            :show-menu="canCreateInventoryFolders"
+            :menu-id="child.id"
+            @click="navigateToSubfolder(child.id)"
+            @menu="toggleSubfolderMenu(child.id)"
+          />
+        </div>
+        <DashboardTablePagination
+          :current-page="hubCurrentPage"
+          :items-per-page="hubItemsPerPage"
+          :total="childFolders.length"
+          @page-change="handleHubPageChange"
+        />
+      </template>
+      <template v-else>
       <div class="flex flex-wrap items-start justify-between gap-3">
         <div class="min-w-0">
           <div class="hidden items-center gap-2 lg:flex">
@@ -282,7 +491,7 @@
             @click="navigateToSubfolder(child.id)"
           >
             <template v-if="canCreateInventoryFolders" #menu>
-              <div data-inventory-subfolder-menu>
+              <div>
                 <button
                   type="button"
                   :data-folder-actions-anchor="child.id"
@@ -304,43 +513,40 @@
         :total="childFolders.length"
         @page-change="handleHubPageChange"
       />
+      </template>
     </template>
 
     <!-- Enhanced Items Table (teleport to body in expanded view; same pattern as receipts) -->
-    <div v-if="!isLoadingFolder && !showCategoryHub" class="flex min-h-0 flex-1 flex-col">
+    <div v-if="!isLoadingFolder && !showCategoryHub && !isCapacitorIos" class="flex min-h-0 flex-1 flex-col">
     <Teleport to="body" :disabled="!isFullscreen">
         <div
           data-dashboard-teleport
           :class="[
             'transition-colors duration-200 ease-out',
             isFullscreen
-              ? 'fixed inset-0 z-[100] flex min-h-0 flex-col overflow-hidden bg-white dark:!bg-dashboard-card'
+              ? `${tableExpandClass} fixed inset-0 z-[100] flex min-h-0 flex-col overflow-hidden`
               : 'relative flex min-h-0 flex-1 flex-col',
           ]"
         >
           <!-- Fullscreen header -->
           <div
             v-if="isFullscreen"
-            class="shrink-0 border-b border-gray-200/80 bg-white/95 px-4 py-3 backdrop-blur-md dark:border-gray-800/80 dark:!bg-dashboard-card/95 sm:px-6 lg:px-8"
-            style="padding-top: max(0.75rem, env(safe-area-inset-top, 0px))"
+            :class="tableExpandHeaderClass"
+            style="padding-top: max(1rem, env(safe-area-inset-top, 0px))"
           >
             <div
               class="flex w-full flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-6"
             >
               <div class="flex min-w-0 items-start justify-between gap-3 lg:items-center">
                 <div class="min-w-0">
-                  <p
-                    class="text-[10px] font-medium uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
-                  >
+                  <p :class="tableExpandEyebrowClass">
                     Expanded view
                   </p>
                   <div class="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                    <h2
-                      class="text-base font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-lg"
-                    >
+                    <h2 :class="tableExpandTitleClass">
                       {{ folder?.name || 'Inventory Products' }}
                     </h2>
-                    <span class="text-xs tabular-nums text-gray-500 dark:text-gray-400">
+                    <span :class="tableExpandMetaClass">
                       {{ folder?.itemCount ?? 0 }} items · {{ formatCurrency(totalInventoryValue) }}
                       <template
                         v-if="isSearchActive && sortedFilteredItems.length !== baseItems.length"
@@ -352,7 +558,8 @@
                 </div>
                 <button
                   type="button"
-                  class="shrink-0 rounded-sm border border-transparent p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-100 lg:hidden"
+                  class="inline-flex lg:hidden"
+                  :class="tableExpandCloseClass"
                   aria-label="Exit expanded view"
                   @click="isFullscreen = false"
                 >
@@ -372,13 +579,15 @@
                     v-model="searchQuery"
                     type="text"
                     placeholder="Search…"
-                    class="w-full rounded-sm bg-white py-2 pl-10 pr-3 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder:text-gray-500"
+                    class="w-full py-2 pl-10 pr-3 text-sm"
+                    :class="tableExpandFieldClass"
                   />
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
                   <select
                     v-model="sortBy"
-                    class="min-w-[7.5rem] cursor-pointer rounded-sm bg-white px-3 py-2 text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:!bg-dashboard-card dark:text-gray-200"
+                    class="min-w-[7.5rem] cursor-pointer px-3 py-2 text-sm font-medium"
+                    :class="tableExpandFieldClass"
                     @change="handleSortByChange"
                   >
                     <option value="name">Name</option>
@@ -389,7 +598,8 @@
                   </select>
                   <button
                     type="button"
-                    class="hidden rounded-sm border border-transparent p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-100 lg:inline-flex"
+                    class="hidden lg:inline-flex"
+                    :class="tableExpandCloseClass"
                     aria-label="Exit expanded view"
                     @click="isFullscreen = false"
                   >
@@ -472,7 +682,7 @@
           <div
             :class="[
               isFullscreen
-                ? 'flex min-h-0 flex-1 flex-col overflow-hidden'
+                ? tableExpandBodyClass
                 : 'data-table-shell flex min-h-0 flex-1 flex-col overflow-hidden',
             ]"
           >
@@ -492,7 +702,6 @@
                       >
                         {{ folder?.name || 'Category' }}
                       </h2>
-                      <DuplicateFeatureUpsellBanner :loading="isLoadingFolder" />
                     </div>
                     <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
                       <span class="tabular-nums font-medium text-gray-600 dark:text-gray-300"
@@ -655,13 +864,29 @@
                     : 'flex min-h-0 flex-1 flex-col'
                 "
               >
-                <!-- Mobile: card list when has items (web; hidden on iOS native card table) -->
+                <!-- Mobile: card list (iOS invoice-style; web compact cards) -->
                 <div
                   class="inventory-items-mobile-list block space-y-2 sm:hidden"
-                  :class="
-                    isFullscreen ? 'min-h-0 flex-1 overflow-y-auto px-4 pb-4 lg:px-8' : 'px-0'
-                  "
+                  :class="[
+                    isFullscreen ? 'min-h-0 flex-1 overflow-y-auto px-4 pb-4 lg:px-8' : 'px-0',
+                    isCapacitorIos ? 'inventory-items-mobile-list--ios' : '',
+                  ]"
                 >
+                  <template v-if="isCapacitorIos">
+                    <IosInventoryItemCard
+                      v-for="item in paginatedItems"
+                      :key="item.id"
+                      :title="getItemPrimaryLabel(item)"
+                      :subtitle="getItemCardSubtitle(item)"
+                      :price="getItemDisplayPrice(item)"
+                      :reference="getItemCardReference(item)"
+                      :status-label="getItemAvailability(item).label"
+                      :status="getItemAvailability(item).status"
+                      :date="getItemCardDate(item)"
+                      @click="openMobileItemDetail(item)"
+                    />
+                  </template>
+                  <template v-else>
                   <div
                     v-for="item in paginatedItems"
                     :key="item.id"
@@ -694,11 +919,7 @@
                               <span
                                 class="text-xs font-semibold tabular-nums text-gray-900 dark:text-gray-100"
                               >
-                                {{
-                                  item.discountedPrice !== undefined
-                                    ? formatCurrency(item.discountedPrice)
-                                    : formatCurrency(item.price ?? item.originalPrice ?? 0)
-                                }}
+                                {{ getItemDisplayPrice(item) }}
                               </span>
                               <InventoryProfitHint
                                 v-if="canShowProfitAndCost"
@@ -721,15 +942,7 @@
                         </div>
                       </div>
                       <div class="flex shrink-0 flex-col items-center gap-0.5" @click.stop>
-                        <button
-                          type="button"
-                          class="inline-flex h-7 w-7 items-center justify-center rounded-lg text-primary-600 transition-colors hover:bg-primary-50 dark:text-primary-400 dark:hover:bg-primary-950/50"
-                          aria-label="View details"
-                          @click="openMobileItemDetail(item)"
-                        >
-                          <EyeIcon class="h-4 w-4" stroke-width="1.75" />
-                        </button>
-                        <div class="relative" data-inventory-item-menu>
+                        <div class="relative">
                           <button
                             type="button"
                             :data-item-actions-anchor="item.id"
@@ -741,7 +954,7 @@
                                 ? 'cursor-not-allowed opacity-40'
                                 : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/80 hover:text-gray-800 dark:hover:text-gray-200',
                             ]"
-                            aria-label="Item actions"
+                            aria-label="Product actions"
                             aria-haspopup="menu"
                             :aria-expanded="openItemMenuId === item.id"
                           >
@@ -751,9 +964,11 @@
                       </div>
                     </div>
                   </div>
+                  </template>
                 </div>
-                <!-- Desktop / iOS native card table -->
+                <!-- Desktop table (web only) -->
                 <div
+                  v-if="!isCapacitorIos"
                   class="inventory-items-table-wrap hidden min-h-0 flex-1 flex-col sm:flex"
                   :class="isFullscreen ? 'overflow-auto px-4 pb-2 pt-2 lg:px-8' : ''"
                 >
@@ -800,13 +1015,13 @@
                                   v-if="
                                     currentSort.key === column.key && currentSort.order === 'asc'
                                   "
-                                  class="w-3 h-3 text-primary-500 dark:text-primary-400"
+                                  class="w-3 h-3 text-gray-700 dark:text-gray-300"
                                 />
                                 <ChevronDownIcon
                                   v-else-if="
                                     currentSort.key === column.key && currentSort.order === 'desc'
                                   "
-                                  class="w-3 h-3 text-primary-500 dark:text-primary-400"
+                                  class="w-3 h-3 text-gray-700 dark:text-gray-300"
                                 />
                                 <BarsArrowUpIcon
                                   v-else
@@ -865,7 +1080,7 @@
                                     ? 'decimal'
                                     : 'text'
                                 "
-                                class="w-full min-w-0 px-2 py-1 text-[10px] border-0 dark:border-primary-500/50 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-400/20 outline-none"
+                                class="w-full min-w-0 px-2 py-1 text-[10px] border-0 dark:border-white/10 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-gray-400/30 outline-none"
                                 @blur="saveInlineEdit"
                                 @keydown.enter="saveInlineEdit"
                                 @keydown.esc="cancelInlineEdit"
@@ -1003,7 +1218,6 @@
                           <td v-if="canManageInventoryItems" class="dashboard-table__col-actions">
                             <div
                               class="relative inline-flex justify-end"
-                              data-inventory-item-menu
                               @click.stop
                             >
                               <button
@@ -1281,9 +1495,9 @@
           class="flex min-h-0 flex-1 flex-col gap-2"
         >
           <div
-            class="shrink-0 p-2 bg-primary-50 dark:bg-primary-900/20 ring-1 ring-primary-200/50 dark:ring-primary-800/40 rounded-sm"
+            class="shrink-0 p-2 bg-gray-50 dark:bg-white/[0.04] ring-1 ring-gray-200/60 dark:ring-white/10 rounded-sm"
           >
-            <p class="text-[11px] text-blue-800 dark:text-blue-200">
+            <p class="text-[11px] text-gray-700 dark:text-gray-300">
               <strong>Bulk Add Mode:</strong> Enter details once, then add serial numbers below.
               Each serial creates a separate product.
             </p>
@@ -1304,7 +1518,7 @@
                   v-model="itemForm.brand"
                   type="text"
                   required
-                  class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 transition-all"
+                  class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
                   placeholder="Enter product model"
                 />
               </div>
@@ -1328,7 +1542,7 @@
                     v-model="itemForm[field.name]"
                     type="text"
                     :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 transition-all"
+                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
                     :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
                   />
                   <input
@@ -1336,7 +1550,7 @@
                     v-model.number="itemForm[field.name]"
                     type="number"
                     :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 transition-all"
+                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
                     :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
                   />
                   <div v-else-if="field.type === 'currency'" class="relative">
@@ -1350,7 +1564,7 @@
                       step="0.01"
                       min="0"
                       :required="field.required"
-                      class="w-full pl-7 pr-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 transition-all"
+                      class="w-full pl-7 pr-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
                       :placeholder="field.placeholder || '0.00'"
                     />
                   </div>
@@ -1358,7 +1572,7 @@
                     v-else-if="field.type === 'select' && field.options"
                     v-model="itemForm[field.name]"
                     :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/50 transition-all"
+                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
                   >
                     <option value="">Select {{ field.label || field.name }}</option>
                     <option v-for="option in field.options" :key="option" :value="option">
@@ -1370,7 +1584,7 @@
                     v-model="itemForm[field.name]"
                     type="text"
                     :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 transition-all"
+                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
                     :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
                   />
                 </div>
@@ -1383,7 +1597,7 @@
                     v-model="itemForm[field.name]"
                     type="date"
                     :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/50 transition-all"
+                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
                   />
                   <Checkbox
                     v-else-if="field.type === 'boolean'"
@@ -1433,7 +1647,7 @@
                   v-model="serialNumbers[index]"
                   type="text"
                   :placeholder="`Serial ${index + 1}`"
-                  class="flex-1 min-w-0 px-2 py-1 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-primary-500/50"
+                  class="flex-1 min-w-0 px-2 py-1 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400/50"
                 />
                 <button
                   type="button"
@@ -1461,7 +1675,7 @@
                     v-model="itemForm[field.name]"
                     type="text"
                     :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 transition-all"
+                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
                     :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
                   />
                   <input
@@ -1469,7 +1683,7 @@
                     v-model.number="itemForm[field.name]"
                     type="number"
                     :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 transition-all"
+                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
                     :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
                   />
                   <div v-else-if="field.type === 'currency'" class="relative">
@@ -1483,7 +1697,7 @@
                       step="0.01"
                       min="0"
                       :required="field.required"
-                      class="w-full pl-7 pr-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 transition-all"
+                      class="w-full pl-7 pr-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
                       :placeholder="field.placeholder || '0.00'"
                     />
                   </div>
@@ -1491,7 +1705,7 @@
                     v-else-if="field.type === 'select' && field.options"
                     v-model="itemForm[field.name]"
                     :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/50 transition-all"
+                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
                   >
                     <option value="">Select {{ field.label || field.name }}</option>
                     <option v-for="option in field.options" :key="option" :value="option">
@@ -1503,7 +1717,7 @@
                     v-model="itemForm[field.name]"
                     type="text"
                     :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 transition-all"
+                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
                     :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
                   />
                 </div>
@@ -1516,7 +1730,7 @@
                     v-model="itemForm[field.name]"
                     type="date"
                     :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/50 transition-all"
+                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
                   />
                   <Checkbox
                     v-else-if="field.type === 'boolean'"
@@ -1542,42 +1756,36 @@
       </form>
 
       <template #footer>
-        <div class="flex w-full flex-col gap-2 sm:flex-row sm:justify-end">
-          <Button
-            variant="outline"
-            size="sm"
-            @click="handleCancelItem"
-            class="w-full sm:w-auto"
-            >Cancel</Button
-          >
-          <Button
-            variant="primary"
-            size="sm"
-            type="submit"
-            form="inventory-item-form"
-            :disabled="!isItemDrawerValid || isSavingItem"
-            :loading="isSavingItem"
-            class="w-full sm:w-auto"
-          >
-            {{
-              editingItem
-                ? isSavingItem
-                  ? 'Updating…'
-                  : 'Update Product'
-                : folder?.hasSerialNumbers && !editingItem
-                ? isSavingItem
-                  ? `Adding ${validBulkSerialNumbers.length}…`
-                  : validBulkSerialNumbers.length > 0
-                  ? `Add ${validBulkSerialNumbers.length} Product${
-                      validBulkSerialNumbers.length !== 1 ? 's' : ''
-                    }`
-                  : 'Add Products'
-                : isSavingItem
-                ? 'Adding…'
-                : 'Add Product'
-            }}
-          </Button>
-        </div>
+        <IosDrawerActions @cancel="handleCancelItem">
+          <template #primary>
+            <Button
+              variant="primary"
+              size="sm"
+              type="submit"
+              form="inventory-item-form"
+              :disabled="!isItemDrawerValid || isSavingItem"
+              :loading="isSavingItem"
+            >
+              {{
+                editingItem
+                  ? isSavingItem
+                    ? 'Updating…'
+                    : 'Update Product'
+                  : folder?.hasSerialNumbers && !editingItem
+                  ? isSavingItem
+                    ? `Adding ${validBulkSerialNumbers.length}…`
+                    : validBulkSerialNumbers.length > 0
+                    ? `Add ${validBulkSerialNumbers.length} Product${
+                        validBulkSerialNumbers.length !== 1 ? 's' : ''
+                      }`
+                    : 'Add Products'
+                  : isSavingItem
+                  ? 'Adding…'
+                  : 'Add Product'
+              }}
+            </Button>
+          </template>
+        </IosDrawerActions>
       </template>
     </SidePanel>
 
@@ -1658,34 +1866,25 @@
         </div>
       </div>
       <template #footer>
-        <Button
-          variant="outline"
-          size="sm"
-          @click="
-            () => {
-              showBulkDeleteModal = false
-              bulkDeleteConfirmed = false
-            }
-          "
-          class="!rounded-2xl"
-          >Cancel</Button
-        >
-        <Button
-          variant="danger"
-          size="sm"
-          :disabled="!bulkDeleteConfirmed || isBulkDeleting"
-          :icon="TrashIcon"
-          class="!rounded-2xl"
-          @click="handleConfirmBulkDelete"
-        >
-          {{
+        <IosDrawerActions
+          primary-variant="danger"
+          :primary-icon="TrashIcon"
+          :primary-label="
             isBulkDeleting
               ? 'Deleting...'
               : `Delete ${selectedItemsForBulk.length} product${
                   selectedItemsForBulk.length !== 1 ? 's' : ''
                 }`
-          }}
-        </Button>
+          "
+          :primary-disabled="!bulkDeleteConfirmed || isBulkDeleting"
+          @cancel="
+            () => {
+              showBulkDeleteModal = false
+              bulkDeleteConfirmed = false
+            }
+          "
+          @primary="handleConfirmBulkDelete"
+        />
       </template>
     </Modal>
 
@@ -1734,7 +1933,7 @@
                 v-model="duplicateSerialNumbers[index]"
                 type="text"
                 :placeholder="`Serial ${index + 1}`"
-                class="flex-1 px-2.5 py-1.5 text-sm rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-primary-500/50"
+                class="flex-1 px-2.5 py-1.5 text-sm rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400/50"
               />
               <button
                 type="button"
@@ -1785,145 +1984,108 @@
       :folder-name="folder?.name"
     />
 
-    <!-- Item actions menu (teleported; not clipped by table overflow) -->
-    <Teleport to="body">
-      <div
-        v-if="openItemMenuId && itemForOpenMenu && itemMenuFixedStyle"
-        data-inventory-item-menu
-        class="frosted-glass fixed z-[1000] min-w-[11rem] overflow-hidden rounded-sm py-1"
-        role="menu"
-        :style="itemMenuFixedStyle"
-      >
-        <button
-          type="button"
-          role="menuitem"
-          @click="
-            () => {
-              handleViewTimeline(itemForOpenMenu)
-              openItemMenuId = null
-            }
-          "
-          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85"
-        >
-          <ClockIcon
-            class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500"
-            stroke-width="1.75"
-          />
-          <span>History</span>
-        </button>
-        <button
-          type="button"
-          role="menuitem"
-          @click="
-            () => {
-              handleApplyDiscount(itemForOpenMenu)
-              openItemMenuId = null
-            }
-          "
-          :disabled="isInventoryItemLocked(itemForOpenMenu)"
-          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-primary-50/80 dark:text-gray-200 dark:hover:bg-primary-950/30 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          <TagIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
-          <span>{{
-            itemForOpenMenu.discountedPrice !== undefined ? 'Discount' : 'Add discount'
-          }}</span>
-        </button>
-        <button
-          type="button"
-          role="menuitem"
-          @click="
-            () => {
-              handleEditItem(itemForOpenMenu)
-              openItemMenuId = null
-            }
-          "
-          :disabled="isInventoryItemLocked(itemForOpenMenu)"
-          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          <PencilSquareIcon
-            class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500"
-            stroke-width="1.75"
-          />
-          <span>Edit</span>
-        </button>
-        <button
-          v-if="canLoanToSellerUi"
-          type="button"
-          role="menuitem"
-          @click="handleLoanToSellerFromMenu(itemForOpenMenu)"
-          :disabled="isInventoryItemLocked(itemForOpenMenu)"
-          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          <ArrowTopRightOnSquareIcon
-            class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500"
-            stroke-width="1.75"
-          />
-          <span>Stock loan</span>
-        </button>
-        <button
-          v-if="canDuplicateByPlan"
-          type="button"
-          role="menuitem"
-          @click="
-            () => {
-              handleDuplicateItem(itemForOpenMenu)
-              openItemMenuId = null
-            }
-          "
-          :disabled="isInventoryItemLocked(itemForOpenMenu)"
-          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          <DocumentDuplicateIcon
-            class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500"
-            stroke-width="1.75"
-          />
-          <span>Duplicate</span>
-        </button>
-        <button
-          type="button"
-          role="menuitem"
-          @click="
-            () => {
-              handleDeleteItem(itemForOpenMenu)
-              openItemMenuId = null
-            }
-          "
-          :disabled="isInventoryItemLocked(itemForOpenMenu)"
-          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/45 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          <TrashIcon class="h-4 w-4 shrink-0" stroke-width="1.75" />
-          <span>Delete</span>
-        </button>
-      </div>
-    </Teleport>
+    <IosContextMenu
+      :open="Boolean(openItemMenuId && itemForOpenMenu && itemMenuFixedStyle)"
+      :style="itemMenuFixedStyle"
+      menu-id="inventory-item"
+    >
+      <IosContextMenuItem
+        label="View details"
+        :icon="EyeIcon"
+        @click="
+          () => {
+            openMobileItemDetail(itemForOpenMenu!)
+            openItemMenuId = null
+          }
+        "
+      />
+      <IosContextMenuItem
+        label="History"
+        :icon="ClockIcon"
+        @click="
+          () => {
+            handleViewTimeline(itemForOpenMenu!)
+            openItemMenuId = null
+          }
+        "
+      />
+      <IosContextMenuItem
+        :label="itemForOpenMenu?.discountedPrice !== undefined ? 'Discount' : 'Add discount'"
+        :icon="TagIcon"
+        :disabled="!itemForOpenMenu || isInventoryItemLocked(itemForOpenMenu)"
+        @click="
+          () => {
+            if (!itemForOpenMenu) return
+            handleApplyDiscount(itemForOpenMenu)
+            openItemMenuId = null
+          }
+        "
+      />
+      <IosContextMenuItem
+        label="Edit"
+        :icon="PencilSquareIcon"
+        :disabled="!itemForOpenMenu || isInventoryItemLocked(itemForOpenMenu)"
+        @click="
+          () => {
+            if (!itemForOpenMenu) return
+            handleEditItem(itemForOpenMenu)
+            openItemMenuId = null
+          }
+        "
+      />
+      <IosContextMenuItem
+        v-if="canLoanToSellerUi"
+        label="Stock loan"
+        :icon="ArrowTopRightOnSquareIcon"
+        :disabled="!itemForOpenMenu || isInventoryItemLocked(itemForOpenMenu)"
+        @click="handleLoanToSellerFromMenu(itemForOpenMenu!)"
+      />
+      <IosContextMenuItem
+        v-if="canDuplicateByPlan"
+        label="Duplicate"
+        :icon="DocumentDuplicateIcon"
+        :disabled="!itemForOpenMenu || isInventoryItemLocked(itemForOpenMenu)"
+        @click="
+          () => {
+            if (!itemForOpenMenu) return
+            handleDuplicateItem(itemForOpenMenu)
+            openItemMenuId = null
+          }
+        "
+      />
+      <IosContextMenuItem
+        label="Delete"
+        :icon="TrashIcon"
+        danger
+        :disabled="!itemForOpenMenu || isInventoryItemLocked(itemForOpenMenu)"
+        @click="
+          () => {
+            if (!itemForOpenMenu) return
+            handleDeleteItem(itemForOpenMenu)
+            openItemMenuId = null
+          }
+        "
+      />
+    </IosContextMenu>
 
     <!-- Subcategory actions menu (hub view) -->
-    <Teleport to="body">
-      <div
-        v-if="openSubfolderMenuId && subfolderForOpenMenu && subfolderMenuFixedStyle"
-        data-inventory-subfolder-menu
-        class="frosted-glass fixed z-[1000] min-w-[120px] rounded-sm py-0.5"
-        :style="subfolderMenuFixedStyle"
-        @click.stop
-      >
-        <button
-          type="button"
-          class="flex w-full items-center gap-1.5 px-2.5 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800/85"
-          @click="handleEditSubfolderFromMenu"
-        >
-          <PencilSquareIcon class="h-3.5 w-3.5 shrink-0" />
-          Edit
-        </button>
-        <button
-          type="button"
-          class="flex w-full items-center gap-1.5 px-2.5 py-2 text-left text-xs text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/35"
-          @click="handleDeleteSubfolderFromMenu"
-        >
-          <TrashIcon class="h-3.5 w-3.5 shrink-0" />
-          Delete
-        </button>
-      </div>
-    </Teleport>
+    <IosContextMenu
+      :open="Boolean(openSubfolderMenuId && subfolderForOpenMenu && subfolderMenuFixedStyle)"
+      :style="subfolderMenuFixedStyle"
+      menu-id="inventory-subfolder"
+    >
+      <IosContextMenuItem
+        label="Edit"
+        :icon="PencilSquareIcon"
+        @click="handleEditSubfolderFromMenu"
+      />
+      <IosContextMenuItem
+        label="Delete"
+        :icon="TrashIcon"
+        danger
+        @click="handleDeleteSubfolderFromMenu"
+      />
+    </IosContextMenu>
 
     <DeleteFolderModal
       v-model="showDeleteSubfolderModal"
@@ -1935,75 +2097,48 @@
       v-model="showSubcategoryModal"
       size="md"
       dense
-      eyebrow="Inventory"
       :title="editingSubfolder ? 'Edit subcategory' : 'Add subcategory'"
-      :subtitle="
-        editingSubfolder
-          ? 'Update the name or description. Columns and settings stay inherited from the parent category.'
-          : subcategoryCreateParent
-            ? `Creates a subcategory inside ${subcategoryCreateParent.name}. Columns and settings are inherited.`
-            : 'Creates a subcategory inside this category.'
-      "
     >
-      <form
+      <IosForm
         id="subcategory-drawer-form"
-        :class="[drawerFillClass, 'divide-y divide-gray-100/90 dark:divide-gray-800/80']"
-        @submit.prevent="handleSaveSubcategory"
+        layout="fill"
+        @submit="handleSaveSubcategory"
       >
-        <section :class="[drawerSectionClass, drawerFillFixedClass]">
-          <div>
-            <label :class="drawerLabelClass">Subcategory name *</label>
-            <input
+        <IosFormSection fixed>
+          <IosFormField label="Subcategory name" required>
+            <IosFormInput
               v-model="subcategoryForm.name"
-              type="text"
               required
-              :class="drawerInputClass"
               placeholder="e.g. Corolla"
             />
-          </div>
-          <div class="mt-2.5">
-            <label :class="drawerLabelClass">Description</label>
-            <textarea
+          </IosFormField>
+          <IosFormField label="Description">
+            <IosFormTextarea
               v-model="subcategoryForm.description"
-              rows="2"
-              :class="[drawerTextareaClass, 'resize-none']"
+              :rows="2"
+              extra-class="resize-none"
               placeholder="Optional"
             />
-          </div>
-        </section>
-      </form>
+          </IosFormField>
+        </IosFormSection>
+      </IosForm>
       <template #footer>
-        <div class="flex justify-end gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            extra-class="!rounded-2xl"
-            :disabled="isSavingSubcategory"
-            @click="showSubcategoryModal = false"
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            type="submit"
-            form="subcategory-drawer-form"
-            extra-class="!rounded-2xl"
-            :loading="isSavingSubcategory"
-            :disabled="!subcategoryForm.name.trim()"
-          >
-            {{ editingSubfolder ? 'Save changes' : 'Create subcategory' }}
-          </Button>
-        </div>
+        <IosDrawerActions @cancel="showSubcategoryModal = false">
+          <template #primary>
+            <Button
+              variant="neutral"
+              size="sm"
+              type="submit"
+              form="subcategory-drawer-form"
+              :loading="isSavingSubcategory"
+              :disabled="!subcategoryForm.name.trim()"
+            >
+              {{ editingSubfolder ? 'Save changes' : 'Create subcategory' }}
+            </Button>
+          </template>
+        </IosDrawerActions>
       </template>
     </SidePanel>
-
-    <div
-      v-if="isCapacitorIos && canManageInventoryItems && !showCategoryHub && !isLoadingFolder"
-      class="ios-inventory-fab-host"
-    >
-      <IosFab :icon="PlusCircleIcon" aria-label="Add product" @click="openAddItemModal" />
-    </div>
   </div>
 </template>
 
@@ -2011,6 +2146,8 @@
 import { ref, computed, reactive, onMounted, onBeforeUnmount, onActivated, watch, nextTick } from 'vue'
 import {
   PlusCircleIcon,
+  PlusIcon,
+  FunnelIcon,
   CubeIcon,
   FolderIcon,
   ExclamationTriangleIcon,
@@ -2032,13 +2169,35 @@ import {
   ClockIcon,
   DocumentDuplicateIcon,
   ArrowTopRightOnSquareIcon,
+  CheckIcon,
 } from '~/utils/app-icons'
 import Button from '~/components/ui/Button.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
+import IosDrawer from '~/components/ios/IosDrawer.vue'
+import {
+  IosForm,
+  IosFormSection,
+  IosFormField,
+  IosFormInput,
+  IosFormTextarea,
+} from '~/components/ios/forms'
+import IosGroupedListSkeleton from '~/components/ios/IosGroupedListSkeleton.vue'
+import IosQuickActionSkeleton from '~/components/ios/IosQuickActionSkeleton.vue'
+import IosTransactionListSkeleton from '~/components/ios/IosTransactionListSkeleton.vue'
+import IosContextMenu from '~/components/ios/IosContextMenu.vue'
+import IosContextMenuItem from '~/components/ios/IosContextMenuItem.vue'
 import Breadcrumbs from '~/components/ui/Breadcrumbs.vue'
 import Modal from '~/components/ui/Modal.vue'
 import SidePanel from '~/components/ui/SidePanel.vue'
+import IosQuickActionBar, {
+  type IosQuickActionOption,
+} from '~/components/ios/IosQuickActionBar.vue'
 import IosSearchBar from '~/components/ios/IosSearchBar.vue'
-import IosFab from '~/components/ios/IosFab.vue'
+import IosInventoryFolderRow from '~/components/ios/IosInventoryFolderRow.vue'
+import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
+import IosReceiptTransactionRow from '~/components/ios/IosReceiptTransactionRow.vue'
+import type { ReceiptTransactionVariant } from '~/components/ios/IosReceiptTransactionRow.vue'
+import IosInventoryItemCard from '~/components/ios/IosInventoryItemCard.vue'
 import IosInventoryItemDetail, {
   type IosInventoryDetailAction,
   type IosInventoryDetailRow,
@@ -2072,7 +2231,13 @@ import {
   isSubfolder,
   rollupFolderStats,
 } from '~/utils/inventory-folder-tree'
-import { computeFixedAnchoredMenuStyle, getVisibleMenuAnchorElement } from '~/utils/menuAnchor'
+import {
+  computeFixedAnchoredMenuStyle,
+  computeFixedMenuHorizontalStyle,
+  getVisibleMenuAnchorElement,
+  isInsideAnchoredMenu,
+} from '~/utils/menuAnchor'
+import { isNativePerfContext, scheduleNativeIdleWork } from '~/utils/capacitor-native-perf'
 import { computeFolderTotalValue } from '~/utils/inventory-folder-availability'
 import { getInventoryItemDisplayName } from '~/composables/useInventoryItemDisplay'
 import {
@@ -2084,6 +2249,7 @@ import {
   availabilityBadgeForStockLoan,
   formatAvailabilityLabel,
   isItemAwaitingPayment,
+  type InventoryAvailabilityStatus,
 } from '~/utils/inventory-availability'
 import { getInventorySourceBadge } from '~/utils/inventory-acquisition-source'
 import {
@@ -2105,7 +2271,6 @@ import BulkDiscountModal from '~/components/inventory/BulkDiscountModal.vue'
 import DeleteItemModal from '~/components/inventory/DeleteItemModal.vue'
 import DeleteFolderModal from '~/components/inventory/DeleteFolderModal.vue'
 import ItemTimelineModal from '~/components/inventory/ItemTimelineModal.vue'
-import DuplicateFeatureUpsellBanner from '~/components/inventory/DuplicateFeatureUpsellBanner.vue'
 import CreateSellerLoanModal from '~/components/seller-loans/CreateSellerLoanModal.vue'
 import InventoryCategoryCard from '~/components/inventory/InventoryCategoryCard.vue'
 import { useDepartmentsStore } from '~/stores/departments'
@@ -2129,6 +2294,13 @@ const { canManageInventoryItems, canManage, canViewProfitAndCost, canCreateInven
 const canShowProfitAndCost = computed(
   () => canViewProfitAndCost.value && folder.value?.trackProfit === true
 )
+
+const inventoryItemTableSkeletonColumns = [
+  { label: 'Product' },
+  { label: 'Qty', class: 'dashboard-table__col-numeric', bone: '2.5rem' },
+  { label: 'Price', class: 'dashboard-table__col-price', bone: '4rem' },
+  { label: 'Status', class: 'dashboard-table__col-status', bone: '4rem' },
+]
 const showStandaloneUnitCostField = computed(
   () => canShowProfitAndCost.value && !templateHasCostPriceField(folder.value?.template?.fields)
 )
@@ -2147,7 +2319,7 @@ const folder = ref<InventoryFolder | null>(null)
 const isLoadingFolder = ref(true)
 const isLoadingItems = ref(false)
 const { headerBtnClass, headerBtnLabelClass, pageWithFixedFooterClass } = useDashboardPageChrome()
-const { pageWithFooterClass } = useDashboardGridPagesChrome()
+const { pageWithFooterClass, tableExpandClass, tableExpandHeaderClass, tableExpandBodyClass, tableExpandCloseClass, tableExpandEyebrowClass, tableExpandTitleClass, tableExpandMetaClass, tableExpandFieldClass } = useDashboardGridPagesChrome()
 
 const inventoryBreadcrumbs = computed(() => {
   const crumbs = [{ label: 'Inventory', href: '/dashboard/inventory', icon: CubeIcon }]
@@ -2185,6 +2357,23 @@ const childFolders = computed(() =>
   folder.value ? getChildFolders(inventoryStore.folders, folder.value.id) : []
 )
 
+const hubSortBy = ref<'name' | 'items'>('name')
+const showSubcategoryMoreSheet = ref(false)
+
+const sortedChildFolders = computed(() => {
+  const list = [...childFolders.value]
+  if (hubSortBy.value === 'items') {
+    return list.sort((a, b) => (b.itemCount ?? 0) - (a.itemCount ?? 0))
+  }
+  return list.sort((a, b) => a.name.localeCompare(b.name))
+})
+
+function selectHubSort(value: 'name' | 'items') {
+  hubSortBy.value = value
+  showSubcategoryMoreSheet.value = false
+  hubCurrentPage.value = 1
+}
+
 const HUB_SUBFOLDERS_PER_PAGE = 24
 
 const getInitialHubPage = (): number => {
@@ -2207,7 +2396,7 @@ const hubItemsPerPage = ref(HUB_SUBFOLDERS_PER_PAGE)
 
 const paginatedChildFolders = computed(() => {
   const start = (hubCurrentPage.value - 1) * hubItemsPerPage.value
-  return childFolders.value.slice(start, start + hubItemsPerPage.value)
+  return sortedChildFolders.value.slice(start, start + hubItemsPerPage.value)
 })
 
 function scrollInventoryPageToTop() {
@@ -2264,6 +2453,13 @@ function subfolderDisplayStats(child: InventoryFolder) {
   return rollupFolderStats(child, inventoryStore.folders)
 }
 
+function formatSubfolderRowValue(child: InventoryFolder): string {
+  const stats = subfolderDisplayStats(child)
+  const countLabel = `${stats.itemCount} item${stats.itemCount === 1 ? '' : 's'}`
+  if (stats.itemCount === 0) return countLabel
+  return `${countLabel} · ${formatCurrency(stats.totalValue ?? 0)}`
+}
+
 function subfolderGrossProfitOnHand(childId: string): number | null {
   const child = inventoryStore.getFolderById(childId)
   if (!child?.trackProfit) return null
@@ -2301,6 +2497,31 @@ const canAddSubcategories = computed(() => {
   const parent = subcategoryCreateParent.value
   if (!parent || !canCreateInventoryFolders.value) return false
   return (parent.itemCount ?? 0) === 0
+})
+
+const subcategoryActionStub = ref('')
+
+const subcategoryQuickActionOptions = computed((): IosQuickActionOption[] => {
+  if (!canAddSubcategories.value) return []
+
+  return [
+    {
+      value: 'add',
+      label: 'Add',
+      icon: PlusIcon,
+      trailing: 'add',
+      action: openCreateSubcategoryModal,
+    },
+    {
+      value: 'more',
+      label: 'More',
+      icon: EllipsisVerticalIcon,
+      trailing: 'more',
+      action: () => {
+        showSubcategoryMoreSheet.value = true
+      },
+    },
+  ]
 })
 
 const showCategoryHub = computed(() => folderShowsCategoryHub(folder.value))
@@ -2353,7 +2574,6 @@ function updateSubfolderMenuPosition() {
     return
   }
   subfolderMenuFixedStyle.value = computeFixedAnchoredMenuStyle(el.getBoundingClientRect(), {
-    menuWidth: 120,
     estimatedMenuHeight: 88,
     margin: 4,
     viewportPadding: 8,
@@ -2385,7 +2605,8 @@ watch(openSubfolderMenuId, (id) => {
 
   subfolderMenuOutsideHandler = (e: MouseEvent) => {
     const t = e.target as Node | null
-    if (t && (t as Element).closest?.('[data-inventory-subfolder-menu]')) return
+    if (isInsideAnchoredMenu(t)) return
+    if ((t as Element | null)?.closest?.('[data-folder-actions-anchor]')) return
     openSubfolderMenuId.value = null
   }
   setTimeout(() => {
@@ -2538,6 +2759,8 @@ async function refreshFolderMetadata(forceFetch = false) {
 }
 
 const searchQuery = ref('')
+const availabilityFilter = ref<'all' | InventoryAvailabilityStatus>('all')
+const showProductMoreSheet = ref(false)
 /** Full folder list for search filter (client-side); not stored in Pinia. */
 const folderSearchItems = ref<InventoryItem[] | null>(null)
 const isSearchItemsLoading = ref(false)
@@ -2752,22 +2975,19 @@ function updateItemMenuPosition() {
     return
   }
   const r = el.getBoundingClientRect()
-  const vw = window.innerWidth
   const vh = window.innerHeight
   const viewportPadding = 8
   const sideGap = 6
-  const menuWidth = 176
   /** Enough for History + discount + edit + optional Duplicate + delete */
   const estimatedMenuHeight = canDuplicateByPlan.value ? 300 : 260
 
-  // Prefer opening beside the clicked action button (to the left on desktop right-edge tables).
-  let left = r.left - menuWidth - sideGap
-  // If not enough space on the left, open to the right.
-  if (left < viewportPadding) {
-    left = r.right + sideGap
-  }
-  // Keep inside viewport horizontally.
-  left = Math.max(viewportPadding, Math.min(left, vw - menuWidth - viewportPadding))
+  // Prefer opening beside the clicked action button (to the left on desktop
+  // right-edge tables), falling back to its right when that side is too tight.
+  const inline = computeFixedMenuHorizontalStyle({
+    rightEdge: r.left - sideGap,
+    fallbackLeftEdge: r.right + sideGap,
+    viewportPadding,
+  })
 
   // Vertically anchor around the clicked row/button.
   let top = r.top - 4
@@ -2776,7 +2996,9 @@ function updateItemMenuPosition() {
 
   itemMenuFixedStyle.value = {
     top: `${Math.round(top)}px`,
-    left: `${Math.round(left)}px`,
+    ...inline,
+    maxHeight: `${Math.round(Math.max(0, vh - top - viewportPadding))}px`,
+    overflowY: 'auto',
   }
 }
 
@@ -2805,7 +3027,8 @@ watch(openItemMenuId, (id) => {
 
   itemMenuOutsideHandler = (e: MouseEvent) => {
     const t = e.target as HTMLElement | null
-    if (t?.closest?.('[data-inventory-item-menu]')) return
+    if (isInsideAnchoredMenu(t)) return
+    if (t?.closest?.('[data-item-actions-anchor]')) return
     openItemMenuId.value = null
     removeItemMenuOutsideListener()
   }
@@ -3469,6 +3692,12 @@ function normalizeUnitCostPayload(payload: Record<string, any>) {
 const filteredItems = computed(() => {
   let result = [...baseItems.value]
 
+  if (availabilityFilter.value !== 'all') {
+    result = result.filter(
+      (item) => getItemAvailability(item).status === availabilityFilter.value
+    )
+  }
+
   // Filter by search query - search across all template fields
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
@@ -3483,6 +3712,142 @@ const filteredItems = computed(() => {
 
   return result
 })
+
+const availabilityFilterOptions = computed(() => {
+  const list = baseItems.value
+  const countFor = (status: InventoryAvailabilityStatus | 'all') => {
+    if (status === 'all') return list.length
+    return list.filter((item) => getItemAvailability(item).status === status).length
+  }
+
+  return [
+    { value: 'all', label: 'All', badge: countFor('all') },
+    { value: 'available', label: 'Available', badge: countFor('available') },
+    { value: 'awaiting_payment', label: 'Awaiting', badge: countFor('awaiting_payment') },
+    { value: 'sold', label: 'Sold', badge: countFor('sold') },
+    { value: 'returned', label: 'Returned', badge: countFor('returned') },
+  ]
+})
+
+const availabilityQuickActionOptions = computed((): IosQuickActionOption[] => {
+  const list = baseItems.value
+  const countFor = (status: InventoryAvailabilityStatus | 'all') => {
+    if (status === 'all') return list.length
+    return list.filter((item) => getItemAvailability(item).status === status).length
+  }
+
+  const options: IosQuickActionOption[] = [
+    { value: 'all', label: 'All', icon: FunnelIcon, badge: countFor('all') || undefined },
+    {
+      value: 'available',
+      label: 'Available',
+      icon: CheckCircleIcon,
+      badge: countFor('available') || undefined,
+    },
+  ]
+
+  if (canManageInventoryItems.value) {
+    options.push({
+      value: 'add',
+      label: 'Add',
+      icon: PlusIcon,
+      trailing: 'add',
+      action: openAddItemModal,
+    })
+  } else {
+    options.push({
+      value: 'sold',
+      label: 'Sold',
+      icon: TagIcon,
+      badge: countFor('sold') || undefined,
+    })
+  }
+
+  options.push({
+    value: 'more',
+    label: 'More',
+    icon: EllipsisVerticalIcon,
+    trailing: 'more',
+    action: () => {
+      showProductMoreSheet.value = true
+    },
+  })
+
+  return options
+})
+
+const productMoreAvailabilityOptions = computed(() =>
+  availabilityFilterOptions.value.filter((option) => {
+    if (option.value === 'all' || option.value === 'available') return false
+    if (canManageInventoryItems.value && option.value === 'sold') return true
+    if (!canManageInventoryItems.value && option.value === 'sold') return false
+    return true
+  })
+)
+
+function selectAvailabilityFromSheet(value: string) {
+  availabilityFilter.value = value as 'all' | InventoryAvailabilityStatus
+  showProductMoreSheet.value = false
+}
+
+function triggerImportFromSheet() {
+  showProductMoreSheet.value = false
+  fileInputRef.value?.click()
+}
+
+function triggerExportFromSheet() {
+  showProductMoreSheet.value = false
+  void handleExportToExcel()
+}
+
+function getItemDisplayPrice(item: InventoryItem): string {
+  const amount =
+    item.discountedPrice !== undefined
+      ? item.discountedPrice
+      : (item.price ?? item.originalPrice ?? 0)
+  return formatCurrency(amount)
+}
+
+function getItemCardSubtitle(item: InventoryItem): string {
+  const brandModel = [item.brand, item.model].filter(Boolean).join(' · ')
+  if (brandModel) return brandModel
+  const source = getItemSourceBadge(item)
+  if (source?.label) return source.label
+  const secondColumn = columns.value[1]
+  if (secondColumn?.key) {
+    const value = item[secondColumn.key]
+    if (value !== undefined && value !== null && String(value).trim() !== '') {
+      return String(value)
+    }
+  }
+  return ''
+}
+
+function getItemCardReference(item: InventoryItem): string {
+  const serial = item.sku || item.serialNumber || item.serialNo
+  if (serial != null && String(serial).trim() !== '') return String(serial).trim()
+  return ''
+}
+
+function getItemCardDate(item: InventoryItem): string {
+  const raw = item.dateOut || item.dateIn
+  return raw ? formatItemDate(raw) : ''
+}
+
+function getItemTransactionVariant(item: InventoryItem): ReceiptTransactionVariant {
+  switch (getItemAvailability(item).status) {
+    case 'available':
+    case 'returned':
+      return 'credit'
+    case 'sold':
+      return 'cancelled'
+    case 'with_seller':
+    case 'awaiting_payment':
+      return 'pending'
+    default:
+      return 'pending'
+  }
+}
 
 // Display list: sorted list, with edited row kept at same position after inline save
 const displayItems = ref<InventoryItem[]>([])
@@ -3563,7 +3928,7 @@ const paginatedItems = computed(() => {
 })
 
 // Reset to first page when filters change; resync server page when not in search mode
-watch([searchQuery, currentSort], () => {
+watch([searchQuery, currentSort, availabilityFilter], () => {
   currentPage.value = 1
   const fid = folderId.value
   if (fid && !searchQuery.value.trim() && !isLoadingFolder.value) {
@@ -5212,28 +5577,35 @@ const refreshCurrentItemsPage = () => {
   return inventoryStore.fetchItemsPage(fid, currentPage.value, itemsPerPage.value, { force: true })
 }
 
-const loadItems = async () => {
+const loadItems = async (options?: { force?: boolean }) => {
   if (!folderId.value || typeof folderId.value !== 'string') {
     return
   }
 
   isLoadingItems.value = true
   try {
-    // Fetch items and receipts in parallel
-    await Promise.all([
-      inventoryStore.fetchItemsPage(folderId.value, currentPage.value, itemsPerPage.value, {
-        force: true,
-      }),
-      receiptsStore.fetchReceipts(),
-    ])
-    // Refresh folder list to update item counts
-    await inventoryStore.fetchFolders()
-    // Update local folder reference
-    if (folder.value) {
-      const updatedFolder = inventoryStore.getFolderById(folderId.value)
-      if (updatedFolder) {
-        applyFolderSnapshot(updatedFolder)
+    await inventoryStore.fetchItemsPage(folderId.value, currentPage.value, itemsPerPage.value, {
+      force: options?.force === true,
+    })
+
+    const warmReceipts = () => {
+      void receiptsStore.fetchReceipts()
+    }
+    const refreshFolderCounts = async () => {
+      await inventoryStore.fetchFolders()
+      if (folder.value) {
+        const updatedFolder = inventoryStore.getFolderById(folderId.value)
+        if (updatedFolder) applyFolderSnapshot(updatedFolder)
       }
+    }
+
+    if (isNativePerfContext()) {
+      scheduleNativeIdleWork(warmReceipts, 350)
+      scheduleNativeIdleWork(() => {
+        void refreshFolderCounts()
+      }, 900)
+    } else {
+      await Promise.all([receiptsStore.fetchReceipts(), refreshFolderCounts()])
     }
   } catch (error: any) {
     console.error('Error loading items:', error)
@@ -5247,7 +5619,7 @@ async function reloadInventoryDetailPage() {
   if (!authStore.currentUser || !folderId.value) return
   const fetched = await inventoryStore.fetchFolder(folderId.value)
   if (fetched) applyFolderSnapshot(fetched)
-  await loadItems()
+  await loadItems({ force: true })
 }
 
 useIosPullToRefreshRegister(reloadInventoryDetailPage)

@@ -10,8 +10,16 @@ import {
 } from 'firebase/firestore'
 import type { InventoryItem } from '~/stores/inventory'
 
-/** Firestore page size (limit + startAfter). */
+/** Firestore page size (limit + startAfter) for the UI's paginated item list. */
 export const INVENTORY_FIRESTORE_PAGE_SIZE = 20
+/**
+ * Page size used only when fetching an entire folder's items at once
+ * (fetchAllInventoryItemsChunked - quick sale, search, bulk export, receipt lines).
+ * Larger than the UI page size on purpose: cursor pagination is a sequential chain of
+ * network round trips, so a bigger chunk means far fewer round trips for the same total
+ * item count (e.g. a 200-item folder: ~1 round trip instead of 10 at size 20).
+ */
+export const INVENTORY_FIRESTORE_ALL_CHUNK_SIZE = 300
 const PAGE_CACHE_TTL_MS = 30_000
 const ALL_CHUNK_CACHE_TTL_MS = 45_000
 

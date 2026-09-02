@@ -1,6 +1,12 @@
 <template>
-  <div :class="pageClass">
-    <DashboardPageHeader class="dash-page-header--unified" :ios-context-only="isCapacitorIos">
+  <div :class="[pageClass, isCapacitorIos ? 'ios-settings-page' : '']">
+    <IosPageNavBar v-if="isCapacitorIos" title="Settings">
+      <template v-if="!canEditSettings" #trailing>
+        <span class="ios-settings-view-only-badge">View only</span>
+      </template>
+    </IosPageNavBar>
+
+    <DashboardPageHeader v-if="!isCapacitorIos" class="dash-page-header--unified">
       <template #eyebrow>
         <p :class="eyebrowClass">Store & app</p>
       </template>
@@ -28,7 +34,45 @@
         subtitle="Logo and subscription for your whole account."
         :badge="`Plan: ${currentSubscriptionLabel}`"
       >
-        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
+        <div
+          v-if="userStore.isSuperAdmin && !isCapacitorIos"
+          class="mb-4 flex flex-wrap items-center gap-2 border-b border-gray-100 pb-4 dark:border-white/[0.06]"
+        >
+          <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Workspace style</span>
+          <ExperienceModeBadge variant="settings" />
+          <span class="text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
+            {{
+              isSoloExperience
+                ? 'Simple setup. Enable more in Advanced features below.'
+                : 'Full workspace with team and multi-location tools as your plan allows.'
+            }}
+          </span>
+        </div>
+        <p
+          :class="[
+            'text-[11px] leading-relaxed text-gray-500 dark:text-gray-400',
+            isCapacitorIos ? 'dash-setting-row dash-setting-row--note' : 'mb-3',
+          ]"
+        >
+          Questions about billing or your data? <GrowthSupportLink />
+        </p>
+        <!-- Plan vs workspace style: the "Workspace style" panel below covers this on iOS -->
+        <p
+          v-if="!isCapacitorIos"
+          class="mb-3 text-[11px] leading-relaxed text-gray-500 dark:text-gray-400"
+        >
+          <span class="font-medium text-gray-700 dark:text-gray-300">Plan</span> is what you pay
+          for (Micro, Medium, Enterprise).
+          <span class="font-medium text-gray-700 dark:text-gray-300"> Workspace style</span> controls
+          how much of the app we show. You can change workspace style below without changing your
+          plan.
+        </p>
+        <div
+          :class="[
+            'grid grid-cols-1 gap-6',
+            isCapacitorIos ? 'dash-settings-account-grid--ios' : 'lg:grid-cols-2 lg:gap-8',
+          ]"
+        >
           <div class="flex items-start gap-4">
             <div class="relative shrink-0">
               <div
@@ -44,7 +88,7 @@
               </div>
               <button
                 type="button"
-                class="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-primary-500 text-white shadow-sm transition hover:bg-primary-600 disabled:opacity-50"
+                class="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-gray-900 text-white shadow-sm transition hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100 disabled:opacity-50"
                 :disabled="isUploadingAccountLogo"
                 aria-label="Upload logo"
                 @click="accountLogoInput?.click()"
@@ -76,104 +120,114 @@
             </div>
           </div>
 
-          <div class="space-y-3">
-            <div>
-              <p class="text-xs font-semibold text-gray-900 dark:text-gray-100">Subscription</p>
-              <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
-                Upgrade to unlock more branches and features.
-              </p>
-            </div>
-            <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
-              <div class="min-w-0 flex-1">
-                <label :class="labelClass">Billing cycle</label>
-                <select
-                  v-model="selectedBillingCycle"
-                  :disabled="!canEditSettings || isUpgradingSubscription"
-                  :class="inputClass(canEditSettings && !isUpgradingSubscription)"
-                >
-                  <option
-                    v-for="cycle in SUBSCRIPTION_BILLING_CYCLES"
-                    :key="cycle"
-                    :value="cycle"
-                  >
-                    {{ BILLING_CYCLE_LABELS[cycle] }}
-                  </option>
-                </select>
-              </div>
-              <div class="min-w-0 flex-1">
-                <label :class="labelClass">Upgrade to</label>
-                <select
-                  v-model="selectedUpgradePlan"
-                  :disabled="
-                    !canEditSettings || isUpgradingSubscription || upgradeOptions.length === 0
-                  "
-                  :class="
-                    inputClass(
-                      canEditSettings && !isUpgradingSubscription && upgradeOptions.length > 0
-                    )
-                  "
-                >
-                  <option value="" disabled>
-                    {{ upgradeOptions.length === 0 ? 'No upgrades available' : 'Select a plan' }}
-                  </option>
-                  <option v-for="p in upgradeOptions" :key="p.id" :value="p.id">
-                    {{ p.name }}
-                  </option>
-                </select>
-              </div>
-              <Button
-                variant="primary"
-                size="sm"
-                :class="headerBtnClass"
-                :disabled="
-                  !canEditSettings ||
-                  !selectedUpgradePlan ||
-                  isUpgradingSubscription ||
-                  upgradeOptions.length === 0
-                "
-                @click="handleUpgradeSubscription"
-              >
-                {{ isUpgradingSubscription ? 'Upgrading…' : 'Upgrade' }}
-              </Button>
-            </div>
-            <p class="text-[10px] leading-relaxed text-gray-500 dark:text-gray-400">
-              Paystack checkout · {{ BILLING_CYCLE_LABELS[selectedBillingCycle].toLowerCase() }}
-              billing · plan updates after payment completes.
-            </p>
-            <details class="group rounded-lg bg-gray-50/50 px-3 py-2 dark:bg-white/[0.02]">
-              <summary
-                class="cursor-pointer list-none text-[11px] font-medium text-gray-600 dark:text-gray-400"
-              >
-                <span class="inline-block transition group-open:rotate-90">›</span> Compare plans
-              </summary>
-              <ul class="mt-2 space-y-2 /80 pl-3">
-                <li
-                  v-for="(plan, id) in SUBSCRIPTION_FEATURE_SUMMARY"
-                  :key="id"
-                  class="text-[10px]"
-                >
-                  <span class="font-medium text-gray-700 dark:text-gray-300">{{
-                    SUBSCRIPTION_PLANS.find((p) => p.id === id)?.name
-                  }}</span>
-                  <ul class="mt-0.5 list-inside list-disc text-gray-500 dark:text-gray-400">
-                    <li v-for="(line, i) in plan" :key="i">{{ line }}</li>
-                  </ul>
-                </li>
-              </ul>
-            </details>
+          <div id="settings-subscription">
+          <SubscriptionPlanPanel
+            :current-subscription-label="currentSubscriptionLabel"
+            :billing-cycle-label="currentBillingCycleLabel"
+            :current-price-label="currentPlanPriceLabel"
+            :status-label="subscriptionStatusBadgeLabel"
+            :status-badge-class="subscriptionStatusBadgeClass"
+            :plan-explainer="planWorkspaceExplainer"
+            :subscription-renewal-label="subscriptionRenewalLabel"
+            v-model:selected-billing-cycle="selectedBillingCycle"
+            v-model:selected-upgrade-plan="selectedUpgradePlan"
+            :upgrade-options="upgradeOptions"
+            :upgrade-price-preview="upgradePricePreview"
+            :pricing-loading="pricingLoading"
+            :can-cancel="canCancelSubscription"
+            :disabled="!canEditSettings"
+            :is-upgrading="isUpgradingSubscription"
+            :is-canceling="isCancelingSubscription"
+            :billing-history="billingHistory"
+            :label-class="labelClass"
+            :input-class="inputClass"
+            :header-text-btn-class="headerTextBtnClass"
+            @upgrade="handleUpgradeSubscription"
+            @cancel="openCancelConfirm"
+          />
           </div>
         </div>
       </DashboardSettingsPanel>
 
-      <!-- Stores -->
+      <CancelDataPolicyPanel v-if="userStore.isSuperAdmin" />
+      <ScheduledBackupPanel v-if="userStore.isSuperAdmin" />
+      <InventoryAuditPanel v-if="userStore.isSuperAdmin" />
+
       <DashboardSettingsPanel
         v-if="userStore.isSuperAdmin"
+        title="Workspace style"
+        subtitle="Choose a simple or full workspace layout. Your subscription plan still controls paid features."
+        compact
+      >
+        <ExperienceModePicker
+          :model-value="selectedExperienceMode"
+          :disabled="!canEditSettings || isSavingExperienceMode"
+          :show-changes="!isCapacitorIos"
+          @update:model-value="onExperienceModeChange"
+        />
+      </DashboardSettingsPanel>
+
+      <!-- Solo: progressive unlock for admin complexity -->
+      <div id="advanced-features">
+      <DashboardSettingsPanel
+        v-if="showProgressiveUnlockPanel"
+        title="Advanced features"
+        subtitle="You chose a simple setup. Turn on team and multi-location tools when you need them."
+        compact
+      >
+        <p class="mb-3 text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
+          Your plan and role permissions still apply. Turning a feature on adds it to navigation
+          where available.
+        </p>
+        <div class="divide-y divide-gray-100 dark:divide-white/[0.06]">
+          <div
+            v-for="(option, unlockIndex) in soloProgressiveUnlockOptions"
+            :key="option.capability"
+            :class="[
+              settingRowClass,
+              unlockIndex === soloProgressiveUnlockOptions.length - 1 ? '!border-0' : '',
+            ]"
+          >
+            <div class="flex-1 min-w-0">
+              <p class="text-xs font-medium text-gray-900 dark:text-gray-100">
+                {{ option.label }}
+              </p>
+              <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+                {{ option.description }}
+              </p>
+            </div>
+            <Switch
+              :model-value="isProgressiveCapabilityEnabled(option.capability, enabledCapabilities)"
+              :disabled="!canEditSettings || togglingProgressiveCapability === option.capability"
+              :aria-label="option.label"
+              @update:model-value="
+                (checked: boolean) => onProgressiveCapabilityToggle(option.capability, checked)
+              "
+            />
+          </div>
+        </div>
+      </DashboardSettingsPanel>
+      </div>
+
+      <!-- Stores -->
+      <DashboardSettingsPanel
+        v-if="userStore.isSuperAdmin && canManageBranches"
         title="Branches"
         subtitle="Create, edit, and switch between store locations."
       >
         <template #actions>
+          <button
+            v-if="isCapacitorIos && !isStaff"
+            type="button"
+            :class="editLinkClass"
+            :disabled="!canAddStore"
+            :title="canAddStore ? 'Create branch' : 'Upgrade to add more stores'"
+            @click="openCreateStoreModal"
+          >
+            Add
+          </button>
           <Button
-            v-if="!isStaff"
+            v-else-if="!isStaff"
             variant="outline"
             size="sm"
             :class="headerBtnClass"
@@ -198,6 +252,16 @@
         >
           {{ hiddenStoreCount }} {{ hiddenStoreCount === 1 ? 'branch is' : 'branches are' }} on your
           account but not on your current plan. Oldest branches stay available first.
+          <span v-if="hiddenStoreNames.length">
+            Hidden:
+            {{ hiddenStoreNames.join(', ') }}.
+          </span>
+          <NuxtLink
+            to="/dashboard/settings?upgrade=1"
+            class="ml-1 font-medium underline underline-offset-2"
+          >
+            Upgrade to restore
+          </NuxtLink>
         </p>
 
         <div class="relative">
@@ -206,7 +270,7 @@
             class="flex items-center gap-2 py-6 text-xs text-gray-500 dark:text-gray-400"
           >
             <div
-              class="h-4 w-4 animate-spin rounded-full border-0 border-primary-500/25 border-t-primary-500"
+              class="h-4 w-4 animate-spin rounded-full border-0 border-gray-300/40 border-t-gray-500 dark:border-white/15 dark:border-t-gray-300"
               aria-hidden="true"
             />
             Loading branches…
@@ -231,14 +295,14 @@
             :fill="false"
             extra-class="py-8"
           >
-            <Button size="sm" @click="openCreateStoreModal" extra-class="!rounded-2xl"
-              >Create branch</Button
-            >
+            <Button variant="neutral" size="sm" extra-class="!rounded-2xl" @click="openCreateStoreModal">
+              Create branch
+            </Button>
           </DashboardTableEmptyState>
 
           <div
             v-else
-            class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+            class="dash-branch-grid grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
             role="list"
             aria-label="Branches"
           >
@@ -332,12 +396,8 @@
         title="Your assignment"
         subtitle="Store and department linked to your account."
       >
-        <div v-if="isLoadingStoreInfo" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div
-            v-for="i in 4"
-            :key="i"
-            class="h-10 animate-pulse rounded-sm bg-gray-200/80 dark:bg-white/10"
-          />
+        <div v-if="isLoadingStoreInfo">
+          <DashFieldGridSkeleton :count="4" />
         </div>
         <div v-else class="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
@@ -460,16 +520,15 @@
         compact
       >
         <template #actions>
-          <Button
+          <button
             v-if="canEditSettings"
-            variant="primary"
-            size="sm"
-            :class="headerBtnClass"
+            type="button"
+            :class="editLinkClass"
             aria-label="Save inventory settings"
             @click="saveInventorySettings"
           >
             Save
-          </Button>
+          </button>
           <span v-else :class="viewOnlyBadgeClass">View only</span>
         </template>
 
@@ -490,7 +549,7 @@
                 min="1"
                 :disabled="!canEditSettings"
                 :class="[
-                  'w-16 px-2.5 py-1.5 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30',
+                  'w-16 px-2.5 py-1.5 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-gray-400/40',
                   canEditSettings
                     ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100'
                     : 'bg-gray-100 dark:bg-gray-800/80 text-gray-500 cursor-not-allowed',
@@ -509,17 +568,11 @@
                 Create purchase orders when stock is low
               </p>
             </div>
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input
-                v-model="inventorySettings.autoReorder"
-                type="checkbox"
-                :disabled="!canEditSettings"
-                class="sr-only peer"
-              />
-              <div
-                class="w-8 h-4 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary-500"
-              ></div>
-            </label>
+            <Switch
+              v-model="inventorySettings.autoReorder"
+              :disabled="!canEditSettings"
+              aria-label="Auto-reorder enabled"
+            />
           </div>
 
           <div :class="[settingRowClass, '!border-0']">
@@ -551,21 +604,20 @@
         compact
       >
         <template #actions>
-          <Button
+          <button
             v-if="canEditSettings"
-            variant="primary"
-            size="sm"
-            :class="headerBtnClass"
+            type="button"
+            :class="editLinkClass"
             aria-label="Save payment methods"
             @click="savePaymentSettings"
           >
             Save
-          </Button>
+          </button>
           <span v-else :class="viewOnlyBadgeClass">View only</span>
         </template>
 
         <div class="space-y-3">
-          <p class="text-[11px] text-gray-500 dark:text-gray-400">
+          <p v-if="!isCapacitorIos" class="text-[11px] text-gray-500 dark:text-gray-400">
             These appear on new sales and balance payments. Add labels your staff use at the
             counter.
           </p>
@@ -595,10 +647,17 @@
               placeholder="e.g. OPay, Moniepoint"
               @keydown.enter.prevent="addPaymentTender"
             />
-            <Button variant="outline" size="sm" @click="addPaymentTender">Add</Button>
+            <Button
+              variant="neutral"
+              size="sm"
+              :extra-class="headerTextBtnClass"
+              @click="addPaymentTender"
+            >
+              Add
+            </Button>
             <button
               type="button"
-              class="text-[11px] font-medium text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+              :class="isCapacitorIos ? cancelLinkClass : 'text-[11px] font-medium text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'"
               @click="resetPaymentTendersToDefault"
             >
               Reset to defaults
@@ -614,16 +673,15 @@
         compact
       >
         <template #actions>
-          <Button
+          <button
             v-if="canEditSettings"
-            variant="primary"
-            size="sm"
-            :class="headerBtnClass"
+            type="button"
+            :class="editLinkClass"
             aria-label="Save sales and receipt settings"
             @click="saveReceiptSettings"
           >
             Save
-          </Button>
+          </button>
           <span v-else :class="viewOnlyBadgeClass">View only</span>
         </template>
 
@@ -640,7 +698,7 @@
               type="text"
               :disabled="!canEditSettings"
               :class="[
-                'w-24 px-2.5 py-1.5 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30',
+                'w-24 px-2.5 py-1.5 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-gray-400/40',
                 canEditSettings
                   ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100'
                   : 'bg-gray-100 dark:bg-gray-800/80 text-gray-500 cursor-not-allowed',
@@ -676,17 +734,11 @@
                 Print receipt after sale
               </p>
             </div>
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input
-                v-model="receiptSettings.autoPrint"
-                type="checkbox"
-                :disabled="!canEditSettings"
-                class="sr-only peer"
-              />
-              <div
-                class="w-8 h-4 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary-500"
-              ></div>
-            </label>
+            <Switch
+              v-model="receiptSettings.autoPrint"
+              :disabled="!canEditSettings"
+              aria-label="Print receipt automatically"
+            />
           </div>
         </div>
       </DashboardSettingsPanel>
@@ -699,7 +751,7 @@
         compact
       >
         <div class="space-y-4">
-          <p class="text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
+          <p v-if="!isCapacitorIos" class="text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
             Inventory exports as a ZIP: one folder per category, each with an
             <code class="rounded bg-black/5 px-1 py-0.5 text-[10px] dark:bg-white/10">items.xlsx</code>
             file, plus a
@@ -721,9 +773,9 @@
 
           <div class="flex flex-wrap items-center gap-2">
             <Button
-              variant="outline"
+              variant="neutral"
               size="sm"
-              :class="headerBtnClass"
+              :extra-class="headerTextBtnClass"
               :disabled="dataExporting"
               :loading="dataExporting && !dataExportStatus"
               @click="handleExportAllStoreData"
@@ -750,131 +802,73 @@
     "
     size="lg"
   >
-    <div class="space-y-3">
-      <div>
-        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Branch Name <span class="text-red-500">*</span>
-        </label>
-        <template v-if="useRegionBranchPicker">
-          <select
-            v-model="branchCity"
-            required
-            class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500/30 outline-none"
-          >
-            <option value="" disabled>Choose a city...</option>
-            <option v-for="city in availableBranchCities" :key="city" :value="city">
-              {{ city }}
-            </option>
-          </select>
-          <input
-            v-model="branchLocality"
-            type="text"
-            class="mt-2 w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500/30 outline-none"
-            placeholder="Area or neighborhood (optional, e.g. Lekki, GRA)"
-          />
-          <p class="mt-1.5 text-[10px] leading-snug text-gray-500 dark:text-gray-400">
-            Cities in {{ branchRegionLabel }} based on your account region.
-          </p>
-        </template>
-        <input
-          v-else
-          v-model="storeForm.name"
-          type="text"
-          required
-          class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500/30 outline-none"
-          placeholder="My Branch"
-        />
-      </div>
+    <IosForm layout="fill">
+      <IosFormSection fixed>
+        <IosFormField label="Branch Name" required>
+          <template v-if="useRegionBranchPicker">
+            <IosFormSelect v-model="branchCity" required extra-class="cursor-pointer">
+              <option value="" disabled>Choose a city...</option>
+              <option v-for="city in availableBranchCities" :key="city" :value="city">
+                {{ city }}
+              </option>
+            </IosFormSelect>
+            <IosFormInput
+              v-model="branchLocality"
+              extra-class="mt-2"
+              placeholder="Area or neighborhood (optional, e.g. Lekki, GRA)"
+            />
+            <p class="ios-form__hint dash-drawer-hint">
+              Cities in {{ branchRegionLabel }} based on your account region.
+            </p>
+          </template>
+          <IosFormInput v-else v-model="storeForm.name" required placeholder="My Branch" />
+        </IosFormField>
 
-      <div>
-        <label class="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300"
-          >Description</label
+        <IosFormField label="Description">
+          <IosFormTextarea
+            v-model="storeForm.description"
+            :rows="2"
+            extra-class="resize-none"
+            placeholder="Store description..."
+          />
+        </IosFormField>
+
+        <IosFormField
+          label="Sell screen note"
+          hint="Shown on Quick Sale and when adding line items / checkout for this branch (e.g. today's promo, price list)."
         >
-        <textarea
-          v-model="storeForm.description"
-          rows="2"
-          class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500/30 outline-none resize-none"
-          placeholder="Store description..."
-        />
-      </div>
-
-      <div>
-        <label class="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
-          Sell screen note
-        </label>
-        <p class="mb-1.5 text-[10px] text-gray-500 dark:text-gray-400">
-          Shown on Quick Sale and when adding line items / checkout for this branch (e.g. today’s
-          promo, price list).
-        </p>
-        <textarea
-          v-model="storeForm.sellScreenNote"
-          rows="3"
-          class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500/30 outline-none resize-y"
-          placeholder="e.g. Promo: 10% off accessories today"
-        />
-      </div>
-
-      <div>
-        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
-          >Address</label
-        >
-        <input
-          v-model="storeForm.address"
-          type="text"
-          class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500/30 outline-none"
-          placeholder="123 Main St, City, State ZIP"
-        />
-      </div>
-
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >Phone</label
-          >
-          <input
-            v-model="storeForm.phone"
-            type="tel"
-            class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500/30 outline-none"
-            placeholder="+1234567890"
+          <IosFormTextarea
+            v-model="storeForm.sellScreenNote"
+            :rows="3"
+            placeholder="e.g. Promo: 10% off accessories today"
           />
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >Email</label
-          >
-          <input
-            v-model="storeForm.email"
-            type="email"
-            class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500/30 outline-none"
-            placeholder="store@example.com"
-          />
-        </div>
-      </div>
+        </IosFormField>
 
-      <div v-if="editingStore">
-        <label class="flex items-center gap-2">
-          <input
-            v-model="storeForm.isActive"
-            type="checkbox"
-            class="w-3.5 h-3.5 text-primary-500 border-gray-300 rounded focus:ring-primary-400"
-          />
-          <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Active</span>
-        </label>
-      </div>
-    </div>
+        <IosFormField label="Address">
+          <IosFormInput v-model="storeForm.address" placeholder="123 Main St, City, State ZIP" />
+        </IosFormField>
+
+        <IosFormField label="Phone">
+          <IosFormInput v-model="storeForm.phone" type="tel" placeholder="+1234567890" />
+        </IosFormField>
+        <IosFormField label="Email">
+          <IosFormInput v-model="storeForm.email" type="email" placeholder="store@example.com" />
+        </IosFormField>
+      </IosFormSection>
+
+      <IosFormSection v-if="editingStore" fixed>
+        <IosFormToggle v-model="storeForm.isActive" label="Active" />
+      </IosFormSection>
+    </IosForm>
 
     <template #footer>
-      <Button variant="outline" size="sm" @click="closeStoreModal" extra-class="!rounded-2xl"
-        >Cancel</Button
-      >
-      <Button
-        size="sm"
-        @click="handleStoreSubmit"
-        :disabled="!storeForm.name || isSubmittingStore"
-        extra-class="!rounded-2xl"
-      >
-        {{ isSubmittingStore ? 'Saving...' : editingStore ? 'Update' : 'Create' }}
-      </Button>
+      <IosDrawerActions
+        :primary-label="isSubmittingStore ? 'Saving...' : editingStore ? 'Update' : 'Create'"
+        :primary-loading="isSubmittingStore"
+        :primary-disabled="!storeForm.name || isSubmittingStore"
+        @cancel="closeStoreModal"
+        @primary="handleStoreSubmit"
+      />
     </template>
   </SidePanel>
 
@@ -897,22 +891,13 @@
     </div>
 
     <template #footer>
-      <Button
-        variant="outline"
-        size="sm"
-        @click="showDeleteModal = false"
-        extra-class="!rounded-2xl"
-        >Cancel</Button
-      >
-      <Button
-        variant="danger"
-        size="sm"
-        @click="handleStoreDelete"
-        :disabled="isDeletingStore"
-        extra-class="!rounded-2xl"
-      >
-        {{ isDeletingStore ? 'Deleting...' : 'Delete' }}
-      </Button>
+      <IosDrawerActions
+        primary-variant="danger"
+        :primary-label="isDeletingStore ? 'Deleting...' : 'Delete'"
+        :primary-loading="isDeletingStore"
+        @cancel="showDeleteModal = false"
+        @primary="handleStoreDelete"
+      />
     </template>
   </Modal>
 
@@ -934,8 +919,8 @@
           class="w-full rounded-sm p-3 text-left transition-all"
           :class="
             newlyCreatedStoreId === store.id
-              ? 'bg-primary-50 dark:bg-primary-900/20'
-              : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
+              ? 'bg-gray-100 dark:bg-white/[0.08]'
+              : 'hover:bg-gray-50 dark:hover:bg-white/[0.04]'
           "
         >
           <div class="flex items-start justify-between">
@@ -953,7 +938,7 @@
             </div>
             <svg
               v-if="newlyCreatedStoreId === store.id"
-              class="w-4 h-4 text-primary-500 dark:text-primary-400 flex-shrink-0 ml-3"
+              class="w-4 h-4 text-gray-700 dark:text-gray-300 flex-shrink-0 ml-3"
               fill="currentColor"
               viewBox="0 0 20 20"
             >
@@ -971,15 +956,40 @@
 
   <TotpConfirmModal
     v-model="totpModalOpen"
-    title="Confirm upgrade"
-    description="Enter your authenticator code to start the subscription upgrade."
+    :title="totpModalTitle"
+    :description="totpModalDescription"
     @confirm="confirmTotp"
     @cancel="cancelTotp"
   />
+
+  <Modal
+    v-model="cancelConfirmOpen"
+    title="Cancel auto-renew?"
+    :subtitle="cancelConfirmSubtitle"
+    size="sm"
+  >
+    <p class="text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+      Paystack will stop charging on your next billing date. You keep
+      {{ currentSubscriptionLabel }} until
+      {{
+        cancelGraceEndLabel ||
+        'the end of your current billing period'
+      }}, then your account moves to Storvv Micro.
+    </p>
+    <template #footer>
+      <IosDrawerActions
+        cancel-label="Keep auto-renew"
+        primary-variant="danger"
+        primary-label="Cancel auto-renew"
+        @cancel="cancelConfirmOpen = false"
+        @primary="proceedCancelSubscription"
+      />
+    </template>
+  </Modal>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import {
   ArrowPathIcon,
@@ -998,24 +1008,49 @@ import { useStoresStore } from '~/stores/stores'
 import { useInventoryStore } from '~/stores/inventory'
 import { useAppToast } from '~/composables/useAppToast'
 import Button from '~/components/ui/Button.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import Modal from '~/components/ui/Modal.vue'
 import SidePanel from '~/components/ui/SidePanel.vue'
+import Switch from '~/components/ui/Switch.vue'
+import {
+  IosForm,
+  IosFormSection,
+  IosFormField,
+  IosFormInput,
+  IosFormSelect,
+  IosFormTextarea,
+  IosFormToggle,
+} from '~/components/ios/forms'
 import type { Store } from '~/composables/useStores'
 import { collection, query, where, getDocs } from 'firebase/firestore'
 import {
   SUBSCRIPTION_PLANS,
-  SUBSCRIPTION_FEATURE_SUMMARY,
   type SubscriptionPlan,
+  resolveEffectiveSubscriptionPlan,
+  normalizeSubscriptionPlan,
 } from '~/types/subscription'
 import {
   BILLING_CYCLE_LABELS,
-  SUBSCRIPTION_BILLING_CYCLES,
   type SubscriptionBillingCycle,
 } from '~/types/subscription-billing'
 import {
   initializePaystackSubscription,
   type PaystackInitializeFetcher,
 } from '~/utils/paystack-upgrade'
+import {
+  cancelPaystackSubscription,
+  type PaystackCancelFetcher,
+} from '~/utils/paystack-cancel-subscription'
+import SubscriptionPlanPanel from '~/components/settings/SubscriptionPlanPanel.vue'
+import ExperienceModePicker from '~/components/settings/ExperienceModePicker.vue'
+import type { BillingHistoryEntry } from '~/server/api/paystack/billing-history.get'
+import {
+  subscriptionStatusLabel,
+} from '~/utils/subscription-billing-ui'
+import { formatUpgradeSuccessMessage } from '~/utils/subscription-upgrade-unlocks'
+import { scrollDashboardToElement } from '~/utils/native-dashboard-scroll'
+import type { ExperienceMode } from '~/types/business-experience'
+import { normalizeExperienceMode } from '~/types/business-experience'
 import { getEffectiveApiBase } from '~/utils/capacitor-api-base'
 import TotpConfirmModal from '~/components/security/TotpConfirmModal.vue'
 import { useTotpConfirmModal } from '~/composables/useTotpConfirmModal'
@@ -1037,6 +1072,17 @@ import { useStoreDataExport } from '~/composables/useStoreDataExport'
 import { usePreferences, regions } from '~/composables/usePreferences'
 import { getCitiesForRegion, isCityInRegion } from '~/utils/region-cities'
 import { formatBranchDisplayName, parseBranchDisplayName } from '~/utils/branch-name'
+import { useProductAnalytics } from '~/composables/useProductAnalytics'
+import { useFunnelAnalytics } from '~/composables/useFunnelAnalytics'
+import { openChurnSurveyModal } from '~/composables/growth-prompts-state'
+import { useBackupPreferences } from '~/composables/useBackupPreferences'
+import {
+  applyEnabledCapabilitiesToStoreDetails,
+  getProgressiveUnlockOptionsForPlan,
+  isProgressiveCapabilityEnabled,
+  isProgressiveUnlockAvailableForPlan,
+  setProgressiveCapabilityEnabled,
+} from '~/utils/business-experience-settings'
 
 type AccountLogoUploadResult = { url: string; path: string }
 
@@ -1055,6 +1101,7 @@ const {
   pageClass,
   pageStackClass,
   headerBtnClass,
+  headerTextBtnClass,
   headerBtnLabelClass,
   labelClass,
   inputClass,
@@ -1067,6 +1114,7 @@ const {
 } = useDashboardSettingsChrome()
 
 const { isCapacitorIos } = useIsCapacitorIos()
+
 
 // Store information
 const storeInfo = reactive({
@@ -1091,6 +1139,21 @@ const authStore = useAuthStore()
 const { authFetch, getAuthHeaders } = useAuthenticatedFetch()
 const inventoryStore = useInventoryStore()
 const toast = useAppToast()
+
+const { isSoloExperience, enabledCapabilities, canManageBranches } = useBusinessCapabilities()
+const effectiveSubscriptionPlan = computed(() =>
+  resolveEffectiveSubscriptionPlan(userStore.userData)
+)
+const soloProgressiveUnlockOptions = computed(() =>
+  getProgressiveUnlockOptionsForPlan(effectiveSubscriptionPlan.value)
+)
+const showProgressiveUnlockPanel = computed(
+  () =>
+    userStore.isSuperAdmin &&
+    isSoloExperience.value &&
+    soloProgressiveUnlockOptions.value.length > 0
+)
+const togglingProgressiveCapability = ref<BusinessCapability | null>(null)
 
 const {
   exporting: dataExporting,
@@ -1127,13 +1190,21 @@ async function handleExportAllStoreData() {
     toast.success(
       `Exported: inventory ZIP (${summary.inventory.folders} categories, ${summary.inventory.items} product(s)), ${summary.receipts.count} sale(s), ${summary.buybacks.count} buyback(s), ${summary.stockLoans.count} stock loan(s).`
     )
+    await markBackupExported()
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Export failed'
     toast.error(message)
   }
 }
 const { limits } = useSubscriptionFeatures()
-const { eligibleStores, hiddenStoreCount } = usePlanEligibleStores()
+const { eligibleStores, hiddenStores, hiddenStoreCount } = usePlanEligibleStores()
+const {
+  loadPricing,
+  formatUpgradePrice,
+  formatPlanPrice,
+  pricingLoading,
+} = useSubscriptionPlanPricing()
+const { syncSubscriptionStatus } = useSubscriptionBillingUi()
 const route = useRoute()
 
 // Check if user is super admin (only super admins can edit settings)
@@ -1144,7 +1215,7 @@ const canEditSettings = computed(() => {
 // Subscription
 const subscriptionOrder: SubscriptionPlan[] = ['storvv_micro', 'storvv_medium', 'storvv_enterprise']
 const currentSubscription = computed<SubscriptionPlan>(() => {
-  return (userStore.userData?.subscription as SubscriptionPlan) || 'storvv_micro'
+  return resolveEffectiveSubscriptionPlan(userStore.userData)
 })
 const currentSubscriptionLabel = computed(() => {
   return SUBSCRIPTION_PLANS.find((p) => p.id === currentSubscription.value)?.name || 'Storvv Micro'
@@ -1156,15 +1227,151 @@ const upgradeOptions = computed(() => {
   const currentIdx = subscriptionOrder.indexOf(currentSubscription.value)
   return SUBSCRIPTION_PLANS.filter((p) => subscriptionOrder.indexOf(p.id) > currentIdx)
 })
+const hiddenStoreNames = computed(() =>
+  hiddenStores.value.map((store) => store.name).filter(Boolean)
+)
+
+const billingHistory = ref<BillingHistoryEntry[]>([])
+const cancelConfirmOpen = ref(false)
+const isSavingExperienceMode = ref(false)
+const selectedExperienceMode = ref<ExperienceMode>(
+  normalizeExperienceMode(userStore.userData?.storeDetails?.experienceMode)
+)
+
+watch(
+  () => userStore.userData?.storeDetails?.experienceMode,
+  (mode) => {
+    selectedExperienceMode.value = normalizeExperienceMode(mode)
+  }
+)
+
+const currentBillingCycleLabel = computed(() => {
+  const cycle = userStore.userData?.subscriptionBillingCycle
+  return cycle ? BILLING_CYCLE_LABELS[cycle] : null
+})
+
+const currentPlanPriceLabel = computed(() => {
+  const cycle = userStore.userData?.subscriptionBillingCycle || 'monthly'
+  return formatPlanPrice(currentSubscription.value, cycle)
+})
+
+const subscriptionStatusBadgeLabel = computed(() =>
+  subscriptionStatusLabel(
+    userStore.userData?.subscriptionStatus,
+    normalizeSubscriptionPlan(userStore.userData?.subscription),
+    resolveEffectiveSubscriptionPlan(userStore.userData)
+  )
+)
+
+const subscriptionStatusBadgeClass = computed(() => {
+  const status = userStore.userData?.subscriptionStatus
+  if (status === 'past_due') {
+    return 'bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-200'
+  }
+  if (status === 'canceled') {
+    return 'bg-amber-100 text-amber-900 dark:bg-amber-500/15 dark:text-amber-100'
+  }
+  if (currentSubscription.value === 'storvv_micro') {
+    return 'bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-gray-300'
+  }
+  return 'bg-emerald-100 text-emerald-900 dark:bg-emerald-500/15 dark:text-emerald-100'
+})
+
+const planWorkspaceExplainer =
+  'Plan controls paid features and branch limits. Workspace style controls navigation complexity.'
+
+const upgradePricePreview = computed(() => {
+  if (!selectedUpgradePlan.value) return null
+  return formatUpgradePrice(selectedUpgradePlan.value, selectedBillingCycle.value)
+})
+
+const cancelGraceEndLabel = computed(() => {
+  const iso = userStore.userData?.subscriptionCurrentPeriodEnd
+  if (!iso) return null
+  const date = new Date(iso)
+  if (!Number.isFinite(date.getTime())) return null
+  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+})
+
+const cancelConfirmSubtitle = computed(() =>
+  cancelGraceEndLabel.value
+    ? `Access continues until ${cancelGraceEndLabel.value}`
+    : 'Your paid period will remain active until it ends'
+)
+
 const selectedUpgradePlan = ref<SubscriptionPlan | ''>('')
 const selectedBillingCycle = ref<SubscriptionBillingCycle>('monthly')
 const isUpgradingSubscription = ref(false)
+
+watch(
+  upgradeOptions,
+  (options) => {
+    if (options.length === 0) {
+      selectedUpgradePlan.value = ''
+      return
+    }
+    const selectionStillValid = options.some((plan) => plan.id === selectedUpgradePlan.value)
+    if (!selectedUpgradePlan.value || !selectionStillValid) {
+      selectedUpgradePlan.value = options[0].id
+    }
+  },
+  { immediate: true }
+)
+
+const subscriptionRenewalLabel = computed(() => {
+  const status = userStore.userData?.subscriptionStatus
+  const cycle = userStore.userData?.subscriptionBillingCycle
+  const periodEnd = userStore.userData?.subscriptionCurrentPeriodEnd
+  if (!cycle || currentSubscription.value === 'storvv_micro') return null
+
+  const cycleLabel = BILLING_CYCLE_LABELS[cycle].toLowerCase()
+  if (status === 'past_due') {
+    return `Renewal payment failed. Update your card in Paystack or choose a plan below to resubscribe (${cycleLabel}).`
+  }
+  if (status === 'canceled') {
+    if (periodEnd) {
+      const formatted = new Date(periodEnd).toLocaleDateString(undefined, {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      })
+      return `Auto-renew is off. Your plan stays active until ${formatted}.`
+    }
+    return 'Auto-renew is off. Choose a plan below to subscribe again.'
+  }
+  if (periodEnd) {
+    const formatted = new Date(periodEnd).toLocaleDateString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    })
+    return `Auto-renew ${cycleLabel}. Next charge around ${formatted}.`
+  }
+  if (status === 'active') {
+    return `Auto-renew ${cycleLabel} via Paystack.`
+  }
+  return null
+})
+
+const canCancelSubscription = computed(() => {
+  if (!canEditSettings.value) return false
+  if (currentSubscription.value === 'storvv_micro') return false
+  return userStore.userData?.subscriptionStatus !== 'canceled'
+})
+
+const isCancelingSubscription = ref(false)
+const totpModalTitle = ref('Confirm upgrade')
+const totpModalDescription = ref('Enter your authenticator code to start the subscription upgrade.')
 const {
   open: totpModalOpen,
   prompt: promptTotp,
   confirm: confirmTotp,
   cancel: cancelTotp,
 } = useTotpConfirmModal()
+
+const { trackEvent } = useProductAnalytics()
+const { recordMilestone } = useFunnelAnalytics()
+const { markBackupExported } = useBackupPreferences()
 
 const handleUpgradeSubscription = async () => {
   if (!canEditSettings.value) {
@@ -1177,6 +1384,14 @@ const handleUpgradeSubscription = async () => {
   }
   if (!selectedUpgradePlan.value) return
 
+  trackEvent('upgrade_started', {
+    plan: selectedUpgradePlan.value,
+    billing_cycle: selectedBillingCycle.value,
+  })
+
+  totpModalTitle.value = 'Confirm upgrade'
+  totpModalDescription.value =
+    'Enter your authenticator code to start the subscription upgrade.'
   isUpgradingSubscription.value = true
   try {
     const totpCode = await resolveTotpForSensitiveAction(promptTotp)
@@ -1200,6 +1415,113 @@ const handleUpgradeSubscription = async () => {
     toast.error(result.message)
   } finally {
     isUpgradingSubscription.value = false
+  }
+}
+
+async function loadBillingHistory() {
+  if (!canEditSettings.value) return
+  try {
+    const data = (await authFetch('/api/paystack/billing-history')) as {
+      entries?: BillingHistoryEntry[]
+    }
+    billingHistory.value = data.entries || []
+  } catch {
+    billingHistory.value = []
+  }
+}
+
+function openCancelConfirm() {
+  if (!canCancelSubscription.value) return
+  cancelConfirmOpen.value = true
+}
+
+async function proceedCancelSubscription() {
+  cancelConfirmOpen.value = false
+  await handleCancelSubscription()
+}
+
+async function onExperienceModeChange(mode: ExperienceMode) {
+  if (!currentUser.value || !canEditSettings.value) return
+  if (mode === selectedExperienceMode.value) return
+
+  isSavingExperienceMode.value = true
+  try {
+    const targetUserId = await getTargetUserId()
+    if (!targetUserId) return
+    const userData = await getUserDocument(targetUserId)
+    const currentStoreDetails = userData?.storeDetails
+    if (!currentStoreDetails?.storeName) {
+      toast.error('Store details are missing. Complete store setup first.')
+      selectedExperienceMode.value = normalizeExperienceMode(currentStoreDetails?.experienceMode)
+      return
+    }
+
+    await updateUserDocument(targetUserId, {
+      storeDetails: {
+        ...currentStoreDetails,
+        experienceMode: mode,
+        onboardingExperienceChosen: true,
+      },
+    })
+    selectedExperienceMode.value = mode
+    await userStore.fetchUserData(currentUser.value.uid)
+    toast.success(mode === 'solo' ? 'Switched to simple workspace' : 'Switched to full workspace')
+  } catch (error: unknown) {
+    toast.error(error instanceof Error ? error.message : 'Could not update workspace style')
+    selectedExperienceMode.value = normalizeExperienceMode(userStore.userData?.storeDetails?.experienceMode)
+  } finally {
+    isSavingExperienceMode.value = false
+  }
+}
+
+const handleCancelSubscription = async () => {
+  if (!canCancelSubscription.value) return
+  if (!currentUser.value) {
+    toast.error('You must be signed in to cancel')
+    return
+  }
+
+  totpModalTitle.value = 'Cancel auto-renew'
+  totpModalDescription.value =
+    'Enter your authenticator code to stop future Paystack charges. Your current plan stays active until the billing period ends.'
+
+  isCancelingSubscription.value = true
+  try {
+    const totpCode = await resolveTotpForSensitiveAction(promptTotp)
+    if (!totpCode) return
+
+    const headers = await getAuthHeaders()
+    const result = await cancelPaystackSubscription(
+      { totpCode },
+      $fetch as PaystackCancelFetcher,
+      getEffectiveApiBase() || undefined,
+      headers
+    )
+
+    if (!result.ok) {
+      toast.error(result.message)
+      return
+    }
+
+    await userStore.fetchUserData(currentUser.value.uid)
+
+    if (result.subscriptionCurrentPeriodEnd) {
+      const formatted = new Date(result.subscriptionCurrentPeriodEnd).toLocaleDateString(
+        undefined,
+        { month: 'short', day: 'numeric', year: 'numeric' }
+      )
+      toast.success(`Auto-renew canceled. Your plan stays active until ${formatted}.`)
+    } else {
+      toast.success('Auto-renew canceled.')
+    }
+
+    await recordMilestone('subscriptionCanceledAt', {
+      plan: currentSubscription.value,
+      grace_end: result.subscriptionCurrentPeriodEnd,
+    })
+    openChurnSurveyModal()
+  } finally {
+    isCancelingSubscription.value = false
   }
 }
 
@@ -1434,6 +1756,14 @@ function resetPaymentTendersToDefault() {
 }
 
 const switchStore = async (storeId: string) => {
+  if (
+    !canManageBranches.value &&
+    storeId !== storesStore.currentStoreId
+  ) {
+    toast.error('Branches are not available on your workspace style. Enable multi-location in Settings.')
+    return
+  }
+
   try {
     toast.info('Switching store...')
     await storesStore.setCurrentStore(storeId)
@@ -1651,6 +1981,9 @@ async function loadSettingsFromFirestore() {
     if (!userStore.userData) {
       await userStore.fetchUserData(currentUser.value.uid)
     }
+    if (userStore.userData?.subscriptionBillingCycle) {
+      selectedBillingCycle.value = userStore.userData.subscriptionBillingCycle
+    }
     if (userStore.isSuperAdmin) {
       await storesStore.fetchStores()
       await storesStore.initializeCurrentStore()
@@ -1722,13 +2055,16 @@ onMounted(async () => {
         message?: string
       }
       if (verify.paid && verify.userId === currentUser.value.uid && verify.planId) {
-        // Subscription is persisted server-side during verification; refresh local user data.
+        const previousPlan = currentSubscription.value
         await userStore.fetchUserData(currentUser.value.uid)
         toast.success(
-          `Upgraded to ${
-            SUBSCRIPTION_PLANS.find((p) => p.id === verify.planId)?.name || 'new plan'
-          }`
+          formatUpgradeSuccessMessage(verify.planId as SubscriptionPlan, previousPlan)
         )
+        await recordMilestone('firstUpgradeSuccessAt', {
+          plan: verify.planId,
+          previous_plan: previousPlan,
+        })
+        trackEvent('upgrade_success', { plan: verify.planId, previous_plan: previousPlan })
         selectedUpgradePlan.value = ''
         if (import.meta.client && window.history.replaceState) {
           window.history.replaceState({}, '', '/dashboard/settings')
@@ -1749,6 +2085,13 @@ onMounted(async () => {
 
   if (currentUser.value) {
     await loadSettingsFromFirestore()
+    await syncSubscriptionStatus()
+    await loadPricing()
+    await loadBillingHistory()
+    if (route.query.upgrade === '1' && import.meta.client) {
+      await nextTick()
+      scrollDashboardToElement('#settings-subscription', { offset: 16 })
+    }
   } else {
     isLoadingStoreInfo.value = false
   }
@@ -1774,7 +2117,6 @@ const cancelEditing = (section: string) => {
   }
 }
 
-// Helper function to update store settings
 const updateStoreSettings = async (settings: any) => {
   if (!currentUser.value) {
     toast.error('You must be signed in to save settings')
@@ -1807,6 +2149,64 @@ const updateStoreSettings = async (settings: any) => {
   } catch (error: any) {
     console.error('Error saving settings:', error)
     toast.error(error.message || 'Failed to save settings. Please try again.')
+  }
+}
+
+const onProgressiveCapabilityToggle = async (
+  capability: BusinessCapability,
+  enabled: boolean
+) => {
+  if (!currentUser.value) {
+    toast.error('You must be signed in to save settings')
+    return
+  }
+
+  if (!canEditSettings.value) {
+    toast.error('Only super admins can edit settings')
+    return
+  }
+
+  const plan = resolveEffectiveSubscriptionPlan(userStore.userData)
+  if (enabled && !isProgressiveUnlockAvailableForPlan(capability, plan)) {
+    toast.error('This feature is not included on your current plan.')
+    return
+  }
+
+  togglingProgressiveCapability.value = capability
+  try {
+    const targetUserId = await getTargetUserId()
+    if (!targetUserId) {
+      toast.error('Unable to determine target user. Please try again.')
+      return
+    }
+
+    const userData = await getUserDocument(targetUserId)
+    const currentStoreDetails = userData?.storeDetails
+    if (!currentStoreDetails?.storeName) {
+      toast.error('Store details are missing. Complete store setup first.')
+      return
+    }
+
+    const nextEnabled = setProgressiveCapabilityEnabled(
+      currentStoreDetails.enabledCapabilities,
+      capability,
+      enabled
+    )
+
+    await updateUserDocument(targetUserId, {
+      storeDetails: applyEnabledCapabilitiesToStoreDetails(
+        currentStoreDetails,
+        nextEnabled
+      ),
+    })
+
+    await userStore.fetchUserData(currentUser.value.uid)
+    toast.success(enabled ? 'Feature enabled' : 'Feature turned off')
+  } catch (error: any) {
+    console.error('Error saving experience settings:', error)
+    toast.error(error.message || 'Failed to save experience settings. Please try again.')
+  } finally {
+    togglingProgressiveCapability.value = null
   }
 }
 

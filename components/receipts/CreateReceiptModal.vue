@@ -2,7 +2,6 @@
   <SidePanel
     :model-value="props.modelValue"
     :title="sheetTitle"
-    :subtitle="sheetSubtitle"
     :content-padding="sheetContentPadding"
     size="lg"
     @update:model-value="(value: boolean) => emit('update:modelValue', value)"
@@ -13,24 +12,41 @@
 
         <div
           v-if="prefillItemMatchFailed"
-          class="rounded-sm border border-amber-200/80 bg-amber-50/90 px-3 py-2 text-xs text-amber-900 dark:border-amber-800/40 dark:bg-amber-950/30 dark:text-amber-100"
+          class="dash-drawer-callout"
           role="status"
         >
-          No matching in-stock product - pick category and items manually.
+          No matching in-stock product — pick category and items manually.
         </div>
 
         <SellScreenNoteBanner v-if="currentStep >= 2" />
 
         <!-- Step 1: Parent category -->
-        <div v-if="currentStep === 0" :class="[drawerFillStepClass, 'gap-3']">
-          <p :class="sectionLabelClass">Parent category</p>
+        <div
+          v-if="currentStep === 0"
+          :class="[drawerFillStepClass, isCapacitorIos ? 'ios-create-sale-step' : 'gap-3']"
+        >
+          <p v-if="isCapacitorIos" class="ios-create-sale-step__hint">
+            {{ sheetStepSubtitles[0] }}
+          </p>
+          <p v-else :class="sectionLabelClass">Parent category</p>
           <DashboardDrawerSearch v-model="folderSearchQuery" placeholder="Search categories…" />
 
-          <div v-if="loadingFolders" class="flex flex-1 flex-col items-center justify-center py-12">
+          <div v-if="loadingFolders && isCapacitorIos" class="flex flex-1 flex-col items-center justify-center py-12">
             <div
-              class="h-5 w-5 animate-spin rounded-full border-0 border-primary-500/30 border-t-primary-500"
+              class="h-5 w-5 animate-spin rounded-full border-0 border-gray-300/40 border-t-gray-500 dark:border-white/15 dark:border-t-gray-300"
             />
             <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Loading categories…</p>
+          </div>
+          <div v-else-if="loadingFolders" :class="pickListClass">
+            <div :class="pickListScrollClass">
+              <div v-for="i in 6" :key="i" :class="pickRowClass">
+                <span class="dash-skeleton dash-skeleton--thumb" />
+                <div class="min-w-0 flex-1 space-y-1.5">
+                  <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-title" />
+                  <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-meta" />
+                </div>
+              </div>
+            </div>
           </div>
           <div v-else-if="parentCategoryRows.length === 0" :class="emptyStateClass">
             <FolderIcon class="mb-2 h-8 w-8 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
@@ -43,6 +59,52 @@
               }}
             </p>
           </div>
+          <div v-else-if="isCapacitorIos" class="ios-create-sale-picker">
+            <div class="ios-create-sale-picker__scroll">
+              <button
+                v-for="row in parentCategoryRows"
+                :key="`${row.depth}-${row.folder.id}`"
+                type="button"
+                :class="[
+                  'ios-create-sale-picker__row',
+                  isParentRowSelected(row.folder) ? 'ios-create-sale-picker__row--selected' : '',
+                  row.depth === 1 ? 'ios-create-sale-picker__row--nested' : '',
+                ]"
+                @click="onParentCategoryRowClick(row)"
+              >
+                <span class="ios-create-sale-picker__icon">
+                  <FolderIcon stroke-width="1.75" />
+                </span>
+                <span class="ios-create-sale-picker__body">
+                  <p class="ios-create-sale-picker__title">
+                    {{ row.folder.name }}
+                    <span v-if="row.depth === 1 && row.parentName" class="font-normal text-gray-500">
+                      · {{ row.parentName }}
+                    </span>
+                  </p>
+                  <p class="ios-create-sale-picker__meta">
+                    {{ folderPickerMeta(row.folder) }}
+                    <span
+                      v-if="!isCategoryHub(row.folder) && selectedCountForFolder(row.folder.id) > 0"
+                      class="ios-create-sale-picker__meta-accent"
+                    >
+                      · {{ selectedCountForFolder(row.folder.id) }} in this sale
+                    </span>
+                  </p>
+                </span>
+                <ChevronRightIcon
+                  v-if="isCategoryHub(row.folder) && !isParentRowSelected(row.folder)"
+                  class="ios-create-sale-picker__chevron"
+                  stroke-width="2"
+                />
+                <CheckCircleIcon
+                  v-if="isParentRowSelected(row.folder)"
+                  class="ios-create-sale-picker__check"
+                  stroke-width="2"
+                />
+              </button>
+            </div>
+          </div>
           <div v-else :class="pickListClass">
             <div :class="pickListScrollClass">
               <button
@@ -52,7 +114,7 @@
                 :class="[
                   pickRowClass,
                   isParentRowSelected(row.folder) ? pickRowSelectedClass : '',
-                  row.depth === 1 ? 'ml-3 border-l-2 border-primary-500/20 pl-2' : '',
+                  row.depth === 1 ? 'ml-3 border-l-2 border-gray-300/60 dark:border-white/15 pl-2' : '',
                 ]"
                 @click="onParentCategoryRowClick(row)"
               >
@@ -78,7 +140,7 @@
                     {{ folderPickerMeta(row.folder) }}
                     <span
                       v-if="!isCategoryHub(row.folder) && selectedCountForFolder(row.folder.id) > 0"
-                      class="text-primary-600 dark:text-primary-400"
+                      class="text-gray-700 dark:text-gray-300"
                     >
                       · {{ selectedCountForFolder(row.folder.id) }} in this sale
                     </span>
@@ -91,7 +153,7 @@
                 />
                 <CheckCircleIcon
                   v-if="isParentRowSelected(row.folder)"
-                  class="h-4 w-4 shrink-0 text-primary-500"
+                  class="h-4 w-4 shrink-0 text-gray-700 dark:text-gray-300"
                   stroke-width="2"
                 />
               </button>
@@ -100,8 +162,17 @@
         </div>
 
         <!-- Step 2: Subcategory -->
-        <div v-if="currentStep === 1" :class="[drawerFillStepClass, 'gap-3']">
-          <div class="flex shrink-0 flex-wrap items-center gap-2">
+        <div
+          v-if="currentStep === 1"
+          :class="[drawerFillStepClass, isCapacitorIos ? 'ios-create-sale-step' : 'gap-3']"
+        >
+          <template v-if="isCapacitorIos">
+            <p class="ios-create-sale-step__hint">{{ sheetStepSubtitles[1] }}</p>
+            <button type="button" class="ios-create-sale-sheet__change-link" @click="goBackToParentCategories">
+              Change parent · {{ selectedParentFolder?.name }}
+            </button>
+          </template>
+          <div v-else class="flex shrink-0 flex-wrap items-center gap-2">
             <p :class="sectionLabelClass">
               Subcategory · {{ selectedParentFolder?.name }}
             </p>
@@ -125,6 +196,41 @@
             <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
               Add subcategories under this parent in Inventory
             </p>
+          </div>
+          <div v-else-if="isCapacitorIos" class="ios-create-sale-picker">
+            <div class="ios-create-sale-picker__scroll">
+              <button
+                v-for="folder in subcategoryFolders"
+                :key="folder.id"
+                type="button"
+                :class="[
+                  'ios-create-sale-picker__row',
+                  isSubcategoryRowSelected(folder) ? 'ios-create-sale-picker__row--selected' : '',
+                ]"
+                @click="onSubcategoryPick(folder)"
+              >
+                <span class="ios-create-sale-picker__icon">
+                  <FolderIcon stroke-width="1.75" />
+                </span>
+                <span class="ios-create-sale-picker__body">
+                  <p class="ios-create-sale-picker__title">{{ folder.name }}</p>
+                  <p class="ios-create-sale-picker__meta">
+                    {{ folderPickerMeta(folder) }}
+                    <span
+                      v-if="selectedCountForFolder(folder.id) > 0"
+                      class="ios-create-sale-picker__meta-accent"
+                    >
+                      · {{ selectedCountForFolder(folder.id) }} in this sale
+                    </span>
+                  </p>
+                </span>
+                <CheckCircleIcon
+                  v-if="isSubcategoryRowSelected(folder)"
+                  class="ios-create-sale-picker__check"
+                  stroke-width="2"
+                />
+              </button>
+            </div>
           </div>
           <div v-else :class="pickListClass">
             <div :class="pickListScrollClass">
@@ -152,7 +258,7 @@
                     {{ folderPickerMeta(folder) }}
                     <span
                       v-if="selectedCountForFolder(folder.id) > 0"
-                      class="text-primary-600 dark:text-primary-400"
+                      class="text-gray-700 dark:text-gray-300"
                     >
                       · {{ selectedCountForFolder(folder.id) }} in this sale
                     </span>
@@ -160,7 +266,7 @@
                 </div>
                 <CheckCircleIcon
                   v-if="isSubcategoryRowSelected(folder)"
-                  class="h-4 w-4 shrink-0 text-primary-500"
+                  class="h-4 w-4 shrink-0 text-gray-700 dark:text-gray-300"
                   stroke-width="2"
                 />
               </button>
@@ -175,7 +281,7 @@
             <div class="flex flex-wrap items-center gap-2">
               <button
                 type="button"
-                class="inline-flex items-center gap-1 text-[11px] font-medium text-primary-600 hover:underline dark:text-primary-400"
+                class="inline-flex items-center gap-1 text-[11px] font-medium text-gray-800 hover:underline dark:text-gray-200"
                 @click="addFromAnotherCategory"
               >
                 <PlusCircleIcon class="h-3.5 w-3.5" stroke-width="2" />
@@ -197,13 +303,29 @@
             "
           />
           <div
-            v-if="loadingItems"
+            v-if="loadingItems && isCapacitorIos"
             class="flex min-h-0 flex-1 flex-col items-center justify-center py-8"
           >
             <div
-              class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-primary-500"
+              class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-gray-500"
             ></div>
             <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Loading items...</p>
+          </div>
+          <div
+            v-else-if="loadingItems"
+            :class="pickListClass"
+          >
+            <div :class="pickListScrollClass">
+              <div v-for="i in 6" :key="i" :class="pickRowClass">
+                <div class="flex w-full items-start gap-2.5">
+                  <span class="dash-skeleton dash-skeleton--chip mt-0.5" />
+                  <div class="min-w-0 flex-1 space-y-1.5">
+                    <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-title" />
+                    <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-meta" />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           <div v-else-if="availableItems.length === 0" :class="emptyStateClass">
             <CubeIcon class="mb-2 h-8 w-8 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
@@ -222,7 +344,7 @@
                   'cursor-pointer',
                   selectedItems.find((si) => si.id === item.id) ? pickRowSelectedClass : '',
                   itemIsOutOnSellerLoan(item) && !selectedItems.find((si) => si.id === item.id)
-                    ? 'bg-primary-50/50 dark:bg-primary-950/15'
+                    ? 'bg-amber-50/60 dark:bg-amber-950/20'
                     : '',
                 ]"
                 @click="onReceiptItemRowClick(item)"
@@ -240,7 +362,7 @@
                       class="text-xs font-medium text-gray-900 dark:text-gray-100"
                       :class="
                         itemIsOutOnSellerLoan(item) &&
-                        'font-semibold text-primary-900 dark:text-primary-50'
+                        'font-semibold text-amber-900 dark:text-amber-100'
                       "
                     >
                       {{ getItemDisplayName(item) }}
@@ -248,7 +370,7 @@
                     <div class="flex items-center gap-3 mt-0.5 text-[10px] sm:text-xs flex-wrap">
                       <span
                         v-if="itemIsOutOnSellerLoan(item)"
-                        class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide text-primary-900 bg-white/95 shadow-sm shadow-primary-900/10 ring-1 ring-primary-400/45 dark:bg-primary-800/90 dark:text-primary-50 dark:ring-primary-400/55 dark:shadow-md dark:shadow-black/40"
+                        class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide text-amber-900 bg-white/95 shadow-sm shadow-amber-900/10 ring-1 ring-amber-400/45 dark:bg-amber-900/80 dark:text-amber-100 dark:ring-amber-400/40 dark:shadow-md dark:shadow-black/40"
                       >
                         On stock loan<span v-if="item.sellerLoanPartyName"
                           >&nbsp;· {{ item.sellerLoanPartyName }}</span
@@ -416,7 +538,7 @@
                   @input="handleCustomerNameInput"
                   @focus="showCustomerSuggestions = true"
                   @blur="handleCustomerNameBlur"
-                  class="app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/40"
+                  class="app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/40"
                   placeholder="John Doe"
                 />
                 <MagnifyingGlassIcon
@@ -465,7 +587,7 @@
               <input
                 v-model="receiptForm.customerEmail"
                 type="email"
-                class="app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/40"
+                class="app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/40"
                 placeholder="john@example.com"
               />
             </div>
@@ -476,7 +598,7 @@
               <input
                 v-model="receiptForm.customerPhone"
                 type="tel"
-                class="app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/40"
+                class="app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/40"
                 placeholder="+1 234 567 8900"
               />
             </div>
@@ -487,7 +609,7 @@
               <input
                 v-model="receiptForm.customerAddress"
                 type="text"
-                class="app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/40"
+                class="app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/40"
                 placeholder="123 Main St, City, State"
               />
             </div>
@@ -519,7 +641,7 @@
                   <PaymentMethodSelect
                     v-model="payment.method"
                     required
-                    select-class="app-field flex-1 px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/40"
+                    select-class="app-field flex-1 px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/40"
                     placeholder="Select method"
                   />
                   <div class="relative w-28">
@@ -534,7 +656,7 @@
                       min="0"
                       :max="receiptTotal - splitPaymentsTotal + payment.amount"
                       required
-                      class="w-full pl-6 pr-2.5 py-2 text-xs rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
+                      class="w-full pl-6 pr-2.5 py-2 text-xs rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/60"
                       placeholder="0.00"
                     />
                   </div>
@@ -550,7 +672,7 @@
                 <button
                   @click="addSplitPayment"
                   type="button"
-                  class="inline-flex w-full items-center justify-center gap-1.5 px-3 py-1.5 text-xs text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-smborder-0-300 dark:border-primary-600 transition-colors"
+                  class="inline-flex w-full items-center justify-center gap-1.5 px-3 py-1.5 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/[0.06] rounded-sm border-0 transition-colors"
                 >
                   <PlusCircleIcon class="h-3.5 w-3.5 shrink-0 opacity-80" :stroke-width="1.75" />
                   Add payment method
@@ -666,7 +788,7 @@
             <textarea
               v-model="receiptForm.notes"
               rows="2"
-              class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/40 resize-none"
+              class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/40 resize-none"
               placeholder="Additional notes..."
             ></textarea>
           </div>
@@ -682,7 +804,7 @@
                 </label>
                 <div v-if="loadingFolders" class="text-center py-3">
                   <div
-                    class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-primary-500"
+                    class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-gray-500"
                   ></div>
                 </div>
                 <div
@@ -702,7 +824,7 @@
                   v-else
                   v-model="swapInFolderId"
                   required
-                  class="app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/40"
+                  class="app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/40"
                 >
                   <option value="">Select category for swapped-in device</option>
                   <option v-for="folder in leafFolders" :key="folder.id" :value="folder.id">
@@ -737,7 +859,7 @@
                       :required="field.required"
                       type="text"
                       :placeholder="swapInFieldPlaceholder(field)"
-                      class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-400/50"
+                      class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50"
                     />
                     <!-- Number Input -->
                     <input
@@ -746,7 +868,7 @@
                       :required="field.required"
                       type="number"
                       :placeholder="swapInFieldPlaceholder(field)"
-                      class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-400/50"
+                      class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50"
                     />
                     <!-- Currency Input -->
                     <div v-else-if="field.type === 'currency'" class="relative">
@@ -760,7 +882,7 @@
                         step="0.01"
                         min="0"
                         :required="field.required"
-                        class="w-full pl-7 pr-3 py-2 text-xs rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-400/50"
+                        class="w-full pl-7 pr-3 py-2 text-xs rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50"
                         placeholder="0.00"
                       />
                     </div>
@@ -770,14 +892,14 @@
                       v-model="swapInItemForm[field.name]"
                       :required="field.required"
                       type="date"
-                      class="app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/40"
+                      class="app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/40"
                     />
                     <!-- Select Input -->
                     <select
                       v-else-if="field.type === 'select' && field.options"
                       v-model="swapInItemForm[field.name]"
                       :required="field.required"
-                      class="app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/40"
+                      class="app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/40"
                     >
                       <option value="">Select {{ swapInFieldLabel(field) }}</option>
                       <option v-for="option in field.options" :key="option" :value="option">
@@ -837,51 +959,19 @@
       </div>
     </template>
 
+    <template v-if="currentStep > 0 && !isCapacitorIos" #leading>
+      <Button variant="outline" size="sm" @click="previousStep">Back</Button>
+    </template>
+
     <template #footer>
-      <div
-        class="flex w-full flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between"
-      >
-        <Button
-          v-if="currentStep > 0"
-          variant="outline"
-          size="sm"
-          :class="[footerBtnOutlineClass, 'w-full sm:w-auto']"
-          @click="previousStep"
-        >
-          Back
-        </Button>
-        <div v-else class="hidden sm:block sm:min-w-[4rem]" />
-        <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-          <Button
-            variant="outline"
-            size="sm"
-            :class="[footerBtnOutlineClass, 'w-full sm:w-auto']"
-            @click="handleCancel"
-          >
-            Cancel
-          </Button>
-          <Button
-            v-if="currentStep < 3"
-            variant="primary"
-            size="sm"
-            :class="[footerBtnPrimaryClass, 'w-full sm:w-auto']"
-            :disabled="!canProceed"
-            @click="nextStep"
-          >
-            Next
-          </Button>
-          <Button
-            v-else
-            variant="primary"
-            size="sm"
-            :class="[footerBtnPrimaryClass, 'w-full sm:w-auto']"
-            :disabled="!isFormValid || isCreating"
-            @click="handleCreateReceipt"
-          >
-            {{ isCreating ? 'Creating…' : 'Create sale' }}
-          </Button>
-        </div>
-      </div>
+      <IosDrawerActions
+        :cancel-label="isCapacitorIos && currentStep > 0 ? 'Back' : 'Cancel'"
+        :primary-label="receiptFooterPrimaryLabel"
+        :primary-loading="isCreating && currentStep >= 3"
+        :primary-disabled="receiptFooterPrimaryDisabled"
+        @cancel="handleReceiptFooterCancel"
+        @primary="handleReceiptFooterPrimary"
+      />
     </template>
   </SidePanel>
 
@@ -902,21 +992,21 @@
             v-model="emailToSend"
             type="email"
             placeholder="Enter email address"
-            class="w-full px-3 py-2 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400"
+            class="w-full px-3 py-2 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/40"
             @keyup.enter="sendReceiptEmail(lastCreatedReceiptId, lastCreatedReceiptData)"
           />
         </div>
-        <div class="flex gap-2 justify-end">
-          <button @click="showEmailModal = false" class="btn-secondary">Cancel</button>
-          <button
-            @click="sendReceiptEmail(lastCreatedReceiptId, lastCreatedReceiptData)"
-            :disabled="!emailToSend || !isValidEmail(emailToSend) || isSendingEmail"
-            class="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 rounded-sm transition-colors"
-          >
-            {{ isSendingEmail ? 'Sending...' : 'Send' }}
-          </button>
-        </div>
       </div>
+    </template>
+    <template #footer>
+      <IosDrawerActions
+        cancel-label="Cancel"
+        primary-label="Send"
+        :primary-loading="isSendingEmail"
+        :primary-disabled="!emailToSend || !isValidEmail(emailToSend)"
+        @cancel="showEmailModal = false"
+        @primary="sendReceiptEmail(lastCreatedReceiptId, lastCreatedReceiptData)"
+      />
     </template>
   </Modal>
 </template>
@@ -940,6 +1030,7 @@ import DashboardDrawerSearch from '~/components/dashboard/DashboardDrawerSearch.
 import SellScreenNoteBanner from '~/components/receipts/SellScreenNoteBanner.vue'
 import PaymentMethodSelect from '~/components/receipts/PaymentMethodSelect.vue'
 import Button from '~/components/ui/Button.vue'
+import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import { useInventoryStore, type InventoryFolder, type InventoryItem } from '~/stores/inventory'
 import { useReceiptsStore, type ReceiptItem } from '~/stores/receipts'
@@ -1055,13 +1146,6 @@ const sheetTitle = computed(() => {
   return steps[currentStep.value]?.label ?? 'Create New Sale'
 })
 
-const sheetSubtitle = computed(() => {
-  if (!isCapacitorIos.value) {
-    return 'Pick category, subcategory, items, then sale details'
-  }
-  return sheetStepSubtitles[currentStep.value] ?? ''
-})
-
 const sheetContentPadding = computed(() => (isCapacitorIos.value ? 'p-0' : ''))
 
 const loadingFolders = ref(false)
@@ -1098,7 +1182,7 @@ const paymentSettlement = ref<'paid_in_full' | 'balance_due'>('paid_in_full')
 const depositAmount = ref(0)
 
 const settlementActiveClass =
-  'rounded-smborder-0-500/50 bg-primary-50 px-3 py-2 text-xs font-medium text-primary-800 dark:bg-primary-950/40 dark:text-primary-200'
+  'rounded-sm border-0 bg-gray-900 px-3 py-2 text-xs font-medium text-white dark:bg-white dark:text-gray-900'
 const settlementInactiveClass =
   'rounded-sm bg-white px-3 py-2 text-xs font-medium text-gray-600 dark:!bg-dashboard-card dark:text-gray-400'
 
@@ -1159,6 +1243,29 @@ const canProceed = computed(() => {
   }
   return false
 })
+
+const receiptFooterPrimaryLabel = computed(() => {
+  if (currentStep.value < 3) return 'Next'
+  return isCreating.value ? 'Creating…' : 'Create sale'
+})
+
+const receiptFooterPrimaryDisabled = computed(() => {
+  if (currentStep.value < 3) return !canProceed.value
+  return !isFormValid.value || isCreating.value
+})
+
+function handleReceiptFooterPrimary() {
+  if (currentStep.value < 3) nextStep()
+  else void handleCreateReceipt()
+}
+
+function handleReceiptFooterCancel() {
+  if (isCapacitorIos.value && currentStep.value > 0) {
+    previousStep()
+    return
+  }
+  handleCancel()
+}
 
 const hasSerialNumberInTemplate = computed(() => {
   if (!selectedFolder.value?.template?.fields) return false

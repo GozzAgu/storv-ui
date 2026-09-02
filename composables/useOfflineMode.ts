@@ -1,214 +1,199 @@
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed } from 'vue'
 import { CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import { useFirestore } from './useFirestore'
 import {
   collection,
   doc,
   setDoc,
-  getDocs,
-  query,
-  where,
-  orderBy,
-  writeBatch,
 } from 'firebase/firestore'
+import {
+  applyQueuedWrite,
+  documentRefFromPath,
+  OFFLINE_QUEUE_STORAGE_KEY,
+  type QueuedFirestoreWrite,
+} from '~/utils/offline-firestore'
 
-interface PendingOperation {
+/** @deprecated Legacy flat-collection queue entry. */
+interface LegacyPendingOperation {
   id: string
   type: 'create' | 'update' | 'delete'
   collection: string
   docId?: string
-  data?: any
+  data?: Record<string, unknown>
   timestamp: number
 }
 
-const isOnline = ref(navigator.onLine)
+type PendingOperation = QueuedFirestoreWrite | LegacyPendingOperation
+
+function isQueuedWrite(op: PendingOperation): op is QueuedFirestoreWrite {
+  return 'documentPath' in op && op.type === 'set'
+}
+
+const isOnline = ref(typeof navigator !== 'undefined' ? navigator.onLine : true)
 const pendingOperations = ref<PendingOperation[]>([])
 const isSyncing = ref(false)
+let offlineSyncInitialized = false
 
-const STORAGE_KEY = 'storv_pending_operations'
+function loadPendingOperationsFromStorage() {
+  try {
+    const stored = localStorage.getItem(OFFLINE_QUEUE_STORAGE_KEY)
+    if (stored) {
+      pendingOperations.value = JSON.parse(stored) as PendingOperation[]
+    }
+  } catch (error) {
+    console.error('Error loading pending operations:', error)
+  }
+}
+
+function savePendingOperationsToStorage() {
+  try {
+    localStorage.setItem(OFFLINE_QUEUE_STORAGE_KEY, JSON.stringify(pendingOperations.value))
+  } catch (error) {
+    console.error('Error saving pending operations:', error)
+  }
+}
+
+function queueOperationGlobal(operation: Omit<QueuedFirestoreWrite, 'id' | 'timestamp'>) {
+  const pendingOp: QueuedFirestoreWrite = {
+    ...operation,
+    timestamp: Date.now(),
+    id: `set_${operation.documentPath}_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
+  }
+  pendingOperations.value.push(pendingOp)
+  savePendingOperationsToStorage()
+  if (isOnline.value) {
+    void syncPendingOperationsGlobal()
+  }
+}
+
+function dequeuePathGlobal(documentPath: string) {
+  pendingOperations.value = pendingOperations.value.filter(
+    (op) => !isQueuedWrite(op) || op.documentPath !== documentPath
+  )
+  savePendingOperationsToStorage()
+}
+
+async function syncPendingOperationsGlobal() {
+  const db = useFirestore().getFirestoreInstance()
+  if (!isOnline.value || isSyncing.value || !db || pendingOperations.value.length === 0) {
+    return
+  }
+
+  isSyncing.value = true
+  const operations = [...pendingOperations.value]
+  const failed: PendingOperation[] = []
+
+  for (const op of operations) {
+    try {
+      if (isQueuedWrite(op)) {
+        await applyQueuedWrite(db, op)
+      } else if (op.type === 'create' && op.data && op.docId) {
+        await setDoc(doc(db, op.collection, op.docId), op.data)
+      } else if (op.type === 'update' && op.data && op.docId) {
+        await setDoc(doc(db, op.collection, op.docId), op.data, { merge: true })
+      } else if (op.type === 'delete' && op.docId) {
+        const { deleteDoc } = await import('firebase/firestore')
+        await deleteDoc(doc(db, op.collection, op.docId))
+      }
+      pendingOperations.value = pendingOperations.value.filter((entry) => entry.id !== op.id)
+    } catch {
+      failed.push(op)
+    }
+  }
+
+  savePendingOperationsToStorage()
+  isSyncing.value = false
+
+  if (failed.length === 0 && isOnline.value && pendingOperations.value.length > 0) {
+    await syncPendingOperationsGlobal()
+  }
+}
+
+/** App-wide offline queue bootstrap (called from plugins/04.offline.client.ts). */
+export function initOfflineSync() {
+  if (typeof window === 'undefined' || offlineSyncInitialized) return
+  offlineSyncInitialized = true
+
+  loadPendingOperationsFromStorage()
+
+  const handleOnline = () => {
+    isOnline.value = true
+    void syncPendingOperationsGlobal()
+  }
+
+  const handleOffline = () => {
+    isOnline.value = false
+  }
+
+  window.addEventListener('online', handleOnline)
+  window.addEventListener('offline', handleOffline)
+
+  if (isOnline.value) {
+    void syncPendingOperationsGlobal()
+  }
+}
+
+export async function writeDocumentWithOfflineSupport(
+  docRef: ReturnType<typeof doc>,
+  data: Record<string, unknown>,
+  options?: { merge?: boolean }
+) {
+  const { setDocumentWithOfflineQueue } = await import('~/utils/offline-firestore')
+  return setDocumentWithOfflineQueue(docRef, data, {
+    merge: options?.merge,
+    isOnline,
+    queue: queueOperationGlobal,
+    dequeuePath: dequeuePathGlobal,
+  })
+}
 
 export const useOfflineMode = () => {
   const db = useFirestore().getFirestoreInstance()
+  const pendingCount = computed(() => pendingOperations.value.length)
 
-  // Load pending operations from localStorage
-  const loadPendingOperations = () => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY)
-      if (stored) {
-        pendingOperations.value = JSON.parse(stored)
-      }
-    } catch (error) {
-      console.error('Error loading pending operations:', error)
-    }
+  const queueOperation = (operation: Omit<QueuedFirestoreWrite, 'id' | 'timestamp'>) => {
+    queueOperationGlobal(operation)
   }
 
-  // Save pending operations to localStorage
-  const savePendingOperations = () => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(pendingOperations.value))
-    } catch (error) {
-      console.error('Error saving pending operations:', error)
-    }
-  }
+  const syncPendingOperations = () => syncPendingOperationsGlobal()
 
-  // Add operation to pending queue
-  const queueOperation = (operation: Omit<PendingOperation, 'id' | 'timestamp'>) => {
-    const pendingOp: PendingOperation = {
-      ...operation,
-      timestamp: Date.now(),
-      id: `${operation.type}_${operation.collection}_${Date.now()}_${Math.random()
-        .toString(36)
-        .substr(2, 9)}`,
-    }
-
-    pendingOperations.value.push(pendingOp)
-    savePendingOperations()
-
-    // Try to sync immediately if online
-    if (isOnline.value) {
-      syncPendingOperations()
-    }
-  }
-
-  // Sync pending operations when online
-  const syncPendingOperations = async () => {
-    if (!isOnline.value || isSyncing.value || !db || pendingOperations.value.length === 0) {
-      return
-    }
-
-    isSyncing.value = true
-    const operations = [...pendingOperations.value]
-    const successfulOps: string[] = []
-
-    try {
-      const batch = writeBatch(db)
-      let batchCount = 0
-      const MAX_BATCH_SIZE = 500 // Firestore limit
-
-      for (const op of operations) {
-        try {
-          const docRef = op.docId
-            ? doc(db, op.collection, op.docId)
-            : doc(collection(db, op.collection))
-
-          switch (op.type) {
-            case 'create':
-              if (op.data) {
-                if (op.docId) {
-                  await setDoc(docRef, op.data)
-                } else {
-                  await setDoc(docRef, op.data)
-                }
-              }
-              break
-            case 'update':
-              if (op.data) {
-                await setDoc(docRef, op.data, { merge: true })
-              }
-              break
-            case 'delete':
-              await setDoc(docRef, { deleted: true }, { merge: true })
-              // Note: Actual deletion might need to be handled differently
-              break
-          }
-
-          successfulOps.push(op.id)
-          batchCount++
-
-          // Execute batch if approaching limit
-          if (batchCount >= MAX_BATCH_SIZE) {
-            await batch.commit()
-            batchCount = 0
-          }
-        } catch (error: any) {
-          console.error(`Error syncing operation ${op.id}:`, error)
-          // Don't remove failed operations, they'll be retried
-        }
-      }
-
-      // Commit remaining batch operations
-      if (batchCount > 0) {
-        await batch.commit()
-      }
-
-      // Remove successful operations
-      pendingOperations.value = pendingOperations.value.filter(
-        (op) => !successfulOps.includes(op.id)
-      )
-      savePendingOperations()
-    } catch (error: any) {
-      console.error('Error syncing pending operations:', error)
-    } finally {
-      isSyncing.value = false
-    }
-  }
-
-  // Create document (with offline support)
-  const createDoc = async (collectionName: string, data: any, docId?: string) => {
+  const createDoc = async (collectionName: string, data: Record<string, unknown>, docId?: string) => {
     if (!db) {
       throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
     }
 
     try {
       const docRef = docId ? doc(db, collectionName, docId) : doc(collection(db, collectionName))
-
       await setDoc(docRef, data)
-
-      // Remove from pending if it was queued
-      const pendingId = `${docId || docRef.id}`
-      pendingOperations.value = pendingOperations.value.filter(
-        (op) => !(op.collection === collectionName && op.docId === pendingId)
-      )
-      savePendingOperations()
-
+      dequeuePathGlobal(docRef.path)
       return docRef.id
-    } catch (error: any) {
-      // If offline, queue the operation
-      if (!isOnline.value || error.code === 'unavailable') {
-        queueOperation({
-          type: 'create',
-          collection: collectionName,
-          docId: docId,
-          data: data,
+    } catch (error: unknown) {
+      const code = (error as { code?: string })?.code
+      if (!isOnline.value || code === 'unavailable') {
+        const docRef = docId ? doc(db, collectionName, docId) : doc(collection(db, collectionName))
+        queueOperationGlobal({
+          type: 'set',
+          documentPath: docRef.path,
+          data,
+          merge: false,
         })
-        return docId || `pending_${Date.now()}`
+        return docId || docRef.id
       }
       throw error
     }
   }
 
-  // Update document (with offline support)
-  const updateDoc = async (collectionName: string, docId: string, data: any) => {
+  const updateDoc = async (collectionName: string, docId: string, data: Record<string, unknown>) => {
     if (!db) {
       throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
     }
 
-    try {
-      const docRef = doc(db, collectionName, docId)
-      await setDoc(docRef, data, { merge: true })
-
-      // Remove from pending if it was queued
-      pendingOperations.value = pendingOperations.value.filter(
-        (op) => !(op.collection === collectionName && op.docId === docId && op.type === 'update')
-      )
-      savePendingOperations()
-    } catch (error: any) {
-      // If offline, queue the operation
-      if (!isOnline.value || error.code === 'unavailable') {
-        queueOperation({
-          type: 'update',
-          collection: collectionName,
-          docId: docId,
-          data: data,
-        })
-      } else {
-        throw error
-      }
-    }
+    const docRef = doc(db, collectionName, docId)
+    const result = await writeDocumentWithOfflineSupport(docRef, data, { merge: true })
+    if (result === 'queued') return
   }
 
-  // Delete document (with offline support)
-  const deleteDoc = async (collectionName: string, docId: string) => {
+  const deleteDocOffline = async (collectionName: string, docId: string) => {
     if (!db) {
       throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
     }
@@ -216,53 +201,21 @@ export const useOfflineMode = () => {
     try {
       const docRef = doc(db, collectionName, docId)
       await setDoc(docRef, { deleted: true, deletedAt: new Date() }, { merge: true })
-
-      // Remove from pending if it was queued
-      pendingOperations.value = pendingOperations.value.filter(
-        (op) => !(op.collection === collectionName && op.docId === docId && op.type === 'delete')
-      )
-      savePendingOperations()
-    } catch (error: any) {
-      // If offline, queue the operation
-      if (!isOnline.value || error.code === 'unavailable') {
-        queueOperation({
-          type: 'delete',
-          collection: collectionName,
-          docId: docId,
+      dequeuePathGlobal(docRef.path)
+    } catch (error: unknown) {
+      const code = (error as { code?: string })?.code
+      if (!isOnline.value || code === 'unavailable') {
+        queueOperationGlobal({
+          type: 'set',
+          documentPath: doc(db, collectionName, docId).path,
+          data: { deleted: true, deletedAt: new Date().toISOString() },
+          merge: true,
         })
       } else {
         throw error
       }
     }
   }
-
-  // Listen for online/offline events
-  const handleOnline = () => {
-    isOnline.value = true
-    syncPendingOperations()
-  }
-
-  const handleOffline = () => {
-    isOnline.value = false
-  }
-
-  onMounted(() => {
-    loadPendingOperations()
-    window.addEventListener('online', handleOnline)
-    window.addEventListener('offline', handleOffline)
-
-    // Try to sync on mount if online
-    if (isOnline.value) {
-      syncPendingOperations()
-    }
-  })
-
-  onUnmounted(() => {
-    window.removeEventListener('online', handleOnline)
-    window.removeEventListener('offline', handleOffline)
-  })
-
-  const pendingCount = computed(() => pendingOperations.value.length)
 
   return {
     isOnline,
@@ -271,8 +224,10 @@ export const useOfflineMode = () => {
     pendingCount,
     createDoc,
     updateDoc,
-    deleteDoc,
+    deleteDoc: deleteDocOffline,
     syncPendingOperations,
     queueOperation,
+    writeDocument: writeDocumentWithOfflineSupport,
+    documentRefFromPath: (path: string) => (db ? documentRefFromPath(db, path) : null),
   }
 }

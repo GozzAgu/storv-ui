@@ -28,10 +28,28 @@ export function useDashboardPageChrome() {
     ? 'inline-flex h-8 shrink-0 items-center rounded-lg border-0 bg-gray-50/80 px-2.5 text-xs font-medium tabular-nums text-gray-600 dark:bg-white/[0.04] dark:text-gray-400'
     : 'inline-flex h-8 shrink-0 items-center rounded-lg border-0 bg-gray-50/80 px-2.5 text-xs font-medium tabular-nums text-gray-600 dark:bg-white/[0.04] dark:text-gray-400'
 
-  const headerBtnClass = computed(() =>
+  /** Icon-only header actions (toolbar / page header). */
+  const headerIconBtnClass = computed(() =>
     isCapacitorIos.value
       ? '!inline-flex !h-9 !w-9 !min-h-9 !min-w-9 !items-center !justify-center !rounded-full !p-0 !text-xs shrink-0'
       : '!inline-flex !h-8 !min-h-8 !items-center !justify-center !rounded-full !px-3.5 !py-0 !text-xs shrink-0'
+  )
+
+  /** Labeled header / panel / inline actions — sales-leads pill style on iOS. */
+  const headerTextBtnClass = computed(() =>
+    isCapacitorIos.value
+      ? 'ios-action-btn ios-action-btn--sm'
+      : '!inline-flex !h-8 !min-h-8 !items-center !justify-center !rounded-full !px-3.5 !py-0 !text-xs shrink-0'
+  )
+
+  /** Alias for inline dashboard actions (same as headerTextBtnClass). */
+  const actionBtnClass = headerTextBtnClass
+
+  /** @deprecated Prefer headerIconBtnClass or headerTextBtnClass explicitly. */
+  const headerBtnClass = headerIconBtnClass
+
+  const toolbarSelectClass = computed(() =>
+    isCapacitorIos.value ? 'ios-toolbar-select' : ''
   )
 
   /** iOS header actions: icon-only (label stays for screen readers). */
@@ -88,6 +106,10 @@ export function useDashboardPageChrome() {
     fieldClass,
     metaClass,
     headerBtnClass,
+    headerIconBtnClass,
+    headerTextBtnClass,
+    actionBtnClass,
+    toolbarSelectClass,
     headerBtnLabelClass,
     segmentTabsClass,
     segmentTabsBtnClass,

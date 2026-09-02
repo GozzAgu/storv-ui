@@ -16,28 +16,23 @@
         try {
           theme = localStorage.getItem('theme')
 
+          function prefersDarkMode() {
+            try {
+              return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
+            } catch (e) {
+              return false
+            }
+          }
+
           if (theme === 'dark') {
             isDark = true
           } else if (theme === 'light') {
             isDark = false
           } else if (theme === 'system') {
-            // User explicitly chose system - follow device preference
-            try {
-              if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                isDark = true
-              }
-            } catch (e) {
-              isDark = false
-            }
+            isDark = prefersDarkMode()
           } else {
-            // No saved theme (first-time user) - follow device preference
-            try {
-              if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                isDark = true
-              }
-            } catch (e) {
-              isDark = false
-            }
+            // No saved theme: follow the device preference (web and native alike).
+            isDark = prefersDarkMode()
           }
         } catch (e) {
           // localStorage access failed - default to light

@@ -2,11 +2,13 @@
   <button
     v-bind="delegatedAttrs"
     :type="type"
+    :data-btn-variant="variant"
     :disabled="disabled || loading"
     :class="[
       'group relative inline-flex items-center justify-center overflow-hidden border-0 font-semibold tracking-tight cursor-pointer transition-[background-color,color,box-shadow,transform,opacity] duration-200 ease-out',
       'focus:outline-none disabled:opacity-45 disabled:cursor-not-allowed',
       'active:scale-[0.98] motion-reduce:active:scale-100',
+      iosNativeClasses,
       radiusClass,
       sizeClasses,
       variantSurfaceClasses,
@@ -55,7 +57,7 @@ const delegatedAttrs = computed(() => {
 })
 
 interface Props {
-  variant?: 'primary' | 'secondary' | 'danger' | 'success' | 'outline' | 'ghost'
+  variant?: 'primary' | 'secondary' | 'danger' | 'success' | 'outline' | 'ghost' | 'neutral'
   size?: 'sm' | 'md' | 'lg'
   type?: 'button' | 'submit' | 'reset'
   disabled?: boolean
@@ -83,7 +85,21 @@ const loadingIcon = ArrowPathIcon
 const { isCapacitorIos } = useIsCapacitorIos()
 const iconOnlyIos = computed(() => isCapacitorIos.value && !!props.icon && !props.loading)
 
-const radiusClass = '!rounded-full'
+const iosNativeClasses = computed(() => {
+  if (!isCapacitorIos.value) return ''
+  const parts = ['ios-action-btn']
+  if (iconOnlyIos.value) parts.push('ios-action-btn--icon-only')
+  // 'neutral' has no native counterpart — reuse the primary native class, whose
+  // color is already neutralized (monochrome pill) inside CRUD drawer footers.
+  else parts.push(`ios-action-btn--${props.variant === 'neutral' ? 'primary' : props.variant}`)
+  return parts.join(' ')
+})
+
+const radiusClass = computed(() => {
+  if (iconOnlyIos.value) return '!rounded-full'
+  if (isCapacitorIos.value) return '!rounded-[var(--ios-radius-md,0.75rem)]'
+  return '!rounded-full'
+})
 
 const showGlassHighlight = computed(() => false)
 
@@ -95,6 +111,14 @@ const sizeClasses = computed(() => {
       lg: '!h-11 !w-11 !min-w-11 !p-0',
     }
     return iconOnlyMap[props.size]
+  }
+  if (isCapacitorIos.value) {
+    const iosTextMap = {
+      sm: 'ios-action-btn--sm',
+      md: 'ios-action-btn--md',
+      lg: 'ios-action-btn--lg',
+    }
+    return iosTextMap[props.size]
   }
   const sizeMap = {
     sm: 'px-3.5 py-1.5 text-xs sm:text-sm',
@@ -125,6 +149,9 @@ const outlineSurfaceClasses =
   'border-[1.5px] border-[rgb(20_63_141/0.35)] bg-transparent text-[#143f8d] hover:border-[#143f8d] hover:bg-[rgb(20_63_141/0.06)] dark:border-white/15 dark:text-gray-100 dark:hover:border-white/25 dark:hover:bg-white/[0.06]'
 
 const variantSurfaceClasses = computed(() => {
+  if (isCapacitorIos.value) {
+    return 'shadow-none'
+  }
   const map = {
     primary: outlineSurfaceClasses,
     secondary:
@@ -136,6 +163,9 @@ const variantSurfaceClasses = computed(() => {
     outline: outlineSurfaceClasses,
     ghost:
       'border-0 bg-transparent text-gray-700 hover:bg-gray-900/[0.05] dark:text-gray-200 dark:hover:bg-white/[0.06]',
+    /** Monochrome pill — CRUD drawer primary action. No brand blue by design. */
+    neutral:
+      'border-0 bg-gray-900 text-white shadow-[0_2px_10px_rgb(0_0_0/0.15)] hover:bg-gray-800 active:bg-black dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100',
   }
   return map[props.variant]
 })
@@ -154,6 +184,8 @@ const variantFocusRingClasses = computed(() => {
     outline: outlineFocus,
     ghost:
       'focus-visible:ring-2 focus-visible:ring-gray-400/45 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[#0c0e14]',
+    neutral:
+      'focus-visible:ring-2 focus-visible:ring-gray-400/50 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[#0c0e14]',
   }
   return map[props.variant]
 })

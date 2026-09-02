@@ -25,6 +25,12 @@ import type { SubscriptionPlan } from '~/types/subscription'
 import type { Store, StoreWithStats } from '~/composables/useStores'
 import { clearInventoryItemQueryCaches } from '~/utils/inventory-items-firestore'
 import { normalizeEntityName } from '~/utils/capitalize-text'
+import {
+  clearStoreDataFetchCaches,
+  isStoreRefreshWarm,
+  markStoreRefreshWarm,
+} from '~/utils/store-data-cache'
+import { invalidateCurrentStoreIdCache } from '~/composables/useCurrentStore'
 
 export const useStoresStore = defineStore('stores', {
   state: () => ({
@@ -321,17 +327,26 @@ export const useStoresStore = defineStore('stores', {
         inventoryStore.itemsPagination = {}
         inventoryStore.itemsLoadedFully = {}
         inventoryStore.selectedItemId = null
+        inventoryStore.folderAvailabilityStats = {}
+        inventoryStore.folderProfitStats = {}
         inventoryStore.loading = false
         inventoryStore.error = null
         clearInventoryItemQueryCaches()
+        const { resetInventoryFetchStamps } = await import('./inventory')
+        resetInventoryFetchStamps()
 
         receiptsStore.receipts = []
         receiptsStore.loading = false
         receiptsStore.error = null
+        const { resetReceiptsFetchStamp } = await import('./receipts')
+        resetReceiptsFetchStamp()
 
         customersStore.customers = []
         customersStore.loading = false
         customersStore.error = null
+
+        clearStoreDataFetchCaches()
+        invalidateCurrentStoreIdCache()
 
         // console.log('[StoresStore] All store data cleared')
       } catch (error: any) {
@@ -341,7 +356,7 @@ export const useStoresStore = defineStore('stores', {
     },
 
     // Refresh all data for the current store
-    async refreshStoreData() {
+    async refreshStoreData(options?: { force?: boolean }) {
       if (import.meta.server) return
       if (!this.currentStoreId) return
 
@@ -349,6 +364,10 @@ export const useStoresStore = defineStore('stores', {
       if (isDemoModeActive()) {
         const { syncDemoToPinia } = await import('~/utils/demo-bridge')
         await syncDemoToPinia()
+        return
+      }
+
+      if (isStoreRefreshWarm(this.currentStoreId, options?.force)) {
         return
       }
 
@@ -415,6 +434,8 @@ export const useStoresStore = defineStore('stores', {
             .fetchCustomers()
             .catch((err) => console.warn('[StoresStore] Failed to fetch customers:', err)),
         ])
+
+        markStoreRefreshWarm(this.currentStoreId)
 
         // console.log('[StoresStore] Successfully refreshed all data for store:', this.currentStoreId)
       } catch (error) {

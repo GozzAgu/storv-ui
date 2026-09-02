@@ -1,5 +1,144 @@
 <template>
-  <div :class="['flex w-full max-w-none flex-col gap-5 pb-10 sm:gap-6', 'dash-page--unified']">
+  <div
+    :class="[
+      'flex w-full max-w-none flex-col',
+      isCapacitorIos ? 'dash-page--unified' : 'gap-5 pb-10 sm:gap-6 dash-page--unified',
+    ]"
+  >
+    <div v-if="isCapacitorIos" class="ios-sales-shell" data-payment-links-page>
+      <IosPageNavBar title="Payment links" />
+
+      <PaymentLinksComingSoon v-if="showPaymentLinksComingSoon" />
+
+      <template v-else>
+        <IosQuickActionBar
+          v-model="iosPaymentTab"
+          aria-label="Payment link actions"
+          :options="iosPaymentQuickActions"
+        />
+
+        <section
+          v-if="!payout.connected || editingBank"
+          class="ios-receipt-transaction-list mb-3 !rounded-2xl !shadow-none"
+        >
+          <div class="px-4 py-3">
+            <p class="text-sm font-semibold text-gray-900 dark:text-gray-50">Connect payout account</p>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              Enter bank details so payments settle to your account.
+            </p>
+            <div class="mt-3 grid grid-cols-1 gap-3">
+              <select
+                v-model="bankCode"
+                :class="[fieldClass, 'w-full']"
+                :disabled="banksLoading"
+                @change="onAccountInput"
+              >
+                <option value="">{{ banksLoading ? 'Loading banks…' : 'Select bank' }}</option>
+                <option v-for="b in banks" :key="b.code" :value="b.code">{{ b.name }}</option>
+              </select>
+              <input
+                v-model="accountNumber"
+                inputmode="numeric"
+                maxlength="10"
+                placeholder="Account number"
+                :class="[fieldClass, 'w-full tabular-nums']"
+                @input="onAccountInput"
+              />
+            </div>
+            <div v-if="resolving" class="mt-2 text-xs text-gray-400">Verifying account…</div>
+            <div
+              v-else-if="resolvedName"
+              class="mt-2 flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300"
+            >
+              <CheckBadgeIcon class="h-4 w-4" />
+              {{ resolvedName }}
+            </div>
+            <p v-if="connectError" class="mt-2 text-xs font-medium text-red-500">{{ connectError }}</p>
+            <div class="mt-3 flex justify-end gap-2">
+              <Button
+                v-if="editingBank"
+                variant="outline"
+                size="sm"
+                @click="editingBank = false"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                :disabled="!canConnect || connecting"
+                @click="connect"
+              >
+                {{ connecting ? 'Connecting…' : editingBank ? 'Update account' : 'Connect' }}
+              </Button>
+            </div>
+          </div>
+        </section>
+
+        <section
+          v-else
+          class="mb-3 rounded-2xl bg-emerald-50/70 px-4 py-3 dark:bg-emerald-500/[0.06]"
+        >
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <p class="text-sm font-medium text-gray-900 dark:text-gray-50">
+                Payouts to {{ payout.accountName }}
+              </p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">
+                {{ payout.bankName }} · ****{{ payout.accountNumberLast4 }}
+                <span v-if="payout.percentageCharge"> · {{ payout.percentageCharge }}% fee</span>
+              </p>
+            </div>
+            <Button variant="outline" size="sm" @click="startEditBank">Change</Button>
+          </div>
+        </section>
+
+        <IosTransactionListSkeleton v-if="loading && links.length === 0" :count="6" />
+
+        <DashboardTableEmptyState
+          v-else-if="links.length === 0"
+          :icon="CreditCardIcon"
+          title="No payment links yet"
+          description="Create your first link to start collecting."
+        />
+
+        <div v-else class="ios-receipt-transaction-list">
+          <IosReceiptTransactionRow
+            v-for="(inv, index) in links"
+            :key="inv.token"
+            :title="inv.customerName || inv.invoiceNumber"
+            :subtitle="`${inv.invoiceNumber} · ${statusLabel(inv.status)}`"
+            :amount="formatNaira(inv.total)"
+            :amount-tone="iosPaymentAmountTone(inv.status)"
+            :date="inv.paidAtMs ? formatDate(inv.paidAtMs) : ''"
+            :variant="iosPaymentVariant(inv.status)"
+            :last="index === links.length - 1"
+            show-menu
+            menu-kind="payment-link"
+            :menu-id="inv.token"
+            @click="share(inv)"
+            @menu="togglePaymentLinkMenu(inv.token)"
+          />
+        </div>
+      </template>
+
+      <CreatePaymentLinkModal v-model="showCreate" @created="onCreated" />
+      <SharePaymentLinkModal
+        v-model="showShare"
+        :link="activeLink"
+        :auto-share="autoShareAfterCreate"
+        @shared="onLinkShared"
+      />
+      <TotpConfirmModal
+        v-model="totpModalOpen"
+        title="Confirm bank connection"
+        description="Enter your authenticator code to connect a payout bank account."
+        @confirm="confirmTotp"
+        @cancel="cancelTotp"
+      />
+    </div>
+
+    <template v-else>
     <DashboardPageHeader class="dash-page-header--unified">
       <template #eyebrow>
         <p :class="eyebrowClass">Payments</p>
@@ -96,12 +235,12 @@
         </div>
         <p v-if="connectError" class="mt-3 text-xs font-medium text-red-500">{{ connectError }}</p>
 
-        <div class="mt-4 flex justify-end gap-2">
+        <div class="mt-4 flex flex-wrap justify-end gap-2">
           <Button
             v-if="editingBank"
-            variant="secondary"
+            variant="outline"
             size="sm"
-            :extra-class="headerBtnClass"
+            :extra-class="headerTextBtnClass"
             @click="editingBank = false"
           >
             Cancel
@@ -109,7 +248,7 @@
           <Button
             variant="primary"
             size="sm"
-            :extra-class="headerBtnClass"
+            :extra-class="headerTextBtnClass"
             :disabled="!canConnect || connecting"
             @click="connect"
           >
@@ -209,21 +348,27 @@
           <span class="text-xs text-gray-500 dark:text-gray-400">{{ links.length }} total</span>
         </div>
 
-        <div v-if="loading && links.length === 0" class="space-y-2 p-4 sm:p-5">
-          <div
-            v-for="i in 4"
-            :key="i"
-            class="h-12 animate-pulse rounded-lg bg-gray-100 dark:bg-white/[0.05]"
-          />
-        </div>
+        <DashTableSkeleton
+          v-if="loading && links.length === 0"
+          :columns="[
+            { label: 'Invoice', lines: 2 },
+            { label: 'Customer', lines: 2 },
+            { label: 'Total', class: 'text-right', bone: '4.5rem' },
+            { label: 'Status', class: 'dashboard-table__col-status', bone: '4.5rem' },
+            { label: 'Actions', class: 'dashboard-table__col-actions', bone: '4.5rem' },
+          ]"
+          :rows="6"
+          leading="none"
+          flush
+          aria-label="Loading payment links"
+        />
 
-        <div v-else-if="links.length === 0" class="px-4 py-12 text-center sm:px-5">
-          <CreditCardIcon class="mx-auto mb-2 h-8 w-8 text-gray-300 dark:text-gray-600" />
-          <p class="text-sm font-medium text-gray-700 dark:text-gray-200">No payment links yet</p>
-          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            Create your first link to start collecting.
-          </p>
-        </div>
+        <DashboardTableEmptyState
+          v-else-if="links.length === 0"
+          :icon="CreditCardIcon"
+          title="No payment links yet"
+          description="Create your first link to start collecting."
+        />
 
         <div v-else class="overflow-x-auto">
           <table class="dashboard-table min-w-full">
@@ -272,14 +417,15 @@
                   </span>
                 </td>
                 <td class="dashboard-table__col-actions">
-                  <div class="inline-flex gap-1.5">
-                    <button type="button" class="btn-secondary btn-sm" @click="share(inv)">
-                      Share
-                    </button>
-                    <a class="btn-outline btn-sm" :href="inv.url" target="_blank" rel="noopener"
-                      >Open</a
-                    >
-                  </div>
+                  <button
+                    type="button"
+                    class="dashboard-table__action-btn"
+                    :data-payment-link-actions-anchor="inv.token"
+                    aria-label="Payment link actions"
+                    @click="togglePaymentLinkMenu(inv.token)"
+                  >
+                    <EllipsisVerticalIcon class="h-4 w-4" stroke-width="2" />
+                  </button>
                 </td>
               </tr>
             </tbody>
@@ -288,7 +434,12 @@
       </section>
 
       <CreatePaymentLinkModal v-model="showCreate" @created="onCreated" />
-      <SharePaymentLinkModal v-model="showShare" :link="activeLink" />
+      <SharePaymentLinkModal
+        v-model="showShare"
+        :link="activeLink"
+        :auto-share="autoShareAfterCreate"
+        @shared="onLinkShared"
+      />
       <TotpConfirmModal
         v-model="totpModalOpen"
         title="Confirm bank connection"
@@ -296,19 +447,66 @@
         @confirm="confirmTotp"
         @cancel="cancelTotp"
       />
+
+      <button
+        v-if="isNativeShell && payout.connected && !showPaymentLinksComingSoon"
+        type="button"
+        class="ios-fab payment-links-native-fab"
+        aria-label="New payment link"
+        @click="showCreate = true"
+      >
+        <CreditCardIcon class="h-5 w-5" stroke-width="2" />
+      </button>
     </template>
+    </template>
+
+    <IosContextMenu
+      :open="Boolean(openPaymentLinkMenuId && paymentLinkForOpenMenu && paymentLinkMenuFixedStyle)"
+      :style="paymentLinkMenuFixedStyle"
+      menu-id="payment-link"
+    >
+      <IosContextMenuItem
+        label="Share"
+        :icon="ShareIcon"
+        @click="
+          () => {
+            share(paymentLinkForOpenMenu!)
+            closePaymentLinkMenu()
+          }
+        "
+      />
+      <IosContextMenuItem
+        label="Open link"
+        :icon="ArrowTopRightOnSquareIcon"
+        :href="paymentLinkForOpenMenu?.url"
+        @click="closePaymentLinkMenu()"
+      />
+    </IosContextMenu>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, defineAsyncComponent } from 'vue'
+import { useRoute } from 'vue-router'
 import {
+  ArrowTopRightOnSquareIcon,
   BuildingLibraryIcon,
   CheckBadgeIcon,
   CreditCardIcon,
+  EllipsisVerticalIcon,
+  ShareIcon,
   ShieldCheckIcon,
 } from '~/utils/app-icons'
 import Button from '~/components/ui/Button.vue'
+import IosContextMenu from '~/components/ios/IosContextMenu.vue'
+import IosContextMenuItem from '~/components/ios/IosContextMenuItem.vue'
+import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
+import IosQuickActionBar, { type IosQuickActionOption } from '~/components/ios/IosQuickActionBar.vue'
+import IosTransactionListSkeleton from '~/components/ios/IosTransactionListSkeleton.vue'
+import IosReceiptTransactionRow, {
+  type ReceiptTransactionAmountTone,
+  type ReceiptTransactionVariant,
+} from '~/components/ios/IosReceiptTransactionRow.vue'
 import DashboardPageHeader from '~/components/dashboard/DashboardPageHeader.vue'
 import type { ShareableLink } from '~/components/payments/SharePaymentLinkModal.vue'
 
@@ -325,6 +523,8 @@ import { usePaymentLinks, type PaymentLinkListItem } from '~/composables/usePaym
 import { useUserStore } from '~/stores/user'
 import PaymentLinksComingSoon from '~/components/payments/PaymentLinksComingSoon.vue'
 import TotpConfirmModal from '~/components/security/TotpConfirmModal.vue'
+import { usePaymentLinksLaunch } from '~/composables/usePaymentLinksLaunch'
+import { isCapacitorNative } from '~/utils/capacitor-env'
 import { useTotpConfirmModal } from '~/composables/useTotpConfirmModal'
 import { resolveTotpForSensitiveAction } from '~/utils/security-api-errors'
 
@@ -333,9 +533,40 @@ definePageMeta({
   middleware: 'auth',
 })
 
+const route = useRoute()
 const { showPaymentLinksComingSoon } = usePaymentLinksLaunch()
+const isNativeShell = computed(() => isCapacitorNative())
+const { isCapacitorIos } = useIsCapacitorIos()
 
-const { eyebrowClass, titleClass, headerBtnClass, fieldClass } = useDashboardPageChrome()
+const iosPaymentTab = ref('links')
+const iosPaymentQuickActions = computed((): IosQuickActionOption[] => [
+  {
+    value: 'new',
+    label: 'New link',
+    icon: CreditCardIcon,
+    trailing: 'add',
+    action: () => {
+      if (payout.value.connected) showCreate.value = true
+    },
+  },
+  { value: 'links', label: 'Links', icon: CreditCardIcon },
+])
+
+function iosPaymentVariant(status: PaymentLinkListItem['status']): ReceiptTransactionVariant {
+  if (status === 'paid') return 'credit'
+  if (status === 'failed' || status === 'expired') return 'cancelled'
+  return 'pending'
+}
+
+function iosPaymentAmountTone(status: PaymentLinkListItem['status']): ReceiptTransactionAmountTone {
+  if (status === 'paid') return 'positive'
+  if (status === 'failed') return 'negative'
+  if (status === 'expired') return 'warning'
+  return 'neutral'
+}
+
+const { eyebrowClass, titleClass, headerBtnClass, headerTextBtnClass, fieldClass } =
+  useDashboardPageChrome()
 const { tableShellClass, tableSectionHeaderClass } = useDashboardTableChrome()
 const userStore = useUserStore()
 const {
@@ -397,6 +628,7 @@ const editingBank = ref(false)
 
 const showCreate = ref(false)
 const showShare = ref(false)
+const autoShareAfterCreate = ref(false)
 const activeLink = ref<ShareableLink | null>(null)
 
 const canConnect = computed(() =>
@@ -476,8 +708,13 @@ const refresh = () => loadAll()
 
 const onCreated = async (link: ShareableLink) => {
   activeLink.value = link
+  autoShareAfterCreate.value = isNativeShell.value
   showShare.value = true
   await loadLinks()
+}
+
+const onLinkShared = () => {
+  autoShareAfterCreate.value = false
 }
 
 const share = (inv: PaymentLinkListItem) => {
@@ -488,8 +725,24 @@ const share = (inv: PaymentLinkListItem) => {
     customerPhone: inv.customerPhone,
     total: inv.total,
   }
+  autoShareAfterCreate.value = false
   showShare.value = true
 }
+
+const {
+  openMenuId: openPaymentLinkMenuId,
+  menuFixedStyle: paymentLinkMenuFixedStyle,
+  toggleMenu: togglePaymentLinkMenu,
+  closeMenu: closePaymentLinkMenu,
+} = useAnchoredRowMenu({
+  anchorAttr: 'data-payment-link-actions-anchor',
+})
+
+const paymentLinkForOpenMenu = computed(() => {
+  const token = openPaymentLinkMenuId.value
+  if (!token) return null
+  return links.value.find((inv) => inv.token === token) ?? null
+})
 
 const statusLabel = (s: PaymentLinkListItem['status']) =>
   ({ unpaid: 'Unpaid', paid: 'Paid', failed: 'Failed', expired: 'Expired' }[s])
@@ -525,5 +778,8 @@ onMounted(async () => {
   if (showPaymentLinksComingSoon.value) return
   await loadAll()
   if (!payout.value.connected) await loadBanks()
+  if (route.query.create === '1' && payout.value.connected) {
+    showCreate.value = true
+  }
 })
 </script>
