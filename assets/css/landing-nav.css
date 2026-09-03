@@ -15,7 +15,7 @@
   top: 0;
   left: 0;
   right: 0;
-  z-index: 70;
+  z-index: 90;
   width: 100%;
   max-width: 100vw;
   overflow-x: clip;
@@ -214,18 +214,28 @@
   stroke-width: 1.75;
 }
 
-/* Mobile menu layer */
+/* Mobile menu layer (teleported to body — keep theme class on root) */
 .landing-mobile-layer {
   position: fixed;
   inset: 0;
-  z-index: 60;
-  /* Force this teleported overlay into its own opaque compositing layer. Without this,
-     some WebKit builds (notably during iOS screen recording/broadcast) have been seen
-     to under-composite a fixed-position portal layered over an animated page, letting
-     the page behind bleed through the panel's solid background. */
+  z-index: 80;
   isolation: isolate;
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
+}
+
+.landing-mobile-layer.landing-page--portfolio {
+  --landing-nav-muted: rgb(26 21 35 / 0.55);
+  --landing-nav-ink: #1a1523;
+  --landing-nav-border: rgb(26 21 35 / 0.08);
+  --landing-nav-surface: #ffffff;
+}
+
+html.dark .landing-mobile-layer.landing-page--portfolio {
+  --landing-nav-muted: rgb(255 255 255 / 0.62);
+  --landing-nav-ink: #ffffff;
+  --landing-nav-border: rgb(255 255 255 / 0.08);
+  --landing-nav-surface: #1e1e1e;
 }
 
 .landing-mobile-layer-enter-active,
@@ -244,42 +254,62 @@
 
 .landing-mobile-layer-enter-active .landing-mobile-panel,
 .landing-mobile-layer-leave-active .landing-mobile-panel {
-  transition:
-    transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 0.2s ease;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .landing-mobile-layer-enter-from .landing-mobile-panel,
 .landing-mobile-layer-leave-to .landing-mobile-panel {
-  opacity: 0;
-  transform: translateY(-0.375rem);
+  transform: translateY(-0.5rem);
+}
+
+.landing-mobile-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  background: rgb(8 8 8 / 0.45);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+html.dark .landing-mobile-backdrop {
+  background: rgb(0 0 0 / 0.62);
 }
 
 .landing-mobile-panel {
-  position: absolute;
+  position: fixed;
   top: calc(var(--landing-header-h) + env(safe-area-inset-top, 0px));
-  left: 1rem;
-  right: 1rem;
+  right: 0;
+  bottom: 0;
+  left: 0;
   z-index: 1;
-  max-height: calc(100dvh - var(--landing-header-h) - env(safe-area-inset-top, 0px) - 1rem);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  border: 1px solid var(--landing-nav-border);
-  border-radius: 1.25rem;
-  background: rgb(8 10 18 / 0.96);
-  box-shadow: 0 24px 64px rgb(0 0 0 / 0.45);
-  /* Own compositing layer with an opaque backing so the panel paints fully solid
-     instead of any of the page behind it showing through (see .landing-mobile-layer). */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 0;
+  border-radius: 1.25rem 1.25rem 0 0;
+  background: var(--landing-nav-surface, #ffffff);
+  box-shadow: 0 -4px 32px rgb(26 21 35 / 0.08);
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
 }
 
+html.dark .landing-mobile-panel {
+  box-shadow: 0 -8px 40px rgb(0 0 0 / 0.45);
+}
+
 .landing-mobile-panel__nav {
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
-  padding: 0.75rem;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.75rem 0.75rem 0.25rem;
 }
 
 .landing-mobile-nav-link {
@@ -302,18 +332,26 @@
 .landing-mobile-nav-link::after {
   content: '→';
   font-size: 0.875rem;
-  color: rgb(148 163 184 / 0.55);
+  color: var(--landing-nav-muted);
 }
 
 .landing-mobile-nav-link:hover,
 .landing-mobile-nav-link:focus-visible {
-  color: #fff;
+  color: var(--landing-nav-ink);
+  background: rgb(26 21 35 / 0.05);
+}
+
+html.dark .landing-mobile-nav-link:hover,
+html.dark .landing-mobile-nav-link:focus-visible {
   background: rgb(255 255 255 / 0.06);
 }
 
 .landing-mobile-panel__cta-wrap {
-  padding: 0 0.75rem 0.75rem;
+  flex-shrink: 0;
+  padding: 0.75rem;
   padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  border-top: 1px solid var(--landing-nav-border);
+  background: var(--landing-nav-surface, #ffffff);
 }
 
 .landing-mobile-panel__cta {
@@ -324,9 +362,14 @@
   font-size: 0.875rem;
   font-weight: 600;
   border-radius: 9999px;
-  background: #f8fafc;
-  color: #050508;
+  background: #1a1523;
+  color: #ffffff;
   box-shadow: none;
+}
+
+html.dark .landing-mobile-panel__cta {
+  background: #ffffff;
+  color: #1a1523;
 }
 
 .landing-mobile-panel__secondary-cta {
@@ -340,18 +383,12 @@
   color: var(--landing-nav-ink);
   text-decoration: none;
   border-radius: 9999px;
-  border: 1px solid var(--landing-nav-border);
-  background: transparent;
+  border: 0;
+  background: rgb(26 21 35 / 0.06);
 }
 
-.landing-mobile-backdrop {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  border: 0;
-  padding: 0;
-  cursor: pointer;
-  background: rgb(0 0 0 / 0.55);
+html.dark .landing-mobile-panel__secondary-cta {
+  background: rgb(255 255 255 / 0.08);
 }
 
 .landing-page [id] {

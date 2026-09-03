@@ -110,7 +110,8 @@ html.dark .landing-page--portfolio .landing-header--scrolled .landing-header__pi
 .landing-page--portfolio .landing-mobile-panel__cta,
 .landing-page--portfolio .landing-pill-cta,
 .landing-page--portfolio .landing-contact__cta,
-.landing-page--portfolio .landing-cookie-banner__btn {
+.landing-page--portfolio .landing-cookie-banner__btn,
+.landing-mobile-layer.landing-page--portfolio .landing-mobile-panel__cta {
   background: #1a1523;
   color: #ffffff;
   box-shadow: none;
@@ -128,7 +129,8 @@ html.dark .landing-page--portfolio .landing-header__cta,
 html.dark .landing-page--portfolio .landing-mobile-panel__cta,
 html.dark .landing-page--portfolio .landing-pill-cta,
 html.dark .landing-page--portfolio .landing-contact__cta,
-html.dark .landing-page--portfolio .landing-cookie-banner__btn {
+html.dark .landing-page--portfolio .landing-cookie-banner__btn,
+html.dark .landing-mobile-layer.landing-page--portfolio .landing-mobile-panel__cta {
   background: #ffffff;
   color: #1a1523;
 }
@@ -152,7 +154,8 @@ html.dark .landing-page--portfolio .landing-cookie-banner__btn:hover {
 
 .landing-page--portfolio .landing-pill-cta--outline,
 .landing-page--portfolio .landing-pill-cta--secondary,
-.landing-page--portfolio .landing-mobile-panel__secondary-cta {
+.landing-page--portfolio .landing-mobile-panel__secondary-cta,
+.landing-mobile-layer.landing-page--portfolio .landing-mobile-panel__secondary-cta {
   background: #ffffff;
   color: #1a1523;
   border: 0;
@@ -167,7 +170,8 @@ html.dark .landing-page--portfolio .landing-cookie-banner__btn:hover {
 
 html.dark .landing-page--portfolio .landing-pill-cta--outline,
 html.dark .landing-page--portfolio .landing-pill-cta--secondary,
-html.dark .landing-page--portfolio .landing-mobile-panel__secondary-cta {
+html.dark .landing-page--portfolio .landing-mobile-panel__secondary-cta,
+html.dark .landing-mobile-layer.landing-page--portfolio .landing-mobile-panel__secondary-cta {
   background: #1e1e1e;
   color: #ffffff;
 }
@@ -194,35 +198,43 @@ html.dark .landing-page--portfolio .landing-header__menu-btn {
   background: #282828;
 }
 
-.landing-page--portfolio .landing-mobile-panel {
+.landing-page--portfolio .landing-mobile-panel,
+.landing-mobile-layer.landing-page--portfolio .landing-mobile-panel {
   border: 0;
   background: #ffffff;
-  box-shadow: 0 24px 64px rgb(26 21 35 / 0.12);
+  box-shadow: 0 -4px 32px rgb(26 21 35 / 0.08);
 }
 
-html.dark .landing-page--portfolio .landing-mobile-panel {
+html.dark .landing-page--portfolio .landing-mobile-panel,
+html.dark .landing-mobile-layer.landing-page--portfolio .landing-mobile-panel {
   background: #1e1e1e;
-  box-shadow: 0 24px 64px rgb(0 0 0 / 0.65);
+  box-shadow: 0 -8px 40px rgb(0 0 0 / 0.45);
 }
 
 .landing-page--portfolio .landing-mobile-nav-link:hover,
-.landing-page--portfolio .landing-mobile-nav-link:focus-visible {
+.landing-page--portfolio .landing-mobile-nav-link:focus-visible,
+.landing-mobile-layer.landing-page--portfolio .landing-mobile-nav-link:hover,
+.landing-mobile-layer.landing-page--portfolio .landing-mobile-nav-link:focus-visible {
   color: #1a1523;
   background: #f5f5f7;
 }
 
 html.dark .landing-page--portfolio .landing-mobile-nav-link:hover,
-html.dark .landing-page--portfolio .landing-mobile-nav-link:focus-visible {
+html.dark .landing-page--portfolio .landing-mobile-nav-link:focus-visible,
+html.dark .landing-mobile-layer.landing-page--portfolio .landing-mobile-nav-link:hover,
+html.dark .landing-mobile-layer.landing-page--portfolio .landing-mobile-nav-link:focus-visible {
   color: #ffffff;
   background: #282828;
 }
 
-.landing-page--portfolio .landing-mobile-backdrop {
-  background: rgb(17 24 39 / 0.25);
+.landing-page--portfolio .landing-mobile-backdrop,
+.landing-mobile-layer.landing-page--portfolio .landing-mobile-backdrop {
+  background: rgb(8 8 8 / 0.45);
 }
 
-html.dark .landing-page--portfolio .landing-mobile-backdrop {
-  background: rgb(0 0 0 / 0.4);
+html.dark .landing-page--portfolio .landing-mobile-backdrop,
+html.dark .landing-mobile-layer.landing-page--portfolio .landing-mobile-backdrop {
+  background: rgb(0 0 0 / 0.62);
 }
 
 /* ── Hero ── */

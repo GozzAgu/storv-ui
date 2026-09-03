@@ -70,7 +70,11 @@
 
     <Teleport to="body">
       <Transition name="landing-mobile-layer">
-        <div v-if="mobileMenuOpen" class="landing-mobile-layer md:hidden" role="presentation">
+        <div
+          v-if="mobileMenuOpen"
+          class="landing-mobile-layer landing-page--portfolio md:hidden"
+          role="presentation"
+        >
           <button
             type="button"
             class="landing-mobile-backdrop"
