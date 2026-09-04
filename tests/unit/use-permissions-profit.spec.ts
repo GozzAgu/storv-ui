@@ -60,4 +60,34 @@ describe('usePermissions profit visibility', () => {
     staffMember.value = { role: 'manager' }
     expect(usePermissions().canManageBilling.value).toBe(false)
   })
+
+  it('blocks a plain staff member from editing receipts by default', async () => {
+    userData.value = { role: 'staff' }
+    staffMember.value = { role: 'staff' }
+    const { usePermissions } = await import('~/composables/usePermissions')
+    expect(usePermissions().canEditReceipts.value).toBe(false)
+  })
+
+  it('allows a staff member granted canManageReceipts to edit receipts', async () => {
+    userData.value = { role: 'staff' }
+    staffMember.value = { role: 'staff', canManageReceipts: true } as any
+    const { usePermissions } = await import('~/composables/usePermissions')
+    expect(usePermissions().canEditReceipts.value).toBe(true)
+  })
+
+  it('allows managers to edit receipts without an explicit grant', async () => {
+    userData.value = { role: 'staff' }
+    staffMember.value = { role: 'manager' }
+    const { usePermissions } = await import('~/composables/usePermissions')
+    expect(usePermissions().canEditReceipts.value).toBe(true)
+  })
+
+  it('restricts commission management to admin/owner, not staff', async () => {
+    const { usePermissions } = await import('~/composables/usePermissions')
+    expect(usePermissions().canManageCommissions.value).toBe(true)
+
+    userData.value = { role: 'staff' }
+    staffMember.value = { role: 'manager' }
+    expect(usePermissions().canManageCommissions.value).toBe(false)
+  })
 })

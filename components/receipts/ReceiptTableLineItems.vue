@@ -77,8 +77,8 @@ const metaSize = computed(() => (props.compact ? 'text-[10px]' : 'text-[11px]'))
 <template>
   <div v-if="items && items.length > 0">
     <div
-      class="hidden grid-cols-[minmax(0,1fr)_2.5rem_5rem_5.5rem] gap-x-2 border-b border-gray-100 px-2 pb-1.5 pt-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-gray-400 dark:border-gray-800/80 dark:text-gray-500 sm:grid"
-      :class="compact ? 'sm:grid-cols-[minmax(0,1fr)_2rem_4.5rem_5rem]' : ''"
+      class="hidden grid-cols-[minmax(0,1fr)_2.5rem_6.5rem_7rem] gap-x-2 border-b border-gray-100 px-2 pb-1.5 pt-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:border-gray-800/80 dark:text-gray-500 sm:grid"
+      :class="compact ? 'sm:grid-cols-[minmax(0,1fr)_2rem_5.75rem_6.25rem]' : ''"
     >
       <span>Product</span>
       <span class="text-center">Qty</span>
@@ -90,8 +90,8 @@ const metaSize = computed(() => (props.compact ? 'text-[10px]' : 'text-[11px]'))
       <li
         v-for="(item, idx) in items"
         :key="idx"
-        class="grid grid-cols-1 gap-2 px-2 py-2.5 sm:grid-cols-[minmax(0,1fr)_2.5rem_5rem_5.5rem] sm:items-start sm:gap-x-2 sm:py-2"
-        :class="compact ? 'sm:grid-cols-[minmax(0,1fr)_2rem_4.5rem_5rem]' : ''"
+        class="grid grid-cols-1 gap-2 px-2 py-2.5 sm:grid-cols-[minmax(0,1fr)_2.5rem_6.5rem_7rem] sm:items-start sm:gap-x-2 sm:py-2"
+        :class="compact ? 'sm:grid-cols-[minmax(0,1fr)_2rem_5.75rem_6.25rem]' : ''"
       >
         <div class="min-w-0">
           <p
@@ -134,10 +134,11 @@ const metaSize = computed(() => (props.compact ? 'text-[10px]' : 'text-[11px]'))
           <span class="text-[10px] font-medium uppercase tracking-wide text-gray-400 sm:hidden">
             Unit
           </span>
-          <div class="tabular-nums" :class="textSize">
+          <div class="tabular-nums leading-tight" :class="textSize">
             <span
               v-if="item.hasDiscount && item.originalPrice != null"
-              class="mr-1 text-gray-400 line-through dark:text-gray-500"
+              class="block text-gray-400 line-through dark:text-gray-500"
+              :class="metaSize"
             >
               {{ formatCurrency(item.originalPrice) }}
             </span>
@@ -151,10 +152,11 @@ const metaSize = computed(() => (props.compact ? 'text-[10px]' : 'text-[11px]'))
           <span class="text-[10px] font-medium uppercase tracking-wide text-gray-400 sm:hidden">
             Total
           </span>
-          <div class="tabular-nums" :class="textSize">
+          <div class="tabular-nums leading-tight" :class="textSize">
             <span
               v-if="item.hasDiscount && item.originalPrice != null"
-              class="mr-1 text-gray-400 line-through dark:text-gray-500"
+              class="block text-gray-400 line-through dark:text-gray-500"
+              :class="metaSize"
             >
               {{ formatCurrency(lineSubtotalBeforeDiscount(item)) }}
             </span>

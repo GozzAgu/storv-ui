@@ -890,7 +890,9 @@
                   <div
                     v-for="item in paginatedItems"
                     :key="item.id"
+                    :data-item-row="item.id"
                     class="rounded-sm bg-white p-3 shadow-none dark:!bg-dashboard-card"
+                    :class="flashItemId === item.id ? '!ring-2 !ring-primary-500/25 ring-offset-2 ring-offset-white dark:!ring-offset-gray-900' : ''"
                   >
                     <div class="flex items-start justify-between gap-1.5">
                       <div class="min-w-0 flex-1 flex items-start gap-1.5">
@@ -1036,7 +1038,12 @@
                         </tr>
                       </thead>
                       <tbody>
-                        <tr v-for="(item, index) in paginatedItems" :key="item.id">
+                        <tr
+                          v-for="(item, index) in paginatedItems"
+                          :key="item.id"
+                          :data-item-row="item.id"
+                          :class="flashItemId === item.id ? '!ring-2 !ring-inset !ring-primary-500/25' : ''"
+                        >
                           <td v-if="showBulkRowSelection" class="text-center">
                             <Checkbox
                               :model-value="selectedItemsForBulk.some((i) => i.id === item.id)"
@@ -2280,6 +2287,7 @@ definePageMeta({
 })
 
 const route = useRoute()
+const router = useRouter()
 const folderId = computed(() => route.params.id as string)
 
 const inventoryStore = useInventoryStore()
@@ -2770,6 +2778,80 @@ let searchLoadTimer: ReturnType<typeof setTimeout> | null = null
 const fullItemsForSerialDup = ref<InventoryItem[] | null>(null)
 
 const isSearchActive = computed(() => searchQuery.value.trim().length > 0)
+
+// Highlight an item deep-linked from global search (?item=<id>) - the folder list is
+// server-paginated, so we can't just jump to "the right page"; instead load the whole
+// folder (same path the search box's "load everything" mode already uses) and flash it.
+const itemFromRoute = computed(() => {
+  const raw = route.query.item
+  if (typeof raw === 'string' && raw.length > 0) return raw
+  if (Array.isArray(raw) && typeof raw[0] === 'string') return raw[0]
+  return null
+})
+
+const flashItemId = ref<string | null>(null)
+let itemHighlightClearTimer: ReturnType<typeof setTimeout> | null = null
+
+function stripItemHighlightQuery() {
+  if (route.query.item == null || route.query.item === '') return
+  const q = { ...route.query }
+  delete q.item
+  void router.replace({ query: q })
+}
+
+async function applyItemHighlightFromRoute(itemId: string) {
+  const fid = folderId.value
+  if (!fid) return
+
+  const target = await inventoryStore.fetchInventoryItemById(itemId)
+  if (!target) return
+
+  isSearchItemsLoading.value = true
+  const token = ++searchItemsLoadToken
+  try {
+    const list = await inventoryStore.fetchItemsAllChunked(fid)
+    if (token !== searchItemsLoadToken) return
+    folderSearchItems.value = list
+  } catch (e) {
+    console.warn('[inventory] Highlight load failed:', e)
+    return
+  } finally {
+    if (token === searchItemsLoadToken) isSearchItemsLoading.value = false
+  }
+
+  // Narrows the visible list to just this item (Object.values(item).some(...) in
+  // filteredItems already matches on `id` since it stringifies every field).
+  searchQuery.value = itemId
+
+  await nextTick()
+  flashItemId.value = itemId
+  if (import.meta.client) {
+    const scrollToRow = () => {
+      const el = document.querySelector<HTMLElement>(`[data-item-row="${itemId}"]`)
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+    nextTick(() => {
+      scrollToRow()
+      requestAnimationFrame(scrollToRow)
+    })
+  }
+
+  if (itemHighlightClearTimer) clearTimeout(itemHighlightClearTimer)
+  itemHighlightClearTimer = setTimeout(() => {
+    flashItemId.value = null
+    itemHighlightClearTimer = null
+    searchQuery.value = ''
+    stripItemHighlightQuery()
+  }, 5000)
+}
+
+watch(
+  [itemFromRoute, isLoadingFolder],
+  ([id, loading]) => {
+    if (id && !loading) void applyItemHighlightFromRoute(id)
+  },
+  { immediate: true }
+)
 
 const sortBy = ref('name')
 const showAddItemModal = ref(false)

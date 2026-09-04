@@ -7,7 +7,7 @@ import {
   assertSucceeds,
   type RulesTestEnvironment,
 } from '@firebase/rules-unit-testing'
-import { doc, getDoc, setDoc } from 'firebase/firestore'
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
 
 describe('firestore.rules', () => {
   let testEnv: RulesTestEnvironment
@@ -255,13 +255,15 @@ describe('firestore.rules', () => {
     storeId: string,
     memberUid: string,
     role: string,
-    canManageInventory = false
+    canManageInventory = false,
+    canManageReceipts = false
   ) {
     await setDoc(doc(context.firestore(), `users/${ownerId}/stores/${storeId}/members/${memberUid}`), {
       authUid: memberUid,
       role,
       status: 'active',
       ...(canManageInventory ? { canManageInventory: true } : {}),
+      ...(canManageReceipts ? { canManageReceipts: true } : {}),
     })
   }
 
@@ -393,5 +395,87 @@ describe('firestore.rules', () => {
 
     const db = testEnv.authenticatedContext('u2').firestore()
     await assertFails(getDoc(doc(db, 'users/u1/stores/s1/inventoryAuditLogs/log1')))
+  })
+
+  async function seedCompletedReceipt(
+    context: Parameters<RulesTestEnvironment['withSecurityRulesDisabled']>[0] extends (
+      c: infer C
+    ) => unknown
+      ? C
+      : never,
+    ownerId: string,
+    storeId: string,
+    receiptId: string
+  ) {
+    await setDoc(doc(context.firestore(), `users/${ownerId}/stores/${storeId}/receipts/${receiptId}`), {
+      receiptNumber: 'R-1',
+      customerName: 'Jane Doe',
+      customerEmail: 'jane@example.com',
+      items: [{ itemId: 'i1', quantity: 1, price: 100, itemName: 'Widget' }],
+      itemsCount: 1,
+      total: 100,
+      paymentMethod: 'cash',
+      status: 'completed',
+      folderId: 'f1',
+      itemIds: ['i1'],
+      storeId,
+      createdBy: ownerId,
+    })
+  }
+
+  it('allows staff granted canManageReceipts to refund a completed receipt', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await seedOwner(context, 'u1', 'storvv_medium')
+      await seedStore(context, 'u1', 's1')
+      await seedMember(context, 'u1', 's1', 'staff1', 'staff', false, true)
+      await seedCompletedReceipt(context, 'u1', 's1', 'r1')
+    })
+
+    const db = testEnv.authenticatedContext('staff1').firestore()
+    await assertSucceeds(
+      updateDoc(doc(db, 'users/u1/stores/s1/receipts/r1'), {
+        status: 'refunded',
+        refundReason: 'Customer changed their mind',
+        notes: 'Returned: Customer changed their mind',
+        updatedAt: new Date().toISOString(),
+      })
+    )
+  })
+
+  it('denies staff without canManageReceipts from refunding a completed receipt', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await seedOwner(context, 'u1', 'storvv_medium')
+      await seedStore(context, 'u1', 's1')
+      await seedMember(context, 'u1', 's1', 'staff1', 'staff', false, false)
+      await seedCompletedReceipt(context, 'u1', 's1', 'r1')
+    })
+
+    const db = testEnv.authenticatedContext('staff1').firestore()
+    await assertFails(
+      updateDoc(doc(db, 'users/u1/stores/s1/receipts/r1'), {
+        status: 'refunded',
+        refundReason: 'Customer changed their mind',
+        updatedAt: new Date().toISOString(),
+      })
+    )
+  })
+
+  it('denies staff granted canManageReceipts from changing items/total while refunding', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await seedOwner(context, 'u1', 'storvv_medium')
+      await seedStore(context, 'u1', 's1')
+      await seedMember(context, 'u1', 's1', 'staff1', 'staff', false, true)
+      await seedCompletedReceipt(context, 'u1', 's1', 'r1')
+    })
+
+    const db = testEnv.authenticatedContext('staff1').firestore()
+    await assertFails(
+      updateDoc(doc(db, 'users/u1/stores/s1/receipts/r1'), {
+        status: 'refunded',
+        refundReason: 'Customer changed their mind',
+        total: 1,
+        updatedAt: new Date().toISOString(),
+      })
+    )
   })
 })

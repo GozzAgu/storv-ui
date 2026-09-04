@@ -52,8 +52,8 @@ html:not(.capacitor-native) .dashboard-layout-root {
   --saas-radius-xl: 2rem;
   --saas-spring: cubic-bezier(0.22, 1, 0.36, 1);
   --saas-topnav-bg: #ffffff;
-  --saas-topnav-border: transparent;
-  --saas-topnav-shadow: none;
+  --saas-topnav-border: rgb(15 23 42 / 0.16);
+  --saas-topnav-shadow: 0 1px 3px rgb(15 23 42 / 0.09), 0 8px 20px rgb(15 23 42 / 0.1);
   --saas-topnav-blur: var(--saas-blur);
   --saas-topnav-height: 3rem;
   --saas-topnav-stack: calc(var(--saas-sidebar-inset) + var(--saas-topnav-height) + 0.625rem);

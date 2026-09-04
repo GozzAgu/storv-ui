@@ -316,6 +316,21 @@
         </div>
       </IosAnalyticsSection>
 
+      <IosAnalyticsSection
+        v-if="isCapacitorIos && canViewProfitAndCost"
+        title="Discount trend"
+        :subtitle="periodLabel"
+      >
+        <div class="ios-analytics-card ios-analytics-card--padded dash-chart-wrap dash-chart-wrap--tall">
+          <LazyApexChart
+            type="line"
+            :height="primaryChartHeight"
+            :options="discountChartOptions"
+            :series="discountChartSeries"
+          />
+        </div>
+      </IosAnalyticsSection>
+
       <div v-if="!isCapacitorIos" :class="chartsGridClass">
         <section :class="[cardFlushClass, 'dash-charts-grid__main overflow-hidden']">
           <div
@@ -352,6 +367,31 @@
           </div>
         </section>
       </div>
+
+      <section
+        v-if="!isCapacitorIos && canViewProfitAndCost"
+        :class="[cardFlushClass, 'overflow-hidden']"
+      >
+        <div
+          :class="[
+            cardHeaderClass,
+            'dash-card__header--compact !mb-0 border-b px-4 py-3 sm:flex-row sm:items-center',
+          ]"
+        >
+          <div>
+            <h2 :class="cardTitleClass">Discount trend</h2>
+            <p :class="cardDescClass">{{ periodLabel }}</p>
+          </div>
+        </div>
+        <div :class="['dash-chart-wrap dash-chart-wrap--tall']">
+          <LazyApexChart
+            type="line"
+            :height="primaryChartHeight"
+            :options="discountChartOptions"
+            :series="discountChartSeries"
+          />
+        </div>
+      </section>
 
       <IosAnalyticsSection
         v-if="isCapacitorIos"
@@ -892,6 +932,7 @@ import {
   ExclamationTriangleIcon,
   ReceiptPercentIcon,
   ShoppingBagIcon,
+  TagIcon,
   UsersIcon,
 } from '~/utils/app-icons'
 import AnalyticsKpiCard from '~/components/analytics/AnalyticsKpiCard.vue'
@@ -929,6 +970,11 @@ import {
   sumReceiptCogs,
   sumReceiptGrossProfit,
 } from '~/utils/inventory-item-cost'
+import {
+  sumReceiptDiscounts,
+  countDiscountedReceipts,
+  discountRatePercent,
+} from '~/utils/receipt-discounts'
 import {
   downloadAnalyticsCsv,
   downloadAnalyticsPdf,
@@ -1571,6 +1617,74 @@ const grossProfitSubtext = computed(() => {
   return `${formatMarginPercent(margin)} gross margin on line revenue`
 })
 
+const periodDiscounts = computed(() => sumReceiptDiscounts(completedReceiptsInPeriod.value))
+
+const periodDiscountedReceiptCount = computed(() =>
+  countDiscountedReceipts(completedReceiptsInPeriod.value)
+)
+
+const periodDiscountRatePercent = computed(() =>
+  discountRatePercent(periodDiscounts.value, periodSalesRevenue.value)
+)
+
+/** Current vs. equal-length prior window, in discount-rate percentage points (not % change of $). */
+const discountRateChange = computed(() => {
+  const now = new Date()
+  const cutoffDate = new Date()
+  let priorCutoff = new Date()
+  switch (selectedPeriod.value) {
+    case 'daily':
+      cutoffDate.setDate(now.getDate() - 30)
+      priorCutoff.setDate(now.getDate() - 60)
+      break
+    case 'weekly':
+      cutoffDate.setDate(now.getDate() - 84)
+      priorCutoff.setDate(now.getDate() - 168)
+      break
+    case 'monthly':
+      cutoffDate.setMonth(now.getMonth() - 12)
+      priorCutoff.setMonth(now.getMonth() - 24)
+      break
+  }
+  const priorReceipts = receipts.value.filter((r) => {
+    if (r.status !== 'completed') return false
+    const receiptDate = r.date?.toDate ? r.date.toDate() : new Date(r.date)
+    return receiptDate >= priorCutoff && receiptDate < cutoffDate
+  })
+  const priorDiscounts = sumReceiptDiscounts(priorReceipts)
+  const priorRevenue = priorReceipts.reduce((sum, receipt) => sum + receiptLineRevenue(receipt), 0)
+  const priorRate = discountRatePercent(priorDiscounts, priorRevenue)
+  const currentRate = periodDiscountRatePercent.value
+  if (priorRate === null || currentRate === null) return NaN
+  return currentRate - priorRate
+})
+
+const discountRateChangeBadge = computed(() => {
+  const v = discountRateChange.value
+  if (Number.isNaN(v)) return null
+  const rounded = Math.round(v * 10) / 10
+  if (rounded === 0) return null
+  return rounded > 0 ? `+${rounded}pt` : `${rounded}pt`
+})
+
+/** Rising discount rate is the concerning direction - no arrow badge (up/green would be
+ *  backwards here), just a warning tone + the change spelled out in the subtext, matching
+ *  how COGS/gross-profit already skip the directional trend badge on this page. */
+const discountTileTone = computed(() => {
+  const v = discountRateChange.value
+  return !Number.isNaN(v) && v > 0.5 ? 'warning' : 'default'
+})
+
+const discountSubtext = computed(() => {
+  const count = periodDiscountedReceiptCount.value
+  if (count === 0) return 'No discounted sales this period'
+  const rate = periodDiscountRatePercent.value
+  const ratePart = rate !== null ? ` · ${formatMarginPercent(rate)} of gross sales` : ''
+  const badge = discountRateChangeBadge.value
+  const changePart = badge ? ` · ${badge} vs last period` : ''
+  return `${count} sale${count === 1 ? '' : 's'} discounted${ratePart}${changePart}`
+})
+
 const analyticsHeaderMetrics = computed(() => {
   const metrics: DashboardPageMetric[] = [
     {
@@ -1633,6 +1747,13 @@ const analyticsHeaderMetrics = computed(() => {
         label: 'COGS',
         value: formatCurrency(periodCogs.value),
         icon: CubeIcon,
+      },
+      {
+        key: 'discounts',
+        label: 'Discounts',
+        value: formatCurrency(periodDiscounts.value),
+        tone: discountTileTone.value === 'warning' ? ('warning' as const) : undefined,
+        icon: TagIcon,
       }
     )
   }
@@ -1737,6 +1858,15 @@ const analyticsKpiCards = computed(() => {
         label: 'COGS',
         value: formatCurrency(periodCogs.value),
         secondary: cogsShare != null ? `${cogsShare}% of revenue` : undefined,
+      },
+      {
+        key: 'discounts',
+        icon: TagIcon,
+        label: 'Discounts',
+        value: formatCurrency(periodDiscounts.value),
+        tone: discountTileTone.value,
+        secondary: discountSubtext.value,
+        sparkline: discountChartSeries.value[0]?.data ?? null,
       }
     )
   }
@@ -2110,6 +2240,137 @@ const revenueChartOptions = computed(() => {
       background: 'transparent',
     },
     colors: [isDark ? '#e4e4e7' : '#4876c7'],
+    stroke: {
+      curve: 'smooth',
+      width: 2,
+    },
+    xaxis: {
+      categories:
+        revenueChartSeries.value[0]?.data.map((_, i) => {
+          if (selectedPeriod.value === 'daily') {
+            const date = new Date()
+            date.setDate(date.getDate() - (29 - i))
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+          } else if (selectedPeriod.value === 'weekly') {
+            return `Week ${i + 1}`
+          } else {
+            const date = new Date()
+            date.setMonth(date.getMonth() - (11 - i))
+            return date.toLocaleDateString('en-US', { month: 'short' })
+          }
+        }) || [],
+      labels: {
+        style: {
+          colors: isDark ? '#9CA3AF' : '#1F2937',
+          fontSize: '12px',
+        },
+      },
+      axisBorder: {
+        show: true,
+        color: isDark ? '#374151' : '#E5E7EB',
+      },
+      axisTicks: {
+        show: true,
+        color: isDark ? '#374151' : '#E5E7EB',
+      },
+    },
+    yaxis: {
+      labels: {
+        style: {
+          colors: isDark ? '#9CA3AF' : '#1F2937',
+          fontSize: '11px',
+        },
+        formatter: (val: number) => chartCurrencyAxis.value(val),
+      },
+    },
+    grid: {
+      borderColor: isDark ? '#374151' : '#E5E7EB',
+      strokeDashArray: 4,
+    },
+    dataLabels: { enabled: false },
+    tooltip: {
+      theme: isDark ? 'dark' : 'light',
+      y: {
+        formatter: (val: number) => formatCurrency(val),
+      },
+    },
+    theme: {
+      mode: isDark ? 'dark' : 'light',
+    },
+  }
+
+  return isCapacitorIos.value ? mergeIosApexChartTheme(base, isDark) : base
+})
+
+const discountChartSeries = computed(() => {
+  const data: number[] = []
+
+  const now = new Date()
+  let periods = 12
+
+  if (selectedPeriod.value === 'daily') {
+    periods = 30
+    for (let i = periods - 1; i >= 0; i--) {
+      const date = new Date(now)
+      date.setDate(date.getDate() - i)
+      const dayDiscount = sumReceiptDiscounts(
+        completedReceiptsInPeriod.value.filter((r) => {
+          const receiptDate = r.date?.toDate ? r.date.toDate() : new Date(r.date)
+          return receiptDate.toDateString() === date.toDateString()
+        })
+      )
+      data.push(dayDiscount)
+    }
+  } else if (selectedPeriod.value === 'weekly') {
+    for (let i = periods - 1; i >= 0; i--) {
+      const date = new Date(now)
+      date.setDate(date.getDate() - i * 7)
+      const weekStart = new Date(date)
+      weekStart.setDate(weekStart.getDate() - 7)
+      const weekDiscount = sumReceiptDiscounts(
+        completedReceiptsInPeriod.value.filter((r) => {
+          const receiptDate = r.date?.toDate ? r.date.toDate() : new Date(r.date)
+          return receiptDate >= weekStart && receiptDate < date
+        })
+      )
+      data.push(weekDiscount)
+    }
+  } else {
+    for (let i = periods - 1; i >= 0; i--) {
+      const date = new Date(now)
+      date.setMonth(date.getMonth() - i)
+      const monthStart = new Date(date.getFullYear(), date.getMonth(), 1)
+      const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0)
+      const monthDiscount = sumReceiptDiscounts(
+        completedReceiptsInPeriod.value.filter((r) => {
+          const receiptDate = r.date?.toDate ? r.date.toDate() : new Date(r.date)
+          return receiptDate >= monthStart && receiptDate <= monthEnd
+        })
+      )
+      data.push(monthDiscount)
+    }
+  }
+
+  return [
+    {
+      name: 'Discounts',
+      data: data,
+    },
+  ]
+})
+
+const discountChartOptions = computed(() => {
+  void displayCurrencyDeps.value
+  const isDark = chartIsDark.value
+
+  const base = {
+    chart: {
+      type: 'line',
+      toolbar: { show: false },
+      zoom: { enabled: false },
+      background: 'transparent',
+    },
+    colors: [isDark ? '#fbbf24' : '#b45309'],
     stroke: {
       curve: 'smooth',
       width: 2,

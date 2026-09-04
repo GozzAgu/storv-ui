@@ -100,6 +100,12 @@
           label="Inventory editor"
           hint="Can add and edit categories, products, quantities, and prices."
         />
+        <IosFormToggle
+          v-if="canGrantReceiptsAccess && formData.role !== 'manager'"
+          v-model="formData.canManageReceipts"
+          label="Receipts editor"
+          hint="Can cancel outstanding orders and process refunds. Managers already have this."
+        />
         <IosFormField label="Hire date" required>
           <IosFormInput v-model="formData.hireDate" type="date" required />
         </IosFormField>
@@ -204,7 +210,7 @@ const authStore = useAuthStore()
 const userStore = useUserStore()
 const toast = useAppToast()
 const { canAddStaff, limits } = useSubscriptionFeatures()
-const { canGrantInventoryAccess } = usePermissions()
+const { canGrantInventoryAccess, canGrantReceiptsAccess } = usePermissions()
 
 const formData = ref({
   firstName: '',
@@ -214,6 +220,7 @@ const formData = ref({
   position: '',
   role: 'staff' as 'manager' | 'staff' | 'intern',
   canManageInventory: false,
+  canManageReceipts: false,
   hireDate: new Date().toISOString().split('T')[0]!,
   salary: undefined as number | undefined,
   status: 'active' as 'active' | 'inactive' | 'on_leave',
@@ -308,6 +315,7 @@ const resetForm = () => {
     position: '',
     role: 'staff',
     canManageInventory: false,
+    canManageReceipts: false,
     hireDate: new Date().toISOString().split('T')[0]!,
     salary: undefined,
     status: 'active',
@@ -401,6 +409,8 @@ watch(
   (role) => {
     if (role !== 'manager') {
       formData.value.canManageInventory = false
+    } else {
+      formData.value.canManageReceipts = false
     }
   }
 )
@@ -419,6 +429,7 @@ watch(
           position: props.staff.position || '',
           role: (props.staff.role as 'manager' | 'staff' | 'intern') || 'staff',
           canManageInventory: props.staff.canManageInventory === true,
+          canManageReceipts: props.staff.canManageReceipts === true,
           hireDate: props.staff.hireDate || new Date().toISOString().split('T')[0]!,
           salary: props.staff.salary,
           status: (props.staff.status as 'active' | 'inactive' | 'on_leave') || 'active',
@@ -461,6 +472,8 @@ const handleSubmit = async () => {
         role: formData.value.role,
         canManageInventory:
           formData.value.role === 'manager' ? formData.value.canManageInventory : false,
+        canManageReceipts:
+          formData.value.role !== 'manager' ? formData.value.canManageReceipts : false,
         hireDate: formData.value.hireDate,
         salary: formData.value.salary,
         status: formData.value.status,
@@ -477,6 +490,8 @@ const handleSubmit = async () => {
         role: formData.value.role,
         canManageInventory:
           formData.value.role === 'manager' ? formData.value.canManageInventory : false,
+        canManageReceipts:
+          formData.value.role !== 'manager' ? formData.value.canManageReceipts : false,
         hireDate: formData.value.hireDate,
         salary: formData.value.salary,
         status: formData.value.status,

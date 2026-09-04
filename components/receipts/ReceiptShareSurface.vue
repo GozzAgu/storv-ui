@@ -1,10 +1,10 @@
 <template>
   <div
     ref="rootEl"
-    class="receipt-content bg-white text-gray-900 rounded-sm overflow-hidden max-w-2xl mx-auto shadow-sm"
+    class="receipt-content bg-white text-gray-900 rounded-lg overflow-hidden max-w-2xl mx-auto shadow-sm border border-gray-200"
     aria-hidden="true"
   >
-    <div class="receipt-header text-center px-6 pt-6 pb-4 border-b border-gray-200/90">
+    <div class="receipt-header text-center px-6 pt-6 pb-4 border-b-2 border-gray-900/90">
       <div v-if="storeLogoUrl" class="mb-2 flex justify-center">
         <img :src="storeLogoUrl" alt="" class="receipt-logo h-16 w-16 object-contain" />
       </div>

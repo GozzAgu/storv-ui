@@ -76,6 +76,8 @@ export interface ReceiptItem {
   hasDiscount?: boolean // Flag to indicate if discount was applied
   /** Acquisition cost snapshot at time of sale (for gross profit). */
   unitCost?: number
+  /** Reserved for a future per-item commission UI; not wired up yet (commission is receipt-level today). */
+  commissionAmount?: number
 }
 
 export interface Receipt {
@@ -101,6 +103,16 @@ export interface Receipt {
   hasSerialNumbers?: boolean
   notes?: string
   refundReason?: string // Reason for return/refund (when status is refunded)
+  discountReason?: string // Reason for a checkout-time discount, required when any item has hasDiscount
+  // Commission fields (admin/owner only): a flat amount folded into `total` so the customer
+  // sees one clean number; the true subtotal is always recoverable as `total - commissionAmount`.
+  commissionAmount?: number
+  commissionOwedToName?: string // Free-text payee (often an external referral agent, not necessarily staff)
+  commissionOwedToUid?: string // Optional staff uid, when the payee is a staff member
+  commissionStatus?: 'owed' | 'paid'
+  commissionPaidAt?: Date | any
+  commissionPaidBy?: string // uid of the admin/owner who marked it paid
+  commissionNotes?: string
   folderId: string
   /** All categories included when a sale spans multiple inventory folders. */
   folderIds?: string[]
@@ -572,12 +584,16 @@ export const useReceiptsStore = defineStore('receipts', {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
 
-      // Super admins and store managers can update receipts; regular staff cannot.
+      // Super admins and store managers can update receipts; staff need an explicit grant
+      // (canManageReceipts) to cancel/refund - the Firestore rules further restrict what
+      // fields a granted-but-not-manager staff member may actually change.
       if (userStore.userData?.role === 'staff') {
         const staffStore = useStaffStore()
         const member = await staffStore.fetchCurrentStaffMember()
-        if (member?.role !== 'manager') {
-          throw new Error('Only managers and super admins can update receipts.')
+        if (member?.role !== 'manager' && member?.canManageReceipts !== true) {
+          throw new Error(
+            'Only managers, super admins, or staff granted receipt access can update receipts.'
+          )
         }
       }
 
@@ -825,6 +841,56 @@ export const useReceiptsStore = defineStore('receipts', {
           ...this.receipts[index]!,
           status: 'cancelled',
           balanceDue: 0,
+          updatedAt: new Date(),
+        }
+      }
+    },
+
+    // Mark a receipt's commission payable as settled. Admin/owner or manager only (matches
+    // Firestore's general receipts update rule - commission fields aren't part of the narrower
+    // staff-grant allowlists).
+    async markCommissionPaid(receiptId: string): Promise<void> {
+      const db = useFirestore().getFirestoreInstance()
+      if (!db) throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
+
+      const authStore = useAuthStore()
+      if (!authStore.currentUser) throw new Error('User must be authenticated')
+
+      const userStore = useUserStore()
+      if (!userStore.userData) {
+        await userStore.fetchUserData(authStore.currentUser.uid)
+      }
+      if (userStore.userData?.role === 'staff') {
+        const staffStore = useStaffStore()
+        const member = await staffStore.fetchCurrentStaffMember()
+        if (member?.role !== 'manager') {
+          throw new Error('Only managers and super admins can settle a commission payable.')
+        }
+      }
+
+      const userId = await getQueryUserId()
+      if (!userId) throw new Error('User ID not available')
+
+      const { getCurrentStoreId } = await import('~/composables/useCurrentStore')
+      const storeId = await getCurrentStoreId()
+      if (!storeId) throw new Error('No store selected')
+
+      const receiptRef = getReceiptDocument(db, userId, storeId, receiptId)
+      const paidAt = serverTimestamp()
+      await updateDoc(receiptRef, {
+        commissionStatus: 'paid',
+        commissionPaidAt: paidAt,
+        commissionPaidBy: authStore.currentUser.uid,
+        updatedAt: paidAt,
+      })
+
+      const index = this.receipts.findIndex((r) => r.id === receiptId)
+      if (index > -1) {
+        this.receipts[index] = {
+          ...this.receipts[index]!,
+          commissionStatus: 'paid',
+          commissionPaidAt: new Date(),
+          commissionPaidBy: authStore.currentUser.uid,
           updatedAt: new Date(),
         }
       }

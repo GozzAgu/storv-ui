@@ -23,16 +23,6 @@
         </div>
         <div class="flex items-center gap-1.5 flex-shrink-0">
           <button
-            v-if="hasWhatsAppFeature"
-            type="button"
-            @click="openWhatsAppModal"
-            :disabled="!receipt"
-            class="px-3 py-1.5 rounded-sm border border-[#25D366]/40 bg-[#25D366]/10 text-[#128C7E] hover:bg-[#25D366]/20 dark:border-[#25D366]/30 dark:text-[#25D366] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5 text-xs font-medium"
-          >
-            <WhatsAppIcon class="w-4 h-4 shrink-0" />
-            <span>WhatsApp</span>
-          </button>
-          <button
             type="button"
             @click="handleEmailClick"
             :disabled="!receipt"
@@ -63,10 +53,10 @@
       <!-- Receipt Content (used for PDF) -->
       <div
         ref="receiptContent"
-        class="receipt-content bg-white text-gray-900 rounded-sm overflow-hidden max-w-2xl mx-auto shadow-sm"
+        class="receipt-content bg-white text-gray-900 rounded-lg overflow-hidden max-w-2xl mx-auto shadow-sm border border-gray-200"
       >
         <!-- Store header -->
-        <div class="receipt-header text-center px-6 pt-6 pb-4 border-b border-gray-200/90">
+        <div class="receipt-header text-center px-6 pt-6 pb-4 border-b-2 border-gray-900/90">
           <div v-if="storeLogoUrl" class="mb-2 flex justify-center">
             <img
               :src="storeLogoUrl"
@@ -119,18 +109,18 @@
           <p class="receipt-section-label mb-2 text-gray-500">Items</p>
           <div class="receipt-items-table-wrap -mx-1 overflow-x-auto px-1">
           <table class="w-full min-w-[20rem]">
-            <thead class="bg-gray-50">
-              <tr class="border-b border-gray-200">
-                <th class="receipt-section-label py-2 text-left text-gray-600">Product</th>
-                <th class="receipt-section-label w-12 py-2 text-center text-gray-600">Qty</th>
-                <th class="receipt-section-label py-2 text-right text-gray-600">Price</th>
+            <thead class="bg-gray-100">
+              <tr class="border-b-2 border-gray-300">
+                <th class="receipt-section-label py-2.5 text-left text-gray-700">Product</th>
+                <th class="receipt-section-label w-12 py-2.5 text-center text-gray-700">Qty</th>
+                <th class="receipt-section-label py-2.5 text-right text-gray-700">Price</th>
                 <th
                   v-if="canViewProfitAndCost"
-                  class="receipt-section-label py-2 text-right text-gray-600"
+                  class="receipt-section-label py-2.5 text-right text-gray-700"
                 >
                   Cost
                 </th>
-                <th class="receipt-section-label py-2 text-right text-gray-600">Total</th>
+                <th class="receipt-section-label py-2.5 text-right text-gray-700">Total</th>
               </tr>
             </thead>
             <tbody>
@@ -139,7 +129,7 @@
                 :key="index"
                 class="border-b border-gray-100/90"
               >
-                <td class="py-2 align-top">
+                <td class="py-2.5 align-top">
                   <p class="text-[12px] font-medium leading-tight text-gray-900">
                     {{ item.itemName }}
                   </p>
@@ -160,10 +150,10 @@
                     }}
                   </p>
                 </td>
-                <td class="py-2 text-center text-[12px] tabular-nums text-gray-700">
+                <td class="py-2.5 text-center text-[12px] tabular-nums text-gray-700">
                   {{ item.quantity }}
                 </td>
-                <td class="py-2 text-right text-[12px] tabular-nums text-gray-700">
+                <td class="py-2.5 text-right text-[12px] tabular-nums text-gray-700">
                   <template v-if="item.hasDiscount && item.originalPrice">
                     <span class="block text-[10px] leading-tight text-gray-400 line-through">{{
                       formatCurrency(item.originalPrice)
@@ -174,14 +164,14 @@
                 </td>
                 <td
                   v-if="canViewProfitAndCost"
-                  class="py-2 text-right text-[12px] tabular-nums text-gray-700"
+                  class="py-2.5 text-right text-[12px] tabular-nums text-gray-700"
                 >
                   <span v-if="receiptLineUnitCost(item) > 0">
                     {{ formatCurrency(receiptLineUnitCost(item)) }}
                   </span>
                   <span v-else class="text-gray-400">-</span>
                 </td>
-                <td class="py-2 text-right text-[12px] font-medium tabular-nums text-gray-900">
+                <td class="py-2.5 text-right text-[12px] font-medium tabular-nums text-gray-900">
                   <template v-if="item.hasDiscount && item.originalPrice">
                     <span
                       class="block text-[10px] font-normal leading-tight text-gray-400 line-through"
@@ -244,6 +234,40 @@
                 </div>
               </template>
               <div
+                v-if="canManageCommissions && (receipt.commissionAmount || 0) > 0"
+                class="space-y-1 border-t border-gray-200 pt-2 text-[12px] leading-tight"
+              >
+                <div class="flex justify-between">
+                  <span class="text-gray-500">Commission</span>
+                  <span>{{ formatCurrency(receipt.commissionAmount || 0) }}</span>
+                </div>
+                <div v-if="receipt.commissionOwedToName" class="flex justify-between">
+                  <span class="text-gray-500">Owed to</span>
+                  <span class="text-gray-900">{{ receipt.commissionOwedToName }}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span
+                    class="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-medium"
+                    :class="
+                      receipt.commissionStatus === 'paid'
+                        ? 'bg-emerald-50 text-emerald-700'
+                        : 'bg-amber-50 text-amber-700'
+                    "
+                  >
+                    {{ receipt.commissionStatus === 'paid' ? 'Paid' : 'Owed' }}
+                  </span>
+                  <button
+                    v-if="receipt.commissionStatus !== 'paid'"
+                    type="button"
+                    class="text-[11px] font-medium text-primary-700 hover:underline disabled:opacity-50"
+                    :disabled="isMarkingCommissionPaid"
+                    @click="markCommissionAsPaid"
+                  >
+                    Mark as paid
+                  </button>
+                </div>
+              </div>
+              <div
                 v-if="receipt.splitPayments?.length"
                 class="space-y-1 border-t border-gray-200 pt-2 text-[12px] leading-tight"
               >
@@ -265,7 +289,7 @@
                 <span class="capitalize text-gray-900">{{ receipt.paymentMethod }}</span>
               </div>
               <div
-                class="flex justify-between border-t border-gray-200 pt-2 text-[13px] font-semibold leading-tight"
+                class="-mx-3 mt-1 flex justify-between rounded-sm bg-gray-900 px-3 py-2 text-[13px] font-semibold leading-tight text-white"
               >
                 <span>{{ receiptTotalLabel }}</span>
                 <span>{{ formatCurrency(receipt.total) }}</span>
@@ -277,7 +301,8 @@
         <!-- Status -->
         <div class="px-6 py-3">
           <span
-            class="inline-flex items-center rounded px-2 py-1 text-[10px] font-medium bg-gray-100 text-gray-700"
+            class="inline-flex items-center rounded px-2 py-1 text-[10px] font-medium"
+            :class="receiptStatusPillClass"
           >
             {{ receipt.status.charAt(0).toUpperCase() + receipt.status.slice(1) }}
           </span>
@@ -408,22 +433,6 @@
       />
     </template>
   </Modal>
-
-  <SendWhatsAppModal
-    v-model="showWhatsAppModal"
-    mode="receipt"
-    :phone="receipt?.customerPhone || ''"
-    :email="receipt?.customerEmail || ''"
-    :template-vars="whatsAppTemplateVars"
-    :receipt-number="receipt?.receiptNumber"
-    :business-name="businessName"
-    :branch-name="branchName"
-    :store-logo-url="storeLogoUrl"
-    :receipt-data="receipt || undefined"
-    :get-receipt-element="() => receiptContent"
-    :get-receipt-pdf-blob="getReceiptPdfBlobForShare"
-    @sent="onWhatsAppSent"
-  />
 </template>
 
 <script setup lang="ts">
@@ -435,9 +444,7 @@ import {
 } from '~/utils/app-icons'
 import Modal from '~/components/ui/Modal.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
-import WhatsAppIcon from '~/components/icons/WhatsAppIcon.vue'
-import SendWhatsAppModal from '~/components/whatsapp/SendWhatsAppModal.vue'
-import type { Receipt, ReceiptItem } from '~/stores/receipts'
+import { useReceiptsStore, type Receipt, type ReceiptItem } from '~/stores/receipts'
 import type { InventoryItem } from '~/stores/inventory'
 import { useUserStore } from '~/stores/user'
 import { useAuthStore } from '~/stores/auth'
@@ -453,8 +460,6 @@ import { useAppToast } from '~/composables/useAppToast'
 import { useProductAnalytics } from '~/composables/useProductAnalytics'
 import { useUser } from '~/composables/useUser'
 import { getQueryUserId } from '~/composables/useFirestorePaths'
-import { formatReceiptDateForWhatsApp } from '~/utils/whatsapp'
-import { base64ToBlob } from '~/utils/file-share'
 import { setReceiptPdfFont } from '~/utils/receipt-pdf-font'
 import { useReceiptPaperHeader } from '~/composables/useReceiptPaperHeader'
 import { usePermissions } from '~/composables/usePermissions'
@@ -482,20 +487,35 @@ const isCapturingPdf = ref(false)
 const isPrinting = ref(false)
 const isSendingEmail = ref(false)
 const showEmailModal = ref(false)
-const showWhatsAppModal = ref(false)
 const emailToSend = ref('')
 const { copyToClipboard } = useCopy()
 const toast = useAppToast()
 const { trackEvent } = useProductAnalytics()
-const { hasFeature: hasWhatsAppFeature } = useWhatsAppMessaging()
 const { authFetch } = useAuthenticatedFetch()
 
 const copyReceiptNumber = (receiptNumber: string) => {
   copyToClipboard(receiptNumber, 'Receipt number')
 }
 const userStore = useUserStore()
-const { canViewProfitAndCost } = usePermissions()
+const { canViewProfitAndCost, canManageCommissions } = usePermissions()
 const { getUserDocument } = useUser()
+const receiptsStore = useReceiptsStore()
+const isMarkingCommissionPaid = ref(false)
+const markCommissionAsPaid = async () => {
+  if (!props.receipt || isMarkingCommissionPaid.value) return
+  isMarkingCommissionPaid.value = true
+  try {
+    await receiptsStore.markCommissionPaid(props.receipt.id)
+    if (props.receipt) {
+      props.receipt.commissionStatus = 'paid'
+    }
+    toast.success('Commission marked as paid')
+  } catch (error: any) {
+    toast.error(error?.message || 'Failed to update commission status')
+  } finally {
+    isMarkingCommissionPaid.value = false
+  }
+}
 
 const receiptPolicies = reactive({
   salesTerms: '',
@@ -550,7 +570,10 @@ const receiptGrossProfitAmount = computed(() => {
 })
 
 function receiptItemDetailLines(item: ReceiptItem) {
-  return getProductDetailLines(item, { formatMoney: (n) => formatCurrency(n) })
+  return getProductDetailLines(item, {
+    formatMoney: (n) => formatCurrency(n),
+    omitLineItemFields: true,
+  })
 }
 
 const receiptRef = computed(() => props.receipt)
@@ -656,34 +679,20 @@ const receiptTotalLabel = computed(() => {
   return showSwapCreditLine.value ? 'Amount due' : 'Total'
 })
 
-const receiptDisplayTotal = computed(() => {
-  if (!props.receipt) return 0
-  if (showSwapCreditLine.value) {
-    return Math.max(0, lineItemsNetTotal.value - swapCreditAmount.value)
+const receiptStatusPillClass = computed(() => {
+  switch (props.receipt?.status) {
+    case 'completed':
+      return 'bg-emerald-50 text-emerald-700'
+    case 'refunded':
+      return 'bg-red-50 text-red-700'
+    case 'balance_due':
+      return 'bg-amber-50 text-amber-700'
+    case 'cancelled':
+      return 'bg-gray-100 text-gray-500'
+    default:
+      return 'bg-gray-100 text-gray-700'
   }
-  return props.receipt.total ?? lineItemsNetTotal.value
 })
-
-const whatsAppTemplateVars = computed(() => ({
-  customerName: props.receipt?.customerName || 'Customer',
-  storeName: businessName.value || 'Store',
-  receiptNumber: props.receipt?.receiptNumber || '',
-  receiptDate: props.receipt?.date ? formatReceiptDateForWhatsApp(props.receipt.date) : '',
-  total: formatCurrency(receiptDisplayTotal.value),
-}))
-
-const openWhatsAppModal = () => {
-  showWhatsAppModal.value = true
-}
-
-async function getReceiptPdfBlobForShare(): Promise<Blob> {
-  const base64 = await generateReceiptPDF()
-  return base64ToBlob(base64, 'application/pdf')
-}
-
-const onWhatsAppSent = () => {
-  /* toast from modal */
-}
 
 // Pre-fill email when receipt changes
 watch(
@@ -765,16 +774,12 @@ const formatPdfCurrency = (value: number) => {
   return formatCurrency(value).replace(/₦/g, 'NGN ')
 }
 
-/** 1×1 transparent GIF: use when proxy fails so html2canvas never taints the canvas */
+/** 1×1 transparent GIF: swapped in for a receipt <img> when its proxy fetch fails, so a broken image never renders */
 const TRANSPARENT_1X1_GIF =
   'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
 
-const RECEIPT_PDF_IMAGE_FORMAT: 'PNG' | 'JPEG' = 'PNG'
-const RECEIPT_PDF_JPEG_QUALITY = 0.96
-const H2C_SCALES: readonly [number, number, number] = [2, 1.75, 1.5]
-
 /**
- * Convert remote images to data URLs so html2canvas does not taint the canvas
+ * Convert remote images to data URLs so the PDF pipeline's <img> fetches don't fail on CORS.
  * (tainted canvas causes SecurityError on toDataURL, PDF generation fails).
  */
 function resolveImgHttpUrl(src: string): string | null {
@@ -792,61 +797,6 @@ function resolveImgHttpUrl(src: string): string | null {
     return trimmed
   }
   return null
-}
-
-/** html2canvas does not support some modern CSS color functions (e.g. oklch in Tailwind v4). */
-function sanitizeUnsupportedColorFunctions(cssText: string): string {
-  return cssText.replace(/oklch\([^)]+\)/gi, '#000')
-}
-
-function forcePrintThemeOnClone(cloneDocument: Document, cloneRoot: HTMLElement) {
-  // Disable dark mode inheritance inside the cloned document.
-  cloneDocument.documentElement.classList.remove('dark')
-  cloneDocument.body.classList.remove('dark')
-  cloneDocument.documentElement.style.colorScheme = 'light'
-  cloneDocument.body.style.colorScheme = 'light'
-
-  // Ensure captured receipt is always white with dark text, regardless of app theme.
-  cloneRoot.classList.add('pdf-export')
-  cloneRoot.style.backgroundColor = '#ffffff'
-  cloneRoot.style.color = '#111827'
-  cloneRoot.style.borderColor = '#e5e7eb'
-  cloneRoot.querySelectorAll<HTMLElement>('*').forEach((node) => {
-    // Keep explicit transparent backgrounds; otherwise force white to avoid dark-mode bleed.
-    const bg = node.style.backgroundColor?.trim().toLowerCase()
-    if (!bg || bg === 'transparent') {
-      node.style.backgroundColor = '#ffffff'
-    }
-    const color = node.style.color?.trim().toLowerCase()
-    if (!color) {
-      node.style.color = '#111827'
-    }
-  })
-}
-
-function prepareHtml2CanvasClone(cloneDocument: Document, cloneRoot: HTMLElement) {
-  // Last-ditch: replace any still-remote <img> in the clone to avoid tainting.
-  cloneRoot.querySelectorAll('img').forEach((img) => {
-    const s = (img.getAttribute('src') || '').trim()
-    if (!s || s.startsWith('data:') || s.startsWith('blob:')) return
-    if (s.startsWith('http://') || s.startsWith('https://') || s.startsWith('//')) {
-      img.setAttribute('src', TRANSPARENT_1X1_GIF)
-    }
-  })
-
-  // Prevent parser crash: strip unsupported color functions from inline styles and style tags.
-  cloneRoot.querySelectorAll<HTMLElement>('[style]').forEach((node) => {
-    const style = node.getAttribute('style')
-    if (!style || !/oklch\(/i.test(style)) return
-    node.setAttribute('style', sanitizeUnsupportedColorFunctions(style))
-  })
-
-  cloneDocument.querySelectorAll<HTMLStyleElement>('style').forEach((styleEl) => {
-    if (!styleEl.textContent || !/oklch\(/i.test(styleEl.textContent)) return
-    styleEl.textContent = sanitizeUnsupportedColorFunctions(styleEl.textContent)
-  })
-
-  forcePrintThemeOnClone(cloneDocument, cloneRoot)
 }
 
 async function fetchProxyImageDataUrl(absoluteUrl: string): Promise<string> {
@@ -893,124 +843,6 @@ async function injectDataUrlsForImages(el: HTMLElement): Promise<void> {
   )
 }
 
-async function html2CanvasReceipt(el: HTMLElement, scale: number): Promise<HTMLCanvasElement> {
-  if (import.meta.client && document.fonts?.ready) {
-    await document.fonts.ready
-  }
-  const { default: html2canvas } = await import('html2canvas')
-  const captureWidth = Math.max(1, Math.ceil(el.scrollWidth || el.clientWidth))
-  const captureHeight = Math.max(1, Math.ceil(el.scrollHeight || el.clientHeight))
-  const baseOptions = {
-    scale,
-    useCORS: true,
-    allowTaint: false,
-    logging: false,
-    backgroundColor: '#ffffff',
-    width: captureWidth,
-    height: captureHeight,
-    x: 0,
-    y: 0,
-    scrollX: 0,
-    scrollY: 0,
-    windowWidth: captureWidth + 32,
-    windowHeight: captureHeight + 32,
-    onclone: prepareHtml2CanvasClone,
-  } as const
-
-  // Use the classic renderer only; foreignObject mode can clip left glyph edges in PDFs.
-  const fallbackCanvas = await html2canvas(el, {
-    ...baseOptions,
-    foreignObjectRendering: false,
-  })
-  if (isCanvasEffectivelyBlank(fallbackCanvas)) {
-    throw new Error('Rendered canvas is blank')
-  }
-  return fallbackCanvas
-}
-
-function createDetachedPdfCaptureNode(el: HTMLElement): {
-  target: HTMLElement
-  cleanup: () => void
-} {
-  if (!import.meta.client || typeof document === 'undefined') {
-    return { target: el, cleanup: () => {} }
-  }
-
-  const wrapper = document.createElement('div')
-  wrapper.style.position = 'fixed'
-  wrapper.style.left = '0'
-  wrapper.style.top = '0'
-  wrapper.style.margin = '0'
-  wrapper.style.padding = '0'
-  wrapper.style.background = '#ffffff'
-  wrapper.style.pointerEvents = 'none'
-  wrapper.style.zIndex = '-1'
-  wrapper.style.overflow = 'visible'
-
-  const clone = el.cloneNode(true) as HTMLElement
-  clone.classList.add('pdf-export')
-  clone.style.margin = '0'
-  clone.style.transform = 'none'
-  clone.style.position = 'static'
-  clone.style.left = '0'
-  clone.style.top = '0'
-  clone.style.overflow = 'visible'
-
-  wrapper.appendChild(clone)
-  document.body.appendChild(wrapper)
-
-  return {
-    target: clone,
-    cleanup: () => {
-      wrapper.remove()
-    },
-  }
-}
-
-function isCanvasEffectivelyBlank(canvas: HTMLCanvasElement): boolean {
-  const ctx = canvas.getContext('2d')
-  if (!ctx || canvas.width === 0 || canvas.height === 0) return true
-  // Sample a coarse grid: if every sampled pixel is near-white/transparent, treat as blank.
-  const cols = 12
-  const rows = 16
-  const stepX = Math.max(1, Math.floor(canvas.width / cols))
-  const stepY = Math.max(1, Math.floor(canvas.height / rows))
-  for (let y = 0; y < canvas.height; y += stepY) {
-    for (let x = 0; x < canvas.width; x += stepX) {
-      const { data } = ctx.getImageData(x, y, 1, 1)
-      const r = data[0] ?? 255
-      const g = data[1] ?? 255
-      const b = data[2] ?? 255
-      const a = data[3] ?? 255
-      const nearWhite = r > 245 && g > 245 && b > 245
-      const transparent = a < 8
-      if (!nearWhite && !transparent) {
-        return false
-      }
-    }
-  }
-  return true
-}
-
-function addCanvasLeftGutter(canvas: HTMLCanvasElement, gutterPx = 24): HTMLCanvasElement {
-  if (!import.meta.client || typeof document === 'undefined' || gutterPx <= 0) {
-    return canvas
-  }
-  const padded = document.createElement('canvas')
-  padded.width = canvas.width + gutterPx
-  padded.height = canvas.height
-  const ctx = padded.getContext('2d')
-  if (!ctx) return canvas
-  ctx.fillStyle = '#ffffff'
-  ctx.fillRect(0, 0, padded.width, padded.height)
-  ctx.drawImage(canvas, gutterPx, 0)
-  return padded
-}
-
-/**
- * Renders the receipt to jsPDF, retrying with lower scale if canvas is too large
- * (browser limits) or the pipeline throws.
- */
 async function ensureReceiptFontsReady(): Promise<void> {
   if (!import.meta.client || !document.fonts?.load) return
   try {
@@ -1043,9 +875,25 @@ async function receiptElementToJsPdf(el: HTMLElement) {
   const rowGap = 4.6
   let y = 16
 
+  const borderInset = 6
+  const drawPageBorder = () => {
+    pdf.setDrawColor(209, 213, 219)
+    pdf.setLineWidth(0.35)
+    pdf.roundedRect(
+      margin - borderInset,
+      borderInset,
+      contentWidth + borderInset * 2,
+      pageHeight - borderInset * 2,
+      2,
+      2
+    )
+  }
+  drawPageBorder()
+
   const ensureSpace = (required = 8) => {
     if (y + required > pageHeight - margin) {
       pdf.addPage()
+      drawPageBorder()
       y = margin
     }
   }
@@ -1061,14 +909,20 @@ async function receiptElementToJsPdf(el: HTMLElement) {
   const writeTextLines = (
     text: string,
     maxWidth = contentWidth,
-    opts?: { bold?: boolean; align?: 'left' | 'right'; x?: number }
+    opts?: {
+      bold?: boolean
+      align?: 'left' | 'right'
+      x?: number
+      color?: [number, number, number]
+    }
   ) => {
     const clean = String(text || '').trim()
     if (!clean) return
     const lines = pdf.splitTextToSize(clean, maxWidth) as string[]
     setReceiptPdfFont(pdf, opts?.bold ? 'bold' : 'normal')
     pdf.setFontSize(10)
-    pdf.setTextColor(31, 41, 55)
+    const [tr, tg, tb] = opts?.color || [31, 41, 55]
+    pdf.setTextColor(tr, tg, tb)
     for (const line of lines) {
       ensureSpace(6)
       if (opts?.align === 'right') {
@@ -1162,13 +1016,18 @@ async function receiptElementToJsPdf(el: HTMLElement) {
   pdf.text('PRICE', priceX, y, { align: 'right' })
   pdf.text('TOTAL', totalX, y, { align: 'right' })
   y += 2
-  pdf.setDrawColor(229, 231, 235)
+  pdf.setDrawColor(209, 213, 219)
+  pdf.setLineWidth(0.5)
   pdf.line(margin, y, rightEdge, y)
+  pdf.setLineWidth(0.2)
   y += 5
 
   // Items rows
   for (const item of receipt.items) {
-    const detailLines = getProductDetailLines(item, { formatMoney: (n) => formatPdfCurrency(n) })
+    const detailLines = getProductDetailLines(item, {
+      formatMoney: (n) => formatPdfCurrency(n),
+      omitLineItemFields: true,
+    })
     const productLinesRaw = [item.itemName, ...detailLines]
     if (item.hasDiscount) {
       productLinesRaw.push(
@@ -1196,24 +1055,28 @@ async function receiptElementToJsPdf(el: HTMLElement) {
     setReceiptPdfFont(pdf, 'bold')
     pdf.text(formatPdfCurrency(item.price * item.quantity), totalX, y, { align: 'right' })
 
-    y += itemBlockHeight + 2
+    y += itemBlockHeight + 2.5
     pdf.setDrawColor(243, 244, 246)
     pdf.line(margin, y, rightEdge, y)
-    y += 4
+    y += 4.5
   }
 
   // Totals
   const totalsLeft = margin + 108
-  const writeTotalRow = (label: string, value: string, bold = false) => {
-    ensureSpace(7)
+  const writeTotalRow = (label: string, value: string, bold = false, highlight = false) => {
+    ensureSpace(highlight ? 10 : 7)
+    if (highlight) {
+      pdf.setFillColor(17, 24, 39)
+      pdf.rect(totalsLeft - 3, y - 4.6, rightEdge - totalsLeft + 3, 7.2, 'F')
+    }
     setReceiptPdfFont(pdf, 'normal')
     pdf.setFontSize(10)
-    pdf.setTextColor(75, 85, 99)
+    pdf.setTextColor(highlight ? 255 : 75, highlight ? 255 : 85, highlight ? 255 : 99)
     pdf.text(label, totalsLeft, y)
     setReceiptPdfFont(pdf, bold ? 'bold' : 'normal')
-    pdf.setTextColor(17, 24, 39)
+    pdf.setTextColor(highlight ? 255 : 17, highlight ? 255 : 24, highlight ? 255 : 39)
     pdf.text(value, rightEdge, y, { align: 'right' })
-    y += rowGap + 0.5
+    y += rowGap + (highlight ? 2 : 0.5)
   }
 
   if (hasAnyDiscount.value) {
@@ -1225,10 +1088,9 @@ async function receiptElementToJsPdf(el: HTMLElement) {
   if (showSwapCreditLine.value) {
     writeTotalRow('Swap credit (trade-in)', `-${formatPdfCurrency(swapCreditAmount.value)}`)
   }
-  if (canViewProfitAndCost.value && receipt.status === 'completed') {
-    writeTotalRow('Cost of goods sold', formatPdfCurrency(receiptCogs.value))
-    writeTotalRow('Gross profit', formatPdfCurrency(receiptGrossProfitAmount.value))
-  }
+  // Cost/gross-profit are intentionally never printed on the PDF - this is the customer-facing
+  // document (downloaded, printed, or emailed), unlike the on-screen view which stays
+  // owner-only behind canViewProfitAndCost.
   if (receipt.splitPayments?.length) {
     receipt.splitPayments.forEach((sp) => {
       writeTotalRow(`Payment (${sp.method})`, formatPdfCurrency(sp.amount))
@@ -1236,12 +1098,22 @@ async function receiptElementToJsPdf(el: HTMLElement) {
   } else {
     writeTotalRow('Payment', receipt.paymentMethod)
   }
-  writeTotalRow(receiptTotalLabel.value, formatPdfCurrency(receipt.total), true)
+  y += 1.5
+  writeTotalRow(receiptTotalLabel.value, formatPdfCurrency(receipt.total), true, true)
 
   y += 3
   ensureSpace(26)
   writeLabel('Status')
-  writeTextLines(receipt.status.charAt(0).toUpperCase() + receipt.status.slice(1))
+  const statusColor: Record<string, [number, number, number]> = {
+    completed: [4, 120, 87],
+    refunded: [185, 28, 28],
+    balance_due: [180, 83, 9],
+    cancelled: [107, 114, 128],
+  }
+  writeTextLines(receipt.status.charAt(0).toUpperCase() + receipt.status.slice(1), contentWidth, {
+    bold: true,
+    color: statusColor[receipt.status] || [55, 65, 81],
+  })
   if (receipt.notes) {
     y += 1
     writeLabel('Notes')

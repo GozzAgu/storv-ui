@@ -300,38 +300,83 @@
             <div
               v-for="(item, index) in cartItems"
               :key="index"
-              class="flex items-center justify-between p-3 bg-gray-50 dark:!bg-dashboard-card rounded-sm"
+              class="p-3 bg-gray-50 dark:!bg-dashboard-card rounded-sm"
             >
-              <div class="flex-1">
-                <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ item.name }}</p>
-                <p class="text-xs text-gray-600 dark:text-gray-400">
-                  Qty: {{ item.quantity }} × {{ formatCurrency(item.price) }}
-                </p>
-              </div>
-              <div class="flex items-center gap-3">
-                <div class="flex items-center gap-2">
+              <div class="flex items-center justify-between">
+                <div class="flex-1">
+                  <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ item.name }}</p>
+                  <p class="text-xs text-gray-600 dark:text-gray-400">
+                    Qty: {{ item.quantity }} ×
+                    <span v-if="(item.discountAmount || 0) > 0">
+                      <span class="line-through text-gray-400 dark:text-gray-500">{{
+                        formatCurrency(item.price)
+                      }}</span>
+                      {{ formatCurrency(Math.max(0, item.price - (item.discountAmount || 0))) }}
+                    </span>
+                    <span v-else>{{ formatCurrency(item.price) }}</span>
+                  </p>
+                </div>
+                <div class="flex items-center gap-3">
+                  <div class="flex items-center gap-2">
+                    <button
+                      @click="updateQuantity(index, item.quantity - 1)"
+                      class="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      <MinusIcon class="w-4 h-4" />
+                    </button>
+                    <span class="w-8 text-center text-sm font-medium">{{ item.quantity }}</span>
+                    <button
+                      @click="updateQuantity(index, item.quantity + 1)"
+                      class="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      <PlusIcon class="w-4 h-4" />
+                    </button>
+                  </div>
                   <button
-                    @click="updateQuantity(index, item.quantity - 1)"
-                    class="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+                    @click="removeItem(index)"
+                    class="p-1 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
                   >
-                    <MinusIcon class="w-4 h-4" />
-                  </button>
-                  <span class="w-8 text-center text-sm font-medium">{{ item.quantity }}</span>
-                  <button
-                    @click="updateQuantity(index, item.quantity + 1)"
-                    class="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    <PlusIcon class="w-4 h-4" />
+                    <TrashIcon class="w-5 h-5" />
                   </button>
                 </div>
+              </div>
+              <button
+                v-if="!item.showDiscountInput && !(item.discountAmount && item.discountAmount > 0)"
+                type="button"
+                class="mt-1.5 text-xs font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+                @click="item.showDiscountInput = true"
+              >
+                + Discount
+              </button>
+              <div v-else class="mt-2 flex items-center gap-2">
+                <span class="text-xs text-gray-600 dark:text-gray-400">Discount</span>
+                <input
+                  v-model.number="item.discountAmount"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="0.00"
+                  class="w-24 px-2 py-1 text-sm rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400/40"
+                />
                 <button
-                  @click="removeItem(index)"
-                  class="p-1 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
+                  type="button"
+                  class="text-xs text-red-600 dark:text-red-400 hover:underline"
+                  @click="item.discountAmount = undefined; item.showDiscountInput = false"
                 >
-                  <TrashIcon class="w-5 h-5" />
+                  Remove
                 </button>
               </div>
             </div>
+          </div>
+          <div v-if="hasAnyDiscount" class="mt-3">
+            <IosFormField label="Discount reason" required>
+              <IosFormTextarea
+                v-model="discountReason"
+                :rows="2"
+                extra-class="resize-none"
+                placeholder="Why is a discount being applied to this sale?"
+              />
+            </IosFormField>
           </div>
         </div>
 
@@ -361,6 +406,49 @@
               placeholder="Phone (Optional)"
               class="w-full px-4 py-2 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400/40"
             />
+          </div>
+        </div>
+
+        <!-- Commission (Collapsible, admin/owner only) -->
+        <div v-if="canManageCommissions" class="border-t border-gray-200 pt-4 dark:border-white/[0.08]">
+          <button
+            @click="showCommission = !showCommission"
+            class="flex items-center justify-between w-full text-left"
+          >
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300"
+              >Commission (Optional)</span
+            >
+            <ChevronDownIcon
+              :class="['w-5 h-5 transition-transform', showCommission ? 'rotate-180' : '']"
+            />
+          </button>
+          <div v-if="showCommission" class="mt-3 space-y-3">
+            <IosFormField label="Commission amount" hint="Folded into the total the customer pays.">
+              <input
+                v-model.number="commissionAmount"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+                class="w-full px-4 py-2 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400/40"
+              />
+            </IosFormField>
+            <IosFormField label="Owed to" hint="Who this commission is owed to.">
+              <input
+                v-model="commissionOwedToName"
+                type="text"
+                placeholder="e.g. referral agent's name"
+                class="w-full px-4 py-2 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400/40"
+              />
+            </IosFormField>
+            <IosFormField v-if="commissionEligibleStaff.length" label="Attribute to staff (optional)">
+              <IosFormSelect v-model="commissionOwedToUid" extra-class="cursor-pointer">
+                <option value="">None</option>
+                <option v-for="s in commissionEligibleStaff" :key="s.id" :value="s.authUid">
+                  {{ s.firstName }} {{ s.lastName }}
+                </option>
+              </IosFormSelect>
+            </IosFormField>
           </div>
         </div>
 
@@ -517,6 +605,7 @@ import DashboardDrawerSearch from '~/components/dashboard/DashboardDrawerSearch.
 import Button from '~/components/ui/Button.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
+import { IosFormField, IosFormTextarea, IosFormSelect } from '~/components/ios/forms'
 import { useInventoryStore, type InventoryFolder, type InventoryItem } from '~/stores/inventory'
 import { useSellerLoanOutsStore } from '~/stores/sellerLoanOuts'
 import { useReceiptsStore } from '~/stores/receipts'
@@ -524,6 +613,7 @@ import { useStoresStore } from '~/stores/stores'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useStaffStore } from '~/stores/staff'
+import { usePermissions } from '~/composables/usePermissions'
 import { usePreferences } from '~/composables/usePreferences'
 import { useAppToast } from '~/composables/useAppToast'
 import { getReceiptProductDetails } from '~/composables/useReceiptProductDetails'
@@ -666,11 +756,28 @@ const folderItems = ref<InventoryItem[]>([])
 const loadingFolderItems = ref(false)
 const itemSearchQuery = ref('')
 const cartItems = ref<
-  Array<{ id: string; name: string; price: number; quantity: number; item: InventoryItem }>
+  Array<{
+    id: string
+    name: string
+    price: number
+    quantity: number
+    item: InventoryItem
+    discountAmount?: number
+    showDiscountInput?: boolean
+  }>
 >([])
 const showCustomerInfo = ref(false)
 const customerName = ref('')
 const customerPhone = ref('')
+const discountReason = ref('')
+const hasAnyDiscount = computed(() =>
+  cartItems.value.some((ci) => (ci.discountAmount || 0) > 0)
+)
+const { canManageCommissions } = usePermissions()
+const showCommission = ref(false)
+const commissionAmount = ref<number | undefined>(undefined)
+const commissionOwedToName = ref('')
+const commissionOwedToUid = ref('')
 const { paymentTenderOptions } = usePaymentTenders()
 const paymentMethod = ref('Cash')
 const useSplitPayment = ref(false)
@@ -680,7 +787,10 @@ const isProcessing = ref(false)
 let html5QrCode: any = null
 
 const cartTotal = computed(() => {
-  return cartItems.value.reduce((total, item) => total + item.price * item.quantity, 0)
+  return cartItems.value.reduce(
+    (total, item) => total + Math.max(0, item.price - (item.discountAmount || 0)) * item.quantity,
+    0
+  )
 })
 
 const splitPaymentsTotal = computed(() =>
@@ -725,6 +835,7 @@ const removeSplitPayment = (index: number) => {
 
 const canCompleteQuickSale = computed(() => {
   if (cartItems.value.length === 0 || !selectedFolderId.value) return false
+  if (hasAnyDiscount.value && !discountReason.value.trim()) return false
   if (useSplitPayment.value) {
     if (splitPayments.value.length === 0) return false
     if (splitPayments.value.some((p) => !p.method || p.amount <= 0)) return false
@@ -732,6 +843,11 @@ const canCompleteQuickSale = computed(() => {
   }
   return !!paymentMethod.value
 })
+
+/** Staff eligible to be attributed a commission payout (has an auth uid, so they're a real login-capable member). */
+const commissionEligibleStaff = computed(() =>
+  staffStore.staff.filter((s) => !!s.authUid && s.status === 'active')
+)
 
 const toggleScanner = async () => {
   if (isScanning.value) {
@@ -1009,17 +1125,27 @@ const completeSale = async () => {
   try {
     const receiptNumber = `REC-${Date.now().toString().slice(-6)}`
 
-    const receiptItems = cartItems.value.map((ci) => ({
-      itemId: ci.id,
-      quantity: ci.quantity,
-      price: ci.price,
-      itemName: ci.name,
-      serialNo: String((ci.item as any).serialNo || (ci.item as any).serialNumber || ''),
-      brand: String((ci.item as any).brand || ''),
-      model: String((ci.item as any).model || ''),
-      sku: String((ci.item as any).sku || ''),
-      productDetails: getReceiptProductDetails(ci.item),
-    }))
+    const receiptItems = cartItems.value.map((ci) => {
+      const discountAmount = ci.discountAmount || 0
+      const hasDiscount = discountAmount > 0
+      return {
+        itemId: ci.id,
+        quantity: ci.quantity,
+        price: hasDiscount ? Math.max(0, ci.price - discountAmount) : ci.price,
+        itemName: ci.name,
+        serialNo: String((ci.item as any).serialNo || (ci.item as any).serialNumber || ''),
+        brand: String((ci.item as any).brand || ''),
+        model: String((ci.item as any).model || ''),
+        sku: String((ci.item as any).sku || ''),
+        productDetails: getReceiptProductDetails(ci.item),
+        ...(hasDiscount && {
+          originalPrice: ci.price,
+          discountAmount,
+          discountPercentage: Math.round((discountAmount / ci.price) * 100),
+          hasDiscount: true,
+        }),
+      }
+    })
 
     const itemIds = cartItems.value.map((ci) => ci.id)
     const hasSerialNumbers = selectedFolder.value?.hasSerialNumbers ?? false
@@ -1071,7 +1197,7 @@ const completeSale = async () => {
       date: new Date(),
       items: receiptItems,
       itemsCount: cartItems.value.reduce((sum, ci) => sum + ci.quantity, 0),
-      total: cartTotal.value,
+      total: cartTotal.value + (canManageCommissions.value ? commissionAmount.value || 0 : 0),
       paymentMethod: useSplitPayment.value ? 'Split Payment' : paymentMethod.value || 'Cash',
       status: 'completed' as const,
       notes: 'Quick Sale',
@@ -1081,6 +1207,17 @@ const completeSale = async () => {
       storeBranchName, // Store branch name
       storeLogoUrl: storesStore.currentStore?.logoUrl || userStore.userData?.storeLogoUrl || '', // Account logo - empty string if none (Firestore rejects undefined)
       createdByUserName, // User who created the receipt
+    }
+
+    if (hasAnyDiscount.value) {
+      receiptData.discountReason = discountReason.value.trim()
+    }
+
+    if (canManageCommissions.value && (commissionAmount.value || 0) > 0) {
+      receiptData.commissionAmount = commissionAmount.value
+      receiptData.commissionOwedToName = commissionOwedToName.value.trim() || undefined
+      receiptData.commissionOwedToUid = commissionOwedToUid.value || undefined
+      receiptData.commissionStatus = 'owed'
     }
 
     if (useSplitPayment.value && splitPayments.value.length > 0) {
@@ -1107,6 +1244,11 @@ const resetForm = () => {
   cartItems.value = []
   customerName.value = ''
   customerPhone.value = ''
+  discountReason.value = ''
+  showCommission.value = false
+  commissionAmount.value = undefined
+  commissionOwedToName.value = ''
+  commissionOwedToUid.value = ''
   paymentMethod.value = 'Cash'
   useSplitPayment.value = false
   splitPayments.value = [{ method: '', amount: 0 }]

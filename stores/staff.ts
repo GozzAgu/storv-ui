@@ -255,6 +255,8 @@ export const useStaffStore = defineStore('staff', {
                     departmentId: s.departmentId,
                     role: s.role || 'staff',
                     status: s.status || 'active',
+                    canManageInventory: s.canManageInventory === true ? true : deleteField(),
+                    canManageReceipts: s.canManageReceipts === true ? true : deleteField(),
                     createdBy: userId,
                     updatedAt: serverTimestamp(),
                   },
@@ -676,6 +678,9 @@ export const useStaffStore = defineStore('staff', {
         ...(staffData.role === 'manager' && staffData.canManageInventory === true
           ? { canManageInventory: true as const }
           : {}),
+        ...(staffData.role !== 'manager' && staffData.canManageReceipts === true
+          ? { canManageReceipts: true as const }
+          : {}),
         hireDate: staffData.hireDate || new Date().toISOString().split('T')[0],
         ...(staffData.salary !== undefined && { salary: Number(staffData.salary) }),
         status:
@@ -698,6 +703,8 @@ export const useStaffStore = defineStore('staff', {
           departmentId: staffData.departmentId,
           role: newStaff.role,
           status: newStaff.status,
+          ...('canManageInventory' in newStaff ? { canManageInventory: true } : {}),
+          ...('canManageReceipts' in newStaff ? { canManageReceipts: true } : {}),
           createdBy: superAdminUid,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
@@ -894,9 +901,16 @@ export const useStaffStore = defineStore('staff', {
               : mergedRole !== 'manager' || normalizedUpdates.canManageInventory === false
               ? { canManageInventory: deleteField() }
               : {}
+          const receiptsPatch =
+            mergedRole !== 'manager' && normalizedUpdates.canManageReceipts === true
+              ? { canManageReceipts: true }
+              : mergedRole === 'manager' || normalizedUpdates.canManageReceipts === false
+              ? { canManageReceipts: deleteField() }
+              : {}
           await updateDoc(staffRef, {
             ...normalizedUpdates,
             ...inventoryPatch,
+            ...receiptsPatch,
             updatedAt: serverTimestamp(),
           })
         }
@@ -905,6 +919,14 @@ export const useStaffStore = defineStore('staff', {
         const mergedRole = normalizedUpdates.role ?? staffMember.role
         const mergedStatus = normalizedUpdates.status ?? staffMember.status
         const mergedDepartmentId = normalizedUpdates.departmentId ?? staffMember.departmentId
+        const mergedCanManageInventory =
+          normalizedUpdates.canManageInventory !== undefined
+            ? normalizedUpdates.canManageInventory
+            : staffMember.canManageInventory
+        const mergedCanManageReceipts =
+          normalizedUpdates.canManageReceipts !== undefined
+            ? normalizedUpdates.canManageReceipts
+            : staffMember.canManageReceipts
         if (!staffMember.authUid) {
           throw new Error('Staff member is missing auth UID')
         }
@@ -917,6 +939,8 @@ export const useStaffStore = defineStore('staff', {
             departmentId: mergedDepartmentId,
             role: mergedRole,
             status: mergedStatus,
+            canManageInventory: mergedCanManageInventory === true ? true : deleteField(),
+            canManageReceipts: mergedCanManageReceipts === true ? true : deleteField(),
             createdBy: userId,
             updatedAt: serverTimestamp(),
           },

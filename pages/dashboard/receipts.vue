@@ -302,6 +302,14 @@
           />
           <QuickSaleModal v-model="showQuickSaleModal" @sale-completed="handleQuickSaleCompleted" />
           <ViewReceiptModal v-model="showViewReceiptModal" :receipt="selectedReceipt" />
+          <ReceiptDetailsDrawer
+            v-model="showReceiptDetailsDrawer"
+            :receipt="selectedReceipt"
+            @preview="previewReceiptFromDrawer"
+            @record-payment="recordPaymentFromDrawer"
+            @cancel="cancelFromDrawer"
+            @refund="refundFromDrawer"
+          />
           <ReturnReceiptModal
             v-model="showReturnReceiptModal"
             :receipt="selectedReceipt"
@@ -699,12 +707,13 @@
                           <div
                             :data-receipt-row="receipt.id"
                             :data-receipt-flash="flashReceiptId === receipt.id ? '' : undefined"
-                            class="rounded-lg bg-white p-2.5 shadow-none dark:!bg-dashboard-card"
+                            class="cursor-pointer rounded-lg bg-white p-2.5 shadow-none dark:!bg-dashboard-card"
                             :class="
                               flashReceiptId === receipt.id
                                 ? '!ring-2 !ring-primary-500/25 ring-offset-2 ring-offset-white dark:bg-gray-800/75 dark:!ring-offset-gray-900'
                                 : ''
                             "
+                            @click="handleViewReceipt(receipt)"
                           >
                           <div class="flex items-start justify-between gap-2">
                             <div class="min-w-0 flex-1 flex items-start gap-2">
@@ -764,23 +773,6 @@
                                 >
                                   {{ getReceiptLineItemsPreview(receipt) }}
                                 </p>
-                                <ReceiptLineItemsToggle
-                                  v-if="getReceiptLineItemsCount(receipt) > 0"
-                                  :expanded="!!expandedReceiptLineItems[receipt.id]"
-                                  :item-count="getReceiptLineItemsCount(receipt)"
-                                  @toggle="toggleReceiptLineItemsExpand(receipt.id)"
-                                />
-                                <ReceiptLineItemsDetailPanel
-                                  v-if="expandedReceiptLineItems[receipt.id]"
-                                  compact
-                                  :item-count="getReceiptLineItemsCount(receipt)"
-                                >
-                                  <ReceiptTableLineItems
-                                    :items="receipt.items"
-                                    :items-count-fallback="receipt.itemsCount"
-                                    compact
-                                  />
-                                </ReceiptLineItemsDetailPanel>
                                 <div class="mt-1.5 flex items-center justify-between gap-2">
                                   <div class="min-w-0">
                                     <span class="text-xs" :class="tableMoneyClass()">{{
@@ -1107,14 +1099,13 @@
                                   :data-receipt-flash="
                                     flashReceiptId === receipt.id ? '' : undefined
                                   "
-                                  :class="[
+                                  class="cursor-pointer"
+                                  :class="
                                     flashReceiptId === receipt.id
                                       ? '!bg-primary-500/[0.06] dark:!bg-primary-500/12'
-                                      : '',
-                                    expandedReceiptLineItems[receipt.id]
-                                      ? 'bg-gray-50/50 dark:bg-white/[0.02]'
-                                      : '',
-                                  ]"
+                                      : ''
+                                  "
+                                  @click="handleViewReceipt(receipt)"
                                 >
                                   <td
                                     v-if="canDeleteReceipts"
@@ -1189,12 +1180,6 @@
                                       {{ getReceiptLineItemsPreview(receipt) }}
                                     </p>
                                     <p v-else class="text-xs text-gray-500">{{ EMPTY_CELL }}</p>
-                                    <ReceiptLineItemsToggle
-                                      v-if="getReceiptLineItemsCount(receipt) > 0"
-                                      :expanded="!!expandedReceiptLineItems[receipt.id]"
-                                      :item-count="getReceiptLineItemsCount(receipt)"
-                                      @toggle="toggleReceiptLineItemsExpand(receipt.id)"
-                                    />
                                   </td>
                                   <td class="whitespace-nowrap px-3 py-2.5 align-middle sm:px-4">
                                     <span class="text-xs" :class="tableMoneyClass()">
@@ -1234,28 +1219,6 @@
                                       >
                                         <EllipsisVerticalIcon class="w-4 h-4" stroke-width="2" />
                                       </button>
-                                    </div>
-                                  </td>
-                                </tr>
-                                <tr
-                                  v-if="expandedReceiptLineItems[receipt.id]"
-                                  class="bg-gray-50/40 dark:bg-white/[0.015]"
-                                >
-                                  <td
-                                    :colspan="receiptLineItemsDetailColspan"
-                                    class="border-t-0 px-3 pb-3 pt-0 sm:px-4"
-                                  >
-                                    <div
-                                      class="border-l-2 border-primary-400/70 pl-3 dark:border-primary-500/50"
-                                    >
-                                      <ReceiptLineItemsDetailPanel
-                                        :item-count="getReceiptLineItemsCount(receipt)"
-                                      >
-                                        <ReceiptTableLineItems
-                                          :items="receipt.items"
-                                          :items-count-fallback="receipt.itemsCount"
-                                        />
-                                      </ReceiptLineItemsDetailPanel>
                                     </div>
                                   </td>
                                 </tr>
@@ -1299,6 +1262,14 @@
 
             <!-- View Receipt Modal -->
             <ViewReceiptModal v-model="showViewReceiptModal" :receipt="selectedReceipt" />
+          <ReceiptDetailsDrawer
+            v-model="showReceiptDetailsDrawer"
+            :receipt="selectedReceipt"
+            @preview="previewReceiptFromDrawer"
+            @record-payment="recordPaymentFromDrawer"
+            @cancel="cancelFromDrawer"
+            @refund="refundFromDrawer"
+          />
 
             <!-- Return Receipt Modal -->
             <ReturnReceiptModal
@@ -1436,7 +1407,12 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="row in filteredOutstandingReceipts" :key="row.id">
+                    <tr
+                      v-for="row in filteredOutstandingReceipts"
+                      :key="row.id"
+                      class="cursor-pointer"
+                      @click="viewOutstandingReceipt(row)"
+                    >
                       <td class="px-3 py-3 text-xs font-medium text-gray-900 dark:text-gray-100">
                         {{ row.receiptNumber }}
                         <p class="mt-0.5 text-[10px] font-normal text-gray-500">
@@ -1468,7 +1444,7 @@
                       <td class="px-3 py-3 text-right text-xs" :class="tableMoneyOwedClass()">
                         {{ formatCurrency(outstandingBalanceDue(row)) }}
                       </td>
-                      <td class="px-3 py-3">
+                      <td class="px-3 py-3" @click.stop>
                         <div class="flex flex-wrap justify-end gap-1.5">
                           <button
                             type="button"
@@ -1606,11 +1582,16 @@
                     <tbody>
                       <template v-for="customer in paginatedCustomers" :key="customer.id">
                         <tr
-                          :class="
+                          :data-customer-row="customer.id"
+                          :data-customer-flash="flashCustomerId === customer.id ? '' : undefined"
+                          :class="[
                             expandedCustomers[customer.id]
                               ? 'bg-gray-50/50 dark:bg-white/[0.02]'
-                              : ''
-                          "
+                              : '',
+                            flashCustomerId === customer.id
+                              ? '!ring-2 !ring-inset !ring-primary-500/25'
+                              : '',
+                          ]"
                         >
                           <td class="px-3 py-2.5 align-middle sm:px-4">
                             <ReceiptLineItemsToggle
@@ -1868,16 +1849,6 @@
         }
       "
     />
-    <IosContextMenuItem
-      v-if="hasWhatsAppFeature && (customerForOpenMenu?.phone || customerForOpenMenu?.email)"
-      label="WhatsApp payment reminder"
-      @click="
-        () => {
-          openCustomerPaymentReminder(customerForOpenMenu!)
-          openCustomerMenuId = null
-        }
-      "
-    />
   </IosContextMenu>
 
   <CustomerBalanceModal
@@ -1887,15 +1858,6 @@
     :email="customerBalanceTarget.email"
     :phone="customerBalanceTarget.phone"
     @saved="onCustomerBalanceSaved"
-  />
-
-  <SendWhatsAppModal
-    v-model="showCustomerWhatsAppModal"
-    mode="payment_reminder"
-    :phone="customerWhatsAppTarget?.phone || ''"
-    :email="customerWhatsAppTarget?.email || ''"
-    :template-vars="customerWhatsAppVars"
-    :store-name="userStore.userData?.storeDetails?.storeName || storesStore.currentStore?.name"
   />
 
   <BalanceDuePaymentModal
@@ -1931,7 +1893,6 @@ import {
   BarsArrowUpIcon,
   ClipboardDocumentIcon,
   ArrowsPointingOutIcon,
-  ArrowTopRightOnSquareIcon,
   EllipsisVerticalIcon,
   QrCodeIcon,
   CheckIcon,
@@ -1963,6 +1924,7 @@ import type {
 import QuickSaleModal from '~/components/receipts/QuickSaleModal.vue'
 // @ts-ignore
 import ViewReceiptModal from '~/components/receipts/ViewReceiptModal.vue'
+import ReceiptDetailsDrawer from '~/components/receipts/ReceiptDetailsDrawer.vue'
 import ReceiptTableLineItems from '~/components/receipts/ReceiptTableLineItems.vue'
 import ReceiptLineItemsToggle from '~/components/receipts/ReceiptLineItemsToggle.vue'
 import ReceiptLineItemsDetailPanel from '~/components/receipts/ReceiptLineItemsDetailPanel.vue'
@@ -1994,7 +1956,6 @@ import { scheduleNativeIdleWork } from '~/utils/capacitor-native-perf'
 import { EMPTY_CELL } from '~/utils/ui-empty'
 import { getCustomerContactKey } from '~/utils/customer-key'
 import { useCustomerAccountsStore } from '~/stores/customerAccounts'
-import SendWhatsAppModal from '~/components/whatsapp/SendWhatsAppModal.vue'
 import CustomerBalanceModal from '~/components/whatsapp/CustomerBalanceModal.vue'
 import BalanceDuePaymentModal from '~/components/receipts/BalanceDuePaymentModal.vue'
 import { receiptAmountPaid, receiptBalanceDue } from '~/utils/receipt-balance'
@@ -2019,25 +1980,11 @@ const { getFirestoreInstance } = useFirestore()
 const staffStore = useStaffStore()
 const { copyToClipboard } = useCopy()
 const customerAccountsStore = useCustomerAccountsStore()
-const { hasFeature: hasWhatsAppFeature, hasBalanceFeature } = useWhatsAppMessaging()
+const { hasBalanceFeature } = useWhatsAppMessaging()
 const userStore = useUserStore()
 
 const showCustomerBalanceModal = ref(false)
-const showCustomerWhatsAppModal = ref(false)
 const customerBalanceTarget = ref<CustomerDisplay | null>(null)
-const customerWhatsAppTarget = ref<CustomerDisplay | null>(null)
-
-const customerWhatsAppVars = computed(() => {
-  const c = customerWhatsAppTarget.value
-  if (!c) return {}
-  const balance = getCustomerBalance(c)
-  return {
-    customerName: c.name,
-    storeName:
-      userStore.userData?.storeDetails?.storeName || storesStore.currentStore?.name || 'Store',
-    balanceDue: formatCurrency(balance),
-  }
-})
 
 function getCustomerBalance(customer: CustomerDisplay): number {
   return customerAccountsStore.getBalanceForContactKey(customer.contactKey)
@@ -2046,15 +1993,6 @@ function getCustomerBalance(customer: CustomerDisplay): number {
 function openCustomerBalance(customer: CustomerDisplay) {
   customerBalanceTarget.value = customer
   showCustomerBalanceModal.value = true
-}
-
-function openCustomerPaymentReminder(customer: CustomerDisplay) {
-  if (!customer.phone && !customer.email) {
-    toast.error('Add a phone number or email on sales for this customer first.')
-    return
-  }
-  customerWhatsAppTarget.value = customer
-  showCustomerWhatsAppModal.value = true
 }
 
 function onCustomerBalanceSaved() {
@@ -2079,9 +2017,13 @@ const route = useRoute()
 const router = useRouter()
 
 const highlightFromRoute = computed(() => {
-  const raw = route.query.highlight
-  if (typeof raw === 'string' && raw.length > 0) return raw
-  if (Array.isArray(raw) && typeof raw[0] === 'string') return raw[0]
+  // `receipt` is what global search links to (`/dashboard/receipts?receipt=<id>`);
+  // `highlight` is used internally (e.g. after undo/balance-payment actions).
+  for (const key of ['receipt', 'highlight'] as const) {
+    const raw = route.query[key]
+    if (typeof raw === 'string' && raw.length > 0) return raw
+    if (Array.isArray(raw) && typeof raw[0] === 'string') return raw[0]
+  }
   return null
 })
 
@@ -2096,8 +2038,11 @@ function clearReceiptHighlightTimer() {
 }
 
 function stripHighlightQuery() {
-  if (route.query.highlight == null || route.query.highlight === '') return
+  const hasReceipt = route.query.receipt != null && route.query.receipt !== ''
+  const hasHighlight = route.query.highlight != null && route.query.highlight !== ''
+  if (!hasReceipt && !hasHighlight) return
   const q = { ...route.query }
+  delete q.receipt
   delete q.highlight
   void router.replace({ query: q })
 }
@@ -2119,7 +2064,51 @@ function applyReceiptHighlight(receiptId: string) {
     flashReceiptId.value = null
     receiptHighlightClearTimer = null
     stripHighlightQuery()
-  }, 3500)
+  }, 5000)
+}
+
+const customerFromRoute = computed(() => {
+  const raw = route.query.customer
+  if (typeof raw === 'string' && raw.length > 0) return raw
+  if (Array.isArray(raw) && typeof raw[0] === 'string') return raw[0]
+  return null
+})
+
+const flashCustomerId = ref<string | null>(null)
+let customerHighlightClearTimer: ReturnType<typeof setTimeout> | null = null
+
+function clearCustomerHighlightTimer() {
+  if (customerHighlightClearTimer) {
+    clearTimeout(customerHighlightClearTimer)
+    customerHighlightClearTimer = null
+  }
+}
+
+function stripCustomerHighlightQuery() {
+  if (route.query.customer == null || route.query.customer === '') return
+  const q = { ...route.query }
+  delete q.customer
+  void router.replace({ query: q })
+}
+
+function applyCustomerHighlight(customerId: string) {
+  clearCustomerHighlightTimer()
+  flashCustomerId.value = customerId
+  if (import.meta.client) {
+    const scrollToRow = () => {
+      const el = document.querySelector<HTMLElement>(`[data-customer-row="${customerId}"]`)
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+    nextTick(() => {
+      scrollToRow()
+      requestAnimationFrame(scrollToRow)
+    })
+  }
+  customerHighlightClearTimer = setTimeout(() => {
+    flashCustomerId.value = null
+    customerHighlightClearTimer = null
+    stripCustomerHighlightQuery()
+  }, 5000)
 }
 
 const activeTab = ref<'receipts' | 'outstanding' | 'customers'>(
@@ -2719,7 +2708,28 @@ function openRecordPayment(receipt: Receipt) {
 
 function viewOutstandingReceipt(receipt: Receipt) {
   selectedReceipt.value = receipt
+  showReceiptDetailsDrawer.value = true
+}
+
+function previewReceiptFromDrawer(receipt: Receipt) {
+  selectedReceipt.value = receipt
+  showReceiptDetailsDrawer.value = false
   showViewReceiptModal.value = true
+}
+
+function recordPaymentFromDrawer(receipt: Receipt) {
+  showReceiptDetailsDrawer.value = false
+  openRecordPayment(receipt)
+}
+
+function cancelFromDrawer(receipt: Receipt) {
+  showReceiptDetailsDrawer.value = false
+  void cancelOutstandingReceipt(receipt)
+}
+
+function refundFromDrawer(receipt: Receipt) {
+  showReceiptDetailsDrawer.value = false
+  handleRefundReceipt(receipt)
 }
 
 async function cancelOutstandingReceipt(receipt: Receipt) {
@@ -3282,6 +3292,29 @@ watch(
   { flush: 'post' }
 )
 
+watch(
+  [customerFromRoute, isInitialLoading, activeTab],
+  async () => {
+    const id = customerFromRoute.value
+    if (!id || isInitialLoading.value || activeTab.value !== 'customers') return
+    await nextTick()
+    let idx = filteredCustomers.value.findIndex((c) => c.id === id)
+    if (idx === -1 && customersSearchQuery.value) {
+      customersSearchQuery.value = ''
+      await nextTick()
+      idx = filteredCustomers.value.findIndex((c) => c.id === id)
+    }
+    if (idx === -1) return
+    const page = Math.floor(idx / customersItemsPerPage.value) + 1
+    if (customersCurrentPage.value !== page) {
+      customersCurrentPage.value = page
+      await nextTick()
+    }
+    applyCustomerHighlight(id)
+  },
+  { flush: 'post' }
+)
+
 const handlePageChange = (page: number) => {
   currentPage.value = page
   // Save to localStorage
@@ -3358,6 +3391,7 @@ const handleReceiptCreated = async (receipt: Receipt) => {
 
 const selectedReceipt = ref<Receipt | null>(null)
 const showViewReceiptModal = ref(false)
+const showReceiptDetailsDrawer = ref(false)
 const showReturnReceiptModal = ref(false)
 const showTimelineModal = ref(false)
 const showDeleteReceiptModal = ref(false)
@@ -3411,7 +3445,7 @@ const handleViewReceiptTimeline = (receipt: Receipt) => {
 
 const handleViewReceipt = (receipt: Receipt) => {
   selectedReceipt.value = receipt
-  showViewReceiptModal.value = true
+  showReceiptDetailsDrawer.value = true
 
   addRecentItem({
     id: receipt.id,
@@ -3728,15 +3762,6 @@ function customerSwipeActions(customer: CustomerDisplay): IosSwipeAction[] {
       shortLabel: 'Balance',
       icon: UserCircleIcon,
       onSelect: () => openCustomerBalance(customer),
-    })
-  }
-  if (hasWhatsAppFeature.value && (customer.phone || customer.email)) {
-    actions.push({
-      id: 'whatsapp',
-      label: 'Payment reminder',
-      shortLabel: 'WhatsApp',
-      icon: ArrowTopRightOnSquareIcon,
-      onSelect: () => openCustomerPaymentReminder(customer),
     })
   }
   return actions

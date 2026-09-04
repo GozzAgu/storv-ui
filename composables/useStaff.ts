@@ -29,6 +29,8 @@ export interface Staff {
   role: 'manager' | 'staff' | 'intern'
   /** When true (managers only), owner allows full inventory edit without super-admin access. */
   canManageInventory?: boolean
+  /** When true, owner allows this staff member to cancel outstanding orders and process refunds without manager-level access. */
+  canManageReceipts?: boolean
   hireDate: string
   salary?: number
   status: 'active' | 'inactive' | 'on_leave'

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 
 definePageMeta({
   layout: 'dashboard',
@@ -8,8 +8,12 @@ definePageMeta({
 
 // Redirect to receipts page with customers tab
 const router = useRouter()
+const route = useRoute()
 onMounted(() => {
-  router.replace({ path: '/dashboard/receipts', query: { tab: 'customers' } })
+  router.replace({
+    path: '/dashboard/receipts',
+    query: { ...route.query, tab: 'customers' },
+  })
 })
 </script>
 <template>

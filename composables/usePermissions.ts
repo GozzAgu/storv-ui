@@ -39,7 +39,14 @@ export const usePermissions = () => {
 
   const canCreate = computed(() => !!authStore.currentUser)
 
-  const canEditReceipts = computed(() => userStore.isSuperAdmin || isManager.value)
+  /** Owner-granted receipts access (cancel/refund) for a staff member (not all staff by default). */
+  const hasReceiptsEditorAccess = computed(() => {
+    if (userStore.isSuperAdmin || isManager.value) return true
+    const member = staffStore.getCurrentStaffMember
+    return member?.canManageReceipts === true
+  })
+
+  const canEditReceipts = computed(() => hasReceiptsEditorAccess.value)
 
   const canDeleteReceipts = computed(() => !isStaff.value)
 
@@ -56,6 +63,9 @@ export const usePermissions = () => {
   /** Super admin can grant inventory editor rights to chosen managers. */
   const canGrantInventoryAccess = computed(() => userStore.isSuperAdmin)
 
+  /** Super admin can grant receipts (cancel/refund) access to chosen staff/interns. */
+  const canGrantReceiptsAccess = computed(() => userStore.isSuperAdmin)
+
   /** Unit cost, margin, COGS, gross profit, and P&L. Store owner (super admin) only; never staff. */
   const canViewProfitAndCost = computed(
     () => !isStaff.value && userStore.userData?.role === 'superAdmin'
@@ -64,10 +74,15 @@ export const usePermissions = () => {
   /** Paystack upgrades, plan banners, and billing. Super admin (account owner) only. */
   const canManageBilling = computed(() => userStore.isSuperAdmin)
 
+  /** Adding/settling a sale commission. Admin/owner-only for now; extend later via a
+   *  Staff.canManageCommissions grant, same pattern as receipts/inventory. */
+  const canManageCommissions = computed(() => !isStaff.value)
+
   return {
     isStaff,
     isManager,
     hasInventoryEditorAccess,
+    hasReceiptsEditorAccess,
     canManage,
     isReadOnly,
     canCreate,
@@ -79,7 +94,9 @@ export const usePermissions = () => {
     canRemoveStaff,
     canMoveStaff,
     canGrantInventoryAccess,
+    canGrantReceiptsAccess,
     canViewProfitAndCost,
     canManageBilling,
+    canManageCommissions,
   }
 }

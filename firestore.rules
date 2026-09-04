@@ -126,6 +126,12 @@ service cloud.firestore {
         memberHasInventoryEditorAccess(userId, storeId);
     }
 
+    // Owner/manager, or any active member explicitly granted canManageReceipts on the member doc.
+    function memberHasReceiptsEditorAccess(userId, storeId) {
+      return isActiveStoreMember(userId, storeId) &&
+        get(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/members/$(request.auth.uid)).data.get('canManageReceipts', false) == true;
+    }
+
     // Sale / return-to-stock: only dateOut + updatedAt may change (not full item edits).
     // Stock loan handshake: optionally set/clear sellerLoan* + updatedAt, or combine with sale (dateOut + clear loan).
     function inventoryItemOnlySaleOrReturnFieldChange() {
@@ -143,6 +149,15 @@ service cloud.firestore {
         && request.resource.data.status in ['balance_due', 'completed', 'cancelled']
         && request.resource.data.diff(resource.data).changedKeys().hasOnly(
           ['amountPaid', 'balanceDue', 'payments', 'status', 'paymentMethod', 'updatedAt', 'completedAt']
+        );
+    }
+
+    // Staff granted canManageReceipts: refund a completed sale, nothing else (items/total untouchable).
+    function receiptStaffRefundUpdate() {
+      return resource.data.status == 'completed'
+        && request.resource.data.status == 'refunded'
+        && request.resource.data.diff(resource.data).changedKeys().hasOnly(
+          ['status', 'refundReason', 'notes', 'updatedAt']
         );
     }
 
@@ -411,8 +426,13 @@ service cloud.firestore {
                         || (canCreateReceipt(userId, storeId) &&
                          receiptBalanceDuePaymentUpdate() &&
                          resourceMatchesStore(storeId) &&
+                         requestMatchesStore(storeId))
+                        || (canCreateReceipt(userId, storeId) &&
+                         memberHasReceiptsEditorAccess(userId, storeId) &&
+                         receiptStaffRefundUpdate() &&
+                         resourceMatchesStore(storeId) &&
                          requestMatchesStore(storeId));
-          
+
           allow delete: if ownsStore(userId, storeId) &&
                          resourceMatchesStore(storeId);
         }

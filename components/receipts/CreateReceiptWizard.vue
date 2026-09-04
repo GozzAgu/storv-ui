@@ -303,19 +303,82 @@
                     "
                   />
                 </div>
+                <div
+                  v-if="selectedItems.find((si) => si.id === item.id)"
+                  class="mt-2 w-full border-t border-gray-100/90 pt-2 dark:border-gray-800/80"
+                  @click.stop
+                >
+                  <template
+                    v-if="
+                      !selectedItems.find((si) => si.id === item.id)?.showDiscountInput &&
+                      !selectedItems.find((si) => si.id === item.id)?.discountAmount
+                    "
+                  >
+                    <button
+                      type="button"
+                      class="text-[11px] font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+                      @click="toggleItemDiscountInput(item.id)"
+                    >
+                      + Discount
+                    </button>
+                  </template>
+                  <div v-else class="flex items-center gap-2">
+                    <label class="text-[10px] font-medium text-gray-600 dark:text-gray-400"
+                      >Discount</label
+                    >
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      :value="selectedItems.find((si) => si.id === item.id)?.discountAmount"
+                      class="h-8 w-24 rounded-lg bg-white px-2 text-xs dark:!bg-dashboard-card"
+                      @input="
+                        setItemDiscountAmount(
+                          item.id,
+                          parseFloat(($event.target as HTMLInputElement).value) || 0
+                        )
+                      "
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
           <div
             v-if="selectedItems.length > 0"
-            class="shrink-0 rounded-lg bg-gray-50/80 px-3 py-2.5 dark:border-white/[0.06] dark:bg-white/[0.03]"
+            class="shrink-0 space-y-2 rounded-lg bg-gray-50/80 px-3 py-2.5 dark:border-white/[0.06] dark:bg-white/[0.03]"
           >
-            <p class="mb-1.5 text-xs font-medium text-gray-700 dark:text-gray-300">
-              Selected items ({{ totalSelectedQuantity }})
-            </p>
-            <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">
-              Total: {{ formatCurrency(itemsSubtotal) }}
-            </p>
+            <div
+              v-for="si in selectedItems"
+              :key="si.id"
+              class="flex items-center justify-between gap-2 text-xs"
+            >
+              <span class="min-w-0 flex-1 truncate text-gray-700 dark:text-gray-300">
+                {{ getItemDisplayName(si.item) }}
+                <span v-if="si.item.folderId && si.item.folderId !== selectedFolder?.id" class="text-gray-400 dark:text-gray-500">
+                  · {{ inventoryStore.getFolderById(si.item.folderId)?.name }}
+                </span>
+              </span>
+              <span class="shrink-0 text-gray-600 dark:text-gray-400">
+                {{ si.quantity }} ×
+                {{ formatCurrency(Math.max(0, getEffectivePrice(si.item) - (si.discountAmount || 0))) }}
+              </span>
+              <button
+                type="button"
+                class="shrink-0 text-red-600 dark:text-red-400"
+                @click="toggleItemSelection(si.item, false)"
+              >
+                <TrashIcon class="h-3.5 w-3.5" />
+              </button>
+            </div>
+            <div class="flex items-center justify-between border-t border-gray-200/80 pt-1.5 dark:border-white/[0.08]">
+              <p class="text-xs font-medium text-gray-700 dark:text-gray-300">
+                Selected items ({{ totalSelectedQuantity }})
+              </p>
+              <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                {{ formatCurrency(itemsSubtotal) }}
+              </p>
+            </div>
           </div>
         </div>
 
@@ -543,6 +606,61 @@
             ></textarea>
           </div>
 
+          <div v-if="hasAnyCheckoutDiscount">
+            <IosFormField label="Discount reason" required>
+              <IosFormTextarea
+                v-model="discountReason"
+                :rows="2"
+                extra-class="resize-none"
+                placeholder="Why is a discount being applied to this sale?"
+              />
+            </IosFormField>
+          </div>
+
+          <!-- Commission (Collapsible, admin/owner only) -->
+          <div v-if="canManageCommissions" class="border-t border-gray-200 pt-3 mt-3 dark:border-white/[0.08]">
+            <button
+              type="button"
+              @click="showCommission = !showCommission"
+              class="flex items-center justify-between w-full text-left"
+            >
+              <span class="text-xs font-medium text-gray-700 dark:text-gray-300"
+                >Commission (Optional)</span
+              >
+              <ChevronRightIcon
+                :class="['h-4 w-4 transition-transform', showCommission ? 'rotate-90' : '']"
+              />
+            </button>
+            <div v-if="showCommission" class="mt-2 space-y-3">
+              <IosFormField label="Commission amount" hint="Folded into the total the customer pays.">
+                <input
+                  v-model.number="commissionAmount"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="0.00"
+                  class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
+                />
+              </IosFormField>
+              <IosFormField label="Owed to" hint="Who this commission is owed to.">
+                <input
+                  v-model="commissionOwedToName"
+                  type="text"
+                  placeholder="e.g. referral agent's name"
+                  class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
+                />
+              </IosFormField>
+              <IosFormField v-if="commissionEligibleStaff.length" label="Attribute to staff (optional)">
+                <IosFormSelect v-model="commissionOwedToUid" extra-class="cursor-pointer">
+                  <option value="">None</option>
+                  <option v-for="s in commissionEligibleStaff" :key="s.id" :value="s.authUid">
+                    {{ s.firstName }} {{ s.lastName }}
+                  </option>
+                </IosFormSelect>
+              </IosFormField>
+            </div>
+          </div>
+
           <!-- Swap-In Section (inventory write; super admin only) -->
           <div v-if="canUseSwapInReceipt" class="border-t border-gray-200 pt-3 mt-3">
             <Checkbox v-model="isSwapIn" label="This is a swap-in transaction" size="sm" />
@@ -672,6 +790,24 @@
               </div>
             </div>
           </div>
+          <div v-if="selectedItems.length > 0" class="space-y-1.5 rounded-sm bg-gray-50/80 p-3 dark:bg-white/[0.03]">
+            <div
+              v-for="si in selectedItems"
+              :key="si.id"
+              class="flex items-center justify-between gap-2 text-xs"
+            >
+              <span class="min-w-0 flex-1 truncate text-gray-700 dark:text-gray-300">
+                {{ getItemDisplayName(si.item) }}
+                <span v-if="si.item.folderId && si.item.folderId !== selectedFolder?.id" class="text-gray-400 dark:text-gray-500">
+                  · {{ inventoryStore.getFolderById(si.item.folderId)?.name }}
+                </span>
+              </span>
+              <span class="shrink-0 text-gray-600 dark:text-gray-400">
+                {{ si.quantity }} ×
+                {{ formatCurrency(Math.max(0, getEffectivePrice(si.item) - (si.discountAmount || 0))) }}
+              </span>
+            </div>
+          </div>
           <div class="p-3 rounded-sm">
             <div class="flex justify-between items-center mb-1.5">
               <span class="text-xs text-gray-600 dark:text-gray-400">Products</span>
@@ -731,12 +867,6 @@
   >
     <template #default>
       <div class="space-y-4">
-        <p
-          v-if="hasWhatsAppFeature && receiptForm.customerPhone"
-          class="text-xs text-gray-500 dark:text-gray-400"
-        >
-          Send via email or WhatsApp with a shareable receipt link.
-        </p>
         <div>
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Email Address
@@ -754,15 +884,6 @@
     <template #footer>
       <Button variant="outline" size="sm" @click="showEmailModal = false">Skip</Button>
       <Button
-        v-if="hasWhatsAppFeature && receiptForm.customerPhone"
-        variant="outline"
-        size="sm"
-        extra-class="!text-[#128C7E] !border-[#25D366]/40 !bg-[#25D366]/10"
-        @click="openPostCreateWhatsApp"
-      >
-        WhatsApp
-      </Button>
-      <Button
         variant="primary"
         size="sm"
         :loading="isSendingEmail"
@@ -773,20 +894,6 @@
       </Button>
     </template>
   </Modal>
-
-  <SendWhatsAppModal
-    v-model="showPostCreateWhatsAppModal"
-    mode="receipt"
-    :phone="receiptForm.customerPhone || ''"
-    :email="receiptForm.customerEmail || ''"
-    :template-vars="postCreateWhatsAppVars"
-    :receipt-for-capture="postCreateReceiptForCapture"
-    :receipt-data="lastCreatedReceiptData"
-    :receipt-number="lastCreatedReceiptData?.receiptNumber"
-    :store-name="userStore.userData?.storeDetails?.storeName || storesStore.currentStore?.name"
-    :store-address="userStore.userData?.storeDetails?.storeAddress"
-    :store-logo-url="userStore.userData?.storeLogoUrl || storesStore.currentStore?.logoUrl"
-  />
 </template>
 
 <script setup lang="ts">
@@ -800,17 +907,16 @@ import {
   EnvelopeIcon,
   PlusCircleIcon,
   ChevronRightIcon,
+  TrashIcon,
 } from '~/utils/app-icons'
 import Modal from '~/components/ui/Modal.vue'
-import SendWhatsAppModal from '~/components/whatsapp/SendWhatsAppModal.vue'
-import { formatReceiptDateForWhatsApp } from '~/utils/whatsapp'
-import type { Receipt } from '~/stores/receipts'
 import SidePanel from '~/components/ui/SidePanel.vue'
 import SellScreenNoteBanner from '~/components/receipts/SellScreenNoteBanner.vue'
 import PaymentMethodSelect from '~/components/receipts/PaymentMethodSelect.vue'
 import Button from '~/components/ui/Button.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
+import { IosFormField, IosFormTextarea, IosFormSelect } from '~/components/ios/forms'
 import { useInventoryStore, type InventoryFolder, type InventoryItem } from '~/stores/inventory'
 import { useReceiptsStore, type ReceiptItem } from '~/stores/receipts'
 import { resolveItemUnitCost } from '~/utils/inventory-item-cost'
@@ -819,6 +925,7 @@ import { useStoresStore } from '~/stores/stores'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useStaffStore } from '~/stores/staff'
+import { usePermissions } from '~/composables/usePermissions'
 import { usePreferences } from '~/composables/usePreferences'
 import { getReceiptProductDetails } from '~/composables/useReceiptProductDetails'
 import {
@@ -866,8 +973,6 @@ const canUseSwapInReceipt = computed(() => userStore.isSuperAdmin)
 
 const isSendingEmail = ref(false)
 const showEmailModal = ref(false)
-const showPostCreateWhatsAppModal = ref(false)
-const { hasFeature: hasWhatsAppFeature } = useWhatsAppMessaging()
 const { authFetch } = useAuthenticatedFetch()
 const emailToSend = ref('')
 const lastCreatedReceiptId = ref('')
@@ -904,9 +1009,30 @@ const currentStep = ref(0)
 const loadingFolders = ref(false)
 const loadingItems = ref(false)
 const isCreating = ref(false)
-const selectedItems = ref<Array<{ id: string; quantity: number; item: InventoryItem }>>([])
+const selectedItems = ref<
+  Array<{
+    id: string
+    quantity: number
+    item: InventoryItem
+    discountAmount?: number
+    showDiscountInput?: boolean
+  }>
+>([])
 const availableItems = ref<InventoryItem[]>([])
 const itemSearchQuery = ref('')
+const discountReason = ref('')
+const hasAnyCheckoutDiscount = computed(() =>
+  selectedItems.value.some((si) => (si.discountAmount || 0) > 0)
+)
+const { canManageCommissions } = usePermissions()
+const showCommission = ref(false)
+const commissionAmount = ref<number | undefined>(undefined)
+const commissionOwedToName = ref('')
+const commissionOwedToUid = ref('')
+/** Staff eligible to be attributed a commission payout (has an auth uid = a real login-capable member). */
+const commissionEligibleStaff = computed(() =>
+  staffStore.staff.filter((s) => !!s.authUid && s.status === 'active')
+)
 const showCustomerSuggestions = ref(false)
 const allCustomers = ref<
   Array<{
@@ -1116,6 +1242,8 @@ const isFormValid = computed(() => {
       }
     }
   }
+
+  if (hasAnyCheckoutDiscount.value && !discountReason.value.trim()) return false
 
   return baseValid
 })
@@ -1334,6 +1462,16 @@ const updateItemQuantity = (itemId: string, quantity: number) => {
   }
 }
 
+const toggleItemDiscountInput = (itemId: string) => {
+  const selected = selectedItems.value.find((si) => si.id === itemId)
+  if (selected) selected.showDiscountInput = true
+}
+
+const setItemDiscountAmount = (itemId: string, amount: number) => {
+  const selected = selectedItems.value.find((si) => si.id === itemId)
+  if (selected) selected.discountAmount = amount > 0 ? amount : undefined
+}
+
 const getEffectivePrice = (item: InventoryItem): number => {
   // If item has a discount, use discounted price; otherwise use regular price
   if (item.discountedPrice !== undefined && item.discountedPrice !== null) {
@@ -1354,12 +1492,25 @@ const getOriginalPrice = (item: InventoryItem): number => {
   return parseFloat(priceField || '0')
 }
 
-/** Sum of sold line items (after per-item discounts) before swap credit */
+/** Sum of sold line items (after per-item discounts, including any checkout-time discount) before swap credit */
 const calculateItemsSubtotal = () => {
   return selectedItems.value.reduce((total, si) => {
-    const price = getEffectivePrice(si.item)
+    const price = Math.max(0, getEffectivePrice(si.item) - (si.discountAmount || 0))
     return total + price * si.quantity
   }, 0)
+}
+
+/** Bucket selected items by the inventory folder they actually belong to (a cart can span
+ *  multiple categories - each item already carries its own `folderId`, independent of
+ *  whatever folder is currently being browsed in the picker). */
+const groupSelectedItemsByFolder = () => {
+  const groups = new Map<string, typeof selectedItems.value>()
+  for (const si of selectedItems.value) {
+    const folderId = si.item.folderId || selectedFolder.value?.id || ''
+    if (!groups.has(folderId)) groups.set(folderId, [])
+    groups.get(folderId)!.push(si)
+  }
+  return groups
 }
 
 /** Value credited from swapped-in device (sum of currency fields on swap-in form) */
@@ -1460,6 +1611,11 @@ const resetForm = () => {
   availableItems.value = []
   folderSearchQuery.value = ''
   itemSearchQuery.value = ''
+  discountReason.value = ''
+  showCommission.value = false
+  commissionAmount.value = undefined
+  commissionOwedToName.value = ''
+  commissionOwedToUid.value = ''
   receiptForm.value = {
     customerName: '',
     customerEmail: '',
@@ -1499,7 +1655,18 @@ const handleCreateReceipt = async () => {
     const receiptItems: ReceiptItem[] = selectedItems.value.map((si) => {
       const effectivePrice = getEffectivePrice(si.item)
       const originalPrice = getOriginalPrice(si.item)
-      const hasDiscount = si.item.discountedPrice !== undefined && si.item.discountedPrice !== null
+      const checkoutDiscount = si.discountAmount || 0
+      const inventoryHasDiscount =
+        si.item.discountedPrice !== undefined && si.item.discountedPrice !== null
+      const hasDiscount = inventoryHasDiscount || checkoutDiscount > 0
+      // A checkout-time discount and a pre-existing inventory discount are mutually exclusive
+      // UI states in practice - don't stack them, just recompute off whichever is active.
+      const finalPrice = checkoutDiscount > 0 ? Math.max(0, effectivePrice - checkoutDiscount) : effectivePrice
+      const discountAmount = checkoutDiscount > 0 ? checkoutDiscount : si.item.discountAmount
+      const discountPercentage =
+        checkoutDiscount > 0
+          ? Math.round((checkoutDiscount / effectivePrice) * 100)
+          : si.item.discountPercentage
 
       // Force quantity to 1 for serial number items
       const itemQuantity = hasSerialNumbers ? 1 : si.quantity
@@ -1507,9 +1674,10 @@ const handleCreateReceipt = async () => {
       return {
         itemId: si.id,
         quantity: itemQuantity,
-        price: effectivePrice, // Final price after discount
+        price: finalPrice, // Final price after discount
         itemName: getItemDisplayName(si.item),
         unitCost: resolveItemUnitCost(si.item),
+        folderId: si.item.folderId,
         serialNo:
           getItemField(si.item, 'serialNo') ||
           getItemField(si.item, 'serialNumber') ||
@@ -1521,8 +1689,8 @@ const handleCreateReceipt = async () => {
         // Include discount information if applicable
         ...(hasDiscount && {
           originalPrice: originalPrice,
-          discountPercentage: si.item.discountPercentage,
-          discountAmount: si.item.discountAmount,
+          discountPercentage,
+          discountAmount,
           hasDiscount: true,
         }),
       }
@@ -1530,13 +1698,18 @@ const handleCreateReceipt = async () => {
 
     const itemIds = selectedItems.value.map((si) => si.id)
     if (itemIds.length > 0 && selectedFolder.value) {
-      const saleLines = selectedItems.value.map((si) => ({
-        itemId: si.id,
-        quantitySold: hasSerialNumbers ? 1 : si.quantity,
-      }))
-      await inventoryStore.applyReceiptSaleToInventory(selectedFolder.value.id, saleLines, {
-        hasSerialNumbers,
-      })
+      const folderGroups = groupSelectedItemsByFolder()
+      for (const [folderId, items] of folderGroups) {
+        const folder = inventoryStore.getFolderById(folderId) || selectedFolder.value
+        const folderHasSerialNumbers = folder?.hasSerialNumbers || hasSerialNumberInTemplate.value
+        const saleLines = items.map((si) => ({
+          itemId: si.id,
+          quantitySold: folderHasSerialNumbers ? 1 : si.quantity,
+        }))
+        await inventoryStore.applyReceiptSaleToInventory(folderId, saleLines, {
+          hasSerialNumbers: folderHasSerialNumbers,
+        })
+      }
     }
 
     // Handle swap-in: Create inventory item for swapped-in device
@@ -1595,16 +1768,28 @@ const handleCreateReceipt = async () => {
       date: new Date(),
       items: receiptItems,
       itemsCount: totalSelectedQuantity.value,
-      total: calculateTotal(),
+      total: calculateTotal() + (canManageCommissions.value ? commissionAmount.value || 0 : 0),
       paymentMethod: useSplitPayment.value ? 'Split Payment' : receiptForm.value.paymentMethod,
       status: receiptForm.value.status as 'completed' | 'pending',
       notes: receiptForm.value.notes || '',
       folderId: selectedFolder.value.id,
+      folderIds: [...new Set(selectedItems.value.map((si) => si.item.folderId).filter(Boolean))],
       itemIds,
       storeId: currentStoreId, // Store ID where receipt was created
       storeBranchName, // Store branch name
       storeLogoUrl: storesStore.currentStore?.logoUrl || userStore.userData?.storeLogoUrl || '', // Account logo - empty string if none (Firestore rejects undefined)
       createdByUserName, // User who created the receipt
+    }
+
+    if (hasAnyCheckoutDiscount.value) {
+      receiptData.discountReason = discountReason.value.trim()
+    }
+
+    if (canManageCommissions.value && (commissionAmount.value || 0) > 0) {
+      receiptData.commissionAmount = commissionAmount.value
+      receiptData.commissionOwedToName = commissionOwedToName.value.trim() || undefined
+      receiptData.commissionOwedToUid = commissionOwedToUid.value || undefined
+      receiptData.commissionStatus = 'owed'
     }
 
     // Add split payments if enabled
@@ -1672,30 +1857,6 @@ const handleCreateReceipt = async () => {
 const isValidEmail = (email: string) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   return emailRegex.test(email)
-}
-
-const postCreateWhatsAppVars = computed(() => {
-  const data = lastCreatedReceiptData.value
-  if (!data) return {}
-  return {
-    customerName: data.customerName || receiptForm.value.customerName,
-    storeName:
-      userStore.userData?.storeDetails?.storeName || storesStore.currentStore?.name || 'Store',
-    receiptNumber: data.receiptNumber || '',
-    receiptDate: formatReceiptDateForWhatsApp(new Date()),
-    total: formatCurrency(calculateTotal()),
-  }
-})
-
-const postCreateReceiptForCapture = computed((): Receipt | null => {
-  const d = lastCreatedReceiptData.value
-  if (!d) return null
-  return { ...d, id: lastCreatedReceiptId.value } as Receipt
-})
-
-const openPostCreateWhatsApp = () => {
-  showEmailModal.value = false
-  showPostCreateWhatsAppModal.value = true
 }
 
 const sendReceiptEmail = async (receiptId: string, receiptData: any) => {

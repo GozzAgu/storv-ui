@@ -1,13 +1,14 @@
 /**
- * Receipt paper typography - technical monospace body + pixel-style section titles
+ * Receipt paper typography - clean sans headings/labels + technical monospace figures
  * (inspired by Vercel Ship / Geist Mono + display headings).
- * Fonts (JetBrains Mono, Pixelify Sans) are loaded via the <link> in nuxt.config.ts.
+ * Fonts (Plus Jakarta Sans, JetBrains Mono) are loaded via the <link> in nuxt.config.ts.
  */
 
 .receipt-content {
   --receipt-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Monaco, Consolas,
     'Liberation Mono', monospace;
-  --receipt-display: 'Pixelify Sans', var(--receipt-mono);
+  --receipt-display: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, Segoe UI,
+    Roboto, sans-serif;
   font-family: var(--receipt-mono);
   font-size: 11px;
   line-height: 1.5;
@@ -18,19 +19,25 @@
 
 .receipt-content .receipt-display-title {
   font-family: var(--receipt-display);
-  font-size: 1.05rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
   text-transform: uppercase;
-  line-height: 1.2;
+  line-height: 1.25;
 }
 
 .receipt-content .receipt-section-label {
   font-family: var(--receipt-display);
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   font-weight: 600;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
+}
+
+/* Table column headers (Product/Qty/Price/Total) reuse .receipt-section-label for sizing but
+   should read bolder than a plain section label like "Receipt" or "Customer". */
+.receipt-content th.receipt-section-label {
+  font-weight: 700;
 }
 
 .receipt-content p,
@@ -60,84 +67,6 @@
 .receipt-logo {
   object-fit: contain;
   object-position: center;
-}
-
-.receipt-content.pdf-export {
-  width: 640px !important;
-  max-width: 640px !important;
-  margin: 0 auto !important;
-  font-size: 10px;
-  line-height: 1.55;
-  overflow: visible !important;
-  padding-left: 12px !important;
-  padding-right: 8px !important;
-  box-sizing: border-box !important;
-  font-family: var(--receipt-mono) !important;
-  -webkit-font-smoothing: auto;
-  text-rendering: auto;
-  font-kerning: none;
-}
-
-.receipt-content.pdf-export .receipt-display-title {
-  font-size: 13px !important;
-  line-height: 1.35 !important;
-}
-
-.receipt-content.pdf-export .text-xs,
-.receipt-content.pdf-export .text-sm,
-.receipt-content.pdf-export .text-\[11px\],
-.receipt-content.pdf-export p {
-  font-size: 10px !important;
-  line-height: 1.5 !important;
-}
-
-.receipt-content.pdf-export .text-\[10px\],
-.receipt-content.pdf-export .text-\[9px\],
-.receipt-content.pdf-export .receipt-section-label {
-  font-size: 9px !important;
-  line-height: 1.5 !important;
-}
-
-.receipt-content.pdf-export th,
-.receipt-content.pdf-export td {
-  font-size: 10px !important;
-  line-height: 1.6 !important;
-  padding-top: 6px !important;
-  padding-bottom: 6px !important;
-  vertical-align: top;
-  overflow: visible !important;
-}
-
-.receipt-content.pdf-export p,
-.receipt-content.pdf-export span,
-.receipt-content.pdf-export td,
-.receipt-content.pdf-export th,
-.receipt-content.pdf-export h1 {
-  overflow-wrap: anywhere !important;
-  word-break: break-word !important;
-  hyphens: auto;
-  white-space: normal !important;
-  line-height: 1.6 !important;
-  overflow: visible !important;
-  font-family: var(--receipt-mono) !important;
-  font-kerning: none;
-  letter-spacing: 0.02em;
-  text-rendering: auto;
-}
-
-.receipt-content.pdf-export table {
-  width: 100% !important;
-  table-layout: fixed;
-  border-collapse: collapse;
-}
-
-.receipt-content.pdf-export tr {
-  overflow: visible !important;
-}
-
-.receipt-content.pdf-export .receipt-logo {
-  width: 64px !important;
-  height: 64px !important;
 }
 
 @media print {

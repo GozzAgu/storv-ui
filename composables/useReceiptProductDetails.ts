@@ -105,7 +105,8 @@ const HIDDEN_RECEIPT_DETAIL_KEYS = new Set<string>(['swapIn', 'swapInReceiptId']
 /** Shown as the swap-in headline; omit from repeated detail rows. */
 const INVENTORY_PRIMARY_NAME_KEYS = new Set(['name', 'title', 'productName', 'itemName'])
 
-/** Fields already shown as line-item columns - omit from detail chips in receipt tables. */
+/** Fields already shown as line-item columns, or internal/cost data - omit from detail chips
+ *  on customer-facing receipts (on-screen, PDF, print, email). */
 const LINE_ITEM_TABLE_HIDDEN_KEYS = new Set<string>([
   'name',
   'itemName',
@@ -114,6 +115,7 @@ const LINE_ITEM_TABLE_HIDDEN_KEYS = new Set<string>([
   'quantity',
   'qty',
   'price',
+  'Price',
   'originalPrice',
   'discountedPrice',
   'unitPrice',
@@ -121,8 +123,16 @@ const LINE_ITEM_TABLE_HIDDEN_KEYS = new Set<string>([
   'discountPercentage',
   'discountAmount',
   'hasDiscount',
+  'discountReason',
   'total',
   'lineTotal',
+  'unitCost',
+  'buyback',
+  'buybackId',
+  'buybackPrice',
+  'stock',
+  'Stock',
+  'status',
 ])
 
 export interface ReceiptDetailLinesOptions {

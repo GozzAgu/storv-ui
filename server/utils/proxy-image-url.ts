@@ -3,6 +3,10 @@ import { createError } from 'h3'
 const ALLOWED_PROXY_HOSTS = new Set([
   'firebasestorage.googleapis.com',
   'storage.googleapis.com',
+  // Store/account logos are uploaded here when Cloudinary env vars are configured (see
+  // pages/dashboard/settings.vue's uploadAccountLogoWithFallback) - needed so receipt PDFs
+  // (download + email attachment) can embed the logo via the same proxy-fetch path.
+  'res.cloudinary.com',
 ])
 
 function isBlockedHostname(hostname: string): boolean {
@@ -42,7 +46,7 @@ export function assertAllowedProxyUrl(rawUrl: string): URL {
     throw createError({ statusCode: 403, message: 'URL host is not allowed' })
   }
   if (!ALLOWED_PROXY_HOSTS.has(parsed.hostname.toLowerCase())) {
-    throw createError({ statusCode: 403, message: 'Only Firebase Storage image URLs are allowed' })
+    throw createError({ statusCode: 403, message: 'Image host is not on the allowed list' })
   }
 
   return parsed

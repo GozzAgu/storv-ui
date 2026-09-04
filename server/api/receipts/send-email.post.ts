@@ -2,7 +2,6 @@ import { createError, defineEventHandler, readBody } from 'h3'
 import { requireAuth } from '~/server/utils/store-auth'
 import { isResendConfigured } from '~/server/utils/delivery-config'
 import { sendReceiptEmail } from '~/server/utils/receipt-delivery-email'
-import { assertWhatsAppSendAllowed, incrementWhatsAppUsage } from '~/server/utils/whatsapp-usage'
 import { assertReceiptDeliveryAccess } from '~/server/utils/receipt-access'
 import { assertRateLimit } from '~/server/utils/rate-limit'
 
@@ -53,8 +52,6 @@ export default defineEventHandler(async (event) => {
     receiptNumber: body.receiptNumber,
   })
 
-  await assertWhatsAppSendAllowed(auth.uid)
-
   let attachmentBuffer: Buffer | undefined
   let attachmentFilename: string | undefined
 
@@ -75,8 +72,6 @@ export default defineEventHandler(async (event) => {
     attachmentMimeType: 'application/pdf',
     caption: 'Please find your receipt attached.',
   })
-
-  await incrementWhatsAppUsage(auth.uid)
 
   return {
     success: true,
