@@ -811,7 +811,7 @@ html.dark .dash-profile-role-badge {
   padding: 0.625rem 0.375rem;
   text-align: center;
   border: 1px solid var(--dash-card-border, rgb(15 23 42 / 0.08));
-  border-radius: 0.875rem;
+  border-radius: 1rem;
   background: var(--dash-card-surface, #ffffff);
   transition:
     border-color 0.18s ease,
@@ -824,7 +824,11 @@ html.dark .dash-profile-stats__item {
 }
 
 .dash-profile-stats__item:hover {
-  border-color: rgb(154 181 227 / 0.22);
+  border-color: rgb(15 23 42 / 0.16);
+}
+
+html.dark .dash-profile-stats__item:hover {
+  border-color: rgb(255 255 255 / 0.18);
 }
 
 .dash-profile-stats__value {
@@ -1203,7 +1207,7 @@ html.dark .dash-roles__footnote-icon {
   width: 100%;
   min-width: 0;
   flex-direction: column;
-  border-radius: 0.875rem;
+  border-radius: 1rem;
   border: 1px solid var(--dash-border, rgb(15 23 42 / 0.08));
   background: rgb(255 255 255 / 0.03);
   padding: 0.625rem;
@@ -1349,12 +1353,13 @@ html:not(.dark) .dash-help-toc__link:hover {
   align-items: center;
   justify-content: center;
   border-radius: 0.75rem;
-  background: rgb(154 181 227 / 0.12);
-  color: #4876c7;
+  background: rgb(15 23 42 / 0.06);
+  color: var(--dash-ink, #0f172a);
 }
 
 html.dark .dash-help-section__icon {
-  color: #9ab5e3;
+  background: rgb(255 255 255 / 0.08);
+  color: var(--dash-ink, #ffffff);
 }
 
 .dash-help-section__title {
@@ -1383,59 +1388,59 @@ html.dark .dash-help-section__blurb {
   gap: 0.5rem;
   height: 2.375rem;
   border-radius: 9999px;
-  border: 1px solid rgb(20 63 141 / 0.16);
-  background: rgb(20 63 141 / 0.07);
+  border: 1px solid transparent;
+  background: var(--dash-primary-btn, #1a1523);
   padding: 0 1rem;
   font-size: 0.8125rem;
   font-weight: 600;
-  color: rgb(20 63 141);
-  transition:
-    background-color 0.15s ease,
-    border-color 0.15s ease;
+  color: var(--dash-primary-btn-fg, #ffffff);
+  transition: background-color 0.15s ease;
 }
 
 .dash-help-assistant-cta:hover {
-  background: rgb(20 63 141 / 0.12);
-  border-color: rgb(20 63 141 / 0.24);
+  background: var(--dash-primary-btn-hover, #000000);
 }
 
 html.dark .dash-help-assistant-cta {
-  border-color: rgb(154 181 227 / 0.2);
-  background: rgb(20 63 141 / 0.18);
-  color: rgb(191 210 246);
+  background: var(--dash-primary-btn, #ffffff);
+  color: var(--dash-primary-btn-fg, #1a1523);
+}
+
+html.dark .dash-help-assistant-cta:hover {
+  background: var(--dash-primary-btn-hover, #f4f4f5);
 }
 
 .dash-help-assistant-link {
   align-self: center;
   border-radius: 9999px;
-  border: 1px solid rgb(20 63 141 / 0.12);
+  border: 1px solid var(--dash-border, rgb(15 23 42 / 0.12));
   background: transparent;
   padding: 0.4375rem 0.8125rem;
   font-size: 0.75rem;
   font-weight: 600;
-  color: rgb(30 64 175);
+  color: var(--dash-ink, #0f172a);
   transition:
     background-color 0.15s ease,
     border-color 0.15s ease;
 }
 
 .dash-help-assistant-link:hover {
-  background: rgb(20 63 141 / 0.06);
-  border-color: rgb(20 63 141 / 0.2);
+  background: rgb(15 23 42 / 0.05);
+  border-color: rgb(15 23 42 / 0.18);
 }
 
 html.dark .dash-help-assistant-link {
-  border-color: rgb(154 181 227 / 0.16);
-  color: rgb(191 210 246);
+  border-color: rgb(255 255 255 / 0.14);
+  color: var(--dash-ink, #ffffff);
 }
 
 html.dark .dash-help-assistant-link:hover {
-  background: rgb(20 63 141 / 0.16);
+  background: rgb(255 255 255 / 0.08);
 }
 
 .dash-help-article {
   border: 1px solid var(--dash-border, rgb(15 23 42 / 0.08));
-  border-radius: 0.875rem;
+  border-radius: 1rem;
   background: var(--dash-surface, #ffffff);
   padding: 1.125rem 1.25rem;
 }

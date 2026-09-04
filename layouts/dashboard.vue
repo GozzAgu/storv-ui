@@ -1152,6 +1152,7 @@ watch(
 const unreadNotificationCount = computed(() => notificationsStore.unreadCount)
 const { isNativeApp } = useCapacitorNativeApp()
 const { isCapacitorIos } = useIsCapacitorIos()
+const assistantStore = useAssistantStore()
 const showNativeCommandHeader = computed(() => isNativeApp.value && isCapacitorIos.value)
 const dashboardMainRef = ref<HTMLElement | null>(null)
 const sidebarOpen = ref(false)
@@ -1943,6 +1944,18 @@ const handleClickOutside = (event: MouseEvent) => {
     eventPath.includes(notificationsPanelRef.value as EventTarget)
   if (notificationsOpen.value && !inNotifications) {
     notificationsOpen.value = false
+  }
+
+  // Web assistant is a floating (non-modal) widget, teleported to <body> - no backdrop to
+  // catch outside clicks, so check directly against its panel + trigger buttons.
+  if (assistantStore.isOpen && !isNativeApp.value) {
+    const panelEl = document.getElementById('dashboard-assistant-panel')
+    const targetEl = target as Element
+    const inPanel = panelEl?.contains(target) || eventPath.includes(panelEl as EventTarget)
+    const onTrigger = !!targetEl.closest?.('[aria-label="Open Storvv Assistant"]')
+    if (!inPanel && !onTrigger) {
+      assistantStore.close()
+    }
   }
 }
 
