@@ -236,7 +236,7 @@ const props = withDefaults(defineProps<Props>(), {
   closeOnBackdrop: true,
   contentPadding: '',
   blurBackdrop: false,
-  dense: false,
+  dense: true,
   fitContent: false,
   nativeSheetVariant: 'crud',
   footerVariant: 'actions',

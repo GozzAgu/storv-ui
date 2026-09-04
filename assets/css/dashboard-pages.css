@@ -250,6 +250,22 @@ html.dark .dash-segment-tabs__btn[aria-selected='true'] {
   flex: 1 1 auto;
 }
 
+/* Many-tab category bars (Settings, Help): scroll horizontally instead of wrapping rows. */
+.dash-segment-tabs--scroll {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.dash-segment-tabs--scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.dash-segment-tabs--scroll .dash-segment-tabs__btn {
+  flex: 0 0 auto;
+  padding-inline: 0.875rem;
+}
+
 /* Compact context bar - inventory folder, sub-pages */
 .dash-page-context-bar {
   display: flex;

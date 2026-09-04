@@ -23,6 +23,15 @@
       </template>
     </div>
 
+    <CategoryTabs
+      :model-value="activeTab"
+      :options="tabs"
+      ariaLabel="Profile sections"
+      scroll
+      @update:model-value="onTabChange"
+    />
+
+    <div v-show="activeTab === 'account'">
     <IosSettingsGroup title="Account details">
       <IosSettingsRow :icon="UserCircleIcon" label="Profile" @click="emit('edit-profile')" />
       <IosSettingsRow
@@ -40,7 +49,9 @@
         @click="emit('open-store-info')"
       />
     </IosSettingsGroup>
+    </div>
 
+    <div v-show="activeTab === 'billing'">
     <IosSettingsGroup v-if="showBilling" title="Billing">
       <IosSettingsRow
         :icon="CreditCardIcon"
@@ -50,7 +61,9 @@
         last
       />
     </IosSettingsGroup>
+    </div>
 
+    <div v-show="activeTab === 'business'">
     <IosSettingsGroup v-if="showStoreInfo" title="Business">
       <IosSettingsRow
         :icon="BuildingStorefrontIcon"
@@ -60,7 +73,9 @@
         @click="emit('open-store-info')"
       />
     </IosSettingsGroup>
+    </div>
 
+    <div v-show="activeTab === 'general'">
     <IosSettingsGroup title="General">
       <IosSettingsRow
         :icon="BellIcon"
@@ -99,7 +114,9 @@
         @click="emit('open-timezone')"
       />
     </IosSettingsGroup>
+    </div>
 
+    <div v-show="activeTab === 'security'">
     <IosSettingsGroup title="Security">
       <IosSettingsRow :icon="KeyIcon" label="Password" @click="emit('open-password')" />
       <IosSettingsRow
@@ -116,7 +133,9 @@
         @click="emit('open-sessions')"
       />
     </IosSettingsGroup>
+    </div>
 
+    <div v-show="activeTab === 'access'">
     <IosSettingsGroup title="Access">
       <IosSettingsRow
         :icon="ClipboardDocumentListIcon"
@@ -126,7 +145,9 @@
         @click="emit('open-roles')"
       />
     </IosSettingsGroup>
+    </div>
 
+    <div v-show="activeTab === 'receipts'">
     <IosSettingsGroup v-if="showReceiptPolicies" title="Receipts">
       <IosSettingsRow
         :icon="ReceiptPercentIcon"
@@ -135,7 +156,9 @@
         @click="emit('open-receipt-policies')"
       />
     </IosSettingsGroup>
+    </div>
 
+    <div v-show="activeTab === 'support'">
     <IosSettingsGroup title="Support">
       <IosSettingsRow :icon="SparklesIcon" label="Dashboard tour" @click="emit('replay-tour')" />
       <IosSettingsRow :icon="InformationCircleIcon" label="Help center" to="/dashboard/help" />
@@ -146,11 +169,13 @@
         @click="emit('open-assistant')"
       />
     </IosSettingsGroup>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
+import CategoryTabs from '~/components/ui/CategoryTabs.vue'
 import {
   BellIcon,
   BuildingStorefrontIcon,
@@ -228,4 +253,35 @@ const sessionCountLabel = computed(() => {
   const count = props.sessionCount
   return count === 1 ? '1 device' : `${count} devices`
 })
+
+const tabs = computed(() => {
+  const list: Array<{ value: string; label: string }> = [{ value: 'account', label: 'Account details' }]
+  if (props.showBilling) list.push({ value: 'billing', label: 'Billing' })
+  if (props.showStoreInfo) list.push({ value: 'business', label: 'Business' })
+  list.push({ value: 'general', label: 'General' })
+  list.push({ value: 'security', label: 'Security' })
+  list.push({ value: 'access', label: 'Access' })
+  if (props.showReceiptPolicies) list.push({ value: 'receipts', label: 'Receipts' })
+  list.push({ value: 'support', label: 'Support' })
+  return list
+})
+
+const activeTab = ref('account')
+
+// showBilling/showStoreInfo/showReceiptPolicies can still be loading when this component mounts
+// (role/plan data resolving) — keep snapping to "account" until the user picks a tab themselves.
+let hasPickedTab = false
+watch(
+  tabs,
+  (list) => {
+    if (!hasPickedTab || !list.some((tab) => tab.value === activeTab.value)) {
+      activeTab.value = 'account'
+    }
+  }
+)
+
+function onTabChange(value: string) {
+  hasPickedTab = true
+  activeTab.value = value
+}
 </script>

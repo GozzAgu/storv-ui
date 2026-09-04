@@ -685,7 +685,6 @@ const inventoryStore = useInventoryStore()
 const authStore = useAuthStore()
 const userStore = useUserStore()
 const storesStore = useStoresStore()
-const staffStore = useStaffStore()
 const salesLeadsStore = useSalesLeadsStore()
 const themeStore = useThemeStore()
 const chartIsDark = computed(() => themeStore.actualTheme === 'dark')
@@ -706,7 +705,7 @@ function goCreatePaymentLink() {
   router.push('/dashboard/payment-links?create=1')
 }
 const { canManageBranches } = useBusinessCapabilities()
-const { canViewProfitAndCost } = usePermissions()
+const { canViewProfitAndCost, hasAnyManageAccess } = usePermissions()
 const { isNativeApp } = useCapacitorNativeApp()
 const { isCapacitorIos } = useIsCapacitorIos()
 const { formatGreeting } = useTimeGreeting()
@@ -798,11 +797,10 @@ const chartPeriodOptions = [
   { value: 'monthly' as const, label: 'Monthly' },
 ]
 
-const isManager = computed(
-  () => userStore.userData?.role === 'staff' && staffStore.getCurrentStaffMember?.role === 'manager'
-)
 const canViewActivity = computed(
-  () => (userStore.isSuperAdmin || isManager.value) && canUseSubscriptionFeature('activity_logs')
+  () =>
+    (userStore.isSuperAdmin || hasAnyManageAccess.value) &&
+    canUseSubscriptionFeature('activity_logs')
 )
 
 function lookupInventoryItemForProfit(itemId: string): InventoryItem | null {
@@ -851,7 +849,7 @@ const userRoleLabel = computed(() => {
   const role = userStore.userData?.role
   if (role === 'superAdmin') return 'Super admin'
   if (role === 'admin') return 'Admin'
-  if (role === 'staff') return isManager.value ? 'Manager' : 'Staff'
+  if (role === 'staff') return hasAnyManageAccess.value ? 'Manager' : 'Staff'
   if (role === 'user') return 'User'
   return ''
 })

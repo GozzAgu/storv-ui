@@ -3,6 +3,7 @@
     :model-value="modelValue"
     :title="receipt ? `Sale #${receipt.receiptNumber}` : 'Sale details'"
     size="lg"
+    dense
     @update:model-value="(value: boolean) => emit('update:modelValue', value)"
   >
     <template #default>

@@ -8,16 +8,17 @@
   >
     <IosForm v-if="item" layout="fill">
       <IosFormSection fixed>
-        <p class="dash-drawer-label">Product</p>
-        <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">
-          {{ getItemName(item) }}
-        </p>
-        <p class="dash-drawer-hint mt-1">
-          Current price
-          <span class="font-semibold text-gray-900 dark:text-gray-100"
-            >{{ currencySymbol }}{{ formatCurrency(getOriginalPrice(item)) }}</span
-          >
-        </p>
+        <IosFormField label="Product">
+          <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+            {{ getItemName(item) }}
+          </p>
+          <p class="dash-drawer-hint mt-1">
+            Current price
+            <span class="font-semibold text-gray-900 dark:text-gray-100"
+              >{{ currencySymbol }}{{ formatCurrency(getOriginalPrice(item)) }}</span
+            >
+          </p>
+        </IosFormField>
       </IosFormSection>
 
       <IosFormSection fixed>
@@ -90,7 +91,7 @@
         v-if="discountValue != null && discountValue > 0 && isValid"
         fixed
       >
-        <p class="dash-drawer-label">Preview</p>
+        <IosFormField label="Preview">
         <div class="space-y-2 text-sm">
           <div class="flex justify-between text-gray-600 dark:text-gray-400">
             <span>Original</span>
@@ -115,6 +116,7 @@
             >
           </div>
         </div>
+        </IosFormField>
       </IosFormSection>
     </IosForm>
 

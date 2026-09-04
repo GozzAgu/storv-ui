@@ -7,7 +7,7 @@ import {
   assertSucceeds,
   type RulesTestEnvironment,
 } from '@firebase/rules-unit-testing'
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
+import { deleteDoc, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
 
 describe('firestore.rules', () => {
   let testEnv: RulesTestEnvironment
@@ -475,6 +475,170 @@ describe('firestore.rules', () => {
         refundReason: 'Customer changed their mind',
         total: 1,
         updatedAt: new Date().toISOString(),
+      })
+    )
+  })
+
+  // --- Permission-matrix ("permissions" map) path: exercises members docs that have already
+  // been migrated to the new per-module grant shape, alongside the legacy-fallback tests above
+  // which exercise un-migrated docs. Both paths must authorize consistently.
+
+  async function seedMemberWithPermissions(
+    context: Parameters<RulesTestEnvironment['withSecurityRulesDisabled']>[0] extends (
+      c: infer C
+    ) => unknown
+      ? C
+      : never,
+    ownerId: string,
+    storeId: string,
+    memberUid: string,
+    permissions: Record<string, Record<string, boolean>>
+  ) {
+    await setDoc(doc(context.firestore(), `users/${ownerId}/stores/${storeId}/members/${memberUid}`), {
+      authUid: memberUid,
+      status: 'active',
+      permissions,
+    })
+  }
+
+  const FULL_PRODUCTS = { view: true, create: true, edit: true, delete: true }
+  const EMPTY_PRODUCTS = { view: true, create: false, edit: false, delete: false }
+  const EMPTY_RECEIPTS = { view: true, create: true, edit: false, delete: false, refund: false }
+
+  it('permission-map: allows create when products.create is granted, with no role field at all', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await seedOwner(context, 'u1', 'storvv_medium')
+      await seedStore(context, 'u1', 's1')
+      await seedMemberWithPermissions(context, 'u1', 's1', 'grantee1', {
+        products: FULL_PRODUCTS,
+        receipts: EMPTY_RECEIPTS,
+      })
+    })
+
+    const db = testEnv.authenticatedContext('grantee1').firestore()
+    await assertSucceeds(
+      setDoc(doc(db, 'users/u1/stores/s1/inventoryFolders/f1'), {
+        storeId: 's1',
+        name: 'Phones',
+        createdBy: 'grantee1',
+      })
+    )
+  })
+
+  it('permission-map: denies create when products.create is not granted (view-only)', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await seedOwner(context, 'u1', 'storvv_medium')
+      await seedStore(context, 'u1', 's1')
+      await seedMemberWithPermissions(context, 'u1', 's1', 'viewer1', {
+        products: EMPTY_PRODUCTS,
+        receipts: EMPTY_RECEIPTS,
+      })
+    })
+
+    const db = testEnv.authenticatedContext('viewer1').firestore()
+    await assertFails(
+      setDoc(doc(db, 'users/u1/stores/s1/inventoryFolders/f1'), {
+        storeId: 's1',
+        name: 'Phones',
+        createdBy: 'viewer1',
+      })
+    )
+  })
+
+  it('permission-map: products actions are split per-action (create granted, delete denied)', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await seedOwner(context, 'u1', 'storvv_medium')
+      await seedStore(context, 'u1', 's1')
+      await seedMemberWithPermissions(context, 'u1', 's1', 'creator1', {
+        products: { view: true, create: true, edit: true, delete: false },
+        receipts: EMPTY_RECEIPTS,
+      })
+      await setDoc(doc(context.firestore(), 'users/u1/stores/s1/inventoryFolders/f1'), {
+        storeId: 's1',
+        name: 'Phones',
+        createdBy: 'u1',
+      })
+    })
+
+    const db = testEnv.authenticatedContext('creator1').firestore()
+    await assertSucceeds(
+      setDoc(doc(db, 'users/u1/stores/s1/inventoryFolders/f2'), {
+        storeId: 's1',
+        name: 'Tablets',
+        createdBy: 'creator1',
+      })
+    )
+    await assertFails(deleteDoc(doc(db, 'users/u1/stores/s1/inventoryFolders/f1')))
+  })
+
+  it('permission-map: allows refund via receipts.refund grant (not tied to any role)', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await seedOwner(context, 'u1', 'storvv_medium')
+      await seedStore(context, 'u1', 's1')
+      await seedMemberWithPermissions(context, 'u1', 's1', 'refunder1', {
+        products: EMPTY_PRODUCTS,
+        receipts: { view: true, create: true, edit: false, delete: false, refund: true },
+      })
+      await seedCompletedReceipt(context, 'u1', 's1', 'r1')
+    })
+
+    const db = testEnv.authenticatedContext('refunder1').firestore()
+    await assertSucceeds(
+      updateDoc(doc(db, 'users/u1/stores/s1/receipts/r1'), {
+        status: 'refunded',
+        refundReason: 'Customer changed their mind',
+        notes: 'Returned: Customer changed their mind',
+        updatedAt: new Date().toISOString(),
+      })
+    )
+  })
+
+  it('permission-map: denies refund without receipts.refund, even with receipts.edit false', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await seedOwner(context, 'u1', 'storvv_medium')
+      await seedStore(context, 'u1', 's1')
+      await seedMemberWithPermissions(context, 'u1', 's1', 'plain1', {
+        products: EMPTY_PRODUCTS,
+        receipts: EMPTY_RECEIPTS,
+      })
+      await seedCompletedReceipt(context, 'u1', 's1', 'r1')
+    })
+
+    const db = testEnv.authenticatedContext('plain1').firestore()
+    await assertFails(
+      updateDoc(doc(db, 'users/u1/stores/s1/receipts/r1'), {
+        status: 'refunded',
+        refundReason: 'Customer changed their mind',
+        updatedAt: new Date().toISOString(),
+      })
+    )
+  })
+
+  it('permission-map: any active member (even view-only) can still create a receipt via POS', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await seedOwner(context, 'u1', 'storvv_medium')
+      await seedStore(context, 'u1', 's1')
+      await seedMemberWithPermissions(context, 'u1', 's1', 'plain2', {
+        products: EMPTY_PRODUCTS,
+        receipts: EMPTY_RECEIPTS,
+      })
+    })
+
+    const db = testEnv.authenticatedContext('plain2').firestore()
+    await assertSucceeds(
+      setDoc(doc(db, 'users/u1/stores/s1/receipts/r2'), {
+        receiptNumber: 'R-2',
+        customerName: 'Jane Doe',
+        customerEmail: 'jane@example.com',
+        items: [{ itemId: 'i1', quantity: 1, price: 100, itemName: 'Widget' }],
+        itemsCount: 1,
+        total: 100,
+        paymentMethod: 'cash',
+        status: 'completed',
+        folderId: 'f1',
+        itemIds: ['i1'],
+        storeId: 's1',
+        createdBy: 'plain2',
       })
     )
   })

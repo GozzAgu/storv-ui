@@ -6,6 +6,12 @@ import {
   TFA_ENABLED_CLAIM,
 } from '~/server/utils/two-factor-claims'
 import { verifyTotpCode } from '~/server/utils/two-factor'
+import {
+  hasAnyModuleManageAccess,
+  resolveStaffPermissions,
+  type LegacyStaffAccessFields,
+} from '~/utils/staff-permissions'
+import type { StaffPermissions } from '~/types/staff-permissions'
 
 export interface AuthContext {
   uid: string
@@ -116,10 +122,17 @@ export async function readTotpCodeFromRequest(event: H3Event): Promise<string | 
   return undefined
 }
 
+/**
+ * Owner, or an active store member whose permission matrix satisfies `hasAccess` (default: any
+ * manage grant across either module — the closest server-side equivalent of the old
+ * role==='manager' check, now that role tiers are retired). Pass a narrower predicate (e.g.
+ * `(p) => p.receipts.delete`) where the caller needs a specific grant.
+ */
 export async function requireStoreManageAccess(
   authUid: string,
   ownerUserId: string,
-  storeId: string
+  storeId: string,
+  hasAccess: (permissions: StaffPermissions) => boolean = hasAnyModuleManageAccess
 ): Promise<void> {
   const adminDb = getAdminFirestore()
 
@@ -138,8 +151,8 @@ export async function requireStoreManageAccess(
     throw createError({ statusCode: 403, message: 'Store membership not found' })
   }
 
-  const member = memberSnap.data() as { status?: string; role?: string } | undefined
-  if (member?.status !== 'active' || member?.role !== 'manager') {
+  const member = memberSnap.data() as LegacyStaffAccessFields & { status?: string } | undefined
+  if (member?.status !== 'active' || !hasAccess(resolveStaffPermissions(member ?? {}))) {
     throw createError({ statusCode: 403, message: 'Insufficient store permissions' })
   }
 }

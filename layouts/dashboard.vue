@@ -1293,14 +1293,14 @@ const sidebarLogoImgClass = computed(() => {
 
 const navigation = DASHBOARD_NAV_DEFINITIONS
 
-// Filter navigation based on user role and subscription plan (web sidebar + iOS/Android bottom nav)
+// Filter navigation based on user access and subscription plan (web sidebar + iOS/Android bottom nav)
+const { hasAnyManageAccess } = usePermissions()
 const filteredNavigation = computed(() => {
-  const isManager =
-    userStore.userData?.role === 'staff' && staffStore.getCurrentStaffMember?.role === 'manager'
-
   return filterDashboardNavItems(navigation, {
     isSuperAdmin: userStore.isSuperAdmin,
-    isManager,
+    // "Manager-only" nav items now gate on any manage grant across the permission matrix,
+    // rather than the retired manager/staff/intern role tier.
+    isManager: hasAnyManageAccess.value,
     canUseFeature: canUseSubscriptionFeature,
     canUseBusinessCapability,
     hidePaymentLinks: isPaymentLinksComingSoon(),

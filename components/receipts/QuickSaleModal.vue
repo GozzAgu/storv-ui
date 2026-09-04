@@ -4,6 +4,7 @@
     title="Quick Sale"
     :content-padding="quickSaleContentPadding"
     size="lg"
+    dense
     @update:model-value="(value: boolean) => emit('update:modelValue', value)"
   >
     <div :class="['space-y-4', isCapacitorIos ? 'ios-quick-sale-sheet' : '']">

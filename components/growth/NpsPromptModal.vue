@@ -1,33 +1,36 @@
 <template>
   <Modal v-model="open" title="How likely are you to recommend Storvv?" subtitle="Your feedback helps us improve for shop owners like you." size="sm">
-    <div class="space-y-4">
-      <div class="flex flex-wrap justify-between gap-1">
-        <button
-          v-for="score in scores"
-          :key="score"
-          type="button"
-          class="flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold transition-colors"
-          :class="
-            selected === score
-              ? 'bg-primary-600 text-white'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-gray-200'
-          "
-          @click="selected = score"
-        >
-          {{ score }}
-        </button>
-      </div>
-      <div class="flex justify-between text-[10px] text-gray-500 dark:text-gray-400">
-        <span>Not likely</span>
-        <span>Very likely</span>
-      </div>
-      <textarea
-        v-model="comment"
-        rows="3"
-        class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs dark:border-white/10 dark:bg-white/[0.03]"
-        placeholder="Optional: what would make Storvv better for your shop?"
-      />
-    </div>
+    <IosForm layout="default" scroll>
+      <IosFormSection fixed>
+        <div class="flex flex-wrap justify-between gap-1">
+          <button
+            v-for="score in scores"
+            :key="score"
+            type="button"
+            class="flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold transition-colors"
+            :class="
+              selected === score
+                ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-gray-200'
+            "
+            @click="selected = score"
+          >
+            {{ score }}
+          </button>
+        </div>
+        <div class="flex justify-between text-[10px] text-gray-500 dark:text-gray-400">
+          <span>Not likely</span>
+          <span>Very likely</span>
+        </div>
+        <IosFormField label="Comment" hint="Optional">
+          <IosFormTextarea
+            v-model="comment"
+            :rows="3"
+            placeholder="What would make Storvv better for your shop?"
+          />
+        </IosFormField>
+      </IosFormSection>
+    </IosForm>
     <template #footer>
       <IosDrawerActions
         cancel-label="Not now"
@@ -46,6 +49,7 @@
 import { ref } from 'vue'
 import Modal from '~/components/ui/Modal.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
+import { IosForm, IosFormSection, IosFormField, IosFormTextarea } from '~/components/ios/forms'
 
 const open = defineModel<boolean>({ required: true })
 

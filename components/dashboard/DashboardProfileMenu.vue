@@ -282,7 +282,6 @@ const {
 const route = useRoute()
 const storesStore = useStoresStore()
 const userStore = useUserStore()
-const staffStore = useStaffStore()
 const notificationsStore = useNotificationsStore()
 const { canUse, plan } = useSubscriptionFeatures()
 const { isCapacitorIos } = useIsCapacitorIos()
@@ -307,10 +306,12 @@ const storeLabel = computed(() => {
   return name.length > 22 ? `${name.slice(0, 21)}…` : name
 })
 
+const { hasAnyManageAccess } = usePermissions()
+
 const roleLabel = computed(() => {
   if (userStore.isSuperAdmin) return 'Admin'
   if (userStore.userData?.role === 'staff') {
-    return staffStore.getCurrentStaffMember?.role === 'manager' ? 'Manager' : 'Staff'
+    return hasAnyManageAccess.value ? 'Manager' : 'Staff'
   }
   const role = userStore.userData?.role
   if (role) return role.charAt(0).toUpperCase() + role.slice(1)

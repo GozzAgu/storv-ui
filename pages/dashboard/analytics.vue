@@ -116,6 +116,13 @@
     />
 
     <template v-else>
+      <CategoryTabs
+        :model-value="activeAnalyticsTab"
+        :options="analyticsTabs"
+        ariaLabel="Analytics sections"
+        @update:model-value="(value: string) => (activeAnalyticsTab = value)"
+      />
+
       <IosAnalyticsActions
         v-if="isCapacitorIos"
         :is-exporting="isExporting"
@@ -132,6 +139,7 @@
         </template>
       </IosAnalyticsActions>
 
+      <div v-show="activeAnalyticsTab === 'overview'">
       <IosAnalyticsSection
         v-if="isCapacitorIos"
         :title="periodLabel"
@@ -285,7 +293,9 @@
           />
         </div>
       </section>
+      </div>
 
+      <div v-show="activeAnalyticsTab === 'revenue'">
       <IosAnalyticsSection
         v-if="isCapacitorIos"
         title="Revenue trends"
@@ -392,7 +402,9 @@
           />
         </div>
       </section>
+      </div>
 
+      <div v-show="activeAnalyticsTab === 'products-customers'">
       <IosAnalyticsSection
         v-if="isCapacitorIos"
         title="Sales breakdown"
@@ -476,7 +488,9 @@
           />
         </section>
       </div>
+      </div>
 
+      <div v-show="activeAnalyticsTab === 'payments-traffic'">
       <IosAnalyticsSection
         v-if="isCapacitorIos && paymentMethodBreakdown.length > 0"
         title="Payment methods"
@@ -656,7 +670,9 @@
           />
         </section>
       </div>
+      </div>
 
+      <div v-show="activeAnalyticsTab === 'reports'">
       <IosAnalyticsSection
         v-if="isCapacitorIos"
         title="Top products"
@@ -904,6 +920,7 @@
           <p v-else :class="emptyClass">All stocked</p>
         </div>
       </div>
+      </div>
 
     </template>
     </div>
@@ -916,6 +933,7 @@ import { ref, computed, onMounted, defineAsyncComponent, type Component } from '
 import { mergeIosApexChartTheme } from '~/utils/ios-apex-chart'
 import IosSegmentedControl from '~/components/ios/IosSegmentedControl.vue'
 import IosAnalyticsActions from '~/components/ios/IosAnalyticsActions.vue'
+import CategoryTabs from '~/components/ui/CategoryTabs.vue'
 
 const LazyApexChart = defineAsyncComponent(
   () => import('~/components/charts/LazyApexChart.client.vue')
@@ -1123,6 +1141,16 @@ const analyticsPeriodOptions = analyticsPeriods.map((period) => ({
 }))
 
 const selectedPeriod = ref<'daily' | 'weekly' | 'monthly'>('monthly')
+
+const analyticsTabs = [
+  { value: 'overview', label: 'Overview' },
+  { value: 'revenue', label: 'Revenue & products' },
+  { value: 'products-customers', label: 'Products & customers' },
+  { value: 'payments-traffic', label: 'Payments & traffic' },
+  { value: 'reports', label: 'Reports' },
+]
+
+const activeAnalyticsTab = ref('overview')
 
 const needsStoreSelection = computed(() => {
   const msg = (receiptsStore.error || inventoryStore.error || '').toLowerCase()
@@ -1988,7 +2016,7 @@ const peakHoursChartOptions = computed(() => {
   const axisFmt = chartCurrencyAxis.value
   return {
     chart: { type: 'bar', toolbar: { show: false }, background: 'transparent' },
-    colors: [isDark ? '#e4e4e7' : '#4876c7'],
+    colors: [isDark ? '#e4e4e7' : '#111827'],
     plotOptions: {
       bar: { borderRadius: 3, columnWidth: '70%', dataLabels: { position: 'top' } },
     },
@@ -2094,12 +2122,12 @@ const heatmapChartOptions = computed(() => {
   const q3 = max * 0.75
   const ranges = [
     { from: 0, to: 0, color: isDark ? '#374151' : '#E5E7EB' },
-    { from: 0.01, to: max > 0 ? q1 : scaleMax, color: isDark ? '#1e3a5f' : '#93c5fd' },
+    { from: 0.01, to: max > 0 ? q1 : scaleMax, color: isDark ? '#52525b' : '#d4d4d8' },
     ...(max > 0
       ? [
-          { from: q1, to: q2, color: isDark ? '#1d4ed8' : '#60a5fa' },
-          { from: q2, to: q3, color: isDark ? '#2563eb' : '#3b82f6' },
-          { from: q3, to: max + 1, color: isDark ? '#3b82f6' : '#1d4ed8' },
+          { from: q1, to: q2, color: isDark ? '#71717a' : '#a1a1aa' },
+          { from: q2, to: q3, color: isDark ? '#a1a1aa' : '#71717a' },
+          { from: q3, to: max + 1, color: isDark ? '#e4e4e7' : '#3f3f46' },
         ]
       : []),
   ]
@@ -2239,7 +2267,7 @@ const revenueChartOptions = computed(() => {
       zoom: { enabled: false },
       background: 'transparent',
     },
-    colors: [isDark ? '#e4e4e7' : '#4876c7'],
+    colors: [isDark ? '#e4e4e7' : '#111827'],
     stroke: {
       curve: 'smooth',
       width: 2,
@@ -2483,7 +2511,7 @@ const categorySalesChartOptions = computed(() => {
 
   return {
     chart: { type: 'bar', toolbar: { show: false }, background: 'transparent' },
-    colors: [isDark ? '#e4e4e7' : '#4876c7'],
+    colors: [isDark ? '#e4e4e7' : '#111827'],
     plotOptions: {
       bar: {
         horizontal: true,

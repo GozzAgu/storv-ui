@@ -679,13 +679,7 @@
             </div>
           </div>
 
-          <div
-            :class="[
-              isFullscreen
-                ? tableExpandBodyClass
-                : 'data-table-shell flex min-h-0 flex-1 flex-col overflow-hidden',
-            ]"
-          >
+          <div :class="isFullscreen ? tableExpandBodyClass : tableShellFlexClass">
             <!-- Desktop toolbar -->
             <DataTableToolbar v-if="!isFullscreen" class="hidden lg:block">
               <template #heading>
@@ -892,7 +886,7 @@
                     :key="item.id"
                     :data-item-row="item.id"
                     class="rounded-sm bg-white p-3 shadow-none dark:!bg-dashboard-card"
-                    :class="flashItemId === item.id ? '!ring-2 !ring-primary-500/25 ring-offset-2 ring-offset-white dark:!ring-offset-gray-900' : ''"
+                    :class="flashItemId === item.id ? '!ring-2 !ring-gray-900/20 dark:!ring-white/25 ring-offset-2 ring-offset-white dark:!ring-offset-gray-900' : ''"
                   >
                     <div class="flex items-start justify-between gap-1.5">
                       <div class="min-w-0 flex-1 flex items-start gap-1.5">
@@ -1042,7 +1036,7 @@
                           v-for="(item, index) in paginatedItems"
                           :key="item.id"
                           :data-item-row="item.id"
-                          :class="flashItemId === item.id ? '!ring-2 !ring-inset !ring-primary-500/25' : ''"
+                          :class="flashItemId === item.id ? '!ring-2 !ring-inset !ring-gray-900/20 dark:!ring-white/25' : ''"
                         >
                           <td v-if="showBulkRowSelection" class="text-center">
                             <Checkbox
@@ -2327,7 +2321,7 @@ const folder = ref<InventoryFolder | null>(null)
 const isLoadingFolder = ref(true)
 const isLoadingItems = ref(false)
 const { headerBtnClass, headerBtnLabelClass, pageWithFixedFooterClass } = useDashboardPageChrome()
-const { pageWithFooterClass, tableExpandClass, tableExpandHeaderClass, tableExpandBodyClass, tableExpandCloseClass, tableExpandEyebrowClass, tableExpandTitleClass, tableExpandMetaClass, tableExpandFieldClass } = useDashboardGridPagesChrome()
+const { pageWithFooterClass, tableShellFlexClass, tableExpandClass, tableExpandHeaderClass, tableExpandBodyClass, tableExpandCloseClass, tableExpandEyebrowClass, tableExpandTitleClass, tableExpandMetaClass, tableExpandFieldClass } = useDashboardGridPagesChrome()
 
 const inventoryBreadcrumbs = computed(() => {
   const crumbs = [{ label: 'Inventory', href: '/dashboard/inventory', icon: CubeIcon }]

@@ -70,7 +70,7 @@ html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .io
 html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__toggle .ios-form__toggle-control {
   display: flex !important;
   flex-direction: row-reverse;
-  align-items: center !important;
+  align-items: flex-start !important;
   justify-content: space-between;
   gap: 0.875rem;
   width: 100%;
@@ -78,6 +78,10 @@ html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .io
   /* The .ios-form__toggle card owns the padding — the row inside must not add more */
   padding: 0 !important;
   border: none !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__toggle .app-checkbox__box {
+  margin-top: 0.125rem;
 }
 
 html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__toggle-copy {

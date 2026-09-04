@@ -140,6 +140,7 @@ import {
   partitionFoldersForCopy,
   validateFolderParentId,
 } from '~/utils/inventory-folder-tree'
+import { getPermissionAction, resolveStaffPermissions } from '~/utils/staff-permissions'
 
 function mapFirestoreDocToInventoryFolder(
   snapshot: QueryDocumentSnapshot,
@@ -1739,8 +1740,9 @@ export const useInventoryStore = defineStore('inventory', {
       if (userStore.userData?.role === 'staff') {
         const staffStore = useStaffStore()
         const staffMember = await staffStore.fetchCurrentStaffMember()
-        if (staffMember?.role !== 'manager') {
-          throw new Error('Only super admins and managers can add items to inventory.')
+        const permissions = staffMember ? resolveStaffPermissions(staffMember) : null
+        if (!permissions || !getPermissionAction(permissions, 'products', 'create')) {
+          throw new Error('You do not have permission to add items to inventory.')
         }
       }
 
@@ -1919,8 +1921,9 @@ export const useInventoryStore = defineStore('inventory', {
       if (userStore.userData?.role === 'staff') {
         const staffStore = useStaffStore()
         const staffMember = await staffStore.fetchCurrentStaffMember()
-        if (staffMember?.role !== 'manager') {
-          throw new Error('Only super admins and managers can add items to inventory.')
+        const permissions = staffMember ? resolveStaffPermissions(staffMember) : null
+        if (!permissions || !getPermissionAction(permissions, 'products', 'create')) {
+          throw new Error('You do not have permission to add items to inventory.')
         }
       }
 
@@ -2096,8 +2099,9 @@ export const useInventoryStore = defineStore('inventory', {
       if (userStore.userData?.role === 'staff') {
         const staffStore = useStaffStore()
         const staffMember = await staffStore.fetchCurrentStaffMember()
-        if (staffMember?.role !== 'manager') {
-          throw new Error('Only super admins and managers can update items in inventory.')
+        const permissions = staffMember ? resolveStaffPermissions(staffMember) : null
+        if (!permissions || !getPermissionAction(permissions, 'products', 'edit')) {
+          throw new Error('You do not have permission to update items in inventory.')
         }
       }
 
@@ -2236,8 +2240,9 @@ export const useInventoryStore = defineStore('inventory', {
       if (userStore.userData?.role === 'staff') {
         const staffStore = useStaffStore()
         const staffMember = await staffStore.fetchCurrentStaffMember()
-        if (staffMember?.role !== 'manager') {
-          throw new Error('Only super admins and managers can delete items from inventory.')
+        const permissions = staffMember ? resolveStaffPermissions(staffMember) : null
+        if (!permissions || !getPermissionAction(permissions, 'products', 'delete')) {
+          throw new Error('You do not have permission to delete items from inventory.')
         }
       }
 
@@ -3149,7 +3154,7 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('User must be authenticated to apply discounts')
       }
 
-      // Check permissions - super admins and managers can apply discounts
+      // Check permissions - super admins and staff granted products.edit can apply discounts
       const userStore = useUserStore()
       if (!userStore.userData) {
         await userStore.fetchUserData(authStore.currentUser.uid)
@@ -3157,8 +3162,9 @@ export const useInventoryStore = defineStore('inventory', {
       if (userStore.userData?.role === 'staff') {
         const staffStore = useStaffStore()
         const staffMember = await staffStore.fetchCurrentStaffMember()
-        if (staffMember?.role !== 'manager') {
-          throw new Error('Only super admins and managers can apply discounts.')
+        const permissions = staffMember ? resolveStaffPermissions(staffMember) : null
+        if (!permissions || !getPermissionAction(permissions, 'products', 'edit')) {
+          throw new Error('You do not have permission to apply discounts.')
         }
       }
 
@@ -3274,7 +3280,7 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('User must be authenticated to apply discounts')
       }
 
-      // Check permissions - super admins and managers can apply discounts
+      // Check permissions - super admins and staff granted products.edit can apply discounts
       const userStore = useUserStore()
       if (!userStore.userData) {
         await userStore.fetchUserData(authStore.currentUser.uid)
@@ -3282,8 +3288,9 @@ export const useInventoryStore = defineStore('inventory', {
       if (userStore.userData?.role === 'staff') {
         const staffStore = useStaffStore()
         const staffMember = await staffStore.fetchCurrentStaffMember()
-        if (staffMember?.role !== 'manager') {
-          throw new Error('Only super admins and managers can apply discounts.')
+        const permissions = staffMember ? resolveStaffPermissions(staffMember) : null
+        if (!permissions || !getPermissionAction(permissions, 'products', 'edit')) {
+          throw new Error('You do not have permission to apply discounts.')
         }
       }
 
@@ -3411,7 +3418,7 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('User must be authenticated to remove discounts')
       }
 
-      // Check permissions - super admins and managers can remove discounts
+      // Check permissions - super admins and staff granted products.edit can remove discounts
       const userStore = useUserStore()
       if (!userStore.userData) {
         await userStore.fetchUserData(authStore.currentUser.uid)
@@ -3419,8 +3426,9 @@ export const useInventoryStore = defineStore('inventory', {
       if (userStore.userData?.role === 'staff') {
         const staffStore = useStaffStore()
         const staffMember = await staffStore.fetchCurrentStaffMember()
-        if (staffMember?.role !== 'manager') {
-          throw new Error('Only super admins and managers can remove discounts.')
+        const permissions = staffMember ? resolveStaffPermissions(staffMember) : null
+        if (!permissions || !getPermissionAction(permissions, 'products', 'edit')) {
+          throw new Error('You do not have permission to remove discounts.')
         }
       }
 
@@ -3495,7 +3503,7 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('User must be authenticated to remove discounts')
       }
 
-      // Check permissions - super admins and managers can remove discounts
+      // Check permissions - super admins and staff granted products.edit can remove discounts
       const userStore = useUserStore()
       if (!userStore.userData) {
         await userStore.fetchUserData(authStore.currentUser.uid)
@@ -3503,8 +3511,9 @@ export const useInventoryStore = defineStore('inventory', {
       if (userStore.userData?.role === 'staff') {
         const staffStore = useStaffStore()
         const staffMember = await staffStore.fetchCurrentStaffMember()
-        if (staffMember?.role !== 'manager') {
-          throw new Error('Only super admins and managers can remove discounts.')
+        const permissions = staffMember ? resolveStaffPermissions(staffMember) : null
+        if (!permissions || !getPermissionAction(permissions, 'products', 'edit')) {
+          throw new Error('You do not have permission to remove discounts.')
         }
       }
 

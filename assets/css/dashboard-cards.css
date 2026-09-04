@@ -632,7 +632,11 @@ html.dark .dash-progress {
 }
 
 .dash-progress__segment--available {
-  background: linear-gradient(90deg, #4876c7 0%, #6e94d6 100%);
+  background: linear-gradient(90deg, #71717a 0%, #a1a1aa 100%);
+}
+
+html.dark .dash-progress__segment--available {
+  background: linear-gradient(90deg, rgb(255 255 255 / 0.55) 0%, rgb(255 255 255 / 0.85) 100%);
 }
 
 .dash-progress__segment--low {
@@ -875,8 +879,12 @@ html.dark .dash-bar {
 .dash-bar__fill {
   height: 100%;
   border-radius: 9999px;
-  background: linear-gradient(90deg, #4876c7 0%, #9ab5e3 100%);
+  background: linear-gradient(90deg, #71717a 0%, #a1a1aa 100%);
   transition: width 0.3s ease;
+}
+
+html.dark .dash-bar__fill {
+  background: linear-gradient(90deg, rgb(255 255 255 / 0.55) 0%, rgb(255 255 255 / 0.85) 100%);
 }
 
 .dash-bar-row__foot {

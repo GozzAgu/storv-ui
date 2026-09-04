@@ -4,6 +4,7 @@
     :title="sheetTitle"
     :content-padding="sheetContentPadding"
     size="lg"
+    dense
     @update:model-value="(value: boolean) => emit('update:modelValue', value)"
   >
     <template #default>
@@ -441,7 +442,7 @@
                     type="number"
                     :value="getSelectedItemQuantity(item.id)"
                     :class="[
-                      'h-8 w-20 rounded-lg bg-white px-2 text-xs dark:!bg-dashboard-card',
+                      'app-field h-8 w-20 px-2 text-xs dark:!bg-dashboard-card',
                       getSelectedItemQuantityError(item.id)
                         ? 'ring-2 ring-red-500/70 focus:ring-red-500/70 dark:ring-red-400/60'
                         : '',
@@ -524,21 +525,17 @@
         </div>
 
         <!-- Step 4: Sale Details -->
-        <div v-if="currentStep === 3" class="space-y-3">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div class="relative">
-              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                Customer Name *
-              </label>
+        <IosForm v-if="currentStep === 3" layout="default" :scroll="false">
+          <IosFormSection fixed grid>
+            <IosFormField label="Customer name" required>
               <div class="relative">
-                <input
+                <IosFormInput
                   v-model="receiptForm.customerName"
-                  type="text"
                   required
+                  extra-class="pr-8"
                   @input="handleCustomerNameInput"
                   @focus="showCustomerSuggestions = true"
                   @blur="handleCustomerNameBlur"
-                  class="app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/40"
                   placeholder="John Doe"
                 />
                 <MagnifyingGlassIcon
@@ -579,45 +576,30 @@
                   </div>
                 </div>
               </div>
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                Customer Email
-              </label>
-              <input
+            </IosFormField>
+            <IosFormField label="Customer email">
+              <IosFormInput
                 v-model="receiptForm.customerEmail"
                 type="email"
-                class="app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/40"
                 placeholder="john@example.com"
               />
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                Customer Phone
-              </label>
-              <input
+            </IosFormField>
+            <IosFormField label="Customer phone">
+              <IosFormInput
                 v-model="receiptForm.customerPhone"
                 type="tel"
-                class="app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/40"
                 placeholder="+1 234 567 8900"
               />
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                Customer Address
-              </label>
-              <input
+            </IosFormField>
+            <IosFormField label="Customer address">
+              <IosFormInput
                 v-model="receiptForm.customerAddress"
-                type="text"
-                class="app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/40"
                 placeholder="123 Main St, City, State"
               />
-            </div>
-            <div>
+            </IosFormField>
+            <IosFormField>
               <div class="flex items-center justify-between mb-1.5">
-                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300">
-                  Payment Method *
-                </label>
+                <span class="ios-form__label dash-drawer-label !mb-0">Payment method *</span>
                 <Checkbox
                   v-if="paymentSettlement !== 'balance_due'"
                   v-model="useSplitPayment"
@@ -646,17 +628,17 @@
                   />
                   <div class="relative w-28">
                     <span
-                      class="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400"
+                      class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400"
                       >{{ currencySymbol }}</span
                     >
-                    <input
+                    <IosFormInput
                       v-model.number="payment.amount"
                       type="number"
                       step="0.01"
-                      min="0"
+                      :min="0"
                       :max="receiptTotal - splitPaymentsTotal + payment.amount"
                       required
-                      class="w-full pl-6 pr-2.5 py-2 text-xs rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/60"
+                      extra-class="pl-7"
                       placeholder="0.00"
                     />
                   </div>
@@ -721,11 +703,8 @@
                   </p>
                 </div>
               </div>
-            </div>
-            <div class="sm:col-span-2">
-              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                Payment *
-              </label>
+            </IosFormField>
+            <IosFormField class="sm:col-span-2" label="Payment" required>
               <div class="grid grid-cols-2 gap-2">
                 <button
                   type="button"
@@ -764,13 +743,13 @@
                 <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Deposit collected today *
                 </label>
-                <input
+                <IosFormInput
                   v-model.number="depositAmount"
                   type="number"
-                  min="0"
+                  :min="0"
                   step="0.01"
                   :max="receiptTotal"
-                  class="app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card tabular-nums dark:text-gray-100"
+                  extra-class="tabular-nums"
                 />
                 <p class="mt-1.5 text-[11px] text-gray-600 dark:text-gray-400 tabular-nums">
                   Balance remaining:
@@ -779,29 +758,24 @@
                   </span>
                 </p>
               </div>
-            </div>
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-              Notes (Optional)
-            </label>
-            <textarea
-              v-model="receiptForm.notes"
-              rows="2"
-              class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/40 resize-none"
-              placeholder="Additional notes..."
-            ></textarea>
-          </div>
+            </IosFormField>
+          </IosFormSection>
+          <IosFormSection fixed>
+            <IosFormField label="Notes" hint="Optional">
+              <IosFormTextarea
+                v-model="receiptForm.notes"
+                :rows="2"
+                placeholder="Additional notes..."
+              />
+            </IosFormField>
+          </IosFormSection>
 
           <!-- Swap-In Section (inventory write; super admin only) -->
-          <div v-if="canUseSwapInReceipt" class="border-t border-gray-200 pt-3 mt-3">
+          <IosFormSection v-if="canUseSwapInReceipt" fixed>
             <Checkbox v-model="isSwapIn" label="This is a swap-in transaction" size="sm" />
 
-            <div v-if="isSwapIn" class="space-y-4 mt-3 pt-3 border-t border-gray-200">
-              <div>
-                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                  Select category for swapped-in device *
-                </label>
+            <div v-if="isSwapIn" class="space-y-4 pt-1">
+              <IosFormField label="Category for swapped-in device" required>
                 <div v-if="loadingFolders" class="text-center py-3">
                   <div
                     class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-gray-500"
@@ -820,18 +794,13 @@
                     No inventory categories found
                   </p>
                 </div>
-                <select
-                  v-else
-                  v-model="swapInFolderId"
-                  required
-                  class="app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/40"
-                >
+                <IosFormSelect v-else v-model="swapInFolderId" required>
                   <option value="">Select category for swapped-in device</option>
                   <option v-for="folder in leafFolders" :key="folder.id" :value="folder.id">
                     {{ folder.name }}
                   </option>
-                </select>
-              </div>
+                </IosFormSelect>
+              </IosFormField>
 
               <!-- Swapped-In Device Details (aligned with inventory product form) -->
               <div v-if="swapInFolderId && swapInFolder" class="space-y-3">
@@ -839,73 +808,64 @@
                   Swapped-In Device Details
                 </h4>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div
+                  <IosFormField
                     v-for="field in swapInDisplayFields"
                     :key="field.id || field.name"
                     :class="
                       field.type === 'boolean' || field.type === 'date' ? 'sm:col-span-2' : ''
                     "
+                    :label="field.type === 'boolean' ? undefined : swapInFieldLabel(field)"
+                    :required="field.type !== 'boolean' && field.required"
                   >
-                    <label
-                      class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-                    >
-                      {{ swapInFieldLabel(field) }}
-                      <span v-if="field.required" class="text-red-500">*</span>
-                    </label>
                     <!-- Text Input -->
-                    <input
+                    <IosFormInput
                       v-if="field.type === 'text'"
                       v-model="swapInItemForm[field.name]"
                       :required="field.required"
-                      type="text"
                       :placeholder="swapInFieldPlaceholder(field)"
-                      class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50"
                     />
                     <!-- Number Input -->
-                    <input
+                    <IosFormInput
                       v-else-if="field.type === 'number'"
                       v-model.number="swapInItemForm[field.name]"
-                      :required="field.required"
                       type="number"
+                      :required="field.required"
                       :placeholder="swapInFieldPlaceholder(field)"
-                      class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50"
                     />
                     <!-- Currency Input -->
                     <div v-else-if="field.type === 'currency'" class="relative">
                       <span
-                        class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400"
+                        class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400"
                         >{{ currencySymbol }}</span
                       >
-                      <input
+                      <IosFormInput
                         v-model.number="swapInItemForm[field.name]"
                         type="number"
                         step="0.01"
-                        min="0"
+                        :min="0"
                         :required="field.required"
-                        class="w-full pl-7 pr-3 py-2 text-xs rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50"
+                        extra-class="pl-7"
                         placeholder="0.00"
                       />
                     </div>
                     <!-- Date Input -->
-                    <input
+                    <IosFormInput
                       v-else-if="field.type === 'date'"
                       v-model="swapInItemForm[field.name]"
-                      :required="field.required"
                       type="date"
-                      class="app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/40"
+                      :required="field.required"
                     />
                     <!-- Select Input -->
-                    <select
+                    <IosFormSelect
                       v-else-if="field.type === 'select' && field.options"
                       v-model="swapInItemForm[field.name]"
                       :required="field.required"
-                      class="app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/40"
                     >
                       <option value="">Select {{ swapInFieldLabel(field) }}</option>
                       <option v-for="option in field.options" :key="option" :value="option">
                         {{ option }}
                       </option>
-                    </select>
+                    </IosFormSelect>
                     <!-- Boolean Input -->
                     <Checkbox
                       v-else-if="field.type === 'boolean'"
@@ -913,7 +873,7 @@
                       :label="swapInFieldLabel(field)"
                       size="sm"
                     />
-                  </div>
+                  </IosFormField>
                 </div>
                 <p
                   v-if="swapInDisplayFields.length === 0"
@@ -923,7 +883,7 @@
                 </p>
               </div>
             </div>
-          </div>
+          </IosFormSection>
           <div class="p-3 rounded-sm">
             <div class="flex justify-between items-center mb-1.5">
               <span class="text-xs text-gray-600 dark:text-gray-400">Products</span>
@@ -955,7 +915,7 @@
               }}</span>
             </div>
           </div>
-        </div>
+        </IosForm>
       </div>
     </template>
 
@@ -983,20 +943,18 @@
     title="Send Receipt via Email"
   >
     <template #default>
-      <div class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Email Address
-          </label>
-          <input
-            v-model="emailToSend"
-            type="email"
-            placeholder="Enter email address"
-            class="w-full px-3 py-2 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/40"
-            @keyup.enter="sendReceiptEmail(lastCreatedReceiptId, lastCreatedReceiptData)"
-          />
-        </div>
-      </div>
+      <IosForm layout="default" scroll>
+        <IosFormSection fixed>
+          <IosFormField label="Email address">
+            <IosFormInput
+              v-model="emailToSend"
+              type="email"
+              placeholder="Enter email address"
+              @keyup.enter="sendReceiptEmail(lastCreatedReceiptId, lastCreatedReceiptData)"
+            />
+          </IosFormField>
+        </IosFormSection>
+      </IosForm>
     </template>
     <template #footer>
       <IosDrawerActions
@@ -1031,6 +989,14 @@ import SellScreenNoteBanner from '~/components/receipts/SellScreenNoteBanner.vue
 import PaymentMethodSelect from '~/components/receipts/PaymentMethodSelect.vue'
 import Button from '~/components/ui/Button.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
+import {
+  IosForm,
+  IosFormSection,
+  IosFormField,
+  IosFormInput,
+  IosFormSelect,
+  IosFormTextarea,
+} from '~/components/ios/forms'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import { useInventoryStore, type InventoryFolder, type InventoryItem } from '~/stores/inventory'
 import { useReceiptsStore, type ReceiptItem } from '~/stores/receipts'

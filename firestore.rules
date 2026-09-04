@@ -60,17 +60,50 @@ service cloud.firestore {
              get(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/members/$(request.auth.uid)).data.status == 'active';
     }
 
-    function isStoreManager(userId, storeId) {
-      return isActiveStoreMember(userId, storeId) &&
-             get(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/members/$(request.auth.uid)).data.role == 'manager';
+    // Raw member doc for the calling user (only meaningful once isActiveStoreMember() is true).
+    function memberData(userId, storeId) {
+      return get(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/members/$(request.auth.uid)).data;
     }
 
-    // Staff / interns: POS, add receipts only (no inventory structure edits; sale fields use narrow item updates).
-    function isStoreStaff(userId, storeId) {
-      return isActiveStoreMember(userId, storeId) && (
-        get(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/members/$(request.auth.uid)).data.role == 'staff' ||
-        get(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/members/$(request.auth.uid)).data.role == 'intern'
-      );
+    // Pre-permission-matrix members only have `role` + the 2 legacy boolean grants. Mirrors
+    // utils/staff-permissions.ts#deriveDefaultPermissions exactly so authorization is identical
+    // for a doc whether or not it has been backfilled with a `permissions` map yet.
+    function legacyHasPermission(member, moduleName, action) {
+      return moduleName == 'products'
+        ? (action == 'view' || (member.role == 'manager' && member.get('canManageInventory', false) == true))
+        : (action == 'view' || action == 'create'
+            ? true
+            : action == 'edit'
+              ? member.role == 'manager'
+              : action == 'refund'
+                ? (member.role == 'manager' || member.get('canManageReceipts', false) == true)
+                : false); // receipts.delete: never granted by migration
+    }
+
+    // Single source of truth for "can this member do <action> on <moduleName>" — checks the new
+    // `permissions` map when present, else falls back to the legacy role/grant fields.
+    function memberHasPermission(userId, storeId, moduleName, action) {
+      return isActiveStoreMember(userId, storeId) &&
+        (memberData(userId, storeId).keys().hasAny(['permissions'])
+          ? memberData(userId, storeId).permissions.get(moduleName, {}).get(action, false) == true
+          : legacyHasPermission(memberData(userId, storeId), moduleName, action));
+    }
+
+    function memberHasAnyProductsManage(userId, storeId) {
+      return memberHasPermission(userId, storeId, 'products', 'create')
+        || memberHasPermission(userId, storeId, 'products', 'edit')
+        || memberHasPermission(userId, storeId, 'products', 'delete');
+    }
+
+    // Any grant that implies elevated (non-view-only) access, across either module. Used only for
+    // the handful of collections outside the v1 permission matrix (customers, seller loans, sales
+    // leads, notifications) that used to be gated on role=='manager' — a staff member trusted with
+    // managing products or receipts is treated as trusted for these lighter-weight, adjacent ops too.
+    function memberHasAnyManage(userId, storeId) {
+      return memberHasAnyProductsManage(userId, storeId)
+        || memberHasPermission(userId, storeId, 'receipts', 'edit')
+        || memberHasPermission(userId, storeId, 'receipts', 'delete')
+        || memberHasPermission(userId, storeId, 'receipts', 'refund');
     }
 
     // Business account owner (path users/{userId} matches auth).
@@ -105,31 +138,34 @@ service cloud.firestore {
       return (isAuthenticated() && userId == request.auth.uid) || isActiveStoreMember(userId, storeId);
     }
 
-    // Super admin or manager: customers, notifications, etc. (not inventory structure or receipt line edits).
+    // Elevated ops outside the v1 permission matrix (customers, seller loans, sales leads,
+    // notifications): owner, or a member with any manage grant. See memberHasAnyManage() above.
     function canManageNonInventoryOps(userId, storeId) {
-      return isStoreOwnerForPath(userId) || isStoreManager(userId, storeId);
+      return isStoreOwnerForPath(userId) || memberHasAnyManage(userId, storeId);
     }
 
-    // Create new receipts (POS): owner, manager, or staff/intern.
+    // Create new receipts (POS): owner, or any active store member — receipts.create defaults
+    // true for every staff member (see deriveDefaultPermissions), same as it always has.
     function canCreateReceipt(userId, storeId) {
-      return isStoreOwnerForPath(userId) || isStoreManager(userId, storeId) || isStoreStaff(userId, storeId);
+      return isStoreOwnerForPath(userId) || isActiveStoreMember(userId, storeId);
     }
 
-    // Owner, or manager explicitly granted canManageInventory on the member doc.
-    function memberHasInventoryEditorAccess(userId, storeId) {
-      return isStoreManager(userId, storeId) &&
-        get(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/members/$(request.auth.uid)).data.get('canManageInventory', false) == true;
+    // Per-action products (inventory folders/items) grant check.
+    function canManageProducts(userId, storeId, action) {
+      return (isStoreOwnerForPath(userId) && ownsStore(userId, storeId)) ||
+        memberHasPermission(userId, storeId, 'products', action);
     }
 
+    // Undifferentiated "can manage products at all" — kept for collections (customer buybacks)
+    // that don't need per-action granularity.
     function canManageInventoryStructure(userId, storeId) {
       return (isStoreOwnerForPath(userId) && ownsStore(userId, storeId)) ||
-        memberHasInventoryEditorAccess(userId, storeId);
+        memberHasAnyProductsManage(userId, storeId);
     }
 
-    // Owner/manager, or any active member explicitly granted canManageReceipts on the member doc.
+    // Narrow cancel/refund grant on an existing receipt (field-locked by receiptStaffRefundUpdate()).
     function memberHasReceiptsEditorAccess(userId, storeId) {
-      return isActiveStoreMember(userId, storeId) &&
-        get(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/members/$(request.auth.uid)).data.get('canManageReceipts', false) == true;
+      return memberHasPermission(userId, storeId, 'receipts', 'refund');
     }
 
     // Sale / return-to-stock: only dateOut + updatedAt may change (not full item edits).
@@ -372,15 +408,15 @@ service cloud.firestore {
           // Note: For staff, the userId in path is their superadmin's UID (via getQueryUserId), so staff can read their store's inventory
           allow read: if canAccessStoreData(userId, storeId);
           
-          // Create/update/delete: owner or inventory-granted manager.
-          allow create: if canManageInventoryStructure(userId, storeId) &&
+          // Create/update/delete: owner, or a member granted the matching products action.
+          allow create: if canManageProducts(userId, storeId, 'create') &&
                          request.resource.data.storeId == storeId;
-          
-          allow update: if canManageInventoryStructure(userId, storeId) &&
+
+          allow update: if canManageProducts(userId, storeId, 'edit') &&
                          resourceMatchesStore(storeId) &&
                          requestMatchesStore(storeId);
-          
-          allow delete: if canManageInventoryStructure(userId, storeId) &&
+
+          allow delete: if canManageProducts(userId, storeId, 'delete') &&
                          resourceMatchesStore(storeId);
         }
         
@@ -393,20 +429,22 @@ service cloud.firestore {
           // Note: For staff, the userId in path is their superadmin's UID (via getQueryUserId), so staff can read their store's inventory
           allow read: if canAccessStoreData(userId, storeId);
           
-          // Full create/delete: owner or inventory-granted manager. Other staff cannot add/remove records.
-          allow create: if canManageInventoryStructure(userId, storeId) &&
+          // Full create/delete: owner, or a member granted the matching products action.
+          allow create: if canManageProducts(userId, storeId, 'create') &&
                          request.resource.data.storeId == storeId;
-          
-          // Full update: super admin. Managers/staff: only dateOut/updatedAt (sale or return-to-stock).
-          allow update: if (canManageInventoryStructure(userId, storeId) &&
+
+          // Full update: owner or products.edit grant. Any other active member: only
+          // dateOut/updatedAt (sale or return-to-stock) — access to mark a sale doesn't require a
+          // products grant, it's the POS flow every active member can perform.
+          allow update: if (canManageProducts(userId, storeId, 'edit') &&
                          resourceMatchesStore(storeId) &&
                          requestMatchesStore(storeId)) ||
-                        ((isStoreManager(userId, storeId) || isStoreStaff(userId, storeId)) &&
+                        (isActiveStoreMember(userId, storeId) &&
                          inventoryItemOnlySaleOrReturnFieldChange() &&
                          resourceMatchesStore(storeId) &&
                          requestMatchesStore(storeId));
-          
-          allow delete: if canManageInventoryStructure(userId, storeId) &&
+
+          allow delete: if canManageProducts(userId, storeId, 'delete') &&
                          resourceMatchesStore(storeId);
         }
         
@@ -416,11 +454,12 @@ service cloud.firestore {
           allow read: if canAccessStoreData(userId, storeId) &&
                        resourceMatchesStore(storeId);
           
-          // Create: super admin, manager, or staff (add receipt). Update: super admin or manager (not staff/intern).
+          // Create: owner or any active member (add receipt, POS). Full update: owner or
+          // receipts.edit grant. Balance-due payment and refund/cancel: narrower carve-outs below.
           allow create: if canCreateReceipt(userId, storeId) &&
                          request.resource.data.storeId == storeId;
 
-          allow update: if ((isStoreOwnerForPath(userId) || isStoreManager(userId, storeId)) &&
+          allow update: if ((isStoreOwnerForPath(userId) || memberHasPermission(userId, storeId, 'receipts', 'edit')) &&
                          resourceMatchesStore(storeId) &&
                          requestMatchesStore(storeId))
                         || (canCreateReceipt(userId, storeId) &&
@@ -529,9 +568,9 @@ service cloud.firestore {
         match /customers/{customerId} {
           allow read: if canAccessStoreData(userId, storeId);
           
-          // Staff can upsert from POS; delete: super admin or manager only.
-          allow create: if canManageNonInventoryOps(userId, storeId) || isStoreStaff(userId, storeId);
-          allow update: if canManageNonInventoryOps(userId, storeId) || isStoreStaff(userId, storeId);
+          // Any active member can upsert from POS; delete stays elevated-ops only.
+          allow create: if isStoreOwnerForPath(userId) || isActiveStoreMember(userId, storeId);
+          allow update: if isStoreOwnerForPath(userId) || isActiveStoreMember(userId, storeId);
           allow delete: if canManageNonInventoryOps(userId, storeId);
         }
 
@@ -539,9 +578,9 @@ service cloud.firestore {
         match /customerAccounts/{accountId} {
           allow read: if planAtLeastMedium(userId) && canAccessStoreData(userId, storeId);
           allow create: if planAtLeastMedium(userId) &&
-                           (canManageNonInventoryOps(userId, storeId) || isStoreStaff(userId, storeId));
+                           (isStoreOwnerForPath(userId) || isActiveStoreMember(userId, storeId));
           allow update: if planAtLeastMedium(userId) &&
-                           (canManageNonInventoryOps(userId, storeId) || isStoreStaff(userId, storeId));
+                           (isStoreOwnerForPath(userId) || isActiveStoreMember(userId, storeId));
           allow delete: if planAtLeastMedium(userId) && canManageNonInventoryOps(userId, storeId);
         }
         
@@ -559,7 +598,7 @@ service cloud.firestore {
         match /activityLogs/{logId} {
           allow read: if planAtLeastMedium(userId) && canAccessStoreData(userId, storeId);
           allow create: if planAtLeastMedium(userId) &&
-                         (canManageNonInventoryOps(userId, storeId) || isStoreStaff(userId, storeId)) &&
+                         (isStoreOwnerForPath(userId) || isActiveStoreMember(userId, storeId)) &&
                          request.resource.data.storeId == storeId &&
                          (request.resource.data.userId == userId || request.resource.data.userId == request.auth.uid);
           allow update, delete: if false;

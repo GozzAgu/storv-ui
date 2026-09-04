@@ -373,17 +373,16 @@ const { tableShellFlexClass } = useDashboardTableChrome()
 const { isCapacitorIos } = useIsCapacitorIos()
 
 const userStore = useUserStore()
-const staffStore = useStaffStore()
 const inventoryStore = useInventoryStore()
 const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
 
-const isManager = computed(
-  () => userStore.userData?.role === 'staff' && staffStore.getCurrentStaffMember?.role === 'manager'
-)
+const { hasAnyManageAccess } = usePermissions()
 const isStaff = computed(() => userStore.userData?.role === 'staff')
 const hasPlanAccess = computed(() => canUseSubscriptionFeature('activity_logs'))
-const canAccess = computed(() => (userStore.isSuperAdmin || isManager.value) && hasPlanAccess.value)
-const accessDeniedByRole = computed(() => !userStore.isSuperAdmin && !isManager.value)
+const canAccess = computed(
+  () => (userStore.isSuperAdmin || hasAnyManageAccess.value) && hasPlanAccess.value
+)
+const accessDeniedByRole = computed(() => !userStore.isSuperAdmin && !hasAnyManageAccess.value)
 
 const storeId = ref<string | null>(null)
 const allLogs = ref<ActivityLog[]>([])

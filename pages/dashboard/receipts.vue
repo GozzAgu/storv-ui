@@ -567,11 +567,10 @@
                       </DashboardToolbarSelect>
                       <DashboardToolbarIconButton
                         class="hidden lg:inline-flex"
-                        :aria-label="isReceiptsFullscreen ? 'Exit expanded view' : 'Expand table'"
+                        aria-label="Expand table"
                         @click="isReceiptsFullscreen = !isReceiptsFullscreen"
                       >
-                        <ArrowsPointingOutIcon v-if="!isReceiptsFullscreen" class="h-4 w-4" />
-                        <XMarkIcon v-else class="h-4 w-4" />
+                        <ArrowsPointingOutIcon class="h-4 w-4" />
                       </DashboardToolbarIconButton>
                     </template>
                     <template #actions>
@@ -710,7 +709,7 @@
                             class="cursor-pointer rounded-lg bg-white p-2.5 shadow-none dark:!bg-dashboard-card"
                             :class="
                               flashReceiptId === receipt.id
-                                ? '!ring-2 !ring-primary-500/25 ring-offset-2 ring-offset-white dark:bg-gray-800/75 dark:!ring-offset-gray-900'
+                                ? '!ring-2 !ring-gray-900/20 ring-offset-2 ring-offset-white dark:bg-gray-800/75 dark:!ring-white/25 dark:!ring-offset-gray-900'
                                 : ''
                             "
                             @click="handleViewReceipt(receipt)"
@@ -737,7 +736,7 @@
                                   >
                                   <button
                                     @click.stop="copyReceiptNumber(receipt.receiptNumber)"
-                                    class="p-0.5 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400"
+                                    class="p-0.5 text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
                                     aria-label="Copy receipt number"
                                   >
                                     <ClipboardDocumentIcon class="w-3.5 h-3.5" stroke-width="1.5" />
@@ -812,7 +811,7 @@
                               <tr>
                                 <th
                                   v-if="canDeleteReceipts"
-                                  class="w-10 px-3 py-2.5 text-center text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4"
+                                  class="w-10 text-center"
                                 >
                                   <Checkbox
                                     :model-value="
@@ -826,7 +825,6 @@
                                 </th>
                                 <th
                                   :class="[
-                                    'px-3 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4',
                                     isColumnSortable('receiptNumber') &&
                                       'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100',
                                   ]"
@@ -842,14 +840,14 @@
                                           currentSort.key === 'receiptNumber' &&
                                           currentSort.order === 'asc'
                                         "
-                                        class="w-3 h-3 text-primary-500 dark:text-primary-400"
+                                        class="w-3 h-3 text-gray-900 dark:text-gray-100"
                                       />
                                       <ChevronDownIcon
                                         v-else-if="
                                           currentSort.key === 'receiptNumber' &&
                                           currentSort.order === 'desc'
                                         "
-                                        class="w-3 h-3 text-primary-500 dark:text-primary-400"
+                                        class="w-3 h-3 text-gray-900 dark:text-gray-100"
                                       />
                                       <BarsArrowUpIcon
                                         v-else
@@ -860,7 +858,6 @@
                                 </th>
                                 <th
                                   :class="[
-                                    'px-3 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4',
                                     isColumnSortable('customerName') &&
                                       'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100',
                                   ]"
@@ -876,14 +873,14 @@
                                           currentSort.key === 'customerName' &&
                                           currentSort.order === 'asc'
                                         "
-                                        class="w-3 h-3 text-primary-500 dark:text-primary-400"
+                                        class="w-3 h-3 text-gray-900 dark:text-gray-100"
                                       />
                                       <ChevronDownIcon
                                         v-else-if="
                                           currentSort.key === 'customerName' &&
                                           currentSort.order === 'desc'
                                         "
-                                        class="w-3 h-3 text-primary-500 dark:text-primary-400"
+                                        class="w-3 h-3 text-gray-900 dark:text-gray-100"
                                       />
                                       <BarsArrowUpIcon
                                         v-else
@@ -894,7 +891,6 @@
                                 </th>
                                 <th
                                   :class="[
-                                    'px-3 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4',
                                     isColumnSortable('date') &&
                                       'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100',
                                   ]"
@@ -907,13 +903,13 @@
                                         v-if="
                                           currentSort.key === 'date' && currentSort.order === 'asc'
                                         "
-                                        class="w-3 h-3 text-primary-500 dark:text-primary-400"
+                                        class="w-3 h-3 text-gray-900 dark:text-gray-100"
                                       />
                                       <ChevronDownIcon
                                         v-else-if="
                                           currentSort.key === 'date' && currentSort.order === 'desc'
                                         "
-                                        class="w-3 h-3 text-primary-500 dark:text-primary-400"
+                                        class="w-3 h-3 text-gray-900 dark:text-gray-100"
                                       />
                                       <BarsArrowUpIcon
                                         v-else
@@ -924,7 +920,7 @@
                                 </th>
                                 <th
                                   :class="[
-                                    'min-w-[9rem] max-w-[16rem] px-3 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4',
+                                    'min-w-[9rem] max-w-[16rem]',
                                     isColumnSortable('itemsCount') &&
                                       'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100',
                                   ]"
@@ -940,14 +936,14 @@
                                           currentSort.key === 'itemsCount' &&
                                           currentSort.order === 'asc'
                                         "
-                                        class="w-3 h-3 text-primary-500 dark:text-primary-400"
+                                        class="w-3 h-3 text-gray-900 dark:text-gray-100"
                                       />
                                       <ChevronDownIcon
                                         v-else-if="
                                           currentSort.key === 'itemsCount' &&
                                           currentSort.order === 'desc'
                                         "
-                                        class="w-3 h-3 text-primary-500 dark:text-primary-400"
+                                        class="w-3 h-3 text-gray-900 dark:text-gray-100"
                                       />
                                       <BarsArrowUpIcon
                                         v-else
@@ -958,7 +954,6 @@
                                 </th>
                                 <th
                                   :class="[
-                                    'px-3 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4',
                                     isColumnSortable('total') &&
                                       'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100',
                                   ]"
@@ -971,14 +966,14 @@
                                         v-if="
                                           currentSort.key === 'total' && currentSort.order === 'asc'
                                         "
-                                        class="w-3 h-3 text-primary-500 dark:text-primary-400"
+                                        class="w-3 h-3 text-gray-900 dark:text-gray-100"
                                       />
                                       <ChevronDownIcon
                                         v-else-if="
                                           currentSort.key === 'total' &&
                                           currentSort.order === 'desc'
                                         "
-                                        class="w-3 h-3 text-primary-500 dark:text-primary-400"
+                                        class="w-3 h-3 text-gray-900 dark:text-gray-100"
                                       />
                                       <BarsArrowUpIcon
                                         v-else
@@ -989,7 +984,6 @@
                                 </th>
                                 <th
                                   :class="[
-                                    'px-3 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4',
                                     isColumnSortable('paymentMethod') &&
                                       'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100',
                                   ]"
@@ -1005,14 +999,14 @@
                                           currentSort.key === 'paymentMethod' &&
                                           currentSort.order === 'asc'
                                         "
-                                        class="w-3 h-3 text-primary-500 dark:text-primary-400"
+                                        class="w-3 h-3 text-gray-900 dark:text-gray-100"
                                       />
                                       <ChevronDownIcon
                                         v-else-if="
                                           currentSort.key === 'paymentMethod' &&
                                           currentSort.order === 'desc'
                                         "
-                                        class="w-3 h-3 text-primary-500 dark:text-primary-400"
+                                        class="w-3 h-3 text-gray-900 dark:text-gray-100"
                                       />
                                       <BarsArrowUpIcon
                                         v-else
@@ -1023,7 +1017,6 @@
                                 </th>
                                 <th
                                   :class="[
-                                    'px-3 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4',
                                     isColumnSortable('status') &&
                                       'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100',
                                   ]"
@@ -1037,14 +1030,14 @@
                                           currentSort.key === 'status' &&
                                           currentSort.order === 'asc'
                                         "
-                                        class="w-3 h-3 text-primary-500 dark:text-primary-400"
+                                        class="w-3 h-3 text-gray-900 dark:text-gray-100"
                                       />
                                       <ChevronDownIcon
                                         v-else-if="
                                           currentSort.key === 'status' &&
                                           currentSort.order === 'desc'
                                         "
-                                        class="w-3 h-3 text-primary-500 dark:text-primary-400"
+                                        class="w-3 h-3 text-gray-900 dark:text-gray-100"
                                       />
                                       <BarsArrowUpIcon
                                         v-else
@@ -1055,7 +1048,6 @@
                                 </th>
                                 <th
                                   :class="[
-                                    'px-3 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4',
                                     isColumnSortable('createdBy') &&
                                       'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100',
                                   ]"
@@ -1069,14 +1061,14 @@
                                           currentSort.key === 'createdBy' &&
                                           currentSort.order === 'asc'
                                         "
-                                        class="w-3 h-3 text-primary-500 dark:text-primary-400"
+                                        class="w-3 h-3 text-gray-900 dark:text-gray-100"
                                       />
                                       <ChevronDownIcon
                                         v-else-if="
                                           currentSort.key === 'createdBy' &&
                                           currentSort.order === 'desc'
                                         "
-                                        class="w-3 h-3 text-primary-500 dark:text-primary-400"
+                                        class="w-3 h-3 text-gray-900 dark:text-gray-100"
                                       />
                                       <BarsArrowUpIcon
                                         v-else
@@ -1102,7 +1094,7 @@
                                   class="cursor-pointer"
                                   :class="
                                     flashReceiptId === receipt.id
-                                      ? '!bg-primary-500/[0.06] dark:!bg-primary-500/12'
+                                      ? '!bg-gray-900/[0.05] dark:!bg-white/[0.06]'
                                       : ''
                                   "
                                   @click="handleViewReceipt(receipt)"
@@ -1133,7 +1125,7 @@
                                       <button
                                         type="button"
                                         @click.stop="copyReceiptNumber(receipt.receiptNumber)"
-                                        class="rounded-sm p-0.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800/90 dark:hover:text-primary-400"
+                                        class="rounded-sm p-0.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800/90 dark:hover:text-gray-100"
                                         aria-label="Copy receipt number"
                                       >
                                         <ClipboardDocumentIcon
@@ -1448,7 +1440,7 @@
                         <div class="flex flex-wrap justify-end gap-1.5">
                           <button
                             type="button"
-                            class="btn-primary btn-primary-sm"
+                            class="rounded-sm bg-gray-900 px-3 py-1 text-[11px] font-semibold text-white hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
                             @click="openRecordPayment(row)"
                           >
                             Record payment
@@ -1589,7 +1581,7 @@
                               ? 'bg-gray-50/50 dark:bg-white/[0.02]'
                               : '',
                             flashCustomerId === customer.id
-                              ? '!ring-2 !ring-inset !ring-primary-500/25'
+                              ? '!ring-2 !ring-inset !ring-gray-900/20 dark:!ring-white/25'
                               : '',
                           ]"
                         >
@@ -1686,7 +1678,7 @@
                         >
                           <td :colspan="hasBalanceFeature ? 8 : 7" class="border-t-0 px-3 pb-3 pt-0 sm:px-4">
                             <div
-                              class="border-l-2 border-primary-400/70 pl-3 dark:border-primary-500/50"
+                              class="border-l-2 border-gray-400/70 pl-3 dark:border-white/20"
                             >
                               <ReceiptLineItemsDetailPanel
                                 title="Order history"
@@ -1701,7 +1693,7 @@
                                   >
                                     <button
                                       type="button"
-                                      class="flex w-full flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-gray-100 px-3 py-2 text-left transition-colors hover:bg-gray-50/90 dark:border-gray-800/80 dark:hover:bg-white/[0.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-400/35"
+                                      class="flex w-full flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-gray-100 px-3 py-2 text-left transition-colors hover:bg-gray-50/90 dark:border-gray-800/80 dark:hover:bg-white/[0.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gray-400/50"
                                       :aria-label="`Open sale ${receipt.receiptNumber} in sales list`"
                                       @click="goToReceiptFromCustomer(receipt)"
                                     >
@@ -1764,7 +1756,7 @@
       <div class="flex min-h-[40vh] w-full max-w-none items-center justify-center px-4 pb-24">
         <div class="text-center">
           <div
-            class="mx-auto h-10 w-10 animate-spin rounded-full border-0 border-gray-200 border-t-primary-500 dark:border-t-primary-400"
+            class="mx-auto h-10 w-10 animate-spin rounded-full border-0 border-gray-300/40 border-t-gray-500 dark:border-white/15 dark:border-t-gray-300"
           />
           <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">Loading sales…</p>
         </div>

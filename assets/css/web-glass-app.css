@@ -476,9 +476,27 @@ html:not(.capacitor-native).dark .dashboard-layout-root .dash-stat-card:hover {
   background: #282828 !important;
 }
 
+/* Teleported drawers sit outside .dashboard-layout-root — bridge theme tokens */
+html:not(.capacitor-native) [data-dashboard-teleport] {
+  --saas-ink: var(--dash-overlay-ink, #1a1523);
+  --saas-muted: var(--dash-overlay-muted, rgb(26 21 35 / 0.58));
+  --dash-ink: var(--dash-overlay-ink, #1a1523);
+  --dash-muted: var(--dash-overlay-muted, rgb(26 21 35 / 0.58));
+  --dash-primary-btn: #1a1523;
+  --dash-primary-btn-fg: #ffffff;
+  --dash-primary-btn-hover: #000000;
+  color: var(--dash-overlay-ink, #1a1523);
+}
+
+html:not(.capacitor-native).dark [data-dashboard-teleport] {
+  --dash-primary-btn: #f4f1ea;
+  --dash-primary-btn-fg: #1a1523;
+  --dash-primary-btn-hover: #ffffff;
+}
+
 html:not(.capacitor-native) .dashboard-layout-root label,
 html:not(.capacitor-native) [data-dashboard-teleport] label {
-  color: var(--saas-muted);
+  color: var(--saas-muted, var(--dash-overlay-muted));
 }
 
 html:not(.capacitor-native):not(.dark) .dash-sidebar .group:has(.dash-nav-icon--active) {
@@ -2092,6 +2110,100 @@ html:not(.capacitor-native) .dash-overlay-shell .ios-form__toggle {
   padding: 0;
   border: 0;
   background: transparent;
+}
+
+html:not(.capacitor-native) .dash-overlay-shell .ios-form__toggle-control,
+html:not(.capacitor-native) .dash-overlay-shell .ios-form__toggle .app-checkbox {
+  align-items: flex-start;
+  width: 100%;
+}
+
+html:not(.capacitor-native) .dash-overlay-shell .ios-form__toggle-title {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--dash-overlay-ink, #1a1523);
+}
+
+html:not(.capacitor-native).dark .dash-overlay-shell .ios-form__toggle-title {
+  color: #ffffff;
+}
+
+html:not(.capacitor-native) .dash-overlay-shell .ios-form__toggle-copy {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.1875rem;
+}
+
+html:not(.capacitor-native) .dash-overlay-shell .ios-form__toggle .ios-form__hint {
+  margin: 0;
+}
+
+html:not(.capacitor-native) .staff-permissions-panel__module {
+  background: #f5f5f7;
+}
+
+html:not(.capacitor-native).dark .staff-permissions-panel__module {
+  background: rgb(255 255 255 / 0.05);
+}
+
+html:not(.capacitor-native) .staff-permissions-panel__action {
+  background: #ffffff;
+}
+
+html:not(.capacitor-native).dark .staff-permissions-panel__action {
+  background: rgb(255 255 255 / 0.1);
+}
+
+html:not(.capacitor-native) .staff-permissions-panel__refund {
+  border-top-color: rgb(26 21 35 / 0.08);
+}
+
+html:not(.capacitor-native).dark .staff-permissions-panel__refund {
+  border-top-color: rgb(255 255 255 / 0.08);
+}
+
+/* Drawer copy must follow theme — teleports lose layout-root vars */
+html:not(.capacitor-native) .dash-overlay-shell .dash-drawer-hint,
+html:not(.capacitor-native) .dash-overlay-shell .ios-form__hint,
+html:not(.capacitor-native) [data-dashboard-teleport] .dash-drawer-hint,
+html:not(.capacitor-native) [data-dashboard-teleport] .ios-form__hint {
+  color: var(--dash-overlay-muted) !important;
+}
+
+html:not(.capacitor-native) .dash-overlay-shell .app-checkbox__label,
+html:not(.capacitor-native) [data-dashboard-teleport] .app-checkbox__label {
+  color: var(--app-checkbox-label, var(--dash-overlay-muted)) !important;
+}
+
+html:not(.capacitor-native) .dash-overlay-shell .app-checkbox--checked .app-checkbox__label,
+html:not(.capacitor-native) [data-dashboard-teleport] .app-checkbox--checked .app-checkbox__label {
+  color: var(--app-checkbox-label-checked, var(--dash-overlay-ink)) !important;
+}
+
+html:not(.capacitor-native) .dash-overlay-shell .ios-form__toggle-title,
+html:not(.capacitor-native) [data-dashboard-teleport] .ios-form__toggle-title {
+  color: var(--dash-overlay-ink) !important;
+}
+
+html:not(.capacitor-native) .dash-overlay-shell .staff-permissions-panel__module-title,
+html:not(.capacitor-native) [data-dashboard-teleport] .staff-permissions-panel__module-title {
+  color: var(--dash-overlay-muted) !important;
+}
+
+html:not(.capacitor-native) .dash-overlay-shell .staff-permissions-panel__action .app-checkbox__label,
+html:not(.capacitor-native) [data-dashboard-teleport] .staff-permissions-panel__action .app-checkbox__label {
+  color: var(--dash-overlay-ink) !important;
+}
+
+html:not(.capacitor-native).dark .dash-overlay-shell .dash-drawer-actions button[data-btn-variant='secondary'],
+html:not(.capacitor-native).dark .dash-overlay-shell .dash-drawer-actions button[data-btn-variant='ghost'],
+html:not(.capacitor-native).dark [data-dashboard-teleport] .dash-drawer-actions button[data-btn-variant='secondary'],
+html:not(.capacitor-native).dark [data-dashboard-teleport] .dash-drawer-actions button[data-btn-variant='ghost'] {
+  color: rgb(255 255 255 / 0.82) !important;
 }
 
 

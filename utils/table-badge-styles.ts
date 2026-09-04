@@ -1,6 +1,8 @@
 const badgeBase =
   'inline-flex max-w-full items-center whitespace-nowrap rounded-full px-2.5 py-0.5 text-[11px] font-semibold leading-tight'
 
+/** @deprecated Role tiers no longer exist — see staffAccessBadgeClass/staffAccessLabel. Kept only
+ *  for any leftover legacy staff.role display. */
 export function staffRoleBadgeClass(role: string): string {
   switch (role) {
     case 'manager':
@@ -10,6 +12,24 @@ export function staffRoleBadgeClass(role: string): string {
     default:
       return `${badgeBase} bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-gray-200`
   }
+}
+
+/** Roster badge for a staff member's permission-matrix summary (full / view-only / custom). */
+export function staffAccessBadgeClass(summary: 'full' | 'view-only' | 'custom'): string {
+  switch (summary) {
+    case 'full':
+      return `${badgeBase} bg-gray-100 text-gray-800 dark:bg-white/10 dark:text-white`
+    case 'custom':
+      return `${badgeBase} bg-gray-100 text-gray-700 ring-1 ring-inset ring-gray-300/70 dark:bg-white/[0.06] dark:text-gray-200 dark:ring-white/15`
+    default:
+      return `${badgeBase} bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-gray-200`
+  }
+}
+
+export function staffAccessLabel(summary: 'full' | 'view-only' | 'custom'): string {
+  if (summary === 'full') return 'Full access'
+  if (summary === 'custom') return 'Custom'
+  return 'View only'
 }
 
 export function staffStatusBadgeClass(status: string): string {

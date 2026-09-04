@@ -27,6 +27,15 @@
     </DashboardPageHeader>
 
     <div :class="[pageStackClass, isCapacitorIos ? 'dash-page-stack--ios-settings' : '']">
+      <CategoryTabs
+        :model-value="activeSettingsTab"
+        :options="settingsTabs"
+        ariaLabel="Settings sections"
+        scroll
+        @update:model-value="onSettingsTabChange"
+      />
+
+      <div v-show="activeSettingsTab === 'account'">
       <!-- Account: logo + subscription -->
       <DashboardSettingsPanel
         v-if="userStore.isSuperAdmin"
@@ -208,7 +217,9 @@
         </div>
       </DashboardSettingsPanel>
       </div>
+      </div>
 
+      <div v-show="activeSettingsTab === 'branches'">
       <!-- Stores -->
       <DashboardSettingsPanel
         v-if="userStore.isSuperAdmin && canManageBranches"
@@ -389,7 +400,9 @@
           </div>
         </div>
       </DashboardSettingsPanel>
+      </div>
 
+      <div v-show="activeSettingsTab === 'assignment'">
       <!-- Staff assignment (read-only) -->
       <DashboardSettingsPanel
         v-if="isStaff"
@@ -424,7 +437,9 @@
           </div>
         </div>
       </DashboardSettingsPanel>
+      </div>
 
+      <div v-show="activeSettingsTab === 'store-info'">
       <!-- Store information -->
       <DashboardSettingsPanel
         :title="isStaff ? 'Branch details' : 'Store information'"
@@ -512,7 +527,9 @@
           </div>
         </div>
       </DashboardSettingsPanel>
+      </div>
 
+      <div v-show="activeSettingsTab === 'inventory'">
       <!-- Inventory settings -->
       <DashboardSettingsPanel
         title="Inventory"
@@ -596,7 +613,9 @@
           </div>
         </div>
       </DashboardSettingsPanel>
+      </div>
 
+      <div v-show="activeSettingsTab === 'payments'">
       <!-- Payment methods at checkout -->
       <DashboardSettingsPanel
         title="Checkout payments"
@@ -665,7 +684,9 @@
           </div>
         </div>
       </DashboardSettingsPanel>
+      </div>
 
+      <div v-show="activeSettingsTab === 'sales-receipts'">
       <!-- Receipt & invoice settings -->
       <DashboardSettingsPanel
         title="Sales & receipts"
@@ -742,7 +763,9 @@
           </div>
         </div>
       </DashboardSettingsPanel>
+      </div>
 
+      <div v-show="activeSettingsTab === 'data-export'">
       <!-- Data export (owner only; includes unit costs / COGS basis) -->
       <DashboardSettingsPanel
         v-if="!isStaff"
@@ -788,6 +811,7 @@
           </div>
         </div>
       </DashboardSettingsPanel>
+      </div>
     </div>
   </div>
 
@@ -1008,6 +1032,7 @@ import { useStoresStore } from '~/stores/stores'
 import { useInventoryStore } from '~/stores/inventory'
 import { useAppToast } from '~/composables/useAppToast'
 import Button from '~/components/ui/Button.vue'
+import CategoryTabs from '~/components/ui/CategoryTabs.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import Modal from '~/components/ui/Modal.vue'
 import SidePanel from '~/components/ui/SidePanel.vue'
@@ -1531,6 +1556,43 @@ const storesError = computed(() => storesStore.error)
 const currentStore = computed(() => storesStore.currentStore)
 const isStaff = computed(() => userStore.userData?.role === 'staff')
 
+const settingsTabs = computed(() => {
+  const tabs: Array<{ value: string; label: string }> = []
+  if (userStore.isSuperAdmin) tabs.push({ value: 'account', label: 'Account & workspace' })
+  if (userStore.isSuperAdmin && canManageBranches.value) {
+    tabs.push({ value: 'branches', label: 'Branches' })
+  }
+  if (isStaff.value) tabs.push({ value: 'assignment', label: 'Your assignment' })
+  tabs.push({ value: 'store-info', label: isStaff.value ? 'Branch details' : 'Store information' })
+  tabs.push({ value: 'inventory', label: 'Inventory' })
+  tabs.push({ value: 'payments', label: 'Checkout payments' })
+  tabs.push({ value: 'sales-receipts', label: 'Sales & receipts' })
+  if (!isStaff.value) tabs.push({ value: 'data-export', label: 'Data export' })
+  return tabs
+})
+
+const activeSettingsTab = ref(settingsTabs.value[0]?.value ?? 'account')
+// Role/plan data (userStore.isSuperAdmin, isStaff) can still be loading when this component is
+// set up, so the very first computed tab list may be missing "Account & workspace"/"Branches"/
+// "Your assignment" — keep snapping to the first tab until the user actually picks one themselves,
+// not just until the current value happens to still be valid.
+let hasPickedSettingsTab = false
+
+watch(
+  settingsTabs,
+  (tabs) => {
+    if (!hasPickedSettingsTab || !tabs.some((tab) => tab.value === activeSettingsTab.value)) {
+      activeSettingsTab.value = tabs[0]?.value ?? 'account'
+    }
+  },
+  { immediate: true }
+)
+
+function onSettingsTabChange(value: string) {
+  hasPickedSettingsTab = true
+  activeSettingsTab.value = value
+}
+
 const staffWorkspace = ref<StaffWorkspaceContext>({
   staff: null,
   store: null,
@@ -2039,6 +2101,16 @@ async function loadSettingsFromFirestore() {
 
 // Load store information and settings from Firestore
 onMounted(async () => {
+  // Deep links (#settings-subscription, #advanced-features) both land in the "account" tab.
+  if (
+    import.meta.client &&
+    (window.location.hash === '#settings-subscription' || window.location.hash === '#advanced-features') &&
+    settingsTabs.value.some((tab) => tab.value === 'account')
+  ) {
+    activeSettingsTab.value = 'account'
+    hasPickedSettingsTab = true
+  }
+
   // Handle Paystack callback after payment redirect
   const refParam = route.query.reference as string | undefined
   const isPaystackCallback =

@@ -226,8 +226,12 @@ html.dark .analytics-kpi-card__progress {
 }
 
 .analytics-kpi-card--accent .analytics-kpi-card__icon {
-  background: var(--dash-card-accent-soft, rgb(20 63 141 / 0.12));
-  color: var(--dash-card-accent, #143f8d);
+  background: rgb(113 113 122 / 0.14);
+  color: #3f3f46;
+}
+
+.analytics-kpi-card--accent .analytics-kpi-card__sparkline {
+  color: #3f3f46;
 }
 
 html.dark .analytics-kpi-card--success .analytics-kpi-card__icon {
@@ -243,12 +247,12 @@ html.dark .analytics-kpi-card--danger .analytics-kpi-card__icon {
 }
 
 html.dark .analytics-kpi-card--accent .analytics-kpi-card__icon {
-  background: rgb(96 165 250 / 0.2);
-  color: #60a5fa;
+  background: rgb(228 228 231 / 0.16);
+  color: #e4e4e7;
 }
 
 html.dark .analytics-kpi-card--accent .analytics-kpi-card__sparkline {
-  color: #60a5fa;
+  color: #e4e4e7;
 }
 
 .analytics-kpi-card--warning .analytics-kpi-card__progress-fill {

@@ -36,6 +36,7 @@ import {
   roundMoney,
 } from '~/utils/receipt-balance'
 import { resolveApiPath } from '~/utils/api-url'
+import { getPermissionAction, resolveStaffPermissions } from '~/utils/staff-permissions'
 import {
   isStoreListFetchFresh,
   isStoreFetchStampFresh,
@@ -584,13 +585,18 @@ export const useReceiptsStore = defineStore('receipts', {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
 
-      // Super admins and store managers can update receipts; staff need an explicit grant
-      // (canManageReceipts) to cancel/refund - the Firestore rules further restrict what
-      // fields a granted-but-not-manager staff member may actually change.
+      // Super admins and staff granted receipts.edit can fully update receipts; staff granted
+      // only receipts.refund can cancel/refund (Firestore rules further restrict which fields a
+      // refund-only grant may actually change).
       if (userStore.userData?.role === 'staff') {
         const staffStore = useStaffStore()
         const member = await staffStore.fetchCurrentStaffMember()
-        if (member?.role !== 'manager' && member?.canManageReceipts !== true) {
+        const permissions = member ? resolveStaffPermissions(member) : null
+        const canEditOrRefund =
+          !!permissions &&
+          (getPermissionAction(permissions, 'receipts', 'edit') ||
+            getPermissionAction(permissions, 'receipts', 'refund'))
+        if (!canEditOrRefund) {
           throw new Error(
             'Only managers, super admins, or staff granted receipt access can update receipts.'
           )

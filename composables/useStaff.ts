@@ -15,6 +15,7 @@ import { useFirestore } from './useFirestore'
 import { useFirebaseAuth } from './useFirebaseAuth'
 import { useDepartments } from './useDepartments'
 import { useStaffStore } from '~/stores/staff'
+import type { StaffPermissions } from '~/types/staff-permissions'
 
 export interface Staff {
   id: string
@@ -26,11 +27,18 @@ export interface Staff {
   departmentName?: string
   storeId: string // Store this staff member belongs to
   position: string
-  role: 'manager' | 'staff' | 'intern'
-  /** When true (managers only), owner allows full inventory edit without super-admin access. */
+  /** @deprecated Superseded by `permissions`. Kept for migration fallback (see
+   *  utils/staff-permissions.ts#resolveStaffPermissions) and rollback safety — do not read
+   *  directly, do not write on new staff. Absent on any staff member created after the
+   *  permission-matrix rollout. */
+  role?: 'manager' | 'staff' | 'intern'
+  /** @deprecated Superseded by `permissions.products`. See `role`. */
   canManageInventory?: boolean
-  /** When true, owner allows this staff member to cancel outstanding orders and process refunds without manager-level access. */
+  /** @deprecated Superseded by `permissions.receipts.refund`. See `role`. */
   canManageReceipts?: boolean
+  /** Per-module grant matrix — the source of truth for what this staff member can do.
+   *  Falls back to `deriveDefaultPermissions(this)` when absent (not-yet-migrated docs). */
+  permissions?: StaffPermissions
   hireDate: string
   salary?: number
   status: 'active' | 'inactive' | 'on_leave'

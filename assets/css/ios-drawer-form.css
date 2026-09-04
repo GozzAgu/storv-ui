@@ -111,13 +111,22 @@ html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .da
 html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud label.dash-drawer-label,
 html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .dash-drawer-label:not(p),
 html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-drawer__content label[class*='text-xs'][class*='font-medium'] {
-  display: block;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.375rem;
   margin-bottom: 0.5rem;
   font-size: var(--ios-field-label-size, 0.8125rem) !important;
   font-weight: 600 !important;
   letter-spacing: 0 !important;
   text-transform: none !important;
   color: var(--ios-field-ink) !important;
+}
+
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__optional {
+  background: rgb(120 120 128 / 0.14);
+  color: var(--ios-label-secondary, rgb(60 60 67 / 0.6));
+  letter-spacing: 0.02em;
 }
 
 /* ── Inputs & selects — appearance lives in ios-fields.css (auth parity) ── */

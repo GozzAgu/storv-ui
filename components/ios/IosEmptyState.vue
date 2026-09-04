@@ -16,7 +16,7 @@
         <button
           v-if="actionLabel"
           type="button"
-          class="rounded-xl bg-[#143f8d] px-5 py-2.5 text-sm font-semibold text-white dark:bg-[#4876c7]"
+          class="rounded-xl bg-gray-900 px-5 py-2.5 text-sm font-semibold text-white dark:bg-white dark:text-gray-900"
           @click="$emit('action')"
         >
           {{ actionLabel }}

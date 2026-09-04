@@ -2,6 +2,7 @@ import { collectionGroup, doc, getDoc, getDocs, query, where, type Firestore } f
 import type { Staff } from '~/composables/useStaff'
 import type { UserData } from '~/composables/useUser'
 import { sanitizeUserData } from '~/utils/sanitize-user-data'
+import { resolveStaffPermissions } from '~/utils/staff-permissions'
 
 function isActiveStaffStatus(status: Staff['status'] | undefined): boolean {
   return (status || 'active') === 'active'
@@ -18,6 +19,13 @@ function mapStaffDoc(staffDoc: { id: string; ref: { path: string }; data: () => 
     extractedDepartmentId = pathParts[5]
   }
 
+  const role: Staff['role'] =
+    staffData.role === 'manager' || staffData.role === 'intern' ? staffData.role : 'staff'
+  const canManageInventory =
+    staffData.canManageInventory === true ? true : undefined
+  const canManageReceipts =
+    staffData.canManageReceipts === true ? true : undefined
+
   return {
     id: staffDoc.id,
     firstName: String(staffData.firstName || ''),
@@ -27,10 +35,15 @@ function mapStaffDoc(staffDoc: { id: string; ref: { path: string }; data: () => 
     departmentId: extractedDepartmentId || String(staffData.departmentId || ''),
     storeId: extractedStoreId || String(staffData.storeId || ''),
     position: String(staffData.position || ''),
-    role:
-      staffData.role === 'manager' || staffData.role === 'intern'
-        ? staffData.role
-        : 'staff',
+    role,
+    canManageInventory,
+    canManageReceipts,
+    permissions: resolveStaffPermissions({
+      role,
+      canManageInventory,
+      canManageReceipts,
+      permissions: staffData.permissions as Staff['permissions'],
+    }),
     hireDate: String(staffData.hireDate || ''),
     salary: typeof staffData.salary === 'number' ? staffData.salary : undefined,
     status:

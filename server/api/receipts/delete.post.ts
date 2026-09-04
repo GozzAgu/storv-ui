@@ -30,7 +30,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 403, message: 'Only super admins can delete receipts' })
   }
 
-  await requireStoreManageAccess(auth.uid, ownerUserId, storeId)
+  await requireStoreManageAccess(auth.uid, ownerUserId, storeId, (p) => p.receipts.delete)
 
   const adminDb = getAdminFirestore()
   const receiptRef = adminDb

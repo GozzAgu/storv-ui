@@ -126,6 +126,14 @@
       </aside>
 
       <div :class="[profileMainClass, isCapacitorIos ? 'dash-page-stack--ios-settings' : '']">
+        <CategoryTabs
+          :model-value="activeProfileTab"
+          :options="profileTabs"
+          ariaLabel="Profile sections"
+          @update:model-value="(value: string) => (activeProfileTab = value)"
+        />
+
+        <div v-show="activeProfileTab === 'profile'">
         <DashboardSettingsPanel
           :title="isStaff ? 'Staff profile' : 'Business profile'"
           :subtitle="
@@ -244,7 +252,9 @@
             </div>
           </div>
         </DashboardSettingsPanel>
+        </div>
 
+        <div v-show="activeProfileTab === 'store-info'">
         <DashboardSettingsPanel
           v-if="showBusinessProfilePanel"
           :title="isStaff ? 'Business profile' : 'Store information'"
@@ -339,7 +349,9 @@
             >
           </div>
         </DashboardSettingsPanel>
+        </div>
 
+        <div v-show="activeProfileTab === 'receipts'">
         <DashboardSettingsPanel
           v-if="!isStaff"
           title="Receipt terms & policies"
@@ -397,7 +409,9 @@
             </div>
           </div>
         </DashboardSettingsPanel>
+        </div>
 
+        <div v-show="activeProfileTab === 'help'">
         <DashboardSettingsPanel
           title="Help & onboarding"
           subtitle="Replay the tour, open help, or ask the assistant."
@@ -451,7 +465,9 @@
             </div>
           </div>
         </DashboardSettingsPanel>
+        </div>
 
+        <div v-show="activeProfileTab === 'preferences'">
         <DashboardSettingsPanel
           title="Preferences"
           subtitle="Language, region, currency, and display."
@@ -478,7 +494,9 @@
             </div>
           </div>
         </DashboardSettingsPanel>
+        </div>
 
+        <div v-show="activeProfileTab === 'security'">
         <DashboardSettingsPanel
           title="Security"
           subtitle="Password, two-factor auth, and active sessions."
@@ -537,7 +555,9 @@
             </div>
           </div>
         </DashboardSettingsPanel>
+        </div>
 
+        <div v-show="activeProfileTab === 'roles'">
         <DashboardSettingsPanel
           title="Roles & permissions"
           subtitle="Your role and what you can access."
@@ -616,6 +636,7 @@
             </p>
           </div>
         </DashboardSettingsPanel>
+        </div>
       </div>
     </div>
     </template>
@@ -1461,6 +1482,7 @@ import {
 } from '~/composables/useStaffWorkspaceContext'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
+import CategoryTabs from '~/components/ui/CategoryTabs.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import IosProfileSettings from '~/components/ios/IosProfileSettings.vue'
 import AccountAvatar from '~/components/ui/AccountAvatar.vue'
@@ -2055,6 +2077,18 @@ const leftCardLine2 = computed(() => {
 const showBusinessProfilePanel = computed(
   () => isLoadingProfile.value || !isStaff.value || isStaff.value
 )
+
+const profileTabs = computed(() => [
+  { value: 'profile', label: isStaff.value ? 'Staff profile' : 'Business profile' },
+  { value: 'store-info', label: isStaff.value ? 'Business profile' : 'Store information' },
+  { value: 'receipts', label: 'Receipt terms & policies' },
+  { value: 'help', label: 'Help & onboarding' },
+  { value: 'preferences', label: 'Preferences' },
+  { value: 'security', label: 'Security' },
+  { value: 'roles', label: 'Roles & permissions' },
+])
+
+const activeProfileTab = ref('profile')
 
 const businessProfileDisplay = computed(() => ({
   storeName:

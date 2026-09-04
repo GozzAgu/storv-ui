@@ -36,6 +36,7 @@ import type { Staff } from '~/composables/useStaff'
 import type { Department } from '~/composables/useDepartments'
 import { getFirebaseConfig } from '~/config/firebase.config'
 import { resolveApiPath } from '~/utils/api-url'
+import { deriveDefaultPermissions, resolveStaffPermissions } from '~/utils/staff-permissions'
 
 function isActiveStaffStatus(status: Staff['status'] | undefined): boolean {
   return (status || 'active') === 'active'
@@ -253,10 +254,19 @@ export const useStaffStore = defineStore('staff', {
                     staffId: s.id,
                     storeId,
                     departmentId: s.departmentId,
-                    role: s.role || 'staff',
                     status: s.status || 'active',
-                    canManageInventory: s.canManageInventory === true ? true : deleteField(),
-                    canManageReceipts: s.canManageReceipts === true ? true : deleteField(),
+                    ...(s.permissions
+                      ? {
+                          permissions: s.permissions,
+                          role: deleteField(),
+                          canManageInventory: deleteField(),
+                          canManageReceipts: deleteField(),
+                        }
+                      : {
+                          role: s.role || 'staff',
+                          canManageInventory: s.canManageInventory === true ? true : deleteField(),
+                          canManageReceipts: s.canManageReceipts === true ? true : deleteField(),
+                        }),
                     createdBy: userId,
                     updatedAt: serverTimestamp(),
                   },
@@ -664,6 +674,11 @@ export const useStaffStore = defineStore('staff', {
       const normalizedFirstName = normalizeEntityName(staffData.firstName)
       const normalizedLastName = normalizeEntityName(staffData.lastName)
 
+      // Per-module permission matrix is the source of truth going forward. `role` is no longer
+      // written for new staff (see composables/useStaff.ts#Staff.role) — pass `permissions`
+      // explicitly (StaffPermissionsPanel does), or a view-only baseline is derived.
+      const permissions = staffData.permissions ?? deriveDefaultPermissions({})
+
       const newStaff = {
         firstName: normalizedFirstName,
         lastName: normalizedLastName,
@@ -673,14 +688,7 @@ export const useStaffStore = defineStore('staff', {
         departmentId: staffData.departmentId,
         storeId,
         position: staffData.position.trim(),
-        role:
-          staffData.role === 'manager' || staffData.role === 'intern' ? staffData.role : 'staff',
-        ...(staffData.role === 'manager' && staffData.canManageInventory === true
-          ? { canManageInventory: true as const }
-          : {}),
-        ...(staffData.role !== 'manager' && staffData.canManageReceipts === true
-          ? { canManageReceipts: true as const }
-          : {}),
+        permissions,
         hireDate: staffData.hireDate || new Date().toISOString().split('T')[0],
         ...(staffData.salary !== undefined && { salary: Number(staffData.salary) }),
         status:
@@ -701,10 +709,8 @@ export const useStaffStore = defineStore('staff', {
           staffId,
           storeId,
           departmentId: staffData.departmentId,
-          role: newStaff.role,
           status: newStaff.status,
-          ...('canManageInventory' in newStaff ? { canManageInventory: true } : {}),
-          ...('canManageReceipts' in newStaff ? { canManageReceipts: true } : {}),
+          permissions,
           createdBy: superAdminUid,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
@@ -717,12 +723,6 @@ export const useStaffStore = defineStore('staff', {
         department.staffCount + 1,
         storeId
       )
-      if (staffData.role === 'manager') {
-        await departmentsStore.updateDepartment(staffData.departmentId, {
-          manager: `${normalizedFirstName} ${normalizedLastName}`,
-          managerId: staffId,
-        } as Partial<import('~/composables/useDepartments').Department>)
-      }
 
       const now = new Date()
       const { password: _pw, ...staffFields } = staffData
@@ -894,39 +894,24 @@ export const useStaffStore = defineStore('staff', {
         } else {
           // Use hierarchical path: users/{userId}/stores/{storeId}/departments/{departmentId}/staff/{staffId}
           const staffRef = getStaffDocument(db, userId, storeId, departmentId, staffId)
-          const mergedRole = normalizedUpdates.role ?? staffMember.role
-          const inventoryPatch =
-            mergedRole === 'manager' && normalizedUpdates.canManageInventory === true
-              ? { canManageInventory: true }
-              : mergedRole !== 'manager' || normalizedUpdates.canManageInventory === false
-              ? { canManageInventory: deleteField() }
-              : {}
-          const receiptsPatch =
-            mergedRole !== 'manager' && normalizedUpdates.canManageReceipts === true
-              ? { canManageReceipts: true }
-              : mergedRole === 'manager' || normalizedUpdates.canManageReceipts === false
-              ? { canManageReceipts: deleteField() }
+          // Writing a fresh permission matrix supersedes the legacy role/grant fields — clear
+          // them so the doc doesn't carry stale, contradictory data (resolveStaffPermissions
+          // already prefers `permissions` when present, but a clean doc is easier to reason about).
+          const legacyFieldClears =
+            normalizedUpdates.permissions !== undefined
+              ? { role: deleteField(), canManageInventory: deleteField(), canManageReceipts: deleteField() }
               : {}
           await updateDoc(staffRef, {
             ...normalizedUpdates,
-            ...inventoryPatch,
-            ...receiptsPatch,
+            ...legacyFieldClears,
             updatedAt: serverTimestamp(),
           })
         }
 
         // Keep store membership index in sync for security rules.
-        const mergedRole = normalizedUpdates.role ?? staffMember.role
         const mergedStatus = normalizedUpdates.status ?? staffMember.status
         const mergedDepartmentId = normalizedUpdates.departmentId ?? staffMember.departmentId
-        const mergedCanManageInventory =
-          normalizedUpdates.canManageInventory !== undefined
-            ? normalizedUpdates.canManageInventory
-            : staffMember.canManageInventory
-        const mergedCanManageReceipts =
-          normalizedUpdates.canManageReceipts !== undefined
-            ? normalizedUpdates.canManageReceipts
-            : staffMember.canManageReceipts
+        const mergedPermissions = normalizedUpdates.permissions ?? staffMember.permissions
         if (!staffMember.authUid) {
           throw new Error('Staff member is missing auth UID')
         }
@@ -937,10 +922,15 @@ export const useStaffStore = defineStore('staff', {
             staffId,
             storeId,
             departmentId: mergedDepartmentId,
-            role: mergedRole,
             status: mergedStatus,
-            canManageInventory: mergedCanManageInventory === true ? true : deleteField(),
-            canManageReceipts: mergedCanManageReceipts === true ? true : deleteField(),
+            ...(mergedPermissions
+              ? {
+                  permissions: mergedPermissions,
+                  role: deleteField(),
+                  canManageInventory: deleteField(),
+                  canManageReceipts: deleteField(),
+                }
+              : {}),
             createdBy: userId,
             updatedAt: serverTimestamp(),
           },
@@ -965,64 +955,6 @@ export const useStaffStore = defineStore('staff', {
 
         if (staffMember.authUid === authStore.currentUser?.uid) {
           await this.fetchCurrentStaffMember().catch(() => {})
-        }
-
-        // Handle role changes that affect department manager assignment
-        if (normalizedUpdates.role !== undefined) {
-          // Get the old role before the update
-          const oldRole = staffMember.role
-          const newRole = normalizedUpdates.role
-
-          const departmentsStore = useDepartmentsStore()
-          const dept = departmentsStore.getDepartmentById(mergedDepartmentId)
-
-          if (dept && dept.createdBy === userId) {
-            // If role changed to manager, set as manager
-            if (newRole === 'manager') {
-              const updatedStaff =
-                this.getStaffMember(staffId) || (await this.fetchStaffMember(staffId))
-              if (updatedStaff) {
-                await departmentsStore.updateDepartment(mergedDepartmentId, {
-                  manager: `${updatedStaff.firstName} ${updatedStaff.lastName}`,
-                  managerId: staffId,
-                } as Partial<import('~/composables/useDepartments').Department>)
-              }
-            }
-            // If role changed from manager to something else (like staff), clear manager and set to "not assigned"
-            else if (oldRole === 'manager' && (newRole === 'staff' || newRole === 'intern')) {
-              // Check if this staff member is currently the manager of the department
-              if (dept.managerId === staffId) {
-                // Use deleteField() to properly remove the fields from Firestore
-                const db = useFirestore().getFirestoreInstance()
-                if (db) {
-                  // Use hierarchical path for department update
-                  const departmentRef = getDepartmentDocument(
-                    db,
-                    userId,
-                    storeId,
-                    mergedDepartmentId
-                  )
-                  await updateDoc(departmentRef, {
-                    manager: deleteField(),
-                    managerId: deleteField(),
-                    updatedAt: serverTimestamp(),
-                  })
-
-                  // Update local state to reflect the change immediately (set to undefined so UI shows "Not assigned")
-                  const deptIndex = departmentsStore.departments.findIndex(
-                    (d) => d.id === mergedDepartmentId
-                  )
-                  if (deptIndex > -1) {
-                    departmentsStore.departments[deptIndex] = {
-                      ...departmentsStore.departments[deptIndex],
-                      manager: undefined,
-                      managerId: undefined,
-                    } as Department
-                  }
-                }
-              }
-            }
-          }
         }
       } catch (error: any) {
         console.error('Error updating staff:', error)

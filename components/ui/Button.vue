@@ -145,8 +145,9 @@ const iconSize = computed(() => {
   return sizeMap[props.size]
 })
 
+/** Monochrome by design — no brand blue. Shared by `primary` (the default variant) and `outline`. */
 const outlineSurfaceClasses =
-  'border-[1.5px] border-[rgb(20_63_141/0.35)] bg-transparent text-[#143f8d] hover:border-[#143f8d] hover:bg-[rgb(20_63_141/0.06)] dark:border-white/15 dark:text-gray-100 dark:hover:border-white/25 dark:hover:bg-white/[0.06]'
+  'border-[1.5px] border-gray-300 bg-transparent text-gray-900 hover:border-gray-400 hover:bg-gray-900/[0.04] dark:border-white/15 dark:text-gray-100 dark:hover:border-white/25 dark:hover:bg-white/[0.06]'
 
 const variantSurfaceClasses = computed(() => {
   if (isCapacitorIos.value) {
@@ -172,7 +173,7 @@ const variantSurfaceClasses = computed(() => {
 
 const variantFocusRingClasses = computed(() => {
   const outlineFocus =
-    'focus-visible:ring-2 focus-visible:ring-primary-500/40 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[#0c0e14]'
+    'focus-visible:ring-2 focus-visible:ring-gray-400/45 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[#0c0e14]'
   const map = {
     primary: outlineFocus,
     secondary:

@@ -423,26 +423,20 @@
 
       <Modal v-model="showTrackingModal" size="sm">
         <template #header>Shipment tracking</template>
-        <div class="space-y-3">
-          <div>
-            <label :class="labelClass">Carrier</label>
-            <input
-              v-model="trackingForm.carrier"
-              type="text"
-              :class="fieldClass"
-              placeholder="e.g. DHL, FedEx"
-            />
-          </div>
-          <div>
-            <label :class="labelClass">Tracking number</label>
-            <input
-              v-model="trackingForm.trackingNumber"
-              type="text"
-              :class="[fieldClass, 'font-mono']"
-              placeholder="e.g. 1234567890"
-            />
-          </div>
-        </div>
+        <IosForm layout="default" scroll>
+          <IosFormSection fixed>
+            <IosFormField label="Carrier">
+              <IosFormInput v-model="trackingForm.carrier" placeholder="e.g. DHL, FedEx" />
+            </IosFormField>
+            <IosFormField label="Tracking number">
+              <IosFormInput
+                v-model="trackingForm.trackingNumber"
+                extra-class="font-mono"
+                placeholder="e.g. 1234567890"
+              />
+            </IosFormField>
+          </IosFormSection>
+        </IosForm>
         <template #footer>
           <IosDrawerActions
             primary-label="Save"
@@ -532,6 +526,7 @@ import {
 } from '~/utils/app-icons'
 import Button from '~/components/ui/Button.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
+import { IosForm, IosFormSection, IosFormField, IosFormInput } from '~/components/ios/forms'
 import IosContextMenu from '~/components/ios/IosContextMenu.vue'
 import IosContextMenuItem from '~/components/ios/IosContextMenuItem.vue'
 import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'

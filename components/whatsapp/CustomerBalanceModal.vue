@@ -18,69 +18,71 @@
         </NuxtLink>
       </div>
 
-      <div v-else class="space-y-4">
-        <div class="rounded-sm bg-gray-50/80 px-4 py-3 dark:bg-white/[0.04]">
-          <p
-            class="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400"
-          >
-            {{ customerName }}
-          </p>
-          <p class="mt-1 text-lg font-semibold tabular-nums text-gray-900 dark:text-gray-50">
-            {{ formatCurrency(currentBalance) }}
-            <span class="text-xs font-normal text-gray-500 dark:text-gray-400">balance due</span>
-          </p>
-        </div>
-
-        <div class="grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            :class="actionTab === 'charge' ? activeTabClass : inactiveTabClass"
-            @click="actionTab = 'charge'"
-          >
-            Add charge
-          </button>
-          <button
-            type="button"
-            :class="actionTab === 'payment' ? activeTabClass : inactiveTabClass"
-            @click="actionTab = 'payment'"
-          >
-            Record payment
-          </button>
-        </div>
-
-        <IosFormField label="Amount">
-          <IosFormInput v-model="amountInput" type="number" min="0" step="0.01" />
-        </IosFormField>
-
-        <IosFormField label="Note" hint="Optional">
-          <IosFormInput v-model="noteInput" type="text" placeholder="e.g. Part payment for invoice" />
-        </IosFormField>
-
-        <div v-if="recentLedger.length" class="border-t border-gray-200 pt-3">
-          <p
-            class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400"
-          >
-            Recent activity
-          </p>
-          <ul class="max-h-36 space-y-1.5 overflow-y-auto text-[11px]">
-            <li
-              v-for="entry in recentLedger"
-              :key="entry.id"
-              class="flex justify-between gap-2 text-gray-600 dark:text-gray-400"
+      <IosForm v-else layout="default" scroll>
+        <IosFormSection fixed>
+          <div class="rounded-sm bg-gray-50/80 px-4 py-3 dark:bg-white/[0.04]">
+            <p
+              class="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400"
             >
-              <span class="min-w-0 truncate capitalize"
-                >{{ entry.type }}{{ entry.note ? ` · ${entry.note}` : '' }}</span
+              {{ customerName }}
+            </p>
+            <p class="mt-1 text-lg font-semibold tabular-nums text-gray-900 dark:text-gray-50">
+              {{ formatCurrency(currentBalance) }}
+              <span class="text-xs font-normal text-gray-500 dark:text-gray-400">balance due</span>
+            </p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              :class="actionTab === 'charge' ? activeTabClass : inactiveTabClass"
+              @click="actionTab = 'charge'"
+            >
+              Add charge
+            </button>
+            <button
+              type="button"
+              :class="actionTab === 'payment' ? activeTabClass : inactiveTabClass"
+              @click="actionTab = 'payment'"
+            >
+              Record payment
+            </button>
+          </div>
+
+          <IosFormField label="Amount">
+            <IosFormInput v-model="amountInput" type="number" min="0" step="0.01" />
+          </IosFormField>
+
+          <IosFormField label="Note" hint="Optional">
+            <IosFormInput v-model="noteInput" type="text" placeholder="e.g. Part payment for invoice" />
+          </IosFormField>
+
+          <div v-if="recentLedger.length" class="border-t border-gray-200 pt-3 dark:border-white/10">
+            <p
+              class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400"
+            >
+              Recent activity
+            </p>
+            <ul class="max-h-36 space-y-1.5 overflow-y-auto text-[11px]">
+              <li
+                v-for="entry in recentLedger"
+                :key="entry.id"
+                class="flex justify-between gap-2 text-gray-600 dark:text-gray-400"
               >
-              <span
-                class="shrink-0"
-                :class="entry.amount >= 0 ? tableMoneyOwedClass() : tableMoneyClass()"
-              >
-                {{ entry.amount >= 0 ? '+' : '' }}{{ formatCurrency(entry.amount) }}
-              </span>
-            </li>
-          </ul>
-        </div>
-      </div>
+                <span class="min-w-0 truncate capitalize"
+                  >{{ entry.type }}{{ entry.note ? ` · ${entry.note}` : '' }}</span
+                >
+                <span
+                  class="shrink-0"
+                  :class="entry.amount >= 0 ? tableMoneyOwedClass() : tableMoneyClass()"
+                >
+                  {{ entry.amount >= 0 ? '+' : '' }}{{ formatCurrency(entry.amount) }}
+                </span>
+              </li>
+            </ul>
+          </div>
+        </IosFormSection>
+      </IosForm>
     </template>
 
     <template #footer>
@@ -101,7 +103,7 @@
 import { ref, computed, watch } from 'vue'
 import Modal from '~/components/ui/Modal.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
-import { IosFormField, IosFormInput } from '~/components/ios/forms'
+import { IosForm, IosFormSection, IosFormField, IosFormInput } from '~/components/ios/forms'
 import { useCustomerAccountsStore } from '~/stores/customerAccounts'
 import { getCustomerContactKey } from '~/utils/customer-key'
 import { tableMoneyClass, tableMoneyOwedClass } from '~/utils/table-money-styles'
@@ -129,9 +131,9 @@ const noteInput = ref('')
 const saving = ref(false)
 
 const activeTabClass =
-  'rounded-sm border-0 bg-gray-900 px-3 py-2 text-xs font-medium text-white dark:bg-white dark:text-gray-900'
+  'h-9 rounded-lg border-0 bg-gray-900 px-3 text-xs font-medium text-white dark:bg-white dark:text-gray-900'
 const inactiveTabClass =
-  'rounded-sm bg-white px-3 py-2 text-xs font-medium text-gray-600 dark:!bg-dashboard-card dark:text-gray-400'
+  'h-9 rounded-lg bg-white px-3 text-xs font-medium text-gray-600 dark:!bg-dashboard-card dark:text-gray-400'
 
 const contactKey = computed(() =>
   getCustomerContactKey({

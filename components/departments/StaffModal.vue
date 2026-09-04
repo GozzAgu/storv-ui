@@ -3,6 +3,7 @@
     :model-value="props.modelValue"
     :title="isEdit ? 'Edit staff' : 'Add staff'"
     size="lg"
+    dense
     @update:model-value="(value: boolean) => emit('update:modelValue', value)"
   >
     <div v-if="emailSentSuccess" class="dash-drawer-empty">
@@ -87,37 +88,20 @@
             placeholder="e.g. Sales Associate"
           />
         </IosFormField>
-        <IosFormField label="Role" required>
-          <IosFormSelect v-model="formData.role" required extra-class="cursor-pointer">
-            <option value="staff">Staff</option>
-            <option value="manager">Manager</option>
-            <option value="intern">Intern</option>
-          </IosFormSelect>
-        </IosFormField>
-        <IosFormToggle
-          v-if="canGrantInventoryAccess && formData.role === 'manager'"
-          v-model="formData.canManageInventory"
-          label="Inventory editor"
-          hint="Can add and edit categories, products, quantities, and prices."
-        />
-        <IosFormToggle
-          v-if="canGrantReceiptsAccess && formData.role !== 'manager'"
-          v-model="formData.canManageReceipts"
-          label="Receipts editor"
-          hint="Can cancel outstanding orders and process refunds. Managers already have this."
-        />
-        <IosFormField label="Hire date" required>
-          <IosFormInput v-model="formData.hireDate" type="date" required />
-        </IosFormField>
-        <IosFormField label="Salary" hint="Optional">
-          <IosFormInput
-            v-model="formData.salary"
-            type="number"
-            min="0"
-            step="0.01"
-            placeholder="0.00"
-          />
-        </IosFormField>
+        <div class="ios-form__grid sm:grid-cols-2">
+          <IosFormField label="Hire date" required>
+            <IosFormInput v-model="formData.hireDate" type="date" required />
+          </IosFormField>
+          <IosFormField label="Salary">
+            <IosFormInput
+              v-model="formData.salary"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="Optional"
+            />
+          </IosFormField>
+        </div>
         <IosFormField label="Status" required>
           <IosFormSelect v-model="formData.status" required extra-class="cursor-pointer">
             <option value="active">Active</option>
@@ -126,6 +110,11 @@
           </IosFormSelect>
         </IosFormField>
       </IosFormSection>
+
+      <StaffPermissionsPanel
+        v-if="canEditStaffPermissions"
+        v-model="formData.permissions"
+      />
 
       <p v-if="errorMessage" class="ios-form__error">{{ errorMessage }}</p>
     </IosForm>
@@ -187,6 +176,9 @@ import { getApiErrorMessage } from '~/utils/api-error-message'
 import LimitUpgradeHint from '~/components/subscription/LimitUpgradeHint.vue'
 import { getPlanDisplayName, getMinimumPlanForFeature } from '~/types/subscription'
 import { useProductAnalytics } from '~/composables/useProductAnalytics'
+import StaffPermissionsPanel from '~/components/departments/StaffPermissionsPanel.vue'
+import type { StaffPermissions } from '~/types/staff-permissions'
+import { deriveDefaultPermissions, resolveStaffPermissions } from '~/utils/staff-permissions'
 
 interface Props {
   modelValue: boolean
@@ -210,7 +202,7 @@ const authStore = useAuthStore()
 const userStore = useUserStore()
 const toast = useAppToast()
 const { canAddStaff, limits } = useSubscriptionFeatures()
-const { canGrantInventoryAccess, canGrantReceiptsAccess } = usePermissions()
+const { canEditStaffPermissions } = usePermissions()
 
 const formData = ref({
   firstName: '',
@@ -218,9 +210,7 @@ const formData = ref({
   email: '',
   phone: '',
   position: '',
-  role: 'staff' as 'manager' | 'staff' | 'intern',
-  canManageInventory: false,
-  canManageReceipts: false,
+  permissions: deriveDefaultPermissions({}) as StaffPermissions,
   hireDate: new Date().toISOString().split('T')[0]!,
   salary: undefined as number | undefined,
   status: 'active' as 'active' | 'inactive' | 'on_leave',
@@ -313,9 +303,7 @@ const resetForm = () => {
     email: '',
     phone: '',
     position: '',
-    role: 'staff',
-    canManageInventory: false,
-    canManageReceipts: false,
+    permissions: deriveDefaultPermissions({}),
     hireDate: new Date().toISOString().split('T')[0]!,
     salary: undefined,
     status: 'active',
@@ -405,17 +393,6 @@ async function emailCredentialsAfterCreate() {
 }
 
 watch(
-  () => formData.value.role,
-  (role) => {
-    if (role !== 'manager') {
-      formData.value.canManageInventory = false
-    } else {
-      formData.value.canManageReceipts = false
-    }
-  }
-)
-
-watch(
   () => props.modelValue,
   (isOpen) => {
     if (isOpen) {
@@ -427,9 +404,7 @@ watch(
           email: props.staff.email || '',
           phone: props.staff.phone || '',
           position: props.staff.position || '',
-          role: (props.staff.role as 'manager' | 'staff' | 'intern') || 'staff',
-          canManageInventory: props.staff.canManageInventory === true,
-          canManageReceipts: props.staff.canManageReceipts === true,
+          permissions: resolveStaffPermissions(props.staff),
           hireDate: props.staff.hireDate || new Date().toISOString().split('T')[0]!,
           salary: props.staff.salary,
           status: (props.staff.status as 'active' | 'inactive' | 'on_leave') || 'active',
@@ -469,11 +444,7 @@ const handleSubmit = async () => {
         email: formData.value.email,
         phone: formData.value.phone.trim(),
         position: formData.value.position,
-        role: formData.value.role,
-        canManageInventory:
-          formData.value.role === 'manager' ? formData.value.canManageInventory : false,
-        canManageReceipts:
-          formData.value.role !== 'manager' ? formData.value.canManageReceipts : false,
+        ...(canEditStaffPermissions.value ? { permissions: formData.value.permissions } : {}),
         hireDate: formData.value.hireDate,
         salary: formData.value.salary,
         status: formData.value.status,
@@ -487,11 +458,9 @@ const handleSubmit = async () => {
         password: generatedPassword.value,
         phone: formData.value.phone.trim() || undefined,
         position: formData.value.position,
-        role: formData.value.role,
-        canManageInventory:
-          formData.value.role === 'manager' ? formData.value.canManageInventory : false,
-        canManageReceipts:
-          formData.value.role !== 'manager' ? formData.value.canManageReceipts : false,
+        permissions: canEditStaffPermissions.value
+          ? formData.value.permissions
+          : deriveDefaultPermissions({}),
         hireDate: formData.value.hireDate,
         salary: formData.value.salary,
         status: formData.value.status,
@@ -611,11 +580,11 @@ onMounted(() => {
 }
 
 .staff-invite-regen {
-  margin-top: 0.25rem;
-  padding: 0.125rem 0;
+  margin-top: 0.5rem;
+  padding: 0.375rem 0;
   font-size: 0.75rem;
-  font-weight: 500;
-  opacity: 0.7;
+  font-weight: 550;
+  opacity: 0.72;
 }
 
 .staff-invite-regen:hover,

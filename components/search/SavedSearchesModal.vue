@@ -95,27 +95,25 @@
       subtitle="Name this search to load it later."
       size="sm"
     >
-      <div class="space-y-3">
-        <IosFormField label="Search Name" required>
-          <IosFormInput
-            v-model="searchName"
-            placeholder="e.g., High-value customers"
-            @keydown.enter="handleSave"
-          />
-        </IosFormField>
-        <div class="p-2.5 bg-gray-50 dark:bg-white/[0.04] rounded-sm">
-          <p class="text-xs text-gray-500 dark:text-gray-400 mb-0.5">Query</p>
-          <p class="text-xs font-medium text-gray-900 dark:text-gray-100">
-            {{ searchStore.query || '(empty)' }}
-          </p>
-          <p
-            v-if="searchStore.hasActiveFilters"
-            class="text-xs text-gray-500 dark:text-gray-400 mt-1.5"
-          >
-            Filters: {{ getFiltersSummary() }}
-          </p>
-        </div>
-      </div>
+      <IosForm layout="default" scroll>
+        <IosFormSection fixed>
+          <IosFormField label="Search Name" required>
+            <IosFormInput
+              v-model="searchName"
+              placeholder="e.g., High-value customers"
+              @keydown.enter="handleSave"
+            />
+          </IosFormField>
+          <IosFormField label="Query">
+            <p class="text-xs font-medium text-gray-900 dark:text-gray-100">
+              {{ searchStore.query || '(empty)' }}
+            </p>
+            <p v-if="searchStore.hasActiveFilters" class="dash-drawer-hint mt-1.5">
+              Filters: {{ getFiltersSummary() }}
+            </p>
+          </IosFormField>
+        </IosFormSection>
+      </IosForm>
 
       <template #footer>
         <IosDrawerActions
@@ -140,7 +138,7 @@ import {
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
-import { IosFormField, IosFormInput } from '~/components/ios/forms'
+import { IosForm, IosFormSection, IosFormField, IosFormInput } from '~/components/ios/forms'
 import { useSearchStore } from '~/stores/search'
 import { useAppToast } from '~/composables/useAppToast'
 

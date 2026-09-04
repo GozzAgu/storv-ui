@@ -82,7 +82,7 @@
             :key="member.id"
             :title="`${member.firstName} ${member.lastName}`"
             :subtitle="getStaffRowSubtitle(member)"
-            :amount="formatStaffRoleLabel(member.role)"
+            :amount="getStaffAccessLabel(member)"
             amount-tone="neutral"
             :date="formatStaffStatusLabel(member.status)"
             :variant="getStaffRowVariant(member)"
@@ -135,7 +135,7 @@
                   </h2>
                   <span :class="tableExpandMetaClass">
                     {{ staff.length }} members · {{ activeStaff }} active ·
-                    {{ totalManagers }} managers
+                    {{ totalFullAccessStaff }} with full access
                   </span>
                 </div>
               </div>
@@ -173,12 +173,7 @@
           </div>
         </div>
 
-        <div
-          :class="[
-            'data-table-shell flex min-h-0 flex-col',
-            isStaffFullscreen ? `${tableExpandBodyClass}` : 'overflow-hidden',
-          ]"
-        >
+        <div :class="isStaffFullscreen ? tableExpandBodyClass : tableShellFlexClass">
           <div
             v-if="canRemoveStaff && rosterTab === 'active' && selectedStaffForBulk.length > 0"
             class="dash-table-bulk-bar"
@@ -216,7 +211,7 @@
                     <span class="dash-page-context-bar__sep">·</span>
                     <span class="tabular-nums">{{ activeStaff }} active</span>
                     <span class="dash-page-context-bar__sep">·</span>
-                    <span class="tabular-nums">{{ totalManagers }} managers</span>
+                    <span class="tabular-nums">{{ totalFullAccessStaff }} with full access</span>
                     <template v-if="staff.length > 0">
                       <span class="dash-page-context-bar__sep">·</span>
                       <span>{{ paginatedStaff.length }} on this page</span>
@@ -390,17 +385,8 @@
                         {{ member.email }}
                       </p>
                       <div class="mt-2 flex flex-wrap items-center gap-1.5">
-                        <span
-                          class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize tracking-wide ring-1 ring-inset"
-                          :class="[
-                            member.role === 'manager'
-                              ? 'bg-primary-500/10 text-primary-700 ring-primary-500/20 dark:bg-primary-400/10 dark:text-primary-300 dark:ring-primary-400/25'
-                              : member.role === 'intern'
-                              ? 'bg-blue-500/10 text-blue-700 ring-blue-500/20 dark:bg-blue-400/10 dark:text-blue-300 dark:ring-blue-400/25'
-                              : 'bg-gray-500/10 text-gray-700 ring-gray-500/15 dark:bg-gray-400/10 dark:text-gray-300 dark:ring-gray-500/20',
-                          ]"
-                        >
-                          {{ member.role }}
+                        <span :class="getStaffAccessBadgeClass(member)">
+                          {{ getStaffAccessLabel(member) }}
                         </span>
                         <span
                           class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize tracking-wide ring-1 ring-inset"
@@ -457,7 +443,7 @@
                       </th>
                       <th>Name</th>
                       <th class="hidden sm:table-cell">Position</th>
-                      <th>Role</th>
+                      <th>Access</th>
                       <th class="hidden md:table-cell">Email</th>
                       <th class="dashboard-table__col-status">Status</th>
                       <th v-if="canManageDepartments" class="dashboard-table__col-actions">
@@ -488,8 +474,8 @@
                       </td>
                       <td>
                         <DashboardTableBadge
-                          :badge-class="staffRoleBadgeClass(member.role)"
-                          :label="member.role"
+                          :badge-class="getStaffAccessBadgeClass(member)"
+                          :label="getStaffAccessLabel(member)"
                         />
                       </td>
                       <td class="hidden md:table-cell">
@@ -546,17 +532,8 @@
                         {{ member.email }}
                       </p>
                       <div class="mt-2 flex flex-wrap items-center gap-1.5">
-                        <span
-                          class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize tracking-wide ring-1 ring-inset"
-                          :class="[
-                            member.role === 'manager'
-                              ? 'bg-primary-500/10 text-primary-700 ring-primary-500/20 dark:bg-primary-400/10 dark:text-primary-300 dark:ring-primary-400/25'
-                              : member.role === 'intern'
-                              ? 'bg-blue-500/10 text-blue-700 ring-blue-500/20 dark:bg-blue-400/10 dark:text-blue-300 dark:ring-blue-400/25'
-                              : 'bg-gray-500/10 text-gray-700 ring-gray-500/15 dark:bg-gray-400/10 dark:text-gray-300 dark:ring-gray-500/20',
-                          ]"
-                        >
-                          {{ member.role }}
+                        <span :class="getStaffAccessBadgeClass(member)">
+                          {{ getStaffAccessLabel(member) }}
                         </span>
                         <span
                           class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize tracking-wide ring-1 ring-inset bg-red-500/10 text-red-800 ring-red-500/20 dark:bg-red-400/10 dark:text-red-300 dark:ring-red-400/25"
@@ -567,7 +544,7 @@
                     </div>
                     <button
                       type="button"
-                      class="shrink-0 rounded-lg p-1.5 text-primary-600 transition-colors hover:bg-primary-50 disabled:opacity-50 dark:text-primary-400 dark:hover:bg-primary-900/25"
+                      class="shrink-0 rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-gray-100 disabled:opacity-50 dark:text-gray-400 dark:hover:bg-gray-800/80"
                       :disabled="reactivateBusyId === member.id"
                       :aria-label="reactivateBusyId === member.id ? 'Reactivating…' : 'Reactivate'"
                       @click="openReactivateStaffModal(member)"
@@ -591,7 +568,7 @@
                     <tr>
                       <th>Name</th>
                       <th class="hidden sm:table-cell">Position</th>
-                      <th>Role</th>
+                      <th>Access</th>
                       <th class="hidden md:table-cell">Email</th>
                       <th class="dashboard-table__col-status">Status</th>
                       <th class="dashboard-table__col-actions">
@@ -613,8 +590,8 @@
                       </td>
                       <td>
                         <DashboardTableBadge
-                          :badge-class="staffRoleBadgeClass(member.role)"
-                          :label="member.role"
+                          :badge-class="getStaffAccessBadgeClass(member)"
+                          :label="getStaffAccessLabel(member)"
                         />
                       </td>
                       <td class="hidden md:table-cell">
@@ -632,7 +609,7 @@
                         <div class="dashboard-table__action-group" @click.stop>
                           <button
                             type="button"
-                            class="dashboard-table__action-btn text-primary-600 hover:!text-primary-700 dark:text-primary-400 dark:hover:!text-primary-300"
+                            class="dashboard-table__action-btn"
                             :disabled="reactivateBusyId === member.id"
                             :aria-label="reactivateBusyId === member.id ? 'Reactivating…' : 'Reactivate'"
                             @click="openReactivateStaffModal(member)"
@@ -716,22 +693,6 @@
       </template>
       <template v-else>
         <IosContextMenuItem
-          :label="
-            roleToggleBusyId === staffForOpenMenu?.id
-              ? 'Updating…'
-              : `Switch to ${getNextStaffRoleLabel(staffForOpenMenu?.role)}`
-          "
-          :icon="ArrowPathIcon"
-          :icon-class="roleToggleBusyId === staffForOpenMenu?.id ? 'animate-spin' : ''"
-          :disabled="!!roleToggleBusyId && roleToggleBusyId !== staffForOpenMenu?.id"
-          @click="
-            () => {
-              handleToggleStaffRole(staffForOpenMenu!)
-              openStaffMenuId = null
-            }
-          "
-        />
-        <IosContextMenuItem
           label="Edit"
           :icon="PencilSquareIcon"
           @click="
@@ -792,7 +753,6 @@ import {
   UserIcon,
   BuildingOfficeIcon,
   UsersIcon,
-  ArrowPathIcon,
   CheckCircleIcon,
   ClockIcon,
   PencilSquareIcon,
@@ -819,15 +779,16 @@ import IosReceiptTransactionRow, {
 } from '~/components/ios/IosReceiptTransactionRow.vue'
 import {
   formatStaffStatusLabel,
-  staffRoleBadgeClass,
+  staffAccessBadgeClass,
+  staffAccessLabel,
   staffStatusBadgeClass,
 } from '~/utils/table-badge-styles'
+import { resolveStaffPermissions, summarizeStaffPermissions } from '~/utils/staff-permissions'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import StaffModal from '~/components/departments/StaffModal.vue'
 import DeactivateStaffModal from '~/components/departments/DeactivateStaffModal.vue'
 import ReactivateStaffModal from '~/components/departments/ReactivateStaffModal.vue'
 import MoveStaffModal from '~/components/departments/MoveStaffModal.vue'
-import { getNextStaffRole, getNextStaffRoleLabel, normalizeStaffRole } from '~/utils/staff-role'
 import StaffInvitePasswordsPanel from '~/components/departments/StaffInvitePasswordsPanel.vue'
 import TotpConfirmModal from '~/components/security/TotpConfirmModal.vue'
 import { useTotpConfirmModal } from '~/composables/useTotpConfirmModal'
@@ -871,6 +832,7 @@ const {
   segmentTabsBtnActiveClass,
 } = useDashboardPageChrome()
 const {
+  tableShellFlexClass,
   tableExpandClass,
   tableExpandHeaderClass,
   tableExpandBodyClass,
@@ -926,8 +888,8 @@ const staffSearchQuery = ref('')
 function matchesStaffSearch(member: Staff, query: string): boolean {
   const q = query.trim().toLowerCase()
   if (!q) return true
-  return [member.firstName, member.lastName, member.email, member.position, member.role].some(
-    (value) => value?.toLowerCase().includes(q)
+  return [member.firstName, member.lastName, member.email, member.position].some((value) =>
+    value?.toLowerCase().includes(q)
   )
 }
 
@@ -942,10 +904,12 @@ function getStaffRowSubtitle(member: Staff): string {
   return parts.join(' · ')
 }
 
-function formatStaffRoleLabel(role: string): string {
-  if (role === 'manager') return 'Manager'
-  if (role === 'intern') return 'Intern'
-  return 'Staff'
+function getStaffAccessLabel(member: Staff): string {
+  return staffAccessLabel(summarizeStaffPermissions(resolveStaffPermissions(member)))
+}
+
+function getStaffAccessBadgeClass(member: Staff): string {
+  return staffAccessBadgeClass(summarizeStaffPermissions(resolveStaffPermissions(member)))
 }
 
 function getStaffRowVariant(member: Staff): ReceiptTransactionVariant {
@@ -1006,7 +970,6 @@ const departmentsListPath = computed(() =>
 )
 const isStaffFullscreen = ref(false)
 const openStaffMenuId = ref<string | null>(null)
-const roleToggleBusyId = ref<string | null>(null)
 
 const toggleStaffMenu = (staffId: string) => {
   openStaffMenuId.value = openStaffMenuId.value === staffId ? null : staffId
@@ -1118,14 +1081,6 @@ watch(isStaffFullscreen, (fullscreen) => {
 
 // Check if current user is staff (limited permissions)
 const isStaff = computed(() => userStore.userData?.role === 'staff')
-// Check if current user is a manager in the department (even if they're a super admin)
-const isManager = computed(() => {
-  if (!department.value || !currentStaffMember.value) return false
-  return (
-    currentStaffMember.value.role === 'manager' &&
-    currentStaffMember.value.departmentId === department.value.id
-  )
-})
 // Get permissions
 const { canCreateStaff, canManage, canRemoveStaff, canMoveStaff } = usePermissions()
 // Only super admins can create or remove staff (managers can edit roles/details)
@@ -1145,7 +1100,7 @@ const staffTableSkeletonColumns = computed(() => {
   columns.push(
     { label: 'Name' },
     { label: 'Position', class: 'hidden sm:table-cell', bone: '5.5rem' },
-    { label: 'Role', bone: '4rem' },
+    { label: 'Access', bone: '4rem' },
     { label: 'Email', class: 'hidden md:table-cell' },
     { label: 'Status', class: 'dashboard-table__col-status', bone: '4.5rem' }
   )
@@ -1354,8 +1309,10 @@ async function handleConfirmReactivateStaff() {
 }
 
 // Computed stats for compact header
-const totalManagers = computed(() => {
-  return staff.value.filter((m) => m.role === 'manager').length
+const totalFullAccessStaff = computed(() => {
+  return staff.value.filter(
+    (m) => summarizeStaffPermissions(resolveStaffPermissions(m)) === 'full'
+  ).length
 })
 
 const activeStaff = computed(() => {
@@ -1501,40 +1458,12 @@ function handleIosStaffRowClick(member: Staff) {
   }
 }
 
+// Legacy field, no longer written on new staff — degrades to "Not assigned" once every staff
+// member in a department has moved to the permission matrix (see StaffPermissionsPanel).
 function syncDepartmentManagerFromStaff() {
   if (!department.value) return
   const manager = staff.value.find((m) => m.role === 'manager')
   department.value.manager = manager ? `${manager.firstName} ${manager.lastName}` : 'Not assigned'
-}
-
-const handleToggleStaffRole = async (staffMember: Staff) => {
-  if (roleToggleBusyId.value) return
-
-  const currentRole = normalizeStaffRole(staffMember.role)
-  const newRole = getNextStaffRole(currentRole)
-  const nextLabel = getNextStaffRoleLabel(currentRole)
-
-  roleToggleBusyId.value = staffMember.id
-
-  const staffIndex = staff.value.findIndex((s) => s.id === staffMember.id)
-  const storeIndex = staffStore.staff.findIndex((s) => s.id === staffMember.id)
-  const originalRole = staffIndex > -1 ? staff.value[staffIndex]!.role : staffMember.role
-
-  if (staffIndex > -1) staff.value[staffIndex]!.role = newRole
-  if (storeIndex > -1) staffStore.staff[storeIndex]!.role = newRole
-
-  try {
-    await staffStore.updateStaff(staffMember.id, { role: newRole })
-    syncDepartmentManagerFromStaff()
-    toast.success(`${staffMember.firstName} is now ${nextLabel}`)
-  } catch (error: unknown) {
-    if (staffIndex > -1) staff.value[staffIndex]!.role = originalRole
-    if (storeIndex > -1) staffStore.staff[storeIndex]!.role = originalRole
-    const message = error instanceof Error ? error.message : 'Failed to update role'
-    toast.error(message)
-  } finally {
-    roleToggleBusyId.value = null
-  }
 }
 
 const handleStaffSuccess = async () => {
