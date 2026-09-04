@@ -287,6 +287,7 @@ const notificationsStore = useNotificationsStore()
 const { canUse, plan } = useSubscriptionFeatures()
 const { isCapacitorIos } = useIsCapacitorIos()
 
+const { activeMenu, openHeaderMenu, closeHeaderMenu } = useActiveHeaderMenu()
 const open = ref(false)
 const menuRootRef = ref<HTMLElement | null>(null)
 const menuPanelRef = ref<HTMLElement | null>(null)
@@ -445,9 +446,21 @@ watch(
 )
 
 watch(open, async (isOpen) => {
+  if (isOpen) {
+    openHeaderMenu('profile')
+  } else {
+    closeHeaderMenu('profile')
+  }
   if (!import.meta.client || !isOpen) return
   await nextTick()
   positionPanel()
   requestAnimationFrame(() => positionPanel())
+})
+
+// Another topnav popover (stores, notifications, assistant) took over - close this one.
+watch(activeMenu, (id) => {
+  if (id !== 'profile' && open.value) {
+    open.value = false
+  }
 })
 </script>

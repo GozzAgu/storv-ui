@@ -1153,6 +1153,7 @@ const unreadNotificationCount = computed(() => notificationsStore.unreadCount)
 const { isNativeApp } = useCapacitorNativeApp()
 const { isCapacitorIos } = useIsCapacitorIos()
 const assistantStore = useAssistantStore()
+const { activeMenu, openHeaderMenu, closeHeaderMenu } = useActiveHeaderMenu()
 const showNativeCommandHeader = computed(() => isNativeApp.value && isCapacitorIos.value)
 const dashboardMainRef = ref<HTMLElement | null>(null)
 const sidebarOpen = ref(false)
@@ -1196,10 +1197,40 @@ const toggleNotifications = () => {
 }
 
 watch(notificationsOpen, async (isOpen) => {
+  if (isOpen) {
+    openHeaderMenu('notifications')
+  } else {
+    closeHeaderMenu('notifications')
+  }
   if (!import.meta.client || !isOpen) return
   await nextTick()
   positionNotificationsPanel()
   requestAnimationFrame(() => positionNotificationsPanel())
+})
+
+// Another topnav popover (stores, profile, assistant) took over - close this one.
+watch(activeMenu, (id) => {
+  if (id !== 'notifications' && notificationsOpen.value) {
+    notificationsOpen.value = false
+  }
+})
+
+watch(
+  () => assistantStore.isOpen,
+  (isOpen) => {
+    if (isOpen) {
+      openHeaderMenu('assistant')
+    } else {
+      closeHeaderMenu('assistant')
+    }
+  }
+)
+
+// Another topnav popover (stores, notifications, profile) took over - close the assistant.
+watch(activeMenu, (id) => {
+  if (id !== 'assistant' && assistantStore.isOpen) {
+    assistantStore.close()
+  }
 })
 
 /** Never block the whole shell on auth - show UI with a short gate only (Capacitor-safe). */

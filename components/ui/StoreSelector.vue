@@ -261,6 +261,7 @@ const storesStore = useStoresStore()
 const userStore = useUserStore()
 const toast = useAppToast()
 
+const { activeMenu, openHeaderMenu, closeHeaderMenu } = useActiveHeaderMenu()
 const dropdownOpen = ref(false)
 const dropdownRef = ref<HTMLElement | null>(null)
 const panelRef = ref<HTMLElement | null>(null)
@@ -302,7 +303,19 @@ function onPanelScrollOrResize() {
 
 function toggleDropdown() {
   dropdownOpen.value = !dropdownOpen.value
+  if (dropdownOpen.value) {
+    openHeaderMenu('stores')
+  } else {
+    closeHeaderMenu('stores')
+  }
 }
+
+// Another topnav popover (notifications, profile menu, assistant) took over - close this one.
+watch(activeMenu, (id) => {
+  if (id !== 'stores' && dropdownOpen.value) {
+    dropdownOpen.value = false
+  }
+})
 
 const loading = computed(() => storesStore.loading)
 const { eligibleStores } = usePlanEligibleStores()
@@ -331,6 +344,7 @@ const handleClickOutside = (event: MouseEvent) => {
 
   if (!inDropdown) {
     dropdownOpen.value = false
+    closeHeaderMenu('stores')
   }
 }
 
@@ -379,6 +393,7 @@ const switchStore = async (storeId: string) => {
   try {
     switchingStore.value = true
     dropdownOpen.value = false
+    closeHeaderMenu('stores')
 
     const [departmentsModule, staffModule, inventoryModule, receiptsModule, customersModule] =
       await Promise.all([
