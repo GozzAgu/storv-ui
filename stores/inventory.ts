@@ -1878,6 +1878,13 @@ export const useInventoryStore = defineStore('inventory', {
             .catch(() => undefined)
         }
 
+        try {
+          const { useStorefrontStore } = await import('~/stores/storefront')
+          useStorefrontStore().queueItemSync(itemForState, newItemRef.id, folderId)
+        } catch {
+          /* optional */
+        }
+
         return newItemRef.id
       } catch (error: any) {
         console.error('Error creating item:', error)
@@ -2191,6 +2198,20 @@ export const useInventoryStore = defineStore('inventory', {
             }).catch(() => undefined)
           }
         }
+
+        try {
+          const { useStorefrontStore } = await import('~/stores/storefront')
+          const merged = {
+            ...(existingItem || {}),
+            ...cleanedUpdates,
+            id: itemId,
+            folderId,
+            storeId,
+          } as InventoryItem
+          useStorefrontStore().queueItemSync(merged, itemId, folderId)
+        } catch {
+          /* optional */
+        }
       } catch (error: any) {
         console.error('Error updating item:', error)
         throw new Error(error.message || 'Failed to update item')
@@ -2285,6 +2306,13 @@ export const useInventoryStore = defineStore('inventory', {
           userId: authStore.currentUser!.uid,
           userDisplayName: userDisplayNameForDelete,
         }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
+
+        try {
+          const { useStorefrontStore } = await import('~/stores/storefront')
+          useStorefrontStore().queueItemSync(null, itemId, folderId)
+        } catch {
+          /* optional */
+        }
       } catch (error: any) {
         console.error('Error deleting item:', error)
         throw new Error(error.message || 'Failed to delete item')
@@ -2986,6 +3014,17 @@ export const useInventoryStore = defineStore('inventory', {
           userId: authStore.currentUser!.uid,
           userDisplayName: userDisplayNameDateOut,
         }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
+
+        try {
+          const { useStorefrontStore } = await import('~/stores/storefront')
+          const sf = useStorefrontStore()
+          for (const itemId of itemIds) {
+            const local = this.items[folderId]?.find((i) => i.id === itemId) || null
+            sf.queueItemSync(local, itemId, folderId)
+          }
+        } catch {
+          /* optional */
+        }
       } catch (error: any) {
         console.error('Error updating dateOut:', error)
         throw new Error(error.message || 'Failed to update dateOut')

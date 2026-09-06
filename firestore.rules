@@ -613,7 +613,52 @@ service cloud.firestore {
                           request.resource.data.userId == userId);
           allow update, delete: if false;
         }
+
+        // Private storefront settings (business only). Public catalogue is top-level storefronts/*.
+        match /storefrontConfig/{docId} {
+          allow read: if canAccessStoreData(userId, storeId);
+          allow create, update: if isStoreOwnerForPath(userId) ||
+            memberHasAnyProductsManage(userId, storeId);
+          allow delete: if isStoreOwnerForPath(userId);
+        }
       }
+    }
+
+    // ── Public storefront projections (anonymous read; business write) ──
+    function requestStorefrontOwnerUid() {
+      return request.resource.data.ownerUid;
+    }
+    function requestStorefrontStoreId() {
+      return request.resource.data.storeId;
+    }
+    function canWriteStorefrontProjection(ownerUid, storeId) {
+      return isAuthenticated() &&
+             ownerUid is string &&
+             storeId is string &&
+             (isStoreOwnerForPath(ownerUid) || memberHasAnyProductsManage(ownerUid, storeId));
+    }
+
+    match /storefronts/{slug} {
+      allow read: if resource.data.isPublished == true;
+      allow create: if canWriteStorefrontProjection(requestStorefrontOwnerUid(), requestStorefrontStoreId())
+                    && request.resource.data.slug == slug;
+      allow update: if canWriteStorefrontProjection(resource.data.ownerUid, resource.data.storeId)
+                    && request.resource.data.ownerUid == resource.data.ownerUid
+                    && request.resource.data.storeId == resource.data.storeId
+                    && request.resource.data.slug == slug;
+      allow delete: if canWriteStorefrontProjection(resource.data.ownerUid, resource.data.storeId);
+    }
+
+    match /storefrontListings/{slug}/items/{itemId} {
+      allow read: if resource.data.isListed == true
+                  && exists(/databases/$(database)/documents/storefronts/$(slug))
+                  && get(/databases/$(database)/documents/storefronts/$(slug)).data.isPublished == true;
+      allow create: if canWriteStorefrontProjection(requestStorefrontOwnerUid(), requestStorefrontStoreId())
+                    && request.resource.data.id == itemId;
+      allow update: if canWriteStorefrontProjection(resource.data.ownerUid, resource.data.storeId)
+                    && request.resource.data.ownerUid == resource.data.ownerUid
+                    && request.resource.data.storeId == resource.data.storeId;
+      allow delete: if canWriteStorefrontProjection(resource.data.ownerUid, resource.data.storeId);
     }
     
     // Legacy collections - keep for backward compatibility during migration

@@ -450,3 +450,37 @@ export async function getQueryUserId(): Promise<string | null> {
 
   return userId
 }
+
+/** Private storefront settings: users/{userId}/stores/{storeId}/storefrontConfig/settings */
+export function getStorefrontConfigDocument(
+  db: Firestore,
+  userId: string,
+  storeId: string
+): DocumentReference {
+  return doc(db, 'users', userId, 'stores', storeId, 'storefrontConfig', 'settings')
+}
+
+/** Public profile: storefronts/{slug} */
+export function getStorefrontPublicProfileDocument(
+  db: Firestore,
+  slug: string
+): DocumentReference {
+  return doc(db, 'storefronts', slug)
+}
+
+/** Public listings collection: storefrontListings/{slug}/items */
+export function getStorefrontListingsCollection(
+  db: Firestore,
+  slug: string
+): CollectionReference {
+  return collection(db, 'storefrontListings', slug, 'items')
+}
+
+export function getStorefrontListingDocument(
+  db: Firestore,
+  slug: string,
+  itemId: string
+): DocumentReference {
+  return doc(db, 'storefrontListings', slug, 'items', itemId)
+}
+

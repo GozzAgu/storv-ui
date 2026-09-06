@@ -90,6 +90,16 @@ export function availabilityBadgeForReturned(): InventoryAvailabilityBadge {
   }
 }
 
+/** Coarse status for an inventory item (used by storefront projection and badges). */
+export function getInventoryAvailabilityStatus(
+  item: InventoryItem
+): InventoryAvailabilityStatus {
+  if (isItemSold(item)) return 'sold'
+  if (isItemOnStockLoan(item)) return 'with_seller'
+  if (isItemAwaitingPayment(item)) return 'awaiting_payment'
+  return 'available'
+}
+
 /** Sort order for availability column (available first when ascending). */
 export function formatAvailabilityLabel(badge: InventoryAvailabilityBadge): string {
   return badge.meta ? `${badge.label} · ${badge.meta}` : badge.label

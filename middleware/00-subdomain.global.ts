@@ -76,6 +76,7 @@ function getAppOrigin(config: ReturnType<typeof useRuntimeConfig>): string {
 
 /** Paths that stay on the marketing site (www). */
 function isMarketingPath(path: string): boolean {
-  const marketingRoutes = ['/', '/privacy', '/terms', '/subscribe']
-  return marketingRoutes.includes(path)
+  if (['/', '/privacy', '/terms', '/subscribe', '/pricing'].includes(path)) return true
+  if (path === '/store' || path.startsWith('/store/')) return true
+  return false
 }
