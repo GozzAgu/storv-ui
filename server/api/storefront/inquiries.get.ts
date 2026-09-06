@@ -39,8 +39,19 @@ export default defineEventHandler(async (event) => {
     .get()
 
   const toMillis = (v: unknown): number => {
-    const t = v as { toMillis?: () => number } | undefined
-    return typeof t?.toMillis === 'function' ? t.toMillis() : 0
+    if (!v) return 0
+    if (typeof v === 'number' && Number.isFinite(v)) return v
+    if (v instanceof Date) return v.getTime()
+    const t = v as { toMillis?: () => number; seconds?: number }
+    if (typeof t?.toMillis === 'function') {
+      try {
+        return t.toMillis()
+      } catch {
+        /* fall through */
+      }
+    }
+    if (typeof t?.seconds === 'number') return t.seconds * 1000
+    return 0
   }
 
   let inquiries = snap.docs.map((d) => {
@@ -66,6 +77,7 @@ export default defineEventHandler(async (event) => {
     }
   })
 
+  const allInquiries = inquiries
   if (statusFilter) {
     inquiries = inquiries.filter((i) => i.status === statusFilter)
   }
@@ -73,9 +85,9 @@ export default defineEventHandler(async (event) => {
   inquiries.sort((a, b) => b.createdAtMs - a.createdAtMs)
 
   const counts = {
-    pending: inquiries.filter((i) => i.status === 'pending').length,
-    confirmed: inquiries.filter((i) => i.status === 'confirmed').length,
-    all: inquiries.length,
+    pending: allInquiries.filter((i) => i.status === 'pending').length,
+    confirmed: allInquiries.filter((i) => i.status === 'confirmed').length,
+    all: allInquiries.length,
   }
 
   return { success: true, inquiries, counts }

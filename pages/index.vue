@@ -1,6 +1,6 @@
 <template>
   <div>
-    <!-- Marketing showcase: hero → problems → features → setup → multi-store -->
+    <!-- Slim home: hero → problem → proof → product stories → teasers → FAQ → CTA -->
     <LandingShowcase
       :logo-src="marketingLogoSrc"
       :dark-logo-src="landingLogoSrc"
@@ -13,11 +13,31 @@
 
     <LandingProductStories />
 
-    <LandingCapabilities @navigate="scrollToSection" />
-
-    <LandingAiShowcase />
-
-    <LandingAppScreenshots :app-url="appOriginUrl" />
+    <!-- Features encyclopedia lives on /features -->
+    <section
+      id="features-teaser"
+      data-section-id="features-teaser"
+      class="landing-teaser scroll-animate scroll-animate-up scroll-mt-[4.75rem] lg:scroll-mt-28"
+    >
+      <div class="landing-teaser__inner">
+        <div class="landing-teaser__copy">
+          <p class="landing-label landing-label--blue">Full product</p>
+          <h2 class="landing-teaser__title">Every capability, without the scroll marathon.</h2>
+          <p class="landing-teaser__lede">
+            Browse inventory, sales, storefront, payments, analytics, and Enterprise tools by
+            category - plus app screenshots and the Storvv Assistant overview.
+          </p>
+          <ul class="landing-teaser__pillars">
+            <li>Storefront &amp; guest catalogue</li>
+            <li>Payment links &amp; leads</li>
+            <li>Screenshots of the real app</li>
+          </ul>
+        </div>
+        <NuxtLink to="/features" class="landing-pill-cta landing-teaser__cta">
+          Explore all features
+        </NuxtLink>
+      </div>
+    </section>
 
     <!-- Security teaser: full write-up lives on its own page -->
     <section
@@ -86,10 +106,6 @@
       </div>
     </section>
 
-    <LandingMoat />
-    <LandingCaseStudies />
-    <LandingPartners />
-
     <LandingFaq />
 
     <LandingContact @open-form="showContactFormModal = true" />
@@ -124,13 +140,11 @@ import '~/assets/css/landing.css'
 import { computed, onMounted, ref } from 'vue'
 import Modal from '~/components/ui/Modal.vue'
 import { useThemeStore } from '~/stores/theme'
-import { useSectionScroll } from '~/composables/useSectionScroll'
 import { useLandingScrollAnimations } from '~/composables/useLandingScrollAnimations'
 
 definePageMeta({ layout: 'marketing' })
 
 const themeStore = useThemeStore()
-const { scrollToSection } = useSectionScroll()
 const { setup: setupScrollAnimations } = useLandingScrollAnimations()
 
 /** Light wordmark for light canvas. */
@@ -165,7 +179,7 @@ useHead({
     {
       name: 'description',
       content:
-        'Storvv: inventory with subcategories, Quick Sale, sales leads, Paystack payment links, analytics, buybacks, stock loans, and multi-store sync. Web dashboard and iOS app.',
+        'Storvv: inventory, sales, public storefront, Paystack payment links, analytics, and multi-store tools. Web dashboard and iOS app.',
     },
   ],
 })

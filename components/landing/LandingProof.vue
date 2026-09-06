@@ -75,35 +75,21 @@ const proofCards: Array<{
     iconKey: 'receipts',
     title: 'Receipts, leads & remote pay',
     description:
-      'Wizard or Quick Sale checkout, sales leads pipeline, customer ledger, and Paystack payment links.',
+      'Wizard or Quick Sale checkout, sales leads pipeline, and Paystack payment links for remote customers.',
   },
   {
-    metric: 'Branches',
-    iconKey: 'branch',
-    title: 'Multi-store from one login',
+    metric: 'Storefront',
+    iconKey: 'storefront',
+    title: 'Public showroom from your stock',
     description:
-      'Switch branches instantly. Enterprise adds transfers, copy-from-branch, and stock loans.',
+      'Publish a guest catalogue, take enquiries and reservations, then complete sales that update inventory.',
   },
   {
     metric: 'Insights',
     iconKey: 'analytics',
     title: 'Analytics & audit trail',
     description:
-      'Feature insights, exports, peak-hour charts, and activity logs on Medium and Enterprise.',
-  },
-  {
-    metric: 'Team',
-    iconKey: 'departments',
-    title: 'Roles that match the floor',
-    description:
-      'Super admin, manager, and staff logins with department folder access and optional 2FA.',
-  },
-  {
-    metric: 'Mobile',
-    iconKey: 'dashboard',
-    title: 'Web + iOS native app',
-    description:
-      'Same data on desktop and iPhone: tabs, pull-to-refresh, swipe actions, native sheets, and full subscription management in Settings.',
+      'Feature insights, storefront traffic, exports, and activity logs on Medium and Enterprise.',
   },
 ]
 </script>
@@ -191,8 +177,14 @@ html.dark .landing-proof__header-visual {
 
 @media (min-width: 768px) {
   .landing-proof__grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 1.25rem;
+  }
+}
+
+@media (min-width: 1100px) {
+  .landing-proof__grid {
+    grid-template-columns: repeat(4, 1fr);
   }
 }
 

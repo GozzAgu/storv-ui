@@ -62,7 +62,7 @@ export const MARKETING_SCREENSHOTS: MarketingScreenshot[] = [
   {
     id: 'payment-links',
     title: 'Payment links',
-    description: 'Paystack checkout links for remote sales on every plan.',
+    description: 'Paystack checkout links for remote sales on every plan. Storefront covers the public catalogue.',
     src: marketingShot('/marketing/screenshots/payment-links.png'),
     iconKey: 'payment-links',
   },
@@ -83,7 +83,7 @@ export const MARKETING_SCREENSHOTS: MarketingScreenshot[] = [
   {
     id: 'analytics',
     title: 'Analytics',
-    description: 'Feature insights, charts, exports, and inventory health (Medium+).',
+    description: 'Feature insights, storefront traffic, charts, and exports (Medium+).',
     src: marketingShot('/marketing/screenshots/analytics.png'),
     iconKey: 'analytics',
   },

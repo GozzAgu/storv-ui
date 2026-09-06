@@ -30,10 +30,27 @@
       <IosTransactionListSkeleton v-if="loading && !inquiries.length" :count="6" />
 
       <DashboardTableEmptyState
-        v-else-if="!filtered.length"
+        v-else-if="!storesStore.currentStoreId"
+        :icon="ShoppingBagIcon"
+        title="Select a store"
+        description="Use the store selector to view storefront inquiries for a branch."
+        :fill="false"
+      />
+
+      <DashboardTableEmptyState
+        v-else-if="!inquiries.length"
         :icon="ShoppingBagIcon"
         title="No inquiries yet"
         description="When guests contact or reserve from your storefront, they appear here."
+        :fill="false"
+      />
+
+      <DashboardTableEmptyState
+        v-else-if="!filtered.length"
+        :icon="ShoppingBagIcon"
+        title="No matching inquiries"
+        description="Try another status filter — Pending, Confirmed, or All."
+        :fill="false"
       />
 
       <div v-else class="ios-receipt-transaction-list">
@@ -42,7 +59,7 @@
           :key="row.id"
           :title="row.customerName"
           :subtitle="iosSubtitle(row)"
-          :amount="row.listingPrice != null ? formatMoney(row.listingPrice) : ' - '"
+          :amount="row.listingPrice != null ? formatMoney(row.listingPrice) : '—'"
           :amount-tone="iosAmountTone(row)"
           :date="formatWhenShort(row.createdAtMs)"
           :variant="iosVariant(row.status)"
@@ -127,7 +144,7 @@
           />
 
           <DashboardTableEmptyState
-            v-else-if="!filtered.length"
+            v-else-if="!inquiries.length"
             :icon="ShoppingBagIcon"
             title="No inquiries yet"
             description="When guests contact or reserve from your storefront, they appear here."
@@ -135,6 +152,13 @@
               'Confirm a reservation to hold the listing',
               'Complete & sell creates a receipt and updates stock',
             ]"
+          />
+
+          <DashboardTableEmptyState
+            v-else-if="!filtered.length"
+            :icon="ShoppingBagIcon"
+            title="No matching inquiries"
+            description="Try another status filter — All, Pending, or Confirmed."
           />
 
           <div v-else class="overflow-x-auto">
@@ -322,6 +346,8 @@
 </template>
 
 <script setup lang="ts">
+import { computed, onMounted, ref, watch } from 'vue'
+import { getDocs, limit, query } from 'firebase/firestore'
 import {
   CheckCircleIcon,
   DevicePhoneMobileIcon,
@@ -331,18 +357,26 @@ import {
 } from '~/utils/app-icons'
 import IosContextMenu from '~/components/ios/IosContextMenu.vue'
 import IosContextMenuItem from '~/components/ios/IosContextMenuItem.vue'
+import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
 import IosQuickActionBar, { type IosQuickActionOption } from '~/components/ios/IosQuickActionBar.vue'
 import IosReceiptTransactionRow, {
   type ReceiptTransactionAmountTone,
   type ReceiptTransactionVariant,
 } from '~/components/ios/IosReceiptTransactionRow.vue'
 import IosTransactionListSkeleton from '~/components/ios/IosTransactionListSkeleton.vue'
-import { getQueryUserId } from '~/composables/useFirestorePaths'
+import { useFirestore } from '~/composables/useFirestore'
+import {
+  getQueryUserId,
+  getStorefrontInquiriesCollection,
+} from '~/composables/useFirestorePaths'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
 import { useAuthenticatedFetch } from '~/composables/useAuthenticatedFetch'
 import { useAnchoredRowMenu } from '~/composables/useAnchoredRowMenu'
 import { useDashboardPageChrome } from '~/composables/useDashboardPageChrome'
 import { useDashboardTableChrome } from '~/composables/useDashboardTableChrome'
+import { useIosPullToRefreshRegister } from '~/composables/useIosPullToRefresh'
+import { useStoresStore } from '~/stores/stores'
+import { CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import type { StorefrontInquiryStatus, StorefrontInquiryType } from '~/types/storefront'
 
 definePageMeta({
@@ -364,32 +398,43 @@ type InquiryRow = {
   createdAtMs: number
 }
 
+const VALID_STATUSES = new Set<StorefrontInquiryStatus>([
+  'pending',
+  'confirmed',
+  'rejected',
+  'cancelled',
+  'completed',
+])
+
 const { authFetch } = useAuthenticatedFetch()
 const { isCapacitorIos } = useIsCapacitorIos()
 const { tableShellFlexClass } = useDashboardTableChrome()
 const { segmentTabsClass, segmentTabsBtnClass, segmentTabsBtnActiveClass } =
   useDashboardPageChrome()
+const storesStore = useStoresStore()
 
 const loading = ref(true)
 const loadError = ref('')
 const inquiries = ref<InquiryRow[]>([])
 const pendingCount = ref(0)
-const statusFilter = ref<'all' | StorefrontInquiryStatus>('pending')
+/** Default to All so iOS users see every inquiry without hunting tabs. */
+const statusFilter = ref<'all' | StorefrontInquiryStatus>('all')
 const actingId = ref('')
 
 const statusTabs = [
+  { value: 'all' as const, label: 'All' },
   { value: 'pending' as const, label: 'Pending' },
   { value: 'confirmed' as const, label: 'Confirmed' },
-  { value: 'all' as const, label: 'All' },
 ]
 
 const iosStatusOptions = computed((): IosQuickActionOption[] => [
+  { value: 'all', label: 'All' },
   {
     value: 'pending',
     label: pendingCount.value ? `Pending (${pendingCount.value})` : 'Pending',
+    badge: pendingCount.value || undefined,
   },
   { value: 'confirmed', label: 'Confirmed' },
-  { value: 'all', label: 'All' },
 ])
 
 const filtered = computed(() => {
@@ -409,8 +454,52 @@ const {
 const inquiryForOpenMenu = computed(() => {
   const id = openInquiryMenuId.value
   if (!id) return null
-  return filtered.value.find((row) => row.id === id) ?? null
+  return inquiries.value.find((row) => row.id === id) ?? null
 })
+
+function toMillis(value: unknown): number {
+  if (!value) return 0
+  if (typeof value === 'number' && Number.isFinite(value)) return value
+  if (value instanceof Date) return value.getTime()
+  if (typeof value === 'object') {
+    const withToMillis = value as { toMillis?: () => number; seconds?: number }
+    if (typeof withToMillis.toMillis === 'function') {
+      try {
+        return withToMillis.toMillis()
+      } catch {
+        /* fall through */
+      }
+    }
+    if (typeof withToMillis.seconds === 'number') {
+      return withToMillis.seconds * 1000
+    }
+  }
+  return 0
+}
+
+function mapInquiryDoc(id: string, data: Record<string, unknown>): InquiryRow {
+  const rawStatus = String(data.status || 'pending') as StorefrontInquiryStatus
+  const status = VALID_STATUSES.has(rawStatus) ? rawStatus : 'pending'
+  const rawType = String(data.type || 'contact')
+  return {
+    id: (typeof data.id === 'string' && data.id) || id,
+    type: rawType === 'reserve' ? 'reserve' : 'contact',
+    status,
+    customerName: String(data.customerName || 'Guest'),
+    customerPhone: String(data.customerPhone || ''),
+    customerNote: typeof data.customerNote === 'string' ? data.customerNote : null,
+    listingId: String(data.listingId || ''),
+    listingTitle: String(data.listingTitle || 'Listing'),
+    listingPrice: (() => {
+      if (data.listingPrice == null || data.listingPrice === '') return null
+      const price = Number(data.listingPrice)
+      return Number.isFinite(price) ? price : null
+    })(),
+    receiptId: typeof data.receiptId === 'string' ? data.receiptId : null,
+    receiptNumber: typeof data.receiptNumber === 'string' ? data.receiptNumber : null,
+    createdAtMs: toMillis(data.createdAt),
+  }
+}
 
 function canAct(status: StorefrontInquiryStatus) {
   return status === 'pending' || status === 'confirmed'
@@ -433,8 +522,16 @@ function statusBadgeClass(status: StorefrontInquiryStatus) {
 
 function iosSubtitle(row: InquiryRow) {
   const type = row.type === 'reserve' ? 'Reserve' : 'Contact'
+  const status =
+    row.status === 'pending'
+      ? 'Pending'
+      : row.status === 'confirmed'
+        ? 'Confirmed'
+        : row.status === 'completed'
+          ? 'Completed'
+          : row.status
   const note = row.customerNote ? ` · ${row.customerNote}` : ''
-  return `${row.listingTitle} · ${type}${note}`
+  return `${row.listingTitle} · ${type} · ${status}${note}`
 }
 
 function iosVariant(status: StorefrontInquiryStatus): ReceiptTransactionVariant {
@@ -524,21 +621,30 @@ async function load() {
   loadError.value = ''
   try {
     const ownerUserId = await getQueryUserId()
-    const storeId = await getCurrentStoreId()
+    const storeId = (await getCurrentStoreId()) || storesStore.currentStoreId || ''
     if (!ownerUserId || !storeId) {
+      inquiries.value = []
+      pendingCount.value = 0
       loadError.value = 'Select a store first.'
       return
     }
-    const res = await authFetch<{
-      inquiries: InquiryRow[]
-      counts: { pending: number }
-    }>(
-      `/api/storefront/inquiries?ownerUserId=${encodeURIComponent(ownerUserId)}&storeId=${encodeURIComponent(storeId)}`
-    )
-    inquiries.value = res.inquiries || []
-    pendingCount.value = res.counts?.pending ?? 0
+
+    // Prefer Firestore client reads on native — same path as buybacks/leads and
+    // works even when the Capacitor shell's hosted API is behind or unreachable.
+    const db = useFirestore().getFirestoreInstance()
+    if (!db) throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
+
+    const col = getStorefrontInquiriesCollection(db, ownerUserId, storeId)
+    const snap = await getDocs(query(col, limit(200)))
+    const rows = snap.docs.map((d) => mapInquiryDoc(d.id, d.data() as Record<string, unknown>))
+    rows.sort((a, b) => b.createdAtMs - a.createdAtMs)
+
+    inquiries.value = rows
+    pendingCount.value = rows.filter((row) => row.status === 'pending').length
   } catch (e: any) {
     loadError.value = e?.data?.message || e?.message || 'Failed to load inquiries'
+    inquiries.value = []
+    pendingCount.value = 0
   } finally {
     loading.value = false
   }
@@ -549,7 +655,7 @@ async function updateStatus(id: string, status: StorefrontInquiryStatus) {
   loadError.value = ''
   try {
     const ownerUserId = await getQueryUserId()
-    const storeId = await getCurrentStoreId()
+    const storeId = (await getCurrentStoreId()) || storesStore.currentStoreId || ''
     if (!ownerUserId || !storeId) throw new Error('No store selected')
     const res = await authFetch<{
       success?: boolean
@@ -577,5 +683,21 @@ async function updateStatus(id: string, status: StorefrontInquiryStatus) {
   }
 }
 
-onMounted(() => void load())
+watch(
+  () => storesStore.currentStoreId,
+  (storeId) => {
+    if (storeId) {
+      void load()
+    } else {
+      inquiries.value = []
+      pendingCount.value = 0
+    }
+  }
+)
+
+useIosPullToRefreshRegister(load)
+
+onMounted(() => {
+  void load()
+})
 </script>

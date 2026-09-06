@@ -25,12 +25,7 @@
             <a href="/#product" class="landing-nav-link" @click.prevent="goToSection('inventory')"
               >Product</a
             >
-            <a
-              href="/#capabilities-grid"
-              class="landing-nav-link"
-              @click.prevent="goToSection('capabilities-grid')"
-              >Features</a
-            >
+            <NuxtLink to="/features" class="landing-nav-link">Features</NuxtLink>
             <NuxtLink to="/pricing" class="landing-nav-link">Pricing</NuxtLink>
             <a href="/#faq" class="landing-nav-link" @click.prevent="goToSection('faq')"
               >Resources</a
@@ -100,16 +95,11 @@
                 "
                 >Product</a
               >
-              <a
-                href="/#capabilities-grid"
+              <NuxtLink
+                to="/features"
                 class="landing-mobile-nav-link"
-                @click.prevent="
-                  () => {
-                    goToSection('capabilities-grid')
-                    mobileMenuOpen = false
-                  }
-                "
-                >Features</a
+                @click="mobileMenuOpen = false"
+                >Features</NuxtLink
               >
               <NuxtLink
                 to="/pricing"
@@ -173,8 +163,8 @@
               />
             </NuxtLink>
             <p class="landing-footer__tagline">
-              Inventory, sales, payment links, analytics, and multi-branch tools for modern
-              retailers - on web and iOS.
+              Inventory, sales, public storefront, payment links, analytics, and multi-branch tools
+              for modern retailers - on web and iOS.
             </p>
           </div>
 
@@ -188,14 +178,12 @@
                 >Sales</a
               >
               <a
-                href="/#capabilities-grid"
+                href="/#storefront"
                 class="landing-footer__link"
-                @click.prevent="goToSection('capabilities-grid')"
-                >All features</a
+                @click.prevent="goToSection('storefront')"
+                >Storefront</a
               >
-              <a href="/#analytics" class="landing-footer__link" @click.prevent="goToSection('analytics')"
-                >Analytics</a
-              >
+              <NuxtLink to="/features" class="landing-footer__link">All features</NuxtLink>
               <NuxtLink to="/demo/dashboard" class="landing-footer__link">Try demo</NuxtLink>
             </div>
           </div>
@@ -203,6 +191,7 @@
           <div>
             <p class="landing-footer__col-title">Resources</p>
             <div class="landing-footer__links">
+              <NuxtLink to="/features" class="landing-footer__link">Features</NuxtLink>
               <NuxtLink to="/pricing" class="landing-footer__link">Pricing</NuxtLink>
               <NuxtLink to="/security" class="landing-footer__link">Security</NuxtLink>
               <a href="/#faq" class="landing-footer__link" @click.prevent="goToSection('faq')">FAQ</a>

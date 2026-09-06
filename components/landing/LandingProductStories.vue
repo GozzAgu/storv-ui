@@ -67,6 +67,30 @@
               </div>
             </template>
 
+            <template v-else-if="story.visual === 'storefront'">
+              <div class="landing-story__mock-row">
+                <div>
+                  <p class="landing-story__mock-label">/store/lagos-gadgets</p>
+                  <p class="landing-story__mock-meta">Public catalogue · 48 listed</p>
+                </div>
+                <span class="landing-story__mock-pill">Live</span>
+              </div>
+              <div class="landing-story__mock-row">
+                <div>
+                  <p class="landing-story__mock-label">Reserve · Emma</p>
+                  <p class="landing-story__mock-meta">Opulent Dubai · Hold until Oct 12</p>
+                </div>
+                <span class="landing-story__mock-pill landing-story__mock-pill--warn">Pending</span>
+              </div>
+              <div class="landing-story__mock-row">
+                <div>
+                  <p class="landing-story__mock-label">Sale #SF-PUXN16</p>
+                  <p class="landing-story__mock-meta">Completed · stock updated</p>
+                </div>
+                <span class="landing-story__mock-pill">Sold</span>
+              </div>
+            </template>
+
             <template v-else-if="story.visual === 'branches'">
               <div
                 v-for="branch in branchRows"
@@ -78,20 +102,6 @@
                   <p class="landing-story__mock-meta">{{ branch.meta }}</p>
                 </div>
                 <span class="landing-story__mock-pill">{{ branch.status }}</span>
-              </div>
-            </template>
-
-            <template v-else-if="story.visual === 'analytics'">
-              <div
-                v-for="row in analyticsRows"
-                :key="row.label"
-                class="landing-story__mock-row"
-              >
-                <div>
-                  <p class="landing-story__mock-label">{{ row.label }}</p>
-                  <p class="landing-story__mock-meta">{{ row.meta }}</p>
-                </div>
-                <span class="landing-story__mock-pill">{{ row.status }}</span>
               </div>
             </template>
           </div>
@@ -132,6 +142,20 @@ const stories = [
     visual: 'sales' as const,
   },
   {
+    id: 'storefront',
+    eyebrow: 'Storefront',
+    title: 'A public showroom backed by your real stock.',
+    lede:
+      'Publish selected inventory to a guest catalogue. Shoppers browse, enquire, or reserve - you confirm in the dashboard and complete sales that update private stock.',
+    bullets: [
+      'Share a storefront URL or QR from Settings',
+      'Guest contact and reservation requests in one inbox',
+      'Complete & sell creates a receipt and decrements inventory',
+      'Optional online checkout via Paystack when enabled',
+    ],
+    visual: 'storefront' as const,
+  },
+  {
     id: 'solutions',
     eyebrow: 'Multi-store',
     title: 'One business. Every branch. One login.',
@@ -145,20 +169,6 @@ const stories = [
     ],
     visual: 'branches' as const,
   },
-  {
-    id: 'analytics',
-    eyebrow: 'Insights & team',
-    title: 'Reports, audits, and help built in.',
-    lede:
-      'Medium and Enterprise unlock analytics, activity logs, and exports. Every plan includes Help center, onboarding, and Storvv Assistant.',
-    bullets: [
-      'Feature insights, charts, peak hours, and PDF/Excel export',
-      'Activity logs for managers and owners',
-      'Solo or Business workspace plus subscription billing in Settings',
-      'Web dashboard plus native iOS app with the same data',
-    ],
-    visual: 'analytics' as const,
-  },
 ]
 
 const inventoryRows = [
@@ -171,11 +181,5 @@ const branchRows = [
   { name: 'Lagos, Lekki', meta: '142 products · active branch', status: 'Active' },
   { name: 'Abuja, Wuse', meta: '98 products · active branch', status: 'Active' },
   { name: 'Transfer #104', meta: '12 units · Lagos → Abuja', status: 'In transit' },
-]
-
-const analyticsRows = [
-  { label: 'Revenue (30d)', meta: '₦18.2M completed', status: 'Medium+' },
-  { label: 'Low stock', meta: '6 categories need restock', status: 'Alert' },
-  { label: 'Activity log', meta: 'Folder edited · 2h ago', status: 'Audit' },
 ]
 </script>
