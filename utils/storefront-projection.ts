@@ -201,5 +201,7 @@ export function buildStorefrontPublicProfile(params: {
     collectionInfo: config.collectionInfo || undefined,
     warrantyInfo: config.warrantyInfo || undefined,
     currency,
+    allowReservations: config.allowReservations !== false,
+    allowOnlineCheckout: config.allowOnlineCheckout === true,
   }
 }

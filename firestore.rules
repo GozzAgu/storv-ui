@@ -621,6 +621,18 @@ service cloud.firestore {
             memberHasAnyProductsManage(userId, storeId);
           allow delete: if isStoreOwnerForPath(userId);
         }
+
+        // Guest inquiries / reservations — client read for staff; writes via Admin SDK only.
+        match /storefrontInquiries/{inquiryId} {
+          allow read: if canAccessStoreData(userId, storeId);
+          allow create, update, delete: if false;
+        }
+
+        // Aggregate public view counts — staff read; Admin SDK writes only.
+        match /storefrontAnalytics/{docId} {
+          allow read: if canAccessStoreData(userId, storeId);
+          allow create, update, delete: if false;
+        }
       }
     }
 
@@ -639,9 +651,20 @@ service cloud.firestore {
     }
 
     match /storefronts/{slug} {
-      allow read: if resource.data.isPublished == true;
+      // Public catalogue: published profiles are world-readable.
+      // Owners/managers can always read their own docs (incl. unpublished).
+      // Note: getDoc on a *missing* doc still fails if rules touch resource.data —
+      // callers must soft-catch permission-denied for existence checks.
+      allow read: if resource.data.isPublished == true
+                  || (isAuthenticated()
+                      && resource.data.ownerUid is string
+                      && resource.data.storeId is string
+                      && (resource.data.ownerUid == request.auth.uid
+                          || memberHasAnyProductsManage(resource.data.ownerUid, resource.data.storeId)));
       allow create: if canWriteStorefrontProjection(requestStorefrontOwnerUid(), requestStorefrontStoreId())
-                    && request.resource.data.slug == slug;
+                    && request.resource.data.slug == slug
+                    && request.resource.data.ownerUid is string
+                    && request.resource.data.storeId is string;
       allow update: if canWriteStorefrontProjection(resource.data.ownerUid, resource.data.storeId)
                     && request.resource.data.ownerUid == resource.data.ownerUid
                     && request.resource.data.storeId == resource.data.storeId
@@ -650,9 +673,13 @@ service cloud.firestore {
     }
 
     match /storefrontListings/{slug}/items/{itemId} {
-      allow read: if resource.data.isListed == true
-                  && exists(/databases/$(database)/documents/storefronts/$(slug))
-                  && get(/databases/$(database)/documents/storefronts/$(slug)).data.isPublished == true;
+      allow read: if (resource.data.isListed == true
+                      && exists(/databases/$(database)/documents/storefronts/$(slug))
+                      && get(/databases/$(database)/documents/storefronts/$(slug)).data.isPublished == true)
+                  || (isAuthenticated()
+                      && resource.data.ownerUid is string
+                      && resource.data.storeId is string
+                      && canWriteStorefrontProjection(resource.data.ownerUid, resource.data.storeId));
       allow create: if canWriteStorefrontProjection(requestStorefrontOwnerUid(), requestStorefrontStoreId())
                     && request.resource.data.id == itemId;
       allow update: if canWriteStorefrontProjection(resource.data.ownerUid, resource.data.storeId)

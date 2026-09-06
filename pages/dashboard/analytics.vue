@@ -139,7 +139,7 @@
         </template>
       </IosAnalyticsActions>
 
-      <div v-show="activeAnalyticsTab === 'overview'">
+      <div v-show="activeAnalyticsTab === 'overview'" class="dash-analytics-panel">
       <IosAnalyticsSection
         v-if="isCapacitorIos"
         :title="periodLabel"
@@ -295,7 +295,7 @@
       </section>
       </div>
 
-      <div v-show="activeAnalyticsTab === 'revenue'">
+      <div v-show="activeAnalyticsTab === 'revenue'" class="dash-analytics-panel">
       <IosAnalyticsSection
         v-if="isCapacitorIos"
         title="Revenue trends"
@@ -404,7 +404,7 @@
       </section>
       </div>
 
-      <div v-show="activeAnalyticsTab === 'products-customers'">
+      <div v-show="activeAnalyticsTab === 'products-customers'" class="dash-analytics-panel">
       <IosAnalyticsSection
         v-if="isCapacitorIos"
         title="Sales breakdown"
@@ -490,7 +490,99 @@
       </div>
       </div>
 
-      <div v-show="activeAnalyticsTab === 'payments-traffic'">
+      <div v-show="activeAnalyticsTab === 'payments-traffic'" class="dash-analytics-panel">
+      <IosAnalyticsSection
+        v-if="isCapacitorIos"
+        title="Storefront traffic"
+        subtitle="Public showroom views and guest requests"
+      >
+        <div :class="[cardPaddedClass, 'ios-analytics-card ios-analytics-card--padded']">
+          <dl :class="metricCellsClass">
+            <div :class="metricCellClass">
+              <dt>Store views</dt>
+              <dd :class="numClass">{{ storefrontStore.analyticsSummary.storeViews }}</dd>
+            </div>
+            <div :class="metricCellClass">
+              <dt>Product views</dt>
+              <dd :class="numClass">{{ storefrontStore.analyticsSummary.productViews }}</dd>
+            </div>
+            <div :class="metricCellClass">
+              <dt>Views (7d)</dt>
+              <dd :class="numClass">{{ storefrontStore.viewsLast7Days }}</dd>
+            </div>
+            <div :class="metricCellClass">
+              <dt>Pending inquiries</dt>
+              <dd :class="numClass">{{ storefrontStore.pendingInquiryCount }}</dd>
+            </div>
+          </dl>
+          <NuxtLink
+            to="/dashboard/storefront"
+            class="mt-3 inline-block text-xs font-semibold text-primary-600 underline-offset-2 hover:underline dark:text-primary-400"
+          >
+            Open storefront →
+          </NuxtLink>
+          <ul
+            v-if="storefrontStore.analyticsSummary.topListings.length"
+            class="mt-3 space-y-1.5 text-xs text-gray-600 dark:text-gray-300"
+          >
+            <li
+              v-for="row in storefrontStore.analyticsSummary.topListings.slice(0, 3)"
+              :key="row.id"
+              class="flex justify-between gap-3"
+            >
+              <span class="truncate font-medium text-gray-800 dark:text-gray-100">{{ row.id }}</span>
+              <span :class="numClass">{{ row.views }} views</span>
+            </li>
+          </ul>
+        </div>
+      </IosAnalyticsSection>
+
+      <section v-else :class="cardPaddedClass">
+        <div :class="[cardHeaderClass, 'dash-card__header--compact']">
+          <div>
+            <h2 :class="cardTitleClass">Storefront traffic</h2>
+            <p :class="cardDescClass">Public showroom views and guest requests</p>
+          </div>
+          <NuxtLink
+            to="/dashboard/storefront"
+            class="text-xs font-semibold text-gray-600 underline-offset-2 hover:underline dark:text-gray-300"
+          >
+            Open →
+          </NuxtLink>
+        </div>
+        <dl :class="metricCellsClass">
+          <div :class="metricCellClass">
+            <dt>Store views</dt>
+            <dd :class="numClass">{{ storefrontStore.analyticsSummary.storeViews }}</dd>
+          </div>
+          <div :class="metricCellClass">
+            <dt>Product views</dt>
+            <dd :class="numClass">{{ storefrontStore.analyticsSummary.productViews }}</dd>
+          </div>
+          <div :class="metricCellClass">
+            <dt>Views (7d)</dt>
+            <dd :class="numClass">{{ storefrontStore.viewsLast7Days }}</dd>
+          </div>
+          <div :class="metricCellClass">
+            <dt>Pending inquiries</dt>
+            <dd :class="numClass">{{ storefrontStore.pendingInquiryCount }}</dd>
+          </div>
+        </dl>
+        <ul
+          v-if="storefrontStore.analyticsSummary.topListings.length"
+          class="mt-4 space-y-1.5 text-xs text-gray-600 dark:text-gray-300"
+        >
+          <li
+            v-for="row in storefrontStore.analyticsSummary.topListings.slice(0, 3)"
+            :key="row.id"
+            class="flex justify-between gap-3"
+          >
+            <span class="truncate font-medium text-gray-800 dark:text-gray-100">{{ row.id }}</span>
+            <span :class="numClass">{{ row.views }} views</span>
+          </li>
+        </ul>
+      </section>
+
       <IosAnalyticsSection
         v-if="isCapacitorIos && paymentMethodBreakdown.length > 0"
         title="Payment methods"
@@ -672,7 +764,7 @@
       </div>
       </div>
 
-      <div v-show="activeAnalyticsTab === 'reports'">
+      <div v-show="activeAnalyticsTab === 'reports'" class="dash-analytics-panel">
       <IosAnalyticsSection
         v-if="isCapacitorIos"
         title="Top products"
@@ -960,6 +1052,7 @@ import { useCustomersStore } from '~/stores/customers'
 import { useDepartmentsStore } from '~/stores/departments'
 import { useCustomerBuybacksStore } from '~/stores/customerBuybacks'
 import { useSellerLoanOutsStore } from '~/stores/sellerLoanOuts'
+import { useStorefrontStore } from '~/stores/storefront'
 import { useCustomerAccountsStore } from '~/stores/customerAccounts'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
@@ -1061,6 +1154,7 @@ const customersStore = useCustomersStore()
 const departmentsStore = useDepartmentsStore()
 const buybacksStore = useCustomerBuybacksStore()
 const sellerLoansStore = useSellerLoanOutsStore()
+const storefrontStore = useStorefrontStore()
 const customerAccountsStore = useCustomerAccountsStore()
 const userStore = useUserStore()
 const themeStore = useThemeStore()
@@ -2648,6 +2742,7 @@ const loadAnalytics = async () => {
     if (canUseSubscriptionFeature('customer_balance')) {
       tasks.push(customerAccountsStore.fetchAccountsForStore())
     }
+    tasks.push(storefrontStore.fetchAnalytics())
 
     await Promise.all(tasks)
     receipts.value = receiptsStore.receipts

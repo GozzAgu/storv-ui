@@ -1,5 +1,10 @@
 import { createError, defineEventHandler, getRouterParam } from 'h3'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
+import { merchantPayoutIsConnected } from '~/server/utils/payment-link-create'
+import {
+  publicStorefrontListingDto,
+  publicStorefrontProfileDto,
+} from '~/server/utils/storefront-public-dto'
 import type { StorefrontPublicListing, StorefrontPublicProfile } from '~/types/storefront'
 
 /** Public product detail for a storefront listing. */
@@ -36,31 +41,19 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, message: 'Product not found' })
   }
 
+  const store = publicStorefrontProfileDto(profile)
+  if (profile.allowOnlineCheckout === true && profile.ownerUid && profile.storeId) {
+    store.acceptsPayments = await merchantPayoutIsConnected(
+      adminDb,
+      profile.ownerUid,
+      profile.storeId
+    )
+  }
+
   return {
     success: true,
-    store: {
-      slug: profile.slug,
-      displayName: profile.displayName,
-      tagline: profile.tagline || null,
-      phonePublic: profile.phonePublic || null,
-      whatsappE164: profile.whatsappE164 || null,
-      emailPublic: profile.emailPublic || null,
-      social: profile.social || {},
-      collectionInfo: profile.collectionInfo || null,
-      warrantyInfo: profile.warrantyInfo || null,
-      currency: profile.currency || null,
-    },
-    item: {
-      id: item.id,
-      title: item.title,
-      price: item.price,
-      currency: item.currency || null,
-      availability: item.availability,
-      categoryPath: item.categoryPath,
-      categoryName: item.categoryName,
-      attributes: item.attributes || [],
-      description: item.description || null,
-      imageUrl: item.imageUrl || null,
-    },
+    store,
+    item: publicStorefrontListingDto(item),
   }
 })
+

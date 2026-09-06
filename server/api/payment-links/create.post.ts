@@ -1,17 +1,12 @@
 import { createError, defineEventHandler, readBody } from 'h3'
-import { FieldValue } from 'firebase-admin/firestore'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
 import { requireAuth, requireStoreManageAccess } from '~/server/utils/store-auth'
-import { resolveBulkStockFieldAndValueFromMap } from '~/utils/inventory-bulk-quantity'
 import { normalizeEntityName } from '~/utils/capitalize-text'
 import {
-  generatePaymentToken,
-  nairaToKobo,
-  payoutDocId,
-  PAYMENT_LINK_CURRENCY,
-  PAYMENT_LINK_TTL_MINUTES,
-  type PaymentLinkItem,
-} from '~/server/utils/payment-links'
+  assertMerchantPayoutConnected,
+  lockPaymentLinkItems,
+  writeLockedPaymentLink,
+} from '~/server/utils/payment-link-create'
 
 interface IncomingItem {
   itemId?: string
@@ -26,29 +21,6 @@ interface Body {
   customerPhone?: string
   customerEmail?: string
   items?: IncomingItem[]
-}
-
-const PRICE_FIELDS = ['price', 'Price', 'PRICE', 'cost', 'Cost', 'COST']
-
-function resolveItemPrice(data: Record<string, unknown>): number {
-  for (const f of PRICE_FIELDS) {
-    if (data[f] !== undefined && data[f] !== null && data[f] !== '') {
-      const n = parseFloat(String(data[f]))
-      if (!Number.isNaN(n)) return n
-    }
-  }
-  return 0
-}
-
-function resolveItemName(data: Record<string, unknown>): string {
-  return String(data.name || data.Name || data.itemName || 'Item')
-}
-
-function makeInvoiceNumber(): string {
-  return `PL-${Date.now().toString(36).toUpperCase().slice(-6)}${Math.random()
-    .toString(36)
-    .toUpperCase()
-    .slice(2, 4)}`
 }
 
 /**
@@ -80,111 +52,37 @@ export default defineEventHandler(async (event) => {
   await requireStoreManageAccess(auth.uid, ownerUserId, storeId)
 
   const adminDb = getAdminFirestore()
+  await assertMerchantPayoutConnected(adminDb, ownerUserId, storeId)
 
-  // Require a connected payout account.
-  const payoutSnap = await adminDb
-    .collection('merchantPayouts')
-    .doc(payoutDocId(ownerUserId, storeId))
-    .get()
-  if (!payoutSnap.exists || !payoutSnap.data()?.subaccountCode) {
-    throw createError({
-      statusCode: 400,
-      message: 'Connect a payout account before creating payment links',
-    })
-  }
+  const { lockedItems, amountKobo } = await lockPaymentLinkItems(
+    adminDb,
+    ownerUserId,
+    storeId,
+    incoming.map((it) => ({
+      itemId: (it.itemId || '').trim(),
+      folderId: (it.folderId || '').trim(),
+      quantity: Math.max(0, Math.floor(Number(it.quantity) || 0)),
+    }))
+  )
 
-  const storeRef = adminDb.collection('users').doc(ownerUserId).collection('stores').doc(storeId)
-
-  // Cache folder docs for serial/bulk + template.
-  const folderCache = new Map<string, Record<string, unknown> | null>()
-  const getFolder = async (fid: string) => {
-    if (folderCache.has(fid)) return folderCache.get(fid)!
-    const snap = await storeRef.collection('inventoryFolders').doc(fid).get()
-    const data = snap.exists ? (snap.data() as Record<string, unknown>) : null
-    folderCache.set(fid, data)
-    return data
-  }
-
-  const lockedItems: PaymentLinkItem[] = []
-  let amountKobo = 0
-
-  for (const it of incoming) {
-    const itemId = (it.itemId || '').trim()
-    const folderId = (it.folderId || '').trim()
-    const quantity = Math.max(0, Math.floor(Number(it.quantity) || 0))
-    if (!itemId || !folderId || quantity <= 0) continue
-
-    const itemSnap = await storeRef.collection('inventoryItems').doc(itemId).get()
-    if (!itemSnap.exists) {
-      throw createError({ statusCode: 404, message: `Item ${itemId} not found` })
-    }
-    const data = itemSnap.data() as Record<string, unknown>
-
-    // Availability + stock check.
-    const folder = (await getFolder(folderId)) as {
-      hasSerialNumbers?: boolean
-      template?: { fields?: Array<{ name?: string }> }
-    } | null
-    const usesSerial = !!folder?.hasSerialNumbers
-    if (usesSerial) {
-      if (data.dateOut || data.pendingSaleReceiptId || data.sellerLoanOutId) {
-        throw createError({
-          statusCode: 409,
-          message: `"${resolveItemName(data)}" is no longer available`,
-        })
-      }
-      if (quantity !== 1) {
-        throw createError({ statusCode: 400, message: `Serialized items must have quantity 1` })
-      }
-    } else {
-      const resolved = resolveBulkStockFieldAndValueFromMap(data, folder?.template?.fields)
-      const available = resolved?.value ?? 0
-      if (available < quantity) {
-        throw createError({
-          statusCode: 409,
-          message: `Not enough stock for "${resolveItemName(data)}" (${available} left)`,
-        })
-      }
-    }
-
-    const unitPrice = resolveItemPrice(data)
-    lockedItems.push({ itemId, folderId, name: resolveItemName(data), unitPrice, quantity })
-    amountKobo += nairaToKobo(unitPrice) * quantity
-  }
-
-  if (lockedItems.length === 0 || amountKobo <= 0) {
-    throw createError({ statusCode: 400, message: 'No valid items to charge for' })
-  }
-
-  // Resolve business name (account-level).
   let businessName = (body.businessName || '').trim()
   if (!businessName) {
     const ownerSnap = await adminDb.collection('users').doc(ownerUserId).get()
     businessName = String(ownerSnap.data()?.name || 'Storvv merchant')
   }
 
-  const token = generatePaymentToken()
-  const invoiceNumber = makeInvoiceNumber()
-  const expiresAt = new Date(Date.now() + PAYMENT_LINK_TTL_MINUTES * 60 * 1000)
-
-  await adminDb.collection('paymentLinks').doc(token).set({
-    token,
+  const { token, invoiceNumber } = await writeLockedPaymentLink({
+    adminDb,
     ownerUserId,
     storeId,
     businessName,
-    invoiceNumber,
     customerName,
     customerPhone,
     customerEmail,
-    items: lockedItems,
-    amount: amountKobo,
-    currency: PAYMENT_LINK_CURRENCY,
-    status: 'unpaid',
-    inventoryApplied: false,
-    expiresAt,
-    createdAt: FieldValue.serverTimestamp(),
-    updatedAt: FieldValue.serverTimestamp(),
+    lockedItems,
+    amountKobo,
     createdBy: auth.uid,
+    source: 'dashboard',
   })
 
   const origin = getRequestURL(event).origin

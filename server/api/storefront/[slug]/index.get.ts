@@ -1,5 +1,9 @@
 import { createError, defineEventHandler, getQuery, getRouterParam } from 'h3'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
+import {
+  publicStorefrontListingDto,
+  publicStorefrontProfileDto,
+} from '~/server/utils/storefront-public-dto'
 import type { StorefrontPublicListing, StorefrontPublicProfile } from '~/types/storefront'
 
 /**
@@ -18,6 +22,7 @@ export default defineEventHandler(async (event) => {
     .toLowerCase()
   const category = String(q.category || '').trim()
   const availability = String(q.availability || '').trim()
+  const sort = String(q.sort || '').trim() // '' | recent | price_asc | price_desc
 
   const adminDb = getAdminFirestore()
   const profileSnap = await adminDb.collection('storefronts').doc(slug).get()
@@ -47,16 +52,46 @@ export default defineEventHandler(async (event) => {
       (i) => i.categoryName === category || i.categoryPath === category
     )
   }
-  if (availability === 'available' || availability === 'unavailable') {
+  if (
+    availability === 'available' ||
+    availability === 'unavailable' ||
+    availability === 'reserved'
+  ) {
     items = items.filter((i) => i.availability === availability)
   }
 
+  const toMs = (v: unknown): number => {
+    if (!v) return 0
+    const t = v as { toMillis?: () => number; seconds?: number }
+    if (typeof t.toMillis === 'function') return t.toMillis()
+    if (typeof t.seconds === 'number') return t.seconds * 1000
+    if (v instanceof Date) return v.getTime()
+    return 0
+  }
+
+  const rank = (a: string) => (a === 'available' ? 0 : a === 'reserved' ? 1 : 2)
   items.sort((a, b) => {
-    if (a.availability !== b.availability) {
-      return a.availability === 'available' ? -1 : 1
+    if (sort === 'recent') {
+      const ta = toMs(a.firstListedAt) || toMs(a.updatedAt)
+      const tb = toMs(b.firstListedAt) || toMs(b.updatedAt)
+      if (tb !== ta) return tb - ta
+      return a.title.localeCompare(b.title)
     }
+    if (sort === 'price_asc') return (a.price || 0) - (b.price || 0)
+    if (sort === 'price_desc') return (b.price || 0) - (a.price || 0)
+    const rd = rank(a.availability) - rank(b.availability)
+    if (rd !== 0) return rd
     return a.title.localeCompare(b.title)
   })
+
+  const recent = [...items]
+    .sort((a, b) => {
+      const ta = toMs(a.firstListedAt) || toMs(a.updatedAt)
+      const tb = toMs(b.firstListedAt) || toMs(b.updatedAt)
+      return tb - ta
+    })
+    .slice(0, 8)
+    .map(publicStorefrontListingDto)
 
   const categories = Array.from(
     new Set(items.map((i) => i.categoryName).filter(Boolean))
@@ -64,42 +99,10 @@ export default defineEventHandler(async (event) => {
 
   return {
     success: true,
-    store: publicProfileDto(profile),
+    store: publicStorefrontProfileDto(profile),
     categories,
-    items: items.map(publicListingDto),
+    recent,
+    items: items.map(publicStorefrontListingDto),
   }
 })
 
-function publicProfileDto(profile: StorefrontPublicProfile) {
-  return {
-    slug: profile.slug,
-    displayName: profile.displayName,
-    tagline: profile.tagline || null,
-    description: profile.description || null,
-    logoUrl: profile.logoUrl || null,
-    city: profile.city || null,
-    addressPublic: profile.addressPublic || null,
-    phonePublic: profile.phonePublic || null,
-    whatsappE164: profile.whatsappE164 || null,
-    emailPublic: profile.emailPublic || null,
-    social: profile.social || {},
-    collectionInfo: profile.collectionInfo || null,
-    warrantyInfo: profile.warrantyInfo || null,
-    currency: profile.currency || null,
-  }
-}
-
-function publicListingDto(item: StorefrontPublicListing) {
-  return {
-    id: item.id,
-    title: item.title,
-    price: item.price,
-    currency: item.currency || null,
-    availability: item.availability,
-    categoryPath: item.categoryPath,
-    categoryName: item.categoryName,
-    attributes: item.attributes || [],
-    description: item.description || null,
-    imageUrl: item.imageUrl || null,
-  }
-}

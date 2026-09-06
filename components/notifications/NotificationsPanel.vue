@@ -260,6 +260,8 @@ async function handleNotificationClick(notification: Notification) {
       router.push(`/dashboard/receipts?highlight=${encodeURIComponent(meta.receiptId)}`)
     } else if (meta.leadId) {
       router.push(`/dashboard/leads/${meta.leadId}`)
+    } else if (meta.inquiryId || notification.type === 'storefront_inquiry') {
+      router.push('/dashboard/storefront')
     } else if (meta.folderId) router.push(`/dashboard/inventory/${meta.folderId}`)
     else if (meta.departmentId) router.push(`/dashboard/departments/${meta.departmentId}`)
     if (props.variant === 'dropdown') emit('close')

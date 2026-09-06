@@ -132,3 +132,104 @@ describe('storefront-projection', () => {
     expect(listing!.availability).toBe('unavailable')
   })
 })
+
+describe('storefront-inquiry', () => {
+  it('validates name, phone, type, and listing', async () => {
+    const { validateInquiryPayload, isValidInquiryPhone, normalizeInquiryName } = await import(
+      '~/utils/storefront-inquiry'
+    )
+    expect(normalizeInquiryName('  Ada  Lovelace ')).toBe('Ada Lovelace')
+    expect(isValidInquiryPhone('+234 801 234 5678')).toBe(true)
+    expect(isValidInquiryPhone('123')).toBe(false)
+
+    expect(
+      validateInquiryPayload({
+        type: 'contact',
+        customerName: 'A',
+        customerPhone: '+2348012345678',
+        listingId: 'i1',
+      }).ok
+    ).toBe(false)
+
+    const ok = validateInquiryPayload({
+      type: 'reserve',
+      customerName: 'Ada',
+      customerPhone: '+2348012345678',
+      customerNote: 'Collect Saturday',
+      listingId: 'item-1',
+    })
+    expect(ok.ok).toBe(true)
+    if (ok.ok) {
+      expect(ok.data.type).toBe('reserve')
+      expect(ok.data.customerNote).toBe('Collect Saturday')
+    }
+  })
+})
+
+describe('storefront-share', () => {
+  it('applies UTM params and builds share copy', async () => {
+    const {
+      withStorefrontUtm,
+      buildStorefrontShareMessage,
+      isLinkPreviewBot,
+      storefrontAbsoluteUrl,
+    } = await import('~/utils/storefront-share')
+
+    expect(withStorefrontUtm('/store/demo', { source: 'whatsapp', medium: 'social' })).toBe(
+      '/store/demo?utm_source=whatsapp&utm_medium=social'
+    )
+    expect(
+      storefrontAbsoluteUrl('https://storvv.com', '/store/demo', { source: 'qr' })
+    ).toBe('https://storvv.com/store/demo?utm_source=qr')
+
+    expect(
+      buildStorefrontShareMessage({
+        storeName: 'Lagos Gadgets',
+        productTitle: 'iPhone 13',
+        priceLabel: '₦450,000',
+        url: 'https://storvv.com/store/demo/p/1',
+      })
+    ).toContain('iPhone 13')
+
+    expect(isLinkPreviewBot('facebookexternalhit/1.1')).toBe(true)
+    expect(isLinkPreviewBot('Mozilla/5.0 Chrome')).toBe(false)
+  })
+})
+
+describe('payment-link-create helpers', () => {
+  it('resolves sell price and name from inventory maps', async () => {
+    const {
+      resolvePaymentLinkItemName,
+      resolvePaymentLinkItemPrice,
+    } = await import('~/server/utils/payment-link-create')
+
+    expect(resolvePaymentLinkItemPrice({ price: 120000 })).toBe(120000)
+    expect(resolvePaymentLinkItemPrice({ Price: '99.5' })).toBe(99.5)
+    expect(resolvePaymentLinkItemPrice({})).toBe(0)
+    expect(resolvePaymentLinkItemName({ name: 'Rose EDT' })).toBe('Rose EDT')
+    expect(resolvePaymentLinkItemName({})).toBe('Item')
+  })
+})
+
+describe('storefront inquiry fulfill helpers', () => {
+  it('builds SF receipt numbers', async () => {
+    const { makeStorefrontInquiryReceiptNumber } = await import(
+      '~/server/utils/storefront-inquiry-fulfill'
+    )
+    const n = makeStorefrontInquiryReceiptNumber()
+    expect(n).toMatch(/^SF-[A-Z0-9]+$/)
+    expect(n.length).toBeGreaterThan(5)
+  })
+})
+
+describe('storefront receipt attribution', () => {
+  it('detects storefront-sourced sales', async () => {
+    const { isStorefrontSourcedReceipt } = await import('~/utils/storefront-receipt')
+    expect(isStorefrontSourcedReceipt({ source: 'storefront' })).toBe(true)
+    expect(isStorefrontSourcedReceipt({ source: 'storefront_inquiry' })).toBe(true)
+    expect(isStorefrontSourcedReceipt({ paymentMethod: 'Storefront' })).toBe(true)
+    expect(isStorefrontSourcedReceipt({ source: 'payment_link', paymentMethod: 'Paystack' })).toBe(
+      false
+    )
+  })
+})

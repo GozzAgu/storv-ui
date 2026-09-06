@@ -130,6 +130,9 @@ export interface Receipt {
   swapInCredit?: number
   /** When payment is split across methods; amounts should sum to `total` */
   splitPayments?: Array<{ method: string; amount: number }>
+  /** Origin channel: payment_link | storefront | storefront_inquiry | undefined (POS) */
+  source?: string
+  storefrontInquiryId?: string
   createdAt: Date | any
   updatedAt?: Date | any
   createdBy: string // Super admin UID (for fetching/ownership)
@@ -315,6 +318,11 @@ export const useReceiptsStore = defineStore('receipts', {
               balanceDue: typeof data.balanceDue === 'number' ? data.balanceDue : undefined,
               payments: data.payments || undefined,
               hasSerialNumbers: data.hasSerialNumbers === true,
+              source: typeof data.source === 'string' ? data.source : undefined,
+              storefrontInquiryId:
+                typeof data.storefrontInquiryId === 'string'
+                  ? data.storefrontInquiryId
+                  : undefined,
             } as Receipt
           })
 

@@ -698,6 +698,10 @@ describe('firestore.rules', () => {
     await assertFails(getDoc(doc(anon, 'storefronts/hidden-shop')))
     await assertSucceeds(getDoc(doc(anon, 'storefrontListings/demo-shop/items/i1')))
     await assertFails(getDoc(doc(anon, 'storefrontListings/demo-shop/items/i2')))
+
+    const owner = testEnv.authenticatedContext('u1').firestore()
+    await assertSucceeds(getDoc(doc(owner, 'storefronts/hidden-shop')))
+    await assertSucceeds(getDoc(doc(owner, 'storefrontListings/demo-shop/items/i2')))
   })
 
   it('denies anonymous read of private inventory even when storefront exists', async () => {
@@ -763,5 +767,66 @@ describe('firestore.rules', () => {
         sortPrice: 10,
       })
     )
+  })
+
+  it('allows store members to read storefront inquiries but denies client writes', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await seedOwner(context, 'u1', 'storvv_micro')
+      await seedStore(context, 'u1', 's1')
+      await setDoc(doc(context.firestore(), 'users/u1/stores/s1/storefrontInquiries/inq1'), {
+        id: 'inq1',
+        type: 'contact',
+        status: 'pending',
+        customerName: 'Ada',
+        customerPhone: '+2348012345678',
+        listingId: 'i1',
+        listingTitle: 'Phone',
+        sourceItemId: 'i1',
+        storefrontSlug: 'demo',
+        storeId: 's1',
+        ownerUid: 'u1',
+      })
+    })
+
+    const owner = testEnv.authenticatedContext('u1').firestore()
+    await assertSucceeds(getDoc(doc(owner, 'users/u1/stores/s1/storefrontInquiries/inq1')))
+    await assertFails(
+      setDoc(doc(owner, 'users/u1/stores/s1/storefrontInquiries/inq2'), {
+        id: 'inq2',
+        type: 'reserve',
+        status: 'pending',
+        customerName: 'Bob',
+        customerPhone: '+2348099999999',
+        listingId: 'i1',
+        listingTitle: 'Phone',
+        sourceItemId: 'i1',
+        storefrontSlug: 'demo',
+        storeId: 's1',
+        ownerUid: 'u1',
+      })
+    )
+
+    const anon = testEnv.unauthenticatedContext().firestore()
+    await assertFails(getDoc(doc(anon, 'users/u1/stores/s1/storefrontInquiries/inq1')))
+  })
+
+  it('allows store members to read storefront analytics but denies client writes', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await seedOwner(context, 'u1', 'storvv_micro')
+      await seedStore(context, 'u1', 's1')
+      await setDoc(doc(context.firestore(), 'users/u1/stores/s1/storefrontAnalytics/summary'), {
+        storeViews: 3,
+        productViews: 5,
+      })
+    })
+
+    const owner = testEnv.authenticatedContext('u1').firestore()
+    await assertSucceeds(getDoc(doc(owner, 'users/u1/stores/s1/storefrontAnalytics/summary')))
+    await assertFails(
+      setDoc(doc(owner, 'users/u1/stores/s1/storefrontAnalytics/summary'), { storeViews: 99 }, { merge: true })
+    )
+
+    const anon = testEnv.unauthenticatedContext().firestore()
+    await assertFails(getDoc(doc(anon, 'users/u1/stores/s1/storefrontAnalytics/summary')))
   })
 })

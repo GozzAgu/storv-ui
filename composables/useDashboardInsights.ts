@@ -3,6 +3,7 @@ import { useReceiptsStore } from '~/stores/receipts'
 import { useInventoryStore } from '~/stores/inventory'
 import { useDepartmentsStore } from '~/stores/departments'
 import { useUserStore } from '~/stores/user'
+import { useStorefrontStore } from '~/stores/storefront'
 import { usePreferences } from '~/composables/usePreferences'
 import type { InventoryItem } from '~/stores/inventory'
 import type { Receipt } from '~/stores/receipts'
@@ -112,6 +113,7 @@ function formatPaymentMethod(method: string | undefined): string {
 export function useDashboardInsights(folderItems: Ref<Record<string, InventoryItem[]>>) {
   const receiptsStore = useReceiptsStore()
   const inventoryStore = useInventoryStore()
+  const storefrontStore = useStorefrontStore()
   const departmentsStore = useDepartmentsStore()
   const userStore = useUserStore()
   const { formatCurrency: formatCurrencyFromPrefs } = usePreferences()
@@ -613,6 +615,19 @@ export function useDashboardInsights(folderItems: Ref<Record<string, InventoryIt
         cta: 'Review balances',
       })
     }
+    const pendingInquiries = storefrontStore.pendingInquiryCount
+    if (pendingInquiries > 0) {
+      items.push({
+        id: 'storefront-inquiries',
+        level: 'warning',
+        title: 'Storefront inquiries',
+        description: `${pendingInquiries} guest request${
+          pendingInquiries === 1 ? '' : 's'
+        } waiting for a reply.`,
+        href: '/dashboard/storefront',
+        cta: 'Open storefront',
+      })
+    }
     if (pendingReceiptsCount.value > 0) {
       items.push({
         id: 'pending',
@@ -671,6 +686,11 @@ export function useDashboardInsights(folderItems: Ref<Record<string, InventoryIt
       label: 'Inventory',
       description: 'Folders, SKUs, serial units, and stock levels',
       href: '/dashboard/inventory',
+    },
+    {
+      label: 'Storefront',
+      description: 'Guest inquiries and public showroom requests',
+      href: '/dashboard/storefront',
     },
     {
       label: 'Analytics',

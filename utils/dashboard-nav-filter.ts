@@ -34,6 +34,18 @@ export const DASHBOARD_NAV_DEFINITIONS: DashboardNavDefinition[] = [
     subscriptionFeature: 'receipts',
   },
   {
+    name: 'Storefront',
+    segment: '/storefront',
+    iconKey: 'storefront',
+    subscriptionFeature: 'inventory',
+  },
+  {
+    name: 'Sales leads',
+    segment: '/leads',
+    iconKey: 'sales-leads',
+    subscriptionFeature: 'sales_leads',
+  },
+  {
     name: 'Customer buybacks',
     segment: '/buybacks',
     iconKey: 'buybacks',
@@ -60,12 +72,6 @@ export const DASHBOARD_NAV_DEFINITIONS: DashboardNavDefinition[] = [
     iconKey: 'payment-links',
     subscriptionFeature: 'payment_links',
     businessCapability: 'paymentLinks',
-  },
-  {
-    name: 'Sales leads',
-    segment: '/leads',
-    iconKey: 'sales-leads',
-    subscriptionFeature: 'sales_leads',
   },
   {
     name: 'Departments',
@@ -105,12 +111,13 @@ export const DASHBOARD_NAV_DEFINITIONS: DashboardNavDefinition[] = [
 ]
 
 const NATIVE_MORE_PRIORITY = [
+  'Storefront',
+  'Sales leads',
   'Customer buybacks',
   'Stock loans',
   'Departments',
   'Multi-Store Sync',
   'Payment links',
-  'Sales leads',
   'Activity Logs',
   'Help center',
   'Settings',

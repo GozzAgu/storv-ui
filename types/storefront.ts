@@ -1,6 +1,14 @@
-/** Public storefront Phase 1 — types for config + customer-facing projections. */
+/** Public storefront types: catalogue projections + Phase 2 guest inquiries. */
 
-export type StorefrontPublicAvailability = 'available' | 'unavailable'
+export type StorefrontPublicAvailability = 'available' | 'unavailable' | 'reserved'
+
+export type StorefrontInquiryType = 'contact' | 'reserve'
+export type StorefrontInquiryStatus =
+  | 'pending'
+  | 'confirmed'
+  | 'rejected'
+  | 'cancelled'
+  | 'completed'
 
 export interface StorefrontSocialLinks {
   instagram?: string
@@ -10,18 +18,15 @@ export interface StorefrontSocialLinks {
 }
 
 export interface StorefrontFolderPublish {
-  /** When true, eligible products in this category can appear on the storefront. */
   enabled: boolean
-  /** Template field ids allowed on the public listing (beyond title/price). */
   publicFieldIds: string[]
 }
 
 export interface StorefrontItemOverride {
-  /** Explicit false hides the item even if the category is published. */
   listed?: boolean
 }
 
-/** Private per-store config: users/{owner}/stores/{storeId}/storefrontConfig/settings */
+/** Private: users/{owner}/stores/{storeId}/storefrontConfig/settings */
 export interface StorefrontConfig {
   enabled: boolean
   slug: string
@@ -37,8 +42,11 @@ export interface StorefrontConfig {
   social?: StorefrontSocialLinks
   collectionInfo?: string
   warrantyInfo?: string
-  /** Only list items that resolve to public "available". */
   listAvailableOnly: boolean
+  /** Allow guests to request a soft hold (Phase 2). Default true. */
+  allowReservations?: boolean
+  /** Allow guests to pay online via Paystack payment links (Phase 4). Default false. */
+  allowOnlineCheckout?: boolean
   folderPublish: Record<string, StorefrontFolderPublish>
   itemOverrides: Record<string, StorefrontItemOverride>
   updatedAt?: unknown
@@ -51,7 +59,7 @@ export interface StorefrontPublicAttribute {
   value: string
 }
 
-/** Top-level public profile: storefronts/{slug} */
+/** Public: storefronts/{slug} */
 export interface StorefrontPublicProfile {
   slug: string
   isPublished: boolean
@@ -70,10 +78,12 @@ export interface StorefrontPublicProfile {
   collectionInfo?: string
   warrantyInfo?: string
   currency?: string
+  allowReservations?: boolean
+  allowOnlineCheckout?: boolean
   updatedAt?: unknown
 }
 
-/** Public listing: storefrontListings/{slug}/items/{itemId} */
+/** Public: storefrontListings/{slug}/items/{itemId} */
 export interface StorefrontPublicListing {
   id: string
   isListed: boolean
@@ -92,7 +102,39 @@ export interface StorefrontPublicListing {
   sourceFolderId: string
   ownerUid: string
   storeId: string
+  reservationInquiryId?: string | null
+  /** When first published to the public catalogue (preserved across syncs). */
+  firstListedAt?: unknown
   updatedAt?: unknown
+}
+
+/**
+ * Private guest inquiry / reservation.
+ * users/{owner}/stores/{storeId}/storefrontInquiries/{id} — Admin SDK writes only.
+ */
+export interface StorefrontInquiry {
+  id: string
+  type: StorefrontInquiryType
+  status: StorefrontInquiryStatus
+  customerName: string
+  customerPhone: string
+  customerNote?: string
+  listingId: string
+  listingTitle: string
+  listingPrice?: number
+  sourceItemId: string
+  sourceFolderId?: string
+  storefrontSlug: string
+  storeId: string
+  ownerUid: string
+  createdAt?: unknown
+  updatedAt?: unknown
+  resolvedAt?: unknown
+  resolvedByUid?: string
+  resolveNote?: string
+  /** Set when Complete creates a POS receipt + inventory decrement. */
+  receiptId?: string
+  receiptNumber?: string
 }
 
 export const EMPTY_STOREFRONT_CONFIG = (): StorefrontConfig => ({
@@ -100,6 +142,8 @@ export const EMPTY_STOREFRONT_CONFIG = (): StorefrontConfig => ({
   slug: '',
   displayName: '',
   listAvailableOnly: true,
+  allowReservations: true,
+  allowOnlineCheckout: false,
   folderPublish: {},
   itemOverrides: {},
   social: {},

@@ -2117,6 +2117,12 @@ onMounted(async () => {
     hasPickedSettingsTab = true
   }
 
+  const tabParam = String(route.query.tab || '').trim()
+  if (tabParam && settingsTabs.value.some((tab) => tab.value === tabParam)) {
+    activeSettingsTab.value = tabParam
+    hasPickedSettingsTab = true
+  }
+
   // Handle Paystack callback after payment redirect
   const refParam = route.query.reference as string | undefined
   const isPaystackCallback =

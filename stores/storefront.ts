@@ -19,6 +19,47 @@ import { buildStorefrontListing } from '~/utils/storefront-projection'
 import { isValidStorefrontSlug } from '~/utils/storefront-slug'
 import { EMPTY_STOREFRONT_CONFIG, type StorefrontConfig } from '~/types/storefront'
 import { suggestDefaultPublicFieldIds } from '~/utils/storefront-fields'
+import { useAuthenticatedFetch } from '~/composables/useAuthenticatedFetch'
+
+export type StorefrontAnalyticsSummary = {
+  storeViews: number
+  productViews: number
+  topListings: { id: string; views: number }[]
+}
+
+export type StorefrontInquiryCounts = {
+  pending: number
+  confirmed: number
+  rejected: number
+  cancelled: number
+  completed: number
+  all: number
+}
+
+export type StorefrontAnalyticsDay = {
+  date: string
+  storeViews: number
+  productViews: number
+}
+
+const EMPTY_INQUIRY_COUNTS = (): StorefrontInquiryCounts => ({
+  pending: 0,
+  confirmed: 0,
+  rejected: 0,
+  cancelled: 0,
+  completed: 0,
+  all: 0,
+})
+
+function isPermissionDeniedMessage(err: unknown): boolean {
+  const code = (err as { code?: string })?.code || ''
+  const message = String((err as { message?: string })?.message || '')
+  return (
+    code === 'permission-denied' ||
+    message.toLowerCase().includes('insufficient permissions') ||
+    message.toLowerCase().includes('permission_denied')
+  )
+}
 
 export const useStorefrontStore = defineStore('storefront', {
   state: () => ({
@@ -28,11 +69,28 @@ export const useStorefrontStore = defineStore('storefront', {
     loadedStoreId: '' as string,
     syncing: false,
     lastError: '' as string,
+    analyticsLoading: false,
+    analyticsLoadedStoreId: '' as string,
+    analyticsFetchedAt: 0,
+    analyticsError: '' as string,
+    analyticsSummary: {
+      storeViews: 0,
+      productViews: 0,
+      topListings: [],
+    } as StorefrontAnalyticsSummary,
+    inquiryCounts: EMPTY_INQUIRY_COUNTS() as StorefrontInquiryCounts,
+    analyticsLast7Days: [] as StorefrontAnalyticsDay[],
   }),
 
   getters: {
     isEnabled: (s) => Boolean(s.config.enabled && s.config.slug),
     publicPath: (s) => (s.config.slug ? `/store/${s.config.slug}` : ''),
+    viewsLast7Days: (s) =>
+      s.analyticsLast7Days.reduce(
+        (sum, d) => sum + (d.storeViews || 0) + (d.productViews || 0),
+        0
+      ),
+    pendingInquiryCount: (s) => s.inquiryCounts.pending || 0,
   },
 
   actions: {
@@ -89,11 +147,20 @@ export const useStorefrontStore = defineStore('storefront', {
         await saveStorefrontConfig(db, ownerUid, storeId, normalized)
 
         if (normalized.enabled && normalized.slug) {
-          await publishStorefrontProfile(db, ownerUid, storeId, normalized, {
-            previousSlug,
-          })
+          try {
+            await publishStorefrontProfile(db, ownerUid, storeId, normalized, {
+              previousSlug,
+            })
+          } catch (e: any) {
+            if (isPermissionDeniedMessage(e)) {
+              throw new Error(
+                'Saved settings, but could not publish the public page. Deploy the latest Firestore rules, then Save again.'
+              )
+            }
+            throw e
+          }
         } else if (previousSlug) {
-          await unpublishStorefrontSlug(db, previousSlug)
+          await unpublishStorefrontSlug(db, previousSlug).catch(() => undefined)
         }
 
         this.config = normalized
@@ -189,6 +256,49 @@ export const useStorefrontStore = defineStore('storefront', {
         })
       } catch {
         /* ignore — storefront may be off */
+      }
+    },
+
+    async fetchAnalytics(options?: { force?: boolean }) {
+      const { ownerUid, storeId } = await this.ensureContext()
+      const fresh =
+        !options?.force &&
+        this.analyticsLoadedStoreId === storeId &&
+        Date.now() - this.analyticsFetchedAt < 60_000
+      if (fresh) return
+
+      this.analyticsLoading = true
+      this.analyticsError = ''
+      try {
+        const { authFetch } = useAuthenticatedFetch()
+        const res = await authFetch<{
+          summary: StorefrontAnalyticsSummary
+          inquiries?: StorefrontInquiryCounts
+          last7Days: StorefrontAnalyticsDay[]
+        }>(
+          `/api/storefront/analytics?ownerUserId=${encodeURIComponent(ownerUid)}&storeId=${encodeURIComponent(storeId)}`
+        )
+        this.analyticsSummary = {
+          storeViews: Number(res.summary?.storeViews) || 0,
+          productViews: Number(res.summary?.productViews) || 0,
+          topListings: Array.isArray(res.summary?.topListings) ? res.summary.topListings : [],
+        }
+        this.inquiryCounts = {
+          ...EMPTY_INQUIRY_COUNTS(),
+          ...(res.inquiries || {}),
+        }
+        this.analyticsLast7Days = Array.isArray(res.last7Days) ? res.last7Days : []
+        this.analyticsLoadedStoreId = storeId
+        this.analyticsFetchedAt = Date.now()
+      } catch (e: any) {
+        this.analyticsError = e?.data?.message || e?.message || 'Views unavailable yet'
+        if (options?.force) {
+          this.analyticsSummary = { storeViews: 0, productViews: 0, topListings: [] }
+          this.inquiryCounts = EMPTY_INQUIRY_COUNTS()
+          this.analyticsLast7Days = []
+        }
+      } finally {
+        this.analyticsLoading = false
       }
     },
   },

@@ -63,6 +63,10 @@ export default defineEventHandler(async (event) => {
           channel: data.channel || null,
           updatedAt: FieldValue.serverTimestamp(),
         })
+      const { releaseStorefrontCheckoutHold } = await import(
+        '~/server/utils/storefront-checkout-hold'
+      )
+      await releaseStorefrontCheckoutHold(adminDb, link).catch(() => undefined)
       return { success: true, paid: false, status: 'failed', message: 'Payment failed' }
     }
     return {

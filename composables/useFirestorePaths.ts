@@ -484,3 +484,21 @@ export function getStorefrontListingDocument(
   return doc(db, 'storefrontListings', slug, 'items', itemId)
 }
 
+/** Private inquiries: users/{userId}/stores/{storeId}/storefrontInquiries */
+export function getStorefrontInquiriesCollection(
+  db: Firestore,
+  userId: string,
+  storeId: string
+): CollectionReference {
+  return collection(db, 'users', userId, 'stores', storeId, 'storefrontInquiries')
+}
+
+export function getStorefrontInquiryDocument(
+  db: Firestore,
+  userId: string,
+  storeId: string,
+  inquiryId: string
+): DocumentReference {
+  return doc(db, 'users', userId, 'stores', storeId, 'storefrontInquiries', inquiryId)
+}
+

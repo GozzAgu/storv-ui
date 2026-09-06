@@ -83,6 +83,29 @@
           />
         </label>
 
+        <div class="mt-3 grid gap-3 sm:grid-cols-2">
+          <label class="block">
+            <span class="dash-field-label">Collection / pickup info</span>
+            <textarea
+              v-model="draft.collectionInfo"
+              rows="2"
+              class="app-field w-full"
+              placeholder="e.g. Collect from our Ikeja shop Mon–Sat"
+              :disabled="!canEdit || saving"
+            />
+          </label>
+          <label class="block">
+            <span class="dash-field-label">Warranty info</span>
+            <textarea
+              v-model="draft.warrantyInfo"
+              rows="2"
+              class="app-field w-full"
+              placeholder="e.g. 30-day seller warranty on phones"
+              :disabled="!canEdit || saving"
+            />
+          </label>
+        </div>
+
         <div class="mt-4 grid gap-3 sm:grid-cols-2">
           <label class="block">
             <span class="dash-field-label">Public phone</span>
@@ -186,6 +209,41 @@
           />
         </label>
 
+        <label class="mt-4 flex items-start justify-between gap-3">
+          <span>
+            <span class="block text-sm font-medium text-gray-900 dark:text-gray-100"
+              >Allow reservation requests</span
+            >
+            <span class="mt-0.5 block text-[11px] text-gray-500 dark:text-gray-400">
+              Guests can ask you to soft-hold an available item. Inventory stays under your control.
+            </span>
+          </span>
+          <input
+            v-model="draft.allowReservations"
+            type="checkbox"
+            class="mt-1 h-4 w-4 rounded border-gray-300"
+            :disabled="!canEdit || saving"
+          />
+        </label>
+
+        <label class="mt-4 flex items-start justify-between gap-3">
+          <span>
+            <span class="block text-sm font-medium text-gray-900 dark:text-gray-100"
+              >Accept online payments</span
+            >
+            <span class="mt-0.5 block text-[11px] text-gray-500 dark:text-gray-400">
+              Guests can pay for available items via Paystack. Requires a connected payout account in
+              Payment links.
+            </span>
+          </span>
+          <input
+            v-model="draft.allowOnlineCheckout"
+            type="checkbox"
+            class="mt-1 h-4 w-4 rounded border-gray-300"
+            :disabled="!canEdit || saving"
+          />
+        </label>
+
         <p v-if="error" class="mt-3 text-xs text-red-600 dark:text-red-400">{{ error }}</p>
         <p v-if="success" class="mt-3 text-xs text-emerald-700 dark:text-emerald-400">{{ success }}</p>
 
@@ -215,6 +273,94 @@
           >
             Open public page →
           </a>
+          <NuxtLink
+            to="/dashboard/storefront"
+            class="text-xs font-semibold text-gray-600 underline-offset-2 hover:underline dark:text-gray-300"
+          >
+            View inquiries →
+          </NuxtLink>
+        </div>
+
+        <p
+          v-if="!draft.enabled && draft.slug"
+          class="mt-3 text-xs text-amber-700 dark:text-amber-300"
+        >
+          Turn on “Show storefront” and Save — the public link stays hidden until it is published.
+        </p>
+
+        <div
+          v-if="draft.enabled && draft.slug"
+          class="mt-5 grid gap-4 rounded-2xl border border-gray-100 p-4 dark:border-white/[0.06] sm:grid-cols-[auto_1fr]"
+        >
+          <div class="flex flex-col items-center gap-2">
+            <div
+              class="rounded-xl bg-white p-2 ring-1 ring-gray-200 dark:bg-white dark:ring-white/10"
+            >
+              <img
+                v-if="qrDataUrl"
+                :src="qrDataUrl"
+                alt="Storefront QR code"
+                class="h-32 w-32"
+                width="128"
+                height="128"
+              />
+              <div v-else class="h-32 w-32 animate-pulse rounded bg-gray-100" />
+            </div>
+            <a
+              v-if="qrDataUrl"
+              :href="qrDataUrl"
+              :download="`${draft.slug}-storefront-qr.png`"
+              class="text-[11px] font-medium text-gray-500 underline-offset-2 hover:underline dark:text-gray-400"
+            >
+              Download QR
+            </a>
+          </div>
+          <div class="min-w-0 space-y-2">
+            <p class="text-sm font-semibold text-gray-900 dark:text-gray-50">Share & track</p>
+            <p class="text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
+              Copy a tracked link for WhatsApp or Instagram. QR opens your public showroom.
+            </p>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" class="btn-outline !min-h-8 !px-3 !text-xs" @click="copyTrackedLink">
+                {{ copiedLink ? 'Copied ✓' : 'Copy tracked link' }}
+              </button>
+              <a
+                :href="whatsappShareHref"
+                target="_blank"
+                rel="noopener"
+                class="btn-outline !min-h-8 !px-3 !text-xs inline-flex items-center"
+              >
+                Share on WhatsApp
+              </a>
+            </div>
+            <div
+              v-if="analyticsSummary"
+              class="mt-2 grid grid-cols-2 gap-2 text-[11px] text-gray-600 dark:text-gray-300"
+            >
+              <p>
+                <span class="font-semibold text-gray-900 dark:text-gray-100">{{
+                  analyticsSummary.storeViews
+                }}</span>
+                store views
+              </p>
+              <p>
+                <span class="font-semibold text-gray-900 dark:text-gray-100">{{
+                  analyticsSummary.productViews
+                }}</span>
+                product views
+              </p>
+              <p class="col-span-2">
+                <span class="font-semibold text-gray-900 dark:text-gray-100">{{
+                  viewsLast7Days
+                }}</span>
+                views in last 7 days
+                <span v-if="pendingInquiryCount" class="text-amber-700 dark:text-amber-300">
+                  · {{ pendingInquiryCount }} pending
+                </span>
+              </p>
+            </div>
+            <p v-else-if="analyticsError" class="text-[11px] text-gray-400">{{ analyticsError }}</p>
+          </div>
         </div>
       </template>
     </DashboardSettingsPanel>
@@ -277,6 +423,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
+import QRCode from 'qrcode'
 import DashboardSettingsPanel from '~/components/dashboard/DashboardSettingsPanel.vue'
 import { useInventoryStore, type InventoryFolder } from '~/stores/inventory'
 import { useStorefrontStore, isStorefrontSlugTaken } from '~/stores/storefront'
@@ -285,6 +432,11 @@ import { useUserStore } from '~/stores/user'
 import { getQueryUserId } from '~/composables/useFirestorePaths'
 import { canAllowlistStorefrontField, suggestDefaultPublicFieldIds } from '~/utils/storefront-fields'
 import { slugifyStorefrontName, storefrontPublicPath } from '~/utils/storefront-slug'
+import {
+  buildStorefrontShareMessage,
+  buildStorefrontWhatsAppShareHref,
+  storefrontAbsoluteUrl,
+} from '~/utils/storefront-share'
 import {
   EMPTY_STOREFRONT_CONFIG,
   type StorefrontConfig,
@@ -296,11 +448,19 @@ const storefront = useStorefrontStore()
 const inventory = useInventoryStore()
 const authStore = useAuthStore()
 const userStore = useUserStore()
-const { loading, saving, syncing } = storeToRefs(storefront)
+const { loading, saving, syncing, analyticsError, pendingInquiryCount, viewsLast7Days } =
+  storeToRefs(storefront)
 
 const draft = ref<StorefrontConfig>(EMPTY_STOREFRONT_CONFIG())
 const error = ref('')
 const success = ref('')
+const qrDataUrl = ref('')
+const copiedLink = ref(false)
+
+const analyticsSummary = computed(() => {
+  if (!storefront.analyticsLoadedStoreId) return null
+  return storefront.analyticsSummary
+})
 
 const leafFolders = computed(() => inventory.leafFolders)
 
@@ -308,6 +468,64 @@ const publicHref = computed(() => {
   if (!import.meta.client || !draft.value.slug) return storefrontPublicPath(draft.value.slug)
   return `${window.location.origin}${storefrontPublicPath(draft.value.slug)}`
 })
+
+const trackedShareUrl = computed(() => {
+  if (!import.meta.client || !draft.value.slug) return ''
+  return storefrontAbsoluteUrl(window.location.origin, storefrontPublicPath(draft.value.slug), {
+    source: 'dashboard',
+    medium: 'share',
+    campaign: draft.value.slug,
+  })
+})
+
+const whatsappShareHref = computed(() => {
+  const message = buildStorefrontShareMessage({
+    storeName: draft.value.displayName || 'our store',
+    url: trackedShareUrl.value || publicHref.value,
+  })
+  return buildStorefrontWhatsAppShareHref(message)
+})
+
+watch(
+  () => trackedShareUrl.value,
+  async (url) => {
+    if (!url) {
+      qrDataUrl.value = ''
+      return
+    }
+    try {
+      qrDataUrl.value = await QRCode.toDataURL(url, {
+        margin: 1,
+        width: 256,
+        color: { dark: '#1a1523', light: '#ffffff' },
+      })
+    } catch {
+      qrDataUrl.value = ''
+    }
+  },
+  { immediate: true }
+)
+
+async function copyTrackedLink() {
+  if (!trackedShareUrl.value) return
+  try {
+    await navigator.clipboard.writeText(trackedShareUrl.value)
+    copiedLink.value = true
+    setTimeout(() => {
+      copiedLink.value = false
+    }, 2000)
+  } catch {
+    error.value = 'Could not copy link'
+  }
+}
+
+async function loadAnalytics() {
+  try {
+    await storefront.fetchAnalytics({ force: true })
+  } catch {
+    /* store sets analyticsError */
+  }
+}
 
 function folderLabel(folder: InventoryFolder) {
   if (folder.parentId) {
@@ -388,6 +606,7 @@ async function onSave() {
     success.value = draft.value.enabled
       ? 'Storefront saved. Run “Sync products now” to refresh listings.'
       : 'Storefront turned off.'
+    void loadAnalytics()
   } catch (e: any) {
     error.value = e?.message || 'Could not save storefront'
   }
@@ -433,6 +652,7 @@ onMounted(async () => {
     if (!draft.value.emailPublic && userStore.userData?.storeDetails?.storeEmail) {
       draft.value.emailPublic = userStore.userData.storeDetails.storeEmail
     }
+    void loadAnalytics()
   } catch (e: any) {
     error.value = e?.message || 'Failed to load storefront settings'
   }

@@ -9,6 +9,7 @@ export type NativeMoreNavGroup = {
 }
 
 const OPERATIONS = new Set([
+  'Storefront',
   'Customer buybacks',
   'Stock loans',
   'Multi-Store Sync',
