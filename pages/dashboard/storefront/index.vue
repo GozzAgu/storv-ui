@@ -64,7 +64,13 @@
           :date="formatWhenShort(row.createdAtMs)"
           :variant="iosVariant(row.status)"
           :last="index === filtered.length - 1"
-          :show-menu="canAct(row.status) || (row.status === 'completed' && !row.receiptId)"
+          :show-menu="
+            canAct(row.status) ||
+            canSendPaymentLink(row) ||
+            canComplete(row) ||
+            canCreateSale(row) ||
+            Boolean(row.receiptId)
+          "
           menu-kind="inquiry"
           :menu-id="row.id"
           @click="onIosRowClick(row)"
@@ -85,8 +91,7 @@
         </template>
         <template #description>
           <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-            Guest messages and reservation requests from your public showroom. Completing a
-            confirmed inquiry creates a sale and updates private stock.
+            Confirm requests, send a payment link, then mark complete after the customer pays.
           </p>
         </template>
         <template #actions>
@@ -125,17 +130,18 @@
 
         <p v-if="loadError" class="text-sm text-red-600 dark:text-red-400">{{ loadError }}</p>
 
-        <div :class="tableShellFlexClass">
+        <div :class="tableShellFlexClass" data-storefront-inquiries>
           <DashTableSkeleton
             v-if="loading && !inquiries.length"
             :columns="[
-              { label: 'Customer', lines: 2 },
-              { label: 'Product', lines: 2 },
+              { label: 'Customer', lines: 1 },
+              { label: 'Product', lines: 1 },
               { label: 'Type', bone: '4rem' },
               { label: 'Price', bone: '4.5rem' },
               { label: 'Status', class: 'dashboard-table__col-status', bone: '5.5rem' },
-              { label: 'Received', bone: '7rem' },
-              { label: 'Actions', class: 'dashboard-table__col-actions', bone: '8rem' },
+              { label: 'Payment', bone: '4.5rem' },
+              { label: 'Received', bone: '6rem' },
+              { label: 'Actions', class: 'dashboard-table__col-actions', bone: '2rem' },
             ]"
             :rows="6"
             leading="none"
@@ -149,8 +155,8 @@
             title="No inquiries yet"
             description="When guests contact or reserve from your storefront, they appear here."
             :tips="[
-              'Confirm a reservation to hold the listing',
-              'Complete & sell creates a receipt and updates stock',
+              'Confirm the request, then send a payment link',
+              'Mark complete only after the customer pays',
             ]"
           />
 
@@ -162,7 +168,7 @@
           />
 
           <div v-else class="overflow-x-auto">
-            <table class="dashboard-table min-w-full">
+            <table class="dashboard-table dashboard-table--storefront-compact min-w-full">
               <thead>
                 <tr>
                   <th scope="col">Customer</th>
@@ -170,34 +176,29 @@
                   <th scope="col">Type</th>
                   <th scope="col">Price</th>
                   <th scope="col" class="dashboard-table__col-status">Status</th>
+                  <th scope="col">Payment</th>
                   <th scope="col">Received</th>
                   <th scope="col" class="dashboard-table__col-actions">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="row in filtered" :key="row.id">
-                  <td class="max-w-[14rem]">
+                  <td class="max-w-[12rem]">
                     <span class="dashboard-table__primary block truncate">{{
                       row.customerName
                     }}</span>
-                    <a
-                      :href="`tel:${row.customerPhone}`"
-                      class="dashboard-table__muted mt-0.5 block truncate text-[10px] underline-offset-2 hover:underline"
-                    >
-                      {{ row.customerPhone }}
-                    </a>
                     <span
-                      v-if="row.customerNote"
-                      class="dashboard-table__muted mt-1 block truncate text-[10px]"
-                      :title="row.customerNote"
+                      v-if="row.customerPhone"
+                      class="dashboard-table__muted block truncate text-[10px]"
+                      >{{ row.customerPhone }}</span
                     >
-                      {{ row.customerNote }}
-                    </span>
                   </td>
-                  <td class="max-w-[16rem]">
-                    <span class="dashboard-table__primary block truncate">{{
-                      row.listingTitle
-                    }}</span>
+                  <td class="max-w-[14rem]">
+                    <span
+                      class="dashboard-table__primary block truncate"
+                      :title="row.customerNote || row.listingTitle"
+                      >{{ row.listingTitle }}</span
+                    >
                     <NuxtLink
                       v-if="row.receiptNumber"
                       :to="
@@ -222,7 +223,7 @@
                     <span v-if="row.listingPrice != null" class="dashboard-table__money">{{
                       formatMoney(row.listingPrice)
                     }}</span>
-                    <span v-else class="dashboard-table__muted"> - </span>
+                    <span v-else class="dashboard-table__muted">—</span>
                   </td>
                   <td class="dashboard-table__col-status">
                     <span
@@ -232,58 +233,28 @@
                       {{ row.status }}
                     </span>
                   </td>
+                  <td class="whitespace-nowrap">
+                    <span
+                      class="inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize"
+                      :class="paymentBadgeClass(row)"
+                    >
+                      {{ paymentLabel(row) }}
+                    </span>
+                  </td>
                   <td class="whitespace-nowrap text-[11px] text-gray-500 dark:text-gray-400">
-                    {{ formatWhen(row.createdAtMs) }}
+                    {{ formatWhenShort(row.createdAtMs) }}
                   </td>
                   <td class="dashboard-table__col-actions">
-                    <div class="flex flex-wrap items-center justify-end gap-1">
-                      <template v-if="canAct(row.status)">
-                        <button
-                          v-if="row.status === 'pending'"
-                          type="button"
-                          class="dashboard-table__action-btn !px-2 text-[11px] font-semibold"
-                          :disabled="actingId === row.id"
-                          @click="updateStatus(row.id, 'confirmed')"
-                        >
-                          Confirm
-                        </button>
-                        <button
-                          v-if="row.status === 'confirmed'"
-                          type="button"
-                          class="dashboard-table__action-btn !px-2 text-[11px] font-semibold"
-                          :disabled="actingId === row.id"
-                          @click="updateStatus(row.id, 'completed')"
-                        >
-                          Complete &amp; sell
-                        </button>
-                        <button
-                          type="button"
-                          class="dashboard-table__action-btn !px-2 text-[11px]"
-                          :disabled="actingId === row.id"
-                          @click="updateStatus(row.id, 'rejected')"
-                        >
-                          Reject
-                        </button>
-                        <button
-                          type="button"
-                          class="dashboard-table__action-btn !px-2 text-[11px]"
-                          :disabled="actingId === row.id"
-                          @click="updateStatus(row.id, 'cancelled')"
-                        >
-                          Cancel
-                        </button>
-                      </template>
-                      <button
-                        v-else-if="row.status === 'completed' && !row.receiptId"
-                        type="button"
-                        class="dashboard-table__action-btn !px-2 text-[11px] font-semibold"
-                        :disabled="actingId === row.id"
-                        @click="updateStatus(row.id, 'completed')"
-                      >
-                        Create sale
-                      </button>
-                      <span v-else class="dashboard-table__muted text-[10px]"> - </span>
-                    </div>
+                    <button
+                      type="button"
+                      class="dashboard-table__action-btn"
+                      :data-inquiry-actions-anchor="row.id"
+                      aria-label="Inquiry actions"
+                      :disabled="actingId === row.id"
+                      @click="toggleInquiryMenu(row.id)"
+                    >
+                      <EllipsisVerticalIcon class="h-4 w-4" stroke-width="2" />
+                    </button>
                   </td>
                 </tr>
               </tbody>
@@ -292,6 +263,8 @@
         </div>
       </div>
     </template>
+
+    <SharePaymentLinkModal v-model="showShareModal" :link="shareLink" />
 
     <IosContextMenu
       :open="Boolean(openInquiryMenuId && inquiryForOpenMenu && inquiryMenuFixedStyle)"
@@ -305,13 +278,19 @@
         @click="runMenuAction('confirmed')"
       />
       <IosContextMenuItem
-        v-if="inquiryForOpenMenu?.status === 'confirmed'"
-        label="Complete & sell"
+        v-if="inquiryForOpenMenu && canSendPaymentLink(inquiryForOpenMenu)"
+        :label="inquiryForOpenMenu.paymentLinkToken ? 'Resend payment link' : 'Send payment link'"
+        :icon="CreditCardIcon"
+        @click="sendPaymentLink()"
+      />
+      <IosContextMenuItem
+        v-if="inquiryForOpenMenu && canComplete(inquiryForOpenMenu)"
+        label="Mark complete"
         :icon="CheckCircleIcon"
         @click="runMenuAction('completed')"
       />
       <IosContextMenuItem
-        v-if="inquiryForOpenMenu?.status === 'completed' && !inquiryForOpenMenu.receiptId"
+        v-if="inquiryForOpenMenu && canCreateSale(inquiryForOpenMenu)"
         label="Create sale"
         :icon="CheckCircleIcon"
         @click="runMenuAction('completed')"
@@ -346,11 +325,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue'
 import { getDocs, limit, query } from 'firebase/firestore'
 import {
   CheckCircleIcon,
+  CreditCardIcon,
   DevicePhoneMobileIcon,
+  EllipsisVerticalIcon,
   ReceiptPercentIcon,
   ShoppingBagIcon,
   XMarkIcon,
@@ -364,6 +345,7 @@ import IosReceiptTransactionRow, {
   type ReceiptTransactionVariant,
 } from '~/components/ios/IosReceiptTransactionRow.vue'
 import IosTransactionListSkeleton from '~/components/ios/IosTransactionListSkeleton.vue'
+import type { ShareableLink } from '~/components/payments/SharePaymentLinkModal.vue'
 import { useFirestore } from '~/composables/useFirestore'
 import {
   getQueryUserId,
@@ -379,9 +361,15 @@ import { useStoresStore } from '~/stores/stores'
 import { CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import type { StorefrontInquiryStatus, StorefrontInquiryType } from '~/types/storefront'
 
+const SharePaymentLinkModal = defineAsyncComponent(
+  () => import('~/components/payments/SharePaymentLinkModal.vue')
+)
+
 definePageMeta({
   layout: 'dashboard',
 })
+
+type PaymentLinkStatus = 'unpaid' | 'paid' | 'failed' | 'expired'
 
 type InquiryRow = {
   id: string
@@ -393,6 +381,9 @@ type InquiryRow = {
   listingId: string
   listingTitle: string
   listingPrice: number | null
+  paymentLinkToken: string | null
+  paymentLinkStatus: PaymentLinkStatus | null
+  paymentLinkInvoiceNumber: string | null
   receiptId: string | null
   receiptNumber: string | null
   createdAtMs: number
@@ -420,6 +411,8 @@ const pendingCount = ref(0)
 /** Default to All so iOS users see every inquiry without hunting tabs. */
 const statusFilter = ref<'all' | StorefrontInquiryStatus>('all')
 const actingId = ref('')
+const showShareModal = ref(false)
+const shareLink = ref<ShareableLink | null>(null)
 
 const statusTabs = [
   { value: 'all' as const, label: 'All' },
@@ -495,6 +488,14 @@ function mapInquiryDoc(id: string, data: Record<string, unknown>): InquiryRow {
       const price = Number(data.listingPrice)
       return Number.isFinite(price) ? price : null
     })(),
+    paymentLinkToken: typeof data.paymentLinkToken === 'string' ? data.paymentLinkToken : null,
+    paymentLinkStatus: (() => {
+      const raw = String(data.paymentLinkStatus || '')
+      if (raw === 'unpaid' || raw === 'paid' || raw === 'failed' || raw === 'expired') return raw
+      return null
+    })(),
+    paymentLinkInvoiceNumber:
+      typeof data.paymentLinkInvoiceNumber === 'string' ? data.paymentLinkInvoiceNumber : null,
     receiptId: typeof data.receiptId === 'string' ? data.receiptId : null,
     receiptNumber: typeof data.receiptNumber === 'string' ? data.receiptNumber : null,
     createdAtMs: toMillis(data.createdAt),
@@ -503,6 +504,52 @@ function mapInquiryDoc(id: string, data: Record<string, unknown>): InquiryRow {
 
 function canAct(status: StorefrontInquiryStatus) {
   return status === 'pending' || status === 'confirmed'
+}
+
+function isPaid(row: InquiryRow) {
+  return row.paymentLinkStatus === 'paid' || Boolean(row.receiptId)
+}
+
+function canSendPaymentLink(row: InquiryRow) {
+  if (!canAct(row.status)) return false
+  if (isPaid(row)) return false
+  if (row.listingPrice == null || row.listingPrice <= 0) return false
+  return true
+}
+
+function canComplete(row: InquiryRow) {
+  // After the customer pays, settle may already create the sale receipt while
+  // leaving the inquiry confirmed — Mark complete still closes the request.
+  return row.status === 'confirmed' && isPaid(row)
+}
+
+function canCreateSale(row: InquiryRow) {
+  return row.status === 'completed' && !row.receiptId && isPaid(row)
+}
+
+function paymentLabel(row: InquiryRow) {
+  if (row.paymentLinkStatus === 'paid' || row.receiptId) return 'Paid'
+  if (row.paymentLinkStatus === 'unpaid') return 'Awaiting'
+  if (row.paymentLinkStatus === 'failed') return 'Failed'
+  if (row.paymentLinkStatus === 'expired') return 'Expired'
+  if (row.status === 'confirmed') return 'No link'
+  return '—'
+}
+
+function paymentBadgeClass(row: InquiryRow) {
+  if (row.paymentLinkStatus === 'paid' || row.receiptId) {
+    return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-200'
+  }
+  if (row.paymentLinkStatus === 'unpaid') {
+    return 'bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-200'
+  }
+  if (row.paymentLinkStatus === 'failed') {
+    return 'bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-200'
+  }
+  if (row.paymentLinkStatus === 'expired') {
+    return 'bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-gray-300'
+  }
+  return 'bg-gray-100 text-gray-500 dark:bg-white/[0.06] dark:text-gray-400'
 }
 
 function typeBadgeClass(type: StorefrontInquiryType) {
@@ -530,8 +577,9 @@ function iosSubtitle(row: InquiryRow) {
         : row.status === 'completed'
           ? 'Completed'
           : row.status
+  const payment = ` · ${paymentLabel(row)}`
   const note = row.customerNote ? ` · ${row.customerNote}` : ''
-  return `${row.listingTitle} · ${type} · ${status}${note}`
+  return `${row.listingTitle} · ${type} · ${status}${payment}${note}`
 }
 
 function iosVariant(status: StorefrontInquiryStatus): ReceiptTransactionVariant {
@@ -590,16 +638,63 @@ function onIosRowClick(row: InquiryRow) {
     void navigateTo(`/dashboard/receipts?receipt=${encodeURIComponent(row.receiptId)}`)
     return
   }
-  if (canAct(row.status) || (row.status === 'completed' && !row.receiptId)) {
+  if (
+    canAct(row.status) ||
+    canSendPaymentLink(row) ||
+    canComplete(row) ||
+    canCreateSale(row)
+  ) {
     toggleInquiryMenu(row.id)
   }
 }
 
 async function runMenuAction(status: StorefrontInquiryStatus) {
-  const id = inquiryForOpenMenu.value?.id
+  const row = inquiryForOpenMenu.value
+  const id = row?.id
   closeInquiryMenu()
   if (!id) return
+  if (status === 'completed' && row && !isPaid(row) && !row.receiptId) {
+    loadError.value =
+      'Send a payment link and wait for the customer to pay before marking complete.'
+    return
+  }
   await updateStatus(id, status)
+}
+
+async function sendPaymentLink() {
+  const row = inquiryForOpenMenu.value
+  closeInquiryMenu()
+  if (!row || !canSendPaymentLink(row)) return
+  actingId.value = row.id
+  loadError.value = ''
+  try {
+    const ownerUserId = await getQueryUserId()
+    const storeId = (await getCurrentStoreId()) || storesStore.currentStoreId || ''
+    if (!ownerUserId || !storeId) throw new Error('No store selected')
+    const res = await authFetch<{
+      success?: boolean
+      url?: string
+      invoiceNumber?: string
+      amount?: number
+    }>(`/api/storefront/inquiries/${row.id}/payment-link`, {
+      method: 'POST',
+      body: { ownerUserId, storeId },
+    })
+    if (!res?.url) throw new Error('Payment link was not created')
+    shareLink.value = {
+      url: res.url,
+      invoiceNumber: res.invoiceNumber || row.paymentLinkInvoiceNumber || '',
+      customerName: row.customerName,
+      customerPhone: row.customerPhone,
+      total: typeof res.amount === 'number' ? res.amount / 100 : row.listingPrice || 0,
+    }
+    showShareModal.value = true
+    await load()
+  } catch (e: any) {
+    loadError.value = e?.data?.message || e?.message || 'Could not create payment link'
+  } finally {
+    actingId.value = ''
+  }
 }
 
 function callCustomer() {

@@ -132,7 +132,11 @@ export interface StorefrontInquiry {
   resolvedAt?: unknown
   resolvedByUid?: string
   resolveNote?: string
-  /** Set when Complete creates a POS receipt + inventory decrement. */
+  /** Payment link sent for this inquiry (merchant → customer). */
+  paymentLinkToken?: string
+  paymentLinkStatus?: 'unpaid' | 'paid' | 'failed' | 'expired'
+  paymentLinkInvoiceNumber?: string
+  /** Set when Complete creates a POS receipt + inventory decrement, or when the payment link settles. */
   receiptId?: string
   receiptNumber?: string
 }

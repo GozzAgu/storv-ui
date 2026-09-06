@@ -162,6 +162,7 @@ export type CreateLockedPaymentLinkParams = {
   source?: 'dashboard' | 'storefront'
   storefrontSlug?: string
   storefrontListingId?: string
+  storefrontInquiryId?: string
 }
 
 export async function writeLockedPaymentLink(
@@ -192,6 +193,7 @@ export async function writeLockedPaymentLink(
     source: params.source || 'dashboard',
     ...(params.storefrontSlug ? { storefrontSlug: params.storefrontSlug } : {}),
     ...(params.storefrontListingId ? { storefrontListingId: params.storefrontListingId } : {}),
+    ...(params.storefrontInquiryId ? { storefrontInquiryId: params.storefrontInquiryId } : {}),
   })
 
   return { token, invoiceNumber, amountKobo: params.amountKobo }
