@@ -615,6 +615,10 @@
       </DashboardSettingsPanel>
       </div>
 
+      <div v-show="activeSettingsTab === 'storefront'">
+        <StorefrontSettingsPanel :can-edit="canEditSettings && userStore.isSuperAdmin" />
+      </div>
+
       <div v-show="activeSettingsTab === 'payments'">
       <!-- Payment methods at checkout -->
       <DashboardSettingsPanel
@@ -1037,6 +1041,7 @@ import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import Modal from '~/components/ui/Modal.vue'
 import SidePanel from '~/components/ui/SidePanel.vue'
 import Switch from '~/components/ui/Switch.vue'
+import StorefrontSettingsPanel from '~/components/dashboard/StorefrontSettingsPanel.vue'
 import {
   IosForm,
   IosFormSection,
@@ -1565,6 +1570,7 @@ const settingsTabs = computed(() => {
   if (isStaff.value) tabs.push({ value: 'assignment', label: 'Your assignment' })
   tabs.push({ value: 'store-info', label: isStaff.value ? 'Branch details' : 'Store information' })
   tabs.push({ value: 'inventory', label: 'Inventory' })
+  if (userStore.isSuperAdmin) tabs.push({ value: 'storefront', label: 'Storefront' })
   tabs.push({ value: 'payments', label: 'Checkout payments' })
   tabs.push({ value: 'sales-receipts', label: 'Sales & receipts' })
   if (!isStaff.value) tabs.push({ value: 'data-export', label: 'Data export' })
@@ -2108,6 +2114,12 @@ onMounted(async () => {
     settingsTabs.value.some((tab) => tab.value === 'account')
   ) {
     activeSettingsTab.value = 'account'
+    hasPickedSettingsTab = true
+  }
+
+  const tabParam = String(route.query.tab || '').trim()
+  if (tabParam && settingsTabs.value.some((tab) => tab.value === tabParam)) {
+    activeSettingsTab.value = tabParam
     hasPickedSettingsTab = true
   }
 

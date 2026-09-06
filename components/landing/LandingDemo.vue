@@ -94,6 +94,7 @@ const previewNav: Array<{ name: string; iconKey: DashboardNavIconKey; active?: b
   { name: 'Dashboard', iconKey: 'dashboard', active: true },
   { name: 'Inventory', iconKey: 'inventory' },
   { name: 'Sales', iconKey: 'receipts' },
+  { name: 'Storefront', iconKey: 'storefront' },
   { name: 'Buybacks', iconKey: 'buybacks' },
   { name: 'Loans', iconKey: 'loans' },
   { name: 'Sync', iconKey: 'sync' },

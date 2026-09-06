@@ -37,5 +37,26 @@ export default defineEventHandler(async (event) => {
     return
   }
 
+  // Guest storefront inquiries also rate-limit inside the handler (stricter).
+  if (/^\/api\/storefront\/[^/]+\/inquiries\/?$/.test(path) && event.method === 'POST') {
+    await assertRateLimit(event, { id: 'storefront-inquiry-ip', limit: 20, windowMs: ONE_MINUTE })
+    return
+  }
+
+  if (
+    path.startsWith('/api/storefront/') &&
+    path.endsWith('/checkout') &&
+    event.method === 'POST'
+  ) {
+    await assertRateLimit(event, { id: 'storefront-checkout-ip', limit: 20, windowMs: ONE_MINUTE })
+    return
+  }
+
+  if (/^\/api\/storefront\/[^/]+\/view\/?$/.test(path) && event.method === 'POST') {
+    await assertRateLimit(event, { id: 'storefront-view-ip', limit: 90, windowMs: ONE_MINUTE })
+    return
+  }
+
   await assertRateLimit(event, { id: 'api-default', limit: 120, windowMs: ONE_MINUTE })
 })
+

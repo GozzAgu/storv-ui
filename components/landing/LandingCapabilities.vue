@@ -15,8 +15,8 @@
           Everything Storvv includes
         </h2>
         <p class="landing-capabilities__lede">
-          Core daily ops on every plan. Analytics, leads, and multi-branch tools unlock as you grow.
-          Browse by category below.
+          Core daily ops on every plan - including a public storefront. Analytics, leads, and
+          multi-branch tools unlock as you grow. Browse by category below.
         </p>
       </header>
 
@@ -144,13 +144,7 @@
 
       <p class="landing-capabilities__footer">
         Questions?
-        <a
-          href="#faq"
-          class="landing-capabilities__footer-link"
-          @click.prevent="emit('navigate', 'faq')"
-        >
-          Read the FAQ
-        </a>
+        <NuxtLink to="/#faq" class="landing-capabilities__footer-link">Read the FAQ</NuxtLink>
         <span class="landing-capabilities__footer-sep" aria-hidden="true">·</span>
         After sign-in, open <span class="landing-capabilities__footer-strong">Help</span> or
         <span class="landing-capabilities__footer-strong">Ask assistant</span> for walkthroughs.
@@ -190,10 +184,6 @@ import {
   UserGroupIcon,
   UsersIcon,
 } from '~/utils/app-icons'
-
-const emit = defineEmits<{
-  navigate: [sectionId: string]
-}>()
 
 interface CapabilityItem {
   icon: Component
@@ -246,11 +236,17 @@ const coreItems: CapabilityItem[] = [
     icon: ChartBarIcon,
     title: 'Dashboard overview',
     description:
-      'Revenue KPIs, low-stock signals, inventory health, payment links summary, and recent activity on the home screen.',
+      'Revenue KPIs, low-stock signals, inventory health, storefront inquiries, payment links summary, and recent activity.',
   },
 ]
 
 const toolsItems: CapabilityItem[] = [
+  {
+    icon: GlobeAltIcon,
+    title: 'Public storefront',
+    description:
+      'Publish selected inventory as a guest catalogue. Shoppers enquire or reserve; you complete sales that update private stock.',
+  },
   {
     icon: CreditCardIcon,
     title: 'Payment links',
@@ -450,6 +446,18 @@ const moreSubcategories: MoreSubcategory[] = [
         description: 'Share a link; customer pays remotely. Summary cards on Dashboard and Analytics.',
       },
       {
+        icon: GlobeAltIcon,
+        title: 'Storefront catalogue',
+        description:
+          'Guest browse of published listings with enquire, reserve, and optional online checkout.',
+      },
+      {
+        icon: UsersIcon,
+        title: 'Storefront inquiries',
+        description:
+          'Inbox for contact and reservation requests; Complete & sell creates a receipt and updates stock.',
+      },
+      {
         icon: BanknotesIcon,
         title: 'Payout accounts',
         description: 'Connect bank details and review settlements for payment-link collections.',
@@ -508,7 +516,13 @@ const moreSubcategories: MoreSubcategory[] = [
         icon: ChartBarIcon,
         title: 'Feature insights',
         description:
-          'Cards for sales, returns, outstanding balances, inventory health, buybacks, loans, and payment links.',
+          'Cards for sales, returns, outstanding balances, inventory health, buybacks, loans, payment links, and storefront.',
+      },
+      {
+        icon: GlobeAltIcon,
+        title: 'Storefront traffic',
+        description:
+          'Views and pending inquiry counts so you know when guests are browsing or waiting on a reply.',
       },
       {
         icon: ChartBarIcon,
@@ -587,7 +601,7 @@ const groups: CapabilityGroup[] = [
     id: 'tools',
     label: 'Growth',
     title: 'Growth & automation',
-    description: 'Payment links on all plans; analytics, leads, and ledgers from Medium upward.',
+    description: 'Storefront and payment links on all plans; analytics, leads, and ledgers from Medium upward.',
     illustration: '/marketing/illustrations/receipt-illustration.png',
     illustrationAlt: 'A hand holding a paper receipt',
     items: toolsItems,

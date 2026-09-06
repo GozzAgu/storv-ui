@@ -18,6 +18,7 @@ import {
   RefreshCcwDot,
   Settings2,
   Store,
+  ShoppingBag,
   UserPlus,
 } from '@lucide/vue'
 
@@ -28,6 +29,7 @@ export type DashboardNavIconKey =
   | 'loans'
   | 'receipts'
   | 'payment-links'
+  | 'storefront'
   | 'sales-leads'
   | 'departments'
   | 'analytics'
@@ -51,6 +53,7 @@ export const DASHBOARD_NAV_ICONS: Record<DashboardNavIconKey, Component> = {
   loans: Handshake,
   receipts: ReceiptText,
   'payment-links': Link2,
+  storefront: ShoppingBag,
   // Distinct from `profile` below - a prospective customer, not the signed-in user.
   'sales-leads': UserPlus,
   departments: Building2,

@@ -132,7 +132,6 @@ html:not(.capacitor-native) .dashboard-layout-root .dashboard-sidebar > button.a
 
 html:not(.capacitor-native) .dashboard-layout-root main[data-dashboard-main] :is(
   .dash-card,
-  .dash-page-header,
   .dash-page-context-bar,
   .dash-stat-card,
   .dash-grid-card,
@@ -158,7 +157,6 @@ html:not(.capacitor-native) .dashboard-layout-root main[data-dashboard-main] :is
 
 html:not(.capacitor-native).dark .dashboard-layout-root main[data-dashboard-main] :is(
   .dash-card,
-  .dash-page-header,
   .dash-page-context-bar,
   .dash-stat-card,
   .dash-grid-card,
@@ -181,11 +179,31 @@ html:not(.capacitor-native).dark .dashboard-layout-root main[data-dashboard-main
   -webkit-backdrop-filter: none !important;
 }
 
-html:not(.capacitor-native) .dashboard-layout-root main[data-dashboard-main] .dash-page-header--unified {
-  background: transparent !important;
-  border: 0 !important;
+/* Page greetings / titles: thin modern border (Dashboard, Analytics, Sales, …) */
+html:not(.capacitor-native) .dashboard-layout-root main[data-dashboard-main] .dash-page-header {
+  border: 1px solid rgb(26 21 35 / 0.1) !important;
+  border-radius: 1.25rem !important;
+  background: var(--saas-glass-bg, #ffffff) !important;
   box-shadow: none !important;
   backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html:not(.capacitor-native).dark .dashboard-layout-root main[data-dashboard-main] .dash-page-header {
+  border: 1px solid rgb(255 255 255 / 0.12) !important;
+  background: #1e1e1e !important;
+}
+
+html:not(.capacitor-native) .dashboard-layout-root main[data-dashboard-main] .dash-page-header--unified {
+  background: var(--saas-glass-bg, #ffffff) !important;
+  border: 1px solid rgb(26 21 35 / 0.1) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+html:not(.capacitor-native).dark .dashboard-layout-root main[data-dashboard-main] .dash-page-header--unified {
+  background: #1e1e1e !important;
+  border: 1px solid rgb(255 255 255 / 0.12) !important;
 }
 
 html:not(.capacitor-native) .dashboard-layout-root main[data-dashboard-main] [class~='bg-white']:not(.receipt-content),

@@ -37,6 +37,10 @@ export interface PaymentLinkDoc {
   paidAt?: FirebaseFirestore.Timestamp | FirebaseFirestore.FieldValue
   expiresAt: Date | FirebaseFirestore.Timestamp
   createdBy: string
+  /** Where the link was created. */
+  source?: 'dashboard' | 'storefront'
+  storefrontSlug?: string
+  storefrontListingId?: string
 }
 
 export interface MerchantPayoutDoc {

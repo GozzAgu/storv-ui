@@ -59,6 +59,7 @@ export function nativeNavShortLabel(name: string): string {
     Departments: 'Teams',
     Analytics: 'Analytics',
     'Payment links': 'Links',
+    Storefront: 'Store',
     'Stock loans': 'Loans',
     'Customer buybacks': 'Buybacks',
     'Activity Logs': 'Activity',

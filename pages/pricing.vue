@@ -12,8 +12,8 @@
             Start free. Pay only when Storvv is already paying for itself.
           </h1>
           <p class="pricing-hero__lede">
-            Start on <strong>Micro</strong> - free, one store, full sales and inventory. Medium
-            adds analytics, sales leads, and a second branch. Enterprise adds transfers, stock
+            Start on <strong>Micro</strong> - free, one store, full sales, inventory, and storefront.
+            Medium adds analytics, sales leads, and a second branch. Enterprise adds transfers, stock
             loans, and unlimited stores. Every payment link, on every plan, goes straight to your
             customers - wherever they're paying from.
           </p>

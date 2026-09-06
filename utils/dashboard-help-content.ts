@@ -182,7 +182,7 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
         title: 'Bottom tabs and More menu',
         body: [
           'Primary tabs: Home (dashboard overview), Stock (inventory categories), Sales (receipts and customers), Analytics (Medium and Enterprise). Icons and labels follow iOS conventions with a floating pill tab bar inset above the safe area.',
-          'Tap More for grouped sections: Operations (customer buybacks, stock loans, multi-store sync, payment links, sales leads when enabled), Organization (departments, activity logs), and Account (settings, help center, profile, sign out). Items appear only when your plan and role include them - same rules as the web sidebar.',
+          'Tap More for grouped sections: Operations (storefront, customer buybacks, stock loans, multi-store sync, payment links, sales leads when enabled), Organization (departments, activity logs), and Account (settings, help center, profile, sign out). Items appear only when your plan and role include them - same rules as the web sidebar.',
           'Super admins switch branches from the branch pill in the command header. Managers and staff stay on their assigned store.',
         ],
       },

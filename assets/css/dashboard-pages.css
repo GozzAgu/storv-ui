@@ -16,15 +16,16 @@
 }
 
 .dash-page-header {
-  border: 1px solid var(--dash-border, rgb(15 23 42 / 0.08));
-  border-radius: 1rem;
+  border: 1px solid rgb(26 21 35 / 0.1);
+  border-radius: 1.25rem;
   background: var(--dash-surface, #ffffff);
   padding: 1rem 1.125rem;
 }
 
 html.dark .dash-page-header {
+  border-color: rgb(255 255 255 / 0.12);
   background: #12141c;
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.04);
+  box-shadow: none;
 }
 
 @media (min-width: 640px) {
@@ -41,18 +42,16 @@ html.dark .dash-page-header {
 
 /* Unified page header: title + metrics + toolbar in one card */
 .dash-page--unified {
-  gap: 0.875rem;
+  gap: 1.5rem;
 }
 
 @media (min-width: 640px) {
   .dash-page--unified {
-    gap: 1rem;
+    gap: 1.75rem;
   }
 }
 
-/* Analytics: KPI panel, inventory health, feature insights, charts, and
-   tables sit right on top of each other at the shared unified-page gap -
-   give this page more breathing room between its top-level sections. */
+/* Analytics: keep the same breathing room as other unified pages */
 .dash-analytics.dash-page--unified {
   gap: 1.5rem;
 }
@@ -71,6 +70,20 @@ html.dark .dash-page-header {
    direct flex items of `.dash-analytics` again. */
 .dash-analytics-body {
   display: contents;
+}
+
+/* Tab panels inside analytics must carry the page gap themselves (cannot use
+   display:contents with v-show). */
+.dash-analytics-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .dash-analytics-panel {
+    gap: 1.75rem;
+  }
 }
 
 .dash-page-header--unified {

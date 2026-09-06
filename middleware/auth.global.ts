@@ -22,7 +22,10 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   const isDashboardRoute = to.path.startsWith('/dashboard')
   const isDemoRoute = to.path === '/demo' || to.path.startsWith('/demo/')
   const isAuthRoute = ['/signin', '/signup', '/forgot-password', '/auth/action'].includes(to.path)
-  const isPublicRoute = ['/privacy', '/terms'].includes(to.path)
+  const isPublicRoute =
+    ['/privacy', '/terms'].includes(to.path) ||
+    to.path === '/store' ||
+    to.path.startsWith('/store/')
 
   // Allow public routes
   if (isPublicRoute || isDemoRoute) {

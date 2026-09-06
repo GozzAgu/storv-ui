@@ -83,20 +83,21 @@ import { ArrowRightIcon } from '~/utils/app-icons'
 const beforePoints = [
   'Stock counts live across three different WhatsApp groups',
   'Receipts scribbled on paper - or not written at all',
-  'No idea which branch is actually making money',
+  'No public catalogue - only DMs and screenshots of stock',
   'One shared login, no record of who changed what',
 ] as const
 
 const afterPoints = [
   'Every category, subcategory, and item in one place',
   'Receipts sent by WhatsApp, email, or PDF in a tap',
-  'Live revenue and stock health per branch, on one screen',
+  'A shareable storefront backed by your real inventory',
   'Roles for owners, managers, and staff - with an audit trail',
 ] as const
 
 const marqueeFeatures = [
   'Inventory categories',
   'Quick Sale',
+  'Public storefront',
   'Payment links',
   'Sales leads',
   'Customer buybacks',

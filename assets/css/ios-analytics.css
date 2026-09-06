@@ -144,9 +144,9 @@ html.capacitor-ios.capacitor-native .ios-analytics-dashboard .dash-bar-row__labe
 }
 
 html.capacitor-ios.capacitor-native .ios-analytics-dashboard .dash-bar-row__track,
-html.capacitor-ios.capacitor-native .ios-analytics-dashboard .dash-progress {
-  border-radius: 9999px;
-  overflow: hidden;
+html.capacitor-ios.capacitor-native .ios-analytics-dashboard .dash-bar,
+html.capacitor-ios.capacitor-native .ios-analytics-dashboard .dash-bar__fill {
+  display: none !important;
 }
 
 html.capacitor-ios.capacitor-native .ios-analytics-dashboard .dash-metric-cells {

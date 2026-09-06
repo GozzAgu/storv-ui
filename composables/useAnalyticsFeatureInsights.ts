@@ -9,6 +9,7 @@ import {
   CurrencyDollarIcon,
   InboxArrowDownIcon,
   ReceiptPercentIcon,
+  ShoppingBagIcon,
   UserGroupIcon,
 } from '~/utils/app-icons'
 import { useReceiptsStore } from '~/stores/receipts'
@@ -17,6 +18,7 @@ import { useDepartmentsStore } from '~/stores/departments'
 import { useCustomerBuybacksStore } from '~/stores/customerBuybacks'
 import { useSellerLoanOutsStore } from '~/stores/sellerLoanOuts'
 import { useCustomerAccountsStore } from '~/stores/customerAccounts'
+import { useStorefrontStore } from '~/stores/storefront'
 import { useUserStore } from '~/stores/user'
 import { usePreferences } from '~/composables/usePreferences'
 import { usePermissions } from '~/composables/usePermissions'
@@ -30,6 +32,7 @@ import {
   sumReceiptGrossProfit,
   receiptLineRevenue,
 } from '~/utils/inventory-item-cost'
+import { isStorefrontSourcedReceipt } from '~/utils/storefront-receipt'
 
 export type AnalyticsPeriod = 'daily' | 'weekly' | 'monthly'
 
@@ -97,6 +100,7 @@ export function useAnalyticsFeatureInsights(
   const buybacksStore = useCustomerBuybacksStore()
   const sellerLoansStore = useSellerLoanOutsStore()
   const customerAccountsStore = useCustomerAccountsStore()
+  const storefrontStore = useStorefrontStore()
   const userStore = useUserStore()
   const { formatCurrency } = usePreferences()
   const { canViewProfitAndCost, isStaff } = usePermissions()
@@ -255,6 +259,14 @@ export function useAnalyticsFeatureInsights(
 
   const totalCreditOwed = computed(() =>
     accountsWithBalance.value.reduce((sum, a) => sum + (a.accountBalance || 0), 0)
+  )
+
+  const storefrontSalesInPeriod = computed(() =>
+    completedInPeriod.value.filter((r) => isStorefrontSourcedReceipt(r))
+  )
+
+  const storefrontRevenueInPeriod = computed(() =>
+    storefrontSalesInPeriod.value.reduce((sum, r) => sum + (r.total || 0), 0)
   )
 
   const featureInsights = computed((): AnalyticsFeatureInsight[] => {
@@ -441,6 +453,37 @@ export function useAnalyticsFeatureInsights(
         linkLabel: 'View loans',
       })
     }
+
+    const storeViews = storefrontStore.analyticsSummary.storeViews || 0
+    const productViews = storefrontStore.analyticsSummary.productViews || 0
+    const views7d = storefrontStore.viewsLast7Days
+    const pendingInquiries = storefrontStore.pendingInquiryCount
+    insightsWithProfit.push({
+      id: 'storefront',
+      icon: ShoppingBagIcon,
+      title: 'Storefront',
+      description: `Public showroom traffic and guest requests · ${periodText.value.toLowerCase()}`,
+      highlight:
+        storefrontRevenueInPeriod.value > 0
+          ? formatCurrency(storefrontRevenueInPeriod.value)
+          : views7d > 0
+            ? `${views7d} views (7d)`
+            : pendingInquiries > 0
+              ? `${pendingInquiries} pending`
+              : 'No traffic yet',
+      metrics: [
+        { label: 'Store views', value: String(storeViews) },
+        { label: 'Product views', value: String(productViews) },
+        { label: 'Views (7d)', value: String(views7d) },
+        {
+          label: 'Storefront sales',
+          value: String(storefrontSalesInPeriod.value.length),
+        },
+        { label: 'Pending inquiries', value: String(pendingInquiries) },
+      ],
+      href: dashPath('/storefront'),
+      linkLabel: 'Open storefront',
+    })
 
     return insightsWithProfit
   })

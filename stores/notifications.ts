@@ -47,6 +47,7 @@ export type NotificationType =
   | 'swap_in_completed'
   | 'lead_created'
   | 'lead_converted'
+  | 'storefront_inquiry'
 
 export interface Notification {
   id: string

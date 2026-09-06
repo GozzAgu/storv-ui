@@ -3805,7 +3805,9 @@ onMounted(async () => {
   // Only load receipts if user is authenticated
   if (authStore.currentUser) {
     try {
-      await receiptsStore.fetchReceipts()
+      await receiptsStore.fetchReceipts({
+        force: Boolean(highlightFromRoute.value),
+      })
       if (isCapacitorIos.value) {
         scheduleNativeIdleWork(() => {
           void loadCreatorNames()

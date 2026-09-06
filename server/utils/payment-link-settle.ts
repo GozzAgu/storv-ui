@@ -80,6 +80,20 @@ export async function settlePaymentLink(
       itemSnaps.set(it.itemId, snap)
     }
 
+    const sfSlug = String(link.storefrontSlug || '').trim()
+    const sfListingId = String(link.storefrontListingId || '').trim()
+    let listingRef: FirebaseFirestore.DocumentReference | null = null
+    let listingExists = false
+    if (sfSlug && sfListingId) {
+      listingRef = adminDb
+        .collection('storefrontListings')
+        .doc(sfSlug)
+        .collection('items')
+        .doc(sfListingId)
+      const listingSnap = await tx.get(listingRef)
+      listingExists = listingSnap.exists
+    }
+
     // --- WRITE PHASE --------------------------------------------------------
     for (const it of items) {
       const snap = itemSnaps.get(it.itemId)
@@ -135,13 +149,21 @@ export async function settlePaymentLink(
       folderId: items[0]?.folderId || '',
       itemIds: items.map((i) => i.itemId),
       storeId,
-      source: 'payment_link',
+      source: link.source === 'storefront' ? 'storefront' : 'payment_link',
       paymentReference: opts.reference,
       paymentChannel: opts.channel || 'card',
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
       createdBy: ownerUserId,
     })
+
+    if (listingRef && listingExists) {
+      tx.update(listingRef, {
+        availability: 'unavailable',
+        reservationInquiryId: null,
+        updatedAt: FieldValue.serverTimestamp(),
+      })
+    }
 
     tx.update(linkRef, {
       status: 'paid',

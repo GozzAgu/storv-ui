@@ -83,6 +83,7 @@ export type ReceiptTransactionMenuKind =
   | 'buyback'
   | 'payment-link'
   | 'transfer'
+  | 'inquiry'
 
 const MENU_KIND_ANCHORS: Record<ReceiptTransactionMenuKind, string> = {
   receipt: 'data-receipt-actions-anchor',
@@ -94,6 +95,7 @@ const MENU_KIND_ANCHORS: Record<ReceiptTransactionMenuKind, string> = {
   buyback: 'data-buyback-actions-anchor',
   'payment-link': 'data-payment-link-actions-anchor',
   transfer: 'data-transfer-actions-anchor',
+  inquiry: 'data-inquiry-actions-anchor',
 }
 
 const MENU_KIND_ARIA: Record<ReceiptTransactionMenuKind, string> = {
@@ -106,6 +108,7 @@ const MENU_KIND_ARIA: Record<ReceiptTransactionMenuKind, string> = {
   buyback: 'Buyback actions',
   'payment-link': 'Payment link actions',
   transfer: 'Transfer actions',
+  inquiry: 'Inquiry actions',
 }
 
 const props = withDefaults(

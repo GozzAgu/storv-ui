@@ -517,6 +517,7 @@ import { useStoresStore } from '~/stores/stores'
 import { getStoreBranchShortLabel } from '~/utils/store-branch-label'
 import { useStaffStore } from '~/stores/staff'
 import { useSalesLeadsStore } from '~/stores/salesLeads'
+import { useStorefrontStore } from '~/stores/storefront'
 import { useThemeStore } from '~/stores/theme'
 import { usePreferences } from '~/composables/usePreferences'
 import { useDashboardInsights } from '~/composables/useDashboardInsights'
@@ -686,6 +687,7 @@ const authStore = useAuthStore()
 const userStore = useUserStore()
 const storesStore = useStoresStore()
 const salesLeadsStore = useSalesLeadsStore()
+const storefrontStore = useStorefrontStore()
 const themeStore = useThemeStore()
 const chartIsDark = computed(() => themeStore.actualTheme === 'dark')
 
@@ -1160,6 +1162,7 @@ const loadDashboardData = async () => {
     await Promise.all([
       receiptsStore.fetchReceipts(),
       canAccessLeadsPlan.value ? salesLeadsStore.fetchSalesLeads(true) : Promise.resolve(),
+      storefrontStore.fetchAnalytics().catch(() => undefined),
     ])
 
     if (isNativeApp.value) {
@@ -1189,6 +1192,7 @@ const refreshDashboardAfterStoreSwitch = async () => {
     await Promise.all([
       receiptsStore.fetchReceipts(),
       canAccessLeadsPlan.value ? salesLeadsStore.fetchSalesLeads(true) : Promise.resolve(),
+      storefrontStore.fetchAnalytics({ force: true }).catch(() => undefined),
     ])
     if (isNativeApp.value) {
       scheduleNativeIdleWork(() => {
