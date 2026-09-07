@@ -24,7 +24,7 @@ html.capacitor-ios.capacitor-native {
   --ios-type-leading: 1.35;
   --ios-type-leading-relaxed: 1.42;
 
-  /* Compact Montserrat scale — dense lists without shrinking inputs below 16px */
+  /* Compact Montserrat scale. dense lists without shrinking inputs below 16px */
   --ios-type-display-size: 1.5rem; /* 24 */
   --ios-type-display-weight: 700;
   --ios-type-display-leading: var(--ios-type-leading-tight);

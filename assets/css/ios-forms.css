@@ -1,5 +1,5 @@
 /**
- * IosForm — Pinterest-style clean CRUD fields inside iOS bottom sheets.
+ * IosForm. Pinterest-style clean CRUD fields inside iOS bottom sheets.
  * Pair with components/ios/forms/* and ios-drawer-form.css shell chrome.
  */
 
@@ -56,7 +56,7 @@ html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .io
   resize: vertical;
 }
 
-/* Toggle rows — label left, control right, on the same surface as the fields */
+/* Toggle rows. label left, control right, on the same surface as the fields */
 html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__toggle {
   display: block;
   width: 100%;
@@ -75,7 +75,7 @@ html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .io
   gap: 0.875rem;
   width: 100%;
   margin: 0;
-  /* The .ios-form__toggle card owns the padding — the row inside must not add more */
+  /* The .ios-form__toggle card owns the padding. the row inside must not add more */
   padding: 0 !important;
   border: none !important;
 }

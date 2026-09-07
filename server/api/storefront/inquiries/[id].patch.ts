@@ -209,7 +209,7 @@ export default defineEventHandler(async (event) => {
       return
     }
 
-    // reject / cancel — release soft hold
+    // reject / cancel. release soft hold
     if (listing.reservationInquiryId === inquiryId || listing.availability === 'reserved') {
       tx.update(listingRef, {
         availability: 'available',

@@ -2,7 +2,7 @@
   <div class="space-y-4">
     <DashboardSettingsPanel
       title="Public storefront"
-      subtitle="Share a digital showroom of selected stock. Customers browse as guests — no accounts."
+      subtitle="Share a digital showroom of selected stock. Customers browse as guests. No accounts."
     >
       <p
         v-if="!canEdit"
@@ -90,7 +90,7 @@
               v-model="draft.collectionInfo"
               rows="2"
               class="app-field w-full"
-              placeholder="e.g. Collect from our Ikeja shop Mon–Sat"
+              placeholder="e.g. Collect from our Ikeja shop Mon-Sat"
               :disabled="!canEdit || saving"
             />
           </label>
@@ -285,7 +285,7 @@
           v-if="!draft.enabled && draft.slug"
           class="mt-3 text-xs text-amber-700 dark:text-amber-300"
         >
-          Turn on “Show storefront” and Save — the public link stays hidden until it is published.
+          Turn on “Show storefront” and Save. The public link stays hidden until it is published.
         </p>
 
         <div

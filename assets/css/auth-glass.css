@@ -1,5 +1,5 @@
 /**
- * Web auth — glass card on a near-black canvas with a top-left light ray
+ * Web auth. glass card on a near-black canvas with a top-left light ray
  * (not used in Capacitor native).
  */
 
@@ -447,7 +447,7 @@ html:not(.capacitor-native) [data-auth-shell].auth-shell--modern.auth-shell--com
   }
 }
 
-/* Light mode — same glass pattern on the cream canvas */
+/* Light mode. same glass pattern on the cream canvas */
 html:not(.capacitor-native):not(.dark):has([data-auth-shell]) body {
   background: #f4f1ea;
 }

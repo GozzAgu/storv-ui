@@ -1,219 +1,274 @@
 <template>
-  <div class="storefront-page">
-    <header class="storefront-page__top">
-      <NuxtLink :to="`/store/${slug}`" class="storefront-page__back"
-        >&larr; {{ store?.displayName || 'Store' }}</NuxtLink
-      >
-      <button type="button" class="storefront-share-btn" @click="shareProduct">
-        {{ shareLabel }}
-      </button>
+  <div class="sf" :class="{ 'sf--dark': isDark }">
+    <header class="sf-chrome">
+      <div class="sf-chrome__inner">
+        <NuxtLink :to="catalogueHref" class="sf-chrome__back">
+          <span aria-hidden="true">←</span>
+          {{ store?.displayName || 'All products' }}
+        </NuxtLink>
+        <div class="sf-chrome__actions">
+          <ThemeToggle />
+          <button type="button" class="sf-btn sf-btn--ghost" @click="shareProduct">
+            {{ shareLabel }}
+          </button>
+        </div>
+      </div>
     </header>
 
-    <div v-if="pending" class="storefront-page__state">Loading...</div>
-    <div v-else-if="error" class="storefront-page__state storefront-page__state--error">
-      {{ error }}
-    </div>
-    <article v-else-if="item" class="storefront-detail">
-      <div
-        v-if="item.imageUrl"
-        class="storefront-detail__hero"
-        :style="{ backgroundImage: `url(${item.imageUrl})` }"
-        role="img"
-        :aria-label="item.title"
+    <div v-if="pending" class="sf-state">Loading product…</div>
+    <div v-else-if="error" class="sf-state sf-state--error">{{ error }}</div>
+
+    <article v-else-if="item" class="sf-detail">
+      <StorefrontMedia
+        :src="item.imageUrl"
+        :title="item.title"
+        :seed="item.id"
+        :category-name="item.categoryName"
+        :category-path="item.categoryPath"
+        :alt="item.title"
+        size="hero"
       />
-      <p class="storefront-detail__cat">{{ item.categoryPath }}</p>
-      <h1 class="storefront-detail__title">{{ item.title }}</h1>
-      <p class="storefront-detail__price">{{ formatMoney(item.price, item.currency) }}</p>
-      <p
-        class="storefront-detail__avail"
-        :class="{
-          'is-yes': item.availability === 'available',
-          'is-hold': item.availability === 'reserved',
-          'is-no': item.availability === 'unavailable',
-        }"
-      >
-        {{ availabilityLabel }}
-      </p>
 
-      <p v-if="item.description" class="storefront-detail__desc">{{ item.description }}</p>
-
-      <dl v-if="item.attributes?.length" class="storefront-detail__attrs">
-        <div v-for="attr in item.attributes" :key="attr.key" class="storefront-detail__row">
-          <dt>{{ attr.label }}</dt>
-          <dd>{{ attr.value }}</dd>
+      <div class="sf-detail__panel">
+        <p v-if="item.categoryPath" class="sf-detail__cat">{{ item.categoryPath }}</p>
+        <h1 class="sf-detail__title">{{ item.title }}</h1>
+        <div class="sf-detail__price-row">
+          <p class="sf-detail__price">{{ formatMoney(item.price, item.currency) }}</p>
+          <span
+            class="sf-detail__avail"
+            :class="{
+              'is-yes': item.availability === 'available',
+              'is-hold': item.availability === 'reserved',
+              'is-no': item.availability === 'unavailable',
+            }"
+          >
+            {{ availabilityLabel }}
+          </span>
         </div>
-      </dl>
 
-      <div class="storefront-detail__cta">
+        <p class="sf-detail__guide">
+          Choose how you want to continue below. Pay online if available, or contact the shop. No
+          account needed.
+        </p>
+
+        <p v-if="item.description" class="sf-detail__desc">{{ item.description }}</p>
+
+        <dl v-if="item.attributes?.length" class="sf-detail__attrs">
+          <div v-for="attr in item.attributes" :key="attr.key" class="sf-detail__row">
+            <dt>{{ attr.label }}</dt>
+            <dd>{{ attr.value }}</dd>
+          </div>
+        </dl>
+
+        <section
+          v-if="activePanel === 'checkout' && canCheckout"
+          id="sf-action-panel"
+          class="sf-panel"
+        >
+          <h2 class="sf-panel__title">Pay securely</h2>
+          <p class="sf-panel__hint">
+            You’ll confirm on Paystack. Stock updates automatically when payment succeeds.
+          </p>
+          <form class="sf-form" @submit.prevent="submitCheckout">
+            <label class="sf-field">
+              <span>Your name</span>
+              <input v-model="payName" type="text" name="pay-name" autocomplete="name" required />
+            </label>
+            <label class="sf-field">
+              <span>Phone (optional)</span>
+              <input
+                v-model="payPhone"
+                type="tel"
+                name="pay-phone"
+                autocomplete="tel"
+                placeholder="+234…"
+              />
+            </label>
+            <label class="sf-field">
+              <span>Email (optional)</span>
+              <input
+                v-model="payEmail"
+                type="email"
+                name="pay-email"
+                autocomplete="email"
+                placeholder="you@email.com"
+              />
+            </label>
+            <p v-if="checkoutError" class="sf-msg sf-msg--error">{{ checkoutError }}</p>
+            <button type="submit" class="sf-btn sf-btn--primary sf-btn--block" :disabled="paying">
+              {{ paying ? 'Preparing checkout…' : `Pay ${formatMoney(item.price, item.currency)}` }}
+            </button>
+            <button type="button" class="sf-text-btn" @click="activePanel = null">Cancel</button>
+          </form>
+        </section>
+
+        <section
+          v-else-if="activePanel === 'inquiry'"
+          id="sf-action-panel"
+          class="sf-panel"
+        >
+          <h2 class="sf-panel__title">
+            {{ canReserve ? 'Contact or reserve' : 'Contact the shop' }}
+          </h2>
+          <p class="sf-panel__hint">
+            Leave your details. The shop will reply. No account needed.
+          </p>
+
+          <div v-if="canReserve" class="sf-tabs" role="tablist">
+            <button
+              type="button"
+              role="tab"
+              class="sf-tab"
+              :class="{ 'is-on': inquiryType === 'contact' }"
+              :aria-selected="inquiryType === 'contact'"
+              @click="inquiryType = 'contact'"
+            >
+              Ask a question
+            </button>
+            <button
+              type="button"
+              role="tab"
+              class="sf-tab"
+              :class="{ 'is-on': inquiryType === 'reserve' }"
+              :aria-selected="inquiryType === 'reserve'"
+              @click="inquiryType = 'reserve'"
+            >
+              Request hold
+            </button>
+          </div>
+
+          <form class="sf-form" @submit.prevent="submitInquiry">
+            <label class="sf-field">
+              <span>Your name</span>
+              <input v-model="formName" type="text" name="name" autocomplete="name" required />
+            </label>
+            <label class="sf-field">
+              <span>Phone</span>
+              <input
+                v-model="formPhone"
+                type="tel"
+                name="phone"
+                autocomplete="tel"
+                required
+                placeholder="+234…"
+              />
+            </label>
+            <label class="sf-field">
+              <span>Note (optional)</span>
+              <textarea
+                v-model="formNote"
+                name="note"
+                rows="3"
+                :placeholder="
+                  inquiryType === 'reserve'
+                    ? 'When can you collect? Any questions?'
+                    : 'What would you like to know?'
+                "
+              />
+            </label>
+            <p v-if="inquiryError" class="sf-msg sf-msg--error">{{ inquiryError }}</p>
+            <p v-if="inquirySuccess" class="sf-msg sf-msg--ok">{{ inquirySuccess }}</p>
+            <button type="submit" class="sf-btn sf-btn--primary sf-btn--block" :disabled="submitting">
+              {{
+                submitting
+                  ? 'Sending…'
+                  : inquiryType === 'reserve'
+                    ? 'Request reservation'
+                    : 'Send message'
+              }}
+            </button>
+            <button type="button" class="sf-text-btn" @click="activePanel = null">Cancel</button>
+          </form>
+        </section>
+
+        <p v-if="item.availability === 'reserved' && activePanel !== 'inquiry'" class="sf-note">
+          This item is on hold for another customer. You can still message the shop.
+        </p>
+
+        <details
+          v-if="store?.collectionInfo || store?.warrantyInfo || hasSecondaryContacts"
+          class="sf-more"
+        >
+          <summary>Shop info &amp; other ways to reach them</summary>
+          <p v-if="store?.collectionInfo">{{ store.collectionInfo }}</p>
+          <p v-if="store?.warrantyInfo">{{ store.warrantyInfo }}</p>
+          <nav v-if="hasSecondaryContacts" class="sf-more__links">
+            <a
+              v-if="store?.whatsappE164"
+              :href="whatsappHref"
+              target="_blank"
+              rel="noopener"
+              >WhatsApp</a
+            >
+            <a v-if="store?.phonePublic" :href="`tel:${store.phonePublic}`">Call</a>
+            <a
+              v-if="store?.emailPublic"
+              :href="`mailto:${store.emailPublic}?subject=${encodeURIComponent(item.title)}`"
+              >Email</a
+            >
+          </nav>
+        </details>
+      </div>
+
+      <div class="sf-dock" role="region" aria-label="Product actions">
         <button
           v-if="canCheckout"
           type="button"
-          class="storefront-cta storefront-cta--primary"
-          @click="showCheckout = true"
+          class="sf-btn sf-btn--primary sf-dock__primary"
+          @click="openPanel('checkout')"
         >
           Pay online
         </button>
         <a
-          v-if="store?.whatsappE164"
+          v-else-if="store?.whatsappE164"
           :href="whatsappHref"
-          class="storefront-cta"
-          :class="{ 'storefront-cta--primary': !canCheckout }"
+          class="sf-btn sf-btn--primary sf-dock__primary"
           target="_blank"
           rel="noopener"
-          >Message on WhatsApp</a
         >
-        <a v-if="store?.phonePublic" :href="`tel:${store.phonePublic}`" class="storefront-cta"
-          >Call {{ store.displayName }}</a
+          Message on WhatsApp
+        </a>
+        <button
+          v-else
+          type="button"
+          class="sf-btn sf-btn--primary sf-dock__primary"
+          @click="openPanel('inquiry')"
         >
+          Contact shop
+        </button>
+
+        <button
+          v-if="canCheckout || store?.whatsappE164"
+          type="button"
+          class="sf-btn sf-btn--ghost sf-dock__secondary"
+          @click="openPanel('inquiry')"
+        >
+          {{ canReserve ? 'Ask / reserve' : 'Ask shop' }}
+        </button>
         <a
-          v-if="store?.emailPublic"
-          :href="`mailto:${store.emailPublic}?subject=${encodeURIComponent(item.title)}`"
-          class="storefront-cta"
-          >Email</a
+          v-else-if="store?.phonePublic"
+          :href="`tel:${store.phonePublic}`"
+          class="sf-btn sf-btn--ghost sf-dock__secondary"
         >
+          Call
+        </a>
       </div>
-
-      <section v-if="showCheckout && canCheckout" class="storefront-inquiry">
-        <h2 class="storefront-inquiry__title">Pay securely</h2>
-        <p class="storefront-inquiry__hint">
-          You’ll confirm payment on Paystack. Stock updates automatically when paid.
-        </p>
-        <form class="storefront-inquiry__form" @submit.prevent="submitCheckout">
-          <label class="storefront-inquiry__field">
-            <span>Your name</span>
-            <input v-model="payName" type="text" name="pay-name" autocomplete="name" required />
-          </label>
-          <label class="storefront-inquiry__field">
-            <span>Phone (optional)</span>
-            <input
-              v-model="payPhone"
-              type="tel"
-              name="pay-phone"
-              autocomplete="tel"
-              placeholder="+234…"
-            />
-          </label>
-          <label class="storefront-inquiry__field">
-            <span>Email (optional)</span>
-            <input
-              v-model="payEmail"
-              type="email"
-              name="pay-email"
-              autocomplete="email"
-              placeholder="you@email.com"
-            />
-          </label>
-          <p v-if="checkoutError" class="storefront-inquiry__error">{{ checkoutError }}</p>
-          <button type="submit" class="storefront-cta storefront-cta--primary" :disabled="paying">
-            {{ paying ? 'Preparing checkout…' : `Pay ${formatMoney(item.price, item.currency)}` }}
-          </button>
-          <button type="button" class="storefront-link-btn" @click="showCheckout = false">
-            Cancel
-          </button>
-        </form>
-      </section>
-
-      <section v-if="showInquirySection" class="storefront-inquiry">
-        <h2 class="storefront-inquiry__title">
-          {{ canReserve ? 'Contact or reserve' : 'Contact the shop' }}
-        </h2>
-        <p class="storefront-inquiry__hint">
-          No account needed. Leave your details and the shop will reply.
-        </p>
-
-        <div v-if="canReserve" class="storefront-inquiry__tabs" role="tablist">
-          <button
-            type="button"
-            role="tab"
-            class="storefront-inquiry__tab"
-            :class="{ 'is-on': inquiryType === 'contact' }"
-            :aria-selected="inquiryType === 'contact'"
-            @click="inquiryType = 'contact'"
-          >
-            Ask a question
-          </button>
-          <button
-            type="button"
-            role="tab"
-            class="storefront-inquiry__tab"
-            :class="{ 'is-on': inquiryType === 'reserve' }"
-            :aria-selected="inquiryType === 'reserve'"
-            @click="inquiryType = 'reserve'"
-          >
-            Request hold
-          </button>
-        </div>
-
-        <form class="storefront-inquiry__form" @submit.prevent="submitInquiry">
-          <label class="storefront-inquiry__field">
-            <span>Your name</span>
-            <input v-model="formName" type="text" name="name" autocomplete="name" required />
-          </label>
-          <label class="storefront-inquiry__field">
-            <span>Phone</span>
-            <input
-              v-model="formPhone"
-              type="tel"
-              name="phone"
-              autocomplete="tel"
-              required
-              placeholder="+234…"
-            />
-          </label>
-          <label class="storefront-inquiry__field">
-            <span>Note (optional)</span>
-            <textarea
-              v-model="formNote"
-              name="note"
-              rows="3"
-              :placeholder="
-                inquiryType === 'reserve'
-                  ? 'When can you collect? Any questions?'
-                  : 'What would you like to know?'
-              "
-            />
-          </label>
-
-          <p v-if="inquiryError" class="storefront-inquiry__error">{{ inquiryError }}</p>
-          <p v-if="inquirySuccess" class="storefront-inquiry__ok">{{ inquirySuccess }}</p>
-
-          <button
-            type="submit"
-            class="storefront-cta storefront-cta--primary"
-            :disabled="submitting"
-          >
-            {{
-              submitting
-                ? 'Sending…'
-                : inquiryType === 'reserve'
-                  ? 'Request reservation'
-                  : 'Send message'
-            }}
-          </button>
-        </form>
-      </section>
-
-      <p v-else-if="item.availability === 'reserved'" class="storefront-detail__note">
-        This item is currently on hold for another customer. You can still message the shop above.
-      </p>
-
-      <p v-if="store?.collectionInfo" class="storefront-detail__note">
-        {{ store.collectionInfo }}
-      </p>
-      <p v-if="store?.warrantyInfo" class="storefront-detail__note">{{ store.warrantyInfo }}</p>
     </article>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { StorefrontInquiryType } from '~/types/storefront'
+import ThemeToggle from '~/components/ui/ThemeToggle.vue'
+import StorefrontMedia from '~/components/storefront/StorefrontMedia.vue'
 import {
   buildStorefrontShareMessage,
   buildStorefrontWhatsAppShareHref,
   formatStorefrontMoney,
   storefrontAbsoluteUrl,
+  withStorefrontUtm,
 } from '~/utils/storefront-share'
-import { storefrontProductPath } from '~/utils/storefront-slug'
+import { storefrontProductPath, storefrontPublicPath } from '~/utils/storefront-slug'
 
 definePageMeta({
   layout: false,
@@ -223,6 +278,12 @@ const route = useRoute()
 const slug = computed(() => String(route.params.slug || '').toLowerCase())
 const itemId = computed(() => String(route.params.itemId || ''))
 const { ping } = useStorefrontViewPing()
+const { actualTheme, initTheme } = useTheme()
+const isDark = computed(() => actualTheme.value === 'dark')
+
+onMounted(() => {
+  initTheme()
+})
 
 const pending = ref(true)
 const error = ref('')
@@ -238,12 +299,21 @@ const submitting = ref(false)
 const inquiryError = ref('')
 const inquirySuccess = ref('')
 
-const showCheckout = ref(false)
 const payName = ref('')
 const payPhone = ref('')
 const payEmail = ref('')
 const paying = ref(false)
 const checkoutError = ref('')
+
+const activePanel = ref<'checkout' | 'inquiry' | null>(null)
+
+const catalogueHref = computed(() =>
+  withStorefrontUtm(storefrontPublicPath(slug.value), {
+    source: 'storefront',
+    medium: 'product_back',
+    campaign: slug.value,
+  })
+)
 
 const canReserve = computed(
   () =>
@@ -258,13 +328,17 @@ const canCheckout = computed(
     item.value?.availability === 'available'
 )
 
-const showInquirySection = computed(() => Boolean(item.value))
 const availabilityLabel = computed(() => {
   const a = item.value?.availability
   if (a === 'available') return 'Available now'
-  if (a === 'reserved') return 'Reserved — on hold'
-  return 'Currently unavailable'
+  if (a === 'reserved') return 'On hold'
+  return 'Unavailable'
 })
+
+const hasSecondaryContacts = computed(
+  () =>
+    Boolean(store.value?.whatsappE164 || store.value?.phonePublic || store.value?.emailPublic)
+)
 
 const whatsappHref = computed(() => {
   const n = String(store.value?.whatsappE164 || '').replace(/\D/g, '')
@@ -277,6 +351,15 @@ const whatsappHref = computed(() => {
 
 function formatMoney(amount: number, currency?: string | null) {
   return formatStorefrontMoney(amount, currency)
+}
+
+function openPanel(panel: 'checkout' | 'inquiry') {
+  activePanel.value = panel
+  if (import.meta.client) {
+    requestAnimationFrame(() => {
+      document.getElementById('sf-action-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }
 }
 
 async function shareProduct() {
@@ -305,7 +388,7 @@ async function shareProduct() {
   }
   try {
     await navigator.clipboard.writeText(url)
-    shareLabel.value = 'Link copied'
+    shareLabel.value = 'Copied'
   } catch {
     window.open(buildStorefrontWhatsAppShareHref(message), '_blank', 'noopener')
     shareLabel.value = 'WhatsApp'
@@ -320,6 +403,7 @@ async function load() {
   error.value = ''
   inquirySuccess.value = ''
   inquiryError.value = ''
+  activePanel.value = null
   try {
     const data = await $fetch<{ store: any; item: any }>(
       `/api/storefront/${slug.value}/items/${itemId.value}`
@@ -429,238 +513,416 @@ watch([slug, itemId], () => void load(), { immediate: true })
 </script>
 
 <style scoped>
-.storefront-page {
+.sf {
+  --sf-ink: #1a1523;
+  --sf-muted: rgb(26 21 35 / 0.58);
+  --sf-faint: rgb(26 21 35 / 0.42);
+  --sf-line: rgb(26 21 35 / 0.1);
+  --sf-canvas: #f3f2f0;
+  --sf-surface: #ffffff;
+  --sf-chrome: rgb(243 242 240 / 0.9);
+  --sf-dock: rgb(243 242 240 / 0.94);
+  --sf-ok: #047857;
+  --sf-hold: #b45309;
   min-height: 100dvh;
-  padding: 1.25rem 1.25rem 3rem;
-  background: #f5f5f7;
-  color: #1a1523;
+  padding-bottom: 6.5rem;
+  background: var(--sf-canvas);
+  color: var(--sf-ink);
+  font-family:
+    'Quicksand',
+    'Plus Jakarta Sans',
+    system-ui,
+    sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
-.storefront-page__top {
+
+.sf--dark {
+  --sf-ink: #f4f1ea;
+  --sf-muted: rgb(244 241 234 / 0.68);
+  --sf-faint: rgb(244 241 234 / 0.45);
+  --sf-line: rgb(255 255 255 / 0.12);
+  --sf-canvas: #0c0b0e;
+  --sf-surface: #1a1820;
+  --sf-chrome: rgb(12 11 14 / 0.92);
+  --sf-dock: rgb(12 11 14 / 0.94);
+  --sf-ok: #34d399;
+  --sf-hold: #fbbf24;
+}
+
+.sf-chrome {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  backdrop-filter: blur(12px);
+  background: var(--sf-chrome);
+  border-bottom: 1px solid var(--sf-line);
+}
+
+.sf-chrome__inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: 36rem;
-  margin: 0 auto 1.75rem;
-}
-.storefront-page__back,
-.storefront-page__brand {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: #1a1523;
-  text-decoration: none;
-}
-.storefront-share-btn {
-  border: 1px solid rgb(26 21 35 / 0.14);
-  background: #fff;
-  border-radius: 9999px;
-  padding: 0.35rem 0.75rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-.storefront-detail__hero {
-  height: min(52vw, 16rem);
-  border-radius: 1rem;
-  background: center / cover no-repeat #ececef;
-  margin-bottom: 1.25rem;
-}
-.storefront-page__state {
-  max-width: 36rem;
-  margin: 3rem auto;
-  text-align: center;
-  color: rgb(26 21 35 / 0.55);
-}
-.storefront-page__state--error {
-  color: #b91c1c;
-}
-.storefront-detail {
-  max-width: 36rem;
-  margin: 0 auto;
-}
-.storefront-detail__cat {
-  margin: 0;
-  font-size: 0.75rem;
-  color: rgb(26 21 35 / 0.45);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-.storefront-detail__title {
-  margin: 0.35rem 0 0;
-  font-size: clamp(1.5rem, 3.5vw, 2rem);
-  font-weight: 650;
-  letter-spacing: -0.03em;
-  line-height: 1.2;
-}
-.storefront-detail__price {
-  margin: 0.75rem 0 0;
-  font-size: 1.25rem;
-  font-weight: 650;
-}
-.storefront-detail__avail {
-  margin: 0.35rem 0 0;
-  font-size: 0.8125rem;
-  font-weight: 600;
-}
-.storefront-detail__avail.is-yes {
-  color: #047857;
-}
-.storefront-detail__avail.is-hold {
-  color: #b45309;
-}
-.storefront-detail__avail.is-no {
-  color: rgb(26 21 35 / 0.45);
-}
-.storefront-detail__desc {
-  margin: 1.25rem 0 0;
-  font-size: 0.9375rem;
-  line-height: 1.55;
-  color: rgb(26 21 35 / 0.72);
-}
-.storefront-detail__attrs {
-  margin: 1.5rem 0 0;
-  padding: 0;
-  border-top: 1px solid rgb(26 21 35 / 0.08);
-}
-.storefront-detail__row {
-  display: grid;
-  grid-template-columns: 8rem 1fr;
   gap: 0.75rem;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid rgb(26 21 35 / 0.08);
-  font-size: 0.875rem;
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 0.75rem 1.15rem;
 }
-.storefront-detail__row dt {
-  margin: 0;
-  color: rgb(26 21 35 / 0.45);
-  font-weight: 500;
-}
-.storefront-detail__row dd {
-  margin: 0;
-  font-weight: 550;
-}
-.storefront-detail__cta {
+
+.sf-chrome__actions {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-top: 1.75rem;
-}
-.storefront-cta {
-  display: inline-flex;
-  justify-content: center;
   align-items: center;
-  min-height: 2.75rem;
-  padding: 0.625rem 1rem;
+  gap: 0.45rem;
+  flex-shrink: 0;
+}
+
+.sf-chrome__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--sf-ink);
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sf-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.35rem;
+  padding: 0.4rem 0.95rem;
   border-radius: 9999px;
-  background: #fff;
-  border: 1px solid rgb(26 21 35 / 0.12);
-  color: #1a1523;
-  font-size: 0.875rem;
-  font-weight: 600;
+  border: 1px solid var(--sf-line);
+  background: var(--sf-surface);
+  color: var(--sf-ink);
+  font-size: 0.8125rem;
+  font-weight: 700;
   text-decoration: none;
   cursor: pointer;
+  font-family: inherit;
 }
-.storefront-cta:disabled {
+
+.sf-btn--primary {
+  background: var(--sf-ink);
+  border-color: transparent;
+  color: var(--sf-surface);
+}
+
+.sf--dark .sf-btn--primary {
+  color: #0c0b0e;
+}
+
+.sf-btn--ghost {
+  background: transparent;
+}
+
+.sf-btn--block {
+  width: 100%;
+}
+
+.sf-btn:disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }
-.storefront-cta--primary {
-  background: #1a1523;
-  border-color: transparent;
-  color: #fff;
+
+.sf-state {
+  max-width: 40rem;
+  margin: 4rem auto;
+  padding: 0 1.25rem;
+  text-align: center;
+  color: var(--sf-muted);
 }
-.storefront-detail__note {
-  margin: 1rem 0 0;
-  font-size: 0.8125rem;
-  line-height: 1.5;
-  color: rgb(26 21 35 / 0.55);
+
+.sf-state--error {
+  color: #b91c1c;
 }
-.storefront-inquiry {
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid rgb(26 21 35 / 0.1);
+
+.sf-detail {
+  max-width: 40rem;
+  margin: 0 auto;
 }
-.storefront-inquiry__title {
+
+.sf-detail__panel {
+  padding: 1.25rem 1.15rem 1.5rem;
+}
+
+.sf-detail__cat {
   margin: 0;
-  font-size: 1.0625rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sf-faint);
+}
+
+.sf-detail__title {
+  margin: 0.35rem 0 0;
+  font-size: clamp(1.55rem, 5vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+}
+
+.sf-detail__price-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem 0.85rem;
+  margin-top: 0.75rem;
+}
+
+.sf-detail__price {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.sf-detail__avail {
+  display: inline-flex;
+  padding: 0.25rem 0.6rem;
+  border-radius: 9999px;
+  background: rgb(26 21 35 / 0.06);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--sf-faint);
+}
+
+.sf-detail__avail.is-yes {
+  background: rgb(4 120 87 / 0.12);
+  color: var(--sf-ok);
+}
+
+.sf-detail__avail.is-hold {
+  background: rgb(180 83 9 / 0.12);
+  color: var(--sf-hold);
+}
+
+.sf-detail__guide {
+  margin: 1rem 0 0;
+  padding: 0.75rem 0.85rem;
+  border-radius: 0.85rem;
+  background: var(--sf-surface);
+  border: 1px solid var(--sf-line);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--sf-muted);
+}
+
+.sf-detail__desc {
+  margin: 1.15rem 0 0;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: rgb(26 21 35 / 0.78);
+}
+
+.sf-detail__attrs {
+  margin: 1.35rem 0 0;
+  padding: 0;
+  border-top: 1px solid var(--sf-line);
+}
+
+.sf-detail__row {
+  display: grid;
+  grid-template-columns: minmax(6rem, 8rem) 1fr;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--sf-line);
+  font-size: 0.875rem;
+}
+
+.sf-detail__row dt {
+  margin: 0;
+  color: var(--sf-faint);
   font-weight: 650;
+}
+
+.sf-detail__row dd {
+  margin: 0;
+  font-weight: 650;
+}
+
+.sf-panel {
+  margin-top: 1.5rem;
+  padding: 1.1rem;
+  border-radius: 1.1rem;
+  background: var(--sf-surface);
+  border: 1px solid var(--sf-line);
+  scroll-margin-top: 4.5rem;
+}
+
+.sf-panel__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
   letter-spacing: -0.02em;
 }
-.storefront-inquiry__hint {
+
+.sf-panel__hint {
   margin: 0.35rem 0 0;
   font-size: 0.8125rem;
-  color: rgb(26 21 35 / 0.55);
   line-height: 1.45;
+  color: var(--sf-muted);
 }
-.storefront-inquiry__tabs {
+
+.sf-tabs {
   display: flex;
-  gap: 0.35rem;
+  gap: 0.4rem;
   margin-top: 1rem;
 }
-.storefront-inquiry__tab {
+
+.sf-tab {
   flex: 1;
-  min-height: 2.25rem;
+  min-height: 2.35rem;
   border-radius: 9999px;
-  border: 1px solid rgb(26 21 35 / 0.12);
-  background: #fff;
+  border: 1px solid var(--sf-line);
+  background: var(--sf-canvas);
   font-size: 0.8125rem;
-  font-weight: 600;
-  color: rgb(26 21 35 / 0.65);
+  font-weight: 700;
+  color: var(--sf-muted);
   cursor: pointer;
+  font-family: inherit;
 }
-.storefront-inquiry__tab.is-on {
-  background: #1a1523;
+
+.sf-tab.is-on {
+  background: var(--sf-ink);
   border-color: transparent;
-  color: #fff;
+  color: var(--sf-surface);
 }
-.storefront-inquiry__form {
+
+.sf--dark .sf-tab.is-on {
+  color: #0c0b0e;
+}
+
+.sf-form {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
   margin-top: 1rem;
 }
-.storefront-inquiry__field {
+
+.sf-field {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
   font-size: 0.75rem;
-  font-weight: 600;
-  color: rgb(26 21 35 / 0.55);
+  font-weight: 700;
+  color: var(--sf-muted);
 }
-.storefront-inquiry__field input,
-.storefront-inquiry__field textarea {
-  min-height: 2.5rem;
-  padding: 0.55rem 0.75rem;
-  border-radius: 0.75rem;
-  border: 1px solid rgb(26 21 35 / 0.14);
-  background: #fff;
-  font-size: 0.9375rem;
+
+.sf-field input,
+.sf-field textarea {
+  min-height: 2.6rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 0.8rem;
+  border: 1px solid var(--sf-line);
+  background: var(--sf-canvas);
+  font-size: 1rem;
   font-weight: 500;
-  color: #1a1523;
+  color: var(--sf-ink);
   font-family: inherit;
 }
-.storefront-inquiry__field textarea {
-  min-height: 4.5rem;
+
+.sf-field textarea {
+  min-height: 4.75rem;
   resize: vertical;
 }
-.storefront-inquiry__error {
+
+.sf-msg {
   margin: 0;
   font-size: 0.8125rem;
+  font-weight: 650;
+}
+
+.sf-msg--error {
   color: #b91c1c;
 }
-.storefront-inquiry__ok {
-  margin: 0;
-  font-size: 0.8125rem;
-  color: #047857;
+
+.sf-msg--ok {
+  color: var(--sf-ok);
 }
-.storefront-link-btn {
+
+.sf-text-btn {
   border: 0;
   background: transparent;
   font-size: 0.8125rem;
-  font-weight: 600;
-  color: #1a1523;
+  font-weight: 700;
+  color: var(--sf-ink);
   text-decoration: underline;
   text-underline-offset: 3px;
   cursor: pointer;
-  margin-top: 0.25rem;
+  font-family: inherit;
+  align-self: center;
+}
+
+.sf-note {
+  margin: 1rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--sf-hold);
+}
+
+.sf-more {
+  margin-top: 1.35rem;
+  border-radius: 0.95rem;
+  border: 1px solid var(--sf-line);
+  background: var(--sf-surface);
+  padding: 0.85rem 1rem;
+}
+
+.sf-more summary {
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.sf-more p {
+  margin: 0.65rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--sf-muted);
+}
+
+.sf-more__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem 1.1rem;
+  margin-top: 0.85rem;
+}
+
+.sf-more__links a {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--sf-ink);
+}
+
+.sf-dock {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem 1.15rem calc(0.75rem + env(safe-area-inset-bottom));
+  background: var(--sf-dock);
+  border-top: 1px solid var(--sf-line);
+  backdrop-filter: blur(14px);
+  max-width: 40rem;
+  margin: 0 auto;
+}
+
+.sf-dock__primary {
+  flex: 1.35;
+  min-height: 2.85rem;
+  font-size: 0.9rem;
+}
+
+.sf-dock__secondary {
+  flex: 1;
+  min-height: 2.85rem;
 }
 </style>

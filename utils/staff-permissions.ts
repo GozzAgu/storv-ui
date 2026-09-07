@@ -32,7 +32,7 @@ export interface LegacyStaffAccessFields {
  *   and create receipts (POS sales) regardless of role, so these default to true.
  * - `products.{create,edit,delete}`: only a manager explicitly granted `canManageInventory`.
  * - `receipts.edit`: full-field receipt edit was manager-implicit only.
- * - `receipts.refund`: the narrow cancel/refund carve-out — managers implicitly had it, or any
+ * - `receipts.refund`: the narrow cancel/refund carve-out. managers implicitly had it, or any
  *   staff/intern explicitly granted `canManageReceipts`.
  * - `receipts.delete`: was owner-only (`usePermissions.canDeleteReceipts = !isStaff`); nobody
  *   gets it by migration.
@@ -61,7 +61,7 @@ export function deriveDefaultPermissions(staff: LegacyStaffAccessFields): StaffP
 }
 
 /**
- * Single source of truth for "what can this staff member actually do" — used client-side (via
+ * Single source of truth for "what can this staff member actually do". used client-side (via
  * usePermissions), by the one-time backfill script, and mirrored (as `legacyHasPermission`) in
  * firestore.rules. Returns the stored grant if present, else derives it from legacy fields.
  */
@@ -91,7 +91,7 @@ export function getPermissionAction(
   return modulePermissions[action] === true
 }
 
-/** Compact roster-badge summary — "Full access" / "View only" / "Custom" — never a stored label. */
+/** Compact roster-badge summary. "Full access" / "View only" / "Custom". never a stored label. */
 export function summarizeStaffPermissions(
   permissions: StaffPermissions
 ): 'full' | 'view-only' | 'custom' {

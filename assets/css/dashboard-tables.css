@@ -742,7 +742,7 @@ main[data-dashboard-main] .activity-log-shell .dashboard-table tbody td {
   padding-bottom: 0.875rem;
 }
 
-/* Storefront inquiries — denser rows for more visible queue */
+/* Storefront inquiries. denser rows for more visible queue */
 main[data-dashboard-main]
   :is(.data-table-shell, .dash-table-shell)
   .dashboard-table--storefront-compact

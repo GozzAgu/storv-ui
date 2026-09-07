@@ -864,7 +864,7 @@ html.dark .dash-list__value--warning {
   color: var(--dash-card-muted);
 }
 
-/* Progress tracks read as long dashes — keep share % in text only. */
+/* Progress tracks read as long dashes. keep share % in text only. */
 .dash-bar,
 .dash-bar__fill {
   display: none !important;

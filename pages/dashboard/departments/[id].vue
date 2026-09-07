@@ -1458,7 +1458,7 @@ function handleIosStaffRowClick(member: Staff) {
   }
 }
 
-// Legacy field, no longer written on new staff — degrades to "Not assigned" once every staff
+// Legacy field, no longer written on new staff. degrades to "Not assigned" once every staff
 // member in a department has moved to the permission matrix (see StaffPermissionsPanel).
 function syncDepartmentManagerFromStaff() {
   if (!department.value) return

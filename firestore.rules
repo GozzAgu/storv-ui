@@ -80,7 +80,7 @@ service cloud.firestore {
                 : false); // receipts.delete: never granted by migration
     }
 
-    // Single source of truth for "can this member do <action> on <moduleName>" — checks the new
+    // Single source of truth for "can this member do <action> on <moduleName>". checks the new
     // `permissions` map when present, else falls back to the legacy role/grant fields.
     function memberHasPermission(userId, storeId, moduleName, action) {
       return isActiveStoreMember(userId, storeId) &&
@@ -97,7 +97,7 @@ service cloud.firestore {
 
     // Any grant that implies elevated (non-view-only) access, across either module. Used only for
     // the handful of collections outside the v1 permission matrix (customers, seller loans, sales
-    // leads, notifications) that used to be gated on role=='manager' — a staff member trusted with
+    // leads, notifications) that used to be gated on role=='manager'. a staff member trusted with
     // managing products or receipts is treated as trusted for these lighter-weight, adjacent ops too.
     function memberHasAnyManage(userId, storeId) {
       return memberHasAnyProductsManage(userId, storeId)
@@ -144,7 +144,7 @@ service cloud.firestore {
       return isStoreOwnerForPath(userId) || memberHasAnyManage(userId, storeId);
     }
 
-    // Create new receipts (POS): owner, or any active store member — receipts.create defaults
+    // Create new receipts (POS): owner, or any active store member. receipts.create defaults
     // true for every staff member (see deriveDefaultPermissions), same as it always has.
     function canCreateReceipt(userId, storeId) {
       return isStoreOwnerForPath(userId) || isActiveStoreMember(userId, storeId);
@@ -156,7 +156,7 @@ service cloud.firestore {
         memberHasPermission(userId, storeId, 'products', action);
     }
 
-    // Undifferentiated "can manage products at all" — kept for collections (customer buybacks)
+    // Undifferentiated "can manage products at all". kept for collections (customer buybacks)
     // that don't need per-action granularity.
     function canManageInventoryStructure(userId, storeId) {
       return (isStoreOwnerForPath(userId) && ownsStore(userId, storeId)) ||
@@ -434,7 +434,7 @@ service cloud.firestore {
                          request.resource.data.storeId == storeId;
 
           // Full update: owner or products.edit grant. Any other active member: only
-          // dateOut/updatedAt (sale or return-to-stock) — access to mark a sale doesn't require a
+          // dateOut/updatedAt (sale or return-to-stock). access to mark a sale doesn't require a
           // products grant, it's the POS flow every active member can perform.
           allow update: if (canManageProducts(userId, storeId, 'edit') &&
                          resourceMatchesStore(storeId) &&
@@ -622,13 +622,13 @@ service cloud.firestore {
           allow delete: if isStoreOwnerForPath(userId);
         }
 
-        // Guest inquiries / reservations — client read for staff; writes via Admin SDK only.
+        // Guest inquiries / reservations. client read for staff; writes via Admin SDK only.
         match /storefrontInquiries/{inquiryId} {
           allow read: if canAccessStoreData(userId, storeId);
           allow create, update, delete: if false;
         }
 
-        // Aggregate public view counts — staff read; Admin SDK writes only.
+        // Aggregate public view counts. staff read; Admin SDK writes only.
         match /storefrontAnalytics/{docId} {
           allow read: if canAccessStoreData(userId, storeId);
           allow create, update, delete: if false;
@@ -653,7 +653,7 @@ service cloud.firestore {
     match /storefronts/{slug} {
       // Public catalogue: published profiles are world-readable.
       // Owners/managers can always read their own docs (incl. unpublished).
-      // Note: getDoc on a *missing* doc still fails if rules touch resource.data —
+      // Note: getDoc on a *missing* doc still fails if rules touch resource.data -
       // callers must soft-catch permission-denied for existence checks.
       allow read: if resource.data.isPublished == true
                   || (isAuthenticated()

@@ -1,5 +1,5 @@
 /**
- * Fixed global top bar — logo, assistant, profile, theme on all iOS in-page routes.
+ * Fixed global top bar. logo, assistant, profile, theme on all iOS in-page routes.
  */
 
 html.capacitor-ios.capacitor-native {

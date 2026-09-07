@@ -1,5 +1,5 @@
 /**
- * iOS drawer system — modern bottom sheets (menu, CRUD, assistant).
+ * iOS drawer system. modern bottom sheets (menu, CRUD, assistant).
  */
 
 html.capacitor-ios.capacitor-native {
@@ -196,7 +196,7 @@ html.capacitor-ios.capacitor-native .ios-drawer .ios-drawer-menu__row--active {
   background: transparent;
 }
 
-/* Form fields — appearance lives in ios-fields.css (auth parity) */
+/* Form fields. appearance lives in ios-fields.css (auth parity) */
 html.capacitor-ios.capacitor-native .ios-drawer:not(.dashboard-native-sheet--crud) label,
 html.capacitor-ios.capacitor-native .ios-drawer:not(.dashboard-native-sheet--crud) .dash-field-label,
 html.capacitor-ios.capacitor-native .ios-drawer:not(.dashboard-native-sheet--crud) .dash-drawer-label {

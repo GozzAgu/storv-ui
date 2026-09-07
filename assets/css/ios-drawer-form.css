@@ -1,5 +1,5 @@
 /**
- * iOS CRUD drawer forms — clean habit-tracker style sheets.
+ * iOS CRUD drawer forms. clean habit-tracker style sheets.
  * Loaded after ios-system.css so drawer fields win over global form chrome.
  */
 
@@ -129,7 +129,7 @@ html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .io
   letter-spacing: 0.02em;
 }
 
-/* ── Inputs & selects — appearance lives in ios-fields.css (auth parity) ── */
+/* ── Inputs & selects. appearance lives in ios-fields.css (auth parity) ── */
 html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .app-field:not(.ios-search-bar__input),
 html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__input,
 html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__select,
@@ -218,7 +218,7 @@ html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .io
   flex-direction: row-reverse;
 }
 
-/* Pick-list rows already pad themselves — don't pad the checkbox label again */
+/* Pick-list rows already pad themselves. don't pad the checkbox label again */
 html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .dash-drawer-pick-row label.group {
   padding: 0 !important;
 }

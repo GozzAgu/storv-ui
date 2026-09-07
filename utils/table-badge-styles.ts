@@ -1,7 +1,7 @@
 const badgeBase =
   'inline-flex max-w-full items-center whitespace-nowrap rounded-full px-2.5 py-0.5 text-[11px] font-semibold leading-tight'
 
-/** @deprecated Role tiers no longer exist — see staffAccessBadgeClass/staffAccessLabel. Kept only
+/** @deprecated Role tiers no longer exist. see staffAccessBadgeClass/staffAccessLabel. Kept only
  *  for any leftover legacy staff.role display. */
 export function staffRoleBadgeClass(role: string): string {
   switch (role) {

@@ -2,7 +2,7 @@
  * Granular, per-module staff permission matrix.
  *
  * Replaces the old fixed `role: 'manager' | 'staff' | 'intern'` tier with an explicit grant per
- * feature module. A staff member's actual access is never read off `role` directly anymore —
+ * feature module. A staff member's actual access is never read off `role` directly anymore -
  * always go through `resolveStaffPermissions()` / `usePermissions().can()` in
  * utils/staff-permissions.ts.
  */

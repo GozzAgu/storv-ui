@@ -36,7 +36,7 @@ export interface CategoryTabOption {
 const props = defineProps<{
   options: CategoryTabOption[]
   ariaLabel: string
-  /** Scroll horizontally instead of wrapping to multiple rows — use when there are many tabs. */
+  /** Scroll horizontally instead of wrapping to multiple rows. use when there are many tabs. */
   scroll?: boolean
 }>()
 

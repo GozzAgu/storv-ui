@@ -110,7 +110,7 @@ export interface StorefrontPublicListing {
 
 /**
  * Private guest inquiry / reservation.
- * users/{owner}/stores/{storeId}/storefrontInquiries/{id} — Admin SDK writes only.
+ * users/{owner}/stores/{storeId}/storefrontInquiries/{id}. Admin SDK writes only.
  */
 export interface StorefrontInquiry {
   id: string

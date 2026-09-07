@@ -14,11 +14,11 @@ import {
 /**
  * Composable for checking user permissions.
  *
- * Staff access is no longer a fixed role tier (manager/staff/intern) — it's a per-module grant
+ * Staff access is no longer a fixed role tier (manager/staff/intern). it's a per-module grant
  * matrix (see types/staff-permissions.ts). `permissions`/`can()` are the source of truth; every
  * other flag below is a thin, name-preserving wrapper over them so existing consumers keep
  * working unchanged. `role` on a Staff doc is deprecated (kept only for migration fallback via
- * `resolveStaffPermissions` — see utils/staff-permissions.ts) and should not be read directly
+ * `resolveStaffPermissions`. see utils/staff-permissions.ts) and should not be read directly
  * anywhere new.
  */
 export const usePermissions = () => {
@@ -28,14 +28,14 @@ export const usePermissions = () => {
 
   const isStaff = computed(() => userStore.userData?.role === 'staff')
 
-  /** The calling account's effective grant matrix — full access for the store owner. */
+  /** The calling account's effective grant matrix. full access for the store owner. */
   const permissions = computed<StaffPermissions>(() => {
     if (userStore.isSuperAdmin) return FULL_STAFF_PERMISSIONS
     const member = staffStore.getCurrentStaffMember
     return member ? resolveStaffPermissions(member) : EMPTY_STAFF_PERMISSIONS
   })
 
-  /** Generic per-module, per-action check — prefer this over the specific flags below in new code. */
+  /** Generic per-module, per-action check. prefer this over the specific flags below in new code. */
   function can(module: PermissionModule, action: PermissionAction): boolean {
     if (userStore.isSuperAdmin) return true
     return getPermissionAction(permissions.value, module, action)
@@ -91,7 +91,7 @@ export const usePermissions = () => {
   const canManageBilling = computed(() => userStore.isSuperAdmin)
 
   /** Adding/settling a sale commission. Owner-only for now; not part of the v1 permission matrix
-   *  (staff management, billing, and commissions are deliberately out of scope — see the staff
+   *  (staff management, billing, and commissions are deliberately out of scope. see the staff
    *  permission matrix plan). */
   const canManageCommissions = computed(() => userStore.isSuperAdmin)
 

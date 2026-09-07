@@ -1580,7 +1580,7 @@ const settingsTabs = computed(() => {
 const activeSettingsTab = ref(settingsTabs.value[0]?.value ?? 'account')
 // Role/plan data (userStore.isSuperAdmin, isStaff) can still be loading when this component is
 // set up, so the very first computed tab list may be missing "Account & workspace"/"Branches"/
-// "Your assignment" — keep snapping to the first tab until the user actually picks one themselves,
+// "Your assignment". keep snapping to the first tab until the user actually picks one themselves,
 // not just until the current value happens to still be valid.
 let hasPickedSettingsTab = false
 

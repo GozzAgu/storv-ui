@@ -49,7 +49,7 @@
         v-else-if="!filtered.length"
         :icon="ShoppingBagIcon"
         title="No matching inquiries"
-        description="Try another status filter — Pending, Confirmed, or All."
+        description="Try another status filter: Pending, Confirmed, or All."
         :fill="false"
       />
 
@@ -59,7 +59,7 @@
           :key="row.id"
           :title="row.customerName"
           :subtitle="iosSubtitle(row)"
-          :amount="row.listingPrice != null ? formatMoney(row.listingPrice) : '—'"
+          :amount="row.listingPrice != null ? formatMoney(row.listingPrice) : '-'"
           :amount-tone="iosAmountTone(row)"
           :date="formatWhenShort(row.createdAtMs)"
           :variant="iosVariant(row.status)"
@@ -164,7 +164,7 @@
             v-else-if="!filtered.length"
             :icon="ShoppingBagIcon"
             title="No matching inquiries"
-            description="Try another status filter — All, Pending, or Confirmed."
+            description="Try another status filter: All, Pending, or Confirmed."
           />
 
           <div v-else class="overflow-x-auto">
@@ -223,7 +223,7 @@
                     <span v-if="row.listingPrice != null" class="dashboard-table__money">{{
                       formatMoney(row.listingPrice)
                     }}</span>
-                    <span v-else class="dashboard-table__muted">—</span>
+                    <span v-else class="dashboard-table__muted">-</span>
                   </td>
                   <td class="dashboard-table__col-status">
                     <span
@@ -519,7 +519,7 @@ function canSendPaymentLink(row: InquiryRow) {
 
 function canComplete(row: InquiryRow) {
   // After the customer pays, settle may already create the sale receipt while
-  // leaving the inquiry confirmed — Mark complete still closes the request.
+  // leaving the inquiry confirmed. Mark complete still closes the request.
   return row.status === 'confirmed' && isPaid(row)
 }
 
@@ -533,7 +533,7 @@ function paymentLabel(row: InquiryRow) {
   if (row.paymentLinkStatus === 'failed') return 'Failed'
   if (row.paymentLinkStatus === 'expired') return 'Expired'
   if (row.status === 'confirmed') return 'No link'
-  return '—'
+  return '-'
 }
 
 function paymentBadgeClass(row: InquiryRow) {
@@ -724,7 +724,7 @@ async function load() {
       return
     }
 
-    // Prefer Firestore client reads on native — same path as buybacks/leads and
+    // Prefer Firestore client reads on native. same path as buybacks/leads and
     // works even when the Capacitor shell's hosted API is behind or unreachable.
     const db = useFirestore().getFirestoreInstance()
     if (!db) throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
