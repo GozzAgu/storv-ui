@@ -6,7 +6,7 @@ test.describe('Authenticated dashboard smoke', () => {
     await gotoDashboard(page, '/dashboard/settings')
 
     if (await isLoginPage(page)) {
-      test.skip(true, 'Auth storage state missing — run tests/auth.setup.ts first')
+      test.skip(true, 'Auth storage state missing. run tests/auth.setup.ts first')
     }
 
     const upgradeButton = page.getByRole('button', { name: /^Upgrade$/i })

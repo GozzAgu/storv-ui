@@ -37,7 +37,7 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
 
-const { actualTheme, setTheme, applyTheme } = useTheme()
+const { actualTheme, setTheme, applyTheme, initTheme } = useTheme()
 
 const isDark = computed(() => actualTheme.value === 'dark')
 
@@ -46,6 +46,7 @@ const toggleTheme = () => {
 }
 
 onMounted(() => {
+  initTheme()
   applyTheme()
 })
 </script>

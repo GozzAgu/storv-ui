@@ -15,7 +15,7 @@
           {{ log.userDisplayName }} · {{ formatWhen(log.createdAt) }}
         </p>
         <p v-if="log.previousValue != null || log.newValue != null" class="mt-0.5 text-gray-600 dark:text-gray-300">
-          {{ log.previousValue ?? '—' }} → {{ log.newValue ?? '—' }}
+          {{ log.previousValue ?? '-' }} → {{ log.newValue ?? '-' }}
         </p>
       </li>
     </ul>

@@ -675,7 +675,7 @@ export const useStaffStore = defineStore('staff', {
       const normalizedLastName = normalizeEntityName(staffData.lastName)
 
       // Per-module permission matrix is the source of truth going forward. `role` is no longer
-      // written for new staff (see composables/useStaff.ts#Staff.role) — pass `permissions`
+      // written for new staff (see composables/useStaff.ts#Staff.role). pass `permissions`
       // explicitly (StaffPermissionsPanel does), or a view-only baseline is derived.
       const permissions = staffData.permissions ?? deriveDefaultPermissions({})
 
@@ -894,7 +894,7 @@ export const useStaffStore = defineStore('staff', {
         } else {
           // Use hierarchical path: users/{userId}/stores/{storeId}/departments/{departmentId}/staff/{staffId}
           const staffRef = getStaffDocument(db, userId, storeId, departmentId, staffId)
-          // Writing a fresh permission matrix supersedes the legacy role/grant fields — clear
+          // Writing a fresh permission matrix supersedes the legacy role/grant fields. clear
           // them so the doc doesn't carry stale, contradictory data (resolveStaffPermissions
           // already prefers `permissions` when present, but a clean doc is easier to reason about).
           const legacyFieldClears =

@@ -39,7 +39,7 @@ const props = withDefaults(
 )
 
 // type="number" inputs emit strings from the DOM even without a `.number`
-// v-model modifier — coerce here so every numeric field bound through this
+// v-model modifier. coerce here so every numeric field bound through this
 // component (price, quantity, salary…) round-trips as an actual number
 // instead of silently failing strict `typeof === 'number'` checks upstream.
 const model = defineModel<string | number | null>({

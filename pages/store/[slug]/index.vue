@@ -1,248 +1,315 @@
 <template>
-  <div class="storefront-page">
-    <header class="storefront-page__top">
-      <NuxtLink to="/" class="storefront-page__brand">Storvv</NuxtLink>
-      <div class="storefront-page__top-actions">
-        <button type="button" class="storefront-share-btn" @click="shareStore">
-          {{ shareLabel }}
-        </button>
-        <p class="storefront-page__brand-note">Digital showroom</p>
+  <div class="sf" :class="{ 'sf--dark': isDark }">
+    <header class="sf-chrome">
+      <div class="sf-chrome__inner">
+        <div class="sf-chrome__brand">
+          <img
+            v-if="store?.logoUrl"
+            :src="store.logoUrl"
+            alt=""
+            class="sf-chrome__logo"
+            width="36"
+            height="36"
+          />
+          <div class="sf-chrome__identity">
+            <p class="sf-chrome__name">{{ store?.displayName || 'Showroom' }}</p>
+            <p v-if="store?.city" class="sf-chrome__meta">{{ store.city }}</p>
+          </div>
+        </div>
+        <div class="sf-chrome__actions">
+          <ThemeToggle />
+          <a
+            v-if="primaryContactHref"
+            :href="primaryContactHref"
+            class="sf-btn sf-btn--ghost"
+            :target="primaryContactIsExternal ? '_blank' : undefined"
+            :rel="primaryContactIsExternal ? 'noopener' : undefined"
+          >
+            {{ primaryContactLabel }}
+          </a>
+          <button type="button" class="sf-btn sf-btn--ghost" @click="shareStore">
+            {{ shareLabel }}
+          </button>
+        </div>
       </div>
     </header>
 
-    <div v-if="pending" class="storefront-page__state">Loading catalogue...</div>
-    <div v-else-if="error" class="storefront-page__state storefront-page__state--error">
-      {{ error }}
-    </div>
+    <div v-if="pending" class="sf-state">Loading catalogue…</div>
+    <div v-else-if="error" class="sf-state sf-state--error">{{ error }}</div>
+
     <template v-else-if="store">
-      <section class="storefront-hero">
-        <h1 class="storefront-hero__title">{{ store.displayName }}</h1>
-        <p v-if="store.tagline" class="storefront-hero__tagline">{{ store.tagline }}</p>
-        <p v-if="store.description" class="storefront-hero__desc">{{ store.description }}</p>
-        <p v-if="store.city" class="storefront-hero__meta">{{ store.city }}</p>
-        <div class="storefront-hero__contacts">
-          <a v-if="store.phonePublic" :href="`tel:${store.phonePublic}`" class="storefront-link"
-            >Call</a
-          >
-          <a
-            v-if="store.whatsappE164"
-            :href="whatsappHref"
-            class="storefront-link"
-            target="_blank"
-            rel="noopener"
-            >WhatsApp</a
-          >
-          <a v-if="store.emailPublic" :href="`mailto:${store.emailPublic}`" class="storefront-link"
-            >Email</a
-          >
-          <a
-            v-if="store.social?.instagram"
-            :href="store.social.instagram"
-            class="storefront-link"
-            target="_blank"
-            rel="noopener"
-            >Instagram</a
-          >
+      <section class="sf-hero">
+        <p class="sf-hero__eyebrow">Digital showroom</p>
+        <h1 class="sf-hero__title">{{ store.displayName }}</h1>
+        <p class="sf-hero__tagline">
+          {{ store.tagline || 'Browse what’s available, then message the shop or pay online.' }}
+        </p>
+        <div class="sf-hero__steps" aria-label="How to use this showroom">
+          <p><span>1</span> Browse products</p>
+          <p><span>2</span> Open an item</p>
+          <p><span>3</span> Pay or contact the shop</p>
         </div>
-        <p v-if="store.collectionInfo" class="storefront-hero__note">{{ store.collectionInfo }}</p>
-        <p v-if="store.warrantyInfo" class="storefront-hero__note">{{ store.warrantyInfo }}</p>
+        <a href="#catalogue" class="sf-btn sf-btn--primary sf-hero__cta">Browse products</a>
       </section>
 
-      <section v-if="recent.length && !search && !category" class="storefront-recent">
-        <h2 class="storefront-recent__title">Recently added</h2>
-        <ul class="storefront-recent__row">
+      <section
+        v-if="recent.length && !search && !category"
+        class="sf-section sf-recent"
+        aria-labelledby="sf-recent-title"
+      >
+        <div class="sf-section__head">
+          <h2 id="sf-recent-title" class="sf-section__title">Just in</h2>
+          <p class="sf-section__hint">Newest arrivals. Tap any item for details</p>
+        </div>
+        <ul class="sf-recent__row">
           <li v-for="item in recent" :key="`r-${item.id}`">
-            <NuxtLink :to="productHref(item.id)" class="storefront-recent__card">
-              <div
-                v-if="item.imageUrl"
-                class="storefront-recent__img"
-                :style="{ backgroundImage: `url(${item.imageUrl})` }"
+            <NuxtLink :to="productHref(item.id)" class="sf-recent__card">
+              <StorefrontMedia
+                :src="item.imageUrl"
+                :title="item.title"
+                :seed="item.id"
+                :category-name="item.categoryName"
+                :category-path="item.categoryPath"
+                size="recent"
               />
-              <div v-else class="storefront-recent__img storefront-recent__img--empty" />
-              <p class="storefront-recent__name">{{ item.title }}</p>
-              <p class="storefront-recent__price">{{ formatMoney(item.price, item.currency) }}</p>
+              <p class="sf-recent__name">{{ item.title }}</p>
+              <p class="sf-recent__price">{{ formatMoney(item.price, item.currency) }}</p>
             </NuxtLink>
           </li>
         </ul>
       </section>
 
-      <div class="storefront-filters">
-        <input
-          v-model="search"
-          type="search"
-          class="storefront-search"
-          placeholder="Search products..."
-          @input="debouncedReload"
-        />
-        <div class="storefront-chips">
-          <button
-            type="button"
-            class="storefront-chip"
-            :class="{ 'storefront-chip--on': !category }"
-            @click="setCategory('')"
-          >
-            All
-          </button>
-          <button
-            v-for="c in categories"
-            :key="c"
-            type="button"
-            class="storefront-chip"
-            :class="{ 'storefront-chip--on': category === c }"
-            @click="setCategory(c)"
-          >
-            {{ c }}
-          </button>
+      <section id="catalogue" class="sf-section sf-catalogue" aria-labelledby="sf-catalogue-title">
+        <div class="sf-section__head">
+          <h2 id="sf-catalogue-title" class="sf-section__title">All products</h2>
+          <p class="sf-section__hint">Search or filter, then tap a product to view and act</p>
         </div>
-        <div class="storefront-sort">
-          <button
-            type="button"
-            class="storefront-chip"
-            :class="{ 'storefront-chip--on': sort === '' }"
-            @click="setSort('')"
-          >
-            Featured
-          </button>
-          <button
-            type="button"
-            class="storefront-chip"
-            :class="{ 'storefront-chip--on': sort === 'recent' }"
-            @click="setSort('recent')"
-          >
-            Newest
-          </button>
-          <button
-            type="button"
-            class="storefront-chip"
-            :class="{ 'storefront-chip--on': sort === 'price_asc' }"
-            @click="setSort('price_asc')"
-          >
-            Price ↑
-          </button>
-          <button
-            type="button"
-            class="storefront-chip"
-            :class="{ 'storefront-chip--on': sort === 'price_desc' }"
-            @click="setSort('price_desc')"
-          >
-            Price ↓
-          </button>
-        </div>
-      </div>
 
-      <p class="storefront-count">
-        {{ items.length }} product{{ items.length === 1 ? '' : 's' }}
-        <span v-if="compareIds.length" class="storefront-count__compare">
-          · {{ compareIds.length }} selected to compare
-        </span>
-      </p>
+        <label class="sf-search">
+          <span class="sf-sr-only">Search products</span>
+          <input
+            v-model="search"
+            type="search"
+            placeholder="Search by name…"
+            autocomplete="off"
+            @input="debouncedReload"
+          />
+        </label>
 
-      <ul v-if="items.length" class="storefront-list">
-        <li v-for="item in items" :key="item.id" class="storefront-list__item">
-          <NuxtLink :to="productHref(item.id)" class="storefront-card">
-            <div
-              v-if="item.imageUrl"
-              class="storefront-card__thumb"
-              :style="{ backgroundImage: `url(${item.imageUrl})` }"
-            />
-            <div class="storefront-card__main">
-              <p class="storefront-card__title">{{ item.title }}</p>
-              <p class="storefront-card__cat">{{ item.categoryPath }}</p>
-              <p v-if="item.attributes?.length" class="storefront-card__attrs">
-                {{
-                  item.attributes
-                    .slice(0, 3)
-                    .map((a: { value: string }) => a.value)
-                    .join(' · ')
-                }}
-              </p>
-            </div>
-            <div class="storefront-card__side">
-              <p class="storefront-card__price">{{ formatMoney(item.price, item.currency) }}</p>
-              <span
-                class="storefront-card__avail"
-                :class="{
-                  'storefront-card__avail--yes': item.availability === 'available',
-                  'storefront-card__avail--hold': item.availability === 'reserved',
-                  'storefront-card__avail--no': item.availability === 'unavailable',
-                }"
-              >
-                {{
-                  item.availability === 'available'
-                    ? 'Available'
-                    : item.availability === 'reserved'
-                      ? 'Reserved'
-                      : 'Unavailable'
-                }}
-              </span>
-            </div>
-          </NuxtLink>
-          <button
-            type="button"
-            class="storefront-compare-toggle"
-            :class="{ 'is-on': compareIds.includes(item.id) }"
-            :disabled="!compareIds.includes(item.id) && compareIds.length >= 3"
-            @click="toggleCompare(item.id)"
-          >
-            {{ compareIds.includes(item.id) ? 'Comparing' : 'Compare' }}
-          </button>
-        </li>
-      </ul>
-      <p v-else class="storefront-page__state">No products match these filters.</p>
-
-      <div v-if="compareIds.length >= 2" class="storefront-compare-bar">
-        <p class="storefront-compare-bar__label">
-          Compare {{ compareIds.length }} items
-        </p>
-        <button type="button" class="storefront-share-btn" @click="showCompare = true">
-          View comparison
-        </button>
-        <button type="button" class="storefront-link-btn" @click="compareIds = []">Clear</button>
-      </div>
-
-      <div
-        v-if="showCompare && compareItems.length >= 2"
-        class="storefront-compare-modal"
-        role="dialog"
-        aria-modal="true"
-        @click.self="showCompare = false"
-      >
-        <div class="storefront-compare-panel">
-          <header class="storefront-compare-panel__head">
-            <h2>Compare</h2>
-            <button type="button" class="storefront-link-btn" @click="showCompare = false">
-              Close
+        <div v-if="categories.length" class="sf-filter-block">
+          <p class="sf-filter-label">Category</p>
+          <div class="sf-chips" role="group" aria-label="Filter by category">
+            <button
+              type="button"
+              class="sf-chip"
+              :class="{ 'is-on': !category }"
+              @click="setCategory('')"
+            >
+              All
             </button>
-          </header>
-          <div class="storefront-compare-grid" :style="{ '--cols': compareItems.length }">
-            <div v-for="item in compareItems" :key="item.id" class="storefront-compare-col">
-              <div
-                v-if="item.imageUrl"
-                class="storefront-compare-col__img"
-                :style="{ backgroundImage: `url(${item.imageUrl})` }"
-              />
-              <p class="storefront-compare-col__title">{{ item.title }}</p>
-              <p class="storefront-compare-col__price">
-                {{ formatMoney(item.price, item.currency) }}
-              </p>
-              <p class="storefront-compare-col__avail">{{ item.availability }}</p>
-              <p class="storefront-compare-col__cat">{{ item.categoryPath }}</p>
-              <dl>
-                <div v-for="attr in item.attributes || []" :key="attr.key">
-                  <dt>{{ attr.label }}</dt>
-                  <dd>{{ attr.value }}</dd>
-                </div>
-              </dl>
-              <NuxtLink :to="productHref(item.id)" class="storefront-link">Open →</NuxtLink>
-            </div>
+            <button
+              v-for="c in categories"
+              :key="c"
+              type="button"
+              class="sf-chip"
+              :class="{ 'is-on': category === c }"
+              @click="setCategory(c)"
+            >
+              {{ c }}
+            </button>
+          </div>
+        </div>
+
+        <div class="sf-filter-block">
+          <p class="sf-filter-label">Sort</p>
+          <div class="sf-chips" role="group" aria-label="Sort products">
+            <button
+              type="button"
+              class="sf-chip"
+              :class="{ 'is-on': sort === '' }"
+              @click="setSort('')"
+            >
+              Featured
+            </button>
+            <button
+              type="button"
+              class="sf-chip"
+              :class="{ 'is-on': sort === 'recent' }"
+              @click="setSort('recent')"
+            >
+              Newest
+            </button>
+            <button
+              type="button"
+              class="sf-chip"
+              :class="{ 'is-on': sort === 'price_asc' }"
+              @click="setSort('price_asc')"
+            >
+              Lowest price
+            </button>
+            <button
+              type="button"
+              class="sf-chip"
+              :class="{ 'is-on': sort === 'price_desc' }"
+              @click="setSort('price_desc')"
+            >
+              Highest price
+            </button>
+          </div>
+        </div>
+
+        <p class="sf-count" aria-live="polite">
+          {{ items.length }} product{{ items.length === 1 ? '' : 's' }}
+          <span v-if="compareIds.length"> · {{ compareIds.length }} selected to compare</span>
+        </p>
+
+        <ul v-if="items.length" class="sf-grid">
+          <li v-for="item in items" :key="item.id" class="sf-grid__item">
+            <NuxtLink :to="productHref(item.id)" class="sf-card">
+              <div class="sf-card__media-wrap">
+                <StorefrontMedia
+                  :src="item.imageUrl"
+                  :title="item.title"
+                  :seed="item.id"
+                  :category-name="item.categoryName"
+                  :category-path="item.categoryPath"
+                  size="card"
+                >
+                  <span
+                    class="sf-card__badge"
+                    :class="{
+                      'is-yes': item.availability === 'available',
+                      'is-hold': item.availability === 'reserved',
+                      'is-no': item.availability === 'unavailable',
+                    }"
+                  >
+                    {{
+                      item.availability === 'available'
+                        ? 'Available'
+                        : item.availability === 'reserved'
+                          ? 'On hold'
+                          : 'Sold'
+                    }}
+                  </span>
+                </StorefrontMedia>
+              </div>
+              <div class="sf-card__body">
+                <p class="sf-card__title">{{ item.title }}</p>
+                <p class="sf-card__price">{{ formatMoney(item.price, item.currency) }}</p>
+                <p v-if="item.categoryPath" class="sf-card__cat">{{ item.categoryPath }}</p>
+              </div>
+            </NuxtLink>
+            <button
+              type="button"
+              class="sf-card__compare"
+              :class="{ 'is-on': compareIds.includes(item.id) }"
+              :disabled="!compareIds.includes(item.id) && compareIds.length >= 3"
+              :aria-pressed="compareIds.includes(item.id)"
+              @click="toggleCompare(item.id)"
+            >
+              {{ compareIds.includes(item.id) ? 'Selected' : 'Compare' }}
+            </button>
+          </li>
+        </ul>
+        <div v-else class="sf-empty">
+          <p class="sf-empty__title">No products match</p>
+          <p class="sf-empty__hint">Try clearing search or choosing another category.</p>
+          <button
+            v-if="search || category"
+            type="button"
+            class="sf-btn sf-btn--ghost"
+            @click="clearFilters"
+          >
+            Clear filters
+          </button>
+        </div>
+      </section>
+
+      <footer class="sf-footer">
+        <details v-if="store.description || store.collectionInfo || store.warrantyInfo" class="sf-about">
+          <summary>About this shop</summary>
+          <p v-if="store.description">{{ store.description }}</p>
+          <p v-if="store.collectionInfo">{{ store.collectionInfo }}</p>
+          <p v-if="store.warrantyInfo">{{ store.warrantyInfo }}</p>
+        </details>
+        <nav v-if="hasSecondaryContacts" class="sf-footer__contacts" aria-label="Contact">
+          <a v-if="store.phonePublic" :href="`tel:${store.phonePublic}`">Call</a>
+          <a
+            v-if="store.whatsappE164"
+            :href="whatsappHref"
+            target="_blank"
+            rel="noopener"
+            >WhatsApp</a
+          >
+          <a v-if="store.emailPublic" :href="`mailto:${store.emailPublic}`">Email</a>
+          <a
+            v-if="store.social?.instagram"
+            :href="store.social.instagram"
+            target="_blank"
+            rel="noopener"
+            >Instagram</a
+          >
+        </nav>
+        <p class="sf-footer__powered">Powered by Storvv</p>
+      </footer>
+    </template>
+
+    <div v-if="compareIds.length >= 2" class="sf-compare-bar">
+      <p>Compare {{ compareIds.length }} items</p>
+      <button type="button" class="sf-btn sf-btn--light" @click="showCompare = true">
+        View
+      </button>
+      <button type="button" class="sf-compare-bar__clear" @click="compareIds = []">Clear</button>
+    </div>
+
+    <div
+      v-if="showCompare && compareItems.length >= 2"
+      class="sf-compare-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Compare products"
+      @click.self="showCompare = false"
+    >
+      <div class="sf-compare-panel">
+        <header class="sf-compare-panel__head">
+          <h2>Compare</h2>
+          <button type="button" class="sf-btn sf-btn--ghost" @click="showCompare = false">
+            Close
+          </button>
+        </header>
+        <div class="sf-compare-grid" :style="{ '--cols': compareItems.length }">
+          <div v-for="item in compareItems" :key="item.id" class="sf-compare-col">
+            <StorefrontMedia
+              :src="item.imageUrl"
+              :title="item.title"
+              :seed="item.id"
+              :category-name="item.categoryName"
+              :category-path="item.categoryPath"
+              size="compare"
+            />
+            <p class="sf-compare-col__title">{{ item.title }}</p>
+            <p class="sf-compare-col__price">{{ formatMoney(item.price, item.currency) }}</p>
+            <p class="sf-compare-col__avail">{{ item.availability }}</p>
+            <p v-if="item.categoryPath" class="sf-compare-col__cat">{{ item.categoryPath }}</p>
+            <dl>
+              <div v-for="attr in item.attributes || []" :key="attr.key">
+                <dt>{{ attr.label }}</dt>
+                <dd>{{ attr.value }}</dd>
+              </div>
+            </dl>
+            <NuxtLink :to="productHref(item.id)" class="sf-btn sf-btn--primary sf-btn--block">
+              Open product
+            </NuxtLink>
           </div>
         </div>
       </div>
-    </template>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import ThemeToggle from '~/components/ui/ThemeToggle.vue'
+import StorefrontMedia from '~/components/storefront/StorefrontMedia.vue'
 import {
   buildStorefrontShareMessage,
   buildStorefrontWhatsAppShareHref,
@@ -259,6 +326,12 @@ definePageMeta({
 const route = useRoute()
 const slug = computed(() => String(route.params.slug || '').toLowerCase())
 const { ping } = useStorefrontViewPing()
+const { actualTheme, initTheme } = useTheme()
+const isDark = computed(() => actualTheme.value === 'dark')
+
+onMounted(() => {
+  initTheme()
+})
 
 const pending = ref(true)
 const error = ref('')
@@ -281,6 +354,28 @@ const whatsappHref = computed(() => {
   )
   return `https://wa.me/${n}?text=${text}`
 })
+
+const primaryContactHref = computed(() => {
+  if (store.value?.whatsappE164) return whatsappHref.value
+  if (store.value?.phonePublic) return `tel:${store.value.phonePublic}`
+  return ''
+})
+
+const primaryContactLabel = computed(() =>
+  store.value?.whatsappE164 ? 'WhatsApp' : store.value?.phonePublic ? 'Call' : ''
+)
+
+const primaryContactIsExternal = computed(() => Boolean(store.value?.whatsappE164))
+
+const hasSecondaryContacts = computed(
+  () =>
+    Boolean(
+      store.value?.phonePublic ||
+        store.value?.whatsappE164 ||
+        store.value?.emailPublic ||
+        store.value?.social?.instagram
+    )
+)
 
 const compareItems = computed(() =>
   compareIds.value
@@ -327,7 +422,7 @@ async function shareStore() {
   }
   try {
     await navigator.clipboard.writeText(url)
-    shareLabel.value = 'Link copied'
+    shareLabel.value = 'Copied'
   } catch {
     window.open(buildStorefrontWhatsAppShareHref(message), '_blank', 'noopener')
     shareLabel.value = 'WhatsApp'
@@ -342,6 +437,12 @@ function toggleCompare(id: string) {
   if (set.has(id)) set.delete(id)
   else if (set.size < 3) set.add(id)
   compareIds.value = Array.from(set)
+}
+
+function clearFilters() {
+  search.value = ''
+  category.value = ''
+  void load()
 }
 
 let timer: ReturnType<typeof setTimeout> | null = null
@@ -430,380 +531,689 @@ watch(slug, () => void load(), { immediate: true })
 </script>
 
 <style scoped>
-.storefront-page {
+.sf {
+  --sf-ink: #1a1523;
+  --sf-muted: rgb(26 21 35 / 0.58);
+  --sf-faint: rgb(26 21 35 / 0.42);
+  --sf-line: rgb(26 21 35 / 0.1);
+  --sf-canvas: #f3f2f0;
+  --sf-surface: #ffffff;
+  --sf-chrome: rgb(243 242 240 / 0.88);
+  --sf-ok: #047857;
+  --sf-hold: #b45309;
+  --sf-chip-bg: #ffffff;
+  --sf-empty-bg: rgb(255 255 255 / 0.55);
   min-height: 100dvh;
-  padding: 1.25rem 1.25rem 5rem;
-  background: #f5f5f7;
-  color: #1a1523;
+  padding-bottom: 5.5rem;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgb(26 21 35 / 0.05), transparent),
+    var(--sf-canvas);
+  color: var(--sf-ink);
+  font-family:
+    'Quicksand',
+    'Plus Jakarta Sans',
+    system-ui,
+    sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
-.storefront-page__top {
+
+.sf--dark {
+  --sf-ink: #f4f1ea;
+  --sf-muted: rgb(244 241 234 / 0.68);
+  --sf-faint: rgb(244 241 234 / 0.45);
+  --sf-line: rgb(255 255 255 / 0.12);
+  --sf-canvas: #0c0b0e;
+  --sf-surface: #1a1820;
+  --sf-chrome: rgb(12 11 14 / 0.9);
+  --sf-ok: #34d399;
+  --sf-hold: #fbbf24;
+  --sf-chip-bg: #1a1820;
+  --sf-empty-bg: rgb(26 24 32 / 0.7);
+  background:
+    radial-gradient(ellipse 80% 45% at 50% -8%, rgb(154 181 227 / 0.08), transparent),
+    var(--sf-canvas);
+}
+
+.sf-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.sf-chrome {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  backdrop-filter: blur(12px);
+  background: var(--sf-chrome);
+  border-bottom: 1px solid var(--sf-line);
+}
+
+.sf-chrome__inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: 42rem;
-  margin: 0 auto 1.75rem;
-  gap: 1rem;
+  gap: 0.75rem;
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 0.75rem 1.25rem;
 }
-.storefront-page__top-actions {
+
+.sf-chrome__brand {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.65rem;
+  min-width: 0;
 }
-.storefront-page__brand {
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  color: #1a1523;
-  text-decoration: none;
+
+.sf-chrome__logo {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.65rem;
+  object-fit: cover;
+  background: var(--sf-surface);
+  flex-shrink: 0;
 }
-.storefront-page__brand-note {
+
+.sf-chrome__name {
   margin: 0;
-  font-size: 0.6875rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgb(26 21 35 / 0.45);
-}
-.storefront-share-btn {
-  border: 1px solid rgb(26 21 35 / 0.14);
-  background: #fff;
-  border-radius: 9999px;
-  padding: 0.35rem 0.75rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-.storefront-page__state {
-  max-width: 42rem;
-  margin: 3rem auto;
-  text-align: center;
-  color: rgb(26 21 35 / 0.55);
   font-size: 0.9375rem;
-}
-.storefront-page__state--error {
-  color: #b91c1c;
-}
-.storefront-hero,
-.storefront-filters,
-.storefront-count,
-.storefront-list,
-.storefront-recent {
-  max-width: 42rem;
-  margin-left: auto;
-  margin-right: auto;
-}
-.storefront-hero__title {
-  margin: 0;
-  font-size: clamp(1.75rem, 4vw, 2.25rem);
-  font-weight: 650;
-  letter-spacing: -0.03em;
-  line-height: 1.15;
-}
-.storefront-hero__tagline {
-  margin: 0.5rem 0 0;
-  font-size: 1.0625rem;
-  color: rgb(26 21 35 / 0.72);
-}
-.storefront-hero__desc,
-.storefront-hero__meta,
-.storefront-hero__note {
-  margin: 0.75rem 0 0;
-  font-size: 0.875rem;
-  line-height: 1.5;
-  color: rgb(26 21 35 / 0.55);
-}
-.storefront-hero__contacts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem 1rem;
-  margin-top: 1rem;
-}
-.storefront-link {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: #1a1523;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-.storefront-link-btn {
-  border: 0;
-  background: transparent;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: #1a1523;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  cursor: pointer;
-}
-.storefront-recent {
-  margin-top: 1.75rem;
-}
-.storefront-recent__title {
-  margin: 0 0 0.75rem;
-  font-size: 0.8125rem;
-  font-weight: 650;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: rgb(26 21 35 / 0.45);
-}
-.storefront-recent__row {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(7.5rem, 1fr);
-  gap: 0.5rem;
-  overflow-x: auto;
-  padding-bottom: 0.25rem;
-}
-.storefront-recent__card {
-  display: block;
-  text-decoration: none;
-  color: inherit;
-  background: #fff;
-  border: 1px solid rgb(26 21 35 / 0.08);
-  border-radius: 0.875rem;
-  overflow: hidden;
-  padding-bottom: 0.65rem;
-}
-.storefront-recent__img {
-  height: 5.5rem;
-  background: center / cover no-repeat #ececef;
-}
-.storefront-recent__img--empty {
-  background: linear-gradient(135deg, #ececef, #f7f7f8);
-}
-.storefront-recent__name,
-.storefront-recent__price {
-  margin: 0.4rem 0.55rem 0;
-  font-size: 0.75rem;
-}
-.storefront-recent__name {
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.storefront-recent__price {
-  font-weight: 650;
+
+.sf-chrome__meta {
+  margin: 0.1rem 0 0;
+  font-size: 0.6875rem;
+  color: var(--sf-faint);
 }
-.storefront-filters {
-  margin-top: 1.75rem;
-}
-.storefront-search {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border: 1px solid rgb(26 21 35 / 0.1);
-  border-radius: 0.875rem;
-  background: #fff;
-  font-size: 0.9375rem;
-}
-.storefront-chips,
-.storefront-sort {
+
+.sf-chrome__actions {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.375rem;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.sf-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.25rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: 9999px;
+  border: 1px solid var(--sf-line);
+  background: var(--sf-surface);
+  color: var(--sf-ink);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.sf-btn--primary {
+  background: var(--sf-ink);
+  border-color: transparent;
+  color: var(--sf-surface);
+}
+
+.sf--dark .sf-btn--primary {
+  color: #0c0b0e;
+}
+
+.sf-btn--ghost {
+  background: transparent;
+}
+
+.sf-btn--light {
+  background: #fff;
+  border-color: transparent;
+  color: #1a1523;
+}
+
+.sf-btn--block {
+  width: 100%;
   margin-top: 0.75rem;
 }
-.storefront-chip {
-  border: 0;
-  border-radius: 9999px;
-  padding: 0.375rem 0.75rem;
-  background: transparent;
-  color: rgb(26 21 35 / 0.55);
-  font-size: 0.75rem;
-  font-weight: 550;
-  cursor: pointer;
+
+.sf-state {
+  max-width: 44rem;
+  margin: 4rem auto;
+  padding: 0 1.25rem;
+  text-align: center;
+  color: var(--sf-muted);
+  font-size: 0.9375rem;
 }
-.storefront-chip--on {
-  background: #1a1523;
-  color: #fff;
+
+.sf-state--error {
+  color: #b91c1c;
 }
-.storefront-count {
-  margin: 1.25rem auto 0.75rem;
-  font-size: 0.75rem;
-  color: rgb(26 21 35 / 0.45);
+
+.sf-hero,
+.sf-section,
+.sf-footer {
+  max-width: 44rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
 }
-.storefront-count__compare {
-  color: #1a1523;
-  font-weight: 600;
+
+.sf-hero {
+  padding-top: 1.75rem;
+  padding-bottom: 0.5rem;
 }
-.storefront-list {
-  list-style: none;
-  margin: 0 auto;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
+
+.sf-hero__eyebrow {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--sf-faint);
+}
+
+.sf-hero__title {
+  margin: 0.4rem 0 0;
+  font-size: clamp(2rem, 7vw, 2.75rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+
+.sf-hero__tagline {
+  margin: 0.65rem 0 0;
+  max-width: 28rem;
+  font-size: 1rem;
+  line-height: 1.45;
+  color: var(--sf-muted);
+}
+
+.sf-hero__steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.5rem;
+  margin: 1.25rem 0 0;
 }
-.storefront-list__item {
-  position: relative;
+
+.sf-hero__steps p {
+  margin: 0;
+  padding: 0.65rem 0.55rem;
+  border-radius: 0.85rem;
+  background: var(--sf-surface);
+  border: 1px solid var(--sf-line);
+  font-size: 0.6875rem;
+  font-weight: 650;
+  line-height: 1.35;
+  color: var(--sf-muted);
 }
-.storefront-card {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1rem 1.125rem;
-  border-radius: 1rem;
-  background: #fff;
-  border: 1px solid rgb(26 21 35 / 0.08);
+
+.sf-hero__steps span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  margin-right: 0.25rem;
+  border-radius: 9999px;
+  background: var(--sf-ink);
+  color: var(--sf-surface);
+  font-size: 0.625rem;
+  font-weight: 700;
+}
+
+.sf--dark .sf-hero__steps span {
+  color: #0c0b0e;
+}
+
+.sf-hero__cta {
+  margin-top: 1.15rem;
+  min-height: 2.75rem;
+  padding-inline: 1.25rem;
+  font-size: 0.875rem;
+}
+
+.sf-section {
+  margin-top: 2rem;
+}
+
+.sf-section__head {
+  margin-bottom: 0.85rem;
+}
+
+.sf-section__title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.sf-section__hint {
+  margin: 0.25rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--sf-muted);
+}
+
+.sf-recent__row {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0.25rem;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(8.5rem, 42%);
+  gap: 0.65rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sf-recent__card {
+  display: block;
+  scroll-snap-align: start;
   text-decoration: none;
   color: inherit;
-  align-items: stretch;
+  background: var(--sf-surface);
+  border: 1px solid var(--sf-line);
+  border-radius: 1rem;
+  overflow: hidden;
+  padding-bottom: 0.7rem;
 }
-.storefront-card__thumb {
-  width: 3.5rem;
-  flex-shrink: 0;
-  border-radius: 0.65rem;
-  background: center / cover no-repeat #ececef;
-}
-.storefront-card__title {
-  margin: 0;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  letter-spacing: -0.015em;
-}
-.storefront-card__cat,
-.storefront-card__attrs {
-  margin: 0.25rem 0 0;
+
+.sf-recent__name,
+.sf-recent__price {
+  margin: 0.45rem 0.65rem 0;
   font-size: 0.75rem;
-  color: rgb(26 21 35 / 0.5);
 }
-.storefront-card__side {
-  text-align: right;
-  flex-shrink: 0;
+
+.sf-recent__name {
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.storefront-card__price {
-  margin: 0;
-  font-size: 0.9375rem;
-  font-weight: 650;
+
+.sf-recent__price {
+  font-weight: 700;
 }
-.storefront-card__avail {
-  display: inline-block;
-  margin-top: 0.35rem;
+
+.sf-search input {
+  width: 100%;
+  min-height: 2.85rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--sf-line);
+  border-radius: 0.9rem;
+  background: var(--sf-surface);
+  font-size: 1rem;
+  font-family: inherit;
+  color: var(--sf-ink);
+}
+
+.sf-filter-block {
+  margin-top: 1rem;
+}
+
+.sf-filter-label {
+  margin: 0 0 0.4rem;
   font-size: 0.6875rem;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sf-faint);
 }
-.storefront-card__avail--yes {
-  color: #047857;
+
+.sf-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
 }
-.storefront-card__avail--hold {
-  color: #b45309;
+
+.sf-chip {
+  border: 1px solid var(--sf-line);
+  border-radius: 9999px;
+  padding: 0.4rem 0.8rem;
+  background: var(--sf-chip-bg);
+  color: var(--sf-muted);
+  font-size: 0.75rem;
+  font-weight: 650;
+  cursor: pointer;
+  font-family: inherit;
 }
-.storefront-card__avail--no {
-  color: rgb(26 21 35 / 0.45);
+
+.sf-chip.is-on {
+  background: var(--sf-ink);
+  border-color: transparent;
+  color: var(--sf-surface);
 }
-.storefront-compare-toggle {
+
+.sf--dark .sf-chip.is-on {
+  color: #0c0b0e;
+}
+
+.sf-count {
+  margin: 1.1rem 0 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 650;
+  color: var(--sf-faint);
+}
+
+.sf-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .sf-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.sf-grid__item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.sf-card {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  text-decoration: none;
+  color: inherit;
+  background: var(--sf-surface);
+  border: 1px solid var(--sf-line);
+  border-radius: 1.05rem;
+  overflow: hidden;
+  min-height: 100%;
+}
+
+.sf-card__media-wrap {
+  position: relative;
+}
+
+.sf-card__badge {
   position: absolute;
-  right: 0.75rem;
-  bottom: 0.55rem;
+  left: 0.5rem;
+  top: 0.5rem;
+  z-index: 2;
+  padding: 0.2rem 0.5rem;
+  border-radius: 9999px;
+  background: rgb(255 255 255 / 0.92);
+  font-size: 0.625rem;
+  font-weight: 700;
+  color: rgb(26 21 35 / 0.55);
+}
+
+.sf--dark .sf-card__badge {
+  background: rgb(12 11 14 / 0.88);
+  color: rgb(244 241 234 / 0.7);
+}
+
+.sf-card__badge.is-yes {
+  color: var(--sf-ok);
+}
+
+.sf-card__badge.is-hold {
+  color: var(--sf-hold);
+}
+
+.sf-card__body {
+  padding: 0.7rem 0.75rem 0.85rem;
+}
+
+.sf-card__title {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.sf-card__price {
+  margin: 0.35rem 0 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.sf-card__cat {
+  margin: 0.25rem 0 0;
+  font-size: 0.6875rem;
+  color: var(--sf-faint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sf-card__compare {
+  margin-top: 0.35rem;
   border: 0;
   background: transparent;
   font-size: 0.6875rem;
-  font-weight: 650;
-  color: rgb(26 21 35 / 0.45);
+  font-weight: 700;
+  color: var(--sf-faint);
   cursor: pointer;
+  font-family: inherit;
+  align-self: flex-start;
+  padding: 0.15rem 0.15rem;
 }
-.storefront-compare-toggle.is-on {
-  color: #1a1523;
+
+.sf-card__compare.is-on {
+  color: var(--sf-ink);
 }
-.storefront-compare-bar {
+
+.sf-card__compare:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.sf-empty {
+  margin-top: 1rem;
+  padding: 2rem 1rem;
+  text-align: center;
+  border-radius: 1rem;
+  border: 1px dashed var(--sf-line);
+  background: var(--sf-empty-bg);
+}
+
+.sf-empty__title {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+.sf-empty__hint {
+  margin: 0.35rem 0 0.85rem;
+  font-size: 0.8125rem;
+  color: var(--sf-muted);
+}
+
+.sf-footer {
+  margin-top: 2.5rem;
+  padding-bottom: 1.5rem;
+}
+
+.sf-about {
+  border-radius: 1rem;
+  border: 1px solid var(--sf-line);
+  background: var(--sf-surface);
+  padding: 0.85rem 1rem;
+}
+
+.sf-about summary {
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.sf-about p {
+  margin: 0.65rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--sf-muted);
+}
+
+.sf-footer__contacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem 1.1rem;
+  margin-top: 1rem;
+}
+
+.sf-footer__contacts a {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--sf-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.sf-footer__powered {
+  margin: 1.25rem 0 0;
+  font-size: 0.6875rem;
+  color: var(--sf-faint);
+}
+
+.sf-compare-bar {
   position: fixed;
   left: 50%;
-  bottom: 1.25rem;
+  bottom: 1.15rem;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.65rem 1rem;
+  gap: 0.65rem;
+  padding: 0.55rem 0.7rem 0.55rem 1rem;
   border-radius: 9999px;
   background: #1a1523;
   color: #fff;
-  box-shadow: 0 10px 30px rgb(26 21 35 / 0.2);
-  z-index: 20;
+  box-shadow: 0 12px 32px rgb(26 21 35 / 0.28);
+  z-index: 40;
 }
-.storefront-compare-bar__label {
+
+.sf--dark .sf-compare-bar {
+  background: #f4f1ea;
+  color: #1a1523;
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.45);
+}
+
+.sf-compare-bar p {
   margin: 0;
   font-size: 0.8125rem;
-  font-weight: 600;
+  font-weight: 700;
+  white-space: nowrap;
 }
-.storefront-compare-bar .storefront-share-btn {
-  background: #fff;
+
+.sf-compare-bar__clear {
+  border: 0;
+  background: transparent;
+  color: rgb(255 255 255 / 0.75);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
 }
-.storefront-compare-bar .storefront-link-btn {
-  color: #fff;
+
+.sf--dark .sf-compare-bar__clear {
+  color: rgb(26 21 35 / 0.65);
 }
-.storefront-compare-modal {
+
+.sf-compare-modal {
   position: fixed;
   inset: 0;
-  background: rgb(26 21 35 / 0.45);
-  z-index: 40;
+  background: rgb(26 21 35 / 0.48);
+  z-index: 50;
   display: flex;
   align-items: flex-end;
   justify-content: center;
   padding: 1rem;
 }
-.storefront-compare-panel {
-  width: min(42rem, 100%);
+
+.sf-compare-panel {
+  width: min(44rem, 100%);
   max-height: 85dvh;
   overflow: auto;
-  background: #fff;
+  background: var(--sf-surface);
   border-radius: 1.25rem;
   padding: 1rem 1rem 1.5rem;
 }
-.storefront-compare-panel__head {
+
+.sf-compare-panel__head {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
 }
-.storefront-compare-panel__head h2 {
+
+.sf-compare-panel__head h2 {
   margin: 0;
   font-size: 1.0625rem;
 }
-.storefront-compare-grid {
+
+.sf-compare-grid {
   display: grid;
   grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
   gap: 0.75rem;
 }
-.storefront-compare-col__img {
-  height: 5rem;
-  border-radius: 0.75rem;
-  background: center / cover no-repeat #ececef;
-  margin-bottom: 0.5rem;
-}
-.storefront-compare-col__title {
-  margin: 0;
+
+.sf-compare-col__title {
+  margin: 0.55rem 0 0;
   font-size: 0.875rem;
-  font-weight: 650;
+  font-weight: 700;
 }
-.storefront-compare-col__price {
+
+.sf-compare-col__price {
   margin: 0.25rem 0 0;
-  font-weight: 650;
+  font-weight: 700;
   font-size: 0.875rem;
 }
-.storefront-compare-col__avail,
-.storefront-compare-col__cat {
+
+.sf-compare-col__avail,
+.sf-compare-col__cat {
   margin: 0.2rem 0 0;
   font-size: 0.75rem;
-  color: rgb(26 21 35 / 0.5);
+  color: var(--sf-muted);
   text-transform: capitalize;
 }
-.storefront-compare-col dl {
-  margin: 0.75rem 0;
+
+.sf-compare-col dl {
+  margin: 0.75rem 0 0;
   padding: 0;
 }
-.storefront-compare-col dt {
+
+.sf-compare-col dt {
   margin: 0.45rem 0 0;
   font-size: 0.6875rem;
-  color: rgb(26 21 35 / 0.45);
+  color: var(--sf-faint);
 }
-.storefront-compare-col dd {
+
+.sf-compare-col dd {
   margin: 0.1rem 0 0;
   font-size: 0.8125rem;
-  font-weight: 550;
+  font-weight: 650;
 }
+
 @media (max-width: 640px) {
-  .storefront-compare-grid {
+  .sf-hero__steps {
+    grid-template-columns: 1fr;
+  }
+
+  .sf-compare-grid {
     grid-template-columns: 1fr;
   }
 }

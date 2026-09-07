@@ -111,12 +111,38 @@ export default defineEventHandler(async (event) => {
         receiptId = inquiry.receiptId
         receiptNumber = inquiry.receiptNumber
       } else {
-        inventory = await readInquiryFulfillInventory(
-          tx,
-          storeRef,
-          inquiry,
-          listing?.sourceFolderId
-        )
+        // Complete is only allowed after the customer paid the payment link
+        // sent for this inquiry (or when backfilling a legacy completed row).
+        let paymentPaid = inquiry.paymentLinkStatus === 'paid'
+        const paymentToken = String(inquiry.paymentLinkToken || '').trim()
+        if (!paymentPaid && paymentToken) {
+          const paySnap = await tx.get(adminDb.collection('paymentLinks').doc(paymentToken))
+          if (paySnap.exists) {
+            const pay = paySnap.data() as { status?: string; receiptId?: string; receiptNumber?: string; inventoryApplied?: boolean }
+            if (pay.status === 'paid') {
+              paymentPaid = true
+              if (pay.receiptId) {
+                receiptId = pay.receiptId
+                receiptNumber = pay.receiptNumber || inquiry.paymentLinkInvoiceNumber
+              }
+            }
+          }
+        }
+        if (!paymentPaid) {
+          throw createError({
+            statusCode: 409,
+            message:
+              'Send a payment link and wait for the customer to pay before marking complete.',
+          })
+        }
+        if (!receiptId) {
+          inventory = await readInquiryFulfillInventory(
+            tx,
+            storeRef,
+            inquiry,
+            listing?.sourceFolderId
+          )
+        }
       }
     }
 
@@ -147,6 +173,10 @@ export default defineEventHandler(async (event) => {
       folderId = inventory.folderId
       patch.receiptId = sale.receiptId
       patch.receiptNumber = sale.receiptNumber
+    } else if (status === 'completed' && receiptId) {
+      patch.receiptId = receiptId
+      if (receiptNumber) patch.receiptNumber = receiptNumber
+      patch.paymentLinkStatus = 'paid'
     }
 
     tx.update(inquiryRef, patch)
@@ -179,7 +209,7 @@ export default defineEventHandler(async (event) => {
       return
     }
 
-    // reject / cancel — release soft hold
+    // reject / cancel. release soft hold
     if (listing.reservationInquiryId === inquiryId || listing.availability === 'reserved') {
       tx.update(listingRef, {
         availability: 'available',

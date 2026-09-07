@@ -124,7 +124,7 @@ export async function readTotpCodeFromRequest(event: H3Event): Promise<string | 
 
 /**
  * Owner, or an active store member whose permission matrix satisfies `hasAccess` (default: any
- * manage grant across either module — the closest server-side equivalent of the old
+ * manage grant across either module. the closest server-side equivalent of the old
  * role==='manager' check, now that role tiers are retired). Pass a narrower predicate (e.g.
  * `(p) => p.receipts.delete`) where the caller needs a specific grant.
  */

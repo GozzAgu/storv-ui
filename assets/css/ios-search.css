@@ -1,5 +1,5 @@
 /**
- * iOS search — layout + inner-input reset.
+ * iOS search. layout + inner-input reset.
  * The chrome (radius, height, icon) lives in ios-fields.css. This file is
  * unlayered so it can beat `@layer base` field borders that otherwise paint a
  * second rectangle inside the rounded search wrapper.
@@ -33,7 +33,7 @@ html.capacitor-ios.capacitor-native .ios-search-input-wrap > kbd {
 }
 
 /*
- * Nested search inputs must be borderless — the label.ios-search-bar is the
+ * Nested search inputs must be borderless. the label.ios-search-bar is the
  * visible field. Unlayered !important wins over the global @layer base
  * `input { border-width: 1px }` rule.
  */

@@ -79,6 +79,39 @@
           </p>
         </div>
       </div>
+      <div
+        v-if="canCreateInventoryFolders && paginatedChildFolders.length > 0"
+        class="flex flex-wrap items-center gap-2"
+      >
+        <Checkbox
+          :model-value="allSubfoldersOnPageSelected"
+          size="sm"
+          wrapper-class="!h-8 items-center"
+          label-class="!text-xs !ml-2 !font-normal !leading-none text-gray-500 dark:text-gray-500"
+          @update:model-value="toggleSelectAllSubfolders"
+        >
+          {{ allSubfoldersOnPageSelected ? 'All selected' : 'Select all' }}
+        </Checkbox>
+        <template v-if="selectedSubfoldersForBulk.length > 0">
+          <span
+            class="inline-flex h-8 items-center text-xs font-medium tabular-nums text-gray-600 dark:text-gray-400"
+          >
+            {{ selectedSubfoldersForBulk.length }} selected
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            :icon="TrashIcon"
+            :extra-class="
+              headerBtnClass +
+              ' !border-red-200/70 !text-red-600 hover:!bg-red-50/80 dark:!border-red-900/40 dark:!text-red-400 dark:hover:!bg-red-950/30'
+            "
+            @click="openBulkDeleteSubfoldersModal"
+          >
+            Delete
+          </Button>
+        </template>
+      </div>
       <Button
         v-if="canAddSubcategories"
         variant="primary"
@@ -430,16 +463,51 @@
             Products live inside subcategories. Open one to add or manage stock.
           </p>
         </div>
-        <Button
-          v-if="canAddSubcategories"
-          variant="primary"
-          size="sm"
-          :icon="PlusCircleIcon"
-          extra-class="!rounded-2xl shrink-0"
-          @click="openCreateSubcategoryModal"
-        >
-          Add subcategory
-        </Button>
+        <div class="flex flex-wrap items-center gap-2 shrink-0">
+          <div
+            v-if="canCreateInventoryFolders && paginatedChildFolders.length > 0"
+            class="flex flex-wrap items-center gap-2"
+          >
+            <Checkbox
+              :model-value="allSubfoldersOnPageSelected"
+              size="sm"
+              wrapper-class="!h-8 items-center"
+              label-class="!text-xs !ml-2 !font-normal !leading-none text-gray-500 dark:text-gray-500"
+              @update:model-value="toggleSelectAllSubfolders"
+            >
+              {{ allSubfoldersOnPageSelected ? 'All selected' : 'Select all' }}
+            </Checkbox>
+            <template v-if="selectedSubfoldersForBulk.length > 0">
+              <span
+                class="inline-flex h-8 items-center text-xs font-medium tabular-nums text-gray-600 dark:text-gray-400"
+              >
+                {{ selectedSubfoldersForBulk.length }} selected
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                :icon="TrashIcon"
+                :extra-class="
+                  headerBtnClass +
+                  ' !border-red-200/70 !text-red-600 hover:!bg-red-50/80 dark:!border-red-900/40 dark:!text-red-400 dark:hover:!bg-red-950/30'
+                "
+                @click="openBulkDeleteSubfoldersModal"
+              >
+                Delete
+              </Button>
+            </template>
+          </div>
+          <Button
+            v-if="canAddSubcategories"
+            variant="primary"
+            size="sm"
+            :icon="PlusCircleIcon"
+            extra-class="!rounded-2xl shrink-0"
+            @click="openCreateSubcategoryModal"
+          >
+            Add subcategory
+          </Button>
+        </div>
       </div>
       <DashboardTableEmptyState
         v-if="childFolders.length === 0"
@@ -490,6 +558,14 @@
             :has-overlays="canCreateInventoryFolders"
             @click="navigateToSubfolder(child.id)"
           >
+            <template v-if="canCreateInventoryFolders" #checkbox>
+              <Checkbox
+                :model-value="selectedSubfoldersForBulk.some((f) => f.id === child.id)"
+                size="sm"
+                wrapper-class="justify-center"
+                @update:model-value="(checked) => toggleSubfolderSelection(child, checked)"
+              />
+            </template>
             <template v-if="canCreateInventoryFolders" #menu>
               <div>
                 <button
@@ -2094,6 +2170,79 @@
       @deleted="handleConfirmDeleteSubfolder"
     />
 
+    <Modal
+      v-model="showBulkDeleteSubfoldersModal"
+      @update:model-value="
+        (v: boolean) => {
+          showBulkDeleteSubfoldersModal = v
+          if (!v) bulkDeleteSubfoldersConfirmed = false
+        }
+      "
+      size="md"
+    >
+      <template #header>
+        <div class="flex items-center gap-2.5">
+          <div
+            class="w-8 h-8 rounded-sm bg-red-100 dark:bg-red-900/30 flex items-center justify-center"
+          >
+            <TrashIcon class="w-4 h-4 text-red-600 dark:text-red-400" />
+          </div>
+          <div class="min-w-0">
+            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+              Delete selected subcategories
+            </h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400">
+              {{ selectedSubfoldersForBulk.length }}
+              {{
+                selectedSubfoldersForBulk.length === 1 ? 'subcategory' : 'subcategories'
+              }}
+              selected
+            </p>
+          </div>
+        </div>
+      </template>
+      <div class="space-y-3">
+        <div
+          class="p-3 bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40 rounded-sm"
+        >
+          <p class="text-xs text-red-800 dark:text-red-200">
+            This will permanently delete the selected subcategories and all products inside them.
+            This action cannot be undone.
+          </p>
+        </div>
+        <div class="rounded-sm bg-gray-50 p-2.5 dark:!bg-dashboard-card/35">
+          <Checkbox
+            v-model="bulkDeleteSubfoldersConfirmed"
+            label="I understand that these subcategories and their products will be permanently deleted."
+            size="sm"
+            wrapper-class="items-start"
+            label-class="text-xs text-gray-700 dark:text-gray-300"
+          />
+        </div>
+      </div>
+      <template #footer>
+        <IosDrawerActions
+          primary-variant="danger"
+          :primary-icon="TrashIcon"
+          :primary-label="
+            isBulkDeletingSubfolders
+              ? 'Deleting...'
+              : `Delete ${selectedSubfoldersForBulk.length} ${
+                  selectedSubfoldersForBulk.length === 1 ? 'subcategory' : 'subcategories'
+                }`
+          "
+          :primary-disabled="!bulkDeleteSubfoldersConfirmed || isBulkDeletingSubfolders"
+          @cancel="
+            () => {
+              showBulkDeleteSubfoldersModal = false
+              bulkDeleteSubfoldersConfirmed = false
+            }
+          "
+          @primary="handleConfirmBulkDeleteSubfolders"
+        />
+      </template>
+    </Modal>
+
     <SidePanel
       v-model="showSubcategoryModal"
       size="md"
@@ -2541,8 +2690,60 @@ const isSavingSubcategory = ref(false)
 const subcategoryForm = reactive({ name: '', description: '' })
 const showDeleteSubfolderModal = ref(false)
 const selectedSubfolderForDelete = ref<InventoryFolder | null>(null)
+const selectedSubfoldersForBulk = ref<InventoryFolder[]>([])
+const showBulkDeleteSubfoldersModal = ref(false)
+const bulkDeleteSubfoldersConfirmed = ref(false)
+const isBulkDeletingSubfolders = ref(false)
 const openSubfolderMenuId = ref<string | null>(null)
 const subfolderMenuFixedStyle = ref<Record<string, string> | null>(null)
+
+const allSubfoldersOnPageSelected = computed(
+  () =>
+    paginatedChildFolders.value.length > 0 &&
+    selectedSubfoldersForBulk.value.length === paginatedChildFolders.value.length
+)
+
+const toggleSubfolderSelection = (subfolder: InventoryFolder, checked: boolean) => {
+  const idx = selectedSubfoldersForBulk.value.findIndex((f) => f.id === subfolder.id)
+  if (checked && idx === -1) selectedSubfoldersForBulk.value.push(subfolder)
+  else if (!checked && idx !== -1) selectedSubfoldersForBulk.value.splice(idx, 1)
+}
+
+const toggleSelectAllSubfolders = () => {
+  if (allSubfoldersOnPageSelected.value) {
+    selectedSubfoldersForBulk.value = []
+  } else {
+    selectedSubfoldersForBulk.value = [...paginatedChildFolders.value]
+  }
+}
+
+const openBulkDeleteSubfoldersModal = () => {
+  bulkDeleteSubfoldersConfirmed.value = false
+  showBulkDeleteSubfoldersModal.value = true
+}
+
+const handleConfirmBulkDeleteSubfolders = async () => {
+  if (!bulkDeleteSubfoldersConfirmed.value || selectedSubfoldersForBulk.value.length === 0) return
+  isBulkDeletingSubfolders.value = true
+  const ids = selectedSubfoldersForBulk.value.map((f) => f.id)
+  const count = ids.length
+  try {
+    for (const id of ids) {
+      await inventoryStore.deleteFolder(id)
+    }
+    selectedSubfoldersForBulk.value = []
+    showBulkDeleteSubfoldersModal.value = false
+    bulkDeleteSubfoldersConfirmed.value = false
+    await inventoryStore.fetchFolders()
+    await inventoryStore.fetchFolderAvailabilityStats()
+    toast.success(`${count} subcategor${count !== 1 ? 'ies' : 'y'} deleted`)
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Failed to delete some subcategories'
+    toast.error(message)
+  } finally {
+    isBulkDeletingSubfolders.value = false
+  }
+}
 
 let subfolderMenuOutsideHandler: ((e: MouseEvent) => void) | null = null
 

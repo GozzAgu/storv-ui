@@ -1,5 +1,5 @@
 /**
- * iOS field system — one appearance for every input, select, textarea, and
+ * iOS field system. one appearance for every input, select, textarea, and
  * search bar in the native shell, matched to the auth screens
  * (.auth-shell--modern .auth-field-input in auth-modern.css).
  *
@@ -11,7 +11,7 @@
  * Exclusions are grouped in a single `:not(a, b, …)` so the base rule keeps a
  * low specificity and the variants below (icon padding, prefixes) can override it.
  *
- * Auth screens are excluded (.auth-field-input) — they own their own rules.
+ * Auth screens are excluded (.auth-field-input). they own their own rules.
  */
 
 html.capacitor-ios.capacitor-native {
@@ -70,7 +70,7 @@ html.capacitor-ios.capacitor-native.dark {
     background-image: none !important;
     color: var(--ios-field-ink) !important;
     font-family: var(--ios-type-font-family) !important;
-    /* 16px floor — anything smaller makes iOS zoom the viewport on focus */
+    /* 16px floor. anything smaller makes iOS zoom the viewport on focus */
     font-size: max(16px, var(--ios-field-size)) !important;
     font-weight: 400 !important;
     line-height: 1.375 !important;

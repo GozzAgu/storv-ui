@@ -255,7 +255,7 @@ export const useStorefrontStore = defineStore('storefront', {
           folders: inventory.folders,
         })
       } catch {
-        /* ignore — storefront may be off */
+        /* ignore. storefront may be off */
       }
     },
 

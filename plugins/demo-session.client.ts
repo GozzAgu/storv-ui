@@ -8,7 +8,7 @@ import { initDemoAuth, syncDemoToPinia } from '~/utils/demo-bridge'
 
 /**
  * Demo routes share the same theme system as the signed-in dashboard.
- * Only toggle a document hook for optional demo-specific CSS — never force dark/light here,
+ * Only toggle a document hook for optional demo-specific CSS. never force dark/light here,
  * or navigation fights `useThemeStore().applyTheme()` and the theme flips between pages.
  */
 function applyDemoDocumentTheme(active: boolean) {

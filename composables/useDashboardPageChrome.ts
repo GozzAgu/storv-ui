@@ -35,7 +35,7 @@ export function useDashboardPageChrome() {
       : '!inline-flex !h-8 !min-h-8 !items-center !justify-center !rounded-full !px-3.5 !py-0 !text-xs shrink-0'
   )
 
-  /** Labeled header / panel / inline actions — sales-leads pill style on iOS. */
+  /** Labeled header / panel / inline actions. sales-leads pill style on iOS. */
   const headerTextBtnClass = computed(() =>
     isCapacitorIos.value
       ? 'ios-action-btn ios-action-btn--sm'

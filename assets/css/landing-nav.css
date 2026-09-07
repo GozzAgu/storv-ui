@@ -214,7 +214,7 @@
   stroke-width: 1.75;
 }
 
-/* Mobile menu layer (teleported to body — keep theme class on root) */
+/* Mobile menu layer (teleported to body. keep theme class on root) */
 .landing-mobile-layer {
   position: fixed;
   inset: 0;

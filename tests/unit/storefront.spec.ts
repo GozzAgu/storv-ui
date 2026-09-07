@@ -131,6 +131,40 @@ describe('storefront-projection', () => {
     expect(listing!.isListed).toBe(false)
     expect(listing!.availability).toBe('unavailable')
   })
+
+  it('marks bulk items with zero quantity unavailable / unlist when listAvailableOnly', () => {
+    const bulkFolder: InventoryFolder = {
+      ...folder,
+      hasSerialNumbers: false,
+      template: {
+        ...folder.template!,
+        fields: [
+          ...(folder.template!.fields ?? []),
+          { id: 'q', name: 'quantity', label: 'Quantity', type: 'number', required: true },
+        ],
+      },
+    }
+    const outOfStock = { ...item, quantity: 0 }
+    const listing = buildStorefrontListing({
+      item: outOfStock,
+      folder: bulkFolder,
+      folders: [bulkFolder],
+      config,
+      ownerUid: 'u1',
+    })
+    expect(listing!.isListed).toBe(false)
+    expect(listing!.availability).toBe('unavailable')
+
+    const inStock = buildStorefrontListing({
+      item: { ...item, quantity: 2 },
+      folder: bulkFolder,
+      folders: [bulkFolder],
+      config,
+      ownerUid: 'u1',
+    })
+    expect(inStock!.isListed).toBe(true)
+    expect(inStock!.availability).toBe('available')
+  })
 })
 
 describe('storefront-inquiry', () => {
@@ -163,6 +197,27 @@ describe('storefront-inquiry', () => {
       expect(ok.data.type).toBe('reserve')
       expect(ok.data.customerNote).toBe('Collect Saturday')
     }
+  })
+})
+
+describe('storefront-media', () => {
+  it('builds stable palettes without images', async () => {
+    const { storefrontPlaceholderPalette } = await import('~/utils/storefront-media')
+    const a = storefrontPlaceholderPalette('item-1::Opulent Dubai')
+    const b = storefrontPlaceholderPalette('item-1::Opulent Dubai')
+    const c = storefrontPlaceholderPalette('item-2::Rage Red Intense')
+    expect(a).toEqual(b)
+    expect(a.from).not.toBe(c.from)
+  })
+
+  it('prefers subcategory (leaf) over parent category path', async () => {
+    const { storefrontCategoryLabel } = await import('~/utils/storefront-media')
+    expect(storefrontCategoryLabel('Eau de Parfum', 'Fragrance / Eau de Parfum')).toBe(
+      'Eau de Parfum'
+    )
+    expect(storefrontCategoryLabel('', 'Fragrance / Eau de Parfum')).toBe('Eau de Parfum')
+    expect(storefrontCategoryLabel('Fragrance', 'Fragrance')).toBe('Fragrance')
+    expect(storefrontCategoryLabel(null, null)).toBe('')
   })
 })
 

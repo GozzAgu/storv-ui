@@ -24,10 +24,10 @@ Without credentials, dashboard specs still run in **skip-if-login** mode; landin
 
 ## Layout
 
-- **`tests/unit/`** — pure helpers, composables, components (happy-dom)
-- **`tests/server/`** — Paystack validation, subscription helpers
-- **`tests/integration/`** — modules with injectable mocks
-- **`tests/rules/`** — Firestore + Storage security rules (emulators)
-- **Root `tests/*.spec.ts`** — Playwright browser tests only
+- **`tests/unit/`**. pure helpers, composables, components (happy-dom)
+- **`tests/server/`**. Paystack validation, subscription helpers
+- **`tests/integration/`**. modules with injectable mocks
+- **`tests/rules/`**. Firestore + Storage security rules (emulators)
+- **Root `tests/*.spec.ts`**. Playwright browser tests only
 
 Vitest specs must live under `tests/{unit,server,integration,rules}/`, not the Playwright root.

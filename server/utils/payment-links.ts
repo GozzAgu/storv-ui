@@ -33,6 +33,8 @@ export interface PaymentLinkDoc {
   channel?: string
   receiptId?: string
   inventoryApplied?: boolean
+  /** Present when paid but inventory could not be applied (already sold, etc.). */
+  settleError?: string
   createdAt?: FirebaseFirestore.Timestamp | FirebaseFirestore.FieldValue
   paidAt?: FirebaseFirestore.Timestamp | FirebaseFirestore.FieldValue
   expiresAt: Date | FirebaseFirestore.Timestamp
@@ -41,6 +43,8 @@ export interface PaymentLinkDoc {
   source?: 'dashboard' | 'storefront'
   storefrontSlug?: string
   storefrontListingId?: string
+  /** When created from a storefront inquiry inbox action. */
+  storefrontInquiryId?: string
 }
 
 export interface MerchantPayoutDoc {
@@ -60,6 +64,16 @@ export interface MerchantPayoutDoc {
 /** Unguessable public token for a payment link. */
 export function generatePaymentToken(): string {
   return randomBytes(20).toString('hex')
+}
+
+/** Inventory soft-lock id written while a payment link holds stock. */
+export function paymentLinkPendingId(token: string): string {
+  return `paylink:${token}`
+}
+
+/** Public listing reservation id for storefront checkout holds. */
+export function storefrontCheckoutReservationId(token: string): string {
+  return `pay:${token}`
 }
 
 /** Paystack transaction reference (idempotency anchor). */

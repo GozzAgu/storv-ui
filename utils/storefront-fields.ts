@@ -105,7 +105,7 @@ export function isHardDeniedStorefrontField(fieldName: string, label?: string): 
   return false
 }
 
-/** Fields always used for title/price — not listed as optional attributes. */
+/** Fields always used for title/price. not listed as optional attributes. */
 export function isCoreStorefrontField(fieldName: string): boolean {
   const key = normalizeStorefrontFieldKey(fieldName)
   return key === 'name' || key === 'price' || key === 'itemname'

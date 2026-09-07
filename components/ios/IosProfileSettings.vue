@@ -14,7 +14,7 @@
         </div>
         <div class="ios-profile-settings__hero-body">
           <p class="ios-profile-settings__hero-name">{{ displayName }}</p>
-          <p class="ios-profile-settings__hero-email">{{ email || '—' }}</p>
+          <p class="ios-profile-settings__hero-email">{{ email || '-' }}</p>
           <button type="button" class="ios-profile-settings__hero-edit" @click="emit('edit-profile')">
             <PencilSquareIcon aria-hidden="true" />
             Edit profile
@@ -269,7 +269,7 @@ const tabs = computed(() => {
 const activeTab = ref('account')
 
 // showBilling/showStoreInfo/showReceiptPolicies can still be loading when this component mounts
-// (role/plan data resolving) — keep snapping to "account" until the user picks a tab themselves.
+// (role/plan data resolving). keep snapping to "account" until the user picks a tab themselves.
 let hasPickedTab = false
 watch(
   tabs,

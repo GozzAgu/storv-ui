@@ -44,7 +44,7 @@ export const ANCHORED_MENU_SELECTOR = '[data-context-menu]'
  * Outside-click handlers close their menu, and they listen in the capture phase
  * so they run *before* the menu item's own handler. Vue flushes between the two,
  * so treating a tap on a menu row as "outside" clears the row state the item's
- * handler is about to read — the menu closes and the action silently no-ops.
+ * handler is about to read. the menu closes and the action silently no-ops.
  * Matching on the shared attribute keeps that from depending on each page
  * remembering to tag its own card.
  */

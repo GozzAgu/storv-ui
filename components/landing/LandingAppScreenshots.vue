@@ -12,7 +12,7 @@
           See every major feature in the app
         </h2>
         <p class="landing-screenshots__lede">
-          Inventory, sales, payment links, analytics, and multi-store tools — captured from the live
+          Inventory, sales, payment links, analytics, and multi-store tools, captured from the live
           demo.
         </p>
       </header>

@@ -1,5 +1,5 @@
 /**
- * iOS Settings & Help — grouped list page chrome (matches inventory/profile pages).
+ * iOS Settings & Help. grouped list page chrome (matches inventory/profile pages).
  */
 
 html.capacitor-ios.capacitor-native .ios-settings-page,
@@ -109,7 +109,7 @@ html.capacitor-ios.capacitor-native .ios-settings-page .dash-setting-row--note {
   color: var(--ios-label-secondary) !important;
 }
 
-/* Small body copy inside cards — 11/10px is unreadable at arm's length */
+/* Small body copy inside cards. 11/10px is unreadable at arm's length */
 html.capacitor-ios.capacitor-native .ios-settings-page .dash-settings-panel__body .text-\[11px\],
 html.capacitor-ios.capacitor-native .ios-settings-page .dash-settings-panel__body .text-\[10px\] {
   font-size: 0.8125rem !important;

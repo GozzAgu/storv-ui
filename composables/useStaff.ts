@@ -28,7 +28,7 @@ export interface Staff {
   storeId: string // Store this staff member belongs to
   position: string
   /** @deprecated Superseded by `permissions`. Kept for migration fallback (see
-   *  utils/staff-permissions.ts#resolveStaffPermissions) and rollback safety — do not read
+   *  utils/staff-permissions.ts#resolveStaffPermissions) and rollback safety. do not read
    *  directly, do not write on new staff. Absent on any staff member created after the
    *  permission-matrix rollout. */
   role?: 'manager' | 'staff' | 'intern'
@@ -36,7 +36,7 @@ export interface Staff {
   canManageInventory?: boolean
   /** @deprecated Superseded by `permissions.receipts.refund`. See `role`. */
   canManageReceipts?: boolean
-  /** Per-module grant matrix — the source of truth for what this staff member can do.
+  /** Per-module grant matrix. the source of truth for what this staff member can do.
    *  Falls back to `deriveDefaultPermissions(this)` when absent (not-yet-migrated docs). */
   permissions?: StaffPermissions
   hireDate: string

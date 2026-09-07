@@ -89,7 +89,7 @@ const iosNativeClasses = computed(() => {
   if (!isCapacitorIos.value) return ''
   const parts = ['ios-action-btn']
   if (iconOnlyIos.value) parts.push('ios-action-btn--icon-only')
-  // 'neutral' has no native counterpart — reuse the primary native class, whose
+  // 'neutral' has no native counterpart. reuse the primary native class, whose
   // color is already neutralized (monochrome pill) inside CRUD drawer footers.
   else parts.push(`ios-action-btn--${props.variant === 'neutral' ? 'primary' : props.variant}`)
   return parts.join(' ')
@@ -145,7 +145,7 @@ const iconSize = computed(() => {
   return sizeMap[props.size]
 })
 
-/** Monochrome by design — no brand blue. Shared by `primary` (the default variant) and `outline`. */
+/** Monochrome by design. no brand blue. Shared by `primary` (the default variant) and `outline`. */
 const outlineSurfaceClasses =
   'border-[1.5px] border-gray-300 bg-transparent text-gray-900 hover:border-gray-400 hover:bg-gray-900/[0.04] dark:border-white/15 dark:text-gray-100 dark:hover:border-white/25 dark:hover:bg-white/[0.06]'
 
@@ -164,7 +164,7 @@ const variantSurfaceClasses = computed(() => {
     outline: outlineSurfaceClasses,
     ghost:
       'border-0 bg-transparent text-gray-700 hover:bg-gray-900/[0.05] dark:text-gray-200 dark:hover:bg-white/[0.06]',
-    /** Monochrome pill — CRUD drawer primary action. No brand blue by design. */
+    /** Monochrome pill. CRUD drawer primary action. No brand blue by design. */
     neutral:
       'border-0 bg-gray-900 text-white shadow-[0_2px_10px_rgb(0_0_0/0.15)] hover:bg-gray-800 active:bg-black dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100',
   }

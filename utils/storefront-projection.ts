@@ -5,6 +5,10 @@ import {
   type InventoryAvailabilityStatus,
 } from '~/utils/inventory-availability'
 import {
+  quantityFieldName,
+  unitsForItem,
+} from '~/utils/inventory-folder-availability'
+import {
   canAllowlistStorefrontField,
   filterAllowlistedFieldIds,
   isCoreStorefrontField,
@@ -21,6 +25,21 @@ function mapPublicAvailability(
   status: InventoryAvailabilityStatus
 ): StorefrontPublicAvailability {
   return status === 'available' ? 'available' : 'unavailable'
+}
+
+/** Serial units use sold/loan/pending flags; bulk units also require on-hand quantity ≥ 1. */
+function resolveStorefrontAvailability(
+  item: InventoryItem,
+  folder: Pick<InventoryFolder, 'hasSerialNumbers' | 'template'>
+): StorefrontPublicAvailability {
+  const fromStatus = mapPublicAvailability(getInventoryAvailabilityStatus(item))
+  if (fromStatus !== 'available') return fromStatus
+  const units = unitsForItem(
+    item,
+    Boolean(folder.hasSerialNumbers),
+    quantityFieldName(folder)
+  )
+  return units >= 1 ? 'available' : 'unavailable'
 }
 
 function formatAttributeValue(raw: unknown): string {
@@ -67,7 +86,7 @@ export function isItemListedOnStorefront(
   const override = config.itemOverrides[item.id]
   if (override?.listed === false) return false
 
-  const availability = mapPublicAvailability(getInventoryAvailabilityStatus(item))
+  const availability = resolveStorefrontAvailability(item, folder)
   if (config.listAvailableOnly && availability !== 'available') return false
   return true
 }
@@ -124,7 +143,7 @@ export function buildStorefrontListing(params: {
   if (!config.enabled || !config.slug) return null
 
   const listed = isItemListedOnStorefront(item, folder, config)
-  const availability = mapPublicAvailability(getInventoryAvailabilityStatus(item))
+  const availability = resolveStorefrontAvailability(item, folder)
   const { categoryPath, categoryName } = resolveCategoryPath(folder, folders)
   const fields = folder.template?.fields ?? []
   const publicFieldIds = resolvePublicFieldIds(folder, config)

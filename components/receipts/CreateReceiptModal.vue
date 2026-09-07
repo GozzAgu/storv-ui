@@ -16,7 +16,7 @@
           class="dash-drawer-callout"
           role="status"
         >
-          No matching in-stock product — pick category and items manually.
+          No matching in-stock product. Pick category and items manually.
         </div>
 
         <SellScreenNoteBanner v-if="currentStep >= 2" />
