@@ -7,7 +7,7 @@ export interface ReceiptStatusBadge {
 }
 
 const badgeShell =
-  'inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-0.5 text-[10px] font-semibold leading-none'
+  'inline-flex items-center gap-1.5 whitespace-nowrap rounded-[var(--saas-radius-chip,0.375rem)] px-2.5 py-0.5 text-[10px] font-semibold leading-none'
 
 export function getReceiptStatusBadge(status: Receipt['status']): ReceiptStatusBadge {
   switch (status) {

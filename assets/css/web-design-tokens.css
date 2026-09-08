@@ -9,8 +9,10 @@ html:not(.capacitor-native) {
   --saas-sidebar-width: 16rem;
   --saas-sidebar-rail: 4.5rem;
   --saas-sidebar-inset: 0.75rem;
-  --saas-radius-lg: 1rem;
-  --saas-radius-xl: 1.25rem;
+  --saas-radius-lg: 0.875rem;
+  --saas-radius-xl: 1.125rem;
+  --saas-radius-control: 0.5rem;
+  --saas-radius-chip: 0.375rem;
   --saas-blur: 20px;
   --saas-spring: cubic-bezier(0.22, 1, 0.36, 1);
   --saas-glass-bg: rgb(255 255 255 / 0.78);
@@ -25,7 +27,7 @@ html:not(.capacitor-native).dark {
   --saas-glass-border: rgb(255 255 255 / 0.08);
   --saas-glass-highlight: inset 0 1px 0 rgb(255 255 255 / 0.06);
   --saas-shadow-md: 0 8px 32px rgb(0 0 0 / 0.45);
-  --saas-surface: #121212;
+  --saas-surface: #1e1e1e;
 }
 
 html:not(.capacitor-native) .dashboard-layout-root {
@@ -48,8 +50,10 @@ html:not(.capacitor-native) .dashboard-layout-root {
   --saas-sidebar-width: 16rem;
   --saas-sidebar-rail: 4.5rem;
   --saas-sidebar-inset: 0.75rem;
-  --saas-radius-lg: 1.5rem;
-  --saas-radius-xl: 2rem;
+  --saas-radius-lg: 0.875rem;
+  --saas-radius-xl: 1.125rem;
+  --saas-radius-control: 0.5rem;
+  --saas-radius-chip: 0.375rem;
   --saas-spring: cubic-bezier(0.22, 1, 0.36, 1);
   --saas-topnav-bg: #ffffff;
   --saas-topnav-border: rgb(15 23 42 / 0.16);
@@ -59,6 +63,8 @@ html:not(.capacitor-native) .dashboard-layout-root {
   --saas-topnav-stack: calc(var(--saas-sidebar-inset) + var(--saas-topnav-height) + 0.625rem);
   --saas-topnav-control-bg: #f5f5f7;
   --saas-topnav-control-border: transparent;
+  --saas-topnav-radius: 0.75rem;
+  --saas-topnav-control-radius: 0.5rem;
 
   --dash-canvas: var(--saas-canvas);
   --dash-surface: var(--saas-surface);
@@ -82,10 +88,12 @@ html:not(.capacitor-native).dark .dashboard-layout-root {
   --saas-ink: #ffffff;
   --saas-muted: rgb(255 255 255 / 0.72);
   --saas-topnav-bg: #1e1e1e;
-  --saas-topnav-border: transparent;
+  --saas-topnav-border: rgb(255 255 255 / 0.08);
   --saas-topnav-shadow: none;
-  --saas-topnav-control-bg: rgb(255 255 255 / 0.08);
+  --saas-topnav-control-bg: rgb(255 255 255 / 0.06);
   --saas-topnav-control-border: transparent;
+  --saas-topnav-radius: 0.75rem;
+  --saas-topnav-control-radius: 0.5rem;
   --dash-canvas: #080808;
   --dash-surface: #1e1e1e;
   --dash-accent: #ffffff;
@@ -128,7 +136,7 @@ html:not(.capacitor-native) .dash-topnav.dashboard-top-nav {
   right: var(--saas-sidebar-inset) !important;
   left: var(--saas-sidebar-inset) !important;
   width: auto;
-  border-radius: var(--saas-radius-xl);
+  border-radius: var(--saas-topnav-radius, 0.75rem);
   border: 1px solid var(--saas-topnav-border);
   background: var(--saas-topnav-bg);
   backdrop-filter: blur(var(--saas-topnav-blur)) saturate(180%);
@@ -278,9 +286,8 @@ html:not(.capacitor-native) .dash-topnav.dashboard-top-nav::before {
   z-index: 0;
   background: linear-gradient(
     180deg,
-    rgb(255 255 255 / 0.08) 0%,
-    transparent 42%,
-    rgb(20 63 141 / 0.03) 100%
+    rgb(255 255 255 / 0.04) 0%,
+    transparent 55%
   );
 }
 
@@ -293,17 +300,15 @@ html:not(.capacitor-native) .dash-topnav.dashboard-top-nav > * {
 html:not(.capacitor-native).dark .dash-topnav.dashboard-top-nav::before {
   background: linear-gradient(
     180deg,
-    rgb(255 255 255 / 0.05) 0%,
-    transparent 38%,
-    rgb(255 255 255 / 0.03) 100%
+    rgb(255 255 255 / 0.035) 0%,
+    transparent 50%
   );
 }
 
 html:not(.capacitor-native) .dash-topnav__search-group.dashboard-topnav-search-group {
   border: 1px solid var(--saas-topnav-control-border);
+  border-radius: var(--saas-topnav-control-radius, 0.5rem);
   background: var(--saas-topnav-control-bg);
-  backdrop-filter: blur(12px) saturate(150%);
-  -webkit-backdrop-filter: blur(12px) saturate(150%);
 }
 
 html:not(.capacitor-native).dark .dash-topnav__search-group.dashboard-topnav-search-group {
@@ -312,15 +317,16 @@ html:not(.capacitor-native).dark .dash-topnav__search-group.dashboard-topnav-sea
 
 html:not(.capacitor-native) .dash-topnav__search-group.dashboard-topnav-search-group:hover,
 html:not(.capacitor-native) .dash-topnav__search-group.dashboard-topnav-search-group:focus-within {
-  border-color: rgb(255 255 255 / 0.22);
-  background: rgb(255 255 255 / 0.08);
-  box-shadow: 0 0 0 3px var(--saas-accent-soft);
+  border-color: rgb(26 21 35 / 0.14);
+  background: rgb(255 255 255 / 0.92);
+  box-shadow: none;
 }
 
-html:not(.capacitor-native):not(.dark) .dash-topnav__search-group.dashboard-topnav-search-group:hover,
-html:not(.capacitor-native):not(.dark) .dash-topnav__search-group.dashboard-topnav-search-group:focus-within {
-  border-color: rgb(20 63 141 / 0.28);
-  background: rgb(255 255 255 / 0.88);
+html:not(.capacitor-native).dark .dash-topnav__search-group.dashboard-topnav-search-group:hover,
+html:not(.capacitor-native).dark .dash-topnav__search-group.dashboard-topnav-search-group:focus-within {
+  border-color: rgb(255 255 255 / 0.14);
+  background: rgb(255 255 255 / 0.08);
+  box-shadow: none;
 }
 
 html:not(.capacitor-native) .dash-topnav__search-group .dash-topnav__search.dashboard-topnav-search {
@@ -339,9 +345,8 @@ html:not(.capacitor-native) .dash-topnav__search-group .dash-topnav__search.dash
 
 html:not(.capacitor-native) .dash-topnav__search.dashboard-topnav-search {
   border: 1px solid var(--saas-topnav-control-border);
+  border-radius: var(--saas-topnav-control-radius, 0.5rem);
   background: var(--saas-topnav-control-bg);
-  backdrop-filter: blur(12px) saturate(150%);
-  -webkit-backdrop-filter: blur(12px) saturate(150%);
 }
 
 html:not(.capacitor-native).dark .dash-topnav__search.dashboard-topnav-search {
@@ -350,41 +355,40 @@ html:not(.capacitor-native).dark .dash-topnav__search.dashboard-topnav-search {
 
 html:not(.capacitor-native) .dash-topnav__search.dashboard-topnav-search:hover,
 html:not(.capacitor-native) .dash-topnav__search.dashboard-topnav-search:focus-visible {
-  border-color: rgb(154 181 227 / 0.28);
-  background: rgb(255 255 255 / 0.08);
-  box-shadow: 0 0 0 3px var(--saas-accent-soft);
+  border-color: rgb(26 21 35 / 0.14);
+  background: rgb(255 255 255 / 0.92);
+  box-shadow: none;
 }
 
-html:not(.capacitor-native):not(.dark) .dash-topnav__search.dashboard-topnav-search:hover,
-html:not(.capacitor-native):not(.dark) .dash-topnav__search.dashboard-topnav-search:focus-visible {
-  background: rgb(255 255 255 / 0.88);
+html:not(.capacitor-native).dark .dash-topnav__search.dashboard-topnav-search:hover,
+html:not(.capacitor-native).dark .dash-topnav__search.dashboard-topnav-search:focus-visible {
+  border-color: rgb(255 255 255 / 0.14);
+  background: rgb(255 255 255 / 0.08);
+  box-shadow: none;
 }
 
 html:not(.capacitor-native) .dash-topnav__assistant.dashboard-topnav-assistant {
   border-color: var(--saas-topnav-control-border);
+  border-radius: var(--saas-topnav-control-radius, 0.5rem);
   background: var(--saas-topnav-control-bg);
-  backdrop-filter: blur(12px) saturate(150%);
-  -webkit-backdrop-filter: blur(12px) saturate(150%);
 }
 
 html:not(.capacitor-native) .dash-topnav__actions.dashboard-topnav-actions {
   border-color: var(--saas-topnav-control-border);
+  border-radius: var(--saas-topnav-control-radius, 0.5rem);
   background: var(--saas-topnav-control-bg);
-  backdrop-filter: blur(12px) saturate(150%);
-  -webkit-backdrop-filter: blur(12px) saturate(150%);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
+  box-shadow: none;
 }
 
 html:not(.capacitor-native):not(.dark) .dash-topnav__actions.dashboard-topnav-actions {
   background: var(--saas-topnav-control-bg);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.65);
+  box-shadow: none;
 }
 
 html:not(.capacitor-native) .dashboard-sidebar-open-trigger {
   border-color: var(--saas-topnav-control-border);
+  border-radius: var(--saas-topnav-control-radius, 0.5rem);
   background: var(--saas-topnav-control-bg);
-  backdrop-filter: blur(12px) saturate(150%);
-  -webkit-backdrop-filter: blur(12px) saturate(150%);
 }
 
 @media (prefers-reduced-transparency: reduce) {
@@ -440,6 +444,13 @@ html:not(.capacitor-native).dark .saas-list-row:hover {
 }
 
 /* ── Dashboard greeting ── */
+html:not(.capacitor-native) .saas-dashboard-greeting-row {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-width: 0;
+}
+
 html:not(.capacitor-native) .saas-dashboard-greeting {
   font-size: 1.75rem;
   font-weight: 600;
@@ -452,6 +463,14 @@ html:not(.capacitor-native) .saas-dashboard-branch {
   margin-top: 0.25rem;
   font-size: 0.9375rem;
   color: var(--saas-muted);
+}
+
+html:not(.capacitor-native) .saas-dashboard-day-story {
+  margin-top: 0.375rem;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: var(--saas-muted);
+  max-width: 42rem;
 }
 
 /* ── Search bar ── */
@@ -548,7 +567,7 @@ html:not(.capacitor-native).dark .dashboard-fixed-footer .dash-pagination__pager
 html:not(.capacitor-native) .dash-table-pagination .dash-pagination__pager {
   background: rgb(255 255 255 / 0.38);
   border-color: var(--saas-glass-border);
-  border-radius: 9999px;
+  border-radius: var(--saas-radius-control, 0.5rem);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   box-shadow:

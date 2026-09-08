@@ -6,14 +6,17 @@
     :ariaLabel="ariaLabel"
     :options="iosOptions"
   />
-  <nav v-else :class="[segmentTabsClass, scroll ? 'dash-segment-tabs--scroll' : '']" role="tablist" :aria-label="ariaLabel">
+  <nav v-else class="dash-tabs-rail" role="tablist" :aria-label="ariaLabel">
     <button
       v-for="option in options"
       :key="option.value"
       type="button"
       role="tab"
       :aria-selected="modelValue === option.value"
-      :class="[segmentTabsBtnClass, modelValue === option.value ? segmentTabsBtnActiveClass : '']"
+      :class="[
+        'dash-tabs-rail__btn',
+        modelValue === option.value ? 'dash-tabs-rail__btn--active' : '',
+      ]"
       @click="modelValue = option.value"
     >
       {{ option.label }}
@@ -36,15 +39,15 @@ export interface CategoryTabOption {
 const props = defineProps<{
   options: CategoryTabOption[]
   ariaLabel: string
-  /** Scroll horizontally instead of wrapping to multiple rows. use when there are many tabs. */
+  /** Kept for API compatibility; rail tabs always scroll horizontally when needed. */
   scroll?: boolean
+  /** Kept for API compatibility; web tabs always use the underline rail. */
+  variant?: 'segment' | 'rail'
 }>()
 
 const modelValue = defineModel<string>({ required: true })
 
 const { isCapacitorIos } = useIsCapacitorIos()
-
-const { segmentTabsClass, segmentTabsBtnClass, segmentTabsBtnActiveClass } = useDashboardPageChrome()
 
 const iosOptions = computed<IosQuickActionOption[]>(() =>
   props.options.map((option) => ({

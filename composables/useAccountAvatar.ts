@@ -1,23 +1,16 @@
 import { computed } from 'vue'
 import { optimizeCloudinaryLogo } from '~/utils/cloudinary'
-import { useStoresStore } from '~/stores/stores'
 import { useUserStore } from '~/stores/user'
 
 /**
- * Account / store logo for circular avatars (top nav, sidebar, profile).
- * Uses the account-level logo when that field exists (including empty after
- * remove), otherwise the current branch logo.
+ * Personal profile photo for circular avatars (top nav, sidebar, Profile).
+ * Company / receipt logos use `storeLogoUrl` separately (Settings → Company logo).
  */
 export function useAccountAvatar() {
   const userStore = useUserStore()
-  const storesStore = useStoresStore()
 
   const avatarImageUrl = computed(() => {
-    const accountLogo = userStore.userData?.storeLogoUrl
-    const raw =
-      typeof accountLogo === 'string'
-        ? accountLogo.trim()
-        : (storesStore.currentStore?.logoUrl || '').trim()
+    const raw = (userStore.userData?.photoURL || '').trim()
     if (!raw) return ''
     return optimizeCloudinaryLogo(raw, 192)
   })

@@ -19,7 +19,7 @@ export function useDashboardHelpChrome() {
   const articleTitleClass = 'dash-help-article__title'
   const articleBodyClass = 'dash-help-article__body'
   const chipClass = 'dash-help-chip'
-  const chipLinkClass = 'dash-help-chip dash-help-chip--link'
+  const chipLinkClass = 'dash-help-screen-link'
   const toolbarLabelClass = 'dash-help-toolbar-label'
   const backTopClass = 'dash-help-back-top'
 

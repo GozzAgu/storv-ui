@@ -30,7 +30,14 @@
           :icon="ArchiveBoxIcon"
           title="No stock loans yet"
           description="Lend serialized inventory from a product page to track borrowers here."
-        />
+        >
+          <NuxtLink
+            to="/dashboard/inventory"
+            class="rounded-lg bg-primary-600 px-3 py-1.5 text-xs font-semibold text-white"
+          >
+            Open inventory
+          </NuxtLink>
+        </DashboardTableEmptyState>
 
         <DashboardTableEmptyState
           v-else-if="filteredLoans.length === 0"
@@ -188,7 +195,14 @@
               'Only items with serial numbers can be lent out',
               'Mark sold or returned when the borrower finishes',
             ]"
-          />
+          >
+            <NuxtLink
+              to="/dashboard/inventory"
+              class="rounded-lg bg-primary-600 px-3 py-1.5 text-xs font-semibold text-white"
+            >
+              Open inventory
+            </NuxtLink>
+          </DashboardTableEmptyState>
 
           <DashboardTableEmptyState
             v-else-if="filteredLoans.length === 0"

@@ -17,7 +17,7 @@ import { useFirestore } from '~/composables/useFirestore'
 import { getActivityLogsCollection } from '~/composables/useFirestorePaths'
 import { getQueryUserId } from '~/composables/useFirestorePaths'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
-import { normalizeSubscriptionPlan, planHasFeature } from '~/types/subscription'
+import { resolveEffectiveSubscriptionPlan, planHasFeature } from '~/types/subscription'
 import type { SubscriptionPlan } from '~/types/subscription'
 
 export type ActivityAction = 'created' | 'updated' | 'deleted'
@@ -67,7 +67,7 @@ export function activityEntityTypeLabel(type: ActivityEntityType): string {
 
 export function activityActionBadgeClass(action: ActivityAction): string {
   const base =
-    'inline-flex shrink-0 items-center justify-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold leading-none'
+    'inline-flex shrink-0 items-center justify-center rounded-[var(--saas-radius-chip,0.375rem)] px-2.5 py-0.5 text-[10px] font-semibold leading-none'
   if (action === 'created') {
     return `${base} bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300`
   }
@@ -137,14 +137,14 @@ async function resolveAccountSubscriptionPlan(): Promise<SubscriptionPlan> {
     if (!userStore.userData) {
       await userStore.fetchUserData(ownerUserId)
     }
-    return normalizeSubscriptionPlan(userStore.userData?.subscription)
+    return resolveEffectiveSubscriptionPlan(userStore.userData)
   }
 
   const db = useFirestore().getFirestoreInstance()
   if (!db) return 'storvv_micro'
   const { getDoc, doc } = await import('firebase/firestore')
   const ownerSnap = await getDoc(doc(db, 'users', ownerUserId))
-  return normalizeSubscriptionPlan(ownerSnap.data()?.subscription)
+  return resolveEffectiveSubscriptionPlan(ownerSnap.data())
 }
 
 /** Write an activity log (fire-and-forget; does not throw). */

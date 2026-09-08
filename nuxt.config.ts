@@ -101,6 +101,10 @@ export default defineNuxtConfig({
       appHost: process.env.NUXT_PUBLIC_APP_HOST || 'app.storvv.com',
       /** Origin used when sending users from www → app (no trailing slash) */
       appOrigin: process.env.NUXT_PUBLIC_APP_ORIGIN || 'https://app.storvv.com',
+      /** Local/staging QA: Settings plan switcher without Paystack (never enable in production). */
+      allowDevPlanSwitcher:
+        process.env.NUXT_PUBLIC_ALLOW_DEV_PLAN_SWITCHER === '1' ||
+        process.env.NUXT_PUBLIC_ALLOW_DEV_PLAN_SWITCHER === 'true',
       paystackPublicKey: process.env.NUXT_PUBLIC_PAYSTACK_PUBLIC_KEY || '',
       /** Optional: base URL for a separate API server when using a static frontend. Staff creation is client-side and does not require a server. */
       apiBase: process.env.NUXT_PUBLIC_API_BASE || '',

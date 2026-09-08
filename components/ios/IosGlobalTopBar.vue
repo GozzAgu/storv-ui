@@ -12,15 +12,6 @@
     </NuxtLink>
 
     <div class="ios-global-top-bar__actions">
-      <button
-        type="button"
-        class="ios-global-top-bar__icon-btn"
-        aria-label="Open Storvv Assistant"
-        @click="$emit('open-assistant')"
-      >
-        <SparklesIcon class="ios-global-top-bar__icon" aria-hidden="true" />
-      </button>
-
       <IosTabBarThemeButton class="ios-global-top-bar__theme" variant="topnav" />
 
       <DashboardProfileMenu
@@ -36,7 +27,6 @@
 </template>
 
 <script setup lang="ts">
-import { SparklesIcon } from '~/utils/app-icons'
 import DashboardProfileMenu from '~/components/dashboard/DashboardProfileMenu.vue'
 import IosTabBarThemeButton from '~/components/ios/IosTabBarThemeButton.vue'
 
@@ -56,7 +46,6 @@ withDefaults(
 )
 
 defineEmits<{
-  'open-assistant': []
   'sign-out': []
 }>()
 </script>

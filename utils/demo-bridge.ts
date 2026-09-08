@@ -26,6 +26,7 @@ import {
   getDemoUserOverrides,
   patchDemoUserOverrides,
   resetDemoExtras,
+  setDemoSubscriptionOverride,
 } from '~/utils/demo-extras'
 import { useDemoAppStore } from '~/stores/demoApp'
 import { useAuthStore } from '~/stores/auth'
@@ -139,7 +140,12 @@ export function getDemoUserData(state: DemoState): UserData {
     email: 'demo@storvv.app',
     name: overrides.name || 'Demo User',
     role: 'superAdmin',
-    subscription: 'storvv_enterprise',
+    subscription: overrides.subscription || 'storvv_enterprise',
+    subscriptionStatus: overrides.subscriptionStatus || 'active',
+    subscriptionCurrentPeriodEnd: overrides.subscriptionCurrentPeriodEnd,
+    subscriptionBillingCycle: overrides.subscriptionBillingCycle || 'monthly',
+    photoURL: overrides.photoURL || '',
+    storeLogoUrl: overrides.storeLogoUrl || '',
     hasCompletedOnboarding: true,
     hasCompletedTutorial: true,
     preferences: {
@@ -320,11 +326,25 @@ export function getDemoActivityLogs(storeId: string): ActivityLog[] {
 }
 
 export function applyDemoUserDocumentUpdate(updates: Partial<UserData>) {
-  patchDemoUserOverrides({
-    name: updates.name,
-    storePhone: updates.storeDetails?.storePhone,
-    storeDetails: updates.storeDetails,
-  })
+  const patch: Parameters<typeof patchDemoUserOverrides>[0] = {}
+  if (updates.name !== undefined) patch.name = updates.name
+  if (updates.storeDetails?.storePhone !== undefined) {
+    patch.storePhone = updates.storeDetails.storePhone
+  }
+  if (updates.storeDetails !== undefined) patch.storeDetails = updates.storeDetails
+  if (updates.photoURL !== undefined) patch.photoURL = updates.photoURL
+  if (updates.storeLogoUrl !== undefined) patch.storeLogoUrl = updates.storeLogoUrl
+  patchDemoUserOverrides(patch)
+  const demo = useDemoAppStore()
+  demo.hydrate()
+  const next = getDemoUserData(demo.state)
+  useUserStore().$patch({ userData: next })
+  return next
+}
+
+/** Demo QA: switch Micro / Medium / Enterprise without Paystack. */
+export function applyDemoSubscriptionPlan(planId: NonNullable<UserData['subscription']>) {
+  setDemoSubscriptionOverride(planId)
   const demo = useDemoAppStore()
   demo.hydrate()
   const next = getDemoUserData(demo.state)

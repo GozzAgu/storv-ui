@@ -31,15 +31,15 @@ export function useDashboardPageChrome() {
   /** Icon-only header actions (toolbar / page header). */
   const headerIconBtnClass = computed(() =>
     isCapacitorIos.value
-      ? '!inline-flex !h-9 !w-9 !min-h-9 !min-w-9 !items-center !justify-center !rounded-full !p-0 !text-xs shrink-0'
-      : '!inline-flex !h-8 !min-h-8 !items-center !justify-center !rounded-full !px-3.5 !py-0 !text-xs shrink-0'
+      ? '!inline-flex !h-9 !w-9 !min-h-9 !min-w-9 !items-center !justify-center !rounded-[var(--ios-radius-control,10px)] !p-0 !text-xs shrink-0'
+      : '!inline-flex !h-8 !min-h-8 !items-center !justify-center !rounded-[var(--saas-radius-control,0.5rem)] !px-3.5 !py-0 !text-xs shrink-0'
   )
 
-  /** Labeled header / panel / inline actions. sales-leads pill style on iOS. */
+  /** Labeled header / panel / inline actions. */
   const headerTextBtnClass = computed(() =>
     isCapacitorIos.value
       ? 'ios-action-btn ios-action-btn--sm'
-      : '!inline-flex !h-8 !min-h-8 !items-center !justify-center !rounded-full !px-3.5 !py-0 !text-xs shrink-0'
+      : '!inline-flex !h-8 !min-h-8 !items-center !justify-center !rounded-[var(--saas-radius-control,0.5rem)] !px-3.5 !py-0 !text-xs shrink-0'
   )
 
   /** Alias for inline dashboard actions (same as headerTextBtnClass). */
@@ -57,14 +57,14 @@ export function useDashboardPageChrome() {
     isCapacitorIos.value ? 'sr-only' : 'hidden sm:inline'
   )
 
-  const segmentTabsClass = 'dash-segment-tabs'
-  const segmentTabsBtnClass = 'dash-segment-tabs__btn'
-  const segmentTabsBtnActiveClass = 'dash-segment-tabs__btn--active'
+  const segmentTabsClass = 'dash-tabs-rail'
+  const segmentTabsBtnClass = 'dash-tabs-rail__btn'
+  const segmentTabsBtnActiveClass = 'dash-tabs-rail__btn--active'
 
   /** @deprecated Prefer `<DashboardBackButton />` for back navigation. */
   const iconBtnClass = computed(() =>
     isCapacitorIos.value
-      ? 'inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100/90 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/[0.06] dark:hover:text-gray-100 [&_svg]:h-[1.125rem] [&_svg]:w-[1.125rem]'
+      ? 'inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--ios-radius-control,10px)] text-gray-500 transition-colors hover:bg-gray-100/90 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/[0.06] dark:hover:text-gray-100 [&_svg]:h-[1.125rem] [&_svg]:w-[1.125rem]'
       : 'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100/90 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/[0.06] dark:hover:text-gray-100'
   )
 

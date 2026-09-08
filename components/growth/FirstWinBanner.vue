@@ -15,13 +15,13 @@
     <div class="mt-3 flex flex-wrap gap-2">
       <NuxtLink
         to="/dashboard/inventory"
-        class="inline-flex items-center rounded-full bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700"
+        class="inline-flex items-center rounded-[var(--saas-radius-control,0.5rem)] bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700"
       >
         Add a product
       </NuxtLink>
       <NuxtLink
         to="/dashboard/receipts"
-        class="inline-flex items-center rounded-full border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 dark:border-white/10 dark:text-gray-200"
+        class="inline-flex items-center rounded-[var(--saas-radius-control,0.5rem)] border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 dark:border-white/10 dark:text-gray-200"
       >
         Record a sale
       </NuxtLink>

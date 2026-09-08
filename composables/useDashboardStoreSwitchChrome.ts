@@ -10,7 +10,6 @@ export function useDashboardStoreSwitchChrome() {
   const triggerSpinnerClass = 'dash-store-trigger__spinner'
 
   const panelClass = 'dash-store-panel'
-  const panelSurfaceClass = 'dash-store-panel__surface'
   const panelHeaderClass = 'dash-store-panel__header'
   const panelSectionLabelClass = 'dash-store-section-label'
   const panelScrollClass = 'dash-store-panel__scroll'
@@ -37,7 +36,6 @@ export function useDashboardStoreSwitchChrome() {
     triggerChevronClass,
     triggerSpinnerClass,
     panelClass,
-    panelSurfaceClass,
     panelHeaderClass,
     panelSectionLabelClass,
     panelScrollClass,

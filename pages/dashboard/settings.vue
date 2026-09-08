@@ -35,54 +35,21 @@
         @update:model-value="onSettingsTabChange"
       />
 
-      <div v-show="activeSettingsTab === 'account'">
+      <div v-show="activeSettingsTab === 'account'" class="dash-page-stack">
       <!-- Account: logo + subscription -->
       <DashboardSettingsPanel
         v-if="userStore.isSuperAdmin"
         title="Account"
-        subtitle="Logo and subscription for your whole account."
+        subtitle="Company logo and billing for your whole account."
         :badge="`Plan: ${currentSubscriptionLabel}`"
       >
         <div
-          v-if="userStore.isSuperAdmin && !isCapacitorIos"
-          class="mb-4 flex flex-wrap items-center gap-2 border-b border-gray-100 pb-4 dark:border-white/[0.06]"
-        >
-          <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Workspace style</span>
-          <ExperienceModeBadge variant="settings" />
-          <span class="text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
-            {{
-              isSoloExperience
-                ? 'Simple setup. Enable more in Advanced features below.'
-                : 'Full workspace with team and multi-location tools as your plan allows.'
-            }}
-          </span>
-        </div>
-        <p
           :class="[
-            'text-[11px] leading-relaxed text-gray-500 dark:text-gray-400',
-            isCapacitorIos ? 'dash-setting-row dash-setting-row--note' : 'mb-3',
+            'grid grid-cols-1 gap-8',
+            isCapacitorIos ? 'dash-settings-account-grid--ios' : 'lg:grid-cols-[minmax(0,14rem)_minmax(0,1fr)] lg:gap-10',
           ]"
         >
-          Questions about billing or your data? <GrowthSupportLink />
-        </p>
-        <!-- Plan vs workspace style: the "Workspace style" panel below covers this on iOS -->
-        <p
-          v-if="!isCapacitorIos"
-          class="mb-3 text-[11px] leading-relaxed text-gray-500 dark:text-gray-400"
-        >
-          <span class="font-medium text-gray-700 dark:text-gray-300">Plan</span> is what you pay
-          for (Micro, Medium, Enterprise).
-          <span class="font-medium text-gray-700 dark:text-gray-300"> Workspace style</span> controls
-          how much of the app we show. You can change workspace style below without changing your
-          plan.
-        </p>
-        <div
-          :class="[
-            'grid grid-cols-1 gap-6',
-            isCapacitorIos ? 'dash-settings-account-grid--ios' : 'lg:grid-cols-2 lg:gap-8',
-          ]"
-        >
-          <div class="flex items-start gap-4">
+          <div class="flex items-start gap-4 lg:flex-col lg:gap-3">
             <div class="relative shrink-0">
               <div
                 class="flex h-[4.5rem] w-[4.5rem] items-center justify-center overflow-hidden rounded-xl bg-gray-50/80 dark:bg-white/[0.03]"
@@ -114,9 +81,9 @@
               />
             </div>
             <div class="min-w-0 pt-0.5">
-              <p class="text-xs font-semibold text-gray-900 dark:text-gray-100">Account logo</p>
+              <p class="text-xs font-semibold text-gray-900 dark:text-gray-100">Company logo</p>
               <p class="mt-1 text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
-                One logo for all branches. Shown on receipts and store cards.
+                Shown on receipts and store cards. Your personal photo is on Profile.
               </p>
               <button
                 v-if="accountLogoUrl"
@@ -129,31 +96,42 @@
             </div>
           </div>
 
-          <div id="settings-subscription">
-          <SubscriptionPlanPanel
-            :current-subscription-label="currentSubscriptionLabel"
-            :billing-cycle-label="currentBillingCycleLabel"
-            :current-price-label="currentPlanPriceLabel"
-            :status-label="subscriptionStatusBadgeLabel"
-            :status-badge-class="subscriptionStatusBadgeClass"
-            :plan-explainer="planWorkspaceExplainer"
-            :subscription-renewal-label="subscriptionRenewalLabel"
-            v-model:selected-billing-cycle="selectedBillingCycle"
-            v-model:selected-upgrade-plan="selectedUpgradePlan"
-            :upgrade-options="upgradeOptions"
-            :upgrade-price-preview="upgradePricePreview"
-            :pricing-loading="pricingLoading"
-            :can-cancel="canCancelSubscription"
-            :disabled="!canEditSettings"
-            :is-upgrading="isUpgradingSubscription"
-            :is-canceling="isCancelingSubscription"
-            :billing-history="billingHistory"
-            :label-class="labelClass"
-            :input-class="inputClass"
-            :header-text-btn-class="headerTextBtnClass"
-            @upgrade="handleUpgradeSubscription"
-            @cancel="openCancelConfirm"
-          />
+          <div id="settings-subscription" class="min-w-0">
+            <SubscriptionPlanPanel
+              :current-subscription-label="currentSubscriptionLabel"
+              :billing-cycle-label="currentBillingCycleLabel"
+              :current-price-label="currentPlanPriceLabel"
+              :status-label="subscriptionStatusBadgeLabel"
+              :status-badge-class="subscriptionStatusBadgeClass"
+              :subscription-renewal-label="subscriptionRenewalLabel"
+              v-model:selected-billing-cycle="selectedBillingCycle"
+              v-model:selected-upgrade-plan="selectedUpgradePlan"
+              :change-plan-options="changePlanOptions"
+              :upgrade-price-preview="upgradePricePreview"
+              :pricing-loading="pricingLoading"
+              :can-cancel="canCancelSubscription"
+              :disabled="!canEditSettings"
+              :is-upgrading="isUpgradingSubscription"
+              :is-canceling="isCancelingSubscription"
+              :billing-history="billingHistory"
+              :label-class="labelClass"
+              :input-class="inputClass"
+              :header-text-btn-class="headerTextBtnClass"
+              :show-qa-plan-switcher="showQaPlanSwitcher"
+              :qa-current-plan-id="storedSubscriptionPlan"
+              :qa-switching="isQaSwitchingPlan"
+              @upgrade="handleUpgradeSubscription"
+              @cancel="openCancelConfirm"
+              @qa-set-plan="handleQaSetPlan"
+            />
+            <p
+              :class="[
+                'mt-5 text-[11px] leading-relaxed text-gray-500 dark:text-gray-400',
+                isCapacitorIos ? 'dash-setting-row dash-setting-row--note' : '',
+              ]"
+            >
+              Billing help? <GrowthSupportLink />
+            </p>
           </div>
         </div>
       </DashboardSettingsPanel>
@@ -165,7 +143,7 @@
       <DashboardSettingsPanel
         v-if="userStore.isSuperAdmin"
         title="Workspace style"
-        subtitle="Choose a simple or full workspace layout. Your subscription plan still controls paid features."
+        subtitle="How much of the app to show. Does not change what you pay for."
         compact
       >
         <ExperienceModePicker
@@ -1042,6 +1020,7 @@ import Modal from '~/components/ui/Modal.vue'
 import SidePanel from '~/components/ui/SidePanel.vue'
 import Switch from '~/components/ui/Switch.vue'
 import StorefrontSettingsPanel from '~/components/dashboard/StorefrontSettingsPanel.vue'
+import { isStorefrontDashboardHidden } from '~/utils/storefront-launch'
 import {
   IosForm,
   IosFormSection,
@@ -1071,6 +1050,11 @@ import {
   cancelPaystackSubscription,
   type PaystackCancelFetcher,
 } from '~/utils/paystack-cancel-subscription'
+import {
+  canShowDevPlanSwitcher,
+  getChangeablePaidPlans,
+} from '~/utils/subscription-plan-switcher'
+import { isDemoModeActive } from '~/utils/demo-mode'
 import SubscriptionPlanPanel from '~/components/settings/SubscriptionPlanPanel.vue'
 import ExperienceModePicker from '~/components/settings/ExperienceModePicker.vue'
 import type { BillingHistoryEntry } from '~/server/api/paystack/billing-history.get'
@@ -1243,7 +1227,6 @@ const canEditSettings = computed(() => {
 })
 
 // Subscription
-const subscriptionOrder: SubscriptionPlan[] = ['storvv_micro', 'storvv_medium', 'storvv_enterprise']
 const currentSubscription = computed<SubscriptionPlan>(() => {
   return resolveEffectiveSubscriptionPlan(userStore.userData)
 })
@@ -1253,10 +1236,14 @@ const currentSubscriptionLabel = computed(() => {
 
 /** Free tier: single store; show upgrade message for multiple branches */
 const isMicroSubscription = computed(() => currentSubscription.value === 'storvv_micro')
-const upgradeOptions = computed(() => {
-  const currentIdx = subscriptionOrder.indexOf(currentSubscription.value)
-  return SUBSCRIPTION_PLANS.filter((p) => subscriptionOrder.indexOf(p.id) > currentIdx)
-})
+
+/** Stored plan (not grace-effective) — used for Paystack change-plan targets. */
+const storedSubscriptionPlan = computed(() =>
+  normalizeSubscriptionPlan(userStore.userData?.subscription)
+)
+
+const changePlanOptions = computed(() => getChangeablePaidPlans(storedSubscriptionPlan.value))
+
 const hiddenStoreNames = computed(() =>
   hiddenStores.value.map((store) => store.name).filter(Boolean)
 )
@@ -1307,9 +1294,6 @@ const subscriptionStatusBadgeClass = computed(() => {
   return 'bg-emerald-100 text-emerald-900 dark:bg-emerald-500/15 dark:text-emerald-100'
 })
 
-const planWorkspaceExplainer =
-  'Plan controls paid features and branch limits. Workspace style controls navigation complexity.'
-
 const upgradePricePreview = computed(() => {
   if (!selectedUpgradePlan.value) return null
   return formatUpgradePrice(selectedUpgradePlan.value, selectedBillingCycle.value)
@@ -1332,9 +1316,16 @@ const cancelConfirmSubtitle = computed(() =>
 const selectedUpgradePlan = ref<SubscriptionPlan | ''>('')
 const selectedBillingCycle = ref<SubscriptionBillingCycle>('monthly')
 const isUpgradingSubscription = ref(false)
+const isQaSwitchingPlan = ref(false)
+
+const showQaPlanSwitcher = computed(() =>
+  canShowDevPlanSwitcher({
+    isDemo: isDemoModeActive(),
+  })
+)
 
 watch(
-  upgradeOptions,
+  changePlanOptions,
   (options) => {
     if (options.length === 0) {
       selectedUpgradePlan.value = ''
@@ -1356,7 +1347,7 @@ const subscriptionRenewalLabel = computed(() => {
 
   const cycleLabel = BILLING_CYCLE_LABELS[cycle].toLowerCase()
   if (status === 'past_due') {
-    return `Renewal payment failed. Update your card in Paystack or choose a plan below to resubscribe (${cycleLabel}).`
+    return 'Last renewal failed. Update your card or switch plan below.'
   }
   if (status === 'canceled') {
     if (periodEnd) {
@@ -1365,9 +1356,9 @@ const subscriptionRenewalLabel = computed(() => {
         day: 'numeric',
         year: 'numeric',
       })
-      return `Auto-renew is off. Your plan stays active until ${formatted}.`
+      return `Auto-renew off · access until ${formatted}`
     }
-    return 'Auto-renew is off. Choose a plan below to subscribe again.'
+    return 'Auto-renew off · pick a plan below to subscribe again'
   }
   if (periodEnd) {
     const formatted = new Date(periodEnd).toLocaleDateString(undefined, {
@@ -1375,10 +1366,10 @@ const subscriptionRenewalLabel = computed(() => {
       day: 'numeric',
       year: 'numeric',
     })
-    return `Auto-renew ${cycleLabel}. Next charge around ${formatted}.`
+    return `Next charge · ${formatted}`
   }
   if (status === 'active') {
-    return `Auto-renew ${cycleLabel} via Paystack.`
+    return `Renews ${cycleLabel}`
   }
   return null
 })
@@ -1405,23 +1396,29 @@ const { markBackupExported } = useBackupPreferences()
 
 const handleUpgradeSubscription = async () => {
   if (!canEditSettings.value) {
-    toast.error('Only super admins can upgrade subscription')
+    toast.error('Only super admins can change subscription')
     return
   }
   if (!currentUser.value) {
-    toast.error('You must be signed in to upgrade')
+    toast.error('You must be signed in to change your plan')
     return
   }
   if (!selectedUpgradePlan.value) return
 
+  const direction =
+    changePlanOptions.value.find((p) => p.id === selectedUpgradePlan.value)?.direction || 'upgrade'
+
   trackEvent('upgrade_started', {
     plan: selectedUpgradePlan.value,
     billing_cycle: selectedBillingCycle.value,
+    direction,
   })
 
-  totpModalTitle.value = 'Confirm upgrade'
+  totpModalTitle.value = direction === 'downgrade' ? 'Confirm downgrade' : 'Confirm plan change'
   totpModalDescription.value =
-    'Enter your authenticator code to start the subscription upgrade.'
+    direction === 'downgrade'
+      ? 'Enter your authenticator code to switch to a lower paid plan via Paystack.'
+      : 'Enter your authenticator code to start the subscription checkout.'
   isUpgradingSubscription.value = true
   try {
     const totpCode = await resolveTotpForSensitiveAction(promptTotp)
@@ -1445,6 +1442,38 @@ const handleUpgradeSubscription = async () => {
     toast.error(result.message)
   } finally {
     isUpgradingSubscription.value = false
+  }
+}
+
+async function handleQaSetPlan(planId: SubscriptionPlan) {
+  if (!showQaPlanSwitcher.value || !canEditSettings.value) return
+  isQaSwitchingPlan.value = true
+  try {
+    if (isDemoModeActive()) {
+      const { applyDemoSubscriptionPlan } = await import('~/utils/demo-bridge')
+      applyDemoSubscriptionPlan(planId)
+      await storesStore.applyPlanToCurrentStoreSelection()
+      toast.success(`Demo plan set to ${SUBSCRIPTION_PLANS.find((p) => p.id === planId)?.name}`)
+      return
+    }
+
+    const headers = await getAuthHeaders()
+    await $fetch('/api/dev/set-subscription', {
+      method: 'POST',
+      headers,
+      body: { planId, billingCycle: selectedBillingCycle.value || 'monthly' },
+      baseURL: getEffectiveApiBase() || undefined,
+    })
+    if (currentUser.value) {
+      await userStore.fetchUserData(currentUser.value.uid)
+    }
+    await storesStore.applyPlanToCurrentStoreSelection()
+    toast.success(`Plan set to ${SUBSCRIPTION_PLANS.find((p) => p.id === planId)?.name}`)
+  } catch (err: unknown) {
+    const e = err as { data?: { message?: string }; message?: string }
+    toast.error(e?.data?.message || e?.message || 'Could not switch plan')
+  } finally {
+    isQaSwitchingPlan.value = false
   }
 }
 
@@ -1570,7 +1599,9 @@ const settingsTabs = computed(() => {
   if (isStaff.value) tabs.push({ value: 'assignment', label: 'Your assignment' })
   tabs.push({ value: 'store-info', label: isStaff.value ? 'Branch details' : 'Store information' })
   tabs.push({ value: 'inventory', label: 'Inventory' })
-  if (userStore.isSuperAdmin) tabs.push({ value: 'storefront', label: 'Storefront' })
+  if (userStore.isSuperAdmin && !isStorefrontDashboardHidden()) {
+    tabs.push({ value: 'storefront', label: 'Storefront' })
+  }
   tabs.push({ value: 'payments', label: 'Checkout payments' })
   tabs.push({ value: 'sales-receipts', label: 'Sales & receipts' })
   if (!isStaff.value) tabs.push({ value: 'data-export', label: 'Data export' })
@@ -1757,9 +1788,9 @@ const handleAccountLogoUpload = async (event: Event) => {
       if (state.userData) state.userData = { ...state.userData, storeLogoUrl: url }
     })
     await storesStore.updateAllStoresLogo(url)
-    toast.success('Logo updated for all stores')
+    toast.success('Company logo updated for all stores')
   } catch (err: unknown) {
-    if (import.meta.dev) console.error('[Account logo upload]', err)
+    if (import.meta.dev) console.error('[Company logo upload]', err)
     const { getFirebaseStorageErrorMessage } = useFirebaseStorage()
     const msg = err instanceof Error ? err.message : getFirebaseStorageErrorMessage(err)
     toast.error(msg)
@@ -1782,7 +1813,7 @@ const removeAccountLogo = async () => {
       if (state.userData) state.userData = { ...state.userData, storeLogoUrl: '' }
     })
     await storesStore.updateAllStoresLogo('')
-    toast.success('Logo removed from all stores')
+    toast.success('Company logo removed from all stores')
   } catch (err: unknown) {
     const { getFirebaseStorageErrorMessage } = useFirebaseStorage()
     toast.error(getFirebaseStorageErrorMessage(err))

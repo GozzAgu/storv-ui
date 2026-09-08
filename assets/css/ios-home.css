@@ -8,8 +8,8 @@ html.capacitor-ios.capacitor-native {
   --ios-home-card-shadow: 0 4px 14px rgb(15 23 42 / 0.06);
   --ios-action-card-shadow: 0 6px 18px rgb(15 23 42 / 0.1), 0 1px 3px rgb(15 23 42 / 0.05);
   --ios-float-shadow: 0 8px 24px rgb(0 0 0 / 0.14), 0 2px 6px rgb(0 0 0 / 0.08);
-  --ios-home-radius: 20px;
-  --ios-home-metric-radius: 18px;
+  --ios-home-radius: 16px;
+  --ios-home-metric-radius: 14px;
   --ios-home-inset: 20px;
   --ios-home-section-gap: 24px;
   --ios-tabbar-float-inset: 20px;
@@ -22,7 +22,10 @@ html.capacitor-ios.capacitor-native.dark {
   --ios-home-card: #1c1c1e;
   --ios-home-card-shadow: 0 8px 24px rgb(0 0 0 / 0.35);
   --ios-action-card-shadow: 0 8px 22px rgb(0 0 0 / 0.42);
-  --ios-float-shadow: 0 12px 32px rgb(0 0 0 / 0.55), 0 0 0 1px rgb(255 255 255 / 0.08);
+  --ios-float-shadow:
+    0 28px 64px rgb(0 0 0 / 0.85),
+    0 10px 24px rgb(0 0 0 / 0.55),
+    0 0 0 1px rgb(255 255 255 / 0.16);
 }
 
 html.capacitor-ios.capacitor-native .ios-home-page {
@@ -112,6 +115,24 @@ html.capacitor-ios.capacitor-native .ios-home-dashboard__intro {
   flex: 1;
 }
 
+html.capacitor-ios.capacitor-native .ios-home-dashboard__greeting-title {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-width: 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-dashboard__sky {
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-dashboard__sky :deep(.dash-greeting-sky__svg) {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
 html.capacitor-ios.capacitor-native .ios-home-dashboard__greeting-row {
   display: flex;
   align-items: flex-start;
@@ -168,7 +189,72 @@ html.capacitor-ios.capacitor-native .ios-home-dashboard__store {
   color: var(--ios-label-secondary);
 }
 
-/* ── Alerts ── */
+html.capacitor-ios.capacitor-native .ios-home-dashboard__day-story {
+  margin: 0.25rem 0 0;
+  font-size: var(--ios-dash-secondary-size);
+  font-weight: 500;
+  line-height: var(--ios-dash-leading);
+  color: var(--ios-label);
+}
+
+/* ── Attention strip ── */
+html.capacitor-ios.capacitor-native .ios-home-dashboard__attention {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4375rem;
+  margin: -0.5rem 0 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-dashboard__attention-label {
+  margin: 0;
+  padding: 0 0.125rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ios-label-secondary);
+}
+
+html.capacitor-ios.capacitor-native .ios-home-dashboard__attention-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4375rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-dashboard__attention-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+  max-width: 100%;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--ios-radius-control, 12px);
+  background: var(--ios-home-card);
+  box-shadow: var(--ios-home-card-shadow);
+  text-decoration: none;
+  color: inherit;
+}
+
+html.capacitor-ios.capacitor-native .ios-home-dashboard__attention-title {
+  font-size: var(--ios-dash-card-title-size);
+  font-weight: 600;
+  color: var(--ios-label);
+}
+
+html.capacitor-ios.capacitor-native .ios-home-dashboard__attention-meta {
+  font-size: var(--ios-dash-secondary-size);
+  line-height: var(--ios-dash-leading);
+  color: var(--ios-label-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── Alerts (legacy) ── */
 html.capacitor-ios.capacitor-native .ios-home-dashboard__alerts {
   display: flex;
   flex-direction: column;

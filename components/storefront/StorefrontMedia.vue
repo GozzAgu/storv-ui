@@ -36,7 +36,7 @@ const props = withDefaults(
     /** Leaf folder name (subcategory when nested). */
     categoryName?: string | null
     categoryPath?: string | null
-    size?: 'card' | 'recent' | 'hero' | 'compare'
+    size?: 'card' | 'recent' | 'hero' | 'compare' | 'folder'
   }>(),
   {
     src: null,
@@ -134,6 +134,17 @@ const mediaStyle = computed(() => {
 .sf-media--compare .sf-media__name {
   font-size: 0.75rem;
   -webkit-line-clamp: 3;
+}
+
+.sf-media--folder {
+  aspect-ratio: 16 / 10;
+  width: 100%;
+  max-height: 4.75rem;
+}
+
+.sf-media--folder .sf-media__name {
+  font-size: 0.8125rem;
+  -webkit-line-clamp: 2;
 }
 
 .sf-media--hero {

@@ -817,6 +817,40 @@
                 >
                   <ArrowsPointingOutIcon class="h-4 w-4" />
                 </DashboardToolbarIconButton>
+                <div
+                  class="hidden items-center rounded-lg border border-gray-200/80 p-0.5 dark:border-white/10 lg:inline-flex"
+                  role="group"
+                  aria-label="Product layout"
+                >
+                  <button
+                    type="button"
+                    class="inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors"
+                    :class="
+                      itemsViewMode === 'table'
+                        ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900'
+                        : 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
+                    "
+                    :aria-pressed="itemsViewMode === 'table'"
+                    aria-label="Compact table"
+                    @click="itemsViewMode = 'table'"
+                  >
+                    <TableCellsIcon class="h-3.5 w-3.5" aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    class="inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors"
+                    :class="
+                      itemsViewMode === 'shelf'
+                        ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900'
+                        : 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
+                    "
+                    :aria-pressed="itemsViewMode === 'shelf'"
+                    aria-label="Shelf view"
+                    @click="itemsViewMode = 'shelf'"
+                  >
+                    <Squares2X2Icon class="h-3.5 w-3.5" aria-hidden="true" />
+                  </button>
+                </div>
               </template>
               <template #actions>
                 <template v-if="canManageInventoryItems && selectedItemsForBulk.length > 0">
@@ -1038,9 +1072,49 @@
                   </div>
                   </template>
                 </div>
-                <!-- Desktop table (web only) -->
+                <!-- Desktop table / shelf (web only) -->
                 <div
-                  v-if="!isCapacitorIos"
+                  v-if="!isCapacitorIos && itemsViewMode === 'shelf'"
+                  class="inventory-items-shelf-wrap hidden min-h-0 flex-1 sm:block"
+                  :class="isFullscreen ? 'overflow-auto px-4 pb-4 pt-2 lg:px-8' : 'px-0 pb-2'"
+                >
+                  <div class="grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-4">
+                    <button
+                      v-for="item in paginatedItems"
+                      :key="item.id"
+                      type="button"
+                      class="inventory-shelf-card rounded-lg border border-gray-100 bg-white p-3 text-left transition-colors hover:border-gray-200 dark:border-white/[0.06] dark:!bg-dashboard-card dark:hover:border-white/15"
+                      :class="
+                        flashItemId === item.id
+                          ? '!ring-2 !ring-gray-900/20 dark:!ring-white/25'
+                          : ''
+                      "
+                      @click="openMobileItemDetail(item)"
+                    >
+                      <p class="truncate text-xs font-semibold text-gray-900 dark:text-gray-100">
+                        {{ getItemPrimaryLabel(item) }}
+                      </p>
+                      <p class="mt-1 text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-50">
+                        {{ getItemDisplayPrice(item) }}
+                      </p>
+                      <div class="mt-2 flex items-center justify-between gap-2">
+                        <InventoryStatusBadge
+                          :badge="getItemAvailability(item)"
+                          :inline-meta="false"
+                          class="shrink-0"
+                        />
+                        <span
+                          v-if="item.sku || item.serialNumber || item.serialNo"
+                          class="truncate text-[10px] text-gray-500 dark:text-gray-400"
+                        >
+                          {{ item.sku || item.serialNumber || item.serialNo }}
+                        </span>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+                <div
+                  v-else-if="!isCapacitorIos"
                   class="inventory-items-table-wrap hidden min-h-0 flex-1 flex-col sm:flex"
                   :class="isFullscreen ? 'overflow-auto px-4 pb-2 pt-2 lg:px-8' : ''"
                 >
@@ -2320,6 +2394,8 @@ import {
   DocumentDuplicateIcon,
   ArrowTopRightOnSquareIcon,
   CheckIcon,
+  Squares2X2Icon,
+  TableCellsIcon,
 } from '~/utils/app-icons'
 import Button from '~/components/ui/Button.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
@@ -2370,6 +2446,7 @@ import { useStoresStore } from '~/stores/stores'
 import { usePermissions } from '~/composables/usePermissions'
 import { planGateMessage } from '~/utils/plan-gate-message'
 import { useSubscriptionFeatures } from '~/composables/useSubscriptionFeatures'
+import { resolveEffectiveSubscriptionPlan } from '~/types/subscription'
 import { useAppToast } from '~/composables/useAppToast'
 import { usePreferences } from '~/composables/usePreferences'
 import { useDashboardDrawerChrome } from '~/composables/useDashboardDrawerChrome'
@@ -2460,7 +2537,7 @@ const toast = useAppToast()
 
 // Duplicate items only on Storvv Medium and Enterprise
 const canDuplicateByPlan = computed(() => {
-  const sub = userStore.userData?.subscription
+  const sub = resolveEffectiveSubscriptionPlan(userStore.userData)
   return sub === 'storvv_medium' || sub === 'storvv_enterprise'
 })
 const { formatCurrency, preferences } = usePreferences()
@@ -2963,6 +3040,25 @@ async function refreshFolderMetadata(forceFetch = false) {
 
 const searchQuery = ref('')
 const availabilityFilter = ref<'all' | InventoryAvailabilityStatus>('all')
+
+function getInitialItemsView(): 'table' | 'shelf' {
+  if (!import.meta.client) return 'table'
+  try {
+    const raw = localStorage.getItem('inventory-items-view')
+    return raw === 'shelf' ? 'shelf' : 'table'
+  } catch {
+    return 'table'
+  }
+}
+const itemsViewMode = ref<'table' | 'shelf'>(getInitialItemsView())
+watch(itemsViewMode, (mode) => {
+  try {
+    localStorage.setItem('inventory-items-view', mode)
+  } catch {
+    /* ignore */
+  }
+})
+
 const showProductMoreSheet = ref(false)
 /** Full folder list for search filter (client-side); not stored in Pinia. */
 const folderSearchItems = ref<InventoryItem[] | null>(null)

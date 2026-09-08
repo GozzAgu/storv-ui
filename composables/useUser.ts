@@ -62,7 +62,8 @@ export interface UserData {
   paystackSubscriptionCode?: string
   paystackCustomerCode?: string
   photoURL?: string
-  storeLogoUrl?: string // Account logo - applies to all stores, shown on receipts
+  /** Company logo for the account — shown on receipts and store cards (not the user avatar). */
+  storeLogoUrl?: string
   storeDetails?: StoreDetails
   preferences?: UserPreferences
   hasCompletedOnboarding: boolean

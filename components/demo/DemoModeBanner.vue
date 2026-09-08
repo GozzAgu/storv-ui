@@ -1,6 +1,6 @@
 <template>
   <div
-    class="mb-4 flex flex-col gap-3 rounded-3xl border border-[rgb(26_21_35/0.1)] bg-white/60 px-4 py-3 shadow-[inset_0_1px_0_rgb(255_255_255/0.9)] backdrop-blur-[28px] sm:flex-row sm:items-center sm:justify-between dark:border-0 dark:bg-[#1e1e1e] dark:shadow-none dark:backdrop-blur-none"
+    class="mb-4 flex flex-col gap-3 rounded-xl border border-[rgb(26_21_35/0.1)] bg-white/60 px-4 py-3 shadow-[inset_0_1px_0_rgb(255_255_255/0.9)] backdrop-blur-[28px] sm:flex-row sm:items-center sm:justify-between dark:border-0 dark:bg-[#1e1e1e] dark:shadow-none dark:backdrop-blur-none"
     role="status"
   >
     <div class="min-w-0">
@@ -15,20 +15,20 @@
     <div class="flex shrink-0 flex-wrap gap-2">
       <button
         type="button"
-        class="rounded-full border border-[rgb(26_21_35/0.16)] bg-transparent px-3 py-1.5 text-xs font-semibold text-[#1a1523] hover:bg-[rgb(26_21_35/0.06)] dark:border-white/20 dark:text-white dark:hover:bg-white/10"
+        class="rounded-[var(--saas-radius-control,0.5rem)] border border-[rgb(26_21_35/0.16)] bg-transparent px-3 py-1.5 text-xs font-semibold text-[#1a1523] hover:bg-[rgb(26_21_35/0.06)] dark:border-white/20 dark:text-white dark:hover:bg-white/10"
         @click="onReset"
       >
         Reset sample data
       </button>
       <NuxtLink
         to="/signup"
-        class="rounded-full border-0 bg-[#1a1523] px-3 py-1.5 text-xs font-semibold text-[#f4f1ea] hover:bg-black dark:bg-[#f4f1ea] dark:text-[#1a1523] dark:hover:bg-white"
+        class="rounded-[var(--saas-radius-control,0.5rem)] border-0 bg-[#1a1523] px-3 py-1.5 text-xs font-semibold text-[#f4f1ea] hover:bg-black dark:bg-[#f4f1ea] dark:text-[#1a1523] dark:hover:bg-white"
       >
         Create free account
       </NuxtLink>
       <NuxtLink
         to="/"
-        class="rounded-full px-3 py-1.5 text-xs font-semibold text-[#1a1523]/60 hover:text-[#1a1523] dark:text-white/70 dark:hover:text-white"
+        class="rounded-[var(--saas-radius-control,0.5rem)] px-3 py-1.5 text-xs font-semibold text-[#1a1523]/60 hover:text-[#1a1523] dark:text-white/70 dark:hover:text-white"
         @click="onExit"
       >
         Exit demo

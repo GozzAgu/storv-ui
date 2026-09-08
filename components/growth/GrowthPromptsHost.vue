@@ -12,12 +12,12 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, computed } from 'vue'
 import NpsPromptModal from '~/components/growth/NpsPromptModal.vue'
 import ChurnSurveyModal from '~/components/growth/ChurnSurveyModal.vue'
 import { useGrowthPrompts } from '~/composables/useGrowthPrompts'
 import { useUserStore } from '~/stores/user'
-import { normalizeSubscriptionPlan } from '~/types/subscription'
+import { resolveEffectiveSubscriptionPlan } from '~/types/subscription'
 
 const userStore = useUserStore()
 const {
@@ -30,7 +30,7 @@ const {
   openChurnSurvey,
 } = useGrowthPrompts()
 
-const currentPlan = normalizeSubscriptionPlan(userStore.userData?.subscription)
+const currentPlan = computed(() => resolveEffectiveSubscriptionPlan(userStore.userData))
 
 onMounted(() => {
   window.setTimeout(() => evaluateNpsPrompt(), 2500)

@@ -492,7 +492,7 @@
 
       <div v-show="activeAnalyticsTab === 'payments-traffic'" class="dash-analytics-panel">
       <IosAnalyticsSection
-        v-if="isCapacitorIos"
+        v-if="isCapacitorIos && !storefrontDashboardHidden"
         title="Storefront traffic"
         subtitle="Public showroom views and guest requests"
       >
@@ -537,7 +537,7 @@
         </div>
       </IosAnalyticsSection>
 
-      <section v-else :class="cardPaddedClass">
+      <section v-else-if="!storefrontDashboardHidden" :class="cardPaddedClass">
         <div :class="[cardHeaderClass, 'dash-card__header--compact']">
           <div>
             <h2 :class="cardTitleClass">Storefront traffic</h2>
@@ -1053,9 +1053,11 @@ import { useDepartmentsStore } from '~/stores/departments'
 import { useCustomerBuybacksStore } from '~/stores/customerBuybacks'
 import { useSellerLoanOutsStore } from '~/stores/sellerLoanOuts'
 import { useStorefrontStore } from '~/stores/storefront'
+import { isStorefrontDashboardHidden } from '~/utils/storefront-launch'
 import { useCustomerAccountsStore } from '~/stores/customerAccounts'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
+import { useStoresStore } from '~/stores/stores'
 import { useThemeStore } from '~/stores/theme'
 import { usePreferences } from '~/composables/usePreferences'
 import { useAppToast } from '~/composables/useAppToast'
@@ -1155,8 +1157,10 @@ const departmentsStore = useDepartmentsStore()
 const buybacksStore = useCustomerBuybacksStore()
 const sellerLoansStore = useSellerLoanOutsStore()
 const storefrontStore = useStorefrontStore()
+const storefrontDashboardHidden = isStorefrontDashboardHidden()
 const customerAccountsStore = useCustomerAccountsStore()
 const userStore = useUserStore()
+const storesStore = useStoresStore()
 const themeStore = useThemeStore()
 const chartIsDark = computed(() => themeStore.actualTheme === 'dark')
 const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
@@ -2761,6 +2765,18 @@ const loadAnalytics = async () => {
 useIosPullToRefreshRegister(loadAnalytics)
 
 function buildAnalyticsSnapshot(): AnalyticsReportSnapshot {
+  const storeName =
+    storesStore.currentStore?.name ||
+    userStore.userData?.storeDetails?.storeName ||
+    ''
+  const businessName =
+    userStore.userData?.storeDetails?.storeName ||
+    userStore.userData?.name ||
+    storeName ||
+    'Storvv'
+  const companyLogoUrl =
+    userStore.userData?.storeLogoUrl || storesStore.currentStore?.logoUrl || ''
+
   return {
     periodLabel: periodLabel.value,
     selectedPeriod: selectedPeriod.value,
@@ -2778,6 +2794,8 @@ function buildAnalyticsSnapshot(): AnalyticsReportSnapshot {
     topProducts: topProducts.value,
     topCustomers: topCustomers.value,
     recentReturns: recentReturns.value,
+    businessName,
+    companyLogoUrl: companyLogoUrl || undefined,
   }
 }
 

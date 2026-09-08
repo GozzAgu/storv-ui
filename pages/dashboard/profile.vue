@@ -47,7 +47,7 @@
       </template>
       <template #description>
         <p :class="descriptionClass">
-          Identity, preferences, and security, aligned with your dashboard.
+          Your photo, business details, preferences, and security.
         </p>
       </template>
     </DashboardPageHeader>
@@ -56,9 +56,37 @@
       <aside :class="profileSidebarClass">
         <section :class="profileCardClass">
           <div :class="profileCardBodyClass">
-            <div :class="profileAvatarClass">
+            <div :class="profileAvatarClass" class="relative mx-auto">
               <AccountAvatar :initials="profileAvatarInitials" />
+              <button
+                type="button"
+                class="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-gray-900 text-white shadow-sm transition hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100 disabled:opacity-50"
+                :disabled="isUploadingProfilePhoto"
+                aria-label="Upload profile photo"
+                @click="profilePhotoInput?.click()"
+              >
+                <ArrowPathIcon v-if="isUploadingProfilePhoto" class="h-3.5 w-3.5 animate-spin" />
+                <CameraIcon v-else class="h-3.5 w-3.5" />
+              </button>
+              <input
+                ref="profilePhotoInput"
+                type="file"
+                accept="image/jpeg,image/png,image/gif,image/webp"
+                class="hidden"
+                @change="handleProfilePhotoUpload"
+              />
             </div>
+            <button
+              v-if="profilePhotoUrl"
+              type="button"
+              class="mx-auto mt-2.5 block text-[11px] font-medium text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+              @click="removeProfilePhoto"
+            >
+              Remove photo
+            </button>
+            <p class="dash-profile-card__hint">
+              Personal photo. Company logo lives in Settings.
+            </p>
             <div v-if="isLoadingProfile" class="mx-auto mt-4 flex max-w-[180px] flex-col items-center space-y-2">
               <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-label" />
               <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-title" />
@@ -66,7 +94,9 @@
               <span class="dash-skeleton dash-skeleton--chip" style="width: 4.75rem; height: 1.25rem" />
             </div>
             <template v-else-if="!isCapacitorIos">
-              <p :class="profileCardEyebrowClass">Business</p>
+              <p :class="profileCardEyebrowClass">
+                {{ isStaff ? 'Team member' : 'Business' }}
+              </p>
               <h2 :class="profileCardNameClass">
                 {{ leftCardHeading }}
               </h2>
@@ -1457,6 +1487,8 @@ import {
   EyeIcon,
   ClipboardDocumentListIcon,
   SparklesIcon,
+  CameraIcon,
+  ArrowPathIcon,
 } from '~/utils/app-icons'
 import { useDashboardAssistant } from '~/composables/useDashboardAssistant'
 import type { FunctionalComponent } from 'vue'
@@ -1495,6 +1527,13 @@ import {
 } from '~/components/ios/forms'
 import TwoFactorSetup from '~/components/auth/TwoFactorSetup.vue'
 import { SUBSCRIPTION_PLANS, resolveEffectiveSubscriptionPlan } from '~/types/subscription'
+import { isCloudinaryUrl } from '~/utils/cloudinary'
+import {
+  BILLING_BLOCKED_USER_MESSAGE,
+  extractUploadFailureMessage,
+  isBillingDelinquentMessage,
+} from '~/utils/storage-billing-errors'
+import { isDemoModeActive } from '~/utils/demo-mode'
 import {
   PASSWORD_MIN_LENGTH,
   getPasswordRuleChecks,
@@ -1548,7 +1587,7 @@ const router = useRouter()
 
 const iosProfileSheetClass = computed(() => (isCapacitorIos.value ? 'ios-profile-sheet' : ''))
 const iosDangerBtnClass =
-  'inline-flex h-8 items-center rounded-full bg-red-500/10 px-3 text-sm font-normal text-red-600 dark:text-red-400'
+  'inline-flex h-8 items-center rounded-[var(--saas-radius-control,0.5rem)] bg-red-500/10 px-3 text-sm font-normal text-red-600 dark:text-red-400'
 
 const showEditProfileModal = ref(false)
 const showStoreInfoModal = ref(false)
@@ -2052,14 +2091,17 @@ const {
   canCreateStaff,
 } = usePermissions()
 
-/** Left column: business / store identity */
+/** Left column heading: business name for owners, person name for staff. */
 const leftCardHeading = computed(() => {
   if (isStaff.value) {
-    return storeInfo.storeName || storesStore.currentStore?.name || 'Business'
+    const staffName = [profileData.firstName, profileData.lastName].filter(Boolean).join(' ').trim()
+    if (staffName) return staffName
+    return profileData.email?.split('@')[0] || 'Staff'
   }
   return (
     profileData.businessName ||
     storeInfo.storeName ||
+    userStore.userData?.storeDetails?.storeName ||
     profileData.email?.split('@')[0] ||
     'Your business'
   )
@@ -2067,9 +2109,7 @@ const leftCardHeading = computed(() => {
 
 const leftCardLine2 = computed(() => {
   if (isStaff.value) {
-    const dept = staffWorkspace.value.departmentName || currentStaffMember.value?.departmentName
-    if (dept) return dept
-    return storeInfo.storeEmail || storeInfo.storePhone || profileData.email || '-'
+    return profileData.email || storeInfo.storeEmail || '-'
   }
   return profileData.email || 'No email'
 })
@@ -2081,11 +2121,11 @@ const showBusinessProfilePanel = computed(
 const profileTabs = computed(() => [
   { value: 'profile', label: isStaff.value ? 'Staff profile' : 'Business profile' },
   { value: 'store-info', label: isStaff.value ? 'Business profile' : 'Store information' },
-  { value: 'receipts', label: 'Receipt terms & policies' },
-  { value: 'help', label: 'Help & onboarding' },
+  { value: 'receipts', label: 'Receipt terms' },
+  { value: 'help', label: 'Help' },
   { value: 'preferences', label: 'Preferences' },
   { value: 'security', label: 'Security' },
-  { value: 'roles', label: 'Roles & permissions' },
+  { value: 'roles', label: 'Roles' },
 ])
 
 const activeProfileTab = ref('profile')
@@ -2141,9 +2181,14 @@ const leftCardBadgeExtra = computed(() => {
 })
 
 const profileAvatarInitials = computed(() => {
-  const raw = isStaff.value
-    ? storeInfo.storeName || storesStore.currentStore?.name || profileData.email || 'U'
-    : profileData.businessName || storeInfo.storeName || profileData.email || 'U'
+  const personalName = isStaff.value
+    ? [profileData.firstName, profileData.lastName].filter(Boolean).join(' ').trim()
+    : (userStore.userData?.name || '').trim()
+  const raw =
+    personalName ||
+    (isStaff.value
+      ? storeInfo.storeName || storesStore.currentStore?.name || profileData.email || 'U'
+      : profileData.businessName || storeInfo.storeName || profileData.email || 'U')
   const s = String(raw).trim()
   const parts = s.split(/\s+/).filter(Boolean)
   if (parts.length >= 2) {
@@ -2153,6 +2198,114 @@ const profileAvatarInitials = computed(() => {
   }
   return (s.slice(0, 2) || 'U').toUpperCase()
 })
+
+const profilePhotoInput = ref<HTMLInputElement | null>(null)
+const isUploadingProfilePhoto = ref(false)
+const profilePhotoUrl = computed(() => userStore.userData?.photoURL || '')
+const { authFetch } = useAuthenticatedFetch()
+
+function isFirebaseStorageUnknown(err: unknown): boolean {
+  return (
+    typeof err === 'object' &&
+    err !== null &&
+    'code' in err &&
+    (err as { code: string }).code === 'storage/unknown'
+  )
+}
+
+async function uploadProfilePhotoWithFallback(
+  file: File,
+  userId: string
+): Promise<{ url: string; path: string }> {
+  const cloudinary = useCloudinary()
+  if (cloudinary.isConfigured.value) {
+    const { url } = await cloudinary.uploadImage(file)
+    return { url, path: '' }
+  }
+
+  const { uploadImage } = useFirebaseStorage()
+  try {
+    return await uploadImage(file, userId, { folder: 'profile' })
+  } catch (err) {
+    if (!isFirebaseStorageUnknown(err)) throw err
+    const body = new FormData()
+    body.append('file', file)
+    try {
+      return await authFetch<{ url: string; path: string }>('/api/storage/upload-profile-photo', {
+        method: 'POST',
+        body,
+      })
+    } catch (apiErr: unknown) {
+      const serverHint = extractUploadFailureMessage(apiErr)
+      if (isBillingDelinquentMessage(serverHint)) {
+        throw new Error(BILLING_BLOCKED_USER_MESSAGE)
+      }
+      throw new Error(
+        `Could not complete upload (${serverHint}). Please try again or contact Storvv support if this continues.`
+      )
+    }
+  }
+}
+
+async function handleProfilePhotoUpload(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file || !authStore.currentUser) return
+
+  isUploadingProfilePhoto.value = true
+  input.value = ''
+
+  try {
+    if (isDemoModeActive()) {
+      const objectUrl = URL.createObjectURL(file)
+      const { applyDemoUserDocumentUpdate } = await import('~/utils/demo-bridge')
+      applyDemoUserDocumentUpdate({ photoURL: objectUrl })
+      toast.success('Profile photo updated')
+      return
+    }
+
+    const userId = authStore.currentUser.uid
+    const { url } = await uploadProfilePhotoWithFallback(file, userId)
+    await updateUserDocument(userId, { photoURL: url })
+    userStore.$patch((state) => {
+      if (state.userData) state.userData = { ...state.userData, photoURL: url }
+    })
+    toast.success('Profile photo updated')
+  } catch (err: unknown) {
+    if (import.meta.dev) console.error('[Profile photo upload]', err)
+    const { getFirebaseStorageErrorMessage } = useFirebaseStorage()
+    const msg = err instanceof Error ? err.message : getFirebaseStorageErrorMessage(err)
+    toast.error(msg)
+  } finally {
+    isUploadingProfilePhoto.value = false
+  }
+}
+
+async function removeProfilePhoto() {
+  if (!authStore.currentUser) return
+  const current = profilePhotoUrl.value
+  try {
+    if (isDemoModeActive()) {
+      const { applyDemoUserDocumentUpdate } = await import('~/utils/demo-bridge')
+      applyDemoUserDocumentUpdate({ photoURL: '' })
+      toast.success('Profile photo removed')
+      return
+    }
+
+    if (current && !isCloudinaryUrl(current) && !current.startsWith('blob:')) {
+      const { deleteImageByUrl } = useFirebaseStorage()
+      await deleteImageByUrl(current)
+    }
+    await updateUserDocument(authStore.currentUser.uid, { photoURL: '' })
+    userStore.$patch((state) => {
+      if (state.userData) state.userData = { ...state.userData, photoURL: '' }
+    })
+    toast.success('Profile photo removed')
+  } catch (err: unknown) {
+    const { getFirebaseStorageErrorMessage } = useFirebaseStorage()
+    toast.error(getFirebaseStorageErrorMessage(err))
+  }
+}
 
 type PermissionGroupId = 'view' | 'operations' | 'admin' | 'sales'
 

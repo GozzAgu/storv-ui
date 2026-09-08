@@ -359,6 +359,7 @@ import { useDashboardTableChrome } from '~/composables/useDashboardTableChrome'
 import { useIosPullToRefreshRegister } from '~/composables/useIosPullToRefresh'
 import { useStoresStore } from '~/stores/stores'
 import { CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
+import { isStorefrontDashboardHidden } from '~/utils/storefront-launch'
 import type { StorefrontInquiryStatus, StorefrontInquiryType } from '~/types/storefront'
 
 const SharePaymentLinkModal = defineAsyncComponent(
@@ -368,6 +369,10 @@ const SharePaymentLinkModal = defineAsyncComponent(
 definePageMeta({
   layout: 'dashboard',
 })
+
+if (isStorefrontDashboardHidden()) {
+  await navigateTo('/dashboard', { replace: true })
+}
 
 type PaymentLinkStatus = 'unpaid' | 'paid' | 'failed' | 'expired'
 

@@ -23,9 +23,8 @@ import {
   getStaffCollection,
   getQueryUserId,
 } from '~/composables/useFirestorePaths'
-import { getPlanLimits } from '~/types/subscription'
+import { getPlanLimits, resolveEffectiveSubscriptionPlan } from '~/types/subscription'
 import { PERMISSION_DENIED_MESSAGE, CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
-import type { SubscriptionPlan } from '~/types/subscription'
 import type { Department } from '~/composables/useDepartments'
 // CORE_DEPARTMENTS should be imported directly from '~/composables/useDepartments' to avoid duplication
 
@@ -343,7 +342,7 @@ export const useDepartmentsStore = defineStore('departments', {
       if (!userStore.userData) {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
-      const plan = (userStore.userData?.subscription as SubscriptionPlan) || 'storvv_micro'
+      const plan = resolveEffectiveSubscriptionPlan(userStore.userData)
       const limits = getPlanLimits(plan)
       const departmentsInStore = this.departments.filter((d) => d.storeId === storeId)
       if (

@@ -4,20 +4,11 @@ import { getAdminFirestore } from '~/server/utils/firebase-admin'
 import { requireAuth } from '~/server/utils/store-auth'
 import { isStaffAccount } from '~/server/utils/whatsapp-usage'
 import { whatsAppLimitMessage } from '~/utils/plan-gate-message'
-import { getPlanLimits } from '~/types/subscription'
-import type { SubscriptionPlan } from '~/types/subscription'
+import { getPlanLimits, resolveEffectiveSubscriptionPlan } from '~/types/subscription'
 
 function currentMonthKey(): string {
   const now = new Date()
   return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`
-}
-
-function normalizePlan(raw: unknown): SubscriptionPlan {
-  const s = typeof raw === 'string' ? raw : 'storvv_micro'
-  if (s === 'storvv_medium' || s === 'storvv_enterprise') return s
-  if (s === 'medium') return 'storvv_medium'
-  if (s === 'enterprise') return 'storvv_enterprise'
-  return 'storvv_micro'
 }
 
 export default defineEventHandler(async (event) => {
@@ -27,7 +18,7 @@ export default defineEventHandler(async (event) => {
 
   const userRef = adminDb.collection('users').doc(auth.uid)
   const userSnap = await userRef.get()
-  const plan = normalizePlan(userSnap.data()?.subscription)
+  const plan = resolveEffectiveSubscriptionPlan(userSnap.data())
   const limit = getPlanLimits(plan).maxWhatsAppMessagesPerMonth
 
   if (limit === 0) {

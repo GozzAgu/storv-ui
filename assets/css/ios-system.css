@@ -115,7 +115,7 @@ html.capacitor-ios.capacitor-native .ios-action-btn {
   min-height: 2.75rem;
   padding-inline: 1rem;
   border: 1px solid transparent;
-  border-radius: var(--ios-radius-md) !important;
+  border-radius: var(--ios-radius-control, 10px) !important;
   font-family: var(--ios-type-font-family);
   font-size: var(--ios-type-subheadline-size) !important;
   font-weight: 600 !important;
@@ -213,7 +213,7 @@ html.capacitor-ios.capacitor-native .ios-action-btn--icon-only {
   height: 2.25rem !important;
   min-height: 2.25rem !important;
   padding: 0 !important;
-  border-radius: 9999px !important;
+  border-radius: var(--ios-radius-control, 10px) !important;
 }
 
 html.capacitor-ios.capacitor-native .ios-action-btn:active:not(:disabled),

@@ -50,86 +50,79 @@
     </template>
 
     <DashboardPageHeader v-if="!isCapacitorIos" class="dash-page-header--unified">
-      <template #eyebrow>
-        <p :class="eyebrowClass">Help</p>
-      </template>
       <template #title>
         <h1 :class="pageTitleClass">Help center</h1>
       </template>
+      <template #actions>
+        <button
+          type="button"
+          class="dash-help-assistant-cta"
+          @click="openAssistant()"
+        >
+          <SparklesIcon class="h-4 w-4 shrink-0" stroke-width="1.75" />
+          Ask assistant
+        </button>
+        <button
+          type="button"
+          class="dash-help-assistant-cta dash-help-assistant-cta--secondary"
+          :disabled="isReplayingTour"
+          @click="replayDashboardTour"
+        >
+          {{ isReplayingTour ? 'Starting tour…' : 'Replay tour' }}
+        </button>
+      </template>
       <template #description>
         <p :class="descriptionClass">
-          How Storvv works: permissions, screens, and plan limits. Filter topics by keyword or open
-          a common screen below.
+          Guides for permissions, screens, and plan limits.
         </p>
       </template>
       <template #toolbar>
-        <div class="flex w-full min-w-0 flex-col gap-3">
-          <div class="flex w-full min-w-0 flex-wrap items-end gap-3">
-          <DashboardToolbarSearch
-            input-id="help-search"
-            v-model="searchQuery"
-            placeholder="Search help topics…"
-            :wide="false"
-            wrapper-class="max-w-md"
-          />
-            <button
-              type="button"
-              class="dash-help-assistant-cta"
-              @click="openAssistant()"
-            >
-              <SparklesIcon class="h-4 w-4 shrink-0" stroke-width="1.75" />
-              Ask assistant
-            </button>
-            <button
-              type="button"
-              class="dash-help-assistant-cta"
-              :disabled="isReplayingTour"
-              @click="replayDashboardTour"
-            >
-              {{ isReplayingTour ? 'Starting tour…' : 'Replay dashboard tour' }}
-            </button>
-          </div>
-          <div>
-            <p :class="toolbarLabelClass">
-              Popular topics
-            </p>
-            <div class="flex flex-wrap gap-2">
-              <button
-                v-for="topic in popularTopics"
-                :key="topic.query"
-                type="button"
-                :class="chipClass"
-                @click="searchQuery = topic.query"
-              >
-                {{ topic.label }}
-              </button>
-            </div>
-          </div>
-          <div>
-            <p :class="toolbarLabelClass">
-              Common screens
-            </p>
-            <div class="flex flex-wrap gap-2">
-              <NuxtLink
-                v-for="link in quickScreenLinks"
-                :key="link.to"
-                :to="link.to"
-                :class="chipLinkClass"
-              >
-                {{ link.label }}
-              </NuxtLink>
-            </div>
-          </div>
-        </div>
+        <DashboardToolbarSearch
+          input-id="help-search"
+          v-model="searchQuery"
+          placeholder="Search help topics…"
+          :wide="false"
+          wrapper-class="w-full !max-w-xl sm:!max-w-xl lg:!max-w-xl"
+        />
       </template>
     </DashboardPageHeader>
+
+    <div v-if="!isCapacitorIos" class="dash-help-discover">
+      <div class="dash-help-discover__block">
+        <p :class="toolbarLabelClass">Popular topics</p>
+        <div class="dash-help-discover__topics">
+          <button
+            v-for="topic in popularTopics"
+            :key="topic.query"
+            type="button"
+            :class="chipClass"
+            @click="searchQuery = topic.query"
+          >
+            {{ topic.label }}
+          </button>
+        </div>
+      </div>
+      <div class="dash-help-discover__block">
+        <p :class="toolbarLabelClass">Common screens</p>
+        <nav class="dash-help-discover__screens" aria-label="Common screens">
+          <NuxtLink
+            v-for="link in quickScreenLinks"
+            :key="link.to"
+            :to="link.to"
+            :class="chipLinkClass"
+          >
+            {{ link.label }}
+          </NuxtLink>
+        </nav>
+      </div>
+    </div>
 
     <div :class="[layoutClass, isCapacitorIos ? 'ios-help-layout--native' : '']">
       <nav v-if="!isCapacitorIos" aria-label="Topics" :class="tocClass">
         <p :class="tocLabelClass">
           On this page
         </p>
-        <ul class="space-y-0.5">
+        <ul class="dash-help-toc__list">
           <li v-for="cat in filteredCategories" :key="cat.id">
             <a
               :href="`#${cat.id}`"
@@ -141,7 +134,7 @@
         </ul>
         <p
           v-if="filteredCategories.length === 0"
-          class="py-2 text-sm leading-relaxed text-gray-500 dark:text-gray-400"
+          class="dash-help-empty"
         >
           No topics match "{{ searchQuery }}". Try another word or clear the filter.
         </p>
@@ -155,18 +148,19 @@
           :class="sectionClass"
         >
           <div :class="sectionHeadClass">
-            <div :class="sectionIconClass">
-              <component
-                :is="cat.icon"
-                class="h-4 w-4 text-gray-500 dark:text-gray-400"
-                stroke-width="1.5"
-              />
-            </div>
             <div class="min-w-0 flex-1">
-              <h2
-                :class="sectionTitleClass"
-                v-html="highlightText(cat.title, trimmedSearch)"
-              ></h2>
+              <div class="dash-help-section__title-row">
+                <component
+                  :is="cat.icon"
+                  class="dash-help-section__glyph"
+                  stroke-width="1.5"
+                  aria-hidden="true"
+                />
+                <h2
+                  :class="sectionTitleClass"
+                  v-html="highlightText(cat.title, trimmedSearch)"
+                ></h2>
+              </div>
               <p
                 :class="sectionBlurbClass"
                 v-html="highlightText(cat.blurb, trimmedSearch)"
@@ -181,7 +175,7 @@
             </button>
           </div>
 
-          <div class="space-y-3">
+          <div class="dash-help-section__articles">
             <article
               v-for="(article, idx) in cat.articles"
               :key="idx"
@@ -199,7 +193,7 @@
                 ></p>
                 <ul
                   v-if="article.bullets?.length"
-                  class="list-disc space-y-1.5 pl-5 marker:text-gray-400 dark:marker:text-gray-500"
+                  class="dash-help-article__bullets"
                 >
                   <li
                     v-for="(b, bIdx) in article.bullets"
@@ -265,7 +259,6 @@ useHead({
 })
 
 const {
-  eyebrowClass,
   pageTitleClass,
   descriptionClass,
   pageClass,
@@ -276,7 +269,6 @@ const {
   contentClass,
   sectionClass,
   sectionHeadClass,
-  sectionIconClass,
   sectionTitleClass,
   sectionBlurbClass,
   articleClass,
@@ -350,15 +342,11 @@ const showBackToTop = ref(false)
 const popularTopics = [
   { label: "What's new", query: 'recent updates' },
   { label: 'Mobile app', query: 'ios android native' },
-  { label: 'Sales leads', query: 'sales leads' },
-  { label: 'Subcategories', query: 'organize with subcategories' },
-  { label: 'Copy from branch', query: 'copy from branch' },
-  { label: 'Create branch', query: 'branch names region' },
-  { label: 'Stock loans', query: 'stock loan' },
-  { label: 'Pull to refresh', query: 'pull to refresh' },
+  { label: 'Getting started', query: 'getting started' },
   { label: 'Staff & roles', query: 'staff' },
   { label: 'Sales & refunds', query: 'receipt' },
-  { label: 'Inventory & categories', query: 'inventory' },
+  { label: 'Inventory', query: 'inventory' },
+  { label: 'Stock loans', query: 'stock loan' },
   { label: 'Plans & billing', query: 'plan' },
 ] as const
 

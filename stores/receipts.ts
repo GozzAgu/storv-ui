@@ -120,7 +120,7 @@ export interface Receipt {
   itemIds: string[] // Array of inventory item IDs that were sold
   storeId: string // Store this receipt belongs to
   storeBranchName?: string // Store branch name where receipt was generated
-  storeLogoUrl?: string // Super admin profile photo - shown on receipts
+  storeLogoUrl?: string // Company logo snapshot shown on this receipt
   createdByUserName?: string // Name of the user who created the receipt
   // Swap-in fields
   isSwapIn?: boolean // Indicates if this receipt includes a swap-in
@@ -519,6 +519,12 @@ export const useReceiptsStore = defineStore('receipts', {
           await useFunnelAnalytics()
             .recordMilestone('firstSaleAt', { store_id: storeId })
             .catch(() => undefined)
+          try {
+            const { useAppToast } = await import('~/composables/useAppToast')
+            useAppToast().success('First sale recorded — nice work')
+          } catch {
+            /* toast optional */
+          }
         }
 
         // Create notification (use account currency for amounts)

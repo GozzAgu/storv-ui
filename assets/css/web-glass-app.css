@@ -17,13 +17,17 @@ html:not(.capacitor-native) .dashboard-layout-root {
   --saas-accent-soft: rgb(26 21 35 / 0.06);
   --saas-ink: #1a1523;
   --saas-muted: rgb(26 21 35 / 0.58);
-  --saas-radius-lg: 1.5rem;
-  --saas-radius-xl: 2rem;
+  --saas-radius-lg: 0.875rem;
+  --saas-radius-xl: 1.125rem;
+  --saas-radius-control: 0.5rem;
+  --saas-radius-chip: 0.375rem;
   --saas-topnav-bg: #ffffff;
   --saas-topnav-border: rgb(15 23 42 / 0.16);
   --saas-topnav-shadow: 0 1px 3px rgb(15 23 42 / 0.09), 0 8px 20px rgb(15 23 42 / 0.1);
   --saas-topnav-control-bg: #f5f5f7;
   --saas-topnav-control-border: transparent;
+  --saas-topnav-radius: 0.75rem;
+  --saas-topnav-control-radius: 0.5rem;
   --dash-canvas: #f5f5f7;
   --dash-surface: #ffffff;
   --dash-border: transparent;
@@ -61,9 +65,11 @@ html:not(.capacitor-native).dark .dashboard-layout-root {
   --saas-ink: #ffffff;
   --saas-muted: rgb(255 255 255 / 0.72);
   --saas-topnav-bg: #1e1e1e;
-  --saas-topnav-border: transparent;
-  --saas-topnav-control-bg: rgb(255 255 255 / 0.08);
+  --saas-topnav-border: rgb(255 255 255 / 0.08);
+  --saas-topnav-control-bg: rgb(255 255 255 / 0.06);
   --saas-topnav-control-border: transparent;
+  --saas-topnav-radius: 0.75rem;
+  --saas-topnav-control-radius: 0.5rem;
   --dash-canvas: #080808;
   --dash-surface: #1e1e1e;
   --dash-border: transparent;
@@ -119,6 +125,7 @@ html:not(.capacitor-native) .dashboard-layout-root .dash-sidebar__logo-bar {
 html:not(.capacitor-native) .dash-topnav.dashboard-top-nav {
   background: var(--saas-topnav-bg);
   border-color: var(--saas-topnav-border);
+  border-radius: var(--saas-topnav-radius, 0.75rem);
   backdrop-filter: blur(28px) saturate(1.45);
   -webkit-backdrop-filter: blur(28px) saturate(1.45);
 }
@@ -136,6 +143,7 @@ html:not(.capacitor-native) .dashboard-layout-root main[data-dashboard-main] :is
   .dash-stat-card,
   .dash-grid-card,
   .dash-settings-panel,
+  .dash-profile-card,
   .dash-state-card,
   .inv-category-card,
   .data-table-shell,
@@ -147,7 +155,7 @@ html:not(.capacitor-native) .dashboard-layout-root main[data-dashboard-main] :is
   .app-card-sm,
   .verify-email-card
 ) {
-  border-radius: 1.5rem !important;
+  border-radius: var(--saas-radius-lg, 0.875rem) !important;
   border: 0 !important;
   background: var(--saas-glass-bg) !important;
   box-shadow: none !important;
@@ -161,6 +169,7 @@ html:not(.capacitor-native).dark .dashboard-layout-root main[data-dashboard-main
   .dash-stat-card,
   .dash-grid-card,
   .dash-settings-panel,
+  .dash-profile-card,
   .dash-state-card,
   .inv-category-card,
   .data-table-shell,
@@ -371,7 +380,7 @@ html:not(.capacitor-native) .dash-overlay-shell,
 html:not(.capacitor-native) [data-dashboard-teleport] .dash-overlay-shell {
   background: var(--dash-overlay-bg);
   border: 1px solid var(--saas-glass-border);
-  border-radius: 1.5rem;
+  border-radius: var(--saas-radius-lg, 0.875rem);
   backdrop-filter: blur(28px) saturate(1.45);
   -webkit-backdrop-filter: blur(28px) saturate(1.45);
   color: var(--saas-ink);
@@ -445,20 +454,12 @@ html:not(.capacitor-native) .dashboard-layout-root .focus\:ring-primary-400\/30:
 
 html:not(.capacitor-native) .dash-profile-panel,
 html:not(.capacitor-native) .dash-notify-panel,
-html:not(.capacitor-native) .dash-store-panel__surface {
+html:not(.capacitor-native) .dash-store-panel {
   background: var(--dash-overlay-bg);
   border: 1px solid var(--saas-glass-border);
+  border-radius: var(--saas-radius-lg, 0.875rem);
   backdrop-filter: blur(28px) saturate(1.45);
   -webkit-backdrop-filter: blur(28px) saturate(1.45);
-}
-
-html:not(.capacitor-native) .dash-profile-panel {
-  box-shadow:
-    0 18px 50px rgb(26 21 35 / 0.16),
-    0 4px 14px rgb(26 21 35 / 0.08);
-}
-
-html:not(.capacitor-native) .dash-notify-panel--dropdown {
   box-shadow:
     0 18px 50px rgb(26 21 35 / 0.16),
     0 4px 14px rgb(26 21 35 / 0.08);
@@ -542,11 +543,17 @@ html:not(.capacitor-native).dark .dashboard-layout-root .dash-plan-badge {
 }
 
 html:not(.capacitor-native).dark .dashboard-layout-root .dash-sidebar.dashboard-sidebar,
-html:not(.capacitor-native).dark .dash-topnav.dashboard-top-nav,
 html:not(.capacitor-native).dark .dashboard-layout-root .dashboard-sidebar > button.absolute.top-10 {
   border: 0 !important;
   box-shadow: none !important;
   background: #1e1e1e !important;
+}
+
+html:not(.capacitor-native).dark .dash-topnav.dashboard-top-nav {
+  border: 1px solid rgb(255 255 255 / 0.08) !important;
+  box-shadow: none !important;
+  background: #1e1e1e !important;
+  border-radius: var(--saas-topnav-radius, 0.75rem) !important;
 }
 
 html:not(.capacitor-native).dark .dashboard-layout-root .dash-sidebar.dashboard-sidebar,
@@ -567,7 +574,6 @@ html:not(.capacitor-native).dark .dashboard-layout-root .dash-sidebar.dashboard-
 
 html:not(.capacitor-native).dark .dash-overlay-shell,
 html:not(.capacitor-native).dark [data-dashboard-teleport] .dash-overlay-shell,
-html:not(.capacitor-native).dark .dash-store-panel__surface,
 html:not(.capacitor-native).dark .dashboard-fixed-footer--web,
 html:not(.capacitor-native).dark .dash-pagination__pager {
   border: 0 !important;
@@ -591,15 +597,22 @@ html:not(.capacitor-native).dark .dash-store-row--active {
   background: rgb(255 255 255 / 0.08);
 }
 
-html:not(.capacitor-native).dark .dash-profile-panel {
+html:not(.capacitor-native).dark .dash-store-panel__footer {
+  border-color: rgb(255 255 255 / 0.06);
+}
+
+html:not(.capacitor-native).dark .dash-profile-panel,
+html:not(.capacitor-native).dark .dash-notify-panel--dropdown,
+html:not(.capacitor-native).dark .dash-store-panel {
   border: 0 !important;
+  border-radius: var(--saas-radius-lg, 0.875rem) !important;
   background: #1e1e1e !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   box-shadow:
     0 28px 64px rgb(0 0 0 / 0.85),
     0 10px 24px rgb(0 0 0 / 0.55),
-    0 0 0 1px rgb(255 255 255 / 0.16);
+    0 0 0 1px rgb(255 255 255 / 0.16) !important;
 }
 
 html:not(.capacitor-native) .dash-notify-panel__tabs {
@@ -609,7 +622,7 @@ html:not(.capacitor-native) .dash-notify-panel__tabs {
 }
 
 html:not(.capacitor-native) .dash-notify-tab {
-  border-radius: 9999px;
+  border-radius: var(--saas-radius-control, 0.5rem);
   border: 0;
 }
 
@@ -983,7 +996,7 @@ html:not(.capacitor-native) .dash-empty-state__mark {
   width: 3.25rem;
   height: 3.25rem;
   margin-bottom: 1rem;
-  border-radius: 9999px;
+  border-radius: var(--saas-radius-control, 0.5rem);
   background: #f4f4f5;
   color: rgb(26 21 35 / 0.42);
 }
@@ -1100,7 +1113,7 @@ html:not(.capacitor-native) .dash-state-card:not(.subscription-feature-gate) > .
   height: 3.25rem !important;
   padding: 0.95rem;
   margin: 0 auto 1rem;
-  border-radius: 9999px;
+  border-radius: var(--saas-radius-control, 0.5rem);
   background: #f4f4f5;
   color: rgb(26 21 35 / 0.42) !important;
 }
@@ -1123,7 +1136,7 @@ html:not(.capacitor-native) .subscription-feature-gate > svg {
   height: 3.25rem !important;
   padding: 0.95rem;
   margin: 0 auto 1rem;
-  border-radius: 9999px;
+  border-radius: var(--saas-radius-control, 0.5rem);
   background: #f4f4f5;
   color: rgb(26 21 35 / 0.42) !important;
 }
@@ -1190,7 +1203,7 @@ html:not(.capacitor-native) .dash-drawer-empty > svg:first-child {
   height: 2.75rem;
   padding: 0.75rem;
   margin: 0 0 0.75rem;
-  border-radius: 9999px;
+  border-radius: var(--saas-radius-control, 0.5rem);
   background: #f4f4f5;
   color: rgb(26 21 35 / 0.42);
 }
@@ -1246,7 +1259,7 @@ html:not(.capacitor-native) .dash-error-card > div:first-child {
   width: 3.25rem;
   height: 3.25rem;
   margin: 0 auto 1rem;
-  border-radius: 9999px;
+  border-radius: var(--saas-radius-control, 0.5rem);
 }
 
 html:not(.capacitor-native) .payment-links-coming-soon {
@@ -1368,7 +1381,7 @@ html:not(.capacitor-native).dark :is(main[data-dashboard-main], [data-dashboard-
   :is(.data-table-shell, .dash-table-shell, .activity-log-shell)
   thead.sticky
   th {
-  background: #1e1e1e !important;
+  background: #080808 !important;
 }
 
 html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-teleport])
@@ -1529,7 +1542,7 @@ html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-telep
   .dashboard-table__action-btn {
   height: 2.25rem;
   width: 2.25rem;
-  border-radius: 9999px;
+  border-radius: var(--saas-radius-control, 0.5rem);
   color: var(--dash-table-body-muted);
 }
 
@@ -1543,7 +1556,7 @@ html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-telep
   .dashboard-table__action-group {
   border: 0;
   background: #f5f5f7;
-  border-radius: 9999px;
+  border-radius: var(--saas-radius-control, 0.5rem);
   padding: 0.125rem;
 }
 
@@ -1565,49 +1578,68 @@ html:not(.capacitor-native).dark :is(main[data-dashboard-main], [data-dashboard-
   background-color: #ffffff !important;
 }
 
+html:not(.capacitor-native) .dash-tabs-rail,
 html:not(.capacitor-native) .dash-segment-tabs {
-  width: fit-content;
+  width: 100%;
   max-width: 100%;
-  gap: 0.25rem;
-  padding: 0.25rem;
-  border-radius: 9999px;
-  background: #f5f5f7;
+  gap: 0.125rem;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
+html:not(.capacitor-native).dark .dash-tabs-rail,
 html:not(.capacitor-native).dark .dash-segment-tabs {
-  background: #282828;
+  background: transparent;
 }
 
+html:not(.capacitor-native) .dash-tabs-rail__btn,
 html:not(.capacitor-native) .dash-segment-tabs__btn {
-  flex: 0 1 auto;
-  min-height: 2rem;
-  padding: 0.375rem 0.875rem;
-  border-radius: 9999px;
+  flex: 0 0 auto;
+  min-height: 2.5rem;
+  padding: 0.65rem 0.9rem;
+  border-radius: 0;
   font-size: 0.8125rem;
   font-weight: 500;
   color: var(--saas-muted);
+  background: transparent;
 }
 
+html:not(.capacitor-native) .dash-tabs-rail__btn:hover,
 html:not(.capacitor-native) .dash-segment-tabs__btn:hover {
   color: var(--saas-ink);
-  background: rgb(255 255 255 / 0.65);
+  background: transparent;
 }
 
+html:not(.capacitor-native).dark .dash-tabs-rail__btn:hover,
 html:not(.capacitor-native).dark .dash-segment-tabs__btn:hover {
-  background: rgb(255 255 255 / 0.06);
+  background: transparent;
 }
 
+html:not(.capacitor-native) .dash-tabs-rail__btn--active,
+html:not(.capacitor-native) .dash-tabs-rail__btn[aria-selected='true'],
 html:not(.capacitor-native) .dash-segment-tabs__btn--active,
-html:not(.capacitor-native) .dash-segment-tabs__btn[aria-selected='true'] {
-  background: #ffffff;
-  color: #1a1523;
-  font-weight: 600;
-  box-shadow: none;
-}
-
+html:not(.capacitor-native) .dash-segment-tabs__btn[aria-selected='true'],
+html:not(.capacitor-native).dark .dash-tabs-rail__btn--active,
+html:not(.capacitor-native).dark .dash-tabs-rail__btn[aria-selected='true'],
 html:not(.capacitor-native).dark .dash-segment-tabs__btn--active,
 html:not(.capacitor-native).dark .dash-segment-tabs__btn[aria-selected='true'] {
-  background: #1e1e1e;
+  background: transparent;
+  box-shadow: none;
+  font-weight: 600;
+}
+
+html:not(.capacitor-native) .dash-tabs-rail__btn--active,
+html:not(.capacitor-native) .dash-tabs-rail__btn[aria-selected='true'],
+html:not(.capacitor-native) .dash-segment-tabs__btn--active,
+html:not(.capacitor-native) .dash-segment-tabs__btn[aria-selected='true'] {
+  color: #1a1523;
+}
+
+html:not(.capacitor-native).dark .dash-tabs-rail__btn--active,
+html:not(.capacitor-native).dark .dash-tabs-rail__btn[aria-selected='true'],
+html:not(.capacitor-native).dark .dash-segment-tabs__btn--active,
+html:not(.capacitor-native).dark .dash-segment-tabs__btn[aria-selected='true'] {
   color: #ffffff;
 }
 
@@ -1665,7 +1697,7 @@ html:not(.capacitor-native) :is(main[data-dashboard-main], [data-dashboard-telep
   tbody
   .dash-status-badge {
   border: 0 !important;
-  border-radius: 9999px !important;
+  border-radius: var(--saas-radius-chip, 0.375rem) !important;
   box-shadow: none !important;
 }
 
@@ -1784,7 +1816,7 @@ html:not(.capacitor-native).dark .tutorial-root .tutorial-ring--locked {
 
 html:not(.capacitor-native) .tutorial-root .tutorial-card {
   border: 0;
-  border-radius: 1.5rem;
+  border-radius: var(--saas-radius-lg, 0.875rem);
   background: #ffffff;
   color: #1a1523;
   box-shadow: 0 18px 50px rgb(26 21 35 / 0.16);
@@ -1821,7 +1853,7 @@ html:not(.capacitor-native).dark .tutorial-root .tutorial-card__step {
 }
 
 html:not(.capacitor-native) .tutorial-root .tutorial-card__close {
-  border-radius: 9999px;
+  border-radius: var(--saas-radius-control, 0.5rem);
   color: rgb(26 21 35 / 0.58);
 }
 
@@ -1846,7 +1878,7 @@ html:not(.capacitor-native) .tutorial-root .tutorial-card__body {
 html:not(.capacitor-native) .tutorial-root .tutorial-card__icon {
   height: 2.75rem;
   width: 2.75rem;
-  border-radius: 9999px;
+  border-radius: var(--saas-radius-control, 0.5rem);
   background: #f5f5f7;
   color: #1a1523;
 }
@@ -1915,7 +1947,7 @@ html:not(.capacitor-native).dark .tutorial-root .tutorial-card__lock-copy {
 }
 
 html:not(.capacitor-native) .tutorial-root .tutorial-card__ghost {
-  border-radius: 9999px;
+  border-radius: var(--saas-radius-control, 0.5rem);
   padding: 0.4375rem 0.875rem;
   color: rgb(26 21 35 / 0.58);
 }
@@ -1936,7 +1968,7 @@ html:not(.capacitor-native).dark .tutorial-root .tutorial-card__ghost:hover {
 
 html:not(.capacitor-native) .tutorial-root .tutorial-card__cta {
   border: 0;
-  border-radius: 9999px;
+  border-radius: var(--saas-radius-control, 0.5rem);
   background: #1a1523;
   padding: 0.5rem 1rem;
   font-size: 0.8125rem;
@@ -1976,7 +2008,7 @@ html:not(.capacitor-native) .dash-table-expand__header {
 }
 
 html:not(.capacitor-native).dark .dash-table-expand__header {
-  background: #080808 !important;
+  background: #1e1e1e !important;
 }
 
 html:not(.capacitor-native) .dash-table-expand__eyebrow {
@@ -2021,7 +2053,7 @@ html:not(.capacitor-native) .dash-table-expand__close {
   align-items: center;
   justify-content: center;
   border: 0;
-  border-radius: 9999px;
+  border-radius: var(--saas-radius-control, 0.5rem);
   background: transparent;
   color: rgb(26 21 35 / 0.58);
 }
@@ -2074,7 +2106,7 @@ html:not(.capacitor-native) .dash-table-expand .dash-table-expand__body,
 html:not(.capacitor-native) .dash-table-expand .data-table-shell {
   margin: 0 1.25rem 1.25rem;
   border: 0 !important;
-  border-radius: 1.5rem !important;
+  border-radius: var(--saas-radius-lg, 0.875rem) !important;
   background: #ffffff !important;
   box-shadow: none !important;
   backdrop-filter: none !important;
@@ -2222,6 +2254,28 @@ html:not(.capacitor-native).dark .dash-overlay-shell .dash-drawer-actions button
 html:not(.capacitor-native).dark [data-dashboard-teleport] .dash-drawer-actions button[data-btn-variant='secondary'],
 html:not(.capacitor-native).dark [data-dashboard-teleport] .dash-drawer-actions button[data-btn-variant='ghost'] {
   color: rgb(255 255 255 / 0.82) !important;
+}
+
+/**
+ * Soften Tailwind pill radii on web dashboard controls.
+ * Avatars, toggles, spinners, and floating action buttons stay circular.
+ */
+html:not(.capacitor-native) .dashboard-layout-root :is(button, [role='button']).rounded-full:not(.animate-spin):not([class*='w-14']):not([class*='h-14']),
+html:not(.capacitor-native) .dashboard-layout-root :is(button, [role='button']).\!rounded-full:not([class*='w-14']):not([class*='h-14']),
+html:not(.capacitor-native) [data-dashboard-teleport] :is(button, [role='button']).rounded-full:not(.animate-spin):not([class*='w-14']):not([class*='h-14']),
+html:not(.capacitor-native) [data-dashboard-teleport] :is(button, [role='button']).\!rounded-full:not([class*='w-14']):not([class*='h-14']),
+html:not(.capacitor-native) .dashboard-layout-root a.rounded-full[class*='px-'],
+html:not(.capacitor-native) [data-dashboard-teleport] a.rounded-full[class*='px-'],
+html:not(.capacitor-native) .dashboard-layout-root .rounded-full[class*='px-']:not(img):not(.peer):not(.animate-spin),
+html:not(.capacitor-native) [data-dashboard-teleport] .rounded-full[class*='px-']:not(img):not(.peer):not(.animate-spin) {
+  border-radius: var(--saas-radius-control, 0.5rem) !important;
+}
+
+html:not(.capacitor-native) .dashboard-layout-root .rounded-full[class*='px-'][class*='py-0.5'],
+html:not(.capacitor-native) .dashboard-layout-root .rounded-full[class*='px-'][class*='py-1'],
+html:not(.capacitor-native) [data-dashboard-teleport] .rounded-full[class*='px-'][class*='py-0.5'],
+html:not(.capacitor-native) [data-dashboard-teleport] .rounded-full[class*='px-'][class*='py-1'] {
+  border-radius: var(--saas-radius-chip, 0.375rem) !important;
 }
 
 

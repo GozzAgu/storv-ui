@@ -35,6 +35,61 @@ export type AnalyticsReportSnapshot = {
   topProducts: AnalyticsExportProduct[]
   topCustomers: AnalyticsExportCustomer[]
   recentReturns: AnalyticsExportReturn[]
+  /** Optional company branding on the PDF cover header. */
+  businessName?: string
+  companyLogoUrl?: string
+}
+
+const INK = { r: 26, g: 21, b: 35 }
+const MUTED = { r: 107, g: 114, b: 128 }
+const RULE = { r: 229, g: 231, b: 235 }
+const SURFACE = { r: 249, g: 250, b: 251 }
+const ACCENT = { r: 26, g: 21, b: 35 }
+
+type PdfDoc = import('jspdf').jsPDF
+
+function setInk(doc: PdfDoc) {
+  doc.setTextColor(INK.r, INK.g, INK.b)
+}
+
+function setMuted(doc: PdfDoc) {
+  doc.setTextColor(MUTED.r, MUTED.g, MUTED.b)
+}
+
+function drawHairline(doc: PdfDoc, x1: number, y: number, x2: number) {
+  doc.setDrawColor(RULE.r, RULE.g, RULE.b)
+  doc.setLineWidth(0.25)
+  doc.line(x1, y, x2, y)
+}
+
+async function tryLoadImageDataUrl(url: string): Promise<{ dataUrl: string; format: 'PNG' | 'JPEG' } | null> {
+  try {
+    const res = await fetch(url)
+    if (!res.ok) return null
+    const blob = await res.blob()
+    const format: 'PNG' | 'JPEG' =
+      blob.type.includes('png') || url.toLowerCase().includes('.png') ? 'PNG' : 'JPEG'
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve(String(reader.result || ''))
+      reader.onerror = () => reject(new Error('read failed'))
+      reader.readAsDataURL(blob)
+    })
+    if (!dataUrl.startsWith('data:image')) return null
+    return { dataUrl, format }
+  } catch {
+    return null
+  }
+}
+
+function truncate(doc: PdfDoc, text: string, maxWidth: number): string {
+  const raw = String(text || '')
+  if (doc.getTextWidth(raw) <= maxWidth) return raw
+  let trimmed = raw
+  while (trimmed.length > 1 && doc.getTextWidth(`${trimmed}…`) > maxWidth) {
+    trimmed = trimmed.slice(0, -1)
+  }
+  return `${trimmed}…`
 }
 
 export function downloadAnalyticsCsv(snapshot: AnalyticsReportSnapshot) {
@@ -81,112 +136,269 @@ export function downloadAnalyticsCsv(snapshot: AnalyticsReportSnapshot) {
 
 export async function downloadAnalyticsPdf(snapshot: AnalyticsReportSnapshot) {
   const { default: jsPDF } = await import('jspdf')
-  const doc = new jsPDF()
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
 
-  doc.setFontSize(18)
-  doc.text('Analytics & Sales Report', 14, 20)
-  doc.setFontSize(10)
-  doc.text(`Period: ${snapshot.periodLabel}`, 14, 28)
-  doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 34)
+  const pageWidth = doc.internal.pageSize.getWidth()
+  const pageHeight = doc.internal.pageSize.getHeight()
+  const marginX = 16
+  const contentWidth = pageWidth - marginX * 2
+  const bottomSafe = pageHeight - 16
+  let y = 16
+  let pageNum = 1
 
-  let yPos = 44
-
-  doc.setFontSize(14)
-  doc.text('Key Metrics', 14, yPos)
-  yPos += 8
-
-  doc.setFontSize(10)
-  const metrics = [
-    ['Total Revenue', snapshot.formatCurrency(snapshot.totalRevenue)],
-    ['Total Sales', snapshot.totalSales.toString()],
-    ['Total Orders', snapshot.totalOrders.toString()],
-    ['Average Order Value', snapshot.formatCurrency(snapshot.averageOrderValue)],
-    ['Low Stock Items', snapshot.lowStockCount.toString()],
-    ['Refunded Count', snapshot.refundedCount.toString()],
-    ['Refund Amount', snapshot.formatCurrency(snapshot.refundAmount)],
-    ['Refund Rate', `${snapshot.refundRate.toFixed(1)}%`],
-    ['Repeat Purchase Rate', `${snapshot.repeatPurchaseRate.toFixed(1)}%`],
-  ]
-
-  metrics.forEach(([label, value]) => {
-    doc.text(`${label}: ${value}`, 20, yPos)
-    yPos += 6
+  const generatedLabel = new Date().toLocaleDateString(undefined, {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
   })
 
-  yPos += 4
+  const businessName = (snapshot.businessName || '').trim() || 'Storvv'
+  const logo = snapshot.companyLogoUrl
+    ? await tryLoadImageDataUrl(snapshot.companyLogoUrl)
+    : null
 
-  if (snapshot.topProducts.length > 0) {
-    doc.setFontSize(14)
-    doc.text('Top Products', 14, yPos)
-    yPos += 8
-    doc.setFontSize(12)
-    doc.text('Product', 20, yPos)
-    doc.text('Quantity', 100, yPos)
-    doc.text('Revenue', 150, yPos)
-    yPos += 6
-    doc.setFontSize(10)
-
-    snapshot.topProducts.slice(0, 10).forEach((product) => {
-      if (yPos > 280) {
-        doc.addPage()
-        yPos = 20
-      }
-      doc.text(product.name.substring(0, 30), 20, yPos)
-      doc.text(product.quantity.toString(), 100, yPos)
-      doc.text(snapshot.formatCurrency(product.revenue), 150, yPos)
-      yPos += 6
-    })
-    yPos += 4
+  const paintFooter = () => {
+    drawHairline(doc, marginX, pageHeight - 12, pageWidth - marginX)
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(8)
+    setMuted(doc)
+    doc.text(businessName, marginX, pageHeight - 7)
+    doc.text(`Page ${pageNum}`, pageWidth - marginX, pageHeight - 7, { align: 'right' })
   }
 
-  if (snapshot.topCustomers.length > 0) {
-    doc.setFontSize(14)
-    doc.text('Top Customers', 14, yPos)
-    yPos += 8
-    doc.setFontSize(12)
-    doc.text('Customer', 20, yPos)
-    doc.text('Orders', 100, yPos)
-    doc.text('Total Spent', 150, yPos)
-    yPos += 6
-    doc.setFontSize(10)
-
-    snapshot.topCustomers.slice(0, 10).forEach((customer) => {
-      if (yPos > 280) {
-        doc.addPage()
-        yPos = 20
-      }
-      doc.text(customer.name.substring(0, 30), 20, yPos)
-      doc.text(customer.orders.toString(), 100, yPos)
-      doc.text(snapshot.formatCurrency(customer.totalSpent), 150, yPos)
-      yPos += 6
-    })
-    yPos += 4
+  const newPage = () => {
+    paintFooter()
+    doc.addPage()
+    pageNum += 1
+    y = 16
   }
 
-  if (snapshot.recentReturns.length > 0) {
-    doc.setFontSize(14)
-    doc.text('Recent Returns', 14, yPos)
-    yPos += 8
-    doc.setFontSize(12)
-    doc.text('Receipt #', 20, yPos)
-    doc.text('Date', 60, yPos)
-    doc.text('Amount', 110, yPos)
-    doc.text('Reason', 150, yPos)
-    yPos += 6
-    doc.setFontSize(10)
-
-    snapshot.recentReturns.forEach((ret) => {
-      if (yPos > 280) {
-        doc.addPage()
-        yPos = 20
-      }
-      doc.text(ret.receiptNumber, 20, yPos)
-      doc.text(snapshot.formatReturnDate(ret.date), 60, yPos)
-      doc.text('-' + snapshot.formatCurrency(ret.amount), 110, yPos)
-      doc.text((ret.reason || '-').substring(0, 25), 150, yPos)
-      yPos += 6
-    })
+  const ensureSpace = (needed: number) => {
+    if (y + needed > bottomSafe) newPage()
   }
 
+  // —— Header ——
+  if (logo) {
+    try {
+      doc.addImage(logo.dataUrl, logo.format, marginX, y, 12, 12)
+    } catch {
+      // ignore broken logo payloads
+    }
+  }
+
+  const headerLeft = logo ? marginX + 16 : marginX
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(11)
+  setInk(doc)
+  doc.text(businessName, headerLeft, y + 5)
+
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(8)
+  setMuted(doc)
+  doc.text('Sales analytics', headerLeft, y + 10)
+
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(8)
+  setMuted(doc)
+  doc.text(snapshot.periodLabel, pageWidth - marginX, y + 5, { align: 'right' })
+  doc.text(`Generated ${generatedLabel}`, pageWidth - marginX, y + 10, { align: 'right' })
+
+  y += 18
+  doc.setFillColor(ACCENT.r, ACCENT.g, ACCENT.b)
+  doc.rect(marginX, y, contentWidth, 0.6, 'F')
+  y += 10
+
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(18)
+  setInk(doc)
+  doc.text('Sales report', marginX, y)
+  y += 10
+
+  // —— Highlight metrics ——
+  const highlights: Array<{ label: string; value: string }> = [
+    { label: 'Revenue', value: snapshot.formatCurrency(snapshot.totalRevenue) },
+    { label: 'Orders', value: String(snapshot.totalOrders) },
+    { label: 'Avg. order', value: snapshot.formatCurrency(snapshot.averageOrderValue) },
+  ]
+
+  const gap = 4
+  const cardW = (contentWidth - gap * 2) / 3
+  const cardH = 22
+  ensureSpace(cardH + 8)
+
+  highlights.forEach((card, i) => {
+    const x = marginX + i * (cardW + gap)
+    doc.setFillColor(SURFACE.r, SURFACE.g, SURFACE.b)
+    doc.roundedRect(x, y, cardW, cardH, 2, 2, 'F')
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(8)
+    setMuted(doc)
+    doc.text(card.label.toUpperCase(), x + 4, y + 7)
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(12)
+    setInk(doc)
+    doc.text(truncate(doc, card.value, cardW - 8), x + 4, y + 16)
+  })
+  y += cardH + 10
+
+  // —— Secondary metrics ——
+  const secondary: Array<[string, string]> = [
+    ['Units sold', String(snapshot.totalSales)],
+    ['Low stock items', String(snapshot.lowStockCount)],
+    ['Refunds', String(snapshot.refundedCount)],
+    ['Refund amount', snapshot.formatCurrency(snapshot.refundAmount)],
+    ['Refund rate', `${snapshot.refundRate.toFixed(1)}%`],
+    ['Repeat purchase', `${snapshot.repeatPurchaseRate.toFixed(1)}%`],
+  ]
+
+  ensureSpace(8 + Math.ceil(secondary.length / 2) * 7)
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(10)
+  setInk(doc)
+  doc.text('Details', marginX, y)
+  y += 5
+  drawHairline(doc, marginX, y, pageWidth - marginX)
+  y += 6
+
+  const colW = contentWidth / 2
+  secondary.forEach(([label, value], index) => {
+    const col = index % 2
+    const row = Math.floor(index / 2)
+    const x = marginX + col * colW
+    const rowY = y + row * 7
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(9)
+    setMuted(doc)
+    doc.text(label, x, rowY)
+    doc.setFont('helvetica', 'bold')
+    setInk(doc)
+    doc.text(value, x + colW - 4, rowY, { align: 'right' })
+  })
+  y += Math.ceil(secondary.length / 2) * 7 + 8
+
+  type TableColumn = {
+    key: string
+    label: string
+    width: number
+    align?: 'left' | 'right'
+  }
+
+  const drawTable = (
+    title: string,
+    columns: TableColumn[],
+    rows: Record<string, string>[]
+  ) => {
+    if (rows.length === 0) return
+
+    ensureSpace(20)
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(10)
+    setInk(doc)
+    doc.text(title, marginX, y)
+    y += 5
+
+    const rowH = 7
+    const headerH = 8
+
+    const drawHeader = () => {
+      doc.setFillColor(SURFACE.r, SURFACE.g, SURFACE.b)
+      doc.rect(marginX, y, contentWidth, headerH, 'F')
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(8)
+      setMuted(doc)
+      let x = marginX + 3
+      columns.forEach((col) => {
+        const textX = col.align === 'right' ? x + col.width - 3 : x
+        doc.text(col.label.toUpperCase(), textX, y + 5.2, {
+          align: col.align === 'right' ? 'right' : 'left',
+        })
+        x += col.width
+      })
+      y += headerH
+    }
+
+    drawHeader()
+
+    rows.forEach((row, rowIndex) => {
+      ensureSpace(rowH + 2)
+      if (y === 16) {
+        // After page break, redraw section context lightly
+        doc.setFont('helvetica', 'bold')
+        doc.setFontSize(9)
+        setInk(doc)
+        doc.text(`${title} (continued)`, marginX, y)
+        y += 5
+        drawHeader()
+      }
+
+      if (rowIndex % 2 === 1) {
+        doc.setFillColor(252, 252, 253)
+        doc.rect(marginX, y, contentWidth, rowH, 'F')
+      }
+
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(9)
+      setInk(doc)
+      let x = marginX + 3
+      columns.forEach((col) => {
+        const cell = truncate(doc, row[col.key] || '', col.width - 4)
+        const textX = col.align === 'right' ? x + col.width - 3 : x
+        doc.text(cell, textX, y + 4.8, {
+          align: col.align === 'right' ? 'right' : 'left',
+        })
+        x += col.width
+      })
+      y += rowH
+    })
+
+    drawHairline(doc, marginX, y, pageWidth - marginX)
+    y += 10
+  }
+
+  drawTable(
+    'Top products',
+    [
+      { key: 'name', label: 'Product', width: contentWidth * 0.52 },
+      { key: 'qty', label: 'Qty', width: contentWidth * 0.16, align: 'right' },
+      { key: 'revenue', label: 'Revenue', width: contentWidth * 0.32, align: 'right' },
+    ],
+    snapshot.topProducts.slice(0, 10).map((p) => ({
+      name: p.name,
+      qty: String(p.quantity),
+      revenue: snapshot.formatCurrency(p.revenue),
+    }))
+  )
+
+  drawTable(
+    'Top customers',
+    [
+      { key: 'name', label: 'Customer', width: contentWidth * 0.52 },
+      { key: 'orders', label: 'Orders', width: contentWidth * 0.16, align: 'right' },
+      { key: 'spent', label: 'Total spent', width: contentWidth * 0.32, align: 'right' },
+    ],
+    snapshot.topCustomers.slice(0, 10).map((c) => ({
+      name: c.name,
+      orders: String(c.orders),
+      spent: snapshot.formatCurrency(c.totalSpent),
+    }))
+  )
+
+  drawTable(
+    'Recent returns',
+    [
+      { key: 'receipt', label: 'Receipt', width: contentWidth * 0.22 },
+      { key: 'date', label: 'Date', width: contentWidth * 0.2 },
+      { key: 'amount', label: 'Amount', width: contentWidth * 0.22, align: 'right' },
+      { key: 'reason', label: 'Reason', width: contentWidth * 0.36 },
+    ],
+    snapshot.recentReturns.map((ret) => ({
+      receipt: ret.receiptNumber,
+      date: snapshot.formatReturnDate(ret.date),
+      amount: `-${snapshot.formatCurrency(ret.amount)}`,
+      reason: ret.reason || '—',
+    }))
+  )
+
+  paintFooter()
   doc.save(`analytics-report-${snapshot.selectedPeriod}-${Date.now()}.pdf`)
 }

@@ -28,7 +28,15 @@
           :icon="InboxArrowDownIcon"
           title="No buybacks yet"
           description="Record customer trade-ins here to add stock and track what you paid."
-        />
+        >
+          <button
+            type="button"
+            class="rounded-lg bg-primary-600 px-3 py-1.5 text-xs font-semibold text-white"
+            @click="showCreateModal = true"
+          >
+            Record buyback
+          </button>
+        </DashboardTableEmptyState>
 
         <div v-else class="ios-receipt-transaction-list">
           <IosReceiptTransactionRow
@@ -149,7 +157,11 @@
               'Items go into the inventory category you pick',
               'Use swap-in on a receipt when trade-in credit applies to a sale',
             ]"
-          />
+          >
+            <Button variant="primary" size="sm" @click="showCreateModal = true">
+              Record buyback
+            </Button>
+          </DashboardTableEmptyState>
 
           <div v-else class="overflow-x-auto">
             <table class="dashboard-table min-w-full">

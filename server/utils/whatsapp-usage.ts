@@ -2,8 +2,7 @@ import { createError } from 'h3'
 import { FieldValue } from 'firebase-admin/firestore'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
 import { whatsAppLimitMessage } from '~/utils/plan-gate-message'
-import { getPlanLimits } from '~/types/subscription'
-import type { SubscriptionPlan } from '~/types/subscription'
+import { getPlanLimits, resolveEffectiveSubscriptionPlan } from '~/types/subscription'
 
 export async function isStaffAccount(uid: string): Promise<boolean> {
   const snap = await getAdminFirestore().collection('users').doc(uid).get()
@@ -15,20 +14,12 @@ function currentMonthKey(): string {
   return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`
 }
 
-function normalizePlan(raw: unknown): SubscriptionPlan {
-  const s = typeof raw === 'string' ? raw : 'storvv_micro'
-  if (s === 'storvv_medium' || s === 'storvv_enterprise') return s
-  if (s === 'medium') return 'storvv_medium'
-  if (s === 'enterprise') return 'storvv_enterprise'
-  return 'storvv_micro'
-}
-
 /** Throws 429 when the user has hit their monthly send cap. */
 export async function assertWhatsAppSendAllowed(uid: string): Promise<void> {
   const adminDb = getAdminFirestore()
   const userRef = adminDb.collection('users').doc(uid)
   const userSnap = await userRef.get()
-  const plan = normalizePlan(userSnap.data()?.subscription)
+  const plan = resolveEffectiveSubscriptionPlan(userSnap.data())
   const limit = getPlanLimits(plan).maxWhatsAppMessagesPerMonth
   if (limit < 0) return
 
@@ -49,7 +40,7 @@ export async function incrementWhatsAppUsage(uid: string): Promise<void> {
   const adminDb = getAdminFirestore()
   const userRef = adminDb.collection('users').doc(uid)
   const userSnap = await userRef.get()
-  const plan = normalizePlan(userSnap.data()?.subscription)
+  const plan = resolveEffectiveSubscriptionPlan(userSnap.data())
   const limit = getPlanLimits(plan).maxWhatsAppMessagesPerMonth
   const monthKey = currentMonthKey()
   const usageRef = userRef.collection('whatsappUsage').doc(monthKey)

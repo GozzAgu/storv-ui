@@ -593,8 +593,7 @@ import Checkbox from '~/components/ui/Checkbox.vue'
 import DepartmentModal from '~/components/departments/DepartmentModal.vue'
 import DepartmentCard from '~/components/departments/DepartmentCard.vue'
 import type { Department } from '~/composables/useDepartments'
-import { getEligibleStoresForPlan } from '~/types/subscription'
-import type { SubscriptionPlan } from '~/types/subscription'
+import { getEligibleStoresForPlan, resolveEffectiveSubscriptionPlan } from '~/types/subscription'
 
 definePageMeta({
   layout: 'dashboard',
@@ -1006,7 +1005,7 @@ onMounted(async () => {
     }
 
     if (userStore.userData?.role === 'superAdmin' && storesStore.stores.length > 0) {
-      const plan = (userStore.userData.subscription as SubscriptionPlan) || 'storvv_micro'
+      const plan = resolveEffectiveSubscriptionPlan(userStore.userData)
       const eligible = getEligibleStoresForPlan(storesStore.stores, plan)
       const eligibleIds = new Set(eligible.map((s) => s.id))
       if (!eligibleIds.has(storeId.value)) {
