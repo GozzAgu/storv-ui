@@ -11,7 +11,7 @@ export interface InventorySourceBadge {
 }
 
 const badgeShell =
-  'inline-flex max-w-full items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-0.5 text-[11px] font-semibold leading-tight'
+  'inline-flex max-w-full items-center gap-1.5 whitespace-nowrap rounded-[var(--saas-radius-chip,0.375rem)] px-2.5 py-0.5 text-[11px] font-semibold leading-tight'
 
 export function isInventorySwapInItem(item: InventoryItem): boolean {
   return item.swapIn === true

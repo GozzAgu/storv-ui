@@ -559,6 +559,29 @@ export function useDashboardInsights(folderItems: Ref<Record<string, InventoryIt
       .reduce((s, r) => s + r.total, 0)
   })
 
+  /** Short one-liner for the greeting row (orders · revenue · alerts). */
+  const dayStory = computed(() => {
+    const parts: string[] = []
+    if (todayReceiptsCount.value > 0) {
+      parts.push(
+        `${todayReceiptsCount.value} sale${todayReceiptsCount.value === 1 ? '' : 's'} · ${formatCurrency(todaySales.value)} today`
+      )
+    } else {
+      parts.push('No sales yet today')
+    }
+    if (outstandingCount.value > 0) {
+      parts.push(
+        `${outstandingCount.value} balance${outstandingCount.value === 1 ? '' : 's'} open`
+      )
+    }
+    if (lowStockItems.value.length > 0) {
+      parts.push(
+        `${lowStockItems.value.length} low stock`
+      )
+    }
+    return parts.join(' · ')
+  })
+
   const executiveSummary = computed(() => {
     const parts: string[] = []
     if (todayReceiptsCount.value > 0) {
@@ -774,6 +797,7 @@ export function useDashboardInsights(folderItems: Ref<Record<string, InventoryIt
     lowStockItems,
     paymentMethodBreakdown,
     recentReceipts,
+    dayStory,
     executiveSummary,
     attentionItems,
     quickLinks,

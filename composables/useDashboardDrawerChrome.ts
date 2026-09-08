@@ -33,7 +33,7 @@ export function useDashboardDrawerChrome() {
   const drawerCalloutClass = 'dash-drawer-callout'
 
   const footerBtnOutlineClass =
-    '!inline-flex !h-9 !min-h-9 !items-center !justify-center !rounded-full !px-4 !py-0 !text-xs !font-semibold'
+    '!inline-flex !h-9 !min-h-9 !items-center !justify-center !rounded-[var(--saas-radius-control,0.5rem)] !px-4 !py-0 !text-xs !font-semibold'
 
   const footerBtnPrimaryClass = footerBtnOutlineClass
 

@@ -1,7 +1,10 @@
 <template>
   <div class="native-command-header">
     <div class="native-command-header__greeting-block min-w-0">
-      <p :class="greetingClass">{{ greeting }}</p>
+      <div class="native-command-header__greeting-title">
+        <p :class="greetingClass">{{ greeting }}</p>
+        <DashboardGreetingSkyIcon class="native-command-header__sky" />
+      </div>
       <p v-if="pageTitle" :class="pageContextClass">{{ pageTitle }}</p>
     </div>
     <div class="native-command-header__row native-command-header__row--utility">
@@ -17,6 +20,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import NativeBranchPill from '~/components/dashboard/NativeBranchPill.vue'
+import DashboardGreetingSkyIcon from '~/components/dashboard/DashboardGreetingSkyIcon.vue'
 import { useIosTypography } from '~/composables/useIosTypography'
 import { useStoresStore } from '~/stores/stores'
 import { useUserStore } from '~/stores/user'

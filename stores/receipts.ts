@@ -519,6 +519,12 @@ export const useReceiptsStore = defineStore('receipts', {
           await useFunnelAnalytics()
             .recordMilestone('firstSaleAt', { store_id: storeId })
             .catch(() => undefined)
+          try {
+            const { useAppToast } = await import('~/composables/useAppToast')
+            useAppToast().success('First sale recorded — nice work')
+          } catch {
+            /* toast optional */
+          }
         }
 
         // Create notification (use account currency for amounts)

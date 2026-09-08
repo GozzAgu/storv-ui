@@ -3,7 +3,8 @@
     :model-value="modelValue"
     :title="receipt ? `Sale #${receipt.receiptNumber}` : 'Sale details'"
     size="lg"
-    dense
+    :dense="false"
+    content-padding="px-4 py-4 sm:px-5 sm:py-5"
     @update:model-value="(value: boolean) => emit('update:modelValue', value)"
   >
     <template #default>
@@ -101,6 +102,15 @@
         >
           Preview receipt
         </Button>
+        <Button
+          variant="outline"
+          size="md"
+          :icon="PrinterIcon"
+          extra-class="!w-auto"
+          @click="emit('print', receipt!)"
+        >
+          Print / PDF
+        </Button>
         <div class="ml-auto flex flex-wrap items-center gap-2">
           <Button
             v-if="isOutstanding"
@@ -140,7 +150,7 @@ import { computed } from 'vue'
 import SidePanel from '~/components/ui/SidePanel.vue'
 import Button from '~/components/ui/Button.vue'
 import ReceiptTableLineItems from '~/components/receipts/ReceiptTableLineItems.vue'
-import { EyeIcon } from '~/utils/app-icons'
+import { EyeIcon, PrinterIcon } from '~/utils/app-icons'
 import type { Receipt } from '~/stores/receipts'
 import { receiptAmountPaid, receiptBalanceDue } from '~/utils/receipt-balance'
 import { usePermissions } from '~/composables/usePermissions'
@@ -154,6 +164,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]
   preview: [receipt: Receipt]
+  print: [receipt: Receipt]
   'record-payment': [receipt: Receipt]
   cancel: [receipt: Receipt]
   refund: [receipt: Receipt]

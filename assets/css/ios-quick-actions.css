@@ -63,7 +63,7 @@ html.capacitor-ios.capacitor-native .ios-quick-actions__icon-wrap {
   justify-content: center;
   width: 2.5rem;
   height: 2.5rem;
-  border-radius: 9999px;
+  border-radius: var(--ios-radius-control, 10px);
   background: var(--ios-fill-tertiary);
   color: var(--ios-label);
   box-shadow: none;

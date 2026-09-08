@@ -72,7 +72,7 @@
       <button
         type="button"
         @click="toggleSidebar"
-        class="group absolute top-10 -right-3 z-10 hidden h-8 w-8 items-center justify-center rounded-full border-0 bg-white/95 text-gray-600 backdrop-blur-md transition-all duration-200 hover:bg-white hover:text-gray-900 dark:bg-white/[0.08] dark:text-gray-300 dark:hover:bg-white/[0.12] dark:hover:text-white lg:flex"
+        class="group absolute top-10 -right-3 z-10 hidden h-8 w-8 items-center justify-center rounded-[var(--saas-radius-control,0.5rem)] border-0 bg-white/95 text-gray-600 backdrop-blur-md transition-all duration-200 hover:bg-white hover:text-gray-900 dark:bg-white/[0.08] dark:text-gray-300 dark:hover:bg-white/[0.12] dark:hover:text-white lg:flex"
         aria-label="Toggle sidebar"
       >
         <ChevronRightIcon v-if="effectiveSidebarCollapsed" class="w-3.5 h-3.5" stroke-width="2.5" />
@@ -618,15 +618,6 @@
                 <MagnifyingGlassIcon class="block h-4 w-4 shrink-0" :size="16" stroke-width="1.75" />
               </button>
 
-              <button
-                type="button"
-                class="dash-topnav__icon-btn"
-                aria-label="Open Storvv Assistant"
-                @click="openAssistant()"
-              >
-                <SparklesIcon class="block h-4 w-4 shrink-0" :size="16" stroke-width="1.75" />
-              </button>
-
               <div class="relative z-[130] h-8 w-8 shrink-0" ref="notificationsRef">
                 <button
                   type="button"
@@ -724,45 +715,6 @@
             </div>
           </div>
 
-          <!-- Desktop search + assistant -->
-          <div
-            v-if="!isNativeApp"
-            class="dash-topnav__search-group dashboard-topnav-search-group group/search hidden h-8 w-[min(100%,12rem)] shrink-0 items-stretch sm:w-[min(100%,14rem)] md:flex lg:w-[min(100%,16rem)] xl:w-[min(100%,18rem)]"
-          >
-            <button
-              type="button"
-              class="dash-topnav__search dashboard-topnav-search relative flex min-w-0 flex-1 items-center gap-2 px-2.5"
-              @click="openGlobalSearch()"
-            >
-              <MagnifyingGlassIcon
-                class="block h-3.5 w-3.5 shrink-0 text-gray-400 dark:text-gray-500"
-                :size="14"
-                stroke-width="1.75"
-              />
-              <span
-                class="min-w-0 flex-1 truncate text-left text-[11px] font-medium text-gray-500 dark:text-gray-400"
-              >
-                Search workspace
-              </span>
-              <kbd
-                class="hidden shrink-0 rounded bg-white/90 px-1.5 py-px font-mono text-[9px] font-medium text-gray-400 dark:border-white/10 dark:bg-white/[0.06] dark:text-gray-500 lg:inline"
-              >
-                ⌘K
-              </kbd>
-            </button>
-            <button
-              type="button"
-              class="dash-topnav__search-assistant dashboard-topnav-search-assistant shrink-0"
-              aria-label="Open Storvv Assistant"
-              @click="openAssistant()"
-            >
-              <SparklesIcon
-                class="block h-3.5 w-3.5 shrink-0 text-gray-700 dark:text-gray-200"
-                stroke-width="1.75"
-              />
-            </button>
-          </div>
-
           <div v-if="!showNativeCommandHeader" class="hidden min-w-0 flex-1 md:block" aria-hidden="true" />
 
           <div v-if="!showNativeCommandHeader" class="min-w-0 flex-1 md:hidden" aria-hidden="true" />
@@ -772,26 +724,6 @@
             v-if="!showNativeCommandHeader"
             class="dash-topnav__actions dashboard-topnav-actions relative z-10 flex shrink-0 items-center"
           >
-            <button
-              type="button"
-              class="dash-topnav__icon-btn md:hidden"
-              aria-label="Search"
-              @click="openGlobalSearch()"
-            >
-              <MagnifyingGlassIcon class="block h-4 w-4 shrink-0" :size="16" stroke-width="1.75" />
-            </button>
-
-            <button
-              type="button"
-              class="dash-topnav__icon-btn md:hidden"
-              aria-label="Open Storvv Assistant"
-              @click="openAssistant()"
-            >
-              <SparklesIcon class="block h-4 w-4 shrink-0" :size="16" stroke-width="1.75" />
-            </button>
-
-            <span class="dash-topnav__divider hidden md:block" aria-hidden="true" />
-
             <StoreSelector
               v-if="userStore.userData?.role === 'superAdmin' && canManageBranches"
               :class="isNativeApp ? 'max-w-[5.25rem] shrink' : 'shrink-0'"
@@ -864,7 +796,6 @@
           :user-name="userName"
           :user-email="userEmail"
           :user-initials="userInitials"
-          @open-assistant="openAssistant()"
           @sign-out="handleSignOut"
         />
       </div>
@@ -948,7 +879,7 @@
     >
       <div class="flex flex-col items-center text-center">
         <div
-          class="flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-red-600 ring-1 ring-red-100 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/20"
+          class="flex h-12 w-12 items-center justify-center rounded-[var(--saas-radius-control,0.5rem)] bg-red-50 text-red-600 ring-1 ring-red-100 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/20"
         >
           <ArrowRightOnRectangleIcon class="h-5 w-5" stroke-width="1.75" />
         </div>
@@ -1004,7 +935,6 @@ import {
   XMarkIcon,
   BellIcon,
   MagnifyingGlassIcon,
-  SparklesIcon,
   ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -1084,7 +1014,6 @@ const departmentsStore = useDepartmentsStore()
 const storesStore = useStoresStore()
 const staffStore = useStaffStore()
 const searchStore = useSearchStore()
-const { openAssistant: openAssistantPanel } = useDashboardAssistant()
 const searchShellReady = ref(false)
 const assistantShellReady = ref(false)
 
@@ -1099,11 +1028,6 @@ function mountAssistantShell() {
 function mountShellWidgets() {
   mountSearchShell()
   mountAssistantShell()
-}
-
-function openAssistant(draft?: string) {
-  mountAssistantShell()
-  openAssistantPanel(draft)
 }
 
 function openGlobalSearch() {

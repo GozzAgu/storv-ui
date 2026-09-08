@@ -39,17 +39,30 @@
 
     <template v-else-if="store">
       <section class="sf-hero">
-        <p class="sf-hero__eyebrow">Digital showroom</p>
+        <img
+          v-if="store.logoUrl"
+          :src="store.logoUrl"
+          alt=""
+          class="sf-hero__mark"
+          width="64"
+          height="64"
+        />
         <h1 class="sf-hero__title">{{ store.displayName }}</h1>
         <p class="sf-hero__tagline">
           {{ store.tagline || 'Browse what’s available, then message the shop or pay online.' }}
         </p>
-        <div class="sf-hero__steps" aria-label="How to use this showroom">
-          <p><span>1</span> Open a category</p>
-          <p><span>2</span> Pick a product</p>
-          <p><span>3</span> Pay or contact the shop</p>
+        <div class="sf-hero__actions">
+          <a href="#catalogue" class="sf-btn sf-btn--primary">Browse catalogue</a>
+          <a
+            v-if="primaryContactHref"
+            :href="primaryContactHref"
+            class="sf-btn sf-btn--ghost"
+            :target="primaryContactIsExternal ? '_blank' : undefined"
+            :rel="primaryContactIsExternal ? 'noopener' : undefined"
+          >
+            {{ primaryContactLabel }}
+          </a>
         </div>
-        <a href="#catalogue" class="sf-btn sf-btn--primary sf-hero__cta">Browse catalogue</a>
       </section>
 
       <section
@@ -249,17 +262,28 @@
               Nothing listed in this category right now.
             </template>
             <template v-else>
-              This shop has not published categories yet.
+              This shop has not published categories yet. Message them to ask what’s available.
             </template>
           </p>
-          <button
-            v-if="search || folderPath"
-            type="button"
-            class="sf-btn sf-btn--ghost"
-            @click="clearFilters"
-          >
-            {{ search ? 'Clear search' : 'Back to categories' }}
-          </button>
+          <div class="sf-empty__actions">
+            <button
+              v-if="search || folderPath"
+              type="button"
+              class="sf-btn sf-btn--ghost"
+              @click="clearFilters"
+            >
+              {{ search ? 'Clear search' : 'Back to categories' }}
+            </button>
+            <a
+              v-else-if="primaryContactHref"
+              :href="primaryContactHref"
+              class="sf-btn sf-btn--primary"
+              :target="primaryContactIsExternal ? '_blank' : undefined"
+              :rel="primaryContactIsExternal ? 'noopener' : undefined"
+            >
+              {{ primaryContactLabel }}
+            </a>
+          </div>
         </div>
       </section>
 
@@ -812,75 +836,46 @@ watch(slug, () => void load(), { immediate: true })
 
 .sf-hero {
   padding-top: 1.75rem;
-  padding-bottom: 0.5rem;
+  padding-bottom: 0.75rem;
 }
 
-.sf-hero__eyebrow {
-  margin: 0;
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--sf-faint);
+.sf-hero__mark {
+  display: block;
+  width: 3.5rem;
+  height: 3.5rem;
+  margin-bottom: 0.85rem;
+  border-radius: 0.85rem;
+  object-fit: cover;
+  border: 1px solid var(--sf-line);
+  background: var(--sf-surface);
 }
 
 .sf-hero__title {
-  margin: 0.4rem 0 0;
-  font-size: clamp(2rem, 7vw, 2.75rem);
+  margin: 0;
+  font-size: clamp(2.15rem, 7.5vw, 3rem);
   font-weight: 700;
-  letter-spacing: -0.04em;
-  line-height: 1.05;
+  letter-spacing: -0.045em;
+  line-height: 1.02;
 }
 
 .sf-hero__tagline {
-  margin: 0.65rem 0 0;
+  margin: 0.7rem 0 0;
   max-width: 28rem;
-  font-size: 1rem;
+  font-size: 1.05rem;
   line-height: 1.45;
   color: var(--sf-muted);
 }
 
-.sf-hero__steps {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.5rem;
-  margin: 1.25rem 0 0;
+.sf-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+  margin-top: 1.25rem;
 }
 
-.sf-hero__steps p {
-  margin: 0;
-  padding: 0.65rem 0.55rem;
-  border-radius: 0.85rem;
-  background: var(--sf-surface);
-  border: 1px solid var(--sf-line);
-  font-size: 0.6875rem;
-  font-weight: 650;
-  line-height: 1.35;
-  color: var(--sf-muted);
-}
-
-.sf-hero__steps span {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.15rem;
-  height: 1.15rem;
-  margin-right: 0.25rem;
-  border-radius: 9999px;
-  background: var(--sf-ink);
-  color: var(--sf-surface);
-  font-size: 0.625rem;
-  font-weight: 700;
-}
-
-.sf--dark .sf-hero__steps span {
-  color: #0c0b0e;
-}
-
-.sf-hero__cta {
-  margin-top: 1.15rem;
+.sf-hero__actions .sf-btn {
   min-height: 2.75rem;
-  padding-inline: 1.25rem;
+  padding-inline: 1.15rem;
   font-size: 0.875rem;
 }
 
@@ -1242,6 +1237,13 @@ watch(slug, () => void load(), { immediate: true })
   color: var(--sf-muted);
 }
 
+.sf-empty__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
 .sf-footer {
   margin-top: 2.5rem;
   padding-bottom: 1.5rem;
@@ -1407,10 +1409,6 @@ watch(slug, () => void load(), { immediate: true })
 }
 
 @media (max-width: 640px) {
-  .sf-hero__steps {
-    grid-template-columns: 1fr;
-  }
-
   .sf-compare-grid {
     grid-template-columns: 1fr;
   }

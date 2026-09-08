@@ -50,11 +50,7 @@ html.capacitor-ios.capacitor-native .ios-filter-chips__chip {
   min-height: 2rem;
   padding: 0.4375rem 0.875rem;
   border: none;
-  border-radius: 9999px;
-  background: var(--ios-fill-tertiary);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  line-height: 1.15;
+  border-radius: var(--ios-radius-chip, 8px);
   letter-spacing: -0.01em;
   white-space: nowrap;
   color: var(--ios-label);

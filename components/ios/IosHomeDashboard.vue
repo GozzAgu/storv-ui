@@ -3,7 +3,11 @@
     <header class="ios-home-dashboard__header">
       <div class="ios-home-dashboard__greeting-row">
         <div class="ios-home-dashboard__intro">
-          <h1 class="ios-home-dashboard__greeting">Hey, {{ displayName }}</h1>
+          <div class="ios-home-dashboard__greeting-title">
+            <h1 class="ios-home-dashboard__greeting">Hey, {{ displayName }}</h1>
+            <DashboardGreetingSkyIcon class="ios-home-dashboard__sky" />
+          </div>
+          <p v-if="dayStory" class="ios-home-dashboard__day-story">{{ dayStory }}</p>
           <p v-if="storeLabel" class="ios-home-dashboard__store">{{ storeLabel }}</p>
         </div>
         <div class="ios-home-dashboard__header-actions">
@@ -19,14 +23,17 @@
       </div>
     </header>
 
-    <ul v-if="alerts.length > 0" class="ios-home-dashboard__alerts">
-      <li v-for="alert in alerts" :key="alert.id">
-        <NuxtLink :to="alert.href" class="ios-home-dashboard__alert">
-          <span class="ios-home-dashboard__alert-title">{{ alert.title }}</span>
-          <span>{{ alert.description }}</span>
-        </NuxtLink>
-      </li>
-    </ul>
+    <nav v-if="alerts.length > 0" class="ios-home-dashboard__attention" aria-label="Needs attention">
+      <p class="ios-home-dashboard__attention-label">Needs attention</p>
+      <ul class="ios-home-dashboard__attention-list">
+        <li v-for="alert in alerts" :key="alert.id">
+          <NuxtLink :to="alert.href" class="ios-home-dashboard__attention-chip">
+            <span class="ios-home-dashboard__attention-title">{{ alert.title }}</span>
+            <span class="ios-home-dashboard__attention-meta">{{ alert.description }}</span>
+          </NuxtLink>
+        </li>
+      </ul>
+    </nav>
 
     <section class="ios-home-dashboard__section">
       <div class="ios-home-dashboard__section-head">
@@ -167,6 +174,7 @@ import {
 import IosDrawer from '~/components/ios/IosDrawer.vue'
 import IosHomeFeedCard from '~/components/ios/IosHomeFeedCard.vue'
 import IosHomeMetricCard from '~/components/ios/IosHomeMetricCard.vue'
+import DashboardGreetingSkyIcon from '~/components/dashboard/DashboardGreetingSkyIcon.vue'
 import { useSearchStore } from '~/stores/search'
 
 export interface IosHomeAlert {
@@ -203,12 +211,14 @@ withDefaults(
   defineProps<{
     displayName: string
     storeLabel?: string
+    dayStory?: string
     metrics: IosHomeMetric[]
     recentSales: IosHomeFeedItem[]
     lowStockPreview?: IosHomeFeedItem[]
     alerts?: IosHomeAlert[]
   }>(),
   {
+    dayStory: '',
     lowStockPreview: () => [],
     alerts: () => [],
   }

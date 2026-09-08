@@ -1587,7 +1587,7 @@ const router = useRouter()
 
 const iosProfileSheetClass = computed(() => (isCapacitorIos.value ? 'ios-profile-sheet' : ''))
 const iosDangerBtnClass =
-  'inline-flex h-8 items-center rounded-full bg-red-500/10 px-3 text-sm font-normal text-red-600 dark:text-red-400'
+  'inline-flex h-8 items-center rounded-[var(--saas-radius-control,0.5rem)] bg-red-500/10 px-3 text-sm font-normal text-red-600 dark:text-red-400'
 
 const showEditProfileModal = ref(false)
 const showStoreInfoModal = ref(false)

@@ -22,6 +22,7 @@
         v-else
         :display-name="iosDisplayName"
         :store-label="iosStoreLabel"
+        :day-story="dayStory"
         :metrics="iosHomeMetrics"
         :recent-sales="iosRecentSales"
         :low-stock-preview="iosLowStockPreview"
@@ -40,21 +41,27 @@
         <p v-if="isNativeApp" :class="eyebrowClass">Overview</p>
       </template>
       <template #title>
-        <h1 :class="isNativeApp ? pageTitleClass : 'saas-dashboard-greeting'">
-          {{
-            isCapacitorIos
-              ? 'Overview'
-              : isNativeApp
-                ? `Welcome back, ${userName}`
-                : formatGreeting(userName || 'User')
-          }}
-        </h1>
+        <div class="saas-dashboard-greeting-row">
+          <h1 :class="isNativeApp ? pageTitleClass : 'saas-dashboard-greeting'">
+            {{
+              isCapacitorIos
+                ? 'Overview'
+                : isNativeApp
+                  ? `Welcome back, ${userName}`
+                  : formatGreeting(userName || 'User')
+            }}
+          </h1>
+          <DashboardGreetingSkyIcon v-if="!isNativeApp" />
+        </div>
       </template>
       <template #description>
-        <p v-if="!isNativeApp" class="saas-dashboard-branch">
-          {{ currentStoreLabel }}
-          <span v-if="userRoleLabel"> · {{ userRoleLabel }}</span>
-        </p>
+        <template v-if="!isNativeApp">
+          <p class="saas-dashboard-branch">
+            {{ currentStoreLabel }}
+            <span v-if="userRoleLabel"> · {{ userRoleLabel }}</span>
+          </p>
+          <p v-if="dayStory" class="saas-dashboard-day-story">{{ dayStory }}</p>
+        </template>
         <p v-else :class="pageMetaClass">
           <strong>{{ currentStoreLabel }}</strong>
           <span v-if="userRoleLabel"> · {{ userRoleLabel }}</span>
@@ -159,17 +166,7 @@
     </template>
 
     <template v-else>
-      <ul v-if="attentionItems.length > 0" :class="alertListClass">
-        <li v-for="alert in attentionItemsTop" :key="alert.id" :class="alertClass(alert.level)">
-          <span class="dash-alert__text">
-            <strong>{{ alert.title }}.</strong>
-            {{ alert.description }}
-          </span>
-          <NuxtLink :to="alert.href" :class="['dash-alert__link', cardLinkClass, '!text-[inherit]']">
-            {{ alert.cta }}
-          </NuxtLink>
-        </li>
-      </ul>
+      <DashboardAttentionStrip :items="homeAttentionItems" />
 
       <div class="dash-home-kpi">
         <div :class="kpiGridClassResolved">
@@ -374,9 +371,23 @@
             <h2 :class="cardTitleClass">Recent sales</h2>
             <NuxtLink to="/dashboard/receipts" :class="cardLinkClass">View all</NuxtLink>
           </div>
-          <div v-if="recentReceipts.length === 0" :class="emptyClass">No sales yet.</div>
+          <div v-if="recentReceipts.length === 0" :class="emptyClass">
+            <p>No sales yet.</p>
+            <NuxtLink to="/dashboard/receipts" :class="[cardLinkClass, 'mt-2 inline-block']">
+              Record first sale
+            </NuxtLink>
+          </div>
           <ul v-else :class="listClass">
-            <li v-for="tx in recentReceiptsTop" :key="tx.id" :class="listRowClass">
+            <li
+              v-for="tx in recentReceiptsTop"
+              :key="tx.id"
+              :class="[listRowClass, 'dash-list__row--interactive']"
+              role="button"
+              tabindex="0"
+              @click="openHomeReceipt(tx.id)"
+              @keydown.enter.prevent="openHomeReceipt(tx.id)"
+              @keydown.space.prevent="openHomeReceipt(tx.id)"
+            >
               <div class="min-w-0">
                 <p :class="['dash-list__primary', 'truncate']">{{ tx.customerName }}</p>
                 <p :class="['dash-list__secondary', numClass]">
@@ -406,7 +417,12 @@
             <h2 :class="cardTitleClass">Top products</h2>
             <NuxtLink to="/dashboard/analytics" :class="cardLinkClass">Analytics</NuxtLink>
           </div>
-          <div v-if="topSellingItems.length === 0" :class="emptyClass">No product sales yet.</div>
+          <div v-if="topSellingItems.length === 0" :class="emptyClass">
+            <p>No product sales yet.</p>
+            <NuxtLink to="/dashboard/inventory" :class="[cardLinkClass, 'mt-2 inline-block']">
+              Add inventory
+            </NuxtLink>
+          </div>
           <ul v-else :class="listClass">
             <li v-for="item in topProductsTop" :key="item.id" :class="listRowClass">
               <div class="min-w-0">
@@ -486,11 +502,38 @@
       </div>
     </template>
     </template>
+
+    <ReceiptDetailsDrawer
+      v-if="!isCapacitorIos"
+      v-model="showHomeReceiptDrawer"
+      :receipt="homeSelectedReceipt"
+      @preview="previewHomeReceipt"
+      @record-payment="goReceiptAction('outstanding')"
+      @cancel="goReceiptAction()"
+      @refund="goReceiptAction()"
+      @print="printHomeReceipt"
+    />
+    <ViewReceiptModal
+      v-if="!isCapacitorIos"
+      v-model="showHomeReceiptPreview"
+      :receipt="homeSelectedReceipt"
+    />
+    <div
+      v-if="homePrintReceipt"
+      class="pointer-events-none fixed left-[-10000px] top-0 opacity-0"
+      aria-hidden="true"
+    >
+      <ReceiptShareSurface
+        ref="homeShareSurfaceRef"
+        :receipt="homePrintReceipt"
+        :business-name="homePrintBusinessName"
+      />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, defineAsyncComponent } from 'vue'
+import { ref, computed, onMounted, watch, defineAsyncComponent, nextTick } from 'vue'
 
 const LazyApexChart = defineAsyncComponent(
   () => import('~/components/charts/LazyApexChart.client.vue')
@@ -504,8 +547,17 @@ import { MARKETING_FEATURE_ICONS } from '~/utils/marketing-feature-icons'
 import MarketingFeatureIcon from '~/components/marketing/MarketingFeatureIcon.vue'
 import DashboardStatTile from '~/components/dashboard/DashboardStatTile.vue'
 import DashboardPageHeader from '~/components/dashboard/DashboardPageHeader.vue'
+import DashboardGreetingSkyIcon from '~/components/dashboard/DashboardGreetingSkyIcon.vue'
+import DashboardAttentionStrip from '~/components/dashboard/DashboardAttentionStrip.vue'
 import PaymentLinksSummaryCard from '~/components/payments/PaymentLinksSummaryCard.vue'
 import InlineStorePicker from '~/components/dashboard/InlineStorePicker.vue'
+import ReceiptDetailsDrawer from '~/components/receipts/ReceiptDetailsDrawer.vue'
+import ViewReceiptModal from '~/components/receipts/ViewReceiptModal.vue'
+import ReceiptShareSurface from '~/components/receipts/ReceiptShareSurface.vue'
+import type { Receipt } from '~/stores/receipts'
+import type { DashboardAlert } from '~/composables/useDashboardInsights'
+import { captureReceiptElementAsPdf } from '~/composables/useReceiptImageCapture'
+import { usePaymentLinks } from '~/composables/usePaymentLinks'
 import { runDashboardShellBootstrap } from '~/composables/useDashboardShellBootstrap'
 import { scheduleNativeIdleWork } from '~/utils/capacitor-native-perf'
 import { useDashboardHomeChrome } from '~/composables/useDashboardHomeChrome'
@@ -582,7 +634,6 @@ const {
   chartsGridClass,
   splitGridClass,
   tripleGridClass,
-  alertListClass,
   progressClass,
   progressLegendClass,
   segmentGroupClass,
@@ -598,7 +649,6 @@ const {
   numClass,
   emptyClass,
   stateCardClass,
-  alertClass,
 } = useDashboardHomeChrome()
 
 /** Max rows shown in dashboard list cards (no in-card scrolling). */
@@ -758,6 +808,7 @@ const {
   lowStockItems,
   paymentMethodBreakdown,
   recentReceipts,
+  dayStory,
   attentionItems,
   quickLinks,
   operationsMetrics,
@@ -779,8 +830,90 @@ const attentionItemsTop = computed(() => topN(attentionItems.value))
 const paymentMethodsTop = computed(() => topN(paymentMethodBreakdown.value))
 const businessMetricsTop = computed(() => [...salesMetrics.value, ...operationsMetrics.value])
 
+const { stats: paymentLinkStats, loadAll: loadPaymentLinksForAttention } = usePaymentLinks()
+
+const homeAttentionItems = computed((): DashboardAlert[] => {
+  const items = [...attentionItemsTop.value]
+  if (canShowPaymentLinksSummary.value && paymentLinkStats.value.failed > 0) {
+    items.unshift({
+      id: 'payment-links-failed',
+      level: 'critical',
+      title: 'Failed payment links',
+      description: `${paymentLinkStats.value.failed} link${
+        paymentLinkStats.value.failed === 1 ? '' : 's'
+      } failed to collect.`,
+      href: '/dashboard/payment-links',
+      cta: 'Review links',
+    })
+  }
+  return topN(items)
+})
+
 function getRecentReceiptById(id: string) {
   return receiptsStore.receipts.find((r) => r.id === id) ?? null
+}
+
+const showHomeReceiptDrawer = ref(false)
+const showHomeReceiptPreview = ref(false)
+const homeSelectedReceipt = ref<Receipt | null>(null)
+const homePrintReceipt = ref<Receipt | null>(null)
+const homeShareSurfaceRef = ref<{ getElement: () => HTMLElement | null } | null>(null)
+
+const homePrintBusinessName = computed(
+  () => storesStore.currentStore?.name || userStore.userData?.businessName || 'Store'
+)
+
+function openHomeReceipt(id: string) {
+  const receipt = getRecentReceiptById(id)
+  if (!receipt) {
+    void navigateTo(`/dashboard/receipts?receipt=${id}`)
+    return
+  }
+  homeSelectedReceipt.value = receipt
+  showHomeReceiptDrawer.value = true
+}
+
+function previewHomeReceipt(receipt: Receipt) {
+  homeSelectedReceipt.value = receipt
+  showHomeReceiptPreview.value = true
+}
+
+function goReceiptAction(tab?: string) {
+  showHomeReceiptDrawer.value = false
+  const id = homeSelectedReceipt.value?.id
+  void navigateTo(
+    tab
+      ? `/dashboard/receipts?tab=${tab}${id ? `&receipt=${id}` : ''}`
+      : id
+        ? `/dashboard/receipts?receipt=${id}`
+        : '/dashboard/receipts'
+  )
+}
+
+async function printHomeReceipt(receipt: Receipt) {
+  homePrintReceipt.value = receipt
+  await nextTick()
+  const el = homeShareSurfaceRef.value?.getElement?.()
+  if (!el) {
+    previewHomeReceipt(receipt)
+    homePrintReceipt.value = null
+    return
+  }
+  try {
+    const blob = await captureReceiptElementAsPdf(el)
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `receipt-${receipt.receiptNumber || receipt.id}.pdf`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success('Receipt PDF ready')
+  } catch {
+    previewHomeReceipt(receipt)
+    toast.info('Opened receipt preview — use Print / PDF there')
+  } finally {
+    homePrintReceipt.value = null
+  }
 }
 
 const recentReceiptsTop = computed(() => topN(recentReceipts.value))
@@ -992,7 +1125,7 @@ const iosLowStockPreview = computed((): IosHomeFeedItem[] =>
 )
 
 const iosHomeAlerts = computed((): IosHomeAlert[] =>
-  attentionItemsTop.value.map((alert) => ({
+  homeAttentionItems.value.map((alert) => ({
     id: alert.id,
     title: alert.title,
     description: alert.description,
@@ -1218,6 +1351,9 @@ const refreshDashboardAfterStoreSwitch = async () => {
 onMounted(async () => {
   isLoading.value = true
   await loadDashboardData()
+  if (canShowPaymentLinksSummary.value) {
+    void loadPaymentLinksForAttention().catch(() => undefined)
+  }
   isLoading.value = false
 })
 

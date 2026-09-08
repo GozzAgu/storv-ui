@@ -96,9 +96,9 @@ const iosNativeClasses = computed(() => {
 })
 
 const radiusClass = computed(() => {
-  if (iconOnlyIos.value) return '!rounded-full'
-  if (isCapacitorIos.value) return '!rounded-[var(--ios-radius-md,0.75rem)]'
-  return '!rounded-full'
+  if (iconOnlyIos.value) return '!rounded-[var(--ios-radius-control,10px)]'
+  if (isCapacitorIos.value) return '!rounded-[var(--ios-radius-control,10px)]'
+  return '!rounded-[var(--saas-radius-control,0.5rem)]'
 })
 
 const showGlassHighlight = computed(() => false)

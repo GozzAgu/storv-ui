@@ -84,21 +84,21 @@
 
     <Teleport to="body">
       <Transition
-        enter-active-class="transition duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
-        enter-from-class="translate-y-1 scale-[0.98] opacity-0"
-        enter-to-class="translate-y-0 scale-100 opacity-100"
-        leave-active-class="transition duration-150 ease-in"
-        leave-from-class="translate-y-0 scale-100 opacity-100"
-        leave-to-class="translate-y-1 scale-[0.98] opacity-0"
+        enter-active-class="transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        enter-from-class="opacity-0 translate-y-1 scale-[0.98]"
+        enter-to-class="opacity-100 translate-y-0 scale-100"
+        leave-active-class="transition-[opacity,transform] duration-150 ease-in"
+        leave-from-class="opacity-100 translate-y-0 scale-100"
+        leave-to-class="opacity-0 translate-y-0.5 scale-[0.99]"
       >
         <div
           v-if="dropdownOpen"
           ref="panelRef"
           :class="panelClass"
           :style="panelStyle"
+          data-dashboard-teleport
           @click.stop
         >
-          <div :class="panelSurfaceClass">
           <div :class="panelHeaderClass">
             <p :class="panelSectionLabelClass">
               {{ isStaff ? 'Your store' : 'Stores' }}
@@ -195,7 +195,6 @@
               Manage stores
             </NuxtLink>
           </div>
-          </div>
         </div>
       </Transition>
     </Teleport>
@@ -230,7 +229,6 @@ const {
   triggerChevronClass,
   triggerSpinnerClass,
   panelClass,
-  panelSurfaceClass,
   panelHeaderClass,
   panelSectionLabelClass,
   panelScrollClass,

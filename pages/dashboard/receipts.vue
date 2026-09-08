@@ -79,7 +79,24 @@
                   ? 'Try adjusting your search, status, or date filters.'
                   : 'Create your first sale to record revenue and track payments.'
               "
-              />
+              >
+                <button
+                  v-if="!(searchQuery || statusFilter !== 'all' || dateFilter !== 'all')"
+                  type="button"
+                  class="rounded-lg bg-primary-600 px-3 py-1.5 text-xs font-semibold text-white"
+                  @click="openCreateSaleFromEmpty"
+                >
+                  Record first sale
+                </button>
+                <button
+                  v-else
+                  type="button"
+                  class="text-xs font-medium text-primary-600 underline decoration-primary-300 underline-offset-2 dark:text-primary-400"
+                  @click="clearReceiptFilters"
+                >
+                  Clear filters
+                </button>
+              </DashboardTableEmptyState>
 
               <template v-else>
                 <div class="ios-receipt-transaction-list">
@@ -306,6 +323,7 @@
             v-model="showReceiptDetailsDrawer"
             :receipt="selectedReceipt"
             @preview="previewReceiptFromDrawer"
+            @print="previewReceiptFromDrawer"
             @record-payment="recordPaymentFromDrawer"
             @cancel="cancelFromDrawer"
             @refund="refundFromDrawer"
@@ -1258,6 +1276,7 @@
             v-model="showReceiptDetailsDrawer"
             :receipt="selectedReceipt"
             @preview="previewReceiptFromDrawer"
+            @print="previewReceiptFromDrawer"
             @record-payment="recordPaymentFromDrawer"
             @cancel="cancelFromDrawer"
             @refund="refundFromDrawer"
@@ -3350,6 +3369,16 @@ const showQuickSaleModal = ref(false)
 
 const openCreateReceiptModal = () => {
   showCreateReceiptModal.value = true
+}
+
+const openCreateSaleFromEmpty = () => {
+  openCreateReceiptModal()
+}
+
+const clearReceiptFilters = () => {
+  searchQuery.value = ''
+  statusFilter.value = 'all'
+  dateFilter.value = 'all'
 }
 
 const openQuickSaleModal = () => {

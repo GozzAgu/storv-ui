@@ -200,7 +200,7 @@
                 v-else-if="!searchStore.query.trim() && !searchStore.hasActiveFilters"
                 class="px-4 py-4 sm:py-5"
               >
-                <div class="dash-empty-state dash-empty-state--compact py-8 text-center">
+                <div class="dash-empty-state dash-empty-state--compact py-6 text-center">
                   <div class="dash-empty-state__mark mx-auto">
                     <MagnifyingGlassIcon
                       class="dash-empty-state__icon h-8 w-8 text-gray-400 dark:text-gray-500"
@@ -213,6 +213,30 @@
                   <p class="dash-empty-state__desc mt-1 text-xs text-gray-500 dark:text-gray-400">
                     Sales, inventory, customers, and more
                   </p>
+                </div>
+
+                <div class="mt-1 space-y-0.5 border-0 pt-1">
+                  <h3 class="mb-1.5 px-1 text-[11px] font-medium text-gray-500 dark:text-gray-400">
+                    Suggested
+                  </h3>
+                  <button
+                    v-for="action in suggestedActions"
+                    :key="action.href"
+                    type="button"
+                    class="group flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50/90 dark:text-gray-300 dark:hover:bg-white/[0.04]"
+                    @click="runSuggestedAction(action.href)"
+                  >
+                    <div class="flex min-w-0 flex-1 items-center gap-2">
+                      <component
+                        :is="action.icon"
+                        class="h-3.5 w-3.5 shrink-0 text-gray-400 dark:text-gray-500"
+                      />
+                      <span class="truncate">{{ action.label }}</span>
+                    </div>
+                    <ArrowRightIcon
+                      class="h-3.5 w-3.5 shrink-0 text-gray-400 opacity-0 transition-opacity group-hover:opacity-100 dark:text-gray-500"
+                    />
+                  </button>
                 </div>
 
                 <div v-if="savedSearches.length > 0" class="mt-2 space-y-0.5 border-0 pt-2">
@@ -358,6 +382,8 @@ import {
   ClockIcon,
   ArrowUpIcon,
   ArrowDownIcon,
+  ChartBarIcon,
+  CreditCardIcon,
 } from '~/utils/app-icons'
 import { useSearchStore, type SearchEntityType } from '~/stores/search'
 import { useInventoryStore } from '~/stores/inventory'
@@ -408,6 +434,37 @@ const receiptStatuses = [
 ]
 
 const savedSearches = computed(() => searchStore.savedSearches)
+
+const suggestedActions = computed(() => {
+  const actions = [
+    {
+      label: 'Record a sale',
+      href: '/dashboard/receipts',
+      icon: ReceiptPercentIcon,
+    },
+    {
+      label: 'Browse inventory',
+      href: '/dashboard/inventory',
+      icon: CubeIcon,
+    },
+    {
+      label: 'Open analytics',
+      href: '/dashboard/analytics',
+      icon: ChartBarIcon,
+    },
+    {
+      label: 'Payment links',
+      href: '/dashboard/payment-links',
+      icon: CreditCardIcon,
+    },
+  ]
+  return actions
+})
+
+function runSuggestedAction(href: string) {
+  searchStore.closeSearch()
+  void router.push(href)
+}
 
 // Debounced search
 let searchTimeout: ReturnType<typeof setTimeout> | null = null

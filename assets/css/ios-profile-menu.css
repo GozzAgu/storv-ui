@@ -148,8 +148,8 @@ html.capacitor-ios.capacitor-native .ios-profile-menu .ios-drawer-menu__check {
   color: var(--ios-accent);
 }
 
-/* Store + notifications dropdowns */
-html.capacitor-ios.capacitor-native .dash-store-panel__surface,
+/* Store + notifications dropdowns - match profile menu float shadow */
+html.capacitor-ios.capacitor-native .dash-store-panel,
 html.capacitor-ios.capacitor-native .dash-notify-panel--dropdown {
   border: none;
   border-radius: 16px;
@@ -159,8 +159,8 @@ html.capacitor-ios.capacitor-native .dash-notify-panel--dropdown {
   -webkit-backdrop-filter: none;
 }
 
-html.capacitor-ios.capacitor-native.dark .dash-store-panel__surface,
+html.capacitor-ios.capacitor-native.dark .dash-store-panel,
 html.capacitor-ios.capacitor-native.dark .dash-notify-panel--dropdown {
-  background: var(--ios-surface-solid, #1c1c1e);
+  background: #000000;
   box-shadow: var(--ios-float-shadow);
 }

@@ -44,7 +44,15 @@
           :icon="InboxIcon"
           title="No leads yet"
           description="Log walk-ins, phone calls, and other enquiries here."
-        />
+        >
+          <button
+            type="button"
+            class="rounded-lg bg-primary-600 px-3 py-1.5 text-xs font-semibold text-white"
+            @click="showCreateModal = true"
+          >
+            Log first lead
+          </button>
+        </DashboardTableEmptyState>
 
         <DashboardTableEmptyState
           v-else-if="filteredLeads.length === 0"
@@ -210,7 +218,11 @@
               'Source is manual - no integrations required',
               'Use Create sale on a lead to open the receipt wizard',
             ]"
-          />
+          >
+            <Button variant="primary" size="sm" @click="showCreateModal = true">
+              Log first lead
+            </Button>
+          </DashboardTableEmptyState>
 
           <DashboardTableEmptyState
             v-else-if="filteredLeads.length === 0"

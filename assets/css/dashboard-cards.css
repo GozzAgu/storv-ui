@@ -560,6 +560,84 @@ html:not(.capacitor-native).dark .dash-stat-card__sparkline path[stroke] {
   }
 }
 
+.dash-attention-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0 0 1rem;
+}
+
+.dash-attention-strip__label {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--dash-card-muted, rgb(107 114 128));
+}
+
+.dash-attention-strip__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dash-attention-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.375rem;
+  max-width: 100%;
+  border-radius: var(--saas-radius-control, 0.5rem);
+  border: 1px solid transparent;
+  padding: 0.4375rem 0.75rem;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  text-decoration: none;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.dash-attention-chip__title {
+  font-weight: 600;
+  color: var(--dash-card-ink, rgb(17 24 39));
+}
+
+.dash-attention-chip__meta {
+  color: var(--dash-card-muted, rgb(107 114 128));
+  white-space: nowrap;
+}
+
+.dash-attention-chip--critical {
+  border-color: rgb(248 113 113 / 0.28);
+  background: rgb(248 113 113 / 0.1);
+}
+
+.dash-attention-chip--warning {
+  border-color: rgb(251 191 36 / 0.3);
+  background: rgb(251 191 36 / 0.1);
+}
+
+.dash-attention-chip--info {
+  border-color: var(--dash-card-border, rgb(15 23 42 / 0.08));
+  background: rgb(15 23 42 / 0.03);
+}
+
+html.dark .dash-attention-chip--info {
+  background: rgb(255 255 255 / 0.04);
+}
+
+.dash-attention-chip:hover {
+  border-color: rgb(15 23 42 / 0.16);
+}
+
+html.dark .dash-attention-chip:hover {
+  border-color: rgb(255 255 255 / 0.18);
+}
+
 .dash-alerts {
   display: flex;
   flex-direction: column;
@@ -762,6 +840,25 @@ html.dark .dash-segment__btn--active {
   gap: 0.75rem;
   border-bottom: 1px solid var(--dash-card-border);
   padding: 0.625rem 0;
+}
+
+.dash-list__row--interactive {
+  cursor: pointer;
+  border-radius: var(--saas-radius-control, 0.5rem);
+  margin-inline: -0.375rem;
+  padding-inline: 0.375rem;
+  transition: background-color 0.12s ease;
+}
+
+.dash-list__row--interactive:hover,
+.dash-list__row--interactive:focus-visible {
+  background: rgb(15 23 42 / 0.04);
+  outline: none;
+}
+
+html.dark .dash-list__row--interactive:hover,
+html.dark .dash-list__row--interactive:focus-visible {
+  background: rgb(255 255 255 / 0.05);
 }
 
 .dash-list__row:last-child {

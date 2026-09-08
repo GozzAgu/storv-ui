@@ -1877,6 +1877,12 @@ export const useInventoryStore = defineStore('inventory', {
           await useFunnelAnalytics()
             .recordMilestone('firstInventoryItemAt', { store_id: storeId })
             .catch(() => undefined)
+          try {
+            const { useAppToast } = await import('~/composables/useAppToast')
+            useAppToast().success('First product added — stock is live')
+          } catch {
+            /* toast optional */
+          }
         }
 
         try {
