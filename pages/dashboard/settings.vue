@@ -1042,6 +1042,7 @@ import Modal from '~/components/ui/Modal.vue'
 import SidePanel from '~/components/ui/SidePanel.vue'
 import Switch from '~/components/ui/Switch.vue'
 import StorefrontSettingsPanel from '~/components/dashboard/StorefrontSettingsPanel.vue'
+import { isStorefrontDashboardHidden } from '~/utils/storefront-launch'
 import {
   IosForm,
   IosFormSection,
@@ -1570,7 +1571,9 @@ const settingsTabs = computed(() => {
   if (isStaff.value) tabs.push({ value: 'assignment', label: 'Your assignment' })
   tabs.push({ value: 'store-info', label: isStaff.value ? 'Branch details' : 'Store information' })
   tabs.push({ value: 'inventory', label: 'Inventory' })
-  if (userStore.isSuperAdmin) tabs.push({ value: 'storefront', label: 'Storefront' })
+  if (userStore.isSuperAdmin && !isStorefrontDashboardHidden()) {
+    tabs.push({ value: 'storefront', label: 'Storefront' })
+  }
   tabs.push({ value: 'payments', label: 'Checkout payments' })
   tabs.push({ value: 'sales-receipts', label: 'Sales & receipts' })
   if (!isStaff.value) tabs.push({ value: 'data-export', label: 'Data export' })

@@ -45,15 +45,15 @@
           {{ store.tagline || 'Browse what’s available, then message the shop or pay online.' }}
         </p>
         <div class="sf-hero__steps" aria-label="How to use this showroom">
-          <p><span>1</span> Browse products</p>
-          <p><span>2</span> Open an item</p>
+          <p><span>1</span> Open a category</p>
+          <p><span>2</span> Pick a product</p>
           <p><span>3</span> Pay or contact the shop</p>
         </div>
-        <a href="#catalogue" class="sf-btn sf-btn--primary sf-hero__cta">Browse products</a>
+        <a href="#catalogue" class="sf-btn sf-btn--primary sf-hero__cta">Browse catalogue</a>
       </section>
 
       <section
-        v-if="recent.length && !search && !category"
+        v-if="recent.length && !search && !folderPath"
         class="sf-section sf-recent"
         aria-labelledby="sf-recent-title"
       >
@@ -81,9 +81,25 @@
 
       <section id="catalogue" class="sf-section sf-catalogue" aria-labelledby="sf-catalogue-title">
         <div class="sf-section__head">
-          <h2 id="sf-catalogue-title" class="sf-section__title">All products</h2>
-          <p class="sf-section__hint">Search or filter, then tap a product to view and act</p>
+          <h2 id="sf-catalogue-title" class="sf-section__title">
+            {{ catalogueTitle }}
+          </h2>
+          <p class="sf-section__hint">{{ catalogueHint }}</p>
         </div>
+
+        <nav v-if="!isSearchMode && folderPath" class="sf-crumbs" aria-label="Catalogue location">
+          <button type="button" class="sf-crumbs__link" @click="openFolder('')">
+            Categories
+          </button>
+          <template v-if="folderParentPath">
+            <span class="sf-crumbs__sep" aria-hidden="true">/</span>
+            <button type="button" class="sf-crumbs__link" @click="openFolder(folderParentPath)">
+              {{ folderParentName }}
+            </button>
+          </template>
+          <span class="sf-crumbs__sep" aria-hidden="true">/</span>
+          <span class="sf-crumbs__here">{{ currentFolderName }}</span>
+        </nav>
 
         <label class="sf-search">
           <span class="sf-sr-only">Search products</span>
@@ -96,31 +112,7 @@
           />
         </label>
 
-        <div v-if="categories.length" class="sf-filter-block">
-          <p class="sf-filter-label">Category</p>
-          <div class="sf-chips" role="group" aria-label="Filter by category">
-            <button
-              type="button"
-              class="sf-chip"
-              :class="{ 'is-on': !category }"
-              @click="setCategory('')"
-            >
-              All
-            </button>
-            <button
-              v-for="c in categories"
-              :key="c"
-              type="button"
-              class="sf-chip"
-              :class="{ 'is-on': category === c }"
-              @click="setCategory(c)"
-            >
-              {{ c }}
-            </button>
-          </div>
-        </div>
-
-        <div class="sf-filter-block">
+        <div v-if="isSearchMode || showingProducts" class="sf-filter-block">
           <p class="sf-filter-label">Sort</p>
           <div class="sf-chips" role="group" aria-label="Sort products">
             <button
@@ -159,12 +151,45 @@
         </div>
 
         <p class="sf-count" aria-live="polite">
-          {{ items.length }} product{{ items.length === 1 ? '' : 's' }}
-          <span v-if="compareIds.length"> · {{ compareIds.length }} selected to compare</span>
+          <template v-if="isSearchMode || showingProducts">
+            {{ visibleProducts.length }} product{{ visibleProducts.length === 1 ? '' : 's' }}
+            <span v-if="compareIds.length"> · {{ compareIds.length }} selected to compare</span>
+          </template>
+          <template v-else>
+            {{ visibleFolders.length }} categor{{ visibleFolders.length === 1 ? 'y' : 'ies' }}
+          </template>
         </p>
 
-        <ul v-if="items.length" class="sf-grid">
-          <li v-for="item in items" :key="item.id" class="sf-grid__item">
+        <!-- Folder tiles (root or subcategory hub) -->
+        <ul v-if="!isSearchMode && !showingProducts && visibleFolders.length" class="sf-folders">
+          <li v-for="folder in visibleFolders" :key="folder.path">
+            <button type="button" class="sf-folder" @click="openFolder(folder.path)">
+              <StorefrontMedia
+                :title="folder.name"
+                :seed="folder.path"
+                :category-name="folder.name"
+                :category-path="folder.path"
+                size="folder"
+              />
+              <span class="sf-folder__body">
+                <span class="sf-folder__name">{{ folder.name }}</span>
+                <span class="sf-folder__meta">
+                  <template v-if="folder.childCount > 0">
+                    {{ folder.childCount }} subcategor{{ folder.childCount === 1 ? 'y' : 'ies' }}
+                    · {{ folder.itemCount }} product{{ folder.itemCount === 1 ? '' : 's' }}
+                  </template>
+                  <template v-else>
+                    {{ folder.itemCount }} product{{ folder.itemCount === 1 ? '' : 's' }}
+                  </template>
+                </span>
+              </span>
+            </button>
+          </li>
+        </ul>
+
+        <!-- Product grid -->
+        <ul v-else-if="(isSearchMode || showingProducts) && visibleProducts.length" class="sf-grid">
+          <li v-for="item in visibleProducts" :key="item.id" class="sf-grid__item">
             <NuxtLink :to="productHref(item.id)" class="sf-card">
               <div class="sf-card__media-wrap">
                 <StorefrontMedia
@@ -211,16 +236,29 @@
             </button>
           </li>
         </ul>
+
         <div v-else class="sf-empty">
-          <p class="sf-empty__title">No products match</p>
-          <p class="sf-empty__hint">Try clearing search or choosing another category.</p>
+          <p class="sf-empty__title">
+            {{ isSearchMode || showingProducts ? 'No products match' : 'No categories yet' }}
+          </p>
+          <p class="sf-empty__hint">
+            <template v-if="isSearchMode">
+              Try a different search, or browse categories instead.
+            </template>
+            <template v-else-if="showingProducts">
+              Nothing listed in this category right now.
+            </template>
+            <template v-else>
+              This shop has not published categories yet.
+            </template>
+          </p>
           <button
-            v-if="search || category"
+            v-if="search || folderPath"
             type="button"
             class="sf-btn sf-btn--ghost"
             @click="clearFilters"
           >
-            Clear filters
+            {{ search ? 'Clear search' : 'Back to categories' }}
           </button>
         </div>
       </section>
@@ -311,6 +349,14 @@
 import ThemeToggle from '~/components/ui/ThemeToggle.vue'
 import StorefrontMedia from '~/components/storefront/StorefrontMedia.vue'
 import {
+  buildStorefrontFolderTree,
+  filterStorefrontItemsByFolderPath,
+  findStorefrontFolder,
+  parseStorefrontCategoryPath,
+  storefrontFolderParentPath,
+  type StorefrontFolderNode,
+} from '~/utils/storefront-catalogue'
+import {
   buildStorefrontShareMessage,
   buildStorefrontWhatsAppShareHref,
   formatStorefrontMoney,
@@ -338,13 +384,67 @@ const error = ref('')
 const store = ref<any>(null)
 const items = ref<any[]>([])
 const recent = ref<any[]>([])
-const categories = ref<string[]>([])
 const search = ref('')
-const category = ref('')
+const folderPath = ref('')
 const sort = ref('')
 const compareIds = ref<string[]>([])
 const showCompare = ref(false)
 const shareLabel = ref('Share')
+
+const isSearchMode = computed(() => Boolean(search.value.trim()))
+
+const folderTree = computed(() => buildStorefrontFolderTree(items.value))
+
+const currentFolder = computed((): StorefrontFolderNode | null => {
+  if (!folderPath.value) return null
+  return findStorefrontFolder(folderTree.value, folderPath.value)
+})
+
+const showingProducts = computed(() => {
+  if (isSearchMode.value) return true
+  if (!folderPath.value) return false
+  const folder = currentFolder.value
+  if (!folder) return true
+  return folder.isLeaf
+})
+
+const visibleFolders = computed((): StorefrontFolderNode[] => {
+  if (isSearchMode.value || showingProducts.value) return []
+  if (!folderPath.value) return folderTree.value
+  return currentFolder.value?.children ?? []
+})
+
+const visibleProducts = computed(() => {
+  if (isSearchMode.value) return items.value
+  if (!showingProducts.value || !folderPath.value) return []
+  return filterStorefrontItemsByFolderPath(items.value, folderPath.value)
+})
+
+const folderParentPath = computed(() => storefrontFolderParentPath(folderPath.value))
+
+const folderParentName = computed(() => {
+  const parts = parseStorefrontCategoryPath(folderParentPath.value)
+  return parts[parts.length - 1] || ''
+})
+
+const currentFolderName = computed(() => {
+  const parts = parseStorefrontCategoryPath(folderPath.value)
+  return parts[parts.length - 1] || folderPath.value
+})
+
+const catalogueTitle = computed(() => {
+  if (isSearchMode.value) return 'Search results'
+  if (!folderPath.value) return 'Categories'
+  if (showingProducts.value) return currentFolderName.value || 'Products'
+  return currentFolderName.value || 'Subcategories'
+})
+
+const catalogueHint = computed(() => {
+  if (isSearchMode.value) return 'Matching products across the catalogue'
+  if (!folderPath.value) return 'Open a category, then a subcategory when needed'
+  if (showingProducts.value) return 'Tap a product to view details and act'
+  return 'Choose a subcategory to see products'
+})
 
 const whatsappHref = computed(() => {
   const n = String(store.value?.whatsappE164 || '').replace(/\D/g, '')
@@ -441,8 +541,16 @@ function toggleCompare(id: string) {
 
 function clearFilters() {
   search.value = ''
-  category.value = ''
+  folderPath.value = ''
   void load()
+}
+
+function openFolder(path: string) {
+  folderPath.value = path
+  search.value = ''
+  if (import.meta.client) {
+    document.getElementById('catalogue')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
 }
 
 let timer: ReturnType<typeof setTimeout> | null = null
@@ -451,11 +559,6 @@ function debouncedReload() {
   timer = setTimeout(() => {
     void load()
   }, 220)
-}
-
-function setCategory(c: string) {
-  category.value = c
-  void load()
 }
 
 function setSort(s: string) {
@@ -480,14 +583,12 @@ async function load() {
     }>(`/api/storefront/${slug.value}`, {
       query: {
         q: search.value || undefined,
-        category: category.value || undefined,
         sort: sort.value || undefined,
       },
     })
     store.value = data.store
     items.value = data.items || []
     recent.value = data.recent || []
-    categories.value = data.categories || []
     ping(slug.value)
 
     const origin = import.meta.client ? window.location.origin : ''
@@ -856,6 +957,103 @@ watch(slug, () => void load(), { immediate: true })
   font-size: 1rem;
   font-family: inherit;
   color: var(--sf-ink);
+}
+
+.sf-crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0 0 0.85rem;
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+
+.sf-crumbs__link {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--sf-muted);
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.sf-crumbs__sep {
+  color: var(--sf-faint);
+}
+
+.sf-crumbs__here {
+  color: var(--sf-ink);
+}
+
+.sf-folders {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+@media (min-width: 640px) {
+  .sf-folders {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.65rem;
+  }
+}
+
+@media (min-width: 900px) {
+  .sf-folders {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.sf-folder {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 0;
+  border: 1px solid var(--sf-line);
+  border-radius: 0.85rem;
+  overflow: hidden;
+  background: var(--sf-surface);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sf-folder:focus-visible {
+  outline: 2px solid var(--sf-ink);
+  outline-offset: 2px;
+}
+
+.sf-folder__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.5rem 0.6rem 0.6rem;
+}
+
+.sf-folder__name {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.sf-folder__meta {
+  font-size: 0.625rem;
+  font-weight: 650;
+  color: var(--sf-faint);
+  line-height: 1.3;
 }
 
 .sf-filter-block {

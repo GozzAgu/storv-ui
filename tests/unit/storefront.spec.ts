@@ -221,6 +221,41 @@ describe('storefront-media', () => {
   })
 })
 
+describe('storefront-catalogue', () => {
+  it('builds parent hubs and leaf folders from category paths', async () => {
+    const {
+      buildStorefrontFolderTree,
+      filterStorefrontItemsByFolderPath,
+      findStorefrontFolder,
+    } = await import('~/utils/storefront-catalogue')
+
+    const items = [
+      { id: '1', categoryPath: 'Perfumes / Lattafa', categoryName: 'Lattafa' },
+      { id: '2', categoryPath: 'Perfumes / Lattafa', categoryName: 'Lattafa' },
+      { id: '3', categoryPath: 'Perfumes / Khadlaj', categoryName: 'Khadlaj' },
+      { id: '4', categoryPath: 'Accessories', categoryName: 'Accessories' },
+    ]
+
+    const tree = buildStorefrontFolderTree(items)
+    expect(tree.map((n) => n.name)).toEqual(['Accessories', 'Perfumes'])
+
+    const perfumes = findStorefrontFolder(tree, 'Perfumes')
+    expect(perfumes?.isLeaf).toBe(false)
+    expect(perfumes?.childCount).toBe(2)
+    expect(perfumes?.itemCount).toBe(3)
+    expect(perfumes?.children.map((c) => c.name)).toEqual(['Khadlaj', 'Lattafa'])
+
+    const accessories = findStorefrontFolder(tree, 'Accessories')
+    expect(accessories?.isLeaf).toBe(true)
+    expect(accessories?.itemCount).toBe(1)
+
+    expect(filterStorefrontItemsByFolderPath(items, 'Perfumes / Lattafa').map((i) => i.id)).toEqual([
+      '1',
+      '2',
+    ])
+  })
+})
+
 describe('storefront-share', () => {
   it('applies UTM params and builds share copy', async () => {
     const {

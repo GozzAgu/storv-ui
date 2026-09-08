@@ -492,7 +492,7 @@
 
       <div v-show="activeAnalyticsTab === 'payments-traffic'" class="dash-analytics-panel">
       <IosAnalyticsSection
-        v-if="isCapacitorIos"
+        v-if="isCapacitorIos && !storefrontDashboardHidden"
         title="Storefront traffic"
         subtitle="Public showroom views and guest requests"
       >
@@ -537,7 +537,7 @@
         </div>
       </IosAnalyticsSection>
 
-      <section v-else :class="cardPaddedClass">
+      <section v-else-if="!storefrontDashboardHidden" :class="cardPaddedClass">
         <div :class="[cardHeaderClass, 'dash-card__header--compact']">
           <div>
             <h2 :class="cardTitleClass">Storefront traffic</h2>
@@ -1053,6 +1053,7 @@ import { useDepartmentsStore } from '~/stores/departments'
 import { useCustomerBuybacksStore } from '~/stores/customerBuybacks'
 import { useSellerLoanOutsStore } from '~/stores/sellerLoanOuts'
 import { useStorefrontStore } from '~/stores/storefront'
+import { isStorefrontDashboardHidden } from '~/utils/storefront-launch'
 import { useCustomerAccountsStore } from '~/stores/customerAccounts'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
@@ -1155,6 +1156,7 @@ const departmentsStore = useDepartmentsStore()
 const buybacksStore = useCustomerBuybacksStore()
 const sellerLoansStore = useSellerLoanOutsStore()
 const storefrontStore = useStorefrontStore()
+const storefrontDashboardHidden = isStorefrontDashboardHidden()
 const customerAccountsStore = useCustomerAccountsStore()
 const userStore = useUserStore()
 const themeStore = useThemeStore()

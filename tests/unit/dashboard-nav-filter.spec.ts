@@ -123,6 +123,18 @@ describe('filterDashboardNavItems', () => {
       expect(names).toContain('Multi-Store Sync')
     }
   })
+
+  it('hides storefront when launch flag is on', () => {
+    const names = filterDashboardNavItems(DASHBOARD_NAV_DEFINITIONS, {
+      isSuperAdmin: true,
+      isManager: false,
+      canUseFeature: () => true,
+      hideStorefront: true,
+    }).map((item) => item.name)
+
+    expect(names).not.toContain('Storefront')
+    expect(names).toContain('Inventory')
+  })
 })
 
 describe('orderNativeMoreNavItems', () => {

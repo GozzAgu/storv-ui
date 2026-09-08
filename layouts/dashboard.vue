@@ -1037,6 +1037,7 @@ import {
 import { shouldShowWebNavSection, webNavSectionLabel } from '~/utils/dashboard-web-nav-groups'
 import type { DashboardNavIconKey } from '~/utils/dashboard-nav-icons'
 import { isPaymentLinksComingSoon, shouldPromoteNativePaymentLinksTab } from '~/utils/payment-links-launch'
+import { isStorefrontDashboardHidden } from '~/utils/storefront-launch'
 import { resolveStoreDepartmentsPath } from '~/utils/department-routes'
 import { getStoreBranchShortLabel } from '~/utils/store-branch-label'
 import { getChildFolders, getRootFolders } from '~/utils/inventory-folder-tree'
@@ -1304,6 +1305,7 @@ const filteredNavigation = computed(() => {
     canUseFeature: canUseSubscriptionFeature,
     canUseBusinessCapability,
     hidePaymentLinks: isPaymentLinksComingSoon(),
+    hideStorefront: isStorefrontDashboardHidden(),
   }).map((item) => ({
     ...item,
     href:

@@ -132,12 +132,14 @@ export function filterDashboardNavItems(
     canUseFeature: (feature: SubscriptionFeature) => boolean
     canUseBusinessCapability?: (capability: BusinessCapability) => boolean
     hidePaymentLinks?: boolean
+    hideStorefront?: boolean
   }
 ): DashboardNavDefinition[] {
   const canSeeManagerOnlyFeatures = options.isSuperAdmin || options.isManager
 
   return items.filter((item) => {
     if (item.segment === '/payment-links' && options.hidePaymentLinks) return false
+    if (item.segment === '/storefront' && options.hideStorefront) return false
     if (item.requiresSuperAdmin && !options.isSuperAdmin) return false
     if (item.requiresManagerOrSuperAdmin && !canSeeManagerOnlyFeatures) return false
     if (item.subscriptionFeature && !options.canUseFeature(item.subscriptionFeature)) return false
