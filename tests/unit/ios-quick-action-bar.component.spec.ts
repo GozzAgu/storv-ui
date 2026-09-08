@@ -16,11 +16,14 @@ function labelsFor(options: IosQuickActionOption[]) {
   const wrapper = mount(IosQuickActionBar, {
     props: { options, ariaLabel: 'Actions', modelValue: 'all' },
   })
-  const labels = wrapper
+  const tabLabels = wrapper
     .findAll('.ios-quick-actions__label')
     .map((node) => node.text())
+  const actionLabels = wrapper
+    .findAll('.ios-quick-actions__action-label')
+    .map((node) => node.text())
   wrapper.unmount()
-  return labels
+  return [...tabLabels, ...actionLabels]
 }
 
 describe('IosQuickActionBar trailing actions', () => {

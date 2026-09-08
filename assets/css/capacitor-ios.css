@@ -1382,8 +1382,10 @@ html.capacitor-ios.capacitor-native .dash-table-toolbar + .dash-tabs-rail {
 
 html.capacitor-ios.capacitor-native .dash-segment-tabs__btn,
 html.capacitor-ios.capacitor-native .dash-tabs-rail__btn {
-  font-size: var(--cap-ios-caption) !important;
-  padding: 0.5rem 0.5rem;
+  font-size: 0.8125rem !important;
+  font-weight: 500;
+  padding: 0.65rem 0.85rem;
+  min-height: 2.5rem;
 }
 
 html.capacitor-ios.capacitor-native .dash-card__header .dash-segment-tabs,

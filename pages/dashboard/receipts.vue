@@ -2608,22 +2608,20 @@ const salesTabOptions = computed(() => [
 const showSalesMoreSheet = ref(false)
 
 const salesQuickActionOptions = computed((): IosQuickActionOption[] => {
-  if (canCreate.value) {
+  const tabs: IosQuickActionOption[] = [
+    { value: 'receipts', label: 'Sales', icon: ReceiptPercentIcon },
+    {
+      value: 'outstanding',
+      label: 'Outstanding',
+      icon: ClockIcon,
+      badge: outstandingReceipts.value.length || undefined,
+    },
+    { value: 'customers', label: 'Customers', icon: UsersIcon },
+  ]
+
+  if (!canCreate.value) {
     return [
-      {
-        value: 'new',
-        label: 'New sale',
-        icon: PlusIcon,
-        trailing: 'add',
-        action: openCreateReceiptModal,
-      },
-      {
-        value: 'quick',
-        label: 'Quick sale',
-        icon: QrCodeIcon,
-        action: openQuickSaleModal,
-      },
-      { value: 'receipts', label: 'Sales', icon: ReceiptPercentIcon },
+      ...tabs,
       {
         value: 'more',
         label: 'More',
@@ -2637,14 +2635,7 @@ const salesQuickActionOptions = computed((): IosQuickActionOption[] => {
   }
 
   return [
-    { value: 'receipts', label: 'Sales', icon: ReceiptPercentIcon },
-    {
-      value: 'outstanding',
-      label: 'Outstanding',
-      icon: ClockIcon,
-      badge: outstandingReceipts.value.length || undefined,
-    },
-    { value: 'customers', label: 'Customers', icon: UsersIcon },
+    ...tabs,
     {
       value: 'more',
       label: 'More',
@@ -2654,12 +2645,25 @@ const salesQuickActionOptions = computed((): IosQuickActionOption[] => {
         showSalesMoreSheet.value = true
       },
     },
+    {
+      value: 'quick',
+      label: 'Quick',
+      icon: QrCodeIcon,
+      action: openQuickSaleModal,
+    },
+    {
+      value: 'new',
+      label: 'New sale',
+      icon: PlusIcon,
+      trailing: 'add',
+      action: openCreateReceiptModal,
+    },
   ]
 })
 
 const receiptStatusQuickActionOptions: IosQuickActionOption[] = [
   { value: 'all', label: 'All', icon: FunnelIcon },
-  { value: 'completed', label: 'Completed', icon: CheckCircleIcon },
+  { value: 'completed', label: 'Completed', icon: ReceiptPercentIcon },
   { value: 'pending', label: 'Pending', icon: ClockIcon },
   { value: 'refunded', label: 'Refunded', icon: ArrowUturnLeftIcon },
 ]

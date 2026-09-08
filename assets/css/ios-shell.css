@@ -448,16 +448,17 @@ html.capacitor-ios.capacitor-native .ios-analytics-period-card .ios-segmented-co
 }
 
 html.capacitor-ios.capacitor-native .ios-analytics-period-card .ios-segmented-control__segment--active {
-  background: var(--ios-label);
-  color: var(--ios-home-bg, #f2f2f7);
-  box-shadow: none;
+  background: var(--ios-surface-solid, #fff);
+  color: var(--ios-label);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.06);
 }
 
 html.capacitor-ios.capacitor-native.dark
   .ios-analytics-period-card
   .ios-segmented-control__segment--active {
-  background: rgb(255 255 255 / 0.92);
-  color: rgb(28 28 30);
+  background: rgb(255 255 255 / 0.14);
+  color: #fff;
+  box-shadow: none;
 }
 
 html.capacitor-ios.capacitor-native .dash-analytics--ios .dash-analytics-kpi-panel {

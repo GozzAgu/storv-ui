@@ -78,17 +78,17 @@ html.capacitor-ios.capacitor-native .ios-quick-action-skeleton {
 }
 
 html.capacitor-ios.capacitor-native .ios-quick-action-skeleton__item {
-  flex: 1 1 0;
-  min-width: 0;
+  flex: 0 0 auto;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 0.4375rem;
+  min-height: 2.5rem;
+  padding: 0.65rem 0.85rem;
 }
 
-html.capacitor-ios.capacitor-native .ios-quick-action-skeleton .ios-skeleton--circle {
-  width: 2.875rem;
-  height: 2.875rem;
+html.capacitor-ios.capacitor-native .ios-quick-action-skeleton .ios-skeleton--line-sm {
+  width: 3.5rem;
+  height: 0.625rem;
+  border-radius: 0.25rem;
 }
 
 /* Grouped folder list placeholder */

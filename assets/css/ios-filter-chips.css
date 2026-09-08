@@ -51,9 +51,12 @@ html.capacitor-ios.capacitor-native .ios-filter-chips__chip {
   padding: 0.4375rem 0.875rem;
   border: none;
   border-radius: var(--ios-radius-chip, 8px);
+  background: rgb(120 120 128 / 0.12);
   letter-spacing: -0.01em;
   white-space: nowrap;
-  color: var(--ios-label);
+  color: var(--ios-label-secondary);
+  font-size: 0.8125rem;
+  font-weight: 500;
   -webkit-tap-highlight-color: transparent;
   transition:
     background 0.15s ease,
@@ -63,6 +66,7 @@ html.capacitor-ios.capacitor-native .ios-filter-chips__chip {
 
 html.capacitor-ios.capacitor-native.dark .ios-filter-chips__chip {
   background: rgb(255 255 255 / 0.08);
+  color: rgb(235 235 245 / 0.7);
 }
 
 html.capacitor-ios.capacitor-native .ios-filter-chips__chip:active {
@@ -70,12 +74,12 @@ html.capacitor-ios.capacitor-native .ios-filter-chips__chip:active {
 }
 
 html.capacitor-ios.capacitor-native .ios-filter-chips__chip--active {
-  background: var(--ios-label);
+  background: rgb(120 120 128 / 0.22);
   font-weight: 600;
-  color: var(--ios-home-bg, #f3f3f5);
+  color: var(--ios-label);
 }
 
 html.capacitor-ios.capacitor-native.dark .ios-filter-chips__chip--active {
-  background: rgb(255 255 255 / 0.92);
-  color: rgb(28 28 30);
+  background: rgb(255 255 255 / 0.16);
+  color: #fff;
 }

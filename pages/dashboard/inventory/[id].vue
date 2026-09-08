@@ -2375,7 +2375,7 @@ import {
   CubeIcon,
   FolderIcon,
   ExclamationTriangleIcon,
-  CheckCircleIcon,
+  ReceiptPercentIcon,
   MagnifyingGlassIcon,
   PencilSquareIcon,
   TrashIcon,
@@ -4114,7 +4114,7 @@ const availabilityQuickActionOptions = computed((): IosQuickActionOption[] => {
     {
       value: 'available',
       label: 'Available',
-      icon: CheckCircleIcon,
+      icon: ReceiptPercentIcon,
       badge: countFor('available') || undefined,
     },
   ]

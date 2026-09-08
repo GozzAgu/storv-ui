@@ -1,35 +1,55 @@
 <template>
   <div
     class="ios-quick-actions"
-    :class="{ 'ios-quick-actions--card': card }"
+    :class="{
+      'ios-quick-actions--card': card,
+      'ios-quick-actions--with-actions': hasTrailingActions,
+    }"
     :role="role"
     :aria-label="ariaLabel"
   >
-    <div class="ios-quick-actions__scroll">
+    <div class="ios-quick-actions__scroll" role="presentation">
       <button
-        v-for="option in orderedOptions"
+        v-for="option in tabOptions"
         :key="option.value"
         type="button"
-        :role="role === 'tablist' && !option.action ? 'tab' : undefined"
-        :aria-selected="
-          role === 'tablist' && !option.action ? modelValue === option.value : undefined
-        "
+        :role="role === 'tablist' ? 'tab' : undefined"
+        :aria-selected="role === 'tablist' ? modelValue === option.value : undefined"
         class="ios-quick-actions__item"
         :class="{
-          'ios-quick-actions__item--active': !option.action && modelValue === option.value,
+          'ios-quick-actions__item--active': modelValue === option.value,
         }"
         @click="onClick(option)"
       >
-        <span class="ios-quick-actions__icon-wrap" aria-hidden="true">
-          <component :is="option.icon ?? DefaultQuickActionIcon" class="ios-quick-actions__icon" />
-          <span
-            v-if="option.badge != null && option.badge > 0"
-            class="ios-quick-actions__badge"
-          >
-            {{ option.badge > 99 ? '99+' : option.badge }}
-          </span>
-        </span>
         <span class="ios-quick-actions__label">{{ option.label }}</span>
+        <span
+          v-if="option.badge != null && option.badge > 0"
+          class="ios-quick-actions__badge"
+        >
+          {{ option.badge > 99 ? '99+' : option.badge }}
+        </span>
+      </button>
+    </div>
+
+    <div v-if="hasTrailingActions" class="ios-quick-actions__actions">
+      <button
+        v-for="option in trailingOptions"
+        :key="option.value"
+        type="button"
+        class="ios-quick-actions__action"
+        :class="{
+          'ios-quick-actions__action--add': option.trailing === 'add',
+          'ios-quick-actions__action--more': option.trailing === 'more',
+        }"
+        :aria-label="option.label"
+        @click="onClick(option)"
+      >
+        <component
+          :is="option.icon ?? DefaultQuickActionIcon"
+          class="ios-quick-actions__action-icon"
+          aria-hidden="true"
+        />
+        <span class="ios-quick-actions__action-label">{{ option.label }}</span>
       </button>
     </div>
   </div>
@@ -64,19 +84,23 @@ const props = withDefaults(
     options: IosQuickActionOption[]
     ariaLabel: string
     role?: 'group' | 'tablist'
+    /** Kept for API compatibility; rails are flat by default. */
     card?: boolean
   }>(),
   {
     role: 'group',
-    card: true,
+    card: false,
   }
 )
 
-const orderedOptions = computed(() => [
-  ...props.options.filter((option) => !option.trailing),
-  ...props.options.filter((option) => option.trailing === 'more'),
+const tabOptions = computed(() => props.options.filter((option) => !option.trailing && !option.action))
+
+const trailingOptions = computed(() => [
+  ...props.options.filter((option) => option.trailing === 'more' || (!option.trailing && option.action)),
   ...props.options.filter((option) => option.trailing === 'add'),
 ])
+
+const hasTrailingActions = computed(() => trailingOptions.value.length > 0)
 
 const emit = defineEmits<{
   change: [value: string]

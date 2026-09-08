@@ -1,12 +1,5 @@
 <template>
-  <IosQuickActionBar
-    v-if="isCapacitorIos"
-    v-model="modelValue"
-    role="tablist"
-    :ariaLabel="ariaLabel"
-    :options="iosOptions"
-  />
-  <nav v-else class="dash-tabs-rail" role="tablist" :aria-label="ariaLabel">
+  <nav class="dash-tabs-rail" role="tablist" :aria-label="ariaLabel">
     <button
       v-for="option in options"
       :key="option.value"
@@ -26,8 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, type Component } from 'vue'
-import IosQuickActionBar, { type IosQuickActionOption } from '~/components/ios/IosQuickActionBar.vue'
+import type { Component } from 'vue'
 
 export interface CategoryTabOption {
   value: string
@@ -36,25 +28,14 @@ export interface CategoryTabOption {
   icon?: Component
 }
 
-const props = defineProps<{
+defineProps<{
   options: CategoryTabOption[]
   ariaLabel: string
   /** Kept for API compatibility; rail tabs always scroll horizontally when needed. */
   scroll?: boolean
-  /** Kept for API compatibility; web tabs always use the underline rail. */
+  /** Kept for API compatibility; tabs always use the underline rail. */
   variant?: 'segment' | 'rail'
 }>()
 
 const modelValue = defineModel<string>({ required: true })
-
-const { isCapacitorIos } = useIsCapacitorIos()
-
-const iosOptions = computed<IosQuickActionOption[]>(() =>
-  props.options.map((option) => ({
-    value: option.value,
-    label: option.label,
-    icon: option.icon,
-    badge: option.count,
-  }))
-)
 </script>

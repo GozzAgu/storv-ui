@@ -14,7 +14,7 @@
         aria-hidden="true"
       >
         <UserCircleIcon v-if="variant === 'customer'" />
-        <CheckCircleIcon v-else-if="variant === 'credit'" />
+        <ReceiptPercentIcon v-else-if="variant === 'credit'" />
         <ClockIcon v-else-if="variant === 'pending'" />
         <ArrowUturnLeftIcon v-else-if="variant === 'debit'" />
         <XMarkIcon v-else />
@@ -50,19 +50,17 @@
 import { computed } from 'vue'
 import {
   ArrowUturnLeftIcon,
-  CheckCircleIcon,
   ClockIcon,
   EllipsisVerticalIcon,
+  ReceiptPercentIcon,
   UserCircleIcon,
   XMarkIcon,
 } from '~/utils/app-icons'
 
 /**
- * `credit` = completed sale, `pending` = awaiting payment/balance due,
+ * `credit` = completed sale / available stock, `pending` = awaiting payment/balance due,
  * `debit` = refunded, `cancelled` = cancelled, `customer` = a customer row
- * rather than a receipt. The icon mirrors these exact states (matching the
- * "Completed / Pending / Refunded" filter chips above the list) instead of a
- * generic money-direction arrow.
+ * rather than a receipt. Credit uses the sales glyph (neutral), not a green check.
  */
 export type ReceiptTransactionVariant =
   | 'credit'
