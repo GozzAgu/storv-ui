@@ -4,15 +4,15 @@
  */
 
 html.capacitor-native {
-  --ios-canvas: #f2f2f7;
-  --ios-glass-bg: rgb(255 255 255 / 0.72);
-  --ios-glass-elevated: rgb(255 255 255 / 0.82);
-  --ios-glass-border: rgb(255 255 255 / 0.8);
-  --ios-glass-highlight: inset 0 1px 0 rgb(255 255 255 / 0.6);
-  --ios-glass-shadow: 0 8px 32px rgb(0 0 0 / 0.06);
-  --ios-glass-blur: 24px;
-  --ios-surface-solid: #ffffff;
-  --ios-separator: rgb(60 60 67 / 0.12);
+  --ios-canvas: #e8eaf0;
+  --ios-glass-bg: rgb(255 255 255 / 0.55);
+  --ios-glass-elevated: rgb(255 255 255 / 0.72);
+  --ios-glass-border: rgb(255 255 255 / 0.7);
+  --ios-glass-highlight: inset 0 1px 0 rgb(255 255 255 / 0.75);
+  --ios-glass-shadow: 0 10px 36px rgb(0 0 0 / 0.08);
+  --ios-glass-blur: 32px;
+  --ios-surface-solid: rgb(255 255 255 / 0.82);
+  --ios-separator: rgb(60 60 67 / 0.14);
   --ios-label: #000000;
   --ios-label-secondary: rgb(60 60 67 / 0.6);
   --ios-accent: #143f8d;
@@ -27,7 +27,7 @@ html.capacitor-native {
   --ios-radius-sm: 10px;
   --ios-radius-md: 12px;
   --ios-radius-lg: 16px;
-  --ios-radius-xl: 20px;
+  --ios-radius-xl: 22px;
   --ios-radius-control: 10px;
   --ios-radius-chip: 8px;
   --ios-space-xs: 4px;
@@ -47,7 +47,7 @@ html.capacitor-native {
   --ios-fill-tertiary: rgb(118 118 128 / 0.12);
   --ios-aurora: radial-gradient(
     ellipse 85% 55% at 50% -18%,
-    rgb(72 118 199 / 0.11),
+    rgb(72 118 199 / 0.16),
     transparent 58%
   );
   --ios-topnav-float-gap: 0.625rem;
@@ -61,21 +61,22 @@ html.capacitor-native {
   --ios-bottomnav-edge-pad: 0.875rem;
   --ios-bottomnav-inset: 1rem;
   --ios-bottomnav-height: 3.375rem;
-  --ios-bottomnav-blur: 40px;
+  --ios-bottomnav-blur: 44px;
 
   --cap-canvas-bg: var(--ios-canvas);
   --dash-card-surface: var(--ios-glass-bg);
-  --dash-card-border: rgb(255 255 255 / 0.55);
+  --dash-card-border: rgb(255 255 255 / 0.6);
 }
 
 html.capacitor-native.dark {
   --ios-canvas: #000000;
-  --ios-glass-bg: rgb(28 28 30 / 0.72);
-  --ios-glass-elevated: rgb(44 44 46 / 0.78);
-  --ios-glass-border: rgb(255 255 255 / 0.08);
-  --ios-glass-highlight: inset 0 1px 0 rgb(255 255 255 / 0.06);
-  --ios-glass-shadow: 0 12px 40px rgb(0 0 0 / 0.45);
-  --ios-surface-solid: #1c1c1e;
+  --ios-glass-bg: rgb(28 28 30 / 0.55);
+  --ios-glass-elevated: rgb(44 44 46 / 0.68);
+  --ios-glass-border: rgb(255 255 255 / 0.12);
+  --ios-glass-highlight: inset 0 1px 0 rgb(255 255 255 / 0.1);
+  --ios-glass-shadow: 0 14px 44px rgb(0 0 0 / 0.5);
+  --ios-glass-blur: 36px;
+  --ios-surface-solid: rgb(28 28 30 / 0.82);
   --ios-separator: rgb(84 84 88 / 0.65);
   --ios-label: #ffffff;
   --ios-label-secondary: rgb(235 235 245 / 0.6);
@@ -89,14 +90,14 @@ html.capacitor-native.dark {
   --ios-fill-tertiary: rgb(118 118 128 / 0.2);
   --ios-aurora: radial-gradient(
     ellipse 80% 50% at 50% -12%,
-    rgb(154 181 227 / 0.12),
+    rgb(154 181 227 / 0.16),
     transparent 52%
   );
 
   --cap-canvas-bg: var(--ios-canvas);
   --cap-surface-bg: var(--ios-surface-solid);
   --dash-card-surface: var(--ios-glass-bg);
-  --dash-card-border: rgb(255 255 255 / 0.1);
+  --dash-card-border: rgb(255 255 255 / 0.12);
 }
 
 /* ── Glass card utility ── */

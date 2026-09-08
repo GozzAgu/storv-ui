@@ -1,0 +1,31 @@
+/**
+ * Storvv icon family — thin rounded outline strokes (Lucide),
+ * matching the frosted-glass UI language across web + iOS.
+ */
+
+:root {
+  --storvv-icon-stroke: 1.5;
+}
+
+svg.lucide,
+.lucide {
+  stroke-width: var(--storvv-icon-stroke) !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+  fill: none !important;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Dense compact controls can go slightly heavier */
+svg.lucide[data-icon-weight='medium'],
+.lucide[data-icon-weight='medium'] {
+  stroke-width: 1.75 !important;
+}
+
+/* Keep filled brand marks / avatars alone */
+img,
+.receipt-logo,
+.sf-chrome__logo,
+.sf-hero__mark {
+  /* not icons */
+}

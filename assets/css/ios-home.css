@@ -3,12 +3,12 @@
  */
 
 html.capacitor-ios.capacitor-native {
-  --ios-home-bg: #f3f3f5;
-  --ios-home-card: #ffffff;
-  --ios-home-card-shadow: 0 4px 14px rgb(15 23 42 / 0.06);
-  --ios-action-card-shadow: 0 6px 18px rgb(15 23 42 / 0.1), 0 1px 3px rgb(15 23 42 / 0.05);
-  --ios-float-shadow: 0 8px 24px rgb(0 0 0 / 0.14), 0 2px 6px rgb(0 0 0 / 0.08);
-  --ios-home-radius: 16px;
+  --ios-home-bg: #e8eaf0;
+  --ios-home-card: rgb(255 255 255 / 0.58);
+  --ios-home-card-shadow: 0 8px 28px rgb(15 23 42 / 0.07), inset 0 1px 0 rgb(255 255 255 / 0.7);
+  --ios-action-card-shadow: 0 8px 24px rgb(15 23 42 / 0.08), inset 0 1px 0 rgb(255 255 255 / 0.65);
+  --ios-float-shadow: 0 12px 36px rgb(0 0 0 / 0.12), 0 2px 8px rgb(0 0 0 / 0.06);
+  --ios-home-radius: 18px;
   --ios-home-metric-radius: 14px;
   --ios-home-inset: 20px;
   --ios-home-section-gap: 24px;
@@ -19,9 +19,9 @@ html.capacitor-ios.capacitor-native {
 
 html.capacitor-ios.capacitor-native.dark {
   --ios-home-bg: #000000;
-  --ios-home-card: #1c1c1e;
-  --ios-home-card-shadow: 0 8px 24px rgb(0 0 0 / 0.35);
-  --ios-action-card-shadow: 0 8px 22px rgb(0 0 0 / 0.42);
+  --ios-home-card: rgb(28 28 30 / 0.55);
+  --ios-home-card-shadow: 0 12px 36px rgb(0 0 0 / 0.45), inset 0 1px 0 rgb(255 255 255 / 0.08);
+  --ios-action-card-shadow: 0 10px 28px rgb(0 0 0 / 0.42), inset 0 1px 0 rgb(255 255 255 / 0.08);
   --ios-float-shadow:
     0 28px 64px rgb(0 0 0 / 0.85),
     0 10px 24px rgb(0 0 0 / 0.55),
@@ -30,6 +30,22 @@ html.capacitor-ios.capacitor-native.dark {
 
 html.capacitor-ios.capacitor-native .ios-home-page {
   background: var(--ios-home-bg);
+}
+
+html.capacitor-ios.capacitor-native .ios-home-dashboard__attention-chip,
+html.capacitor-ios.capacitor-native .ios-home-dashboard__alert,
+html.capacitor-ios.capacitor-native .ios-home-metric-card,
+html.capacitor-ios.capacitor-native .ios-home-feed-card {
+  backdrop-filter: blur(var(--ios-glass-blur, 32px)) saturate(1.5);
+  -webkit-backdrop-filter: blur(var(--ios-glass-blur, 32px)) saturate(1.5);
+  border: 1px solid rgb(255 255 255 / 0.55);
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-home-dashboard__attention-chip,
+html.capacitor-ios.capacitor-native.dark .ios-home-dashboard__alert,
+html.capacitor-ios.capacitor-native.dark .ios-home-metric-card,
+html.capacitor-ios.capacitor-native.dark .ios-home-feed-card {
+  border-color: rgb(255 255 255 / 0.1);
 }
 
 html.capacitor-ios.capacitor-native .dashboard-native-main--home,

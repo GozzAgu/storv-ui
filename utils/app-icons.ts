@@ -1,6 +1,7 @@
 /**
- * App-wide icons (Lucide) exported with legacy Heroicon names so existing
- * components keep working without template churn.
+ * App-wide icons (Lucide) — thin rounded outline family.
+ * Exported with legacy Heroicon names so existing components keep working.
+ * Stroke weight is enforced in assets/css/app-iconography.css (~1.5).
  */
 export {
   Archive as ArchiveBoxIcon,
