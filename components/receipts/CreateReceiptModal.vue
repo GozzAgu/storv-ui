@@ -4,7 +4,7 @@
     :title="sheetTitle"
     :content-padding="sheetContentPadding"
     size="lg"
-    dense
+    :dense="isCapacitorIos"
     @update:model-value="(value: boolean) => emit('update:modelValue', value)"
   >
     <template #default>
@@ -1112,7 +1112,9 @@ const sheetTitle = computed(() => {
   return steps[currentStep.value]?.label ?? 'Create New Sale'
 })
 
-const sheetContentPadding = computed(() => (isCapacitorIos.value ? 'p-0' : ''))
+const sheetContentPadding = computed(() =>
+  isCapacitorIos.value ? 'p-0' : 'px-4 py-3 sm:px-5 sm:py-4'
+)
 
 const loadingFolders = ref(false)
 const loadingItems = ref(false)

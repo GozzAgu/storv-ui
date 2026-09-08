@@ -1356,6 +1356,7 @@ import Checkbox from '~/components/ui/Checkbox.vue'
 import DashboardTablePagination from '~/components/dashboard/DashboardTablePagination.vue'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
+import { resolveEffectiveSubscriptionPlan } from '~/types/subscription'
 import {
   useInventoryStore,
   type InventoryFolder,
@@ -1769,13 +1770,13 @@ const { formatCurrency, preferences } = usePreferences()
 const currencySymbol = computed(() => preferences.value?.currencySymbol || '$')
 
 const canDuplicateByPlan = computed(() => {
-  const sub = userStore.userData?.subscription
+  const sub = resolveEffectiveSubscriptionPlan(userStore.userData)
   return sub === 'storvv_medium' || sub === 'storvv_enterprise'
 })
 
 // Copy folder templates between branches: Enterprise only
 const canCopyFolderTemplatesFromBranchByPlan = computed(
-  () => userStore.userData?.subscription === 'storvv_enterprise'
+  () => resolveEffectiveSubscriptionPlan(userStore.userData) === 'storvv_enterprise'
 )
 
 const otherBranchesForTemplateCopy = computed(() => {

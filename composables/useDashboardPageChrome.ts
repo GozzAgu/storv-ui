@@ -57,9 +57,9 @@ export function useDashboardPageChrome() {
     isCapacitorIos.value ? 'sr-only' : 'hidden sm:inline'
   )
 
-  const segmentTabsClass = 'dash-segment-tabs'
-  const segmentTabsBtnClass = 'dash-segment-tabs__btn'
-  const segmentTabsBtnActiveClass = 'dash-segment-tabs__btn--active'
+  const segmentTabsClass = 'dash-tabs-rail'
+  const segmentTabsBtnClass = 'dash-tabs-rail__btn'
+  const segmentTabsBtnActiveClass = 'dash-tabs-rail__btn--active'
 
   /** @deprecated Prefer `<DashboardBackButton />` for back navigation. */
   const iconBtnClass = computed(() =>

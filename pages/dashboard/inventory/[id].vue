@@ -2370,6 +2370,7 @@ import { useStoresStore } from '~/stores/stores'
 import { usePermissions } from '~/composables/usePermissions'
 import { planGateMessage } from '~/utils/plan-gate-message'
 import { useSubscriptionFeatures } from '~/composables/useSubscriptionFeatures'
+import { resolveEffectiveSubscriptionPlan } from '~/types/subscription'
 import { useAppToast } from '~/composables/useAppToast'
 import { usePreferences } from '~/composables/usePreferences'
 import { useDashboardDrawerChrome } from '~/composables/useDashboardDrawerChrome'
@@ -2460,7 +2461,7 @@ const toast = useAppToast()
 
 // Duplicate items only on Storvv Medium and Enterprise
 const canDuplicateByPlan = computed(() => {
-  const sub = userStore.userData?.subscription
+  const sub = resolveEffectiveSubscriptionPlan(userStore.userData)
   return sub === 'storvv_medium' || sub === 'storvv_enterprise'
 })
 const { formatCurrency, preferences } = usePreferences()

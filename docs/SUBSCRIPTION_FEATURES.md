@@ -178,8 +178,9 @@ Show upgrade prompts when users **hit a limit**, not at random:
 
 - **Feature flags:** `types/subscription.ts` - `FEATURES_BY_PLAN`, `LIMITS_BY_PLAN`, `SUBSCRIPTION_FEATURE_SUMMARY`, `SUBSCRIPTION_PLAN_NOT_INCLUDED`
 - **Usage:** `useSubscriptionFeatures()` - `canUse(feature)`, `limits`, `featureSummary`
-- **Billing:** Paystack **Subscriptions** (auto-renew). Checkout passes a Paystack plan code (`PLN_xxx`) per tier and billing cycle (monthly, quarterly, yearly). Renewals are applied via the Paystack webhook (`charge.success`); failed renewals set `subscriptionStatus: past_due`; `subscription.disable` stops auto-renew. Super admins can **Cancel auto-renew** in Settings (keeps plan until `subscriptionCurrentPeriodEnd`, then reverts to Micro).
-- **Env:** `PAYSTACK_PLAN_CODE_MEDIUM_MONTHLY`, `_QUARTERLY`, `_YEARLY`, and the same for Enterprise. Amount env vars must match the Paystack plan amounts.
+- **Billing:** Paystack **Subscriptions** (auto-renew). Checkout passes a Paystack plan code (`PLN_xxx`) per tier and billing cycle (monthly, quarterly, yearly). Renewals are applied via the Paystack webhook (`charge.success`); failed renewals set `subscriptionStatus: past_due`; `subscription.disable` stops auto-renew. Super admins can **change plan** (including Enterprise → Medium) via Paystack checkout, or **Cancel auto-renew** (keeps plan until `subscriptionCurrentPeriodEnd`, then reverts to Micro).
+- **Env:** `PAYSTACK_PLAN_CODE_MEDIUM_MONTHLY`, `_QUARTERLY`, `_YEARLY`, and the same for Enterprise. Amount env vars must match the Paystack plan amounts. See `.env.example`.
+- **QA:** Demo Settings shows a plan switcher (Micro/Medium/Enterprise) without Paystack. Local/staging can still use `POST /api/dev/set-subscription` when `NODE_ENV=development` or `NUXT_PUBLIC_ALLOW_DEV_PLAN_SWITCHER=1` (never in production).
 - **Nav:** Sidebar hides Analytics (Micro), Activity logs (Micro), Sales leads (Micro), Multi-Store Sync & Stock loans (Micro & Medium)
 - **Firestore rules:** `firestore.rules` - `planAtLeastMedium()` / `planIsEnterprise()` on sales leads, customer accounts, activity logs, stock loans, and multi-store sync collections
 - **Duplicate category:** Medium+ via plan check in `inventory/index.vue` and `inventory/[id].vue` (not a separate feature flag)

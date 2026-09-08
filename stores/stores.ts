@@ -20,8 +20,7 @@ import {
   getStoreDocument,
   getQueryUserId,
 } from '~/composables/useFirestorePaths'
-import { getPlanLimits, getEligibleStoresForPlan } from '~/types/subscription'
-import type { SubscriptionPlan } from '~/types/subscription'
+import { getPlanLimits, getEligibleStoresForPlan, resolveEffectiveSubscriptionPlan } from '~/types/subscription'
 import type { Store, StoreWithStats } from '~/composables/useStores'
 import { clearInventoryItemQueryCaches } from '~/utils/inventory-items-firestore'
 import { normalizeEntityName } from '~/utils/capitalize-text'
@@ -155,7 +154,7 @@ export const useStoresStore = defineStore('stores', {
         await this.fetchStores()
       }
 
-      const plan = (userStore.userData?.subscription as SubscriptionPlan) || 'storvv_micro'
+      const plan = resolveEffectiveSubscriptionPlan(userStore.userData)
       const eligible = getEligibleStoresForPlan(this.stores, plan)
       const eligibleIds = new Set(eligible.map((s) => s.id))
 
@@ -209,7 +208,7 @@ export const useStoresStore = defineStore('stores', {
         return
       }
 
-      const plan = (userStore.userData.subscription as SubscriptionPlan) || 'storvv_micro'
+      const plan = resolveEffectiveSubscriptionPlan(userStore.userData)
       const eligible = getEligibleStoresForPlan(this.stores, plan)
       const eligibleIds = new Set(eligible.map((s) => s.id))
 
@@ -259,7 +258,7 @@ export const useStoresStore = defineStore('stores', {
           await u.fetchUserData(useAuthStore().currentUser!.uid)
         }
         if (u.userData?.role === 'superAdmin') {
-          const plan = (u.userData.subscription as SubscriptionPlan) || 'storvv_micro'
+          const plan = resolveEffectiveSubscriptionPlan(u.userData)
           const eligibleIds = new Set(getEligibleStoresForPlan(this.stores, plan).map((s) => s.id))
           if (!eligibleIds.has(storeId)) {
             throw new Error(
@@ -678,7 +677,7 @@ export const useStoresStore = defineStore('stores', {
         throw new Error('Only super admins can create stores')
       }
 
-      const plan = (userStore.userData?.subscription as SubscriptionPlan) || 'storvv_micro'
+      const plan = resolveEffectiveSubscriptionPlan(userStore.userData)
       const limits = getPlanLimits(plan)
       if (limits.maxStores >= 0 && this.stores.length >= limits.maxStores) {
         const msg =
@@ -849,7 +848,7 @@ export const useStoresStore = defineStore('stores', {
           const remaining = this.stores.filter((s) => s.id !== storeId)
           const { useUserStore } = await import('./user')
           const u = useUserStore()
-          const plan = (u.userData?.subscription as SubscriptionPlan) || 'storvv_micro'
+          const plan = resolveEffectiveSubscriptionPlan(u.userData)
           const eligible =
             u.userData?.role === 'superAdmin'
               ? getEligibleStoresForPlan(remaining, plan)

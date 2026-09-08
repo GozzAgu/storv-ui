@@ -3,7 +3,8 @@
     :model-value="props.modelValue"
     title="Create New Sale"
     size="lg"
-    dense
+    :dense="false"
+    content-padding="px-4 py-3 sm:px-5 sm:py-4"
     @update:model-value="(value: boolean) => emit('update:modelValue', value)"
   >
     <template #default>

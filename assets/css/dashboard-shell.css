@@ -4,10 +4,10 @@
   --dash-ink: #f8fafc;
   --dash-muted: #cbd5e1;
   --dash-border: rgb(255 255 255 / 0.08);
-  --dash-surface: #12141c;
-  --dash-canvas: #07080c;
-  --dash-accent: #9ab5e3;
-  --dash-accent-soft: rgb(154 181 227 / 0.12);
+  --dash-surface: #1e1e1e;
+  --dash-canvas: #080808;
+  --dash-accent: #ffffff;
+  --dash-accent-soft: rgb(255 255 255 / 0.08);
   --dash-avatar-bg: rgb(255 255 255 / 0.08);
   --dash-avatar-fg: #f8fafc;
   --dash-avatar-border: rgb(255 255 255 / 0.14);
@@ -46,8 +46,8 @@ html:not(.capacitor-native).dark .dash-sidebar.dashboard-sidebar {
 
 html.dark .dash-sidebar.dashboard-sidebar {
   background:
-    radial-gradient(ellipse 90% 45% at 0% 0%, rgb(20 63 141 / 0.14), transparent 55%),
-    linear-gradient(180deg, #050508 0%, #0a0c14 100%);
+    radial-gradient(ellipse 90% 45% at 0% 0%, rgb(255 255 255 / 0.05), transparent 55%),
+    linear-gradient(180deg, #080808 0%, #0a0a0a 100%);
 }
 
 .dash-sidebar__logo-bar {

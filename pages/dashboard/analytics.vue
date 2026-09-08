@@ -1057,6 +1057,7 @@ import { isStorefrontDashboardHidden } from '~/utils/storefront-launch'
 import { useCustomerAccountsStore } from '~/stores/customerAccounts'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
+import { useStoresStore } from '~/stores/stores'
 import { useThemeStore } from '~/stores/theme'
 import { usePreferences } from '~/composables/usePreferences'
 import { useAppToast } from '~/composables/useAppToast'
@@ -1159,6 +1160,7 @@ const storefrontStore = useStorefrontStore()
 const storefrontDashboardHidden = isStorefrontDashboardHidden()
 const customerAccountsStore = useCustomerAccountsStore()
 const userStore = useUserStore()
+const storesStore = useStoresStore()
 const themeStore = useThemeStore()
 const chartIsDark = computed(() => themeStore.actualTheme === 'dark')
 const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
@@ -2763,6 +2765,18 @@ const loadAnalytics = async () => {
 useIosPullToRefreshRegister(loadAnalytics)
 
 function buildAnalyticsSnapshot(): AnalyticsReportSnapshot {
+  const storeName =
+    storesStore.currentStore?.name ||
+    userStore.userData?.storeDetails?.storeName ||
+    ''
+  const businessName =
+    userStore.userData?.storeDetails?.storeName ||
+    userStore.userData?.name ||
+    storeName ||
+    'Storvv'
+  const companyLogoUrl =
+    userStore.userData?.storeLogoUrl || storesStore.currentStore?.logoUrl || ''
+
   return {
     periodLabel: periodLabel.value,
     selectedPeriod: selectedPeriod.value,
@@ -2780,6 +2794,8 @@ function buildAnalyticsSnapshot(): AnalyticsReportSnapshot {
     topProducts: topProducts.value,
     topCustomers: topCustomers.value,
     recentReturns: recentReturns.value,
+    businessName,
+    companyLogoUrl: companyLogoUrl || undefined,
   }
 }
 

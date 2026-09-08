@@ -30,8 +30,7 @@ import { getStaffCollection,
   getQueryUserId,
 } from '~/composables/useFirestorePaths'
 import { normalizeEntityName } from '~/utils/capitalize-text'
-import { getPlanLimits } from '~/types/subscription'
-import type { SubscriptionPlan } from '~/types/subscription'
+import { getPlanLimits, resolveEffectiveSubscriptionPlan } from '~/types/subscription'
 import type { Staff } from '~/composables/useStaff'
 import type { Department } from '~/composables/useDepartments'
 import { getFirebaseConfig } from '~/config/firebase.config'
@@ -93,7 +92,7 @@ async function assertStaffPlanCapacity(storeId: string): Promise<void> {
       await userStore.fetchUserData(authStore.currentUser.uid)
     }
   }
-  const plan = (userStore.userData?.subscription as SubscriptionPlan) || 'storvv_micro'
+  const plan = resolveEffectiveSubscriptionPlan(userStore.userData)
   const limits = getPlanLimits(plan)
   const departmentsStore = useDepartmentsStore()
   const staffCountInStore = departmentsStore.departments
@@ -629,7 +628,7 @@ export const useStaffStore = defineStore('staff', {
       if (!userStore.userData) {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
-      const plan = (userStore.userData?.subscription as SubscriptionPlan) || 'storvv_micro'
+      const plan = resolveEffectiveSubscriptionPlan(userStore.userData)
       const limits = getPlanLimits(plan)
       const staffCountInStore = departmentsStore.departments
         .filter((d) => d.storeId === storeId)

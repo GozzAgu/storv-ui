@@ -17,7 +17,7 @@ import { useFirestore } from '~/composables/useFirestore'
 import { getActivityLogsCollection } from '~/composables/useFirestorePaths'
 import { getQueryUserId } from '~/composables/useFirestorePaths'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
-import { normalizeSubscriptionPlan, planHasFeature } from '~/types/subscription'
+import { resolveEffectiveSubscriptionPlan, planHasFeature } from '~/types/subscription'
 import type { SubscriptionPlan } from '~/types/subscription'
 
 export type ActivityAction = 'created' | 'updated' | 'deleted'
@@ -137,14 +137,14 @@ async function resolveAccountSubscriptionPlan(): Promise<SubscriptionPlan> {
     if (!userStore.userData) {
       await userStore.fetchUserData(ownerUserId)
     }
-    return normalizeSubscriptionPlan(userStore.userData?.subscription)
+    return resolveEffectiveSubscriptionPlan(userStore.userData)
   }
 
   const db = useFirestore().getFirestoreInstance()
   if (!db) return 'storvv_micro'
   const { getDoc, doc } = await import('firebase/firestore')
   const ownerSnap = await getDoc(doc(db, 'users', ownerUserId))
-  return normalizeSubscriptionPlan(ownerSnap.data()?.subscription)
+  return resolveEffectiveSubscriptionPlan(ownerSnap.data())
 }
 
 /** Write an activity log (fire-and-forget; does not throw). */

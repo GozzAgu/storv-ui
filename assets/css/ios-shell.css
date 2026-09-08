@@ -291,7 +291,8 @@ html.capacitor-ios.capacitor-native .dash-page-header--ios-context .dash-page-he
   -webkit-backdrop-filter: blur(12px) saturate(1.1);
 }
 
-html.capacitor-ios.capacitor-native .dash-page-header--ios-context .dash-segment-tabs {
+html.capacitor-ios.capacitor-native .dash-page-header--ios-context .dash-segment-tabs,
+html.capacitor-ios.capacitor-native .dash-page-header--ios-context .dash-tabs-rail {
   margin-top: 0.125rem;
 }
 

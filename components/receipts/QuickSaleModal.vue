@@ -4,7 +4,7 @@
     title="Quick Sale"
     :content-padding="quickSaleContentPadding"
     size="lg"
-    dense
+    :dense="isCapacitorIos"
     @update:model-value="(value: boolean) => emit('update:modelValue', value)"
   >
     <div :class="['space-y-4', isCapacitorIos ? 'ios-quick-sale-sheet' : '']">
@@ -662,7 +662,9 @@ const {
 } = useDashboardDrawerChrome()
 
 const { isCapacitorIos } = useIsCapacitorIos()
-const quickSaleContentPadding = computed(() => (isCapacitorIos.value ? 'p-0' : ''))
+const quickSaleContentPadding = computed(() =>
+  isCapacitorIos.value ? 'p-0' : 'px-4 py-3 sm:px-5 sm:py-4'
+)
 
 const {
   selectedParentFolder,

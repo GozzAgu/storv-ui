@@ -58,6 +58,13 @@ export interface DemoExtrasState {
     name?: string
     storePhone?: string
     storeDetails?: UserData['storeDetails']
+    photoURL?: string
+    storeLogoUrl?: string
+    /** Demo QA: override plan without Paystack. */
+    subscription?: UserData['subscription']
+    subscriptionStatus?: UserData['subscriptionStatus']
+    subscriptionCurrentPeriodEnd?: string
+    subscriptionBillingCycle?: UserData['subscriptionBillingCycle']
   }
 }
 
@@ -746,5 +753,19 @@ export function patchDemoUserOverrides(patch: DemoExtrasState['userOverrides']) 
       ? { ...extras.userOverrides.storeDetails, ...patch.storeDetails }
       : extras.userOverrides.storeDetails,
   }
+  saveDemoExtras(extras)
+}
+
+/** Set demo plan for QA; clears cancel-grace period end. */
+export function setDemoSubscriptionOverride(planId: NonNullable<UserData['subscription']>) {
+  const extras = loadDemoExtras()
+  const next = {
+    ...extras.userOverrides,
+    subscription: planId,
+    subscriptionStatus: 'active' as const,
+    subscriptionBillingCycle: 'monthly' as const,
+  }
+  delete next.subscriptionCurrentPeriodEnd
+  extras.userOverrides = next
   saveDemoExtras(extras)
 }

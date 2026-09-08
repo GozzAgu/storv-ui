@@ -1361,26 +1361,33 @@ html.capacitor-ios.capacitor-native .dash-dept-roster-toolbar .dash-page-context
   gap: 0.5rem;
 }
 
-/* Segmented tabs - full width inside shells and headers */
+/* Underline rail tabs - full width inside shells and headers */
 html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-segment-tabs,
+html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-tabs-rail,
 html.capacitor-ios.capacitor-native .data-table-shell .dash-segment-tabs,
-html.capacitor-ios.capacitor-native .dash-table-toolbar .dash-segment-tabs {
+html.capacitor-ios.capacitor-native .data-table-shell .dash-tabs-rail,
+html.capacitor-ios.capacitor-native .dash-table-toolbar .dash-segment-tabs,
+html.capacitor-ios.capacitor-native .dash-table-toolbar .dash-tabs-rail {
   width: 100%;
   margin-inline: 0;
 }
 
 html.capacitor-ios.capacitor-native .data-table-shell .dash-segment-tabs,
-html.capacitor-ios.capacitor-native .dash-table-toolbar + .dash-segment-tabs {
+html.capacitor-ios.capacitor-native .data-table-shell .dash-tabs-rail,
+html.capacitor-ios.capacitor-native .dash-table-toolbar + .dash-segment-tabs,
+html.capacitor-ios.capacitor-native .dash-table-toolbar + .dash-tabs-rail {
   margin: 0 0.875rem 0.625rem;
   width: calc(100% - 1.75rem);
 }
 
-html.capacitor-ios.capacitor-native .dash-segment-tabs__btn {
+html.capacitor-ios.capacitor-native .dash-segment-tabs__btn,
+html.capacitor-ios.capacitor-native .dash-tabs-rail__btn {
   font-size: var(--cap-ios-caption) !important;
   padding: 0.5rem 0.5rem;
 }
 
-html.capacitor-ios.capacitor-native .dash-card__header .dash-segment-tabs {
+html.capacitor-ios.capacitor-native .dash-card__header .dash-segment-tabs,
+html.capacitor-ios.capacitor-native .dash-card__header .dash-tabs-rail {
   width: 100%;
   margin-top: 0.375rem;
 }
@@ -1411,8 +1418,9 @@ html.capacitor-ios.capacitor-native .dash-segment__btn--active {
   box-shadow: none;
 }
 
-/* Filter pills in unified header - same as dash-segment-tabs */
-html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-header__toolbar .dash-segment-tabs {
+/* Filter rails in unified header */
+html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-header__toolbar .dash-segment-tabs,
+html.capacitor-ios.capacitor-native .dash-page-header--unified .dash-page-header__toolbar .dash-tabs-rail {
   width: 100%;
 }
 

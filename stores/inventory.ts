@@ -24,6 +24,7 @@ import {
  * Pinia holds one page at a time per folder; full lists use fetchItemsAllChunked (cached, not kept in state).
  */
 import { useFirestore } from '~/composables/useFirestore'
+import { resolveEffectiveSubscriptionPlan } from '~/types/subscription'
 import { useAuthStore } from './auth'
 import { useUserStore } from './user'
 import { useStaffStore } from './staff'
@@ -775,7 +776,7 @@ export const useInventoryStore = defineStore('inventory', {
       if (userStore.userData?.role !== 'superAdmin') {
         throw new Error('Only super admins can load folder templates across branches.')
       }
-      const plan = userStore.userData?.subscription as string | undefined
+      const plan = resolveEffectiveSubscriptionPlan(userStore.userData)
       if (plan !== 'storvv_enterprise') {
         throw new Error(
           'Loading folder templates for another branch is available on the Storvv Enterprise plan.'
@@ -845,7 +846,7 @@ export const useInventoryStore = defineStore('inventory', {
       if (userStore.userData?.role !== 'superAdmin') {
         throw new Error('Only super admins can copy folder templates between branches.')
       }
-      const plan = userStore.userData?.subscription as string | undefined
+      const plan = resolveEffectiveSubscriptionPlan(userStore.userData)
       if (plan !== 'storvv_enterprise') {
         throw new Error(
           'Copying folder templates between branches is available on the Storvv Enterprise plan.'

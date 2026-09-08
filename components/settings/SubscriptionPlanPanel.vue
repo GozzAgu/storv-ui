@@ -1,46 +1,58 @@
 <template>
-  <div class="subscription-plan-panel space-y-4">
-    <div
-      class="rounded-lg border border-gray-200/80 bg-gray-50/60 px-3 py-3 dark:border-white/[0.08] dark:bg-white/[0.03] sm:px-4"
-    >
-      <div class="flex flex-wrap items-start justify-between gap-3">
-        <div class="min-w-0">
-          <p class="text-[10px] font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
-            Current plan
-          </p>
-          <p class="mt-0.5 text-sm font-semibold text-gray-900 dark:text-gray-100">
-            {{ currentSubscriptionLabel }}
-          </p>
-          <p v-if="billingCycleLabel" class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
-            Billed {{ billingCycleLabel.toLowerCase() }}
-            <span v-if="currentPriceLabel"> · {{ currentPriceLabel }}</span>
-          </p>
-        </div>
-        <span
-          class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold"
-          :class="statusBadgeClass"
+  <div class="subscription-plan-panel space-y-5">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div class="min-w-0">
+        <p class="text-[10px] font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
+          Your plan
+        </p>
+        <p class="mt-0.5 text-base font-semibold text-gray-900 dark:text-gray-100">
+          {{ currentSubscriptionLabel }}
+        </p>
+        <p v-if="billingSummary" class="mt-1 text-[12px] text-gray-500 dark:text-gray-400">
+          {{ billingSummary }}
+        </p>
+        <p
+          v-if="subscriptionRenewalLabel"
+          class="mt-1.5 text-[12px] leading-snug text-gray-600 dark:text-gray-300"
         >
-          {{ statusLabel }}
-        </span>
+          {{ subscriptionRenewalLabel }}
+        </p>
       </div>
-      <p
-        v-if="planExplainer"
-        class="mt-3 border-t border-gray-200/70 pt-3 text-[10px] leading-relaxed text-gray-500 dark:border-white/[0.06] dark:text-gray-400"
+      <span
+        class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold"
+        :class="statusBadgeClass"
       >
-        {{ planExplainer }}
-      </p>
-      <p
-        v-if="subscriptionRenewalLabel"
-        class="mt-2 text-[11px] leading-relaxed text-gray-600 dark:text-gray-300"
-      >
-        {{ subscriptionRenewalLabel }}
-      </p>
+        {{ statusLabel }}
+      </span>
     </div>
 
-    <div class="space-y-3">
+    <div
+      v-if="changePlanOptions.length > 0"
+      class="space-y-3 border-t border-gray-100 pt-5 dark:border-white/[0.06]"
+    >
+      <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Switch plan</p>
       <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
         <div class="min-w-0 flex-1">
-          <label :class="labelClass">Billing cycle</label>
+          <label :class="labelClass">Plan</label>
+          <select
+            :model-value="selectedUpgradePlan"
+            :disabled="disabled || isUpgrading"
+            :class="inputClass(!disabled && !isUpgrading)"
+            @change="
+              emit(
+                'update:selectedUpgradePlan',
+                ($event.target as HTMLSelectElement).value as SubscriptionPlan | ''
+              )
+            "
+          >
+            <option value="" disabled>Select a plan</option>
+            <option v-for="plan in changePlanOptions" :key="plan.id" :value="plan.id">
+              {{ planOptionLabel(plan) }}
+            </option>
+          </select>
+        </div>
+        <div class="min-w-0 flex-1">
+          <label :class="labelClass">Billing</label>
           <select
             :model-value="selectedBillingCycle"
             :disabled="disabled || isUpgrading"
@@ -52,88 +64,85 @@
             </option>
           </select>
         </div>
-        <div class="min-w-0 flex-1">
-          <label :class="labelClass">Upgrade to</label>
-          <select
-            :model-value="selectedUpgradePlan"
-            :disabled="disabled || isUpgrading || upgradeOptions.length === 0"
-            :class="inputClass(!disabled && !isUpgrading && upgradeOptions.length > 0)"
-            @change="
-              emit(
-                'update:selectedUpgradePlan',
-                ($event.target as HTMLSelectElement).value as SubscriptionPlan | ''
-              )
-            "
-          >
-            <option value="" disabled>
-              {{ upgradeOptions.length === 0 ? 'No upgrades available' : 'Select a plan' }}
-            </option>
-            <option v-for="plan in upgradeOptions" :key="plan.id" :value="plan.id">
-              {{ plan.name }}
-            </option>
-          </select>
-        </div>
         <Button
           variant="neutral"
           size="sm"
           :extra-class="headerTextBtnClass"
-          :disabled="disabled || !selectedUpgradePlan || isUpgrading || upgradeOptions.length === 0"
+          :disabled="disabled || !selectedUpgradePlan || isUpgrading"
           @click="emit('upgrade')"
         >
-          {{ isUpgrading ? 'Upgrading…' : 'Upgrade' }}
+          {{ isUpgrading ? 'Redirecting…' : changePlanButtonLabel }}
         </Button>
       </div>
-
-      <p v-if="upgradePricePreview" class="text-[11px] font-medium text-gray-700 dark:text-gray-300">
+      <p v-if="upgradePricePreview" class="text-[12px] font-medium text-gray-700 dark:text-gray-300">
         {{ upgradePricePreview }}
       </p>
-      <p v-else-if="pricingLoading" class="text-[10px] text-gray-500 dark:text-gray-400">
+      <p v-else-if="pricingLoading" class="text-[11px] text-gray-500 dark:text-gray-400">
         Loading price…
       </p>
+    </div>
 
-      <p class="text-[10px] leading-relaxed text-gray-500 dark:text-gray-400">
-        Paystack auto-renews on your selected cycle. Plan updates after the first payment completes.
+    <div
+      v-if="canCancel"
+      class="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-gray-100 pt-4 dark:border-white/[0.06]"
+    >
+      <Button
+        variant="secondary"
+        size="sm"
+        :extra-class="headerTextBtnClass"
+        :disabled="isCanceling || isUpgrading"
+        @click="emit('cancel')"
+      >
+        {{ isCanceling ? 'Canceling…' : 'Cancel auto-renew' }}
+      </Button>
+      <span class="text-[11px] text-gray-500 dark:text-gray-400">
+        Keep this plan until the period ends, then move to Micro.
+      </span>
+    </div>
+
+    <details class="group text-[11px] text-gray-500 dark:text-gray-400">
+      <summary class="cursor-pointer list-none font-medium text-gray-600 dark:text-gray-400">
+        <span class="inline-block transition group-open:rotate-90">›</span> Compare plans
+      </summary>
+      <ul class="mt-2 space-y-2 pl-3">
+        <li v-for="(plan, id) in SUBSCRIPTION_FEATURE_SUMMARY" :key="id">
+          <span class="font-medium text-gray-700 dark:text-gray-300">
+            {{ SUBSCRIPTION_PLANS.find((p) => p.id === id)?.name }}
+          </span>
+          <ul class="mt-0.5 list-inside list-disc">
+            <li v-for="(line, i) in plan" :key="i">{{ line }}</li>
+          </ul>
+        </li>
+      </ul>
+    </details>
+
+    <div
+      v-if="showQaPlanSwitcher"
+      class="rounded-lg border border-amber-200/80 bg-amber-50/70 px-3 py-3 dark:border-amber-500/25 dark:bg-amber-500/10"
+    >
+      <p class="text-[10px] font-semibold uppercase tracking-wide text-amber-900 dark:text-amber-100">
+        QA plan switcher
       </p>
-
-      <div v-if="canCancel" class="pt-1">
+      <p class="mt-1 text-[10px] leading-relaxed text-amber-900/80 dark:text-amber-100/80">
+        Demo only. Jump between Micro, Medium, and Enterprise without Paystack.
+      </p>
+      <div class="mt-2 flex flex-wrap gap-2">
         <Button
+          v-for="plan in SUBSCRIPTION_PLANS"
+          :key="plan.id"
           variant="secondary"
           size="sm"
           :extra-class="headerTextBtnClass"
-          :disabled="isCanceling || isUpgrading"
-          @click="emit('cancel')"
+          :disabled="qaSwitching || plan.id === qaCurrentPlanId"
+          @click="emit('qa-set-plan', plan.id)"
         >
-          {{ isCanceling ? 'Canceling…' : 'Cancel auto-renew' }}
+          {{ plan.name }}
         </Button>
-        <p class="mt-1.5 text-[10px] leading-relaxed text-gray-500 dark:text-gray-400">
-          Stops future Paystack charges. You keep your current plan until the billing period ends.
-        </p>
       </div>
-
-      <details class="group rounded-lg bg-gray-50/50 px-3 py-2 dark:bg-white/[0.02]">
-        <summary
-          class="cursor-pointer list-none text-[11px] font-medium text-gray-600 dark:text-gray-400"
-        >
-          <span class="inline-block transition group-open:rotate-90">›</span> Compare plans
-        </summary>
-        <ul class="mt-2 space-y-2 pl-3">
-          <li v-for="(plan, id) in SUBSCRIPTION_FEATURE_SUMMARY" :key="id" class="text-[10px]">
-            <span class="font-medium text-gray-700 dark:text-gray-300">
-              {{ SUBSCRIPTION_PLANS.find((p) => p.id === id)?.name }}
-            </span>
-            <ul class="mt-0.5 list-inside list-disc text-gray-500 dark:text-gray-400">
-              <li v-for="(line, i) in plan" :key="i">{{ line }}</li>
-            </ul>
-          </li>
-        </ul>
-      </details>
     </div>
 
-    <div v-if="billingHistory.length" class="border-t border-gray-100 pt-3 dark:border-white/[0.06]">
+    <div v-if="billingHistory.length" class="border-t border-gray-100 pt-4 dark:border-white/[0.06]">
       <p class="text-xs font-semibold text-gray-900 dark:text-gray-100">Billing history</p>
-      <p class="mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">
-        Recent subscription payments on this account.
-      </p>
       <ul class="mt-2 divide-y divide-gray-100 dark:divide-white/[0.06]">
         <li
           v-for="entry in billingHistory"
@@ -156,6 +165,7 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import Button from '~/components/ui/Button.vue'
 import {
   SUBSCRIPTION_PLANS,
@@ -167,7 +177,6 @@ import {
   SUBSCRIPTION_BILLING_CYCLES,
   type SubscriptionBillingCycle,
 } from '~/types/subscription-billing'
-import { formatPlanPriceKobo, subscriptionStatusLabel } from '~/utils/subscription-billing-ui'
 import type { BillingHistoryEntry } from '~/server/api/paystack/billing-history.get'
 
 const props = defineProps<{
@@ -176,11 +185,14 @@ const props = defineProps<{
   currentPriceLabel: string | null
   statusLabel: string
   statusBadgeClass: string
-  planExplainer: string
   subscriptionRenewalLabel: string | null
   selectedBillingCycle: SubscriptionBillingCycle
   selectedUpgradePlan: SubscriptionPlan | ''
-  upgradeOptions: Array<{ id: SubscriptionPlan; name: string }>
+  changePlanOptions: Array<{
+    id: SubscriptionPlan
+    name: string
+    direction: 'upgrade' | 'downgrade' | 'same'
+  }>
   upgradePricePreview: string | null
   pricingLoading: boolean
   canCancel: boolean
@@ -191,6 +203,9 @@ const props = defineProps<{
   labelClass: string
   inputClass: (enabled: boolean) => string
   headerTextBtnClass: string
+  showQaPlanSwitcher?: boolean
+  qaCurrentPlanId?: SubscriptionPlan
+  qaSwitching?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -198,9 +213,33 @@ const emit = defineEmits<{
   cancel: []
   'update:selectedBillingCycle': [SubscriptionBillingCycle]
   'update:selectedUpgradePlan': [SubscriptionPlan | '']
+  'qa-set-plan': [SubscriptionPlan]
 }>()
 
 const { formatCurrency } = usePreferences()
+
+const billingSummary = computed(() => {
+  const parts: string[] = []
+  if (props.billingCycleLabel) parts.push(props.billingCycleLabel)
+  if (props.currentPriceLabel) parts.push(props.currentPriceLabel)
+  return parts.join(' · ')
+})
+
+const changePlanButtonLabel = computed(() => {
+  const selected = props.changePlanOptions.find((p) => p.id === props.selectedUpgradePlan)
+  if (selected?.direction === 'downgrade') return 'Downgrade'
+  if (selected?.direction === 'upgrade') return 'Upgrade'
+  return 'Continue'
+})
+
+function planOptionLabel(plan: {
+  name: string
+  direction: 'upgrade' | 'downgrade' | 'same'
+}) {
+  if (plan.direction === 'downgrade') return `${plan.name} · lower plan`
+  if (plan.direction === 'upgrade') return `${plan.name} · higher plan`
+  return plan.name
+}
 
 function formatHistoryDate(iso: string) {
   const date = new Date(iso)

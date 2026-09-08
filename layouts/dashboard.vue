@@ -1390,7 +1390,11 @@ watch(
 )
 
 watch(
-  () => userStore.userData?.subscription,
+  () => [
+    userStore.userData?.subscription,
+    userStore.userData?.subscriptionStatus,
+    userStore.userData?.subscriptionCurrentPeriodEnd,
+  ],
   async () => {
     if (userStore.userData?.role !== 'superAdmin' || !storesStore.stores.length) return
     await storesStore.applyPlanToCurrentStoreSelection()
@@ -1759,7 +1763,7 @@ const userName = computed(() => {
   // Try to get name from Firestore userData first (only if it's for the current auth user)
   // During staff creation, ignore userData if it's for staff (preserve super admin cache)
   if (userStore.userData?.name && currentUserId && userStore.userData.uid === currentUserId) {
-    const name = userStore.userData.name ?? null
+    const name = (userStore.userData.name || '').trim()
     const userRole = userStore.userData.role
 
     // During staff creation, if userData shows staff, ignore it and use cache
@@ -1767,13 +1771,19 @@ const userName = computed(() => {
       return cachedUserName.value || 'User'
     }
 
-    // Only use and cache if it's the super admin (not staff)
-    if (name && userRole === 'superAdmin') {
-      if (!isStaffCreationInProgress()) {
-        cachedUserName.value = name
-        cachedUserId.value = currentUserId ?? null
-        setCachedUserName(name, currentUserId ?? null)
+    if (name) {
+      // Super admin: business name. Staff / other roles: person name (stored on userData.name).
+      if (userRole === 'superAdmin') {
+        if (!isStaffCreationInProgress()) {
+          cachedUserName.value = name
+          cachedUserId.value = currentUserId ?? null
+          setCachedUserName(name, currentUserId ?? null)
+        }
+        return name
       }
+
+      // Prefer storeDetails.storeName only when it is the account business label for owners;
+      // for staff keep the personal name from userData.name.
       return name
     }
   }
