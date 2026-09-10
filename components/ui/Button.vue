@@ -32,11 +32,11 @@
         v-else-if="icon && !iconRight"
         :is="icon"
         :class="iconSize"
-        :stroke-width="1.35"
+        :stroke-width="1.75"
       />
       <span v-if="iconOnlyIos" class="sr-only"><slot /></span>
       <slot v-else />
-      <component v-if="icon && iconRight" :is="icon" :class="iconSize" :stroke-width="1.35" />
+      <component v-if="icon && iconRight" :is="icon" :class="iconSize" :stroke-width="1.75" />
     </span>
   </button>
 </template>

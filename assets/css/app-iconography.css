@@ -1,14 +1,12 @@
 /**
  * Storvv icon family — thin rounded outline strokes (Lucide),
  * matching the frosted-glass UI language across web + iOS.
- * Reference: soft geometric line icons with round caps/joins.
  */
 
 :root {
-  --storvv-icon-stroke: 1.35;
+  --storvv-icon-stroke: 1.5;
 }
 
-/* Lucide (primary app icon set) */
 svg.lucide,
 .lucide {
   stroke-width: var(--storvv-icon-stroke) !important;
@@ -21,24 +19,7 @@ svg.lucide,
 /* Dense compact controls can go slightly heavier */
 svg.lucide[data-icon-weight='medium'],
 .lucide[data-icon-weight='medium'] {
-  stroke-width: 1.55 !important;
-}
-
-/* Catch outline SVGs that omit the lucide class (legacy / inline) */
-html:not(.capacitor-native) .dashboard-layout-root svg:not([fill='currentColor']):not(.lucide),
-html.capacitor-ios.capacitor-native [data-dashboard-main] svg:not([fill='currentColor']):not(.lucide),
-html.capacitor-ios.capacitor-native .ios-tab-bar svg:not(.lucide),
-html.capacitor-ios.capacitor-native .ios-global-top-bar svg:not(.lucide) {
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-/* Prefer outline over accidental fills on UI icons */
-html:not(.capacitor-native) .dashboard-layout-root button svg.lucide,
-html:not(.capacitor-native) .dashboard-layout-root a svg.lucide,
-html.capacitor-ios.capacitor-native button svg.lucide,
-html.capacitor-ios.capacitor-native a svg.lucide {
-  fill: none !important;
+  stroke-width: 1.75 !important;
 }
 
 /* Keep filled brand marks / avatars alone */

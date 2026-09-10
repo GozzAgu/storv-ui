@@ -9,9 +9,9 @@ html.capacitor-ios.capacitor-native .ios-help-page {
   gap: 0.75rem;
   min-height: 100%;
   padding:
-    var(--ios-page-shell-pad-top, 0.375rem)
-    var(--ios-home-inset, 20px)
-    calc(var(--dashboard-bottom-nav-stack, 5rem) + 0.75rem);
+    var(--ios-page-shell-pad-top, 0.25rem)
+    var(--ios-home-inset, 16px)
+    calc(var(--dashboard-bottom-nav-stack, 5rem) + 0.5rem);
   background: var(--ios-home-bg, #f3f3f5);
 }
 

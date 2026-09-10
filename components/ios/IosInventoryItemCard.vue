@@ -1,7 +1,7 @@
 <template>
   <button type="button" class="ios-inventory-item-card" @click="$emit('click')">
     <div class="ios-inventory-item-card__icon" aria-hidden="true">
-      <CubeIcon />
+      <PackageIcon />
     </div>
     <div class="ios-inventory-item-card__body">
       <div class="ios-inventory-item-card__top">
@@ -24,7 +24,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { CubeIcon } from '~/utils/app-icons'
+import { PackageIcon } from '~/utils/app-icons'
 import type { InventoryAvailabilityStatus } from '~/utils/inventory-availability'
 
 const props = defineProps<{

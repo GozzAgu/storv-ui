@@ -9,7 +9,7 @@
 
 html.capacitor-ios.capacitor-native .ios-filter-chips {
   /* Chips scroll under the page gutter, so the row reads as continuous */
-  --ios-filter-chips-bleed: var(--ios-home-inset, 20px);
+  --ios-filter-chips-bleed: var(--ios-home-inset, 16px);
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
