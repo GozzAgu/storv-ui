@@ -33,9 +33,11 @@ html.capacitor-ios.capacitor-native .ios-filter-chips__scroll {
   min-width: 0;
   margin-inline: calc(var(--ios-filter-chips-bleed) * -1);
   padding-inline: var(--ios-filter-chips-bleed);
-  overflow-x: auto;
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
   scroll-padding-inline: var(--ios-filter-chips-bleed);
-  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: auto;
   scrollbar-width: none;
 }
 

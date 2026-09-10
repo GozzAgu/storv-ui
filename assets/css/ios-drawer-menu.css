@@ -26,7 +26,8 @@ html.capacitor-ios.capacitor-native .ios-drawer-menu {
   display: flex;
   flex-direction: column;
   gap: 0.125rem;
-  /* Keeps the last card off the sheet's bottom edge / home indicator */
+  /* Top breathing room under the sheet header; bottom clears home indicator */
+  padding-top: 0.25rem;
   padding-bottom: 0.75rem;
 }
 
@@ -161,7 +162,7 @@ html.capacitor-ios.capacitor-native .ios-drawer-menu__chevron {
   width: 0.875rem;
   height: 0.875rem;
   color: var(--ios-label-tertiary);
-  stroke-width: 2;
+  stroke-width: 1.35;
 }
 
 html.capacitor-ios.capacitor-native .ios-drawer-menu__badge,

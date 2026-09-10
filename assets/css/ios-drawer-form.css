@@ -17,7 +17,7 @@ html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud {
 /* ── Centered header (title + close) ── */
 html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .dashboard-native-sheet__header {
   position: relative;
-  padding: 0.25rem 1rem 0.75rem;
+  padding: 1rem 1.125rem 0.875rem;
 }
 
 html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .dashboard-native-sheet__header .flex.min-w-0,
@@ -66,12 +66,13 @@ html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .da
 
 /* ── Form body ── */
 html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .dashboard-native-sheet__body {
-  padding: 0 1.25rem 1.25rem;
+  padding: 0.75rem 1.25rem 1.25rem;
   background: var(--ios-drawer-surface);
 }
 
 html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-drawer__content {
   gap: 0;
+  padding-top: 0;
 }
 
 html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-drawer__content > .space-y-3,

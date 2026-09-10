@@ -56,4 +56,28 @@ describe('IosQuickActionBar trailing actions', () => {
       ])
     ).toEqual(['Leads', 'Add'])
   })
+
+  it('keeps action-only buttons outside the tab underline track', () => {
+    const wrapper = mount(IosQuickActionBar, {
+      props: {
+        ariaLabel: 'Sales',
+        modelValue: 'receipts',
+        options: [
+          { value: 'receipts', label: 'Sales' },
+          { value: 'customers', label: 'Customers' },
+          { value: 'quick', label: 'Quick', action: () => undefined },
+          { value: 'new', label: 'New sale', trailing: 'add', action: () => undefined },
+        ],
+      },
+    })
+    expect(wrapper.findAll('.ios-quick-actions__scroll .ios-quick-actions__label').map((n) => n.text())).toEqual([
+      'Sales',
+      'Customers',
+    ])
+    expect(wrapper.findAll('.ios-quick-actions__action-label').map((n) => n.text())).toEqual([
+      'Quick',
+      'New sale',
+    ])
+    wrapper.unmount()
+  })
 })

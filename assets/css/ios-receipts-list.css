@@ -24,9 +24,11 @@ html.capacitor-ios.capacitor-native.dark .ios-filter-pills {
 html.capacitor-ios.capacitor-native .ios-filter-pills__scroll {
   display: flex;
   gap: 0.125rem;
-  overflow-x: auto;
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
   padding: 0;
-  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: auto;
   scrollbar-width: none;
 }
 

@@ -51,7 +51,7 @@ html.capacitor-ios.capacitor-native .ios-drawer .dashboard-native-sheet__header,
 html.capacitor-ios.capacitor-native .ios-drawer .native-more-sheet__header {
   /* Top inset used to come from the grab handle's own margins; restore it
      now that the (non-functional) handle is gone. */
-  padding: 0.875rem 1rem 0.625rem;
+  padding: 1.25rem 1.125rem 0.875rem;
   border-bottom: none;
   background: transparent;
 }
@@ -140,12 +140,12 @@ html.capacitor-ios.capacitor-native .ios-drawer .dashboard-native-sheet__close s
 
 /* ── Body ── */
 html.capacitor-ios.capacitor-native .ios-drawer .dashboard-native-sheet__body {
-  padding: 0 0 0.75rem;
+  padding: 0.75rem 0 0.75rem;
   background: transparent;
 }
 
 html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--menu .dashboard-native-sheet__body {
-  padding: 0;
+  padding: 0.75rem 0 0;
   background: var(--ios-drawer-menu-canvas, var(--ios-home-bg, #f2f2f7));
 }
 
@@ -164,14 +164,16 @@ html.capacitor-ios.capacitor-native .ios-drawer__content {
   display: flex;
   flex-direction: column;
   gap: 0.875rem;
+  padding-top: 0.25rem;
 }
 
 html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--menu .ios-drawer__content {
   gap: 0;
+  padding-top: 0;
 }
 
 html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--menu .ios-drawer-menu {
-  padding-top: 0.125rem;
+  padding-top: 0.75rem;
 }
 
 /* Beat legacy glass / SaaS chrome when ios-drawer is present */

@@ -1,7 +1,7 @@
 /**
  * App-wide icons (Lucide) — thin rounded outline family.
  * Exported with legacy Heroicon names so existing components keep working.
- * Stroke weight is enforced in assets/css/app-iconography.css (~1.5).
+ * Stroke weight is enforced in assets/css/app-iconography.css (~1.35).
  */
 export {
   Archive as ArchiveBoxIcon,
@@ -44,7 +44,7 @@ export {
   ClipboardList as ClipboardDocumentListIcon,
   Clock as ClockIcon,
   CloudUpload as CloudArrowUpIcon,
-  Settings as Cog6ToothIcon,
+  Settings2 as Cog6ToothIcon,
   CreditCard as CreditCardIcon,
   Box as CubeIcon,
   DollarSign as CurrencyDollarIcon,

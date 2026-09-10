@@ -4,30 +4,30 @@
  */
 
 html:not(.capacitor-native) .dashboard-layout-root {
-  --saas-canvas: #eef0f5;
-  --saas-surface: rgb(255 255 255 / 0.72);
-  --saas-glass-bg: rgb(255 255 255 / 0.58);
-  --saas-glass-border: rgb(255 255 255 / 0.65);
-  --saas-glass-highlight: inset 0 1px 0 rgb(255 255 255 / 0.75);
-  --saas-shadow-sm: 0 2px 12px rgb(15 23 42 / 0.04);
-  --saas-shadow-md: 0 8px 28px rgb(15 23 42 / 0.07);
-  --saas-shadow-lg: 0 18px 48px rgb(15 23 42 / 0.1);
-  --saas-blur: 32px;
+  --saas-canvas: #e8ebf2;
+  --saas-surface: rgb(255 255 255 / 0.48);
+  --saas-glass-bg: rgb(255 255 255 / 0.4);
+  --saas-glass-border: rgb(255 255 255 / 0.7);
+  --saas-glass-highlight: inset 0 1px 0 rgb(255 255 255 / 0.82);
+  --saas-shadow-sm: 0 4px 18px rgb(15 23 42 / 0.05);
+  --saas-shadow-md: 0 12px 36px rgb(15 23 42 / 0.09);
+  --saas-shadow-lg: 0 24px 56px rgb(15 23 42 / 0.12);
+  --saas-blur: 48px;
   --saas-accent: #1a1523;
   --saas-accent-soft: rgb(26 21 35 / 0.06);
   --saas-ink: #1a1523;
   --saas-muted: rgb(26 21 35 / 0.58);
-  --saas-radius-lg: 1rem;
-  --saas-radius-xl: 1.25rem;
-  --saas-radius-control: 0.625rem;
-  --saas-radius-chip: 0.5rem;
-  --saas-topnav-bg: rgb(255 255 255 / 0.55);
-  --saas-topnav-border: rgb(255 255 255 / 0.7);
-  --saas-topnav-shadow: 0 8px 28px rgb(15 23 42 / 0.08), var(--saas-glass-highlight);
-  --saas-topnav-control-bg: rgb(255 255 255 / 0.45);
-  --saas-topnav-control-border: rgb(255 255 255 / 0.5);
-  --saas-topnav-radius: 1rem;
-  --saas-topnav-control-radius: 0.625rem;
+  --saas-radius-lg: 1.125rem;
+  --saas-radius-xl: 1.5rem;
+  --saas-radius-control: 0.75rem;
+  --saas-radius-chip: 0.625rem;
+  --saas-topnav-bg: rgb(255 255 255 / 0.38);
+  --saas-topnav-border: rgb(255 255 255 / 0.72);
+  --saas-topnav-shadow: 0 12px 36px rgb(15 23 42 / 0.1), var(--saas-glass-highlight);
+  --saas-topnav-control-bg: rgb(255 255 255 / 0.35);
+  --saas-topnav-control-border: rgb(255 255 255 / 0.55);
+  --saas-topnav-radius: 1.25rem;
+  --saas-topnav-control-radius: 0.75rem;
   --dash-canvas: #eef0f5;
   --dash-surface: rgb(255 255 255 / 0.72);
   --dash-border: rgb(255 255 255 / 0.55);
@@ -53,23 +53,23 @@ html:not(.capacitor-native) .dashboard-layout-root {
 
 html:not(.capacitor-native).dark .dashboard-layout-root {
   --saas-canvas: #050505;
-  --saas-surface: rgb(30 30 30 / 0.72);
-  --saas-glass-bg: rgb(28 28 30 / 0.55);
-  --saas-glass-border: rgb(255 255 255 / 0.1);
-  --saas-glass-highlight: inset 0 1px 0 rgb(255 255 255 / 0.08);
-  --saas-shadow-sm: 0 2px 14px rgb(0 0 0 / 0.35);
-  --saas-shadow-md: 0 10px 36px rgb(0 0 0 / 0.45);
-  --saas-shadow-lg: 0 20px 56px rgb(0 0 0 / 0.55);
+  --saas-surface: rgb(30 30 30 / 0.48);
+  --saas-glass-bg: rgb(28 28 30 / 0.4);
+  --saas-glass-border: rgb(255 255 255 / 0.14);
+  --saas-glass-highlight: inset 0 1px 0 rgb(255 255 255 / 0.1);
+  --saas-shadow-sm: 0 4px 18px rgb(0 0 0 / 0.4);
+  --saas-shadow-md: 0 14px 40px rgb(0 0 0 / 0.5);
+  --saas-shadow-lg: 0 24px 64px rgb(0 0 0 / 0.58);
   --saas-accent: #ffffff;
   --saas-accent-soft: rgb(255 255 255 / 0.08);
   --saas-ink: #ffffff;
   --saas-muted: rgb(255 255 255 / 0.72);
-  --saas-topnav-bg: rgb(28 28 30 / 0.55);
-  --saas-topnav-border: rgb(255 255 255 / 0.1);
+  --saas-topnav-bg: rgb(28 28 30 / 0.4);
+  --saas-topnav-border: rgb(255 255 255 / 0.14);
   --saas-topnav-control-bg: rgb(255 255 255 / 0.06);
-  --saas-topnav-control-border: rgb(255 255 255 / 0.08);
-  --saas-topnav-radius: 1rem;
-  --saas-topnav-control-radius: 0.625rem;
+  --saas-topnav-control-border: rgb(255 255 255 / 0.1);
+  --saas-topnav-radius: 1.25rem;
+  --saas-topnav-control-radius: 0.75rem;
   --dash-canvas: #050505;
   --dash-surface: rgb(30 30 30 / 0.72);
   --dash-border: rgb(255 255 255 / 0.1);
@@ -105,23 +105,23 @@ html:not(.capacitor-native) .dashboard-atmosphere {
 
 html:not(.capacitor-native) .dashboard-atmosphere__glow {
   position: absolute;
-  width: 42vw;
-  height: 42vw;
+  width: 48vw;
+  height: 48vw;
   border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.55;
+  filter: blur(100px);
+  opacity: 0.65;
 }
 
 html:not(.capacitor-native) .dashboard-atmosphere__glow--tr {
-  top: -12%;
-  right: -8%;
-  background: rgb(154 181 227 / 0.45);
+  top: -14%;
+  right: -10%;
+  background: rgb(154 181 227 / 0.55);
 }
 
 html:not(.capacitor-native) .dashboard-atmosphere__glow--tl {
-  top: 18%;
-  left: -10%;
-  background: rgb(255 255 255 / 0.7);
+  top: 16%;
+  left: -12%;
+  background: rgb(255 255 255 / 0.85);
 }
 
 html:not(.capacitor-native).dark .dashboard-atmosphere__glow--tr {
@@ -178,12 +178,12 @@ html:not(.capacitor-native) .dashboard-layout-root main[data-dashboard-main] :is
   .app-card-sm,
   .verify-email-card
 ) {
-  border-radius: var(--saas-radius-lg, 1rem) !important;
+  border-radius: var(--saas-radius-xl, 1.5rem) !important;
   border: 1px solid var(--saas-glass-border) !important;
   background: var(--saas-glass-bg) !important;
-  box-shadow: var(--saas-shadow-sm), var(--saas-glass-highlight) !important;
-  backdrop-filter: blur(18px) saturate(1.35) !important;
-  -webkit-backdrop-filter: blur(18px) saturate(1.35) !important;
+  box-shadow: var(--saas-shadow-md), var(--saas-glass-highlight) !important;
+  backdrop-filter: blur(var(--saas-blur, 48px)) saturate(1.7) !important;
+  -webkit-backdrop-filter: blur(var(--saas-blur, 48px)) saturate(1.7) !important;
 }
 
 html:not(.capacitor-native).dark .dashboard-layout-root main[data-dashboard-main] :is(
@@ -479,14 +479,14 @@ html:not(.capacitor-native) .dashboard-layout-root .focus\:ring-primary-400\/30:
 html:not(.capacitor-native) .dash-profile-panel,
 html:not(.capacitor-native) .dash-notify-panel,
 html:not(.capacitor-native) .dash-store-panel {
-  background: var(--dash-overlay-bg);
+  background: var(--saas-glass-bg);
   border: 1px solid var(--saas-glass-border);
-  border-radius: var(--saas-radius-lg, 0.875rem);
-  backdrop-filter: blur(28px) saturate(1.45);
-  -webkit-backdrop-filter: blur(28px) saturate(1.45);
+  border-radius: var(--saas-radius-xl, 1.5rem);
+  backdrop-filter: blur(var(--saas-blur, 48px)) saturate(1.7);
+  -webkit-backdrop-filter: blur(var(--saas-blur, 48px)) saturate(1.7);
   box-shadow:
-    0 18px 50px rgb(26 21 35 / 0.16),
-    0 4px 14px rgb(26 21 35 / 0.08);
+    var(--saas-shadow-lg),
+    var(--saas-glass-highlight);
 }
 
 html:not(.capacitor-native) .dashboard-layout-root .dash-help-assistant-cta,
