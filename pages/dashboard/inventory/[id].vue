@@ -2543,8 +2543,9 @@ const canDuplicateByPlan = computed(() => {
 const { formatCurrency, preferences } = usePreferences()
 const { drawerFillClass, drawerFillFixedClass, drawerFillScrollClass, drawerSectionClass, drawerLabelClass, drawerInputClass, drawerTextareaClass } = useDashboardDrawerChrome()
 const currencySymbol = computed(() => preferences.value?.currencySymbol || '$')
-const folder = ref<InventoryFolder | null>(null)
-const isLoadingFolder = ref(true)
+const initialExistingFolder = folderId.value ? inventoryStore.getFolderById(folderId.value) ?? null : null
+const folder = ref<InventoryFolder | null>(initialExistingFolder)
+const isLoadingFolder = ref(!initialExistingFolder)
 const isLoadingItems = ref(false)
 const { headerBtnClass, headerBtnLabelClass, pageWithFixedFooterClass } = useDashboardPageChrome()
 const { pageWithFooterClass, tableShellFlexClass, tableExpandClass, tableExpandHeaderClass, tableExpandBodyClass, tableExpandCloseClass, tableExpandEyebrowClass, tableExpandTitleClass, tableExpandMetaClass, tableExpandFieldClass } = useDashboardGridPagesChrome()
@@ -5907,23 +5908,25 @@ watch(
   { immediate: false }
 )
 
-const loadFolderData = async () => {
+const loadFolderData = async (options?: { force?: boolean }) => {
   if (!folderId.value || typeof folderId.value !== 'string') {
     console.error('Invalid folder ID:', folderId.value)
     navigateTo('/dashboard/inventory')
     return
   }
 
-  isLoadingFolder.value = true
+  if (!folder.value) {
+    isLoadingFolder.value = true
+  }
   try {
-    const fetchedFolder = await inventoryStore.fetchFolder(folderId.value)
+    const fetchedFolder = await inventoryStore.fetchFolder(folderId.value, options)
     if (fetchedFolder) {
       applyFolderSnapshot(fetchedFolder)
       useHead({
         title: `${folder.value?.name || 'Folder'} - Inventory - Storvv`,
       })
       // Load items for this folder
-      await loadItems()
+      await loadItems(options)
       await inventoryStore.recomputeFolderTotalValue(folderId.value).catch(() => {})
       const refreshed = inventoryStore.getFolderById(folderId.value)
       if (refreshed) applyFolderSnapshot(refreshed)
@@ -5955,7 +5958,10 @@ const loadItems = async (options?: { force?: boolean }) => {
     return
   }
 
-  isLoadingItems.value = true
+  const hasItems = (inventoryStore.items[folderId.value]?.length ?? 0) > 0
+  if (!hasItems) {
+    isLoadingItems.value = true
+  }
   try {
     await inventoryStore.fetchItemsPage(folderId.value, currentPage.value, itemsPerPage.value, {
       force: options?.force === true,
@@ -5965,7 +5971,7 @@ const loadItems = async (options?: { force?: boolean }) => {
       void receiptsStore.fetchReceipts()
     }
     const refreshFolderCounts = async () => {
-      await inventoryStore.fetchFolders()
+      await inventoryStore.fetchFolders(options)
       if (folder.value) {
         const updatedFolder = inventoryStore.getFolderById(folderId.value)
         if (updatedFolder) applyFolderSnapshot(updatedFolder)
@@ -5978,7 +5984,7 @@ const loadItems = async (options?: { force?: boolean }) => {
         void refreshFolderCounts()
       }, 900)
     } else {
-      await Promise.all([receiptsStore.fetchReceipts(), refreshFolderCounts()])
+      await Promise.all([receiptsStore.fetchReceipts(options), refreshFolderCounts()])
     }
   } catch (error: any) {
     console.error('Error loading items:', error)
@@ -5990,7 +5996,7 @@ const loadItems = async (options?: { force?: boolean }) => {
 
 async function reloadInventoryDetailPage() {
   if (!authStore.currentUser || !folderId.value) return
-  const fetched = await inventoryStore.fetchFolder(folderId.value)
+  const fetched = await inventoryStore.fetchFolder(folderId.value, { force: true })
   if (fetched) applyFolderSnapshot(fetched)
   await loadItems({ force: true })
 }

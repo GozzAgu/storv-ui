@@ -151,14 +151,14 @@
     </DashboardPageHeader>
 
     <div
-      v-if="isCapacitorIos && !inventoryStore.loading && inventoryStore.folders.length > 0"
+      v-if="isCapacitorIos && (inventoryStore.folders.length > 0 || !inventoryStore.loading)"
       class="ios-search-bar-host ios-search-bar-host--sticky"
     >
       <IosSearchBar v-model="searchQuery" placeholder="Search categories…" />
     </div>
 
     <IosQuickActionBar
-      v-if="isCapacitorIos && !inventoryStore.loading && inventoryStore.folders.length > 0"
+      v-if="isCapacitorIos && (inventoryStore.folders.length > 0 || !inventoryStore.loading)"
       v-model="categoryFilter"
       class="ios-inventory-filter-tabs"
       aria-label="Category actions"
@@ -276,7 +276,7 @@
     </template>
 
     <div
-      v-if="!inventoryStore.loading && inventoryStore.folders.length > 0"
+      v-if="inventoryStore.folders.length > 0 || !inventoryStore.loading"
       :class="[
         gridShellClass,
         isCapacitorIos
@@ -3127,7 +3127,8 @@ const toggleDepartmentAccess = (departmentId: string, checked: boolean) => {
 
 async function reloadInventoryCategories() {
   if (!authStore.currentUser) return
-  await inventoryStore.fetchFolders()
+  await inventoryStore.fetchFolders({ force: true })
+  await inventoryStore.fetchFolderAvailabilityStats({ force: true })
 }
 
 useIosPullToRefreshRegister(reloadInventoryCategories)

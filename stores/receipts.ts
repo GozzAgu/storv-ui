@@ -229,7 +229,9 @@ export const useReceiptsStore = defineStore('receipts', {
           return
         }
 
-        this.loading = true
+        if (this.receipts.length === 0) {
+          this.loading = true
+        }
         this.error = null
 
         try {

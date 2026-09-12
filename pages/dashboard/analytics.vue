@@ -1168,7 +1168,8 @@ const { canShowPaymentLinksFeature } = usePaymentLinksLaunch()
 const { canManageBranches } = useBusinessCapabilities()
 
 // State
-const isLoading = ref(true)
+const hasInitialAnalyticsData = receiptsStore.receipts.length > 0 || inventoryStore.folders.length > 0
+const isLoading = ref(!hasInitialAnalyticsData)
 const isExporting = ref(false)
 const {
   pageClass,
@@ -2728,30 +2729,33 @@ const customerChartOptions = computed(() => {
 })
 
 // Functions
-const loadAnalytics = async () => {
-  isLoading.value = true
+const loadAnalytics = async (options?: { force?: boolean }) => {
+  const hasData = receiptsStore.receipts.length > 0 || inventoryStore.folders.length > 0
+  if (!hasData) {
+    isLoading.value = true
+  }
   try {
     const tasks: Promise<unknown>[] = [
-      receiptsStore.fetchReceipts(),
-      inventoryStore.fetchFolders(),
-      departmentsStore.fetchDepartments(),
+      receiptsStore.fetchReceipts(options),
+      inventoryStore.fetchFolders(options),
+      departmentsStore.fetchDepartments(options),
     ]
 
     if (userStore.userData) {
-      tasks.push(buybacksStore.fetchCustomerBuybacks(true))
+      tasks.push(buybacksStore.fetchCustomerBuybacks(options?.force === true))
     }
     if (canUseSubscriptionFeature('seller_loans')) {
-      tasks.push(sellerLoansStore.fetchSellerLoanOuts(true))
+      tasks.push(sellerLoansStore.fetchSellerLoanOuts(options?.force === true))
     }
     if (canUseSubscriptionFeature('customer_balance')) {
       tasks.push(customerAccountsStore.fetchAccountsForStore())
     }
-    tasks.push(storefrontStore.fetchAnalytics())
+    tasks.push(storefrontStore.fetchAnalytics(options))
 
     await Promise.all(tasks)
     receipts.value = receiptsStore.receipts
 
-    const grouped = await inventoryStore.fetchFolderAvailabilityStats()
+    const grouped = await inventoryStore.fetchFolderAvailabilityStats(options)
     inventoryItems.value = Object.values(grouped).flat()
     analyticsFolderItems.value = grouped
   } catch (error) {
@@ -2762,7 +2766,9 @@ const loadAnalytics = async () => {
   }
 }
 
-useIosPullToRefreshRegister(loadAnalytics)
+useIosPullToRefreshRegister(async () => {
+  await loadAnalytics({ force: true })
+})
 
 function buildAnalyticsSnapshot(): AnalyticsReportSnapshot {
   const storeName =

@@ -9,6 +9,13 @@ import { isNativePerfContext, scheduleNativeIdleWork } from '~/utils/capacitor-n
 
 let shellBootstrapInflight: Promise<void> | null = null
 let shellBootstrapKey = ''
+let shellBootstrapCompletedKey = ''
+
+export function resetDashboardShellBootstrap(): void {
+  shellBootstrapInflight = null
+  shellBootstrapKey = ''
+  shellBootstrapCompletedKey = ''
+}
 
 /**
  * Coordinates one-time dashboard shell data load (user, stores, folders, departments).
@@ -18,6 +25,7 @@ export function runDashboardShellBootstrap(options?: { force?: boolean }): Promi
   if (options?.force) {
     shellBootstrapInflight = null
     shellBootstrapKey = ''
+    shellBootstrapCompletedKey = ''
   }
 
   const authStore = useAuthStore()
@@ -25,6 +33,10 @@ export function runDashboardShellBootstrap(options?: { force?: boolean }): Promi
   const userId = authStore.currentUser?.uid ?? ''
   const role = userStore.userData?.role ?? ''
   const key = `${userId}:${role}`
+
+  if (!options?.force && shellBootstrapCompletedKey === key) {
+    return Promise.resolve()
+  }
 
   if (!options?.force && shellBootstrapInflight && shellBootstrapKey === key) {
     return shellBootstrapInflight
@@ -86,11 +98,15 @@ export function runDashboardShellBootstrap(options?: { force?: boolean }): Promi
   })()
 
   shellBootstrapKey = key
-  shellBootstrapInflight = run.finally(() => {
-    if (shellBootstrapInflight === run) {
-      shellBootstrapInflight = null
-    }
-  })
+  shellBootstrapInflight = run
+    .then(() => {
+      shellBootstrapCompletedKey = key
+    })
+    .finally(() => {
+      if (shellBootstrapInflight === run) {
+        shellBootstrapInflight = null
+      }
+    })
 
   return shellBootstrapInflight
 }

@@ -320,7 +320,9 @@ export const useInventoryStore = defineStore('inventory', {
       }
 
       const run = (async () => {
-      this.loading = true
+      if (this.folders.length === 0) {
+        this.loading = true
+      }
       this.error = null
 
       const db = useFirestore().getFirestoreInstance()
@@ -1009,11 +1011,18 @@ export const useInventoryStore = defineStore('inventory', {
     },
 
     // Get a single folder
-    async fetchFolder(folderId: string): Promise<InventoryFolder | null> {
+    async fetchFolder(folderId: string, options?: { force?: boolean }): Promise<InventoryFolder | null> {
       const { isDemoModeActive } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) {
         await this.fetchFolders()
         return this.folders.find((f) => f.id === folderId) ?? null
+      }
+
+      if (!options?.force) {
+        const existing = this.folders.find((f) => f.id === folderId)
+        if (existing) {
+          return existing
+        }
       }
 
       const db = useFirestore().getFirestoreInstance()

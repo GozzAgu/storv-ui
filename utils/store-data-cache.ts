@@ -1,3 +1,5 @@
+import { isCapacitorNative } from '~/utils/capacitor-env'
+
 /** Shared TTL for Pinia store list fetches (receipts, folders, availability stats). */
 export const STORE_LIST_FETCH_TTL_MS = 90_000
 
@@ -13,6 +15,7 @@ export function isStoreFetchStampFresh(
 ): boolean {
   if (force) return false
   if (!stamp || stamp.storeId !== storeId) return false
+  if (isCapacitorNative()) return true
   return Date.now() - stamp.fetchedAt < STORE_LIST_FETCH_TTL_MS
 }
 
@@ -24,6 +27,7 @@ export function isStoreListFetchFresh(
 ): boolean {
   if (force) return false
   if (!stamp || stamp.storeId !== storeId || !hasData) return false
+  if (isCapacitorNative()) return true
   return Date.now() - stamp.fetchedAt < STORE_LIST_FETCH_TTL_MS
 }
 

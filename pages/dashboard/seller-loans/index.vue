@@ -700,7 +700,7 @@ watch(
 
 onMounted(() => {
   if (canAccessSellerLoansPlan.value && canAccessByRole.value && storesStore.currentStoreId) {
-    sellerLoansStore.fetchSellerLoanOuts(true)
+    sellerLoansStore.fetchSellerLoanOuts(false)
   }
 })
 

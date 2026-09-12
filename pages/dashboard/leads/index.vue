@@ -571,7 +571,7 @@ watch(
 
 onMounted(async () => {
   if (canAccessLeadsPlan.value && storesStore.currentStoreId) {
-    await salesLeadsStore.fetchSalesLeads(true)
+    await salesLeadsStore.fetchSalesLeads(false)
   }
 })
 </script>

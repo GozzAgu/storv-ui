@@ -382,7 +382,7 @@ onMounted(async () => {
     await inventoryStore.fetchFolders()
   }
   if (storesStore.currentStoreId) {
-    await buybacksStore.fetchCustomerBuybacks(true)
+    await buybacksStore.fetchCustomerBuybacks(false)
   }
 })
 </script>

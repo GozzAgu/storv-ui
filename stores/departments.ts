@@ -25,10 +25,16 @@ import {
 } from '~/composables/useFirestorePaths'
 import { getPlanLimits, resolveEffectiveSubscriptionPlan } from '~/types/subscription'
 import { PERMISSION_DENIED_MESSAGE, CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
+import { isStoreFetchStampFresh, type StoreFetchStamp } from '~/utils/store-data-cache'
 import type { Department } from '~/composables/useDepartments'
 // CORE_DEPARTMENTS should be imported directly from '~/composables/useDepartments' to avoid duplication
 
 let fetchDepartmentsInflight: { key: string; promise: Promise<void> } | null = null
+let departmentsFetchStamp: StoreFetchStamp | null = null
+
+export function resetDepartmentsFetchStamp(): void {
+  departmentsFetchStamp = null
+}
 
 export const useDepartmentsStore = defineStore('departments', {
   state: () => ({
@@ -65,12 +71,17 @@ export const useDepartmentsStore = defineStore('departments', {
       const storeIdForKey = (await getCurrentStoreId()) ?? ''
       if (options?.force) {
         fetchDepartmentsInflight = null
+        departmentsFetchStamp = null
+      } else if (isStoreFetchStampFresh(departmentsFetchStamp, storeIdForKey, options?.force)) {
+        return
       } else if (fetchDepartmentsInflight?.key === storeIdForKey) {
         return fetchDepartmentsInflight.promise
       }
 
       const run = (async () => {
-      this.loading = true
+      if (this.departments.length === 0) {
+        this.loading = true
+      }
       this.error = null
 
       // console.log('[DepartmentsStore] Starting fetchDepartments')
@@ -196,6 +207,7 @@ export const useDepartmentsStore = defineStore('departments', {
         }
 
         this.departments = visibleDepartments
+        departmentsFetchStamp = { storeId, fetchedAt: Date.now() }
       } catch (error: any) {
         console.error('[DepartmentsStore] Error fetching departments:', error.message || error)
         this.error = error.message || 'Failed to fetch departments'
@@ -389,6 +401,7 @@ export const useDepartmentsStore = defineStore('departments', {
           createdBy: authStore.currentUser.uid,
         }
         this.departments.unshift(departmentForState)
+        departmentsFetchStamp = null
 
         return newDepartmentRef.id
       } catch (error: any) {
@@ -470,6 +483,7 @@ export const useDepartmentsStore = defineStore('departments', {
             ...normalizedUpdates,
           } as Department
         }
+        departmentsFetchStamp = null
       } catch (error: any) {
         console.error('Error updating department:', error)
         throw new Error(error.message || 'Failed to update department')
@@ -541,6 +555,7 @@ export const useDepartmentsStore = defineStore('departments', {
 
         // Remove from local state
         this.departments = this.departments.filter((d) => d.id !== departmentId)
+        departmentsFetchStamp = null
       } catch (error: any) {
         console.error('Error deleting department:', error)
         throw new Error(error.message || 'Failed to delete department')

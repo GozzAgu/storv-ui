@@ -8,6 +8,7 @@ import {
   getDocs,
   type CollectionReference,
 } from 'firebase/firestore'
+import { isCapacitorNative } from '~/utils/capacitor-env'
 import type { InventoryItem } from '~/stores/inventory'
 
 /** Firestore page size (limit + startAfter) for the UI's paginated item list. */
@@ -211,7 +212,7 @@ export async function getInventoryItemsPage(
   const pKey = pageCacheKey(folderId, page, pageSize)
   if (!force) {
     const hit = pageDataCache.get(pKey)
-    if (hit && Date.now() - hit.fetchedAt < PAGE_CACHE_TTL_MS) {
+    if (hit && (isCapacitorNative() || Date.now() - hit.fetchedAt < PAGE_CACHE_TTL_MS)) {
       return hit.items
     }
   }
@@ -275,7 +276,7 @@ export async function fetchAllInventoryItemsChunked(
   const { itemsRef, folderId, queryUserId, isStaff, pageSize, force } = params
   if (!force) {
     const hit = allItemsCache.get(folderId)
-    if (hit && Date.now() - hit.fetchedAt < ALL_CHUNK_CACHE_TTL_MS) {
+    if (hit && (isCapacitorNative() || Date.now() - hit.fetchedAt < ALL_CHUNK_CACHE_TTL_MS)) {
       return hit.items
     }
   }

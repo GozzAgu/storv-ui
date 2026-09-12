@@ -46,7 +46,7 @@
           />
 
           <template v-if="activeTab === 'receipts'">
-            <template v-if="receiptsStore.loading">
+            <template v-if="receiptsStore.loading && receiptsStore.receipts.length === 0">
               <div class="ios-search-bar-host">
                 <div class="ios-skeleton ios-search-skeleton" aria-hidden="true" />
               </div>
@@ -2187,8 +2187,8 @@ watch(activeTab, (newTab) => {
   }
 })
 
-// Initialize loading state synchronously on client
-const isInitialLoading = ref(true)
+// Initialize loading state synchronously on client (warm cache avoids flash)
+const isInitialLoading = ref(receiptsStore.receipts.length === 0)
 const {
   headerBtnClass,
   headerBtnLabelClass,
@@ -3802,12 +3802,8 @@ onMounted(async () => {
   // Only run on client
   if (import.meta.server) return
 
-  // Set initial loading state (skip skeleton when native already has warm receipts)
-  isInitialLoading.value = !(
-    isCapacitorIos.value &&
-    receiptsStore.receipts.length > 0 &&
-    !receiptsStore.loading
-  )
+  // Set initial loading state (skip skeleton when we already have warm receipts)
+  isInitialLoading.value = receiptsStore.receipts.length === 0 && receiptsStore.loading
 
   // Wait for auth to finish loading before loading receipts
   if (authStore.loading) {

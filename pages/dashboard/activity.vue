@@ -351,6 +351,7 @@ import {
   normalizeActivityLogText,
 } from '~/composables/useActivityLog'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
+import { isCapacitorNative } from '~/utils/capacitor-env'
 import FeatureGateCard from '~/components/subscription/FeatureGateCard.vue'
 import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
 import IosQuickActionBar, { type IosQuickActionOption } from '~/components/ios/IosQuickActionBar.vue'
@@ -626,35 +627,60 @@ function getInitials(name: string): string {
   return `${parts[0]![0] || ''}${parts[parts.length - 1]![0] || ''}`.toUpperCase()
 }
 
-async function loadLogs() {
+let cachedActivityLogs: { storeId: string; logs: ActivityLog[]; fetchedAt: number } | null = null
+
+async function loadLogs(force = false) {
   if (!canAccess.value) return
-  loading.value = true
-  fetchError.value = null
   storeId.value = await getCurrentStoreId()
   if (!storeId.value) {
     loading.value = false
     return
   }
+
+  if (!force && cachedActivityLogs && cachedActivityLogs.storeId === storeId.value) {
+    allLogs.value = cachedActivityLogs.logs
+    loading.value = false
+    if (isCapacitorNative() || Date.now() - cachedActivityLogs.fetchedAt < 60_000) {
+      return
+    }
+  }
+
+  if (allLogs.value.length === 0) {
+    loading.value = true
+  }
+  fetchError.value = null
   try {
     if (inventoryStore.folders.length === 0) {
       await inventoryStore.fetchFolders().catch(() => {})
     }
-    allLogs.value = await fetchActivityLogs(fetchLimit)
+    const freshLogs = await fetchActivityLogs(fetchLimit)
+    allLogs.value = freshLogs
+    if (storeId.value) {
+      cachedActivityLogs = { storeId: storeId.value, logs: freshLogs, fetchedAt: Date.now() }
+    }
   } catch (e: any) {
     console.error('[Activity] Failed to fetch logs:', e)
-    fetchError.value = e?.message || 'Permission or network error. Check the console for details.'
-    allLogs.value = []
+    if (allLogs.value.length === 0) {
+      fetchError.value = e?.message || 'Permission or network error. Check the console for details.'
+      allLogs.value = []
+    }
   } finally {
     loading.value = false
   }
 }
+
+useIosPullToRefreshRegister(async () => {
+  await loadLogs(true)
+})
 
 const storesStore = useStoresStore()
 
 watch(
   () => storesStore.currentStoreId,
   () => {
-    loadLogs()
+    cachedActivityLogs = null
+    allLogs.value = []
+    loadLogs(true)
   }
 )
 

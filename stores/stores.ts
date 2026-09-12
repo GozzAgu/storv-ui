@@ -340,6 +340,12 @@ export const useStoresStore = defineStore('stores', {
         const { resetReceiptsFetchStamp } = await import('./receipts')
         resetReceiptsFetchStamp()
 
+        const { resetDepartmentsFetchStamp } = await import('./departments')
+        resetDepartmentsFetchStamp()
+
+        const { resetDashboardShellBootstrap } = await import('~/composables/useDashboardShellBootstrap')
+        resetDashboardShellBootstrap()
+
         customersStore.customers = []
         customersStore.loading = false
         customersStore.error = null
@@ -443,7 +449,7 @@ export const useStoresStore = defineStore('stores', {
     },
 
     // Fetch all stores for current super admin
-    async fetchStores() {
+    async fetchStores(options?: { force?: boolean }) {
       const { isDemoModeActive } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) {
         const { syncDemoToPinia } = await import('~/utils/demo-bridge')
@@ -451,7 +457,13 @@ export const useStoresStore = defineStore('stores', {
         return
       }
 
-      this.loading = true
+      if (!options?.force && this.stores.length > 0) {
+        return
+      }
+
+      if (this.stores.length === 0) {
+        this.loading = true
+      }
       this.error = null
 
       const db = useFirestore().getFirestoreInstance()

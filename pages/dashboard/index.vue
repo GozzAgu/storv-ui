@@ -762,7 +762,7 @@ const { isNativeApp } = useCapacitorNativeApp()
 const { isCapacitorIos } = useIsCapacitorIos()
 const { formatGreeting } = useTimeGreeting()
 useIosPullToRefreshRegister(async () => {
-  await loadDashboardData()
+  await loadDashboardData({ force: true })
 })
 
 const currencySymbol = computed(() => preferences.value.currencySymbol || '$')
@@ -922,7 +922,8 @@ const lowStockItemsTop = computed(() => topN(lowStockItems.value))
 const recentActivityLogsTop = computed(() => topN(recentActivityLogs.value, DASHBOARD_ACTIVITY_TOP))
 const quickLinksTop = computed(() => topN(quickLinks.value))
 
-const isLoading = ref(true)
+const hasInitialDashboardData = receiptsStore.receipts.length > 0 || inventoryStore.folders.length > 0
+const isLoading = ref(!hasInitialDashboardData)
 const chartView = ref<'daily' | 'weekly' | 'monthly'>('monthly')
 const recentActivityLogs = ref<ActivityLog[]>([])
 
@@ -1286,26 +1287,26 @@ const loadRecentActivity = async () => {
   recentActivityLogs.value = await fetchActivityLogs(DASHBOARD_ACTIVITY_TOP)
 }
 
-const loadDashboardData = async () => {
+const loadDashboardData = async (options?: { force?: boolean }) => {
   try {
     if (!authStore.currentUser) return
 
-    await runDashboardShellBootstrap()
+    await runDashboardShellBootstrap(options)
 
     await Promise.all([
-      receiptsStore.fetchReceipts(),
-      canAccessLeadsPlan.value ? salesLeadsStore.fetchSalesLeads(true) : Promise.resolve(),
-      storefrontStore.fetchAnalytics().catch(() => undefined),
+      receiptsStore.fetchReceipts(options),
+      canAccessLeadsPlan.value ? salesLeadsStore.fetchSalesLeads(options?.force === true) : Promise.resolve(),
+      storefrontStore.fetchAnalytics(options).catch(() => undefined),
     ])
 
     if (isNativeApp.value) {
       scheduleNativeIdleWork(() => {
-        void inventoryStore.fetchFolderAvailabilityStats().then((grouped) => {
+        void inventoryStore.fetchFolderAvailabilityStats(options).then((grouped) => {
           dashboardFolderItems.value = grouped
         })
       }, 600)
     } else {
-      dashboardFolderItems.value = await inventoryStore.fetchFolderAvailabilityStats()
+      dashboardFolderItems.value = await inventoryStore.fetchFolderAvailabilityStats(options)
     }
 
     if (isNativeApp.value) {
@@ -1323,18 +1324,18 @@ const loadDashboardData = async () => {
 const refreshDashboardAfterStoreSwitch = async () => {
   try {
     await Promise.all([
-      receiptsStore.fetchReceipts(),
+      receiptsStore.fetchReceipts({ force: true }),
       canAccessLeadsPlan.value ? salesLeadsStore.fetchSalesLeads(true) : Promise.resolve(),
       storefrontStore.fetchAnalytics({ force: true }).catch(() => undefined),
     ])
     if (isNativeApp.value) {
       scheduleNativeIdleWork(() => {
-        void inventoryStore.fetchFolderAvailabilityStats().then((grouped) => {
+        void inventoryStore.fetchFolderAvailabilityStats({ force: true }).then((grouped) => {
           dashboardFolderItems.value = grouped
         })
       }, 600)
     } else {
-      dashboardFolderItems.value = await inventoryStore.fetchFolderAvailabilityStats()
+      dashboardFolderItems.value = await inventoryStore.fetchFolderAvailabilityStats({ force: true })
     }
     if (isNativeApp.value) {
       scheduleNativeIdleWork(() => {
@@ -1349,7 +1350,10 @@ const refreshDashboardAfterStoreSwitch = async () => {
 }
 
 onMounted(async () => {
-  isLoading.value = true
+  const hasData = receiptsStore.receipts.length > 0 || inventoryStore.folders.length > 0
+  if (!hasData) {
+    isLoading.value = true
+  }
   await loadDashboardData()
   if (canShowPaymentLinksSummary.value) {
     void loadPaymentLinksForAttention().catch(() => undefined)
