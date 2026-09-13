@@ -1,5 +1,6 @@
 <template>
   <div :class="isCapacitorIos ? 'ios-profile-page' : pageClass">
+    <IosPageNavBar v-if="isCapacitorIos" title="Profile" />
     <IosProfileSettings
       v-if="isCapacitorIos"
       :display-name="iosProfileDisplayName"
@@ -1516,6 +1517,7 @@ import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import CategoryTabs from '~/components/ui/CategoryTabs.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
+import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
 import IosProfileSettings from '~/components/ios/IosProfileSettings.vue'
 import AccountAvatar from '~/components/ui/AccountAvatar.vue'
 import {

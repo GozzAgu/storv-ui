@@ -1,5 +1,5 @@
 /**
- * Fixed global top bar. logo, assistant, profile, theme on all iOS in-page routes.
+ * Fixed global top bar. page title, logo/back, profile, theme on all iOS in-page routes.
  */
 
 html.capacitor-ios.capacitor-native {
@@ -23,12 +23,20 @@ html.capacitor-ios.capacitor-native .ios-global-top-bar-host {
 }
 
 html.capacitor-ios.capacitor-native .ios-global-top-bar {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(2.75rem, auto) minmax(0, 1fr) minmax(2.75rem, auto);
   align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
+  column-gap: 0.5rem;
   min-height: var(--ios-global-top-bar-height);
   pointer-events: auto;
+}
+
+html.capacitor-ios.capacitor-native .ios-global-top-bar__leading {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
 }
 
 html.capacitor-ios.capacitor-native .ios-global-top-bar__logo-link {
@@ -45,13 +53,41 @@ html.capacitor-ios.capacitor-native .ios-global-top-bar__logo {
   object-fit: contain;
 }
 
+html.capacitor-ios.capacitor-native .ios-global-top-bar__title {
+  margin: 0;
+  min-width: 0;
+  font-size: var(--ios-dash-nav-title-size, 0.9375rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: var(--ios-dash-leading-tight, 1.15);
+  text-align: center;
+  color: var(--ios-label);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html.capacitor-ios.capacitor-native .ios-global-top-bar__title--empty {
+  visibility: hidden;
+}
+
 html.capacitor-ios.capacitor-native .ios-global-top-bar__actions {
   display: flex;
   align-items: center;
-  gap: 0;
-  flex: 1;
-  min-width: 0;
   justify-content: flex-end;
+  gap: 0;
+  min-width: 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-global-top-bar__trailing {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-global-top-bar__trailing:empty {
+  display: none;
 }
 
 html.capacitor-ios.capacitor-native .ios-global-top-bar__profile-menu--extreme {
@@ -112,6 +148,13 @@ html.capacitor-ios.capacitor-native .ios-profile-menu__avatar img,
 html.capacitor-ios.capacitor-native .ios-profile-settings__hero-avatar img {
   object-fit: cover;
   object-position: center;
+}
+
+html.capacitor-ios.capacitor-native .ios-global-top-bar__leading a.group,
+html.capacitor-ios.capacitor-native .ios-global-top-bar__leading button.group {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--ios-radius-control, 10px);
 }
 
 html.capacitor-ios.capacitor-native .ios-global-top-bar__theme {

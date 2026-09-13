@@ -792,6 +792,11 @@
         class="ios-global-top-bar-host"
       >
         <IosGlobalTopBar
+          :title="iosGlobalPageTitle"
+          :show-back="iosPageNavShowBack"
+          :back-to="iosPageNavBackTo"
+          :back-label="iosPageNavBackLabel"
+          :fallback-to="iosPageNavFallbackTo"
           :home-href="dashPath('')"
           :user-name="userName"
           :user-email="userEmail"
@@ -1762,6 +1767,21 @@ const isIosInPageChrome = computed(() => {
   if (!isCapacitorIos.value) return false
   const path = route.path.replace(/\/$/, '') || '/dashboard'
   return path === '/dashboard' || path.startsWith('/dashboard/')
+})
+
+const iosPageNav = useIosPageNav()
+const {
+  title: iosPageNavTitle,
+  showBack: iosPageNavShowBack,
+  backTo: iosPageNavBackTo,
+  backLabel: iosPageNavBackLabel,
+  fallbackTo: iosPageNavFallbackTo,
+} = iosPageNav
+
+const iosGlobalPageTitle = computed(() => {
+  if (iosPageNavTitle.value) return iosPageNavTitle.value
+  if (isDashboardHome.value) return ''
+  return currentPageName.value
 })
 
 const commandHeaderPageTitle = computed(() => {

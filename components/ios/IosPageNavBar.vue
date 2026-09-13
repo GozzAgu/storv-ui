@@ -1,5 +1,14 @@
 <template>
-  <header class="ios-page-nav-bar">
+  <!--
+    On Capacitor iOS the title / back chrome lives in the fixed global top bar.
+    This component only registers that chrome (and teleports trailing actions).
+  -->
+  <Teleport v-if="isCapacitorIos && hasTrailingSlot && trailingReady" to="#ios-global-top-bar-trailing">
+    <slot name="trailing" />
+  </Teleport>
+
+  <!-- Non-iOS / web fallback keeps an in-page nav bar when needed -->
+  <header v-if="!isCapacitorIos" class="ios-page-nav-bar">
     <div class="ios-page-nav-bar__side">
       <slot name="leading">
         <DashboardBackButton
@@ -23,9 +32,11 @@
 
 <script setup lang="ts">
 import type { RouteLocationRaw } from 'vue-router'
+import { computed, nextTick, onBeforeUnmount, onMounted, useSlots, watch } from 'vue'
 import DashboardBackButton from '~/components/dashboard/DashboardBackButton.vue'
+import { useIosPageNav } from '~/composables/useIosPageNav'
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     title: string
     showBack?: boolean
@@ -40,4 +51,55 @@ withDefaults(
     fallbackTo: '/dashboard',
   }
 )
+
+const slots = useSlots()
+const { isCapacitorIos } = useIsCapacitorIos()
+const { setPageNav, clearPageNav } = useIosPageNav()
+
+const hasTrailingSlot = computed(() => Boolean(slots.trailing))
+const trailingReady = ref(false)
+
+let owner = 0
+
+function syncPageNav() {
+  if (!isCapacitorIos.value) return
+  owner = setPageNav(
+    {
+      title: props.title,
+      showBack: props.showBack,
+      backTo: props.backTo,
+      backLabel: props.backLabel,
+      fallbackTo: props.fallbackTo,
+      hasTrailing: hasTrailingSlot.value,
+    },
+    owner || undefined
+  )
+}
+
+watch(
+  () =>
+    [
+      props.title,
+      props.showBack,
+      props.backTo,
+      props.backLabel,
+      props.fallbackTo,
+      hasTrailingSlot.value,
+      isCapacitorIos.value,
+    ] as const,
+  () => {
+    syncPageNav()
+  },
+  { immediate: true }
+)
+
+onMounted(async () => {
+  await nextTick()
+  trailingReady.value =
+    isCapacitorIos.value && Boolean(document.getElementById('ios-global-top-bar-trailing'))
+})
+
+onBeforeUnmount(() => {
+  clearPageNav(owner)
+})
 </script>
