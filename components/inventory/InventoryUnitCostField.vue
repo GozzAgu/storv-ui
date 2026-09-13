@@ -17,7 +17,7 @@
         type="number"
         step="0.01"
         min="0"
-        class="w-full pl-7 pr-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
+        :class="inputClass"
         placeholder="0.00"
         @input="onInput"
       />
@@ -33,6 +33,7 @@ import { computed } from 'vue'
 import { formatMarginPercent, getItemGrossProfit, getItemSellPrice } from '~/utils/inventory-item-cost'
 import type { InventoryItem } from '~/stores/inventory'
 import { usePermissions } from '~/composables/usePermissions'
+import { APP_FIELD_ON_WHITE_CLASS } from '~/utils/app-chrome'
 
 const props = withDefaults(
   defineProps<{
@@ -56,6 +57,7 @@ const emit = defineEmits<{
 const { currencySymbol } = usePreferences()
 const { canViewProfitAndCost } = usePermissions()
 const showMarginPreview = computed(() => canViewProfitAndCost.value)
+const inputClass = `${APP_FIELD_ON_WHITE_CLASS} !pl-7`
 
 const marginPreview = computed(() => {
   const cost = props.modelValue

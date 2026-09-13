@@ -1669,7 +1669,7 @@
                   v-model="itemForm.brand"
                   type="text"
                   required
-                  class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
+                  :class="drawerInputClass"
                   placeholder="Enter product model"
                 />
               </div>
@@ -1693,7 +1693,7 @@
                     v-model="itemForm[field.name]"
                     type="text"
                     :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
+                    :class="drawerInputClass"
                     :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
                   />
                   <input
@@ -1701,7 +1701,7 @@
                     v-model.number="itemForm[field.name]"
                     type="number"
                     :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
+                    :class="drawerInputClass"
                     :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
                   />
                   <div v-else-if="field.type === 'currency'" class="relative">
@@ -1715,7 +1715,7 @@
                       step="0.01"
                       min="0"
                       :required="field.required"
-                      class="w-full pl-7 pr-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
+                      :class="[drawerInputClass, '!pl-7']"
                       :placeholder="field.placeholder || '0.00'"
                     />
                   </div>
@@ -1723,7 +1723,7 @@
                     v-else-if="field.type === 'select' && field.options"
                     v-model="itemForm[field.name]"
                     :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
+                    :class="drawerInputClass"
                   >
                     <option value="">Select {{ field.label || field.name }}</option>
                     <option v-for="option in field.options" :key="option" :value="option">
@@ -1735,7 +1735,7 @@
                     v-model="itemForm[field.name]"
                     type="text"
                     :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
+                    :class="drawerInputClass"
                     :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
                   />
                 </div>
@@ -1748,7 +1748,7 @@
                     v-model="itemForm[field.name]"
                     type="date"
                     :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
+                    :class="drawerInputClass"
                   />
                   <Checkbox
                     v-else-if="field.type === 'boolean'"
@@ -1798,7 +1798,7 @@
                   v-model="serialNumbers[index]"
                   type="text"
                   :placeholder="`Serial ${index + 1}`"
-                  class="flex-1 min-w-0 px-2 py-1 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400/50"
+                  :class="[drawerInputClass, 'flex-1 min-w-0 !px-2 !h-8 !min-h-8']"
                 />
                 <button
                   type="button"
@@ -1826,7 +1826,7 @@
                     v-model="itemForm[field.name]"
                     type="text"
                     :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
+                    :class="drawerInputClass"
                     :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
                   />
                   <input
@@ -1834,7 +1834,7 @@
                     v-model.number="itemForm[field.name]"
                     type="number"
                     :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
+                    :class="drawerInputClass"
                     :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
                   />
                   <div v-else-if="field.type === 'currency'" class="relative">
@@ -1848,7 +1848,7 @@
                       step="0.01"
                       min="0"
                       :required="field.required"
-                      class="w-full pl-7 pr-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
+                      :class="[drawerInputClass, '!pl-7']"
                       :placeholder="field.placeholder || '0.00'"
                     />
                   </div>
@@ -1856,7 +1856,7 @@
                     v-else-if="field.type === 'select' && field.options"
                     v-model="itemForm[field.name]"
                     :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
+                    :class="drawerInputClass"
                   >
                     <option value="">Select {{ field.label || field.name }}</option>
                     <option v-for="option in field.options" :key="option" :value="option">
@@ -1868,7 +1868,7 @@
                     v-model="itemForm[field.name]"
                     type="text"
                     :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
+                    :class="drawerInputClass"
                     :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
                   />
                 </div>
@@ -1881,7 +1881,7 @@
                     v-model="itemForm[field.name]"
                     type="date"
                     :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/50 transition-all"
+                    :class="drawerInputClass"
                   />
                   <Checkbox
                     v-else-if="field.type === 'boolean'"
@@ -2084,7 +2084,7 @@
                 v-model="duplicateSerialNumbers[index]"
                 type="text"
                 :placeholder="`Serial ${index + 1}`"
-                class="flex-1 px-2.5 py-1.5 text-sm rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400/50"
+                :class="[drawerInputClass, 'flex-1 !text-sm']"
               />
               <button
                 type="button"
