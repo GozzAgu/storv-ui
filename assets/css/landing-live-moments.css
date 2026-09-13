@@ -1,0 +1,255 @@
+/**
+ * Clean live moments — soft crossfades, quiet journey, no gimmicks.
+ */
+
+.landing-story__stage {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.25rem;
+  background: #0a0b0f;
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.1) inset,
+    0 22px 50px rgb(15 23 42 / 0.1);
+}
+
+.landing-story__stage .landing-story__mock-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.55rem 0.9rem;
+  border-bottom: 1px solid rgb(255 255 255 / 0.05);
+}
+
+.landing-story__stage .landing-story__mock-dot {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 9999px;
+  background: rgb(255 255 255 / 0.16);
+}
+
+.landing-story__stage-label {
+  margin-left: auto;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(248 250 252 / 0.55);
+}
+
+.landing-story__crossfade {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  background: #050508;
+}
+
+.landing-story__shot {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  opacity: 0;
+  transform: scale(1.015);
+  transition:
+    opacity 0.85s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 1.1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.landing-story__shot--active {
+  opacity: 1;
+  transform: scale(1);
+  z-index: 1;
+}
+
+/* ── Journey ── */
+.landing-journey {
+  padding: clamp(3.5rem, 8vw, 6rem) 1.25rem;
+  background: #f5f5f7;
+}
+
+html.dark .landing-journey {
+  background: #080808;
+}
+
+.landing-journey__inner {
+  max-width: 68rem;
+  margin: 0 auto;
+}
+
+.landing-journey__header {
+  max-width: 32rem;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.landing-journey__title {
+  margin-top: 0.5rem;
+  font-size: clamp(1.5rem, 3.2vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--landing-section-heading, #0f172a);
+}
+
+.landing-journey__lede {
+  margin-top: 0.65rem;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--landing-section-body, #64748b);
+}
+
+.landing-journey__track {
+  margin-top: 1.75rem;
+  display: grid;
+  gap: 0.5rem;
+  max-width: 40rem;
+  margin-inline: auto;
+}
+
+@media (min-width: 768px) {
+  .landing-journey__track {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    max-width: none;
+    gap: 0.65rem;
+  }
+}
+
+.landing-journey__step {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  width: 100%;
+  text-align: left;
+  padding: 0.85rem 0.95rem;
+  border-radius: 0.9rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  transition: background 0.25s ease;
+}
+
+.landing-journey__step:hover {
+  background: rgb(26 21 35 / 0.03);
+}
+
+.landing-journey__step--active {
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgb(15 23 42 / 0.06);
+}
+
+html.dark .landing-journey__step:hover {
+  background: rgb(255 255 255 / 0.04);
+}
+
+html.dark .landing-journey__step--active {
+  background: #1a1a1a;
+  box-shadow: none;
+}
+
+.landing-journey__step-index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  background: rgb(26 21 35 / 0.06);
+  color: rgb(26 21 35 / 0.55);
+  flex-shrink: 0;
+}
+
+.landing-journey__step--active .landing-journey__step-index {
+  background: #143f8d;
+  color: #fff;
+}
+
+html.dark .landing-journey__step-index {
+  background: rgb(255 255 255 / 0.08);
+  color: rgb(255 255 255 / 0.55);
+}
+
+.landing-journey__step-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.landing-journey__step-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--landing-section-heading, #0f172a);
+}
+
+.landing-journey__step-desc {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--landing-section-body, #64748b);
+}
+
+.landing-journey__stage {
+  position: relative;
+  margin-top: 1.25rem;
+  overflow: hidden;
+  border-radius: 1.25rem;
+  background: #0a0b0f;
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.08) inset,
+    0 22px 50px rgb(15 23 42 / 0.1);
+}
+
+.landing-journey__progress {
+  height: 2px;
+  background: rgb(255 255 255 / 0.06);
+}
+
+.landing-journey__progress-bar {
+  display: block;
+  height: 100%;
+  background: #9ab5e3;
+  transition: width 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.landing-journey__frame {
+  position: relative;
+  aspect-ratio: 16 / 10;
+}
+
+.landing-journey__shot {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  opacity: 0;
+  transition: opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.landing-journey__shot--active {
+  opacity: 1;
+  z-index: 1;
+}
+
+/* Proof numbers — quieter */
+.landing-proof__stat-value {
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.landing-proof__stat-suffix {
+  font-weight: 600;
+  opacity: 0.7;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-story__shot,
+  .landing-journey__shot,
+  .landing-journey__progress-bar {
+    transition: none !important;
+  }
+}

@@ -11,7 +11,11 @@
 
     <LandingProof class="landing-proof--premium" />
 
+    <LandingScrollTimeline />
+
     <LandingProductStories />
+
+    <LandingAiShowcase />
 
     <!-- Features encyclopedia lives on /features -->
     <section

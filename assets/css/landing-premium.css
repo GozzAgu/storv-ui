@@ -307,11 +307,43 @@
 }
 
 .landing-ai__chat {
-  margin-top: 2.5rem;
+  margin-top: 2rem;
   text-align: left;
-  padding: 1.25rem;
+  padding: 1.1rem 1.15rem;
   max-width: 28rem;
-  margin-inline: auto;
+  margin-inline: 0;
+  border-radius: 1.15rem !important;
+  background: #ffffff !important;
+  box-shadow: 0 12px 36px rgb(15 23 42 / 0.06);
+}
+
+html.dark .landing-ai__chat {
+  background: #1a1a1a !important;
+}
+
+.landing-ai__msg {
+  min-height: 1.25rem;
+}
+
+.landing-ai__chips {
+  margin-top: 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.landing-ai__chip {
+  padding: 0.35rem 0.7rem;
+  border-radius: 9999px;
+  background: rgb(26 21 35 / 0.04);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgb(26 21 35 / 0.62);
+}
+
+html.dark .landing-ai__chip {
+  background: rgb(255 255 255 / 0.06);
+  color: rgb(255 255 255 / 0.62);
 }
 
 .landing-ai__msg {

@@ -706,6 +706,17 @@ html.theme-transitioning .dashboard-global-tooltip-bubble {
     transform: translateY(0);
   }
 
+  /* Quieter marketing reveals */
+  .landing-page--portfolio .scroll-animate-up {
+    transform: translateY(0.85rem);
+  }
+
+  .landing-page--portfolio .scroll-animate {
+    transition:
+      opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
   .scroll-animate-down {
     transform: translateY(-1.5rem);
   }

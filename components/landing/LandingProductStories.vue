@@ -4,6 +4,7 @@
       v-for="(story, index) in stories"
       :key="story.id"
       :id="story.id"
+      :ref="(el) => setStoryRef(story.id, el)"
       :data-section-id="`landing-story-${story.id}`"
       class="landing-story scroll-animate scroll-animate-up"
       :class="{ 'landing-story--reverse': index % 2 === 1 }"
@@ -19,91 +20,35 @@
         </div>
 
         <div class="landing-story__visual">
-          <div class="landing-story__mock landing-glass">
+          <div
+            class="landing-story__stage landing-glass"
+            :class="{ 'landing-story__stage--active': activeStoryId === story.id }"
+          >
             <div class="landing-story__mock-bar" aria-hidden="true">
               <span class="landing-story__mock-dot" />
               <span class="landing-story__mock-dot" />
               <span class="landing-story__mock-dot" />
+              <span class="landing-story__stage-label">{{ story.eyebrow }}</span>
             </div>
 
-            <template v-if="story.visual === 'inventory'">
-              <div
-                v-for="row in inventoryRows"
-                :key="row.name"
-                class="landing-story__mock-row"
-              >
-                <div>
-                  <p class="landing-story__mock-label">{{ row.name }}</p>
-                  <p class="landing-story__mock-meta">{{ row.count }} products</p>
-                </div>
-                <span
-                  class="landing-story__mock-pill"
-                  :class="row.warn ? 'landing-story__mock-pill--warn' : ''"
-                >
-                  {{ row.status }}
-                </span>
-              </div>
-            </template>
-
-            <template v-else-if="story.visual === 'sales'">
-              <div class="landing-story__mock-row">
-                <div>
-                  <p class="landing-story__mock-label">Quick Sale</p>
-                  <p class="landing-story__mock-meta">iPhone 15 Pro · barcode scan</p>
-                </div>
-                <span class="landing-story__mock-pill">Paid</span>
-              </div>
-              <div class="landing-story__mock-row">
-                <div>
-                  <p class="landing-story__mock-label">Lead · Ada O.</p>
-                  <p class="landing-story__mock-meta">WhatsApp enquiry · Negotiating</p>
-                </div>
-              </div>
-              <div class="landing-story__mock-row">
-                <div>
-                  <p class="landing-story__mock-label">Payment link</p>
-                  <p class="landing-story__mock-meta">₦890,000 · Paystack paid</p>
-                </div>
-              </div>
-            </template>
-
-            <template v-else-if="story.visual === 'storefront'">
-              <div class="landing-story__mock-row">
-                <div>
-                  <p class="landing-story__mock-label">/store/lagos-gadgets</p>
-                  <p class="landing-story__mock-meta">Public catalogue · 48 listed</p>
-                </div>
-                <span class="landing-story__mock-pill">Live</span>
-              </div>
-              <div class="landing-story__mock-row">
-                <div>
-                  <p class="landing-story__mock-label">Reserve · Emma</p>
-                  <p class="landing-story__mock-meta">Opulent Dubai · Hold until Oct 12</p>
-                </div>
-                <span class="landing-story__mock-pill landing-story__mock-pill--warn">Pending</span>
-              </div>
-              <div class="landing-story__mock-row">
-                <div>
-                  <p class="landing-story__mock-label">Sale #SF-PUXN16</p>
-                  <p class="landing-story__mock-meta">Completed · stock updated</p>
-                </div>
-                <span class="landing-story__mock-pill">Sold</span>
-              </div>
-            </template>
-
-            <template v-else-if="story.visual === 'branches'">
-              <div
-                v-for="branch in branchRows"
-                :key="branch.name"
-                class="landing-story__mock-row"
-              >
-                <div>
-                  <p class="landing-story__mock-label">{{ branch.name }}</p>
-                  <p class="landing-story__mock-meta">{{ branch.meta }}</p>
-                </div>
-                <span class="landing-story__mock-pill">{{ branch.status }}</span>
-              </div>
-            </template>
+            <div class="landing-story__crossfade">
+              <img
+                v-for="(shot, shotIndex) in story.shots"
+                :key="shot"
+                :src="shot"
+                :alt="`${story.eyebrow} product screenshot`"
+                class="landing-story__shot"
+                :class="{
+                  'landing-story__shot--active':
+                    activeStoryId === story.id
+                      ? shotIndex === activeShotIndex
+                      : shotIndex === 0,
+                }"
+                loading="lazy"
+                width="960"
+                height="640"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -112,6 +57,9 @@
 </template>
 
 <script setup lang="ts">
+import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import { useLandingReducedMotion } from '~/composables/useLandingHeroMotion'
+
 const stories = [
   {
     id: 'inventory',
@@ -125,7 +73,7 @@ const stories = [
       'Customer buybacks add trade-in stock at cost',
       'Department-scoped folder access for staff',
     ],
-    visual: 'inventory' as const,
+    shots: ['/marketing/screenshots/inventory.png', '/marketing/screenshots/buybacks.png'],
   },
   {
     id: 'sales',
@@ -139,7 +87,11 @@ const stories = [
       'Customer balance ledger, refunds, and WhatsApp receipts',
       'Payment links on every plan for remote checkout',
     ],
-    visual: 'sales' as const,
+    shots: [
+      '/marketing/screenshots/receipts.png',
+      '/marketing/screenshots/sales-leads.png',
+      '/marketing/screenshots/payment-links.png',
+    ],
   },
   {
     id: 'storefront',
@@ -153,7 +105,10 @@ const stories = [
       'Complete & sell creates a receipt and decrements inventory',
       'Optional online checkout via Paystack when enabled',
     ],
-    visual: 'storefront' as const,
+    shots: [
+      '/marketing/screenshots/dashboard.png',
+      '/marketing/screenshots/receipts-customers.png',
+    ],
   },
   {
     id: 'solutions',
@@ -167,19 +122,62 @@ const stories = [
       'Copy from branch for Enterprise template rollout',
       'Stock loans for serial inventory lent to borrowers',
     ],
-    visual: 'branches' as const,
+    shots: [
+      '/marketing/screenshots/multi-store-sync.png',
+      '/marketing/screenshots/seller-loans.png',
+      '/marketing/screenshots/analytics.png',
+    ],
   },
 ]
 
-const inventoryRows = [
-  { name: 'Smartphones', count: '320', status: 'Healthy', warn: false },
-  { name: 'Accessories', count: '148', status: 'Low stock', warn: true },
-  { name: 'Toyota · 3 subcategories', count: '64', status: 'Healthy', warn: false },
-]
+const prefersReducedMotion = useLandingReducedMotion()
+const activeStoryId = ref(stories[0]?.id ?? 'inventory')
+const activeShotIndex = ref(0)
+const storyEls = new Map<string, Element>()
 
-const branchRows = [
-  { name: 'Lagos, Lekki', meta: '142 products · active branch', status: 'Active' },
-  { name: 'Abuja, Wuse', meta: '98 products · active branch', status: 'Active' },
-  { name: 'Transfer #104', meta: '12 units · Lagos → Abuja', status: 'In transit' },
-]
+function setStoryRef(id: string, el: unknown) {
+  if (el && el instanceof Element) storyEls.set(id, el)
+  else storyEls.delete(id)
+}
+
+let shotTimer: ReturnType<typeof setInterval> | null = null
+let observer: IntersectionObserver | null = null
+
+function bumpShot() {
+  const story = stories.find((s) => s.id === activeStoryId.value)
+  if (!story || story.shots.length < 2) return
+  activeShotIndex.value = (activeShotIndex.value + 1) % story.shots.length
+}
+
+onMounted(() => {
+  if (!import.meta.client) return
+
+  void nextTick(() => {
+    observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]
+        if (!visible?.target) return
+        const id = (visible.target as HTMLElement).id
+        if (id && id !== activeStoryId.value) {
+          activeStoryId.value = id
+          activeShotIndex.value = 0
+        }
+      },
+      { threshold: [0.35, 0.55] }
+    )
+
+    storyEls.forEach((el) => observer?.observe(el))
+  })
+
+  if (!prefersReducedMotion.value) {
+    shotTimer = setInterval(bumpShot, 3200)
+  }
+})
+
+onBeforeUnmount(() => {
+  if (shotTimer) clearInterval(shotTimer)
+  observer?.disconnect()
+})
 </script>

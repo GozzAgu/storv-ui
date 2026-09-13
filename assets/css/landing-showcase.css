@@ -709,9 +709,9 @@ html.dark .landing-about-section .landing-label--blue {
 
 .landing-hero__reveal {
   opacity: 0;
-  transform: translateY(1.25rem);
-  animation: landing-hero-reveal 0.75s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  animation-delay: calc(80ms + var(--hero-i, 0) * 90ms);
+  transform: translateY(0.85rem);
+  animation: landing-hero-reveal 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: calc(60ms + var(--hero-i, 0) * 70ms);
 }
 
 @keyframes landing-hero-reveal {

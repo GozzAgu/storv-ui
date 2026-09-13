@@ -1,6 +1,7 @@
 <template>
   <section
     id="proof"
+    ref="sectionRef"
     data-section-id="landing-proof"
     class="landing-proof scroll-animate scroll-animate-up"
     aria-labelledby="landing-proof-heading"
@@ -28,8 +29,11 @@
       </header>
 
       <div class="landing-proof__stats" aria-label="Platform highlights">
-        <div v-for="stat in proofStats" :key="stat.label">
-          <p class="landing-proof__stat-value">{{ stat.value }}</p>
+        <div v-for="stat in animatedStats" :key="stat.label">
+          <p class="landing-proof__stat-value">
+            <span class="landing-proof__stat-num">{{ stat.display }}</span
+            ><span v-if="stat.suffix" class="landing-proof__stat-suffix">{{ stat.suffix }}</span>
+          </p>
           <p class="landing-proof__stat-label">{{ stat.label }}</p>
         </div>
       </div>
@@ -49,13 +53,34 @@
 </template>
 
 <script setup lang="ts">
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import type { MarketingFeatureIconKey } from '~/utils/marketing-feature-icons'
+import { useLandingCountUp } from '~/composables/useLandingHeroMotion'
 
-const proofStats = [
-  { value: 'Solo', label: 'Focused workspace for owner-operators' },
-  { value: 'Medium+', label: 'Analytics, leads & Paystack auto-renew' },
-  { value: 'Enterprise', label: 'Transfers, stock loans & template copy' },
-]
+const sectionRef = ref<HTMLElement | null>(null)
+const inView = ref(false)
+
+const countModules = useLandingCountUp(8, inView)
+const countPlans = useLandingCountUp(3, inView)
+const countPlatforms = useLandingCountUp(2, inView)
+
+const animatedStats = computed(() => [
+  {
+    display: String(countModules.value),
+    suffix: '+',
+    label: 'Core retail workflows in one workspace',
+  },
+  {
+    display: String(countPlans.value),
+    suffix: '',
+    label: 'Plans from free Micro to Enterprise',
+  },
+  {
+    display: String(countPlatforms.value),
+    suffix: '',
+    label: 'Surfaces · web dashboard & iOS app',
+  },
+])
 
 const proofCards: Array<{
   metric: string
@@ -92,6 +117,24 @@ const proofCards: Array<{
       'Feature insights, storefront traffic, exports, and activity logs on Medium and Enterprise.',
   },
 ]
+
+let observer: IntersectionObserver | null = null
+
+onMounted(() => {
+  if (!import.meta.client || !sectionRef.value) return
+  observer = new IntersectionObserver(
+    (entries) => {
+      if (entries.some((e) => e.isIntersecting)) {
+        inView.value = true
+        observer?.disconnect()
+      }
+    },
+    { threshold: 0.35 }
+  )
+  observer.observe(sectionRef.value)
+})
+
+onBeforeUnmount(() => observer?.disconnect())
 </script>
 
 <style scoped>
@@ -229,50 +272,8 @@ html.dark .landing-proof__header-visual {
   color: var(--landing-section-body, #475569);
 }
 
-.landing-proof__founding {
-  margin-top: 2.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  align-items: flex-start;
-  border-radius: 1rem;
-  border: 1px dashed rgb(26 21 35 / 0.08);
-  background: #ffffff;
-  padding: 1.5rem 1.35rem;
-}
-
-@media (min-width: 640px) {
-  .landing-proof__founding {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1.5rem 1.75rem;
-  }
-}
-
-.landing-proof__founding-title {
-  margin-top: 0.35rem;
-  font-size: 1.0625rem;
-  font-weight: 700;
-  color: var(--landing-section-heading, #0f172a);
-}
-
-.landing-proof__founding-desc {
-  margin-top: 0.5rem;
-  max-width: 36rem;
-  font-size: 0.875rem;
-  line-height: 1.6;
-  color: var(--landing-section-body, #334155);
-}
-
-.landing-proof .landing-label--muted {
-  font-size: 0.75rem;
-  color: var(--landing-section-body, #475569);
-}
-
-.landing-proof__founding-cta {
-  flex-shrink: 0;
-  white-space: nowrap;
+.landing-proof__stat-num {
+  font-variant-numeric: tabular-nums;
 }
 
 html.dark .landing-proof {
@@ -291,10 +292,5 @@ html.dark .landing-proof__card-icon {
 html.dark .landing-proof .landing-label,
 html.dark .landing-proof__metric {
   color: rgb(255 255 255 / 0.62);
-}
-
-html.dark .landing-proof__founding {
-  border: 0;
-  background: #1e1e1e;
 }
 </style>
