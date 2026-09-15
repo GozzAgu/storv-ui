@@ -176,6 +176,7 @@ html.dark .dash-overlay-header {
   overflow-y: auto;
   overflow-x: hidden;
   overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   background: var(--dash-overlay-surface);
 }
 
@@ -338,11 +339,38 @@ html.dark .dash-drawer-callout {
   background: rgb(255 255 255 / 0.04);
 }
 
-/* Drawer / modal body: inner fill layout owns scrolling */
-.side-panel-body-scroll:has(> .dash-drawer-fill),
-.dash-overlay-body:has(> .dash-drawer-fill),
-.dashboard-native-sheet__body:has(> .dash-drawer-fill) {
+/*
+ * Drawer / modal body scrolling:
+ * - Default: body scrolls (overflow-y: auto above).
+ * - Only lock the body when a dedicated inner scroll/step region is a direct
+ *   child of the fill layout — otherwise long forms clip with no scrollbar.
+ * - Also cover the iOS `.ios-drawer__content` wrapper between body and fill.
+ */
+.side-panel-body-scroll:has(> .dash-drawer-fill > .dash-drawer-fill__scroll),
+.side-panel-body-scroll:has(> .dash-drawer-fill > .dash-drawer-fill-step),
+.side-panel-body-scroll:has(> .ios-form.dash-drawer-fill > .dash-drawer-fill__scroll),
+.modal-body-scroll:has(> .dash-drawer-fill > .dash-drawer-fill__scroll),
+.modal-body-scroll:has(> .dash-drawer-fill > .dash-drawer-fill-step),
+.modal-body-scroll:has(> .ios-form.dash-drawer-fill > .dash-drawer-fill__scroll),
+.dash-overlay-body:has(> .dash-drawer-fill > .dash-drawer-fill__scroll),
+.dash-overlay-body:has(> .dash-drawer-fill > .dash-drawer-fill-step),
+.dash-overlay-body:has(> .ios-form.dash-drawer-fill > .dash-drawer-fill__scroll),
+.dashboard-native-sheet__body:has(> .dash-drawer-fill > .dash-drawer-fill__scroll),
+.dashboard-native-sheet__body:has(> .dash-drawer-fill > .dash-drawer-fill-step),
+.dashboard-native-sheet__body:has(> .ios-drawer__content > .dash-drawer-fill > .dash-drawer-fill__scroll),
+.dashboard-native-sheet__body:has(> .ios-drawer__content > .dash-drawer-fill > .dash-drawer-fill-step),
+.dashboard-native-sheet__body:has(> .ios-drawer__content > .ios-form.dash-drawer-fill > .dash-drawer-fill__scroll) {
   display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.ios-drawer__content:has(> .dash-drawer-fill > .dash-drawer-fill__scroll),
+.ios-drawer__content:has(> .dash-drawer-fill > .dash-drawer-fill-step),
+.ios-drawer__content:has(> .ios-form.dash-drawer-fill > .dash-drawer-fill__scroll) {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
   flex-direction: column;
   overflow: hidden;
 }
@@ -354,6 +382,14 @@ html.dark .dash-drawer-callout {
   flex-direction: column;
 }
 
+/* Fill layouts without a dedicated scroll/step child scroll as a unit */
+.dash-drawer-fill:not(:has(> .dash-drawer-fill__scroll)):not(:has(> .dash-drawer-fill-step)) {
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
 .dash-drawer-fill__fixed {
   flex-shrink: 0;
 }
@@ -362,7 +398,9 @@ html.dark .dash-drawer-callout {
   min-height: 0;
   flex: 1 1 auto;
   overflow-y: auto;
+  overflow-x: hidden;
   overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .dash-drawer-fill-step {
@@ -370,6 +408,10 @@ html.dark .dash-drawer-callout {
   min-height: 0;
   flex: 1 1 auto;
   flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .dash-drawer-pick-list {

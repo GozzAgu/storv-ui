@@ -5,7 +5,7 @@
         feature="multi_store_sync"
         gate="custom"
         :description="
-          isStaff
+          isStaff || !userStore.isSuperAdmin
             ? 'Only super admins can access multi-store sync.'
             : undefined
         "
@@ -74,7 +74,8 @@
           <div>
             <h2 :class="sectionTitleClass">Move stock between branches</h2>
             <p :class="sectionSubtitleClass">
-              Request a transfer → Approve → In transit (add tracking) → Complete to update stock
+              Request → Approve → In transit → Complete. Stock moves only when you complete the
+              transfer.
             </p>
           </div>
         </header>
@@ -85,7 +86,7 @@
               <select
                 v-model="transferForm.sourceStoreId"
                 :class="fieldClass"
-                @change="loadSourceStoreInventory"
+                @change="onSourceStoreChange"
               >
                 <option value="">Select source store</option>
                 <option v-for="store in stores" :key="store.id" :value="store.id">
@@ -98,7 +99,7 @@
               <select
                 v-model="transferForm.destinationStoreId"
                 :class="fieldClass"
-                @change="loadDestinationStoreFolders"
+                @change="onDestinationStoreChange"
               >
                 <option value="">Select destination store</option>
                 <option
@@ -113,26 +114,26 @@
           </div>
 
           <div v-if="transferForm.destinationStoreId" class="mt-4">
-            <label :class="labelClass">Destination folder</label>
+            <label :class="labelClass">Destination category</label>
             <select v-model="transferForm.destinationFolderId" :class="fieldClass">
-              <option value="">Select destination folder</option>
+              <option value="">Select destination category</option>
               <option v-for="folder in destinationFolders" :key="folder.id" :value="folder.id">
                 {{ folder.name }}
               </option>
             </select>
             <p :class="[inlineNoteClass, 'mt-1.5']">
-              Folder in the destination store where items will be transferred
+              Category in the destination branch where items will land
             </p>
           </div>
 
           <div v-if="transferForm.sourceStoreId" class="mt-4">
-            <label :class="labelClass">Inventory folder</label>
+            <label :class="labelClass">Source category</label>
             <select
               v-model="transferForm.folderId"
               :class="fieldClass"
-              @change="loadFolderItems"
+              @change="onSourceFolderChange"
             >
-              <option value="">Select folder</option>
+              <option value="">Select category</option>
               <option v-for="folder in sourceFolders" :key="folder.id" :value="folder.id">
                 {{ folder.name }}
               </option>
@@ -141,9 +142,9 @@
 
           <div v-if="transferForm.folderId && availableItems.length > 0" class="mt-4 space-y-2">
             <label :class="labelClass">Select items to transfer</label>
-            <div :class="[tableShellClass, itemsTableShellClass, 'overflow-x-hidden']">
+            <div :class="itemsTableShellClass">
               <table class="dashboard-table min-w-full">
-                <thead class="sticky top-0">
+                <thead class="sticky top-0 z-[1]">
                   <tr>
                     <th class="text-left">Item</th>
                     <th v-if="!currentFolderHasSerialNumbers" class="text-left">Available</th>
@@ -546,6 +547,8 @@ import { useAppToast } from '~/composables/useAppToast'
 import { useFirestore } from '~/composables/useFirestore'
 import { CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import { tableMoneyClass } from '~/utils/table-money-styles'
+import { getQueryUserId } from '~/composables/useFirestorePaths'
+import { invalidateFolderItemCaches } from '~/utils/inventory-items-firestore'
 
 definePageMeta({
   layout: 'dashboard',
@@ -604,8 +607,10 @@ const userStore = useUserStore()
 const { isStaff } = usePermissions()
 const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
 
-// Security check - only super admins with Enterprise plan can access
-const canAccess = computed(() => !isStaff.value && canUseSubscriptionFeature('multi_store_sync'))
+// Security: nav + tools are super-admin + Enterprise only (managers see the gate)
+const canAccess = computed(
+  () => userStore.isSuperAdmin && canUseSubscriptionFeature('multi_store_sync')
+)
 const { isCapacitorIos } = useIsCapacitorIos()
 
 const iosSyncTabOptions: IosQuickActionOption[] = [
@@ -716,6 +721,57 @@ const removeUndefined = (obj: any): any => {
   return obj
 }
 
+async function resolveOwnerUserId(): Promise<string> {
+  const authStore = useAuthStore()
+  const uid = (await getQueryUserId()) ?? authStore.currentUser?.uid
+  if (!uid) throw new Error('User not authenticated')
+  return uid
+}
+
+/** Item IDs already claimed by open transfers (pending / in transit). */
+const itemsLockedInOpenTransfers = computed(() => {
+  const locked = new Set<string>()
+  for (const transfer of transferHistory.value) {
+    const status = String(transfer.status || '').toLowerCase()
+    if (status !== 'pending_approval' && status !== 'in_transit') continue
+    for (const line of transfer.items || []) {
+      if (line?.itemId) locked.add(String(line.itemId))
+    }
+  }
+  return locked
+})
+
+function isItemAvailableForTransfer(item: any, hasSerialNumbers: boolean) {
+  const dateOut = item.dateOut
+  if (dateOut && dateOut !== null && dateOut !== '') return false
+
+  const loanId = item.sellerLoanOutId
+  if (loanId != null && loanId !== undefined && String(loanId).trim() !== '') return false
+
+  // Only block items still sitting in an open transfer — not stock that previously arrived via transfer
+  if (itemsLockedInOpenTransfers.value.has(String(item.id))) return false
+
+  if (hasSerialNumbers) return true
+  const quantity = item.quantity || item.Quantity || 0
+  return quantity > 0
+}
+
+function resetTransferSelection(opts?: { keepStores?: boolean; keepDestination?: boolean }) {
+  if (!opts?.keepStores) {
+    transferForm.value.sourceStoreId = ''
+    transferForm.value.destinationStoreId = ''
+  }
+  if (!opts?.keepDestination) {
+    transferForm.value.destinationFolderId = ''
+    destinationFolders.value = []
+  }
+  transferForm.value.folderId = ''
+  transferForm.value.items = {}
+  transferForm.value.notes = opts?.keepStores ? transferForm.value.notes : ''
+  availableItems.value = []
+  if (!opts?.keepStores) sourceFolders.value = []
+}
+
 // Methods
 const loadStores = async () => {
   try {
@@ -726,26 +782,49 @@ const loadStores = async () => {
   }
 }
 
+const onSourceStoreChange = async () => {
+  transferForm.value.folderId = ''
+  transferForm.value.items = {}
+  availableItems.value = []
+  sourceFolders.value = []
+
+  if (
+    transferForm.value.destinationStoreId &&
+    transferForm.value.destinationStoreId === transferForm.value.sourceStoreId
+  ) {
+    transferForm.value.destinationStoreId = ''
+    transferForm.value.destinationFolderId = ''
+    destinationFolders.value = []
+  }
+
+  await loadSourceStoreInventory()
+}
+
+const onDestinationStoreChange = async () => {
+  transferForm.value.destinationFolderId = ''
+  destinationFolders.value = []
+  await loadDestinationStoreFolders()
+}
+
+const onSourceFolderChange = async () => {
+  transferForm.value.items = {}
+  availableItems.value = []
+  await loadFolderItems()
+}
+
 const loadSourceStoreInventory = async () => {
-  if (!transferForm.value.sourceStoreId) return
+  if (!transferForm.value.sourceStoreId) {
+    sourceFolders.value = []
+    return
+  }
 
   const storeId = transferForm.value.sourceStoreId
-
   try {
-    // Switch to source store temporarily to load inventory
-    const currentStoreId = storesStore.currentStoreId
-    await storesStore.setCurrentStore(storeId)
-
-    // Fetch folders
-    await inventoryStore.fetchFolders()
-    sourceFolders.value = inventoryStore.folders
-
-    // Restore original store
-    if (currentStoreId) {
-      await storesStore.setCurrentStore(currentStoreId)
-    }
+    // Branch-scoped load — never mutates the app's current store (same pattern as copy-from-branch)
+    sourceFolders.value = await inventoryStore.fetchFolderTemplatesForStore(storeId)
   } catch (error: any) {
-    toast.error('Failed to load inventory: ' + error.message)
+    sourceFolders.value = []
+    toast.error('Failed to load categories: ' + error.message)
   }
 }
 
@@ -756,82 +835,35 @@ const loadDestinationStoreFolders = async () => {
     return
   }
 
+  const storeId = transferForm.value.destinationStoreId
   try {
-    // Switch to destination store temporarily to load folders
-    const currentStoreId = storesStore.currentStoreId
-    await storesStore.setCurrentStore(transferForm.value.destinationStoreId)
-
-    // Fetch folders
-    await inventoryStore.fetchFolders()
-    destinationFolders.value = inventoryStore.folders
-
-    // Restore original store
-    if (currentStoreId) {
-      await storesStore.setCurrentStore(currentStoreId)
-    }
+    destinationFolders.value = await inventoryStore.fetchFolderTemplatesForStore(storeId)
   } catch (error: any) {
-    toast.error('Failed to load destination folders: ' + error.message)
+    toast.error('Failed to load destination categories: ' + error.message)
     destinationFolders.value = []
   }
 }
 
 const loadFolderItems = async () => {
-  if (!transferForm.value.folderId || !transferForm.value.sourceStoreId) return
+  if (!transferForm.value.folderId || !transferForm.value.sourceStoreId) {
+    availableItems.value = []
+    return
+  }
 
   try {
-    const currentStoreId = storesStore.currentStoreId
-    await storesStore.setCurrentStore(transferForm.value.sourceStoreId)
+    const folderItems = await inventoryStore.fetchItemsAllChunkedForStore(
+      transferForm.value.sourceStoreId,
+      transferForm.value.folderId,
+      { force: true }
+    )
 
-    const folderItems = await inventoryStore.fetchItemsAllChunked(transferForm.value.folderId, {
-      force: true,
-    })
-
-    // Get folder info to check if it has serial numbers
     const folder = sourceFolders.value.find((f) => f.id === transferForm.value.folderId)
     const hasSerialNumbers = folder?.hasSerialNumbers || false
-
-    // Filter items based on type
-    if (hasSerialNumbers) {
-      // For serial numbers, only show unsold items (no dateOut) that haven't been transferred
-      availableItems.value = folderItems.filter((item) => {
-        const dateOut = item.dateOut
-        const isSold = dateOut && dateOut !== null && dateOut !== ''
-        if (isSold) return false
-
-        const loanId = item.sellerLoanOutId
-        const onLoan = loanId != null && loanId !== undefined && String(loanId).trim() !== ''
-        if (onLoan) return false
-
-        // Filter out items that have been transferred
-        const isTransferred = item.isTransferred || item.transferredTo
-        if (isTransferred) return false
-
-        return true
-      })
-    } else {
-      // For bulk items, show items that have available quantity (not sold and quantity > 0) and haven't been transferred
-      availableItems.value = folderItems.filter((item) => {
-        const dateOut = item.dateOut
-        const isSold = dateOut && dateOut !== null && dateOut !== ''
-        if (isSold) return false
-
-        const loanId = item.sellerLoanOutId
-        const onLoan = loanId != null && loanId !== undefined && String(loanId).trim() !== ''
-        if (onLoan) return false
-
-        // Filter out items that have been transferred
-        const isTransferred = item.isTransferred || item.transferredTo
-        if (isTransferred) return false
-
-        const quantity = item.quantity || item.Quantity || 0
-        return quantity > 0
-      })
-    }
-
-    if (currentStoreId) {
-      await storesStore.setCurrentStore(currentStoreId)
-    }
+    availableItems.value = folderItems.filter((item) =>
+      isItemAvailableForTransfer(item, hasSerialNumbers)
+    )
   } catch (error: any) {
+    availableItems.value = []
     toast.error('Failed to load items: ' + error.message)
   }
 }
@@ -896,17 +928,7 @@ const requestTransfer = async () => {
       toast.success(
         'Transfer requested. Approve it from Transfer History, then complete when stock arrives.'
       )
-      transferForm.value = {
-        sourceStoreId: '',
-        destinationStoreId: '',
-        folderId: '',
-        destinationFolderId: '',
-        items: {},
-        notes: '',
-      }
-      availableItems.value = []
-      sourceFolders.value = []
-      destinationFolders.value = []
+      resetTransferSelection()
       await loadTransferHistory()
       return
     }
@@ -931,7 +953,7 @@ const requestTransfer = async () => {
       doc: createDoc,
     } = await import('firebase/firestore')
     const { getStoreDocument } = await import('~/composables/useFirestorePaths')
-    const pathUserId = userId
+    const pathUserId = await resolveOwnerUserId()
 
     const sourceStoreRef = getStoreDocument(db, pathUserId, transferForm.value.sourceStoreId)
     const destStoreRef = getStoreDocument(db, pathUserId, transferForm.value.destinationStoreId)
@@ -943,13 +965,21 @@ const requestTransfer = async () => {
       throw new Error('One or both stores not found')
     const sourceStore = sourceStoreSnap.data()
     const destStore = destStoreSnap.data()
-    if (sourceStore.ownerId !== userId || destStore.ownerId !== userId)
+    if (
+      (sourceStore.ownerId && sourceStore.ownerId !== pathUserId) ||
+      (destStore.ownerId && destStore.ownerId !== pathUserId)
+    )
       throw new Error('You do not have permission to transfer items between these stores')
 
     const transferredItems: any[] = []
     for (const [itemId, qty] of Object.entries(transferForm.value.items)) {
       const quantity = Number(qty)
       if (quantity <= 0) continue
+      if (itemsLockedInOpenTransfers.value.has(itemId)) {
+        throw new Error(
+          'One or more selected items are already in an open transfer. Finish or cancel that transfer first.'
+        )
+      }
       const item = availableItems.value.find((i) => i.id === itemId)
       transferredItems.push({
         itemId,
@@ -982,17 +1012,7 @@ const requestTransfer = async () => {
     toast.success(
       'Transfer requested. Approve it from Transfer History, then complete when stock arrives.'
     )
-    transferForm.value = {
-      sourceStoreId: '',
-      destinationStoreId: '',
-      folderId: '',
-      destinationFolderId: '',
-      items: {},
-      notes: '',
-    }
-    availableItems.value = []
-    sourceFolders.value = []
-    destinationFolders.value = []
+    resetTransferSelection()
     await loadTransferHistory()
   } catch (error: any) {
     toast.error(error.message || 'Failed to create transfer request')
@@ -1019,13 +1039,13 @@ const executeTransfer = async (transfer: any) => {
   const db = useFirestore().getFirestoreInstance()
   if (!db) throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
 
-  const { getDoc, setDoc, updateDoc, serverTimestamp, query, where, getDocs, collection, doc } =
+  const { getDoc, setDoc, updateDoc, serverTimestamp, query, where, getDocs, doc } =
     await import('firebase/firestore')
   const { deleteDoc } = await import('firebase/firestore')
-  const { getInventoryItemDocument, getInventoryItemsCollection, getStoreDocument } = await import(
+  const { getInventoryItemDocument, getInventoryItemsCollection } = await import(
     '~/composables/useFirestorePaths'
   )
-  const pathUserId = userId
+  const pathUserId = await resolveOwnerUserId()
 
   const sourceStoreId = transfer.sourceStoreId
   const destinationStoreId = transfer.destinationStoreId
@@ -1080,6 +1100,11 @@ const executeTransfer = async (transfer: any) => {
             createdBy: _createdBy,
             dateOut: _dateOut,
             id: _id,
+            isTransferred: _isTransferred,
+            transferredTo: _transferredTo,
+            transferredFrom: _transferredFrom,
+            transferredFromFolder: _transferredFromFolder,
+            transferredAt: _transferredAt,
             ...itemDataWithoutSystemFields
           } = sourceItem
           const cleanedItemData = removeUndefined(itemDataWithoutSystemFields)
@@ -1093,10 +1118,11 @@ const executeTransfer = async (transfer: any) => {
             createdBy: userId,
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp(),
+            // Provenance only — do NOT mark destination stock as isTransferred
+            // (that flag previously blocked the item from ever transferring again)
             transferredFrom: sourceStoreId,
             transferredFromFolder: folderId,
             transferredAt: serverTimestamp(),
-            isTransferred: true,
           })
           await deleteDoc(sourceItemRef)
           transferredItems.push({
@@ -1132,7 +1158,12 @@ const executeTransfer = async (transfer: any) => {
           const existingItemsSnap = await getDocs(existingItemsQuery)
           if (existingItemsSnap.empty) {
             const newItemRef = doc(destItemsRef)
-            const { createdBy: _, ...itemDataWithoutCreatedBy } = sourceItem
+            const {
+              createdBy: _,
+              isTransferred: _isTransferred,
+              transferredTo: _transferredTo,
+              ...itemDataWithoutCreatedBy
+            } = sourceItem
             const cleanedItemData = removeUndefined(itemDataWithoutCreatedBy)
             const originalDateIn = sourceItem.dateIn || sourceItem.DateIn || null
             await setDoc(newItemRef, {
@@ -1190,6 +1221,9 @@ const executeTransfer = async (transfer: any) => {
       itemsCount: transferredItems.length || (transfer.items || []).length,
     })
 
+    invalidateFolderItemCaches(folderId)
+    invalidateFolderItemCaches(destinationFolderId)
+
     if (errors.length > 0) {
       toast.warning(
         `Transfer completed with ${errors.length} errors. ${transferredItems.length} items moved.`
@@ -1224,7 +1258,7 @@ const approveTransfer = async (transfer: any) => {
   const db = useFirestore().getFirestoreInstance()
   if (!db) return
   const { updateDoc, serverTimestamp, doc } = await import('firebase/firestore')
-  const pathUserId = userId
+  const pathUserId = await resolveOwnerUserId()
   const transferRef = doc(db, 'users', pathUserId, 'storeTransfers', transfer.id)
   await updateDoc(transferRef, {
     status: 'in_transit',
@@ -1251,7 +1285,7 @@ const cancelTransfer = async (transfer: any) => {
   const db = useFirestore().getFirestoreInstance()
   if (!db) return
   const { updateDoc, doc } = await import('firebase/firestore')
-  const pathUserId = userId
+  const pathUserId = await resolveOwnerUserId()
   const transferRef = doc(db, 'users', pathUserId, 'storeTransfers', transfer.id)
   await updateDoc(transferRef, { status: 'cancelled' })
   toast.success('Transfer cancelled.')
@@ -1289,7 +1323,7 @@ const saveTracking = async () => {
   const db = useFirestore().getFirestoreInstance()
   if (!db) return
   const { updateDoc, doc } = await import('firebase/firestore')
-  const pathUserId = userId
+  const pathUserId = await resolveOwnerUserId()
   const transferRef = doc(db, 'users', pathUserId, 'storeTransfers', t.id)
   await updateDoc(transferRef, {
     carrier: trackingForm.value.carrier || null,
@@ -1357,7 +1391,7 @@ const loadTransferHistory = async () => {
       getDoc,
       where: firestoreWhere,
     } = await import('firebase/firestore')
-    const pathUserId = userId
+    const pathUserId = await resolveOwnerUserId()
 
     // console.log('[TransferHistory] Loading transfer history for userId:', pathUserId, 'auth.uid:', authStore.currentUser?.uid)
 
@@ -1613,7 +1647,7 @@ const loadConsolidatedReports = async () => {
     // Import Firebase functions
     const { collection, query, where, getDocs, Timestamp } = await import('firebase/firestore')
     const { getReceiptsCollection } = await import('~/composables/useFirestorePaths')
-    const pathUserId = userId
+    const pathUserId = await resolveOwnerUserId()
 
     // Calculate date range
     const days =
@@ -1829,13 +1863,15 @@ const formatDate = (date: any) => {
 
 // Lifecycle
 onMounted(async () => {
-  if (canAccess.value) {
-    await loadStores()
-    // Load transfer history after a short delay to ensure user data is loaded
-    setTimeout(async () => {
-      await loadTransferHistory()
-    }, 500)
-    await loadConsolidatedReports()
+  if (!canAccess.value) return
+  if (!userStore.userData) {
+    const authStore = useAuthStore()
+    if (authStore.currentUser?.uid) {
+      await userStore.fetchUserData(authStore.currentUser.uid)
+    }
   }
+  if (!canAccess.value) return
+  await loadStores()
+  await Promise.all([loadTransferHistory(), loadConsolidatedReports()])
 })
 </script>

@@ -625,6 +625,15 @@ export function getDemoFolderTemplatesForStore(storeId: string): InventoryFolder
   return buildInventoryForStore(store).folders
 }
 
+/** Items in one category for a branch — does not touch Pinia current store. */
+export function getDemoItemsForStoreFolder(storeId: string, folderId: string): InventoryItem[] {
+  const demo = useDemoAppStore()
+  demo.hydrate()
+  const store = demo.getStore(storeId)
+  if (!store) throw new Error('Branch not found.')
+  return buildInventoryForStore(store).itemsByFolder[folderId] ?? []
+}
+
 export async function applyDemoDuplicateFolderTemplatesBetweenStores(
   sourceStoreId: string,
   targetStoreId: string,

@@ -362,6 +362,7 @@ onUnmounted(() => {
 
 .side-panel-body-scroll {
   scrollbar-gutter: stable;
+  -webkit-overflow-scrolling: touch;
 }
 
 .side-panel-body-scroll::-webkit-scrollbar {

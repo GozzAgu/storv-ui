@@ -271,11 +271,14 @@ export async function fetchAllInventoryItemsChunked(
     isStaff: boolean
     pageSize: number
     force: boolean
+    /** Disambiguate same folderId across branches (multi-store sync). */
+    cacheNamespace?: string
   }
 ): Promise<InventoryItem[]> {
-  const { itemsRef, folderId, queryUserId, isStaff, pageSize, force } = params
+  const { itemsRef, folderId, queryUserId, isStaff, pageSize, force, cacheNamespace } = params
+  const cacheKey = cacheNamespace ? `${cacheNamespace}:${folderId}` : folderId
   if (!force) {
-    const hit = allItemsCache.get(folderId)
+    const hit = allItemsCache.get(cacheKey)
     if (hit && (isCapacitorNative() || Date.now() - hit.fetchedAt < ALL_CHUNK_CACHE_TTL_MS)) {
       return hit.items
     }
@@ -311,6 +314,6 @@ export async function fetchAllInventoryItemsChunked(
   }
 
   sortItemsDesc(all)
-  allItemsCache.set(folderId, { items: all, fetchedAt: Date.now() })
+  allItemsCache.set(cacheKey, { items: all, fetchedAt: Date.now() })
   return all
 }

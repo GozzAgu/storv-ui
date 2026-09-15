@@ -276,7 +276,7 @@
     </template>
 
     <div
-      v-if="inventoryStore.folders.length > 0 || !inventoryStore.loading"
+      v-if="!inventoryStore.loading && inventoryStore.folders.length > 0"
       :class="[
         gridShellClass,
         isCapacitorIos
@@ -307,10 +307,11 @@
             ? 'Try a different search term.'
             : 'Adjust filters or go to another page.'
         "
-        :tips="[
-          'Clear search or department filter to see more',
-          'Create a category with New category',
-        ]"
+        :tips="
+          selectedDepartmentId || searchQuery || categoryFilter === 'low-stock'
+            ? ['Clear filters to see all categories']
+            : undefined
+        "
       >
         <Button
           v-if="selectedDepartmentId"
@@ -563,33 +564,12 @@
       "
       :description="
         isStaff && !searchQuery
-          ? 'Categories shared with your department will appear here. Ask your admin if you need access to more.'
+          ? 'Categories shared with your department will appear here. Ask your admin if you need access.'
           : selectedDepartmentId
           ? 'Try another department or clear the filter to see all categories.'
           : searchQuery
           ? 'Try a different search term.'
-          : 'Categories group products so your team can find stock faster.'
-      "
-      :tips="
-        isStaff && !searchQuery
-          ? [
-              'Your view is limited to categories your department can access',
-              'Contact your admin if you expect to see more categories',
-            ]
-          : selectedDepartmentId
-          ? [
-              'Categories can be shared across departments or restricted',
-              'Clear the department filter to browse everything',
-            ]
-          : searchQuery
-          ? [
-              'Search matches category names and descriptions',
-              'Create a new category if the one you need is missing',
-            ]
-          : [
-              'Open a category to add products and custom fields',
-              'Use departments to control who sees each category',
-            ]
+          : 'Create a category to organize products, then add stock inside it.'
       "
       extra-class="dash-table-shell rounded-xl bg-white dark:!bg-dashboard-card"
     >
@@ -1011,6 +991,7 @@
       title="Duplicate category"
       subtitle="Create copies with the same template and settings. Enter one or more category names."
       size="md"
+      content-padding="p-4 sm:p-5"
       @update:model-value="(v: boolean) => { showDuplicateFolderModal = v }"
     >
       <form
@@ -1094,6 +1075,7 @@
       title="Copy category templates from another branch"
       subtitle="Pick a source branch, select top-level categories, then choose whether to include subcategories."
       size="lg"
+      content-padding="p-4 sm:p-5"
     >
       <div :class="[drawerFillClass, 'gap-4 text-left']">
         <div :class="drawerFillFixedClass">

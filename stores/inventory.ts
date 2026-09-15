@@ -1670,6 +1670,68 @@ export const useInventoryStore = defineStore('inventory', {
     },
 
     /**
+     * Load all items in a folder for a specific branch without switching Pinia current store.
+     * Used by multi-store sync. Super admin + Enterprise only.
+     */
+    async fetchItemsAllChunkedForStore(
+      storeId: string,
+      folderId: string,
+      options?: { force?: boolean }
+    ): Promise<InventoryItem[]> {
+      if (!storeId || !folderId) return []
+
+      const { isDemoModeActive } = await import('~/utils/demo-mode')
+      if (isDemoModeActive()) {
+        const { getDemoItemsForStoreFolder } = await import('~/utils/demo-bridge')
+        return getDemoItemsForStoreFolder(storeId, folderId)
+      }
+
+      const db = useFirestore().getFirestoreInstance()
+      if (!db) throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
+      const authStore = useAuthStore()
+      if (!authStore.currentUser) throw new Error('You must be signed in.')
+      const userStore = useUserStore()
+      if (!userStore.userData) {
+        await userStore.fetchUserData(authStore.currentUser.uid)
+      }
+      if (userStore.userData?.role !== 'superAdmin') {
+        throw new Error('Only super admins can load inventory across branches.')
+      }
+      const plan = resolveEffectiveSubscriptionPlan(userStore.userData)
+      if (plan !== 'storvv_enterprise') {
+        throw new Error(
+          'Loading inventory for another branch is available on the Storvv Enterprise plan.'
+        )
+      }
+
+      const ownerUid = (await getQueryUserId()) ?? authStore.currentUser.uid
+      const itemsRef = getInventoryItemsCollection(db, ownerUid, storeId)
+      const force = options?.force === true
+      const inflightKey = `${storeId}:${folderId}`
+
+      if (!force) {
+        const ex = inventoryItemsAllInflight.get(inflightKey)
+        if (ex) return ex
+      } else {
+        inventoryItemsAllInflight.delete(inflightKey)
+      }
+
+      const promise = fetchAllInventoryItemsChunked(db, {
+        itemsRef,
+        folderId,
+        queryUserId: ownerUid,
+        isStaff: false,
+        pageSize: INVENTORY_FIRESTORE_ALL_CHUNK_SIZE,
+        force,
+        cacheNamespace: storeId,
+      })
+
+      inventoryItemsAllInflight.set(inflightKey, promise)
+      promise.finally(() => inventoryItemsAllInflight.delete(inflightKey))
+      return promise
+    },
+
+    /**
      * @deprecated Prefer fetchItemsPage (UI) or fetchItemsAllChunked (full list, not in store).
      * Loads page 1 only for minimal backward compat.
      */

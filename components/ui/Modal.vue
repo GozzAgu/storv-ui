@@ -315,6 +315,7 @@ onUnmounted(() => {
 <style scoped>
 .modal-body-scroll {
   scrollbar-gutter: stable;
+  -webkit-overflow-scrolling: touch;
 }
 
 .modal-body-scroll::-webkit-scrollbar {

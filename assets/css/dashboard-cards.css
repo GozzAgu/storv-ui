@@ -1536,10 +1536,22 @@ html.dark .dash-restricted-card__icon {
 }
 
 .dash-items-picker {
-  max-height: 13rem;
-  overflow: auto;
+  max-height: min(42vh, 20rem);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   border: 1px solid var(--dash-card-border);
   border-radius: 0.75rem;
+  background: var(--dash-card-surface, transparent);
+}
+
+.dash-items-picker .dashboard-table thead th {
+  background: var(--dash-table-head-bg, rgb(248 250 252 / 0.95));
+}
+
+html.dark .dash-items-picker .dashboard-table thead th {
+  background: rgb(18 20 28 / 0.96);
 }
 
 .dash-transfer-list {

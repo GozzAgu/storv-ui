@@ -140,6 +140,9 @@ html.capacitor-ios.capacitor-native .ios-drawer .dashboard-native-sheet__close s
 
 /* ── Body ── */
 html.capacitor-ios.capacitor-native .ios-drawer .dashboard-native-sheet__body {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   padding: 0.75rem 0 0.75rem;
   background: transparent;
 }
@@ -162,6 +165,8 @@ html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .da
 
 html.capacitor-ios.capacitor-native .ios-drawer__content {
   display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
   flex-direction: column;
   gap: 0.875rem;
   padding-top: 0.25rem;
