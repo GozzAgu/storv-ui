@@ -1962,6 +1962,7 @@ async function handleConfirmCopyFolderTemplates() {
           skippedCount ? ` Skipped ${skippedCount} duplicate name(s).` : ''
         }`
       )
+      await reloadInventoryCategories()
     }
     showCopyFolderTemplatesModal.value = false
   } catch (error: unknown) {

@@ -115,29 +115,27 @@
 
           <div v-if="transferForm.destinationStoreId" class="mt-4">
             <label :class="labelClass">Destination category</label>
-            <select v-model="transferForm.destinationFolderId" :class="fieldClass">
-              <option value="">Select destination category</option>
-              <option v-for="folder in destinationFolders" :key="folder.id" :value="folder.id">
-                {{ folder.name }}
-              </option>
-            </select>
+            <DashboardFolderDrillPicker
+              :key="`dest-${transferForm.destinationStoreId}`"
+              v-model="transferForm.destinationFolderId"
+              :folders="destinationFolders"
+              empty-label="No categories on the destination branch yet."
+            />
             <p :class="[inlineNoteClass, 'mt-1.5']">
-              Category in the destination branch where items will land
+              Pick a category first. If it has subcategories, open it and choose where items should
+              land.
             </p>
           </div>
 
           <div v-if="transferForm.sourceStoreId" class="mt-4">
             <label :class="labelClass">Source category</label>
-            <select
+            <DashboardFolderDrillPicker
+              :key="`src-${transferForm.sourceStoreId}`"
               v-model="transferForm.folderId"
-              :class="fieldClass"
+              :folders="sourceFolders"
+              empty-label="No categories on the source branch yet."
               @change="onSourceFolderChange"
-            >
-              <option value="">Select category</option>
-              <option v-for="folder in sourceFolders" :key="folder.id" :value="folder.id">
-                {{ folder.name }}
-              </option>
-            </select>
+            />
           </div>
 
           <div v-if="transferForm.folderId && availableItems.length > 0" class="mt-4 space-y-2">
@@ -537,6 +535,7 @@ import IosReceiptTransactionRow, {
 } from '~/components/ios/IosReceiptTransactionRow.vue'
 import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
 import Modal from '~/components/ui/Modal.vue'
+import DashboardFolderDrillPicker from '~/components/dashboard/DashboardFolderDrillPicker.vue'
 import { useStoresStore } from '~/stores/stores'
 import { useInventoryStore } from '~/stores/inventory'
 import { useUserStore } from '~/stores/user'
@@ -545,6 +544,7 @@ import { usePermissions } from '~/composables/usePermissions'
 import { usePreferences } from '~/composables/usePreferences'
 import { useAppToast } from '~/composables/useAppToast'
 import { useFirestore } from '~/composables/useFirestore'
+import { useIosPullToRefreshRegister } from '~/composables/useIosPullToRefresh'
 import { CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import { tableMoneyClass } from '~/utils/table-money-styles'
 import { getQueryUserId } from '~/composables/useFirestorePaths'
@@ -1874,4 +1874,12 @@ onMounted(async () => {
   await loadStores()
   await Promise.all([loadTransferHistory(), loadConsolidatedReports()])
 })
+
+async function reloadMultiStorePage() {
+  if (!canAccess.value) return
+  await loadStores()
+  await Promise.all([loadTransferHistory(), loadConsolidatedReports()])
+}
+
+useIosPullToRefreshRegister(reloadMultiStorePage)
 </script>

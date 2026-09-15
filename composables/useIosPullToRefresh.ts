@@ -1,20 +1,17 @@
-const IOS_PTR_HANDLER_KEY = 'ios-ptr-handler'
+/**
+ * iOS pull-to-refresh uses the shared dashboard page refresh registry
+ * so the header refresh button and PTR stay in sync.
+ */
+import {
+  useDashboardPageRefreshHandler,
+  useDashboardPageRefreshRegister,
+} from '~/composables/useDashboardPageRefresh'
 
 /** Pages register their refresh logic (home, sales, analytics, etc.). */
 export function useIosPullToRefreshRegister(handler: () => Promise<void>) {
-  const registered = useState<(() => Promise<void>) | null>(IOS_PTR_HANDLER_KEY, () => null)
-
-  onMounted(() => {
-    registered.value = handler
-  })
-
-  onUnmounted(() => {
-    if (registered.value === handler) {
-      registered.value = null
-    }
-  })
+  return useDashboardPageRefreshRegister(handler)
 }
 
 export function useIosPullToRefreshHandler() {
-  return useState<(() => Promise<void>) | null>(IOS_PTR_HANDLER_KEY, () => null)
+  return useDashboardPageRefreshHandler()
 }

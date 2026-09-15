@@ -609,6 +609,7 @@
             :page-title="commandHeaderPageTitle"
           >
             <template #actions>
+              <DashboardPageRefreshButton />
               <button
                 type="button"
                 class="dash-topnav__icon-btn"
@@ -728,6 +729,8 @@
               v-if="userStore.userData?.role === 'superAdmin' && canManageBranches"
               :class="isNativeApp ? 'max-w-[5.25rem] shrink' : 'shrink-0'"
             />
+
+            <DashboardPageRefreshButton />
 
             <ThemeToggle class="shrink-0" />
 
@@ -948,6 +951,7 @@ import {
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import ThemeToggle from '~/components/ui/ThemeToggle.vue'
+import DashboardPageRefreshButton from '~/components/dashboard/DashboardPageRefreshButton.vue'
 import DashboardHoverTooltip from '~/components/ui/DashboardHoverTooltip.vue'
 import DashboardNavIcon from '~/components/dashboard/DashboardNavIcon.vue'
 import DemoModeBanner from '~/components/demo/DemoModeBanner.vue'

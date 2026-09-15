@@ -991,7 +991,8 @@ export const useInventoryStore = defineStore('inventory', {
       const createdCount = payloads.length
       const resolvedTarget = await getCurrentStoreId()
       if (resolvedTarget === targetStoreId) {
-        await this.fetchFolders()
+        await this.fetchFolders({ force: true })
+        await this.fetchFolderAvailabilityStats({ force: true })
       }
 
       if (createdCount > 0) {

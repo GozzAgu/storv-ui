@@ -35,6 +35,8 @@
         <slot name="trailing" />
       </div>
 
+      <DashboardPageRefreshButton extra-class="ios-global-top-bar__refresh" />
+
       <IosTabBarThemeButton class="ios-global-top-bar__theme" variant="topnav" />
 
       <DashboardProfileMenu
@@ -52,6 +54,7 @@
 <script setup lang="ts">
 import type { RouteLocationRaw } from 'vue-router'
 import DashboardBackButton from '~/components/dashboard/DashboardBackButton.vue'
+import DashboardPageRefreshButton from '~/components/dashboard/DashboardPageRefreshButton.vue'
 import DashboardProfileMenu from '~/components/dashboard/DashboardProfileMenu.vue'
 import IosTabBarThemeButton from '~/components/ios/IosTabBarThemeButton.vue'
 

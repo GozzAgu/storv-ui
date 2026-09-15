@@ -113,9 +113,7 @@
               </p>
             </div>
 
-            <div class="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Business experience">
-              <ExperienceModePicker v-model="selectedExperienceMode" :show-changes="false" />
-            </div>
+            <ExperienceModePicker v-model="selectedExperienceMode" :show-changes="false" />
           </div>
 
           <!-- Step 3: Store Information -->
@@ -288,6 +286,7 @@ import {
   UserIcon,
 } from '~/utils/app-icons'
 import Button from '~/components/ui/Button.vue'
+import ExperienceModePicker from '~/components/settings/ExperienceModePicker.vue'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useUser, type StoreDetails } from '~/composables/useUser'
 import { usePreferences, currencies, regions } from '~/composables/usePreferences'
