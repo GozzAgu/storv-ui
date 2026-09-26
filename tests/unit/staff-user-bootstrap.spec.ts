@@ -52,22 +52,21 @@ describe('buildStaffUserDataWithOwnerContext', () => {
     updatedAt: null,
   }
 
-  it('inherits owner preferences and marks onboarding complete', async () => {
-    getDoc.mockResolvedValue({
-      exists: () => true,
-      id: 'owner-uid',
-      data: () => ({
-        role: 'superAdmin',
-        subscription: 'storvv_enterprise',
-        preferences: { currency: 'NGN', region: 'NG' },
-        storeDetails: { storeName: 'Port Harcourt' },
-        hasCompletedOnboarding: true,
-      }),
+  it('inherits owner preferences via API and marks onboarding complete', async () => {
+    mockFetch.mockResolvedValue({
+      subscription: 'storvv_enterprise',
+      preferences: { currency: 'NGN', region: 'NG' },
+      storeDetails: { storeName: 'Port Harcourt' },
     })
 
     const { buildStaffUserDataWithOwnerContext } = await import('~/utils/staff-user-bootstrap')
-    const result = await buildStaffUserDataWithOwnerContext({} as never, staff, 'auth-staff')
+    const { userData: result, inheritedOwnerContext } = await buildStaffUserDataWithOwnerContext(
+      {} as never,
+      staff,
+      'auth-staff'
+    )
 
+    expect(inheritedOwnerContext).toBe(true)
     expect(result.role).toBe('staff')
     expect(result.hasCompletedOnboarding).toBe(true)
     expect(result.hasCompletedTutorial).toBe(true)
@@ -75,40 +74,46 @@ describe('buildStaffUserDataWithOwnerContext', () => {
     expect(result.preferences?.currency).toBe('NGN')
     expect(result.storeDetails?.storeName).toBe('Port Harcourt')
     expect(result.mustChangePassword).toBe(true)
-    expect(mockFetch).not.toHaveBeenCalled()
   })
 
-  it('falls back when owner doc is missing and API is unavailable', async () => {
-    getDoc.mockResolvedValue({ exists: () => false })
+  it('preserves prior enterprise plan when owner context is unavailable', async () => {
     mockFetch.mockRejectedValue(new Error('offline'))
+    getDoc.mockRejectedValue(new Error('Missing or insufficient permissions'))
 
     const { buildStaffUserDataWithOwnerContext } = await import('~/utils/staff-user-bootstrap')
-    const result = await buildStaffUserDataWithOwnerContext({} as never, staff, 'auth-staff')
+    const { userData: result, inheritedOwnerContext } = await buildStaffUserDataWithOwnerContext(
+      {} as never,
+      staff,
+      'auth-staff',
+      {
+        uid: 'auth-staff',
+        email: 'frank@example.com',
+        name: 'Franklin Agu',
+        role: 'staff',
+        subscription: 'storvv_enterprise',
+        hasCompletedOnboarding: true,
+        hasCompletedTutorial: true,
+      }
+    )
 
+    expect(inheritedOwnerContext).toBe(false)
+    expect(result.subscription).toBe('storvv_enterprise')
+  })
+
+  it('falls back to micro only when no prior plan and API unavailable', async () => {
+    mockFetch.mockRejectedValue(new Error('offline'))
+    getDoc.mockResolvedValue({ exists: () => false })
+
+    const { buildStaffUserDataWithOwnerContext } = await import('~/utils/staff-user-bootstrap')
+    const { userData: result, inheritedOwnerContext } = await buildStaffUserDataWithOwnerContext(
+      {} as never,
+      staff,
+      'auth-staff'
+    )
+
+    expect(inheritedOwnerContext).toBe(false)
     expect(result.hasCompletedOnboarding).toBe(true)
     expect(result.subscription).toBe('storvv_micro')
     expect(result.preferences).toBeUndefined()
-  })
-
-  it('inherits enterprise plan via API when owner doc read is denied', async () => {
-    getDoc.mockRejectedValue(new Error('Missing or insufficient permissions'))
-    mockFetch.mockResolvedValue({
-      subscription: 'storvv_enterprise',
-      preferences: { currency: 'NGN' },
-      storeDetails: { storeName: 'Kano' },
-    })
-
-    const { buildStaffUserDataWithOwnerContext } = await import('~/utils/staff-user-bootstrap')
-    const result = await buildStaffUserDataWithOwnerContext({} as never, staff, 'auth-staff')
-
-    expect(result.subscription).toBe('storvv_enterprise')
-    expect(result.preferences?.currency).toBe('NGN')
-    expect(result.storeDetails?.storeName).toBe('Kano')
-    expect(mockFetch).toHaveBeenCalledWith(
-      '/api/workspace/owner-context',
-      expect.objectContaining({
-        headers: { Authorization: 'Bearer token' },
-      })
-    )
   })
 })

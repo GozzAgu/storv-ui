@@ -348,7 +348,7 @@
               <p class="dash-eyebrow">Sales</p>
             </template>
             <template #title>
-              <h1 :class="pageTitleClass">Sales</h1>
+              <h1 :class="pageTitleClass">{{ branchPageTitle('Sales') }}</h1>
             </template>
             <template v-if="!receiptsStore.loading" #description>
               <DashboardPageMetrics :metrics="receiptsHeaderMetrics" aria-label="Sales summary" />
@@ -1265,74 +1265,24 @@
               @returned="handleReceiptReturned"
             />
 
-            <!-- Delete Receipt Modal -->
             <!-- Bulk Delete Receipts Modal -->
-            <Modal
+            <BulkDeleteConfirmModal
               v-model="showBulkDeleteReceiptsModal"
-              @update:model-value="(v: boolean) => { showBulkDeleteReceiptsModal = v; if (!v) bulkDeleteReceiptsConfirmed = false }"
-              size="md"
-            >
-              <template #header>
-                <div class="flex items-center gap-2.5">
-                  <div
-                    class="w-8 h-8 rounded-sm bg-red-100 dark:bg-red-900/30 flex items-center justify-center"
-                  >
-                    <TrashIcon class="w-4 h-4 text-red-600 dark:text-red-400" />
-                  </div>
-                  <div class="min-w-0">
-                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                      Delete selected sales
-                    </h3>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">
-                      {{ selectedReceiptsForBulk.length }} sale{{
-                        selectedReceiptsForBulk.length !== 1 ? 's' : ''
-                      }}
-                      selected
-                    </p>
-                  </div>
-                </div>
-              </template>
-              <div class="space-y-3">
-                <div
-                  class="p-3 bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40 rounded-sm"
-                >
-                  <p class="text-xs text-red-800 dark:text-red-200">
-                    This will permanently delete the selected sales. This action cannot be
-                    undone. Associated customer data may be affected.
-                  </p>
-                </div>
-                <div class="rounded-sm bg-gray-50 p-2.5 dark:!bg-dashboard-card/35">
-                  <Checkbox
-                    v-model="bulkDeleteReceiptsConfirmed"
-                    label="I understand that these sales will be permanently deleted."
-                    size="sm"
-                    wrapper-class="items-start"
-                    label-class="text-xs text-gray-700 dark:text-gray-300"
-                  />
-                </div>
-              </div>
-              <template #footer>
-                <IosDrawerActions
-                  primary-variant="danger"
-                  :primary-icon="TrashIcon"
-                  :primary-label="
-                    isBulkDeletingReceipts
-                      ? 'Deleting...'
-                      : `Delete ${selectedReceiptsForBulk.length} sale${
-                          selectedReceiptsForBulk.length !== 1 ? 's' : ''
-                        }`
-                  "
-                  :primary-disabled="!bulkDeleteReceiptsConfirmed || isBulkDeletingReceipts"
-                  @cancel="
-                    () => {
-                      showBulkDeleteReceiptsModal = false
-                      bulkDeleteReceiptsConfirmed = false
-                    }
-                  "
-                  @primary="handleConfirmBulkDeleteReceipts"
-                />
-              </template>
-            </Modal>
+              v-model:confirmed="bulkDeleteReceiptsConfirmed"
+              title="Delete selected sales"
+              entity-label="sale"
+              :count="selectedReceiptsForBulk.length"
+              :item-names="
+                selectedReceiptsForBulk.map(
+                  (r) => r.receiptNumber || r.customerName || r.id
+                )
+              "
+              warning="This permanently deletes the selected sales. Associated customer balances may be affected. This cannot be undone."
+              confirm-label="I understand these sales will be permanently deleted."
+              :loading="isBulkDeletingReceipts"
+              @update:model-value="(v) => { if (!v) bulkDeleteReceiptsConfirmed = false }"
+              @confirm="handleConfirmBulkDeleteReceipts"
+            />
             <DeleteReceiptModal
               v-model="showDeleteReceiptModal"
               :receipt="selectedReceipt"
@@ -2174,16 +2124,16 @@ const {
   segmentTabsBtnActiveClass,
 } = useDashboardPageChrome()
 const { isCapacitorIos } = useIsCapacitorIos()
+const { branchPageTitle, currentStoreLabel } = useCurrentStoreLabel()
 
 const iosSalesNavTitle = computed(() => {
-  switch (activeTab.value) {
-    case 'outstanding':
-      return 'Outstanding'
-    case 'customers':
-      return 'Customers'
-    default:
-      return 'Transactions'
-  }
+  const page =
+    activeTab.value === 'outstanding'
+      ? 'Outstanding'
+      : activeTab.value === 'customers'
+        ? 'Customers'
+        : 'Sales'
+  return currentStoreLabel.value ? `${currentStoreLabel.value} · ${page}` : page
 })
 
 const { tableShellFlexClass, tableExpandClass, tableExpandHeaderClass, tableExpandBodyClass, tableExpandCloseClass, tableExpandEyebrowClass, tableExpandTitleClass, tableExpandMetaClass, tableExpandFieldClass } = useDashboardTableChrome()

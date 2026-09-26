@@ -207,3 +207,37 @@ html.capacitor-ios.capacitor-native.capacitor-ipad .ios-inventory-folder-row__se
   width: 1.4rem;
   height: 1.4rem;
 }
+
+/* iPad: first-class density — wider toolbars, roomier select targets, multi-column lists */
+html.capacitor-ios.capacitor-native.capacitor-ipad .ios-page-nav-bar {
+  padding-inline: 1.25rem;
+}
+
+html.capacitor-ios.capacitor-native.capacitor-ipad .ios-inventory-list-meta,
+html.capacitor-ios.capacitor-native.capacitor-ipad .ios-bulk-select-host {
+  padding-inline: 1.25rem;
+}
+
+html.capacitor-ios.capacitor-native.capacitor-ipad .ios-search-bar-host {
+  padding-inline: 1.25rem;
+}
+
+html.capacitor-ios.capacitor-native.capacitor-ipad .ios-receipt-transaction-list,
+html.capacitor-ios.capacitor-native.capacitor-ipad .ios-grouped-list {
+  max-width: 56rem;
+  margin-inline: auto;
+}
+
+html.capacitor-ios.capacitor-native.capacitor-ipad .ios-quick-action-bar {
+  max-width: 56rem;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+}
+
+html.capacitor-ios.capacitor-native.capacitor-ipad .dash-bulk-select {
+  gap: 0.75rem;
+}
+
+html.capacitor-ios.capacitor-native.capacitor-ipad .ios-receipt-transaction-row__main {
+  padding-block: 0.75rem;
+}

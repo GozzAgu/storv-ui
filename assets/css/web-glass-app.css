@@ -569,9 +569,9 @@ html:not(.capacitor-native):not(.dark) .dash-sidebar .font-bold {
 }
 
 html:not(.capacitor-native) .dash-home .saas-dashboard-greeting {
-  font-size: clamp(1.75rem, 3vw, 2.15rem);
+  font-size: clamp(1.25rem, 2vw, 1.5rem);
   font-weight: 700;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.03em;
 }
 
 html:not(.capacitor-native) .dashboard-layout-root .dash-plan-badge {

@@ -231,13 +231,24 @@
 
     <template v-if="isCapacitorIos && !isLoadingFolder && !showCategoryHub">
       <IosPageNavBar
-        :title="folder?.name || 'Products'"
+        :title="iosProductsNavTitle"
         show-back
         :back-to="inventoryBackTo"
         :back-label="inventoryBackLabel"
-      />
+      >
+        <template v-if="showBulkRowSelection && paginatedItems.length > 0" #trailing>
+          <button
+            type="button"
+            class="ios-top-bar-text-btn"
+            @click="toggleIosItemsSelectMode"
+          >
+            {{ isIosItemsSelecting ? 'Done' : 'Select' }}
+          </button>
+        </template>
+      </IosPageNavBar>
       <p class="ios-inventory-list-meta">
         {{ paginationTotal }} item{{ paginationTotal === 1 ? '' : 's' }}
+        <template v-if="currentStoreLabel"> · {{ currentStoreLabel }}</template>
       </p>
       <div class="ios-search-bar-host ios-search-bar-host--sticky">
         <IosSearchBar v-model="searchQuery" placeholder="Search products…" />
@@ -248,6 +259,47 @@
         aria-label="Product actions"
         :options="availabilityQuickActionOptions"
       />
+      <div
+        v-if="isIosItemsSelecting && showBulkRowSelection && paginatedItems.length > 0"
+        class="ios-bulk-select-host"
+      >
+        <DashboardBulkSelectControl
+          :model-value="
+            selectedItemsForBulk.length > 0 &&
+            selectedItemsForBulk.length ===
+              paginatedItems.filter((i) => !isInventoryItemLocked(i)).length
+          "
+          :selected-count="selectedItemsForBulk.length"
+          @update:model-value="toggleSelectAll"
+        >
+          <template #action>
+            <Button
+              v-if="canManageInventoryItems && selectedItemsForBulk.length > 0"
+              variant="outline"
+              size="sm"
+              :icon="TrashIcon"
+              :extra-class="
+                headerBtnClass +
+                ' !border-red-200/70 !text-red-600 hover:!bg-red-50/80 dark:!border-red-900/40 dark:!text-red-400 dark:hover:!bg-red-950/30'
+              "
+              @click="openBulkDeleteModal"
+            >
+              Delete
+            </Button>
+            <Button
+              v-if="canLoanToSellerUi"
+              variant="outline"
+              size="sm"
+              :icon="ArrowTopRightOnSquareIcon"
+              :disabled="selectedItemsEligibleForSellerLoan.length === 0"
+              :extra-class="headerBtnClass"
+              @click="openCreateSellerLoanModal"
+            >
+              Stock loan
+            </Button>
+          </template>
+        </DashboardBulkSelectControl>
+      </div>
 
       <IosDrawer
         v-model="showProductMoreSheet"
@@ -283,16 +335,25 @@
               </ul>
             </div>
           </section>
-          <section v-if="canManageInventoryItems" class="ios-drawer-menu__section">
+          <section v-if="canManageInventoryItems || canLoanToSellerUi" class="ios-drawer-menu__section">
             <p class="ios-drawer-menu__section-label">Tools</p>
             <div class="ios-drawer-menu__group">
               <ul class="ios-drawer-menu__list">
-                <li>
+                <li v-if="canLoanToSellerUi">
+                  <button
+                    type="button"
+                    class="ios-drawer-menu__row"
+                    @click="startIosStockLoanSelect"
+                  >
+                    <span class="ios-drawer-menu__label">Stock loan…</span>
+                  </button>
+                </li>
+                <li v-if="canManageInventoryItems">
                   <button type="button" class="ios-drawer-menu__row" @click="triggerImportFromSheet">
                     <span class="ios-drawer-menu__label">Import from Excel</span>
                   </button>
                 </li>
-                <li>
+                <li v-if="canManageInventoryItems">
                   <button type="button" class="ios-drawer-menu__row" @click="triggerExportFromSheet">
                     <span class="ios-drawer-menu__label">Export to Excel</span>
                   </button>
@@ -325,10 +386,21 @@
           :date="getItemCardDate(item)"
           :variant="getItemTransactionVariant(item)"
           :last="index === paginatedItems.length - 1"
-          :show-menu="!isInventoryItemLocked(item)"
+          :show-menu="!isInventoryItemLocked(item) && !isIosItemsSelecting"
           menu-kind="item"
           :menu-id="item.id"
-          @click="openMobileItemDetail(item)"
+          :selectable="
+            isIosItemsSelecting &&
+            showBulkRowSelection &&
+            !isInventoryItemLocked(item)
+          "
+          :selected="selectedItemsForBulk.some((i) => i.id === item.id)"
+          @click="
+            isIosItemsSelecting && !isInventoryItemLocked(item)
+              ? toggleItemSelection(item)
+              : openMobileItemDetail(item)
+          "
+          @select="(checked) => toggleItemSelection(item, checked)"
           @menu="toggleItemMenu(item.id)"
         />
       </div>
@@ -345,11 +417,28 @@
     <template v-if="!isLoadingFolder && showCategoryHub">
       <template v-if="isCapacitorIos">
         <IosPageNavBar
-          :title="folder?.name || 'Category'"
+          :title="
+            currentStoreLabel
+              ? `${currentStoreLabel} · ${folder?.name || 'Category'}`
+              : folder?.name || 'Category'
+          "
           show-back
           :back-to="inventoryBackTo"
           :back-label="inventoryBackLabel"
-        />
+        >
+          <template
+            v-if="canCreateInventoryFolders && paginatedChildFolders.length > 0"
+            #trailing
+          >
+            <button
+              type="button"
+              class="ios-top-bar-text-btn"
+              @click="toggleIosSubfolderSelectMode"
+            >
+              {{ isIosSubfolderSelecting ? 'Done' : 'Select' }}
+            </button>
+          </template>
+        </IosPageNavBar>
         <p class="ios-inventory-list-meta">
           <template v-if="childFolders.length > 0">
             {{ childFolders.length }} subcategor{{ childFolders.length === 1 ? 'y' : 'ies' }}
@@ -363,7 +452,11 @@
           :options="subcategoryQuickActionOptions"
         />
         <div
-          v-if="canCreateInventoryFolders && paginatedChildFolders.length > 0"
+          v-if="
+            isIosSubfolderSelecting &&
+            canCreateInventoryFolders &&
+            paginatedChildFolders.length > 0
+          "
           class="ios-bulk-select-host"
         >
           <DashboardBulkSelectControl
@@ -449,7 +542,7 @@
             :last="index === paginatedChildFolders.length - 1"
             :show-menu="canCreateInventoryFolders"
             :menu-id="child.id"
-            :selectable="canCreateInventoryFolders"
+            :selectable="canCreateInventoryFolders && isIosSubfolderSelecting"
             :selected="selectedSubfoldersForBulk.some((f) => f.id === child.id)"
             @click="navigateToSubfolder(child.id)"
             @menu="toggleSubfolderMenu(child.id)"
@@ -1980,72 +2073,19 @@
     />
 
     <!-- Bulk Delete Modal -->
-    <Modal
+    <BulkDeleteConfirmModal
       v-model="showBulkDeleteModal"
-      @update:model-value="(v: boolean) => { showBulkDeleteModal = v; if (!v) bulkDeleteConfirmed = false }"
-      size="md"
-    >
-      <template #header>
-        <div class="flex items-center gap-2.5">
-          <div
-            class="w-8 h-8 rounded-sm bg-red-100 dark:bg-red-900/30 flex items-center justify-center"
-          >
-            <TrashIcon class="w-4 h-4 text-red-600 dark:text-red-400" />
-          </div>
-          <div class="min-w-0">
-            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
-              Delete selected products
-            </h3>
-            <p class="text-xs text-gray-500 dark:text-gray-400">
-              {{ selectedItemsForBulk.length }} product{{
-                selectedItemsForBulk.length !== 1 ? 's' : ''
-              }}
-              selected
-            </p>
-          </div>
-        </div>
-      </template>
-      <div class="space-y-3">
-        <div
-          class="p-3 bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40 rounded-sm"
-        >
-          <p class="text-xs text-red-800 dark:text-red-200">
-            This will permanently delete the selected products from inventory. This action cannot be
-            undone.
-          </p>
-        </div>
-        <div class="rounded-sm bg-gray-50 p-2.5 dark:!bg-dashboard-card/35">
-          <Checkbox
-            v-model="bulkDeleteConfirmed"
-            label="I understand that these products will be permanently deleted."
-            size="sm"
-            wrapper-class="items-start"
-            label-class="text-xs text-gray-700 dark:text-gray-300"
-          />
-        </div>
-      </div>
-      <template #footer>
-        <IosDrawerActions
-          primary-variant="danger"
-          :primary-icon="TrashIcon"
-          :primary-label="
-            isBulkDeleting
-              ? 'Deleting...'
-              : `Delete ${selectedItemsForBulk.length} product${
-                  selectedItemsForBulk.length !== 1 ? 's' : ''
-                }`
-          "
-          :primary-disabled="!bulkDeleteConfirmed || isBulkDeleting"
-          @cancel="
-            () => {
-              showBulkDeleteModal = false
-              bulkDeleteConfirmed = false
-            }
-          "
-          @primary="handleConfirmBulkDelete"
-        />
-      </template>
-    </Modal>
+      v-model:confirmed="bulkDeleteConfirmed"
+      title="Delete selected products"
+      entity-label="product"
+      :count="selectedItemsForBulk.length"
+      :item-names="selectedItemsForBulk.map((i) => getItemDisplayName(i))"
+      warning="This permanently deletes the selected products from inventory. This cannot be undone."
+      confirm-label="I understand these products will be permanently deleted."
+      :loading="isBulkDeleting"
+      @update:model-value="(v) => { if (!v) bulkDeleteConfirmed = false }"
+      @confirm="handleConfirmBulkDelete"
+    />
 
     <!-- Duplicate Item Modal (multiple serial numbers) -->
     <Modal
@@ -2252,78 +2292,25 @@
       @deleted="handleConfirmDeleteSubfolder"
     />
 
-    <Modal
+    <BulkDeleteConfirmModal
       v-model="showBulkDeleteSubfoldersModal"
-      @update:model-value="
-        (v: boolean) => {
-          showBulkDeleteSubfoldersModal = v
-          if (!v) bulkDeleteSubfoldersConfirmed = false
-        }
+      v-model:confirmed="bulkDeleteSubfoldersConfirmed"
+      title="Delete selected subcategories"
+      entity-label="subcategory"
+      entity-label-plural="subcategories"
+      :count="selectedSubfoldersForBulk.length"
+      :item-names="selectedSubfoldersForBulk.map((f) => f.name)"
+      warning="This permanently deletes the selected subcategories and every product inside them. This cannot be undone."
+      :impact-summary="
+        `Delete ${selectedSubfoldersForBulk.length} ${
+          selectedSubfoldersForBulk.length === 1 ? 'subcategory' : 'subcategories'
+        } and all products inside`
       "
-      size="md"
-    >
-      <template #header>
-        <div class="flex items-center gap-2.5">
-          <div
-            class="w-8 h-8 rounded-sm bg-red-100 dark:bg-red-900/30 flex items-center justify-center"
-          >
-            <TrashIcon class="w-4 h-4 text-red-600 dark:text-red-400" />
-          </div>
-          <div class="min-w-0">
-            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
-              Delete selected subcategories
-            </h3>
-            <p class="text-xs text-gray-500 dark:text-gray-400">
-              {{ selectedSubfoldersForBulk.length }}
-              {{
-                selectedSubfoldersForBulk.length === 1 ? 'subcategory' : 'subcategories'
-              }}
-              selected
-            </p>
-          </div>
-        </div>
-      </template>
-      <div class="space-y-3">
-        <div
-          class="p-3 bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40 rounded-sm"
-        >
-          <p class="text-xs text-red-800 dark:text-red-200">
-            This will permanently delete the selected subcategories and all products inside them.
-            This action cannot be undone.
-          </p>
-        </div>
-        <div class="rounded-sm bg-gray-50 p-2.5 dark:!bg-dashboard-card/35">
-          <Checkbox
-            v-model="bulkDeleteSubfoldersConfirmed"
-            label="I understand that these subcategories and their products will be permanently deleted."
-            size="sm"
-            wrapper-class="items-start"
-            label-class="text-xs text-gray-700 dark:text-gray-300"
-          />
-        </div>
-      </div>
-      <template #footer>
-        <IosDrawerActions
-          primary-variant="danger"
-          :primary-icon="TrashIcon"
-          :primary-label="
-            isBulkDeletingSubfolders
-              ? 'Deleting...'
-              : `Delete ${selectedSubfoldersForBulk.length} ${
-                  selectedSubfoldersForBulk.length === 1 ? 'subcategory' : 'subcategories'
-                }`
-          "
-          :primary-disabled="!bulkDeleteSubfoldersConfirmed || isBulkDeletingSubfolders"
-          @cancel="
-            () => {
-              showBulkDeleteSubfoldersModal = false
-              bulkDeleteSubfoldersConfirmed = false
-            }
-          "
-          @primary="handleConfirmBulkDeleteSubfolders"
-        />
-      </template>
-    </Modal>
+      confirm-label="I understand these subcategories and their products will be permanently deleted."
+      :loading="isBulkDeletingSubfolders"
+      @update:model-value="(v) => { if (!v) bulkDeleteSubfoldersConfirmed = false }"
+      @confirm="handleConfirmBulkDeleteSubfolders"
+    />
 
     <SidePanel
       v-model="showSubcategoryModal"
@@ -2522,6 +2509,38 @@ const inventoryStore = useInventoryStore()
 const receiptsStore = useReceiptsStore()
 const authStore = useAuthStore()
 const { isCapacitorIos } = useIsCapacitorIos()
+const {
+  isSelecting: isIosSubfolderSelecting,
+  toggleSelectMode: toggleIosSubfolderSelectMode,
+  exitSelectMode: exitIosSubfolderSelectMode,
+} = useIosBulkSelectMode({
+  clearSelection: () => {
+    selectedSubfoldersForBulk.value = []
+  },
+})
+const {
+  isSelecting: isIosItemsSelecting,
+  toggleSelectMode: toggleIosItemsSelectMode,
+  exitSelectMode: exitIosItemsSelectMode,
+  enterSelectMode: enterIosItemsSelectMode,
+} = useIosBulkSelectMode({
+  clearSelection: () => {
+    selectedItemsForBulk.value = []
+  },
+})
+
+function startIosStockLoanSelect() {
+  showProductMoreSheet.value = false
+  enterIosItemsSelectMode()
+}
+watch(
+  () => folderId.value,
+  () => {
+    exitIosSubfolderSelectMode()
+    exitIosItemsSelectMode()
+  }
+)
+const { currentStoreLabel } = useCurrentStoreLabel()
 const userStore = useUserStore()
 const storesStore = useStoresStore()
 const departmentsStore = useDepartmentsStore()
@@ -2553,6 +2572,10 @@ const { drawerFillClass, drawerFillFixedClass, drawerFillScrollClass, drawerSect
 const currencySymbol = computed(() => preferences.value?.currencySymbol || '$')
 const initialExistingFolder = folderId.value ? inventoryStore.getFolderById(folderId.value) ?? null : null
 const folder = ref<InventoryFolder | null>(initialExistingFolder)
+const iosProductsNavTitle = computed(() => {
+  const name = folder.value?.name || 'Products'
+  return currentStoreLabel.value ? `${currentStoreLabel.value} · ${name}` : name
+})
 const isLoadingFolder = ref(!initialExistingFolder)
 const isLoadingItems = ref(false)
 const { headerBtnClass, headerBtnLabelClass, pageWithFixedFooterClass } = useDashboardPageChrome()

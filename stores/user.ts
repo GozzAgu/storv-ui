@@ -102,8 +102,18 @@ export const useUserStore = defineStore('user', {
             const { buildStaffUserDataWithOwnerContext } = await import(
               '~/utils/staff-user-bootstrap'
             )
-            this.userData = await buildStaffUserDataWithOwnerContext(db, cachedStaff, userId)
-            writeUserProfileCache(userId, this.userData)
+            const prior = this.userData?.uid === userId ? this.userData : null
+            const result = await buildStaffUserDataWithOwnerContext(
+              db,
+              cachedStaff,
+              userId,
+              prior
+            )
+            this.userData = result.userData
+            // Only cache after owner plan inheritance so we never poison Micro over Enterprise.
+            if (result.inheritedOwnerContext) {
+              writeUserProfileCache(userId, this.userData)
+            }
             return
           }
 
@@ -120,8 +130,17 @@ export const useUserStore = defineStore('user', {
             } else {
               staffStore.staff[existingIndex] = lookup.staff
             }
-            this.userData = await buildStaffUserDataWithOwnerContext(db, lookup.staff, userId)
-            writeUserProfileCache(userId, this.userData)
+            const prior = this.userData?.uid === userId ? this.userData : null
+            const result = await buildStaffUserDataWithOwnerContext(
+              db,
+              lookup.staff,
+              userId,
+              prior
+            )
+            this.userData = result.userData
+            if (result.inheritedOwnerContext) {
+              writeUserProfileCache(userId, this.userData)
+            }
             return
           }
 

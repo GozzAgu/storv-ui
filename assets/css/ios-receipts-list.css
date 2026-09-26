@@ -139,6 +139,18 @@ html.capacitor-ios.capacitor-native .ios-receipt-transaction-row {
   color: inherit;
 }
 
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-row--selectable {
+  align-items: center;
+}
+
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-row--selected {
+  background: var(--ios-tint-muted, rgb(20 63 141 / 0.1));
+}
+
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-row--selectable .ios-inventory-folder-row__select {
+  margin-left: 0.5rem;
+}
+
 html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__main {
   display: flex;
   align-items: flex-start;

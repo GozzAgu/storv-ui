@@ -18,25 +18,56 @@
 
       <IosHomeDashboardSkeleton v-else-if="isLoading" />
 
-      <IosHomeDashboard
-        v-else
-        :display-name="iosDisplayName"
-        :store-label="iosStoreLabel"
-        :day-story="dayStory"
-        :metrics="iosHomeMetrics"
-        :recent-sales="iosRecentSales"
-        :low-stock-preview="iosLowStockPreview"
-        :alerts="iosHomeAlerts"
-      />
+      <template v-else>
+        <GettingStartedChecklist class="mb-2 px-4" />
+        <section
+          v-if="isQuietDashboard && !gettingStartedVisible"
+          class="dash-quiet-today ios-quiet-today px-4"
+        >
+          <div class="dash-quiet-today__strip">
+            <div class="min-w-0">
+              <p class="dash-quiet-today__eyebrow">{{ iosStoreLabel || 'Today' }}</p>
+              <h1 class="dash-quiet-today__title">{{ quietHeadline }}</h1>
+              <p class="dash-quiet-today__meta">0 sales · quiet so far</p>
+            </div>
+            <NuxtLink
+              v-if="quietPrimaryCta"
+              :to="quietPrimaryCta.href"
+              class="dash-quiet-today__cta"
+            >
+              {{ quietPrimaryCta.label }}
+            </NuxtLink>
+          </div>
+        </section>
+
+        <IosHomeDashboard
+          v-else-if="!isQuietDashboard"
+          :display-name="iosDisplayName"
+          :store-label="iosStoreLabel"
+          :day-story="dayStory"
+          :metrics="iosHomeMetrics"
+          :recent-sales="iosRecentSales"
+          :low-stock-preview="iosLowStockPreview"
+          :alerts="iosHomeAlerts"
+        />
+      </template>
     </template>
 
     <template v-else>
-    <Tutorial ref="tutorialRef" :tutorial-steps="resolvedTutorialSteps" @complete="onTutorialComplete" />
+    <Tutorial
+      v-if="!gettingStartedVisible"
+      ref="tutorialRef"
+      :tutorial-steps="resolvedTutorialSteps"
+      @complete="onTutorialComplete"
+    />
 
-    <GettingStartedChecklist v-if="!needsStoreSelection && !isLoading" class="mb-4" />
-    <FirstWinBanner v-if="!needsStoreSelection && !isLoading" class="mb-4" />
+    <GettingStartedChecklist v-if="!needsStoreSelection && !isLoading" class="mb-2" />
 
-    <DashboardPageHeader v-if="!isCapacitorIos" data-tutorial="dashboard" :class="pageHeaderClass">
+    <DashboardPageHeader
+      v-if="!isCapacitorIos && !isQuietDashboard"
+      data-tutorial="dashboard"
+      :class="pageHeaderClass"
+    >
       <template #eyebrow>
         <p v-if="isNativeApp" :class="eyebrowClass">Overview</p>
       </template>
@@ -166,6 +197,35 @@
     </template>
 
     <template v-else>
+      <section
+        v-if="isQuietDashboard && !gettingStartedVisible"
+        class="dash-quiet-today"
+        data-tutorial="dashboard"
+      >
+        <div class="dash-quiet-today__strip">
+          <div class="min-w-0">
+            <p class="dash-quiet-today__eyebrow">
+              {{ currentStoreLabel || 'Today' }}
+              <span v-if="userRoleLabel"> · {{ userRoleLabel }}</span>
+            </p>
+            <h1 class="dash-quiet-today__title">
+              {{ quietHeadline }}
+            </h1>
+            <p class="dash-quiet-today__meta">
+              {{ formatCurrency(0) }} revenue · 0 sales · quiet so far
+            </p>
+          </div>
+          <NuxtLink
+            v-if="quietPrimaryCta"
+            :to="quietPrimaryCta.href"
+            class="dash-quiet-today__cta"
+          >
+            {{ quietPrimaryCta.label }}
+          </NuxtLink>
+        </div>
+      </section>
+
+      <template v-else-if="!isQuietDashboard">
       <DashboardAttentionStrip :items="homeAttentionItems" />
 
       <div class="dash-home-kpi">
@@ -500,6 +560,7 @@
           </ul>
         </section>
       </div>
+    </template>
     </template>
     </template>
 
@@ -974,6 +1035,41 @@ const dashboardGrossProfitSubtext = computed(() => {
 })
 
 const needsStoreSelection = computed(() => !storesStore.currentStoreId)
+
+const { visible: gettingStartedVisible, nextStep: gettingStartedNextStep } =
+  useGettingStartedPath()
+
+/** New / empty workspace: compress chrome to a today strip + one CTA. */
+const isQuietDashboard = computed(() => {
+  if (needsStoreSelection.value || isLoading.value) return false
+  return (
+    todayReceiptsCount.value === 0 &&
+    todaySales.value === 0 &&
+    totalRevenue.value === 0 &&
+    totalOrders.value === 0 &&
+    outstandingCount.value === 0 &&
+    lowStockItems.value.length === 0
+  )
+})
+
+const quietHeadline = computed(() => {
+  if (gettingStartedNextStep.value) return gettingStartedNextStep.value.title
+  if (inventoryStore.totalItems === 0) return 'Ready when you are'
+  return 'Quiet day so far'
+})
+
+const quietPrimaryCta = computed(() => {
+  if (gettingStartedNextStep.value) {
+    return {
+      href: gettingStartedNextStep.value.href,
+      label: gettingStartedNextStep.value.cta,
+    }
+  }
+  if (inventoryStore.totalItems === 0) {
+    return { href: '/dashboard/inventory', label: 'Add product' }
+  }
+  return { href: '/dashboard/receipts', label: 'Create sale' }
+})
 
 const currentStoreLabel = computed(() => {
   const store = storesStore.currentStore

@@ -7,7 +7,20 @@
       isCapacitorIos ? 'ios-inventory-categories-page' : '',
     ]"
   >
-    <IosPageNavBar v-if="isCapacitorIos" title="Categories" />
+    <IosPageNavBar v-if="isCapacitorIos" :title="iosCategoriesNavTitle">
+      <template
+        v-if="canCreateInventoryFolders && paginatedFolders.length > 0"
+        #trailing
+      >
+        <button
+          type="button"
+          class="ios-top-bar-text-btn"
+          @click="toggleIosFolderSelectMode"
+        >
+          {{ isIosFolderSelecting ? 'Done' : 'Select' }}
+        </button>
+      </template>
+    </IosPageNavBar>
 
     <DashboardPageHeader v-if="!isCapacitorIos" class="dash-page-header--unified">
       <template #eyebrow>
@@ -18,7 +31,7 @@
         </nav>
       </template>
       <template #title>
-        <h1 :class="titleClass">Categories</h1>
+        <h1 :class="titleClass">{{ branchPageTitle('Categories') }}</h1>
       </template>
       <template
         v-if="inventoryStore.loading && inventoryStore.folders.length === 0"
@@ -160,6 +173,7 @@
     <div
       v-if="
         isCapacitorIos &&
+        isIosFolderSelecting &&
         canCreateInventoryFolders &&
         paginatedFolders.length > 0 &&
         !inventoryStore.loading
@@ -357,7 +371,7 @@
           :last="index === paginatedFolders.length - 1"
           :show-menu="canCreateInventoryFolders"
           :menu-id="folder.id"
-          :selectable="canCreateInventoryFolders"
+          :selectable="canCreateInventoryFolders && isIosFolderSelecting"
           :selected="selectedFoldersForBulk.some((f) => f.id === folder.id)"
           @click="navigateToFolder(folder.id)"
           @menu="toggleFolderMenu(folder.id)"
@@ -621,70 +635,25 @@
     </DashboardTableEmptyState>
 
     <!-- Bulk Delete Folders Modal -->
-    <Modal
+    <BulkDeleteConfirmModal
       v-model="showBulkDeleteFoldersModal"
-      @update:model-value="(v: boolean) => { showBulkDeleteFoldersModal = v; if (!v) bulkDeleteFoldersConfirmed = false }"
-      size="md"
-    >
-      <template #header>
-        <div class="flex items-center gap-2.5">
-          <div
-            class="w-8 h-8 rounded-sm bg-red-100 dark:bg-red-900/30 flex items-center justify-center"
-          >
-            <TrashIcon class="w-4 h-4 text-red-600 dark:text-red-400" />
-          </div>
-          <div class="min-w-0">
-            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
-              Delete selected categories
-            </h3>
-            <p class="text-xs text-gray-500 dark:text-gray-400">
-              {{ selectedFoldersForBulk.length }}
-              {{ selectedFoldersForBulk.length === 1 ? 'category' : 'categories' }} selected
-            </p>
-          </div>
-        </div>
-      </template>
-      <div class="space-y-3">
-        <div
-          class="p-3 bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40 rounded-sm"
-        >
-          <p class="text-xs text-red-800 dark:text-red-200">
-            This will permanently delete the selected categories and all products inside them. This
-            action cannot be undone.
-          </p>
-        </div>
-        <div class="rounded-sm bg-gray-50 p-2.5 dark:!bg-dashboard-card/35">
-          <Checkbox
-            v-model="bulkDeleteFoldersConfirmed"
-            label="I understand that these categories and their products will be permanently deleted."
-            size="sm"
-            wrapper-class="items-start"
-            label-class="text-xs text-gray-700 dark:text-gray-300"
-          />
-        </div>
-      </div>
-      <template #footer>
-        <IosDrawerActions
-          primary-variant="danger"
-          :primary-icon="TrashIcon"
-          :primary-label="
-            isBulkDeletingFolders
-              ? 'Deleting...'
-              : `Delete ${selectedFoldersForBulk.length} ${
-                  selectedFoldersForBulk.length === 1 ? 'category' : 'categories'
-                }`
-          "
-          :primary-disabled="!bulkDeleteFoldersConfirmed || isBulkDeletingFolders"
-          @cancel="
-            () => {
-              showBulkDeleteFoldersModal = false
-              bulkDeleteFoldersConfirmed = false
-            }
-          "
-          @primary="handleConfirmBulkDeleteFolders"
-        />
-      </template>
-    </Modal>
+      v-model:confirmed="bulkDeleteFoldersConfirmed"
+      title="Delete selected categories"
+      entity-label="category"
+      entity-label-plural="categories"
+      :count="selectedFoldersForBulk.length"
+      :item-names="selectedFoldersForBulk.map((f) => f.name)"
+      warning="This permanently deletes the selected categories and every product inside them. This cannot be undone."
+      :impact-summary="
+        `Delete ${selectedFoldersForBulk.length} ${
+          selectedFoldersForBulk.length === 1 ? 'category' : 'categories'
+        } and all products inside`
+      "
+      confirm-label="I understand these categories and their products will be permanently deleted."
+      :loading="isBulkDeletingFolders"
+      @update:model-value="(v) => { if (!v) bulkDeleteFoldersConfirmed = false }"
+      @confirm="handleConfirmBulkDeleteFolders"
+    />
     <!-- Delete Folder Modal -->
     <DeleteFolderModal
       v-model="showDeleteFolderModal"
@@ -1738,6 +1707,27 @@ async function handleExportReorderList() {
 }
 const { canCreateInventoryFolders, canViewProfitAndCost, isStaff } = usePermissions()
 const { isCapacitorIos } = useIsCapacitorIos()
+const { branchPageTitle, currentStoreLabel } = useCurrentStoreLabel()
+const iosCategoriesNavTitle = computed(() =>
+  currentStoreLabel.value ? `${currentStoreLabel.value} · Categories` : 'Categories'
+)
+
+const {
+  isSelecting: isIosFolderSelecting,
+  toggleSelectMode: toggleIosFolderSelectMode,
+  exitSelectMode: exitIosFolderSelectMode,
+} = useIosBulkSelectMode({
+  clearSelection: () => {
+    selectedFoldersForBulk.value = []
+  },
+})
+
+watch(
+  () => storesStore.currentStoreId,
+  () => {
+    exitIosFolderSelectMode()
+  }
+)
 
 const effectiveFoldersViewMode = computed(() =>
   isCapacitorIos.value ? 'grid' : foldersViewMode.value

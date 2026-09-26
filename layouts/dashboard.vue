@@ -829,7 +829,7 @@
         ref="dashboardMainRef"
         data-dashboard-main
         :class="[
-          'w-full min-w-0 max-w-full px-3 py-2.5 sm:px-4 sm:py-3 lg:px-5 lg:py-4',
+          'w-full min-w-0 max-w-full px-3 pt-1.5 pb-2.5 sm:px-4 sm:pt-2 sm:pb-3 lg:px-5 lg:pt-2 lg:pb-3',
           isNativeApp
             ? [
                 'dashboard-native-main min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain',

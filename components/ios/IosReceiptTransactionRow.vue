@@ -4,9 +4,39 @@
     :class="{
       'ios-receipt-transaction-row--nested': nested,
       'ios-receipt-transaction-row--last': last,
-      'ios-receipt-transaction-row--with-menu': showMenu,
+      'ios-receipt-transaction-row--with-menu': showMenu && !selectable,
+      'ios-receipt-transaction-row--selected': selectable && selected,
+      'ios-receipt-transaction-row--selectable': selectable,
     }"
   >
+    <label
+      v-if="selectable"
+      class="ios-inventory-folder-row__select"
+      @click.stop
+    >
+      <input
+        type="checkbox"
+        class="ios-inventory-folder-row__select-input"
+        :checked="selected"
+        @change="$emit('select', ($event.target as HTMLInputElement).checked)"
+      />
+      <span class="ios-inventory-folder-row__select-box" aria-hidden="true">
+        <svg
+          class="ios-inventory-folder-row__select-mark"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="3"
+            d="M5 13l4 4L19 7"
+          />
+        </svg>
+      </span>
+      <span class="sr-only">Select {{ title }}</span>
+    </label>
     <button type="button" class="ios-receipt-transaction-row__main" @click="$emit('click')">
       <div
         class="ios-receipt-transaction-row__icon"
@@ -34,7 +64,7 @@
       </div>
     </button>
     <button
-      v-if="showMenu"
+      v-if="showMenu && !selectable"
       type="button"
       class="ios-list-row-menu-btn ios-receipt-transaction-row__menu"
       v-bind="menuAnchorAttrs"
@@ -125,15 +155,20 @@ const props = withDefaults(
     /** Override anchor attribute (e.g. data-item-actions-anchor). */
     menuAnchor?: string
     menuAriaLabel?: string
+    selectable?: boolean
+    selected?: boolean
   }>(),
   {
     menuKind: 'receipt',
+    selectable: false,
+    selected: false,
   }
 )
 
 defineEmits<{
   click: []
   menu: []
+  select: [checked: boolean]
 }>()
 
 const resolvedMenuAnchor = computed(
@@ -149,3 +184,4 @@ const menuAnchorAttrs = computed(() => {
   return { [resolvedMenuAnchor.value]: props.menuId }
 })
 </script>
+

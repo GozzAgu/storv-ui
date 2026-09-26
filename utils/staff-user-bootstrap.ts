@@ -1,6 +1,7 @@
 import { collectionGroup, doc, getDoc, getDocs, query, where, type Firestore } from 'firebase/firestore'
 import type { Staff } from '~/composables/useStaff'
 import type { UserData } from '~/composables/useUser'
+import type { SubscriptionPlan } from '~/types/subscription'
 import { resolveApiPath } from '~/utils/api-url'
 import { getFirebaseClientAuth } from '~/utils/firebase-client-auth'
 import { sanitizeUserData } from '~/utils/sanitize-user-data'
@@ -10,6 +11,12 @@ type OwnerWorkspaceContext = Pick<
   UserData,
   'subscription' | 'subscriptionBillingCycle' | 'preferences' | 'storeDetails' | 'storeLogoUrl'
 >
+
+export type StaffOwnerContextResult = {
+  userData: UserData
+  /** True when owner plan/prefs were applied (safe to cache as authoritative). */
+  inheritedOwnerContext: boolean
+}
 
 function applyOwnerContext(base: UserData, owner: OwnerWorkspaceContext): UserData {
   return {
@@ -25,7 +32,7 @@ function applyOwnerContext(base: UserData, owner: OwnerWorkspaceContext): UserDa
 }
 
 /**
- * users/{ownerId} is owner-only in Firestore rules, so staff getDoc fails.
+ * users/{ownerId} is owner-only in Firestore rules, so staff getDoc often fails.
  * Admin-backed API returns the plan/prefs staff need for nav feature gates.
  */
 async function fetchOwnerWorkspaceContextFromApi(): Promise<OwnerWorkspaceContext | null> {
@@ -96,13 +103,26 @@ function mapStaffDoc(staffDoc: { id: string; ref: { path: string }; data: () => 
   }
 }
 
-export function buildStaffUserData(staff: Staff, authUid: string): UserData {
+/**
+ * Seed staff profile. Prefer prior cached owner plan so nav does not flash Micro
+ * while owner context is still loading.
+ */
+export function buildStaffUserData(
+  staff: Staff,
+  authUid: string,
+  prior?: Pick<UserData, 'subscription' | 'subscriptionBillingCycle' | 'preferences' | 'storeDetails' | 'storeLogoUrl'> | null
+): UserData {
+  const priorPlan = prior?.subscription
   return {
     uid: authUid,
     email: staff.email || '',
     name: `${staff.firstName || ''} ${staff.lastName || ''}`.trim() || 'Staff Member',
     role: 'staff',
-    subscription: 'storvv_micro',
+    subscription: (priorPlan as SubscriptionPlan) || 'storvv_micro',
+    subscriptionBillingCycle: prior?.subscriptionBillingCycle,
+    preferences: prior?.preferences,
+    storeDetails: prior?.storeDetails,
+    storeLogoUrl: prior?.storeLogoUrl,
     hasCompletedOnboarding: true,
     hasCompletedTutorial: true,
     mustChangePassword: Boolean(staff.mustChangePassword),
@@ -115,11 +135,23 @@ export function buildStaffUserData(staff: Staff, authUid: string): UserData {
 export async function buildStaffUserDataWithOwnerContext(
   db: Firestore,
   staff: Staff,
-  authUid: string
-): Promise<UserData> {
-  const base = buildStaffUserData(staff, authUid)
+  authUid: string,
+  prior?: UserData | null
+): Promise<StaffOwnerContextResult> {
+  const base = buildStaffUserData(staff, authUid, prior?.uid === authUid ? prior : null)
   const ownerId = staff.createdBy?.trim()
-  if (!ownerId) return base
+  if (!ownerId) {
+    return { userData: base, inheritedOwnerContext: false }
+  }
+
+  // Prefer admin API (works regardless of owner-doc rules); fall back to client getDoc.
+  const fromApi = await fetchOwnerWorkspaceContextFromApi()
+  if (fromApi?.subscription || fromApi?.preferences || fromApi?.storeDetails) {
+    return {
+      userData: applyOwnerContext(base, fromApi),
+      inheritedOwnerContext: true,
+    }
+  }
 
   try {
     const ownerSnap = await getDoc(doc(db, 'users', ownerId))
@@ -128,18 +160,16 @@ export async function buildStaffUserDataWithOwnerContext(
         uid: ownerSnap.id,
         ...ownerSnap.data(),
       } as UserData)
-      return applyOwnerContext(base, owner)
+      return {
+        userData: applyOwnerContext(base, owner),
+        inheritedOwnerContext: true,
+      }
     }
   } catch {
-    // Permission denied for staff under owner-only users/{id} rules — fall through to API.
+    // Permission denied / offline — keep prior plan on base.
   }
 
-  const fromApi = await fetchOwnerWorkspaceContextFromApi()
-  if (fromApi) {
-    return applyOwnerContext(base, fromApi)
-  }
-
-  return base
+  return { userData: base, inheritedOwnerContext: false }
 }
 
 export type StaffLookupResult =

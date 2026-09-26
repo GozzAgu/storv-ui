@@ -436,7 +436,8 @@ const switchStore = async (storeId: string) => {
 
     await storesStore.setCurrentStore(storeId)
 
-    toast.success(`Switched to ${branchShortLabel(storesStore.getStoreById(storeId)?.name) || 'store'}`)
+    const label = branchShortLabel(storesStore.getStoreById(storeId)?.name) || 'store'
+    toast.success(`Showing data for ${label}. Lists and metrics are scoped to this branch.`)
   } catch (err: any) {
     console.error('Error switching store:', err)
     toast.error(err.message || 'Failed to switch store')

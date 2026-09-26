@@ -62,7 +62,7 @@ html:not(.capacitor-native) .dashboard-layout-root {
   --saas-topnav-shadow: 0 8px 28px rgb(15 23 42 / 0.08), var(--saas-glass-highlight);
   --saas-topnav-blur: var(--saas-blur);
   --saas-topnav-height: 3rem;
-  --saas-topnav-stack: calc(var(--saas-sidebar-inset) + var(--saas-topnav-height) + 0.625rem);
+  --saas-topnav-stack: calc(var(--saas-sidebar-inset) + var(--saas-topnav-height) + 0.25rem);
   --saas-topnav-control-bg: rgb(255 255 255 / 0.45);
   --saas-topnav-control-border: rgb(255 255 255 / 0.5);
   --saas-topnav-radius: 1rem;
@@ -1000,9 +1000,9 @@ html:not(.capacitor-native).dark .dash-sidebar .font-bold {
 }
 
 html:not(.capacitor-native).dark .dash-home .saas-dashboard-greeting {
-  font-size: clamp(1.75rem, 3vw, 2.15rem);
+  font-size: clamp(1.25rem, 2vw, 1.5rem);
   font-weight: 700;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.03em;
 }
 
 html:not(.capacitor-native).dark .dashboard-atmosphere__ray {

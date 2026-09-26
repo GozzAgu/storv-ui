@@ -6,7 +6,20 @@
       isCapacitorIos ? 'ios-inventory-categories-page' : '',
     ]"
   >
-    <IosPageNavBar v-if="isCapacitorIos" title="Departments" />
+    <IosPageNavBar v-if="isCapacitorIos" :title="iosDepartmentsNavTitle">
+      <template
+        v-if="canManageDepartments && paginatedDepartments.length > 0"
+        #trailing
+      >
+        <button
+          type="button"
+          class="ios-top-bar-text-btn"
+          @click="toggleIosDepartmentSelectMode"
+        >
+          {{ isIosDepartmentSelecting ? 'Done' : 'Select' }}
+        </button>
+      </template>
+    </IosPageNavBar>
 
     <DashboardPageHeader v-if="!isCapacitorIos" class="dash-page-header--unified">
       <template #eyebrow>
@@ -23,7 +36,7 @@
       </template>
       <template #title>
         <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <h1 :class="titleClass">Departments</h1>
+          <h1 :class="titleClass">{{ branchPageTitle('Departments') }}</h1>
           <span
             v-if="currentStore?.id === store?.id"
             class="inline-flex items-center rounded-full border border-emerald-200/80 bg-emerald-50/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-800 dark:border-emerald-500/25 dark:bg-emerald-500/10 dark:text-emerald-300/90"
@@ -140,6 +153,7 @@
     <div
       v-if="
         isCapacitorIos &&
+        isIosDepartmentSelecting &&
         canManageDepartments &&
         paginatedDepartments.length > 0 &&
         !departmentsStore.loading &&
@@ -263,7 +277,7 @@
             :show-menu="canManageDepartments"
             menu-kind="department"
             :menu-id="department.id"
-            :selectable="canManageDepartments"
+            :selectable="canManageDepartments && isIosDepartmentSelecting"
             :selected="selectedDepartmentsForBulk.some((d) => d.id === department.id)"
             @click="navigateToDepartment(department.id)"
             @menu="toggleDepartmentMenu(department.id)"
@@ -480,73 +494,19 @@
     </div>
 
     <!-- Bulk Delete Departments Modal -->
-    <Modal
+    <BulkDeleteConfirmModal
       v-model="showBulkDeleteDepartmentsModal"
-      @update:model-value="(v: boolean) => { showBulkDeleteDepartmentsModal = v; if (!v) bulkDeleteDepartmentsConfirmed = false }"
-      size="md"
-    >
-      <template #header>
-        <div class="flex items-center gap-2.5">
-          <div
-            class="w-8 h-8 rounded-sm bg-red-100 dark:bg-red-900/30 flex items-center justify-center"
-          >
-            <TrashIcon class="w-4 h-4 text-red-600 dark:text-red-400" />
-          </div>
-          <div class="min-w-0">
-            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
-              Delete selected departments
-            </h3>
-            <p class="text-xs text-gray-500 dark:text-gray-400">
-              {{ selectedDepartmentsForBulk.length }} department{{
-                selectedDepartmentsForBulk.length !== 1 ? 's' : ''
-              }}
-              selected
-            </p>
-          </div>
-        </div>
-      </template>
-      <div class="space-y-3">
-        <div
-          class="p-3 bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40 rounded-sm"
-        >
-          <p class="text-xs text-red-800 dark:text-red-200">
-            This will permanently delete the selected departments and their staff associations. This
-            action cannot be undone.
-          </p>
-        </div>
-        <div class="rounded-sm bg-gray-50 p-2.5 dark:!bg-dashboard-card/35">
-          <Checkbox
-            v-model="bulkDeleteDepartmentsConfirmed"
-            label="I understand that these departments will be permanently deleted."
-            size="sm"
-            wrapper-class="items-start"
-            label-class="text-xs text-gray-700 dark:text-gray-300"
-          />
-        </div>
-      </div>
-      <template #footer>
-        <IosDrawerActions
-          primary-variant="danger"
-          :primary-icon="TrashIcon"
-          :primary-label="
-            isBulkDeletingDepartments
-              ? 'Deleting...'
-              : `Delete ${selectedDepartmentsForBulk.length} department${
-                  selectedDepartmentsForBulk.length !== 1 ? 's' : ''
-                }`
-          "
-          :primary-loading="isBulkDeletingDepartments"
-          :primary-disabled="!bulkDeleteDepartmentsConfirmed || isBulkDeletingDepartments"
-          @cancel="
-            () => {
-              showBulkDeleteDepartmentsModal = false
-              bulkDeleteDepartmentsConfirmed = false
-            }
-          "
-          @primary="handleConfirmBulkDeleteDepartments"
-        />
-      </template>
-    </Modal>
+      v-model:confirmed="bulkDeleteDepartmentsConfirmed"
+      title="Delete selected departments"
+      entity-label="department"
+      :count="selectedDepartmentsForBulk.length"
+      :item-names="selectedDepartmentsForBulk.map((d) => d.name)"
+      warning="This permanently deletes the selected departments and their staff associations. This cannot be undone."
+      confirm-label="I understand these departments will be permanently deleted."
+      :loading="isBulkDeletingDepartments"
+      @update:model-value="(v) => { if (!v) bulkDeleteDepartmentsConfirmed = false }"
+      @confirm="handleConfirmBulkDeleteDepartments"
+    />
 
     <!-- Department ⋮ menu (teleported; same as main Departments list + Inventory folders) -->
     <IosContextMenu
@@ -653,6 +613,23 @@ const {
 
 const { tableShellClass } = useDashboardTableChrome()
 const { isCapacitorIos } = useIsCapacitorIos()
+const { currentStoreLabel, branchPageTitle } = useCurrentStoreLabel()
+const iosDepartmentsNavTitle = computed(() =>
+  currentStoreLabel.value ? `${currentStoreLabel.value} · Departments` : 'Departments'
+)
+const {
+  isSelecting: isIosDepartmentSelecting,
+  toggleSelectMode: toggleIosDepartmentSelectMode,
+  exitSelectMode: exitIosDepartmentSelectMode,
+} = useIosBulkSelectMode({
+  clearSelection: () => {
+    selectedDepartmentsForBulk.value = []
+  },
+})
+watch(
+  () => storeId.value,
+  () => exitIosDepartmentSelectMode()
+)
 
 const showDepartmentModal = ref(false)
 const editingDepartment = ref<Department | null>(null)
