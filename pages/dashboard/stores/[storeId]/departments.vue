@@ -96,36 +96,28 @@
         />
         <div
           v-if="canManageDepartments && paginatedDepartments.length > 0"
-          class="dash-page-header__bulk ml-auto flex flex-wrap items-center gap-2"
+          class="dash-page-header__bulk ml-auto"
         >
-          <Checkbox
+          <DashboardBulkSelectControl
             :model-value="allDepartmentsOnPageSelected"
-            size="sm"
-            wrapper-class="!h-8 items-center"
-            label-class="!text-xs !ml-2 !font-normal !leading-none text-gray-500 dark:text-gray-400"
+            :selected-count="selectedDepartmentsForBulk.length"
             @update:model-value="setSelectAllDepartmentsBulk"
           >
-            {{ allDepartmentsOnPageSelected ? 'All selected' : 'Select all' }}
-          </Checkbox>
-          <template v-if="selectedDepartmentsForBulk.length > 0">
-            <span
-              class="inline-flex h-8 items-center text-xs font-medium tabular-nums text-gray-600 dark:text-gray-400"
-            >
-              {{ selectedDepartmentsForBulk.length }} selected
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              :icon="TrashIcon"
-              :extra-class="
-                headerBtnClass +
-                ' !border-red-200/70 !text-red-600 hover:!bg-red-50/80 dark:!border-red-900/40 dark:!text-red-400 dark:hover:!bg-red-950/30'
-              "
-              @click="openBulkDeleteDepartmentsModal"
-            >
-              <span :class="headerBtnLabelClass">Delete</span>
-            </Button>
-          </template>
+            <template #action>
+              <Button
+                variant="outline"
+                size="sm"
+                :icon="TrashIcon"
+                :extra-class="
+                  headerBtnClass +
+                  ' !border-red-200/70 !text-red-600 hover:!bg-red-50/80 dark:!border-red-900/40 dark:!text-red-400 dark:hover:!bg-red-950/30'
+                "
+                @click="openBulkDeleteDepartmentsModal"
+              >
+                <span :class="headerBtnLabelClass">Delete</span>
+              </Button>
+            </template>
+          </DashboardBulkSelectControl>
         </div>
       </template>
     </DashboardPageHeader>

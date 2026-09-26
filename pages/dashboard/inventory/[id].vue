@@ -83,34 +83,26 @@
         v-if="canCreateInventoryFolders && paginatedChildFolders.length > 0"
         class="flex flex-wrap items-center gap-2"
       >
-        <Checkbox
+        <DashboardBulkSelectControl
           :model-value="allSubfoldersOnPageSelected"
-          size="sm"
-          wrapper-class="!h-8 items-center"
-          label-class="!text-xs !ml-2 !font-normal !leading-none text-gray-500 dark:text-gray-500"
+          :selected-count="selectedSubfoldersForBulk.length"
           @update:model-value="toggleSelectAllSubfolders"
         >
-          {{ allSubfoldersOnPageSelected ? 'All selected' : 'Select all' }}
-        </Checkbox>
-        <template v-if="selectedSubfoldersForBulk.length > 0">
-          <span
-            class="inline-flex h-8 items-center text-xs font-medium tabular-nums text-gray-600 dark:text-gray-400"
-          >
-            {{ selectedSubfoldersForBulk.length }} selected
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            :icon="TrashIcon"
-            :extra-class="
-              headerBtnClass +
-              ' !border-red-200/70 !text-red-600 hover:!bg-red-50/80 dark:!border-red-900/40 dark:!text-red-400 dark:hover:!bg-red-950/30'
-            "
-            @click="openBulkDeleteSubfoldersModal"
-          >
-            Delete
-          </Button>
-        </template>
+          <template #action>
+            <Button
+              variant="outline"
+              size="sm"
+              :icon="TrashIcon"
+              :extra-class="
+                headerBtnClass +
+                ' !border-red-200/70 !text-red-600 hover:!bg-red-50/80 dark:!border-red-900/40 dark:!text-red-400 dark:hover:!bg-red-950/30'
+              "
+              @click="openBulkDeleteSubfoldersModal"
+            >
+              Delete
+            </Button>
+          </template>
+        </DashboardBulkSelectControl>
       </div>
       <Button
         v-if="canAddSubcategories"
@@ -463,26 +455,14 @@
             Products live inside subcategories. Open one to add or manage stock.
           </p>
         </div>
-        <div class="flex flex-wrap items-center gap-2 shrink-0">
-          <div
+        <div class="flex shrink-0 flex-wrap items-center gap-2">
+          <DashboardBulkSelectControl
             v-if="canCreateInventoryFolders && paginatedChildFolders.length > 0"
-            class="flex flex-wrap items-center gap-2"
+            :model-value="allSubfoldersOnPageSelected"
+            :selected-count="selectedSubfoldersForBulk.length"
+            @update:model-value="toggleSelectAllSubfolders"
           >
-            <Checkbox
-              :model-value="allSubfoldersOnPageSelected"
-              size="sm"
-              wrapper-class="!h-8 items-center"
-              label-class="!text-xs !ml-2 !font-normal !leading-none text-gray-500 dark:text-gray-500"
-              @update:model-value="toggleSelectAllSubfolders"
-            >
-              {{ allSubfoldersOnPageSelected ? 'All selected' : 'Select all' }}
-            </Checkbox>
-            <template v-if="selectedSubfoldersForBulk.length > 0">
-              <span
-                class="inline-flex h-8 items-center text-xs font-medium tabular-nums text-gray-600 dark:text-gray-400"
-              >
-                {{ selectedSubfoldersForBulk.length }} selected
-              </span>
+            <template #action>
               <Button
                 variant="outline"
                 size="sm"
@@ -496,7 +476,7 @@
                 Delete
               </Button>
             </template>
-          </div>
+          </DashboardBulkSelectControl>
           <Button
             v-if="canAddSubcategories"
             variant="primary"

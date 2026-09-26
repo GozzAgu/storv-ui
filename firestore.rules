@@ -320,9 +320,17 @@ service cloud.firestore {
         ]);
     }
     
-    // Users collection - owner-only read; whitelisted self-service updates
+    // Active staff indexed at users/{ownerId}/workspaceMembers/{staffAuthUid} (written by
+    // admin owner-context API and owner staff sync) so staff can inherit plan/prefs.
+    function isActiveWorkspaceMember(userId) {
+      return isAuthenticated() &&
+             exists(/databases/$(database)/documents/users/$(userId)/workspaceMembers/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(userId)/workspaceMembers/$(request.auth.uid)).data.get('status', '') == 'active';
+    }
+
+    // Users collection - owner read, or active workspace staff (plan inheritance); self-service updates
     match /users/{userId} {
-      allow read: if isOwner(userId);
+      allow read: if isOwner(userId) || isActiveWorkspaceMember(userId);
       
       allow create: if isOwner(userId)
         && request.resource.data.keys().hasOnly(userSelfServiceCreateKeys());
@@ -330,6 +338,11 @@ service cloud.firestore {
       allow update: if isOwner(userId) && userSelfServiceUpdateAllowed();
       
       allow delete: if isOwner(userId);
+
+      match /workspaceMembers/{memberUid} {
+        allow read: if isOwner(userId) || (isAuthenticated() && request.auth.uid == memberUid);
+        allow create, update, delete: if isOwner(userId);
+      }
 
       match /security/{docId} {
         allow read, write: if false;

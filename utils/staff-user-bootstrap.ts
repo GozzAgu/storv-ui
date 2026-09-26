@@ -1,8 +1,46 @@
 import { collectionGroup, doc, getDoc, getDocs, query, where, type Firestore } from 'firebase/firestore'
 import type { Staff } from '~/composables/useStaff'
 import type { UserData } from '~/composables/useUser'
+import { resolveApiPath } from '~/utils/api-url'
+import { getFirebaseClientAuth } from '~/utils/firebase-client-auth'
 import { sanitizeUserData } from '~/utils/sanitize-user-data'
 import { resolveStaffPermissions } from '~/utils/staff-permissions'
+
+type OwnerWorkspaceContext = Pick<
+  UserData,
+  'subscription' | 'subscriptionBillingCycle' | 'preferences' | 'storeDetails' | 'storeLogoUrl'
+>
+
+function applyOwnerContext(base: UserData, owner: OwnerWorkspaceContext): UserData {
+  return {
+    ...base,
+    subscription: owner.subscription ?? base.subscription,
+    subscriptionBillingCycle: owner.subscriptionBillingCycle,
+    preferences: owner.preferences,
+    storeDetails: owner.storeDetails,
+    storeLogoUrl: owner.storeLogoUrl,
+    hasCompletedOnboarding: true,
+    hasCompletedTutorial: true,
+  }
+}
+
+/**
+ * users/{ownerId} is owner-only in Firestore rules, so staff getDoc fails.
+ * Admin-backed API returns the plan/prefs staff need for nav feature gates.
+ */
+async function fetchOwnerWorkspaceContextFromApi(): Promise<OwnerWorkspaceContext | null> {
+  try {
+    const auth = getFirebaseClientAuth()
+    const user = auth?.currentUser
+    if (!user) return null
+    const token = await user.getIdToken()
+    return await $fetch<OwnerWorkspaceContext>(resolveApiPath('/api/workspace/owner-context'), {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+  } catch {
+    return null
+  }
+}
 
 function isActiveStaffStatus(status: Staff['status'] | undefined): boolean {
   return (status || 'active') === 'active'
@@ -85,26 +123,23 @@ export async function buildStaffUserDataWithOwnerContext(
 
   try {
     const ownerSnap = await getDoc(doc(db, 'users', ownerId))
-    if (!ownerSnap.exists()) return base
-
-    const owner = sanitizeUserData({
-      uid: ownerSnap.id,
-      ...ownerSnap.data(),
-    } as UserData)
-
-    return {
-      ...base,
-      subscription: owner.subscription ?? base.subscription,
-      subscriptionBillingCycle: owner.subscriptionBillingCycle,
-      preferences: owner.preferences,
-      storeDetails: owner.storeDetails,
-      storeLogoUrl: owner.storeLogoUrl,
-      hasCompletedOnboarding: true,
-      hasCompletedTutorial: true,
+    if (ownerSnap.exists()) {
+      const owner = sanitizeUserData({
+        uid: ownerSnap.id,
+        ...ownerSnap.data(),
+      } as UserData)
+      return applyOwnerContext(base, owner)
     }
   } catch {
-    return base
+    // Permission denied for staff under owner-only users/{id} rules — fall through to API.
   }
+
+  const fromApi = await fetchOwnerWorkspaceContextFromApi()
+  if (fromApi) {
+    return applyOwnerContext(base, fromApi)
+  }
+
+  return base
 }
 
 export type StaffLookupResult =

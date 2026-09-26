@@ -110,6 +110,27 @@ async function assertStaffPlanCapacity(storeId: string): Promise<void> {
 const getStoreMemberDoc = (db: Firestore, userId: string, storeId: string, memberAuthUid: string) =>
   doc(db, `users/${userId}/stores/${storeId}/members/${memberAuthUid}`)
 
+const getWorkspaceMemberDoc = (db: Firestore, ownerUserId: string, memberAuthUid: string) =>
+  doc(db, `users/${ownerUserId}/workspaceMembers/${memberAuthUid}`)
+
+async function syncWorkspaceMemberIndex(
+  db: Firestore,
+  ownerUserId: string,
+  memberAuthUid: string,
+  payload: { storeId: string; status: string }
+) {
+  await setDoc(
+    getWorkspaceMemberDoc(db, ownerUserId, memberAuthUid),
+    {
+      authUid: memberAuthUid,
+      storeId: payload.storeId,
+      status: payload.status || 'active',
+      updatedAt: serverTimestamp(),
+    },
+    { merge: true }
+  )
+}
+
 export const useStaffStore = defineStore('staff', {
   state: () => ({
     staff: [] as Staff[],
@@ -245,11 +266,12 @@ export const useStaffStore = defineStore('staff', {
           await Promise.allSettled(
             activeStaff
               .filter((s) => s.authUid)
-              .map((s) =>
-                setDoc(
-                  getStoreMemberDoc(db, userId, storeId, s.authUid as string),
+              .map(async (s) => {
+                const authUid = s.authUid as string
+                await setDoc(
+                  getStoreMemberDoc(db, userId, storeId, authUid),
                   {
-                    authUid: s.authUid,
+                    authUid,
                     staffId: s.id,
                     storeId,
                     departmentId: s.departmentId,
@@ -271,7 +293,11 @@ export const useStaffStore = defineStore('staff', {
                   },
                   { merge: true }
                 )
-              )
+                await syncWorkspaceMemberIndex(db, userId, authUid, {
+                  storeId,
+                  status: s.status || 'active',
+                })
+              })
           )
         }
 
@@ -716,6 +742,10 @@ export const useStaffStore = defineStore('staff', {
         },
         { merge: true }
       )
+      await syncWorkspaceMemberIndex(db, superAdminUid, staffAuthUid, {
+        storeId,
+        status: newStaff.status,
+      })
 
       await departmentsStore.updateStaffCount(
         staffData.departmentId,
@@ -935,6 +965,10 @@ export const useStaffStore = defineStore('staff', {
           },
           { merge: true }
         )
+        await syncWorkspaceMemberIndex(db, userId, staffMember.authUid, {
+          storeId,
+          status: String(mergedStatus || 'active'),
+        })
 
         // Update in local state
         const departmentsStoreForName = useDepartmentsStore()

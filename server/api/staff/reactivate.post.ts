@@ -110,6 +110,21 @@ export default defineEventHandler(async (event) => {
         },
         { merge: true }
       )
+
+    await adminDb
+      .collection('users')
+      .doc(ownerUserId)
+      .collection('workspaceMembers')
+      .doc(authUid)
+      .set(
+        {
+          authUid,
+          storeId,
+          status: 'active',
+          updatedAt: FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      )
   }
 
   await staffRef.update({

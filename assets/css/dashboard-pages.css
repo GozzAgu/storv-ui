@@ -407,6 +407,8 @@ html.dark .dash-page-context-bar__sep {
 
 .dash-page-header__bulk {
   width: 100%;
+  display: flex;
+  align-items: center;
   justify-content: flex-end;
 }
 

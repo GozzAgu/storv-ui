@@ -130,6 +130,50 @@ describe('firestore.rules', () => {
     await assertFails(getDoc(doc(db, 'users/u1')))
   })
 
+  it('allows active workspace members to read owner user doc', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await setDoc(doc(context.firestore(), 'users/u1'), {
+        uid: 'u1',
+        email: 'a@b.com',
+        name: 'Owner',
+        role: 'superAdmin',
+        subscription: 'storvv_enterprise',
+        hasCompletedOnboarding: true,
+        hasCompletedTutorial: false,
+      })
+      await setDoc(doc(context.firestore(), 'users/u1/workspaceMembers/staff1'), {
+        authUid: 'staff1',
+        storeId: 's1',
+        status: 'active',
+      })
+    })
+
+    const db = testEnv.authenticatedContext('staff1').firestore()
+    await assertSucceeds(getDoc(doc(db, 'users/u1')))
+  })
+
+  it('denies inactive workspace members from reading owner user doc', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await setDoc(doc(context.firestore(), 'users/u1'), {
+        uid: 'u1',
+        email: 'a@b.com',
+        name: 'Owner',
+        role: 'superAdmin',
+        subscription: 'storvv_enterprise',
+        hasCompletedOnboarding: true,
+        hasCompletedTutorial: false,
+      })
+      await setDoc(doc(context.firestore(), 'users/u1/workspaceMembers/staff1'), {
+        authUid: 'staff1',
+        storeId: 's1',
+        status: 'inactive',
+      })
+    })
+
+    const db = testEnv.authenticatedContext('staff1').firestore()
+    await assertFails(getDoc(doc(db, 'users/u1')))
+  })
+
   it('denies client updates to subscription field', async () => {
     await testEnv.withSecurityRulesDisabled(async (context) => {
       await setDoc(doc(context.firestore(), 'users/u1'), {
