@@ -462,6 +462,52 @@
                     {{ getSelectedItemQuantityError(item.id) }}
                   </p>
                 </div>
+                <div
+                  v-if="selectedItems.find((si) => si.id === item.id)"
+                  class="mt-2 w-full border-t border-gray-100/90 pt-2 dark:border-gray-800/80"
+                  @click.stop
+                >
+                  <template
+                    v-if="
+                      !selectedItems.find((si) => si.id === item.id)?.showDiscountInput &&
+                      !(selectedItems.find((si) => si.id === item.id)?.discountAmount)
+                    "
+                  >
+                    <button
+                      type="button"
+                      class="text-[11px] font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+                      @click="toggleItemDiscountInput(item.id)"
+                    >
+                      + Discount
+                    </button>
+                  </template>
+                  <div v-else class="flex flex-wrap items-center gap-2">
+                    <label class="text-[10px] font-medium text-gray-600 dark:text-gray-400"
+                      >Discount</label
+                    >
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      :value="selectedItems.find((si) => si.id === item.id)?.discountAmount"
+                      class="app-field h-8 w-24 px-2 text-xs dark:!bg-dashboard-card"
+                      placeholder="0.00"
+                      @input="
+                        setItemDiscountAmount(
+                          item.id,
+                          parseFloat(($event.target as HTMLInputElement).value) || 0
+                        )
+                      "
+                    />
+                    <button
+                      type="button"
+                      class="text-[11px] text-red-600 hover:underline dark:text-red-400"
+                      @click="clearItemDiscount(item.id)"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -498,6 +544,13 @@
                       {{ getItemDisplayName(si.item) }}
                       <span v-if="!itemUsesSerialNumbers(si.item) && si.quantity > 1">
                         × {{ si.quantity }}
+                      </span>
+                      <span class="ml-1 text-gray-500 dark:text-gray-400">
+                        {{
+                          formatCurrency(
+                            Math.max(0, getEffectivePrice(si.item) - (si.discountAmount || 0))
+                          )
+                        }}
                       </span>
                       <span
                         v-if="getSelectedItemQuantityError(si.id)"
@@ -768,6 +821,14 @@
                 v-model="receiptForm.notes"
                 :rows="2"
                 placeholder="Additional notes..."
+              />
+            </IosFormField>
+            <IosFormField v-if="hasAnyCheckoutDiscount" label="Discount reason" required>
+              <IosFormTextarea
+                v-model="discountReason"
+                :rows="2"
+                extra-class="resize-none"
+                placeholder="Why is a discount being applied to this sale?"
               />
             </IosFormField>
           </IosFormSection>
@@ -1121,7 +1182,19 @@ const sheetContentPadding = computed(() =>
 const loadingFolders = ref(false)
 const loadingItems = ref(false)
 const isCreating = ref(false)
-const selectedItems = ref<Array<{ id: string; quantity: number; item: InventoryItem }>>([])
+const selectedItems = ref<
+  Array<{
+    id: string
+    quantity: number
+    item: InventoryItem
+    discountAmount?: number
+    showDiscountInput?: boolean
+  }>
+>([])
+const discountReason = ref('')
+const hasAnyCheckoutDiscount = computed(() =>
+  selectedItems.value.some((si) => (si.discountAmount || 0) > 0)
+)
 const availableItems = ref<InventoryItem[]>([])
 const itemSearchQuery = ref('')
 const showCustomerSuggestions = ref(false)
@@ -1370,6 +1443,8 @@ const isFormValid = computed(() => {
       }
     }
   }
+
+  if (hasAnyCheckoutDiscount.value && !discountReason.value.trim()) return false
 
   return baseValid
 })
@@ -1762,6 +1837,24 @@ const updateItemQuantity = (itemId: string, quantity: number) => {
   }
 }
 
+const toggleItemDiscountInput = (itemId: string) => {
+  const selected = selectedItems.value.find((si) => si.id === itemId)
+  if (selected) selected.showDiscountInput = true
+}
+
+const setItemDiscountAmount = (itemId: string, amount: number) => {
+  const selected = selectedItems.value.find((si) => si.id === itemId)
+  if (selected) selected.discountAmount = amount > 0 ? amount : undefined
+}
+
+const clearItemDiscount = (itemId: string) => {
+  const selected = selectedItems.value.find((si) => si.id === itemId)
+  if (selected) {
+    selected.discountAmount = undefined
+    selected.showDiscountInput = false
+  }
+}
+
 const getEffectivePrice = (item: InventoryItem): number => {
   // If item has a discount, use discounted price; otherwise use regular price
   if (item.discountedPrice !== undefined && item.discountedPrice !== null) {
@@ -1782,10 +1875,10 @@ const getOriginalPrice = (item: InventoryItem): number => {
   return parseFloat(priceField || '0')
 }
 
-/** Sum of sold line items (after per-item discounts) before swap credit */
+/** Sum of sold line items (after per-item discounts, including any checkout-time discount) before swap credit */
 const calculateItemsSubtotal = () => {
   return selectedItems.value.reduce((total, si) => {
-    const price = getEffectivePrice(si.item)
+    const price = Math.max(0, getEffectivePrice(si.item) - (si.discountAmount || 0))
     return total + price * si.quantity
   }, 0)
 }
@@ -1900,6 +1993,7 @@ const resetForm = () => {
   }
   paymentSettlement.value = 'paid_in_full'
   depositAmount.value = 0
+  discountReason.value = ''
   // Reset swap-in state
   isSwapIn.value = false
   swapInFolderId.value = ''
@@ -1933,9 +2027,19 @@ const handleCreateReceipt = async () => {
     // Create receipt items array
     const receiptItems: ReceiptItem[] = selectedItems.value.map((si) => {
       const lineSerial = itemUsesSerialNumbers(si.item)
-      const effectivePrice = getEffectivePrice(si.item)
+      const checkoutDiscount = si.discountAmount || 0
+      const inventoryHasDiscount =
+        si.item.discountedPrice !== undefined && si.item.discountedPrice !== null
+      // A checkout-time discount and a pre-existing inventory discount are mutually exclusive
+      // for metadata; final unit price always applies checkout discount on top of effective price.
+      const finalPrice = Math.max(0, getEffectivePrice(si.item) - checkoutDiscount)
       const originalPrice = getOriginalPrice(si.item)
-      const hasDiscount = si.item.discountedPrice !== undefined && si.item.discountedPrice !== null
+      const hasDiscount = inventoryHasDiscount || checkoutDiscount > 0
+      const discountAmount = checkoutDiscount > 0 ? checkoutDiscount : si.item.discountAmount
+      const discountPercentage =
+        checkoutDiscount > 0 && originalPrice > 0
+          ? Math.round((checkoutDiscount / originalPrice) * 100)
+          : si.item.discountPercentage
 
       const itemQuantity = lineSerial ? 1 : si.quantity
 
@@ -1943,7 +2047,7 @@ const handleCreateReceipt = async () => {
         itemId: si.id,
         folderId: si.item.folderId,
         quantity: itemQuantity,
-        price: effectivePrice, // Final price after discount
+        price: finalPrice, // Final price after discount
         itemName: getItemDisplayName(si.item),
         unitCost: resolveItemUnitCost(si.item),
         serialNo:
@@ -1957,8 +2061,8 @@ const handleCreateReceipt = async () => {
         // Include discount information if applicable
         ...(hasDiscount && {
           originalPrice: originalPrice,
-          discountPercentage: si.item.discountPercentage,
-          discountAmount: si.item.discountAmount,
+          discountPercentage,
+          discountAmount,
           hasDiscount: true,
         }),
       }
@@ -2063,6 +2167,10 @@ const handleCreateReceipt = async () => {
         method: p.method,
         amount: p.amount,
       }))
+    }
+
+    if (hasAnyCheckoutDiscount.value) {
+      receiptData.discountReason = discountReason.value.trim()
     }
 
     // Add swap-in fields if enabled
