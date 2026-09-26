@@ -94,7 +94,7 @@ service cloud.firestore {
                   : false)
               : moduleName == 'sellerLoans'
                 ? (action == 'view' || action == 'create' || action == 'edit'
-                    ? elevated
+                    ? true
                     : false)
                 : moduleName == 'multiStoreSync'
                   ? false
@@ -183,8 +183,13 @@ service cloud.firestore {
       return isStoreOwnerForPath(userId) || memberHasPermission(userId, storeId, 'buybacks', action);
     }
 
+    // Stock loans: every active store member can view/create/edit (baseline, like POS sales).
+    // Delete stays on the explicit sellerLoans.delete grant.
     function canAccessSellerLoans(userId, storeId, action) {
-      return isStoreOwnerForPath(userId) || memberHasPermission(userId, storeId, 'sellerLoans', action);
+      return isStoreOwnerForPath(userId)
+        || (isActiveStoreMember(userId, storeId)
+            && (action == 'view' || action == 'create' || action == 'edit'))
+        || memberHasPermission(userId, storeId, 'sellerLoans', action);
     }
 
     function canAccessLeads(userId, storeId, action) {

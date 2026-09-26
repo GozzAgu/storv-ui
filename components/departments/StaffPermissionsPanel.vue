@@ -126,8 +126,8 @@ const modules: Array<{
   {
     key: 'sellerLoans',
     title: 'Stock loans',
-    viewHint: 'Devices loaned to sellers or retailers.',
-    manageHint: 'Create and update stock loans.',
+    viewHint: 'Always on for staff. Devices loaned to sellers or retailers.',
+    manageHint: 'Always on for staff. Create and update stock loans.',
   },
   {
     key: 'multiStoreSync',

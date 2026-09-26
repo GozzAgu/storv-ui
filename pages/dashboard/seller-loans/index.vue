@@ -117,7 +117,7 @@
       class="rounded-sm bg-red-50/90 px-4 py-4 dark:bg-red-950/25 sm:px-5 sm:py-5"
     >
       <p class="text-xs font-medium text-red-800 dark:text-red-200">
-        Only super admins and store managers can manage stock loans.
+        You do not have access to stock loans on this account.
       </p>
     </div>
 

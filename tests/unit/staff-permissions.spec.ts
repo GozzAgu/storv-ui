@@ -35,12 +35,12 @@ describe('deriveDefaultPermissions', () => {
     expect(p.leads.delete).toBe(true)
   })
 
-  it('staff without receipts grant: view + create receipts only (POS), no refund', () => {
+  it('staff without receipts grant: view + create receipts only (POS), stock loans baseline on', () => {
     const p = deriveDefaultPermissions({ role: 'staff' })
     expect(p.receipts).toEqual({ view: true, create: true, edit: false, delete: false, refund: false })
     expect(p.leads).toEqual({ view: true, create: true, edit: true, delete: false })
     expect(p.buybacks.view).toBe(false)
-    expect(p.sellerLoans.view).toBe(false)
+    expect(p.sellerLoans).toEqual({ view: true, create: true, edit: true, delete: false })
     expect(p.multiStoreSync.view).toBe(false)
   })
 
@@ -85,8 +85,19 @@ describe('resolveStaffPermissions', () => {
     })
     expect(result.leads.view).toBe(true)
     expect(result.buybacks.view).toBe(false)
-    expect(result.sellerLoans.view).toBe(false)
+    expect(result.sellerLoans).toEqual({ view: true, create: true, edit: true, delete: false })
     expect(result.multiStoreSync.view).toBe(false)
+  })
+
+  it('forces stock loans baseline even when a stored matrix left them off', () => {
+    const result = resolveStaffPermissions({
+      role: 'staff',
+      permissions: {
+        ...EMPTY_STAFF_PERMISSIONS,
+        sellerLoans: { view: false, create: false, edit: false, delete: false },
+      },
+    })
+    expect(result.sellerLoans).toEqual({ view: true, create: true, edit: true, delete: false })
   })
 
   it('falls back to deriveDefaultPermissions when permissions is absent', () => {

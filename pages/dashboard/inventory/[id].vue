@@ -2517,7 +2517,7 @@ const { isCapacitorIos } = useIsCapacitorIos()
 const userStore = useUserStore()
 const storesStore = useStoresStore()
 const departmentsStore = useDepartmentsStore()
-const { canManageInventoryItems, canManage, canViewProfitAndCost, canCreateInventoryFolders, isStaff } =
+const { canManageInventoryItems, canManage, can, canViewProfitAndCost, canCreateInventoryFolders, isStaff } =
   usePermissions()
 const canShowProfitAndCost = computed(
   () => canViewProfitAndCost.value && folder.value?.trackProfit === true
@@ -3952,18 +3952,23 @@ const createSellerLoanModalItems = computed(
 
 const sellerLoansEnterpriseUnlocked = computed(() => subscriptionFeaturesUi.canUse('seller_loans'))
 
-/** Managers / super admin + Enterprise + serial-number folder */
+/** Staff with stock-loan access + plan unlocked + serial-number folder */
 const canLoanToSellerUi = computed(
-  () => !!(canManage.value && sellerLoansEnterpriseUnlocked.value && folder.value?.hasSerialNumbers)
+  () =>
+    !!(
+      can('sellerLoans', 'create') &&
+      sellerLoansEnterpriseUnlocked.value &&
+      folder.value?.hasSerialNumbers
+    )
 )
 
-/** Checkboxes so managers/super admins can select rows for Stock loan where that feature is unlocked */
+/** Checkboxes so staff can select rows for Stock loan where that feature is unlocked */
 const showBulkRowSelection = computed(
   () => canManageInventoryItems.value || canLoanToSellerUi.value
 )
 
 const sellerLoanButtonTitle = computed(() => {
-  if (!folder.value?.hasSerialNumbers || !canManage.value) return ''
+  if (!folder.value?.hasSerialNumbers || !can('sellerLoans', 'create')) return ''
   return selectedItemsEligibleForSellerLoan.value.length === 0
     ? 'Select one or more available products using the checkboxes'
     : 'Record a stock loan for the selected products'

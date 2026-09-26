@@ -53,7 +53,8 @@ export interface LegacyStaffAccessFields {
  *   gets it by migration.
  * - `leads`: any member could view/create/edit; delete required elevated manage access.
  * - `buybacks`: matched inventory manage (create/edit); view when they could manage.
- * - `sellerLoans`: elevated manage access (same as former "manager-only" ops).
+ * - `sellerLoans`: baseline for every staff member (view/create/edit), same idea as leads /
+ *   receipts.create. Delete stays elevated-only.
  * - `multiStoreSync`: owner-only historically; staff never inherit it by migration.
  */
 export function deriveDefaultPermissions(staff: LegacyStaffAccessFields): StaffPermissions {
@@ -92,9 +93,9 @@ export function deriveDefaultPermissions(staff: LegacyStaffAccessFields): StaffP
   }
 
   const sellerLoans: ModulePermission = {
-    view: elevated,
-    create: elevated,
-    edit: elevated,
+    view: true,
+    create: true,
+    edit: true,
     delete: false,
   }
 
@@ -123,12 +124,24 @@ export function normalizeStaffPermissions(
  * Single source of truth for "what can this staff member actually do". used client-side (via
  * usePermissions), by the one-time backfill script, and mirrored (as `legacyHasPermission`) in
  * firestore.rules. Returns the stored grant if present, else derives it from legacy fields.
+ *
+ * Stock loans view/create/edit are always granted (baseline for every active staff member), even
+ * when an older stored matrix left them off.
  */
 export function resolveStaffPermissions(staff: LegacyStaffAccessFields): StaffPermissions {
-  if (staff.permissions) {
-    return normalizeStaffPermissions(staff.permissions, staff)
+  const base = staff.permissions
+    ? normalizeStaffPermissions(staff.permissions, staff)
+    : deriveDefaultPermissions(staff)
+
+  return {
+    ...base,
+    sellerLoans: {
+      view: true,
+      create: true,
+      edit: true,
+      delete: base.sellerLoans.delete === true,
+    },
   }
-  return deriveDefaultPermissions(staff)
 }
 
 export function isModuleManaging(module: ModulePermission): boolean {
@@ -144,7 +157,8 @@ export function hasAnyModuleManageAccess(permissions: StaffPermissions): boolean
     // Leads create/edit are baseline for staff (same idea as receipts.create); only delete elevates.
     permissions.leads.delete ||
     isModuleManaging(permissions.buybacks) ||
-    isModuleManaging(permissions.sellerLoans) ||
+    // Stock loans view/create/edit are baseline; only delete elevates.
+    permissions.sellerLoans.delete ||
     isModuleManaging(permissions.multiStoreSync)
   )
 }
@@ -172,7 +186,7 @@ export function summarizeStaffPermissions(
     !permissions.receipts.refund &&
     !permissions.leads.delete &&
     !isModuleManaging(permissions.buybacks) &&
-    !isModuleManaging(permissions.sellerLoans) &&
+    !permissions.sellerLoans.delete &&
     !isModuleManaging(permissions.multiStoreSync)
   return isViewOnly ? 'view-only' : 'custom'
 }
