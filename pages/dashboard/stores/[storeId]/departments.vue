@@ -138,6 +138,38 @@
     />
 
     <div
+      v-if="
+        isCapacitorIos &&
+        canManageDepartments &&
+        paginatedDepartments.length > 0 &&
+        !departmentsStore.loading &&
+        !storesLoading
+      "
+      class="ios-bulk-select-host"
+    >
+      <DashboardBulkSelectControl
+        :model-value="allDepartmentsOnPageSelected"
+        :selected-count="selectedDepartmentsForBulk.length"
+        @update:model-value="setSelectAllDepartmentsBulk"
+      >
+        <template #action>
+          <Button
+            variant="outline"
+            size="sm"
+            :icon="TrashIcon"
+            :extra-class="
+              headerBtnClass +
+              ' !border-red-200/70 !text-red-600 hover:!bg-red-50/80 dark:!border-red-900/40 dark:!text-red-400 dark:hover:!bg-red-950/30'
+            "
+            @click="openBulkDeleteDepartmentsModal"
+          >
+            <span :class="headerBtnLabelClass">Delete</span>
+          </Button>
+        </template>
+      </DashboardBulkSelectControl>
+    </div>
+
+    <div
       v-if="departmentsStore.error && !departmentsStore.loading"
       :class="errorCardClass"
     >
@@ -231,8 +263,11 @@
             :show-menu="canManageDepartments"
             menu-kind="department"
             :menu-id="department.id"
+            :selectable="canManageDepartments"
+            :selected="selectedDepartmentsForBulk.some((d) => d.id === department.id)"
             @click="navigateToDepartment(department.id)"
             @menu="toggleDepartmentMenu(department.id)"
+            @select="(checked) => toggleDepartmentSelection(department, checked)"
           />
         </div>
 

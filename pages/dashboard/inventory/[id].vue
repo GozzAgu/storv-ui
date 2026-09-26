@@ -362,6 +362,31 @@
           aria-label="Subcategory actions"
           :options="subcategoryQuickActionOptions"
         />
+        <div
+          v-if="canCreateInventoryFolders && paginatedChildFolders.length > 0"
+          class="ios-bulk-select-host"
+        >
+          <DashboardBulkSelectControl
+            :model-value="allSubfoldersOnPageSelected"
+            :selected-count="selectedSubfoldersForBulk.length"
+            @update:model-value="toggleSelectAllSubfolders"
+          >
+            <template #action>
+              <Button
+                variant="outline"
+                size="sm"
+                :icon="TrashIcon"
+                :extra-class="
+                  headerBtnClass +
+                  ' !border-red-200/70 !text-red-600 hover:!bg-red-50/80 dark:!border-red-900/40 dark:!text-red-400 dark:hover:!bg-red-950/30'
+                "
+                @click="openBulkDeleteSubfoldersModal"
+              >
+                Delete
+              </Button>
+            </template>
+          </DashboardBulkSelectControl>
+        </div>
         <IosDrawer
           v-model="showSubcategoryMoreSheet"
           title="Subcategory options"
@@ -424,8 +449,11 @@
             :last="index === paginatedChildFolders.length - 1"
             :show-menu="canCreateInventoryFolders"
             :menu-id="child.id"
+            :selectable="canCreateInventoryFolders"
+            :selected="selectedSubfoldersForBulk.some((f) => f.id === child.id)"
             @click="navigateToSubfolder(child.id)"
             @menu="toggleSubfolderMenu(child.id)"
+            @select="(checked) => toggleSubfolderSelection(child, checked)"
           />
         </div>
         <DashboardTablePagination

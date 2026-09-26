@@ -63,4 +63,17 @@ export function markCapacitorDocument(): void {
   } catch {
     /* ignore */
   }
+
+  try {
+    const ua = navigator.userAgent
+    const isIpadUa = /iPad/i.test(ua)
+    const isIpadOsDesktopUa =
+      navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1
+    const isWideCapIos =
+      html.classList.contains('capacitor-ios') &&
+      window.matchMedia('(min-width: 768px)').matches
+    html.classList.toggle('capacitor-ipad', isIpadUa || isIpadOsDesktopUa || isWideCapIos)
+  } catch {
+    /* ignore */
+  }
 }

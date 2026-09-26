@@ -157,6 +157,37 @@
       :options="categoryQuickActionOptions"
     />
 
+    <div
+      v-if="
+        isCapacitorIos &&
+        canCreateInventoryFolders &&
+        paginatedFolders.length > 0 &&
+        !inventoryStore.loading
+      "
+      class="ios-bulk-select-host"
+    >
+      <DashboardBulkSelectControl
+        :model-value="allFoldersOnPageSelected"
+        :selected-count="selectedFoldersForBulk.length"
+        @update:model-value="toggleSelectAllFolders"
+      >
+        <template #action>
+          <Button
+            variant="outline"
+            size="sm"
+            :icon="TrashIcon"
+            :extra-class="
+              headerBtnClass +
+              ' !border-red-200/70 !text-red-600 hover:!bg-red-50/80 dark:!border-red-900/40 dark:!text-red-400 dark:hover:!bg-red-950/30'
+            "
+            @click="openBulkDeleteFoldersModal"
+          >
+            Delete
+          </Button>
+        </template>
+      </DashboardBulkSelectControl>
+    </div>
+
     <IosDrawer
       v-if="isCapacitorIos"
       v-model="showInventoryMoreSheet"
@@ -326,8 +357,11 @@
           :last="index === paginatedFolders.length - 1"
           :show-menu="canCreateInventoryFolders"
           :menu-id="folder.id"
+          :selectable="canCreateInventoryFolders"
+          :selected="selectedFoldersForBulk.some((f) => f.id === folder.id)"
           @click="navigateToFolder(folder.id)"
           @menu="toggleFolderMenu(folder.id)"
+          @select="(checked) => toggleFolderSelection(folder, checked)"
         />
       </div>
 

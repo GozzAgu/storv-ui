@@ -2,6 +2,7 @@
   <div
     :class="[
       'dash-bulk-select',
+      `dash-bulk-select--${resolvedSize}`,
       selectedCount > 0 && 'dash-bulk-select--active',
       extraClass,
     ]"
@@ -49,18 +50,24 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useIosLayoutSize } from '~/composables/useIosLayoutSize'
+
 /**
- * Compact segmented bulk-select bar with its own visible checkbox (not the
- * shared Checkbox component) so scoped styles and contrast stay reliable.
+ * Compact segmented bulk-select bar with its own visible checkbox.
+ * size="auto" promotes to comfortable on iPad (Capacitor / iPadOS).
  */
-withDefaults(
+const props = withDefaults(
   defineProps<{
     modelValue: boolean
     selectedCount?: number
+    /** compact = phone/web, comfortable = iPad, auto = pick from layout */
+    size?: 'auto' | 'compact' | 'comfortable'
     extraClass?: string
   }>(),
   {
     selectedCount: 0,
+    size: 'auto',
     extraClass: '',
   }
 )
@@ -68,6 +75,11 @@ withDefaults(
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]
 }>()
+
+const { bulkSelectSize } = useIosLayoutSize()
+const resolvedSize = computed(() =>
+  props.size === 'auto' ? bulkSelectSize.value : props.size
+)
 </script>
 
 <style scoped>
@@ -279,5 +291,58 @@ const emit = defineEmits<{
 .dash-bulk-select__action--idle {
   opacity: 0;
   pointer-events: none;
+}
+
+/* iPad / large-tablet density */
+.dash-bulk-select--comfortable {
+  --bulk-gap: 0.625rem;
+  grid-template-columns: auto 1px 5.75rem 1px max-content;
+  height: 2.5rem;
+  min-height: 2.5rem;
+  padding: 0 0.625rem 0 0.375rem;
+  border-radius: 1.15rem;
+}
+
+.dash-bulk-select--comfortable .dash-bulk-select__lead {
+  height: 2.5rem;
+  gap: 0.5rem;
+}
+
+.dash-bulk-select--comfortable .dash-bulk-select__box {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 0.3rem;
+}
+
+.dash-bulk-select--comfortable .dash-bulk-select__mark {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.dash-bulk-select--comfortable .dash-bulk-select__label,
+.dash-bulk-select--comfortable .dash-bulk-select__count {
+  font-size: 0.8125rem;
+}
+
+.dash-bulk-select--comfortable .dash-bulk-select__rule {
+  height: 1.125rem;
+}
+
+.dash-bulk-select--comfortable .dash-bulk-select__action {
+  min-width: 5.5rem;
+  min-height: 2.5rem;
+}
+
+.dash-bulk-select--comfortable .dash-bulk-select__action :deep(button) {
+  height: 2rem !important;
+  min-height: 2rem !important;
+  padding-inline: 0.75rem !important;
+  border-radius: 0.85rem !important;
+  font-size: 0.8125rem !important;
+}
+
+.dash-bulk-select--comfortable .dash-bulk-select__action :deep(svg) {
+  width: 1rem !important;
+  height: 1rem !important;
 }
 </style>
