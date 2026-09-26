@@ -858,6 +858,16 @@ html:not(.dark) .dash-store-row--active {
   color: var(--dash-ink);
 }
 
+.dash-store-row__meta {
+  margin: 0.125rem 0 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.6875rem;
+  line-height: 1.3;
+  color: var(--dash-muted, rgb(100 116 139));
+}
+
 .dash-store-row--active .dash-store-row__name {
   font-weight: 600;
 }

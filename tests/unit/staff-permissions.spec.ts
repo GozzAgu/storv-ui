@@ -13,23 +13,35 @@ describe('deriveDefaultPermissions', () => {
     const p = deriveDefaultPermissions({ role: 'manager', canManageInventory: true })
     expect(p.products).toEqual({ view: true, create: true, edit: true, delete: true })
     expect(p.receipts).toEqual({ view: true, create: true, edit: true, delete: false, refund: true })
+    expect(p.buybacks).toEqual({ view: true, create: true, edit: true, delete: false })
+    expect(p.sellerLoans.view).toBe(true)
+    expect(p.leads.delete).toBe(true)
+    expect(p.multiStoreSync.view).toBe(false)
   })
 
   it('manager without inventory grant: view-only products, receipts edit + refund still implicit', () => {
     const p = deriveDefaultPermissions({ role: 'manager' })
     expect(p.products).toEqual({ view: true, create: false, edit: false, delete: false })
     expect(p.receipts).toEqual({ view: true, create: true, edit: true, delete: false, refund: true })
+    expect(p.buybacks.view).toBe(false)
+    expect(p.sellerLoans.view).toBe(true)
   })
 
   it('staff with receipts grant: no products manage, no receipts edit, but refund granted', () => {
     const p = deriveDefaultPermissions({ role: 'staff', canManageReceipts: true })
     expect(p.products).toEqual({ view: true, create: false, edit: false, delete: false })
     expect(p.receipts).toEqual({ view: true, create: true, edit: false, delete: false, refund: true })
+    expect(p.sellerLoans.view).toBe(true)
+    expect(p.leads.delete).toBe(true)
   })
 
   it('staff without receipts grant: view + create receipts only (POS), no refund', () => {
     const p = deriveDefaultPermissions({ role: 'staff' })
     expect(p.receipts).toEqual({ view: true, create: true, edit: false, delete: false, refund: false })
+    expect(p.leads).toEqual({ view: true, create: true, edit: true, delete: false })
+    expect(p.buybacks.view).toBe(false)
+    expect(p.sellerLoans.view).toBe(false)
+    expect(p.multiStoreSync.view).toBe(false)
   })
 
   it('intern with receipts grant: same shape as staff+grant', () => {
@@ -60,7 +72,21 @@ describe('resolveStaffPermissions', () => {
   it('prefers a stored permissions object over deriving from legacy fields', () => {
     const stored = FULL_STAFF_PERMISSIONS
     const result = resolveStaffPermissions({ role: 'staff', permissions: stored })
-    expect(result).toBe(stored)
+    expect(result).toEqual(stored)
+  })
+
+  it('fills missing modules on a partial stored matrix from migration defaults', () => {
+    const result = resolveStaffPermissions({
+      role: 'staff',
+      permissions: {
+        products: { view: true, create: false, edit: false, delete: false },
+        receipts: { view: true, create: true, edit: false, delete: false, refund: false },
+      },
+    })
+    expect(result.leads.view).toBe(true)
+    expect(result.buybacks.view).toBe(false)
+    expect(result.sellerLoans.view).toBe(false)
+    expect(result.multiStoreSync.view).toBe(false)
   })
 
   it('falls back to deriveDefaultPermissions when permissions is absent', () => {

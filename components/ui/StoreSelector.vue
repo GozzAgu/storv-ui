@@ -154,7 +154,10 @@
                 </span>
                 <div class="min-w-0 flex-1">
                   <p :class="rowNameClass">
-                    {{ branchShortLabel(store.name) || 'Unnamed store' }}
+                    {{ storePrimaryLabel(store) }}
+                  </p>
+                  <p v-if="storeSecondaryLabel(store)" class="dash-store-row__meta">
+                    {{ storeSecondaryLabel(store) }}
                   </p>
                   <div
                     v-if="currentStore?.id === store.id || store.isActive === false"
@@ -212,6 +215,10 @@ import { useUserStore } from '~/stores/user'
 import { useAppToast } from '~/composables/useAppToast'
 import { useDashboardStoreSwitchChrome } from '~/composables/useDashboardStoreSwitchChrome'
 import { getStoreBranchCodeLabel, getStoreBranchShortLabel } from '~/utils/store-branch-label'
+import {
+  getStoreSwitcherPrimaryLabel,
+  getStoreSwitcherSecondaryLabel,
+} from '~/utils/branch-name'
 import { storeBranchNavTooltip } from '~/utils/dashboard-tooltip'
 
 const props = withDefaults(
@@ -329,6 +336,19 @@ function branchShortLabel(name: string | null | undefined) {
 
 function branchCodeLabel(name: string | null | undefined) {
   return getStoreBranchCodeLabel(name)
+}
+
+function storePrimaryLabel(store: { id?: string; name?: string | null }) {
+  return getStoreSwitcherPrimaryLabel(store, stores.value)
+}
+
+function storeSecondaryLabel(store: {
+  id?: string
+  name?: string | null
+  address?: string | null
+  description?: string | null
+}) {
+  return getStoreSwitcherSecondaryLabel(store, stores.value)
 }
 
 const handleClickOutside = (event: MouseEvent) => {

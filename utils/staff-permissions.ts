@@ -6,14 +6,29 @@ import type {
   StaffPermissions,
 } from '~/types/staff-permissions'
 
+const emptyModule = (): ModulePermission => ({
+  view: false,
+  create: false,
+  edit: false,
+  delete: false,
+})
+
 export const FULL_STAFF_PERMISSIONS: StaffPermissions = {
   products: { view: true, create: true, edit: true, delete: true },
   receipts: { view: true, create: true, edit: true, delete: true, refund: true },
+  leads: { view: true, create: true, edit: true, delete: true },
+  buybacks: { view: true, create: true, edit: true, delete: true },
+  sellerLoans: { view: true, create: true, edit: true, delete: true },
+  multiStoreSync: { view: true, create: true, edit: true, delete: true },
 }
 
 export const EMPTY_STAFF_PERMISSIONS: StaffPermissions = {
-  products: { view: false, create: false, edit: false, delete: false },
-  receipts: { view: false, create: false, edit: false, delete: false, refund: false },
+  products: emptyModule(),
+  receipts: { ...emptyModule(), refund: false },
+  leads: emptyModule(),
+  buybacks: emptyModule(),
+  sellerLoans: emptyModule(),
+  multiStoreSync: emptyModule(),
 }
 
 /** The subset of a legacy `Staff`/`members` doc needed to derive default permissions. */
@@ -21,7 +36,7 @@ export interface LegacyStaffAccessFields {
   role?: 'manager' | 'staff' | 'intern' | string
   canManageInventory?: boolean
   canManageReceipts?: boolean
-  permissions?: StaffPermissions
+  permissions?: Partial<StaffPermissions> | StaffPermissions
 }
 
 /**
@@ -36,11 +51,16 @@ export interface LegacyStaffAccessFields {
  *   staff/intern explicitly granted `canManageReceipts`.
  * - `receipts.delete`: was owner-only (`usePermissions.canDeleteReceipts = !isStaff`); nobody
  *   gets it by migration.
+ * - `leads`: any member could view/create/edit; delete required elevated manage access.
+ * - `buybacks`: matched inventory manage (create/edit); view when they could manage.
+ * - `sellerLoans`: elevated manage access (same as former "manager-only" ops).
+ * - `multiStoreSync`: owner-only historically; staff never inherit it by migration.
  */
 export function deriveDefaultPermissions(staff: LegacyStaffAccessFields): StaffPermissions {
   const isManager = staff.role === 'manager'
   const inventoryManaged = isManager && staff.canManageInventory === true
   const hadRefundAccess = isManager || staff.canManageReceipts === true
+  const elevated = inventoryManaged || isManager || hadRefundAccess
 
   const products: ModulePermission = {
     view: true,
@@ -57,7 +77,46 @@ export function deriveDefaultPermissions(staff: LegacyStaffAccessFields): StaffP
     refund: hadRefundAccess,
   }
 
-  return { products, receipts }
+  const leads: ModulePermission = {
+    view: true,
+    create: true,
+    edit: true,
+    delete: elevated,
+  }
+
+  const buybacks: ModulePermission = {
+    view: inventoryManaged,
+    create: inventoryManaged,
+    edit: inventoryManaged,
+    delete: false,
+  }
+
+  const sellerLoans: ModulePermission = {
+    view: elevated,
+    create: elevated,
+    edit: elevated,
+    delete: false,
+  }
+
+  const multiStoreSync: ModulePermission = emptyModule()
+
+  return { products, receipts, leads, buybacks, sellerLoans, multiStoreSync }
+}
+
+/** Fill any modules missing from a stored (partial) matrix using migration defaults. */
+export function normalizeStaffPermissions(
+  permissions: Partial<StaffPermissions> | StaffPermissions,
+  legacy: LegacyStaffAccessFields = {}
+): StaffPermissions {
+  const derived = deriveDefaultPermissions(legacy)
+  return {
+    products: permissions.products ?? derived.products,
+    receipts: permissions.receipts ?? derived.receipts,
+    leads: permissions.leads ?? derived.leads,
+    buybacks: permissions.buybacks ?? derived.buybacks,
+    sellerLoans: permissions.sellerLoans ?? derived.sellerLoans,
+    multiStoreSync: permissions.multiStoreSync ?? derived.multiStoreSync,
+  }
 }
 
 /**
@@ -66,7 +125,10 @@ export function deriveDefaultPermissions(staff: LegacyStaffAccessFields): StaffP
  * firestore.rules. Returns the stored grant if present, else derives it from legacy fields.
  */
 export function resolveStaffPermissions(staff: LegacyStaffAccessFields): StaffPermissions {
-  return staff.permissions ?? deriveDefaultPermissions(staff)
+  if (staff.permissions) {
+    return normalizeStaffPermissions(staff.permissions, staff)
+  }
+  return deriveDefaultPermissions(staff)
 }
 
 export function isModuleManaging(module: ModulePermission): boolean {
@@ -78,7 +140,12 @@ export function hasAnyModuleManageAccess(permissions: StaffPermissions): boolean
     isModuleManaging(permissions.products) ||
     permissions.receipts.edit ||
     permissions.receipts.delete ||
-    permissions.receipts.refund
+    permissions.receipts.refund ||
+    // Leads create/edit are baseline for staff (same idea as receipts.create); only delete elevates.
+    permissions.leads.delete ||
+    isModuleManaging(permissions.buybacks) ||
+    isModuleManaging(permissions.sellerLoans) ||
+    isModuleManaging(permissions.multiStoreSync)
   )
 }
 
@@ -95,15 +162,17 @@ export function getPermissionAction(
 export function summarizeStaffPermissions(
   permissions: StaffPermissions
 ): 'full' | 'view-only' | 'custom' {
-  if (
-    JSON.stringify(permissions) === JSON.stringify(FULL_STAFF_PERMISSIONS)
-  ) {
+  if (JSON.stringify(permissions) === JSON.stringify(FULL_STAFF_PERMISSIONS)) {
     return 'full'
   }
   const isViewOnly =
     !isModuleManaging(permissions.products) &&
     !permissions.receipts.edit &&
     !permissions.receipts.delete &&
-    !permissions.receipts.refund
+    !permissions.receipts.refund &&
+    !permissions.leads.delete &&
+    !isModuleManaging(permissions.buybacks) &&
+    !isModuleManaging(permissions.sellerLoans) &&
+    !isModuleManaging(permissions.multiStoreSync)
   return isViewOnly ? 'view-only' : 'custom'
 }

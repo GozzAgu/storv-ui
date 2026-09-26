@@ -13,6 +13,18 @@ function escapeHtml(text: string): string {
     .replace(/'/g, '&#039;')
 }
 
+function describeFetchFailure(err: unknown): string {
+  if (!(err instanceof Error)) return 'Network error talking to the email provider'
+  const cause = (err as Error & { cause?: { code?: string; message?: string } }).cause
+  if (cause?.code === 'ENOTFOUND' || /enotfound/i.test(String(cause?.message || err.message))) {
+    return 'Could not reach api.resend.com (DNS/network). Check your connection and try again.'
+  }
+  if (cause?.code === 'ETIMEDOUT' || /timeout|aborted/i.test(err.message)) {
+    return 'Timed out connecting to the email provider. Try again in a moment.'
+  }
+  return err.message || 'Network error talking to the email provider'
+}
+
 async function sendViaResend(params: {
   toEmail: string
   subject: string
@@ -25,19 +37,25 @@ async function sendViaResend(params: {
     )
   }
 
-  const response = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      from,
-      to: [params.toEmail.trim().toLowerCase()],
-      subject: params.subject,
-      html: params.html,
-    }),
-  })
+  let response: Response
+  try {
+    response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        from,
+        to: [params.toEmail.trim().toLowerCase()],
+        subject: params.subject,
+        html: params.html,
+      }),
+      signal: AbortSignal.timeout(20_000),
+    })
+  } catch (err) {
+    throw new Error(describeFetchFailure(err))
+  }
 
   if (!response.ok) {
     const err = (await response.json().catch(() => ({}))) as {

@@ -5,14 +5,14 @@
       <IosPageNavBar title="Sales leads" />
 
       <IosQuickActionBar
-        v-if="canAccessLeadsPlan"
+        v-if="canAccessLeads"
         v-model="iosLeadTab"
         role="tablist"
         aria-label="Lead actions and filters"
         :options="iosLeadQuickActions"
       />
 
-      <template v-if="canAccessLeadsPlan && storesStore.currentStoreId">
+      <template v-if="canAccessLeads && storesStore.currentStoreId">
         <div v-if="!salesLeadsStore.loading" class="ios-sales-chrome">
           <div class="ios-search-bar-host ios-search-bar-host--sticky">
             <IosSearchBar
@@ -90,13 +90,21 @@
       </template>
 
       <DashboardTableEmptyState
-        v-else-if="canAccessLeadsPlan && !storesStore.currentStoreId"
+        v-else-if="canAccessLeads && !storesStore.currentStoreId"
         :icon="BuildingStorefrontIcon"
         title="Select a store"
         description="Use the store selector to view leads for a branch."
       />
 
       <FeatureGateCard v-else-if="!canAccessLeadsPlan" feature="sales_leads" />
+      <div
+        v-else
+        class="rounded-sm bg-red-50/90 px-4 py-4 dark:bg-red-950/25 sm:px-5 sm:py-5"
+      >
+        <p class="text-xs font-medium text-red-800 dark:text-red-200">
+          Sales leads are not enabled for your account. Ask your store owner to grant access.
+        </p>
+      </div>
     </div>
 
     <!-- Web -->
@@ -109,18 +117,18 @@
         <h1 :class="pageTitleClass">Sales leads</h1>
       </template>
       <template
-        v-if="canAccessLeadsPlan && salesLeadsStore.loading && salesLeadsStore.leads.length === 0"
+        v-if="canAccessLeads && salesLeadsStore.loading && salesLeadsStore.leads.length === 0"
         #description
       >
         <DashPageMetricsSkeleton :count="2" />
       </template>
       <template
-        v-else-if="canAccessLeadsPlan && !salesLeadsStore.loading && filteredLeads.length > 0"
+        v-else-if="canAccessLeads && !salesLeadsStore.loading && filteredLeads.length > 0"
         #description
       >
         <DashboardPageMetrics :metrics="leadHeaderMetrics" aria-label="Lead summary" />
       </template>
-      <template v-if="canAccessLeadsPlan" #actions>
+      <template v-if="canAccessLeads && canCreateLead" #actions>
         <Button
           variant="primary"
           size="sm"
@@ -142,7 +150,23 @@
       </p>
     </div>
 
-    <template v-else-if="canAccessLeadsPlan">
+    <div
+      v-else-if="!canAccessLeadsPlan"
+      class="py-8"
+    >
+      <FeatureGateCard feature="sales_leads" />
+    </div>
+
+    <div
+      v-else-if="!canAccessLeads"
+      class="rounded-sm bg-red-50/90 px-4 py-4 dark:bg-red-950/25 sm:px-5 sm:py-5"
+    >
+      <p class="text-xs font-medium text-red-800 dark:text-red-200">
+        Sales leads are not enabled for your account. Ask your store owner to grant access.
+      </p>
+    </div>
+
+    <template v-else-if="canAccessLeads">
       <div
         v-if="!storesStore.currentStoreId && !salesLeadsStore.loading"
         :class="tableShellFlexClass"
@@ -317,9 +341,6 @@
       </div>
     </template>
 
-    <div v-else class="py-8">
-      <FeatureGateCard feature="sales_leads" />
-    </div>
     </template>
 
     <CreateLeadModal v-model="showCreateModal" @created="onLeadCreated" />
@@ -392,6 +413,7 @@ const { tableShellFlexClass } = useDashboardTableChrome()
 const { dashPath } = useDashboardPaths()
 const { formatCurrency } = usePreferences()
 const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
+const { can } = usePermissions()
 const { isCapacitorIos } = useIsCapacitorIos()
 
 const salesLeadsStore = useSalesLeadsStore()
@@ -453,6 +475,8 @@ function formatWhenShort(v: Date | undefined) {
 const openStatuses: SalesLeadStatus[] = ['new', 'contacted', 'negotiating']
 
 const canAccessLeadsPlan = computed(() => canUseSubscriptionFeature('sales_leads'))
+const canAccessLeads = computed(() => canAccessLeadsPlan.value && can('leads', 'view'))
+const canCreateLead = computed(() => can('leads', 'create'))
 
 const filteredLeads = computed(() => {
   let rows = salesLeadsStore.leads
@@ -561,7 +585,7 @@ async function onLeadCreated(leadId: string) {
 watch(
   () => storesStore.currentStoreId,
   () => {
-    if (storesStore.currentStoreId && canAccessLeadsPlan.value) {
+    if (storesStore.currentStoreId && canAccessLeads.value) {
       salesLeadsStore.fetchSalesLeads(true)
     } else if (!storesStore.currentStoreId) {
       salesLeadsStore.clearForUiStoreSwitch()
@@ -570,7 +594,7 @@ watch(
 )
 
 onMounted(async () => {
-  if (canAccessLeadsPlan.value && storesStore.currentStoreId) {
+  if (canAccessLeads.value && storesStore.currentStoreId) {
     await salesLeadsStore.fetchSalesLeads(false)
   }
 })

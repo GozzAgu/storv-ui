@@ -39,7 +39,7 @@
       >
         <BuildingStorefrontIcon class="h-3.5 w-3.5 shrink-0 opacity-70" stroke-width="1.6" />
         <span class="truncate max-w-[10rem]">
-          {{ switchingStoreId === store.id ? 'Switching…' : branchLabel(store.name) }}
+          {{ switchingStoreId === store.id ? 'Switching…' : storePrimaryLabel(store) }}
         </span>
       </button>
     </div>
@@ -52,7 +52,7 @@ import { BuildingStorefrontIcon } from '~/utils/app-icons'
 import { useStoresStore } from '~/stores/stores'
 import { useUserStore } from '~/stores/user'
 import { useAppToast } from '~/composables/useAppToast'
-import { getStoreBranchShortLabel } from '~/utils/store-branch-label'
+import { getStoreSwitcherPrimaryLabel } from '~/utils/branch-name'
 
 const storesStore = useStoresStore()
 const userStore = useUserStore()
@@ -67,8 +67,8 @@ const stores = computed(() =>
   userStore.userData?.role === 'superAdmin' ? eligibleStores.value : storesStore.stores
 )
 
-function branchLabel(name: string | null | undefined) {
-  return getStoreBranchShortLabel(name) || 'Unnamed store'
+function storePrimaryLabel(store: { id?: string; name?: string | null }) {
+  return getStoreSwitcherPrimaryLabel(store, stores.value) || 'Unnamed store'
 }
 
 async function selectStore(storeId: string) {

@@ -27,7 +27,7 @@
   </IosDrawer>
 
   <Teleport v-else :to="teleportTarget">
-    <!-- Web: frosted glass backdrop -->
+    <!-- Web: dimmed backdrop -->
     <Transition
       v-if="!nativeInApp"
       enter-active-class="transition-opacity duration-[400ms] ease-out"

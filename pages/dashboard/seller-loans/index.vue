@@ -501,11 +501,11 @@ const { isCapacitorIos } = useIsCapacitorIos()
 
 const sellerLoansStore = useSellerLoanOutsStore()
 const storesStore = useStoresStore()
-const { canManage, isStaff } = usePermissions()
+const { can, isStaff } = usePermissions()
 const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
 const toast = useAppToast()
 
-const canAccessByRole = computed(() => canManage.value)
+const canAccessByRole = computed(() => can('sellerLoans', 'view'))
 const canAccessSellerLoansPlan = computed(() => canUseSubscriptionFeature('seller_loans'))
 
 type LoanStatusFilter = 'active' | 'returned' | 'sold' | 'all'

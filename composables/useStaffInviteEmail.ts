@@ -34,6 +34,8 @@ export function useStaffInviteEmail() {
       {
         method: 'POST',
         body: payload,
+        // Resend + Firebase can be slow on first call; fail before the browser gives up silently.
+        timeout: 45_000,
       }
     )
   }

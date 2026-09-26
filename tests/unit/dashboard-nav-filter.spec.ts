@@ -8,6 +8,7 @@ import {
   buildBusinessCapabilityContext,
   canUseBusinessCapability,
 } from '~/types/business-experience'
+import type { PermissionModule } from '~/types/staff-permissions'
 import type { SubscriptionFeature } from '~/types/subscription'
 
 const enterpriseFeatures = new Set<SubscriptionFeature>([
@@ -20,34 +21,51 @@ const enterpriseFeatures = new Set<SubscriptionFeature>([
   'departments',
   'settings',
   'profile',
+  'sales_leads',
 ])
 
 function canUseEnterprise(feature: SubscriptionFeature) {
   return enterpriseFeatures.has(feature)
 }
 
+function canViewNone(_module: PermissionModule) {
+  return false
+}
+
+function canViewGranted(modules: PermissionModule[]) {
+  const set = new Set(modules)
+  return (module: PermissionModule) => set.has(module)
+}
+
 describe('filterDashboardNavItems', () => {
-  it('lets floor staff see customer buybacks but not stock loans', () => {
+  it('hides permission-gated ops when staff has no grants', () => {
     const names = filterDashboardNavItems(DASHBOARD_NAV_DEFINITIONS, {
       isSuperAdmin: false,
       isManager: false,
       canUseFeature: canUseEnterprise,
+      canViewModule: canViewNone,
     }).map((item) => item.name)
 
-    expect(names).toContain('Customer buybacks')
+    expect(names).not.toContain('Customer buybacks')
     expect(names).not.toContain('Stock loans')
+    expect(names).not.toContain('Sales leads')
+    expect(names).not.toContain('Multi-Store Sync')
     expect(names).not.toContain('Departments')
   })
 
-  it('lets staff managers see stock loans on enterprise', () => {
+  it('shows ops only when the matching module view grant is present', () => {
     const names = filterDashboardNavItems(DASHBOARD_NAV_DEFINITIONS, {
       isSuperAdmin: false,
       isManager: true,
-      canUseFeature: canUseEnterprise,
+      canUseFeature: (feature) =>
+        feature === 'multi_store_sync' ? true : canUseEnterprise(feature),
+      canViewModule: canViewGranted(['buybacks', 'sellerLoans', 'leads']),
     }).map((item) => item.name)
 
     expect(names).toContain('Customer buybacks')
     expect(names).toContain('Stock loans')
+    expect(names).toContain('Sales leads')
+    expect(names).not.toContain('Multi-Store Sync')
     expect(names).not.toContain('Departments')
   })
 

@@ -5,8 +5,8 @@
         feature="multi_store_sync"
         gate="custom"
         :description="
-          isStaff || !userStore.isSuperAdmin
-            ? 'Only super admins can access multi-store sync.'
+          isStaff || !can('multiStoreSync', 'view')
+            ? 'Multi-store sync is not enabled for your account. Ask your store owner to grant access.'
             : undefined
         "
         :secondary-href="isStaff ? undefined : '/dashboard/help#settings-subscription'"
@@ -604,12 +604,12 @@ const toast = useAppToast()
 const storesStore = useStoresStore()
 const inventoryStore = useInventoryStore()
 const userStore = useUserStore()
-const { isStaff } = usePermissions()
+const { isStaff, can } = usePermissions()
 const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
 
-// Security: nav + tools are super-admin + Enterprise only (managers see the gate)
+// Security: Enterprise plan + multi-store view grant (owners always have full grants)
 const canAccess = computed(
-  () => userStore.isSuperAdmin && canUseSubscriptionFeature('multi_store_sync')
+  () => can('multiStoreSync', 'view') && canUseSubscriptionFeature('multi_store_sync')
 )
 const { isCapacitorIos } = useIsCapacitorIos()
 

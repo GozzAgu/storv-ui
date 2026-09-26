@@ -44,7 +44,7 @@ html:not(.capacitor-native) .dashboard-layout-root {
   --dash-primary-btn-fg: #ffffff;
   --dash-primary-btn-hover: #000000;
   --dash-outline-border: rgb(26 21 35 / 0.12);
-  --dash-overlay-bg: rgb(255 255 255 / 0.72);
+  --dash-overlay-bg: #ffffff;
   --dash-thead-bg: rgb(26 21 35 / 0.04);
   color: var(--saas-ink);
   background: var(--saas-canvas);
@@ -86,7 +86,7 @@ html:not(.capacitor-native).dark .dashboard-layout-root {
   --dash-primary-btn-fg: #1a1523;
   --dash-primary-btn-hover: #ffffff;
   --dash-outline-border: rgb(255 255 255 / 0.22);
-  --dash-overlay-bg: rgb(28 28 30 / 0.72);
+  --dash-overlay-bg: #1c1c1e;
   --dash-thead-bg: rgb(255 255 255 / 0.04);
   color: var(--saas-ink);
   background: var(--saas-canvas);
@@ -402,11 +402,11 @@ html:not(.capacitor-native).dark .dash-overlay-backdrop {
 
 html:not(.capacitor-native) .dash-overlay-shell,
 html:not(.capacitor-native) [data-dashboard-teleport] .dash-overlay-shell {
-  background: var(--dash-overlay-bg);
-  border: 1px solid var(--saas-glass-border);
+  background: var(--dash-overlay-surface, var(--dash-overlay-bg, #ffffff));
+  border: 1px solid var(--dash-overlay-border);
   border-radius: var(--saas-radius-lg, 0.875rem);
-  backdrop-filter: blur(28px) saturate(1.45);
-  -webkit-backdrop-filter: blur(28px) saturate(1.45);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   color: var(--saas-ink);
 }
 
@@ -479,11 +479,11 @@ html:not(.capacitor-native) .dashboard-layout-root .focus\:ring-primary-400\/30:
 html:not(.capacitor-native) .dash-profile-panel,
 html:not(.capacitor-native) .dash-notify-panel,
 html:not(.capacitor-native) .dash-store-panel {
-  background: var(--dash-overlay-bg);
-  border: 1px solid var(--saas-glass-border);
+  background: var(--dash-overlay-surface, #ffffff);
+  border: 1px solid var(--dash-overlay-border);
   border-radius: var(--saas-radius-lg, 0.875rem);
-  backdrop-filter: blur(28px) saturate(1.45);
-  -webkit-backdrop-filter: blur(28px) saturate(1.45);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   box-shadow:
     0 18px 50px rgb(26 21 35 / 0.16),
     0 4px 14px rgb(26 21 35 / 0.08);
@@ -528,6 +528,9 @@ html:not(.capacitor-native) [data-dashboard-teleport] {
   --dash-primary-btn: #1a1523;
   --dash-primary-btn-fg: #ffffff;
   --dash-primary-btn-hover: #000000;
+  --dash-overlay-bg: #ffffff;
+  --dash-overlay-surface: #ffffff;
+  --dash-overlay-chrome: #f8fafc;
   color: var(--dash-overlay-ink, #1a1523);
 }
 
@@ -535,6 +538,9 @@ html:not(.capacitor-native).dark [data-dashboard-teleport] {
   --dash-primary-btn: #f4f1ea;
   --dash-primary-btn-fg: #1a1523;
   --dash-primary-btn-hover: #ffffff;
+  --dash-overlay-bg: #1c1c1e;
+  --dash-overlay-surface: #1c1c1e;
+  --dash-overlay-chrome: #232326;
 }
 
 html:not(.capacitor-native) .dashboard-layout-root label,
@@ -596,8 +602,6 @@ html:not(.capacitor-native).dark .dashboard-layout-root .dash-sidebar.dashboard-
   color: #ffffff !important;
 }
 
-html:not(.capacitor-native).dark .dash-overlay-shell,
-html:not(.capacitor-native).dark [data-dashboard-teleport] .dash-overlay-shell,
 html:not(.capacitor-native).dark .dashboard-fixed-footer--web,
 html:not(.capacitor-native).dark .dash-pagination__pager {
   border: 1px solid var(--saas-glass-border) !important;
@@ -605,6 +609,15 @@ html:not(.capacitor-native).dark .dash-pagination__pager {
   background: var(--saas-glass-bg) !important;
   backdrop-filter: blur(24px) saturate(1.45) !important;
   -webkit-backdrop-filter: blur(24px) saturate(1.45) !important;
+}
+
+html:not(.capacitor-native).dark .dash-overlay-shell,
+html:not(.capacitor-native).dark [data-dashboard-teleport] .dash-overlay-shell {
+  border: 1px solid var(--dash-overlay-border) !important;
+  box-shadow: var(--dash-overlay-shadow) !important;
+  background: var(--dash-overlay-surface, #1c1c1e) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 html:not(.capacitor-native).dark .dash-store-panel :is(
@@ -628,12 +641,12 @@ html:not(.capacitor-native).dark .dash-store-panel__footer {
 html:not(.capacitor-native).dark .dash-profile-panel,
 html:not(.capacitor-native).dark .dash-notify-panel--dropdown,
 html:not(.capacitor-native).dark .dash-store-panel {
-  border: 1px solid var(--saas-glass-border) !important;
+  border: 1px solid var(--dash-overlay-border) !important;
   border-radius: var(--saas-radius-xl, 1.25rem) !important;
-  background: var(--saas-glass-bg) !important;
-  backdrop-filter: blur(28px) saturate(1.55) !important;
-  -webkit-backdrop-filter: blur(28px) saturate(1.55) !important;
-  box-shadow: var(--saas-shadow-lg), var(--saas-glass-highlight) !important;
+  background: var(--dash-overlay-surface, #1c1c1e) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 18px 50px rgb(0 0 0 / 0.45) !important;
 }
 
 html:not(.capacitor-native) .dash-notify-panel__tabs {

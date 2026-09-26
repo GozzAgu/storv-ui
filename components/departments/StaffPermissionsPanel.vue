@@ -5,103 +5,65 @@
     </p>
 
     <div class="staff-permissions-panel">
-      <div class="staff-permissions-panel__module">
-        <p class="staff-permissions-panel__module-title">Inventory</p>
+      <div
+        v-for="module in modules"
+        :key="module.key"
+        class="staff-permissions-panel__module"
+      >
+        <p class="staff-permissions-panel__module-title">{{ module.title }}</p>
         <IosFormToggle
-          :model-value="modelValue.products.view"
+          :model-value="modelValue[module.key].view"
           label="View"
-          hint="Categories, items, quantities, and prices."
+          :hint="module.viewHint"
           :disabled="disabled"
-          @update:model-value="onProductsViewToggle"
+          @update:model-value="onViewToggle(module.key, $event)"
         />
-        <template v-if="modelValue.products.view">
+        <template v-if="modelValue[module.key].view">
           <IosFormToggle
-            :model-value="isManaging(modelValue.products)"
+            :model-value="isManaging(modelValue[module.key])"
             label="Manage"
-            hint="Add, edit, and delete inventory."
+            :hint="module.manageHint"
             :disabled="disabled"
-            @update:model-value="onProductsManageToggle"
+            @update:model-value="onManageToggle(module.key, $event)"
           />
-          <div class="staff-permissions-panel__actions" role="group" aria-label="Inventory actions">
+          <div
+            class="staff-permissions-panel__actions"
+            role="group"
+            :aria-label="`${module.title} actions`"
+          >
             <Checkbox
-              :model-value="modelValue.products.create"
+              :model-value="modelValue[module.key].create"
               label="Create"
               size="sm"
               :disabled="disabled"
               wrapper-class="staff-permissions-panel__action"
-              @update:model-value="updateProducts({ create: $event })"
+              @update:model-value="updateModule(module.key, { create: $event })"
             />
             <Checkbox
-              :model-value="modelValue.products.edit"
+              :model-value="modelValue[module.key].edit"
               label="Edit"
               size="sm"
               :disabled="disabled"
               wrapper-class="staff-permissions-panel__action"
-              @update:model-value="updateProducts({ edit: $event })"
+              @update:model-value="updateModule(module.key, { edit: $event })"
             />
             <Checkbox
-              :model-value="modelValue.products.delete"
+              :model-value="modelValue[module.key].delete"
               label="Delete"
               size="sm"
               :disabled="disabled"
               wrapper-class="staff-permissions-panel__action"
-              @update:model-value="updateProducts({ delete: $event })"
+              @update:model-value="updateModule(module.key, { delete: $event })"
             />
           </div>
-        </template>
-      </div>
-
-      <div class="staff-permissions-panel__module">
-        <p class="staff-permissions-panel__module-title">Receipts</p>
-        <IosFormToggle
-          :model-value="modelValue.receipts.view"
-          label="View"
-          hint="Orders and transactions."
-          :disabled="disabled"
-          @update:model-value="onReceiptsViewToggle"
-        />
-        <template v-if="modelValue.receipts.view">
-          <IosFormToggle
-            :model-value="isManaging(modelValue.receipts)"
-            label="Manage"
-            hint="Create and fully edit receipts."
-            :disabled="disabled"
-            @update:model-value="onReceiptsManageToggle"
-          />
-          <div class="staff-permissions-panel__actions" role="group" aria-label="Receipt actions">
-            <Checkbox
-              :model-value="modelValue.receipts.create"
-              label="Create"
-              size="sm"
-              :disabled="disabled"
-              wrapper-class="staff-permissions-panel__action"
-              @update:model-value="updateReceipts({ create: $event })"
-            />
-            <Checkbox
-              :model-value="modelValue.receipts.edit"
-              label="Edit"
-              size="sm"
-              :disabled="disabled"
-              wrapper-class="staff-permissions-panel__action"
-              @update:model-value="updateReceipts({ edit: $event })"
-            />
-            <Checkbox
-              :model-value="modelValue.receipts.delete"
-              label="Delete"
-              size="sm"
-              :disabled="disabled"
-              wrapper-class="staff-permissions-panel__action"
-              @update:model-value="updateReceipts({ delete: $event })"
-            />
-          </div>
-          <div class="staff-permissions-panel__refund">
+          <div v-if="module.key === 'receipts'" class="staff-permissions-panel__refund">
             <Checkbox
               :model-value="modelValue.receipts.refund"
               label="Refund & cancel outstanding orders"
               size="sm"
               :disabled="disabled"
               wrapper-class="staff-permissions-panel__refund-control"
-              @update:model-value="updateReceipts({ refund: $event })"
+              @update:model-value="updateModule('receipts', { refund: $event })"
             />
             <p class="dash-drawer-hint">Separate from full edit access.</p>
           </div>
@@ -114,7 +76,12 @@
 <script setup lang="ts">
 import { IosFormSection, IosFormToggle } from '~/components/ios/forms'
 import Checkbox from '~/components/ui/Checkbox.vue'
-import type { ModulePermission, ReceiptsPermission, StaffPermissions } from '~/types/staff-permissions'
+import type {
+  ModulePermission,
+  PermissionModule,
+  ReceiptsPermission,
+  StaffPermissions,
+} from '~/types/staff-permissions'
 
 interface Props {
   modelValue: StaffPermissions
@@ -124,44 +91,86 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), { disabled: false })
 const emit = defineEmits<{ 'update:modelValue': [StaffPermissions] }>()
 
+type CrudModule = Exclude<PermissionModule, never>
+
+const modules: Array<{
+  key: CrudModule
+  title: string
+  viewHint: string
+  manageHint: string
+}> = [
+  {
+    key: 'products',
+    title: 'Inventory',
+    viewHint: 'Categories, items, quantities, and prices.',
+    manageHint: 'Add, edit, and delete inventory.',
+  },
+  {
+    key: 'receipts',
+    title: 'Receipts',
+    viewHint: 'Orders and transactions.',
+    manageHint: 'Create and fully edit receipts.',
+  },
+  {
+    key: 'leads',
+    title: 'Sales leads',
+    viewHint: 'Enquiry pipeline before a sale.',
+    manageHint: 'Add, edit, and delete sales leads.',
+  },
+  {
+    key: 'buybacks',
+    title: 'Customer buybacks',
+    viewHint: 'Customer sell-ins and buyback history.',
+    manageHint: 'Record and update customer buybacks.',
+  },
+  {
+    key: 'sellerLoans',
+    title: 'Stock loans',
+    viewHint: 'Devices loaned to sellers or retailers.',
+    manageHint: 'Create and update stock loans.',
+  },
+  {
+    key: 'multiStoreSync',
+    title: 'Multi-Store Sync',
+    viewHint: 'Branch transfers and consolidated reports.',
+    manageHint: 'Request, approve, and complete transfers.',
+  },
+]
+
 function isManaging(module: ModulePermission): boolean {
   return module.create || module.edit || module.delete
 }
 
-function updateProducts(patch: Partial<ModulePermission>) {
+function updateModule(
+  key: PermissionModule,
+  patch: Partial<ModulePermission> | Partial<ReceiptsPermission>
+) {
   emit('update:modelValue', {
     ...props.modelValue,
-    products: { ...props.modelValue.products, ...patch },
+    [key]: { ...props.modelValue[key], ...patch },
   })
 }
 
-function updateReceipts(patch: Partial<ReceiptsPermission>) {
-  emit('update:modelValue', {
-    ...props.modelValue,
-    receipts: { ...props.modelValue.receipts, ...patch },
-  })
+function onViewToggle(key: PermissionModule, value: boolean) {
+  if (value) {
+    updateModule(key, { view: true })
+    return
+  }
+  if (key === 'receipts') {
+    updateModule(key, {
+      view: false,
+      create: false,
+      edit: false,
+      delete: false,
+      refund: false,
+    })
+    return
+  }
+  updateModule(key, { view: false, create: false, edit: false, delete: false })
 }
 
-function onProductsViewToggle(value: boolean) {
-  updateProducts(
-    value ? { view: true } : { view: false, create: false, edit: false, delete: false }
-  )
-}
-
-function onReceiptsViewToggle(value: boolean) {
-  updateReceipts(
-    value
-      ? { view: true }
-      : { view: false, create: false, edit: false, delete: false, refund: false }
-  )
-}
-
-function onProductsManageToggle(value: boolean) {
-  updateProducts({ create: value, edit: value, delete: value })
-}
-
-function onReceiptsManageToggle(value: boolean) {
-  updateReceipts({ create: value, edit: value, delete: value })
+function onManageToggle(key: PermissionModule, value: boolean) {
+  updateModule(key, { create: value, edit: value, delete: value })
 }
 </script>
 

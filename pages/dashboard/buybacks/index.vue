@@ -105,7 +105,7 @@
       class="rounded-sm bg-red-50/90 px-4 py-4 dark:bg-red-950/25 sm:px-5 sm:py-5"
     >
       <p class="text-xs font-medium text-red-800 dark:text-red-200">
-        Sign in to record customer buybacks for your branch.
+        Customer buybacks are not enabled for your account. Ask your store owner to grant access.
       </p>
     </div>
 
@@ -264,7 +264,7 @@ import CreateBuybackModal from '~/components/buybacks/CreateBuybackModal.vue'
 import { useCustomerBuybacksStore, type CustomerBuyback } from '~/stores/customerBuybacks'
 import { useInventoryStore } from '~/stores/inventory'
 import { useStoresStore } from '~/stores/stores'
-import { useAuthStore } from '~/stores/auth'
+import { usePreferences } from '~/composables/usePreferences'
 
 definePageMeta({
   layout: 'dashboard',
@@ -278,8 +278,10 @@ const { isCapacitorIos } = useIsCapacitorIos()
 const buybacksStore = useCustomerBuybacksStore()
 const inventoryStore = useInventoryStore()
 const storesStore = useStoresStore()
-const authStore = useAuthStore()
 const { formatCurrency } = usePreferences()
+const { can } = usePermissions()
+
+const canAccess = computed(() => can('buybacks', 'view'))
 
 const buybackHeaderMetrics = computed(() => {
   const rows = buybacksStore.buybacks
@@ -329,8 +331,6 @@ const iosBuybackQuickActions = computed((): IosQuickActionOption[] => [
   },
   { value: 'list', label: 'Buybacks', icon: InboxArrowDownIcon },
 ])
-
-const canAccess = computed(() => !!authStore.currentUser)
 
 function formatWhenShort(v: Date | undefined) {
   if (!v) return ''

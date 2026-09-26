@@ -1,12 +1,14 @@
 /* Modals, drawers, toasts, and floating menus - Storvv SaaS overlay system */
 
 :root {
-  --dash-overlay-border: rgb(255 255 255 / 0.55);
+  --dash-overlay-border: rgb(15 23 42 / 0.1);
   --dash-overlay-divider: rgb(15 23 42 / 0.08);
-  --dash-overlay-surface: rgb(255 255 255 / 0.62);
+  --dash-overlay-surface: #ffffff;
+  --dash-overlay-chrome: #f8fafc;
+  --dash-overlay-bg: #ffffff;
   --dash-overlay-muted: #475569;
   --dash-overlay-ink: #0f172a;
-  --dash-overlay-shadow: 0 24px 64px rgb(15 23 42 / 0.14), inset 0 1px 0 rgb(255 255 255 / 0.7);
+  --dash-overlay-shadow: 0 24px 64px rgb(15 23 42 / 0.18);
   --app-checkbox-box-bg: #f4f4f5;
   --app-checkbox-box-bg-hover: #e4e4e7;
   --app-checkbox-box-checked-bg: #1a1523;
@@ -18,14 +20,14 @@
 }
 
 html.dark {
-  --dash-overlay-border: rgb(255 255 255 / 0.12);
+  --dash-overlay-border: rgb(255 255 255 / 0.1);
   --dash-overlay-divider: rgb(255 255 255 / 0.08);
-  --dash-overlay-surface: rgb(28 28 30 / 0.62);
+  --dash-overlay-surface: #1c1c1e;
+  --dash-overlay-chrome: #232326;
+  --dash-overlay-bg: #1c1c1e;
   --dash-overlay-muted: rgb(255 255 255 / 0.68);
   --dash-overlay-ink: #ffffff;
-  --dash-overlay-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.08),
-    0 24px 64px rgb(0 0 0 / 0.45);
+  --dash-overlay-shadow: 0 24px 64px rgb(0 0 0 / 0.55);
   --app-checkbox-box-bg: rgb(255 255 255 / 0.14);
   --app-checkbox-box-bg-hover: rgb(255 255 255 / 0.2);
   --app-checkbox-box-checked-bg: #ffffff;
@@ -68,8 +70,9 @@ html:not(.capacitor-native).dark .dash-overlay-backdrop {
   background: var(--dash-overlay-surface);
   color: var(--dash-overlay-ink);
   box-shadow: var(--dash-overlay-shadow);
-  backdrop-filter: blur(28px) saturate(1.55);
-  -webkit-backdrop-filter: blur(28px) saturate(1.55);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  isolation: isolate;
 }
 
 .dash-overlay-modal {
@@ -146,12 +149,12 @@ html:not(.capacitor-native).dark .dash-overlay-backdrop {
   justify-content: space-between;
   gap: 0.75rem;
   border-bottom: 1px solid var(--dash-overlay-divider);
-  background: rgb(248 250 252 / 0.72);
+  background: var(--dash-overlay-chrome);
   padding: 0.875rem 1rem;
 }
 
 html.dark .dash-overlay-header {
-  background: rgb(255 255 255 / 0.02);
+  background: var(--dash-overlay-chrome);
 }
 
 @media (min-width: 640px) {
@@ -193,12 +196,12 @@ html.dark .dash-overlay-header {
   justify-content: flex-end;
   gap: 0.5rem;
   border-top: 1px solid var(--dash-overlay-divider);
-  background: rgb(248 250 252 / 0.55);
+  background: var(--dash-overlay-chrome);
   padding: 0.75rem 1rem;
 }
 
 html.dark .dash-overlay-footer {
-  background: rgb(255 255 255 / 0.02);
+  background: var(--dash-overlay-chrome);
 }
 
 @media (min-width: 640px) {
@@ -686,8 +689,8 @@ html.dark .dash-toast__icon--info {
   border-radius: 0.875rem !important;
   background: var(--dash-overlay-surface) !important;
   box-shadow: 0 12px 32px rgb(15 23 42 / 0.12) !important;
-  backdrop-filter: blur(16px) saturate(1.15);
-  -webkit-backdrop-filter: blur(16px) saturate(1.15);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 html.dark .frosted-glass {
@@ -717,8 +720,8 @@ html.dark .frosted-glass {
   border-radius: 0.875rem;
   background: var(--dash-overlay-surface);
   box-shadow: 0 12px 32px rgb(15 23 42 / 0.12);
-  backdrop-filter: blur(16px) saturate(1.15);
-  -webkit-backdrop-filter: blur(16px) saturate(1.15);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 html.dark .ios-context-menu {

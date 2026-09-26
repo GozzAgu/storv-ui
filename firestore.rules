@@ -69,23 +69,47 @@ service cloud.firestore {
     // utils/staff-permissions.ts#deriveDefaultPermissions exactly so authorization is identical
     // for a doc whether or not it has been backfilled with a `permissions` map yet.
     function legacyHasPermission(member, moduleName, action) {
+      let isManager = member.role == 'manager';
+      let inventoryManaged = isManager && member.get('canManageInventory', false) == true;
+      let hadRefundAccess = isManager || member.get('canManageReceipts', false) == true;
+      let elevated = inventoryManaged || isManager || hadRefundAccess;
+
       return moduleName == 'products'
-        ? (action == 'view' || (member.role == 'manager' && member.get('canManageInventory', false) == true))
-        : (action == 'view' || action == 'create'
-            ? true
-            : action == 'edit'
-              ? member.role == 'manager'
-              : action == 'refund'
-                ? (member.role == 'manager' || member.get('canManageReceipts', false) == true)
-                : false); // receipts.delete: never granted by migration
+        ? (action == 'view' || inventoryManaged)
+        : moduleName == 'receipts'
+          ? (action == 'view' || action == 'create'
+              ? true
+              : action == 'edit'
+                ? isManager
+                : action == 'refund'
+                  ? hadRefundAccess
+                  : false)
+          : moduleName == 'leads'
+            ? (action == 'view' || action == 'create' || action == 'edit'
+                ? true
+                : action == 'delete' ? elevated : false)
+            : moduleName == 'buybacks'
+              ? (action == 'view' || action == 'create' || action == 'edit'
+                  ? inventoryManaged
+                  : false)
+              : moduleName == 'sellerLoans'
+                ? (action == 'view' || action == 'create' || action == 'edit'
+                    ? elevated
+                    : false)
+                : moduleName == 'multiStoreSync'
+                  ? false
+                  : false;
     }
 
     // Single source of truth for "can this member do <action> on <moduleName>". checks the new
-    // `permissions` map when present, else falls back to the legacy role/grant fields.
+    // `permissions` map when present (falling back to legacy for modules not yet stored), else
+    // falls back to the legacy role/grant fields entirely.
     function memberHasPermission(userId, storeId, moduleName, action) {
       return isActiveStoreMember(userId, storeId) &&
         (memberData(userId, storeId).keys().hasAny(['permissions'])
-          ? memberData(userId, storeId).permissions.get(moduleName, {}).get(action, false) == true
+          ? (memberData(userId, storeId).permissions.keys().hasAny([moduleName])
+              ? memberData(userId, storeId).permissions.get(moduleName, {}).get(action, false) == true
+              : legacyHasPermission(memberData(userId, storeId), moduleName, action))
           : legacyHasPermission(memberData(userId, storeId), moduleName, action));
     }
 
@@ -95,15 +119,25 @@ service cloud.firestore {
         || memberHasPermission(userId, storeId, 'products', 'delete');
     }
 
-    // Any grant that implies elevated (non-view-only) access, across either module. Used only for
-    // the handful of collections outside the v1 permission matrix (customers, seller loans, sales
-    // leads, notifications) that used to be gated on role=='manager'. a staff member trusted with
-    // managing products or receipts is treated as trusted for these lighter-weight, adjacent ops too.
+    // Any grant that implies elevated (non-view-only) access. Used for lighter-weight collections
+    // (customers, notifications) that still gate on "trusted staff" rather than a dedicated module.
     function memberHasAnyManage(userId, storeId) {
       return memberHasAnyProductsManage(userId, storeId)
         || memberHasPermission(userId, storeId, 'receipts', 'edit')
         || memberHasPermission(userId, storeId, 'receipts', 'delete')
-        || memberHasPermission(userId, storeId, 'receipts', 'refund');
+        || memberHasPermission(userId, storeId, 'receipts', 'refund')
+        || memberHasPermission(userId, storeId, 'leads', 'create')
+        || memberHasPermission(userId, storeId, 'leads', 'edit')
+        || memberHasPermission(userId, storeId, 'leads', 'delete')
+        || memberHasPermission(userId, storeId, 'buybacks', 'create')
+        || memberHasPermission(userId, storeId, 'buybacks', 'edit')
+        || memberHasPermission(userId, storeId, 'buybacks', 'delete')
+        || memberHasPermission(userId, storeId, 'sellerLoans', 'create')
+        || memberHasPermission(userId, storeId, 'sellerLoans', 'edit')
+        || memberHasPermission(userId, storeId, 'sellerLoans', 'delete')
+        || memberHasPermission(userId, storeId, 'multiStoreSync', 'create')
+        || memberHasPermission(userId, storeId, 'multiStoreSync', 'edit')
+        || memberHasPermission(userId, storeId, 'multiStoreSync', 'delete');
     }
 
     // Business account owner (path users/{userId} matches auth).
@@ -138,10 +172,27 @@ service cloud.firestore {
       return (isAuthenticated() && userId == request.auth.uid) || isActiveStoreMember(userId, storeId);
     }
 
-    // Elevated ops outside the v1 permission matrix (customers, seller loans, sales leads,
-    // notifications): owner, or a member with any manage grant. See memberHasAnyManage() above.
+    // Elevated ops outside a dedicated permission module (customers, notifications): owner, or a
+    // member with any manage grant. Dedicated modules (buybacks, seller loans, leads, multi-store)
+    // use memberHasPermission() directly.
     function canManageNonInventoryOps(userId, storeId) {
       return isStoreOwnerForPath(userId) || memberHasAnyManage(userId, storeId);
+    }
+
+    function canAccessBuybacks(userId, storeId, action) {
+      return isStoreOwnerForPath(userId) || memberHasPermission(userId, storeId, 'buybacks', action);
+    }
+
+    function canAccessSellerLoans(userId, storeId, action) {
+      return isStoreOwnerForPath(userId) || memberHasPermission(userId, storeId, 'sellerLoans', action);
+    }
+
+    function canAccessLeads(userId, storeId, action) {
+      return isStoreOwnerForPath(userId) || memberHasPermission(userId, storeId, 'leads', action);
+    }
+
+    function canAccessMultiStore(userId, storeId, action) {
+      return isStoreOwnerForPath(userId) || memberHasPermission(userId, storeId, 'multiStoreSync', action);
     }
 
     // Create new receipts (POS): owner, or any active store member. receipts.create defaults
@@ -286,27 +337,67 @@ service cloud.firestore {
       // Store transfers subcollection: users/{userId}/storeTransfers/{transferId}
       // This collection stores transfer history for multi-store operations
       match /storeTransfers/{transferId} {
-        allow read: if isAuthenticated() && userId == request.auth.uid && planIsEnterprise(userId);
+        allow read: if planIsEnterprise(userId) && (
+                       isStoreOwnerForPath(userId) ||
+                       (resource.data.keys().hasAny(['sourceStoreId']) &&
+                         canAccessMultiStore(userId, resource.data.sourceStoreId, 'view')) ||
+                       (resource.data.keys().hasAny(['destinationStoreId']) &&
+                         canAccessMultiStore(userId, resource.data.destinationStoreId, 'view')) ||
+                       (resource.data.keys().hasAny(['fromStoreId']) &&
+                         canAccessMultiStore(userId, resource.data.fromStoreId, 'view')) ||
+                       (resource.data.keys().hasAny(['toStoreId']) &&
+                         canAccessMultiStore(userId, resource.data.toStoreId, 'view'))
+                     );
         
-        allow create: if isAuthenticated() && 
-                       userId == request.auth.uid && 
-                       planIsEnterprise(userId) &&
-                       request.resource.data.createdBy == request.auth.uid;
+        allow create: if planIsEnterprise(userId) &&
+                       request.resource.data.createdBy == request.auth.uid &&
+                       (
+                         isStoreOwnerForPath(userId) ||
+                         (request.resource.data.keys().hasAny(['sourceStoreId']) &&
+                           canAccessMultiStore(userId, request.resource.data.sourceStoreId, 'create')) ||
+                         (request.resource.data.keys().hasAny(['fromStoreId']) &&
+                           canAccessMultiStore(userId, request.resource.data.fromStoreId, 'create'))
+                       );
         
-        allow update, delete: if isAuthenticated() && userId == request.auth.uid && planIsEnterprise(userId);
+        allow update, delete: if planIsEnterprise(userId) && (
+                       isStoreOwnerForPath(userId) ||
+                       (resource.data.keys().hasAny(['sourceStoreId']) &&
+                         canAccessMultiStore(userId, resource.data.sourceStoreId, 'edit')) ||
+                       (resource.data.keys().hasAny(['destinationStoreId']) &&
+                         canAccessMultiStore(userId, resource.data.destinationStoreId, 'edit')) ||
+                       (resource.data.keys().hasAny(['fromStoreId']) &&
+                         canAccessMultiStore(userId, resource.data.fromStoreId, 'edit')) ||
+                       (resource.data.keys().hasAny(['toStoreId']) &&
+                         canAccessMultiStore(userId, resource.data.toStoreId, 'edit'))
+                     );
       }
       
       // Store syncs subcollection: users/{userId}/storeSyncs/{syncId}
       // This collection stores sync history for multi-store operations
       match /storeSyncs/{syncId} {
-        allow read: if isAuthenticated() && userId == request.auth.uid && planIsEnterprise(userId);
+        allow read: if planIsEnterprise(userId) && (
+                       isStoreOwnerForPath(userId) ||
+                       (resource.data.keys().hasAny(['sourceStoreId']) &&
+                         canAccessMultiStore(userId, resource.data.sourceStoreId, 'view')) ||
+                       (resource.data.keys().hasAny(['destinationStoreId']) &&
+                         canAccessMultiStore(userId, resource.data.destinationStoreId, 'view'))
+                     );
         
-        allow create: if isAuthenticated() && 
-                       userId == request.auth.uid && 
-                       planIsEnterprise(userId) &&
-                       request.resource.data.createdBy == request.auth.uid;
+        allow create: if planIsEnterprise(userId) &&
+                       request.resource.data.createdBy == request.auth.uid &&
+                       (
+                         isStoreOwnerForPath(userId) ||
+                         (request.resource.data.keys().hasAny(['sourceStoreId']) &&
+                           canAccessMultiStore(userId, request.resource.data.sourceStoreId, 'create'))
+                       );
         
-        allow update, delete: if isAuthenticated() && userId == request.auth.uid && planIsEnterprise(userId);
+        allow update, delete: if planIsEnterprise(userId) && (
+                       isStoreOwnerForPath(userId) ||
+                       (resource.data.keys().hasAny(['sourceStoreId']) &&
+                         canAccessMultiStore(userId, resource.data.sourceStoreId, 'edit')) ||
+                       (resource.data.keys().hasAny(['destinationStoreId']) &&
+                         canAccessMultiStore(userId, resource.data.destinationStoreId, 'edit'))
+                     );
       }
       
       // Stores subcollection: users/{userId}/stores/{storeId}
@@ -480,11 +571,11 @@ service cloud.firestore {
         // Loan inventory to external seller / retailer (tracked; not marked sold until receipt).
         match /sellerLoanOuts/{loanId} {
           allow read: if planIsEnterprise(userId) &&
-                         canAccessStoreData(userId, storeId) &&
+                         canAccessSellerLoans(userId, storeId, 'view') &&
                          resourceMatchesStore(storeId);
 
           allow create: if planIsEnterprise(userId) &&
-                           canManageNonInventoryOps(userId, storeId) &&
+                           canAccessSellerLoans(userId, storeId, 'create') &&
                            request.resource.data.storeId == storeId &&
                            request.resource.data.createdBy == request.auth.uid &&
                            request.resource.data.status == 'active' &&
@@ -492,7 +583,7 @@ service cloud.firestore {
                            request.resource.data.lines.size() > 0;
 
           allow update: if planIsEnterprise(userId) &&
-                           ((canManageNonInventoryOps(userId, storeId) &&
+                           ((canAccessSellerLoans(userId, storeId, 'edit') &&
                            resourceMatchesStore(storeId) &&
                            requestMatchesStore(storeId))
                         || (canCreateReceipt(userId, storeId) &&
@@ -505,10 +596,10 @@ service cloud.firestore {
 
         // Customer buybacks: store buys items from customers into inventory.
         match /customerBuybacks/{buybackId} {
-          allow read: if canAccessStoreData(userId, storeId) &&
+          allow read: if canAccessBuybacks(userId, storeId, 'view') &&
                          resourceMatchesStore(storeId);
 
-          allow create: if canManageInventoryStructure(userId, storeId) &&
+          allow create: if canAccessBuybacks(userId, storeId, 'create') &&
                            request.resource.data.storeId == storeId &&
                            request.resource.data.createdBy == request.auth.uid &&
                            request.resource.data.status == 'completed' &&
@@ -517,7 +608,7 @@ service cloud.firestore {
                            request.resource.data.purchasePrice is number &&
                            request.resource.data.purchasePrice > 0;
 
-          allow update: if canManageInventoryStructure(userId, storeId) &&
+          allow update: if canAccessBuybacks(userId, storeId, 'edit') &&
                            resourceMatchesStore(storeId) &&
                            requestMatchesStore(storeId);
 
@@ -527,11 +618,11 @@ service cloud.firestore {
         // Sales leads: manual enquiry tracking (no external messaging APIs).
         match /salesLeads/{leadId} {
           allow read: if planAtLeastMedium(userId) &&
-                         canAccessStoreData(userId, storeId) &&
+                         canAccessLeads(userId, storeId, 'view') &&
                          resourceMatchesStore(storeId);
 
           allow create: if planAtLeastMedium(userId) &&
-                           canCreateReceipt(userId, storeId) &&
+                           canAccessLeads(userId, storeId, 'create') &&
                            request.resource.data.storeId == storeId &&
                            request.resource.data.createdBy == request.auth.uid &&
                            request.resource.data.status == 'new' &&
@@ -540,12 +631,12 @@ service cloud.firestore {
                            request.resource.data.source is string;
 
           allow update: if planAtLeastMedium(userId) &&
-                           canCreateReceipt(userId, storeId) &&
+                           canAccessLeads(userId, storeId, 'edit') &&
                            resourceMatchesStore(storeId) &&
                            requestMatchesStore(storeId);
 
           allow delete: if planAtLeastMedium(userId) &&
-                           canManageNonInventoryOps(userId, storeId) &&
+                           canAccessLeads(userId, storeId, 'delete') &&
                            resourceMatchesStore(storeId);
         }
 

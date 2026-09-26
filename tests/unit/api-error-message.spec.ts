@@ -22,6 +22,15 @@ describe('getApiErrorMessage', () => {
     ).toBe('The storvv.com domain is not verified.')
   })
 
+  it('turns opaque ofetch network failures into a clear web message', async () => {
+    const { getApiErrorMessage } = await import('~/utils/api-error-message')
+    const message = getApiErrorMessage(
+      new TypeError('[POST] "/api/staff/send-invite-email": <no response> Failed to fetch'),
+      'Could not send invite email'
+    )
+    expect(message).toContain('Could not reach the email service')
+  })
+
   it('adds mobile rebuild hint for network failures on Capacitor', async () => {
     const { isCapacitorNative } = await import('~/utils/capacitor-env')
     vi.mocked(isCapacitorNative).mockReturnValue(true)

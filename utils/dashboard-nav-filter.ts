@@ -1,5 +1,6 @@
 import type { DashboardNavIconKey } from '~/utils/dashboard-nav-icons'
 import type { BusinessCapability } from '~/types/business-experience'
+import type { PermissionModule } from '~/types/staff-permissions'
 import type { SubscriptionFeature } from '~/types/subscription'
 
 export type DashboardNavDefinition = {
@@ -8,6 +9,8 @@ export type DashboardNavDefinition = {
   iconKey: DashboardNavIconKey
   requiresSuperAdmin?: boolean
   requiresManagerOrSuperAdmin?: boolean
+  /** Staff need `view` on this module (super admins always pass). */
+  permissionModule?: PermissionModule
   subscriptionFeature?: SubscriptionFeature
   /** Solo experience hides admin-complexity routes (subscription + role gates still apply). */
   businessCapability?: BusinessCapability
@@ -43,26 +46,28 @@ export const DASHBOARD_NAV_DEFINITIONS: DashboardNavDefinition[] = [
     name: 'Sales leads',
     segment: '/leads',
     iconKey: 'sales-leads',
+    permissionModule: 'leads',
     subscriptionFeature: 'sales_leads',
   },
   {
     name: 'Customer buybacks',
     segment: '/buybacks',
     iconKey: 'buybacks',
+    permissionModule: 'buybacks',
     subscriptionFeature: 'inventory',
   },
   {
     name: 'Stock loans',
     segment: '/seller-loans',
     iconKey: 'loans',
+    permissionModule: 'sellerLoans',
     subscriptionFeature: 'seller_loans',
-    requiresManagerOrSuperAdmin: true,
   },
   {
     name: 'Multi-Store Sync',
     segment: '/multi-store-sync',
     iconKey: 'sync',
-    requiresSuperAdmin: true,
+    permissionModule: 'multiStoreSync',
     subscriptionFeature: 'multi_store_sync',
     businessCapability: 'multiLocationAdmin',
   },
@@ -130,6 +135,7 @@ export function filterDashboardNavItems(
     isSuperAdmin: boolean
     isManager: boolean
     canUseFeature: (feature: SubscriptionFeature) => boolean
+    canViewModule?: (module: PermissionModule) => boolean
     canUseBusinessCapability?: (capability: BusinessCapability) => boolean
     hidePaymentLinks?: boolean
     hideStorefront?: boolean
@@ -142,6 +148,11 @@ export function filterDashboardNavItems(
     if (item.segment === '/storefront' && options.hideStorefront) return false
     if (item.requiresSuperAdmin && !options.isSuperAdmin) return false
     if (item.requiresManagerOrSuperAdmin && !canSeeManagerOnlyFeatures) return false
+    if (item.permissionModule) {
+      const canView =
+        options.isSuperAdmin || options.canViewModule?.(item.permissionModule) === true
+      if (!canView) return false
+    }
     if (item.subscriptionFeature && !options.canUseFeature(item.subscriptionFeature)) return false
     if (
       item.businessCapability &&

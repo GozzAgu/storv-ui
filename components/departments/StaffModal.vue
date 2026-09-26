@@ -10,8 +10,9 @@
       <CheckCircleIcon class="h-6 w-6" stroke-width="1.75" />
       <p>Invite emailed</p>
       <p class="dash-drawer-hint">
-        We sent a sign-in link to
-        <span class="font-medium">{{ formData.email }}</span>. They can set a password, then sign in.
+        We emailed sign-in details to
+        <span class="font-medium">{{ formData.email }}</span>. They can change the password after
+        signing in.
       </p>
     </div>
 
@@ -34,6 +35,13 @@
           {{ copiedPassword ? 'Copied' : 'Copy' }}
         </button>
       </div>
+      <button
+        type="button"
+        class="staff-invite-mailto"
+        @click="openMailtoInvite(temporaryPasswordToShow)"
+      >
+        Open in email app instead
+      </button>
     </div>
 
     <IosForm v-else id="staff-drawer-form" layout="fill" @submit="handleSubmit">
@@ -361,10 +369,46 @@ async function emailStaffCredentials(params: {
       userStore.userData?.name ||
       'Storvv',
     temporaryPassword: params.temporaryPassword,
-    mode: 'reset_link',
+    // Match the created temporary password (and StaffInvitePasswordsPanel). reset_link is for
+    // re-invites without a known password and needs Firebase Admin password-reset generation.
+    mode: 'credentials',
   })
   const { trackEvent } = useProductAnalytics()
-  trackEvent('staff_invite_sent', { mode: 'reset_link' })
+  trackEvent('staff_invite_sent', { mode: 'credentials' })
+}
+
+function inviteSignInUrl() {
+  const config = useRuntimeConfig()
+  const origin = String(config.public.appOrigin || '').trim().replace(/\/$/, '')
+  return origin ? `${origin}/signin` : 'https://app.storvv.com/signin'
+}
+
+function openMailtoInvite(password: string) {
+  const email = formData.value.email.trim()
+  const name = `${formData.value.firstName} ${formData.value.lastName}`.trim() || 'there'
+  const business =
+    userStore.userData?.storeDetails?.storeName || userStore.userData?.name || 'Storvv'
+  const signInUrl = inviteSignInUrl()
+  const subject = encodeURIComponent(`Your Storvv sign-in for ${business}`)
+  const body = encodeURIComponent(
+    [
+      `Hi ${name},`,
+      '',
+      `You've been invited to ${business} on Storvv.`,
+      '',
+      `Sign in: ${signInUrl}`,
+      `Email: ${email}`,
+      `Temporary password: ${password}`,
+      '',
+      'Change this password after you sign in.',
+    ].join('\n')
+  )
+  window.open(`mailto:${encodeURIComponent(email)}?subject=${subject}&body=${body}`, '_blank')
+}
+
+function inviteEmailFailureMessage(error: unknown) {
+  const message = getApiErrorMessage(error, 'Could not send invite email')
+  return `${message} You can copy the password below, or open your email app.`
 }
 
 async function emailCredentialsAfterCreate() {
@@ -385,8 +429,8 @@ async function emailCredentialsAfterCreate() {
     temporaryPasswordToShow.value = ''
     emailSentSuccess.value = true
   } catch (error: unknown) {
-    const message = getApiErrorMessage(error, 'Could not send invite email')
-    toast.error(message)
+    toast.error(inviteEmailFailureMessage(error))
+    openMailtoInvite(password)
   } finally {
     isSendingInviteEmail.value = false
   }
@@ -492,8 +536,8 @@ const handleSubmit = async () => {
             toast.success(`Sign-in details emailed to ${formData.value.email}`)
             return
           } catch (error: unknown) {
-            const message = getApiErrorMessage(error, 'Could not send invite email')
-            toast.error(`${message}. You can copy the password below instead.`)
+            toast.error(inviteEmailFailureMessage(error))
+            openMailtoInvite(created.temporaryPassword)
           } finally {
             isSendingInviteEmail.value = false
           }
@@ -590,5 +634,26 @@ onMounted(() => {
 .staff-invite-regen:hover,
 .staff-invite-secret__copy:hover {
   opacity: 1;
+}
+
+.staff-invite-mailto {
+  margin-top: 0.875rem;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgb(72 118 199);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+:global(html.dark) .staff-invite-secret {
+  background: rgb(255 255 255 / 0.06);
+}
+
+:global(html.dark) .staff-invite-mailto {
+  color: rgb(154 181 227);
 }
 </style>

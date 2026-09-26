@@ -7,7 +7,13 @@
  * utils/staff-permissions.ts.
  */
 
-export type PermissionModule = 'products' | 'receipts'
+export type PermissionModule =
+  | 'products'
+  | 'receipts'
+  | 'leads'
+  | 'buybacks'
+  | 'sellerLoans'
+  | 'multiStoreSync'
 
 export interface ModulePermission {
   view: boolean
@@ -29,6 +35,10 @@ export interface ReceiptsPermission extends ModulePermission {
 export interface StaffPermissions {
   products: ModulePermission
   receipts: ReceiptsPermission
+  leads: ModulePermission
+  buybacks: ModulePermission
+  sellerLoans: ModulePermission
+  multiStoreSync: ModulePermission
 }
 
 export type PermissionAction = keyof ReceiptsPermission

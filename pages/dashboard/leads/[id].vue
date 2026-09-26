@@ -52,6 +52,15 @@
     </div>
 
     <div
+      v-else-if="!canAccessLeads"
+      class="rounded-sm bg-red-50/90 px-4 py-4 dark:bg-red-950/25 sm:px-5 sm:py-5"
+    >
+      <p class="text-xs font-medium text-red-800 dark:text-red-200">
+        Sales leads are not enabled for your account. Ask your store owner to grant access.
+      </p>
+    </div>
+
+    <div
       v-else-if="salesLeadsStore.detailLoading && !lead"
       class="p-8 text-center text-sm text-gray-500 dark:text-gray-400"
     >
@@ -253,7 +262,7 @@ const { pageWithFixedFooterClass, pageTitleClass, eyebrowClass } = useDashboardP
 const { dashPath } = useDashboardPaths()
 const { formatCurrency } = usePreferences()
 const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
-const { canManage } = usePermissions()
+const { can } = usePermissions()
 
 const salesLeadsStore = useSalesLeadsStore()
 const staffStore = useStaffStore()
@@ -266,8 +275,9 @@ const lead = computed(
     null
 )
 const canAccessLeadsPlan = computed(() => canUseSubscriptionFeature('sales_leads'))
+const canAccessLeads = computed(() => canAccessLeadsPlan.value && can('leads', 'view'))
 const isOpenLead = computed(() => (lead.value ? isOpenSalesLeadStatus(lead.value.status) : false))
-const canDeleteLead = computed(() => canManage.value)
+const canDeleteLead = computed(() => can('leads', 'delete'))
 const activeStaff = computed(() => staffStore.staff.filter((member) => member.status === 'active'))
 
 const openStatuses: SalesLeadStatus[] = ['new', 'contacted', 'negotiating']
@@ -295,7 +305,7 @@ watch(
 )
 
 watch(
-  [leadId, canAccessLeadsPlan],
+  [leadId, canAccessLeads],
   async ([id, canAccess]) => {
     if (!id || !canAccess) return
     await Promise.all([salesLeadsStore.fetchLeadById(id), staffStore.fetchStaff()])
