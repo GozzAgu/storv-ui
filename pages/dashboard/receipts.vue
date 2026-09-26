@@ -591,30 +591,6 @@
                         <ArrowsPointingOutIcon class="h-4 w-4" />
                       </DashboardToolbarIconButton>
                     </template>
-                    <template #actions>
-                      <Button
-                        v-if="canCreate && !isCapacitorIos"
-                        variant="outline"
-                        size="sm"
-                        :icon="QrCodeIcon"
-                        aria-label="Quick sale"
-                        :extra-class="headerBtnClass"
-                        @click="openQuickSaleModal"
-                      >
-                        <span :class="headerBtnLabelClass">Quick sale</span>
-                      </Button>
-                      <Button
-                        v-if="canCreate && !isCapacitorIos"
-                        variant="primary"
-                        size="sm"
-                        :icon="ReceiptPercentIcon"
-                        aria-label="New sale"
-                        :extra-class="headerBtnClass"
-                        @click="openCreateReceiptModal"
-                      >
-                        <span :class="headerBtnLabelClass">New sale</span>
-                      </Button>
-                    </template>
                   </DataTableToolbar>
                   <!-- Bulk actions (receipts) -->
                   <div
