@@ -18,27 +18,29 @@
           />
         </IosFormField>
 
-        <IosFormField label="Phone" hint="Optional">
-          <IosFormInput
-            v-model="customerPhone"
-            type="tel"
-            maxlength="40"
-            autocomplete="tel"
-            placeholder="Contact number"
-            @blur="refreshDuplicateWarning"
-          />
-        </IosFormField>
+        <div class="ios-form__grid ios-form__grid--pair">
+          <IosFormField label="Phone" hint="Optional">
+            <IosFormInput
+              v-model="customerPhone"
+              type="tel"
+              maxlength="40"
+              autocomplete="tel"
+              placeholder="Contact number"
+              @blur="refreshDuplicateWarning"
+            />
+          </IosFormField>
 
-        <IosFormField label="Email" hint="Optional">
-          <IosFormInput
-            v-model="customerEmail"
-            type="email"
-            maxlength="120"
-            autocomplete="email"
-            placeholder="Email address"
-            @blur="refreshDuplicateWarning"
-          />
-        </IosFormField>
+          <IosFormField label="Email" hint="Optional">
+            <IosFormInput
+              v-model="customerEmail"
+              type="email"
+              maxlength="120"
+              autocomplete="email"
+              placeholder="Email address"
+              @blur="refreshDuplicateWarning"
+            />
+          </IosFormField>
+        </div>
       </IosFormSection>
 
       <div v-if="duplicateLead" class="dash-drawer-callout">
@@ -91,30 +93,32 @@
           </p>
         </IosFormField>
 
-        <IosFormField label="Estimated value" hint="Optional">
-          <div class="relative">
-            <span
-              class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400"
-              >{{ currencySymbol }}</span
-            >
-            <IosFormInput
-              v-model="estimatedValue"
-              type="number"
-              min="0"
-              step="0.01"
-              extra-class="pl-7"
-              placeholder="0.00"
-            />
-          </div>
-        </IosFormField>
+        <div class="ios-form__grid ios-form__grid--pair">
+          <IosFormField label="Estimated value" hint="Optional">
+            <div class="relative">
+              <span
+                class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400"
+                >{{ currencySymbol }}</span
+              >
+              <IosFormInput
+                v-model="estimatedValue"
+                type="number"
+                min="0"
+                step="0.01"
+                extra-class="pl-7"
+                placeholder="0.00"
+              />
+            </div>
+          </IosFormField>
 
-        <IosFormField label="Source" required>
-          <IosFormSelect v-model="source">
-            <option v-for="option in SALES_LEAD_SOURCES" :key="option" :value="option">
-              {{ SALES_LEAD_SOURCE_LABELS[option] }}
-            </option>
-          </IosFormSelect>
-        </IosFormField>
+          <IosFormField label="Source" required>
+            <IosFormSelect v-model="source">
+              <option v-for="option in SALES_LEAD_SOURCES" :key="option" :value="option">
+                {{ SALES_LEAD_SOURCE_LABELS[option] }}
+              </option>
+            </IosFormSelect>
+          </IosFormField>
+        </div>
 
         <IosFormField label="Notes" hint="Optional">
           <IosFormTextarea

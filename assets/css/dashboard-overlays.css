@@ -17,6 +17,11 @@
   --app-checkbox-label: #475569;
   --app-checkbox-label-checked: #0f172a;
   --app-checkbox-focus: rgb(26 21 35 / 0.35);
+  --dash-form-gap: 0.625rem;
+  --dash-form-label-gap: 0.25rem;
+  --dash-form-section-gap: 0.875rem;
+  --dash-form-pad-x: 1rem;
+  --dash-form-pad-y: 0.75rem;
 }
 
 html.dark {
@@ -285,13 +290,66 @@ html.dark .dash-overlay-close:hover {
 
 /* Drawer internals */
 .dash-drawer-section {
-  padding: 0.75rem 1rem;
+  padding: 0.625rem var(--dash-form-pad-x, 1rem);
 }
 
 @media (min-width: 640px) {
   .dash-drawer-section {
-    padding: 0.875rem 1.25rem;
+    padding: 0.75rem 1.125rem;
   }
+}
+
+/**
+ * IosForm layout (web + shared). ios-forms.css only loads on Capacitor iOS,
+ * so pair grids and density live here for the desktop/web bundle.
+ */
+.ios-form.dash-drawer-fill > .dash-drawer-fill__scroll,
+.ios-form > .ios-form__body,
+.ios-form > .ios-form__scroll {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dash-form-section-gap);
+  padding: var(--dash-form-pad-y) var(--dash-form-pad-x) 1rem;
+}
+
+.ios-form .dash-drawer-section,
+.ios-form .ios-form__section {
+  padding: 0;
+  margin: 0;
+}
+
+.ios-form .ios-form__section-body,
+.ios-form .ios-form__grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dash-form-gap);
+  min-width: 0;
+}
+
+.ios-form__field {
+  min-width: 0;
+}
+
+.ios-form__grid--pair,
+.ios-form__grid.sm\:grid-cols-2,
+.ios-form__grid.grid-cols-2 {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--dash-form-gap);
+  align-items: start;
+}
+
+@media (max-width: 359px) {
+  .ios-form__grid--pair,
+  .ios-form__grid.sm\:grid-cols-2,
+  .ios-form__grid.grid-cols-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ios-form .ios-form__label,
+.ios-form .dash-drawer-label:not(p) {
+  margin-bottom: var(--dash-form-label-gap);
 }
 
 .dash-drawer-label {
@@ -299,7 +357,7 @@ html.dark .dash-overlay-close:hover {
   align-items: baseline;
   flex-wrap: wrap;
   gap: 0.25rem 0.375rem;
-  margin-bottom: 0.375rem;
+  margin-bottom: var(--dash-form-label-gap, 0.25rem);
   font-size: 0.6875rem;
   font-weight: 600;
   letter-spacing: 0.04em;

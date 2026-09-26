@@ -24,24 +24,26 @@
             placeholder="Who sold this item?"
           />
         </IosFormField>
-        <IosFormField label="Phone" hint="Optional">
-          <IosFormInput
-            v-model="customerPhone"
-            type="tel"
-            maxlength="40"
-            autocomplete="tel"
-            placeholder="Contact number"
-          />
-        </IosFormField>
-        <IosFormField label="Email" hint="Optional">
-          <IosFormInput
-            v-model="customerEmail"
-            type="email"
-            maxlength="120"
-            autocomplete="email"
-            placeholder="Email address"
-          />
-        </IosFormField>
+        <div class="ios-form__grid ios-form__grid--pair">
+          <IosFormField label="Phone" hint="Optional">
+            <IosFormInput
+              v-model="customerPhone"
+              type="tel"
+              maxlength="40"
+              autocomplete="tel"
+              placeholder="Contact number"
+            />
+          </IosFormField>
+          <IosFormField label="Email" hint="Optional">
+            <IosFormInput
+              v-model="customerEmail"
+              type="email"
+              maxlength="120"
+              autocomplete="email"
+              placeholder="Email address"
+            />
+          </IosFormField>
+        </div>
       </IosFormSection>
 
       <IosFormSection fixed>
@@ -72,26 +74,28 @@
       </IosFormSection>
 
       <IosFormSection fixed>
-        <IosFormField label="Amount paid to customer" required>
-          <div class="relative">
-            <span
-              class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400"
-              >{{ currencySymbol }}</span
-            >
-            <IosFormInput
-              v-model="purchasePrice"
-              type="number"
-              min="0"
-              step="0.01"
-              extra-class="pl-7"
-              placeholder="0.00"
-            />
-          </div>
-        </IosFormField>
+        <div class="ios-form__grid ios-form__grid--pair">
+          <IosFormField label="Amount paid to customer" required>
+            <div class="relative">
+              <span
+                class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400"
+                >{{ currencySymbol }}</span
+              >
+              <IosFormInput
+                v-model="purchasePrice"
+                type="number"
+                min="0"
+                step="0.01"
+                extra-class="pl-7"
+                placeholder="0.00"
+              />
+            </div>
+          </IosFormField>
 
-        <IosFormField label="Payment method" required>
-          <PaymentMethodSelect v-model="paymentMethod" required />
-        </IosFormField>
+          <IosFormField label="Payment method" required>
+            <PaymentMethodSelect v-model="paymentMethod" required />
+          </IosFormField>
+        </div>
 
         <IosFormField label="Notes" hint="Optional">
           <IosFormTextarea

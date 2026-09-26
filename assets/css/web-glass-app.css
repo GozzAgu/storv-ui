@@ -284,8 +284,7 @@ html:not(.capacitor-native) .dashboard-layout-root input:not(
   [type='reset']
 ),
 html:not(.capacitor-native) .dashboard-layout-root select:not(.ios-toolbar-select),
-html:not(.capacitor-native) .dashboard-layout-root textarea,
-html:not(.capacitor-native) .dashboard-layout-root .app-field,
+html:not(.capacitor-native) .dashboard-layout-root .app-field:not(textarea),
 html:not(.capacitor-native) [data-dashboard-teleport] input:not(
   .sr-only,
   [type='file'],
@@ -298,11 +297,24 @@ html:not(.capacitor-native) [data-dashboard-teleport] input:not(
   [type='reset']
 ),
 html:not(.capacitor-native) [data-dashboard-teleport] select,
-html:not(.capacitor-native) [data-dashboard-teleport] textarea,
-html:not(.capacitor-native) [data-dashboard-teleport] .app-field {
-  min-height: 2.75rem;
+html:not(.capacitor-native) [data-dashboard-teleport] .app-field:not(textarea) {
+  min-height: 2.25rem;
+  height: 2.25rem;
   border: 1px solid var(--saas-glass-border) !important;
-  border-radius: 0.75rem !important;
+  border-radius: 0.625rem !important;
+  background: var(--dash-field-bg) !important;
+  color: var(--saas-ink) !important;
+  box-shadow: none !important;
+}
+
+html:not(.capacitor-native) .dashboard-layout-root textarea,
+html:not(.capacitor-native) .dashboard-layout-root textarea.app-field,
+html:not(.capacitor-native) [data-dashboard-teleport] textarea,
+html:not(.capacitor-native) [data-dashboard-teleport] textarea.app-field {
+  min-height: 4.5rem;
+  height: auto;
+  border: 1px solid var(--saas-glass-border) !important;
+  border-radius: 0.625rem !important;
   background: var(--dash-field-bg) !important;
   color: var(--saas-ink) !important;
   box-shadow: none !important;

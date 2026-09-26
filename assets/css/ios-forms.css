@@ -119,15 +119,17 @@ html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .io
   opacity: 0.6;
 }
 
-/* Web: keep readable spacing without forcing iOS-only layout */
+/* Web: denser spacing; pair grids are defined in dashboard-overlays.css (always loaded) */
 html:not(.capacitor-ios) .ios-form__body,
 html:not(.capacitor-ios) .ios-form__grid {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--dash-form-gap, 0.625rem);
 }
 
-html:not(.capacitor-ios) .ios-form__grid.sm\:grid-cols-2 {
+html:not(.capacitor-ios) .ios-form__grid--pair,
+html:not(.capacitor-ios) .ios-form__grid.sm\:grid-cols-2,
+html:not(.capacitor-ios) .ios-form__grid.grid-cols-2 {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }

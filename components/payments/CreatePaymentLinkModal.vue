@@ -8,12 +8,14 @@
   >
     <IosForm layout="fill">
       <IosFormSection fixed>
-        <IosFormField label="Customer name">
-          <IosFormInput v-model="customerName" placeholder="e.g. Sarah Johnson" />
-        </IosFormField>
-        <IosFormField label="Customer phone" hint="WhatsApp">
-          <IosFormInput v-model="customerPhone" type="tel" placeholder="e.g. 080 1234 5678" />
-        </IosFormField>
+        <div class="ios-form__grid ios-form__grid--pair">
+          <IosFormField label="Customer name">
+            <IosFormInput v-model="customerName" placeholder="e.g. Sarah Johnson" />
+          </IosFormField>
+          <IosFormField label="Customer phone" hint="WhatsApp">
+            <IosFormInput v-model="customerPhone" type="tel" placeholder="e.g. 080 1234 5678" />
+          </IosFormField>
+        </div>
       </IosFormSection>
 
       <IosFormSection fixed>

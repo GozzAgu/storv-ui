@@ -34,17 +34,19 @@
       </IosFormSection>
 
       <IosFormSection fixed>
-        <IosFormField label="Borrower name" required>
-          <IosFormInput
-            v-model="partyName"
-            maxlength="120"
-            placeholder="Company or borrower name"
-            autocomplete="organization"
-          />
-        </IosFormField>
-        <IosFormField label="Phone" hint="Optional">
-          <IosFormInput v-model="partyPhone" type="tel" maxlength="40" placeholder="Contact number" />
-        </IosFormField>
+        <div class="ios-form__grid ios-form__grid--pair">
+          <IosFormField label="Borrower name" required>
+            <IosFormInput
+              v-model="partyName"
+              maxlength="120"
+              placeholder="Company or borrower name"
+              autocomplete="organization"
+            />
+          </IosFormField>
+          <IosFormField label="Phone" hint="Optional">
+            <IosFormInput v-model="partyPhone" type="tel" maxlength="40" placeholder="Contact number" />
+          </IosFormField>
+        </div>
         <IosFormField label="Notes" hint="Optional">
           <IosFormTextarea
             v-model="partyNotes"

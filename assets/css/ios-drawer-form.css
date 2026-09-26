@@ -6,7 +6,7 @@
 html.capacitor-ios.capacitor-native {
   --ios-drawer-form-radius: 12px;
   --ios-drawer-form-field-bg: var(--ios-fill-tertiary);
-  --ios-drawer-form-gap: 1rem;
+  --ios-drawer-form-gap: 0.75rem;
 }
 
 /* Scope token for readability */
@@ -99,7 +99,10 @@ html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .da
 }
 
 html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .dash-drawer-section .grid,
-html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-drawer__content .grid {
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-drawer__content .grid,
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__grid--pair,
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__grid.sm\:grid-cols-2,
+html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .ios-form__grid.grid-cols-2 {
   grid-template-columns: 1fr !important;
   gap: var(--ios-drawer-form-gap) !important;
 }

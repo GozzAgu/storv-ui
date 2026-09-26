@@ -51,7 +51,7 @@
       </IosFormSection>
 
       <IosFormSection fixed>
-        <div class="ios-form__grid sm:grid-cols-2">
+        <div class="ios-form__grid ios-form__grid--pair">
           <IosFormField label="First name" required>
             <IosFormInput v-model="formData.firstName" required placeholder="First name" />
           </IosFormField>
@@ -67,9 +67,18 @@
             placeholder="email@example.com"
           />
         </IosFormField>
-        <IosFormField label="Phone" hint="Optional">
-          <IosFormInput v-model="formData.phone" type="tel" placeholder="+1234567890" />
-        </IosFormField>
+        <div class="ios-form__grid ios-form__grid--pair">
+          <IosFormField label="Phone" hint="Optional">
+            <IosFormInput v-model="formData.phone" type="tel" placeholder="+1234567890" />
+          </IosFormField>
+          <IosFormField label="Position" required>
+            <IosFormInput
+              v-model="formData.position"
+              required
+              placeholder="e.g. Sales Associate"
+            />
+          </IosFormField>
+        </div>
       </IosFormSection>
 
       <IosFormSection v-if="!isEdit" fixed>
@@ -89,18 +98,11 @@
       </IosFormSection>
 
       <IosFormSection fixed>
-        <IosFormField label="Position" required>
-          <IosFormInput
-            v-model="formData.position"
-            required
-            placeholder="e.g. Sales Associate"
-          />
-        </IosFormField>
-        <div class="ios-form__grid sm:grid-cols-2">
+        <div class="ios-form__grid ios-form__grid--pair">
           <IosFormField label="Hire date" required>
             <IosFormInput v-model="formData.hireDate" type="date" required />
           </IosFormField>
-          <IosFormField label="Salary">
+          <IosFormField label="Salary" hint="Optional">
             <IosFormInput
               v-model="formData.salary"
               type="number"

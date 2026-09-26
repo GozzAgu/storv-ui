@@ -577,20 +577,22 @@
                 </div>
               </div>
             </IosFormField>
-            <IosFormField label="Customer email">
-              <IosFormInput
-                v-model="receiptForm.customerEmail"
-                type="email"
-                placeholder="john@example.com"
-              />
-            </IosFormField>
-            <IosFormField label="Customer phone">
-              <IosFormInput
-                v-model="receiptForm.customerPhone"
-                type="tel"
-                placeholder="+1 234 567 8900"
-              />
-            </IosFormField>
+            <div class="ios-form__grid ios-form__grid--pair">
+              <IosFormField label="Customer email">
+                <IosFormInput
+                  v-model="receiptForm.customerEmail"
+                  type="email"
+                  placeholder="john@example.com"
+                />
+              </IosFormField>
+              <IosFormField label="Customer phone">
+                <IosFormInput
+                  v-model="receiptForm.customerPhone"
+                  type="tel"
+                  placeholder="+1 234 567 8900"
+                />
+              </IosFormField>
+            </div>
             <IosFormField label="Customer address">
               <IosFormInput
                 v-model="receiptForm.customerAddress"

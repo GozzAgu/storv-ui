@@ -182,15 +182,15 @@ function onManageToggle(key: PermissionModule, value: boolean) {
 .staff-permissions-panel {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
 .staff-permissions-panel__module {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  padding: 0.875rem 1rem;
-  border-radius: 0.875rem;
+  gap: 0.5rem;
+  padding: 0.625rem 0.75rem;
+  border-radius: 0.75rem;
   background: rgb(26 21 35 / 0.04);
 }
 

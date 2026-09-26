@@ -8,33 +8,35 @@
   >
     <IosForm layout="fill" @submit="save">
       <IosFormSection fixed>
-        <IosFormField label="Phone">
-          <IosFormInput
-            v-model="customerPhone"
-            type="tel"
-            maxlength="40"
-            autocomplete="tel"
-          />
-        </IosFormField>
+        <div class="ios-form__grid ios-form__grid--pair">
+          <IosFormField label="Phone">
+            <IosFormInput
+              v-model="customerPhone"
+              type="tel"
+              maxlength="40"
+              autocomplete="tel"
+            />
+          </IosFormField>
+
+          <IosFormField label="Estimated value" hint="Optional">
+            <div class="relative">
+              <span
+                class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400"
+                >{{ currencySymbol }}</span
+              >
+              <IosFormInput
+                v-model="estimatedValue"
+                type="number"
+                min="0"
+                step="0.01"
+                extra-class="pl-7"
+              />
+            </div>
+          </IosFormField>
+        </div>
 
         <IosFormField label="Product interest" required>
           <IosFormInput v-model="productName" maxlength="160" />
-        </IosFormField>
-
-        <IosFormField label="Estimated value" hint="Optional">
-          <div class="relative">
-            <span
-              class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400"
-              >{{ currencySymbol }}</span
-            >
-            <IosFormInput
-              v-model="estimatedValue"
-              type="number"
-              min="0"
-              step="0.01"
-              extra-class="pl-7"
-            />
-          </div>
         </IosFormField>
       </IosFormSection>
 
