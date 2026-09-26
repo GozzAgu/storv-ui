@@ -2248,17 +2248,26 @@ const updateStoreSettings = async (settings: any) => {
     const userData = await getUserDocument(targetUserId)
     const currentStoreDetails = userData?.storeDetails || {}
     const currentSettings = (currentStoreDetails as any).settings || {}
+    const nextStoreDetails = {
+      ...currentStoreDetails,
+      settings: {
+        ...currentSettings,
+        ...settings,
+      },
+    }
 
     const { updateUserDocument } = useUser()
     await updateUserDocument(targetUserId, {
-      storeDetails: {
-        ...currentStoreDetails,
-        settings: {
-          ...currentSettings,
-          ...settings,
-        },
-      },
+      storeDetails: nextStoreDetails,
     } as any)
+
+    // Keep live checkout pickers in sync with the saved account methods
+    if (userStore.userData?.uid === targetUserId) {
+      userStore.userData = {
+        ...userStore.userData,
+        storeDetails: nextStoreDetails as any,
+      }
+    }
 
     toast.success('Settings saved successfully!')
   } catch (error: any) {
@@ -2403,7 +2412,6 @@ const savePaymentSettings = async () => {
   await updateStoreSettings({
     payment: { paymentMethods: methods },
   })
-  toast.success('Payment methods saved')
 }
 
 // Save receipt settings

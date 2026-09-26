@@ -1106,6 +1106,7 @@ const { authFetch } = useAuthenticatedFetch()
 const userStore = useUserStore()
 const staffStore = useStaffStore()
 const { formatCurrency, preferences } = usePreferences()
+const { defaultPaymentMethod } = usePaymentTenders()
 const {
   sectionLabelClass,
   pickListClass,
@@ -1214,7 +1215,7 @@ const receiptForm = ref({
   customerEmail: '',
   customerPhone: '',
   customerAddress: '',
-  paymentMethod: 'Cash',
+  paymentMethod: defaultPaymentMethod.value,
   notes: '',
 })
 
@@ -1571,7 +1572,7 @@ async function applyReceiptCreationPrefill(prefill: ReceiptCreationPrefill) {
         if (match && !match.dateOut && !match.pendingSaleReceiptId) {
           toggleItemSelection(match, true)
           if (!receiptForm.value.paymentMethod) {
-            receiptForm.value.paymentMethod = 'Cash'
+            receiptForm.value.paymentMethod = defaultPaymentMethod.value
           }
           currentStep.value = 3
           return
@@ -1602,7 +1603,7 @@ async function applyReceiptCreationPrefill(prefill: ReceiptCreationPrefill) {
     availableItems.value.find((row) => row.id === resolved.item.id) ?? resolved.item
   toggleItemSelection(match, true)
   if (!receiptForm.value.paymentMethod) {
-    receiptForm.value.paymentMethod = 'Cash'
+    receiptForm.value.paymentMethod = defaultPaymentMethod.value
   }
   currentStep.value = 3
 }
@@ -1988,7 +1989,7 @@ const resetForm = () => {
     customerEmail: '',
     customerPhone: '',
     customerAddress: '',
-    paymentMethod: 'Cash',
+    paymentMethod: defaultPaymentMethod.value,
     notes: '',
   }
   paymentSettlement.value = 'paid_in_full'

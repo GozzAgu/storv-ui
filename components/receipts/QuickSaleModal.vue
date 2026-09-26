@@ -455,27 +455,20 @@
 
         <!-- Payment -->
         <div class="border-t border-gray-200 pt-4 dark:border-white/[0.08]">
-          <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Payment</span>
+          <div class="mb-2.5 flex flex-wrap items-center justify-between gap-2">
+            <div class="min-w-0">
+              <p class="text-xs font-semibold text-gray-800 dark:text-gray-100">Payment</p>
+              <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+                From your checkout methods in Settings
+              </p>
+            </div>
             <Checkbox v-model="useSplitPayment" label="Split payment" size="sm" />
           </div>
 
-          <div v-if="!useSplitPayment" class="grid grid-cols-2 gap-2 sm:grid-cols-3">
-            <button
-              v-for="method in paymentTenderOptions"
-              :key="method"
-              type="button"
-              @click="paymentMethod = method"
-              :class="[
-                'px-4 py-2 rounded-sm text-sm font-medium transition-colors',
-                paymentMethod === method
-                  ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600',
-              ]"
-            >
-              {{ method }}
-            </button>
-          </div>
+          <PaymentTenderPicker
+            v-if="!useSplitPayment"
+            v-model="paymentMethod"
+          />
 
           <div v-else class="space-y-2">
             <div
@@ -602,6 +595,7 @@ import {
 import SidePanel from '~/components/ui/SidePanel.vue'
 import SellScreenNoteBanner from '~/components/receipts/SellScreenNoteBanner.vue'
 import PaymentMethodSelect from '~/components/receipts/PaymentMethodSelect.vue'
+import PaymentTenderPicker from '~/components/receipts/PaymentTenderPicker.vue'
 import DashboardDrawerSearch from '~/components/dashboard/DashboardDrawerSearch.vue'
 import Button from '~/components/ui/Button.vue'
 import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
@@ -781,11 +775,22 @@ const showCommission = ref(false)
 const commissionAmount = ref<number | undefined>(undefined)
 const commissionOwedToName = ref('')
 const commissionOwedToUid = ref('')
-const { paymentTenderOptions } = usePaymentTenders()
-const paymentMethod = ref('Cash')
+const { paymentTenderOptions, defaultPaymentMethod } = usePaymentTenders()
+const paymentMethod = ref(defaultPaymentMethod.value)
 const useSplitPayment = ref(false)
 const splitPayments = ref<Array<{ method: string; amount: number }>>([{ method: '', amount: 0 }])
 const isProcessing = ref(false)
+
+watch(
+  paymentTenderOptions,
+  (opts) => {
+    if (!opts.length) return
+    if (!opts.includes(paymentMethod.value)) {
+      paymentMethod.value = opts[0]!
+    }
+  },
+  { immediate: true }
+)
 
 let html5QrCode: any = null
 
@@ -1252,7 +1257,7 @@ const resetForm = () => {
   commissionAmount.value = undefined
   commissionOwedToName.value = ''
   commissionOwedToUid.value = ''
-  paymentMethod.value = 'Cash'
+  paymentMethod.value = defaultPaymentMethod.value
   useSplitPayment.value = false
   splitPayments.value = [{ method: '', amount: 0 }]
   manualBarcode.value = ''
