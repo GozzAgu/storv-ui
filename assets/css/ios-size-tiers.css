@@ -1,0 +1,196 @@
+/**
+ * iOS size tiers. `html.ios-size-*` is set from the window width by
+ * utils/ios-size-tier.ts (phone-sm < 375 ≤ phone < 430 ≤ phone-lg < 744 ≤
+ * tablet-sm < 834 ≤ tablet < 1024 ≤ tablet-lg). Tokens first, then tablet layouts.
+ * `phone` keeps the defaults defined in the token files.
+ */
+
+/* ── Tokens ── */
+
+html.capacitor-ios.capacitor-native.ios-size-phone-sm {
+  --ios-home-inset: 12px;
+  --ios-home-section-gap: 16px;
+  --ios-list-row-pad-inline: 0.75rem;
+  --ios-list-icon-size: 2rem;
+  --ios-field-height: 3rem;
+  --ios-field-pad-block: 0.75rem;
+  --ios-field-pad-inline: 0.875rem;
+  --ios-global-top-bar-height: 2.75rem;
+  --ios-dash-metric-value-size: 1rem;
+}
+
+html.capacitor-ios.capacitor-native.ios-size-phone-lg {
+  --ios-home-inset: 20px;
+  --ios-home-section-gap: 22px;
+  --ios-list-title-size: 0.875rem;
+  --ios-list-subtitle-size: 0.75rem;
+  --ios-list-amount-size: 0.8125rem;
+  --ios-list-row-pad-block: 0.625rem;
+  --ios-list-icon-size: 2.25rem;
+  --ios-dash-menu-size: 0.875rem;
+  --ios-dash-secondary-size: 0.75rem;
+  --ios-dash-metric-value-size: 1.3125rem;
+}
+
+html.capacitor-ios.capacitor-native:is(.ios-size-tablet-sm, .ios-size-tablet, .ios-size-tablet-lg) {
+  --ios-home-inset: 24px;
+  --ios-home-section-gap: 28px;
+  --ios-home-radius: 20px;
+  --ios-content-max: 46rem;
+  --ios-list-title-size: 0.9375rem;
+  --ios-list-subtitle-size: 0.8125rem;
+  --ios-list-meta-size: 0.75rem;
+  --ios-list-amount-size: 0.875rem;
+  --ios-list-row-pad-block: 0.75rem;
+  --ios-list-row-pad-inline: 1.125rem;
+  --ios-list-row-min-height: 3.25rem;
+  --ios-list-icon-size: 2.5rem;
+  --ios-field-height: 3.25rem;
+  --ios-field-label-size: 0.875rem;
+  --ios-global-top-bar-height: 3.5rem;
+  --ios-dash-page-title-size: 1.625rem;
+  --ios-dash-section-title-size: 1.0625rem;
+  --ios-dash-card-title-size: 0.9375rem;
+  --ios-dash-body-size: 0.8125rem;
+  --ios-dash-secondary-size: 0.8125rem;
+  --ios-dash-meta-size: 0.75rem;
+  --ios-dash-link-size: 0.8125rem;
+  --ios-dash-menu-size: 0.9375rem;
+  --ios-dash-nav-title-size: 1.0625rem;
+  --ios-dash-metric-value-size: 1.5rem;
+  --ios-dash-metric-label-size: 0.8125rem;
+  --ios-type-body-size: 1rem;
+  --ios-type-headline-size: 1rem;
+  --ios-type-subheadline-size: 0.875rem;
+  --ios-type-footnote-size: 0.8125rem;
+  --ios-type-caption-size: 0.75rem;
+}
+
+html.capacitor-ios.capacitor-native.ios-size-tablet {
+  --ios-home-inset: 28px;
+  --ios-content-max: 60rem;
+}
+
+html.capacitor-ios.capacitor-native.ios-size-tablet-lg {
+  --ios-home-inset: 32px;
+  --ios-content-max: 76rem;
+}
+
+/* ── Tablet: centre page content, keep the canvas edge to edge ── */
+
+html.capacitor-ios.capacitor-native.capacitor-ipad
+  :is(.ios-home-dashboard, .ios-sales-shell, .ios-inventory-items-page, .ios-inventory-categories-page) {
+  padding-inline: max(var(--ios-home-inset), calc((100% - var(--ios-content-max)) / 2));
+}
+
+html.capacitor-ios.capacitor-native.capacitor-ipad
+  :is(.ios-receipt-transaction-list, .ios-grouped-list, .ios-quick-action-bar) {
+  max-width: none;
+}
+
+html.capacitor-ios.capacitor-native.capacitor-ipad .ios-global-top-bar-host {
+  padding-inline: max(var(--ios-home-inset), calc((100% - var(--ios-content-max)) / 2));
+}
+
+html.capacitor-ios.capacitor-native.capacitor-ipad .ios-global-top-bar__title {
+  font-size: 1.0625rem;
+}
+
+html.capacitor-ios.capacitor-native.capacitor-ipad .ios-receipt-transaction-row__icon svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* ── Home ── */
+
+html.capacitor-ios.capacitor-native:is(.ios-size-tablet-sm, .ios-size-tablet) .ios-home-dashboard__metrics-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+html.capacitor-ios.capacitor-native.ios-size-tablet-lg .ios-home-dashboard__metrics-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+/* Large tablet: header, alerts and metrics span; the feeds sit side by side */
+html.capacitor-ios.capacitor-native.ios-size-tablet-lg .ios-home-dashboard {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
+  column-gap: var(--ios-home-section-gap);
+  row-gap: var(--ios-home-section-gap);
+}
+
+html.capacitor-ios.capacitor-native.ios-size-tablet-lg
+  .ios-home-dashboard
+  > :is(.ios-home-dashboard__header, .ios-home-dashboard__attention, .ios-home-dashboard__section:first-of-type) {
+  grid-column: 1 / -1;
+}
+
+html.capacitor-ios.capacitor-native.ios-size-tablet-lg
+  .ios-home-dashboard
+  > :not(.ios-home-dashboard__header, .ios-home-dashboard__attention, .ios-home-dashboard__section) {
+  grid-column: 1 / -1;
+}
+
+/* ── Sales / inventory lists: two columns from 834px, flat lists only ── */
+
+html.capacitor-ios.capacitor-native:is(.ios-size-tablet, .ios-size-tablet-lg)
+  .ios-receipt-transaction-list:not(:has(.ios-receipt-transaction-list__group)),
+html.capacitor-ios.capacitor-native:is(.ios-size-tablet, .ios-size-tablet-lg)
+  .ios-grouped-list:has(> .ios-inventory-folder-row) {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+html.capacitor-ios.capacitor-native:is(.ios-size-tablet, .ios-size-tablet-lg)
+  .ios-receipt-transaction-list:not(:has(.ios-receipt-transaction-list__group))
+  > .ios-receipt-transaction-row:nth-child(odd),
+html.capacitor-ios.capacitor-native:is(.ios-size-tablet, .ios-size-tablet-lg)
+  .ios-grouped-list
+  > .ios-inventory-folder-row:nth-child(odd) {
+  border-right: 1px solid var(--ios-separator);
+}
+
+/* With an even count the last two rows share the bottom edge */
+html.capacitor-ios.capacitor-native:is(.ios-size-tablet, .ios-size-tablet-lg)
+  .ios-receipt-transaction-list:not(:has(.ios-receipt-transaction-list__group))
+  > .ios-receipt-transaction-row:nth-child(odd):nth-last-child(2),
+html.capacitor-ios.capacitor-native:is(.ios-size-tablet, .ios-size-tablet-lg)
+  .ios-grouped-list
+  > .ios-inventory-folder-row:nth-child(odd):nth-last-child(2) {
+  border-bottom: none;
+}
+
+/* ── Drawers: a centred sheet instead of an 11-inch-wide one ── */
+
+html.capacitor-ios.capacitor-native.capacitor-ipad .dashboard-native-sheet {
+  left: 0;
+  right: 0;
+  width: auto;
+  max-width: 40rem;
+  margin-inline: auto;
+}
+
+html.capacitor-ios.capacitor-native.ios-size-tablet-lg .dashboard-native-sheet--crud {
+  max-width: 44rem;
+}
+
+html.capacitor-ios.capacitor-native.capacitor-ipad.ios-landscape .dashboard-native-sheet {
+  bottom: 1.5rem;
+  border-radius: var(--ios-drawer-radius, 1.75rem);
+}
+
+html.capacitor-ios.capacitor-native.capacitor-ipad.ios-landscape .dashboard-native-sheet--crud {
+  max-height: min(86dvh, 760px);
+}
+
+/* Two-up field pairs are readable again at sheet width on tablets */
+html.capacitor-ios.capacitor-native.capacitor-ipad
+  .ios-drawer.dashboard-native-sheet--crud
+  :is(.ios-form__grid--pair, .ios-form__grid.sm\:grid-cols-2, .ios-form__grid.grid-cols-2) {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+html.capacitor-ios.capacitor-native.capacitor-ipad .ios-sales-fab-host {
+  right: max(var(--ios-home-inset), calc((100% - var(--ios-content-max)) / 2));
+}

@@ -1,5 +1,6 @@
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useIsCapacitorIos } from '~/composables/useNativeTableLayout'
+import { applyIosSizeTier, isTabletTier, type IosSizeTier } from '~/utils/ios-size-tier'
 
 /** iPad / large-tablet layout (Capacitor iOS or iPadOS Safari). */
 export function isIpadLikeViewport(): boolean {
@@ -17,33 +18,26 @@ export function isIpadLikeViewport(): boolean {
   return false
 }
 
+/** Current width tier, kept in sync by the Capacitor plugin (`startIosSizeTierTracking`). */
+export const iosSizeTier = ref<IosSizeTier>('phone')
+
 /**
  * Compact (iPhone) vs comfortable (iPad) density for native iOS chrome.
  * Web desktop stays on the default compact control unless forced.
  */
 export function useIosLayoutSize() {
   const { isCapacitorIos } = useIsCapacitorIos()
-  const isIpadLayout = ref(false)
+  const isIpadLayout = computed(() => isTabletTier(iosSizeTier.value))
 
   function refresh() {
-    isIpadLayout.value = isIpadLikeViewport()
-    if (import.meta.client && typeof document !== 'undefined') {
-      document.documentElement.classList.toggle('capacitor-ipad', isIpadLayout.value)
+    if (import.meta.client && typeof window !== 'undefined') {
+      iosSizeTier.value = applyIosSizeTier()
     }
-  }
-
-  if (import.meta.client) {
-    onMounted(() => {
-      refresh()
-      const mq = window.matchMedia('(min-width: 768px)')
-      mq.addEventListener('change', refresh)
-      onUnmounted(() => mq.removeEventListener('change', refresh))
-    })
   }
 
   const bulkSelectSize = computed<'compact' | 'comfortable'>(() =>
     isCapacitorIos.value && isIpadLayout.value ? 'comfortable' : 'compact'
   )
 
-  return { isIpadLayout, bulkSelectSize, refreshIosLayoutSize: refresh }
+  return { sizeTier: iosSizeTier, isIpadLayout, bulkSelectSize, refreshIosLayoutSize: refresh }
 }

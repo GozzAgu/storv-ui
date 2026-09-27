@@ -7,6 +7,8 @@ import {
 } from '~/utils/capacitor-root-path'
 import { startNativeKeyboardHandling } from '~/composables/useNativeKeyboardInset'
 import { stripNativeWebFontLinks, scheduleNativeIdleWork } from '~/utils/capacitor-native-perf'
+import { startIosSizeTierTracking } from '~/utils/ios-size-tier'
+import { iosSizeTier } from '~/composables/useIosLayoutSize'
 
 function detectNativeShell(): boolean {
   if (import.meta.server) return false
@@ -74,5 +76,8 @@ export default defineNuxtPlugin({
 
     markCapacitorDocument()
     setTimeout(markCapacitorDocument, 0)
+    startIosSizeTierTracking((tier) => {
+      iosSizeTier.value = tier
+    })
   },
 })
