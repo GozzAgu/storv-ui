@@ -698,7 +698,10 @@ service cloud.firestore {
           allow read: if canAccessStoreData(userId, storeId);
           
           allow create: if canCreateReceipt(userId, storeId);
-          allow update: if canManageNonInventoryOps(userId, storeId);
+          allow update: if canManageNonInventoryOps(userId, storeId)
+            || (canAccessStoreData(userId, storeId)
+                && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read'])
+                && request.resource.data.read == true);
           allow delete: if isAuthenticated() && userId == request.auth.uid;
         }
         

@@ -247,11 +247,9 @@ function formatTime(date: Date | unknown): string {
 
 async function handleNotificationClick(notification: Notification) {
   if (!notification.read) {
-    try {
-      await notificationsStore.markAsRead(notification.id)
-    } catch (error: unknown) {
-      toast.error((error as Error).message || 'Failed to mark notification as read')
-    }
+    notificationsStore.markAsRead(notification.id).catch((error: unknown) => {
+      console.warn('Failed to mark notification as read:', error)
+    })
   }
 
   const meta = notification.metadata
