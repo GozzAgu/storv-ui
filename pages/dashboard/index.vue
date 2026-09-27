@@ -223,6 +223,20 @@
             {{ quietPrimaryCta.label }}
           </NuxtLink>
         </div>
+
+        <section :class="[cardPaddedClass, 'dash-quiet-today__shortcuts']">
+          <div :class="[cardHeaderClass, 'dash-card__header--compact']">
+            <h2 :class="cardTitleClass">Shortcuts</h2>
+          </div>
+          <ul :class="listClass">
+            <li v-for="link in quietShortcutLinks" :key="link.href" :class="listRowClass">
+              <NuxtLink :to="link.href" class="dash-shortcut-link w-full">
+                <span>{{ link.label }}</span>
+                <span aria-hidden="true">→</span>
+              </NuxtLink>
+            </li>
+          </ul>
+        </section>
       </section>
 
       <template v-else-if="!isQuietDashboard">
@@ -1069,6 +1083,22 @@ const quietPrimaryCta = computed(() => {
     return { href: '/dashboard/inventory', label: 'Add product' }
   }
   return { href: '/dashboard/receipts', label: 'Create sale' }
+})
+
+const quietShortcutLinks = computed(() => {
+  const links = [
+    { href: '/dashboard/receipts', label: 'Create sale' },
+    { href: '/dashboard/inventory', label: 'Inventory' },
+    { href: '/dashboard/analytics', label: 'Analytics' },
+  ]
+  if (quietPrimaryCta.value?.href === '/dashboard/inventory') {
+    return [
+      { href: '/dashboard/inventory', label: 'Add product' },
+      { href: '/dashboard/receipts', label: 'Sales' },
+      { href: '/dashboard/analytics', label: 'Analytics' },
+    ]
+  }
+  return links
 })
 
 const currentStoreLabel = computed(() => {
