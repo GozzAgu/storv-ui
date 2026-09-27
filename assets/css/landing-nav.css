@@ -1,11 +1,11 @@
 /* Portfolio-style floating nav - inspired by goz-portfolio-app.vercel.app */
 
 :root {
-  --storvv-blue: #1a1523;
+  --storvv-blue: #0f172a;
   --storvv-blue-hover: #111018;
   --landing-header-h: 4.25rem;
-  --landing-nav-muted: rgb(26 21 35 / 0.55);
-  --landing-nav-ink: #1a1523;
+  --landing-nav-muted: rgb(15 23 42 / 0.55);
+  --landing-nav-ink: #0f172a;
   --landing-nav-border: transparent;
   --landing-nav-surface: #ffffff;
 }
@@ -225,9 +225,9 @@
 }
 
 .landing-mobile-layer.landing-page--portfolio {
-  --landing-nav-muted: rgb(26 21 35 / 0.55);
-  --landing-nav-ink: #1a1523;
-  --landing-nav-border: rgb(26 21 35 / 0.08);
+  --landing-nav-muted: rgb(15 23 42 / 0.55);
+  --landing-nav-ink: #0f172a;
+  --landing-nav-border: rgb(15 23 42 / 0.08);
   --landing-nav-surface: #ffffff;
 }
 
@@ -291,7 +291,7 @@ html.dark .landing-mobile-backdrop {
   border: 0;
   border-radius: 1.25rem 1.25rem 0 0;
   background: var(--landing-nav-surface, #ffffff);
-  box-shadow: 0 -4px 32px rgb(26 21 35 / 0.08);
+  box-shadow: 0 -4px 32px rgb(15 23 42 / 0.08);
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
   -webkit-backface-visibility: hidden;
@@ -338,7 +338,7 @@ html.dark .landing-mobile-panel {
 .landing-mobile-nav-link:hover,
 .landing-mobile-nav-link:focus-visible {
   color: var(--landing-nav-ink);
-  background: rgb(26 21 35 / 0.05);
+  background: rgb(15 23 42 / 0.05);
 }
 
 html.dark .landing-mobile-nav-link:hover,
@@ -362,14 +362,14 @@ html.dark .landing-mobile-nav-link:focus-visible {
   font-size: 0.875rem;
   font-weight: 600;
   border-radius: 9999px;
-  background: #1a1523;
+  background: #0f172a;
   color: #ffffff;
   box-shadow: none;
 }
 
 html.dark .landing-mobile-panel__cta {
   background: #ffffff;
-  color: #1a1523;
+  color: #0f172a;
 }
 
 .landing-mobile-panel__secondary-cta {
@@ -384,7 +384,7 @@ html.dark .landing-mobile-panel__cta {
   text-decoration: none;
   border-radius: 9999px;
   border: 0;
-  background: rgb(26 21 35 / 0.06);
+  background: rgb(15 23 42 / 0.06);
 }
 
 html.dark .landing-mobile-panel__secondary-cta {

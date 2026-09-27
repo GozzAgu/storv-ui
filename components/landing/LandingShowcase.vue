@@ -14,13 +14,18 @@
         <span class="landing-hero__aurora-blob landing-hero__aurora-blob--a" />
         <span class="landing-hero__aurora-blob landing-hero__aurora-blob--b" />
       </div>
+      <div class="landing-hero__pattern" aria-hidden="true">
+        <div class="landing-hero__pattern-fade">
+          <div class="landing-hero__pattern-tile" />
+        </div>
+      </div>
       <div class="landing-hero__spotlight" aria-hidden="true" />
 
       <div class="landing-hero__inner landing-hero__inner--split">
         <div class="landing-hero__copy">
           <p class="landing-hero__badge landing-hero__reveal" style="--hero-i: 0">
             <span class="landing-hero__badge-dot" aria-hidden="true" />
-            Retail OS · Web &amp; iOS
+            Retail OS · Web · iOS &amp; Android soon
           </p>
           <h1 id="landing-hero-title" class="landing-hero__title landing-hero__title--premium">
             <span class="landing-hero__line landing-hero__reveal" style="--hero-i: 1"
@@ -35,7 +40,7 @@
             class="landing-hero__role landing-hero__role--premium landing-hero__reveal"
             style="--hero-i: 3"
           >
-            Stock, sales, and a public storefront in one workspace. Start with
+            Stock, sales, receipts, and your team in one workspace. Start with
             <strong>Solo</strong> or scale into the full <strong>Business</strong> experience.
           </p>
 

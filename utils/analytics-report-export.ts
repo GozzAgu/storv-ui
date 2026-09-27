@@ -177,7 +177,7 @@ export async function downloadAnalyticsPdf(snapshot: AnalyticsReportSnapshot) {
     if (y + needed > bottomSafe) newPage()
   }
 
-  // —— Header ——
+  // Header
   if (logo) {
     try {
       doc.addImage(logo.dataUrl, logo.format, marginX, y, 12, 12)
@@ -214,7 +214,7 @@ export async function downloadAnalyticsPdf(snapshot: AnalyticsReportSnapshot) {
   doc.text('Sales report', marginX, y)
   y += 10
 
-  // —— Highlight metrics ——
+  // Highlight metrics
   const highlights: Array<{ label: string; value: string }> = [
     { label: 'Revenue', value: snapshot.formatCurrency(snapshot.totalRevenue) },
     { label: 'Orders', value: String(snapshot.totalOrders) },
@@ -241,7 +241,7 @@ export async function downloadAnalyticsPdf(snapshot: AnalyticsReportSnapshot) {
   })
   y += cardH + 10
 
-  // —— Secondary metrics ——
+  // Secondary metrics
   const secondary: Array<[string, string]> = [
     ['Units sold', String(snapshot.totalSales)],
     ['Low stock items', String(snapshot.lowStockCount)],
@@ -395,7 +395,7 @@ export async function downloadAnalyticsPdf(snapshot: AnalyticsReportSnapshot) {
       receipt: ret.receiptNumber,
       date: snapshot.formatReturnDate(ret.date),
       amount: `-${snapshot.formatCurrency(ret.amount)}`,
-      reason: ret.reason || '—',
+      reason: ret.reason || '-',
     }))
   )
 

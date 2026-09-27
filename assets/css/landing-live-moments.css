@@ -1,5 +1,5 @@
 /**
- * Clean live moments — soft crossfades, quiet journey, no gimmicks.
+ * Clean live moments, soft crossfades, quiet journey, no gimmicks.
  */
 
 .landing-story__stage {
@@ -130,7 +130,7 @@ html.dark .landing-journey {
 }
 
 .landing-journey__step:hover {
-  background: rgb(26 21 35 / 0.03);
+  background: rgb(15 23 42 / 0.03);
 }
 
 .landing-journey__step--active {
@@ -156,8 +156,8 @@ html.dark .landing-journey__step--active {
   border-radius: 9999px;
   font-size: 0.6875rem;
   font-weight: 700;
-  background: rgb(26 21 35 / 0.06);
-  color: rgb(26 21 35 / 0.55);
+  background: rgb(15 23 42 / 0.06);
+  color: rgb(15 23 42 / 0.55);
   flex-shrink: 0;
 }
 
@@ -234,7 +234,7 @@ html.dark .landing-journey__step-index {
   z-index: 1;
 }
 
-/* Proof numbers — quieter */
+/* Proof numbers, quieter */
 .landing-proof__stat-value {
   font-size: clamp(1.75rem, 3vw, 2.25rem);
   font-weight: 700;

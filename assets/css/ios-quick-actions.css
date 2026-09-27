@@ -1,5 +1,5 @@
 /**
- * iOS tab / filter rail — clean text tabs with horizontal scroll only.
+ * iOS tab / filter rail, clean text tabs with horizontal scroll only.
  * Underline lives on the tab track; create/more sit outside it and stay fixed.
  */
 
@@ -159,7 +159,7 @@ html.capacitor-ios.capacitor-native.dark
   border: none;
 }
 
-/* Compact icon-only trailing actions — stay fixed outside the scroll track */
+/* Compact icon-only trailing actions, stay fixed outside the scroll track */
 html.capacitor-ios.capacitor-native .ios-quick-actions__actions {
   display: flex;
   flex-shrink: 0;

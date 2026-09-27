@@ -17,98 +17,12 @@
 
     <LandingAiShowcase />
 
-    <!-- Features encyclopedia lives on /features -->
-    <section
-      id="features-teaser"
-      data-section-id="features-teaser"
-      class="landing-teaser scroll-animate scroll-animate-up scroll-mt-[4.75rem] lg:scroll-mt-28"
-    >
-      <div class="landing-teaser__inner">
-        <div class="landing-teaser__copy">
-          <p class="landing-label landing-label--blue">Full product</p>
-          <h2 class="landing-teaser__title">Every capability, without the scroll marathon.</h2>
-          <p class="landing-teaser__lede">
-            Browse inventory, sales, storefront, payments, analytics, and Enterprise tools by
-            category - plus app screenshots and the Storvv Assistant overview.
-          </p>
-          <ul class="landing-teaser__pillars">
-            <li>Storefront &amp; guest catalogue</li>
-            <li>Payment links &amp; leads</li>
-            <li>Screenshots of the real app</li>
-          </ul>
-        </div>
-        <NuxtLink to="/features" class="landing-pill-cta landing-teaser__cta">
-          Explore all features
-        </NuxtLink>
-      </div>
-    </section>
+    <LandingFeaturesTeaser />
 
-    <!-- Security teaser: full write-up lives on its own page -->
-    <section
-      id="security"
-      data-section-id="security-teaser"
-      class="landing-teaser scroll-animate scroll-animate-up scroll-mt-[4.75rem] lg:scroll-mt-28"
-    >
-      <div class="landing-teaser__inner">
-        <img
-          src="/marketing/illustrations/trust-badge-icon.png"
-          alt=""
-          class="landing-teaser__badge"
-          loading="lazy"
-          width="112"
-          height="112"
-        />
-        <div class="landing-teaser__copy">
-          <p class="landing-label landing-label--blue">Peace of mind</p>
-          <h2 class="landing-teaser__title">Your business data deserves protection.</h2>
-          <p class="landing-teaser__lede">
-            Secure authentication, role-based permissions, and cloud infrastructure - built for
-            retail teams who cannot afford downtime or data loss.
-          </p>
-          <ul class="landing-teaser__pillars">
-            <li>Safe when you sign in</li>
-            <li>Each person sees what they need</li>
-            <li>Built to stay online</li>
-          </ul>
-        </div>
-        <NuxtLink to="/security" class="landing-pill-cta landing-pill-cta--outline landing-teaser__cta">
-          Read our security overview
-        </NuxtLink>
-      </div>
-    </section>
+    <LandingSecurityTeaser />
 
     <!-- Pricing teaser: full plan breakdown and live prices live on /pricing -->
-    <section
-      id="pricing"
-      data-section-id="pricing-teaser"
-      class="landing-teaser landing-teaser--pricing scroll-animate scroll-animate-up scroll-mt-[4.75rem] lg:scroll-mt-28"
-    >
-      <div class="landing-teaser__inner">
-        <div class="landing-teaser__copy landing-teaser__copy--center">
-          <p class="landing-label landing-label--blue">Plans that scale</p>
-          <h2 class="landing-teaser__title">Start free. Upgrade only when you outgrow it.</h2>
-          <p class="landing-teaser__lede">
-            Micro is free forever for one store. Medium adds analytics and leads. Enterprise adds
-            multi-branch transfers and stock loans. Prices shown on the pricing page match your
-            region automatically.
-          </p>
-        </div>
-        <div class="landing-teaser__plans">
-          <div v-for="plan in pricingTiers" :key="plan.name" class="landing-teaser__plan">
-            <p class="landing-teaser__plan-name">{{ plan.name }}</p>
-            <p class="landing-teaser__plan-detail">{{ plan.detail }}</p>
-          </div>
-        </div>
-        <div class="landing-teaser__actions">
-          <NuxtLink to="/pricing" class="landing-pill-cta landing-teaser__cta">
-            See full pricing & compare plans
-          </NuxtLink>
-          <NuxtLink to="/demo/dashboard" class="landing-pill-cta landing-pill-cta--outline">
-            Try demo
-          </NuxtLink>
-        </div>
-      </div>
-    </section>
+    <LandingPlansTeaser />
 
     <LandingFaq />
 
@@ -165,11 +79,6 @@ const appOriginUrl = computed(() => {
   return typeof o === 'string' && o.length > 0 ? o : 'https://app.storvv.com'
 })
 
-const pricingTiers = [
-  { name: 'Micro', detail: 'Free · 1 store, full sales & inventory' },
-  { name: 'Medium', detail: 'Analytics, sales leads, a second branch' },
-  { name: 'Enterprise', detail: 'Transfers, stock loans, unlimited stores' },
-] as const
 
 onMounted(() => {
   if (import.meta.client) {
@@ -183,7 +92,7 @@ useHead({
     {
       name: 'description',
       content:
-        'Storvv: inventory, sales, public storefront, Paystack payment links, analytics, and multi-store tools. Web dashboard and iOS app.',
+        'Storvv: inventory, sales, analytics, and multi-store tools for retailers. Web dashboard today, iOS and Android apps coming soon.',
     },
   ],
 })
@@ -228,8 +137,8 @@ html.dark .landing-hero-float-card:hover {
 
 /* Hero: faint blueprint mesh (readable center, fades at edges) */
 .landing-hero-grid {
-  background-image: linear-gradient(rgb(26 21 35 / 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(26 21 35 / 0.05) 1px, transparent 1px);
+  background-image: linear-gradient(rgb(15 23 42 / 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(15 23 42 / 0.05) 1px, transparent 1px);
   background-size: 52px 52px;
   mask-image: radial-gradient(ellipse 110% 85% at 50% 32%, rgb(0 0 0) 22%, transparent 72%);
   -webkit-mask-image: radial-gradient(ellipse 110% 85% at 50% 32%, rgb(0 0 0) 22%, transparent 72%);
@@ -245,155 +154,5 @@ html.dark .landing-hero-float-card:hover {
   -webkit-box-decoration-break: clone;
   background-clip: text;
   -webkit-background-clip: text;
-}
-
-/* ── Compact teaser sections (security / pricing) ── */
-.landing-teaser {
-  padding: clamp(3.5rem, 8vw, 6rem) 1.25rem;
-  background: #f5f5f7;
-}
-
-.landing-teaser--pricing {
-  background: #ffffff;
-}
-
-html.dark .landing-teaser {
-  background: #080808;
-}
-
-html.dark .landing-teaser--pricing {
-  background: #0d0d0d;
-}
-
-.landing-teaser__inner {
-  max-width: 60rem;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.5rem;
-  text-align: center;
-}
-
-.landing-teaser .landing-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--storvv-blue-light, rgb(26 21 35 / 0.55));
-}
-
-@media (min-width: 800px) {
-  .landing-teaser:not(.landing-teaser--pricing) .landing-teaser__inner {
-    flex-direction: row;
-    text-align: left;
-    align-items: center;
-  }
-}
-
-.landing-teaser__badge {
-  flex-shrink: 0;
-  width: 5.5rem;
-  height: 5.5rem;
-  border-radius: 1.25rem;
-  object-fit: contain;
-  background: #ffffff;
-}
-
-html.dark .landing-teaser__badge {
-  background: #1e1e1e;
-}
-
-.landing-teaser__copy {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.landing-teaser__copy--center {
-  max-width: 34rem;
-}
-
-.landing-teaser__title {
-  margin-top: 0.4rem;
-  font-size: clamp(1.5rem, 3vw, 2rem);
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
-  color: var(--landing-section-heading, #0f172a);
-}
-
-.landing-teaser__lede {
-  margin-top: 0.65rem;
-  font-size: 0.9375rem;
-  line-height: 1.6;
-  color: var(--landing-section-body, #334155);
-}
-
-.landing-teaser__pillars {
-  margin-top: 1rem;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.5rem 1.25rem;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: rgb(26 21 35 / 0.6);
-}
-
-@media (min-width: 800px) {
-  .landing-teaser__pillars {
-    justify-content: flex-start;
-  }
-}
-
-html.dark .landing-teaser__pillars {
-  color: rgb(255 255 255 / 0.65);
-}
-
-.landing-teaser__cta {
-  flex-shrink: 0;
-  white-space: nowrap;
-}
-
-.landing-teaser__plans {
-  display: grid;
-  gap: 0.75rem;
-  width: 100%;
-  max-width: 40rem;
-}
-
-@media (min-width: 640px) {
-  .landing-teaser__plans {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-.landing-teaser__plan {
-  border-radius: 1rem;
-  background: #f5f5f7;
-  padding: 1rem 1.1rem;
-}
-
-html.dark .landing-teaser__plan {
-  background: #1e1e1e;
-}
-
-.landing-teaser__plan-name {
-  font-weight: 700;
-  color: var(--landing-section-heading, #0f172a);
-}
-
-.landing-teaser__plan-detail {
-  margin-top: 0.3rem;
-  font-size: 0.8125rem;
-  line-height: 1.4;
-  color: var(--landing-section-body, #475569);
-}
-
-.landing-teaser__actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.75rem;
 }
 </style>

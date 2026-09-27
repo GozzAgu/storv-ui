@@ -523,7 +523,7 @@ export const useReceiptsStore = defineStore('receipts', {
             .catch(() => undefined)
           try {
             const { useAppToast } = await import('~/composables/useAppToast')
-            useAppToast().success('First sale recorded — nice work')
+            useAppToast().success('First sale recorded. Nice work!')
           } catch {
             /* toast optional */
           }

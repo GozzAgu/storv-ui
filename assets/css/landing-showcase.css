@@ -4,11 +4,11 @@
 .landing-showcase,
 .landing-who-uses-section,
 .landing-about-section {
-  --storvv-blue: #1a1523;
+  --storvv-blue: #0f172a;
   --storvv-blue-hover: #111018;
   --storvv-blue-mid: #3f3a45;
-  --storvv-blue-light: rgb(26 21 35 / 0.55);
-  --storvv-blue-pale: rgb(26 21 35 / 0.42);
+  --storvv-blue-light: rgb(15 23 42 / 0.55);
+  --storvv-blue-pale: rgb(15 23 42 / 0.42);
   --storvv-blue-tint: #f4f4f5;
   --storvv-blue-rgb: 26, 21, 35;
   --storvv-blue-mid-rgb: 63, 58, 69;
@@ -32,14 +32,14 @@
 }
 
 .landing-showcase {
-  --landing-ink: #1a1523;
+  --landing-ink: #0f172a;
   --landing-ink-soft: #3f3a45;
   --landing-blue: var(--storvv-blue);
   --landing-blue-hover: var(--storvv-blue-hover);
   --landing-blue-bright: var(--storvv-blue);
   --landing-blue-light: var(--storvv-blue-light);
-  --landing-muted: rgb(26 21 35 / 0.58);
-  --landing-muted-soft: rgb(26 21 35 / 0.42);
+  --landing-muted: rgb(15 23 42 / 0.58);
+  --landing-muted-soft: rgb(15 23 42 / 0.42);
   --landing-light: #f5f5f7;
   --landing-light-dot: #d4d4d8;
 }
@@ -131,7 +131,7 @@ html.dark .landing-about-section .landing-label--blue {
   position: relative;
   overflow: hidden;
   background: #f5f5f7;
-  color: #1a1523;
+  color: #0f172a;
   display: flex;
   flex-direction: column;
   padding-top: calc(var(--landing-header-h, 3.5rem) + 3rem);
@@ -2502,7 +2502,7 @@ html.dark .landing-about-link:hover {
   display: block;
   padding: calc(var(--landing-header-h, 3.5rem) + 2.5rem) 0 max(3rem, env(safe-area-inset-bottom));
   background: var(--cap-ink);
-  color: #1a1523;
+  color: #0f172a;
   border-top: 0;
 }
 
@@ -2987,7 +2987,7 @@ html.dark .landing-about-link:hover {
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgb(26 21 35 / 0.55);
+  color: rgb(15 23 42 / 0.55);
 }
 
 .landing-capabilities__also-row {
@@ -3003,7 +3003,7 @@ html.dark .landing-about-link:hover {
   padding: 0.5rem 0.875rem;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #1a1523;
+  color: #0f172a;
   cursor: pointer;
   background: #eeeeef;
   border: 0;
@@ -3013,7 +3013,7 @@ html.dark .landing-about-link:hover {
 }
 
 .landing-capabilities__also-btn:hover {
-  color: #1a1523;
+  color: #0f172a;
   background: #e4e4e7;
   border-color: transparent;
   transform: none;
@@ -3023,7 +3023,7 @@ html.dark .landing-about-link:hover {
   font-size: 0.875rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  color: rgb(26 21 35 / 0.45);
+  color: rgb(15 23 42 / 0.45);
 }
 
 .landing-capabilities__footer {
@@ -3032,24 +3032,24 @@ html.dark .landing-about-link:hover {
   text-align: center;
   font-size: 0.875rem;
   line-height: 1.55;
-  color: rgb(26 21 35 / 0.58);
+  color: rgb(15 23 42 / 0.58);
 }
 
 .landing-capabilities__footer-link {
   font-weight: 600;
-  color: #1a1523;
+  color: #0f172a;
   text-decoration: none;
 }
 
 .landing-capabilities__footer-link:hover {
-  color: #1a1523;
+  color: #0f172a;
   text-decoration: underline;
   text-underline-offset: 2px;
 }
 
 .landing-capabilities__footer-strong {
   font-weight: 600;
-  color: #1a1523;
+  color: #0f172a;
 }
 
 .landing-capabilities__footer-sep {
@@ -3160,7 +3160,7 @@ html.dark .landing-about-link:hover {
 }
 
 .landing-contact__card--primary {
-  background: #1a1523;
+  background: #0f172a;
   border-color: transparent;
   box-shadow: none;
 }
@@ -3319,7 +3319,7 @@ html.dark .landing-about-link:hover {
   position: relative;
   overflow: hidden;
   background: #f5f5f7;
-  color: #1a1523;
+  color: #0f172a;
   padding-block: 5.5rem;
   border-top: 0;
 }

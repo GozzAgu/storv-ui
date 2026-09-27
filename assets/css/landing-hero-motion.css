@@ -1,5 +1,5 @@
 /**
- * Clean, alive landing hero — soft light, one product loop, minimal chrome.
+ * Clean, alive landing hero, soft light, one product loop, minimal chrome.
  */
 
 .landing-hero--alive {
@@ -68,6 +68,57 @@
   }
 }
 
+.landing-hero__pattern {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 100%);
+}
+
+.landing-hero__pattern-fade {
+  position: absolute;
+  inset: 0;
+  -webkit-mask-image: radial-gradient(
+    ellipse 62% 58% at 34% 52%,
+    transparent 0%,
+    rgb(0 0 0 / 0.35) 45%,
+    #000 85%
+  );
+  mask-image: radial-gradient(
+    ellipse 62% 58% at 34% 52%,
+    transparent 0%,
+    rgb(0 0 0 / 0.35) 45%,
+    #000 85%
+  );
+}
+
+.landing-hero__pattern-tile {
+  position: absolute;
+  inset: -288px;
+  max-width: none;
+  background-color: rgb(20 63 141 / 0.11);
+  -webkit-mask-image: url('/marketing/patterns/retail-pattern.svg');
+  mask-image: url('/marketing/patterns/retail-pattern.svg');
+  -webkit-mask-size: 288px 288px;
+  mask-size: 288px 288px;
+  -webkit-mask-repeat: repeat;
+  mask-repeat: repeat;
+  transform: translate3d(calc(var(--hero-mx) * -6px), calc(var(--hero-my) * -6px), 0);
+  animation: landing-hero-pattern-drift 90s linear infinite;
+}
+
+@keyframes landing-hero-pattern-drift {
+  to {
+    translate: 288px 288px;
+  }
+}
+
+html.dark .landing-hero__pattern-tile {
+  background-color: rgb(169 188 245 / 0.075);
+}
+
 .landing-hero__spotlight {
   pointer-events: none;
   position: absolute;
@@ -87,8 +138,8 @@
   margin-bottom: 1.5rem;
   padding: 0.3rem 0.75rem 0.3rem 0.55rem;
   border: 0;
-  background: rgb(26 21 35 / 0.04);
-  color: rgb(26 21 35 / 0.62);
+  background: rgb(15 23 42 / 0.04);
+  color: rgb(15 23 42 / 0.62);
   font-size: 0.6875rem;
   font-weight: 600;
   letter-spacing: 0.06em;
@@ -137,14 +188,14 @@
 
 .landing-pill-cta--ghost {
   background: transparent !important;
-  border: 1px solid rgb(26 21 35 / 0.12) !important;
-  color: var(--portfolio-ink, #1a1523) !important;
+  border: 1px solid rgb(15 23 42 / 0.12) !important;
+  color: var(--portfolio-ink, #0f172a) !important;
   box-shadow: none !important;
 }
 
 .landing-pill-cta--ghost:hover {
-  background: rgb(26 21 35 / 0.04) !important;
-  border-color: rgb(26 21 35 / 0.18) !important;
+  background: rgb(15 23 42 / 0.04) !important;
+  border-color: rgb(15 23 42 / 0.18) !important;
 }
 
 .landing-page--portfolio .landing-hero--alive .landing-hero__link-row {
@@ -295,7 +346,7 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgb(26 21 35 / 0.45);
+  color: rgb(15 23 42 / 0.45);
 }
 
 .landing-hero-float-card__value {
@@ -303,7 +354,7 @@
   font-size: 0.8125rem;
   font-weight: 700;
   letter-spacing: -0.01em;
-  color: #1a1523;
+  color: #0f172a;
 }
 
 .landing-hero-float-card--primary {
@@ -380,6 +431,7 @@ html.dark .landing-hero__spotlight {
   .landing-hero-mock__card--video,
   .landing-hero__badge-dot,
   .landing-hero-float-card__pulse,
+  .landing-hero__pattern-tile,
   .landing-page--portfolio .landing-hero--alive .landing-hero__accent {
     animation: none !important;
   }

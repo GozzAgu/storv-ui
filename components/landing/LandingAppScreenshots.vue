@@ -325,7 +325,7 @@ onUnmounted(() => {
   position: relative;
   padding: clamp(4rem, 8vw, 6.5rem) 1.25rem;
   background: #f5f5f7;
-  color: #1a1523;
+  color: #0f172a;
 }
 
 .landing-screenshots__inner {
@@ -340,7 +340,7 @@ onUnmounted(() => {
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgb(26 21 35 / 0.45);
+  color: rgb(15 23 42 / 0.45);
 }
 
 .landing-screenshots__title {
@@ -349,7 +349,7 @@ onUnmounted(() => {
   font-weight: 650;
   letter-spacing: -0.03em;
   line-height: 1.15;
-  color: #1a1523;
+  color: #0f172a;
 }
 
 .landing-screenshots__lede {
@@ -357,7 +357,7 @@ onUnmounted(() => {
   max-width: 28rem;
   font-size: 0.9375rem;
   line-height: 1.55;
-  color: rgb(26 21 35 / 0.55);
+  color: rgb(15 23 42 / 0.55);
 }
 
 .landing-screenshots__tabs {
@@ -376,7 +376,7 @@ onUnmounted(() => {
   border: 0;
   border-radius: 9999px;
   background: transparent;
-  color: rgb(26 21 35 / 0.5);
+  color: rgb(15 23 42 / 0.5);
   font-size: 0.75rem;
   font-weight: 550;
   line-height: 1.2;
@@ -384,12 +384,12 @@ onUnmounted(() => {
 }
 
 .landing-screenshots__tab:hover {
-  color: #1a1523;
+  color: #0f172a;
   background: #eeeeef;
 }
 
 .landing-screenshots__tab--active {
-  background: #1a1523;
+  background: #0f172a;
   color: #ffffff;
 }
 
@@ -430,7 +430,7 @@ onUnmounted(() => {
   height: 2px;
   overflow: hidden;
   border-radius: 9999px;
-  background: rgb(26 21 35 / 0.08);
+  background: rgb(15 23 42 / 0.08);
   pointer-events: none;
 }
 
@@ -439,7 +439,7 @@ onUnmounted(() => {
   height: 100%;
   width: 0;
   border-radius: inherit;
-  background: #1a1523;
+  background: #0f172a;
   animation: landing-screenshots-progress 5.2s linear forwards;
 }
 
@@ -465,7 +465,7 @@ onUnmounted(() => {
   border: 0;
   border-radius: 9999px;
   background: #ffffff;
-  color: #1a1523;
+  color: #0f172a;
   cursor: pointer;
   transform: translateY(-50%);
 }
@@ -492,14 +492,14 @@ onUnmounted(() => {
   font-size: 0.9375rem;
   font-weight: 600;
   letter-spacing: -0.015em;
-  color: var(--portfolio-ink, #1a1523);
+  color: var(--portfolio-ink, #0f172a);
 }
 
 .landing-screenshots__caption-desc {
   margin: 0.25rem 0 0;
   font-size: 0.8125rem;
   line-height: 1.5;
-  color: var(--portfolio-muted, rgb(26 21 35 / 0.58));
+  color: var(--portfolio-muted, rgb(15 23 42 / 0.58));
 }
 
 .landing-screenshots__cta {
@@ -514,12 +514,12 @@ onUnmounted(() => {
 .landing-screenshots__secondary {
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--portfolio-muted, rgb(26 21 35 / 0.58));
+  color: var(--portfolio-muted, rgb(15 23 42 / 0.58));
   text-decoration: none;
 }
 
 .landing-screenshots__secondary:hover {
-  color: var(--portfolio-ink, #1a1523);
+  color: var(--portfolio-ink, #0f172a);
 }
 
 .landing-screenshots-modal {
@@ -564,14 +564,14 @@ onUnmounted(() => {
   align-items: center;
   gap: 0.75rem;
   min-width: 0;
-  color: rgb(26 21 35 / 0.5);
+  color: rgb(15 23 42 / 0.5);
 }
 
 .landing-screenshots-modal__title {
   margin: 0;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #1a1523;
+  color: #0f172a;
   text-align: left;
 }
 
@@ -580,7 +580,7 @@ onUnmounted(() => {
   max-width: 42vw;
   overflow: hidden;
   font-size: 0.75rem;
-  color: rgb(26 21 35 / 0.55);
+  color: rgb(15 23 42 / 0.55);
   text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -597,7 +597,7 @@ onUnmounted(() => {
   margin-right: 0.35rem;
   font-size: 0.75rem;
   font-weight: 600;
-  color: rgb(26 21 35 / 0.45);
+  color: rgb(15 23 42 / 0.45);
 }
 
 .landing-screenshots-modal__icon-btn {
@@ -609,7 +609,7 @@ onUnmounted(() => {
   border: 0;
   border-radius: 9999px;
   background: #f5f5f7;
-  color: #1a1523;
+  color: #0f172a;
 }
 
 .landing-screenshots-modal__icon-btn:hover {
@@ -741,7 +741,7 @@ onUnmounted(() => {
 
 :global(html.dark) .landing-screenshots__tab--active {
   background: #ffffff;
-  color: #1a1523;
+  color: #0f172a;
 }
 
 :global(html.dark) .landing-screenshots__preview,

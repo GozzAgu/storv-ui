@@ -404,7 +404,7 @@ html.dark .dash-drawer-callout {
  * Drawer / modal body scrolling:
  * - Default: body scrolls (overflow-y: auto above).
  * - Only lock the body when a dedicated inner scroll/step region is a direct
- *   child of the fill layout — otherwise long forms clip with no scrollbar.
+ *   child of the fill layout, otherwise long forms clip with no scrollbar.
  * - Also cover the iOS `.ios-drawer__content` wrapper between body and fill.
  */
 .side-panel-body-scroll:has(> .dash-drawer-fill > .dash-drawer-fill__scroll),

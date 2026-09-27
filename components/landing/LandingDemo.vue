@@ -133,7 +133,7 @@ const previewNav: Array<{ name: string; iconKey: DashboardNavIconKey; active?: b
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgb(26 21 35 / 0.55);
+  color: rgb(15 23 42 / 0.55);
 }
 
 .landing-demo__title {
@@ -146,7 +146,7 @@ const previewNav: Array<{ name: string; iconKey: DashboardNavIconKey; active?: b
 }
 
 .landing-demo__accent {
-  color: var(--landing-section-accent, #1a1523);
+  color: var(--landing-section-accent, #0f172a);
   font-size: inherit;
   font-weight: inherit;
   line-height: inherit;
@@ -180,7 +180,7 @@ const previewNav: Array<{ name: string; iconKey: DashboardNavIconKey; active?: b
   content: '✓';
   flex-shrink: 0;
   font-weight: 700;
-  color: rgb(26 21 35 / 0.45);
+  color: rgb(15 23 42 / 0.45);
 }
 
 .landing-demo__actions {
@@ -200,7 +200,7 @@ const previewNav: Array<{ name: string; iconKey: DashboardNavIconKey; active?: b
 .landing-demo__secondary {
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--landing-section-accent, #1a1523);
+  color: var(--landing-section-accent, #0f172a);
 }
 
 .landing-demo__preview {
@@ -251,7 +251,7 @@ const previewNav: Array<{ name: string; iconKey: DashboardNavIconKey; active?: b
   gap: 0.35rem;
   width: 2.75rem;
   padding: 0.65rem 0.45rem;
-  background: #1a1523;
+  background: #0f172a;
 }
 
 .landing-demo__nav-item {
@@ -285,7 +285,7 @@ const previewNav: Array<{ name: string; iconKey: DashboardNavIconKey; active?: b
 
 .landing-demo__stat-value {
   font-weight: 700;
-  color: #1a1523;
+  color: #0f172a;
 }
 
 .landing-demo__stat-label {
@@ -306,7 +306,7 @@ const previewNav: Array<{ name: string; iconKey: DashboardNavIconKey; active?: b
   padding: 0.5rem;
   border-radius: 0.375rem;
   background: #f5f5f7;
-  color: #1a1523;
+  color: #0f172a;
 }
 
 .landing-demo__pill {
@@ -320,7 +320,7 @@ const previewNav: Array<{ name: string; iconKey: DashboardNavIconKey; active?: b
 
 .landing-demo__pill--warn {
   background: #fffbeb;
-  color: #b45309;
+  color: #143f8d;
 }
 
 html.dark .landing-demo {

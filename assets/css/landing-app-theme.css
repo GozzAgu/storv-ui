@@ -1,6 +1,6 @@
 /**
  * Landing palette aligned with the web dashboard.
- * Light: canvas #f5f5f7, cards #ffffff, ink #1a1523.
+ * Light: canvas #f5f5f7, cards #ffffff, ink #0f172a.
  * Dark: canvas #080808, cards #1e1e1e, ink #ffffff.
  * No navy / orange brand fills.
  */
@@ -11,24 +11,24 @@
 .landing-who-uses-section,
 .landing-about-section,
 .landing-capabilities {
-  --storvv-blue: #1a1523;
+  --storvv-blue: #0f172a;
   --storvv-blue-hover: #111018;
   --storvv-blue-mid: #3f3a45;
-  --storvv-blue-light: rgb(26 21 35 / 0.55);
-  --storvv-blue-pale: rgb(26 21 35 / 0.42);
+  --storvv-blue-light: rgb(15 23 42 / 0.55);
+  --storvv-blue-pale: rgb(15 23 42 / 0.42);
   --storvv-blue-tint: #f4f4f5;
   --storvv-blue-rgb: 26, 21, 35;
   --storvv-blue-mid-rgb: 63, 58, 69;
   --storvv-blue-light-rgb: 113, 113, 122;
-  --landing-blue: #1a1523;
+  --landing-blue: #0f172a;
   --landing-blue-hover: #111018;
 }
 
 .landing-page--portfolio {
   --portfolio-bg: #f5f5f7;
   --portfolio-bg-soft: #f5f5f7;
-  --portfolio-ink: #1a1523;
-  --portfolio-muted: rgb(26 21 35 / 0.58);
+  --portfolio-ink: #0f172a;
+  --portfolio-muted: rgb(15 23 42 / 0.58);
   --portfolio-border: transparent;
   --portfolio-card: #ffffff;
   --landing-glass-bg: #ffffff;
@@ -36,11 +36,11 @@
   --landing-glass-border: transparent;
   --landing-glass-highlight: none;
   --landing-glass-shadow: none;
-  --landing-section-heading: #1a1523;
-  --landing-section-body: rgb(26 21 35 / 0.58);
-  --landing-section-accent: #1a1523;
-  --landing-nav-muted: rgb(26 21 35 / 0.55);
-  --landing-nav-ink: #1a1523;
+  --landing-section-heading: #0f172a;
+  --landing-section-body: rgb(15 23 42 / 0.58);
+  --landing-section-accent: #0f172a;
+  --landing-nav-muted: rgb(15 23 42 / 0.55);
+  --landing-nav-ink: #0f172a;
   --landing-nav-border: transparent;
   --landing-nav-surface: #ffffff;
   background: var(--portfolio-bg);
@@ -112,7 +112,7 @@ html.dark .landing-page--portfolio .landing-header--scrolled .landing-header__pi
 .landing-page--portfolio .landing-contact__cta,
 .landing-page--portfolio .landing-cookie-banner__btn,
 .landing-mobile-layer.landing-page--portfolio .landing-mobile-panel__cta {
-  background: #1a1523;
+  background: #0f172a;
   color: #ffffff;
   box-shadow: none;
 }
@@ -132,7 +132,7 @@ html.dark .landing-page--portfolio .landing-contact__cta,
 html.dark .landing-page--portfolio .landing-cookie-banner__btn,
 html.dark .landing-mobile-layer.landing-page--portfolio .landing-mobile-panel__cta {
   background: #ffffff;
-  color: #1a1523;
+  color: #0f172a;
 }
 
 html.dark .landing-page--portfolio .landing-header__cta:hover,
@@ -140,7 +140,7 @@ html.dark .landing-page--portfolio .landing-pill-cta:hover,
 html.dark .landing-page--portfolio .landing-contact__cta:hover,
 html.dark .landing-page--portfolio .landing-cookie-banner__btn:hover {
   background: #f4f4f5;
-  color: #1a1523;
+  color: #0f172a;
 }
 
 .landing-page--portfolio .landing-pill-cta--hero {
@@ -157,7 +157,7 @@ html.dark .landing-page--portfolio .landing-cookie-banner__btn:hover {
 .landing-page--portfolio .landing-mobile-panel__secondary-cta,
 .landing-mobile-layer.landing-page--portfolio .landing-mobile-panel__secondary-cta {
   background: #ffffff;
-  color: #1a1523;
+  color: #0f172a;
   border: 0;
   box-shadow: none;
 }
@@ -202,7 +202,7 @@ html.dark .landing-page--portfolio .landing-header__menu-btn {
 .landing-mobile-layer.landing-page--portfolio .landing-mobile-panel {
   border: 0;
   background: #ffffff;
-  box-shadow: 0 -4px 32px rgb(26 21 35 / 0.08);
+  box-shadow: 0 -4px 32px rgb(15 23 42 / 0.08);
 }
 
 html.dark .landing-page--portfolio .landing-mobile-panel,
@@ -215,7 +215,7 @@ html.dark .landing-mobile-layer.landing-page--portfolio .landing-mobile-panel {
 .landing-page--portfolio .landing-mobile-nav-link:focus-visible,
 .landing-mobile-layer.landing-page--portfolio .landing-mobile-nav-link:hover,
 .landing-mobile-layer.landing-page--portfolio .landing-mobile-nav-link:focus-visible {
-  color: #1a1523;
+  color: #0f172a;
   background: #f5f5f7;
 }
 
@@ -394,7 +394,7 @@ html.dark .landing-page--portfolio .landing-core__card--wide {
 }
 
 .landing-page--portfolio .landing-contact__card--primary {
-  background: #1a1523 !important;
+  background: #0f172a !important;
   color: #ffffff !important;
   box-shadow: none !important;
   transform: none;
@@ -408,7 +408,7 @@ html.dark .landing-page--portfolio .landing-core__card--wide {
 
 html.dark .landing-page--portfolio .landing-contact__card--primary {
   background: #ffffff !important;
-  color: #1a1523 !important;
+  color: #0f172a !important;
 }
 
 html.dark .landing-page--portfolio .landing-contact__card--primary:hover {
@@ -446,7 +446,7 @@ html.dark .landing-page--portfolio .landing-contact__card--primary:hover {
 }
 
 .landing-page--portfolio .landing-story__chart-bar {
-  background: #1a1523;
+  background: #0f172a;
 }
 
 html.dark .landing-page--portfolio .landing-story__chart-bar {
@@ -463,7 +463,7 @@ html.dark .landing-page--portfolio .landing-story__chart-bar {
 }
 
 .landing-page--portfolio .landing-story__mock-row {
-  border-bottom-color: rgb(26 21 35 / 0.06);
+  border-bottom-color: rgb(15 23 42 / 0.06);
 }
 
 html.dark .landing-page--portfolio .landing-story__mock-row {
@@ -471,13 +471,13 @@ html.dark .landing-page--portfolio .landing-story__mock-row {
 }
 
 .landing-page--portfolio .landing-ai__msg--user {
-  background: #1a1523;
+  background: #0f172a;
   color: #ffffff;
 }
 
 html.dark .landing-page--portfolio .landing-ai__msg--user {
   background: #ffffff;
-  color: #1a1523;
+  color: #0f172a;
 }
 
 /* AI bubble sits inside a `.landing-glass` panel of the same color as this
@@ -520,7 +520,7 @@ html.dark .landing-page--portfolio .landing-ai__chip {
 }
 
 .landing-page--portfolio .landing-proof__stats {
-  border-top-color: rgb(26 21 35 / 0.06);
+  border-top-color: rgb(15 23 42 / 0.06);
 }
 
 html.dark .landing-page--portfolio .landing-proof__stats {
@@ -542,7 +542,7 @@ html.dark .landing-page--portfolio .landing-security__badge {
 .landing-page--portfolio .landing-footer,
 .landing-page--portfolio .landing-cookie-banner {
   background: #f5f5f7;
-  border-color: rgb(26 21 35 / 0.06);
+  border-color: rgb(15 23 42 / 0.06);
 }
 
 html.dark .landing-page--portfolio .landing-footer,
@@ -634,13 +634,13 @@ html.dark .landing-page--portfolio .landing-hero-mock__panel {
 }
 
 .landing-page--portfolio .landing-hero-mock__pill {
-  background: #1a1523;
+  background: #0f172a;
   color: #ffffff;
 }
 
 html.dark .landing-page--portfolio .landing-hero-mock__pill {
   background: #ffffff;
-  color: #1a1523;
+  color: #0f172a;
 }
 
 .landing-page--portfolio .landing-hero-mock__stats {
@@ -653,7 +653,7 @@ html.dark .landing-page--portfolio .landing-hero-mock__stats {
 }
 
 .landing-page--portfolio .landing-hero-mock__stat {
-  border-right-color: rgb(26 21 35 / 0.06);
+  border-right-color: rgb(15 23 42 / 0.06);
 }
 
 html.dark .landing-page--portfolio .landing-hero-mock__stat {
@@ -661,7 +661,7 @@ html.dark .landing-page--portfolio .landing-hero-mock__stat {
 }
 
 .landing-page--portfolio .landing-hero-mock__overlay {
-  background: rgb(26 21 35 / 0.78);
+  background: rgb(15 23 42 / 0.78);
   border: 0;
 }
 
@@ -752,7 +752,7 @@ html.dark .landing-page--portfolio .landing-screenshots__tab:hover {
 
 html.dark .landing-page--portfolio .landing-screenshots__tab--active {
   background: #ffffff;
-  color: #1a1523;
+  color: #0f172a;
 }
 
 html.dark .landing-page--portfolio .landing-proof {
@@ -766,7 +766,7 @@ html.dark .landing-page--portfolio .landing-hero-float-card:hover {
 .landing-page--portfolio .landing-nav-link:hover,
 .landing-page--portfolio .landing-nav-link:focus-visible {
   background: #f4f4f5;
-  color: #1a1523;
+  color: #0f172a;
 }
 
 html.dark .landing-page--portfolio .landing-nav-link:hover,
@@ -780,7 +780,7 @@ html.dark .landing-page--portfolio .landing-nav-link:focus-visible {
 }
 
 .landing-page--portfolio .theme-clean-toggle:focus-visible {
-  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px rgb(26 21 35 / 0.35);
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px rgb(15 23 42 / 0.35);
 }
 
 html.dark .landing-page--portfolio .theme-clean-toggle:focus-visible {
@@ -888,13 +888,13 @@ html.dark .landing-page--portfolio .landing-capabilities__tab:hover:not(.landing
 
 .landing-page--portfolio .landing-capabilities__tab--active {
   color: #ffffff;
-  background: #1a1523;
+  background: #0f172a;
   border-color: transparent;
   box-shadow: none;
 }
 
 html.dark .landing-page--portfolio .landing-capabilities__tab--active {
-  color: #1a1523;
+  color: #0f172a;
   background: #ffffff;
 }
 
@@ -909,12 +909,12 @@ html.dark .landing-page--portfolio .landing-capabilities__tab--active {
 
 .landing-page--portfolio .landing-capabilities__panel-link {
   color: #ffffff;
-  background: #1a1523;
+  background: #0f172a;
   border: 0;
 }
 
 html.dark .landing-page--portfolio .landing-capabilities__panel-link {
-  color: #1a1523;
+  color: #0f172a;
   background: #ffffff;
 }
 
@@ -949,12 +949,12 @@ html.dark .landing-page--portfolio .landing-capabilities__subtab:hover {
 
 .landing-page--portfolio .landing-capabilities__subtab--active {
   color: #ffffff;
-  background: #1a1523;
+  background: #0f172a;
   border-color: transparent;
 }
 
 html.dark .landing-page--portfolio .landing-capabilities__subtab--active {
-  color: #1a1523;
+  color: #0f172a;
   background: #ffffff;
 }
 
@@ -981,18 +981,18 @@ html.dark .landing-page--portfolio .landing-capabilities__icon {
 
 .landing-page--portfolio .landing-capabilities__also-btn {
   background: #eeeeef;
-  color: #1a1523;
+  color: #0f172a;
   border: 0;
 }
 
 .landing-page--portfolio .landing-capabilities__also-btn:hover {
   background: #e4e4e7;
-  color: #1a1523;
+  color: #0f172a;
   transform: none;
 }
 
 .landing-page--portfolio .landing-capabilities__also-count {
-  color: rgb(26 21 35 / 0.45);
+  color: rgb(15 23 42 / 0.45);
 }
 
 html.dark .landing-page--portfolio .landing-capabilities__also-btn {
@@ -1062,16 +1062,16 @@ html.dark .landing-page--portfolio .landing-security__pillars li {
 /* ── Contact primary CTA contrast ── */
 .landing-page--portfolio .landing-contact__card--primary .landing-contact__cta {
   background: #ffffff;
-  color: #1a1523;
+  color: #0f172a;
 }
 
 .landing-page--portfolio .landing-contact__card--primary .landing-contact__cta:hover {
   background: #f4f4f5;
-  color: #1a1523;
+  color: #0f172a;
 }
 
 html.dark .landing-page--portfolio .landing-contact__card--primary .landing-contact__cta {
-  background: #1a1523;
+  background: #0f172a;
   color: #ffffff;
 }
 
@@ -1082,16 +1082,16 @@ html.dark .landing-page--portfolio .landing-contact__card--primary .landing-cont
 
 html.dark .landing-page--portfolio .landing-contact__card-title--on-dark,
 html.dark .landing-page--portfolio .landing-contact__icon--on-dark {
-  color: #1a1523 !important;
+  color: #0f172a !important;
 }
 
 html.dark .landing-page--portfolio .landing-contact__card-desc--on-dark {
-  color: rgb(26 21 35 / 0.58) !important;
+  color: rgb(15 23 42 / 0.58) !important;
 }
 
 html.dark .landing-page--portfolio .landing-contact__step--on-dark {
-  color: #1a1523;
-  background: rgb(26 21 35 / 0.08);
+  color: #0f172a;
+  background: rgb(15 23 42 / 0.08);
 }
 
 .landing-page--portfolio .landing-contact__email {
@@ -1129,7 +1129,7 @@ html.dark .landing-page--portfolio .landing-contact__step--on-dark {
   margin: 0;
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;
-  background: #1a1523;
+  background: #0f172a;
   color: #ffffff !important;
   font-size: 0.8125rem;
   font-weight: 600;
@@ -1140,7 +1140,7 @@ html.dark .landing-page--portfolio .landing-contact__step--on-dark {
 html.dark .landing-page--portfolio .landing-pricing__badge,
 html.dark .landing-page--portfolio #pricing .landing-pricing__badge {
   background: #ffffff;
-  color: #1a1523 !important;
+  color: #0f172a !important;
 }
 
 /* ── FAQ ── */
@@ -1219,7 +1219,7 @@ html.dark .landing-page--portfolio .landing-faq__item {
   height: 2rem;
   border-radius: 9999px;
   background: #f4f4f5;
-  color: rgb(26 21 35 / 0.45);
+  color: rgb(15 23 42 / 0.45);
 }
 
 html.dark .landing-page--portfolio .landing-faq__icon {
@@ -1289,4 +1289,35 @@ html.dark .landing-page--portfolio .landing-who-point-title,
 html.dark .landing-page--portfolio .landing-core__title,
 html.dark .landing-page--portfolio .landing-core__card-title {
   color: #ffffff !important;
+}
+
+/* Product screenshots: in light mode the white UI shots need a frame so they don't melt into the page */
+html:not(.dark) .landing-page--portfolio .landing-journey__stage.landing-glass,
+html:not(.dark) .landing-page--portfolio .landing-story__stage.landing-glass,
+html:not(.dark) .landing-page--portfolio .landing-ps__card,
+html:not(.dark) .landing-page--portfolio .landing-proof__header-visual,
+html:not(.dark) .landing-page--portfolio .landing-ai__visual,
+html:not(.dark) .landing-page--portfolio .landing-capabilities__panel-illustration,
+html:not(.dark) .landing-page--portfolio .landing-screenshots__preview {
+  background: #ffffff !important;
+  border: 1px solid rgb(15 23 42 / 0.16) !important;
+  box-shadow:
+    0 0 0 8px #ffffff,
+    0 0 0 9px rgb(15 23 42 / 0.08),
+    0 2px 6px rgb(15 23 42 / 0.06),
+    0 36px 80px -20px rgb(20 63 141 / 0.38),
+    0 16px 36px -10px rgb(15 23 42 / 0.18) !important;
+}
+
+html:not(.dark) .landing-page--portfolio .landing-journey__frame,
+html:not(.dark) .landing-page--portfolio .landing-story__crossfade {
+  background: #f1f4f9;
+}
+
+html:not(.dark) .landing-page--portfolio .landing-journey__progress {
+  background: rgb(15 23 42 / 0.06);
+}
+
+html:not(.dark) .landing-page--portfolio .landing-journey__progress-bar {
+  background: #143f8d;
 }

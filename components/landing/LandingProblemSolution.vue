@@ -24,12 +24,12 @@
         <article class="landing-ps__card landing-ps__card--before" data-section-id="ps-before">
           <span class="landing-ps__tag landing-ps__tag--before">Without Storvv</span>
           <img
-            src="/marketing/illustrations/pain-point-before.png"
-            alt="An exhausted shop owner surrounded by unlabeled boxes, a lamp, and scattered belongings."
+            src="/marketing/illustrations/pain-point-before-scene.jpg"
+            alt="A cluttered shop counter: a phone flooded with chat notifications, crumpled paper receipts everywhere, a notebook of crossed-out stock counts, question-mark sticky notes, and disorganised boxes on a half-empty shelf."
             class="landing-ps__img"
             loading="lazy"
-            width="900"
-            height="600"
+            width="1024"
+            height="768"
           />
           <ul class="landing-ps__points">
             <li v-for="p in beforePoints" :key="p">{{ p }}</li>
@@ -43,12 +43,12 @@
         <article class="landing-ps__card landing-ps__card--after" data-section-id="ps-after">
           <span class="landing-ps__tag landing-ps__tag--after">With Storvv</span>
           <img
-            src="/marketing/illustrations/pain-point-after.png"
-            alt="A calm warehouse worker holding one labeled box beside neatly organized, evenly stocked shelves."
-            class="landing-ps__img landing-ps__img--after"
+            src="/marketing/illustrations/pain-point-after-scene.jpg"
+            alt="A tidy shop counter with a sales dashboard on a laptop, an inventory list on a tablet, a digital receipt on a phone, a barcode scanner, and labeled color-coded bins on the shelves."
+            class="landing-ps__img"
             loading="lazy"
-            width="640"
-            height="596"
+            width="1024"
+            height="768"
           />
           <ul class="landing-ps__points landing-ps__points--after">
             <li v-for="p in afterPoints" :key="p">{{ p }}</li>
@@ -83,22 +83,20 @@ import { ArrowRightIcon } from '~/utils/app-icons'
 const beforePoints = [
   'Stock counts live across three different WhatsApp groups',
   'Receipts scribbled on paper - or not written at all',
-  'No public catalogue - only DMs and screenshots of stock',
+  'No idea what is selling or about to run out',
   'One shared login, no record of who changed what',
 ] as const
 
 const afterPoints = [
   'Every category, subcategory, and item in one place',
   'Receipts sent by WhatsApp, email, or PDF in a tap',
-  'A shareable storefront backed by your real inventory',
+  'Low-stock alerts and sales numbers at a glance',
   'Roles for owners, managers, and staff - with an audit trail',
 ] as const
 
 const marqueeFeatures = [
   'Inventory categories',
   'Quick Sale',
-  'Public storefront',
-  'Payment links',
   'Sales leads',
   'Customer buybacks',
   'WhatsApp receipts',
@@ -107,7 +105,6 @@ const marqueeFeatures = [
   'Stock loans',
   'Roles & departments',
   'Storvv Assistant',
-  'iOS native app',
 ] as const
 </script>
 
@@ -132,7 +129,7 @@ const marqueeFeatures = [
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--storvv-blue-light, rgb(26 21 35 / 0.55));
+  color: var(--storvv-blue-light, rgb(15 23 42 / 0.55));
 }
 
 .landing-ps__title {
@@ -184,7 +181,7 @@ const marqueeFeatures = [
     height: 2.5rem;
     border-radius: 9999px;
     background: #ffffff;
-    color: rgb(26 21 35 / 0.5);
+    color: rgb(15 23 42 / 0.5);
   }
 }
 
@@ -216,13 +213,13 @@ const marqueeFeatures = [
 }
 
 .landing-ps__tag--before {
-  background: rgb(26 21 35 / 0.06);
-  color: rgb(26 21 35 / 0.6);
+  background: rgb(15 23 42 / 0.06);
+  color: rgb(15 23 42 / 0.6);
 }
 
 .landing-ps__tag--after {
   background: rgb(72 118 199 / 0.12);
-  color: #1a1523;
+  color: #0f172a;
 }
 
 .landing-ps__img {
@@ -232,12 +229,6 @@ const marqueeFeatures = [
   border-radius: 1rem;
   object-fit: contain;
   background: #ffffff;
-}
-
-.landing-ps__img--after {
-  max-width: 15rem;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 .landing-ps__points {
@@ -263,7 +254,7 @@ const marqueeFeatures = [
   width: 0.4rem;
   height: 0.4rem;
   border-radius: 9999px;
-  background: rgb(26 21 35 / 0.28);
+  background: rgb(15 23 42 / 0.28);
 }
 
 .landing-ps__points--after li::before {
@@ -296,7 +287,7 @@ const marqueeFeatures = [
   padding: 0.55rem 1.1rem;
   border-radius: 9999px;
   background: #ffffff;
-  color: rgb(26 21 35 / 0.7);
+  color: rgb(15 23 42 / 0.7);
   font-size: 0.8125rem;
   font-weight: 600;
   white-space: nowrap;

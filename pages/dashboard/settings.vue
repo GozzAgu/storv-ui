@@ -1237,7 +1237,7 @@ const currentSubscriptionLabel = computed(() => {
 /** Free tier: single store; show upgrade message for multiple branches */
 const isMicroSubscription = computed(() => currentSubscription.value === 'storvv_micro')
 
-/** Stored plan (not grace-effective) — used for Paystack change-plan targets. */
+/** Stored plan (not grace-effective), used for Paystack change-plan targets. */
 const storedSubscriptionPlan = computed(() =>
   normalizeSubscriptionPlan(userStore.userData?.subscription)
 )

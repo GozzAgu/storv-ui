@@ -54,13 +54,13 @@ const items = [
 .landing-moat-card__title {
   font-size: 1rem;
   font-weight: 600;
-  color: #1a1523;
+  color: #0f172a;
 }
 .landing-moat-card__body {
   margin-top: 0.5rem;
   font-size: 0.875rem;
   line-height: 1.55;
-  color: rgb(26 21 35 / 0.58);
+  color: rgb(15 23 42 / 0.58);
 }
 html.dark .landing-moat-card {
   background: #1e1e1e;

@@ -625,7 +625,7 @@ export function getDemoFolderTemplatesForStore(storeId: string): InventoryFolder
   return buildInventoryForStore(store).folders
 }
 
-/** Items in one category for a branch — does not touch Pinia current store. */
+/** Items in one category for a branch, does not touch Pinia current store. */
 export function getDemoItemsForStoreFolder(storeId: string, folderId: string): InventoryItem[] {
   const demo = useDemoAppStore()
   demo.hydrate()

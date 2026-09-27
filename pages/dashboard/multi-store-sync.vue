@@ -748,7 +748,7 @@ function isItemAvailableForTransfer(item: any, hasSerialNumbers: boolean) {
   const loanId = item.sellerLoanOutId
   if (loanId != null && loanId !== undefined && String(loanId).trim() !== '') return false
 
-  // Only block items still sitting in an open transfer — not stock that previously arrived via transfer
+  // Only block items still sitting in an open transfer, not stock that previously arrived via transfer
   if (itemsLockedInOpenTransfers.value.has(String(item.id))) return false
 
   if (hasSerialNumbers) return true
@@ -820,7 +820,7 @@ const loadSourceStoreInventory = async () => {
 
   const storeId = transferForm.value.sourceStoreId
   try {
-    // Branch-scoped load — never mutates the app's current store (same pattern as copy-from-branch)
+    // Branch-scoped load, never mutates the app's current store (same pattern as copy-from-branch)
     sourceFolders.value = await inventoryStore.fetchFolderTemplatesForStore(storeId)
   } catch (error: any) {
     sourceFolders.value = []
@@ -1118,7 +1118,7 @@ const executeTransfer = async (transfer: any) => {
             createdBy: userId,
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp(),
-            // Provenance only — do NOT mark destination stock as isTransferred
+            // Provenance only, do NOT mark destination stock as isTransferred
             // (that flag previously blocked the item from ever transferring again)
             transferredFrom: sourceStoreId,
             transferredFromFolder: folderId,

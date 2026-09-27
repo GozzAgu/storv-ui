@@ -12,9 +12,9 @@
           <span>{{ channel.detail }}</span>
         </li>
       </ul>
-      <p class="mt-4 text-sm" style="color: var(--portfolio-muted, rgb(26 21 35 / 0.58))">
+      <p class="mt-4 text-sm" style="color: var(--portfolio-muted, rgb(15 23 42 / 0.58))">
         Partner enquiries:
-        <a href="mailto:partners@storvv.com" class="font-medium underline-offset-2 hover:underline" style="color: var(--portfolio-ink, #1a1523)">partners@storvv.com</a>
+        <a href="mailto:partners@storvv.com" class="font-medium underline-offset-2 hover:underline" style="color: var(--portfolio-ink, #0f172a)">partners@storvv.com</a>
       </p>
     </div>
   </section>
@@ -43,10 +43,10 @@ const channels = [
   background: #ffffff;
   border: 0;
   font-size: 0.875rem;
-  color: rgb(26 21 35 / 0.58);
+  color: rgb(15 23 42 / 0.58);
 }
 .landing-partners-list strong {
-  color: #1a1523;
+  color: #0f172a;
 }
 html.dark .landing-partners-list li {
   background: #1e1e1e;

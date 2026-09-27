@@ -168,7 +168,7 @@ export async function buildStaffUserDataWithOwnerContext(
       }
     }
   } catch {
-    // Permission denied / offline — keep prior plan on base.
+    // Permission denied / offline, keep prior plan on base.
   }
 
   return { userData: base, inheritedOwnerContext: false }

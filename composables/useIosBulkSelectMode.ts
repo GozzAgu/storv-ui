@@ -32,7 +32,7 @@ export function useIosBulkSelectMode(opts?: {
     watch(
       () => opts.selectedCount!.value,
       () => {
-        /* keep mode until Done — no auto-exit on zero */
+        /* keep mode until Done, no auto-exit on zero */
       }
     )
   }

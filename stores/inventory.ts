@@ -1951,7 +1951,7 @@ export const useInventoryStore = defineStore('inventory', {
             .catch(() => undefined)
           try {
             const { useAppToast } = await import('~/composables/useAppToast')
-            useAppToast().success('First product added — stock is live')
+            useAppToast().success('First product added. Stock is live')
           } catch {
             /* toast optional */
           }

@@ -987,7 +987,7 @@ async function printHomeReceipt(receipt: Receipt) {
     toast.success('Receipt PDF ready')
   } catch {
     previewHomeReceipt(receipt)
-    toast.info('Opened receipt preview — use Print / PDF there')
+    toast.info('Opened receipt preview. Use Print / PDF there')
   } finally {
     homePrintReceipt.value = null
   }

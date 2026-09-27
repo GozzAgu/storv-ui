@@ -13,7 +13,7 @@
           Inventory → sale → insight
         </h2>
         <p class="landing-journey__lede">
-          The path your shop runs every day — connected in one workspace.
+          The path your shop runs every day, connected in one workspace.
         </p>
       </header>
 
@@ -72,7 +72,7 @@ const steps = [
   {
     id: 'sale',
     title: 'Sale',
-    description: 'Checkout, leads, and payment links close the loop.',
+    description: 'Checkout, receipts, and sales leads close the loop.',
     image: '/marketing/screenshots/receipts.png',
   },
   {

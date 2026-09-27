@@ -208,7 +208,7 @@ html.capacitor-ios.capacitor-native.capacitor-ipad .ios-inventory-folder-row__se
   height: 1.4rem;
 }
 
-/* iPad: first-class density — wider toolbars, roomier select targets, multi-column lists */
+/* iPad: first-class density, wider toolbars, roomier select targets, multi-column lists */
 html.capacitor-ios.capacitor-native.capacitor-ipad .ios-page-nav-bar {
   padding-inline: 1.25rem;
 }

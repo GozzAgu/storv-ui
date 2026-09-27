@@ -46,29 +46,29 @@
 }
 .landing-story-card--invite {
   background: transparent;
-  border: 1px dashed rgb(26 21 35 / 0.16);
+  border: 1px dashed rgb(15 23 42 / 0.16);
 }
 .landing-story-card__shop {
   font-weight: 600;
-  color: #1a1523;
+  color: #0f172a;
 }
 .landing-story-card__location {
   margin-top: 0.125rem;
   font-size: 0.75rem;
-  color: rgb(26 21 35 / 0.55);
+  color: rgb(15 23 42 / 0.55);
 }
 .landing-story-card__note {
   margin-top: 0.75rem;
   font-size: 0.875rem;
   line-height: 1.55;
-  color: rgb(26 21 35 / 0.58);
+  color: rgb(15 23 42 / 0.58);
 }
 .landing-story-card__link {
   display: inline-block;
   margin-top: 0.875rem;
   font-size: 0.8125rem;
   font-weight: 600;
-  color: #1a1523;
+  color: #0f172a;
 }
 html.dark .landing-story-card {
   background: #1e1e1e;

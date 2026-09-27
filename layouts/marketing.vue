@@ -148,112 +148,21 @@
 
     <slot />
 
-    <!-- Footer -->
-    <footer class="landing-footer landing-footer--premium">
-      <div class="landing-footer__inner">
-        <div class="landing-footer__top landing-footer__columns">
-          <div>
-            <NuxtLink to="/" class="landing-footer__brand">
-              <img
-                :src="landingLogoSrc"
-                alt="Storvv"
-                class="landing-footer__logo"
-                width="140"
-                height="40"
-              />
-            </NuxtLink>
-            <p class="landing-footer__tagline">
-              Inventory, sales, public storefront, payment links, analytics, and multi-branch tools
-              for modern retailers - on web and iOS.
-            </p>
-          </div>
+    <LandingFooter />
 
-          <div>
-            <p class="landing-footer__col-title">Product</p>
-            <div class="landing-footer__links">
-              <a href="/#inventory" class="landing-footer__link" @click.prevent="goToSection('inventory')"
-                >Inventory</a
-              >
-              <a href="/#sales" class="landing-footer__link" @click.prevent="goToSection('sales')"
-                >Sales</a
-              >
-              <a
-                href="/#storefront"
-                class="landing-footer__link"
-                @click.prevent="goToSection('storefront')"
-                >Storefront</a
-              >
-              <NuxtLink to="/features" class="landing-footer__link">All features</NuxtLink>
-              <NuxtLink to="/demo/dashboard" class="landing-footer__link">Try demo</NuxtLink>
-            </div>
-          </div>
-
-          <div>
-            <p class="landing-footer__col-title">Resources</p>
-            <div class="landing-footer__links">
-              <NuxtLink to="/features" class="landing-footer__link">Features</NuxtLink>
-              <NuxtLink to="/pricing" class="landing-footer__link">Pricing</NuxtLink>
-              <NuxtLink to="/security" class="landing-footer__link">Security</NuxtLink>
-              <a href="/#faq" class="landing-footer__link" @click.prevent="goToSection('faq')">FAQ</a>
-              <a href="/#contact" class="landing-footer__link" @click.prevent="goToSection('contact')"
-                >Contact</a
-              >
-            </div>
-          </div>
-
-          <div>
-            <p class="landing-footer__col-title">Company</p>
-            <div class="landing-footer__links">
-              <a href="mailto:hello@storvv.com" class="landing-footer__link">hello@storvv.com</a>
-              <a
-                href="https://www.instagram.com/_storvv_"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="landing-footer__link"
-                >Instagram</a
-              >
-              <a
-                href="https://x.com/_storvv_"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="landing-footer__link"
-                >X</a
-              >
-              <NuxtLink to="/privacy" class="landing-footer__link">Privacy</NuxtLink>
-              <NuxtLink to="/terms" class="landing-footer__link">Terms</NuxtLink>
-            </div>
-          </div>
-        </div>
-
-        <div class="landing-footer__bottom">
-          <p>&copy; {{ new Date().getFullYear() }} Storvv. All rights reserved.</p>
-          <p>
-            Powered by Nuxt ·
-            <a
-              href="https://goz-portfolio-app.vercel.app/"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="landing-footer__link"
-              >Credits</a
-            >
-          </p>
-        </div>
+    <!-- Cookie consent banner -->
+    <div v-if="!cookiesAccepted" class="landing-cookie-banner">
+      <p class="landing-cookie-banner__text">
+        We use cookies on our website to help us provide the best browsing experience. By
+        continuing to use our website you are deemed to have agreed to the use of cookies.
+      </p>
+      <div class="landing-cookie-banner__actions">
+        <NuxtLink to="/privacy" class="landing-cookie-banner__link">Learn more</NuxtLink>
+        <button type="button" class="landing-cookie-banner__btn" @click="acceptCookies">
+          OK
+        </button>
       </div>
-
-      <!-- Cookie consent banner -->
-      <div v-if="!cookiesAccepted" class="landing-cookie-banner">
-        <p class="landing-cookie-banner__text">
-          We use cookies on our website to help us provide the best browsing experience. By
-          continuing to use our website you are deemed to have agreed to the use of cookies.
-        </p>
-        <div class="landing-cookie-banner__actions">
-          <NuxtLink to="/privacy" class="landing-cookie-banner__link">Learn more</NuxtLink>
-          <button type="button" class="landing-cookie-banner__btn" @click="acceptCookies">
-            OK
-          </button>
-        </div>
-      </div>
-    </footer>
+    </div>
 
     <!-- Back to Top Button -->
     <Transition
@@ -267,7 +176,8 @@
       <button
         v-if="showBackToTop"
         @click="scrollToTop"
-        class="fixed bottom-6 right-6 z-50 w-11 h-11 rounded-full bg-[#1a1523] text-white hover:bg-[#111018] transition-colors flex items-center justify-center dark:bg-white dark:text-[#1a1523] dark:hover:bg-[#f4f4f5]"
+        :class="cookiesAccepted ? 'bottom-6' : 'bottom-24 sm:bottom-20'"
+        class="fixed right-6 z-50 w-11 h-11 rounded-full bg-[#0f172a] text-white hover:bg-[#111018] transition-colors flex items-center justify-center dark:bg-white dark:text-[#0f172a] dark:hover:bg-[#f4f4f5]"
         aria-label="Back to top"
       >
         <ArrowUpIcon class="w-5 h-5" />

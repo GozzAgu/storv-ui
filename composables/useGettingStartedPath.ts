@@ -107,7 +107,7 @@ export function useGettingStartedPath() {
     steps.value.length === 0 ? 0 : Math.round((completedCount.value / steps.value.length) * 100)
   )
 
-  /** Next incomplete step — drives quiet-dashboard CTA. */
+  /** Next incomplete step, drives quiet-dashboard CTA. */
   const nextStep = computed(() => steps.value.find((step) => !step.done) ?? null)
 
   const visible = computed(() => {
