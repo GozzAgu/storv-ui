@@ -45,7 +45,7 @@
         @click="onClick(option)"
       >
         <component
-          :is="option.icon ?? DefaultQuickActionIcon"
+          :is="option.trailing === 'add' ? PlusIcon : (option.icon ?? DefaultQuickActionIcon)"
           class="ios-quick-actions__action-icon"
           aria-hidden="true"
         />
@@ -57,7 +57,7 @@
 
 <script setup lang="ts">
 import { computed, type Component } from 'vue'
-import { FunnelIcon } from '~/utils/app-icons'
+import { FunnelIcon, PlusIcon } from '~/utils/app-icons'
 import { useIosHaptics } from '~/composables/useIosHaptics'
 
 const DefaultQuickActionIcon = FunnelIcon

@@ -5,13 +5,13 @@
 
 html.capacitor-native {
   --ios-canvas: #e8eaf0;
-  --ios-glass-bg: rgb(255 255 255 / 0.55);
-  --ios-glass-elevated: rgb(255 255 255 / 0.72);
-  --ios-glass-border: rgb(255 255 255 / 0.7);
+  --ios-glass-bg: #ffffff;
+  --ios-glass-elevated: #ffffff;
+  --ios-glass-border: rgb(60 60 67 / 0.1);
   --ios-glass-highlight: inset 0 1px 0 rgb(255 255 255 / 0.75);
   --ios-glass-shadow: 0 10px 36px rgb(0 0 0 / 0.08);
   --ios-glass-blur: 32px;
-  --ios-surface-solid: rgb(255 255 255 / 0.82);
+  --ios-surface-solid: #ffffff;
   --ios-separator: rgb(60 60 67 / 0.14);
   --ios-label: #000000;
   --ios-label-secondary: rgb(60 60 67 / 0.6);
@@ -65,18 +65,18 @@ html.capacitor-native {
 
   --cap-canvas-bg: var(--ios-canvas);
   --dash-card-surface: var(--ios-glass-bg);
-  --dash-card-border: rgb(255 255 255 / 0.6);
+  --dash-card-border: rgb(60 60 67 / 0.1);
 }
 
 html.capacitor-native.dark {
   --ios-canvas: #000000;
-  --ios-glass-bg: rgb(28 28 30 / 0.55);
-  --ios-glass-elevated: rgb(44 44 46 / 0.68);
+  --ios-glass-bg: #1c1c1e;
+  --ios-glass-elevated: #2c2c2e;
   --ios-glass-border: rgb(255 255 255 / 0.12);
   --ios-glass-highlight: inset 0 1px 0 rgb(255 255 255 / 0.1);
   --ios-glass-shadow: 0 14px 44px rgb(0 0 0 / 0.5);
   --ios-glass-blur: 36px;
-  --ios-surface-solid: rgb(28 28 30 / 0.82);
+  --ios-surface-solid: #1c1c1e;
   --ios-separator: rgb(84 84 88 / 0.65);
   --ios-label: #ffffff;
   --ios-label-secondary: rgb(235 235 245 / 0.6);
@@ -103,8 +103,6 @@ html.capacitor-native.dark {
 /* ── Glass card utility ── */
 html.capacitor-native .ios-glass-card {
   background: var(--ios-glass-bg);
-  backdrop-filter: blur(var(--ios-glass-blur)) saturate(180%);
-  -webkit-backdrop-filter: blur(var(--ios-glass-blur)) saturate(180%);
   border: 1px solid var(--ios-glass-border);
   box-shadow: var(--ios-glass-shadow), var(--ios-glass-highlight);
   border-radius: var(--ios-radius-lg);
@@ -264,8 +262,6 @@ html.capacitor-native .data-table-shell,
 html.capacitor-native .dash-table-shell,
 html.capacitor-native .dash-grid-shell--table {
   background: var(--ios-glass-bg);
-  backdrop-filter: blur(var(--ios-glass-blur)) saturate(180%);
-  -webkit-backdrop-filter: blur(var(--ios-glass-blur)) saturate(180%);
   border-color: var(--ios-glass-border);
   box-shadow: var(--ios-glass-shadow), var(--ios-glass-highlight);
   border-radius: var(--ios-radius-lg);
@@ -294,20 +290,18 @@ html.capacitor-native .native-tabbar {
   overflow: hidden;
   border-radius: 9999px;
   border: 1px solid rgb(255 255 255 / 0.55);
-  background: rgb(255 255 255 / 0.78);
+  background: #ffffff;
   box-shadow:
     0 1px 0 rgb(255 255 255 / 0.72) inset,
     0 8px 28px rgb(15 23 42 / 0.08),
     0 1px 2px rgb(15 23 42 / 0.04);
-  -webkit-backdrop-filter: blur(var(--ios-bottomnav-blur, 40px)) saturate(190%);
-  backdrop-filter: blur(var(--ios-bottomnav-blur, 40px)) saturate(190%);
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
 }
 
 html.capacitor-native.dark .native-tabbar {
   border-color: rgb(255 255 255 / 0.1);
-  background: rgb(28 28 30 / 0.78);
+  background: #1c1c1e;
   box-shadow:
     0 1px 0 rgb(255 255 255 / 0.08) inset,
     0 10px 32px rgb(0 0 0 / 0.42),
@@ -415,8 +409,6 @@ html.capacitor-native .dashboard-fixed-footer--native {
   border: 1px solid var(--ios-topnav-border, var(--ios-glass-border));
   background: var(--ios-topnav-bg, var(--ios-glass-bg));
   box-shadow: var(--ios-topnav-shadow, var(--ios-glass-shadow), var(--ios-glass-highlight));
-  -webkit-backdrop-filter: blur(var(--ios-topnav-blur, 24px)) saturate(180%);
-  backdrop-filter: blur(var(--ios-topnav-blur, 24px)) saturate(180%);
   transform: translateZ(0);
   overflow: hidden;
 }
@@ -537,8 +529,6 @@ html.capacitor-native .native-topnav {
   border: 1px solid var(--ios-topnav-border);
   background: var(--ios-topnav-bg);
   box-shadow: var(--ios-topnav-shadow);
-  -webkit-backdrop-filter: blur(var(--ios-topnav-blur)) saturate(180%);
-  backdrop-filter: blur(var(--ios-topnav-blur)) saturate(180%);
   transform: translateZ(0);
 }
 

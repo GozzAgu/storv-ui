@@ -385,6 +385,7 @@
           amount-tone="neutral"
           :date="getItemCardDate(item)"
           :variant="getItemTransactionVariant(item)"
+          :icon="itemAvailabilityIcon(getItemAvailability(item).status)"
           :last="index === paginatedItems.length - 1"
           :show-menu="!isInventoryItemLocked(item) && !isIosItemsSelecting"
           menu-kind="item"
@@ -2418,6 +2419,7 @@ import IosInventoryFolderRow from '~/components/ios/IosInventoryFolderRow.vue'
 import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
 import IosReceiptTransactionRow from '~/components/ios/IosReceiptTransactionRow.vue'
 import type { ReceiptTransactionVariant } from '~/components/ios/IosReceiptTransactionRow.vue'
+import { itemAvailabilityIcon } from '~/utils/ios-row-icons'
 import IosInventoryItemCard from '~/components/ios/IosInventoryItemCard.vue'
 import IosInventoryItemDetail, {
   type IosInventoryDetailAction,
@@ -2767,7 +2769,7 @@ const subcategoryQuickActionOptions = computed((): IosQuickActionOption[] => {
   return [
     {
       value: 'add',
-      label: 'Add',
+      label: 'Add subcategory',
       icon: PlusIcon,
       trailing: 'add',
       action: openCreateSubcategoryModal,
@@ -4159,7 +4161,7 @@ const availabilityQuickActionOptions = computed((): IosQuickActionOption[] => {
   if (canManageInventoryItems.value) {
     options.push({
       value: 'add',
-      label: 'Add',
+      label: 'Add product',
       icon: PlusIcon,
       trailing: 'add',
       action: openAddItemModal,

@@ -206,12 +206,46 @@ html.capacitor-ios.capacitor-native .ios-quick-actions__action-label {
   display: none;
 }
 
+/* Create action: a real filled button with a label, never an ambiguous glyph */
 html.capacitor-ios.capacitor-native .ios-quick-actions__action--add {
-  background: rgb(120 120 128 / 0.12);
+  gap: 0.25rem;
+  width: auto;
+  min-height: 2rem;
+  margin-left: 0.25rem;
+  padding: 0 0.75rem 0 0.5625rem;
+  border-radius: 9999px;
+  background: var(--ios-label);
+  color: #ffffff;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.12);
 }
 
 html.capacitor-ios.capacitor-native.dark .ios-quick-actions__action--add {
-  background: rgb(255 255 255 / 0.1);
+  background: #ffffff;
+  color: #111111;
+}
+
+html.capacitor-ios.capacitor-native .ios-quick-actions__action--add:active {
+  background: var(--ios-label);
+  opacity: 0.75;
+  transform: scale(0.97);
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-quick-actions__action--add:active {
+  background: #ffffff;
+}
+
+html.capacitor-ios.capacitor-native .ios-quick-actions__action--add .ios-quick-actions__action-icon {
+  width: 0.9375rem;
+  height: 0.9375rem;
+  stroke-width: 2.25;
+}
+
+html.capacitor-ios.capacitor-native .ios-quick-actions__action--add .ios-quick-actions__action-label {
+  display: inline;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
 }
 
 html.capacitor-ios.capacitor-native .ios-quick-actions__icon-wrap,

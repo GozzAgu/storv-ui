@@ -72,10 +72,11 @@ html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud lab
 html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .dash-field-label,
 html.capacitor-ios.capacitor-native .ios-drawer.dashboard-native-sheet--crud .dash-drawer-label {
   display: block;
-  margin-bottom: 0.4375rem;
-  font-size: var(--ios-dash-secondary-size, 0.6875rem) !important;
-  font-weight: 500;
-  color: var(--ios-label-secondary) !important;
+  margin-bottom: 0.5rem;
+  font-size: var(--ios-field-label-size, 0.8125rem) !important;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--ios-field-ink) !important;
 }
 
 html.capacitor-ios.capacitor-native .ios-drawer .dash-overlay-eyebrow {

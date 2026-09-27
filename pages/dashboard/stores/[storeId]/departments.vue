@@ -669,7 +669,7 @@ const departmentQuickActionOptions = computed((): IosQuickActionOption[] => {
   if (canManageDepartments.value) {
     options.push({
       value: 'new',
-      label: 'New',
+      label: 'Add department',
       icon: PlusIcon,
       trailing: 'add',
       action: openCreateDepartmentModal,

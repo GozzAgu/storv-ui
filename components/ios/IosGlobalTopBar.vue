@@ -35,6 +35,18 @@
         <slot name="trailing" />
       </div>
 
+      <button
+        type="button"
+        class="ios-global-top-bar__ask-ai"
+        aria-label="Open Storvv Assistant"
+        :aria-expanded="assistantOpen"
+        aria-controls="dashboard-assistant-panel"
+        @click.stop="$emit('ask-ai')"
+      >
+        <SparklesIcon class="ios-global-top-bar__ask-ai-icon" aria-hidden="true" />
+        <span class="ios-global-top-bar__ask-ai-label">Ask AI</span>
+      </button>
+
       <DashboardPageRefreshButton extra-class="ios-global-top-bar__refresh" />
 
       <IosTabBarThemeButton class="ios-global-top-bar__theme" variant="topnav" />
@@ -57,6 +69,7 @@ import DashboardBackButton from '~/components/dashboard/DashboardBackButton.vue'
 import DashboardPageRefreshButton from '~/components/dashboard/DashboardPageRefreshButton.vue'
 import DashboardProfileMenu from '~/components/dashboard/DashboardProfileMenu.vue'
 import IosTabBarThemeButton from '~/components/ios/IosTabBarThemeButton.vue'
+import { SparklesIcon } from '~/utils/app-icons'
 
 withDefaults(
   defineProps<{
@@ -69,6 +82,7 @@ withDefaults(
     userEmail?: string
     userInitials?: string
     homeHref?: string
+    assistantOpen?: boolean
   }>(),
   {
     title: '',
@@ -80,10 +94,12 @@ withDefaults(
     userEmail: '',
     userInitials: 'U',
     homeHref: '/dashboard',
+    assistantOpen: false,
   }
 )
 
 defineEmits<{
   'sign-out': []
+  'ask-ai': []
 }>()
 </script>

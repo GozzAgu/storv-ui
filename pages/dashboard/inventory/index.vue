@@ -1442,7 +1442,7 @@ const categoryQuickActionOptions = computed((): IosQuickActionOption[] => {
   if (canCreateInventoryFolders.value) {
     options.push({
       value: 'new',
-      label: 'New',
+      label: 'Add category',
       icon: PlusIcon,
       trailing: 'add',
       action: openCreateFolderModal,

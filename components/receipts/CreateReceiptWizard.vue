@@ -532,7 +532,7 @@
                 <button
                   @click="addSplitPayment"
                   type="button"
-                  class="inline-flex w-full items-center justify-center gap-1.5 px-3 py-1.5 text-xs text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-sm border-0 dark:border-primary-600 transition-colors"
+                  class="ios-add-btn inline-flex w-full items-center justify-center gap-1.5 px-3 py-1.5 text-xs text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-sm border-0 dark:border-primary-600 transition-colors"
                 >
                   <PlusCircleIcon class="h-3.5 w-3.5 shrink-0 opacity-80" :stroke-width="1.75" />
                   Add payment method

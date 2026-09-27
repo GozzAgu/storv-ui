@@ -153,6 +153,7 @@
                 :amount-tone="getOutstandingTransactionAmount(row).tone"
                 :date="formatReceiptTransactionDate(row.date)"
                 variant="pending"
+                icon="balance-due"
                 :last="index === filteredOutstandingReceipts.length - 1"
                 show-menu
                 :menu-id="row.id"

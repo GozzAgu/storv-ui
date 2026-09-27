@@ -78,6 +78,7 @@
             aria-label="Record a sale"
           >
             <PlusIcon aria-hidden="true" />
+            <span>New sale</span>
           </NuxtLink>
         </div>
       </div>

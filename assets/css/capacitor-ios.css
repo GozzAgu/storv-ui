@@ -25,11 +25,11 @@ html.capacitor-ios.capacitor-native {
   --cap-ios-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --cap-ios-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 
-  --cap-ios-glass: rgb(255 255 255 / 0.78);
-  --cap-ios-glass-border: rgb(255 255 255 / 0.55);
-  --cap-ios-nav-glass: rgb(255 255 255 / 0.34);
-  --cap-ios-nav-glass-border: rgb(255 255 255 / 0.42);
-  --cap-ios-nav-indicator: rgb(255 255 255 / 0.58);
+  --cap-ios-glass: #ffffff;
+  --cap-ios-glass-border: rgb(60 60 67 / 0.1);
+  --cap-ios-nav-glass: #ffffff;
+  --cap-ios-nav-glass-border: rgb(60 60 67 / 0.1);
+  --cap-ios-nav-indicator: #ffffff;
   --cap-ios-nav-indicator-border: rgb(255 255 255 / 0.72);
   --cap-ios-glow: rgb(20 63 141 / 0.14);
   --cap-ios-sheen: linear-gradient(
@@ -51,11 +51,11 @@ html.capacitor-ios.capacitor-native {
 }
 
 html.capacitor-ios.capacitor-native.dark {
-  --cap-ios-glass: rgb(18 20 28 / 0.82);
+  --cap-ios-glass: #1c1c1e;
   --cap-ios-glass-border: rgb(255 255 255 / 0.1);
-  --cap-ios-nav-glass: rgb(22 24 32 / 0.48);
+  --cap-ios-nav-glass: #1c1c1e;
   --cap-ios-nav-glass-border: rgb(255 255 255 / 0.12);
-  --cap-ios-nav-indicator: rgb(255 255 255 / 0.14);
+  --cap-ios-nav-indicator: #2c2c2e;
   --cap-ios-nav-indicator-border: rgb(255 255 255 / 0.18);
   --cap-ios-glow: rgb(154 181 227 / 0.1);
   --cap-ios-sheen: linear-gradient(

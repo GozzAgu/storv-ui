@@ -1466,7 +1466,7 @@ const staffQuickActionOptions = computed((): IosQuickActionOption[] => {
   if (canCreateNewStaff.value) {
     options.push({
       value: 'add',
-      label: 'Add',
+      label: 'Add staff',
       icon: PlusIcon,
       trailing: 'add',
       action: openCreateStaffModal,

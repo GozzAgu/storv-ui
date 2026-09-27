@@ -51,11 +51,7 @@
         :class="`ios-receipt-transaction-row__icon--${variant}`"
         aria-hidden="true"
       >
-        <UserCircleIcon v-if="variant === 'customer'" />
-        <ReceiptPercentIcon v-else-if="variant === 'credit'" />
-        <ClockIcon v-else-if="variant === 'pending'" />
-        <ArrowUturnLeftIcon v-else-if="variant === 'debit'" />
-        <XMarkIcon v-else />
+        <component :is="resolvedIcon" :stroke-width="1.75" />
       </div>
       <div class="ios-receipt-transaction-row__body">
         <p class="ios-receipt-transaction-row__title">{{ title }}</p>
@@ -86,19 +82,13 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import {
-  ArrowUturnLeftIcon,
-  ClockIcon,
-  EllipsisVerticalIcon,
-  ReceiptPercentIcon,
-  UserCircleIcon,
-  XMarkIcon,
-} from '~/utils/app-icons'
+import { EllipsisVerticalIcon } from '~/utils/app-icons'
+import { IOS_ROW_ICONS, type IosRowIconKey } from '~/utils/ios-row-icons'
 
 /**
  * `credit` = completed sale / available stock, `pending` = awaiting payment/balance due,
  * `debit` = refunded, `cancelled` = cancelled, `customer` = a customer row
- * rather than a receipt. Credit uses the sales glyph (neutral), not a green check.
+ * rather than a receipt. The variant sets the tint; the glyph comes from `icon` or `menuKind`.
  */
 export type ReceiptTransactionVariant =
   | 'credit'
@@ -167,6 +157,8 @@ const props = withDefaults(
     selected?: boolean
     /** Photo shown instead of the variant glyph (e.g. staff roster). */
     avatarUrl?: string
+    /** Explicit glyph when the row status is finer-grained than `variant`. */
+    icon?: IosRowIconKey
   }>(),
   {
     menuKind: 'receipt',
@@ -188,6 +180,44 @@ watch(
     avatarFailed.value = false
   }
 )
+
+const SALE_ICON_BY_VARIANT: Record<ReceiptTransactionVariant, IosRowIconKey> = {
+  credit: 'sale',
+  pending: 'sale-pending',
+  debit: 'sale-refunded',
+  cancelled: 'sale-cancelled',
+  customer: 'customer',
+}
+
+function defaultIconKey(): IosRowIconKey {
+  if (props.variant === 'customer') return 'customer'
+  switch (props.menuKind) {
+    case 'customer':
+      return 'customer'
+    case 'item':
+      return props.variant === 'cancelled' ? 'item-sold' : 'item-in-stock'
+    case 'stock-loan':
+      if (props.variant === 'credit') return 'item-sold'
+      if (props.variant === 'cancelled') return 'item-returned'
+      return 'stock-loan'
+    case 'staff':
+      return props.variant === 'cancelled' ? 'staff-removed' : 'staff'
+    case 'lead':
+      return props.variant === 'credit' ? 'paid' : 'lead'
+    case 'buyback':
+      return 'buyback'
+    case 'payment-link':
+      return props.variant === 'credit' ? 'paid' : 'payment-link'
+    case 'transfer':
+      return props.variant === 'cancelled' ? 'cancelled' : 'transfer'
+    case 'inquiry':
+      return props.variant === 'cancelled' ? 'cancelled' : 'order'
+    default:
+      return SALE_ICON_BY_VARIANT[props.variant]
+  }
+}
+
+const resolvedIcon = computed(() => IOS_ROW_ICONS[props.icon ?? defaultIconKey()])
 
 const resolvedMenuAnchor = computed(
   () => props.menuAnchor ?? MENU_KIND_ANCHORS[props.menuKind]

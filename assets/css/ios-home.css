@@ -4,7 +4,7 @@
 
 html.capacitor-ios.capacitor-native {
   --ios-home-bg: #e8eaf0;
-  --ios-home-card: rgb(255 255 255 / 0.58);
+  --ios-home-card: #ffffff;
   --ios-home-card-shadow: 0 8px 28px rgb(15 23 42 / 0.07), inset 0 1px 0 rgb(255 255 255 / 0.7);
   --ios-action-card-shadow: 0 8px 24px rgb(15 23 42 / 0.08), inset 0 1px 0 rgb(255 255 255 / 0.65);
   --ios-float-shadow: 0 12px 36px rgb(0 0 0 / 0.12), 0 2px 8px rgb(0 0 0 / 0.06);
@@ -19,7 +19,7 @@ html.capacitor-ios.capacitor-native {
 
 html.capacitor-ios.capacitor-native.dark {
   --ios-home-bg: #000000;
-  --ios-home-card: rgb(28 28 30 / 0.55);
+  --ios-home-card: #1c1c1e;
   --ios-home-card-shadow: 0 12px 36px rgb(0 0 0 / 0.45), inset 0 1px 0 rgb(255 255 255 / 0.08);
   --ios-action-card-shadow: 0 10px 28px rgb(0 0 0 / 0.42), inset 0 1px 0 rgb(255 255 255 / 0.08);
   --ios-float-shadow:
@@ -36,9 +36,7 @@ html.capacitor-ios.capacitor-native .ios-home-dashboard__attention-chip,
 html.capacitor-ios.capacitor-native .ios-home-dashboard__alert,
 html.capacitor-ios.capacitor-native .ios-home-metric-card,
 html.capacitor-ios.capacitor-native .ios-home-feed-card {
-  backdrop-filter: blur(var(--ios-glass-blur, 32px)) saturate(1.5);
-  -webkit-backdrop-filter: blur(var(--ios-glass-blur, 32px)) saturate(1.5);
-  border: 1px solid rgb(255 255 255 / 0.55);
+  border: 1px solid rgb(60 60 67 / 0.08);
 }
 
 html.capacitor-ios.capacitor-native.dark .ios-home-dashboard__attention-chip,
@@ -348,12 +346,18 @@ html.capacitor-ios.capacitor-native .ios-home-dashboard__add-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
+  gap: 0.25rem;
+  height: 2rem;
+  padding: 0 0.75rem 0 0.5625rem;
   border-radius: 9999px;
   background: #111111;
   color: #ffffff;
-  box-shadow: none;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.12);
 }
 
 html.capacitor-ios.capacitor-native.dark .ios-home-dashboard__add-btn {
@@ -362,8 +366,8 @@ html.capacitor-ios.capacitor-native.dark .ios-home-dashboard__add-btn {
 }
 
 html.capacitor-ios.capacitor-native .ios-home-dashboard__add-btn svg {
-  width: 1.125rem;
-  height: 1.125rem;
+  width: 0.9375rem;
+  height: 0.9375rem;
   stroke-width: 2.25;
 }
 

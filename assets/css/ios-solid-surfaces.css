@@ -1,0 +1,80 @@
+/**
+ * iOS solid surfaces. Cards, drawers, menus, dropdowns and bars are opaque:
+ * no frosted glass, no see-through content. Loaded last in ios-native.css so it
+ * wins over the older glass rules in capacitor-ios.css / ios-shell.css.
+ */
+
+html.capacitor-ios.capacitor-native
+  :is(
+    .dash-card,
+    .dash-page-header,
+    .dash-page-header__toolbar,
+    .dash-page-context-bar,
+    .dash-stat-card,
+    .dash-grid-card,
+    .inv-category-card,
+    .data-table-shell,
+    .dash-table-shell,
+    .dash-grid-shell--table,
+    .dash-profile-stats__item,
+    .dash-roles__hero,
+    .ios-glass-card,
+    .ios-home-metric-card,
+    .ios-home-feed-card,
+    .ios-home-dashboard__alert,
+    .ios-home-dashboard__attention-chip,
+    .ios-fab--secondary,
+    .ios-quick-sale-sheet__scan,
+    .native-topnav,
+    .native-tabbar,
+    .native-tabbar__indicator,
+    .native-more-sheet,
+    .native-side-drawer-panel,
+    .side-panel-native-dialog,
+    .dashboard-native-sheet,
+    .dashboard-fixed-footer--native,
+    .receipt-line-items-panel,
+    .frosted-glass,
+    .dash-toast,
+    .auth-card,
+    .ios-global-top-bar-host,
+    [data-dashboard-teleport],
+    [role='menu'],
+    [role='listbox']
+  ) {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* Tailwind frosted utilities used by shared web components */
+html.capacitor-ios.capacitor-native [class*='backdrop-blur'] {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* Sticky page toolbar sat on 88% canvas + blur; make it the solid canvas */
+html.capacitor-ios.capacitor-native .dash-page-header--ios-context .dash-page-header__toolbar {
+  background: var(--ios-canvas);
+}
+
+/* Drawer dimmer: a plain dim, no blur of the page behind */
+html.capacitor-ios.capacitor-native .native-bottom-nav__backdrop.dash-overlay-backdrop {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* Shared web cards/panels rendered on iOS with translucent Tailwind fills */
+@layer components {
+  html.capacitor-ios.capacitor-native .bg-white\/95,
+  html.capacitor-ios.capacitor-native .bg-white\/90,
+  html.capacitor-ios.capacitor-native .bg-white\/80 {
+    background-color: #ffffff !important;
+  }
+
+  html.capacitor-ios.capacitor-native.dark .app-card,
+  html.capacitor-ios.capacitor-native.dark .dark\:bg-gray-800\/95,
+  html.capacitor-ios.capacitor-native.dark .dark\:bg-gray-900\/95,
+  html.capacitor-ios.capacitor-native.dark .dark\:bg-gray-900\/90 {
+    background-color: #1c1c1e !important;
+  }
+}

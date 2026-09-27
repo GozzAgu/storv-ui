@@ -273,7 +273,7 @@
                 </div>
                 <PlusIcon
                   v-if="canAddItemToCart(item)"
-                  class="h-4 w-4 shrink-0 text-gray-700 dark:text-gray-300"
+                  class="ios-add-glyph h-4 w-4 shrink-0 text-gray-700 dark:text-gray-300"
                 />
               </button>
             </div>
@@ -506,7 +506,7 @@
             </div>
             <button
               type="button"
-              class="inline-flex w-full items-center justify-center gap-1.5 px-3 py-1.5 text-xs text-gray-700 dark:text-gray-300 border-0 dark:border-white/10 rounded-sm"
+              class="ios-add-btn inline-flex w-full items-center justify-center gap-1.5 px-3 py-1.5 text-xs text-gray-700 dark:text-gray-300 border-0 dark:border-white/10 rounded-sm"
               @click="addSplitPayment"
             >
               <PlusCircleIcon class="h-3.5 w-3.5 shrink-0 opacity-80" :stroke-width="1.75" />

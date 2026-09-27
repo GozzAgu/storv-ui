@@ -235,8 +235,8 @@ html.capacitor-ios.capacitor-native .ios-receipt-transaction-row--nested .ios-re
 }
 
 html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__icon--customer {
-  border-color: rgb(0 122 255 / 0.45);
-  color: rgb(0 122 255);
+  background: rgb(88 86 214 / 0.12);
+  color: rgb(88 86 214);
 }
 
 html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__amount--warning {
@@ -259,34 +259,53 @@ html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__icon {
   width: var(--ios-list-icon-size, 2.125rem);
   height: var(--ios-list-icon-size, 2.125rem);
   border-radius: 9999px;
-  border: 1.5px solid var(--ios-separator);
-  color: var(--ios-label-secondary);
+  background: rgb(118 118 128 / 0.12);
+  color: var(--ios-label);
 }
 
 html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__icon svg {
-  width: 1rem;
-  height: 1rem;
-  stroke-width: 2;
+  width: 1.0625rem;
+  height: 1.0625rem;
+  stroke-width: 1.75;
 }
 
 html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__icon--credit {
-  border-color: var(--ios-separator);
-  color: var(--ios-label-secondary);
+  background: rgb(0 122 255 / 0.1);
+  color: rgb(0 122 255);
 }
 
 html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__icon--debit {
-  border-color: rgb(255 59 48 / 0.55);
+  background: rgb(255 59 48 / 0.12);
   color: rgb(255 59 48);
 }
 
 html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__icon--pending {
-  border-color: rgb(255 149 0 / 0.55);
-  color: rgb(255 149 0);
+  background: rgb(255 149 0 / 0.14);
+  color: rgb(230 126 0);
 }
 
 html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__icon--cancelled {
-  border-color: rgb(142 142 147 / 0.55);
+  background: rgb(118 118 128 / 0.12);
   color: rgb(142 142 147);
+}
+
+html.dark.capacitor-ios.capacitor-native .ios-receipt-transaction-row__icon--credit {
+  background: rgb(10 132 255 / 0.18);
+  color: rgb(100 170 255);
+}
+
+html.dark.capacitor-ios.capacitor-native .ios-receipt-transaction-row__icon--pending {
+  background: rgb(255 159 10 / 0.18);
+  color: rgb(255 179 64);
+}
+
+html.dark.capacitor-ios.capacitor-native .ios-receipt-transaction-row__icon--debit {
+  background: rgb(255 69 58 / 0.18);
+  color: rgb(255 105 97);
+}
+
+html.dark.capacitor-ios.capacitor-native .ios-receipt-transaction-row__icon--cancelled {
+  background: rgb(118 118 128 / 0.24);
 }
 
 html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__body {

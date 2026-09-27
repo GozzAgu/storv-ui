@@ -57,6 +57,7 @@
               amount-tone="neutral"
               :date="formatDateShort(log.createdAt)"
               :variant="iosActivityVariant(log.action)"
+              :icon="iosActivityIcon(log.action)"
               :last="index === paginatedLogs.length - 1"
             />
           </div>
@@ -341,6 +342,7 @@ import {
   TrashIcon,
 } from '~/utils/app-icons'
 import type { ActivityAction, ActivityEntityType, ActivityLog } from '~/composables/useActivityLog'
+import type { IosRowIconKey } from '~/utils/ios-row-icons'
 import {
   ACTIVITY_LOGS_FETCH_LIMIT,
   activityActionBadgeClass,
@@ -416,6 +418,10 @@ const iosActivityFilterOptions = computed((): IosQuickActionOption[] =>
             : TrashIcon,
   }))
 )
+
+function iosActivityIcon(action: ActivityAction): IosRowIconKey {
+  return `activity-${action}`
+}
 
 function iosActivityVariant(action: ActivityAction): ReceiptTransactionVariant {
   if (action === 'created') return 'credit'

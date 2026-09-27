@@ -322,7 +322,7 @@ const iosBuybackTab = ref('list')
 const iosBuybackQuickActions = computed((): IosQuickActionOption[] => [
   {
     value: 'add',
-    label: 'Record',
+    label: 'Add buyback',
     icon: ArrowUturnLeftIcon,
     trailing: 'add',
     action: () => {

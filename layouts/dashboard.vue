@@ -816,7 +816,9 @@
           :user-name="userName"
           :user-email="userEmail"
           :user-initials="userInitials"
+          :assistant-open="assistantStore.isOpen"
           @sign-out="handleSignOut"
+          @ask-ai="openAssistant()"
         />
       </div>
 

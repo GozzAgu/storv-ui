@@ -282,7 +282,7 @@
             <div class="flex flex-wrap items-center gap-2">
               <button
                 type="button"
-                class="inline-flex items-center gap-1 text-[11px] font-medium text-gray-800 hover:underline dark:text-gray-200"
+                class="ios-add-btn ios-add-btn--inline inline-flex items-center gap-1 text-[11px] font-medium text-gray-800 hover:underline dark:text-gray-200"
                 @click="addFromAnotherCategory"
               >
                 <PlusCircleIcon class="h-3.5 w-3.5" stroke-width="2" />
@@ -709,7 +709,7 @@
                 <button
                   @click="addSplitPayment"
                   type="button"
-                  class="inline-flex w-full items-center justify-center gap-1.5 px-3 py-1.5 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/[0.06] rounded-sm border-0 transition-colors"
+                  class="ios-add-btn inline-flex w-full items-center justify-center gap-1.5 px-3 py-1.5 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/[0.06] rounded-sm border-0 transition-colors"
                 >
                   <PlusCircleIcon class="h-3.5 w-3.5 shrink-0 opacity-80" :stroke-width="1.75" />
                   Add payment method

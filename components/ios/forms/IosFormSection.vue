@@ -18,7 +18,7 @@
 const props = withDefaults(
   defineProps<{
     title?: string
-    /** When false, section heading is hidden (default hidden on iOS CRUD). */
+    /** When false, the section heading is hidden. */
     showTitle?: boolean
     fixed?: boolean
     grid?: boolean
@@ -29,10 +29,5 @@ const props = withDefaults(
   }
 )
 
-const { isCapacitorIos } = useIsCapacitorIos()
-
-const resolvedShowTitle = computed(() => {
-  if (props.showTitle !== undefined) return props.showTitle
-  return !isCapacitorIos.value
-})
+const resolvedShowTitle = computed(() => props.showTitle ?? true)
 </script>

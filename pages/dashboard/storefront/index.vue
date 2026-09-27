@@ -63,6 +63,7 @@
           :amount-tone="iosAmountTone(row)"
           :date="formatWhenShort(row.createdAtMs)"
           :variant="iosVariant(row.status)"
+          :icon="iosVariant(row.status) === 'cancelled' ? 'cancelled' : 'order'"
           :last="index === filtered.length - 1"
           :show-menu="
             canAct(row.status) ||
