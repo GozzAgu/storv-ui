@@ -101,6 +101,65 @@ html.capacitor-ios.capacitor-native.dark .ios-profile-settings__hero-avatar {
   color: #f2f2f7;
 }
 
+html.capacitor-ios.capacitor-native .ios-profile-settings__hero-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+html.capacitor-ios.capacitor-native button.ios-profile-settings__hero-avatar {
+  padding: 0;
+  border: none;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html.capacitor-ios.capacitor-native button.ios-profile-settings__hero-avatar:active {
+  opacity: 0.7;
+}
+
+html.capacitor-ios.capacitor-native .ios-profile-settings__hero-avatar-badge {
+  position: absolute;
+  right: -0.125rem;
+  bottom: -0.125rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.625rem;
+  height: 1.625rem;
+  border-radius: 9999px;
+  background: var(--ios-tint, #143f8d);
+  color: #fff;
+  border: 2px solid var(--ios-bg, #f2f2f7);
+  pointer-events: none;
+}
+
+html.capacitor-ios.capacitor-native.dark .ios-profile-settings__hero-avatar-badge {
+  border-color: #000;
+}
+
+html.capacitor-ios.capacitor-native .ios-profile-settings__hero-avatar-badge svg {
+  width: 0.8125rem;
+  height: 0.8125rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-profile-settings__hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.875rem;
+}
+
+html.capacitor-ios.capacitor-native .ios-profile-settings__hero-remove {
+  padding: 0;
+  margin-top: 0.5rem;
+  border: none;
+  background: transparent;
+  color: var(--ios-destructive, #ff3b30);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  -webkit-tap-highlight-color: transparent;
+}
+
 html.capacitor-ios.capacitor-native .ios-profile-settings__hero-avatar--skeleton {
   background: var(--ios-fill-secondary);
 }

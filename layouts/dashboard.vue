@@ -730,6 +730,18 @@
               :class="isNativeApp ? 'max-w-[5.25rem] shrink' : 'shrink-0'"
             />
 
+            <button
+              type="button"
+              class="dash-topnav__ask-ai"
+              aria-label="Open Storvv Assistant"
+              :aria-expanded="assistantStore.isOpen"
+              aria-controls="dashboard-assistant-panel"
+              @click.stop="openAssistant()"
+            >
+              <SparklesIcon class="h-3.5 w-3.5 shrink-0" stroke-width="1.75" aria-hidden="true" />
+              <span class="hidden sm:inline">Ask AI</span>
+            </button>
+
             <DashboardPageRefreshButton />
 
             <ThemeToggle class="shrink-0" />
@@ -942,6 +954,7 @@ import { ref, reactive, onMounted, onUnmounted, computed, watch, nextTick, defin
 import {
   XMarkIcon,
   BellIcon,
+  SparklesIcon,
   MagnifyingGlassIcon,
   ChevronDownIcon,
   ChevronLeftIcon,
@@ -1037,6 +1050,16 @@ function mountAssistantShell() {
 function mountShellWidgets() {
   mountSearchShell()
   mountAssistantShell()
+}
+
+const { openAssistant: openAssistantPanel } = useDashboardAssistant()
+
+function openAssistant(draft?: string) {
+  mountAssistantShell()
+  nextTick(() => {
+    if (assistantStore.isOpen && !draft) assistantStore.close()
+    else openAssistantPanel(draft)
+  })
 }
 
 function openGlobalSearch() {

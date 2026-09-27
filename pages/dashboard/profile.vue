@@ -21,6 +21,10 @@
       :two-factor-enabled="securitySettings.twoFactor"
       :session-count="securitySettings.activeSessions"
       :role-label="roleBadgeLabel"
+      :has-photo="Boolean(profilePhotoUrl)"
+      :photo-uploading="isUploadingProfilePhoto"
+      @change-photo="iosProfilePhotoInput?.click()"
+      @remove-photo="removeProfilePhoto"
       @edit-profile="openEditProfileModal"
       @open-store-info="showStoreInfoModal = true"
       @open-notifications="showNotificationsModal = true"
@@ -36,6 +40,14 @@
       @open-receipt-policies="openReceiptPoliciesModal"
       @replay-tour="replayDashboardTour"
       @open-assistant="openAssistant()"
+    />
+    <input
+      v-if="isCapacitorIos"
+      ref="iosProfilePhotoInput"
+      type="file"
+      accept="image/jpeg,image/png,image/gif,image/webp"
+      class="hidden"
+      @change="handleProfilePhotoUpload"
     />
 
     <template v-if="!isCapacitorIos">
@@ -2202,6 +2214,7 @@ const profileAvatarInitials = computed(() => {
 })
 
 const profilePhotoInput = ref<HTMLInputElement | null>(null)
+const iosProfilePhotoInput = ref<HTMLInputElement | null>(null)
 const isUploadingProfilePhoto = ref(false)
 const profilePhotoUrl = computed(() => userStore.userData?.photoURL || '')
 const { authFetch } = useAuthenticatedFetch()

@@ -9,16 +9,38 @@
         </div>
       </div>
       <template v-else>
-        <div class="ios-profile-settings__hero-avatar">
-          <AccountAvatar :initials="avatarInitials" />
+        <div class="ios-profile-settings__hero-avatar-wrap">
+          <button
+            type="button"
+            class="ios-profile-settings__hero-avatar"
+            :disabled="photoUploading"
+            aria-label="Change profile photo"
+            @click="emit('change-photo')"
+          >
+            <AccountAvatar :initials="avatarInitials" />
+          </button>
+          <span class="ios-profile-settings__hero-avatar-badge" aria-hidden="true">
+            <ArrowPathIcon v-if="photoUploading" class="animate-spin" />
+            <CameraIcon v-else />
+          </span>
         </div>
         <div class="ios-profile-settings__hero-body">
           <p class="ios-profile-settings__hero-name">{{ displayName }}</p>
           <p class="ios-profile-settings__hero-email">{{ email || '-' }}</p>
-          <button type="button" class="ios-profile-settings__hero-edit" @click="emit('edit-profile')">
-            <PencilSquareIcon aria-hidden="true" />
-            Edit profile
-          </button>
+          <div class="ios-profile-settings__hero-actions">
+            <button type="button" class="ios-profile-settings__hero-edit" @click="emit('edit-profile')">
+              <PencilSquareIcon aria-hidden="true" />
+              Edit profile
+            </button>
+            <button
+              v-if="hasPhoto && !photoUploading"
+              type="button"
+              class="ios-profile-settings__hero-remove"
+              @click="emit('remove-photo')"
+            >
+              Remove photo
+            </button>
+          </div>
         </div>
       </template>
     </div>
@@ -182,6 +204,8 @@ import {
   CalendarIcon,
   ClipboardDocumentListIcon,
   CreditCardIcon,
+  ArrowPathIcon,
+  CameraIcon,
   CurrencyDollarIcon,
   DevicePhoneMobileIcon,
   GlobeAltIcon,
@@ -217,8 +241,12 @@ const props = withDefaults(
     twoFactorEnabled: boolean
     sessionCount: number
     roleLabel: string
+    hasPhoto?: boolean
+    photoUploading?: boolean
   }>(),
   {
+    hasPhoto: false,
+    photoUploading: false,
     isLoading: false,
     isStaff: false,
     showBilling: false,
@@ -233,6 +261,8 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   'edit-profile': []
+  'change-photo': []
+  'remove-photo': []
   'open-store-info': []
   'open-notifications': []
   'open-language': []

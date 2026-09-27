@@ -751,7 +751,8 @@ const tutorialSteps: TutorialStep[] = [
     description:
       'Sales drive revenue charts, customer counts, and payment-method breakdowns. Balance-due sales surface under Needs attention.',
     icon: MARKETING_FEATURE_ICONS.receipts,
-    targetSelector: '[data-tutorial="receipts"]',
+    targetSelector: '[data-tutorial="sales"]',
+    fallbackTargetSelector: '[data-tutorial="receipts"]',
   },
   {
     title: 'View Analytics & Reports',
@@ -793,7 +794,8 @@ const staffTutorialSteps: TutorialStep[] = [
     description:
       'Create receipts, take payments, and look up past sales for customers you serve.',
     icon: MARKETING_FEATURE_ICONS.receipts,
-    targetSelector: '[data-tutorial="receipts"]',
+    targetSelector: '[data-tutorial="sales"]',
+    fallbackTargetSelector: '[data-tutorial="receipts"]',
   },
   {
     title: 'Your profile',
@@ -1056,6 +1058,7 @@ const { visible: gettingStartedVisible, nextStep: gettingStartedNextStep } =
 /** New / empty workspace: compress chrome to a today strip + one CTA. */
 const isQuietDashboard = computed(() => {
   if (needsStoreSelection.value || isLoading.value) return false
+  if (inventoryStore.totalItems > 0 || inventoryStore.folders.length > 0) return false
   return (
     todayReceiptsCount.value === 0 &&
     todaySales.value === 0 &&
