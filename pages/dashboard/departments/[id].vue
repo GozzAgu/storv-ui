@@ -86,6 +86,7 @@
             amount-tone="neutral"
             :date="formatStaffStatusLabel(member.status)"
             :variant="getStaffRowVariant(member)"
+            :avatar-url="member.photoURL"
             :last="index === iosPaginatedStaffRoster.length - 1"
             :show-menu="rosterTab === 'active' ? canManageDepartments : canRemoveStaff"
             menu-kind="staff"
@@ -371,6 +372,12 @@
                         wrapper-class="justify-center"
                       />
                     </div>
+                    <StaffAvatar
+                      :first-name="member.firstName"
+                      :last-name="member.lastName"
+                      :photo-url="member.photoURL"
+                      size="md"
+                    />
                     <div class="min-w-0 flex-1">
                       <p class="text-sm font-semibold text-gray-900 dark:text-gray-50">
                         {{ member.firstName }} {{ member.lastName }}
@@ -463,9 +470,16 @@
                         />
                       </td>
                       <td>
-                        <span class="dashboard-table__primary"
-                          >{{ member.firstName }} {{ member.lastName }}</span
-                        >
+                        <div class="flex items-center gap-2.5">
+                          <StaffAvatar
+                            :first-name="member.firstName"
+                            :last-name="member.lastName"
+                            :photo-url="member.photoURL"
+                          />
+                          <span class="dashboard-table__primary"
+                            >{{ member.firstName }} {{ member.lastName }}</span
+                          >
+                        </div>
                       </td>
                       <td class="hidden sm:table-cell">
                         <span class="dashboard-table__muted">{{
@@ -518,6 +532,12 @@
                   class="rounded-xl bg-white/95 p-3 shadow-none backdrop-blur-sm dark:bg-white/[0.04]"
                 >
                   <div class="flex items-start justify-between gap-2">
+                    <StaffAvatar
+                      :first-name="member.firstName"
+                      :last-name="member.lastName"
+                      :photo-url="member.photoURL"
+                      size="md"
+                    />
                     <div class="min-w-0 flex-1">
                       <p class="text-sm font-semibold text-gray-900 dark:text-gray-50">
                         {{ member.firstName }} {{ member.lastName }}
@@ -579,9 +599,16 @@
                   <tbody>
                     <tr v-for="member in paginatedRemovedStaff" :key="member.id">
                       <td>
-                        <span class="dashboard-table__primary"
-                          >{{ member.firstName }} {{ member.lastName }}</span
-                        >
+                        <div class="flex items-center gap-2.5">
+                          <StaffAvatar
+                            :first-name="member.firstName"
+                            :last-name="member.lastName"
+                            :photo-url="member.photoURL"
+                          />
+                          <span class="dashboard-table__primary"
+                            >{{ member.firstName }} {{ member.lastName }}</span
+                          >
+                        </div>
                       </td>
                       <td class="hidden sm:table-cell">
                         <span class="dashboard-table__muted">{{
@@ -790,6 +817,7 @@ import DeactivateStaffModal from '~/components/departments/DeactivateStaffModal.
 import ReactivateStaffModal from '~/components/departments/ReactivateStaffModal.vue'
 import MoveStaffModal from '~/components/departments/MoveStaffModal.vue'
 import StaffInvitePasswordsPanel from '~/components/departments/StaffInvitePasswordsPanel.vue'
+import StaffAvatar from '~/components/departments/StaffAvatar.vue'
 import TotpConfirmModal from '~/components/security/TotpConfirmModal.vue'
 import { useTotpConfirmModal } from '~/composables/useTotpConfirmModal'
 import { resolveTotpForSensitiveAction } from '~/utils/security-api-errors'

@@ -45,6 +45,8 @@ export interface Staff {
   removedAt?: unknown
   removedBy?: string
   authUid?: string // Firebase Auth UID
+  /** Personal profile photo. Staff have no users/{uid} doc, so it lives on the roster row. */
+  photoURL?: string
   mustChangePassword?: boolean // When true, staff must set a new password on next login
   createdAt: any
   updatedAt: any

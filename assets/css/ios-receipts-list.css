@@ -139,6 +139,18 @@ html.capacitor-ios.capacitor-native .ios-receipt-transaction-row {
   color: inherit;
 }
 
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__icon--avatar {
+  overflow: hidden;
+  border-radius: 9999px;
+  padding: 0;
+}
+
+html.capacitor-ios.capacitor-native .ios-receipt-transaction-row__icon--avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 html.capacitor-ios.capacitor-native .ios-receipt-transaction-row--selectable {
   align-items: center;
 }

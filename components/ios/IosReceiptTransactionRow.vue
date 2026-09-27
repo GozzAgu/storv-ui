@@ -39,6 +39,14 @@
     </label>
     <button type="button" class="ios-receipt-transaction-row__main" @click="$emit('click')">
       <div
+        v-if="avatarUrl && !avatarFailed"
+        class="ios-receipt-transaction-row__icon ios-receipt-transaction-row__icon--avatar"
+        aria-hidden="true"
+      >
+        <img :src="avatarUrl" alt="" loading="lazy" @error="avatarFailed = true" />
+      </div>
+      <div
+        v-else
         class="ios-receipt-transaction-row__icon"
         :class="`ios-receipt-transaction-row__icon--${variant}`"
         aria-hidden="true"
@@ -77,7 +85,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import {
   ArrowUturnLeftIcon,
   ClockIcon,
@@ -157,6 +165,8 @@ const props = withDefaults(
     menuAriaLabel?: string
     selectable?: boolean
     selected?: boolean
+    /** Photo shown instead of the variant glyph (e.g. staff roster). */
+    avatarUrl?: string
   }>(),
   {
     menuKind: 'receipt',
@@ -170,6 +180,14 @@ defineEmits<{
   menu: []
   select: [checked: boolean]
 }>()
+
+const avatarFailed = ref(false)
+watch(
+  () => props.avatarUrl,
+  () => {
+    avatarFailed.value = false
+  }
+)
 
 const resolvedMenuAnchor = computed(
   () => props.menuAnchor ?? MENU_KIND_ANCHORS[props.menuKind]

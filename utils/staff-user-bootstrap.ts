@@ -96,6 +96,7 @@ function mapStaffDoc(staffDoc: { id: string; ref: { path: string }; data: () => 
         ? staffData.status
         : 'active',
     authUid: staffData.authUid ? String(staffData.authUid) : undefined,
+    photoURL: staffData.photoURL ? String(staffData.photoURL) : undefined,
     mustChangePassword: Boolean(staffData.mustChangePassword),
     createdAt: staffData.createdAt,
     updatedAt: staffData.updatedAt,
@@ -117,6 +118,7 @@ export function buildStaffUserData(
     uid: authUid,
     email: staff.email || '',
     name: `${staff.firstName || ''} ${staff.lastName || ''}`.trim() || 'Staff Member',
+    photoURL: staff.photoURL || '',
     role: 'staff',
     subscription: (priorPlan as SubscriptionPlan) || 'storvv_micro',
     subscriptionBillingCycle: prior?.subscriptionBillingCycle,

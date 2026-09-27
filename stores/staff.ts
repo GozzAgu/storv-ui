@@ -1169,6 +1169,33 @@ export const useStaffStore = defineStore('staff', {
       }
     },
 
+    /** Staff self-service: persist personal photo on the roster doc (staff have no users/{uid}). */
+    async updateOwnStaffPhoto(photoURL: string) {
+      const db = useFirestore().getFirestoreInstance()
+      if (!db) {
+        throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
+      }
+
+      const staffMember = await this.fetchCurrentStaffMember()
+      if (!staffMember?.createdBy || !staffMember.storeId || !staffMember.departmentId) {
+        throw new Error('Could not find your staff profile. Please sign in again.')
+      }
+
+      const staffRef = getStaffDocument(
+        db,
+        staffMember.createdBy,
+        staffMember.storeId,
+        staffMember.departmentId,
+        staffMember.id
+      )
+      await updateDoc(staffRef, { photoURL, updatedAt: serverTimestamp() })
+
+      const index = this.staff.findIndex((s) => s.id === staffMember.id)
+      if (index > -1 && this.staff[index]) {
+        this.staff[index] = { ...this.staff[index], photoURL }
+      }
+    },
+
     // Get current logged-in staff member's data
     async fetchCurrentStaffMember(): Promise<Staff | null> {
       const { isDemoModeActive } = await import('~/utils/demo-mode')

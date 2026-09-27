@@ -2249,6 +2249,17 @@ async function uploadProfilePhotoWithFallback(
   }
 }
 
+async function savePersonalPhotoURL(userId: string, photoURL: string) {
+  if (isStaff.value) {
+    await staffStore.updateOwnStaffPhoto(photoURL)
+    if (currentStaffMember.value) {
+      currentStaffMember.value = { ...currentStaffMember.value, photoURL }
+    }
+    return
+  }
+  await updateUserDocument(userId, { photoURL })
+}
+
 async function handleProfilePhotoUpload(event: Event) {
   const input = event.target as HTMLInputElement
   const file = input.files?.[0]
@@ -2268,7 +2279,7 @@ async function handleProfilePhotoUpload(event: Event) {
 
     const userId = authStore.currentUser.uid
     const { url } = await uploadProfilePhotoWithFallback(file, userId)
-    await updateUserDocument(userId, { photoURL: url })
+    await savePersonalPhotoURL(userId, url)
     userStore.$patch((state) => {
       if (state.userData) state.userData = { ...state.userData, photoURL: url }
     })
@@ -2298,7 +2309,7 @@ async function removeProfilePhoto() {
       const { deleteImageByUrl } = useFirebaseStorage()
       await deleteImageByUrl(current)
     }
-    await updateUserDocument(authStore.currentUser.uid, { photoURL: '' })
+    await savePersonalPhotoURL(authStore.currentUser.uid, '')
     userStore.$patch((state) => {
       if (state.userData) state.userData = { ...state.userData, photoURL: '' }
     })
