@@ -763,3 +763,80 @@ main[data-dashboard-main]
   font-size: 0.75rem;
   line-height: 1.35;
 }
+
+/* Dense variant (inventory folder items): single-line rows */
+html:not(.capacitor-native) main[data-dashboard-main] .inventory-items-table-wrap .dashboard-table.dashboard-table--dense thead tr th {
+  padding-top: 0.5625rem;
+  padding-bottom: 0.5625rem;
+}
+
+html:not(.capacitor-native) main[data-dashboard-main] .inventory-items-table-wrap .dashboard-table.dashboard-table--dense tbody tr td {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+html:not(.capacitor-native) main[data-dashboard-main] .inventory-items-table-wrap .dashboard-table.dashboard-table--dense :is(th, td).dashboard-table__col-name {
+  min-width: 11rem;
+  max-width: 18rem;
+}
+
+html:not(.capacitor-native) main[data-dashboard-main] .inventory-items-table-wrap .dashboard-table.dashboard-table--dense .dashboard-table__name {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html:not(.capacitor-native) main[data-dashboard-main] .inventory-items-table-wrap .dashboard-table.dashboard-table--dense :is(th, td):is(.dashboard-table__col-price, .dashboard-table__col-cost) {
+  min-width: 6.5rem;
+}
+
+html:not(.capacitor-native) main[data-dashboard-main] .inventory-items-table-wrap .dashboard-table.dashboard-table--dense :is(th, td).dashboard-table__col-margin {
+  min-width: 0;
+}
+
+html:not(.capacitor-native) main[data-dashboard-main] .inventory-items-table-wrap .dashboard-table.dashboard-table--dense :is(th, td):is(.dashboard-table__col-source, .dashboard-table__col-status) {
+  min-width: 0;
+  width: 1%;
+}
+
+html:not(.capacitor-native) main[data-dashboard-main] .inventory-items-table-wrap .dashboard-table.dashboard-table--dense :is(th, td).dashboard-table__col-date {
+  width: 1%;
+}
+
+html:not(.capacitor-native) main[data-dashboard-main] .inventory-items-table-wrap .dashboard-table.dashboard-table--dense .dashboard-table__pct {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  padding: 0.0625rem 0.375rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+  background: rgb(5 150 105 / 0.1);
+  color: rgb(4 120 87);
+}
+
+html.dark:not(.capacitor-native) main[data-dashboard-main] .inventory-items-table-wrap .dashboard-table.dashboard-table--dense .dashboard-table__pct {
+  background: rgb(52 211 153 / 0.12);
+  color: rgb(110 231 183);
+}
+
+html:not(.capacitor-native) main[data-dashboard-main] .inventory-items-table-wrap .dashboard-table.dashboard-table--dense .dashboard-table__pct--neg {
+  background: rgb(220 38 38 / 0.1);
+  color: rgb(185 28 28);
+}
+
+html.dark:not(.capacitor-native) main[data-dashboard-main] .inventory-items-table-wrap .dashboard-table.dashboard-table--dense .dashboard-table__pct--neg {
+  background: rgb(248 113 113 / 0.12);
+  color: rgb(252 165 165);
+}
+
+html:not(.capacitor-native) main[data-dashboard-main] .inventory-items-table-wrap .dashboard-table.dashboard-table--dense .dashboard-table__action-btn {
+  height: 1.875rem;
+  width: 1.875rem;
+}

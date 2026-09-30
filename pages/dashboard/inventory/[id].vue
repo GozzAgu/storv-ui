@@ -1221,7 +1221,7 @@
                   :class="isFullscreen ? 'overflow-auto px-4 pb-2 pt-2 lg:px-8' : ''"
                 >
                   <div class="min-h-0 flex-1 overflow-x-auto">
-                    <table class="dashboard-table min-w-full">
+                    <table class="dashboard-table dashboard-table--dense min-w-full">
                       <thead :class="isFullscreen ? 'sticky top-0 z-10' : ''">
                         <tr>
                           <th v-if="showBulkRowSelection" class="w-10 text-center">
@@ -1303,11 +1303,17 @@
                             v-for="(column, colIndex) in columns"
                             :key="column.key"
                             :class="[
+                              colIndex === 0 && 'dashboard-table__col-name',
                               column.key === 'availability' && 'dashboard-table__col-status',
                               column.key === 'source' && 'dashboard-table__col-source',
                               column.key === 'unitCost' && 'dashboard-table__col-cost',
                               column.key === 'margin' && 'dashboard-table__col-margin',
                               isInventorySellPriceColumn(column) && 'dashboard-table__col-price',
+                              ('type' in column && column.type === 'date') ||
+                              column.key === 'dateIn' ||
+                              column.key === 'dateOut'
+                                ? 'dashboard-table__col-date'
+                                : '',
                             ]"
                           >
                             <!-- Inline edit mode (large screens only); click outside saves -->
@@ -1354,7 +1360,10 @@
                               @click="startInlineEdit(item, column)"
                             >
                               <template v-if="colIndex === 0">
-                                <span class="dashboard-table__primary">
+                                <span
+                                  class="dashboard-table__primary dashboard-table__name"
+                                  :data-dashboard-tooltip="getItemPrimaryLabel(item)"
+                                >
                                   {{ getItemPrimaryLabel(item) }}
                                 </span>
                               </template>
@@ -1372,9 +1381,9 @@
                                 <div v-else-if="isInventorySellPriceColumn(column)">
                                   <div
                                     v-if="item.discountedPrice !== undefined"
-                                    class="flex flex-col gap-0.5"
+                                    class="inline-flex items-baseline gap-1.5 whitespace-nowrap"
                                   >
-                                    <div class="flex flex-wrap items-baseline gap-x-1.5 gap-y-0">
+                                    <div class="inline-flex items-baseline gap-1">
                                       <span class="dashboard-table__numeric">
                                         {{ formatCurrency(item.discountedPrice) }}
                                       </span>
@@ -1423,10 +1432,26 @@
                                   </span>
                                   <span v-else class="text-gray-400 dark:text-gray-500"> - </span>
                                 </div>
-                                <div v-else-if="column.key === 'margin'">
-                                  <span :class="inventoryMarginClass(item)">
-                                    {{ getItemMarginLabel(item) }}
-                                  </span>
+                                <div
+                                  v-else-if="column.key === 'margin'"
+                                  class="inline-flex items-center justify-end gap-1.5 whitespace-nowrap"
+                                >
+                                  <template v-if="getItemGrossProfit(item) !== null">
+                                    <span :class="inventoryMarginClass(item)">
+                                      {{ getItemProfitLabel(item) }}
+                                    </span>
+                                    <span
+                                      class="dashboard-table__pct"
+                                      :class="
+                                        getItemGrossProfit(item)! < 0
+                                          ? 'dashboard-table__pct--neg'
+                                          : ''
+                                      "
+                                    >
+                                      {{ formatMarginPercent(getItemMarginPercent(item)) }}
+                                    </span>
+                                  </template>
+                                  <span v-else class="dashboard-table__muted">-</span>
                                 </div>
                                 <div v-else-if="column.key === 'source'">
                                   <InventorySourceBadge
@@ -4077,6 +4102,12 @@ function inventoryMarginClass(item: InventoryItem): string {
   if (profit === null) return `${base} dashboard-table__muted`
   if (profit < 0) return `${base} text-red-600/75 dark:text-red-400/75`
   return `${base} text-gray-500 dark:text-gray-400`
+}
+
+const getItemProfitLabel = (item: InventoryItem) => {
+  const profit = getItemGrossProfit(item)
+  if (profit === null) return '-'
+  return `${profit >= 0 ? '+' : ''}${formatCurrency(profit)}`
 }
 
 const getItemMarginLabel = (item: InventoryItem) => {

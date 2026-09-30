@@ -1110,8 +1110,8 @@
                                       @click.stop
                                     />
                                   </td>
-                                  <td class="px-3 py-2.5 align-middle sm:px-4">
-                                    <div class="flex flex-wrap items-center gap-1.5">
+                                  <td class="whitespace-nowrap px-3 py-2.5 align-middle sm:px-4">
+                                    <div class="flex flex-nowrap items-center gap-1">
                                       <span
                                         class="text-xs font-semibold tabular-nums text-gray-900 dark:text-gray-50"
                                       >
@@ -1120,7 +1120,7 @@
                                       <button
                                         type="button"
                                         @click.stop="copyReceiptNumber(receipt.receiptNumber)"
-                                        class="rounded-sm p-0.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800/90 dark:hover:text-gray-100"
+                                        class="shrink-0 rounded-sm p-0.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800/90 dark:hover:text-gray-100"
                                         aria-label="Copy receipt number"
                                       >
                                         <ClipboardDocumentIcon
