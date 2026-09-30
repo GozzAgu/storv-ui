@@ -378,6 +378,63 @@ describe('firestore.rules', () => {
     )
   })
 
+  it('allows plain staff to create a swap-in inventory item', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await seedOwner(context, 'u1', 'storvv_medium')
+      await seedStore(context, 'u1', 's1')
+      await seedMember(context, 'u1', 's1', 'staff1', 'staff', false)
+    })
+
+    const db = testEnv.authenticatedContext('staff1').firestore()
+    await assertSucceeds(
+      setDoc(doc(db, 'users/u1/stores/s1/inventoryItems/swap1'), {
+        storeId: 's1',
+        folderId: 'f1',
+        name: 'iPhone 13',
+        swapIn: true,
+        createdBy: 'u1',
+      })
+    )
+  })
+
+  it('denies plain staff creating a regular inventory item', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await seedOwner(context, 'u1', 'storvv_medium')
+      await seedStore(context, 'u1', 's1')
+      await seedMember(context, 'u1', 's1', 'staff1', 'staff', false)
+    })
+
+    const db = testEnv.authenticatedContext('staff1').firestore()
+    await assertFails(
+      setDoc(doc(db, 'users/u1/stores/s1/inventoryItems/i1'), {
+        storeId: 's1',
+        folderId: 'f1',
+        name: 'iPhone 13',
+        createdBy: 'u1',
+      })
+    )
+  })
+
+  it('allows plain staff to link a swap-in item to its receipt once', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await seedOwner(context, 'u1', 'storvv_medium')
+      await seedStore(context, 'u1', 's1')
+      await seedMember(context, 'u1', 's1', 'staff1', 'staff', false)
+      await setDoc(doc(context.firestore(), 'users/u1/stores/s1/inventoryItems/swap1'), {
+        storeId: 's1',
+        folderId: 'f1',
+        name: 'iPhone 13',
+        swapIn: true,
+      })
+    })
+
+    const db = testEnv.authenticatedContext('staff1').firestore()
+    const ref = doc(db, 'users/u1/stores/s1/inventoryItems/swap1')
+    await assertSucceeds(updateDoc(ref, { swapInReceiptId: 'r1' }))
+    await assertFails(updateDoc(ref, { swapInReceiptId: 'r2' }))
+    await assertFails(updateDoc(ref, { name: 'Renamed' }))
+  })
+
   it('allows owner to update activationFunnel on own user doc', async () => {
     await testEnv.withSecurityRulesDisabled(async (context) => {
       await seedOwner(context, 'u1', 'storvv_micro')

@@ -236,6 +236,13 @@ service cloud.firestore {
              || changed.hasOnly(['dateOut', 'pendingSaleReceiptId', 'pendingSaleAt', 'sellerLoanOutId', 'sellerLoanPartyName', 'sellerLoanPartyPhone', 'sellerLoanOutAt', 'updatedAt']);
     }
 
+    // Swap-in sale: link the trade-in item to its receipt, once.
+    function inventoryItemSwapInReceiptLink() {
+      return resource.data.get('swapIn', false) == true
+             && resource.data.get('swapInReceiptId', null) == null
+             && request.resource.data.diff(resource.data).changedKeys().hasOnly(['swapInReceiptId', 'updatedAt']);
+    }
+
     function receiptBalanceDuePaymentUpdate() {
       return resource.data.status == 'balance_due'
         && request.resource.data.status in ['balance_due', 'completed', 'cancelled']
@@ -539,7 +546,12 @@ service cloud.firestore {
           allow read: if canAccessStoreData(userId, storeId);
           
           // Full create/delete: owner, or a member granted the matching products action.
-          allow create: if canManageProducts(userId, storeId, 'create') &&
+          // Any active member may also add a trade-in item while recording a swap-in sale.
+          allow create: if (canManageProducts(userId, storeId, 'create') ||
+                          (isActiveStoreMember(userId, storeId) &&
+                           request.resource.data.get('swapIn', false) == true &&
+                           request.resource.data.get('buyback', false) != true &&
+                           !request.resource.data.keys().hasAny(['swapInReceiptId']))) &&
                          request.resource.data.storeId == storeId;
 
           // Full update: owner or products.edit grant. Any other active member: only
@@ -550,6 +562,10 @@ service cloud.firestore {
                          requestMatchesStore(storeId)) ||
                         (isActiveStoreMember(userId, storeId) &&
                          inventoryItemOnlySaleOrReturnFieldChange() &&
+                         resourceMatchesStore(storeId) &&
+                         requestMatchesStore(storeId)) ||
+                        (isActiveStoreMember(userId, storeId) &&
+                         inventoryItemSwapInReceiptLink() &&
                          resourceMatchesStore(storeId) &&
                          requestMatchesStore(storeId));
 

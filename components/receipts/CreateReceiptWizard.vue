@@ -663,7 +663,7 @@
             </div>
           </div>
 
-          <!-- Swap-In Section (inventory write; super admin only) -->
+          <!-- Swap-In Section -->
           <div v-if="canUseSwapInReceipt" class="border-t border-gray-200 pt-3 mt-3">
             <Checkbox v-model="isSwapIn" label="This is a swap-in transaction" size="sm" />
 
@@ -970,8 +970,10 @@ const {
 } = useDashboardDrawerChrome()
 const currencySymbol = computed(() => preferences.value.currencySymbol || '$')
 
-// Swap-in creates inventory rows: super admin only (managers/staff cannot edit inventory structure).
-const canUseSwapInReceipt = computed(() => userStore.isSuperAdmin)
+// Swap-in is part of the sale flow, so anyone who can record a sale can take a trade-in.
+const canUseSwapInReceipt = computed(
+  () => userStore.isSuperAdmin || userStore.userData?.role === 'staff'
+)
 
 const isSendingEmail = ref(false)
 const showEmailModal = ref(false)
@@ -1816,10 +1818,7 @@ const handleCreateReceipt = async () => {
     // Update swap-in item to link it to the receipt (if created)
     if (swapInItemId && swapInFolderId.value) {
       try {
-        // Update the item to link it to the receipt
-        await inventoryStore.updateItem(swapInFolderId.value, swapInItemId, {
-          swapInReceiptId: receiptId,
-        })
+        await inventoryStore.linkSwapInReceipt(swapInFolderId.value, swapInItemId, receiptId)
       } catch (error: any) {
         console.error('Error updating swap-in item with receipt ID:', error)
         // Don't fail receipt creation if swap-in update fails

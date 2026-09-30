@@ -1805,12 +1805,13 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('User must be authenticated to create items')
       }
 
-      // Check permissions - super admins and managers can create items; other staff view-only
+      // Check permissions - super admins and managers can create items; other staff view-only.
+      // Swap-in trade-ins are recorded from the sale flow, which every staff member can use.
       const userStore = useUserStore()
       if (!userStore.userData) {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
-      if (userStore.userData?.role === 'staff') {
+      if (userStore.userData?.role === 'staff' && itemData.swapIn !== true) {
         const staffStore = useStaffStore()
         const staffMember = await staffStore.fetchCurrentStaffMember()
         const permissions = staffMember ? resolveStaffPermissions(staffMember) : null
@@ -2155,6 +2156,40 @@ export const useInventoryStore = defineStore('inventory', {
     },
 
     // Update an item
+    async linkSwapInReceipt(folderId: string, itemId: string, receiptId: string) {
+      const { isDemoModeActive } = await import('~/utils/demo-mode')
+      if (isDemoModeActive()) return
+
+      const db = useFirestore().getFirestoreInstance()
+      if (!db) {
+        throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
+      }
+
+      const userId = await getQueryUserId()
+      if (!userId) {
+        throw new Error('User must be authenticated to update items')
+      }
+
+      const existingItem = this.items[folderId]?.find((item) => item.id === itemId)
+      const storeId =
+        existingItem?.storeId ??
+        this.getFolderById(folderId)?.storeId ??
+        (await getCurrentStoreId()) ??
+        ''
+      if (!storeId) {
+        throw new Error('No store selected')
+      }
+
+      await updateDoc(getInventoryItemDocument(db, userId, storeId, itemId), {
+        swapInReceiptId: receiptId,
+        updatedAt: serverTimestamp(),
+      })
+
+      if (existingItem) {
+        existingItem.swapInReceiptId = receiptId
+      }
+    },
+
     async updateItem(
       folderId: string,
       itemId: string,
