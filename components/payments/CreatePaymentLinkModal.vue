@@ -1,66 +1,57 @@
 <template>
-  <SidePanel
-    :model-value="modelValue"
-    size="lg"
+  <SDialog
+      placement="right"
+    :open="modelValue"
+    size="md"
     title="New payment link"
-    dense
-    @update:model-value="(v: boolean) => emit('update:modelValue', v)"
+    @update:open="(v: boolean) => emit('update:modelValue', v)"
   >
-    <IosForm layout="fill">
-      <IosFormSection fixed>
-        <div class="ios-form__grid ios-form__grid--pair">
-          <IosFormField label="Customer name">
-            <IosFormInput v-model="customerName" placeholder="e.g. Sarah Johnson" />
-          </IosFormField>
-          <IosFormField label="Customer phone" hint="WhatsApp">
-            <IosFormInput v-model="customerPhone" type="tel" placeholder="e.g. 080 1234 5678" />
-          </IosFormField>
+    <SForm>
+      <SFormSection>
+        <div class="s-form-pair">
+          <SField label="Customer name">
+            <SInput v-model="customerName" placeholder="e.g. Sarah Johnson" />
+          </SField>
+          <SField label="Customer phone" hint="WhatsApp">
+            <SInput v-model="customerPhone" type="tel" placeholder="e.g. 080 1234 5678" />
+          </SField>
         </div>
-      </IosFormSection>
+      </SFormSection>
 
-      <IosFormSection fixed>
-        <IosFormField label="Category">
-          <IosFormSelect
-            v-model="selectedFolderId"
-            extra-class="cursor-pointer"
-            @change="onFolderChange"
-          >
+      <SFormSection>
+        <SField label="Category">
+          <SSelect v-model="selectedFolderId" @change="onFolderChange">
             <option value="">Select a category</option>
             <option v-for="f in inventoryStore.leafFolders" :key="f.id" :value="f.id">
               {{ f.name }}
             </option>
-          </IosFormSelect>
-        </IosFormField>
+          </SSelect>
+        </SField>
 
-        <IosFormField v-if="selectedFolderId" label="Items">
-          <div v-if="itemsLoading" :class="pickListClass">
+        <SField v-if="selectedFolderId" v-slot="{ labelId }" label="Items">
+          <div v-if="itemsLoading" :class="pickListClass" aria-busy="true">
             <div :class="pickListScrollClass">
-              <div
-                v-for="i in 3"
-                :key="i"
-                :class="[pickRowClass, '!cursor-default hover:!bg-transparent']"
-              >
-                <div class="min-w-0 flex-1 space-y-1.5">
-                  <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-title" />
-                  <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-meta" />
+              <div v-for="i in 3" :key="i" :class="[pickRowClass, 's-pick__row--static']">
+                <div class="s-sheet-row__main">
+                  <SSkeleton :lines="2" height="12px" />
                 </div>
               </div>
             </div>
           </div>
 
           <div v-else-if="availableItems.length === 0" :class="emptyStateClass">
-            <p class="text-xs font-medium text-gray-700 dark:text-gray-300">No available items</p>
-            <p class="dash-drawer-hint mt-0.5">Try another category</p>
+            <strong>No available items</strong>
+            <span>Try another category</span>
           </div>
 
-          <div v-else :class="pickListClass">
-            <div :class="[pickListScrollClass, 'max-h-64']">
+          <div v-else :class="pickListClass" role="group" :aria-labelledby="labelId">
+            <div :class="pickListScrollClass">
               <div
                 v-for="entry in availableItems"
                 :key="entry.itemId"
-                :class="[pickRowClass, '!cursor-default hover:!bg-transparent']"
+                :class="[pickRowClass, 's-pick__row--static']"
               >
-                <div class="min-w-0 flex-1">
+                <div class="s-sheet-row__main">
                   <p :class="pickRowTitleClass">{{ entry.name }}</p>
                   <p :class="pickRowMetaClass">
                     {{ formatNaira(entry.unitPrice) }}
@@ -68,45 +59,45 @@
                     <span v-else> · {{ entry.max }} in stock</span>
                   </p>
                 </div>
-                <div class="flex shrink-0 items-center gap-1.5">
-                  <button
-                    type="button"
-                    class="flex h-7 w-7 items-center justify-center rounded-full text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50 disabled:opacity-40 dark:text-gray-300 dark:ring-white/10 dark:hover:bg-white/[0.06]"
+                <div class="s-sheet-stepper">
+                  <SIconButton
+                    variant="secondary"
+                    :label="`Decrease ${entry.name} quantity`"
                     :disabled="(cart[entry.itemId]?.quantity || 0) <= 0"
                     @click="dec(entry)"
                   >
-                    −
-                  </button>
-                  <span class="w-6 text-center text-sm tabular-nums text-gray-900 dark:text-gray-100">{{
+                    <Minus :size="16" :stroke-width="2" aria-hidden="true" />
+                  </SIconButton>
+                  <span class="s-sheet-stepper__value" aria-live="polite">{{
                     cart[entry.itemId]?.quantity || 0
                   }}</span>
-                  <button
-                    type="button"
-                    class="flex h-7 w-7 items-center justify-center rounded-full text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50 disabled:opacity-40 dark:text-gray-300 dark:ring-white/10 dark:hover:bg-white/[0.06]"
+                  <SIconButton
+                    variant="secondary"
+                    :label="`Increase ${entry.name} quantity`"
                     :disabled="(cart[entry.itemId]?.quantity || 0) >= entry.max"
                     @click="inc(entry)"
                   >
-                    +
-                  </button>
+                    <Plus :size="16" :stroke-width="2" aria-hidden="true" />
+                  </SIconButton>
                 </div>
               </div>
             </div>
           </div>
-        </IosFormField>
-      </IosFormSection>
+        </SField>
+      </SFormSection>
 
-      <p v-if="errorMsg" class="ios-form__error">{{ errorMsg }}</p>
-    </IosForm>
+      <p v-if="errorMsg" class="s-field__error" role="alert">{{ errorMsg }}</p>
+    </SForm>
 
     <template #leading>
-      <span class="text-xs text-gray-600 dark:text-gray-400">
+      <span class="s-form-meta">
         Total
-        <strong class="tabular-nums text-gray-900 dark:text-gray-100">{{ formatNaira(total) }}</strong>
+        <strong class="s-sheet-total">{{ formatNaira(total) }}</strong>
       </span>
     </template>
 
     <template #footer>
-      <IosDrawerActions
+      <SDialogActions
         :primary-loading="creating"
         :primary-disabled="!canCreate"
         primary-label="Generate link"
@@ -114,20 +105,21 @@
         @primary="create"
       />
     </template>
-  </SidePanel>
+  </SDialog>
 </template>
 
 <script setup lang="ts">
+import SDialog from '~/components/s/SDialog.vue'
+import SDialogActions from '~/components/s/SDialogActions.vue'
+import SField from '~/components/s/SField.vue'
+import SForm from '~/components/s/SForm.vue'
+import SFormSection from '~/components/s/SFormSection.vue'
+import SInput from '~/components/s/SInput.vue'
+import SSelect from '~/components/s/SSelect.vue'
 import { ref, computed, reactive, watch } from 'vue'
-import SidePanel from '~/components/ui/SidePanel.vue'
-import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
-import {
-  IosForm,
-  IosFormSection,
-  IosFormField,
-  IosFormInput,
-  IosFormSelect,
-} from '~/components/ios/forms'
+import { Minus, Plus } from '@lucide/vue'
+import SIconButton from '~/components/s/SIconButton.vue'
+import SSkeleton from '~/components/s/SSkeleton.vue'
 import { formatNaira } from '~/utils/naira'
 import { useInventoryStore, type InventoryItem } from '~/stores/inventory'
 import { resolveBulkStockFieldAndValue } from '~/utils/inventory-bulk-quantity'

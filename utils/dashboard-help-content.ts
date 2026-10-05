@@ -33,39 +33,36 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
     blurb: 'Highlights from recent Storvv releases.',
     articles: [
       {
-        title: 'Storvv iOS app redesign',
+        title: 'One design across web and app',
         body: [
-          'The Capacitor iOS app now uses a native-first layout: a floating bottom tab bar (Home, Stock, Sales, Analytics), a compact command header with your branch name, and a grouped More sheet for everything else (buybacks, stock loans, sales leads, payment links, departments, activity logs, settings, help, and profile).',
-          'Screens use iOS-style grouped lists, glass cards, native bottom sheets instead of centered modals, sticky search bars on inventory, segmented filters (All / Low stock on categories; Receipts / Customers on Sales; Daily / Weekly / Monthly on Analytics), and floating action buttons for Quick Sale and add product.',
-          'Pull down on Home, Sales, Analytics, Inventory, and category detail to refresh data. On Sales, swipe a receipt row left for View, Share, or Refund (when your role allows). Light haptic feedback confirms tab changes, FAB taps, pull-to-refresh, and swipe actions.',
-          'The web dashboard is unchanged in features; only layout and navigation differ on native. See the Mobile app (iOS & Android) section in this Help center for full details.',
+          'Storvv now has one design on the web and in the iOS and Android apps. The app no longer has its own iOS-style screens: every page looks and works the same on every device.',
+          'On phones, the top bar shows the page title, search, notifications and your avatar menu. The bottom bar holds Overview, Inventory, Sales, Customers and More; More opens the full menu with every section your plan and role include. On tablets and desktop the sidebar is always visible.',
+          'Forms and details open in side sheets with Cancel and a primary action at the bottom; confirmations are centred dialogs. In lists, use the ⋯ menu on each row for actions, or tick row checkboxes to show bulk actions in the toolbar. In the app, pull down at the top of a page to refresh it.',
+          'A few pages were renamed or moved: Analytics is now Reports, Customers and Branches each have their own page, and Profile is a single scrolling page. See Mobile app (iOS & Android) in this Help center for details.',
         ],
         bullets: [
           'Install from the App Store (bundle ID com.storvv.app). Rebuild with npm run cap:build after pulling updates, then run from Xcode.',
-          'VoiceOver labels on dashboard stat cards summarize value and trend for accessibility.',
         ],
       },
       {
         title: 'Faster load times (web and mobile)',
         body: [
-          'Recent performance work reduces duplicate data fetching on sign-in, loads shell data (stores, categories, departments) once, and splits iOS-only styles so the first paint is smaller on web and native.',
-          'The dashboard home defers activity-log loading on mobile until after KPIs render, and lazy-loads tutorial and chart modules. Vendor libraries (Firebase, charts, exports) load in separate chunks when you open screens that need them.',
-          'On native, Google Fonts are skipped in favor of system typography for quicker startup. If the app feels stale after an update, rebuild with npm run cap:build and clean the Xcode build folder.',
+          'Storvv loads faster after sign-in, and charts and export tools only download when you open a screen that needs them.',
+          'If the app feels stale after an update, rebuild with npm run cap:build and clean the Xcode build folder.',
         ],
       },
       {
         title: 'Sales leads pipeline (Medium and Enterprise)',
         body: [
           'Sales leads (/dashboard/leads) track enquiries before they become receipts: walk-ins, phone, WhatsApp, referrals, and other sources. Add customer contact, product interest, optional estimated value, assignee, and notes.',
-          'Update status from New → Contacted → Negotiating. Use Create sale to open the receipt wizard with customer details prefilled; completing the sale marks the lead Won and links the receipt. Duplicate phone or email on an open lead suggests opening the existing record.',
-          'On iOS, open Sales leads from More → Operations when your plan includes leads. Managers and owners can delete leads; activity logs record created and converted events.',
+          'Tap a lead in the list to open it, then update status from New → Contacted → Negotiating. Use Create sale in the lead page header to start a sale with customer details prefilled; completing the sale marks the lead Won and links the receipt. Duplicate phone or email on an open lead suggests opening the existing record.',
+          'On phones, open Sales leads from More when your plan includes leads. Managers and owners can delete leads; activity logs record created and converted events.',
         ],
       },
       {
-        title: 'Analytics export and import on iOS',
+        title: 'Reports: period and exports',
         body: [
-          'On the iOS app, Analytics uses Export and Import buttons below the period segmented control (Daily, Weekly, Monthly). Export opens a sheet to pick PDF report or Excel spreadsheet for the active store and period.',
-          'Import opens the file picker for .xlsx, .xls, or .csv files. Spreadsheet import is rolling out; you may see a coming-soon message until your workspace supports it. On web, Export PDF and Export Excel remain in the analytics toolbar.',
+          'Analytics is now called Reports. Pick the period from the dropdown, then use the separate PDF and Excel buttons to download a report for the active store and period. It works the same on web and in the app.',
         ],
       },
       {
@@ -83,7 +80,7 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
       {
         title: 'Copy from branch: optional subcategories (Enterprise)',
         body: [
-          'On Inventory (/dashboard/inventory), super admins on Storvv Enterprise use Copy from branch when you have more than one active branch. Pick a source branch, then select top-level category templates to copy into the branch you are viewing in the header store switcher.',
+          'On Inventory (/dashboard/inventory), super admins on Storvv Enterprise use Copy from branch when you have more than one active branch. Pick a source branch, then select top-level category templates to copy into the branch you are viewing in the sidebar branch switcher.',
           'Each selected parent shows how many subcategories it has (for example Toyota · 3 subcategories). Check Also copy subcategories into selected folders when you want the full hierarchy copied, not just the parent shells. Parent categories are always included; subcategories copy only when that box is checked.',
           'Only category templates copy: names, custom columns, serial vs bulk mode, and colors. Products, stock counts, and department restrictions do not copy. If a name already exists on the destination, skip it or create an automatic “(copy)” suffix.',
         ],
@@ -93,9 +90,9 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
         ],
       },
       {
-        title: 'Branch names from your region (Settings)',
+        title: 'Branch names from your region (Branches)',
         body: [
-          'When creating a branch in Settings → Branches → Create Branch, the branch name uses cities from your account region (the country you picked during onboarding), matching the head-store step in Account setup.',
+          'When creating a branch on the Branches page with Add branch, the branch name uses cities from your account region (the country you picked during onboarding), matching the head-store step in Account setup.',
           'Choose a city from the dropdown (for example Lagos, Abuja, or Port Harcourt for Nigeria). Optionally add an area or neighborhood after the city (for example Lekki or GRA) so the branch displays as “Lagos, Lekki” in the sidebar and store switcher.',
           'If your region has no preset city list, you can enter a custom branch name instead. Sell screen notes and contact fields remain optional on the same form.',
         ],
@@ -117,27 +114,27 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
         ],
       },
       {
-        title: 'Analytics feature insights',
+        title: 'Reports feature insights',
         body: [
-          'Analytics & Reports (/dashboard/analytics) on Storvv Medium and Enterprise now includes a Feature insights grid alongside charts and exports. After you pick Daily, Weekly, or Monthly, cards summarize sales, returns, outstanding balances, inventory health, customers, profit and cost (super admin), operations, buybacks, customer balance ledger, stock loans, and payment links where your plan includes them.',
-          'Inventory health shows available vs sold units, low-stock lines, and book value with the same progress bar as the dashboard home. Peak hours, sales by hour, day-of-week charts, and the traffic heatmap help you spot busy periods.',
+          'Reports (/dashboard/analytics) on Storvv Medium and Enterprise includes a Feature insights grid alongside charts and exports. After you pick a period, cards summarize sales, returns, outstanding balances, inventory health, customers, profit and cost (super admin), operations, buybacks, customer balance ledger, stock loans, and payment links where your plan includes them.',
+          'Inventory health shows available vs sold units, low-stock lines, and book value with the same progress bar as Overview. Peak hours, sales by hour, day-of-week charts, and the traffic heatmap help you spot busy periods.',
         ],
         bullets: [
-          'Analytics requires a selected store; super admins use the header store switcher.',
-          'Export PDF and Export Excel download reports for the active period and branch.',
+          'Reports requires a selected store; super admins use the branch switcher.',
+          'The PDF and Excel buttons download reports for the active period and branch.',
         ],
       },
       {
         title: 'Quick Sale side drawer',
         body: [
-          'Quick Sale opens as a right-side drawer (not a centered modal) from the Sales page. Pick a parent category, then a subcategory when the parent has children, then scan barcodes or search products. External USB barcode scanners work as keyboard input when the scan field is focused.',
+          'Quick Sale opens as a side sheet from the Quick sale button in the Sales page header. Pick a parent category, then a subcategory when the parent has children, then scan barcodes or search products. External USB barcode scanners work as keyboard input when the scan field is focused.',
           'Quick Sale shares the same category hierarchy and stock checks as Create New Sale. Over-quantity lines show an error and block checkout.',
         ],
       },
       {
         title: 'Stock loans (Enterprise)',
         body: [
-          'Super admins and store managers on Storvv Enterprise get Stock loans under Inventory in the sidebar. Use it when serial-tracked inventory is lent to a borrower (for example stock on consignment) while it still belongs to your branch on paper.',
+          'Super admins and store managers on Storvv Enterprise get Stock loans under Operations in the menu. Use it when serial-tracked inventory is lent to a borrower (for example stock on consignment) while it still belongs to your branch on paper.',
           'Create a loan from a serial folder by selecting rows and confirming the borrower. Active loans list borrower, units, filters for Active / Returned / Sold (borrower) / All, and per-row actions.',
         ],
         bullets: [
@@ -155,9 +152,8 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
       {
         title: 'Navigation polish',
         body: [
-          'The Stock loans sidebar icon uses a filled glyph when that page is active so the active rail state matches bolder labels everywhere else.',
           "The public Storvv site opens with a dedicated What's new band under the hero, then lists Stock loans in the capabilities grid.",
-          'This Help center is updated alongside product changes: search for stock loan, iOS, sales leads, or recent updates in the help search box to jump here.',
+          'This Help center is updated alongside product changes: search for stock loan, mobile app, sales leads, or recent updates in the help search box to jump here.',
         ],
       },
     ],
@@ -165,7 +161,7 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
   {
     id: 'mobile-app',
     title: 'Mobile app (iOS & Android)',
-    blurb: 'Capacitor native shell: tab bar, gestures, sheets, and the same data as web.',
+    blurb: 'The iOS and Android apps: same design and same data as the web.',
     articles: [
       {
         title: 'Install, update, and API setup',
@@ -175,68 +171,59 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
         ],
         bullets: [
           'Bundle ID on iOS: com.storvv.app.',
-          'Payment links setup may still require the web app depending on your build; core sales and inventory work on device.',
+          'Payment links and Storefront show Coming soon where they are not yet available; core sales and inventory work on device.',
         ],
       },
       {
-        title: 'Bottom tabs and More menu',
+        title: 'Bottom bar and More menu',
         body: [
-          'Primary tabs: Home (dashboard overview), Stock (inventory categories), Sales (receipts and customers), Analytics (Medium and Enterprise). Icons and labels follow iOS conventions with a floating pill tab bar inset above the safe area.',
-          'Tap More for grouped sections: Operations (storefront, customer buybacks, stock loans, multi-store sync, payment links, sales leads when enabled), Organization (departments, activity logs), and Account (settings, help center, profile, sign out). Items appear only when your plan and role include them - same rules as the web sidebar.',
-          'Super admins switch branches from the branch pill in the command header. Managers and staff stay on their assigned store.',
+          'The app uses the same design as the web. On phones, the bottom bar holds Overview, Inventory, Sales, Customers and More. On tablets the sidebar is always visible instead.',
+          'Tap More to open the full menu with every section your plan and role include, such as Reports, Transfers, Stock loans, Buybacks, Sales leads, Storefront, Payment links, Team, Branches, Activity, Help and Settings.',
+          'Super admins switch branches from the branch switcher in that menu. Managers and staff stay on their assigned store.',
         ],
       },
       {
-        title: 'Command header and native chrome',
+        title: 'Top bar, sheets, and dialogs',
         body: [
-          'Each screen shows a compact top bar with the page title, optional back control on detail routes, and the branch pill (store selector) for super admins. The web sidebar and desktop header are hidden on native.',
-          'Modals and side panels open as right-edge native sheets (DashboardNativeSheet) instead of centered dialogs. Settings, Quick Sale, Create New Sale, export pickers, and product detail use this pattern.',
-          'Grouped list rows (IosNativeListRow) and section headers match iOS Settings styling. Stat cards on Home use larger hero typography for revenue KPIs.',
+          'The top bar shows the page title, search, notifications and your avatar menu. On wider screens it also has refresh and Ask AI.',
+          'Forms and details open in side sheets, full width on phones, with Cancel and a primary action at the bottom. Confirmations, such as deleting something, appear as centred dialogs.',
         ],
       },
       {
         title: 'Pull to refresh',
         body: [
-          'Pull down at the top of Home, Sales, Analytics, the inventory categories list, and inside a category detail page to reload that screen’s data. A native spinner appears while the refresh runs.',
-          'Use pull to refresh after switching branches in another tab, or when you expect new receipts or stock changes from a teammate.',
+          'In the app, pull down at the top of a page to reload its data. On the web, the refresh button in the top bar does the same.',
+          'Refresh after switching branches, or when you expect new sales or stock changes from a teammate.',
         ],
       },
       {
-        title: 'Sales: FAB, tabs, and swipe actions',
+        title: 'Sales and customers on mobile',
         body: [
-          'Sales opens with a segmented control for Receipts vs Customers. A floating Quick Sale button sits above the tab bar on iOS for fast checkout.',
-          'Swipe a receipt row left to reveal actions: View sale, Share sale, and Refund sale (for completed receipts when managers or super admins have edit rights). Haptics confirm each action.',
-          'Pull to refresh reloads receipts and customer totals. Fullscreen table mode from web is replaced by the native list layout on phone.',
+          'Sales shows your sales list with filters. Use New sale or Quick sale in the page header to check out.',
+          'Each sale row has a ⋯ menu with actions such as view and refund (refund needs edit rights). To act on several sales at once, tick their checkboxes and use the bulk actions in the toolbar.',
+          'Customers is its own page in the bottom bar, with All, Repeat and Owe money tabs, search and sort. Manage customer balances there.',
         ],
       },
       {
-        title: 'Inventory: search, filters, and add product FAB',
+        title: 'Inventory on mobile',
         body: [
-          'The categories screen has a sticky glass search bar and an All | Low stock segmented filter. Low stock shows a badge count when categories have items below threshold.',
-          'Inside a category, search filters products by name or SKU. Super admins see a floating + button to add a product without scrolling to the toolbar.',
-          'Product detail on iOS uses a grouped native sheet layout for fields, history, and actions. Pull to refresh works on both the category list and detail views.',
+          'Categories show as a grid or table, with search and filters in the toolbar.',
+          'Inside a category, the products list has its own filters. Tap a product to open its details in a side sheet; History and Edit are in each row’s ⋯ menu.',
         ],
       },
       {
-        title: 'Analytics on native',
+        title: 'Reports on mobile',
         body: [
-          'Pick Daily, Weekly, or Monthly with the segmented control under the command header. Feature insight cards, charts, and inventory health mirror the web analytics page for the active store.',
-          'Export opens a sheet to download PDF or Excel for the current period. Import lets you pick a spreadsheet file (.xlsx, .xls, .csv); full import processing may show a coming-soon toast until enabled for your workspace.',
+          'Pick the period from the dropdown at the top. Feature insight cards, charts, and inventory health are the same as on the web for the active store.',
+          'Use the PDF and Excel buttons to download a report for the current period.',
         ],
       },
       {
         title: 'Storvv Assistant on mobile',
         body: [
-          'Open Ask assistant from the command header or Help center. Chat goes to the hosted /api/assistant endpoint - there is no on-device AI model.',
+          'Tap Ask AI to open the assistant as a floating chat card. Chat goes to the hosted /api/assistant endpoint - there is no on-device AI model.',
           'The assistant explains screens, roles, plans, and workflows from this Help center knowledge base. It cannot read your live stock, sales, or customer numbers. Demo mode uses canned tips instead of Gemini.',
           'If assistant fails on device, confirm NUXT_PUBLIC_API_BASE, redeploy Vercel with GEMINI_API_KEY and GEMINI_MODEL=gemini-3.1-flash-lite, and rebuild the app.',
-        ],
-      },
-      {
-        title: 'Accessibility and motion',
-        body: [
-          'Dashboard stat cards expose VoiceOver labels with metric name, value, and trend when applicable. Reduce Transparency and Reduce Motion system settings apply fallbacks (solid backgrounds, less shimmer).',
-          'Tab bar, FAB, pull-to-refresh threshold, and swipe actions use light impact haptics on supported devices.',
         ],
       },
     ],
@@ -249,10 +236,10 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
       {
         title: 'What Storvv does in this app',
         body: [
-          'Storvv is your operational workspace: inventory lives in folders and items, sales are recorded as receipts (with customers on the same Sales screen), and optional areas include Analytics, Activity Logs, Departments, and Multi-Store Sync depending on your subscription.',
-          'Nearly all data is tied to the store that is active for your session. Super admins switch stores from the store selector in the header; managers and staff work inside the store they have been assigned.',
-          'Use the web dashboard in a browser or the Capacitor iOS/Android app - the same account, stores, and permissions apply. Native apps use a bottom tab bar and More menu instead of the desktop sidebar.',
-          'The sidebar (web) lists real product routes: Dashboard, Inventory, Customer buybacks (super admins), Stock loans (Enterprise, managers/super admins), Receipts, Analytics, Activity Logs, Multi-Store Sync, Payment links, Sales leads, Help center, Settings, and Profile. Items such as Analytics, Stock loans, Payment links, Sales leads, or Multi-Store Sync only appear when your plan and role include them.',
+          'Storvv is your operational workspace: inventory lives in folders and items, sales are recorded as receipts, customers have their own page, and optional areas include Reports, Activity, Team, and Transfers depending on your subscription.',
+          'Nearly all data is tied to the store that is active for your session. Super admins switch stores from the branch switcher in the sidebar; managers and staff work inside the store they have been assigned.',
+          'Use the web dashboard in a browser or the Capacitor iOS/Android app - the same account, stores, permissions, and design apply everywhere. On phones, a bottom bar and More menu replace the always-visible sidebar.',
+          'The sidebar lists Overview, Inventory, Sales, Customers, Reports, Transfers, Stock loans, Buybacks (super admins), Sales leads, Storefront, Payment links, Team, Branches, Activity, Help, and Settings. Items such as Reports, Stock loans, Payment links, Sales leads, or Transfers only appear when your plan and role include them.',
         ],
       },
       {
@@ -284,32 +271,32 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
       {
         title: 'Native app navigation (iOS and Android)',
         body: [
-          'On the mobile app, primary destinations are bottom tabs: Home, Stock, Sales, and Analytics. Everything else lives under More, grouped as Operations, Organization, and Account (buybacks, stock loans, sales leads, departments, settings, help, profile, and more).',
-          'The command header shows the screen title and a branch pill for super admins. Sheets replace most modals. See Mobile app (iOS & Android) in this Help center for pull-to-refresh, swipe actions, FABs, and assistant setup on device.',
+          'The app has the same navigation as the web on a phone: a bottom bar with Overview, Inventory, Sales, Customers and More. More opens the full menu with every section your plan and role include, plus the branch switcher for super admins.',
+          'See Mobile app (iOS & Android) in this Help center for pull to refresh, sheets, and assistant setup on device.',
         ],
       },
       {
         title: 'Sidebar, header, and version',
         body: [
-          'The sidebar collapses on desktop to a narrow icon rail or expands to show full labels. On mobile, open it with the menu control in the top bar.',
-          'When the sidebar is collapsed on a large screen, the active page is highlighted on its icon (a clear “pill” state) so you can see where you are at a glance.',
-          'The header shows the active page name (on medium screens and up), opens Global Search, shows the store / branch switcher for super admins, theme toggle, notifications, and your profile menu (Profile, Settings, Sign out).',
+          'On tablets and desktop the sidebar is always visible. On large screens you can collapse it to a narrow icon rail or expand it to show full labels. On phones, tap More in the bottom bar to open it.',
+          'When the sidebar is collapsed on a large screen, the active page is highlighted on its icon so you can see where you are at a glance.',
+          'The top bar shows the page title, search, notifications, and your avatar menu. On wider screens it also has refresh and Ask AI.',
           'At the bottom of the sidebar, a small version label (for example V0.1) reflects the current app build; it is informational only.',
         ],
       },
       {
         title: 'Store switcher (branches)',
         body: [
-          'Super admins switch the active branch from the store control in the header. The menu lists your branches; the current one is marked active. Choose “Manage stores” to jump to Settings and edit branch details.',
+          'Super admins switch the active branch from the branch switcher in the sidebar (on phones, open it with More). The menu lists your branches; the current one is marked active. Choose “Manage branches” to open the Branches page and edit branch details.',
           'Managers and staff work in the store they were assigned; they do not change branch from this control.',
-          'Always confirm the correct branch is selected before editing inventory, recording sales, or reading analytics, because most screens use the active branch only.',
-          'If Analytics prompts you to pick a store, use the header switcher (super admins) or ask an admin to confirm your assigned branch.',
+          'Always confirm the correct branch is selected before editing inventory, recording sales, or reading reports, because most screens use the active branch only.',
+          'If Reports prompts you to pick a store, use the branch switcher (super admins) or ask an admin to confirm your assigned branch.',
         ],
       },
       {
         title: 'Global search (⌘K / Ctrl+K)',
         body: [
-          'Click Search in the header or press ⌘K on Mac / Ctrl+K on Windows. The modal searches receipts, inventory, and customers and offers quick filters by entity type.',
+          'Tap Search in the top bar or press ⌘K on Mac / Ctrl+K on Windows. The modal searches receipts, inventory, and customers and offers quick filters by entity type.',
           'Use arrow keys to move through results, Enter to open a result, Esc to close; this matches the on-screen hints.',
         ],
       },
@@ -330,7 +317,6 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
         title: 'Categories list (/dashboard/inventory)',
         body: [
           'The Inventory entry opens top-level categories only: search, filter by department, sort by name / products / date, and paginate. Subcategories (for example Corolla under Toyota) do not appear on this main list - open the parent category to see them.',
-          'On iOS, a sticky search bar and All | Low stock segmented filter appear at the top of the categories list. Low stock highlights categories with items below your threshold.',
           'Category cards show how many subcategories a parent has when applicable. Use the grid / table toggle next to the filters to switch layout. Grid shows category cards; table matches the same styling as the product table inside a category.',
           'Super admins can create top-level categories with New category, rename, delete, and bulk-delete where the UI provides those actions. Storvv Micro may show upsell messaging when category limits apply.',
         ],
@@ -357,8 +343,8 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
         title: 'Inside a category (/dashboard/inventory/[id])',
         body: [
           'Parent categories with subcategories enabled (or an empty parent that already has subcategories) show the subcategory hub instead of a product table.',
-          'Leaf categories - subcategories or top-level categories without children - open a table of products with the columns your template defines. Use pagination, search, and filters from the toolbar. On iOS, search is sticky at the top and super admins get a floating add-product button.',
-          'Row actions (three-dot menu) include History (item timeline), Add discount / Discount for line-level pricing, and Edit item when the item is not locked. Items tied to completed sales can be restricted so catalog edits do not fight receipt history.',
+          'Leaf categories - subcategories or top-level categories without children - open a table of products with the columns your template defines. Use pagination, search, and filters from the toolbar. Tap a product to open its details in a side sheet.',
+          'Row actions (⋯ menu) include History (item timeline), Add discount / Discount for line-level pricing, and Edit item when the item is not locked. Items tied to completed sales can be restricted so catalog edits do not fight receipt history.',
         ],
       },
       {
@@ -371,7 +357,7 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
       {
         title: 'Customer buybacks (/dashboard/buybacks)',
         body: [
-          'Customer buybacks is under Inventory in the sidebar for super admins only. Record when a customer sells stock to your branch: you capture item details in a leaf category, pay the customer, and Storvv adds the unit to inventory with that purchase price as unit cost.',
+          'Buybacks is under Operations in the menu for super admins only. Record when a customer sells stock to your branch: you capture item details in a leaf category, pay the customer, and Storvv adds the unit to inventory with that purchase price as unit cost.',
           'The buybacks table lists customer, item summary, amount paid, payment method, and date. Open View in stock to jump to the inventory row. Swap-in credit on Create New Sale can apply buyback value toward a purchase when your workflow uses trade-ins.',
         ],
         bullets: [
@@ -383,7 +369,7 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
         title: 'Copy from branch (Enterprise)',
         body: [
           'On the Categories page (/dashboard/inventory), super admins on Storvv Enterprise see a “Copy from branch” action next to “New category” when you have more than one active branch.',
-          'It opens a side drawer where you pick a source branch, then select top-level category templates to copy into the branch you are currently viewing in the app (header / sidebar store switcher). Each parent row shows its subcategory count when applicable.',
+          'It opens a side drawer where you pick a source branch, then select top-level category templates to copy into the branch you are currently viewing in the app (sidebar branch switcher). Each parent row shows its subcategory count when applicable.',
           'Check Also copy subcategories into selected folders to copy the full hierarchy (for example Toyota plus Corolla, Camry, and Highlander). Leave it unchecked to copy only the selected parent category shells. Parent categories you select are always copied; subcategories copy only when that option is on.',
           'Only folder definitions are copied: names, custom field templates, serial vs bulk mode, colors, and whether the parent uses subcategories. Products, quantities, and department restrictions are not copied (those IDs are per branch; re-apply access on the destination if you use them).',
           'If a folder name already exists on the destination, you can skip that folder or create a copy with an automatic “(copy)” suffix. Medium plan includes duplicating a single folder within one branch; copying selected templates across branches is Enterprise only.',
@@ -400,11 +386,10 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
     blurb: 'The Sales page (/dashboard/receipts), permissions, and refunds.',
     articles: [
       {
-        title: 'Sales page: Receipts and Customers tabs',
+        title: 'Sales page',
         body: [
-          'Sidebar label is Receipts, but the page title reads “Sales” with subtitle “Manage receipts, customers, and returns”. Two tabs exist: Receipts (default) and Customers. On iOS, these tabs use a segmented control under the command header.',
-          'Receipts shows totals for receipt count, sales amount, today, and month, plus search, status filters (All, Completed, Pending, Refunded), and date filters (All dates, Today, This week, This month). Use fullscreen mode for dense lists on web; filters stay pinned at the top.',
-          'Use the “New sale” button in the sales table toolbar to open Create New Sale. On iOS, a floating Quick Sale button also sits above the tab bar. Swipe a receipt row left for View, Share, or Refund when permitted.',
+          'Sales (/dashboard/receipts) lists your sales with search, status filters (All, Completed, Pending, Refunded), and date filters (All dates, Today, This week, This month). Customers now have their own page in the sidebar and bottom bar.',
+          'Use New sale or Quick sale in the page header to check out. Each sale row has a ⋯ menu with actions such as view and refund when your role allows. Tick row checkboxes to show bulk actions in the toolbar.',
         ],
       },
       {
@@ -412,23 +397,23 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
         body: [
           'The drawer title is “Create New Sale” with subtitle “Pick category, subcategory, items, then sale details.” Step 1: pick a parent category (for example Toyota or Office Chairs). Step 2: pick a subcategory when the parent has children (for example Corolla under Toyota); leaf categories skip this step. Step 3: select items and quantities; use “Add from another category” to keep your cart and add lines from more categories in one sale. Step 4: sale details - customer fields, payment method, paid in full or balance due, and notes.',
           'Selected items are grouped by category before checkout. Serial folders can include lines on an active Stock loan: you may add them like other sellable SKUs. Completing the sale marks them sold and updates the borrower loan in the background when your plan includes Stock loans (Enterprise).',
-          'After you reach the items step, if your branch has a Sell screen note configured in Settings → create or edit branch, a short banner can appear at the top of the items and checkout steps with store-specific reminders (for example promos or price notes).',
+          'After you reach the items step, if your branch has a Sell screen note configured on the Branches page (add or edit branch), a short banner can appear at the top of the items and checkout steps with store-specific reminders (for example promos or price notes).',
           'Super admins can enable swap-in style lines inside the receipt flow when your business records trade-ins alongside standard SKUs.',
         ],
       },
       {
         title: 'Quick Sale (side drawer)',
         body: [
-          'Quick Sale opens from the Sales page toolbar as a side drawer. Step through parent category → subcategory (when needed) → product list, then add lines to the cart. Barcode scanning and wedge scanners (keyboard input) work when the active category is selected and the scan field is focused.',
+          'Quick Sale opens from the Quick sale button in the Sales page header as a side sheet. Step through parent category → subcategory (when needed) → product list, then add lines to the cart. Barcode scanning and wedge scanners (keyboard input) work when the active category is selected and the scan field is focused.',
           'Stock validation matches Create New Sale: you cannot add more quantity than available, and checkout stays disabled until the cart is valid. Quick Sale uses the same payment and customer fields as other checkout flows where shown.',
-          'Sell screen notes from Settings → branch profile appear at the top of Quick Sale and Create New Sale after you pick a category, so cashiers see branch reminders inline.',
+          'Sell screen notes from the Branches page appear at the top of Quick Sale and Create New Sale after you pick a category, so cashiers see branch reminders inline.',
         ],
       },
       {
         title: 'Sales leads (/dashboard/leads)',
         body: [
           'Sales leads on Storvv Medium and Enterprise let you log walk-ins, phone calls, WhatsApp enquiries, and referrals before they become a receipt. Add a lead with customer contact, product interest, optional estimated value, and source.',
-          'Open a lead to update status (New → Contacted → Negotiating), assign it to a staff member, add notes, or use Create sale to open the existing receipt wizard with customer details prefilled. When the receipt completes, the lead is marked Won and links to that receipt.',
+          'Tap a lead in the list to open it. From there, update status (New → Contacted → Negotiating), assign it to a staff member, add notes, or use Create sale in the page header to start a sale with customer details prefilled. When the receipt completes, the lead is marked Won and links to that receipt.',
           'If no in-stock SKU matches the product name, Create sale still opens with the customer filled in and a banner reminding you to pick category and items manually. Optionally link an inventory item when creating the lead so convert always finds the right SKU.',
         ],
         bullets: [
@@ -440,14 +425,15 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
         title: 'Payment links',
         body: [
           'Payment links (/dashboard/payment-links) let you create shareable Paystack checkout links for remote sales on web and in the iOS/Android app. Connect a payout account first, pick inventory items, then share the link on WhatsApp. When the customer pays, stock updates and a receipt is created automatically.',
-          'The Payment links summary on Dashboard home and Analytics shows collected, paid, unpaid, and failed counts plus recent links. On phone, use the Links tab or Share to WhatsApp after creating a link.',
+          'The Payment links summary on Overview and Reports shows collected, paid, unpaid, and failed counts plus recent links.',
+          'Where payment links are not yet available for your workspace, the page shows Coming soon. Storefront works the same way.',
         ],
       },
       {
         title: 'Customer balance and credit ledger',
         body: [
-          'Storvv Medium and Enterprise include customer balance tracking on the Sales → Customers tab. When a sale is completed with balance due or credit applied, the customer ledger records charges and payments.',
-          'Open a customer row menu to view or adjust balance where your role allows. Payment reminders and WhatsApp nudges for outstanding balances follow your plan limits (Micro caps WhatsApp sends per month).',
+          'Storvv Medium and Enterprise include customer balance tracking on the Customers page; the Owe money tab lists customers with an outstanding balance. When a sale is completed with balance due or credit applied, the customer ledger records charges and payments.',
+          'Open a customer’s ⋯ menu to view or adjust balance where your role allows. Payment reminders and WhatsApp nudges for outstanding balances follow your plan limits (Micro caps WhatsApp sends per month).',
         ],
       },
       {
@@ -458,16 +444,16 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
         ],
       },
       {
-        title: 'Customers tab',
+        title: 'Customers page',
         body: [
-          'Switch to Customers to search and maintain the customer directory used when filling receipt details. The tab has its own pagination and fullscreen option parallel to receipts.',
+          'Customers is its own page in the sidebar and bottom bar. Use the All, Repeat and Owe money tabs, search, and sort to find people in the customer directory used when filling sale details. Customer balances are managed here.',
         ],
       },
       {
         title: 'Returns and refunds',
         body: [
-          'Returns are processed per receipt via the Return flow (not a separate third tab). Filter the Receipts list with status Refunded to audit completed refunds.',
-          'Bookmarks to /dashboard/returns redirect into Sales; stay on the Receipts tab and open the return / refund action on the row when you have permission.',
+          'Returns are processed per sale via the refund action, not on a separate page. Filter the Sales list with status Refunded to audit completed refunds.',
+          'Bookmarks to /dashboard/returns redirect into Sales; open the refund action from the row’s ⋯ menu when you have permission.',
         ],
         bullets: [
           'Match the correct receipt before refunding so inventory and totals reconcile.',
@@ -478,16 +464,16 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
   },
   {
     id: 'analytics',
-    title: 'Analytics & Reports',
+    title: 'Reports',
     blurb: '/dashboard/analytics: metrics, charts, exports.',
     articles: [
       {
-        title: 'Analytics page',
+        title: 'Reports page',
         body: [
-          'Analytics & Reports (/dashboard/analytics) appears when your subscription exposes it in the sidebar (Storvv Medium and Enterprise include analytics navigation; Storvv Micro focuses on core sales and inventory).',
+          'Reports (/dashboard/analytics, formerly Analytics) appears when your subscription exposes it in the sidebar (Storvv Medium and Enterprise include Reports; Storvv Micro focuses on core sales and inventory).',
           'You must select a store first; the page shows a centered prompt with a link to Settings if nothing is selected.',
-          'Use the period picker: Daily (last 30 days), Weekly (last 12 weeks), or Monthly (last 12 months). On iOS this is a segmented control below the command header. Header metrics summarize total revenue, completed revenue, orders, average order value, customers in period, low stock count, refunds, and gross profit / COGS when the owner can view cost data.',
-          'A period summary paragraph and Inventory health bar mirror the dashboard home. Feature insights cards break down sales, returns, outstanding balances, inventory, customers, profit, operations, buybacks, customer balance, and stock loans depending on role and plan.',
+          'Pick the period from the dropdown at the top: Daily (last 30 days), Weekly (last 12 weeks), or Monthly (last 12 months). Header metrics summarize total revenue, completed revenue, orders, average order value, customers in period, low stock count, refunds, and gross profit / COGS when the owner can view cost data.',
+          'A period summary paragraph and Inventory health bar mirror Overview. Feature insights cards break down sales, returns, outstanding balances, inventory, customers, profit, operations, buybacks, customer balance, and stock loans depending on role and plan.',
         ],
       },
       {
@@ -495,7 +481,7 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
         body: [
           'Charts include revenue trends, top products (donut and table), sales by category, top customers, payment methods, peak hours, sales by hour and day of week, and a day × hour traffic heatmap.',
           'Tables list top products, top customers, recent returns, and low stock with an export reorder list action. Payment links summary appears when your plan includes payment links.',
-          'Export PDF and Export Excel download reports for the current store and period; they disable while an export is running. On iOS, tap Export below the period control to pick PDF or Excel from a sheet; Import opens a spreadsheet file picker (full import may show coming soon until enabled).',
+          'The PDF and Excel buttons in the page header download reports for the current store and period; they disable while an export is running.',
         ],
       },
     ],
@@ -567,14 +553,14 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
         body: [
           'Only super admins can edit Settings. Others see a View only banner while fields stay disabled.',
           'Super admins manage account logo, Paystack subscription upgrades between Storvv Micro, Medium, and Enterprise, store profile data (branch name, business type, contact fields), inventory defaults (low stock threshold, default category), and receipt numbering (prefix + next number).',
-          'Branches: use Create Branch to add locations. Branch names use a city picker from your account region (same country as onboarding), with an optional area or neighborhood field (for example “Port Harcourt, GRA”). When creating or editing a branch, you can add an optional Sell screen note for that location. It is shown to people selling on Quick Sale and during Create New Receipt (items and receipt-details steps) for that branch only.',
+          'Branches have their own page (not a Settings tab): use Add branch to add locations. Branch names use a city picker from your account region (same country as onboarding), with an optional area or neighborhood field (for example “Port Harcourt, GRA”). When creating or editing a branch, you can add an optional Sell screen note for that location. It is shown to people selling on Quick Sale and during Create New Receipt (items and receipt-details steps) for that branch only.',
         ],
       },
       {
         title: 'Plan tiers',
         body: [
-          'Storvv Micro (free): one store, one department, up to 2 staff. Full inventory and sales (Quick Sale, Create New Sale, receipts, returns, customers), Paystack payment links, dashboard, notifications, help center, Storvv Assistant, and web + iOS. WhatsApp receipt sharing capped at 10 per month. No analytics, sales leads, activity logs, customer balance ledger, duplicate category, or multi-store tools.',
-          'Storvv Medium adds up to 2 stores, 10 departments and 25 staff per store, Analytics with PDF/Excel export, activity logs, sales leads, customer balance ledger, unlimited WhatsApp, and duplicate categories within the same branch.',
+          'Storvv Micro (free): one store, one department, up to 2 staff. Full inventory and sales (Quick Sale, Create New Sale, receipts, returns, customers), Paystack payment links, dashboard, notifications, help center, Storvv Assistant, and web + iOS/Android apps. WhatsApp receipt sharing capped at 10 per month. No Reports, sales leads, activity logs, customer balance ledger, duplicate category, or multi-store tools.',
+          'Storvv Medium adds up to 2 stores, 10 departments and 25 staff per store, Reports with PDF/Excel export, activity logs, sales leads, customer balance ledger, unlimited WhatsApp, and duplicate categories within the same branch.',
           'Storvv Enterprise adds unlimited stores, departments, and staff; Multi-Store Sync and stock transfers; Copy from branch (category templates across stores); stock loans for serial inventory; and priority support. Customer buybacks are available to super admins on all plans (role-based, not plan-gated).',
         ],
       },
@@ -588,7 +574,8 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
       {
         title: 'Profile & 2FA',
         body: [
-          'Profile (/dashboard/profile) is where you manage your name, contact info, and security; Two-Factor Authentication can be turned on or off using the prompts on that page.',
+          'Profile (/dashboard/profile) is one scrolling page: your identity card, business profile, store information, plan & billing, receipt terms, roles & permissions, preferences, notifications, security, and help & onboarding.',
+          'Two-Factor Authentication can be turned on or off in the Security section of that page.',
           'Super admins can edit Receipt terms & policies (sales terms, refund policy) on Profile; that text can surface on printed / viewed receipts and related customer communications where the product uses it.',
           'Password changes use the Change password screen (/dashboard/change-password), linked from Profile.',
         ],
@@ -596,13 +583,13 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
       {
         title: 'Notifications',
         body: [
-          'Click the bell for the dropdown NotificationsPanel. Full-page alerts live at /dashboard/notifications using the same component in page mode.',
+          'Tap the bell in the top bar to see recent notifications. The full list lives at /dashboard/notifications.',
         ],
       },
       {
         title: 'Help center search',
         body: [
-          'The search box on this page filters only these help topics; it does not search your store data. Use Global Search in the header for receipts, inventory, and customers.',
+          'The search box on this page filters only these help topics; it does not search your store data. Use search in the top bar for receipts, inventory, and customers.',
         ],
       },
     ],
@@ -639,10 +626,10 @@ export function buildAssistantSystemPrompt(knowledgeBase: string): string {
     '- Use plain text only. Do NOT use Markdown bold (**text**), headings (#), or other Markdown formatting. For lists, use lines starting with "- " (hyphen and space).',
     '- Explain role and plan limits in general terms; remind users that missing controls may mean their role or plan does not include a feature.',
     '- Inventory uses top-level categories plus optional one-level subcategories (not unlimited nesting). When creating a category, Organize with subcategories is optional (off by default). When users ask about subfolders or subcategories, describe the parent hub, leaf-only products, inheritance rules, and the optional toggle from the knowledge base - do not say folders are strictly flat.',
-    '- Copy from branch (Enterprise, /dashboard/inventory): select top-level templates from another branch; optionally include subcategories with a checkbox. Branch creation (Settings): city picker from account region plus optional area suffix.',
-    '- Customer buybacks (/dashboard/buybacks) are super-admin only. Quick Sale and Create New Sale use parent → subcategory → items → checkout. Analytics includes feature insight cards for sales, inventory, buybacks, loans, and balances when applicable.',
-    '- Sales leads (/dashboard/leads) on Medium and Enterprise: track enquiries before receipts; Create sale prefills the receipt wizard. Native iOS uses bottom tabs (Home, Stock, Sales, Analytics), More menu for other routes, pull-to-refresh on main lists, swipe actions on Sales receipts, and Export/Import on Analytics.',
-    '- Mobile app: same data as web; assistant on device uses hosted API + GEMINI on server. Do not describe web-only sidebar controls when user asks about iPhone or native app - describe tabs, More sheet, command header, and native sheets instead.',
+    '- Copy from branch (Enterprise, /dashboard/inventory): select top-level templates from another branch; optionally include subcategories with a checkbox. Branch creation (Branches page): city picker from account region plus optional area suffix.',
+    '- Customer buybacks (/dashboard/buybacks) are super-admin only. Quick Sale and Create New Sale use parent → subcategory → items → checkout. Reports (formerly Analytics) includes feature insight cards for sales, inventory, buybacks, loans, and balances when applicable.',
+    '- Sales leads (/dashboard/leads) on Medium and Enterprise: track enquiries before receipts; Create sale in the lead page header prefills the sale. Native iOS and Android use the same design as the web: on phones a bottom bar (Overview, Inventory, Sales, Customers, More), More opens the full menu, pull down to refresh, and a ⋯ menu on each list row for actions.',
+    '- Mobile app: same data and same design as web; assistant on device uses hosted API + GEMINI on server. Do not describe swipe actions, floating action buttons, long-press menus, or iOS segmented controls - they do not exist.',
     '',
     'Knowledge base:',
     knowledgeBase,

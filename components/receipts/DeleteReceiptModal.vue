@@ -1,220 +1,115 @@
 <template>
-  <Modal
-    :model-value="props.modelValue"
-    @update:model-value="(value: boolean) => emit('update:modelValue', value)"
-    size="lg"
+  <SDialog
+    :open="props.modelValue"
+    role="alertdialog"
+    size="sm"
+    title="Delete sale?"
+    :description="receipt ? `Receipt #${receipt.receiptNumber}` : undefined"
+    :dismissible="!isProcessing"
+    @update:open="(value: boolean) => emit('update:modelValue', value)"
   >
-    <template #header>
-      <div class="flex items-center gap-3">
-        <div
-          class="w-10 h-10 rounded-sm bg-red-100 dark:bg-red-900/30 flex items-center justify-center"
-        >
-          <TrashIcon class="w-6 h-6 text-red-600 dark:text-red-400" />
-        </div>
-        <div>
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Delete Sale</h3>
-          <p class="text-sm text-gray-500 dark:text-gray-400">
-            Receipt #{{ receipt?.receiptNumber }}
-          </p>
-        </div>
-      </div>
-    </template>
-
-    <div v-if="!receipt" class="text-center py-12">
-      <div
-        class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"
-      ></div>
-      <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading sale...</p>
+    <div v-if="!receipt" class="s-receipt-view__loading">
+      <SSpinner :size="24" />
+      <p>Loading sale…</p>
     </div>
 
-    <div v-else class="max-h-[calc(100vh-16rem)] overflow-y-auto space-y-4">
-      <!-- Warning Message -->
-      <div
-        class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-sm"
-      >
-        <div class="flex items-start gap-3">
-          <ExclamationTriangleIcon
-            class="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5"
-          />
-          <div>
-            <p class="text-sm font-medium text-red-800 dark:text-red-200">Confirm Deletion</p>
-            <p class="mt-1 text-xs text-red-700 dark:text-red-300">
-              This action cannot be undone. Deleting this sale will also delete the associated
-              customer (if no other sales exist) and return all items to inventory.
-            </p>
-          </div>
-        </div>
+    <div v-else class="s-form">
+      <div class="s-receipt-callout s-receipt-callout--error">
+        <p class="s-receipt-callout__title">This can't be undone</p>
+        <p>
+          Deleting this sale also deletes the associated customer (if no other sales exist) and
+          returns all items to inventory.
+        </p>
       </div>
 
-      <!-- Receipt Details -->
-      <div class="space-y-3">
-        <div>
-          <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
-            Sale Information
-          </h4>
-          <div class="bg-gray-50 dark:bg-gray-700/50 rounded-sm p-3 space-y-1.5">
-            <div class="flex justify-between text-sm">
-              <span class="text-gray-600 dark:text-gray-400">Receipt Number:</span>
-              <span class="font-medium text-gray-900 dark:text-gray-100">{{
-                receipt.receiptNumber
-              }}</span>
-            </div>
-            <div class="flex justify-between text-sm">
-              <span class="text-gray-600 dark:text-gray-400">Customer:</span>
-              <span class="font-medium text-gray-900 dark:text-gray-100">{{
-                receipt.customerName
-              }}</span>
-            </div>
-            <div class="flex justify-between text-sm">
-              <span class="text-gray-600 dark:text-gray-400">Date:</span>
-              <span class="font-medium text-gray-900 dark:text-gray-100">{{
-                formatDate(receipt.date)
-              }}</span>
-            </div>
-            <div class="flex justify-between text-sm">
-              <span class="text-gray-600 dark:text-gray-400">Total Amount:</span>
-              <span class="font-semibold text-gray-900 dark:text-gray-100"
-                >${{ formatCurrency(receipt.total) }}</span
-              >
-            </div>
-            <div class="flex justify-between text-sm">
-              <span class="text-gray-600 dark:text-gray-400">Status:</span>
-              <span class="font-medium text-gray-900 dark:text-gray-100">{{
-                receipt.status.charAt(0).toUpperCase() + receipt.status.slice(1)
-              }}</span>
-            </div>
-            <div class="flex justify-between text-sm">
-              <span class="text-gray-600 dark:text-gray-400">Items Count:</span>
-              <span class="font-medium text-gray-900 dark:text-gray-100"
-                >{{ receipt.itemsCount }} product{{ receipt.itemsCount !== 1 ? 's' : '' }}</span
-              >
-            </div>
+      <section class="s-form-section">
+        <h3 class="s-form-section__title">Sale information</h3>
+        <dl class="s-record-summary s-record-summary--stack">
+          <div class="s-record-row">
+            <dt>Receipt number</dt>
+            <dd class="s-record-row__value">{{ receipt.receiptNumber }}</dd>
           </div>
-        </div>
-
-        <!-- Items to be Returned -->
-        <div>
-          <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
-            Items to be Returned to Inventory
-          </h4>
-          <div class="rounded-sm overflow-hidden">
-            <div class="overflow-x-auto max-h-48 overflow-y-auto">
-              <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead class="sticky top-0 bg-gray-50/95 dark:!bg-dashboard-card/90">
-                  <tr>
-                    <th
-                      class="bg-gray-50/95 px-4 py-3 text-left text-xs !font-bold text-gray-500 dark:!bg-dashboard-card/90 dark:text-gray-400 uppercase"
-                    >
-                      Product
-                    </th>
-                    <th
-                      class="bg-gray-50/95 px-4 py-3 text-center text-xs !font-bold text-gray-500 dark:!bg-dashboard-card/90 dark:text-gray-400 uppercase"
-                    >
-                      Quantity
-                    </th>
-                    <th
-                      class="bg-gray-50/95 px-4 py-3 text-right text-xs !font-bold text-gray-500 dark:!bg-dashboard-card/90 dark:text-gray-400 uppercase"
-                    >
-                      Price
-                    </th>
-                    <th
-                      class="bg-gray-50/95 px-4 py-3 text-right text-xs !font-bold text-gray-500 dark:!bg-dashboard-card/90 dark:text-gray-400 uppercase"
-                    >
-                      Total
-                    </th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                  <tr v-for="(item, index) in receipt.items" :key="index">
-                    <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
-                      {{ item.itemName }}
-                    </td>
-                    <td class="px-4 py-3 text-sm text-center text-gray-600 dark:text-gray-400">
-                      {{ item.quantity }}
-                    </td>
-                    <td class="px-4 py-3 text-sm text-right text-gray-600 dark:text-gray-400">
-                      ${{ formatCurrency(item.price) }}
-                    </td>
-                    <td
-                      class="px-4 py-3 text-sm text-right font-medium text-gray-900 dark:text-gray-100"
-                    >
-                      ${{ formatCurrency(item.price * item.quantity) }}
-                    </td>
-                  </tr>
-                </tbody>
-                <tfoot class="bg-gray-50 dark:!bg-dashboard-card/70">
-                  <tr>
-                    <td
-                      colspan="3"
-                      class="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-100 text-right"
-                    >
-                      Total:
-                    </td>
-                    <td
-                      class="px-4 py-3 text-sm font-bold text-gray-900 dark:text-gray-100 text-right"
-                    >
-                      ${{ formatCurrency(receipt.total) }}
-                    </td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
+          <div class="s-record-row">
+            <dt>Customer</dt>
+            <dd class="s-record-row__value">{{ receipt.customerName }}</dd>
           </div>
-        </div>
+          <div class="s-record-row">
+            <dt>Date</dt>
+            <dd class="s-record-row__value">{{ formatDate(receipt.date) }}</dd>
+          </div>
+          <div class="s-record-row">
+            <dt>Status</dt>
+            <dd>
+              <SBadge :tone="getReceiptStatusTone(receipt.status)">
+                {{ receipt.status.charAt(0).toUpperCase() + receipt.status.slice(1) }}
+              </SBadge>
+            </dd>
+          </div>
+          <div class="s-record-row">
+            <dt>Items</dt>
+            <dd class="s-record-row__value">
+              {{ receipt.itemsCount }} product{{ receipt.itemsCount !== 1 ? 's' : '' }}
+            </dd>
+          </div>
+          <div class="s-record-row s-record-row--total">
+            <dt>Total</dt>
+            <dd class="s-record-row__value">{{ formatCurrency(receipt.total) }}</dd>
+          </div>
+        </dl>
+      </section>
 
-        <!-- What Will Happen -->
-        <div
-          class="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-sm"
-        >
-          <h4 class="text-xs font-semibold text-yellow-900 dark:text-yellow-100 mb-1.5">
-            What will happen:
-          </h4>
-          <ul
-            class="space-y-0.5 text-xs text-yellow-800 dark:text-yellow-200 list-disc list-inside"
-          >
-            <li>All items from this sale will be returned to inventory</li>
-            <li>The associated customer will be removed (if this was their only sale)</li>
-            <li>This sale will be permanently deleted</li>
-            <li>This action cannot be undone</li>
-          </ul>
-        </div>
+      <section class="s-form-section">
+        <h3 class="s-form-section__title">Returned to inventory</h3>
+        <ul class="s-record-rows s-receipt-items">
+          <li v-for="(item, index) in receipt.items" :key="index" class="s-record-row">
+            <span>{{ item.itemName }} × {{ item.quantity }}</span>
+            <span class="s-record-row__value">
+              {{ formatCurrency(item.price * item.quantity) }}
+            </span>
+          </li>
+        </ul>
+      </section>
 
-        <!-- Confirmation Checkbox -->
-        <div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-sm">
-          <Checkbox
-            v-model="confirmed"
-            label="I understand that this action cannot be undone and will permanently delete this sale and its associated data."
-            size="sm"
-            wrapper-class="items-start"
-            label-class="text-sm text-gray-700 dark:text-gray-300"
-          />
-        </div>
+      <div class="s-receipt-callout">
+        <p class="s-receipt-callout__title">What will happen</p>
+        <ul class="s-receipt-callout__list">
+          <li>All items from this sale will be returned to inventory</li>
+          <li>The associated customer will be removed (if this was their only sale)</li>
+          <li>This sale will be permanently deleted</li>
+        </ul>
       </div>
+
+      <SCheckbox
+        v-model="confirmed"
+        label="I understand this permanently deletes this sale and its associated data."
+      />
     </div>
 
     <template #footer>
-      <IosDrawerActions
+      <SDialogActions
         primary-variant="danger"
-        :primary-label="isProcessing ? 'Deleting...' : 'Delete Sale'"
+        :primary-label="isProcessing ? 'Deleting…' : 'Delete sale'"
         :primary-icon="TrashIcon"
+        :primary-loading="isProcessing"
         :primary-disabled="!confirmed || isProcessing"
         @cancel="handleCancel"
         @primary="handleConfirmDelete"
       />
     </template>
-  </Modal>
+  </SDialog>
 </template>
 
 <script setup lang="ts">
+import SDialog from '~/components/s/SDialog.vue'
+import SDialogActions from '~/components/s/SDialogActions.vue'
+import SBadge from '~/components/s/SBadge.vue'
+import SCheckbox from '~/components/s/SCheckbox.vue'
+import SSpinner from '~/components/s/SSpinner.vue'
 import { ref, watch } from 'vue'
-import {
-  TrashIcon,
-  ExclamationTriangleIcon,
-} from '~/utils/app-icons'
-import Modal from '~/components/ui/Modal.vue'
-import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
-import Checkbox from '~/components/ui/Checkbox.vue'
+import { TrashIcon } from '~/utils/app-icons'
 import type { Receipt } from '~/stores/receipts'
+import { getReceiptStatusTone } from '~/utils/receipt-status'
+import { usePreferences } from '~/composables/usePreferences'
 
 interface Props {
   modelValue: boolean
@@ -230,12 +125,7 @@ const emit = defineEmits<{
 const confirmed = ref(false)
 const isProcessing = ref(false)
 
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value)
-}
+const { formatCurrency } = usePreferences()
 
 const formatDate = (date: Date | string | any) => {
   if (!date) return 'N/A'

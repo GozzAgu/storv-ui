@@ -1,371 +1,282 @@
 <template>
   <Teleport to="body">
-    <Transition
-      enter-active-class="transition-opacity duration-200 ease-out"
-      enter-from-class="opacity-0"
-      enter-to-class="opacity-100"
-      leave-active-class="transition-opacity duration-150 ease-in"
-      leave-from-class="opacity-100"
-      leave-to-class="opacity-0"
-    >
-      <div v-if="searchStore.isOpen" class="fixed inset-0 z-[100]" data-dashboard-teleport role="presentation">
-        <!-- Dismiss on overlay click -->
+    <Transition name="s-dialog">
+      <div
+        v-if="searchStore.isOpen"
+        class="s-c s-dialog-layer s-palette-layer"
+        data-dashboard-teleport
+      >
         <div
           data-global-search-backdrop
-          class="absolute inset-0 bg-gray-900/25 backdrop-blur-[2px] dark:bg-black/40"
+          class="s-dialog__scrim"
           aria-hidden="true"
           @click="searchStore.closeSearch()"
         />
 
         <div
-          class="pointer-events-none fixed inset-0 flex justify-center overflow-y-auto px-3 pt-[calc(env(safe-area-inset-top)+1rem)] pb-6 sm:px-4 sm:pt-[12vh]"
+          class="s-dialog s-dialog--md s-palette"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Search"
+          @click.stop
+          @keydown.esc="searchStore.closeSearch()"
         >
-          <div
-            class="pointer-events-auto relative flex max-h-[min(72vh,calc(100dvh-2.5rem))] w-full max-w-xl flex-col overflow-hidden rounded-2xl border-0 bg-white text-gray-900 shadow-[0_20px_60px_-20px_rgb(15_23_42/0.22)] dark:!bg-dashboard-card dark:text-gray-100 dark:shadow-[0_24px_70px_-20px_rgb(0_0_0/0.55)] sm:max-h-[min(78vh,calc(100dvh-3rem))]"
-            @click.stop
-          >
-            <!-- Search -->
-            <div class="shrink-0 px-4 pb-3 pt-4">
-              <div class="ios-search-input-wrap relative">
-                <MagnifyingGlassIcon
-                  class="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500"
-                />
+          <div class="s-palette__head">
+            <div class="s-palette__search">
+              <div class="s-control s-control--lg s-palette__control">
+                <span class="s-control__affix">
+                  <MagnifyingGlassIcon :size="16" :stroke-width="1.75" aria-hidden="true" />
+                </span>
                 <input
                   ref="searchInput"
                   v-model="searchStore.query"
                   type="text"
+                  class="s-control__input"
                   placeholder="Search sales, inventory, customers…"
-                  class="app-field w-full rounded-lg py-0 pl-9 pr-12 text-sm placeholder:text-gray-400 dark:!bg-white/[0.04]"
+                  aria-label="Search"
+                  role="combobox"
+                  aria-autocomplete="list"
+                  :aria-expanded="orderedResults.length > 0"
+                  :aria-controls="listboxId"
+                  :aria-activedescendant="activeOptionId"
+                  autocomplete="off"
                   @input="handleSearchInput"
-                  @keydown.esc="searchStore.closeSearch()"
                   @keydown.enter="handleEnter"
                   @keydown.down.prevent="navigateResults(1)"
                   @keydown.up.prevent="navigateResults(-1)"
                 />
-                <kbd
-                  class="pointer-events-none absolute right-2.5 top-1/2 hidden -translate-y-1/2 rounded-md bg-gray-100/90 px-1.5 py-0.5 text-[10px] font-medium text-gray-500 dark:bg-white/[0.06] dark:text-gray-400 sm:inline-block"
-                >
-                  Esc
-                </kbd>
+                <kbd class="s-kbd s-palette__esc" aria-hidden="true">Esc</kbd>
               </div>
+              <SButton
+                class="s-palette__cancel"
+                variant="ghost"
+                @click="searchStore.closeSearch()"
+              >
+                Cancel
+              </SButton>
+            </div>
 
-              <div class="mt-3 flex flex-wrap items-center gap-1">
-                <button
-                  v-for="entityType in entityTypes"
-                  :key="entityType.value"
-                  type="button"
-                  class="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-medium transition-colors duration-150"
-                  :class="
-                    isEntityTypeSelected(entityType.value)
-                      ? 'bg-primary-500/10 text-primary-800 dark:bg-primary-400/15 dark:text-primary-200'
-                      : 'text-gray-600 hover:bg-gray-100/90 dark:text-gray-400 dark:hover:bg-white/[0.05]'
-                  "
-                  @click="toggleEntityType(entityType.value)"
-                >
-                  <component :is="entityType.icon" class="h-3.5 w-3.5 shrink-0 opacity-80" />
-                  {{ entityType.label }}
-                </button>
-                <button
-                  v-if="searchStore.hasActiveFilters"
-                  type="button"
-                  class="rounded-lg px-2 py-1 text-[11px] font-medium text-red-600 transition-colors hover:bg-red-50/90 dark:text-red-400 dark:hover:bg-red-500/10"
-                  @click="searchStore.resetFilters()"
-                >
-                  Clear
-                </button>
-              </div>
-
+            <div class="s-palette__chips" role="group" aria-label="Search in">
+              <button
+                v-for="entityType in entityTypes"
+                :key="entityType.value"
+                type="button"
+                class="s-palette__chip"
+                :aria-pressed="isEntityTypeSelected(entityType.value)"
+                @click="toggleEntityType(entityType.value)"
+              >
+                <component :is="entityType.icon" :size="14" :stroke-width="1.75" aria-hidden="true" />
+                {{ entityType.label }}
+              </button>
+              <button
+                v-if="searchStore.hasActiveFilters"
+                type="button"
+                class="s-palette__chip s-palette__chip--clear"
+                @click="searchStore.resetFilters()"
+              >
+                Clear
+              </button>
               <button
                 type="button"
-                class="mt-2.5 flex w-full items-center justify-between rounded-lg px-1 py-1 text-[11px] font-medium text-gray-500 transition-colors hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+                class="s-palette__chip s-palette__filters-toggle"
+                :aria-expanded="showAdvancedFilters"
+                aria-controls="global-search-filters"
                 @click="showAdvancedFilters = !showAdvancedFilters"
               >
-                <span class="inline-flex items-center gap-1.5">
-                  <FunnelIcon class="h-3.5 w-3.5" />
-                  Filters
-                </span>
+                <FunnelIcon :size="14" :stroke-width="1.75" aria-hidden="true" />
+                Filters
                 <ChevronDownIcon
-                  class="h-3.5 w-3.5 transition-transform duration-200"
-                  :class="showAdvancedFilters ? 'rotate-180' : ''"
+                  class="s-palette__chevron"
+                  :class="{ 's-palette__chevron--open': showAdvancedFilters }"
+                  :size="14"
+                  :stroke-width="1.75"
+                  aria-hidden="true"
                 />
               </button>
             </div>
+          </div>
 
-            <!-- Advanced Filters -->
-            <Transition
-              enter-active-class="transition-all duration-200"
-              enter-from-class="opacity-0 max-h-0"
-              enter-to-class="opacity-100 max-h-96"
-              leave-active-class="transition-all duration-200"
-              leave-from-class="opacity-100 max-h-96"
-              leave-to-class="opacity-0 max-h-0"
+          <div v-if="showAdvancedFilters" id="global-search-filters" class="s-palette__filters">
+            <div class="s-form-pair">
+              <SInput
+                v-model="startDate"
+                label="Start"
+                type="date"
+                @change="updateDateRange"
+              />
+              <SInput
+                v-model="endDate"
+                label="End"
+                type="date"
+                @change="updateDateRange"
+              />
+            </div>
+
+            <div
+              v-if="
+                searchStore.filters.entityTypes.includes('receipts') ||
+                searchStore.filters.entityTypes.includes('all')
+              "
+              class="s-palette__status"
+              role="group"
+              :aria-labelledby="statusLabelId"
             >
-              <div
-                v-if="showAdvancedFilters"
-                class="shrink-0 space-y-3 border-0 bg-gray-50/60 px-4 py-3 dark:bg-white/[0.02]"
-              >
-                <div class="grid grid-cols-2 gap-3">
-                  <div>
-                    <label
-                      class="mb-1 block text-[11px] font-medium text-gray-600 dark:text-gray-400"
-                      >Start</label
-                    >
-                    <input
-                      v-model="startDate"
-                      type="date"
-                      class="app-field w-full rounded-lg text-xs"
-                      @change="updateDateRange"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      class="mb-1 block text-[11px] font-medium text-gray-600 dark:text-gray-400"
-                      >End</label
-                    >
-                    <input
-                      v-model="endDate"
-                      type="date"
-                      class="app-field w-full rounded-lg text-xs"
-                      @change="updateDateRange"
-                    />
-                  </div>
-                </div>
-
-                <div
-                  v-if="
-                    searchStore.filters.entityTypes.includes('receipts') ||
-                    searchStore.filters.entityTypes.includes('all')
-                  "
-                >
-                  <label
-                    class="mb-1.5 block text-[11px] font-medium text-gray-600 dark:text-gray-400"
-                    >Status</label
-                  >
-                  <div class="flex flex-wrap gap-1">
-                    <button
-                      v-for="status in receiptStatuses"
-                      :key="status.value"
-                      type="button"
-                      class="rounded-lg px-2 py-1 text-[11px] font-medium transition-colors duration-150"
-                      :class="
-                        isStatusSelected(status.value)
-                          ? 'bg-primary-500/10 text-primary-800 dark:bg-primary-400/15 dark:text-primary-200'
-                          : 'text-gray-600 hover:bg-gray-100/90 dark:text-gray-400 dark:hover:bg-white/[0.05]'
-                      "
-                      @click="toggleStatus(status.value)"
-                    >
-                      {{ status.label }}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </Transition>
-
-            <!-- Results -->
-            <div class="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-              <!-- Loading State -->
-              <div
-                v-if="searchStore.loading"
-                class="flex flex-col items-center justify-center px-6 py-14"
-              >
-                <div
-                  class="h-5 w-5 animate-spin rounded-full border-2 border-primary-500/20 border-t-primary-600 dark:border-t-primary-400"
-                />
-                <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">Searching…</p>
-              </div>
-
-              <!-- No Results -->
-              <div
-                v-else-if="!searchStore.hasResults && searchStore.query.trim()"
-                class="dash-empty-state dash-empty-state--compact flex flex-col items-center justify-center px-6 py-14 text-center"
-              >
-                <div class="dash-empty-state__mark">
-                  <MagnifyingGlassIcon
-                    class="dash-empty-state__icon h-8 w-8 text-gray-300 dark:text-gray-600"
-                    stroke-width="1.5"
-                  />
-                </div>
-                <p class="dash-empty-state__title text-sm font-medium text-gray-900 dark:text-gray-100">
-                  No results found
-                </p>
-                <p
-                  class="dash-empty-state__desc mt-1 max-w-[16rem] text-xs leading-relaxed text-gray-500 dark:text-gray-400"
-                >
-                  Try a different term or clear filters
-                </p>
-              </div>
-
-              <!-- Empty State -->
-              <div
-                v-else-if="!searchStore.query.trim() && !searchStore.hasActiveFilters"
-                class="px-4 py-4 sm:py-5"
-              >
-                <div class="dash-empty-state dash-empty-state--compact py-6 text-center">
-                  <div class="dash-empty-state__mark mx-auto">
-                    <MagnifyingGlassIcon
-                      class="dash-empty-state__icon h-8 w-8 text-gray-400 dark:text-gray-500"
-                      stroke-width="1.5"
-                    />
-                  </div>
-                  <p class="dash-empty-state__title text-sm font-medium tracking-tight text-gray-900 dark:text-gray-50">
-                    Search your workspace
-                  </p>
-                  <p class="dash-empty-state__desc mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    Sales, inventory, customers, and more
-                  </p>
-                </div>
-
-                <div class="mt-1 space-y-0.5 border-0 pt-1">
-                  <h3 class="mb-1.5 px-1 text-[11px] font-medium text-gray-500 dark:text-gray-400">
-                    Suggested
-                  </h3>
-                  <button
-                    v-for="action in suggestedActions"
-                    :key="action.href"
-                    type="button"
-                    class="group flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50/90 dark:text-gray-300 dark:hover:bg-white/[0.04]"
-                    @click="runSuggestedAction(action.href)"
-                  >
-                    <div class="flex min-w-0 flex-1 items-center gap-2">
-                      <component
-                        :is="action.icon"
-                        class="h-3.5 w-3.5 shrink-0 text-gray-400 dark:text-gray-500"
-                      />
-                      <span class="truncate">{{ action.label }}</span>
-                    </div>
-                    <ArrowRightIcon
-                      class="h-3.5 w-3.5 shrink-0 text-gray-400 opacity-0 transition-opacity group-hover:opacity-100 dark:text-gray-500"
-                    />
-                  </button>
-                </div>
-
-                <div v-if="savedSearches.length > 0" class="mt-2 space-y-0.5 border-0 pt-2">
-                  <div class="mb-1.5 flex items-center justify-between px-1">
-                    <h3 class="text-[11px] font-medium text-gray-500 dark:text-gray-400">Recent</h3>
-                    <button
-                      type="button"
-                      class="text-[11px] font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400"
-                      @click="showSavedSearchesModal = true"
-                    >
-                      Manage
-                    </button>
-                  </div>
-                  <button
-                    v-for="saved in savedSearches.slice(0, 5)"
-                    :key="saved.id"
-                    type="button"
-                    class="group flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50/90 dark:text-gray-300 dark:hover:bg-white/[0.04]"
-                    @click="loadSavedSearch(saved.id)"
-                  >
-                    <div class="flex min-w-0 flex-1 items-center gap-2">
-                      <ClockIcon class="h-3.5 w-3.5 shrink-0 text-gray-400 dark:text-gray-500" />
-                      <span class="truncate">{{ saved.name }}</span>
-                    </div>
-                    <ArrowRightIcon
-                      class="h-3.5 w-3.5 shrink-0 text-gray-400 opacity-0 transition-opacity group-hover:opacity-100 dark:text-gray-500"
-                    />
-                  </button>
-                </div>
-              </div>
-
-              <!-- Results List -->
-              <div v-else class="px-2 pb-2">
+              <p :id="statusLabelId" class="s-palette__caption">Status</p>
+              <div class="s-palette__chips">
                 <button
-                  v-for="(result, index) in searchStore.results"
-                  :key="result.id"
+                  v-for="status in receiptStatuses"
+                  :key="status.value"
                   type="button"
-                  class="flex w-full rounded-lg px-2 py-2 text-left transition-colors duration-150 sm:px-2.5 sm:py-2.5"
-                  :class="
-                    selectedIndex === index
-                      ? 'bg-primary-500/8 dark:bg-primary-400/10'
-                      : 'hover:bg-gray-50/90 dark:hover:bg-white/[0.04]'
-                  "
-                  @click="handleResultClick(result)"
+                  class="s-palette__chip"
+                  :aria-pressed="isStatusSelected(status.value)"
+                  @click="toggleStatus(status.value)"
                 >
-                  <div class="flex items-start gap-2.5 sm:gap-3">
-                    <div
-                      :class="[
-                        'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg sm:h-10 sm:w-10',
-                        getEntityTypeColor(result.type),
-                      ]"
-                    >
-                      <component
-                        :is="getEntityIcon(result.icon)"
-                        class="h-4 w-4 text-white sm:h-[1.125rem] sm:w-[1.125rem]"
-                      />
-                    </div>
-                    <div class="flex-1 min-w-0">
-                      <div class="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
-                        <p class="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate">
-                          {{ result.title }}
-                        </p>
-                        <span
-                          :class="[
-                            'px-1.5 sm:px-2 py-0.5 text-xs font-medium rounded',
-                            getEntityTypeBadgeColor(result.type),
-                          ]"
-                        >
-                          {{ getEntityTypeLabel(result.type) }}
-                        </span>
-                      </div>
-                      <p class="text-xs text-gray-600 dark:text-gray-400 truncate mb-0.5 sm:mb-1">
-                        {{ result.subtitle }}
-                      </p>
-                      <p
-                        v-if="result.description"
-                        class="text-xs text-gray-500 dark:text-gray-500 line-clamp-1"
-                      >
-                        {{ result.description }}
-                      </p>
-                    </div>
-                    <ArrowRightIcon
-                      class="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-gray-500 flex-shrink-0"
-                    />
-                  </div>
+                  {{ status.label }}
                 </button>
               </div>
             </div>
+          </div>
 
-            <!-- Footer -->
-            <div
-              class="flex shrink-0 items-center justify-between gap-3 bg-gray-50/70 px-4 py-2.5 dark:bg-white/[0.02]"
+          <div ref="resultsEl" class="s-palette__body">
+            <div v-if="searchStore.loading" class="s-palette__loading" role="status">
+              <SSpinner :size="20" />
+              <p>Searching…</p>
+            </div>
+
+            <SEmptyState
+              v-else-if="!searchStore.hasResults && searchStore.query.trim()"
+              class="s-palette__empty"
+              title="No results found"
+              description="Try a different term or clear filters"
             >
-              <div
-                class="hidden items-center gap-3 text-[10px] text-gray-400 dark:text-gray-500 sm:flex"
+              <template #icon>
+                <MagnifyingGlassIcon :size="20" :stroke-width="1.75" />
+              </template>
+            </SEmptyState>
+
+            <template v-else-if="!searchStore.query.trim() && !searchStore.hasActiveFilters">
+              <section class="s-palette__group" aria-labelledby="global-search-suggested">
+                <h3 id="global-search-suggested" class="s-palette__caption">Suggested</h3>
+                <button
+                  v-for="action in suggestedActions"
+                  :key="action.href"
+                  type="button"
+                  class="s-palette__row"
+                  @click="runSuggestedAction(action.href)"
+                >
+                  <span class="s-palette__icon" aria-hidden="true">
+                    <component :is="action.icon" :size="16" :stroke-width="1.75" />
+                  </span>
+                  <span class="s-palette__text">
+                    <span class="s-palette__title">{{ action.label }}</span>
+                  </span>
+                  <ArrowRightIcon class="s-palette__go" :size="16" :stroke-width="1.75" aria-hidden="true" />
+                </button>
+              </section>
+
+              <section
+                v-if="savedSearches.length > 0"
+                class="s-palette__group"
+                aria-labelledby="global-search-recent"
               >
-                <span class="inline-flex items-center gap-0.5">
-                  <ArrowUpIcon class="h-3 w-3" />
-                  <ArrowDownIcon class="h-3 w-3" />
-                  Navigate
-                </span>
-                <span class="text-gray-300 dark:text-gray-600">·</span>
-                <span>↵ Select</span>
-                <span class="text-gray-300 dark:text-gray-600">·</span>
-                <span class="inline-flex items-center gap-1">
-                  <kbd
-                    class="rounded bg-white/80 px-1 py-px font-sans text-[9px] dark:bg-white/[0.06]"
-                    >/</kbd
+                <div class="s-palette__group-head">
+                  <h3 id="global-search-recent" class="s-palette__caption">Recent</h3>
+                  <button
+                    type="button"
+                    class="s-palette__link"
+                    @click="showSavedSearchesModal = true"
                   >
-                  Save
-                </span>
-              </div>
-              <p class="text-[11px] tabular-nums text-gray-500 dark:text-gray-400">
-                {{ searchStore.results.length }}
-                {{ searchStore.results.length === 1 ? 'result' : 'results' }}
-              </p>
+                    Manage
+                  </button>
+                </div>
+                <button
+                  v-for="saved in savedSearches.slice(0, 5)"
+                  :key="saved.id"
+                  type="button"
+                  class="s-palette__row"
+                  @click="loadSavedSearch(saved.id)"
+                >
+                  <span class="s-palette__icon" aria-hidden="true">
+                    <ClockIcon :size="16" :stroke-width="1.75" />
+                  </span>
+                  <span class="s-palette__text">
+                    <span class="s-palette__title">{{ saved.name }}</span>
+                  </span>
+                  <ArrowRightIcon class="s-palette__go" :size="16" :stroke-width="1.75" aria-hidden="true" />
+                </button>
+              </section>
+            </template>
+
+            <div v-else :id="listboxId" role="listbox" aria-label="Search results">
+              <section
+                v-for="group in resultGroups"
+                :key="group.type"
+                class="s-palette__group"
+                role="group"
+                :aria-labelledby="`${listboxId}-${group.type}`"
+              >
+                <h3 :id="`${listboxId}-${group.type}`" class="s-palette__caption">
+                  {{ getEntityGroupLabel(group.type) }}
+                </h3>
+                <button
+                  v-for="entry in group.items"
+                  :id="`${listboxId}-opt-${entry.index}`"
+                  :key="entry.result.id"
+                  type="button"
+                  role="option"
+                  class="s-palette__row"
+                  :class="{ 's-palette__row--active': selectedIndex === entry.index }"
+                  :aria-selected="selectedIndex === entry.index"
+                  :data-index="entry.index"
+                  @click="handleResultClick(entry.result)"
+                >
+                  <span
+                    class="s-palette__icon"
+                    :class="`s-palette__icon--${getEntityTone(entry.result.type)}`"
+                    aria-hidden="true"
+                  >
+                    <component :is="getEntityIcon(entry.result.icon)" :size="16" :stroke-width="1.75" />
+                  </span>
+                  <span class="s-palette__text">
+                    <span class="s-palette__title">{{ entry.result.title }}</span>
+                    <span v-if="entry.result.subtitle" class="s-palette__meta">
+                      {{ entry.result.subtitle }}
+                    </span>
+                    <span v-if="entry.result.description" class="s-palette__meta">
+                      {{ entry.result.description }}
+                    </span>
+                  </span>
+                  <ArrowRightIcon class="s-palette__go" :size="16" :stroke-width="1.75" aria-hidden="true" />
+                </button>
+              </section>
             </div>
           </div>
+
+          <footer class="s-palette__foot">
+            <p class="s-palette__hints" aria-hidden="true">
+              <span class="s-palette__hint">
+                <kbd class="s-kbd"><ArrowUpIcon :size="12" :stroke-width="2" /></kbd>
+                <kbd class="s-kbd"><ArrowDownIcon :size="12" :stroke-width="2" /></kbd>
+                Navigate
+              </span>
+              <span class="s-palette__hint"><kbd class="s-kbd">↵</kbd> Open</span>
+              <span class="s-palette__hint"><kbd class="s-kbd">Esc</kbd> Close</span>
+            </p>
+            <p class="s-palette__count" aria-live="polite">
+              {{ searchStore.results.length }}
+              {{ searchStore.results.length === 1 ? 'result' : 'results' }}
+            </p>
+          </footer>
         </div>
       </div>
     </Transition>
 
-    <!-- Saved Searches Modal -->
     <SavedSearchesModal v-model="showSavedSearchesModal" @load="loadSavedSearch" />
   </Teleport>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, nextTick } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, nextTick, useId } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   MagnifyingGlassIcon,
@@ -389,17 +300,26 @@ import { useSearchStore, type SearchEntityType } from '~/stores/search'
 import { useInventoryStore } from '~/stores/inventory'
 import { useUserStore } from '~/stores/user'
 import SavedSearchesModal from '~/components/search/SavedSearchesModal.vue'
+import SButton from '~/components/s/SButton.vue'
+import SEmptyState from '~/components/s/SEmptyState.vue'
+import SInput from '~/components/s/SInput.vue'
+import SSpinner from '~/components/s/SSpinner.vue'
+import { isCapacitorNative } from '~/utils/capacitor-env'
 
 const router = useRouter()
 const searchStore = useSearchStore()
 const userStore = useUserStore()
 const { canUse: canUseBusinessCapability } = useBusinessCapabilities()
 const searchInput = ref<HTMLInputElement | null>(null)
+const resultsEl = ref<HTMLElement | null>(null)
 const showAdvancedFilters = ref(false)
 const showSavedSearchesModal = ref(false)
 const selectedIndex = ref(-1)
 const startDate = ref('')
 const endDate = ref('')
+const uid = useId()
+const listboxId = `global-search-${uid}-results`
+const statusLabelId = `global-search-${uid}-status`
 
 // Check if user is staff to filter entity types
 const isStaff = computed(() => userStore.userData?.role === 'staff')
@@ -461,6 +381,31 @@ const suggestedActions = computed(() => {
   return actions
 })
 
+/** Results grouped by entity type; keyboard order follows the visual order. */
+const resultGroups = computed(() => {
+  const groups = new Map<string, any[]>()
+  for (const result of searchStore.results) {
+    const list = groups.get(result.type)
+    if (list) list.push(result)
+    else groups.set(result.type, [result])
+  }
+  let index = 0
+  return Array.from(groups, ([type, results]) => ({
+    type: type as SearchEntityType,
+    items: results.map((result) => ({ result, index: index++ })),
+  }))
+})
+
+const orderedResults = computed(() =>
+  resultGroups.value.flatMap((group) => group.items.map((entry) => entry.result))
+)
+
+const activeOptionId = computed(() =>
+  selectedIndex.value >= 0 && orderedResults.value[selectedIndex.value]
+    ? `${listboxId}-opt-${selectedIndex.value}`
+    : undefined
+)
+
 function runSuggestedAction(href: string) {
   searchStore.closeSearch()
   void router.push(href)
@@ -483,16 +428,22 @@ const handleSearchInput = () => {
 }
 
 const handleEnter = () => {
-  if (selectedIndex.value >= 0 && searchStore.results[selectedIndex.value]) {
-    handleResultClick(searchStore.results[selectedIndex.value])
-  } else if (searchStore.results.length > 0) {
-    handleResultClick(searchStore.results[0])
+  const results = orderedResults.value
+  if (selectedIndex.value >= 0 && results[selectedIndex.value]) {
+    handleResultClick(results[selectedIndex.value])
+  } else if (results.length > 0) {
+    handleResultClick(results[0])
   }
 }
 
 const navigateResults = (direction: number) => {
-  const maxIndex = searchStore.results.length - 1
+  const maxIndex = orderedResults.value.length - 1
   selectedIndex.value = Math.max(-1, Math.min(maxIndex, selectedIndex.value + direction))
+  void nextTick(() => {
+    resultsEl.value
+      ?.querySelector<HTMLElement>(`[data-index="${selectedIndex.value}"]`)
+      ?.scrollIntoView({ block: 'nearest' })
+  })
 }
 
 const handleResultClick = (result: any) => {
@@ -575,39 +526,36 @@ const getEntityIcon = (iconName: string) => {
   return icons[iconName] || MagnifyingGlassIcon
 }
 
-const getEntityTypeColor = (type: SearchEntityType) => {
-  const colors: Record<string, string> = {
-    receipts: 'bg-green-500',
-    inventory: 'bg-blue-500',
-    customers: 'bg-primary-400',
-    leads: 'bg-violet-500',
-    departments: 'bg-orange-500',
-    staff: 'bg-pink-500',
+const getEntityTone = (type: SearchEntityType) => {
+  const tones: Record<string, string> = {
+    receipts: 'success',
+    inventory: 'info',
+    customers: 'accent',
+    leads: 'accent',
+    departments: 'warning',
+    staff: 'neutral',
   }
-  return colors[type] || 'bg-gray-500'
+  return tones[type] || 'neutral'
 }
 
-const getEntityTypeBadgeColor = (type: SearchEntityType) => {
-  const colors: Record<string, string> = {
-    receipts: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300',
-    inventory: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300',
-    customers: 'bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300',
-    departments: 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300',
-    staff: 'bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-300',
-  }
-  return colors[type] || 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'
-}
-
-const getEntityTypeLabel = (type: SearchEntityType) => {
+const getEntityGroupLabel = (type: SearchEntityType) => {
   const labels: Record<string, string> = {
-    receipts: 'Sale',
-    inventory: 'Product',
-    customers: 'Customer',
-    departments: 'Department',
+    receipts: 'Sales',
+    inventory: 'Products',
+    customers: 'Customers',
+    leads: 'Leads',
+    departments: 'Departments',
     staff: 'Staff',
   }
   return labels[type] || type
 }
+
+watch(
+  () => searchStore.results,
+  () => {
+    if (selectedIndex.value > orderedResults.value.length - 1) selectedIndex.value = -1
+  }
+)
 
 // Watch for modal open to focus input
 watch(
@@ -625,21 +573,19 @@ watch(
   }
 )
 
-// Keyboard shortcut handler
+// The web dashboard layout owns Cmd+K; only native shells (hardware keyboards) rely on this one.
+const handleKeyDown = (e: KeyboardEvent) => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+    e.preventDefault()
+    searchStore.toggleSearch()
+  }
+}
+
 onMounted(() => {
-  const handleKeyDown = (e: KeyboardEvent) => {
-    // Cmd+K or Ctrl+K
-    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-      e.preventDefault()
-      searchStore.toggleSearch()
-    }
-  }
+  if (isCapacitorNative()) window.addEventListener('keydown', handleKeyDown)
+})
 
-  window.addEventListener('keydown', handleKeyDown)
-
-  // Cleanup
-  return () => {
-    window.removeEventListener('keydown', handleKeyDown)
-  }
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeyDown)
 })
 </script>

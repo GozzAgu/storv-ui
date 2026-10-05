@@ -1,1467 +1,926 @@
 <template>
-  <div :class="isCapacitorIos ? 'ios-profile-page' : pageClass">
-    <IosPageNavBar v-if="isCapacitorIos" title="Profile" />
-    <IosProfileSettings
-      v-if="isCapacitorIos"
-      :display-name="iosProfileDisplayName"
-      :email="profileData.email || leftCardLine2"
-      :avatar-initials="profileAvatarInitials"
-      :is-loading="isLoadingProfile"
-      :is-staff="isStaff"
-      :show-billing="!isStaff && userStore.isSuperAdmin"
-      :show-store-info="!isStaff && hasBusinessProfileContent"
-      :show-receipt-policies="!isStaff"
-      :subscription-label="iosSubscriptionLabel"
-      :store-summary="businessProfileDisplay.storeName || undefined"
-      :language="accountSettings.language"
-      :theme="accountSettings.theme"
-      :region="accountSettings.region"
-      :currency="accountSettings.currency"
-      :timezone="accountSettings.timezone"
-      :two-factor-enabled="securitySettings.twoFactor"
-      :session-count="securitySettings.activeSessions"
-      :role-label="roleBadgeLabel"
-      :has-photo="Boolean(profilePhotoUrl)"
-      :photo-uploading="isUploadingProfilePhoto"
-      @change-photo="iosProfilePhotoInput?.click()"
-      @remove-photo="removeProfilePhoto"
-      @edit-profile="openEditProfileModal"
-      @open-store-info="showStoreInfoModal = true"
-      @open-notifications="showNotificationsModal = true"
-      @open-language="showLanguageModal = true"
-      @open-theme="showThemeModal = true"
-      @open-region="showRegionModal = true"
-      @open-currency="showCurrencyModal = true"
-      @open-timezone="showTimezoneModal = true"
-      @open-password="showPasswordModal = true"
-      @toggle-two-factor="handle2FAToggle"
-      @open-sessions="showSessionsModal = true"
-      @open-roles="showRolesModal = true"
-      @open-receipt-policies="openReceiptPoliciesModal"
-      @replay-tour="replayDashboardTour"
-      @open-assistant="openAssistant()"
-    />
-    <input
-      v-if="isCapacitorIos"
-      ref="iosProfilePhotoInput"
-      type="file"
-      accept="image/jpeg,image/png,image/gif,image/webp"
-      class="hidden"
-      @change="handleProfilePhotoUpload"
-    />
+  <div class="ds-root s-c s-page s-profile">
+    <SPageHeader title="Profile" description="Your photo, business details, preferences, and security." />
 
-    <template v-if="!isCapacitorIos">
-    <DashboardPageHeader class="dash-page-header--unified">
-      <template #eyebrow>
-        <p :class="eyebrowClass">Account</p>
-      </template>
-      <template #title>
-        <h1 :class="pageTitleClass">Profile</h1>
-      </template>
-      <template #description>
-        <p :class="descriptionClass">
-          Your photo, business details, preferences, and security.
-        </p>
-      </template>
-    </DashboardPageHeader>
+    <div class="s-profile__layout">
+      <aside class="s-profile__aside">
+        <SCard class="s-profile__hero">
+          <div class="s-profile__identity">
+            <SAvatar :src="avatarImageUrl" :name="leftCardHeading" class="s-profile__avatar">
+              {{ profileAvatarInitials }}
+            </SAvatar>
+            <div v-if="isLoadingProfile" class="s-profile__identity-text" aria-hidden="true">
+              <SSkeleton width="40%" height="12px" />
+              <SSkeleton width="70%" height="24px" />
+              <SSkeleton width="55%" height="16px" />
+            </div>
+            <div v-else class="s-profile__identity-text">
+              <p class="s-profile__eyebrow">{{ isStaff ? 'Team member' : 'Business' }}</p>
+              <h2 class="s-profile__name">{{ leftCardHeading }}</h2>
+              <p class="s-profile__email">{{ leftCardLine2 || EMPTY_CELL }}</p>
+              <div class="s-profile__badges">
+                <SBadge tone="accent" size="md">{{ roleBadgeLabel }}</SBadge>
+                <SBadge v-if="leftCardBadgeExtra" size="md">{{ leftCardBadgeExtra }}</SBadge>
+              </div>
+            </div>
+          </div>
 
-    <div :class="profileGridClass">
-      <aside :class="profileSidebarClass">
-        <section :class="profileCardClass">
-          <div :class="profileCardBodyClass">
-            <div :class="profileAvatarClass" class="relative mx-auto">
-              <AccountAvatar :initials="profileAvatarInitials" />
-              <button
-                type="button"
-                class="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-gray-900 text-white shadow-sm transition hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100 disabled:opacity-50"
+          <div class="s-profile__controls">
+            <div class="s-profile__actions">
+              <SButton variant="primary" @click="openEditProfileModal">
+                <template #leading><Pencil :size="16" :stroke-width="2" aria-hidden="true" /></template>
+                Edit profile
+              </SButton>
+              <SButton
+                :loading="isUploadingProfilePhoto"
                 :disabled="isUploadingProfilePhoto"
-                aria-label="Upload profile photo"
                 @click="profilePhotoInput?.click()"
               >
-                <ArrowPathIcon v-if="isUploadingProfilePhoto" class="h-3.5 w-3.5 animate-spin" />
-                <CameraIcon v-else class="h-3.5 w-3.5" />
-              </button>
+                <template #leading><Camera :size="16" :stroke-width="2" aria-hidden="true" /></template>
+                {{ profilePhotoUrl ? 'Change photo' : 'Add photo' }}
+              </SButton>
+              <SButton v-if="profilePhotoUrl" variant="ghost" @click="removeProfilePhoto">
+                Remove photo
+              </SButton>
               <input
                 ref="profilePhotoInput"
                 type="file"
                 accept="image/jpeg,image/png,image/gif,image/webp"
-                class="hidden"
+                class="ds-sr-only"
+                tabindex="-1"
+                aria-hidden="true"
                 @change="handleProfilePhotoUpload"
               />
             </div>
-            <button
-              v-if="profilePhotoUrl"
-              type="button"
-              class="mx-auto mt-2.5 block text-[11px] font-medium text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-              @click="removeProfilePhoto"
-            >
-              Remove photo
-            </button>
-            <p class="dash-profile-card__hint">
-              Personal photo. Company logo lives in Settings.
-            </p>
-            <div v-if="isLoadingProfile" class="mx-auto mt-4 flex max-w-[180px] flex-col items-center space-y-2">
-              <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-label" />
-              <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-title" />
-              <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-meta" />
-              <span class="dash-skeleton dash-skeleton--chip" style="width: 4.75rem; height: 1.25rem" />
-            </div>
-            <template v-else-if="!isCapacitorIos">
-              <p :class="profileCardEyebrowClass">
-                {{ isStaff ? 'Team member' : 'Business' }}
-              </p>
-              <h2 :class="profileCardNameClass">
-                {{ leftCardHeading }}
-              </h2>
-              <p :class="profileCardMetaClass">
-                {{ leftCardLine2 || '-' }}
-              </p>
-              <span :class="profileRoleBadgeClass">
-                {{
-                  isStaff
-                    ? 'Staff'
-                    : profileData.role === 'superAdmin'
-                    ? 'Super Admin'
-                    : profileData.role || 'User'
-                }}
-              </span>
-              <p v-if="leftCardBadgeExtra" :class="[inlineNoteClass, 'mt-2']">
-                {{ leftCardBadgeExtra }}
-              </p>
-            </template>
-            <template v-else>
-              <span :class="profileRoleBadgeClass">
-                {{
-                  isStaff
-                    ? 'Staff'
-                    : profileData.role === 'superAdmin'
-                    ? 'Super Admin'
-                    : profileData.role || 'User'
-                }}
-              </span>
-            </template>
-
-            <div :class="profileStatBarClass">
-              <div :class="profileStatItemClass">
-                <p :class="profileStatLabelClass">Orders</p>
-                <p v-if="isLoadingStats" class="dash-skeleton dash-skeleton--line dash-skeleton--line-metric mx-auto mt-1" />
-                <p v-else :class="profileStatValueClass">
-                  {{ totalOrders }}
-                </p>
-              </div>
-              <div :class="profileStatItemClass">
-                <p :class="profileStatLabelClass">Products</p>
-                <p v-if="isLoadingStats" class="dash-skeleton dash-skeleton--line dash-skeleton--line-metric mx-auto mt-1" />
-                <p v-else :class="profileStatValueClass">
-                  {{ totalProducts }}
-                </p>
-              </div>
-              <div :class="profileStatItemClass">
-                <p :class="profileStatLabelClass">Customers</p>
-                <p v-if="isLoadingStats" class="dash-skeleton dash-skeleton--line dash-skeleton--line-metric mx-auto mt-1" />
-                <p v-else :class="profileStatValueClass">
-                  {{ totalCustomers }}
-                </p>
-              </div>
-            </div>
+            <p class="s-profile__hint">Personal photo. Company logo lives in Settings.</p>
           </div>
-        </section>
+
+          <dl class="s-metrics s-metrics--inline s-profile__stats">
+            <div class="s-metrics__item">
+              <dt class="s-metrics__label">Orders</dt>
+              <dd class="s-metrics__value">
+                <SSkeleton v-if="isLoadingStats" width="48px" height="24px" />
+                <template v-else>{{ totalOrders }}</template>
+              </dd>
+            </div>
+            <div class="s-metrics__item">
+              <dt class="s-metrics__label">Products</dt>
+              <dd class="s-metrics__value">
+                <SSkeleton v-if="isLoadingStats" width="48px" height="24px" />
+                <template v-else>{{ totalProducts }}</template>
+              </dd>
+            </div>
+            <div class="s-metrics__item">
+              <dt class="s-metrics__label">Customers</dt>
+              <dd class="s-metrics__value">
+                <SSkeleton v-if="isLoadingStats" width="48px" height="24px" />
+                <template v-else>{{ totalCustomers }}</template>
+              </dd>
+            </div>
+          </dl>
+        </SCard>
       </aside>
 
-      <div :class="[profileMainClass, isCapacitorIos ? 'dash-page-stack--ios-settings' : '']">
-        <CategoryTabs
-          :model-value="activeProfileTab"
-          :options="profileTabs"
-          ariaLabel="Profile sections"
-          @update:model-value="(value: string) => (activeProfileTab = value)"
-        />
-
-        <div v-show="activeProfileTab === 'profile'">
-        <DashboardSettingsPanel
+      <div class="s-profile__main">
+        <SCard
           :title="isStaff ? 'Staff profile' : 'Business profile'"
-          :subtitle="
-            isStaff ? 'Your details as a team member' : 'Update your business contact information'
-          "
+          :description="isStaff ? 'Your details as a team member' : 'Update your business contact information'"
         >
           <template #actions>
-            <button
-              v-if="!isEditingPersonalInfo"
-              type="button"
-              :class="editLinkClass"
-              @click="enableEditing('personal')"
-            >
+            <SButton size="sm" @click="openEditProfileModal">
+              <template #leading><Pencil :size="16" :stroke-width="2" aria-hidden="true" /></template>
               Edit
-            </button>
-            <template v-else>
-              <button type="button" :class="cancelLinkClass" @click="cancelEditing('personal')">
-                Cancel
-              </button>
-              <button type="button" :class="editLinkClass" @click="savePersonalInfo">Save</button>
-            </template>
+            </SButton>
           </template>
+          <SSkeleton v-if="isLoadingProfile" :lines="4" />
+          <dl v-else class="s-settings__facts">
+            <template v-if="!isStaff">
+              <div class="s-settings__span">
+                <dt>Business name</dt>
+                <dd>{{ profileData.businessName || EMPTY_CELL }}</dd>
+              </div>
+            </template>
+            <template v-else>
+              <div>
+                <dt>First name</dt>
+                <dd>{{ profileData.firstName || EMPTY_CELL }}</dd>
+              </div>
+              <div>
+                <dt>Last name</dt>
+                <dd>{{ profileData.lastName || EMPTY_CELL }}</dd>
+              </div>
+            </template>
+            <div>
+              <dt>Email</dt>
+              <dd class="s-profile__wrap">{{ profileData.email || EMPTY_CELL }}</dd>
+            </div>
+            <div>
+              <dt>Phone</dt>
+              <dd>{{ profileData.phone || EMPTY_CELL }}</dd>
+            </div>
+            <div class="s-settings__span">
+              <dt>Bio</dt>
+              <dd class="s-profile__wrap">{{ profileData.bio || EMPTY_CELL }}</dd>
+            </div>
+          </dl>
+        </SCard>
 
-          <div v-if="!isStaff" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div class="sm:col-span-2">
-              <label :class="labelClass">Business name</label>
-              <input
-                v-model="profileData.businessName"
-                type="text"
-                :disabled="!isEditingPersonalInfo"
-                :class="inputClass(isEditingPersonalInfo)"
-                placeholder="Your business or store name"
-              />
-            </div>
-            <div>
-              <label :class="labelClass">Email</label>
-              <input
-                v-model="profileData.email"
-                type="email"
-                :disabled="!isEditingPersonalInfo"
-                :class="inputClass(isEditingPersonalInfo)"
-                placeholder="Enter email"
-              />
-            </div>
-            <div>
-              <label :class="labelClass">Phone</label>
-              <input
-                v-model="profileData.phone"
-                type="tel"
-                :disabled="!isEditingPersonalInfo"
-                :class="inputClass(isEditingPersonalInfo)"
-                placeholder="Business phone"
-              />
-            </div>
-            <div class="sm:col-span-2">
-              <label :class="labelClass">Bio</label>
-              <textarea
-                v-model="profileData.bio"
-                rows="3"
-                :disabled="!isEditingPersonalInfo"
-                :class="[inputClass(isEditingPersonalInfo), 'min-h-[5rem] resize-y']"
-                placeholder="Tell customers about your business"
-              />
-            </div>
-          </div>
-          <div v-else class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <label :class="labelClass">First name</label>
-              <input
-                v-model="profileData.firstName"
-                type="text"
-                :disabled="!isEditingPersonalInfo"
-                :class="inputClass(isEditingPersonalInfo)"
-                placeholder="First name"
-              />
-            </div>
-            <div>
-              <label :class="labelClass">Last name</label>
-              <input
-                v-model="profileData.lastName"
-                type="text"
-                :disabled="!isEditingPersonalInfo"
-                :class="inputClass(isEditingPersonalInfo)"
-                placeholder="Last name"
-              />
-            </div>
-            <div>
-              <label :class="labelClass">Email</label>
-              <input
-                v-model="profileData.email"
-                type="email"
-                :disabled="!isEditingPersonalInfo"
-                :class="inputClass(isEditingPersonalInfo)"
-                placeholder="Work email"
-              />
-            </div>
-            <div>
-              <label :class="labelClass">Phone</label>
-              <input
-                v-model="profileData.phone"
-                type="tel"
-                :disabled="!isEditingPersonalInfo"
-                :class="inputClass(isEditingPersonalInfo)"
-                placeholder="Phone"
-              />
-            </div>
-            <div class="sm:col-span-2">
-              <label :class="labelClass">Bio</label>
-              <textarea
-                v-model="profileData.bio"
-                rows="3"
-                :disabled="!isEditingPersonalInfo"
-                :class="[inputClass(isEditingPersonalInfo), 'min-h-[5rem] resize-y']"
-                placeholder="Optional note"
-              />
-            </div>
-          </div>
-        </DashboardSettingsPanel>
-        </div>
-
-        <div v-show="activeProfileTab === 'store-info'">
-        <DashboardSettingsPanel
+        <SCard
           v-if="showBusinessProfilePanel"
           :title="isStaff ? 'Business profile' : 'Store information'"
-          :subtitle="
-            isStaff ? 'Your assigned branch and department' : 'Branch details from onboarding.'
-          "
+          :description="isStaff ? 'Your assigned branch and department' : 'Branch details from onboarding.'"
         >
-          <div v-if="isLoadingProfile" class="space-y-4">
-            <DashFieldGridSkeleton :count="isStaff ? 6 : 4" />
-          </div>
-          <div v-else-if="hasBusinessProfileContent" class="space-y-4">
-            <div
-              v-if="
-                isStaff &&
-                (businessProfileDisplay.departmentName ||
-                  businessProfileDisplay.position ||
-                  businessProfileDisplay.staffRole)
-              "
-              class="grid grid-cols-1 gap-4 sm:grid-cols-2"
-            >
+          <SSkeleton v-if="isLoadingProfile" :lines="isStaff ? 6 : 4" />
+          <dl v-else-if="hasBusinessProfileContent" class="s-settings__facts">
+            <template v-if="isStaff">
               <div v-if="businessProfileDisplay.departmentName">
-                <p :class="labelClass">Department</p>
-                <p :class="readonlyValueClass">
-                  {{ businessProfileDisplay.departmentName }}
-                </p>
+                <dt>Department</dt>
+                <dd>{{ businessProfileDisplay.departmentName }}</dd>
               </div>
               <div v-if="businessProfileDisplay.position">
-                <p :class="labelClass">Position</p>
-                <p :class="readonlyValueClass">
-                  {{ businessProfileDisplay.position }}
-                </p>
+                <dt>Position</dt>
+                <dd>{{ businessProfileDisplay.position }}</dd>
               </div>
               <div v-if="businessProfileDisplay.staffRole">
-                <p :class="labelClass">Team role</p>
-                <p :class="[readonlyValueClass, 'capitalize']">
-                  {{ businessProfileDisplay.staffRole }}
-                </p>
+                <dt>Team role</dt>
+                <dd class="s-settings__capitalize">{{ businessProfileDisplay.staffRole }}</dd>
               </div>
+            </template>
+            <div v-if="businessProfileDisplay.storeName">
+              <dt>Branch name</dt>
+              <dd>{{ businessProfileDisplay.storeName }}</dd>
             </div>
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div v-if="businessProfileDisplay.storeName">
-                <p :class="labelClass">Branch name</p>
-                <p :class="readonlyValueClass">
-                  {{ businessProfileDisplay.storeName }}
-                </p>
-              </div>
-              <div v-if="businessProfileDisplay.storeDescription">
-                <p :class="labelClass">Business type</p>
-                <p :class="readonlyValueClass">
-                  {{ businessProfileDisplay.storeDescription }}
-                </p>
-              </div>
-              <div v-if="businessProfileDisplay.storeEmail">
-                <p :class="labelClass">Store email</p>
-                <p :class="readonlyValueClass">
-                  {{ businessProfileDisplay.storeEmail }}
-                </p>
-              </div>
-              <div v-if="businessProfileDisplay.storePhone">
-                <p :class="labelClass">Store phone</p>
-                <p :class="readonlyValueClass">
-                  {{ businessProfileDisplay.storePhone }}
-                </p>
-              </div>
+            <div v-if="businessProfileDisplay.storeDescription">
+              <dt>Business type</dt>
+              <dd>{{ businessProfileDisplay.storeDescription }}</dd>
             </div>
-            <div v-if="businessProfileDisplay.storeAddress">
-              <p :class="labelClass">Address</p>
-              <p :class="readonlyValueClass">
-                {{ businessProfileDisplay.storeAddress }}
-              </p>
+            <div v-if="businessProfileDisplay.storeEmail">
+              <dt>Store email</dt>
+              <dd class="s-profile__wrap">{{ businessProfileDisplay.storeEmail }}</dd>
             </div>
-            <div v-if="!isStaff" :class="inlineDividerClass">
-              <NuxtLink to="/dashboard/settings" :class="editLinkClass"
-                >Manage store settings →</NuxtLink
-              >
+            <div v-if="businessProfileDisplay.storePhone">
+              <dt>Store phone</dt>
+              <dd>{{ businessProfileDisplay.storePhone }}</dd>
             </div>
-          </div>
-          <div v-else class="py-6 text-center">
-            <p class="text-xs text-gray-500 dark:text-gray-400">
-              {{
-                isStaff
-                  ? 'Your branch details are not available yet. Contact your administrator.'
-                  : 'No store information available.'
-              }}
-            </p>
-            <NuxtLink
-              v-if="!isStaff"
-              to="/dashboard/settings"
-              class="mt-3 inline-flex"
-              :class="editLinkClass"
-              >Set up store information</NuxtLink
-            >
-          </div>
-        </DashboardSettingsPanel>
-        </div>
+            <div v-if="businessProfileDisplay.storeAddress" class="s-settings__span">
+              <dt>Address</dt>
+              <dd class="s-profile__wrap">{{ businessProfileDisplay.storeAddress }}</dd>
+            </div>
+          </dl>
+          <SEmptyState
+            v-else
+            :title="isStaff ? 'Your branch details are not available yet' : 'No store information available'"
+            :description="isStaff ? 'Contact your administrator.' : undefined"
+          >
+            <template #icon><Store :size="24" :stroke-width="1.75" /></template>
+            <template v-if="!isStaff" #actions>
+              <SButton to="/dashboard/settings">Set up store information</SButton>
+            </template>
+          </SEmptyState>
+          <template v-if="!isStaff && !isLoadingProfile && hasBusinessProfileContent" #footer>
+            <SButton variant="ghost" size="sm" to="/dashboard/settings">
+              Manage store settings
+              <template #trailing><ChevronRight :size="16" :stroke-width="2" aria-hidden="true" /></template>
+            </SButton>
+          </template>
+        </SCard>
 
-        <div v-show="activeProfileTab === 'receipts'">
-        <DashboardSettingsPanel
+        <SCard
+          v-if="!isStaff && userStore.isSuperAdmin"
+          title="Plan & billing"
+          description="Your Storvv subscription."
+          flush
+          class="s-profile__list-card"
+        >
+          <ul class="s-list">
+            <li>
+              <NuxtLink
+                to="/dashboard/settings#settings-subscription"
+                class="s-list__item s-list__item--interactive s-profile__row"
+              >
+                <span class="s-list__lead"><CreditCard :size="20" :stroke-width="1.75" aria-hidden="true" /></span>
+                <span class="s-list__main">
+                  <span class="s-list__primary">Subscription & billing</span>
+                  <span class="s-list__secondary">{{ subscriptionLabel }}</span>
+                </span>
+                <span class="s-list__action">Manage</span>
+              </NuxtLink>
+            </li>
+          </ul>
+        </SCard>
+
+        <SCard
           v-if="!isStaff"
           title="Receipt terms & policies"
-          subtitle="Shown on printed and PDF receipts for your store."
+          description="Shown on printed and PDF receipts for your store."
         >
           <template #actions>
-            <button
-              v-if="!isEditingReceiptPolicies"
-              type="button"
-              :class="editLinkClass"
-              @click="startEditingReceiptPolicies"
-            >
+            <SButton size="sm" @click="openReceiptPoliciesModal">
+              <template #leading><Pencil :size="16" :stroke-width="2" aria-hidden="true" /></template>
               Edit
-            </button>
-            <template v-else>
-              <button type="button" :class="cancelLinkClass" @click="cancelEditingReceiptPolicies">
-                Cancel
-              </button>
-              <button type="button" :class="editLinkClass" @click="saveReceiptPolicies">
-                Save
-              </button>
-            </template>
+            </SButton>
           </template>
+          <dl class="s-settings__policy">
+            <div>
+              <dt>Sales terms & conditions</dt>
+              <dd class="s-profile__wrap">{{ receiptPoliciesForm.salesTerms || 'Not set' }}</dd>
+            </div>
+            <div>
+              <dt>Refund policy</dt>
+              <dd class="s-profile__wrap">{{ receiptPoliciesForm.refundPolicy || 'Not set' }}</dd>
+            </div>
+            <div>
+              <dt>Warranty policy</dt>
+              <dd class="s-profile__wrap">{{ receiptPoliciesForm.warrantyPolicy || 'Not set' }}</dd>
+            </div>
+          </dl>
+        </SCard>
 
-          <div class="space-y-4">
-            <div>
-              <label :class="labelClass">Sales terms & conditions</label>
-              <textarea
-                v-model="receiptPoliciesForm.salesTerms"
-                rows="4"
-                :disabled="!isEditingReceiptPolicies"
-                :class="policyTextareaClass"
-                placeholder="e.g. All sales are final unless otherwise stated…"
-              />
-            </div>
-            <div>
-              <label :class="labelClass">Refund policy</label>
-              <textarea
-                v-model="receiptPoliciesForm.refundPolicy"
-                rows="4"
-                :disabled="!isEditingReceiptPolicies"
-                :class="policyTextareaClass"
-                placeholder="e.g. Refunds within 7 days with receipt…"
-              />
-            </div>
-            <div>
-              <label :class="labelClass">Warranty policy</label>
-              <textarea
-                v-model="receiptPoliciesForm.warrantyPolicy"
-                rows="4"
-                :disabled="!isEditingReceiptPolicies"
-                :class="policyTextareaClass"
-                placeholder="e.g. Manufacturer warranty applies…"
-              />
+        <SCard title="Roles & permissions" description="Your role and what you can access.">
+          <template #actions>
+            <SButton size="sm" @click="showRolesModal = true">View permissions</SButton>
+          </template>
+          <div class="s-profile__role">
+            <span class="s-profile__mark" aria-hidden="true">
+              <component :is="roleHeaderIcon" :size="16" :stroke-width="1.75" />
+            </span>
+            <div class="s-profile__role-text">
+              <div class="s-profile__role-head">
+                <p class="s-settings__row-label">{{ roleCardTitle }}</p>
+                <SBadge v-if="roleBadgeLabel" tone="accent">{{ roleBadgeLabel }}</SBadge>
+              </div>
+              <p class="s-settings__row-hint">{{ roleCardDescription }}</p>
+              <div v-if="roleMetaItems.length > 0" class="s-profile__badges">
+                <SBadge v-for="meta in roleMetaItems" :key="meta.key" size="md">
+                  <component :is="meta.icon" :size="14" :stroke-width="2" aria-hidden="true" />
+                  {{ meta.text }}
+                </SBadge>
+              </div>
             </div>
           </div>
-        </DashboardSettingsPanel>
-        </div>
+        </SCard>
 
-        <div v-show="activeProfileTab === 'help'">
-        <DashboardSettingsPanel
-          title="Help & onboarding"
-          subtitle="Replay the tour, open help, or ask the assistant."
-          compact
+        <SCard
+          title="Preferences"
+          description="Theme, language, region, currency, and timezone."
+          flush
+          class="s-profile__list-card"
         >
-          <div class="space-y-0">
-            <div :class="settingRowClass">
-              <div class="flex min-w-0 flex-1 items-center gap-3">
-                <SparklesIcon :class="settingRowIconClass" />
-                <div>
-                  <p :class="settingRowTitleClass">Dashboard tour</p>
-                  <p :class="settingRowDescClass">
-                    Walk through navigation and key screens again.
-                  </p>
-                </div>
-              </div>
+          <ul class="s-list">
+            <li v-for="pref in preferenceRows" :key="pref.key">
               <button
                 type="button"
-                :class="editLinkClass"
+                class="s-list__item s-list__item--interactive s-profile__row"
+                aria-haspopup="dialog"
+                @click="pref.action"
+              >
+                <span class="s-list__lead"><component :is="pref.icon" :size="20" :stroke-width="1.75" aria-hidden="true" /></span>
+                <span class="s-list__main">
+                  <span class="s-list__primary">{{ pref.label }}</span>
+                  <span class="s-list__secondary">{{ pref.value }}</span>
+                </span>
+                <span class="s-list__action">Change</span>
+              </button>
+            </li>
+          </ul>
+        </SCard>
+
+        <SCard
+          title="Notifications"
+          description="How Storvv lets you know about activity."
+          flush
+          class="s-profile__list-card"
+        >
+          <ul class="s-list">
+            <li>
+              <button
+                type="button"
+                class="s-list__item s-list__item--interactive s-profile__row"
+                aria-haspopup="dialog"
+                @click="showNotificationsModal = true"
+              >
+                <span class="s-list__lead"><Bell :size="20" :stroke-width="1.75" aria-hidden="true" /></span>
+                <span class="s-list__main">
+                  <span class="s-list__primary">Notification channels</span>
+                  <span class="s-list__secondary">{{ accountSettings.notifications }}</span>
+                </span>
+                <span class="s-list__action">Manage</span>
+              </button>
+            </li>
+          </ul>
+        </SCard>
+
+        <SCard
+          title="Security"
+          description="Password, two-factor auth, and active sessions."
+          flush
+          class="s-profile__list-card"
+        >
+          <ul class="s-list">
+            <li>
+              <button
+                type="button"
+                class="s-list__item s-list__item--interactive s-profile__row"
+                aria-haspopup="dialog"
+                @click="showPasswordModal = true"
+              >
+                <span class="s-list__lead"><KeyRound :size="20" :stroke-width="1.75" aria-hidden="true" /></span>
+                <span class="s-list__main">
+                  <span class="s-list__primary">Password</span>
+                  <span class="s-list__secondary">Update your sign-in password</span>
+                </span>
+                <span class="s-list__action">Change</span>
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                class="s-list__item s-list__item--interactive s-profile__row"
+                aria-haspopup="dialog"
+                @click="handle2FAToggle"
+              >
+                <span class="s-list__lead"><ShieldCheck :size="20" :stroke-width="1.75" aria-hidden="true" /></span>
+                <span class="s-list__main">
+                  <span class="s-list__primary">Two-factor authentication</span>
+                  <span class="s-list__secondary">{{ securitySettings.twoFactor ? 'Enabled' : 'Not enabled' }}</span>
+                </span>
+                <span class="s-list__action" :class="{ 's-profile__action--danger': securitySettings.twoFactor }">
+                  {{ securitySettings.twoFactor ? 'Disable' : 'Enable' }}
+                </span>
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                class="s-list__item s-list__item--interactive s-profile__row"
+                aria-haspopup="dialog"
+                @click="showSessionsModal = true"
+              >
+                <span class="s-list__lead"><Smartphone :size="20" :stroke-width="1.75" aria-hidden="true" /></span>
+                <span class="s-list__main">
+                  <span class="s-list__primary">Active sessions</span>
+                  <span class="s-list__secondary">{{ securitySettings.activeSessions }} devices</span>
+                </span>
+                <span class="s-list__action">View all</span>
+              </button>
+            </li>
+          </ul>
+        </SCard>
+
+        <SCard
+          title="Help & onboarding"
+          description="Replay the tour, open help, or ask the assistant."
+          flush
+          class="s-profile__list-card"
+        >
+          <ul class="s-list">
+            <li>
+              <button
+                type="button"
+                class="s-list__item s-list__item--interactive s-profile__row"
                 :disabled="isReplayingTour"
                 @click="replayDashboardTour"
               >
-                {{ isReplayingTour ? 'Starting…' : 'Replay' }}
+                <span class="s-list__lead"><Sparkles :size="20" :stroke-width="1.75" aria-hidden="true" /></span>
+                <span class="s-list__main">
+                  <span class="s-list__primary">Dashboard tour</span>
+                  <span class="s-list__secondary">Walk through navigation and key screens again.</span>
+                </span>
+                <span class="s-list__action">{{ isReplayingTour ? 'Starting…' : 'Replay' }}</span>
               </button>
-            </div>
-            <div :class="settingRowClass">
-              <div class="flex min-w-0 flex-1 items-center gap-3">
-                <InformationCircleIcon :class="settingRowIconClass" />
-                <div>
-                  <p :class="settingRowTitleClass">Help center</p>
-                  <p :class="settingRowDescClass">
-                    Permissions, workflows, and plan limits.
-                  </p>
-                </div>
-              </div>
-              <NuxtLink to="/dashboard/help" :class="editLinkClass">Open</NuxtLink>
-            </div>
-            <div :class="[settingRowClass, '!border-0']">
-              <div class="flex min-w-0 flex-1 items-center gap-3">
-                <SparklesIcon :class="settingRowIconClass" />
-                <div>
-                  <p :class="settingRowTitleClass">Ask assistant</p>
-                  <p :class="settingRowDescClass">
-                    Get answers about Storvv features in plain language.
-                  </p>
-                </div>
-              </div>
-              <button type="button" :class="editLinkClass" @click="openAssistant()">
-                Ask
-              </button>
-            </div>
-          </div>
-        </DashboardSettingsPanel>
-        </div>
-
-        <div v-show="activeProfileTab === 'preferences'">
-        <DashboardSettingsPanel
-          title="Preferences"
-          subtitle="Language, region, currency, and display."
-          compact
-        >
-          <div class="space-y-0">
-            <div
-              v-for="pref in preferenceRows"
-              :key="pref.key"
-              :class="[settingRowClass, pref.key === 'timezone' ? '!border-0' : '']"
-            >
-              <div class="flex min-w-0 flex-1 items-center gap-3">
-                <component :is="pref.icon" :class="settingRowIconClass" />
-                <div class="min-w-0">
-                  <p :class="settingRowTitleClass">{{ pref.label }}</p>
-                  <p :class="settingRowDescClass">
-                    {{ pref.value }}
-                  </p>
-                </div>
-              </div>
-              <button type="button" :class="editLinkClass" @click="pref.action">
-                {{ pref.actionLabel }}
-              </button>
-            </div>
-          </div>
-        </DashboardSettingsPanel>
-        </div>
-
-        <div v-show="activeProfileTab === 'security'">
-        <DashboardSettingsPanel
-          title="Security"
-          subtitle="Password, two-factor auth, and active sessions."
-          compact
-        >
-          <div class="space-y-0">
-            <div :class="settingRowClass">
-              <div class="flex min-w-0 flex-1 items-center gap-3">
-                <KeyIcon :class="settingRowIconClass" />
-                <div>
-                  <p :class="settingRowTitleClass">Password</p>
-                  <p :class="settingRowDescClass">
-                    Update your sign-in password
-                  </p>
-                </div>
-              </div>
-              <button type="button" :class="editLinkClass" @click="showPasswordModal = true">
-                Change
-              </button>
-            </div>
-            <div :class="settingRowClass">
-              <div class="flex min-w-0 flex-1 items-center gap-3">
-                <ShieldCheckIcon :class="settingRowIconClass" />
-                <div>
-                  <p :class="settingRowTitleClass">
-                    Two-factor authentication
-                  </p>
-                  <p :class="settingRowDescClass">
-                    {{ securitySettings.twoFactor ? 'Enabled' : 'Not enabled' }}
-                  </p>
-                </div>
-              </div>
+            </li>
+            <li>
+              <NuxtLink to="/dashboard/help" class="s-list__item s-list__item--interactive s-profile__row">
+                <span class="s-list__lead"><Info :size="20" :stroke-width="1.75" aria-hidden="true" /></span>
+                <span class="s-list__main">
+                  <span class="s-list__primary">Help center</span>
+                  <span class="s-list__secondary">Permissions, workflows, and plan limits.</span>
+                </span>
+                <span class="s-list__action">Open</span>
+              </NuxtLink>
+            </li>
+            <li>
               <button
                 type="button"
-                :class="securitySettings.twoFactor ? iosDangerBtnClass : editLinkClass"
-                @click="handle2FAToggle"
+                class="s-list__item s-list__item--interactive s-profile__row"
+                @click="openAssistant()"
               >
-                {{ securitySettings.twoFactor ? 'Disable' : 'Enable' }}
+                <span class="s-list__lead"><MessageCircle :size="20" :stroke-width="1.75" aria-hidden="true" /></span>
+                <span class="s-list__main">
+                  <span class="s-list__primary">Ask assistant</span>
+                  <span class="s-list__secondary">Get answers about Storvv features in plain language.</span>
+                </span>
+                <span class="s-list__action">Ask</span>
               </button>
-            </div>
-            <div :class="[settingRowClass, '!border-0']">
-              <div class="flex min-w-0 flex-1 items-center gap-3">
-                <DevicePhoneMobileIcon :class="settingRowIconClass" />
-                <div>
-                  <p :class="settingRowTitleClass">
-                    Active sessions
-                  </p>
-                  <p :class="settingRowDescClass">
-                    {{ securitySettings.activeSessions }} devices
-                  </p>
-                </div>
-              </div>
-              <button type="button" :class="editLinkClass" @click="showSessionsModal = true">
-                View all
-              </button>
-            </div>
-          </div>
-        </DashboardSettingsPanel>
-        </div>
-
-        <div v-show="activeProfileTab === 'roles'">
-        <DashboardSettingsPanel
-          title="Roles & permissions"
-          subtitle="Your role and what you can access."
-        >
-          <div class="dash-roles">
-            <div class="dash-roles__hero">
-              <div class="dash-roles__hero-icon" aria-hidden="true">
-                <component :is="roleHeaderIcon" />
-              </div>
-              <div class="dash-roles__hero-body">
-                <div class="dash-roles__hero-top">
-                  <p class="dash-roles__hero-title">{{ roleCardTitle }}</p>
-                  <span v-if="roleBadgeLabel" class="dash-roles__badge">{{ roleBadgeLabel }}</span>
-                </div>
-                <p class="dash-roles__hero-desc">{{ roleCardDescription }}</p>
-                <div v-if="roleMetaItems.length > 0" class="dash-roles__meta">
-                  <span
-                    v-for="meta in roleMetaItems"
-                    :key="meta.key"
-                    class="dash-roles__meta-chip"
-                  >
-                    <component :is="meta.icon" aria-hidden="true" />
-                    {{ meta.text }}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <p class="dash-roles__section-label">
-                <ClipboardDocumentListIcon aria-hidden="true" />
-                Permissions
-              </p>
-
-              <p v-if="userPermissions.length === 0" class="dash-roles__empty">
-                Loading your access list…
-              </p>
-
-              <div v-else class="dash-roles__groups">
-                <div v-for="group in permissionGroups" :key="group.id">
-                  <p
-                    v-if="permissionGroups.length > 1"
-                    class="dash-roles__group-label"
-                  >
-                    <component :is="group.icon" aria-hidden="true" />
-                    {{ group.label }}
-                  </p>
-                  <ul class="dash-roles__list">
-                    <li
-                      v-for="item in group.items"
-                      :key="item.id"
-                      class="dash-roles__item"
-                    >
-                      <span class="dash-roles__check" aria-hidden="true">
-                        <CheckIcon />
-                      </span>
-                      <span class="dash-roles__item-text">{{ item.label }}</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            <p class="dash-roles__footnote">
-              <span class="dash-roles__footnote-icon" aria-hidden="true">
-                <InformationCircleIcon />
-              </span>
-              <span>
-                <template v-if="isStaff">
-                  Contact your super admin in Settings if you need a different role or department.
-                </template>
-                <template v-else>
-                  Manage team access under Settings → Departments and staff.
-                </template>
-              </span>
-            </p>
-          </div>
-        </DashboardSettingsPanel>
-        </div>
+            </li>
+          </ul>
+        </SCard>
       </div>
     </div>
-    </template>
   </div>
 
-  <!-- iOS: Edit profile -->
-  <Modal v-model="showEditProfileModal" :title="isStaff ? 'Staff profile' : 'Business profile'" size="lg">
-    <IosForm :class="iosProfileSheetClass" layout="fill">
-      <IosFormSection v-if="!isStaff" fixed>
-        <IosFormField label="Business name">
-          <IosFormInput
-            v-model="profileData.businessName"
-            :disabled="!isEditingPersonalInfo"
-            placeholder="Your business or store name"
-          />
-        </IosFormField>
-        <IosFormField label="Email">
-          <IosFormInput
+  <SDialog
+    v-model:open="showEditProfileModal"
+    :title="isStaff ? 'Staff profile' : 'Business profile'"
+    size="lg"
+    @update:open="(open: boolean) => !open && cancelEditing('personal')"
+  >
+    <form id="profile-edit-form" class="s-form" @submit.prevent="savePersonalInfoAndCloseModal">
+      <template v-if="!isStaff">
+        <SInput
+          v-model="profileData.businessName"
+          label="Business name"
+          :disabled="!isEditingPersonalInfo"
+          placeholder="Your business or store name"
+        />
+        <div class="s-form-pair">
+          <SInput
             v-model="profileData.email"
             type="email"
+            label="Email"
+            autocomplete="email"
             :disabled="!isEditingPersonalInfo"
             placeholder="Enter email"
           />
-        </IosFormField>
-        <IosFormField label="Phone">
-          <IosFormInput
+          <SInput
             v-model="profileData.phone"
             type="tel"
+            label="Phone"
+            autocomplete="tel"
             :disabled="!isEditingPersonalInfo"
             placeholder="Business phone"
           />
-        </IosFormField>
-        <IosFormField label="Bio">
-          <IosFormTextarea
-            v-model="profileData.bio"
-            :rows="3"
-            :disabled="!isEditingPersonalInfo"
-            extra-class="min-h-[5rem] resize-y"
-            placeholder="Tell customers about your business"
-          />
-        </IosFormField>
-      </IosFormSection>
-      <IosFormSection v-else fixed>
-        <IosFormField label="First name">
-          <IosFormInput
+        </div>
+        <STextarea
+          v-model="profileData.bio"
+          label="Bio"
+          :rows="3"
+          :disabled="!isEditingPersonalInfo"
+          placeholder="Tell customers about your business"
+        />
+      </template>
+      <template v-else>
+        <div class="s-form-pair">
+          <SInput
             v-model="profileData.firstName"
+            label="First name"
+            autocomplete="given-name"
             :disabled="!isEditingPersonalInfo"
             placeholder="First name"
           />
-        </IosFormField>
-        <IosFormField label="Last name">
-          <IosFormInput
+          <SInput
             v-model="profileData.lastName"
+            label="Last name"
+            autocomplete="family-name"
             :disabled="!isEditingPersonalInfo"
             placeholder="Last name"
           />
-        </IosFormField>
-        <IosFormField label="Email">
-          <IosFormInput
+        </div>
+        <div class="s-form-pair">
+          <SInput
             v-model="profileData.email"
             type="email"
+            label="Email"
+            autocomplete="email"
             :disabled="!isEditingPersonalInfo"
             placeholder="Work email"
           />
-        </IosFormField>
-        <IosFormField label="Phone">
-          <IosFormInput
+          <SInput
             v-model="profileData.phone"
             type="tel"
+            label="Phone"
+            autocomplete="tel"
             :disabled="!isEditingPersonalInfo"
             placeholder="Phone"
           />
-        </IosFormField>
-        <IosFormField label="Bio">
-          <IosFormTextarea
-            v-model="profileData.bio"
-            :rows="3"
-            :disabled="!isEditingPersonalInfo"
-            extra-class="min-h-[5rem] resize-y"
-            placeholder="Optional note"
-          />
-        </IosFormField>
-      </IosFormSection>
-    </IosForm>
+        </div>
+        <STextarea
+          v-model="profileData.bio"
+          label="Bio"
+          :rows="3"
+          :disabled="!isEditingPersonalInfo"
+          placeholder="Optional note"
+        />
+      </template>
+    </form>
     <template #footer>
-      <IosDrawerActions
-        primary-label="Save"
-        cancel-label="Cancel"
-        @cancel="cancelEditProfileModal"
-        @primary="savePersonalInfoAndCloseModal"
-      />
+      <SButton @click="cancelEditProfileModal">Cancel</SButton>
+      <SButton variant="primary" type="submit" form="profile-edit-form">Save</SButton>
     </template>
-  </Modal>
+  </SDialog>
 
-  <!-- iOS: Store information -->
-  <Modal v-model="showStoreInfoModal" title="Store information" size="lg">
-    <div :class="[iosProfileSheetClass, 'space-y-4']">
-      <div v-if="isLoadingProfile" class="space-y-3">
-        <div class="h-4 w-3/4 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10" />
-        <div class="h-4 w-1/2 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10" />
+  <SDialog
+    v-model:open="showReceiptPoliciesModal"
+    title="Receipt terms & policies"
+    description="Shown on printed and PDF receipts for your store."
+    size="lg"
+    @update:open="(open: boolean) => !open && cancelEditingReceiptPolicies()"
+  >
+    <form id="profile-receipt-form" class="s-form" @submit.prevent="saveReceiptPoliciesAndCloseModal">
+      <STextarea
+        v-model="receiptPoliciesForm.salesTerms"
+        label="Sales terms & conditions"
+        :rows="4"
+        :disabled="!isEditingReceiptPolicies"
+        placeholder="e.g. All sales are final unless otherwise stated…"
+      />
+      <STextarea
+        v-model="receiptPoliciesForm.refundPolicy"
+        label="Refund policy"
+        :rows="4"
+        :disabled="!isEditingReceiptPolicies"
+        placeholder="e.g. Refunds within 7 days with receipt…"
+      />
+      <STextarea
+        v-model="receiptPoliciesForm.warrantyPolicy"
+        label="Warranty policy"
+        :rows="4"
+        :disabled="!isEditingReceiptPolicies"
+        placeholder="e.g. Manufacturer warranty applies…"
+      />
+    </form>
+    <template #footer>
+      <SButton @click="cancelReceiptPoliciesModal">Cancel</SButton>
+      <SButton variant="primary" type="submit" form="profile-receipt-form">Save</SButton>
+    </template>
+  </SDialog>
+
+  <SDialog v-model:open="showRolesModal" title="Roles & permissions" :description="roleCardTitle" size="lg">
+    <div class="s-form">
+      <p v-if="userPermissions.length === 0" class="s-list__empty">Loading your access list…</p>
+      <div v-else class="s-profile-perms">
+        <section v-for="group in permissionGroups" :key="group.id" class="s-profile-perms__group">
+          <h3 v-if="permissionGroups.length > 1" class="s-profile-perms__label">
+            <component :is="group.icon" :size="14" :stroke-width="2" aria-hidden="true" />
+            {{ group.label }}
+          </h3>
+          <ul class="s-profile-perms__list">
+            <li v-for="item in group.items" :key="item.id" class="s-profile-perms__item">
+              <Check class="s-profile-perms__check" :size="16" :stroke-width="2.5" aria-hidden="true" />
+              <span>{{ item.label }}</span>
+            </li>
+          </ul>
+        </section>
       </div>
-      <div v-else-if="hasBusinessProfileContent" class="space-y-4">
-        <div
-          v-if="
-            isStaff &&
-            (businessProfileDisplay.departmentName ||
-              businessProfileDisplay.position ||
-              businessProfileDisplay.staffRole)
-          "
-          class="grid grid-cols-1 gap-4 sm:grid-cols-2"
-        >
-          <div v-if="businessProfileDisplay.departmentName">
-            <p :class="labelClass">Department</p>
-            <p :class="readonlyValueClass">{{ businessProfileDisplay.departmentName }}</p>
-          </div>
-          <div v-if="businessProfileDisplay.position">
-            <p :class="labelClass">Position</p>
-            <p :class="readonlyValueClass">{{ businessProfileDisplay.position }}</p>
-          </div>
-          <div v-if="businessProfileDisplay.staffRole">
-            <p :class="labelClass">Team role</p>
-            <p :class="[readonlyValueClass, 'capitalize']">{{ businessProfileDisplay.staffRole }}</p>
-          </div>
-        </div>
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div v-if="businessProfileDisplay.storeName">
-            <p :class="labelClass">Branch name</p>
-            <p :class="readonlyValueClass">{{ businessProfileDisplay.storeName }}</p>
-          </div>
-          <div v-if="businessProfileDisplay.storeDescription">
-            <p :class="labelClass">Business type</p>
-            <p :class="readonlyValueClass">{{ businessProfileDisplay.storeDescription }}</p>
-          </div>
-          <div v-if="businessProfileDisplay.storeEmail">
-            <p :class="labelClass">Store email</p>
-            <p :class="readonlyValueClass">{{ businessProfileDisplay.storeEmail }}</p>
-          </div>
-          <div v-if="businessProfileDisplay.storePhone">
-            <p :class="labelClass">Store phone</p>
-            <p :class="readonlyValueClass">{{ businessProfileDisplay.storePhone }}</p>
-          </div>
-        </div>
-        <div v-if="businessProfileDisplay.storeAddress">
-          <p :class="labelClass">Address</p>
-          <p :class="readonlyValueClass">{{ businessProfileDisplay.storeAddress }}</p>
-        </div>
-      </div>
-      <p v-else class="text-xs text-gray-500 dark:text-gray-400">
-        {{
-          isStaff
-            ? 'Your branch details are not available yet. Contact your administrator.'
-            : 'No store information available.'
-        }}
+      <p class="s-callout s-profile-perms__note">
+        <Info :size="16" :stroke-width="2" aria-hidden="true" />
+        <span>
+          <template v-if="isStaff">
+            Contact your super admin in Settings if you need a different role or department.
+          </template>
+          <template v-else>
+            Manage team access under Settings → Departments and staff.
+          </template>
+        </span>
       </p>
     </div>
     <template #footer>
-      <IosDrawerActions
-        :show-primary="!isStaff"
-        primary-label="Manage store"
-        cancel-label="Close"
-        @cancel="showStoreInfoModal = false"
-        @primary="navigateTo('/dashboard/settings')"
-      />
+      <SButton @click="showRolesModal = false">Close</SButton>
     </template>
-  </Modal>
+  </SDialog>
 
-  <!-- iOS: Receipt policies -->
-  <Modal v-model="showReceiptPoliciesModal" title="Receipt terms & policies" size="lg">
-    <IosForm :class="iosProfileSheetClass" layout="fill">
-      <IosFormSection fixed>
-        <IosFormField label="Sales terms & conditions">
-          <IosFormTextarea
-            v-model="receiptPoliciesForm.salesTerms"
-            :rows="4"
-            :disabled="!isEditingReceiptPolicies"
-            extra-class="min-h-[5rem] resize-y"
-            placeholder="e.g. All sales are final unless otherwise stated…"
-          />
-        </IosFormField>
-        <IosFormField label="Refund policy">
-          <IosFormTextarea
-            v-model="receiptPoliciesForm.refundPolicy"
-            :rows="4"
-            :disabled="!isEditingReceiptPolicies"
-            extra-class="min-h-[5rem] resize-y"
-            placeholder="e.g. Refunds within 7 days with receipt…"
-          />
-        </IosFormField>
-        <IosFormField label="Warranty policy">
-          <IosFormTextarea
-            v-model="receiptPoliciesForm.warrantyPolicy"
-            :rows="4"
-            :disabled="!isEditingReceiptPolicies"
-            extra-class="min-h-[5rem] resize-y"
-            placeholder="e.g. Manufacturer warranty applies…"
-          />
-        </IosFormField>
-      </IosFormSection>
-    </IosForm>
-    <template #footer>
-      <IosDrawerActions
-        primary-label="Save"
-        cancel-label="Cancel"
-        @cancel="cancelReceiptPoliciesModal"
-        @primary="saveReceiptPoliciesAndCloseModal"
-      />
-    </template>
-  </Modal>
-
-  <!-- iOS: Roles & permissions -->
-  <Modal v-model="showRolesModal" title="Roles & permissions" size="lg">
-    <div :class="iosProfileSheetClass">
-      <div class="dash-roles">
-        <div class="dash-roles__hero">
-          <div class="dash-roles__hero-icon" aria-hidden="true">
-            <component :is="roleHeaderIcon" />
-          </div>
-          <div class="dash-roles__hero-body">
-            <div class="dash-roles__hero-top">
-              <p class="dash-roles__hero-title">{{ roleCardTitle }}</p>
-              <span v-if="roleBadgeLabel" class="dash-roles__badge">{{ roleBadgeLabel }}</span>
-            </div>
-            <p class="dash-roles__hero-desc">{{ roleCardDescription }}</p>
-            <div v-if="roleMetaItems.length > 0" class="dash-roles__meta">
-              <span v-for="meta in roleMetaItems" :key="meta.key" class="dash-roles__meta-chip">
-                <component :is="meta.icon" aria-hidden="true" />
-                {{ meta.text }}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <p class="dash-roles__section-label">
-            <ClipboardDocumentListIcon aria-hidden="true" />
-            Permissions
-          </p>
-
-          <p v-if="userPermissions.length === 0" class="dash-roles__empty">
-            Loading your access list…
-          </p>
-
-          <div v-else class="dash-roles__groups">
-            <div v-for="group in permissionGroups" :key="group.id">
-              <p v-if="permissionGroups.length > 1" class="dash-roles__group-label">
-                <component :is="group.icon" aria-hidden="true" />
-                {{ group.label }}
-              </p>
-              <ul class="dash-roles__list">
-                <li v-for="item in group.items" :key="item.id" class="dash-roles__item">
-                  <span class="dash-roles__check" aria-hidden="true">
-                    <CheckIcon />
-                  </span>
-                  <span class="dash-roles__item-text">{{ item.label }}</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <p class="dash-roles__footnote">
-          <span class="dash-roles__footnote-icon" aria-hidden="true">
-            <InformationCircleIcon />
-          </span>
-          <span>
-            <template v-if="isStaff">
-              Contact your super admin in Settings if you need a different role or department.
-            </template>
-            <template v-else>
-              Manage team access under Settings → Departments and staff.
-            </template>
-          </span>
-        </p>
-      </div>
-    </div>
-    <template #footer>
-      <IosDrawerActions :show-primary="false" cancel-label="Close" @cancel="showRolesModal = false" />
-    </template>
-  </Modal>
-
-  <!-- Theme Change Modal -->
-  <Modal v-model="showThemeModal" title="Change Theme" size="md">
-    <div :class="[iosProfileSheetClass, 'space-y-4']">
-      <p class="text-xs text-gray-600 dark:text-gray-400">Select your preferred theme</p>
-      <div class="space-y-2">
+  <SDialog v-model:open="showThemeModal" title="Change theme" description="Select your preferred theme" size="md">
+    <div class="s-pick">
+      <div class="s-pick__scroll" role="radiogroup" aria-label="Theme">
         <button
           v-for="themeOption in themeOptions"
           :key="themeOption.value"
+          type="button"
+          role="radio"
+          class="s-pick__row"
+          :class="{ 's-pick__row--selected': currentThemeValue === themeOption.value }"
+          :aria-checked="currentThemeValue === themeOption.value"
           @click="selectTheme(themeOption.value as 'light' | 'dark' | 'system')"
-          :class="[
-            'w-full p-4 rounded-sm border-0 transition-all text-left',
-            currentThemeValue === themeOption.value
-              ? 'bg-gray-100 dark:bg-white/[0.08]'
-              : 'bg-gray-50/80 dark:bg-gray-800/50',
-          ]"
         >
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-xs font-medium text-gray-900 dark:text-gray-100">
-                {{ themeOption.label }}
-              </p>
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                {{ themeOption.description }}
-              </p>
-            </div>
-            <div
-              v-if="currentThemeValue === themeOption.value"
-              class="w-5 h-5 rounded-full bg-gray-900 dark:bg-white flex items-center justify-center"
-            >
-              <CheckCircleIcon class="w-4 h-4 text-white dark:text-gray-900" />
-            </div>
-          </div>
+          <span class="s-profile-pick__text">
+            <span class="s-pick__title">{{ themeOption.label }}</span>
+            <span class="s-pick__meta">{{ themeOption.description }}</span>
+          </span>
+          <Check
+            v-if="currentThemeValue === themeOption.value"
+            class="s-profile-pick__check"
+            :size="16"
+            :stroke-width="2.5"
+            aria-hidden="true"
+          />
         </button>
       </div>
     </div>
     <template #footer>
-      <IosDrawerActions
-        :show-primary="false"
-        cancel-label="Close"
-        @cancel="showThemeModal = false"
-      />
+      <SButton @click="showThemeModal = false">Close</SButton>
     </template>
-  </Modal>
+  </SDialog>
 
-  <!-- Language Selection Modal -->
-  <Modal v-model="showLanguageModal" title="Change Language" size="md">
-    <div :class="[iosProfileSheetClass, 'space-y-4']">
-      <p class="text-xs text-gray-600 dark:text-gray-400">Select your preferred language</p>
-      <div class="space-y-2 max-h-96 overflow-y-auto">
+  <SDialog v-model:open="showLanguageModal" title="Change language" description="Select your preferred language" size="md">
+    <div class="s-pick">
+      <div class="s-pick__scroll" role="radiogroup" aria-label="Language">
         <button
           v-for="lang in languages"
           :key="lang.code"
+          type="button"
+          role="radio"
+          class="s-pick__row"
+          :class="{ 's-pick__row--selected': accountSettings.language === lang.name }"
+          :aria-checked="accountSettings.language === lang.name"
           @click="selectLanguage(lang.code, lang.name)"
-          :class="[
-            'w-full p-4 rounded-sm border-0 transition-all text-left',
-            accountSettings.language === lang.name
-              ? 'bg-gray-100 dark:bg-white/[0.08]'
-              : 'bg-gray-50/80 dark:bg-gray-800/50',
-          ]"
         >
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-xs font-medium text-gray-900 dark:text-gray-100">{{ lang.name }}</p>
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ lang.nativeName }}</p>
-            </div>
-            <div
-              v-if="accountSettings.language === lang.name"
-              class="w-5 h-5 rounded-full bg-gray-900 dark:bg-white flex items-center justify-center"
-            >
-              <CheckCircleIcon class="w-4 h-4 text-white dark:text-gray-900" />
-            </div>
-          </div>
+          <span class="s-profile-pick__text">
+            <span class="s-pick__title">{{ lang.name }}</span>
+            <span class="s-pick__meta">{{ lang.nativeName }}</span>
+          </span>
+          <Check
+            v-if="accountSettings.language === lang.name"
+            class="s-profile-pick__check"
+            :size="16"
+            :stroke-width="2.5"
+            aria-hidden="true"
+          />
         </button>
       </div>
     </div>
     <template #footer>
-      <IosDrawerActions
-        :show-primary="false"
-        cancel-label="Close"
-        @cancel="showLanguageModal = false"
-      />
+      <SButton @click="showLanguageModal = false">Close</SButton>
     </template>
-  </Modal>
+  </SDialog>
 
-  <!-- Notifications Settings Modal -->
-  <Modal v-model="showNotificationsModal" title="Notification Preferences" size="lg">
-    <div :class="[iosProfileSheetClass, 'space-y-4 sm:space-y-5']">
-      <div class="space-y-4">
-        <div class="flex items-center justify-between py-4 border-b border-gray-200">
-          <div>
-            <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Email Notifications</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Receive notifications via email
-            </p>
-          </div>
-          <label class="relative inline-flex items-center cursor-pointer">
-            <input v-model="notificationSettings.email" type="checkbox" class="sr-only peer" />
-            <div
-              class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-gray-400/40 dark:peer-focus:ring-white/20 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-900 dark:peer-checked:bg-gray-200"
-            ></div>
-          </label>
-        </div>
-
-        <div class="flex items-center justify-between py-4 border-b border-gray-200">
-          <div>
-            <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Push Notifications</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Receive push notifications in browser
-            </p>
-          </div>
-          <label class="relative inline-flex items-center cursor-pointer">
-            <input
-              v-model="notificationSettings.push"
-              type="checkbox"
-              class="sr-only peer"
-              @change="handlePushNotificationToggle"
-            />
-            <div
-              class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-gray-400/40 dark:peer-focus:ring-white/20 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-900 dark:peer-checked:bg-gray-200"
-            ></div>
-          </label>
-        </div>
-
-        <div class="flex items-center justify-between py-4 border-b border-gray-200">
-          <div>
-            <p class="text-xs font-medium text-gray-900 dark:text-gray-100">SMS Notifications</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Receive notifications via SMS
-            </p>
-          </div>
-          <label class="relative inline-flex items-center cursor-pointer">
-            <input v-model="notificationSettings.sms" type="checkbox" class="sr-only peer" />
-            <div
-              class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-gray-400/40 dark:peer-focus:ring-white/20 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-900 dark:peer-checked:bg-gray-200"
-            ></div>
-          </label>
-        </div>
-
-        <div class="flex items-center justify-between py-4">
-          <div>
-            <p class="text-xs font-medium text-gray-900 dark:text-gray-100">In-App Notifications</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Show notifications within the app
-            </p>
-          </div>
-          <label class="relative inline-flex items-center cursor-pointer">
-            <input v-model="notificationSettings.inApp" type="checkbox" class="sr-only peer" />
-            <div
-              class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-gray-400/40 dark:peer-focus:ring-white/20 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-900 dark:peer-checked:bg-gray-200"
-            ></div>
-          </label>
-        </div>
+  <SDialog v-model:open="showNotificationsModal" title="Notification preferences" size="lg">
+    <div class="s-settings__rows">
+      <div class="s-settings__row">
+        <SCheckbox
+          v-model="notificationSettings.email"
+          variant="switch"
+          label="Email notifications"
+          description="Receive notifications via email"
+        />
+      </div>
+      <div class="s-settings__row">
+        <SCheckbox
+          v-model="notificationSettings.push"
+          variant="switch"
+          label="Push notifications"
+          description="Receive push notifications in browser"
+          @change="handlePushNotificationToggle"
+        />
+      </div>
+      <div class="s-settings__row">
+        <SCheckbox
+          v-model="notificationSettings.sms"
+          variant="switch"
+          label="SMS notifications"
+          description="Receive notifications via SMS"
+        />
+      </div>
+      <div class="s-settings__row">
+        <SCheckbox
+          v-model="notificationSettings.inApp"
+          variant="switch"
+          label="In-app notifications"
+          description="Show notifications within the app"
+        />
       </div>
     </div>
     <template #footer>
-      <IosDrawerActions
-        primary-label="Save changes"
-        @cancel="showNotificationsModal = false"
-        @primary="saveNotificationSettings"
-      />
+      <SButton @click="showNotificationsModal = false">Cancel</SButton>
+      <SButton variant="primary" @click="saveNotificationSettings">Save changes</SButton>
     </template>
-  </Modal>
+  </SDialog>
 
-  <!-- Password Change Modal -->
-  <Modal v-model="showPasswordModal" title="Change Password" size="md">
-    <IosForm :class="iosProfileSheetClass" layout="fill">
-      <IosFormSection fixed>
-        <p class="ios-form__hint dash-drawer-hint">
-          Enter your current password and choose a new one
-        </p>
-
-        <IosFormField label="Current Password">
-          <IosFormInput
-            v-model="passwordForm.currentPassword"
-            type="password"
-            placeholder="Enter current password"
-          />
-        </IosFormField>
-
-        <IosFormField label="New Password">
-          <IosFormInput
-            v-model="passwordForm.newPassword"
-            type="password"
-            :minlength="PASSWORD_MIN_LENGTH"
-            autocomplete="new-password"
-            placeholder="At least 12 characters, number and capital letter"
-          />
-          <p class="ios-form__hint dash-drawer-hint">
-            At least {{ PASSWORD_MIN_LENGTH }} characters, one number, one uppercase letter.
-          </p>
-          <ul
-            v-if="passwordForm.newPassword.length > 0"
-            class="mt-2 space-y-0.5 text-[10px] leading-tight text-gray-600 dark:text-gray-400"
-            aria-label="Password requirements"
-          >
-            <li v-for="rule in passwordRuleChecks" :key="rule.id" class="flex items-center gap-1.5">
-              <span
-                :class="
-                  rule.ok
-                    ? 'text-green-600 dark:text-green-400'
-                    : 'text-gray-400 dark:text-gray-500'
-                "
-                aria-hidden="true"
-                >{{ rule.ok ? '✓' : '○' }}</span
-              >
-              <span>{{ rule.label }}</span>
-            </li>
-          </ul>
-        </IosFormField>
-
-        <IosFormField label="Confirm New Password">
-          <IosFormInput
-            v-model="passwordForm.confirmPassword"
-            type="password"
-            placeholder="Confirm new password"
-          />
-          <p
-            v-if="
-              passwordForm.newPassword &&
-              passwordForm.confirmPassword &&
-              passwordForm.newPassword !== passwordForm.confirmPassword
-            "
-            class="text-xs text-red-500 mt-1"
-          >
-            Passwords do not match
-          </p>
-        </IosFormField>
-
-        <p
-          v-if="passwordError"
-          class="rounded-sm border border-red-200 bg-red-50 p-3 text-xs text-red-600 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400"
+  <SDialog
+    v-model:open="showPasswordModal"
+    title="Change password"
+    description="Enter your current password and choose a new one"
+    size="md"
+  >
+    <form id="profile-password-form" class="s-form" @submit.prevent="handlePasswordChange">
+      <SInput
+        v-model="passwordForm.currentPassword"
+        type="password"
+        label="Current password"
+        autocomplete="current-password"
+        placeholder="Enter current password"
+      />
+      <div>
+        <SInput
+          v-model="passwordForm.newPassword"
+          type="password"
+          label="New password"
+          :minlength="PASSWORD_MIN_LENGTH"
+          autocomplete="new-password"
+          placeholder="At least 12 characters, number and capital letter"
+          :hint="`At least ${PASSWORD_MIN_LENGTH} characters, one number, one uppercase letter.`"
+        />
+        <ul
+          v-if="passwordForm.newPassword.length > 0"
+          class="s-profile-rules"
+          aria-label="Password requirements"
         >
-          {{ passwordError }}
-        </p>
-      </IosFormSection>
-    </IosForm>
+          <li
+            v-for="rule in passwordRuleChecks"
+            :key="rule.id"
+            class="s-profile-rules__item"
+            :class="{ 's-profile-rules__item--ok': rule.ok }"
+          >
+            <Check v-if="rule.ok" :size="14" :stroke-width="2.5" aria-hidden="true" />
+            <Circle v-else :size="14" :stroke-width="2" aria-hidden="true" />
+            <span>{{ rule.label }}</span>
+          </li>
+        </ul>
+      </div>
+      <SInput
+        v-model="passwordForm.confirmPassword"
+        type="password"
+        label="Confirm new password"
+        autocomplete="new-password"
+        placeholder="Confirm new password"
+        :error="
+          passwordForm.newPassword &&
+          passwordForm.confirmPassword &&
+          passwordForm.newPassword !== passwordForm.confirmPassword
+            ? 'Passwords do not match'
+            : undefined
+        "
+      />
+      <p v-if="passwordError" class="s-profile-error" role="alert">{{ passwordError }}</p>
+    </form>
     <template #footer>
-      <IosDrawerActions
-        primary-label="Change password"
-        :primary-loading="isChangingPassword"
-        :primary-disabled="
+      <SButton
+        @click="
+          () => {
+            showPasswordModal = false
+            resetPasswordForm()
+          }
+        "
+      >
+        Cancel
+      </SButton>
+      <SButton
+        variant="primary"
+        type="submit"
+        form="profile-password-form"
+        :loading="isChangingPassword"
+        :disabled="
           isChangingPassword ||
           !passwordForm.currentPassword ||
           !passwordForm.newPassword ||
           passwordForm.newPassword !== passwordForm.confirmPassword ||
           !isPasswordPolicyValid(passwordForm.newPassword)
         "
-        @cancel="
-          () => {
-            showPasswordModal = false
-            resetPasswordForm()
-          }
-        "
-        @primary="handlePasswordChange"
-      />
+      >
+        Change password
+      </SButton>
     </template>
-  </Modal>
+  </SDialog>
 
-  <!-- Active Sessions Modal -->
-  <Modal v-model="showSessionsModal" title="Active Sessions" size="lg">
-    <div :class="[iosProfileSheetClass, 'space-y-4']">
-      <p class="text-xs text-gray-600 dark:text-gray-400">
-        Manage devices where you're currently signed in
-      </p>
-      <div v-if="isLoadingSessions" class="space-y-3">
-        <div
-          v-for="i in 3"
-          :key="i"
-          class="flex items-center justify-between p-4 rounded-sm"
-        >
-          <div class="flex min-w-0 flex-1 items-start gap-2">
-            <span class="dash-skeleton dash-skeleton--thumb mt-0.5" />
-            <div class="min-w-0 flex-1 space-y-1.5">
-              <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-title" />
-              <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-meta" />
-              <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-meta" />
-            </div>
-          </div>
-          <span class="dash-skeleton dash-skeleton--line dash-skeleton--select" />
+  <SDialog
+    v-model:open="showSessionsModal"
+    title="Active sessions"
+    description="Manage devices where you're currently signed in"
+    size="lg"
+  >
+    <ul v-if="isLoadingSessions" class="s-list" aria-label="Loading sessions">
+      <li v-for="i in 3" :key="i" class="s-list__item s-profile-session" aria-hidden="true">
+        <SSkeleton width="20px" height="20px" />
+        <div class="s-list__main">
+          <SSkeleton width="45%" height="14px" />
+          <SSkeleton width="60%" height="12px" />
         </div>
-      </div>
-      <div v-else-if="activeSessions.length === 0" class="text-center py-8">
-        <p class="text-xs text-gray-500 dark:text-gray-400">No active sessions found</p>
-      </div>
-      <div v-else class="space-y-3">
-        <div
-          v-for="(session, index) in activeSessions"
-          :key="index"
-          class="p-4 rounded-sm hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
-        >
-          <div class="flex items-center justify-between">
-            <div class="flex-1">
-              <div class="flex items-center gap-2 mb-1">
-                <DevicePhoneMobileIcon class="w-5 h-5 text-gray-400 dark:text-gray-500" />
-                <p class="text-xs font-medium text-gray-900 dark:text-gray-100">
-                  {{ session.device }}
-                </p>
-                <span
-                  v-if="session.current"
-                  class="px-2 py-0.5 text-xs font-medium bg-gray-100 dark:bg-white/[0.08] text-gray-700 dark:text-gray-300 rounded-full"
-                >
-                  Current
-                </span>
-              </div>
-              <p class="text-xs text-gray-500 dark:text-gray-400">{{ session.location }}</p>
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Last active: {{ formatDate(session.lastActive) }}
-              </p>
-            </div>
-            <button
-              v-if="!session.current"
-              @click="revokeSession(index)"
-              class="px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-sm transition-colors"
-            >
-              Revoke
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+        <SSkeleton width="64px" height="32px" />
+      </li>
+    </ul>
+    <p v-else-if="activeSessions.length === 0" class="s-list__empty">No active sessions found</p>
+    <ul v-else class="s-list" aria-label="Signed-in devices">
+      <li v-for="(session, index) in activeSessions" :key="index" class="s-list__item s-profile-session">
+        <span class="s-list__lead"><Smartphone :size="20" :stroke-width="1.75" aria-hidden="true" /></span>
+        <span class="s-list__main">
+          <span class="s-profile-session__head">
+            <span class="s-list__primary">{{ session.device }}</span>
+            <SBadge v-if="session.current" tone="accent">Current</SBadge>
+          </span>
+          <span class="s-list__secondary">{{ session.location }}</span>
+          <span class="s-list__secondary">Last active: {{ formatDate(session.lastActive) }}</span>
+        </span>
+        <SButton v-if="!session.current" variant="ghost" size="sm" @click="revokeSession(index)">
+          Revoke
+        </SButton>
+      </li>
+    </ul>
     <template #footer>
-      <IosDrawerActions
-        cancel-label="Close"
-        primary-variant="danger"
-        primary-label="Revoke all others"
-        :show-primary="activeSessions.length > 1"
-        @cancel="showSessionsModal = false"
-        @primary="revokeAllSessions"
-      />
+      <SButton @click="showSessionsModal = false">Close</SButton>
+      <SButton v-if="activeSessions.length > 1" variant="danger" @click="revokeAllSessions">
+        Revoke all others
+      </SButton>
     </template>
-  </Modal>
+  </SDialog>
 
-  <!-- Region Selection Modal -->
-  <Modal v-model="showRegionModal" title="Change Region" size="md">
-    <div :class="[iosProfileSheetClass, 'space-y-4']">
-      <p class="text-xs text-gray-600 dark:text-gray-400">Select your region</p>
-      <div class="space-y-2 max-h-96 overflow-y-auto">
+  <SDialog v-model:open="showRegionModal" title="Change region" description="Select your region" size="md">
+    <div class="s-pick">
+      <div class="s-pick__scroll" role="radiogroup" aria-label="Region">
         <button
           v-for="region in regions"
           :key="region.code"
+          type="button"
+          role="radio"
+          class="s-pick__row"
+          :class="{ 's-pick__row--selected': accountSettings.region === region.name }"
+          :aria-checked="accountSettings.region === region.name"
           @click="selectRegion(region.code, region.name)"
-          :class="[
-            'w-full p-4 rounded-sm border-0 transition-all text-left',
-            accountSettings.region === region.name
-              ? 'bg-gray-100 dark:bg-white/[0.08]'
-              : 'bg-gray-50/80 dark:bg-gray-800/50',
-          ]"
         >
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <span class="text-xl">{{ region.flag }}</span>
-              <div>
-                <p class="text-xs font-medium text-gray-900 dark:text-gray-100">
-                  {{ region.name }}
-                </p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">{{ region.code }}</p>
-              </div>
-            </div>
-            <div
-              v-if="accountSettings.region === region.name"
-              class="w-5 h-5 rounded-full bg-gray-900 dark:bg-white flex items-center justify-center"
-            >
-              <CheckCircleIcon class="w-4 h-4 text-white dark:text-gray-900" />
-            </div>
-          </div>
+          <span class="s-profile-pick__flag" aria-hidden="true">{{ region.flag }}</span>
+          <span class="s-profile-pick__text">
+            <span class="s-pick__title">{{ region.name }}</span>
+            <span class="s-pick__meta">{{ region.code }}</span>
+          </span>
+          <Check
+            v-if="accountSettings.region === region.name"
+            class="s-profile-pick__check"
+            :size="16"
+            :stroke-width="2.5"
+            aria-hidden="true"
+          />
         </button>
       </div>
     </div>
     <template #footer>
-      <IosDrawerActions
-        :show-primary="false"
-        cancel-label="Close"
-        @cancel="showRegionModal = false"
-      />
+      <SButton @click="showRegionModal = false">Close</SButton>
     </template>
-  </Modal>
+  </SDialog>
 
-  <!-- Currency Selection Modal -->
-  <Modal v-model="showCurrencyModal" title="Change Currency" size="md">
-    <div :class="[iosProfileSheetClass, 'space-y-4']">
-      <p class="text-xs text-gray-600 dark:text-gray-400">Select your currency</p>
-      <div class="space-y-2 max-h-96 overflow-y-auto">
+  <SDialog v-model:open="showCurrencyModal" title="Change currency" description="Select your currency" size="md">
+    <div class="s-pick">
+      <div class="s-pick__scroll" role="radiogroup" aria-label="Currency">
         <button
           v-for="currency in currencies"
           :key="currency.code"
+          type="button"
+          role="radio"
+          class="s-pick__row"
+          :class="{ 's-pick__row--selected': accountSettings.currency === currency.code }"
+          :aria-checked="accountSettings.currency === currency.code"
           @click="selectCurrency(currency.code, currency.name, currency.symbol)"
-          :class="[
-            'w-full p-4 rounded-sm border-0 transition-all text-left',
-            accountSettings.currency === currency.code
-              ? 'bg-gray-100 dark:bg-white/[0.08]'
-              : 'bg-gray-50/80 dark:bg-gray-800/50',
-          ]"
         >
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-xs font-medium text-gray-900 dark:text-gray-100">
-                {{ currency.name }}
-              </p>
-              <p class="text-xs text-gray-500 dark:text-gray-400">
-                {{ currency.symbol }} {{ currency.code }}
-              </p>
-            </div>
-            <div
-              v-if="accountSettings.currency === currency.code"
-              class="w-5 h-5 rounded-full bg-gray-900 dark:bg-white flex items-center justify-center"
-            >
-              <CheckCircleIcon class="w-4 h-4 text-white dark:text-gray-900" />
-            </div>
-          </div>
+          <span class="s-profile-pick__text">
+            <span class="s-pick__title">{{ currency.name }}</span>
+            <span class="s-pick__meta">{{ currency.symbol }} {{ currency.code }}</span>
+          </span>
+          <Check
+            v-if="accountSettings.currency === currency.code"
+            class="s-profile-pick__check"
+            :size="16"
+            :stroke-width="2.5"
+            aria-hidden="true"
+          />
         </button>
       </div>
     </div>
     <template #footer>
-      <IosDrawerActions
-        :show-primary="false"
-        cancel-label="Close"
-        @cancel="showCurrencyModal = false"
-      />
+      <SButton @click="showCurrencyModal = false">Close</SButton>
     </template>
-  </Modal>
+  </SDialog>
 
-  <!-- Timezone Selection Modal -->
-  <Modal v-model="showTimezoneModal" title="Change Timezone" size="md">
-    <div :class="[iosProfileSheetClass, 'space-y-4']">
-      <p class="text-xs text-gray-600 dark:text-gray-400">Select your timezone</p>
-      <div>
-        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-          Timezone
-        </label>
-        <select
-          v-model="selectedTimezone"
-          class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-gray-400/40 outline-none"
-        >
-          <option v-for="tz in timezones" :key="tz.value" :value="tz.value">
-            {{ tz.label }}
-          </option>
-        </select>
-      </div>
-    </div>
+  <SDialog v-model:open="showTimezoneModal" title="Change timezone" description="Select your timezone" size="md">
+    <SSelect v-model="selectedTimezone" label="Timezone" :options="timezones" />
     <template #footer>
-      <IosDrawerActions
-        primary-label="Save"
-        @cancel="showTimezoneModal = false"
-        @primary="saveTimezone"
-      />
+      <SButton @click="showTimezoneModal = false">Cancel</SButton>
+      <SButton variant="primary" @click="saveTimezone">Save</SButton>
     </template>
-  </Modal>
+  </SDialog>
 
-  <!-- 2FA Setup Modal -->
   <TwoFactorSetup
     v-model="show2FASetupModal"
     @success="handle2FASetupSuccess"
     @error="handle2FAError"
   />
 
-  <!-- 2FA Disable Modal -->
-  <Modal v-model="show2FADisableModal" title="Disable Two-Factor Authentication" size="md">
-    <div :class="[iosProfileSheetClass, 'space-y-4']">
-      <p class="text-xs text-gray-600 dark:text-gray-400">
-        Enter your password and authenticator code to disable two-factor authentication.
-      </p>
-      <div>
-        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-          Password
-        </label>
-        <input
-          v-model="disable2FAPassword"
-          type="password"
-          class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-gray-400/40 outline-none"
-          placeholder="Enter your password"
-          @keyup.enter="handleDisable2FA"
-        />
-      </div>
-      <div>
-        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-          Authenticator code
-        </label>
-        <input
-          v-model="disable2FATotp"
-          type="text"
-          inputmode="numeric"
-          autocomplete="one-time-code"
-          maxlength="6"
-          class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-gray-400/40 outline-none tracking-[0.25em]"
-          placeholder="6-digit code"
-          @keyup.enter="handleDisable2FA"
-        />
-      </div>
-      <div
-        v-if="disable2FAError"
-        class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-sm"
-      >
-        <p class="text-xs text-red-600 dark:text-red-400">{{ disable2FAError }}</p>
-      </div>
+  <SDialog
+    v-model:open="show2FADisableModal"
+    title="Disable two-factor authentication"
+    description="Enter your password and authenticator code to disable two-factor authentication."
+    size="md"
+  >
+    <div class="s-form">
+      <SInput
+        v-model="disable2FAPassword"
+        type="password"
+        label="Password"
+        autocomplete="current-password"
+        placeholder="Enter your password"
+        @keyup.enter="handleDisable2FA"
+      />
+      <SInput
+        v-model="disable2FATotp"
+        label="Authenticator code"
+        inputmode="numeric"
+        autocomplete="one-time-code"
+        maxlength="6"
+        class="s-otp-input"
+        placeholder="6-digit code"
+        @keyup.enter="handleDisable2FA"
+      />
+      <p v-if="disable2FAError" class="s-profile-error" role="alert">{{ disable2FAError }}</p>
     </div>
     <template #footer>
-      <IosDrawerActions
-        primary-variant="danger"
-        primary-label="Disable 2FA"
-        :primary-loading="isDisabling2FA"
-        :primary-disabled="isDisabling2FA || !disable2FAPassword || disable2FATotp.trim().length !== 6"
-        @cancel="
+      <SButton
+        @click="
           () => {
             show2FADisableModal = false
             disable2FAPassword = ''
@@ -1469,42 +928,54 @@
             disable2FAError = ''
           }
         "
-        @primary="handleDisable2FA"
-      />
+      >
+        Cancel
+      </SButton>
+      <SButton
+        variant="danger"
+        :loading="isDisabling2FA"
+        :disabled="isDisabling2FA || !disable2FAPassword || disable2FATotp.trim().length !== 6"
+        @click="handleDisable2FA"
+      >
+        Disable 2FA
+      </SButton>
     </template>
-  </Modal>
+  </SDialog>
 </template>
 
 <script setup lang="ts">
+import SDialog from '~/components/s/SDialog.vue'
 import { ref, reactive, watch, onMounted, computed } from 'vue'
+import type { Component } from 'vue'
 import {
-  LanguageIcon,
-  BellIcon,
-  MoonIcon,
-  CalendarIcon,
-  KeyIcon,
-  ShieldCheckIcon,
-  DevicePhoneMobileIcon,
-  CheckCircleIcon,
-  CheckIcon,
-  InformationCircleIcon,
-  GlobeAltIcon,
-  CurrencyDollarIcon,
-  ChevronRightIcon,
-  BuildingStorefrontIcon,
-  UserGroupIcon,
-  CubeIcon,
-  ReceiptPercentIcon,
-  ChartBarIcon,
-  Cog6ToothIcon,
-  EyeIcon,
-  ClipboardDocumentListIcon,
-  SparklesIcon,
-  CameraIcon,
-  ArrowPathIcon,
-} from '~/utils/app-icons'
+  Bell,
+  Camera,
+  ChartColumn,
+  Check,
+  ChevronRight,
+  Circle,
+  Clock,
+  Coins,
+  CreditCard,
+  Eye,
+  Globe,
+  Info,
+  KeyRound,
+  Languages,
+  MessageCircle,
+  Package,
+  Pencil,
+  Receipt,
+  Settings,
+  ShieldCheck,
+  Smartphone,
+  Sparkles,
+  Store,
+  SunMoon,
+  Users,
+} from '@lucide/vue'
 import { useDashboardAssistant } from '~/composables/useDashboardAssistant'
-import type { FunctionalComponent } from 'vue'
+import { useAccountAvatar } from '~/composables/useAccountAvatar'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useUser, type StoreDetails } from '~/composables/useUser'
 import { useTheme } from '~/composables/useTheme'
@@ -1525,21 +996,19 @@ import {
   fillProfileStoreInfoFromStore,
   type StaffWorkspaceContext,
 } from '~/composables/useStaffWorkspaceContext'
-import Modal from '~/components/ui/Modal.vue'
-import Button from '~/components/ui/Button.vue'
-import CategoryTabs from '~/components/ui/CategoryTabs.vue'
-import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
-import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
-import IosProfileSettings from '~/components/ios/IosProfileSettings.vue'
-import AccountAvatar from '~/components/ui/AccountAvatar.vue'
-import {
-  IosForm,
-  IosFormSection,
-  IosFormField,
-  IosFormInput,
-  IosFormTextarea,
-} from '~/components/ios/forms'
+import SAvatar from '~/components/s/SAvatar.vue'
+import SBadge from '~/components/s/SBadge.vue'
+import SButton from '~/components/s/SButton.vue'
+import SCard from '~/components/s/SCard.vue'
+import SCheckbox from '~/components/s/SCheckbox.vue'
+import SEmptyState from '~/components/s/SEmptyState.vue'
+import SInput from '~/components/s/SInput.vue'
+import SPageHeader from '~/components/s/SPageHeader.vue'
+import SSelect from '~/components/s/SSelect.vue'
+import SSkeleton from '~/components/s/SSkeleton.vue'
+import STextarea from '~/components/s/STextarea.vue'
 import TwoFactorSetup from '~/components/auth/TwoFactorSetup.vue'
+import { EMPTY_CELL } from '~/utils/ui-empty'
 import { SUBSCRIPTION_PLANS, resolveEffectiveSubscriptionPlan } from '~/types/subscription'
 import { isCloudinaryUrl } from '~/utils/cloudinary'
 import {
@@ -1563,48 +1032,7 @@ useHead({
   title: 'Profile - Storvv',
 })
 
-const {
-  eyebrowClass,
-  pageTitleClass,
-  descriptionClass,
-  pageClass,
-  profileGridClass,
-  profileSidebarClass,
-  profileMainClass,
-  profileCardClass,
-  profileCardBodyClass,
-  profileAvatarClass,
-  profileCardEyebrowClass,
-  profileCardNameClass,
-  profileCardMetaClass,
-  profileRoleBadgeClass,
-  profileStatBarClass,
-  profileStatItemClass,
-  profileStatValueClass,
-  profileStatLabelClass,
-  profileStatDividerClass,
-  labelClass,
-  inputClass,
-  editLinkClass,
-  cancelLinkClass,
-  settingRowClass,
-  settingRowIconClass,
-  settingRowTitleClass,
-  settingRowDescClass,
-  readonlyValueClass,
-  inlineNoteClass,
-  inlineDividerClass,
-} = useDashboardSettingsChrome()
-
-const { isCapacitorIos } = useIsCapacitorIos()
-const router = useRouter()
-
-const iosProfileSheetClass = computed(() => (isCapacitorIos.value ? 'ios-profile-sheet' : ''))
-const iosDangerBtnClass =
-  'inline-flex h-8 items-center rounded-[var(--saas-radius-control,0.5rem)] bg-red-500/10 px-3 text-sm font-normal text-red-600 dark:text-red-400'
-
 const showEditProfileModal = ref(false)
-const showStoreInfoModal = ref(false)
 const showReceiptPoliciesModal = ref(false)
 const showRolesModal = ref(false)
 
@@ -1678,11 +1106,6 @@ const backupReceiptPolicies = reactive({
 })
 const isEditingReceiptPolicies = ref(false)
 
-const policyTextareaClass = computed(() => [
-  inputClass(isEditingReceiptPolicies.value),
-  'min-h-[5rem] resize-y',
-])
-
 // Edit state
 const isEditingPersonalInfo = ref(false)
 const isLoadingProfile = ref(true)
@@ -1701,7 +1124,7 @@ const staffStore = useStaffStore()
 const storesStore = useStoresStore()
 const userStore = useUserStore()
 
-const iosSubscriptionLabel = computed(() => {
+const subscriptionLabel = computed(() => {
   const plan = resolveEffectiveSubscriptionPlan(userStore.userData)
   return SUBSCRIPTION_PLANS.find((p) => p.id === plan)?.name || 'Storvv Micro'
 })
@@ -2132,18 +1555,6 @@ const showBusinessProfilePanel = computed(
   () => isLoadingProfile.value || !isStaff.value || isStaff.value
 )
 
-const profileTabs = computed(() => [
-  { value: 'profile', label: isStaff.value ? 'Staff profile' : 'Business profile' },
-  { value: 'store-info', label: isStaff.value ? 'Business profile' : 'Store information' },
-  { value: 'receipts', label: 'Receipt terms' },
-  { value: 'help', label: 'Help' },
-  { value: 'preferences', label: 'Preferences' },
-  { value: 'security', label: 'Security' },
-  { value: 'roles', label: 'Roles' },
-])
-
-const activeProfileTab = ref('profile')
-
 const businessProfileDisplay = computed(() => ({
   storeName:
     storeInfo.storeName || staffWorkspace.value.storeName || storesStore.currentStore?.name || '',
@@ -2214,9 +1625,9 @@ const profileAvatarInitials = computed(() => {
 })
 
 const profilePhotoInput = ref<HTMLInputElement | null>(null)
-const iosProfilePhotoInput = ref<HTMLInputElement | null>(null)
 const isUploadingProfilePhoto = ref(false)
 const profilePhotoUrl = computed(() => userStore.userData?.photoURL || '')
+const { avatarImageUrl } = useAccountAvatar()
 const { authFetch } = useAuthenticatedFetch()
 
 function isFirebaseStorageUnknown(err: unknown): boolean {
@@ -2347,37 +1758,24 @@ const roleBadgeLabel = computed(() => {
   return profileData.role || 'User'
 })
 
-const iosProfileDisplayName = computed((): string => {
-  if (isStaff.value) {
-    const name = [profileData.firstName, profileData.lastName].filter(Boolean).join(' ').trim()
-    if (name) return name
-  }
-  return leftCardHeading.value || 'Profile'
-})
-
-const iosProfileSubtitle = computed((): string => {
-  const parts = [roleBadgeLabel.value, profileData.email || leftCardLine2.value].filter(Boolean)
-  return parts.join(' · ')
-})
-
 const roleCardTitle = computed(() => {
   if (isStaff.value) return isManager.value ? 'Store manager' : 'Staff member'
   if (userStore.isSuperAdmin || profileData.role === 'superAdmin') return 'Super admin'
   return profileData.role || 'User'
 })
 
-const roleHeaderIcon = computed((): FunctionalComponent => {
-  if (isStaff.value && isManager.value) return UserGroupIcon
-  return ShieldCheckIcon
+const roleHeaderIcon = computed((): Component => {
+  if (isStaff.value && isManager.value) return Users
+  return ShieldCheck
 })
 
 const roleMetaItems = computed(() => {
-  if (!isStaff.value) return [] as Array<{ key: string; text: string; icon: FunctionalComponent }>
-  const items: Array<{ key: string; text: string; icon: FunctionalComponent }> = []
+  if (!isStaff.value) return [] as Array<{ key: string; text: string; icon: Component }>
+  const items: Array<{ key: string; text: string; icon: Component }> = []
   const branch = businessProfileDisplay.value.storeName
   const dept = businessProfileDisplay.value.departmentName
-  if (branch) items.push({ key: 'branch', text: branch, icon: BuildingStorefrontIcon })
-  if (dept) items.push({ key: 'dept', text: dept, icon: UserGroupIcon })
+  if (branch) items.push({ key: 'branch', text: branch, icon: Store })
+  if (dept) items.push({ key: 'dept', text: dept, icon: Users })
   return items
 })
 
@@ -2394,30 +1792,30 @@ const roleCardDescription = computed(() => {
   return 'Contact your administrator if you need clarification on your access level.'
 })
 
-function permissionIconFor(label: string): FunctionalComponent {
+function permissionIconFor(label: string): Component {
   const lower = label.toLowerCase()
-  if (lower.includes('inventory') || lower.includes('folder')) return CubeIcon
+  if (lower.includes('inventory') || lower.includes('folder')) return Package
   if (lower.includes('receipt') || lower.includes('sales') || lower.includes('return'))
-    return ReceiptPercentIcon
-  if (lower.includes('customer')) return UserGroupIcon
-  if (lower.includes('analytics') || lower.includes('report')) return ChartBarIcon
+    return Receipt
+  if (lower.includes('customer')) return Users
+  if (lower.includes('analytics') || lower.includes('report')) return ChartColumn
   if (
     lower.includes('setting') ||
     lower.includes('payment') ||
     lower.includes('permission') ||
     lower.includes('team')
   ) {
-    return Cog6ToothIcon
+    return Settings
   }
-  if (lower.startsWith('view ') || lower.includes('view and')) return EyeIcon
-  return ChevronRightIcon
+  if (lower.startsWith('view ') || lower.includes('view and')) return Eye
+  return ChevronRight
 }
 
-const permissionGroupIcons: Record<PermissionGroupId, FunctionalComponent> = {
-  view: EyeIcon,
-  sales: ReceiptPercentIcon,
-  operations: CubeIcon,
-  admin: Cog6ToothIcon,
+const permissionGroupIcons: Record<PermissionGroupId, Component> = {
+  view: Eye,
+  sales: Receipt,
+  operations: Package,
+  admin: Settings,
 }
 
 function permissionGroupFor(label: string): PermissionGroupId {
@@ -2502,7 +1900,7 @@ const permissionGroupLabels: Record<PermissionGroupId, string> = {
 const permissionGroups = computed(() => {
   const buckets = new Map<
     PermissionGroupId,
-    Array<{ id: string; label: string; icon: FunctionalComponent }>
+    Array<{ id: string; label: string; icon: Component }>
   >()
   const order: PermissionGroupId[] = ['view', 'sales', 'operations', 'admin']
 
@@ -2540,11 +1938,19 @@ const disable2FAError = ref('')
 
 const preferenceRows = computed(() => [
   {
+    key: 'theme',
+    label: 'Theme',
+    value: accountSettings.theme,
+    icon: SunMoon,
+    action: () => {
+      showThemeModal.value = true
+    },
+  },
+  {
     key: 'language',
     label: 'Language',
     value: accountSettings.language,
-    icon: LanguageIcon,
-    actionLabel: 'Change',
+    icon: Languages,
     action: () => {
       showLanguageModal.value = true
     },
@@ -2553,8 +1959,7 @@ const preferenceRows = computed(() => [
     key: 'region',
     label: 'Region',
     value: accountSettings.region,
-    icon: GlobeAltIcon,
-    actionLabel: 'Change',
+    icon: Globe,
     action: () => {
       showRegionModal.value = true
     },
@@ -2563,38 +1968,16 @@ const preferenceRows = computed(() => [
     key: 'currency',
     label: 'Currency',
     value: accountSettings.currency,
-    icon: CurrencyDollarIcon,
-    actionLabel: 'Change',
+    icon: Coins,
     action: () => {
       showCurrencyModal.value = true
-    },
-  },
-  {
-    key: 'notifications',
-    label: 'Notifications',
-    value: accountSettings.notifications,
-    icon: BellIcon,
-    actionLabel: 'Manage',
-    action: () => {
-      showNotificationsModal.value = true
-    },
-  },
-  {
-    key: 'theme',
-    label: 'Theme',
-    value: accountSettings.theme,
-    icon: MoonIcon,
-    actionLabel: 'Change',
-    action: () => {
-      showThemeModal.value = true
     },
   },
   {
     key: 'timezone',
     label: 'Timezone',
     value: accountSettings.timezone,
-    icon: CalendarIcon,
-    actionLabel: 'Change',
+    icon: Clock,
     action: () => {
       showTimezoneModal.value = true
     },

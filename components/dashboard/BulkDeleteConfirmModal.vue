@@ -1,84 +1,54 @@
 <template>
-  <Modal
-    :model-value="modelValue"
-    @update:model-value="emit('update:modelValue', $event)"
-    size="md"
+  <SDialog
+    :open="modelValue"
+    role="alertdialog"
+    size="sm"
+    :title="title"
+    :description="warning"
+    @update:open="emit('update:modelValue', $event)"
   >
-    <template #header>
-      <div class="flex items-center gap-2.5">
-        <div
-          class="flex h-8 w-8 items-center justify-center rounded-sm bg-red-100 dark:bg-red-900/30"
-        >
-          <TrashIcon class="h-4 w-4 text-red-600 dark:text-red-400" />
-        </div>
-        <div class="min-w-0">
-          <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
-            {{ title }}
-          </h3>
-          <p class="text-xs text-gray-500 dark:text-gray-400">
-            {{ countLabel }}
-          </p>
-        </div>
-      </div>
-    </template>
+    <div class="s-confirm">
+      <p class="s-callout">
+        <strong>{{ impactSummary }}</strong> · {{ countLabel }}
+      </p>
 
-    <div class="space-y-3">
-      <div
-        class="rounded-sm bg-red-50 p-3 ring-1 ring-red-200/50 dark:bg-red-900/20 dark:ring-red-800/40"
-      >
-        <p class="text-xs font-semibold text-red-900 dark:text-red-100">
-          {{ impactSummary }}
-        </p>
-        <p class="mt-1 text-xs text-red-800 dark:text-red-200">
-          {{ warning }}
-        </p>
-      </div>
-
-      <ul
-        v-if="itemNames.length > 0"
-        class="max-h-36 space-y-1 overflow-y-auto rounded-sm bg-gray-50 p-2.5 text-xs text-gray-700 dark:!bg-dashboard-card/35 dark:text-gray-300"
-      >
-        <li v-for="(name, i) in visibleNames" :key="`${name}-${i}`" class="truncate">
-          · {{ name }}
+      <ul v-if="itemNames.length > 0" class="s-confirm__names" :aria-label="countLabel">
+        <li v-for="(name, i) in visibleNames" :key="`${name}-${i}`" class="s-confirm__name">
+          <span class="s-confirm__name-primary">{{ name }}</span>
         </li>
-        <li v-if="hiddenCount > 0" class="font-medium text-gray-500 dark:text-gray-400">
-          · and {{ hiddenCount }} more
+        <li v-if="hiddenCount > 0" class="s-confirm__name s-confirm__name--more">
+          and {{ hiddenCount }} more
         </li>
       </ul>
 
-      <div class="rounded-sm bg-gray-50 p-2.5 dark:!bg-dashboard-card/35">
-        <Checkbox
+      <div class="s-confirm__ack">
+        <SCheckbox
           :model-value="confirmed"
-          size="sm"
-          wrapper-class="items-start"
-          label-class="text-xs text-gray-700 dark:text-gray-300"
+          :label="confirmLabel"
           @update:model-value="emit('update:confirmed', $event === true)"
-        >
-          {{ confirmLabel }}
-        </Checkbox>
+        />
       </div>
     </div>
 
     <template #footer>
-      <IosDrawerActions
+      <SDialogActions
         primary-variant="danger"
-        :primary-icon="TrashIcon"
+        :primary-icon="Trash2"
         :primary-label="primaryLabel"
         :primary-disabled="!confirmed || loading"
         @cancel="emit('update:modelValue', false)"
         @primary="emit('confirm')"
       />
     </template>
-  </Modal>
+  </SDialog>
 </template>
 
 <script setup lang="ts">
+import SCheckbox from '~/components/s/SCheckbox.vue'
+import SDialog from '~/components/s/SDialog.vue'
+import SDialogActions from '~/components/s/SDialogActions.vue'
 import { computed } from 'vue'
-import { TrashIcon } from '~/utils/app-icons'
-import Checkbox from '~/components/ui/Checkbox.vue'
-import Modal from '~/components/ui/Modal.vue'
-import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
-
+import { Trash2 } from '@lucide/vue'
 const props = withDefaults(
   defineProps<{
     modelValue: boolean

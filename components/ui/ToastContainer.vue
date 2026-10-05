@@ -1,65 +1,59 @@
 <template>
   <Teleport to="body">
-    <TransitionGroup tag="div" name="toast" class="dash-toast-stack">
+    <TransitionGroup
+      tag="div"
+      name="s-toast"
+      class="s-c s-toast-stack"
+      aria-live="polite"
+      aria-relevant="additions"
+    >
       <div
         v-for="toast in toasts"
         :key="toast.id"
-        class="dash-toast"
-        role="status"
-        :aria-live="toast.type === 'error' ? 'assertive' : 'polite'"
+        class="s-toast"
+        :class="`s-toast--${toast.type}`"
+        :role="toast.type === 'error' ? 'alert' : undefined"
       >
-        <div class="dash-toast__inner">
-          <component
-            :is="getIcon(toast.type)"
-            :class="['mt-0.5 h-4 w-4 shrink-0', getIconClass(toast.type)]"
-            stroke-width="1.75"
-            aria-hidden="true"
-          />
+        <component
+          :is="getIcon(toast.type)"
+          class="s-toast__icon"
+          :size="16"
+          :stroke-width="1.75"
+          aria-hidden="true"
+        />
 
-          <div class="min-w-0 flex-1">
-            <p class="dash-toast__message">
-              {{ toast.message }}
-            </p>
-            <button
-              v-if="toast.action"
-              type="button"
-              class="dash-toast__action"
-              @click="toast.action.onClick()"
-            >
-              {{ toast.action.label }}
-            </button>
-          </div>
-
-          <button
-            type="button"
-            class="dash-toast__close"
-            aria-label="Dismiss"
-            @click="removeToast(toast.id)"
+        <div class="s-toast__body">
+          <p class="s-toast__message">{{ toast.message }}</p>
+          <SButton
+            v-if="toast.action"
+            class="s-toast__action"
+            variant="ghost"
+            size="sm"
+            @click="toast.action.onClick()"
           >
-            <XMarkIcon class="h-3.5 w-3.5" stroke-width="2" />
-          </button>
+            {{ toast.action.label }}
+          </SButton>
         </div>
 
-        <div v-if="showsProgress(toast)" class="dash-toast__progress-track" aria-hidden="true">
-          <div
-            class="dash-toast__progress-bar"
-            :class="getProgressClass(toast.type)"
+        <SIconButton class="s-toast__close" label="Dismiss" size="sm" @click="removeToast(toast.id)">
+          <X :size="16" :stroke-width="1.75" aria-hidden="true" />
+        </SIconButton>
+
+        <span v-if="showsProgress(toast)" class="s-toast__progress" aria-hidden="true">
+          <span
+            class="s-toast__progress-bar"
             :style="{ animationDuration: `${toast.duration}ms` }"
           />
-        </div>
+        </span>
       </div>
     </TransitionGroup>
   </Teleport>
 </template>
 
 <script setup lang="ts">
-import {
-  XMarkIcon,
-  CheckCircleIcon,
-  ExclamationTriangleIcon,
-  InformationCircleIcon,
-  XCircleIcon,
-} from '~/utils/app-icons'
+import { CircleAlert, CircleCheck, CircleX, Info, X } from '@lucide/vue'
+import SButton from '~/components/s/SButton.vue'
+import SIconButton from '~/components/s/SIconButton.vue'
 import { useAppToast, type Toast, type ToastType } from '~/composables/useAppToast'
 
 const { toasts, removeToast } = useAppToast()
@@ -71,91 +65,13 @@ function showsProgress(toast: Toast) {
 const getIcon = (type: ToastType) => {
   switch (type) {
     case 'success':
-      return CheckCircleIcon
+      return CircleCheck
     case 'error':
-      return XCircleIcon
+      return CircleX
     case 'warning':
-      return ExclamationTriangleIcon
-    case 'info':
-      return InformationCircleIcon
+      return CircleAlert
     default:
-      return InformationCircleIcon
-  }
-}
-
-const getIconClass = (type: ToastType) => {
-  switch (type) {
-    case 'success':
-      return 'dash-toast__icon--success'
-    case 'error':
-      return 'dash-toast__icon--error'
-    case 'warning':
-      return 'dash-toast__icon--warning'
-    case 'info':
-      return 'dash-toast__icon--info'
-    default:
-      return 'dash-toast__icon--info'
-  }
-}
-
-const getProgressClass = (type: ToastType) => {
-  switch (type) {
-    case 'success':
-      return 'dash-toast__progress-bar--success'
-    case 'error':
-      return 'dash-toast__progress-bar--error'
-    case 'warning':
-      return 'dash-toast__progress-bar--warning'
-    case 'info':
-      return 'dash-toast__progress-bar--info'
-    default:
-      return 'dash-toast__progress-bar--info'
+      return Info
   }
 }
 </script>
-
-<style scoped>
-.toast-enter-active {
-  transition:
-    opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.toast-leave-active {
-  transition:
-    opacity 0.28s cubic-bezier(0.4, 0, 1, 1),
-    transform 0.32s cubic-bezier(0.4, 0, 1, 1);
-}
-
-.toast-enter-from,
-.toast-leave-to {
-  opacity: 0;
-  transform: translate3d(100%, 0, 0);
-}
-
-.toast-move {
-  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.dash-toast__progress-bar {
-  animation-name: dash-toast-progress;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .toast-enter-active,
-  .toast-leave-active,
-  .toast-move {
-    transition-duration: 0.01ms !important;
-  }
-
-  .toast-enter-from,
-  .toast-leave-to {
-    transform: none;
-  }
-
-  .dash-toast__progress-bar {
-    animation: none;
-    transform: scaleX(0);
-  }
-}
-</style>

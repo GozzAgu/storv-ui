@@ -1,430 +1,329 @@
 <template>
-  <Modal
-    :model-value="props.modelValue"
-    @update:model-value="(value: boolean) => emit('update:modelValue', value)"
-    size="xl"
-    :close-on-backdrop="!isPrinting"
-    :show-close="!isPrinting"
-    content-padding="p-0"
+  <SDialog
+    :open="props.modelValue"
+    :title="receipt ? `Receipt ${receipt.receiptNumber}` : 'Receipt'"
+    size="lg"
+    :dismissible="!isPrinting"
+    @update:open="(value: boolean) => emit('update:modelValue', value)"
   >
-    <template #header>
-      <div class="flex items-center justify-between w-full gap-4">
-        <div class="flex items-center gap-2 min-w-0">
-          <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
-            {{ receipt?.receiptNumber }}
-          </h3>
-          <button
-            v-if="receipt"
-            @click="copyReceiptNumber(receipt.receiptNumber)"
-            class="p-1.5 rounded-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex-shrink-0"
-          >
-            <ClipboardDocumentIcon class="w-4 h-4" stroke-width="1.5" />
-          </button>
-        </div>
-        <div class="flex items-center gap-1.5 flex-shrink-0">
-          <button
-            type="button"
-            @click="handleEmailClick"
-            :disabled="!receipt"
-            class="px-3 py-1.5 rounded-sm bg-white dark:!bg-dashboard-card text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5 text-xs font-medium"
-          >
-            <EnvelopeIcon class="w-4 h-4" stroke-width="1.5" />
-            <span>Email</span>
-          </button>
-          <button
-            type="button"
-            @click="handlePrintPDF"
-            :disabled="isPrinting || !receipt"
-            class="px-3 py-1.5 rounded-sm bg-white dark:!bg-dashboard-card text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5 text-xs font-medium"
-          >
-            <PrinterIcon class="w-4 h-4" stroke-width="1.5" />
-            <span>{{ isPrinting ? 'Generating...' : 'Print' }}</span>
-          </button>
-        </div>
-      </div>
-    </template>
-
-    <div v-if="!receipt" class="text-center py-12">
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-400"></div>
-      <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading receipt...</p>
+    <div v-if="!receipt" class="s-receipt-view__loading">
+      <SSpinner :size="24" />
+      <p>Loading receipt…</p>
     </div>
 
-    <div v-else class="max-h-[calc(100vh-12rem)] overflow-y-auto p-4 sm:p-6">
-      <!-- Receipt Content (used for PDF) -->
-      <div
-        ref="receiptContent"
-        class="receipt-content bg-white text-gray-900 rounded-lg overflow-hidden max-w-2xl mx-auto shadow-sm border border-gray-200"
-      >
-        <!-- Store header -->
-        <div class="receipt-header text-center px-6 pt-6 pb-4 border-b-2 border-gray-900/90">
-          <div v-if="storeLogoUrl" class="mb-2 flex justify-center">
-            <img
-              :src="storeLogoUrl"
-              alt="Store logo"
-              class="receipt-logo h-16 w-16 sm:h-20 sm:w-20 rounded-sm object-contain"
-            />
-          </div>
-          <h1 class="receipt-display-title text-gray-900">{{ businessName }}</h1>
-          <p v-if="branchName" class="mt-1 text-[11px] leading-snug text-gray-600">
-            {{ branchName }}
-          </p>
-          <p v-if="storePhone || storeEmail" class="mt-1 text-[10px] leading-snug text-gray-500">
+    <div v-else class="s-receipt-view">
+      <div ref="receiptContent" class="s-receipt-doc">
+        <header class="s-receipt-doc__header">
+          <img
+            v-if="storeLogoUrl"
+            :src="storeLogoUrl"
+            alt="Store logo"
+            class="s-receipt-doc__logo"
+          />
+          <h1 class="s-receipt-doc__title">{{ businessName }}</h1>
+          <p v-if="branchName" class="s-receipt-doc__sub">{{ branchName }}</p>
+          <p v-if="storePhone || storeEmail" class="s-receipt-doc__fine">
             <span v-if="storePhone">{{ storePhone }}</span
             ><span v-if="storePhone && storeEmail"> · </span
             ><span v-if="storeEmail">{{ storeEmail }}</span>
           </p>
-        </div>
+        </header>
 
-        <!-- Meta block -->
-        <div class="receipt-section px-6 py-4 border-b border-gray-100">
-          <div class="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
+        <section class="s-receipt-doc__section">
+          <div class="s-receipt-doc__split">
             <div>
-              <p class="receipt-section-label text-gray-500">Receipt</p>
-              <p class="mt-1 text-[13px] font-medium leading-tight text-gray-900">
+              <p class="s-receipt-doc__label">Receipt</p>
+              <p class="s-receipt-doc__value s-receipt-doc__value--strong">
                 {{ receipt.receiptNumber }}
-                <span v-if="receipt.isSwapIn" class="font-normal text-gray-500"> · Swap-in</span>
+                <span v-if="receipt.isSwapIn" class="s-receipt-doc__muted"> · Swap-in</span>
               </p>
             </div>
-            <div class="text-right">
-              <p class="receipt-section-label text-gray-500">Date & time</p>
-              <p class="mt-1 text-[12px] leading-tight text-gray-900">
-                {{ formatReceiptDate(receipt.date) }}
-              </p>
-              <p class="text-[10px] text-gray-500">{{ formatReceiptTime(receipt.date) }}</p>
+            <div class="s-receipt-doc__end">
+              <p class="s-receipt-doc__label">Date & time</p>
+              <p class="s-receipt-doc__value">{{ formatReceiptDate(receipt.date) }}</p>
+              <p class="s-receipt-doc__fine">{{ formatReceiptTime(receipt.date) }}</p>
             </div>
           </div>
-          <div class="mt-3 border-t border-gray-100 pt-3">
-            <p class="receipt-section-label text-gray-500">Customer</p>
-            <p class="mt-1 text-[13px] font-medium leading-tight text-gray-900">
+          <div class="s-receipt-doc__party">
+            <p class="s-receipt-doc__label">Customer</p>
+            <p class="s-receipt-doc__value s-receipt-doc__value--strong">
               {{ receipt.customerName }}
             </p>
-            <p v-if="receipt.customerEmail" class="mt-1 text-[10px] leading-snug text-gray-500">
+            <p v-if="receipt.customerEmail" class="s-receipt-doc__fine">
               {{ receipt.customerEmail }}
             </p>
           </div>
-        </div>
+        </section>
 
-        <!-- Items -->
-        <div class="receipt-section px-6 py-4 border-b border-gray-100">
-          <p class="receipt-section-label mb-2 text-gray-500">Items</p>
-          <div class="receipt-items-table-wrap -mx-1 overflow-x-auto px-1">
-          <table class="w-full min-w-[20rem]">
-            <thead class="bg-gray-100">
-              <tr class="border-b-2 border-gray-300">
-                <th class="receipt-section-label py-2.5 text-left text-gray-700">Product</th>
-                <th class="receipt-section-label w-12 py-2.5 text-center text-gray-700">Qty</th>
-                <th class="receipt-section-label py-2.5 text-right text-gray-700">Price</th>
-                <th
-                  v-if="canViewProfitAndCost"
-                  class="receipt-section-label py-2.5 text-right text-gray-700"
-                >
-                  Cost
-                </th>
-                <th class="receipt-section-label py-2.5 text-right text-gray-700">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="(item, index) in receipt.items"
-                :key="index"
-                class="border-b border-gray-100/90"
-              >
-                <td class="py-2.5 align-top">
-                  <p class="text-[12px] font-medium leading-tight text-gray-900">
-                    {{ item.itemName }}
-                  </p>
-                  <div v-if="receiptItemDetailLines(item).length > 0" class="mt-0.5 space-y-px">
+        <section class="s-receipt-doc__section">
+          <p class="s-receipt-doc__label">Items</p>
+          <div class="s-receipt-doc__table-wrap">
+            <table class="s-receipt-doc__table">
+              <thead>
+                <tr>
+                  <th scope="col">Product</th>
+                  <th scope="col" class="s-receipt-doc__center">Qty</th>
+                  <th scope="col" class="s-receipt-doc__num">Price</th>
+                  <th v-if="canViewProfitAndCost" scope="col" class="s-receipt-doc__num">Cost</th>
+                  <th scope="col" class="s-receipt-doc__num">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(item, index) in receipt.items" :key="index">
+                  <td>
+                    <p class="s-receipt-doc__item-name">{{ item.itemName }}</p>
                     <p
                       v-for="(line, detailIndex) in receiptItemDetailLines(item)"
                       :key="`${index}-detail-${detailIndex}`"
-                      class="text-[10px] leading-snug text-gray-500"
+                      class="s-receipt-doc__detail"
                     >
                       {{ line }}
                     </p>
-                  </div>
-                  <p v-if="item.hasDiscount" class="mt-1 text-[10px] text-gray-500">
-                    {{
-                      item.discountPercentage
-                        ? `${item.discountPercentage}% off`
-                        : `-${formatCurrency(item.discountAmount || 0)}`
-                    }}
-                  </p>
-                </td>
-                <td class="py-2.5 text-center text-[12px] tabular-nums text-gray-700">
-                  {{ item.quantity }}
-                </td>
-                <td class="py-2.5 text-right text-[12px] tabular-nums text-gray-700">
-                  <template v-if="item.hasDiscount && item.originalPrice">
-                    <span class="block text-[10px] leading-tight text-gray-400 line-through">{{
-                      formatCurrency(item.originalPrice)
-                    }}</span>
-                    <span class="leading-tight">{{ formatCurrency(item.price) }}</span>
-                  </template>
-                  <span v-else>{{ formatCurrency(item.price) }}</span>
-                </td>
-                <td
-                  v-if="canViewProfitAndCost"
-                  class="py-2.5 text-right text-[12px] tabular-nums text-gray-700"
-                >
-                  <span v-if="receiptLineUnitCost(item) > 0">
-                    {{ formatCurrency(receiptLineUnitCost(item)) }}
-                  </span>
-                  <span v-else class="text-gray-400">-</span>
-                </td>
-                <td class="py-2.5 text-right text-[12px] font-medium tabular-nums text-gray-900">
-                  <template v-if="item.hasDiscount && item.originalPrice">
-                    <span
-                      class="block text-[10px] font-normal leading-tight text-gray-400 line-through"
-                      >{{ formatCurrency((item.originalPrice || 0) * item.quantity) }}</span
-                    >
-                    <span class="leading-tight">{{
-                      formatCurrency(item.price * item.quantity)
-                    }}</span>
-                  </template>
-                  <span v-else>{{ formatCurrency(item.price * item.quantity) }}</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                    <p v-if="item.hasDiscount" class="s-receipt-doc__detail">
+                      {{
+                        item.discountPercentage
+                          ? `${item.discountPercentage}% off`
+                          : `-${formatCurrency(item.discountAmount || 0)}`
+                      }}
+                    </p>
+                  </td>
+                  <td class="s-receipt-doc__center">{{ item.quantity }}</td>
+                  <td class="s-receipt-doc__num">
+                    <template v-if="item.hasDiscount && item.originalPrice">
+                      <span class="s-receipt-doc__was">{{ formatCurrency(item.originalPrice) }}</span>
+                      <span>{{ formatCurrency(item.price) }}</span>
+                    </template>
+                    <span v-else>{{ formatCurrency(item.price) }}</span>
+                  </td>
+                  <td v-if="canViewProfitAndCost" class="s-receipt-doc__num">
+                    <span v-if="receiptLineUnitCost(item) > 0">
+                      {{ formatCurrency(receiptLineUnitCost(item)) }}
+                    </span>
+                    <span v-else class="s-receipt-doc__muted">-</span>
+                  </td>
+                  <td class="s-receipt-doc__num s-receipt-doc__strong">
+                    <template v-if="item.hasDiscount && item.originalPrice">
+                      <span class="s-receipt-doc__was">{{
+                        formatCurrency((item.originalPrice || 0) * item.quantity)
+                      }}</span>
+                      <span>{{ formatCurrency(item.price * item.quantity) }}</span>
+                    </template>
+                    <span v-else>{{ formatCurrency(item.price * item.quantity) }}</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-        </div>
+        </section>
 
-        <!-- Totals -->
-        <div class="receipt-section px-6 py-4 border-b border-gray-100">
-          <div class="flex justify-end">
-            <div class="w-56 space-y-1">
-              <template v-if="hasAnyDiscount">
-                <div class="flex justify-between text-[12px] leading-tight">
-                  <span class="text-gray-500">Subtotal</span>
-                  <span>{{ formatCurrency(calculateSubtotalBeforeDiscount) }}</span>
-                </div>
-                <div class="flex justify-between text-[12px] leading-tight">
-                  <span class="text-gray-500">Discount</span>
-                  <span class="text-gray-600">-{{ formatCurrency(calculateTotalDiscount) }}</span>
-                </div>
-              </template>
-              <template v-else>
-                <div class="flex justify-between text-[12px] leading-tight">
-                  <span class="text-gray-500">Subtotal</span>
-                  <span>{{ formatCurrency(lineItemsNetTotal) }}</span>
-                </div>
-              </template>
-              <template v-if="showSwapCreditLine">
-                <div class="flex justify-between text-[12px] leading-tight">
-                  <span class="text-gray-500">Swap credit (trade-in)</span>
-                  <span class="text-gray-600">-{{ formatCurrency(swapCreditAmount) }}</span>
-                </div>
-              </template>
-              <template v-if="canViewProfitAndCost && receipt.status === 'completed'">
-                <div class="flex justify-between text-[12px] leading-tight">
-                  <span class="text-gray-500">Cost of goods sold</span>
-                  <span>{{ formatCurrency(receiptCogs) }}</span>
-                </div>
-                <div class="flex justify-between text-[12px] leading-tight">
-                  <span class="text-gray-500">Gross profit</span>
-                  <span
-                    :class="
-                      receiptGrossProfitAmount >= 0
-                        ? 'text-emerald-700 dark:text-emerald-400/90'
-                        : 'text-gray-900'
-                    "
-                  >
-                    {{ formatCurrency(receiptGrossProfitAmount) }}
-                  </span>
-                </div>
-              </template>
-              <div
-                v-if="canManageCommissions && (receipt.commissionAmount || 0) > 0"
-                class="space-y-1 border-t border-gray-200 pt-2 text-[12px] leading-tight"
-              >
-                <div class="flex justify-between">
-                  <span class="text-gray-500">Commission</span>
-                  <span>{{ formatCurrency(receipt.commissionAmount || 0) }}</span>
-                </div>
-                <div v-if="receipt.commissionOwedToName" class="flex justify-between">
-                  <span class="text-gray-500">Owed to</span>
-                  <span class="text-gray-900">{{ receipt.commissionOwedToName }}</span>
-                </div>
-                <div class="flex items-center justify-between">
-                  <span
-                    class="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-medium"
-                    :class="
-                      receipt.commissionStatus === 'paid'
-                        ? 'bg-emerald-50 text-emerald-700'
-                        : 'bg-amber-50 text-amber-700'
-                    "
-                  >
-                    {{ receipt.commissionStatus === 'paid' ? 'Paid' : 'Owed' }}
-                  </span>
-                  <button
-                    v-if="receipt.commissionStatus !== 'paid'"
-                    type="button"
-                    class="text-[11px] font-medium text-primary-700 hover:underline disabled:opacity-50"
-                    :disabled="isMarkingCommissionPaid"
-                    @click="markCommissionAsPaid"
-                  >
-                    Mark as paid
-                  </button>
-                </div>
+        <section class="s-receipt-doc__section">
+          <div class="s-receipt-doc__totals">
+            <template v-if="hasAnyDiscount">
+              <div class="s-receipt-doc__row">
+                <span>Subtotal</span>
+                <span>{{ formatCurrency(calculateSubtotalBeforeDiscount) }}</span>
               </div>
-              <div
-                v-if="receipt.splitPayments?.length"
-                class="space-y-1 border-t border-gray-200 pt-2 text-[12px] leading-tight"
-              >
-                <span class="text-gray-500">Payment</span>
-                <div
-                  v-for="(sp, spIdx) in receipt.splitPayments"
-                  :key="spIdx"
-                  class="flex justify-between gap-2"
+              <div class="s-receipt-doc__row">
+                <span>Discount</span>
+                <span>-{{ formatCurrency(calculateTotalDiscount) }}</span>
+              </div>
+            </template>
+            <div v-else class="s-receipt-doc__row">
+              <span>Subtotal</span>
+              <span>{{ formatCurrency(lineItemsNetTotal) }}</span>
+            </div>
+            <div v-if="showSwapCreditLine" class="s-receipt-doc__row">
+              <span>Swap credit (trade-in)</span>
+              <span>-{{ formatCurrency(swapCreditAmount) }}</span>
+            </div>
+            <template v-if="canViewProfitAndCost && receipt.status === 'completed'">
+              <div class="s-receipt-doc__row">
+                <span>Cost of goods sold</span>
+                <span>{{ formatCurrency(receiptCogs) }}</span>
+              </div>
+              <div class="s-receipt-doc__row">
+                <span>Gross profit</span>
+                <span class="s-receipt-doc__value--strong">
+                  {{ formatCurrency(receiptGrossProfitAmount) }}
+                </span>
+              </div>
+            </template>
+            <div
+              v-if="canManageCommissions && (receipt.commissionAmount || 0) > 0"
+              class="s-receipt-doc__group"
+            >
+              <div class="s-receipt-doc__row">
+                <span>Commission</span>
+                <span>{{ formatCurrency(receipt.commissionAmount || 0) }}</span>
+              </div>
+              <div v-if="receipt.commissionOwedToName" class="s-receipt-doc__row">
+                <span>Owed to</span>
+                <span>{{ receipt.commissionOwedToName }}</span>
+              </div>
+              <div class="s-receipt-doc__row">
+                <span
+                  class="s-receipt-doc__pill"
+                  :class="{ 's-receipt-doc__pill--muted': receipt.commissionStatus === 'paid' }"
                 >
-                  <span class="capitalize text-gray-600">{{ sp.method }}</span>
-                  <span class="tabular-nums text-gray-900">{{ formatCurrency(sp.amount) }}</span>
-                </div>
-              </div>
-              <div
-                v-else
-                class="flex justify-between border-t border-gray-200 pt-2 text-[12px] leading-tight"
-              >
-                <span class="text-gray-500">Payment</span>
-                <span class="capitalize text-gray-900">{{ receipt.paymentMethod }}</span>
-              </div>
-              <div
-                class="-mx-3 mt-1 flex justify-between rounded-sm bg-gray-900 px-3 py-2 text-[13px] font-semibold leading-tight text-white"
-              >
-                <span>{{ receiptTotalLabel }}</span>
-                <span>{{ formatCurrency(receipt.total) }}</span>
+                  {{ receipt.commissionStatus === 'paid' ? 'Paid' : 'Owed' }}
+                </span>
+                <button
+                  v-if="receipt.commissionStatus !== 'paid'"
+                  type="button"
+                  class="s-receipt-doc__link"
+                  :disabled="isMarkingCommissionPaid"
+                  @click="markCommissionAsPaid"
+                >
+                  Mark as paid
+                </button>
               </div>
             </div>
+            <div v-if="receipt.splitPayments?.length" class="s-receipt-doc__group">
+              <span class="s-receipt-doc__muted">Payment</span>
+              <div
+                v-for="(sp, spIdx) in receipt.splitPayments"
+                :key="spIdx"
+                class="s-receipt-doc__row"
+              >
+                <span class="s-receipt-doc__capitalize">{{ sp.method }}</span>
+                <span>{{ formatCurrency(sp.amount) }}</span>
+              </div>
+            </div>
+            <div v-else class="s-receipt-doc__group">
+              <div class="s-receipt-doc__row">
+                <span>Payment</span>
+                <span class="s-receipt-doc__capitalize">{{ receipt.paymentMethod }}</span>
+              </div>
+            </div>
+            <div class="s-receipt-doc__grand">
+              <span>{{ receiptTotalLabel }}</span>
+              <span>{{ formatCurrency(receipt.total) }}</span>
+            </div>
           </div>
-        </div>
+        </section>
 
-        <!-- Status -->
-        <div class="px-6 py-3">
+        <section class="s-receipt-doc__section s-receipt-doc__section--plain">
           <span
-            class="inline-flex items-center rounded px-2 py-1 text-[10px] font-medium"
-            :class="receiptStatusPillClass"
+            class="s-receipt-doc__pill"
+            :class="{ 's-receipt-doc__pill--muted': receipt.status === 'cancelled' }"
           >
             {{ receipt.status.charAt(0).toUpperCase() + receipt.status.slice(1) }}
           </span>
-        </div>
+        </section>
 
-        <!-- Notes -->
-        <div v-if="receipt.notes" class="px-6 pb-3">
-          <p class="receipt-section-label mb-1 text-gray-500">Notes</p>
-          <p class="whitespace-pre-wrap text-[12px] leading-snug text-gray-700">
-            {{ receipt.notes }}
-          </p>
-        </div>
+        <section v-if="receipt.notes" class="s-receipt-doc__section s-receipt-doc__section--plain">
+          <p class="s-receipt-doc__label">Notes</p>
+          <p class="s-receipt-doc__note">{{ receipt.notes }}</p>
+        </section>
 
-        <!-- Swap-in (trade-in device added to inventory) -->
-        <div v-if="receipt.isSwapIn" class="px-6 pb-3">
-          <p class="receipt-section-label mb-1 text-gray-500">Swap-in</p>
-          <p v-if="swapInFolderName" class="text-[10px] text-gray-500 mb-1.5">
-            Folder: {{ swapInFolderName }}
-          </p>
-          <template v-if="swapInItemLoading">
-            <p class="text-[12px] leading-snug text-gray-500">Loading trade-in details…</p>
-          </template>
-          <template v-else-if="swapInItemError">
-            <p class="text-[12px] leading-snug text-amber-800 dark:text-amber-300/90">
-              {{ swapInItemError }}
-            </p>
-          </template>
-          <template v-else-if="swapInPrimaryLabel">
-            <p class="text-[12px] font-medium leading-snug text-gray-900">
-              {{ swapInPrimaryLabel }}
-            </p>
-            <div v-if="swapInDetailLines.length > 0" class="mt-0.5 space-y-px">
-              <p
-                v-for="(line, i) in swapInDetailLines"
-                :key="`swap-in-detail-${i}`"
-                class="text-[10px] leading-snug text-gray-500"
-              >
-                {{ line }}
-              </p>
-            </div>
-          </template>
-          <template v-else-if="swapInFolderName">
-            <p class="text-[12px] leading-snug text-gray-700">
-              Device added to {{ swapInFolderName }}
-            </p>
-          </template>
-          <template v-else-if="receipt.swapInItemId">
-            <p class="text-[12px] leading-snug text-gray-500">
-              Trade-in recorded; details unavailable.
-            </p>
-          </template>
-        </div>
-
-        <!-- Branch & generated by -->
-        <div
-          v-if="receipt.createdByUserName"
-          class="border-t border-gray-100 px-6 py-3 text-[10px] leading-snug text-gray-500"
+        <section
+          v-if="receipt.isSwapIn"
+          class="s-receipt-doc__section s-receipt-doc__section--plain"
         >
-          <span>Generated by {{ receipt.createdByUserName }}</span>
-        </div>
+          <p class="s-receipt-doc__label">Swap-in</p>
+          <p v-if="swapInFolderName" class="s-receipt-doc__fine">Folder: {{ swapInFolderName }}</p>
+          <p v-if="swapInItemLoading" class="s-receipt-doc__muted">Loading trade-in details…</p>
+          <p v-else-if="swapInItemError" class="s-receipt-doc__note">{{ swapInItemError }}</p>
+          <template v-else-if="swapInPrimaryLabel">
+            <p class="s-receipt-doc__item-name">{{ swapInPrimaryLabel }}</p>
+            <p
+              v-for="(line, i) in swapInDetailLines"
+              :key="`swap-in-detail-${i}`"
+              class="s-receipt-doc__detail"
+            >
+              {{ line }}
+            </p>
+          </template>
+          <p v-else-if="swapInFolderName" class="s-receipt-doc__note">
+            Device added to {{ swapInFolderName }}
+          </p>
+          <p v-else-if="receipt.swapInItemId" class="s-receipt-doc__muted">
+            Trade-in recorded; details unavailable.
+          </p>
+        </section>
 
-        <!-- Account policies (set on Profile: Receipt terms & policies) -->
-        <div
+        <section
+          v-if="receipt.createdByUserName"
+          class="s-receipt-doc__section s-receipt-doc__section--ruled"
+        >
+          <p class="s-receipt-doc__fine">Generated by {{ receipt.createdByUserName }}</p>
+        </section>
+
+        <section
           v-if="hasReceiptPolicyContent"
-          class="border-t border-gray-100 px-6 py-4 space-y-3 text-left receipt-policies"
+          class="s-receipt-doc__section s-receipt-doc__section--ruled s-receipt-doc__policies"
         >
           <div v-if="receiptPolicies.salesTerms">
-            <p class="receipt-section-label mb-1 text-gray-500">Terms & conditions (sales)</p>
-            <p class="whitespace-pre-wrap text-[10px] leading-snug text-gray-600">
+            <p class="s-receipt-doc__label">Terms & conditions (sales)</p>
+            <p class="s-receipt-doc__note s-receipt-doc__note--fine">
               {{ receiptPolicies.salesTerms }}
             </p>
           </div>
           <div v-if="receiptPolicies.refundPolicy">
-            <p class="receipt-section-label mb-1 text-gray-500">Refund policy</p>
-            <p class="whitespace-pre-wrap text-[10px] leading-snug text-gray-600">
+            <p class="s-receipt-doc__label">Refund policy</p>
+            <p class="s-receipt-doc__note s-receipt-doc__note--fine">
               {{ receiptPolicies.refundPolicy }}
             </p>
           </div>
           <div v-if="receiptPolicies.warrantyPolicy">
-            <p class="receipt-section-label mb-1 text-gray-500">Warranty policy</p>
-            <p class="whitespace-pre-wrap text-[10px] leading-snug text-gray-600">
+            <p class="s-receipt-doc__label">Warranty policy</p>
+            <p class="s-receipt-doc__note s-receipt-doc__note--fine">
               {{ receiptPolicies.warrantyPolicy }}
             </p>
           </div>
-        </div>
+        </section>
 
-        <!-- Footer -->
-        <div class="border-t border-gray-100 bg-gray-50 px-6 py-3 text-center">
-          <p class="text-[12px] leading-tight text-gray-700">Thank you for your business</p>
-          <p class="mt-1 text-[10px] text-gray-500">
-            Computer-generated receipt · Generated by storvv
-          </p>
-        </div>
+        <footer class="s-receipt-doc__footer">
+          <p>Thank you for your business</p>
+          <p class="s-receipt-doc__fine">Computer-generated receipt · Generated by storvv</p>
+        </footer>
       </div>
     </div>
-  </Modal>
 
-  <!-- Email Input Modal -->
-  <Modal
-    :model-value="showEmailModal"
-    @update:model-value="showEmailModal = $event"
-    size="sm"
-    title="Send Receipt via Email"
-  >
-    <template #default>
-      <div class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Email Address
-          </label>
-          <input
-            v-model="emailToSend"
-            type="email"
-            placeholder="Enter email address"
-            class="w-full px-3 py-2 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400"
-            @keyup.enter="handleSendEmail"
-          />
-        </div>
-      </div>
-    </template>
     <template #footer>
-      <IosDrawerActions
+      <div class="s-dialog__foot-start">
+        <SButton
+          variant="ghost"
+          :disabled="!receipt"
+          @click="receipt && copyReceiptNumber(receipt.receiptNumber)"
+        >
+          <template #leading>
+            <ClipboardDocumentIcon :size="16" :stroke-width="1.75" aria-hidden="true" />
+          </template>
+          Copy number
+        </SButton>
+      </div>
+      <SButton :disabled="!receipt" @click="handleEmailClick">
+        <template #leading>
+          <EnvelopeIcon :size="16" :stroke-width="1.75" aria-hidden="true" />
+        </template>
+        Email
+      </SButton>
+      <SButton variant="primary" :loading="isPrinting" :disabled="!receipt" @click="handlePrintPDF">
+        <template #leading>
+          <PrinterIcon v-if="!isPrinting" :size="16" :stroke-width="1.75" aria-hidden="true" />
+        </template>
+        {{ isPrinting ? 'Generating…' : 'Print / PDF' }}
+      </SButton>
+    </template>
+  </SDialog>
+
+  <SDialog
+    :open="showEmailModal"
+    size="sm"
+    title="Send receipt by email"
+    @update:open="showEmailModal = $event"
+  >
+    <SInput
+      v-model="emailToSend"
+      label="Email address"
+      type="email"
+      autocomplete="email"
+      placeholder="name@example.com"
+      @keyup.enter="handleSendEmail"
+    />
+    <template #footer>
+      <SDialogActions
         primary-label="Send"
         :primary-loading="isSendingEmail"
         :primary-disabled="!emailToSend || !isValidEmail(emailToSend)"
@@ -432,18 +331,21 @@
         @primary="handleSendEmail"
       />
     </template>
-  </Modal>
+  </SDialog>
 </template>
 
 <script setup lang="ts">
+import SDialog from '~/components/s/SDialog.vue'
+import SDialogActions from '~/components/s/SDialogActions.vue'
+import SButton from '~/components/s/SButton.vue'
+import SInput from '~/components/s/SInput.vue'
+import SSpinner from '~/components/s/SSpinner.vue'
 import { ref, reactive, computed, watch, onMounted, nextTick, shallowRef } from 'vue'
 import {
   PrinterIcon,
   EnvelopeIcon,
   ClipboardDocumentIcon,
 } from '~/utils/app-icons'
-import Modal from '~/components/ui/Modal.vue'
-import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
 import { useReceiptsStore, type Receipt, type ReceiptItem } from '~/stores/receipts'
 import type { InventoryItem } from '~/stores/inventory'
 import { useUserStore } from '~/stores/user'
@@ -677,21 +579,6 @@ const showSwapCreditLine = computed(() => {
 
 const receiptTotalLabel = computed(() => {
   return showSwapCreditLine.value ? 'Amount due' : 'Total'
-})
-
-const receiptStatusPillClass = computed(() => {
-  switch (props.receipt?.status) {
-    case 'completed':
-      return 'bg-emerald-50 text-emerald-700'
-    case 'refunded':
-      return 'bg-red-50 text-red-700'
-    case 'balance_due':
-      return 'bg-amber-50 text-amber-700'
-    case 'cancelled':
-      return 'bg-gray-100 text-gray-500'
-    default:
-      return 'bg-gray-100 text-gray-700'
-  }
 })
 
 // Pre-fill email when receipt changes

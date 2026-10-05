@@ -1,30 +1,16 @@
 <template>
-  <header class="auth-page-header">
-    <a
-      v-if="showLogo"
-      href="https://www.storvv.com"
-      class="auth-page-header__logo-wrap"
-      aria-label="Storvv home"
-    >
-      <img src="/storvv logo mobile.png" alt="Storvv" class="auth-page-header__logo" width="44" height="44" />
-    </a>
-    <h1 class="auth-page-header__title">{{ title }}</h1>
-    <p v-if="subtitle" class="auth-page-header__subtitle">{{ subtitle }}</p>
-    <p v-if="$slots.default" class="auth-page-header__lede">
+  <header class="s-auth-header">
+    <h1 class="s-auth-header__title">{{ title }}</h1>
+    <p v-if="subtitle" class="s-auth-header__subtitle">{{ subtitle }}</p>
+    <p v-if="$slots.default" class="s-auth-header__subtitle">
       <slot />
     </p>
   </header>
 </template>
 
 <script setup lang="ts">
-withDefaults(
-  defineProps<{
-    title: string
-    subtitle?: string
-    showLogo?: boolean
-  }>(),
-  {
-    showLogo: true,
-  }
-)
+defineProps<{
+  title: string
+  subtitle?: string
+}>()
 </script>

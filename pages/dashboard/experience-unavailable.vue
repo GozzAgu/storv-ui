@@ -1,52 +1,35 @@
 <template>
-  <div :class="pageClass">
-    <DashboardPageHeader class="dash-page-header--unified" :ios-context-only="isCapacitorIos">
-      <template #title>
-        <h1 :class="pageTitleClass">{{ pageTitle }}</h1>
-      </template>
-      <template #description>
-        <p :class="descriptionClass">{{ pageDescription }}</p>
-      </template>
-    </DashboardPageHeader>
+  <div class="ds-root s-c s-page">
+    <SPageHeader :title="pageTitle">
+      <template #description>{{ pageDescription }}</template>
+    </SPageHeader>
 
-    <div :class="pageStackClass">
-      <FeatureGateCard
-        v-if="planFeature"
-        :feature="planFeature"
-        :title="planGateTitle"
-        :description="planGateDescription"
-        :tips="planGateTips"
-        primary-label="View plans"
-        primary-href="/dashboard/settings?upgrade=1"
-      />
-      <DashboardTableEmptyState
-        v-else
-        :icon="LockClosedIcon"
-        title="This feature is not enabled"
-        :description="emptyDescription"
-        :tips="emptyTips"
-        :fill="false"
-        extra-class="py-12"
-      >
-        <Button
-          v-if="canSelfUnlock"
-          size="sm"
-          @click="navigateTo('/dashboard/settings#advanced-features')"
-        >
-          Turn on in Settings
-        </Button>
-        <Button variant="outline" size="sm" @click="navigateTo('/dashboard')">
-          Back to dashboard
-        </Button>
-      </DashboardTableEmptyState>
-    </div>
+    <PlanGate v-if="planFeature" :feature="planFeature" :description="planGateDescription" />
+    <SCard v-else>
+      <SEmptyState title="This feature is turned off" :description="emptyHelp">
+        <template #icon><Lock :size="24" :stroke-width="1.75" /></template>
+        <template #actions>
+          <SButton
+            v-if="canSelfUnlock"
+            variant="primary"
+            :to="dashPath('/dashboard/settings#advanced-features')"
+          >
+            Turn on in Settings
+          </SButton>
+          <SButton :to="dashPath('/dashboard')">Back to dashboard</SButton>
+        </template>
+      </SEmptyState>
+    </SCard>
   </div>
 </template>
 
 <script setup lang="ts">
-import { LockClosedIcon } from '~/utils/app-icons'
-import Button from '~/components/ui/Button.vue'
-import FeatureGateCard from '~/components/subscription/FeatureGateCard.vue'
+import { Lock } from '@lucide/vue'
+import PlanGate from '~/components/subscription/PlanGate.vue'
+import SPageHeader from '~/components/s/SPageHeader.vue'
+import SCard from '~/components/s/SCard.vue'
+import SEmptyState from '~/components/s/SEmptyState.vue'
+import SButton from '~/components/s/SButton.vue'
 import {
   BUSINESS_CAPABILITIES,
   BUSINESS_CAPABILITY_LABELS,
@@ -68,14 +51,6 @@ useHead({
   title: 'Feature not available - Storvv',
 })
 
-const {
-  pageClass,
-  pageStackClass,
-  pageTitleClass,
-  descriptionClass,
-} = useDashboardSettingsChrome()
-
-const { isCapacitorIos } = useIsCapacitorIos()
 const userStore = useUserStore()
 const { isSoloExperience } = useBusinessCapabilities()
 const route = useRoute()
@@ -122,22 +97,11 @@ const pageDescription = computed(() =>
     : 'This area is turned off for your current Storvv setup.'
 )
 
-const planGateTitle = computed(() => {
-  if (!planFeature.value) return ''
-  const plan = getMinimumPlanForFeature(planFeature.value)
-  return plan ? `${getPlanDisplayName(plan)} feature` : 'Upgrade required'
-})
-
 const planGateDescription = computed(() => {
   if (!planFeature.value) return ''
   const plan = getMinimumPlanForFeature(planFeature.value)
   if (!plan) return 'Upgrade your subscription to open this screen.'
   return `${getPlanDisplayName(plan)} includes this feature. Upgrade in Settings to unlock it for your team.`
-})
-
-const planGateTips = computed(() => {
-  if (!planFeature.value) return []
-  return ['Compare plans in Settings → Account', 'Your data stays safe if you upgrade later']
 })
 
 const emptyDescription = computed(() => {
@@ -157,4 +121,8 @@ const emptyTips = computed(() => {
   }
   return ['Return to the dashboard to continue with your available tools.']
 })
+
+const emptyHelp = computed(() => `${emptyDescription.value} ${emptyTips.value[0]}`)
+
+const { dashPath } = useDashboardPaths()
 </script>

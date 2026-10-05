@@ -1,84 +1,74 @@
 <template>
-  <div class="min-h-screen bg-gray-50 px-4 py-10 dark:bg-slate-950">
-    <div class="mx-auto max-w-lg">
-      <div v-if="loading" class="py-16 text-center text-sm text-gray-500">Loading receipt…</div>
+  <main class="ds-root s-c s-receipt-public">
+    <div class="s-receipt-public__inner">
+      <div v-if="loading" class="s-receipt-public__state" role="status">
+        <SSpinner :size="24" />
+        <p>Loading receipt…</p>
+      </div>
 
-      <div
-        v-else-if="error"
-        class="rounded-sm border border-red-200 bg-red-50 px-4 py-6 text-center text-sm text-red-800 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-200"
-      >
+      <div v-else-if="error" class="s-receipt-public__error" role="alert">
         {{ error }}
       </div>
 
-      <article
-        v-else-if="receipt"
-        class="overflow-hidden rounded-sm bg-white shadow-sm dark:border-gray-800 dark:bg-slate-900"
-      >
-        <header class="border-b border-gray-100 px-6 py-5 text-center dark:border-gray-800">
-          <h1 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
-            {{ receipt.storeName || 'Store' }}
-          </h1>
-          <p class="mt-1 text-[10px] uppercase tracking-wider text-gray-500">Receipt</p>
-          <p class="mt-2 text-base font-semibold text-gray-900 dark:text-gray-50">
-            #{{ receipt.receiptNumber }}
-          </p>
-          <p class="mt-1 text-xs text-gray-500">{{ formattedDate }}</p>
+      <article v-else-if="receipt" class="s-receipt-doc">
+        <header class="s-receipt-doc__header">
+          <h1 class="s-receipt-doc__title">{{ receipt.storeName || 'Store' }}</h1>
+          <p class="s-receipt-doc__label">Receipt</p>
+          <p class="s-receipt-doc__number">#{{ receipt.receiptNumber }}</p>
+          <p class="s-receipt-doc__fine">{{ formattedDate }}</p>
         </header>
 
-        <section class="border-b border-gray-100 px-6 py-4 dark:border-gray-800">
-          <p class="text-[10px] font-medium uppercase tracking-wider text-gray-500">Customer</p>
-          <p class="mt-1 text-sm font-medium text-gray-900 dark:text-gray-100">
+        <section class="s-receipt-doc__section">
+          <p class="s-receipt-doc__label">Customer</p>
+          <p class="s-receipt-doc__value s-receipt-doc__value--strong">
             {{ receipt.customerName }}
           </p>
         </section>
 
-        <section class="px-6 py-4">
-          <table class="w-full text-xs">
-            <thead>
-              <tr
-                class="border-b border-gray-200 text-left text-[10px] uppercase tracking-wider text-gray-500"
-              >
-                <th class="pb-2">Item</th>
-                <th class="pb-2 text-center">Qty</th>
-                <th class="pb-2 text-right">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="(item, idx) in receipt.items || []"
-                :key="idx"
-                class="border-b border-gray-100 dark:border-gray-800"
-              >
-                <td class="py-2 pr-2 text-gray-900 dark:text-gray-100">{{ item.itemName }}</td>
-                <td class="py-2 text-center text-gray-600">{{ item.quantity }}</td>
-                <td
-                  class="py-2 text-right font-medium tabular-nums text-gray-900 dark:text-gray-100"
-                >
-                  {{ formatMoney(item.price * item.quantity) }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <p class="mt-4 text-right text-sm font-semibold text-gray-900 dark:text-gray-50">
-            Total: {{ formatMoney(receipt.total) }}
-          </p>
-          <p v-if="receipt.paymentMethod" class="mt-1 text-right text-[11px] text-gray-500">
-            Paid via {{ receipt.paymentMethod }}
-          </p>
+        <section class="s-receipt-doc__section">
+          <div class="s-receipt-doc__table-wrap">
+            <table class="s-receipt-doc__table">
+              <thead>
+                <tr>
+                  <th scope="col">Item</th>
+                  <th scope="col" class="s-receipt-doc__center">Qty</th>
+                  <th scope="col" class="s-receipt-doc__num">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(item, idx) in receipt.items || []" :key="idx">
+                  <td class="s-receipt-doc__item-name">{{ item.itemName }}</td>
+                  <td class="s-receipt-doc__center">{{ item.quantity }}</td>
+                  <td class="s-receipt-doc__num s-receipt-doc__strong">
+                    {{ formatMoney(item.price * item.quantity) }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="s-receipt-doc__totals">
+            <div class="s-receipt-doc__grand">
+              <span>Total</span>
+              <span>{{ formatMoney(receipt.total) }}</span>
+            </div>
+            <p v-if="receipt.paymentMethod" class="s-receipt-doc__fine s-receipt-doc__end">
+              Paid via {{ receipt.paymentMethod }}
+            </p>
+          </div>
         </section>
 
-        <footer
-          class="border-t border-gray-100 bg-gray-50 px-6 py-4 text-center dark:border-gray-800 dark:bg-slate-900/80"
-        >
-          <p class="text-xs text-gray-600 dark:text-gray-400">Thank you for your business</p>
-          <p class="mt-1 text-[10px] text-gray-400">Powered by Storvv</p>
+        <footer class="s-receipt-doc__footer">
+          <p>Thank you for your business</p>
+          <p class="s-receipt-doc__fine">Powered by Storvv</p>
         </footer>
       </article>
     </div>
-  </div>
+  </main>
 </template>
 
 <script setup lang="ts">
+import SSpinner from '~/components/s/SSpinner.vue'
+
 definePageMeta({ layout: false })
 
 interface PublicReceiptItem {

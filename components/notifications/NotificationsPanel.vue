@@ -1,21 +1,29 @@
 <template>
-  <div :class="variant === 'dropdown' ? panelDropdownClass : panelClass">
-    <div :class="headerClass">
-      <h2 :class="titleClass">Notifications</h2>
-      <div class="dash-notify-panel__header-actions">
-        <button
+  <div class="s-c s-notify" :class="`s-notify--${variant}`">
+    <div class="s-notify__head">
+      <h2 v-if="variant === 'dropdown'" class="s-notify__title">Notifications</h2>
+      <STabs
+        v-else
+        v-model="activeTab"
+        :tabs="tabs"
+        label="Notification filters"
+        class="s-notify__tabs"
+      />
+      <div class="s-notify__head-actions">
+        <SButton
           v-if="unreadCount > 0"
-          type="button"
-          :class="headerActionClass"
+          variant="ghost"
+          size="sm"
           :disabled="notificationsStore.loading"
           @click="handleMarkAllAsRead"
         >
+          <template #leading><CheckCheck :size="16" :stroke-width="2" aria-hidden="true" /></template>
           Mark all read
-        </button>
+        </SButton>
         <NuxtLink
           v-if="variant === 'dropdown'"
           to="/dashboard/notifications"
-          :class="headerLinkClass"
+          class="s-link s-notify__view-all"
           @click="emit('close')"
         >
           View all
@@ -23,111 +31,104 @@
       </div>
     </div>
 
-    <div :class="tabsClass">
-      <button
-        type="button"
-        :class="[tabClass, activeTab === 'inbox' ? tabActiveClass : '']"
-        @click="activeTab = 'inbox'"
-      >
-        Inbox
-        <span v-if="unreadCount > 0" :class="tabBadgeClass">
-          {{ unreadCount > 99 ? '99+' : unreadCount }}
-        </span>
-      </button>
-      <button
-        type="button"
-        :class="[tabClass, activeTab === 'read' ? tabActiveClass : '']"
-        @click="activeTab = 'read'"
-      >
-        Read
-        <span v-if="readCount > 0" :class="tabBadgeClass">
-          {{ readCount > 99 ? '99+' : readCount }}
-        </span>
-      </button>
+    <div v-if="variant === 'dropdown'" class="s-notify__segment">
+      <STabs v-model="activeTab" :tabs="tabs" label="Notification filters" block />
     </div>
 
-    <div :class="bodyClass">
+    <div class="s-notify__body">
       <ul
         v-if="notificationsStore.loading && notifications.length === 0"
-        :class="skeletonListClass"
+        class="s-list"
+        aria-label="Loading notifications"
+        aria-busy="true"
       >
-        <li v-for="i in 4" :key="i" :class="skeletonRowClass">
-          <div class="dash-notify-skeleton-row__avatar" />
-          <div class="dash-notify-skeleton-row__content">
-            <div class="dash-notify-skeleton-row__line dash-notify-skeleton-row__line--medium" />
-            <div class="dash-notify-skeleton-row__line dash-notify-skeleton-row__line--long" />
-            <div class="dash-notify-skeleton-row__line dash-notify-skeleton-row__line--short" />
+        <li v-for="i in 4" :key="i" class="s-list__item s-notify__item" aria-hidden="true">
+          <SSkeleton circle height="32px" />
+          <div class="s-notify__content">
+            <SSkeleton width="45%" height="14px" />
+            <SSkeleton width="85%" height="12px" />
+            <SSkeleton width="20%" height="12px" />
           </div>
         </li>
       </ul>
 
-      <div v-else-if="filteredNotifications.length === 0" :class="emptyClass">
-        <div :class="emptyIconClass">
-          <BellIcon stroke-width="1.75" />
-        </div>
-        <h3 :class="emptyTitleClass">
-          {{ activeTab === 'inbox' ? 'No notifications yet' : 'No read notifications' }}
-        </h3>
-        <p :class="emptyDescClass">
-          {{
-            activeTab === 'inbox'
-              ? 'Sales, inventory, and team activity will show up here.'
-              : "Notifications you've read will appear here."
-          }}
-        </p>
-      </div>
+      <SEmptyState
+        v-else-if="filteredNotifications.length === 0"
+        :title="activeTab === 'inbox' ? 'No notifications yet' : 'No read notifications'"
+        :description="
+          activeTab === 'inbox'
+            ? 'Sales, inventory, and team activity will show up here.'
+            : 'Notifications you\'ve read will appear here.'
+        "
+      >
+        <template #icon><Bell :size="24" :stroke-width="1.75" /></template>
+      </SEmptyState>
 
-      <ul v-else :class="listClass">
+      <ul v-else class="s-list">
         <li v-for="notification in filteredNotifications" :key="notification.id">
           <button
             type="button"
-            :class="[itemClass, !notification.read ? itemUnreadClass : '']"
+            class="s-list__item s-list__item--interactive s-notify__item"
+            :class="{ 's-notify__item--unread': !notification.read }"
             @click="handleNotificationClick(notification)"
           >
-            <div :class="[itemAvatarClass, getAvatarToneClass(notification)]">
-              {{ getAvatarInitial(notification) }}
-            </div>
-            <div :class="itemContentClass">
-              <p class="m-0 leading-snug">
-                <span :class="itemTitleClass">{{ notification.title }}</span>
-                <span :class="itemMessageClass">
-                  - {{ formatMessageWithAccountCurrency(notification.message) }}
-                </span>
-              </p>
-              <p :class="itemTimeClass">{{ formatTime(notification.createdAt) }}</p>
-            </div>
-            <span v-if="!notification.read" :class="itemDotClass" aria-hidden="true" />
+            <span class="s-notify__icon" :class="`s-notify__icon--${getTone(notification)}`" aria-hidden="true">
+              <component :is="getIcon(notification)" :size="16" :stroke-width="1.75" />
+            </span>
+            <span class="s-notify__content">
+              <span class="s-notify__item-title">{{ notification.title }}</span>
+              <span v-if="notification.message" class="s-notify__message">
+                {{ formatMessageWithAccountCurrency(notification.message) }}
+              </span>
+              <span class="s-notify__time">{{ formatTime(notification.createdAt) }}</span>
+            </span>
+            <span v-if="!notification.read" class="s-notify__dot">
+              <span class="ds-sr-only">Unread</span>
+            </span>
           </button>
         </li>
       </ul>
 
       <div
         v-if="notificationsStore.hasMore && filteredNotifications.length > 0"
-        :class="footerClass"
+        class="s-notify__foot"
       >
-        <button
-          type="button"
-          :class="footerActionClass"
-          :disabled="notificationsStore.loading"
+        <SButton
+          variant="ghost"
+          size="sm"
+          block
+          :loading="notificationsStore.loading"
           @click="loadMoreNotifications"
         >
-          {{ notificationsStore.loading ? 'Loading…' : 'Load more' }}
-        </button>
+          Load more
+        </SButton>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, type Component } from 'vue'
 import {
-  BellIcon,
-} from '~/utils/app-icons'
+  Bell,
+  Building2,
+  CheckCheck,
+  FileDown,
+  Package,
+  Receipt,
+  Repeat,
+  Store,
+  Target,
+  UserRound,
+} from '@lucide/vue'
+import SButton from '~/components/s/SButton.vue'
+import SEmptyState from '~/components/s/SEmptyState.vue'
+import SSkeleton from '~/components/s/SSkeleton.vue'
+import STabs from '~/components/s/STabs.vue'
 import { useNotificationsStore, type Notification } from '~/stores/notifications'
 import { useRouter } from 'vue-router'
 import { useAppToast } from '~/composables/useAppToast'
 import { usePreferences } from '~/composables/usePreferences'
-import { useDashboardNotificationsChrome } from '~/composables/useDashboardNotificationsChrome'
 
 const props = withDefaults(
   defineProps<{
@@ -139,37 +140,6 @@ const props = withDefaults(
 const emit = defineEmits<{
   close: []
 }>()
-
-const {
-  panelClass,
-  panelDropdownClass,
-  headerClass,
-  titleClass,
-  headerActionClass,
-  headerLinkClass,
-  tabsClass,
-  tabClass,
-  tabActiveClass,
-  tabBadgeClass,
-  bodyClass,
-  listClass,
-  itemClass,
-  itemUnreadClass,
-  itemAvatarClass,
-  itemContentClass,
-  itemTitleClass,
-  itemMessageClass,
-  itemTimeClass,
-  itemDotClass,
-  emptyClass,
-  emptyIconClass,
-  emptyTitleClass,
-  emptyDescClass,
-  footerClass,
-  footerActionClass,
-  skeletonListClass,
-  skeletonRowClass,
-} = useDashboardNotificationsChrome()
 
 const notificationsStore = useNotificationsStore()
 const router = useRouter()
@@ -183,35 +153,38 @@ const unreadNotifications = computed(() => notificationsStore.unreadNotification
 const unreadCount = computed(() => unreadNotifications.value.length)
 const readCount = computed(() => notificationsStore.readNotifications.length)
 
+const tabs = computed(() => [
+  { value: 'inbox', label: 'Inbox', count: unreadCount.value || undefined },
+  { value: 'read', label: 'Read', count: readCount.value || undefined },
+])
+
 const filteredNotifications = computed(() => {
   if (activeTab.value === 'inbox') return notifications.value
   return notificationsStore.readNotifications
 })
 
-const avatarTones = [
-  '',
-  'dash-notify-item__avatar--tone-1',
-  'dash-notify-item__avatar--tone-2',
-  'dash-notify-item__avatar--tone-3',
-] as const
+type Tone = 'accent' | 'success' | 'warning' | 'info' | 'neutral'
 
-function getAvatarInitial(notification: Notification): string {
-  const t = notification.title?.trim()
-  if (t) return (t[0] ?? 'N').toUpperCase()
-  const type = notification.type
-  if (type?.startsWith('receipt')) return 'R'
-  if (type?.startsWith('item') || type?.startsWith('folder')) return 'I'
-  if (type?.startsWith('staff')) return 'S'
-  if (type?.startsWith('department')) return 'D'
-  return 'N'
+function getIcon(notification: Notification): Component {
+  const type = notification.type || ''
+  if (type.startsWith('receipt')) return Receipt
+  if (type.startsWith('item') || type.startsWith('folder')) return Package
+  if (type.startsWith('staff')) return UserRound
+  if (type.startsWith('department')) return Building2
+  if (type.startsWith('lead')) return Target
+  if (type === 'storefront_inquiry') return Store
+  if (type === 'swap_in_completed') return Repeat
+  if (type === 'import_completed' || type === 'export_completed') return FileDown
+  return Bell
 }
 
-function getAvatarToneClass(notification: Notification): string {
-  const type = notification.type
-  const index = type
-    ? Math.abs(type.split('').reduce((a, c) => a + c.charCodeAt(0), 0)) % avatarTones.length
-    : 0
-  return avatarTones[index] ?? avatarTones[0]
+function getTone(notification: Notification): Tone {
+  const type = notification.type || ''
+  if (type.endsWith('_deleted') || type === 'receipt_refunded') return 'warning'
+  if (type.startsWith('receipt') || type === 'lead_converted') return 'success'
+  if (type.startsWith('lead') || type === 'storefront_inquiry') return 'accent'
+  if (type.startsWith('item') || type.startsWith('folder')) return 'info'
+  return 'neutral'
 }
 
 function formatMessageWithAccountCurrency(message: string): string {

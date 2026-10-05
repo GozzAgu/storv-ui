@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import Modal from '~/components/ui/Modal.vue'
-import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
-import { IosFormField, IosFormInput } from '~/components/ios/forms'
+import SDialog from '~/components/s/SDialog.vue'
+import SDialogActions from '~/components/s/SDialogActions.vue'
+import SInput from '~/components/s/SInput.vue'
 
 const props = defineProps<{
   modelValue: boolean
@@ -39,28 +39,27 @@ function submit() {
 </script>
 
 <template>
-  <Modal
-    :model-value="modelValue"
+  <SDialog
+    :open="modelValue"
     :title="title || 'Confirm with authenticator'"
-    :subtitle="description || 'Enter the 6-digit code from your authenticator app.'"
+    :description="description || 'Enter the 6-digit code from your authenticator app.'"
     size="sm"
-    @update:model-value="(value: boolean) => { if (!value) close() }"
+    :dismissible="!loading"
+    @update:open="(value: boolean) => { if (!value) close() }"
   >
-    <IosFormField label="Authenticator code" for="totp-confirm-code">
-      <IosFormInput
-        id="totp-confirm-code"
-        v-model="code"
-        type="text"
-        inputmode="numeric"
-        autocomplete="one-time-code"
-        maxlength="6"
-        extra-class="rounded-xl text-center text-lg tracking-[0.35em]"
-        placeholder="000000"
-        @keyup.enter="submit"
-      />
-    </IosFormField>
+    <SInput
+      id="totp-confirm-code"
+      v-model="code"
+      label="Authenticator code"
+      inputmode="numeric"
+      autocomplete="one-time-code"
+      maxlength="6"
+      class="s-otp-input"
+      placeholder="000000"
+      @keyup.enter="submit"
+    />
     <template #footer>
-      <IosDrawerActions
+      <SDialogActions
         primary-label="Confirm"
         :primary-loading="loading"
         :primary-disabled="code.trim().length !== 6"
@@ -69,5 +68,5 @@ function submit() {
         @primary="submit"
       />
     </template>
-  </Modal>
+  </SDialog>
 </template>

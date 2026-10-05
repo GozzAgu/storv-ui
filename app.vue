@@ -1,28 +1,20 @@
 <template>
-  <UApp class="font-sans">
-    <div
-      v-if="capacitorBooting"
-      class="capacitor-boot-splash fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-[#fafafa] dark:bg-[#07080c]"
-      aria-busy="true"
-      aria-label="Loading Storv"
-    >
-      <div
-        class="h-10 w-10 animate-spin rounded-full border-0 border-primary-500 border-t-transparent"
-      />
-      <p class="mt-4 text-sm text-gray-600 dark:text-gray-400">Loading Storv…</p>
-    </div>
-    <NuxtLayout>
-      <NuxtPage />
-    </NuxtLayout>
-    <!-- Toast Notifications - Global -->
-    <ClientOnly>
-      <ToastContainer />
-    </ClientOnly>
-  </UApp>
+  <div v-if="capacitorBooting" class="s-c s-boot" aria-busy="true" aria-label="Loading Storvv">
+    <SSpinner :size="32" />
+    <p class="s-boot__label">Loading Storvv…</p>
+  </div>
+  <NuxtRouteAnnouncer />
+  <NuxtLayout>
+    <NuxtPage />
+  </NuxtLayout>
+  <ClientOnly>
+    <ToastContainer />
+  </ClientOnly>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import SSpinner from '~/components/s/SSpinner.vue'
 import ToastContainer from '~/components/ui/ToastContainer.vue'
 import { isCapacitorNative, markCapacitorDocument } from '~/utils/capacitor-env'
 import { captureException } from '~/utils/observability'

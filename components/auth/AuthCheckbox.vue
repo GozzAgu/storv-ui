@@ -1,33 +1,24 @@
 <template>
-  <label
-    class="auth-checkbox"
-    :class="{ 'auth-checkbox--disabled': disabled }"
-  >
+  <label class="s-check s-auth-check" :class="{ 's-check--disabled': disabled }">
     <input
       type="checkbox"
-      class="auth-checkbox__input sr-only"
+      class="s-check__input"
       :checked="modelValue"
       :disabled="disabled"
       @change="$emit('update:modelValue', ($event.target as HTMLInputElement).checked)"
     />
-    <span class="auth-checkbox__box" aria-hidden="true">
-      <svg v-if="modelValue" class="auth-checkbox__check" viewBox="0 0 12 12" fill="none">
-        <path
-          d="M2.5 6.2 4.8 8.5 9.5 3.5"
-          stroke="currentColor"
-          stroke-width="1.75"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-      </svg>
+    <span class="s-check__box" aria-hidden="true">
+      <Check :size="14" :stroke-width="2.5" />
     </span>
-    <span v-if="$slots.default" class="auth-checkbox__label">
-      <slot />
+    <span v-if="$slots.default" class="s-check__text">
+      <span class="s-check__label"><slot /></span>
     </span>
   </label>
 </template>
 
 <script setup lang="ts">
+import { Check } from '@lucide/vue'
+
 defineProps<{
   modelValue: boolean
   disabled?: boolean

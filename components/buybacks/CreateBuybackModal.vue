@@ -1,60 +1,60 @@
 <template>
-  <SidePanel
-    :model-value="modelValue"
+  <SDialog
+      placement="right"
+    :open="modelValue"
     title="Record customer buyback"
-    size="lg"
-    dense
-    @update:model-value="(value: boolean) => emit('update:modelValue', value)"
+    size="md"
+    @update:open="(value: boolean) => emit('update:modelValue', value)"
   >
-    <IosForm id="buyback-drawer-form" layout="fill" @submit="submit">
-      <IosFormSection fixed>
-        <p class="dash-drawer-callout">
-          <strong class="font-medium text-gray-900 dark:text-gray-100">Not a sale:</strong>
+    <SForm id="buyback-drawer-form" @submit="submit">
+      <SFormSection>
+        <p class="s-callout">
+          <strong>Not a sale:</strong>
           You pay the customer and the item goes straight into stock. Use swap-in on a receipt when
           trade-in credit applies to a sale happening now.
         </p>
-      </IosFormSection>
+      </SFormSection>
 
-      <IosFormSection fixed>
-        <IosFormField label="Customer name" required>
-          <IosFormInput
+      <SFormSection>
+        <SField label="Customer name" required>
+          <SInput
             v-model="customerName"
             maxlength="120"
             autocomplete="name"
             placeholder="Who sold this item?"
           />
-        </IosFormField>
-        <div class="ios-form__grid ios-form__grid--pair">
-          <IosFormField label="Phone" hint="Optional">
-            <IosFormInput
+        </SField>
+        <div class="s-form-pair">
+          <SField label="Phone" hint="Optional">
+            <SInput
               v-model="customerPhone"
               type="tel"
               maxlength="40"
               autocomplete="tel"
               placeholder="Contact number"
             />
-          </IosFormField>
-          <IosFormField label="Email" hint="Optional">
-            <IosFormInput
+          </SField>
+          <SField label="Email" hint="Optional">
+            <SInput
               v-model="customerEmail"
               type="email"
               maxlength="120"
               autocomplete="email"
               placeholder="Email address"
             />
-          </IosFormField>
+          </SField>
         </div>
-      </IosFormSection>
+      </SFormSection>
 
-      <IosFormSection fixed>
-        <IosFormField label="Inventory category" required>
-          <IosFormSelect v-model="folderId" required extra-class="cursor-pointer">
+      <SFormSection>
+        <SField label="Inventory category" required>
+          <SSelect v-model="folderId" required>
             <option value="">Select category</option>
             <option v-for="folder in folders" :key="folder.id" :value="folder.id">
               {{ folderOptionLabel(folder) }}
             </option>
-          </IosFormSelect>
-        </IosFormField>
+          </SSelect>
+        </SField>
 
         <template v-if="folderId && folder">
           <BuybackItemFields
@@ -64,52 +64,47 @@
             :field-placeholder="fieldPlaceholder"
             @update:model-value="itemForm = $event"
           />
-          <p
-            v-if="buybackDisplayFields.length === 0"
-            class="ios-form__hint dash-drawer-hint"
-          >
+          <p v-if="buybackDisplayFields.length === 0" class="s-form-meta">
             This category has no fields configured yet.
           </p>
         </template>
-      </IosFormSection>
+      </SFormSection>
 
-      <IosFormSection fixed>
-        <div class="ios-form__grid ios-form__grid--pair">
-          <IosFormField label="Amount paid to customer" required>
-            <div class="relative">
-              <span
-                class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400"
-                >{{ currencySymbol }}</span
-              >
-              <IosFormInput
-                v-model="purchasePrice"
-                type="number"
-                min="0"
-                step="0.01"
-                extra-class="pl-7"
-                placeholder="0.00"
-              />
+      <SFormSection>
+        <div class="s-form-pair">
+          <SField label="Amount paid to customer" required>
+            <SInput
+              v-model="purchasePrice"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="0.00"
+            >
+              <template #prefix>{{ currencySymbol }}</template>
+            </SInput>
+          </SField>
+
+          <SField v-slot="{ id }" label="Payment method" required>
+            <div class="s-control s-control--select">
+              <PaymentMethodSelect :id="id" v-model="paymentMethod" required select-class="s-control__input" />
+              <ChevronDown class="s-control__chevron" :size="16" :stroke-width="1.75" aria-hidden="true" />
             </div>
-          </IosFormField>
-
-          <IosFormField label="Payment method" required>
-            <PaymentMethodSelect v-model="paymentMethod" required />
-          </IosFormField>
+          </SField>
         </div>
 
-        <IosFormField label="Notes" hint="Optional">
-          <IosFormTextarea
+        <SField label="Notes" hint="Optional">
+          <STextarea
             v-model="notes"
             :rows="2"
             maxlength="1000"
             placeholder="Condition, ID check, reference…"
           />
-        </IosFormField>
-      </IosFormSection>
-    </IosForm>
+        </SField>
+      </SFormSection>
+    </SForm>
 
     <template #footer>
-      <IosDrawerActions
+      <SDialogActions
         primary-label="Record buyback"
         :primary-loading="submitting"
         :primary-disabled="!canSubmit"
@@ -118,23 +113,22 @@
         @primary="submit"
       />
     </template>
-  </SidePanel>
+  </SDialog>
 </template>
 
 <script setup lang="ts">
+import SDialog from '~/components/s/SDialog.vue'
+import SDialogActions from '~/components/s/SDialogActions.vue'
+import SField from '~/components/s/SField.vue'
+import SForm from '~/components/s/SForm.vue'
+import SFormSection from '~/components/s/SFormSection.vue'
+import SInput from '~/components/s/SInput.vue'
+import SSelect from '~/components/s/SSelect.vue'
+import STextarea from '~/components/s/STextarea.vue'
 import { computed, ref, watch } from 'vue'
-import SidePanel from '~/components/ui/SidePanel.vue'
-import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
+import { ChevronDown } from '@lucide/vue'
 import PaymentMethodSelect from '~/components/receipts/PaymentMethodSelect.vue'
 import BuybackItemFields from '~/components/buybacks/BuybackItemFields.vue'
-import {
-  IosForm,
-  IosFormSection,
-  IosFormField,
-  IosFormInput,
-  IosFormSelect,
-  IosFormTextarea,
-} from '~/components/ios/forms'
 import { useInventoryStore } from '~/stores/inventory'
 import { useCustomerBuybacksStore } from '~/stores/customerBuybacks'
 import { useInventoryItemCaptureForm } from '~/composables/useInventoryItemCaptureForm'

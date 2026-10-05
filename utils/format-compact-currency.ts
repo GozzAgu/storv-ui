@@ -24,6 +24,17 @@ export function formatCompactCurrencySuffix(amount: number): string {
   return ''
 }
 
+/** Chart axis label at every magnitude: "₦0", "₦850", "₦12k", "₦1.2m", "₦3b". */
+export function formatAxisCurrency(amount: number, symbol: string): string {
+  if (!Number.isFinite(amount)) return ''
+  const sign = amount < 0 ? '-' : ''
+  const abs = Math.abs(amount)
+  const suffix =
+    formatCompactCurrencySuffix(abs) ||
+    (abs >= 1000 ? `${formatCompactUnit(abs / 1000)}k` : String(Math.round(abs)))
+  return `${sign}${symbol}${suffix}`
+}
+
 /** Full compact currency string, e.g. "₦180m" or "-$1.3b". */
 export function formatCompactCurrency(amount: number, symbol: string): string | null {
   if (!Number.isFinite(amount)) return null

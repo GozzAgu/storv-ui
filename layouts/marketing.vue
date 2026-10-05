@@ -1,305 +1,220 @@
 <template>
-  <div class="landing-page landing-page--portfolio min-h-screen antialiased">
+  <div class="ds-root s-c mk">
     <header
-      class="landing-header"
-      :class="{ 'landing-header--menu-open': mobileMenuOpen, 'landing-header--scrolled': headerScrolled }"
+      class="mk-header"
+      :class="{ 'mk-header--scrolled': headerScrolled, 'mk-header--open': menuOpen }"
     >
-      <div class="landing-header__shell">
-        <div class="landing-header__pill">
-          <NuxtLink
-            to="/"
-            class="landing-header__brand"
-            aria-label="Storvv home"
-            @click="mobileMenuOpen = false"
+      <div class="mk-container mk-header__bar">
+        <NuxtLink
+          to="/"
+          class="mk-header__brand"
+          aria-label="Storvv home"
+          @click="menuOpen = false"
+        >
+          <img :src="logoSrc" alt="" class="mk-header__logo" width="104" height="28" />
+        </NuxtLink>
+
+        <nav class="mk-header__nav" aria-label="Primary">
+          <a href="/#product" class="mk-nav-link" @click.prevent="goToSection('product')"
+            >Product</a
           >
-            <img
-              :src="landingLogoSrc"
-              alt=""
-              class="landing-header__logo"
-              width="140"
-              height="40"
-            />
+          <NuxtLink v-for="link in pageLinks" :key="link.to" :to="link.to" class="mk-nav-link">
+            {{ link.label }}
           </NuxtLink>
+        </nav>
 
-          <nav class="landing-header__links landing-header__desktop" aria-label="Primary">
-            <a href="/#product" class="landing-nav-link" @click.prevent="goToSection('inventory')"
-              >Product</a
-            >
-            <NuxtLink to="/features" class="landing-nav-link">Features</NuxtLink>
-            <NuxtLink to="/pricing" class="landing-nav-link">Pricing</NuxtLink>
-            <a href="/#faq" class="landing-nav-link" @click.prevent="goToSection('faq')"
-              >Resources</a
-            >
-          </nav>
-
-          <div class="landing-header__actions">
-            <ThemeToggle />
-            <a :href="appOriginUrl" class="landing-header__sign-in">Sign in</a>
-            <a :href="appOriginUrl" class="landing-header__cta">Get Started</a>
-            <div class="landing-header__mobile">
-              <NuxtLink
-                to="/demo/dashboard"
-                class="landing-header__cta landing-header__cta--compact"
-                >Try demo</NuxtLink
-              >
-              <button
-                type="button"
-                class="landing-header__menu-btn"
-                :aria-expanded="mobileMenuOpen"
-                aria-controls="landing-mobile-nav"
-                :aria-label="mobileMenuOpen ? 'Close menu' : 'Open menu'"
-                @click="mobileMenuOpen = !mobileMenuOpen"
-              >
-                <XMarkIcon
-                  v-if="mobileMenuOpen"
-                  class="landing-header__menu-icon"
-                  aria-hidden="true"
-                />
-                <Bars3Icon v-else class="landing-header__menu-icon" aria-hidden="true" />
-              </button>
-            </div>
-          </div>
+        <div class="mk-header__actions">
+          <SIconButton :label="themeLabel" @click="toggleTheme">
+            <Moon v-if="isDark" :size="18" aria-hidden="true" />
+            <Sun v-else :size="18" aria-hidden="true" />
+          </SIconButton>
+          <SButton variant="ghost" class="mk-btn mk-btn--compact mk-header__signin" :to="appUrl">
+            Sign in
+          </SButton>
+          <SButton variant="primary" class="mk-btn mk-btn--compact" :to="appUrl"
+            >Start free</SButton
+          >
+          <SIconButton
+            class="mk-header__menu"
+            :label="menuOpen ? 'Close menu' : 'Open menu'"
+            :aria-expanded="menuOpen"
+            aria-controls="mk-menu"
+            @click="menuOpen = !menuOpen"
+          >
+            <X v-if="menuOpen" :size="20" aria-hidden="true" />
+            <Menu v-else :size="20" aria-hidden="true" />
+          </SIconButton>
         </div>
       </div>
     </header>
 
-    <Teleport to="body">
-      <Transition name="landing-mobile-layer">
-        <div
-          v-if="mobileMenuOpen"
-          class="landing-mobile-layer landing-page--portfolio md:hidden"
-          role="presentation"
-        >
-          <button
-            type="button"
-            class="landing-mobile-backdrop"
-            aria-label="Close menu"
-            @click="mobileMenuOpen = false"
-          />
-          <div
-            id="landing-mobile-nav"
-            class="landing-mobile-panel"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Site menu"
-          >
-            <nav class="landing-mobile-panel__nav" aria-label="Primary">
-              <a
-                href="/#product"
-                class="landing-mobile-nav-link"
-                @click.prevent="
-                  () => {
-                    goToSection('inventory')
-                    mobileMenuOpen = false
-                  }
-                "
-                >Product</a
-              >
-              <NuxtLink
-                to="/features"
-                class="landing-mobile-nav-link"
-                @click="mobileMenuOpen = false"
-                >Features</NuxtLink
-              >
-              <NuxtLink
-                to="/pricing"
-                class="landing-mobile-nav-link"
-                @click="mobileMenuOpen = false"
-                >Pricing</NuxtLink
-              >
-              <a
-                href="/#faq"
-                class="landing-mobile-nav-link"
-                @click.prevent="
-                  () => {
-                    goToSection('faq')
-                    mobileMenuOpen = false
-                  }
-                "
-                >Resources</a
-              >
-              <a
-                :href="appOriginUrl"
-                class="landing-mobile-nav-link"
-                @click="mobileMenuOpen = false"
-                >Sign in</a
-              >
-            </nav>
-            <div class="landing-mobile-panel__cta-wrap">
-              <a
-                :href="appOriginUrl"
-                class="landing-header__cta landing-mobile-panel__cta"
-                @click="mobileMenuOpen = false"
-              >
-                Get Started
-              </a>
-              <a
-                :href="appOriginUrl"
-                class="landing-mobile-panel__secondary-cta"
-                @click="mobileMenuOpen = false"
-              >
-                Start free
-              </a>
-            </div>
+    <Transition name="mk-menu">
+      <div v-if="menuOpen" class="mk-menu">
+        <button
+          type="button"
+          class="mk-menu__scrim"
+          aria-label="Close menu"
+          @click="menuOpen = false"
+        />
+        <div id="mk-menu" class="mk-menu__panel">
+          <nav class="mk-menu__nav" aria-label="Site menu">
+            <a href="/#product" class="mk-menu__link" @click.prevent="openSection('product')"
+              >Product</a
+            >
+            <NuxtLink
+              v-for="link in pageLinks"
+              :key="link.to"
+              :to="link.to"
+              class="mk-menu__link"
+              @click="menuOpen = false"
+            >
+              {{ link.label }}
+            </NuxtLink>
+            <NuxtLink to="/demo/dashboard" class="mk-menu__link" @click="menuOpen = false">
+              Live demo
+            </NuxtLink>
+          </nav>
+          <div class="mk-menu__actions">
+            <SButton variant="secondary" class="mk-btn" :to="appUrl">Sign in</SButton>
+            <SButton variant="primary" class="mk-btn" :to="appUrl">Start free</SButton>
           </div>
         </div>
-      </Transition>
-    </Teleport>
+      </div>
+    </Transition>
 
-    <slot />
+    <main>
+      <slot />
+    </main>
 
-    <LandingFooter />
+    <MkFooter />
 
-    <!-- Cookie consent banner -->
-    <div v-if="!cookiesAccepted" class="landing-cookie-banner">
-      <p class="landing-cookie-banner__text">
-        We use cookies on our website to help us provide the best browsing experience. By
-        continuing to use our website you are deemed to have agreed to the use of cookies.
+    <div v-if="!cookiesAccepted" class="mk-cookie" role="region" aria-label="Cookie notice">
+      <p>
+        We use cookies to give you the best browsing experience. By continuing to use the site you
+        agree to their use.
       </p>
-      <div class="landing-cookie-banner__actions">
-        <NuxtLink to="/privacy" class="landing-cookie-banner__link">Learn more</NuxtLink>
-        <button type="button" class="landing-cookie-banner__btn" @click="acceptCookies">
-          OK
-        </button>
+      <div class="mk-cookie__actions">
+        <NuxtLink to="/privacy" class="mk-link">Learn more</NuxtLink>
+        <SButton variant="primary" size="sm" @click="acceptCookies">OK</SButton>
       </div>
     </div>
 
-    <!-- Back to Top Button -->
-    <Transition
-      enter-active-class="transition ease-out duration-200"
-      enter-from-class="opacity-0 translate-y-4"
-      enter-to-class="opacity-100 translate-y-0"
-      leave-active-class="transition ease-in duration-150"
-      leave-from-class="opacity-100 translate-y-0"
-      leave-to-class="opacity-0 translate-y-4"
-    >
-      <button
-        v-if="showBackToTop"
-        @click="scrollToTop"
-        :class="cookiesAccepted ? 'bottom-6' : 'bottom-24 sm:bottom-20'"
-        class="fixed right-6 z-50 w-11 h-11 rounded-full bg-[#0f172a] text-white hover:bg-[#111018] transition-colors flex items-center justify-center dark:bg-white dark:text-[#0f172a] dark:hover:bg-[#f4f4f5]"
-        aria-label="Back to top"
-      >
-        <ArrowUpIcon class="w-5 h-5" />
-      </button>
+    <Transition name="mk-fade">
+      <div v-if="showBackToTop && cookiesAccepted" class="mk-to-top">
+        <SIconButton label="Back to top" variant="secondary" @click="scrollToTop">
+          <ArrowUp :size="18" aria-hidden="true" />
+        </SIconButton>
+      </div>
     </Transition>
   </div>
 </template>
 
 <script setup lang="ts">
-import '~/assets/css/landing.css'
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
-import ThemeToggle from '~/components/ui/ThemeToggle.vue'
-import { Bars3Icon, XMarkIcon, ArrowUpIcon } from '~/utils/app-icons'
-import { useThemeStore } from '~/stores/theme'
+import '~/assets/css/marketing.css'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { ArrowUp, Menu, Moon, Sun, X } from '@lucide/vue'
+import SButton from '~/components/s/SButton.vue'
+import SIconButton from '~/components/s/SIconButton.vue'
+import MkFooter from '~/components/marketing/MkFooter.vue'
+import { useTheme } from '~/composables/useTheme'
 import { useSectionScroll } from '~/composables/useSectionScroll'
+import {
+  useMarketingAppUrl,
+  useMarketingLogo,
+  useMarketingReveal,
+} from '~/composables/useMarketingSite'
 
-const themeStore = useThemeStore()
 const route = useRoute()
+const appUrl = useMarketingAppUrl()
+const logoSrc = useMarketingLogo()
 const { scrollToSection, scrollToTop, goToSection } = useSectionScroll()
+const { actualTheme, setTheme, initTheme, applyTheme } = useTheme()
+useMarketingReveal()
 
-/** Light wordmark for light canvas. */
-const landingLogoSrc = computed(() =>
-  themeStore.actualTheme === 'dark' ? '/storvv logo.png' : '/storvv logo 2.png'
-)
+const pageLinks = [
+  { label: 'Features', to: '/features' },
+  { label: 'Pricing', to: '/pricing' },
+  { label: 'Security', to: '/security' },
+]
 
-function applyLandingDocumentTheme() {
-  if (!import.meta.client) return
-  themeStore.initTheme()
-  themeStore.applyTheme()
-  const html = document.documentElement
-  const isDark = html.classList.contains('dark')
-  const meta = document.getElementById('theme-color-meta')
-  if (meta) meta.setAttribute('content', isDark ? '#080808' : '#f5f5f7')
+const isDark = computed(() => actualTheme.value === 'dark')
+const themeLabel = computed(() => (isDark.value ? 'Switch to light mode' : 'Switch to dark mode'))
+
+function toggleTheme() {
+  setTheme(isDark.value ? 'light' : 'dark')
 }
 
-const mobileMenuOpen = ref(false)
+function syncThemeColor() {
+  const meta = document.getElementById('theme-color-meta')
+  if (meta) meta.setAttribute('content', getComputedStyle(document.body).backgroundColor)
+}
+
+const menuOpen = ref(false)
 const headerScrolled = ref(false)
 const showBackToTop = ref(false)
 const cookiesAccepted = ref(true)
 
-const runtimeConfig = useRuntimeConfig()
-const appOriginUrl = computed(() => {
-  const o = runtimeConfig.public.appOrigin
-  return typeof o === 'string' && o.length > 0 ? o : 'https://app.storvv.com'
-})
-
-let mobileMenuMql: MediaQueryList | null = null
-function closeMobileMenuIfDesktop() {
-  if (mobileMenuMql?.matches) mobileMenuOpen.value = false
+function openSection(id: string) {
+  menuOpen.value = false
+  goToSection(id)
 }
 
-watch(
-  () => themeStore.actualTheme,
-  () => applyLandingDocumentTheme()
-)
+function acceptCookies() {
+  cookiesAccepted.value = true
+  localStorage.setItem('storvv-cookies-accepted', 'true')
+}
+
+function onScroll() {
+  headerScrolled.value = window.scrollY > 8
+  showBackToTop.value = window.scrollY > 800
+}
+
+let desktopQuery: MediaQueryList | null = null
+function closeMenuOnDesktop() {
+  if (desktopQuery?.matches) menuOpen.value = false
+}
+
+watch(actualTheme, () => requestAnimationFrame(syncThemeColor))
 
 watch(
   () => route.path,
   () => {
-    mobileMenuOpen.value = false
+    menuOpen.value = false
   }
 )
 
-// `<NuxtLayout>` keeps this layout instance mounted across client-side page
-// changes (it only remounts if the layout name itself changes), so the
-// onMounted hash-scroll below only fires on a hard/first load. Client-side
-// navigations to e.g. `/#faq` from another marketing page need this watcher
-// instead - the target section lives on the page that just finished mounting.
+// The layout stays mounted across client-side navigation, so hash links from other pages
+// (e.g. `/#faq`) scroll here once the new page has rendered.
 watch(
   () => route.fullPath,
   () => {
-    if (!import.meta.client || !route.hash) return
-    const sectionId = route.hash.substring(1)
-    setTimeout(() => scrollToSection(sectionId), 150)
+    if (!route.hash) return
+    setTimeout(() => scrollToSection(route.hash.slice(1)), 150)
   }
 )
 
-watch(mobileMenuOpen, (open) => {
-  if (!import.meta.client) return
+watch(menuOpen, (open) => {
   document.body.style.overflow = open ? 'hidden' : ''
 })
 
-const acceptCookies = () => {
-  cookiesAccepted.value = true
-  if (import.meta.client) localStorage.setItem('storvv-cookies-accepted', 'true')
-}
-
-function handleScroll() {
-  headerScrolled.value = window.scrollY > 24
-  showBackToTop.value = window.scrollY > 400
-}
-
 onMounted(() => {
-  if (import.meta.client) {
-    applyLandingDocumentTheme()
-    mobileMenuMql = window.matchMedia('(min-width: 768px)')
-    mobileMenuMql.addEventListener('change', closeMobileMenuIfDesktop)
+  initTheme()
+  applyTheme()
+  syncThemeColor()
+  desktopQuery = window.matchMedia('(min-width: 900px)')
+  desktopQuery.addEventListener('change', closeMenuOnDesktop)
+  cookiesAccepted.value = !!localStorage.getItem('storvv-cookies-accepted')
+  if (window.location.hash) {
+    const id = window.location.hash.slice(1)
+    setTimeout(() => scrollToSection(id), 100)
   }
-
-  if (import.meta.client && !localStorage.getItem('storvv-cookies-accepted')) {
-    cookiesAccepted.value = false
-  }
-
-  // Deep-link into a section on this page (e.g. arriving at /#faq from another page).
-  if (import.meta.client && window.location.hash) {
-    const sectionId = window.location.hash.substring(1)
-    setTimeout(() => scrollToSection(sectionId), 100)
-  }
-
-  if (import.meta.client) {
-    window.addEventListener('scroll', handleScroll)
-    handleScroll()
-  }
+  window.addEventListener('scroll', onScroll, { passive: true })
+  onScroll()
 })
 
 onUnmounted(() => {
-  if (import.meta.client) {
-    document.body.style.overflow = ''
-    mobileMenuMql?.removeEventListener('change', closeMobileMenuIfDesktop)
-    mobileMenuMql = null
-    themeStore.applyTheme()
-    window.removeEventListener('scroll', handleScroll)
-  }
+  document.body.style.overflow = ''
+  desktopQuery?.removeEventListener('change', closeMenuOnDesktop)
+  window.removeEventListener('scroll', onScroll)
 })
 </script>

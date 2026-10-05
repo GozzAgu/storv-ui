@@ -1,11 +1,8 @@
 <template>
   <span
     v-if="hint"
-    :class="[
-      inline ? 'inline' : 'block',
-      'text-[10px] tabular-nums leading-snug text-emerald-700 dark:text-emerald-400/90',
-      className,
-    ]"
+    class="s-profit-hint"
+    :class="[inline ? 's-profit-hint--inline' : '', className]"
   >
     {{ hint }}
   </span>

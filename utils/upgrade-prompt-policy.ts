@@ -3,7 +3,7 @@
  *
  * 1. Action-required (global, dismissible): billing past due, canceled grace, expired plan.
  * 2. Point-of-action: user hits a limit or tries a gated control (toast, modal, disabled action).
- * 3. Route gate: dedicated empty state (FeatureGateCard) when opening a paid screen.
+ * 3. Route gate: dedicated empty state (PlanGate) when opening a paid screen.
  *
  * Do NOT show ambient page-header upsells for features that are already hidden on the current plan.
  */

@@ -1,24 +1,20 @@
 <template>
-  <div class="auth-segment" role="tablist" aria-label="Authentication mode">
+  <nav class="s-tabs s-tabs--block s-auth-segment" aria-label="Sign in or create an account">
     <NuxtLink
       to="/signin"
-      class="auth-segment__item"
-      :class="{ 'auth-segment__item--active': mode === 'signin' }"
-      role="tab"
-      :aria-selected="mode === 'signin'"
+      class="s-tabs__tab"
+      :aria-current="mode === 'signin' ? 'page' : undefined"
     >
       Sign in
     </NuxtLink>
     <NuxtLink
       to="/signup"
-      class="auth-segment__item"
-      :class="{ 'auth-segment__item--active': mode === 'signup' }"
-      role="tab"
-      :aria-selected="mode === 'signup'"
+      class="s-tabs__tab"
+      :aria-current="mode === 'signup' ? 'page' : undefined"
     >
       Create account
     </NuxtLink>
-  </div>
+  </nav>
 </template>
 
 <script setup lang="ts">

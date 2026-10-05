@@ -1,105 +1,71 @@
 <template>
-  <div
-    v-if="canShow && filteredEntries.length > 0"
-    class="rounded-2xl border border-amber-200/75 bg-amber-50/85 px-4 py-3 backdrop-blur-md dark:border-amber-800/55 dark:bg-amber-950/35 sm:px-5 sm:py-4"
-  >
-    <div class="flex flex-wrap items-start justify-between gap-2 mb-3">
-      <div class="min-w-0">
-        <h2
-          class="text-sm font-semibold text-amber-900 dark:text-amber-100 flex items-center gap-2"
-        >
-          <LockClosedIcon class="w-4 h-4 shrink-0 text-amber-700 dark:text-amber-300" />
-          Pending staff sign-in invites
-        </h2>
-        <p
-          class="mt-0.5 text-[11px] text-amber-800/80 dark:text-amber-200/70 leading-snug max-w-xl"
-        >
-          Staff who have not changed their password yet. Email credentials to them or copy manually.
-          Entries disappear after they sign in and set a new password.
+  <SCard v-if="canShow && filteredEntries.length > 0" flush class="s-invites">
+    <div class="s-invites__head">
+      <span class="s-invites__icon" aria-hidden="true">
+        <KeyRound :size="16" :stroke-width="1.75" />
+      </span>
+      <div class="s-invites__intro">
+        <h2 class="s-invites__title">Pending sign-in invites</h2>
+        <p class="s-invites__text">
+          These people haven't set their own password yet. Email them their sign-in details or copy
+          them. Each invite disappears once they sign in and change their password.
         </p>
       </div>
-      <button
-        type="button"
-        class="text-[11px] font-medium text-amber-800 dark:text-amber-200 hover:underline shrink-0"
-        @click="clearThisDepartment"
-      >
-        Clear for this department
-      </button>
+      <SButton variant="ghost" size="sm" @click="clearThisDepartment">Clear all</SButton>
     </div>
-    <ul class="space-y-2.5">
-      <li
-        v-for="entry in filteredEntries"
-        :key="entry.id"
-        class="rounded-sm bg-white/80 dark:!bg-dashboard-card ring-1 ring-amber-200/60 dark:ring-amber-800/40 px-3 py-2.5"
-      >
-        <div class="flex flex-wrap items-start justify-between gap-2">
-          <div class="min-w-0 flex-1">
-            <p class="text-xs font-medium text-gray-900 dark:text-gray-100 truncate max-w-full">
-              {{ entry.staffName || 'Staff' }}
-            </p>
-            <p class="text-[11px] text-gray-500 dark:text-gray-400 truncate">
-              {{ entry.staffEmail }}
-            </p>
-            <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">
-              {{ entry.departmentName }} · {{ formatTime(entry.createdAt) }}
-            </p>
-          </div>
-          <div class="flex items-center gap-1.5 shrink-0">
-            <button
-              type="button"
-              class="rounded-sm px-2 py-1 text-[10px] font-medium text-amber-900 hover:bg-amber-100/80 disabled:opacity-60 dark:text-amber-100 dark:hover:bg-amber-900/30"
-              :disabled="emailingId === entry.id"
-              title="Email sign-in details to staff"
-              @click="emailEntryToStaff(entry)"
-            >
-              {{ emailingId === entry.id ? 'Sending…' : 'Email to staff' }}
-            </button>
-            <button
-              type="button"
-              class="rounded-sm px-2 py-1 text-[10px] font-medium text-amber-900 hover:bg-amber-100/80 dark:text-amber-100 dark:hover:bg-amber-900/30"
-              title="Copy invite email"
-              @click="copyInviteEmail(entry)"
-            >
-              {{ copyInviteId === entry.id ? 'Copied' : 'Copy invite' }}
-            </button>
-            <button
-              type="button"
-              class="p-1.5 rounded-sm text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800"
-              title="Copy password"
-              @click="copyPassword(entry)"
-            >
-              <ClipboardDocumentIcon v-if="copyId !== entry.id" class="w-4 h-4" />
-              <CheckCircleIcon v-else class="w-4 h-4 text-emerald-600" />
-            </button>
-            <button
-              type="button"
-              class="p-1.5 rounded-sm text-gray-400 hover:text-red-600 dark:hover:text-red-400"
-              title="Remove saved invite"
-              @click="removeInvite(entry.id)"
-            >
-              <TrashIcon class="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-        <div class="mt-2 pt-2 border-t border-gray-200/80 dark:border-white/10">
-          <code
-            class="block text-xs font-mono text-gray-900 dark:text-gray-100 break-all select-all"
-            >{{ entry.password }}</code
+    <ul class="s-list" aria-label="Pending invites">
+      <li v-for="entry in filteredEntries" :key="entry.id" class="s-list__item s-invites__item">
+        <span class="s-list__main">
+          <span class="s-list__primary">{{ entry.staffName || 'Staff' }}</span>
+          <span class="s-list__secondary">{{ entry.staffEmail }} · {{ formatTime(entry.createdAt) }}</span>
+          <span class="s-invites__password">
+            <span class="ds-sr-only">Temporary password:</span>
+            <code>{{ entry.password }}</code>
+          </span>
+        </span>
+        <span class="s-invites__actions">
+          <SButton
+            variant="secondary"
+            size="sm"
+            :loading="emailingId === entry.id"
+            @click="emailEntryToStaff(entry)"
           >
-        </div>
+            <template #leading><Mail :size="14" :stroke-width="2" aria-hidden="true" /></template>
+            Email
+          </SButton>
+          <SButton variant="ghost" size="sm" @click="copyInviteEmail(entry)">
+            {{ copyInviteId === entry.id ? 'Copied' : 'Copy invite' }}
+          </SButton>
+          <SIconButton
+            :label="copyId === entry.id ? 'Password copied' : `Copy password for ${entry.staffEmail}`"
+            size="sm"
+            @click="copyPassword(entry)"
+          >
+            <Check v-if="copyId === entry.id" :size="16" :stroke-width="2" aria-hidden="true" />
+            <Copy v-else :size="16" :stroke-width="1.75" aria-hidden="true" />
+          </SIconButton>
+          <SIconButton
+            :label="`Remove invite for ${entry.staffEmail}`"
+            size="sm"
+            @click="removeInvite(entry.id)"
+          >
+            <Trash2 :size="16" :stroke-width="1.75" aria-hidden="true" />
+          </SIconButton>
+        </span>
       </li>
     </ul>
-  </div>
+    <p class="ds-sr-only" aria-live="polite">
+      {{ copyId ? 'Password copied' : copyInviteId ? 'Invite copied' : '' }}
+    </p>
+  </SCard>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
-import {
-  LockClosedIcon,
-  ClipboardDocumentIcon,
-  CheckCircleIcon,
-  TrashIcon,
-} from '~/utils/app-icons'
+import { Check, Copy, KeyRound, Mail, Trash2 } from '@lucide/vue'
+import SButton from '~/components/s/SButton.vue'
+import SCard from '~/components/s/SCard.vue'
+import SIconButton from '~/components/s/SIconButton.vue'
 import {
   useStaffInvitePasswordsStore,
   type StaffInvitePasswordEntry,

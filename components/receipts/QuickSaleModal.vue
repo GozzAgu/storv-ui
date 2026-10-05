@@ -1,70 +1,58 @@
 <template>
-  <SidePanel
-    :model-value="modelValue"
-    title="Quick Sale"
-    :content-padding="quickSaleContentPadding"
-    size="lg"
-    :dense="isCapacitorIos"
-    @update:model-value="(value: boolean) => emit('update:modelValue', value)"
+  <SDialog
+      placement="right"
+    :open="modelValue"
+    title="Quick sale"
+    size="md"
+    @update:open="(value: boolean) => emit('update:modelValue', value)"
   >
-    <div :class="['space-y-4', isCapacitorIos ? 'ios-quick-sale-sheet' : '']">
+    <div class="s-form s-qs">
         <SellScreenNoteBanner />
 
         <!-- Folder Selection -->
-        <div class="space-y-2">
-          <div class="flex items-center justify-between gap-2">
+        <section class="s-qs__group" aria-label="Category">
+          <div class="s-qs__group-head">
             <p :class="sectionLabelClass">Category</p>
-            <button
+            <SButton
               v-if="selectedFolder && !folderPickerExpanded"
-              type="button"
-              class="text-xs font-medium text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
+              variant="ghost"
+              size="sm"
               @click="openCategoryPicker"
             >
               Change
-            </button>
+            </SButton>
           </div>
 
           <div
             v-if="selectedFolder && !folderPickerExpanded"
-            :class="[pickRowClass, pickRowSelectedClass, 'rounded-xl border border-gray-200/80 dark:border-white/[0.08]']"
+            :class="[pickRowSelectedClass, 's-qs__selected']"
           >
-            <div
-              :class="[
-                'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg',
-                getFolderColorClass(selectedFolder.color),
-              ]"
-            >
-              <FolderIcon class="h-4 w-4 text-white" stroke-width="1.75" />
-            </div>
-            <div class="min-w-0 flex-1">
+            <span :class="folderTileClass(selectedFolder.color)" aria-hidden="true">
+              <FolderIcon :size="16" :stroke-width="1.75" />
+            </span>
+            <div class="s-qs__row-main">
               <p :class="pickRowTitleClass">{{ selectedFolderLabel }}</p>
               <p :class="pickRowMetaClass">{{ folderPickerMeta(selectedFolder) }}</p>
             </div>
           </div>
 
           <template v-else>
-            <button
-              v-if="showSubcategoryList && selectedParentFolder"
-              type="button"
-              class="inline-flex items-center gap-1 text-xs font-medium text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
-              @click="goBackToParentCategories"
-            >
-              <ChevronLeftIcon class="h-3.5 w-3.5" />
-              {{ selectedParentFolder.name }}
-            </button>
+            <div v-if="showSubcategoryList && selectedParentFolder">
+              <SButton variant="ghost" size="sm" @click="goBackToParentCategories">
+                <template #leading>
+                  <ChevronLeftIcon :size="16" :stroke-width="2" aria-hidden="true" />
+                </template>
+                {{ selectedParentFolder.name }}
+              </SButton>
+            </div>
 
-            <DashboardDrawerSearch
+            <SSearch
               v-model="folderPickerSearch"
               :placeholder="showSubcategoryList ? 'Search subcategories…' : 'Search categories…'"
             />
 
             <div :class="pickListClass">
-              <div
-                :class="[
-                  pickListScrollClass,
-                  'dash-drawer-pick-scroll--chain max-h-48',
-                ]"
-              >
+              <div :class="[pickListScrollClass, 's-qs__scroll']">
                 <template v-if="showSubcategoryList">
                   <button
                     v-for="folder in subcategoryFolders"
@@ -74,27 +62,26 @@
                       pickRowClass,
                       isSubcategoryRowSelected(folder) ? pickRowSelectedClass : '',
                     ]"
+                    :aria-pressed="isSubcategoryRowSelected(folder)"
                     @click="onSubcategoryPick(folder)"
                   >
-                    <div
-                      :class="[
-                        'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg',
-                        getFolderColorClass(folder.color),
-                      ]"
-                    >
-                      <FolderIcon class="h-4 w-4 text-white" stroke-width="1.75" />
-                    </div>
-                    <div class="min-w-0 flex-1">
-                      <p :class="pickRowTitleClass">{{ folder.name }}</p>
-                      <p :class="pickRowMetaClass">{{ folderPickerMeta(folder) }}</p>
-                    </div>
+                    <span :class="folderTileClass(folder.color)" aria-hidden="true">
+                      <FolderIcon :size="16" :stroke-width="1.75" />
+                    </span>
+                    <span class="s-qs__row-main">
+                      <span :class="pickRowTitleClass">{{ folder.name }}</span>
+                      <span :class="pickRowMetaClass">{{ folderPickerMeta(folder) }}</span>
+                    </span>
                     <CheckIcon
                       v-if="isSubcategoryRowSelected(folder)"
-                      class="h-4 w-4 shrink-0 text-gray-700 dark:text-gray-300"
+                      class="s-qs__row-check"
+                      :size="16"
+                      :stroke-width="2"
+                      aria-hidden="true"
                     />
                   </button>
-                  <div v-if="subcategoryFolders.length === 0" :class="[emptyStateClass, '!min-h-[8rem]']">
-                    <p class="text-xs text-gray-500 dark:text-gray-400">No subcategories found</p>
+                  <div v-if="subcategoryFolders.length === 0" :class="emptyStateClass">
+                    <p>No subcategories found</p>
                   </div>
                 </template>
                 <template v-else>
@@ -105,478 +92,432 @@
                     :class="[
                       pickRowClass,
                       isParentRowSelected(row.folder) ? pickRowSelectedClass : '',
-                      row.depth === 1 ? 'ml-3 border-l-2 border-gray-300/50 dark:border-white/10 pl-2' : '',
+                      row.depth === 1 ? 's-qs__row--nested' : '',
                     ]"
+                    :aria-pressed="isParentRowSelected(row.folder)"
                     @click="onParentCategoryPick(row)"
                   >
-                    <div
-                      :class="[
-                        'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg',
-                        getFolderColorClass(row.folder.color),
-                      ]"
-                    >
-                      <FolderIcon class="h-4 w-4 text-white" stroke-width="1.75" />
-                    </div>
-                    <div class="min-w-0 flex-1">
-                      <p :class="pickRowTitleClass">
+                    <span :class="folderTileClass(row.folder.color)" aria-hidden="true">
+                      <FolderIcon :size="16" :stroke-width="1.75" />
+                    </span>
+                    <span class="s-qs__row-main">
+                      <span :class="pickRowTitleClass">
                         {{ row.folder.name }}
-                        <span
-                          v-if="row.depth === 1 && row.parentName"
-                          class="font-normal text-gray-500 dark:text-gray-400"
-                        >
+                        <span v-if="row.depth === 1 && row.parentName" class="s-qs__row-parent">
                           · {{ row.parentName }}
                         </span>
-                      </p>
-                      <p :class="pickRowMetaClass">{{ folderPickerMeta(row.folder) }}</p>
-                    </div>
+                      </span>
+                      <span :class="pickRowMetaClass">{{ folderPickerMeta(row.folder) }}</span>
+                    </span>
                     <ChevronRightIcon
                       v-if="isCategoryHub(row.folder) && !isParentRowSelected(row.folder)"
-                      class="h-4 w-4 shrink-0 text-gray-400"
+                      class="s-qs__row-chevron"
+                      :size="16"
+                      :stroke-width="2"
+                      aria-hidden="true"
                     />
                     <CheckIcon
                       v-if="!isCategoryHub(row.folder) && isParentRowSelected(row.folder)"
-                      class="h-4 w-4 shrink-0 text-gray-700 dark:text-gray-300"
+                      class="s-qs__row-check"
+                      :size="16"
+                      :stroke-width="2"
+                      aria-hidden="true"
                     />
                   </button>
-                  <div v-if="parentCategoryRows.length === 0" :class="[emptyStateClass, '!min-h-[8rem]']">
-                    <FolderIcon class="mb-2 h-7 w-7 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
-                    <p class="text-xs text-gray-500 dark:text-gray-400">No categories found</p>
+                  <div v-if="parentCategoryRows.length === 0" :class="emptyStateClass">
+                    <FolderIcon :size="24" :stroke-width="1.5" aria-hidden="true" />
+                    <p>No categories found</p>
                   </div>
                 </template>
               </div>
             </div>
           </template>
-        </div>
+        </section>
 
         <!-- Barcode scan / search (after category is picked) -->
-        <div
+        <section
           v-if="selectedFolder && !folderPickerExpanded"
-          :class="[
-            'space-y-3 rounded-sm border border-gray-200/80 bg-gray-50/50 p-3 dark:border-white/[0.08] dark:bg-white/[0.02]',
-            isCapacitorIos ? 'ios-quick-sale-sheet__scan' : '',
-          ]"
+          class="s-qs-scan"
+          aria-label="Scan or search"
         >
-          <div class="flex items-center justify-between gap-3">
-            <div class="flex items-center gap-3">
-              <QrCodeIcon class="h-6 w-6 text-gray-700 dark:text-gray-300" />
-              <div>
-                <p :class="sectionLabelClass">Scan or search</p>
-                <p class="text-[11px] text-gray-500 dark:text-gray-400">
-                  Barcode, SKU, or serial in {{ selectedFolder.name }}
-                </p>
-              </div>
+          <div class="s-qs-scan__head">
+            <span class="s-qs-scan__icon" aria-hidden="true">
+              <QrCodeIcon :size="20" :stroke-width="1.75" />
+            </span>
+            <div class="s-qs__row-main">
+              <p :class="sectionLabelClass">Scan or search</p>
+              <p class="s-form-meta">Barcode, SKU, or serial in {{ selectedFolder.name }}</p>
             </div>
-            <button
-              type="button"
+            <SButton
+              size="sm"
+              :variant="isScanning ? 'danger' : 'primary'"
+              :aria-pressed="isScanning"
               @click="toggleScanner"
-              :class="[
-                'px-3 py-1.5 rounded-sm text-xs font-medium transition-colors',
-                isScanning
-                  ? 'bg-red-600 text-white hover:bg-red-700'
-                  : 'bg-gray-900 text-white hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100',
-              ]"
             >
+              <template #leading>
+                <XMarkIcon v-if="isScanning" :size="16" :stroke-width="2" aria-hidden="true" />
+                <QrCodeIcon v-else :size="16" :stroke-width="2" aria-hidden="true" />
+              </template>
               {{ isScanning ? 'Stop' : 'Scan' }}
-            </button>
+            </SButton>
           </div>
 
-          <div v-if="isScanning" class="relative">
-            <div
-              ref="scannerContainer"
-              id="scanner-container"
-              class="h-64 w-full overflow-hidden rounded-sm bg-black"
-            >
-              <div
-                v-if="!scannerReady"
-                class="flex h-full items-center justify-center text-white"
-              >
-                <div class="text-center">
-                  <div
-                    class="mb-2 inline-block h-8 w-8 animate-spin rounded-full border-b-2 border-white"
-                  />
-                  <p class="text-sm">Initializing camera…</p>
-                </div>
+          <div v-if="isScanning" class="s-qs-scan__camera-wrap">
+            <div ref="scannerContainer" id="scanner-container" class="s-qs-scan__camera">
+              <div v-if="!scannerReady" class="s-qs-scan__loading">
+                <SSpinner :size="24" label="Starting camera" />
+                <p>Initializing camera…</p>
               </div>
             </div>
-            <p class="mt-2 text-center text-xs text-gray-500 dark:text-gray-400">
-              Point camera at barcode or QR code
-            </p>
+            <p class="s-form-meta s-qs-scan__tip">Point camera at barcode or QR code</p>
           </div>
 
-          <div class="flex gap-2">
-            <input
-              v-model="manualBarcode"
-              type="text"
-              placeholder="Enter barcode, SKU, or serial…"
-              class="app-field flex-1 rounded-sm px-4 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400/40 dark:!bg-dashboard-card dark:text-gray-100"
-              @keyup.enter="searchByBarcode"
-            />
-            <Button variant="secondary" @click="searchByBarcode" :loading="isSearching">Search</Button>
+          <div class="s-inline-field">
+            <div class="s-inline-field__grow">
+              <SInput
+                v-model="manualBarcode"
+                placeholder="Enter barcode, SKU, or serial…"
+                aria-label="Barcode, SKU, or serial"
+                @keyup.enter="searchByBarcode"
+              />
+            </div>
+            <SButton :loading="isSearching" @click="searchByBarcode">Search</SButton>
           </div>
-        </div>
+        </section>
 
         <!-- Products in selected subfolder -->
-        <div v-if="selectedFolder && !folderPickerExpanded" class="space-y-2">
+        <section
+          v-if="selectedFolder && !folderPickerExpanded"
+          class="s-qs__group"
+          aria-label="Products"
+        >
           <p :class="sectionLabelClass">Products · {{ selectedFolder.name }}</p>
-          <DashboardDrawerSearch v-model="itemSearchQuery" placeholder="Search products…" />
+          <SSearch v-model="itemSearchQuery" placeholder="Search products…" />
 
-          <div v-if="loadingFolderItems && isCapacitorIos" class="flex items-center justify-center py-6">
-            <div
-              class="inline-block h-5 w-5 animate-spin rounded-full border-b-2 border-gray-500"
-            />
-          </div>
-          <div v-else-if="loadingFolderItems" :class="pickListClass">
-            <div :class="[pickListScrollClass, 'dash-drawer-pick-scroll--chain max-h-48']">
+          <div v-if="loadingFolderItems" :class="pickListClass" aria-busy="true">
+            <div :class="[pickListScrollClass, 's-qs__scroll']">
               <div v-for="i in 5" :key="i" :class="pickRowClass">
-                <div class="min-w-0 flex-1 space-y-1.5">
-                  <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-title" />
-                  <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-meta" />
+                <div class="s-qs__row-main s-qs__skeleton">
+                  <SSkeleton width="60%" height="14px" />
+                  <SSkeleton width="40%" height="12px" />
                 </div>
-                <span class="dash-skeleton dash-skeleton--line" style="width: 3.5rem" />
+                <SSkeleton width="3.5rem" height="14px" />
               </div>
             </div>
           </div>
-          <div v-else-if="availableFolderItems.length === 0" :class="[emptyStateClass, '!min-h-[6rem]']">
-            <p class="text-xs text-gray-500 dark:text-gray-400">
-              {{ itemSearchQuery ? 'No products found' : 'No products in this category' }}
-            </p>
+          <div v-else-if="availableFolderItems.length === 0" :class="emptyStateClass">
+            <p>{{ itemSearchQuery ? 'No products found' : 'No products in this category' }}</p>
           </div>
           <div v-else :class="pickListClass">
-            <div
-              :class="[pickListScrollClass, 'dash-drawer-pick-scroll--chain max-h-48']"
-            >
+            <div :class="[pickListScrollClass, 's-qs__scroll']">
               <button
                 v-for="item in availableFolderItems"
                 :key="item.id"
                 type="button"
-                :class="[
-                  pickRowClass,
-                  isItemInCart(item.id) ? pickRowSelectedClass : '',
-                  !canAddItemToCart(item) ? 'opacity-60' : '',
-                ]"
+                :class="[pickRowClass, isItemInCart(item.id) ? pickRowSelectedClass : '']"
                 :disabled="!canAddItemToCart(item)"
                 @click="onPickFolderItem(item)"
               >
-                <div class="min-w-0 flex-1 text-left">
-                  <p :class="pickRowTitleClass">{{ getItemDisplayName(item) }}</p>
-                  <p :class="pickRowMetaClass">
+                <span class="s-qs__row-main">
+                  <span :class="pickRowTitleClass">{{ getItemDisplayName(item) }}</span>
+                  <span :class="[pickRowMetaClass, 's-qs__num']">
                     <span v-if="getItemBarcodeLabel(item)">{{ getItemBarcodeLabel(item) }} · </span>
                     <span v-if="getItemField(item, 'sku')">SKU: {{ getItemField(item, 'sku') }} · </span>
                     <span v-if="getItemPriceLabel(item)">{{ getItemPriceLabel(item) }}</span>
                     <span v-if="!selectedFolder?.hasSerialNumbers && getItemStockLabel(item) !== null">
                       · Stock: {{ getItemStockLabel(item) }}
                     </span>
-                    <span v-if="isItemInCart(item.id)" class="text-gray-700 dark:text-gray-300">
-                      · In cart
-                    </span>
-                  </p>
-                </div>
+                  </span>
+                </span>
+                <SBadge v-if="isItemInCart(item.id)" tone="accent">In cart</SBadge>
                 <PlusIcon
                   v-if="canAddItemToCart(item)"
-                  class="ios-add-glyph h-4 w-4 shrink-0 text-gray-700 dark:text-gray-300"
+                  class="s-qs__row-add"
+                  :size="16"
+                  :stroke-width="2"
+                  aria-hidden="true"
                 />
               </button>
             </div>
           </div>
-        </div>
+        </section>
 
         <!-- Selected Items -->
-        <div class="border-t border-gray-200 pt-4 dark:border-white/[0.08]">
-          <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Selected Items</h3>
-          <div
+        <section class="s-qs__block" aria-labelledby="quick-sale-cart-title">
+          <h3 id="quick-sale-cart-title" class="s-form-section__title">Selected items</h3>
+          <SEmptyState
             v-if="cartItems.length === 0"
-            class="text-center py-8 px-4 rounded-sm bg-gray-50/50 dark:bg-white/[0.03]"
+            class="s-qs-cart__empty"
+            title="Your cart is empty"
+            description="Pick a category, then scan or tap a product"
           >
-            <div
-              class="w-14 h-14 mx-auto mb-3 rounded-sm bg-green-50 dark:bg-green-900/20 flex items-center justify-center"
-            >
-              <ShoppingBagIcon class="w-7 h-7 text-green-600 dark:text-green-400" />
-            </div>
-            <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Your cart is empty
-            </p>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Pick a category, then scan or tap a product</p>
-          </div>
-          <div v-else class="space-y-2 max-h-64 overflow-y-auto">
-            <div
-              v-for="(item, index) in cartItems"
-              :key="index"
-              class="p-3 bg-gray-50 dark:!bg-dashboard-card rounded-sm"
-            >
-              <div class="flex items-center justify-between">
-                <div class="flex-1">
-                  <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ item.name }}</p>
-                  <p class="text-xs text-gray-600 dark:text-gray-400">
+            <template #icon>
+              <ShoppingBagIcon :size="20" :stroke-width="1.75" />
+            </template>
+          </SEmptyState>
+          <ul v-else class="s-qs-cart">
+            <li v-for="(item, index) in cartItems" :key="index" class="s-qs-line">
+              <div class="s-qs-line__row">
+                <div class="s-qs__row-main">
+                  <p class="s-qs-line__name">{{ item.name }}</p>
+                  <p class="s-qs-line__meta">
                     Qty: {{ item.quantity }} ×
                     <span v-if="(item.discountAmount || 0) > 0">
-                      <span class="line-through text-gray-400 dark:text-gray-500">{{
-                        formatCurrency(item.price)
-                      }}</span>
+                      <s class="s-qs-line__was">{{ formatCurrency(item.price) }}</s>
                       {{ formatCurrency(Math.max(0, item.price - (item.discountAmount || 0))) }}
                     </span>
                     <span v-else>{{ formatCurrency(item.price) }}</span>
                   </p>
                 </div>
-                <div class="flex items-center gap-3">
-                  <div class="flex items-center gap-2">
-                    <button
-                      @click="updateQuantity(index, item.quantity - 1)"
-                      class="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                      <MinusIcon class="w-4 h-4" />
-                    </button>
-                    <span class="w-8 text-center text-sm font-medium">{{ item.quantity }}</span>
-                    <button
-                      @click="updateQuantity(index, item.quantity + 1)"
-                      class="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                      <PlusIcon class="w-4 h-4" />
-                    </button>
-                  </div>
-                  <button
-                    @click="removeItem(index)"
-                    class="p-1 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
+                <div class="s-qs-stepper">
+                  <SIconButton
+                    label="Decrease quantity"
+                    variant="secondary"
+                    @click="updateQuantity(index, item.quantity - 1)"
                   >
-                    <TrashIcon class="w-5 h-5" />
-                  </button>
+                    <MinusIcon :size="16" :stroke-width="2" aria-hidden="true" />
+                  </SIconButton>
+                  <span class="s-qs-stepper__value" aria-live="polite">{{ item.quantity }}</span>
+                  <SIconButton
+                    label="Increase quantity"
+                    variant="secondary"
+                    @click="updateQuantity(index, item.quantity + 1)"
+                  >
+                    <PlusIcon :size="16" :stroke-width="2" aria-hidden="true" />
+                  </SIconButton>
                 </div>
+                <SIconButton
+                  :label="`Remove ${item.name}`"
+                  class="s-qs-line__remove"
+                  @click="removeItem(index)"
+                >
+                  <TrashIcon :size="16" :stroke-width="2" aria-hidden="true" />
+                </SIconButton>
               </div>
               <button
                 v-if="!item.showDiscountInput && !(item.discountAmount && item.discountAmount > 0)"
                 type="button"
-                class="mt-1.5 text-xs font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+                class="s-link s-qs-line__link"
                 @click="item.showDiscountInput = true"
               >
-                + Discount
+                Add discount
               </button>
-              <div v-else class="mt-2 flex items-center gap-2">
-                <span class="text-xs text-gray-600 dark:text-gray-400">Discount</span>
-                <input
-                  v-model.number="item.discountAmount"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  placeholder="0.00"
-                  class="w-24 px-2 py-1 text-sm rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400/40"
-                />
-                <button
-                  type="button"
-                  class="text-xs text-red-600 dark:text-red-400 hover:underline"
+              <div v-else class="s-qs-line__discount">
+                <label :for="`quick-sale-discount-${index}`" class="s-field__label">Discount</label>
+                <div class="s-qs-line__discount-input">
+                  <SInput
+                    :id="`quick-sale-discount-${index}`"
+                    v-model="item.discountAmount"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="0.00"
+                  >
+                    <template #prefix>{{ currencySymbol }}</template>
+                  </SInput>
+                </div>
+                <SButton
+                  variant="ghost"
+                  size="sm"
                   @click="item.discountAmount = undefined; item.showDiscountInput = false"
                 >
                   Remove
-                </button>
+                </SButton>
               </div>
-            </div>
-          </div>
-          <div v-if="hasAnyDiscount" class="mt-3">
-            <IosFormField label="Discount reason" required>
-              <IosFormTextarea
-                v-model="discountReason"
-                :rows="2"
-                extra-class="resize-none"
-                placeholder="Why is a discount being applied to this sale?"
-              />
-            </IosFormField>
-          </div>
-        </div>
+            </li>
+          </ul>
+          <SField v-if="hasAnyDiscount" label="Discount reason" required>
+            <STextarea
+              v-model="discountReason"
+              :rows="2"
+              placeholder="Why is a discount being applied to this sale?"
+            />
+          </SField>
+        </section>
 
         <!-- Customer Info (Collapsible) -->
-        <div class="border-t border-gray-200 pt-4 dark:border-white/[0.08]">
+        <section class="s-qs__block">
           <button
+            type="button"
+            class="s-qs-disclosure"
+            :aria-expanded="showCustomerInfo"
+            aria-controls="quick-sale-customer"
             @click="showCustomerInfo = !showCustomerInfo"
-            class="flex items-center justify-between w-full text-left"
           >
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300"
-              >Customer Info (Optional)</span
-            >
+            <span>Customer info <span class="s-field__optional">Optional</span></span>
             <ChevronDownIcon
-              :class="['w-5 h-5 transition-transform', showCustomerInfo ? 'rotate-180' : '']"
+              :class="['s-qs-disclosure__chevron', showCustomerInfo ? 's-qs-disclosure__chevron--open' : '']"
+              :size="16"
+              :stroke-width="2"
+              aria-hidden="true"
             />
           </button>
-          <div v-if="showCustomerInfo" class="mt-3 space-y-3">
-            <input
-              v-model="customerName"
-              type="text"
-              placeholder="Customer Name"
-              class="w-full px-4 py-2 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400/40"
-            />
-            <input
-              v-model="customerPhone"
-              type="tel"
-              placeholder="Phone (Optional)"
-              class="w-full px-4 py-2 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400/40"
-            />
+          <div v-if="showCustomerInfo" id="quick-sale-customer" class="s-form">
+            <SField label="Customer name">
+              <SInput v-model="customerName" placeholder="Walk-in customer" autocomplete="name" />
+            </SField>
+            <SField label="Phone" hint="Optional">
+              <SInput v-model="customerPhone" type="tel" autocomplete="tel" />
+            </SField>
           </div>
-        </div>
+        </section>
 
         <!-- Commission (Collapsible, admin/owner only) -->
-        <div v-if="canManageCommissions" class="border-t border-gray-200 pt-4 dark:border-white/[0.08]">
+        <section v-if="canManageCommissions" class="s-qs__block">
           <button
+            type="button"
+            class="s-qs-disclosure"
+            :aria-expanded="showCommission"
+            aria-controls="quick-sale-commission"
             @click="showCommission = !showCommission"
-            class="flex items-center justify-between w-full text-left"
           >
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300"
-              >Commission (Optional)</span
-            >
+            <span>Commission <span class="s-field__optional">Optional</span></span>
             <ChevronDownIcon
-              :class="['w-5 h-5 transition-transform', showCommission ? 'rotate-180' : '']"
+              :class="['s-qs-disclosure__chevron', showCommission ? 's-qs-disclosure__chevron--open' : '']"
+              :size="16"
+              :stroke-width="2"
+              aria-hidden="true"
             />
           </button>
-          <div v-if="showCommission" class="mt-3 space-y-3">
-            <IosFormField label="Commission amount" hint="Folded into the total the customer pays.">
-              <input
-                v-model.number="commissionAmount"
+          <div v-if="showCommission" id="quick-sale-commission" class="s-form">
+            <SField label="Commission amount" hint="Folded into the total the customer pays.">
+              <SInput
+                v-model="commissionAmount"
                 type="number"
                 min="0"
                 step="0.01"
                 placeholder="0.00"
-                class="w-full px-4 py-2 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400/40"
-              />
-            </IosFormField>
-            <IosFormField label="Owed to" hint="Who this commission is owed to.">
-              <input
-                v-model="commissionOwedToName"
-                type="text"
-                placeholder="e.g. referral agent's name"
-                class="w-full px-4 py-2 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400/40"
-              />
-            </IosFormField>
-            <IosFormField v-if="commissionEligibleStaff.length" label="Attribute to staff (optional)">
-              <IosFormSelect v-model="commissionOwedToUid" extra-class="cursor-pointer">
+              >
+                <template #prefix>{{ currencySymbol }}</template>
+              </SInput>
+            </SField>
+            <SField label="Owed to" hint="Who this commission is owed to.">
+              <SInput v-model="commissionOwedToName" placeholder="e.g. referral agent's name" />
+            </SField>
+            <SField v-if="commissionEligibleStaff.length" label="Attribute to staff" hint="Optional">
+              <SSelect v-model="commissionOwedToUid">
                 <option value="">None</option>
                 <option v-for="s in commissionEligibleStaff" :key="s.id" :value="s.authUid">
                   {{ s.firstName }} {{ s.lastName }}
                 </option>
-              </IosFormSelect>
-            </IosFormField>
+              </SSelect>
+            </SField>
           </div>
-        </div>
+        </section>
 
         <!-- Payment -->
-        <div class="border-t border-gray-200 pt-4 dark:border-white/[0.08]">
-          <div class="mb-2.5 flex flex-wrap items-center justify-between gap-2">
-            <div class="min-w-0">
-              <p class="text-xs font-semibold text-gray-800 dark:text-gray-100">Payment</p>
-              <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
-                From your checkout methods in Settings
-              </p>
+        <section class="s-qs__block" aria-labelledby="quick-sale-payment-title">
+          <div class="s-qs__group-head">
+            <div class="s-qs__row-main">
+              <h3 id="quick-sale-payment-title" class="s-form-section__title">Payment</h3>
+              <p class="s-form-meta">From your checkout methods in Settings</p>
             </div>
-            <Checkbox v-model="useSplitPayment" label="Split payment" size="sm" />
+            <SCheckbox v-model="useSplitPayment" variant="switch" label="Split payment" />
           </div>
 
-          <PaymentTenderPicker
+          <div
             v-if="!useSplitPayment"
-            v-model="paymentMethod"
-          />
-
-          <div v-else class="space-y-2">
-            <div
-              v-for="(payment, index) in splitPayments"
-              :key="index"
-              class="flex items-center gap-2 flex-wrap"
+            class="s-qs-tenders"
+            role="group"
+            aria-labelledby="quick-sale-payment-title"
+          >
+            <button
+              v-for="method in paymentTenderOptions"
+              :key="method"
+              type="button"
+              class="s-qs-tender"
+              :aria-pressed="paymentMethod === method"
+              @click="paymentMethod = method"
             >
-              <PaymentMethodSelect
-                v-model="payment.method"
-                select-class="flex-1 min-w-[8rem] px-3 py-2 text-sm rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100"
-                placeholder="Method"
-              />
-              <div class="relative w-32">
-                <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-500">{{
-                  currencySymbol
-                }}</span>
-                <input
-                  v-model.number="payment.amount"
+              {{ method }}
+            </button>
+          </div>
+
+          <div v-else class="s-qs-split">
+            <div v-for="(payment, index) in splitPayments" :key="index" class="s-qs-split__line">
+              <div class="s-control s-control--select s-qs-split__method">
+                <PaymentMethodSelect
+                  v-model="payment.method"
+                  select-class="s-control__input"
+                  placeholder="Method"
+                  :aria-label="`Payment line ${index + 1} method`"
+                />
+                <ChevronDownIcon
+                  class="s-control__chevron"
+                  :size="16"
+                  :stroke-width="1.75"
+                  aria-hidden="true"
+                />
+              </div>
+              <div class="s-qs-split__amount">
+                <SInput
+                  v-model="payment.amount"
                   type="number"
                   step="0.01"
                   min="0"
                   :max="cartTotal - splitPaymentsTotal + payment.amount"
-                  class="w-full pl-6 pr-2 py-2 text-sm rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100"
                   placeholder="0.00"
-                />
+                  :aria-label="`Payment line ${index + 1} amount`"
+                >
+                  <template #prefix>{{ currencySymbol }}</template>
+                </SInput>
               </div>
-              <button
+              <SIconButton
                 v-if="splitPayments.length > 1"
-                type="button"
-                class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-sm"
+                :label="`Remove payment line ${index + 1}`"
                 @click="removeSplitPayment(index)"
               >
-                <XMarkIcon class="w-4 h-4" />
-              </button>
+                <XMarkIcon :size="16" :stroke-width="2" aria-hidden="true" />
+              </SIconButton>
             </div>
-            <button
-              type="button"
-              class="ios-add-btn inline-flex w-full items-center justify-center gap-1.5 px-3 py-1.5 text-xs text-gray-700 dark:text-gray-300 border-0 dark:border-white/10 rounded-sm"
-              @click="addSplitPayment"
-            >
-              <PlusCircleIcon class="h-3.5 w-3.5 shrink-0 opacity-80" :stroke-width="1.75" />
+            <SButton block @click="addSplitPayment">
+              <template #leading>
+                <PlusIcon :size="16" :stroke-width="2" aria-hidden="true" />
+              </template>
               Add payment line
-            </button>
-            <div
-              class="rounded-sm border p-2.5 space-y-1.5"
-              :class="{
-                'border-emerald-200/80 bg-emerald-50/90 dark:border-emerald-800/50 dark:bg-emerald-950/25':
-                  splitPaymentBalanceUi.tone === 'ok',
-                'border-amber-200/80 bg-amber-50/90 dark:border-amber-800/50 dark:bg-amber-950/20':
-                  splitPaymentBalanceUi.tone === 'short',
-                'border-red-200/80 bg-red-50/90 dark:border-red-800/50 dark:bg-red-950/20':
-                  splitPaymentBalanceUi.tone === 'over',
-              }"
-            >
-              <div class="flex justify-between items-start gap-2">
-                <span class="text-[10px] font-medium uppercase tracking-wide text-gray-500"
-                  >Balance</span
-                >
-                <div class="text-right">
-                  <p
-                    class="text-sm font-semibold tabular-nums"
-                    :class="{
-                      'text-emerald-700 dark:text-emerald-300': splitPaymentBalanceUi.tone === 'ok',
-                      'text-amber-800 dark:text-amber-200': splitPaymentBalanceUi.tone === 'short',
-                      'text-red-700 dark:text-red-300': splitPaymentBalanceUi.tone === 'over',
-                    }"
-                  >
-                    {{ splitPaymentBalanceUi.headline }}
-                  </p>
-                  <p
-                    class="text-[10px] text-gray-600 dark:text-gray-400 mt-0.5 max-w-[16rem] ml-auto leading-snug"
-                  >
-                    {{ splitPaymentBalanceUi.sub }}
-                  </p>
+            </SButton>
+            <div :class="['s-qs-balance', `s-qs-balance--${splitPaymentBalanceUi.tone}`]" role="status">
+              <div class="s-qs-balance__row">
+                <span class="s-qs-balance__label">Balance</span>
+                <div class="s-qs-balance__value">
+                  <p class="s-qs-balance__headline">{{ splitPaymentBalanceUi.headline }}</p>
+                  <p class="s-qs-balance__sub">{{ splitPaymentBalanceUi.sub }}</p>
                 </div>
               </div>
-              <p class="text-[10px] text-gray-500 tabular-nums pt-1 border-t border-gray-200/80/60">
+              <p class="s-qs-balance__foot">
                 Allocated {{ formatCurrency(splitPaymentsTotal) }} of
                 {{ formatCurrency(cartTotal) }}
               </p>
             </div>
           </div>
-        </div>
+        </section>
 
         <!-- Total -->
-        <div class="border-t border-gray-200 pt-4 dark:border-white/[0.08]">
-          <div class="flex items-center justify-between">
-            <span class="text-lg font-semibold text-gray-900 dark:text-gray-100">Total</span>
-            <span class="text-2xl font-bold text-gray-700 dark:text-gray-300">
-              {{ formatCurrency(cartTotal) }}
-            </span>
-          </div>
+        <div class="s-qs-summary">
+          <span class="s-qs-summary__label">Total</span>
+          <span class="s-qs-summary__value">{{ formatCurrency(cartTotal) }}</span>
         </div>
       </div>
 
     <template #footer>
-      <IosDrawerActions
-        :primary-label="`Complete Sale (${formatCurrency(cartTotal)})`"
+      <SDialogActions
+        :primary-label="`Complete sale (${formatCurrency(cartTotal)})`"
         :primary-loading="isProcessing"
         :primary-disabled="!canCompleteQuickSale"
         @cancel="handleCancel"
         @primary="completeSale"
       />
     </template>
-  </SidePanel>
+  </SDialog>
 </template>
 
 <script setup lang="ts">
+import SDialog from '~/components/s/SDialog.vue'
+import SDialogActions from '~/components/s/SDialogActions.vue'
+import SField from '~/components/s/SField.vue'
+import SInput from '~/components/s/SInput.vue'
+import SSelect from '~/components/s/SSelect.vue'
+import STextarea from '~/components/s/STextarea.vue'
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import {
   XMarkIcon,
@@ -584,7 +525,6 @@ import {
   ShoppingBagIcon,
   MinusIcon,
   PlusIcon,
-  PlusCircleIcon,
   TrashIcon,
   ChevronDownIcon,
   ChevronLeftIcon,
@@ -592,15 +532,16 @@ import {
   FolderIcon,
   CheckIcon,
 } from '~/utils/app-icons'
-import SidePanel from '~/components/ui/SidePanel.vue'
 import SellScreenNoteBanner from '~/components/receipts/SellScreenNoteBanner.vue'
 import PaymentMethodSelect from '~/components/receipts/PaymentMethodSelect.vue'
-import PaymentTenderPicker from '~/components/receipts/PaymentTenderPicker.vue'
-import DashboardDrawerSearch from '~/components/dashboard/DashboardDrawerSearch.vue'
-import Button from '~/components/ui/Button.vue'
-import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
-import Checkbox from '~/components/ui/Checkbox.vue'
-import { IosFormField, IosFormTextarea, IosFormSelect } from '~/components/ios/forms'
+import SBadge from '~/components/s/SBadge.vue'
+import SButton from '~/components/s/SButton.vue'
+import SCheckbox from '~/components/s/SCheckbox.vue'
+import SEmptyState from '~/components/s/SEmptyState.vue'
+import SIconButton from '~/components/s/SIconButton.vue'
+import SSearch from '~/components/s/SSearch.vue'
+import SSkeleton from '~/components/s/SSkeleton.vue'
+import SSpinner from '~/components/s/SSpinner.vue'
 import { useInventoryStore, type InventoryFolder, type InventoryItem } from '~/stores/inventory'
 import { useSellerLoanOutsStore } from '~/stores/sellerLoanOuts'
 import { useReceiptsStore } from '~/stores/receipts'
@@ -615,7 +556,7 @@ import { getReceiptProductDetails } from '~/composables/useReceiptProductDetails
 import { resolveBulkStockFieldAndValue } from '~/utils/inventory-bulk-quantity'
 import { useReceiptCategoryPicker } from '~/composables/useReceiptCategoryPicker'
 import { useDashboardDrawerChrome } from '~/composables/useDashboardDrawerChrome'
-import { getFolderColorClass, getInventoryItemDisplayName as getItemDisplayName, getInventoryItemField as getItemField } from '~/composables/useInventoryItemDisplay'
+import { getInventoryItemDisplayName as getItemDisplayName, getInventoryItemField as getItemField } from '~/composables/useInventoryItemDisplay'
 import type { InventoryFolderDisplayRow } from '~/utils/inventory-folder-tree'
 
 interface Props {
@@ -655,10 +596,20 @@ const {
   emptyStateClass,
 } = useDashboardDrawerChrome()
 
-const { isCapacitorIos } = useIsCapacitorIos()
-const quickSaleContentPadding = computed(() =>
-  isCapacitorIos.value ? 'p-0' : 'px-4 py-3 sm:px-5 sm:py-4'
-)
+const FOLDER_TONES: Record<string, string> = {
+  blue: 'info',
+  green: 'success',
+  purple: 'accent',
+  indigo: 'accent',
+  orange: 'warning',
+  yellow: 'warning',
+  red: 'error',
+  pink: 'error',
+}
+
+function folderTileClass(color: string): string {
+  return `s-qs-folder s-qs-folder--${FOLDER_TONES[color] ?? 'neutral'}`
+}
 
 const {
   selectedParentFolder,

@@ -1,437 +1,267 @@
 <template>
-  <div
-    :class="[
-      'flex w-full max-w-none flex-col',
-      isCapacitorIos ? 'dash-page--unified' : 'gap-5 pb-10 sm:gap-6 dash-page--unified',
-    ]"
-  >
-    <div v-if="isCapacitorIos" class="ios-sales-shell" data-payment-links-page>
-      <IosPageNavBar title="Payment links" />
-
-      <PaymentLinksComingSoon v-if="showPaymentLinksComingSoon" />
-
-      <template v-else>
-        <IosQuickActionBar
-          v-model="iosPaymentTab"
-          aria-label="Payment link actions"
-          :options="iosPaymentQuickActions"
-        />
-
-        <section
-          v-if="!payout.connected || editingBank"
-          class="ios-receipt-transaction-list mb-3 !rounded-2xl !shadow-none"
-        >
-          <div class="px-4 py-3">
-            <p class="text-sm font-semibold text-gray-900 dark:text-gray-50">Connect payout account</p>
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              Enter bank details so payments settle to your account.
-            </p>
-            <div class="mt-3 grid grid-cols-1 gap-3">
-              <select
-                v-model="bankCode"
-                :class="[fieldClass, 'w-full']"
-                :disabled="banksLoading"
-                @change="onAccountInput"
-              >
-                <option value="">{{ banksLoading ? 'Loading banks…' : 'Select bank' }}</option>
-                <option v-for="b in banks" :key="b.code" :value="b.code">{{ b.name }}</option>
-              </select>
-              <input
-                v-model="accountNumber"
-                inputmode="numeric"
-                maxlength="10"
-                placeholder="Account number"
-                :class="[fieldClass, 'w-full tabular-nums']"
-                @input="onAccountInput"
-              />
-            </div>
-            <div v-if="resolving" class="mt-2 text-xs text-gray-400">Verifying account…</div>
-            <div
-              v-else-if="resolvedName"
-              class="mt-2 flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300"
-            >
-              <CheckBadgeIcon class="h-4 w-4" />
-              {{ resolvedName }}
-            </div>
-            <p v-if="connectError" class="mt-2 text-xs font-medium text-red-500">{{ connectError }}</p>
-            <div class="mt-3 flex justify-end gap-2">
-              <Button
-                v-if="editingBank"
-                variant="outline"
-                size="sm"
-                @click="editingBank = false"
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="primary"
-                size="sm"
-                :disabled="!canConnect || connecting"
-                @click="connect"
-              >
-                {{ connecting ? 'Connecting…' : editingBank ? 'Update account' : 'Connect' }}
-              </Button>
-            </div>
-          </div>
-        </section>
-
-        <section
-          v-else
-          class="mb-3 rounded-2xl bg-emerald-50/70 px-4 py-3 dark:bg-emerald-500/[0.06]"
-        >
-          <div class="flex items-start justify-between gap-3">
-            <div class="min-w-0">
-              <p class="text-sm font-medium text-gray-900 dark:text-gray-50">
-                Payouts to {{ payout.accountName }}
-              </p>
-              <p class="text-xs text-gray-500 dark:text-gray-400">
-                {{ payout.bankName }} · ****{{ payout.accountNumberLast4 }}
-                <span v-if="payout.percentageCharge"> · {{ payout.percentageCharge }}% fee</span>
-              </p>
-            </div>
-            <Button variant="outline" size="sm" @click="startEditBank">Change</Button>
-          </div>
-        </section>
-
-        <IosTransactionListSkeleton v-if="loading && links.length === 0" :count="6" />
-
-        <DashboardTableEmptyState
-          v-else-if="links.length === 0"
-          :icon="CreditCardIcon"
-          title="No payment links yet"
-          description="Create your first link to start collecting."
-        />
-
-        <div v-else class="ios-receipt-transaction-list">
-          <IosReceiptTransactionRow
-            v-for="(inv, index) in links"
-            :key="inv.token"
-            :title="inv.customerName || inv.invoiceNumber"
-            :subtitle="`${inv.invoiceNumber} · ${statusLabel(inv.status)}`"
-            :amount="formatNaira(inv.total)"
-            :amount-tone="iosPaymentAmountTone(inv.status)"
-            :date="inv.paidAtMs ? formatDate(inv.paidAtMs) : ''"
-            :variant="iosPaymentVariant(inv.status)"
-            :last="index === links.length - 1"
-            show-menu
-            menu-kind="payment-link"
-            :menu-id="inv.token"
-            @click="share(inv)"
-            @menu="togglePaymentLinkMenu(inv.token)"
-          />
-        </div>
-      </template>
-
-      <CreatePaymentLinkModal v-model="showCreate" @created="onCreated" />
-      <SharePaymentLinkModal
-        v-model="showShare"
-        :link="activeLink"
-        :auto-share="autoShareAfterCreate"
-        @shared="onLinkShared"
-      />
-      <TotpConfirmModal
-        v-model="totpModalOpen"
-        title="Confirm bank connection"
-        description="Enter your authenticator code to connect a payout bank account."
-        @confirm="confirmTotp"
-        @cancel="cancelTotp"
-      />
-    </div>
-
-    <template v-else>
-    <DashboardPageHeader class="dash-page-header--unified">
+  <div class="ds-root s-c s-page s-paylinks">
+    <SPageHeader title="Payment links">
       <template #eyebrow>
-        <p :class="eyebrowClass">Payments</p>
-      </template>
-      <template #title>
-        <h1 :class="titleClass">Payment links</h1>
+        <p class="s-page-header__eyebrow">Payments</p>
       </template>
       <template #description>
-        <p v-if="showPaymentLinksComingSoon" class="dash-page-meta mt-1.5 max-w-2xl">
-          Pay-by-link checkout is coming soon.
-        </p>
-        <DashboardPageMetrics
-          v-else-if="!loading"
-          :metrics="paymentLinksHeaderMetrics"
-          aria-label="Payment links summary"
-        />
+        {{
+          showPaymentLinksComingSoon
+            ? 'Pay-by-link checkout is coming soon.'
+            : 'Send customers a secure link to pay. Paid links settle straight to your bank.'
+        }}
       </template>
       <template v-if="!showPaymentLinksComingSoon" #actions>
-        <Button
+        <SButton
           variant="primary"
-          size="sm"
-          :icon="CreditCardIcon"
-          :extra-class="headerBtnClass"
           :disabled="!payout.connected"
           :title="payout.connected ? '' : 'Connect a payout account first'"
           aria-label="New payment link"
           @click="showCreate = true"
         >
+          <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
           New payment link
-        </Button>
+        </SButton>
       </template>
-    </DashboardPageHeader>
+    </SPageHeader>
 
     <PaymentLinksComingSoon v-if="showPaymentLinksComingSoon" />
 
     <template v-else>
-      <section
+      <SCard
         v-if="!payout.connected || editingBank"
-        class="rounded-xl border-0 bg-white px-4 py-3.5 dark:!bg-dashboard-card sm:px-5 sm:py-4"
+        title="Connect your payout account"
+        description="Enter your bank details. Payments settle straight to this account."
       >
-        <div class="mb-3 flex items-center gap-3">
-          <div
-            class="flex h-9 w-9 items-center justify-center rounded-full bg-primary-50 text-primary-600 dark:bg-primary-500/10 dark:text-primary-400"
-          >
-            <BuildingLibraryIcon class="h-5 w-5" />
-          </div>
-          <div>
-            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-50">
-              Connect your payout account
-            </h2>
-            <p class="text-xs text-gray-500 dark:text-gray-400">
-              Enter your bank details. Payments settle straight to this account.
-            </p>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div>
-            <label class="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-400"
-              >Bank</label
-            >
-            <select
+        <div class="s-form">
+          <div class="s-form-pair">
+            <SSelect
               v-model="bankCode"
-              :class="[fieldClass, 'w-full']"
+              label="Bank"
+              :options="bankOptions"
+              :placeholder="banksLoading ? 'Loading banks…' : 'Select bank'"
               :disabled="banksLoading"
               @change="onAccountInput"
-            >
-              <option value="">{{ banksLoading ? 'Loading banks…' : 'Select bank' }}</option>
-              <option v-for="b in banks" :key="b.code" :value="b.code">{{ b.name }}</option>
-            </select>
-          </div>
-          <div>
-            <label class="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-400"
-              >Account number</label
-            >
-            <input
+            />
+            <SInput
               v-model="accountNumber"
+              label="Account number"
               inputmode="numeric"
               maxlength="10"
               placeholder="0123456789"
-              :class="[fieldClass, 'w-full tabular-nums']"
               @input="onAccountInput"
             />
           </div>
+
+          <p v-if="resolving" class="s-form-meta s-paylinks__verify" role="status">
+            <SSpinner :size="14" />
+            Verifying account…
+          </p>
+          <p v-else-if="resolvedName" class="s-paylinks__verified">
+            <BadgeCheck :size="16" :stroke-width="2" aria-hidden="true" />
+            {{ resolvedName }}
+          </p>
+          <p v-if="connectError" class="s-paylinks__error" role="alert">{{ connectError }}</p>
         </div>
 
-        <div v-if="resolving" class="mt-3 text-xs text-gray-400">Verifying account…</div>
-        <div
-          v-else-if="resolvedName"
-          class="mt-3 flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300"
-        >
-          <CheckBadgeIcon class="h-4 w-4" />
-          {{ resolvedName }}
-        </div>
-        <p v-if="connectError" class="mt-3 text-xs font-medium text-red-500">{{ connectError }}</p>
-
-        <div class="mt-4 flex flex-wrap justify-end gap-2">
-          <Button
-            v-if="editingBank"
-            variant="outline"
-            size="sm"
-            :extra-class="headerTextBtnClass"
-            @click="editingBank = false"
-          >
-            Cancel
-          </Button>
-          <Button
+        <template #footer>
+          <SButton v-if="editingBank" @click="editingBank = false">Cancel</SButton>
+          <SButton
             variant="primary"
-            size="sm"
-            :extra-class="headerTextBtnClass"
-            :disabled="!canConnect || connecting"
+            :loading="connecting"
+            :disabled="!canConnect"
             @click="connect"
           >
-            {{ connecting ? 'Connecting…' : 'Connect account' }}
-          </Button>
+            Connect account
+          </SButton>
+        </template>
+      </SCard>
+
+      <section v-else class="s-paylinks__payout" aria-label="Payout account">
+        <span class="s-paylinks__payout-icon" aria-hidden="true">
+          <Landmark :size="20" :stroke-width="1.75" />
+        </span>
+        <div class="s-paylinks__payout-text">
+          <p class="s-paylinks__payout-name">Payouts to {{ payout.accountName }}</p>
+          <p class="s-paylinks__payout-meta">
+            {{ payout.bankName }} · ****{{ payout.accountNumberLast4 }}
+            <span v-if="payout.percentageCharge"> · {{ payout.percentageCharge }}% fee</span>
+          </p>
         </div>
+        <SBadge tone="success" dot>Connected</SBadge>
+        <SButton size="sm" @click="startEditBank">Change</SButton>
       </section>
 
-      <!-- Connected banner -->
-      <section
-        v-else
-        class="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-emerald-50/70 px-4 py-3 ring-1 ring-emerald-200/70 dark:bg-emerald-500/[0.06] dark:ring-emerald-500/20"
-      >
-        <div class="flex items-center gap-3">
-          <CheckBadgeIcon class="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-          <div>
-            <p class="text-sm font-medium text-gray-900 dark:text-gray-50">
-              Payouts to {{ payout.accountName }}
-            </p>
-            <p class="text-xs text-gray-500 dark:text-gray-400">
-              {{ payout.bankName }} · ****{{ payout.accountNumberLast4 }}
-              <span v-if="payout.percentageCharge"> · {{ payout.percentageCharge }}% fee</span>
-            </p>
-          </div>
-        </div>
-        <button type="button" class="btn-secondary btn-sm" @click="startEditBank">Change</button>
-      </section>
-
-      <!-- Settlement reassurance -->
-      <div
-        v-if="stats.paid > 0"
-        class="flex items-center gap-2.5 rounded-lg bg-emerald-50/60 px-3.5 py-2.5 text-xs text-emerald-800 ring-1 ring-emerald-100 dark:bg-emerald-500/[0.06] dark:text-emerald-200 dark:ring-emerald-500/20"
-      >
-        <ShieldCheckIcon class="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-        <span
-          >Paid funds are secured by Paystack and settle to your bank the next business day.</span
-        >
+      <div v-if="!loading || links.length > 0" class="s-paylinks__stats" aria-label="Payment links summary">
+        <SStat label="Collected" :value="formatNaira(stats.collected)" />
+        <SStat label="Paid" :value="stats.paid" />
+        <SStat
+          label="Unpaid"
+          :value="stats.unpaid"
+          :hint="stats.unpaid > 0 ? 'Awaiting payment' : undefined"
+          :tone="stats.unpaid > 0 ? 'warning' : undefined"
+        />
+        <SStat
+          label="Failed"
+          :value="stats.failed"
+          :hint="stats.failed > 0 ? 'Follow up with the customer' : undefined"
+          :tone="stats.failed > 0 ? 'error' : undefined"
+        />
       </div>
 
-      <!-- Payouts to bank (real Paystack settlements) -->
-      <section
-        v-if="payout.connected && settlements.length > 0"
-        :class="tableShellClass"
-      >
-        <div
-          :class="[
-            tableSectionHeaderClass,
-            'flex items-center justify-between px-4 py-3 sm:px-5',
-          ]"
-        >
-          <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-50">
-            Payouts to your bank
-          </h2>
-          <span class="text-xs text-gray-500 dark:text-gray-400">
+      <p v-if="stats.paid > 0" class="s-callout s-paylinks__callout">
+        <ShieldCheck :size="16" :stroke-width="1.75" aria-hidden="true" />
+        <span>Paid funds are secured by Paystack and settle to your bank the next business day.</span>
+      </p>
+
+      <SCard v-if="payout.connected && settlements.length > 0" title="Payouts to your bank" flush>
+        <template #actions>
+          <span class="s-paylinks__summary">
             {{ formatNaira(settlementSummary.settledTotal) }} settled
-            <template v-if="settlementSummary.pendingTotal > 0"
-              >· {{ formatNaira(settlementSummary.pendingTotal) }} pending</template
-            >
+            <template v-if="settlementSummary.pendingTotal > 0">
+              · {{ formatNaira(settlementSummary.pendingTotal) }} pending
+            </template>
           </span>
-        </div>
-        <ul class="m-0 list-none p-0">
-          <li
-            v-for="(s, index) in settlements"
-            :key="s.id"
-            :class="[
-              'flex items-center justify-between px-4 py-2.5 text-sm sm:px-5',
-              index < settlements.length - 1 ? 'dash-table-list-row' : '',
-            ]"
-          >
-            <span class="text-gray-700 dark:text-gray-200">{{ formatDate(s.dateMs) }}</span>
-            <span class="flex items-center gap-2.5">
-              <span class="font-medium tabular-nums text-gray-900 dark:text-gray-100">{{
-                formatNaira(s.amount)
-              }}</span>
-              <span
-                :class="[
-                  'inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium capitalize',
-                  settlementBadgeClass(s.status),
-                ]"
-              >
-                {{ s.status }}
-              </span>
+        </template>
+        <ul class="s-list">
+          <li v-for="s in settlements" :key="s.id" class="s-list__item">
+            <span class="s-list__main">
+              <span class="s-list__primary">{{ formatDate(s.dateMs) }}</span>
+            </span>
+            <span class="s-paylinks__settlement-end">
+              <span class="s-list__value">{{ formatNaira(s.amount) }}</span>
+              <SBadge :tone="settlementTone(s.status)">{{ capitalize(s.status) }}</SBadge>
             </span>
           </li>
         </ul>
-      </section>
+      </SCard>
 
-      <!-- Invoices -->
-      <section :class="tableShellClass">
-        <div
-          :class="[
-            tableSectionHeaderClass,
-            'flex items-center justify-between px-4 py-3 sm:px-5',
-          ]"
-        >
-          <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-50">Recent links</h2>
-          <span class="text-xs text-gray-500 dark:text-gray-400">{{ links.length }} total</span>
+      <div v-if="links.length > 0" class="s-toolbar">
+        <SSearch
+          v-model="searchQuery"
+          class="s-toolbar__search"
+          placeholder="Search links"
+          label="Search payment links by invoice, customer or phone"
+        />
+        <div class="s-toolbar__filter">
+          <SSelect v-model="statusFilter" :options="statusOptions" aria-label="Filter by status" />
         </div>
+      </div>
 
-        <DashTableSkeleton
-          v-if="loading && links.length === 0"
-          :columns="[
-            { label: 'Invoice', lines: 2 },
-            { label: 'Customer', lines: 2 },
-            { label: 'Total', class: 'text-right', bone: '4.5rem' },
-            { label: 'Status', class: 'dashboard-table__col-status', bone: '4.5rem' },
-            { label: 'Actions', class: 'dashboard-table__col-actions', bone: '4.5rem' },
-          ]"
-          :rows="6"
-          leading="none"
-          flush
-          aria-label="Loading payment links"
-        />
+      <SCard v-if="loading && links.length === 0" flush aria-busy="true">
+        <ul class="s-list" aria-label="Loading payment links">
+          <li v-for="i in 6" :key="i" class="s-list__item" aria-hidden="true">
+            <div class="s-list__main">
+              <SSkeleton width="40%" height="14px" />
+              <SSkeleton width="25%" height="12px" />
+            </div>
+            <SSkeleton width="72px" height="20px" />
+          </li>
+        </ul>
+      </SCard>
 
-        <DashboardTableEmptyState
-          v-else-if="links.length === 0"
-          :icon="CreditCardIcon"
-          title="No payment links yet"
-          description="Create your first link to start collecting."
-        />
+      <SCard v-else-if="links.length === 0">
+        <SEmptyState title="No payment links yet" description="Create your first link to start collecting.">
+          <template #icon><CreditCard :size="24" :stroke-width="1.75" /></template>
+          <template v-if="payout.connected" #actions>
+            <SButton variant="primary" @click="showCreate = true">
+              <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
+              New payment link
+            </SButton>
+          </template>
+        </SEmptyState>
+      </SCard>
 
-        <div v-else class="overflow-x-auto">
-          <table class="dashboard-table min-w-full">
+      <SCard v-else-if="visibleLinks.length === 0">
+        <SEmptyState title="No links found" description="Try another status, or clear the search.">
+          <template #icon><SearchX :size="24" :stroke-width="1.75" /></template>
+          <template #actions>
+            <SButton @click="clearFilters">Show all links</SButton>
+          </template>
+        </SEmptyState>
+      </SCard>
+
+      <template v-else>
+        <!-- Phone -->
+        <SCard flush class="s-only-sm">
+          <ul class="s-list">
+            <li v-for="inv in paginatedLinks" :key="inv.token" class="s-list__item">
+              <span class="s-list__main">
+                <span class="s-list__primary">{{ inv.customerName }}</span>
+                <span class="s-list__secondary">
+                  #{{ inv.invoiceNumber }} · {{ itemsLabel(inv.itemsCount) }}
+                </span>
+              </span>
+              <span class="s-list__end">
+                <span class="s-list__value">{{ formatNaira(inv.total) }}</span>
+                <SBadge :tone="statusTone(inv.status)">{{ statusLabel(inv.status) }}</SBadge>
+              </span>
+              <SIconButton
+                label="Payment link actions"
+                size="sm"
+                :data-payment-link-actions-anchor="inv.token"
+                aria-haspopup="menu"
+                :aria-expanded="openPaymentLinkMenuId === inv.token"
+                @click="togglePaymentLinkMenu(inv.token)"
+              >
+                <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
+              </SIconButton>
+            </li>
+          </ul>
+        </SCard>
+
+        <!-- Tablet and desktop -->
+        <div class="s-table-wrap s-hide-sm">
+          <table class="s-table">
             <thead>
               <tr>
                 <th scope="col">Invoice</th>
                 <th scope="col">Customer</th>
-                <th scope="col" class="text-right">Total</th>
-                <th scope="col" class="dashboard-table__col-status">Status</th>
-                <th scope="col" class="dashboard-table__col-actions">Actions</th>
+                <th scope="col" class="s-table__num">Total</th>
+                <th scope="col">Status</th>
+                <th scope="col" class="s-table__actions"><span class="ds-sr-only">Actions</span></th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="inv in links" :key="inv.token">
+              <tr v-for="inv in paginatedLinks" :key="inv.token">
                 <td>
-                  <span class="dashboard-table__primary">{{ inv.invoiceNumber }}</span>
-                  <span class="dashboard-table__muted mt-0.5 block text-[11px]"
-                    >{{ inv.itemsCount }} item{{ inv.itemsCount === 1 ? '' : 's' }}</span
-                  >
+                  <span class="s-table__primary">{{ inv.invoiceNumber }}</span>
+                  <span class="s-table__secondary">{{ itemsLabel(inv.itemsCount) }}</span>
                 </td>
                 <td>
-                  <span class="dashboard-table__primary">{{ inv.customerName }}</span>
-                  <span
-                    v-if="inv.customerPhone"
-                    class="dashboard-table__muted mt-0.5 block text-[11px]"
-                    >{{ inv.customerPhone }}</span
-                  >
+                  <span class="s-table__primary">{{ inv.customerName }}</span>
+                  <span v-if="inv.customerPhone" class="s-table__secondary">{{ inv.customerPhone }}</span>
                 </td>
-                <td class="text-right">
-                  <span class="dashboard-table__money">{{ formatNaira(inv.total) }}</span>
+                <td class="s-table__num">{{ formatNaira(inv.total) }}</td>
+                <td>
+                  <SBadge :tone="statusTone(inv.status)" dot>{{ statusLabel(inv.status) }}</SBadge>
+                  <span v-if="inv.status === 'paid'" class="s-table__secondary">{{ settlementNote(inv) }}</span>
                 </td>
-                <td class="dashboard-table__col-status">
-                  <span
-                    :class="[
-                      'inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium',
-                      statusClass(inv.status),
-                    ]"
-                  >
-                    {{ statusLabel(inv.status) }}
-                  </span>
-                  <span
-                    v-if="inv.status === 'paid'"
-                    class="dashboard-table__muted mt-1 block text-[11px] text-emerald-600 dark:text-emerald-400"
-                  >
-                    {{ settlementNote(inv) }}
-                  </span>
-                </td>
-                <td class="dashboard-table__col-actions">
-                  <button
-                    type="button"
-                    class="dashboard-table__action-btn"
+                <td class="s-table__actions">
+                  <SIconButton
+                    label="Payment link actions"
+                    size="sm"
                     :data-payment-link-actions-anchor="inv.token"
-                    aria-label="Payment link actions"
+                    aria-haspopup="menu"
+                    :aria-expanded="openPaymentLinkMenuId === inv.token"
                     @click="togglePaymentLinkMenu(inv.token)"
                   >
-                    <EllipsisVerticalIcon class="h-4 w-4" stroke-width="2" />
-                  </button>
+                    <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
+                  </SIconButton>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
-      </section>
+
+        <SPagination
+          :current-page="currentPage"
+          :page-size="PAGE_SIZE"
+          :total="visibleLinks.length"
+          label="Payment links pagination"
+          @page-change="onPageChange"
+        />
+      </template>
 
       <CreatePaymentLinkModal v-model="showCreate" @created="onCreated" />
       <SharePaymentLinkModal
@@ -447,67 +277,59 @@
         @confirm="confirmTotp"
         @cancel="cancelTotp"
       />
-
-      <button
-        v-if="isNativeShell && payout.connected && !showPaymentLinksComingSoon"
-        type="button"
-        class="ios-fab payment-links-native-fab"
-        aria-label="New payment link"
-        @click="showCreate = true"
-      >
-        <CreditCardIcon class="h-5 w-5" stroke-width="2" />
-      </button>
-    </template>
     </template>
 
-    <IosContextMenu
+    <SMenu
       :open="Boolean(openPaymentLinkMenuId && paymentLinkForOpenMenu && paymentLinkMenuFixedStyle)"
       :style="paymentLinkMenuFixedStyle"
       menu-id="payment-link"
+      label="Payment link actions"
+      @close="closePaymentLinkMenu"
     >
-      <IosContextMenuItem
+      <SMenuItem
         label="Share"
-        :icon="ShareIcon"
-        @click="
+        :icon="Share2"
+        @select="
           () => {
             share(paymentLinkForOpenMenu!)
             closePaymentLinkMenu()
           }
         "
       />
-      <IosContextMenuItem
-        label="Open link"
-        :icon="ArrowTopRightOnSquareIcon"
-        :href="paymentLinkForOpenMenu?.url"
-        @click="closePaymentLinkMenu()"
-      />
-    </IosContextMenu>
+      <SMenuItem label="Open link" :icon="ExternalLink" @select="openPaymentLink" />
+    </SMenu>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, defineAsyncComponent } from 'vue'
+import { ref, computed, onMounted, watch, defineAsyncComponent } from 'vue'
 import { useRoute } from 'vue-router'
 import {
-  ArrowTopRightOnSquareIcon,
-  BuildingLibraryIcon,
-  CheckBadgeIcon,
-  CreditCardIcon,
-  EllipsisVerticalIcon,
-  ShareIcon,
-  ShieldCheckIcon,
-} from '~/utils/app-icons'
-import Button from '~/components/ui/Button.vue'
-import IosContextMenu from '~/components/ios/IosContextMenu.vue'
-import IosContextMenuItem from '~/components/ios/IosContextMenuItem.vue'
-import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
-import IosQuickActionBar, { type IosQuickActionOption } from '~/components/ios/IosQuickActionBar.vue'
-import IosTransactionListSkeleton from '~/components/ios/IosTransactionListSkeleton.vue'
-import IosReceiptTransactionRow, {
-  type ReceiptTransactionAmountTone,
-  type ReceiptTransactionVariant,
-} from '~/components/ios/IosReceiptTransactionRow.vue'
-import DashboardPageHeader from '~/components/dashboard/DashboardPageHeader.vue'
+  BadgeCheck,
+  CreditCard,
+  EllipsisVertical,
+  ExternalLink,
+  Landmark,
+  Plus,
+  SearchX,
+  Share2,
+  ShieldCheck,
+} from '@lucide/vue'
+import SBadge from '~/components/s/SBadge.vue'
+import SButton from '~/components/s/SButton.vue'
+import SCard from '~/components/s/SCard.vue'
+import SEmptyState from '~/components/s/SEmptyState.vue'
+import SIconButton from '~/components/s/SIconButton.vue'
+import SInput from '~/components/s/SInput.vue'
+import SMenu from '~/components/s/SMenu.vue'
+import SMenuItem from '~/components/s/SMenuItem.vue'
+import SPageHeader from '~/components/s/SPageHeader.vue'
+import SPagination from '~/components/s/SPagination.vue'
+import SSearch from '~/components/s/SSearch.vue'
+import SSelect from '~/components/s/SSelect.vue'
+import SSkeleton from '~/components/s/SSkeleton.vue'
+import SSpinner from '~/components/s/SSpinner.vue'
+import SStat from '~/components/s/SStat.vue'
 import type { ShareableLink } from '~/components/payments/SharePaymentLinkModal.vue'
 
 // Lazy-loaded so the page's first paint never depends on these (heavier) chunks.
@@ -527,47 +349,18 @@ import { usePaymentLinksLaunch } from '~/composables/usePaymentLinksLaunch'
 import { isCapacitorNative } from '~/utils/capacitor-env'
 import { useTotpConfirmModal } from '~/composables/useTotpConfirmModal'
 import { resolveTotpForSensitiveAction } from '~/utils/security-api-errors'
+import { EMPTY_CELL } from '~/utils/ui-empty'
 
 definePageMeta({
   layout: 'dashboard',
   middleware: 'auth',
 })
 
+const PAGE_SIZE = 50
+
 const route = useRoute()
 const { showPaymentLinksComingSoon } = usePaymentLinksLaunch()
 const isNativeShell = computed(() => isCapacitorNative())
-const { isCapacitorIos } = useIsCapacitorIos()
-
-const iosPaymentTab = ref('links')
-const iosPaymentQuickActions = computed((): IosQuickActionOption[] => [
-  {
-    value: 'new',
-    label: 'New link',
-    icon: CreditCardIcon,
-    trailing: 'add',
-    action: () => {
-      if (payout.value.connected) showCreate.value = true
-    },
-  },
-  { value: 'links', label: 'Links', icon: CreditCardIcon },
-])
-
-function iosPaymentVariant(status: PaymentLinkListItem['status']): ReceiptTransactionVariant {
-  if (status === 'paid') return 'credit'
-  if (status === 'failed' || status === 'expired') return 'cancelled'
-  return 'pending'
-}
-
-function iosPaymentAmountTone(status: PaymentLinkListItem['status']): ReceiptTransactionAmountTone {
-  if (status === 'paid') return 'positive'
-  if (status === 'failed') return 'negative'
-  if (status === 'expired') return 'warning'
-  return 'neutral'
-}
-
-const { eyebrowClass, titleClass, headerBtnClass, headerTextBtnClass, fieldClass } =
-  useDashboardPageChrome()
-const { tableShellClass, tableSectionHeaderClass } = useDashboardTableChrome()
 const userStore = useUserStore()
 const {
   payout,
@@ -582,32 +375,6 @@ const {
   resolveAccount,
   connectBank,
 } = usePaymentLinks()
-
-const paymentLinksHeaderMetrics = computed(() => [
-  {
-    key: 'collected',
-    label: 'Collected',
-    value: formatNaira(stats.value.collected),
-  },
-  {
-    key: 'paid',
-    label: 'Paid',
-    value: String(stats.value.paid),
-    tone: stats.value.paid > 0 ? ('success' as const) : undefined,
-  },
-  {
-    key: 'unpaid',
-    label: 'Unpaid',
-    value: String(stats.value.unpaid),
-    tone: stats.value.unpaid > 0 ? ('warning' as const) : undefined,
-  },
-  {
-    key: 'failed',
-    label: 'Failed',
-    value: String(stats.value.failed),
-    tone: stats.value.failed > 0 ? ('danger' as const) : undefined,
-  },
-])
 
 const {
   open: totpModalOpen,
@@ -631,13 +398,15 @@ const showShare = ref(false)
 const autoShareAfterCreate = ref(false)
 const activeLink = ref<ShareableLink | null>(null)
 
+const bankOptions = computed(() => banks.value.map((b) => ({ value: b.code, label: b.name })))
+
 const canConnect = computed(() =>
   Boolean(bankCode.value && accountNumber.value.length === 10 && resolvedName.value)
 )
 
 let resolveTimer: ReturnType<typeof setTimeout> | null = null
 const onAccountInput = () => {
-  accountNumber.value = accountNumber.value.replace(/\D/g, '').slice(0, 10)
+  accountNumber.value = String(accountNumber.value ?? '').replace(/\D/g, '').slice(0, 10)
   resolvedName.value = ''
   connectError.value = ''
   if (resolveTimer) clearTimeout(resolveTimer)
@@ -729,6 +498,48 @@ const share = (inv: PaymentLinkListItem) => {
   showShare.value = true
 }
 
+const searchQuery = ref('')
+const statusFilter = ref<'all' | PaymentLinkListItem['status']>('all')
+const statusOptions = [
+  { value: 'all', label: 'All statuses' },
+  { value: 'unpaid', label: 'Unpaid' },
+  { value: 'paid', label: 'Paid' },
+  { value: 'failed', label: 'Failed' },
+  { value: 'expired', label: 'Expired' },
+]
+
+const visibleLinks = computed(() => {
+  let rows = links.value
+  if (statusFilter.value !== 'all') rows = rows.filter((inv) => inv.status === statusFilter.value)
+  const q = searchQuery.value.trim().toLowerCase()
+  if (!q) return rows
+  return rows.filter((inv) =>
+    [inv.invoiceNumber, inv.customerName, inv.customerPhone]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase()
+      .includes(q)
+  )
+})
+
+const currentPage = ref(1)
+const paginatedLinks = computed(() =>
+  visibleLinks.value.slice((currentPage.value - 1) * PAGE_SIZE, currentPage.value * PAGE_SIZE)
+)
+watch([searchQuery, statusFilter], () => {
+  currentPage.value = 1
+})
+
+function onPageChange(page: number) {
+  currentPage.value = page
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+function clearFilters() {
+  searchQuery.value = ''
+  statusFilter.value = 'all'
+}
+
 const {
   openMenuId: openPaymentLinkMenuId,
   menuFixedStyle: paymentLinkMenuFixedStyle,
@@ -744,8 +555,21 @@ const paymentLinkForOpenMenu = computed(() => {
   return links.value.find((inv) => inv.token === token) ?? null
 })
 
+function openPaymentLink() {
+  const url = paymentLinkForOpenMenu.value?.url
+  closePaymentLinkMenu()
+  if (url) window.open(url, '_blank', 'noopener')
+}
+
+const itemsLabel = (count: number) => `${count} item${count === 1 ? '' : 's'}`
+
+const capitalize = (value: string) => (value ? value[0]!.toUpperCase() + value.slice(1) : value)
+
 const statusLabel = (s: PaymentLinkListItem['status']) =>
   ({ unpaid: 'Unpaid', paid: 'Paid', failed: 'Failed', expired: 'Expired' }[s])
+
+const statusTone = (s: PaymentLinkListItem['status']) =>
+  ({ unpaid: 'neutral', paid: 'success', failed: 'error', expired: 'warning' } as const)[s]
 
 // Real status: a payment is settled once Paystack has run a payout dated after it was captured.
 const settlementNote = (inv: PaymentLinkListItem) => {
@@ -759,20 +583,10 @@ const settlementNote = (inv: PaymentLinkListItem) => {
 const formatDate = (ms: number) =>
   ms
     ? new Date(ms).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })
-    : ', '
+    : EMPTY_CELL
 
-const settlementBadgeClass = (status: string) =>
-  status === 'success' || status === 'completed'
-    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300'
-    : 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300'
-
-const statusClass = (s: PaymentLinkListItem['status']) =>
-  ({
-    unpaid: 'bg-gray-100 text-gray-600 dark:bg-white/[0.06] dark:text-gray-300',
-    paid: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
-    failed: 'bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300',
-    expired: 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300',
-  }[s])
+const settlementTone = (status: string) =>
+  status === 'success' || status === 'completed' ? 'success' : 'warning'
 
 onMounted(async () => {
   if (showPaymentLinksComingSoon.value) return

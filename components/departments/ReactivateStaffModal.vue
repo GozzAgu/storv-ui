@@ -1,104 +1,59 @@
 <template>
-  <Modal
-    :model-value="modelValue"
-    size="md"
-    @update:model-value="(value: boolean) => emit('update:modelValue', value)"
+  <SDialog
+    :open="modelValue"
+    size="sm"
+    :title="`Reactivate ${staffName || 'staff member'}?`"
+    description="They can sign in again with their existing email and password, and will reappear on the active roster."
+    :dismissible="!isProcessing"
+    @update:open="(value: boolean) => emit('update:modelValue', value)"
   >
-    <template #header>
-      <div class="flex items-center gap-2.5">
-        <div
-          class="flex h-8 w-8 items-center justify-center rounded-sm bg-primary-100 dark:bg-primary-900/30"
-        >
-          <ArrowUturnLeftIcon class="h-4 w-4 text-primary-600 dark:text-primary-400" />
+    <div class="s-confirm">
+      <dl v-if="staff" class="s-record-summary s-record-summary--stack">
+        <div class="s-record-row">
+          <dt>Name</dt>
+          <dd class="s-record-row__value">{{ staff.firstName }} {{ staff.lastName }}</dd>
         </div>
-        <div class="min-w-0">
-          <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
-            Reactivate staff member
-          </h3>
-          <p class="truncate text-xs text-gray-500 dark:text-gray-400">{{ staffName }}</p>
+        <div class="s-record-row">
+          <dt>Email</dt>
+          <dd class="s-record-row__value">{{ staff.email }}</dd>
         </div>
-      </div>
-    </template>
+        <div v-if="staff.position" class="s-record-row">
+          <dt>Position</dt>
+          <dd class="s-record-row__value">{{ staff.position }}</dd>
+        </div>
+        <div class="s-record-row">
+          <dt>Role</dt>
+          <dd class="s-record-row__value s-confirm__value--capitalize">{{ staff.role }}</dd>
+        </div>
+      </dl>
 
-    <div class="space-y-3">
-      <div
-        class="rounded-sm bg-primary-50 p-3 ring-1 ring-primary-200/50 dark:bg-primary-900/20 dark:ring-primary-800/40"
-      >
-        <div class="flex items-start gap-2.5">
-          <CheckCircleIcon class="mt-0.5 h-4 w-4 shrink-0 text-primary-600 dark:text-primary-400" />
-          <div>
-            <p class="text-xs font-medium text-primary-900 dark:text-primary-100">
-              Restore sign-in access
-            </p>
-            <p class="mt-0.5 text-xs text-primary-800 dark:text-primary-200">
-              They can sign in again with their existing email and password. They will reappear on
-              the active roster.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div v-if="staff" class="space-y-2">
-        <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Staff details</h4>
-        <div class="space-y-1.5 rounded-sm bg-gray-50/80 p-2.5 dark:bg-gray-700/40">
-          <div class="flex justify-between gap-2 text-xs">
-            <span class="text-gray-500 dark:text-gray-400">Name</span>
-            <span class="font-medium text-gray-900 dark:text-gray-100">
-              {{ staff.firstName }} {{ staff.lastName }}
-            </span>
-          </div>
-          <div class="flex justify-between gap-2 text-xs">
-            <span class="text-gray-500 dark:text-gray-400">Email</span>
-            <span class="truncate font-medium text-gray-900 dark:text-gray-100">{{
-              staff.email
-            }}</span>
-          </div>
-          <div v-if="staff.position" class="flex justify-between gap-2 text-xs">
-            <span class="text-gray-500 dark:text-gray-400">Position</span>
-            <span class="font-medium text-gray-900 dark:text-gray-100">{{ staff.position }}</span>
-          </div>
-          <div class="flex justify-between gap-2 text-xs">
-            <span class="text-gray-500 dark:text-gray-400">Role</span>
-            <span class="font-medium capitalize text-gray-900 dark:text-gray-100">{{
-              staff.role
-            }}</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="rounded-sm bg-gray-50 p-2.5 dark:!bg-dashboard-card/35">
-        <Checkbox
+      <div class="s-confirm__ack">
+        <SCheckbox
           v-model="confirmed"
           label="I understand this staff member will be reactivated and can sign in again."
-          size="sm"
-          wrapper-class="items-start"
-          label-class="text-xs text-gray-700 dark:text-gray-300"
         />
       </div>
     </div>
 
     <template #footer>
-      <IosDrawerActions
+      <SDialogActions
         primary-label="Reactivate staff member"
-        :primary-icon="ArrowUturnLeftIcon"
+        :primary-icon="Undo2"
         :primary-disabled="!confirmed || isProcessing"
         :primary-loading="isProcessing"
         @cancel="handleCancel"
         @primary="handleConfirm"
       />
     </template>
-  </Modal>
+  </SDialog>
 </template>
 
 <script setup lang="ts">
+import SCheckbox from '~/components/s/SCheckbox.vue'
+import SDialog from '~/components/s/SDialog.vue'
+import SDialogActions from '~/components/s/SDialogActions.vue'
 import { computed, ref, watch } from 'vue'
-import {
-  ArrowUturnLeftIcon,
-  CheckCircleIcon,
-} from '~/utils/app-icons'
-import Modal from '~/components/ui/Modal.vue'
-import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
-import Checkbox from '~/components/ui/Checkbox.vue'
+import { Undo2 } from '@lucide/vue'
 import type { Staff } from '~/composables/useStaff'
 
 const props = defineProps<{

@@ -1,56 +1,24 @@
 <template>
-  <section
-    :class="[
-      'payment-links-coming-soon dash-empty-state',
-      compact
-        ? 'dash-empty-state--compact rounded-lg bg-gray-50/80 px-4 py-5 text-center dark:bg-white/[0.03]'
-        : 'rounded-xl border border-dashed border-primary-200/80 bg-primary-50/35 px-6 py-12 text-center dark:border-primary-500/20 dark:bg-primary-500/[0.06]',
-    ]"
-  >
-    <div
-      :class="[
-        'dash-empty-state__mark mx-auto flex items-center justify-center rounded-full bg-primary-100 text-primary-600 dark:bg-primary-500/15 dark:text-primary-400',
-        compact ? 'h-10 w-10' : 'h-12 w-12',
-      ]"
+  <SCard class="s-paylinks-soon" :class="{ 's-paylinks-soon--compact': compact }">
+    <SEmptyState
+      :title="compact ? 'Payment links are coming soon' : 'Payment links'"
+      description="Pay-by-link checkout is on the way. You'll connect your bank, send secure links, and auto-create receipts when customers pay."
     >
-      <CreditCardIcon
-        :class="['dash-empty-state__icon', compact ? 'h-5 w-5' : 'h-6 w-6']"
-        aria-hidden="true"
-      />
-    </div>
-    <p
-      :class="[
-        'dash-empty-state__eyebrow font-semibold uppercase tracking-[0.14em] text-primary-700 dark:text-primary-300',
-        compact ? 'mt-3 text-[10px]' : 'mt-4 text-xs',
-      ]"
-    >
-      Coming soon
-    </p>
-    <h2
-      v-if="!compact"
-      class="dash-empty-state__title mt-2 text-lg font-semibold text-gray-900 dark:text-gray-50"
-    >
-      Payment links
-    </h2>
-    <p
-      :class="[
-        'dash-empty-state__desc mx-auto leading-relaxed text-gray-600 dark:text-gray-400',
-        compact ? 'mt-2 max-w-sm text-xs' : 'mt-2 max-w-md text-sm',
-      ]"
-    >
-      Pay-by-link checkout is on the way. You'll connect your bank, send secure links, and
-      auto-create receipts when customers pay.
-    </p>
-    <p v-if="!compact" class="mx-auto mt-3 max-w-md text-xs text-gray-500 dark:text-gray-500">
-      We're finishing the last pieces - check back soon.
-    </p>
-  </section>
+      <template #icon><CreditCard :size="24" :stroke-width="1.75" /></template>
+      <template v-if="!compact" #actions>
+        <SBadge tone="accent" size="md">Coming soon</SBadge>
+        <p class="s-form-meta">We're finishing the last pieces. Check back soon.</p>
+      </template>
+    </SEmptyState>
+  </SCard>
 </template>
 
 <script setup lang="ts">
-import {
-  CreditCardIcon,
-} from '~/utils/app-icons'
+import { CreditCard } from '@lucide/vue'
+import SBadge from '~/components/s/SBadge.vue'
+import SCard from '~/components/s/SCard.vue'
+import SEmptyState from '~/components/s/SEmptyState.vue'
+
 withDefaults(
   defineProps<{
     compact?: boolean

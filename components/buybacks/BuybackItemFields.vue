@@ -1,6 +1,6 @@
 <template>
-  <IosFormField v-for="field in fields" :key="field.name" :label="fieldLabel(field)" :required="field.required">
-    <IosFormInput
+  <SField v-for="field in fields" :key="field.name" :label="fieldLabel(field)" :required="field.required">
+    <SInput
       v-if="field.type === 'text'"
       :model-value="String(modelValue[field.name] ?? '')"
       type="text"
@@ -8,7 +8,7 @@
       @update:model-value="updateField(field.name, $event)"
     />
 
-    <IosFormInput
+    <SInput
       v-else-if="field.type === 'number'"
       :model-value="Number(modelValue[field.name] ?? 0)"
       type="number"
@@ -16,58 +16,49 @@
       @update:model-value="updateField(field.name, Number($event))"
     />
 
-    <div v-else-if="field.type === 'currency'" class="relative">
-      <span
-        class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400"
-        >{{ currencySymbol }}</span
-      >
-      <IosFormInput
-        :model-value="Number(modelValue[field.name] ?? 0)"
-        type="number"
-        min="0"
-        step="0.01"
-        extra-class="pl-7"
-        :placeholder="fieldPlaceholder(field)"
-        @update:model-value="updateField(field.name, Number($event))"
-      />
-    </div>
+    <SInput
+      v-else-if="field.type === 'currency'"
+      :model-value="Number(modelValue[field.name] ?? 0)"
+      type="number"
+      min="0"
+      step="0.01"
+      :placeholder="fieldPlaceholder(field)"
+      @update:model-value="updateField(field.name, Number($event))"
+    >
+      <template #prefix>{{ currencySymbol }}</template>
+    </SInput>
 
-    <IosFormInput
+    <SInput
       v-else-if="field.type === 'date'"
       :model-value="String(modelValue[field.name] ?? '')"
       type="date"
       @update:model-value="updateField(field.name, $event)"
     />
 
-    <IosFormSelect
+    <SSelect
       v-else-if="field.type === 'select'"
       :model-value="String(modelValue[field.name] ?? '')"
-      extra-class="cursor-pointer"
       @update:model-value="updateField(field.name, $event)"
     >
       <option value="">Select {{ fieldLabel(field) }}</option>
       <option v-for="opt in field.options || []" :key="opt" :value="opt">{{ opt }}</option>
-    </IosFormSelect>
+    </SSelect>
 
-    <label
+    <SCheckbox
       v-else-if="field.type === 'boolean'"
-      class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"
-    >
-      <input
-        type="checkbox"
-        :checked="Boolean(modelValue[field.name])"
-        class="rounded border-gray-300 text-gray-800 focus:ring-gray-400/40 dark:border-gray-600 dark:text-gray-200"
-        @change="updateField(field.name, ($event.target as HTMLInputElement).checked)"
-      />
-      {{ fieldLabel(field) }}
-    </label>
-  </IosFormField>
+      :model-value="Boolean(modelValue[field.name])"
+      :label="fieldLabel(field)"
+      @update:model-value="updateField(field.name, $event)"
+    />
+  </SField>
 </template>
 
 <script setup lang="ts">
+import SField from '~/components/s/SField.vue'
+import SInput from '~/components/s/SInput.vue'
+import SSelect from '~/components/s/SSelect.vue'
 import { computed } from 'vue'
-import { IosFormField, IosFormInput, IosFormSelect } from '~/components/ios/forms'
-
+import SCheckbox from '~/components/s/SCheckbox.vue'
 const props = defineProps<{
   fields: Array<{
     name: string

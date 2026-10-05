@@ -1,60 +1,60 @@
 <template>
-  <div class="auth-field">
-    <div v-if="label || $slots['label-right']" class="auth-field__label-row">
-      <label v-if="label" :for="inputId" class="auth-field__label">
-        {{ label }}
-      </label>
+  <div class="s-field">
+    <div v-if="label || $slots['label-right']" class="s-auth-field__label-row">
+      <label v-if="label" :for="inputId" class="s-field__label">{{ label }}</label>
       <slot name="label-right" />
     </div>
-    <div class="auth-field__control" :class="{ 'auth-field__control--with-icon': !!icon }">
-      <component :is="icon" v-if="icon" class="auth-field__leading-icon" aria-hidden="true" />
+    <div class="s-control s-control--lg" :class="{ 's-control--disabled': disabled }">
+      <component
+        :is="icon"
+        v-if="icon"
+        class="s-auth-field__icon"
+        :size="18"
+        :stroke-width="1.75"
+        aria-hidden="true"
+      />
       <input
         :id="inputId"
         v-model="model"
+        class="s-control__input"
+        :class="inputClass"
         :type="resolvedType"
         :autocomplete="autocomplete"
         :required="required"
         :placeholder="placeholder"
         :minlength="minlength"
         :disabled="disabled"
-        class="app-field auth-field-input w-full"
-        :class="[
-          passwordToggle ? 'auth-field-input--password' : '',
-          passwordToggle && biometricAutofill ? 'auth-field-input--password-biometric' : '',
-          icon ? 'auth-field-input--with-icon' : '',
-          inputClass,
-        ]"
-        @focus="$emit('focus', $event)"
         v-bind="inputAttrs"
+        @focus="$emit('focus', $event)"
       />
       <button
         v-if="showClear && model.length > 0 && !passwordToggle"
         type="button"
-        class="auth-field__clear"
+        class="s-auth-field__action"
         aria-label="Clear input"
         @click="model = ''"
       >
-        <XMarkIcon class="h-4 w-4" />
+        <X :size="16" :stroke-width="1.75" aria-hidden="true" />
       </button>
       <button
         v-if="biometricAutofill"
         type="button"
-        class="auth-field__biometric"
+        class="s-auth-field__action"
         :aria-label="biometricLabel || 'Autofill with biometrics'"
         @click="$emit('biometric-autofill')"
       >
-        <FingerPrintIcon class="h-4 w-4" />
+        <Fingerprint :size="16" :stroke-width="1.75" aria-hidden="true" />
       </button>
       <button
         v-if="passwordToggle"
         type="button"
-        class="auth-field__toggle"
-        :class="{ 'auth-field__toggle--with-biometric': biometricAutofill }"
+        class="s-auth-field__action"
         :aria-label="showPassword ? 'Hide password' : 'Show password'"
+        :aria-pressed="showPassword"
         @click="showPassword = !showPassword"
       >
-        <EyeSlashIcon v-if="showPassword" class="h-4 w-4" />
-        <EyeIcon v-else class="h-4 w-4" />
+        <EyeOff v-if="showPassword" :size="16" :stroke-width="1.75" aria-hidden="true" />
+        <Eye v-else :size="16" :stroke-width="1.75" aria-hidden="true" />
       </button>
     </div>
     <slot name="hint" />
@@ -63,7 +63,7 @@
 
 <script setup lang="ts">
 import { computed, ref, useAttrs, type Component } from 'vue'
-import { EyeIcon, EyeSlashIcon, XMarkIcon, FingerPrintIcon } from '~/utils/app-icons'
+import { Eye, EyeOff, Fingerprint, X } from '@lucide/vue'
 
 defineOptions({ inheritAttrs: false })
 

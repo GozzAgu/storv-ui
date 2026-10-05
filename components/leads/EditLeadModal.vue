@@ -1,50 +1,40 @@
 <template>
-  <SidePanel
-    :model-value="modelValue"
+  <SDialog
+      placement="right"
+    :open="modelValue"
     title="Edit lead"
-    size="lg"
-    dense
-    @update:model-value="(value: boolean) => emit('update:modelValue', value)"
+    size="md"
+    @update:open="(value: boolean) => emit('update:modelValue', value)"
   >
-    <IosForm layout="fill" @submit="save">
-      <IosFormSection fixed>
-        <div class="ios-form__grid ios-form__grid--pair">
-          <IosFormField label="Phone">
-            <IosFormInput
+    <SForm @submit="save">
+      <SFormSection>
+        <div class="s-form-pair">
+          <SField label="Phone">
+            <SInput
               v-model="customerPhone"
               type="tel"
               maxlength="40"
               autocomplete="tel"
             />
-          </IosFormField>
+          </SField>
 
-          <IosFormField label="Estimated value" hint="Optional">
-            <div class="relative">
-              <span
-                class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400"
-                >{{ currencySymbol }}</span
-              >
-              <IosFormInput
-                v-model="estimatedValue"
-                type="number"
-                min="0"
-                step="0.01"
-                extra-class="pl-7"
-              />
-            </div>
-          </IosFormField>
+          <SField label="Estimated value" hint="Optional">
+            <SInput v-model="estimatedValue" type="number" min="0" step="0.01">
+              <template #prefix>{{ currencySymbol }}</template>
+            </SInput>
+          </SField>
         </div>
 
-        <IosFormField label="Product interest" required>
-          <IosFormInput v-model="productName" maxlength="160" />
-        </IosFormField>
-      </IosFormSection>
+        <SField label="Product interest" required>
+          <SInput v-model="productName" maxlength="160" />
+        </SField>
+      </SFormSection>
 
-      <p v-if="errorMessage" class="ios-form__error">{{ errorMessage }}</p>
-    </IosForm>
+      <p v-if="errorMessage" class="s-field__error" role="alert">{{ errorMessage }}</p>
+    </SForm>
 
     <template #footer>
-      <IosDrawerActions
+      <SDialogActions
         primary-label="Save changes"
         :primary-loading="isSaving"
         :primary-disabled="!canSave"
@@ -53,19 +43,17 @@
         @primary="save"
       />
     </template>
-  </SidePanel>
+  </SDialog>
 </template>
 
 <script setup lang="ts">
+import SDialog from '~/components/s/SDialog.vue'
+import SDialogActions from '~/components/s/SDialogActions.vue'
+import SField from '~/components/s/SField.vue'
+import SForm from '~/components/s/SForm.vue'
+import SFormSection from '~/components/s/SFormSection.vue'
+import SInput from '~/components/s/SInput.vue'
 import { computed, ref, watch } from 'vue'
-import SidePanel from '~/components/ui/SidePanel.vue'
-import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
-import {
-  IosForm,
-  IosFormSection,
-  IosFormField,
-  IosFormInput,
-} from '~/components/ios/forms'
 import { usePreferences } from '~/composables/usePreferences'
 import { useSalesLeadsStore } from '~/stores/salesLeads'
 import type { SalesLead } from '~/types/leads'

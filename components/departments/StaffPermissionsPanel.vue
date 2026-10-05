@@ -1,81 +1,91 @@
 <template>
-  <IosFormSection title="Permissions" :show-title="true" :grid="false" fixed>
-    <p class="staff-permissions-panel__lede dash-drawer-hint">
-      Choose what this person can see and change. View is required before manage options unlock.
-    </p>
+  <SFormSection title="Permissions" :show-title="true">
+    <p class="s-field__hint">Choose how much of each area this person can use.</p>
 
-    <div class="staff-permissions-panel">
-      <div
-        v-for="module in modules"
-        :key="module.key"
-        class="staff-permissions-panel__module"
-      >
-        <p class="staff-permissions-panel__module-title">{{ module.title }}</p>
-        <IosFormToggle
-          :model-value="modelValue[module.key].view"
-          label="View"
-          :hint="module.viewHint"
-          :disabled="disabled"
-          @update:model-value="onViewToggle(module.key, $event)"
-        />
-        <template v-if="modelValue[module.key].view">
-          <IosFormToggle
-            :model-value="isManaging(modelValue[module.key])"
-            label="Manage"
-            :hint="module.manageHint"
+    <ul class="s-perm">
+      <li v-for="module in modules" :key="module.key" class="s-perm__module">
+        <div class="s-perm__head">
+          <span :id="`${baseId}-${module.key}`" class="s-perm__title">{{ module.title }}</span>
+          <SBadge v-if="module.key === 'sellerLoans'" size="sm">Always on</SBadge>
+        </div>
+        <p class="s-perm__hint">{{ levelHint(module) }}</p>
+
+        <div
+          v-if="module.key !== 'sellerLoans'"
+          class="s-tabs s-tabs--block s-perm__levels"
+          role="radiogroup"
+          :aria-labelledby="`${baseId}-${module.key}`"
+          @keydown="onLevelKeydown(module.key, $event)"
+        >
+          <button
+            v-for="option in LEVELS"
+            :key="option.value"
+            type="button"
+            role="radio"
+            class="s-tabs__tab"
+            :data-level="option.value"
+            :aria-checked="levelOf(module.key) === option.value"
+            :tabindex="levelOf(module.key) === option.value ? 0 : -1"
             :disabled="disabled"
-            @update:model-value="onManageToggle(module.key, $event)"
-          />
-          <div
-            class="staff-permissions-panel__actions"
-            role="group"
-            :aria-label="`${module.title} actions`"
+            @click="setLevel(module.key, option.value)"
           >
-            <Checkbox
-              :model-value="modelValue[module.key].create"
-              label="Create"
-              size="sm"
+            {{ option.label }}
+          </button>
+        </div>
+
+        <div
+          v-if="showChips(module.key)"
+          class="s-perm__chips"
+          role="group"
+          :aria-label="`${module.title} actions`"
+        >
+          <template v-if="module.key !== 'sellerLoans' && levelOf(module.key) === 'custom'">
+            <button
+              v-for="action in CRUD_ACTIONS"
+              :key="action.key"
+              type="button"
+              class="s-perm__chip"
+              :aria-pressed="modelValue[module.key][action.key]"
               :disabled="disabled"
-              wrapper-class="staff-permissions-panel__action"
-              @update:model-value="updateModule(module.key, { create: $event })"
-            />
-            <Checkbox
-              :model-value="modelValue[module.key].edit"
-              label="Edit"
-              size="sm"
-              :disabled="disabled"
-              wrapper-class="staff-permissions-panel__action"
-              @update:model-value="updateModule(module.key, { edit: $event })"
-            />
-            <Checkbox
-              :model-value="modelValue[module.key].delete"
-              label="Delete"
-              size="sm"
-              :disabled="disabled"
-              wrapper-class="staff-permissions-panel__action"
-              @update:model-value="updateModule(module.key, { delete: $event })"
-            />
-          </div>
-          <div v-if="module.key === 'receipts'" class="staff-permissions-panel__refund">
-            <Checkbox
-              :model-value="modelValue.receipts.refund"
-              label="Refund & cancel outstanding orders"
-              size="sm"
-              :disabled="disabled"
-              wrapper-class="staff-permissions-panel__refund-control"
-              @update:model-value="updateModule('receipts', { refund: $event })"
-            />
-            <p class="dash-drawer-hint">Separate from full edit access.</p>
-          </div>
-        </template>
-      </div>
-    </div>
-  </IosFormSection>
+              @click="updateModule(module.key, { [action.key]: !modelValue[module.key][action.key] })"
+            >
+              <Check v-if="modelValue[module.key][action.key]" :size="14" :stroke-width="2.5" aria-hidden="true" />
+              {{ action.label }}
+            </button>
+          </template>
+          <button
+            v-if="module.key === 'sellerLoans'"
+            type="button"
+            class="s-perm__chip"
+            :aria-pressed="modelValue.sellerLoans.delete"
+            :disabled="disabled"
+            @click="updateModule('sellerLoans', { delete: !modelValue.sellerLoans.delete })"
+          >
+            <Check v-if="modelValue.sellerLoans.delete" :size="14" :stroke-width="2.5" aria-hidden="true" />
+            Can delete
+          </button>
+          <button
+            v-if="module.key === 'receipts'"
+            type="button"
+            class="s-perm__chip"
+            :aria-pressed="modelValue.receipts.refund"
+            :disabled="disabled"
+            @click="updateModule('receipts', { refund: !modelValue.receipts.refund })"
+          >
+            <Check v-if="modelValue.receipts.refund" :size="14" :stroke-width="2.5" aria-hidden="true" />
+            Refund &amp; cancel orders
+          </button>
+        </div>
+      </li>
+    </ul>
+  </SFormSection>
 </template>
 
 <script setup lang="ts">
-import { IosFormSection, IosFormToggle } from '~/components/ios/forms'
-import Checkbox from '~/components/ui/Checkbox.vue'
+import { reactive, useId } from 'vue'
+import { Check } from '@lucide/vue'
+import SBadge from '~/components/s/SBadge.vue'
+import SFormSection from '~/components/s/SFormSection.vue'
 import type {
   ModulePermission,
   PermissionModule,
@@ -91,10 +101,25 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), { disabled: false })
 const emit = defineEmits<{ 'update:modelValue': [StaffPermissions] }>()
 
-type CrudModule = Exclude<PermissionModule, never>
+type Level = 'none' | 'view' | 'manage' | 'custom'
+
+const LEVELS: Array<{ value: Level; label: string }> = [
+  { value: 'none', label: 'None' },
+  { value: 'view', label: 'View' },
+  { value: 'manage', label: 'Manage' },
+  { value: 'custom', label: 'Custom' },
+]
+
+const CRUD_ACTIONS: Array<{ key: 'create' | 'edit' | 'delete'; label: string }> = [
+  { key: 'create', label: 'Create' },
+  { key: 'edit', label: 'Edit' },
+  { key: 'delete', label: 'Delete' },
+]
+
+const baseId = useId()
 
 const modules: Array<{
-  key: CrudModule
+  key: PermissionModule
   title: string
   viewHint: string
   manageHint: string
@@ -126,19 +151,42 @@ const modules: Array<{
   {
     key: 'sellerLoans',
     title: 'Stock loans',
-    viewHint: 'Always on for staff. Devices loaned to sellers or retailers.',
-    manageHint: 'Always on for staff. Create and update stock loans.',
+    viewHint: 'Staff can always view, create and update stock loans.',
+    manageHint: 'Staff can always view, create and update stock loans.',
   },
   {
     key: 'multiStoreSync',
-    title: 'Multi-Store Sync',
+    title: 'Multi-store sync',
     viewHint: 'Branch transfers and consolidated reports.',
     manageHint: 'Request, approve, and complete transfers.',
   },
 ]
 
-function isManaging(module: ModulePermission): boolean {
-  return module.create || module.edit || module.delete
+/** Modules where the user picked Custom but hasn't granted a mix of actions yet. */
+const customOpen = reactive<Partial<Record<PermissionModule, boolean>>>({})
+
+function levelOf(key: PermissionModule): Level {
+  const m = props.modelValue[key]
+  if (!m.view) return 'none'
+  if (customOpen[key]) return 'custom'
+  if (!m.create && !m.edit && !m.delete) return 'view'
+  if (m.create && m.edit && m.delete) return 'manage'
+  return 'custom'
+}
+
+function showChips(key: PermissionModule): boolean {
+  if (key === 'sellerLoans') return true
+  if (key === 'receipts') return props.modelValue.receipts.view
+  return levelOf(key) === 'custom'
+}
+
+function levelHint(module: (typeof modules)[number]): string {
+  if (module.key === 'sellerLoans') return module.viewHint
+  const level = levelOf(module.key)
+  if (level === 'none') return 'No access.'
+  if (level === 'view') return module.viewHint
+  if (level === 'manage') return module.manageHint
+  return 'Pick the actions this person can take.'
 }
 
 function updateModule(
@@ -151,124 +199,33 @@ function updateModule(
   })
 }
 
-function onViewToggle(key: PermissionModule, value: boolean) {
-  if (value) {
+function setLevel(key: PermissionModule, level: Level) {
+  customOpen[key] = level === 'custom'
+  if (level === 'none') {
+    updateModule(
+      key,
+      key === 'receipts'
+        ? { view: false, create: false, edit: false, delete: false, refund: false }
+        : { view: false, create: false, edit: false, delete: false }
+    )
+  } else if (level === 'view') {
+    updateModule(key, { view: true, create: false, edit: false, delete: false })
+  } else if (level === 'manage') {
+    updateModule(key, { view: true, create: true, edit: true, delete: true })
+  } else {
     updateModule(key, { view: true })
-    return
   }
-  if (key === 'receipts') {
-    updateModule(key, {
-      view: false,
-      create: false,
-      edit: false,
-      delete: false,
-      refund: false,
-    })
-    return
-  }
-  updateModule(key, { view: false, create: false, edit: false, delete: false })
 }
 
-function onManageToggle(key: PermissionModule, value: boolean) {
-  updateModule(key, { create: value, edit: value, delete: value })
+function onLevelKeydown(key: PermissionModule, event: KeyboardEvent) {
+  const forward = event.key === 'ArrowRight' || event.key === 'ArrowDown'
+  const back = event.key === 'ArrowLeft' || event.key === 'ArrowUp'
+  if (!forward && !back) return
+  event.preventDefault()
+  const index = LEVELS.findIndex((l) => l.value === levelOf(key))
+  const next = LEVELS[(index + (forward ? 1 : -1) + LEVELS.length) % LEVELS.length]!.value
+  setLevel(key, next)
+  const group = event.currentTarget as HTMLElement
+  requestAnimationFrame(() => group.querySelector<HTMLElement>(`[data-level="${next}"]`)?.focus())
 }
 </script>
-
-<style scoped>
-.staff-permissions-panel__lede {
-  margin: 0 0 0.875rem;
-}
-
-.staff-permissions-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.staff-permissions-panel__module {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding: 0.625rem 0.75rem;
-  border-radius: 0.75rem;
-  background: rgb(26 21 35 / 0.04);
-}
-
-:global(html.dark) .staff-permissions-panel__module {
-  background: rgb(255 255 255 / 0.04);
-}
-
-.staff-permissions-panel__module-title {
-  margin: 0;
-  font-size: 0.6875rem;
-  font-weight: 650;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--dash-overlay-muted);
-}
-
-.staff-permissions-panel__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.125rem;
-}
-
-.staff-permissions-panel__action {
-  margin: 0 !important;
-  min-height: 2rem;
-  align-items: center !important;
-  padding: 0.375rem 0.75rem;
-  border-radius: 9999px;
-  background: rgb(255 255 255 / 0.72);
-  gap: 0.5rem;
-  color: var(--dash-overlay-ink);
-}
-
-.staff-permissions-panel__action :deep(.app-checkbox__box) {
-  margin-top: 0;
-}
-
-.staff-permissions-panel__action :deep(.app-checkbox__label) {
-  font-size: 0.75rem;
-  font-weight: 550;
-  color: var(--dash-overlay-ink) !important;
-}
-
-.staff-permissions-panel__action.app-checkbox--checked :deep(.app-checkbox__label) {
-  color: var(--dash-overlay-ink) !important;
-}
-
-:global(html.dark) .staff-permissions-panel__action {
-  background: rgb(255 255 255 / 0.1);
-}
-
-.staff-permissions-panel__refund {
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
-  margin-top: 0.125rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid rgb(26 21 35 / 0.06);
-}
-
-:global(html.dark) .staff-permissions-panel__refund {
-  border-top-color: rgb(255 255 255 / 0.08);
-}
-
-.staff-permissions-panel__refund-control {
-  margin: 0 !important;
-  align-items: flex-start;
-}
-
-.staff-permissions-panel__refund-control :deep(.app-checkbox__label) {
-  font-size: 0.8125rem;
-  font-weight: 550;
-  line-height: 1.35;
-}
-
-.staff-permissions-panel__refund > .dash-drawer-hint {
-  margin: 0;
-  padding-left: 1.625rem;
-}
-</style>

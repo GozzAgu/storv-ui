@@ -1,212 +1,108 @@
 <template>
-  <Modal
-    :model-value="props.modelValue"
-    @update:model-value="(value: boolean) => emit('update:modelValue', value)"
-    size="lg"
+  <SDialog
+    :open="props.modelValue"
+    role="alertdialog"
+    size="md"
+    title="Return / refund sale"
+    :description="receipt ? `Receipt #${receipt.receiptNumber}` : undefined"
+    :dismissible="!isProcessing"
+    @update:open="(value: boolean) => emit('update:modelValue', value)"
   >
-    <template #header>
-      <div class="flex items-center gap-3">
-        <div
-          class="w-10 h-10 rounded-sm bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center"
-        >
-          <ArrowPathIcon class="w-6 h-6 text-orange-600 dark:text-orange-400" />
-        </div>
-        <div>
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            Return/Refund Sale
-          </h3>
-          <p class="text-sm text-gray-500 dark:text-gray-400">
-            Receipt #{{ receipt?.receiptNumber }}
-          </p>
-        </div>
-      </div>
-    </template>
-
-    <div v-if="!receipt" class="text-center py-12">
-      <div
-        class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-500"
-      ></div>
-      <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading sale...</p>
+    <div v-if="!receipt" class="s-receipt-view__loading">
+      <SSpinner :size="24" />
+      <p>Loading sale…</p>
     </div>
 
-    <div v-else class="max-h-[calc(100vh-16rem)] overflow-y-auto space-y-4">
-      <!-- Warning Message -->
-      <div
-        class="p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-sm"
-      >
-        <div class="flex items-start gap-3">
-          <ExclamationTriangleIcon
-            class="w-5 h-5 text-orange-600 dark:text-orange-400 flex-shrink-0 mt-0.5"
-          />
-          <div>
-            <p class="text-sm font-medium text-orange-800 dark:text-orange-200">
-              Confirm Return/Refund
-            </p>
-            <p class="mt-1 text-xs text-orange-700 dark:text-orange-300">
-              This action will mark the sale as refunded and return all items to inventory. The
-              customer will be notified and the transaction will be recorded.
-            </p>
-          </div>
-        </div>
+    <div v-else class="s-form">
+      <div class="s-receipt-callout s-receipt-callout--warning">
+        <p class="s-receipt-callout__title">Confirm return / refund</p>
+        <p>
+          This marks the sale as refunded and returns all items to inventory. The customer will
+          be notified and the transaction will be recorded.
+        </p>
       </div>
 
-      <!-- Receipt Details -->
-      <div class="space-y-3">
-        <div>
-          <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
-            Sale Information
-          </h4>
-          <div class="bg-gray-50 dark:bg-gray-700/50 rounded-sm p-3 space-y-1.5">
-            <div class="flex justify-between text-sm">
-              <span class="text-gray-600 dark:text-gray-400">Receipt Number:</span>
-              <span class="font-medium text-gray-900 dark:text-gray-100">{{
-                receipt.receiptNumber
-              }}</span>
-            </div>
-            <div class="flex justify-between text-sm">
-              <span class="text-gray-600 dark:text-gray-400">Customer:</span>
-              <span class="font-medium text-gray-900 dark:text-gray-100">{{
-                receipt.customerName
-              }}</span>
-            </div>
-            <div class="flex justify-between text-sm">
-              <span class="text-gray-600 dark:text-gray-400">Date:</span>
-              <span class="font-medium text-gray-900 dark:text-gray-100">{{
-                formatDate(receipt.date)
-              }}</span>
-            </div>
-            <div class="flex justify-between text-sm">
-              <span class="text-gray-600 dark:text-gray-400">Total Amount:</span>
-              <span class="font-semibold text-gray-900 dark:text-gray-100"
-                >${{ formatCurrency(receipt.total) }}</span
-              >
-            </div>
-            <div class="flex justify-between text-sm">
-              <span class="text-gray-600 dark:text-gray-400">Payment Method:</span>
-              <span class="font-medium text-gray-900 dark:text-gray-100">{{
-                receipt.paymentMethod
-              }}</span>
-            </div>
+      <section class="s-form-section">
+        <h3 class="s-form-section__title">Sale information</h3>
+        <dl class="s-record-summary s-record-summary--stack">
+          <div class="s-record-row">
+            <dt>Receipt number</dt>
+            <dd class="s-record-row__value">{{ receipt.receiptNumber }}</dd>
           </div>
-        </div>
-
-        <!-- Items to be Returned -->
-        <div>
-          <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
-            Items to be Returned
-          </h4>
-          <div class="rounded-sm overflow-hidden">
-            <div class="overflow-x-auto max-h-48 overflow-y-auto">
-              <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead class="sticky top-0 bg-gray-50/95 dark:!bg-dashboard-card/90">
-                  <tr>
-                    <th
-                      class="bg-gray-50/95 px-4 py-2 text-left text-xs !font-bold text-gray-500 dark:!bg-dashboard-card/90 dark:text-gray-400 uppercase"
-                    >
-                      Item
-                    </th>
-                    <th
-                      class="bg-gray-50/95 px-4 py-2 text-center text-xs !font-bold text-gray-500 dark:!bg-dashboard-card/90 dark:text-gray-400 uppercase"
-                    >
-                      Quantity
-                    </th>
-                    <th
-                      class="bg-gray-50/95 px-4 py-2 text-right text-xs !font-bold text-gray-500 dark:!bg-dashboard-card/90 dark:text-gray-400 uppercase"
-                    >
-                      Price
-                    </th>
-                    <th
-                      class="bg-gray-50/95 px-4 py-2 text-right text-xs !font-bold text-gray-500 dark:!bg-dashboard-card/90 dark:text-gray-400 uppercase"
-                    >
-                      Total
-                    </th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                  <tr v-for="(item, index) in receipt.items" :key="index">
-                    <td class="px-4 py-2 text-sm text-gray-900 dark:text-gray-100">
-                      {{ item.itemName }}
-                    </td>
-                    <td class="px-4 py-2 text-sm text-center text-gray-600 dark:text-gray-400">
-                      {{ item.quantity }}
-                    </td>
-                    <td class="px-4 py-2 text-sm text-right text-gray-600 dark:text-gray-400">
-                      ${{ formatCurrency(item.price) }}
-                    </td>
-                    <td
-                      class="px-4 py-2 text-sm text-right font-medium text-gray-900 dark:text-gray-100"
-                    >
-                      ${{ formatCurrency(item.price * item.quantity) }}
-                    </td>
-                  </tr>
-                </tbody>
-                <tfoot class="sticky bottom-0 bg-gray-50 dark:!bg-dashboard-card/70">
-                  <tr>
-                    <td
-                      colspan="3"
-                      class="px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 text-right"
-                    >
-                      Refund Amount:
-                    </td>
-                    <td
-                      class="px-4 py-2 text-sm font-bold text-gray-900 dark:text-gray-100 text-right"
-                    >
-                      ${{ formatCurrency(receipt.total) }}
-                    </td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
+          <div class="s-record-row">
+            <dt>Customer</dt>
+            <dd class="s-record-row__value">{{ receipt.customerName }}</dd>
           </div>
-        </div>
+          <div class="s-record-row">
+            <dt>Date</dt>
+            <dd class="s-record-row__value">{{ formatDate(receipt.date) }}</dd>
+          </div>
+          <div class="s-record-row">
+            <dt>Payment method</dt>
+            <dd class="s-record-row__value">{{ receipt.paymentMethod }}</dd>
+          </div>
+          <div class="s-record-row">
+            <dt>Total</dt>
+            <dd class="s-record-row__value">{{ formatCurrency(receipt.total) }}</dd>
+          </div>
+        </dl>
+      </section>
 
-        <!-- Return Reason (Optional) -->
-        <IosFormField label="Return Reason" hint="Optional">
-          <IosFormTextarea
-            v-model="returnReason"
-            :rows="2"
-            extra-class="resize-none"
-            placeholder="Enter reason for return/refund..."
-          />
-        </IosFormField>
-
-        <!-- Confirmation Checkbox -->
-        <div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-sm">
-          <Checkbox
-            v-model="confirmed"
-            label="I confirm that I want to return/refund this sale. All items will be returned to inventory and the sale will be marked as refunded."
-            size="sm"
-            wrapper-class="items-start"
-            label-class="text-sm text-gray-700 dark:text-gray-300"
-          />
+      <section class="s-form-section">
+        <h3 class="s-form-section__title">Items to be returned</h3>
+        <ul class="s-record-rows s-receipt-items">
+          <li v-for="(item, index) in receipt.items" :key="index" class="s-record-row">
+            <span>{{ item.itemName }} × {{ item.quantity }}</span>
+            <span class="s-record-row__value">
+              {{ formatCurrency(item.price * item.quantity) }}
+            </span>
+          </li>
+        </ul>
+        <div class="s-record-row s-record-row--total">
+          <span>Refund amount</span>
+          <span class="s-record-row__value">{{ formatCurrency(receipt.total) }}</span>
         </div>
-      </div>
+      </section>
+
+      <SField label="Return reason" hint="Optional">
+        <STextarea
+          v-model="returnReason"
+          :rows="2"
+          placeholder="Enter reason for return/refund..."
+        />
+      </SField>
+
+      <SCheckbox
+        v-model="confirmed"
+        label="I confirm this return/refund. All items go back to inventory and the sale is marked as refunded."
+      />
     </div>
 
     <template #footer>
-      <IosDrawerActions
-        :primary-label="isProcessing ? 'Processing...' : 'Confirm Return/Refund'"
+      <SDialogActions
+        :primary-label="isProcessing ? 'Processing…' : 'Confirm return / refund'"
         :primary-icon="ArrowPathIcon"
+        :primary-loading="isProcessing"
         :primary-disabled="!confirmed || isProcessing"
         @cancel="handleCancel"
         @primary="handleConfirmReturn"
       />
     </template>
-  </Modal>
+  </SDialog>
 </template>
 
 <script setup lang="ts">
+import SDialog from '~/components/s/SDialog.vue'
+import SDialogActions from '~/components/s/SDialogActions.vue'
+import SField from '~/components/s/SField.vue'
+import STextarea from '~/components/s/STextarea.vue'
+import SCheckbox from '~/components/s/SCheckbox.vue'
+import SSpinner from '~/components/s/SSpinner.vue'
 import { ref, watch } from 'vue'
-import {
-  ArrowPathIcon,
-  ExclamationTriangleIcon,
-} from '~/utils/app-icons'
-import Modal from '~/components/ui/Modal.vue'
-import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
-import Checkbox from '~/components/ui/Checkbox.vue'
-import { IosFormField, IosFormTextarea } from '~/components/ios/forms'
+import { ArrowPathIcon } from '~/utils/app-icons'
 import { useReceiptsStore, type Receipt } from '~/stores/receipts'
 import { useInventoryStore } from '~/stores/inventory'
+import { usePreferences } from '~/composables/usePreferences'
 import { groupReceiptItemsByFolder, folderHasSerialNumbers } from '~/utils/receipt-multi-folder'
 
 interface Props {
@@ -222,17 +118,11 @@ const emit = defineEmits<{
 
 const receiptsStore = useReceiptsStore()
 const inventoryStore = useInventoryStore()
+const { formatCurrency } = usePreferences()
 
 const returnReason = ref('')
 const confirmed = ref(false)
 const isProcessing = ref(false)
-
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value)
-}
 
 const formatDate = (date: Date | string | any) => {
   if (!date) return 'N/A'

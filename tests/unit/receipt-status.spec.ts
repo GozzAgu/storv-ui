@@ -1,11 +1,16 @@
 import { describe, it, expect } from 'vitest'
-import { getReceiptStatusBadge } from '~/utils/receipt-status'
+import { getReceiptStatusLabel, getReceiptStatusTone } from '~/utils/receipt-status'
 
 describe('receipt-status', () => {
   it('returns labels for known statuses', () => {
-    expect(getReceiptStatusBadge('completed').label).toBe('Completed')
-    expect(getReceiptStatusBadge('refunded').label).toBe('Refunded')
-    expect(getReceiptStatusBadge('balance_due').label).toBe('Balance due')
-    expect(getReceiptStatusBadge('completed').class).toContain('rounded-full')
+    expect(getReceiptStatusLabel('completed')).toBe('Completed')
+    expect(getReceiptStatusLabel('refunded')).toBe('Refunded')
+    expect(getReceiptStatusLabel('balance_due')).toBe('Balance due')
+  })
+
+  it('maps statuses to badge tones', () => {
+    expect(getReceiptStatusTone('completed')).toBe('success')
+    expect(getReceiptStatusTone('balance_due')).toBe('warning')
+    expect(getReceiptStatusTone('refunded')).toBe('error')
   })
 })

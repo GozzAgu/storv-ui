@@ -1,88 +1,47 @@
 <template>
-  <Modal
-    :model-value="modelValue"
-    @update:model-value="(v: boolean) => emit('update:modelValue', v)"
+  <SDialog
+    :open="modelValue"
     size="md"
+    title="Sale history"
+    :description="`Receipt #${receipt?.receiptNumber || '-'}${
+      receipt?.customerName ? ` · ${receipt.customerName}` : ''
+    }`"
+    @update:open="(v: boolean) => emit('update:modelValue', v)"
   >
-    <template #header>
-      <div class="min-w-0 flex-1">
-        <h3
-          class="text-base font-semibold text-gray-900 dark:text-gray-100 truncate tracking-tight"
-        >
-          Sale history
-        </h3>
-        <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 truncate">
-          Receipt #{{ receipt?.receiptNumber || '-' }} · {{ receipt?.customerName || '' }}
-        </p>
-      </div>
-    </template>
+    <SEmptyState
+      v-if="timeline.length === 0"
+      title="No events yet"
+      description="Activity for this sale will appear here"
+    >
+      <template #icon>
+        <ClockIcon :size="20" :stroke-width="1.75" />
+      </template>
+    </SEmptyState>
 
-    <div class="p-4 sm:p-5 max-h-[calc(100vh-14rem)] overflow-y-auto">
-      <div v-if="timeline.length === 0" class="dash-empty-state dash-empty-state--compact py-10">
-        <div
-          class="dash-empty-state__mark w-10 h-10 mx-auto rounded-full bg-gray-100 dark:bg-gray-700/80"
-        >
-          <ClockIcon
-            class="dash-empty-state__icon w-5 h-5 text-gray-400 dark:text-gray-500"
-            stroke-width="1.5"
-          />
+    <ul v-else class="s-receipt-timeline">
+      <li v-for="(event, index) in timeline" :key="index" class="s-receipt-timeline__event">
+        <span class="s-receipt-timeline__marker" aria-hidden="true">
+          <component :is="getEventIcon(event.type)" :size="14" :stroke-width="2" />
+        </span>
+        <div class="s-receipt-timeline__body">
+          <p class="s-receipt-timeline__label">{{ event.label }}</p>
+          <p class="s-receipt-timeline__description">{{ event.description }}</p>
+          <span class="s-receipt-timeline__time">{{ formatDate(event.date) }}</span>
         </div>
-        <p class="dash-empty-state__title mt-0 text-sm font-medium text-gray-700 dark:text-gray-300">
-          No events yet
-        </p>
-        <p class="dash-empty-state__desc mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-          Activity for this sale will appear here
-        </p>
-      </div>
-
-      <div v-else class="relative">
-        <div
-          class="absolute left-[11px] top-2 bottom-2 w-px bg-gray-200 dark:bg-gray-600"
-          aria-hidden="true"
-        />
-        <ul class="space-y-0">
-          <li
-            v-for="(event, index) in timeline"
-            :key="index"
-            class="relative flex gap-3 pb-5 last:pb-0"
-          >
-            <div
-              class="relative z-10 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700"
-            >
-              <component
-                :is="getEventIcon(event.type)"
-                class="h-3.5 w-3.5 text-gray-500 dark:text-gray-400"
-                stroke-width="2"
-              />
-            </div>
-            <div class="flex-1 min-w-0 pt-px">
-              <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
-                {{ event.label }}
-              </p>
-              <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                {{ event.description }}
-              </p>
-              <span
-                class="inline-block mt-1.5 text-[11px] text-gray-400 dark:text-gray-500 tabular-nums"
-              >
-                {{ formatDate(event.date) }}
-              </span>
-            </div>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </Modal>
+      </li>
+    </ul>
+  </SDialog>
 </template>
 
 <script setup lang="ts">
+import SDialog from '~/components/s/SDialog.vue'
+import SEmptyState from '~/components/s/SEmptyState.vue'
 import { computed } from 'vue'
 import {
   ClockIcon,
   PlusCircleIcon,
   ArrowPathIcon,
 } from '~/utils/app-icons'
-import Modal from '~/components/ui/Modal.vue'
 import { useReceiptTimeline, type ReceiptTimelineEventType } from '~/composables/useReceiptTimeline'
 import type { Receipt } from '~/stores/receipts'
 import { usePreferences } from '~/composables/usePreferences'

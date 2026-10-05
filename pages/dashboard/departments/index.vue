@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import SSpinner from '~/components/s/SSpinner.vue'
 import { resolveStoreDepartmentsPath } from '~/utils/department-routes'
 import { useStoresStore } from '~/stores/stores'
 
@@ -21,9 +22,8 @@ await navigateTo(target, { replace: true })
 </script>
 
 <template>
-  <div
-    class="flex min-h-[40vh] items-center justify-center text-sm text-gray-500 dark:text-gray-400"
-  >
+  <div class="ds-root s-c s-page s-redirect" role="status">
+    <SSpinner :size="16" />
     Opening departments…
   </div>
 </template>

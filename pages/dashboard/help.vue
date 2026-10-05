@@ -1,242 +1,117 @@
 <template>
-  <div :class="[pageClass, isCapacitorIos ? 'ios-help-page' : '']">
-    <IosPageNavBar v-if="isCapacitorIos" title="Help center" />
-
-    <template v-if="isCapacitorIos">
-      <div class="ios-search-bar-host ios-search-bar-host--sticky">
-        <IosSearchBar v-model="searchQuery" placeholder="Search help topics…" />
-      </div>
-
-      <IosQuickActionBar
-        v-model="iosHelpActionTab"
-        ariaLabel="Help actions"
-        :options="iosHelpActionOptions"
-      />
-
-      <IosFilterChips
-        title="Popular topics"
-        ariaLabel="Popular help topics"
-        :options="iosPopularTopicOptions"
-        :selected="trimmedSearch"
-        @select="(query) => (searchQuery = query)"
-      />
-
-      <IosSettingsGroup v-if="filteredCategories.length" title="On this page">
-        <IosSettingsRow
-          v-for="(cat, index) in filteredCategories"
-          :key="cat.id"
-          :label="cat.title"
-          :last="index === filteredCategories.length - 1"
-          @click="scrollToSection(cat.id)"
-        />
-      </IosSettingsGroup>
-
-      <p
-        v-else-if="trimmedSearch"
-        class="px-1 text-sm leading-relaxed text-gray-500 dark:text-gray-400"
-      >
-        No topics match "{{ searchQuery }}". Try another word or clear the filter.
-      </p>
-
-      <IosSettingsGroup title="Common screens">
-        <IosSettingsRow
-          v-for="(link, index) in quickScreenLinks"
-          :key="link.to"
-          :label="link.label"
-          :to="link.to"
-          :last="index === quickScreenLinks.length - 1"
-        />
-      </IosSettingsGroup>
-    </template>
-
-    <DashboardPageHeader v-if="!isCapacitorIos" class="dash-page-header--unified">
-      <template #title>
-        <h1 :class="pageTitleClass">Help center</h1>
+  <div class="ds-root s-c s-page">
+    <SPageHeader title="Help">
+      <template #description>
+        How Storvv works: inventory, sales, staff access, branches and plans.
       </template>
       <template #actions>
-        <button
-          type="button"
-          class="dash-help-assistant-cta"
-          @click="openAssistant()"
-        >
-          <SparklesIcon class="h-4 w-4 shrink-0" stroke-width="1.75" />
+        <SButton variant="secondary" :loading="isReplayingTour" @click="replayDashboardTour">
+          Replay tour
+        </SButton>
+        <SButton @click="openAssistant()">
+          <template #leading><Sparkles :size="16" :stroke-width="2" aria-hidden="true" /></template>
           Ask assistant
-        </button>
-        <button
-          type="button"
-          class="dash-help-assistant-cta dash-help-assistant-cta--secondary"
-          :disabled="isReplayingTour"
-          @click="replayDashboardTour"
-        >
-          {{ isReplayingTour ? 'Starting tour…' : 'Replay tour' }}
-        </button>
+        </SButton>
       </template>
-      <template #description>
-        <p :class="descriptionClass">
-          Guides for permissions, screens, and plan limits.
-        </p>
-      </template>
-      <template #toolbar>
-        <DashboardToolbarSearch
-          input-id="help-search"
-          v-model="searchQuery"
-          placeholder="Search help topics…"
-          :wide="false"
-          wrapper-class="w-full !max-w-xl sm:!max-w-xl lg:!max-w-xl"
-        />
-      </template>
-    </DashboardPageHeader>
+    </SPageHeader>
 
-    <div v-if="!isCapacitorIos" class="dash-help-discover">
-      <div class="dash-help-discover__block">
-        <p :class="toolbarLabelClass">Popular topics</p>
-        <div class="dash-help-discover__topics">
-          <button
-            v-for="topic in popularTopics"
-            :key="topic.query"
-            type="button"
-            :class="chipClass"
-            @click="searchQuery = topic.query"
-          >
-            {{ topic.label }}
-          </button>
-        </div>
-      </div>
-      <div class="dash-help-discover__block">
-        <p :class="toolbarLabelClass">Common screens</p>
-        <nav class="dash-help-discover__screens" aria-label="Common screens">
-          <NuxtLink
-            v-for="link in quickScreenLinks"
-            :key="link.to"
-            :to="link.to"
-            :class="chipLinkClass"
-          >
-            {{ link.label }}
-          </NuxtLink>
-        </nav>
+    <div class="s-help__search">
+      <SSearch v-model="searchQuery" placeholder="Search help" label="Search help topics" />
+      <div class="s-help__topics" role="group" aria-label="Popular topics">
+        <button
+          v-for="topic in popularTopics"
+          :key="topic.query"
+          type="button"
+          class="s-help__topic"
+          :aria-pressed="trimmedSearch === topic.query"
+          @click="searchQuery = trimmedSearch === topic.query ? '' : topic.query"
+        >
+          {{ topic.label }}
+        </button>
       </div>
     </div>
 
-    <div :class="[layoutClass, isCapacitorIos ? 'ios-help-layout--native' : '']">
-      <nav v-if="!isCapacitorIos" aria-label="Topics" :class="tocClass">
-        <p :class="tocLabelClass">
-          On this page
-        </p>
-        <ul class="dash-help-toc__list">
+    <SCard v-if="filteredCategories.length === 0">
+      <SEmptyState
+        title="No help topics found"
+        :description="`Nothing matches “${trimmedSearch}”. Try another word, or ask the assistant.`"
+      >
+        <template #icon><SearchX :size="24" :stroke-width="1.75" aria-hidden="true" /></template>
+        <template #actions>
+          <SButton variant="secondary" @click="searchQuery = ''">Clear search</SButton>
+          <SButton @click="openAssistant(buildAssistantTopicPrompt(trimmedSearch))">Ask assistant</SButton>
+        </template>
+      </SEmptyState>
+    </SCard>
+
+    <div v-else class="s-help__layout">
+      <nav class="s-help__toc s-hide-md" aria-label="Help topics">
+        <p class="s-help__toc-label">Topics</p>
+        <ul>
           <li v-for="cat in filteredCategories" :key="cat.id">
-            <a
-              :href="`#${cat.id}`"
-              :class="tocLinkClass"
-              @click.prevent="scrollToSection(cat.id)"
-              v-html="highlightText(cat.title, trimmedSearch)"
-            ></a>
+            <a :href="`#${cat.id}`" class="s-help__toc-link" @click.prevent="scrollToSection(cat.id)">
+              {{ cat.title }}
+            </a>
           </li>
         </ul>
-        <p
-          v-if="filteredCategories.length === 0"
-          class="dash-help-empty"
-        >
-          No topics match "{{ searchQuery }}". Try another word or clear the filter.
-        </p>
       </nav>
 
-      <div :class="contentClass">
-        <section
-          v-for="cat in filteredCategories"
-          :id="cat.id"
-          :key="cat.id"
-          :class="sectionClass"
-        >
-          <div :class="sectionHeadClass">
-            <div class="min-w-0 flex-1">
-              <div class="dash-help-section__title-row">
-                <component
-                  :is="cat.icon"
-                  class="dash-help-section__glyph"
-                  stroke-width="1.5"
-                  aria-hidden="true"
-                />
-                <h2
-                  :class="sectionTitleClass"
-                  v-html="highlightText(cat.title, trimmedSearch)"
-                ></h2>
-              </div>
-              <p
-                :class="sectionBlurbClass"
-                v-html="highlightText(cat.blurb, trimmedSearch)"
-              ></p>
+      <div class="s-help__sections">
+        <SCard v-for="cat in filteredCategories" :id="cat.id" :key="cat.id" class="s-help__section">
+          <header class="s-help__section-head">
+            <span class="s-help__section-icon" aria-hidden="true">
+              <component :is="cat.webIcon" :size="20" :stroke-width="1.75" />
+            </span>
+            <div class="s-help__section-text">
+              <h2 class="s-help__section-title" v-html="highlightText(cat.title, trimmedSearch, WEB_MARK_CLASS)" />
+              <p class="s-help__section-blurb" v-html="highlightText(cat.blurb, trimmedSearch, WEB_MARK_CLASS)" />
             </div>
-            <button
-              type="button"
-              class="dash-help-assistant-link shrink-0"
-              @click="askAboutCategory(cat.title)"
-            >
-              Ask assistant
-            </button>
-          </div>
+            <SButton variant="ghost" size="sm" @click="askAboutCategory(cat.title)">Ask assistant</SButton>
+          </header>
 
-          <div class="dash-help-section__articles">
-            <article
-              v-for="(article, idx) in cat.articles"
-              :key="idx"
-              :class="articleClass"
-            >
-              <h3
-                :class="articleTitleClass"
-                v-html="highlightText(article.title, trimmedSearch)"
-              ></h3>
-              <div :class="articleBodyClass">
-                <p
-                  v-for="(para, pIdx) in article.body"
-                  :key="pIdx"
-                  v-html="highlightText(para, trimmedSearch)"
-                ></p>
-                <ul
-                  v-if="article.bullets?.length"
-                  class="dash-help-article__bullets"
-                >
-                  <li
-                    v-for="(b, bIdx) in article.bullets"
-                    :key="bIdx"
-                    v-html="highlightText(b, trimmedSearch)"
-                  ></li>
-                </ul>
-              </div>
-            </article>
-          </div>
-        </section>
+          <article v-for="(article, idx) in cat.articles" :key="idx" class="s-help__article">
+            <h3 class="s-help__article-title" v-html="highlightText(article.title, trimmedSearch, WEB_MARK_CLASS)" />
+            <p
+              v-for="(para, pIdx) in article.body"
+              :key="pIdx"
+              v-html="highlightText(para, trimmedSearch, WEB_MARK_CLASS)"
+            />
+            <ul v-if="article.bullets?.length">
+              <li
+                v-for="(b, bIdx) in article.bullets"
+                :key="bIdx"
+                v-html="highlightText(b, trimmedSearch, WEB_MARK_CLASS)"
+              />
+            </ul>
+          </article>
+        </SCard>
       </div>
     </div>
-
-    <button
-      v-show="showBackToTop"
-      type="button"
-      :class="backTopClass"
-      aria-label="Back to top"
-      @click="scrollToTop"
-    >
-      <ArrowUpIcon class="h-4 w-4" stroke-width="2" />
-    </button>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { Component } from 'vue'
 import {
-  ArrowUpIcon,
-  SparklesIcon,
-  Squares2X2Icon,
-  CubeIcon,
-  ReceiptPercentIcon,
-  ChartBarIcon,
-  ShieldCheckIcon,
-  BuildingOfficeIcon,
-  ArrowsRightLeftIcon,
-  Cog6ToothIcon,
-  UserCircleIcon,
-  RocketLaunchIcon,
-  DevicePhoneMobileIcon,
-} from '~/utils/app-icons'
+  ArrowLeftRight,
+  BarChart3,
+  Building2,
+  LayoutGrid,
+  Megaphone,
+  Package,
+  Receipt,
+  SearchX,
+  Settings,
+  ShieldCheck,
+  Smartphone,
+  Sparkles,
+  UserRound,
+} from '@lucide/vue'
+import SButton from '~/components/s/SButton.vue'
+import SCard from '~/components/s/SCard.vue'
+import SEmptyState from '~/components/s/SEmptyState.vue'
+import SPageHeader from '~/components/s/SPageHeader.vue'
+import SSearch from '~/components/s/SSearch.vue'
 import {
   buildAssistantTopicPrompt,
   useDashboardAssistant,
@@ -257,30 +132,6 @@ definePageMeta({
 useHead({
   title: 'Help center - Storvv',
 })
-
-const {
-  pageTitleClass,
-  descriptionClass,
-  pageClass,
-  layoutClass,
-  tocClass,
-  tocLabelClass,
-  tocLinkClass,
-  contentClass,
-  sectionClass,
-  sectionHeadClass,
-  sectionTitleClass,
-  sectionBlurbClass,
-  articleClass,
-  articleTitleClass,
-  articleBodyClass,
-  chipClass,
-  chipLinkClass,
-  toolbarLabelClass,
-  backTopClass,
-} = useDashboardHelpChrome()
-
-const { isCapacitorIos } = useIsCapacitorIos()
 
 const { openAssistant } = useDashboardAssistant()
 const { resetTutorial } = useUser()
@@ -312,32 +163,31 @@ async function replayDashboardTour() {
   }
 }
 
-type Category = DashboardHelpCategory & { icon: Component }
+type Category = DashboardHelpCategory & { webIcon: Component }
 
-const categoryIcons: Record<DashboardHelpCategoryId, Component> = {
-  'recent-updates': RocketLaunchIcon,
-  'mobile-app': DevicePhoneMobileIcon,
-  'getting-started': SparklesIcon,
-  'navigation-search': Squares2X2Icon,
-  inventory: CubeIcon,
-  'sales-receipts-customers': ReceiptPercentIcon,
-  analytics: ChartBarIcon,
-  'activity-logs': ShieldCheckIcon,
-  'departments-staff': BuildingOfficeIcon,
-  'multi-store': ArrowsRightLeftIcon,
-  'settings-subscription': Cog6ToothIcon,
-  'profile-notifications': UserCircleIcon,
+const webCategoryIcons: Record<DashboardHelpCategoryId, Component> = {
+  'recent-updates': Megaphone,
+  'mobile-app': Smartphone,
+  'getting-started': Sparkles,
+  'navigation-search': LayoutGrid,
+  inventory: Package,
+  'sales-receipts-customers': Receipt,
+  analytics: BarChart3,
+  'activity-logs': ShieldCheck,
+  'departments-staff': Building2,
+  'multi-store': ArrowLeftRight,
+  'settings-subscription': Settings,
+  'profile-notifications': UserRound,
 }
 
 const categories: Category[] = dashboardHelpCategories.map((category) => ({
   ...category,
-  icon: categoryIcons[category.id],
+  webIcon: webCategoryIcons[category.id],
 }))
 
 const router = useRouter()
 
 const searchQuery = ref('')
-const showBackToTop = ref(false)
 
 const popularTopics = [
   { label: "What's new", query: 'recent updates' },
@@ -349,43 +199,6 @@ const popularTopics = [
   { label: 'Stock loans', query: 'stock loan' },
   { label: 'Plans & billing', query: 'plan' },
 ] as const
-
-const quickScreenLinks = [
-  { label: 'Dashboard', to: '/dashboard' },
-  { label: 'Inventory', to: '/dashboard/inventory' },
-  { label: 'Sales leads', to: '/dashboard/leads' },
-  { label: 'Stock loans', to: '/dashboard/seller-loans' },
-  { label: 'Sales', to: '/dashboard/receipts' },
-  { label: 'Analytics', to: '/dashboard/analytics' },
-  { label: 'Settings', to: '/dashboard/settings' },
-  { label: 'Profile', to: '/dashboard/profile' },
-] as const
-
-const iosHelpActionTab = ref('assistant')
-
-const iosHelpActionOptions = computed(() => [
-  {
-    value: 'assistant',
-    label: 'Ask assistant',
-    icon: SparklesIcon,
-    action: () => openAssistant(),
-  },
-  {
-    value: 'tour',
-    label: isReplayingTour.value ? 'Starting tour…' : 'Replay tour',
-    icon: RocketLaunchIcon,
-    action: () => {
-      if (!isReplayingTour.value) void replayDashboardTour()
-    },
-  },
-])
-
-const iosPopularTopicOptions = computed(() =>
-  popularTopics.map((topic) => ({
-    value: topic.query,
-    label: topic.label,
-  }))
-)
 
 const trimmedSearch = computed(() => searchQuery.value.trim())
 
@@ -406,8 +219,10 @@ function escapeRegExp(text: string): string {
   return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
+const WEB_MARK_CLASS = 's-help__mark'
+
 /** Safe for v-html: escapes source text, wraps case-insensitive query matches in <mark>. */
-function highlightText(text: string, needle: string): string {
+function highlightText(text: string, needle: string, markClass = WEB_MARK_CLASS): string {
   const escaped = escapeHtml(text)
   const q = needle.trim()
   if (!q) {
@@ -418,7 +233,7 @@ function highlightText(text: string, needle: string): string {
   return escaped.replace(
     re,
     (m) =>
-      `<mark class="rounded px-0.5 bg-amber-200/95 text-gray-900 dark:bg-amber-400/30 dark:text-gray-100">${m}</mark>`
+      `<mark class="${markClass}">${m}</mark>`
   )
 }
 
@@ -461,16 +276,6 @@ function scrollToSection(id: string) {
   })
 }
 
-function scrollToTop() {
-  if (!import.meta.client) return
-  window.scrollTo({ top: 0, behavior: 'smooth' })
-}
-
-function onHelpScroll() {
-  if (!import.meta.client) return
-  showBackToTop.value = window.scrollY > 320
-}
-
 onMounted(() => {
   if (!import.meta.client) return
   const h = window.location.hash
@@ -479,14 +284,6 @@ onMounted(() => {
     requestAnimationFrame(() => {
       document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     })
-  }
-  onHelpScroll()
-  window.addEventListener('scroll', onHelpScroll, { passive: true })
-})
-
-onUnmounted(() => {
-  if (import.meta.client) {
-    window.removeEventListener('scroll', onHelpScroll)
   }
 })
 </script>

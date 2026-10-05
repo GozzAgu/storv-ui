@@ -1,136 +1,110 @@
 <template>
-  <div class="max-w-md mx-auto">
-    <DashboardBackButton to="/dashboard" label="Back to dashboard" variant="text" class="mb-4" />
-    <div class="mb-6">
-      <p class="text-[11px] font-medium uppercase tracking-widest text-gray-400 dark:text-gray-500">
-        Security
-      </p>
-      <h1
-        class="mt-1 text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100 tracking-tight"
-      >
-        Set your password
-      </h1>
-      <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-        You signed in with a temporary password. Choose a new password to continue.
-      </p>
-    </div>
+  <AuthShell
+    panel-eyebrow="Welcome to the team"
+    panel-title="Make your account yours"
+    panel-description="Your manager gave you a temporary password. Choose your own before you start."
+    :steps="staffSteps"
+    :active-step="0"
+    steps-label="Getting started as staff"
+  >
+    <AuthPageHeader
+      title="Set your password"
+      subtitle="You signed in with a temporary password. Choose a new one to continue."
+    />
 
-    <form
-      @submit.prevent="handleSubmit"
-      class="overflow-hidden rounded-sm bg-white dark:!bg-dashboard-card"
-    >
-      <div class="p-4 sm:p-6 space-y-4">
-        <div>
-          <label
-            for="current"
-            class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-            >Current (temporary) password</label
-          >
-          <input
-            id="current"
-            v-model="form.currentPassword"
-            :type="showCurrent ? 'text' : 'password'"
-            autocomplete="current-password"
-            required
-            class="w-full rounded-sm bg-white px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500/25 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder-gray-500"
-            placeholder="Enter temporary password"
-          />
-        </div>
-        <div>
-          <label for="new" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-            >New password</label
-          >
-          <input
-            id="new"
-            v-model="form.newPassword"
-            :type="showNew ? 'text' : 'password'"
-            autocomplete="new-password"
-            required
-            :minlength="PASSWORD_MIN_LENGTH"
-            class="w-full rounded-sm bg-white px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500/25 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder-gray-500"
-            placeholder="At least 12 characters, number and capital letter"
-          />
-          <p class="mt-1.5 text-[10px] text-gray-500 dark:text-gray-400 leading-snug">
-            At least {{ PASSWORD_MIN_LENGTH }} characters, one number, one uppercase letter.
-          </p>
-        </div>
-        <div>
-          <label
-            for="confirm"
-            class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-            >Confirm new password</label
-          >
-          <input
-            id="confirm"
-            v-model="form.confirmPassword"
-            :type="showConfirm ? 'text' : 'password'"
-            autocomplete="new-password"
-            required
-            class="w-full rounded-sm bg-white px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500/25 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder-gray-500"
-            placeholder="Confirm new password"
-          />
-        </div>
-        <div
-          v-if="errorMessage"
-          class="p-3 rounded-sm bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40"
+    <AuthCard>
+      <form class="auth-form" @submit.prevent="handleSubmit">
+        <AuthField
+          v-model="form.currentPassword"
+          input-id="current"
+          label="Temporary password"
+          autocomplete="current-password"
+          placeholder="The password you were given"
+          password-toggle
+          :icon="Lock"
+          required
+        />
+        <AuthField
+          v-model="form.newPassword"
+          input-id="new"
+          label="New password"
+          autocomplete="new-password"
+          placeholder="Choose a new password"
+          password-toggle
+          :icon="Lock"
+          :minlength="PASSWORD_MIN_LENGTH"
+          required
         >
-          <p class="text-xs text-red-600 dark:text-red-400">{{ errorMessage }}</p>
-        </div>
-        <Button
-          type="submit"
-          size="sm"
-          class="w-full !rounded-2xl"
+          <template #hint>
+            <AuthPasswordStrength :password="form.newPassword" />
+          </template>
+        </AuthField>
+        <AuthField
+          v-model="form.confirmPassword"
+          input-id="confirm"
+          label="Confirm new password"
+          autocomplete="new-password"
+          placeholder="Type it again"
+          password-toggle
+          :icon="Lock"
+          required
+        >
+          <template #hint>
+            <p v-if="passwordsDiffer" class="s-field__error" role="alert">Passwords do not match</p>
+          </template>
+        </AuthField>
+
+        <AuthAlert v-if="errorMessage" title="Couldn't update your password" :message="errorMessage" />
+
+        <AuthPrimaryButton
+          :label="isSubmitting ? 'Updating…' : 'Update password'"
+          :loading="isSubmitting"
           :disabled="
             isSubmitting ||
             !form.currentPassword ||
             !form.newPassword ||
-            form.newPassword !== form.confirmPassword ||
+            passwordsDiffer ||
             !isPasswordPolicyValid(form.newPassword)
           "
-        >
-          <span v-if="isSubmitting" class="flex items-center justify-center gap-2">
-            <svg
-              class="animate-spin h-4 w-4"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                class="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                stroke-width="4"
-              />
-              <path
-                class="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              />
-            </svg>
-            Updating...
-          </span>
-          <span v-else>Update password</span>
-        </Button>
-      </div>
-    </form>
-  </div>
+        />
+      </form>
+
+      <template #footer>
+        <button type="button" class="auth-link" @click="signOut">Sign out</button>
+      </template>
+    </AuthCard>
+  </AuthShell>
 </template>
 
 <script setup lang="ts">
+import { Lock } from '@lucide/vue'
+import AuthShell from '~/components/auth/AuthShell.vue'
+import AuthPageHeader from '~/components/auth/AuthPageHeader.vue'
+import AuthCard from '~/components/auth/AuthCard.vue'
+import AuthField from '~/components/auth/AuthField.vue'
+import AuthAlert from '~/components/auth/AuthAlert.vue'
+import AuthPrimaryButton from '~/components/auth/AuthPrimaryButton.vue'
+import AuthPasswordStrength from '~/components/auth/AuthPasswordStrength.vue'
 import {
   PASSWORD_MIN_LENGTH,
   isPasswordPolicyValid,
   getPasswordPolicyErrors,
 } from '~/utils/passwordPolicy'
 
-definePageMeta({ layout: 'dashboard', middleware: ['auth'] })
+definePageMeta({ layout: false, middleware: ['auth'] })
+
+useHead({ title: 'Set your password - Storvv' })
+
+const staffSteps = [
+  { label: 'Set your own password' },
+  { label: 'Open your branch' },
+  { label: 'Start selling' },
+]
 
 const form = ref({ currentPassword: '', newPassword: '', confirmPassword: '' })
-const showCurrent = ref(false)
-const showNew = ref(false)
-const showConfirm = ref(false)
+const passwordsDiffer = computed(
+  () => !!form.value.confirmPassword && form.value.newPassword !== form.value.confirmPassword
+)
 const isSubmitting = ref(false)
 const errorMessage = ref('')
 
@@ -151,6 +125,11 @@ onMounted(() => {
     navigateTo('/dashboard')
   }
 })
+
+async function signOut() {
+  await useFirebaseAuth().signOut()
+  await navigateTo('/signin')
+}
 
 const handleSubmit = async () => {
   if (form.value.newPassword !== form.value.confirmPassword) {

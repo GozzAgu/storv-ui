@@ -1,13 +1,11 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import tailwindcss from '@tailwindcss/vite'
 import { CAPACITOR_SHELL_INLINE_SCRIPT } from './utils/capacitor-shell-inline'
 
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: process.env.NODE_ENV === 'development' },
-  modules: ['@nuxt/ui', '@pinia/nuxt'],
-  ui: {
-    fonts: false,
-  },
+  modules: ['@pinia/nuxt'],
   css: ['~/assets/css/main.css'],
   // Optimize CSS loading to prevent FOUC
   experimental: {
@@ -26,6 +24,7 @@ export default defineNuxtConfig({
     },
   },
   vite: {
+    plugins: [tailwindcss()],
     css: {
       devSourcemap: false,
     },
@@ -40,7 +39,6 @@ export default defineNuxtConfig({
             if (id.includes('jspdf')) return 'vendor-jspdf'
             if (id.includes('html5-qrcode')) return 'vendor-scanner'
             if (id.includes('html2canvas')) return 'vendor-html2canvas'
-            if (id.includes('@nuxt/ui') || id.includes('@headlessui')) return 'vendor-ui'
           },
         },
       },
@@ -151,11 +149,11 @@ export default defineNuxtConfig({
         {
           rel: 'icon',
           type: 'image/png',
-          href: '/storvv%20logo%20mobile.png',
+          href: '/brand/storvv-app-icon.png',
         },
         {
           rel: 'apple-touch-icon',
-          href: '/storvv%20logo%20mobile.png',
+          href: '/brand/storvv-app-icon.png',
         },
         {
           rel: 'preconnect',
@@ -168,7 +166,7 @@ export default defineNuxtConfig({
         },
         {
           rel: 'stylesheet',
-          href: 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Pixelify+Sans:wght@400;600&display=swap',
+          href: 'https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Pixelify+Sans:wght@400;600&display=swap',
           media: 'print',
           onload: 'this.media="all"',
         },

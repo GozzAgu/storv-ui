@@ -1,17 +1,20 @@
 <template>
-  <button
+  <SButton
     :type="type"
-    class="auth-primary-btn"
-    :disabled="disabled || loading"
-    :aria-busy="loading"
+    variant="primary"
+    size="lg"
+    block
+    :loading="loading"
+    :disabled="disabled"
     @click="$emit('click')"
   >
-    <span v-if="loading" class="auth-primary-btn__spinner" aria-hidden="true" />
-    <span :class="{ 'opacity-0': loading }">{{ label }}</span>
-  </button>
+    {{ label }}
+  </SButton>
 </template>
 
 <script setup lang="ts">
+import SButton from '~/components/s/SButton.vue'
+
 withDefaults(
   defineProps<{
     label: string

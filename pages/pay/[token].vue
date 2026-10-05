@@ -1,175 +1,113 @@
 <template>
-  <div
-    class="min-h-dvh bg-gradient-to-b from-gray-50 to-gray-100 px-4 py-8 dark:from-[#0b0d12] dark:to-[#070809] sm:py-12"
-  >
-    <div class="mx-auto w-full max-w-md">
-      <!-- Brand -->
-      <div class="mb-5 flex items-center justify-center gap-2">
-        <div
-          class="flex h-7 w-7 items-center justify-center rounded-md bg-gray-900 text-xs font-bold text-white dark:bg-white dark:text-gray-900"
-        >
-          S
-        </div>
-        <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">Storvv Checkout</span>
+  <div class="ds-root s-c s-pay">
+    <main class="s-pay__inner">
+      <div class="s-pay__brand">
+        <span class="s-pay__brand-mark" aria-hidden="true">S</span>
+        <span class="s-pay__brand-name">Storvv Checkout</span>
       </div>
 
-      <!-- Loading -->
-      <div
-        v-if="loading"
-        class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 dark:bg-[#12151c] dark:ring-white/[0.06]"
-      >
-        <div class="space-y-3">
-          <div class="h-5 w-1/2 animate-pulse rounded bg-gray-100 dark:bg-white/[0.06]" />
-          <div class="h-20 animate-pulse rounded bg-gray-100 dark:bg-white/[0.06]" />
-          <div class="h-10 animate-pulse rounded bg-gray-100 dark:bg-white/[0.06]" />
+      <div v-if="loading" class="s-pay__card s-pay__card--padded" aria-busy="true">
+        <div class="s-pay__loading">
+          <SSkeleton width="50%" height="20px" />
+          <SSkeleton height="80px" />
+          <SSkeleton height="40px" />
         </div>
-        <p v-if="verifying" class="mt-3 text-center text-xs text-gray-400">
+        <p v-if="verifying" class="s-pay__status" role="status">
+          <SSpinner :size="14" />
           Confirming your payment…
         </p>
       </div>
 
-      <!-- Not found / expired -->
-      <div
-        v-else-if="!invoice || invoice.status === 'expired'"
-        class="rounded-2xl bg-white p-8 text-center shadow-sm ring-1 ring-gray-200 dark:bg-[#12151c] dark:ring-white/[0.06]"
-      >
-        <ExclamationTriangleIcon class="mx-auto mb-3 h-10 w-10 text-amber-500" />
-        <h1 class="text-base font-semibold text-gray-900 dark:text-gray-50">
-          {{ invoice?.status === 'expired' ? 'Link expired' : 'Link not found' }}
-        </h1>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          {{
+      <div v-else-if="!invoice || invoice.status === 'expired'" class="s-pay__card">
+        <SEmptyState
+          :title="invoice?.status === 'expired' ? 'Link expired' : 'Link not found'"
+          :description="
             invoice?.status === 'expired'
               ? 'This payment link is no longer active.'
               : 'This payment link is invalid or has expired.'
-          }}
-        </p>
+          "
+        >
+          <template #icon><TriangleAlert :size="24" :stroke-width="1.75" /></template>
+        </SEmptyState>
       </div>
 
-      <!-- Paid (success) -->
-      <div
-        v-else-if="invoice.status === 'paid'"
-        class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 dark:bg-[#12151c] dark:ring-white/[0.06]"
-      >
-        <div class="bg-emerald-50 px-6 py-7 text-center dark:bg-emerald-500/[0.08]">
-          <div
-            class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500 text-white"
-          >
-            <CheckIcon class="h-7 w-7" stroke-width="2.5" />
-          </div>
-          <h1 class="text-lg font-semibold text-gray-900 dark:text-gray-50">Payment successful</h1>
-          <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">
+      <div v-else-if="invoice.status === 'paid'" class="s-pay__card">
+        <div class="s-pay__success">
+          <span class="s-pay__success-icon" aria-hidden="true">
+            <Check :size="28" :stroke-width="2.5" />
+          </span>
+          <h1 class="s-pay__success-title">Payment successful</h1>
+          <p class="s-pay__success-text">
             {{ formatNaira(invoice.total) }} paid to {{ invoice.businessName }}
           </p>
         </div>
-        <div class="space-y-2 px-6 py-5 text-sm">
-          <div class="flex justify-between">
-            <span class="text-gray-500 dark:text-gray-400">Invoice</span
-            ><span class="font-medium text-gray-900 dark:text-gray-100">{{
-              invoice.invoiceNumber
-            }}</span>
+        <dl class="s-pay__details">
+          <div class="s-pay__detail">
+            <dt>Invoice</dt>
+            <dd>{{ invoice.invoiceNumber }}</dd>
           </div>
-          <div v-if="invoice.reference" class="flex justify-between">
-            <span class="text-gray-500 dark:text-gray-400">Reference</span
-            ><span class="font-medium tabular-nums text-gray-900 dark:text-gray-100">{{
-              invoice.reference
-            }}</span>
+          <div v-if="invoice.reference" class="s-pay__detail">
+            <dt>Reference</dt>
+            <dd class="s-pay__num">{{ invoice.reference }}</dd>
           </div>
-          <div v-if="invoice.channel" class="flex justify-between">
-            <span class="text-gray-500 dark:text-gray-400">Paid via</span
-            ><span class="font-medium capitalize text-gray-900 dark:text-gray-100">{{
-              invoice.channel.replace('_', ' ')
-            }}</span>
+          <div v-if="invoice.channel" class="s-pay__detail">
+            <dt>Paid via</dt>
+            <dd class="s-pay__capitalize">{{ invoice.channel.replace('_', ' ') }}</dd>
           </div>
-        </div>
+        </dl>
       </div>
 
-      <!-- Checkout (unpaid) -->
-      <div
-        v-else
-        class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 dark:bg-[#12151c] dark:ring-white/[0.06]"
-      >
-        <div class="border-b border-gray-100 px-6 py-5 dark:border-white/[0.06]">
-          <p class="text-[11px] font-medium uppercase tracking-wide text-gray-400">
-            Pay {{ invoice.businessName }}
-          </p>
-          <p class="mt-1 text-2xl font-semibold tabular-nums text-gray-900 dark:text-gray-50">
-            {{ formatNaira(invoice.total) }}
-          </p>
-          <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-            {{ invoice.invoiceNumber }} · for {{ invoice.customerName }}
-          </p>
+      <div v-else class="s-pay__card">
+        <div class="s-pay__summary">
+          <p class="s-pay__payee">Pay {{ invoice.businessName }}</p>
+          <p class="s-pay__amount">{{ formatNaira(invoice.total) }}</p>
+          <p class="s-pay__meta">{{ invoice.invoiceNumber }} · for {{ invoice.customerName }}</p>
         </div>
 
-        <ul class="divide-y divide-gray-50 px-6 dark:divide-white/[0.04]">
-          <li
-            v-for="(it, idx) in invoice.items"
-            :key="idx"
-            class="flex items-center justify-between py-3 text-sm"
-          >
-            <span class="text-gray-700 dark:text-gray-200"
-              >{{ it.name }} <span class="text-gray-400">× {{ it.quantity }}</span></span
-            >
-            <span class="tabular-nums text-gray-900 dark:text-gray-100">{{
-              formatNaira(it.unitPrice * it.quantity)
-            }}</span>
+        <ul class="s-pay__items">
+          <li v-for="(it, idx) in invoice.items" :key="idx" class="s-pay__item">
+            <span class="s-pay__item-name">
+              {{ it.name }} <span class="s-pay__item-qty">× {{ it.quantity }}</span>
+            </span>
+            <span class="s-pay__num">{{ formatNaira(it.unitPrice * it.quantity) }}</span>
           </li>
         </ul>
 
-        <div class="space-y-3 px-6 py-5">
-          <div
-            v-if="paymentFailed"
-            class="flex items-start gap-2 rounded-lg bg-red-50 px-3 py-2.5 text-xs text-red-700 dark:bg-red-500/10 dark:text-red-300"
-          >
-            <ExclamationTriangleIcon class="mt-0.5 h-4 w-4 shrink-0" />
+        <form class="s-pay__form" @submit.prevent="pay">
+          <p v-if="paymentFailed" class="s-pay__alert" role="alert">
+            <TriangleAlert :size="16" :stroke-width="1.75" aria-hidden="true" />
             <span>Your last payment didn't go through. Please try again.</span>
-          </div>
-          <div>
-            <label class="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-400"
-              >Email (for your receipt)</label
-            >
-            <input
-              v-model="email"
-              type="email"
-              placeholder="you@example.com"
-              class="w-full rounded-lg bg-white px-3 py-2 text-sm text-gray-900 ring-1 ring-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-400/40 dark:bg-white/[0.04] dark:text-gray-100 dark:ring-white/10"
-            />
-          </div>
-          <button
-            type="button"
-            class="btn-primary w-full justify-center py-2.5"
-            :disabled="!canPay || processing"
-            @click="pay"
-          >
-            <span v-if="processing" class="flex items-center gap-2">
-              <span
-                class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"
-              />
-              Redirecting…
-            </span>
-            <span v-else>Pay {{ formatNaira(invoice.total) }}</span>
-          </button>
-          <p v-if="payError" class="text-center text-xs font-medium text-red-500">{{ payError }}</p>
-        </div>
+          </p>
+          <SInput
+            v-model="email"
+            type="email"
+            label="Email (for your receipt)"
+            placeholder="you@example.com"
+            autocomplete="email"
+          />
+          <SButton type="submit" variant="primary" size="lg" block :loading="processing" :disabled="!canPay">
+            {{ processing ? 'Redirecting…' : `Pay ${formatNaira(invoice.total)}` }}
+          </SButton>
+          <p v-if="payError" class="s-pay__error" role="alert">{{ payError }}</p>
+        </form>
 
-        <div
-          class="flex items-center justify-center gap-1.5 border-t border-gray-100 px-6 py-3 dark:border-white/[0.06]"
-        >
-          <LockClosedIcon class="h-3.5 w-3.5 text-gray-400" />
-          <span class="text-[11px] text-gray-400">Secured by Paystack · No account needed</span>
-        </div>
+        <p class="s-pay__foot">
+          <Lock :size="14" :stroke-width="2" aria-hidden="true" />
+          Secured by Paystack · No account needed
+        </p>
       </div>
-    </div>
+    </main>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import {
-  CheckIcon,
-  LockClosedIcon,
-  ExclamationTriangleIcon,
-} from '~/utils/app-icons'
+import { Check, Lock, TriangleAlert } from '@lucide/vue'
+import SButton from '~/components/s/SButton.vue'
+import SEmptyState from '~/components/s/SEmptyState.vue'
+import SInput from '~/components/s/SInput.vue'
+import SSkeleton from '~/components/s/SSkeleton.vue'
+import SSpinner from '~/components/s/SSpinner.vue'
 import { formatNaira } from '~/utils/naira'
 
 definePageMeta({ layout: false })

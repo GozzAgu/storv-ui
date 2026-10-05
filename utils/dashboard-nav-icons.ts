@@ -20,6 +20,7 @@ import {
   Store,
   ShoppingBag,
   UserPlus,
+  UsersRound,
 } from '@lucide/vue'
 
 export type DashboardNavIconKey =
@@ -31,6 +32,7 @@ export type DashboardNavIconKey =
   | 'payment-links'
   | 'storefront'
   | 'sales-leads'
+  | 'customers'
   | 'departments'
   | 'analytics'
   | 'activity'
@@ -56,6 +58,7 @@ export const DASHBOARD_NAV_ICONS: Record<DashboardNavIconKey, Component> = {
   storefront: ShoppingBag,
   // Distinct from `profile` below - a prospective customer, not the signed-in user.
   'sales-leads': UserPlus,
+  customers: UsersRound,
   departments: Building2,
   analytics: ChartNoAxesColumnIncreasing,
   // The conventional "history" glyph reads as an audit trail more instantly than a scroll.

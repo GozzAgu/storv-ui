@@ -1,39 +1,34 @@
 <template>
-  <div class="min-w-0">
-    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-      Unit cost
-      <span v-if="optionalHint" class="font-normal text-gray-500 dark:text-gray-400">
-        (what you paid)
-      </span>
+  <div class="s-c s-field">
+    <label class="s-field__label" :for="inputId">
+      Unit cost<span v-if="optionalHint" class="s-field__optional">(what you paid)</span>
     </label>
-    <div class="relative">
-      <span
-        class="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400"
-      >
-        {{ currencySymbol }}
-      </span>
+    <div class="s-control">
+      <span class="s-control__affix">{{ currencySymbol }}</span>
       <input
+        :id="inputId"
         :value="modelValue ?? ''"
         type="number"
+        inputmode="decimal"
         step="0.01"
         min="0"
-        :class="inputClass"
+        class="s-control__input"
         placeholder="0.00"
+        :aria-describedby="marginPreview !== null && showMarginPreview ? previewId : undefined"
         @input="onInput"
       />
     </div>
-    <p v-if="marginPreview !== null && showMarginPreview" class="mt-1 text-[10px] tabular-nums text-emerald-700 dark:text-emerald-400/90">
+    <p v-if="marginPreview !== null && showMarginPreview" :id="previewId" class="s-profit-hint">
       Est. margin {{ marginPreview }}
     </p>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, useId } from 'vue'
 import { formatMarginPercent, getItemGrossProfit, getItemSellPrice } from '~/utils/inventory-item-cost'
 import type { InventoryItem } from '~/stores/inventory'
 import { usePermissions } from '~/composables/usePermissions'
-import { APP_FIELD_ON_WHITE_CLASS } from '~/utils/app-chrome'
 
 const props = withDefaults(
   defineProps<{
@@ -57,7 +52,8 @@ const emit = defineEmits<{
 const { currencySymbol } = usePreferences()
 const { canViewProfitAndCost } = usePermissions()
 const showMarginPreview = computed(() => canViewProfitAndCost.value)
-const inputClass = `${APP_FIELD_ON_WHITE_CLASS} !pl-7`
+const inputId = `unit-cost-${useId()}`
+const previewId = `${inputId}-margin`
 
 const marginPreview = computed(() => {
   const cost = props.modelValue

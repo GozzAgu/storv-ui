@@ -1,54 +1,36 @@
 <template>
-  <div class="mt-4 flex w-full max-w-md flex-col items-center gap-3">
-    <p class="text-xs text-gray-500 dark:text-gray-400">
-      {{ stores.length === 0 ? 'No stores yet' : 'Choose a store to continue' }}
-    </p>
-
-    <div
-      v-if="loading"
-      class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400"
-    >
-      <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-        <path
-          class="opacity-75"
-          fill="currentColor"
-          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-        />
-      </svg>
+  <div class="s-store-picker">
+    <div v-if="loading" class="s-store-picker__status" role="status">
+      <SSpinner :size="16" />
       Loading stores…
     </div>
 
-    <div v-else-if="stores.length === 0" class="text-center">
-      <NuxtLink
-        to="/dashboard/settings"
-        class="text-xs font-medium text-primary-700 hover:underline dark:text-primary-300"
-      >
-        Add your first store in Settings
-      </NuxtLink>
-    </div>
+    <SButton v-else-if="stores.length === 0" variant="primary" to="/dashboard/branches">
+      Add your first store
+    </SButton>
 
-    <div v-else class="flex w-full flex-wrap justify-center gap-2">
-      <button
+    <div v-else class="s-store-picker__list" role="group" aria-label="Choose a store">
+      <SButton
         v-for="store in stores"
         :key="store.id"
-        type="button"
-        class="inline-flex min-h-9 items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-800 transition-colors hover:border-primary-400 hover:bg-primary-50/60 disabled:cursor-wait disabled:opacity-60 dark:border-white/10 dark:bg-white/5 dark:text-gray-100 dark:hover:border-primary-500/40 dark:hover:bg-primary-500/10"
-        :disabled="switchingStoreId === store.id"
+        :loading="switchingStoreId === store.id"
+        :disabled="!!switchingStoreId && switchingStoreId !== store.id"
         @click="selectStore(store.id)"
       >
-        <BuildingStorefrontIcon class="h-3.5 w-3.5 shrink-0 opacity-70" stroke-width="1.6" />
-        <span class="truncate max-w-[10rem]">
-          {{ switchingStoreId === store.id ? 'Switching…' : storePrimaryLabel(store) }}
-        </span>
-      </button>
+        <template v-if="switchingStoreId !== store.id" #leading>
+          <Store :size="16" :stroke-width="1.75" aria-hidden="true" />
+        </template>
+        <span class="s-store-picker__name">{{ storePrimaryLabel(store) }}</span>
+      </SButton>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { BuildingStorefrontIcon } from '~/utils/app-icons'
+import { Store } from '@lucide/vue'
+import SButton from '~/components/s/SButton.vue'
+import SSpinner from '~/components/s/SSpinner.vue'
 import { useStoresStore } from '~/stores/stores'
 import { useUserStore } from '~/stores/user'
 import { useAppToast } from '~/composables/useAppToast'

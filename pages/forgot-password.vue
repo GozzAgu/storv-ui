@@ -1,8 +1,11 @@
 <template>
   <AuthShell
-    mobile-line="Password help: we'll email you a secure reset link."
-    panel-title="Back to work, without the lockout stress."
-    panel-description="Request a reset link and choose a new password. Your store data stays safe, and you keep the same workspace."
+    panel-eyebrow="Account recovery"
+    panel-title="Back to work in minutes"
+    panel-description="Your store data stays safe, and you keep the same workspace."
+    :steps="recoverySteps"
+    :active-step="emailSent ? 1 : 0"
+    steps-label="Resetting your password"
   >
     <AuthPageHeader
       title="Forgot password?"
@@ -28,30 +31,29 @@
         <AuthPrimaryButton label="Send reset link" :loading="isLoading" :disabled="isLoading" />
       </form>
 
-      <div v-else class="space-y-5">
+      <div v-else class="s-auth-body">
         <AuthSuccessPanel :icon="CheckCircleIcon">
           <template #title>Check your email</template>
           We've sent a password reset link to
-          <span class="font-medium text-gray-900 dark:text-gray-100">{{ form.email }}</span
-          >.
+          <strong>{{ form.email }}</strong>.
         </AuthSuccessPanel>
 
-        <p class="text-center text-sm text-gray-500 dark:text-gray-400">
+        <p class="auth-auth-footer-link">
           Didn't receive it? Check spam or
           <button
             type="button"
-            class="auth-link disabled:opacity-50"
+            class="auth-link"
             :disabled="isResending"
             @click="resendEmail"
           >
-            {{ isResending ? 'Resending...' : 'Resend email' }}
+            {{ isResending ? 'Resending…' : 'Resend email' }}
           </button>
         </p>
       </div>
 
       <p class="auth-auth-footer-link">
         Remembered it?
-        <NuxtLink to="/signin">Log In</NuxtLink>
+        <NuxtLink to="/signin">Sign in</NuxtLink>
       </p>
     </AuthCard>
   </AuthShell>
@@ -76,6 +78,12 @@ definePageMeta({
 const form = ref({
   email: '',
 })
+
+const recoverySteps = [
+  { label: 'Enter your email' },
+  { label: 'Open the reset link' },
+  { label: 'Choose a new password' },
+]
 
 const emailSent = ref(false)
 const isLoading = ref(false)

@@ -1,279 +1,187 @@
 <template>
-  <div :class="[pageWithFixedFooterClass, 'dash-page--unified']">
-    <div v-if="isCapacitorIos" class="ios-sales-shell" data-buybacks-page>
-      <IosPageNavBar title="Buybacks" />
-
-      <IosQuickActionBar
-        v-if="canAccess"
-        v-model="iosBuybackTab"
-        aria-label="Buyback actions"
-        :options="iosBuybackQuickActions"
-      />
-
-      <template v-if="canAccess && storesStore.currentStoreId">
-        <IosTransactionListSkeleton
-          v-if="buybacksStore.loading && buybacksStore.buybacks.length === 0"
-          :count="8"
-        />
-
-        <DashboardTableEmptyState
-          v-else-if="buybacksStore.error"
-          :icon="InboxArrowDownIcon"
-          title="Could not load buybacks"
-          :description="buybacksStore.error"
-        />
-
-        <DashboardTableEmptyState
-          v-else-if="buybacksStore.buybacks.length === 0"
-          :icon="InboxArrowDownIcon"
-          title="No buybacks yet"
-          description="Record customer trade-ins here to add stock and track what you paid."
-        >
-          <button
-            type="button"
-            class="rounded-lg bg-primary-600 px-3 py-1.5 text-xs font-semibold text-white"
-            @click="showCreateModal = true"
-          >
-            Record buyback
-          </button>
-        </DashboardTableEmptyState>
-
-        <div v-else class="ios-receipt-transaction-list">
-          <IosReceiptTransactionRow
-            v-for="(row, index) in buybacksStore.buybacks"
-            :key="row.id"
-            :title="row.customerName"
-            :subtitle="`${row.itemSummary} · ${folderName(row.folderId)}`"
-            :amount="formatBuybackAmount(row.purchasePrice)"
-            amount-tone="negative"
-            :date="formatWhenShort(row.createdAt)"
-            variant="debit"
-            :last="index === buybacksStore.buybacks.length - 1"
-            show-menu
-            menu-kind="buyback"
-            :menu-id="row.id"
-            @click="navigateTo(inventoryItemLink(row))"
-            @menu="toggleBuybackMenu(row.id)"
-          />
-        </div>
+  <div class="ds-root s-c s-page">
+    <SPageHeader title="Buybacks">
+      <template #description>
+        Items you've bought back from customers. Each one goes into stock at what you paid.
       </template>
-
-      <DashboardTableEmptyState
-        v-else-if="canAccess && !storesStore.currentStoreId"
-        :icon="BuildingStorefrontIcon"
-        title="Select a store"
-        description="Use the store selector to record buybacks for a branch."
-      />
-    </div>
-
-    <template v-else>
-    <DashboardPageHeader class="dash-page-header--unified">
-      <template #eyebrow>
-        <p :class="eyebrowClass">Inventory</p>
-      </template>
-      <template #title>
-        <h1 :class="pageTitleClass">Customer buybacks</h1>
-      </template>
-      <template
-        v-if="canAccess && buybacksStore.loading && buybacksStore.buybacks.length === 0"
-        #description
-      >
-        <DashPageMetricsSkeleton :count="2" />
-      </template>
-      <template
-        v-else-if="canAccess && !buybacksStore.loading && buybacksStore.buybacks.length > 0"
-        #description
-      >
-        <DashboardPageMetrics :metrics="buybackHeaderMetrics" aria-label="Buyback summary" />
-      </template>
-      <template v-if="canAccess" #actions>
-        <Button
-          v-if="canAccess"
-          variant="primary"
-          size="sm"
-          :icon="ArrowUturnLeftIcon"
-          :extra-class="headerBtnClass"
-          @click="showCreateModal = true"
-        >
+      <template v-if="canAccess && storesStore.currentStoreId" #actions>
+        <SButton variant="primary" @click="showCreateModal = true">
+          <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
           Record buyback
-        </Button>
+        </SButton>
       </template>
-    </DashboardPageHeader>
+    </SPageHeader>
 
-    <div
-      v-if="!canAccess"
-      class="rounded-sm bg-red-50/90 px-4 py-4 dark:bg-red-950/25 sm:px-5 sm:py-5"
-    >
-      <p class="text-xs font-medium text-red-800 dark:text-red-200">
-        Customer buybacks are not enabled for your account. Ask your store owner to grant access.
-      </p>
-    </div>
+    <SCard v-if="!canAccess">
+      <SEmptyState
+        title="You don't have access to buybacks"
+        description="Ask the account owner to give you access to customer buybacks."
+      >
+        <template #icon><Lock :size="24" :stroke-width="1.75" /></template>
+      </SEmptyState>
+    </SCard>
+
+    <SCard v-else-if="!storesStore.currentStoreId && !buybacksStore.loading">
+      <SEmptyState
+        title="Choose a branch"
+        description="Buybacks are kept per branch. Pick one from the branch switcher to see its buybacks."
+      >
+        <template #icon><Store :size="24" :stroke-width="1.75" /></template>
+      </SEmptyState>
+    </SCard>
+
+    <SCard v-else-if="buybacksStore.loading && buybacksStore.buybacks.length === 0" flush aria-busy="true">
+      <ul class="s-list" aria-label="Loading buybacks">
+        <li v-for="i in 6" :key="i" class="s-list__item" aria-hidden="true">
+          <div class="s-list__main">
+            <SSkeleton width="40%" height="14px" />
+            <SSkeleton width="25%" height="12px" />
+          </div>
+          <SSkeleton width="72px" height="14px" />
+        </li>
+      </ul>
+    </SCard>
+
+    <SCard v-else-if="buybacksStore.error">
+      <SEmptyState title="Couldn't load buybacks" :description="buybacksStore.error">
+        <template #icon><TriangleAlert :size="24" :stroke-width="1.75" /></template>
+        <template #actions>
+          <SButton @click="buybacksStore.fetchCustomerBuybacks(true)">Try again</SButton>
+        </template>
+      </SEmptyState>
+    </SCard>
+
+    <SCard v-else-if="buybacksStore.buybacks.length === 0">
+      <SEmptyState
+        title="No buybacks yet"
+        description="When a customer sells you an item, record it here. It's added to stock in the category you choose, at the price you paid."
+      >
+        <template #icon><Undo2 :size="24" :stroke-width="1.75" /></template>
+        <template #actions>
+          <SButton variant="primary" @click="showCreateModal = true">
+            <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
+            Record buyback
+          </SButton>
+        </template>
+      </SEmptyState>
+    </SCard>
 
     <template v-else>
-      <div
-        v-if="!storesStore.currentStoreId && !buybacksStore.loading"
-        :class="tableShellFlexClass"
-      >
-        <DashboardTableEmptyState
-          :icon="BuildingStorefrontIcon"
-          title="Select a store"
-          description="Use the store selector in the top bar to record buybacks for a branch."
-          :tips="['Buybacks are tracked per store', 'Items appear in the category you choose']"
+      <dl class="s-metrics">
+        <div class="s-metrics__item">
+          <dt class="s-metrics__label">Buybacks</dt>
+          <dd class="s-metrics__value">{{ buybacksStore.buybacks.length }}</dd>
+        </div>
+        <div class="s-metrics__item">
+          <dt class="s-metrics__label">Total paid</dt>
+          <dd class="s-metrics__value">{{ formatCurrency(totalPaid) }}</dd>
+        </div>
+      </dl>
+
+      <div class="s-toolbar">
+        <SSearch
+          v-model="searchQuery"
+          class="s-toolbar__search"
+          placeholder="Search buybacks"
+          label="Search buybacks by customer, phone or item"
         />
       </div>
 
-      <div v-else :class="tableShellFlexClass">
-          <DashTableSkeleton
-            v-if="buybacksStore.loading && buybacksStore.buybacks.length === 0"
-            :columns="[
-              { label: 'Customer', lines: 2 },
-              { label: 'Item', lines: 2 },
-              { label: 'Paid', bone: '4.5rem' },
-              { label: 'Method', bone: '4.5rem' },
-              { label: 'Date', bone: '5.5rem' },
-              { label: 'Actions', class: 'dashboard-table__col-actions', bone: '1.5rem' },
-            ]"
-            :rows="8"
-            leading="none"
-            flush
-            aria-label="Loading buybacks"
-          />
+      <SCard v-if="filteredBuybacks.length === 0">
+        <SEmptyState title="No buybacks found" description="Try another customer name, phone number or item.">
+          <template #icon><SearchX :size="24" :stroke-width="1.75" /></template>
+          <template #actions>
+            <SButton @click="searchQuery = ''">Clear search</SButton>
+          </template>
+        </SEmptyState>
+      </SCard>
 
-          <div v-else-if="buybacksStore.error" class="px-4 py-10 text-center sm:px-6">
-            <p class="text-sm font-medium text-red-600 dark:text-red-400">
-              Could not load buybacks.
-            </p>
-            <p class="mx-auto mt-1 max-w-sm text-xs text-gray-500 dark:text-gray-400">
-              {{ buybacksStore.error }}
-            </p>
-          </div>
+      <template v-else>
+        <!-- Phone -->
+        <SCard flush class="s-only-sm">
+          <ul class="s-list">
+            <li v-for="row in paginatedBuybacks" :key="row.id">
+              <NuxtLink :to="inventoryItemLink(row)" class="s-list__item s-list__item--interactive">
+                <span class="s-list__main">
+                  <span class="s-list__primary">{{ row.itemSummary }}</span>
+                  <span class="s-list__secondary">{{ row.customerName }} · {{ formatDay(row.createdAt) }}</span>
+                </span>
+                <span class="s-list__end">
+                  <span class="s-list__value">{{ formatCurrency(row.purchasePrice) }}</span>
+                </span>
+              </NuxtLink>
+            </li>
+          </ul>
+        </SCard>
 
-          <DashboardTableEmptyState
-            v-else-if="buybacksStore.buybacks.length === 0"
-            :icon="InboxArrowDownIcon"
-            title="No buybacks yet"
-            description="When customers sell items to your store, record them here to add stock and track what you paid."
-            :tips="[
-              'Items go into the inventory category you pick',
-              'Use swap-in on a receipt when trade-in credit applies to a sale',
-            ]"
-          >
-            <Button variant="primary" size="sm" @click="showCreateModal = true">
-              Record buyback
-            </Button>
-          </DashboardTableEmptyState>
+        <!-- Tablet and desktop -->
+        <div class="s-table-wrap s-hide-sm">
+          <table class="s-table">
+            <thead>
+              <tr>
+                <th scope="col">Item</th>
+                <th scope="col">Customer</th>
+                <th scope="col" class="s-table__num">Paid</th>
+                <th scope="col" class="s-hide-md">Method</th>
+                <th scope="col">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="row in paginatedBuybacks" :key="row.id">
+                <td>
+                  <NuxtLink :to="inventoryItemLink(row)" class="s-table__primary s-link">
+                    {{ row.itemSummary }}
+                  </NuxtLink>
+                  <span class="s-table__secondary">{{ folderName(row.folderId) }}</span>
+                </td>
+                <td>
+                  <span class="s-table__primary">{{ row.customerName }}</span>
+                  <span v-if="row.customerPhone" class="s-table__secondary">{{ row.customerPhone }}</span>
+                </td>
+                <td class="s-table__num">{{ formatCurrency(row.purchasePrice) }}</td>
+                <td class="s-hide-md">{{ row.paymentMethod || EMPTY_CELL }}</td>
+                <td class="s-table__nowrap">{{ formatDay(row.createdAt) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-          <div v-else class="overflow-x-auto">
-            <table class="dashboard-table min-w-full">
-              <thead>
-                <tr>
-                  <th scope="col">Customer</th>
-                  <th scope="col">Item</th>
-                  <th scope="col">Paid</th>
-                  <th scope="col">Method</th>
-                  <th scope="col">Date</th>
-                  <th scope="col" class="dashboard-table__col-actions">
-                    <span class="sr-only">Actions</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="row in buybacksStore.buybacks" :key="row.id">
-                  <td class="max-w-[14rem]">
-                    <span class="dashboard-table__primary block truncate">
-                      {{ row.customerName }}
-                    </span>
-                    <span
-                      v-if="row.customerPhone"
-                      class="dashboard-table__muted mt-0.5 block truncate text-[10px]"
-                    >
-                      {{ row.customerPhone }}
-                    </span>
-                  </td>
-                  <td class="max-w-[16rem]">
-                    <span class="dashboard-table__primary block truncate">
-                      {{ row.itemSummary }}
-                    </span>
-                    <span class="dashboard-table__muted mt-0.5 block truncate text-[10px]">
-                      {{ folderName(row.folderId) }}
-                    </span>
-                  </td>
-                  <td class="whitespace-nowrap tabular-nums">
-                    {{ formatCurrency(row.purchasePrice) }}
-                  </td>
-                  <td class="whitespace-nowrap">{{ row.paymentMethod }}</td>
-                  <td class="whitespace-nowrap text-[11px] text-gray-500 dark:text-gray-400">
-                    {{ formatWhen(row.createdAt) }}
-                  </td>
-                  <td class="dashboard-table__col-actions">
-                    <button
-                      type="button"
-                      class="dashboard-table__action-btn"
-                      :data-buyback-actions-anchor="row.id"
-                      aria-label="Buyback actions"
-                      @click="toggleBuybackMenu(row.id)"
-                    >
-                      <EllipsisVerticalIcon class="h-4 w-4" stroke-width="2" />
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-      </div>
-    </template>
+        <SPagination
+          :current-page="currentPage"
+          :page-size="PAGE_SIZE"
+          :total="filteredBuybacks.length"
+          label="Buybacks pagination"
+          @page-change="(page) => (currentPage = page)"
+        />
+      </template>
     </template>
 
     <CreateBuybackModal v-model="showCreateModal" />
-
-    <IosContextMenu
-      :open="Boolean(openBuybackMenuId && buybackForOpenMenu && buybackMenuFixedStyle)"
-      :style="buybackMenuFixedStyle"
-      menu-id="buyback"
-    >
-      <IosContextMenuItem
-        label="View in stock"
-        :icon="BuildingStorefrontIcon"
-        @click="
-          () => {
-            navigateTo(inventoryItemLink(buybackForOpenMenu))
-            closeBuybackMenu()
-          }
-        "
-      />
-    </IosContextMenu>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import {
-  ArrowUturnLeftIcon,
-  BuildingStorefrontIcon,
-  EllipsisVerticalIcon,
-  InboxArrowDownIcon,
-} from '~/utils/app-icons'
-import Button from '~/components/ui/Button.vue'
-import IosContextMenu from '~/components/ios/IosContextMenu.vue'
-import IosContextMenuItem from '~/components/ios/IosContextMenuItem.vue'
-import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
-import IosQuickActionBar, { type IosQuickActionOption } from '~/components/ios/IosQuickActionBar.vue'
-import IosTransactionListSkeleton from '~/components/ios/IosTransactionListSkeleton.vue'
-import IosReceiptTransactionRow from '~/components/ios/IosReceiptTransactionRow.vue'
+import { Lock, Plus, SearchX, Store, TriangleAlert, Undo2 } from '@lucide/vue'
+import SButton from '~/components/s/SButton.vue'
+import SCard from '~/components/s/SCard.vue'
+import SEmptyState from '~/components/s/SEmptyState.vue'
+import SPageHeader from '~/components/s/SPageHeader.vue'
+import SPagination from '~/components/s/SPagination.vue'
+import SSearch from '~/components/s/SSearch.vue'
+import SSkeleton from '~/components/s/SSkeleton.vue'
 import CreateBuybackModal from '~/components/buybacks/CreateBuybackModal.vue'
 import { useCustomerBuybacksStore, type CustomerBuyback } from '~/stores/customerBuybacks'
 import { useInventoryStore } from '~/stores/inventory'
 import { useStoresStore } from '~/stores/stores'
 import { usePreferences } from '~/composables/usePreferences'
+import { EMPTY_CELL } from '~/utils/ui-empty'
 
 definePageMeta({
   layout: 'dashboard',
 })
 
-const { eyebrowClass, pageTitleClass, headerBtnClass, pageWithFixedFooterClass } =
-  useDashboardPageChrome()
-const { tableShellFlexClass } = useDashboardTableChrome()
-const { isCapacitorIos } = useIsCapacitorIos()
+const PAGE_SIZE = 50
 
 const buybacksStore = useCustomerBuybacksStore()
 const inventoryStore = useInventoryStore()
@@ -283,81 +191,44 @@ const { can } = usePermissions()
 
 const canAccess = computed(() => can('buybacks', 'view'))
 
-const buybackHeaderMetrics = computed(() => {
-  const rows = buybacksStore.buybacks
-  const totalPaid = rows.reduce((sum, row) => sum + (row.purchasePrice ?? 0), 0)
-  return [
-    {
-      key: 'count',
-      label: 'Buybacks',
-      value: String(rows.length),
-    },
-    {
-      key: 'paid',
-      label: 'Total paid',
-      value: formatCurrency(totalPaid),
-    },
-  ]
+const totalPaid = computed(() =>
+  buybacksStore.buybacks.reduce((sum, row) => sum + (row.purchasePrice ?? 0), 0)
+)
+
+const searchQuery = ref('')
+const currentPage = ref(1)
+
+const filteredBuybacks = computed(() => {
+  const q = searchQuery.value.trim().toLowerCase()
+  if (!q) return buybacksStore.buybacks
+  return buybacksStore.buybacks.filter((row) =>
+    [row.customerName, row.customerPhone, row.itemSummary].some((value) =>
+      value?.toLowerCase().includes(q)
+    )
+  )
+})
+
+const paginatedBuybacks = computed(() => {
+  const start = (currentPage.value - 1) * PAGE_SIZE
+  return filteredBuybacks.value.slice(start, start + PAGE_SIZE)
+})
+
+watch(searchQuery, () => {
+  currentPage.value = 1
 })
 
 const showCreateModal = ref(false)
-
-const {
-  openMenuId: openBuybackMenuId,
-  menuFixedStyle: buybackMenuFixedStyle,
-  toggleMenu: toggleBuybackMenu,
-  closeMenu: closeBuybackMenu,
-} = useAnchoredRowMenu({
-  anchorAttr: 'data-buyback-actions-anchor',
-})
-
-const buybackForOpenMenu = computed(() => {
-  const id = openBuybackMenuId.value
-  if (!id) return null
-  return buybacksStore.buybacks.find((row) => row.id === id) ?? null
-})
-
-const iosBuybackTab = ref('list')
-
-const iosBuybackQuickActions = computed((): IosQuickActionOption[] => [
-  {
-    value: 'add',
-    label: 'Add buyback',
-    icon: ArrowUturnLeftIcon,
-    trailing: 'add',
-    action: () => {
-      showCreateModal.value = true
-    },
-  },
-  { value: 'list', label: 'Buybacks', icon: InboxArrowDownIcon },
-])
-
-function formatWhenShort(v: Date | undefined) {
-  if (!v) return ''
-  try {
-    const day = String(v.getDate()).padStart(2, '0')
-    const month = String(v.getMonth() + 1).padStart(2, '0')
-    const year = v.getFullYear()
-    return `${day}.${month}.${year}`
-  } catch {
-    return ''
-  }
-}
-
-function formatBuybackAmount(price: number) {
-  return formatCurrency(price).replace(/\.00$/, '')
-}
 
 function folderName(folderId: string) {
   return inventoryStore.getFolderById(folderId)?.name || 'Inventory'
 }
 
-function formatWhen(v: Date | undefined) {
-  if (!v) return '-'
+function formatDay(v: Date | undefined) {
+  if (!v) return EMPTY_CELL
   try {
-    return v.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
+    return v.toLocaleDateString(undefined, { dateStyle: 'medium' })
   } catch {
-    return '-'
+    return EMPTY_CELL
   }
 }
 

@@ -1,318 +1,402 @@
 <template>
   <ClientOnly>
-    <div
-      :class="[
-        'dashboard-page-with-footer flex w-full max-w-none flex-col min-h-[calc(100svh-4.5rem)]',
-        isCapacitorIos ? '' : 'gap-5 pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:gap-6 sm:pb-32',
-      ]"
-    >
+    <div class="ds-root s-c">
       <!-- Initial loading -->
       <template v-if="isInitialLoading">
-        <div v-if="isCapacitorIos" class="ios-sales-shell">
-          <div class="ios-page-nav-bar" aria-hidden="true">
-            <span class="ios-page-nav-bar__spacer" />
-            <div class="ios-skeleton ios-nav-title-skeleton" />
-            <span class="ios-page-nav-bar__spacer" />
+        <div class="s-page s-sales" aria-busy="true">
+          <SPageHeader :title="branchPageTitle('Sales')">
+            <template #eyebrow>
+              <p class="s-page-header__eyebrow">Sales</p>
+            </template>
+          </SPageHeader>
+          <div class="s-metrics" aria-hidden="true">
+            <div v-for="i in 4" :key="i" class="s-metrics__item">
+              <SSkeleton width="64px" height="12px" />
+              <SSkeleton width="96px" height="24px" />
+            </div>
           </div>
-          <IosQuickActionSkeleton :count="4" />
-          <IosTransactionListSkeleton :count="8" />
-        </div>
-        <div v-else class="flex min-h-0 flex-1 flex-col gap-4 sm:gap-5">
-          <nav :class="segmentTabsClass" aria-hidden="true">
-            <span class="dash-skeleton dash-skeleton--select" />
-            <span class="dash-skeleton dash-skeleton--select" />
-            <span class="dash-skeleton dash-skeleton--select" />
-          </nav>
-          <DashTableSkeleton
-            :columns="receiptsTableSkeletonColumns"
-            :rows="8"
-            leading="none"
-            show-toolbar
-            aria-label="Loading sales"
-          />
+          <SCard flush>
+            <ul class="s-list" aria-label="Loading sales">
+              <li v-for="i in 8" :key="i" class="s-list__item" aria-hidden="true">
+                <div class="s-list__main">
+                  <SSkeleton width="40%" height="14px" />
+                  <SSkeleton width="25%" height="12px" />
+                </div>
+                <SSkeleton width="72px" height="14px" />
+              </li>
+            </ul>
+          </SCard>
         </div>
       </template>
 
       <template v-else>
-        <!-- iOS: mockup-style transactions UI (no tables, no layout top nav) -->
-        <div v-if="isCapacitorIos" class="ios-sales-shell" data-receipts-page>
-          <IosPageNavBar :title="iosSalesNavTitle" />
-
-          <IosQuickActionBar
-            v-model="activeTab"
-            role="tablist"
-            aria-label="Sales views and actions"
-            :options="salesQuickActionOptions"
-          />
-
-          <template v-if="activeTab === 'receipts'">
-            <template v-if="receiptsStore.loading && receiptsStore.receipts.length === 0">
-              <div class="ios-search-bar-host">
-                <div class="ios-skeleton ios-search-skeleton" aria-hidden="true" />
-              </div>
-              <IosQuickActionSkeleton :count="4" />
-              <IosTransactionListSkeleton :count="8" />
+        <div class="s-page s-sales" data-receipts-page>
+          <SPageHeader :title="branchPageTitle('Sales')">
+            <template #eyebrow>
+              <p class="s-page-header__eyebrow">Sales</p>
             </template>
+            <template v-if="canCreate" #actions>
+              <SButton @click="openQuickSaleModal">
+                <template #leading><QrCode :size="16" :stroke-width="1.75" aria-hidden="true" /></template>
+                Quick sale
+              </SButton>
+              <SButton variant="primary" @click="openCreateReceiptModal">
+                <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
+                New sale
+              </SButton>
+            </template>
+          </SPageHeader>
 
-            <template v-else>
-              <div class="ios-sales-chrome">
-                <div class="ios-search-bar-host ios-search-bar-host--sticky">
-                  <IosSearchBar v-model="searchQuery" placeholder="Search sales…" />
-                </div>
-                <IosQuickActionBar
-                  v-model="statusFilter"
-                  aria-label="Filter by status"
-                  :options="receiptStatusQuickActionOptions"
-                />
-              </div>
-
-              <DashboardTableEmptyState
-                v-if="sortedFilteredReceipts.length === 0"
-              :icon="ReceiptPercentIcon"
-              :title="
-                searchQuery || statusFilter !== 'all' || dateFilter !== 'all'
-                  ? 'No sales found'
-                  : 'No sales yet'
-              "
-              :description="
-                searchQuery || statusFilter !== 'all' || dateFilter !== 'all'
-                  ? 'Try adjusting your search, status, or date filters.'
-                  : 'Create your first sale to record revenue and track payments.'
-              "
+          <dl v-if="!receiptsStore.loading" class="s-metrics" aria-label="Sales summary">
+            <div v-for="metric in receiptsHeaderMetrics" :key="metric.key" class="s-metrics__item">
+              <dt class="s-metrics__label">{{ metric.label }}</dt>
+              <dd
+                class="s-metrics__value"
+                :class="metric.tone && `s-metrics__value--${metric.tone}`"
               >
-                <button
-                  v-if="!(searchQuery || statusFilter !== 'all' || dateFilter !== 'all')"
-                  type="button"
-                  class="rounded-lg bg-primary-600 px-3 py-1.5 text-xs font-semibold text-white"
-                  @click="openCreateSaleFromEmpty"
-                >
-                  Record first sale
-                </button>
-                <button
-                  v-else
-                  type="button"
-                  class="text-xs font-medium text-primary-600 underline decoration-primary-300 underline-offset-2 dark:text-primary-400"
-                  @click="clearReceiptFilters"
-                >
-                  Clear filters
-                </button>
-              </DashboardTableEmptyState>
+                {{ metric.value }}
+              </dd>
+            </div>
+          </dl>
 
-              <template v-else>
-                <div class="ios-receipt-transaction-list">
-                  <IosReceiptTransactionRow
-                    v-for="(receipt, index) in paginatedReceipts"
-                    :key="receipt.id"
-                    :title="getReceiptProductSummary(receipt)"
-                    :subtitle="getReceiptTransactionSubtitle(receipt)"
-                    :amount="getReceiptTransactionAmount(receipt).text"
-                    :amount-tone="getReceiptTransactionAmount(receipt).tone"
-                    :date="formatReceiptTransactionDate(receipt.date)"
-                    :variant="getReceiptTransactionVariant(receipt)"
-                    :last="index === paginatedReceipts.length - 1"
-                    show-menu
-                    :menu-id="receipt.id"
-                    @click="handleViewReceipt(receipt)"
-                    @menu="toggleReceiptMenu(receipt.id)"
-                  />
-                </div>
-                <DashboardTablePagination
-                  :current-page="currentPage"
-                  :items-per-page="itemsPerPage"
-                  :total="sortedFilteredReceipts.length"
-                  @page-change="handlePageChange"
-                />
-              </template>
-            </template>
-          </template>
+          <STabs v-model="activeTab" :tabs="salesTabs" label="Sales views" />
 
-          <template v-else-if="activeTab === 'outstanding'">
-            <div v-if="!receiptsStore.loading" class="ios-sales-chrome">
-              <div class="ios-search-bar-host ios-search-bar-host--sticky">
-                <IosSearchBar
-                  v-model="outstandingSearchQuery"
-                  placeholder="Search customer or receipt #…"
-                />
+          <!-- Sales -->
+          <section v-if="activeTab === 'receipts'" class="s-sales__section" aria-label="Sales">
+            <div
+              v-if="canDeleteReceipts && selectedReceiptsForBulk.length > 0"
+              class="s-toolbar s-toolbar--selection"
+              role="region"
+              aria-label="Bulk actions"
+            >
+              <SCheckbox
+                :model-value="allReceiptsOnPageSelected"
+                :label="`${selectedReceiptsForBulk.length} selected`"
+                @update:model-value="toggleSelectAllReceipts"
+              />
+              <div class="s-toolbar__end">
+                <SButton variant="ghost" size="sm" @click="selectedReceiptsForBulk = []">Clear</SButton>
+                <SButton variant="danger" size="sm" @click="openBulkDeleteReceiptsModal">
+                  <template #leading><Trash2 :size="14" :stroke-width="2" aria-hidden="true" /></template>
+                  Delete
+                </SButton>
+              </div>
+            </div>
+            <div v-else-if="!receiptsStore.loading" class="s-toolbar">
+              <SSearch
+                v-model="searchQuery"
+                class="s-toolbar__search"
+                placeholder="Search sales"
+                label="Search by receipt number, customer or item"
+              />
+              <div class="s-toolbar__filter">
+                <SSelect v-model="statusFilter" :options="receiptStatusFilterOptions" aria-label="Status" />
+              </div>
+              <div class="s-toolbar__filter">
+                <SSelect v-model="dateFilter" :options="receiptDateFilterSelectOptions" aria-label="Date range" />
               </div>
             </div>
 
-            <DashboardTableEmptyState
-              v-if="filteredOutstandingReceipts.length === 0 && !receiptsStore.loading"
-              :icon="ClockIcon"
-              title="No outstanding payments"
-              description="Create a sale with “Balance due” when a customer pays a deposit. It will appear here until paid in full."
-            />
+            <SCard v-if="receiptsStore.loading" flush aria-busy="true">
+              <ul class="s-list" aria-label="Loading sales">
+                <li v-for="i in 8" :key="i" class="s-list__item" aria-hidden="true">
+                  <div class="s-list__main">
+                    <SSkeleton width="40%" height="14px" />
+                    <SSkeleton width="25%" height="12px" />
+                  </div>
+                  <SSkeleton width="72px" height="14px" />
+                </li>
+              </ul>
+            </SCard>
 
-            <div v-else-if="!receiptsStore.loading" class="ios-receipt-transaction-list">
-              <IosReceiptTransactionRow
-                v-for="(row, index) in filteredOutstandingReceipts"
-                :key="row.id"
-                :title="row.customerName || 'Walk-in customer'"
-                :subtitle="getOutstandingTransactionSubtitle(row)"
-                :amount="getOutstandingTransactionAmount(row).text"
-                :amount-tone="getOutstandingTransactionAmount(row).tone"
-                :date="formatReceiptTransactionDate(row.date)"
-                variant="pending"
-                icon="balance-due"
-                :last="index === filteredOutstandingReceipts.length - 1"
-                show-menu
-                :menu-id="row.id"
-                @click="viewOutstandingReceipt(row)"
-                @menu="toggleReceiptMenu(row.id)"
-              />
-            </div>
-          </template>
-
-          <template v-else-if="activeTab === 'customers'">
-            <div v-if="!receiptsStore.loading" class="ios-sales-chrome">
-              <div class="ios-search-bar-host ios-search-bar-host--sticky">
-                <IosSearchBar v-model="customersSearchQuery" placeholder="Search customers…" />
-              </div>
-              <IosQuickActionBar
-                v-model="customersSortBy"
-                aria-label="Sort customers"
-                :options="customerSortQuickActionOptions"
-              />
-            </div>
-
-            <IosTransactionListSkeleton v-if="receiptsStore.loading" :count="6" />
-
-            <DashboardTableEmptyState
-              v-else-if="filteredCustomers.length === 0"
-              :icon="UsersIcon"
-              :title="customersSearchQuery ? 'No customers found' : 'No customers yet'"
-              :description="
-                customersSearchQuery
-                  ? 'Try another name, phone number, or email.'
-                  : 'Customers are created automatically when you add them on a sale.'
-              "
-            />
+            <SCard v-else-if="sortedFilteredReceipts.length === 0">
+              <SEmptyState
+                :title="hasReceiptFilters ? 'No sales found' : 'No sales yet'"
+                :description="
+                  hasReceiptFilters
+                    ? 'Try adjusting your search, status, or date filters.'
+                    : 'Record your first sale to track revenue and payments.'
+                "
+              >
+                <template #icon>
+                  <SearchX v-if="hasReceiptFilters" :size="24" :stroke-width="1.75" />
+                  <ReceiptText v-else :size="24" :stroke-width="1.75" />
+                </template>
+                <template v-if="hasReceiptFilters || canCreate" #actions>
+                  <SButton v-if="hasReceiptFilters" @click="clearReceiptFilters">Clear filters</SButton>
+                  <SButton v-else variant="primary" @click="openCreateReceiptModal">
+                    <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
+                    New sale
+                  </SButton>
+                </template>
+              </SEmptyState>
+            </SCard>
 
             <template v-else>
-              <div class="ios-receipt-transaction-list">
-                <div
-                  v-for="(customer, customerIndex) in paginatedCustomers"
-                  :key="customer.id"
-                  class="ios-receipt-transaction-list__group"
-                  :class="{ 'ios-receipt-transaction-list__group--last': customerIndex === paginatedCustomers.length - 1 }"
-                >
-                  <IosReceiptTransactionRow
-                    :title="customer.name"
-                    :subtitle="getCustomerTransactionSubtitle(customer)"
-                    :amount="getCustomerTransactionAmount(customer).text"
-                    :amount-tone="getCustomerTransactionAmount(customer).tone"
-                    :date="formatReceiptTransactionDate(customer.lastOrderDate)"
-                    :variant="getCustomerTransactionVariant(customer)"
-                    show-menu
-                    menu-kind="customer"
-                    :menu-id="customer.id"
-                    @click="toggleCustomerExpanded(customer.id)"
-                    @menu="toggleCustomerMenu(customer.id)"
-                  />
-                  <div
-                    v-if="expandedCustomers[customer.id]"
-                    class="ios-receipt-transaction-list__nested"
-                  >
-                    <IosReceiptTransactionRow
-                      v-for="(receipt, receiptIndex) in getCustomerReceipts(customer.id)"
+              <!-- Phone: one row per sale -->
+              <SCard flush class="s-only-sm">
+                <ul class="s-list">
+                  <li v-for="receipt in paginatedReceipts" :key="receipt.id">
+                    <div
+                      :data-receipt-row="receipt.id"
+                      class="s-list__item"
+                      :class="{ 's-list__item--flash': flashReceiptId === receipt.id }"
+                    >
+                      <SCheckbox
+                        v-if="canDeleteReceipts"
+                        :model-value="isReceiptSelected(receipt)"
+                        :aria-label="`Select sale ${receipt.receiptNumber}`"
+                        @update:model-value="(checked) => toggleReceiptSelection(receipt, checked)"
+                      />
+                      <button
+                        type="button"
+                        class="s-list__main s-list__hit"
+                        @click="handleViewReceipt(receipt)"
+                      >
+                        <span class="s-list__primary">{{ receipt.customerName || 'Walk-in customer' }}</span>
+                        <span class="s-list__secondary">
+                          #{{ receipt.receiptNumber }} · {{ formatDate(receipt.date) }}
+                        </span>
+                      </button>
+                      <div class="s-list__end">
+                        <span class="s-list__value">{{ formatCurrency(receipt.total) }}</span>
+                        <SBadge v-if="receipt.status !== 'completed'" :tone="getReceiptStatusTone(receipt.status)">
+                          {{ getReceiptStatusLabel(receipt.status) }}
+                        </SBadge>
+                      </div>
+                      <SIconButton
+                        label="Sale actions"
+                        size="sm"
+                        :data-receipt-actions-anchor="receipt.id"
+                        aria-haspopup="menu"
+                        :aria-expanded="openReceiptMenuId === receipt.id"
+                        @click="toggleReceiptMenu(receipt.id)"
+                      >
+                        <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
+                      </SIconButton>
+                    </div>
+                  </li>
+                </ul>
+              </SCard>
+
+              <!-- Tablet and desktop: table -->
+              <div class="s-table-wrap s-hide-sm">
+                <table class="s-table">
+                  <thead>
+                    <tr>
+                      <th v-if="canDeleteReceipts" scope="col" class="s-table__check">
+                        <SCheckbox
+                          :model-value="allReceiptsOnPageSelected"
+                          aria-label="Select all sales on this page"
+                          @update:model-value="toggleSelectAllReceipts"
+                        />
+                      </th>
+                      <th
+                        v-for="column in receiptTableColumns"
+                        :key="column.key"
+                        scope="col"
+                        :class="column.class"
+                        :aria-sort="ariaSort(column.key)"
+                      >
+                        <SSortHeader
+                          :label="column.label"
+                          :direction="sortDirection(column.key)"
+                          :align="column.align"
+                          @sort="toggleSort(column.key)"
+                        />
+                      </th>
+                      <th scope="col" class="s-table__actions">
+                        <span class="ds-sr-only">Actions</span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr
+                      v-for="receipt in paginatedReceipts"
                       :key="receipt.id"
-                      nested
-                      :title="getReceiptProductSummary(receipt)"
-                      :subtitle="getReceiptTransactionSubtitle(receipt)"
-                      :amount="getReceiptTransactionAmount(receipt).text"
-                      :amount-tone="getReceiptTransactionAmount(receipt).tone"
-                      :date="formatReceiptTransactionDate(receipt.date)"
-                      :variant="getReceiptTransactionVariant(receipt)"
-                      :last="receiptIndex === getCustomerReceipts(customer.id).length - 1"
-                      show-menu
-                      :menu-id="receipt.id"
-                      @click="goToReceiptFromCustomer(receipt)"
-                      @menu="toggleReceiptMenu(receipt.id)"
-                    />
-                  </div>
-                </div>
+                      :data-receipt-row="receipt.id"
+                      class="s-table__row--interactive"
+                      :class="{
+                        's-table__row--flash': flashReceiptId === receipt.id,
+                        's-table__row--selected': isReceiptSelected(receipt),
+                      }"
+                      tabindex="0"
+                      @click="handleViewReceipt(receipt)"
+                      @keydown.enter.self="handleViewReceipt(receipt)"
+                    >
+                      <td v-if="canDeleteReceipts" class="s-table__check" @click.stop>
+                        <SCheckbox
+                          :model-value="isReceiptSelected(receipt)"
+                          :aria-label="`Select sale ${receipt.receiptNumber}`"
+                          @update:model-value="(checked) => toggleReceiptSelection(receipt, checked)"
+                        />
+                      </td>
+                      <td>
+                        <span class="s-table__inline">
+                          <span class="s-table__primary">#{{ receipt.receiptNumber }}</span>
+                          <SIconButton
+                            label="Copy receipt number"
+                            size="sm"
+                            @click.stop="copyReceiptNumber(receipt.receiptNumber)"
+                          >
+                            <CopyIcon :size="14" :stroke-width="1.75" aria-hidden="true" />
+                          </SIconButton>
+                          <SBadge v-if="receipt.isSwapIn" tone="info">Swap</SBadge>
+                        </span>
+                      </td>
+                      <td>
+                        <span class="s-table__primary">{{ receipt.customerName || 'Walk-in customer' }}</span>
+                        <span
+                          v-if="receipt.customerPhone || receipt.customerEmail"
+                          class="s-table__secondary"
+                        >
+                          {{ receipt.customerPhone || receipt.customerEmail }}
+                        </span>
+                      </td>
+                      <td class="s-hide-md">{{ formatDate(receipt.date) }}</td>
+                      <td class="s-hide-lg">
+                        <span class="s-table__secondary">
+                          {{ getReceiptLineItemsPreview(receipt) || EMPTY_CELL }}
+                        </span>
+                      </td>
+                      <td class="s-table__num">
+                        <span class="s-table__primary">{{ formatCurrency(receipt.total) }}</span>
+                        <ReceiptProfitHint :receipt="receipt" />
+                      </td>
+                      <td class="s-hide-lg">{{ formatPaymentMethod(receipt.paymentMethod) }}</td>
+                      <td>
+                        <SBadge :tone="getReceiptStatusTone(receipt.status)" dot>
+                          {{ getReceiptStatusLabel(receipt.status) }}
+                        </SBadge>
+                      </td>
+                      <td class="s-hide-lg">
+                        <span class="s-table__secondary">
+                          {{
+                            receipt.createdByUserName ||
+                            getCreatorName(receipt.actualCreator || receipt.createdBy)
+                          }}
+                        </span>
+                      </td>
+                      <td class="s-table__actions" @click.stop>
+                        <SIconButton
+                          label="Sale actions"
+                          size="sm"
+                          :data-receipt-actions-anchor="receipt.id"
+                          aria-haspopup="menu"
+                          :aria-expanded="openReceiptMenuId === receipt.id"
+                          @click="toggleReceiptMenu(receipt.id)"
+                        >
+                          <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
+                        </SIconButton>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
-              <DashboardTablePagination
-                :current-page="customersCurrentPage"
-                :items-per-page="customersItemsPerPage"
-                :total="filteredCustomers.length"
-                @page-change="handleCustomersPageChange"
+
+              <SPagination
+                :current-page="currentPage"
+                :page-size="itemsPerPage"
+                :total="sortedFilteredReceipts.length"
+                label="Sales pagination"
+                @page-change="handlePageChange"
               />
             </template>
-          </template>
+          </section>
 
-          <IosDrawer
-            v-if="isCapacitorIos"
-            v-model="showSalesMoreSheet"
-            title="Sales options"
-            subtitle="Views and filters"
-            variant="menu"
-            footer-variant="menu"
-            body-padding="p-0"
-            aria-label="Sales options"
-          >
-            <div class="ios-drawer-menu">
-              <section class="ios-drawer-menu__section">
-                <p class="ios-drawer-menu__section-label">Views</p>
-                <div class="ios-drawer-menu__group">
-                  <ul class="ios-drawer-menu__list">
-                    <li v-if="canCreate">
-                      <button
-                        type="button"
-                        class="ios-drawer-menu__row"
-                        @click="selectSalesTabFromSheet('outstanding')"
-                      >
-                        <span class="ios-drawer-menu__label">Outstanding</span>
-                        <span v-if="outstandingReceipts.length > 0" class="ios-drawer-menu__value">
-                          {{ outstandingReceipts.length }}
-                        </span>
-                        <CheckIcon
-                          v-if="activeTab === 'outstanding'"
-                          class="ios-drawer-menu__check"
-                          aria-hidden="true"
-                        />
-                      </button>
-                    </li>
-                    <li>
-                      <button
-                        type="button"
-                        class="ios-drawer-menu__row"
-                        @click="selectSalesTabFromSheet('customers')"
-                      >
-                        <span class="ios-drawer-menu__label">Customers</span>
-                        <CheckIcon
-                          v-if="activeTab === 'customers'"
-                          class="ios-drawer-menu__check"
-                          aria-hidden="true"
-                        />
-                      </button>
-                    </li>
-                  </ul>
-                </div>
-              </section>
-              <section v-if="activeTab === 'receipts'" class="ios-drawer-menu__section">
-                <p class="ios-drawer-menu__section-label">Date range</p>
-                <div class="ios-drawer-menu__group">
-                  <ul class="ios-drawer-menu__list">
-                    <li v-for="option in receiptDateFilterOptions" :key="option.value">
-                      <button
-                        type="button"
-                        class="ios-drawer-menu__row"
-                        @click="selectReceiptDateFilter(option.value)"
-                      >
-                        <span class="ios-drawer-menu__label">{{ option.label }}</span>
-                        <CheckIcon
-                          v-if="dateFilter === option.value"
-                          class="ios-drawer-menu__check"
-                          aria-hidden="true"
-                        />
-                      </button>
-                    </li>
-                  </ul>
-                </div>
-              </section>
+          <!-- Outstanding (balance due) -->
+          <section v-else-if="activeTab === 'outstanding'" class="s-sales__section" aria-label="Outstanding">
+            <div v-if="!receiptsStore.loading" class="s-toolbar">
+              <SSearch
+                v-model="outstandingSearchQuery"
+                class="s-toolbar__search"
+                placeholder="Search customer or receipt #"
+              />
             </div>
-          </IosDrawer>
+
+            <SCard v-if="receiptsStore.loading" flush aria-busy="true">
+              <ul class="s-list" aria-label="Loading outstanding payments">
+                <li v-for="i in 6" :key="i" class="s-list__item" aria-hidden="true">
+                  <div class="s-list__main">
+                    <SSkeleton width="40%" height="14px" />
+                    <SSkeleton width="25%" height="12px" />
+                  </div>
+                  <SSkeleton width="72px" height="14px" />
+                </li>
+              </ul>
+            </SCard>
+
+            <SCard v-else-if="filteredOutstandingReceipts.length === 0">
+              <SEmptyState
+                title="No outstanding payments"
+                description="Sales recorded with a balance due appear here until they're paid in full."
+              >
+                <template #icon><CircleCheck :size="24" :stroke-width="1.75" /></template>
+              </SEmptyState>
+            </SCard>
+
+            <div v-else class="s-table-wrap">
+              <table class="s-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Customer</th>
+                    <th scope="col" class="s-hide-sm">Sale</th>
+                    <th scope="col" class="s-hide-md">Items</th>
+                    <th scope="col" class="s-table__num s-hide-sm">Total</th>
+                    <th scope="col" class="s-table__num s-hide-sm">Paid</th>
+                    <th scope="col" class="s-table__num">Balance</th>
+                    <th scope="col"><span class="ds-sr-only">Actions</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="row in filteredOutstandingReceipts"
+                    :key="row.id"
+                    class="s-table__row--interactive"
+                    tabindex="0"
+                    @click="viewOutstandingReceipt(row)"
+                    @keydown.enter.self="viewOutstandingReceipt(row)"
+                  >
+                    <td>
+                      <span class="s-table__primary">{{ row.customerName || 'Walk-in customer' }}</span>
+                      <span v-if="row.customerPhone || row.customerEmail" class="s-table__secondary">
+                        {{ row.customerPhone || row.customerEmail }}
+                      </span>
+                    </td>
+                    <td class="s-hide-sm">
+                      <span class="s-table__primary">#{{ row.receiptNumber }}</span>
+                      <span class="s-table__secondary">{{ formatDate(row.date) }}</span>
+                    </td>
+                    <td class="s-hide-md">
+                      <span class="s-table__secondary">{{ getReceiptLineItemsPreview(row) || EMPTY_CELL }}</span>
+                    </td>
+                    <td class="s-table__num s-hide-sm">{{ formatCurrency(row.total) }}</td>
+                    <td class="s-table__num s-hide-sm">{{ formatCurrency(outstandingAmountPaid(row)) }}</td>
+                    <td class="s-table__num s-table__warning">
+                      <span class="s-table__primary">{{ formatCurrency(outstandingBalanceDue(row)) }}</span>
+                    </td>
+                    <td @click.stop>
+                      <div class="s-table__row-actions">
+                        <SButton size="sm" variant="primary" @click="openRecordPayment(row)">
+                          Record payment
+                        </SButton>
+                        <SButton
+                          v-if="canEditReceipts"
+                          size="sm"
+                          variant="ghost"
+                          class="s-hide-sm"
+                          @click="cancelOutstandingReceipt(row)"
+                        >
+                          Cancel sale
+                        </SButton>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
 
           <CreateReceiptModal
             v-model="showCreateReceiptModal"
@@ -334,6 +418,19 @@
             :receipt="selectedReceipt"
             @returned="handleReceiptReturned"
           />
+          <BulkDeleteConfirmModal
+            v-model="showBulkDeleteReceiptsModal"
+            v-model:confirmed="bulkDeleteReceiptsConfirmed"
+            title="Delete selected sales"
+            entity-label="sale"
+            :count="selectedReceiptsForBulk.length"
+            :item-names="selectedReceiptsForBulk.map((r) => r.receiptNumber || r.customerName || r.id)"
+            warning="This permanently deletes the selected sales. Associated customer balances may be affected. This cannot be undone."
+            confirm-label="I understand these sales will be permanently deleted."
+            :loading="isBulkDeletingReceipts"
+            @update:model-value="(v) => { if (!v) bulkDeleteReceiptsConfirmed = false }"
+            @confirm="handleConfirmBulkDeleteReceipts"
+          />
           <DeleteReceiptModal
             v-model="showDeleteReceiptModal"
             :receipt="selectedReceipt"
@@ -341,1462 +438,41 @@
           />
           <ReceiptTimelineModal v-model="showTimelineModal" :receipt="selectedReceipt" />
         </div>
-
-        <!-- Web / desktop -->
-        <div v-else class="flex w-full min-h-0 flex-1 flex-col gap-4 sm:gap-5 dash-page--unified" data-receipts-page>
-          <DashboardPageHeader class="dash-page-header--unified">
-            <template #eyebrow>
-              <p class="dash-eyebrow">Sales</p>
-            </template>
-            <template #title>
-              <h1 :class="pageTitleClass">{{ branchPageTitle('Sales') }}</h1>
-            </template>
-            <template v-if="!receiptsStore.loading" #description>
-              <DashboardPageMetrics :metrics="receiptsHeaderMetrics" aria-label="Sales summary" />
-            </template>
-            <template v-if="canCreate" #actions>
-              <Button
-                variant="outline"
-                size="sm"
-                :icon="QrCodeIcon"
-                aria-label="Quick sale"
-                :extra-class="headerBtnClass"
-                @click="openQuickSaleModal"
-              >
-                <span :class="headerBtnLabelClass">Quick sale</span>
-              </Button>
-              <Button
-                variant="primary"
-                size="sm"
-                :icon="ReceiptPercentIcon"
-                aria-label="New sale"
-                :extra-class="headerBtnClass"
-                @click="openCreateReceiptModal"
-              >
-                <span :class="headerBtnLabelClass">New sale</span>
-              </Button>
-            </template>
-          </DashboardPageHeader>
-
-          <!-- Tabs -->
-          <nav :class="segmentTabsClass" aria-label="Sales views" role="tablist">
-            <button
-              type="button"
-              role="tab"
-              :aria-selected="activeTab === 'receipts'"
-              :class="[
-                segmentTabsBtnClass,
-                activeTab === 'receipts' ? segmentTabsBtnActiveClass : '',
-              ]"
-              @click="activeTab = 'receipts'"
-            >
-              Sales
-            </button>
-            <button
-              type="button"
-              role="tab"
-              :aria-selected="activeTab === 'outstanding'"
-              :class="[
-                segmentTabsBtnClass,
-                activeTab === 'outstanding' ? segmentTabsBtnActiveClass : '',
-              ]"
-              @click="activeTab = 'outstanding'"
-            >
-              <span class="inline-flex items-center justify-center gap-1.5">
-                Outstanding
-                <span
-                  v-if="outstandingReceipts.length > 0"
-                  class="min-w-[1.125rem] rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-amber-900 dark:bg-amber-950/50 dark:text-amber-200"
-                >
-                  {{ outstandingReceipts.length }}
-                </span>
-              </span>
-            </button>
-            <button
-              type="button"
-              role="tab"
-              :aria-selected="activeTab === 'customers'"
-              :class="[
-                segmentTabsBtnClass,
-                activeTab === 'customers' ? segmentTabsBtnActiveClass : '',
-              ]"
-              @click="activeTab = 'customers'"
-            >
-              Customers
-            </button>
-          </nav>
-
-          <!-- Receipts Tab Content -->
-          <template v-if="activeTab === 'receipts'">
-            <!-- Teleport fullscreen to body so position:fixed is not clipped by layout page transition (transform) -->
-            <Teleport to="body" :disabled="!isReceiptsFullscreen">
-              <!-- Receipts Table -->
-              <div
-                data-dashboard-teleport
-                :class="[
-                  'transition-colors duration-200 ease-out',
-                  isReceiptsFullscreen
-                    ? `${tableExpandClass} fixed inset-0 z-[100] flex min-h-0 flex-col overflow-hidden`
-                    : 'relative flex min-h-0 flex-1 flex-col',
-                ]"
-              >
-                <!-- Fullscreen header -->
-                <div
-                  v-if="isReceiptsFullscreen"
-                  :class="tableExpandHeaderClass"
-                  style="padding-top: max(1rem, env(safe-area-inset-top, 0px))"
-                >
-                  <div
-                    class="flex w-full flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-6"
-                  >
-                    <div class="flex min-w-0 items-start justify-between gap-3 lg:items-center">
-                      <div class="min-w-0">
-                        <p :class="tableExpandEyebrowClass">
-                          Expanded view
-                        </p>
-                        <div class="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                          <h2 :class="tableExpandTitleClass">
-                            Sales
-                          </h2>
-                          <span :class="tableExpandMetaClass">
-                            {{ receipts.length }} in store ·
-                            {{ formatCurrency(totalSales) }} completed · Today
-                            {{ formatCurrency(todaySales) }} ({{ todayReceipts }}) · Month
-                            {{ formatCurrency(monthSales) }} ({{ monthReceipts }})
-                          </span>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        class="inline-flex lg:hidden"
-                        :class="tableExpandCloseClass"
-                        aria-label="Exit expanded view"
-                        @click="isReceiptsFullscreen = false"
-                      >
-                        <XMarkIcon class="h-5 w-5" />
-                      </button>
-                    </div>
-                    <div
-                      class="flex min-w-0 flex-1 flex-wrap items-center gap-2 lg:max-w-none lg:justify-end"
-                    >
-                      <div
-                        class="relative min-w-0 w-full sm:max-w-[min(100%,20rem)] lg:w-56 lg:max-w-[16rem] lg:flex-initial"
-                      >
-                        <MagnifyingGlassIcon
-                          class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500"
-                        />
-                        <input
-                          v-model="searchQuery"
-                          type="text"
-                          placeholder="Search sales..."
-                          class="w-full py-2 pl-10 pr-3 text-sm"
-                          :class="tableExpandFieldClass"
-                        />
-                      </div>
-                      <div class="flex flex-wrap items-center gap-2">
-                        <select
-                          v-model="statusFilter"
-                          class="min-w-[7.5rem] cursor-pointer px-3 py-2 text-sm font-medium"
-                          :class="tableExpandFieldClass"
-                        >
-                          <option value="all">All Status</option>
-                          <option value="completed">Completed</option>
-                          <option value="pending">Pending</option>
-                          <option value="refunded">Refunded</option>
-                        </select>
-                        <select
-                          v-model="dateFilter"
-                          class="min-w-[7.5rem] cursor-pointer px-3 py-2 text-sm font-medium"
-                          :class="tableExpandFieldClass"
-                        >
-                          <option value="all">All Dates</option>
-                          <option value="today">Today</option>
-                          <option value="week">This Week</option>
-                          <option value="month">This Month</option>
-                        </select>
-                        <button
-                          type="button"
-                          class="hidden lg:inline-flex"
-                          :class="tableExpandCloseClass"
-                          aria-label="Exit expanded view"
-                          @click="isReceiptsFullscreen = false"
-                        >
-                          <XMarkIcon class="h-5 w-5" />
-                        </button>
-                        <Button
-                          v-if="canCreate && !isCapacitorIos"
-                          variant="outline"
-                          size="sm"
-                          :icon="QrCodeIcon"
-                          aria-label="Quick sale"
-                          extra-class="!rounded-2xl shrink-0 max-sm:!px-2 max-sm:!py-1.5"
-                          @click="openQuickSaleModal"
-                        >
-                          <span :class="headerBtnLabelClass">Quick sale</span>
-                        </Button>
-                        <Button
-                          v-if="canCreate && !isCapacitorIos"
-                          variant="primary"
-                          size="sm"
-                          :icon="ReceiptPercentIcon"
-                          aria-label="New sale"
-                          extra-class="!rounded-2xl ml-auto shrink-0 max-sm:!px-2 max-sm:!py-1.5"
-                          @click="openCreateReceiptModal"
-                        >
-                          <span :class="headerBtnLabelClass">New sale</span>
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div
-                  :class="[
-                    isReceiptsFullscreen
-                      ? tableExpandBodyClass
-                      : tableShellFlexClass,
-                  ]"
-                >
-                  <!-- Toolbar: search + filters (left), primary action (right) -->
-                  <DataTableToolbar
-                    v-if="!receiptsStore.loading && !isReceiptsFullscreen && !isCapacitorIos"
-                    native-table-key="receipts-main"
-                  >
-                    <template #filters>
-                      <DashboardToolbarSearch
-                        v-model="searchQuery"
-                        placeholder="Search sales…"
-                        :wide="false"
-                        input-class="sm:w-48"
-                      />
-                      <DashboardToolbarSelect
-                        v-model="statusFilter"
-                        min-width-class="min-w-[6.5rem]"
-                      >
-                        <option value="all">All Status</option>
-                        <option value="completed">Completed</option>
-                        <option value="pending">Pending</option>
-                        <option value="refunded">Refunded</option>
-                      </DashboardToolbarSelect>
-                      <DashboardToolbarSelect v-model="dateFilter" min-width-class="min-w-[6.5rem]">
-                        <option value="all">All Dates</option>
-                        <option value="today">Today</option>
-                        <option value="week">This Week</option>
-                        <option value="month">This Month</option>
-                      </DashboardToolbarSelect>
-                      <DashboardToolbarIconButton
-                        class="hidden lg:inline-flex"
-                        aria-label="Expand table"
-                        @click="isReceiptsFullscreen = !isReceiptsFullscreen"
-                      >
-                        <ArrowsPointingOutIcon class="h-4 w-4" />
-                      </DashboardToolbarIconButton>
-                    </template>
-                  </DataTableToolbar>
-                  <!-- Bulk actions (receipts) -->
-                  <div
-                    v-if="canDeleteReceipts && selectedReceiptsForBulk.length > 0"
-                    class="dash-table-bulk-bar"
-                  >
-                    <span class="text-xs font-medium text-gray-700 dark:text-gray-300"
-                      >{{ selectedReceiptsForBulk.length }} selected</span
-                    >
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      :icon="TrashIcon"
-                      class="!rounded-2xl !px-2.5 !py-1.5 !text-xs-gray-200/80 dark:!border-gray-700/80 !text-gray-600 dark:!text-gray-300 hover:!text-red-600 dark:hover:!text-red-400 hover:!border-red-200/80 dark:hover:!border-red-800/50 hover:!bg-red-50/60 dark:hover:!bg-red-900/10"
-                      @click="openBulkDeleteReceiptsModal"
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                  <!-- Table Loading Skeleton -->
-                  <div
-                    v-if="receiptsStore.loading"
-                    :class="
-                      isReceiptsFullscreen
-                        ? 'min-h-0 flex-1 overflow-y-auto px-4 pb-4 lg:px-8'
-                        : 'min-h-0 flex-1 overflow-x-auto'
-                    "
-                  >
-                    <div class="receipts-mobile-list space-y-2 px-3 py-3 sm:hidden">
-                      <DashListCardSkeleton :count="6" />
-                    </div>
-                    <div class="hidden sm:block">
-                      <DashTableSkeleton
-                        :columns="receiptsTableSkeletonColumns"
-                        :rows="8"
-                        leading="none"
-                        show-toolbar
-                        flush
-                        aria-label="Loading sales"
-                      />
-                    </div>
-                  </div>
-                  <!-- Standalone empty state (same styling as customers empty state, no button) -->
-                  <DashboardTableEmptyState
-                    v-else-if="sortedFilteredReceipts.length === 0"
-                    :icon="ReceiptPercentIcon"
-                    :title="
-                      searchQuery || statusFilter !== 'all' || dateFilter !== 'all'
-                        ? 'No sales found'
-                        : 'No sales yet'
-                    "
-                    :description="
-                      searchQuery || statusFilter !== 'all' || dateFilter !== 'all'
-                        ? 'Try adjusting your search, status, or date filters.'
-                        : 'Create your first sale to record revenue and track payments.'
-                    "
-                    :tips="
-                      searchQuery || statusFilter !== 'all' || dateFilter !== 'all'
-                        ? [
-                            'Clear filters to see every sale for this store',
-                            'Receipt numbers and customer names are searchable',
-                          ]
-                        : [
-                            'Add line items from inventory categories',
-                            'Use Outstanding for deposits and balance due',
-                          ]
-                    "
-                    :extra-class="isReceiptsFullscreen ? 'min-h-0 flex-1' : ''"
-                  >
-                    <Button
-                      v-if="
-                        canCreate &&
-                        !isCapacitorIos &&
-                        !searchQuery &&
-                        statusFilter === 'all' &&
-                        dateFilter === 'all'
-                      "
-                      variant="primary"
-                      size="sm"
-                      extra-class="!text-xs !py-1.5 !px-3"
-                      @click="openCreateReceiptModal"
-                    >
-                      Create sale
-                    </Button>
-                  </DashboardTableEmptyState>
-                  <template v-else>
-                    <div
-                      :class="
-                        isReceiptsFullscreen
-                          ? 'flex min-h-0 flex-1 flex-col overflow-hidden'
-                          : 'contents'
-                      "
-                    >
-                      <!-- Mobile: card list (web only; iOS uses dedicated shell above) -->
-                      <div
-                        class="receipts-mobile-list space-y-2 sm:hidden"
-                        :class="
-                          isReceiptsFullscreen
-                            ? 'min-h-0 flex-1 overflow-y-auto px-4 pb-4 lg:px-8'
-                            : 'block px-0'
-                        "
-                      >
-                        <div
-                          v-for="receipt in paginatedReceipts"
-                          :key="receipt.id"
-                        >
-                          <div
-                            :data-receipt-row="receipt.id"
-                            :data-receipt-flash="flashReceiptId === receipt.id ? '' : undefined"
-                            class="cursor-pointer rounded-lg bg-white p-2.5 shadow-none dark:!bg-dashboard-card"
-                            :class="
-                              flashReceiptId === receipt.id
-                                ? '!ring-2 !ring-gray-900/20 ring-offset-2 ring-offset-white dark:bg-gray-800/75 dark:!ring-white/25 dark:!ring-offset-gray-900'
-                                : ''
-                            "
-                            @click="handleViewReceipt(receipt)"
-                          >
-                          <div class="flex items-start justify-between gap-2">
-                            <div class="min-w-0 flex-1 flex items-start gap-2">
-                              <Checkbox
-                                v-if="canDeleteReceipts"
-                                :model-value="
-                                  selectedReceiptsForBulk.some((r) => r.id === receipt.id)
-                                "
-                                @update:model-value="
-                                  (checked) => toggleReceiptSelection(receipt, checked)
-                                "
-                                size="sm"
-                                wrapper-class="justify-center pt-0.5"
-                                @click.stop
-                              />
-                              <div class="min-w-0 flex-1">
-                                <div class="flex flex-wrap items-center gap-1.5">
-                                  <span
-                                    class="text-[11px] font-semibold text-gray-900 dark:text-gray-100"
-                                    >{{ receipt.receiptNumber }}</span
-                                  >
-                                  <button
-                                    @click.stop="copyReceiptNumber(receipt.receiptNumber)"
-                                    class="p-0.5 text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
-                                    aria-label="Copy receipt number"
-                                  >
-                                    <ClipboardDocumentIcon class="w-3.5 h-3.5" stroke-width="1.5" />
-                                  </button>
-                                  <span
-                                    v-if="receipt.isSwapIn"
-                                    class="inline-flex items-center rounded-full bg-sky-50 px-2 py-0.5 text-[9px] font-semibold text-sky-800 dark:bg-sky-500/15 dark:text-sky-200"
-                                  >
-                                    Swap
-                                  </span>
-                                </div>
-                                <p
-                                  class="mt-0.5 text-[10px] leading-snug text-gray-600 dark:text-gray-400"
-                                >
-                                  <span class="line-clamp-2">{{ receipt.customerName }}</span>
-                                  <span
-                                    v-if="receipt.customerEmail"
-                                    class="block truncate text-[9px] text-gray-500 dark:text-gray-500"
-                                    >{{ receipt.customerEmail }}</span
-                                  >
-                                  <span
-                                    v-if="receipt.customerPhone"
-                                    class="block tabular-nums text-[9px] text-gray-500 dark:text-gray-500"
-                                    >{{ receipt.customerPhone }}</span
-                                  >
-                                </p>
-                                <p class="mt-0.5 text-[9px] text-gray-500 dark:text-gray-500">
-                                  {{ formatDate(receipt.date) }}
-                                </p>
-                                <p
-                                  v-if="getReceiptLineItemsPreview(receipt)"
-                                  class="mt-1 line-clamp-2 text-[10px] text-gray-600 dark:text-gray-400"
-                                >
-                                  {{ getReceiptLineItemsPreview(receipt) }}
-                                </p>
-                                <div class="mt-1.5 flex items-center justify-between gap-2">
-                                  <div class="min-w-0">
-                                    <span class="text-xs" :class="tableMoneyClass()">{{
-                                      formatCurrency(receipt.total)
-                                    }}</span>
-                                    <ReceiptProfitHint :receipt="receipt" class="mt-0.5" />
-                                  </div>
-                                  <ReceiptStatusBadge :badge="receiptStatusBadge(receipt)" />
-                                </div>
-                              </div>
-                            </div>
-                            <div class="relative shrink-0" @click.stop>
-                              <button
-                                type="button"
-                                :data-receipt-actions-anchor="receipt.id"
-                                @click="toggleReceiptMenu(receipt.id)"
-                                class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800/85 dark:hover:text-gray-100"
-                                aria-label="Sale actions"
-                                aria-haspopup="menu"
-                                :aria-expanded="openReceiptMenuId === receipt.id"
-                              >
-                                <EllipsisVerticalIcon class="w-4 h-4" stroke-width="2" />
-                              </button>
-                            </div>
-                          </div>
-                          </div>
-                        </div>
-                      </div>
-                      <!-- Desktop / iOS native card table -->
-                      <div
-                        class="receipts-table-wrap hidden min-h-0 flex-1 flex-col sm:flex"
-                        :class="isReceiptsFullscreen ? 'overflow-auto px-4 pb-2 pt-2 lg:px-8' : ''"
-                      >
-                        <div class="min-h-0 flex-1 overflow-x-auto">
-                          <table class="dashboard-table min-w-full">
-                            <thead :class="isReceiptsFullscreen ? 'sticky top-0 z-10' : ''">
-                              <tr>
-                                <th
-                                  v-if="canDeleteReceipts"
-                                  class="w-10 text-center"
-                                >
-                                  <Checkbox
-                                    :model-value="
-                                      paginatedReceipts.length > 0 &&
-                                      selectedReceiptsForBulk.length === paginatedReceipts.length
-                                    "
-                                    @update:model-value="toggleSelectAllReceipts"
-                                    size="sm"
-                                    wrapper-class="justify-center"
-                                  />
-                                </th>
-                                <th
-                                  :class="[
-                                    isColumnSortable('receiptNumber') &&
-                                      'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100',
-                                  ]"
-                                  @click="
-                                    isColumnSortable('receiptNumber') && toggleSort('receiptNumber')
-                                  "
-                                >
-                                  <div class="flex items-center gap-1.5">
-                                    Sale #
-                                    <template v-if="isColumnSortable('receiptNumber')">
-                                      <ChevronUpIcon
-                                        v-if="
-                                          currentSort.key === 'receiptNumber' &&
-                                          currentSort.order === 'asc'
-                                        "
-                                        class="w-3 h-3 text-gray-900 dark:text-gray-100"
-                                      />
-                                      <ChevronDownIcon
-                                        v-else-if="
-                                          currentSort.key === 'receiptNumber' &&
-                                          currentSort.order === 'desc'
-                                        "
-                                        class="w-3 h-3 text-gray-900 dark:text-gray-100"
-                                      />
-                                      <BarsArrowUpIcon
-                                        v-else
-                                        class="w-3 h-3 text-gray-400 dark:text-gray-500 opacity-50"
-                                      />
-                                    </template>
-                                  </div>
-                                </th>
-                                <th
-                                  :class="[
-                                    isColumnSortable('customerName') &&
-                                      'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100',
-                                  ]"
-                                  @click="
-                                    isColumnSortable('customerName') && toggleSort('customerName')
-                                  "
-                                >
-                                  <div class="flex items-center gap-1.5">
-                                    Customer
-                                    <template v-if="isColumnSortable('customerName')">
-                                      <ChevronUpIcon
-                                        v-if="
-                                          currentSort.key === 'customerName' &&
-                                          currentSort.order === 'asc'
-                                        "
-                                        class="w-3 h-3 text-gray-900 dark:text-gray-100"
-                                      />
-                                      <ChevronDownIcon
-                                        v-else-if="
-                                          currentSort.key === 'customerName' &&
-                                          currentSort.order === 'desc'
-                                        "
-                                        class="w-3 h-3 text-gray-900 dark:text-gray-100"
-                                      />
-                                      <BarsArrowUpIcon
-                                        v-else
-                                        class="w-3 h-3 text-gray-400 dark:text-gray-500 opacity-50"
-                                      />
-                                    </template>
-                                  </div>
-                                </th>
-                                <th
-                                  :class="[
-                                    isColumnSortable('date') &&
-                                      'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100',
-                                  ]"
-                                  @click="isColumnSortable('date') && toggleSort('date')"
-                                >
-                                  <div class="flex items-center gap-1.5">
-                                    Date
-                                    <template v-if="isColumnSortable('date')">
-                                      <ChevronUpIcon
-                                        v-if="
-                                          currentSort.key === 'date' && currentSort.order === 'asc'
-                                        "
-                                        class="w-3 h-3 text-gray-900 dark:text-gray-100"
-                                      />
-                                      <ChevronDownIcon
-                                        v-else-if="
-                                          currentSort.key === 'date' && currentSort.order === 'desc'
-                                        "
-                                        class="w-3 h-3 text-gray-900 dark:text-gray-100"
-                                      />
-                                      <BarsArrowUpIcon
-                                        v-else
-                                        class="w-3 h-3 text-gray-400 dark:text-gray-500 opacity-50"
-                                      />
-                                    </template>
-                                  </div>
-                                </th>
-                                <th
-                                  :class="[
-                                    'min-w-[9rem] max-w-[16rem]',
-                                    isColumnSortable('itemsCount') &&
-                                      'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100',
-                                  ]"
-                                  @click="
-                                    isColumnSortable('itemsCount') && toggleSort('itemsCount')
-                                  "
-                                >
-                                  <div class="flex items-center gap-1.5">
-                                    Items
-                                    <template v-if="isColumnSortable('itemsCount')">
-                                      <ChevronUpIcon
-                                        v-if="
-                                          currentSort.key === 'itemsCount' &&
-                                          currentSort.order === 'asc'
-                                        "
-                                        class="w-3 h-3 text-gray-900 dark:text-gray-100"
-                                      />
-                                      <ChevronDownIcon
-                                        v-else-if="
-                                          currentSort.key === 'itemsCount' &&
-                                          currentSort.order === 'desc'
-                                        "
-                                        class="w-3 h-3 text-gray-900 dark:text-gray-100"
-                                      />
-                                      <BarsArrowUpIcon
-                                        v-else
-                                        class="w-3 h-3 text-gray-400 dark:text-gray-500 opacity-50"
-                                      />
-                                    </template>
-                                  </div>
-                                </th>
-                                <th
-                                  :class="[
-                                    isColumnSortable('total') &&
-                                      'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100',
-                                  ]"
-                                  @click="isColumnSortable('total') && toggleSort('total')"
-                                >
-                                  <div class="flex items-center gap-1.5">
-                                    Total
-                                    <template v-if="isColumnSortable('total')">
-                                      <ChevronUpIcon
-                                        v-if="
-                                          currentSort.key === 'total' && currentSort.order === 'asc'
-                                        "
-                                        class="w-3 h-3 text-gray-900 dark:text-gray-100"
-                                      />
-                                      <ChevronDownIcon
-                                        v-else-if="
-                                          currentSort.key === 'total' &&
-                                          currentSort.order === 'desc'
-                                        "
-                                        class="w-3 h-3 text-gray-900 dark:text-gray-100"
-                                      />
-                                      <BarsArrowUpIcon
-                                        v-else
-                                        class="w-3 h-3 text-gray-400 dark:text-gray-500 opacity-50"
-                                      />
-                                    </template>
-                                  </div>
-                                </th>
-                                <th
-                                  :class="[
-                                    isColumnSortable('paymentMethod') &&
-                                      'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100',
-                                  ]"
-                                  @click="
-                                    isColumnSortable('paymentMethod') && toggleSort('paymentMethod')
-                                  "
-                                >
-                                  <div class="flex items-center gap-1.5">
-                                    Payment
-                                    <template v-if="isColumnSortable('paymentMethod')">
-                                      <ChevronUpIcon
-                                        v-if="
-                                          currentSort.key === 'paymentMethod' &&
-                                          currentSort.order === 'asc'
-                                        "
-                                        class="w-3 h-3 text-gray-900 dark:text-gray-100"
-                                      />
-                                      <ChevronDownIcon
-                                        v-else-if="
-                                          currentSort.key === 'paymentMethod' &&
-                                          currentSort.order === 'desc'
-                                        "
-                                        class="w-3 h-3 text-gray-900 dark:text-gray-100"
-                                      />
-                                      <BarsArrowUpIcon
-                                        v-else
-                                        class="w-3 h-3 text-gray-400 dark:text-gray-500 opacity-50"
-                                      />
-                                    </template>
-                                  </div>
-                                </th>
-                                <th
-                                  :class="[
-                                    isColumnSortable('status') &&
-                                      'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100',
-                                  ]"
-                                  @click="isColumnSortable('status') && toggleSort('status')"
-                                >
-                                  <div class="flex items-center gap-1.5">
-                                    Status
-                                    <template v-if="isColumnSortable('status')">
-                                      <ChevronUpIcon
-                                        v-if="
-                                          currentSort.key === 'status' &&
-                                          currentSort.order === 'asc'
-                                        "
-                                        class="w-3 h-3 text-gray-900 dark:text-gray-100"
-                                      />
-                                      <ChevronDownIcon
-                                        v-else-if="
-                                          currentSort.key === 'status' &&
-                                          currentSort.order === 'desc'
-                                        "
-                                        class="w-3 h-3 text-gray-900 dark:text-gray-100"
-                                      />
-                                      <BarsArrowUpIcon
-                                        v-else
-                                        class="w-3 h-3 text-gray-400 dark:text-gray-500 opacity-50"
-                                      />
-                                    </template>
-                                  </div>
-                                </th>
-                                <th
-                                  :class="[
-                                    isColumnSortable('createdBy') &&
-                                      'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100',
-                                  ]"
-                                  @click="isColumnSortable('createdBy') && toggleSort('createdBy')"
-                                >
-                                  <div class="flex items-center gap-1.5">
-                                    Created By
-                                    <template v-if="isColumnSortable('createdBy')">
-                                      <ChevronUpIcon
-                                        v-if="
-                                          currentSort.key === 'createdBy' &&
-                                          currentSort.order === 'asc'
-                                        "
-                                        class="w-3 h-3 text-gray-900 dark:text-gray-100"
-                                      />
-                                      <ChevronDownIcon
-                                        v-else-if="
-                                          currentSort.key === 'createdBy' &&
-                                          currentSort.order === 'desc'
-                                        "
-                                        class="w-3 h-3 text-gray-900 dark:text-gray-100"
-                                      />
-                                      <BarsArrowUpIcon
-                                        v-else
-                                        class="w-3 h-3 text-gray-400 dark:text-gray-500 opacity-50"
-                                      />
-                                    </template>
-                                  </div>
-                                </th>
-                                <th
-                                  class="w-12 px-3 py-2.5 text-right text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:w-[4.5rem] sm:px-4"
-                                >
-                                  Actions
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              <template v-for="receipt in paginatedReceipts" :key="receipt.id">
-                                <tr
-                                  :data-receipt-row="receipt.id"
-                                  :data-receipt-flash="
-                                    flashReceiptId === receipt.id ? '' : undefined
-                                  "
-                                  class="cursor-pointer"
-                                  :class="
-                                    flashReceiptId === receipt.id
-                                      ? '!bg-gray-900/[0.05] dark:!bg-white/[0.06]'
-                                      : ''
-                                  "
-                                  @click="handleViewReceipt(receipt)"
-                                >
-                                  <td
-                                    v-if="canDeleteReceipts"
-                                    class="w-10 px-3 py-2.5 text-center align-middle sm:px-4"
-                                  >
-                                    <Checkbox
-                                      :model-value="
-                                        selectedReceiptsForBulk.some((r) => r.id === receipt.id)
-                                      "
-                                      @update:model-value="
-                                        (checked) => toggleReceiptSelection(receipt, checked)
-                                      "
-                                      size="sm"
-                                      wrapper-class="justify-center"
-                                      @click.stop
-                                    />
-                                  </td>
-                                  <td class="whitespace-nowrap px-3 py-2.5 align-middle sm:px-4">
-                                    <div class="flex flex-nowrap items-center gap-1">
-                                      <span
-                                        class="text-xs font-semibold tabular-nums text-gray-900 dark:text-gray-50"
-                                      >
-                                        {{ receipt.receiptNumber }}
-                                      </span>
-                                      <button
-                                        type="button"
-                                        @click.stop="copyReceiptNumber(receipt.receiptNumber)"
-                                        class="shrink-0 rounded-sm p-0.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800/90 dark:hover:text-gray-100"
-                                        aria-label="Copy receipt number"
-                                      >
-                                        <ClipboardDocumentIcon
-                                          class="w-3.5 h-3.5"
-                                          stroke-width="1.5"
-                                        />
-                                      </button>
-                                      <span
-                                        v-if="receipt.isSwapIn"
-                                        class="inline-flex items-center rounded-full bg-sky-50 px-2 py-0.5 text-[9px] font-semibold text-sky-800 dark:bg-sky-500/15 dark:text-sky-200"
-                                        title="Swap-in transaction"
-                                      >
-                                        Swap
-                                      </span>
-                                    </div>
-                                  </td>
-                                  <td class="max-w-[12rem] px-3 py-2.5 align-middle sm:px-4">
-                                    <p
-                                      class="truncate text-xs font-medium text-gray-900 dark:text-gray-50"
-                                    >
-                                      {{ receipt.customerName }}
-                                    </p>
-                                    <p
-                                      v-if="receipt.customerPhone || receipt.customerEmail"
-                                      class="mt-0.5 truncate text-[11px] tabular-nums text-gray-500 dark:text-gray-400"
-                                    >
-                                      {{ receipt.customerPhone || receipt.customerEmail }}
-                                    </p>
-                                  </td>
-                                  <td class="whitespace-nowrap px-3 py-2.5 align-middle sm:px-4">
-                                    <span
-                                      class="text-xs tabular-nums text-gray-600 dark:text-gray-300"
-                                    >
-                                      {{ formatDate(receipt.date) }}
-                                    </span>
-                                  </td>
-                                  <td
-                                    class="min-w-[9rem] max-w-[16rem] px-3 py-2.5 align-middle sm:px-4"
-                                  >
-                                    <p
-                                      v-if="getReceiptLineItemsPreview(receipt)"
-                                      class="truncate text-xs text-gray-800 dark:text-gray-200"
-                                    >
-                                      {{ getReceiptLineItemsPreview(receipt) }}
-                                    </p>
-                                    <p v-else class="text-xs text-gray-500">{{ EMPTY_CELL }}</p>
-                                  </td>
-                                  <td class="whitespace-nowrap px-3 py-2.5 align-middle sm:px-4">
-                                    <span class="text-xs" :class="tableMoneyClass()">
-                                      {{ formatCurrency(receipt.total) }}
-                                    </span>
-                                    <ReceiptProfitHint :receipt="receipt" class="mt-0.5" />
-                                  </td>
-                                  <td class="whitespace-nowrap px-3 py-2.5 align-middle sm:px-4">
-                                    <span class="text-xs text-gray-700 dark:text-gray-300">
-                                      {{ formatPaymentMethod(receipt.paymentMethod) }}
-                                    </span>
-                                  </td>
-                                  <td class="px-3 py-2.5 align-middle sm:px-4">
-                                    <ReceiptStatusBadge :badge="receiptStatusBadge(receipt)" />
-                                  </td>
-                                  <td class="max-w-[10rem] px-3 py-2.5 align-middle sm:px-4">
-                                    <p class="truncate text-xs text-gray-600 dark:text-gray-300">
-                                      {{
-                                        receipt.createdByUserName ||
-                                        getCreatorName(receipt.actualCreator || receipt.createdBy)
-                                      }}
-                                    </p>
-                                  </td>
-                                  <td class="px-4 py-2 text-right align-middle sm:px-5">
-                                    <div
-                                      class="relative inline-flex justify-end"
-                                      @click.stop
-                                    >
-                                      <button
-                                        type="button"
-                                        :data-receipt-actions-anchor="receipt.id"
-                                        @click="toggleReceiptMenu(receipt.id)"
-                                        class="inline-flex h-8 w-8 items-center justify-center rounded-xl text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800/85 dark:hover:text-gray-100"
-                                        aria-label="Sale actions"
-                                        aria-haspopup="menu"
-                                        :aria-expanded="openReceiptMenuId === receipt.id"
-                                      >
-                                        <EllipsisVerticalIcon class="w-4 h-4" stroke-width="2" />
-                                      </button>
-                                    </div>
-                                  </td>
-                                </tr>
-                              </template>
-                            </tbody>
-                          </table>
-                        </div>
-                        <DashboardTablePagination
-                          v-if="sortedFilteredReceipts.length > 0 && !isReceiptsFullscreen"
-                          :current-page="currentPage"
-                          :items-per-page="itemsPerPage"
-                          :total="sortedFilteredReceipts.length"
-                          @page-change="handlePageChange"
-                        />
-                      </div>
-                    </div>
-                  </template>
-
-                  <!-- Fullscreen: pagination pinned inside overlay -->
-                  <DashboardTablePagination
-                    v-if="isReceiptsFullscreen && sortedFilteredReceipts.length > 0"
-                    :pin-to-viewport="false"
-                    class="shrink-0"
-                    style="padding-bottom: env(safe-area-inset-bottom, 0px)"
-                    :current-page="currentPage"
-                    :items-per-page="itemsPerPage"
-                    :total="sortedFilteredReceipts.length"
-                    @page-change="handlePageChange"
-                  />
-                </div>
-              </div>
-            </Teleport>
-
-            <!-- Create Receipt Modal -->
-            <CreateReceiptModal
-              v-model="showCreateReceiptModal"
-              @receipt-created="handleReceiptCreated"
-            />
-
-            <QuickSaleModal v-model="showQuickSaleModal" @sale-completed="handleQuickSaleCompleted" />
-
-            <!-- View Receipt Modal -->
-            <ViewReceiptModal v-model="showViewReceiptModal" :receipt="selectedReceipt" />
-          <ReceiptDetailsDrawer
-            v-model="showReceiptDetailsDrawer"
-            :receipt="selectedReceipt"
-            @preview="previewReceiptFromDrawer"
-            @print="previewReceiptFromDrawer"
-            @record-payment="recordPaymentFromDrawer"
-            @cancel="cancelFromDrawer"
-            @refund="refundFromDrawer"
-          />
-
-            <!-- Return Receipt Modal -->
-            <ReturnReceiptModal
-              v-model="showReturnReceiptModal"
-              :receipt="selectedReceipt"
-              @returned="handleReceiptReturned"
-            />
-
-            <!-- Bulk Delete Receipts Modal -->
-            <BulkDeleteConfirmModal
-              v-model="showBulkDeleteReceiptsModal"
-              v-model:confirmed="bulkDeleteReceiptsConfirmed"
-              title="Delete selected sales"
-              entity-label="sale"
-              :count="selectedReceiptsForBulk.length"
-              :item-names="
-                selectedReceiptsForBulk.map(
-                  (r) => r.receiptNumber || r.customerName || r.id
-                )
-              "
-              warning="This permanently deletes the selected sales. Associated customer balances may be affected. This cannot be undone."
-              confirm-label="I understand these sales will be permanently deleted."
-              :loading="isBulkDeletingReceipts"
-              @update:model-value="(v) => { if (!v) bulkDeleteReceiptsConfirmed = false }"
-              @confirm="handleConfirmBulkDeleteReceipts"
-            />
-            <DeleteReceiptModal
-              v-model="showDeleteReceiptModal"
-              :receipt="selectedReceipt"
-              @confirmDelete="handleReceiptConfirmDelete"
-            />
-
-            <!-- Receipt Timeline Modal -->
-            <ReceiptTimelineModal v-model="showTimelineModal" :receipt="selectedReceipt" />
-          </template>
-
-          <!-- Outstanding (balance due) tab -->
-          <template v-else-if="activeTab === 'outstanding'">
-            <div :class="tableShellFlexClass">
-              <DataTableToolbar
-                v-if="!receiptsStore.loading"
-                native-table-key="receipts-outstanding"
-              >
-                <template #filters>
-                  <DashboardToolbarSearch
-                    v-model="outstandingSearchQuery"
-                    placeholder="Search customer or receipt #…"
-                    wrapper-class="sm:max-w-xs"
-                  />
-                </template>
-              </DataTableToolbar>
-
-              <DashTableSkeleton
-                v-if="receiptsStore.loading"
-                :columns="outstandingTableSkeletonColumns"
-                :rows="8"
-                leading="none"
-                show-toolbar
-                flush
-                aria-label="Loading outstanding payments"
-              />
-
-              <DashboardTableEmptyState
-                v-else-if="filteredOutstandingReceipts.length === 0"
-                :icon="ClockIcon"
-                title="No outstanding payments"
-                description="Create a sale with “Balance due” when a customer pays a deposit. It will appear here until paid in full."
-                :tips="[
-                  'Record partial payments from the Actions menu on each row',
-                  'The balance clears automatically when paid in full',
-                ]"
-              />
-
-              <div v-else class="outstanding-table-wrap min-h-0 flex-1 overflow-x-auto">
-                <table class="dashboard-table min-w-full">
-                  <thead>
-                    <tr>
-                      <th class="text-left">Sale</th>
-                      <th class="text-left">Customer</th>
-                      <th class="hidden text-left md:table-cell">Items</th>
-                      <th class="text-right">Total</th>
-                      <th class="text-right">Paid</th>
-                      <th class="text-right">Balance</th>
-                      <th class="text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr
-                      v-for="row in filteredOutstandingReceipts"
-                      :key="row.id"
-                      class="cursor-pointer"
-                      @click="viewOutstandingReceipt(row)"
-                    >
-                      <td class="px-3 py-3 text-xs font-medium text-gray-900 dark:text-gray-100">
-                        {{ row.receiptNumber }}
-                        <p class="mt-0.5 text-[10px] font-normal text-gray-500">
-                          {{ formatDate(row.date) }}
-                        </p>
-                      </td>
-                      <td class="px-3 py-3 text-xs text-gray-700 dark:text-gray-300">
-                        <p class="font-medium text-gray-900 dark:text-gray-100">
-                          {{ row.customerName }}
-                        </p>
-                        <p v-if="row.customerPhone" class="text-[10px] text-gray-500">
-                          {{ row.customerPhone }}
-                        </p>
-                        <p v-if="row.customerEmail" class="text-[10px] text-gray-500">
-                          {{ row.customerEmail }}
-                        </p>
-                      </td>
-                      <td
-                        class="hidden px-3 py-3 text-xs text-gray-600 dark:text-gray-400 md:table-cell"
-                      >
-                        {{ getReceiptLineItemsPreview(row) || EMPTY_CELL }}
-                      </td>
-                      <td class="px-3 py-3 text-right text-xs" :class="tableMoneyClass()">
-                        {{ formatCurrency(row.total) }}
-                      </td>
-                      <td class="px-3 py-3 text-right text-xs" :class="tableMoneyClass()">
-                        {{ formatCurrency(outstandingAmountPaid(row)) }}
-                      </td>
-                      <td class="px-3 py-3 text-right text-xs" :class="tableMoneyOwedClass()">
-                        {{ formatCurrency(outstandingBalanceDue(row)) }}
-                      </td>
-                      <td class="px-3 py-3" @click.stop>
-                        <div class="flex flex-wrap justify-end gap-1.5">
-                          <button
-                            type="button"
-                            class="rounded-sm bg-gray-900 px-3 py-1 text-[11px] font-semibold text-white hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
-                            @click="openRecordPayment(row)"
-                          >
-                            Record payment
-                          </button>
-                          <button
-                            type="button"
-                            class="rounded-sm bg-white px-3 py-1 text-[11px] font-semibold text-gray-700 hover:bg-gray-50 dark:bg-gray-900/40 dark:text-gray-300 dark:hover:bg-gray-800"
-                            @click="viewOutstandingReceipt(row)"
-                          >
-                            View
-                          </button>
-                          <button
-                            v-if="canEditReceipts"
-                            type="button"
-                            class="rounded-sm border border-red-200/80 bg-white px-3 py-1 text-[11px] font-semibold text-red-700 hover:bg-red-50 dark:border-red-900/40 dark:bg-gray-900/40 dark:text-red-300 dark:hover:bg-red-950/30"
-                            @click="cancelOutstandingReceipt(row)"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </template>
-
-          <!-- Customers tab -->
-          <template v-else-if="activeTab === 'customers'">
-            <div :class="tableShellFlexClass">
-              <DataTableToolbar
-                v-if="!receiptsStore.loading"
-                native-table-key="receipts-customers"
-              >
-                <template #filters>
-                  <DashboardToolbarSearch
-                    v-model="customersSearchQuery"
-                    placeholder="Search customers…"
-                    wrapper-class="sm:max-w-xs"
-                  />
-                  <DashboardToolbarSelect
-                    v-model="customersSortBy"
-                    min-width-class="min-w-[6.5rem]"
-                  >
-                    <option value="name">Name</option>
-                    <option value="orders">Orders</option>
-                    <option value="spent">Total Spent</option>
-                    <option value="lastOrder">Last Order</option>
-                  </DashboardToolbarSelect>
-                </template>
-              </DataTableToolbar>
-              <DashTableSkeleton
-                v-if="receiptsStore.loading"
-                :columns="customersTableSkeletonColumns"
-                :rows="8"
-                leading="none"
-                show-toolbar
-                flush
-                aria-label="Loading customers"
-              />
-              <DashboardTableEmptyState
-                v-else-if="filteredCustomers.length === 0"
-                :icon="UsersIcon"
-                :title="customersSearchQuery ? 'No customers found' : 'No customers yet'"
-                :description="
-                  customersSearchQuery
-                    ? 'Try another name, phone number, or email.'
-                    : 'Customers are created automatically when you add them on a sale.'
-                "
-                :tips="
-                  customersSearchQuery
-                    ? [
-                        'Search matches name, phone, and email fields',
-                        'Clear search to see your full customer list',
-                      ]
-                    : [
-                        'Each sale links to a customer profile',
-                        'Expand a row to see order history and totals',
-                      ]
-                "
-              />
-              <div v-else class="flex min-h-0 flex-1 flex-col">
-                <div class="customers-table-wrap min-h-0 flex-1 overflow-x-auto">
-                  <table class="dashboard-table min-w-full">
-                    <thead>
-                      <tr>
-                        <th
-                          class="min-w-[90px] px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:min-w-[100px] sm:px-4"
-                        >
-                          Sales
-                        </th>
-                        <th
-                          class="px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4"
-                        >
-                          Customer
-                        </th>
-                        <th
-                          class="px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4"
-                        >
-                          Contact
-                        </th>
-                        <th
-                          class="px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4"
-                        >
-                          Orders
-                        </th>
-                        <th
-                          class="px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4"
-                        >
-                          Total Spent
-                        </th>
-                        <th
-                          v-if="hasBalanceFeature"
-                          class="px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4"
-                        >
-                          Balance
-                        </th>
-                        <th
-                          class="px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4"
-                        >
-                          Last Order
-                        </th>
-                        <th
-                          class="w-12 px-3 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:w-[4.5rem] sm:px-4"
-                        >
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <template v-for="customer in paginatedCustomers" :key="customer.id">
-                        <tr
-                          :data-customer-row="customer.id"
-                          :data-customer-flash="flashCustomerId === customer.id ? '' : undefined"
-                          :class="[
-                            expandedCustomers[customer.id]
-                              ? 'bg-gray-50/50 dark:bg-white/[0.02]'
-                              : '',
-                            flashCustomerId === customer.id
-                              ? '!ring-2 !ring-inset !ring-gray-900/20 dark:!ring-white/25'
-                              : '',
-                          ]"
-                        >
-                          <td class="px-3 py-2.5 align-middle sm:px-4">
-                            <ReceiptLineItemsToggle
-                              v-if="getCustomerReceipts(customer.id).length > 0"
-                              :expanded="!!expandedCustomers[customer.id]"
-                              :item-count="getCustomerReceipts(customer.id).length"
-                              noun="sale"
-                              hide-text="Hide orders"
-                              no-top-margin
-                              @toggle="toggleCustomerExpanded(customer.id)"
-                            />
-                            <span v-else class="text-[10px] text-gray-400 dark:text-gray-500">-</span>
-                          </td>
-                          <td class="px-3 py-2.5 sm:px-4">
-                            <div class="flex items-center gap-2">
-                              <span
-                                class="text-[10px] font-medium text-gray-900 dark:text-gray-100"
-                                >{{ customer.name }}</span
-                              >
-                            </div>
-                          </td>
-                          <td class="px-3 py-2.5 sm:px-4">
-                            <div class="space-y-0.5">
-                              <p
-                                v-if="customer.email"
-                                class="text-[10px] text-gray-600 dark:text-gray-300 truncate"
-                              >
-                                {{ customer.email }}
-                              </p>
-                              <p
-                                v-if="customer.phone"
-                                class="text-[10px] text-gray-600 dark:text-gray-300 truncate"
-                              >
-                                {{ customer.phone }}
-                              </p>
-                              <p
-                                v-if="!customer.email && !customer.phone"
-                                class="text-[10px] text-gray-400 dark:text-gray-500"
-                              >
-                                -
-                              </p>
-                            </div>
-                          </td>
-                          <td class="px-3 py-2.5 sm:px-4">
-                            <span class="text-[10px] text-gray-600 dark:text-gray-300">{{
-                              customer.receipts.length
-                            }}</span>
-                          </td>
-                          <td class="px-3 py-2.5 sm:px-4">
-                            <span class="text-[10px]" :class="tableMoneyClass()">{{
-                              formatCurrency(customer.totalSpent)
-                            }}</span>
-                          </td>
-                          <td v-if="hasBalanceFeature" class="px-3 py-2.5 sm:px-4">
-                            <span
-                              v-if="getCustomerBalance(customer) > 0"
-                              :class="tableMoneyOwedClass() + ' text-[10px]'"
-                            >
-                              {{ formatCurrency(getCustomerBalance(customer)) }}
-                            </span>
-                            <span v-else class="text-[10px] text-gray-400 dark:text-gray-500">{{
-                              EMPTY_CELL
-                            }}</span>
-                          </td>
-                          <td class="px-3 py-2.5 sm:px-4">
-                            <span class="text-[10px] text-gray-600 dark:text-gray-300">{{
-                              formatDate(customer.lastOrderDate)
-                            }}</span>
-                          </td>
-                          <td class="px-3 py-2.5 sm:px-4 text-right">
-                            <div
-                              class="relative inline-flex justify-end"
-                              @click.stop
-                            >
-                              <button
-                                type="button"
-                                :data-customer-actions-anchor="customer.id"
-                                @click="toggleCustomerMenu(customer.id)"
-                                class="inline-flex h-8 w-8 items-center justify-center rounded-xl text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700/80 dark:hover:text-gray-200"
-                                aria-label="Customer actions"
-                                aria-haspopup="menu"
-                                :aria-expanded="openCustomerMenuId === customer.id"
-                              >
-                                <EllipsisVerticalIcon class="w-4 h-4" stroke-width="2" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                        <tr
-                          v-if="expandedCustomers[customer.id]"
-                          class="bg-gray-50/40 dark:bg-white/[0.015]"
-                        >
-                          <td :colspan="hasBalanceFeature ? 8 : 7" class="border-t-0 px-3 pb-3 pt-0 sm:px-4">
-                            <div
-                              class="border-l-2 border-gray-400/70 pl-3 dark:border-white/20"
-                            >
-                              <ReceiptLineItemsDetailPanel
-                                title="Order history"
-                                count-noun="sale"
-                                :item-count="getCustomerReceipts(customer.id).length"
-                              >
-                                <div class="space-y-2">
-                                  <article
-                                    v-for="receipt in getCustomerReceipts(customer.id)"
-                                    :key="receipt.id"
-                                    class="overflow-hidden rounded-md border border-gray-200/80 bg-white dark:border-gray-700/50 dark:bg-gray-900/40"
-                                  >
-                                    <button
-                                      type="button"
-                                      class="flex w-full flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-gray-100 px-3 py-2 text-left transition-colors hover:bg-gray-50/90 dark:border-gray-800/80 dark:hover:bg-white/[0.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gray-400/50"
-                                      :aria-label="`Open sale ${receipt.receiptNumber} in sales list`"
-                                      @click="goToReceiptFromCustomer(receipt)"
-                                    >
-                                      <div class="min-w-0">
-                                        <p class="text-xs font-semibold tabular-nums text-gray-900 dark:text-gray-50">
-                                          #{{ receipt.receiptNumber }}
-                                        </p>
-                                        <p class="mt-0.5 text-[10px] tabular-nums text-gray-500 dark:text-gray-400">
-                                          {{ formatDate(receipt.date) }}, {{ formatTime(receipt.date) }}
-                                        </p>
-                                      </div>
-                                      <div class="flex shrink-0 items-center gap-2">
-                                        <span class="text-xs" :class="tableMoneyClass()">
-                                          {{ formatCurrency(receipt.total) }}
-                                        </span>
-                                        <ReceiptStatusBadge :badge="receiptStatusBadge(receipt)" />
-                                      </div>
-                                    </button>
-                                    <div class="px-1 py-1">
-                                      <ReceiptTableLineItems
-                                        v-if="receipt.items?.length"
-                                        :items="receipt.items"
-                                        :items-count-fallback="receipt.itemsCount"
-                                        compact
-                                      />
-                                      <p
-                                        v-else
-                                        class="px-2 py-2 text-[11px] text-gray-500 dark:text-gray-400"
-                                      >
-                                        {{ receipt.itemsCount }} item{{
-                                          receipt.itemsCount === 1 ? '' : 's'
-                                        }}
-                                        · open in Sales for full details
-                                      </p>
-                                    </div>
-                                  </article>
-                                </div>
-                              </ReceiptLineItemsDetailPanel>
-                            </div>
-                          </td>
-                        </tr>
-                      </template>
-                    </tbody>
-                  </table>
-                </div>
-                <DashboardTablePagination
-                  v-if="filteredCustomers.length > 0"
-                  :current-page="customersCurrentPage"
-                  :items-per-page="customersItemsPerPage"
-                  :total="filteredCustomers.length"
-                  @page-change="handleCustomersPageChange"
-                />
-              </div>
-            </div>
-          </template>
-        </div>
       </template>
     </div>
     <template #fallback>
-      <div class="flex min-h-[40vh] w-full max-w-none items-center justify-center px-4 pb-24">
-        <div class="text-center">
-          <div
-            class="mx-auto h-10 w-10 animate-spin rounded-full border-0 border-gray-300/40 border-t-gray-500 dark:border-white/15 dark:border-t-gray-300"
-          />
-          <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">Loading sales…</p>
-        </div>
+      <div class="ds-root s-c s-sales s-sales--fallback" role="status">
+        <SSpinner :size="24" />
+        <span class="ds-sr-only">Loading sales</span>
       </div>
     </template>
   </ClientOnly>
 
-  <!-- Receipt / customer actions (teleported; not clipped by table/card overflow) -->
-  <IosContextMenu
+  <!-- Receipt actions (teleported; not clipped by table/card overflow) -->
+  <SMenu
     ref="receiptMenuPanelRef"
     :open="Boolean(openReceiptMenuId && receiptForOpenMenu && receiptMenuFixedStyle)"
     :style="receiptMenuFixedStyle"
     menu-id="receipt"
+    label="Sale actions"
+    @close="closeReceiptMenu"
   >
-    <IosContextMenuItem
-      label="History"
-      :icon="ClockIcon"
-      @click="
-        () => {
-          handleViewReceiptTimeline(receiptForOpenMenu!)
-          openReceiptMenuId = null
-        }
-      "
-    />
-    <IosContextMenuItem
-      label="View sale"
-      :icon="EyeIcon"
-      @click="
-        () => {
-          handleViewReceipt(receiptForOpenMenu!)
-          openReceiptMenuId = null
-        }
-      "
-    />
-    <IosContextMenuItem
+    <SMenuItem label="View sale" :icon="Eye" @select="runReceiptMenuAction(handleViewReceipt)" />
+    <SMenuItem label="History" :icon="History" @select="runReceiptMenuAction(handleViewReceiptTimeline)" />
+    <SMenuItem
       v-if="receiptForOpenMenu?.status === 'completed' && canEditReceipts"
       label="Refund"
-      :icon="ArrowPathIcon"
-      @click="
-        () => {
-          handleRefundReceipt(receiptForOpenMenu!)
-          openReceiptMenuId = null
-        }
-      "
+      :icon="Undo2"
+      @select="runReceiptMenuAction(handleRefundReceipt)"
     />
-    <IosContextMenuItem
+    <SMenuItem
       v-if="canDeleteReceipts"
       label="Delete"
-      :icon="TrashIcon"
+      :icon="Trash2"
       danger
-      @click="
-        () => {
-          handleDeleteReceipt(receiptForOpenMenu!)
-          openReceiptMenuId = null
-        }
-      "
+      @select="runReceiptMenuAction(handleDeleteReceipt)"
     />
-  </IosContextMenu>
-  <IosContextMenu
-    ref="customerMenuPanelRef"
-    :open="Boolean(openCustomerMenuId && customerForOpenMenu && customerMenuFixedStyle)"
-    :style="customerMenuFixedStyle"
-    menu-id="customer"
-  >
-    <IosContextMenuItem
-      label="View sales"
-      :icon="PrinterIcon"
-      @click="
-        () => {
-          viewCustomerReceipts(customerForOpenMenu!)
-          openCustomerMenuId = null
-        }
-      "
-    />
-    <IosContextMenuItem
-      v-if="hasBalanceFeature"
-      label="Manage balance"
-      @click="
-        () => {
-          openCustomerBalance(customerForOpenMenu!)
-          openCustomerMenuId = null
-        }
-      "
-    />
-  </IosContextMenu>
-
-  <CustomerBalanceModal
-    v-if="customerBalanceTarget"
-    v-model="showCustomerBalanceModal"
-    :customer-name="customerBalanceTarget.name"
-    :email="customerBalanceTarget.email"
-    :phone="customerBalanceTarget.phone"
-    @saved="onCustomerBalanceSaved"
-  />
+  </SMenu>
 
   <BalanceDuePaymentModal
     v-model="showBalancePaymentModal"
@@ -1806,67 +482,50 @@
 </template>
 
 <script setup lang="ts">
+import ReceiptProfitHint from '~/components/receipts/ReceiptProfitHint.vue'
+import BulkDeleteConfirmModal from '~/components/dashboard/BulkDeleteConfirmModal.vue'
 import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import {
-  ReceiptPercentIcon,
-  PlusIcon,
-  FunnelIcon,
-  ArrowUturnLeftIcon,
-  CurrencyDollarIcon,
-  MagnifyingGlassIcon,
-  ArrowPathIcon,
-  ArrowDownTrayIcon,
-  PrinterIcon,
-  EyeIcon,
-  UsersIcon,
-  UserCircleIcon,
-  ClockIcon,
-  CheckCircleIcon,
-  XMarkIcon,
   PencilSquareIcon,
-  TrashIcon,
-  ChevronUpIcon,
-  ChevronDownIcon,
   ChevronRightIcon,
-  BarsArrowUpIcon,
-  ClipboardDocumentIcon,
-  ArrowsPointingOutIcon,
-  EllipsisVerticalIcon,
-  QrCodeIcon,
-  CheckIcon,
 } from '~/utils/app-icons'
-import Button from '~/components/ui/Button.vue'
-import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
-import IosQuickActionSkeleton from '~/components/ios/IosQuickActionSkeleton.vue'
-import IosTransactionListSkeleton from '~/components/ios/IosTransactionListSkeleton.vue'
-import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
-import Modal from '~/components/ui/Modal.vue'
-import Checkbox from '~/components/ui/Checkbox.vue'
+import {
+  CircleCheck,
+  Copy as CopyIcon,
+  EllipsisVertical,
+  Eye,
+  History,
+  Plus,
+  QrCode,
+  ReceiptText,
+  SearchX,
+  Trash2,
+  Undo2,
+} from '@lucide/vue'
+import SBadge from '~/components/s/SBadge.vue'
+import SButton from '~/components/s/SButton.vue'
+import SCard from '~/components/s/SCard.vue'
+import SCheckbox from '~/components/s/SCheckbox.vue'
+import SEmptyState from '~/components/s/SEmptyState.vue'
+import SIconButton from '~/components/s/SIconButton.vue'
+import SMenu from '~/components/s/SMenu.vue'
+import SMenuItem from '~/components/s/SMenuItem.vue'
+import SPageHeader from '~/components/s/SPageHeader.vue'
+import SPagination from '~/components/s/SPagination.vue'
+import SSearch from '~/components/s/SSearch.vue'
+import SSelect from '~/components/s/SSelect.vue'
+import SSkeleton from '~/components/s/SSkeleton.vue'
+import SSortHeader from '~/components/s/SSortHeader.vue'
+import SSpinner from '~/components/s/SSpinner.vue'
+import STabs from '~/components/s/STabs.vue'
 // @ts-ignore
 import CreateReceiptModal from '~/components/receipts/CreateReceiptModal.vue'
-import IosQuickActionBar, {
-  type IosQuickActionOption,
-} from '~/components/ios/IosQuickActionBar.vue'
-import IosDrawer from '~/components/ios/IosDrawer.vue'
-import IosContextMenu from '~/components/ios/IosContextMenu.vue'
-import IosContextMenuItem from '~/components/ios/IosContextMenuItem.vue'
-import IosSearchBar from '~/components/ios/IosSearchBar.vue'
-import IosSwipeActions, { type IosSwipeAction } from '~/components/ios/IosSwipeActions.vue'
-import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
-import IosReceiptTransactionRow from '~/components/ios/IosReceiptTransactionRow.vue'
-import type {
-  ReceiptTransactionAmountTone,
-  ReceiptTransactionVariant,
-} from '~/components/ios/IosReceiptTransactionRow.vue'
 // @ts-ignore
 import QuickSaleModal from '~/components/receipts/QuickSaleModal.vue'
 // @ts-ignore
 import ViewReceiptModal from '~/components/receipts/ViewReceiptModal.vue'
 import ReceiptDetailsDrawer from '~/components/receipts/ReceiptDetailsDrawer.vue'
-import ReceiptTableLineItems from '~/components/receipts/ReceiptTableLineItems.vue'
-import ReceiptLineItemsToggle from '~/components/receipts/ReceiptLineItemsToggle.vue'
-import ReceiptLineItemsDetailPanel from '~/components/receipts/ReceiptLineItemsDetailPanel.vue'
-import { getReceiptStatusBadge } from '~/utils/receipt-status'
+import { getReceiptStatusLabel, getReceiptStatusTone } from '~/utils/receipt-status'
 // @ts-ignore
 import ReturnReceiptModal from '~/components/receipts/ReturnReceiptModal.vue'
 // @ts-ignore
@@ -1890,14 +549,10 @@ import {
   computeFixedAnchoredMenuStyle,
   isInsideAnchoredMenu,
 } from '~/utils/menuAnchor'
-import { scheduleNativeIdleWork } from '~/utils/capacitor-native-perf'
 import { EMPTY_CELL } from '~/utils/ui-empty'
-import { getCustomerContactKey } from '~/utils/customer-key'
-import { useCustomerAccountsStore } from '~/stores/customerAccounts'
-import CustomerBalanceModal from '~/components/whatsapp/CustomerBalanceModal.vue'
 import BalanceDuePaymentModal from '~/components/receipts/BalanceDuePaymentModal.vue'
+import { useDashboardPageRefreshRegister } from '~/composables/useDashboardPageRefresh'
 import { receiptAmountPaid, receiptBalanceDue } from '~/utils/receipt-balance'
-import { tableMoneyClass, tableMoneyOwedClass } from '~/utils/table-money-styles'
 
 definePageMeta({
   layout: 'dashboard',
@@ -1917,25 +572,7 @@ const { getUserDocument } = useUser()
 const { getFirestoreInstance } = useFirestore()
 const staffStore = useStaffStore()
 const { copyToClipboard } = useCopy()
-const customerAccountsStore = useCustomerAccountsStore()
-const { hasBalanceFeature } = useWhatsAppMessaging()
 const userStore = useUserStore()
-
-const showCustomerBalanceModal = ref(false)
-const customerBalanceTarget = ref<CustomerDisplay | null>(null)
-
-function getCustomerBalance(customer: CustomerDisplay): number {
-  return customerAccountsStore.getBalanceForContactKey(customer.contactKey)
-}
-
-function openCustomerBalance(customer: CustomerDisplay) {
-  customerBalanceTarget.value = customer
-  showCustomerBalanceModal.value = true
-}
-
-function onCustomerBalanceSaved() {
-  void customerAccountsStore.fetchAccountsForStore()
-}
 
 // Copy functions
 const copyReceiptNumber = (receiptNumber: string) => {
@@ -1990,7 +627,7 @@ function applyReceiptHighlight(receiptId: string) {
   flashReceiptId.value = receiptId
   if (import.meta.client) {
     const scrollToRow = () => {
-      const el = document.querySelector<HTMLElement>(`[data-receipt-row="${receiptId}"]`)
+      const el = getVisibleMenuAnchorElement('data-receipt-row', receiptId)
       el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
     nextTick(() => {
@@ -2005,50 +642,6 @@ function applyReceiptHighlight(receiptId: string) {
   }, 5000)
 }
 
-const customerFromRoute = computed(() => {
-  const raw = route.query.customer
-  if (typeof raw === 'string' && raw.length > 0) return raw
-  if (Array.isArray(raw) && typeof raw[0] === 'string') return raw[0]
-  return null
-})
-
-const flashCustomerId = ref<string | null>(null)
-let customerHighlightClearTimer: ReturnType<typeof setTimeout> | null = null
-
-function clearCustomerHighlightTimer() {
-  if (customerHighlightClearTimer) {
-    clearTimeout(customerHighlightClearTimer)
-    customerHighlightClearTimer = null
-  }
-}
-
-function stripCustomerHighlightQuery() {
-  if (route.query.customer == null || route.query.customer === '') return
-  const q = { ...route.query }
-  delete q.customer
-  void router.replace({ query: q })
-}
-
-function applyCustomerHighlight(customerId: string) {
-  clearCustomerHighlightTimer()
-  flashCustomerId.value = customerId
-  if (import.meta.client) {
-    const scrollToRow = () => {
-      const el = document.querySelector<HTMLElement>(`[data-customer-row="${customerId}"]`)
-      el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    }
-    nextTick(() => {
-      scrollToRow()
-      requestAnimationFrame(scrollToRow)
-    })
-  }
-  customerHighlightClearTimer = setTimeout(() => {
-    flashCustomerId.value = null
-    customerHighlightClearTimer = null
-    stripCustomerHighlightQuery()
-  }, 5000)
-}
-
 const activeTab = ref<'receipts' | 'outstanding' | 'customers'>(
   (['receipts', 'outstanding', 'customers'].includes(String(route.query.tab))
     ? route.query.tab
@@ -2057,48 +650,18 @@ const activeTab = ref<'receipts' | 'outstanding' | 'customers'>(
 const outstandingSearchQuery = ref('')
 const showBalancePaymentModal = ref(false)
 const balancePaymentReceipt = ref<Receipt | null>(null)
-const isReceiptsFullscreen = ref(false)
-const isCustomersFullscreen = ref(false)
 const openReceiptMenuId = ref<string | null>(null)
-const openCustomerMenuId = ref<string | null>(null)
 
 const toggleReceiptMenu = (receiptId: string) => {
-  if (openReceiptMenuId.value !== receiptId) openCustomerMenuId.value = null
   openReceiptMenuId.value = openReceiptMenuId.value === receiptId ? null : receiptId
 }
 
-const toggleCustomerMenu = (customerId: string) => {
-  if (openCustomerMenuId.value !== customerId) openReceiptMenuId.value = null
-  openCustomerMenuId.value = openCustomerMenuId.value === customerId ? null : customerId
-}
-
-// Handle ESC key to exit fullscreen and close menus
+// Handle ESC key to close menus
 const handleKeyDown = (e: KeyboardEvent) => {
   if (e.key === 'Escape') {
-    if (isReceiptsFullscreen.value) {
-      isReceiptsFullscreen.value = false
-    }
-    if (isCustomersFullscreen.value) {
-      isCustomersFullscreen.value = false
-    }
     openReceiptMenuId.value = null
-    openCustomerMenuId.value = null
   }
 }
-
-// Watch fullscreen state to lock/unlock body scroll
-watch(
-  [isReceiptsFullscreen, isCustomersFullscreen],
-  ([receiptsFullscreen, customersFullscreen]) => {
-    if (import.meta.client) {
-      if (receiptsFullscreen || customersFullscreen) {
-        document.body.style.overflow = 'hidden'
-      } else {
-        document.body.style.overflow = ''
-      }
-    }
-  }
-)
 
 // Watch for tab changes and update URL
 watch(activeTab, (newTab) => {
@@ -2109,35 +672,34 @@ watch(activeTab, (newTab) => {
     flashReceiptId.value = null
   }
   void router.replace({ query: q })
-  if (newTab === 'customers' && hasBalanceFeature.value) {
-    void customerAccountsStore.fetchAccountsForStore()
-  }
 })
+
+// Sidebar links (Sales / Customers) change the tab through the URL
+watch(
+  () => route.query.tab,
+  (tab) => {
+    const next = (['receipts', 'outstanding', 'customers'].includes(String(tab))
+      ? tab
+      : 'receipts') as typeof activeTab.value
+    if (next !== activeTab.value) activeTab.value = next
+  }
+)
 
 // Initialize loading state synchronously on client (warm cache avoids flash)
 const isInitialLoading = ref(receiptsStore.receipts.length === 0)
-const {
-  headerBtnClass,
-  headerBtnLabelClass,
-  pageTitleClass,
-  segmentTabsClass,
-  segmentTabsBtnClass,
-  segmentTabsBtnActiveClass,
-} = useDashboardPageChrome()
-const { isCapacitorIos } = useIsCapacitorIos()
-const { branchPageTitle, currentStoreLabel } = useCurrentStoreLabel()
+const { branchPageTitle } = useCurrentStoreLabel()
+const { dashPath } = useDashboardPaths()
 
-const iosSalesNavTitle = computed(() => {
-  const page =
-    activeTab.value === 'outstanding'
-      ? 'Outstanding'
-      : activeTab.value === 'customers'
-        ? 'Customers'
-        : 'Sales'
-  return currentStoreLabel.value ? `${currentStoreLabel.value} · ${page}` : page
-})
-
-const { tableShellFlexClass, tableExpandClass, tableExpandHeaderClass, tableExpandBodyClass, tableExpandCloseClass, tableExpandEyebrowClass, tableExpandTitleClass, tableExpandMetaClass, tableExpandFieldClass } = useDashboardTableChrome()
+// Customers have their own page; old `?tab=customers` links land there.
+watch(
+  () => route.query.tab,
+  (tab) => {
+    if (tab !== 'customers') return
+    const { tab: _tab, ...query } = route.query
+    void router.replace({ path: dashPath('/customers'), query })
+  },
+  { immediate: true }
+)
 
 const searchQuery = ref('')
 const statusFilter = ref('all')
@@ -2156,14 +718,6 @@ const getInitialPage = (): number => {
 }
 const currentPage = ref(getInitialPage())
 const itemsPerPage = ref(100)
-/** Expandable full line-item details (desktop secondary row + mobile accordion) */
-const expandedReceiptLineItems = ref<Record<string, boolean>>({})
-const receiptLineItemsDetailColspan = computed(() => (canDeleteReceipts.value ? 10 : 9))
-
-const getReceiptLineItemsCount = (receipt: Receipt) =>
-  receipt.items?.length ?? receipt.itemsCount ?? 0
-
-const receiptStatusBadge = (receipt: Receipt) => getReceiptStatusBadge(receipt.status)
 
 const formatPaymentMethod = (method: string | undefined) => {
   if (!method?.trim()) return EMPTY_CELL
@@ -2180,13 +734,6 @@ const getReceiptLineItemsPreview = (receipt: Receipt): string => {
   return `${names.slice(0, max).join(', ')} · +${names.length - max} more`
 }
 
-const toggleReceiptLineItemsExpand = (receiptId: string) => {
-  expandedReceiptLineItems.value = {
-    ...expandedReceiptLineItems.value,
-    [receiptId]: !expandedReceiptLineItems.value[receiptId],
-  }
-}
-
 // Sorting state
 const currentSort = ref<{ key: string; order: 'asc' | 'desc' }>({ key: 'date', order: 'desc' })
 
@@ -2201,266 +748,6 @@ const sortableColumns = [
   { key: 'status', label: 'Status' },
   { key: 'createdBy', label: 'Created By' },
 ]
-
-const receiptsTableSkeletonColumns = computed(() => {
-  const columns: Array<{
-    id?: string
-    label: string
-    class?: string
-    bone?: string
-    lines?: 1 | 2
-  }> = []
-  if (canDeleteReceipts.value) {
-    columns.push({ id: 'select', label: '', class: 'w-10 text-center', bone: '1rem' })
-  }
-  columns.push(
-    { label: 'Sale #', bone: '4.5rem' },
-    { label: 'Customer', lines: 2 },
-    { label: 'Date', bone: '4.5rem' },
-    { label: 'Items', bone: '7rem' },
-    { label: 'Total', bone: '4rem' },
-    { label: 'Payment', bone: '4.5rem' },
-    { label: 'Status', class: 'dashboard-table__col-status', bone: '4.5rem' },
-    { label: 'Created By', bone: '5.5rem' },
-    { label: 'Actions', class: 'w-12 text-right', bone: '1.5rem' }
-  )
-  return columns
-})
-
-const outstandingTableSkeletonColumns = [
-  { label: 'Sale', lines: 2 as const },
-  { label: 'Customer', lines: 2 as const },
-  { label: 'Items', class: 'hidden md:table-cell', bone: '7rem' },
-  { label: 'Total', class: 'text-right', bone: '4rem' },
-  { label: 'Paid', class: 'text-right', bone: '4rem' },
-  { label: 'Balance', class: 'text-right', bone: '4rem' },
-  { label: 'Actions', class: 'text-right', bone: '4.5rem' },
-]
-
-const customersTableSkeletonColumns = computed(() => {
-  const columns: Array<{
-    label: string
-    class?: string
-    bone?: string
-    lines?: 1 | 2
-  }> = [
-    { label: 'Sales', bone: '3.25rem' },
-    { label: 'Customer', bone: '7rem' },
-    { label: 'Contact', lines: 2 },
-    { label: 'Orders', bone: '2.5rem' },
-    { label: 'Total Spent', bone: '4.5rem' },
-  ]
-  if (hasBalanceFeature.value) {
-    columns.push({ label: 'Balance', bone: '4rem' })
-  }
-  columns.push(
-    { label: 'Last Order', bone: '5rem' },
-    { label: 'Actions', class: 'w-12 text-right', bone: '1.5rem' }
-  )
-  return columns
-})
-
-// Customers tab state
-const customersSearchQuery = ref('')
-const customersSortBy = ref('name')
-const expandedCustomers = ref<Record<string, boolean>>({})
-const getCustomersInitialPage = (): number => {
-  if (import.meta.client) {
-    try {
-      const saved = localStorage.getItem('receipts-customers-page')
-      return saved ? parseInt(saved, 10) : 1
-    } catch (e) {
-      return 1
-    }
-  }
-  return 1
-}
-const customersCurrentPage = ref(getCustomersInitialPage())
-const customersItemsPerPage = ref(100)
-
-// Customer interface for display
-interface CustomerDisplay {
-  id: string
-  contactKey: string
-  name: string
-  email?: string
-  phone?: string
-  address?: string
-  receipts: string[]
-  totalSpent: number
-  lastOrderDate: Date
-  firstOrderDate: Date
-}
-
-// Extract unique customers from receipts based on email or phone
-const uniqueCustomers = computed(() => {
-  const customerMap = new Map<string, CustomerDisplay>()
-
-  receiptsStore.receipts.forEach((receipt) => {
-    // Use email or phone as the key to identify unique customers
-    const receiptWithPhone = receipt as Receipt & {
-      customerPhone?: string
-      customerAddress?: string
-    }
-    const key =
-      receipt.customerEmail?.toLowerCase().trim() ||
-      receiptWithPhone.customerPhone?.trim() ||
-      receipt.customerName.toLowerCase().trim() ||
-      ''
-
-    if (!key) return // Skip receipts without any identifier
-
-    if (customerMap.has(key)) {
-      // Update existing customer
-      const existing = customerMap.get(key)!
-      existing.receipts.push(receipt.id)
-      existing.totalSpent += receipt.total
-      const receiptDate = receipt.date?.toDate ? receipt.date.toDate() : new Date(receipt.date)
-      if (receiptDate > existing.lastOrderDate) {
-        existing.lastOrderDate = receiptDate
-      }
-      if (receiptDate < existing.firstOrderDate) {
-        existing.firstOrderDate = receiptDate
-      }
-      // Update contact info if available
-      if (receipt.customerEmail && !existing.email) {
-        existing.email = receipt.customerEmail
-      }
-      if (receiptWithPhone.customerPhone && !existing.phone) {
-        existing.phone = receiptWithPhone.customerPhone
-      }
-      if (receiptWithPhone.customerAddress && !existing.address) {
-        existing.address = receiptWithPhone.customerAddress
-      }
-    } else {
-      // Create new customer
-      const receiptDate = receipt.date?.toDate ? receipt.date.toDate() : new Date(receipt.date)
-      customerMap.set(key, {
-        id: key,
-        contactKey: getCustomerContactKey({
-          email: receipt.customerEmail,
-          phone: receiptWithPhone.customerPhone,
-          name: receipt.customerName,
-        }),
-        name: receipt.customerName,
-        email: receipt.customerEmail,
-        phone: receiptWithPhone.customerPhone,
-        address: receiptWithPhone.customerAddress,
-        receipts: [receipt.id],
-        totalSpent: receipt.total,
-        lastOrderDate: receiptDate,
-        firstOrderDate: receiptDate,
-      })
-    }
-  })
-
-  return Array.from(customerMap.values())
-})
-
-// Filter customers
-const filteredCustomers = computed(() => {
-  let result = [...uniqueCustomers.value]
-
-  // Search filter
-  if (customersSearchQuery.value) {
-    const query = customersSearchQuery.value.toLowerCase()
-    result = result.filter(
-      (customer) =>
-        customer.name.toLowerCase().includes(query) ||
-        customer.email?.toLowerCase().includes(query) ||
-        customer.phone?.toLowerCase().includes(query)
-    )
-  }
-
-  // Sort
-  result.sort((a, b) => {
-    switch (customersSortBy.value) {
-      case 'name':
-        return a.name.localeCompare(b.name)
-      case 'orders':
-        return b.receipts.length - a.receipts.length
-      case 'spent':
-        return b.totalSpent - a.totalSpent
-      case 'lastOrder':
-        return b.lastOrderDate.getTime() - a.lastOrderDate.getTime()
-      default:
-        return 0
-    }
-  })
-
-  return result
-})
-
-const customerForOpenMenu = computed(() => {
-  const id = openCustomerMenuId.value
-  if (!id) return null
-  return filteredCustomers.value.find((c) => c.id === id) ?? null
-})
-
-// Paginated customers
-const paginatedCustomers = computed(() => {
-  const start = (customersCurrentPage.value - 1) * customersItemsPerPage.value
-  const end = start + customersItemsPerPage.value
-  return filteredCustomers.value.slice(start, end)
-})
-
-// Customer statistics
-const customersTotalRevenue = computed(() => {
-  return uniqueCustomers.value.reduce((sum, c) => sum + c.totalSpent, 0)
-})
-
-const customersAverageOrderValue = computed(() => {
-  const totalOrders = uniqueCustomers.value.reduce((sum, c) => sum + c.receipts.length, 0)
-  return totalOrders > 0 ? customersTotalRevenue.value / totalOrders : 0
-})
-
-const customersTotalOrders = computed(() =>
-  uniqueCustomers.value.reduce((sum, c) => sum + c.receipts.length, 0)
-)
-
-// Get receipts for a customer
-const getCustomerReceipts = (customerId: string) => {
-  const customer = uniqueCustomers.value.find((c) => c.id === customerId)
-  if (!customer) return []
-
-  return receiptsStore.receipts
-    .filter((r) => customer.receipts.includes(r.id))
-    .sort((a, b) => {
-      const dateA = a.date?.toDate ? a.date.toDate() : new Date(a.date)
-      const dateB = b.date?.toDate ? b.date.toDate() : new Date(b.date)
-      return dateB.getTime() - dateA.getTime()
-    })
-}
-
-// Toggle customer expanded state
-const toggleCustomerExpanded = (customerId: string) => {
-  expandedCustomers.value[customerId] = !expandedCustomers.value[customerId]
-}
-
-// View customer receipts (filter receipts tab)
-const viewCustomerReceipts = (customer: CustomerDisplay) => {
-  activeTab.value = 'receipts'
-  // Set search query to customer name or email
-  searchQuery.value = customer.email || customer.name
-  // Trigger search
-  setTimeout(() => {
-    // Scroll to top
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, 100)
-}
-
-// Handle customers page change
-const handleCustomersPageChange = (page: number) => {
-  customersCurrentPage.value = page
-  if (import.meta.client) {
-    try {
-      localStorage.setItem('receipts-customers-page', page.toString())
-    } catch (e) {
-      // Ignore localStorage errors
-    }
-  }
-  window.scrollTo({ top: 0, behavior: 'smooth' })
-}
 
 // Filter receipts by current store for all computed properties
 const currentStoreId = computed(() => storesStore.currentStoreId)
@@ -2522,106 +809,85 @@ const outstandingReceipts = computed(() =>
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 )
 
-const salesTabOptions = computed(() => [
-  { value: 'receipts', label: 'Sales' },
-  {
-    value: 'outstanding',
-    label: 'Outstanding',
-    badge: outstandingReceipts.value.length || undefined,
-  },
-  { value: 'customers', label: 'Customers' },
-])
-
-const showSalesMoreSheet = ref(false)
-
-const salesQuickActionOptions = computed((): IosQuickActionOption[] => {
-  const tabs: IosQuickActionOption[] = [
-    { value: 'receipts', label: 'Sales', icon: ReceiptPercentIcon },
-    {
-      value: 'outstanding',
-      label: 'Outstanding',
-      icon: ClockIcon,
-      badge: outstandingReceipts.value.length || undefined,
-    },
-    { value: 'customers', label: 'Customers', icon: UsersIcon },
-  ]
-
-  if (!canCreate.value) {
-    return [
-      ...tabs,
-      {
-        value: 'more',
-        label: 'More',
-        icon: EllipsisVerticalIcon,
-        trailing: 'more',
-        action: () => {
-          showSalesMoreSheet.value = true
-        },
-      },
-    ]
-  }
-
-  return [
-    ...tabs,
-    {
-      value: 'more',
-      label: 'More',
-      icon: EllipsisVerticalIcon,
-      trailing: 'more',
-      action: () => {
-        showSalesMoreSheet.value = true
-      },
-    },
-    {
-      value: 'quick',
-      label: 'Quick',
-      icon: QrCodeIcon,
-      action: openQuickSaleModal,
-    },
-    {
-      value: 'new',
-      label: 'New sale',
-      icon: PlusIcon,
-      trailing: 'add',
-      action: openCreateReceiptModal,
-    },
-  ]
-})
-
-const receiptStatusQuickActionOptions: IosQuickActionOption[] = [
-  { value: 'all', label: 'All', icon: FunnelIcon },
-  { value: 'completed', label: 'Completed', icon: ReceiptPercentIcon },
-  { value: 'pending', label: 'Pending', icon: ClockIcon },
-  { value: 'refunded', label: 'Refunded', icon: ArrowUturnLeftIcon },
-]
-
 const receiptStatusFilterOptions = [
-  { value: 'all', label: 'All' },
+  { value: 'all', label: 'All statuses' },
   { value: 'completed', label: 'Completed' },
   { value: 'pending', label: 'Pending' },
   { value: 'refunded', label: 'Refunded' },
 ]
 
-const receiptDateFilterOptions = [
+const receiptDateFilterSelectOptions = [
   { value: 'all', label: 'All dates' },
   { value: 'today', label: 'Today' },
-  { value: 'week', label: 'Week' },
-  { value: 'month', label: 'Month' },
+  { value: 'week', label: 'This week' },
+  { value: 'month', label: 'This month' },
 ]
 
-const customerSortQuickActionOptions: IosQuickActionOption[] = [
-  { value: 'name', label: 'Name', icon: UserCircleIcon },
-  { value: 'orders', label: 'Orders', icon: ClipboardDocumentIcon },
-  { value: 'spent', label: 'Spent', icon: CurrencyDollarIcon },
-  { value: 'lastOrder', label: 'Recent', icon: ClockIcon },
+const receiptTableColumns: Array<{
+  key: string
+  label: string
+  class?: string
+  align?: 'start' | 'end'
+}> = [
+  { key: 'receiptNumber', label: 'Sale' },
+  { key: 'customerName', label: 'Customer' },
+  { key: 'date', label: 'Date', class: 's-hide-md' },
+  { key: 'itemsCount', label: 'Items', class: 's-hide-lg' },
+  { key: 'total', label: 'Total', class: 's-table__num', align: 'end' },
+  { key: 'paymentMethod', label: 'Payment', class: 's-hide-lg' },
+  { key: 'status', label: 'Status' },
+  { key: 'createdBy', label: 'Created by', class: 's-hide-lg' },
 ]
 
-const customerSortFilterOptions = [
-  { value: 'name', label: 'Name' },
-  { value: 'orders', label: 'Orders' },
-  { value: 'spent', label: 'Spent' },
-  { value: 'lastOrder', label: 'Recent' },
-]
+const salesTabs = computed(() => [
+  { value: 'receipts', label: 'Sales' },
+  { value: 'outstanding', label: 'Outstanding', count: outstandingReceipts.value.length || undefined },
+])
+
+const hasReceiptFilters = computed(
+  () => Boolean(searchQuery.value) || statusFilter.value !== 'all' || dateFilter.value !== 'all'
+)
+
+function isReceiptSelected(receipt: Receipt): boolean {
+  return selectedReceiptsForBulk.value.some((r) => r.id === receipt.id)
+}
+
+const allReceiptsOnPageSelected = computed(
+  () =>
+    paginatedReceipts.value.length > 0 &&
+    selectedReceiptsForBulk.value.length === paginatedReceipts.value.length
+)
+
+function sortDirection(key: string): 'asc' | 'desc' | null {
+  return currentSort.value.key === key ? currentSort.value.order : null
+}
+
+function ariaSort(key: string): 'ascending' | 'descending' | 'none' {
+  const direction = sortDirection(key)
+  if (direction === 'asc') return 'ascending'
+  if (direction === 'desc') return 'descending'
+  return 'none'
+}
+
+function runReceiptMenuAction(action: (receipt: Receipt) => unknown) {
+  const receipt = receiptForOpenMenu.value
+  if (receipt) action(receipt)
+  openReceiptMenuId.value = null
+}
+
+function focusMenuAnchor(
+  attribute: Parameters<typeof getVisibleMenuAnchorElement>[0],
+  id: string | null
+) {
+  if (!id || !import.meta.client) return
+  getVisibleMenuAnchorElement(attribute, id)?.focus()
+}
+
+function closeReceiptMenu() {
+  const id = openReceiptMenuId.value
+  openReceiptMenuId.value = null
+  focusMenuAnchor('data-receipt-actions-anchor', id)
+}
 
 const filteredOutstandingReceipts = computed(() => {
   const q = outstandingSearchQuery.value.trim().toLowerCase()
@@ -2823,33 +1089,6 @@ const receiptForOpenMenu = computed(() => {
 })
 
 const receiptsHeaderMetrics = computed(() => {
-  if (activeTab.value === 'customers') {
-    const total = uniqueCustomers.value.length
-    const shown = filteredCustomers.value.length
-    return [
-      {
-        key: 'customers',
-        label: shown !== total ? 'Customers shown' : 'Customers',
-        value: shown !== total ? `${shown} / ${total}` : String(total),
-      },
-      {
-        key: 'revenue',
-        label: 'Revenue',
-        value: formatCurrency(customersTotalRevenue.value),
-      },
-      {
-        key: 'orders',
-        label: 'Orders',
-        value: String(customersTotalOrders.value),
-      },
-      {
-        key: 'aov',
-        label: 'Avg. order',
-        value: formatCurrency(customersAverageOrderValue.value),
-      },
-    ]
-  }
-
   if (activeTab.value === 'outstanding') {
     const rows = filteredOutstandingReceipts.value
     const balanceTotal = rows.reduce((sum, row) => sum + outstandingBalanceDue(row), 0)
@@ -2903,11 +1142,9 @@ const receiptsHeaderMetrics = computed(() => {
 })
 
 const receiptMenuFixedStyle = ref<Record<string, string> | null>(null)
-const customerMenuFixedStyle = ref<Record<string, string> | null>(null)
-/** IosContextMenu exposes its rendered card as `panel` so we can measure it */
+/** The menu exposes its rendered card as `panel` so we can measure it */
 type ContextMenuHandle = { panel: HTMLElement | null } | null
 const receiptMenuPanelRef = ref<ContextMenuHandle>(null)
-const customerMenuPanelRef = ref<ContextMenuHandle>(null)
 
 function updateReceiptMenuPosition() {
   const id = openReceiptMenuId.value
@@ -2929,26 +1166,6 @@ function updateReceiptMenuPosition() {
   })
 }
 
-function updateCustomerMenuPosition() {
-  const id = openCustomerMenuId.value
-  if (!id || !import.meta.client) {
-    customerMenuFixedStyle.value = null
-    return
-  }
-  const el = getVisibleMenuAnchorElement('data-customer-actions-anchor', id)
-  if (!el) {
-    customerMenuFixedStyle.value = null
-    return
-  }
-  const r = el.getBoundingClientRect()
-  const estimatedMenuHeight = customerMenuPanelRef.value?.panel?.offsetHeight || 52
-  customerMenuFixedStyle.value = computeFixedAnchoredMenuStyle(r, {
-    estimatedMenuHeight,
-    margin: 4,
-    viewportPadding: 8,
-  })
-}
-
 function addReceiptMenuPositionListeners() {
   if (!import.meta.client) return
   window.addEventListener('scroll', updateReceiptMenuPosition, true)
@@ -2961,32 +1178,12 @@ function removeReceiptMenuPositionListeners() {
   window.removeEventListener('resize', updateReceiptMenuPosition)
 }
 
-function addCustomerMenuPositionListeners() {
-  if (!import.meta.client) return
-  window.addEventListener('scroll', updateCustomerMenuPosition, true)
-  window.addEventListener('resize', updateCustomerMenuPosition)
-}
-
-function removeCustomerMenuPositionListeners() {
-  if (!import.meta.client) return
-  window.removeEventListener('scroll', updateCustomerMenuPosition, true)
-  window.removeEventListener('resize', updateCustomerMenuPosition)
-}
-
 let receiptMenuOutsideHandler: ((e: MouseEvent) => void) | null = null
-let customerMenuOutsideHandler: ((e: MouseEvent) => void) | null = null
 
 function removeReceiptMenuOutsideListener() {
   if (receiptMenuOutsideHandler && import.meta.client) {
     document.removeEventListener('click', receiptMenuOutsideHandler, true)
     receiptMenuOutsideHandler = null
-  }
-}
-
-function removeCustomerMenuOutsideListener() {
-  if (customerMenuOutsideHandler && import.meta.client) {
-    document.removeEventListener('click', customerMenuOutsideHandler, true)
-    customerMenuOutsideHandler = null
   }
 }
 
@@ -3015,35 +1212,6 @@ watch(openReceiptMenuId, (id) => {
     setTimeout(() => {
       if (openReceiptMenuId.value && receiptMenuOutsideHandler) {
         document.addEventListener('click', receiptMenuOutsideHandler, true)
-      }
-    }, 0)
-  })
-})
-
-watch(openCustomerMenuId, (id) => {
-  removeCustomerMenuOutsideListener()
-  removeCustomerMenuPositionListeners()
-  customerMenuFixedStyle.value = null
-  if (!id || !import.meta.client) return
-
-  nextTick(() => {
-    updateCustomerMenuPosition()
-    addCustomerMenuPositionListeners()
-  })
-
-  customerMenuOutsideHandler = (e: MouseEvent) => {
-    const t = e.target as HTMLElement | null
-    if (isInsideAnchoredMenu(t)) return
-    if (t?.closest?.('[data-customer-actions-anchor]')) return
-    openCustomerMenuId.value = null
-    removeCustomerMenuOutsideListener()
-  }
-
-  nextTick(() => {
-    requestAnimationFrame(() => updateCustomerMenuPosition())
-    setTimeout(() => {
-      if (openCustomerMenuId.value && customerMenuOutsideHandler) {
-        document.addEventListener('click', customerMenuOutsideHandler, true)
       }
     }, 0)
   })
@@ -3079,99 +1247,6 @@ const formatDate = (date: string | Date) => {
   })
 }
 
-function formatReceiptTransactionDate(date: string | Date) {
-  const dateObj = date instanceof Date ? date : new Date(date)
-  const day = String(dateObj.getDate()).padStart(2, '0')
-  const month = String(dateObj.getMonth() + 1).padStart(2, '0')
-  const year = dateObj.getFullYear()
-  return `${day}.${month}.${year}`
-}
-
-function getReceiptTransactionSubtitle(receipt: Receipt): string {
-  const parts: string[] = []
-  if (receipt.paymentMethod?.trim()) parts.push(receipt.paymentMethod.trim())
-  parts.push(receipt.receiptNumber)
-  return parts.join(' · ')
-}
-
-/** What was actually sold, so the list reads product-first instead of customer-first. */
-function getReceiptProductSummary(receipt: Receipt): string {
-  const items = receipt.items ?? []
-  if (items.length === 0) return receipt.receiptNumber
-  const first = items[0]!.itemName || 'Item'
-  if (items.length === 1) return first
-  return `${first} +${items.length - 1} more`
-}
-
-function getReceiptTransactionVariant(receipt: Receipt): ReceiptTransactionVariant {
-  switch (receipt.status) {
-    case 'completed':
-      return 'credit'
-    case 'refunded':
-      return 'debit'
-    case 'cancelled':
-      return 'cancelled'
-    default:
-      return 'pending'
-  }
-}
-
-function getReceiptTransactionAmount(receipt: Receipt): {
-  text: string
-  tone: ReceiptTransactionAmountTone
-} {
-  const formatted = formatCurrency(receipt.total)
-  if (receipt.status === 'refunded') {
-    return { text: `- ${formatted}`, tone: 'negative' }
-  }
-  if (receipt.status === 'completed') {
-    return { text: `+ ${formatted}`, tone: 'positive' }
-  }
-  return { text: formatted, tone: 'neutral' }
-}
-
-function getOutstandingTransactionSubtitle(receipt: Receipt): string {
-  const paid = formatCurrency(outstandingAmountPaid(receipt))
-  return `${receipt.receiptNumber} · ${paid} paid`
-}
-
-function getOutstandingTransactionAmount(receipt: Receipt): {
-  text: string
-  tone: ReceiptTransactionAmountTone
-} {
-  return {
-    text: formatCurrency(outstandingBalanceDue(receipt)),
-    tone: 'warning',
-  }
-}
-
-function getCustomerTransactionSubtitle(customer: CustomerDisplay): string {
-  const parts: string[] = []
-  if (customer.email?.trim()) parts.push(customer.email.trim())
-  else if (customer.phone?.trim()) parts.push(customer.phone.trim())
-  const orderLabel = `${customer.receipts.length} order${customer.receipts.length === 1 ? '' : 's'}`
-  parts.push(orderLabel)
-  if (hasBalanceFeature.value && getCustomerBalance(customer) > 0) {
-    parts.push(`${formatCurrency(getCustomerBalance(customer))} owed`)
-  }
-  return parts.join(' · ')
-}
-
-function getCustomerTransactionVariant(customer: CustomerDisplay): ReceiptTransactionVariant {
-  if (hasBalanceFeature.value && getCustomerBalance(customer) > 0) return 'pending'
-  return 'customer'
-}
-
-function getCustomerTransactionAmount(customer: CustomerDisplay): {
-  text: string
-  tone: ReceiptTransactionAmountTone
-} {
-  return {
-    text: `+ ${formatCurrency(customer.totalSpent)}`,
-    tone: 'positive',
-  }
-}
-
 const formatTime = (date: string | Date) => {
   const dateObj = date instanceof Date ? date : new Date(date)
   return dateObj.toLocaleTimeString('en-US', {
@@ -3194,23 +1269,6 @@ const resetFilters = () => {
   }
 }
 
-async function goToReceiptFromCustomer(receipt: Receipt) {
-  activeTab.value = 'receipts'
-  await nextTick()
-  let idx = sortedFilteredReceipts.value.findIndex((r) => r.id === receipt.id)
-  if (idx === -1) {
-    resetFilters()
-    await nextTick()
-    idx = sortedFilteredReceipts.value.findIndex((r) => r.id === receipt.id)
-  }
-  if (idx === -1) {
-    toast.error('Could not find this sale in the list.')
-    await router.replace({ query: { ...route.query, tab: 'receipts' } })
-    return
-  }
-  await router.replace({ query: { ...route.query, tab: 'receipts', highlight: receipt.id } })
-}
-
 watch(
   [highlightFromRoute, isInitialLoading, activeTab],
   async () => {
@@ -3231,30 +1289,7 @@ watch(
     }
     applyReceiptHighlight(id)
   },
-  { flush: 'post' }
-)
-
-watch(
-  [customerFromRoute, isInitialLoading, activeTab],
-  async () => {
-    const id = customerFromRoute.value
-    if (!id || isInitialLoading.value || activeTab.value !== 'customers') return
-    await nextTick()
-    let idx = filteredCustomers.value.findIndex((c) => c.id === id)
-    if (idx === -1 && customersSearchQuery.value) {
-      customersSearchQuery.value = ''
-      await nextTick()
-      idx = filteredCustomers.value.findIndex((c) => c.id === id)
-    }
-    if (idx === -1) return
-    const page = Math.floor(idx / customersItemsPerPage.value) + 1
-    if (customersCurrentPage.value !== page) {
-      customersCurrentPage.value = page
-      await nextTick()
-    }
-    applyCustomerHighlight(id)
-  },
-  { flush: 'post' }
+  { flush: 'post', immediate: true }
 )
 
 const handlePageChange = (page: number) => {
@@ -3273,22 +1308,9 @@ const handlePageChange = (page: number) => {
 // Watch for page changes to persist
 watch(currentPage, (newPage) => {
   openReceiptMenuId.value = null
-  expandedReceiptLineItems.value = {}
   if (import.meta.client && activeTab.value === 'receipts') {
     try {
       localStorage.setItem('receipts-page', newPage.toString())
-    } catch (e) {
-      // Ignore localStorage errors
-    }
-  }
-})
-
-// Watch for customers tab page changes
-watch(customersCurrentPage, (newPage) => {
-  openCustomerMenuId.value = null
-  if (import.meta.client && activeTab.value === 'customers') {
-    try {
-      localStorage.setItem('receipts-customers-page', newPage.toString())
     } catch (e) {
       // Ignore localStorage errors
     }
@@ -3302,10 +1324,6 @@ const openCreateReceiptModal = () => {
   showCreateReceiptModal.value = true
 }
 
-const openCreateSaleFromEmpty = () => {
-  openCreateReceiptModal()
-}
-
 const clearReceiptFilters = () => {
   searchQuery.value = ''
   statusFilter.value = 'all'
@@ -3314,16 +1332,6 @@ const clearReceiptFilters = () => {
 
 const openQuickSaleModal = () => {
   showQuickSaleModal.value = true
-}
-
-function selectSalesTabFromSheet(tab: 'receipts' | 'outstanding' | 'customers') {
-  activeTab.value = tab
-  showSalesMoreSheet.value = false
-}
-
-function selectReceiptDateFilter(value: string) {
-  dateFilter.value = value
-  showSalesMoreSheet.value = false
 }
 
 const handleQuickSaleCompleted = async () => {
@@ -3632,92 +1640,7 @@ async function reloadReceiptsPage() {
   await loadCreatorNames()
 }
 
-useIosPullToRefreshRegister(reloadReceiptsPage)
-
-function receiptSwipeActions(receipt: Receipt): IosSwipeAction[] {
-  const actions: IosSwipeAction[] = [
-    {
-      id: 'view',
-      label: 'View sale',
-      shortLabel: 'View',
-      tone: 'primary',
-      icon: EyeIcon,
-      onSelect: () => handleViewReceipt(receipt),
-    },
-    {
-      id: 'share',
-      label: 'Share sale',
-      shortLabel: 'Share',
-      icon: ArrowDownTrayIcon,
-      onSelect: () => handleViewReceipt(receipt),
-    },
-  ]
-  if (receipt.status === 'completed' && canEditReceipts.value) {
-    actions.push({
-      id: 'refund',
-      label: 'Refund sale',
-      shortLabel: 'Refund',
-      tone: 'danger',
-      icon: ArrowPathIcon,
-      onSelect: () => handleRefundReceipt(receipt),
-    })
-  }
-  return actions
-}
-
-function outstandingSwipeActions(receipt: Receipt): IosSwipeAction[] {
-  const actions: IosSwipeAction[] = [
-    {
-      id: 'pay',
-      label: 'Record payment',
-      shortLabel: 'Pay',
-      tone: 'primary',
-      icon: CheckCircleIcon,
-      onSelect: () => openRecordPayment(receipt),
-    },
-    {
-      id: 'view',
-      label: 'View sale',
-      shortLabel: 'View',
-      icon: EyeIcon,
-      onSelect: () => viewOutstandingReceipt(receipt),
-    },
-  ]
-  if (canEditReceipts.value) {
-    actions.push({
-      id: 'cancel',
-      label: 'Cancel order',
-      shortLabel: 'Cancel',
-      tone: 'danger',
-      icon: XMarkIcon,
-      onSelect: () => cancelOutstandingReceipt(receipt),
-    })
-  }
-  return actions
-}
-
-function customerSwipeActions(customer: CustomerDisplay): IosSwipeAction[] {
-  const actions: IosSwipeAction[] = [
-    {
-      id: 'sales',
-      label: 'View sales',
-      shortLabel: 'Sales',
-      tone: 'primary',
-      icon: ReceiptPercentIcon,
-      onSelect: () => viewCustomerReceipts(customer),
-    },
-  ]
-  if (hasBalanceFeature.value) {
-    actions.push({
-      id: 'balance',
-      label: 'Manage balance',
-      shortLabel: 'Balance',
-      icon: UserCircleIcon,
-      onSelect: () => openCustomerBalance(customer),
-    })
-  }
-  return actions
-}
+useDashboardPageRefreshRegister(reloadReceiptsPage)
 
 // Load receipts on mount
 onMounted(async () => {
@@ -3728,6 +1651,12 @@ onMounted(async () => {
 
   // Only run on client
   if (import.meta.server) return
+
+  if (route.query.new === '1') {
+    openCreateReceiptModal()
+    const { new: _new, ...rest } = route.query
+    void router.replace({ query: rest })
+  }
 
   // Set initial loading state (skip skeleton when we already have warm receipts)
   isInitialLoading.value = receiptsStore.receipts.length === 0 && receiptsStore.loading
@@ -3764,21 +1693,13 @@ onMounted(async () => {
       await receiptsStore.fetchReceipts({
         force: Boolean(highlightFromRoute.value),
       })
-      if (isCapacitorIos.value) {
-        scheduleNativeIdleWork(() => {
-          void loadCreatorNames()
-        }, 500)
-      } else {
-        await loadCreatorNames()
-      }
+      await loadCreatorNames()
     } catch (error: any) {
       console.error('Error loading receipts:', error.message || error)
     }
   }
 
-  if (!isCapacitorIos.value) {
-    await new Promise((resolve) => setTimeout(resolve, 300))
-  }
+  await new Promise((resolve) => setTimeout(resolve, 300))
   isInitialLoading.value = false
 })
 
@@ -3788,9 +1709,7 @@ onBeforeUnmount(() => {
   if (import.meta.client) {
     window.removeEventListener('keydown', handleKeyDown)
     removeReceiptMenuOutsideListener()
-    removeCustomerMenuOutsideListener()
     removeReceiptMenuPositionListeners()
-    removeCustomerMenuPositionListeners()
     document.body.style.overflow = ''
   }
 })
@@ -3843,12 +1762,3 @@ watch(
   { immediate: false }
 )
 </script>
-
-<style>
-/*
- * Receipt flash (dark): force a gray row tint so `dark:` utilities never lose to a light base bg.
- */
-html.dark [data-receipt-flash] {
-  background-color: rgb(16 185 129 / 0.12) !important;
-}
-</style>

@@ -102,6 +102,13 @@ export function getReceiptProductDetails(
 /** Omit inventory/system fields echoed into product snapshots (not helpful on printed receipts). */
 const HIDDEN_RECEIPT_DETAIL_KEYS = new Set<string>(['swapIn', 'swapInReceiptId'])
 
+/** Stock-loan, held-sale and transfer bookkeeping that should never reach a receipt. */
+const INTERNAL_DETAIL_KEY_PATTERN = /^(sellerLoan|pendingSale|transfer|acquisition)/i
+
+function isHiddenDetailKey(key: string): boolean {
+  return HIDDEN_RECEIPT_DETAIL_KEYS.has(key) || INTERNAL_DETAIL_KEY_PATTERN.test(key)
+}
+
 /** Shown as the swap-in headline; omit from repeated detail rows. */
 const INVENTORY_PRIMARY_NAME_KEYS = new Set(['name', 'title', 'productName', 'itemName'])
 
@@ -181,7 +188,7 @@ export function getProductDetailLines(
   const seen = new Set<string>()
   const lines: string[] = []
   for (const key of DETAIL_ORDER) {
-    if (HIDDEN_RECEIPT_DETAIL_KEYS.has(key)) continue
+    if (isHiddenDetailKey(key)) continue
     if (opts?.omitLineItemFields && LINE_ITEM_TABLE_HIDDEN_KEYS.has(key)) continue
     const value = raw[key]
     if (value === undefined || value === null) continue
@@ -196,7 +203,7 @@ export function getProductDetailLines(
 
   for (const [key, value] of Object.entries(raw)) {
     if ((DETAIL_ORDER as readonly string[]).includes(key)) continue
-    if (HIDDEN_RECEIPT_DETAIL_KEYS.has(key)) continue
+    if (isHiddenDetailKey(key)) continue
     if (opts?.omitLineItemFields && LINE_ITEM_TABLE_HIDDEN_KEYS.has(key)) continue
     if (value === undefined || value === null) continue
     const text = String(value).trim()
@@ -220,7 +227,7 @@ export function getInventoryItemDetailLines(
   const seen = new Set<string>()
   const lines: string[] = []
   for (const key of DETAIL_ORDER) {
-    if (HIDDEN_RECEIPT_DETAIL_KEYS.has(key) || INVENTORY_PRIMARY_NAME_KEYS.has(key)) continue
+    if (isHiddenDetailKey(key) || INVENTORY_PRIMARY_NAME_KEYS.has(key)) continue
     const value = raw[key]
     if (value === undefined || value === null) continue
     const text = String(value).trim()
@@ -234,7 +241,7 @@ export function getInventoryItemDetailLines(
 
   for (const [key, value] of Object.entries(raw)) {
     if ((DETAIL_ORDER as readonly string[]).includes(key)) continue
-    if (HIDDEN_RECEIPT_DETAIL_KEYS.has(key) || INVENTORY_PRIMARY_NAME_KEYS.has(key)) continue
+    if (isHiddenDetailKey(key) || INVENTORY_PRIMARY_NAME_KEYS.has(key)) continue
     if (value === undefined || value === null) continue
     const text = String(value).trim()
     if (!text) continue

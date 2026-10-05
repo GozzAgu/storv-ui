@@ -1,59 +1,5 @@
 <template>
-  <div :class="[pageClass, isCapacitorIos ? 'ios-home-page' : '']">
-    <template v-if="isCapacitorIos">
-      <IosEmptyState
-        v-if="needsStoreSelection && !isLoading"
-        :icon="BuildingStorefrontIcon"
-        title="Select a store"
-        :description="
-          canManageBranches
-            ? 'Choose a branch to load metrics, sales, and alerts for your dashboard.'
-            : 'Your dashboard loads for your store. If this takes a moment, we are connecting to your store data.'
-        "
-      >
-        <template v-if="canManageBranches" #action>
-          <InlineStorePicker />
-        </template>
-      </IosEmptyState>
-
-      <IosHomeDashboardSkeleton v-else-if="isLoading" />
-
-      <template v-else>
-        <GettingStartedChecklist class="mb-2 px-4" />
-        <section
-          v-if="isQuietDashboard && !gettingStartedVisible"
-          class="dash-quiet-today ios-quiet-today px-4"
-        >
-          <div class="dash-quiet-today__strip">
-            <div class="min-w-0">
-              <p class="dash-quiet-today__eyebrow">{{ iosStoreLabel || 'Today' }}</p>
-              <h1 class="dash-quiet-today__title">{{ quietHeadline }}</h1>
-              <p class="dash-quiet-today__meta">0 sales · quiet so far</p>
-            </div>
-            <NuxtLink
-              v-if="quietPrimaryCta"
-              :to="quietPrimaryCta.href"
-              class="dash-quiet-today__cta"
-            >
-              {{ quietPrimaryCta.label }}
-            </NuxtLink>
-          </div>
-        </section>
-
-        <IosHomeDashboard
-          v-else-if="!isQuietDashboard"
-          :display-name="iosDisplayName"
-          :store-label="iosStoreLabel"
-          :day-story="dayStory"
-          :metrics="iosHomeMetrics"
-          :recent-sales="iosRecentSales"
-          :low-stock-preview="iosLowStockPreview"
-          :alerts="iosHomeAlerts"
-        />
-      </template>
-    </template>
-
-    <template v-else>
+  <div class="ds-root s-c s-page s-overview">
     <Tutorial
       v-if="!gettingStartedVisible"
       ref="tutorialRef"
@@ -61,525 +7,226 @@
       @complete="onTutorialComplete"
     />
 
-    <GettingStartedChecklist v-if="!needsStoreSelection && !isLoading" class="mb-2" />
-
-    <DashboardPageHeader
-      v-if="!isCapacitorIos && !isQuietDashboard"
-      data-tutorial="dashboard"
-      :class="pageHeaderClass"
-    >
+    <SPageHeader :title="formatGreeting(userName || 'there')" data-tutorial="dashboard">
       <template #eyebrow>
-        <p v-if="isNativeApp" :class="eyebrowClass">Overview</p>
-      </template>
-      <template #title>
-        <div class="saas-dashboard-greeting-row">
-          <h1 :class="isNativeApp ? pageTitleClass : 'saas-dashboard-greeting'">
-            {{
-              isCapacitorIos
-                ? 'Overview'
-                : isNativeApp
-                  ? `Welcome back, ${userName}`
-                  : formatGreeting(userName || 'User')
-            }}
-          </h1>
-          <DashboardGreetingSkyIcon v-if="!isNativeApp" />
-        </div>
-      </template>
-      <template #description>
-        <template v-if="!isNativeApp">
-          <p class="saas-dashboard-branch">
-            {{ currentStoreLabel }}
-            <span v-if="userRoleLabel"> · {{ userRoleLabel }}</span>
-          </p>
-          <p v-if="dayStory" class="saas-dashboard-day-story">{{ dayStory }}</p>
-        </template>
-        <p v-else :class="pageMetaClass">
-          <strong>{{ currentStoreLabel }}</strong>
-          <span v-if="userRoleLabel"> · {{ userRoleLabel }}</span>
-          <span> · </span>
-          <span :class="numClass">{{ totalOrders }} sales</span>
+        <p class="s-page-header__eyebrow">
+          {{ currentStoreLabel }}<template v-if="userRoleLabel"> · {{ userRoleLabel }}</template>
         </p>
       </template>
-    </DashboardPageHeader>
+      <template v-if="!needsStoreSelection && !isLoading && dayStory" #description>
+        {{ dayStory }}
+      </template>
+      <template v-if="!needsStoreSelection" #actions>
+        <SButton v-if="canManageInventoryItems" to="/dashboard/inventory">
+          <template #leading>
+            <PackagePlus :size="16" :stroke-width="1.75" aria-hidden="true" />
+          </template>
+          Add product
+        </SButton>
+        <SButton variant="primary" to="/dashboard/receipts?new=1">
+          <template #leading>
+            <Plus :size="16" :stroke-width="2" aria-hidden="true" />
+          </template>
+          New sale
+        </SButton>
+      </template>
+    </SPageHeader>
 
-    <div v-if="needsStoreSelection && !isLoading" :class="[stateCardClass, 'dash-empty-state']">
-      <div class="dash-empty-state__mark">
-        <MarketingFeatureIcon
-          name="branch"
-          size="md"
-          class="dash-empty-state__icon"
-        />
-      </div>
-      <p :class="['dash-empty-state__title', 'dash-state-card__title', pageTitleClass, '!text-sm']">
-        Select a store to load your dashboard
-      </p>
-      <p :class="['dash-empty-state__desc', 'dash-state-card__desc', cardDescClass]">
-        {{
+    <SCard v-if="needsStoreSelection && !isLoading">
+      <SEmptyState
+        title="Select a store"
+        :description="
           canManageBranches
-            ? 'Choose a branch below or from the store selector in the top bar. Metrics, charts, and alerts are scoped to the active store.'
-            : 'Your dashboard loads for your store. If this takes a moment, we are connecting to your store data.'
-        }}
-      </p>
-      <InlineStorePicker v-if="canManageBranches" />
-      <NuxtLink
-        v-if="canManageBranches"
-        to="/dashboard/settings"
-        :class="[linkClass, 'mt-4 inline-block']"
+            ? 'Pick the branch you want to see. Every number on this page is for one branch at a time.'
+            : 'We are connecting to your store. This usually takes a moment.'
+        "
       >
-        Manage stores in Settings
-      </NuxtLink>
-    </div>
+        <template #icon><Store :size="20" :stroke-width="1.75" /></template>
+        <template v-if="canManageBranches" #actions>
+          <InlineStorePicker />
+          <SButton variant="ghost" size="sm" to="/dashboard/settings">Manage stores</SButton>
+        </template>
+      </SEmptyState>
+    </SCard>
 
     <template v-else-if="isLoading">
-      <div class="dash-home-kpi">
-        <div :class="kpiGridClassResolved">
-          <DashStatCardSkeleton
-            v-for="i in homeKpiSkeletonCount"
-            :key="`kpi-${i}`"
-            :hero="i === 1"
-          />
-        </div>
-        <div
-          v-if="canViewProfitAndCost"
-          :class="[kpiGridClassResolved, 'dash-kpi-grid--pair']"
-        >
-          <DashStatCardSkeleton v-for="i in 2" :key="`profit-${i}`" />
+      <div class="s-overview__stats" role="status" aria-label="Loading overview">
+        <div v-for="i in 4" :key="`stat-${i}`" class="s-stat">
+          <SSkeleton width="50%" height="16px" />
+          <SSkeleton width="70%" height="32px" />
+          <SSkeleton width="40%" height="16px" />
         </div>
       </div>
-
-      <section :class="[cardPaddedClass, 'dash-inventory-health']">
-        <div :class="[cardHeaderClass, 'dash-card__header--compact dash-inventory-health__header']">
-          <div class="space-y-2">
-            <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-label" />
-            <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-meta" />
-          </div>
-          <span class="dash-skeleton dash-skeleton--line" style="width: 5.5rem" />
-        </div>
-        <div class="dash-inventory-health__footer">
-          <div class="dash-skeleton dash-skeleton--bar" />
-          <div class="mt-2 flex flex-wrap gap-3">
-            <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-meta" />
-            <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-meta" />
-            <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-meta" />
-          </div>
-        </div>
-      </section>
-
-      <div :class="chartsGridClass">
-        <DashChartPanelSkeleton
-          extra-class="dash-charts-grid__main"
-          show-control
-        />
-        <DashChartPanelSkeleton extra-class="dash-charts-grid__side" variant="bars" />
+      <div class="s-overview__row s-overview__row--main">
+        <SCard><SSkeleton height="260px" /></SCard>
+        <SCard><SSkeleton :lines="4" height="40px" /></SCard>
       </div>
-
-      <div :class="splitGridClass">
-        <DashChartPanelSkeleton variant="list" leading="avatar" />
-        <DashChartPanelSkeleton variant="list" />
-      </div>
-
-      <section :class="cardPaddedClass">
-        <div :class="cardHeaderClass">
-          <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-label" />
-          <span class="dash-skeleton dash-skeleton--line" style="width: 5rem" />
-        </div>
-        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          <div v-for="i in 6" :key="i" class="space-y-2">
-            <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-meta" />
-            <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-value" />
-          </div>
-        </div>
-      </section>
-
-      <div :class="tripleGridClass">
-        <DashChartPanelSkeleton v-for="i in 3" :key="`list-${i}`" variant="list" />
+      <div class="s-overview__row s-overview__row--main">
+        <SCard><SSkeleton :lines="5" height="40px" /></SCard>
+        <SCard><SSkeleton :lines="5" height="40px" /></SCard>
       </div>
     </template>
 
     <template v-else>
-      <section
-        v-if="isQuietDashboard && !gettingStartedVisible"
-        class="dash-quiet-today"
-        data-tutorial="dashboard"
-      >
-        <div class="dash-quiet-today__strip">
-          <div class="min-w-0">
-            <p class="dash-quiet-today__eyebrow">
-              {{ currentStoreLabel || 'Today' }}
-              <span v-if="userRoleLabel"> · {{ userRoleLabel }}</span>
-            </p>
-            <h1 class="dash-quiet-today__title">
-              {{ quietHeadline }}
-            </h1>
-            <p class="dash-quiet-today__meta">
-              {{ formatCurrency(0) }} revenue · 0 sales · quiet so far
-            </p>
-          </div>
-          <NuxtLink
-            v-if="quietPrimaryCta"
-            :to="quietPrimaryCta.href"
-            class="dash-quiet-today__cta"
-          >
-            {{ quietPrimaryCta.label }}
-          </NuxtLink>
-        </div>
+      <GettingStartedChecklist />
 
-        <section :class="[cardPaddedClass, 'dash-quiet-today__shortcuts']">
-          <div :class="[cardHeaderClass, 'dash-card__header--compact']">
-            <h2 :class="cardTitleClass">Shortcuts</h2>
-          </div>
-          <ul :class="listClass">
-            <li v-for="link in quietShortcutLinks" :key="link.href" :class="listRowClass">
-              <NuxtLink :to="link.href" class="dash-shortcut-link w-full">
-                <span>{{ link.label }}</span>
-                <span aria-hidden="true">→</span>
+      <div v-if="isQuietDashboard && !gettingStartedVisible" class="s-overview-quiet">
+        <SCard class="s-overview-quiet__hero">
+          <p class="s-overview-quiet__eyebrow">Today</p>
+          <h2 class="s-overview-quiet__title">{{ quietHeadline }}</h2>
+          <p class="s-overview-quiet__meta">{{ formatCurrency(0) }} revenue · 0 sales so far</p>
+          <SButton v-if="quietPrimaryCta" variant="primary" :to="quietPrimaryCta.href">
+            {{ quietPrimaryCta.label }}
+          </SButton>
+        </SCard>
+        <SCard title="Shortcuts" flush>
+          <ul class="s-list">
+            <li v-for="link in quietShortcutLinks" :key="link.href">
+              <NuxtLink :to="link.href" class="s-list__item s-list__item--interactive">
+                <span class="s-list__main">
+                  <span class="s-list__primary">{{ link.label }}</span>
+                </span>
+                <ChevronRight class="s-list__lead" :size="16" :stroke-width="2" aria-hidden="true" />
               </NuxtLink>
             </li>
           </ul>
-        </section>
-      </section>
+        </SCard>
+      </div>
 
       <template v-else-if="!isQuietDashboard">
-      <DashboardAttentionStrip :items="homeAttentionItems" />
-
-      <div class="dash-home-kpi">
-        <div :class="kpiGridClassResolved">
-          <DashboardStatTile
-            class="dash-kpi-hero"
-            label="Total revenue"
+        <div class="s-overview__stats">
+          <SStat
+            label="Revenue"
             :value="formatCurrency(totalRevenue)"
-            :subtext="revenueChangeText"
-            :change="revenueChangePercent"
-            :change-positive="revenueChangePositive"
-            :sparkline-data="statCardRevenueSparkline.length > 1 ? statCardRevenueSparkline : undefined"
-            :icon="BanknotesIcon"
-            tone="accent"
-            hero
-          />
-          <DashboardStatTile
-            label="Orders today"
-            :value="todayReceiptsCount.toString()"
-            :subtext="`${formatCurrency(todaySales)} revenue`"
-            :icon="ShoppingBagIcon"
-          />
-          <DashboardStatTile
-            label="Customers"
-            :value="totalCustomers.toString()"
-            :subtext="`${newCustomersToday} active today`"
-            :subtext-class="newCustomersToday > 0 ? 'success' : ''"
-            :icon="UsersIcon"
-          />
-          <DashboardStatTile
-            label="Low stock signals"
-            :value="lowStockItems.length.toString()"
-            :subtext="lowStockItems.length > 0 ? 'Review restocking' : 'Within thresholds'"
-            :subtext-class="lowStockItems.length > 0 ? 'warning' : ''"
-            :icon="ExclamationTriangleIcon"
-            :tone="lowStockItems.length > 0 ? 'warning' : 'default'"
-          />
-          <DashboardStatTile
+            :delta="revenueDelta"
+            :hint="revenueChangeText"
+            to="/dashboard/analytics"
+          >
+            <template #icon><Banknote :size="16" :stroke-width="2" /></template>
+          </SStat>
+          <SStat
+            label="Sales today"
+            :value="todayReceiptsCount"
+            :hint="`${formatCurrency(todaySales)} revenue`"
+            to="/dashboard/receipts"
+          >
+            <template #icon><ShoppingBag :size="16" :stroke-width="2" /></template>
+          </SStat>
+          <SStat
             label="Outstanding"
             :value="formatCurrency(outstandingBalanceTotal)"
-            :subtext="`${outstandingCount} open balance${outstandingCount === 1 ? '' : 's'}`"
-            :subtext-class="outstandingCount > 0 ? 'warning' : ''"
-            :icon="CreditCardIcon"
-            :tone="outstandingCount > 0 ? 'warning' : 'default'"
+            :hint="`${outstandingCount} open balance${outstandingCount === 1 ? '' : 's'}`"
+            :tone="outstandingCount > 0 ? 'warning' : undefined"
+            to="/dashboard/receipts?tab=outstanding"
+          >
+            <template #icon><Clock :size="16" :stroke-width="2" /></template>
+          </SStat>
+          <SStat
+            label="Low stock"
+            :value="lowStockItems.length"
+            :hint="lowStockItems.length > 0 ? 'Review restocking' : 'All above reorder level'"
+            :tone="lowStockItems.length > 0 ? 'warning' : undefined"
+            to="/dashboard/inventory"
+          >
+            <template #icon><TriangleAlert :size="16" :stroke-width="2" /></template>
+          </SStat>
+        </div>
+
+        <div class="s-overview__row s-overview__row--main">
+          <OverviewRevenueChart
+            :daily="dailyRevenueData"
+            :weekly="weeklyRevenueData"
+            :monthly="monthlyRevenueData"
+            :currency-symbol="currencySymbol"
           />
-          <DashboardStatTile
-            v-if="canAccessLeadsPlan"
-            label="Open leads"
-            :value="String(openLeadsCount)"
-            :subtext="`${formatCurrency(openLeadsPipeline)} est. pipeline`"
-            :icon="UsersIcon"
-          />
+          <OverviewAttention :items="homeAttentionItems" />
         </div>
 
-        <div v-if="canViewProfitAndCost" :class="[kpiGridClassResolved, 'dash-kpi-grid--pair']">
-          <DashboardStatTile
-            label="Gross profit"
-            :value="formatCurrency(dashboardGrossProfit)"
-            :subtext="dashboardGrossProfitSubtext"
-            :change-positive="dashboardGrossProfit >= 0"
-            :icon="ChartBarIcon"
-            :tone="dashboardGrossProfit >= 0 ? 'success' : 'danger'"
-          />
-          <DashboardStatTile
-            label="Cost of goods sold"
-            :value="formatCurrency(dashboardCogs)"
-            subtext="Completed sales with unit cost"
-            :icon="CubeIcon"
-          />
-        </div>
-      </div>
-
-      <section :class="[cardPaddedClass, 'dash-inventory-health']">
-        <div :class="[cardHeaderClass, 'dash-card__header--compact dash-inventory-health__header']">
-          <div>
-            <p :class="eyebrowClass">Inventory health</p>
-            <p :class="cardDescClass">
-              <span :class="numClass">{{ inStockCount }}</span> available units ·
-              <span :class="numClass">{{ outOfStockCount }}</span> sold ·
-              <span :class="numClass">{{ lowStockItems.length }}</span> low-stock lines
-            </p>
-          </div>
-          <NuxtLink to="/dashboard/inventory" :class="cardLinkClass">Open inventory</NuxtLink>
-        </div>
-        <div class="dash-inventory-health__footer">
-          <div :class="[progressClass, 'dash-progress--slim']">
-            <div
-              class="dash-progress__segment--available transition-all"
-              :style="{ width: `${inStockPercentage}%` }"
-            />
-            <div
-              class="dash-progress__segment--low transition-all"
-              :style="{ width: `${lowStockPercentage}%` }"
-            />
-            <div
-              class="dash-progress__segment--sold transition-all"
-              :style="{ width: `${soldPercentage}%` }"
-            />
-          </div>
-          <div :class="[progressLegendClass, 'dash-progress__legend--compact']">
-            <span :class="numClass">{{ inStockPercentage }}% available</span>
-            <span :class="numClass">{{ soldPercentage }}% sold through</span>
-            <span :class="numClass">{{ formatCurrency(inventoryTotalValue) }} on hand (book)</span>
-          </div>
-        </div>
-      </section>
-
-      <div :class="chartsGridClass">
-        <section
-          :class="[cardFlushClass, 'dash-charts-grid__main overflow-hidden']"
-          data-tutorial="analytics-preview"
-        >
-          <div :class="[cardHeaderClass, 'dash-card__header--compact !mb-0 px-4 py-3 sm:flex-row sm:items-center']">
-            <div>
-              <h2 :class="cardTitleClass">Revenue performance</h2>
-              <p :class="cardDescClass">{{ chartSubtitle }}</p>
-            </div>
-            <div :class="segmentGroupClass" role="group" aria-label="Chart period">
-              <button
-                v-for="opt in chartPeriodOptions"
-                :key="opt.value"
-                type="button"
-                :class="[segmentBtnClass, chartView === opt.value ? segmentBtnActiveClass : '']"
-                @click="chartView = opt.value"
-              >
-                {{ opt.label }}
-              </button>
-            </div>
-          </div>
-          <div :class="['dash-chart-wrap', chartData.length === 0 ? 'flex items-center justify-center' : '']">
-            <div v-if="chartData.length === 0" class="dash-empty-state dash-empty-state--compact">
-              <div class="dash-empty-state__mark">
-                <MarketingFeatureIcon name="analytics" size="sm" class="dash-empty-state__icon" />
-              </div>
-              <p class="dash-empty-state__title">No revenue data yet</p>
-              <p class="dash-empty-state__desc">Completed sales will populate this chart</p>
-            </div>
-            <ClientOnly v-else>
-              <LazyApexChart type="area" :height="chartHeight" :options="chartOptions" :series="chartSeries" />
-              <template #fallback>
-                <div :class="emptyClass">Loading chart…</div>
-              </template>
-            </ClientOnly>
-          </div>
-        </section>
-
-        <section :class="[cardPaddedClass, 'dash-charts-grid__side flex flex-col']">
-          <p :class="eyebrowClass">Payment methods</p>
-          <p :class="cardDescClass">Share of completed sales by tender type</p>
-          <div v-if="paymentMethodBreakdown.length === 0" :class="['dash-empty', 'mt-4']">
-            No completed sales to analyze yet.
-          </div>
-          <ul v-else :class="barListClass">
-            <li v-for="slice in paymentMethodsTop" :key="slice.method">
-              <div :class="['dash-bar-row__head', numClass]">
-                <span :class="['dash-bar-row__label', cardTitleClass, '!text-xs']">{{ slice.label }}</span>
-                <span :class="['dash-bar-row__meta', numClass]">
-                  {{ slice.share }}% · {{ formatCurrency(slice.revenue) }}
-                </span>
-              </div>
-              <div :class="barTrackClass">
-                <div
-                  :class="barFillClass"
-                  :style="{ width: `${Math.max(slice.share, 2)}%` }"
-                />
-              </div>
-              <p :class="['dash-bar-row__foot', numClass]">
-                {{ slice.count }} sale{{ slice.count === 1 ? '' : 's' }}
-              </p>
-            </li>
-          </ul>
-        </section>
-      </div>
-
-      <PaymentLinksSummaryCard
-        v-if="canShowPaymentLinksSummary"
-        card-class="dash-card dash-card--padded"
-        @create-link="goCreatePaymentLink"
-      />
-
-      <section :class="cardPaddedClass">
-        <div :class="cardHeaderClass">
-          <p :class="eyebrowClass">Business metrics</p>
-          <NuxtLink to="/dashboard/analytics" :class="cardLinkClass">Full analytics</NuxtLink>
-        </div>
-        <dl :class="metricGridClass">
-          <div v-for="row in businessMetricsTop" :key="row.label" :class="metricRowClass">
-            <dt>{{ row.label }}</dt>
-            <dd :class="numClass">{{ row.value }}</dd>
-          </div>
-          <div v-if="canViewProfitAndCost" :class="metricRowClass">
-            <dt>Gross profit</dt>
-            <dd :class="[numClass, 'text-emerald-700 dark:text-emerald-400/90']">
-              {{ formatCurrency(dashboardGrossProfit) }}
-            </dd>
-          </div>
-        </dl>
-      </section>
-
-      <div :class="splitGridClass">
-        <section :class="cardPaddedClass">
-          <div :class="[cardHeaderClass, 'dash-card__header--compact']">
-            <h2 :class="cardTitleClass">Recent sales</h2>
-            <NuxtLink to="/dashboard/receipts" :class="cardLinkClass">View all</NuxtLink>
-          </div>
-          <div v-if="recentReceipts.length === 0" :class="emptyClass">
-            <p>No sales yet.</p>
-            <NuxtLink to="/dashboard/receipts" :class="[cardLinkClass, 'mt-2 inline-block']">
-              Record first sale
-            </NuxtLink>
-          </div>
-          <ul v-else :class="listClass">
-            <li
-              v-for="tx in recentReceiptsTop"
-              :key="tx.id"
-              :class="[listRowClass, 'dash-list__row--interactive']"
-              role="button"
-              tabindex="0"
-              @click="openHomeReceipt(tx.id)"
-              @keydown.enter.prevent="openHomeReceipt(tx.id)"
-              @keydown.space.prevent="openHomeReceipt(tx.id)"
+        <div class="s-overview__row s-overview__row--main">
+          <SCard title="Recent sales" flush>
+            <template #actions>
+              <SButton variant="ghost" size="sm" to="/dashboard/receipts">View all</SButton>
+            </template>
+            <SEmptyState
+              v-if="recentReceipts.length === 0"
+              title="No sales yet"
+              description="Your latest sales will show up here."
             >
-              <div class="min-w-0">
-                <p :class="['dash-list__primary', 'truncate']">{{ tx.customerName }}</p>
-                <p :class="['dash-list__secondary', numClass]">
-                  <span>#{{ tx.receiptNumber }}</span>
-                  <span aria-hidden="true"> · </span>
-                  <span>{{ tx.paymentMethod }}</span>
-                  <span class="hidden sm:inline" aria-hidden="true"> · </span>
-                  <span class="hidden sm:inline">{{ tx.statusLabel }}</span>
-                  <span aria-hidden="true"> · </span>
-                  <span>{{ tx.time }}</span>
-                </p>
-              </div>
-              <div class="shrink-0 text-right">
-                <p :class="['dash-list__value', numClass]">{{ tx.amount }}</p>
-                <ReceiptProfitHint
-                  v-if="getRecentReceiptById(tx.id)"
-                  :receipt="getRecentReceiptById(tx.id)!"
-                  class="mt-0.5"
-                />
-              </div>
-            </li>
-          </ul>
-        </section>
+              <template #actions>
+                <SButton variant="primary" size="sm" to="/dashboard/receipts?new=1">
+                  New sale
+                </SButton>
+              </template>
+            </SEmptyState>
+            <ul v-else class="s-list">
+              <li v-for="tx in recentReceiptsTop" :key="tx.id">
+                <button
+                  type="button"
+                  class="s-list__item s-list__item--interactive"
+                  @click="openHomeReceipt(tx.id)"
+                >
+                  <SAvatar :name="tx.customerName" />
+                  <span class="s-list__main">
+                    <span class="s-list__primary">{{ tx.customerName }}</span>
+                    <span class="s-list__secondary">
+                      #{{ tx.receiptNumber }} · {{ tx.paymentMethod }} · {{ tx.time }}
+                    </span>
+                  </span>
+                  <span class="s-list__end">
+                    <span class="s-list__value">{{ tx.amount }}</span>
+                    <SBadge v-if="tx.status !== 'completed'" :tone="getReceiptStatusTone(tx.status)">
+                      {{ tx.statusLabel }}
+                    </SBadge>
+                    <ReceiptProfitHint
+                      v-else-if="getRecentReceiptById(tx.id)"
+                      :receipt="getRecentReceiptById(tx.id)!"
+                    />
+                  </span>
+                </button>
+              </li>
+            </ul>
+          </SCard>
 
-        <section :class="cardPaddedClass">
-          <div :class="[cardHeaderClass, 'dash-card__header--compact']">
-            <h2 :class="cardTitleClass">Top products</h2>
-            <NuxtLink to="/dashboard/analytics" :class="cardLinkClass">Analytics</NuxtLink>
-          </div>
-          <div v-if="topSellingItems.length === 0" :class="emptyClass">
-            <p>No product sales yet.</p>
-            <NuxtLink to="/dashboard/inventory" :class="[cardLinkClass, 'mt-2 inline-block']">
-              Add inventory
-            </NuxtLink>
-          </div>
-          <ul v-else :class="listClass">
-            <li v-for="item in topProductsTop" :key="item.id" :class="listRowClass">
-              <div class="min-w-0">
-                <p :class="['dash-list__primary', 'truncate']">{{ item.name }}</p>
-                <p :class="['dash-list__secondary', numClass]">{{ item.sales }} sold</p>
-              </div>
-              <p :class="['dash-list__value', numClass]">{{ formatCurrency(item.revenue) }}</p>
-            </li>
-          </ul>
-        </section>
-      </div>
-
-      <div :class="tripleGridClass">
-        <section :class="cardPaddedClass">
-          <div :class="[cardHeaderClass, 'dash-card__header--compact']">
-            <h2 :class="cardTitleClass">Low stock</h2>
-            <div class="flex items-center gap-2">
-              <button
+          <SCard title="Low stock" flush>
+            <template #actions>
+              <SButton
                 v-if="lowStockItems.length > 0"
-                type="button"
-                :class="[cardLinkClass, 'disabled:opacity-50']"
-                :disabled="reorderExporting"
+                variant="ghost"
+                size="sm"
+                :loading="reorderExporting"
                 @click="handleExportReorderList"
               >
-                {{ reorderExporting ? 'Exporting…' : 'Export reorder list' }}
-              </button>
-              <NuxtLink to="/dashboard/inventory" :class="cardLinkClass">Inventory</NuxtLink>
-            </div>
-          </div>
-          <div v-if="lowStockItems.length === 0" :class="emptyClass">All lines above threshold.</div>
-          <ul v-else :class="listClass">
-            <li v-for="item in lowStockItemsTop" :key="item.id" :class="listRowClass">
-              <p :class="['dash-list__primary', 'truncate', '!font-medium']">{{ item.name }}</p>
-              <span :class="['dash-list__value', 'dash-list__value--warning', numClass]">
-                {{ item.quantity }}<span v-if="!item.isSerialNumber"> / {{ item.threshold }}</span>
-              </span>
-            </li>
-          </ul>
-        </section>
-
-        <section v-if="canViewActivity" :class="cardPaddedClass">
-          <div :class="[cardHeaderClass, 'dash-card__header--compact']">
-            <h2 :class="cardTitleClass">Recent activity</h2>
-            <NuxtLink to="/dashboard/activity" :class="cardLinkClass">All logs</NuxtLink>
-          </div>
-          <div v-if="recentActivityLogs.length === 0" :class="emptyClass">No activity logged yet.</div>
-          <ul v-else :class="listClass">
-            <li v-for="log in recentActivityLogsTop" :key="log.id" :class="[listRowClass, '!items-start gap-2']">
-              <span class="self-start" :class="activityActionBadgeClass(log.action)">
-                {{ activityActionLabel(log.action) }}
-              </span>
-              <div class="min-w-0 flex-1">
-                <p :class="['dash-list__primary', 'truncate']">{{ activityLogPreviewTitle(log) }}</p>
-                <p :class="['dash-list__secondary', numClass]">
-                  {{ activityEntityTypeLabel(log.entityType) }}
-                  <span class="hidden sm:inline"> · {{ log.userDisplayName }}</span>
-                  · {{ formatActivityTime(log.createdAt) }}
-                </p>
-              </div>
-            </li>
-          </ul>
-        </section>
-
-        <section :class="[cardPaddedClass, canViewActivity ? '' : 'dash-triple-grid__wide']">
-          <div :class="[cardHeaderClass, 'dash-card__header--compact']">
-            <h2 :class="cardTitleClass">Shortcuts</h2>
-          </div>
-          <ul :class="listClass">
-            <li v-for="link in quickLinksTop" :key="link.href" :class="listRowClass">
-              <NuxtLink :to="link.href" class="dash-shortcut-link w-full">
-                <span>{{ link.label }}</span>
-                <span aria-hidden="true">→</span>
-              </NuxtLink>
-            </li>
-          </ul>
-        </section>
-      </div>
-    </template>
-    </template>
+                <template v-if="!reorderExporting" #leading>
+                  <Download :size="16" :stroke-width="1.75" aria-hidden="true" />
+                </template>
+                Export
+              </SButton>
+            </template>
+            <p v-if="lowStockItems.length === 0" class="s-list__empty">
+              Everything is above its reorder level.
+            </p>
+            <ul v-else class="s-list">
+              <li v-for="item in lowStockItemsTop" :key="item.id">
+                <NuxtLink
+                  :to="`/dashboard/inventory/${item.folderId}`"
+                  class="s-list__item s-list__item--interactive"
+                >
+                  <span class="s-list__main">
+                    <span class="s-list__primary">{{ item.name }}</span>
+                    <span class="s-list__secondary">{{ lowStockMeta(item) }}</span>
+                  </span>
+                  <span class="s-list__value s-list__value--warning">
+                    {{ item.isSerialNumber ? 'Serial' : `${item.quantity} left` }}
+                  </span>
+                </NuxtLink>
+              </li>
+            </ul>
+          </SCard>
+        </div>
+      </template>
     </template>
 
     <ReceiptDetailsDrawer
-      v-if="!isCapacitorIos"
       v-model="showHomeReceiptDrawer"
       :receipt="homeSelectedReceipt"
       @preview="previewHomeReceipt"
@@ -589,7 +236,6 @@
       @print="printHomeReceipt"
     />
     <ViewReceiptModal
-      v-if="!isCapacitorIos"
       v-model="showHomeReceiptPreview"
       :receipt="homeSelectedReceipt"
     />
@@ -609,23 +255,26 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, defineAsyncComponent, nextTick } from 'vue'
+import { Banknote, ChevronRight, Clock, Download, PackagePlus, Plus, ShoppingBag, Store, TriangleAlert } from '@lucide/vue'
 
-const LazyApexChart = defineAsyncComponent(
-  () => import('~/components/charts/LazyApexChart.client.vue')
-)
 const Tutorial = defineAsyncComponent(() => import('~/components/Tutorial.vue'))
 const GettingStartedChecklist = defineAsyncComponent(
   () => import('~/components/dashboard/GettingStartedChecklist.vue')
 )
 import type { TutorialStep } from '~/components/Tutorial.vue'
 import { MARKETING_FEATURE_ICONS } from '~/utils/marketing-feature-icons'
-import MarketingFeatureIcon from '~/components/marketing/MarketingFeatureIcon.vue'
-import DashboardStatTile from '~/components/dashboard/DashboardStatTile.vue'
-import DashboardPageHeader from '~/components/dashboard/DashboardPageHeader.vue'
-import DashboardGreetingSkyIcon from '~/components/dashboard/DashboardGreetingSkyIcon.vue'
-import DashboardAttentionStrip from '~/components/dashboard/DashboardAttentionStrip.vue'
-import PaymentLinksSummaryCard from '~/components/payments/PaymentLinksSummaryCard.vue'
+import SAvatar from '~/components/s/SAvatar.vue'
+import SBadge from '~/components/s/SBadge.vue'
+import SButton from '~/components/s/SButton.vue'
+import SCard from '~/components/s/SCard.vue'
+import SEmptyState from '~/components/s/SEmptyState.vue'
+import SPageHeader from '~/components/s/SPageHeader.vue'
+import SSkeleton from '~/components/s/SSkeleton.vue'
+import SStat from '~/components/s/SStat.vue'
+import OverviewAttention from '~/components/overview/OverviewAttention.vue'
+import OverviewRevenueChart from '~/components/overview/OverviewRevenueChart.vue'
 import InlineStorePicker from '~/components/dashboard/InlineStorePicker.vue'
+import ReceiptProfitHint from '~/components/receipts/ReceiptProfitHint.vue'
 import ReceiptDetailsDrawer from '~/components/receipts/ReceiptDetailsDrawer.vue'
 import ViewReceiptModal from '~/components/receipts/ViewReceiptModal.vue'
 import ReceiptShareSurface from '~/components/receipts/ReceiptShareSurface.vue'
@@ -635,107 +284,38 @@ import { captureReceiptElementAsPdf } from '~/composables/useReceiptImageCapture
 import { usePaymentLinks } from '~/composables/usePaymentLinks'
 import { runDashboardShellBootstrap } from '~/composables/useDashboardShellBootstrap'
 import { scheduleNativeIdleWork } from '~/utils/capacitor-native-perf'
-import { useDashboardHomeChrome } from '~/composables/useDashboardHomeChrome'
 import { useReceiptsStore } from '~/stores/receipts'
 import { useInventoryStore } from '~/stores/inventory'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useStoresStore } from '~/stores/stores'
 import { getStoreBranchShortLabel } from '~/utils/store-branch-label'
-import { useStaffStore } from '~/stores/staff'
+import { getReceiptStatusTone } from '~/utils/receipt-status'
 import { useSalesLeadsStore } from '~/stores/salesLeads'
 import { useStorefrontStore } from '~/stores/storefront'
-import { useThemeStore } from '~/stores/theme'
 import { usePreferences } from '~/composables/usePreferences'
 import { useDashboardInsights } from '~/composables/useDashboardInsights'
 import { useAppToast } from '~/composables/useAppToast'
 import { useReorderListExport } from '~/composables/useReorderListExport'
-import {
-  activityActionBadgeClass,
-  activityActionLabel,
-  activityEntityTypeLabel,
-  activityLogPreviewTitle,
-  fetchActivityLogs,
-  type ActivityLog,
-} from '~/composables/useActivityLog'
 import { useSubscriptionFeatures } from '~/composables/useSubscriptionFeatures'
 import { usePermissions } from '~/composables/usePermissions'
 import { useCapacitorNativeApp } from '~/composables/useCapacitorNativeApp'
+import { useDashboardPageRefreshRegister } from '~/composables/useDashboardPageRefresh'
 import type { InventoryItem } from '~/stores/inventory'
-import {
-  formatMarginPercent,
-  receiptLineRevenue,
-  sumReceiptCogs,
-  sumReceiptGrossProfit,
-} from '~/utils/inventory-item-cost'
-import {
-  BanknotesIcon,
-  BuildingStorefrontIcon,
-  ChartBarIcon,
-  CreditCardIcon,
-  CubeIcon,
-  ExclamationTriangleIcon,
-  ShoppingBagIcon,
-  UsersIcon,
-} from '~/utils/app-icons'
-import IosEmptyState from '~/components/ios/IosEmptyState.vue'
-import IosHomeDashboard from '~/components/ios/IosHomeDashboard.vue'
-import IosHomeDashboardSkeleton from '~/components/ios/IosHomeDashboardSkeleton.vue'
-import type {
-  IosHomeAlert,
-  IosHomeFeedItem,
-  IosHomeMetric,
-} from '~/components/ios/IosHomeDashboard.vue'
 
 definePageMeta({
   layout: 'dashboard',
   middleware: 'auth',
 })
 
-const {
-  pageClass,
-  cardPaddedClass,
-  cardFlushClass,
-  pageHeaderClass,
-  eyebrowClass,
-  pageTitleClass,
-  pageMetaClass,
-  linkClass,
-  cardHeaderClass,
-  cardTitleClass,
-  cardDescClass,
-  cardLinkClass,
-  kpiGridClass,
-  chartsGridClass,
-  splitGridClass,
-  tripleGridClass,
-  progressClass,
-  progressLegendClass,
-  segmentGroupClass,
-  segmentBtnClass,
-  segmentBtnActiveClass,
-  listClass,
-  listRowClass,
-  metricGridClass,
-  metricRowClass,
-  barListClass,
-  barTrackClass,
-  barFillClass,
-  numClass,
-  emptyClass,
-  stateCardClass,
-} = useDashboardHomeChrome()
-
 /** Max rows shown in dashboard list cards (no in-card scrolling). */
 const DASHBOARD_LIST_TOP = 5
-/** Recent activity rows are taller (badge + two lines) - show fewer to match card height. */
-const DASHBOARD_ACTIVITY_TOP = 3
 
 const tutorialSteps: TutorialStep[] = [
   {
     title: 'Welcome to Your Dashboard',
     description:
-      'Your command center summarizes revenue, inventory health, outstanding balances, and recent sales for the active store.',
+      'Your command center summarizes revenue, alerts, outstanding balances, and recent sales for the active store.',
     icon: MARKETING_FEATURE_ICONS.dashboard,
     targetSelector: '[data-tutorial="dashboard"]',
   },
@@ -815,8 +395,6 @@ const userStore = useUserStore()
 const storesStore = useStoresStore()
 const salesLeadsStore = useSalesLeadsStore()
 const storefrontStore = useStorefrontStore()
-const themeStore = useThemeStore()
-const chartIsDark = computed(() => themeStore.actualTheme === 'dark')
 
 const resolvedTutorialSteps = computed(() =>
   userStore.userData?.role === 'staff' ? staffTutorialSteps : tutorialSteps
@@ -825,20 +403,15 @@ const resolvedTutorialSteps = computed(() =>
 const { preferences } = usePreferences()
 const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
 const canAccessLeadsPlan = computed(() => canUseSubscriptionFeature('sales_leads'))
-const openLeadsCount = computed(() => salesLeadsStore.openLeadsCount)
-const openLeadsPipeline = computed(() => salesLeadsStore.openPipelineValue)
-const { canShowPaymentLinksSummary } = usePaymentLinksLaunch()
-const router = useRouter()
-
-function goCreatePaymentLink() {
-  router.push('/dashboard/payment-links?create=1')
-}
+const { canShowPaymentLinksSummary, showPaymentLinksComingSoon } = usePaymentLinksLaunch()
+const paymentLinksLive = computed(
+  () => canShowPaymentLinksSummary.value && !showPaymentLinksComingSoon.value
+)
 const { canManageBranches } = useBusinessCapabilities()
-const { canViewProfitAndCost, hasAnyManageAccess } = usePermissions()
+const { canManageInventoryItems, hasAnyManageAccess } = usePermissions()
 const { isNativeApp } = useCapacitorNativeApp()
-const { isCapacitorIos } = useIsCapacitorIos()
 const { formatGreeting } = useTimeGreeting()
-useIosPullToRefreshRegister(async () => {
+useDashboardPageRefreshRegister(async () => {
   await loadDashboardData({ force: true })
 })
 
@@ -867,51 +440,35 @@ const {
   todayReceiptsCount,
   outstandingCount,
   outstandingBalanceTotal,
-  totalCustomers,
-  newCustomersToday,
-  inventoryTotalValue,
-  inStockCount,
-  outOfStockCount,
-  inStockPercentage,
-  soldPercentage,
-  lowStockPercentage,
   dailyRevenueData,
   weeklyRevenueData,
   monthlyRevenueData,
   revenueChangePercent,
-  revenueChangePositive,
   revenueChangeText,
-  topSellingItems,
   lowStockItems,
-  paymentMethodBreakdown,
   recentReceipts,
   dayStory,
   attentionItems,
-  quickLinks,
-  operationsMetrics,
-  salesMetrics,
-  statCardRevenueSparkline,
 } = insights
 
-const homeKpiSkeletonCount = computed(() => (canAccessLeadsPlan.value ? 6 : 5))
-
-const kpiGridClassResolved = computed(() =>
-  isNativeApp.value ? `${kpiGridClass} dash-kpi-grid--compact` : kpiGridClass
-)
+const revenueDelta = computed(() => {
+  const raw = revenueChangePercent.value
+  if (!raw) return undefined
+  const value = Number.parseFloat(raw)
+  return Number.isFinite(value) ? value : undefined
+})
 
 function topN<T>(items: T[], limit = DASHBOARD_LIST_TOP): T[] {
   return items.slice(0, limit)
 }
 
 const attentionItemsTop = computed(() => topN(attentionItems.value))
-const paymentMethodsTop = computed(() => topN(paymentMethodBreakdown.value))
-const businessMetricsTop = computed(() => [...salesMetrics.value, ...operationsMetrics.value])
 
 const { stats: paymentLinkStats, loadAll: loadPaymentLinksForAttention } = usePaymentLinks()
 
 const homeAttentionItems = computed((): DashboardAlert[] => {
   const items = [...attentionItemsTop.value]
-  if (canShowPaymentLinksSummary.value && paymentLinkStats.value.failed > 0) {
+  if (paymentLinksLive.value && paymentLinkStats.value.failed > 0) {
     items.unshift({
       id: 'payment-links-failed',
       level: 'critical',
@@ -925,6 +482,12 @@ const homeAttentionItems = computed((): DashboardAlert[] => {
   }
   return topN(items)
 })
+
+function lowStockMeta(item: { folderName?: string; isSerialNumber?: boolean; threshold?: number }) {
+  const parts = [item.folderName?.trim()]
+  if (!item.isSerialNumber) parts.push(`reorder at ${item.threshold}`)
+  return parts.filter(Boolean).join(' · ')
+}
 
 function getRecentReceiptById(id: string) {
   return receiptsStore.receipts.find((r) => r.id === id) ?? null
@@ -994,61 +557,10 @@ async function printHomeReceipt(receipt: Receipt) {
 }
 
 const recentReceiptsTop = computed(() => topN(recentReceipts.value))
-const topProductsTop = computed(() => topN(topSellingItems.value))
 const lowStockItemsTop = computed(() => topN(lowStockItems.value))
-const recentActivityLogsTop = computed(() => topN(recentActivityLogs.value, DASHBOARD_ACTIVITY_TOP))
-const quickLinksTop = computed(() => topN(quickLinks.value))
 
 const hasInitialDashboardData = receiptsStore.receipts.length > 0 || inventoryStore.folders.length > 0
 const isLoading = ref(!hasInitialDashboardData)
-const chartView = ref<'daily' | 'weekly' | 'monthly'>('monthly')
-const recentActivityLogs = ref<ActivityLog[]>([])
-
-const chartPeriodOptions = [
-  { value: 'daily' as const, label: 'Daily' },
-  { value: 'weekly' as const, label: 'Weekly' },
-  { value: 'monthly' as const, label: 'Monthly' },
-]
-
-const canViewActivity = computed(
-  () =>
-    (userStore.isSuperAdmin || hasAnyManageAccess.value) &&
-    canUseSubscriptionFeature('activity_logs')
-)
-
-function lookupInventoryItemForProfit(itemId: string): InventoryItem | null {
-  for (const list of Object.values(inventoryStore.items)) {
-    const hit = list.find((i) => i.id === itemId)
-    if (hit) return hit
-  }
-  for (const list of Object.values(dashboardFolderItems.value)) {
-    const hit = list.find((i) => i.id === itemId)
-    if (hit) return hit
-  }
-  return null
-}
-
-const completedReceiptsForProfit = computed(() =>
-  receiptsStore.receipts.filter((r) => r.status === 'completed')
-)
-
-const dashboardSalesRevenue = computed(() =>
-  completedReceiptsForProfit.value.reduce((sum, receipt) => sum + receiptLineRevenue(receipt), 0)
-)
-
-const dashboardCogs = computed(() =>
-  sumReceiptCogs(completedReceiptsForProfit.value, lookupInventoryItemForProfit)
-)
-
-const dashboardGrossProfit = computed(() =>
-  sumReceiptGrossProfit(completedReceiptsForProfit.value, lookupInventoryItemForProfit)
-)
-
-const dashboardGrossProfitSubtext = computed(() => {
-  if (dashboardSalesRevenue.value <= 0) return 'Add unit costs on inventory items'
-  const margin = (dashboardGrossProfit.value / dashboardSalesRevenue.value) * 100
-  return `${formatMarginPercent(margin)} gross margin on line revenue`
-})
 
 const needsStoreSelection = computed(() => !storesStore.currentStoreId)
 
@@ -1085,23 +597,22 @@ const quietPrimaryCta = computed(() => {
   if (inventoryStore.totalItems === 0) {
     return { href: '/dashboard/inventory', label: 'Add product' }
   }
-  return { href: '/dashboard/receipts', label: 'Create sale' }
+  return { href: '/dashboard/receipts?new=1', label: 'New sale' }
 })
 
 const quietShortcutLinks = computed(() => {
-  const links = [
-    { href: '/dashboard/receipts', label: 'Create sale' },
-    { href: '/dashboard/inventory', label: 'Inventory' },
-    { href: '/dashboard/analytics', label: 'Analytics' },
-  ]
   if (quietPrimaryCta.value?.href === '/dashboard/inventory') {
     return [
       { href: '/dashboard/inventory', label: 'Add product' },
       { href: '/dashboard/receipts', label: 'Sales' },
-      { href: '/dashboard/analytics', label: 'Analytics' },
+      { href: '/dashboard/analytics', label: 'Reports' },
     ]
   }
-  return links
+  return [
+    { href: '/dashboard/receipts?new=1', label: 'New sale' },
+    { href: '/dashboard/inventory', label: 'Inventory' },
+    { href: '/dashboard/analytics', label: 'Reports' },
+  ]
 })
 
 const currentStoreLabel = computed(() => {
@@ -1128,293 +639,7 @@ const userName = computed(() => {
   return 'User'
 })
 
-const iosDisplayName = computed((): string => {
-  if (userStore.userData?.name?.trim()) return userStore.userData.name.trim()
-  if (authStore.currentUser?.displayName?.trim()) return authStore.currentUser.displayName.trim()
-  return userName.value || 'User'
-})
-
-const iosStoreLabel = computed(() => {
-  const parts = [currentStoreLabel.value]
-  if (userRoleLabel.value) parts.push(userRoleLabel.value)
-  return parts.filter(Boolean).join(' · ')
-})
-
-function initialsFromName(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean)
-  if (parts.length === 0) return '?'
-  if (parts.length === 1) {
-    const first = parts[0] ?? ''
-    return first.slice(0, 2).toUpperCase()
-  }
-  const first = parts[0] ?? ''
-  const last = parts[parts.length - 1] ?? ''
-  return `${first[0] ?? ''}${last[0] ?? ''}`.toUpperCase()
-}
-
-function formatCompactNumber(value: number): string {
-  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`
-  if (value >= 10_000) return `${Math.round(value / 1000)}K`
-  if (value >= 1_000) return `${(value / 1000).toFixed(1).replace(/\.0$/, '')}K`
-  return String(value)
-}
-
-function formatCompactCurrency(value: number): string {
-  const symbol = currencySymbol.value || '$'
-  if (value >= 1_000_000) {
-    return `${symbol}${(value / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`
-  }
-  if (value >= 10_000) return `${symbol}${Math.round(value / 1000)}K`
-  if (value >= 1_000) return `${symbol}${(value / 1000).toFixed(1).replace(/\.0$/, '')}K`
-  return formatCurrency(value)
-}
-
-const iosHomeMetrics = computed((): IosHomeMetric[] => {
-  const metrics: IosHomeMetric[] = [
-    {
-      id: 'revenue',
-      label: 'Total revenue',
-      value: formatCompactCurrency(totalRevenue.value),
-      href: '/dashboard/analytics',
-      icon: BanknotesIcon,
-    },
-    {
-      id: 'orders',
-      label: 'Orders today',
-      value: String(todayReceiptsCount.value),
-      href: '/dashboard/receipts',
-      icon: ShoppingBagIcon,
-    },
-    {
-      id: 'customers',
-      label: 'Active customers',
-      value: formatCompactNumber(totalCustomers.value),
-      href: '/dashboard/receipts',
-      icon: UsersIcon,
-    },
-    {
-      id: 'low-stock',
-      label: 'Low stock signals',
-      value: String(lowStockItems.value.length),
-      href: '/dashboard/inventory',
-      tone: 'warning',
-      icon: ExclamationTriangleIcon,
-    },
-  ]
-
-  if (outstandingCount.value > 0) {
-    metrics.push({
-      id: 'outstanding',
-      label: 'Outstanding balances',
-      value: formatCompactCurrency(outstandingBalanceTotal.value),
-      href: '/dashboard/receipts',
-      icon: CreditCardIcon,
-    })
-  }
-
-  if (canAccessLeadsPlan.value) {
-    metrics.push({
-      id: 'leads',
-      label: 'Open leads',
-      value: String(openLeadsCount.value),
-      href: '/dashboard/leads',
-      icon: UsersIcon,
-    })
-  }
-
-  return metrics.slice(0, 6)
-})
-
-const iosRecentSales = computed((): IosHomeFeedItem[] =>
-  recentReceiptsTop.value.map((receipt) => ({
-    id: receipt.id,
-    title: receipt.customerName,
-    subtitle: `Receipt ${receipt.receiptNumber}`,
-    body: `${receipt.paymentMethod} · ${receipt.statusLabel}`,
-    timeLabel: receipt.time,
-    valueLabel: receipt.amount,
-    initials: initialsFromName(receipt.customerName),
-    badge: receipt.status !== 'completed' ? receipt.statusLabel : undefined,
-    href: `/dashboard/receipts?receipt=${receipt.id}`,
-  }))
-)
-
-const iosLowStockPreview = computed((): IosHomeFeedItem[] =>
-  lowStockItemsTop.value.map((item) => ({
-    id: item.id,
-    title: item.name,
-    subtitle: item.folderName,
-    body: item.isSerialNumber
-      ? 'Serialized item below threshold'
-      : `${item.quantity} units left · threshold ${item.threshold}`,
-    timeLabel: 'Inventory',
-    valueLabel: item.isSerialNumber ? 'Serial' : `${item.quantity} left`,
-    initials: item.name.slice(0, 2).toUpperCase(),
-    href: `/dashboard/inventory/${item.folderId}`,
-  }))
-)
-
-const iosHomeAlerts = computed((): IosHomeAlert[] =>
-  homeAttentionItems.value.map((alert) => ({
-    id: alert.id,
-    title: alert.title,
-    description: alert.description,
-    href: alert.href,
-  }))
-)
-
-const chartData = computed(() => {
-  switch (chartView.value) {
-    case 'weekly':
-      return weeklyRevenueData.value
-    case 'monthly':
-      return monthlyRevenueData.value
-    default:
-      return dailyRevenueData.value
-  }
-})
-
-const chartSubtitle = computed(() => {
-  switch (chartView.value) {
-    case 'weekly':
-      return 'Last 12 weeks · completed sales only'
-    case 'monthly':
-      return 'Last 12 months · completed sales only'
-    default:
-      return 'Last 30 days · completed sales only'
-  }
-})
-
-const chartSeries = computed(() => {
-  if (chartData.value.length === 0) return []
-  const seriesName =
-    chartView.value === 'weekly'
-      ? 'Weekly revenue'
-      : chartView.value === 'monthly'
-      ? 'Monthly revenue'
-      : 'Daily revenue'
-  const dataToUse = chartView.value === 'monthly' ? chartData.value.slice(-12) : chartData.value
-  return [
-    {
-      name: seriesName,
-      data: dataToUse.map((item) => item.revenue),
-    },
-  ]
-})
-
-const isMobile = ref(false)
-if (import.meta.client) {
-  isMobile.value = window.innerWidth < 640
-  window.addEventListener('resize', () => {
-    isMobile.value = window.innerWidth < 640
-  })
-}
-const chartHeight = computed(() => (isMobile.value ? 176 : 220))
-
-const chartOptions = computed(() => {
-  const isDark = chartIsDark.value
-  const lineColor = isDark ? '#e4e4e7' : '#4876c7'
-  const gridColor = isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(15, 23, 42, 0.06)'
-  const labelColor = isDark ? '#a1a1aa' : '#64748b'
-
-  return {
-    chart: {
-      type: 'area',
-      height: chartHeight.value,
-      toolbar: { show: false },
-      zoom: { enabled: false },
-      fontFamily: 'var(--app-font-sans, Quicksand, ui-sans-serif, system-ui, sans-serif)',
-      background: 'transparent',
-      animations: { enabled: true, easing: 'easeinout', speed: 600 },
-    },
-    dataLabels: { enabled: false },
-    stroke: { curve: 'smooth', width: 2, colors: [lineColor] },
-    fill: {
-      type: 'gradient',
-      gradient: {
-        shadeIntensity: 0,
-        opacityFrom: 0.22,
-        opacityTo: 0,
-        stops: [0, 100],
-        colorStops: [
-          { offset: 0, color: lineColor, opacity: 0.24 },
-          { offset: 100, color: lineColor, opacity: 0 },
-        ],
-      },
-    },
-    xaxis: {
-      categories: (() => {
-        const data = chartView.value === 'monthly' ? chartData.value.slice(-12) : chartData.value
-        return data.map((item, index) => {
-          if (chartView.value === 'weekly') return `W${index + 1}`
-          if (chartView.value === 'monthly')
-            return item.date.toLocaleDateString('en-US', { month: 'short' })
-          return item.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-        })
-      })(),
-      labels: {
-        style: { colors: labelColor, fontSize: '11px', fontWeight: 400 },
-        rotate: chartView.value === 'monthly' ? 0 : -45,
-        rotateAlways: false,
-        offsetY: 4,
-      },
-      axisBorder: { show: false },
-      axisTicks: { show: false },
-    },
-    yaxis: {
-      labels: {
-        style: { colors: labelColor, fontSize: '11px', fontWeight: 400 },
-        formatter: (value: number) => {
-          const symbol = currencySymbol.value || '$'
-          if (value >= 1000) return `${symbol}${(value / 1000).toFixed(1)}k`
-          return `${symbol}${Math.round(value)}`
-        },
-      },
-      axisBorder: { show: false },
-      axisTicks: { show: false },
-    },
-    grid: {
-      borderColor: 'transparent',
-      xaxis: { lines: { show: false } },
-      yaxis: { lines: { show: true, color: gridColor } },
-      padding: { top: 8, right: 4, bottom: 36, left: 4 },
-    },
-    tooltip: {
-      theme: isDark ? 'dark' : 'light',
-      y: { formatter: (value: number) => formatCurrency(value) },
-    },
-    theme: { mode: isDark ? 'dark' : 'light' },
-    colors: [lineColor],
-    legend: { show: false },
-    markers: { size: 0, hover: { size: 4 } },
-  }
-})
-
-function formatActivityTime(createdAt: ActivityLog['createdAt']): string {
-  const d =
-    createdAt instanceof Date
-      ? createdAt
-      : typeof createdAt === 'object' && createdAt && 'toDate' in createdAt
-      ? (createdAt as { toDate: () => Date }).toDate()
-      : new Date()
-  const seconds = Math.floor((Date.now() - d.getTime()) / 1000)
-  if (seconds < 60) return 'just now'
-  const minutes = Math.floor(seconds / 60)
-  if (minutes < 60) return `${minutes}m ago`
-  const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours}h ago`
-  return d.toLocaleDateString()
-}
-
 const onTutorialComplete = () => {}
-
-const loadRecentActivity = async () => {
-  if (!canViewActivity.value) {
-    recentActivityLogs.value = []
-    return
-  }
-  recentActivityLogs.value = await fetchActivityLogs(DASHBOARD_ACTIVITY_TOP)
-}
 
 const loadDashboardData = async (options?: { force?: boolean }) => {
   try {
@@ -1437,14 +662,6 @@ const loadDashboardData = async (options?: { force?: boolean }) => {
     } else {
       dashboardFolderItems.value = await inventoryStore.fetchFolderAvailabilityStats(options)
     }
-
-    if (isNativeApp.value) {
-      scheduleNativeIdleWork(() => {
-        void loadRecentActivity()
-      })
-    } else {
-      await loadRecentActivity()
-    }
   } catch (error) {
     console.error('Error loading dashboard data:', error)
   }
@@ -1466,13 +683,6 @@ const refreshDashboardAfterStoreSwitch = async () => {
     } else {
       dashboardFolderItems.value = await inventoryStore.fetchFolderAvailabilityStats({ force: true })
     }
-    if (isNativeApp.value) {
-      scheduleNativeIdleWork(() => {
-        void loadRecentActivity()
-      })
-    } else {
-      await loadRecentActivity()
-    }
   } catch (error) {
     console.error('Error refreshing dashboard after store switch:', error)
   }
@@ -1484,7 +694,7 @@ onMounted(async () => {
     isLoading.value = true
   }
   await loadDashboardData()
-  if (canShowPaymentLinksSummary.value) {
+  if (paymentLinksLive.value) {
     void loadPaymentLinksForAttention().catch(() => undefined)
   }
   isLoading.value = false
@@ -1510,6 +720,6 @@ watch(
 )
 
 useHead({
-  title: 'Dashboard - Storvv',
+  title: 'Overview - Storvv',
 })
 </script>

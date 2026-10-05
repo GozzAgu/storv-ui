@@ -1,26 +1,26 @@
 <template>
-  <SidePanel
-    :model-value="modelValue"
+  <SDialog
+      placement="right"
+    :open="modelValue"
     title="Add sales lead"
-    size="lg"
-    dense
-    @update:model-value="(value: boolean) => emit('update:modelValue', value)"
+    size="md"
+    @update:open="(value: boolean) => emit('update:modelValue', value)"
   >
-    <IosForm layout="fill" @submit="save">
-      <IosFormSection fixed>
-        <IosFormField label="Customer name" required>
-          <IosFormInput
+    <SForm @submit="save">
+      <SFormSection>
+        <SField label="Customer name" required>
+          <SInput
             v-model="customerName"
             maxlength="120"
             autocomplete="name"
             placeholder="Who is enquiring?"
             @blur="refreshDuplicateWarning"
           />
-        </IosFormField>
+        </SField>
 
-        <div class="ios-form__grid ios-form__grid--pair">
-          <IosFormField label="Phone" hint="Optional">
-            <IosFormInput
+        <div class="s-form-pair">
+          <SField label="Phone" hint="Optional">
+            <SInput
               v-model="customerPhone"
               type="tel"
               maxlength="40"
@@ -28,10 +28,10 @@
               placeholder="Contact number"
               @blur="refreshDuplicateWarning"
             />
-          </IosFormField>
+          </SField>
 
-          <IosFormField label="Email" hint="Optional">
-            <IosFormInput
+          <SField label="Email" hint="Optional">
+            <SInput
               v-model="customerEmail"
               type="email"
               maxlength="120"
@@ -39,102 +39,84 @@
               placeholder="Email address"
               @blur="refreshDuplicateWarning"
             />
-          </IosFormField>
+          </SField>
         </div>
-      </IosFormSection>
+      </SFormSection>
 
-      <div v-if="duplicateLead" class="dash-drawer-callout">
+      <p v-if="duplicateLead" class="s-callout" role="status">
         An open lead already exists for this contact ({{ duplicateLead.customerName }}).
         <NuxtLink
           :to="dashPath(`/leads/${duplicateLead.id}`)"
-          class="font-medium text-gray-900 underline underline-offset-2 dark:text-gray-100"
+          class="s-link"
           @click="emit('update:modelValue', false)"
         >
           Open existing lead
         </NuxtLink>
-      </div>
+      </p>
 
-      <IosFormSection fixed>
-        <IosFormField label="Product interest" required>
-          <IosFormInput
+      <SFormSection>
+        <SField label="Product interest" required>
+          <SInput
             v-model="productName"
             maxlength="160"
             placeholder="What are they looking for?"
           />
-        </IosFormField>
+        </SField>
 
-        <IosFormField label="Link inventory item" hint="Optional">
-          <div class="flex flex-wrap gap-2">
-            <IosFormInput
-              v-model="inventorySearchQuery"
-              maxlength="160"
-              placeholder="Search in-stock products…"
-              extra-class="min-w-0 flex-1"
-            />
-            <Button
-              variant="secondary"
-              size="sm"
+        <SField label="Link inventory item" hint="Optional">
+          <div class="s-inline-field">
+            <div class="s-inline-field__grow">
+              <SInput
+                v-model="inventorySearchQuery"
+                maxlength="160"
+                placeholder="Search in-stock products…"
+              />
+            </div>
+            <SButton
               :loading="inventoryLinkLoading"
               :disabled="!inventorySearchQuery.trim()"
               @click="linkInventoryItem"
             >
               Find item
-            </Button>
+            </SButton>
           </div>
-          <p v-if="linkedInventoryLabel" class="mt-1.5 text-xs text-gray-600 dark:text-gray-400">
-            Linked: {{ linkedInventoryLabel }}
-            <button
-              type="button"
-              class="ml-1 font-medium text-gray-800 hover:underline dark:text-gray-200"
-              @click="clearInventoryLink"
-            >
-              Clear
-            </button>
+          <p v-if="linkedInventoryLabel" class="s-form-meta">
+            Linked: <strong>{{ linkedInventoryLabel }}</strong>
+            <button type="button" class="s-link" @click="clearInventoryLink">Clear</button>
           </p>
-        </IosFormField>
+        </SField>
 
-        <div class="ios-form__grid ios-form__grid--pair">
-          <IosFormField label="Estimated value" hint="Optional">
-            <div class="relative">
-              <span
-                class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400"
-                >{{ currencySymbol }}</span
-              >
-              <IosFormInput
-                v-model="estimatedValue"
-                type="number"
-                min="0"
-                step="0.01"
-                extra-class="pl-7"
-                placeholder="0.00"
-              />
-            </div>
-          </IosFormField>
+        <div class="s-form-pair">
+          <SField label="Estimated value" hint="Optional">
+            <SInput v-model="estimatedValue" type="number" min="0" step="0.01" placeholder="0.00">
+              <template #prefix>{{ currencySymbol }}</template>
+            </SInput>
+          </SField>
 
-          <IosFormField label="Source" required>
-            <IosFormSelect v-model="source">
+          <SField label="Source" required>
+            <SSelect v-model="source">
               <option v-for="option in SALES_LEAD_SOURCES" :key="option" :value="option">
                 {{ SALES_LEAD_SOURCE_LABELS[option] }}
               </option>
-            </IosFormSelect>
-          </IosFormField>
+            </SSelect>
+          </SField>
         </div>
 
-        <IosFormField label="Notes" hint="Optional">
-          <IosFormTextarea
+        <SField label="Notes" hint="Optional">
+          <STextarea
             v-model="notes"
             :rows="3"
             maxlength="500"
             placeholder="Anything useful for follow-up"
           />
-        </IosFormField>
-      </IosFormSection>
+        </SField>
+      </SFormSection>
 
-      <p v-if="errorMessage" class="ios-form__error">{{ errorMessage }}</p>
-    </IosForm>
+      <p v-if="errorMessage" class="s-field__error" role="alert">{{ errorMessage }}</p>
+    </SForm>
 
     <template #footer>
-      <IosDrawerActions
+      <SDialogActions
         cancel-label="Cancel"
         primary-label="Save lead"
         :primary-loading="isSaving"
@@ -144,22 +126,20 @@
         @primary="save"
       />
     </template>
-  </SidePanel>
+  </SDialog>
 </template>
 
 <script setup lang="ts">
+import SDialog from '~/components/s/SDialog.vue'
+import SDialogActions from '~/components/s/SDialogActions.vue'
+import SField from '~/components/s/SField.vue'
+import SForm from '~/components/s/SForm.vue'
+import SFormSection from '~/components/s/SFormSection.vue'
+import SInput from '~/components/s/SInput.vue'
+import SSelect from '~/components/s/SSelect.vue'
+import STextarea from '~/components/s/STextarea.vue'
 import { computed, ref, watch } from 'vue'
-import SidePanel from '~/components/ui/SidePanel.vue'
-import Button from '~/components/ui/Button.vue'
-import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
-import {
-  IosForm,
-  IosFormSection,
-  IosFormField,
-  IosFormInput,
-  IosFormTextarea,
-  IosFormSelect,
-} from '~/components/ios/forms'
+import SButton from '~/components/s/SButton.vue'
 import { usePreferences } from '~/composables/usePreferences'
 import { useSalesLeadsStore } from '~/stores/salesLeads'
 import { findDuplicateOpenLead } from '~/composables/leads/findDuplicateOpenLead'

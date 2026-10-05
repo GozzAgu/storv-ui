@@ -6,8 +6,8 @@ export type Theme = 'light' | 'dark' | 'system'
 
 const NATIVE_LEGACY_LIGHT_MIGRATION = 'theme-native-legacy-light-v1'
 
-/** Keep in sync with `assets/css/main.css` (`html.theme-transitioning` duration). */
-const THEME_TRANSITION_MS = 160
+/** Keep in sync with `--s-duration-fast`, used by `html.theme-transitioning` in `ds/base.css`. */
+const THEME_TRANSITION_MS = 150
 const THEME_TRANSITION_MS_REDUCED = 70
 
 /** Browser `setTimeout` id (avoid Node `Timeout` vs `number` mismatch in TS). */

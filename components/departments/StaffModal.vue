@@ -1,142 +1,160 @@
 <template>
-  <SidePanel
-    :model-value="props.modelValue"
+  <SDialog
+      placement="right"
+    :open="props.modelValue"
     :title="isEdit ? 'Edit staff' : 'Add staff'"
-    size="lg"
-    dense
-    @update:model-value="(value: boolean) => emit('update:modelValue', value)"
+    size="md"
+    @update:open="(value: boolean) => emit('update:modelValue', value)"
   >
-    <div v-if="emailSentSuccess" class="dash-drawer-empty">
-      <CheckCircleIcon class="h-6 w-6" stroke-width="1.75" />
-      <p>Invite emailed</p>
-      <p class="dash-drawer-hint">
+    <div
+      v-if="emailSentSuccess"
+      class="s-auth-status s-auth-status--success s-record-status"
+      role="status"
+    >
+      <span class="s-auth-status__icon" aria-hidden="true">
+        <CheckCircleIcon :size="24" :stroke-width="1.75" />
+      </span>
+      <h3 class="s-auth-status__title">Invite emailed</h3>
+      <p class="s-auth-status__body">
         We emailed sign-in details to
-        <span class="font-medium">{{ formData.email }}</span>. They can change the password after
+        <strong>{{ formData.email }}</strong>. They can change the password after
         signing in.
       </p>
     </div>
 
-    <div v-else-if="showTemporaryPassword" class="dash-drawer-empty">
-      <CheckCircleIcon class="h-6 w-6" stroke-width="1.75" />
-      <p>Account created</p>
-      <p class="dash-drawer-hint">
+    <div
+      v-else-if="showTemporaryPassword"
+      class="s-auth-status s-auth-status--success s-record-status"
+      role="status"
+    >
+      <span class="s-auth-status__icon" aria-hidden="true">
+        <CheckCircleIcon :size="24" :stroke-width="1.75" />
+      </span>
+      <h3 class="s-auth-status__title">Account created</h3>
+      <p class="s-auth-status__body">
         Share this one-time password with
-        <span class="font-medium">{{ formData.email }}</span>. They can change it in Profile after signing in.
+        <strong>{{ formData.email }}</strong>. They can change it in Profile after signing in.
       </p>
-      <div class="staff-invite-secret">
-        <code>{{ temporaryPasswordToShow }}</code>
-        <button type="button" class="staff-invite-secret__copy" @click="copyTemporaryPassword">
-          <ClipboardDocumentIcon
-            v-if="!copiedPassword"
-            class="h-4 w-4 shrink-0"
-            stroke-width="1.75"
-          />
-          <CheckCircleIcon v-else class="h-4 w-4 shrink-0" stroke-width="2" />
+      <div class="s-record-secret">
+        <code class="s-record-secret__code">{{ temporaryPasswordToShow }}</code>
+        <SButton size="sm" variant="ghost" @click="copyTemporaryPassword">
+          <template #leading>
+            <ClipboardDocumentIcon
+              v-if="!copiedPassword"
+              :size="16"
+              :stroke-width="2"
+              aria-hidden="true"
+            />
+            <CheckCircleIcon v-else :size="16" :stroke-width="2" aria-hidden="true" />
+          </template>
           {{ copiedPassword ? 'Copied' : 'Copy' }}
-        </button>
+        </SButton>
       </div>
-      <button
-        type="button"
-        class="staff-invite-mailto"
-        @click="openMailtoInvite(temporaryPasswordToShow)"
-      >
+      <SButton size="sm" variant="ghost" @click="openMailtoInvite(temporaryPasswordToShow)">
         Open in email app instead
-      </button>
+      </SButton>
     </div>
 
-    <IosForm v-else id="staff-drawer-form" layout="fill" @submit="handleSubmit">
-      <IosFormSection v-if="staffLimitReached && !isEdit" fixed>
-        <LimitUpgradeHint message="Your plan staff limit is reached for this store." />
-        <p class="ios-form__hint dash-drawer-hint">{{ staffLimitMessage }}</p>
-      </IosFormSection>
+    <SForm v-else id="staff-drawer-form" @submit="handleSubmit">
+      <SFormSection v-if="staffLimitReached && !isEdit">
+        <p class="s-notice">
+          Your plan staff limit is reached for this store.
+          <NuxtLink to="/dashboard/settings?upgrade=1" class="s-link">Upgrade</NuxtLink>
+        </p>
+        <p v-if="staffLimitMessage" class="s-field__hint">{{ staffLimitMessage }}</p>
+      </SFormSection>
 
-      <IosFormSection fixed>
-        <div class="ios-form__grid ios-form__grid--pair">
-          <IosFormField label="First name" required>
-            <IosFormInput v-model="formData.firstName" required placeholder="First name" />
-          </IosFormField>
-          <IosFormField label="Last name" required>
-            <IosFormInput v-model="formData.lastName" required placeholder="Last name" />
-          </IosFormField>
+      <SFormSection>
+        <div class="s-form-pair">
+          <SField label="First name" required>
+            <SInput v-model="formData.firstName" required placeholder="First name" />
+          </SField>
+          <SField label="Last name" required>
+            <SInput v-model="formData.lastName" required placeholder="Last name" />
+          </SField>
         </div>
-        <IosFormField label="Email" required>
-          <IosFormInput
+        <SField label="Email" required>
+          <SInput
             v-model="formData.email"
             type="email"
             required
             placeholder="email@example.com"
           />
-        </IosFormField>
-        <div class="ios-form__grid ios-form__grid--pair">
-          <IosFormField label="Phone" hint="Optional">
-            <IosFormInput v-model="formData.phone" type="tel" placeholder="+1234567890" />
-          </IosFormField>
-          <IosFormField label="Position" required>
-            <IosFormInput
+        </SField>
+        <div class="s-form-pair">
+          <SField label="Phone" hint="Optional">
+            <SInput v-model="formData.phone" type="tel" placeholder="+1234567890" />
+          </SField>
+          <SField label="Position" required>
+            <SInput
               v-model="formData.position"
               required
-              placeholder="e.g. Sales Associate"
+              placeholder="e.g. Sales associate"
             />
-          </IosFormField>
+          </SField>
         </div>
-      </IosFormSection>
+      </SFormSection>
 
-      <IosFormSection v-if="!isEdit" fixed>
-        <IosFormToggle
+      <SFormSection v-if="!isEdit">
+        <SCheckbox
           v-model="emailCredentialsToStaff"
           label="Email sign-in details"
-          :hint="
+          :description="
             emailCredentialsToStaff
               ? 'A random password is generated and emailed when the account is created.'
               : 'A random password is generated. You can copy it after the account is created.'
           "
         />
-        <button type="button" class="staff-invite-regen" @click="regeneratePassword">
-          <ArrowPathIcon class="h-4 w-4" stroke-width="1.75" />
-          Regenerate password
-        </button>
-      </IosFormSection>
+        <div>
+          <SButton size="sm" variant="ghost" @click="regeneratePassword">
+            <template #leading>
+              <ArrowPathIcon :size="16" :stroke-width="2" aria-hidden="true" />
+            </template>
+            Regenerate password
+          </SButton>
+        </div>
+      </SFormSection>
 
-      <IosFormSection fixed>
-        <div class="ios-form__grid ios-form__grid--pair">
-          <IosFormField label="Hire date" required>
-            <IosFormInput v-model="formData.hireDate" type="date" required />
-          </IosFormField>
-          <IosFormField label="Salary" hint="Optional">
-            <IosFormInput
+      <SFormSection>
+        <div class="s-form-pair">
+          <SField label="Hire date" required>
+            <SInput v-model="formData.hireDate" type="date" required />
+          </SField>
+          <SField label="Salary" hint="Optional">
+            <SInput
               v-model="formData.salary"
               type="number"
               min="0"
               step="0.01"
               placeholder="Optional"
             />
-          </IosFormField>
+          </SField>
         </div>
-        <IosFormField label="Status" required>
-          <IosFormSelect v-model="formData.status" required extra-class="cursor-pointer">
+        <SField label="Status" required>
+          <SSelect v-model="formData.status" required>
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
-            <option value="on_leave">On Leave</option>
-          </IosFormSelect>
-        </IosFormField>
-      </IosFormSection>
+            <option value="on_leave">On leave</option>
+          </SSelect>
+        </SField>
+      </SFormSection>
 
       <StaffPermissionsPanel
         v-if="canEditStaffPermissions"
         v-model="formData.permissions"
       />
 
-      <p v-if="errorMessage" class="ios-form__error">{{ errorMessage }}</p>
-    </IosForm>
+      <p v-if="errorMessage" class="s-field__error" role="alert">{{ errorMessage }}</p>
+    </SForm>
 
     <template #footer>
-      <IosDrawerActions
+      <SDialogActions
         v-if="emailSentSuccess"
         cancel-label="Done"
         :show-primary="false"
         @cancel="closeAfterSuccess"
       />
-      <IosDrawerActions
+      <SDialogActions
         v-else-if="showTemporaryPassword"
         cancel-label="Done"
         primary-label="Email to staff instead"
@@ -145,7 +163,7 @@
         @cancel="closeAfterSuccess"
         @primary="emailCredentialsAfterCreate"
       />
-      <IosDrawerActions
+      <SDialogActions
         v-else
         :primary-label="staffFooterPrimaryLabel"
         :primary-loading="isSubmitting"
@@ -154,26 +172,25 @@
         @primary="handleSubmit"
       />
     </template>
-  </SidePanel>
+  </SDialog>
 </template>
 
 <script setup lang="ts">
+import SDialog from '~/components/s/SDialog.vue'
+import SCheckbox from '~/components/s/SCheckbox.vue'
+import SDialogActions from '~/components/s/SDialogActions.vue'
+import SField from '~/components/s/SField.vue'
+import SForm from '~/components/s/SForm.vue'
+import SFormSection from '~/components/s/SFormSection.vue'
+import SInput from '~/components/s/SInput.vue'
+import SSelect from '~/components/s/SSelect.vue'
 import { ref, watch, computed, onMounted } from 'vue'
 import {
   CheckCircleIcon,
   ClipboardDocumentIcon,
   ArrowPathIcon,
 } from '~/utils/app-icons'
-import SidePanel from '~/components/ui/SidePanel.vue'
-import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
-import {
-  IosForm,
-  IosFormSection,
-  IosFormField,
-  IosFormInput,
-  IosFormSelect,
-  IosFormToggle,
-} from '~/components/ios/forms'
+import SButton from '~/components/s/SButton.vue'
 import type { Staff } from '~/composables/useStaff'
 import { useStaffStore } from '~/stores/staff'
 import { useDepartmentsStore } from '~/stores/departments'
@@ -183,7 +200,6 @@ import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useAppToast } from '~/composables/useAppToast'
 import { getApiErrorMessage } from '~/utils/api-error-message'
-import LimitUpgradeHint from '~/components/subscription/LimitUpgradeHint.vue'
 import { getPlanDisplayName, getMinimumPlanForFeature } from '~/types/subscription'
 import { useProductAnalytics } from '~/composables/useProductAnalytics'
 import StaffPermissionsPanel from '~/components/departments/StaffPermissionsPanel.vue'
@@ -581,81 +597,3 @@ onMounted(() => {
   // Any initialization logic can go here
 })
 </script>
-
-<style scoped>
-.staff-invite-secret {
-  display: flex;
-  width: 100%;
-  max-width: 22rem;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 1.25rem;
-  padding: 0.75rem 0.875rem;
-  border-radius: 1rem;
-  background: rgb(244 244 245);
-  text-align: left;
-}
-
-.staff-invite-secret code {
-  min-width: 0;
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 0.8125rem;
-  letter-spacing: 0.02em;
-}
-
-.staff-invite-secret__copy,
-.staff-invite-regen {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-  color: inherit;
-}
-
-.staff-invite-secret__copy {
-  flex-shrink: 0;
-  border-radius: 9999px;
-  padding: 0.25rem 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.staff-invite-regen {
-  margin-top: 0.5rem;
-  padding: 0.375rem 0;
-  font-size: 0.75rem;
-  font-weight: 550;
-  opacity: 0.72;
-}
-
-.staff-invite-regen:hover,
-.staff-invite-secret__copy:hover {
-  opacity: 1;
-}
-
-.staff-invite-mailto {
-  margin-top: 0.875rem;
-  border: 0;
-  background: transparent;
-  padding: 0;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: rgb(72 118 199);
-  cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 0.15em;
-}
-
-:global(html.dark) .staff-invite-secret {
-  background: rgb(255 255 255 / 0.06);
-}
-
-:global(html.dark) .staff-invite-mailto {
-  color: rgb(154 181 227);
-}
-</style>

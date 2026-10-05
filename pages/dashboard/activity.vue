@@ -1,326 +1,171 @@
 <template>
-  <div :class="[pageWithFixedFooterClass, 'dash-page--unified']">
-    <div v-if="isCapacitorIos" class="ios-sales-shell" data-activity-page>
-      <IosPageNavBar title="Activity" />
-
-      <template v-if="canAccess && storeId">
-        <div v-if="!loading" class="ios-sales-chrome">
-          <div class="ios-search-bar-host ios-search-bar-host--sticky">
-            <IosSearchBar v-model="searchQuery" placeholder="Search user, item, or ID…" />
-          </div>
-          <IosQuickActionBar
-            v-model="actionFilter"
-            aria-label="Filter by action"
-            :options="iosActivityFilterOptions"
-          />
-        </div>
-
-        <IosTransactionListSkeleton v-if="loading" :count="8" />
-
-        <DashboardTableEmptyState
-          v-else-if="fetchError"
-          :icon="ClipboardDocumentListIcon"
-          title="Could not load activity"
-          :description="fetchError"
-        />
-
-        <DashboardTableEmptyState
-          v-else-if="allLogs.length === 0"
-          :icon="ClipboardDocumentListIcon"
-          title="No activity yet"
-          description="Changes to inventory folders and items will appear here automatically."
-        />
-
-        <DashboardTableEmptyState
-          v-else-if="filteredLogs.length === 0"
-          :icon="MagnifyingGlassIcon"
-          title="No matching events"
-          description="Adjust your search or filter to see more results."
-        >
-          <button
-            type="button"
-            class="text-xs font-medium text-primary-600 dark:text-primary-400"
-            @click="resetFilters()"
-          >
-            Clear filters
-          </button>
-        </DashboardTableEmptyState>
-
-        <template v-else>
-          <div class="ios-receipt-transaction-list">
-            <IosReceiptTransactionRow
-              v-for="(log, index) in paginatedLogs"
-              :key="log.id"
-              :title="displayEntityName(log)"
-              :subtitle="`${log.userDisplayName} · ${activityActionLabel(log.action)}`"
-              :amount="relativeTimeCompact(log.createdAt)"
-              amount-tone="neutral"
-              :date="formatDateShort(log.createdAt)"
-              :variant="iosActivityVariant(log.action)"
-              :icon="iosActivityIcon(log.action)"
-              :last="index === paginatedLogs.length - 1"
-            />
-          </div>
-          <DashboardTablePagination
-            :current-page="currentPage"
-            :items-per-page="itemsPerPage"
-            :total="filteredLogs.length"
-            @page-change="handlePageChange"
-          />
-        </template>
+  <div class="ds-root s-c s-page">
+    <SPageHeader title="Activity">
+      <template #description>
+        Who added, changed or deleted inventory and leads in this branch, and when.
       </template>
+    </SPageHeader>
 
-      <DashboardTableEmptyState
-        v-else-if="canAccess && !storeId && !loading"
-        :icon="BuildingStorefrontIcon"
-        title="Select a store"
-        description="Choose a branch from the store selector."
-      />
-
-      <FeatureGateCard
-        v-else-if="!canAccess"
-        feature="activity_logs"
-        :title="accessDeniedByRole ? 'Managers only' : undefined"
-        :description="
-          accessDeniedByRole
-            ? 'Activity Logs are available to super admins and store managers only.'
-            : isStaff
-              ? 'Activity Logs are not enabled for your workspace.'
-              : undefined
-        "
-      />
-    </div>
-
-    <template v-else>
-    <DashboardPageHeader class="dash-page-header--unified">
-      <template #eyebrow>
-        <p :class="eyebrowClass">Audit trail</p>
-      </template>
-      <template #title>
-        <h1 :class="pageTitleClass">Activity Logs</h1>
-      </template>
-      <template v-if="canAccess && loading" #description>
-        <DashPageMetricsSkeleton :count="4" />
-      </template>
-      <template v-else-if="canAccess && !loading && allLogs.length > 0" #description>
-        <DashboardPageMetrics :metrics="headerMetrics" aria-label="Activity summary" />
-      </template>
-      <template v-if="canAccess && storeId && loading" #filters>
-        <nav :class="segmentTabsClass" aria-hidden="true">
-          <span v-for="tab in actionTabs" :key="tab.value" class="dash-skeleton dash-skeleton--select" />
-        </nav>
-        <span class="dash-skeleton dash-skeleton--line dash-skeleton--search" />
-      </template>
-      <template v-else-if="canAccess && storeId && !loading && allLogs.length > 0" #filters>
-        <nav :class="segmentTabsClass" aria-label="Filter by action" role="tablist">
-          <button
-            v-for="tab in actionTabs"
-            :key="tab.value"
-            type="button"
-            role="tab"
-            :aria-selected="actionFilter === tab.value"
-            :class="[
-              segmentTabsBtnClass,
-              actionFilter === tab.value ? segmentTabsBtnActiveClass : '',
-            ]"
-            @click="actionFilter = tab.value"
-          >
-            {{ tab.label }}
-          </button>
-        </nav>
-        <DashboardToolbarSearch
-          v-model="searchQuery"
-          placeholder="Search user, item, or ID…"
-          :wide="false"
-          input-class="sm:w-52"
-        />
-      </template>
-    </DashboardPageHeader>
-
-    <div v-if="!canAccess" :class="dashboardCardPaddedClass">
-      <FeatureGateCard
-        feature="activity_logs"
-        :title="accessDeniedByRole ? 'Managers only' : undefined"
-        :description="
-          accessDeniedByRole
-            ? 'Activity Logs are available to super admins and store managers only.'
-            : isStaff
-              ? 'Activity Logs are not enabled for your workspace.'
-              : undefined
-        "
-        :secondary-href="accessDeniedByRole ? undefined : '/dashboard/help#settings-subscription'"
-      />
-    </div>
-
-    <template v-else>
-      <div
-        v-if="!storeId && !loading"
-        :class="tableShellFlexClass"
+    <SCard v-if="accessDeniedByRole">
+      <SEmptyState
+        title="Managers only"
+        description="Activity is available to the account owner and store managers."
       >
-        <DashboardTableEmptyState
-          :icon="BuildingStorefrontIcon"
-          title="Select a store to view activity"
-          description="Choose a branch from the store selector in the top bar."
-          :tips="[
-            'Logs are scoped to the active store',
-            'Inventory create, update, and delete events appear here',
-          ]"
+        <template #icon><Lock :size="24" :stroke-width="1.75" aria-hidden="true" /></template>
+      </SEmptyState>
+    </SCard>
+
+    <PlanGate
+      v-else-if="!canAccess"
+      feature="activity_logs"
+      description="See who changed what in your inventory, with a full history for every branch."
+    />
+
+    <SCard v-else-if="!storeId && !loading">
+      <SEmptyState
+        title="Choose a branch"
+        description="Activity is kept per branch. Pick one from the branch switcher to see its history."
+      >
+        <template #icon><Store :size="24" :stroke-width="1.75" aria-hidden="true" /></template>
+      </SEmptyState>
+    </SCard>
+
+    <SCard v-else-if="loading" flush aria-busy="true">
+      <ul class="s-list" aria-label="Loading activity">
+        <li v-for="i in 8" :key="i" class="s-list__item" aria-hidden="true">
+          <SSkeleton circle width="32px" height="32px" />
+          <div class="s-list__main">
+            <SSkeleton width="40%" height="14px" />
+            <SSkeleton width="25%" height="12px" />
+          </div>
+          <SSkeleton width="64px" height="14px" />
+        </li>
+      </ul>
+    </SCard>
+
+    <SCard v-else-if="fetchError">
+      <SEmptyState title="Couldn't load activity" :description="fetchError">
+        <template #icon><TriangleAlert :size="24" :stroke-width="1.75" aria-hidden="true" /></template>
+        <template #actions>
+          <SButton @click="loadLogs(true)">Try again</SButton>
+        </template>
+      </SEmptyState>
+    </SCard>
+
+    <SCard v-else-if="allLogs.length === 0">
+      <SEmptyState
+        title="No activity yet"
+        description="When someone adds, edits or deletes inventory or leads, it shows up here."
+      >
+        <template #icon><History :size="24" :stroke-width="1.75" aria-hidden="true" /></template>
+      </SEmptyState>
+    </SCard>
+
+    <template v-else>
+      <STabs v-model="actionFilter" :tabs="webActionTabs" label="Filter by action" />
+
+      <div class="s-toolbar">
+        <SSearch
+          v-model="searchQuery"
+          class="s-toolbar__search"
+          placeholder="Search activity"
+          label="Search activity by person, item or record ID"
         />
       </div>
 
-      <div v-else class="flex min-h-0 flex-1 flex-col">
-        <div :class="tableShellFlexClass">
-          <p
-            v-if="reachedFetchCap"
-            class="border-b border-gray-100/90 px-4 py-2 text-[11px] text-gray-500 dark:border-gray-800/80 dark:text-gray-400 sm:px-5"
-          >
-            Showing newest {{ fetchLimit }} events - use search to narrow results.
-          </p>
+      <p v-if="reachedFetchCap" class="s-notice">
+        Showing the newest {{ fetchLimit }} events. Search to find older ones.
+      </p>
 
-          <DashTableSkeleton
-            v-if="loading"
-            :columns="[
-              { label: 'User' },
-              { label: 'Action', class: 'dashboard-table__col-status', bone: '4.5rem' },
-              { label: 'Details', lines: 2 },
-              { label: 'When', class: 'whitespace-nowrap text-right', lines: 2 },
-            ]"
-            :rows="8"
-            leading="avatar"
-            :leading-meta="false"
-            flush
-            aria-label="Loading activity"
-          />
+      <SCard v-if="filteredLogs.length === 0">
+        <SEmptyState title="No matching activity" description="Try another tab, or clear the search.">
+          <template #icon><SearchX :size="24" :stroke-width="1.75" aria-hidden="true" /></template>
+          <template #actions>
+            <SButton @click="resetFilters()">Show all activity</SButton>
+          </template>
+        </SEmptyState>
+      </SCard>
 
-          <div v-else-if="fetchError" class="px-4 py-12 text-center sm:px-6">
-            <p class="text-sm font-medium text-red-600 dark:text-red-400">
-              Could not load activity logs
-            </p>
-            <p
-              class="mx-auto mt-1.5 max-w-sm text-xs leading-relaxed text-gray-500 dark:text-gray-400"
-            >
-              {{ fetchError }}
-            </p>
-            <button
-              type="button"
-              class="mt-4 rounded-lg bg-gray-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-gray-800 dark:bg-white/10 dark:text-gray-100 dark:hover:bg-white/15"
-              @click="loadLogs()"
-            >
-              Try again
-            </button>
-          </div>
+      <template v-else>
+        <!-- Phone -->
+        <SCard flush class="s-only-sm">
+          <ul class="s-list">
+            <li v-for="log in paginatedLogs" :key="log.id" class="s-list__item">
+              <SAvatar :name="log.userDisplayName" size="sm" />
+              <div class="s-list__main">
+                <span class="s-list__primary">{{ displayEntityName(log) }}</span>
+                <span class="s-list__secondary">
+                  {{ log.userDisplayName }} · {{ relativeTime(log.createdAt) }}
+                </span>
+              </div>
+              <div class="s-list__end">
+                <SBadge :tone="activityActionTone(log.action)" size="sm">
+                  {{ activityActionLabel(log.action) }}
+                </SBadge>
+              </div>
+            </li>
+          </ul>
+        </SCard>
 
-          <DashboardTableEmptyState
-            v-else-if="allLogs.length === 0"
-            :icon="ClipboardDocumentListIcon"
-            title="No activity yet"
-            description="Changes to inventory folders and items will appear here automatically."
-            :tips="[
-              'Each entry records who performed the action',
-              'Create, update, and delete events are retained for auditing',
-            ]"
-          />
-
-          <DashboardTableEmptyState
-            v-else-if="filteredLogs.length === 0"
-            :icon="MagnifyingGlassIcon"
-            title="No matching events"
-            description="Adjust your search or filter to see more results."
-            :tips="[
-              'Search matches names, item titles, and record IDs',
-              'Use the action filter to focus on creates, updates, or deletes',
-            ]"
-          >
-            <button
-              type="button"
-              class="text-xs font-medium text-primary-600 transition hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
-              @click="resetFilters()"
-            >
-              Clear filters
-            </button>
-          </DashboardTableEmptyState>
-
-          <div v-else class="flex flex-col">
-            <div class="overflow-x-auto">
-              <table class="dashboard-table min-w-full">
-                <thead>
-                  <tr>
-                    <th scope="col" class="w-[min(14rem,28%)]">User</th>
-                    <th scope="col" class="dashboard-table__col-status">Action</th>
-                    <th scope="col">Details</th>
-                    <th scope="col" class="whitespace-nowrap text-right">When</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="log in paginatedLogs" :key="log.id">
-                    <td>
-                      <div class="flex min-w-0 items-center gap-3">
-                        <span
-                          class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold tracking-tight"
-                          :class="avatarToneClass(log.userDisplayName)"
-                        >
-                          {{ getInitials(log.userDisplayName) }}
-                        </span>
-                        <span class="dashboard-table__primary min-w-0 truncate text-sm">
-                          {{ log.userDisplayName }}
-                        </span>
-                      </div>
-                    </td>
-                    <td class="dashboard-table__col-status">
-                      <span :class="activityActionBadgeClass(log.action)">
-                        <span
-                          class="mr-1.5 inline-block h-1.5 w-1.5 rounded-full"
-                          :class="actionDotClass(log.action)"
-                          aria-hidden="true"
-                        />
-                        {{ activityActionLabel(log.action) }}
-                      </span>
-                    </td>
-                    <td class="max-w-[min(24rem,42vw)]">
-                      <p class="dashboard-table__primary truncate">
-                        {{ displayEntityName(log) }}
-                      </p>
-                      <div class="mt-1 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5">
-                        <span
-                          class="inline-flex items-center gap-1 rounded-md bg-gray-100/90 px-1.5 py-0.5 text-[10px] font-medium text-gray-600 dark:bg-white/[0.05] dark:text-gray-400"
-                        >
-                          <component
-                            :is="entityTypeIcon(log.entityType)"
-                            class="h-3 w-3 shrink-0 opacity-70"
-                            aria-hidden="true"
-                          />
-                          {{ activityEntityTypeLabel(log.entityType) }}
-                        </span>
-                        <span
-                          v-if="logDetailSubtitle(log)"
-                          class="dashboard-table__muted min-w-0 truncate text-[10px] leading-snug"
-                        >
-                          {{ logDetailSubtitle(log) }}
-                        </span>
-                      </div>
-                    </td>
-                    <td class="whitespace-nowrap text-right">
-                      <p class="dashboard-table__primary text-xs tabular-nums">
-                        {{ relativeTime(log.createdAt) }}
-                      </p>
-                      <p class="dashboard-table__muted mt-0.5 text-[10px] tabular-nums">
-                        {{ formatDate(log.createdAt) }}
-                      </p>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <DashboardTablePagination
-              :current-page="currentPage"
-              :items-per-page="itemsPerPage"
-              :total="filteredLogs.length"
-              @page-change="handlePageChange"
-            />
-          </div>
+        <!-- Tablet and desktop -->
+        <div class="s-table-wrap s-hide-sm">
+          <table class="s-table">
+            <thead>
+              <tr>
+                <th scope="col">Person</th>
+                <th scope="col">Action</th>
+                <th scope="col">What changed</th>
+                <th scope="col">When</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="log in paginatedLogs" :key="log.id">
+                <td>
+                  <span class="s-table__inline">
+                    <SAvatar :name="log.userDisplayName" size="sm" />
+                    <span class="s-table__primary">{{ log.userDisplayName }}</span>
+                  </span>
+                </td>
+                <td>
+                  <SBadge :tone="activityActionTone(log.action)" size="sm" dot>
+                    {{ activityActionLabel(log.action) }}
+                  </SBadge>
+                </td>
+                <td>
+                  <span class="s-table__primary">{{ displayEntityName(log) }}</span>
+                  <span class="s-table__secondary s-activity__meta">
+                    <component
+                      :is="entityTypeIcon(log.entityType)"
+                      :size="14"
+                      :stroke-width="2"
+                      aria-hidden="true"
+                    />
+                    {{ activityEntityTypeLabel(log.entityType) }}
+                    <template v-if="logDetailSubtitle(log)"> · {{ logDetailSubtitle(log) }}</template>
+                  </span>
+                </td>
+                <td class="s-table__nowrap">
+                  <span class="s-table__primary">{{ relativeTime(log.createdAt) }}</span>
+                  <span
+                    v-if="relativeTime(log.createdAt) !== formatDate(log.createdAt)"
+                    class="s-table__secondary"
+                  >
+                    {{ formatDate(log.createdAt) }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-      </div>
-    </template>
+
+        <SPagination
+          :current-page="currentPage"
+          :page-size="itemsPerPage"
+          :total="filteredLogs.length"
+          label="Activity pagination"
+          @page-change="handlePageChange"
+        />
+      </template>
     </template>
   </div>
 </template>
@@ -329,23 +174,30 @@
 definePageMeta({ layout: 'dashboard', middleware: 'auth' })
 
 import {
-  BuildingStorefrontIcon,
-  ClipboardDocumentListIcon,
-  CubeIcon,
-  FolderIcon,
-  FunnelIcon,
-  InboxIcon,
-  MagnifyingGlassIcon,
-  PencilSquareIcon,
-  PlusIcon,
-  Squares2X2Icon,
-  TrashIcon,
-} from '~/utils/app-icons'
+  Box,
+  FolderClosed,
+  History,
+  Inbox,
+  LayoutGrid,
+  Lock,
+  SearchX,
+  Store,
+  TriangleAlert,
+} from '@lucide/vue'
+import SAvatar from '~/components/s/SAvatar.vue'
+import SBadge from '~/components/s/SBadge.vue'
+import SButton from '~/components/s/SButton.vue'
+import SCard from '~/components/s/SCard.vue'
+import SEmptyState from '~/components/s/SEmptyState.vue'
+import SPageHeader from '~/components/s/SPageHeader.vue'
+import SPagination from '~/components/s/SPagination.vue'
+import SSearch from '~/components/s/SSearch.vue'
+import SSkeleton from '~/components/s/SSkeleton.vue'
+import STabs from '~/components/s/STabs.vue'
+import PlanGate from '~/components/subscription/PlanGate.vue'
 import type { ActivityAction, ActivityEntityType, ActivityLog } from '~/composables/useActivityLog'
-import type { IosRowIconKey } from '~/utils/ios-row-icons'
 import {
   ACTIVITY_LOGS_FETCH_LIMIT,
-  activityActionBadgeClass,
   activityActionLabel,
   activityEntityTypeLabel,
   activityLogDetailSubtitle,
@@ -353,34 +205,13 @@ import {
   normalizeActivityLogText,
 } from '~/composables/useActivityLog'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
+import { useDashboardPageRefreshRegister } from '~/composables/useDashboardPageRefresh'
 import { isCapacitorNative } from '~/utils/capacitor-env'
-import FeatureGateCard from '~/components/subscription/FeatureGateCard.vue'
-import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
-import IosQuickActionBar, { type IosQuickActionOption } from '~/components/ios/IosQuickActionBar.vue'
-import IosTransactionListSkeleton from '~/components/ios/IosTransactionListSkeleton.vue'
-import IosSearchBar from '~/components/ios/IosSearchBar.vue'
-import IosReceiptTransactionRow, {
-  type ReceiptTransactionVariant,
-} from '~/components/ios/IosReceiptTransactionRow.vue'
-const {
-  eyebrowClass,
-  pageTitleClass,
-  dashboardCardPaddedClass,
-  pageWithFixedFooterClass,
-  segmentTabsClass,
-  segmentTabsBtnClass,
-  segmentTabsBtnActiveClass,
-} = useDashboardPageChrome()
-
-const { tableShellFlexClass } = useDashboardTableChrome()
-const { isCapacitorIos } = useIsCapacitorIos()
-
 const userStore = useUserStore()
 const inventoryStore = useInventoryStore()
 const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
 
 const { hasAnyManageAccess } = usePermissions()
-const isStaff = computed(() => userStore.userData?.role === 'staff')
 const hasPlanAccess = computed(() => canUseSubscriptionFeature('activity_logs'))
 const canAccess = computed(
   () => (userStore.isSuperAdmin || hasAnyManageAccess.value) && hasPlanAccess.value
@@ -403,50 +234,6 @@ const actionTabs: Array<{ value: 'all' | ActivityAction; label: string }> = [
   { value: 'updated', label: 'Updated' },
   { value: 'deleted', label: 'Deleted' },
 ]
-
-const iosActivityFilterOptions = computed((): IosQuickActionOption[] =>
-  actionTabs.map((tab) => ({
-    value: tab.value,
-    label: tab.label,
-    icon:
-      tab.value === 'all'
-        ? FunnelIcon
-        : tab.value === 'created'
-          ? PlusIcon
-          : tab.value === 'updated'
-            ? PencilSquareIcon
-            : TrashIcon,
-  }))
-)
-
-function iosActivityIcon(action: ActivityAction): IosRowIconKey {
-  return `activity-${action}`
-}
-
-function iosActivityVariant(action: ActivityAction): ReceiptTransactionVariant {
-  if (action === 'created') return 'credit'
-  if (action === 'deleted') return 'cancelled'
-  return 'pending'
-}
-
-function formatDateShort(d: Date | unknown): string {
-  if (!d) return ''
-  const date = d instanceof Date ? d : new Date(d as string | number)
-  if (Number.isNaN(date.getTime())) return ''
-  const day = String(date.getDate()).padStart(2, '0')
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const year = date.getFullYear()
-  return `${day}.${month}.${year}`
-}
-
-const AVATAR_TONES = [
-  'bg-violet-100 text-violet-800 dark:bg-violet-500/20 dark:text-violet-200',
-  'bg-sky-100 text-sky-800 dark:bg-sky-500/20 dark:text-sky-200',
-  'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-200',
-  'bg-amber-100 text-amber-900 dark:bg-amber-500/20 dark:text-amber-200',
-  'bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-200',
-  'bg-indigo-100 text-indigo-800 dark:bg-indigo-500/20 dark:text-indigo-200',
-] as const
 
 const reachedFetchCap = computed(() => allLogs.value.length >= fetchLimit)
 
@@ -480,41 +267,22 @@ const paginatedLogs = computed(() => {
   return list.slice(start, start + itemsPerPage)
 })
 
-const createdCount = computed(
-  () => filteredLogs.value.filter((log) => log.action === 'created').length
-)
-const updatedCount = computed(
-  () => filteredLogs.value.filter((log) => log.action === 'updated').length
-)
-const deletedCount = computed(
-  () => filteredLogs.value.filter((log) => log.action === 'deleted').length
+const webActionTabs = computed(() =>
+  actionTabs.map((tab) => ({
+    value: tab.value,
+    label: tab.label,
+    count:
+      tab.value === 'all'
+        ? allLogs.value.length
+        : allLogs.value.filter((log) => log.action === tab.value).length,
+  }))
 )
 
-const headerMetrics = computed(() => [
-  {
-    key: 'total',
-    label: 'Events',
-    value: String(filteredLogs.value.length),
-  },
-  {
-    key: 'created',
-    label: 'Created',
-    value: String(createdCount.value),
-    tone: 'success' as const,
-  },
-  {
-    key: 'updated',
-    label: 'Updated',
-    value: String(updatedCount.value),
-    tone: 'info' as const,
-  },
-  {
-    key: 'deleted',
-    label: 'Deleted',
-    value: String(deletedCount.value),
-    tone: deletedCount.value > 0 ? ('danger' as const) : undefined,
-  },
-])
+function activityActionTone(action: ActivityAction): 'success' | 'info' | 'error' {
+  if (action === 'created') return 'success'
+  if (action === 'deleted') return 'error'
+  return 'info'
+}
 
 function handlePageChange(page: number) {
   currentPage.value = page
@@ -562,22 +330,10 @@ function displayEntityName(log: ActivityLog): string {
 }
 
 function entityTypeIcon(type: ActivityEntityType) {
-  if (type === 'folder') return FolderIcon
-  if (type === 'items_batch') return Squares2X2Icon
-  if (type === 'lead') return InboxIcon
-  return CubeIcon
-}
-
-function avatarToneClass(name: string): string {
-  const value = String(name || 'U')
-  const idx = value.split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0) % AVATAR_TONES.length
-  return AVATAR_TONES[idx]!
-}
-
-function actionDotClass(action: ActivityAction): string {
-  if (action === 'created') return 'bg-emerald-500 dark:bg-emerald-400'
-  if (action === 'deleted') return 'bg-rose-500 dark:bg-rose-400'
-  return 'bg-blue-500 dark:bg-blue-400'
+  if (type === 'folder') return FolderClosed
+  if (type === 'items_batch') return LayoutGrid
+  if (type === 'lead') return Inbox
+  return Box
 }
 
 function formatDate(d: Date | unknown): string {
@@ -603,34 +359,6 @@ function relativeTime(d: Date | unknown): string {
   const days = Math.floor(hrs / 24)
   if (days < 7) return `${days}d ago`
   return formatDate(d)
-}
-
-/** Short relative label for iOS transaction rows (never full locale datetime). */
-function relativeTimeCompact(d: Date | unknown): string {
-  if (!d) return ''
-  const date = d instanceof Date ? d : new Date(d as string | number)
-  if (Number.isNaN(date.getTime())) return ''
-  const diffMs = Date.now() - date.getTime()
-  const mins = Math.floor(diffMs / 60000)
-  if (mins < 1) return 'Now'
-  if (mins < 60) return `${mins}m`
-  const hrs = Math.floor(mins / 60)
-  if (hrs < 24) return `${hrs}h`
-  const days = Math.floor(hrs / 24)
-  if (days < 7) return `${days}d`
-  if (days < 30) return `${Math.floor(days / 7)}w`
-  if (days < 365) return `${Math.floor(days / 30)}mo`
-  return `${Math.floor(days / 365)}y`
-}
-
-function getInitials(name: string): string {
-  const value = String(name || '').trim()
-  if (!value) return 'U'
-  const parts = value.split(/\s+/).filter(Boolean)
-  if (parts.length === 1) {
-    return parts[0]!.slice(0, 2).toUpperCase()
-  }
-  return `${parts[0]![0] || ''}${parts[parts.length - 1]![0] || ''}`.toUpperCase()
 }
 
 let cachedActivityLogs: { storeId: string; logs: ActivityLog[]; fetchedAt: number } | null = null
@@ -675,7 +403,7 @@ async function loadLogs(force = false) {
   }
 }
 
-useIosPullToRefreshRegister(async () => {
+useDashboardPageRefreshRegister(async () => {
   await loadLogs(true)
 })
 

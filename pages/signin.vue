@@ -1,9 +1,21 @@
 <template>
   <AuthShell
-    mobile-line="Storvv: inventory, receipts, and branches in one place."
-    panel-title="Run your store with a calmer workflow."
-    panel-description="Sign in to manage stock, ring up activity, and keep every branch aligned without jumping between tools."
+    panel-eyebrow="Welcome back"
+    panel-title="Your store, in one place"
+    panel-description="Stock, sales, and every branch in one workspace."
+    :steps="signInHighlights"
+    steps-label="What you can do in Storvv"
   >
+    <AuthBuddies
+      mode="signin"
+      :focused="focused"
+      :email="form.email"
+      :password="form.password"
+      :error="errorMessage"
+      :loading="isLoading || isVerifyingTwoFactor"
+      :two-factor="awaitingTwoFactor"
+    />
+
     <AuthPageHeader
       title="Welcome back!"
       subtitle="Sign in to manage inventory, sales, and every branch from one workspace."
@@ -12,106 +24,106 @@
     <AuthSegmentToggle mode="signin" />
 
     <AuthCard>
-      <div class="auth-form-panel">
-      <form
-        class="auth-form"
-        @submit.prevent="awaitingTwoFactor ? submitTwoFactorCode() : handleSignIn()"
-      >
-        <template v-if="!awaitingTwoFactor">
-          <AuthField
-            v-model="form.email"
-            input-id="email"
-            label="Email"
-            type="email"
-            autocomplete="username"
-            placeholder="Enter your email"
-            :icon="EnvelopeIcon"
-            required
+      <div class="auth-form-panel" @focusin="trackFocus" @focusout="trackFocus">
+        <form
+          class="auth-form"
+          @submit.prevent="awaitingTwoFactor ? submitTwoFactorCode() : handleSignIn()"
+        >
+          <template v-if="!awaitingTwoFactor">
+            <AuthField
+              v-model="form.email"
+              input-id="email"
+              label="Email"
+              type="email"
+              autocomplete="username"
+              placeholder="Enter your email"
+              :icon="EnvelopeIcon"
+              required
+            />
+
+            <AuthField
+              v-model="form.password"
+              input-id="password"
+              label="Password"
+              autocomplete="current-password"
+              placeholder="Enter your password"
+              password-toggle
+              :icon="LockClosedIcon"
+              :biometric-autofill="isSupported && hasSavedLogin"
+              :biometric-label="`Autofill with ${biometryLabel}`"
+              required
+              @focus="offerBiometricAutofillOnFocus"
+              @biometric-autofill="fillFromBiometric"
+            />
+
+            <div v-if="isSupported" class="auth-checkbox-options">
+              <AuthCheckbox v-model="form.enableFaceId">
+                Use {{ biometryLabel }} next time on this device
+              </AuthCheckbox>
+            </div>
+
+            <div class="auth-form-meta">
+              <AuthCheckbox v-model="form.rememberMe">Remember me</AuthCheckbox>
+              <NuxtLink to="/forgot-password" class="auth-link">Forgot password?</NuxtLink>
+            </div>
+          </template>
+
+          <AuthSuccessPanel v-if="actionSuccessTitle" :icon="CheckCircleIcon">
+            <template #title>{{ actionSuccessTitle }}</template>
+            {{ actionSuccessBody }}
+          </AuthSuccessPanel>
+
+          <AuthAlert
+            v-if="errorMessage"
+            :message="errorMessage"
+            :show-firestore-guide="errorMessage.includes('PERMISSION_DENIED')"
           />
 
-          <AuthField
-            v-model="form.password"
-            input-id="password"
-            label="Password"
-            autocomplete="current-password"
-            placeholder="Enter your password"
-            password-toggle
-            :icon="LockClosedIcon"
-            :biometric-autofill="isSupported && hasSavedLogin"
-            :biometric-label="`Autofill with ${biometryLabel}`"
-            required
-            @focus="offerBiometricAutofillOnFocus"
-            @biometric-autofill="fillFromBiometric"
-          />
-
-          <div v-if="isSupported" class="auth-checkbox-options">
-            <AuthCheckbox v-model="form.enableFaceId">
-              Use {{ biometryLabel }} next time on this device
-            </AuthCheckbox>
+          <div v-if="awaitingTwoFactor" class="auth-form">
+            <p class="s-auth-note">
+              Enter the 6-digit code from your authenticator app to finish signing in.
+            </p>
+            <AuthField
+              v-model="twoFactorCode"
+              input-id="twoFactorCode"
+              label="Authentication code"
+              type="text"
+              inputmode="numeric"
+              autocomplete="one-time-code"
+              placeholder="000000"
+              maxlength="6"
+              required
+            />
+            <AuthPrimaryButton
+              type="button"
+              label="Verify and continue"
+              :loading="isVerifyingTwoFactor"
+              :disabled="isVerifyingTwoFactor || twoFactorCode.length !== 6"
+              @click="submitTwoFactorCode"
+            />
+            <button
+              type="button"
+              class="auth-link s-auth-secondary-link"
+              :disabled="isVerifyingTwoFactor"
+              @click="cancelTwoFactorSignIn"
+            >
+              Use a different account
+            </button>
           </div>
 
-          <div class="auth-form-meta">
-            <AuthCheckbox v-model="form.rememberMe">Remember me</AuthCheckbox>
-            <NuxtLink to="/forgot-password" class="auth-link">Forgot password?</NuxtLink>
-          </div>
-        </template>
+          <template v-else>
+            <AuthPrimaryButton
+              label="Sign in"
+              :loading="isLoading"
+              :disabled="isLoading || isBiometricFilling"
+            />
+          </template>
+        </form>
 
-        <AuthSuccessPanel v-if="actionSuccessTitle" :icon="CheckCircleIcon" class="mb-4">
-          <template #title>{{ actionSuccessTitle }}</template>
-          {{ actionSuccessBody }}
-        </AuthSuccessPanel>
-
-        <AuthAlert
-          v-if="errorMessage"
-          :message="errorMessage"
-          :show-firestore-guide="errorMessage.includes('PERMISSION_DENIED')"
-        />
-
-        <div v-if="awaitingTwoFactor" class="space-y-4">
-          <p class="text-sm text-gray-600 dark:text-gray-400">
-            Enter the 6-digit code from your authenticator app to finish signing in.
-          </p>
-          <AuthField
-            v-model="twoFactorCode"
-            input-id="twoFactorCode"
-            label="Authentication code"
-            type="text"
-            inputmode="numeric"
-            autocomplete="one-time-code"
-            placeholder="000000"
-            maxlength="6"
-            required
-          />
-          <AuthPrimaryButton
-            type="button"
-            label="Verify and continue"
-            :loading="isVerifyingTwoFactor"
-            :disabled="isVerifyingTwoFactor || twoFactorCode.length !== 6"
-            @click="submitTwoFactorCode"
-          />
-          <button
-            type="button"
-            class="auth-link text-xs"
-            :disabled="isVerifyingTwoFactor"
-            @click="cancelTwoFactorSignIn"
-          >
-            Use a different account
-          </button>
-        </div>
-
-        <template v-else>
-          <AuthPrimaryButton
-            label="Log In"
-            :loading="isLoading"
-            :disabled="isLoading || isBiometricFilling"
-          />
-        </template>
-      </form>
-
-      <p v-if="!awaitingTwoFactor" class="auth-auth-footer-link">
-        Don't have an account?
-        <NuxtLink to="/signup">Sign Up</NuxtLink>
-      </p>
+        <p v-if="!awaitingTwoFactor" class="auth-auth-footer-link">
+          Don't have an account?
+          <NuxtLink to="/signup">Create one</NuxtLink>
+        </p>
       </div>
     </AuthCard>
   </AuthShell>
@@ -119,11 +131,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
-import {
-  CheckCircleIcon,
-  EnvelopeIcon,
-  LockClosedIcon,
-} from '~/utils/app-icons'
+import { CheckCircleIcon, EnvelopeIcon, LockClosedIcon } from '~/utils/app-icons'
 import { BiometryError } from '@aparajita/capacitor-biometric-auth'
 import AuthShell from '~/components/auth/AuthShell.vue'
 import AuthPageHeader from '~/components/auth/AuthPageHeader.vue'
@@ -134,7 +142,9 @@ import AuthSuccessPanel from '~/components/auth/AuthSuccessPanel.vue'
 import AuthSegmentToggle from '~/components/auth/AuthSegmentToggle.vue'
 import AuthPrimaryButton from '~/components/auth/AuthPrimaryButton.vue'
 import AuthCheckbox from '~/components/auth/AuthCheckbox.vue'
+import AuthBuddies from '~/components/auth/AuthBuddies.vue'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
+import { useFocusedField } from '~/composables/useFocusedField'
 import { useNativeBiometricLogin } from '~/composables/useNativeBiometricLogin'
 import { useUserStore } from '~/stores/user'
 import { useAuthenticatedFetch } from '~/composables/useAuthenticatedFetch'
@@ -156,6 +166,12 @@ definePageMeta({
 })
 
 const route = useRoute()
+
+const signInHighlights = [
+  { label: "Check today's sales" },
+  { label: 'Restock what is running low' },
+  { label: 'Keep every branch in sync' },
+]
 
 const actionSuccessTitle = computed(() => {
   if (route.query.verified === '1') return 'Email verified'
@@ -180,6 +196,7 @@ const form = ref({
   enableFaceId: false,
 })
 
+const { focused, trackFocus } = useFocusedField()
 const isLoading = ref(false)
 const isVerifyingTwoFactor = ref(false)
 const awaitingTwoFactor = ref(false)
@@ -267,7 +284,10 @@ async function resumePendingTwoFactorSignIn() {
   } catch {
     return
   }
-  if (userStore.userData?.twoFactorEnabled && !isTwoFactorSessionVerified(authStore.currentUser.uid)) {
+  if (
+    userStore.userData?.twoFactorEnabled &&
+    !isTwoFactorSessionVerified(authStore.currentUser.uid)
+  ) {
     awaitingTwoFactor.value = true
     form.value.email = authStore.currentUser.email || form.value.email
   }
@@ -300,8 +320,7 @@ async function persistBiometricLogin(email: string, password: string) {
 async function finishAuthenticatedSession(email: string, password: string) {
   const userData = userStore.userData
   if (!userData) {
-    errorMessage.value =
-      userStore.error || 'Account not found. Please contact your administrator.'
+    errorMessage.value = userStore.error || 'Account not found. Please contact your administrator.'
     try {
       await signOut()
     } catch {
@@ -342,8 +361,7 @@ async function completeSignIn(email: string, password: string) {
 
   const userData = userStore.userData
   if (!userData) {
-    errorMessage.value =
-      userStore.error || 'Account not found. Please contact your administrator.'
+    errorMessage.value = userStore.error || 'Account not found. Please contact your administrator.'
     try {
       await signOut()
     } catch {

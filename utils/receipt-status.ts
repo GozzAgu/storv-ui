@@ -1,51 +1,30 @@
 import type { Receipt } from '~/stores/receipts'
 
-export interface ReceiptStatusBadge {
-  label: string
-  dotClass: string
-  class: string
-}
+export type ReceiptStatusTone = 'success' | 'warning' | 'error' | 'neutral'
 
-const badgeShell =
-  'inline-flex items-center gap-1.5 whitespace-nowrap rounded-[var(--saas-radius-chip,0.375rem)] px-2.5 py-0.5 text-[10px] font-semibold leading-none'
-
-export function getReceiptStatusBadge(status: Receipt['status']): ReceiptStatusBadge {
+/** Badge tone for a receipt status in the design-system components. */
+export function getReceiptStatusTone(status: Receipt['status']): ReceiptStatusTone {
   switch (status) {
     case 'completed':
-      return {
-        label: 'Completed',
-        dotClass: 'bg-emerald-500 dark:bg-emerald-400',
-        class: `${badgeShell} bg-emerald-50 text-emerald-950 dark:bg-emerald-500/15 dark:text-emerald-100`,
-      }
+      return 'success'
     case 'pending':
-      return {
-        label: 'Pending',
-        dotClass: 'bg-amber-500 dark:bg-amber-400',
-        class: `${badgeShell} bg-amber-50 text-amber-950 dark:bg-amber-500/15 dark:text-amber-100`,
-      }
     case 'balance_due':
-      return {
-        label: 'Balance due',
-        dotClass: 'bg-amber-500 dark:bg-amber-400',
-        class: `${badgeShell} bg-amber-50 text-amber-950 dark:bg-amber-500/15 dark:text-amber-100`,
-      }
+      return 'warning'
     case 'refunded':
-      return {
-        label: 'Refunded',
-        dotClass: 'bg-rose-500 dark:bg-rose-400',
-        class: `${badgeShell} bg-rose-50 text-rose-950 dark:bg-rose-500/15 dark:text-rose-100`,
-      }
-    case 'cancelled':
-      return {
-        label: 'Cancelled',
-        dotClass: 'bg-slate-400 dark:bg-slate-500',
-        class: `${badgeShell} bg-slate-100 text-slate-700 dark:bg-white/10 dark:text-slate-200`,
-      }
+      return 'error'
     default:
-      return {
-        label: status,
-        dotClass: 'bg-gray-400',
-        class: `${badgeShell} bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-gray-200`,
-      }
+      return 'neutral'
   }
+}
+
+const RECEIPT_STATUS_LABELS: Partial<Record<Receipt['status'], string>> = {
+  completed: 'Completed',
+  pending: 'Pending',
+  balance_due: 'Balance due',
+  refunded: 'Refunded',
+  cancelled: 'Cancelled',
+}
+
+export function getReceiptStatusLabel(status: Receipt['status']): string {
+  return RECEIPT_STATUS_LABELS[status] ?? status
 }

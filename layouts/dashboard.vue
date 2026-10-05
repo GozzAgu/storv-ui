@@ -1,1009 +1,159 @@
 <template>
-  <!-- Loading state while checking authentication -->
-  <div
-    v-if="checkingAuth"
-    class="min-h-screen w-full flex items-center justify-center bg-[#f4f1ea] dark:bg-[#080808]"
-  >
-    <div class="text-center">
-      <div
-        class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#1a1523]/50 dark:border-white/70 mb-4"
-      ></div>
-      <p class="text-sm text-[#1a1523]/55 dark:text-white/60">Verifying authentication...</p>
-    </div>
+  <div v-if="checkingAuth" class="ds-root s-boot" role="status">
+    <Loader2 class="s-spin s-boot__spinner" :size="24" :stroke-width="2" aria-hidden="true" />
+    <p class="ds-small ds-text-muted">Verifying authentication…</p>
   </div>
 
-  <!-- Dashboard content (only shown if authenticated) -->
   <div
     v-else
     :class="[
-      'dashboard-layout-root font-sans w-full overflow-x-clip relative bg-[#f4f1ea] dark:bg-[#080808]',
-      isDemoDashboard ? 'dashboard-layout-root--demo' : '',
-      !isNativeApp && effectiveSidebarCollapsed ? 'dashboard-layout-root--sidebar-collapsed' : '',
-      isNativeApp
-        ? 'dashboard-layout-root--native h-[100dvh] max-h-[100dvh] overflow-hidden'
-        : 'min-h-screen',
+      'ds-root s-shell',
+      effectiveSidebarCollapsed ? 's-shell--collapsed' : '',
+      sidebarOpen ? 's-shell--drawer-open' : '',
     ]"
   >
-    <div v-if="!isNativeApp" class="dashboard-atmosphere" aria-hidden="true">
-      <span class="dashboard-atmosphere__glow dashboard-atmosphere__glow--tr" />
-      <span class="dashboard-atmosphere__glow dashboard-atmosphere__glow--tl" />
-      <span class="dashboard-atmosphere__ray dashboard-atmosphere__ray--1" />
-      <span class="dashboard-atmosphere__ray dashboard-atmosphere__ray--2" />
-      <span class="dashboard-atmosphere__ray dashboard-atmosphere__ray--3" />
-    </div>
-    <!-- Sidebar (web / tablet - native app uses bottom nav) -->
-    <aside
-      v-if="!isNativeApp"
-      class="dashboard-sidebar dash-sidebar"
-      :class="[
-        'fixed inset-y-0 left-0 z-[55] flex max-lg:transform-gpu max-lg:will-change-transform lg:will-change-auto flex-col transition-[transform,width] max-lg:duration-[420ms] max-lg:ease-[cubic-bezier(0.16,1,0.3,1)] lg:duration-300 lg:ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none lg:translate-x-0',
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full',
-        effectiveSidebarCollapsed ? 'w-[72px]' : 'w-64',
-      ]"
+    <a class="s-skip-link" href="#main-content">Skip to content</a>
+    <ShellSidebar
+      :sections="shellNavSections"
+      :footer-items="shellFooterNav"
+      :is-active="isShellNavActive"
+      :collapsed="effectiveSidebarCollapsed"
+      :open="sidebarOpen"
+      :busy="switchingStore"
+      :home-to="dashPath('')"
+      :logo-src="sidebarLogoSrc"
+      :version="appVersion"
+      @close="sidebarOpen = false"
+      @toggle-collapse="toggleSidebar"
     >
-      <!-- Logo / Brand -->
-      <div :class="['dash-sidebar__logo-bar', sidebarLogoBarClass]">
-        <NuxtLink
-          :to="dashPath('')"
-          :class="[
-            'flex items-center transition-all duration-300',
-            effectiveSidebarCollapsed
-              ? 'relative group justify-center w-full'
-              : 'gap-1.5 min-w-0 flex-1',
-          ]"
-        >
-          <img :src="sidebarLogoSrc" alt="Storvv" :class="sidebarLogoImgClass" />
-          <DashboardHoverTooltip v-if="effectiveSidebarCollapsed">
-            Dashboard home
-          </DashboardHoverTooltip>
-        </NuxtLink>
-        <button
-          v-if="!effectiveSidebarCollapsed"
-          type="button"
-          @click="sidebarOpen = false"
-          class="group relative rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-gray-100/90 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.06] dark:hover:text-gray-100 lg:hidden"
-          aria-label="Close menu"
-        >
-          <XMarkIcon class="w-4 h-4" stroke-width="2" />
-        </button>
-      </div>
+      <template v-if="showBranchSwitcher || currentStore" #branch>
+        <ShellBranchSwitcher
+          :interactive="showBranchSwitcher"
+          :compact="effectiveSidebarCollapsed"
+          :manage-to="dashPath('/branches')"
+        />
+      </template>
+    </ShellSidebar>
 
-      <!-- Collapse toggle (desktop) - larger on large screens -->
-      <button
-        type="button"
-        @click="toggleSidebar"
-        class="group absolute top-10 -right-3 z-10 hidden h-8 w-8 items-center justify-center rounded-[var(--saas-radius-control,0.5rem)] border-0 bg-white/95 text-gray-600 backdrop-blur-md transition-all duration-200 hover:bg-white hover:text-gray-900 dark:bg-white/[0.08] dark:text-gray-300 dark:hover:bg-white/[0.12] dark:hover:text-white lg:flex"
-        aria-label="Toggle sidebar"
+    <div class="s-shell__scrim" aria-hidden="true" @click="closeMobileSidebarOverlay" />
+
+    <div class="s-shell__main">
+      <ShellTopBar
+        :title="shellPageTitle"
+        @open-menu="sidebarOpen = true"
+        @search="openGlobalSearch()"
       >
-        <ChevronRightIcon v-if="effectiveSidebarCollapsed" class="w-3.5 h-3.5" stroke-width="2.5" />
-        <ChevronLeftIcon v-else class="w-3.5 h-3.5" stroke-width="2.5" />
-      </button>
-
-      <!-- Navigation -->
-      <nav
-        class="dash-sidebar__nav relative min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain py-1"
-        :class="effectiveSidebarCollapsed ? 'px-1.5' : 'px-2'"
-      >
-        <div class="min-h-0 space-y-0">
-          <template v-for="(item, navIndex) in filteredNavigation" :key="item.name">
-            <p
-              v-if="
-                !isNativeApp &&
-                !effectiveSidebarCollapsed &&
-                shouldShowWebNavSection(item.name, navIndex, filteredNavigation)
-              "
-              class="saas-nav-section-label"
-            >
-              {{ webNavSectionLabel(item.name) }}
-            </p>
-            <!-- Inventory (expandable) -->
-            <div v-if="item.name === 'Inventory' && !effectiveSidebarCollapsed" class="space-y-0.5">
-              <div
-                :class="[
-                  'group relative mx-0.5 flex w-full max-w-full items-center justify-between rounded-lg px-2 py-1.5 transition-colors duration-200',
-                  !isActive(item.href) ? 'hover:bg-gray-100/90 dark:hover:bg-white/[0.05]' : '',
-                ]"
-              >
-                <NuxtLink
-                  :to="item.href"
-                  data-tutorial="inventory"
-                  class="flex min-w-0 flex-1 items-center gap-2.5"
-                  :class="{ 'pointer-events-none opacity-50': switchingStore }"
-                >
-                  <DashboardNavIcon
-                    :name="item.iconKey"
-                    :active="isActive(item.href)"
-                    size="md"
-                    class="shrink-0 transition-colors"
-                  />
-                  <span
-                    class="truncate text-[13px] leading-snug"
-                    :class="
-                      isActive(item.href)
-                        ? 'font-bold text-gray-900 dark:text-gray-100'
-                        : 'font-normal text-gray-500 group-hover:text-gray-800 dark:text-gray-400 dark:group-hover:text-gray-100'
-                    "
-                  >
-                    {{ item.name }}
-                  </span>
-                </NuxtLink>
-                <button
-                  v-if="sidebarFolderTree.length > 0"
-                  type="button"
-                  @click.stop="inventoryExpanded = !inventoryExpanded"
-                  class="shrink-0 rounded-lg p-1.5 transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
-                  :class="
-                    isActive(item.href)
-                      ? 'text-gray-700 dark:text-gray-300'
-                      : 'text-gray-500 dark:text-gray-400'
-                  "
-                  :aria-expanded="inventoryExpanded"
-                  aria-label="Toggle inventory categories"
-                >
-                  <span class="group relative inline-flex">
-                    <ChevronDownIcon
-                      class="w-3.5 h-3.5 transition-transform duration-200"
-                      :class="inventoryExpanded ? 'rotate-180' : ''"
-                      stroke-width="2"
-                    />
-                  </span>
-                </button>
-              </div>
-              <ul
-                v-if="inventoryExpanded && sidebarFolderTree.length > 0"
-                class="dash-nav-tree dash-nav-tree--from-parent py-0.5"
-              >
-                <li
-                  v-for="group in sidebarFolderTree"
-                  :key="group.folder.id"
-                  class="dash-nav-tree__node"
-                >
-                  <div class="dash-nav-tree__row">
-                    <NuxtLink
-                      :to="dashPath(`/inventory/${group.folder.id}`)"
-                      :class="sidebarFolderLinkClass(group.folder.id)"
-                    >
-                      <DashboardNavIcon
-                        :name="isSidebarFolderActive(group.folder.id) ? 'folder-open' : 'folder'"
-                        :active="isSidebarFolderActive(group.folder.id)"
-                        size="sm"
-                      />
-                      <span
-                        class="min-w-0 flex-1 truncate leading-snug"
-                        :class="sidebarFolderLabelClass(group.folder.id)"
-                      >
-                        {{ group.folder.name }}
-                      </span>
-                      <span class="dash-nav-tree__count">{{
-                        sidebarFolderCount(group.folder, group.children.length)
-                      }}</span>
-                    </NuxtLink>
-                    <button
-                      v-if="group.children.length > 0"
-                      type="button"
-                      class="group relative shrink-0 rounded-lg p-1 text-gray-500 transition-colors hover:bg-black/[0.04] hover:text-gray-800 dark:hover:bg-white/[0.06] dark:hover:text-gray-200"
-                      :aria-expanded="isSidebarFolderExpanded(group.folder.id)"
-                      :aria-label="`Toggle ${group.folder.name} subcategories`"
-                      @click.stop="toggleSidebarFolderExpanded(group.folder.id)"
-                    >
-                      <ChevronDownIcon
-                        class="h-3.5 w-3.5 transition-transform duration-200"
-                        :class="isSidebarFolderExpanded(group.folder.id) ? 'rotate-180' : ''"
-                        stroke-width="2"
-                      />
-                    </button>
-                  </div>
-                  <ul
-                    v-if="group.children.length > 0 && isSidebarFolderExpanded(group.folder.id)"
-                    class="dash-nav-tree"
-                  >
-                    <li
-                      v-for="child in group.children"
-                      :key="child.id"
-                      class="dash-nav-tree__node"
-                    >
-                      <NuxtLink
-                        :to="dashPath(`/inventory/${child.id}`)"
-                        :class="sidebarFolderLinkClass(child.id)"
-                      >
-                        <DashboardNavIcon
-                          :name="isSidebarFolderActive(child.id) ? 'folder-open' : 'folder'"
-                          :active="isSidebarFolderActive(child.id)"
-                          size="sm"
-                        />
-                        <span
-                          class="min-w-0 flex-1 truncate leading-snug"
-                          :class="sidebarFolderLabelClass(child.id)"
-                        >
-                          {{ child.name }}
-                        </span>
-                        <span class="dash-nav-tree__count">{{ child.itemCount || 0 }}</span>
-                      </NuxtLink>
-                    </li>
-                  </ul>
-                </li>
-              </ul>
-            </div>
-
-            <!-- Regular nav items -->
-            <NuxtLink
-              v-else-if="
-                (item.name !== 'Inventory' && item.name !== 'Departments') ||
-                effectiveSidebarCollapsed
-              "
-              :to="item.href"
-              :data-tutorial="item.name.toLowerCase().replace(/\s+/g, '-')"
-              :class="[
-                'group relative flex items-center transition-[transform,color] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]',
-                effectiveSidebarCollapsed
-                  ? 'mx-0.5 w-full justify-center rounded-lg py-1.5 active:scale-[0.98] motion-reduce:active:scale-100'
-                  : 'mx-0.5 gap-2 rounded-lg px-2 py-1.5',
-                !isActive(item.href) && effectiveSidebarCollapsed
-                  ? 'text-gray-500 hover:bg-gray-100/90 dark:text-gray-400 dark:hover:bg-white/[0.06]'
-                  : !isActive(item.href)
-                  ? 'text-gray-500 hover:bg-gray-100/90 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/[0.05] dark:hover:text-gray-100'
-                  : 'text-gray-900 dark:text-gray-100',
-                { 'pointer-events-none opacity-50': switchingStore },
-              ]"
-            >
-              <DashboardNavIcon
-                :name="item.iconKey"
-                :active="isActive(item.href)"
-                size="md"
-                class="shrink-0 transition-colors"
-              />
-              <span
-                v-if="!effectiveSidebarCollapsed"
-                class="truncate text-[13px] leading-snug"
-                :class="
-                  isActive(item.href)
-                    ? 'font-bold text-gray-900 dark:text-gray-100'
-                    : 'font-normal text-gray-500 group-hover:text-gray-800 dark:text-gray-400 dark:group-hover:text-gray-100'
-                "
-              >
-                {{ item.name }}
-              </span>
-              <DashboardHoverTooltip v-if="effectiveSidebarCollapsed">
-                {{ item.name }}
-              </DashboardHoverTooltip>
-            </NuxtLink>
-          </template>
-
-          <!-- Stores (super admins with multi-location access) -->
-          <div
-            v-if="userStore.isSuperAdmin && canManageBranches && !effectiveSidebarCollapsed"
-            class="dash-sidebar__branches mt-1.5 rounded-xl border-0 p-1.5"
+        <template #actions>
+          <SButton
+            class="s-topbar__ai"
+            aria-label="Open Storvv Assistant"
+            :aria-expanded="assistantStore.isOpen"
+            aria-controls="dashboard-assistant-panel"
+            @click.stop="openAssistant()"
           >
-            <button
-              type="button"
-              @click="storesSectionCollapsed = !storesSectionCollapsed"
-              class="group relative flex w-full items-center justify-between rounded-lg px-2 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-500 transition-colors hover:bg-gray-100/90 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/[0.05] dark:hover:text-gray-200"
-              :aria-expanded="!storesSectionCollapsed"
-            >
-              <span>Branches</span>
-              <ChevronDownIcon
-                class="w-3.5 h-3.5 transition-transform duration-200"
-                :class="storesSectionCollapsed ? '' : 'rotate-180'"
-                stroke-width="2"
-              />
-            </button>
-            <div v-if="!storesSectionCollapsed" class="mt-1 space-y-0.5 pl-0">
-              <template v-for="store in storesList" :key="store.id">
-                <div
-                  :class="[
-                    'flex items-center justify-between rounded-lg px-2 py-2 transition-colors duration-200',
-                    store.id !== storesStore.currentStoreId ? 'opacity-40' : '',
-                    store.id === storesStore.currentStoreId &&
-                    !(
-                      route.params.storeId === store.id &&
-                      route.path.startsWith('/dashboard/stores/') &&
-                      route.path.includes('/departments')
-                    )
-                      ? 'hover:bg-gray-100/90 dark:hover:bg-white/[0.05]'
-                      : '',
-                  ]"
-                >
-                  <NuxtLink
-                    :to="
-                      store.id === storesStore.currentStoreId
-                        ? `/dashboard/stores/${store.id}/departments`
-                        : '#'
-                    "
-                    class="group relative flex min-w-0 flex-1 items-center gap-2"
-                    :class="{
-                      'pointer-events-none cursor-not-allowed':
-                        switchingStore || store.id !== storesStore.currentStoreId,
-                    }"
-                    @click.prevent="store.id !== storesStore.currentStoreId ? null : null"
-                  >
-                    <DashboardNavIcon
-                      name="branch"
-                      :active="
-                        route.params.storeId === store.id &&
-                        route.path.startsWith('/dashboard/stores/') &&
-                        route.path.includes('/departments')
-                      "
-                      size="md"
-                      aria-hidden="true"
-                    />
-                    <span
-                      class="truncate text-[13px] leading-snug"
-                      :data-dashboard-tooltip="
-                        storeBranchNavTooltip(store.name, getStoreBranchShortLabel(store.name))
-                      "
-                      :class="
-                        route.params.storeId === store.id &&
-                        route.path.startsWith('/dashboard/stores/') &&
-                        route.path.includes('/departments')
-                          ? 'font-bold text-gray-900 dark:text-gray-100'
-                          : currentStore?.id === store.id
-                          ? 'font-medium text-gray-900 dark:text-gray-100'
-                          : 'font-normal text-gray-500 group-hover:text-gray-800 dark:text-gray-400 dark:group-hover:text-gray-100'
-                      "
-                    >
-                      {{ getStoreBranchShortLabel(store.name) }}
-                    </span>
-                    <span
-                      v-if="
-                        currentStore?.id === store.id || store.id === storesStore.currentStoreId
-                      "
-                      class="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500 ring-2 ring-emerald-500/25"
-                      aria-hidden="true"
-                    ></span>
-                    <span
-                      v-if="store.id !== storesStore.currentStoreId"
-                      class="text-[9px] text-gray-400 dark:text-gray-500 italic shrink-0"
-                      >Inactive</span
-                    >
-                  </NuxtLink>
-                  <button
-                    v-if="store.id === storesStore.currentStoreId"
-                    type="button"
-                    @click.stop="toggleStoreExpanded(store.id)"
-                    class="group relative shrink-0 rounded-lg p-1 text-gray-500 transition-colors hover:bg-black/[0.04] hover:text-gray-800 dark:hover:bg-white/[0.06] dark:hover:text-gray-200"
-                    :aria-expanded="!!expandedStores[store.id]"
-                    aria-label="Toggle departments"
-                  >
-                    <ChevronDownIcon
-                      class="w-3.5 h-3.5 transition-transform duration-200"
-                      :class="expandedStores[store.id] ? 'rotate-180' : ''"
-                      stroke-width="2"
-                    />
-                  </button>
-                </div>
-                <ul
-                  v-if="expandedStores[store.id] && store.id === storesStore.currentStoreId"
-                  class="dash-nav-tree dash-nav-tree--from-parent py-0.5"
-                >
-                  <li
-                    v-for="department in getDepartmentsForStore(store.id)"
-                    :key="department.id"
-                    class="dash-nav-tree__node"
-                  >
-                    <div class="dash-nav-tree__row">
-                      <NuxtLink
-                        :to="`/dashboard/departments/${department.id}`"
-                        :class="sidebarDepartmentLinkClass(department.id)"
-                      >
-                        <DashboardNavIcon
-                          :name="isSidebarDepartmentActive(department.id) ? 'folder-open' : 'folder'"
-                          :active="isSidebarDepartmentActive(department.id)"
-                          size="sm"
-                        />
-                        <span
-                          class="min-w-0 flex-1 truncate leading-snug"
-                          :class="sidebarDepartmentLabelClass(department.id)"
-                        >
-                          {{ department.name }}
-                        </span>
-                        <span class="dash-nav-tree__count">{{
-                          department.staffCount || 0
-                        }}</span>
-                      </NuxtLink>
-                      <button
-                        type="button"
-                        @click.stop="toggleDepartmentExpanded(department.id)"
-                        class="group relative shrink-0 rounded-lg p-1 text-gray-500 transition-colors hover:bg-black/[0.04] hover:text-gray-800 dark:hover:bg-white/[0.06] dark:hover:text-gray-200"
-                        :aria-expanded="expandedDepartments[department.id]"
-                        aria-label="Toggle staff list"
-                      >
-                        <ChevronDownIcon
-                          class="w-3.5 h-3.5 transition-transform duration-200"
-                          :class="expandedDepartments[department.id] ? 'rotate-180' : ''"
-                          stroke-width="2"
-                        />
-                      </button>
-                    </div>
-                    <ul
-                      v-if="expandedDepartments[department.id]"
-                      class="dash-nav-tree"
-                    >
-                      <li
-                        v-for="member in getStaffForDepartment(department.id)"
-                        :key="member.id"
-                        class="dash-nav-tree__node"
-                      >
-                        <NuxtLink
-                          :to="`/dashboard/departments/${department.id}`"
-                          class="dash-nav-tree__link group relative text-[13px] text-gray-500 transition-colors hover:bg-gray-100/90 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/[0.05] dark:hover:text-gray-100"
-                        >
-                          <span class="truncate">{{
-                            member.firstName && member.lastName
-                              ? `${member.firstName} ${member.lastName}`
-                              : member.email || 'Staff'
-                          }}</span>
-                        </NuxtLink>
-                      </li>
-                      <li
-                        v-if="getStaffForDepartment(department.id).length === 0"
-                        class="dash-nav-tree__node"
-                      >
-                        <span
-                          class="dash-nav-tree__link text-[13px] text-gray-400 dark:text-gray-500"
-                        >
-                          No staff
-                        </span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li
-                    v-if="getDepartmentsForStore(store.id).length === 0"
-                    class="dash-nav-tree__node"
-                  >
-                    <NuxtLink
-                      :to="`/dashboard/stores/${store.id}/departments`"
-                      class="dash-nav-tree__link text-xs font-medium text-gray-600 hover:bg-gray-100/90 dark:text-gray-300 dark:hover:bg-white/[0.05]"
-                    >
-                      View departments
-                    </NuxtLink>
-                  </li>
-                </ul>
-              </template>
-              <div
-                v-if="storesList.length === 0"
-                class="px-2.5 py-2 text-xs text-gray-500 dark:text-gray-400"
-              >
-                No stores
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Recent Items -->
-        <div v-if="!effectiveSidebarCollapsed" class="mt-auto pt-1.5">
-          <RecentItemsWidget />
-        </div>
-      </nav>
-
-      <!-- Bottom: user + sign out -->
-      <div
-        class="dash-sidebar__footer"
-        :class="effectiveSidebarCollapsed ? 'px-1.5 pb-2.5 pt-2.5' : 'px-2.5 pb-3 pt-2.5'"
-      >
-        <div
-          class="dash-sidebar__user"
-          :class="effectiveSidebarCollapsed ? 'dash-sidebar__user--collapsed group' : ''"
-        >
-          <div class="dash-sidebar__avatar">
-            <AccountAvatar :initials="userInitials" />
-          </div>
-          <div v-if="!effectiveSidebarCollapsed" class="min-w-0 flex-1">
-            <p class="dash-sidebar__user-name">{{ userName }}</p>
-            <p class="dash-sidebar__user-email">{{ userEmail }}</p>
-            <ExperienceModeBadge variant="sidebar" />
-          </div>
-          <DashboardHoverTooltip v-if="effectiveSidebarCollapsed">
-            {{ userName }}
-            <span class="mt-0.5 block text-[11px] font-normal text-gray-400">{{
-              userEmail
-            }}</span>
-          </DashboardHoverTooltip>
-        </div>
-        <button
-          type="button"
-          @click="handleSignOut"
-          :class="[
-            'dash-sidebar__sign-out',
-            effectiveSidebarCollapsed ? 'relative group' : '',
-          ]"
-        >
-          <DashboardNavIcon name="sign-out" size="md" class="shrink-0 opacity-80" />
-          <span v-if="!effectiveSidebarCollapsed">Sign out</span>
-          <DashboardHoverTooltip v-if="effectiveSidebarCollapsed">
-            Sign out
-          </DashboardHoverTooltip>
-        </button>
-        <p
-          class="dash-sidebar__version"
-          :class="effectiveSidebarCollapsed ? 'dash-sidebar__version--center' : ''"
-        >
-          V{{ appVersion }}
-        </p>
-      </div>
-    </aside>
-
-    <!-- Mobile scrim (web drawer only) -->
-    <div
-      v-if="!isNativeApp"
-      class="dashboard-mobile-scrim fixed inset-0 z-[54] lg:hidden touch-manipulation transition-[opacity,backdrop-filter,-webkit-backdrop-filter,background-color] duration-[420ms] ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none motion-reduce:duration-0"
-      :class="[
-        sidebarOpen
-          ? 'pointer-events-auto bg-gray-900/25 opacity-100 backdrop-blur-[2px] dark:bg-black/40'
-          : 'pointer-events-none opacity-0 backdrop-blur-none dark:bg-transparent',
-      ]"
-      :aria-hidden="!sidebarOpen"
-      @click="closeMobileSidebarOverlay"
-    />
-
-    <!-- Main Content -->
-    <div
-      :class="[
-        'w-full',
-        isNativeApp
-          ? 'dashboard-native-shell flex h-full min-h-0 flex-col overflow-hidden'
-          : [
-              'dashboard-main-shell min-h-screen transition-[padding-left] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]',
-              sidebarCollapsed ? 'lg:pl-[72px]' : 'lg:pl-64',
-            ],
-      ]"
-      style="min-width: 0; max-width: 100vw"
-    >
-      <!-- Top Navigation (fixed so it stays visible when scrolling) -->
-      <header
-        v-if="!(isCapacitorIos && isIosInPageChrome)"
-        :class="[
-          'dash-topnav dashboard-top-nav fixed top-0 right-0 isolate',
-          isNativeApp
-            ? 'dashboard-top-nav-native left-0 z-[54]'
-            : [
-                'left-0 transition-[left] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]',
-                sidebarOpen ? 'z-40 lg:z-[54]' : 'z-[54]',
-                sidebarCollapsed ? 'lg:left-[72px]' : 'lg:left-64',
-              ],
-        ]"
-      >
-        <div
-          :class="[
-            'relative flex w-full gap-2.5 px-3 sm:px-4 lg:gap-3 lg:px-5',
-            showNativeCommandHeader ? 'items-start pt-2.5 pb-2' : 'items-center',
-            isNativeApp
-              ? [
-                  'native-topnav dashboard-top-nav-native-row',
-                  showNativeCommandHeader ? 'dashboard-top-nav-native-row--command' : 'h-11',
-                ]
-              : 'h-11 sm:h-12',
-          ]"
-        >
-          <!-- Mobile nav trigger (web drawer) -->
-          <button
-            v-if="!isNativeApp"
-            type="button"
-            class="dashboard-sidebar-open-trigger group flex h-8 shrink-0 items-center gap-0.5 py-1 pl-1.5 pr-2 lg:hidden"
-            aria-label="Open menu"
-            @click="sidebarOpen = true"
-          >
-            <img
-              src="/storvv logo mobile.png"
-              alt=""
-              class="h-6 w-6 shrink-0 object-contain"
-              width="24"
-              height="24"
-              decoding="async"
-            />
-            <ChevronRightIcon
-              class="h-3 w-3 shrink-0 text-gray-400 transition-transform duration-200 group-hover:translate-x-px dark:text-gray-500"
-              stroke-width="2.5"
-              aria-hidden="true"
-            />
-          </button>
-
-          <!-- Native iOS: command header (greeting + branch + actions) -->
-        <div
-          v-if="showNativeCommandHeader && !isDashboardHome"
-          class="flex min-w-0 w-full flex-1 flex-col gap-2"
-        >
-          <IosTopNavBrandRow />
-          <NativeCommandHeader
-            class="min-w-0 w-full flex-1"
-            :greeting="commandHeaderGreeting"
-            :page-title="commandHeaderPageTitle"
-          >
-            <template #actions>
-              <DashboardPageRefreshButton />
-              <button
-                type="button"
-                class="dash-topnav__icon-btn"
-                aria-label="Search"
-                @click="openGlobalSearch()"
-              >
-                <MagnifyingGlassIcon class="block h-4 w-4 shrink-0" :size="16" stroke-width="1.75" />
-              </button>
-
-              <div class="relative z-[130] h-8 w-8 shrink-0" ref="notificationsRef">
-                <button
-                  type="button"
-                  class="dash-topnav__icon-btn group relative inline-flex cursor-pointer"
-                  aria-label="Notifications"
-                  :aria-expanded="notificationsOpen"
-                  aria-haspopup="true"
-                  @click.stop.prevent="toggleNotifications"
-                >
-                  <BellIcon
-                    class="h-4 w-4 text-gray-600 transition-colors group-hover:text-gray-900 dark:text-gray-300 dark:group-hover:text-gray-100"
-                    stroke-width="1.75"
-                  />
-                  <span
-                    v-if="unreadNotificationCount > 0"
-                    class="pointer-events-none absolute right-0.5 top-0.5 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-red-500 px-0.5 text-[8px] font-bold leading-none text-white ring-2 ring-gray-50 dark:ring-[#0a0c12]"
-                  >
-                    {{ unreadNotificationCount > 99 ? '99+' : unreadNotificationCount }}
-                  </span>
-                </button>
-                <Transition
-                  enter-active-class="transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
-                  enter-from-class="opacity-0 translate-y-1 scale-[0.98]"
-                  enter-to-class="opacity-100 translate-y-0 scale-100"
-                  leave-active-class="transition-[opacity,transform] duration-150 ease-in"
-                  leave-from-class="opacity-100 translate-y-0 scale-100"
-                  leave-to-class="opacity-0 translate-y-0.5 scale-[0.99]"
-                >
-                  <Teleport to="body">
-                    <div
-                      v-if="notificationsOpen"
-                      ref="notificationsPanelRef"
-                      data-dashboard-teleport
-                      :style="notificationsPanelStyle"
-                      class="pointer-events-auto origin-top-right"
-                      @click.stop
-                    >
-                      <NotificationsPanel variant="dropdown" @close="notificationsOpen = false" />
-                    </div>
-                  </Teleport>
-                </Transition>
-              </div>
-
-              <DashboardProfileMenu
-                :user-name="userName"
-                :user-email="userEmail"
-                :user-initials="userInitials"
-                compact
-                @sign-out="handleSignOut"
-              />
+            <template #leading>
+              <Sparkles :size="16" :stroke-width="1.75" aria-hidden="true" />
             </template>
-          </NativeCommandHeader>
-        </div>
-
-          <!-- Native (non-iOS): logo + current workspace page -->
-          <div v-else-if="isNativeApp" class="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
-            <NuxtLink
-              :to="dashPath('')"
-              class="flex shrink-0 items-center rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/35"
-              aria-label="Storv home"
-            >
-              <img
-                src="/storvv logo mobile.png"
-                alt=""
-                class="h-7 w-7 object-contain"
-                width="28"
-                height="28"
-                decoding="async"
-              />
-            </NuxtLink>
-            <div
-              class="native-topnav-page flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden border-l border-gray-200/90 pl-2 dark:border-white/10"
-            >
-              <DashboardNavIcon
-                :name="currentPageIconKey"
-                size="sm"
-                class="shrink-0 text-gray-400 dark:text-gray-500"
-              />
-              <p class="native-topnav-page__title truncate text-sm font-semibold leading-tight text-gray-900 dark:text-gray-100">
-                {{ currentPageName }}
-              </p>
-            </div>
-          </div>
-
-          <!-- Page title -->
-          <div v-else class="hidden min-w-0 shrink-0 md:block lg:min-w-[7.5rem]">
-            <p class="dash-topnav__eyebrow">Workspace</p>
-            <div class="mt-0.5 flex min-w-0 items-center gap-1.5">
-              <DashboardNavIcon
-                :name="currentPageIconKey"
-                size="sm"
-                class="text-gray-400 dark:text-gray-500"
-              />
-              <h1 class="dash-topnav__title">{{ currentPageName }}</h1>
-            </div>
-          </div>
-
-          <div v-if="!showNativeCommandHeader" class="hidden min-w-0 flex-1 md:block" aria-hidden="true" />
-
-          <div v-if="!showNativeCommandHeader" class="min-w-0 flex-1 md:hidden" aria-hidden="true" />
-
-          <!-- Actions toolbar -->
-          <div
-            v-if="!showNativeCommandHeader"
-            class="dash-topnav__actions dashboard-topnav-actions relative z-10 flex shrink-0 items-center"
+            <span class="s-topbar__ai-label">Ask AI</span>
+          </SButton>
+          <SIconButton
+            class="s-topbar__refresh"
+            label="Refresh page"
+            :loading="refreshBusy"
+            @click="refreshPage"
           >
-            <StoreSelector
-              v-if="userStore.userData?.role === 'superAdmin' && canManageBranches"
-              :class="isNativeApp ? 'max-w-[5.25rem] shrink' : 'shrink-0'"
-            />
+            <RefreshCw :size="20" :stroke-width="1.75" aria-hidden="true" />
+          </SIconButton>
+          <ShellNotifications />
+          <ShellUserMenu
+            :user-name="userName"
+            :user-email="userEmail"
+            :user-initials="userInitials"
+            @sign-out="handleSignOut"
+          />
+        </template>
+      </ShellTopBar>
 
-            <button
-              type="button"
-              class="dash-topnav__ask-ai"
-              aria-label="Open Storvv Assistant"
-              :aria-expanded="assistantStore.isOpen"
-              aria-controls="dashboard-assistant-panel"
-              @click.stop="openAssistant()"
-            >
-              <SparklesIcon class="h-3.5 w-3.5 shrink-0" stroke-width="1.75" aria-hidden="true" />
-              <span class="hidden sm:inline">Ask AI</span>
-            </button>
-
-            <DashboardPageRefreshButton />
-
-            <ThemeToggle class="shrink-0" />
-
-            <div class="relative z-[130] h-8 w-8 shrink-0" ref="notificationsRef">
-              <button
-                type="button"
-                class="dash-topnav__icon-btn group relative inline-flex cursor-pointer"
-                aria-label="Notifications"
-                :aria-expanded="notificationsOpen"
-                aria-haspopup="true"
-                @click.stop.prevent="toggleNotifications"
-              >
-                <BellIcon
-                  class="h-4 w-4 text-gray-600 transition-colors group-hover:text-gray-900 dark:text-gray-300 dark:group-hover:text-gray-100"
-                  stroke-width="1.75"
-                />
-                <span
-                  v-if="unreadNotificationCount > 0"
-                  class="pointer-events-none absolute right-0.5 top-0.5 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-red-500 px-0.5 text-[8px] font-bold leading-none text-white ring-2 ring-gray-50 dark:ring-[#0a0c12]"
-                >
-                  {{ unreadNotificationCount > 99 ? '99+' : unreadNotificationCount }}
-                </span>
-              </button>
-              <Transition
-                enter-active-class="transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
-                enter-from-class="opacity-0 translate-y-1 scale-[0.98]"
-                enter-to-class="opacity-100 translate-y-0 scale-100"
-                leave-active-class="transition-[opacity,transform] duration-150 ease-in"
-                leave-from-class="opacity-100 translate-y-0 scale-100"
-                leave-to-class="opacity-0 translate-y-0.5 scale-[0.99]"
-              >
-                <Teleport to="body">
-                    <div
-                      v-if="notificationsOpen"
-                      ref="notificationsPanelRef"
-                      data-dashboard-teleport
-                      :style="notificationsPanelStyle"
-                      class="pointer-events-auto origin-top-right"
-                    @click.stop
-                  >
-                    <NotificationsPanel variant="dropdown" @close="notificationsOpen = false" />
-                  </div>
-                </Teleport>
-              </Transition>
-            </div>
-
-            <span class="dash-topnav__divider hidden sm:block" aria-hidden="true" />
-
-            <DashboardProfileMenu
-              :user-name="userName"
-              :user-email="userEmail"
-              :user-initials="userInitials"
-              :compact="isNativeApp"
-              @sign-out="handleSignOut"
-            />
-          </div>
-        </div>
-      </header>
-
-      <div
-        v-if="isCapacitorIos && isIosInPageChrome"
-        class="ios-global-top-bar-host"
-      >
-        <IosGlobalTopBar
-          :title="iosGlobalPageTitle"
-          :show-back="iosPageNavShowBack"
-          :back-to="iosPageNavBackTo"
-          :back-label="iosPageNavBackLabel"
-          :fallback-to="iosPageNavFallbackTo"
-          :home-href="dashPath('')"
-          :user-name="userName"
-          :user-email="userEmail"
-          :user-initials="userInitials"
-          :assistant-open="assistantStore.isOpen"
-          @sign-out="handleSignOut"
-          @ask-ai="openAssistant()"
-        />
-      </div>
-
-      <!-- Spacer so fixed nav never overlaps page content -->
-      <div
-        class="dashboard-top-nav-spacer shrink-0"
-        :class="
-          isNativeApp
-            ? [
-                'dashboard-top-nav-spacer-native',
-                isIosInPageChrome && isCapacitorIos
-                  ? 'dashboard-top-nav-spacer-native--global-bar'
-                  : '',
-              ]
-            : 'dashboard-top-nav-spacer--web h-11 sm:h-12'
-        "
-        aria-hidden="true"
-      />
-
-      <!-- Page Content (same soft entrance as auth pages; re-runs on route change) -->
-      <main
-        ref="dashboardMainRef"
-        data-dashboard-main
-        :class="[
-          'w-full min-w-0 max-w-full px-3 pt-1.5 pb-2.5 sm:px-4 sm:pt-2 sm:pb-3 lg:px-5 lg:pt-2 lg:pb-3',
-          isNativeApp
-            ? [
-                'dashboard-native-main min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain',
-                isIosInPageChrome && isCapacitorIos ? 'dashboard-native-main--in-page' : '',
-              ]
-            : 'overflow-x-clip overflow-y-visible',
-        ]"
-      >
-        <IosPullToRefreshHost
-          v-if="isCapacitorIos"
-          :scroll-target="dashboardMainRef"
-        />
-        <div
-          :key="isNativeApp ? 'native-shell' : route.path"
-          :class="[
-            'min-w-0',
-            isNativeApp
-              ? 'opacity-100'
-              : 'opacity-0 motion-reduce:animate-none motion-reduce:opacity-100 motion-reduce:transform-none animate-auth-fade-up [animation-delay:40ms]',
-          ]"
-        >
+      <main id="main-content" ref="dashboardMainRef" data-dashboard-main class="s-shell__content" tabindex="-1">
+        <ShellPullToRefresh v-if="isNativeApp" />
+        <div :key="route.path" class="s-shell__page">
           <DemoModeBanner v-if="isDemoDashboard" />
           <SubscriptionBillingBanner />
           <ClientOnly>
-            <OfflineStatusBanner class="mb-3" />
+            <OfflineStatusBanner />
           </ClientOnly>
           <slot />
         </div>
       </main>
     </div>
 
-    <!-- Native overlays: host on body so fixed modals/drawers are not clipped by overflow-hidden shells (iOS WKWebView) -->
-    <Teleport v-if="isNativeApp" to="body">
-      <div
-        id="dashboard-native-overlay-host"
-        class="dashboard-native-overlay-host"
-        aria-hidden="true"
-      />
-    </Teleport>
+    <ShellBottomNav
+      :items="shellBottomNav"
+      :is-active="isShellNavActive"
+      @more="sidebarOpen = true"
+    />
 
-    <!-- Toast Notifications -->
-    <ToastContainer />
     <ClientOnly>
       <GrowthPromptsHost />
     </ClientOnly>
 
     <!-- Sign out confirmation -->
-    <Modal
-      :model-value="showLogoutConfirm"
-      size="xs"
-      :show-close="false"
-      :close-on-backdrop="!loggingOut"
-      content-padding="px-5 pt-6 pb-5 sm:px-6 sm:pt-7 sm:pb-6"
-      @update:model-value="(value: boolean) => { if (!value) cancelSignOut() }"
+    <SDialog
+      :open="showLogoutConfirm"
+      title="Sign out?"
+      description="You'll need to sign in again to access your dashboard."
+      size="sm"
+      role="alertdialog"
+      :dismissible="!loggingOut"
+      @update:open="(value: boolean) => { if (!value) cancelSignOut() }"
     >
-      <div class="flex flex-col items-center text-center">
-        <div
-          class="flex h-12 w-12 items-center justify-center rounded-[var(--saas-radius-control,0.5rem)] bg-red-50 text-red-600 ring-1 ring-red-100 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/20"
-        >
-          <ArrowRightOnRectangleIcon class="h-5 w-5" stroke-width="1.75" />
-        </div>
-        <h3 class="mt-4 text-base font-semibold text-gray-900 dark:text-gray-50">Sign out?</h3>
-        <p class="mt-1.5 max-w-[16rem] text-sm leading-relaxed text-gray-500 dark:text-gray-400">
-          You'll need to sign in again to access your dashboard.
-        </p>
-
-        <div class="mt-6 flex w-full flex-col-reverse gap-2.5 sm:flex-row sm:justify-center">
-          <Button
-            variant="outline"
-            size="sm"
-            :disabled="loggingOut"
-            class="w-full sm:min-w-[7.5rem] sm:w-auto"
-            @click="cancelSignOut"
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="danger"
-            size="sm"
-            :disabled="loggingOut"
-            :loading="loggingOut"
-            class="w-full sm:min-w-[7.5rem] sm:w-auto"
-            @click="confirmSignOut"
-          >
-            Sign out
-          </Button>
-        </div>
-      </div>
-    </Modal>
+      <template #footer>
+        <SButton :disabled="loggingOut" data-autofocus @click="cancelSignOut">Cancel</SButton>
+        <SButton variant="danger" :loading="loggingOut" @click="confirmSignOut">Sign out</SButton>
+      </template>
+    </SDialog>
 
     <!-- Global Search (deferred; especially on native to keep first paint lean) -->
     <GlobalSearch v-if="searchShellReady" />
 
     <DashboardAssistant v-if="assistantShellReady" />
-
-    <DashboardNativeTableLayoutSync />
-
-    <!-- Native app bottom navigation (CSS fallback via html.capacitor-native) -->
-    <DashboardNativeBottomNav
-      class="dashboard-native-bottom-nav-host"
-      :primary-items="nativePrimaryNav"
-      :more-items="nativeMoreNav"
-      @sign-out="handleSignOut"
-    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, onUnmounted, computed, watch, nextTick, defineAsyncComponent } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch, nextTick, defineAsyncComponent } from 'vue'
+import { Loader2, RefreshCw, Sparkles } from '@lucide/vue'
+import SButton from '~/components/s/SButton.vue'
+import SIconButton from '~/components/s/SIconButton.vue'
+import SDialog from '~/components/s/SDialog.vue'
+import ShellSidebar from '~/components/shell/ShellSidebar.vue'
+import ShellTopBar from '~/components/shell/ShellTopBar.vue'
+import ShellBranchSwitcher from '~/components/shell/ShellBranchSwitcher.vue'
+import ShellNotifications from '~/components/shell/ShellNotifications.vue'
+import ShellUserMenu from '~/components/shell/ShellUserMenu.vue'
+import ShellBottomNav from '~/components/shell/ShellBottomNav.vue'
+import ShellPullToRefresh from '~/components/shell/ShellPullToRefresh.vue'
 import {
-  XMarkIcon,
-  BellIcon,
-  SparklesIcon,
-  MagnifyingGlassIcon,
-  ChevronDownIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  ArrowRightOnRectangleIcon,
-} from '~/utils/app-icons'
-import Modal from '~/components/ui/Modal.vue'
-import Button from '~/components/ui/Button.vue'
-import ThemeToggle from '~/components/ui/ThemeToggle.vue'
-import DashboardPageRefreshButton from '~/components/dashboard/DashboardPageRefreshButton.vue'
-import DashboardHoverTooltip from '~/components/ui/DashboardHoverTooltip.vue'
-import DashboardNavIcon from '~/components/dashboard/DashboardNavIcon.vue'
+  SHELL_BRANCHES_NAV_NAME,
+  SHELL_CUSTOMERS_NAV_NAME,
+  buildShellBottomNav,
+  buildShellFooterNav,
+  buildShellNavSections,
+  shellNavLabel,
+  shellRouteTitle,
+  type ShellNavItem,
+  type ShellNavSourceItem,
+} from '~/utils/shell-nav'
+import { usePageRefreshAction } from '~/composables/usePageRefreshAction'
 import DemoModeBanner from '~/components/demo/DemoModeBanner.vue'
-import DashboardNativeBottomNav from '~/components/dashboard/DashboardNativeBottomNav.vue'
-import DashboardNativeTableLayoutSync from '~/components/dashboard/DashboardNativeTableLayoutSync.vue'
-import NativeCommandHeader from '~/components/dashboard/NativeCommandHeader.vue'
-import IosPullToRefreshHost from '~/components/ios/IosPullToRefreshHost.vue'
-import IosGlobalTopBar from '~/components/ios/IosGlobalTopBar.vue'
-import DashboardProfileMenu from '~/components/dashboard/DashboardProfileMenu.vue'
-import AccountAvatar from '~/components/ui/AccountAvatar.vue'
-import {
-  splitNativeBottomNav,
-  isDashboardNavActive,
-  resolveNativePrimaryOrder,
-  type DashboardNavItem,
-} from '~/utils/dashboard-native-nav'
-import {
-  DASHBOARD_NAV_DEFINITIONS,
-  filterDashboardNavItems,
-  orderNativeMoreNavItems,
-} from '~/utils/dashboard-nav-filter'
-import { shouldShowWebNavSection, webNavSectionLabel } from '~/utils/dashboard-web-nav-groups'
-import type { DashboardNavIconKey } from '~/utils/dashboard-nav-icons'
-import { isPaymentLinksComingSoon, shouldPromoteNativePaymentLinksTab } from '~/utils/payment-links-launch'
+import SubscriptionBillingBanner from '~/components/dashboard/SubscriptionBillingBanner.vue'
+import OfflineStatusBanner from '~/components/growth/OfflineStatusBanner.vue'
+import { isDashboardNavActive } from '~/utils/shell-nav'
+import { DASHBOARD_NAV_DEFINITIONS, filterDashboardNavItems } from '~/utils/dashboard-nav-filter'
+import { isPaymentLinksComingSoon } from '~/utils/payment-links-launch'
 import { isStorefrontDashboardHidden } from '~/utils/storefront-launch'
 import { resolveStoreDepartmentsPath } from '~/utils/department-routes'
-import { getStoreBranchShortLabel } from '~/utils/store-branch-label'
-import { getChildFolders, getRootFolders } from '~/utils/inventory-folder-tree'
 import { isStaffCreationInProgress } from '~/utils/staff-creation-session'
-import StoreSelector from '~/components/ui/StoreSelector.vue'
-import ToastContainer from '~/components/ui/ToastContainer.vue'
-
-const RecentItemsWidget = defineAsyncComponent(
-  () => import('~/components/ui/RecentItemsWidget.vue')
-)
-import NotificationsPanel from '~/components/notifications/NotificationsPanel.vue'
-
 const GlobalSearch = defineAsyncComponent(() => import('~/components/search/GlobalSearch.vue'))
 const DashboardAssistant = defineAsyncComponent(
   () => import('~/components/dashboard/DashboardAssistant.vue')
@@ -1013,13 +163,9 @@ import { useTheme } from '~/composables/useTheme'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useNotificationsStore } from '~/stores/notifications'
-import { useInventoryStore } from '~/stores/inventory'
-import { useReceiptsStore } from '~/stores/receipts'
 import { useDepartmentsStore } from '~/stores/departments'
 import { useStoresStore } from '~/stores/stores'
-import { useStaffStore } from '~/stores/staff'
 import { useSearchStore } from '~/stores/search'
-import { clearNativeOverlayLock } from '~/utils/native-overlay-lock'
 import { isCapacitorNative } from '~/utils/capacitor-env'
 import { scheduleNativeIdleWork } from '~/utils/capacitor-native-perf'
 import { runDashboardShellBootstrap } from '~/composables/useDashboardShellBootstrap'
@@ -1032,12 +178,10 @@ const userStore = useUserStore()
 const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
 const { canUse: canUseBusinessCapability, canManageBranches } = useBusinessCapabilities()
 const notificationsStore = useNotificationsStore()
-const inventoryStore = useInventoryStore()
-const receiptsStore = useReceiptsStore()
 const departmentsStore = useDepartmentsStore()
 const storesStore = useStoresStore()
-const staffStore = useStaffStore()
 const searchStore = useSearchStore()
+const { busy: refreshBusy, refresh: refreshPage } = usePageRefreshAction()
 const searchShellReady = ref(false)
 const assistantShellReady = ref(false)
 
@@ -1071,13 +215,16 @@ function openGlobalSearch() {
 
 function handleGlobalSearchShortcut(e: KeyboardEvent) {
   if (isCapacitorNative()) return
+  if (e.key === 'Escape' && sidebarOpen.value) {
+    sidebarOpen.value = false
+    return
+  }
   if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
     e.preventDefault()
     mountSearchShell()
     nextTick(() => searchStore.toggleSearch())
   }
 }
-const { eligibleStores } = usePlanEligibleStores()
 const { syncSubscriptionStatus } = useSubscriptionBillingUi()
 // Fetch notifications after shell is interactive (native defers further).
 function scheduleNotificationsFetch() {
@@ -1107,73 +254,15 @@ watch(
   }
 )
 
-// Computed unread count
-const unreadNotificationCount = computed(() => notificationsStore.unreadCount)
 const { isNativeApp } = useCapacitorNativeApp()
-const { isCapacitorIos } = useIsCapacitorIos()
 const assistantStore = useAssistantStore()
 const { activeMenu, openHeaderMenu, closeHeaderMenu } = useActiveHeaderMenu()
-const showNativeCommandHeader = computed(() => isNativeApp.value && isCapacitorIos.value)
 const dashboardMainRef = ref<HTMLElement | null>(null)
 const sidebarOpen = ref(false)
 
 function closeMobileSidebarOverlay() {
   if (sidebarOpen.value) sidebarOpen.value = false
 }
-const notificationsOpen = ref(false)
-const notificationsRef = ref<HTMLElement | null>(null)
-const notificationsPanelRef = ref<HTMLElement | null>(null)
-const notificationsPanelStyle = ref<Record<string, string>>({})
-
-function positionNotificationsPanel() {
-  if (!import.meta.client || !notificationsOpen.value || !notificationsRef.value) return
-  const rect = notificationsRef.value.getBoundingClientRect()
-  const gap = 8
-  const margin = 12
-  const panelWidth = Math.min(320, window.innerWidth - margin * 2)
-  let right = window.innerWidth - rect.right
-  const leftEdge = window.innerWidth - right - panelWidth
-  if (leftEdge < margin) {
-    right = Math.max(margin, window.innerWidth - panelWidth - margin)
-  }
-  notificationsPanelStyle.value = {
-    position: 'fixed',
-    top: `${Math.round(rect.bottom + gap)}px`,
-    right: `${Math.round(right)}px`,
-    left: 'auto',
-    width: `${Math.round(panelWidth)}px`,
-    maxWidth: `calc(100vw - ${margin * 2}px)`,
-    zIndex: '140',
-  }
-}
-
-function onNotificationsScrollOrResize() {
-  if (notificationsOpen.value) positionNotificationsPanel()
-}
-
-const toggleNotifications = () => {
-  notificationsOpen.value = !notificationsOpen.value
-}
-
-watch(notificationsOpen, async (isOpen) => {
-  if (isOpen) {
-    openHeaderMenu('notifications')
-  } else {
-    closeHeaderMenu('notifications')
-  }
-  if (!import.meta.client || !isOpen) return
-  await nextTick()
-  positionNotificationsPanel()
-  requestAnimationFrame(() => positionNotificationsPanel())
-})
-
-// Another topnav popover (stores, profile, assistant) took over - close this one.
-watch(activeMenu, (id) => {
-  if (id !== 'notifications' && notificationsOpen.value) {
-    notificationsOpen.value = false
-  }
-})
-
 watch(
   () => assistantStore.isOpen,
   (isOpen) => {
@@ -1195,9 +284,7 @@ watch(activeMenu, (id) => {
 /** Never block the whole shell on auth - show UI with a short gate only (Capacitor-safe). */
 const checkingAuth = ref(false)
 
-// Track store switching state
 const switchingStore = ref(false)
-const previousStoreId = ref<string | null>(null)
 
 // Sidebar collapsed state with localStorage persistence
 // Initialize synchronously on client to prevent layout shift
@@ -1227,110 +314,115 @@ const toggleSidebar = () => {
 const isLgUp = useMinWidthQuery(1024)
 const effectiveSidebarCollapsed = computed(() => sidebarCollapsed.value && isLgUp.value)
 
-/** Compact PNG only on lg+ when the sidebar is collapsed to the icon rail (not on phone/tablet drawer). */
-const sidebarUsesMobileLogoAsset = computed(() => effectiveSidebarCollapsed.value)
+const sidebarLogoSrc = computed(() =>
+  actualTheme.value === 'dark' ? '/brand/storvv-logo-reversed.png' : '/brand/storvv-logo.png'
+)
 
-const sidebarLogoSrc = computed(() => {
-  if (sidebarUsesMobileLogoAsset.value) return '/storvv logo mobile.png'
-  return actualTheme.value === 'dark' ? '/storvv logo.png' : '/storvv logo 2.png'
-})
-
-const sidebarLogoBarClass = computed(() => '')
-
-const sidebarLogoImgClass = computed(() => {
-  const base =
-    'shrink-0 object-contain transition-[height,width,max-width] duration-300 ease-in-out'
-  if (effectiveSidebarCollapsed.value) {
-    return [base, 'mx-auto object-center h-7 w-7 max-h-7 max-w-7']
-  }
-  return [
-    base,
-    'object-left',
-    'h-8 w-auto max-h-8 max-w-[calc(100%-0.5rem)]',
-  ]
-})
+if (import.meta.client) {
+  watch(
+    () => effectiveSidebarCollapsed.value,
+    (collapsed) => document.documentElement.classList.toggle('s-rail-collapsed', collapsed),
+    { immediate: true }
+  )
+}
 
 const navigation = DASHBOARD_NAV_DEFINITIONS
 
 // Filter navigation based on user access and subscription plan (web sidebar + iOS/Android bottom nav)
 const { hasAnyManageAccess, can } = usePermissions()
-const filteredNavigation = computed(() => {
-  return filterDashboardNavItems(navigation, {
+
+function navFilterOptions(launchGates: boolean) {
+  return {
     isSuperAdmin: userStore.isSuperAdmin,
     // "Manager-only" nav items now gate on any manage grant across the permission matrix,
     // rather than the retired manager/staff/intern role tier.
     isManager: hasAnyManageAccess.value,
-    canViewModule: (module) => can(module, 'view'),
+    canViewModule: (module: Parameters<typeof can>[0]) => can(module, 'view'),
     canUseFeature: canUseSubscriptionFeature,
     canUseBusinessCapability,
-    hidePaymentLinks: isPaymentLinksComingSoon(),
-    hideStorefront: isStorefrontDashboardHidden(),
-  }).map((item) => ({
+    hidePaymentLinks: launchGates && isPaymentLinksComingSoon(),
+    hideStorefront: launchGates && isStorefrontDashboardHidden(),
+  }
+}
+
+function navHref(item: { name: string; segment: string }) {
+  return item.name === 'Departments'
+    ? resolveStoreDepartmentsPath(storesStore.currentStoreId, storesStore.stores[0]?.id) ??
+        dashPath('/departments')
+    : dashPath(item.segment)
+}
+
+const filteredNavigation = computed(() => {
+  return filterDashboardNavItems(navigation, navFilterOptions(true)).map((item) => ({
     ...item,
-    href:
-      item.name === 'Departments'
-        ? resolveStoreDepartmentsPath(storesStore.currentStoreId, storesStore.stores[0]?.id) ??
-          dashPath('/departments')
-        : dashPath(item.segment),
+    href: navHref(item),
   }))
 })
 
-/**
- * Native bottom nav: promote Payment links to a primary tab when live on Capacitor.
- */
-const promoteNativePaymentLinks = computed(
-  () =>
-    shouldPromoteNativePaymentLinksTab() &&
-    canUseBusinessCapability('paymentLinks') &&
-    canUseSubscriptionFeature('payment_links')
-)
+/** Web shell nav: unlaunched modules are left out; Customers shows wherever Sales does; Branches needs multi-location. */
+const shellNavSource = computed<ShellNavSourceItem[]>(() => {
+  const unlaunchedSegments = new Set<string>()
+  if (isPaymentLinksComingSoon()) unlaunchedSegments.add('/payment-links')
+  if (isStorefrontDashboardHidden()) unlaunchedSegments.add('/storefront')
 
-const nativeNavigationItems = computed((): DashboardNavItem[] => filteredNavigation.value)
+  const items: ShellNavSourceItem[] = filterDashboardNavItems(navigation, navFilterOptions(false))
+    .filter((item) => !unlaunchedSegments.has(item.segment))
+    .map((item) => ({
+      name: item.name,
+      iconKey: item.iconKey,
+      href: navHref(item),
+    }))
 
-const nativePrimaryOrder = computed(() =>
-  resolveNativePrimaryOrder({ promotePaymentLinks: promoteNativePaymentLinks.value })
-)
+  const sales = items.find((item) => item.name === 'Sales')
+  if (sales) {
+    items.push({
+      name: SHELL_CUSTOMERS_NAV_NAME,
+      iconKey: 'customers',
+      href: dashPath('/customers'),
+    })
+  }
+  if (userStore.isSuperAdmin && canManageBranches.value) {
+    items.push({ name: SHELL_BRANCHES_NAV_NAME, iconKey: 'branch', href: dashPath('/branches') })
+  }
+  return items
+})
 
-const nativeNavSplit = computed(() =>
-  splitNativeBottomNav(nativeNavigationItems.value, nativePrimaryOrder.value)
-)
-const nativePrimaryNav = computed(() => nativeNavSplit.value.primary)
-const nativeMoreNav = computed(() => orderNativeMoreNavItems(nativeNavSplit.value.more))
+const shellNavSections = computed(() => buildShellNavSections(shellNavSource.value))
+const shellFooterNav = computed(() => buildShellFooterNav(shellNavSource.value))
+const shellBottomNav = computed(() => buildShellBottomNav(shellNavSource.value))
 
 const route = useRoute()
-const { dashPath, isDemoDashboard, matchesDashboardPath } = useDashboardPaths()
+const { basePath, dashPath, isDemoDashboard, matchesDashboardPath } = useDashboardPaths()
 useDemoConversionNudge()
 
 const isActive = (href: string) => {
-  const visibleHrefs = filteredNavigation.value.map((item) => item.href)
+  const visibleHrefs = [
+    ...filteredNavigation.value.map((item) => item.href),
+    ...shellNavSource.value.map((item) => item.href),
+  ]
   return isDashboardNavActive(route.path, href, visibleHrefs)
 }
 
-const currentPage = computed(() => {
-  return filteredNavigation.value.find((item) => isActive(item.href)) || filteredNavigation.value[0]
+const onCustomersTab = computed(
+  () => matchesDashboardPath(route.path, '/receipts') && route.query.tab === 'customers'
+)
+
+function isShellNavActive(item: ShellNavItem | ShellNavSourceItem) {
+  if (item.name === SHELL_CUSTOMERS_NAV_NAME) {
+    return onCustomersTab.value || matchesDashboardPath(route.path, '/customers')
+  }
+  if (item.name === SHELL_BRANCHES_NAV_NAME) return matchesDashboardPath(route.path, '/branches')
+  if (item.name === 'Sales' && onCustomersTab.value) return false
+  return isActive(item.href)
+}
+
+const shellPageTitle = computed(() => {
+  const active = shellNavSource.value.find((item) => isShellNavActive(item))
+  if (active) return shellNavLabel(active.name)
+  return shellRouteTitle(route.path.slice(basePath.value.length))
 })
 
-const currentPageName = computed(() => {
-  return currentPage.value?.name || 'Dashboard'
-})
-
-const currentPageIconKey = computed((): DashboardNavIconKey => {
-  return currentPage.value?.iconKey || 'dashboard'
-})
-
-// Folder navigation for Inventory
-const isInventoryRoute = computed(() => matchesDashboardPath(route.path, '/inventory'))
-
-// Expanded state for Inventory folders: chevron only (never auto-open on nav)
-const inventoryExpanded = ref(false)
-const expandedSidebarFolders = reactive<Record<string, boolean>>({})
-
-// Expanded state for Stores - manage which stores are expanded
-// Use reactive object instead of Set for better Vue reactivity
-const expandedStores = reactive<Record<string, boolean>>({})
-const expandedDepartments = reactive<Record<string, boolean>>({})
-// Fathom-style: collapsible Stores section header
-const storesSectionCollapsed = ref(false)
+useHead({ title: () => (shellPageTitle.value ? `${shellPageTitle.value} - Storvv` : 'Storvv') })
 
 // Load stores and departments when user data is available
 watch(
@@ -1340,10 +432,6 @@ watch(
     if (isStaffCreationInProgress()) return
 
     await runDashboardShellBootstrap()
-
-    if (storesStore.currentStoreId) {
-      expandedStores[storesStore.currentStoreId] = true
-    }
   },
   { immediate: true }
 )
@@ -1360,237 +448,49 @@ watch(
   }
 )
 
-// Watch for store changes and auto-expand current store
+// Dim navigation while a branch switch reloads scoped data
 watch(
   () => storesStore.currentStoreId,
   async (newStoreId, oldStoreId) => {
-    // Track store switching
-    if (oldStoreId && newStoreId && oldStoreId !== newStoreId) {
-      switchingStore.value = true
-      previousStoreId.value = oldStoreId
-
-      // Collapse the previous store
-      if (oldStoreId) {
-        expandedStores[oldStoreId] = false
-      }
-    }
-
-    if (newStoreId) {
-      // Expand the new current store
-      expandedStores[newStoreId] = true
-
-      // Wait for data to load before showing details
-      if (switchingStore.value) {
-        // Wait a bit for data to refresh
-        await new Promise((resolve) => setTimeout(resolve, 500))
-        switchingStore.value = false
-        previousStoreId.value = null
-      }
-    }
-  },
-  { immediate: true }
+    if (!oldStoreId || !newStoreId || oldStoreId === newStoreId) return
+    switchingStore.value = true
+    await new Promise((resolve) => setTimeout(resolve, 500))
+    switchingStore.value = false
+  }
 )
 
-// Also watch for loading state to detect when switching completes
 watch(
   () => storesStore.loading,
   (loading) => {
     if (!loading && switchingStore.value) {
-      // Give a small delay to ensure all data is loaded
       setTimeout(() => {
         switchingStore.value = false
-        previousStoreId.value = null
       }, 300)
     }
   }
 )
 
-// Auto-expand departments when navigating to departments route
 watch(
   () => route.path,
   (path) => {
-    if (path.startsWith('/dashboard/departments')) {
-      // Extract department ID from route if available
-      const deptId = route.params.id as string
-      if (deptId && deptId !== 'index') {
-        expandedDepartments[deptId] = true
-        // Find which store this department belongs to and expand it
-        const dept = departmentsStore.departments.find((d) => d.id === deptId)
-        if (dept?.storeId) {
-          expandedStores[dept.storeId] = true
-        }
-      }
-    }
-
-    // Auto-expand store when navigating to store departments page
-    if (path.startsWith('/dashboard/stores/') && path.includes('/departments')) {
-      const storeId = route.params.storeId as string
-      if (storeId) {
-        expandedStores[storeId] = true
-        // Also fetch departments for this store if not already loaded
-        if (authStore.currentUser && departmentsStore.departments.length === 0) {
-          departmentsStore
-            .fetchDepartments()
-            .catch((err) => console.error('Error fetching departments:', err))
-        }
-      }
+    if (
+      path.startsWith('/dashboard/stores/') &&
+      path.includes('/departments') &&
+      authStore.currentUser &&
+      departmentsStore.departments.length === 0
+    ) {
+      departmentsStore
+        .fetchDepartments()
+        .catch((err) => console.error('Error fetching departments:', err))
     }
   },
   { immediate: true }
 )
 
-// Close the inventory tree when leaving inventory. Opening is chevron-only.
-watch(
-  isInventoryRoute,
-  (onInventory) => {
-    if (!onInventory) inventoryExpanded.value = false
-  }
-)
-
-const inventoryFolders = computed(() => {
-  if (!inventoryStore.folders) return []
-  return inventoryStore.folders.filter(
-    (folder) => folder && folder.id && folder.name && typeof folder.name === 'string'
-  )
-})
-
-const sidebarFolderTree = computed(() => {
-  const folders = inventoryFolders.value
-  const byName = (a: { name: string }, b: { name: string }) =>
-    a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
-  return getRootFolders(folders)
-    .slice()
-    .sort(byName)
-    .map((folder) => ({
-      folder,
-      children: getChildFolders(folders, folder.id).slice().sort(byName),
-    }))
-})
-
-watch(
-  () => route.params.id,
-  (id) => {
-    if (typeof id !== 'string' || !id) return
-    const parent = sidebarFolderTree.value.find((group) =>
-      group.children.some((child) => child.id === id)
-    )
-    if (parent) expandedSidebarFolders[parent.folder.id] = true
-  },
-  { immediate: true }
-)
-
-function isSidebarFolderActive(folderId: string) {
-  return route.params.id === folderId
-}
-
-function sidebarFolderLinkClass(folderId: string) {
-  return [
-    'dash-nav-tree__link group relative text-[13px] transition-colors',
-    isSidebarFolderActive(folderId)
-      ? 'bg-gray-100/90 dark:bg-white/[0.06]'
-      : 'text-gray-500 hover:bg-gray-100/90 dark:text-gray-400 dark:hover:bg-white/[0.05]',
-    { 'pointer-events-none opacity-50': switchingStore.value },
-  ]
-}
-
-function sidebarFolderLabelClass(folderId: string) {
-  return isSidebarFolderActive(folderId)
-    ? 'font-bold text-gray-900 dark:text-gray-100'
-    : 'font-normal group-hover:text-gray-800 dark:group-hover:text-gray-100'
-}
-
-function sidebarFolderCount(folder: { itemCount?: number }, childCount: number) {
-  if (childCount > 0) return childCount
-  return folder.itemCount ?? 0
-}
-
-function isSidebarFolderExpanded(folderId: string) {
-  return !!expandedSidebarFolders[folderId]
-}
-
-function toggleSidebarFolderExpanded(folderId: string) {
-  expandedSidebarFolders[folderId] = !expandedSidebarFolders[folderId]
-}
-
-function isSidebarDepartmentActive(departmentId: string) {
-  return (
-    route.params.id === departmentId && route.path.startsWith('/dashboard/departments')
-  )
-}
-
-function sidebarDepartmentLinkClass(departmentId: string) {
-  return [
-    'dash-nav-tree__link group relative text-[13px] transition-colors',
-    isSidebarDepartmentActive(departmentId)
-      ? 'bg-gray-100/90 dark:bg-white/[0.06]'
-      : 'text-gray-500 hover:bg-gray-100/90 dark:text-gray-400 dark:hover:bg-white/[0.05]',
-    { 'pointer-events-none opacity-50': switchingStore.value },
-  ]
-}
-
-function sidebarDepartmentLabelClass(departmentId: string) {
-  return isSidebarDepartmentActive(departmentId)
-    ? 'font-bold text-gray-900 dark:text-gray-100'
-    : 'font-normal group-hover:text-gray-800 dark:group-hover:text-gray-100'
-}
-
-// Current store
 const currentStore = computed(() => storesStore.currentStore)
-
-// Super-admins: only plan-eligible branches (oldest-first when over limit). Staff: full assigned list.
-const storesList = computed(() => {
-  const allStores =
-    userStore.userData?.role === 'superAdmin' ? eligibleStores.value : storesStore.stores
-  const current = currentStore.value
-  if (!current || !allStores.some((s) => s.id === current.id)) return allStores
-  const otherStores = allStores.filter((s) => s.id !== current.id)
-  return [current, ...otherStores]
-})
-
-// Get departments for a specific store
-const getDepartmentsForStore = (storeId: string) => {
-  return departmentsStore.departments.filter((dept) => dept.storeId === storeId)
-}
-
-// Get staff for a specific department
-const getStaffForDepartment = (departmentId: string) => {
-  return staffStore.staff.filter((s) => s.departmentId === departmentId)
-}
-
-// Toggle store expansion
-const toggleStoreExpanded = (storeId: string) => {
-  expandedStores[storeId] = !expandedStores[storeId]
-  // Fetch departments for this store when expanding
-  if (expandedStores[storeId] && authStore.currentUser) {
-    departmentsStore
-      .fetchDepartments()
-      .catch((err) => console.error('Error fetching departments:', err))
-  }
-}
-
-// Toggle department expansion
-const toggleDepartmentExpanded = async (departmentId: string) => {
-  expandedDepartments[departmentId] = !expandedDepartments[departmentId]
-  // Fetch staff for this department when expanding
-  if (expandedDepartments[departmentId] && authStore.currentUser) {
-    try {
-      await staffStore.fetchStaffByDepartment(departmentId)
-    } catch (err) {
-      console.error('Error fetching staff:', err)
-    }
-  }
-}
-
-// Departments navigation (kept for compatibility)
-const isDepartmentsRoute = computed(() => {
-  if (route.path.startsWith('/dashboard/departments')) return true
-  return route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments')
-})
-
-const departmentsList = computed(() => {
-  if (!departmentsStore.departments) return []
-  return departmentsStore.departments
-})
+const showBranchSwitcher = computed(
+  () => userStore.userData?.role === 'superAdmin' && canManageBranches.value
+)
 
 // Cache user profile info to prevent UI flickering during staff creation (sign out/sign in process)
 // Store the super admin's info when they first load, and preserve it during staff creation
@@ -1786,40 +686,6 @@ const userName = computed(() => {
   return 'User'
 })
 
-const { formatGreeting } = useTimeGreeting()
-const commandHeaderGreeting = computed(() => formatGreeting(userName.value || ''))
-const isDashboardHome = computed(() => {
-  const path = route.path.replace(/\/$/, '')
-  return path === '/dashboard'
-})
-
-const isIosInPageChrome = computed(() => {
-  if (!isCapacitorIos.value) return false
-  const path = route.path.replace(/\/$/, '') || '/dashboard'
-  return path === '/dashboard' || path.startsWith('/dashboard/')
-})
-
-const iosPageNav = useIosPageNav()
-const {
-  title: iosPageNavTitle,
-  showBack: iosPageNavShowBack,
-  backTo: iosPageNavBackTo,
-  backLabel: iosPageNavBackLabel,
-  fallbackTo: iosPageNavFallbackTo,
-} = iosPageNav
-
-const iosGlobalPageTitle = computed(() => {
-  if (iosPageNavTitle.value) return iosPageNavTitle.value
-  if (isDashboardHome.value) return ''
-  return currentPageName.value
-})
-
-const commandHeaderPageTitle = computed(() => {
-  const path = route.path
-  if (path === '/dashboard' || path === '/dashboard/') return ''
-  return currentPageName.value
-})
-
 const userEmail = computed(() => {
   // During SSR, return a safe default to prevent hydration mismatch
   if (import.meta.server) {
@@ -1954,18 +820,9 @@ const confirmSignOut = async () => {
 const handleClickOutside = (event: MouseEvent) => {
   const target = event.target as Node
   const eventPath = typeof event.composedPath === 'function' ? event.composedPath() : []
-  const inNotifications =
-    notificationsRef.value?.contains(target) ||
-    notificationsPanelRef.value?.contains(target) ||
-    eventPath.includes(notificationsRef.value as EventTarget) ||
-    eventPath.includes(notificationsPanelRef.value as EventTarget)
-  if (notificationsOpen.value && !inNotifications) {
-    notificationsOpen.value = false
-  }
-
   // Web assistant is a floating (non-modal) widget, teleported to <body> - no backdrop to
   // catch outside clicks, so check directly against its panel + trigger buttons.
-  if (assistantStore.isOpen && !isNativeApp.value) {
+  if (assistantStore.isOpen) {
     const panelEl = document.getElementById('dashboard-assistant-panel')
     const targetEl = target as Element
     const inPanel = panelEl?.contains(target) || eventPath.includes(panelEl as EventTarget)
@@ -1980,7 +837,6 @@ const handleClickOutside = (event: MouseEvent) => {
 watch(
   () => route.path,
   () => {
-    clearNativeOverlayLock()
     useAssistantStore().close()
     if (import.meta.client && sidebarOpen.value) {
       // Check if we're on mobile (screen width < 1024px which is lg breakpoint)
@@ -2046,8 +902,6 @@ const checkAuth = async () => {
 onMounted(async () => {
   document.addEventListener('click', handleClickOutside)
   if (import.meta.client) {
-    window.addEventListener('resize', onNotificationsScrollOrResize)
-    window.addEventListener('scroll', onNotificationsScrollOrResize, true)
     if (!isCapacitorNative()) {
       window.addEventListener('keydown', handleGlobalSearchShortcut)
     }
@@ -2163,12 +1017,9 @@ watch(
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
   if (import.meta.client) {
-    window.removeEventListener('resize', onNotificationsScrollOrResize)
-    window.removeEventListener('scroll', onNotificationsScrollOrResize, true)
     if (!isCapacitorNative()) {
       window.removeEventListener('keydown', handleGlobalSearchShortcut)
     }
-    clearNativeOverlayLock()
   }
 })
 </script>

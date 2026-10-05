@@ -674,11 +674,7 @@ watch(slug, () => void load(), { immediate: true })
     radial-gradient(ellipse 80% 50% at 50% -10%, rgb(26 21 35 / 0.05), transparent),
     var(--sf-canvas);
   color: var(--sf-ink);
-  font-family:
-    'Quicksand',
-    'Plus Jakarta Sans',
-    system-ui,
-    sans-serif;
+  font-family: var(--s-font-sans);
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 

@@ -1,52 +1,44 @@
 <template>
-  <DashboardSettingsPanel
+  <SCard
     title="Backup reminders"
-    subtitle="Get reminded to export Excel backups on a schedule."
-    compact
+    description="Storvv stores your data securely. Scheduled exports are your offline safety copy."
   >
-    <div class="space-y-0">
-      <div class="dash-setting-row">
-        <div class="min-w-0 flex-1">
-          <p class="text-xs font-medium text-gray-900 dark:text-gray-100">In-app reminders</p>
-          <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
-            Get nudged to export Excel backups on a schedule.
-          </p>
-        </div>
-        <Switch
+    <div class="s-settings__rows">
+      <div class="s-settings__row">
+        <SCheckbox
           :model-value="enabled"
-          aria-label="Backup reminders"
+          variant="switch"
+          label="In-app reminders"
+          description="Get nudged to export Excel backups on a schedule."
           @update:model-value="onEnabledChange"
         />
       </div>
-      <div v-if="enabled" class="dash-setting-row">
-        <div class="min-w-0 flex-1">
-          <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Frequency</p>
+      <div v-if="enabled" class="s-settings__row">
+        <div class="s-settings__row-text">
+          <p class="s-settings__row-label" :id="frequencyLabelId">Frequency</p>
         </div>
-        <select v-model="frequency" :class="[APP_FIELD_CLASS, 'min-w-[8rem] !w-auto']" @change="save">
-          <option value="weekly">Weekly</option>
-          <option value="monthly">Monthly</option>
-        </select>
+        <div class="s-settings__control">
+          <SSelect
+            v-model="frequency"
+            :options="frequencyOptions"
+            :aria-labelledby="frequencyLabelId"
+            @update:model-value="save"
+          />
+        </div>
       </div>
-      <p
-        v-if="dueReminder"
-        class="dash-setting-row dash-setting-row--note rounded-lg bg-amber-500/10 px-3 py-2 text-[11px] text-amber-900 dark:text-amber-100"
-      >
-        Reminder: export a backup from Data export below. Last export:
-        {{ lastExportLabel }}.
-      </p>
-      <p class="dash-setting-row dash-setting-row--note text-[10px] text-gray-500 dark:text-gray-400">
-        Storvv stores your data securely; scheduled exports are your offline safety copy.
-      </p>
     </div>
-  </DashboardSettingsPanel>
+    <p v-if="dueReminder" class="s-notice s-settings__notice">
+      Time for a backup. Export one from Data export. Last export: {{ lastExportLabel }}.
+    </p>
+  </SCard>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import DashboardSettingsPanel from '~/components/dashboard/DashboardSettingsPanel.vue'
-import Switch from '~/components/ui/Switch.vue'
+import { computed, ref, useId, watch } from 'vue'
+import SCard from '~/components/s/SCard.vue'
+import SCheckbox from '~/components/s/SCheckbox.vue'
+import SSelect from '~/components/s/SSelect.vue'
 import type { BackupPreferences } from '~/types/growth'
-import { APP_FIELD_CLASS } from '~/utils/app-chrome'
 import { useUserStore } from '~/stores/user'
 import { useAuthStore } from '~/stores/auth'
 import { useUser } from '~/composables/useUser'
@@ -57,6 +49,11 @@ const { updateUserDocument } = useUser()
 
 const enabled = ref(false)
 const frequency = ref<BackupPreferences['frequency']>('weekly')
+const frequencyLabelId = `backup-frequency-${useId()}`
+const frequencyOptions = [
+  { value: 'weekly', label: 'Weekly' },
+  { value: 'monthly', label: 'Monthly' },
+]
 
 watch(
   () => userStore.userData?.backupPreferences,

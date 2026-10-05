@@ -1,0 +1,200 @@
+/*
+ * Base layer for the product. Document-level rules apply everywhere; type, colour and focus
+ * styling apply inside `.ds-root`, which every product layout and standalone page sets.
+ */
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    overflow-x: clip;
+    background: var(--s-bg);
+  }
+
+  #__nuxt {
+    min-height: 100vh;
+    overflow-x: clip;
+  }
+
+  /* Safari zooms the page when a focused field is under 16px. */
+  @supports (-webkit-touch-callout: none) {
+    @media (hover: none) and (pointer: coarse) {
+      :is(input, select, textarea) {
+        font-size: max(16px, 1em);
+      }
+    }
+  }
+
+  /* Lucide icons: one stroke weight across the product */
+  svg.lucide {
+    stroke-width: var(--s-icon-stroke);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .ds-root {
+    font-family: var(--s-font-sans);
+    font: var(--s-text-body);
+    color: var(--s-text);
+    background: var(--s-bg);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  .ds-root :where(h1, h2, h3, h4, p) {
+    margin: 0;
+  }
+
+  .ds-root :where(a) {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  :where(.ds-root, .s-c)
+    :where(button, [role='button'], a, input, select, textarea, summary, [tabindex]:not([tabindex='-1'])):focus-visible {
+    outline: none;
+    box-shadow: var(--s-focus-ring);
+  }
+
+  .ds-root ::selection {
+    background: var(--s-accent-soft);
+    color: var(--s-text);
+  }
+}
+
+/* Revealed by the boot script in `app.html` once styles are in. */
+html.styles-loaded {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Capacitor WKWebView/WebView document behaviour */
+html.capacitor-native {
+  -webkit-tap-highlight-color: transparent;
+  background-color: var(--s-bg);
+}
+
+html.capacitor-native body {
+  overscroll-behavior-y: none;
+}
+
+html.capacitor-native #__nuxt {
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+html.capacitor-native :is(input, select, textarea) {
+  font-size: max(16px, 1em);
+}
+
+/* Light/dark cross-fade while `theme-transitioning` is on <html> (see `stores/theme.ts`). */
+html.theme-transitioning,
+html.theme-transitioning :is(body, aside, header, main, nav, [data-dashboard-teleport]) {
+  transition-property: background-color, color, border-color, box-shadow !important;
+  transition-duration: var(--s-duration-fast) !important;
+  transition-timing-function: var(--s-ease) !important;
+  transition-delay: 0s !important;
+}
+
+/* ApexCharts can inject an attribution link into the chart SVG. */
+.apexcharts-canvas a[href*='apexcharts.com'] {
+  display: none !important;
+}
+
+/* Capacitor launch splash, shown for a moment while the shell boots */
+.s-boot {
+  position: fixed;
+  inset: 0;
+  z-index: var(--s-z-toast);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-space-2);
+  background: var(--s-bg);
+  color: var(--s-accent);
+}
+
+.s-boot__label {
+  margin: 0;
+  color: var(--s-text-2);
+  font: var(--s-text-body);
+  font-family: var(--s-font-sans);
+}
+
+@layer utilities {
+  .ds-display {
+    font: var(--s-text-display);
+    letter-spacing: var(--s-tracking-tight);
+  }
+  .ds-title {
+    font: var(--s-text-title);
+    letter-spacing: var(--s-tracking-tight);
+  }
+  .ds-heading {
+    font: var(--s-text-heading);
+    letter-spacing: -0.01em;
+  }
+  .ds-body-lg {
+    font: var(--s-text-body-lg);
+  }
+  .ds-body {
+    font: var(--s-text-body);
+  }
+  .ds-small {
+    font: var(--s-text-small);
+  }
+  .ds-caption {
+    font: var(--s-text-caption);
+  }
+  .ds-overline {
+    font: var(--s-text-caption);
+    font-weight: 600;
+    letter-spacing: var(--s-tracking-caps);
+    text-transform: uppercase;
+    color: var(--s-text-muted);
+  }
+  .ds-num {
+    font-variant-numeric: tabular-nums;
+  }
+  .ds-text-2 {
+    color: var(--s-text-2);
+  }
+  .ds-text-muted {
+    color: var(--s-text-muted);
+  }
+  .ds-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+}
+
+@theme inline {
+  --color-ds-bg: var(--s-bg);
+  --color-ds-surface: var(--s-surface);
+  --color-ds-surface-2: var(--s-surface-2);
+  --color-ds-border: var(--s-border);
+  --color-ds-text: var(--s-text);
+  --color-ds-text-2: var(--s-text-2);
+  --color-ds-muted: var(--s-text-muted);
+  --color-ds-accent: var(--s-accent);
+  --color-ds-success: var(--s-success);
+  --color-ds-warning: var(--s-warning);
+  --color-ds-error: var(--s-error);
+  --color-ds-info: var(--s-info);
+}

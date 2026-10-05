@@ -1,31 +1,23 @@
 <template>
-  <div class="inline-flex min-w-0 max-w-full flex-col items-start gap-0.5">
-    <span :class="badge.class">
-      <span class="h-1.5 w-1.5 shrink-0 rounded-full" :class="badge.dotClass" aria-hidden="true" />
-      <span class="truncate">{{ badge.label }}</span>
-      <span
-        v-if="badge.meta && inlineMeta"
-        class="truncate font-mono text-[9px] font-normal tabular-nums text-current/55"
-      >
-        · {{ badge.meta }}
-      </span>
-    </span>
-    <span
-      v-if="badge.meta && !inlineMeta"
-      class="max-w-full truncate font-mono text-[9px] tabular-nums text-gray-500 dark:text-gray-400"
-    >
-      {{ badge.meta }}
-    </span>
-  </div>
+  <span class="s-c s-status-badge" :class="{ 's-status-badge--stacked': !inlineMeta }">
+    <SBadge :tone="inventoryAvailabilityTone(badge.status)" dot>
+      {{ badge.label }}<template v-if="badge.meta && inlineMeta"> · {{ badge.meta }}</template>
+    </SBadge>
+    <span v-if="badge.meta && !inlineMeta" class="s-status-badge__meta">{{ badge.meta }}</span>
+  </span>
 </template>
 
 <script setup lang="ts">
-import type { InventoryAvailabilityBadge } from '~/utils/inventory-availability'
+import SBadge from '~/components/s/SBadge.vue'
+import {
+  inventoryAvailabilityTone,
+  type InventoryAvailabilityBadge,
+} from '~/utils/inventory-availability'
 
-const props = withDefaults(
+withDefaults(
   defineProps<{
     badge: InventoryAvailabilityBadge
-    /** Show receipt ref inside the pill (table cells); below the pill on tight layouts */
+    /** Show the receipt ref inside the pill; below it on tight layouts. */
     inlineMeta?: boolean
   }>(),
   { inlineMeta: true }
