@@ -1734,7 +1734,8 @@ html.dark .mk {
 /* ── Steps ─────────────────────────────────────────────────────────────── */
 
 .mk-step__num {
-  font: 600 0.8125rem / 1.25rem var(--s-font-mono);
+  font: 600 0.8125rem / 1.25rem var(--s-font-sans);
+  font-variant-numeric: tabular-nums;
   color: var(--s-accent);
 }
 
@@ -1796,7 +1797,8 @@ html.dark .mk {
   height: var(--s-space-4);
   border: 1px solid var(--s-border-strong);
   border-radius: var(--s-radius-full);
-  font: 600 0.8125rem / 1 var(--s-font-mono);
+  font: 600 0.8125rem / 1 var(--s-font-sans);
+  font-variant-numeric: tabular-nums;
   color: var(--s-text-muted);
   transition: background-color var(--s-duration) var(--s-ease),
     border-color var(--s-duration) var(--s-ease), color var(--s-duration) var(--s-ease);

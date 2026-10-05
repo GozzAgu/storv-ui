@@ -21,7 +21,7 @@ export const DS_CHART_PALETTE_FALLBACK: DsChartPalette = {
   muted: '#667085',
   grid: '#e4e7ec',
   surface: '#f2f4f7',
-  font: 'Inter, sans-serif',
+  font: "'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', sans-serif",
 }
 
 export function readDsChartPalette(fallback: DsChartPalette = DS_CHART_PALETTE_FALLBACK): DsChartPalette {

@@ -133,7 +133,7 @@ html:has(.s-shell.ds-root) body {
 .s-shell__scrim {
   position: fixed;
   inset: 0;
-  z-index: var(--s-z-modal);
+  z-index: var(--s-z-overlay);
   background: var(--s-scrim);
   opacity: 0;
   pointer-events: none;
@@ -519,6 +519,8 @@ html:has(.s-shell.ds-root) body {
 }
 
 .s-branch__list {
+  display: grid;
+  gap: var(--s-space-half);
   max-height: 280px;
   margin: 0;
   padding: 0;
@@ -703,6 +705,17 @@ html:has(.s-shell.ds-root) body {
 .s-popover-host--notifications {
   width: 360px;
   max-width: calc(100vw - var(--s-space-2) * 2);
+}
+
+@media (max-width: 639px) {
+  .s-topbar :is(.s-popover, .s-popover-host) {
+    position: fixed;
+    top: calc(var(--s-topbar-h) + env(safe-area-inset-top, 0px) + var(--s-space-1));
+    right: var(--s-space-2);
+    left: var(--s-space-2);
+    width: auto;
+    max-width: none;
+  }
 }
 
 .s-user-menu__head {

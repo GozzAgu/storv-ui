@@ -42,7 +42,6 @@
   .ds-root {
     font-family: var(--s-font-sans);
     font: var(--s-text-body);
-    font-feature-settings: 'cv11', 'ss01';
     color: var(--s-text);
     background: var(--s-bg);
     -webkit-font-smoothing: antialiased;

@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    --app-font-sans: Quicksand, 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    --app-font-sans: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI',
       Roboto, 'Helvetica Neue', Arial, sans-serif;
     --app-text-size: 0.675rem;
     --app-line-height: 1.35;

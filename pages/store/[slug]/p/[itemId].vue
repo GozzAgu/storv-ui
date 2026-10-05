@@ -528,11 +528,7 @@ watch([slug, itemId], () => void load(), { immediate: true })
   padding-bottom: 6.5rem;
   background: var(--sf-canvas);
   color: var(--sf-ink);
-  font-family:
-    'Quicksand',
-    'Plus Jakarta Sans',
-    system-ui,
-    sans-serif;
+  font-family: var(--s-font-sans);
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
