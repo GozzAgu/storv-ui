@@ -3,8 +3,7 @@
  * Every component root carries `.s-c` so legacy global text rules don't leak into it.
  */
 
-.s-c
-  :where(p, span, label, a, li, button, kbd, input, select, textarea, legend, dt, dd, td, th) {
+.s-c :where(p, span, label, a, li, button, kbd, input, select, textarea, legend, dt, dd, td, th) {
   font-size: inherit;
   line-height: inherit;
 }
@@ -29,10 +28,8 @@
   text-decoration: none;
   cursor: pointer;
   user-select: none;
-  transition:
-    background-color var(--s-duration-fast) var(--s-ease),
-    box-shadow var(--s-duration-fast) var(--s-ease),
-    color var(--s-duration-fast) var(--s-ease),
+  transition: background-color var(--s-duration-fast) var(--s-ease),
+    box-shadow var(--s-duration-fast) var(--s-ease), color var(--s-duration-fast) var(--s-ease),
     transform var(--s-duration-fast) var(--s-ease);
 }
 
@@ -103,9 +100,7 @@
 /* Hairline drawn as a shadow so it never shifts layout */
 .s-btn--secondary {
   background: var(--s-surface);
-  box-shadow:
-    0 0 0 1px var(--s-border),
-    var(--s-shadow-sm);
+  box-shadow: 0 0 0 1px var(--s-border), var(--s-shadow-sm);
   color: var(--s-text);
 }
 
@@ -168,10 +163,8 @@
   background: transparent;
   color: var(--s-text-2);
   cursor: pointer;
-  transition:
-    background-color var(--s-duration-fast) var(--s-ease),
-    box-shadow var(--s-duration-fast) var(--s-ease),
-    color var(--s-duration-fast) var(--s-ease);
+  transition: background-color var(--s-duration-fast) var(--s-ease),
+    box-shadow var(--s-duration-fast) var(--s-ease), color var(--s-duration-fast) var(--s-ease);
 }
 
 .s-icon-btn svg {
@@ -212,9 +205,7 @@
 
 .s-icon-btn--secondary {
   background: var(--s-surface);
-  box-shadow:
-    0 0 0 1px var(--s-border),
-    var(--s-shadow-sm);
+  box-shadow: 0 0 0 1px var(--s-border), var(--s-shadow-sm);
 }
 
 .s-icon-btn--secondary:focus-visible {
@@ -747,8 +738,7 @@
   border-radius: var(--s-radius);
   background: var(--s-field-bg);
   color: var(--s-text);
-  transition:
-    background-color var(--s-duration-fast) var(--s-ease),
+  transition: background-color var(--s-duration-fast) var(--s-ease),
     border-color var(--s-duration-fast) var(--s-ease),
     box-shadow var(--s-duration-fast) var(--s-ease);
 }
@@ -861,6 +851,68 @@ textarea.s-control__input {
   pointer-events: none;
 }
 
+/* ── Flag, country select ── */
+
+.s-flag {
+  display: inline-block;
+  flex-shrink: 0;
+  width: calc(var(--s-space-2) + var(--s-space-half));
+  aspect-ratio: 3 / 2;
+  border-radius: var(--s-space-quarter);
+  background: var(--s-surface-2);
+  box-shadow: 0 0 0 1px var(--s-border);
+  object-fit: cover;
+}
+
+.s-country-select__trigger {
+  width: 100%;
+  padding-right: 36px;
+  font: var(--s-text-body);
+  font-family: var(--s-font-sans);
+  text-align: left;
+  cursor: pointer;
+}
+
+.s-country-select__trigger:focus-visible {
+  outline: none;
+  box-shadow: var(--s-focus-ring);
+}
+
+.s-country-select__value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.s-country-select__value--empty {
+  color: var(--s-text-muted);
+}
+
+.s-popover.s-country-select__panel {
+  width: 100%;
+  max-height: 320px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.s-country-select__panel .s-pick__row {
+  gap: var(--s-space-1-5);
+  padding: var(--s-space-1) var(--s-space-1-5);
+  border-bottom: 0;
+  border-radius: var(--s-radius);
+}
+
+.s-country-select__panel .s-pick__title {
+  flex: 1;
+}
+
+.s-country-select__check {
+  flex-shrink: 0;
+  color: var(--s-accent);
+}
+
 .s-check {
   display: flex;
   align-items: flex-start;
@@ -898,8 +950,7 @@ textarea.s-control__input {
   border-radius: var(--s-radius-sm);
   background: var(--s-surface);
   color: transparent;
-  transition:
-    background-color var(--s-duration-fast) var(--s-ease),
+  transition: background-color var(--s-duration-fast) var(--s-ease),
     border-color var(--s-duration-fast) var(--s-ease);
 }
 
@@ -994,10 +1045,8 @@ textarea.s-control__input {
   font-weight: 500;
   white-space: nowrap;
   cursor: pointer;
-  transition:
-    background-color var(--s-duration-fast) var(--s-ease),
-    color var(--s-duration-fast) var(--s-ease),
-    box-shadow var(--s-duration-fast) var(--s-ease);
+  transition: background-color var(--s-duration-fast) var(--s-ease),
+    color var(--s-duration-fast) var(--s-ease), box-shadow var(--s-duration-fast) var(--s-ease);
 }
 
 .s-tabs__tab:hover {
@@ -1160,8 +1209,7 @@ textarea.s-control__input {
 
 .s-pop-enter-active,
 .s-pop-leave-active {
-  transition:
-    opacity var(--s-duration-fast) var(--s-ease-out),
+  transition: opacity var(--s-duration-fast) var(--s-ease-out),
     transform var(--s-duration-fast) var(--s-ease-out);
 }
 

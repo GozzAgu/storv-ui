@@ -33,7 +33,7 @@
               Try the live demo
             </SButton>
           </div>
-          <ul class="mk-hero__note" aria-label="Good to know">
+          <ul class="mk-hero__proof" aria-label="Good to know">
             <li><Check :size="16" aria-hidden="true" />Free forever for one store</li>
             <li><Check :size="16" aria-hidden="true" />No card needed</li>
             <li><Check :size="16" aria-hidden="true" />Set up in minutes</li>
@@ -41,45 +41,82 @@
         </div>
 
         <div class="mk-hero__visual">
-          <img
-            class="mk-hero__photo"
-            src="/marketing/hero-owner.webp"
-            alt="A smiling boutique owner checking her sales on her phone behind the counter"
-            width="864"
-            height="1152"
-            fetchpriority="high"
-          />
-          <ul class="mk-floats" aria-hidden="true">
-            <li class="mk-float mk-float--inverse mk-float--sale">
-              <span class="mk-float__icon mk-float__icon--success">
-                <ReceiptText :size="18" />
+          <div class="mk-hero__frame">
+            <img
+              class="mk-hero__photo"
+              src="/marketing/hero-owner.webp"
+              alt="A smiling boutique owner checking her sales on her phone behind the counter"
+              width="864"
+              height="1152"
+              fetchpriority="high"
+            />
+          </div>
+
+          <div class="mk-float mk-float--inverse mk-float--sale" aria-hidden="true">
+            <span class="mk-float__icon mk-float__icon--success">
+              <ReceiptText :size="18" />
+            </span>
+            <Transition name="mk-word" mode="out-in">
+              <span :key="sale.amount" class="mk-float__body">
+                <span class="mk-float__title">Sale completed · {{ sale.amount }}</span>
+                <span class="mk-float__text">{{ sale.detail }}</span>
               </span>
-              <Transition name="mk-word" mode="out-in">
-                <span :key="sale.amount" class="mk-float__body">
-                  <span class="mk-float__title">Sale completed · {{ sale.amount }}</span>
-                  <span class="mk-float__text">{{ sale.detail }}</span>
-                </span>
-              </Transition>
-            </li>
-            <li class="mk-float mk-float--sync">
-              <span class="mk-float__live" />
-              <span class="mk-float__body">
-                <span class="mk-float__eyebrow">Inventory</span>
-                <span class="mk-float__title">Live stock sync</span>
+            </Transition>
+          </div>
+
+          <div class="mk-glance" aria-hidden="true">
+            <div class="mk-glance__head">
+              <span class="mk-glance__label"><span class="mk-glance__live" />Today · Lagos</span>
+              <span class="mk-mini__pill mk-mini__pill--success">
+                <TrendingUp :size="12" />+18%
               </span>
-            </li>
-            <li class="mk-float mk-float--stock">
-              <span class="mk-float__icon mk-float__icon--warning">
-                <TriangleAlert :size="18" />
-              </span>
-              <span class="mk-float__body">
-                <span class="mk-float__title">Low stock</span>
-                <span class="mk-float__text">iPhone 13 128GB · 2 left</span>
-              </span>
-            </li>
-          </ul>
+            </div>
+            <p class="mk-glance__value">₦1,240,000</p>
+            <p class="mk-mini__sub">Revenue, vs ₦1.05m yesterday</p>
+            <svg
+              class="mk-glance__spark"
+              viewBox="0 0 240 56"
+              preserveAspectRatio="none"
+              focusable="false"
+            >
+              <defs>
+                <linearGradient id="mk-glance-fill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="currentColor" stop-opacity="0.22" />
+                  <stop offset="100%" stop-color="currentColor" stop-opacity="0" />
+                </linearGradient>
+              </defs>
+              <path
+                d="M0 44 L24 40 L48 42 L72 32 L96 35 L120 26 L144 29 L168 18 L192 22 L216 12 L240 8 L240 56 L0 56 Z"
+                fill="url(#mk-glance-fill)"
+              />
+              <path
+                d="M0 44 L24 40 L48 42 L72 32 L96 35 L120 26 L144 29 L168 18 L192 22 L216 12 L240 8"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linejoin="round"
+                vector-effect="non-scaling-stroke"
+              />
+            </svg>
+            <dl class="mk-glance__stats">
+              <div>
+                <dt>Sales</dt>
+                <dd>42</dd>
+              </div>
+              <div>
+                <dt>Items sold</dt>
+                <dd>118</dd>
+              </div>
+              <div>
+                <dt>Low stock</dt>
+                <dd class="mk-glance__warn">2</dd>
+              </div>
+            </dl>
+          </div>
         </div>
       </div>
+
+      <MkMarquee />
     </section>
 
     <MkIntro />
@@ -196,7 +233,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import { ArrowRight, Check, ReceiptText, TriangleAlert } from '@lucide/vue'
+import { ArrowRight, Check, ReceiptText, TrendingUp } from '@lucide/vue'
 import SButton from '~/components/s/SButton.vue'
 import SDialog from '~/components/s/SDialog.vue'
 import MkAssistant from '~/components/marketing/MkAssistant.vue'
@@ -205,6 +242,7 @@ import MkFaq, { type MkFaqItem } from '~/components/marketing/MkFaq.vue'
 import MkTour from '~/components/marketing/MkTour.vue'
 import MkSectionHead from '~/components/marketing/MkSectionHead.vue'
 import MkIntro from '~/components/marketing/MkIntro.vue'
+import MkMarquee from '~/components/marketing/MkMarquee.vue'
 import MkPlatform from '~/components/marketing/MkPlatform.vue'
 import MkSetup from '~/components/marketing/MkSetup.vue'
 import MkStats from '~/components/marketing/MkStats.vue'

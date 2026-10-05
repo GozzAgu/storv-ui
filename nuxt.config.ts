@@ -4,7 +4,10 @@ import { CAPACITOR_SHELL_INLINE_SCRIPT } from './utils/capacitor-shell-inline'
 
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
-  devtools: { enabled: process.env.NODE_ENV === 'development' },
+  // Off by default so the Nuxt badge never shows on screen; run with NUXT_DEVTOOLS=true to use it.
+  devtools: {
+    enabled: process.env.NODE_ENV === 'development' && process.env.NUXT_DEVTOOLS === 'true',
+  },
   modules: ['@pinia/nuxt'],
   css: ['~/assets/css/main.css'],
   // Optimize CSS loading to prevent FOUC
@@ -149,7 +152,12 @@ export default defineNuxtConfig({
         {
           rel: 'icon',
           type: 'image/png',
-          href: '/brand/storvv-app-icon.png',
+          href: '/brand/storvv-favicon.png',
+        },
+        {
+          rel: 'icon',
+          href: '/favicon.ico',
+          sizes: 'any',
         },
         {
           rel: 'apple-touch-icon',

@@ -24,7 +24,10 @@
           :aria-valuemax="totalSteps"
           :aria-valuetext="`Step ${currentStep} of ${totalSteps}`"
         >
-          <span class="s-onboarding__fill" :style="{ width: `${(currentStep / totalSteps) * 100}%` }" />
+          <span
+            class="s-onboarding__fill"
+            :style="{ width: `${(currentStep / totalSteps) * 100}%` }"
+          />
         </div>
       </div>
 
@@ -42,13 +45,13 @@
               :options="currencyOptions"
               required
             />
-            <SSelect
+            <SCountrySelect
               id="country"
               v-model="selectedCountry"
               label="Country"
               placeholder="Choose your country"
               hint="Sets how dates, times and numbers are shown."
-              :options="countryOptions"
+              :countries="regions"
               required
             />
           </div>
@@ -124,7 +127,9 @@
 
         <div class="s-onboarding__actions">
           <SButton v-if="currentStep > 1" :disabled="isLoading" @click="previousStep">
-            <template #leading><ArrowLeft :size="16" :stroke-width="2" aria-hidden="true" /></template>
+            <template #leading
+              ><ArrowLeft :size="16" :stroke-width="2" aria-hidden="true"
+            /></template>
             Back
           </SButton>
           <SButton v-if="currentStep === 2" variant="ghost" @click="skipExperienceStep">
@@ -137,7 +142,9 @@
             :loading="isLoading"
             :disabled="isLoading || !canContinue"
           >
-            {{ isLoading ? 'Setting up…' : currentStep === totalSteps ? 'Finish setup' : 'Continue' }}
+            {{
+              isLoading ? 'Setting up…' : currentStep === totalSteps ? 'Finish setup' : 'Continue'
+            }}
             <template v-if="!isLoading" #trailing>
               <ArrowRight :size="16" :stroke-width="2" aria-hidden="true" />
             </template>
@@ -155,6 +162,7 @@ import AuthShell from '~/components/auth/AuthShell.vue'
 import AuthPageHeader from '~/components/auth/AuthPageHeader.vue'
 import AuthAlert from '~/components/auth/AuthAlert.vue'
 import SButton from '~/components/s/SButton.vue'
+import SCountrySelect from '~/components/s/SCountrySelect.vue'
 import SInput from '~/components/s/SInput.vue'
 import SSelect from '~/components/s/SSelect.vue'
 import SSpinner from '~/components/s/SSpinner.vue'
@@ -230,11 +238,9 @@ const currencyOptions = currencies.map((currency) => ({
   value: currency.code,
   label: `${currency.symbol} ${currency.name} (${currency.code})`,
 }))
-const countryOptions = regions.map((region) => ({
-  value: region.code,
-  label: `${region.flag} ${region.name}`,
-}))
-const cityOptions = computed(() => availableCities.value.map((city) => ({ value: city, label: city })))
+const cityOptions = computed(() =>
+  availableCities.value.map((city) => ({ value: city, label: city }))
+)
 
 const selectedRegionLabel = computed(() => {
   const region = regions.find((r) => r.code === selectedCountry.value)
@@ -414,4 +420,3 @@ const completeOnboarding = async () => {
   }
 }
 </script>
-
