@@ -44,113 +44,6 @@
         </figure>
       </div>
 
-      <ul class="mk-bento">
-        <!-- Inventory -->
-        <li class="mk-tile mk-reveal">
-          <p class="mk-tile__label">
-            <span class="mk-tile__icon"><Boxes :size="16" aria-hidden="true" /></span>Inventory
-          </p>
-          <h3 class="mk-tile__title">Know what's on every shelf.</h3>
-          <div class="mk-mini" aria-hidden="true">
-            <div class="mk-mini__row mk-mini__row--alert">
-              <span class="mk-mini__thumb mk-mini__thumb--warning"
-                ><TriangleAlert :size="16"
-              /></span>
-              <span class="mk-mini__main">
-                <span class="mk-mini__strong">iPhone 13 128GB</span>
-              </span>
-              <span class="mk-mini__pill mk-mini__pill--warning">2 left</span>
-            </div>
-          </div>
-        </li>
-
-        <!-- Sales -->
-        <li class="mk-tile mk-reveal">
-          <p class="mk-tile__label">
-            <span class="mk-tile__icon"><ReceiptText :size="16" aria-hidden="true" /></span>Sales
-          </p>
-          <h3 class="mk-tile__title">Sell in seconds.</h3>
-          <div class="mk-mini" aria-hidden="true">
-            <div class="mk-mini__row">
-              <span class="mk-mini__thumb"><Send :size="16" /></span>
-              <span class="mk-mini__main">
-                <span class="mk-mini__strong">₦500,000</span>
-              </span>
-              <span class="mk-mini__pill mk-mini__pill--success">Receipt sent</span>
-            </div>
-          </div>
-        </li>
-
-        <!-- Customers -->
-        <li class="mk-tile mk-reveal">
-          <p class="mk-tile__label">
-            <span class="mk-tile__icon"><UsersRound :size="16" aria-hidden="true" /></span>Customers
-          </p>
-          <h3 class="mk-tile__title">See who owes you.</h3>
-          <div class="mk-mini" aria-hidden="true">
-            <div class="mk-mini__row">
-              <SAvatar name="Ada Okonkwo" size="sm" />
-              <span class="mk-mini__main">
-                <span class="mk-mini__strong">Ada Okonkwo</span>
-              </span>
-              <span class="mk-mini__pill mk-mini__pill--warning">Owes ₦120,000</span>
-            </div>
-          </div>
-        </li>
-
-        <!-- Reports -->
-        <li class="mk-tile mk-reveal">
-          <p class="mk-tile__label">
-            <span class="mk-tile__icon"><BarChart3 :size="16" aria-hidden="true" /></span>Reports
-          </p>
-          <h3 class="mk-tile__title">Know what you made.</h3>
-          <div class="mk-mini" aria-hidden="true">
-            <div class="mk-mini__row">
-              <span class="mk-mini__thumb"><BarChart3 :size="16" /></span>
-              <span class="mk-mini__main">
-                <span class="mk-mini__strong">₦1.24m this week</span>
-              </span>
-              <span class="mk-mini__pill mk-mini__pill--success">+18%</span>
-            </div>
-          </div>
-        </li>
-
-        <!-- Team -->
-        <li class="mk-tile mk-reveal">
-          <p class="mk-tile__label">
-            <span class="mk-tile__icon"><UserCog :size="16" aria-hidden="true" /></span>Team
-          </p>
-          <h3 class="mk-tile__title">Control who sees what.</h3>
-          <div class="mk-mini" aria-hidden="true">
-            <div class="mk-mini__row">
-              <SAvatar name="Chioma Eze" size="sm" />
-              <span class="mk-mini__main">
-                <span class="mk-mini__strong">Chioma Eze</span>
-              </span>
-              <span class="mk-mini__pill mk-mini__pill--accent">Manager</span>
-            </div>
-          </div>
-        </li>
-
-        <!-- Branches -->
-        <li class="mk-tile mk-reveal">
-          <p class="mk-tile__label">
-            <span class="mk-tile__icon"><ArrowLeftRight :size="16" aria-hidden="true" /></span
-            >Branches
-          </p>
-          <h3 class="mk-tile__title">Every branch, one login.</h3>
-          <div class="mk-mini" aria-hidden="true">
-            <div class="mk-mini__row">
-              <span class="mk-mini__thumb"><ArrowLeftRight :size="16" /></span>
-              <span class="mk-mini__main">
-                <span class="mk-mini__strong">Lagos → Abuja</span>
-              </span>
-              <span class="mk-mini__pill mk-mini__pill--success">Approved</span>
-            </div>
-          </div>
-        </li>
-      </ul>
-
       <!-- How it connects -->
       <div class="mk-flow mk-reveal">
         <h3 class="mk-flow__title">One sale. Everything updates.</h3>
@@ -173,19 +66,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  ArrowLeftRight,
-  ArrowRight,
-  BarChart3,
-  Boxes,
-  Check,
-  ReceiptText,
-  Send,
-  TriangleAlert,
-  UserCog,
-  UsersRound,
-} from '@lucide/vue'
-import SAvatar from '~/components/s/SAvatar.vue'
+import { ArrowRight, BarChart3, Boxes, Check, ReceiptText, UsersRound } from '@lucide/vue'
 import SButton from '~/components/s/SButton.vue'
 import MkSectionHead from '~/components/marketing/MkSectionHead.vue'
 

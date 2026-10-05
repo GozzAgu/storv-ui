@@ -29,7 +29,7 @@ export function useMarketingReveal() {
   function scan() {
     if (!observer) return
     document
-      .querySelectorAll('.mk-reveal:not(.mk-reveal--in)')
+      .querySelectorAll('.mk-reveal:not([data-revealed])')
       .forEach((el) => observer?.observe(el))
   }
 
@@ -39,7 +39,8 @@ export function useMarketingReveal() {
       (entries) => {
         for (const entry of entries) {
           if (!entry.isIntersecting) continue
-          entry.target.classList.add('mk-reveal--in')
+          // An attribute, not a class: Vue rewrites `class` on reactive bindings and would drop it.
+          entry.target.setAttribute('data-revealed', '')
           observer?.unobserve(entry.target)
         }
       },

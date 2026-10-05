@@ -48,21 +48,21 @@ describe('MkSetup', () => {
   it('does nothing when a step is clicked', async () => {
     const wrapper = mountSetup()
     const reveal = wrapper.find('.mk-setup')
-    reveal.element.classList.add('mk-reveal--in')
+    reveal.element.setAttribute('data-revealed', '')
 
     await wrapper.findAll('.mk-setup__step')[2]!.trigger('click')
     expect(current(wrapper)).toEqual(['step', undefined, undefined])
-    expect(reveal.classes()).toContain('mk-reveal--in')
+    expect(reveal.attributes()).toHaveProperty('data-revealed')
   })
 
-  it('keeps the reveal class while the steps change', async () => {
+  it('keeps the reveal marker while the steps change', async () => {
     const wrapper = mountSetup()
     const reveal = wrapper.find('.mk-setup')
-    reveal.element.classList.add('mk-reveal--in')
+    reveal.element.setAttribute('data-revealed', '')
 
     await reveal.trigger('mouseenter')
     await wrapper.findAll('.mk-setup__fill')[0]!.trigger('animationend')
     await reveal.trigger('mouseleave')
-    expect(reveal.classes()).toContain('mk-reveal--in')
+    expect(reveal.attributes()).toHaveProperty('data-revealed')
   })
 })

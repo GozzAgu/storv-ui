@@ -4,46 +4,48 @@
       class="mk-header"
       :class="{ 'mk-header--scrolled': headerScrolled, 'mk-header--open': menuOpen }"
     >
-      <div class="mk-container mk-header__bar">
-        <NuxtLink
-          to="/"
-          class="mk-header__brand"
-          aria-label="Storvv home"
-          @click="menuOpen = false"
-        >
-          <img :src="logoSrc" alt="" class="mk-header__logo" width="104" height="28" />
-        </NuxtLink>
-
-        <nav class="mk-header__nav" aria-label="Primary">
-          <a href="/#product" class="mk-nav-link" @click.prevent="goToSection('product')"
-            >Product</a
+      <div class="mk-container">
+        <div class="mk-header__bar">
+          <NuxtLink
+            to="/"
+            class="mk-header__brand"
+            aria-label="Storvv home"
+            @click="menuOpen = false"
           >
-          <NuxtLink v-for="link in pageLinks" :key="link.to" :to="link.to" class="mk-nav-link">
-            {{ link.label }}
+            <img :src="logoSrc" alt="" class="mk-header__logo" width="104" height="28" />
           </NuxtLink>
-        </nav>
 
-        <div class="mk-header__actions">
-          <SIconButton :label="themeLabel" @click="toggleTheme">
-            <Moon v-if="isDark" :size="18" aria-hidden="true" />
-            <Sun v-else :size="18" aria-hidden="true" />
-          </SIconButton>
-          <SButton variant="ghost" class="mk-btn mk-btn--compact mk-header__signin" :to="appUrl">
-            Sign in
-          </SButton>
-          <SButton variant="primary" class="mk-btn mk-btn--compact" :to="appUrl"
-            >Start free</SButton
-          >
-          <SIconButton
-            class="mk-header__menu"
-            :label="menuOpen ? 'Close menu' : 'Open menu'"
-            :aria-expanded="menuOpen"
-            aria-controls="mk-menu"
-            @click="menuOpen = !menuOpen"
-          >
-            <X v-if="menuOpen" :size="20" aria-hidden="true" />
-            <Menu v-else :size="20" aria-hidden="true" />
-          </SIconButton>
+          <nav class="mk-header__nav" aria-label="Primary">
+            <a href="/#product" class="mk-nav-link" @click.prevent="goToSection('product')"
+              >Product</a
+            >
+            <NuxtLink v-for="link in pageLinks" :key="link.to" :to="link.to" class="mk-nav-link">
+              {{ link.label }}
+            </NuxtLink>
+          </nav>
+
+          <div class="mk-header__actions">
+            <SIconButton :label="themeLabel" @click="toggleTheme">
+              <Moon v-if="isDark" :size="18" aria-hidden="true" />
+              <Sun v-else :size="18" aria-hidden="true" />
+            </SIconButton>
+            <SButton variant="ghost" class="mk-btn mk-btn--compact mk-header__signin" :to="appUrl">
+              Sign in
+            </SButton>
+            <SButton variant="primary" class="mk-btn mk-btn--compact" :to="appUrl"
+              >Start free</SButton
+            >
+            <SIconButton
+              class="mk-header__menu"
+              :label="menuOpen ? 'Close menu' : 'Open menu'"
+              :aria-expanded="menuOpen"
+              aria-controls="mk-menu"
+              @click="menuOpen = !menuOpen"
+            >
+              <X v-if="menuOpen" :size="20" aria-hidden="true" />
+              <Menu v-else :size="20" aria-hidden="true" />
+            </SIconButton>
+          </div>
         </div>
       </div>
     </header>
