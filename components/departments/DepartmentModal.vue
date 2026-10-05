@@ -1,45 +1,45 @@
 <template>
-  <SidePanel
-    :modelValue="props.modelValue"
-    @update:modelValue="(value: boolean) => emit('update:modelValue', value)"
+  <SDialog
+      placement="right"
+    :open="props.modelValue"
+    @update:open="(value: boolean) => emit('update:modelValue', value)"
     :title="isEdit ? 'Edit department' : 'Create department'"
     size="lg"
     dense
   >
-    <IosForm layout="fill" @submit="handleSubmit">
-      <IosFormSection fixed>
-        <IosFormField label="Department type" required>
-          <IosFormSelect v-model="formData.departmentType" required>
+    <SForm @submit="handleSubmit">
+      <SFormSection>
+        <SField label="Department type" required>
+          <SSelect v-model="formData.departmentType" required>
             <option value="">Select department type</option>
             <option v-for="deptType in coreDepartments" :key="deptType" :value="deptType">
               {{ deptType }}
             </option>
-          </IosFormSelect>
-        </IosFormField>
+          </SSelect>
+        </SField>
 
-        <IosFormField label="Department name" required>
-          <IosFormInput
+        <SField label="Department name" required>
+          <SInput
             v-model="formData.name"
             required
             placeholder="Enter department name"
           />
-        </IosFormField>
+        </SField>
 
-        <IosFormField label="Description" hint="Optional">
-          <IosFormTextarea
+        <SField label="Description" hint="Optional">
+          <STextarea
             v-model="formData.description"
             :rows="3"
-            extra-class="resize-none"
             placeholder="Brief description of the department"
           />
-        </IosFormField>
-      </IosFormSection>
+        </SField>
+      </SFormSection>
 
-      <p v-if="errorMessage" class="ios-form__error">{{ errorMessage }}</p>
-    </IosForm>
+      <p v-if="errorMessage" class="s-field__error" role="alert">{{ errorMessage }}</p>
+    </SForm>
 
     <template #footer>
-      <IosDrawerActions
+      <SDialogActions
         :primary-label="isEdit ? 'Update department' : 'Create department'"
         :primary-loading="isSubmitting"
         :primary-disabled="isSubmitting || !formData.name || !formData.departmentType"
@@ -47,21 +47,19 @@
         @primary="handleSubmit"
       />
     </template>
-  </SidePanel>
+  </SDialog>
 </template>
 
 <script setup lang="ts">
+import SDialog from '~/components/s/SDialog.vue'
+import SDialogActions from '~/components/s/SDialogActions.vue'
+import SField from '~/components/s/SField.vue'
+import SForm from '~/components/s/SForm.vue'
+import SFormSection from '~/components/s/SFormSection.vue'
+import SInput from '~/components/s/SInput.vue'
+import SSelect from '~/components/s/SSelect.vue'
+import STextarea from '~/components/s/STextarea.vue'
 import { ref, watch, computed } from 'vue'
-import SidePanel from '~/components/ui/SidePanel.vue'
-import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
-import {
-  IosForm,
-  IosFormSection,
-  IosFormField,
-  IosFormInput,
-  IosFormTextarea,
-  IosFormSelect,
-} from '~/components/ios/forms'
 import { useDepartmentsStore } from '~/stores/departments'
 import { useStoresStore } from '~/stores/stores'
 import { CORE_DEPARTMENTS } from '~/composables/useDepartments'

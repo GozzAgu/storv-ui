@@ -1,79 +1,77 @@
 <template>
-  <Modal
-    :model-value="modelValue"
+  <SDialog
+    :open="modelValue"
     size="md"
     title="Record payment"
-    @update:model-value="emit('update:modelValue', $event)"
+    @update:open="emit('update:modelValue', $event)"
   >
     <template #default>
-      <div v-if="receipt" class="space-y-4">
-        <div
-          class="rounded-sm border border-amber-200/80 bg-amber-50/60 px-3 py-2.5 dark:border-amber-900/40 dark:bg-amber-950/20"
-        >
-          <p class="text-xs font-medium text-gray-900 dark:text-gray-100">
+      <div v-if="receipt" class="s-form">
+        <div class="s-record-summary s-record-summary--warning">
+          <p class="s-receipt-pay__ref">
             {{ receipt.receiptNumber }} · {{ receipt.customerName }}
           </p>
-          <div class="mt-2 grid grid-cols-3 gap-2 text-center">
+          <dl class="s-record-totals">
             <div>
-              <p class="text-[10px] uppercase tracking-wide text-gray-500">Total</p>
-              <p class="text-sm font-semibold tabular-nums">{{ formatCurrency(receipt.total) }}</p>
+              <dt class="s-record-totals__label">Total</dt>
+              <dd class="s-record-totals__value">{{ formatCurrency(receipt.total) }}</dd>
             </div>
             <div>
-              <p class="text-[10px] uppercase tracking-wide text-gray-500">Paid</p>
-              <p class="text-sm font-semibold tabular-nums text-emerald-700 dark:text-emerald-300">
+              <dt class="s-record-totals__label">Paid</dt>
+              <dd class="s-record-totals__value s-record-totals__value--success">
                 {{ formatCurrency(amountPaid) }}
-              </p>
+              </dd>
             </div>
             <div>
-              <p class="text-[10px] uppercase tracking-wide text-gray-500">Balance</p>
-              <p class="text-sm font-semibold tabular-nums text-amber-800 dark:text-amber-200">
+              <dt class="s-record-totals__label">Balance</dt>
+              <dd class="s-record-totals__value s-record-totals__value--warning">
                 {{ formatCurrency(balanceDue) }}
-              </p>
+              </dd>
             </div>
-          </div>
+          </dl>
         </div>
 
-        <IosFormField label="Payment amount">
-          <IosFormInput
+        <SField label="Payment amount">
+          <SInput
             v-model="paymentAmount"
             type="number"
+            inputmode="decimal"
             min="0"
             step="0.01"
             :max="balanceDue"
-            extra-class="tabular-nums"
           />
-          <div class="mt-2 flex flex-wrap gap-2">
-            <button
+          <div v-if="amountPresets.length" class="s-receipt-pay__presets">
+            <SButton
               v-for="preset in amountPresets"
               :key="preset.label"
-              type="button"
-              class="rounded-sm px-2 py-1 text-[11px] font-medium text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/[0.06]"
+              size="sm"
               @click="paymentAmount = preset.value"
             >
               {{ preset.label }}
-            </button>
+            </SButton>
           </div>
-        </IosFormField>
+        </SField>
 
-        <IosFormField label="Payment method">
-          <PaymentMethodSelect v-model="paymentMethod" />
-        </IosFormField>
+        <SField label="Payment method">
+          <template #default="{ id: methodId }">
+            <div class="s-control s-control--select">
+              <PaymentMethodSelect :id="methodId" v-model="paymentMethod" />
+              <ChevronDownIcon
+                class="s-control__chevron"
+                :size="16"
+                :stroke-width="1.75"
+                aria-hidden="true"
+              />
+            </div>
+          </template>
+        </SField>
 
-        <div
-          v-if="receipt.payments?.length"
-          class="border-t border-gray-100 pt-3 dark:border-gray-800"
-        >
-          <p class="mb-2 text-[10px] font-medium uppercase tracking-wide text-gray-500">
-            Payment history
-          </p>
-          <ul class="space-y-1.5">
-            <li
-              v-for="(p, idx) in receipt.payments"
-              :key="idx"
-              class="flex justify-between text-xs text-gray-700 dark:text-gray-300"
-            >
+        <div v-if="receipt.payments?.length" class="s-record-history">
+          <h4 class="s-record-history__title">Payment history</h4>
+          <ul class="s-record-rows">
+            <li v-for="(p, idx) in receipt.payments" :key="idx" class="s-record-row">
               <span>{{ p.method }} · {{ formatPaymentDate(p.paidAt) }}</span>
-              <span class="font-medium tabular-nums">{{ formatCurrency(p.amount) }}</span>
+              <span class="s-record-row__value">{{ formatCurrency(p.amount) }}</span>
             </li>
           </ul>
         </div>
@@ -81,7 +79,7 @@
     </template>
 
     <template #footer>
-      <IosDrawerActions
+      <SDialogActions
         :primary-label="submitLabel"
         :primary-loading="submitting"
         :primary-disabled="!canSubmit"
@@ -89,15 +87,18 @@
         @primary="submit"
       />
     </template>
-  </Modal>
+  </SDialog>
 </template>
 
 <script setup lang="ts">
+import SDialog from '~/components/s/SDialog.vue'
+import SDialogActions from '~/components/s/SDialogActions.vue'
+import SField from '~/components/s/SField.vue'
+import SInput from '~/components/s/SInput.vue'
+import SButton from '~/components/s/SButton.vue'
 import { ref, computed, watch } from 'vue'
-import Modal from '~/components/ui/Modal.vue'
-import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
+import { ChevronDownIcon } from '~/utils/app-icons'
 import PaymentMethodSelect from '~/components/receipts/PaymentMethodSelect.vue'
-import { IosFormField, IosFormInput } from '~/components/ios/forms'
 import type { Receipt } from '~/stores/receipts'
 import { receiptAmountPaid, receiptBalanceDue, roundMoney } from '~/utils/receipt-balance'
 import { usePreferences } from '~/composables/usePreferences'

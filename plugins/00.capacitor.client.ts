@@ -6,10 +6,7 @@ import {
   redirectCapacitorRootToSignIn,
 } from '~/utils/capacitor-root-path'
 import { startNativeKeyboardHandling } from '~/composables/useNativeKeyboardInset'
-import { stripNativeWebFontLinks, scheduleNativeIdleWork } from '~/utils/capacitor-native-perf'
-import { startIosSizeTierTracking } from '~/utils/ios-size-tier'
-import { iosSizeTier } from '~/composables/useIosLayoutSize'
-
+import { stripNativeWebFontLinks } from '~/utils/capacitor-native-perf'
 function detectNativeShell(): boolean {
   if (import.meta.server) return false
   try {
@@ -38,13 +35,6 @@ export default defineNuxtPlugin({
     stripNativeWebFontLinks()
     void startNativeKeyboardHandling()
 
-    let iosNativeStylesLoaded = false
-    const loadIosNativeStyles = () => {
-      if (iosNativeStylesLoaded) return
-      iosNativeStylesLoaded = true
-      void import('~/assets/css/ios-native.css')
-    }
-
     if (redirectCapacitorRootToSignIn()) return
 
     const router = useRouter()
@@ -55,19 +45,6 @@ export default defineNuxtPlugin({
       }
     })
 
-    router.afterEach((to) => {
-      if (to.path.startsWith('/dashboard')) {
-        loadIosNativeStyles()
-      }
-    })
-
-    scheduleNativeIdleWork(() => {
-      const path = router.currentRoute.value.path
-      if (path.startsWith('/dashboard') || path === '/signin' || path === '/signup') {
-        loadIosNativeStyles()
-      }
-    }, 900)
-
     nuxtApp.hook('page:finish', () => {
       if (isCapacitorMarketingRoot(router.currentRoute.value.path)) {
         void router.replace('/signin')
@@ -76,8 +53,5 @@ export default defineNuxtPlugin({
 
     markCapacitorDocument()
     setTimeout(markCapacitorDocument, 0)
-    startIosSizeTierTracking((tier) => {
-      iosSizeTier.value = tier
-    })
   },
 })

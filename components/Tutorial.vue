@@ -2,14 +2,14 @@
   <Teleport to="body">
     <div
       v-if="showTutorial"
-      class="tutorial-root fixed inset-0 z-[120]"
+      class="s-c s-tour"
       role="dialog"
       aria-modal="true"
       :aria-label="`Tutorial step ${currentStep} of ${totalSteps}`"
     >
       <div
         v-if="spotlightRect"
-        class="tutorial-scrim absolute inset-0 transition-[clip-path] duration-300 ease-out motion-reduce:transition-none"
+        class="s-tour__scrim"
         :style="scrimStyle"
         aria-hidden="true"
         @click="skipTutorial"
@@ -17,84 +17,67 @@
 
       <div
         v-if="spotlightRect"
-        class="tutorial-ring pointer-events-none fixed transition-all duration-300 ease-out motion-reduce:transition-none"
-        :class="{ 'tutorial-ring--locked': currentStepLocked }"
+        class="s-tour__ring"
+        :class="{ 's-tour__ring--locked': currentStepLocked }"
         :style="ringStyle"
         aria-hidden="true"
       />
 
       <div
         ref="tutorialCard"
-        class="tutorial-card pointer-events-auto fixed w-[min(100%,22rem)] overflow-hidden transition-[top,left,opacity] duration-300 ease-out motion-reduce:transition-none"
-        :class="{ 'tutorial-card--visible': cardReady }"
+        class="s-tour__card"
+        :class="{ 's-tour__card--visible': cardReady }"
         :style="cardPosition"
         @click.stop
       >
         <span
           v-if="arrowStyle"
-          class="tutorial-card__arrow pointer-events-none absolute h-3 w-3 rotate-45"
+          class="s-tour__arrow"
           :style="arrowStyle"
           aria-hidden="true"
         />
 
-        <div class="tutorial-card__header">
-          <p class="tutorial-card__step">Step {{ currentStep }} of {{ totalSteps }}</p>
-          <button
-            type="button"
-            class="tutorial-card__close"
-            aria-label="Skip tutorial"
-            @click="skipTutorial"
-          >
-            <XMarkIcon class="h-4 w-4" stroke-width="1.75" />
-          </button>
+        <div class="s-tour__head">
+          <p class="s-tour__step">Step {{ currentStep }} of {{ totalSteps }}</p>
+          <SIconButton label="Skip tutorial" size="sm" @click="skipTutorial">
+            <X :size="16" :stroke-width="1.75" aria-hidden="true" />
+          </SIconButton>
         </div>
 
-        <div class="tutorial-card__body">
-          <div
-            class="tutorial-card__icon"
-            :class="{ 'tutorial-card__icon--locked': currentStepLocked }"
+        <div class="s-tour__body">
+          <span
+            class="s-tour__icon"
+            :class="{ 's-tour__icon--locked': currentStepLocked }"
+            aria-hidden="true"
           >
-            <component :is="currentStepData?.icon" class="h-5 w-5" />
-          </div>
+            <component :is="currentStepData?.icon" :size="20" :stroke-width="1.75" />
+          </span>
 
-          <h3 class="tutorial-card__title">
+          <h3 class="s-tour__title">
             {{ currentStepData?.title }}
           </h3>
 
-          <div
-            v-if="currentStepLocked"
-            class="tutorial-card__lock"
-            role="status"
-          >
-            <p class="tutorial-card__lock-title">Not included on {{ currentPlanLabel }}</p>
-            <p class="tutorial-card__lock-copy">
-              Available on {{ requiredPlanLabel }}. Upgrade anytime in Settings.
-            </p>
+          <div v-if="currentStepLocked" class="s-notice s-tour__lock" role="status">
+            <p class="s-tour__lock-title">Not included on {{ currentPlanLabel }}</p>
+            <p>Available on {{ requiredPlanLabel }}. Upgrade anytime in Settings.</p>
           </div>
 
-          <p class="tutorial-card__copy">
+          <p class="s-tour__copy">
             {{ stepDescription }}
           </p>
         </div>
 
-        <div class="tutorial-card__footer">
-          <button
-            v-if="currentStep > 1"
-            type="button"
-            class="tutorial-card__ghost"
-            @click="previousStep"
-          >
+        <div class="s-tour__foot">
+          <SButton v-if="currentStep > 1" variant="ghost" size="sm" @click="previousStep">
             Previous
-          </button>
-          <div v-else />
+          </SButton>
+          <span v-else />
 
-          <div class="tutorial-card__actions">
-            <button type="button" class="tutorial-card__ghost" @click="skipTutorial">
-              Skip
-            </button>
-            <button type="button" class="tutorial-card__cta" @click="nextStep">
+          <div class="s-tour__actions">
+            <SButton variant="ghost" size="sm" @click="skipTutorial">Skip</SButton>
+            <SButton variant="primary" size="sm" @click="nextStep">
               {{ currentStep === totalSteps ? 'Get started' : 'Next' }}
-            </button>
+            </SButton>
           </div>
         </div>
       </div>
@@ -105,7 +88,9 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { XMarkIcon } from '~/utils/app-icons'
+import { X } from '@lucide/vue'
+import SButton from '~/components/s/SButton.vue'
+import SIconButton from '~/components/s/SIconButton.vue'
 import { useUser } from '~/composables/useUser'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useSubscriptionFeatures } from '~/composables/useSubscriptionFeatures'
@@ -453,210 +438,3 @@ watch(showTutorial, (open) => {
   document.body.style.overflow = open ? 'hidden' : ''
 })
 </script>
-
-<style scoped>
-.tutorial-scrim {
-  background: rgb(2 6 23 / 0.72);
-  backdrop-filter: blur(2px);
-}
-
-.tutorial-ring {
-  border: 2px solid rgb(110 148 214 / 0.95);
-  border-radius: 0.65rem;
-  box-shadow:
-    0 0 0 1px rgb(255 255 255 / 0.08),
-    0 0 24px rgb(72 118 199 / 0.35);
-}
-
-.tutorial-ring--locked {
-  border-color: rgb(245 158 11 / 0.85);
-  box-shadow:
-    0 0 0 1px rgb(245 158 11 / 0.15),
-    0 0 24px rgb(245 158 11 / 0.2);
-}
-
-.tutorial-card {
-  opacity: 0;
-  border: 1px solid rgb(229 231 235 / 0.9);
-  border-radius: 0.75rem;
-  background: #ffffff;
-  color: #111827;
-  box-shadow: 0 25px 50px rgb(15 23 42 / 0.18);
-}
-
-.tutorial-card--visible {
-  opacity: 1;
-}
-
-.tutorial-card__arrow {
-  z-index: 0;
-  border: 1px solid rgb(229 231 235 / 0.9);
-  background: #ffffff;
-}
-
-.tutorial-card__header,
-.tutorial-card__footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  border-color: rgb(229 231 235 / 0.9);
-}
-
-.tutorial-card__header {
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
-}
-
-.tutorial-card__footer {
-  border-top-width: 1px;
-  border-top-style: solid;
-}
-
-.tutorial-card__step {
-  margin: 0;
-  font-size: 0.625rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: #9ca3af;
-}
-
-.tutorial-card__close,
-.tutorial-card__ghost,
-.tutorial-card__cta {
-  border: 0;
-  cursor: pointer;
-  background: transparent;
-}
-
-.tutorial-card__close {
-  display: flex;
-  height: 2rem;
-  width: 2rem;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0.5rem;
-  color: #6b7280;
-}
-
-.tutorial-card__body {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding: 1rem;
-}
-
-.tutorial-card__icon {
-  display: flex;
-  height: 2.75rem;
-  width: 2.75rem;
-  margin-inline: auto;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0.5rem;
-  background: #143f8d;
-  color: #ffffff;
-}
-
-.tutorial-card__icon--locked {
-  background: rgb(245 158 11 / 0.15);
-  color: #b45309;
-}
-
-.tutorial-card__title {
-  margin: 0;
-  text-align: center;
-  font-size: 0.875rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-
-.tutorial-card__copy {
-  margin: 0;
-  text-align: center;
-  font-size: 0.75rem;
-  line-height: 1.6;
-  color: #4b5563;
-}
-
-.tutorial-card__lock {
-  border: 1px solid rgb(245 158 11 / 0.35);
-  border-radius: 0.5rem;
-  background: rgb(245 158 11 / 0.1);
-  padding: 0.5rem 0.75rem;
-  text-align: center;
-}
-
-.tutorial-card__lock-title {
-  margin: 0;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  color: #78350f;
-}
-
-.tutorial-card__lock-copy {
-  margin: 0.125rem 0 0;
-  font-size: 0.625rem;
-  line-height: 1.5;
-  color: rgb(146 64 14 / 0.9);
-}
-
-.tutorial-card__actions {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.tutorial-card__ghost {
-  border-radius: 0.5rem;
-  padding: 0.375rem 0.75rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: #4b5563;
-}
-
-.tutorial-card__cta {
-  border-radius: 9999px;
-  background: #143f8d;
-  padding: 0.4375rem 0.875rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-:global(html.dark) .tutorial-card {
-  border-color: rgb(255 255 255 / 0.1);
-  background: #12141c;
-  color: #f3f4f6;
-}
-
-:global(html.dark) .tutorial-card__arrow {
-  border-color: rgb(255 255 255 / 0.1);
-  background: #12141c;
-}
-
-:global(html.dark) .tutorial-card__header,
-:global(html.dark) .tutorial-card__footer {
-  border-color: rgb(255 255 255 / 0.1);
-}
-
-:global(html.dark) .tutorial-card__copy,
-:global(html.dark) .tutorial-card__ghost {
-  color: #9ca3af;
-}
-
-:global(html.dark) .tutorial-card__icon--locked {
-  color: #fcd34d;
-}
-
-:global(html.dark) .tutorial-card__lock-title {
-  color: #fef3c7;
-}
-
-:global(html.dark) .tutorial-card__lock-copy {
-  color: rgb(253 230 138 / 0.85);
-}
-</style>

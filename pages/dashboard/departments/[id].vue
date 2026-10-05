@@ -1,679 +1,284 @@
 <template>
-  <div
-    :class="[
-      'dashboard-page-with-footer dash-page--unified flex min-h-[calc(100svh-4rem)] w-full max-w-none flex-col space-y-5 overflow-x-hidden pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:space-y-6 sm:pb-32',
-      isCapacitorIos ? 'ios-inventory-items-page' : '',
-    ]"
-  >
-    <Breadcrumbs
-      v-if="!isCapacitorIos"
-      :items="departmentBreadcrumbs"
-      class="text-[11px] text-gray-500 dark:text-gray-400"
-    />
+  <div class="ds-root s-c s-page s-team">
+    <SPageHeader
+      :title="department?.name || 'Department'"
+      :back="departmentsListPath ? { to: departmentsListPath, label: 'Team' } : undefined"
+    >
+      <template #eyebrow>
+        <nav class="s-breadcrumb" aria-label="Breadcrumb">
+          <NuxtLink v-if="departmentsListPath" :to="departmentsListPath" class="s-breadcrumb__link">
+            Team
+          </NuxtLink>
+          <template v-if="departmentStoreName">
+            <ChevronRight class="s-breadcrumb__sep" :size="14" :stroke-width="2" aria-hidden="true" />
+            <span>{{ departmentStoreName }}</span>
+          </template>
+        </nav>
+      </template>
+      <template #description>
+        {{ department?.description?.trim() || 'Add people to this department, set what they can access, and move them between departments.' }}
+      </template>
+      <template v-if="canCreateNewStaff && !(staff.length === 0 && !isLoadingStaff)" #actions>
+        <SButton variant="primary" @click="openCreateStaffModal">
+          <template #leading><UserPlus :size="16" :stroke-width="1.75" aria-hidden="true" /></template>
+          Add staff
+        </SButton>
+      </template>
+    </SPageHeader>
 
     <StaffInvitePasswordsPanel
-      v-if="departmentId && !isCapacitorIos"
+      v-if="departmentId"
       :department-id="departmentId"
       :can-show="canCreateNewStaff"
     />
 
-    <template v-if="isCapacitorIos">
-      <template v-if="isLoadingStaff">
-        <div class="ios-receipt-transaction-list">
-          <div v-for="i in 8" :key="i" class="dash-skeleton" style="height: 4.5rem; margin: 0.5rem 1rem" />
+    <SCard v-if="isLoadingStaff" flush aria-busy="true">
+      <ul class="s-list" aria-label="Loading staff">
+        <li v-for="i in 6" :key="i" class="s-list__item" aria-hidden="true">
+          <SSkeleton circle width="32px" height="32px" />
+          <div class="s-list__main">
+            <SSkeleton width="35%" height="14px" />
+            <SSkeleton width="25%" height="12px" />
+          </div>
+          <SSkeleton width="64px" height="20px" />
+        </li>
+      </ul>
+    </SCard>
+
+    <template v-else>
+      <dl v-if="staff.length > 0" class="s-metrics">
+        <div class="s-metrics__item">
+          <dt class="s-metrics__label">Members</dt>
+          <dd class="s-metrics__value">{{ staff.length }}</dd>
         </div>
-      </template>
+        <div class="s-metrics__item">
+          <dt class="s-metrics__label">Active</dt>
+          <dd class="s-metrics__value">{{ activeStaff }}</dd>
+        </div>
+        <div class="s-metrics__item">
+          <dt class="s-metrics__label">Full access</dt>
+          <dd class="s-metrics__value">{{ totalFullAccessStaff }}</dd>
+        </div>
+      </dl>
+
+      <STabs
+        v-if="canRemoveStaff && (staff.length > 0 || removedStaff.length > 0)"
+        v-model="rosterTab"
+        :tabs="rosterTabs"
+        label="Staff roster"
+      />
+
+      <div
+        v-if="canRemoveStaff && rosterTab === 'active' && selectedStaffForBulk.length > 0"
+        class="s-toolbar s-toolbar--selection"
+        role="region"
+        aria-label="Bulk actions"
+      >
+        <SCheckbox
+          :model-value="allStaffOnPageSelected"
+          :label="`${selectedStaffForBulk.length} selected`"
+          @update:model-value="toggleSelectAllStaff"
+        />
+        <div class="s-toolbar__end">
+          <SButton variant="ghost" size="sm" @click="selectedStaffForBulk = []">Clear</SButton>
+          <SButton variant="danger" size="sm" @click="openBulkDeleteStaffModal">
+            <template #leading><UserMinus :size="14" :stroke-width="2" aria-hidden="true" /></template>
+            Remove
+          </SButton>
+        </div>
+      </div>
+      <div v-else-if="rosterSource.length > 0" class="s-toolbar">
+        <SSearch
+          v-model="staffSearchQuery"
+          class="s-toolbar__search"
+          placeholder="Search staff"
+          label="Search staff by name, email or position"
+        />
+      </div>
+
+      <SCard v-if="rosterTab === 'active' && staff.length === 0">
+        <SEmptyState
+          title="No staff in this department yet"
+          description="Add people to give them a sign-in, a role and access to this branch. They sign in with the email and temporary password you set."
+        >
+          <template #icon><Users :size="24" :stroke-width="1.75" /></template>
+          <template v-if="canCreateNewStaff" #actions>
+            <SButton variant="primary" @click="openCreateStaffModal">
+              <template #leading><UserPlus :size="16" :stroke-width="1.75" aria-hidden="true" /></template>
+              Add staff
+            </SButton>
+          </template>
+        </SEmptyState>
+      </SCard>
+
+      <SCard v-else-if="rosterTab === 'removed' && removedStaff.length === 0">
+        <SEmptyState
+          title="No removed staff"
+          description="People you remove from this department show up here, and you can reactivate them to restore their sign-in."
+        >
+          <template #icon><Users :size="24" :stroke-width="1.75" /></template>
+          <template #actions>
+            <SButton @click="rosterTab = 'active'">View active staff</SButton>
+          </template>
+        </SEmptyState>
+      </SCard>
+
+      <SCard v-else-if="rosterPaginationTotal === 0">
+        <SEmptyState title="No staff found" description="Try a different name, email or position.">
+          <template #icon><SearchX :size="24" :stroke-width="1.75" /></template>
+          <template #actions>
+            <SButton @click="staffSearchQuery = ''">Clear search</SButton>
+          </template>
+        </SEmptyState>
+      </SCard>
 
       <template v-else>
-        <IosPageNavBar
-          :title="department?.name || 'Staff'"
-          show-back
-          :back-to="departmentsListPath || undefined"
-          back-label="Departments"
-        />
-        <p class="ios-inventory-list-meta">
-          {{ rosterPaginationTotal }} member{{ rosterPaginationTotal === 1 ? '' : 's' }}
-        </p>
-        <div class="ios-search-bar-host ios-search-bar-host--sticky">
-          <IosSearchBar v-model="staffSearchQuery" placeholder="Search staff…" />
+        <!-- Phone -->
+        <SCard flush class="s-only-sm">
+          <ul class="s-list">
+            <li v-for="member in rosterPage" :key="member.id">
+              <div class="s-list__item">
+                <SCheckbox
+                  v-if="canRemoveStaff && rosterTab === 'active'"
+                  :model-value="isStaffSelected(member)"
+                  :aria-label="`Select ${staffName(member)}`"
+                  @update:model-value="(checked) => toggleStaffSelection(member, checked)"
+                />
+                <SAvatar :name="staffName(member)" :src="member.photoURL" size="sm" />
+                <span class="s-list__main">
+                  <span class="s-list__primary">{{ staffName(member) }}</span>
+                  <span class="s-list__secondary">{{ getStaffRowSubtitle(member) }}</span>
+                </span>
+                <span class="s-list__end">
+                  <SBadge :tone="staffStatusTone(member)" size="sm">{{ staffStatusLabel(member) }}</SBadge>
+                </span>
+                <SIconButton
+                  v-if="rosterTab === 'active' ? canManageDepartments : canRemoveStaff"
+                  :label="`Actions for ${staffName(member)}`"
+                  size="sm"
+                  :data-staff-actions-anchor="member.id"
+                  aria-haspopup="menu"
+                  :aria-expanded="openStaffMenuId === member.id"
+                  @click="toggleStaffMenu(member.id)"
+                >
+                  <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
+                </SIconButton>
+              </div>
+            </li>
+          </ul>
+        </SCard>
+
+        <!-- Tablet and desktop -->
+        <div class="s-table-wrap s-hide-sm">
+          <table class="s-table">
+            <thead>
+              <tr>
+                <th v-if="canRemoveStaff && rosterTab === 'active'" scope="col" class="s-table__check">
+                  <SCheckbox
+                    :model-value="allStaffOnPageSelected"
+                    aria-label="Select all staff on this page"
+                    @update:model-value="toggleSelectAllStaff"
+                  />
+                </th>
+                <th scope="col">Name</th>
+                <th scope="col" class="s-hide-md">Position</th>
+                <th scope="col">Access</th>
+                <th scope="col" class="s-hide-lg">Email</th>
+                <th scope="col">Status</th>
+                <th scope="col" class="s-table__actions"><span class="ds-sr-only">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="member in rosterPage"
+                :key="member.id"
+                :class="{ 's-table__row--selected': isStaffSelected(member) }"
+              >
+                <td v-if="canRemoveStaff && rosterTab === 'active'" class="s-table__check">
+                  <SCheckbox
+                    :model-value="isStaffSelected(member)"
+                    :aria-label="`Select ${staffName(member)}`"
+                    @update:model-value="(checked) => toggleStaffSelection(member, checked)"
+                  />
+                </td>
+                <td>
+                  <div class="s-table__inline">
+                    <SAvatar :name="staffName(member)" :src="member.photoURL" size="sm" />
+                    <span class="s-table__primary">{{ staffName(member) }}</span>
+                  </div>
+                </td>
+                <td class="s-hide-md">
+                  <span v-if="member.position">{{ member.position }}</span>
+                  <span v-else class="s-table__muted">{{ EMPTY_CELL }}</span>
+                </td>
+                <td>
+                  <SBadge :tone="getStaffAccessLabel(member) === 'Full access' ? 'accent' : 'neutral'">
+                    {{ getStaffAccessLabel(member) }}
+                  </SBadge>
+                </td>
+                <td class="s-hide-lg"><span class="s-table__secondary">{{ member.email }}</span></td>
+                <td>
+                  <SBadge :tone="staffStatusTone(member)" dot>{{ staffStatusLabel(member) }}</SBadge>
+                </td>
+                <td class="s-table__actions">
+                  <SIconButton
+                    v-if="rosterTab === 'active' ? canManageDepartments : canRemoveStaff"
+                    :label="`Actions for ${staffName(member)}`"
+                    size="sm"
+                    :data-staff-actions-anchor="member.id"
+                    aria-haspopup="menu"
+                    :aria-expanded="openStaffMenuId === member.id"
+                    @click="toggleStaffMenu(member.id)"
+                  >
+                    <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
+                  </SIconButton>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-        <IosQuickActionBar
-          v-model="rosterTab"
-          class="ios-inventory-availability-tabs"
-          ariaLabel="Staff roster"
-          role="tablist"
-          :options="staffQuickActionOptions"
-        />
 
-        <DashboardTableEmptyState
-          v-if="rosterTab === 'active' && staff.length === 0"
-          :icon="UsersIcon"
-          title="No staff members yet"
-          description="Add people to this department to assign roles, track status, and control access."
-        >
-          <Button
-            v-if="canCreateNewStaff"
-            variant="primary"
-            size="sm"
-            :icon="UserIcon"
-            @click="openCreateStaffModal"
-          >
-            Add staff
-          </Button>
-        </DashboardTableEmptyState>
-
-        <DashboardTableEmptyState
-          v-else-if="rosterTab === 'removed' && removedStaff.length === 0"
-          :icon="UsersIcon"
-          title="No removed staff"
-          description="When you remove someone from this department, they appear here."
-        />
-
-        <DashboardTableEmptyState
-          v-else-if="rosterPaginationTotal === 0 && staffSearchQuery.trim()"
-          :icon="UsersIcon"
-          title="No staff found"
-          description="Try a different search term."
-        />
-
-        <div v-else class="ios-receipt-transaction-list">
-          <IosReceiptTransactionRow
-            v-for="(member, index) in iosPaginatedStaffRoster"
-            :key="member.id"
-            :title="`${member.firstName} ${member.lastName}`"
-            :subtitle="getStaffRowSubtitle(member)"
-            :amount="getStaffAccessLabel(member)"
-            amount-tone="neutral"
-            :date="formatStaffStatusLabel(member.status)"
-            :variant="getStaffRowVariant(member)"
-            :avatar-url="member.photoURL"
-            :last="index === iosPaginatedStaffRoster.length - 1"
-            :show-menu="rosterTab === 'active' ? canManageDepartments : canRemoveStaff"
-            menu-kind="staff"
-            :menu-id="member.id"
-            @click="handleIosStaffRowClick(member)"
-            @menu="toggleStaffMenu(member.id)"
-          />
-        </div>
-
-        <DashboardTablePagination
-          v-if="rosterPaginationTotal > 0"
+        <SPagination
           :current-page="staffCurrentPage"
-          :items-per-page="staffItemsPerPage"
+          :page-size="staffItemsPerPage"
           :total="rosterPaginationTotal"
+          label="Staff pagination"
           @page-change="handleStaffPageChange"
         />
       </template>
     </template>
 
-    <Teleport v-if="!isCapacitorIos" to="body" :disabled="!isStaffFullscreen">
-      <div
-        data-dashboard-teleport
-        :class="[
-          'flex min-h-0 flex-col transition-colors duration-200 ease-out',
-          isStaffFullscreen
-            ? `${tableExpandClass} fixed inset-0 z-[100] flex min-h-0 flex-col overflow-hidden`
-            : 'relative flex-1',
-        ]"
-      >
-        <!-- Fullscreen header (same pattern as receipts) -->
-        <div
-          v-if="isStaffFullscreen"
-          :class="tableExpandHeaderClass"
-          style="padding-top: max(1rem, env(safe-area-inset-top, 0px))"
-        >
-          <div
-            class="flex w-full flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-6"
-          >
-            <div class="flex min-w-0 items-start justify-between gap-3 lg:items-center">
-              <div class="min-w-0">
-                <p :class="tableExpandEyebrowClass">
-                  Expanded view
-                </p>
-                <div class="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                  <h2 :class="tableExpandTitleClass">
-                    {{ department?.name || 'Department' }}
-                  </h2>
-                  <span :class="tableExpandMetaClass">
-                    {{ staff.length }} members · {{ activeStaff }} active ·
-                    {{ totalFullAccessStaff }} with full access
-                  </span>
-                </div>
-              </div>
-              <button
-                type="button"
-                class="inline-flex lg:hidden"
-                :class="tableExpandCloseClass"
-                aria-label="Exit expanded view"
-                @click="isStaffFullscreen = false"
-              >
-                <XMarkIcon class="h-5 w-5" />
-              </button>
-            </div>
-            <div class="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-2">
-              <Button
-                v-if="canCreateNewStaff"
-                variant="primary"
-                size="sm"
-                :icon="UserIcon"
-                extra-class="!rounded-2xl"
-                @click="openCreateStaffModal"
-              >
-                <span :class="headerBtnLabelClass">Add staff</span>
-              </Button>
-              <button
-                type="button"
-                class="hidden lg:inline-flex"
-                :class="tableExpandCloseClass"
-                aria-label="Exit expanded view"
-                @click="isStaffFullscreen = false"
-              >
-                <XMarkIcon class="h-5 w-5" />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div :class="isStaffFullscreen ? tableExpandBodyClass : tableShellFlexClass">
-          <div
-            v-if="canRemoveStaff && rosterTab === 'active' && selectedStaffForBulk.length > 0"
-            class="dash-table-bulk-bar"
-          >
-            <span class="text-xs font-medium text-gray-700 dark:text-gray-300"
-              >{{ selectedStaffForBulk.length }} selected</span
-            >
-            <Button
-              variant="outline"
-              size="sm"
-              :icon="TrashIcon"
-              class="!rounded-2xl-red-200 dark:!border-red-800 !text-red-600 dark:!text-red-400 hover:!bg-red-50 dark:hover:!bg-red-900/20"
-              @click="openBulkDeleteStaffModal"
-            >
-              Delete ({{ selectedStaffForBulk.length }})
-            </Button>
-          </div>
-
-          <!-- Table toolbar -->
-          <DataTableToolbar v-if="!isLoadingStaff && !isStaffFullscreen" class="dash-dept-roster-toolbar">
-            <template #heading>
-              <div class="dash-page-context-bar !border-0 !bg-transparent !p-0 !shadow-none">
-                <DashboardBackButton
-                  v-if="departmentsListPath"
-                  :to="departmentsListPath"
-                  label="Back to departments"
-                  class="mt-px shrink-0"
-                />
-                <div class="min-w-0 flex-1">
-                  <h2 class="dash-page-context-bar__title truncate">
-                    {{ department?.name || 'Department' }}
-                  </h2>
-                  <p class="dash-page-context-bar__meta">
-                    <span class="tabular-nums">{{ staff.length }} members</span>
-                    <span class="dash-page-context-bar__sep">·</span>
-                    <span class="tabular-nums">{{ activeStaff }} active</span>
-                    <span class="dash-page-context-bar__sep">·</span>
-                    <span class="tabular-nums">{{ totalFullAccessStaff }} with full access</span>
-                    <template v-if="staff.length > 0">
-                      <span class="dash-page-context-bar__sep">·</span>
-                      <span>{{ paginatedStaff.length }} on this page</span>
-                    </template>
-                  </p>
-                </div>
-              </div>
-            </template>
-            <template #actions>
-              <Button
-                v-if="
-                  canCreateNewStaff &&
-                  !(rosterTab === 'active' && staff.length === 0 && !isLoadingStaff)
-                "
-                variant="primary"
-                size="sm"
-                :icon="UserIcon"
-                :extra-class="headerBtnClass"
-                @click="openCreateStaffModal"
-              >
-                <span :class="headerBtnLabelClass">Add staff</span>
-              </Button>
-              <DashboardToolbarIconButton
-                class="hidden lg:inline-flex"
-                aria-label="Expand table"
-                @click="isStaffFullscreen = true"
-              >
-                <ArrowsPointingOutIcon class="h-4 w-4" />
-              </DashboardToolbarIconButton>
-            </template>
-          </DataTableToolbar>
-
-          <nav
-            v-if="canRemoveStaff && !isLoadingStaff && !isStaffFullscreen"
-            :class="segmentTabsClass"
-            role="tablist"
-            aria-label="Staff roster"
-          >
-            <button
-              type="button"
-              role="tab"
-              :aria-selected="rosterTab === 'active'"
-              :class="[
-                segmentTabsBtnClass,
-                rosterTab === 'active' ? segmentTabsBtnActiveClass : '',
-              ]"
-              @click="rosterTab = 'active'"
-            >
-              Active
-              <span class="tabular-nums">({{ staff.length }})</span>
-            </button>
-            <button
-              type="button"
-              role="tab"
-              :aria-selected="rosterTab === 'removed'"
-              :class="[
-                segmentTabsBtnClass,
-                rosterTab === 'removed' ? segmentTabsBtnActiveClass : '',
-              ]"
-              @click="rosterTab = 'removed'"
-            >
-              Removed
-              <span class="tabular-nums">({{ removedStaff.length }})</span>
-            </button>
-          </nav>
-
-          <div
-            v-if="isLoadingStaff"
-            class="min-h-[min(420px,calc(100svh-16rem))] flex-1 overflow-x-auto"
-          >
-            <div class="dash-table-skeleton__toolbar">
-              <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-title" />
-              <span class="dash-skeleton dash-skeleton--line dash-skeleton--search" />
-            </div>
-            <nav
-              v-if="canRemoveStaff"
-              :class="segmentTabsClass"
-              aria-hidden="true"
-            >
-              <span class="dash-skeleton dash-skeleton--select" />
-              <span class="dash-skeleton dash-skeleton--select" />
-            </nav>
-            <div class="dept-staff-mobile-list space-y-2.5 px-3 pb-4 md:hidden">
-              <DashListCardSkeleton :count="6" />
-            </div>
-            <div class="hidden md:block">
-              <DashTableSkeleton
-                :columns="staffTableSkeletonColumns"
-                :rows="8"
-                leading="none"
-                flush
-                aria-label="Loading staff"
-              />
-            </div>
-          </div>
-
-          <DashboardTableEmptyState
-            v-else-if="rosterTab === 'active' && staff.length === 0"
-            :icon="UsersIcon"
-            eyebrow="Empty roster"
-            title="No staff members yet"
-            description="Add people to this department to assign roles, track status, and control access."
-            :tips="[
-              'Managers can invite staff and set permissions',
-              'Staff sign in with the email and temporary password you provide',
-            ]"
-          >
-            <Button
-              v-if="canCreateNewStaff"
-              variant="primary"
-              size="sm"
-              :icon="UserIcon"
-              extra-class="!rounded-2xl"
-              @click="openCreateStaffModal"
-            >
-              Add staff
-            </Button>
-          </DashboardTableEmptyState>
-
-          <DashboardTableEmptyState
-            v-else-if="rosterTab === 'removed' && removedStaff.length === 0"
-            :icon="UsersIcon"
-            eyebrow="Removed staff"
-            title="No removed staff"
-            description="When you remove someone from this department, they appear here. You can reactivate them to restore sign-in access."
-          >
-            <Button
-              variant="outline"
-              size="sm"
-              extra-class="!rounded-2xl"
-              @click="rosterTab = 'active'"
-            >
-              View active staff
-            </Button>
-          </DashboardTableEmptyState>
-
-          <div
-            v-else
-            :class="[
-              'flex min-h-0 flex-1 flex-col gap-3',
-              isStaffFullscreen ? 'overflow-auto px-4 pb-2 pt-2 lg:px-8' : '',
-            ]"
-          >
-            <template v-if="rosterTab === 'active'">
-              <div v-if="!isStaffFullscreen" class="dept-staff-mobile-list space-y-2.5 px-0.5 md:hidden">
-                <div
-                  v-for="member in paginatedStaff"
-                  :key="`mobile-${member.id}`"
-                  class="rounded-xl bg-white/95 p-3 shadow-none backdrop-blur-sm dark:bg-white/[0.04]"
-                >
-                  <div class="flex items-start justify-between gap-2">
-                    <div v-if="canRemoveStaff" class="pt-0.5" @click.stop>
-                      <Checkbox
-                        :model-value="selectedStaffForBulk.some((s) => s.id === member.id)"
-                        @update:model-value="(checked) => toggleStaffSelection(member, checked)"
-                        size="sm"
-                        wrapper-class="justify-center"
-                      />
-                    </div>
-                    <StaffAvatar
-                      :first-name="member.firstName"
-                      :last-name="member.lastName"
-                      :photo-url="member.photoURL"
-                      size="md"
-                    />
-                    <div class="min-w-0 flex-1">
-                      <p class="text-sm font-semibold text-gray-900 dark:text-gray-50">
-                        {{ member.firstName }} {{ member.lastName }}
-                      </p>
-                      <p
-                        v-if="member.position"
-                        class="mt-0.5 text-xs text-gray-600 dark:text-gray-400"
-                      >
-                        {{ member.position }}
-                      </p>
-                      <p class="mt-1 truncate text-[11px] text-gray-500 dark:text-gray-500">
-                        {{ member.email }}
-                      </p>
-                      <div class="mt-2 flex flex-wrap items-center gap-1.5">
-                        <span :class="getStaffAccessBadgeClass(member)">
-                          {{ getStaffAccessLabel(member) }}
-                        </span>
-                        <span
-                          class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize tracking-wide ring-1 ring-inset"
-                          :class="[
-                            member.status === 'active'
-                              ? 'bg-emerald-500/10 text-emerald-800 ring-emerald-500/20 dark:bg-emerald-400/10 dark:text-emerald-300 dark:ring-emerald-400/25'
-                              : member.status === 'on_leave'
-                              ? 'bg-amber-500/10 text-amber-800 ring-amber-500/20 dark:bg-amber-400/10 dark:text-amber-300 dark:ring-amber-400/25'
-                              : 'bg-red-500/10 text-red-800 ring-red-500/20 dark:bg-red-400/10 dark:text-red-300 dark:ring-red-400/25',
-                          ]"
-                        >
-                          {{ member.status === 'on_leave' ? 'On Leave' : member.status }}
-                        </span>
-                      </div>
-                    </div>
-                    <div v-if="canManageDepartments" class="shrink-0" @click.stop>
-                      <button
-                        type="button"
-                        :data-staff-actions-anchor="member.id"
-                        class="rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800/80"
-                        :aria-expanded="openStaffMenuId === member.id"
-                        aria-haspopup="menu"
-                        :aria-label="`Actions for ${member.firstName} ${member.lastName}`"
-                        @click="toggleStaffMenu(member.id)"
-                      >
-                        <EllipsisVerticalIcon class="h-5 w-5" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div
-                :class="[
-                  'dept-staff-table-wrap',
-                  isStaffFullscreen
-                    ? 'min-h-0 overflow-auto'
-                    : 'hidden min-h-0 overflow-x-auto md:block',
-                ]"
-              >
-                <table class="dashboard-table min-w-full">
-                  <thead :class="isStaffFullscreen ? 'sticky top-0 z-10' : ''">
-                    <tr>
-                      <th v-if="canRemoveStaff" class="w-10 text-center">
-                        <Checkbox
-                          :model-value="
-                            paginatedStaff.length > 0 &&
-                            selectedStaffForBulk.length === paginatedStaff.length
-                          "
-                          @update:model-value="toggleSelectAllStaff"
-                          size="sm"
-                          wrapper-class="justify-center"
-                        />
-                      </th>
-                      <th>Name</th>
-                      <th class="hidden sm:table-cell">Position</th>
-                      <th>Access</th>
-                      <th class="hidden md:table-cell">Email</th>
-                      <th class="dashboard-table__col-status">Status</th>
-                      <th v-if="canManageDepartments" class="dashboard-table__col-actions">
-                        <span class="sr-only">Actions</span>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="member in paginatedStaff" :key="member.id">
-                      <td v-if="canRemoveStaff" class="text-center">
-                        <Checkbox
-                          :model-value="selectedStaffForBulk.some((s) => s.id === member.id)"
-                          @update:model-value="(checked) => toggleStaffSelection(member, checked)"
-                          size="sm"
-                          wrapper-class="justify-center"
-                          @click.stop
-                        />
-                      </td>
-                      <td>
-                        <div class="flex items-center gap-2.5">
-                          <StaffAvatar
-                            :first-name="member.firstName"
-                            :last-name="member.lastName"
-                            :photo-url="member.photoURL"
-                          />
-                          <span class="dashboard-table__primary"
-                            >{{ member.firstName }} {{ member.lastName }}</span
-                          >
-                        </div>
-                      </td>
-                      <td class="hidden sm:table-cell">
-                        <span class="dashboard-table__muted">{{
-                          member.position || EMPTY_CELL
-                        }}</span>
-                      </td>
-                      <td>
-                        <DashboardTableBadge
-                          :badge-class="getStaffAccessBadgeClass(member)"
-                          :label="getStaffAccessLabel(member)"
-                        />
-                      </td>
-                      <td class="hidden md:table-cell">
-                        <span class="dashboard-table__muted block max-w-[12rem] truncate">{{
-                          member.email
-                        }}</span>
-                      </td>
-                      <td class="dashboard-table__col-status">
-                        <DashboardTableBadge
-                          :badge-class="staffStatusBadgeClass(member.status)"
-                          :label="formatStaffStatusLabel(member.status)"
-                        />
-                      </td>
-                      <td v-if="canManageDepartments" class="dashboard-table__col-actions">
-                        <div class="flex justify-end" @click.stop>
-                          <button
-                            type="button"
-                            :data-staff-actions-anchor="member.id"
-                            class="dashboard-table__action-btn"
-                            :aria-expanded="openStaffMenuId === member.id"
-                            aria-haspopup="menu"
-                            :aria-label="`Actions for ${member.firstName} ${member.lastName}`"
-                            @click="toggleStaffMenu(member.id)"
-                          >
-                            <EllipsisVerticalIcon class="h-4 w-4 shrink-0" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </template>
-
-            <template v-else>
-              <div v-if="!isStaffFullscreen" class="dept-staff-mobile-list space-y-2.5 px-0.5 md:hidden">
-                <div
-                  v-for="member in paginatedRemovedStaff"
-                  :key="`removed-mobile-${member.id}`"
-                  class="rounded-xl bg-white/95 p-3 shadow-none backdrop-blur-sm dark:bg-white/[0.04]"
-                >
-                  <div class="flex items-start justify-between gap-2">
-                    <StaffAvatar
-                      :first-name="member.firstName"
-                      :last-name="member.lastName"
-                      :photo-url="member.photoURL"
-                      size="md"
-                    />
-                    <div class="min-w-0 flex-1">
-                      <p class="text-sm font-semibold text-gray-900 dark:text-gray-50">
-                        {{ member.firstName }} {{ member.lastName }}
-                      </p>
-                      <p
-                        v-if="member.position"
-                        class="mt-0.5 text-xs text-gray-600 dark:text-gray-400"
-                      >
-                        {{ member.position }}
-                      </p>
-                      <p class="mt-1 truncate text-[11px] text-gray-500 dark:text-gray-500">
-                        {{ member.email }}
-                      </p>
-                      <div class="mt-2 flex flex-wrap items-center gap-1.5">
-                        <span :class="getStaffAccessBadgeClass(member)">
-                          {{ getStaffAccessLabel(member) }}
-                        </span>
-                        <span
-                          class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize tracking-wide ring-1 ring-inset bg-red-500/10 text-red-800 ring-red-500/20 dark:bg-red-400/10 dark:text-red-300 dark:ring-red-400/25"
-                        >
-                          Removed
-                        </span>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      class="shrink-0 rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-gray-100 disabled:opacity-50 dark:text-gray-400 dark:hover:bg-gray-800/80"
-                      :disabled="reactivateBusyId === member.id"
-                      :aria-label="reactivateBusyId === member.id ? 'Reactivating…' : 'Reactivate'"
-                      @click="openReactivateStaffModal(member)"
-                    >
-                      <ArrowUturnLeftIcon class="h-5 w-5" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div
-                :class="[
-                  'dept-staff-table-wrap',
-                  isStaffFullscreen
-                    ? 'min-h-0 overflow-auto'
-                    : 'hidden min-h-0 overflow-x-auto md:block',
-                ]"
-              >
-                <table class="dashboard-table min-w-full">
-                  <thead :class="isStaffFullscreen ? 'sticky top-0 z-10' : ''">
-                    <tr>
-                      <th>Name</th>
-                      <th class="hidden sm:table-cell">Position</th>
-                      <th>Access</th>
-                      <th class="hidden md:table-cell">Email</th>
-                      <th class="dashboard-table__col-status">Status</th>
-                      <th class="dashboard-table__col-actions">
-                        <span class="sr-only">Actions</span>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="member in paginatedRemovedStaff" :key="member.id">
-                      <td>
-                        <div class="flex items-center gap-2.5">
-                          <StaffAvatar
-                            :first-name="member.firstName"
-                            :last-name="member.lastName"
-                            :photo-url="member.photoURL"
-                          />
-                          <span class="dashboard-table__primary"
-                            >{{ member.firstName }} {{ member.lastName }}</span
-                          >
-                        </div>
-                      </td>
-                      <td class="hidden sm:table-cell">
-                        <span class="dashboard-table__muted">{{
-                          member.position || EMPTY_CELL
-                        }}</span>
-                      </td>
-                      <td>
-                        <DashboardTableBadge
-                          :badge-class="getStaffAccessBadgeClass(member)"
-                          :label="getStaffAccessLabel(member)"
-                        />
-                      </td>
-                      <td class="hidden md:table-cell">
-                        <span class="dashboard-table__muted block max-w-[12rem] truncate">{{
-                          member.email
-                        }}</span>
-                      </td>
-                      <td class="dashboard-table__col-status">
-                        <DashboardTableBadge
-                          badge-class="bg-red-500/10 text-red-800 ring-red-500/20 dark:bg-red-400/10 dark:text-red-300 dark:ring-red-400/25"
-                          label="Removed"
-                        />
-                      </td>
-                      <td class="dashboard-table__col-actions">
-                        <div class="dashboard-table__action-group" @click.stop>
-                          <button
-                            type="button"
-                            class="dashboard-table__action-btn"
-                            :disabled="reactivateBusyId === member.id"
-                            :aria-label="reactivateBusyId === member.id ? 'Reactivating…' : 'Reactivate'"
-                            @click="openReactivateStaffModal(member)"
-                          >
-                            <ArrowUturnLeftIcon class="h-3.5 w-3.5 shrink-0" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </template>
-
-            <DashboardTablePagination
-              v-if="rosterPaginationTotal > 0 && !isStaffFullscreen"
-              :current-page="staffCurrentPage"
-              :items-per-page="staffItemsPerPage"
-              :total="rosterPaginationTotal"
-              @page-change="handleStaffPageChange"
-            />
-
-            <!-- Fullscreen: pagination pinned inside overlay -->
-            <DashboardTablePagination
-              v-if="isStaffFullscreen && rosterPaginationTotal > 0"
-              :pin-to-viewport="false"
-              class="shrink-0"
-              style="padding-bottom: env(safe-area-inset-bottom, 0px)"
-              :current-page="staffCurrentPage"
-              :items-per-page="staffItemsPerPage"
-              :total="rosterPaginationTotal"
-              @page-change="handleStaffPageChange"
-            />
-          </div>
-        </div>
-      </div>
-    </Teleport>
+    <SMenu
+      :open="Boolean(openStaffMenuId && staffForOpenMenu && staffMenuFixedStyle)"
+      :style="staffMenuFixedStyle"
+      menu-id="staff"
+      label="Staff actions"
+      @close="closeStaffMenu"
+    >
+      <SMenuItem
+        v-if="rosterTab === 'removed'"
+        :label="reactivateBusyId === staffForOpenMenu?.id ? 'Reactivating…' : 'Reactivate'"
+        :icon="RotateCcw"
+        :disabled="reactivateBusyId === staffForOpenMenu?.id"
+        @select="runStaffMenuAction(openReactivateStaffModal)"
+      />
+      <template v-else>
+        <SMenuItem label="Edit" :icon="Pencil" @select="runStaffMenuAction(handleEditStaff)" />
+        <SMenuItem
+          v-if="canMoveStaff"
+          label="Move to another department"
+          :icon="ArrowLeftRight"
+          @select="runStaffMenuAction(openMoveStaffModal)"
+        />
+        <SMenuItem
+          v-if="canRemoveStaff"
+          label="Remove from department"
+          :icon="UserMinus"
+          danger
+          @select="runStaffMenuAction(openDeactivateStaffModal)"
+        />
+      </template>
+    </SMenu>
 
     <DeactivateStaffModal
       v-model="showDeactivateStaffModal"
@@ -699,61 +304,6 @@
       @confirm="handleConfirmMoveStaff"
     />
 
-    <!-- Staff ⋮ menu (teleported so table overflow does not clip it) -->
-    <IosContextMenu
-      :open="Boolean(openStaffMenuId && staffForOpenMenu && staffMenuFixedStyle)"
-      :style="staffMenuFixedStyle"
-      menu-id="staff"
-    >
-      <template v-if="rosterTab === 'removed'">
-        <IosContextMenuItem
-          :label="reactivateBusyId === staffForOpenMenu?.id ? 'Reactivating…' : 'Reactivate'"
-          :icon="ArrowUturnLeftIcon"
-          :disabled="reactivateBusyId === staffForOpenMenu?.id"
-          @click="
-            () => {
-              openReactivateStaffModal(staffForOpenMenu!)
-              openStaffMenuId = null
-            }
-          "
-        />
-      </template>
-      <template v-else>
-        <IosContextMenuItem
-          label="Edit"
-          :icon="PencilSquareIcon"
-          @click="
-            () => {
-              handleEditStaff(staffForOpenMenu!)
-              openStaffMenuId = null
-            }
-          "
-        />
-        <IosContextMenuItem
-          v-if="canMoveStaff"
-          label="Move department"
-          :icon="ArrowsRightLeftIcon"
-          @click="
-            () => {
-              openMoveStaffModal(staffForOpenMenu!)
-              openStaffMenuId = null
-            }
-          "
-        />
-        <IosContextMenuItem
-          v-if="canRemoveStaff"
-          label="Remove"
-          :icon="TrashIcon"
-          danger
-          @click="
-            () => {
-              openDeactivateStaffModal(staffForOpenMenu!)
-              openStaffMenuId = null
-            }
-          "
-        />
-      </template>
-    </IosContextMenu>
     <!-- Staff Modal -->
     <StaffModal
       v-if="departmentId"
@@ -777,47 +327,40 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import {
-  UserIcon,
-  BuildingOfficeIcon,
-  UsersIcon,
-  CheckCircleIcon,
-  ClockIcon,
-  PencilSquareIcon,
-  TrashIcon,
-  ArrowUturnLeftIcon,
-  ArrowsPointingOutIcon,
-  ArrowsRightLeftIcon,
-  XMarkIcon,
-  EllipsisVerticalIcon,
-  ClipboardDocumentIcon,
-  PlusIcon,
-} from '~/utils/app-icons'
-import Button from '~/components/ui/Button.vue'
-import Breadcrumbs from '~/components/ui/Breadcrumbs.vue'
-import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
-import DashboardTableBadge from '~/components/ui/DashboardTableBadge.vue'
-import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
-import IosContextMenu from '~/components/ios/IosContextMenu.vue'
-import IosContextMenuItem from '~/components/ios/IosContextMenuItem.vue'
-import IosSearchBar from '~/components/ios/IosSearchBar.vue'
-import IosQuickActionBar, { type IosQuickActionOption } from '~/components/ios/IosQuickActionBar.vue'
-import IosReceiptTransactionRow, {
-  type ReceiptTransactionVariant,
-} from '~/components/ios/IosReceiptTransactionRow.vue'
+  ArrowLeftRight,
+  ChevronRight,
+  EllipsisVertical,
+  Pencil,
+  RotateCcw,
+  SearchX,
+  UserMinus,
+  UserPlus,
+  Users,
+} from '@lucide/vue'
+import SAvatar from '~/components/s/SAvatar.vue'
+import SBadge from '~/components/s/SBadge.vue'
+import SButton from '~/components/s/SButton.vue'
+import SCard from '~/components/s/SCard.vue'
+import SCheckbox from '~/components/s/SCheckbox.vue'
+import SEmptyState from '~/components/s/SEmptyState.vue'
+import SIconButton from '~/components/s/SIconButton.vue'
+import SMenu from '~/components/s/SMenu.vue'
+import SMenuItem from '~/components/s/SMenuItem.vue'
+import SPageHeader from '~/components/s/SPageHeader.vue'
+import SPagination from '~/components/s/SPagination.vue'
+import SSearch from '~/components/s/SSearch.vue'
+import SSkeleton from '~/components/s/SSkeleton.vue'
+import STabs from '~/components/s/STabs.vue'
 import {
   formatStaffStatusLabel,
-  staffAccessBadgeClass,
   staffAccessLabel,
-  staffStatusBadgeClass,
-} from '~/utils/table-badge-styles'
+} from '~/utils/status-labels'
 import { resolveStaffPermissions, summarizeStaffPermissions } from '~/utils/staff-permissions'
-import Checkbox from '~/components/ui/Checkbox.vue'
 import StaffModal from '~/components/departments/StaffModal.vue'
 import DeactivateStaffModal from '~/components/departments/DeactivateStaffModal.vue'
 import ReactivateStaffModal from '~/components/departments/ReactivateStaffModal.vue'
 import MoveStaffModal from '~/components/departments/MoveStaffModal.vue'
 import StaffInvitePasswordsPanel from '~/components/departments/StaffInvitePasswordsPanel.vue'
-import StaffAvatar from '~/components/departments/StaffAvatar.vue'
 import TotpConfirmModal from '~/components/security/TotpConfirmModal.vue'
 import { useTotpConfirmModal } from '~/composables/useTotpConfirmModal'
 import { resolveTotpForSensitiveAction } from '~/utils/security-api-errors'
@@ -851,40 +394,7 @@ definePageMeta({
 })
 
 const route = useRoute()
-const { isCapacitorIos } = useIsCapacitorIos()
-const {
-  headerBtnClass,
-  headerBtnLabelClass,
-  segmentTabsClass,
-  segmentTabsBtnClass,
-  segmentTabsBtnActiveClass,
-} = useDashboardPageChrome()
-const {
-  tableShellFlexClass,
-  tableExpandClass,
-  tableExpandHeaderClass,
-  tableExpandBodyClass,
-  tableExpandCloseClass,
-  tableExpandEyebrowClass,
-  tableExpandTitleClass,
-  tableExpandMetaClass,
-} = useDashboardTableChrome()
 const departmentId = computed(() => route.params.id as string)
-
-const departmentBreadcrumbs = computed(() => {
-  const storeId = department.value?.storeId || storesStore.currentStoreId
-  const store = storeId ? storesStore.getStoreById(storeId) : null
-  const items: Array<{ label: string; href?: string; icon: typeof BuildingOfficeIcon }> = []
-  if (storeId) {
-    items.push({
-      label: store?.name || 'Departments',
-      href: storeDepartmentsPath(storeId),
-      icon: BuildingOfficeIcon,
-    })
-  }
-  items.push({ label: department.value?.name || 'Department', icon: UsersIcon })
-  return items
-})
 
 const department = ref<Department | null>(null)
 const staff = ref<Staff[]>([])
@@ -936,15 +446,19 @@ function getStaffAccessLabel(member: Staff): string {
   return staffAccessLabel(summarizeStaffPermissions(resolveStaffPermissions(member)))
 }
 
-function getStaffAccessBadgeClass(member: Staff): string {
-  return staffAccessBadgeClass(summarizeStaffPermissions(resolveStaffPermissions(member)))
+function staffName(member: Staff): string {
+  return `${member.firstName} ${member.lastName}`.trim() || member.email
 }
 
-function getStaffRowVariant(member: Staff): ReceiptTransactionVariant {
-  if (rosterTab.value === 'removed') return 'cancelled'
-  if (member.status === 'active') return 'credit'
-  if (member.status === 'on_leave') return 'pending'
-  return 'cancelled'
+function staffStatusTone(member: Staff): 'success' | 'warning' | 'error' {
+  if (rosterTab.value === 'removed') return 'error'
+  if (member.status === 'active') return 'success'
+  if (member.status === 'on_leave') return 'warning'
+  return 'error'
+}
+
+function staffStatusLabel(member: Staff): string {
+  return rosterTab.value === 'removed' ? 'Removed' : formatStaffStatusLabel(member.status)
 }
 
 const filteredStaffRoster = computed(() =>
@@ -952,12 +466,6 @@ const filteredStaffRoster = computed(() =>
     ? filterStaffBySearch(staff.value)
     : filterStaffBySearch(removedStaff.value)
 )
-
-const iosPaginatedStaffRoster = computed(() => {
-  const start = (staffCurrentPage.value - 1) * staffItemsPerPage.value
-  const end = start + staffItemsPerPage.value
-  return filteredStaffRoster.value.slice(start, end)
-})
 
 // Staff modal
 const showStaffModal = ref(false)
@@ -996,7 +504,10 @@ const departmentsListPath = computed(() =>
     storesStore.stores[0]?.id
   )
 )
-const isStaffFullscreen = ref(false)
+const departmentStoreName = computed(() => {
+  const storeId = department.value?.storeId || storesStore.currentStoreId
+  return storeId ? storesStore.getStoreById(storeId)?.name || '' : ''
+})
 const openStaffMenuId = ref<string | null>(null)
 
 const toggleStaffMenu = (staffId: string) => {
@@ -1086,26 +597,18 @@ watch(openStaffMenuId, (id) => {
   })
 })
 
-// Handle ESC key to exit fullscreen and close menus
-const handleKeyDown = (e: KeyboardEvent) => {
-  if (e.key === 'Escape') {
-    if (isStaffFullscreen.value) {
-      isStaffFullscreen.value = false
-    }
-    openStaffMenuId.value = null
-  }
+function closeStaffMenu() {
+  const id = openStaffMenuId.value
+  openStaffMenuId.value = null
+  if (!id || !import.meta.client) return
+  nextTick(() => getVisibleMenuAnchorElement('data-staff-actions-anchor', id)?.focus())
 }
 
-// Watch fullscreen state to lock/unlock body scroll
-watch(isStaffFullscreen, (fullscreen) => {
-  if (import.meta.client) {
-    if (fullscreen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
-    }
-  }
-})
+function runStaffMenuAction(action: (member: Staff) => void) {
+  const member = staffForOpenMenu.value
+  closeStaffMenu()
+  if (member) action(member)
+}
 
 // Check if current user is staff (limited permissions)
 const isStaff = computed(() => userStore.userData?.role === 'staff')
@@ -1114,29 +617,6 @@ const { canCreateStaff, canManage, canRemoveStaff, canMoveStaff } = usePermissio
 // Only super admins can create or remove staff (managers can edit roles/details)
 const canManageDepartments = computed(() => canManage.value)
 const canCreateNewStaff = computed(() => canCreateStaff.value)
-
-const staffTableSkeletonColumns = computed(() => {
-  const columns: Array<{
-    id?: string
-    label: string
-    class?: string
-    bone?: string
-  }> = []
-  if (canRemoveStaff.value) {
-    columns.push({ id: 'select', label: '', class: 'w-10 text-center', bone: '1rem' })
-  }
-  columns.push(
-    { label: 'Name' },
-    { label: 'Position', class: 'hidden sm:table-cell', bone: '5.5rem' },
-    { label: 'Access', bone: '4rem' },
-    { label: 'Email', class: 'hidden md:table-cell' },
-    { label: 'Status', class: 'dashboard-table__col-status', bone: '4.5rem' }
-  )
-  if (canManageDepartments.value) {
-    columns.push({ label: 'Actions', class: 'dashboard-table__col-actions', bone: '1.5rem' })
-  }
-  return columns
-})
 
 // Current staff member (for staff users and to check manager status)
 const currentStaffMember = ref<Staff | null>(null)
@@ -1156,6 +636,22 @@ const paginatedRemovedStaff = computed(() => {
 })
 
 const rosterPaginationTotal = computed(() => filteredStaffRoster.value.length)
+const rosterSource = computed(() => (rosterTab.value === 'active' ? staff.value : removedStaff.value))
+const rosterPage = computed(() =>
+  rosterTab.value === 'active' ? paginatedStaff.value : paginatedRemovedStaff.value
+)
+const rosterTabs = computed(() => [
+  { value: 'active', label: 'Active', count: staff.value.length },
+  { value: 'removed', label: 'Removed', count: removedStaff.value.length },
+])
+
+function isStaffSelected(member: Staff): boolean {
+  return selectedStaffForBulk.value.some((s) => s.id === member.id)
+}
+
+const allStaffOnPageSelected = computed(
+  () => paginatedStaff.value.length > 0 && paginatedStaff.value.every((m) => isStaffSelected(m))
+)
 
 watch(staffSearchQuery, () => {
   staffCurrentPage.value = 1
@@ -1444,48 +940,6 @@ const handleEditStaff = (staffMember: Staff) => {
   showStaffModal.value = true
 }
 
-const staffQuickActionOptions = computed((): IosQuickActionOption[] => {
-  const options: IosQuickActionOption[] = [
-    {
-      value: 'active',
-      label: 'Active',
-      icon: UsersIcon,
-      badge: staff.value.length || undefined,
-    },
-  ]
-
-  if (canRemoveStaff.value) {
-    options.push({
-      value: 'removed',
-      label: 'Removed',
-      icon: TrashIcon,
-      badge: removedStaff.value.length || undefined,
-    })
-  }
-
-  if (canCreateNewStaff.value) {
-    options.push({
-      value: 'add',
-      label: 'Add staff',
-      icon: PlusIcon,
-      trailing: 'add',
-      action: openCreateStaffModal,
-    })
-  }
-
-  return options
-})
-
-function handleIosStaffRowClick(member: Staff) {
-  if (rosterTab.value === 'removed') {
-    openReactivateStaffModal(member)
-    return
-  }
-  if (canManageDepartments.value) {
-    handleEditStaff(member)
-  }
-}
-
 // Legacy field, no longer written on new staff. degrades to "Not assigned" once every staff
 // member in a department has moved to the permission matrix (see StaffPermissionsPanel).
 function syncDepartmentManagerFromStaff() {
@@ -1606,11 +1060,6 @@ watch(
 )
 
 onMounted(async () => {
-  // Add keyboard listener for ESC key
-  if (import.meta.client) {
-    window.addEventListener('keydown', handleKeyDown)
-  }
-
   if (import.meta.server) return
 
   // Wait for auth and user data to load
@@ -1631,13 +1080,8 @@ onMounted(async () => {
   await loadDepartmentData()
 })
 
-// Cleanup keyboard listener and restore body overflow
 onBeforeUnmount(() => {
   removeStaffMenuOutsideListener()
   removeStaffMenuPositionListeners()
-  if (import.meta.client) {
-    window.removeEventListener('keydown', handleKeyDown)
-    document.body.style.overflow = ''
-  }
 })
 </script>

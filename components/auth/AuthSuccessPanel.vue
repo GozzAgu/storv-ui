@@ -1,15 +1,15 @@
 <template>
-  <div class="auth-success-panel" role="status">
-    <div class="auth-success-panel__icon">
-      <component :is="icon" stroke-width="1.5" />
-    </div>
-    <p class="auth-success-panel__title">
+  <div class="s-auth-status s-auth-status--success" role="status">
+    <span class="s-auth-status__icon">
+      <component :is="icon" :size="24" :stroke-width="1.75" aria-hidden="true" />
+    </span>
+    <p class="s-auth-status__title">
       <slot name="title" />
     </p>
-    <p class="auth-success-panel__body">
+    <p class="s-auth-status__body">
       <slot />
     </p>
-    <p v-if="$slots.footer" class="auth-success-panel__foot">
+    <p v-if="$slots.footer" class="s-auth-status__hint">
       <slot name="footer" />
     </p>
   </div>

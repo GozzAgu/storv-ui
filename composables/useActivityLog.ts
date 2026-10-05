@@ -65,18 +65,6 @@ export function activityEntityTypeLabel(type: ActivityEntityType): string {
   return 'Item'
 }
 
-export function activityActionBadgeClass(action: ActivityAction): string {
-  const base =
-    'inline-flex shrink-0 items-center justify-center rounded-[var(--saas-radius-chip,0.375rem)] px-2.5 py-0.5 text-[10px] font-semibold leading-none'
-  if (action === 'created') {
-    return `${base} bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300`
-  }
-  if (action === 'deleted') {
-    return `${base} bg-rose-100 text-rose-800 dark:bg-rose-500/15 dark:text-rose-300`
-  }
-  return `${base} bg-blue-100 text-blue-800 dark:bg-blue-500/15 dark:text-blue-300`
-}
-
 /** Primary line for compact activity previews (dashboard, widgets). */
 export function activityLogPreviewTitle(
   log: Pick<ActivityLog, 'action' | 'entityType' | 'entityName'>

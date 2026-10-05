@@ -1,327 +1,262 @@
 <template>
-  <div
-    :class="[
-      'flex w-full max-w-none flex-col',
-      isCapacitorIos ? 'dash-page--unified' : 'gap-5 pb-10 sm:gap-6 dash-page--unified',
-    ]"
-  >
-    <!-- iOS -->
-    <div v-if="isCapacitorIos" class="ios-sales-shell" data-storefront-page>
-      <IosPageNavBar title="Storefront" />
+  <div class="ds-root s-c s-page s-storefront">
+    <SPageHeader title="Storefront">
+      <template #description>
+        Confirm requests, send a payment link, then mark complete after the customer pays.
+      </template>
+      <template #actions>
+        <SButton to="/dashboard/settings?tab=storefront">
+          <template #leading><Settings :size="16" :stroke-width="1.75" aria-hidden="true" /></template>
+          Storefront settings
+        </SButton>
+      </template>
+    </SPageHeader>
 
-      <div class="ios-sales-chrome">
-        <IosQuickActionBar
-          v-model="statusFilter"
-          aria-label="Filter inquiries by status"
-          :options="iosStatusOptions"
-        />
-        <div class="flex justify-end px-1">
-          <NuxtLink
-            to="/dashboard/settings?tab=storefront"
-            class="text-xs font-semibold text-primary-600 underline-offset-2 hover:underline dark:text-primary-400"
-          >
-            Settings →
-          </NuxtLink>
-        </div>
+    <dl v-if="!loading && inquiries.length > 0" class="s-metrics">
+      <div class="s-metrics__item">
+        <dt class="s-metrics__label">Pending</dt>
+        <dd class="s-metrics__value" :class="{ 's-metrics__value--warning': pendingCount > 0 }">
+          {{ pendingCount }}
+        </dd>
       </div>
-
-      <p v-if="loadError" class="px-1 text-sm text-red-600 dark:text-red-400">{{ loadError }}</p>
-
-      <IosTransactionListSkeleton v-if="loading && !inquiries.length" :count="6" />
-
-      <DashboardTableEmptyState
-        v-else-if="!storesStore.currentStoreId"
-        :icon="ShoppingBagIcon"
-        title="Select a store"
-        description="Use the store selector to view storefront inquiries for a branch."
-        :fill="false"
-      />
-
-      <DashboardTableEmptyState
-        v-else-if="!inquiries.length"
-        :icon="ShoppingBagIcon"
-        title="No inquiries yet"
-        description="When guests contact or reserve from your storefront, they appear here."
-        :fill="false"
-      />
-
-      <DashboardTableEmptyState
-        v-else-if="!filtered.length"
-        :icon="ShoppingBagIcon"
-        title="No matching inquiries"
-        description="Try another status filter: Pending, Confirmed, or All."
-        :fill="false"
-      />
-
-      <div v-else class="ios-receipt-transaction-list">
-        <IosReceiptTransactionRow
-          v-for="(row, index) in filtered"
-          :key="row.id"
-          :title="row.customerName"
-          :subtitle="iosSubtitle(row)"
-          :amount="row.listingPrice != null ? formatMoney(row.listingPrice) : '-'"
-          :amount-tone="iosAmountTone(row)"
-          :date="formatWhenShort(row.createdAtMs)"
-          :variant="iosVariant(row.status)"
-          :icon="iosVariant(row.status) === 'cancelled' ? 'cancelled' : 'order'"
-          :last="index === filtered.length - 1"
-          :show-menu="
-            canAct(row.status) ||
-            canSendPaymentLink(row) ||
-            canComplete(row) ||
-            canCreateSale(row) ||
-            Boolean(row.receiptId)
-          "
-          menu-kind="inquiry"
-          :menu-id="row.id"
-          @click="onIosRowClick(row)"
-          @menu="toggleInquiryMenu(row.id)"
-        />
+      <div class="s-metrics__item">
+        <dt class="s-metrics__label">Awaiting payment</dt>
+        <dd class="s-metrics__value">{{ awaitingPaymentCount }}</dd>
       </div>
+      <div class="s-metrics__item">
+        <dt class="s-metrics__label">Completed</dt>
+        <dd class="s-metrics__value">{{ completedCount }}</dd>
+      </div>
+    </dl>
+
+    <STabs v-model="statusFilter" :tabs="statusTabs" label="Inquiry filters" />
+
+    <p v-if="loadError" class="s-storefront__error" role="alert">
+      <TriangleAlert :size="16" :stroke-width="1.75" aria-hidden="true" />
+      {{ loadError }}
+    </p>
+
+    <div v-if="!loading && inquiries.length > 0" class="s-toolbar">
+      <SSearch
+        v-model="searchQuery"
+        class="s-toolbar__search"
+        placeholder="Search inquiries"
+        label="Search inquiries by customer, phone or product"
+      />
     </div>
 
-    <!-- Web -->
-    <template v-else>
-      <DashboardPageHeader class="dash-page-header--unified">
-        <template #title>
-          <h1
-            class="dash-page-title text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-50"
-          >
-            Storefront
-          </h1>
-        </template>
-        <template #description>
-          <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-            Confirm requests, send a payment link, then mark complete after the customer pays.
-          </p>
-        </template>
-        <template #actions>
-          <NuxtLink
-            to="/dashboard/settings?tab=storefront"
-            class="text-xs font-semibold text-gray-600 underline-offset-2 hover:underline dark:text-gray-300"
-          >
-            Storefront settings →
-          </NuxtLink>
-        </template>
-      </DashboardPageHeader>
-
-      <div class="flex min-h-0 flex-1 flex-col gap-4 sm:gap-5">
-        <nav :class="segmentTabsClass" aria-label="Inquiry filters" role="tablist">
-          <button
-            v-for="opt in statusTabs"
-            :key="opt.value"
-            type="button"
-            role="tab"
-            :aria-selected="statusFilter === opt.value"
-            :class="[
-              segmentTabsBtnClass,
-              statusFilter === opt.value ? segmentTabsBtnActiveClass : '',
-            ]"
-            @click="statusFilter = opt.value"
-          >
-            {{ opt.label }}
-            <span
-              v-if="opt.value === 'pending' && pendingCount"
-              class="ml-1.5 min-w-[1.125rem] rounded-full bg-gray-200/80 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums dark:bg-white/10"
-            >
-              {{ pendingCount }}
-            </span>
-          </button>
-        </nav>
-
-        <p v-if="loadError" class="text-sm text-red-600 dark:text-red-400">{{ loadError }}</p>
-
-        <div :class="tableShellFlexClass" data-storefront-inquiries>
-          <DashTableSkeleton
-            v-if="loading && !inquiries.length"
-            :columns="[
-              { label: 'Customer', lines: 1 },
-              { label: 'Product', lines: 1 },
-              { label: 'Type', bone: '4rem' },
-              { label: 'Price', bone: '4.5rem' },
-              { label: 'Status', class: 'dashboard-table__col-status', bone: '5.5rem' },
-              { label: 'Payment', bone: '4.5rem' },
-              { label: 'Received', bone: '6rem' },
-              { label: 'Actions', class: 'dashboard-table__col-actions', bone: '2rem' },
-            ]"
-            :rows="6"
-            leading="none"
-            flush
-            aria-label="Loading inquiries"
-          />
-
-          <DashboardTableEmptyState
-            v-else-if="!inquiries.length"
-            :icon="ShoppingBagIcon"
-            title="No inquiries yet"
-            description="When guests contact or reserve from your storefront, they appear here."
-            :tips="[
-              'Confirm the request, then send a payment link',
-              'Mark complete only after the customer pays',
-            ]"
-          />
-
-          <DashboardTableEmptyState
-            v-else-if="!filtered.length"
-            :icon="ShoppingBagIcon"
-            title="No matching inquiries"
-            description="Try another status filter: All, Pending, or Confirmed."
-          />
-
-          <div v-else class="overflow-x-auto">
-            <table class="dashboard-table dashboard-table--storefront-compact min-w-full">
-              <thead>
-                <tr>
-                  <th scope="col">Customer</th>
-                  <th scope="col">Product</th>
-                  <th scope="col">Type</th>
-                  <th scope="col">Price</th>
-                  <th scope="col" class="dashboard-table__col-status">Status</th>
-                  <th scope="col">Payment</th>
-                  <th scope="col">Received</th>
-                  <th scope="col" class="dashboard-table__col-actions">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="row in filtered" :key="row.id">
-                  <td class="max-w-[12rem]">
-                    <span class="dashboard-table__primary block truncate">{{
-                      row.customerName
-                    }}</span>
-                    <span
-                      v-if="row.customerPhone"
-                      class="dashboard-table__muted block truncate text-[10px]"
-                      >{{ row.customerPhone }}</span
-                    >
-                  </td>
-                  <td class="max-w-[14rem]">
-                    <span
-                      class="dashboard-table__primary block truncate"
-                      :title="row.customerNote || row.listingTitle"
-                      >{{ row.listingTitle }}</span
-                    >
-                    <NuxtLink
-                      v-if="row.receiptNumber"
-                      :to="
-                        row.receiptId
-                          ? `/dashboard/receipts?receipt=${encodeURIComponent(row.receiptId)}`
-                          : '/dashboard/receipts'
-                      "
-                      class="mt-0.5 block truncate text-[10px] font-medium text-violet-700 underline-offset-2 hover:underline dark:text-violet-300"
-                    >
-                      Sale #{{ row.receiptNumber }}
-                    </NuxtLink>
-                  </td>
-                  <td class="whitespace-nowrap">
-                    <span
-                      class="inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide"
-                      :class="typeBadgeClass(row.type)"
-                    >
-                      {{ row.type === 'reserve' ? 'Reserve' : 'Contact' }}
-                    </span>
-                  </td>
-                  <td class="whitespace-nowrap tabular-nums">
-                    <span v-if="row.listingPrice != null" class="dashboard-table__money">{{
-                      formatMoney(row.listingPrice)
-                    }}</span>
-                    <span v-else class="dashboard-table__muted">-</span>
-                  </td>
-                  <td class="dashboard-table__col-status">
-                    <span
-                      class="inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize"
-                      :class="statusBadgeClass(row.status)"
-                    >
-                      {{ row.status }}
-                    </span>
-                  </td>
-                  <td class="whitespace-nowrap">
-                    <span
-                      class="inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize"
-                      :class="paymentBadgeClass(row)"
-                    >
-                      {{ paymentLabel(row) }}
-                    </span>
-                  </td>
-                  <td class="whitespace-nowrap text-[11px] text-gray-500 dark:text-gray-400">
-                    {{ formatWhenShort(row.createdAtMs) }}
-                  </td>
-                  <td class="dashboard-table__col-actions">
-                    <button
-                      type="button"
-                      class="dashboard-table__action-btn"
-                      :data-inquiry-actions-anchor="row.id"
-                      aria-label="Inquiry actions"
-                      :disabled="actingId === row.id"
-                      @click="toggleInquiryMenu(row.id)"
-                    >
-                      <EllipsisVerticalIcon class="h-4 w-4" stroke-width="2" />
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+    <SCard v-if="loading && !inquiries.length" flush aria-busy="true" data-storefront-inquiries>
+      <ul class="s-list" aria-label="Loading inquiries">
+        <li v-for="i in 6" :key="i" class="s-list__item" aria-hidden="true">
+          <div class="s-list__main">
+            <SSkeleton width="40%" height="14px" />
+            <SSkeleton width="25%" height="12px" />
           </div>
-        </div>
+          <SSkeleton width="72px" height="20px" />
+        </li>
+      </ul>
+    </SCard>
+
+    <SCard v-else-if="!inquiries.length" data-storefront-inquiries>
+      <SEmptyState
+        title="No inquiries yet"
+        description="When guests contact or reserve from your storefront, they appear here."
+      >
+        <template #icon><ShoppingBag :size="24" :stroke-width="1.75" /></template>
+        <template #actions>
+          <ol class="s-storefront__tips">
+            <li>Confirm the request, then send a payment link</li>
+            <li>Mark complete only after the customer pays</li>
+          </ol>
+        </template>
+      </SEmptyState>
+    </SCard>
+
+    <SCard v-else-if="!filtered.length" data-storefront-inquiries>
+      <SEmptyState
+        title="No matching inquiries"
+        :description="searchQuery ? 'Try another name, phone number or product.' : 'Try another status filter: All, Pending, or Confirmed.'"
+      >
+        <template #icon><SearchX :size="24" :stroke-width="1.75" /></template>
+        <template #actions>
+          <SButton @click="clearFilters">Show all inquiries</SButton>
+        </template>
+      </SEmptyState>
+    </SCard>
+
+    <template v-else>
+      <!-- Phone -->
+      <SCard flush class="s-only-sm" data-storefront-inquiries>
+        <ul class="s-list">
+          <li v-for="row in paginated" :key="row.id" class="s-list__item">
+            <span class="s-list__main">
+              <span class="s-list__primary">{{ row.customerName }}</span>
+              <span class="s-list__secondary">{{ row.listingTitle }}</span>
+              <span class="s-storefront__badges">
+                <SBadge :tone="statusTone(row.status)">{{ statusLabel(row.status) }}</SBadge>
+                <SBadge v-if="paymentLabel(row) !== EMPTY_PAYMENT" :tone="paymentTone(row)">
+                  {{ paymentLabel(row) }}
+                </SBadge>
+              </span>
+            </span>
+            <span class="s-list__end">
+              <span v-if="row.listingPrice != null" class="s-list__value">{{ formatMoney(row.listingPrice) }}</span>
+              <span class="s-list__secondary">{{ formatWhenShort(row.createdAtMs) }}</span>
+            </span>
+            <SIconButton
+              label="Inquiry actions"
+              size="sm"
+              :data-inquiry-actions-anchor="row.id"
+              aria-haspopup="menu"
+              :aria-expanded="openInquiryMenuId === row.id"
+              :loading="actingId === row.id"
+              @click="toggleInquiryMenu(row.id)"
+            >
+              <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
+            </SIconButton>
+          </li>
+        </ul>
+      </SCard>
+
+      <!-- Tablet and desktop -->
+      <div class="s-table-wrap s-hide-sm" data-storefront-inquiries>
+        <table class="s-table">
+          <thead>
+            <tr>
+              <th scope="col">Customer</th>
+              <th scope="col">Product</th>
+              <th scope="col" class="s-hide-md">Type</th>
+              <th scope="col" class="s-table__num">Price</th>
+              <th scope="col">Status</th>
+              <th scope="col">Payment</th>
+              <th scope="col" class="s-hide-lg">Received</th>
+              <th scope="col" class="s-table__actions"><span class="ds-sr-only">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="row in paginated" :key="row.id">
+              <td>
+                <span class="s-table__primary s-storefront__cell">{{ row.customerName }}</span>
+                <span v-if="row.customerPhone" class="s-table__secondary">{{ row.customerPhone }}</span>
+              </td>
+              <td>
+                <span class="s-table__primary s-storefront__cell" :title="row.customerNote || row.listingTitle">
+                  {{ row.listingTitle }}
+                </span>
+                <NuxtLink
+                  v-if="row.receiptNumber"
+                  :to="
+                    row.receiptId
+                      ? `/dashboard/receipts?receipt=${encodeURIComponent(row.receiptId)}`
+                      : '/dashboard/receipts'
+                  "
+                  class="s-link s-storefront__sale"
+                >
+                  Sale #{{ row.receiptNumber }}
+                </NuxtLink>
+              </td>
+              <td class="s-hide-md">
+                <SBadge :tone="row.type === 'reserve' ? 'warning' : 'info'">
+                  {{ row.type === 'reserve' ? 'Reserve' : 'Contact' }}
+                </SBadge>
+              </td>
+              <td class="s-table__num">
+                <span v-if="row.listingPrice != null">{{ formatMoney(row.listingPrice) }}</span>
+                <span v-else class="s-table__muted">{{ EMPTY_PAYMENT }}</span>
+              </td>
+              <td>
+                <SBadge :tone="statusTone(row.status)" dot>{{ statusLabel(row.status) }}</SBadge>
+              </td>
+              <td>
+                <SBadge :tone="paymentTone(row)">{{ paymentLabel(row) }}</SBadge>
+              </td>
+              <td class="s-hide-lg s-table__nowrap s-table__muted">{{ formatWhenShort(row.createdAtMs) }}</td>
+              <td class="s-table__actions">
+                <SIconButton
+                  label="Inquiry actions"
+                  size="sm"
+                  :data-inquiry-actions-anchor="row.id"
+                  aria-haspopup="menu"
+                  :aria-expanded="openInquiryMenuId === row.id"
+                  :loading="actingId === row.id"
+                  @click="toggleInquiryMenu(row.id)"
+                >
+                  <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
+                </SIconButton>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
+
+      <SPagination
+        :current-page="currentPage"
+        :page-size="PAGE_SIZE"
+        :total="filtered.length"
+        label="Inquiries pagination"
+        @page-change="onPageChange"
+      />
     </template>
 
     <SharePaymentLinkModal v-model="showShareModal" :link="shareLink" />
 
-    <IosContextMenu
+    <SMenu
       :open="Boolean(openInquiryMenuId && inquiryForOpenMenu && inquiryMenuFixedStyle)"
       :style="inquiryMenuFixedStyle"
       menu-id="inquiry"
+      label="Inquiry actions"
+      @close="closeInquiryMenu"
     >
-      <IosContextMenuItem
+      <SMenuItem
         v-if="inquiryForOpenMenu?.status === 'pending'"
         label="Confirm"
-        :icon="CheckCircleIcon"
-        @click="runMenuAction('confirmed')"
+        :icon="CircleCheck"
+        @select="runMenuAction('confirmed')"
       />
-      <IosContextMenuItem
+      <SMenuItem
         v-if="inquiryForOpenMenu && canSendPaymentLink(inquiryForOpenMenu)"
         :label="inquiryForOpenMenu.paymentLinkToken ? 'Resend payment link' : 'Send payment link'"
-        :icon="CreditCardIcon"
-        @click="sendPaymentLink()"
+        :icon="CreditCard"
+        @select="sendPaymentLink()"
       />
-      <IosContextMenuItem
+      <SMenuItem
         v-if="inquiryForOpenMenu && canComplete(inquiryForOpenMenu)"
         label="Mark complete"
-        :icon="CheckCircleIcon"
-        @click="runMenuAction('completed')"
+        :icon="CircleCheck"
+        @select="runMenuAction('completed')"
       />
-      <IosContextMenuItem
+      <SMenuItem
         v-if="inquiryForOpenMenu && canCreateSale(inquiryForOpenMenu)"
         label="Create sale"
-        :icon="CheckCircleIcon"
-        @click="runMenuAction('completed')"
+        :icon="CircleCheck"
+        @select="runMenuAction('completed')"
       />
-      <IosContextMenuItem
+      <SMenuItem
         v-if="canAct(inquiryForOpenMenu?.status || 'pending')"
         label="Reject"
         danger
-        :icon="XMarkIcon"
-        @click="runMenuAction('rejected')"
+        :icon="X"
+        @select="runMenuAction('rejected')"
       />
-      <IosContextMenuItem
+      <SMenuItem
         v-if="canAct(inquiryForOpenMenu?.status || 'pending')"
         label="Cancel hold"
-        :icon="XMarkIcon"
-        @click="runMenuAction('cancelled')"
+        :icon="X"
+        @select="runMenuAction('cancelled')"
       />
-      <IosContextMenuItem
+      <SMenuItem
         v-if="inquiryForOpenMenu?.customerPhone"
         label="Call customer"
-        :icon="DevicePhoneMobileIcon"
-        @click="callCustomer()"
+        :icon="Phone"
+        @select="callCustomer()"
       />
-      <IosContextMenuItem
+      <SMenuItem
         v-if="inquiryForOpenMenu?.receiptId"
         label="View sale"
-        :icon="ReceiptPercentIcon"
-        @click="openSale()"
+        :icon="Receipt"
+        @select="openSale()"
       />
-    </IosContextMenu>
+    </SMenu>
   </div>
 </template>
 
@@ -329,23 +264,29 @@
 import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue'
 import { getDocs, limit, query } from 'firebase/firestore'
 import {
-  CheckCircleIcon,
-  CreditCardIcon,
-  DevicePhoneMobileIcon,
-  EllipsisVerticalIcon,
-  ReceiptPercentIcon,
-  ShoppingBagIcon,
-  XMarkIcon,
-} from '~/utils/app-icons'
-import IosContextMenu from '~/components/ios/IosContextMenu.vue'
-import IosContextMenuItem from '~/components/ios/IosContextMenuItem.vue'
-import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
-import IosQuickActionBar, { type IosQuickActionOption } from '~/components/ios/IosQuickActionBar.vue'
-import IosReceiptTransactionRow, {
-  type ReceiptTransactionAmountTone,
-  type ReceiptTransactionVariant,
-} from '~/components/ios/IosReceiptTransactionRow.vue'
-import IosTransactionListSkeleton from '~/components/ios/IosTransactionListSkeleton.vue'
+  CircleCheck,
+  CreditCard,
+  EllipsisVertical,
+  Phone,
+  Receipt,
+  SearchX,
+  Settings,
+  ShoppingBag,
+  TriangleAlert,
+  X,
+} from '@lucide/vue'
+import SBadge from '~/components/s/SBadge.vue'
+import SButton from '~/components/s/SButton.vue'
+import SCard from '~/components/s/SCard.vue'
+import SEmptyState from '~/components/s/SEmptyState.vue'
+import SIconButton from '~/components/s/SIconButton.vue'
+import SMenu from '~/components/s/SMenu.vue'
+import SMenuItem from '~/components/s/SMenuItem.vue'
+import SPageHeader from '~/components/s/SPageHeader.vue'
+import SPagination from '~/components/s/SPagination.vue'
+import SSearch from '~/components/s/SSearch.vue'
+import SSkeleton from '~/components/s/SSkeleton.vue'
+import STabs from '~/components/s/STabs.vue'
 import type { ShareableLink } from '~/components/payments/SharePaymentLinkModal.vue'
 import { useFirestore } from '~/composables/useFirestore'
 import {
@@ -355,9 +296,7 @@ import {
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
 import { useAuthenticatedFetch } from '~/composables/useAuthenticatedFetch'
 import { useAnchoredRowMenu } from '~/composables/useAnchoredRowMenu'
-import { useDashboardPageChrome } from '~/composables/useDashboardPageChrome'
-import { useDashboardTableChrome } from '~/composables/useDashboardTableChrome'
-import { useIosPullToRefreshRegister } from '~/composables/useIosPullToRefresh'
+import { useDashboardPageRefreshRegister } from '~/composables/useDashboardPageRefresh'
 import { useStoresStore } from '~/stores/stores'
 import { CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import { isStorefrontDashboardHidden } from '~/utils/storefront-launch'
@@ -403,43 +342,66 @@ const VALID_STATUSES = new Set<StorefrontInquiryStatus>([
   'completed',
 ])
 
+const PAGE_SIZE = 50
+const EMPTY_PAYMENT = '—'
+
 const { authFetch } = useAuthenticatedFetch()
-const { isCapacitorIos } = useIsCapacitorIos()
-const { tableShellFlexClass } = useDashboardTableChrome()
-const { segmentTabsClass, segmentTabsBtnClass, segmentTabsBtnActiveClass } =
-  useDashboardPageChrome()
 const storesStore = useStoresStore()
 
 const loading = ref(true)
 const loadError = ref('')
 const inquiries = ref<InquiryRow[]>([])
 const pendingCount = ref(0)
-/** Default to All so iOS users see every inquiry without hunting tabs. */
 const statusFilter = ref<'all' | StorefrontInquiryStatus>('all')
+const searchQuery = ref('')
 const actingId = ref('')
 const showShareModal = ref(false)
 const shareLink = ref<ShareableLink | null>(null)
 
-const statusTabs = [
-  { value: 'all' as const, label: 'All' },
-  { value: 'pending' as const, label: 'Pending' },
-  { value: 'confirmed' as const, label: 'Confirmed' },
-]
-
-const iosStatusOptions = computed((): IosQuickActionOption[] => [
+const statusTabs = computed(() => [
   { value: 'all', label: 'All' },
-  {
-    value: 'pending',
-    label: pendingCount.value ? `Pending (${pendingCount.value})` : 'Pending',
-    badge: pendingCount.value || undefined,
-  },
+  { value: 'pending', label: 'Pending', count: pendingCount.value || undefined },
   { value: 'confirmed', label: 'Confirmed' },
 ])
 
+const awaitingPaymentCount = computed(
+  () => inquiries.value.filter((row) => row.paymentLinkStatus === 'unpaid' && !row.receiptId).length
+)
+const completedCount = computed(
+  () => inquiries.value.filter((row) => row.status === 'completed').length
+)
+
 const filtered = computed(() => {
-  if (statusFilter.value === 'all') return inquiries.value
-  return inquiries.value.filter((i) => i.status === statusFilter.value)
+  let rows = inquiries.value
+  if (statusFilter.value !== 'all') rows = rows.filter((i) => i.status === statusFilter.value)
+  const q = searchQuery.value.trim().toLowerCase()
+  if (!q) return rows
+  return rows.filter((row) =>
+    [row.customerName, row.customerPhone, row.listingTitle]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase()
+      .includes(q)
+  )
 })
+
+const currentPage = ref(1)
+const paginated = computed(() =>
+  filtered.value.slice((currentPage.value - 1) * PAGE_SIZE, currentPage.value * PAGE_SIZE)
+)
+watch([statusFilter, searchQuery], () => {
+  currentPage.value = 1
+})
+
+function onPageChange(page: number) {
+  currentPage.value = page
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+function clearFilters() {
+  searchQuery.value = ''
+  statusFilter.value = 'all'
+}
 
 const {
   openMenuId: openInquiryMenuId,
@@ -539,66 +501,24 @@ function paymentLabel(row: InquiryRow) {
   if (row.paymentLinkStatus === 'failed') return 'Failed'
   if (row.paymentLinkStatus === 'expired') return 'Expired'
   if (row.status === 'confirmed') return 'No link'
-  return '-'
+  return EMPTY_PAYMENT
 }
 
-function paymentBadgeClass(row: InquiryRow) {
-  if (row.paymentLinkStatus === 'paid' || row.receiptId) {
-    return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-200'
-  }
-  if (row.paymentLinkStatus === 'unpaid') {
-    return 'bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-200'
-  }
-  if (row.paymentLinkStatus === 'failed') {
-    return 'bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-200'
-  }
-  if (row.paymentLinkStatus === 'expired') {
-    return 'bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-gray-300'
-  }
-  return 'bg-gray-100 text-gray-500 dark:bg-white/[0.06] dark:text-gray-400'
+function paymentTone(row: InquiryRow) {
+  if (row.paymentLinkStatus === 'paid' || row.receiptId) return 'success'
+  if (row.paymentLinkStatus === 'unpaid') return 'warning'
+  if (row.paymentLinkStatus === 'failed') return 'error'
+  return 'neutral'
 }
 
-function typeBadgeClass(type: StorefrontInquiryType) {
-  return type === 'reserve'
-    ? 'bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-200'
-    : 'bg-sky-100 text-sky-800 dark:bg-sky-500/15 dark:text-sky-200'
+function statusLabel(status: StorefrontInquiryStatus) {
+  return status[0]!.toUpperCase() + status.slice(1)
 }
 
-function statusBadgeClass(status: StorefrontInquiryStatus) {
-  if (status === 'pending') return 'bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-gray-200'
-  if (status === 'confirmed')
-    return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-200'
-  if (status === 'completed')
-    return 'bg-violet-100 text-violet-800 dark:bg-violet-500/15 dark:text-violet-200'
-  return 'bg-gray-100 text-gray-500 dark:bg-white/[0.06] dark:text-gray-400'
-}
-
-function iosSubtitle(row: InquiryRow) {
-  const type = row.type === 'reserve' ? 'Reserve' : 'Contact'
-  const status =
-    row.status === 'pending'
-      ? 'Pending'
-      : row.status === 'confirmed'
-        ? 'Confirmed'
-        : row.status === 'completed'
-          ? 'Completed'
-          : row.status
-  const payment = ` · ${paymentLabel(row)}`
-  const note = row.customerNote ? ` · ${row.customerNote}` : ''
-  return `${row.listingTitle} · ${type} · ${status}${payment}${note}`
-}
-
-function iosVariant(status: StorefrontInquiryStatus): ReceiptTransactionVariant {
-  if (status === 'completed') return 'credit'
-  if (status === 'pending' || status === 'confirmed') return 'pending'
-  if (status === 'rejected' || status === 'cancelled') return 'cancelled'
-  return 'pending'
-}
-
-function iosAmountTone(row: InquiryRow): ReceiptTransactionAmountTone {
-  if (row.status === 'completed') return 'positive'
-  if (row.status === 'rejected' || row.status === 'cancelled') return 'neutral'
-  return 'warning'
+function statusTone(status: StorefrontInquiryStatus) {
+  if (status === 'confirmed') return 'success'
+  if (status === 'completed') return 'accent'
+  return 'neutral'
 }
 
 function formatWhen(ms: number) {
@@ -636,21 +556,6 @@ function formatMoney(amount: number) {
     }).format(amount)
   } catch {
     return String(amount)
-  }
-}
-
-function onIosRowClick(row: InquiryRow) {
-  if (row.receiptId) {
-    void navigateTo(`/dashboard/receipts?receipt=${encodeURIComponent(row.receiptId)}`)
-    return
-  }
-  if (
-    canAct(row.status) ||
-    canSendPaymentLink(row) ||
-    canComplete(row) ||
-    canCreateSale(row)
-  ) {
-    toggleInquiryMenu(row.id)
   }
 }
 
@@ -796,7 +701,7 @@ watch(
   }
 )
 
-useIosPullToRefreshRegister(load)
+useDashboardPageRefreshRegister(load)
 
 onMounted(() => {
   void load()

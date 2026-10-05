@@ -18,7 +18,7 @@ describe('dashboard help content', () => {
     const kb = buildDashboardHelpKnowledgeBase()
     expect(kb).toContain('## Inventory')
     expect(kb).toContain('## Mobile app (iOS & Android)')
-    expect(kb).toContain('Storvv iOS app redesign')
+    expect(kb).toContain('One design across web and app')
     expect(kb).toContain('Sales leads pipeline')
     expect(kb).toContain('Subcategories (one level under a parent category)')
     expect(kb).toContain('Optional subcategories when creating categories')

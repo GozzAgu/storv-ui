@@ -1,644 +1,100 @@
 <template>
   <div
     :data-inventory-subcategory-hub="showCategoryHub ? '' : undefined"
-    :class="[
-      showCategoryHub ? pageWithFooterClass : pageWithFixedFooterClass,
-      'dash-page--unified w-full max-w-none flex-col space-y-5 overflow-x-hidden sm:space-y-6',
-      isCapacitorIos ? 'ios-inventory-items-page' : '',
-    ]"
+    class="ds-root s-c s-page s-inventory"
   >
-    <Breadcrumbs
-      v-if="!isCapacitorIos"
-      :items="inventoryBreadcrumbs"
-      class="text-[11px] text-gray-500 dark:text-gray-400"
-    />
 
     <!-- Loading -->
     <template v-if="isLoadingFolder">
-      <template v-if="isCapacitorIos && loadingShowsCategoryHub">
-        <div class="ios-page-nav-bar" aria-hidden="true">
-          <span class="ios-page-nav-bar__spacer" />
-          <div class="ios-skeleton ios-nav-title-skeleton" />
-          <span class="ios-page-nav-bar__spacer" />
-        </div>
-        <div class="ios-skeleton ios-skeleton--line ios-skeleton--line-sm ios-nav-title-skeleton" style="width: 5rem; margin: -0.25rem auto 0" />
-        <IosQuickActionSkeleton :count="2" />
-        <IosGroupedListSkeleton :count="6" />
-      </template>
-      <template v-else-if="isCapacitorIos">
-        <div class="ios-page-nav-bar" aria-hidden="true">
-          <span class="ios-page-nav-bar__spacer" />
-          <div class="ios-skeleton ios-nav-title-skeleton" />
-          <span class="ios-page-nav-bar__spacer" />
-        </div>
-        <div class="ios-skeleton ios-skeleton--line ios-skeleton--line-sm ios-nav-title-skeleton" style="width: 4rem; margin: -0.25rem auto 0.5rem" />
-        <div class="ios-search-bar-host">
-          <div class="ios-skeleton ios-search-skeleton" aria-hidden="true" />
-        </div>
-        <IosQuickActionSkeleton :count="4" />
-        <IosTransactionListSkeleton :count="8" />
-      </template>
-      <template v-else-if="loadingShowsCategoryHub">
-        <div class="flex flex-wrap items-center gap-2">
-          <span class="dash-skeleton dash-skeleton--thumb" />
-          <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-title" />
-        </div>
-        <div
-          class="dash-grid-shell dash-grid-shell--grid inventory-categories-shell--grid mt-4"
-        >
-          <div class="inventory-categories-grid dash-grid">
-            <FolderCardSkeleton v-for="i in 6" :key="i" />
-          </div>
-        </div>
-      </template>
-      <DashTableSkeleton
-        v-else
-        :columns="inventoryItemTableSkeletonColumns"
-        :rows="8"
-        leading="icon"
-        show-toolbar
-        aria-label="Loading products"
-      />
-    </template>
-
-    <!-- Mobile / tablet toolbar -->
-    <div v-else-if="showCategoryHub && !isCapacitorIos" class="flex flex-col gap-2 lg:hidden">
-      <div class="dash-page-context-bar">
-        <DashboardBackButton
-          :to="inventoryBackTo"
-          :label="inventoryBackLabel"
-          class="mt-px shrink-0"
-        />
-        <div class="min-w-0 flex-1">
-          <h2 class="dash-page-context-bar__title truncate">{{ folder?.name || 'Category' }}</h2>
-          <p class="dash-page-context-bar__meta">
-            <template v-if="childFolders.length > 0">
-              {{ childFolders.length }} subcategor{{ childFolders.length === 1 ? 'y' : 'ies' }}
-            </template>
-            <template v-else>Organize with subcategories</template>
-          </p>
-        </div>
-      </div>
-      <div
-        v-if="canCreateInventoryFolders && paginatedChildFolders.length > 0"
-        class="flex flex-wrap items-center gap-2"
-      >
-        <DashboardBulkSelectControl
-          :model-value="allSubfoldersOnPageSelected"
-          :selected-count="selectedSubfoldersForBulk.length"
-          @update:model-value="toggleSelectAllSubfolders"
-        >
-          <template #action>
-            <Button
-              variant="outline"
-              size="sm"
-              :icon="TrashIcon"
-              :extra-class="
-                headerBtnClass +
-                ' !border-red-200/70 !text-red-600 hover:!bg-red-50/80 dark:!border-red-900/40 dark:!text-red-400 dark:hover:!bg-red-950/30'
-              "
-              @click="openBulkDeleteSubfoldersModal"
-            >
-              Delete
-            </Button>
-          </template>
-        </DashboardBulkSelectControl>
-      </div>
-      <Button
-        v-if="canAddSubcategories"
-        variant="primary"
-        size="sm"
-        :icon="PlusCircleIcon"
-        class="w-full shrink-0 !rounded-xl sm:!rounded-2xl"
-        @click="openCreateSubcategoryModal"
-      >
-        Add subcategory
-      </Button>
-    </div>
-
-    <div v-else-if="!isCapacitorIos" class="flex flex-col gap-2 lg:hidden">
-      <div class="dash-page-context-bar">
-        <DashboardBackButton
-          :to="inventoryBackTo"
-          :label="inventoryBackLabel"
-          class="mt-px shrink-0"
-        />
-        <div class="min-w-0 flex-1">
-          <div class="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
-            <h2 class="dash-page-context-bar__title truncate">
-              {{ folder?.name || 'Category' }}
-            </h2>
-          </div>
-          <p class="dash-page-context-bar__meta">
-            <span class="tabular-nums">{{ folder?.itemCount ?? 0 }} items</span>
-            <span class="dash-page-context-bar__sep">·</span>
-            <span class="tabular-nums">{{ formatCurrency(totalInventoryValue) }} total value</span>
-            <template v-if="isSearchActive && sortedFilteredItems.length !== baseItems.length">
-              <span class="dash-page-context-bar__sep">·</span>
-              <span>{{ sortedFilteredItems.length }} shown</span>
-            </template>
-          </p>
-        </div>
-      </div>
-      <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
-        <DashboardToolbarSearch
-          v-if="!isCapacitorIos"
-          v-model="searchQuery"
-          placeholder="Search by name, SKU…"
-          :wide="false"
-          wrapper-class="flex-1"
-        />
-        <div class="flex flex-wrap items-center gap-2">
-          <template v-if="canManageInventoryItems && selectedItemsForBulk.length > 0">
-            <Button
-              variant="outline"
-              size="sm"
-              :icon="TagIcon"
-              class="shrink-0 !rounded-xl !px-2 !py-2 !text-[11px] sm:!rounded-2xl sm:!px-3 sm:!py-2.5 sm:!text-xs"
-              @click="openBulkDiscountModal"
-            >
-              <span class="hidden sm:inline">Discount</span>
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              :icon="TrashIcon"
-              class="shrink-0 !rounded-xl-red-200/80 !px-2 !py-2 !text-[11px] dark:!border-red-800/40 sm:!rounded-2xl sm:!px-3 sm:!py-2.5 sm:!text-xs"
-              @click="openBulkDeleteModal"
-            >
-              <span class="hidden sm:inline">Delete</span>
-            </Button>
-          </template>
-          <template v-if="canLoanToSellerUi">
-            <Button
-              variant="outline"
-              size="sm"
-              :icon="ArrowTopRightOnSquareIcon"
-              class="shrink-0 !rounded-xl !px-2 !py-2 !text-[11px] sm:!rounded-2xl sm:!px-3 sm:!py-2.5 sm:!text-xs"
-              :disabled="selectedItemsEligibleForSellerLoan.length === 0"
-              :aria-label="sellerLoanButtonTitle"
-              @click="openCreateSellerLoanModal"
-            >
-              <span class="hidden sm:inline">Stock loan</span>
-            </Button>
-          </template>
-          <Button
-            v-if="canManageInventoryItems"
-            variant="outline"
-            size="sm"
-            class="shrink-0 !rounded-xl !px-2 !py-2 sm:!rounded-2xl sm:!px-3 sm:!py-2.5"
-            :icon="ArrowDownTrayIcon"
-            :loading="isImporting"
-            :disabled="isExporting"
-            aria-label="Import from Excel"
-            @click="fileInputRef?.click()"
-          />
-          <Button
-            v-if="canManageInventoryItems"
-            variant="outline"
-            size="sm"
-            class="shrink-0 !rounded-xl !px-2 !py-2 sm:!rounded-2xl sm:!px-3 sm:!py-2.5"
-            :icon="ArrowUpTrayIcon"
-            :loading="isExporting"
-            :disabled="isImporting || (folder?.itemCount ?? 0) === 0"
-            aria-label="Export to Excel"
-            @click="handleExportToExcel"
-          />
-          <Button
-            v-if="canManageInventoryItems && !isCapacitorIos"
-            variant="primary"
-            class="shrink-0 !rounded-xl !px-2 !py-2 text-xs sm:!rounded-2xl sm:!px-3 sm:!py-2.5 sm:text-sm"
-            :icon="PlusCircleIcon"
-            aria-label="Add product"
-            @click="openAddItemModal"
-          >
-            <span :class="headerBtnLabelClass">Add</span>
-          </Button>
-          <select
-            v-model="sortBy"
-            class="min-w-[6.5rem] flex-1 cursor-pointer rounded-sm bg-white px-2 py-2 text-xs font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400/40 dark:!bg-dashboard-card dark:text-gray-200 sm:min-w-[120px] sm:flex-none sm:px-3 sm:py-2.5 sm:text-sm"
-            @change="handleSortByChange"
-          >
-            <option value="name">Name</option>
-            <option value="price">Unit price</option>
-            <option value="sku">SKU</option>
-            <option value="dateIn">Date In</option>
-            <option value="availability">Status</option>
-          </select>
-        </div>
-      </div>
-    </div>
-
-    <template v-if="isCapacitorIos && !isLoadingFolder && !showCategoryHub">
-      <IosPageNavBar
-        :title="iosProductsNavTitle"
-        show-back
-        :back-to="inventoryBackTo"
-        :back-label="inventoryBackLabel"
-      >
-        <template v-if="showBulkRowSelection && paginatedItems.length > 0" #trailing>
-          <button
-            type="button"
-            class="ios-top-bar-text-btn"
-            @click="toggleIosItemsSelectMode"
-          >
-            {{ isIosItemsSelecting ? 'Done' : 'Select' }}
-          </button>
+      <SPageHeader :title="folder?.name || 'Category'" :back="inventoryBack">
+        <template #eyebrow>
+          <nav class="s-breadcrumb" aria-label="Breadcrumb">
+            <NuxtLink to="/dashboard/inventory" class="s-breadcrumb__link">Inventory</NuxtLink>
+          </nav>
         </template>
-      </IosPageNavBar>
-      <p class="ios-inventory-list-meta">
-        {{ paginationTotal }} item{{ paginationTotal === 1 ? '' : 's' }}
-        <template v-if="currentStoreLabel"> · {{ currentStoreLabel }}</template>
-      </p>
-      <div class="ios-search-bar-host ios-search-bar-host--sticky">
-        <IosSearchBar v-model="searchQuery" placeholder="Search products…" />
-      </div>
-      <IosQuickActionBar
-        v-model="availabilityFilter"
-        class="ios-inventory-availability-tabs"
-        aria-label="Product actions"
-        :options="availabilityQuickActionOptions"
-      />
-      <div
-        v-if="isIosItemsSelecting && showBulkRowSelection && paginatedItems.length > 0"
-        class="ios-bulk-select-host"
-      >
-        <DashboardBulkSelectControl
-          :model-value="
-            selectedItemsForBulk.length > 0 &&
-            selectedItemsForBulk.length ===
-              paginatedItems.filter((i) => !isInventoryItemLocked(i)).length
-          "
-          :selected-count="selectedItemsForBulk.length"
-          @update:model-value="toggleSelectAll"
-        >
-          <template #action>
-            <Button
-              v-if="canManageInventoryItems && selectedItemsForBulk.length > 0"
-              variant="outline"
-              size="sm"
-              :icon="TrashIcon"
-              :extra-class="
-                headerBtnClass +
-                ' !border-red-200/70 !text-red-600 hover:!bg-red-50/80 dark:!border-red-900/40 dark:!text-red-400 dark:hover:!bg-red-950/30'
-              "
-              @click="openBulkDeleteModal"
-            >
-              Delete
-            </Button>
-            <Button
-              v-if="canLoanToSellerUi"
-              variant="outline"
-              size="sm"
-              :icon="ArrowTopRightOnSquareIcon"
-              :disabled="selectedItemsEligibleForSellerLoan.length === 0"
-              :extra-class="headerBtnClass"
-              @click="openCreateSellerLoanModal"
-            >
-              Stock loan
-            </Button>
-          </template>
-        </DashboardBulkSelectControl>
-      </div>
-
-      <IosDrawer
-        v-model="showProductMoreSheet"
-        title="Product options"
-        subtitle="Filters and tools"
-        variant="menu"
-        footer-variant="menu"
-        body-padding="p-0"
-        aria-label="Product options"
-      >
-        <div class="ios-drawer-menu">
-          <section class="ios-drawer-menu__section">
-            <p class="ios-drawer-menu__section-label">Availability</p>
-            <div class="ios-drawer-menu__group">
-              <ul class="ios-drawer-menu__list">
-                <li v-for="option in productMoreAvailabilityOptions" :key="option.value">
-                  <button
-                    type="button"
-                    class="ios-drawer-menu__row"
-                    @click="selectAvailabilityFromSheet(option.value)"
-                  >
-                    <span class="ios-drawer-menu__label">{{ option.label }}</span>
-                    <span v-if="option.badge != null" class="ios-drawer-menu__value">
-                      {{ option.badge }}
-                    </span>
-                    <CheckIcon
-                      v-if="availabilityFilter === option.value"
-                      class="ios-drawer-menu__check"
-                      aria-hidden="true"
-                    />
-                  </button>
-                </li>
-              </ul>
-            </div>
-          </section>
-          <section v-if="canManageInventoryItems || canLoanToSellerUi" class="ios-drawer-menu__section">
-            <p class="ios-drawer-menu__section-label">Tools</p>
-            <div class="ios-drawer-menu__group">
-              <ul class="ios-drawer-menu__list">
-                <li v-if="canLoanToSellerUi">
-                  <button
-                    type="button"
-                    class="ios-drawer-menu__row"
-                    @click="startIosStockLoanSelect"
-                  >
-                    <span class="ios-drawer-menu__label">Stock loan…</span>
-                  </button>
-                </li>
-                <li v-if="canManageInventoryItems">
-                  <button type="button" class="ios-drawer-menu__row" @click="triggerImportFromSheet">
-                    <span class="ios-drawer-menu__label">Import from Excel</span>
-                  </button>
-                </li>
-                <li v-if="canManageInventoryItems">
-                  <button type="button" class="ios-drawer-menu__row" @click="triggerExportFromSheet">
-                    <span class="ios-drawer-menu__label">Export to Excel</span>
-                  </button>
-                </li>
-              </ul>
-            </div>
-          </section>
+      </SPageHeader>
+      <div v-if="loadingShowsCategoryHub" class="s-category-grid" role="status" aria-label="Loading subcategories">
+        <div v-for="i in 6" :key="i" class="s-category-card" aria-hidden="true">
+          <SSkeleton width="40px" height="40px" />
+          <SSkeleton width="70%" height="16px" />
+          <SSkeleton width="45%" height="12px" />
         </div>
-      </IosDrawer>
-
-      <DashboardTableEmptyState
-        v-if="sortedFilteredItems.length === 0"
-        :icon="CubeIcon"
-        :title="searchQuery ? 'No products found' : 'No products yet'"
-        :description="
-          searchQuery
-            ? 'Try a different search term.'
-            : 'Add your first product to this folder.'
-        "
-      />
-
-      <div v-else class="ios-receipt-transaction-list">
-        <IosReceiptTransactionRow
-          v-for="(item, index) in paginatedItems"
-          :key="item.id"
-          :title="getItemPrimaryLabel(item)"
-          :subtitle="getItemCardSubtitle(item) || getItemAvailability(item).label"
-          :amount="getItemDisplayPrice(item)"
-          amount-tone="neutral"
-          :date="getItemCardDate(item)"
-          :variant="getItemTransactionVariant(item)"
-          :icon="itemAvailabilityIcon(getItemAvailability(item).status)"
-          :last="index === paginatedItems.length - 1"
-          :show-menu="!isInventoryItemLocked(item) && !isIosItemsSelecting"
-          menu-kind="item"
-          :menu-id="item.id"
-          :selectable="
-            isIosItemsSelecting &&
-            showBulkRowSelection &&
-            !isInventoryItemLocked(item)
-          "
-          :selected="selectedItemsForBulk.some((i) => i.id === item.id)"
-          @click="
-            isIosItemsSelecting && !isInventoryItemLocked(item)
-              ? toggleItemSelection(item)
-              : openMobileItemDetail(item)
-          "
-          @select="(checked) => toggleItemSelection(item, checked)"
-          @menu="toggleItemMenu(item.id)"
-        />
       </div>
-
-      <DashboardTablePagination
-        :current-page="currentPage"
-        :items-per-page="itemsPerPage"
-        :total="paginationTotal"
-        @page-change="handlePageChange"
-      />
+      <SCard v-else flush aria-busy="true">
+        <ul class="s-list" aria-label="Loading products">
+          <li v-for="i in 8" :key="i" class="s-list__item" aria-hidden="true">
+            <div class="s-list__main">
+              <SSkeleton width="40%" height="14px" />
+              <SSkeleton width="25%" height="12px" />
+            </div>
+            <SSkeleton width="72px" height="14px" />
+          </li>
+        </ul>
+      </SCard>
     </template>
 
     <!-- Category hub: subcategories live inside the parent folder -->
     <template v-if="!isLoadingFolder && showCategoryHub">
-      <template v-if="isCapacitorIos">
-        <IosPageNavBar
-          :title="
-            currentStoreLabel
-              ? `${currentStoreLabel} · ${folder?.name || 'Category'}`
-              : folder?.name || 'Category'
-          "
-          show-back
-          :back-to="inventoryBackTo"
-          :back-label="inventoryBackLabel"
-        >
-          <template
-            v-if="canCreateInventoryFolders && paginatedChildFolders.length > 0"
-            #trailing
-          >
-            <button
-              type="button"
-              class="ios-top-bar-text-btn"
-              @click="toggleIosSubfolderSelectMode"
-            >
-              {{ isIosSubfolderSelecting ? 'Done' : 'Select' }}
-            </button>
-          </template>
-        </IosPageNavBar>
-        <p class="ios-inventory-list-meta">
+      <SPageHeader :title="folder?.name || 'Category'" :back="inventoryBack">
+        <template #eyebrow>
+          <nav class="s-breadcrumb" aria-label="Breadcrumb">
+            <template v-for="(crumb, index) in inventoryParentCrumbs" :key="crumb.href">
+              <ChevronRight v-if="index > 0" class="s-breadcrumb__sep" :size="14" :stroke-width="2" aria-hidden="true" />
+              <NuxtLink :to="crumb.href" class="s-breadcrumb__link">{{ crumb.label }}</NuxtLink>
+            </template>
+          </nav>
+        </template>
+        <template #description>
           <template v-if="childFolders.length > 0">
-            {{ childFolders.length }} subcategor{{ childFolders.length === 1 ? 'y' : 'ies' }}
+            {{ childFolders.length }} subcategor{{ childFolders.length === 1 ? 'y' : 'ies' }}.
           </template>
-          <template v-else>Organize with subcategories</template>
-        </p>
-        <IosQuickActionBar
-          v-if="subcategoryQuickActionOptions.length > 0"
-          v-model="subcategoryActionStub"
-          aria-label="Subcategory actions"
-          :options="subcategoryQuickActionOptions"
-        />
-        <div
-          v-if="
-            isIosSubfolderSelecting &&
-            canCreateInventoryFolders &&
-            paginatedChildFolders.length > 0
-          "
-          class="ios-bulk-select-host"
-        >
-          <DashboardBulkSelectControl
-            :model-value="allSubfoldersOnPageSelected"
-            :selected-count="selectedSubfoldersForBulk.length"
-            @update:model-value="toggleSelectAllSubfolders"
-          >
-            <template #action>
-              <Button
-                variant="outline"
-                size="sm"
-                :icon="TrashIcon"
-                :extra-class="
-                  headerBtnClass +
-                  ' !border-red-200/70 !text-red-600 hover:!bg-red-50/80 dark:!border-red-900/40 dark:!text-red-400 dark:hover:!bg-red-950/30'
-                "
-                @click="openBulkDeleteSubfoldersModal"
-              >
-                Delete
-              </Button>
-            </template>
-          </DashboardBulkSelectControl>
-        </div>
-        <IosDrawer
-          v-model="showSubcategoryMoreSheet"
-          title="Subcategory options"
-          variant="menu"
-          footer-variant="menu"
-          body-padding="p-0"
-          aria-label="Subcategory options"
-        >
-          <div class="ios-drawer-menu">
-            <section class="ios-drawer-menu__section">
-              <p class="ios-drawer-menu__section-label">Sort by</p>
-              <div class="ios-drawer-menu__group">
-                <ul class="ios-drawer-menu__list">
-                  <li>
-                    <button
-                      type="button"
-                      class="ios-drawer-menu__row"
-                      @click="selectHubSort('name')"
-                    >
-                      <span class="ios-drawer-menu__label">Name</span>
-                      <CheckIcon
-                        v-if="hubSortBy === 'name'"
-                        class="ios-drawer-menu__check"
-                        aria-hidden="true"
-                      />
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      type="button"
-                      class="ios-drawer-menu__row"
-                      @click="selectHubSort('items')"
-                    >
-                      <span class="ios-drawer-menu__label">Products</span>
-                      <CheckIcon
-                        v-if="hubSortBy === 'items'"
-                        class="ios-drawer-menu__check"
-                        aria-hidden="true"
-                      />
-                    </button>
-                  </li>
-                </ul>
-              </div>
-            </section>
-          </div>
-        </IosDrawer>
-        <DashboardTableEmptyState
-          v-if="childFolders.length === 0"
-          :icon="FolderIcon"
-          title="No subcategories yet"
-          description="Create subcategories to organize products inside this category."
-        />
-        <div v-else class="ios-grouped-list">
-          <IosInventoryFolderRow
-            v-for="(child, index) in paginatedChildFolders"
-            :key="child.id"
-            :name="child.name"
-            :subtitle="child.description?.trim() || undefined"
-            :value="formatSubfolderRowValue(child)"
-            :last="index === paginatedChildFolders.length - 1"
-            :show-menu="canCreateInventoryFolders"
-            :menu-id="child.id"
-            :selectable="canCreateInventoryFolders && isIosSubfolderSelecting"
-            :selected="selectedSubfoldersForBulk.some((f) => f.id === child.id)"
-            @click="navigateToSubfolder(child.id)"
-            @menu="toggleSubfolderMenu(child.id)"
-            @select="(checked) => toggleSubfolderSelection(child, checked)"
-          />
-        </div>
-        <DashboardTablePagination
-          :current-page="hubCurrentPage"
-          :items-per-page="hubItemsPerPage"
-          :total="childFolders.length"
-          @page-change="handleHubPageChange"
-        />
-      </template>
-      <template v-else>
-      <div class="flex flex-wrap items-start justify-between gap-3">
-        <div class="min-w-0">
-          <div class="hidden items-center gap-2 lg:flex">
-            <DashboardBackButton
-              :to="inventoryBackTo"
-              :label="inventoryBackLabel"
-              class="shrink-0"
-            />
-            <h2 class="truncate text-sm font-semibold text-gray-900 dark:text-gray-100">
-              {{ folder?.name || 'Category' }}
-            </h2>
-          </div>
-          <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 lg:sr-only">
-            Subcategories
-          </h2>
-          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            Products live inside subcategories. Open one to add or manage stock.
-          </p>
-        </div>
-        <div class="flex shrink-0 flex-wrap items-center gap-2">
-          <DashboardBulkSelectControl
-            v-if="canCreateInventoryFolders && paginatedChildFolders.length > 0"
-            :model-value="allSubfoldersOnPageSelected"
-            :selected-count="selectedSubfoldersForBulk.length"
-            @update:model-value="toggleSelectAllSubfolders"
-          >
-            <template #action>
-              <Button
-                variant="outline"
-                size="sm"
-                :icon="TrashIcon"
-                :extra-class="
-                  headerBtnClass +
-                  ' !border-red-200/70 !text-red-600 hover:!bg-red-50/80 dark:!border-red-900/40 dark:!text-red-400 dark:hover:!bg-red-950/30'
-                "
-                @click="openBulkDeleteSubfoldersModal"
-              >
-                Delete
-              </Button>
-            </template>
-          </DashboardBulkSelectControl>
-          <Button
-            v-if="canAddSubcategories"
-            variant="primary"
-            size="sm"
-            :icon="PlusCircleIcon"
-            extra-class="!rounded-2xl shrink-0"
-            @click="openCreateSubcategoryModal"
-          >
+          Products live inside subcategories. Open one to add or manage stock.
+        </template>
+        <template v-if="canAddSubcategories" #actions>
+          <SButton variant="primary" @click="openCreateSubcategoryModal">
+            <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
             Add subcategory
-          </Button>
+          </SButton>
+        </template>
+      </SPageHeader>
+
+      <div
+        v-if="canCreateInventoryFolders && selectedSubfoldersForBulk.length > 0"
+        class="s-toolbar s-toolbar--selection"
+        role="region"
+        aria-label="Bulk actions"
+      >
+        <SCheckbox
+          :model-value="allSubfoldersOnPageSelected"
+          :label="`${selectedSubfoldersForBulk.length} selected`"
+          @update:model-value="toggleSelectAllSubfolders()"
+        />
+        <div class="s-toolbar__end">
+          <SButton variant="ghost" size="sm" @click="selectedSubfoldersForBulk = []">Clear</SButton>
+          <SButton variant="danger" size="sm" @click="openBulkDeleteSubfoldersModal">
+            <template #leading><Trash2 :size="14" :stroke-width="2" aria-hidden="true" /></template>
+            Delete
+          </SButton>
         </div>
       </div>
-      <DashboardTableEmptyState
-        v-if="childFolders.length === 0"
-        :icon="FolderIcon"
-        eyebrow="No subcategories yet"
-        :title="`Organize ${folder?.name || 'this category'} with subcategories`"
-        description="Create subcategories (e.g. Corolla, Camry under Toyota) and add products inside each one."
-        :tips="[
-          'Subcategories inherit this category’s columns and settings',
-          'Once products exist in this category, subcategories can’t be added',
-        ]"
-        extra-class="mt-4"
-      >
-        <Button
-          v-if="canAddSubcategories"
-          variant="primary"
-          size="sm"
-          :icon="PlusCircleIcon"
-          extra-class="!rounded-2xl"
-          @click="openCreateSubcategoryModal"
+
+      <SCard v-if="childFolders.length === 0">
+        <SEmptyState
+          :title="`Organize ${folder?.name || 'this category'} with subcategories`"
+          description="Create subcategories (for example Corolla and Camry under Toyota), then add products inside each one. Subcategories inherit this category's columns and settings."
         >
-          Add subcategory
-        </Button>
-      </DashboardTableEmptyState>
-      <div
-        v-else
-        class="dash-grid-shell dash-grid-shell--grid inventory-categories-shell--grid mt-4"
-      >
-        <div class="inventory-categories-grid dash-grid">
+          <template #icon><FolderPlus :size="24" :stroke-width="1.75" /></template>
+          <template v-if="canAddSubcategories" #actions>
+            <SButton variant="primary" @click="openCreateSubcategoryModal">
+              <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
+              Add subcategory
+            </SButton>
+          </template>
+        </SEmptyState>
+      </SCard>
+
+      <template v-else>
+        <div class="s-category-grid">
           <InventoryCategoryCard
             v-for="child in paginatedChildFolders"
             :key="child.id"
@@ -648,6 +104,8 @@
             :item-count="subfolderDisplayStats(child).itemCount"
             :low-stock-count="subfolderDisplayStats(child).lowStockCount"
             :total-value="subfolderDisplayStats(child).totalValue"
+            :value-label="formatCurrency(subfolderDisplayStats(child).totalValue ?? 0)"
+            :selected="selectedSubfoldersForBulk.some((f) => f.id === child.id)"
             :has-serial-numbers="child.hasSerialNumbers"
             :allowed-department-ids="child.allowedDepartments"
             :resolve-department-name="getDepartmentName"
@@ -661,892 +119,432 @@
             @click="navigateToSubfolder(child.id)"
           >
             <template v-if="canCreateInventoryFolders" #checkbox>
-              <Checkbox
+              <SCheckbox
                 :model-value="selectedSubfoldersForBulk.some((f) => f.id === child.id)"
-                size="sm"
-                wrapper-class="justify-center"
+                :aria-label="`Select ${child.name}`"
                 @update:model-value="(checked) => toggleSubfolderSelection(child, checked)"
               />
             </template>
             <template v-if="canCreateInventoryFolders" #menu>
-              <div>
-                <button
-                  type="button"
-                  :data-folder-actions-anchor="child.id"
-                  class="inline-flex h-7 w-7 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700/80 dark:hover:text-gray-200"
-                  aria-label="Subcategory options"
-                  @click="toggleSubfolderMenu(child.id)"
-                >
-                  <EllipsisVerticalIcon class="h-3.5 w-3.5" stroke-width="2" />
-                </button>
-              </div>
+              <SIconButton
+                label="Subcategory options"
+                size="sm"
+                :data-folder-actions-anchor="child.id"
+                aria-haspopup="menu"
+                :aria-expanded="openSubfolderMenuId === child.id"
+                @click="toggleSubfolderMenu(child.id)"
+              >
+                <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
+              </SIconButton>
             </template>
           </InventoryCategoryCard>
         </div>
-      </div>
-      <DashboardTablePagination
-        v-if="childFolders.length > 0"
-        :current-page="hubCurrentPage"
-        :items-per-page="hubItemsPerPage"
-        :total="childFolders.length"
-        @page-change="handleHubPageChange"
-      />
+        <SPagination
+          :current-page="hubCurrentPage"
+          :page-size="hubItemsPerPage"
+          :total="childFolders.length"
+          label="Subcategories pagination"
+          @page-change="handleHubPageChange"
+        />
       </template>
     </template>
 
-    <!-- Enhanced Items Table (teleport to body in expanded view; same pattern as receipts) -->
-    <div v-if="!isLoadingFolder && !showCategoryHub && !isCapacitorIos" class="flex min-h-0 flex-1 flex-col">
-    <Teleport to="body" :disabled="!isFullscreen">
-        <div
-          data-dashboard-teleport
-          :class="[
-            'transition-colors duration-200 ease-out',
-            isFullscreen
-              ? `${tableExpandClass} fixed inset-0 z-[100] flex min-h-0 flex-col overflow-hidden`
-              : 'relative flex min-h-0 flex-1 flex-col',
-          ]"
-        >
-          <!-- Fullscreen header -->
-          <div
-            v-if="isFullscreen"
-            :class="tableExpandHeaderClass"
-            style="padding-top: max(1rem, env(safe-area-inset-top, 0px))"
-          >
-            <div
-              class="flex w-full flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-6"
-            >
-              <div class="flex min-w-0 items-start justify-between gap-3 lg:items-center">
-                <div class="min-w-0">
-                  <p :class="tableExpandEyebrowClass">
-                    Expanded view
-                  </p>
-                  <div class="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                    <h2 :class="tableExpandTitleClass">
-                      {{ folder?.name || 'Inventory Products' }}
-                    </h2>
-                    <span :class="tableExpandMetaClass">
-                      {{ folder?.itemCount ?? 0 }} items · {{ formatCurrency(totalInventoryValue) }}
-                      <template
-                        v-if="isSearchActive && sortedFilteredItems.length !== baseItems.length"
-                      >
-                        · {{ sortedFilteredItems.length }} shown
-                      </template>
-                    </span>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  class="inline-flex lg:hidden"
-                  :class="tableExpandCloseClass"
-                  aria-label="Exit expanded view"
-                  @click="isFullscreen = false"
-                >
-                  <XMarkIcon class="h-5 w-5" />
-                </button>
-              </div>
-              <div
-                class="flex min-w-0 flex-1 flex-wrap items-center gap-2 lg:max-w-none lg:justify-end"
-              >
-                <div
-                  class="relative min-w-0 w-full sm:max-w-[min(100%,20rem)] lg:w-56 lg:max-w-[16rem] lg:flex-initial"
-                >
-                  <MagnifyingGlassIcon
-                    class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500"
-                  />
-                  <input
-                    v-model="searchQuery"
-                    type="text"
-                    placeholder="Search…"
-                    class="w-full py-2 pl-10 pr-3 text-sm"
-                    :class="tableExpandFieldClass"
-                  />
-                </div>
-                <div class="flex flex-wrap items-center gap-2">
-                  <select
-                    v-model="sortBy"
-                    class="min-w-[7.5rem] cursor-pointer px-3 py-2 text-sm font-medium"
-                    :class="tableExpandFieldClass"
-                    @change="handleSortByChange"
-                  >
-                    <option value="name">Name</option>
-                    <option value="price">Unit price</option>
-                    <option value="sku">SKU</option>
-                    <option value="dateIn">Date In</option>
-                    <option value="availability">Status</option>
-                  </select>
-                  <button
-                    type="button"
-                    class="hidden lg:inline-flex"
-                    :class="tableExpandCloseClass"
-                    aria-label="Exit expanded view"
-                    @click="isFullscreen = false"
-                  >
-                    <XMarkIcon class="h-5 w-5" />
-                  </button>
-                  <template v-if="canLoanToSellerUi">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      :icon="ArrowTopRightOnSquareIcon"
-                      extra-class="!rounded-2xl"
-                      :disabled="selectedItemsEligibleForSellerLoan.length === 0"
-                      :aria-label="sellerLoanButtonTitle"
-                      @click="openCreateSellerLoanModal"
-                    >
-                      Stock loan
-                    </Button>
-                  </template>
-                  <template v-if="canManageInventoryItems">
-                    <template v-if="selectedItemsForBulk.length > 0">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        :icon="TagIcon"
-                        extra-class="!rounded-2xl"
-                        @click="openBulkDiscountModal"
-                      >
-                        Discount
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        :icon="TrashIcon"
-                        extra-class="!rounded-2xl-red-200/80 dark:!border-red-800/40"
-                        @click="openBulkDeleteModal"
-                      >
-                        Delete
-                      </Button>
-                    </template>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      :icon="ArrowDownTrayIcon"
-                      :loading="isImporting"
-                      :disabled="isExporting"
-                      extra-class="!rounded-2xl"
-                      aria-label="Import from Excel"
-                      @click="fileInputRef?.click()"
-                    >
-                      Import
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      :icon="ArrowUpTrayIcon"
-                      :loading="isExporting"
-                      :disabled="isImporting || (folder?.itemCount ?? 0) === 0"
-                      extra-class="!rounded-2xl"
-                      aria-label="Export to Excel"
-                      @click="handleExportToExcel"
-                    >
-                      Export
-                    </Button>
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      :icon="PlusCircleIcon"
-                      extra-class="!rounded-2xl"
-                      aria-label="Add product"
-                      @click="openAddItemModal"
-                    >
-                      Add product
-                    </Button>
-                  </template>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div :class="isFullscreen ? tableExpandBodyClass : tableShellFlexClass">
-            <!-- Desktop toolbar -->
-            <DataTableToolbar v-if="!isFullscreen" class="hidden lg:block">
-              <template #heading>
-                <div class="flex min-w-0 flex-1 items-start gap-2">
-                  <DashboardBackButton
-                    :to="inventoryBackTo"
-                    :label="inventoryBackLabel"
-                    class="mt-0.5 hidden lg:inline-flex"
-                  />
-                  <div class="min-w-0 flex-1">
-                    <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                      <h2
-                        class="truncate text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm"
-                      >
-                        {{ folder?.name || 'Category' }}
-                      </h2>
-                    </div>
-                    <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
-                      <span class="tabular-nums font-medium text-gray-600 dark:text-gray-300"
-                        >{{ folder?.itemCount ?? 0 }} items</span
-                      >
-                      <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
-                      <span class="tabular-nums"
-                        >{{ formatCurrency(totalInventoryValue) }} total value</span
-                      >
-                      <template
-                        v-if="isSearchActive && sortedFilteredItems.length !== baseItems.length"
-                      >
-                        <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
-                        <span>{{ sortedFilteredItems.length }} shown</span>
-                      </template>
-                    </p>
-                  </div>
-                </div>
-              </template>
-              <template #filters>
-                <DashboardToolbarSearch
-                  v-if="!isCapacitorIos"
-                  v-model="searchQuery"
-                  placeholder="Search…"
-                  :wide="false"
-                  input-class="w-40 sm:w-48"
-                />
-                <DashboardToolbarSelect
-                  v-model="sortBy"
-                  min-width-class="min-w-[6.5rem]"
-                  @change="handleSortByChange"
-                >
-                  <option value="name">Name</option>
-                  <option value="price">Unit price</option>
-                  <option value="sku">SKU</option>
-                  <option value="dateIn">Date In</option>
-                  <option value="availability">Status</option>
-                </DashboardToolbarSelect>
-                <DashboardToolbarIconButton
-                  class="hidden lg:inline-flex"
-                  aria-label="Expand table"
-                  @click="isFullscreen = !isFullscreen"
-                >
-                  <ArrowsPointingOutIcon class="h-4 w-4" />
-                </DashboardToolbarIconButton>
-                <div
-                  class="hidden items-center rounded-lg border border-gray-200/80 p-0.5 dark:border-white/10 lg:inline-flex"
-                  role="group"
-                  aria-label="Product layout"
-                >
-                  <button
-                    type="button"
-                    class="inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors"
-                    :class="
-                      itemsViewMode === 'table'
-                        ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900'
-                        : 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
-                    "
-                    :aria-pressed="itemsViewMode === 'table'"
-                    aria-label="Compact table"
-                    @click="itemsViewMode = 'table'"
-                  >
-                    <TableCellsIcon class="h-3.5 w-3.5" aria-hidden="true" />
-                  </button>
-                  <button
-                    type="button"
-                    class="inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors"
-                    :class="
-                      itemsViewMode === 'shelf'
-                        ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900'
-                        : 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
-                    "
-                    :aria-pressed="itemsViewMode === 'shelf'"
-                    aria-label="Shelf view"
-                    @click="itemsViewMode = 'shelf'"
-                  >
-                    <Squares2X2Icon class="h-3.5 w-3.5" aria-hidden="true" />
-                  </button>
-                </div>
-              </template>
-              <template #actions>
-                <template v-if="canManageInventoryItems && selectedItemsForBulk.length > 0">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    :icon="TagIcon"
-                    extra-class="!rounded-2xl max-sm:!px-2 max-sm:!py-1.5"
-                    @click="openBulkDiscountModal"
-                  >
-                    <span class="hidden sm:inline">Discount</span>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    :icon="TrashIcon"
-                    extra-class="!rounded-2xl max-sm:!px-2 max-sm:!py-1.5-red-200/80 dark:!border-red-800/40"
-                    @click="openBulkDeleteModal"
-                  >
-                    <span class="hidden sm:inline">Delete</span>
-                  </Button>
-                </template>
-                <template v-if="canLoanToSellerUi">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    :icon="ArrowTopRightOnSquareIcon"
-                    extra-class="!rounded-2xl max-sm:!px-2 max-sm:!py-1.5"
-                    :disabled="selectedItemsEligibleForSellerLoan.length === 0"
-                    :aria-label="sellerLoanButtonTitle"
-                    @click="openCreateSellerLoanModal"
-                  >
-                    <span class="hidden sm:inline">Stock loan</span>
-                  </Button>
-                </template>
-                <Button
-                  v-if="canManageInventoryItems"
-                  variant="outline"
-                  size="sm"
-                  :icon="ArrowDownTrayIcon"
-                  :loading="isImporting"
-                  :disabled="isExporting"
-                  extra-class="!rounded-2xl max-sm:!px-2 max-sm:!py-1.5"
-                  aria-label="Import from Excel"
-                  @click="fileInputRef?.click()"
-                >
-                  <span class="hidden sm:inline">Import</span>
-                </Button>
-                <Button
-                  v-if="canManageInventoryItems"
-                  variant="outline"
-                  size="sm"
-                  :icon="ArrowUpTrayIcon"
-                  :loading="isExporting"
-                  :disabled="isImporting || (folder?.itemCount ?? 0) === 0"
-                  extra-class="!rounded-2xl max-sm:!px-2 max-sm:!py-1.5"
-                  aria-label="Export to Excel"
-                  @click="handleExportToExcel"
-                >
-                  <span class="hidden sm:inline">Export</span>
-                </Button>
-                <Button
-                  v-if="canManageInventoryItems"
-                  variant="primary"
-                  size="sm"
-                  :icon="PlusCircleIcon"
-                  aria-label="Add product"
-                  extra-class="!rounded-2xl max-sm:!px-2 max-sm:!py-1.5"
-                  @click="openAddItemModal"
-                >
-                  <span :class="headerBtnLabelClass">Add product</span>
-                </Button>
-              </template>
-            </DataTableToolbar>
-            <!-- Empty state inside table card -->
-            <DashboardTableEmptyState
-              v-if="sortedFilteredItems.length === 0"
-              :icon="CubeIcon"
-              :eyebrow="searchQuery ? 'No match' : 'Empty folder'"
-              :title="searchQuery ? 'No products found' : 'No products in this folder'"
-              :description="
-                searchQuery
-                  ? 'Try a different term or reset filters to see everything in this folder.'
-                  : 'Add your first product to start tracking stock, pricing, and serial numbers here.'
-              "
-              :tips="
-                searchQuery
-                  ? [
-                      'Search matches name, SKU, and custom fields',
-                      'Clear search to view all products in this category',
-                    ]
-                  : [
-                      'Import from CSV or add items one at a time',
-                      'Serialized items can be lent via Stock loans',
-                    ]
-              "
-              extra-class="mx-3 mb-4 sm:mx-5"
-            >
-              <Button
-                v-if="canManageInventoryItems && !searchQuery"
-                variant="primary"
-                size="sm"
-                :icon="PlusCircleIcon"
-                extra-class="!rounded-2xl"
-                @click="openAddItemModal"
-              >
-                Add product
-              </Button>
-            </DashboardTableEmptyState>
-            <template v-else>
-              <div
-                :class="
-                  isFullscreen
-                    ? 'flex min-h-0 flex-1 flex-col overflow-hidden'
-                    : 'flex min-h-0 flex-1 flex-col'
-                "
-              >
-                <!-- Mobile: card list (iOS invoice-style; web compact cards) -->
-                <div
-                  class="inventory-items-mobile-list block space-y-2 sm:hidden"
-                  :class="[
-                    isFullscreen ? 'min-h-0 flex-1 overflow-y-auto px-4 pb-4 lg:px-8' : 'px-0',
-                    isCapacitorIos ? 'inventory-items-mobile-list--ios' : '',
-                  ]"
-                >
-                  <template v-if="isCapacitorIos">
-                    <IosInventoryItemCard
-                      v-for="item in paginatedItems"
-                      :key="item.id"
-                      :title="getItemPrimaryLabel(item)"
-                      :subtitle="getItemCardSubtitle(item)"
-                      :price="getItemDisplayPrice(item)"
-                      :reference="getItemCardReference(item)"
-                      :status-label="getItemAvailability(item).label"
-                      :status="getItemAvailability(item).status"
-                      :date="getItemCardDate(item)"
-                      @click="openMobileItemDetail(item)"
-                    />
-                  </template>
-                  <template v-else>
-                  <div
-                    v-for="item in paginatedItems"
-                    :key="item.id"
-                    :data-item-row="item.id"
-                    class="rounded-sm bg-white p-3 shadow-none dark:!bg-dashboard-card"
-                    :class="flashItemId === item.id ? '!ring-2 !ring-gray-900/20 dark:!ring-white/25 ring-offset-2 ring-offset-white dark:!ring-offset-gray-900' : ''"
-                  >
-                    <div class="flex items-start justify-between gap-1.5">
-                      <div class="min-w-0 flex-1 flex items-start gap-1.5">
-                        <Checkbox
-                          v-if="showBulkRowSelection && !isInventoryItemLocked(item)"
-                          :model-value="selectedItemsForBulk.some((i) => i.id === item.id)"
-                          @update:model-value="(checked) => toggleItemSelection(item, checked)"
-                          size="sm"
-                          wrapper-class="justify-center pt-0.5"
-                          @click.stop
-                        />
-                        <div class="min-w-0 flex-1">
-                          <p
-                            class="truncate text-[11px] font-semibold leading-snug text-gray-900 dark:text-gray-100"
-                          >
-                            {{ getItemPrimaryLabel(item) }}
-                          </p>
-                          <InventorySourceBadge
-                            v-if="getItemSourceBadge(item)"
-                            :badge="getItemSourceBadge(item)!"
-                            :inline-meta="false"
-                            class="mt-1"
-                          />
-                          <div class="mt-0.5 flex flex-wrap items-center justify-between gap-1.5">
-                            <div class="flex min-w-0 flex-wrap items-baseline gap-x-1.5 gap-y-0">
-                              <span
-                                class="text-xs font-semibold tabular-nums text-gray-900 dark:text-gray-100"
-                              >
-                                {{ getItemDisplayPrice(item) }}
-                              </span>
-                              <InventoryProfitHint
-                                v-if="canShowProfitAndCost"
-                                :item="item"
-                                inline
-                              />
-                            </div>
-                            <InventoryStatusBadge
-                              :badge="getItemAvailability(item)"
-                              :inline-meta="false"
-                              class="shrink-0"
-                            />
-                          </div>
-                          <p
-                            v-if="item.sku || item.serialNumber || item.serialNo"
-                            class="mt-0.5 truncate text-[9px] text-gray-500 dark:text-gray-400"
-                          >
-                            {{ item.sku || item.serialNumber || item.serialNo }}
-                          </p>
-                        </div>
-                      </div>
-                      <div class="flex shrink-0 flex-col items-center gap-0.5" @click.stop>
-                        <div class="relative">
-                          <button
-                            type="button"
-                            :data-item-actions-anchor="item.id"
-                            @click="toggleItemMenu(item.id)"
-                            :disabled="isInventoryItemLocked(item)"
-                            :class="[
-                              'inline-flex h-7 w-7 items-center justify-center rounded-lg transition-colors',
-                              isInventoryItemLocked(item)
-                                ? 'cursor-not-allowed opacity-40'
-                                : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/80 hover:text-gray-800 dark:hover:text-gray-200',
-                            ]"
-                            aria-label="Product actions"
-                            aria-haspopup="menu"
-                            :aria-expanded="openItemMenuId === item.id"
-                          >
-                            <EllipsisVerticalIcon class="h-3.5 w-3.5" stroke-width="2" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  </template>
-                </div>
-                <!-- Desktop table / shelf (web only) -->
-                <div
-                  v-if="!isCapacitorIos && itemsViewMode === 'shelf'"
-                  class="inventory-items-shelf-wrap hidden min-h-0 flex-1 sm:block"
-                  :class="isFullscreen ? 'overflow-auto px-4 pb-4 pt-2 lg:px-8' : 'px-0 pb-2'"
-                >
-                  <div class="grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-4">
-                    <button
-                      v-for="item in paginatedItems"
-                      :key="item.id"
-                      type="button"
-                      class="inventory-shelf-card rounded-lg border border-gray-100 bg-white p-3 text-left transition-colors hover:border-gray-200 dark:border-white/[0.06] dark:!bg-dashboard-card dark:hover:border-white/15"
-                      :class="
-                        flashItemId === item.id
-                          ? '!ring-2 !ring-gray-900/20 dark:!ring-white/25'
-                          : ''
-                      "
-                      @click="openMobileItemDetail(item)"
-                    >
-                      <p class="truncate text-xs font-semibold text-gray-900 dark:text-gray-100">
-                        {{ getItemPrimaryLabel(item) }}
-                      </p>
-                      <p class="mt-1 text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-50">
-                        {{ getItemDisplayPrice(item) }}
-                      </p>
-                      <div class="mt-2 flex items-center justify-between gap-2">
-                        <InventoryStatusBadge
-                          :badge="getItemAvailability(item)"
-                          :inline-meta="false"
-                          class="shrink-0"
-                        />
-                        <span
-                          v-if="item.sku || item.serialNumber || item.serialNo"
-                          class="truncate text-[10px] text-gray-500 dark:text-gray-400"
-                        >
-                          {{ item.sku || item.serialNumber || item.serialNo }}
-                        </span>
-                      </div>
-                    </button>
-                  </div>
-                </div>
-                <div
-                  v-else-if="!isCapacitorIos"
-                  class="inventory-items-table-wrap hidden min-h-0 flex-1 flex-col sm:flex"
-                  :class="isFullscreen ? 'overflow-auto px-4 pb-2 pt-2 lg:px-8' : ''"
-                >
-                  <div class="min-h-0 flex-1 overflow-x-auto">
-                    <table class="dashboard-table dashboard-table--dense min-w-full">
-                      <thead :class="isFullscreen ? 'sticky top-0 z-10' : ''">
-                        <tr>
-                          <th v-if="showBulkRowSelection" class="w-10 text-center">
-                            <Checkbox
-                              :model-value="
-                                (() => {
-                                  const availableItems = filteredItems.filter(
-                                    (item) => !isInventoryItemLocked(item)
-                                  )
-                                  return (
-                                    selectedItemsForBulk.length === availableItems.length &&
-                                    availableItems.length > 0
-                                  )
-                                })()
-                              "
-                              @update:model-value="(checked) => toggleSelectAll(checked)"
-                              size="sm"
-                              wrapper-class="justify-center"
-                            />
-                          </th>
-                          <th
-                            v-for="column in columns"
-                            :key="column.key"
-                            :class="[
-                              column.key === 'availability' && 'dashboard-table__col-status',
-                              column.key === 'source' && 'dashboard-table__col-source',
-                              column.key === 'unitCost' && 'dashboard-table__col-cost',
-                              column.key === 'margin' && 'dashboard-table__col-margin',
-                              isInventorySellPriceColumn(column) && 'dashboard-table__col-price',
-                              column.sortable &&
-                                'cursor-pointer select-none hover:text-gray-800 dark:hover:text-gray-200',
-                            ]"
-                            @click="column.sortable && toggleSort(column.key)"
-                          >
-                            <div class="flex items-center gap-1.5">
-                              {{ column.label }}
-                              <template v-if="column.sortable">
-                                <ChevronUpIcon
-                                  v-if="
-                                    currentSort.key === column.key && currentSort.order === 'asc'
-                                  "
-                                  class="w-3 h-3 text-gray-700 dark:text-gray-300"
-                                />
-                                <ChevronDownIcon
-                                  v-else-if="
-                                    currentSort.key === column.key && currentSort.order === 'desc'
-                                  "
-                                  class="w-3 h-3 text-gray-700 dark:text-gray-300"
-                                />
-                                <BarsArrowUpIcon
-                                  v-else
-                                  class="w-3 h-3 text-gray-400 dark:text-gray-500 opacity-50"
-                                />
-                              </template>
-                            </div>
-                          </th>
-                          <th v-if="canManageInventoryItems" class="dashboard-table__col-actions">
-                            <span class="sr-only">Actions</span>
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr
-                          v-for="(item, index) in paginatedItems"
-                          :key="item.id"
-                          :data-item-row="item.id"
-                          :class="flashItemId === item.id ? '!ring-2 !ring-inset !ring-gray-900/20 dark:!ring-white/25' : ''"
-                        >
-                          <td v-if="showBulkRowSelection" class="text-center">
-                            <Checkbox
-                              :model-value="selectedItemsForBulk.some((i) => i.id === item.id)"
-                              @update:model-value="(checked) => toggleItemSelection(item, checked)"
-                              :disabled="isInventoryItemLocked(item)"
-                              size="sm"
-                              wrapper-class="justify-center"
-                            />
-                          </td>
-                          <td
-                            v-for="(column, colIndex) in columns"
-                            :key="column.key"
-                            :class="[
-                              colIndex === 0 && 'dashboard-table__col-name',
-                              column.key === 'availability' && 'dashboard-table__col-status',
-                              column.key === 'source' && 'dashboard-table__col-source',
-                              column.key === 'unitCost' && 'dashboard-table__col-cost',
-                              column.key === 'margin' && 'dashboard-table__col-margin',
-                              isInventorySellPriceColumn(column) && 'dashboard-table__col-price',
-                              ('type' in column && column.type === 'date') ||
-                              column.key === 'dateIn' ||
-                              column.key === 'dateOut'
-                                ? 'dashboard-table__col-date'
-                                : '',
-                            ]"
-                          >
-                            <!-- Inline edit mode (large screens only); click outside saves -->
-                            <div
-                              v-if="
-                                isLargeScreen &&
-                                canManageInventoryItems &&
-                                !isInventoryItemLocked(item) &&
-                                isColumnEditable(column) &&
-                                isEditingCell(item, column.key)
-                              "
-                              ref="inlineEditCellRef"
-                              class="min-w-[80px]"
-                            >
-                              <input
-                                ref="inlineEditInputRef"
-                                v-model="inlineEditValue"
-                                type="text"
-                                :inputmode="
-                                  column.type === 'currency' ||
-                                  column.type === 'number' ||
-                                  column.key.toLowerCase().includes('price')
-                                    ? 'decimal'
-                                    : 'text'
-                                "
-                                class="w-full min-w-0 px-2 py-1 text-[10px] border-0 dark:border-white/10 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-gray-400/30 outline-none"
-                                @blur="saveInlineEdit"
-                                @keydown.enter="saveInlineEdit"
-                                @keydown.esc="cancelInlineEdit"
-                                @click.stop
-                              />
-                            </div>
-                            <!-- Display mode -->
-                            <div
-                              v-else
-                              :class="[
-                                'flex items-center gap-1.5 min-h-[22px]',
-                                isLargeScreen &&
-                                  canManageInventoryItems &&
-                                  !isInventoryItemLocked(item) &&
-                                  isColumnEditable(column) &&
-                                  'cursor-text hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded px-1 -mx-1 transition-colors',
-                              ]"
-                              @click="startInlineEdit(item, column)"
-                            >
-                              <template v-if="colIndex === 0">
-                                <span
-                                  class="dashboard-table__primary dashboard-table__name"
-                                  :data-dashboard-tooltip="getItemPrimaryLabel(item)"
-                                >
-                                  {{ getItemPrimaryLabel(item) }}
-                                </span>
-                              </template>
-                              <template v-else>
-                                <div v-if="isInventoryUnitCostColumn(column)">
-                                  <span
-                                    v-if="getItemCostForDisplay(item) !== undefined"
-                                    class="dashboard-table__numeric"
-                                  >
-                                    {{ formatCurrency(getItemCostForDisplay(item)!) }}
-                                  </span>
-                                  <span v-else class="dashboard-table__muted italic">-</span>
-                                </div>
-                                <!-- Sell price (unit price) - amount only; margin lives in Margin column -->
-                                <div v-else-if="isInventorySellPriceColumn(column)">
-                                  <div
-                                    v-if="item.discountedPrice !== undefined"
-                                    class="inline-flex items-baseline gap-1.5 whitespace-nowrap"
-                                  >
-                                    <div class="inline-flex items-baseline gap-1">
-                                      <span class="dashboard-table__numeric">
-                                        {{ formatCurrency(item.discountedPrice) }}
-                                      </span>
-                                      <span
-                                        v-if="getItemDiscountLabel(item)"
-                                        class="text-[10px] font-medium tabular-nums text-red-600/90 dark:text-red-400/90"
-                                      >
-                                        {{ getItemDiscountLabel(item) }}
-                                      </span>
-                                    </div>
-                                    <span
-                                      class="text-[11px] tabular-nums text-gray-400 line-through dark:text-gray-500"
-                                    >
-                                      {{
-                                        formatCurrency(item.originalPrice || item[column.key] || 0)
-                                      }}
-                                    </span>
-                                  </div>
-                                  <span v-else class="dashboard-table__numeric">
-                                    {{ formatCurrency(item[column.key] || 0) }}
-                                  </span>
-                                </div>
-                                <div
-                                  v-else-if="'type' in column && column.type === 'number'"
-                                  class="dashboard-table__numeric"
-                                >
-                                  {{ formatNumber(item[column.key]) }}
-                                </div>
-                                <div
-                                  v-else-if="'type' in column && column.type === 'date'"
-                                  class="dashboard-table__muted"
-                                >
-                                  <span v-if="item[column.key]">
-                                    {{ formatItemDate(item[column.key]) }}
-                                  </span>
-                                  <span v-else class="text-gray-400 dark:text-gray-500 italic">
-                                    -
-                                  </span>
-                                </div>
-                                <div
-                                  v-else-if="column.key === 'dateIn' || column.key === 'dateOut'"
-                                  class="dashboard-table__muted"
-                                >
-                                  <span v-if="item[column.key]">
-                                    {{ formatItemDate(item[column.key]) }}
-                                  </span>
-                                  <span v-else class="text-gray-400 dark:text-gray-500"> - </span>
-                                </div>
-                                <div
-                                  v-else-if="column.key === 'margin'"
-                                  class="inline-flex items-center justify-end gap-1.5 whitespace-nowrap"
-                                >
-                                  <template v-if="getItemGrossProfit(item) !== null">
-                                    <span :class="inventoryMarginClass(item)">
-                                      {{ getItemProfitLabel(item) }}
-                                    </span>
-                                    <span
-                                      class="dashboard-table__pct"
-                                      :class="
-                                        getItemGrossProfit(item)! < 0
-                                          ? 'dashboard-table__pct--neg'
-                                          : ''
-                                      "
-                                    >
-                                      {{ formatMarginPercent(getItemMarginPercent(item)) }}
-                                    </span>
-                                  </template>
-                                  <span v-else class="dashboard-table__muted">-</span>
-                                </div>
-                                <div v-else-if="column.key === 'source'">
-                                  <InventorySourceBadge
-                                    v-if="getItemSourceBadge(item)"
-                                    :badge="getItemSourceBadge(item)!"
-                                  />
-                                  <span v-else class="dashboard-table__muted italic">Stock</span>
-                                </div>
-                                <div v-else-if="column.key === 'availability'">
-                                  <InventoryStatusBadge :badge="getItemAvailability(item)" />
-                                </div>
-                                <div
-                                  v-else-if="'type' in column && column.type === 'boolean'"
-                                  class="inline-flex items-center px-2 py-0.5 text-[9px] font-medium"
-                                  :class="
-                                    item[column.key]
-                                      ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
-                                      : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'
-                                  "
-                                >
-                                  {{ item[column.key] ? 'Yes' : 'No' }}
-                                </div>
-                                <div v-else class="dashboard-table__muted">
-                                  <span
-                                    v-if="
-                                      getItemDisplayValue(item[column.key]) &&
-                                      typeof getItemDisplayValue(item[column.key]) === 'string' &&
-                                      getItemDisplayValue(item[column.key]).length > 30
-                                    "
-                                    class="block truncate max-w-xs"
-                                    :data-dashboard-tooltip="getItemDisplayValue(item[column.key])"
-                                  >
-                                    {{ getItemDisplayValue(item[column.key]) }}
-                                  </span>
-                                  <span v-else>
-                                    {{ getItemDisplayValue(item[column.key]) }}
-                                  </span>
-                                </div>
-                              </template>
-                            </div>
-                          </td>
-                          <td v-if="canManageInventoryItems" class="dashboard-table__col-actions">
-                            <div
-                              class="relative inline-flex justify-end"
-                              @click.stop
-                            >
-                              <button
-                                type="button"
-                                :data-item-actions-anchor="item.id"
-                                @click="toggleItemMenu(item.id)"
-                                :disabled="isInventoryItemLocked(item)"
-                                :class="[
-                                  'dashboard-table__action-btn',
-                                  isInventoryItemLocked(item)
-                                    ? 'cursor-not-allowed opacity-40'
-                                    : '',
-                                ]"
-                                aria-label="Item actions"
-                                aria-haspopup="menu"
-                                :aria-expanded="openItemMenuId === item.id"
-                              >
-                                <EllipsisVerticalIcon class="w-4 h-4" stroke-width="2" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-                <DashboardTablePagination
-                  v-if="paginationTotal > 0 && !isFullscreen"
-                  :current-page="currentPage"
-                  :items-per-page="itemsPerPage"
-                  :total="paginationTotal"
-                  @page-change="handlePageChange"
-                />
-              </div>
+    <!-- Products -->
+    <template v-if="!isLoadingFolder && !showCategoryHub">
+      <SPageHeader :title="folder?.name || 'Category'" :back="inventoryBack">
+        <template #eyebrow>
+          <nav class="s-breadcrumb" aria-label="Breadcrumb">
+            <template v-for="(crumb, index) in inventoryParentCrumbs" :key="crumb.href">
+              <ChevronRight v-if="index > 0" class="s-breadcrumb__sep" :size="14" :stroke-width="2" aria-hidden="true" />
+              <NuxtLink :to="crumb.href" class="s-breadcrumb__link">{{ crumb.label }}</NuxtLink>
             </template>
+          </nav>
+        </template>
+        <template #description>
+          {{ folder?.itemCount ?? 0 }} {{ (folder?.itemCount ?? 0) === 1 ? 'item' : 'items' }}
+          · {{ formatCurrency(totalInventoryValue) }} total value
+          <template v-if="isSearchActive && sortedFilteredItems.length !== baseItems.length">
+            · {{ sortedFilteredItems.length }} shown
+          </template>
+        </template>
+        <template v-if="canManageInventoryItems" #actions>
+          <SButton :loading="isImporting" :disabled="isExporting" @click="fileInputRef?.click()">
+            <template #leading><Upload :size="16" :stroke-width="1.75" aria-hidden="true" /></template>
+            Import
+          </SButton>
+          <SButton
+            :loading="isExporting"
+            :disabled="isImporting || (folder?.itemCount ?? 0) === 0"
+            @click="handleExportToExcel"
+          >
+            <template #leading><Download :size="16" :stroke-width="1.75" aria-hidden="true" /></template>
+            Export
+          </SButton>
+          <SButton variant="primary" @click="openAddItemModal">
+            <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
+            Add product
+          </SButton>
+        </template>
+      </SPageHeader>
 
-            <!-- Fullscreen: pagination pinned inside overlay -->
-            <DashboardTablePagination
-              v-if="isFullscreen && paginationTotal > 0"
-              :pin-to-viewport="false"
-              class="shrink-0"
-              style="padding-bottom: env(safe-area-inset-bottom, 0px)"
-              :current-page="currentPage"
-              :items-per-page="itemsPerPage"
-              :total="paginationTotal"
-              @page-change="handlePageChange"
-            />
+      <div
+        v-if="showBulkRowSelection && selectedItemsForBulk.length > 0"
+        class="s-toolbar s-toolbar--selection"
+        role="region"
+        aria-label="Bulk actions"
+      >
+        <SCheckbox
+          :model-value="allSelectableItemsSelected"
+          :label="`${selectedItemsForBulk.length} selected`"
+          @update:model-value="(checked) => toggleSelectAll(checked)"
+        />
+        <div class="s-toolbar__end">
+          <SButton variant="ghost" size="sm" @click="selectedItemsForBulk = []">Clear</SButton>
+          <SButton
+            v-if="canLoanToSellerUi"
+            size="sm"
+            :disabled="selectedItemsEligibleForSellerLoan.length === 0"
+            :title="sellerLoanButtonTitle || undefined"
+            @click="openCreateSellerLoanModal"
+          >
+            <template #leading><HandCoins :size="14" :stroke-width="2" aria-hidden="true" /></template>
+            Stock loan
+          </SButton>
+          <template v-if="canManageInventoryItems">
+            <SButton size="sm" @click="openBulkDiscountModal">
+              <template #leading><Tag :size="14" :stroke-width="2" aria-hidden="true" /></template>
+              Discount
+            </SButton>
+            <SButton variant="danger" size="sm" @click="openBulkDeleteModal">
+              <template #leading><Trash2 :size="14" :stroke-width="2" aria-hidden="true" /></template>
+              Delete
+            </SButton>
+          </template>
+        </div>
+      </div>
+      <div v-else class="s-toolbar">
+        <SSearch
+          v-model="searchQuery"
+          class="s-toolbar__search"
+          placeholder="Search products"
+          label="Search by name, SKU or serial number"
+        />
+        <div class="s-toolbar__filter">
+          <SSelect
+            :model-value="sortBy"
+            :options="itemSortSelectOptions"
+            aria-label="Sort by"
+            @update:model-value="onItemSortSelect"
+          />
+        </div>
+        <div class="s-toolbar__end s-hide-sm">
+          <div class="s-toggle-group" role="group" aria-label="Layout">
+            <button
+              type="button"
+              class="s-toggle-group__btn"
+              :aria-pressed="itemsViewMode === 'table'"
+              aria-label="Table view"
+              @click="itemsViewMode = 'table'"
+            >
+              <List :size="16" :stroke-width="1.75" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              class="s-toggle-group__btn"
+              :aria-pressed="itemsViewMode === 'shelf'"
+              aria-label="Shelf view"
+              @click="itemsViewMode = 'shelf'"
+            >
+              <LayoutGrid :size="16" :stroke-width="1.75" aria-hidden="true" />
+            </button>
           </div>
         </div>
-      </Teleport>
-    </div>
+      </div>
+
+      <SCard v-if="sortedFilteredItems.length === 0">
+        <SEmptyState
+          :title="searchQuery ? 'No products found' : 'No products yet'"
+          :description="
+            searchQuery
+              ? 'Try a different name, SKU or serial number.'
+              : 'Add your first product to track stock, pricing and serial numbers here, or import a spreadsheet.'
+          "
+        >
+          <template #icon>
+            <SearchX v-if="searchQuery" :size="24" :stroke-width="1.75" />
+            <PackagePlus v-else :size="24" :stroke-width="1.75" />
+          </template>
+          <template v-if="searchQuery || canManageInventoryItems" #actions>
+            <SButton v-if="searchQuery" @click="searchQuery = ''">Clear search</SButton>
+            <template v-else>
+              <SButton :loading="isImporting" @click="fileInputRef?.click()">
+                <template #leading><Upload :size="16" :stroke-width="1.75" aria-hidden="true" /></template>
+                Import
+              </SButton>
+              <SButton variant="primary" @click="openAddItemModal">
+                <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
+                Add product
+              </SButton>
+            </template>
+          </template>
+        </SEmptyState>
+      </SCard>
+
+      <template v-else>
+        <!-- Phone: one row per product -->
+        <SCard flush class="s-only-sm">
+          <ul class="s-list">
+            <li v-for="item in paginatedItems" :key="item.id">
+              <div
+                :data-item-row="item.id"
+                class="s-list__item s-product-row"
+                :class="{ 's-list__item--flash': flashItemId === item.id }"
+              >
+                <SCheckbox
+                  v-if="showBulkRowSelection && !isInventoryItemLocked(item)"
+                  :model-value="isItemSelected(item)"
+                  :aria-label="`Select ${getItemPrimaryLabel(item)}`"
+                  @update:model-value="(checked) => toggleItemSelection(item, checked)"
+                />
+                <button type="button" class="s-list__main s-list__hit" @click="openMobileItemDetail(item)">
+                  <span class="s-list__primary">{{ getItemPrimaryLabel(item) }}</span>
+                  <span class="s-list__secondary">
+                    {{ [item.sku || item.serialNumber || item.serialNo, getItemSourceBadge(item)?.label].filter(Boolean).join(' · ') || folder?.name }}
+                  </span>
+                </button>
+                <div class="s-list__end">
+                  <span class="s-list__value">{{ getItemDisplayPrice(item) }}</span>
+                  <InventoryStatusBadge :badge="getItemAvailability(item)" :inline-meta="false" />
+                </div>
+                <SIconButton
+                  label="Product actions"
+                  size="sm"
+                  :disabled="isInventoryItemLocked(item)"
+                  :data-item-actions-anchor="item.id"
+                  aria-haspopup="menu"
+                  :aria-expanded="openItemMenuId === item.id"
+                  @click="toggleItemMenu(item.id)"
+                >
+                  <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
+                </SIconButton>
+              </div>
+            </li>
+          </ul>
+        </SCard>
+
+        <!-- Tablet and desktop: shelf -->
+        <div v-if="itemsViewMode === 'shelf'" class="s-product-grid s-hide-sm">
+          <button
+            v-for="item in paginatedItems"
+            :key="item.id"
+            type="button"
+            class="s-product-card"
+            :class="{ 's-product-card--flash': flashItemId === item.id }"
+            @click="openMobileItemDetail(item)"
+          >
+            <span class="s-product-card__name">{{ getItemPrimaryLabel(item) }}</span>
+            <span class="s-product-card__price">{{ getItemDisplayPrice(item) }}</span>
+            <span class="s-product-card__foot">
+              <InventoryStatusBadge :badge="getItemAvailability(item)" :inline-meta="false" />
+              <span v-if="item.sku || item.serialNumber || item.serialNo" class="s-product-card__ref">
+                {{ item.sku || item.serialNumber || item.serialNo }}
+              </span>
+            </span>
+          </button>
+        </div>
+
+        <!-- Tablet and desktop: table -->
+        <div v-else class="s-table-wrap s-hide-sm">
+          <table class="s-table">
+            <thead>
+              <tr>
+                <th v-if="showBulkRowSelection" scope="col" class="s-table__check">
+                  <SCheckbox
+                    :model-value="allSelectableItemsSelected"
+                    aria-label="Select all products"
+                    @update:model-value="(checked) => toggleSelectAll(checked)"
+                  />
+                </th>
+                <th
+                  v-for="column in columns"
+                  :key="column.key"
+                  scope="col"
+                  :class="{ 's-table__num': isNumericItemColumn(column) }"
+                  :aria-sort="column.sortable ? itemAriaSort(column.key) : undefined"
+                >
+                  <SSortHeader
+                    v-if="column.sortable"
+                    :label="column.label"
+                    :direction="itemSortDirection(column.key)"
+                    :align="isNumericItemColumn(column) ? 'end' : 'start'"
+                    @sort="toggleSort(column.key)"
+                  />
+                  <template v-else>{{ column.label }}</template>
+                </th>
+                <th v-if="canManageInventoryItems" scope="col" class="s-table__actions">
+                  <span class="ds-sr-only">Actions</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="item in paginatedItems"
+                :key="item.id"
+                :data-item-row="item.id"
+                :class="{
+                  's-table__row--flash': flashItemId === item.id,
+                  's-table__row--selected': isItemSelected(item),
+                }"
+              >
+                <td v-if="showBulkRowSelection" class="s-table__check">
+                  <SCheckbox
+                    :model-value="isItemSelected(item)"
+                    :disabled="isInventoryItemLocked(item)"
+                    :aria-label="`Select ${getItemPrimaryLabel(item)}`"
+                    @update:model-value="(checked) => toggleItemSelection(item, checked)"
+                  />
+                </td>
+                <td
+                  v-for="(column, colIndex) in columns"
+                  :key="column.key"
+                  :class="{ 's-table__num': isNumericItemColumn(column) }"
+                >
+                  <!-- Inline edit (large screens); blur or Enter saves, Escape cancels -->
+                  <div
+                    v-if="
+                      isLargeScreen &&
+                      canManageInventoryItems &&
+                      !isInventoryItemLocked(item) &&
+                      isColumnEditable(column) &&
+                      isEditingCell(item, column.key)
+                    "
+                    ref="inlineEditCellRef"
+                    class="s-inline-edit"
+                  >
+                    <input
+                      ref="inlineEditInputRef"
+                      v-model="inlineEditValue"
+                      type="text"
+                      class="s-inline-edit__input"
+                      :aria-label="`${column.label} for ${getItemPrimaryLabel(item)}`"
+                      :inputmode="
+                        column.type === 'currency' ||
+                        column.type === 'number' ||
+                        column.key.toLowerCase().includes('price')
+                          ? 'decimal'
+                          : 'text'
+                      "
+                      @blur="saveInlineEdit"
+                      @keydown.enter="saveInlineEdit"
+                      @keydown.esc="cancelInlineEdit"
+                      @click.stop
+                    />
+                  </div>
+                  <div
+                    v-else
+                    class="s-cell"
+                    :class="{
+                      's-cell--editable':
+                        isLargeScreen &&
+                        canManageInventoryItems &&
+                        !isInventoryItemLocked(item) &&
+                        isColumnEditable(column),
+                    }"
+                    @click="startInlineEdit(item, column)"
+                  >
+                    <template v-if="colIndex === 0">
+                      <span class="s-table__primary s-cell__name" :title="getItemPrimaryLabel(item)">
+                        {{ getItemPrimaryLabel(item) }}
+                      </span>
+                    </template>
+                    <template v-else-if="isInventoryUnitCostColumn(column)">
+                      <template v-if="getItemCostForDisplay(item) !== undefined">
+                        {{ formatCurrency(getItemCostForDisplay(item)!) }}
+                      </template>
+                      <span v-else class="s-table__muted">{{ EMPTY_CELL }}</span>
+                    </template>
+                    <template v-else-if="isInventorySellPriceColumn(column)">
+                      <span v-if="item.discountedPrice !== undefined" class="s-price">
+                        <span class="s-price__now">{{ formatCurrency(item.discountedPrice) }}</span>
+                        <span v-if="getItemDiscountLabel(item)" class="s-price__off">
+                          {{ getItemDiscountLabel(item) }}
+                        </span>
+                        <s class="s-price__was">
+                          {{ formatCurrency(item.originalPrice || item[column.key] || 0) }}
+                        </s>
+                      </span>
+                      <template v-else>{{ formatCurrency(item[column.key] || 0) }}</template>
+                    </template>
+                    <template v-else-if="'type' in column && column.type === 'number'">
+                      {{ formatNumber(item[column.key]) }}
+                    </template>
+                    <template
+                      v-else-if="
+                        ('type' in column && column.type === 'date') ||
+                        column.key === 'dateIn' ||
+                        column.key === 'dateOut'
+                      "
+                    >
+                      <template v-if="item[column.key]">{{ formatItemDate(item[column.key]) }}</template>
+                      <span v-else class="s-table__muted">{{ EMPTY_CELL }}</span>
+                    </template>
+                    <template v-else-if="column.key === 'margin'">
+                      <span
+                        v-if="getItemGrossProfit(item) !== null"
+                        :class="getItemGrossProfit(item)! < 0 ? 's-table__error' : 's-table__muted'"
+                      >
+                        {{ getItemProfitLabel(item) }} · {{ formatMarginPercent(getItemMarginPercent(item)) }}
+                      </span>
+                      <span v-else class="s-table__muted">{{ EMPTY_CELL }}</span>
+                    </template>
+                    <template v-else-if="column.key === 'source'">
+                      <InventorySourceBadge v-if="getItemSourceBadge(item)" :badge="getItemSourceBadge(item)!" />
+                      <span v-else class="s-table__muted">Stock</span>
+                    </template>
+                    <template v-else-if="column.key === 'availability'">
+                      <InventoryStatusBadge :badge="getItemAvailability(item)" />
+                    </template>
+                    <template v-else-if="'type' in column && column.type === 'boolean'">
+                      <SBadge :tone="item[column.key] ? 'success' : 'neutral'">
+                        {{ item[column.key] ? 'Yes' : 'No' }}
+                      </SBadge>
+                    </template>
+                    <span
+                      v-else
+                      class="s-cell__text"
+                      :title="String(getItemDisplayValue(item[column.key]) ?? '')"
+                    >
+                      {{ getItemDisplayValue(item[column.key]) }}
+                    </span>
+                  </div>
+                </td>
+                <td v-if="canManageInventoryItems" class="s-table__actions">
+                  <SIconButton
+                    label="Product actions"
+                    size="sm"
+                    :disabled="isInventoryItemLocked(item)"
+                    :data-item-actions-anchor="item.id"
+                    aria-haspopup="menu"
+                    :aria-expanded="openItemMenuId === item.id"
+                    @click="toggleItemMenu(item.id)"
+                  >
+                    <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
+                  </SIconButton>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <SPagination
+          :current-page="currentPage"
+          :page-size="itemsPerPage"
+          :total="paginationTotal"
+          label="Products pagination"
+          @page-change="handlePageChange"
+        />
+      </template>
+    </template>
 
     <!-- Hidden file input for import -->
     <input
@@ -1554,119 +552,68 @@
       ref="fileInputRef"
       type="file"
       accept=".xlsx,.xls"
-      class="hidden"
+      hidden
       @change="handleFileImport"
     />
 
     <!-- Mobile: read-only product details (matches desktop columns) -->
-    <SidePanel
-      v-model="showMobileItemDetailPanel"
-      eyebrow="Inventory"
+    <SDialog
+      placement="right"
+      v-model:open="showMobileItemDetailPanel"
       title="Product details"
-      :subtitle="
+      :description="
         mobileDetailItem
           ? `${folder?.name || 'Category'} · ${formatAvailabilityLabel(
               getItemAvailability(mobileDetailItem)
             )}`
           : undefined
       "
-      content-padding="p-4 sm:p-5"
-      @close="mobileDetailItem = null"
+      @update:open="(open: boolean) => { if (!open) mobileDetailItem = null }"
     >
-      <IosInventoryItemDetail
-        v-if="isCapacitorIos && mobileDetailItem"
-        :name="getItemPrimaryLabel(mobileDetailItem)"
-        :subtitle="`${folder?.name || 'Category'} · ${formatAvailabilityLabel(
-          getItemAvailability(mobileDetailItem)
-        )}`"
-        :stats="mobileDetailStats(mobileDetailItem)"
-        :detail-rows="mobileDetailRows(mobileDetailItem)"
-        :actions="mobileDetailActions(mobileDetailItem)"
-      >
-        <template #banner>
-          <div
-            v-if="isItemOutOnSellerLoan(mobileDetailItem)"
-            class="rounded-md border border-indigo-200/80 bg-indigo-50/80 px-3 py-2 dark:border-indigo-800/50 dark:bg-indigo-950/35"
-          >
-            <p
-              class="text-[10px] font-semibold uppercase tracking-wide text-indigo-800 dark:text-indigo-200"
-            >
-              Stock loan
-            </p>
-            <p
-              v-if="mobileDetailItem.sellerLoanPartyName"
-              class="mt-0.5 text-sm text-indigo-950 dark:text-indigo-50"
-            >
-              {{ mobileDetailItem.sellerLoanPartyName }}
-            </p>
-            <p
-              v-if="mobileDetailItem.sellerLoanPartyPhone"
-              class="text-xs tabular-nums text-indigo-800/90 dark:text-indigo-200/95"
-            >
-              {{ mobileDetailItem.sellerLoanPartyPhone }}
-            </p>
-          </div>
-        </template>
-      </IosInventoryItemDetail>
-      <div v-else-if="mobileDetailItem" class="space-y-4 pb-2">
-        <div
-          v-if="isItemOutOnSellerLoan(mobileDetailItem)"
-          class="rounded-md border border-indigo-200/80 bg-indigo-50/80 px-3 py-2 dark:border-indigo-800/50 dark:bg-indigo-950/35"
-        >
-          <p
-            class="text-[10px] font-semibold uppercase tracking-wide text-indigo-800 dark:text-indigo-200"
-          >
-            Stock loan
-          </p>
-          <p
-            v-if="mobileDetailItem.sellerLoanPartyName"
-            class="mt-0.5 text-sm text-indigo-950 dark:text-indigo-50"
-          >
+      <div v-if="mobileDetailItem" class="s-form">
+        <div v-if="isItemOutOnSellerLoan(mobileDetailItem)" class="s-callout s-inv-loan">
+          <p class="s-inv-loan__title">Stock loan</p>
+          <p v-if="mobileDetailItem.sellerLoanPartyName">
             {{ mobileDetailItem.sellerLoanPartyName }}
           </p>
-          <p
-            v-if="mobileDetailItem.sellerLoanPartyPhone"
-            class="text-xs tabular-nums text-indigo-800/90 dark:text-indigo-200/95"
-          >
+          <p v-if="mobileDetailItem.sellerLoanPartyPhone" class="s-inv-detail__strong">
             {{ mobileDetailItem.sellerLoanPartyPhone }}
           </p>
         </div>
-        <dl class="dash-native-detail-dl divide-y divide-gray-100 dark:divide-gray-800">
+        <dl class="s-inv-detail">
           <div
             v-for="(column, colIndex) in columns"
             :key="column.key"
-            class="gap-1 py-3 first:pt-0"
+            class="s-inv-detail__row"
           >
             <dt>
               {{ column.label }}
             </dt>
-            <dd class="min-w-0 leading-snug">
+            <dd>
               <template v-if="colIndex === 0">
-                <span class="font-medium">{{ getItemPrimaryLabel(mobileDetailItem) }}</span>
+                <span class="s-inv-detail__strong">{{ getItemPrimaryLabel(mobileDetailItem) }}</span>
               </template>
               <template v-else>
                 <div v-if="isInventoryUnitCostColumn(column)">
                   <span v-if="getItemCostForDisplay(mobileDetailItem) !== undefined">
                     {{ formatCurrency(getItemCostForDisplay(mobileDetailItem)!) }}
                   </span>
-                  <span v-else class="text-gray-400 italic dark:text-gray-500">-</span>
+                  <span v-else class="s-inv-detail__muted">-</span>
                 </div>
-                <div v-else-if="isInventorySellPriceColumn(column)" class="space-y-0.5">
+                <div v-else-if="isInventorySellPriceColumn(column)">
                   <template v-if="mobileDetailItem.discountedPrice !== undefined">
-                    <div class="flex flex-wrap items-baseline gap-x-2">
-                      <span class="font-medium tabular-nums">
+                    <div class="s-inv-detail__price">
+                      <span class="s-inv-detail__strong">
                         {{ formatCurrency(mobileDetailItem.discountedPrice) }}
                       </span>
                       <span
                         v-if="getItemDiscountLabel(mobileDetailItem)"
-                        class="text-xs font-medium tabular-nums text-red-600/90 dark:text-red-400/90"
+                        class="s-inv-detail__discount"
                       >
                         {{ getItemDiscountLabel(mobileDetailItem) }}
                       </span>
                     </div>
-                    <span
-                      class="block text-xs tabular-nums text-gray-400 line-through dark:text-gray-500"
-                    >
+                    <span class="s-inv-detail__was">
                       {{
                         formatCurrency(
                           mobileDetailItem.originalPrice || mobileDetailItem[column.key] || 0
@@ -1674,33 +621,24 @@
                       }}
                     </span>
                   </template>
-                  <span v-else class="font-medium tabular-nums">{{
+                  <span v-else class="s-inv-detail__strong">{{
                     formatCurrency(mobileDetailItem[column.key] || 0)
                   }}</span>
                 </div>
-                <div
-                  v-else-if="'type' in column && column.type === 'number'"
-                  class="text-gray-700 dark:text-gray-300"
-                >
+                <div v-else-if="'type' in column && column.type === 'number'">
                   {{ formatNumber(mobileDetailItem[column.key]) }}
                 </div>
-                <div
-                  v-else-if="'type' in column && column.type === 'date'"
-                  class="text-gray-700 dark:text-gray-300"
-                >
+                <div v-else-if="'type' in column && column.type === 'date'">
                   <span v-if="mobileDetailItem[column.key]">{{
                     formatItemDate(mobileDetailItem[column.key])
                   }}</span>
-                  <span v-else class="text-gray-400 italic dark:text-gray-500">-</span>
+                  <span v-else class="s-inv-detail__muted">-</span>
                 </div>
-                <div
-                  v-else-if="column.key === 'dateIn' || column.key === 'dateOut'"
-                  class="text-gray-700 dark:text-gray-300"
-                >
+                <div v-else-if="column.key === 'dateIn' || column.key === 'dateOut'">
                   <span v-if="mobileDetailItem[column.key]">{{
                     formatItemDate(mobileDetailItem[column.key])
                   }}</span>
-                  <span v-else class="text-gray-400 dark:text-gray-500">-</span>
+                  <span v-else class="s-inv-detail__muted">-</span>
                 </div>
                 <div v-else-if="column.key === 'margin'">
                   <span :class="inventoryMarginClass(mobileDetailItem)">
@@ -1712,26 +650,18 @@
                     v-if="getItemSourceBadge(mobileDetailItem)"
                     :badge="getItemSourceBadge(mobileDetailItem)!"
                   />
-                  <span v-else class="text-gray-400 italic dark:text-gray-500">Stock</span>
+                  <span v-else class="s-inv-detail__muted">Stock</span>
                 </div>
                 <div v-else-if="column.key === 'availability'">
                   <InventoryStatusBadge :badge="getItemAvailability(mobileDetailItem)" />
                 </div>
-                <div
+                <SBadge
                   v-else-if="'type' in column && column.type === 'boolean'"
-                  class="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium"
-                  :class="
-                    mobileDetailItem[column.key]
-                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
-                      : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
-                  "
+                  :tone="mobileDetailItem[column.key] ? 'success' : 'neutral'"
                 >
                   {{ mobileDetailItem[column.key] ? 'Yes' : 'No' }}
-                </div>
-                <div
-                  v-else
-                  class="whitespace-pre-wrap break-words text-gray-700 dark:text-gray-300"
-                >
+                </SBadge>
+                <div v-else class="s-inv-detail__text">
                   {{ getItemDisplayValue(mobileDetailItem[column.key]) }}
                 </div>
               </template>
@@ -1739,68 +669,48 @@
           </div>
         </dl>
       </div>
-    </SidePanel>
+    </SDialog>
 
     <!-- Enhanced Add/Edit Item (slide-over) -->
-    <SidePanel
-      v-model="showAddItemModal"
+    <SDialog
+      placement="right"
+      v-model:open="showAddItemModal"
       :title="
         editingItem
-          ? 'Edit Product'
+          ? 'Edit product'
           : folder?.hasSerialNumbers && !editingItem
-          ? 'Add Products with Serial Numbers'
-          : 'Add New Product'
+          ? 'Add products with serial numbers'
+          : 'Add product'
       "
-      :subtitle="
+      :description="
         folder?.hasSerialNumbers && !editingItem
-          ? 'Enter shared details, then add serial numbers'
+          ? 'Enter shared details, then add serial numbers.'
           : editingItem
-          ? 'Update product details'
-          : 'Add a new product to this folder'
+          ? 'Update product details.'
+          : 'Add a new product to this category.'
       "
-      content-padding="p-3"
     >
       <form
         id="inventory-item-form"
+        :class="folder?.hasSerialNumbers && !editingItem ? drawerFillClass : 's-form'"
         @submit.prevent="handleSaveItem"
-        :class="
-          folder?.hasSerialNumbers && !editingItem ? [drawerFillClass, 'gap-2'] : 'space-y-2'
-        "
       >
-        <!-- Bulk Add Mode for Serial Numbers -->
-        <div
-          v-if="folder?.hasSerialNumbers && !editingItem"
-          class="flex min-h-0 flex-1 flex-col gap-2"
-        >
-          <div
-            class="shrink-0 p-2 bg-gray-50 dark:bg-white/[0.04] ring-1 ring-gray-200/60 dark:ring-white/10 rounded-sm"
-          >
-            <p class="text-[11px] text-gray-700 dark:text-gray-300">
-              <strong>Bulk Add Mode:</strong> Enter details once, then add serial numbers below.
-              Each serial creates a separate product.
-            </p>
-          </div>
+        <!-- Bulk add mode for serial numbers -->
+        <template v-if="folder?.hasSerialNumbers && !editingItem">
+          <p class="s-callout">
+            <strong>Bulk add:</strong> Enter details once, then add serial numbers below. Each
+            serial creates a separate product.
+          </p>
 
-          <!-- Common Fields (shared); side by side -->
-          <div class="shrink-0 space-y-2">
-            <h4 class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-              Product details (shared)
-            </h4>
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              <!-- Product model (brand) -->
-              <div>
-                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
-                  >Product model *</label
-                >
-                <input
-                  v-model="itemForm.brand"
-                  type="text"
-                  required
-                  :class="drawerInputClass"
-                  placeholder="Enter product model"
-                />
-              </div>
-              <!-- Template fields (Product, Price, etc.) -->
+          <section class="s-form-section">
+            <h3 class="s-form-section__title">Shared product details</h3>
+            <div class="s-form-pair">
+              <SInput
+                v-model="itemForm.brand"
+                label="Product model"
+                required
+                placeholder="Enter product model"
+              />
               <template
                 v-for="field in effectiveTemplateFields.filter(
                   (f) =>
@@ -1811,234 +721,193 @@
                 )"
                 :key="field.id"
               >
-                <div v-if="field.type !== 'boolean' && field.type !== 'date'" class="min-w-0">
-                  <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    {{ field.label || field.name }} {{ field.required ? '*' : '' }}
-                  </label>
-                  <input
-                    v-if="field.type === 'text'"
-                    v-model="itemForm[field.name]"
-                    type="text"
-                    :required="field.required"
-                    :class="drawerInputClass"
-                    :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
-                  />
-                  <input
-                    v-else-if="field.type === 'number'"
-                    v-model.number="itemForm[field.name]"
-                    type="number"
-                    :required="field.required"
-                    :class="drawerInputClass"
-                    :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
-                  />
-                  <div v-else-if="field.type === 'currency'" class="relative">
-                    <span
-                      class="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400"
-                      >{{ currencySymbol }}</span
-                    >
-                    <input
-                      v-model.number="itemForm[field.name]"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      :required="field.required"
-                      :class="[drawerInputClass, '!pl-7']"
-                      :placeholder="field.placeholder || '0.00'"
-                    />
-                  </div>
-                  <select
-                    v-else-if="field.type === 'select' && field.options"
-                    v-model="itemForm[field.name]"
-                    :required="field.required"
-                    :class="drawerInputClass"
-                  >
-                    <option value="">Select {{ field.label || field.name }}</option>
-                    <option v-for="option in field.options" :key="option" :value="option">
-                      {{ option }}
-                    </option>
-                  </select>
-                  <input
-                    v-else
-                    v-model="itemForm[field.name]"
-                    type="text"
-                    :required="field.required"
-                    :class="drawerInputClass"
-                    :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
-                  />
-                </div>
-                <div v-else class="col-span-2 sm:col-span-1">
-                  <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
-                    >{{ field.label || field.name }} {{ field.required ? '*' : '' }}</label
-                  >
-                  <input
-                    v-if="field.type === 'date'"
-                    v-model="itemForm[field.name]"
-                    type="date"
-                    :required="field.required"
-                    :class="drawerInputClass"
-                  />
-                  <Checkbox
-                    v-else-if="field.type === 'boolean'"
-                    v-model="itemForm[field.name]"
-                    :label="field.label || field.name"
-                    size="sm"
-                  />
-                </div>
+                <SInput
+                  v-if="field.type === 'number'"
+                  v-model.number="itemForm[field.name]"
+                  type="number"
+                  :label="field.label || field.name"
+                  :required="field.required"
+                  :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
+                />
+                <SInput
+                  v-else-if="field.type === 'currency'"
+                  v-model.number="itemForm[field.name]"
+                  type="number"
+                  inputmode="decimal"
+                  step="0.01"
+                  min="0"
+                  :label="field.label || field.name"
+                  :required="field.required"
+                  :placeholder="field.placeholder || '0.00'"
+                >
+                  <template #prefix>{{ currencySymbol }}</template>
+                </SInput>
+                <SSelect
+                  v-else-if="field.type === 'select' && field.options"
+                  v-model="itemForm[field.name]"
+                  :label="field.label || field.name"
+                  :required="field.required"
+                  :options="itemSelectFieldOptions(field)"
+                />
+                <SField
+                  v-else-if="field.type === 'date'"
+                  :label="field.label || field.name"
+                  :required="field.required"
+                >
+                  <template #default="{ id: controlId, describedBy }">
+                    <div class="s-control">
+                      <input
+                        :id="controlId"
+                        v-model="itemForm[field.name]"
+                        type="date"
+                        class="s-control__input"
+                        :required="field.required"
+                        :aria-describedby="describedBy"
+                      />
+                    </div>
+                  </template>
+                </SField>
+                <SCheckbox
+                  v-else-if="field.type === 'boolean'"
+                  v-model="itemForm[field.name]"
+                  :label="field.label || field.name"
+                />
+                <SInput
+                  v-else
+                  v-model="itemForm[field.name]"
+                  :label="field.label || field.name"
+                  :required="field.required"
+                  :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
+                />
               </template>
-            </div>
-            <div v-if="showStandaloneUnitCostField" class="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2">
               <InventoryUnitCostField
+                v-if="showStandaloneUnitCostField"
                 :model-value="itemForm.unitCost ?? null"
                 :sell-price="getItemSellPrice(itemForm as InventoryItem)"
                 @update:model-value="(value) => (itemForm.unitCost = value)"
               />
             </div>
-          </div>
+          </section>
 
-          <!-- Serial Numbers - fills remaining drawer height -->
-          <div class="flex min-h-0 flex-1 flex-col gap-2">
-            <div class="flex shrink-0 items-center justify-between gap-2">
-              <h4 class="text-xs font-semibold text-gray-700 dark:text-gray-300">Serial numbers</h4>
-              <Button
-                variant="outline"
-                size="sm"
-                :icon="PlusCircleIcon"
-                @click="addSerialNumber"
-                class="!py-1.5 !text-xs"
-              >
-                Add Serial Number
-              </Button>
+          <!-- Serial numbers fill the remaining drawer height -->
+          <section class="s-form-section">
+            <div class="s-inv-row-head">
+              <h3 class="s-form-section__title">Serial numbers</h3>
+              <SButton size="sm" @click="addSerialNumber">
+                <template #leading>
+                  <Plus :size="16" :stroke-width="2" aria-hidden="true" />
+                </template>
+                Add serial number
+              </SButton>
             </div>
-            <div
-              v-if="serialNumbers.length === 0"
-              class="flex min-h-0 flex-1 items-center justify-center rounded-sm border border-dashed border-gray-300 py-6 text-center text-[11px] text-gray-500 dark:border-gray-600 dark:text-gray-400"
-            >
-              No serial numbers added. Click "Add Serial Number" to start.
-            </div>
-            <div v-else :class="[drawerFillScrollClass, 'space-y-1.5 pr-0.5']">
+            <p v-if="serialNumbers.length === 0" :class="emptyStateClass">
+              No serial numbers yet. Select “Add serial number” to start.
+            </p>
+            <div v-else :class="[drawerFillScrollClass, 's-inv-stack']">
               <div
                 v-for="(serial, index) in serialNumbers"
                 :key="index"
-                class="flex items-center gap-1.5 p-1.5 bg-gray-50 dark:bg-gray-700/50 rounded-sm"
+                class="s-inline-field"
               >
-                <input
-                  v-model="serialNumbers[index]"
-                  type="text"
-                  :placeholder="`Serial ${index + 1}`"
-                  :class="[drawerInputClass, 'flex-1 min-w-0 !px-2 !h-8 !min-h-8']"
-                />
-                <button
-                  type="button"
+                <div class="s-inline-field__grow">
+                  <SInput
+                    v-model="serialNumbers[index]"
+                    :placeholder="`Serial ${index + 1}`"
+                    :aria-label="`Serial number ${index + 1}`"
+                  />
+                </div>
+                <SIconButton
+                  :label="`Remove serial number ${index + 1}`"
                   @click="removeSerialNumber(index)"
-                  class="p-1 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
                 >
-                  <TrashIcon class="w-3.5 h-3.5" />
-                </button>
+                  <Trash2 :size="16" :stroke-width="1.75" aria-hidden="true" />
+                </SIconButton>
               </div>
             </div>
-          </div>
-        </div>
+          </section>
+        </template>
 
-        <!-- Single Item Mode (normal or edit); fields side by side -->
-        <div v-else>
-          <div v-if="effectiveTemplateFields.length > 0" class="space-y-2">
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              <template v-for="field in effectiveTemplateFields" :key="field.id">
-                <div v-if="field.type !== 'boolean' && field.type !== 'date'" class="min-w-0">
-                  <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    {{ field.label || field.name }} {{ field.required ? '*' : '' }}
-                  </label>
-                  <input
-                    v-if="field.type === 'text'"
-                    v-model="itemForm[field.name]"
-                    type="text"
-                    :required="field.required"
-                    :class="drawerInputClass"
-                    :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
-                  />
-                  <input
-                    v-else-if="field.type === 'number'"
-                    v-model.number="itemForm[field.name]"
-                    type="number"
-                    :required="field.required"
-                    :class="drawerInputClass"
-                    :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
-                  />
-                  <div v-else-if="field.type === 'currency'" class="relative">
-                    <span
-                      class="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400"
-                      >{{ currencySymbol }}</span
-                    >
+        <!-- Single item mode (add or edit) -->
+        <template v-else>
+          <div v-if="effectiveTemplateFields.length > 0" class="s-form-pair">
+            <template v-for="field in effectiveTemplateFields" :key="field.id">
+              <SInput
+                v-if="field.type === 'number'"
+                v-model.number="itemForm[field.name]"
+                type="number"
+                :label="field.label || field.name"
+                :required="field.required"
+                :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
+              />
+              <SInput
+                v-else-if="field.type === 'currency'"
+                v-model.number="itemForm[field.name]"
+                type="number"
+                inputmode="decimal"
+                step="0.01"
+                min="0"
+                :label="field.label || field.name"
+                :required="field.required"
+                :placeholder="field.placeholder || '0.00'"
+              >
+                <template #prefix>{{ currencySymbol }}</template>
+              </SInput>
+              <SSelect
+                v-else-if="field.type === 'select' && field.options"
+                v-model="itemForm[field.name]"
+                :label="field.label || field.name"
+                :required="field.required"
+                :options="itemSelectFieldOptions(field)"
+              />
+              <SField
+                v-else-if="field.type === 'date'"
+                :label="field.label || field.name"
+                :required="field.required"
+              >
+                <template #default="{ id: controlId, describedBy }">
+                  <div class="s-control">
                     <input
-                      v-model.number="itemForm[field.name]"
-                      type="number"
-                      step="0.01"
-                      min="0"
+                      :id="controlId"
+                      v-model="itemForm[field.name]"
+                      type="date"
+                      class="s-control__input"
                       :required="field.required"
-                      :class="[drawerInputClass, '!pl-7']"
-                      :placeholder="field.placeholder || '0.00'"
+                      :aria-describedby="describedBy"
                     />
                   </div>
-                  <select
-                    v-else-if="field.type === 'select' && field.options"
-                    v-model="itemForm[field.name]"
-                    :required="field.required"
-                    :class="drawerInputClass"
-                  >
-                    <option value="">Select {{ field.label || field.name }}</option>
-                    <option v-for="option in field.options" :key="option" :value="option">
-                      {{ option }}
-                    </option>
-                  </select>
-                  <input
-                    v-else
-                    v-model="itemForm[field.name]"
-                    type="text"
-                    :required="field.required"
-                    :class="drawerInputClass"
-                    :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
-                  />
-                </div>
-                <div v-else class="col-span-2 sm:col-span-1 min-w-0">
-                  <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    {{ field.label || field.name }} {{ field.required ? '*' : '' }}
-                  </label>
-                  <input
-                    v-if="field.type === 'date'"
-                    v-model="itemForm[field.name]"
-                    type="date"
-                    :required="field.required"
-                    :class="drawerInputClass"
-                  />
-                  <Checkbox
-                    v-else-if="field.type === 'boolean'"
-                    v-model="itemForm[field.name]"
-                    :label="field.label || field.name"
-                    size="sm"
-                  />
-                </div>
-              </template>
-            </div>
-            <div v-if="showStandaloneUnitCostField" class="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2">
-              <InventoryUnitCostField
-                :model-value="itemForm.unitCost ?? null"
-                :sell-price="getItemSellPrice(itemForm as InventoryItem)"
-                @update:model-value="(value) => (itemForm.unitCost = value)"
+                </template>
+              </SField>
+              <SCheckbox
+                v-else-if="field.type === 'boolean'"
+                v-model="itemForm[field.name]"
+                :label="field.label || field.name"
               />
-            </div>
+              <SInput
+                v-else
+                v-model="itemForm[field.name]"
+                :label="field.label || field.name"
+                :required="field.required"
+                :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
+              />
+            </template>
+            <InventoryUnitCostField
+              v-if="showStandaloneUnitCostField"
+              :model-value="itemForm.unitCost ?? null"
+              :sell-price="getItemSellPrice(itemForm as InventoryItem)"
+              @update:model-value="(value) => (itemForm.unitCost = value)"
+            />
           </div>
-          <div v-else class="text-center py-6 text-sm text-gray-500 dark:text-gray-400">
-            No template fields defined for this folder. Please edit the folder to add fields.
-          </div>
-        </div>
+          <p v-else :class="emptyStateClass">
+            No template fields for this category yet. Edit the category to add fields.
+          </p>
+        </template>
       </form>
 
       <template #footer>
-        <IosDrawerActions @cancel="handleCancelItem">
+        <SDialogActions @cancel="handleCancelItem">
           <template #primary>
-            <Button
+            <SButton
               variant="primary"
-              size="sm"
               type="submit"
               form="inventory-item-form"
               :disabled="!isItemDrawerValid || isSavingItem"
@@ -2048,24 +917,24 @@
                 editingItem
                   ? isSavingItem
                     ? 'Updating…'
-                    : 'Update Product'
+                    : 'Update product'
                   : folder?.hasSerialNumbers && !editingItem
                   ? isSavingItem
                     ? `Adding ${validBulkSerialNumbers.length}…`
                     : validBulkSerialNumbers.length > 0
-                    ? `Add ${validBulkSerialNumbers.length} Product${
+                    ? `Add ${validBulkSerialNumbers.length} product${
                         validBulkSerialNumbers.length !== 1 ? 's' : ''
                       }`
-                    : 'Add Products'
+                    : 'Add products'
                   : isSavingItem
                   ? 'Adding…'
-                  : 'Add Product'
+                  : 'Add product'
               }}
-            </Button>
+            </SButton>
           </template>
-        </IosDrawerActions>
+        </SDialogActions>
       </template>
-    </SidePanel>
+    </SDialog>
 
     <!-- Discount Modal -->
     <DiscountModal
@@ -2114,93 +983,74 @@
     />
 
     <!-- Duplicate Item Modal (multiple serial numbers) -->
-    <Modal
-      v-model="showDuplicateModal"
+    <SDialog
+      v-model:open="showDuplicateModal"
       title="Duplicate product"
-      subtitle="Add one or more new serial numbers. Each will create a copy of this product; serial numbers must be unique."
+      description="Add one or more new serial numbers. Each will create a copy of this product; serial numbers must be unique."
       size="sm"
-      @update:model-value="(v: boolean) => { showDuplicateModal = v }"
+      @update:open="(v: boolean) => { showDuplicateModal = v }"
     >
-      <form @submit.prevent="handleConfirmDuplicate" :class="[drawerFillClass, 'gap-4']">
-        <div :class="drawerFillFixedClass">
-          <div class="flex items-center justify-between">
-            <label class="text-xs font-medium text-gray-700 dark:text-gray-300"
-              >New serial numbers</label
-            >
-            <Button
-              variant="outline"
-              size="sm"
-              type="button"
-              :icon="PlusCircleIcon"
-              @click="addDuplicateSerialNumber"
-              class="!rounded-2xl"
-            >
-              Add
-            </Button>
-          </div>
+      <form id="duplicate-item-form" class="s-form" @submit.prevent="handleConfirmDuplicate">
+        <div class="s-inv-row-head">
+          <span class="s-field__label">New serial numbers</span>
+          <SButton size="sm" @click="addDuplicateSerialNumber">
+            <template #leading>
+              <Plus :size="16" :stroke-width="2" aria-hidden="true" />
+            </template>
+            Add
+          </SButton>
         </div>
-        <div
-          v-if="duplicateSerialNumbers.length === 0"
-          :class="[
-            drawerFillFixedClass,
-            'text-center py-3 text-xs text-gray-500 dark:text-gray-400 border border-dashed border-gray-300 rounded-sm',
-          ]"
-        >
-          No serial numbers. Click "Add" to enter one or more.
-        </div>
-        <div v-else :class="[drawerFillScrollClass, 'space-y-2']">
-            <div
-              v-for="(serial, index) in duplicateSerialNumbers"
-              :key="index"
-              class="flex items-center gap-1.5 p-2 bg-gray-50 dark:bg-gray-700/50 rounded-sm"
-            >
-              <input
+        <p v-if="duplicateSerialNumbers.length === 0" :class="emptyStateClass">
+          No serial numbers. Select “Add” to enter one or more.
+        </p>
+        <div v-else class="s-inv-stack">
+          <div
+            v-for="(serial, index) in duplicateSerialNumbers"
+            :key="index"
+            class="s-inline-field"
+          >
+            <div class="s-inline-field__grow">
+              <SInput
                 v-model="duplicateSerialNumbers[index]"
-                type="text"
                 :placeholder="`Serial ${index + 1}`"
-                :class="[drawerInputClass, 'flex-1 !text-sm']"
+                :aria-label="`Serial number ${index + 1}`"
               />
-              <button
-                type="button"
-                @click="removeDuplicateSerialNumber(index)"
-                class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-sm transition-colors"
-              >
-                <TrashIcon class="w-4 h-4" />
-              </button>
             </div>
+            <SIconButton
+              :label="`Remove serial number ${index + 1}`"
+              @click="removeDuplicateSerialNumber(index)"
+            >
+              <Trash2 :size="16" :stroke-width="1.75" aria-hidden="true" />
+            </SIconButton>
           </div>
-        <div :class="[drawerFillFixedClass, 'flex justify-end gap-2']">
-          <Button
-            variant="outline"
-            size="sm"
-            type="button"
-            @click="
-              () => {
-                showDuplicateModal = false
-                clearDuplicateModal()
-              }
-            "
-            class="!rounded-2xl"
-            >Cancel</Button
-          >
-          <Button
-            variant="primary"
-            size="sm"
-            type="submit"
-            :disabled="isDuplicating || !hasValidDuplicateSerials"
-            class="!rounded-2xl"
-          >
-            {{
-              isDuplicating
-                ? 'Duplicating...'
-                : `Duplicate ${validDuplicateSerialsCount} product${
-                    validDuplicateSerialsCount !== 1 ? 's' : ''
-                  }`
-            }}
-          </Button>
         </div>
       </form>
-    </Modal>
+
+      <template #footer>
+        <SDialogActions
+          @cancel="
+            () => {
+              showDuplicateModal = false
+              clearDuplicateModal()
+            }
+          "
+        >
+          <template #primary>
+            <SButton
+              variant="primary"
+              type="submit"
+              form="duplicate-item-form"
+              :loading="isDuplicating"
+              :disabled="!hasValidDuplicateSerials"
+            >
+              Duplicate {{ validDuplicateSerialsCount }} product{{
+                validDuplicateSerialsCount !== 1 ? 's' : ''
+              }}
+            </SButton>
+          </template>
+        </SDialogActions>
+      </template>
+    </SDialog>
 
     <!-- Item Timeline Modal -->
     <ItemTimelineModal
@@ -2209,108 +1059,48 @@
       :folder-name="folder?.name"
     />
 
-    <IosContextMenu
+    <SMenu
       :open="Boolean(openItemMenuId && itemForOpenMenu && itemMenuFixedStyle)"
       :style="itemMenuFixedStyle"
       menu-id="inventory-item"
+      label="Product actions"
+      @close="closeItemMenu"
     >
-      <IosContextMenuItem
-        label="View details"
-        :icon="EyeIcon"
-        @click="
-          () => {
-            openMobileItemDetail(itemForOpenMenu!)
-            openItemMenuId = null
-          }
-        "
-      />
-      <IosContextMenuItem
-        label="History"
-        :icon="ClockIcon"
-        @click="
-          () => {
-            handleViewTimeline(itemForOpenMenu!)
-            openItemMenuId = null
-          }
-        "
-      />
-      <IosContextMenuItem
-        :label="itemForOpenMenu?.discountedPrice !== undefined ? 'Discount' : 'Add discount'"
-        :icon="TagIcon"
-        :disabled="!itemForOpenMenu || isInventoryItemLocked(itemForOpenMenu)"
-        @click="
-          () => {
-            if (!itemForOpenMenu) return
-            handleApplyDiscount(itemForOpenMenu)
-            openItemMenuId = null
-          }
-        "
-      />
-      <IosContextMenuItem
-        label="Edit"
-        :icon="PencilSquareIcon"
-        :disabled="!itemForOpenMenu || isInventoryItemLocked(itemForOpenMenu)"
-        @click="
-          () => {
-            if (!itemForOpenMenu) return
-            handleEditItem(itemForOpenMenu)
-            openItemMenuId = null
-          }
-        "
-      />
-      <IosContextMenuItem
-        v-if="canLoanToSellerUi"
-        label="Stock loan"
-        :icon="ArrowTopRightOnSquareIcon"
-        :disabled="!itemForOpenMenu || isInventoryItemLocked(itemForOpenMenu)"
-        @click="handleLoanToSellerFromMenu(itemForOpenMenu!)"
-      />
-      <IosContextMenuItem
-        v-if="canDuplicateByPlan"
-        label="Duplicate"
-        :icon="DocumentDuplicateIcon"
-        :disabled="!itemForOpenMenu || isInventoryItemLocked(itemForOpenMenu)"
-        @click="
-          () => {
-            if (!itemForOpenMenu) return
-            handleDuplicateItem(itemForOpenMenu)
-            openItemMenuId = null
-          }
-        "
-      />
-      <IosContextMenuItem
-        label="Delete"
-        :icon="TrashIcon"
-        danger
-        :disabled="!itemForOpenMenu || isInventoryItemLocked(itemForOpenMenu)"
-        @click="
-          () => {
-            if (!itemForOpenMenu) return
-            handleDeleteItem(itemForOpenMenu)
-            openItemMenuId = null
-          }
-        "
-      />
-    </IosContextMenu>
+      <SMenuItem label="View details" :icon="Eye" @select="runItemMenuAction(openMobileItemDetail)" />
+      <SMenuItem label="History" :icon="HistoryIcon" @select="runItemMenuAction(handleViewTimeline)" />
+      <template v-if="itemForOpenMenu && !isInventoryItemLocked(itemForOpenMenu)">
+        <SMenuItem label="Edit" :icon="Pencil" @select="runItemMenuAction(handleEditItem)" />
+        <SMenuItem
+          :label="itemForOpenMenu.discountedPrice !== undefined ? 'Change discount' : 'Add discount'"
+          :icon="Tag"
+          @select="runItemMenuAction(handleApplyDiscount)"
+        />
+        <SMenuItem
+          v-if="canLoanToSellerUi"
+          label="Stock loan"
+          :icon="HandCoins"
+          @select="handleLoanToSellerFromMenu(itemForOpenMenu)"
+        />
+        <SMenuItem
+          v-if="canDuplicateByPlan"
+          label="Duplicate"
+          :icon="Copy"
+          @select="runItemMenuAction(handleDuplicateItem)"
+        />
+        <SMenuItem label="Delete" :icon="Trash2" danger @select="runItemMenuAction(handleDeleteItem)" />
+      </template>
+    </SMenu>
 
-    <!-- Subcategory actions menu (hub view) -->
-    <IosContextMenu
+    <SMenu
       :open="Boolean(openSubfolderMenuId && subfolderForOpenMenu && subfolderMenuFixedStyle)"
       :style="subfolderMenuFixedStyle"
       menu-id="inventory-subfolder"
+      label="Subcategory actions"
+      @close="closeSubfolderMenu"
     >
-      <IosContextMenuItem
-        label="Edit"
-        :icon="PencilSquareIcon"
-        @click="handleEditSubfolderFromMenu"
-      />
-      <IosContextMenuItem
-        label="Delete"
-        :icon="TrashIcon"
-        danger
-        @click="handleDeleteSubfolderFromMenu"
-      />
-    </IosContextMenu>
+      <SMenuItem label="Edit" :icon="Pencil" @select="handleEditSubfolderFromMenu" />
+      <SMenuItem label="Delete" :icon="Trash2" danger @select="handleDeleteSubfolderFromMenu" />
+    </SMenu>
 
     <DeleteFolderModal
       v-model="showDeleteSubfolderModal"
@@ -2338,121 +1128,61 @@
       @confirm="handleConfirmBulkDeleteSubfolders"
     />
 
-    <SidePanel
-      v-model="showSubcategoryModal"
+    <SDialog
+      placement="right"
+      v-model:open="showSubcategoryModal"
       size="md"
-      dense
       :title="editingSubfolder ? 'Edit subcategory' : 'Add subcategory'"
     >
-      <IosForm
+      <SForm
         id="subcategory-drawer-form"
-        layout="fill"
         @submit="handleSaveSubcategory"
       >
-        <IosFormSection fixed>
-          <IosFormField label="Subcategory name" required>
-            <IosFormInput
+        <SFormSection>
+          <SField label="Subcategory name" required>
+            <SInput
               v-model="subcategoryForm.name"
               required
               placeholder="e.g. Corolla"
             />
-          </IosFormField>
-          <IosFormField label="Description">
-            <IosFormTextarea
+          </SField>
+          <SField label="Description">
+            <STextarea
               v-model="subcategoryForm.description"
               :rows="2"
-              extra-class="resize-none"
               placeholder="Optional"
             />
-          </IosFormField>
-        </IosFormSection>
-      </IosForm>
+          </SField>
+        </SFormSection>
+      </SForm>
       <template #footer>
-        <IosDrawerActions @cancel="showSubcategoryModal = false">
+        <SDialogActions @cancel="showSubcategoryModal = false">
           <template #primary>
-            <Button
-              variant="neutral"
-              size="sm"
+            <SButton
+              variant="primary"
               type="submit"
               form="subcategory-drawer-form"
               :loading="isSavingSubcategory"
               :disabled="!subcategoryForm.name.trim()"
             >
               {{ editingSubfolder ? 'Save changes' : 'Create subcategory' }}
-            </Button>
+            </SButton>
           </template>
-        </IosDrawerActions>
+        </SDialogActions>
       </template>
-    </SidePanel>
+    </SDialog>
   </div>
 </template>
 
 <script setup lang="ts">
+import SDialog from '~/components/s/SDialog.vue'
+import SDialogActions from '~/components/s/SDialogActions.vue'
+import SForm from '~/components/s/SForm.vue'
+import SFormSection from '~/components/s/SFormSection.vue'
+import STextarea from '~/components/s/STextarea.vue'
+import BulkDeleteConfirmModal from '~/components/dashboard/BulkDeleteConfirmModal.vue'
 import { ref, computed, reactive, onMounted, onBeforeUnmount, onActivated, watch, nextTick } from 'vue'
-import {
-  PlusCircleIcon,
-  PlusIcon,
-  FunnelIcon,
-  CubeIcon,
-  FolderIcon,
-  ExclamationTriangleIcon,
-  ReceiptPercentIcon,
-  MagnifyingGlassIcon,
-  PencilSquareIcon,
-  TrashIcon,
-  ArrowPathIcon,
-  ChevronUpIcon,
-  ChevronDownIcon,
-  EyeIcon,
-  BarsArrowUpIcon,
-  ArrowDownTrayIcon,
-  ArrowUpTrayIcon,
-  TagIcon,
-  XMarkIcon,
-  ArrowsPointingOutIcon,
-  EllipsisVerticalIcon,
-  ClockIcon,
-  DocumentDuplicateIcon,
-  ArrowTopRightOnSquareIcon,
-  CheckIcon,
-  Squares2X2Icon,
-  TableCellsIcon,
-} from '~/utils/app-icons'
-import Button from '~/components/ui/Button.vue'
-import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
-import IosDrawer from '~/components/ios/IosDrawer.vue'
-import {
-  IosForm,
-  IosFormSection,
-  IosFormField,
-  IosFormInput,
-  IosFormTextarea,
-} from '~/components/ios/forms'
-import IosGroupedListSkeleton from '~/components/ios/IosGroupedListSkeleton.vue'
-import IosQuickActionSkeleton from '~/components/ios/IosQuickActionSkeleton.vue'
-import IosTransactionListSkeleton from '~/components/ios/IosTransactionListSkeleton.vue'
-import IosContextMenu from '~/components/ios/IosContextMenu.vue'
-import IosContextMenuItem from '~/components/ios/IosContextMenuItem.vue'
-import Breadcrumbs from '~/components/ui/Breadcrumbs.vue'
-import Modal from '~/components/ui/Modal.vue'
-import SidePanel from '~/components/ui/SidePanel.vue'
-import IosQuickActionBar, {
-  type IosQuickActionOption,
-} from '~/components/ios/IosQuickActionBar.vue'
-import IosSearchBar from '~/components/ios/IosSearchBar.vue'
-import IosInventoryFolderRow from '~/components/ios/IosInventoryFolderRow.vue'
-import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
-import IosReceiptTransactionRow from '~/components/ios/IosReceiptTransactionRow.vue'
-import type { ReceiptTransactionVariant } from '~/components/ios/IosReceiptTransactionRow.vue'
-import { itemAvailabilityIcon } from '~/utils/ios-row-icons'
-import IosInventoryItemCard from '~/components/ios/IosInventoryItemCard.vue'
-import IosInventoryItemDetail, {
-  type IosInventoryDetailAction,
-  type IosInventoryDetailRow,
-  type IosInventoryDetailStat,
-} from '~/components/ios/IosInventoryItemDetail.vue'
-import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
-import Checkbox from '~/components/ui/Checkbox.vue'
+import { CubeIcon, FolderIcon } from '~/utils/app-icons'
 import {
   useInventoryStore,
   type InventoryFolder,
@@ -2487,6 +1217,7 @@ import {
   isInsideAnchoredMenu,
 } from '~/utils/menuAnchor'
 import { isNativePerfContext, scheduleNativeIdleWork } from '~/utils/capacitor-native-perf'
+import { useDashboardPageRefreshRegister } from '~/composables/useDashboardPageRefresh'
 import { computeFolderTotalValue } from '~/utils/inventory-folder-availability'
 import { getInventoryItemDisplayName } from '~/composables/useInventoryItemDisplay'
 import {
@@ -2522,6 +1253,41 @@ import DeleteFolderModal from '~/components/inventory/DeleteFolderModal.vue'
 import ItemTimelineModal from '~/components/inventory/ItemTimelineModal.vue'
 import CreateSellerLoanModal from '~/components/seller-loans/CreateSellerLoanModal.vue'
 import InventoryCategoryCard from '~/components/inventory/InventoryCategoryCard.vue'
+import {
+  ChevronRight,
+  Copy,
+  Download,
+  EllipsisVertical,
+  Eye,
+  FolderPlus,
+  HandCoins,
+  History as HistoryIcon,
+  LayoutGrid,
+  List,
+  PackagePlus,
+  Pencil,
+  Plus,
+  SearchX,
+  Tag,
+  Trash2,
+  Upload,
+} from '@lucide/vue'
+import SBadge from '~/components/s/SBadge.vue'
+import SButton from '~/components/s/SButton.vue'
+import SCard from '~/components/s/SCard.vue'
+import SCheckbox from '~/components/s/SCheckbox.vue'
+import SEmptyState from '~/components/s/SEmptyState.vue'
+import SField from '~/components/s/SField.vue'
+import SIconButton from '~/components/s/SIconButton.vue'
+import SInput from '~/components/s/SInput.vue'
+import SMenu from '~/components/s/SMenu.vue'
+import SMenuItem from '~/components/s/SMenuItem.vue'
+import SPageHeader from '~/components/s/SPageHeader.vue'
+import SPagination from '~/components/s/SPagination.vue'
+import SSearch from '~/components/s/SSearch.vue'
+import SSelect from '~/components/s/SSelect.vue'
+import SSkeleton from '~/components/s/SSkeleton.vue'
+import SSortHeader from '~/components/s/SSortHeader.vue'
 import { useDepartmentsStore } from '~/stores/departments'
 
 definePageMeta({
@@ -2535,39 +1301,13 @@ const folderId = computed(() => route.params.id as string)
 const inventoryStore = useInventoryStore()
 const receiptsStore = useReceiptsStore()
 const authStore = useAuthStore()
-const { isCapacitorIos } = useIsCapacitorIos()
-const {
-  isSelecting: isIosSubfolderSelecting,
-  toggleSelectMode: toggleIosSubfolderSelectMode,
-  exitSelectMode: exitIosSubfolderSelectMode,
-} = useIosBulkSelectMode({
-  clearSelection: () => {
-    selectedSubfoldersForBulk.value = []
-  },
-})
-const {
-  isSelecting: isIosItemsSelecting,
-  toggleSelectMode: toggleIosItemsSelectMode,
-  exitSelectMode: exitIosItemsSelectMode,
-  enterSelectMode: enterIosItemsSelectMode,
-} = useIosBulkSelectMode({
-  clearSelection: () => {
-    selectedItemsForBulk.value = []
-  },
-})
-
-function startIosStockLoanSelect() {
-  showProductMoreSheet.value = false
-  enterIosItemsSelectMode()
-}
 watch(
   () => folderId.value,
   () => {
-    exitIosSubfolderSelectMode()
-    exitIosItemsSelectMode()
+    selectedSubfoldersForBulk.value = []
+    selectedItemsForBulk.value = []
   }
 )
-const { currentStoreLabel } = useCurrentStoreLabel()
 const userStore = useUserStore()
 const storesStore = useStoresStore()
 const departmentsStore = useDepartmentsStore()
@@ -2577,12 +1317,6 @@ const canShowProfitAndCost = computed(
   () => canViewProfitAndCost.value && folder.value?.trackProfit === true
 )
 
-const inventoryItemTableSkeletonColumns = [
-  { label: 'Product' },
-  { label: 'Qty', class: 'dashboard-table__col-numeric', bone: '2.5rem' },
-  { label: 'Price', class: 'dashboard-table__col-price', bone: '4rem' },
-  { label: 'Status', class: 'dashboard-table__col-status', bone: '4rem' },
-]
 const showStandaloneUnitCostField = computed(
   () => canShowProfitAndCost.value && !templateHasCostPriceField(folder.value?.template?.fields)
 )
@@ -2595,18 +1329,19 @@ const canDuplicateByPlan = computed(() => {
   return sub === 'storvv_medium' || sub === 'storvv_enterprise'
 })
 const { formatCurrency, preferences } = usePreferences()
-const { drawerFillClass, drawerFillFixedClass, drawerFillScrollClass, drawerSectionClass, drawerLabelClass, drawerInputClass, drawerTextareaClass } = useDashboardDrawerChrome()
+const { drawerFillClass, drawerFillScrollClass, emptyStateClass } = useDashboardDrawerChrome()
 const currencySymbol = computed(() => preferences.value?.currencySymbol || '$')
+
+function itemSelectFieldOptions(field: TemplateField) {
+  return [
+    { value: '', label: `Select ${field.label || field.name}` },
+    ...(field.options ?? []).map((option) => ({ value: option, label: option })),
+  ]
+}
 const initialExistingFolder = folderId.value ? inventoryStore.getFolderById(folderId.value) ?? null : null
 const folder = ref<InventoryFolder | null>(initialExistingFolder)
-const iosProductsNavTitle = computed(() => {
-  const name = folder.value?.name || 'Products'
-  return currentStoreLabel.value ? `${currentStoreLabel.value} · ${name}` : name
-})
 const isLoadingFolder = ref(!initialExistingFolder)
 const isLoadingItems = ref(false)
-const { headerBtnClass, headerBtnLabelClass, pageWithFixedFooterClass } = useDashboardPageChrome()
-const { pageWithFooterClass, tableShellFlexClass, tableExpandClass, tableExpandHeaderClass, tableExpandBodyClass, tableExpandCloseClass, tableExpandEyebrowClass, tableExpandTitleClass, tableExpandMetaClass, tableExpandFieldClass } = useDashboardGridPagesChrome()
 
 const inventoryBreadcrumbs = computed(() => {
   const crumbs = [{ label: 'Inventory', href: '/dashboard/inventory', icon: CubeIcon }]
@@ -2626,26 +1361,20 @@ const inventoryBreadcrumbs = computed(() => {
   return crumbs
 })
 
-const folderParent = computed(() =>
-  folder.value ? getFolderParent(inventoryStore.folders, folder.value) : null
-)
+const inventoryParentCrumbs = computed(() => inventoryBreadcrumbs.value.slice(0, -1))
 
-const inventoryBackTo = computed(() =>
-  folderParent.value
-    ? `/dashboard/inventory/${folderParent.value.id}`
-    : '/dashboard/inventory'
-)
+const inventoryBack = computed(() => {
+  const parent = inventoryParentCrumbs.value.at(-1)
+  return parent ? { to: parent.href, label: parent.label } : { to: '/dashboard/inventory', label: 'Inventory' }
+})
 
-const inventoryBackLabel = computed(() =>
-  folderParent.value ? `Back to ${folderParent.value.name}` : 'Back to inventory'
-)
+const EMPTY_CELL = '—'
 
 const childFolders = computed(() =>
   folder.value ? getChildFolders(inventoryStore.folders, folder.value.id) : []
 )
 
 const hubSortBy = ref<'name' | 'items'>('name')
-const showSubcategoryMoreSheet = ref(false)
 
 const sortedChildFolders = computed(() => {
   const list = [...childFolders.value]
@@ -2654,12 +1383,6 @@ const sortedChildFolders = computed(() => {
   }
   return list.sort((a, b) => a.name.localeCompare(b.name))
 })
-
-function selectHubSort(value: 'name' | 'items') {
-  hubSortBy.value = value
-  showSubcategoryMoreSheet.value = false
-  hubCurrentPage.value = 1
-}
 
 const HUB_SUBFOLDERS_PER_PAGE = 24
 
@@ -2740,13 +1463,6 @@ function subfolderDisplayStats(child: InventoryFolder) {
   return rollupFolderStats(child, inventoryStore.folders)
 }
 
-function formatSubfolderRowValue(child: InventoryFolder): string {
-  const stats = subfolderDisplayStats(child)
-  const countLabel = `${stats.itemCount} item${stats.itemCount === 1 ? '' : 's'}`
-  if (stats.itemCount === 0) return countLabel
-  return `${countLabel} · ${formatCurrency(stats.totalValue ?? 0)}`
-}
-
 function subfolderGrossProfitOnHand(childId: string): number | null {
   const child = inventoryStore.getFolderById(childId)
   if (!child?.trackProfit) return null
@@ -2784,31 +1500,6 @@ const canAddSubcategories = computed(() => {
   const parent = subcategoryCreateParent.value
   if (!parent || !canCreateInventoryFolders.value) return false
   return (parent.itemCount ?? 0) === 0
-})
-
-const subcategoryActionStub = ref('')
-
-const subcategoryQuickActionOptions = computed((): IosQuickActionOption[] => {
-  if (!canAddSubcategories.value) return []
-
-  return [
-    {
-      value: 'add',
-      label: 'Add subcategory',
-      icon: PlusIcon,
-      trailing: 'add',
-      action: openCreateSubcategoryModal,
-    },
-    {
-      value: 'more',
-      label: 'More',
-      icon: EllipsisVerticalIcon,
-      trailing: 'more',
-      action: () => {
-        showSubcategoryMoreSheet.value = true
-      },
-    },
-  ]
 })
 
 const showCategoryHub = computed(() => folderShowsCategoryHub(folder.value))
@@ -2899,6 +1590,12 @@ const subfolderForOpenMenu = computed(() => {
 const toggleSubfolderMenu = (subfolderId: string) => {
   openSubfolderMenuId.value =
     openSubfolderMenuId.value === subfolderId ? null : subfolderId
+}
+
+function closeSubfolderMenu() {
+  const id = openSubfolderMenuId.value
+  openSubfolderMenuId.value = null
+  if (id) getVisibleMenuAnchorElement('data-folder-actions-anchor', id)?.focus()
 }
 
 function updateSubfolderMenuPosition() {
@@ -3118,7 +1815,6 @@ watch(itemsViewMode, (mode) => {
   }
 })
 
-const showProductMoreSheet = ref(false)
 /** Full folder list for search filter (client-side); not stored in Pinia. */
 const folderSearchItems = ref<InventoryItem[] | null>(null)
 const isSearchItemsLoading = ref(false)
@@ -3177,7 +1873,7 @@ async function applyItemHighlightFromRoute(itemId: string) {
   flashItemId.value = itemId
   if (import.meta.client) {
     const scrollToRow = () => {
-      const el = document.querySelector<HTMLElement>(`[data-item-row="${itemId}"]`)
+      const el = getVisibleMenuAnchorElement('data-item-row', itemId)
       el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
     nextTick(() => {
@@ -3224,90 +1920,6 @@ function openMobileItemDetail(item: InventoryItem) {
   showMobileItemDetailPanel.value = true
 }
 
-function formatItemColumnForDetail(
-  item: InventoryItem,
-  column: { key: string; label: string; type?: string }
-): string {
-  if (isInventoryUnitCostColumn(column)) {
-    const cost = getItemCostForDisplay(item)
-    return cost !== undefined ? formatCurrency(cost) : '-'
-  }
-  if (isInventorySellPriceColumn(column)) {
-    if (item.discountedPrice !== undefined) {
-      const base = formatCurrency(item.discountedPrice)
-      const discount = getItemDiscountLabel(item)
-      return discount ? `${base} (${discount})` : base
-    }
-    return formatCurrency(item[column.key] || 0)
-  }
-  if (column.type === 'number') return formatNumber(item[column.key])
-  if (column.type === 'date' || column.key === 'dateIn' || column.key === 'dateOut') {
-    return item[column.key] ? formatItemDate(item[column.key]) : '-'
-  }
-  if (column.key === 'margin') return getItemMarginLabel(item)
-  if (column.key === 'source') {
-    const badge = getItemSourceBadge(item)
-    return badge?.label ?? 'Stock'
-  }
-  if (column.key === 'availability') return formatAvailabilityLabel(getItemAvailability(item))
-  if (column.type === 'boolean') return item[column.key] ? 'Yes' : 'No'
-  return String(getItemDisplayValue(item[column.key]))
-}
-
-function mobileDetailStats(item: InventoryItem): IosInventoryDetailStat[] {
-  const qk = quantityFieldKeyForFolder()
-  const onHand =
-    qk && item[qk] != null && item[qk] !== ''
-      ? formatNumber(item[qk])
-      : formatAvailabilityLabel(getItemAvailability(item))
-
-  const priceColumn = columns.value.find((col) => isInventorySellPriceColumn(col))
-  const priceKey = priceColumn?.key ?? 'price'
-  const unitPrice =
-    item.discountedPrice !== undefined ? item.discountedPrice : Number(item[priceKey] || 0)
-  const price = formatCurrency(unitPrice)
-
-  let value = price
-  if (qk && item[qk] != null && item[qk] !== '') {
-    value = formatCurrency(unitPrice * Number(item[qk]))
-  }
-
-  return [
-    { label: 'On hand', value: onHand },
-    { label: 'Price', value: price },
-    { label: 'Value', value: value },
-  ]
-}
-
-function mobileDetailRows(item: InventoryItem): IosInventoryDetailRow[] {
-  return columns.value
-    .slice(1)
-    .map((column) => ({
-      label: column.label,
-      value: formatItemColumnForDetail(item, column),
-    }))
-    .filter((row) => row.value !== '-')
-}
-
-function mobileDetailActions(item: InventoryItem): IosInventoryDetailAction[] {
-  const actions: IosInventoryDetailAction[] = [
-    {
-      id: 'timeline',
-      label: 'View timeline',
-      subtitle: 'Stock history and sales',
-      onSelect: () => handleViewTimeline(item),
-    },
-  ]
-  if (canManageInventoryItems.value && !isInventoryItemLocked(item)) {
-    actions.push({
-      id: 'edit',
-      label: 'Edit product',
-      onSelect: () => handleEditItem(item),
-    })
-  }
-  return actions
-}
-
 const editingItem = ref<InventoryItem | null>(null)
 // Load pagination state from localStorage - use folder ID in key for uniqueness
 const getInitialPage = (): number => {
@@ -3331,7 +1943,6 @@ const isImporting = ref(false)
 const isExporting = ref(false)
 
 const currentSort = ref<{ key: string; order: 'asc' | 'desc' }>({ key: 'name', order: 'asc' })
-const isFullscreen = ref(false)
 const openItemMenuId = ref<string | null>(null)
 
 watch(currentPage, () => {
@@ -3380,6 +1991,18 @@ watch(searchQuery, () => {
 
 const toggleItemMenu = (itemId: string) => {
   openItemMenuId.value = openItemMenuId.value === itemId ? null : itemId
+}
+
+function runItemMenuAction(action: (item: InventoryItem) => unknown) {
+  const item = itemForOpenMenu.value
+  if (item) action(item)
+  openItemMenuId.value = null
+}
+
+function closeItemMenu() {
+  const id = openItemMenuId.value
+  openItemMenuId.value = null
+  if (id) getVisibleMenuAnchorElement('data-item-actions-anchor', id)?.focus()
 }
 
 /** Capture-phase outside click; same pattern as inventory folder list (index). */
@@ -3485,26 +2108,11 @@ watch(
   { immediate: true }
 )
 
-// Handle ESC key to exit fullscreen and close menus
 const handleKeyDown = (e: KeyboardEvent) => {
   if (e.key === 'Escape') {
-    if (isFullscreen.value) {
-      isFullscreen.value = false
-    }
     openItemMenuId.value = null
   }
 }
-
-// Watch fullscreen state to lock/unlock body scroll
-watch(isFullscreen, (fullscreen) => {
-  if (import.meta.client) {
-    if (fullscreen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
-    }
-  }
-})
 
 const itemForm = reactive<Record<string, any>>({})
 const serialNumbers = ref<string[]>([])
@@ -4098,10 +2706,8 @@ function isInventorySellPriceColumn(column: { key: string; type?: string }): boo
 
 function inventoryMarginClass(item: InventoryItem): string {
   const profit = getItemGrossProfit(item)
-  const base = 'text-[11px] tabular-nums'
-  if (profit === null) return `${base} dashboard-table__muted`
-  if (profit < 0) return `${base} text-red-600/75 dark:text-red-400/75`
-  return `${base} text-gray-500 dark:text-gray-400`
+  if (profit !== null && profit < 0) return 's-inv-detail__loss'
+  return 's-inv-detail__muted'
 }
 
 const getItemProfitLabel = (item: InventoryItem) => {
@@ -4156,140 +2762,12 @@ const filteredItems = computed(() => {
   return result
 })
 
-const availabilityFilterOptions = computed(() => {
-  const list = baseItems.value
-  const countFor = (status: InventoryAvailabilityStatus | 'all') => {
-    if (status === 'all') return list.length
-    return list.filter((item) => getItemAvailability(item).status === status).length
-  }
-
-  return [
-    { value: 'all', label: 'All', badge: countFor('all') },
-    { value: 'available', label: 'Available', badge: countFor('available') },
-    { value: 'awaiting_payment', label: 'Awaiting', badge: countFor('awaiting_payment') },
-    { value: 'sold', label: 'Sold', badge: countFor('sold') },
-    { value: 'returned', label: 'Returned', badge: countFor('returned') },
-  ]
-})
-
-const availabilityQuickActionOptions = computed((): IosQuickActionOption[] => {
-  const list = baseItems.value
-  const countFor = (status: InventoryAvailabilityStatus | 'all') => {
-    if (status === 'all') return list.length
-    return list.filter((item) => getItemAvailability(item).status === status).length
-  }
-
-  const options: IosQuickActionOption[] = [
-    { value: 'all', label: 'All', icon: FunnelIcon, badge: countFor('all') || undefined },
-    {
-      value: 'available',
-      label: 'Available',
-      icon: ReceiptPercentIcon,
-      badge: countFor('available') || undefined,
-    },
-  ]
-
-  if (canManageInventoryItems.value) {
-    options.push({
-      value: 'add',
-      label: 'Add product',
-      icon: PlusIcon,
-      trailing: 'add',
-      action: openAddItemModal,
-    })
-  } else {
-    options.push({
-      value: 'sold',
-      label: 'Sold',
-      icon: TagIcon,
-      badge: countFor('sold') || undefined,
-    })
-  }
-
-  options.push({
-    value: 'more',
-    label: 'More',
-    icon: EllipsisVerticalIcon,
-    trailing: 'more',
-    action: () => {
-      showProductMoreSheet.value = true
-    },
-  })
-
-  return options
-})
-
-const productMoreAvailabilityOptions = computed(() =>
-  availabilityFilterOptions.value.filter((option) => {
-    if (option.value === 'all' || option.value === 'available') return false
-    if (canManageInventoryItems.value && option.value === 'sold') return true
-    if (!canManageInventoryItems.value && option.value === 'sold') return false
-    return true
-  })
-)
-
-function selectAvailabilityFromSheet(value: string) {
-  availabilityFilter.value = value as 'all' | InventoryAvailabilityStatus
-  showProductMoreSheet.value = false
-}
-
-function triggerImportFromSheet() {
-  showProductMoreSheet.value = false
-  fileInputRef.value?.click()
-}
-
-function triggerExportFromSheet() {
-  showProductMoreSheet.value = false
-  void handleExportToExcel()
-}
-
 function getItemDisplayPrice(item: InventoryItem): string {
   const amount =
     item.discountedPrice !== undefined
       ? item.discountedPrice
       : (item.price ?? item.originalPrice ?? 0)
   return formatCurrency(amount)
-}
-
-function getItemCardSubtitle(item: InventoryItem): string {
-  const brandModel = [item.brand, item.model].filter(Boolean).join(' · ')
-  if (brandModel) return brandModel
-  const source = getItemSourceBadge(item)
-  if (source?.label) return source.label
-  const secondColumn = columns.value[1]
-  if (secondColumn?.key) {
-    const value = item[secondColumn.key]
-    if (value !== undefined && value !== null && String(value).trim() !== '') {
-      return String(value)
-    }
-  }
-  return ''
-}
-
-function getItemCardReference(item: InventoryItem): string {
-  const serial = item.sku || item.serialNumber || item.serialNo
-  if (serial != null && String(serial).trim() !== '') return String(serial).trim()
-  return ''
-}
-
-function getItemCardDate(item: InventoryItem): string {
-  const raw = item.dateOut || item.dateIn
-  return raw ? formatItemDate(raw) : ''
-}
-
-function getItemTransactionVariant(item: InventoryItem): ReceiptTransactionVariant {
-  switch (getItemAvailability(item).status) {
-    case 'available':
-    case 'returned':
-      return 'credit'
-    case 'sold':
-      return 'cancelled'
-    case 'with_seller':
-    case 'awaiting_payment':
-      return 'pending'
-    default:
-      return 'pending'
-  }
 }
 
 // Display list: sorted list, with edited row kept at same position after inline save
@@ -4390,6 +2868,40 @@ const toggleSort = (key: string) => {
   }
   // Sync sortBy dropdown with currentSort
   sortBy.value = key
+}
+
+const itemSortSelectOptions = [
+  { value: 'name', label: 'Sort: Name' },
+  { value: 'price', label: 'Sort: Unit price' },
+  { value: 'sku', label: 'Sort: SKU' },
+  { value: 'dateIn', label: 'Sort: Date in' },
+  { value: 'availability', label: 'Sort: Status' },
+]
+
+function onItemSortSelect(value: string | number) {
+  sortBy.value = String(value)
+  handleSortByChange()
+}
+
+function itemSortDirection(key: string): 'asc' | 'desc' | null {
+  return currentSort.value.key === key ? currentSort.value.order : null
+}
+
+function itemAriaSort(key: string): 'ascending' | 'descending' | 'none' {
+  const direction = itemSortDirection(key)
+  if (direction === 'asc') return 'ascending'
+  if (direction === 'desc') return 'descending'
+  return 'none'
+}
+
+function isNumericItemColumn(column: { key: string; type?: string }) {
+  return (
+    column.type === 'currency' ||
+    column.type === 'number' ||
+    column.key === 'margin' ||
+    isInventoryUnitCostColumn(column) ||
+    isInventorySellPriceColumn(column)
+  )
 }
 
 const handleSortByChange = () => {
@@ -5170,6 +3682,14 @@ const toggleItemSelection = (item: InventoryItem, checked?: boolean) => {
     }
   }
 }
+
+const isItemSelected = (item: InventoryItem) =>
+  selectedItemsForBulk.value.some((selected) => selected.id === item.id)
+
+const allSelectableItemsSelected = computed(() => {
+  const selectable = filteredItems.value.filter((item) => !isInventoryItemLocked(item))
+  return selectable.length > 0 && selectable.every(isItemSelected)
+})
 
 const toggleSelectAll = (checked?: boolean) => {
   // Items that aren't sold / on a stock loan can't be bulk-edited together
@@ -6070,5 +4590,5 @@ async function reloadInventoryDetailPage() {
   await loadItems({ force: true })
 }
 
-useIosPullToRefreshRegister(reloadInventoryDetailPage)
+useDashboardPageRefreshRegister(reloadInventoryDetailPage)
 </script>

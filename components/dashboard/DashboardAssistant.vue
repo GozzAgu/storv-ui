@@ -1,51 +1,25 @@
 <template>
-  <div class="dashboard-assistant">
-    <!-- Native: sheet / side drawer -->
-    <SidePanel
-      v-if="isNativeApp"
-      id="dashboard-assistant-panel"
-      v-model="assistantStore.isOpen"
-      title="Storvv Assistant"
-      :subtitle="isDemoAssistant ? 'Demo mode: sample guidance only (no live AI or store data).' : 'Ask how to use inventory, sales, roles, and plans.'"
-      eyebrow="Assistant"
-      native-sheet-variant="assistant"
-      size="md"
-      dense
-      content-padding="p-0"
-      blur-backdrop
-    >
-      <DashboardAssistantBody variant="sheet" />
-    </SidePanel>
-
-    <!-- Web: floating chat card (Marsh-style) -->
-    <Teleport v-else to="body">
-      <Transition name="assistant-float">
+  <div>
+    <Teleport to="body">
+      <Transition name="s-assistant-panel">
         <div
           v-if="assistantStore.isOpen"
           id="dashboard-assistant-panel"
-          class="dashboard-assistant__float"
+          class="s-c s-assistant-panel"
           data-dashboard-teleport
           role="dialog"
           aria-modal="false"
           aria-labelledby="dashboard-assistant-float-title"
+          @keydown.esc="assistantStore.close()"
         >
-          <header class="dashboard-assistant__float-header">
-            <div class="dashboard-assistant__float-brand">
-              <div class="dashboard-assistant__float-logo" aria-hidden="true">
-                <span>S</span>
-              </div>
-              <h2 id="dashboard-assistant-float-title" class="dashboard-assistant__float-title">
-                Storvv Assistant
-              </h2>
-            </div>
-            <button
-              type="button"
-              class="dashboard-assistant__float-close"
-              aria-label="Close assistant"
-              @click="assistantStore.close()"
-            >
-              <XMarkIcon class="h-5 w-5" stroke-width="1.75" />
-            </button>
+          <header class="s-assistant-panel__head">
+            <SAvatar aria-hidden="true">S</SAvatar>
+            <h2 id="dashboard-assistant-float-title" class="s-assistant-panel__title">
+              Storvv Assistant
+            </h2>
+            <SIconButton label="Close assistant" size="sm" @click="assistantStore.close()">
+              <X :size="18" :stroke-width="1.75" aria-hidden="true" />
+            </SIconButton>
           </header>
 
           <DashboardAssistantBody variant="float" />
@@ -56,148 +30,11 @@
 </template>
 
 <script setup lang="ts">
-import { XMarkIcon } from '~/utils/app-icons'
-import SidePanel from '~/components/ui/SidePanel.vue'
+import { X } from '@lucide/vue'
+import SAvatar from '~/components/s/SAvatar.vue'
+import SIconButton from '~/components/s/SIconButton.vue'
 import DashboardAssistantBody from '~/components/dashboard/DashboardAssistantBody.vue'
 import { useDashboardAssistant } from '~/composables/useDashboardAssistant'
 
-const { isNativeApp, isDemoAssistant, assistantStore } = useDashboardAssistant()
+const { assistantStore } = useDashboardAssistant()
 </script>
-
-<style>
-/* Web floating widget. Unscoped so Teleport styles apply */
-.dashboard-assistant__float {
-  --saas-surface: #ffffff;
-  --saas-ink: #1a1523;
-  --saas-muted: rgb(26 21 35 / 0.58);
-  --saas-accent: #1a1523;
-  --saas-accent-soft: rgb(26 21 35 / 0.06);
-  --dash-overlay-ink: #1a1523;
-  --dash-overlay-muted: rgb(26 21 35 / 0.58);
-  --dash-overlay-border: rgb(26 21 35 / 0.08);
-  --dash-overlay-divider: rgb(26 21 35 / 0.06);
-  --dash-field-bg: #f5f5f7;
-
-  position: fixed;
-  z-index: 1150;
-  right: 1.5rem;
-  bottom: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  width: min(24.5rem, calc(100vw - 2rem));
-  height: min(36rem, calc(100dvh - 3rem));
-  overflow: hidden;
-  border-radius: 1.375rem;
-  background: var(--saas-surface);
-  color: var(--saas-ink);
-  box-shadow:
-    0 4px 24px rgb(26 21 35 / 0.08),
-    0 1px 3px rgb(26 21 35 / 0.04);
-  border: 1px solid var(--dash-overlay-border);
-}
-
-html.dark .dashboard-assistant__float {
-  --saas-surface: #1e1e1e;
-  --saas-ink: #ffffff;
-  --saas-muted: rgb(255 255 255 / 0.58);
-  --saas-accent: #ffffff;
-  --saas-accent-soft: rgb(255 255 255 / 0.08);
-  --dash-overlay-ink: #ffffff;
-  --dash-overlay-muted: rgb(255 255 255 / 0.58);
-  --dash-overlay-border: transparent;
-  --dash-overlay-divider: rgb(255 255 255 / 0.06);
-  --dash-field-bg: rgb(255 255 255 / 0.06);
-
-  box-shadow: 0 24px 64px rgb(0 0 0 / 0.45);
-}
-
-.dashboard-assistant__float-header {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 1rem 1.125rem 0.875rem;
-  border-bottom: 1px solid var(--dash-overlay-divider);
-}
-
-.dashboard-assistant__float-brand {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 0.625rem;
-}
-
-.dashboard-assistant__float-logo {
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 9999px;
-  background: var(--saas-accent-soft);
-  color: var(--saas-ink);
-  font-size: 0.8125rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
-
-.dashboard-assistant__float-title {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 700;
-  line-height: 1.25;
-  letter-spacing: -0.01em;
-  color: var(--saas-ink);
-}
-
-.dashboard-assistant__float-close {
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  border: 0;
-  border-radius: 9999px;
-  background: transparent;
-  color: var(--saas-muted);
-  transition: background-color 0.15s ease, color 0.15s ease;
-}
-
-.dashboard-assistant__float-close:hover {
-  background: var(--saas-accent-soft);
-  color: var(--saas-ink);
-}
-
-.dashboard-assistant__panel--float {
-  flex: 1 1 auto;
-  min-height: 0;
-  height: auto;
-  background: inherit;
-}
-
-.assistant-float-enter-active,
-.assistant-float-leave-active {
-  transition:
-    opacity 0.22s ease,
-    transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
-  transform-origin: bottom right;
-}
-
-.assistant-float-enter-from,
-.assistant-float-leave-to {
-  opacity: 0;
-  transform: translateY(12px) scale(0.96);
-}
-
-@media (max-width: 640px) {
-  .dashboard-assistant__float {
-    right: 0.75rem;
-    bottom: 0.75rem;
-    width: calc(100vw - 1.5rem);
-    height: min(34rem, calc(100dvh - 1.5rem));
-  }
-}
-</style>

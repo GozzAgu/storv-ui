@@ -1,430 +1,339 @@
 <template>
-  <div class="space-y-4">
-    <DashboardSettingsPanel
+  <div class="s-c s-storefront-settings">
+    <SCard
       title="Public storefront"
-      subtitle="Share a digital showroom of selected stock. Customers browse as guests. No accounts."
+      description="Share a digital showroom of selected stock. Customers browse as guests. No accounts."
     >
-      <p
-        v-if="!canEdit"
-        class="mb-3 text-[11px] leading-relaxed text-gray-500 dark:text-gray-400"
-      >
-        Only the account owner can publish or change the storefront.
-      </p>
+      <div class="s-storefront-settings__body">
+        <p v-if="!canEdit" class="s-callout">Only the account owner can publish or change the storefront.</p>
 
-      <div v-if="loading" class="space-y-3">
-        <div class="h-10 animate-pulse rounded-lg bg-gray-100 dark:bg-white/[0.06]" />
-        <div class="h-24 animate-pulse rounded-lg bg-gray-100 dark:bg-white/[0.06]" />
-      </div>
+        <div v-if="loading" class="s-storefront-settings__loading" aria-busy="true">
+          <SSkeleton height="40px" />
+          <SSkeleton height="96px" />
+        </div>
 
-      <template v-else>
-        <label class="dash-setting-row flex items-start justify-between gap-3">
-          <span>
-            <span class="block text-sm font-medium text-gray-900 dark:text-gray-100"
-              >Show storefront</span
-            >
-            <span class="mt-0.5 block text-[11px] text-gray-500 dark:text-gray-400">
-              When on, anyone with the link can view published products.
-            </span>
-          </span>
-          <input
-            v-model="draft.enabled"
-            type="checkbox"
-            class="mt-1 h-4 w-4 rounded border-gray-300"
-            :disabled="!canEdit || saving"
-          />
-        </label>
+        <template v-else>
+          <div class="s-settings__rows">
+            <div class="s-settings__row">
+              <SCheckbox
+                v-model="draft.enabled"
+                variant="switch"
+                label="Show storefront"
+                description="When on, anyone with the link can view published products."
+                :disabled="!canEdit || saving"
+              />
+            </div>
+          </div>
 
-        <div class="mt-4 grid gap-3 sm:grid-cols-2">
-          <label class="block">
-            <span class="dash-field-label">Public name</span>
-            <input
-              v-model="draft.displayName"
-              type="text"
-              class="app-field w-full"
-              placeholder="Your shop name"
-              :disabled="!canEdit || saving"
-            />
-          </label>
-          <label class="block">
-            <span class="dash-field-label">URL slug</span>
-            <div class="flex items-center gap-1">
-              <span class="shrink-0 text-[11px] text-gray-400">/store/</span>
-              <input
+          <SFormSection title="Details">
+            <div class="s-form-pair">
+              <SInput
+                v-model="draft.displayName"
+                label="Public name"
+                placeholder="Your shop name"
+                :disabled="!canEdit || saving"
+              />
+              <SInput
                 v-model="draft.slug"
-                type="text"
-                class="app-field w-full"
+                label="URL slug"
                 placeholder="my-shop"
                 :disabled="!canEdit || saving"
                 @blur="normalizeSlug"
+              >
+                <template #prefix>/store/</template>
+              </SInput>
+            </div>
+            <SInput
+              v-model="draft.tagline"
+              label="Short tagline"
+              placeholder="Know what’s available before you visit"
+              :disabled="!canEdit || saving"
+            />
+            <STextarea
+              v-model="draft.description"
+              label="About"
+              hint="Optional"
+              :rows="3"
+              placeholder="Optional intro for customers"
+              :disabled="!canEdit || saving"
+            />
+            <div class="s-form-pair">
+              <STextarea
+                v-model="draft.collectionInfo"
+                label="Collection / pickup info"
+                :rows="2"
+                placeholder="e.g. Collect from our Ikeja shop Mon-Sat"
+                :disabled="!canEdit || saving"
+              />
+              <STextarea
+                v-model="draft.warrantyInfo"
+                label="Warranty info"
+                :rows="2"
+                placeholder="e.g. 30-day seller warranty on phones"
+                :disabled="!canEdit || saving"
               />
             </div>
-          </label>
-        </div>
+          </SFormSection>
 
-        <label class="mt-3 block">
-          <span class="dash-field-label">Short tagline</span>
-          <input
-            v-model="draft.tagline"
-            type="text"
-            class="app-field w-full"
-            placeholder="Know what’s available before you visit"
-            :disabled="!canEdit || saving"
-          />
-        </label>
+          <SFormSection title="Contact">
+            <div class="s-form-pair">
+              <SInput
+                v-model="draft.phonePublic"
+                type="tel"
+                label="Public phone"
+                placeholder="+234…"
+                :disabled="!canEdit || saving"
+              />
+              <SInput
+                v-model="draft.whatsappE164"
+                type="tel"
+                label="WhatsApp (E.164)"
+                placeholder="2348012345678"
+                :disabled="!canEdit || saving"
+              />
+            </div>
+            <div class="s-form-pair">
+              <SInput
+                v-model="draft.emailPublic"
+                type="email"
+                label="Public email"
+                placeholder="hello@shop.com"
+                :disabled="!canEdit || saving"
+              />
+              <SInput
+                v-model="draft.city"
+                label="City"
+                placeholder="Lagos"
+                :disabled="!canEdit || saving"
+              />
+            </div>
+          </SFormSection>
 
-        <label class="mt-3 block">
-          <span class="dash-field-label">About</span>
-          <textarea
-            v-model="draft.description"
-            rows="3"
-            class="app-field w-full"
-            placeholder="Optional intro for customers"
-            :disabled="!canEdit || saving"
-          />
-        </label>
+          <SFormSection title="Social links">
+            <div class="s-form-pair">
+              <SInput
+                v-model="draft.social!.instagram"
+                type="url"
+                label="Instagram URL"
+                placeholder="https://instagram.com/…"
+                :disabled="!canEdit || saving"
+              />
+              <SInput
+                v-model="draft.social!.facebook"
+                type="url"
+                label="Facebook URL"
+                placeholder="https://facebook.com/…"
+                :disabled="!canEdit || saving"
+              />
+            </div>
+            <div class="s-form-pair">
+              <SInput
+                v-model="draft.social!.tiktok"
+                type="url"
+                label="TikTok URL"
+                placeholder="https://tiktok.com/@…"
+                :disabled="!canEdit || saving"
+              />
+              <SInput
+                v-model="draft.social!.website"
+                type="url"
+                label="Website"
+                placeholder="https://"
+                :disabled="!canEdit || saving"
+              />
+            </div>
+          </SFormSection>
 
-        <div class="mt-3 grid gap-3 sm:grid-cols-2">
-          <label class="block">
-            <span class="dash-field-label">Collection / pickup info</span>
-            <textarea
-              v-model="draft.collectionInfo"
-              rows="2"
-              class="app-field w-full"
-              placeholder="e.g. Collect from our Ikeja shop Mon-Sat"
-              :disabled="!canEdit || saving"
-            />
-          </label>
-          <label class="block">
-            <span class="dash-field-label">Warranty info</span>
-            <textarea
-              v-model="draft.warrantyInfo"
-              rows="2"
-              class="app-field w-full"
-              placeholder="e.g. 30-day seller warranty on phones"
-              :disabled="!canEdit || saving"
-            />
-          </label>
-        </div>
+          <SFormSection title="What guests can do">
+            <div class="s-settings__rows">
+              <div class="s-settings__row">
+                <SCheckbox
+                  v-model="draft.listAvailableOnly"
+                  variant="switch"
+                  label="Only show available stock"
+                  description="Sold, reserved, or on-loan units stay off the public list."
+                  :disabled="!canEdit || saving"
+                />
+              </div>
+              <div class="s-settings__row">
+                <SCheckbox
+                  v-model="draft.allowReservations"
+                  variant="switch"
+                  label="Allow reservation requests"
+                  description="Guests can ask you to soft-hold an available item. Inventory stays under your control."
+                  :disabled="!canEdit || saving"
+                />
+              </div>
+              <div class="s-settings__row">
+                <SCheckbox
+                  v-model="draft.allowOnlineCheckout"
+                  variant="switch"
+                  label="Accept online payments"
+                  description="Guests can pay for available items via Paystack. Requires a connected payout account in Payment links."
+                  :disabled="!canEdit || saving"
+                />
+              </div>
+            </div>
+          </SFormSection>
 
-        <div class="mt-4 grid gap-3 sm:grid-cols-2">
-          <label class="block">
-            <span class="dash-field-label">Public phone</span>
-            <input
-              v-model="draft.phonePublic"
-              type="tel"
-              class="app-field w-full"
-              placeholder="+234…"
-              :disabled="!canEdit || saving"
-            />
-          </label>
-          <label class="block">
-            <span class="dash-field-label">WhatsApp (E.164)</span>
-            <input
-              v-model="draft.whatsappE164"
-              type="tel"
-              class="app-field w-full"
-              placeholder="2348012345678"
-              :disabled="!canEdit || saving"
-            />
-          </label>
-          <label class="block">
-            <span class="dash-field-label">Public email</span>
-            <input
-              v-model="draft.emailPublic"
-              type="email"
-              class="app-field w-full"
-              placeholder="hello@shop.com"
-              :disabled="!canEdit || saving"
-            />
-          </label>
-          <label class="block">
-            <span class="dash-field-label">City</span>
-            <input
-              v-model="draft.city"
-              type="text"
-              class="app-field w-full"
-              placeholder="Lagos"
-              :disabled="!canEdit || saving"
-            />
-          </label>
-        </div>
+          <p v-if="error" class="s-storefront-settings__error" role="alert">{{ error }}</p>
+          <p v-if="success" class="s-storefront-settings__success" role="status">{{ success }}</p>
 
-        <div class="mt-4 grid gap-3 sm:grid-cols-2">
-          <label class="block">
-            <span class="dash-field-label">Instagram URL</span>
-            <input
-              v-model="draft.social!.instagram"
-              type="url"
-              class="app-field w-full"
-              placeholder="https://instagram.com/…"
-              :disabled="!canEdit || saving"
-            />
-          </label>
-          <label class="block">
-            <span class="dash-field-label">Facebook URL</span>
-            <input
-              v-model="draft.social!.facebook"
-              type="url"
-              class="app-field w-full"
-              placeholder="https://facebook.com/…"
-              :disabled="!canEdit || saving"
-            />
-          </label>
-          <label class="block">
-            <span class="dash-field-label">TikTok URL</span>
-            <input
-              v-model="draft.social!.tiktok"
-              type="url"
-              class="app-field w-full"
-              placeholder="https://tiktok.com/@…"
-              :disabled="!canEdit || saving"
-            />
-          </label>
-          <label class="block">
-            <span class="dash-field-label">Website</span>
-            <input
-              v-model="draft.social!.website"
-              type="url"
-              class="app-field w-full"
-              placeholder="https://"
-              :disabled="!canEdit || saving"
-            />
-          </label>
-        </div>
+          <p v-if="!draft.enabled && draft.slug" class="s-notice">
+            Turn on “Show storefront” and Save. The public link stays hidden until it is published.
+          </p>
 
-        <label class="mt-4 flex items-start justify-between gap-3">
-          <span>
-            <span class="block text-sm font-medium text-gray-900 dark:text-gray-100"
-              >Only show available stock</span
-            >
-            <span class="mt-0.5 block text-[11px] text-gray-500 dark:text-gray-400">
-              Sold, reserved, or on-loan units stay off the public list.
-            </span>
-          </span>
-          <input
-            v-model="draft.listAvailableOnly"
-            type="checkbox"
-            class="mt-1 h-4 w-4 rounded border-gray-300"
-            :disabled="!canEdit || saving"
-          />
-        </label>
-
-        <label class="mt-4 flex items-start justify-between gap-3">
-          <span>
-            <span class="block text-sm font-medium text-gray-900 dark:text-gray-100"
-              >Allow reservation requests</span
-            >
-            <span class="mt-0.5 block text-[11px] text-gray-500 dark:text-gray-400">
-              Guests can ask you to soft-hold an available item. Inventory stays under your control.
-            </span>
-          </span>
-          <input
-            v-model="draft.allowReservations"
-            type="checkbox"
-            class="mt-1 h-4 w-4 rounded border-gray-300"
-            :disabled="!canEdit || saving"
-          />
-        </label>
-
-        <label class="mt-4 flex items-start justify-between gap-3">
-          <span>
-            <span class="block text-sm font-medium text-gray-900 dark:text-gray-100"
-              >Accept online payments</span
-            >
-            <span class="mt-0.5 block text-[11px] text-gray-500 dark:text-gray-400">
-              Guests can pay for available items via Paystack. Requires a connected payout account in
-              Payment links.
-            </span>
-          </span>
-          <input
-            v-model="draft.allowOnlineCheckout"
-            type="checkbox"
-            class="mt-1 h-4 w-4 rounded border-gray-300"
-            :disabled="!canEdit || saving"
-          />
-        </label>
-
-        <p v-if="error" class="mt-3 text-xs text-red-600 dark:text-red-400">{{ error }}</p>
-        <p v-if="success" class="mt-3 text-xs text-emerald-700 dark:text-emerald-400">{{ success }}</p>
-
-        <div v-if="canEdit" class="mt-4 flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            class="btn-primary"
-            :disabled="saving || syncing"
-            @click="onSave"
+          <section
+            v-if="draft.enabled && draft.slug"
+            class="s-storefront-share"
+            aria-labelledby="storefront-share-title"
           >
-            {{ saving ? 'Saving…' : 'Save storefront' }}
-          </button>
-          <button
-            type="button"
-            class="btn-outline"
-            :disabled="saving || syncing || !draft.enabled || !draft.slug"
-            @click="onSync"
-          >
-            {{ syncing ? 'Syncing…' : 'Sync products now' }}
-          </button>
+            <div class="s-storefront-share__qr">
+              <div class="s-storefront-share__qr-frame">
+                <img
+                  v-if="qrDataUrl"
+                  :src="qrDataUrl"
+                  alt="Storefront QR code"
+                  class="s-storefront-share__qr-img"
+                  width="128"
+                  height="128"
+                />
+                <SSkeleton v-else width="128px" height="128px" />
+              </div>
+              <a
+                v-if="qrDataUrl"
+                :href="qrDataUrl"
+                :download="`${draft.slug}-storefront-qr.png`"
+                class="s-link s-storefront-share__download"
+              >
+                Download QR
+              </a>
+            </div>
+            <div class="s-storefront-share__main">
+              <h3 id="storefront-share-title" class="s-storefront-share__title">Share & track</h3>
+              <p class="s-form-meta">
+                Copy a tracked link for WhatsApp or Instagram. QR opens your public showroom.
+              </p>
+              <div class="s-storefront-share__actions">
+                <SButton size="sm" @click="copyTrackedLink">
+                  <template #leading>
+                    <component :is="copiedLink ? Check : Copy" :size="14" :stroke-width="2" aria-hidden="true" />
+                  </template>
+                  {{ copiedLink ? 'Copied' : 'Copy tracked link' }}
+                </SButton>
+                <a
+                  :href="whatsappShareHref"
+                  target="_blank"
+                  rel="noopener"
+                  class="s-c s-btn s-btn--secondary s-btn--sm"
+                >
+                  <MessageCircle :size="14" :stroke-width="2" aria-hidden="true" />
+                  <span>Share on WhatsApp</span>
+                </a>
+              </div>
+              <dl v-if="analyticsSummary" class="s-metrics s-metrics--inline s-storefront-share__metrics">
+                <div class="s-metrics__item">
+                  <dt class="s-metrics__label">Store views</dt>
+                  <dd class="s-metrics__value">{{ analyticsSummary.storeViews }}</dd>
+                </div>
+                <div class="s-metrics__item">
+                  <dt class="s-metrics__label">Product views</dt>
+                  <dd class="s-metrics__value">{{ analyticsSummary.productViews }}</dd>
+                </div>
+                <div class="s-metrics__item">
+                  <dt class="s-metrics__label">Last 7 days</dt>
+                  <dd class="s-metrics__value">{{ viewsLast7Days }}</dd>
+                </div>
+              </dl>
+              <SBadge v-if="analyticsSummary && pendingInquiryCount" tone="warning" dot>
+                {{ pendingInquiryCount }} pending
+              </SBadge>
+              <p v-else-if="!analyticsSummary && analyticsError" class="s-form-meta">{{ analyticsError }}</p>
+            </div>
+          </section>
+        </template>
+      </div>
+
+      <template v-if="canEdit && !loading" #footer>
+        <span class="s-storefront-settings__links">
           <a
             v-if="draft.enabled && draft.slug"
             :href="publicHref"
             target="_blank"
             rel="noopener"
-            class="text-xs font-semibold text-gray-600 underline-offset-2 hover:underline dark:text-gray-300"
+            class="s-link s-storefront-settings__link"
           >
-            Open public page →
+            Open public page
+            <ExternalLink :size="14" :stroke-width="2" aria-hidden="true" />
           </a>
-          <NuxtLink
-            to="/dashboard/storefront"
-            class="text-xs font-semibold text-gray-600 underline-offset-2 hover:underline dark:text-gray-300"
-          >
-            View inquiries →
-          </NuxtLink>
-        </div>
-
-        <p
-          v-if="!draft.enabled && draft.slug"
-          class="mt-3 text-xs text-amber-700 dark:text-amber-300"
+          <NuxtLink to="/dashboard/storefront" class="s-link s-storefront-settings__link">View inquiries</NuxtLink>
+        </span>
+        <SButton
+          :loading="syncing"
+          :disabled="saving || !draft.enabled || !draft.slug"
+          @click="onSync"
         >
-          Turn on “Show storefront” and Save. The public link stays hidden until it is published.
-        </p>
-
-        <div
-          v-if="draft.enabled && draft.slug"
-          class="mt-5 grid gap-4 rounded-2xl border border-gray-100 p-4 dark:border-white/[0.06] sm:grid-cols-[auto_1fr]"
-        >
-          <div class="flex flex-col items-center gap-2">
-            <div
-              class="rounded-xl bg-white p-2 ring-1 ring-gray-200 dark:bg-white dark:ring-white/10"
-            >
-              <img
-                v-if="qrDataUrl"
-                :src="qrDataUrl"
-                alt="Storefront QR code"
-                class="h-32 w-32"
-                width="128"
-                height="128"
-              />
-              <div v-else class="h-32 w-32 animate-pulse rounded bg-gray-100" />
-            </div>
-            <a
-              v-if="qrDataUrl"
-              :href="qrDataUrl"
-              :download="`${draft.slug}-storefront-qr.png`"
-              class="text-[11px] font-medium text-gray-500 underline-offset-2 hover:underline dark:text-gray-400"
-            >
-              Download QR
-            </a>
-          </div>
-          <div class="min-w-0 space-y-2">
-            <p class="text-sm font-semibold text-gray-900 dark:text-gray-50">Share & track</p>
-            <p class="text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
-              Copy a tracked link for WhatsApp or Instagram. QR opens your public showroom.
-            </p>
-            <div class="flex flex-wrap gap-2">
-              <button type="button" class="btn-outline !min-h-8 !px-3 !text-xs" @click="copyTrackedLink">
-                {{ copiedLink ? 'Copied ✓' : 'Copy tracked link' }}
-              </button>
-              <a
-                :href="whatsappShareHref"
-                target="_blank"
-                rel="noopener"
-                class="btn-outline !min-h-8 !px-3 !text-xs inline-flex items-center"
-              >
-                Share on WhatsApp
-              </a>
-            </div>
-            <div
-              v-if="analyticsSummary"
-              class="mt-2 grid grid-cols-2 gap-2 text-[11px] text-gray-600 dark:text-gray-300"
-            >
-              <p>
-                <span class="font-semibold text-gray-900 dark:text-gray-100">{{
-                  analyticsSummary.storeViews
-                }}</span>
-                store views
-              </p>
-              <p>
-                <span class="font-semibold text-gray-900 dark:text-gray-100">{{
-                  analyticsSummary.productViews
-                }}</span>
-                product views
-              </p>
-              <p class="col-span-2">
-                <span class="font-semibold text-gray-900 dark:text-gray-100">{{
-                  viewsLast7Days
-                }}</span>
-                views in last 7 days
-                <span v-if="pendingInquiryCount" class="text-amber-700 dark:text-amber-300">
-                  · {{ pendingInquiryCount }} pending
-                </span>
-              </p>
-            </div>
-            <p v-else-if="analyticsError" class="text-[11px] text-gray-400">{{ analyticsError }}</p>
-          </div>
-        </div>
+          Sync products now
+        </SButton>
+        <SButton variant="primary" :loading="saving" :disabled="syncing" @click="onSave">
+          Save storefront
+        </SButton>
       </template>
-    </DashboardSettingsPanel>
+    </SCard>
 
-    <DashboardSettingsPanel
+    <SCard
       title="Categories on storefront"
-      subtitle="Choose which categories appear, and which product fields customers can see. Cost, serials, and supplier fields stay private."
-      compact
+      description="Choose which categories appear, and which product fields customers can see. Cost, serials, and supplier fields stay private."
     >
-      <div v-if="!leafFolders.length" class="text-[11px] text-gray-500 dark:text-gray-400">
+      <p v-if="!leafFolders.length" class="s-form-meta">
         Create inventory categories first, then enable them here.
-      </div>
-      <ul v-else class="divide-y divide-gray-100 dark:divide-white/[0.06]">
-        <li v-for="folder in leafFolders" :key="folder.id" class="py-3">
-          <label class="flex items-start justify-between gap-3">
-            <span>
-              <span class="block text-sm font-medium text-gray-900 dark:text-gray-100">{{
-                folderLabel(folder)
-              }}</span>
-              <span class="text-[11px] text-gray-500">{{ folder.itemCount || 0 }} products</span>
-            </span>
-            <input
-              type="checkbox"
-              class="mt-1 h-4 w-4 rounded border-gray-300"
-              :checked="Boolean(draft.folderPublish[folder.id]?.enabled)"
-              :disabled="!canEdit || saving"
-              @change="toggleFolder(folder, ($event.target as HTMLInputElement).checked)"
-            />
-          </label>
-          <div
-            v-if="draft.folderPublish[folder.id]?.enabled"
-            class="mt-2 flex flex-wrap gap-2 pl-0.5"
-          >
-            <label
-              v-for="field in allowlistableFields(folder)"
-              :key="field.id"
-              class="inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-2.5 py-1 text-[11px] text-gray-700 dark:bg-white/[0.08] dark:text-gray-200"
-            >
-              <input
-                type="checkbox"
-                class="h-3 w-3 rounded border-gray-300"
-                :checked="draft.folderPublish[folder.id]?.publicFieldIds?.includes(field.id)"
-                :disabled="!canEdit || saving"
-                @change="toggleField(folder.id, field.id, ($event.target as HTMLInputElement).checked)"
-              />
-              {{ field.label }}
-            </label>
-            <p
-              v-if="!allowlistableFields(folder).length"
-              class="text-[11px] text-gray-500 dark:text-gray-400"
-            >
+      </p>
+      <ul v-else class="s-storefront-cats">
+        <li v-for="folder in leafFolders" :key="folder.id" class="s-storefront-cats__item">
+          <SCheckbox
+            variant="switch"
+            :label="folderLabel(folder)"
+            :description="`${folder.itemCount || 0} products`"
+            :model-value="Boolean(draft.folderPublish[folder.id]?.enabled)"
+            :disabled="!canEdit || saving"
+            @update:model-value="(on: boolean) => toggleFolder(folder, on)"
+          />
+          <div v-if="draft.folderPublish[folder.id]?.enabled" class="s-storefront-cats__fields">
+            <template v-if="allowlistableFields(folder).length">
+              <p class="s-storefront-cats__fields-label">Visible fields</p>
+              <div class="s-storefront-cats__chips">
+                <SCheckbox
+                  v-for="field in allowlistableFields(folder)"
+                  :key="field.id"
+                  :label="field.label"
+                  :model-value="Boolean(draft.folderPublish[folder.id]?.publicFieldIds?.includes(field.id))"
+                  :disabled="!canEdit || saving"
+                  @update:model-value="(on: boolean) => toggleField(folder.id, field.id, on)"
+                />
+              </div>
+            </template>
+            <p v-else class="s-form-meta">
               Only name and price will show (no extra public columns on this template).
             </p>
           </div>
         </li>
       </ul>
-    </DashboardSettingsPanel>
+    </SCard>
   </div>
 </template>
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import QRCode from 'qrcode'
-import DashboardSettingsPanel from '~/components/dashboard/DashboardSettingsPanel.vue'
+import { Check, Copy, ExternalLink, MessageCircle } from '@lucide/vue'
+import SBadge from '~/components/s/SBadge.vue'
+import SButton from '~/components/s/SButton.vue'
+import SCard from '~/components/s/SCard.vue'
+import SCheckbox from '~/components/s/SCheckbox.vue'
+import SFormSection from '~/components/s/SFormSection.vue'
+import SInput from '~/components/s/SInput.vue'
+import SSkeleton from '~/components/s/SSkeleton.vue'
+import STextarea from '~/components/s/STextarea.vue'
 import { useInventoryStore, type InventoryFolder } from '~/stores/inventory'
 import { useStorefrontStore, isStorefrontSlugTaken } from '~/stores/storefront'
 import { useAuthStore } from '~/stores/auth'

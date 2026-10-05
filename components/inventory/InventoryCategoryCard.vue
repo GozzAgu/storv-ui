@@ -1,33 +1,48 @@
 <template>
-  <article class="dash-grid-card inv-category-card dash-folder-card" @click="$emit('click')">
-    <div v-if="hasOverlays" class="dash-folder-card__chrome">
-      <div class="dash-folder-card__check" @click.stop>
+  <article class="s-c s-category-card" :class="{ 's-category-card--selected': selected }">
+    <div class="s-category-card__head">
+      <span class="s-category-card__mark" aria-hidden="true">
+        <component
+          :is="childCount > 0 ? FolderTree : FolderClosed"
+          :size="16"
+          :stroke-width="1.75"
+          fill="currentColor"
+          fill-opacity="0.14"
+        />
+      </span>
+      <div v-if="hasOverlays" class="s-category-card__controls">
         <slot name="checkbox" />
-      </div>
-      <div class="dash-folder-card__menu" @click.stop>
         <slot name="menu" />
       </div>
     </div>
 
-    <GlassFolderMark class="dash-folder-card__mark" />
+    <div class="s-category-card__body">
+      <h3 class="s-category-card__title">
+        <button type="button" class="s-category-card__link" @click="$emit('click')">
+          {{ displayName }}
+        </button>
+      </h3>
+      <p class="s-category-card__meta">{{ metaLabel }}</p>
+    </div>
 
-    <div class="dash-folder-card__copy">
-      <h3 class="dash-folder-card__title">{{ displayName }}</h3>
-      <p class="dash-folder-card__meta">{{ metaLabel }}</p>
-      <p
-        v-if="lowStockCount > 0"
-        class="dash-folder-card__hint dash-folder-card__hint--warning"
-      >
-        {{ lowStockCount }} low stock
-      </p>
+    <div class="s-category-card__foot">
+      <div v-if="valueLabel" class="s-category-card__stat">
+        <span class="s-category-card__stat-label">Stock value</span>
+        <span class="s-category-card__value">{{ valueLabel }}</span>
+      </div>
+      <div v-if="lowStockCount > 0 || hasSerialNumbers" class="s-category-card__badges">
+        <SBadge v-if="lowStockCount > 0" tone="warning" size="sm" dot>{{ lowStockCount }} low</SBadge>
+        <SBadge v-if="hasSerialNumbers" size="sm">Serial</SBadge>
+      </div>
     </div>
   </article>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import GlassFolderMark from '~/components/ui/GlassFolderMark.vue'
-import { formatCategoryDisplayName } from '~/utils/inventory-category-card'
+import { FolderClosed, FolderTree } from '@lucide/vue'
+import SBadge from '~/components/s/SBadge.vue'
+import { formatCategoryDisplayName } from '~/utils/inventory-category-format'
 import type { FolderAvailabilityStats } from '~/utils/inventory-folder-availability'
 
 const props = withDefaults(
@@ -39,6 +54,9 @@ const props = withDefaults(
     childCount?: number
     lowStockCount?: number
     totalValue?: number
+    /** Pre-formatted stock value shown next to the item count. */
+    valueLabel?: string
+    selected?: boolean
     hasSerialNumbers?: boolean
     allowedDepartmentIds?: string[]
     resolveDepartmentName?: (id: string) => string | undefined
@@ -56,6 +74,8 @@ const props = withDefaults(
     childCount: 0,
     lowStockCount: 0,
     totalValue: 0,
+    valueLabel: '',
+    selected: false,
     hasSerialNumbers: false,
     allowedDepartmentIds: undefined,
     resolveDepartmentName: () => undefined,

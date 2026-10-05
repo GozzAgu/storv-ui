@@ -1,964 +1,390 @@
 <template>
-  <div :class="[pageClass, isCapacitorIos ? 'ios-settings-page' : '']">
-    <IosPageNavBar v-if="isCapacitorIos" title="Settings">
-      <template v-if="!canEditSettings" #trailing>
-        <span class="ios-settings-view-only-badge">View only</span>
-      </template>
-    </IosPageNavBar>
-
-    <DashboardPageHeader v-if="!isCapacitorIos" class="dash-page-header--unified">
-      <template #eyebrow>
-        <p :class="eyebrowClass">Store & app</p>
-      </template>
-      <template #title>
-        <h1 :class="pageTitleClass">Settings</h1>
-      </template>
+  <div class="ds-root s-c s-page">
+    <SPageHeader title="Settings">
       <template #description>
-        <p :class="descriptionClass">
-          Branches, business details, inventory defaults, and sales, tuned to match how you work.
-        </p>
+        Business details, plan, inventory defaults, and how sales are recorded.
       </template>
-      <template #actions>
-        <div v-if="!canEditSettings" :class="viewOnlyBadgeClass">
-          <span class="h-1.5 w-1.5 rounded-full bg-amber-500 dark:bg-amber-400" />
-          <span>View only</span>
-        </div>
+      <template v-if="!canEditSettings" #actions>
+        <SBadge tone="warning" dot>View only</SBadge>
       </template>
-    </DashboardPageHeader>
+    </SPageHeader>
 
-    <div :class="[pageStackClass, isCapacitorIos ? 'dash-page-stack--ios-settings' : '']">
-      <CategoryTabs
-        :model-value="activeSettingsTab"
-        :options="settingsTabs"
-        ariaLabel="Settings sections"
-        scroll
-        @update:model-value="onSettingsTabChange"
+    <STabs
+      :model-value="activeSettingsTab"
+      :tabs="settingsTabs"
+      label="Settings sections"
+      @update:model-value="onSettingsTabChange"
+    />
+
+    <div v-if="activeSettingsTab === 'account' && userStore.isSuperAdmin" class="s-settings">
+      <SCard title="Company logo" description="Shown on receipts and branch cards. Your personal photo is on Profile.">
+        <div class="s-settings__logo">
+          <div class="s-settings__logo-frame">
+            <img v-if="accountLogoUrl" :src="displayAccountLogoSrc" alt="Company logo" />
+            <Store v-else :size="24" :stroke-width="1.75" aria-hidden="true" />
+          </div>
+          <div class="s-settings__logo-actions">
+            <SButton
+              variant="secondary"
+              size="sm"
+              :loading="isUploadingAccountLogo"
+              :disabled="isUploadingAccountLogo"
+              @click="accountLogoInput?.click()"
+            >
+              <template #leading><Upload :size="16" :stroke-width="2" aria-hidden="true" /></template>
+              {{ accountLogoUrl ? 'Replace logo' : 'Upload logo' }}
+            </SButton>
+            <SButton v-if="accountLogoUrl" variant="ghost" size="sm" @click="removeAccountLogo">
+              Remove
+            </SButton>
+            <input
+              ref="accountLogoInput"
+              type="file"
+              accept="image/jpeg,image/png,image/gif,image/webp"
+              class="ds-sr-only"
+              tabindex="-1"
+              aria-hidden="true"
+              @change="handleAccountLogoUpload"
+            />
+          </div>
+        </div>
+      </SCard>
+
+      <SubscriptionPlanPanel
+        :current-subscription-label="currentSubscriptionLabel"
+        :billing-cycle-label="currentBillingCycleLabel"
+        :current-price-label="currentPlanPriceLabel"
+        :status-label="subscriptionStatusBadgeLabel"
+        :status-tone="subscriptionStatusTone"
+        :subscription-renewal-label="subscriptionRenewalLabel"
+        v-model:selected-billing-cycle="selectedBillingCycle"
+        v-model:selected-upgrade-plan="selectedUpgradePlan"
+        :change-plan-options="changePlanOptions"
+        :upgrade-price-preview="upgradePricePreview"
+        :pricing-loading="pricingLoading"
+        :can-cancel="canCancelSubscription"
+        :disabled="!canEditSettings"
+        :is-upgrading="isUpgradingSubscription"
+        :is-canceling="isCancelingSubscription"
+        :billing-history="billingHistory"
+        :show-qa-plan-switcher="showQaPlanSwitcher"
+        :qa-current-plan-id="storedSubscriptionPlan"
+        :qa-switching="isQaSwitchingPlan"
+        @upgrade="handleUpgradeSubscription"
+        @cancel="openCancelConfirm"
+        @qa-set-plan="handleQaSetPlan"
       />
 
-      <div v-show="activeSettingsTab === 'account'" class="dash-page-stack">
-      <!-- Account: logo + subscription -->
-      <DashboardSettingsPanel
-        v-if="userStore.isSuperAdmin"
-        title="Account"
-        subtitle="Company logo and billing for your whole account."
-        :badge="`Plan: ${currentSubscriptionLabel}`"
-      >
-        <div
-          :class="[
-            'grid grid-cols-1 gap-8',
-            isCapacitorIos ? 'dash-settings-account-grid--ios' : 'lg:grid-cols-[minmax(0,14rem)_minmax(0,1fr)] lg:gap-10',
-          ]"
-        >
-          <div class="flex items-start gap-4 lg:flex-col lg:gap-3">
-            <div class="relative shrink-0">
-              <div
-                class="flex h-[4.5rem] w-[4.5rem] items-center justify-center overflow-hidden rounded-xl bg-gray-50/80 dark:bg-white/[0.03]"
-              >
-                <img
-                  v-if="accountLogoUrl"
-                  :src="displayAccountLogoSrc"
-                  alt="Account logo"
-                  class="h-full w-full object-cover"
-                />
-                <BuildingStorefrontIcon v-else class="h-8 w-8 text-gray-400 dark:text-gray-500" />
-              </div>
-              <button
-                type="button"
-                class="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-gray-900 text-white shadow-sm transition hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100 disabled:opacity-50"
-                :disabled="isUploadingAccountLogo"
-                aria-label="Upload logo"
-                @click="accountLogoInput?.click()"
-              >
-                <ArrowPathIcon v-if="isUploadingAccountLogo" class="h-3.5 w-3.5 animate-spin" />
-                <CameraIcon v-else class="h-3.5 w-3.5" />
-              </button>
-              <input
-                ref="accountLogoInput"
-                type="file"
-                accept="image/jpeg,image/png,image/gif,image/webp"
-                class="hidden"
-                @change="handleAccountLogoUpload"
-              />
-            </div>
-            <div class="min-w-0 pt-0.5">
-              <p class="text-xs font-semibold text-gray-900 dark:text-gray-100">Company logo</p>
-              <p class="mt-1 text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
-                Shown on receipts and store cards. Your personal photo is on Profile.
-              </p>
-              <button
-                v-if="accountLogoUrl"
-                type="button"
-                class="mt-2 text-[11px] font-medium text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                @click="removeAccountLogo"
-              >
-                Remove logo
-              </button>
-            </div>
-          </div>
-
-          <div id="settings-subscription" class="min-w-0">
-            <SubscriptionPlanPanel
-              :current-subscription-label="currentSubscriptionLabel"
-              :billing-cycle-label="currentBillingCycleLabel"
-              :current-price-label="currentPlanPriceLabel"
-              :status-label="subscriptionStatusBadgeLabel"
-              :status-badge-class="subscriptionStatusBadgeClass"
-              :subscription-renewal-label="subscriptionRenewalLabel"
-              v-model:selected-billing-cycle="selectedBillingCycle"
-              v-model:selected-upgrade-plan="selectedUpgradePlan"
-              :change-plan-options="changePlanOptions"
-              :upgrade-price-preview="upgradePricePreview"
-              :pricing-loading="pricingLoading"
-              :can-cancel="canCancelSubscription"
-              :disabled="!canEditSettings"
-              :is-upgrading="isUpgradingSubscription"
-              :is-canceling="isCancelingSubscription"
-              :billing-history="billingHistory"
-              :label-class="labelClass"
-              :input-class="inputClass"
-              :header-text-btn-class="headerTextBtnClass"
-              :show-qa-plan-switcher="showQaPlanSwitcher"
-              :qa-current-plan-id="storedSubscriptionPlan"
-              :qa-switching="isQaSwitchingPlan"
-              @upgrade="handleUpgradeSubscription"
-              @cancel="openCancelConfirm"
-              @qa-set-plan="handleQaSetPlan"
-            />
-            <p
-              :class="[
-                'mt-5 text-[11px] leading-relaxed text-gray-500 dark:text-gray-400',
-                isCapacitorIos ? 'dash-setting-row dash-setting-row--note' : '',
-              ]"
-            >
-              Billing help? <GrowthSupportLink />
-            </p>
-          </div>
-        </div>
-      </DashboardSettingsPanel>
-
-      <CancelDataPolicyPanel v-if="userStore.isSuperAdmin" />
-      <ScheduledBackupPanel v-if="userStore.isSuperAdmin" />
-      <InventoryAuditPanel v-if="userStore.isSuperAdmin" />
-
-      <DashboardSettingsPanel
-        v-if="userStore.isSuperAdmin"
-        title="Workspace style"
-        subtitle="How much of the app to show. Does not change what you pay for."
-        compact
-      >
+      <SCard title="Workspace style" description="How much of the app to show. This doesn't change what you pay.">
         <ExperienceModePicker
           :model-value="selectedExperienceMode"
           :disabled="!canEditSettings || isSavingExperienceMode"
-          :show-changes="!isCapacitorIos"
           @update:model-value="onExperienceModeChange"
         />
-      </DashboardSettingsPanel>
+      </SCard>
 
-      <!-- Solo: progressive unlock for admin complexity -->
-      <div id="advanced-features">
-      <DashboardSettingsPanel
+      <SCard
         v-if="showProgressiveUnlockPanel"
+        id="advanced-features"
         title="Advanced features"
-        subtitle="You chose a simple setup. Turn on team and multi-location tools when you need them."
-        compact
+        description="You chose a simple setup. Turn on team and multi-location tools when you need them. Your plan and role permissions still apply."
       >
-        <p class="mb-3 text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
-          Your plan and role permissions still apply. Turning a feature on adds it to navigation
-          where available.
-        </p>
-        <div class="divide-y divide-gray-100 dark:divide-white/[0.06]">
-          <div
-            v-for="(option, unlockIndex) in soloProgressiveUnlockOptions"
-            :key="option.capability"
-            :class="[
-              settingRowClass,
-              unlockIndex === soloProgressiveUnlockOptions.length - 1 ? '!border-0' : '',
-            ]"
-          >
-            <div class="flex-1 min-w-0">
-              <p class="text-xs font-medium text-gray-900 dark:text-gray-100">
-                {{ option.label }}
-              </p>
-              <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
-                {{ option.description }}
-              </p>
-            </div>
-            <Switch
+        <div class="s-settings__rows">
+          <div v-for="option in soloProgressiveUnlockOptions" :key="option.capability" class="s-settings__row">
+            <SCheckbox
               :model-value="isProgressiveCapabilityEnabled(option.capability, enabledCapabilities)"
+              variant="switch"
+              :label="option.label"
+              :description="option.description"
               :disabled="!canEditSettings || togglingProgressiveCapability === option.capability"
-              :aria-label="option.label"
-              @update:model-value="
-                (checked: boolean) => onProgressiveCapabilityToggle(option.capability, checked)
-              "
+              @update:model-value="(checked: boolean) => onProgressiveCapabilityToggle(option.capability, checked)"
             />
           </div>
         </div>
-      </DashboardSettingsPanel>
-      </div>
-      </div>
+      </SCard>
 
-      <div v-show="activeSettingsTab === 'branches'">
-      <!-- Stores -->
-      <DashboardSettingsPanel
-        v-if="userStore.isSuperAdmin && canManageBranches"
-        title="Branches"
-        subtitle="Create, edit, and switch between store locations."
+      <ScheduledBackupPanel />
+      <CancelDataPolicyPanel />
+      <InventoryAuditPanel />
+    </div>
+
+    <SCard
+      v-else-if="activeSettingsTab === 'assignment' && isStaff"
+      title="Your assignment"
+      description="The branch and department linked to your account."
+    >
+      <SSkeleton v-if="isLoadingStoreInfo" :lines="3" />
+      <dl v-else class="s-settings__facts">
+        <div>
+          <dt>Branch</dt>
+          <dd>{{ storeInfo.name || EMPTY_CELL }}</dd>
+        </div>
+        <div>
+          <dt>Department</dt>
+          <dd>{{ staffWorkspace.departmentName || EMPTY_CELL }}</dd>
+        </div>
+        <div v-if="staffWorkspace.position">
+          <dt>Position</dt>
+          <dd>{{ staffWorkspace.position }}</dd>
+        </div>
+        <div v-if="staffWorkspace.staffRole">
+          <dt>Team role</dt>
+          <dd class="s-settings__capitalize">{{ staffWorkspace.staffRole }}</dd>
+        </div>
+      </dl>
+    </SCard>
+
+    <SCard
+      v-else-if="activeSettingsTab === 'store-info'"
+      :title="isStaff ? 'Branch details' : 'Store information'"
+      :description="isStaff ? 'Contact details for your branch.' : 'Business details shown on receipts and invoices.'"
+    >
+      <template v-if="canEditSettings && !isEditingStore && !isLoadingStoreInfo" #actions>
+        <SButton variant="secondary" size="sm" @click="enableEditing('store')">
+          <template #leading><Pencil :size="16" :stroke-width="2" aria-hidden="true" /></template>
+          Edit
+        </SButton>
+      </template>
+
+      <SSkeleton v-if="isLoadingStoreInfo" :lines="4" />
+      <form
+        v-else
+        id="settings-store-form"
+        class="s-settings__grid"
+        :class="{ 's-settings__grid--readonly': !isEditingStore }"
+        @submit.prevent="saveStoreInfo"
       >
-        <template #actions>
-          <button
-            v-if="isCapacitorIos && !isStaff"
-            type="button"
-            :class="editLinkClass"
-            :disabled="!canAddStore"
-            :title="canAddStore ? 'Create branch' : 'Upgrade to add more stores'"
-            @click="openCreateStoreModal"
-          >
-            Add
-          </button>
-          <Button
-            v-else-if="!isStaff"
-            variant="outline"
-            size="sm"
-            :class="headerBtnClass"
-            :icon="BuildingStorefrontIcon"
-            :title="canAddStore ? 'Create branch' : 'Upgrade to add more stores'"
-            :disabled="!canAddStore"
-            @click="openCreateStoreModal"
-          >
-            <span :class="headerBtnLabelClass">Add branch</span>
-          </Button>
-        </template>
-
-        <p
-          v-if="isMicroSubscription"
-          class="mb-3 text-[11px] leading-relaxed text-amber-700/90 dark:text-amber-400/85"
-        >
-          Storvv Micro includes one branch. Upgrade in Account above for Medium or Enterprise.
-        </p>
-        <p
-          v-if="hiddenStoreCount > 0"
-          class="mb-3 text-[11px] leading-relaxed text-amber-700/90 dark:text-amber-400/85"
-        >
-          {{ hiddenStoreCount }} {{ hiddenStoreCount === 1 ? 'branch is' : 'branches are' }} on your
-          account but not on your current plan. Oldest branches stay available first.
-          <span v-if="hiddenStoreNames.length">
-            Hidden:
-            {{ hiddenStoreNames.join(', ') }}.
-          </span>
-          <NuxtLink
-            to="/dashboard/settings?upgrade=1"
-            class="ml-1 font-medium underline underline-offset-2"
-          >
-            Upgrade to restore
-          </NuxtLink>
-        </p>
-
-        <div class="relative">
-          <div
-            v-if="storesLoading"
-            class="flex items-center gap-2 py-6 text-xs text-gray-500 dark:text-gray-400"
-          >
-            <div
-              class="h-4 w-4 animate-spin rounded-full border-0 border-gray-300/40 border-t-gray-500 dark:border-white/15 dark:border-t-gray-300"
-              aria-hidden="true"
-            />
-            Loading branches…
-          </div>
-
-          <div
-            v-else-if="storesError"
-            class="rounded-sm bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40 px-4 py-3"
-          >
-            <p class="text-xs font-medium text-red-800 dark:text-red-200">{{ storesError }}</p>
-          </div>
-
-          <DashboardTableEmptyState
-            v-else-if="eligibleStores.length === 0"
-            :icon="BuildingStorefrontIcon"
-            title="No branches yet"
-            description="Create your first branch to organize inventory, staff, and sales by location."
-            :tips="[
-              'Each branch has its own departments and stock',
-              'Switch branches anytime from the sidebar or here',
-            ]"
-            :fill="false"
-            extra-class="py-8"
-          >
-            <Button variant="neutral" size="sm" extra-class="!rounded-2xl" @click="openCreateStoreModal">
-              Create branch
-            </Button>
-          </DashboardTableEmptyState>
-
-          <div
-            v-else
-            class="dash-branch-grid grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
-            role="list"
-            aria-label="Branches"
-          >
-            <div v-for="store in eligibleStores" :key="store.id" role="listitem" class="min-w-0">
-              <div
-                :class="[
-                  storeBranchCardClass,
-                  currentStore?.id === store.id ? storeBranchCardActiveClass : '',
-                  currentStore?.id !== store.id ? 'cursor-pointer' : '',
-                ]"
-                :role="currentStore?.id !== store.id ? 'button' : undefined"
-                :tabindex="currentStore?.id !== store.id ? 0 : undefined"
-                @click="currentStore?.id !== store.id && switchStore(store.id)"
-                @keydown.enter.prevent="currentStore?.id !== store.id && switchStore(store.id)"
-                @keydown.space.prevent="currentStore?.id !== store.id && switchStore(store.id)"
-              >
-                <div class="flex items-start gap-2">
-                  <div
-                    class="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-md bg-gray-100/90 dark:bg-white/[0.06]"
-                  >
-                    <img
-                      v-if="store.logoUrl || accountLogoUrl"
-                      :src="optimizeCloudinaryLogo(store.logoUrl || accountLogoUrl)"
-                      :alt="store.name"
-                      class="h-full w-full object-cover"
-                    />
-                    <BuildingStorefrontIcon
-                      v-else
-                      class="h-3.5 w-3.5 text-gray-400 dark:text-gray-500"
-                      stroke-width="1.75"
-                    />
-                  </div>
-                  <div class="min-w-0 flex-1">
-                    <p
-                      class="truncate text-[11px] font-medium leading-tight text-gray-900 dark:text-gray-100"
-                    >
-                      {{ store.name }}
-                    </p>
-                    <p
-                      v-if="store.address || store.description"
-                      class="mt-0.5 truncate text-[10px] leading-snug text-gray-500 dark:text-gray-400"
-                    >
-                      {{ store.address || store.description }}
-                    </p>
-                  </div>
-                </div>
-                <div class="mt-1.5 flex items-center justify-between gap-1">
-                  <span
-                    v-if="currentStore?.id === store.id"
-                    class="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-700 dark:text-emerald-400"
-                  >
-                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden="true" />
-                    Current
-                  </span>
-                  <span
-                    v-else-if="!store.isActive"
-                    class="text-[10px] text-gray-400 dark:text-gray-500"
-                  >
-                    Inactive
-                  </span>
-                  <span v-else aria-hidden="true" class="block h-px w-px" />
-                  <div class="flex shrink-0 items-center gap-0.5" @click.stop>
-                    <button
-                      type="button"
-                      class="rounded-md p-0.5 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-white/[0.06] dark:hover:text-gray-200"
-                      aria-label="Edit branch"
-                      @click="editStore(store)"
-                    >
-                      <PencilSquareIcon class="h-3 w-3" />
-                    </button>
-                    <button
-                      type="button"
-                      class="rounded-md p-0.5 text-gray-400 transition hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-red-950/30 dark:hover:text-red-400"
-                      :disabled="currentStore?.id === store.id"
-                      aria-label="Delete branch"
-                      @click="confirmDelete(store)"
-                    >
-                      <TrashIcon class="h-3 w-3" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+        <SInput
+          v-model="storeInfo.name"
+          label="Branch name"
+          placeholder="Enter branch name"
+          :readonly="!isEditingStore"
+          :disabled="!canEditSettings"
+        />
+        <SInput
+          v-model="storeInfo.businessType"
+          label="Business type"
+          placeholder="For example, perfume shop"
+          :readonly="!isEditingStore"
+          :disabled="!canEditSettings"
+        />
+        <SInput
+          v-model="storeInfo.email"
+          type="email"
+          label="Email"
+          placeholder="store@example.com"
+          autocomplete="email"
+          :readonly="!isEditingStore"
+          :disabled="!canEditSettings"
+        />
+        <SInput
+          v-model="storeInfo.phone"
+          type="tel"
+          label="Phone"
+          placeholder="Enter phone number"
+          autocomplete="tel"
+          :readonly="!isEditingStore"
+          :disabled="!canEditSettings"
+        />
+        <div class="s-settings__span">
+          <STextarea
+            v-model="storeInfo.address"
+            label="Address"
+            placeholder="Enter store address"
+            :rows="2"
+            :readonly="!isEditingStore"
+            :disabled="!canEditSettings"
+          />
         </div>
-      </DashboardSettingsPanel>
-      </div>
+      </form>
 
-      <div v-show="activeSettingsTab === 'assignment'">
-      <!-- Staff assignment (read-only) -->
-      <DashboardSettingsPanel
-        v-if="isStaff"
-        title="Your assignment"
-        subtitle="Store and department linked to your account."
-      >
-        <div v-if="isLoadingStoreInfo">
-          <DashFieldGridSkeleton :count="4" />
-        </div>
-        <div v-else class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <label :class="labelClass">Branch</label>
-            <p class="mt-1 text-xs text-gray-900 dark:text-gray-100">{{ storeInfo.name || '-' }}</p>
-          </div>
-          <div>
-            <label :class="labelClass">Department</label>
-            <p class="mt-1 text-xs text-gray-900 dark:text-gray-100">
-              {{ staffWorkspace.departmentName || '-' }}
-            </p>
-          </div>
-          <div v-if="staffWorkspace.position">
-            <label :class="labelClass">Position</label>
-            <p class="mt-1 text-xs text-gray-900 dark:text-gray-100">
-              {{ staffWorkspace.position }}
-            </p>
-          </div>
-          <div v-if="staffWorkspace.staffRole">
-            <label :class="labelClass">Team role</label>
-            <p class="mt-1 text-xs capitalize text-gray-900 dark:text-gray-100">
-              {{ staffWorkspace.staffRole }}
-            </p>
-          </div>
-        </div>
-      </DashboardSettingsPanel>
-      </div>
+      <template v-if="isEditingStore" #footer>
+        <SButton variant="secondary" @click="cancelEditing('store')">Cancel</SButton>
+        <SButton variant="primary" type="submit" form="settings-store-form">Save changes</SButton>
+      </template>
+    </SCard>
 
-      <div v-show="activeSettingsTab === 'store-info'">
-      <!-- Store information -->
-      <DashboardSettingsPanel
-        :title="isStaff ? 'Branch details' : 'Store information'"
-        :subtitle="
-          isStaff
-            ? 'Contact details for your assigned branch (view only).'
-            : 'Business details for the active branch.'
-        "
-      >
-        <template #actions>
-          <button
-            v-if="canEditSettings && !isEditingStore"
-            type="button"
-            :class="editLinkClass"
-            @click="enableEditing('store')"
-          >
-            Edit
-          </button>
-          <template v-else-if="canEditSettings && isEditingStore">
-            <button type="button" :class="cancelLinkClass" @click="cancelEditing('store')">
-              Cancel
-            </button>
-            <button
-              type="button"
-              :class="editLinkClass"
-              aria-label="Save store information"
-              @click="saveStoreInfo"
-            >
-              Save
-            </button>
-          </template>
-          <span v-else :class="viewOnlyBadgeClass">View only</span>
-        </template>
-
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <label :class="labelClass">Branch name</label>
-            <input
-              v-model="storeInfo.name"
-              type="text"
-              :disabled="!canEditSettings || !isEditingStore"
-              :class="inputClass(canEditSettings && isEditingStore)"
-              placeholder="Enter branch name"
-            />
+    <SCard
+      v-else-if="activeSettingsTab === 'inventory'"
+      title="Inventory"
+      description="Stock alerts and defaults for new products."
+    >
+      <form id="settings-inventory-form" class="s-settings__rows" @submit.prevent="saveInventorySettings">
+        <div class="s-settings__row">
+          <div class="s-settings__row-text">
+            <label class="s-settings__row-label" for="settings-low-stock">Low stock alert</label>
+            <p class="s-settings__row-hint">Flag a product when its stock falls below this quantity.</p>
           </div>
-          <div>
-            <label :class="labelClass">Business type</label>
-            <input
-              v-model="storeInfo.businessType"
-              type="text"
-              :disabled="!canEditSettings || !isEditingStore"
-              :class="inputClass(canEditSettings && isEditingStore)"
-              placeholder="Enter business type"
-            />
-          </div>
-          <div>
-            <label :class="labelClass">Email</label>
-            <input
-              v-model="storeInfo.email"
-              type="email"
-              :disabled="!canEditSettings || !isEditingStore"
-              :class="inputClass(canEditSettings && isEditingStore)"
-              placeholder="Enter store email"
-            />
-          </div>
-          <div>
-            <label :class="labelClass">Phone</label>
-            <input
-              v-model="storeInfo.phone"
-              type="tel"
-              :disabled="!canEditSettings || !isEditingStore"
-              :class="inputClass(canEditSettings && isEditingStore)"
-              placeholder="Enter phone number"
-            />
-          </div>
-          <div class="sm:col-span-2">
-            <label :class="labelClass">Address</label>
-            <textarea
-              v-model="storeInfo.address"
-              rows="2"
-              :disabled="!canEditSettings || !isEditingStore"
-              :class="[inputClass(canEditSettings && isEditingStore), 'resize-none']"
-              placeholder="Enter store address"
-            />
-          </div>
-        </div>
-      </DashboardSettingsPanel>
-      </div>
-
-      <div v-show="activeSettingsTab === 'inventory'">
-      <!-- Inventory settings -->
-      <DashboardSettingsPanel
-        title="Inventory"
-        subtitle="Stock alerts and defaults for new products."
-        compact
-      >
-        <template #actions>
-          <button
-            v-if="canEditSettings"
-            type="button"
-            :class="editLinkClass"
-            aria-label="Save inventory settings"
-            @click="saveInventorySettings"
-          >
-            Save
-          </button>
-          <span v-else :class="viewOnlyBadgeClass">View only</span>
-        </template>
-
-        <div class="space-y-0">
-          <div :class="settingRowClass">
-            <div class="flex-1">
-              <p class="text-xs font-medium text-gray-900 dark:text-gray-100">
-                Low stock alert threshold
-              </p>
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                Alert when stock falls below this quantity
-              </p>
-            </div>
-            <div class="flex items-center gap-2">
-              <input
-                v-model.number="inventorySettings.lowStockThreshold"
-                type="number"
-                min="1"
-                :disabled="!canEditSettings"
-                :class="[
-                  'w-16 px-2.5 py-1.5 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-gray-400/40',
-                  canEditSettings
-                    ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100'
-                    : 'bg-gray-100 dark:bg-gray-800/80 text-gray-500 cursor-not-allowed',
-                ]"
-              />
-              <span class="text-xs text-gray-600 dark:text-gray-400">units</span>
-            </div>
-          </div>
-
-          <div :class="settingRowClass">
-            <div class="flex-1 min-w-0">
-              <p class="text-xs font-medium text-gray-900 dark:text-gray-100">
-                Auto-reorder enabled
-              </p>
-              <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
-                Create purchase orders when stock is low
-              </p>
-            </div>
-            <Switch
-              v-model="inventorySettings.autoReorder"
-              :disabled="!canEditSettings"
-              aria-label="Auto-reorder enabled"
-            />
-          </div>
-
-          <div :class="[settingRowClass, '!border-0']">
-            <div class="flex-1 min-w-0">
-              <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Default category</p>
-              <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
-                Default category for new products
-              </p>
-            </div>
-            <select
-              v-model="inventorySettings.defaultCategory"
-              :disabled="!canEditSettings"
-              :class="[inputClass(canEditSettings), '!w-auto min-w-[8rem]']"
-            >
-              <option value="general">General</option>
-              <option value="electronics">Electronics</option>
-              <option value="clothing">Clothing</option>
-              <option value="food">Food & Beverages</option>
-              <option value="office">Office Supplies</option>
-            </select>
-          </div>
-        </div>
-      </DashboardSettingsPanel>
-      </div>
-
-      <div v-show="activeSettingsTab === 'storefront'">
-        <StorefrontSettingsPanel :can-edit="canEditSettings && userStore.isSuperAdmin" />
-      </div>
-
-      <div v-show="activeSettingsTab === 'payments'">
-      <!-- Payment methods at checkout -->
-      <DashboardSettingsPanel
-        title="Checkout payments"
-        subtitle="Tender types on sales, including OPay, Moniepoint, transfer, and cash."
-        compact
-      >
-        <template #actions>
-          <button
-            v-if="canEditSettings"
-            type="button"
-            :class="editLinkClass"
-            aria-label="Save payment methods"
-            @click="savePaymentSettings"
-          >
-            Save
-          </button>
-          <span v-else :class="viewOnlyBadgeClass">View only</span>
-        </template>
-
-        <div class="space-y-3">
-          <p v-if="!isCapacitorIos" class="text-[11px] text-gray-500 dark:text-gray-400">
-            These appear on new sales and balance payments. Add labels your staff use at the
-            counter.
-          </p>
-          <ul class="flex flex-wrap gap-1.5">
-            <li
-              v-for="(tender, index) in paymentTenders"
-              :key="`${tender}-${index}`"
-              class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-800 dark:bg-white/[0.08] dark:text-gray-200"
-            >
-              {{ tender }}
-              <button
-                v-if="canEditSettings"
-                type="button"
-                class="text-gray-500 hover:text-red-600 dark:hover:text-red-400"
-                aria-label="Remove"
-                @click="removePaymentTender(index)"
-              >
-                ×
-              </button>
-            </li>
-          </ul>
-          <div v-if="canEditSettings" class="flex flex-wrap items-center gap-2">
-            <input
-              v-model="newPaymentTender"
-              type="text"
-              :class="[inputClass(true), 'min-w-[10rem] flex-1']"
-              placeholder="e.g. OPay, Moniepoint"
-              @keydown.enter.prevent="addPaymentTender"
-            />
-            <Button
-              variant="neutral"
-              size="sm"
-              :extra-class="headerTextBtnClass"
-              @click="addPaymentTender"
-            >
-              Add
-            </Button>
-            <button
-              type="button"
-              :class="isCapacitorIos ? cancelLinkClass : 'text-[11px] font-medium text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'"
-              @click="resetPaymentTendersToDefault"
-            >
-              Reset to defaults
-            </button>
-          </div>
-        </div>
-      </DashboardSettingsPanel>
-      </div>
-
-      <div v-show="activeSettingsTab === 'sales-receipts'">
-      <!-- Receipt & invoice settings -->
-      <DashboardSettingsPanel
-        title="Sales & receipts"
-        subtitle="Numbering, prefixes, and print behavior."
-        compact
-      >
-        <template #actions>
-          <button
-            v-if="canEditSettings"
-            type="button"
-            :class="editLinkClass"
-            aria-label="Save sales and receipt settings"
-            @click="saveReceiptSettings"
-          >
-            Save
-          </button>
-          <span v-else :class="viewOnlyBadgeClass">View only</span>
-        </template>
-
-        <div class="space-y-0">
-          <div :class="settingRowClass">
-            <div class="flex-1">
-              <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Receipt prefix</p>
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                Prefix for receipt numbers (e.g. REC-)
-              </p>
-            </div>
-            <input
-              v-model="receiptSettings.prefix"
-              type="text"
-              :disabled="!canEditSettings"
-              :class="[
-                'w-24 px-2.5 py-1.5 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-gray-400/40',
-                canEditSettings
-                  ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100'
-                  : 'bg-gray-100 dark:bg-gray-800/80 text-gray-500 cursor-not-allowed',
-              ]"
-              placeholder="REC-"
-            />
-          </div>
-
-          <div :class="settingRowClass">
-            <div class="flex-1 min-w-0">
-              <p class="text-xs font-medium text-gray-900 dark:text-gray-100">
-                Next receipt number
-              </p>
-              <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
-                Starting number for next receipt
-              </p>
-            </div>
-            <input
-              v-model.number="receiptSettings.nextNumber"
+          <div class="s-settings__control s-settings__control--narrow">
+            <SInput
+              id="settings-low-stock"
+              v-model="inventorySettings.lowStockThreshold"
               type="number"
+              inputmode="numeric"
               min="1"
               :disabled="!canEditSettings"
-              :class="[inputClass(canEditSettings), '!w-24']"
-            />
+            >
+              <template #suffix>units</template>
+            </SInput>
           </div>
-
-          <div :class="[settingRowClass, '!border-0']">
-            <div class="flex-1">
-              <p class="text-xs font-medium text-gray-900 dark:text-gray-100">
-                Print receipt automatically
-              </p>
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                Print receipt after sale
-              </p>
-            </div>
-            <Switch
-              v-model="receiptSettings.autoPrint"
+        </div>
+        <div class="s-settings__row">
+          <SCheckbox
+            v-model="inventorySettings.autoReorder"
+            variant="switch"
+            label="Auto-reorder"
+            description="Create purchase orders when stock is low."
+            :disabled="!canEditSettings"
+          />
+        </div>
+        <div class="s-settings__row">
+          <div class="s-settings__row-text">
+            <label class="s-settings__row-label" for="settings-default-category">Default category</label>
+            <p class="s-settings__row-hint">Used for new products when no category is picked.</p>
+          </div>
+          <div class="s-settings__control">
+            <SSelect
+              id="settings-default-category"
+              v-model="inventorySettings.defaultCategory"
+              :options="defaultCategoryOptions"
               :disabled="!canEditSettings"
-              aria-label="Print receipt automatically"
             />
           </div>
         </div>
-      </DashboardSettingsPanel>
-      </div>
+      </form>
+      <template v-if="canEditSettings" #footer>
+        <SButton variant="primary" type="submit" form="settings-inventory-form">Save inventory settings</SButton>
+      </template>
+    </SCard>
 
-      <div v-show="activeSettingsTab === 'data-export'">
-      <!-- Data export (owner only; includes unit costs / COGS basis) -->
-      <DashboardSettingsPanel
-        v-if="!isStaff"
-        title="Data export"
-        subtitle="Download Excel backups of inventory (by category folder), sales, buybacks, and stock loans for this branch."
-        compact
-      >
-        <div class="space-y-4">
-          <p v-if="!isCapacitorIos" class="text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
-            Inventory exports as a ZIP: one folder per category, each with an
-            <code class="rounded bg-black/5 px-1 py-0.5 text-[10px] dark:bg-white/10">items.xlsx</code>
-            file, plus a
-            <code class="rounded bg-black/5 px-1 py-0.5 text-[10px] dark:bg-white/10">categories.xlsx</code>
-            index. Sales, buybacks, and stock loans download as separate Excel files. Large stores may
-            take a moment to gather.
-          </p>
+    <StorefrontSettingsPanel
+      v-else-if="activeSettingsTab === 'storefront'"
+      :can-edit="canEditSettings && userStore.isSuperAdmin"
+    />
 
-          <ul class="grid gap-2 sm:grid-cols-2">
-            <li
-              v-for="item in dataExportItems"
-              :key="item.key"
-              class="rounded-lg bg-gray-50/70 px-3 py-2.5 text-[11px] text-gray-600 dark:bg-white/[0.03] dark:text-gray-400"
-            >
-              <p class="font-medium text-gray-800 dark:text-gray-200">{{ item.label }}</p>
-              <p class="mt-0.5">{{ item.description }}</p>
-            </li>
-          </ul>
+    <SCard
+      v-else-if="activeSettingsTab === 'payments'"
+      title="Checkout payments"
+      description="Payment methods staff can pick on new sales and balance payments."
+    >
+      <ul class="s-settings__chips" aria-label="Payment methods">
+        <li v-for="(tender, index) in paymentTenders" :key="`${tender}-${index}`" class="s-settings__chip">
+          {{ tender }}
+          <button
+            v-if="canEditSettings"
+            type="button"
+            class="s-settings__chip-remove"
+            :aria-label="`Remove ${tender}`"
+            @click="removePaymentTender(index)"
+          >
+            <X :size="14" :stroke-width="2" aria-hidden="true" />
+          </button>
+        </li>
+      </ul>
+      <form v-if="canEditSettings" class="s-settings__add" @submit.prevent="addPaymentTender">
+        <SInput v-model="newPaymentTender" label="Add a method" placeholder="For example, OPay or Moniepoint" />
+        <SButton type="submit" variant="secondary" :disabled="!newPaymentTender.trim()">
+          <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
+          Add
+        </SButton>
+      </form>
+      <template v-if="canEditSettings" #footer>
+        <SButton variant="ghost" @click="resetPaymentTendersToDefault">Reset to defaults</SButton>
+        <SButton variant="primary" @click="savePaymentSettings">Save payment methods</SButton>
+      </template>
+    </SCard>
 
-          <div class="flex flex-wrap items-center gap-2">
-            <Button
-              variant="neutral"
-              size="sm"
-              :extra-class="headerTextBtnClass"
-              :disabled="dataExporting"
-              :loading="dataExporting && !dataExportStatus"
-              @click="handleExportAllStoreData"
-            >
-              {{ dataExporting && !dataExportStatus ? 'Exporting…' : 'Export all to Excel' }}
-            </Button>
-            <p v-if="dataExportStatus" class="text-[11px] text-gray-500 dark:text-gray-400">
-              {{ dataExportStatus }}
-            </p>
+    <SCard
+      v-else-if="activeSettingsTab === 'sales-receipts'"
+      title="Sales & receipts"
+      description="Receipt numbering and printing."
+    >
+      <form id="settings-receipt-form" class="s-settings__rows" @submit.prevent="saveReceiptSettings">
+        <div class="s-settings__row">
+          <div class="s-settings__row-text">
+            <label class="s-settings__row-label" for="settings-receipt-prefix">Receipt prefix</label>
+            <p class="s-settings__row-hint">Added before every receipt number, for example REC-.</p>
+          </div>
+          <div class="s-settings__control s-settings__control--narrow">
+            <SInput
+              id="settings-receipt-prefix"
+              v-model="receiptSettings.prefix"
+              placeholder="REC-"
+              :disabled="!canEditSettings"
+            />
           </div>
         </div>
-      </DashboardSettingsPanel>
-      </div>
-    </div>
+        <div class="s-settings__row">
+          <div class="s-settings__row-text">
+            <label class="s-settings__row-label" for="settings-receipt-next">Next receipt number</label>
+            <p class="s-settings__row-hint">The number the next sale will use.</p>
+          </div>
+          <div class="s-settings__control s-settings__control--narrow">
+            <SInput
+              id="settings-receipt-next"
+              v-model="receiptSettings.nextNumber"
+              type="number"
+              inputmode="numeric"
+              min="1"
+              :disabled="!canEditSettings"
+            />
+          </div>
+        </div>
+        <div class="s-settings__row">
+          <SCheckbox
+            v-model="receiptSettings.autoPrint"
+            variant="switch"
+            label="Print receipts automatically"
+            description="Open the print dialog as soon as a sale is completed."
+            :disabled="!canEditSettings"
+          />
+        </div>
+      </form>
+      <template v-if="canEditSettings" #footer>
+        <SButton variant="primary" type="submit" form="settings-receipt-form">Save receipt settings</SButton>
+      </template>
+    </SCard>
+
+    <SCard
+      v-else-if="activeSettingsTab === 'data-export' && !isStaff"
+      title="Data export"
+      description="Download Excel backups of this branch. Large stores may take a moment to gather."
+    >
+      <ul class="s-settings__exports">
+        <li v-for="item in dataExportItems" :key="item.key">
+          <FileSpreadsheet :size="20" :stroke-width="1.75" aria-hidden="true" />
+          <div>
+            <p class="s-settings__row-label">{{ item.label }}</p>
+            <p class="s-settings__row-hint">{{ item.description }}</p>
+          </div>
+        </li>
+      </ul>
+      <template #footer>
+        <p v-if="dataExportStatus" class="s-settings__status" role="status">{{ dataExportStatus }}</p>
+        <SButton variant="primary" :loading="dataExporting" :disabled="dataExporting" @click="handleExportAllStoreData">
+          <template #leading><Download :size="16" :stroke-width="2" aria-hidden="true" /></template>
+          {{ dataExporting ? 'Exporting…' : 'Export all to Excel' }}
+        </SButton>
+      </template>
+    </SCard>
+
+    <SDialog
+      v-model:open="cancelConfirmOpen"
+      role="alertdialog"
+      title="Cancel auto-renew?"
+      :description="cancelConfirmSubtitle"
+    >
+      <p class="s-settings__dialog-text">
+        Paystack will stop charging on your next billing date. You keep {{ currentSubscriptionLabel }} until
+        {{ cancelGraceEndLabel || 'the end of your current billing period' }}, then your account moves to
+        Storvv Micro.
+      </p>
+      <template #footer>
+        <SButton variant="secondary" @click="cancelConfirmOpen = false">Keep auto-renew</SButton>
+        <SButton variant="danger" @click="proceedCancelSubscription">Cancel auto-renew</SButton>
+      </template>
+    </SDialog>
   </div>
-
-  <!-- Create/Edit Branch (slide-over) -->
-  <SidePanel
-    v-model="showCreateModal"
-    :title="editingStore ? 'Edit Branch' : 'Create Branch'"
-    :subtitle="
-      editingStore
-        ? 'Update branch details.'
-        : 'Add a new branch with name, description, and contact info.'
-    "
-    size="lg"
-  >
-    <IosForm layout="fill">
-      <IosFormSection fixed>
-        <IosFormField label="Branch Name" required>
-          <template v-if="useRegionBranchPicker">
-            <IosFormSelect v-model="branchCity" required extra-class="cursor-pointer">
-              <option value="" disabled>Choose a city...</option>
-              <option v-for="city in availableBranchCities" :key="city" :value="city">
-                {{ city }}
-              </option>
-            </IosFormSelect>
-            <IosFormInput
-              v-model="branchLocality"
-              extra-class="mt-2"
-              placeholder="Area or neighborhood (optional, e.g. Lekki, GRA)"
-            />
-            <p class="ios-form__hint dash-drawer-hint">
-              Cities in {{ branchRegionLabel }} based on your account region.
-            </p>
-          </template>
-          <IosFormInput v-else v-model="storeForm.name" required placeholder="My Branch" />
-        </IosFormField>
-
-        <IosFormField label="Description">
-          <IosFormTextarea
-            v-model="storeForm.description"
-            :rows="2"
-            extra-class="resize-none"
-            placeholder="Store description..."
-          />
-        </IosFormField>
-
-        <IosFormField
-          label="Sell screen note"
-          hint="Shown on Quick Sale and when adding line items / checkout for this branch (e.g. today's promo, price list)."
-        >
-          <IosFormTextarea
-            v-model="storeForm.sellScreenNote"
-            :rows="3"
-            placeholder="e.g. Promo: 10% off accessories today"
-          />
-        </IosFormField>
-
-        <IosFormField label="Address">
-          <IosFormInput v-model="storeForm.address" placeholder="123 Main St, City, State ZIP" />
-        </IosFormField>
-
-        <IosFormField label="Phone">
-          <IosFormInput v-model="storeForm.phone" type="tel" placeholder="+1234567890" />
-        </IosFormField>
-        <IosFormField label="Email">
-          <IosFormInput v-model="storeForm.email" type="email" placeholder="store@example.com" />
-        </IosFormField>
-      </IosFormSection>
-
-      <IosFormSection v-if="editingStore" fixed>
-        <IosFormToggle v-model="storeForm.isActive" label="Active" />
-      </IosFormSection>
-    </IosForm>
-
-    <template #footer>
-      <IosDrawerActions
-        :primary-label="isSubmittingStore ? 'Saving...' : editingStore ? 'Update' : 'Create'"
-        :primary-loading="isSubmittingStore"
-        :primary-disabled="!storeForm.name || isSubmittingStore"
-        @cancel="closeStoreModal"
-        @primary="handleStoreSubmit"
-      />
-    </template>
-  </SidePanel>
-
-  <!-- Delete Store Confirmation Modal -->
-  <Modal
-    v-model="showDeleteModal"
-    title="Delete Store"
-    subtitle="This action cannot be undone."
-    size="md"
-  >
-    <div class="space-y-3">
-      <p class="text-xs text-gray-700 dark:text-gray-300">
-        Are you sure you want to delete <strong>{{ storeToDelete?.name }}</strong
-        >?
-      </p>
-      <p class="text-xs text-red-600 dark:text-red-400">
-        All data associated with this store (departments, staff, inventory, sales) will need to
-        be handled separately.
-      </p>
-    </div>
-
-    <template #footer>
-      <IosDrawerActions
-        primary-variant="danger"
-        :primary-label="isDeletingStore ? 'Deleting...' : 'Delete'"
-        :primary-loading="isDeletingStore"
-        @cancel="showDeleteModal = false"
-        @primary="handleStoreDelete"
-      />
-    </template>
-  </Modal>
-
-  <!-- Store Selection Modal (shown after first store creation) -->
-  <Modal
-    v-model="showStoreSelectionModal"
-    title="Select Your Store"
-    subtitle="Your store was created. Select it to continue."
-    size="md"
-    :close-on-backdrop="false"
-  >
-    <div class="space-y-3">
-      <p class="text-xs text-gray-700 dark:text-gray-300">Please select this store to continue.</p>
-      <div class="space-y-2 max-h-96 overflow-y-auto">
-        <button
-          v-for="store in storesStore.stores"
-          :key="store.id"
-          @click="handleStoreSelection(store.id)"
-          class="w-full rounded-sm p-3 text-left transition-all"
-          :class="
-            newlyCreatedStoreId === store.id
-              ? 'bg-gray-100 dark:bg-white/[0.08]'
-              : 'hover:bg-gray-50 dark:hover:bg-white/[0.04]'
-          "
-        >
-          <div class="flex items-start justify-between">
-            <div class="flex-1">
-              <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                {{ store.name }}
-              </h3>
-              <p class="text-xs text-gray-600 dark:text-gray-400 mt-0.5" v-if="store.description">
-                {{ store.description }}
-              </p>
-              <div class="mt-1.5 flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400">
-                <span v-if="store.address">{{ store.address }}</span>
-                <span v-if="store.phone">{{ store.phone }}</span>
-              </div>
-            </div>
-            <svg
-              v-if="newlyCreatedStoreId === store.id"
-              class="w-4 h-4 text-gray-700 dark:text-gray-300 flex-shrink-0 ml-3"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                clip-rule="evenodd"
-              />
-            </svg>
-          </div>
-        </button>
-      </div>
-    </div>
-  </Modal>
 
   <TotpConfirmModal
     v-model="totpModalOpen"
@@ -967,44 +393,11 @@
     @confirm="confirmTotp"
     @cancel="cancelTotp"
   />
-
-  <Modal
-    v-model="cancelConfirmOpen"
-    title="Cancel auto-renew?"
-    :subtitle="cancelConfirmSubtitle"
-    size="sm"
-  >
-    <p class="text-sm leading-relaxed text-gray-600 dark:text-gray-400">
-      Paystack will stop charging on your next billing date. You keep
-      {{ currentSubscriptionLabel }} until
-      {{
-        cancelGraceEndLabel ||
-        'the end of your current billing period'
-      }}, then your account moves to Storvv Micro.
-    </p>
-    <template #footer>
-      <IosDrawerActions
-        cancel-label="Keep auto-renew"
-        primary-variant="danger"
-        primary-label="Cancel auto-renew"
-        @cancel="cancelConfirmOpen = false"
-        @primary="proceedCancelSubscription"
-      />
-    </template>
-  </Modal>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
-import {
-  ArrowPathIcon,
-  BuildingStorefrontIcon,
-  CameraIcon,
-  CheckIcon,
-  PencilSquareIcon,
-  TrashIcon,
-} from '~/utils/app-icons'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useUser } from '~/composables/useUser'
 import { useFirestore } from '~/composables/useFirestore'
@@ -1013,24 +406,24 @@ import { useUserStore } from '~/stores/user'
 import { useStoresStore } from '~/stores/stores'
 import { useInventoryStore } from '~/stores/inventory'
 import { useAppToast } from '~/composables/useAppToast'
-import Button from '~/components/ui/Button.vue'
-import CategoryTabs from '~/components/ui/CategoryTabs.vue'
-import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
-import Modal from '~/components/ui/Modal.vue'
-import SidePanel from '~/components/ui/SidePanel.vue'
-import Switch from '~/components/ui/Switch.vue'
 import StorefrontSettingsPanel from '~/components/dashboard/StorefrontSettingsPanel.vue'
+import { Download, FileSpreadsheet, Pencil, Plus, Store, Upload, X } from '@lucide/vue'
+import SBadge from '~/components/s/SBadge.vue'
+import SButton from '~/components/s/SButton.vue'
+import SCard from '~/components/s/SCard.vue'
+import SCheckbox from '~/components/s/SCheckbox.vue'
+import SDialog from '~/components/s/SDialog.vue'
+import SInput from '~/components/s/SInput.vue'
+import SPageHeader from '~/components/s/SPageHeader.vue'
+import SSelect from '~/components/s/SSelect.vue'
+import SSkeleton from '~/components/s/SSkeleton.vue'
+import STabs from '~/components/s/STabs.vue'
+import STextarea from '~/components/s/STextarea.vue'
+import CancelDataPolicyPanel from '~/components/growth/CancelDataPolicyPanel.vue'
+import InventoryAuditPanel from '~/components/growth/InventoryAuditPanel.vue'
+import ScheduledBackupPanel from '~/components/growth/ScheduledBackupPanel.vue'
+import { EMPTY_CELL } from '~/utils/ui-empty'
 import { isStorefrontDashboardHidden } from '~/utils/storefront-launch'
-import {
-  IosForm,
-  IosFormSection,
-  IosFormField,
-  IosFormInput,
-  IosFormSelect,
-  IosFormTextarea,
-  IosFormToggle,
-} from '~/components/ios/forms'
-import type { Store } from '~/composables/useStores'
 import { collection, query, where, getDocs } from 'firebase/firestore'
 import {
   SUBSCRIPTION_PLANS,
@@ -1083,9 +476,6 @@ import {
 } from '~/composables/useStaffWorkspaceContext'
 import { DEFAULT_PAYMENT_TENDERS, normalizePaymentTenderList } from '~/utils/payment-tenders'
 import { useStoreDataExport } from '~/composables/useStoreDataExport'
-import { usePreferences, regions } from '~/composables/usePreferences'
-import { getCitiesForRegion, isCityInRegion } from '~/utils/region-cities'
-import { formatBranchDisplayName, parseBranchDisplayName } from '~/utils/branch-name'
 import { useProductAnalytics } from '~/composables/useProductAnalytics'
 import { useFunnelAnalytics } from '~/composables/useFunnelAnalytics'
 import { openChurnSurveyModal } from '~/composables/growth-prompts-state'
@@ -1108,26 +498,7 @@ useHead({
   title: 'Settings - Storvv',
 })
 
-const {
-  eyebrowClass,
-  pageTitleClass,
-  descriptionClass,
-  pageClass,
-  pageStackClass,
-  headerBtnClass,
-  headerTextBtnClass,
-  headerBtnLabelClass,
-  labelClass,
-  inputClass,
-  editLinkClass,
-  cancelLinkClass,
-  viewOnlyBadgeClass,
-  settingRowClass,
-  storeBranchCardClass,
-  storeBranchCardActiveClass,
-} = useDashboardSettingsChrome()
-
-const { isCapacitorIos } = useIsCapacitorIos()
+const { dashPath } = useDashboardPaths()
 
 
 // Store information
@@ -1154,7 +525,7 @@ const { authFetch, getAuthHeaders } = useAuthenticatedFetch()
 const inventoryStore = useInventoryStore()
 const toast = useAppToast()
 
-const { isSoloExperience, enabledCapabilities, canManageBranches } = useBusinessCapabilities()
+const { isSoloExperience, enabledCapabilities } = useBusinessCapabilities()
 const effectiveSubscriptionPlan = computed(() =>
   resolveEffectiveSubscriptionPlan(userStore.userData)
 )
@@ -1210,8 +581,6 @@ async function handleExportAllStoreData() {
     toast.error(message)
   }
 }
-const { limits } = useSubscriptionFeatures()
-const { eligibleStores, hiddenStores, hiddenStoreCount } = usePlanEligibleStores()
 const {
   loadPricing,
   formatUpgradePrice,
@@ -1234,19 +603,12 @@ const currentSubscriptionLabel = computed(() => {
   return SUBSCRIPTION_PLANS.find((p) => p.id === currentSubscription.value)?.name || 'Storvv Micro'
 })
 
-/** Free tier: single store; show upgrade message for multiple branches */
-const isMicroSubscription = computed(() => currentSubscription.value === 'storvv_micro')
-
 /** Stored plan (not grace-effective), used for Paystack change-plan targets. */
 const storedSubscriptionPlan = computed(() =>
   normalizeSubscriptionPlan(userStore.userData?.subscription)
 )
 
 const changePlanOptions = computed(() => getChangeablePaidPlans(storedSubscriptionPlan.value))
-
-const hiddenStoreNames = computed(() =>
-  hiddenStores.value.map((store) => store.name).filter(Boolean)
-)
 
 const billingHistory = ref<BillingHistoryEntry[]>([])
 const cancelConfirmOpen = ref(false)
@@ -1280,18 +642,12 @@ const subscriptionStatusBadgeLabel = computed(() =>
   )
 )
 
-const subscriptionStatusBadgeClass = computed(() => {
+const subscriptionStatusTone = computed(() => {
   const status = userStore.userData?.subscriptionStatus
-  if (status === 'past_due') {
-    return 'bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-200'
-  }
-  if (status === 'canceled') {
-    return 'bg-amber-100 text-amber-900 dark:bg-amber-500/15 dark:text-amber-100'
-  }
-  if (currentSubscription.value === 'storvv_micro') {
-    return 'bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-gray-300'
-  }
-  return 'bg-emerald-100 text-emerald-900 dark:bg-emerald-500/15 dark:text-emerald-100'
+  if (status === 'past_due') return 'error'
+  if (status === 'canceled') return 'warning'
+  if (currentSubscription.value === 'storvv_micro') return 'neutral'
+  return 'success'
 })
 
 const upgradePricePreview = computed(() => {
@@ -1584,18 +940,11 @@ const handleCancelSubscription = async () => {
   }
 }
 
-// Stores management
-const storesLoading = computed(() => storesStore.loading)
-const storesError = computed(() => storesStore.error)
-const currentStore = computed(() => storesStore.currentStore)
 const isStaff = computed(() => userStore.userData?.role === 'staff')
 
 const settingsTabs = computed(() => {
   const tabs: Array<{ value: string; label: string }> = []
   if (userStore.isSuperAdmin) tabs.push({ value: 'account', label: 'Account & workspace' })
-  if (userStore.isSuperAdmin && canManageBranches.value) {
-    tabs.push({ value: 'branches', label: 'Branches' })
-  }
   if (isStaff.value) tabs.push({ value: 'assignment', label: 'Your assignment' })
   tabs.push({ value: 'store-info', label: isStaff.value ? 'Branch details' : 'Store information' })
   tabs.push({ value: 'inventory', label: 'Inventory' })
@@ -1610,8 +959,8 @@ const settingsTabs = computed(() => {
 
 const activeSettingsTab = ref(settingsTabs.value[0]?.value ?? 'account')
 // Role/plan data (userStore.isSuperAdmin, isStaff) can still be loading when this component is
-// set up, so the very first computed tab list may be missing "Account & workspace"/"Branches"/
-// "Your assignment". keep snapping to the first tab until the user actually picks one themselves,
+// set up, so the very first computed tab list may be missing "Account & workspace"/"Your
+// assignment". keep snapping to the first tab until the user actually picks one themselves,
 // not just until the current value happens to still be valid.
 let hasPickedSettingsTab = false
 
@@ -1644,76 +993,6 @@ const staffWorkspace = ref<StaffWorkspaceContext>({
   position: '',
 })
 
-const canAddStore = computed(() => {
-  const max = limits.value.maxStores
-  if (max < 0) return true
-  return storesStore.stores.length < max
-})
-
-// Store management state
-const showCreateModal = ref(false)
-const showDeleteModal = ref(false)
-const showStoreSelectionModal = ref(false)
-const editingStore = ref<Store | null>(null)
-const storeToDelete = ref<Store | null>(null)
-const isSubmittingStore = ref(false)
-const isDeletingStore = ref(false)
-const newlyCreatedStoreId = ref<string | null>(null)
-
-const storeForm = ref({
-  name: '',
-  description: '',
-  sellScreenNote: '',
-  address: '',
-  phone: '',
-  email: '',
-  isActive: true,
-})
-
-const { preferences } = usePreferences()
-const branchCity = ref('')
-const branchLocality = ref('')
-const useCustomBranchName = ref(false)
-
-const accountRegion = computed(() => preferences.value.region || 'US')
-const availableBranchCities = computed(() => getCitiesForRegion(accountRegion.value))
-const branchRegionLabel = computed(() => {
-  const region = regions.find((r) => r.code === accountRegion.value)
-  return region ? `${region.flag} ${region.name}` : 'your region'
-})
-const useRegionBranchPicker = computed(
-  () => availableBranchCities.value.length > 0 && !useCustomBranchName.value
-)
-
-watch([branchCity, branchLocality], () => {
-  if (!useRegionBranchPicker.value) return
-  storeForm.value.name = formatBranchDisplayName(branchCity.value, branchLocality.value)
-})
-
-function resetBranchNameFields() {
-  branchCity.value = ''
-  branchLocality.value = ''
-  useCustomBranchName.value = false
-}
-
-function loadBranchNameFields(name: string) {
-  resetBranchNameFields()
-  if (availableBranchCities.value.length === 0) {
-    storeForm.value.name = name
-    return
-  }
-
-  const parsed = parseBranchDisplayName(name)
-  if (isCityInRegion(parsed.city, accountRegion.value)) {
-    branchCity.value = parsed.city
-    branchLocality.value = parsed.locality
-    storeForm.value.name = formatBranchDisplayName(parsed.city, parsed.locality)
-    return
-  }
-
-  useCustomBranchName.value = true
-  storeForm.value.name = name
-}
 const accountLogoInput = ref<HTMLInputElement | null>(null)
 const isUploadingAccountLogo = ref(false)
 
@@ -1827,6 +1106,14 @@ const inventorySettings = reactive({
   defaultCategory: 'general',
 })
 
+const defaultCategoryOptions = [
+  { value: 'general', label: 'General' },
+  { value: 'electronics', label: 'Electronics' },
+  { value: 'clothing', label: 'Clothing' },
+  { value: 'food', label: 'Food & Beverages' },
+  { value: 'office', label: 'Office Supplies' },
+]
+
 // Receipt settings
 const receiptSettings = reactive({
   prefix: 'REC-',
@@ -1852,142 +1139,6 @@ function removePaymentTender(index: number) {
 
 function resetPaymentTendersToDefault() {
   paymentTenders.value = [...DEFAULT_PAYMENT_TENDERS]
-}
-
-const switchStore = async (storeId: string) => {
-  if (
-    !canManageBranches.value &&
-    storeId !== storesStore.currentStoreId
-  ) {
-    toast.error('Branches are not available on your workspace style. Enable multi-location in Settings.')
-    return
-  }
-
-  try {
-    toast.info('Switching store...')
-    await storesStore.setCurrentStore(storeId)
-    toast.success('Store switched successfully')
-  } catch (err: any) {
-    toast.error(err.message || 'Failed to switch store')
-  }
-}
-
-// Store management functions
-const closeStoreModal = () => {
-  showCreateModal.value = false
-  editingStore.value = null
-  resetBranchNameFields()
-  storeForm.value = {
-    name: '',
-    description: '',
-    sellScreenNote: '',
-    address: '',
-    phone: '',
-    email: '',
-    isActive: true,
-  }
-}
-
-const editStore = (store: Store) => {
-  editingStore.value = store
-  storeForm.value = {
-    name: store.name,
-    description: store.description || '',
-    sellScreenNote: store.sellScreenNote || '',
-    address: store.address || '',
-    phone: store.phone || '',
-    email: store.email || '',
-    isActive: store.isActive,
-  }
-  loadBranchNameFields(store.name)
-  showCreateModal.value = true
-}
-
-const openCreateStoreModal = () => {
-  if (!canAddStore.value) {
-    toast.error(
-      'Storvv Micro allows 1 store. Upgrade your plan in the Account section to add more.'
-    )
-    return
-  }
-  resetBranchNameFields()
-  showCreateModal.value = true
-}
-
-const handleStoreSubmit = async () => {
-  if (!storeForm.value.name) return
-  if (!editingStore.value && !canAddStore.value) {
-    toast.error('Storvv Micro allows 1 store. Upgrade your plan to add more.')
-    return
-  }
-
-  isSubmittingStore.value = true
-  try {
-    const storePayload = {
-      name: storeForm.value.name,
-      description: storeForm.value.description,
-      sellScreenNote: storeForm.value.sellScreenNote.trim(),
-      address: storeForm.value.address,
-      phone: storeForm.value.phone,
-      email: storeForm.value.email,
-      isActive: storeForm.value.isActive,
-    }
-    if (editingStore.value) {
-      await storesStore.updateStore(editingStore.value.id, storePayload)
-      toast.success('Store updated successfully')
-      closeStoreModal()
-    } else {
-      const wasFirstStore = storesStore.stores.length === 0
-      const logoUrl = userStore.userData?.storeLogoUrl || ''
-      const newStoreId = await storesStore.createStore({ ...storePayload, logoUrl })
-      toast.success('Store created successfully')
-      closeStoreModal()
-      await storesStore.fetchStores()
-
-      // If this was the first store, show store selection modal
-      if (wasFirstStore) {
-        newlyCreatedStoreId.value = newStoreId
-        showStoreSelectionModal.value = true
-      }
-    }
-  } catch (err: any) {
-    toast.error(err.message || 'Failed to save store')
-  } finally {
-    isSubmittingStore.value = false
-  }
-}
-
-const handleStoreSelection = async (storeId: string) => {
-  try {
-    await storesStore.setCurrentStore(storeId)
-    toast.success('Store selected successfully')
-    showStoreSelectionModal.value = false
-    newlyCreatedStoreId.value = null
-  } catch (err: any) {
-    toast.error(err.message || 'Failed to select store')
-  }
-}
-
-const confirmDelete = (store: Store) => {
-  storeToDelete.value = store
-  showDeleteModal.value = true
-}
-
-const handleStoreDelete = async () => {
-  if (!storeToDelete.value) return
-
-  isDeletingStore.value = true
-  try {
-    await storesStore.deleteStore(storeToDelete.value.id)
-    toast.success('Store deleted successfully')
-    showDeleteModal.value = false
-    storeToDelete.value = null
-    await storesStore.fetchStores()
-  } catch (err: any) {
-    toast.error(err.message || 'Failed to delete store')
-  } finally {
-    isDeletingStore.value = false
-  }
 }
 
 // Helper function to get the correct user ID (super admin UID if staff)
@@ -2149,6 +1300,10 @@ onMounted(async () => {
   }
 
   const tabParam = String(route.query.tab || '').trim()
+  if (tabParam === 'branches') {
+    await navigateTo({ path: dashPath('/branches'), replace: true })
+    return
+  }
   if (tabParam && settingsTabs.value.some((tab) => tab.value === tabParam)) {
     activeSettingsTab.value = tabParam
     hasPickedSettingsTab = true

@@ -1,477 +1,297 @@
 <template>
-  <div :class="[pageWithFixedFooterClass, 'dash-page--unified']">
-    <div v-if="isCapacitorIos" class="ios-sales-shell" data-seller-loans-page>
-      <IosPageNavBar title="Stock loans" />
-
-      <template v-if="canAccessByRole && canAccessSellerLoansPlan && storesStore.currentStoreId">
-        <div v-if="!sellerLoansStore.loading" class="ios-sales-chrome">
-          <IosQuickActionBar
-            v-model="statusFilter"
-            role="tablist"
-            aria-label="Filter stock loans"
-            :options="iosLoanStatusOptions"
-          />
-        </div>
-
-        <IosTransactionListSkeleton
-          v-if="sellerLoansStore.loading && sellerLoansStore.loans.length === 0"
-          :count="8"
-        />
-
-        <DashboardTableEmptyState
-          v-else-if="sellerLoansStore.error"
-          :icon="ArchiveBoxIcon"
-          title="Could not load stock loans"
-          :description="sellerLoansStore.error"
-        />
-
-        <DashboardTableEmptyState
-          v-else-if="sellerLoansStore.loans.length === 0"
-          :icon="ArchiveBoxIcon"
-          title="No stock loans yet"
-          description="Lend serialized inventory from a product page to track borrowers here."
-        >
-          <NuxtLink
-            to="/dashboard/inventory"
-            class="rounded-lg bg-primary-600 px-3 py-1.5 text-xs font-semibold text-white"
-          >
-            Open inventory
-          </NuxtLink>
-        </DashboardTableEmptyState>
-
-        <DashboardTableEmptyState
-          v-else-if="filteredLoans.length === 0"
-          :icon="MagnifyingGlassIcon"
-          title="No loans in this filter"
-          description="Switch tabs to see loans in another status."
-        />
-
-        <template v-else>
-          <div class="ios-receipt-transaction-list">
-            <IosReceiptTransactionRow
-              v-for="(loan, index) in paginatedLoans"
-              :key="loan.id"
-              :title="loan.partyName"
-              :subtitle="iosLoanSubtitle(loan)"
-              :amount="`${loan.lines.length} unit${loan.lines.length === 1 ? '' : 's'}`"
-              amount-tone="neutral"
-              :date="formatWhenShort(loan.createdAt)"
-              :variant="iosLoanVariant(loan.status)"
-              :last="index === paginatedLoans.length - 1"
-              :show-menu="loan.status === 'active'"
-              menu-kind="stock-loan"
-              :menu-id="loan.id"
-              @menu="toggleLoanMenu(loan.id)"
-            />
-          </div>
-          <DashboardTablePagination
-            :current-page="currentPage"
-            :items-per-page="itemsPerPage"
-            :total="filteredLoans.length"
-            @page-change="handlePageChange"
-          />
-        </template>
+  <div class="ds-root s-c s-page">
+    <SPageHeader title="Stock loans">
+      <template #description>
+        Serial-numbered stock you've lent to resellers. Mark each loan sold or returned when they're done.
       </template>
+    </SPageHeader>
 
-      <DashboardTableEmptyState
-        v-else-if="canAccessByRole && canAccessSellerLoansPlan && !storesStore.currentStoreId"
-        :icon="BuildingStorefrontIcon"
-        title="Select a store"
-        description="Use the store selector to view stock loans for a branch."
-      />
+    <SCard v-if="!canAccessByRole">
+      <SEmptyState
+        title="You don't have access to stock loans"
+        description="Ask the account owner to give you access to stock loans."
+      >
+        <template #icon><Lock :size="24" :stroke-width="1.75" /></template>
+      </SEmptyState>
+    </SCard>
 
-      <FeatureGateCard
-        v-else-if="!canAccessByRole || !canAccessSellerLoansPlan"
-        feature="seller_loans"
-        gate="custom"
-        :description="
-          isStaff ? 'Stock loans are not enabled for your workspace.' : undefined
-        "
-      />
-    </div>
+    <PlanGate
+      v-else-if="!canAccessSellerLoansPlan"
+      feature="seller_loans"
+      description="Lend serial-numbered stock to resellers and track it until it's sold or returned."
+    />
+
+    <SCard v-else-if="!storesStore.currentStoreId && !sellerLoansStore.loading">
+      <SEmptyState
+        title="Choose a branch"
+        description="Stock loans are kept per branch. Pick one from the branch switcher to see its loans."
+      >
+        <template #icon><Store :size="24" :stroke-width="1.75" /></template>
+      </SEmptyState>
+    </SCard>
+
+    <SCard v-else-if="sellerLoansStore.loading && sellerLoansStore.loans.length === 0" flush aria-busy="true">
+      <ul class="s-list" aria-label="Loading stock loans">
+        <li v-for="i in 6" :key="i" class="s-list__item" aria-hidden="true">
+          <div class="s-list__main">
+            <SSkeleton width="40%" height="14px" />
+            <SSkeleton width="25%" height="12px" />
+          </div>
+          <SSkeleton width="64px" height="20px" />
+        </li>
+      </ul>
+    </SCard>
+
+    <SCard v-else-if="sellerLoansStore.error">
+      <SEmptyState title="Couldn't load stock loans" :description="sellerLoansStore.error">
+        <template #icon><TriangleAlert :size="24" :stroke-width="1.75" /></template>
+        <template #actions>
+          <SButton @click="sellerLoansStore.fetchSellerLoanOuts(true)">Try again</SButton>
+        </template>
+      </SEmptyState>
+    </SCard>
+
+    <SCard v-else-if="sellerLoansStore.loans.length === 0">
+      <SEmptyState
+        title="No stock loans yet"
+        description="To lend stock, select serial-numbered products in Inventory and choose Stock loan."
+      >
+        <template #icon><Handshake :size="24" :stroke-width="1.75" /></template>
+        <template #actions>
+          <SButton variant="primary" :to="dashPath('/inventory')">Go to Inventory</SButton>
+        </template>
+      </SEmptyState>
+    </SCard>
 
     <template v-else>
-    <DashboardPageHeader class="dash-page-header--unified">
-      <template #eyebrow>
-        <p :class="eyebrowClass">Inventory</p>
-      </template>
-      <template #title>
-        <h1 :class="pageTitleClass">Stock loans</h1>
-      </template>
-      <template
-        v-if="canAccessByRole && canAccessSellerLoansPlan && sellerLoansStore.loading && sellerLoansStore.loans.length === 0"
-        #description
-      >
-        <DashPageMetricsSkeleton :count="4" />
-      </template>
-      <template
-        v-else-if="canAccessByRole && canAccessSellerLoansPlan && !sellerLoansStore.loading && sellerLoansStore.loans.length > 0"
-        #description
-      >
-        <DashboardPageMetrics :metrics="loanHeaderMetrics" aria-label="Loan summary" />
-      </template>
-    </DashboardPageHeader>
-
-    <div
-      v-if="!canAccessByRole"
-      class="rounded-sm bg-red-50/90 px-4 py-4 dark:bg-red-950/25 sm:px-5 sm:py-5"
-    >
-      <p class="text-xs font-medium text-red-800 dark:text-red-200">
-        You do not have access to stock loans on this account.
-      </p>
-    </div>
-
-    <template v-else-if="canAccessSellerLoansPlan">
-      <div
-        v-if="!storesStore.currentStoreId && !sellerLoansStore.loading"
-        :class="tableShellFlexClass"
-      >
-        <DashboardTableEmptyState
-          :icon="BuildingStorefrontIcon"
-          title="Select a store"
-          description="Use the store selector in the top bar to view stock loans for a branch."
-          :tips="['Loans are tracked per store', 'Only serialized inventory can be lent out']"
-        />
-      </div>
-
-      <div v-else class="flex min-h-0 flex-1 flex-col gap-4 sm:gap-5">
-        <nav :class="segmentTabsClass" aria-label="Stock loan views" role="tablist">
-          <button
-            v-for="tab in loanStatusTabs"
-            :key="tab.value"
-            type="button"
-            role="tab"
-            :aria-selected="statusFilter === tab.value"
-            :class="[
-              segmentTabsBtnClass,
-              statusFilter === tab.value ? segmentTabsBtnActiveClass : '',
-            ]"
-            @click="statusFilter = tab.value"
-          >
-            <span class="inline-flex items-center justify-center gap-1.5">
-              {{ tab.label }}
-              <span
-                v-if="tab.badgeCount"
-                class="min-w-[1.125rem] rounded-full px-1.5 py-0.5 text-[10px] font-semibold tabular-nums"
-                :class="tab.badgeClass"
-              >
-                {{ tab.badgeCount }}
-              </span>
-            </span>
-          </button>
-        </nav>
-
-        <div :class="tableShellFlexClass">
-          <DashTableSkeleton
-            v-if="sellerLoansStore.loading && sellerLoansStore.loans.length === 0"
-            :columns="[
-              { label: 'Borrower', lines: 2 },
-              { label: 'Units', bone: '2.5rem' },
-              { label: 'Started', bone: '5.5rem' },
-              { label: 'Status', class: 'dashboard-table__col-status', bone: '4.5rem' },
-              { label: 'Actions', class: 'dashboard-table__col-actions', bone: '4.5rem' },
-            ]"
-            :rows="8"
-            leading="none"
-            flush
-            aria-label="Loading stock loans"
-          />
-
-          <div v-else-if="sellerLoansStore.error" class="px-4 py-10 text-center sm:px-6">
-            <p class="text-sm font-medium text-red-600 dark:text-red-400">
-              Could not load stock loans.
-            </p>
-            <p class="mx-auto mt-1 max-w-sm text-xs text-gray-500 dark:text-gray-400">
-              {{ sellerLoansStore.error }}
-            </p>
-          </div>
-
-          <DashboardTableEmptyState
-            v-else-if="sellerLoansStore.loans.length === 0"
-            :icon="ArchiveBoxIcon"
-            title="No stock loans yet"
-            description="Lend serialized inventory from a product page to track borrowers here."
-            :tips="[
-              'Only items with serial numbers can be lent out',
-              'Mark sold or returned when the borrower finishes',
-            ]"
-          >
-            <NuxtLink
-              to="/dashboard/inventory"
-              class="rounded-lg bg-primary-600 px-3 py-1.5 text-xs font-semibold text-white"
-            >
-              Open inventory
-            </NuxtLink>
-          </DashboardTableEmptyState>
-
-          <DashboardTableEmptyState
-            v-else-if="filteredLoans.length === 0"
-            :icon="MagnifyingGlassIcon"
-            title="No loans in this filter"
-            description="Switch tabs to see loans in another status."
-            :tips="[
-              'Active loans are still with the borrower',
-              'Returned and sold loans stay in history for reference',
-            ]"
-          >
-            <button
-              type="button"
-              class="text-xs font-medium text-primary-600 underline decoration-primary-300 underline-offset-2 hover:text-primary-700 dark:text-primary-400 dark:decoration-primary-600 dark:hover:text-primary-300"
-              @click="statusFilter = 'all'"
-            >
-              View all
-            </button>
-          </DashboardTableEmptyState>
-
-          <div v-else class="flex flex-col">
-            <div class="overflow-x-auto">
-              <table class="dashboard-table min-w-full">
-                <thead>
-                  <tr>
-                    <th scope="col">Borrower</th>
-                    <th scope="col">Units</th>
-                    <th scope="col">Started</th>
-                    <th scope="col" class="dashboard-table__col-status">Status</th>
-                    <th scope="col" class="dashboard-table__col-actions">
-                      <span class="sr-only">Actions</span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="loan in paginatedLoans" :key="loan.id">
-                    <td class="max-w-[16rem] sm:max-w-xs">
-                      <span class="dashboard-table__primary block truncate">
-                        {{ loan.partyName }}
-                      </span>
-                      <span
-                        v-if="loan.partyPhone"
-                        class="dashboard-table__muted mt-0.5 block truncate text-[10px]"
-                      >
-                        {{ loan.partyPhone }}
-                      </span>
-                      <span
-                        v-if="loan.partyNotes && loan.status === 'active'"
-                        class="dashboard-table__muted mt-1 block max-w-xs truncate text-[10px]"
-                      >
-                        {{ loan.partyNotes }}
-                      </span>
-                    </td>
-                    <td>
-                      <span class="dashboard-table__numeric">{{ loan.lines.length }}</span>
-                      <button
-                        v-if="loan.lines.length > 0 && loan.lines.length <= 40"
-                        type="button"
-                        class="mt-1 flex items-center gap-0.5 text-[10px] font-medium text-primary-600 transition-colors hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
-                        :aria-expanded="expandedLoanIds.has(loan.id)"
-                        @click="toggleLoanLines(loan.id)"
-                      >
-                        <ChevronRightIcon
-                          class="h-3 w-3 shrink-0 transition-transform"
-                          :class="expandedLoanIds.has(loan.id) ? 'rotate-90' : ''"
-                          stroke-width="2"
-                        />
-                        {{ expandedLoanIds.has(loan.id) ? 'Hide products' : 'View products' }}
-                      </button>
-                      <ul
-                        v-if="expandedLoanIds.has(loan.id) && loan.lines.length"
-                        class="mt-1.5 max-h-32 space-y-0.5 overflow-y-auto pl-2"
-                      >
-                        <li
-                          v-for="(line, i) in loan.lines"
-                          :key="i"
-                          class="dashboard-table__muted text-[10px] leading-snug"
-                        >
-                          {{ line.itemSummary }}
-                        </li>
-                      </ul>
-                    </td>
-                    <td class="whitespace-nowrap">
-                      <span class="dashboard-table__muted">{{ formatWhen(loan.createdAt) }}</span>
-                    </td>
-                    <td class="dashboard-table__col-status">
-                      <DashboardTableBadge
-                        :badge-class="sellerLoanStatusBadgeClass(loan.status)"
-                        :label="formatSellerLoanStatusLabel(loan.status)"
-                      />
-                    </td>
-                    <td class="dashboard-table__col-actions">
-                      <template v-if="loan.status === 'active'">
-                        <div
-                          class="inline-flex justify-end"
-                          @click.stop
-                        >
-                          <button
-                            type="button"
-                            :data-stock-loan-actions-anchor="loan.id"
-                            class="dashboard-table__action-btn"
-                            :disabled="loanActionBusyId === loan.id"
-                            :aria-expanded="openLoanMenuId === loan.id"
-                            aria-haspopup="menu"
-                            aria-label="Stock loan actions"
-                            @click="toggleLoanMenu(loan.id)"
-                          >
-                            <EllipsisVerticalIcon class="h-4 w-4 shrink-0" stroke-width="2" />
-                          </button>
-                        </div>
-                      </template>
-                      <span
-                        v-else-if="loan.status === 'sold' && loan.soldAt"
-                        class="dashboard-table__muted block text-right text-[10px] whitespace-nowrap"
-                      >
-                        {{ formatWhen(loan.soldAt) }}
-                      </span>
-                      <span
-                        v-else-if="loan.returnedAt"
-                        class="dashboard-table__muted block text-right text-[10px] whitespace-nowrap"
-                      >
-                        {{ formatWhen(loan.returnedAt) }}
-                      </span>
-                      <span v-else class="dashboard-table__muted text-[10px]">-</span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <DashboardTablePagination
-              :current-page="currentPage"
-              :items-per-page="itemsPerPage"
-              :total="filteredLoans.length"
-              @page-change="handlePageChange"
-            />
-          </div>
+      <dl class="s-metrics">
+        <div class="s-metrics__item">
+          <dt class="s-metrics__label">On loan</dt>
+          <dd class="s-metrics__value">{{ loanCountByStatus.active }}</dd>
         </div>
-      </div>
-    </template>
+        <div class="s-metrics__item">
+          <dt class="s-metrics__label">Units out</dt>
+          <dd class="s-metrics__value">{{ unitsOnLoan }}</dd>
+        </div>
+        <div class="s-metrics__item">
+          <dt class="s-metrics__label">Sold by borrower</dt>
+          <dd class="s-metrics__value">{{ loanCountByStatus.sold }}</dd>
+        </div>
+        <div class="s-metrics__item">
+          <dt class="s-metrics__label">Returned</dt>
+          <dd class="s-metrics__value">{{ loanCountByStatus.returned }}</dd>
+        </div>
+      </dl>
 
-    <div v-else class="py-8">
-      <FeatureGateCard
-        feature="seller_loans"
-        gate="custom"
-        :description="
-          isStaff
-            ? 'Stock loans are not enabled for your workspace.'
-            : undefined
-        "
-        :secondary-href="isStaff ? undefined : '/dashboard/help#settings-subscription'"
-      />
-    </div>
-    </template>
+      <STabs v-model="statusFilter" :tabs="webLoanTabs" label="Loan status" />
 
-    <Modal
-      v-model="showReturnModal"
-      title="Return to store"
-      subtitle="This clears the stock-loan flags on the listed inventory so the units show as available again on the shelf."
-      size="md"
-      :close-on-backdrop="!confirmReturnLoading"
-      :show-close="!confirmReturnLoading"
-    >
-      <template #default>
-        <p v-if="loanPendingReturn" class="text-sm text-gray-700 dark:text-gray-300">
-          Mark all
-          <span class="font-semibold tabular-nums">{{ loanPendingReturn.lines.length }}</span>
-          item{{ loanPendingReturn.lines.length !== 1 ? 's' : '' }}
-          from
-          <span class="font-semibold">{{ loanPendingReturn.partyName }}</span>
-          as returned to your store?
-        </p>
-        <p
-          v-if="loanPendingReturn?.partyNotes"
-          class="mt-3 text-xs text-gray-500 dark:text-gray-400"
+      <SCard v-if="filteredLoans.length === 0">
+        <SEmptyState
+          :title="`No ${statusFilter === 'sold' ? 'sold' : statusFilter} loans`"
+          description="Loans move between these tabs as you mark them sold or returned."
         >
-          Notes on file: {{ loanPendingReturn.partyNotes }}
-        </p>
-      </template>
-      <template #footer>
-        <IosDrawerActions
-          primary-label="Return to store"
-          :primary-loading="confirmReturnLoading"
-          :primary-disabled="!loanPendingReturn"
-          :cancel-disabled="confirmReturnLoading"
-          @cancel="closeReturnModal"
-          @primary="confirmReturn"
+          <template #icon><Handshake :size="24" :stroke-width="1.75" /></template>
+          <template #actions>
+            <SButton @click="statusFilter = 'all'">Show all loans</SButton>
+          </template>
+        </SEmptyState>
+      </SCard>
+
+      <template v-else>
+        <!-- Phone -->
+        <SCard flush class="s-only-sm">
+          <ul class="s-list">
+            <li v-for="loan in paginatedLoans" :key="loan.id">
+              <div class="s-list__item">
+                <button
+                  type="button"
+                  class="s-list__main s-list__hit"
+                  :aria-expanded="expandedLoanIds.has(loan.id)"
+                  @click="toggleLoanLines(loan.id)"
+                >
+                  <span class="s-list__primary">{{ loan.partyName }}</span>
+                  <span class="s-list__secondary">{{ unitLabel(loan) }} · {{ formatDay(loan.createdAt) }}</span>
+                </button>
+                <span class="s-list__end">
+                  <SBadge :tone="loanTone(loan.status)" size="sm">{{ formatSellerLoanStatusLabel(loan.status) }}</SBadge>
+                </span>
+                <SIconButton
+                  v-if="loan.status === 'active'"
+                  :label="`Actions for loan to ${loan.partyName}`"
+                  size="sm"
+                  :data-stock-loan-actions-anchor="loan.id"
+                  :disabled="loanActionBusyId === loan.id"
+                  aria-haspopup="menu"
+                  :aria-expanded="openLoanMenuId === loan.id"
+                  @click="toggleLoanMenu(loan.id)"
+                >
+                  <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
+                </SIconButton>
+              </div>
+              <ul v-if="expandedLoanIds.has(loan.id)" class="s-loan__lines">
+                <li v-for="(line, index) in loan.lines" :key="index">{{ line.itemSummary }}</li>
+              </ul>
+            </li>
+          </ul>
+        </SCard>
+
+        <!-- Tablet and desktop -->
+        <div class="s-table-wrap s-hide-sm">
+          <table class="s-table">
+            <thead>
+              <tr>
+                <th scope="col">Borrower</th>
+                <th scope="col" class="s-table__num">Units</th>
+                <th scope="col">Lent</th>
+                <th scope="col" class="s-hide-md">Closed</th>
+                <th scope="col">Status</th>
+                <th scope="col" class="s-table__actions"><span class="ds-sr-only">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <template v-for="loan in paginatedLoans" :key="loan.id">
+                <tr :class="{ 's-table__row--expanded': expandedLoanIds.has(loan.id) }">
+                  <td>
+                    <span class="s-table__primary">{{ loan.partyName }}</span>
+                    <span v-if="loan.partyPhone || loan.partyNotes" class="s-table__secondary">
+                      {{ loan.partyPhone || loan.partyNotes }}
+                    </span>
+                  </td>
+                  <td class="s-table__num">
+                    <button
+                      type="button"
+                      class="s-loan__toggle"
+                      :aria-expanded="expandedLoanIds.has(loan.id)"
+                      :aria-label="`${expandedLoanIds.has(loan.id) ? 'Hide' : 'Show'} the ${unitLabel(loan)} lent to ${loan.partyName}`"
+                      @click="toggleLoanLines(loan.id)"
+                    >
+                      {{ loan.lines.length }}
+                      <ChevronDown
+                        :size="14"
+                        :stroke-width="2"
+                        class="s-loan__chevron"
+                        :class="{ 's-loan__chevron--open': expandedLoanIds.has(loan.id) }"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </td>
+                  <td class="s-table__nowrap">{{ formatDay(loan.createdAt) }}</td>
+                  <td class="s-hide-md s-table__nowrap">
+                    <span v-if="loanClosedAt(loan)">{{ formatDay(loanClosedAt(loan)) }}</span>
+                    <span v-else class="s-table__muted">{{ EMPTY_CELL }}</span>
+                  </td>
+                  <td>
+                    <SBadge :tone="loanTone(loan.status)" dot>{{ formatSellerLoanStatusLabel(loan.status) }}</SBadge>
+                  </td>
+                  <td class="s-table__actions">
+                    <SIconButton
+                      v-if="loan.status === 'active'"
+                      :label="`Actions for loan to ${loan.partyName}`"
+                      size="sm"
+                      :data-stock-loan-actions-anchor="loan.id"
+                      :disabled="loanActionBusyId === loan.id"
+                      aria-haspopup="menu"
+                      :aria-expanded="openLoanMenuId === loan.id"
+                      @click="toggleLoanMenu(loan.id)"
+                    >
+                      <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
+                    </SIconButton>
+                  </td>
+                </tr>
+                <tr v-if="expandedLoanIds.has(loan.id)">
+                  <td colspan="6" class="s-table__nested">
+                    <ul class="s-list" :aria-label="`Units lent to ${loan.partyName}`">
+                      <li v-for="(line, index) in loan.lines" :key="index" class="s-list__item">
+                        <span class="s-list__main">{{ line.itemSummary }}</span>
+                      </li>
+                    </ul>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+
+        <SPagination
+          :current-page="currentPage"
+          :page-size="itemsPerPage"
+          :total="filteredLoans.length"
+          label="Stock loans pagination"
+          @page-change="handlePageChange"
         />
       </template>
-    </Modal>
+    </template>
 
-    <Modal
-      v-model="showSoldModal"
-      title="Mark sold (borrower)"
-      subtitle="Each listed unit will be marked sold in inventory (same as a receipt sale outside the POS). Stock loan borrowing flags are cleared. This cannot be undone from here."
-      size="md"
-      :close-on-backdrop="!confirmSoldLoading"
-      :show-close="!confirmSoldLoading"
-    >
-      <template #default>
-        <p v-if="loanPendingSold" class="text-sm text-gray-700 dark:text-gray-300">
-          Mark all
-          <span class="font-semibold tabular-nums">{{ loanPendingSold.lines.length }}</span>
-          item{{ loanPendingSold.lines.length !== 1 ? 's' : '' }}
-          from
-          <span class="font-semibold">{{ loanPendingSold.partyName }}</span>
-          as sold by the borrower?
-        </p>
-        <p v-if="loanPendingSold?.partyNotes" class="mt-3 text-xs text-gray-500 dark:text-gray-400">
-          Notes on file: {{ loanPendingSold.partyNotes }}
-        </p>
-      </template>
-      <template #footer>
-        <IosDrawerActions
-          primary-label="Mark sold"
-          :primary-loading="confirmSoldLoading"
-          :primary-disabled="!loanPendingSold"
-          :cancel-disabled="confirmSoldLoading"
-          @cancel="closeSoldModal"
-          @primary="confirmMarkSold"
-        />
-      </template>
-    </Modal>
-
-    <IosContextMenu
+    <SMenu
       :open="Boolean(openLoanMenuId && loanForOpenMenu && loanMenuFixedStyle)"
       :style="loanMenuFixedStyle"
       menu-id="stock-loan"
+      label="Stock loan actions"
+      @close="closeLoanMenu"
     >
-      <IosContextMenuItem
-        label="Mark sold (borrower)"
-        :icon="CheckCircleIcon"
-        @click="handleLoanMenuMarkSold"
-      />
-      <IosContextMenuItem
-        label="Return to store"
-        :icon="ArrowUturnLeftIcon"
-        @click="handleLoanMenuReturnToStore"
-      />
-    </IosContextMenu>
+      <SMenuItem label="Mark sold by borrower" :icon="CircleCheck" @select="handleLoanMenuMarkSold" />
+      <SMenuItem label="Return to stock" :icon="Undo2" @select="handleLoanMenuReturnToStore" />
+    </SMenu>
+
+    <SDialog
+      v-model:open="showReturnModal"
+      role="alertdialog"
+      size="sm"
+      title="Return this stock?"
+      :description="loanPendingReturn ? `${unitLabel(loanPendingReturn)} from ${loanPendingReturn.partyName} go back on your shelf as available.` : undefined"
+      :dismissible="!confirmReturnLoading"
+    >
+      <p v-if="loanPendingReturn?.partyNotes" class="s-loan__note">Notes: {{ loanPendingReturn.partyNotes }}</p>
+      <template #footer>
+        <SButton :disabled="confirmReturnLoading" @click="closeReturnModal">Cancel</SButton>
+        <SButton variant="primary" :loading="confirmReturnLoading" @click="confirmReturn">Return to stock</SButton>
+      </template>
+    </SDialog>
+
+    <SDialog
+      v-model:open="showSoldModal"
+      role="alertdialog"
+      size="sm"
+      title="Mark as sold by the borrower?"
+      :description="loanPendingSold ? `${unitLabel(loanPendingSold)} from ${loanPendingSold.partyName} will show as sold in your inventory. You can't undo this here.` : undefined"
+      :dismissible="!confirmSoldLoading"
+    >
+      <p v-if="loanPendingSold?.partyNotes" class="s-loan__note">Notes: {{ loanPendingSold.partyNotes }}</p>
+      <template #footer>
+        <SButton :disabled="confirmSoldLoading" @click="closeSoldModal">Cancel</SButton>
+        <SButton variant="primary" :loading="confirmSoldLoading" @click="confirmMarkSold">Mark sold</SButton>
+      </template>
+    </SDialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, watch, onMounted, nextTick, onBeforeUnmount } from 'vue'
 import {
-  ArchiveBoxIcon,
-  ArrowUturnLeftIcon,
-  BuildingStorefrontIcon,
-  CheckCircleIcon,
-  ChevronRightIcon,
-  ClockIcon,
-  EllipsisVerticalIcon,
-  FunnelIcon,
-  MagnifyingGlassIcon,
-} from '~/utils/app-icons'
-import Modal from '~/components/ui/Modal.vue'
-import Button from '~/components/ui/Button.vue'
-import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
-import IosContextMenu from '~/components/ios/IosContextMenu.vue'
-import IosContextMenuItem from '~/components/ios/IosContextMenuItem.vue'
-import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
-import IosQuickActionBar, { type IosQuickActionOption } from '~/components/ios/IosQuickActionBar.vue'
-import IosTransactionListSkeleton from '~/components/ios/IosTransactionListSkeleton.vue'
-import IosReceiptTransactionRow, {
-  type ReceiptTransactionVariant,
-} from '~/components/ios/IosReceiptTransactionRow.vue'
-import FeatureGateCard from '~/components/subscription/FeatureGateCard.vue'
-import DashboardTableBadge from '~/components/ui/DashboardTableBadge.vue'
-import { formatSellerLoanStatusLabel, sellerLoanStatusBadgeClass } from '~/utils/table-badge-styles'
+  ChevronDown,
+  CircleCheck,
+  EllipsisVertical,
+  Handshake,
+  Lock,
+  Store,
+  TriangleAlert,
+  Undo2,
+} from '@lucide/vue'
+import SBadge from '~/components/s/SBadge.vue'
+import SButton from '~/components/s/SButton.vue'
+import SCard from '~/components/s/SCard.vue'
+import SDialog from '~/components/s/SDialog.vue'
+import SEmptyState from '~/components/s/SEmptyState.vue'
+import SIconButton from '~/components/s/SIconButton.vue'
+import SMenu from '~/components/s/SMenu.vue'
+import SMenuItem from '~/components/s/SMenuItem.vue'
+import SPageHeader from '~/components/s/SPageHeader.vue'
+import SPagination from '~/components/s/SPagination.vue'
+import SSkeleton from '~/components/s/SSkeleton.vue'
+import STabs from '~/components/s/STabs.vue'
+import PlanGate from '~/components/subscription/PlanGate.vue'
+import { formatSellerLoanStatusLabel } from '~/utils/status-labels'
+import { EMPTY_CELL } from '~/utils/ui-empty'
 import { useSellerLoanOutsStore, type SellerLoanOut } from '~/stores/sellerLoanOuts'
 import { useStoresStore } from '~/stores/stores'
 import { usePermissions } from '~/composables/usePermissions'
@@ -487,21 +307,11 @@ definePageMeta({
   layout: 'dashboard',
 })
 
-const {
-  eyebrowClass,
-  pageTitleClass,
-  pageWithFixedFooterClass,
-  segmentTabsClass,
-  segmentTabsBtnClass,
-  segmentTabsBtnActiveClass,
-} = useDashboardPageChrome()
-
-const { tableShellFlexClass } = useDashboardTableChrome()
-const { isCapacitorIos } = useIsCapacitorIos()
+const { dashPath } = useDashboardPaths()
 
 const sellerLoansStore = useSellerLoanOutsStore()
 const storesStore = useStoresStore()
-const { can, isStaff } = usePermissions()
+const { can } = usePermissions()
 const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
 const toast = useAppToast()
 
@@ -521,58 +331,6 @@ const loanCountByStatus = computed(() => {
     returned: rows.filter((l) => l.status === 'returned').length,
   }
 })
-
-const loanStatusTabs = computed(() => {
-  const counts = loanCountByStatus.value
-  return [
-    {
-      value: 'active' as const,
-      label: 'Active',
-      badgeCount: counts.active > 0 ? counts.active : undefined,
-      badgeClass: 'bg-indigo-100 text-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-200',
-    },
-    { value: 'returned' as const, label: 'Returned' },
-    { value: 'sold' as const, label: 'Sold (borrower)' },
-    { value: 'all' as const, label: 'All' },
-  ]
-})
-
-const iosLoanStatusOptions = computed((): IosQuickActionOption[] =>
-  loanStatusTabs.value.map((tab) => ({
-    value: tab.value,
-    label: tab.label,
-    badge: tab.badgeCount,
-    icon:
-      tab.value === 'active'
-        ? ClockIcon
-        : tab.value === 'returned'
-          ? ArrowUturnLeftIcon
-          : tab.value === 'sold'
-            ? CheckCircleIcon
-            : FunnelIcon,
-  }))
-)
-
-function iosLoanSubtitle(loan: SellerLoanOut) {
-  const status = formatSellerLoanStatusLabel(loan.status)
-  const phone = loan.partyPhone ? ` · ${loan.partyPhone}` : ''
-  return `${status}${phone}`
-}
-
-function iosLoanVariant(status: SellerLoanOut['status']): ReceiptTransactionVariant {
-  if (status === 'active') return 'pending'
-  if (status === 'sold') return 'credit'
-  return 'cancelled'
-}
-
-function formatWhenShort(v: Date | undefined) {
-  if (!v) return ''
-  try {
-    return v.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-  } catch {
-    return ''
-  }
-}
 
 function toggleLoanLines(loanId: string) {
   const next = new Set(expandedLoanIds.value)
@@ -604,36 +362,37 @@ const filteredLoans = computed(() => {
   return rows.filter((l) => l.status === 'returned')
 })
 
-const loanHeaderMetrics = computed(() => {
+const webLoanTabs = computed(() => {
   const counts = loanCountByStatus.value
-  const total = sellerLoansStore.loans.length
-  const shown = filteredLoans.value.length
-
   return [
-    {
-      key: 'shown',
-      label: statusFilter.value === 'all' ? 'Loans' : 'Shown',
-      value: statusFilter.value === 'all' ? String(total) : `${shown} / ${total}`,
-    },
-    {
-      key: 'active',
-      label: 'On loan',
-      value: String(counts.active),
-      tone: counts.active > 0 ? ('info' as const) : undefined,
-    },
-    {
-      key: 'sold',
-      label: 'Sold',
-      value: String(counts.sold),
-      tone: 'success' as const,
-    },
-    {
-      key: 'returned',
-      label: 'Returned',
-      value: String(counts.returned),
-    },
+    { value: 'active', label: 'On loan', count: counts.active },
+    { value: 'sold', label: 'Sold by borrower', count: counts.sold },
+    { value: 'returned', label: 'Returned', count: counts.returned },
+    { value: 'all', label: 'All', count: sellerLoansStore.loans.length },
   ]
 })
+
+const unitsOnLoan = computed(() =>
+  sellerLoansStore.loans
+    .filter((loan) => loan.status === 'active')
+    .reduce((sum, loan) => sum + loan.lines.length, 0)
+)
+
+function unitLabel(loan: SellerLoanOut) {
+  return `${loan.lines.length} unit${loan.lines.length === 1 ? '' : 's'}`
+}
+
+function loanTone(status: SellerLoanOut['status']): 'info' | 'success' | 'neutral' {
+  if (status === 'active') return 'info'
+  if (status === 'sold') return 'success'
+  return 'neutral'
+}
+
+function loanClosedAt(loan: SellerLoanOut): Date | undefined {
+  if (loan.status === 'sold') return loan.soldAt
+  if (loan.status === 'returned') return loan.returnedAt
+  return undefined
+}
 
 const paginatedLoans = computed(() => {
   const list = filteredLoans.value
@@ -675,15 +434,12 @@ watch(
   }
 )
 
-function formatWhen(v: Date | undefined) {
-  if (!v) return '-'
+function formatDay(v: Date | undefined) {
+  if (!v) return EMPTY_CELL
   try {
-    return v.toLocaleString(undefined, {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    })
+    return v.toLocaleDateString(undefined, { dateStyle: 'medium' })
   } catch {
-    return '-'
+    return EMPTY_CELL
   }
 }
 
@@ -789,6 +545,12 @@ onBeforeUnmount(() => {
   removeLoanMenuOutsideListener()
   removeLoanMenuPositionListeners()
 })
+
+function closeLoanMenu() {
+  const id = openLoanMenuId.value
+  openLoanMenuId.value = null
+  if (id) nextTick(() => getVisibleMenuAnchorElement('data-stock-loan-actions-anchor', id)?.focus())
+}
 
 function handleLoanMenuMarkSold() {
   const loan = loanForOpenMenu.value

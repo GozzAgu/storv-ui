@@ -1,11 +1,22 @@
 <template>
   <AuthShell
-    compact
-    content-width-class="max-w-[440px]"
-    mobile-line="Join Storvv: your store workspace, organized."
-    panel-title="Open a workspace built for multi-branch retail."
-    panel-description="Create your owner account, then invite managers and staff. Inventory, receipts, and structure stay connected."
+    panel-eyebrow="Join Storvv"
+    panel-title="Start your journey"
+    panel-description="Follow these simple steps to set up your store workspace."
+    :active-step="registrationComplete ? 1 : 0"
   >
+    <AuthBuddies
+      mode="signup"
+      :focused="focused"
+      :name="form.name"
+      :email="form.email"
+      :password="form.password"
+      :confirm-password="form.confirmPassword"
+      :error="errorMessage"
+      :loading="isLoading"
+      :done="registrationComplete"
+    />
+
     <AuthPageHeader
       v-if="!registrationComplete"
       title="Create your account"
@@ -16,13 +27,12 @@
       v-else
       title="Check your email"
       subtitle="We need you to confirm your address before you sign in."
-      :show-logo="false"
     />
 
     <AuthSegmentToggle v-if="!registrationComplete" mode="signup" />
 
     <AuthCard>
-      <div v-if="registrationComplete" class="space-y-4" role="status">
+      <div v-if="registrationComplete" class="s-auth-body" role="status">
         <AuthSuccessPanel :icon="EnvelopeIcon">
           <template #title>
             <template v-if="registrationVerificationSent">Open the link we sent you</template>
@@ -30,14 +40,12 @@
           </template>
           <template v-if="registrationVerificationSent">
             We emailed
-            <span class="font-medium text-gray-800 dark:text-gray-200">{{ registrationEmail }}</span
+            <strong>{{ registrationEmail }}</strong
             >. Check your inbox and spam folder.
           </template>
           <template v-else>
             We could not send a verification email automatically. You can still
-            <NuxtLink :to="signInLinkWithEmail" class="auth-link underline underline-offset-2">
-              sign in
-            </NuxtLink>
+            <NuxtLink :to="signInLinkWithEmail" class="auth-link"> sign in </NuxtLink>
             with the password you chose.
           </template>
           <template v-if="registrationVerificationSent" #footer>
@@ -47,144 +55,104 @@
 
         <p class="auth-auth-footer-link">
           Ready to continue?
-          <NuxtLink :to="signInLinkWithEmail">Log in</NuxtLink>
+          <NuxtLink :to="signInLinkWithEmail">Sign in</NuxtLink>
         </p>
       </div>
 
-      <div v-else class="auth-form-panel">
-      <form class="auth-form" @submit.prevent="handleSignUp">
-        <AuthField
-          v-model="form.name"
-          input-id="business-name"
-          label="Your business name"
-          type="text"
-          autocomplete="organization"
-          placeholder="Your business name"
-          :icon="BuildingStorefrontIcon"
-          required
-        />
+      <div v-else class="auth-form-panel" @focusin="trackFocus" @focusout="trackFocus">
+        <form class="auth-form" @submit.prevent="handleSignUp">
+          <AuthField
+            v-model="form.name"
+            input-id="business-name"
+            label="Your business name"
+            type="text"
+            autocomplete="organization"
+            placeholder="Your business name"
+            :icon="BuildingStorefrontIcon"
+            required
+          />
 
-        <AuthField
-          v-model="form.email"
-          input-id="email"
-          label="Email"
-          type="email"
-          autocomplete="email"
-          placeholder="Enter your email"
-          :icon="EnvelopeIcon"
-          required
-        />
+          <AuthField
+            v-model="form.email"
+            input-id="email"
+            label="Email"
+            type="email"
+            autocomplete="email"
+            placeholder="Enter your email"
+            :icon="EnvelopeIcon"
+            required
+          />
 
-        <AuthField
-          v-model="form.password"
-          input-id="password"
-          label="Password"
-          autocomplete="new-password"
-          placeholder="Enter your password"
-          password-toggle
-          :icon="LockClosedIcon"
-          :minlength="PASSWORD_MIN_LENGTH"
-          required
-        >
-          <template #hint>
-            <div v-if="form.password.length > 0" class="mt-1.5 space-y-1" aria-live="polite">
-              <div class="flex items-center justify-between gap-2">
-                <span class="text-[10px] font-medium text-gray-500 dark:text-gray-400"
-                  >Password strength</span
-                >
-                <span class="text-[10px] font-semibold tabular-nums" :class="strengthLabelClass">
-                  {{ passwordStrength.label }}
-                </span>
-              </div>
-              <div
-                class="flex gap-1"
-                role="meter"
-                :aria-valuenow="passwordStrength.score"
-                aria-valuemin="0"
-                aria-valuemax="100"
-                aria-label="Password strength score"
+          <AuthField
+            v-model="form.password"
+            input-id="password"
+            label="Password"
+            autocomplete="new-password"
+            placeholder="Enter your password"
+            password-toggle
+            :icon="LockClosedIcon"
+            :minlength="PASSWORD_MIN_LENGTH"
+            required
+          >
+            <template #hint>
+              <AuthPasswordStrength :password="form.password" />
+            </template>
+          </AuthField>
+
+          <AuthField
+            v-model="form.confirmPassword"
+            input-id="confirmPassword"
+            label="Confirm password"
+            autocomplete="new-password"
+            placeholder="Re-enter your password"
+            password-toggle
+            :icon="LockClosedIcon"
+            required
+          >
+            <template #hint>
+              <p
+                v-if="
+                  form.password && form.confirmPassword && form.password !== form.confirmPassword
+                "
+                class="s-field__error"
+                role="alert"
               >
-                <div
-                  v-for="seg in 4"
-                  :key="seg"
-                  class="h-1.5 min-w-0 flex-1 rounded-full transition-colors duration-200"
-                  :class="
-                    seg <= passwordStrength.segments
-                      ? strengthSegmentClass
-                      : 'bg-gray-200 dark:bg-gray-700'
-                  "
-                />
-              </div>
-              <p class="text-[10px] leading-snug text-gray-500 dark:text-gray-400">
-                {{ strengthHint }}
+                Passwords do not match
               </p>
-            </div>
-            <p class="mt-1 text-[10px] leading-snug text-gray-500 dark:text-gray-400">
-              At least {{ PASSWORD_MIN_LENGTH }} characters, one number, and one uppercase letter.
-            </p>
-          </template>
-        </AuthField>
+            </template>
+          </AuthField>
 
-        <AuthField
-          v-model="form.confirmPassword"
-          input-id="confirmPassword"
-          label="Confirm password"
-          autocomplete="new-password"
-          placeholder="Re-enter your password"
-          password-toggle
-          :icon="LockClosedIcon"
-          required
-        >
-          <template #hint>
-            <p
-              v-if="form.password && form.confirmPassword && form.password !== form.confirmPassword"
-              class="mt-1 text-xs text-red-500 dark:text-red-400"
-            >
-              Passwords do not match
-            </p>
-          </template>
-        </AuthField>
+          <AuthAlert v-if="errorMessage" :message="errorMessage">
+            <template v-if="errorMessage.includes('PERMISSION_DENIED')" #actions>
+              <SButton size="sm" @click="copyRulesToClipboard">
+                {{ rulesCopied ? 'Copied' : 'Copy setup rules' }}
+              </SButton>
+            </template>
+          </AuthAlert>
 
-        <AuthAlert v-if="errorMessage" :message="errorMessage">
-          <template v-if="errorMessage.includes('PERMISSION_DENIED')" #actions>
-            <div class="flex items-center gap-2">
-              <button
-                type="button"
-                class="inline-flex items-center gap-2 rounded-lg bg-gray-600 px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-gray-700"
-                @click="copyRulesToClipboard"
-              >
-                Copy setup rules
-              </button>
-              <span v-if="rulesCopied" class="text-[11px] text-green-600 dark:text-green-400"
-                >Copied!</span
-              >
-            </div>
-          </template>
-        </AuthAlert>
+          <div class="auth-checkbox-options">
+            <AuthCheckbox v-model="form.acceptTerms">
+              I accept the
+              <NuxtLink to="/terms" class="auth-link">terms</NuxtLink>
+              and
+              <NuxtLink to="/privacy" class="auth-link">privacy policy</NuxtLink>
+            </AuthCheckbox>
+          </div>
 
-        <div class="auth-checkbox-options">
-          <AuthCheckbox v-model="form.acceptTerms">
-            I accept the
-            <NuxtLink to="/terms" class="auth-link">terms</NuxtLink>
-            and
-            <NuxtLink to="/privacy" class="auth-link">privacy policy</NuxtLink>
-          </AuthCheckbox>
-        </div>
+          <AuthPrimaryButton
+            label="Create account"
+            :loading="isLoading"
+            :disabled="
+              isLoading ||
+              !!(form.password && form.confirmPassword && form.password !== form.confirmPassword)
+            "
+          />
+        </form>
 
-        <AuthPrimaryButton
-          label="Sign Up"
-          :loading="isLoading"
-          :disabled="
-            isLoading ||
-            !!(form.password && form.confirmPassword && form.password !== form.confirmPassword)
-          "
-        />
-      </form>
-
-      <p class="auth-auth-footer-link">
-        Already have an account?
-        <NuxtLink to="/signin">Log In</NuxtLink>
-      </p>
+        <p class="auth-auth-footer-link">
+          Already have an account?
+          <NuxtLink to="/signin">Sign in</NuxtLink>
+        </p>
       </div>
     </AuthCard>
   </AuthShell>
@@ -192,11 +160,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
-import {
-  EnvelopeIcon,
-  LockClosedIcon,
-  BuildingStorefrontIcon,
-} from '~/utils/app-icons'
+import { EnvelopeIcon, LockClosedIcon, BuildingStorefrontIcon } from '~/utils/app-icons'
 import AuthShell from '~/components/auth/AuthShell.vue'
 import AuthPageHeader from '~/components/auth/AuthPageHeader.vue'
 import AuthCard from '~/components/auth/AuthCard.vue'
@@ -206,13 +170,16 @@ import AuthSuccessPanel from '~/components/auth/AuthSuccessPanel.vue'
 import AuthSegmentToggle from '~/components/auth/AuthSegmentToggle.vue'
 import AuthPrimaryButton from '~/components/auth/AuthPrimaryButton.vue'
 import AuthCheckbox from '~/components/auth/AuthCheckbox.vue'
+import AuthPasswordStrength from '~/components/auth/AuthPasswordStrength.vue'
+import SButton from '~/components/s/SButton.vue'
+import AuthBuddies from '~/components/auth/AuthBuddies.vue'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
+import { useFocusedField } from '~/composables/useFocusedField'
 import { useUser } from '~/composables/useUser'
 import {
   PASSWORD_MIN_LENGTH,
   getPasswordPolicyErrors,
   isPasswordPolicyValid,
-  getPasswordStrength,
 } from '~/utils/passwordPolicy'
 import { markCapacitorDocument } from '~/utils/capacitor-env'
 import { useProductAnalytics } from '~/composables/useProductAnalytics'
@@ -237,6 +204,7 @@ const form = ref({
   acceptTerms: false,
 })
 
+const { focused, trackFocus } = useFocusedField()
 const isLoading = ref(false)
 const errorMessage = ref('')
 const rulesCopied = ref(false)
@@ -260,44 +228,6 @@ watch(registrationComplete, (done) => {
 const { signUp, signOut } = useFirebaseAuth()
 const { trackEvent } = useProductAnalytics()
 const { createUserDocument } = useUser()
-
-const passwordStrength = computed(() => getPasswordStrength(form.value.password))
-
-const strengthLabelClass = computed(() => {
-  const t = passwordStrength.value.tier
-  return {
-    'text-gray-400 dark:text-gray-500': t === 'empty',
-    'text-red-600 dark:text-red-400': t === 'weak',
-    'text-orange-600 dark:text-orange-400': t === 'fair',
-    'text-amber-600 dark:text-amber-400': t === 'good',
-    'text-green-600 dark:text-green-400': t === 'strong',
-  }
-})
-
-const strengthSegmentClass = computed(() => {
-  const t = passwordStrength.value.tier
-  if (t === 'weak') return 'bg-red-500 dark:bg-red-500'
-  if (t === 'fair') return 'bg-orange-500 dark:bg-orange-400'
-  if (t === 'good') return 'bg-amber-500 dark:bg-amber-400'
-  if (t === 'strong') return 'bg-green-500 dark:bg-green-500'
-  return 'bg-gray-300 dark:bg-gray-600'
-})
-
-const strengthHint = computed(() => {
-  const s = passwordStrength.value
-  const pwd = form.value.password
-  if (!pwd.length) return ''
-  if (!isPasswordPolicyValid(pwd)) {
-    return 'Meet all required checks to continue.'
-  }
-  if (s.tier === 'strong') {
-    return 'Great! This password looks strong.'
-  }
-  if (s.tier === 'good') {
-    return 'Good. Add variety or length to reach Strong.'
-  }
-  return 'Add lowercase letters, symbols, or more characters to increase strength.'
-})
 
 const copyRulesToClipboard = async () => {
   const rules = `rules_version = '2';

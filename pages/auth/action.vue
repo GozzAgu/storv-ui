@@ -1,29 +1,31 @@
 <template>
   <AuthShell
-    :mobile-line="shellCopy.mobileLine"
+    :panel-eyebrow="shellCopy.eyebrow"
     :panel-title="shellCopy.panelTitle"
     :panel-description="shellCopy.panelDescription"
+    :steps="shellCopy.steps"
+    :steps-label="shellCopy.stepsLabel"
+    :active-step="shellCopy.activeStep"
   >
     <AuthPageHeader
       v-if="showPageHeader"
       :title="headerCopy.title"
       :subtitle="headerCopy.lede"
-      :show-logo="phase !== 'loading'"
     />
 
     <AuthCard>
-      <div v-if="phase === 'loading'" class="auth-action-status auth-action-status--loading">
-        <div class="auth-action-status__spinner" aria-hidden="true" />
-        <h2 class="auth-action-status__title">Confirming your link</h2>
-        <p class="auth-action-status__body">Validating your secure request…</p>
+      <div v-if="phase === 'loading'" class="s-auth-status" role="status">
+        <SSpinner :size="28" label="Confirming your link" />
+        <p class="s-auth-status__title">Confirming your link</p>
+        <p class="s-auth-status__body">Validating your secure request…</p>
       </div>
 
       <form
         v-else-if="phase === 'reset-form'"
-        class="auth-form space-y-5"
+        class="auth-form"
         @submit.prevent="submitPasswordReset"
       >
-        <p v-if="resetEmail" class="auth-action-reset-intro">
+        <p v-if="resetEmail" class="s-auth-note">
           Set a new password for <strong>{{ resetEmail }}</strong>.
         </p>
 
@@ -49,75 +51,51 @@
 
         <AuthAlert v-if="formError" :title="formErrorTitle" :message="formError" />
 
-        <Button
-          type="submit"
-          variant="primary"
-          size="md"
-          :icon="ArrowRightIcon"
-          icon-right
-          extra-class="auth-btn auth-btn--primary !w-full"
-          :loading="submitting"
-          :disabled="submitting"
-        >
+        <SButton type="submit" variant="primary" size="lg" block :loading="submitting">
           Update password
-        </Button>
+          <template #trailing><ArrowRightIcon :size="16" :stroke-width="1.75" aria-hidden="true" /></template>
+        </SButton>
       </form>
 
-      <div
-        v-else-if="phase === 'success'"
-        class="auth-action-status auth-action-status--success"
-        role="status"
-      >
-        <div class="auth-action-status__icon" aria-hidden="true">
-          <CheckCircleIcon stroke-width="1.75" />
-        </div>
-        <h2 class="auth-action-status__title">{{ successTitle }}</h2>
-        <p class="auth-action-status__body">{{ successMessage }}</p>
-        <div class="auth-action-status__actions">
-          <Button
-            variant="primary"
-            size="md"
-            :icon="ArrowRightIcon"
-            icon-right
-            extra-class="auth-btn auth-btn--primary !w-full"
-            @click="goToSignInAfterSuccess"
-          >
+      <div v-else-if="phase === 'success'" class="s-auth-status s-auth-status--success" role="status">
+        <span class="s-auth-status__icon">
+          <CheckCircleIcon :size="24" :stroke-width="1.75" aria-hidden="true" />
+        </span>
+        <h1 class="s-auth-status__title">{{ successTitle }}</h1>
+        <p class="s-auth-status__body">{{ successMessage }}</p>
+        <div class="s-auth-status__actions">
+          <SButton variant="primary" size="lg" block @click="goToSignInAfterSuccess">
             {{ successCtaLabel }}
-          </Button>
+            <template #trailing><ArrowRightIcon :size="16" :stroke-width="1.75" aria-hidden="true" /></template>
+          </SButton>
         </div>
       </div>
 
-      <div v-else class="auth-action-status auth-action-status--error" role="alert">
-        <div class="auth-action-status__icon" aria-hidden="true">
-          <ExclamationTriangleIcon stroke-width="1.75" />
-        </div>
-        <h2 class="auth-action-status__title">{{ errorTitle }}</h2>
-        <p class="auth-action-status__body">{{ errorMessage }}</p>
-        <div class="auth-action-status__actions">
-          <Button
+      <div v-else class="s-auth-status s-auth-status--error" role="alert">
+        <span class="s-auth-status__icon">
+          <ExclamationTriangleIcon :size="24" :stroke-width="1.75" aria-hidden="true" />
+        </span>
+        <h1 class="s-auth-status__title">{{ errorTitle }}</h1>
+        <p class="s-auth-status__body">{{ errorMessage }}</p>
+        <div class="s-auth-status__actions">
+          <SButton
             v-if="primaryErrorAction"
             variant="primary"
-            size="md"
-            extra-class="auth-btn auth-btn--primary !w-full"
+            size="lg"
+            block
             @click="primaryErrorAction.run"
           >
             {{ primaryErrorAction.label }}
-          </Button>
-          <Button
-            v-if="secondaryErrorAction"
-            variant="outline"
-            size="md"
-            extra-class="auth-btn auth-btn--outline !w-full"
-            @click="secondaryErrorAction.run"
-          >
+          </SButton>
+          <SButton v-if="secondaryErrorAction" size="lg" block @click="secondaryErrorAction.run">
             {{ secondaryErrorAction.label }}
-          </Button>
+          </SButton>
         </div>
-        <p v-if="showResendHint" class="auth-action-status__hint">
+        <p v-if="showResendHint" class="s-auth-status__hint">
           Signed in already?
-          <NuxtLink to="/dashboard/verify-email">Resend verification</NuxtLink>
+          <NuxtLink to="/dashboard/verify-email" class="auth-link">Resend verification</NuxtLink>
           from the dashboard, or
-          <NuxtLink to="/forgot-password">request a password reset</NuxtLink>.
+          <NuxtLink to="/forgot-password" class="auth-link">request a password reset</NuxtLink>.
         </p>
       </div>
 
@@ -145,7 +123,8 @@ import AuthPageHeader from '~/components/auth/AuthPageHeader.vue'
 import AuthCard from '~/components/auth/AuthCard.vue'
 import AuthField from '~/components/auth/AuthField.vue'
 import AuthAlert from '~/components/auth/AuthAlert.vue'
-import Button from '~/components/ui/Button.vue'
+import SButton from '~/components/s/SButton.vue'
+import SSpinner from '~/components/s/SSpinner.vue'
 import { getFirebaseClientAuth } from '~/utils/firebase-client-auth'
 import {
   getAuthActionErrorCopy,
@@ -190,27 +169,30 @@ const successCtaLabel = computed(() =>
   actionMode.value === 'resetPassword' ? 'Continue to sign in' : 'Continue to sign in'
 )
 
+const recoverySteps = [
+  { label: 'Enter your email' },
+  { label: 'Open the reset link' },
+  { label: 'Choose a new password' },
+]
+
 const shellCopy = computed(() => {
-  if (phase.value === 'success') {
-    return {
-      mobileLine: 'You are all set. Sign in to open your workspace.',
-      panelTitle: 'Welcome back to Storvv.',
-      panelDescription: 'Your account is ready. Sign in to manage inventory, receipts, and branches.',
-    }
-  }
   if (actionMode.value === 'resetPassword' || phase.value === 'reset-form') {
     return {
-      mobileLine: 'Choose a new password to get back into your workspace.',
-      panelTitle: 'Secure recovery, on your terms.',
-      panelDescription:
-        'Reset links expire quickly. Once you set a new password, sign in on any device to pick up where you left off.',
+      eyebrow: 'Account recovery',
+      panelTitle: 'Back to work in minutes',
+      panelDescription: 'Reset links expire quickly. Set a new password and sign in on any device.',
+      steps: recoverySteps,
+      stepsLabel: 'Resetting your password',
+      activeStep: phase.value === 'success' ? -1 : 2,
     }
   }
   return {
-    mobileLine: 'Confirm your email to unlock billing, staff tools, and the full dashboard.',
-    panelTitle: 'One quick step before you dive in.',
-    panelDescription:
-      'Verified accounts keep your workspace secure and ensure receipts, billing, and team invites reach the right inbox.',
+    eyebrow: 'Join Storvv',
+    panelTitle: 'Start your journey',
+    panelDescription: 'Verified accounts keep receipts, billing, and team invites reaching the right inbox.',
+    steps: undefined,
+    stepsLabel: undefined,
+    activeStep: phase.value === 'success' ? 1 : 0,
   }
 })
 

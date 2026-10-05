@@ -1,249 +1,241 @@
 <template>
-  <div :class="[pageWithFixedFooterClass, 'dash-page--unified']">
-    <DashboardPageHeader class="dash-page-header--unified">
+  <div class="ds-root s-c s-page">
+    <SPageHeader
+      :title="lead?.customerName || 'Sales lead'"
+      :back="{ to: dashPath('/leads'), label: 'Sales leads' }"
+    >
       <template #eyebrow>
-        <p :class="eyebrowClass">Commerce</p>
-      </template>
-      <template #title>
-        <div class="flex flex-wrap items-center gap-2">
-          <h1 :class="pageTitleClass">{{ lead?.customerName || 'Sales lead' }}</h1>
-          <LeadStatusBadge v-if="lead" :status="lead.status" />
-        </div>
+        <nav class="s-breadcrumb" aria-label="Breadcrumb">
+          <NuxtLink :to="dashPath('/leads')" class="s-breadcrumb__link">Sales leads</NuxtLink>
+          <template v-if="lead">
+            <ChevronRight class="s-breadcrumb__sep" :size="14" :stroke-width="2" aria-hidden="true" />
+            <span>{{ lead.customerName }}</span>
+          </template>
+        </nav>
       </template>
       <template v-if="lead" #description>
-        <p class="text-sm text-gray-600 dark:text-gray-400">
-          {{ lead.productName }}
+        <span class="s-lead__summary">
+          <SBadge :tone="leadStatusTone(lead.status)" size="sm">
+            {{ SALES_LEAD_STATUS_LABELS[lead.status] }}
+          </SBadge>
+          <span>{{ lead.productName }}</span>
           <span v-if="lead.estimatedValue && lead.estimatedValue > 0">
-            · Est. {{ formatCurrency(lead.estimatedValue) }}
+            · Possible value {{ formatCurrency(lead.estimatedValue) }}
           </span>
-        </p>
+        </span>
       </template>
-      <template #actions>
-        <div class="flex flex-wrap items-center gap-2">
-          <Button
-            v-if="lead && isOpenLead"
-            variant="outline"
-            size="sm"
-            @click="showEditModal = true"
-          >
-            Edit
-          </Button>
-          <Button
-            v-if="lead && canDeleteLead"
-            variant="outline"
-            size="sm"
-            :loading="deleteSaving"
-            @click="showDeleteConfirm = true"
-          >
-            Delete
-          </Button>
-          <NuxtLink
-            :to="dashPath('/leads')"
-            class="text-xs font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400"
-          >
-            Back to leads
-          </NuxtLink>
-        </div>
+      <template v-if="lead && canAccessLeads" #actions>
+        <SButton v-if="canDeleteLead" variant="ghost" @click="showDeleteConfirm = true">
+          <template #leading><Trash2 :size="16" :stroke-width="2" aria-hidden="true" /></template>
+          Delete
+        </SButton>
+        <SButton v-if="isOpenLead" variant="secondary" @click="showEditModal = true">
+          <template #leading><Pencil :size="16" :stroke-width="2" aria-hidden="true" /></template>
+          Edit
+        </SButton>
+        <SButton v-if="isOpenLead" @click="openConvertModal(lead)">
+          <template #leading><Receipt :size="16" :stroke-width="2" aria-hidden="true" /></template>
+          Create sale
+        </SButton>
       </template>
-    </DashboardPageHeader>
+    </SPageHeader>
 
-    <div v-if="!canAccessLeadsPlan" class="py-8">
-      <FeatureGateCard feature="sales_leads" />
+    <PlanGate
+      v-if="!canAccessLeadsPlan"
+      feature="sales_leads"
+      description="Track interested customers, follow up, and turn them into sales."
+    />
+
+    <SCard v-else-if="!canAccessLeads">
+      <SEmptyState
+        title="You don't have access to sales leads"
+        description="Ask your store owner to give you access."
+      >
+        <template #icon><Lock :size="24" :stroke-width="1.75" aria-hidden="true" /></template>
+      </SEmptyState>
+    </SCard>
+
+    <div v-else-if="salesLeadsStore.detailLoading && !lead" class="s-lead__layout" aria-busy="true">
+      <SCard>
+        <div class="s-form">
+          <SSkeleton width="40%" height="20px" />
+          <SSkeleton width="70%" height="16px" />
+          <SSkeleton width="55%" height="16px" />
+        </div>
+      </SCard>
+      <SCard>
+        <SSkeleton width="50%" height="16px" />
+      </SCard>
     </div>
 
-    <div
-      v-else-if="!canAccessLeads"
-      class="rounded-sm bg-red-50/90 px-4 py-4 dark:bg-red-950/25 sm:px-5 sm:py-5"
-    >
-      <p class="text-xs font-medium text-red-800 dark:text-red-200">
-        Sales leads are not enabled for your account. Ask your store owner to grant access.
-      </p>
-    </div>
+    <SCard v-else-if="!lead">
+      <SEmptyState
+        title="Lead not found"
+        :description="salesLeadsStore.error || 'It may have been deleted.'"
+      >
+        <template #icon><SearchX :size="24" :stroke-width="1.75" aria-hidden="true" /></template>
+        <template #actions>
+          <SButton variant="secondary" :to="dashPath('/leads')">Back to leads</SButton>
+        </template>
+      </SEmptyState>
+    </SCard>
 
-    <div
-      v-else-if="salesLeadsStore.detailLoading && !lead"
-      class="p-8 text-center text-sm text-gray-500 dark:text-gray-400"
-    >
-      Loading lead…
-    </div>
+    <div v-else class="s-lead__layout">
+      <div class="s-lead__main">
+        <SCard title="Details">
+          <dl class="s-lead__facts">
+            <div>
+              <dt>Customer</dt>
+              <dd>
+                <span class="s-lead__fact-primary">{{ lead.customerName }}</span>
+                <a v-if="lead.customerPhone" :href="`tel:${lead.customerPhone}`" class="s-link">
+                  {{ lead.customerPhone }}
+                </a>
+                <a v-if="lead.customerEmail" :href="`mailto:${lead.customerEmail}`" class="s-link">
+                  {{ lead.customerEmail }}
+                </a>
+              </dd>
+            </div>
+            <div>
+              <dt>Source</dt>
+              <dd>{{ SALES_LEAD_SOURCE_LABELS[lead.source] }}</dd>
+            </div>
+            <div v-if="lead.status === 'won'">
+              <dt>Sale</dt>
+              <dd>
+                <NuxtLink
+                  v-if="lead.receiptId"
+                  :to="dashPath(`/receipts?highlight=${encodeURIComponent(lead.receiptId)}`)"
+                  class="s-link"
+                >
+                  View receipt
+                </NuxtLink>
+                <span v-if="lead.wonRevenue">{{ formatCurrency(lead.wonRevenue) }}</span>
+              </dd>
+            </div>
+            <div v-if="lead.status === 'lost' && lead.lostReason">
+              <dt>Reason lost</dt>
+              <dd>{{ lead.lostReason }}</dd>
+            </div>
+          </dl>
+        </SCard>
 
-    <div v-else-if="!lead" class="rounded-sm bg-red-50/90 px-4 py-4 dark:bg-red-950/25">
-      <p class="text-xs font-medium text-red-800 dark:text-red-200">
-        {{ salesLeadsStore.error || 'Lead not found.' }}
-      </p>
-    </div>
-
-    <div v-else class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
-      <section class="space-y-5 rounded-sm border border-gray-200/80 bg-white p-4 dark:border-white/10 dark:bg-dashboard-card sm:p-5">
-        <div class="grid gap-4 sm:grid-cols-2">
-          <div>
-            <p class="text-[11px] font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
-              Customer
-            </p>
-            <p class="mt-1 text-sm font-medium text-gray-900 dark:text-gray-100">
-              {{ lead.customerName }}
-            </p>
-            <p v-if="lead.customerPhone" class="text-xs text-gray-600 dark:text-gray-400">
-              {{ lead.customerPhone }}
-            </p>
-            <p v-if="lead.customerEmail" class="text-xs text-gray-600 dark:text-gray-400">
-              {{ lead.customerEmail }}
-            </p>
+        <SCard title="Follow-up">
+          <div class="s-form">
+            <div class="s-lead__controls">
+              <SSelect
+                v-if="isOpenLead"
+                :model-value="selectedStatus"
+                label="Status"
+                :options="openStatusOptions"
+                :disabled="statusSaving"
+                @update:model-value="onWebStatusChange"
+              />
+              <SSelect
+                :model-value="assignedToSelection"
+                label="Assigned to"
+                :options="assigneeOptions"
+                :disabled="assignSaving"
+                @update:model-value="onWebAssignChange"
+              />
+            </div>
+            <div v-if="isOpenLead">
+              <SButton variant="secondary" :disabled="statusSaving" @click="showLostModal = true">
+                Mark as lost
+              </SButton>
+            </div>
           </div>
-          <div>
-            <p class="text-[11px] font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
-              Source
-            </p>
-            <p class="mt-1 text-sm text-gray-900 dark:text-gray-100">
-              {{ SALES_LEAD_SOURCE_LABELS[lead.source] }}
-            </p>
-          </div>
-        </div>
+        </SCard>
 
-        <div>
-          <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300"
-            >Assigned to</label
-          >
-          <select
-            v-model="assignedToSelection"
-            class="app-field max-w-sm px-3 py-2 text-sm"
-            :disabled="assignSaving"
-            @change="onAssignChange"
-          >
-            <option value="">Unassigned</option>
-            <option v-for="member in activeStaff" :key="member.id" :value="member.id">
-              {{ member.firstName }} {{ member.lastName }}
-            </option>
-          </select>
-        </div>
+        <SCard title="Notes">
+          <form class="s-form" @submit.prevent="saveNote">
+            <p v-if="lead.notes" class="s-lead__note">{{ lead.notes }}</p>
+            <STextarea
+              v-model="noteDraft"
+              label="Add a note"
+              :rows="3"
+              :maxlength="500"
+              placeholder="What did you talk about? When should you follow up?"
+            />
+            <div class="s-lead__form-end">
+              <SButton variant="primary" type="submit" :loading="noteSaving" :disabled="!noteDraft.trim()">
+                Save note
+              </SButton>
+            </div>
+          </form>
+        </SCard>
+      </div>
 
-        <div v-if="lead.notes">
-          <p class="text-[11px] font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
-            Latest note
-          </p>
-          <p class="mt-1 whitespace-pre-wrap text-sm text-gray-800 dark:text-gray-200">
-            {{ lead.notes }}
-          </p>
-        </div>
-
-        <div v-if="isOpenLead" class="flex flex-wrap gap-2">
-          <label class="sr-only" for="lead-status">Status</label>
-          <select
-            id="lead-status"
-            v-model="selectedStatus"
-            class="app-field px-3 py-2 text-sm"
-            :disabled="statusSaving"
-            @change="onStatusChange"
-          >
-            <option v-for="status in openStatuses" :key="status" :value="status">
-              {{ SALES_LEAD_STATUS_LABELS[status] }}
-            </option>
-          </select>
-          <ConvertLeadToSaleButton :lead="lead" />
-          <Button variant="outline" size="sm" :disabled="statusSaving" @click="showLostModal = true">
-            Mark lost
-          </Button>
-        </div>
-
-        <div v-else-if="lead.status === 'won' && lead.receiptId" class="text-sm">
-          <NuxtLink
-            :to="dashPath(`/receipts?highlight=${encodeURIComponent(lead.receiptId)}`)"
-            class="font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400"
-          >
-            View receipt
-          </NuxtLink>
-          <span v-if="lead.wonRevenue" class="ml-2 text-gray-600 dark:text-gray-400">
-            · {{ formatCurrency(lead.wonRevenue) }}
-          </span>
-        </div>
-
-        <div v-else-if="lead.status === 'lost' && lead.lostReason" class="text-sm text-gray-600 dark:text-gray-400">
-          Reason: {{ lead.lostReason }}
-        </div>
-
-        <div>
-          <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300"
-            >Add note</label
-          >
-          <textarea
-            v-model="noteDraft"
-            rows="3"
-            maxlength="500"
-            class="app-field w-full px-3 py-2 text-sm"
-            placeholder="Follow-up details"
-          />
-          <div class="mt-2 flex justify-end">
-            <Button
-              variant="primary"
-              size="sm"
-              :loading="noteSaving"
-              :disabled="!noteDraft.trim()"
-              @click="saveNote"
-            >
-              Save note
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      <aside class="rounded-sm border border-gray-200/80 bg-white p-4 dark:border-white/10 dark:bg-dashboard-card sm:p-5">
-        <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Activity</h2>
-        <div class="mt-3">
-          <LeadTimeline :events="salesLeadsStore.events" />
-        </div>
-      </aside>
+      <SCard title="Activity" flush>
+        <ul v-if="salesLeadsStore.events.length" class="s-list">
+          <li v-for="event in salesLeadsStore.events" :key="event.id" class="s-list__item">
+            <div class="s-list__main">
+              <span class="s-lead__event">{{ event.description }}</span>
+              <span class="s-list__secondary">{{ formatWhen(event.createdAt) }}</span>
+            </div>
+          </li>
+        </ul>
+        <p v-else class="s-lead__empty">No activity yet.</p>
+      </SCard>
     </div>
 
     <EditLeadModal v-model="showEditModal" :lead="lead" />
 
-    <Modal v-model="showLostModal" title="Mark lead lost" size="md">
-      <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300"
-        >Reason (optional)</label
-      >
-      <input
-        v-model="lostReason"
-        type="text"
-        maxlength="200"
-        class="app-field w-full px-3 py-2 text-sm"
-        placeholder="Price, timing, bought elsewhere…"
-      />
-      <template #footer>
-        <IosDrawerActions
-          primary-label="Mark lost"
-          :primary-loading="statusSaving"
-          @cancel="showLostModal = false"
-          @primary="confirmLost"
-        />
-      </template>
-    </Modal>
+    <CreateReceiptModal
+      v-model="showReceiptModal"
+      :prefill="receiptPrefill"
+      @receipt-created="onReceiptCreated"
+    />
 
-    <Modal v-model="showDeleteConfirm" title="Delete lead?" size="md">
-      <p class="text-sm text-gray-600 dark:text-gray-400">
-        This removes {{ lead?.customerName }} from your leads list. This cannot be undone.
-      </p>
-      <template #footer>
-        <IosDrawerActions
-          primary-variant="danger"
-          primary-label="Delete lead"
-          :primary-loading="deleteSaving"
-          @cancel="showDeleteConfirm = false"
-          @primary="confirmDelete"
+    <SDialog
+      v-model:open="showLostModal"
+      title="Mark lead as lost"
+      description="This closes the lead. You can still see it under Lost."
+    >
+      <form id="lead-lost-form" class="s-form" @submit.prevent="confirmLost">
+        <SInput
+          v-model="lostReason"
+          label="Reason (optional)"
+          :maxlength="200"
+          placeholder="Price, timing, bought elsewhere…"
         />
+      </form>
+      <template #footer>
+        <SButton variant="secondary" @click="showLostModal = false">Cancel</SButton>
+        <SButton variant="primary" type="submit" form="lead-lost-form" :loading="statusSaving">Mark as lost</SButton>
       </template>
-    </Modal>
+    </SDialog>
+
+    <SDialog
+      v-model:open="showDeleteConfirm"
+      role="alertdialog"
+      title="Delete this lead?"
+      :description="`This removes ${lead?.customerName ?? 'this lead'} from your leads. This can't be undone.`"
+    >
+      <template #footer>
+        <SButton variant="secondary" @click="showDeleteConfirm = false">Cancel</SButton>
+        <SButton variant="danger" :loading="deleteSaving" @click="confirmDelete">Delete lead</SButton>
+      </template>
+    </SDialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import Button from '~/components/ui/Button.vue'
-import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
-import FeatureGateCard from '~/components/subscription/FeatureGateCard.vue'
-import Modal from '~/components/ui/Modal.vue'
-import ConvertLeadToSaleButton from '~/components/leads/ConvertLeadToSaleButton.vue'
+import { ChevronRight, Lock, Pencil, Receipt, SearchX, Trash2 } from '@lucide/vue'
+import SBadge from '~/components/s/SBadge.vue'
+import SButton from '~/components/s/SButton.vue'
+import SCard from '~/components/s/SCard.vue'
+import SDialog from '~/components/s/SDialog.vue'
+import SEmptyState from '~/components/s/SEmptyState.vue'
+import SInput from '~/components/s/SInput.vue'
+import SPageHeader from '~/components/s/SPageHeader.vue'
+import SSelect from '~/components/s/SSelect.vue'
+import SSkeleton from '~/components/s/SSkeleton.vue'
+import STextarea from '~/components/s/STextarea.vue'
+import CreateReceiptModal from '~/components/receipts/CreateReceiptModal.vue'
+import PlanGate from '~/components/subscription/PlanGate.vue'
 import EditLeadModal from '~/components/leads/EditLeadModal.vue'
-import LeadStatusBadge from '~/components/leads/LeadStatusBadge.vue'
-import LeadTimeline from '~/components/leads/LeadTimeline.vue'
 import {
   useSalesLeadsStore,
   SALES_LEAD_SOURCE_LABELS,
@@ -252,13 +244,15 @@ import {
 import { useStaffStore } from '~/stores/staff'
 import type { SalesLeadStatus } from '~/types/leads'
 import { isOpenSalesLeadStatus } from '~/types/leads'
+import { useConvertLeadToSale } from '~/composables/leads/useConvertLeadToSale'
+import { leadStatusTone } from '~/utils/lead-status'
+import { EMPTY_CELL } from '~/utils/ui-empty'
 
 definePageMeta({
   layout: 'dashboard',
 })
 
 const route = useRoute()
-const { pageWithFixedFooterClass, pageTitleClass, eyebrowClass } = useDashboardPageChrome()
 const { dashPath } = useDashboardPaths()
 const { formatCurrency } = usePreferences()
 const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
@@ -281,6 +275,19 @@ const canDeleteLead = computed(() => can('leads', 'delete'))
 const activeStaff = computed(() => staffStore.staff.filter((member) => member.status === 'active'))
 
 const openStatuses: SalesLeadStatus[] = ['new', 'contacted', 'negotiating']
+const openStatusOptions = openStatuses.map((status) => ({
+  label: SALES_LEAD_STATUS_LABELS[status],
+  value: status,
+}))
+const assigneeOptions = computed(() => [
+  { label: 'Unassigned', value: '' },
+  ...activeStaff.value.map((member) => ({
+    label: `${member.firstName} ${member.lastName}`.trim(),
+    value: member.id,
+  })),
+])
+const { showReceiptModal, receiptPrefill, openConvertModal, onReceiptCreated } =
+  useConvertLeadToSale()
 const selectedStatus = ref<SalesLeadStatus>('new')
 const assignedToSelection = ref('')
 const noteDraft = ref('')
@@ -320,6 +327,25 @@ async function onStatusChange() {
     await salesLeadsStore.updateLeadStatus(lead.value.id, selectedStatus.value)
   } finally {
     statusSaving.value = false
+  }
+}
+
+function onWebStatusChange(value: string | number | null | undefined) {
+  selectedStatus.value = value as SalesLeadStatus
+  void onStatusChange()
+}
+
+function onWebAssignChange(value: string | number | null | undefined) {
+  assignedToSelection.value = String(value ?? '')
+  void onAssignChange()
+}
+
+function formatWhen(v: Date | undefined) {
+  if (!v) return EMPTY_CELL
+  try {
+    return v.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
+  } catch {
+    return EMPTY_CELL
   }
 }
 

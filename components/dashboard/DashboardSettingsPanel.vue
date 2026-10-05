@@ -1,25 +1,17 @@
 <template>
-  <section
-    :id="id"
-    :class="[panelClass, iosGrouped ? 'dash-settings-panel--ios-grouped' : '']"
-  >
-    <header :class="panelHeaderClass">
-      <div class="min-w-0 flex-1">
-        <h2 :class="sectionTitleClass">{{ title }}</h2>
-        <p v-if="subtitle && !iosGrouped" :class="sectionSubtitleClass">{{ subtitle }}</p>
-      </div>
-      <div v-if="$slots.actions || badge" class="flex shrink-0 flex-wrap items-center gap-2">
-        <slot name="actions" />
-        <span v-if="badge && !$slots.actions" :class="planBadgeClass">{{ badge }}</span>
-      </div>
-    </header>
-    <div :class="compact ? panelBodyCompactClass : panelBodyClass">
-      <slot />
-    </div>
-  </section>
+  <SCard :id="id" :title="title" :description="subtitle" :class="{ 's-settings-panel--compact': compact }">
+    <template v-if="$slots.actions || badge" #actions>
+      <slot name="actions" />
+      <SBadge v-if="badge && !$slots.actions" tone="accent">{{ badge }}</SBadge>
+    </template>
+    <slot />
+  </SCard>
 </template>
 
 <script setup lang="ts">
+import SBadge from '~/components/s/SBadge.vue'
+import SCard from '~/components/s/SCard.vue'
+
 defineProps<{
   id?: string
   title: string
@@ -27,22 +19,4 @@ defineProps<{
   badge?: string
   compact?: boolean
 }>()
-
-const { isCapacitorIos } = useIsCapacitorIos()
-
-/**
- * iOS renders Settings as grouped sections: an uppercase caption above an inset
- * card, so the panel shell and subtitle are dropped in favour of the card body.
- */
-const iosGrouped = isCapacitorIos
-
-const {
-  panelClass,
-  panelHeaderClass,
-  panelBodyClass,
-  panelBodyCompactClass,
-  sectionTitleClass,
-  sectionSubtitleClass,
-  planBadgeClass,
-} = useDashboardSettingsChrome()
 </script>

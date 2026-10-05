@@ -1,40 +1,37 @@
 <template>
-  <Modal v-model="open" title="How likely are you to recommend Storvv?" subtitle="Your feedback helps us improve for shop owners like you." size="sm">
-    <IosForm layout="default" scroll>
-      <IosFormSection fixed>
-        <div class="flex flex-wrap justify-between gap-1">
-          <button
-            v-for="score in scores"
-            :key="score"
-            type="button"
-            class="flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold transition-colors"
-            :class="
-              selected === score
-                ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-gray-200'
-            "
-            @click="selected = score"
-          >
-            {{ score }}
-          </button>
-        </div>
-        <div class="flex justify-between text-[10px] text-gray-500 dark:text-gray-400">
-          <span>Not likely</span>
-          <span>Very likely</span>
-        </div>
-        <IosFormField label="Comment" hint="Optional">
-          <IosFormTextarea
+  <SDialog v-model:open="open" title="How likely are you to recommend Storvv?" description="Your feedback helps us improve for shop owners like you." size="sm">
+    <SForm>
+      <SFormSection>
+        <fieldset class="s-nps" aria-label="Score from 0, not likely, to 10, very likely">
+          <div class="s-nps__scale">
+            <button
+              v-for="score in scores"
+              :key="score"
+              type="button"
+              class="s-nps__score"
+              :aria-pressed="selected === score"
+              @click="selected = score"
+            >
+              {{ score }}
+            </button>
+          </div>
+          <div class="s-nps__legend" aria-hidden="true">
+            <span>Not likely</span>
+            <span>Very likely</span>
+          </div>
+        </fieldset>
+        <SField label="Comment" hint="Optional">
+          <STextarea
             v-model="comment"
             :rows="3"
             placeholder="What would make Storvv better for your shop?"
           />
-        </IosFormField>
-      </IosFormSection>
-    </IosForm>
+        </SField>
+      </SFormSection>
+    </SForm>
     <template #footer>
-      <IosDrawerActions
+      <SDialogActions
         cancel-label="Not now"
-        cancel-variant="ghost"
         primary-label="Submit"
         :primary-loading="submitting"
         :primary-disabled="selected == null"
@@ -42,15 +39,17 @@
         @primary="onSubmit"
       />
     </template>
-  </Modal>
+  </SDialog>
 </template>
 
 <script setup lang="ts">
+import SDialog from '~/components/s/SDialog.vue'
+import SDialogActions from '~/components/s/SDialogActions.vue'
+import SField from '~/components/s/SField.vue'
+import SForm from '~/components/s/SForm.vue'
+import SFormSection from '~/components/s/SFormSection.vue'
+import STextarea from '~/components/s/STextarea.vue'
 import { ref } from 'vue'
-import Modal from '~/components/ui/Modal.vue'
-import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
-import { IosForm, IosFormSection, IosFormField, IosFormTextarea } from '~/components/ios/forms'
-
 const open = defineModel<boolean>({ required: true })
 
 const emit = defineEmits<{

@@ -1,0 +1,99 @@
+/* Team and Branches: departments list, department detail, staff roster, branches */
+
+.s-team__branch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-space-1);
+}
+
+.s-team__cell {
+  display: flex;
+  align-items: center;
+  gap: var(--s-space-1-5);
+  min-width: 0;
+  max-width: 360px;
+}
+
+.s-team__cell-text {
+  min-width: 0;
+}
+
+.s-team__cell-text .s-table__primary {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.s-team__mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--s-radius);
+  background: var(--s-accent-soft);
+  color: var(--s-accent-soft-text);
+}
+
+.s-invites__head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-space-1-5);
+  padding: var(--s-space-2);
+  border-bottom: 1px solid var(--s-border);
+}
+
+.s-invites__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--s-radius);
+  background: var(--s-warning-soft);
+  color: var(--s-warning);
+}
+
+.s-invites__intro {
+  flex: 1;
+  min-width: 0;
+}
+
+.s-invites__title {
+  margin: 0;
+  font: var(--s-text-body);
+  font-weight: 600;
+  color: var(--s-text);
+}
+
+.s-invites__text {
+  margin: var(--s-space-half) 0 0;
+  max-width: 60ch;
+  font: var(--s-text-small);
+  color: var(--s-text-muted);
+}
+
+.s-invites__item {
+  flex-wrap: wrap;
+}
+
+.s-invites__password code {
+  display: inline-block;
+  margin-top: var(--s-space-half);
+  padding: var(--s-space-quarter) var(--s-space-1);
+  border-radius: var(--s-radius-sm);
+  background: var(--s-surface-2);
+  font: 500 0.75rem/1.125rem var(--s-font-mono);
+  color: var(--s-text);
+  word-break: break-all;
+  user-select: all;
+}
+
+.s-invites__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--s-space-half);
+  margin-left: auto;
+}

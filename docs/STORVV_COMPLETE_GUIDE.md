@@ -8,6 +8,7 @@ This is the **master reference** for Storvv: what the product is, who it serves,
 
 | Document | Focus |
 | -------- | ----- |
+| [STORVV_USER_GUIDE.md](./STORVV_USER_GUIDE.md) | Step-by-step guide for everyday users (current UI) |
 | [HOW_STORVV_WORKS.md](./HOW_STORVV_WORKS.md) | Short architecture overview |
 | [STORVV_APP_FLOW.md](./STORVV_APP_FLOW.md) | User journeys with file references |
 | [SUBSCRIPTION_FEATURES.md](./SUBSCRIPTION_FEATURES.md) | Plan matrix (kept in sync with code) |

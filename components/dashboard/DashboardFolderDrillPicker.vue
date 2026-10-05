@@ -1,29 +1,29 @@
 <template>
-  <div class="dash-folder-drill">
-    <div v-if="browseParent" class="dash-folder-drill__nav">
-      <button type="button" class="dash-folder-drill__back" @click="goBack">
-        <ChevronLeftIcon class="h-3.5 w-3.5 shrink-0" stroke-width="2" aria-hidden="true" />
+  <div class="s-c s-folder-drill" role="group">
+    <div v-if="browseParent" class="s-folder-drill__nav">
+      <button type="button" class="s-folder-drill__back" @click="goBack">
+        <ChevronLeft :size="14" :stroke-width="2" aria-hidden="true" />
         All categories
       </button>
-      <p class="dash-folder-drill__parent">{{ browseParent.name }}</p>
+      <p class="s-folder-drill__parent">{{ browseParent.name }}</p>
     </div>
 
-    <div v-if="modelValue && selectedFolder" class="dash-folder-drill__selected">
-      <span class="dash-folder-drill__selected-label">Selected</span>
-      <span class="dash-folder-drill__selected-name">{{ selectedPathLabel }}</span>
-      <button type="button" class="dash-folder-drill__clear" @click="clearSelection">Clear</button>
+    <div v-if="modelValue && selectedFolder" class="s-folder-drill__selected">
+      <span class="s-folder-drill__selected-label">Selected</span>
+      <span class="s-folder-drill__selected-name">{{ selectedPathLabel }}</span>
+      <button type="button" class="s-folder-drill__clear" @click="clearSelection">Clear</button>
     </div>
 
-    <div v-if="visibleFolders.length === 0" class="dash-folder-drill__empty">
+    <p v-if="visibleFolders.length === 0" class="s-pick__empty">
       {{
         browseParent
           ? 'No subcategories in this category.'
           : emptyLabel
       }}
-    </div>
+    </p>
 
     <div v-else :class="pickListClass">
-      <div :class="[pickListScrollClass, 'dash-folder-drill__scroll']">
+      <div :class="[pickListScrollClass, 's-folder-drill__scroll']">
         <button
           v-for="folder in visibleFolders"
           :key="folder.id"
@@ -34,7 +34,7 @@
           ]"
           @click="onPick(folder)"
         >
-          <div class="min-w-0 flex-1 text-left">
+          <div class="s-folder-drill__text">
             <p :class="pickRowTitleClass">{{ folder.name }}</p>
             <p :class="pickRowMetaClass">
               {{
@@ -44,16 +44,18 @@
               }}
             </p>
           </div>
-          <ChevronRightIcon
+          <ChevronRight
             v-if="hasChildren(folder)"
-            class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500"
-            stroke-width="1.75"
+            class="s-folder-drill__icon"
+            :size="16"
+            :stroke-width="1.75"
             aria-hidden="true"
           />
-          <CheckCircleIcon
+          <CircleCheck
             v-else-if="modelValue === folder.id"
-            class="h-4 w-4 shrink-0 text-primary-500"
-            stroke-width="2"
+            class="s-folder-drill__icon s-folder-drill__icon--selected"
+            :size="16"
+            :stroke-width="2"
             aria-hidden="true"
           />
         </button>
@@ -64,7 +66,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { CheckCircleIcon, ChevronLeftIcon, ChevronRightIcon } from '~/utils/app-icons'
+import { ChevronLeft, ChevronRight, CircleCheck } from '@lucide/vue'
 import type { InventoryFolder } from '~/stores/inventory'
 import {
   folderHasChildren,
@@ -184,125 +186,3 @@ watch(
 
 defineExpose({ goBack, clearSelection })
 </script>
-
-<style scoped>
-.dash-folder-drill {
-  display: flex;
-  flex-direction: column;
-  gap: 0.625rem;
-}
-
-.dash-folder-drill__nav {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem 0.75rem;
-}
-
-.dash-folder-drill__back {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.125rem;
-  border: 0;
-  background: transparent;
-  padding: 0;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  color: rgb(72 118 199);
-  cursor: pointer;
-}
-
-.dash-folder-drill__back:hover {
-  text-decoration: underline;
-}
-
-html.dark .dash-folder-drill__back {
-  color: rgb(154 181 227);
-}
-
-.dash-folder-drill__parent {
-  margin: 0;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: rgb(15 23 42);
-}
-
-html.dark .dash-folder-drill__parent {
-  color: rgb(248 250 252);
-}
-
-.dash-folder-drill__selected {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.375rem 0.5rem;
-  border-radius: 0.625rem;
-  background: rgb(248 250 252 / 0.9);
-  padding: 0.5rem 0.75rem;
-  font-size: 0.6875rem;
-}
-
-html.dark .dash-folder-drill__selected {
-  background: rgb(255 255 255 / 0.04);
-}
-
-.dash-folder-drill__selected-label {
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: rgb(100 116 139);
-}
-
-html.dark .dash-folder-drill__selected-label {
-  color: rgb(148 163 184);
-}
-
-.dash-folder-drill__selected-name {
-  min-width: 0;
-  flex: 1 1 auto;
-  font-weight: 600;
-  color: rgb(15 23 42);
-}
-
-html.dark .dash-folder-drill__selected-name {
-  color: rgb(248 250 252);
-}
-
-.dash-folder-drill__clear {
-  border: 0;
-  background: transparent;
-  padding: 0;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  color: rgb(100 116 139);
-  cursor: pointer;
-}
-
-.dash-folder-drill__clear:hover {
-  color: rgb(15 23 42);
-  text-decoration: underline;
-}
-
-html.dark .dash-folder-drill__clear:hover {
-  color: rgb(226 232 240);
-}
-
-.dash-folder-drill__empty {
-  border: 1px dashed rgb(15 23 42 / 0.12);
-  border-radius: 0.75rem;
-  padding: 0.875rem 1rem;
-  font-size: 0.75rem;
-  line-height: 1.4;
-  color: rgb(100 116 139);
-  text-align: center;
-}
-
-html.dark .dash-folder-drill__empty {
-  border-color: rgb(255 255 255 / 0.1);
-  color: rgb(148 163 184);
-}
-
-.dash-folder-drill__scroll {
-  max-height: min(28vh, 14rem);
-}
-</style>

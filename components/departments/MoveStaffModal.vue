@@ -1,56 +1,55 @@
 <template>
-  <SidePanel
-    :model-value="modelValue"
+  <SDialog
+      placement="right"
+    :open="modelValue"
     title="Move to another department"
     size="md"
-    dense
-    @update:model-value="(value: boolean) => emit('update:modelValue', value)"
+    @update:open="(value: boolean) => emit('update:modelValue', value)"
   >
-    <IosForm layout="fill">
-      <IosFormSection fixed>
-        <p class="dash-drawer-callout">
+    <SForm>
+      <SFormSection>
+        <p class="s-callout">
           Move
-          <span class="font-medium text-gray-900 dark:text-gray-100">{{ staffName }}</span>
+          <strong>{{ staffName }}</strong>
           from
-          <span class="font-medium text-gray-900 dark:text-gray-100">{{ currentDepartmentName }}</span>
+          <strong>{{ currentDepartmentName }}</strong>
           to another department. Their role stays the same; inventory and department access update to
           match the new department on their next action (or immediately if they refresh).
         </p>
-      </IosFormSection>
+      </SFormSection>
 
-      <IosFormSection fixed>
-        <IosFormField v-if="staff" label="Destination department" required>
-          <IosFormSelect
+      <SFormSection>
+        <SField
+          v-if="staff"
+          label="Destination department"
+          required
+          :hint="
+            departmentOptions.length === 0
+              ? 'No other departments in this store. Create another department first.'
+              : undefined
+          "
+        >
+          <SSelect
             v-model="targetDepartmentId"
             required
-            extra-class="cursor-pointer"
             :disabled="isProcessing || departmentOptions.length === 0"
           >
             <option value="" disabled>Select department</option>
             <option v-for="dept in departmentOptions" :key="dept.id" :value="dept.id">
               {{ dept.name }}
             </option>
-          </IosFormSelect>
-          <p
-            v-if="departmentOptions.length === 0"
-            class="ios-form__hint dash-drawer-hint"
-          >
-            No other departments in this store. Create another department first.
-          </p>
-        </IosFormField>
+          </SSelect>
+        </SField>
 
-        <Checkbox
+        <SCheckbox
           v-model="confirmed"
           label="I understand this staff member will move departments and their access will follow the new department."
-          size="sm"
-          wrapper-class="items-start"
-          label-class="text-xs text-gray-700 dark:text-gray-300"
         />
-      </IosFormSection>
-    </IosForm>
+      </SFormSection>
+    </SForm>
 
     <template #footer>
-      <IosDrawerActions
+      <SDialogActions
         primary-label="Move staff member"
         :primary-icon="ArrowsRightLeftIcon"
         :primary-disabled="!canSubmit"
@@ -59,16 +58,19 @@
         @primary="handleConfirm"
       />
     </template>
-  </SidePanel>
+  </SDialog>
 </template>
 
 <script setup lang="ts">
+import SDialog from '~/components/s/SDialog.vue'
+import SDialogActions from '~/components/s/SDialogActions.vue'
+import SField from '~/components/s/SField.vue'
+import SForm from '~/components/s/SForm.vue'
+import SFormSection from '~/components/s/SFormSection.vue'
+import SSelect from '~/components/s/SSelect.vue'
 import { computed, ref, watch } from 'vue'
 import { ArrowsRightLeftIcon } from '~/utils/app-icons'
-import SidePanel from '~/components/ui/SidePanel.vue'
-import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
-import Checkbox from '~/components/ui/Checkbox.vue'
-import { IosForm, IosFormSection, IosFormField, IosFormSelect } from '~/components/ios/forms'
+import SCheckbox from '~/components/s/SCheckbox.vue'
 import type { Staff } from '~/composables/useStaff'
 import type { Department } from '~/composables/useDepartments'
 

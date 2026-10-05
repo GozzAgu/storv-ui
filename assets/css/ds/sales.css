@@ -1,0 +1,42 @@
+/* Sales: receipts list and outstanding balances */
+
+.s-sales__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-space-2);
+}
+
+.s-sales--fallback {
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+  color: var(--s-text-muted);
+}
+
+.s-sales .s-only-sm .s-list__item {
+  gap: var(--s-space-1);
+  padding: var(--s-space-1) var(--s-space-1) var(--s-space-1) var(--s-space-2);
+}
+
+.s-sales .s-list__end {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--s-space-half);
+}
+
+.s-disclosure {
+  flex-shrink: 0;
+  color: var(--s-text-muted);
+  transition: transform var(--s-duration-fast) var(--s-ease);
+}
+
+.s-disclosure--open {
+  transform: rotate(90deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .s-disclosure {
+    transition: none;
+  }
+}

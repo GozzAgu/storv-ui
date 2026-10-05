@@ -1,22 +1,41 @@
 <template>
-  <SidePanel
-    :model-value="props.modelValue"
-    :title="sheetTitle"
-    :content-padding="sheetContentPadding"
-    size="lg"
-    :dense="isCapacitorIos"
-    @update:model-value="(value: boolean) => emit('update:modelValue', value)"
+  <SDialog
+      placement="right"
+    :open="props.modelValue"
+    title="New sale"
+    size="md"
+    @update:open="(value: boolean) => emit('update:modelValue', value)"
   >
     <template #default>
-      <div :class="[drawerFillClass, 'gap-4', isCapacitorIos ? 'ios-create-sale-sheet' : '']">
-        <DashboardDrawerStepper v-if="!isCapacitorIos" :steps="steps" :current-step="currentStep" />
+      <div :class="[drawerFillClass, 's-new-sale']">
+        <nav aria-label="Sale progress">
+          <ol class="s-steps">
+            <li
+              v-for="(step, index) in steps"
+              :key="step.id"
+              class="s-steps__item"
+              :class="{
+                's-steps__item--done': index < currentStep,
+                's-steps__item--current': index === currentStep,
+              }"
+              :aria-current="index === currentStep ? 'step' : undefined"
+            >
+              <span class="s-steps__marker" aria-hidden="true">
+                <CheckIcon v-if="index < currentStep" :size="12" :stroke-width="3" />
+                <template v-else>{{ index + 1 }}</template>
+              </span>
+              <span class="s-steps__label">{{ step.label }}</span>
+              <span v-if="index < currentStep" class="ds-sr-only">(done)</span>
+            </li>
+          </ol>
+        </nav>
 
         <div
           v-if="prefillItemMatchFailed"
-          class="dash-drawer-callout"
+          :class="drawerCalloutClass"
           role="status"
         >
-          No matching in-stock product. Pick category and items manually.
+          No matching in-stock product. Pick a category and items manually.
         </div>
 
         <SellScreenNoteBanner v-if="currentStep >= 2" />
@@ -24,87 +43,33 @@
         <!-- Step 1: Parent category -->
         <div
           v-if="currentStep === 0"
-          :class="[drawerFillStepClass, isCapacitorIos ? 'ios-create-sale-step' : 'gap-3']"
+          :class="drawerFillStepClass"
         >
-          <p v-if="isCapacitorIos" class="ios-create-sale-step__hint">
-            {{ sheetStepSubtitles[0] }}
-          </p>
-          <p v-else :class="sectionLabelClass">Parent category</p>
-          <DashboardDrawerSearch v-model="folderSearchQuery" placeholder="Search categories…" />
+          <p :class="sectionLabelClass">Parent category</p>
+          <SSearch v-model="folderSearchQuery" placeholder="Search categories…" />
 
-          <div v-if="loadingFolders && isCapacitorIos" class="flex flex-1 flex-col items-center justify-center py-12">
-            <div
-              class="h-5 w-5 animate-spin rounded-full border-0 border-gray-300/40 border-t-gray-500 dark:border-white/15 dark:border-t-gray-300"
-            />
-            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Loading categories…</p>
-          </div>
-          <div v-else-if="loadingFolders" :class="pickListClass">
+          <div v-if="loadingFolders" :class="pickListClass" aria-busy="true">
+            <span class="ds-sr-only">Loading categories…</span>
             <div :class="pickListScrollClass">
               <div v-for="i in 6" :key="i" :class="pickRowClass">
-                <span class="dash-skeleton dash-skeleton--thumb" />
-                <div class="min-w-0 flex-1 space-y-1.5">
-                  <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-title" />
-                  <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-meta" />
-                </div>
+                <SSkeleton width="36px" height="36px" />
+                <span class="s-new-sale__row-body">
+                  <SSkeleton width="60%" height="12px" />
+                  <SSkeleton width="35%" height="10px" />
+                </span>
               </div>
             </div>
           </div>
           <div v-else-if="parentCategoryRows.length === 0" :class="emptyStateClass">
-            <FolderIcon class="mb-2 h-8 w-8 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
-            <p class="text-xs font-medium text-gray-800 dark:text-gray-200">
+            <FolderIcon :size="24" :stroke-width="1.5" aria-hidden="true" />
+            <p class="s-new-sale__empty-title">
               {{ folderSearchQuery ? 'No categories found' : 'No categories yet' }}
             </p>
-            <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+            <p>
               {{
                 folderSearchQuery ? 'Try another search' : 'Create a category in Inventory first'
               }}
             </p>
-          </div>
-          <div v-else-if="isCapacitorIos" class="ios-create-sale-picker">
-            <div class="ios-create-sale-picker__scroll">
-              <button
-                v-for="row in parentCategoryRows"
-                :key="`${row.depth}-${row.folder.id}`"
-                type="button"
-                :class="[
-                  'ios-create-sale-picker__row',
-                  isParentRowSelected(row.folder) ? 'ios-create-sale-picker__row--selected' : '',
-                  row.depth === 1 ? 'ios-create-sale-picker__row--nested' : '',
-                ]"
-                @click="onParentCategoryRowClick(row)"
-              >
-                <span class="ios-create-sale-picker__icon">
-                  <FolderIcon stroke-width="1.75" />
-                </span>
-                <span class="ios-create-sale-picker__body">
-                  <p class="ios-create-sale-picker__title">
-                    {{ row.folder.name }}
-                    <span v-if="row.depth === 1 && row.parentName" class="font-normal text-gray-500">
-                      · {{ row.parentName }}
-                    </span>
-                  </p>
-                  <p class="ios-create-sale-picker__meta">
-                    {{ folderPickerMeta(row.folder) }}
-                    <span
-                      v-if="!isCategoryHub(row.folder) && selectedCountForFolder(row.folder.id) > 0"
-                      class="ios-create-sale-picker__meta-accent"
-                    >
-                      · {{ selectedCountForFolder(row.folder.id) }} in this sale
-                    </span>
-                  </p>
-                </span>
-                <ChevronRightIcon
-                  v-if="isCategoryHub(row.folder) && !isParentRowSelected(row.folder)"
-                  class="ios-create-sale-picker__chevron"
-                  stroke-width="2"
-                />
-                <CheckCircleIcon
-                  v-if="isParentRowSelected(row.folder)"
-                  class="ios-create-sale-picker__check"
-                  stroke-width="2"
-                />
-              </button>
-            </div>
           </div>
           <div v-else :class="pickListClass">
             <div :class="pickListScrollClass">
@@ -115,47 +80,44 @@
                 :class="[
                   pickRowClass,
                   isParentRowSelected(row.folder) ? pickRowSelectedClass : '',
-                  row.depth === 1 ? 'ml-3 border-l-2 border-gray-300/60 dark:border-white/15 pl-2' : '',
+                  row.depth === 1 ? 's-new-sale__row--nested' : '',
                 ]"
+                :aria-pressed="isParentRowSelected(row.folder)"
                 @click="onParentCategoryRowClick(row)"
               >
-                <div
-                  :class="[
-                    'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg',
-                    getFolderColorClass(row.folder.color),
-                  ]"
-                >
-                  <FolderIcon class="h-4 w-4 text-white" stroke-width="1.75" />
-                </div>
-                <div class="min-w-0 flex-1">
-                  <p :class="pickRowTitleClass">
+                <span class="s-new-sale__mark" aria-hidden="true">
+                  <FolderIcon :size="16" :stroke-width="1.75" />
+                </span>
+                <span class="s-new-sale__row-body">
+                  <span :class="pickRowTitleClass">
                     {{ row.folder.name }}
-                    <span
-                      v-if="row.depth === 1 && row.parentName"
-                      class="font-normal text-gray-500 dark:text-gray-400"
-                    >
+                    <span v-if="row.depth === 1 && row.parentName" class="s-new-sale__muted">
                       · {{ row.parentName }}
                     </span>
-                  </p>
-                  <p :class="pickRowMetaClass">
+                  </span>
+                  <span :class="pickRowMetaClass">
                     {{ folderPickerMeta(row.folder) }}
                     <span
                       v-if="!isCategoryHub(row.folder) && selectedCountForFolder(row.folder.id) > 0"
-                      class="text-gray-700 dark:text-gray-300"
+                      class="s-new-sale__accent"
                     >
                       · {{ selectedCountForFolder(row.folder.id) }} in this sale
                     </span>
-                  </p>
-                </div>
+                  </span>
+                </span>
                 <ChevronRightIcon
                   v-if="isCategoryHub(row.folder) && !isParentRowSelected(row.folder)"
-                  class="h-4 w-4 shrink-0 text-gray-400"
-                  stroke-width="2"
+                  class="s-new-sale__row-icon"
+                  :size="16"
+                  :stroke-width="2"
+                  aria-hidden="true"
                 />
                 <CheckCircleIcon
                   v-if="isParentRowSelected(row.folder)"
-                  class="h-4 w-4 shrink-0 text-gray-700 dark:text-gray-300"
-                  stroke-width="2"
+                  class="s-new-sale__row-check"
+                  :size="16"
+                  :stroke-width="2"
+                  aria-hidden="true"
                 />
               </button>
             </div>
@@ -165,73 +127,23 @@
         <!-- Step 2: Subcategory -->
         <div
           v-if="currentStep === 1"
-          :class="[drawerFillStepClass, isCapacitorIos ? 'ios-create-sale-step' : 'gap-3']"
+          :class="drawerFillStepClass"
         >
-          <template v-if="isCapacitorIos">
-            <p class="ios-create-sale-step__hint">{{ sheetStepSubtitles[1] }}</p>
-            <button type="button" class="ios-create-sale-sheet__change-link" @click="goBackToParentCategories">
-              Change parent · {{ selectedParentFolder?.name }}
-            </button>
-          </template>
-          <div v-else class="flex shrink-0 flex-wrap items-center gap-2">
+          <div class="s-new-sale__head">
             <p :class="sectionLabelClass">
               Subcategory · {{ selectedParentFolder?.name }}
             </p>
-            <button
-              type="button"
-              class="text-[11px] font-medium text-gray-500 hover:text-gray-700 hover:underline dark:text-gray-400 dark:hover:text-gray-200"
-              @click="goBackToParentCategories"
-            >
+            <SButton variant="ghost" size="sm" @click="goBackToParentCategories">
               Change parent
-            </button>
+            </SButton>
           </div>
-          <DashboardDrawerSearch
-            v-model="subcategorySearchQuery"
-            placeholder="Search subcategories…"
-          />
+          <SSearch v-model="subcategorySearchQuery" placeholder="Search subcategories…" />
           <div v-if="subcategoryFolders.length === 0" :class="emptyStateClass">
-            <FolderIcon class="mb-2 h-8 w-8 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
-            <p class="text-xs font-medium text-gray-800 dark:text-gray-200">
+            <FolderIcon :size="24" :stroke-width="1.5" aria-hidden="true" />
+            <p class="s-new-sale__empty-title">
               {{ subcategorySearchQuery ? 'No subcategories found' : 'No subcategories yet' }}
             </p>
-            <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
-              Add subcategories under this parent in Inventory
-            </p>
-          </div>
-          <div v-else-if="isCapacitorIos" class="ios-create-sale-picker">
-            <div class="ios-create-sale-picker__scroll">
-              <button
-                v-for="folder in subcategoryFolders"
-                :key="folder.id"
-                type="button"
-                :class="[
-                  'ios-create-sale-picker__row',
-                  isSubcategoryRowSelected(folder) ? 'ios-create-sale-picker__row--selected' : '',
-                ]"
-                @click="onSubcategoryPick(folder)"
-              >
-                <span class="ios-create-sale-picker__icon">
-                  <FolderIcon stroke-width="1.75" />
-                </span>
-                <span class="ios-create-sale-picker__body">
-                  <p class="ios-create-sale-picker__title">{{ folder.name }}</p>
-                  <p class="ios-create-sale-picker__meta">
-                    {{ folderPickerMeta(folder) }}
-                    <span
-                      v-if="selectedCountForFolder(folder.id) > 0"
-                      class="ios-create-sale-picker__meta-accent"
-                    >
-                      · {{ selectedCountForFolder(folder.id) }} in this sale
-                    </span>
-                  </p>
-                </span>
-                <CheckCircleIcon
-                  v-if="isSubcategoryRowSelected(folder)"
-                  class="ios-create-sale-picker__check"
-                  stroke-width="2"
-                />
-              </button>
-            </div>
+            <p>Add subcategories under this parent in Inventory</p>
           </div>
           <div v-else :class="pickListClass">
             <div :class="pickListScrollClass">
@@ -243,32 +155,27 @@
                   pickRowClass,
                   isSubcategoryRowSelected(folder) ? pickRowSelectedClass : '',
                 ]"
+                :aria-pressed="isSubcategoryRowSelected(folder)"
                 @click="onSubcategoryPick(folder)"
               >
-                <div
-                  :class="[
-                    'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg',
-                    getFolderColorClass(folder.color),
-                  ]"
-                >
-                  <FolderIcon class="h-4 w-4 text-white" stroke-width="1.75" />
-                </div>
-                <div class="min-w-0 flex-1">
-                  <p :class="pickRowTitleClass">{{ folder.name }}</p>
-                  <p :class="pickRowMetaClass">
+                <span class="s-new-sale__mark" aria-hidden="true">
+                  <FolderIcon :size="16" :stroke-width="1.75" />
+                </span>
+                <span class="s-new-sale__row-body">
+                  <span :class="pickRowTitleClass">{{ folder.name }}</span>
+                  <span :class="pickRowMetaClass">
                     {{ folderPickerMeta(folder) }}
-                    <span
-                      v-if="selectedCountForFolder(folder.id) > 0"
-                      class="text-gray-700 dark:text-gray-300"
-                    >
+                    <span v-if="selectedCountForFolder(folder.id) > 0" class="s-new-sale__accent">
                       · {{ selectedCountForFolder(folder.id) }} in this sale
                     </span>
-                  </p>
-                </div>
+                  </span>
+                </span>
                 <CheckCircleIcon
                   v-if="isSubcategoryRowSelected(folder)"
-                  class="h-4 w-4 shrink-0 text-gray-700 dark:text-gray-300"
-                  stroke-width="2"
+                  class="s-new-sale__row-check"
+                  :size="16"
+                  :stroke-width="2"
+                  aria-hidden="true"
                 />
               </button>
             </div>
@@ -276,64 +183,53 @@
         </div>
 
         <!-- Step 3: Select Items -->
-        <div v-if="currentStep === 2" :class="[drawerFillStepClass, 'gap-3']">
-          <div class="flex shrink-0 flex-wrap items-center justify-between gap-2">
+        <div
+          v-if="currentStep === 2"
+          :class="drawerFillStepClass"
+        >
+          <div class="s-new-sale__head">
             <p :class="sectionLabelClass">Items · {{ selectedFolder?.name }}</p>
-            <div class="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                class="ios-add-btn ios-add-btn--inline inline-flex items-center gap-1 text-[11px] font-medium text-gray-800 hover:underline dark:text-gray-200"
-                @click="addFromAnotherCategory"
-              >
-                <PlusCircleIcon class="h-3.5 w-3.5" stroke-width="2" />
+            <div class="s-new-sale__head-actions">
+              <SButton variant="ghost" size="sm" @click="addFromAnotherCategory">
+                <template #leading>
+                  <PlusCircleIcon :size="16" :stroke-width="2" aria-hidden="true" />
+                </template>
                 Add from another category
-              </button>
-              <button
-                type="button"
-                class="text-[11px] font-medium text-gray-500 hover:text-gray-700 hover:underline dark:text-gray-400 dark:hover:text-gray-200"
-                @click="loadItems"
-              >
+              </SButton>
+              <SButton variant="ghost" size="sm" @click="loadItems">
+                <template #leading>
+                  <ArrowPathIcon :size="16" :stroke-width="2" aria-hidden="true" />
+                </template>
                 Refresh list
-              </button>
+              </SButton>
             </div>
           </div>
-          <DashboardDrawerSearch
+          <SSearch
             v-model="itemSearchQuery"
             :placeholder="
               selectedFolder?.hasSerialNumbers ? 'Search name or serial…' : 'Search products…'
             "
           />
           <div
-            v-if="loadingItems && isCapacitorIos"
-            class="flex min-h-0 flex-1 flex-col items-center justify-center py-8"
-          >
-            <div
-              class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-gray-500"
-            ></div>
-            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Loading items...</p>
-          </div>
-          <div
-            v-else-if="loadingItems"
+            v-if="loadingItems"
             :class="pickListClass"
+            aria-busy="true"
           >
+            <span class="ds-sr-only">Loading items…</span>
             <div :class="pickListScrollClass">
               <div v-for="i in 6" :key="i" :class="pickRowClass">
-                <div class="flex w-full items-start gap-2.5">
-                  <span class="dash-skeleton dash-skeleton--chip mt-0.5" />
-                  <div class="min-w-0 flex-1 space-y-1.5">
-                    <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-title" />
-                    <span class="dash-skeleton dash-skeleton--line dash-skeleton--line-meta" />
-                  </div>
-                </div>
+                <SSkeleton width="20px" height="20px" />
+                <span class="s-new-sale__row-body">
+                  <SSkeleton width="60%" height="12px" />
+                  <SSkeleton width="35%" height="10px" />
+                </span>
               </div>
             </div>
           </div>
           <div v-else-if="availableItems.length === 0" :class="emptyStateClass">
-            <CubeIcon class="mb-2 h-8 w-8 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
-            <p class="text-xs font-medium text-gray-800 dark:text-gray-200">No items available</p>
-            <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
-              This category has no items to add
-            </p>
+            <CubeIcon :size="24" :stroke-width="1.5" aria-hidden="true" />
+            <p class="s-new-sale__empty-title">No items available</p>
+            <p>This category has no items to add</p>
           </div>
           <div v-else :class="pickListClass">
             <div :class="pickListScrollClass">
@@ -342,68 +238,57 @@
                 :key="item.id"
                 :class="[
                   pickRowClass,
-                  'cursor-pointer',
+                  's-new-sale__item',
                   selectedItems.find((si) => si.id === item.id) ? pickRowSelectedClass : '',
                   itemIsOutOnSellerLoan(item) && !selectedItems.find((si) => si.id === item.id)
-                    ? 'bg-amber-50/60 dark:bg-amber-950/20'
+                    ? 's-new-sale__item--loan'
                     : '',
                 ]"
                 @click="onReceiptItemRowClick(item)"
               >
-                <div class="flex w-full items-start gap-2.5">
-                  <Checkbox
-                    :model-value="selectedItems.find((si) => si.id === item.id) !== undefined"
-                    @update:model-value="(checked) => toggleItemSelection(item, checked)"
-                    @click.stop
-                    size="sm"
-                    class="mt-0.5"
-                  />
-                  <div class="min-w-0 flex-1">
-                    <h4
-                      class="text-xs font-medium text-gray-900 dark:text-gray-100"
-                      :class="
-                        itemIsOutOnSellerLoan(item) &&
-                        'font-semibold text-amber-900 dark:text-amber-100'
-                      "
+                <div class="s-new-sale__item-main">
+                  <span class="s-new-sale__item-check" @click.stop>
+                    <SCheckbox
+                      :model-value="selectedItems.find((si) => si.id === item.id) !== undefined"
+                      :aria-label="`Select ${getItemDisplayName(item)}`"
+                      @update:model-value="(checked: boolean) => toggleItemSelection(item, checked)"
+                    />
+                  </span>
+                  <div class="s-new-sale__row-body">
+                    <p
+                      class="s-new-sale__item-title"
+                      :class="{ 's-new-sale__item-title--loan': itemIsOutOnSellerLoan(item) }"
                     >
                       {{ getItemDisplayName(item) }}
-                    </h4>
-                    <div class="flex items-center gap-3 mt-0.5 text-[10px] sm:text-xs flex-wrap">
-                      <span
-                        v-if="itemIsOutOnSellerLoan(item)"
-                        class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide text-amber-900 bg-white/95 shadow-sm shadow-amber-900/10 ring-1 ring-amber-400/45 dark:bg-amber-900/80 dark:text-amber-100 dark:ring-amber-400/40 dark:shadow-md dark:shadow-black/40"
-                      >
+                    </p>
+                    <p class="s-new-sale__meta">
+                      <SBadge v-if="itemIsOutOnSellerLoan(item)" tone="warning">
                         On stock loan<span v-if="item.sellerLoanPartyName"
                           >&nbsp;· {{ item.sellerLoanPartyName }}</span
                         >
-                      </span>
+                      </SBadge>
                       <span
                         v-if="
                           (selectedFolder?.hasSerialNumbers || hasSerialNumberInTemplate) &&
                           (getItemField(item, 'serialNo') || getItemField(item, 'serialNumber'))
                         "
-                        class="text-gray-500 dark:text-gray-400"
                       >
                         Serial:
                         {{ getItemField(item, 'serialNo') || getItemField(item, 'serialNumber') }}
                       </span>
-                      <span
-                        v-if="getItemField(item, 'sku')"
-                        class="text-gray-500 dark:text-gray-400"
-                        >SKU: {{ getItemField(item, 'sku') }}</span
-                      >
+                      <span v-if="getItemField(item, 'sku')">SKU: {{ getItemField(item, 'sku') }}</span>
                       <span v-if="getItemField(item, 'price')">
                         <span
                           v-if="item.discountedPrice !== undefined && item.discountedPrice !== null"
-                          class="flex items-center gap-1"
+                          class="s-new-sale__price"
                         >
-                          <span class="text-gray-400 dark:text-gray-500 line-through">
+                          <s class="s-new-sale__price-was">
                             {{ formatCurrency(parseFloat(getItemField(item, 'price') || '0')) }}
-                          </span>
-                          <span class="text-green-600 dark:text-green-400 font-semibold">
+                          </s>
+                          <span class="s-new-sale__price-now">
                             {{ formatCurrency(item.discountedPrice) }}
                           </span>
-                          <span class="text-red-600 dark:text-red-400">
+                          <span class="s-new-sale__price-off">
                             ({{
                               item.discountPercentage
                                 ? `-${item.discountPercentage}%`
@@ -411,7 +296,7 @@
                             }})
                           </span>
                         </span>
-                        <span v-else class="text-gray-500 dark:text-gray-400">
+                        <span v-else>
                           Price:
                           {{ formatCurrency(parseFloat(getItemField(item, 'price') || '0')) }}
                         </span>
@@ -420,11 +305,10 @@
                         v-if="
                           !itemUsesSerialNumbers(item) && getItemAvailableStock(item) !== null
                         "
-                        class="text-gray-500 dark:text-gray-400"
                       >
                         Stock: {{ getItemAvailableStock(item) }}
                       </span>
-                    </div>
+                    </p>
                   </div>
                 </div>
                 <div
@@ -432,39 +316,24 @@
                     selectedItems.find((si) => si.id === item.id) &&
                     !itemUsesSerialNumbers(item)
                   "
-                  class="mt-2 w-full border-t border-gray-100/90 pt-2 dark:border-gray-800/80"
+                  class="s-new-sale__item-extra"
                   @click.stop
                 >
-                  <label class="mb-1 block text-[10px] font-medium text-gray-600 dark:text-gray-400"
-                    >Quantity</label
-                  >
-                  <input
-                    type="number"
-                    :value="getSelectedItemQuantity(item.id)"
-                    :class="[
-                      'app-field h-8 w-20 px-2 text-xs dark:!bg-dashboard-card',
-                      getSelectedItemQuantityError(item.id)
-                        ? 'ring-2 ring-red-500/70 focus:ring-red-500/70 dark:ring-red-400/60'
-                        : '',
-                    ]"
-                    min="1"
-                    @input="
-                      updateItemQuantity(
-                        item.id,
-                        parseInt(($event.target as HTMLInputElement).value) || 1
-                      )
-                    "
-                  />
-                  <p
-                    v-if="getSelectedItemQuantityError(item.id)"
-                    class="mt-1 text-[10px] font-medium text-red-600 dark:text-red-400"
-                  >
-                    {{ getSelectedItemQuantityError(item.id) }}
-                  </p>
+                  <SField label="Quantity" :error="getSelectedItemQuantityError(item.id) || undefined">
+                    <SInput
+                      class="s-new-sale__narrow"
+                      type="number"
+                      min="1"
+                      :model-value="getSelectedItemQuantity(item.id)"
+                      @update:model-value="
+                        (value) => updateItemQuantity(item.id, parseInt(String(value)) || 1)
+                      "
+                    />
+                  </SField>
                 </div>
                 <div
                   v-if="selectedItems.find((si) => si.id === item.id)"
-                  class="mt-2 w-full border-t border-gray-100/90 pt-2 dark:border-gray-800/80"
+                  class="s-new-sale__item-extra"
                   @click.stop
                 >
                   <template
@@ -473,422 +342,348 @@
                       !(selectedItems.find((si) => si.id === item.id)?.discountAmount)
                     "
                   >
-                    <button
-                      type="button"
-                      class="text-[11px] font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
-                      @click="toggleItemDiscountInput(item.id)"
-                    >
-                      + Discount
-                    </button>
+                    <SButton variant="ghost" size="sm" @click="toggleItemDiscountInput(item.id)">
+                      <template #leading>
+                        <PlusIcon :size="16" :stroke-width="2" aria-hidden="true" />
+                      </template>
+                      Discount
+                    </SButton>
                   </template>
-                  <div v-else class="flex flex-wrap items-center gap-2">
-                    <label class="text-[10px] font-medium text-gray-600 dark:text-gray-400"
-                      >Discount</label
-                    >
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      :value="selectedItems.find((si) => si.id === item.id)?.discountAmount"
-                      class="app-field h-8 w-24 px-2 text-xs dark:!bg-dashboard-card"
-                      placeholder="0.00"
-                      @input="
-                        setItemDiscountAmount(
-                          item.id,
-                          parseFloat(($event.target as HTMLInputElement).value) || 0
-                        )
-                      "
-                    />
-                    <button
-                      type="button"
-                      class="text-[11px] text-red-600 hover:underline dark:text-red-400"
-                      @click="clearItemDiscount(item.id)"
-                    >
-                      Remove
-                    </button>
-                  </div>
+                  <SField v-else label="Discount">
+                    <div class="s-inline-field">
+                      <SInput
+                        class="s-new-sale__narrow"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="0.00"
+                        :model-value="selectedItems.find((si) => si.id === item.id)?.discountAmount"
+                        @update:model-value="
+                          (value) => setItemDiscountAmount(item.id, parseFloat(String(value)) || 0)
+                        "
+                      >
+                        <template #prefix>{{ currencySymbol }}</template>
+                      </SInput>
+                      <SButton variant="ghost" @click="clearItemDiscount(item.id)">Remove</SButton>
+                    </div>
+                  </SField>
                 </div>
               </div>
             </div>
           </div>
-          <div
+          <section
             v-if="selectedItems.length > 0"
-            class="shrink-0 rounded-lg bg-gray-50/80 px-3 py-2.5 dark:border-white/[0.06] dark:bg-white/[0.03]"
+            class="s-new-sale__summary"
+            aria-label="Selected products"
           >
-            <p class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-              Selected ({{ totalSelectedQuantity }})
-            </p>
-            <div class="space-y-2 mb-2">
-              <div
-                v-for="group in selectedItemsByFolder"
-                :key="group.folderId"
-                class="rounded-md border border-gray-200/80 bg-white/60 px-2 py-1.5 dark:border-white/[0.06] dark:bg-white/[0.02]"
-              >
-                <p class="text-[10px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                  {{ group.folderName }}
-                </p>
-                <ul class="mt-1 space-y-0.5">
-                  <li
-                    v-for="si in group.lines"
-                    :key="si.id"
-                    class="flex items-center justify-between gap-2 text-[11px] text-gray-700 dark:text-gray-300"
+            <p class="s-new-sale__summary-title">Selected ({{ totalSelectedQuantity }})</p>
+            <div
+              v-for="group in selectedItemsByFolder"
+              :key="group.folderId"
+              class="s-new-sale__group"
+            >
+              <p class="s-new-sale__group-title">{{ group.folderName }}</p>
+              <ul class="s-new-sale__lines">
+                <li v-for="si in group.lines" :key="si.id" class="s-new-sale__line">
+                  <span
+                    class="s-new-sale__line-text"
+                    :class="{ 's-new-sale__line-text--error': getSelectedItemQuantityError(si.id) }"
                   >
-                    <span
-                      class="min-w-0 truncate"
-                      :class="
-                        getSelectedItemQuantityError(si.id)
-                          ? 'text-red-600 dark:text-red-400'
-                          : ''
-                      "
-                    >
+                    <span class="s-new-sale__line-name">
                       {{ getItemDisplayName(si.item) }}
                       <span v-if="!itemUsesSerialNumbers(si.item) && si.quantity > 1">
                         × {{ si.quantity }}
                       </span>
-                      <span class="ml-1 text-gray-500 dark:text-gray-400">
-                        {{
-                          formatCurrency(
-                            Math.max(0, getEffectivePrice(si.item) - (si.discountAmount || 0))
-                          )
-                        }}
-                      </span>
-                      <span
-                        v-if="getSelectedItemQuantityError(si.id)"
-                        class="block text-[10px] font-medium"
-                      >
-                        {{ getSelectedItemQuantityError(si.id) }}
-                      </span>
                     </span>
-                    <button
-                      type="button"
-                      class="shrink-0 text-gray-400 hover:text-red-600 dark:hover:text-red-400"
-                      aria-label="Remove item"
-                      @click.stop="removeSelectedItem(si.id)"
-                    >
-                      <XMarkIcon class="h-3.5 w-3.5" stroke-width="2" />
-                    </button>
-                  </li>
-                </ul>
-              </div>
+                    <span class="s-new-sale__line-price">
+                      {{
+                        formatCurrency(
+                          Math.max(0, getEffectivePrice(si.item) - (si.discountAmount || 0))
+                        )
+                      }}
+                    </span>
+                    <span v-if="getSelectedItemQuantityError(si.id)" class="s-new-sale__line-error">
+                      {{ getSelectedItemQuantityError(si.id) }}
+                    </span>
+                  </span>
+                  <SIconButton
+                    :label="`Remove ${getItemDisplayName(si.item)}`"
+                    class="s-new-sale__line-remove"
+                    @click.stop="removeSelectedItem(si.id)"
+                  >
+                    <XMarkIcon :size="16" :stroke-width="2" aria-hidden="true" />
+                  </SIconButton>
+                </li>
+              </ul>
             </div>
-            <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">
-              Total: {{ formatCurrency(itemsSubtotal) }}
+            <p class="s-new-sale__summary-total">
+              <span>Total</span>
+              <span>{{ formatCurrency(itemsSubtotal) }}</span>
             </p>
-          </div>
+          </section>
         </div>
 
         <!-- Step 4: Sale Details -->
-        <IosForm v-if="currentStep === 3" layout="default" :scroll="false">
-          <IosFormSection fixed grid>
-            <IosFormField label="Customer name" required>
-              <div class="relative">
-                <IosFormInput
+        <SForm v-if="currentStep === 3">
+          <SFormSection>
+            <SField label="Customer name" required>
+              <div class="s-pop-anchor">
+                <SInput
                   v-model="receiptForm.customerName"
                   required
-                  extra-class="pr-8"
+                  autocomplete="off"
                   @input="handleCustomerNameInput"
                   @focus="showCustomerSuggestions = true"
                   @blur="handleCustomerNameBlur"
                   placeholder="John Doe"
-                />
-                <MagnifyingGlassIcon
-                  v-if="receiptForm.customerName && matchingCustomers.length > 0"
-                  class="absolute right-2.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500"
-                />
-                <!-- Customer Suggestions Dropdown -->
-                <div
+                >
+                  <template v-if="receiptForm.customerName && matchingCustomers.length > 0" #suffix>
+                    <MagnifyingGlassIcon :size="16" :stroke-width="1.75" aria-hidden="true" />
+                  </template>
+                </SInput>
+                <ul
                   v-if="
                     showCustomerSuggestions &&
                     receiptForm.customerName &&
                     matchingCustomers.length > 0
                   "
-                  class="absolute z-50 w-full mt-1 bg-white dark:!bg-dashboard-card rounded-sm max-h-48 overflow-y-auto"
+                  class="s-popover s-popover--start s-new-sale__suggest"
+                  role="listbox"
+                  aria-label="Matching customers"
                 >
-                  <div
+                  <li
                     v-for="customer in matchingCustomers"
                     :key="customer.id"
+                    class="s-menu-row"
+                    role="option"
+                    aria-selected="false"
                     @mousedown.prevent="selectCustomer(customer)"
-                    class="px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0"
                   >
-                    <div class="flex items-center justify-between">
-                      <div class="flex-1">
-                        <p class="text-xs font-medium text-gray-900 dark:text-gray-100">
-                          {{ customer.name }}
-                        </p>
-                        <div
-                          class="flex items-center gap-2 mt-0.5 text-[10px] text-gray-500 dark:text-gray-400"
-                        >
-                          <span v-if="customer.email">{{ customer.email }}</span>
-                          <span v-if="customer.phone">{{ customer.phone }}</span>
-                        </div>
-                      </div>
-                      <div class="text-[10px] text-gray-400 dark:text-gray-500 ml-3">
-                        {{ customer.totalOrders }} order{{ customer.totalOrders !== 1 ? 's' : '' }}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                    <span class="s-menu-row__text">
+                      <span class="s-menu-row__label">{{ customer.name }}</span>
+                      <span v-if="customer.email || customer.phone" class="s-menu-row__meta">
+                        {{ [customer.email, customer.phone].filter(Boolean).join(' · ') }}
+                      </span>
+                    </span>
+                    <span class="s-new-sale__suggest-count">
+                      {{ customer.totalOrders }} order{{ customer.totalOrders !== 1 ? 's' : '' }}
+                    </span>
+                  </li>
+                </ul>
               </div>
-            </IosFormField>
-            <div class="ios-form__grid ios-form__grid--pair">
-              <IosFormField label="Customer email">
-                <IosFormInput
+            </SField>
+            <div class="s-form-pair">
+              <SField label="Customer email">
+                <SInput
                   v-model="receiptForm.customerEmail"
                   type="email"
                   placeholder="john@example.com"
                 />
-              </IosFormField>
-              <IosFormField label="Customer phone">
-                <IosFormInput
+              </SField>
+              <SField label="Customer phone">
+                <SInput
                   v-model="receiptForm.customerPhone"
                   type="tel"
                   placeholder="+1 234 567 8900"
                 />
-              </IosFormField>
+              </SField>
             </div>
-            <IosFormField label="Customer address">
-              <IosFormInput
+            <SField label="Customer address">
+              <SInput
                 v-model="receiptForm.customerAddress"
                 placeholder="123 Main St, City, State"
               />
-            </IosFormField>
-            <IosFormField>
-              <div class="flex items-center justify-between mb-1.5">
-                <span class="ios-form__label dash-drawer-label !mb-0">Payment method *</span>
-                <Checkbox
-                  v-if="paymentSettlement !== 'balance_due'"
-                  v-model="useSplitPayment"
-                  label="Split Payment"
-                  size="sm"
-                />
-              </div>
+            </SField>
+            <SField :label="useSplitPayment ? 'Payment methods' : 'Payment method'" required>
+              <SSelect v-if="!useSplitPayment" v-model="receiptForm.paymentMethod" required>
+                <option value="">Select payment method</option>
+                <option v-for="tender in paymentTenderOptions" :key="tender" :value="tender">
+                  {{ tender }}
+                </option>
+              </SSelect>
 
-              <!-- Single Payment Method -->
-              <div v-if="!useSplitPayment">
-                <PaymentMethodSelect v-model="receiptForm.paymentMethod" required />
-              </div>
-
-              <!-- Split Payment Methods -->
-              <div v-else class="space-y-2">
+              <div v-else class="s-new-sale__split">
                 <div
                   v-for="(payment, index) in splitPayments"
                   :key="index"
-                  class="flex items-center gap-2"
+                  class="s-new-sale__split-row"
                 >
-                  <PaymentMethodSelect
+                  <SSelect
                     v-model="payment.method"
                     required
-                    select-class="app-field flex-1 px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400/40"
-                    placeholder="Select method"
-                  />
-                  <div class="relative w-28">
-                    <span
-                      class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400"
-                      >{{ currencySymbol }}</span
-                    >
-                    <IosFormInput
-                      v-model.number="payment.amount"
-                      type="number"
-                      step="0.01"
-                      :min="0"
-                      :max="receiptTotal - splitPaymentsTotal + payment.amount"
-                      required
-                      extra-class="pl-7"
-                      placeholder="0.00"
-                    />
-                  </div>
-                  <button
+                    :aria-label="`Payment method ${index + 1}`"
+                  >
+                    <option value="">Select method</option>
+                    <option v-for="tender in paymentTenderOptions" :key="tender" :value="tender">
+                      {{ tender }}
+                    </option>
+                  </SSelect>
+                  <SInput
+                    v-model.number="payment.amount"
+                    type="number"
+                    step="0.01"
+                    :min="0"
+                    :max="receiptTotal - splitPaymentsTotal + payment.amount"
+                    required
+                    placeholder="0.00"
+                    :aria-label="`Amount ${index + 1}`"
+                  >
+                    <template #prefix>{{ currencySymbol }}</template>
+                  </SInput>
+                  <SIconButton
                     v-if="splitPayments.length > 1"
+                    :label="`Remove payment ${index + 1}`"
                     @click="removeSplitPayment(index)"
-                    type="button"
-                    class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-sm transition-colors"
                   >
-                    <XMarkIcon class="w-4 h-4" />
-                  </button>
+                    <XMarkIcon :size="16" :stroke-width="2" aria-hidden="true" />
+                  </SIconButton>
                 </div>
-                <button
-                  @click="addSplitPayment"
-                  type="button"
-                  class="ios-add-btn inline-flex w-full items-center justify-center gap-1.5 px-3 py-1.5 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/[0.06] rounded-sm border-0 transition-colors"
-                >
-                  <PlusCircleIcon class="h-3.5 w-3.5 shrink-0 opacity-80" :stroke-width="1.75" />
+                <SButton variant="ghost" size="sm" @click="addSplitPayment">
+                  <template #leading>
+                    <PlusCircleIcon :size="16" :stroke-width="2" aria-hidden="true" />
+                  </template>
                   Add payment method
-                </button>
+                </SButton>
                 <div
-                  class="rounded-sm border p-2.5 space-y-1.5"
-                  :class="{
-                    'border-emerald-200/80 bg-emerald-50/90 dark:border-emerald-800/50 dark:bg-emerald-950/25':
-                      splitPaymentBalanceUi.tone === 'ok',
-                    'border-amber-200/80 bg-amber-50/90 dark:border-amber-800/50 dark:bg-amber-950/20':
-                      splitPaymentBalanceUi.tone === 'short',
-                    'border-red-200/80 bg-red-50/90 dark:border-red-800/50 dark:bg-red-950/20':
-                      splitPaymentBalanceUi.tone === 'over',
-                  }"
+                  class="s-new-sale__balance"
+                  :class="`s-new-sale__balance--${splitPaymentBalanceUi.tone}`"
+                  role="status"
                 >
-                  <div class="flex justify-between items-start gap-2">
-                    <span
-                      class="text-[10px] font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400"
-                      >Balance</span
-                    >
-                    <div class="text-right">
-                      <p
-                        class="text-xs font-semibold tabular-nums"
-                        :class="{
-                          'text-emerald-700 dark:text-emerald-300':
-                            splitPaymentBalanceUi.tone === 'ok',
-                          'text-amber-800 dark:text-amber-200':
-                            splitPaymentBalanceUi.tone === 'short',
-                          'text-red-700 dark:text-red-300': splitPaymentBalanceUi.tone === 'over',
-                        }"
-                      >
-                        {{ splitPaymentBalanceUi.headline }}
-                      </p>
-                      <p
-                        class="text-[10px] text-gray-600 dark:text-gray-400 mt-0.5 max-w-[14rem] ml-auto leading-snug"
-                      >
-                        {{ splitPaymentBalanceUi.sub }}
-                      </p>
-                    </div>
+                  <div class="s-new-sale__balance-head">
+                    <span class="s-new-sale__balance-label">Balance</span>
+                    <span class="s-new-sale__balance-value">{{ splitPaymentBalanceUi.headline }}</span>
                   </div>
-                  <p
-                    class="text-[10px] text-gray-500 dark:text-gray-400 tabular-nums pt-1 border-t border-gray-200/80/60"
-                  >
+                  <p class="s-new-sale__balance-sub">{{ splitPaymentBalanceUi.sub }}</p>
+                  <p class="s-new-sale__balance-foot">
                     Allocated {{ formatCurrency(splitPaymentsTotal) }} of
                     {{ formatCurrency(receiptTotal) }}
                   </p>
                 </div>
               </div>
-            </IosFormField>
-            <IosFormField class="sm:col-span-2" label="Payment" required>
-              <div class="grid grid-cols-2 gap-2">
+            </SField>
+            <SCheckbox
+              v-if="paymentSettlement !== 'balance_due'"
+              v-model="useSplitPayment"
+              label="Split payment"
+            />
+            <div class="s-field">
+              <span :id="settlementLabelId" class="s-field__label">
+                Payment<span class="s-field__required" aria-hidden="true">*</span>
+              </span>
+              <div class="s-choice-grid" role="radiogroup" :aria-labelledby="settlementLabelId">
                 <button
                   type="button"
-                  :class="
-                    paymentSettlement === 'paid_in_full'
-                      ? settlementActiveClass
-                      : settlementInactiveClass
-                  "
+                  role="radio"
+                  class="s-choice"
+                  :aria-checked="paymentSettlement === 'paid_in_full'"
                   @click="paymentSettlement = 'paid_in_full'"
                 >
-                  Paid in full
+                  <span class="s-choice__head">
+                    <span class="s-choice__title">Paid in full</span>
+                    <span class="s-choice__radio" aria-hidden="true" />
+                  </span>
                 </button>
                 <button
                   type="button"
-                  :class="
-                    paymentSettlement === 'balance_due'
-                      ? settlementActiveClass
-                      : settlementInactiveClass
-                  "
+                  role="radio"
+                  class="s-choice"
+                  :aria-checked="paymentSettlement === 'balance_due'"
                   @click="paymentSettlement = 'balance_due'"
                 >
-                  Balance due
+                  <span class="s-choice__head">
+                    <span class="s-choice__title">Balance due</span>
+                    <span class="s-choice__radio" aria-hidden="true" />
+                  </span>
                 </button>
               </div>
-              <p class="mt-1 text-[10px] text-gray-500 dark:text-gray-400">
+              <p class="s-field__hint">
                 {{
                   paymentSettlement === 'balance_due'
                     ? 'Stock stays reserved until paid off. Order appears under Outstanding.'
                     : 'Stock is marked sold when the sale is recorded.'
                 }}
               </p>
-              <div
-                v-if="paymentSettlement === 'balance_due'"
-                class="mt-3 rounded-sm border border-amber-200/70 bg-amber-50/50 p-3 dark:border-amber-900/40 dark:bg-amber-950/15"
-              >
-                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Deposit collected today *
-                </label>
-                <IosFormInput
+            </div>
+            <div v-if="paymentSettlement === 'balance_due'" class="s-new-sale__deposit">
+              <SField label="Deposit collected today" required>
+                <SInput
                   v-model.number="depositAmount"
                   type="number"
                   :min="0"
                   step="0.01"
                   :max="receiptTotal"
-                  extra-class="tabular-nums"
-                />
-                <p class="mt-1.5 text-[11px] text-gray-600 dark:text-gray-400 tabular-nums">
-                  Balance remaining:
-                  <span class="font-semibold text-amber-800 dark:text-amber-200">
-                    {{ formatCurrency(Math.max(0, receiptTotal - (depositAmount || 0))) }}
-                  </span>
-                </p>
-              </div>
-            </IosFormField>
-          </IosFormSection>
-          <IosFormSection fixed>
-            <IosFormField label="Notes" hint="Optional">
-              <IosFormTextarea
+                >
+                  <template #prefix>{{ currencySymbol }}</template>
+                </SInput>
+              </SField>
+              <p class="s-form-meta s-new-sale__num">
+                Balance remaining:
+                <strong class="s-new-sale__due">
+                  {{ formatCurrency(Math.max(0, receiptTotal - (depositAmount || 0))) }}
+                </strong>
+              </p>
+            </div>
+          </SFormSection>
+          <SFormSection>
+            <SField label="Notes" hint="Optional">
+              <STextarea
                 v-model="receiptForm.notes"
                 :rows="2"
                 placeholder="Additional notes..."
               />
-            </IosFormField>
-            <IosFormField v-if="hasAnyCheckoutDiscount" label="Discount reason" required>
-              <IosFormTextarea
+            </SField>
+            <SField v-if="hasAnyCheckoutDiscount" label="Discount reason" required>
+              <STextarea
                 v-model="discountReason"
                 :rows="2"
-                extra-class="resize-none"
                 placeholder="Why is a discount being applied to this sale?"
               />
-            </IosFormField>
-          </IosFormSection>
+            </SField>
+          </SFormSection>
 
           <!-- Swap-In Section -->
-          <IosFormSection v-if="canUseSwapInReceipt" fixed>
-            <Checkbox v-model="isSwapIn" label="This is a swap-in transaction" size="sm" />
+          <SFormSection v-if="canUseSwapInReceipt">
+            <SCheckbox v-model="isSwapIn" label="This is a swap-in transaction" />
 
-            <div v-if="isSwapIn" class="space-y-4 pt-1">
-              <IosFormField label="Category for swapped-in device" required>
-                <div v-if="loadingFolders" class="text-center py-3">
-                  <div
-                    class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-gray-500"
-                  ></div>
+            <div v-if="isSwapIn" class="s-form">
+              <SField label="Category for swapped-in device" required>
+                <div v-if="loadingFolders" class="s-new-sale__loading">
+                  <SSpinner :size="20" label="Loading categories" />
                 </div>
-                <div
-                  v-else-if="leafFolders.length === 0"
-                  class="text-center py-4 px-3 border border-dashed border-gray-300 rounded-sm bg-gray-50/50 dark:bg-gray-800/50"
-                >
-                  <div
-                    class="w-10 h-10 mx-auto mb-2 rounded-sm bg-gray-100 dark:bg-gray-700 flex items-center justify-center"
-                  >
-                    <FolderIcon class="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                  </div>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">
-                    No inventory categories found
-                  </p>
+                <div v-else-if="leafFolders.length === 0" class="s-pick__empty">
+                  <FolderIcon :size="20" :stroke-width="1.75" aria-hidden="true" />
+                  <p>No inventory categories found</p>
                 </div>
-                <IosFormSelect v-else v-model="swapInFolderId" required>
+                <SSelect v-else v-model="swapInFolderId" required>
                   <option value="">Select category for swapped-in device</option>
                   <option v-for="folder in leafFolders" :key="folder.id" :value="folder.id">
                     {{ folder.name }}
                   </option>
-                </IosFormSelect>
-              </IosFormField>
+                </SSelect>
+              </SField>
 
               <!-- Swapped-In Device Details (aligned with inventory product form) -->
-              <div v-if="swapInFolderId && swapInFolder" class="space-y-3">
-                <h4 class="text-xs font-semibold text-gray-700 dark:text-gray-300">
-                  Swapped-In Device Details
-                </h4>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <IosFormField
+              <div v-if="swapInFolderId && swapInFolder" class="s-form">
+                <h4 class="s-form-section__title">Swapped-in device details</h4>
+                <div class="s-form-pair">
+                  <SField
                     v-for="field in swapInDisplayFields"
                     :key="field.id || field.name"
                     :class="
-                      field.type === 'boolean' || field.type === 'date' ? 'sm:col-span-2' : ''
+                      field.type === 'boolean' || field.type === 'date' ? 's-new-sale__span' : ''
                     "
                     :label="field.type === 'boolean' ? undefined : swapInFieldLabel(field)"
                     :required="field.type !== 'boolean' && field.required"
                   >
                     <!-- Text Input -->
-                    <IosFormInput
+                    <SInput
                       v-if="field.type === 'text'"
                       v-model="swapInItemForm[field.name]"
                       :required="field.required"
                       :placeholder="swapInFieldPlaceholder(field)"
                     />
                     <!-- Number Input -->
-                    <IosFormInput
+                    <SInput
                       v-else-if="field.type === 'number'"
                       v-model.number="swapInItemForm[field.name]"
                       type="number"
@@ -896,30 +691,26 @@
                       :placeholder="swapInFieldPlaceholder(field)"
                     />
                     <!-- Currency Input -->
-                    <div v-else-if="field.type === 'currency'" class="relative">
-                      <span
-                        class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400"
-                        >{{ currencySymbol }}</span
-                      >
-                      <IosFormInput
-                        v-model.number="swapInItemForm[field.name]"
-                        type="number"
-                        step="0.01"
-                        :min="0"
-                        :required="field.required"
-                        extra-class="pl-7"
-                        placeholder="0.00"
-                      />
-                    </div>
+                    <SInput
+                      v-else-if="field.type === 'currency'"
+                      v-model.number="swapInItemForm[field.name]"
+                      type="number"
+                      step="0.01"
+                      :min="0"
+                      :required="field.required"
+                      placeholder="0.00"
+                    >
+                      <template #prefix>{{ currencySymbol }}</template>
+                    </SInput>
                     <!-- Date Input -->
-                    <IosFormInput
+                    <SInput
                       v-else-if="field.type === 'date'"
                       v-model="swapInItemForm[field.name]"
                       type="date"
                       :required="field.required"
                     />
                     <!-- Select Input -->
-                    <IosFormSelect
+                    <SSelect
                       v-else-if="field.type === 'select' && field.options"
                       v-model="swapInItemForm[field.name]"
                       :required="field.required"
@@ -928,99 +719,85 @@
                       <option v-for="option in field.options" :key="option" :value="option">
                         {{ option }}
                       </option>
-                    </IosFormSelect>
+                    </SSelect>
                     <!-- Boolean Input -->
-                    <Checkbox
+                    <SCheckbox
                       v-else-if="field.type === 'boolean'"
                       v-model="swapInItemForm[field.name]"
                       :label="swapInFieldLabel(field)"
-                      size="sm"
                     />
-                  </IosFormField>
+                  </SField>
                 </div>
-                <p
-                  v-if="swapInDisplayFields.length === 0"
-                  class="text-xs text-gray-500 dark:text-gray-400"
-                >
+                <p v-if="swapInDisplayFields.length === 0" class="s-form-meta">
                   No template fields defined for this folder.
                 </p>
               </div>
             </div>
-          </IosFormSection>
-          <div class="p-3 rounded-sm">
-            <div class="flex justify-between items-center mb-1.5">
-              <span class="text-xs text-gray-600 dark:text-gray-400">Products</span>
-              <span class="text-xs font-medium text-gray-900 dark:text-gray-100">{{
-                totalSelectedQuantity
-              }}</span>
+          </SFormSection>
+          <dl class="s-new-sale__totals">
+            <div class="s-new-sale__total-row">
+              <dt>Products</dt>
+              <dd>{{ totalSelectedQuantity }}</dd>
             </div>
-            <div class="flex justify-between items-center mb-1.5">
-              <span class="text-xs text-gray-600 dark:text-gray-400">Subtotal (items)</span>
-              <span class="text-xs font-medium text-gray-900 dark:text-gray-100">{{
-                formatCurrency(itemsSubtotal)
-              }}</span>
+            <div class="s-new-sale__total-row">
+              <dt>Subtotal (items)</dt>
+              <dd>{{ formatCurrency(itemsSubtotal) }}</dd>
             </div>
             <div
               v-if="isSwapIn && swapInCreditAmount > 0"
-              class="flex justify-between items-center mb-1.5"
+              class="s-new-sale__total-row s-new-sale__total-row--credit"
             >
-              <span class="text-xs text-gray-600 dark:text-gray-400">Swap credit (trade-in)</span>
-              <span class="text-xs font-medium text-emerald-700 dark:text-emerald-400"
-                >−{{ formatCurrency(swapInCreditAmount) }}</span
-              >
+              <dt>Swap credit (trade-in)</dt>
+              <dd>−{{ formatCurrency(swapInCreditAmount) }}</dd>
             </div>
-            <div class="flex justify-between items-center pt-1.5 border-t border-gray-200">
-              <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{
-                isSwapIn ? 'Amount due' : 'Total'
-              }}</span>
-              <span class="text-base font-bold text-gray-900 dark:text-gray-100">{{
-                formatCurrency(receiptTotal)
-              }}</span>
+            <div class="s-new-sale__total-row s-new-sale__total-row--grand">
+              <dt>{{ isSwapIn ? 'Amount due' : 'Total' }}</dt>
+              <dd>{{ formatCurrency(receiptTotal) }}</dd>
             </div>
-          </div>
-        </IosForm>
+          </dl>
+        </SForm>
       </div>
     </template>
 
-    <template v-if="currentStep > 0 && !isCapacitorIos" #leading>
-      <Button variant="outline" size="sm" @click="previousStep">Back</Button>
+    <template v-if="currentStep > 0" #leading>
+      <SButton @click="previousStep">Back</SButton>
     </template>
 
     <template #footer>
-      <IosDrawerActions
-        :cancel-label="isCapacitorIos && currentStep > 0 ? 'Back' : 'Cancel'"
+      <SDialogActions
+        cancel-label="Cancel"
         :primary-label="receiptFooterPrimaryLabel"
         :primary-loading="isCreating && currentStep >= 3"
         :primary-disabled="receiptFooterPrimaryDisabled"
-        @cancel="handleReceiptFooterCancel"
+        @cancel="handleCancel"
         @primary="handleReceiptFooterPrimary"
       />
     </template>
-  </SidePanel>
+  </SDialog>
 
   <!-- Email Input Modal -->
-  <Modal
-    :model-value="showEmailModal"
-    @update:model-value="showEmailModal = $event"
+  <SDialog
+    :open="showEmailModal"
+    @update:open="showEmailModal = $event"
     size="sm"
-    title="Send Receipt via Email"
+    title="Send receipt via email"
   >
     <template #default>
-      <IosForm layout="default" scroll>
-        <IosFormSection fixed>
-          <IosFormField label="Email address">
-            <IosFormInput
+      <SForm>
+        <SFormSection>
+          <SField label="Email address">
+            <SInput
               v-model="emailToSend"
               type="email"
               placeholder="Enter email address"
               @keyup.enter="sendReceiptEmail(lastCreatedReceiptId, lastCreatedReceiptData)"
             />
-          </IosFormField>
-        </IosFormSection>
-      </IosForm>
+          </SField>
+        </SFormSection>
+      </SForm>
     </template>
     <template #footer>
-      <IosDrawerActions
+      <SDialogActions
         cancel-label="Cancel"
         primary-label="Send"
         :primary-loading="isSendingEmail"
@@ -1029,38 +806,39 @@
         @primary="sendReceiptEmail(lastCreatedReceiptId, lastCreatedReceiptData)"
       />
     </template>
-  </Modal>
+  </SDialog>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import SDialog from '~/components/s/SDialog.vue'
+import SDialogActions from '~/components/s/SDialogActions.vue'
+import SField from '~/components/s/SField.vue'
+import SForm from '~/components/s/SForm.vue'
+import SFormSection from '~/components/s/SFormSection.vue'
+import SInput from '~/components/s/SInput.vue'
+import SSelect from '~/components/s/SSelect.vue'
+import STextarea from '~/components/s/STextarea.vue'
+import { ref, computed, watch, onMounted, useId } from 'vue'
 import {
   FolderIcon,
   CubeIcon,
   CheckCircleIcon,
+  CheckIcon,
   MagnifyingGlassIcon,
   XMarkIcon,
-  EnvelopeIcon,
   PlusCircleIcon,
+  PlusIcon,
+  ArrowPathIcon,
   ChevronRightIcon,
 } from '~/utils/app-icons'
-import Modal from '~/components/ui/Modal.vue'
-import SidePanel from '~/components/ui/SidePanel.vue'
-import DashboardDrawerStepper from '~/components/dashboard/DashboardDrawerStepper.vue'
-import DashboardDrawerSearch from '~/components/dashboard/DashboardDrawerSearch.vue'
 import SellScreenNoteBanner from '~/components/receipts/SellScreenNoteBanner.vue'
-import PaymentMethodSelect from '~/components/receipts/PaymentMethodSelect.vue'
-import Button from '~/components/ui/Button.vue'
-import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
-import {
-  IosForm,
-  IosFormSection,
-  IosFormField,
-  IosFormInput,
-  IosFormSelect,
-  IosFormTextarea,
-} from '~/components/ios/forms'
-import Checkbox from '~/components/ui/Checkbox.vue'
+import SBadge from '~/components/s/SBadge.vue'
+import SButton from '~/components/s/SButton.vue'
+import SCheckbox from '~/components/s/SCheckbox.vue'
+import SIconButton from '~/components/s/SIconButton.vue'
+import SSearch from '~/components/s/SSearch.vue'
+import SSkeleton from '~/components/s/SSkeleton.vue'
+import SSpinner from '~/components/s/SSpinner.vue'
 import { useInventoryStore, type InventoryFolder, type InventoryItem } from '~/stores/inventory'
 import { useReceiptsStore, type ReceiptItem } from '~/stores/receipts'
 import { useSellerLoanOutsStore } from '~/stores/sellerLoanOuts'
@@ -1076,7 +854,6 @@ import { computeBalanceDue, roundMoney } from '~/utils/receipt-balance'
 import {
   getInventoryItemDisplayName as getItemDisplayName,
   getInventoryItemField as getItemField,
-  getFolderColorClass,
 } from '~/composables/useInventoryItemDisplay'
 import {
   folderHasSerialNumbers,
@@ -1106,8 +883,9 @@ const { authFetch } = useAuthenticatedFetch()
 const userStore = useUserStore()
 const staffStore = useStaffStore()
 const { formatCurrency, preferences } = usePreferences()
-const { defaultPaymentMethod } = usePaymentTenders()
+const { defaultPaymentMethod, paymentTenderOptions } = usePaymentTenders()
 const {
+  drawerCalloutClass,
   sectionLabelClass,
   pickListClass,
   pickListScrollClass,
@@ -1118,8 +896,6 @@ const {
   emptyStateClass,
   drawerFillClass,
   drawerFillStepClass,
-  footerBtnOutlineClass,
-  footerBtnPrimaryClass,
 } = useDashboardDrawerChrome()
 const currencySymbol = computed(() => preferences.value.currencySymbol || '$')
 
@@ -1139,15 +915,6 @@ const steps = [
   { id: 'subcategory', label: 'Subcategory' },
   { id: 'items', label: 'Products' },
   { id: 'details', label: 'Checkout' },
-]
-
-const { isCapacitorIos } = useIsCapacitorIos()
-
-const sheetStepSubtitles = [
-  'Choose a parent category',
-  'Choose a subcategory',
-  'Add products to the sale',
-  'Customer, payment, and totals',
 ]
 
 const {
@@ -1172,15 +939,6 @@ const {
 } = useReceiptCategoryPicker()
 
 const currentStep = ref(0)
-
-const sheetTitle = computed(() => {
-  if (!isCapacitorIos.value) return 'Create New Sale'
-  return steps[currentStep.value]?.label ?? 'Create New Sale'
-})
-
-const sheetContentPadding = computed(() =>
-  isCapacitorIos.value ? 'p-0' : 'px-4 py-3 sm:px-5 sm:py-4'
-)
 
 const loadingFolders = ref(false)
 const loadingItems = ref(false)
@@ -1227,10 +985,7 @@ const prefillItemMatchFailed = ref(false)
 const paymentSettlement = ref<'paid_in_full' | 'balance_due'>('paid_in_full')
 const depositAmount = ref(0)
 
-const settlementActiveClass =
-  'rounded-sm border-0 bg-gray-900 px-3 py-2 text-xs font-medium text-white dark:bg-white dark:text-gray-900'
-const settlementInactiveClass =
-  'rounded-sm bg-white px-3 py-2 text-xs font-medium text-gray-600 dark:!bg-dashboard-card dark:text-gray-400'
+const settlementLabelId = `new-sale-settlement-${useId()}`
 
 watch(paymentSettlement, (mode) => {
   if (mode === 'balance_due') {
@@ -1303,14 +1058,6 @@ const receiptFooterPrimaryDisabled = computed(() => {
 function handleReceiptFooterPrimary() {
   if (currentStep.value < 3) nextStep()
   else void handleCreateReceipt()
-}
-
-function handleReceiptFooterCancel() {
-  if (isCapacitorIos.value && currentStep.value > 0) {
-    previousStep()
-    return
-  }
-  handleCancel()
 }
 
 const hasSerialNumberInTemplate = computed(() => {
@@ -1952,7 +1699,7 @@ const removeSplitPayment = (index: number) => {
 }
 
 // formatCurrency is now imported from usePreferences for currency conversion
-// getItemDisplayName, getItemField, getFolderColorClass from useInventoryItemDisplay
+// getItemDisplayName, getItemField from useInventoryItemDisplay
 
 const nextStep = async () => {
   if (!canProceed.value) return

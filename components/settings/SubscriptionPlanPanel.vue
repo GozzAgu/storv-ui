@@ -1,172 +1,124 @@
 <template>
-  <div class="subscription-plan-panel space-y-5">
-    <div class="flex flex-wrap items-start justify-between gap-3">
-      <div class="min-w-0">
-        <p class="text-[10px] font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
-          Your plan
-        </p>
-        <p class="mt-0.5 text-base font-semibold text-gray-900 dark:text-gray-100">
-          {{ currentSubscriptionLabel }}
-        </p>
-        <p v-if="billingSummary" class="mt-1 text-[12px] text-gray-500 dark:text-gray-400">
-          {{ billingSummary }}
-        </p>
-        <p
-          v-if="subscriptionRenewalLabel"
-          class="mt-1.5 text-[12px] leading-snug text-gray-600 dark:text-gray-300"
-        >
-          {{ subscriptionRenewalLabel }}
-        </p>
-      </div>
-      <span
-        class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold"
-        :class="statusBadgeClass"
-      >
-        {{ statusLabel }}
-      </span>
-    </div>
+  <SCard id="settings-subscription" title="Plan & billing">
+    <template #actions>
+      <SBadge :tone="statusTone" dot>{{ statusLabel }}</SBadge>
+    </template>
 
-    <div
-      v-if="changePlanOptions.length > 0"
-      class="space-y-3 border-t border-gray-100 pt-5 dark:border-white/[0.06]"
-    >
-      <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Switch plan</p>
-      <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
-        <div class="min-w-0 flex-1">
-          <label :class="labelClass">Plan</label>
-          <select
+    <div class="s-plan">
+      <div class="s-plan__current">
+        <p class="s-plan__name">{{ currentSubscriptionLabel }}</p>
+        <p v-if="billingSummary" class="s-plan__meta">{{ billingSummary }}</p>
+        <p v-if="subscriptionRenewalLabel" class="s-plan__meta">{{ subscriptionRenewalLabel }}</p>
+      </div>
+
+      <section v-if="changePlanOptions.length > 0" class="s-plan__section" aria-labelledby="plan-switch-heading">
+        <h3 id="plan-switch-heading" class="s-plan__heading">Switch plan</h3>
+        <div class="s-plan__switch">
+          <SSelect
             :model-value="selectedUpgradePlan"
+            label="Plan"
+            placeholder="Select a plan"
+            :options="planSelectOptions"
             :disabled="disabled || isUpgrading"
-            :class="inputClass(!disabled && !isUpgrading)"
-            @change="
-              emit(
-                'update:selectedUpgradePlan',
-                ($event.target as HTMLSelectElement).value as SubscriptionPlan | ''
-              )
-            "
-          >
-            <option value="" disabled>Select a plan</option>
-            <option v-for="plan in changePlanOptions" :key="plan.id" :value="plan.id">
-              {{ planOptionLabel(plan) }}
-            </option>
-          </select>
-        </div>
-        <div class="min-w-0 flex-1">
-          <label :class="labelClass">Billing</label>
-          <select
+            @update:model-value="(value) => emit('update:selectedUpgradePlan', (value ?? '') as SubscriptionPlan | '')"
+          />
+          <SSelect
             :model-value="selectedBillingCycle"
+            label="Billing"
+            :options="billingCycleOptions"
             :disabled="disabled || isUpgrading"
-            :class="inputClass(!disabled && !isUpgrading)"
-            @change="emit('update:selectedBillingCycle', ($event.target as HTMLSelectElement).value as SubscriptionBillingCycle)"
+            @update:model-value="(value) => emit('update:selectedBillingCycle', value as SubscriptionBillingCycle)"
+          />
+          <SButton
+            variant="primary"
+            :disabled="disabled || !selectedUpgradePlan || isUpgrading"
+            :loading="isUpgrading"
+            @click="emit('upgrade')"
           >
-            <option v-for="cycle in SUBSCRIPTION_BILLING_CYCLES" :key="cycle" :value="cycle">
-              {{ BILLING_CYCLE_LABELS[cycle] }}
-            </option>
-          </select>
+            {{ isUpgrading ? 'Redirecting…' : changePlanButtonLabel }}
+          </SButton>
         </div>
-        <Button
-          variant="neutral"
-          size="sm"
-          :extra-class="headerTextBtnClass"
-          :disabled="disabled || !selectedUpgradePlan || isUpgrading"
-          @click="emit('upgrade')"
-        >
-          {{ isUpgrading ? 'Redirecting…' : changePlanButtonLabel }}
-        </Button>
-      </div>
-      <p v-if="upgradePricePreview" class="text-[12px] font-medium text-gray-700 dark:text-gray-300">
-        {{ upgradePricePreview }}
-      </p>
-      <p v-else-if="pricingLoading" class="text-[11px] text-gray-500 dark:text-gray-400">
-        Loading price…
-      </p>
-    </div>
+        <p v-if="upgradePricePreview" class="s-plan__price">{{ upgradePricePreview }}</p>
+        <p v-else-if="pricingLoading" class="s-plan__meta">Loading price…</p>
+      </section>
 
-    <div
-      v-if="canCancel"
-      class="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-gray-100 pt-4 dark:border-white/[0.06]"
-    >
-      <Button
-        variant="secondary"
-        size="sm"
-        :extra-class="headerTextBtnClass"
-        :disabled="isCanceling || isUpgrading"
-        @click="emit('cancel')"
-      >
-        {{ isCanceling ? 'Canceling…' : 'Cancel auto-renew' }}
-      </Button>
-      <span class="text-[11px] text-gray-500 dark:text-gray-400">
-        Keep this plan until the period ends, then move to Micro.
-      </span>
-    </div>
+      <details class="s-plan__compare">
+        <summary>
+          <ChevronRight :size="16" :stroke-width="2" aria-hidden="true" />
+          Compare plans
+        </summary>
+        <dl class="s-plan__features">
+          <div v-for="(lines, id) in SUBSCRIPTION_FEATURE_SUMMARY" :key="id">
+            <dt>{{ SUBSCRIPTION_PLANS.find((p) => p.id === id)?.name }}</dt>
+            <dd>
+              <ul>
+                <li v-for="(line, i) in lines" :key="i">{{ line }}</li>
+              </ul>
+            </dd>
+          </div>
+        </dl>
+      </details>
 
-    <details class="group text-[11px] text-gray-500 dark:text-gray-400">
-      <summary class="cursor-pointer list-none font-medium text-gray-600 dark:text-gray-400">
-        <span class="inline-block transition group-open:rotate-90">›</span> Compare plans
-      </summary>
-      <ul class="mt-2 space-y-2 pl-3">
-        <li v-for="(plan, id) in SUBSCRIPTION_FEATURE_SUMMARY" :key="id">
-          <span class="font-medium text-gray-700 dark:text-gray-300">
-            {{ SUBSCRIPTION_PLANS.find((p) => p.id === id)?.name }}
-          </span>
-          <ul class="mt-0.5 list-inside list-disc">
-            <li v-for="(line, i) in plan" :key="i">{{ line }}</li>
-          </ul>
-        </li>
-      </ul>
-    </details>
+      <section v-if="showQaPlanSwitcher" class="s-plan__qa" aria-labelledby="plan-qa-heading">
+        <h3 id="plan-qa-heading" class="s-plan__heading">QA plan switcher</h3>
+        <p class="s-plan__meta">Demo only. Jump between plans without Paystack.</p>
+        <div class="s-plan__qa-actions">
+          <SButton
+            v-for="plan in SUBSCRIPTION_PLANS"
+            :key="plan.id"
+            variant="secondary"
+            size="sm"
+            :disabled="qaSwitching || plan.id === qaCurrentPlanId"
+            @click="emit('qa-set-plan', plan.id)"
+          >
+            {{ plan.name }}
+          </SButton>
+        </div>
+      </section>
 
-    <div
-      v-if="showQaPlanSwitcher"
-      class="rounded-lg border border-amber-200/80 bg-amber-50/70 px-3 py-3 dark:border-amber-500/25 dark:bg-amber-500/10"
-    >
-      <p class="text-[10px] font-semibold uppercase tracking-wide text-amber-900 dark:text-amber-100">
-        QA plan switcher
-      </p>
-      <p class="mt-1 text-[10px] leading-relaxed text-amber-900/80 dark:text-amber-100/80">
-        Demo only. Jump between Micro, Medium, and Enterprise without Paystack.
-      </p>
-      <div class="mt-2 flex flex-wrap gap-2">
-        <Button
-          v-for="plan in SUBSCRIPTION_PLANS"
-          :key="plan.id"
+      <section v-if="billingHistory.length" class="s-plan__section" aria-labelledby="plan-history-heading">
+        <h3 id="plan-history-heading" class="s-plan__heading">Billing history</h3>
+        <ul class="s-list">
+          <li v-for="entry in billingHistory" :key="entry.reference" class="s-list__item">
+            <div class="s-list__main">
+              <p class="s-list__primary">{{ entry.planLabel }}</p>
+              <p class="s-list__secondary">
+                {{ formatHistoryDate(entry.paidAt) }} · {{ entry.billingCycle }}
+              </p>
+            </div>
+            <p class="s-list__end s-list__value">{{ formatHistoryAmount(entry.amountKobo) }}</p>
+          </li>
+        </ul>
+      </section>
+
+      <div v-if="canCancel" class="s-plan__cancel">
+        <SButton
           variant="secondary"
           size="sm"
-          :extra-class="headerTextBtnClass"
-          :disabled="qaSwitching || plan.id === qaCurrentPlanId"
-          @click="emit('qa-set-plan', plan.id)"
+          :disabled="isCanceling || isUpgrading"
+          :loading="isCanceling"
+          @click="emit('cancel')"
         >
-          {{ plan.name }}
-        </Button>
+          {{ isCanceling ? 'Canceling…' : 'Cancel auto-renew' }}
+        </SButton>
+        <p class="s-plan__meta">Keep this plan until the period ends, then move to Micro.</p>
       </div>
     </div>
 
-    <div v-if="billingHistory.length" class="border-t border-gray-100 pt-4 dark:border-white/[0.06]">
-      <p class="text-xs font-semibold text-gray-900 dark:text-gray-100">Billing history</p>
-      <ul class="mt-2 divide-y divide-gray-100 dark:divide-white/[0.06]">
-        <li
-          v-for="entry in billingHistory"
-          :key="entry.reference"
-          class="flex flex-wrap items-baseline justify-between gap-2 py-2 text-[11px]"
-        >
-          <div class="min-w-0">
-            <p class="font-medium text-gray-800 dark:text-gray-200">{{ entry.planLabel }}</p>
-            <p class="text-[10px] text-gray-500 dark:text-gray-400">
-              {{ formatHistoryDate(entry.paidAt) }} · {{ entry.billingCycle }}
-            </p>
-          </div>
-          <span class="font-medium text-gray-700 dark:text-gray-300">
-            {{ formatHistoryAmount(entry.amountKobo) }}
-          </span>
-        </li>
-      </ul>
-    </div>
-  </div>
+    <template #footer>
+      <p class="s-plan__meta">Billing help? <GrowthSupportLink class="s-link" /></p>
+    </template>
+  </SCard>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import Button from '~/components/ui/Button.vue'
+import { ChevronRight } from '@lucide/vue'
+import SBadge from '~/components/s/SBadge.vue'
+import SButton from '~/components/s/SButton.vue'
+import SCard from '~/components/s/SCard.vue'
+import SSelect from '~/components/s/SSelect.vue'
+import GrowthSupportLink from '~/components/growth/GrowthSupportLink.vue'
 import {
   SUBSCRIPTION_PLANS,
   SUBSCRIPTION_FEATURE_SUMMARY,
@@ -184,7 +136,7 @@ const props = defineProps<{
   billingCycleLabel: string | null
   currentPriceLabel: string | null
   statusLabel: string
-  statusBadgeClass: string
+  statusTone?: 'neutral' | 'success' | 'warning' | 'error'
   subscriptionRenewalLabel: string | null
   selectedBillingCycle: SubscriptionBillingCycle
   selectedUpgradePlan: SubscriptionPlan | ''
@@ -200,9 +152,6 @@ const props = defineProps<{
   isUpgrading: boolean
   isCanceling: boolean
   billingHistory: BillingHistoryEntry[]
-  labelClass: string
-  inputClass: (enabled: boolean) => string
-  headerTextBtnClass: string
   showQaPlanSwitcher?: boolean
   qaCurrentPlanId?: SubscriptionPlan
   qaSwitching?: boolean
@@ -217,6 +166,14 @@ const emit = defineEmits<{
 }>()
 
 const { formatCurrency } = usePreferences()
+
+const planSelectOptions = computed(() =>
+  props.changePlanOptions.map((plan) => ({ value: plan.id, label: planOptionLabel(plan) }))
+)
+const billingCycleOptions = SUBSCRIPTION_BILLING_CYCLES.map((cycle) => ({
+  value: cycle,
+  label: BILLING_CYCLE_LABELS[cycle],
+}))
 
 const billingSummary = computed(() => {
   const parts: string[] = []

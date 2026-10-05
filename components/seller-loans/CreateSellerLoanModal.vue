@@ -1,65 +1,65 @@
 <template>
-  <SidePanel
-    :model-value="modelValue"
+  <SDialog
+      placement="right"
+    :open="modelValue"
     title="Stock loan"
-    size="lg"
-    dense
-    @update:model-value="(value: boolean) => emit('update:modelValue', value)"
+    size="md"
+    @update:open="(value: boolean) => emit('update:modelValue', value)"
   >
-    <IosForm layout="fill">
-      <IosFormSection fixed>
-        <p class="dash-drawer-callout">
-          <strong class="font-medium text-gray-900 dark:text-gray-100">Not a sale:</strong>
+    <SForm>
+      <SFormSection>
+        <p class="s-callout">
+          <strong>Not a sale:</strong>
           Selected serial items are marked as on a stock loan to the borrower below. Selling on a
           receipt or choosing Mark sold on Stock loans marks units sold and updates this loan.
         </p>
-      </IosFormSection>
+      </SFormSection>
 
-      <IosFormSection fixed>
-        <p class="dash-drawer-label">Products</p>
+      <SFormSection>
+        <h3 class="s-form-section__title">Products</h3>
         <div :class="pickListClass">
           <ul :class="pickListScrollClass">
             <li
               v-for="it in items"
               :key="it.id"
-              :class="[pickRowClass, '!cursor-default hover:!bg-transparent']"
+              :class="[pickRowClass, 's-pick__row--static']"
             >
               <span :class="pickRowTitleClass">{{ getInventoryItemDisplayName(it) }}</span>
             </li>
           </ul>
         </div>
-        <p class="ios-form__hint dash-drawer-hint">
+        <p class="s-form-meta">
           {{ items.length }} item{{ items.length !== 1 ? 's' : '' }}
         </p>
-      </IosFormSection>
+      </SFormSection>
 
-      <IosFormSection fixed>
-        <div class="ios-form__grid ios-form__grid--pair">
-          <IosFormField label="Borrower name" required>
-            <IosFormInput
+      <SFormSection>
+        <div class="s-form-pair">
+          <SField label="Borrower name" required>
+            <SInput
               v-model="partyName"
               maxlength="120"
               placeholder="Company or borrower name"
               autocomplete="organization"
             />
-          </IosFormField>
-          <IosFormField label="Phone" hint="Optional">
-            <IosFormInput v-model="partyPhone" type="tel" maxlength="40" placeholder="Contact number" />
-          </IosFormField>
+          </SField>
+          <SField label="Phone" hint="Optional">
+            <SInput v-model="partyPhone" type="tel" maxlength="40" placeholder="Contact number" />
+          </SField>
         </div>
-        <IosFormField label="Notes" hint="Optional">
-          <IosFormTextarea
+        <SField label="Notes" hint="Optional">
+          <STextarea
             v-model="partyNotes"
             :rows="3"
             maxlength="1000"
             placeholder="SKU list, handshake details, pickup time…"
           />
-        </IosFormField>
-      </IosFormSection>
-    </IosForm>
+        </SField>
+      </SFormSection>
+    </SForm>
 
     <template #footer>
-      <IosDrawerActions
+      <SDialogActions
         primary-label="Confirm stock loan"
         :primary-loading="submitting"
         :primary-disabled="!partyNameTrimmed"
@@ -67,20 +67,18 @@
         @primary="submit"
       />
     </template>
-  </SidePanel>
+  </SDialog>
 </template>
 
 <script setup lang="ts">
+import SDialog from '~/components/s/SDialog.vue'
+import SDialogActions from '~/components/s/SDialogActions.vue'
+import SField from '~/components/s/SField.vue'
+import SForm from '~/components/s/SForm.vue'
+import SFormSection from '~/components/s/SFormSection.vue'
+import SInput from '~/components/s/SInput.vue'
+import STextarea from '~/components/s/STextarea.vue'
 import { ref, computed, watch } from 'vue'
-import SidePanel from '~/components/ui/SidePanel.vue'
-import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
-import {
-  IosForm,
-  IosFormSection,
-  IosFormField,
-  IosFormInput,
-  IosFormTextarea,
-} from '~/components/ios/forms'
 import type { InventoryItem } from '~/stores/inventory'
 import { getInventoryItemDisplayName } from '~/composables/useInventoryItemDisplay'
 import { useSellerLoanOutsStore } from '~/stores/sellerLoanOuts'

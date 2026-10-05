@@ -1,497 +1,286 @@
 <template>
-  <div
-    :class="[
-      pageWithFooterClass,
-      'dash-page--unified',
-      isCapacitorIos ? 'ios-inventory-categories-page' : '',
-    ]"
-  >
-    <IosPageNavBar v-if="isCapacitorIos" :title="iosDepartmentsNavTitle">
-      <template
-        v-if="canManageDepartments && paginatedDepartments.length > 0"
-        #trailing
-      >
-        <button
-          type="button"
-          class="ios-top-bar-text-btn"
-          @click="toggleIosDepartmentSelectMode"
-        >
-          {{ isIosDepartmentSelecting ? 'Done' : 'Select' }}
-        </button>
-      </template>
-    </IosPageNavBar>
-
-    <DashboardPageHeader v-if="!isCapacitorIos" class="dash-page-header--unified">
+  <div class="ds-root s-c s-page s-team">
+    <SPageHeader title="Team">
       <template #eyebrow>
-        <nav :class="eyebrowClass" aria-label="Breadcrumb">
-          <NuxtLink
-            to="/dashboard/settings"
-            class="transition-colors hover:text-primary-500 dark:hover:text-primary-400"
-          >
-            Settings
-          </NuxtLink>
-          <span class="mx-1.5 text-gray-300 dark:text-gray-600">/</span>
-          <span class="text-gray-600 dark:text-gray-400">{{ store?.name || 'Store' }}</span>
-        </nav>
+        <span class="s-page-header__eyebrow s-team__branch">
+          {{ store?.name || 'Branch' }}
+          <SBadge v-if="store && currentStore?.id === store.id" tone="success" size="sm">Current branch</SBadge>
+        </span>
       </template>
-      <template #title>
-        <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <h1 :class="titleClass">{{ branchPageTitle('Departments') }}</h1>
-          <span
-            v-if="currentStore?.id === store?.id"
-            class="inline-flex items-center rounded-full border border-emerald-200/80 bg-emerald-50/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-800 dark:border-emerald-500/25 dark:bg-emerald-500/10 dark:text-emerald-300/90"
-          >
-            Current branch
-          </span>
-        </div>
+      <template #description>
+        Departments group your staff and decide which inventory they can see. Open one to manage its people and roles.
       </template>
-      <template v-if="departmentsStore.loading || storesLoading" #description>
-        <DashPageMetricsSkeleton :count="4" />
-      </template>
-      <template v-else-if="headerStatsReady && storeDepartments.length > 0" #description>
-        <DashboardPageMetrics
-          :metrics="departmentHeaderMetrics"
-          aria-label="Department summary"
-        />
-      </template>
-      <template #actions>
-        <div
-          v-if="storeDepartments.length > 0 && !isCapacitorIos"
-          :class="viewToggleClass"
-          role="group"
-          aria-label="Department layout"
-        >
-          <button
-            type="button"
-            :class="[
-              viewToggleBtnClass,
-              departmentsViewMode === 'grid' ? viewToggleBtnActiveClass : '',
-            ]"
-            :aria-pressed="departmentsViewMode === 'grid'"
-            @click="departmentsViewMode = 'grid'"
-          >
-            <Squares2X2Icon class="h-3.5 w-3.5" aria-hidden="true" />
-          </button>
-          <button
-            type="button"
-            :class="[
-              viewToggleBtnClass,
-              departmentsViewMode === 'table' ? viewToggleBtnActiveClass : '',
-            ]"
-            :aria-pressed="departmentsViewMode === 'table'"
-            @click="departmentsViewMode = 'table'"
-          >
-            <TableCellsIcon class="h-3.5 w-3.5" aria-hidden="true" />
-          </button>
-        </div>
-        <Button
-          v-if="canManageDepartments"
+      <template v-if="canManageDepartments" #actions>
+        <SButton
           variant="primary"
-          size="sm"
-          :icon="BuildingOfficeIcon"
           :disabled="!canAddDepartmentForStore"
-          :title="canAddDepartmentForStore ? 'Create new department' : departmentLimitMessage"
-          :extra-class="headerBtnClass"
-          aria-label="New department"
+          :title="canAddDepartmentForStore ? undefined : departmentLimitMessage"
           @click="openCreateDepartmentModal"
         >
-          <span :class="headerBtnLabelClass">New department</span>
-        </Button>
+          <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
+          New department
+        </SButton>
       </template>
-      <template v-if="departmentsStore.loading || storesLoading" #filters>
-        <span class="dash-skeleton dash-skeleton--search" />
-      </template>
-      <template v-else-if="headerStatsReady && storeDepartments.length > 0" #filters>
-        <DashboardToolbarSearch
-          v-model="searchQuery"
-          placeholder="Search departments…"
-          input-class="sm:w-52"
-        />
-        <div
-          v-if="canManageDepartments && paginatedDepartments.length > 0"
-          class="dash-page-header__bulk ml-auto"
-        >
-          <DashboardBulkSelectControl
-            :model-value="allDepartmentsOnPageSelected"
-            :selected-count="selectedDepartmentsForBulk.length"
-            @update:model-value="setSelectAllDepartmentsBulk"
-          >
-            <template #action>
-              <Button
-                variant="outline"
-                size="sm"
-                :icon="TrashIcon"
-                :extra-class="
-                  headerBtnClass +
-                  ' !border-red-200/70 !text-red-600 hover:!bg-red-50/80 dark:!border-red-900/40 dark:!text-red-400 dark:hover:!bg-red-950/30'
-                "
-                @click="openBulkDeleteDepartmentsModal"
-              >
-                <span :class="headerBtnLabelClass">Delete</span>
-              </Button>
-            </template>
-          </DashboardBulkSelectControl>
-        </div>
-      </template>
-    </DashboardPageHeader>
+    </SPageHeader>
 
-    <div
-      v-if="isCapacitorIos && !departmentsStore.loading && !storesLoading && storeDepartments.length > 0"
-      class="ios-search-bar-host ios-search-bar-host--sticky"
-    >
-      <IosSearchBar v-model="searchQuery" placeholder="Search departments…" />
-    </div>
+    <p v-if="canManageDepartments && !canAddDepartmentForStore && departmentLimitMessage" class="s-notice">
+      {{ departmentLimitMessage }}
+    </p>
 
-    <IosQuickActionBar
-      v-if="isCapacitorIos && !departmentsStore.loading && !storesLoading && storeDepartments.length > 0"
-      v-model="departmentFilter"
-      class="ios-inventory-filter-tabs"
-      ariaLabel="Department filters"
-      :options="departmentQuickActionOptions"
-    />
-
-    <div
-      v-if="
-        isCapacitorIos &&
-        isIosDepartmentSelecting &&
-        canManageDepartments &&
-        paginatedDepartments.length > 0 &&
-        !departmentsStore.loading &&
-        !storesLoading
-      "
-      class="ios-bulk-select-host"
-    >
-      <DashboardBulkSelectControl
-        :model-value="allDepartmentsOnPageSelected"
-        :selected-count="selectedDepartmentsForBulk.length"
-        @update:model-value="setSelectAllDepartmentsBulk"
-      >
-        <template #action>
-          <Button
-            variant="outline"
-            size="sm"
-            :icon="TrashIcon"
-            :extra-class="
-              headerBtnClass +
-              ' !border-red-200/70 !text-red-600 hover:!bg-red-50/80 dark:!border-red-900/40 dark:!text-red-400 dark:hover:!bg-red-950/30'
-            "
-            @click="openBulkDeleteDepartmentsModal"
-          >
-            <span :class="headerBtnLabelClass">Delete</span>
-          </Button>
+    <SCard v-if="departmentsStore.error && !departmentsStore.loading">
+      <SEmptyState title="Couldn't load departments" :description="departmentsStore.error">
+        <template #icon><TriangleAlert :size="24" :stroke-width="1.75" /></template>
+        <template #actions>
+          <SButton @click="handleRetryFetch">
+            <template #leading><RotateCw :size="16" :stroke-width="1.75" aria-hidden="true" /></template>
+            Try again
+          </SButton>
         </template>
-      </DashboardBulkSelectControl>
-    </div>
+      </SEmptyState>
+    </SCard>
 
-    <div
-      v-if="departmentsStore.error && !departmentsStore.loading"
-      :class="errorCardClass"
-    >
-      <div class="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/30">
-        <BuildingOfficeIcon class="h-5 w-5 text-red-600 dark:text-red-400" />
-      </div>
-      <h3 :class="['dash-state-card__title', titleClass, '!text-sm']">
-        Error loading departments
-      </h3>
-      <p :class="['dash-state-card__desc', cardDescClass, 'mx-auto max-w-md']">
-        {{ departmentsStore.error }}
-      </p>
-      <Button variant="primary" :icon="ArrowPathIcon" class="mt-4" @click="handleRetryFetch">
-        Retry
-      </Button>
-    </div>
+    <SCard v-else-if="departmentsStore.loading || storesLoading" flush aria-busy="true">
+      <ul class="s-list" aria-label="Loading departments">
+        <li v-for="i in 6" :key="i" class="s-list__item" aria-hidden="true">
+          <SSkeleton width="32px" height="32px" />
+          <div class="s-list__main">
+            <SSkeleton width="35%" height="14px" />
+            <SSkeleton width="20%" height="12px" />
+          </div>
+          <SSkeleton width="56px" height="14px" />
+        </li>
+      </ul>
+    </SCard>
 
-    <template v-else-if="departmentsStore.loading || storesLoading">
-      <template v-if="isCapacitorIos">
-        <div class="ios-search-bar-host">
-          <div class="ios-skeleton ios-search-skeleton" aria-hidden="true" />
+    <SCard v-else-if="storeDepartments.length === 0">
+      <SEmptyState
+        title="No departments yet"
+        description="Create a department such as Sales or Warehouse, then add staff to it. Each department can have its own roster and inventory access."
+      >
+        <template #icon><Building2 :size="24" :stroke-width="1.75" /></template>
+        <template v-if="canManageDepartments" #actions>
+          <SButton variant="primary" :disabled="!canAddDepartmentForStore" @click="openCreateDepartmentModal">
+            <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
+            New department
+          </SButton>
+        </template>
+      </SEmptyState>
+    </SCard>
+
+    <template v-else>
+      <dl class="s-metrics">
+        <div v-for="metric in teamMetrics" :key="metric.key" class="s-metrics__item">
+          <dt class="s-metrics__label">{{ metric.label }}</dt>
+          <dd class="s-metrics__value" :class="metric.tone && `s-metrics__value--${metric.tone}`">
+            {{ metric.value }}
+          </dd>
         </div>
-        <IosQuickActionSkeleton :count="3" />
-        <IosGroupedListSkeleton :count="8" />
-      </template>
-      <DashTableSkeleton
-        v-else-if="departmentsViewMode === 'table'"
-        :columns="departmentTableSkeletonColumns"
-        :rows="8"
-        leading="icon"
-        show-toolbar
-        aria-label="Loading departments"
+      </dl>
+
+      <STabs
+        v-if="inactiveDepartmentsCount > 0"
+        v-model="departmentFilter"
+        :tabs="departmentFilterTabs"
+        label="Department status"
       />
-      <div v-else :class="[gridClass, 'departments-grid']">
-        <FolderCardSkeleton v-for="i in 8" :key="i" />
+
+      <div
+        v-if="canManageDepartments && selectedDepartmentsForBulk.length > 0"
+        class="s-toolbar s-toolbar--selection"
+        role="region"
+        aria-label="Bulk actions"
+      >
+        <SCheckbox
+          :model-value="allDepartmentsOnPageSelected"
+          :label="`${selectedDepartmentsForBulk.length} selected`"
+          @update:model-value="setSelectAllDepartmentsBulk"
+        />
+        <div class="s-toolbar__end">
+          <SButton variant="ghost" size="sm" @click="selectedDepartmentsForBulk = []">Clear</SButton>
+          <SButton variant="danger" size="sm" @click="openBulkDeleteDepartmentsModal">
+            <template #leading><Trash2 :size="14" :stroke-width="2" aria-hidden="true" /></template>
+            Delete
+          </SButton>
+        </div>
       </div>
+      <div v-else class="s-toolbar">
+        <SSearch
+          v-model="searchQuery"
+          class="s-toolbar__search"
+          placeholder="Search departments"
+          label="Search departments by name, type or manager"
+        />
+      </div>
+
+      <SCard v-if="paginatedDepartments.length === 0">
+        <SEmptyState
+          :title="searchQuery ? 'No departments found' : `No ${departmentFilter} departments`"
+          :description="searchQuery ? 'Try a different name, type or manager.' : 'Try another status.'"
+        >
+          <template #icon><SearchX :size="24" :stroke-width="1.75" /></template>
+          <template #actions>
+            <SButton @click="resetFilters">Show all departments</SButton>
+          </template>
+        </SEmptyState>
+      </SCard>
+
+      <template v-else>
+        <!-- Phone -->
+        <SCard flush class="s-only-sm">
+          <ul class="s-list">
+            <li v-for="department in paginatedDepartments" :key="department.id">
+              <div class="s-list__item">
+                <SCheckbox
+                  v-if="canManageDepartments"
+                  :model-value="isDepartmentSelected(department)"
+                  :aria-label="`Select ${department.name}`"
+                  @update:model-value="(checked) => toggleDepartmentSelection(department, checked)"
+                />
+                <button type="button" class="s-list__main s-list__hit" @click="navigateToDepartment(department.id)">
+                  <span class="s-list__primary">{{ department.name }}</span>
+                  <span class="s-list__secondary">{{ departmentSummary(department) }}</span>
+                </button>
+                <span class="s-list__end">
+                  <span class="s-list__value">{{ staffLabel(department) }}</span>
+                  <SBadge v-if="department.isActive === false" tone="warning" size="sm">Inactive</SBadge>
+                </span>
+                <SIconButton
+                  v-if="canManageDepartments"
+                  label="Department actions"
+                  size="sm"
+                  :data-department-actions-anchor="department.id"
+                  aria-haspopup="menu"
+                  :aria-expanded="openDepartmentMenuId === department.id"
+                  @click="toggleDepartmentMenu(department.id)"
+                >
+                  <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
+                </SIconButton>
+              </div>
+            </li>
+          </ul>
+        </SCard>
+
+        <!-- Tablet and desktop -->
+        <div class="s-table-wrap s-hide-sm">
+          <table class="s-table">
+            <thead>
+              <tr>
+                <th v-if="canManageDepartments" scope="col" class="s-table__check">
+                  <SCheckbox
+                    :model-value="allDepartmentsOnPageSelected"
+                    aria-label="Select all departments"
+                    @update:model-value="setSelectAllDepartmentsBulk"
+                  />
+                </th>
+                <th scope="col">Department</th>
+                <th scope="col" class="s-hide-md">Type</th>
+                <th scope="col" class="s-table__num">Staff</th>
+                <th scope="col" class="s-hide-md">Manager</th>
+                <th scope="col">Status</th>
+                <th scope="col" class="s-hide-lg">Updated</th>
+                <th v-if="canManageDepartments" scope="col" class="s-table__actions">
+                  <span class="ds-sr-only">Actions</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="department in paginatedDepartments"
+                :key="department.id"
+                class="s-table__row--interactive"
+                :class="{ 's-table__row--selected': isDepartmentSelected(department) }"
+                tabindex="0"
+                @click="navigateToDepartment(department.id)"
+                @keydown.enter.self="navigateToDepartment(department.id)"
+              >
+                <td v-if="canManageDepartments" class="s-table__check" @click.stop>
+                  <SCheckbox
+                    :model-value="isDepartmentSelected(department)"
+                    :aria-label="`Select ${department.name}`"
+                    @update:model-value="(checked) => toggleDepartmentSelection(department, checked)"
+                  />
+                </td>
+                <td>
+                  <div class="s-team__cell">
+                    <span class="s-team__mark" aria-hidden="true">
+                      <Building2 :size="16" :stroke-width="1.75" />
+                    </span>
+                    <span class="s-team__cell-text">
+                      <span class="s-table__primary">{{ department.name }}</span>
+                      <span v-if="department.description?.trim()" class="s-table__secondary">
+                        {{ department.description }}
+                      </span>
+                    </span>
+                  </div>
+                </td>
+                <td class="s-hide-md">{{ formatDepartmentTypeLabel(department.departmentType) }}</td>
+                <td class="s-table__num">{{ department.staffCount || 0 }}</td>
+                <td class="s-hide-md">
+                  <span v-if="department.manager?.trim()">{{ department.manager }}</span>
+                  <span v-else class="s-table__muted">Not assigned</span>
+                </td>
+                <td>
+                  <SBadge :tone="department.isActive === false ? 'warning' : 'success'" dot>
+                    {{ department.isActive === false ? 'Inactive' : 'Active' }}
+                  </SBadge>
+                </td>
+                <td class="s-hide-lg s-table__muted">
+                  {{ formatCategoryDate(department.updatedAt) ?? formatCategoryDate(department.createdAt) ?? EMPTY_CELL }}
+                </td>
+                <td v-if="canManageDepartments" class="s-table__actions" @click.stop>
+                  <SIconButton
+                    label="Department actions"
+                    size="sm"
+                    :data-department-actions-anchor="department.id"
+                    aria-haspopup="menu"
+                    :aria-expanded="openDepartmentMenuId === department.id"
+                    @click="toggleDepartmentMenu(department.id)"
+                  >
+                    <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
+                  </SIconButton>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <SPagination
+          :current-page="currentPage"
+          :page-size="itemsPerPage"
+          :total="filteredDepartments.length"
+          label="Departments pagination"
+          @page-change="handlePageChange"
+        />
+      </template>
     </template>
 
-    <div v-else-if="!departmentsStore.error">
-      <div
-        v-if="storeDepartments.length > 0"
-        :class="[
-          departmentsViewMode === 'table' && !isCapacitorIos
-            ? [gridShellClass, tableShellClass, 'dash-grid-shell--table departments-shell--table']
-            : [gridShellClass, isCapacitorIos ? 'ios-inventory-categories-list-shell' : 'dash-grid-shell--grid departments-shell--grid'],
-        ]"
-      >
-        <DashboardTableEmptyState
-          v-if="paginatedDepartments.length === 0"
-          :icon="BuildingOfficeIcon"
-          :title="
-            departmentFilter === 'inactive'
-              ? 'No inactive departments'
-              : departmentFilter === 'active'
-                ? 'No active departments'
-                : searchQuery
-                  ? 'No departments found'
-                  : 'No departments on this page'
-          "
-          :description="
-            departmentFilter !== 'all'
-              ? 'Try another filter or clear search.'
-              : searchQuery
-                ? 'Try a different search term.'
-                : 'Adjust filters or go to another page.'
-          "
-          :tips="[
-            'Search matches department names',
-            'Clear search to see every department in this store',
-          ]"
-        >
-          <Button
-            v-if="departmentFilter !== 'all'"
-            variant="outline"
-            size="sm"
-            extra-class="!text-xs !py-1.5 !px-3"
-            @click="departmentFilter = 'all'"
-          >
-            Show all
-          </Button>
-        </DashboardTableEmptyState>
+    <SMenu
+      :open="Boolean(openDepartmentMenuId && departmentForOpenMenu && departmentMenuFixedStyle)"
+      :style="departmentMenuFixedStyle"
+      menu-id="store-department"
+      label="Department actions"
+      @close="closeDepartmentMenu"
+    >
+      <SMenuItem label="Open" :icon="ArrowRight" @select="runDepartmentMenuAction((d) => navigateToDepartment(d.id))" />
+      <SMenuItem label="Edit" :icon="Pencil" @select="runDepartmentMenuAction(handleEditDepartment)" />
+      <SMenuItem label="Delete" :icon="Trash2" danger @select="runDepartmentMenuAction(askDeleteDepartment)" />
+    </SMenu>
 
-        <div v-else-if="isCapacitorIos" class="ios-grouped-list">
-          <IosInventoryFolderRow
-            v-for="(department, index) in paginatedDepartments"
-            :key="department.id"
-            :name="department.name"
-            :subtitle="departmentRowSubtitle(department)"
-            :value="formatDepartmentRowValue(department)"
-            :last="index === paginatedDepartments.length - 1"
-            :show-menu="canManageDepartments"
-            menu-kind="department"
-            :menu-id="department.id"
-            :selectable="canManageDepartments && isIosDepartmentSelecting"
-            :selected="selectedDepartmentsForBulk.some((d) => d.id === department.id)"
-            @click="navigateToDepartment(department.id)"
-            @menu="toggleDepartmentMenu(department.id)"
-            @select="(checked) => toggleDepartmentSelection(department, checked)"
-          />
-        </div>
-
-        <div
-          v-else-if="paginatedDepartments.length > 0 && departmentsViewMode === 'grid'"
-          :class="[gridClass, 'departments-grid']"
-        >
-        <DepartmentCard
-          v-for="department in paginatedDepartments"
-          :key="department.id"
-          :name="department.name"
-          :description="department.description"
-          :staff-count="department.staffCount || 0"
-          :department-type="department.departmentType || ''"
-          :manager="department.manager"
-          :store-name="store?.name"
-          :inactive="department.isActive === false"
-          :deleting="deletingDepartmentId === department.id"
-          :updated-at="department.updatedAt"
-          :created-at="department.createdAt"
-          :has-overlays="canManageDepartments"
-          @open="navigateToDepartment(department.id)"
-        >
-          <template v-if="canManageDepartments" #checkbox>
-            <Checkbox
-              :model-value="selectedDepartmentsForBulk.some((d) => d.id === department.id)"
-              @update:model-value="(checked) => toggleDepartmentSelection(department, checked)"
-              size="sm"
-              wrapper-class="justify-center"
-            />
-          </template>
-          <template v-if="canManageDepartments" #menu>
-            <div>
-              <button
-                type="button"
-                :data-department-actions-anchor="department.id"
-                :class="menuBtnClass"
-                aria-label="Department options"
-                @click="toggleDepartmentMenu(department.id)"
-              >
-                <EllipsisVerticalIcon class="h-3.5 w-3.5" stroke-width="2" />
-              </button>
-            </div>
-          </template>
-        </DepartmentCard>
-        </div>
-
-        <div
-          v-else-if="paginatedDepartments.length > 0 && departmentsViewMode === 'table'"
-          class="departments-table flex min-h-0 flex-1 flex-col"
-        >
-          <div class="overflow-x-auto">
-            <table class="dashboard-table min-w-full">
-              <thead>
-                <tr>
-                  <th v-if="canManageDepartments" scope="col" class="w-11 text-center">
-                    <Checkbox
-                      :model-value="allDepartmentsOnPageSelected"
-                      size="sm"
-                      wrapper-class="justify-center"
-                      @update:model-value="setSelectAllDepartmentsBulk"
-                    />
-                  </th>
-                  <th scope="col">Department</th>
-                  <th scope="col" class="hidden sm:table-cell">Type</th>
-                  <th scope="col" class="text-right">Staff</th>
-                  <th scope="col" class="hidden md:table-cell">Manager</th>
-                  <th scope="col" class="dashboard-table__col-status">Status</th>
-                  <th scope="col" class="hidden lg:table-cell">Updated</th>
-                  <th
-                    v-if="canManageDepartments"
-                    scope="col"
-                    class="dashboard-table__col-actions"
-                  >
-                    <span class="sr-only">Actions</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  v-for="department in paginatedDepartments"
-                  :key="department.id"
-                  class="cursor-pointer"
-                  @click="navigateToDepartment(department.id)"
-                >
-                  <td v-if="canManageDepartments" class="text-center" @click.stop>
-                    <Checkbox
-                      :model-value="selectedDepartmentsForBulk.some((d) => d.id === department.id)"
-                      size="sm"
-                      wrapper-class="justify-center"
-                      @update:model-value="
-                        (checked) => toggleDepartmentSelection(department, checked)
-                      "
-                    />
-                  </td>
-                  <td class="max-w-[min(16rem,32vw)]">
-                    <div class="flex min-w-0 items-center gap-2.5">
-                      <span
-                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary-500/10 text-primary-700 dark:bg-primary-400/15 dark:text-primary-200"
-                        aria-hidden="true"
-                      >
-                        <BuildingOffice2Icon class="h-4 w-4" stroke-width="1.5" />
-                      </span>
-                      <div class="min-w-0">
-                        <span class="dashboard-table__primary block truncate">{{
-                          department.name
-                        }}</span>
-                        <span
-                          v-if="department.description?.trim()"
-                          class="dashboard-table__muted mt-0.5 block truncate text-[10px]"
-                        >
-                          {{ department.description }}
-                        </span>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="hidden sm:table-cell">
-                    <span
-                      class="inline-flex rounded-md bg-gray-100/90 px-1.5 py-0.5 text-[10px] font-medium text-gray-600 dark:bg-white/[0.05] dark:text-gray-400"
-                    >
-                      {{ formatDepartmentTypeLabel(department.departmentType) }}
-                    </span>
-                  </td>
-                  <td class="text-right">
-                    <span class="dashboard-table__numeric">{{ department.staffCount || 0 }}</span>
-                  </td>
-                  <td class="hidden max-w-[12rem] md:table-cell">
-                    <span class="dashboard-table__muted block truncate text-xs">
-                      {{ departmentManagerLabel(department.manager) }}
-                    </span>
-                  </td>
-                  <td class="dashboard-table__col-status">
-                    <span :class="departmentStatusPill(department.isActive === false).pillClass">
-                      <span class="dash-grid-card__pill-dot" aria-hidden="true" />
-                      {{ departmentStatusPill(department.isActive === false).label }}
-                    </span>
-                  </td>
-                  <td class="hidden lg:table-cell">
-                    <span class="dashboard-table__muted text-xs">
-                      {{
-                        formatCategoryDate(department.updatedAt) ??
-                        formatCategoryDate(department.createdAt) ??
-                        '-'
-                      }}
-                    </span>
-                  </td>
-                  <td
-                    v-if="canManageDepartments"
-                    class="dashboard-table__col-actions"
-                    @click.stop
-                  >
-                    <button
-                      type="button"
-                      class="dashboard-table__action-btn"
-                      :data-department-actions-anchor="department.id"
-                      aria-label="Department options"
-                      @click="toggleDepartmentMenu(department.id)"
-                    >
-                      <EllipsisVerticalIcon class="h-4 w-4" stroke-width="2" />
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <DashboardTablePagination
-            v-if="filteredDepartments.length > 0 && departmentsViewMode === 'table'"
-            :current-page="currentPage"
-            :items-per-page="itemsPerPage"
-            :total="filteredDepartments.length"
-            @page-change="handlePageChange"
-          />
-        </div>
-      </div>
-
-      <DashboardTablePagination
-        v-if="
-          storeDepartments.length > 0 &&
-          filteredDepartments.length > 0 &&
-          (isCapacitorIos || departmentsViewMode === 'grid')
-        "
-        :current-page="currentPage"
-        :items-per-page="itemsPerPage"
-        :total="filteredDepartments.length"
-        @page-change="handlePageChange"
-      />
-
-      <DashboardTableEmptyState
-        v-if="storeDepartments.length === 0"
-        :icon="BuildingOfficeIcon"
-        :title="searchQuery ? 'No departments found' : 'No departments yet'"
-        :description="
-          searchQuery
-            ? 'Try a different search term.'
-            : 'Departments organize staff and can restrict which inventory categories they see.'
-        "
-        :tips="
-          searchQuery
-            ? [
-                'Search matches department names',
-                'Clear search to see every department in this store',
-              ]
-            : [
-                'Each department can have its own staff roster',
-                'Open a department to add members and manage roles',
-              ]
-        "
-        extra-class="dash-table-shell rounded-xl"
-      />
-    </div>
+    <SDialog
+      v-model:open="showDeleteDepartmentDialog"
+      role="alertdialog"
+      size="sm"
+      :title="`Delete ${departmentPendingDelete?.name ?? 'department'}?`"
+      description="This permanently deletes the department and its staff associations. This can't be undone."
+      :dismissible="!deletingDepartmentId"
+    >
+      <template #footer>
+        <SButton :disabled="Boolean(deletingDepartmentId)" @click="showDeleteDepartmentDialog = false">Cancel</SButton>
+        <SButton variant="danger" :loading="Boolean(deletingDepartmentId)" @click="confirmDeleteDepartment">
+          Delete department
+        </SButton>
+      </template>
+    </SDialog>
 
     <!-- Bulk Delete Departments Modal -->
     <BulkDeleteConfirmModal
@@ -508,37 +297,6 @@
       @confirm="handleConfirmBulkDeleteDepartments"
     />
 
-    <!-- Department ⋮ menu (teleported; same as main Departments list + Inventory folders) -->
-    <IosContextMenu
-      :open="Boolean(openDepartmentMenuId && departmentForOpenMenu && departmentMenuFixedStyle)"
-      :style="departmentMenuFixedStyle"
-      menu-id="store-department"
-    >
-      <IosContextMenuItem
-        label="Edit"
-        :icon="PencilSquareIcon"
-        @click="
-          () => {
-            handleEditDepartment(departmentForOpenMenu!)
-            openDepartmentMenuId = null
-          }
-        "
-      />
-      <IosContextMenuItem
-        :label="deletingDepartmentId === departmentForOpenMenu?.id ? 'Deleting…' : 'Delete'"
-        :icon="deletingDepartmentId === departmentForOpenMenu?.id ? ArrowPathIcon : TrashIcon"
-        :icon-class="deletingDepartmentId === departmentForOpenMenu?.id ? 'animate-spin' : ''"
-        :disabled="deletingDepartmentId === departmentForOpenMenu?.id"
-        danger
-        @click="
-          () => {
-            handleDeleteDepartment(departmentForOpenMenu!)
-            openDepartmentMenuId = null
-          }
-        "
-      />
-    </IosContextMenu>
-
     <DepartmentModal
       v-model="showDepartmentModal"
       :department="editingDepartment"
@@ -550,35 +308,34 @@
 </template>
 
 <script setup lang="ts">
+import BulkDeleteConfirmModal from '~/components/dashboard/BulkDeleteConfirmModal.vue'
 import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import {
-  BuildingOfficeIcon,
-  BuildingOffice2Icon,
-  ArrowPathIcon,
-  PencilSquareIcon,
-  TrashIcon,
-  EllipsisVerticalIcon,
-  Squares2X2Icon,
-  TableCellsIcon,
-  CheckCircleIcon,
-  PlusIcon,
-  XMarkIcon,
-} from '~/utils/app-icons'
-import Button from '~/components/ui/Button.vue'
-import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
-import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
-import IosSearchBar from '~/components/ios/IosSearchBar.vue'
-import IosQuickActionBar, { type IosQuickActionOption } from '~/components/ios/IosQuickActionBar.vue'
-import IosGroupedListSkeleton from '~/components/ios/IosGroupedListSkeleton.vue'
-import IosQuickActionSkeleton from '~/components/ios/IosQuickActionSkeleton.vue'
-import IosInventoryFolderRow from '~/components/ios/IosInventoryFolderRow.vue'
-import IosContextMenu from '~/components/ios/IosContextMenu.vue'
-import IosContextMenuItem from '~/components/ios/IosContextMenuItem.vue'
-import DashboardTablePagination from '~/components/dashboard/DashboardTablePagination.vue'
-import Modal from '~/components/ui/Modal.vue'
-import Checkbox from '~/components/ui/Checkbox.vue'
+  ArrowRight,
+  Building2,
+  EllipsisVertical,
+  Pencil,
+  Plus,
+  RotateCw,
+  SearchX,
+  Trash2,
+  TriangleAlert,
+} from '@lucide/vue'
+import SBadge from '~/components/s/SBadge.vue'
+import SButton from '~/components/s/SButton.vue'
+import SCard from '~/components/s/SCard.vue'
+import SCheckbox from '~/components/s/SCheckbox.vue'
+import SDialog from '~/components/s/SDialog.vue'
+import SEmptyState from '~/components/s/SEmptyState.vue'
+import SIconButton from '~/components/s/SIconButton.vue'
+import SMenu from '~/components/s/SMenu.vue'
+import SMenuItem from '~/components/s/SMenuItem.vue'
+import SPageHeader from '~/components/s/SPageHeader.vue'
+import SPagination from '~/components/s/SPagination.vue'
+import SSearch from '~/components/s/SSearch.vue'
+import SSkeleton from '~/components/s/SSkeleton.vue'
+import STabs from '~/components/s/STabs.vue'
 import DepartmentModal from '~/components/departments/DepartmentModal.vue'
-import DepartmentCard from '~/components/departments/DepartmentCard.vue'
 import type { Department } from '~/composables/useDepartments'
 import { getEligibleStoresForPlan, resolveEffectiveSubscriptionPlan } from '~/types/subscription'
 
@@ -595,41 +352,7 @@ useHead({
   title: `Departments - Storvv`,
 })
 
-const {
-  pageWithFooterClass,
-  eyebrowClass,
-  titleClass,
-  cardDescClass,
-  headerBtnClass,
-  headerBtnLabelClass,
-  gridShellClass,
-  gridClass,
-  menuBtnClass,
-  errorCardClass,
-  viewToggleClass,
-  viewToggleBtnClass,
-  viewToggleBtnActiveClass,
-} = useDashboardGridPagesChrome()
-
-const { tableShellClass } = useDashboardTableChrome()
-const { isCapacitorIos } = useIsCapacitorIos()
-const { currentStoreLabel, branchPageTitle } = useCurrentStoreLabel()
-const iosDepartmentsNavTitle = computed(() =>
-  currentStoreLabel.value ? `${currentStoreLabel.value} · Departments` : 'Departments'
-)
-const {
-  isSelecting: isIosDepartmentSelecting,
-  toggleSelectMode: toggleIosDepartmentSelectMode,
-  exitSelectMode: exitIosDepartmentSelectMode,
-} = useIosBulkSelectMode({
-  clearSelection: () => {
-    selectedDepartmentsForBulk.value = []
-  },
-})
-watch(
-  () => storeId.value,
-  () => exitIosDepartmentSelectMode()
-)
+const EMPTY_CELL = '—'
 
 const showDepartmentModal = ref(false)
 const editingDepartment = ref<Department | null>(null)
@@ -645,93 +368,6 @@ const deletingDepartmentId = ref<string | null>(null)
 
 const searchQuery = ref('')
 const departmentFilter = ref<'all' | 'active' | 'inactive'>('all')
-
-const departmentQuickActionOptions = computed((): IosQuickActionOption[] => {
-  const options: IosQuickActionOption[] = [
-    { value: 'all', label: 'All', icon: BuildingOfficeIcon },
-    {
-      value: 'active',
-      label: 'Active',
-      icon: CheckCircleIcon,
-      badge: activeDepartmentsCount.value || undefined,
-    },
-  ]
-
-  if (inactiveDepartmentsCount.value > 0) {
-    options.push({
-      value: 'inactive',
-      label: 'Inactive',
-      icon: XMarkIcon,
-      badge: inactiveDepartmentsCount.value,
-    })
-  }
-
-  if (canManageDepartments.value) {
-    options.push({
-      value: 'new',
-      label: 'Add department',
-      icon: PlusIcon,
-      trailing: 'add',
-      action: openCreateDepartmentModal,
-    })
-  }
-
-  return options
-})
-
-function departmentRowSubtitle(department: Department): string {
-  const parts: string[] = []
-  if (department.departmentType) {
-    parts.push(formatDepartmentTypeLabel(department.departmentType))
-  }
-  const manager = departmentManagerLabel(department.manager)
-  if (manager && manager !== 'Not assigned') parts.push(manager)
-  if (department.isActive === false) parts.push('Inactive')
-  return parts.join(' · ')
-}
-
-function formatDepartmentRowValue(department: Department): string {
-  const count = department.staffCount || 0
-  return `${count} staff`
-}
-
-const getInitialDepartmentsView = (): 'grid' | 'table' => {
-  if (import.meta.client) {
-    try {
-      if (
-        document.documentElement.classList.contains('capacitor-ios') ||
-        window.matchMedia('(max-width: 639px)').matches
-      ) {
-        return 'table'
-      }
-      const saved = localStorage.getItem(`stores-${storeId.value}-departments-view`)
-      if (saved === 'table' || saved === 'grid') return saved
-    } catch {
-      /* ignore */
-    }
-  }
-  return 'grid'
-}
-
-const departmentsViewMode = ref<'grid' | 'table'>(getInitialDepartmentsView())
-watch(departmentsViewMode, (mode) => {
-  openDepartmentMenuId.value = null
-  if (!import.meta.client) return
-  try {
-    localStorage.setItem(`stores-${storeId.value}-departments-view`, mode)
-  } catch {
-    /* ignore */
-  }
-})
-
-const departmentTableSkeletonColumns = [
-  { label: 'Department' },
-  { label: 'Type', class: 'hidden sm:table-cell', bone: '4.5rem' },
-  { label: 'Staff', class: 'text-right', bone: '2rem' },
-  { label: 'Manager', class: 'hidden md:table-cell', bone: '5rem' },
-  { label: 'Status', class: 'dashboard-table__col-status', bone: '3.5rem' },
-  { label: 'Updated', class: 'hidden lg:table-cell', bone: '4rem' },
-]
 
 // Load pagination state from localStorage
 const getInitialPage = (): number => {
@@ -760,12 +396,8 @@ import {
   computeFixedAnchoredMenuStyle,
   isInsideAnchoredMenu,
 } from '~/utils/menuAnchor'
-import { formatCategoryDate } from '~/utils/inventory-category-card'
-import {
-  departmentManagerLabel,
-  departmentStatusPill,
-  formatDepartmentTypeLabel,
-} from '~/utils/department-card'
+import { formatCategoryDate } from '~/utils/inventory-category-format'
+import { formatDepartmentTypeLabel } from '~/utils/department-format'
 
 // Get store instances - only accessible on client
 const departmentsStore = useDepartmentsStore()
@@ -792,10 +424,6 @@ const departmentLimitMessage = computed(() => {
     : `Your plan allows up to ${max} departments per store. Upgrade for more.`
 })
 
-const headerStatsReady = computed(
-  () => !!store.value && !departmentsStore.loading && !storesLoading.value
-)
-
 // Filter departments by storeId
 const storeDepartments = computed(() => {
   return departmentsStore.departments.filter((dept) => dept.storeId === storeId.value)
@@ -813,36 +441,34 @@ const inactiveDepartmentsCount = computed(
   () => storeDepartments.value.filter((dept) => dept.isActive === false).length
 )
 
-const departmentHeaderMetrics = computed(() => {
-  const total = storeDepartments.value.length
-  const shown = filteredDepartments.value.length
-  const categoriesValue = shown !== total ? `${shown} / ${total}` : String(total)
+const teamMetrics = computed(() => [
+  { key: 'departments', label: 'Departments', value: String(storeDepartments.value.length) },
+  { key: 'staff', label: 'Staff', value: String(totalStaffForStore.value) },
+  {
+    key: 'inactive',
+    label: 'Inactive',
+    value: String(inactiveDepartmentsCount.value),
+    tone: inactiveDepartmentsCount.value > 0 ? ('warning' as const) : undefined,
+  },
+])
 
-  return [
-    {
-      key: 'departments',
-      label: shown !== total ? 'Departments shown' : 'Departments',
-      value: categoriesValue,
-    },
-    {
-      key: 'staff',
-      label: 'Staff',
-      value: String(totalStaffForStore.value),
-    },
-    {
-      key: 'active',
-      label: 'Active',
-      value: String(activeDepartmentsCount.value),
-      tone: 'success' as const,
-    },
-    {
-      key: 'inactive',
-      label: 'Inactive',
-      value: String(inactiveDepartmentsCount.value),
-      tone: inactiveDepartmentsCount.value > 0 ? ('warning' as const) : undefined,
-    },
-  ]
-})
+const departmentFilterTabs = computed(() => [
+  { value: 'all', label: 'All', count: storeDepartments.value.length },
+  { value: 'active', label: 'Active', count: activeDepartmentsCount.value },
+  { value: 'inactive', label: 'Inactive', count: inactiveDepartmentsCount.value },
+])
+
+function departmentSummary(department: Department): string {
+  const parts = [formatDepartmentTypeLabel(department.departmentType)]
+  const manager = department.manager?.trim()
+  if (manager) parts.push(manager)
+  return parts.join(' · ')
+}
+
+function staffLabel(department: Department): string {
+  const count = department.staffCount || 0
+  return `${count} staff`
+}
 
 const filteredDepartments = computed(() => {
   let list = storeDepartments.value
@@ -869,6 +495,10 @@ const paginatedDepartments = computed(() => {
   const end = start + itemsPerPage.value
   return filteredDepartments.value.slice(start, end)
 })
+
+function isDepartmentSelected(department: Department): boolean {
+  return selectedDepartmentsForBulk.value.some((d) => d.id === department.id)
+}
 
 watch(departmentFilter, () => {
   currentPage.value = 1
@@ -1229,13 +859,34 @@ const handleEditDepartment = (department: Department) => {
   showDepartmentModal.value = true
 }
 
-const handleDeleteDepartment = async (department: Department) => {
-  if (
-    !confirm(
-      `Are you sure you want to delete the "${department.name}" department? This action cannot be undone.`
-    )
-  )
-    return
+const showDeleteDepartmentDialog = ref(false)
+const departmentPendingDelete = ref<Department | null>(null)
+
+function askDeleteDepartment(department: Department) {
+  departmentPendingDelete.value = department
+  showDeleteDepartmentDialog.value = true
+}
+
+async function confirmDeleteDepartment() {
+  const department = departmentPendingDelete.value
+  if (!department) return
+  await deleteDepartment(department)
+  showDeleteDepartmentDialog.value = false
+}
+
+function runDepartmentMenuAction(action: (department: Department) => unknown) {
+  const department = departmentForOpenMenu.value
+  openDepartmentMenuId.value = null
+  if (department) action(department)
+}
+
+function closeDepartmentMenu() {
+  const id = openDepartmentMenuId.value
+  openDepartmentMenuId.value = null
+  if (id) getVisibleMenuAnchorElement('data-department-actions-anchor', id)?.focus()
+}
+
+async function deleteDepartment(department: Department) {
   deletingDepartmentId.value = department.id
   try {
     await departmentsStore.deleteDepartment(department.id, storeId.value)

@@ -350,7 +350,7 @@ export function useAnalyticsFeatureInsights(
           },
           { label: 'Completed sales', value: String(completedInPeriod.value.length) },
         ],
-        href: dashPath('/receipts?tab=customers'),
+        href: dashPath('/customers'),
         linkLabel: 'View customers',
       },
     ]
@@ -430,7 +430,7 @@ export function useAnalyticsFeatureInsights(
           },
           { label: 'Total owed', value: formatCurrency(totalCreditOwed.value) },
         ],
-        href: dashPath('/receipts?tab=customers'),
+        href: dashPath('/customers'),
         linkLabel: 'Manage balances',
       })
     }

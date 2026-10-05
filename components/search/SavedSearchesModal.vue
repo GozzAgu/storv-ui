@@ -1,144 +1,106 @@
 <template>
-  <Modal v-model="isOpen" title="Saved Searches" subtitle="Load or save search filters." size="md">
-    <template #header>
-      <div class="flex items-center justify-between w-full">
-        <div class="min-w-0 flex-1">
-          <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Saved Searches</h3>
-          <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Load or save search filters</p>
-        </div>
-        <button
-          @click="showCreateModal = true"
-          class="flex-shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/[0.06] rounded-sm transition-colors"
-        >
-          <BookmarkSquareIcon class="h-3.5 w-3.5 shrink-0 opacity-80" :stroke-width="1.75" />
-          Save current
-        </button>
-      </div>
-    </template>
-
-    <div class="space-y-4">
-      <!-- Loading State -->
-      <div v-if="searchStore.loading" class="text-center py-8">
-        <div
-          class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-500"
-        ></div>
-        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading...</p>
-      </div>
-
-      <!-- Empty State -->
-      <div v-else-if="searchStore.savedSearches.length === 0" class="text-center py-8">
-        <div
-          class="w-14 h-14 mx-auto mb-3 rounded-sm bg-gray-100 dark:bg-white/[0.06] flex items-center justify-center"
-        >
-          <MagnifyingGlassIcon class="w-7 h-7 text-gray-700 dark:text-gray-300" />
-        </div>
-        <p class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">No saved searches</p>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">
-          Save your frequently used searches for quick access
-        </p>
-        <Button variant="neutral" size="sm" :icon="BookmarkSquareIcon" @click="showCreateModal = true">
-          Save Current Search
-        </Button>
-      </div>
-
-      <!-- Saved Searches List -->
-      <div v-else class="space-y-2">
-        <div
-          v-for="saved in searchStore.savedSearches"
-          :key="saved.id"
-          class="group p-3 rounded-sm hover:bg-gray-50 dark:hover:bg-white/[0.04] transition-all"
-        >
-          <div class="flex items-start justify-between gap-3">
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-2 mb-1">
-                <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
-                  {{ saved.name }}
-                </h4>
-                <span
-                  class="px-2 py-0.5 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded"
-                >
-                  {{ saved.filters.entityTypes.length }} type{{
-                    saved.filters.entityTypes.length !== 1 ? 's' : ''
-                  }}
-                </span>
-              </div>
-              <p v-if="saved.query" class="text-xs text-gray-600 dark:text-gray-400 truncate mb-1">
-                "{{ saved.query }}"
-              </p>
-              <p class="text-xs text-gray-500 dark:text-gray-500">
-                Saved {{ formatDate(saved.createdAt) }}
-              </p>
-            </div>
-            <div class="flex items-center gap-1 flex-shrink-0">
-              <button
-                @click="$emit('load', saved.id)"
-                class="p-1.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/[0.06] rounded-sm transition-colors"
-              >
-                <ArrowRightIcon class="w-4 h-4" />
-              </button>
-              <button
-                @click="handleDelete(saved.id)"
-                class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-sm transition-colors opacity-0 group-hover:opacity-100"
-              >
-                <TrashIcon class="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+  <SDialog v-model:open="isOpen" title="Saved searches" description="Load or save search filters." size="md">
+    <div v-if="searchStore.loading" class="s-saved__loading">
+      <SSpinner :size="24" label="Loading saved searches" />
+      <span>Loading…</span>
     </div>
 
-    <!-- Create Saved Search Modal -->
-    <Modal
-      v-model="showCreateModal"
-      title="Save Search"
-      subtitle="Name this search to load it later."
+    <SEmptyState
+      v-else-if="searchStore.savedSearches.length === 0"
+      title="No saved searches"
+      description="Save your frequently used searches for quick access."
+    >
+      <template #icon>
+        <Search :size="20" :stroke-width="1.75" />
+      </template>
+    </SEmptyState>
+
+    <ul v-else class="s-list s-saved__list" aria-label="Saved searches">
+      <li v-for="saved in searchStore.savedSearches" :key="saved.id" class="s-list__item">
+        <span class="s-list__main">
+          <span class="s-list__primary">{{ saved.name }}</span>
+          <span class="s-list__secondary">
+            <template v-if="saved.query">"{{ saved.query }}" · </template>Saved
+            {{ formatDate(saved.createdAt) }}
+          </span>
+        </span>
+        <SBadge>
+          {{ saved.filters.entityTypes.length }} type{{
+            saved.filters.entityTypes.length !== 1 ? 's' : ''
+          }}
+        </SBadge>
+        <span class="s-saved__actions">
+          <SIconButton :label="`Load ${saved.name}`" @click="$emit('load', saved.id)">
+            <ArrowRight :size="18" :stroke-width="1.75" aria-hidden="true" />
+          </SIconButton>
+          <SIconButton
+            class="s-saved__delete"
+            :label="`Delete ${saved.name}`"
+            @click="handleDelete(saved.id)"
+          >
+            <Trash2 :size="18" :stroke-width="1.75" aria-hidden="true" />
+          </SIconButton>
+        </span>
+      </li>
+    </ul>
+
+    <template #footer>
+      <SDialogActions
+        cancel-label="Close"
+        primary-label="Save current search"
+        :primary-icon="Bookmark"
+        @cancel="isOpen = false"
+        @primary="showCreateModal = true"
+      />
+    </template>
+
+    <SDialog
+      v-model:open="showCreateModal"
+      title="Save search"
+      description="Name this search to load it later."
       size="sm"
     >
-      <IosForm layout="default" scroll>
-        <IosFormSection fixed>
-          <IosFormField label="Search Name" required>
-            <IosFormInput
+      <SForm>
+        <SFormSection>
+          <SField label="Search name" required>
+            <SInput
               v-model="searchName"
               placeholder="e.g., High-value customers"
               @keydown.enter="handleSave"
             />
-          </IosFormField>
-          <IosFormField label="Query">
-            <p class="text-xs font-medium text-gray-900 dark:text-gray-100">
-              {{ searchStore.query || '(empty)' }}
-            </p>
-            <p v-if="searchStore.hasActiveFilters" class="dash-drawer-hint mt-1.5">
-              Filters: {{ getFiltersSummary() }}
-            </p>
-          </IosFormField>
-        </IosFormSection>
-      </IosForm>
+          </SField>
+          <div class="s-callout s-saved__query">
+            <span>Query: <strong>{{ searchStore.query || '(empty)' }}</strong></span>
+            <span v-if="searchStore.hasActiveFilters">Filters: {{ getFiltersSummary() }}</span>
+          </div>
+        </SFormSection>
+      </SForm>
 
       <template #footer>
-        <IosDrawerActions
+        <SDialogActions
           primary-label="Save"
           :primary-disabled="!searchName.trim()"
           @cancel="showCreateModal = false"
           @primary="handleSave"
         />
       </template>
-    </Modal>
-  </Modal>
+    </SDialog>
+  </SDialog>
 </template>
 
 <script setup lang="ts">
+import SBadge from '~/components/s/SBadge.vue'
+import SDialog from '~/components/s/SDialog.vue'
+import SDialogActions from '~/components/s/SDialogActions.vue'
+import SEmptyState from '~/components/s/SEmptyState.vue'
+import SField from '~/components/s/SField.vue'
+import SForm from '~/components/s/SForm.vue'
+import SFormSection from '~/components/s/SFormSection.vue'
+import SIconButton from '~/components/s/SIconButton.vue'
+import SInput from '~/components/s/SInput.vue'
+import SSpinner from '~/components/s/SSpinner.vue'
 import { ref, computed } from 'vue'
-import {
-  BookmarkSquareIcon,
-  MagnifyingGlassIcon,
-  ArrowRightIcon,
-  TrashIcon,
-} from '~/utils/app-icons'
-import Modal from '~/components/ui/Modal.vue'
-import Button from '~/components/ui/Button.vue'
-import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
-import { IosForm, IosFormSection, IosFormField, IosFormInput } from '~/components/ios/forms'
+import { ArrowRight, Bookmark, Search, Trash2 } from '@lucide/vue'
 import { useSearchStore } from '~/stores/search'
 import { useAppToast } from '~/composables/useAppToast'
 

@@ -1,27 +1,16 @@
 <template>
-  <div v-if="note" class="dash-drawer-callout">
-    <div class="flex gap-2">
-      <BookmarkSquareIcon
-        class="mt-0.5 h-4 w-4 shrink-0 text-gray-500 dark:text-gray-400"
-        aria-hidden="true"
-      />
-      <div class="min-w-0 flex-1">
-        <p class="text-[10px] font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-400">
-          Store note
-        </p>
-        <p class="mt-0.5 whitespace-pre-wrap text-xs text-gray-800 dark:text-gray-200">
-          {{ note }}
-        </p>
-      </div>
+  <aside v-if="note" class="s-callout s-store-note" aria-label="Store note">
+    <Bookmark class="s-store-note__icon" :size="16" :stroke-width="1.75" aria-hidden="true" />
+    <div class="s-store-note__text">
+      <strong>Note from your manager</strong>
+      <p class="s-store-note__body">{{ note }}</p>
     </div>
-  </div>
+  </aside>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import {
-  BookmarkSquareIcon,
-} from '~/utils/app-icons'
+import { Bookmark } from '@lucide/vue'
 import { useStoresStore } from '~/stores/stores'
 
 const storesStore = useStoresStore()

@@ -1,0 +1,89 @@
+/* Customers: directory and customer detail sheet */
+
+.s-customer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-space-3);
+}
+
+.s-customer__contact {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-space-1);
+  margin: 0;
+}
+
+.s-customer__row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-space-1-5);
+}
+
+.s-customer__row dt {
+  display: inline-flex;
+  flex-shrink: 0;
+  padding-top: var(--s-space-quarter);
+  color: var(--s-text-muted);
+}
+
+.s-customer__row dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.s-customer__none {
+  margin: 0;
+  color: var(--s-text-muted);
+}
+
+.s-customer__stats {
+  display: grid;
+  gap: var(--s-space-2);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.s-customer__balance {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-space-2);
+  padding: var(--s-space-2);
+  border: 1px solid var(--s-border);
+  border-radius: var(--s-radius-lg);
+}
+
+.s-customer__balance p {
+  margin: 0;
+}
+
+.s-customer__balance-label {
+  color: var(--s-text-muted);
+  font: var(--s-text-caption);
+}
+
+.s-customer__balance-value {
+  font: var(--s-text-body-lg);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.s-customer__balance-value--owed {
+  color: var(--s-warning);
+}
+
+.s-customer__history {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-space-1);
+}
+
+.s-customer__heading {
+  margin: 0;
+  font: var(--s-text-body);
+  font-weight: 600;
+}
+
+.s-customer .s-list__item {
+  padding-inline: var(--s-space-2);
+}

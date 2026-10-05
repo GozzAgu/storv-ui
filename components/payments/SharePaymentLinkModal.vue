@@ -1,117 +1,92 @@
 <template>
-  <Modal
-    :model-value="modelValue"
+  <SDialog
+    :open="modelValue"
     size="md"
     title="Share payment link"
-    subtitle="Send this to your customer on any channel. They can pay without an account."
-    @update:model-value="(v: boolean) => emit('update:modelValue', v)"
+    description="Send this to your customer on any channel. They can pay without an account."
+    @update:open="(v: boolean) => emit('update:modelValue', v)"
   >
-    <div v-if="link" class="space-y-4">
-      <!-- Primary share (native sheet on phone) -->
-      <button
-        type="button"
-        class="flex w-full items-center justify-center gap-2 rounded-xl bg-primary-600 px-4 py-3 text-sm font-semibold text-white hover:bg-primary-700 disabled:opacity-60"
-        :disabled="sharing"
-        @click="shareViaSystem"
-      >
+    <div v-if="link" class="s-c s-paylink-share">
+      <SButton variant="primary" size="lg" block :loading="sharing" @click="shareViaSystem">
+        <template #leading><Share2 :size="16" :stroke-width="2" aria-hidden="true" /></template>
         {{ sharing ? 'Opening share…' : nativeShareLabel }}
-      </button>
+      </SButton>
 
-      <!-- Link -->
-      <div
-        class="flex items-center gap-2 rounded-lg bg-gray-50 p-1.5 ring-1 ring-gray-200 dark:bg-white/[0.04] dark:ring-white/10"
-      >
-        <span class="min-w-0 flex-1 truncate px-2 text-xs text-gray-600 dark:text-gray-300">{{
-          link.url
-        }}</span>
-        <button type="button" class="btn-primary btn-sm" @click="copyLink">
-          {{ copied ? 'Copied ✓' : 'Copy' }}
-        </button>
+      <div class="s-paylink-share__link">
+        <span class="s-paylink-share__url">{{ link.url }}</span>
+        <SButton size="sm" variant="primary" @click="copyLink">
+          <template #leading>
+            <component :is="copied ? Check : Copy" :size="14" :stroke-width="2" aria-hidden="true" />
+          </template>
+          {{ copied ? 'Copied' : 'Copy' }}
+        </SButton>
       </div>
 
-      <!-- QR -->
-      <div class="flex flex-col items-center gap-2 py-1">
-        <div class="rounded-xl bg-white p-3 ring-1 ring-gray-200 dark:ring-white/10">
+      <div class="s-paylink-share__qr">
+        <div class="s-paylink-share__qr-frame">
           <img
             v-if="qrDataUrl"
             :src="qrDataUrl"
             alt="Scan to pay"
-            class="h-36 w-36"
+            class="s-paylink-share__qr-img"
             width="144"
             height="144"
           />
-          <div v-else class="h-36 w-36 animate-pulse rounded bg-gray-100" />
+          <SSkeleton v-else width="144px" height="144px" />
         </div>
         <a
           v-if="qrDataUrl"
           :href="qrDataUrl"
           :download="`${link.invoiceNumber}-qr.png`"
-          class="text-[11px] font-medium text-gray-500 underline-offset-2 hover:text-gray-700 hover:underline dark:text-gray-400 dark:hover:text-gray-200"
+          class="s-link s-paylink-share__download"
         >
+          <Download :size="14" :stroke-width="2" aria-hidden="true" />
           Scan to pay · download QR
         </a>
       </div>
 
-      <!-- Share channels -->
-      <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        <button
-          type="button"
-          class="share-btn bg-[#25D366]/10 text-[#1a8c46] dark:text-[#34d77f]"
-          @click="shareWhatsApp"
-        >
+      <div class="s-paylink-share__channels">
+        <SButton @click="shareWhatsApp">
+          <template #leading><MessageCircle :size="16" :stroke-width="1.75" aria-hidden="true" /></template>
           WhatsApp
-        </button>
-        <a
-          :href="telegramUrl"
-          target="_blank"
-          rel="noopener"
-          class="share-btn bg-[#229ED9]/10 text-[#1c7fb0] dark:text-[#4cb8ec]"
-          >Telegram</a
-        >
-        <a
-          :href="facebookUrl"
-          target="_blank"
-          rel="noopener"
-          class="share-btn bg-[#1877F2]/10 text-[#1565d8] dark:text-[#5b9bf5]"
-          >Facebook</a
-        >
-        <button
-          type="button"
-          class="share-btn bg-gray-100 text-gray-700 dark:bg-white/[0.06] dark:text-gray-200"
-          @click="copyLink"
-        >
+        </SButton>
+        <a :href="telegramUrl" target="_blank" rel="noopener" class="s-c s-btn s-btn--secondary">
+          <Send :size="16" :stroke-width="1.75" aria-hidden="true" />
+          <span>Telegram</span>
+        </a>
+        <a :href="facebookUrl" target="_blank" rel="noopener" class="s-c s-btn s-btn--secondary">
+          <ExternalLink :size="16" :stroke-width="1.75" aria-hidden="true" />
+          <span>Facebook</span>
+        </a>
+        <SButton @click="copyLink">
+          <template #leading><Copy :size="16" :stroke-width="1.75" aria-hidden="true" /></template>
           Copy link
-        </button>
+        </SButton>
       </div>
 
-      <!-- Message preview -->
-      <div
-        class="rounded-lg bg-gray-50 p-3 ring-1 ring-gray-100 dark:bg-white/[0.03] dark:ring-white/[0.06]"
-      >
-        <p class="mb-1 text-[10px] font-medium uppercase tracking-wide text-gray-400">
-          Message preview
-        </p>
-        <p class="whitespace-pre-line text-xs text-gray-700 dark:text-gray-300">{{ message }}</p>
+      <div class="s-paylink-share__preview">
+        <p class="s-paylink-share__preview-label">Message preview</p>
+        <p class="s-paylink-share__preview-text">{{ message }}</p>
       </div>
     </div>
 
     <template #footer>
-      <Button variant="outline" size="sm" @click="emit('update:modelValue', false)">
-        Close
-      </Button>
-      <Button v-if="link" variant="primary" size="sm" @click="openCheckout">
+      <SButton @click="emit('update:modelValue', false)">Close</SButton>
+      <SButton v-if="link" variant="primary" @click="openCheckout">
+        <template #leading><ExternalLink :size="16" :stroke-width="2" aria-hidden="true" /></template>
         Open checkout page
-      </Button>
+      </SButton>
     </template>
-  </Modal>
+  </SDialog>
 </template>
 
 <script setup lang="ts">
+import SDialog from '~/components/s/SDialog.vue'
 import { ref, computed, watch } from 'vue'
 import QRCode from 'qrcode'
-import Modal from '~/components/ui/Modal.vue'
-import Button from '~/components/ui/Button.vue'
-import { formatNaira } from '~/utils/naira'
+import { Check, Copy, Download, ExternalLink, MessageCircle, Send, Share2 } from '@lucide/vue'
+import SButton from '~/components/s/SButton.vue'
+import SSkeleton from '~/components/s/SSkeleton.vue'
 import { buildPaymentLinkShareMessage } from '~/utils/payment-link-share'
 import { usePaymentLinkShare } from '~/composables/usePaymentLinkShare'
 import { isCapacitorNative } from '~/utils/capacitor-env'
@@ -213,19 +188,3 @@ watch(
   }
 )
 </script>
-
-<style scoped>
-.share-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0.625rem;
-  padding: 0.5rem 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  transition: filter 0.15s ease;
-}
-.share-btn:hover {
-  filter: brightness(0.97);
-}
-</style>

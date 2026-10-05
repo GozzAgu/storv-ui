@@ -12,7 +12,12 @@ export function getVisibleMenuAnchorElement(
     | 'data-folder-actions-anchor'
     | 'data-department-actions-anchor'
     | 'data-staff-actions-anchor'
-    | 'data-stock-loan-actions-anchor',
+    | 'data-branch-actions-anchor'
+    | 'data-stock-loan-actions-anchor'
+    | 'data-transfer-actions-anchor'
+    | 'data-receipt-row'
+    | 'data-customer-row'
+    | 'data-item-row',
   id: string
 ): HTMLElement | null {
   if (!import.meta.client) return null
@@ -35,7 +40,7 @@ export function getVisibleMenuAnchorElement(
   return bestArea > 0 ? best : null
 }
 
-/** Attribute every `IosContextMenu` card renders, whatever its `menu-id` is. */
+/** Attribute an anchored row menu renders, whatever its `menu-id` is. */
 export const ANCHORED_MENU_SELECTOR = '[data-context-menu]'
 
 /**

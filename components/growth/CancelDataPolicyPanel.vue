@@ -1,30 +1,37 @@
 <template>
-  <DashboardSettingsPanel
+  <SCard
     title="If you cancel"
-    subtitle="What happens to your data when auto-renew stops."
-    compact
+    description="What happens to your data when auto-renew stops."
   >
-    <ul class="space-y-2 text-[11px] leading-relaxed text-gray-600 dark:text-gray-400">
-      <li>
-        <span class="font-medium text-gray-800 dark:text-gray-200">During your paid period:</span>
-        Full access continues until the date shown on your plan card.
-      </li>
-      <li>
-        <span class="font-medium text-gray-800 dark:text-gray-200">After it ends:</span>
-        Your account moves to Storvv Micro (one branch, core inventory and sales).
-      </li>
-      <li>
-        <span class="font-medium text-gray-800 dark:text-gray-200">Your data:</span>
-        Storvv keeps your inventory, sales history, and customers. Export anytime below before or after canceling.
-      </li>
-      <li>
-        <span class="font-medium text-gray-800 dark:text-gray-200">Branches over plan limits:</span>
-        Oldest branches stay active first; extras are hidden until you upgrade again.
-      </li>
-    </ul>
-  </DashboardSettingsPanel>
+    <dl class="s-settings__policy">
+      <div v-for="item in policy" :key="item.term">
+        <dt>{{ item.term }}</dt>
+        <dd>{{ item.detail }}</dd>
+      </div>
+    </dl>
+  </SCard>
 </template>
 
 <script setup lang="ts">
-import DashboardSettingsPanel from '~/components/dashboard/DashboardSettingsPanel.vue'
+import SCard from '~/components/s/SCard.vue'
+
+const policy = [
+  {
+    term: 'During your paid period',
+    detail: 'Full access continues until the date shown on your plan card.',
+  },
+  {
+    term: 'After it ends',
+    detail: 'Your account moves to Storvv Micro (one branch, core inventory and sales).',
+  },
+  {
+    term: 'Your data',
+    detail:
+      'Storvv keeps your inventory, sales history, and customers. Export anytime before or after canceling.',
+  },
+  {
+    term: 'Branches over plan limits',
+    detail: 'Oldest branches stay active first; extras are hidden until you upgrade again.',
+  },
+] as const
 </script>

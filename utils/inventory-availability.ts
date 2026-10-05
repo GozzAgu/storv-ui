@@ -12,12 +12,7 @@ export interface InventoryAvailabilityBadge {
   label: string
   /** Secondary line (e.g. receipt number) - kept out of the pill label for a clean single-line badge */
   meta?: string
-  dotClass: string
-  class: string
 }
-
-const badgeShell =
-  'inline-flex max-w-full items-center gap-1.5 whitespace-nowrap rounded-[var(--saas-radius-chip,0.375rem)] px-2.5 py-0.5 text-[11px] font-semibold leading-tight'
 
 export function getPendingSaleReceiptId(item: InventoryItem): string | null {
   const id = item.pendingSaleReceiptId
@@ -49,8 +44,6 @@ export function availabilityBadgeForAwaitingPayment(
     status: 'awaiting_payment',
     label: 'Awaiting payment',
     meta,
-    dotClass: 'bg-amber-500 dark:bg-amber-400',
-    class: `${badgeShell} bg-amber-50 text-amber-950 dark:bg-amber-500/15 dark:text-amber-100`,
   }
 }
 
@@ -58,8 +51,6 @@ export function availabilityBadgeForSold(): InventoryAvailabilityBadge {
   return {
     status: 'sold',
     label: 'Sold',
-    dotClass: 'bg-orange-500 dark:bg-orange-400',
-    class: `${badgeShell} bg-orange-50 text-orange-950 dark:bg-orange-500/15 dark:text-orange-100`,
   }
 }
 
@@ -67,8 +58,6 @@ export function availabilityBadgeForAvailable(): InventoryAvailabilityBadge {
   return {
     status: 'available',
     label: 'Available',
-    dotClass: 'bg-emerald-500 dark:bg-emerald-400',
-    class: `${badgeShell} bg-emerald-50 text-emerald-950 dark:bg-emerald-500/15 dark:text-emerald-100`,
   }
 }
 
@@ -76,8 +65,6 @@ export function availabilityBadgeForStockLoan(): InventoryAvailabilityBadge {
   return {
     status: 'with_seller',
     label: 'On stock loan',
-    dotClass: 'bg-violet-500 dark:bg-violet-400',
-    class: `${badgeShell} bg-violet-50 text-violet-950 dark:bg-violet-500/15 dark:text-violet-100`,
   }
 }
 
@@ -85,8 +72,6 @@ export function availabilityBadgeForReturned(): InventoryAvailabilityBadge {
   return {
     status: 'returned',
     label: 'Returned',
-    dotClass: 'bg-slate-500 dark:bg-slate-400',
-    class: `${badgeShell} bg-slate-100 text-slate-800 dark:bg-white/10 dark:text-slate-200`,
   }
 }
 
@@ -112,3 +97,21 @@ export const AVAILABILITY_SORT_ORDER: InventoryAvailabilityStatus[] = [
   'sold',
   'returned',
 ]
+
+/** Badge tone for an availability status in the design-system components. */
+export function inventoryAvailabilityTone(
+  status: InventoryAvailabilityStatus
+): 'success' | 'info' | 'warning' | 'neutral' | 'accent' {
+  switch (status) {
+    case 'available':
+      return 'success'
+    case 'with_seller':
+      return 'info'
+    case 'awaiting_payment':
+      return 'warning'
+    case 'returned':
+      return 'accent'
+    default:
+      return 'neutral'
+  }
+}

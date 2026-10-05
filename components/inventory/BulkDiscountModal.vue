@@ -1,53 +1,56 @@
 <template>
-  <SidePanel
-    :model-value="props.modelValue"
+  <SDialog
+      placement="right"
+    :open="props.modelValue"
     title="Apply bulk discount"
-    size="lg"
-    dense
-    @update:model-value="(value: boolean) => emit('update:modelValue', value)"
+    size="md"
+    @update:open="(value: boolean) => emit('update:modelValue', value)"
   >
-    <IosForm layout="fill">
-      <IosFormSection fixed>
-        <p class="dash-drawer-callout">
+    <SForm>
+      <SFormSection>
+        <p class="s-callout">
           This discount will be applied to
-          <strong class="font-medium text-gray-900 dark:text-gray-100">{{ selectedItems.length }}</strong>
+          <strong>{{ selectedItems.length }}</strong>
           selected product{{ selectedItems.length !== 1 ? 's' : '' }}.
         </p>
-      </IosFormSection>
+      </SFormSection>
 
-      <IosFormSection fixed>
-        <IosFormField label="Discount type" required>
-          <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+      <SFormSection>
+        <div class="s-field">
+          <span :id="discountTypeLabelId" class="s-field__label">
+            Discount type<span class="s-field__required" aria-hidden="true">*</span>
+          </span>
+          <div class="s-choice-grid" role="radiogroup" :aria-labelledby="discountTypeLabelId">
             <button
               type="button"
+              role="radio"
+              class="s-choice"
+              :aria-checked="discountType === 'percentage'"
               @click="discountType = 'percentage'"
-              :class="[
-                'rounded-lg px-3 py-2.5 text-center transition-all',
-                discountType === 'percentage'
-                  ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900'
-                  : 'bg-gray-50/80 text-gray-900 dark:bg-white/[0.04] dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-white/[0.08]',
-              ]"
             >
-              <p class="text-sm font-medium">Percentage</p>
-              <p class="mt-1 text-xs opacity-70">e.g., 10%</p>
+              <span class="s-choice__head">
+                <span class="s-choice__title">Percentage</span>
+                <span class="s-choice__radio" aria-hidden="true" />
+              </span>
+              <span class="s-choice__description">e.g. 10%</span>
             </button>
             <button
               type="button"
+              role="radio"
+              class="s-choice"
+              :aria-checked="discountType === 'amount'"
               @click="discountType = 'amount'"
-              :class="[
-                'rounded-lg px-3 py-2.5 text-center transition-all',
-                discountType === 'amount'
-                  ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900'
-                  : 'bg-gray-50/80 text-gray-900 dark:bg-white/[0.04] dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-white/[0.08]',
-              ]"
             >
-              <p class="text-sm font-medium">Fixed amount</p>
-              <p class="mt-1 text-xs opacity-70">e.g., {{ currencySymbol }}5.00</p>
+              <span class="s-choice__head">
+                <span class="s-choice__title">Fixed amount</span>
+                <span class="s-choice__radio" aria-hidden="true" />
+              </span>
+              <span class="s-choice__description">e.g. {{ currencySymbol }}5.00</span>
             </button>
           </div>
-        </IosFormField>
+        </div>
 
-        <IosFormField
+        <SField
           label="Discount value"
           required
           :hint="
@@ -56,103 +59,90 @@
               : 'Enter a fixed amount to deduct from each product.'
           "
         >
-          <div class="relative">
-            <span
-              v-if="discountType === 'percentage'"
-              class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400"
-            >
-              %
-            </span>
-            <span
-              v-else
-              class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400"
-            >
-              {{ currencySymbol }}
-            </span>
-            <IosFormInput
-              v-model="discountValue"
-              type="number"
-              :min="0"
-              :max="discountType === 'percentage' ? 100 : undefined"
-              step="any"
-              extra-class="pl-8"
-              :placeholder="discountType === 'percentage' ? '10' : '5.00'"
-            />
-          </div>
-        </IosFormField>
-      </IosFormSection>
+          <SInput
+            v-model="discountValue"
+            type="number"
+            :min="0"
+            :max="discountType === 'percentage' ? 100 : undefined"
+            step="any"
+            :placeholder="discountType === 'percentage' ? '10' : '5.00'"
+          >
+            <template #prefix>{{ discountType === 'percentage' ? '%' : currencySymbol }}</template>
+          </SInput>
+        </SField>
+      </SFormSection>
 
-      <IosFormSection
+      <SFormSection
         v-if="discountValue && discountValue > 0 && previewItems.length > 0"
         fixed
       >
-        <p class="dash-drawer-label">
+        <h3 class="s-form-section__title">
           Preview (first {{ Math.min(3, previewItems.length) }})
-        </p>
+        </h3>
         <div :class="pickListClass">
-          <div :class="[pickListScrollClass, 'max-h-64']">
+          <div :class="pickListScrollClass">
             <div
               v-for="(item, index) in previewItems.slice(0, 3)"
               :key="item.id || index"
-              :class="[pickRowClass, '!cursor-default hover:!bg-transparent', 'flex-col !items-start gap-1']"
+              :class="[pickRowClass, 's-pick__row--static', 's-pick__row--stacked']"
             >
               <p :class="pickRowTitleClass">{{ getItemName(item) }}</p>
-              <div class="space-y-1 text-xs text-gray-600 dark:text-gray-400">
-                <div class="flex justify-between gap-4">
-                  <span>Original</span>
-                  <span>{{ currencySymbol }}{{ formatCurrency(getItemPrice(item)) }}</span>
+              <dl class="s-sheet-summary">
+                <div class="s-sheet-summary__row">
+                  <dt>Original</dt>
+                  <dd>{{ currencySymbol }}{{ formatCurrency(getItemPrice(item)) }}</dd>
                 </div>
-                <div class="flex justify-between gap-4 text-red-600 dark:text-red-400">
-                  <span>Discount</span>
-                  <span>
+                <div class="s-sheet-summary__row s-sheet-summary__row--discount">
+                  <dt>Discount</dt>
+                  <dd>
                     {{
                       discountType === 'percentage'
                         ? `${discountValue}%`
                         : `−${currencySymbol}${formatCurrency(discountValue)}`
                     }}
-                  </span>
+                  </dd>
                 </div>
-                <div class="flex justify-between gap-4 font-semibold text-gray-900 dark:text-gray-100">
-                  <span>New price</span>
-                  <span>{{ currencySymbol }}{{ formatCurrency(calculateItemDiscountedPrice(item)) }}</span>
+                <div class="s-sheet-summary__row s-sheet-summary__row--total">
+                  <dt>New price</dt>
+                  <dd>{{ currencySymbol }}{{ formatCurrency(calculateItemDiscountedPrice(item)) }}</dd>
                 </div>
-              </div>
+              </dl>
             </div>
           </div>
         </div>
-        <p
-          v-if="selectedItems.length > 3"
-          class="dash-drawer-hint mt-2 text-center"
-        >
+        <p v-if="selectedItems.length > 3" class="s-form-meta">
           … and {{ selectedItems.length - 3 }} more product{{
             selectedItems.length - 3 !== 1 ? 's' : ''
           }}
         </p>
-      </IosFormSection>
+      </SFormSection>
 
-      <IosFormSection v-if="discountValue && discountValue > 0" fixed>
-        <p class="dash-drawer-hint">
+      <SFormSection v-if="discountValue && discountValue > 0" fixed>
+        <p class="s-form-meta">
           Items without a valid price will be skipped automatically.
         </p>
-      </IosFormSection>
-    </IosForm>
+      </SFormSection>
+    </SForm>
 
     <template #footer>
-      <IosDrawerActions
+      <SDialogActions
         :primary-label="bulkDiscountPrimaryLabel"
         :primary-disabled="!isValid || isApplying"
         @cancel="handleCancel"
         @primary="handleApplyBulkDiscount"
       />
     </template>
-  </SidePanel>
+  </SDialog>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import SidePanel from '~/components/ui/SidePanel.vue'
-import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
-import { IosForm, IosFormSection, IosFormField, IosFormInput } from '~/components/ios/forms'
+import SDialog from '~/components/s/SDialog.vue'
+import SDialogActions from '~/components/s/SDialogActions.vue'
+import SField from '~/components/s/SField.vue'
+import SForm from '~/components/s/SForm.vue'
+import SFormSection from '~/components/s/SFormSection.vue'
+import SInput from '~/components/s/SInput.vue'
+import { ref, computed, useId } from 'vue'
 import { useInventoryStore, type InventoryItem } from '~/stores/inventory'
 import { useAppToast } from '~/composables/useAppToast'
 import { usePreferences } from '~/composables/usePreferences'
@@ -179,6 +169,8 @@ const {
   pickRowClass,
   pickRowTitleClass,
 } = useDashboardDrawerChrome()
+
+const discountTypeLabelId = `bulk-discount-type-${useId()}`
 
 const discountType = ref<'percentage' | 'amount'>('percentage')
 const discountValue = ref<number>(0)

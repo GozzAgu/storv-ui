@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  formatAxisCurrency,
   formatCompactCurrency,
   formatCompactCurrencySuffix,
   formatCompactUnit,
@@ -18,6 +19,15 @@ describe('formatCompactCurrency', () => {
   it('returns null below one million', () => {
     expect(formatCompactCurrency(999_999, '₦')).toBeNull()
     expect(formatCompactCurrencySuffix(500_000)).toBe('')
+  })
+
+  it('formats axis labels at every magnitude', () => {
+    expect(formatAxisCurrency(0, '₦')).toBe('₦0')
+    expect(formatAxisCurrency(850, '₦')).toBe('₦850')
+    expect(formatAxisCurrency(12_000, '₦')).toBe('₦12k')
+    expect(formatAxisCurrency(800_000, '₦')).toBe('₦800k')
+    expect(formatAxisCurrency(1_200_000, '₦')).toBe('₦1.2m')
+    expect(formatAxisCurrency(-2_500, '$')).toBe('-$2.5k')
   })
 
   it('formats compact units', () => {

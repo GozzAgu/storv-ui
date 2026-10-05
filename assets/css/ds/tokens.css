@@ -1,0 +1,187 @@
+/*
+ * Storvv design system tokens.
+ * Every new UI component reads from these variables; nothing else defines color, type,
+ * spacing, radius, elevation or motion for the redesigned product.
+ */
+
+:root {
+  /* Color: neutrals */
+  --s-bg: #f7f8fa;
+  --s-surface: #ffffff;
+  --s-surface-2: #f2f4f7;
+  --s-surface-hover: #eef1f5;
+  --s-border: #e4e7ec;
+  --s-border-strong: #d0d5dd;
+
+  /* Color: text */
+  --s-text: #0f1728;
+  --s-text-2: #475467;
+  --s-text-muted: #5f6b7e;
+  --s-text-on-accent: #ffffff;
+
+  /* Color: accent (Storvv logo blue) */
+  --s-accent: #3d63f2;
+  --s-accent-hover: #3156e0;
+  --s-accent-active: #2849c4;
+  --s-accent-soft: #eef1fe;
+  --s-accent-soft-text: #2849c4;
+
+  /* Color: status (text / soft background) */
+  --s-success: #067647;
+  --s-success-soft: #ecfdf3;
+  --s-warning: #b54708;
+  --s-warning-soft: #fffaeb;
+  --s-error: #c01048;
+  --s-error-soft: #fff1f3;
+  --s-info: #175cd3;
+  --s-info-soft: #eff8ff;
+
+  /* Fields: filled and borderless at rest; the border only appears on focus or error */
+  --s-field-bg: #f2f4f7;
+  --s-field-bg-hover: #eaecf0;
+  --s-field-bg-focus: #ffffff;
+
+  /* Brand panel (auth) */
+  --s-brand-gradient: radial-gradient(80% 60% at 100% 0%, rgb(61 99 242 / 0.35) 0%, rgb(61 99 242 / 0) 70%),
+    radial-gradient(70% 50% at 0% 100%, rgb(142 162 255 / 0.14) 0%, rgb(142 162 255 / 0) 70%),
+    linear-gradient(160deg, #12234b 0%, #0c1938 60%, #09132c 100%);
+  /* Content on the brand panel stays the same in both themes */
+  --s-on-brand: #ffffff;
+  --s-brand-ink: #0f1728;
+
+  /* Primary buttons use the logo blue in both themes */
+  --s-btn-primary: var(--s-accent);
+  --s-btn-primary-hover: var(--s-accent-hover);
+  --s-btn-primary-active: var(--s-accent-active);
+  --s-on-btn-primary: #ffffff;
+
+  /* Focus */
+  --s-focus-ring: 0 0 0 3px rgb(61 99 242 / 0.28);
+
+  /* Typography */
+  --s-font-sans: 'Inter Variable', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+  --s-font-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+
+  --s-text-display: 600 1.75rem/2.25rem var(--s-font-sans);
+  --s-text-title: 600 1.25rem/1.75rem var(--s-font-sans);
+  --s-text-hero: 600 2.25rem/2.75rem var(--s-font-sans);
+  --s-text-heading: 600 1rem/1.5rem var(--s-font-sans);
+  --s-text-subheading: 600 0.9375rem/1.375rem var(--s-font-sans);
+  --s-text-body-lg: 400 0.9375rem/1.375rem var(--s-font-sans);
+  --s-text-body: 400 0.8125rem/1.25rem var(--s-font-sans);
+  --s-text-small: 400 0.75rem/1.125rem var(--s-font-sans);
+  --s-text-caption: 500 0.6875rem/1rem var(--s-font-sans);
+
+  --s-tracking-tight: -0.02em;
+  --s-tracking-caps: 0.06em;
+
+  /* Spacing: 8-point system; sub-8 steps are for optical nudges, icon/label gaps and dense rows */
+  --s-space-quarter: 2px;
+  --s-space-half: 4px;
+  --s-space-1: 8px;
+  --s-space-1-5: 12px;
+  --s-space-2: 16px;
+  --s-space-3: 24px;
+  --s-space-4: 32px;
+  --s-space-5: 40px;
+  --s-space-6: 48px;
+  --s-space-8: 64px;
+
+  /* Radius */
+  --s-radius-sm: 6px;
+  --s-radius: 8px;
+  --s-radius-lg: 12px;
+  --s-radius-xl: 16px;
+  --s-radius-2xl: 24px;
+  --s-radius-full: 9999px;
+
+  /* Elevation: `sm` separates borderless cards from the page; `md`/`lg` are for overlays */
+  --s-shadow-sm: 0 1px 2px rgb(16 24 40 / 0.05);
+  --s-shadow-md: 0 4px 12px -2px rgb(16 24 40 / 0.08), 0 2px 4px -2px rgb(16 24 40 / 0.04);
+  --s-shadow-lg: 0 16px 40px -8px rgb(16 24 40 / 0.16), 0 4px 8px -4px rgb(16 24 40 / 0.06);
+  --s-scrim: rgb(16 24 40 / 0.45);
+
+  /* Icons */
+  --s-icon-stroke: 1.5;
+
+  /* Motion */
+  --s-duration-fast: 150ms;
+  --s-duration: 200ms;
+  --s-duration-slow: 250ms;
+  --s-ease: cubic-bezier(0.2, 0, 0, 1);
+  --s-ease-out: cubic-bezier(0, 0, 0.2, 1);
+
+  /* Layout */
+  --s-touch: 44px;
+  --s-drawer-w: 480px;
+  --s-control-h: 40px;
+  --s-control-h-sm: 32px;
+  --s-btn-h: 36px;
+  --s-btn-h-sm: 28px;
+  --s-btn-h-lg: 40px;
+  --s-rail-w: 232px;
+  --s-rail-w-collapsed: 64px;
+  --s-topbar-h: 56px;
+  --s-bottomnav-h: 64px;
+  --s-content-max: 1280px;
+
+  /* Layers */
+  --s-z-sticky: 10;
+  --s-z-nav: 30;
+  --s-z-overlay: 40;
+  --s-z-modal: 50;
+  --s-z-toast: 60;
+}
+
+html.dark {
+  --s-bg: #0b0d12;
+  --s-surface: #12151c;
+  --s-surface-2: #181c25;
+  --s-surface-hover: #1d2230;
+  --s-border: #242a37;
+  --s-border-strong: #313848;
+
+  --s-text: #f2f4f7;
+  --s-text-2: #b4bccb;
+  --s-text-muted: #8a93a6;
+  --s-text-on-accent: #0b0d12;
+
+  --s-accent: #8ea2ff;
+  --s-accent-hover: #a3b3ff;
+  --s-accent-active: #7a91fb;
+  --s-accent-soft: rgb(142 162 255 / 0.14);
+  --s-accent-soft-text: #a3b3ff;
+
+  --s-btn-primary: #3d63f2;
+  --s-btn-primary-hover: #3156e0;
+  --s-btn-primary-active: #2849c4;
+
+  --s-success: #47cd89;
+  --s-success-soft: rgb(71 205 137 / 0.12);
+  --s-warning: #fdb022;
+  --s-warning-soft: rgb(253 176 34 / 0.12);
+  --s-error: #fd6f8e;
+  --s-error-soft: rgb(253 111 142 / 0.12);
+  --s-info: #84caff;
+  --s-info-soft: rgb(132 202 255 / 0.12);
+
+  --s-focus-ring: 0 0 0 3px rgb(142 162 255 / 0.35);
+
+  --s-field-bg: #1b1f2a;
+  --s-field-bg-hover: #212634;
+  --s-field-bg-focus: #12151c;
+
+  --s-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3);
+  --s-shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.45);
+  --s-shadow-lg: 0 16px 40px -8px rgb(0 0 0 / 0.6);
+  --s-scrim: rgb(0 0 0 / 0.65);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --s-duration-fast: 0ms;
+    --s-duration: 0ms;
+    --s-duration-slow: 0ms;
+  }
+}

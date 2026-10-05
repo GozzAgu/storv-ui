@@ -59,7 +59,7 @@ export {
   Eye as EyeIcon,
   EyeOff as EyeSlashIcon,
   Fingerprint as FingerPrintIcon,
-  Folder as FolderIcon,
+  FolderClosed as FolderIcon,
   Filter as FunnelIcon,
   Globe as GlobeAltIcon,
   Home as HomeIcon,

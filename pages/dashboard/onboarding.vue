@@ -1,292 +1,167 @@
 <template>
-  <div class="min-h-screen bg-gray-50 dark:!bg-dashboard-card">
-    <div
-      v-if="checkingProfile"
-      class="flex min-h-screen items-center justify-center px-4"
-    >
-      <div class="text-center">
-        <div
-          class="mx-auto mb-4 inline-block h-10 w-10 animate-spin rounded-full border-b-2 border-primary-500"
-        />
-        <p class="text-sm text-gray-600 dark:text-gray-400">Loading your account…</p>
-      </div>
+  <AuthShell
+    panel-eyebrow="Set up your store"
+    panel-title="A few details and you're in"
+    panel-description="This takes about a minute. You can change all of it later in Settings."
+    :steps="onboardingSteps"
+    :active-step="checkingProfile ? -1 : currentStep - 1"
+    steps-label="Store setup"
+    wide
+  >
+    <div v-if="checkingProfile" class="s-auth-status" role="status">
+      <SSpinner :size="28" label="Loading your account" />
+      <p class="s-auth-status__body">Loading your account…</p>
     </div>
 
-    <div v-else class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <!-- Progress Indicator -->
-      <div class="mb-5 sm:mb-6">
-        <div class="flex items-center justify-between mb-1.5">
-          <h2 class="text-xs font-medium text-gray-600 dark:text-gray-400">Account Setup</h2>
-          <span class="text-xs font-medium text-primary-500 dark:text-primary-400"
-            >Step {{ currentStep }} of {{ totalSteps }}</span
-          >
-        </div>
-        <div class="h-1.5 w-full rounded-full bg-gray-200 dark:bg-white/10">
-          <div
-            class="bg-gradient-to-r from-primary-400 to-primary-500 h-1.5 rounded-full transition-[width] duration-300 ease-out"
-            :style="{ width: `${(currentStep / totalSteps) * 100}%` }"
-          ></div>
+    <template v-else>
+      <div class="s-onboarding__progress">
+        <p class="s-onboarding__step-count">Step {{ currentStep }} of {{ totalSteps }}</p>
+        <div
+          class="s-onboarding__track"
+          role="progressbar"
+          :aria-valuenow="currentStep"
+          aria-valuemin="1"
+          :aria-valuemax="totalSteps"
+          :aria-valuetext="`Step ${currentStep} of ${totalSteps}`"
+        >
+          <span class="s-onboarding__fill" :style="{ width: `${(currentStep / totalSteps) * 100}%` }" />
         </div>
       </div>
 
-      <!-- Form Card -->
-      <div class="bg-white dark:!bg-dashboard-card rounded-sm p-5 sm:p-6">
-        <Transition name="step-fade" mode="out-in">
-          <!-- Step 1: Currency & Country Selection -->
-          <div v-if="currentStep === 1" key="step-1" class="space-y-4 sm:space-y-5">
-            <div class="text-center mb-4 sm:mb-5">
-              <div
-                class="mx-auto flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 mb-2.5"
-              >
-                <GlobeAltIcon class="h-5 w-5 text-white" />
-              </div>
-              <h1 class="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                Welcome to Storvv!
-              </h1>
-              <p class="text-xs text-gray-600 dark:text-gray-400 max-w-md mx-auto leading-relaxed">
-                Let's set up your account. Choose your currency and country to get started.
-              </p>
-            </div>
+      <AuthPageHeader :title="stepCopy.title" :subtitle="stepCopy.subtitle" />
 
-            <!-- Currency Selection -->
-            <div>
-              <label
-                for="currency"
-                class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-              >
-                Select Currency <span class="text-red-500">*</span>
-              </label>
-              <select
-                id="currency"
-                v-model="selectedCurrency"
-                required
-                class="onboarding-input app-field w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 rounded-sm focus:ring-2 focus:ring-primary-400/30 outline-none text-gray-900 dark:text-gray-100"
-              >
-                <option value="" disabled>Choose a currency...</option>
-                <option v-for="currency in currencies" :key="currency.code" :value="currency.code">
-                  {{ currency.symbol }} {{ currency.name }} ({{ currency.code }})
-                </option>
-              </select>
-              <p class="mt-1.5 text-[11px] leading-snug text-gray-500 dark:text-gray-400">
-                This currency will be used throughout your account for all transactions and reports.
-              </p>
-            </div>
-
-            <!-- Country Selection -->
-            <div>
-              <label
-                for="country"
-                class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-              >
-                Select Country <span class="text-red-500">*</span>
-              </label>
-              <select
-                id="country"
-                v-model="selectedCountry"
-                required
-                class="onboarding-input app-field w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 rounded-sm focus:ring-2 focus:ring-primary-400/30 outline-none text-gray-900 dark:text-gray-100"
-              >
-                <option value="" disabled>Choose your country...</option>
-                <option v-for="region in regions" :key="region.code" :value="region.code">
-                  {{ region.flag }} {{ region.name }}
-                </option>
-              </select>
-              <p class="mt-1.5 text-[11px] leading-snug text-gray-500 dark:text-gray-400">
-                This helps us format dates, times, and numbers according to your location.
-              </p>
-            </div>
+      <form class="auth-form" novalidate @submit.prevent="nextStep">
+        <Transition name="s-onboarding-step" mode="out-in">
+          <div v-if="currentStep === 1" key="step-1" class="s-form">
+            <SSelect
+              id="currency"
+              v-model="selectedCurrency"
+              label="Currency"
+              placeholder="Choose a currency"
+              hint="Used for every price, sale and report in your account."
+              :options="currencyOptions"
+              required
+            />
+            <SSelect
+              id="country"
+              v-model="selectedCountry"
+              label="Country"
+              placeholder="Choose your country"
+              hint="Sets how dates, times and numbers are shown."
+              :options="countryOptions"
+              required
+            />
           </div>
 
-          <!-- Step 2: Business experience -->
-          <div v-else-if="currentStep === 2" key="step-2" class="space-y-4 sm:space-y-5">
-            <div class="text-center mb-4 sm:mb-5">
-              <div
-                class="mx-auto flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 mb-2.5"
-              >
-                <UserIcon class="h-5 w-5 text-white" />
-              </div>
-              <h1 class="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                How do you run your business?
-              </h1>
-              <p class="text-xs text-gray-600 dark:text-gray-400 max-w-md mx-auto leading-relaxed">
-                Choose the setup that fits you. You can enable more features later in Settings.
-              </p>
-            </div>
-
-            <ExperienceModePicker v-model="selectedExperienceMode" :show-changes="false" />
+          <div v-else-if="currentStep === 2" key="step-2" class="s-form">
+            <ExperienceModePicker
+              v-model="selectedExperienceMode"
+              :show-changes="false"
+              aria-label="How you run your business"
+            />
           </div>
 
-          <!-- Step 3: Store Information -->
-          <div v-else key="step-3" class="space-y-3">
-            <div class="text-center mb-4 sm:mb-5">
-              <div
-                class="mx-auto flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 mb-2.5"
-              >
-                <BuildingStorefrontIcon class="h-5 w-5 text-white" />
-              </div>
-              <h1 class="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                Store Information
-              </h1>
-              <p class="text-xs text-gray-600 dark:text-gray-400 max-w-md mx-auto leading-relaxed">
-                Tell us about your store. This information will be used on receipts and reports.
-              </p>
-            </div>
+          <div v-else key="step-3" class="s-form">
+            <SSelect
+              v-if="availableCities.length > 0"
+              id="storeName"
+              v-model="storeDetails.storeName"
+              label="Head branch"
+              placeholder="Choose a city"
+              :hint="`Cities in ${selectedRegionLabel}.`"
+              :options="cityOptions"
+              required
+            />
+            <SInput
+              v-else
+              id="storeName"
+              v-model="storeDetails.storeName"
+              label="Head branch"
+              placeholder="For example, Lekki"
+              hint="The name of your main store location."
+              required
+            />
 
-            <!-- Head store branch -->
-            <div>
-              <label
-                for="storeName"
-                class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-              >
-                Head store branch <span class="text-red-500">*</span>
-              </label>
-              <select
-                v-if="availableCities.length > 0"
-                id="storeName"
-                v-model="storeDetails.storeName"
-                required
-                class="onboarding-input app-field w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 rounded-sm focus:ring-2 focus:ring-primary-400/30 outline-none text-gray-900 dark:text-gray-100"
-              >
-                <option value="" disabled>Choose a city...</option>
-                <option v-for="city in availableCities" :key="city" :value="city">
-                  {{ city }}
-                </option>
-              </select>
-              <input
-                v-else
-                id="storeName"
-                v-model="storeDetails.storeName"
-                type="text"
-                required
-                class="onboarding-input app-field w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 rounded-sm focus:ring-2 focus:ring-primary-400/30 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                placeholder="Enter head store branch"
-              />
-              <p class="mt-1.5 text-[11px] leading-snug text-gray-500 dark:text-gray-400">
-                Cities in {{ selectedRegionLabel }} based on your country selection.
-              </p>
-            </div>
-
-            <!-- Store Address -->
-            <div>
-              <label
-                for="storeAddress"
-                class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-              >
-                Store Address
-              </label>
-              <textarea
+            <fieldset class="s-onboarding__optional">
+              <legend>Optional, shown on receipts</legend>
+              <STextarea
                 id="storeAddress"
                 v-model="storeDetails.storeAddress"
-                rows="3"
-                class="onboarding-input app-field w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 rounded-sm focus:ring-2 focus:ring-primary-400/30 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                placeholder="123 Main Street, City, State 12345"
-              ></textarea>
-            </div>
-
-            <!-- Store Phone -->
-            <div>
-              <label
-                for="storePhone"
-                class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-              >
-                Store Phone
-              </label>
-              <input
-                id="storePhone"
-                v-model="storeDetails.storePhone"
-                type="tel"
-                class="onboarding-input app-field w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 rounded-sm focus:ring-2 focus:ring-primary-400/30 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                placeholder="+1 (555) 123-4567"
+                label="Address"
+                placeholder="Street, area and city"
+                :rows="2"
               />
-            </div>
-
-            <!-- Store Email -->
-            <div>
-              <label
-                for="storeEmail"
-                class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-              >
-                Store Email
-              </label>
-              <input
-                id="storeEmail"
-                v-model="storeDetails.storeEmail"
-                type="email"
-                class="onboarding-input app-field w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 rounded-sm focus:ring-2 focus:ring-primary-400/30 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                placeholder="store@example.com"
-              />
-            </div>
-
-            <!-- Store Description -->
-            <div>
-              <label
-                for="storeDescription"
-                class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-              >
-                Store Description
-              </label>
-              <textarea
+              <div class="s-onboarding__pair">
+                <SInput
+                  id="storePhone"
+                  v-model="storeDetails.storePhone"
+                  type="tel"
+                  label="Phone"
+                  autocomplete="tel"
+                  placeholder="+234 800 000 0000"
+                />
+                <SInput
+                  id="storeEmail"
+                  v-model="storeDetails.storeEmail"
+                  type="email"
+                  label="Email"
+                  autocomplete="email"
+                  placeholder="store@example.com"
+                />
+              </div>
+              <STextarea
                 id="storeDescription"
                 v-model="storeDetails.storeDescription"
-                rows="3"
-                class="onboarding-input app-field w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 rounded-sm focus:ring-2 focus:ring-primary-400/30 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                placeholder="Tell us about your store..."
-              ></textarea>
-            </div>
+                label="What you sell"
+                placeholder="For example, perfumes and body care"
+                :rows="2"
+              />
+            </fieldset>
           </div>
         </Transition>
 
-        <!-- Error Message -->
-        <div
-          v-if="errorMessage"
-          class="p-2.5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-sm mb-4"
-        >
-          <p class="text-xs text-red-600 dark:text-red-400 text-center">{{ errorMessage }}</p>
-        </div>
+        <AuthAlert v-if="errorMessage" title="Can't continue yet" :message="errorMessage" />
 
-        <!-- Navigation Buttons -->
-        <div class="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
-          <Button
-            v-if="currentStep > 1"
-            variant="outline"
-            size="sm"
-            type="button"
-            @click="previousStep"
-          >
-            Previous
-          </Button>
-          <div v-else aria-hidden="true" />
-
-          <Button
+        <div class="s-onboarding__actions">
+          <SButton v-if="currentStep > 1" :disabled="isLoading" @click="previousStep">
+            <template #leading><ArrowLeft :size="16" :stroke-width="2" aria-hidden="true" /></template>
+            Back
+          </SButton>
+          <SButton v-if="currentStep === 2" variant="ghost" @click="skipExperienceStep">
+            Skip for now
+          </SButton>
+          <SButton
+            type="submit"
             variant="primary"
-            size="sm"
-            type="button"
-            :icon="ArrowRightIcon"
-            icon-right
+            class="s-onboarding__next"
             :loading="isLoading"
             :disabled="isLoading || !canContinue"
-            @click="nextStep"
           >
-            {{
-              isLoading ? 'Saving...' : currentStep === totalSteps ? 'Complete Setup' : 'Continue'
-            }}
-          </Button>
+            {{ isLoading ? 'Setting up…' : currentStep === totalSteps ? 'Finish setup' : 'Continue' }}
+            <template v-if="!isLoading" #trailing>
+              <ArrowRight :size="16" :stroke-width="2" aria-hidden="true" />
+            </template>
+          </SButton>
         </div>
-      </div>
-    </div>
-  </div>
+      </form>
+    </template>
+  </AuthShell>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, nextTick, computed, watch } from 'vue'
-import {
-  GlobeAltIcon,
-  ArrowRightIcon,
-  BuildingStorefrontIcon,
-  UserIcon,
-} from '~/utils/app-icons'
-import Button from '~/components/ui/Button.vue'
+import { ArrowLeft, ArrowRight } from '@lucide/vue'
+import AuthShell from '~/components/auth/AuthShell.vue'
+import AuthPageHeader from '~/components/auth/AuthPageHeader.vue'
+import AuthAlert from '~/components/auth/AuthAlert.vue'
+import SButton from '~/components/s/SButton.vue'
+import SInput from '~/components/s/SInput.vue'
+import SSelect from '~/components/s/SSelect.vue'
+import SSpinner from '~/components/s/SSpinner.vue'
+import STextarea from '~/components/s/STextarea.vue'
 import ExperienceModePicker from '~/components/settings/ExperienceModePicker.vue'
+import { DEFAULT_EXPERIENCE_MODE } from '~/types/business-experience'
+import { suggestOnboardingLocale } from '~/utils/onboarding-locale'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useUser, type StoreDetails } from '~/composables/useUser'
 import { usePreferences, currencies, regions } from '~/composables/usePreferences'
@@ -298,9 +173,32 @@ import { withOnboardingExperienceChoice } from '~/utils/onboarding-experience'
 import { useFunnelAnalytics } from '~/composables/useFunnelAnalytics'
 
 definePageMeta({
-  layout: 'dashboard',
+  layout: false,
   middleware: 'auth',
 })
+
+useHead({ title: 'Set up your store - Storvv' })
+
+const onboardingSteps = [
+  { label: 'Currency and country' },
+  { label: 'How you work' },
+  { label: 'Your head branch' },
+]
+
+const STEP_COPY = [
+  {
+    title: 'Welcome to Storvv',
+    subtitle: 'Choose the currency and country your business runs in.',
+  },
+  {
+    title: 'How do you run your business?',
+    subtitle: 'Pick what fits today. You can turn on more tools later in Settings.',
+  },
+  {
+    title: 'Add your head branch',
+    subtitle: 'This becomes your first store. Add more branches any time.',
+  },
+] as const
 
 const { currentUser, loading: authLoading } = useFirebaseAuth()
 const { getUserDocument, updateUserDocument, updateStoreDetails } = useUser()
@@ -326,11 +224,17 @@ const storeDetails = ref<StoreDetails>({
   storeDescription: '',
 })
 
-// Get currency symbol from selected currency
-const selectedCurrencySymbol = computed(() => {
-  const currency = currencies.find((c) => c.code === selectedCurrency.value)
-  return currency?.symbol || '$'
-})
+const stepCopy = computed(() => STEP_COPY[currentStep.value - 1] ?? STEP_COPY[0])
+
+const currencyOptions = currencies.map((currency) => ({
+  value: currency.code,
+  label: `${currency.symbol} ${currency.name} (${currency.code})`,
+}))
+const countryOptions = regions.map((region) => ({
+  value: region.code,
+  label: `${region.flag} ${region.name}`,
+}))
+const cityOptions = computed(() => availableCities.value.map((city) => ({ value: city, label: city })))
 
 const selectedRegionLabel = computed(() => {
   const region = regions.find((r) => r.code === selectedCountry.value)
@@ -381,6 +285,13 @@ onMounted(async () => {
     const userData = await getUserDocument(currentUser.value.uid)
     if (userData?.hasCompletedOnboarding) {
       await navigateTo('/dashboard')
+      return
+    }
+
+    if (!selectedCountry.value && !selectedCurrency.value) {
+      const suggestion = suggestOnboardingLocale(navigator.languages ?? [], regions, currencies)
+      selectedCountry.value = suggestion.country
+      selectedCurrency.value = suggestion.currency
     }
   } finally {
     checkingProfile.value = false
@@ -393,6 +304,13 @@ const previousStep = () => {
     errorMessage.value = ''
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
+}
+
+function skipExperienceStep() {
+  selectedExperienceMode.value = DEFAULT_EXPERIENCE_MODE
+  errorMessage.value = ''
+  currentStep.value = 3
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 const nextStep = async () => {
@@ -497,28 +415,3 @@ const completeOnboarding = async () => {
 }
 </script>
 
-<style scoped>
-.step-fade-enter-active,
-.step-fade-leave-active {
-  transition: opacity 220ms ease, transform 220ms ease;
-}
-
-.step-fade-enter-from,
-.step-fade-leave-to {
-  opacity: 0;
-  transform: translateY(6px);
-}
-
-/* Native selects: align height with compact inputs (browser default line-height can look tall) */
-.onboarding-input {
-  min-height: 2.25rem;
-}
-select.onboarding-input {
-  min-height: 2.25rem;
-  padding-top: 0.375rem;
-  padding-bottom: 0.375rem;
-}
-textarea.onboarding-input {
-  min-height: auto;
-}
-</style>

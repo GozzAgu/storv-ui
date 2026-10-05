@@ -1,92 +1,70 @@
 <template>
-  <Modal
-    :model-value="modelValue"
-    @update:model-value="emit('update:modelValue', $event)"
+  <SDialog
+    :open="modelValue"
+    @update:open="emit('update:modelValue', $event)"
     size="md"
     title="Customer balance"
   >
     <template #default>
-      <div v-if="!hasBalanceFeature" class="space-y-3">
-        <p class="text-sm text-gray-600 dark:text-gray-400">
+      <div v-if="!hasBalanceFeature" class="s-balance__locked">
+        <p class="s-balance__locked-text">
           Customer balance tracking is available on Storvv Medium and Enterprise.
         </p>
-        <NuxtLink
-          to="/dashboard/settings?tab=subscription"
-          class="inline-flex text-sm font-medium text-gray-800 hover:text-gray-950 dark:text-gray-200"
-        >
-          View plans →
-        </NuxtLink>
+        <SButton size="sm" to="/dashboard/settings?tab=subscription">
+          View plans
+          <template #trailing>
+            <ArrowRight :size="14" :stroke-width="2" aria-hidden="true" />
+          </template>
+        </SButton>
       </div>
 
-      <IosForm v-else layout="default" scroll>
-        <IosFormSection fixed>
-          <div class="rounded-sm bg-gray-50/80 px-4 py-3 dark:bg-white/[0.04]">
-            <p
-              class="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400"
-            >
-              {{ customerName }}
-            </p>
-            <p class="mt-1 text-lg font-semibold tabular-nums text-gray-900 dark:text-gray-50">
+      <SForm v-else>
+        <SFormSection>
+          <div class="s-balance__summary">
+            <p class="s-balance__name">{{ customerName }}</p>
+            <p class="s-balance__amount">
               {{ formatCurrency(currentBalance) }}
-              <span class="text-xs font-normal text-gray-500 dark:text-gray-400">balance due</span>
+              <span class="s-balance__amount-label">balance due</span>
             </p>
           </div>
 
-          <div class="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              :class="actionTab === 'charge' ? activeTabClass : inactiveTabClass"
-              @click="actionTab = 'charge'"
-            >
-              Add charge
-            </button>
-            <button
-              type="button"
-              :class="actionTab === 'payment' ? activeTabClass : inactiveTabClass"
-              @click="actionTab = 'payment'"
-            >
-              Record payment
-            </button>
-          </div>
+          <STabs
+            v-model="actionTab"
+            :tabs="actionTabs"
+            label="Balance action"
+            block
+          />
 
-          <IosFormField label="Amount">
-            <IosFormInput v-model="amountInput" type="number" min="0" step="0.01" />
-          </IosFormField>
+          <SField label="Amount">
+            <SInput v-model="amountInput" type="number" inputmode="decimal" min="0" step="0.01" />
+          </SField>
 
-          <IosFormField label="Note" hint="Optional">
-            <IosFormInput v-model="noteInput" type="text" placeholder="e.g. Part payment for invoice" />
-          </IosFormField>
+          <SField label="Note" hint="Optional">
+            <SInput v-model="noteInput" type="text" placeholder="e.g. Part payment for invoice" />
+          </SField>
 
-          <div v-if="recentLedger.length" class="border-t border-gray-200 pt-3 dark:border-white/10">
-            <p
-              class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400"
-            >
-              Recent activity
-            </p>
-            <ul class="max-h-36 space-y-1.5 overflow-y-auto text-[11px]">
-              <li
-                v-for="entry in recentLedger"
-                :key="entry.id"
-                class="flex justify-between gap-2 text-gray-600 dark:text-gray-400"
-              >
-                <span class="min-w-0 truncate capitalize"
+          <div v-if="recentLedger.length" class="s-record-history">
+            <h4 class="s-record-history__title">Recent activity</h4>
+            <ul class="s-record-rows s-balance__history">
+              <li v-for="entry in recentLedger" :key="entry.id" class="s-record-row">
+                <span class="s-balance__entry-label"
                   >{{ entry.type }}{{ entry.note ? ` · ${entry.note}` : '' }}</span
                 >
                 <span
-                  class="shrink-0"
-                  :class="entry.amount >= 0 ? tableMoneyOwedClass() : tableMoneyClass()"
+                  class="s-record-row__value"
+                  :class="entry.amount >= 0 ? 's-balance__entry--owed' : 's-balance__entry--credit'"
                 >
                   {{ entry.amount >= 0 ? '+' : '' }}{{ formatCurrency(entry.amount) }}
                 </span>
               </li>
             </ul>
           </div>
-        </IosFormSection>
-      </IosForm>
+        </SFormSection>
+      </SForm>
     </template>
 
     <template #footer>
-      <IosDrawerActions
+      <SDialogActions
         cancel-label="Close"
         primary-label="Save"
         :show-primary="hasBalanceFeature"
@@ -96,17 +74,22 @@
         @primary="handleSave"
       />
     </template>
-  </Modal>
+  </SDialog>
 </template>
 
 <script setup lang="ts">
+import SButton from '~/components/s/SButton.vue'
+import SDialog from '~/components/s/SDialog.vue'
+import SDialogActions from '~/components/s/SDialogActions.vue'
+import SField from '~/components/s/SField.vue'
+import SForm from '~/components/s/SForm.vue'
+import SFormSection from '~/components/s/SFormSection.vue'
+import SInput from '~/components/s/SInput.vue'
+import STabs from '~/components/s/STabs.vue'
 import { ref, computed, watch } from 'vue'
-import Modal from '~/components/ui/Modal.vue'
-import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
-import { IosForm, IosFormSection, IosFormField, IosFormInput } from '~/components/ios/forms'
+import { ArrowRight } from '@lucide/vue'
 import { useCustomerAccountsStore } from '~/stores/customerAccounts'
 import { getCustomerContactKey } from '~/utils/customer-key'
-import { tableMoneyClass, tableMoneyOwedClass } from '~/utils/table-money-styles'
 
 const props = defineProps<{
   modelValue: boolean
@@ -125,15 +108,15 @@ const { formatCurrency } = usePreferences()
 const accountsStore = useCustomerAccountsStore()
 const toast = useAppToast()
 
-const actionTab = ref<'charge' | 'payment'>('charge')
+const actionTab = ref<string>('charge')
 const amountInput = ref<number | null>(null)
 const noteInput = ref('')
 const saving = ref(false)
 
-const activeTabClass =
-  'h-9 rounded-lg border-0 bg-gray-900 px-3 text-xs font-medium text-white dark:bg-white dark:text-gray-900'
-const inactiveTabClass =
-  'h-9 rounded-lg bg-white px-3 text-xs font-medium text-gray-600 dark:!bg-dashboard-card dark:text-gray-400'
+const actionTabs = [
+  { value: 'charge', label: 'Add charge' },
+  { value: 'payment', label: 'Record payment' },
+]
 
 const contactKey = computed(() =>
   getCustomerContactKey({

@@ -1,355 +1,194 @@
 <template>
-  <Modal
-    :modelValue="props.modelValue"
-    @update:modelValue="(value: boolean) => emit('update:modelValue', value)"
-    title="Set Up Two-Factor Authentication"
+  <SDialog
+    :open="props.modelValue"
+    @update:open="(value: boolean) => emit('update:modelValue', value)"
+    title="Set up two-factor authentication"
     size="md"
   >
-    <div class="space-y-4">
-      <!-- Step 1: Choose Method -->
-      <div v-if="step === 1" class="space-y-3">
-        <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+    <div class="s-form">
+      <template v-if="step === 1">
+        <p class="s-settings__dialog-text">
           Choose your preferred 2FA method. We recommend using an authenticator app for better
           security.
         </p>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div class="s-choice-grid" role="radiogroup" aria-label="Two-factor method">
           <button
+            type="button"
+            role="radio"
+            class="s-choice"
+            :aria-checked="selectedMethod === 'totp'"
             @click="selectMethod('totp')"
-            :class="[
-              'p-4 rounded-sm border-0 transition-all text-left',
-              selectedMethod === 'totp'
-                ? 'bg-primary-50 dark:bg-primary-900/20'
-                : 'bg-gray-50/80 dark:bg-gray-800/50',
-            ]"
           >
-            <div class="flex items-center gap-2 mb-1.5">
-              <div
-                class="w-8 h-8 rounded-sm bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center"
-              >
-                <ShieldCheckIcon class="w-5 h-5 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <p class="font-semibold text-sm text-gray-900 dark:text-gray-100">
-                  Authenticator App
-                </p>
-                <p class="text-[11px] text-gray-500 dark:text-gray-400">Recommended</p>
-              </div>
-            </div>
-            <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+            <span class="s-choice__head">
+              <span class="s-profile-2fa__method">
+                <ShieldCheck :size="20" :stroke-width="1.75" aria-hidden="true" />
+                <span class="s-choice__title">Authenticator app</span>
+              </span>
+              <span class="s-choice__radio" aria-hidden="true" />
+            </span>
+            <SBadge tone="accent" class="s-profile-2fa__badge">Recommended</SBadge>
+            <span class="s-choice__description">
               Use apps like Google Authenticator, Authy, or Microsoft Authenticator
-            </p>
+            </span>
           </button>
 
           <button
+            type="button"
+            role="radio"
+            class="s-choice"
+            :aria-checked="selectedMethod === 'phone'"
             @click="selectMethod('phone')"
-            :class="[
-              'p-4 rounded-sm border-0 transition-all text-left',
-              selectedMethod === 'phone'
-                ? 'bg-primary-50 dark:bg-primary-900/20'
-                : 'bg-gray-50/80 dark:bg-gray-800/50',
-            ]"
           >
-            <div class="flex items-center gap-2 mb-1.5">
-              <div
-                class="w-8 h-8 rounded-sm bg-green-100 dark:bg-green-900/30 flex items-center justify-center"
-              >
-                <DevicePhoneMobileIcon class="w-5 h-5 text-green-600 dark:text-green-400" />
-              </div>
-              <p class="font-semibold text-sm text-gray-900 dark:text-gray-100">SMS</p>
-            </div>
-            <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-              Receive verification codes via SMS
-            </p>
+            <span class="s-choice__head">
+              <span class="s-profile-2fa__method">
+                <Smartphone :size="20" :stroke-width="1.75" aria-hidden="true" />
+                <span class="s-choice__title">SMS</span>
+              </span>
+              <span class="s-choice__radio" aria-hidden="true" />
+            </span>
+            <span class="s-choice__description">Receive verification codes via SMS</span>
           </button>
         </div>
-      </div>
+      </template>
 
-      <!-- Step 2: TOTP Setup -->
-      <div v-if="step === 2 && selectedMethod === 'totp'" class="space-y-4">
-        <div class="text-center">
-          <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1.5">
-            Scan QR Code
-          </h3>
-          <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-4">
-            Scan this QR code with your authenticator app
-          </p>
+      <template v-if="step === 2 && selectedMethod === 'totp'">
+        <div class="s-profile-2fa__intro">
+          <h3 class="s-form-section__title">Scan QR code</h3>
+          <p class="s-settings__dialog-text">Scan this QR code with your authenticator app</p>
+        </div>
 
-          <!-- QR Code -->
-          <div class="flex justify-center mb-4">
-            <div v-if="qrCodeUrl" class="p-3 bg-white dark:!bg-dashboard-card rounded-sm">
-              <img :src="qrCodeUrl" alt="2FA QR Code" class="w-56 h-56" />
-            </div>
-            <div
-              v-else
-              class="w-56 h-56 bg-gray-100 dark:!bg-dashboard-card rounded-sm flex items-center justify-center"
-            >
-              <div class="text-center">
-                <div
-                  class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-primary-500 mb-2"
-                ></div>
-                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                  Generating QR code...
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Manual Entry -->
-          <div class="bg-gray-50 dark:bg-gray-800/50 rounded-sm p-3">
-            <p class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-              Can't scan? Enter this code manually:
-            </p>
-            <div class="flex items-center justify-between gap-2">
-              <code
-                class="flex-1 px-3 py-1.5 bg-white dark:!bg-dashboard-card rounded-sm text-xs sm:text-sm font-mono text-gray-900 dark:text-gray-100 break-all"
-              >
-                {{ secretKey }}
-              </code>
-              <button
-                @click="copySecret"
-                class="px-3 py-1.5 text-xs sm:text-sm font-medium text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-sm transition-colors"
-              >
-                Copy
-              </button>
-            </div>
-          </div>
-
-          <div
-            class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-sm border border-blue-200 dark:border-blue-800"
-          >
-            <p class="text-xs sm:text-sm text-blue-900 dark:text-blue-100">
-              <strong>Popular authenticator apps:</strong> Google Authenticator, Microsoft
-              Authenticator, Authy, 1Password
-            </p>
+        <div class="s-profile-2fa__qr">
+          <img v-if="qrCodeUrl" :src="qrCodeUrl" alt="2FA QR code" />
+          <div v-else class="s-profile-2fa__qr-loading" role="status">
+            <SSpinner :size="24" />
+            <span>Generating QR code...</span>
           </div>
         </div>
-      </div>
 
-      <!-- Step 2: Phone Setup -->
-      <div v-if="step === 2 && selectedMethod === 'phone'" class="space-y-3">
-        <div>
-          <label
-            class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-          >
-            Phone Number
-          </label>
-          <input
-            v-model="phoneNumber"
-            type="tel"
-            class="w-full px-3 py-2 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-400 outline-none text-sm"
-            placeholder="+1234567890"
-          />
-          <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
-            Enter your phone number with country code
-          </p>
+        <div class="s-profile-2fa__secret">
+          <p class="s-form-meta">Can't scan? Enter this code manually:</p>
+          <div class="s-inline-field">
+            <code class="s-inline-field__grow s-profile-2fa__key">{{ secretKey }}</code>
+            <SButton size="sm" @click="copySecret">
+              <template #leading><Copy :size="16" :stroke-width="2" aria-hidden="true" /></template>
+              Copy
+            </SButton>
+          </div>
         </div>
+
+        <p class="s-callout">
+          <strong>Popular authenticator apps:</strong> Google Authenticator, Microsoft
+          Authenticator, Authy, 1Password
+        </p>
+      </template>
+
+      <template v-if="step === 2 && selectedMethod === 'phone'">
+        <SInput
+          v-model="phoneNumber"
+          type="tel"
+          label="Phone number"
+          autocomplete="tel"
+          placeholder="+1234567890"
+          hint="Enter your phone number with country code"
+        />
         <div id="recaptcha-container-2fa"></div>
-      </div>
+      </template>
 
-      <!-- Step 3: Verify -->
-      <div v-if="step === 3" class="space-y-3">
-        <div class="text-center">
-          <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1.5">
-            Verify Setup
-          </h3>
-          <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-4">
+      <template v-if="step === 3">
+        <div class="s-profile-2fa__intro">
+          <h3 class="s-form-section__title">Verify setup</h3>
+          <p class="s-settings__dialog-text">
             Enter the {{ selectedMethod === 'totp' ? '6-digit code' : 'verification code' }} from
             your {{ selectedMethod === 'totp' ? 'authenticator app' : 'phone' }}
           </p>
         </div>
 
-        <div>
-          <label
-            class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-          >
-            Verification Code
-          </label>
-          <input
-            v-model="verificationCode"
-            type="text"
-            maxlength="6"
-            class="w-full px-3 py-2 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-400 outline-none text-center text-xl tracking-widest font-mono"
-            placeholder="000000"
-            @input="formatCode"
-          />
-        </div>
+        <SInput
+          v-model="verificationCode"
+          label="Verification code"
+          inputmode="numeric"
+          autocomplete="one-time-code"
+          maxlength="6"
+          class="s-otp-input s-otp-input--lg"
+          placeholder="000000"
+          @input="formatCode"
+        />
 
-        <div
-          v-if="errorMessage"
-          class="p-2.5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-sm"
-        >
-          <p class="text-xs sm:text-sm text-red-600 dark:text-red-400">{{ errorMessage }}</p>
-        </div>
-      </div>
+        <p v-if="errorMessage" class="s-profile-error" role="alert">{{ errorMessage }}</p>
+      </template>
 
-      <!-- Step 4: Backup Codes -->
-      <div v-if="step === 4" class="space-y-3">
-        <div class="text-center">
-          <CheckCircleIcon class="w-12 h-12 text-green-500 mx-auto mb-3" />
-          <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1.5">
-            Two-Factor Authentication Enabled!
-          </h3>
-          <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-4">
+      <template v-if="step === 4">
+        <div class="s-profile-2fa__intro">
+          <CircleCheck class="s-profile-2fa__done" :size="48" :stroke-width="1.75" aria-hidden="true" />
+          <h3 class="s-form-section__title">Two-factor authentication enabled!</h3>
+          <p class="s-settings__dialog-text">
             Save these backup codes in a safe place. You can use them if you lose access to your
             authenticator app.
           </p>
         </div>
 
-        <div
-          class="bg-gray-50 dark:bg-gray-800/50 rounded-sm p-3 border border-dashed border-gray-300"
-        >
-          <div class="grid grid-cols-2 gap-1.5">
-            <div
-              v-for="(code, index) in backupCodes"
-              :key="index"
-              class="px-2.5 py-1.5 bg-white dark:!bg-dashboard-card rounded text-xs sm:text-sm font-mono text-gray-900 dark:text-gray-100 text-center"
-            >
-              {{ code }}
-            </div>
-          </div>
-        </div>
+        <ul class="s-profile-2fa__codes" aria-label="Backup codes">
+          <li v-for="(code, index) in backupCodes" :key="index">{{ code }}</li>
+        </ul>
 
-        <div class="flex gap-2">
-          <button
-            @click="copyBackupCodes"
-            class="flex-1 px-3 py-1.5 text-xs sm:text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-sm transition-colors"
-          >
-            Copy Codes
-          </button>
-          <button
-            @click="downloadBackupCodes"
-            class="flex-1 px-3 py-1.5 text-xs sm:text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-sm transition-colors"
-          >
+        <div class="s-profile-2fa__code-actions">
+          <SButton block @click="copyBackupCodes">
+            <template #leading><Copy :size="16" :stroke-width="2" aria-hidden="true" /></template>
+            Copy codes
+          </SButton>
+          <SButton block @click="downloadBackupCodes">
+            <template #leading><Download :size="16" :stroke-width="2" aria-hidden="true" /></template>
             Download
-          </button>
+          </SButton>
         </div>
 
-        <div
-          class="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-sm border border-yellow-200 dark:border-yellow-800"
-        >
-          <p class="text-xs sm:text-sm text-yellow-900 dark:text-yellow-100">
-            <strong>Important:</strong> Each backup code can only be used once. Store them securely.
-          </p>
-        </div>
-      </div>
+        <p class="s-notice">
+          <strong>Important:</strong> Each backup code can only be used once. Store them securely.
+        </p>
+      </template>
     </div>
 
     <template #footer>
-      <div class="flex items-center justify-between w-full">
-        <Button
-          v-if="step > 1 && step < 4"
-          variant="outline"
-          size="sm"
-          @click="previousStep"
-          :disabled="isVerifying"
-          extra-class="!rounded-2xl"
-        >
-          Back
-        </Button>
-        <div v-else></div>
-
-        <div class="flex gap-2">
-          <Button
-            v-if="step < 4"
-            variant="outline"
-            size="sm"
-            @click="$emit('update:modelValue', false)"
-            :disabled="isVerifying"
-            extra-class="!rounded-2xl"
-          >
-            Cancel
-          </Button>
-          <Button
-            v-if="step === 1"
-            size="sm"
-            @click="nextStep"
-            :disabled="!selectedMethod"
-            extra-class="!rounded-2xl"
-          >
-            Continue
-          </Button>
-          <Button
-            v-if="step === 2"
-            size="sm"
-            @click="initiateSetup"
-            :disabled="isLoading || (selectedMethod === 'phone' && !phoneNumber)"
-            extra-class="!rounded-2xl"
-          >
-            <span v-if="isLoading" class="flex items-center gap-2">
-              <svg
-                class="animate-spin h-4 w-4"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  class="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  stroke-width="4"
-                ></circle>
-                <path
-                  class="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-              Setting up...
-            </span>
-            <span v-else>Continue</span>
-          </Button>
-          <Button
-            v-if="step === 3"
-            size="sm"
-            @click="verifyCode"
-            :disabled="isVerifying || !verificationCode || verificationCode.length !== 6"
-            extra-class="!rounded-2xl"
-          >
-            <span v-if="isVerifying" class="flex items-center gap-2">
-              <svg
-                class="animate-spin h-4 w-4"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  class="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  stroke-width="4"
-                ></circle>
-                <path
-                  class="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-              Verifying...
-            </span>
-            <span v-else>Verify</span>
-          </Button>
-          <Button v-if="step === 4" size="sm" @click="completeSetup" extra-class="!rounded-2xl">
-            Done
-          </Button>
-        </div>
+      <div v-if="step > 1 && step < 4" class="s-dialog__foot-start">
+        <SButton :disabled="isVerifying" @click="previousStep">Back</SButton>
       </div>
+      <SButton v-if="step < 4" :disabled="isVerifying" @click="$emit('update:modelValue', false)">
+        Cancel
+      </SButton>
+      <SButton v-if="step === 1" variant="primary" :disabled="!selectedMethod" @click="nextStep">
+        Continue
+      </SButton>
+      <SButton
+        v-if="step === 2"
+        variant="primary"
+        :loading="isLoading"
+        :disabled="isLoading || (selectedMethod === 'phone' && !phoneNumber)"
+        @click="initiateSetup"
+      >
+        {{ isLoading ? 'Setting up...' : 'Continue' }}
+      </SButton>
+      <SButton
+        v-if="step === 3"
+        variant="primary"
+        :loading="isVerifying"
+        :disabled="isVerifying || !verificationCode || verificationCode.length !== 6"
+        @click="verifyCode"
+      >
+        {{ isVerifying ? 'Verifying...' : 'Verify' }}
+      </SButton>
+      <SButton v-if="step === 4" variant="primary" @click="completeSetup">Done</SButton>
     </template>
-  </Modal>
+  </SDialog>
 </template>
 
 <script setup lang="ts">
+import SDialog from '~/components/s/SDialog.vue'
 import { ref, watch, onMounted, onUnmounted } from 'vue'
-import {
-  ShieldCheckIcon,
-  DevicePhoneMobileIcon,
-  CheckCircleIcon,
-} from '~/utils/app-icons'
-import Modal from '~/components/ui/Modal.vue'
-import Button from '~/components/ui/Button.vue'
+import { CircleCheck, Copy, Download, ShieldCheck, Smartphone } from '@lucide/vue'
+import SBadge from '~/components/s/SBadge.vue'
+import SButton from '~/components/s/SButton.vue'
+import SInput from '~/components/s/SInput.vue'
+import SSpinner from '~/components/s/SSpinner.vue'
 import QRCode from 'qrcode'
 import { TOTP } from 'otpauth'
 

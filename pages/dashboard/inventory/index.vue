@@ -1,638 +1,339 @@
 <template>
   <div
     data-inventory-categories
-    :class="[
-      pageWithFooterClass,
-      'dash-page--unified',
-      isCapacitorIos ? 'ios-inventory-categories-page' : '',
-    ]"
+    class="ds-root s-c s-page s-inventory"
   >
-    <IosPageNavBar v-if="isCapacitorIos" :title="iosCategoriesNavTitle">
-      <template
-        v-if="canCreateInventoryFolders && paginatedFolders.length > 0"
-        #trailing
-      >
-        <button
-          type="button"
-          class="ios-top-bar-text-btn"
-          @click="toggleIosFolderSelectMode"
-        >
-          {{ isIosFolderSelecting ? 'Done' : 'Select' }}
-        </button>
-      </template>
-    </IosPageNavBar>
-
-    <DashboardPageHeader v-if="!isCapacitorIos" class="dash-page-header--unified">
+    <SPageHeader :title="branchPageTitle('Categories')">
       <template #eyebrow>
-        <nav :class="eyebrowClass" aria-label="Breadcrumb">
-          <span>Inventory</span>
-          <span class="mx-1.5 text-gray-300 dark:text-gray-600">/</span>
-          <span class="text-gray-600 dark:text-gray-400">Categories</span>
-        </nav>
-      </template>
-      <template #title>
-        <h1 :class="titleClass">{{ branchPageTitle('Categories') }}</h1>
-      </template>
-      <template
-        v-if="inventoryStore.loading && inventoryStore.folders.length === 0"
-        #description
-      >
-        <DashPageMetricsSkeleton :count="5" />
-      </template>
-      <template
-        v-else-if="!inventoryStore.loading && inventoryStore.folders.length > 0"
-        #description
-      >
-        <DashboardPageMetrics
-          :metrics="categoryHeaderMetrics"
-          aria-label="Category summary"
-        />
+        <p class="s-page-header__eyebrow">Inventory</p>
       </template>
       <template #actions>
-        <div :class="viewToggleClass" role="group" aria-label="Category layout">
-          <button
-            type="button"
-            :class="[viewToggleBtnClass, foldersViewMode === 'grid' ? viewToggleBtnActiveClass : '']"
-            :aria-pressed="foldersViewMode === 'grid'"
-            @click="foldersViewMode = 'grid'"
-          >
-            <Squares2X2Icon class="h-3.5 w-3.5" aria-hidden="true" />
-          </button>
-          <button
-            type="button"
-            :class="[viewToggleBtnClass, foldersViewMode === 'table' ? viewToggleBtnActiveClass : '']"
-            :aria-pressed="foldersViewMode === 'table'"
-            @click="foldersViewMode = 'table'"
-          >
-            <TableCellsIcon class="h-3.5 w-3.5" aria-hidden="true" />
-          </button>
-        </div>
-        <Button
+        <SButton
           v-if="inventoryStore.lowStockFolders.length > 0"
-          variant="outline"
-          size="sm"
-          :extra-class="headerTextBtnClass"
-          :disabled="reorderExporting"
+          :loading="reorderExporting"
           @click="handleExportReorderList"
         >
-          {{ reorderExporting ? 'Exporting…' : 'Export reorder list' }}
-        </Button>
+          <template #leading><Download :size="16" :stroke-width="1.75" aria-hidden="true" /></template>
+          Export reorder list
+        </SButton>
         <template v-if="canCreateInventoryFolders">
-          <Button
+          <SButton
             v-if="canShowCopyFolderTemplatesFromBranch"
-            variant="outline"
-            size="sm"
-            :icon="ArrowsRightLeftIcon"
-            :extra-class="headerBtnClass"
             @click="openCopyFolderTemplatesFromBranchModal"
           >
-            <span class="hidden sm:inline">Copy from branch</span>
-            <span class="sm:hidden">Copy</span>
-          </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            :icon="PlusCircleIcon"
-            :extra-class="headerBtnClass"
-            @click="openCreateFolderModal"
-          >
+            <template #leading><ArrowLeftRight :size="16" :stroke-width="1.75" aria-hidden="true" /></template>
+            Copy from branch
+          </SButton>
+          <SButton variant="primary" @click="openCreateFolderModal">
+            <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
             New category
-          </Button>
+          </SButton>
         </template>
       </template>
-      <template v-if="inventoryStore.loading && inventoryStore.folders.length === 0" #filters>
-        <span class="dash-skeleton dash-skeleton--search" />
-        <span class="dash-skeleton dash-skeleton--select" />
-        <span class="dash-skeleton dash-skeleton--select" />
-      </template>
-      <template v-else-if="!inventoryStore.loading && inventoryStore.folders.length > 0" #filters>
-        <DashboardToolbarSearch
-          v-if="!isCapacitorIos"
-          v-model="searchQuery"
-          placeholder="Search categories…"
-          input-class="sm:w-52"
-        />
-        <DashboardToolbarSelect
-          v-if="!isStaff"
-          v-model="selectedDepartmentId"
-          wrapper-class="min-w-[8.5rem] flex-1 sm:flex-none"
-        >
-          <option value="">All departments</option>
-          <option v-for="dept in currentStoreDepartments" :key="dept.id" :value="dept.id">
-            {{ dept.name }}
-          </option>
-        </DashboardToolbarSelect>
-        <DashboardToolbarSelect v-model="sortBy" min-width-class="min-w-[5.5rem]">
-          <option value="name">Name</option>
-          <option value="items">Products</option>
-          <option value="date">Date</option>
-        </DashboardToolbarSelect>
-        <div
-          v-if="canCreateInventoryFolders && paginatedFolders.length > 0"
-          class="dash-page-header__bulk ml-auto"
-        >
-          <DashboardBulkSelectControl
-            :model-value="allFoldersOnPageSelected"
-            :selected-count="selectedFoldersForBulk.length"
-            @update:model-value="toggleSelectAllFolders"
-          >
-            <template #action>
-              <Button
-                variant="outline"
-                size="sm"
-                :icon="TrashIcon"
-                :extra-class="
-                  headerBtnClass +
-                  ' !border-red-200/70 !text-red-600 hover:!bg-red-50/80 dark:!border-red-900/40 dark:!text-red-400 dark:hover:!bg-red-950/30'
-                "
-                @click="openBulkDeleteFoldersModal"
-              >
-                Delete
-              </Button>
-            </template>
-          </DashboardBulkSelectControl>
-        </div>
-      </template>
-    </DashboardPageHeader>
+    </SPageHeader>
 
     <div
-      v-if="isCapacitorIos && (inventoryStore.folders.length > 0 || !inventoryStore.loading)"
-      class="ios-search-bar-host ios-search-bar-host--sticky"
+      v-if="inventoryStore.loading && inventoryStore.folders.length === 0"
+      class="s-metrics"
+      aria-hidden="true"
     >
-      <IosSearchBar v-model="searchQuery" placeholder="Search categories…" />
-    </div>
-
-    <IosQuickActionBar
-      v-if="isCapacitorIos && (inventoryStore.folders.length > 0 || !inventoryStore.loading)"
-      v-model="categoryFilter"
-      class="ios-inventory-filter-tabs"
-      aria-label="Category actions"
-      :options="categoryQuickActionOptions"
-    />
-
-    <div
-      v-if="
-        isCapacitorIos &&
-        isIosFolderSelecting &&
-        canCreateInventoryFolders &&
-        paginatedFolders.length > 0 &&
-        !inventoryStore.loading
-      "
-      class="ios-bulk-select-host"
-    >
-      <DashboardBulkSelectControl
-        :model-value="allFoldersOnPageSelected"
-        :selected-count="selectedFoldersForBulk.length"
-        @update:model-value="toggleSelectAllFolders"
-      >
-        <template #action>
-          <Button
-            variant="outline"
-            size="sm"
-            :icon="TrashIcon"
-            :extra-class="
-              headerBtnClass +
-              ' !border-red-200/70 !text-red-600 hover:!bg-red-50/80 dark:!border-red-900/40 dark:!text-red-400 dark:hover:!bg-red-950/30'
-            "
-            @click="openBulkDeleteFoldersModal"
-          >
-            Delete
-          </Button>
-        </template>
-      </DashboardBulkSelectControl>
-    </div>
-
-    <IosDrawer
-      v-if="isCapacitorIos"
-      v-model="showInventoryMoreSheet"
-      title="Category options"
-      subtitle="Sort and filter"
-      variant="menu"
-      footer-variant="menu"
-      body-padding="p-0"
-      aria-label="Category options"
-    >
-      <div class="ios-drawer-menu">
-        <section v-if="!isStaff" class="ios-drawer-menu__section">
-          <p class="ios-drawer-menu__section-label">Department</p>
-          <div class="ios-drawer-menu__group">
-            <ul class="ios-drawer-menu__list">
-              <li>
-                <button
-                  type="button"
-                  class="ios-drawer-menu__row"
-                  @click="selectInventoryDepartment('')"
-                >
-                  <span class="ios-drawer-menu__label">All departments</span>
-                  <CheckIcon
-                    v-if="!selectedDepartmentId"
-                    class="ios-drawer-menu__check"
-                    aria-hidden="true"
-                  />
-                </button>
-              </li>
-              <li v-for="dept in currentStoreDepartments" :key="dept.id">
-                <button
-                  type="button"
-                  class="ios-drawer-menu__row"
-                  @click="selectInventoryDepartment(dept.id)"
-                >
-                  <span class="ios-drawer-menu__label">{{ dept.name }}</span>
-                  <CheckIcon
-                    v-if="selectedDepartmentId === dept.id"
-                    class="ios-drawer-menu__check"
-                    aria-hidden="true"
-                  />
-                </button>
-              </li>
-            </ul>
-          </div>
-        </section>
-        <section class="ios-drawer-menu__section">
-          <p class="ios-drawer-menu__section-label">Sort by</p>
-          <div class="ios-drawer-menu__group">
-            <ul class="ios-drawer-menu__list">
-              <li v-for="option in inventorySortOptions" :key="option.value">
-                <button
-                  type="button"
-                  class="ios-drawer-menu__row"
-                  @click="selectInventorySort(option.value)"
-                >
-                  <span class="ios-drawer-menu__label">{{ option.label }}</span>
-                  <CheckIcon
-                    v-if="sortBy === option.value"
-                    class="ios-drawer-menu__check"
-                    aria-hidden="true"
-                  />
-                </button>
-              </li>
-            </ul>
-          </div>
-        </section>
-        <section
-          v-if="inventoryStore.lowStockFolders.length > 0"
-          class="ios-drawer-menu__section"
-        >
-          <div class="ios-drawer-menu__group">
-            <ul class="ios-drawer-menu__list">
-              <li>
-                <button
-                  type="button"
-                  class="ios-drawer-menu__row"
-                  @click="handleExportReorderFromSheet"
-                >
-                  <span class="ios-drawer-menu__label">Export reorder list</span>
-                  <span class="ios-drawer-menu__meta">Low-stock categories</span>
-                </button>
-              </li>
-            </ul>
-          </div>
-        </section>
+      <div v-for="i in 4" :key="i" class="s-metrics__item">
+        <SSkeleton width="64px" height="12px" />
+        <SSkeleton width="96px" height="24px" />
       </div>
-    </IosDrawer>
+    </div>
+    <dl
+      v-else-if="!inventoryStore.loading && inventoryStore.folders.length > 0"
+      class="s-metrics"
+      aria-label="Category summary"
+    >
+      <div v-for="metric in categoryHeaderMetrics" :key="metric.key" class="s-metrics__item">
+        <dt class="s-metrics__label">{{ metric.label }}</dt>
+        <dd
+          class="s-metrics__value"
+          :class="metric.tone && `s-metrics__value--${metric.tone}`"
+        >
+          {{ metric.value }}
+        </dd>
+      </div>
+    </dl>
 
-    <template v-if="inventoryStore.loading && inventoryStore.folders.length === 0">
-      <template v-if="isCapacitorIos">
-        <div class="ios-search-bar-host">
-          <div class="ios-skeleton ios-search-skeleton" aria-hidden="true" />
-        </div>
-        <IosQuickActionSkeleton :count="4" />
-        <IosGroupedListSkeleton :count="10" />
-      </template>
-      <DashTableSkeleton
-        v-else-if="effectiveFoldersViewMode === 'table'"
-        :columns="inventoryTableSkeletonColumns"
-        :rows="8"
-        leading="icon"
-        show-toolbar
-        aria-label="Loading categories"
+    <template v-if="!inventoryStore.loading && inventoryStore.folders.length > 0">
+      <STabs
+        v-model="categoryFilter"
+        :tabs="categoryFilterTabs"
+        label="Filter categories"
       />
-      <div v-else :class="[gridClass, 'inventory-categories-grid']">
-        <FolderCardSkeleton v-for="i in 8" :key="i" />
+
+      <div
+        v-if="canCreateInventoryFolders && selectedFoldersForBulk.length > 0"
+        class="s-toolbar s-toolbar--selection"
+        role="region"
+        aria-label="Bulk actions"
+      >
+        <SCheckbox
+          :model-value="allFoldersOnPageSelected"
+          :label="`${selectedFoldersForBulk.length} selected`"
+          @update:model-value="toggleSelectAllFolders"
+        />
+        <div class="s-toolbar__end">
+          <SButton variant="ghost" size="sm" @click="selectedFoldersForBulk = []">Clear</SButton>
+          <SButton variant="danger" size="sm" @click="openBulkDeleteFoldersModal">
+            <template #leading><Trash2 :size="14" :stroke-width="2" aria-hidden="true" /></template>
+            Delete
+          </SButton>
+        </div>
+      </div>
+      <div v-else class="s-toolbar">
+        <SSearch
+          v-model="searchQuery"
+          class="s-toolbar__search"
+          placeholder="Search categories"
+        />
+        <div v-if="!isStaff" class="s-toolbar__filter">
+          <SSelect
+            v-model="selectedDepartmentId"
+            :options="departmentFilterOptions"
+            aria-label="Department"
+          />
+        </div>
+        <div class="s-toolbar__filter">
+          <SSelect v-model="sortBy" :options="categorySortSelectOptions" aria-label="Sort by" />
+        </div>
+        <div class="s-toolbar__end">
+          <div class="s-toggle-group" role="group" aria-label="Layout">
+            <button
+              type="button"
+              class="s-toggle-group__btn"
+              :aria-pressed="foldersViewMode === 'grid'"
+              aria-label="Grid view"
+              @click="foldersViewMode = 'grid'"
+            >
+              <LayoutGrid :size="16" :stroke-width="1.75" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              class="s-toggle-group__btn"
+              :aria-pressed="foldersViewMode === 'table'"
+              aria-label="Table view"
+              @click="foldersViewMode = 'table'"
+            >
+              <List :size="16" :stroke-width="1.75" aria-hidden="true" />
+            </button>
+          </div>
+        </div>
       </div>
     </template>
 
-    <div
-      v-if="!inventoryStore.loading && inventoryStore.folders.length > 0"
-      :class="[
-        gridShellClass,
-        isCapacitorIos
-          ? 'ios-inventory-categories-list-shell'
-          : effectiveFoldersViewMode === 'table'
-            ? [tableShellClass, 'dash-grid-shell--table inventory-categories-shell--table']
-            : 'dash-grid-shell--grid inventory-categories-shell--grid',
-      ]"
-    >
-      <DashboardTableEmptyState
-        v-if="paginatedFolders.length === 0"
-        :icon="FolderIcon"
-        :title="
-          selectedDepartmentId
-            ? `No categories in ${getDepartmentName(selectedDepartmentId) ?? 'this department'}`
-            : categoryFilter === 'low-stock'
-            ? 'No low-stock categories'
-            : searchQuery
-            ? 'No categories found'
-            : 'No categories on this page'
-        "
-        :description="
-          selectedDepartmentId
-            ? 'Try another department or clear the filter.'
-            : categoryFilter === 'low-stock'
-            ? 'All categories are above your low-stock threshold.'
-            : searchQuery
-            ? 'Try a different search term.'
-            : 'Adjust filters or go to another page.'
-        "
-        :tips="
-          selectedDepartmentId || searchQuery || categoryFilter === 'low-stock'
-            ? ['Clear filters to see all categories']
-            : undefined
-        "
-      >
-        <Button
-          v-if="selectedDepartmentId"
-          variant="outline"
-          size="sm"
-          extra-class="!text-xs !py-1.5 !px-3"
-          @click="selectedDepartmentId = ''"
-        >
-          Clear filter
-        </Button>
-      </DashboardTableEmptyState>
+    <template v-if="inventoryStore.loading && inventoryStore.folders.length === 0">
+      <div class="s-category-grid" role="status" aria-label="Loading categories">
+        <div v-for="i in 8" :key="i" class="s-category-card" aria-hidden="true">
+          <SSkeleton width="40px" height="40px" />
+          <SSkeleton width="70%" height="16px" />
+          <SSkeleton width="45%" height="12px" />
+        </div>
+      </div>
+    </template>
 
-      <div v-else-if="isCapacitorIos" class="ios-grouped-list">
-        <IosInventoryFolderRow
-          v-for="(folder, index) in paginatedFolders"
+
+    <section
+      v-if="!inventoryStore.loading && inventoryStore.folders.length > 0"
+      class="s-inventory__section"
+      aria-label="Categories"
+    >
+      <SCard v-if="paginatedFolders.length === 0">
+        <SEmptyState
+          :title="filteredCategoriesEmptyTitle"
+          :description="filteredCategoriesEmptyDescription"
+        >
+          <template #icon><SearchX :size="24" :stroke-width="1.75" /></template>
+          <template v-if="hasActiveCategoryFilters" #actions>
+            <SButton @click="clearCategoryFilters">Clear filters</SButton>
+          </template>
+        </SEmptyState>
+      </SCard>
+
+      <div v-else-if="foldersViewMode === 'grid'" class="s-category-grid">
+        <InventoryCategoryCard
+          v-for="folder in paginatedFolders"
           :key="folder.id"
           :name="folder.name"
-          :subtitle="folderCategoryDescription(folder)"
-          :value="formatFolderRowValue(folder)"
-          :last="index === paginatedFolders.length - 1"
-          :show-menu="canCreateInventoryFolders"
-          :menu-id="folder.id"
-          :selectable="canCreateInventoryFolders && isIosFolderSelecting"
-          :selected="selectedFoldersForBulk.some((f) => f.id === folder.id)"
+          :description="folderCategoryDescription(folder)"
+          :type="folder.type"
+          :item-count="folderDisplayStats(folder).itemCount"
+          :child-count="getChildFolders(folders, folder.id).length"
+          :low-stock-count="folderDisplayStats(folder).lowStockCount"
+          :total-value="folderDisplayStats(folder).totalValue"
+          :value-label="formatCurrency(folderDisplayStats(folder).totalValue ?? 0)"
+          :selected="isFolderSelected(folder)"
+          :has-serial-numbers="folder.hasSerialNumbers"
+          :allowed-department-ids="folder.allowedDepartments"
+          :resolve-department-name="getDepartmentName"
+          :show-departments="!isStaff"
+          :availability-stats="inventoryStore.folderAvailabilityStats[folder.id] ?? null"
+          :stats-loading="inventoryStore.availabilityStatsLoading"
+          :track-profit="folder.trackProfit === true"
+          :gross-profit-on-hand="folderGrossProfitOnHand(folder.id)"
+          :show-profit="canViewProfitAndCost && folder.trackProfit === true"
+          :has-overlays="canCreateInventoryFolders"
           @click="navigateToFolder(folder.id)"
-          @menu="toggleFolderMenu(folder.id)"
-          @select="(checked) => toggleFolderSelection(folder, checked)"
-        />
+        >
+          <template v-if="canCreateInventoryFolders" #checkbox>
+            <SCheckbox
+              :model-value="isFolderSelected(folder)"
+              :aria-label="`Select ${folder.name}`"
+              @update:model-value="(checked) => toggleFolderSelection(folder, checked)"
+            />
+          </template>
+          <template v-if="canCreateInventoryFolders" #menu>
+            <SIconButton
+              label="Category options"
+              size="sm"
+              :data-folder-actions-anchor="folder.id"
+              aria-haspopup="menu"
+              :aria-expanded="openFolderMenuId === folder.id"
+              @click="toggleFolderMenu(folder.id)"
+            >
+              <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
+            </SIconButton>
+          </template>
+        </InventoryCategoryCard>
       </div>
 
-      <Transition v-else name="folders-view" mode="out-in">
-        <!-- Folders grid -->
-        <div
-          v-if="paginatedFolders.length > 0 && effectiveFoldersViewMode === 'grid'"
-          key="grid"
-          class="inventory-categories-grid dash-grid"
-        >
-          <InventoryCategoryCard
-            v-for="folder in paginatedFolders"
-            :key="folder.id"
-            :name="folder.name"
-            :description="folderCategoryDescription(folder)"
-            :type="folder.type"
-            :item-count="folderDisplayStats(folder).itemCount"
-            :child-count="getChildFolders(folders, folder.id).length"
-            :low-stock-count="folderDisplayStats(folder).lowStockCount"
-            :total-value="folderDisplayStats(folder).totalValue"
-            :has-serial-numbers="folder.hasSerialNumbers"
-            :allowed-department-ids="folder.allowedDepartments"
-            :resolve-department-name="getDepartmentName"
-            :show-departments="!isStaff"
-            :availability-stats="inventoryStore.folderAvailabilityStats[folder.id] ?? null"
-            :stats-loading="inventoryStore.availabilityStatsLoading"
-            :track-profit="folder.trackProfit === true"
-            :gross-profit-on-hand="folderGrossProfitOnHand(folder.id)"
-            :show-profit="canViewProfitAndCost && folder.trackProfit === true"
-            :has-overlays="canCreateInventoryFolders"
-            @click="navigateToFolder(folder.id)"
-          >
-            <template v-if="canCreateInventoryFolders" #checkbox>
-              <Checkbox
-                :model-value="selectedFoldersForBulk.some((f) => f.id === folder.id)"
-                @update:model-value="(checked) => toggleFolderSelection(folder, checked)"
-                size="sm"
-                wrapper-class="justify-center"
-              />
-            </template>
-            <template v-if="canCreateInventoryFolders" #menu>
-              <div>
-                <button
-                  type="button"
+      <div v-else class="s-table-wrap">
+        <table class="s-table">
+          <thead>
+            <tr>
+              <th v-if="canCreateInventoryFolders" scope="col" class="s-table__check">
+                <SCheckbox
+                  :model-value="allFoldersOnPageSelected"
+                  aria-label="Select all categories on this page"
+                  @update:model-value="toggleSelectAllFolders"
+                />
+              </th>
+              <th scope="col">Category</th>
+              <th scope="col" class="s-hide-sm">Type</th>
+              <th scope="col" class="s-table__num">Products</th>
+              <th scope="col" class="s-table__num s-hide-sm">Value</th>
+              <th v-if="canViewProfitAndCost" scope="col" class="s-table__num s-hide-md">Profit</th>
+              <th scope="col" class="s-hide-md">Tracking</th>
+              <th v-if="!isStaff" scope="col" class="s-hide-lg">Departments</th>
+              <th v-if="canCreateInventoryFolders" scope="col" class="s-table__actions">
+                <span class="ds-sr-only">Actions</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="folder in paginatedFolders"
+              :key="folder.id"
+              class="s-table__row--interactive"
+              :class="{ 's-table__row--selected': isFolderSelected(folder) }"
+              tabindex="0"
+              @click="navigateToFolder(folder.id)"
+              @keydown.enter.self="navigateToFolder(folder.id)"
+            >
+              <td v-if="canCreateInventoryFolders" class="s-table__check" @click.stop>
+                <SCheckbox
+                  :model-value="isFolderSelected(folder)"
+                  :aria-label="`Select ${folder.name}`"
+                  @update:model-value="(checked) => toggleFolderSelection(folder, checked)"
+                />
+              </td>
+              <td>
+                <div class="s-category-cell">
+                  <span class="s-category-cell__mark" aria-hidden="true">
+                    <component
+                      :is="getChildFolders(folders, folder.id).length > 0 ? FolderTree : FolderClosed"
+                      :size="16"
+                      :stroke-width="1.75"
+                      fill="currentColor"
+                      fill-opacity="0.14"
+                    />
+                  </span>
+                  <div class="s-category-cell__text">
+                    <span class="s-table__primary">{{ folder.name }}</span>
+                    <span v-if="folderCategoryDescription(folder)" class="s-table__secondary">
+                      {{ folderCategoryDescription(folder) }}
+                    </span>
+                  </div>
+                </div>
+              </td>
+              <td class="s-hide-sm">
+                <SBadge>{{ formatFolderTypeLabel(folder.type) }}</SBadge>
+              </td>
+              <td class="s-table__num">
+                <span class="s-table__primary">{{ folderDisplayStats(folder).itemCount }}</span>
+                <span
+                  v-if="folderDisplayStats(folder).lowStockCount > 0"
+                  class="s-table__secondary s-table__warning"
+                >
+                  {{ folderDisplayStats(folder).lowStockCount }} low stock
+                </span>
+              </td>
+              <td class="s-table__num s-hide-sm">
+                {{ formatCurrency(folderDisplayStats(folder).totalValue ?? 0) }}
+              </td>
+              <td v-if="canViewProfitAndCost" class="s-table__num s-hide-md">
+                <span v-if="folder.trackProfit" :class="folderProfitToneClass(folder.id)">
+                  {{ formatFolderProfit(folder.id) }}
+                </span>
+                <span v-else class="s-table__muted">–</span>
+              </td>
+              <td class="s-hide-md">
+                <SBadge :tone="folder.hasSerialNumbers ? 'accent' : 'neutral'">
+                  {{ folder.hasSerialNumbers ? 'Serial' : 'Quantity' }}
+                </SBadge>
+              </td>
+              <td v-if="!isStaff" class="s-hide-lg">
+                <span class="s-table__secondary">{{ folderDepartmentsSummary(folder) }}</span>
+              </td>
+              <td v-if="canCreateInventoryFolders" class="s-table__actions" @click.stop>
+                <SIconButton
+                  label="Category options"
+                  size="sm"
                   :data-folder-actions-anchor="folder.id"
+                  aria-haspopup="menu"
+                  :aria-expanded="openFolderMenuId === folder.id"
                   @click="toggleFolderMenu(folder.id)"
-                  :class="menuBtnClass"
-                  aria-label="Category options"
                 >
-                  <EllipsisVerticalIcon class="h-3.5 w-3.5" stroke-width="2" />
-                </button>
-              </div>
-            </template>
-          </InventoryCategoryCard>
-        </div>
+                  <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
+                </SIconButton>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-        <!-- Categories table -->
-        <div
-          v-else-if="paginatedFolders.length > 0 && effectiveFoldersViewMode === 'table'"
-          key="table"
-          class="inventory-categories-table flex min-h-0 flex-1 flex-col"
-        >
-          <div class="overflow-x-auto">
-            <table class="dashboard-table min-w-full">
-              <thead>
-                <tr>
-                  <th v-if="canCreateInventoryFolders" scope="col" class="w-11 text-center">
-                    <Checkbox
-                      :model-value="allFoldersOnPageSelected"
-                      size="sm"
-                      wrapper-class="justify-center"
-                      @update:model-value="toggleSelectAllFolders"
-                    />
-                  </th>
-                  <th scope="col">Category</th>
-                  <th scope="col" class="hidden sm:table-cell dashboard-table__col-type">Type</th>
-                  <th scope="col" class="dashboard-table__col-numeric">Products</th>
-                  <th scope="col" class="hidden sm:table-cell dashboard-table__col-numeric">Value</th>
-                  <th
-                    v-if="canViewProfitAndCost"
-                    scope="col"
-                    class="hidden md:table-cell dashboard-table__col-numeric"
-                  >
-                    Profit
-                  </th>
-                  <th scope="col" class="hidden md:table-cell dashboard-table__col-compact-status">
-                    Tracking
-                  </th>
-                  <th v-if="!isStaff" scope="col" class="hidden lg:table-cell">Departments</th>
-                  <th
-                    v-if="canCreateInventoryFolders"
-                    scope="col"
-                    class="dashboard-table__col-actions"
-                  >
-                    <span class="sr-only">Actions</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  v-for="folder in paginatedFolders"
-                  :key="folder.id"
-                  class="cursor-pointer"
-                  @click="navigateToFolder(folder.id)"
-                >
-                  <td v-if="canCreateInventoryFolders" class="text-center" @click.stop>
-                    <Checkbox
-                      :model-value="selectedFoldersForBulk.some((f) => f.id === folder.id)"
-                      size="sm"
-                      wrapper-class="justify-center"
-                      @update:model-value="(checked) => toggleFolderSelection(folder, checked)"
-                    />
-                  </td>
-                  <td class="max-w-[min(16rem,32vw)]">
-                    <div class="flex min-w-0 items-center gap-2.5">
-                      <span
-                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary-500/10 text-primary-700 dark:bg-primary-400/15 dark:text-primary-200"
-                        aria-hidden="true"
-                      >
-                        <FolderIcon class="h-4 w-4" />
-                      </span>
-                      <div class="min-w-0">
-                        <span class="dashboard-table__primary block truncate">{{ folder.name }}</span>
-                        <span
-                          v-if="folderCategoryDescription(folder)"
-                          class="dashboard-table__muted mt-0.5 block truncate text-[10px]"
-                        >
-                          {{ folderCategoryDescription(folder) }}
-                        </span>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="hidden sm:table-cell dashboard-table__col-type">
-                    <span
-                      class="inline-flex rounded-md bg-gray-100/90 px-1.5 py-0.5 text-[10px] font-medium text-gray-600 dark:bg-white/[0.05] dark:text-gray-400"
-                    >
-                      {{ formatFolderTypeLabel(folder.type) }}
-                    </span>
-                  </td>
-                  <td class="dashboard-table__col-numeric">
-                    <span class="dashboard-table__numeric">{{
-                      folderDisplayStats(folder).itemCount
-                    }}</span>
-                    <span
-                      v-if="folderDisplayStats(folder).lowStockCount > 0"
-                      class="dashboard-table__muted mt-0.5 block text-[10px] tabular-nums"
-                    >
-                      {{ folderDisplayStats(folder).lowStockCount }} low stock
-                    </span>
-                  </td>
-                  <td class="hidden sm:table-cell dashboard-table__col-numeric">
-                    <span class="dashboard-table__money">{{
-                      formatCurrency(folderDisplayStats(folder).totalValue ?? 0)
-                    }}</span>
-                  </td>
-                  <td v-if="canViewProfitAndCost" class="hidden md:table-cell dashboard-table__col-numeric">
-                    <span
-                      v-if="folder.trackProfit"
-                      class="dashboard-table__money"
-                      :class="folderProfitTableClass(folder.id)"
-                    >
-                      {{ formatFolderProfit(folder.id) }}
-                    </span>
-                    <span v-else class="dashboard-table__muted text-xs">-</span>
-                  </td>
-                  <td class="hidden md:table-cell dashboard-table__col-compact-status">
-                    <span
-                      class="inline-flex rounded-md px-1.5 py-0.5 text-[10px] font-medium"
-                      :class="
-                        folder.hasSerialNumbers
-                          ? 'bg-violet-100/90 text-violet-800 dark:bg-violet-500/15 dark:text-violet-200'
-                          : 'bg-sky-100/90 text-sky-800 dark:bg-sky-500/15 dark:text-sky-200'
-                      "
-                    >
-                      {{ folder.hasSerialNumbers ? 'Serial' : 'Quantity' }}
-                    </span>
-                  </td>
-                  <td v-if="!isStaff" class="hidden max-w-[12rem] lg:table-cell">
-                    <span class="dashboard-table__muted block truncate text-xs">
-                      {{ folderDepartmentsSummary(folder) }}
-                    </span>
-                  </td>
-                  <td
-                    v-if="canCreateInventoryFolders"
-                    class="dashboard-table__col-actions"
-                    @click.stop
-                  >
-                    <button
-                      type="button"
-                      class="dashboard-table__action-btn"
-                      :data-folder-actions-anchor="folder.id"
-                      aria-label="Category options"
-                      @click="toggleFolderMenu(folder.id)"
-                    >
-                      <EllipsisVerticalIcon class="h-4 w-4" stroke-width="2" />
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </Transition>
-
-      <DashboardTablePagination
-        v-if="foldersForCategoryList.length > 0"
+      <SPagination
         :current-page="currentPage"
-        :items-per-page="itemsPerPage"
+        :page-size="itemsPerPage"
         :total="foldersForCategoryList.length"
+        label="Categories pagination"
         @page-change="handlePageChange"
       />
-    </div>
+    </section>
 
     <!-- Empty state (no categories at all) -->
-    <DashboardTableEmptyState
-      v-if="!inventoryStore.loading && inventoryStore.folders.length === 0"
-      :icon="FolderIcon"
-      :title="
-        isStaff && !searchQuery
-          ? 'No categories in your department'
-          : selectedDepartmentId
-          ? `No categories in ${getDepartmentName(selectedDepartmentId) ?? 'this department'}`
-          : searchQuery
-          ? 'No categories found'
-          : 'No categories yet'
-      "
-      :description="
-        isStaff && !searchQuery
-          ? 'Categories shared with your department will appear here. Ask your admin if you need access.'
-          : selectedDepartmentId
-          ? 'Try another department or clear the filter to see all categories.'
-          : searchQuery
-          ? 'Try a different search term.'
-          : 'Create a category to organize products, then add stock inside it.'
-      "
-      extra-class="dash-table-shell rounded-xl bg-white dark:!bg-dashboard-card"
-    >
-      <Button
-        v-if="canCreateInventoryFolders && !selectedDepartmentId && !searchQuery"
-        variant="primary"
-        size="sm"
-        :icon="PlusCircleIcon"
-        extra-class="!text-xs !py-1.5 !px-3"
-        @click="openCreateFolderModal"
-      >
-        New category
-      </Button>
-      <Button
-        v-else-if="selectedDepartmentId"
-        variant="outline"
-        size="sm"
-        extra-class="!text-xs !py-1.5 !px-3"
-        @click="selectedDepartmentId = ''"
-      >
-        Clear filter
-      </Button>
-    </DashboardTableEmptyState>
+    <SCard v-if="!inventoryStore.loading && inventoryStore.folders.length === 0">
+      <SEmptyState :title="noCategoriesTitle" :description="noCategoriesDescription">
+        <template #icon><FolderPlus :size="24" :stroke-width="1.75" /></template>
+        <template
+          v-if="(canCreateInventoryFolders && !selectedDepartmentId && !searchQuery) || selectedDepartmentId"
+          #actions
+        >
+          <SButton
+            v-if="canCreateInventoryFolders && !selectedDepartmentId && !searchQuery"
+            variant="primary"
+            @click="openCreateFolderModal"
+          >
+            <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
+            New category
+          </SButton>
+          <SButton v-else @click="selectedDepartmentId = ''">Clear filter</SButton>
+        </template>
+      </SEmptyState>
+    </SCard>
 
     <!-- Bulk Delete Folders Modal -->
     <BulkDeleteConfirmModal
@@ -662,19 +363,19 @@
     />
 
     <!-- Create Folder (slide-over) -->
-    <SidePanel
-      v-model="showCreateFolderModal"
-      size="xl"
-      dense
+    <SDialog
+      placement="right"
+      v-model:open="showCreateFolderModal"
+      size="lg"
       :title="editingFolder ? 'Edit category' : 'Create new category'"
     >
-      <IosForm id="folder-drawer-form" layout="fill" @submit="handleSaveFolder">
-        <IosFormSection title="Basic info" fixed>
-          <IosFormField label="Category name" required>
-            <IosFormInput v-model="folderForm.name" required placeholder="e.g. Chairs" />
-          </IosFormField>
-          <IosFormField label="Type" required>
-            <IosFormSelect v-model="folderForm.type" required extra-class="cursor-pointer">
+      <SForm id="folder-drawer-form" @submit="handleSaveFolder">
+        <SFormSection title="Basic info">
+          <SField label="Category name" required>
+            <SInput v-model="folderForm.name" required placeholder="e.g. Chairs" />
+          </SField>
+          <SField label="Type" required>
+            <SSelect v-model="folderForm.type" required>
               <option value="">Select type</option>
               <option value="general">General</option>
               <option value="electronics">Electronics</option>
@@ -683,219 +384,171 @@
               <option value="food">Food & Beverage</option>
               <option value="office">Office Supplies</option>
               <option value="other">Other</option>
-            </IosFormSelect>
-          </IosFormField>
-          <p v-if="editingFolder && isSubfolder(editingFolder)" :class="[drawerHintClass, 'mt-1']">
+            </SSelect>
+          </SField>
+          <p v-if="editingFolder && isSubfolder(editingFolder)" class="s-form-meta">
             Subcategory of
             {{
               folders.find((entry) => entry.id === editingFolder?.parentId)?.name ||
               'parent category'
             }}.
           </p>
-          <IosFormField label="Description">
-            <IosFormTextarea
+          <SField label="Description">
+            <STextarea
               v-model="folderForm.description"
               :rows="2"
-              extra-class="resize-none"
               placeholder="Optional: purpose of this category"
             />
-          </IosFormField>
-        </IosFormSection>
+          </SField>
+        </SFormSection>
 
-        <IosFormSection
+        <SFormSection
           v-if="showUsesSubcategoriesOption && !isSubfolderDrawer"
-          fixed
         >
-          <IosFormToggle
+          <SCheckbox
             v-model="folderForm.usesSubcategories"
             label="Organize with subcategories"
-            hint="Products go inside subcategories (e.g. Corolla, Camry under Toyota) instead of directly in this category."
+            description="Products go inside subcategories (e.g. Corolla, Camry under Toyota) instead of directly in this category."
             :disabled="usesSubcategoriesLocked"
           />
-        </IosFormSection>
+        </SFormSection>
 
-        <IosFormSection
+        <SFormSection
           v-if="!(editingFolder && isSubfolder(editingFolder))"
-          fixed
         >
-          <IosFormToggle
+          <SCheckbox
             v-model="folderForm.hasSerialNumbers"
             label="Use serial numbers"
-            hint="On: one row per serial. Off: quantity field tracks stock."
+            description="On: one row per serial. Off: quantity field tracks stock."
           />
-        </IosFormSection>
+        </SFormSection>
 
-        <IosFormSection
+        <SFormSection
           v-if="canViewProfitAndCost && !isSubfolderDrawer"
-          fixed
         >
-          <IosFormToggle
+          <SCheckbox
             v-model="folderForm.trackProfit"
             label="Track profit"
-            hint="Adds a cost price column and shows gross profit per category and for the store."
+            description="Adds a cost price column and shows gross profit per category and for the store."
           />
-        </IosFormSection>
+        </SFormSection>
 
-        <IosFormSection
+        <SFormSection
           v-if="canCreateInventoryFolders && !isSubfolderDrawer && !isStaff"
           title="Department access"
-          fixed
         >
-          <p :class="[drawerHintClass, 'mt-0']">
+          <p :class="drawerHintClass">
             Leave all unchecked for every department. Check to limit access.
           </p>
-          <div v-if="departmentsStore.loading" :class="[drawerHintClass, 'mt-2']">
+          <p v-if="departmentsStore.loading" :class="drawerHintClass" role="status">
             Loading departments…
-          </div>
-          <div
-            v-else-if="currentStoreDepartments.length === 0"
-            class="mt-2 rounded-lg bg-gray-50/50 px-2.5 py-2 dark:bg-white/[0.02]"
-          >
-            <p :class="drawerHintClass">No departments yet. Category stays open to everyone.</p>
+          </p>
+          <p v-else-if="currentStoreDepartments.length === 0" class="s-callout">
+            No departments yet. Category stays open to everyone.
             <NuxtLink
               v-if="currentStoreId"
               :to="`/dashboard/stores/${currentStoreId}/departments`"
-              class="mt-1.5 inline-block text-[11px] font-medium text-gray-800 hover:underline dark:text-gray-200"
+              class="s-link"
             >
-              Add departments →
+              Add departments
             </NuxtLink>
-          </div>
-          <div v-else :class="[pickListClass, 'mt-2']">
+          </p>
+          <div v-else :class="[pickListClass, 's-inv-pick']">
             <ul :class="pickListScrollClass">
               <li v-for="dept in currentStoreDepartments" :key="dept.id" :class="pickRowClass">
-                <Checkbox
+                <SCheckbox
                   :model-value="folderForm.allowedDepartments.includes(dept.id)"
-                  size="sm"
-                  wrapper-class="min-w-0 flex-1 w-full items-start gap-2.5"
-                  label-class="!ml-2.5 min-w-0 flex-1 block"
+                  :label="dept.name"
+                  :description="dept.description || undefined"
                   @update:model-value="(checked) => toggleDepartmentAccess(dept.id, !!checked)"
-                >
-                  <span :class="pickRowTitleClass">{{ dept.name }}</span>
-                  <span
-                    v-if="dept.description"
-                    :class="[pickRowMetaClass, 'mt-0.5 block truncate']"
-                    >{{ dept.description }}</span
-                  >
-                </Checkbox>
+                />
               </li>
             </ul>
           </div>
-        </IosFormSection>
+        </SFormSection>
 
-        <IosFormSection v-if="!isSubfolderDrawer" title="Table template">
-          <p :class="[drawerHintClass, 'mt-0']">Columns for products in this category.</p>
+        <SFormSection v-if="!isSubfolderDrawer" title="Table template">
+          <p :class="drawerHintClass">Columns for products in this category.</p>
           <input
             v-if="selectedTemplate"
             ref="folderTemplateExcelInput"
             type="file"
             accept=".xlsx,.xls,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            class="sr-only"
+            class="ds-sr-only"
+            tabindex="-1"
+            aria-hidden="true"
             :disabled="importingFolderTemplate"
             @change="handleImportFolderTemplateExcel"
           />
 
-          <div
-            v-if="selectedTemplate && editableFields.length > 0"
-            class="mt-2.5 overflow-hidden rounded-lg dark:border-white/[0.06]"
-          >
-            <div
-              class="hidden shrink-0 grid-cols-12 gap-2 border-b border-gray-100/90 bg-gray-50/80 px-2.5 py-1.5 text-[10px] font-medium uppercase tracking-wide text-gray-400 dark:border-gray-800/80 dark:bg-white/[0.03] dark:text-gray-500 sm:grid"
-            >
-              <span class="col-span-5">Label</span>
-              <span class="col-span-3">Type</span>
-              <span class="col-span-4 text-right">Options</span>
+          <div v-if="selectedTemplate && editableFields.length > 0" class="s-inv-fields">
+            <div class="s-inv-fields__head" aria-hidden="true">
+              <span>Label</span>
+              <span>Type</span>
+              <span class="s-inv-fields__head-end">Options</span>
             </div>
-            <div class="divide-y divide-gray-100/90 dark:divide-gray-800/80">
-              <div
-                v-for="(field, index) in editableFields"
-                :key="field.id"
-                class="grid grid-cols-1 items-center gap-2 px-2.5 py-2 sm:grid-cols-12 sm:gap-2"
-              >
-                <div class="min-w-0 sm:col-span-5">
-                  <label :class="[drawerLabelClass, 'sm:sr-only']">Label</label>
-                  <input
-                    v-model="field.label"
-                    type="text"
-                    required
-                    :class="drawerInputClass"
-                    placeholder="Column title"
-                    @input="syncTemplateFieldNameFromLabel(field)"
-                  />
-                </div>
-                <div class="min-w-0 sm:col-span-3">
-                  <label :class="[drawerLabelClass, 'sm:sr-only']">Type</label>
-                  <select
-                    v-model="field.type"
-                    required
-                    :class="[drawerInputClass, 'cursor-pointer']"
-                  >
-                    <option value="text">Text</option>
-                    <option value="number">Number</option>
-                    <option value="date">Date</option>
-                    <option value="select">Select</option>
-                    <option value="boolean">Boolean</option>
-                    <option value="currency">Currency</option>
-                  </select>
-                </div>
-                <div class="flex items-center justify-between gap-2 sm:col-span-4 sm:justify-end">
-                  <Checkbox
-                    v-model="field.required"
-                    size="sm"
-                    label="Required"
-                    wrapper-class="items-center gap-1.5"
-                    label-class="!ml-1.5 text-[11px] font-normal text-gray-500 dark:text-gray-400"
-                  />
-                  <button
-                    v-if="!isLockedTemplateField(field)"
-                    type="button"
-                    class="rounded-md p-1 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30 dark:hover:text-red-400"
-                    aria-label="Remove field"
-                    @click="handleRemoveField(index)"
-                  >
-                    <TrashIcon class="h-3.5 w-3.5" />
-                  </button>
-                  <span
-                    v-else
-                    class="text-[10px] font-medium text-gray-400 dark:text-gray-500"
-                    title="Built-in column"
-                  >
-                    Default
-                  </span>
-                </div>
+            <div
+              v-for="(field, index) in editableFields"
+              :key="field.id"
+              class="s-inv-fields__row"
+            >
+              <SInput
+                v-model="field.label"
+                required
+                placeholder="Column title"
+                :aria-label="`Column ${index + 1} label`"
+                @input="syncTemplateFieldNameFromLabel(field)"
+              />
+              <SSelect
+                v-model="field.type"
+                required
+                :aria-label="`Column ${index + 1} type`"
+                :options="templateFieldTypeOptions"
+              />
+              <div class="s-inv-fields__end">
+                <SCheckbox v-model="field.required" label="Required" />
+                <SIconButton
+                  v-if="!isLockedTemplateField(field)"
+                  :label="`Remove column ${field.label || index + 1}`"
+                  @click="handleRemoveField(index)"
+                >
+                  <Trash2 :size="16" :stroke-width="1.75" aria-hidden="true" />
+                </SIconButton>
+                <SBadge v-else title="Built-in column">Default</SBadge>
               </div>
             </div>
           </div>
-          <div v-else-if="selectedTemplate" :class="[emptyStateClass, '!py-6']">
-            <Squares2X2Icon class="mb-2 h-7 w-7 text-gray-400 dark:text-gray-500" />
-            <p class="text-xs font-medium text-gray-700 dark:text-gray-300">No fields yet</p>
-            <p :class="[drawerHintClass, 'mt-0.5']">Add a column or import from Excel</p>
+          <div v-else-if="selectedTemplate" :class="emptyStateClass">
+            <LayoutGrid :size="24" :stroke-width="1.75" aria-hidden="true" />
+            <p class="s-inv-empty__title">No fields yet</p>
+            <p>Add a column or import from Excel</p>
           </div>
 
-          <div v-if="selectedTemplate" class="ios-form-add-stack">
-            <button type="button" class="ios-form-add-row" @click="handleAddField">
-              <PlusIcon class="ios-form-add-row__glyph" aria-hidden="true" />
+          <div v-if="selectedTemplate" class="s-inv-actions">
+            <SButton size="sm" @click="handleAddField">
+              <template #leading>
+                <Plus :size="16" :stroke-width="2" aria-hidden="true" />
+              </template>
               Add column
-            </button>
-            <button
-              type="button"
-              class="ios-form-add-row ios-form-add-row--secondary"
+            </SButton>
+            <SButton
+              size="sm"
+              variant="ghost"
               :disabled="importingFolderTemplate"
               @click="triggerFolderTemplateExcelPicker"
             >
-              <ArrowPathIcon
-                v-if="importingFolderTemplate"
-                class="ios-form-add-row__glyph animate-spin"
-                aria-hidden="true"
-              />
-              <ArrowUpTrayIcon v-else class="ios-form-add-row__glyph" aria-hidden="true" />
+              <template #leading>
+                <SSpinner v-if="importingFolderTemplate" :size="16" />
+                <Upload v-else :size="16" :stroke-width="2" aria-hidden="true" />
+              </template>
               {{ importingFolderTemplate ? 'Importing…' : 'Import Excel' }}
-            </button>
+            </SButton>
           </div>
-        </IosFormSection>
-      </IosForm>
+        </SFormSection>
+      </SForm>
 
       <template #footer>
-        <IosDrawerActions
+        <SDialogActions
           :primary-label="`${editingFolder ? 'Update' : 'Create'} category`"
           :primary-loading="isSavingFolder"
           :primary-disabled="!isFolderDrawerValid || isSavingFolder"
@@ -903,23 +556,23 @@
           @primary="handleSaveFolder"
         />
       </template>
-    </SidePanel>
+    </SDialog>
 
-    <Modal
-      v-model="showProfitSkipConfirmModal"
+    <SDialog
+      v-model:open="showProfitSkipConfirmModal"
       title="Create without profit tracking?"
-      subtitle="You can turn this on later, but cost and margin won't be tracked until you do."
+      description="You can turn this on later, but cost and margin won't be tracked until you do."
       size="md"
     >
-      <div class="space-y-3 text-sm text-gray-600 dark:text-gray-300">
+      <div class="s-inventory__dialog-copy">
         <p>
-          <strong class="font-medium text-gray-900 dark:text-gray-100">Track profit</strong>
-          adds a <strong class="font-medium">Cost price</strong> column to this category and
+          <strong>Track profit</strong>
+          adds a <strong>Cost price</strong> column to this category and
           calculates gross profit (unit price minus cost) for each product.
         </p>
         <p>
           You'll see per-category profit on category cards, a store-wide
-          <strong class="font-medium">Total profit</strong> summary, and margin on item rows -
+          <strong>Total profit</strong> summary, and margin on item rows -
           visible only to super admins.
         </p>
         <p>
@@ -928,34 +581,34 @@
         </p>
       </div>
       <template #footer>
-        <IosDrawerActions
+        <SDialogActions
           cancel-label="Go back"
           primary-label="Continue without profit"
           @cancel="showProfitSkipConfirmModal = false"
           @primary="confirmCreateWithoutProfitTracking"
         />
       </template>
-    </Modal>
+    </SDialog>
 
-    <Modal
-      v-model="showSubfolderSyncModal"
+    <SDialog
+      v-model:open="showSubfolderSyncModal"
       title="Apply changes to subcategories?"
-      :subtitle="
+      :description="
         subfolderSyncCount === 1
           ? 'This category has 1 subcategory.'
           : `This category has ${subfolderSyncCount} subcategories.`
       "
       size="md"
-      @update:model-value="
+      @update:open="
         (open: boolean) => {
           if (!open) pendingParentFolderSave = null
         }
       "
     >
-      <div class="space-y-3 text-sm text-gray-600 dark:text-gray-300">
+      <div class="s-inventory__dialog-copy">
         <p>
           You changed columns, tracking, or access settings on
-          <strong class="font-medium text-gray-900 dark:text-gray-100">{{
+          <strong>{{
             editingFolder?.name || 'this category'
           }}</strong
           >.
@@ -964,12 +617,12 @@
           Subcategories normally inherit these settings. Apply the same changes to all
           subcategories, or keep this update on the parent category only.
         </p>
-        <p class="text-xs text-gray-500 dark:text-gray-400">
+        <p class="s-inventory__dialog-note">
           Names and descriptions for each subcategory stay unchanged either way.
         </p>
       </div>
       <template #footer>
-        <IosDrawerActions
+        <SDialogActions
           cancel-label="Parent only"
           primary-label="Apply to subcategories"
           :primary-loading="isSavingFolder"
@@ -978,73 +631,57 @@
           @primary="confirmParentFolderSave(true)"
         />
       </template>
-    </Modal>
+    </SDialog>
 
     <!-- Duplicate category -->
-    <SidePanel
-      v-model="showDuplicateFolderModal"
+    <SDialog
+      placement="right"
+      v-model:open="showDuplicateFolderModal"
       title="Duplicate category"
-      subtitle="Create copies with the same template and settings. Enter one or more category names."
+      description="Create copies with the same template and settings. Enter one or more category names."
       size="md"
-      content-padding="p-4 sm:p-5"
-      @update:model-value="(v: boolean) => { showDuplicateFolderModal = v }"
+      @update:open="(v: boolean) => { showDuplicateFolderModal = v }"
     >
-      <form
-        @submit.prevent="handleConfirmDuplicateFolder"
-        :class="[drawerFillClass, 'gap-4']"
-      >
-        <div :class="[drawerFillFixedClass, 'flex items-center justify-between']">
-          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300"
-            >Category name(s)</label
-          >
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            :icon="PlusCircleIcon"
-            @click="addDuplicateFolderName"
-            extra-class="!rounded-2xl"
-          >
+      <form :class="drawerFillClass" @submit.prevent="handleConfirmDuplicateFolder">
+        <div :class="[drawerFillFixedClass, 's-inv-row-head']">
+          <p class="s-field__label">Category names</p>
+          <SButton size="sm" @click="addDuplicateFolderName">
+            <template #leading>
+              <Plus :size="16" :stroke-width="2" aria-hidden="true" />
+            </template>
             Add name
-          </Button>
+          </SButton>
         </div>
-        <div :class="[drawerFillScrollClass, 'space-y-2']">
-          <div
-            v-if="duplicateFolderNames.length === 0"
-            class="text-center py-4 text-sm text-gray-500 dark:text-gray-400 rounded-sm bg-gray-50/50 dark:bg-gray-800/30"
-          >
-            Click "Add name" to enter category name(s)
-          </div>
+        <div :class="[drawerFillScrollClass, 's-inv-stack']">
+          <p v-if="duplicateFolderNames.length === 0" :class="emptyStateClass">
+            Select “Add name” to enter one or more category names.
+          </p>
           <div
             v-for="(name, index) in duplicateFolderNames"
             :key="index"
-            class="flex items-center gap-2"
+            class="s-inline-field"
           >
-            <input
-              v-model="duplicateFolderNames[index]"
-              type="text"
-              class="flex-1 min-w-0 px-3 py-2 text-sm rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400/40 transition-colors"
-              placeholder="New category name"
-            />
-            <button
-              type="button"
+            <div class="s-inline-field__grow">
+              <SInput
+                v-model="duplicateFolderNames[index]"
+                placeholder="New category name"
+                :aria-label="`Category name ${index + 1}`"
+              />
+            </div>
+            <SIconButton
+              :label="`Remove category name ${index + 1}`"
               @click="removeDuplicateFolderName(index)"
-              class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-sm transition-colors shrink-0"
-              aria-label="Remove"
             >
-              <TrashIcon class="w-4 h-4" />
-            </button>
+              <Trash2 :size="16" :stroke-width="1.75" aria-hidden="true" />
+            </SIconButton>
           </div>
         </div>
-        <p
-          v-if="duplicateFolderNamesError"
-          :class="[drawerFillFixedClass, 'text-xs text-red-600 dark:text-red-400']"
-        >
+        <p v-if="duplicateFolderNamesError" class="s-field__error" role="alert">
           {{ duplicateFolderNamesError }}
         </p>
       </form>
       <template #footer>
-        <IosDrawerActions
+        <SDialogActions
           :primary-label="
             isDuplicatingFolder
               ? 'Duplicating…'
@@ -1062,92 +699,77 @@
           @primary="handleConfirmDuplicateFolder"
         />
       </template>
-    </SidePanel>
+    </SDialog>
 
     <!-- Copy selected folder templates from another branch -->
-    <SidePanel
-      v-model="showCopyFolderTemplatesModal"
+    <SDialog
+      placement="right"
+      v-model:open="showCopyFolderTemplatesModal"
       title="Copy category templates from another branch"
-      subtitle="Pick a source branch, select top-level categories, then choose whether to include subcategories."
-      size="lg"
-      content-padding="p-4 sm:p-5"
+      description="Pick a source branch, select top-level categories, then choose whether to include subcategories."
+      size="md"
     >
-      <div :class="[drawerFillClass, 'gap-4 text-left']">
-        <div :class="drawerFillFixedClass">
-          <p :class="sectionLabelClass">Source branch</p>
-          <select
-            v-model="copyTemplatesSourceStoreId"
-            class="mt-1.5 w-full rounded-lg bg-white py-2 pl-3 pr-8 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400/40 dark:!bg-dashboard-card dark:text-gray-100"
-          >
-            <option value="" disabled>Select a branch…</option>
-            <option v-for="s in otherBranchesForTemplateCopy" :key="s.id" :value="s.id">
-              {{ branchDisplayLabel(s) }}
-            </option>
-          </select>
-        </div>
-        <div v-if="copyTemplatesSourceStoreId" :class="[drawerFillStepClass, 'gap-2']">
-          <div :class="[drawerFillFixedClass, 'flex flex-wrap items-center justify-between gap-2']">
-            <p :class="sectionLabelClass">Categories to copy</p>
-            <div class="flex items-center gap-2">
-              <span class="text-[10px] tabular-nums text-gray-500 dark:text-gray-400">
+      <div :class="drawerFillClass">
+        <SSelect
+          v-model="copyTemplatesSourceStoreId"
+          label="Source branch"
+          placeholder="Select a branch…"
+          :options="
+            otherBranchesForTemplateCopy.map((s) => ({ value: s.id, label: branchDisplayLabel(s) }))
+          "
+        />
+        <section v-if="copyTemplatesSourceStoreId" class="s-form-section">
+          <div class="s-inv-row-head">
+            <h3 class="s-form-section__title">Categories to copy</h3>
+            <div class="s-inv-row-head__actions">
+              <span class="s-form-meta" aria-live="polite">
                 {{ copyTemplatesSelectedCount }} selected
               </span>
-              <button
-                type="button"
-                class="text-[11px] font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100 disabled:opacity-40"
+              <SButton
+                size="sm"
+                variant="ghost"
                 :disabled="
                   copyTemplatesRootFoldersList.length === 0 || loadingCopyTemplatesSourceFolders
                 "
                 @click="selectAllCopyTemplatesFolders"
               >
-                All
-              </button>
-              <span class="text-gray-300 dark:text-gray-600">|</span>
-              <button
-                type="button"
-                class="text-[11px] font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 disabled:opacity-40"
+                Select all
+              </SButton>
+              <SButton
+                size="sm"
+                variant="ghost"
                 :disabled="loadingCopyTemplatesSourceFolders"
                 @click="clearCopyTemplatesFolderSelection"
               >
-                None
-              </button>
+                Clear
+              </SButton>
             </div>
           </div>
-          <div :class="pickListClass">
-            <div
-              v-if="loadingCopyTemplatesSourceFolders"
-              class="px-3 py-8 text-center text-xs text-gray-500 dark:text-gray-400"
+          <p v-if="loadingCopyTemplatesSourceFolders" :class="emptyStateClass" role="status">
+            Loading categories…
+          </p>
+          <div v-else-if="copyTemplatesRootFoldersList.length === 0" class="s-callout">
+            <p>
+              No category templates were found under
+              <strong>{{ copyTemplatesSourceBranchLabel }}</strong>
+              (your &ldquo;Source branch&rdquo; above).
+            </p>
+            <p
+              v-if="
+                storesStore.currentStoreId &&
+                copyTemplatesSourceStoreId &&
+                copyTemplatesSourceStoreId !== storesStore.currentStoreId &&
+                inventoryViewBranchLabel
+              "
             >
-              Loading categories…
-            </div>
-            <div
-              v-else-if="copyTemplatesRootFoldersList.length === 0"
-              :class="[emptyStateClass, '!items-start !py-6 !text-left']"
-            >
-              <p>
-                No category templates were found under
-                <strong class="font-medium text-gray-700 dark:text-gray-300">{{
-                  copyTemplatesSourceBranchLabel
-                }}</strong>
-                (<span class="whitespace-normal">your &ldquo;Source branch&rdquo;</span> above).
-              </p>
-              <p
-                v-if="
-                  storesStore.currentStoreId &&
-                  copyTemplatesSourceStoreId &&
-                  copyTemplatesSourceStoreId !== storesStore.currentStoreId &&
-                  inventoryViewBranchLabel
-                "
-              >
-                The category tiles behind this modal are from
-                <strong class="font-medium text-gray-700 dark:text-gray-300">{{
-                  inventoryViewBranchLabel
-                }}</strong>
-                Switch &ldquo;Source branch&rdquo; to that branch if those are the categories you
-                want to copy, or create categories first on {{ copyTemplatesSourceBranchLabel }}.
-              </p>
-            </div>
-            <ul v-else :class="pickListScrollClass">
+              The category tiles behind this panel are from
+              <strong>{{ inventoryViewBranchLabel }}</strong>.
+              Switch &ldquo;Source branch&rdquo; to that branch if those are the categories you
+              want to copy, or create categories first on {{ copyTemplatesSourceBranchLabel }}.
+            </p>
+          </div>
+          <div v-else :class="[pickListClass, 's-inv-pick']">
+            <ul :class="pickListScrollClass">
               <li
                 v-for="f in copyTemplatesRootFoldersList"
                 :key="f.id"
@@ -1156,71 +778,75 @@
                   copyTemplatesSelectedFolderIds.includes(f.id) ? pickRowSelectedClass : '',
                 ]"
               >
-                <Checkbox
+                <SCheckbox
                   :model-value="copyTemplatesSelectedFolderIds.includes(f.id)"
+                  :label="f.name || 'Untitled'"
+                  :description="
+                    copyTemplatesSubfolderCount(f.id) > 0
+                      ? `${copyTemplatesSubfolderCount(f.id)} subcategor${
+                          copyTemplatesSubfolderCount(f.id) === 1 ? 'y' : 'ies'
+                        }`
+                      : undefined
+                  "
                   @update:model-value="(checked) => setCopyTemplatesFolderChecked(f.id, !!checked)"
-                  size="sm"
-                  wrapper-class="min-w-0 flex-1"
-                  label-class="!ml-2.5 min-w-0"
-                >
-                  <span :class="pickRowTitleClass">{{ f.name || 'Untitled' }}</span>
-                  <span
-                    v-if="copyTemplatesSubfolderCount(f.id) > 0"
-                    class="ml-1.5 text-[10px] font-normal text-gray-500 dark:text-gray-400"
-                  >
-                    · {{ copyTemplatesSubfolderCount(f.id) }}
-                    subcategor{{ copyTemplatesSubfolderCount(f.id) === 1 ? 'y' : 'ies' }}
-                  </span>
-                </Checkbox>
+                />
               </li>
             </ul>
           </div>
-          <Checkbox
+          <SCheckbox
             v-if="copyTemplatesSelectedHasSubfolders"
             v-model="copyTemplatesIncludeSubfolders"
-            size="sm"
-            wrapper-class="items-start gap-2.5"
-            label-class="!ml-2.5 min-w-0 flex-1 block text-sm text-gray-600 dark:text-gray-400"
+            label="Also copy subcategories into selected categories"
+            :description="
+              copyTemplatesIncludeSubfolders && copyTemplatesSubfolderPreview
+                ? `Includes: ${copyTemplatesSubfolderPreview}`
+                : undefined
+            "
+          />
+        </section>
+        <fieldset class="s-form-section">
+          <legend class="s-form-section__title">When a category name already exists here</legend>
+          <div
+            class="s-c s-choice-grid"
+            role="radiogroup"
+            aria-label="When a category name already exists here"
           >
-            <span>
-              Also copy subcategories into selected folders
-              <span
-                v-if="copyTemplatesIncludeSubfolders && copyTemplatesSubfolderPreview"
-                class="mt-1 block text-[11px] leading-relaxed text-gray-500 dark:text-gray-400"
-              >
-                Includes: {{ copyTemplatesSubfolderPreview }}
-              </span>
-            </span>
-          </Checkbox>
-        </div>
-        <fieldset :class="[drawerFillFixedClass, 'space-y-2']">
-          <legend :class="sectionLabelClass">When a category name already exists here</legend>
-          <label
-            class="flex cursor-pointer items-start gap-2 text-sm text-gray-600 dark:text-gray-400"
-          >
-            <input v-model="copyTemplatesNameCollision" type="radio" value="skip" class="mt-0.5" />
-            <span>Skip that category</span>
-          </label>
-          <label
-            class="flex cursor-pointer items-start gap-2 text-sm text-gray-600 dark:text-gray-400"
-          >
-            <input
-              v-model="copyTemplatesNameCollision"
-              type="radio"
-              value="suffix"
-              class="mt-0.5"
-            />
-            <span
-              >Create with suffix &ldquo;(copy)&rdquo;, then &ldquo;(copy 2)&rdquo; if needed</span
+            <button
+              type="button"
+              role="radio"
+              class="s-choice"
+              :aria-checked="copyTemplatesNameCollision === 'skip'"
+              @click="copyTemplatesNameCollision = 'skip'"
             >
-          </label>
+              <span class="s-choice__head">
+                <span class="s-choice__title">Skip it</span>
+                <span class="s-choice__radio" aria-hidden="true" />
+              </span>
+              <span class="s-choice__description">Leave that category out of the copy.</span>
+            </button>
+            <button
+              type="button"
+              role="radio"
+              class="s-choice"
+              :aria-checked="copyTemplatesNameCollision === 'suffix'"
+              @click="copyTemplatesNameCollision = 'suffix'"
+            >
+              <span class="s-choice__head">
+                <span class="s-choice__title">Add a suffix</span>
+                <span class="s-choice__radio" aria-hidden="true" />
+              </span>
+              <span class="s-choice__description">
+                Create it as &ldquo;(copy)&rdquo;, then &ldquo;(copy 2)&rdquo; if needed.
+              </span>
+            </button>
+          </div>
         </fieldset>
-        <p class="text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
+        <p class="s-form-meta">
           Department restrictions are not copied; set them again on this branch if you use them.
         </p>
       </div>
       <template #footer>
-        <IosDrawerActions
+        <SDialogActions
           :primary-label="
             isCopyingFolderTemplates
               ? 'Copying…'
@@ -1239,98 +865,77 @@
           @primary="handleConfirmCopyFolderTemplates"
         />
       </template>
-    </SidePanel>
+    </SDialog>
 
     <!-- Folder actions menu (teleported; not clipped by grid/card overflow) -->
-    <IosContextMenu
+    <SMenu
       :open="Boolean(openFolderMenuId && folderForOpenMenu && folderMenuFixedStyle)"
       :style="folderMenuFixedStyle"
       menu-id="inventory-folder"
+      label="Category actions"
+      @close="closeFolderMenu"
     >
-      <IosContextMenuItem
+      <SMenuItem
         v-if="canDuplicateByPlan"
         label="Duplicate"
-        :icon="DocumentDuplicateIcon"
-        @click="
-          () => {
-            handleDuplicateFolder(folderForOpenMenu!)
-            openFolderMenuId = null
-          }
-        "
+        :icon="Copy"
+        @select="runFolderMenuAction(handleDuplicateFolder)"
       />
-      <IosContextMenuItem
-        label="Edit"
-        :icon="PencilSquareIcon"
-        @click="
-          () => {
-            handleEditFolder(folderForOpenMenu!)
-            openFolderMenuId = null
-          }
-        "
-      />
-      <IosContextMenuItem
+      <SMenuItem label="Edit" :icon="Pencil" @select="runFolderMenuAction(handleEditFolder)" />
+      <SMenuItem
         label="Delete"
-        :icon="TrashIcon"
+        :icon="Trash2"
         danger
-        @click="
-          () => {
-            handleDeleteFolder(folderForOpenMenu!)
-            openFolderMenuId = null
-          }
-        "
+        @select="runFolderMenuAction(handleDeleteFolder)"
       />
-    </IosContextMenu>
+    </SMenu>
   </div>
 </template>
 
 <script setup lang="ts">
+import SDialog from '~/components/s/SDialog.vue'
+import SDialogActions from '~/components/s/SDialogActions.vue'
+import SField from '~/components/s/SField.vue'
+import SForm from '~/components/s/SForm.vue'
+import SFormSection from '~/components/s/SFormSection.vue'
+import STextarea from '~/components/s/STextarea.vue'
+import BulkDeleteConfirmModal from '~/components/dashboard/BulkDeleteConfirmModal.vue'
 import { ref, computed, reactive, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import type { Store } from '~/composables/useStores'
 import {
-  FolderIcon,
-  PlusCircleIcon,
-  CubeIcon,
-  PencilSquareIcon,
-  TrashIcon,
-  DocumentDuplicateIcon,
-  EllipsisVerticalIcon,
-  PlusIcon,
-  ArrowPathIcon,
-  ExclamationTriangleIcon,
-  Squares2X2Icon,
-  TableCellsIcon,
-  ArrowUpTrayIcon,
-  ArrowsRightLeftIcon,
-  CheckIcon,
-} from '~/utils/app-icons'
-import Modal from '~/components/ui/Modal.vue'
-import SidePanel from '~/components/ui/SidePanel.vue'
-import Button from '~/components/ui/Button.vue'
-import IosDrawerActions from '~/components/ios/IosDrawerActions.vue'
-import {
-  IosForm,
-  IosFormSection,
-  IosFormField,
-  IosFormInput,
-  IosFormTextarea,
-  IosFormSelect,
-  IosFormToggle,
-} from '~/components/ios/forms'
-import IosQuickActionBar, {
-  type IosQuickActionOption,
-} from '~/components/ios/IosQuickActionBar.vue'
-import IosGroupedListSkeleton from '~/components/ios/IosGroupedListSkeleton.vue'
-import IosQuickActionSkeleton from '~/components/ios/IosQuickActionSkeleton.vue'
-import IosContextMenu from '~/components/ios/IosContextMenu.vue'
-import IosContextMenuItem from '~/components/ios/IosContextMenuItem.vue'
-import IosDrawer from '~/components/ios/IosDrawer.vue'
-import IosInventoryFolderRow from '~/components/ios/IosInventoryFolderRow.vue'
-import IosPageNavBar from '~/components/ios/IosPageNavBar.vue'
-import IosSearchBar from '~/components/ios/IosSearchBar.vue'
+  ArrowLeftRight,
+  Copy,
+  Download,
+  EllipsisVertical,
+  FolderClosed,
+  FolderPlus,
+  FolderTree,
+  LayoutGrid,
+  List,
+  Pencil,
+  Plus,
+  SearchX,
+  Trash2,
+  Upload,
+} from '@lucide/vue'
+import SBadge from '~/components/s/SBadge.vue'
+import SButton from '~/components/s/SButton.vue'
+import SCard from '~/components/s/SCard.vue'
+import SCheckbox from '~/components/s/SCheckbox.vue'
+import SEmptyState from '~/components/s/SEmptyState.vue'
+import SIconButton from '~/components/s/SIconButton.vue'
+import SInput from '~/components/s/SInput.vue'
+import SMenu from '~/components/s/SMenu.vue'
+import SMenuItem from '~/components/s/SMenuItem.vue'
+import SPageHeader from '~/components/s/SPageHeader.vue'
+import SPagination from '~/components/s/SPagination.vue'
+import SSearch from '~/components/s/SSearch.vue'
+import SSelect from '~/components/s/SSelect.vue'
+import SSkeleton from '~/components/s/SSkeleton.vue'
+import SSpinner from '~/components/s/SSpinner.vue'
+import STabs from '~/components/s/STabs.vue'
 import DeleteFolderModal from '~/components/inventory/DeleteFolderModal.vue'
 import InventoryCategoryCard from '~/components/inventory/InventoryCategoryCard.vue'
-import Checkbox from '~/components/ui/Checkbox.vue'
-import DashboardTablePagination from '~/components/dashboard/DashboardTablePagination.vue'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { resolveEffectiveSubscriptionPlan } from '~/types/subscription'
@@ -1369,6 +974,7 @@ import {
   removeCostPriceTemplateField,
 } from '~/utils/inventory-folder-profit'
 import { runDashboardShellBootstrap } from '~/composables/useDashboardShellBootstrap'
+import { useDashboardPageRefreshRegister } from '~/composables/useDashboardPageRefresh'
 import { isNativePerfContext, scheduleNativeIdleWork } from '~/utils/capacitor-native-perf'
 
 definePageMeta({
@@ -1380,44 +986,28 @@ useHead({
 })
 
 const {
-  pageWithFooterClass,
-  eyebrowClass,
-  titleClass,
-  headerBtnClass,
-  headerTextBtnClass,
-  tableShellClass,
-  gridShellClass,
-  gridClass,
-  gridFooterClass,
-  menuBtnClass,
-  viewToggleClass,
-  viewToggleBtnClass,
-  viewToggleBtnActiveClass,
-} = useDashboardGridPagesChrome()
-const {
-  sectionLabelClass,
   pickListClass,
   pickListScrollClass,
   pickRowClass,
   pickRowSelectedClass,
-  pickRowTitleClass,
-  pickRowMetaClass,
   emptyStateClass,
-  drawerSectionClass,
-  drawerLabelClass,
-  drawerInputClass,
-  drawerTextareaClass,
   drawerHintClass,
   drawerFillClass,
   drawerFillFixedClass,
   drawerFillScrollClass,
-  footerBtnOutlineClass,
-  footerBtnPrimaryClass,
 } = useDashboardDrawerChrome()
+
+const templateFieldTypeOptions = [
+  { value: 'text', label: 'Text' },
+  { value: 'number', label: 'Number' },
+  { value: 'date', label: 'Date' },
+  { value: 'select', label: 'Select' },
+  { value: 'boolean', label: 'Yes / no' },
+  { value: 'currency', label: 'Currency' },
+]
 
 const searchQuery = ref('')
 const categoryFilter = ref<'all' | 'low-stock'>('all')
-const showInventoryMoreSheet = ref(false)
 
 const categoryFilterOptions = computed(() => [
   { value: 'all', label: 'All categories' },
@@ -1428,60 +1018,12 @@ const categoryFilterOptions = computed(() => [
   },
 ])
 
-const categoryQuickActionOptions = computed((): IosQuickActionOption[] => {
-  const options: IosQuickActionOption[] = [
-    { value: 'all', label: 'All', icon: FolderIcon },
-    {
-      value: 'low-stock',
-      label: 'Low stock',
-      icon: ExclamationTriangleIcon,
-      badge: inventoryStore.lowStockFolders.length || undefined,
-    },
-  ]
-
-  if (canCreateInventoryFolders.value) {
-    options.push({
-      value: 'new',
-      label: 'Add category',
-      icon: PlusIcon,
-      trailing: 'add',
-      action: openCreateFolderModal,
-    })
-  }
-
-  options.push({
-    value: 'more',
-    label: 'More',
-    icon: EllipsisVerticalIcon,
-    trailing: 'more',
-    action: () => {
-      showInventoryMoreSheet.value = true
-    },
-  })
-
-  return options
-})
-
-function selectInventoryDepartment(departmentId: string) {
-  selectedDepartmentId.value = departmentId
-  showInventoryMoreSheet.value = false
-}
-
-function selectInventorySort(value: string) {
-  sortBy.value = value
-  showInventoryMoreSheet.value = false
-}
-
 const inventorySortOptions = [
   { value: 'name', label: 'Name' },
   { value: 'items', label: 'Products' },
   { value: 'date', label: 'Date' },
 ] as const
 
-function handleExportReorderFromSheet() {
-  showInventoryMoreSheet.value = false
-  void handleExportReorderList()
-}
 const sortBy = ref('name')
 const showCreateFolderModal = ref(false)
 const preserveFolderDrawerDraft = ref(false)
@@ -1612,10 +1154,7 @@ const selectedDepartmentId = ref(getInitialDepartment())
 const getInitialFoldersView = (): 'grid' | 'table' => {
   if (import.meta.client) {
     try {
-      if (
-        document.documentElement.classList.contains('capacitor-ios') ||
-        window.matchMedia('(max-width: 639px)').matches
-      ) {
+      if (window.matchMedia('(max-width: 639px)').matches) {
         return 'table'
       }
       const v = localStorage.getItem('inventory-folders-view')
@@ -1706,59 +1245,14 @@ async function handleExportReorderList() {
   }
 }
 const { canCreateInventoryFolders, canViewProfitAndCost, isStaff } = usePermissions()
-const { isCapacitorIos } = useIsCapacitorIos()
-const { branchPageTitle, currentStoreLabel } = useCurrentStoreLabel()
-const iosCategoriesNavTitle = computed(() =>
-  currentStoreLabel.value ? `${currentStoreLabel.value} · Categories` : 'Categories'
-)
-
-const {
-  isSelecting: isIosFolderSelecting,
-  toggleSelectMode: toggleIosFolderSelectMode,
-  exitSelectMode: exitIosFolderSelectMode,
-} = useIosBulkSelectMode({
-  clearSelection: () => {
-    selectedFoldersForBulk.value = []
-  },
-})
+const { branchPageTitle } = useCurrentStoreLabel()
 
 watch(
   () => storesStore.currentStoreId,
   () => {
-    exitIosFolderSelectMode()
+    selectedFoldersForBulk.value = []
   }
 )
-
-const effectiveFoldersViewMode = computed(() =>
-  isCapacitorIos.value ? 'grid' : foldersViewMode.value
-)
-
-const inventoryTableSkeletonColumns = computed(() => {
-  const cols: { label: string; class?: string; bone?: string }[] = [
-    { label: 'Category' },
-    { label: 'Type', class: 'hidden sm:table-cell dashboard-table__col-type', bone: '4.5rem' },
-    { label: 'Products', class: 'dashboard-table__col-numeric', bone: '2.5rem' },
-    { label: 'Value', class: 'hidden sm:table-cell dashboard-table__col-numeric', bone: '4rem' },
-  ]
-  if (canViewProfitAndCost.value) {
-    cols.push({
-      label: 'Profit',
-      class: 'hidden md:table-cell dashboard-table__col-numeric',
-      bone: '4rem',
-    })
-  }
-  cols.push(
-    {
-      label: 'Tracking',
-      class: 'hidden md:table-cell dashboard-table__col-compact-status',
-      bone: '3.5rem',
-    }
-  )
-  if (!isStaff.value) {
-    cols.push({ label: 'Departments', class: 'hidden lg:table-cell', bone: '5rem' })
-  }
-  return cols
-})
 
 watch(isStaff, (staff) => {
   if (staff) selectedDepartmentId.value = ''
@@ -2289,13 +1783,6 @@ function folderDisplayStats(folder: InventoryFolder) {
   }
 }
 
-function formatFolderRowValue(folder: InventoryFolder): string {
-  const stats = folderDisplayStats(folder)
-  const countLabel = `${stats.itemCount} item${stats.itemCount === 1 ? '' : 's'}`
-  if (stats.itemCount === 0) return countLabel
-  return `${countLabel} · ${formatCurrency(stats.totalValue ?? 0)}`
-}
-
 function folderCategoryDescription(folder: InventoryFolder): string {
   if (folderUsesSubcategoryHub(folder, folders.value)) {
     const subCount = getChildFolders(folders.value, folder.id).length
@@ -2383,18 +1870,98 @@ function formatFolderProfit(folderId: string): string {
   return formatCurrency(profit)
 }
 
-function folderProfitTableClass(folderId: string): string {
+
+function folderProfitToneClass(folderId: string): string {
   const profit = folderGrossProfitOnHand(folderId)
   if (profit === null || profit === 0) return ''
-  return profit > 0
-    ? 'text-emerald-700 dark:text-emerald-300'
-    : 'text-red-600 dark:text-red-400'
+  return profit > 0 ? 's-table__success' : 's-table__error'
 }
 
 const folderForOpenMenu = computed(() => {
   const id = openFolderMenuId.value
   if (!id) return null
   return foldersForCategoryList.value.find((f) => f.id === id) ?? null
+})
+
+function runFolderMenuAction(action: (folder: InventoryFolder) => unknown) {
+  const folder = folderForOpenMenu.value
+  if (folder) action(folder)
+  openFolderMenuId.value = null
+}
+
+function closeFolderMenu() {
+  const id = openFolderMenuId.value
+  openFolderMenuId.value = null
+  if (!id || !import.meta.client) return
+  document.querySelector<HTMLElement>(`[data-folder-actions-anchor="${id}"]`)?.focus()
+}
+
+const categoryFilterTabs = computed(() =>
+  categoryFilterOptions.value.map((option) => ({
+    value: option.value,
+    label: option.label,
+    count: option.badge,
+  }))
+)
+
+const departmentFilterOptions = computed(() => [
+  { value: '', label: 'All departments' },
+  ...currentStoreDepartments.value.map((dept) => ({ value: dept.id, label: dept.name })),
+])
+
+const categorySortSelectOptions = inventorySortOptions.map((option) => ({
+  value: option.value,
+  label: `Sort: ${option.label}`,
+}))
+
+function isFolderSelected(folder: InventoryFolder): boolean {
+  return selectedFoldersForBulk.value.some((f) => f.id === folder.id)
+}
+
+const hasActiveCategoryFilters = computed(
+  () => Boolean(selectedDepartmentId.value || searchQuery.value) || categoryFilter.value === 'low-stock'
+)
+
+function clearCategoryFilters() {
+  searchQuery.value = ''
+  selectedDepartmentId.value = ''
+  categoryFilter.value = 'all'
+}
+
+const filteredCategoriesEmptyTitle = computed(() => {
+  if (selectedDepartmentId.value) {
+    return `No categories in ${getDepartmentName(selectedDepartmentId.value) ?? 'this department'}`
+  }
+  if (categoryFilter.value === 'low-stock') return 'No low-stock categories'
+  if (searchQuery.value) return 'No categories found'
+  return 'No categories on this page'
+})
+
+const filteredCategoriesEmptyDescription = computed(() => {
+  if (selectedDepartmentId.value) return 'Try another department or clear the filter.'
+  if (categoryFilter.value === 'low-stock') return 'All categories are above your low-stock threshold.'
+  if (searchQuery.value) return 'Try a different search term.'
+  return 'Adjust filters or go to another page.'
+})
+
+const noCategoriesTitle = computed(() => {
+  if (isStaff.value && !searchQuery.value) return 'No categories in your department'
+  if (selectedDepartmentId.value) {
+    return `No categories in ${getDepartmentName(selectedDepartmentId.value) ?? 'this department'}`
+  }
+  if (searchQuery.value) return 'No categories found'
+  return 'No categories yet'
+})
+
+const noCategoriesDescription = computed(() => {
+  if (isStaff.value && !searchQuery.value) {
+    return 'Categories shared with your department will appear here. Ask your admin if you need access.'
+  }
+  if (selectedDepartmentId.value) {
+    return 'Try another department or clear the filter to see all categories.'
+  }
+  if (searchQuery.value) return 'Try a different search term.'
+  return 'Create a category to organize products, then add stock inside it.'
 })
 
 const subfolderSyncCount = computed(() => {
@@ -2450,34 +2017,6 @@ watch(selectedDepartmentId, (newDeptId) => {
     }
   }
 })
-
-const getFolderColor = (color: string) => {
-  const colorMap: Record<string, string> = {
-    blue: 'bg-blue-500',
-    green: 'bg-green-500',
-    purple: 'bg-primary-400',
-    orange: 'bg-orange-500',
-    red: 'bg-red-500',
-    pink: 'bg-pink-500',
-    indigo: 'bg-indigo-500',
-    yellow: 'bg-yellow-500',
-  }
-  return colorMap[color] || 'bg-gray-500'
-}
-
-const getFolderGradient = (color: string) => {
-  const gradientMap: Record<string, string> = {
-    blue: 'from-blue-500 to-blue-600',
-    green: 'from-green-500 to-green-600',
-    purple: 'from-primary-500 to-primary-600',
-    orange: 'from-orange-500 to-orange-600',
-    red: 'from-red-500 to-red-600',
-    pink: 'from-pink-500 to-pink-600',
-    indigo: 'from-indigo-500 to-indigo-600',
-    yellow: 'from-yellow-500 to-yellow-600',
-  }
-  return gradientMap[color] || 'from-gray-500 to-gray-600'
-}
 
 const getDepartmentName = (deptId: string) => {
   const dept = departmentsStore.getDepartmentById(deptId)
@@ -3130,7 +2669,7 @@ async function reloadInventoryCategories() {
   await inventoryStore.fetchFolderAvailabilityStats({ force: true })
 }
 
-useIosPullToRefreshRegister(reloadInventoryCategories)
+useDashboardPageRefreshRegister(reloadInventoryCategories)
 
 // Load folders on mount
 onMounted(async () => {
@@ -3225,30 +2764,3 @@ watch(
   { immediate: false }
 )
 </script>
-
-<style scoped>
-/* Grid / table view switch */
-.folders-view-enter-active,
-.folders-view-leave-active {
-  transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.folders-view-enter-from,
-.folders-view-leave-to {
-  opacity: 0;
-  transform: translateY(8px);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .folders-view-enter-active,
-  .folders-view-leave-active {
-    transition-duration: 0.01ms;
-  }
-
-  .folders-view-enter-from,
-  .folders-view-leave-to {
-    transform: none;
-  }
-}
-</style>

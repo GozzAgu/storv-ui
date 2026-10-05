@@ -1,36 +1,43 @@
 <template>
-  <DashboardSettingsPanel
+  <SCard
     title="Recent price & name changes"
-    subtitle="Who changed inventory pricing on this branch (last 30 days on all plans)."
-    compact
+    description="Who changed inventory pricing on this branch in the last 30 days."
+    :flush="!loading && logs.length > 0"
   >
-    <p v-if="loading" class="text-xs text-gray-500">Loading…</p>
-    <ul v-else-if="logs.length" class="divide-y divide-gray-100 dark:divide-white/[0.06]">
-      <li v-for="log in logs" :key="log.id" class="py-2 text-[11px]">
-        <p class="font-medium text-gray-900 dark:text-gray-100">
-          {{ log.itemName }}
-          <span class="font-normal text-gray-500">· {{ inventoryAuditFieldLabel(log.field) }}</span>
-        </p>
-        <p class="mt-0.5 text-gray-500 dark:text-gray-400">
-          {{ log.userDisplayName }} · {{ formatWhen(log.createdAt) }}
-        </p>
-        <p v-if="log.previousValue != null || log.newValue != null" class="mt-0.5 text-gray-600 dark:text-gray-300">
-          {{ log.previousValue ?? '-' }} → {{ log.newValue ?? '-' }}
+    <SSkeleton v-if="loading" :lines="3" />
+    <ul v-else-if="logs.length" class="s-list">
+      <li v-for="log in logs" :key="log.id" class="s-list__item">
+        <div class="s-list__main">
+          <p class="s-list__primary">
+            {{ log.itemName }} · {{ inventoryAuditFieldLabel(log.field) }}
+          </p>
+          <p class="s-list__secondary">
+            {{ log.userDisplayName }} · {{ formatWhen(log.createdAt) }}
+          </p>
+        </div>
+        <p v-if="log.previousValue != null || log.newValue != null" class="s-list__end s-settings__change">
+          {{ log.previousValue ?? EMPTY_CELL }}
+          <ArrowRight :size="14" :stroke-width="2" aria-hidden="true" />
+          <span class="ds-sr-only">changed to</span>
+          {{ log.newValue ?? EMPTY_CELL }}
         </p>
       </li>
     </ul>
-    <p v-else class="text-xs text-gray-500 dark:text-gray-400">No tracked changes yet.</p>
-  </DashboardSettingsPanel>
+    <p v-else class="s-settings__muted">No tracked changes yet.</p>
+  </SCard>
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import DashboardSettingsPanel from '~/components/dashboard/DashboardSettingsPanel.vue'
+import { ArrowRight } from '@lucide/vue'
+import SCard from '~/components/s/SCard.vue'
+import SSkeleton from '~/components/s/SSkeleton.vue'
 import {
   fetchInventoryAuditLogs,
   inventoryAuditFieldLabel,
 } from '~/composables/useInventoryAuditLog'
 import type { InventoryAuditLog } from '~/types/growth'
+import { EMPTY_CELL } from '~/utils/ui-empty'
 
 const logs = ref<InventoryAuditLog[]>([])
 const loading = ref(true)

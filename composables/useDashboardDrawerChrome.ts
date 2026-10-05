@@ -1,61 +1,27 @@
 /**
- * Shared layout tokens for SidePanel / drawer flows (receipts, inventory, settings).
+ * Shared DS class names for sheet flows (receipts, inventory, pick lists).
  */
-import {
-  APP_FIELD_ON_WHITE_CLASS,
-  APP_FIELD_TEXTAREA_CLASS,
-} from '~/utils/app-chrome'
-
 export function useDashboardDrawerChrome() {
-  const searchInputClass = `h-9 w-full pl-9 pr-3 ${APP_FIELD_ON_WHITE_CLASS} dark:!bg-dashboard-card`
+  const drawerFillClass = 's-form'
+  const drawerFillFixedClass = 's-form'
+  const drawerFillScrollClass = 's-form'
+  const drawerFillStepClass = 's-form'
 
-  const drawerFillClass = 'dash-drawer-fill'
-  const drawerFillFixedClass = 'dash-drawer-fill__fixed'
-  const drawerFillScrollClass = 'dash-drawer-fill__scroll'
-  const drawerFillStepClass = 'dash-drawer-fill-step'
+  const pickListClass = 's-pick'
+  const pickListScrollClass = 's-pick__scroll'
+  const pickRowClass = 's-pick__row'
+  const pickRowSelectedClass = 's-pick__row s-pick__row--selected'
 
-  const pickListClass = 'dash-drawer-pick-list'
-  const pickListScrollClass = 'dash-drawer-pick-scroll'
-  const pickRowClass = 'dash-drawer-pick-row'
-  const pickRowSelectedClass = 'dash-drawer-pick-row dash-drawer-pick-row--selected'
+  const pickRowTitleClass = 's-pick__title'
+  const pickRowMetaClass = 's-pick__meta'
 
-  const pickRowTitleClass = 'truncate text-xs font-medium text-gray-900 dark:text-gray-100'
-  const pickRowMetaClass = 'text-[11px] text-gray-500 dark:text-gray-400'
+  const emptyStateClass = 's-pick__empty'
 
-  const emptyStateClass = 'dash-drawer-empty'
-
-  const sectionLabelClass = 'dash-drawer-label'
-  const drawerSectionClass = 'dash-drawer-section'
-  const drawerLabelClass = 'dash-drawer-label'
-  const drawerInputClass = APP_FIELD_ON_WHITE_CLASS
-  const drawerTextareaClass = APP_FIELD_TEXTAREA_CLASS
-  const drawerHintClass = 'dash-drawer-hint'
-  const drawerCalloutClass = 'dash-drawer-callout'
-
-  const footerBtnOutlineClass =
-    '!inline-flex !h-9 !min-h-9 !items-center !justify-center !rounded-[var(--saas-radius-control,0.5rem)] !px-4 !py-0 !text-xs !font-semibold'
-
-  const footerBtnPrimaryClass = footerBtnOutlineClass
-
-  /** Scroll pick lists with mouse wheel while hovered; at list edges, scroll passes to the modal. */
-  function scrollPickListOnWheel(event: WheelEvent) {
-    const el = event.currentTarget as HTMLElement | null
-    if (!el || el.scrollHeight <= el.clientHeight) return
-
-    const deltaY = event.deltaY
-    const atTop = el.scrollTop <= 0
-    const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 1
-
-    if ((deltaY < 0 && atTop) || (deltaY > 0 && atBottom)) {
-      return
-    }
-
-    event.preventDefault()
-    el.scrollTop += deltaY
-  }
+  const sectionLabelClass = 's-field__label'
+  const drawerHintClass = 's-field__hint'
+  const drawerCalloutClass = 's-callout'
 
   return {
-    searchInputClass,
     drawerFillClass,
     drawerFillFixedClass,
     drawerFillScrollClass,
@@ -68,14 +34,7 @@ export function useDashboardDrawerChrome() {
     pickRowMetaClass,
     emptyStateClass,
     sectionLabelClass,
-    drawerSectionClass,
-    drawerLabelClass,
-    drawerInputClass,
-    drawerTextareaClass,
     drawerHintClass,
     drawerCalloutClass,
-    footerBtnOutlineClass,
-    footerBtnPrimaryClass,
-    scrollPickListOnWheel,
   }
 }
