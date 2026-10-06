@@ -318,6 +318,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				INFOPLIST_FILE = App/Info.plist;
+				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.REPLACE_ME";
 				INFOPLIST_KEY_CFBundleDisplayName = Storvv;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -346,6 +347,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				INFOPLIST_FILE = App/Info.plist;
+				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.REPLACE_ME";
 				INFOPLIST_KEY_CFBundleDisplayName = Storvv;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (

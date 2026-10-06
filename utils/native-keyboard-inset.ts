@@ -1,3 +1,5 @@
+let currentInset = 0
+
 /** Keyboard overlap (px) for native shells - used to lift drawer content above the keyboard. */
 export function computeVisualKeyboardInset(): number {
   if (typeof window === 'undefined' || !window.visualViewport) return 0
@@ -6,9 +8,14 @@ export function computeVisualKeyboardInset(): number {
   return Math.max(0, Math.round(inset))
 }
 
+export function getNativeKeyboardInset(): number {
+  return currentInset
+}
+
 export function applyNativeKeyboardInset(px: number): void {
   if (typeof document === 'undefined') return
   const clamped = Math.max(0, Math.round(px))
+  currentInset = clamped
   document.documentElement.style.setProperty('--native-keyboard-inset', `${clamped}px`)
   document.documentElement.toggleAttribute('data-native-keyboard-open', clamped > 0)
 }

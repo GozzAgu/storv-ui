@@ -21,6 +21,15 @@ const config: CapacitorConfig = {
       /** Keyboard overlays the WebView; drawer padding follows keyboard height in CSS. */
       resize: 'none',
     },
+    SocialLogin: {
+      /** Only bundle what we use; Apple stays on (system API) for Sign in with Apple. */
+      providers: {
+        google: true,
+        apple: true,
+        facebook: false,
+        twitter: false,
+      },
+    },
   },
 }
 

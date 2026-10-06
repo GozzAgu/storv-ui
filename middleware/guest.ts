@@ -1,6 +1,7 @@
 import type { RouteLocationNormalized } from 'vue-router'
 import { getAuthWaitMs, waitForAuthStore } from '~/utils/wait-for-auth'
 import { clearSignOutPending, isSignOutPending } from '~/utils/auth-sign-out'
+import { hasPendingGoogleRedirect } from '~/utils/google-sign-in'
 
 /** Let verified users finish on /signin (and survive refresh) without guest → dashboard bounce. */
 export const SIGNIN_ALLOW_WHILE_AUTHED_KEY = 'storv_allow_signin_while_authed'
@@ -50,6 +51,11 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     // Check if we're already going to dashboard to prevent loops
     if (to.path.startsWith('/dashboard')) {
       return // Already going to dashboard, don't redirect
+    }
+
+    // Back from Google's redirect page: the auth page still has to open or create the workspace.
+    if ((to.path === '/signin' || to.path === '/signup') && hasPendingGoogleRedirect()) {
+      return
     }
 
     if (shouldStayOnSigninWhileAuthed(to)) {

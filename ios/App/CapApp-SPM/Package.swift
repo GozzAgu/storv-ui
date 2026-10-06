@@ -15,7 +15,8 @@ let package = Package(
         .package(name: "AparajitaCapacitorBiometricAuth", path: "../../../node_modules/@aparajita/capacitor-biometric-auth"),
         .package(name: "AparajitaCapacitorSecureStorage", path: "../../../node_modules/@aparajita/capacitor-secure-storage"),
         .package(name: "CapacitorHaptics", path: "../../../node_modules/@capacitor/haptics"),
-        .package(name: "CapacitorKeyboard", path: "../../../node_modules/@capacitor/keyboard")
+        .package(name: "CapacitorKeyboard", path: "../../../node_modules/@capacitor/keyboard"),
+        .package(name: "CapgoCapacitorSocialLogin", path: "../../../node_modules/@capgo/capacitor-social-login")
     ],
     targets: [
         .target(
@@ -26,7 +27,8 @@ let package = Package(
                 .product(name: "AparajitaCapacitorBiometricAuth", package: "AparajitaCapacitorBiometricAuth"),
                 .product(name: "AparajitaCapacitorSecureStorage", package: "AparajitaCapacitorSecureStorage"),
                 .product(name: "CapacitorHaptics", package: "CapacitorHaptics"),
-                .product(name: "CapacitorKeyboard", package: "CapacitorKeyboard")
+                .product(name: "CapacitorKeyboard", package: "CapacitorKeyboard"),
+                .product(name: "CapgoCapacitorSocialLogin", package: "CapgoCapacitorSocialLogin")
             ]
         )
     ]

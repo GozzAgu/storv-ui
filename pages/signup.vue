@@ -60,6 +60,21 @@
       </div>
 
       <div v-else class="auth-form-panel" @focusin="trackFocus" @focusout="trackFocus">
+        <AuthGoogleButton
+          v-if="googleAvailable"
+          label="Sign up with Google"
+          :loading="googleLoading"
+          :disabled="isLoading"
+          @click="handleGoogleSignUp()"
+        >
+          <p class="s-auth-oauth__terms">
+            By continuing with Google you agree to our
+            <NuxtLink to="/terms" class="auth-link">terms</NuxtLink>
+            and
+            <NuxtLink to="/privacy" class="auth-link">privacy policy</NuxtLink>.
+          </p>
+        </AuthGoogleButton>
+        <AuthAlert v-if="googleError" :message="googleError" />
         <form class="auth-form" @submit.prevent="handleSignUp">
           <AuthField
             v-model="form.name"
@@ -173,7 +188,13 @@ import AuthCheckbox from '~/components/auth/AuthCheckbox.vue'
 import AuthPasswordStrength from '~/components/auth/AuthPasswordStrength.vue'
 import SButton from '~/components/s/SButton.vue'
 import AuthBuddies from '~/components/auth/AuthBuddies.vue'
+import AuthGoogleButton from '~/components/auth/AuthGoogleButton.vue'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
+import { useGoogleSignIn } from '~/composables/useGoogleSignIn'
+import { useUserStore } from '~/stores/user'
+import { getErrorMessage } from '~/utils/error-message'
+import { hasPendingGoogleRedirect } from '~/utils/google-sign-in'
+import { resolvePostSignInDestination } from '~/utils/post-sign-in-destination'
 import { useFocusedField } from '~/composables/useFocusedField'
 import { useUser } from '~/composables/useUser'
 import {
@@ -192,6 +213,7 @@ definePageMeta({
 
 onMounted(() => {
   markCapacitorDocument()
+  if (hasPendingGoogleRedirect()) void handleGoogleSignUp(true)
 })
 
 const toast = useAppToast()
@@ -228,6 +250,35 @@ watch(registrationComplete, (done) => {
 const { signUp, signOut } = useFirebaseAuth()
 const { trackEvent } = useProductAnalytics()
 const { createUserDocument } = useUser()
+const {
+  available: googleAvailable,
+  loading: googleLoading,
+  continueWithGoogle,
+  resumeGoogleRedirect,
+} = useGoogleSignIn()
+const userStore = useUserStore()
+const googleError = ref('')
+
+async function handleGoogleSignUp(resumeRedirect = false) {
+  googleError.value = ''
+  errorMessage.value = ''
+  try {
+    const outcome = resumeRedirect ? await resumeGoogleRedirect() : await continueWithGoogle()
+    if (!outcome || outcome.status === 'cancelled') return
+    if (outcome.status === 'needs-two-factor') {
+      await navigateTo('/signin?verify2fa=1', { replace: true })
+      return
+    }
+    if (!outcome.isNewAccount) {
+      toast.info('Welcome back — you already have a Storvv account.')
+    }
+    if (userStore.userData) {
+      await navigateTo(resolvePostSignInDestination(userStore.userData))
+    }
+  } catch (error: unknown) {
+    googleError.value = getErrorMessage(error) || 'Google sign-up failed. Please try again.'
+  }
+}
 
 const copyRulesToClipboard = async () => {
   const rules = `rules_version = '2';

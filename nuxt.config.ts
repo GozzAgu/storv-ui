@@ -26,6 +26,21 @@ export default defineNuxtConfig({
       crawlLinks: true,
     },
   },
+  /**
+   * Serves Firebase's sign-in handler from our own domain, so Google redirect sign-in works in
+   * browsers that block third-party storage (Safari, Firefox). Takes effect once
+   * NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN is set to the app host (e.g. app.storvv.com).
+   */
+  routeRules: process.env.NUXT_PUBLIC_FIREBASE_PROJECT_ID
+    ? {
+        '/__/auth/**': {
+          proxy: `https://${process.env.NUXT_PUBLIC_FIREBASE_PROJECT_ID}.firebaseapp.com/__/auth/**`,
+        },
+        '/__/firebase/**': {
+          proxy: `https://${process.env.NUXT_PUBLIC_FIREBASE_PROJECT_ID}.firebaseapp.com/__/firebase/**`,
+        },
+      }
+    : {},
   vite: {
     plugins: [tailwindcss()],
     css: {
@@ -107,6 +122,9 @@ export default defineNuxtConfig({
       appHost: process.env.NUXT_PUBLIC_APP_HOST || 'app.storvv.com',
       /** Origin used when sending users from www → app (no trailing slash) */
       appOrigin: process.env.NUXT_PUBLIC_APP_ORIGIN || 'https://app.storvv.com',
+      /** Google sign-in on iOS: OAuth client IDs from the Firebase project's Google Cloud console. */
+      googleWebClientId: process.env.NUXT_PUBLIC_GOOGLE_WEB_CLIENT_ID || '',
+      googleIosClientId: process.env.NUXT_PUBLIC_GOOGLE_IOS_CLIENT_ID || '',
       /** Local/staging QA: Settings plan switcher without Paystack (never enable in production). */
       allowDevPlanSwitcher:
         process.env.NUXT_PUBLIC_ALLOW_DEV_PLAN_SWITCHER === '1' ||

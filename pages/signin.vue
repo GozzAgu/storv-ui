@@ -25,6 +25,12 @@
 
     <AuthCard>
       <div class="auth-form-panel" @focusin="trackFocus" @focusout="trackFocus">
+        <AuthGoogleButton
+          v-if="googleAvailable && !awaitingTwoFactor"
+          :loading="googleLoading"
+          :disabled="isLoading || isBiometricFilling"
+          @click="handleGoogleSignIn()"
+        />
         <form
           class="auth-form"
           @submit.prevent="awaitingTwoFactor ? submitTwoFactorCode() : handleSignIn()"
@@ -143,7 +149,10 @@ import AuthSegmentToggle from '~/components/auth/AuthSegmentToggle.vue'
 import AuthPrimaryButton from '~/components/auth/AuthPrimaryButton.vue'
 import AuthCheckbox from '~/components/auth/AuthCheckbox.vue'
 import AuthBuddies from '~/components/auth/AuthBuddies.vue'
+import AuthGoogleButton from '~/components/auth/AuthGoogleButton.vue'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
+import { useGoogleSignIn } from '~/composables/useGoogleSignIn'
+import { hasPendingGoogleRedirect } from '~/utils/google-sign-in'
 import { useFocusedField } from '~/composables/useFocusedField'
 import { useNativeBiometricLogin } from '~/composables/useNativeBiometricLogin'
 import { useUserStore } from '~/stores/user'
@@ -152,7 +161,7 @@ import { markCapacitorDocument } from '~/utils/capacitor-env'
 import { clearSignOutPending } from '~/utils/auth-sign-out'
 import { getErrorMessage } from '~/utils/error-message'
 import { getAuthWaitMs, waitForAuthStore } from '~/utils/wait-for-auth'
-import { markOnboardingCompleteForSession } from '~/utils/onboarding-session'
+import { resolvePostSignInDestination } from '~/utils/post-sign-in-destination'
 import { useFunnelAnalytics } from '~/composables/useFunnelAnalytics'
 import {
   isTwoFactorSessionVerified,
@@ -232,6 +241,8 @@ onMounted(() => {
   }
   if (route.query.verify2fa === '1') {
     void resumePendingTwoFactorSignIn()
+  } else if (hasPendingGoogleRedirect()) {
+    void handleGoogleSignIn(true)
   }
 })
 
@@ -294,6 +305,12 @@ async function resumePendingTwoFactorSignIn() {
 }
 
 const { signIn, signOut } = useFirebaseAuth()
+const {
+  available: googleAvailable,
+  loading: googleLoading,
+  continueWithGoogle,
+  resumeGoogleRedirect,
+} = useGoogleSignIn()
 const { authFetch } = useAuthenticatedFetch()
 const userStore = useUserStore()
 
@@ -317,7 +334,8 @@ async function persistBiometricLogin(email: string, password: string) {
   }
 }
 
-async function finishAuthenticatedSession(email: string, password: string) {
+/** `credentials` is null for Google sign-in, which has no password to save for Face ID. */
+async function finishAuthenticatedSession(credentials: { email: string; password: string } | null) {
   const userData = userStore.userData
   if (!userData) {
     errorMessage.value = userStore.error || 'Account not found. Please contact your administrator.'
@@ -329,23 +347,16 @@ async function finishAuthenticatedSession(email: string, password: string) {
     return
   }
 
-  await persistBiometricLogin(email, password)
+  if (credentials?.password) {
+    await persistBiometricLogin(credentials.email, credentials.password)
+  }
 
   if (userData.role === 'superAdmin') {
     const { recordMilestone } = useFunnelAnalytics()
     await recordMilestone('firstLoginAt', { role: userData.role })
   }
 
-  let destination = '/dashboard'
-  if (userData.role === 'staff') {
-    destination = userData.mustChangePassword ? '/dashboard/change-password' : '/dashboard'
-  } else if (!userData.hasCompletedOnboarding) {
-    destination = '/dashboard/onboarding'
-  } else {
-    markOnboardingCompleteForSession(userData.uid)
-  }
-
-  await navigateTo(destination)
+  await navigateTo(resolvePostSignInDestination(userData))
 }
 
 async function completeSignIn(email: string, password: string) {
@@ -381,7 +392,28 @@ async function completeSignIn(email: string, password: string) {
     return
   }
 
-  await finishAuthenticatedSession(normalizedEmail, password)
+  await finishAuthenticatedSession({ email: normalizedEmail, password })
+}
+
+async function handleGoogleSignIn(resumeRedirect = false) {
+  errorMessage.value = ''
+  try {
+    const outcome = resumeRedirect ? await resumeGoogleRedirect() : await continueWithGoogle()
+    if (!outcome || outcome.status === 'cancelled') return
+    if (outcome.status === 'needs-two-factor') {
+      pendingSignIn.value = null
+      form.value.email = outcome.user.email || form.value.email
+      awaitingTwoFactor.value = true
+      twoFactorCode.value = ''
+      if (route.query.verify2fa !== '1') {
+        await navigateTo('/signin?verify2fa=1', { replace: true })
+      }
+      return
+    }
+    await finishAuthenticatedSession(null)
+  } catch (error: unknown) {
+    errorMessage.value = getErrorMessage(error) || 'Google sign-in failed. Please try again.'
+  }
 }
 
 async function submitTwoFactorCode() {
@@ -411,8 +443,8 @@ async function submitTwoFactorCode() {
     const pending = pendingSignIn.value
     pendingSignIn.value = null
     await finishAuthenticatedSession(
-      pending?.email || form.value.email,
-      pending?.password || form.value.password
+      pending ??
+        (form.value.password ? { email: form.value.email, password: form.value.password } : null)
     )
   } catch (error: unknown) {
     errorMessage.value = getErrorMessage(error) || 'Invalid verification code'

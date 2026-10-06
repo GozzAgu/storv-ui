@@ -86,6 +86,11 @@ html.capacitor-native body {
   overscroll-behavior-y: none;
 }
 
+/* The keyboard overlays the WebView, so the last fields on a page need room to scroll above it. */
+html.capacitor-native[data-native-keyboard-open] body {
+  padding-bottom: var(--native-keyboard-inset);
+}
+
 html.capacitor-native #__nuxt {
   padding-left: env(safe-area-inset-left, 0px);
   padding-right: env(safe-area-inset-right, 0px);
