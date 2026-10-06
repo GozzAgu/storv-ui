@@ -1,4 +1,4 @@
-import type { SubscriptionPlan } from '~/types/subscription'
+import { ADD_ON_ELIGIBLE_PLAN, type SubscriptionPlan } from '~/types/subscription'
 import type { SubscriptionBillingCycle } from '~/types/subscription-billing'
 import { isSubscriptionBillingCycle } from '~/types/subscription-billing'
 import { createError, defineEventHandler, getQuery } from 'h3'
@@ -15,6 +15,11 @@ import {
   applySubscriptionToUser,
   fetchActivePaystackSubscription,
 } from '~/server/utils/paystack-subscription'
+import {
+  attachPaystackSubscriptionToAddOn,
+  cancelAllAddOns,
+  completeAddOnCheckout,
+} from '~/server/utils/subscription-addons'
 
 export default defineEventHandler(async (event) => {
   try {
@@ -53,7 +58,13 @@ export default defineEventHandler(async (event) => {
         reference: string
         amount?: number
         currency?: string
-        metadata?: { userId?: string; planId?: string; billingCycle?: string }
+        metadata?: {
+          kind?: string
+          userId?: string
+          planId?: string
+          billingCycle?: string
+          paystackPlanCode?: string
+        }
         customer?: { customer_code?: string }
       }
       message?: string
@@ -72,6 +83,40 @@ export default defineEventHandler(async (event) => {
         success: false,
         message: 'Payment was not successful',
         paid: false,
+      }
+    }
+
+    if (data.metadata?.kind === 'addon') {
+      const addOnUserId = data.metadata.userId
+      if (!addOnUserId || auth.uid !== addOnUserId) {
+        throw createError({ statusCode: 403, message: 'Cannot verify payment for another user' })
+      }
+      const adminDb = getAdminFirestore()
+      const completed = await completeAddOnCheckout(adminDb, {
+        userId: addOnUserId,
+        reference,
+        paidAmountKobo: data.amount ?? 0,
+        currency: data.currency,
+      })
+      const customerCode = data.customer?.customer_code
+      if (customerCode) {
+        try {
+          await attachPaystackSubscriptionToAddOn(adminDb, secretKey, {
+            userId: addOnUserId,
+            addOnId: reference,
+            customerCode,
+          })
+        } catch (err) {
+          console.warn('[paystack/verify] could not attach add-on subscription', err)
+        }
+      }
+      return {
+        success: true,
+        paid: true,
+        userId: addOnUserId,
+        addOn: completed.kind,
+        storeId: completed.storeId ?? null,
+        alreadyProcessed: completed.alreadyProcessed,
       }
     }
 
@@ -187,7 +232,11 @@ export default defineEventHandler(async (event) => {
     const customerCode = data.customer?.customer_code
     if (customerCode) {
       try {
-        const activeSub = await fetchActivePaystackSubscription(secretKey, customerCode)
+        const activeSub = await fetchActivePaystackSubscription(
+          secretKey,
+          customerCode,
+          data.metadata?.paystackPlanCode
+        )
         if (activeSub?.subscription_code) {
           await applySubscriptionToUser(adminDb, {
             userId,
@@ -205,6 +254,14 @@ export default defineEventHandler(async (event) => {
         }
       } catch (err) {
         console.warn('[paystack/verify] could not attach Paystack subscription record', err)
+      }
+    }
+
+    if (planId !== ADD_ON_ELIGIBLE_PLAN) {
+      try {
+        await cancelAllAddOns(adminDb, secretKey, userId, { immediate: true })
+      } catch (err) {
+        console.warn('[paystack/verify] could not cancel add-ons after plan change', err)
       }
     }
 

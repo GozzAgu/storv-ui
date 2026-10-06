@@ -20,7 +20,13 @@ import {
   getStoreDocument,
   getQueryUserId,
 } from '~/composables/useFirestorePaths'
-import { getPlanLimits, getEligibleStoresForPlan, resolveEffectiveSubscriptionPlan } from '~/types/subscription'
+import {
+  getPlanLimits,
+  getEligibleStoresForPlan,
+  resolveEffectiveSubscriptionPlan,
+  storeLimitReachedMessage,
+  summarizeSubscriptionAddOns,
+} from '~/types/subscription'
 import type { Store, StoreWithStats } from '~/composables/useStores'
 import { clearInventoryItemQueryCaches } from '~/utils/inventory-items-firestore'
 import { normalizeEntityName } from '~/utils/capitalize-text'
@@ -155,7 +161,11 @@ export const useStoresStore = defineStore('stores', {
       }
 
       const plan = resolveEffectiveSubscriptionPlan(userStore.userData)
-      const eligible = getEligibleStoresForPlan(this.stores, plan)
+      const eligible = getEligibleStoresForPlan(
+        this.stores,
+        plan,
+        summarizeSubscriptionAddOns(userStore.userData?.subscriptionAddOns)
+      )
       const eligibleIds = new Set(eligible.map((s) => s.id))
 
       let storeWasSet = false
@@ -209,7 +219,11 @@ export const useStoresStore = defineStore('stores', {
       }
 
       const plan = resolveEffectiveSubscriptionPlan(userStore.userData)
-      const eligible = getEligibleStoresForPlan(this.stores, plan)
+      const eligible = getEligibleStoresForPlan(
+        this.stores,
+        plan,
+        summarizeSubscriptionAddOns(userStore.userData?.subscriptionAddOns)
+      )
       const eligibleIds = new Set(eligible.map((s) => s.id))
 
       // Full refresh resets Pinia while localStorage still has the user's branch; if we skip this,
@@ -259,7 +273,10 @@ export const useStoresStore = defineStore('stores', {
         }
         if (u.userData?.role === 'superAdmin') {
           const plan = resolveEffectiveSubscriptionPlan(u.userData)
-          const eligibleIds = new Set(getEligibleStoresForPlan(this.stores, plan).map((s) => s.id))
+          const addOns = summarizeSubscriptionAddOns(u.userData.subscriptionAddOns)
+          const eligibleIds = new Set(
+            getEligibleStoresForPlan(this.stores, plan, addOns).map((s) => s.id)
+          )
           if (!eligibleIds.has(storeId)) {
             throw new Error(
               'This branch is not available on your current plan. Upgrade in Settings to access it.'
@@ -690,13 +707,9 @@ export const useStoresStore = defineStore('stores', {
       }
 
       const plan = resolveEffectiveSubscriptionPlan(userStore.userData)
-      const limits = getPlanLimits(plan)
+      const limits = getPlanLimits(plan, summarizeSubscriptionAddOns(userStore.userData?.subscriptionAddOns))
       if (limits.maxStores >= 0 && this.stores.length >= limits.maxStores) {
-        const msg =
-          plan === 'storvv_micro'
-            ? 'Storvv Micro allows 1 store. Upgrade to Medium or Enterprise to add more.'
-            : `Your plan allows up to ${limits.maxStores} stores. Upgrade to Enterprise for unlimited stores.`
-        throw new Error(msg)
+        throw new Error(storeLimitReachedMessage(plan, limits.maxStores))
       }
 
       try {
@@ -863,7 +876,11 @@ export const useStoresStore = defineStore('stores', {
           const plan = resolveEffectiveSubscriptionPlan(u.userData)
           const eligible =
             u.userData?.role === 'superAdmin'
-              ? getEligibleStoresForPlan(remaining, plan)
+              ? getEligibleStoresForPlan(
+                  remaining,
+                  plan,
+                  summarizeSubscriptionAddOns(u.userData.subscriptionAddOns)
+                )
               : remaining
           const nextStore = eligible.find((s) => s.isActive !== false) || eligible[0]
           if (nextStore) {

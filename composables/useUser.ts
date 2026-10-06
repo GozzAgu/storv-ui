@@ -4,7 +4,7 @@ import {
   PERMISSION_DENIED_MESSAGE,
   CLOUD_UNAVAILABLE_MESSAGE,
 } from '~/utils/cloud-user-messages'
-import type { SubscriptionPlan } from '~/types/subscription'
+import type { SubscriptionAddOnEntry, SubscriptionPlan } from '~/types/subscription'
 import type { SubscriptionBillingCycle } from '~/types/subscription-billing'
 import type { UserPreferences } from '~/composables/usePreferences'
 import type {
@@ -59,6 +59,8 @@ export interface UserData {
   subscriptionStatus?: 'active' | 'past_due' | 'canceled' | 'none'
   /** ISO date when the current paid period ends (next Paystack charge). */
   subscriptionCurrentPeriodEnd?: string
+  /** Enterprise extra stores / staff seats, written by the billing server. */
+  subscriptionAddOns?: SubscriptionAddOnEntry[]
   paystackSubscriptionCode?: string
   paystackCustomerCode?: string
   photoURL?: string

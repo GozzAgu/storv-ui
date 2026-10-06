@@ -16,8 +16,8 @@ const FEATURE_UNLOCK_LABELS: Partial<Record<SubscriptionFeature, string>> = {
 
 const PLAN_LIMIT_UNLOCKS: Record<SubscriptionPlan, string[]> = {
   storvv_micro: ['1 store', '1 department', 'Up to 2 staff'],
-  storvv_medium: ['Up to 2 stores', 'Up to 10 departments', 'Up to 25 staff per store'],
-  storvv_enterprise: ['Unlimited stores, departments & staff'],
+  storvv_medium: ['Up to 2 stores', 'Up to 10 departments', 'Up to 5 staff per store'],
+  storvv_enterprise: ['Up to 5 stores', 'Unlimited departments', 'Up to 10 staff per store'],
 }
 
 /** Human-readable unlocks when moving from one paid tier to another. */

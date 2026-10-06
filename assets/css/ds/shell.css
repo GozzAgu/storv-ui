@@ -54,7 +54,7 @@ html:has(.s-shell.ds-root) body {
   width: 100%;
   min-width: 0;
   padding: var(--s-space-2) var(--s-space-2)
-    calc(var(--s-bottomnav-h) + var(--s-space-3) + env(safe-area-inset-bottom, 0px));
+    calc(var(--s-bottomnav-h) + var(--s-bottomnav-offset) + var(--s-space-2));
 }
 
 @media (min-width: 640px) {
@@ -130,27 +130,6 @@ html:has(.s-shell.ds-root) body {
   }
 }
 
-.s-shell__scrim {
-  position: fixed;
-  inset: 0;
-  z-index: var(--s-z-overlay);
-  background: var(--s-scrim);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--s-duration-slow) var(--s-ease);
-}
-
-.s-shell--drawer-open .s-shell__scrim {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-@media (min-width: 1024px) {
-  .s-shell__scrim {
-    display: none;
-  }
-}
-
 /* ── Collapsed-rail tooltip ──────────────────────────────────────────── */
 
 .s-tooltip {
@@ -169,54 +148,30 @@ html:has(.s-shell.ds-root) body {
 }
 
 /* ── Sidebar ───────────────────────────────────────────────────────────── */
+/* Desktop only: below lg the bottom bar and its expanded grid carry navigation, and the
+   branch switcher moves into the top bar. */
 
 .s-sidebar {
   position: fixed;
   inset-block: 0;
   left: 0;
-  z-index: var(--s-z-modal);
-  display: flex;
+  z-index: var(--s-z-nav);
+  display: none;
   flex-direction: column;
-  width: min(var(--s-rail-w) + var(--s-space-4), 85vw);
+  width: var(--s-rail-w);
   background: var(--s-surface);
   border-right: 1px solid var(--s-border);
-  padding-top: env(safe-area-inset-top, 0px);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
   font-family: var(--s-font-sans);
-  transform: translateX(-100%);
-  visibility: hidden;
-  transition:
-    transform var(--s-duration-slow) var(--s-ease),
-    visibility 0s linear var(--s-duration-slow),
-    width var(--s-duration-slow) var(--s-ease);
+  transition: width var(--s-duration-slow) var(--s-ease);
 }
 
-.s-sidebar--open {
-  transform: none;
-  visibility: visible;
-  box-shadow: var(--s-shadow-lg);
-  transition:
-    transform var(--s-duration-slow) var(--s-ease),
-    visibility 0s,
-    width var(--s-duration-slow) var(--s-ease);
+.s-sidebar--collapsed {
+  width: var(--s-rail-w-collapsed);
 }
 
 @media (min-width: 1024px) {
   .s-sidebar {
-    z-index: var(--s-z-nav);
-    width: var(--s-rail-w);
-    transform: none;
-    visibility: visible;
-    box-shadow: none;
-    transition: width var(--s-duration-slow) var(--s-ease);
-  }
-
-  .s-sidebar--collapsed {
-    width: var(--s-rail-w-collapsed);
-  }
-
-  .s-sidebar__close {
-    display: none;
+    display: flex;
   }
 }
 
@@ -569,9 +524,64 @@ html:has(.s-shell.ds-root) body {
     gap: var(--s-space-2);
     padding-inline: var(--s-space-4);
   }
+}
 
-  .s-topbar__menu {
+/* Phones and tablets: the branch switcher leads the bar and takes the small title's place
+   (every page has its own large title). */
+.s-topbar__lead {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+}
+
+.s-topbar__lead + .s-topbar__title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.s-topbar__lead .s-branch__trigger {
+  width: auto;
+  max-width: 100%;
+  min-height: var(--s-touch);
+  padding: var(--s-space-half) var(--s-space-1-5) var(--s-space-half) var(--s-space-half);
+  gap: var(--s-space-1);
+  border-radius: var(--s-radius-full);
+  background: transparent;
+}
+
+.s-topbar__lead .s-branch__mark {
+  border-radius: var(--s-radius-full);
+}
+
+.s-topbar__lead .s-branch__eyebrow {
+  display: none;
+}
+
+.s-topbar__lead .s-branch__name {
+  font: 600 1.0625rem/1.375rem var(--s-font-sans);
+  letter-spacing: -0.01em;
+}
+
+.s-topbar__lead .s-branch__chevron {
+  padding: 0;
+  background: none;
+  box-shadow: none;
+}
+
+@media (min-width: 1024px) {
+  .s-topbar__lead {
     display: none;
+  }
+
+  .s-topbar__lead + .s-topbar__title {
+    position: static;
+    width: auto;
+    height: auto;
+    clip-path: none;
   }
 }
 
@@ -753,20 +763,34 @@ html:has(.s-shell.ds-root) body {
 }
 
 /* ── Phone bottom bar ──────────────────────────────────────────────────── */
+/* Icon-only glass bar + a matching button that expands into a grid of every other destination.
+   It floats just above the home indicator, or a small gap above the screen edge without one. */
 
+/* Frosted glass with no borders: the edge comes from a soft top highlight and layered shadows. */
 .s-bottomnav {
+  --s-bottomnav-glass: rgb(255 255 255 / 0.55);
+  --s-bottomnav-frost: saturate(1.8) blur(24px);
+  --s-bottomnav-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9), 0 1px 2px rgb(15 23 42 / 0.05),
+    0 8px 24px -6px rgb(15 23 42 / 0.14), 0 24px 48px -16px rgb(15 23 42 / 0.12);
+  --s-bottomnav-active: rgb(15 23 42 / 0.06);
+  --s-bottomnav-panel: rgb(255 255 255 / 0.68);
+  --s-bottomnav-tile: rgb(15 23 42 / 0.04);
+  --s-bottomnav-radius: var(--s-radius-xl);
   position: fixed;
-  inset-inline: 0;
-  bottom: 0;
+  inset-inline: var(--s-space-2);
+  bottom: var(--s-bottomnav-offset);
   z-index: var(--s-z-nav);
-  display: grid;
-  grid-auto-columns: 1fr;
-  grid-auto-flow: column;
-  height: calc(var(--s-bottomnav-h) + env(safe-area-inset-bottom, 0px));
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-  border-top: 1px solid var(--s-border);
-  background: var(--s-surface);
   font-family: var(--s-font-sans);
+  pointer-events: none;
+}
+
+html.dark .s-bottomnav {
+  --s-bottomnav-glass: rgb(26 31 52 / 0.55);
+  --s-bottomnav-shadow: inset 0 1px 0 rgb(255 255 255 / 0.07), 0 1px 2px rgb(0 0 0 / 0.3),
+    0 8px 24px -6px rgb(0 0 0 / 0.45), 0 24px 48px -16px rgb(0 0 0 / 0.5);
+  --s-bottomnav-active: rgb(255 255 255 / 0.08);
+  --s-bottomnav-panel: rgb(26 31 52 / 0.7);
+  --s-bottomnav-tile: rgb(255 255 255 / 0.05);
 }
 
 @media (min-width: 1024px) {
@@ -775,40 +799,180 @@ html:has(.s-shell.ds-root) body {
   }
 }
 
-.s-bottomnav__item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--s-space-half);
-  min-width: 0;
-  padding: 0 var(--s-space-half);
-  border: 0;
-  background: transparent;
-  color: var(--s-text-muted);
-  cursor: pointer;
-  transition: color var(--s-duration-fast) var(--s-ease);
+.s-bottomnav__backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgb(15 23 42 / 0.12);
+  pointer-events: auto;
+  animation: s-bottomnav-fade var(--s-duration) var(--s-ease);
 }
 
-.s-bottomnav__item:focus-visible {
-  outline: none;
-  box-shadow: inset var(--s-focus-ring);
+html.dark .s-bottomnav__backdrop {
+  background: rgb(0 0 0 / 0.4);
+}
+
+@keyframes s-bottomnav-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+.s-bottomnav__dock {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: var(--s-space-1-5);
+}
+
+.s-bottomnav__bar,
+.s-bottomnav__panel,
+.s-bottomnav__toggle {
+  border: 0;
+  border-radius: var(--s-bottomnav-radius);
+  background: var(--s-bottomnav-glass);
+  box-shadow: var(--s-bottomnav-shadow);
+  -webkit-backdrop-filter: var(--s-bottomnav-frost);
+  backdrop-filter: var(--s-bottomnav-frost);
+  pointer-events: auto;
+}
+
+.s-bottomnav__bar {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--s-bottomnav-h);
+  padding: 0 var(--s-space-1);
+}
+
+.s-bottomnav__item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--s-touch) + var(--s-space-1-5));
+  height: var(--s-touch);
+  border-radius: var(--s-radius-lg);
+  color: var(--s-text-2);
+  transition: background-color var(--s-duration-fast) var(--s-ease),
+    color var(--s-duration-fast) var(--s-ease), transform var(--s-duration-fast) var(--s-ease);
 }
 
 .s-bottomnav__item--active {
-  color: var(--s-accent);
+  background: var(--s-bottomnav-active);
+  color: var(--s-text);
 }
 
-.s-bottomnav__label {
+.s-bottomnav__item:active,
+.s-bottomnav__toggle:active,
+.s-bottomnav__tile:active {
+  transform: scale(0.94);
+}
+
+.s-bottomnav__toggle {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--s-bottomnav-h);
+  height: var(--s-bottomnav-h);
+  padding: 0;
+  color: var(--s-text);
+  cursor: pointer;
+  transition: transform var(--s-duration-fast) var(--s-ease);
+}
+
+/* The current page lives behind the grid: mark the toggle so the active state isn't lost */
+.s-bottomnav__toggle--dot::after {
+  content: '';
+  position: absolute;
+  top: var(--s-space-1-5);
+  right: var(--s-space-1-5);
+  width: var(--s-space-1);
+  height: var(--s-space-1);
+  border-radius: var(--s-radius-full);
+  background: var(--s-accent);
+}
+
+.s-bottomnav__panel {
+  display: grid;
+  flex: 1;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--s-space-2) var(--s-space-1);
+  max-height: min(60dvh, 420px);
+  padding: var(--s-space-2) var(--s-space-1-5);
+  overflow-y: auto;
+  background: var(--s-bottomnav-panel);
+  /* Heavier frost so labels stay readable over busy pages */
+  -webkit-backdrop-filter: saturate(1.8) blur(40px);
+  backdrop-filter: saturate(1.8) blur(40px);
+  transform-origin: bottom left;
+}
+
+.s-bottomnav__tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-space-half);
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--s-text-2);
+  cursor: pointer;
+  transition: transform var(--s-duration-fast) var(--s-ease);
+}
+
+.s-bottomnav__tile-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--s-touch) + var(--s-space-1));
+  height: calc(var(--s-touch) + var(--s-space-1));
+  border-radius: var(--s-radius-lg);
+  background: var(--s-bottomnav-tile);
+  color: var(--s-text);
+}
+
+.s-bottomnav__tile--active .s-bottomnav__tile-icon {
+  background: var(--s-accent-soft);
+  color: var(--s-accent-soft-text);
+}
+
+.s-bottomnav__tile-label {
+  display: -webkit-box;
   max-width: 100%;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   font: var(--s-text-caption);
+  line-height: 1.25;
+  text-align: center;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
 }
 
-.s-bottomnav__item--active .s-bottomnav__label {
+.s-bottomnav__tile--active .s-bottomnav__tile-label {
+  color: var(--s-text);
   font-weight: 600;
+}
+
+.s-bottomnav__item:focus-visible,
+.s-bottomnav__toggle:focus-visible,
+.s-bottomnav__tile:focus-visible {
+  outline: none;
+  box-shadow: var(--s-focus-ring);
+}
+
+.s-bottomnav-swap-enter-active,
+.s-bottomnav-swap-leave-active {
+  transition: opacity var(--s-duration-fast) var(--s-ease),
+    transform var(--s-duration) var(--s-ease-out);
+}
+
+.s-bottomnav-swap-enter-from,
+.s-bottomnav-swap-leave-to {
+  opacity: 0;
+  transform: scale(0.92);
 }
 
 /* Keyboard users land here first; hidden until focused. */

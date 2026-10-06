@@ -13,6 +13,7 @@ export type PaystackSubscriptionRecord = {
   email_token?: string
   status?: string
   next_payment_date?: string
+  createdAt?: string
   plan?: { plan_code?: string; interval?: string }
   customer?: { customer_code?: string }
 }
@@ -99,16 +100,28 @@ export async function disablePaystackSubscription(
   })
 }
 
-/** Fetch active subscription for a Paystack customer after first checkout. */
-export async function fetchActivePaystackSubscription(
+/** All Paystack subscriptions for a customer (the list API returns an array; older shapes nest it). */
+export async function listPaystackSubscriptions(
   secretKey: string,
   customerCode: string
+): Promise<PaystackSubscriptionRecord[]> {
+  const data = await paystackRequest<
+    PaystackSubscriptionRecord[] | { subscriptions?: PaystackSubscriptionRecord[] }
+  >(`/subscription?customer=${encodeURIComponent(customerCode)}`, { secretKey })
+  return Array.isArray(data) ? data : data?.subscriptions || []
+}
+
+/**
+ * Fetch active subscription for a Paystack customer after first checkout.
+ * Pass `planCode` so add-on subscriptions on the same customer are never mistaken for the plan.
+ */
+export async function fetchActivePaystackSubscription(
+  secretKey: string,
+  customerCode: string,
+  planCode?: string
 ): Promise<PaystackSubscriptionRecord | null> {
-  const data = await paystackRequest<{ subscriptions?: PaystackSubscriptionRecord[] }>(
-    `/subscription?customer=${encodeURIComponent(customerCode)}`,
-    { secretKey }
-  )
-  const subs = data.subscriptions || []
+  const all = await listPaystackSubscriptions(secretKey, customerCode)
+  const subs = planCode ? all.filter((s) => s.plan?.plan_code === planCode) : all
   const active =
     subs.find((s) => s.status === 'active') ||
     subs.find((s) => s.status === 'non-renewing') ||

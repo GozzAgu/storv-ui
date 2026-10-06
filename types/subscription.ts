@@ -134,15 +134,85 @@ const LIMITS_BY_PLAN: Record<SubscriptionPlan, SubscriptionLimits> = {
   storvv_medium: {
     maxStores: 2,
     maxDepartmentsPerStore: 10,
-    maxStaffPerStore: 25,
+    maxStaffPerStore: 5,
     maxWhatsAppMessagesPerMonth: -1,
   },
   storvv_enterprise: {
-    maxStores: -1,
+    maxStores: 5,
     maxDepartmentsPerStore: -1,
-    maxStaffPerStore: -1,
+    maxStaffPerStore: 10,
     maxWhatsAppMessagesPerMonth: -1,
   },
+}
+
+/** Paid extras sold monthly on top of Enterprise. */
+export type SubscriptionAddOnKind = 'store' | 'staff'
+
+export const ADD_ON_ELIGIBLE_PLAN: SubscriptionPlan = 'storvv_enterprise'
+
+/** Monthly add-on prices in naira. Must match the Paystack add-on plan amounts. */
+export const SUBSCRIPTION_ADD_ON_PRICES_NGN: Record<SubscriptionAddOnKind, number> = {
+  store: 5000,
+  staff: 2000,
+}
+
+export function formatNaira(amount: number): string {
+  return `₦${amount.toLocaleString('en-NG')}`
+}
+
+export const SUBSCRIPTION_ADD_ON_LABELS: Record<SubscriptionAddOnKind, string> = {
+  store: 'Extra store',
+  staff: 'Extra staff seat',
+}
+
+/** Server-written summary row on the owner doc (`subscriptionAddOns`). */
+export interface SubscriptionAddOnEntry {
+  id: string
+  kind: SubscriptionAddOnKind
+  /** Staff seats belong to one store. */
+  storeId?: string
+  status: 'active' | 'past_due' | 'canceled'
+  /** Canceled add-ons keep counting until this date. */
+  endsAt?: string
+}
+
+export interface SubscriptionAddOnTotals {
+  extraStores: number
+  extraStaffByStore: Record<string, number>
+}
+
+const EMPTY_ADD_ON_TOTALS: SubscriptionAddOnTotals = { extraStores: 0, extraStaffByStore: {} }
+
+/** Add-ons that still grant capacity right now (drops malformed and expired rows). */
+export function getLiveSubscriptionAddOns(
+  raw: unknown,
+  now = Date.now()
+): SubscriptionAddOnEntry[] {
+  if (!Array.isArray(raw)) return []
+  return raw.filter((entry): entry is SubscriptionAddOnEntry => {
+    if (!entry || typeof entry !== 'object') return false
+    const row = entry as Partial<SubscriptionAddOnEntry>
+    if (typeof row.id !== 'string' || (row.kind !== 'store' && row.kind !== 'staff')) return false
+    if (row.kind === 'staff' && typeof row.storeId !== 'string') return false
+    if (row.status !== 'canceled') return row.status === 'active' || row.status === 'past_due'
+    const endMs = row.endsAt ? new Date(row.endsAt).getTime() : NaN
+    return Number.isFinite(endMs) && endMs > now
+  })
+}
+
+export function summarizeSubscriptionAddOns(
+  raw: unknown,
+  now = Date.now()
+): SubscriptionAddOnTotals {
+  const totals: SubscriptionAddOnTotals = { extraStores: 0, extraStaffByStore: {} }
+  for (const entry of getLiveSubscriptionAddOns(raw, now)) {
+    if (entry.kind === 'store') {
+      totals.extraStores += 1
+    } else if (entry.storeId) {
+      totals.extraStaffByStore[entry.storeId] = (totals.extraStaffByStore[entry.storeId] || 0) + 1
+    }
+  }
+  return totals
 }
 
 /** Returns whether the plan includes the feature. */
@@ -160,9 +230,49 @@ export function getPlanDisplayName(plan: SubscriptionPlan): string {
   return SUBSCRIPTION_PLANS.find((entry) => entry.id === plan)?.name ?? plan
 }
 
-/** Returns limits for the plan. */
-export function getPlanLimits(plan: SubscriptionPlan): SubscriptionLimits {
-  return LIMITS_BY_PLAN[plan] ?? LIMITS_BY_PLAN.storvv_micro
+/** Returns limits for the plan, raised by purchased add-ons when the plan supports them. */
+export function getPlanLimits(
+  plan: SubscriptionPlan,
+  addOns: SubscriptionAddOnTotals = EMPTY_ADD_ON_TOTALS
+): SubscriptionLimits {
+  const base = LIMITS_BY_PLAN[plan] ?? LIMITS_BY_PLAN.storvv_micro
+  if (plan !== ADD_ON_ELIGIBLE_PLAN || base.maxStores < 0 || addOns.extraStores <= 0) return base
+  return { ...base, maxStores: base.maxStores + addOns.extraStores }
+}
+
+/** Staff cap for one store: plan allowance plus any seats bought for that store. */
+export function getStaffLimitForStore(
+  plan: SubscriptionPlan,
+  storeId: string | null | undefined,
+  addOns: SubscriptionAddOnTotals = EMPTY_ADD_ON_TOTALS
+): number {
+  const base = getPlanLimits(plan).maxStaffPerStore
+  if (base < 0 || plan !== ADD_ON_ELIGIBLE_PLAN || !storeId) return base
+  return base + (addOns.extraStaffByStore[storeId] || 0)
+}
+
+export function storeLimitReachedMessage(plan: SubscriptionPlan, maxStores: number): string {
+  if (plan === 'storvv_micro') {
+    return 'Storvv Micro allows 1 store. Upgrade to Medium or Enterprise to add more.'
+  }
+  if (plan === 'storvv_medium') {
+    return `Storvv Medium allows up to ${maxStores} stores. Upgrade to Enterprise for up to ${LIMITS_BY_PLAN.storvv_enterprise.maxStores}.`
+  }
+  return `You're using all ${maxStores} stores on your plan. Add another store for ${formatNaira(
+    SUBSCRIPTION_ADD_ON_PRICES_NGN.store
+  )}/month in Settings → Plan & billing.`
+}
+
+export function staffLimitReachedMessage(plan: SubscriptionPlan, maxStaff: number): string {
+  if (plan === 'storvv_micro') {
+    return `Storvv Micro allows up to ${maxStaff} staff per store. Upgrade to Medium or Enterprise for more.`
+  }
+  if (plan === 'storvv_medium') {
+    return `Storvv Medium allows up to ${maxStaff} staff per store. Upgrade to Enterprise for ${LIMITS_BY_PLAN.storvv_enterprise.maxStaffPerStore} per store.`
+  }
+  return `This store is using all ${maxStaff} staff seats. Add a seat for ${formatNaira(
+    SUBSCRIPTION_ADD_ON_PRICES_NGN.staff
+  )}/month in Settings → Plan & billing.`
 }
 
 /** Normalize Firestore Timestamp / Date / string for sorting. Missing dates sort last (newest), so limits trim undated stores first when over capacity. */
@@ -186,9 +296,10 @@ export function storeCreatedAtMillis(createdAt: unknown): number {
  */
 export function getEligibleStoresForPlan<T extends { id: string; createdAt?: unknown }>(
   stores: T[],
-  plan: SubscriptionPlan
+  plan: SubscriptionPlan,
+  addOns: SubscriptionAddOnTotals = EMPTY_ADD_ON_TOTALS
 ): T[] {
-  const max = getPlanLimits(plan).maxStores
+  const max = getPlanLimits(plan, addOns).maxStores
   if (max < 0) return [...stores]
   const sorted = [...stores].sort((a, b) => {
     const da = storeCreatedAtMillis(a.createdAt)
@@ -214,7 +325,7 @@ export const SUBSCRIPTION_FEATURE_SUMMARY: Record<SubscriptionPlan, string[]> = 
   ],
   storvv_medium: [
     'Everything in Micro',
-    'Up to 2 stores · 10 departments · 25 staff per store',
+    'Up to 2 stores · 10 departments · 5 staff per store',
     'Analytics, activity logs & PDF/Excel exports',
     'Sales leads (enquiry pipeline → receipt)',
     'Customer balance / credit ledger',
@@ -224,7 +335,10 @@ export const SUBSCRIPTION_FEATURE_SUMMARY: Record<SubscriptionPlan, string[]> = 
   ],
   storvv_enterprise: [
     'Everything in Medium',
-    'Unlimited stores, departments & staff',
+    'Up to 5 stores · 10 staff per store · unlimited departments',
+    `Add stores (${formatNaira(SUBSCRIPTION_ADD_ON_PRICES_NGN.store)}/mo, ${
+      LIMITS_BY_PLAN.storvv_enterprise.maxStaffPerStore
+    } staff each) or staff seats (${formatNaira(SUBSCRIPTION_ADD_ON_PRICES_NGN.staff)}/mo) anytime`,
     'Multi-store sync & stock transfers',
     'Copy from branch (category templates across stores)',
     'Stock loans for serial-tracked inventory',

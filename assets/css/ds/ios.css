@@ -1,6 +1,6 @@
 /*
  * iOS layer for phones (the Capacitor iOS app and mobile web). Restyles the shared design
- * system to the Storvv iOS spec: blue-white canvas, hairline cards, frosted bars, a floating
+ * system to the Storvv iOS spec: blue-white canvas, hairline cards, a solid top bar, a floating
  * tab bar, bottom sheets with a grab handle, 44pt controls and large titles.
  * Tablet and desktop layouts are untouched.
  */
@@ -20,13 +20,7 @@
     --s-control-h: var(--s-touch);
     --s-control-h-sm: calc(var(--s-space-4) + var(--s-space-half));
 
-    /* Floating tab bar height plus the gap it keeps above the home indicator */
-    --s-bottomnav-h: calc(var(--s-space-8) + var(--s-space-1));
-    --s-ios-tabbar-h: var(--s-space-8);
-
-    --s-ios-glass: rgb(255 255 255 / 0.72);
     --s-ios-hairline: rgb(15 23 42 / 0.06);
-    --s-ios-blur: saturate(1.8) blur(20px);
     --s-ios-float-shadow: 0 12px 32px -8px rgb(15 23 42 / 0.18), 0 2px 6px rgb(15 23 42 / 0.06);
   }
 
@@ -41,52 +35,21 @@
     --s-field-bg-hover: #252b4a;
     --s-field-bg-focus: #171b2e;
 
-    --s-ios-glass: rgb(23 27 46 / 0.72);
     --s-ios-hairline: rgb(255 255 255 / 0.08);
     --s-ios-float-shadow: 0 12px 32px -8px rgb(0 0 0 / 0.6), 0 2px 6px rgb(0 0 0 / 0.3);
   }
 
-  /* ── Frosted top bar ── */
+  /* ── Top bar ── */
 
+  /* Solid, in the canvas colour: a blurred bar samples the web view's edge under the status bar */
   .s-topbar {
     border-bottom-color: var(--s-ios-hairline);
-    background: var(--s-ios-glass);
-    -webkit-backdrop-filter: var(--s-ios-blur);
-    backdrop-filter: var(--s-ios-blur);
+    background: var(--s-bg);
   }
 
   .s-topbar__title {
     font-weight: 600;
     font-size: 1.0625rem;
-  }
-
-  /* ── Floating glass tab bar ── */
-
-  .s-bottomnav {
-    inset-inline: var(--s-space-2);
-    bottom: calc(env(safe-area-inset-bottom, 0px) + var(--s-space-1));
-    height: var(--s-ios-tabbar-h);
-    padding: var(--s-space-half);
-    border: 1px solid var(--s-ios-hairline);
-    border-radius: var(--s-radius-full);
-    background: var(--s-ios-glass);
-    box-shadow: var(--s-ios-float-shadow);
-    -webkit-backdrop-filter: var(--s-ios-blur);
-    backdrop-filter: var(--s-ios-blur);
-  }
-
-  .s-bottomnav__item {
-    border-radius: var(--s-radius-full);
-    transition: background-color var(--s-duration-fast) var(--s-ease),
-      color var(--s-duration-fast) var(--s-ease);
-  }
-
-  .s-bottomnav__item--active {
-    background: var(--s-accent-soft);
-  }
-
-  .s-bottomnav__item:active {
-    transform: scale(0.96);
   }
 
   /* ── Large titles ── */

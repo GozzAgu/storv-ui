@@ -337,7 +337,11 @@ import SSkeleton from '~/components/s/SSkeleton.vue'
 import STabs from '~/components/s/STabs.vue'
 import DepartmentModal from '~/components/departments/DepartmentModal.vue'
 import type { Department } from '~/composables/useDepartments'
-import { getEligibleStoresForPlan, resolveEffectiveSubscriptionPlan } from '~/types/subscription'
+import {
+  getEligibleStoresForPlan,
+  resolveEffectiveSubscriptionPlan,
+  summarizeSubscriptionAddOns,
+} from '~/types/subscription'
 
 definePageMeta({
   layout: 'dashboard',
@@ -640,7 +644,11 @@ onMounted(async () => {
 
     if (userStore.userData?.role === 'superAdmin' && storesStore.stores.length > 0) {
       const plan = resolveEffectiveSubscriptionPlan(userStore.userData)
-      const eligible = getEligibleStoresForPlan(storesStore.stores, plan)
+      const eligible = getEligibleStoresForPlan(
+        storesStore.stores,
+        plan,
+        summarizeSubscriptionAddOns(userStore.userData.subscriptionAddOns)
+      )
       const eligibleIds = new Set(eligible.map((s) => s.id))
       if (!eligibleIds.has(storeId.value)) {
         const fallback = eligible[0]

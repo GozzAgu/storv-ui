@@ -12,11 +12,11 @@ import type { Store } from '~/composables/useStores'
  */
 export function usePlanEligibleStores() {
   const storesStore = useStoresStore()
-  const { plan } = useSubscriptionFeatures()
+  const { plan, addOns } = useSubscriptionFeatures()
   const { canManageBranches } = useBusinessCapabilities()
 
   const eligibleStores = computed<Store[]>(() => {
-    const planEligible = getEligibleStoresForPlan(storesStore.stores, plan.value)
+    const planEligible = getEligibleStoresForPlan(storesStore.stores, plan.value, addOns.value)
     return filterStoresForBusinessExperience(planEligible, {
       canManageBranches: canManageBranches.value,
       currentStoreId: storesStore.currentStoreId,

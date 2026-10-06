@@ -316,6 +316,7 @@ service cloud.firestore {
           'subscriptionUpdatedAt',
           'subscriptionStatus',
           'subscriptionCurrentPeriodEnd',
+          'subscriptionAddOns',
           'paystackSubscriptionCode',
           'paystackSubscriptionEmailToken',
           'paystackCustomerCode',
@@ -356,6 +357,11 @@ service cloud.firestore {
       }
 
       match /pendingCheckouts/{checkoutId} {
+        allow read, write: if false;
+      }
+
+      // Billing server only; the owner reads the summary on users/{userId}.subscriptionAddOns.
+      match /subscriptionAddOns/{addOnId} {
         allow read, write: if false;
       }
       

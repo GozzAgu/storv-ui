@@ -8,7 +8,7 @@ const MIN_SCALE = 0.6
 
 export default defineNuxtPlugin(() => {
   const phone = window.matchMedia('(max-width: 639px)')
-  const lastFit = new WeakMap<HTMLElement, string>()
+  let lastFit = new WeakMap<HTMLElement, string>()
   let frame = 0
 
   function fit(el: HTMLElement) {
@@ -42,6 +42,12 @@ export default defineNuxtPlugin(() => {
   })
   window.addEventListener('resize', schedule, { passive: true })
   phone.addEventListener('change', schedule)
-  void document.fonts?.ready.then(schedule)
+  // Text widens once the web font swaps in without the cell or text changing, so re-measure all.
+  function refitAll() {
+    lastFit = new WeakMap()
+    schedule()
+  }
+  void document.fonts?.ready.then(refitAll)
+  document.fonts?.addEventListener('loadingdone', refitAll)
   schedule()
 })

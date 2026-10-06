@@ -13,7 +13,8 @@ const config: CapacitorConfig = {
      * "automatic" shrinks the WebView and shows black letterboxing above/below the app.
      */
     contentInset: 'never',
-    backgroundColor: '#f3f4f6',
+    /** Light canvas; AppBridgeViewController switches it for dark mode. */
+    backgroundColor: '#f5f7ff',
   },
   plugins: {
     Keyboard: {

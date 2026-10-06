@@ -42,6 +42,79 @@
         <p v-else-if="pricingLoading" class="s-plan__meta">Loading price…</p>
       </section>
 
+      <section v-if="addOnsAvailable" class="s-plan__section" aria-labelledby="plan-addons-heading">
+        <h3 id="plan-addons-heading" class="s-plan__heading">Add-ons</h3>
+        <p class="s-plan__meta s-plan__lede">
+          Enterprise includes {{ enterpriseLimits.maxStores }} stores with
+          {{ enterpriseLimits.maxStaffPerStore }} staff each. Grow past that anytime, billed monthly.
+        </p>
+        <div class="s-plan__addons">
+          <div class="s-plan__addon">
+            <div>
+              <p class="s-plan__addon-title">Extra store</p>
+              <p class="s-plan__addon-price">{{ addOnPriceLabels.store }} / month</p>
+              <p class="s-plan__meta">Comes with {{ enterpriseLimits.maxStaffPerStore }} staff seats.</p>
+            </div>
+            <div class="s-plan__addon-actions">
+              <SButton
+                variant="secondary"
+                :disabled="disabled || addOnPending !== null"
+                :loading="addOnPending === 'store'"
+                @click="emit('buy-add-on', 'store')"
+              >
+                <template #leading><Store :size="16" :stroke-width="2" aria-hidden="true" /></template>
+                Add a store
+              </SButton>
+            </div>
+          </div>
+          <div class="s-plan__addon">
+            <div>
+              <p class="s-plan__addon-title">Extra staff seat</p>
+              <p class="s-plan__addon-price">{{ addOnPriceLabels.staff }} / month per seat</p>
+              <p class="s-plan__meta">For a store that has used all its seats.</p>
+            </div>
+            <div class="s-plan__addon-actions">
+              <SSelect
+                v-model="seatStoreId"
+                label="Store"
+                placeholder="Select a store"
+                :options="seatStoreOptions"
+                :disabled="disabled || addOnPending !== null || seatStoreOptions.length === 0"
+              />
+              <SButton
+                variant="secondary"
+                :disabled="disabled || addOnPending !== null || !seatStoreId"
+                :loading="addOnPending === 'staff'"
+                @click="emit('buy-add-on', 'staff', seatStoreId)"
+              >
+                <template #leading><UserPlus :size="16" :stroke-width="2" aria-hidden="true" /></template>
+                Add seat
+              </SButton>
+            </div>
+          </div>
+        </div>
+        <ul v-if="addOnRows.length" class="s-list s-plan__addon-list">
+          <li v-for="addOn in addOnRows" :key="addOn.id" class="s-list__item">
+            <div class="s-list__main">
+              <p class="s-list__primary">{{ addOn.label }}</p>
+              <p class="s-list__secondary">{{ addOn.detail }}</p>
+            </div>
+            <div class="s-list__end">
+              <SButton
+                v-if="addOn.canCancel"
+                variant="ghost"
+                size="sm"
+                :disabled="disabled || addOnPending !== null"
+                :loading="addOnPending === addOn.id"
+                @click="emit('cancel-add-on', addOn.id)"
+              >
+                Remove
+              </SButton>
+            </div>
+          </li>
+        </ul>
+      </section>
+
       <details class="s-plan__compare">
         <summary>
           <ChevronRight :size="16" :stroke-width="2" aria-hidden="true" />
@@ -112,16 +185,20 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { ChevronRight } from '@lucide/vue'
+import { computed, ref, watch } from 'vue'
+import { ChevronRight, Store, UserPlus } from '@lucide/vue'
 import SBadge from '~/components/s/SBadge.vue'
 import SButton from '~/components/s/SButton.vue'
 import SCard from '~/components/s/SCard.vue'
 import SSelect from '~/components/s/SSelect.vue'
 import GrowthSupportLink from '~/components/growth/GrowthSupportLink.vue'
 import {
+  formatNaira,
+  getPlanLimits,
+  SUBSCRIPTION_ADD_ON_PRICES_NGN,
   SUBSCRIPTION_PLANS,
   SUBSCRIPTION_FEATURE_SUMMARY,
+  type SubscriptionAddOnKind,
   type SubscriptionPlan,
 } from '~/types/subscription'
 import {
@@ -155,11 +232,42 @@ const props = defineProps<{
   showQaPlanSwitcher?: boolean
   qaCurrentPlanId?: SubscriptionPlan
   qaSwitching?: boolean
+  addOnsAvailable?: boolean
+  addOns?: Array<{ id: string; label: string; detail: string; canCancel: boolean }>
+  addOnPrices?: Record<SubscriptionAddOnKind, string>
+  addOnStoreOptions?: Array<{ value: string; label: string }>
+  /** 'store' | 'staff' while starting checkout, or an add-on id while removing it. */
+  addOnBusy?: string | null
 }>()
+
+const addOnRows = computed(() => props.addOns ?? [])
+const addOnPriceLabels = computed(
+  () =>
+    props.addOnPrices ?? {
+      store: formatNaira(SUBSCRIPTION_ADD_ON_PRICES_NGN.store),
+      staff: formatNaira(SUBSCRIPTION_ADD_ON_PRICES_NGN.staff),
+    }
+)
+const seatStoreOptions = computed(() => props.addOnStoreOptions ?? [])
+const addOnPending = computed(() => props.addOnBusy ?? null)
+const enterpriseLimits = getPlanLimits('storvv_enterprise')
+
+const seatStoreId = ref('')
+watch(
+  seatStoreOptions,
+  (options) => {
+    if (!options.some((option) => option.value === seatStoreId.value)) {
+      seatStoreId.value = options[0]?.value ?? ''
+    }
+  },
+  { immediate: true }
+)
 
 const emit = defineEmits<{
   upgrade: []
   cancel: []
+  'buy-add-on': [kind: SubscriptionAddOnKind, storeId?: string]
+  'cancel-add-on': [addOnId: string]
   'update:selectedBillingCycle': [SubscriptionBillingCycle]
   'update:selectedUpgradePlan': [SubscriptionPlan | '']
   'qa-set-plan': [SubscriptionPlan]

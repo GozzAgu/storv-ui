@@ -18,8 +18,11 @@
         </p>
       </div>
 
-      <ul class="mk-stats">
-        <li v-for="(stat, i) in stats" :key="stat.id" class="mk-stat mk-reveal">
+      <ul class="mk-stats mk-reveal">
+        <li v-for="(stat, i) in stats" :key="stat.id" class="mk-stat">
+          <span class="mk-stat__icon" aria-hidden="true">
+            <component :is="stat.icon" :size="20" :stroke-width="1.75" />
+          </span>
           <p class="mk-stat__value">
             <span class="ds-sr-only">{{ stat.end }}{{ stat.suffix }}</span>
             <span aria-hidden="true">{{ counts[i] }}</span>
@@ -46,13 +49,22 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref, type Component } from 'vue'
+import { Layers, MonitorSmartphone, Sparkles } from '@lucide/vue'
 
 type Chip = { label: string; live?: boolean }
 
-const stats: { id: string; end: number; suffix: string; label: string; chips: Chip[] }[] = [
+const stats: {
+  id: string
+  icon: Component
+  end: number
+  suffix: string
+  label: string
+  chips: Chip[]
+}[] = [
   {
     id: 'workflows',
+    icon: Layers,
     end: 8,
     suffix: '+',
     label: 'Core retail workflows in one workspace',
@@ -69,6 +81,7 @@ const stats: { id: string; end: number; suffix: string; label: string; chips: Ch
   },
   {
     id: 'plans',
+    icon: Sparkles,
     end: 3,
     suffix: '',
     label: 'Plans, from free Micro to Enterprise',
@@ -76,6 +89,7 @@ const stats: { id: string; end: number; suffix: string; label: string; chips: Ch
   },
   {
     id: 'platforms',
+    icon: MonitorSmartphone,
     end: 3,
     suffix: '',
     label: 'Platforms, live on the web today',

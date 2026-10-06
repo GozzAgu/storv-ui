@@ -300,7 +300,7 @@ const ladder = [
   },
   {
     name: 'Medium',
-    scope: 'Up to 2 stores',
+    scope: 'Up to 2 stores · 5 staff each',
     unlocks: [
       'Analytics and exports',
       'Sales leads and customer balances',
@@ -310,7 +310,7 @@ const ladder = [
   },
   {
     name: 'Enterprise',
-    scope: 'Unlimited stores',
+    scope: '5 stores · 10 staff each · add more',
     unlocks: [
       'Stock transfers between branches',
       'Copy from branch and stock loans',

@@ -284,7 +284,7 @@ const faq: MkFaqItem[] = [
   },
   {
     q: 'What do Medium and Enterprise add?',
-    a: 'Medium adds a second store, analytics, sales leads and unlimited WhatsApp receipts. Enterprise adds unlimited stores and stock transfers. See the <a href="/pricing">full comparison</a>.',
+    a: 'Medium adds a second store, analytics, sales leads and unlimited WhatsApp receipts. Enterprise covers 5 stores with 10 staff each plus stock transfers, and you can add more stores or staff seats any time. See the <a href="/pricing">full comparison</a>.',
     html: true,
   },
   {

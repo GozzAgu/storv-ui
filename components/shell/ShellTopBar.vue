@@ -1,13 +1,8 @@
 <template>
   <header class="s-topbar">
-    <SIconButton
-      class="s-topbar__menu"
-      label="Open menu"
-      aria-controls="shell-sidebar"
-      @click="emit('open-menu')"
-    >
-      <Menu :size="20" :stroke-width="1.75" aria-hidden="true" />
-    </SIconButton>
+    <div v-if="$slots.lead" class="s-topbar__lead">
+      <slot name="lead" />
+    </div>
 
     <h1 class="s-topbar__title">{{ title }}</h1>
 
@@ -25,15 +20,13 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { Menu, Search } from '@lucide/vue'
-import SIconButton from '~/components/s/SIconButton.vue'
+import { Search } from '@lucide/vue'
 
 defineProps<{
   title: string
 }>()
 
 const emit = defineEmits<{
-  'open-menu': []
   search: []
 }>()
 

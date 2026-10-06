@@ -200,7 +200,7 @@ import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useAppToast } from '~/composables/useAppToast'
 import { getApiErrorMessage } from '~/utils/api-error-message'
-import { getPlanDisplayName, getMinimumPlanForFeature } from '~/types/subscription'
+import { staffLimitReachedMessage } from '~/types/subscription'
 import { useProductAnalytics } from '~/composables/useProductAnalytics'
 import StaffPermissionsPanel from '~/components/departments/StaffPermissionsPanel.vue'
 import type { StaffPermissions } from '~/types/staff-permissions'
@@ -227,7 +227,7 @@ const { sendStaffInviteEmail } = useStaffInviteEmail()
 const authStore = useAuthStore()
 const userStore = useUserStore()
 const toast = useAppToast()
-const { canAddStaff, limits } = useSubscriptionFeatures()
+const { plan, canAddStaff, staffLimitForStore } = useSubscriptionFeatures()
 const { canEditStaffPermissions } = usePermissions()
 
 const formData = ref({
@@ -288,9 +288,10 @@ const isEdit = computed(() => !!props.staff)
 
 const staffFooterPrimaryLabel = computed(() => (isEdit.value ? 'Update staff' : 'Add staff'))
 
+const staffStoreId = computed(() => departmentsStore.getDepartmentById(props.departmentId)?.storeId)
+
 const storeStaffCount = computed(() => {
-  const dept = departmentsStore.getDepartmentById(props.departmentId)
-  const storeId = dept?.storeId
+  const storeId = staffStoreId.value
   if (!storeId) return 0
   return staffStore.staff.filter((member) => {
     const memberDept = departmentsStore.getDepartmentById(member.departmentId)
@@ -299,15 +300,13 @@ const storeStaffCount = computed(() => {
 })
 
 const staffLimitReached = computed(
-  () => !isEdit.value && !canAddStaff(storeStaffCount.value)
+  () => !isEdit.value && !canAddStaff(storeStaffCount.value, staffStoreId.value)
 )
 
 const staffLimitMessage = computed(() => {
-  const max = limits.value.maxStaffPerStore
+  const max = staffLimitForStore(staffStoreId.value)
   if (max < 0) return ''
-  const upgradePlan = getMinimumPlanForFeature('analytics')
-  const planHint = upgradePlan ? ` Upgrade to ${getPlanDisplayName(upgradePlan)} for more.` : ''
-  return `Your plan includes up to ${max} staff per store.${planHint}`
+  return staffLimitReachedMessage(plan.value, max)
 })
 
 const isFormValid = computed(() => {

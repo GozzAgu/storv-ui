@@ -77,6 +77,11 @@ export default defineNuxtConfig({
     paystackPlanCodeEnterpriseMonthly: process.env.PAYSTACK_PLAN_CODE_ENTERPRISE_MONTHLY || '',
     paystackPlanCodeEnterpriseQuarterly: process.env.PAYSTACK_PLAN_CODE_ENTERPRISE_QUARTERLY || '',
     paystackPlanCodeEnterpriseYearly: process.env.PAYSTACK_PLAN_CODE_ENTERPRISE_YEARLY || '',
+    // Enterprise add-ons: one monthly Paystack subscription per extra store / staff seat (kobo).
+    paystackAddOnStoreAmount: parseInt(process.env.PAYSTACK_ADDON_STORE_AMOUNT || '500000', 10),
+    paystackAddOnStaffAmount: parseInt(process.env.PAYSTACK_ADDON_STAFF_AMOUNT || '200000', 10),
+    paystackPlanCodeAddOnStore: process.env.PAYSTACK_PLAN_CODE_ADDON_STORE || '',
+    paystackPlanCodeAddOnStaff: process.env.PAYSTACK_PLAN_CODE_ADDON_STAFF || '',
     // Platform fee (%) retained by Storvv on each payment-link sale (Paystack subaccount percentage_charge).
     paymentLinkPlatformFeePercent: parseFloat(process.env.PAYMENT_LINK_PLATFORM_FEE_PERCENT || '0'),
     firebaseServiceAccount: process.env.FIREBASE_SERVICE_ACCOUNT_JSON || '',

@@ -1,12 +1,15 @@
-import type { SubscriptionPlan } from '~/types/subscription'
+import type { SubscriptionAddOnKind, SubscriptionPlan } from '~/types/subscription'
+import { SUBSCRIPTION_ADD_ON_PRICES_NGN } from '~/types/subscription'
 import type { SubscriptionBillingCycle } from '~/types/subscription-billing'
 import { formatBillingCyclePriceLabel } from '~/utils/subscription-billing-ui'
 
 type PlanPricingMap = Partial<
   Record<SubscriptionPlan, Partial<Record<SubscriptionBillingCycle, number>>>
 >
+type AddOnPricingMap = Partial<Record<SubscriptionAddOnKind, number>>
 
 const pricingCache = ref<PlanPricingMap | null>(null)
+const addOnPricingCache = ref<AddOnPricingMap>({})
 const pricingLoading = ref(false)
 const pricingError = ref<string | null>(null)
 
@@ -22,8 +25,10 @@ export function useSubscriptionPlanPricing() {
     try {
       const data = (await authFetch('/api/paystack/plan-pricing')) as {
         plans?: PlanPricingMap
+        addOns?: AddOnPricingMap
       }
       pricingCache.value = data.plans || {}
+      addOnPricingCache.value = data.addOns || {}
       return pricingCache.value
     } catch (err: unknown) {
       pricingError.value =
@@ -63,6 +68,11 @@ export function useSubscriptionPlanPricing() {
     return `${formatted} ${suffix}, auto-renews`
   }
 
+  /** Monthly add-on price in kobo; falls back to the published price before the server responds. */
+  function getAddOnAmountKobo(kind: SubscriptionAddOnKind): number {
+    return addOnPricingCache.value[kind] ?? SUBSCRIPTION_ADD_ON_PRICES_NGN[kind] * 100
+  }
+
   return {
     pricingCache,
     pricingLoading,
@@ -71,5 +81,6 @@ export function useSubscriptionPlanPricing() {
     getPlanAmountKobo,
     formatPlanPrice,
     formatUpgradePrice,
+    getAddOnAmountKobo,
   }
 }

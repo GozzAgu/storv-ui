@@ -88,6 +88,31 @@
           </article>
         </div>
 
+        <section class="mk-addons" aria-labelledby="addons-title">
+          <div class="mk-addons__intro">
+            <p class="mk-eyebrow">Enterprise add-ons</p>
+            <h2 id="addons-title" class="mk-addons__title">Outgrowing 5 stores or 10 staff?</h2>
+            <p class="mk-card__text">
+              Add exactly what you need, billed monthly with your plan. Remove it any time.
+            </p>
+          </div>
+          <ul class="mk-addons__list">
+            <li v-for="addOn in addOns" :key="addOn.kind" class="mk-addon">
+              <span class="mk-feature__icon"
+                ><component :is="addOn.icon" :size="16" aria-hidden="true"
+              /></span>
+              <div class="mk-addon__body">
+                <p class="mk-addon__name">{{ addOn.name }}</p>
+                <p class="mk-addon__note">{{ addOn.note }}</p>
+              </div>
+              <p class="mk-addon__price">
+                <span class="mk-addon__amount">{{ addOnPrice(addOn.kind) }}</span>
+                <span class="mk-plan__period">{{ addOn.unit }}</span>
+              </p>
+            </li>
+          </ul>
+        </section>
+
         <ul class="mk-facts" aria-label="Good to know">
           <li v-for="a in assurances" :key="a.label" class="mk-fact">
             <component :is="a.icon" :size="18" aria-hidden="true" />
@@ -240,11 +265,14 @@ import {
   Minus,
   ReceiptText,
   ShieldCheck,
+  Store,
   UserCog,
+  UserPlus,
   UserRound,
   Users,
   UsersRound,
 } from '@lucide/vue'
+import { getPlanLimits, type SubscriptionAddOnKind } from '~/types/subscription'
 import SButton from '~/components/s/SButton.vue'
 import STabs from '~/components/s/STabs.vue'
 import MkCta from '~/components/marketing/MkCta.vue'
@@ -265,8 +293,33 @@ import {
 definePageMeta({ layout: 'marketing' })
 
 const appUrl = useMarketingAppUrl()
-const { cycle, currency, planPrice, planListPrice, periodSuffix, renewLabel } =
+const { cycle, currency, planPrice, planListPrice, addOnPrice, periodSuffix, renewLabel } =
   useMarketingPricing()
+
+const enterpriseLimits = getPlanLimits('storvv_enterprise')
+
+const addOns: {
+  kind: SubscriptionAddOnKind
+  icon: Component
+  name: string
+  note: string
+  unit: string
+}[] = [
+  {
+    kind: 'store',
+    icon: Store,
+    name: 'Extra store',
+    note: `A new branch with ${enterpriseLimits.maxStaffPerStore} staff seats included`,
+    unit: '/ month',
+  },
+  {
+    kind: 'staff',
+    icon: UserPlus,
+    name: 'Extra staff seat',
+    note: 'One more team member on a store you already have',
+    unit: '/ seat / month',
+  },
+]
 
 const cycleTabs = SUBSCRIPTION_BILLING_CYCLES.map((value) => ({
   value,
@@ -282,17 +335,24 @@ const assurances: { icon: Component; label: string }[] = [
 
 type CellValue = boolean | string
 
-const compareGroups: {
-  label: string
-  rows: { label: string; values: [CellValue, CellValue, CellValue] }[]
-}[] = [
+const compareGroups = computed<
+  {
+    label: string
+    rows: { label: string; values: [CellValue, CellValue, CellValue] }[]
+  }[]
+>(() => [
   {
     label: 'Limits',
     rows: [
-      { label: 'Stores', values: ['1', 'Up to 2', 'Unlimited'] },
+      { label: 'Stores', values: ['1', 'Up to 2', 'Up to 5'] },
       { label: 'Departments', values: ['1', '10', 'Unlimited'] },
-      { label: 'Staff', values: ['Up to 2', '25 per store', 'Unlimited'] },
+      { label: 'Staff', values: ['Up to 2', '5 per store', '10 per store'] },
       { label: 'WhatsApp receipts', values: ['10 a month', 'Unlimited', 'Unlimited'] },
+      {
+        label: `Extra store (${enterpriseLimits.maxStaffPerStore} staff included)`,
+        values: [false, false, `${addOnPrice('store')} / month`],
+      },
+      { label: 'Extra staff seat', values: [false, false, `${addOnPrice('staff')} / month`] },
     ],
   },
   {
@@ -324,7 +384,7 @@ const compareGroups: {
       { label: 'Priority support', values: [false, false, true] },
     ],
   },
-]
+])
 
 interface Workspace {
   icon: Component
@@ -359,7 +419,7 @@ const workspaces: Workspace[] = [
   },
 ]
 
-const billingFaq: MkFaqItem[] = [
+const billingFaq = computed<MkFaqItem[]>(() => [
   {
     q: 'Is Micro really free?',
     a: 'Yes. Free forever for one store. No card needed.',
@@ -367,6 +427,14 @@ const billingFaq: MkFaqItem[] = [
   {
     q: 'How do I upgrade and pay?',
     a: 'Settings → Billing. Pick a plan, see the price, pay with Paystack. Monthly, quarterly, or yearly.',
+  },
+  {
+    q: 'What if I need more than 5 stores or 10 staff?',
+    a: `On Enterprise, add a store for ${addOnPrice('store')} a month (it comes with ${
+      enterpriseLimits.maxStaffPerStore
+    } staff seats), or add a staff seat to any store for ${addOnPrice(
+      'staff'
+    )} a month. Do it from Settings → Billing and remove add-ons any time.`,
   },
   {
     q: 'Can I cancel any time?',
@@ -384,7 +452,7 @@ const billingFaq: MkFaqItem[] = [
     q: 'Does Solo or Business change my price?',
     a: 'No. It only changes which menus you see.',
   },
-]
+])
 
 useHead({
   title: 'Pricing - Storvv',
@@ -392,7 +460,7 @@ useHead({
     {
       name: 'description',
       content:
-        'Storvv pricing: Micro is free forever for one store. Medium adds analytics, sales leads, and a second branch. Enterprise adds stock transfers, stock loans, and unlimited stores. Cancel anytime.',
+        'Storvv pricing: Micro is free forever for one store. Medium adds analytics, sales leads, and a second branch. Enterprise covers 5 stores with 10 staff each, plus stock transfers and stock loans, and you can add stores or staff seats any time. Cancel anytime.',
     },
   ],
 })

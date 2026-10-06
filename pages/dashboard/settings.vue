@@ -70,9 +70,16 @@
         :show-qa-plan-switcher="showQaPlanSwitcher"
         :qa-current-plan-id="storedSubscriptionPlan"
         :qa-switching="isQaSwitchingPlan"
+        :add-ons-available="addOnsAvailable"
+        :add-ons="addOnRows"
+        :add-on-prices="addOnPriceLabels"
+        :add-on-store-options="addOnStoreOptions"
+        :add-on-busy="addOnBusy"
         @upgrade="handleUpgradeSubscription"
         @cancel="openCancelConfirm"
         @qa-set-plan="handleQaSetPlan"
+        @buy-add-on="handleBuyAddOn"
+        @cancel-add-on="handleCancelAddOn"
       />
 
       <SCard title="Workspace style" description="How much of the app to show. This doesn't change what you pay.">
@@ -426,7 +433,12 @@ import { EMPTY_CELL } from '~/utils/ui-empty'
 import { isStorefrontDashboardHidden } from '~/utils/storefront-launch'
 import { collection, query, where, getDocs } from 'firebase/firestore'
 import {
+  ADD_ON_ELIGIBLE_PLAN,
+  formatNaira,
+  getLiveSubscriptionAddOns,
+  SUBSCRIPTION_ADD_ON_LABELS,
   SUBSCRIPTION_PLANS,
+  type SubscriptionAddOnKind,
   type SubscriptionPlan,
   resolveEffectiveSubscriptionPlan,
   normalizeSubscriptionPlan,
@@ -589,6 +601,7 @@ const {
   loadPricing,
   formatUpgradePrice,
   formatPlanPrice,
+  getAddOnAmountKobo,
   pricingLoading,
 } = useSubscriptionPlanPricing()
 const { syncSubscriptionStatus } = useSubscriptionBillingUi()
@@ -834,6 +847,101 @@ async function handleQaSetPlan(planId: SubscriptionPlan) {
     toast.error(e?.data?.message || e?.message || 'Could not switch plan')
   } finally {
     isQaSwitchingPlan.value = false
+  }
+}
+
+const addOnBusy = ref<string | null>(null)
+
+const addOnsAvailable = computed(
+  () => canEditSettings.value && currentSubscription.value === ADD_ON_ELIGIBLE_PLAN
+)
+
+const addOnPriceLabels = computed(() => ({
+  store: formatNaira(getAddOnAmountKobo('store') / 100),
+  staff: formatNaira(getAddOnAmountKobo('staff') / 100),
+}))
+
+const addOnStoreOptions = computed(() =>
+  storesStore.stores.map((store) => ({ value: store.id, label: store.name || 'Unnamed store' }))
+)
+
+const addOnRows = computed(() =>
+  getLiveSubscriptionAddOns(userStore.userData?.subscriptionAddOns).map((addOn) => {
+    const storeName = addOn.storeId ? storesStore.getStoreById(addOn.storeId)?.name : null
+    const label =
+      addOn.kind === 'staff'
+        ? `Staff seat · ${storeName || 'Removed store'}`
+        : SUBSCRIPTION_ADD_ON_LABELS.store
+    let detail = `${addOnPriceLabels.value[addOn.kind]} / month · renews monthly`
+    if (addOn.status === 'past_due') detail = 'Payment failed · Paystack will retry your card'
+    if (addOn.status === 'canceled' && addOn.endsAt) {
+      detail = `Removed · available until ${new Date(addOn.endsAt).toLocaleDateString(undefined, {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      })}`
+    }
+    return { id: addOn.id, label, detail, canCancel: addOn.status !== 'canceled' }
+  })
+)
+
+function apiErrorMessage(err: unknown, fallback: string): string {
+  const e = err as { data?: { message?: string }; message?: string }
+  return e?.data?.message || e?.message || fallback
+}
+
+async function handleBuyAddOn(kind: SubscriptionAddOnKind, storeId?: string) {
+  if (!addOnsAvailable.value || !currentUser.value) return
+  totpModalTitle.value = kind === 'store' ? 'Add a store' : 'Add a staff seat'
+  totpModalDescription.value = `Enter your authenticator code to continue to Paystack. ${addOnPriceLabels.value[kind]} / month, billed separately from your plan.`
+  addOnBusy.value = kind
+  try {
+    const totpCode = await resolveTotpForSensitiveAction(promptTotp)
+    const headers = await getAuthHeaders()
+    const result = await $fetch<{ authorization_url?: string }>('/api/paystack/addons/initialize', {
+      method: 'POST',
+      headers,
+      body: { kind, storeId, totpCode },
+      baseURL: getEffectiveApiBase() || undefined,
+    })
+    if (result.authorization_url) {
+      trackEvent('addon_checkout_started', { kind })
+      window.location.href = result.authorization_url
+      return
+    }
+    toast.error('Could not start checkout')
+  } catch (err: unknown) {
+    toast.error(apiErrorMessage(err, 'Could not start checkout'))
+  } finally {
+    addOnBusy.value = null
+  }
+}
+
+async function handleCancelAddOn(addOnId: string) {
+  if (!canEditSettings.value || !currentUser.value) return
+  totpModalTitle.value = 'Remove add-on'
+  totpModalDescription.value =
+    'Enter your authenticator code to stop this add-on. It stays available until the end of the month you paid for.'
+  addOnBusy.value = addOnId
+  try {
+    const totpCode = await resolveTotpForSensitiveAction(promptTotp)
+    const headers = await getAuthHeaders()
+    const result = await $fetch<{ endsAt?: string | null }>('/api/paystack/addons/cancel', {
+      method: 'POST',
+      headers,
+      body: { addOnId, totpCode },
+      baseURL: getEffectiveApiBase() || undefined,
+    })
+    await userStore.fetchUserData(currentUser.value.uid)
+    toast.success(
+      result.endsAt
+        ? `Add-on removed. You can keep using it until ${new Date(result.endsAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}.`
+        : 'Add-on removed.'
+    )
+  } catch (err: unknown) {
+    toast.error(apiErrorMessage(err, 'Could not remove add-on'))
+  } finally {
+    addOnBusy.value = null
   }
 }
 
@@ -1326,9 +1434,22 @@ onMounted(async () => {
         paid?: boolean
         userId?: string
         planId?: string
+        addOn?: SubscriptionAddOnKind
         message?: string
       }
-      if (verify.paid && verify.userId === currentUser.value.uid && verify.planId) {
+      if (verify.paid && verify.userId === currentUser.value.uid && verify.addOn) {
+        await userStore.fetchUserData(currentUser.value.uid)
+        await storesStore.applyPlanToCurrentStoreSelection()
+        toast.success(
+          verify.addOn === 'store'
+            ? 'Extra store added. You can create another branch now.'
+            : 'Staff seat added. You can invite another team member to that store.'
+        )
+        trackEvent('addon_purchased', { kind: verify.addOn })
+        if (import.meta.client && window.history.replaceState) {
+          window.history.replaceState({}, '', '/dashboard/settings')
+        }
+      } else if (verify.paid && verify.userId === currentUser.value.uid && verify.planId) {
         const previousPlan = currentSubscription.value
         await userStore.fetchUserData(currentUser.value.uid)
         toast.success(

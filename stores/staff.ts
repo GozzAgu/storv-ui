@@ -30,7 +30,12 @@ import { getStaffCollection,
   getQueryUserId,
 } from '~/composables/useFirestorePaths'
 import { normalizeEntityName } from '~/utils/capitalize-text'
-import { getPlanLimits, resolveEffectiveSubscriptionPlan } from '~/types/subscription'
+import {
+  getStaffLimitForStore,
+  resolveEffectiveSubscriptionPlan,
+  staffLimitReachedMessage,
+  summarizeSubscriptionAddOns,
+} from '~/types/subscription'
 import type { Staff } from '~/composables/useStaff'
 import type { Department } from '~/composables/useDepartments'
 import { getFirebaseConfig } from '~/config/firebase.config'
@@ -93,17 +98,17 @@ async function assertStaffPlanCapacity(storeId: string): Promise<void> {
     }
   }
   const plan = resolveEffectiveSubscriptionPlan(userStore.userData)
-  const limits = getPlanLimits(plan)
+  const maxStaff = getStaffLimitForStore(
+    plan,
+    storeId,
+    summarizeSubscriptionAddOns(userStore.userData?.subscriptionAddOns)
+  )
   const departmentsStore = useDepartmentsStore()
   const staffCountInStore = departmentsStore.departments
     .filter((d) => d.storeId === storeId)
     .reduce((sum, d) => sum + (d.staffCount || 0), 0)
-  if (limits.maxStaffPerStore >= 0 && staffCountInStore >= limits.maxStaffPerStore) {
-    const msg =
-      plan === 'storvv_micro'
-        ? 'Storvv Micro allows up to 2 staff per store. Upgrade to Medium or Enterprise for more.'
-        : `Your plan allows up to ${limits.maxStaffPerStore} staff per store. Upgrade to Enterprise for unlimited.`
-    throw new Error(msg)
+  if (maxStaff >= 0 && staffCountInStore >= maxStaff) {
+    throw new Error(staffLimitReachedMessage(plan, maxStaff))
   }
 }
 
@@ -655,16 +660,16 @@ export const useStaffStore = defineStore('staff', {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
       const plan = resolveEffectiveSubscriptionPlan(userStore.userData)
-      const limits = getPlanLimits(plan)
+      const maxStaff = getStaffLimitForStore(
+        plan,
+        storeId,
+        summarizeSubscriptionAddOns(userStore.userData?.subscriptionAddOns)
+      )
       const staffCountInStore = departmentsStore.departments
         .filter((d) => d.storeId === storeId)
         .reduce((sum, d) => sum + (d.staffCount || 0), 0)
-      if (limits.maxStaffPerStore >= 0 && staffCountInStore >= limits.maxStaffPerStore) {
-        const msg =
-          plan === 'storvv_micro'
-            ? 'Storvv Micro allows up to 2 staff per store. Upgrade to Medium or Enterprise for more.'
-            : `Your plan allows up to ${limits.maxStaffPerStore} staff per store. Upgrade to Enterprise for unlimited.`
-        throw new Error(msg)
+      if (maxStaff >= 0 && staffCountInStore >= maxStaff) {
+        throw new Error(staffLimitReachedMessage(plan, maxStaff))
       }
 
       const normalizedEmail = staffData.email.trim().toLowerCase()

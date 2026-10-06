@@ -68,3 +68,19 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         _ = ApplicationDelegateProxy.shared.application(UIApplication.shared, continue: userActivity) { _ in }
     }
 }
+
+/// The storyboard's root controller. Paints the web view's backing in the app canvas
+/// (--s-bg in assets/css/ds/ios.css) for light and dark, so no fixed grey shows at the edges.
+class AppBridgeViewController: CAPBridgeViewController {
+    override func capacitorDidLoad() {
+        let canvas = UIColor { traits in
+            traits.userInterfaceStyle == .dark
+                ? UIColor(red: 15 / 255, green: 18 / 255, blue: 33 / 255, alpha: 1)
+                : UIColor(red: 245 / 255, green: 247 / 255, blue: 1, alpha: 1)
+        }
+        view.backgroundColor = canvas
+        webView?.backgroundColor = canvas
+        webView?.scrollView.backgroundColor = canvas
+        webView?.underPageBackgroundColor = canvas
+    }
+}

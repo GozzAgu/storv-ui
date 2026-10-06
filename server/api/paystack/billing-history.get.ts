@@ -1,7 +1,12 @@
 import { createError, defineEventHandler } from 'h3'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
 import { requireAuth } from '~/server/utils/store-auth'
-import { getPlanDisplayName, normalizeSubscriptionPlan } from '~/types/subscription'
+import {
+  getPlanDisplayName,
+  normalizeSubscriptionPlan,
+  SUBSCRIPTION_ADD_ON_LABELS,
+  type SubscriptionAddOnKind,
+} from '~/types/subscription'
 
 export type BillingHistoryEntry = {
   reference: string
@@ -30,6 +35,8 @@ export default defineEventHandler(async (event) => {
   const entries: BillingHistoryEntry[] = snap.docs
     .map((docSnap) => {
       const data = docSnap.data() as {
+        kind?: string
+        addOnKind?: SubscriptionAddOnKind
         planId?: string
         billingCycle?: string
         amount?: number
@@ -39,10 +46,12 @@ export default defineEventHandler(async (event) => {
         status?: string
       }
       const planId = normalizeSubscriptionPlan(data.planId)
+      const addOnLabel =
+        data.kind === 'addon' && data.addOnKind ? SUBSCRIPTION_ADD_ON_LABELS[data.addOnKind] : null
       return {
         reference: docSnap.id,
         planId,
-        planLabel: getPlanDisplayName(planId),
+        planLabel: addOnLabel || getPlanDisplayName(planId),
         billingCycle: data.billingCycle || 'monthly',
         amountKobo: Number(data.amount) || 0,
         currency: (data.currency || 'NGN').toUpperCase(),

@@ -34,10 +34,9 @@
     </SCard>
 
     <template v-else>
-      <p v-if="eligibleStores.length > 0 && !canAddStore && isMicroSubscription" class="s-notice">
-        Storvv Micro includes one branch.
-        <NuxtLink :to="dashPath('/settings?upgrade=1')" class="s-link">Upgrade your plan</NuxtLink>
-        to add more.
+      <p v-if="eligibleStores.length > 0 && !canAddStore" class="s-notice">
+        {{ storeLimitMessage }}
+        <NuxtLink :to="dashPath('/settings?upgrade=1')" class="s-link">Open Plan &amp; billing</NuxtLink>
       </p>
       <p v-if="hiddenStoreCount > 0" class="s-notice">
         {{ hiddenStoreCount }} {{ hiddenStoreCount === 1 ? 'branch is' : 'branches are' }} on your
@@ -340,9 +339,9 @@ const {
   eligibleStores,
   hiddenStoreCount,
   hiddenStoreNames,
-  isMicroSubscription,
   maxStores,
   canAddStore,
+  storeLimitMessage,
   canManageBranches,
   showCreateModal,
   showDeleteModal,

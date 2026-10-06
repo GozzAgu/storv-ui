@@ -4,26 +4,17 @@
     <p class="ds-small ds-text-muted">Verifying authentication…</p>
   </div>
 
-  <div
-    v-else
-    :class="[
-      'ds-root s-shell',
-      effectiveSidebarCollapsed ? 's-shell--collapsed' : '',
-      sidebarOpen ? 's-shell--drawer-open' : '',
-    ]"
-  >
+  <div v-else :class="['ds-root s-shell', effectiveSidebarCollapsed ? 's-shell--collapsed' : '']">
     <a class="s-skip-link" href="#main-content">Skip to content</a>
     <ShellSidebar
       :sections="shellNavSections"
       :footer-items="shellFooterNav"
       :is-active="isShellNavActive"
       :collapsed="effectiveSidebarCollapsed"
-      :open="sidebarOpen"
       :busy="switchingStore"
       :home-to="dashPath('')"
       :logo-src="sidebarLogoSrc"
       :version="appVersion"
-      @close="sidebarOpen = false"
       @toggle-collapse="toggleSidebar"
     >
       <template v-if="showBranchSwitcher || currentStore" #branch>
@@ -35,14 +26,14 @@
       </template>
     </ShellSidebar>
 
-    <div class="s-shell__scrim" aria-hidden="true" @click="closeMobileSidebarOverlay" />
-
     <div class="s-shell__main">
-      <ShellTopBar
-        :title="shellPageTitle"
-        @open-menu="sidebarOpen = true"
-        @search="openGlobalSearch()"
-      >
+      <ShellTopBar :title="shellPageTitle" @search="openGlobalSearch()">
+        <template v-if="showBranchSwitcher || currentStore" #lead>
+          <ShellBranchSwitcher
+            :interactive="showBranchSwitcher"
+            :manage-to="dashPath('/branches')"
+          />
+        </template>
         <template #actions>
           <SButton
             class="s-topbar__ai"
@@ -89,8 +80,8 @@
 
     <ShellBottomNav
       :items="shellBottomNav"
+      :more-items="shellMoreNav"
       :is-active="isShellNavActive"
-      @more="sidebarOpen = true"
     />
 
     <ClientOnly>
@@ -137,6 +128,7 @@ import {
   SHELL_BRANCHES_NAV_NAME,
   SHELL_CUSTOMERS_NAV_NAME,
   buildShellBottomNav,
+  buildShellMoreNav,
   buildShellFooterNav,
   buildShellNavSections,
   shellNavLabel,
@@ -215,10 +207,6 @@ function openGlobalSearch() {
 
 function handleGlobalSearchShortcut(e: KeyboardEvent) {
   if (isCapacitorNative()) return
-  if (e.key === 'Escape' && sidebarOpen.value) {
-    sidebarOpen.value = false
-    return
-  }
   if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
     e.preventDefault()
     mountSearchShell()
@@ -258,11 +246,7 @@ const { isNativeApp } = useCapacitorNativeApp()
 const assistantStore = useAssistantStore()
 const { activeMenu, openHeaderMenu, closeHeaderMenu } = useActiveHeaderMenu()
 const dashboardMainRef = ref<HTMLElement | null>(null)
-const sidebarOpen = ref(false)
 
-function closeMobileSidebarOverlay() {
-  if (sidebarOpen.value) sidebarOpen.value = false
-}
 watch(
   () => assistantStore.isOpen,
   (isOpen) => {
@@ -390,6 +374,7 @@ const shellNavSource = computed<ShellNavSourceItem[]>(() => {
 const shellNavSections = computed(() => buildShellNavSections(shellNavSource.value))
 const shellFooterNav = computed(() => buildShellFooterNav(shellNavSource.value))
 const shellBottomNav = computed(() => buildShellBottomNav(shellNavSource.value))
+const shellMoreNav = computed(() => buildShellMoreNav(shellNavSource.value))
 
 const route = useRoute()
 const { basePath, dashPath, isDemoDashboard, matchesDashboardPath } = useDashboardPaths()
@@ -833,17 +818,10 @@ const handleClickOutside = (event: MouseEvent) => {
   }
 }
 
-// Close sidebar on mobile when route changes
 watch(
   () => route.path,
   () => {
     useAssistantStore().close()
-    if (import.meta.client && sidebarOpen.value) {
-      // Check if we're on mobile (screen width < 1024px which is lg breakpoint)
-      if (window.innerWidth < 1024) {
-        sidebarOpen.value = false
-      }
-    }
   }
 )
 

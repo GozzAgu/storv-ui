@@ -11,6 +11,13 @@ import {
   maybeDowngradeExpiredSubscription,
 } from '~/server/utils/paystack-subscription'
 import { VALID_PLANS } from '~/server/utils/paystack-validation'
+import {
+  attachSubscriptionFromWebhook,
+  cancelAllAddOns,
+  completeAddOnCheckout,
+  findAddOnBySubscriptionCode,
+  updateAddOnFromWebhook,
+} from '~/server/utils/subscription-addons'
 import { logServerError } from '~/server/utils/log-server-error'
 
 type PaystackWebhookPayload = {
@@ -18,6 +25,7 @@ type PaystackWebhookPayload = {
   data?: {
     reference?: string
     amount?: number
+    currency?: string
     channel?: string
     status?: string
     metadata?: Record<string, unknown>
@@ -28,6 +36,11 @@ type PaystackWebhookPayload = {
       next_payment_date?: string
     }
     customer?: { customer_code?: string }
+    /** subscription.* events send the subscription itself as `data`. */
+    subscription_code?: string
+    email_token?: string
+    next_payment_date?: string
+    plan?: { plan_code?: string }
   }
 }
 
@@ -88,11 +101,34 @@ export default defineEventHandler(async (event) => {
     let planId = extracted.planId
     let billingCycle = extracted.billingCycle
 
-    if (!userId && subscriptionCode) {
+    const isAddOnCharge =
+      data.metadata?.kind === 'addon' ||
+      Boolean(subscriptionCode && (await findAddOnBySubscriptionCode(adminDb, subscriptionCode)))
+
+    if (isAddOnCharge) {
+      try {
+        if (data.metadata?.kind === 'addon' && userId && reference) {
+          await completeAddOnCheckout(adminDb, {
+            userId,
+            reference,
+            paidAmountKobo: Number(data.amount),
+            currency: data.currency,
+          })
+        }
+        if (subscriptionCode) {
+          await updateAddOnFromWebhook(adminDb, subscriptionCode, {
+            status: 'active',
+            nextPaymentDate: extracted.nextPaymentDate,
+          })
+        }
+      } catch (err) {
+        logServerError('paystack/webhook.addon_charge', err)
+      }
+    } else if (!userId && subscriptionCode) {
       userId = (await findUserIdByPaystackSubscriptionCode(adminDb, subscriptionCode)) || undefined
     }
 
-    if (userId && subscriptionCode) {
+    if (!isAddOnCharge && userId && subscriptionCode) {
       try {
         const userSnap = await adminDb.collection('users').doc(userId).get()
         const userData = userSnap.data()
@@ -122,28 +158,42 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  if (eventName === 'subscription.disable' && data?.subscription?.subscription_code) {
+  if (eventName === 'subscription.create' && data?.subscription_code) {
     try {
-      const userId = await findUserIdByPaystackSubscriptionCode(
-        adminDb,
-        data.subscription.subscription_code
-      )
+      await attachSubscriptionFromWebhook(adminDb, data)
+    } catch (err) {
+      logServerError('paystack/webhook.subscription_create', err)
+    }
+  }
+
+  const lifecycleCode = data?.subscription?.subscription_code || data?.subscription_code
+
+  if (eventName === 'subscription.disable' && lifecycleCode) {
+    try {
+      const isAddOn = await updateAddOnFromWebhook(adminDb, lifecycleCode, { status: 'canceled' })
+      const userId = isAddOn
+        ? null
+        : await findUserIdByPaystackSubscriptionCode(adminDb, lifecycleCode)
       if (userId) {
         const userSnap = await adminDb.collection('users').doc(userId).get()
+        const userData = userSnap.data()
         await cancelAutoRenewForUser(adminDb, userId)
-        await maybeDowngradeExpiredSubscription(adminDb, userId, userSnap.data())
+        await maybeDowngradeExpiredSubscription(adminDb, userId, userData)
+        await cancelAllAddOns(adminDb, secretKey, userId, {
+          endsAt: userData?.subscriptionCurrentPeriodEnd,
+        })
       }
     } catch (err) {
       logServerError('paystack/webhook.subscription_disable', err)
     }
   }
 
-  if (eventName === 'invoice.payment_failed' && data?.subscription?.subscription_code) {
+  if (eventName === 'invoice.payment_failed' && lifecycleCode) {
     try {
-      const userId = await findUserIdByPaystackSubscriptionCode(
-        adminDb,
-        data.subscription.subscription_code
-      )
+      const isAddOn = await updateAddOnFromWebhook(adminDb, lifecycleCode, { status: 'past_due' })
+      const userId = isAddOn
+        ? null
+        : await findUserIdByPaystackSubscriptionCode(adminDb, lifecycleCode)
       if (userId) {
         await adminDb.collection('users').doc(userId).set(
           {

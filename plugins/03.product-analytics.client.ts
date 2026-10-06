@@ -9,6 +9,8 @@ export type ProductAnalyticsEvent =
   | 'upgrade_started'
   | 'upgrade_success'
   | 'subscription_cancel'
+  | 'addon_checkout_started'
+  | 'addon_purchased'
   | 'payment_link_created'
   | 'receipt_email_sent'
   | 'nps_submitted'
@@ -24,6 +26,8 @@ const PRODUCT_EVENTS: ProductAnalyticsEvent[] = [
   'upgrade_started',
   'upgrade_success',
   'subscription_cancel',
+  'addon_checkout_started',
+  'addon_purchased',
   'payment_link_created',
   'receipt_email_sent',
   'nps_submitted',

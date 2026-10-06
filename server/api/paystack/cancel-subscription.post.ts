@@ -7,6 +7,7 @@ import {
   disablePaystackSubscription,
   maybeDowngradeExpiredSubscription,
 } from '~/server/utils/paystack-subscription'
+import { cancelAllAddOns } from '~/server/utils/subscription-addons'
 
 export default defineEventHandler(async (event) => {
   try {
@@ -61,6 +62,9 @@ export default defineEventHandler(async (event) => {
 
     await cancelAutoRenewForUser(adminDb, auth.uid)
     await maybeDowngradeExpiredSubscription(adminDb, auth.uid, userData)
+    await cancelAllAddOns(adminDb, secretKey, auth.uid, {
+      endsAt: userData.subscriptionCurrentPeriodEnd,
+    })
 
     const refreshed = await userRef.get()
     const refreshedData = refreshed.data()

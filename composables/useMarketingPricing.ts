@@ -7,6 +7,7 @@ import {
   deriveBillingListAmount,
   type SubscriptionBillingCycle,
 } from '~/utils/subscription-billing'
+import { SUBSCRIPTION_ADD_ON_PRICES_NGN, type SubscriptionAddOnKind } from '~/types/subscription'
 
 export type MarketingPlanId = 'micro' | 'medium' | 'enterprise'
 type PaidPlan = Exclude<MarketingPlanId, 'micro'>
@@ -50,13 +51,13 @@ export const MARKETING_PLANS: MarketingPlan[] = [
     featured: true,
     cta: 'Get Medium',
     highlights: [
-      'Up to 2 stores, 25 staff each',
+      'Up to 2 stores, 5 staff each',
       'Reports with PDF and Excel exports',
       'Sales leads and customer balances',
     ],
     features: [
       'Everything in Micro',
-      'Up to 2 stores · 25 staff per store',
+      'Up to 2 stores · 5 staff per store',
       'Analytics with PDF and Excel exports',
       'Sales leads and customer balances',
       'Activity log of every change',
@@ -71,13 +72,14 @@ export const MARKETING_PLANS: MarketingPlan[] = [
     featured: false,
     cta: 'Get Enterprise',
     highlights: [
-      'Unlimited stores and staff',
+      'Up to 5 stores, 10 staff each',
+      'Add stores or staff seats anytime',
       'Stock transfers between branches',
-      'Priority support',
     ],
     features: [
       'Everything in Medium',
-      'Unlimited stores, departments, and staff',
+      'Up to 5 stores · 10 staff per store',
+      'Unlimited departments',
       'Stock transfers between branches',
       'Copy categories from another branch',
       'Stock loans for serial-tracked items',
@@ -116,26 +118,34 @@ const EU_COUNTRY_CODES = new Set([
   'SE',
 ])
 
+/** NG mirrors what Paystack charges; other regions are display conversions. Add-ons are monthly. */
 const PRICING_BY_REGION = {
   NG: {
     currency: 'NGN',
-    medium: { monthly: 10000, yearly: 100000, yearlyList: 120000 },
+    medium: { monthly: 15000, yearly: 153000, yearlyList: 180000 },
     enterprise: { monthly: 25000, yearly: 200000, yearlyList: 300000 },
+    addOns: {
+      store: SUBSCRIPTION_ADD_ON_PRICES_NGN.store,
+      staff: SUBSCRIPTION_ADD_ON_PRICES_NGN.staff,
+    },
   },
   US: {
     currency: 'USD',
-    medium: { monthly: 7, yearly: 70, yearlyList: 84 },
+    medium: { monthly: 10, yearly: 102, yearlyList: 120 },
     enterprise: { monthly: 19, yearly: 190, yearlyList: 228 },
+    addOns: { store: 3, staff: 1 },
   },
   GB: {
     currency: 'GBP',
-    medium: { monthly: 6, yearly: 60, yearlyList: 72 },
+    medium: { monthly: 8, yearly: 82, yearlyList: 96 },
     enterprise: { monthly: 15, yearly: 150, yearlyList: 180 },
+    addOns: { store: 3, staff: 1 },
   },
   EU: {
     currency: 'EUR',
-    medium: { monthly: 7, yearly: 70, yearlyList: 84 },
+    medium: { monthly: 9, yearly: 92, yearlyList: 108 },
     enterprise: { monthly: 17, yearly: 170, yearlyList: 204 },
+    addOns: { store: 3, staff: 1 },
   },
 } as const
 
@@ -184,6 +194,10 @@ export function useMarketingPricing() {
     return formatPrice(deriveBillingListAmount(pricing.value[plan].monthly, 'quarterly'))
   }
 
+  function addOnPrice(kind: SubscriptionAddOnKind) {
+    return formatPrice(pricing.value.addOns[kind])
+  }
+
   const periodSuffix = computed(() => BILLING_CYCLE_PERIOD_SUFFIX[cycle.value])
 
   const renewLabel = computed(() =>
@@ -196,5 +210,5 @@ export function useMarketingPricing() {
     region.value = detectRegion(browserLocale)
   })
 
-  return { cycle, currency, planPrice, planListPrice, periodSuffix, renewLabel }
+  return { cycle, currency, planPrice, planListPrice, addOnPrice, periodSuffix, renewLabel }
 }

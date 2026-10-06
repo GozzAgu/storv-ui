@@ -1,7 +1,8 @@
-import type { SubscriptionPlan } from '~/types/subscription'
+import type { SubscriptionAddOnKind, SubscriptionPlan } from '~/types/subscription'
 import type { SubscriptionBillingCycle } from '~/types/subscription-billing'
 import { SUBSCRIPTION_PLANS } from '~/types/subscription'
 import { getExpectedPlanAmount } from '~/server/utils/paystack-validation'
+import { getAddOnAmountKobo, SUBSCRIPTION_ADD_ON_KINDS } from '~/server/utils/subscription-addons'
 
 /** Public plan amounts (kobo) for checkout price preview. */
 export default defineEventHandler(() => {
@@ -26,5 +27,14 @@ export default defineEventHandler(() => {
     }
   }
 
-  return { plans, currency: 'NGN' }
+  const addOns: Partial<Record<SubscriptionAddOnKind, number>> = {}
+  for (const kind of SUBSCRIPTION_ADD_ON_KINDS) {
+    try {
+      addOns[kind] = getAddOnAmountKobo(kind, config as Record<string, unknown>)
+    } catch {
+      // Unconfigured add-on: the client falls back to the published price.
+    }
+  }
+
+  return { plans, addOns, currency: 'NGN' }
 })

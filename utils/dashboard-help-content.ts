@@ -560,8 +560,8 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
         title: 'Plan tiers',
         body: [
           'Storvv Micro (free): one store, one department, up to 2 staff. Full inventory and sales (Quick Sale, Create New Sale, receipts, returns, customers), Paystack payment links, dashboard, notifications, help center, Storvv Assistant, and web + iOS/Android apps. WhatsApp receipt sharing capped at 10 per month. No Reports, sales leads, activity logs, customer balance ledger, duplicate category, or multi-store tools.',
-          'Storvv Medium adds up to 2 stores, 10 departments and 25 staff per store, Reports with PDF/Excel export, activity logs, sales leads, customer balance ledger, unlimited WhatsApp, and duplicate categories within the same branch.',
-          'Storvv Enterprise adds unlimited stores, departments, and staff; Multi-Store Sync and stock transfers; Copy from branch (category templates across stores); stock loans for serial inventory; and priority support. Customer buybacks are available to super admins on all plans (role-based, not plan-gated).',
+          'Storvv Medium (₦15,000/month) adds up to 2 stores, 10 departments and 5 staff per store, Reports with PDF/Excel export, activity logs, sales leads, customer balance ledger, unlimited WhatsApp, and duplicate categories within the same branch.',
+          'Storvv Enterprise covers up to 5 stores with 10 staff each and unlimited departments. Need more? Add a store for ₦5,000/month (10 staff seats included) or a staff seat on any store for ₦2,000/month in Settings → Plan & billing. It also adds Multi-Store Sync and stock transfers; Copy from branch (category templates across stores); stock loans for serial inventory; and priority support. Customer buybacks are available to super admins on all plans (role-based, not plan-gated).',
         ],
       },
     ],

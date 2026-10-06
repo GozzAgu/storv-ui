@@ -6,7 +6,7 @@ import { usePreferences, regions } from '~/composables/usePreferences'
 import { usePlanEligibleStores } from '~/composables/usePlanEligibleStores'
 import { useSubscriptionFeatures } from '~/composables/useSubscriptionFeatures'
 import type { Store } from '~/composables/useStores'
-import { resolveEffectiveSubscriptionPlan } from '~/types/subscription'
+import { resolveEffectiveSubscriptionPlan, storeLimitReachedMessage } from '~/types/subscription'
 import { getCitiesForRegion, isCityInRegion } from '~/utils/region-cities'
 import { formatBranchDisplayName, parseBranchDisplayName } from '~/utils/branch-name'
 
@@ -58,6 +58,9 @@ export function useBranchManagement() {
     if (maxStores.value < 0) return true
     return storesStore.stores.length < maxStores.value
   })
+  const storeLimitMessage = computed(() =>
+    storeLimitReachedMessage(resolveEffectiveSubscriptionPlan(userStore.userData), maxStores.value)
+  )
 
   const showCreateModal = ref(false)
   const showDeleteModal = ref(false)
@@ -249,6 +252,7 @@ export function useBranchManagement() {
     isMicroSubscription,
     maxStores,
     canAddStore,
+    storeLimitMessage,
     canManageBranches,
     showCreateModal,
     showDeleteModal,

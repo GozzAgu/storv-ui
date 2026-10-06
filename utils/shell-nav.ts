@@ -111,6 +111,14 @@ export function buildShellBottomNav(items: ShellNavSourceItem[]): ShellNavItem[]
   return pick(items, SHELL_BOTTOM_NAV)
 }
 
+/** Everything the phone bottom bar doesn't show, in sidebar order, for its expanded "More" grid. */
+export function buildShellMoreNav(items: ShellNavSourceItem[]): ShellNavItem[] {
+  const names = [...SHELL_SECTIONS.flatMap((section) => section.items), ...SHELL_FOOTER].filter(
+    (name) => !(SHELL_BOTTOM_NAV as readonly string[]).includes(name)
+  )
+  return pick(items, names)
+}
+
 export function isDashboardNavActive(currentPath: string, href: string, visibleHrefs: string[]) {
   if (isDepartmentsNavHref(href) && isDepartmentsAreaPath(currentPath)) {
     return true
