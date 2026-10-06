@@ -23,7 +23,7 @@
         <p class="s-receipt-doc__label">Customer</p>
         <p class="s-receipt-doc__value s-receipt-doc__value--strong">{{ receipt.customerName }}</p>
         <p v-if="receipt.customerPhone" class="s-receipt-doc__fine">
-          {{ receipt.customerPhone }}
+          {{ maskPhone(receipt.customerPhone) }}
         </p>
       </div>
     </section>
@@ -65,6 +65,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import type { Receipt } from '~/stores/receipts'
+import { maskPhone } from '~/utils/mask-phone'
 
 const props = defineProps<{
   receipt: Receipt

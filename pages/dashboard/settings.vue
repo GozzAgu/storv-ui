@@ -480,6 +480,7 @@ import { useProductAnalytics } from '~/composables/useProductAnalytics'
 import { useFunnelAnalytics } from '~/composables/useFunnelAnalytics'
 import { openChurnSurveyModal } from '~/composables/growth-prompts-state'
 import { useBackupPreferences } from '~/composables/useBackupPreferences'
+import { useSensitiveAction } from '~/composables/useSensitiveAction'
 import {
   applyEnabledCapabilitiesToStoreDetails,
   getProgressiveUnlockOptionsForPlan,
@@ -569,7 +570,10 @@ const dataExportItems = [
   },
 ] as const
 
+const { confirm: confirmSensitive } = useSensitiveAction()
+
 async function handleExportAllStoreData() {
+  if (!(await confirmSensitive('export-data'))) return
   try {
     const summary = await exportAllStoreData()
     toast.success(

@@ -759,19 +759,53 @@
       </div>
     </template>
 
-    <template v-if="currentStep > 0" #leading>
-      <SButton @click="previousStep">Back</SButton>
-    </template>
-
     <template #footer>
-      <SDialogActions
-        cancel-label="Cancel"
-        :primary-label="receiptFooterPrimaryLabel"
-        :primary-loading="isCreating && currentStep >= 3"
-        :primary-disabled="receiptFooterPrimaryDisabled"
-        @cancel="handleCancel"
-        @primary="handleReceiptFooterPrimary"
-      />
+      <div v-if="isPhone" class="s-sale-dock">
+        <div class="s-sale-dock__row">
+          <SButton v-if="currentStep > 0" :disabled="isCreating" @click="previousStep">
+            Back
+          </SButton>
+          <div v-if="selectedItems.length > 0" class="s-cart-summary">
+            <span class="s-cart-summary__count">
+              {{ totalSelectedQuantity }} {{ totalSelectedQuantity === 1 ? 'Item' : 'Items' }}
+            </span>
+            <span class="s-cart-summary__total">
+              <span class="s-cart-summary__label">Total</span>
+              <span class="s-cart-summary__value">{{ formatCurrency(receiptTotal) }}</span>
+            </span>
+          </div>
+          <SButton
+            v-if="currentStep < 3"
+            class="s-sale-dock__next"
+            variant="primary"
+            :disabled="receiptFooterPrimaryDisabled"
+            @click="handleReceiptFooterPrimary"
+          >
+            {{ currentStep === 2 ? 'Review' : 'Next' }}
+          </SButton>
+        </div>
+        <SSlideToConfirm
+          v-if="currentStep === 3"
+          :label="`Slide to charge ${formatCurrency(receiptTotal)}`"
+          loading-label="Creating sale…"
+          :disabled="!isFormValid"
+          :loading="isCreating"
+          @confirm="handleCreateReceipt"
+        />
+      </div>
+      <template v-else>
+        <div v-if="currentStep > 0" class="s-dialog__foot-start">
+          <SButton :disabled="isCreating" @click="previousStep">Back</SButton>
+        </div>
+        <SDialogActions
+          cancel-label="Cancel"
+          :primary-label="receiptFooterPrimaryLabel"
+          :primary-loading="isCreating && currentStep >= 3"
+          :primary-disabled="receiptFooterPrimaryDisabled"
+          @cancel="handleCancel"
+          @primary="handleReceiptFooterPrimary"
+        />
+      </template>
     </template>
   </SDialog>
 
@@ -812,6 +846,10 @@
 <script setup lang="ts">
 import SDialog from '~/components/s/SDialog.vue'
 import SDialogActions from '~/components/s/SDialogActions.vue'
+import SSlideToConfirm from '~/components/s/SSlideToConfirm.vue'
+import { useHaptics } from '~/composables/useHaptics'
+import { useMinWidthQuery } from '~/composables/useMinWidthQuery'
+import { STAFF_DISCOUNT_LIMIT_PERCENT, useSensitiveAction } from '~/composables/useSensitiveAction'
 import SField from '~/components/s/SField.vue'
 import SForm from '~/components/s/SForm.vue'
 import SFormSection from '~/components/s/SFormSection.vue'
@@ -883,6 +921,10 @@ const { authFetch } = useAuthenticatedFetch()
 const userStore = useUserStore()
 const staffStore = useStaffStore()
 const { formatCurrency, preferences } = usePreferences()
+const haptics = useHaptics()
+const { confirm: confirmSensitive } = useSensitiveAction()
+const isAtLeastSm = useMinWidthQuery(640)
+const isPhone = computed(() => !isAtLeastSm.value)
 const { defaultPaymentMethod, paymentTenderOptions } = usePaymentTenders()
 const {
   drawerCalloutClass,
@@ -1550,6 +1592,7 @@ const toggleItemSelection = (item: InventoryItem, checked?: boolean) => {
           quantity: defaultQuantity,
           item,
         })
+        void haptics.impact('light')
       }
     } else {
       const index = selectedItems.value.findIndex((si) => si.id === item.id)
@@ -1567,6 +1610,7 @@ const toggleItemSelection = (item: InventoryItem, checked?: boolean) => {
         quantity: defaultQuantity,
         item,
       })
+      void haptics.impact('light')
     }
   }
 }
@@ -1760,10 +1804,25 @@ const handleCancel = () => {
   emit('update:modelValue', false)
 }
 
+/** True when any checkout discount exceeds the staff limit for its line. */
+const exceedsStaffDiscountLimit = () =>
+  selectedItems.value.some((si) => {
+    const discount = si.discountAmount || 0
+    const unitPrice = getEffectivePrice(si.item)
+    return (
+      discount > 0 && unitPrice > 0 && (discount / unitPrice) * 100 > STAFF_DISCOUNT_LIMIT_PERCENT
+    )
+  })
+
 const handleCreateReceipt = async () => {
-  if (!isFormValid.value || selectedItems.value.length === 0) return
+  if (!isFormValid.value || selectedItems.value.length === 0 || isCreating.value) return
 
   isCreating.value = true
+  if (exceedsStaffDiscountLimit() && !(await confirmSensitive('discount'))) {
+    isCreating.value = false
+    return
+  }
+
   try {
     // Generate receipt number
     const receiptNumber = `REC-${Date.now().toString().slice(-6)}`
@@ -1963,6 +2022,7 @@ const handleCreateReceipt = async () => {
       // Don't fail the receipt creation if customer creation fails
     }
 
+    void haptics.notify('success')
     emit('receipt-created', { ...receiptData, id: receiptId })
 
     lastCreatedReceiptId.value = receiptId

@@ -250,7 +250,11 @@
                           v-if="receipt.customerPhone || receipt.customerEmail"
                           class="s-table__secondary"
                         >
-                          {{ receipt.customerPhone || receipt.customerEmail }}
+                          {{
+                            receipt.customerPhone
+                              ? maskPhone(receipt.customerPhone)
+                              : receipt.customerEmail
+                          }}
                         </span>
                       </td>
                       <td class="s-hide-md">{{ formatDate(receipt.date) }}</td>
@@ -360,7 +364,7 @@
                     <td>
                       <span class="s-table__primary">{{ row.customerName || 'Walk-in customer' }}</span>
                       <span v-if="row.customerPhone || row.customerEmail" class="s-table__secondary">
-                        {{ row.customerPhone || row.customerEmail }}
+                        {{ row.customerPhone ? maskPhone(row.customerPhone) : row.customerEmail }}
                       </span>
                     </td>
                     <td class="s-hide-sm">
@@ -553,6 +557,8 @@ import { EMPTY_CELL } from '~/utils/ui-empty'
 import BalanceDuePaymentModal from '~/components/receipts/BalanceDuePaymentModal.vue'
 import { useDashboardPageRefreshRegister } from '~/composables/useDashboardPageRefresh'
 import { receiptAmountPaid, receiptBalanceDue } from '~/utils/receipt-balance'
+import { maskPhone } from '~/utils/mask-phone'
+import { useSensitiveAction } from '~/composables/useSensitiveAction'
 
 definePageMeta({
   layout: 'dashboard',
@@ -566,6 +572,7 @@ useHead({
 const receiptsStore = useReceiptsStore()
 const storesStore = useStoresStore()
 const toast = useAppToast()
+const { confirm: confirmSensitive } = useSensitiveAction()
 const authStore = useAuthStore()
 const { canManage, canCreate, canEditReceipts, canDeleteReceipts } = usePermissions()
 const { getUserDocument } = useUser()
@@ -948,6 +955,7 @@ async function cancelOutstandingReceipt(receipt: Receipt) {
   ) {
     return
   }
+  if (!(await confirmSensitive('void'))) return
   try {
     await receiptsStore.cancelBalanceDueReceipt(receipt.id)
     toast.success('Order cancelled and stock released.')

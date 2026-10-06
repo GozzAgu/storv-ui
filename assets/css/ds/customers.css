@@ -87,3 +87,10 @@
 .s-customer .s-list__item {
   padding-inline: var(--s-space-2);
 }
+
+.s-customer__masked {
+  display: flex;
+  align-items: center;
+  gap: var(--s-space-1);
+  font-variant-numeric: tabular-nums;
+}

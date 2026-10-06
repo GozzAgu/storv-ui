@@ -1,0 +1,454 @@
+/*
+ * iOS layer for phones (the Capacitor iOS app and mobile web). Restyles the shared design
+ * system to the Storvv iOS spec: blue-white canvas, hairline cards, frosted bars, a floating
+ * tab bar, bottom sheets with a grab handle, 44pt controls and large titles.
+ * Tablet and desktop layouts are untouched.
+ */
+
+@media (max-width: 639px) {
+  :root {
+    --s-bg: #f5f7ff;
+    --s-surface-2: #eef1fa;
+    --s-surface-hover: #e7ebf8;
+    --s-border: rgb(15 23 42 / 0.08);
+    --s-border-strong: rgb(15 23 42 / 0.14);
+    --s-field-bg: #eef1fa;
+    --s-field-bg-hover: #e7ebf8;
+
+    --s-btn-h: var(--s-touch);
+    --s-btn-h-lg: calc(var(--s-touch) + var(--s-space-half));
+    --s-control-h: var(--s-touch);
+    --s-control-h-sm: calc(var(--s-space-4) + var(--s-space-half));
+
+    /* Floating tab bar height plus the gap it keeps above the home indicator */
+    --s-bottomnav-h: calc(var(--s-space-8) + var(--s-space-1));
+    --s-ios-tabbar-h: var(--s-space-8);
+
+    --s-ios-glass: rgb(255 255 255 / 0.72);
+    --s-ios-hairline: rgb(15 23 42 / 0.06);
+    --s-ios-blur: saturate(1.8) blur(20px);
+    --s-ios-float-shadow: 0 12px 32px -8px rgb(15 23 42 / 0.18), 0 2px 6px rgb(15 23 42 / 0.06);
+  }
+
+  html.dark {
+    --s-bg: #0f1221;
+    --s-surface: #171b2e;
+    --s-surface-2: #1f2440;
+    --s-surface-hover: #252b4a;
+    --s-border: rgb(255 255 255 / 0.08);
+    --s-border-strong: rgb(255 255 255 / 0.14);
+    --s-field-bg: #1f2440;
+    --s-field-bg-hover: #252b4a;
+    --s-field-bg-focus: #171b2e;
+
+    --s-ios-glass: rgb(23 27 46 / 0.72);
+    --s-ios-hairline: rgb(255 255 255 / 0.08);
+    --s-ios-float-shadow: 0 12px 32px -8px rgb(0 0 0 / 0.6), 0 2px 6px rgb(0 0 0 / 0.3);
+  }
+
+  /* ── Frosted top bar ── */
+
+  .s-topbar {
+    border-bottom-color: var(--s-ios-hairline);
+    background: var(--s-ios-glass);
+    -webkit-backdrop-filter: var(--s-ios-blur);
+    backdrop-filter: var(--s-ios-blur);
+  }
+
+  .s-topbar__title {
+    font-weight: 600;
+    font-size: 1.0625rem;
+  }
+
+  /* ── Floating glass tab bar ── */
+
+  .s-bottomnav {
+    inset-inline: var(--s-space-2);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + var(--s-space-1));
+    height: var(--s-ios-tabbar-h);
+    padding: var(--s-space-half);
+    border: 1px solid var(--s-ios-hairline);
+    border-radius: var(--s-radius-full);
+    background: var(--s-ios-glass);
+    box-shadow: var(--s-ios-float-shadow);
+    -webkit-backdrop-filter: var(--s-ios-blur);
+    backdrop-filter: var(--s-ios-blur);
+  }
+
+  .s-bottomnav__item {
+    border-radius: var(--s-radius-full);
+    transition: background-color var(--s-duration-fast) var(--s-ease),
+      color var(--s-duration-fast) var(--s-ease);
+  }
+
+  .s-bottomnav__item--active {
+    background: var(--s-accent-soft);
+  }
+
+  .s-bottomnav__item:active {
+    transform: scale(0.96);
+  }
+
+  /* ── Large titles ── */
+
+  .s-page-header {
+    margin-bottom: var(--s-space-2);
+  }
+
+  .s-page-header__title {
+    font: 700 1.75rem/2.25rem var(--s-font-sans);
+    letter-spacing: -0.025em;
+  }
+
+  .s-page-header__eyebrow {
+    margin-bottom: 0;
+    font: var(--s-text-caption);
+    letter-spacing: var(--s-tracking-caps);
+    text-transform: uppercase;
+  }
+
+  .s-page-header__actions {
+    width: 100%;
+  }
+
+  .s-page-header__actions > .s-btn {
+    flex: 1 1 0;
+  }
+
+  /* ── Cards: 16pt corners and a hairline instead of a heavy shadow ── */
+
+  .s-card,
+  .s-stat {
+    border-radius: var(--s-radius-xl);
+    box-shadow: 0 0 0 1px var(--s-ios-hairline), var(--s-shadow-sm);
+  }
+
+  .s-card__head {
+    padding: var(--s-space-2) var(--s-space-2) 0;
+  }
+
+  .s-card__body {
+    padding: var(--s-space-1-5) var(--s-space-2) var(--s-space-2);
+  }
+
+  .s-card__foot {
+    padding: var(--s-space-1-5) var(--s-space-2);
+  }
+
+  /* ── Stats ──
+   * Header metric strips become a two-column ruled grid: one card, hairline dividers from the
+   * 1px gap, label on top and value on the bottom of every cell so rows line up. An odd last
+   * metric spans the full width instead of leaving an empty cell. Long values shrink to fit
+   * (plugins/05.fit-stat-values.client.ts) rather than truncating. */
+
+  .s-metrics:not(.s-metrics--inline) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    border-radius: var(--s-radius-xl);
+    background: var(--s-border);
+    box-shadow: 0 0 0 1px var(--s-ios-hairline), var(--s-shadow-sm);
+  }
+
+  .s-metrics:not(.s-metrics--inline) .s-metrics__item {
+    justify-content: space-between;
+    gap: var(--s-space-1);
+    min-height: calc(var(--s-space-8) + var(--s-space-2));
+    padding: var(--s-space-1-5) var(--s-space-2);
+    background: var(--s-surface);
+    box-shadow: none;
+  }
+
+  .s-metrics:not(.s-metrics--inline) .s-metrics__item:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+
+  .s-metrics__label {
+    font: 600 0.6875rem/1rem var(--s-font-sans);
+    letter-spacing: 0.06em;
+  }
+
+  .s-metrics:not(.s-metrics--inline) .s-metrics__value {
+    font: 700 1.375rem/1.75rem var(--s-font-sans);
+    letter-spacing: -0.02em;
+    text-overflow: clip;
+  }
+
+  /* Stat cards (overview): icon + label, a large value, then the hint pinned to the bottom */
+  .s-stat {
+    gap: var(--s-space-1);
+    padding: var(--s-space-2);
+  }
+
+  .s-stat__icon {
+    width: calc(var(--s-space-3) + var(--s-space-1));
+    height: calc(var(--s-space-3) + var(--s-space-1));
+    border-radius: var(--s-radius);
+  }
+
+  .s-stat__icon svg {
+    width: var(--s-space-2);
+    height: var(--s-space-2);
+  }
+
+  .s-stat__label {
+    overflow: hidden;
+    color: var(--s-text-2);
+    font: 600 0.8125rem/1.125rem var(--s-font-sans);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .s-stat__value,
+  .s-overview__stats .s-stat__value {
+    overflow: hidden;
+    margin-top: var(--s-space-half);
+    font: 700 1.5rem/2rem var(--s-font-sans);
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    overflow-wrap: normal;
+  }
+
+  .s-stat__foot {
+    margin-top: auto;
+    font: var(--s-text-caption);
+  }
+
+  /* ── Segmented control ── */
+
+  .s-tabs {
+    border-radius: calc(var(--s-radius) + var(--s-space-half));
+  }
+
+  .s-tabs__tab {
+    border-radius: var(--s-radius);
+    font: var(--s-text-body);
+    font-weight: 600;
+  }
+
+  /* ── Controls: 16px text so iOS doesn't zoom into focused fields ── */
+
+  .s-control__input,
+  .s-control textarea {
+    font-size: 1rem;
+  }
+
+  .s-btn {
+    border-radius: var(--s-radius-lg);
+    font-weight: 600;
+  }
+
+  .s-btn--sm {
+    border-radius: var(--s-radius);
+  }
+
+  /* ── Money and counts always line up ── */
+
+  .s-stat__value,
+  .s-record-row__value,
+  .s-c td,
+  .s-badge {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Sheets: every dialog and side drawer becomes a bottom sheet ── */
+
+  .s-dialog-layer,
+  .s-dialog-layer--right,
+  .s-dialog-layer--bottom {
+    align-items: flex-end;
+    justify-content: stretch;
+    padding: calc(env(safe-area-inset-top, 0px) + var(--s-space-1)) 0 0;
+  }
+
+  .s-dialog,
+  .s-dialog-layer--right .s-dialog,
+  .s-dialog-layer--bottom .s-dialog {
+    max-width: none;
+    max-height: 100%;
+    padding-top: var(--s-space-1);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    border-width: 0;
+    border-radius: var(--s-radius-2xl) var(--s-radius-2xl) 0 0;
+    box-shadow: 0 -8px 32px -8px rgb(15 23 42 / 0.2);
+  }
+
+  /* Side drawers are full flows (new sale, item details): open them at the large detent */
+  .s-dialog-layer--right .s-dialog {
+    height: 100%;
+  }
+
+  .s-dialog::before {
+    content: '';
+    position: absolute;
+    top: var(--s-space-1);
+    left: 50%;
+    width: calc(var(--s-space-4) + var(--s-space-half));
+    height: calc(var(--s-space-half) + 1px);
+    border-radius: var(--s-radius-full);
+    background: var(--s-border-strong);
+    transform: translateX(-50%);
+  }
+
+  .s-dialog__head {
+    padding: var(--s-space-2) var(--s-space-2) 0;
+  }
+
+  .s-dialog__title {
+    font-size: 1.0625rem;
+  }
+
+  .s-dialog__body {
+    padding: var(--s-space-2);
+  }
+
+  .s-dialog__foot {
+    padding: var(--s-space-1-5) var(--s-space-2);
+    border-top-color: var(--s-ios-hairline);
+  }
+
+  .s-dialog__foot > .s-btn {
+    flex: 1 1 auto;
+  }
+
+  .s-dialog-enter-active .s-dialog,
+  .s-dialog-leave-active .s-dialog {
+    transition: transform var(--s-duration-slow) var(--s-ease-out);
+  }
+
+  .s-dialog-enter-from .s-dialog,
+  .s-dialog-leave-to .s-dialog,
+  .s-dialog-enter-from.s-dialog-layer--right .s-dialog,
+  .s-dialog-leave-to.s-dialog-layer--right .s-dialog,
+  .s-dialog-enter-from.s-dialog-layer--bottom .s-dialog,
+  .s-dialog-leave-to.s-dialog-layer--bottom .s-dialog {
+    transform: translateY(100%);
+  }
+
+  /* ── Lists read as inset-grouped rows ── */
+
+  .s-list__item {
+    min-height: calc(var(--s-touch) + var(--s-space-1-5));
+  }
+}
+
+/* ── Slide to confirm ── */
+
+.s-slide {
+  --s-slide-knob: calc(var(--s-touch) + var(--s-space-1));
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: calc(var(--s-slide-knob) + var(--s-space-1));
+  padding: var(--s-space-half);
+  border-radius: var(--s-radius-xl);
+  background: var(--s-btn-primary);
+  color: var(--s-on-btn-primary);
+  font: var(--s-text-subheading);
+  font-family: var(--s-font-sans);
+  font-variant-numeric: tabular-nums;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.s-slide[aria-disabled='true'] {
+  opacity: 0.45;
+}
+
+.s-slide__knob:focus-visible {
+  outline: none;
+  box-shadow: var(--s-focus-ring);
+}
+
+.s-slide__label {
+  flex: 1;
+  padding-left: var(--s-slide-knob);
+  text-align: center;
+  pointer-events: none;
+  transition: opacity var(--s-duration-fast) var(--s-ease);
+}
+
+.s-slide__knob {
+  position: absolute;
+  top: var(--s-space-half);
+  left: var(--s-space-half);
+  display: grid;
+  place-items: center;
+  width: var(--s-slide-knob);
+  height: var(--s-slide-knob);
+  padding: 0;
+  border: 0;
+  border-radius: var(--s-radius-lg);
+  background: var(--s-on-btn-primary);
+  color: var(--s-btn-primary);
+  cursor: grab;
+  touch-action: none;
+}
+
+.s-slide__knob:disabled {
+  cursor: default;
+}
+
+.s-slide__knob--settle {
+  transition: transform var(--s-duration) var(--s-ease-out);
+}
+
+/* ── Sale dock: the phone footer of the new-sale sheet ── */
+
+.s-sale-dock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-space-1-5);
+  width: 100%;
+}
+
+.s-sale-dock__row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-space-1);
+}
+
+.s-sale-dock__next {
+  margin-left: auto;
+  padding-inline: var(--s-space-3);
+}
+
+.s-cart-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--s-space-1);
+  min-width: 0;
+  margin-right: auto;
+  font-family: var(--s-font-sans);
+}
+
+.s-cart-summary__count {
+  padding: var(--s-space-half) var(--s-space-1);
+  border-radius: var(--s-radius-full);
+  background: var(--s-accent-soft);
+  color: var(--s-accent-soft-text);
+  font: var(--s-text-small);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.s-cart-summary__total {
+  display: grid;
+  min-width: 0;
+}
+
+.s-cart-summary__label {
+  color: var(--s-text-muted);
+  font: var(--s-text-caption);
+}
+
+.s-cart-summary__value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--s-text);
+  font: var(--s-text-subheading);
+  font-variant-numeric: tabular-nums;
+}

@@ -14,7 +14,9 @@
         />
 
         <div
+          ref="paletteRef"
           class="s-dialog s-dialog--md s-palette"
+          tabindex="-1"
           role="dialog"
           aria-modal="true"
           aria-label="Search"
@@ -28,7 +30,6 @@
                   <MagnifyingGlassIcon :size="16" :stroke-width="1.75" aria-hidden="true" />
                 </span>
                 <input
-                  ref="searchInput"
                   v-model="searchStore.query"
                   type="text"
                   class="s-control__input"
@@ -310,7 +311,7 @@ const router = useRouter()
 const searchStore = useSearchStore()
 const userStore = useUserStore()
 const { canUse: canUseBusinessCapability } = useBusinessCapabilities()
-const searchInput = ref<HTMLInputElement | null>(null)
+const paletteRef = ref<HTMLElement | null>(null)
 const resultsEl = ref<HTMLElement | null>(null)
 const showAdvancedFilters = ref(false)
 const showSavedSearchesModal = ref(false)
@@ -557,7 +558,7 @@ watch(
   }
 )
 
-// Watch for modal open to focus input
+// Focus the palette (not the input) on open so the keyboard only appears when the user taps the field.
 watch(
   () => searchStore.isOpen,
   async (isOpen) => {
@@ -567,7 +568,7 @@ watch(
         void inventoryStore.fetchFolders()
       }
       await nextTick()
-      searchInput.value?.focus()
+      paletteRef.value?.focus({ preventScroll: true })
       await searchStore.loadSavedSearches()
     }
   }

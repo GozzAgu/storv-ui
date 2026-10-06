@@ -137,8 +137,9 @@ watch(
     }
     returnFocusTo = document.activeElement as HTMLElement | null
     await nextTick()
-    const autofocus = panelRef.value?.querySelector<HTMLElement>('[autofocus], [data-autofocus]')
-    ;(autofocus || focusables().find((el) => !el.closest('.s-dialog__head')) || panelRef.value)?.focus()
+    // Focus the panel, never a field: opening a sheet must not raise the keyboard.
+    const autofocus = panelRef.value?.querySelector<HTMLElement>('[data-autofocus]')
+    ;(autofocus || panelRef.value)?.focus({ preventScroll: true })
   },
   { immediate: true, flush: 'post' }
 )

@@ -230,7 +230,6 @@ watch(
     void refreshStatus()
     const seed = assistantStore.takeDraftSeed()
     if (seed) draft.value = seed
-    nextTick(focusInput)
   },
   { immediate: true }
 )

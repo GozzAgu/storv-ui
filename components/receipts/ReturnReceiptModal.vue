@@ -103,6 +103,8 @@ import { ArrowPathIcon } from '~/utils/app-icons'
 import { useReceiptsStore, type Receipt } from '~/stores/receipts'
 import { useInventoryStore } from '~/stores/inventory'
 import { usePreferences } from '~/composables/usePreferences'
+import { useSensitiveAction } from '~/composables/useSensitiveAction'
+import { useHaptics } from '~/composables/useHaptics'
 import { groupReceiptItemsByFolder, folderHasSerialNumbers } from '~/utils/receipt-multi-folder'
 
 interface Props {
@@ -119,6 +121,8 @@ const emit = defineEmits<{
 const receiptsStore = useReceiptsStore()
 const inventoryStore = useInventoryStore()
 const { formatCurrency } = usePreferences()
+const { confirm: confirmSensitive } = useSensitiveAction()
+const haptics = useHaptics()
 
 const returnReason = ref('')
 const confirmed = ref(false)
@@ -150,6 +154,10 @@ const handleConfirmReturn = async () => {
   if (!props.receipt || !confirmed.value || isProcessing.value) return
 
   isProcessing.value = true
+  if (!(await confirmSensitive('refund'))) {
+    isProcessing.value = false
+    return
+  }
 
   try {
     const receipt = props.receipt
@@ -202,6 +210,7 @@ const handleConfirmReturn = async () => {
     // 3. Update customer (if needed - this might be handled elsewhere)
     // The receipt status change should be sufficient
 
+    void haptics.notify('success')
     emit('returned', receipt)
     handleCancel()
   } catch (error: any) {

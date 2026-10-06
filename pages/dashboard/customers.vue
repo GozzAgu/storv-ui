@@ -135,7 +135,9 @@
                 </div>
               </td>
               <td class="s-hide-md">
-                <span class="s-table__secondary">{{ customer.phone || customer.email || EMPTY_CELL }}</span>
+                <span class="s-table__secondary">{{
+                  customer.phone ? maskPhone(customer.phone) : customer.email || EMPTY_CELL
+                }}</span>
               </td>
               <td class="s-table__num">{{ customer.receipts.length }}</td>
               <td class="s-table__num">{{ formatCurrency(customer.totalSpent) }}</td>
@@ -198,7 +200,13 @@
         <dl class="s-customer__contact">
           <div v-if="selectedCustomer.phone" class="s-customer__row">
             <dt><Phone :size="16" :stroke-width="1.75" aria-hidden="true" /><span class="ds-sr-only">Phone</span></dt>
-            <dd><a :href="`tel:${selectedCustomer.phone}`" class="s-link">{{ selectedCustomer.phone }}</a></dd>
+            <dd v-if="phoneRevealed">
+              <a :href="`tel:${selectedCustomer.phone}`" class="s-link">{{ selectedCustomer.phone }}</a>
+            </dd>
+            <dd v-else class="s-customer__masked">
+              <span>{{ maskPhone(selectedCustomer.phone) }}</span>
+              <SButton size="sm" variant="ghost" @click="revealPhone">Show</SButton>
+            </dd>
           </div>
           <div v-if="selectedCustomer.email" class="s-customer__row">
             <dt><Mail :size="16" :stroke-width="1.75" aria-hidden="true" /><span class="ds-sr-only">Email</span></dt>
@@ -326,6 +334,9 @@ import { useWhatsAppMessaging } from '~/composables/useWhatsAppMessaging'
 import { useAnchoredRowMenu } from '~/composables/useAnchoredRowMenu'
 import { getVisibleMenuAnchorElement } from '~/utils/menuAnchor'
 import { getReceiptStatusLabel, getReceiptStatusTone } from '~/utils/receipt-status'
+import { maskPhone } from '~/utils/mask-phone'
+import { isCapacitorNative } from '~/utils/capacitor-env'
+import { useSensitiveAction } from '~/composables/useSensitiveAction'
 import {
   buildCustomerDirectory,
   filterCustomerDirectory,
@@ -505,7 +516,15 @@ function toTime(date: unknown) {
 
 function openCustomer(customer: CustomerDirectoryEntry) {
   selectedCustomerId.value = customer.id
+  phoneRevealed.value = !isCapacitorNative()
   showDetail.value = true
+}
+
+const { confirm: confirmSensitive } = useSensitiveAction()
+const phoneRevealed = ref(!isCapacitorNative())
+
+async function revealPhone() {
+  phoneRevealed.value = await confirmSensitive('reveal-customer')
 }
 
 function goToReceipt(receipt: Receipt) {
