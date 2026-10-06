@@ -70,7 +70,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 }
 
 /// The storyboard's root controller. Paints the web view's backing in the app canvas
-/// (--s-bg in assets/css/ds/ios.css) for light and dark, so no fixed grey shows at the edges.
+/// (--s-bg in assets/css/ds/ios.css) for light and dark, so no fixed grey shows at the edges,
+/// and turns off the system top edge effect, which shows as a dark band under the status bar
+/// in light mode (the web top bar already provides its own background there).
 class AppBridgeViewController: CAPBridgeViewController {
     override func capacitorDidLoad() {
         let canvas = UIColor { traits in
@@ -82,5 +84,8 @@ class AppBridgeViewController: CAPBridgeViewController {
         webView?.backgroundColor = canvas
         webView?.scrollView.backgroundColor = canvas
         webView?.underPageBackgroundColor = canvas
+        if #available(iOS 26.0, *) {
+            webView?.scrollView.topEdgeEffect.isHidden = true
+        }
     }
 }
