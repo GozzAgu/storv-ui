@@ -252,7 +252,7 @@ Found while building 2a: the Storage emulator allowed a second upload to an exis
 path although `update` is denied, so the rule now checks `resource == null` itself. Emulator
 suites now run one file at a time (they timed out under parallel load).
 
-Closed in 2b (see 6c), except the public privacy wording, which waits for approval.
+Closed in 2b (see 6c).
 
 ## 6c. Delivered in Step 2b (maker and checker screens)
 
@@ -271,8 +271,7 @@ Closed in 2b (see 6c), except the public privacy wording, which waits for approv
   notifications carry no customer data.
 - Refunds ask for the native biometric check; permission changes ask for TOTP when the owner has
   2FA (server enforces).
-- Proof retention is shown in the timeline; public privacy wording is drafted in
-  `privacy-notes.md` and waits for approval.
+- Proof retention is shown in the timeline and in the public privacy policy (section 8).
 
 ## 7. Residual risks and open items
 
