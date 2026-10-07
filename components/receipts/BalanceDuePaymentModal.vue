@@ -103,6 +103,8 @@ import type { Receipt } from '~/stores/receipts'
 import { receiptAmountPaid, receiptBalanceDue, roundMoney } from '~/utils/receipt-balance'
 import { usePreferences } from '~/composables/usePreferences'
 import { useAppToast } from '~/composables/useAppToast'
+import { koboToNaira, nairaToKobo } from '~/utils/money-kobo'
+import { isV2Sale, saleOutstandingKobo } from '~/utils/payments-v2-tenders'
 
 const props = defineProps<{
   modelValue: boolean
@@ -122,10 +124,22 @@ const paymentAmount = ref(0)
 const paymentMethod = ref('Cash')
 const submitting = ref(false)
 
-const { paymentTenderOptions } = usePaymentTenders()
+const paymentsV2 = usePaymentsV2()
+const useV2 = computed(
+  () => !!props.receipt && paymentsV2.access.value.enabled && isV2Sale(props.receipt)
+)
 
-const amountPaid = computed(() => (props.receipt ? receiptAmountPaid(props.receipt) : 0))
-const balanceDue = computed(() => (props.receipt ? receiptBalanceDue(props.receipt) : 0))
+const amountPaid = computed(() => {
+  if (!props.receipt) return 0
+  const summary = props.receipt.paymentSummary
+  if (useV2.value) return summary ? koboToNaira(summary.netPaidKobo + summary.awaitingKobo) : 0
+  return receiptAmountPaid(props.receipt)
+})
+const balanceDue = computed(() => {
+  if (!props.receipt) return 0
+  if (useV2.value) return koboToNaira(saleOutstandingKobo(props.receipt))
+  return receiptBalanceDue(props.receipt)
+})
 
 const amountPresets = computed(() => {
   const bal = balanceDue.value
@@ -152,8 +166,9 @@ watch(
   () => props.modelValue,
   (open) => {
     if (!open || !props.receipt) return
+    void paymentsV2.loadAccess()
     paymentMethod.value = props.receipt.paymentMethod?.split(',')[0]?.trim() || 'Cash'
-    paymentAmount.value = receiptBalanceDue(props.receipt)
+    paymentAmount.value = balanceDue.value
   }
 )
 
@@ -171,6 +186,10 @@ async function submit() {
   if (!props.receipt || !canSubmit.value) return
   submitting.value = true
   try {
+    if (useV2.value) {
+      await submitV2(props.receipt.id)
+      return
+    }
     const { completed } = await receiptsStore.recordBalancePayment(props.receipt.id, {
       amount: paymentAmount.value,
       method: paymentMethod.value,
@@ -183,9 +202,28 @@ async function submit() {
     emit('completed', props.receipt.id)
     emit('update:modelValue', false)
   } catch (e: unknown) {
-    toast.error(e instanceof Error ? e.message : 'Could not record payment')
+    toast.error(paymentsErrorMessage(e, 'Could not record payment'))
   } finally {
     submitting.value = false
   }
+}
+
+async function submitV2(receiptId: string) {
+  const res = await paymentsV2.record(receiptId, [
+    { methodLabel: paymentMethod.value.trim() || 'Cash', amountKobo: nairaToKobo(paymentAmount.value) },
+  ])
+  await receiptsStore.syncV2Receipt(receiptId, res.saleCompleted)
+  const awaiting = res.payments.some((p) => p.status === 'awaiting_confirmation')
+  toast.success(
+    res.saleCompleted
+      ? awaiting
+        ? 'Payment recorded and awaiting confirmation. The sale is complete and stock is marked sold.'
+        : 'Payment complete. Receipt is now in your sales list and stock is marked sold.'
+      : awaiting
+        ? 'Payment recorded. It is awaiting confirmation.'
+        : 'Payment recorded.'
+  )
+  emit('completed', receiptId)
+  emit('update:modelValue', false)
 }
 </script>

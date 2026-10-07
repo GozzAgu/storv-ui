@@ -795,7 +795,12 @@ service cloud.firestore {
         match /notifications/{notificationId} {
           allow read: if canAccessStoreData(userId, storeId);
           
-          allow create: if canCreateReceipt(userId, storeId);
+          // Payments V2 notifications are server-written; a client must not forge them.
+          allow create: if canCreateReceipt(userId, storeId)
+            && request.resource.data.get('source', '') != 'payments_v2'
+            && !(request.resource.data.get('type', '') in
+                 ['payment_awaiting_confirmation', 'payment_rejected', 'till_count_difference'])
+            && !('recipientUids' in request.resource.data);
           allow update: if canManageNonInventoryOps(userId, storeId)
             || (canAccessStoreData(userId, storeId)
                 && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read'])

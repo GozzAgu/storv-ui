@@ -473,7 +473,37 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)(
           status: 'refunded',
         })
         expect(await receipt(store)).toMatchObject({ status: 'refunded', refundReason: 'Returned' })
+        await expectCode(
+          closeSale(db, owner, { receiptId: 'r1', action: 'refund', reason: 'Again' }),
+          'RECEIPT_CLOSED'
+        )
+        await expectCode(
+          closeSale(db, owner, { receiptId: 'r1', action: 'cancel', reason: 'Again' }),
+          'RECEIPT_CLOSED'
+        )
         await expectChainOk(ownerId)
+      })
+    })
+
+    describe('closing needs the right kind of sale', () => {
+      it('cancel is for outstanding orders, refund for completed sales', async () => {
+        const { as, ownerId } = await seed()
+        const owner = await as(ownerId)
+        await expectCode(
+          closeSale(db, owner, { receiptId: 'r1', action: 'cancel', reason: 'Wrong' }),
+          'SALE_NOT_OPEN',
+          409
+        )
+        const open = await seed({ status: 'balance_due' })
+        await expectCode(
+          closeSale(db, await open.as(open.ownerId), {
+            receiptId: 'r1',
+            action: 'refund',
+            reason: 'Wrong',
+          }),
+          'SALE_NOT_OPEN',
+          409
+        )
       })
     })
 

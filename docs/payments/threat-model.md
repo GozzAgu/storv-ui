@@ -252,8 +252,27 @@ Found while building 2a: the Storage emulator allowed a second upload to an exis
 path although `update` is denied, so the rule now checks `resource == null` itself. Emulator
 suites now run one file at a time (they timed out under parallel load).
 
-Still open for 2b: screens, the privacy notes for proof retention (L), client permission
-read-out via `/api/payments/access`.
+Closed in 2b (see 6c), except the public privacy wording, which waits for approval.
+
+## 6c. Delivered in Step 2b (maker and checker screens)
+
+- Client flag `NUXT_PUBLIC_PAYMENTS_V2` only shows screens; every capability comes from
+  `/api/payments/access` (server-resolved), never from the staff doc.
+- New sales and balance payments record money through `/api/payments/record`. A failed record
+  never undoes the sale: the sale is saved, a warning says so, and "Record payment" stays on it.
+  V2 balance-due receipts are created with `amountPaid: 0`; the server mirrors what is recorded.
+- Return and cancel on V2 sales call `closeSale` first; stock moves only after it succeeds, and
+  the client no longer writes the (locked) status. `closeSale` now also refuses refunding an open
+  balance-due order or cancelling a completed sale (`SALE_NOT_OPEN`); closed receipts were
+  already refused (`RECEIPT_CLOSED`).
+- Clients cannot create payment notifications (types `payment_*`, `till_count_difference`,
+  source `payments_v2` or `recipientUids`): stops a member forging "awaiting" or "rejected"
+  alerts. Recipient filtering is display-only (all members can read store notifications); payment
+  notifications carry no customer data.
+- Refunds ask for the native biometric check; permission changes ask for TOTP when the owner has
+  2FA (server enforces).
+- Proof retention is shown in the timeline; public privacy wording is drafted in
+  `privacy-notes.md` and waits for approval.
 
 ## 7. Residual risks and open items
 

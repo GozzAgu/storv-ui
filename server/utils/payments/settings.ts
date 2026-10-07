@@ -1,11 +1,10 @@
 import type { DocumentReference, Firestore, Transaction } from 'firebase-admin/firestore'
-import type { CashConfirmationMode, PaymentKind, PaymentSettings } from '~/types/payments-v2'
+import type { CashConfirmationMode, PaymentSettings } from '~/types/payments-v2'
+import { MANUAL_KINDS, normalizeTenderLabel, type ManualKind } from '~/utils/payment-tender-kind'
 import { appendAuditEvents, readChainHead, storeDocRef } from './audit-log'
 import type { PaymentsAccess } from './access'
 import { PaymentServiceError, TX_OPTIONS } from './records'
 
-type ManualKind = Exclude<PaymentKind, 'paystack_link'>
-const MANUAL_KINDS: readonly ManualKind[] = ['cash', 'pos', 'manual_transfer']
 const MAX_TENDER_LABELS = 40
 
 export const DEFAULT_PAYMENT_SETTINGS: PaymentSettings = {
@@ -16,9 +15,7 @@ export const DEFAULT_PAYMENT_SETTINGS: PaymentSettings = {
 export const settingsRef = (store: DocumentReference) =>
   store.collection('paymentConfig').doc('settings')
 
-export function normalizeTenderLabel(label: string): string {
-  return label.trim().toLowerCase().replace(/\s+/g, ' ').slice(0, 60)
-}
+export { kindForTender, normalizeTenderLabel } from '~/utils/payment-tender-kind'
 
 export function parsePaymentSettings(raw: unknown): PaymentSettings {
   const data = (raw ?? {}) as Partial<PaymentSettings>
@@ -39,19 +36,6 @@ export async function readPaymentSettings(
 ): Promise<PaymentSettings> {
   const snap = tx ? await tx.get(settingsRef(store)) : await settingsRef(store).get()
   return parsePaymentSettings(snap.data())
-}
-
-/**
- * Kind for a merchant's tender label. Every manual kind needs a checker, so a wrong mapping can
- * only change whether cash goes through the till count, never skip confirmation.
- */
-export function kindForTender(label: string, settings: PaymentSettings): ManualKind {
-  const key = normalizeTenderLabel(label)
-  const mapped = settings.tenderKinds[key]
-  if (mapped) return mapped
-  if (/\bcash\b/.test(key)) return 'cash'
-  if (/\b(pos|card|terminal)\b/.test(key)) return 'pos'
-  return 'manual_transfer'
 }
 
 export async function updatePaymentSettings(

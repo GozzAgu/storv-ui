@@ -205,6 +205,17 @@ export async function closeSale(
   await db.runTransaction(async (tx) => {
     const ctx = await readReceiptContext(tx, store, receiptId)
     const head = await readChainHead(tx, store)
+    // The client moves stock only after this succeeds, so closing twice must fail.
+    const open = status === 'cancelled' ? ['balance_due', 'pending'] : ['completed']
+    if (!open.includes(ctx.legacyStatus)) {
+      throw new PaymentServiceError(
+        'SALE_NOT_OPEN',
+        409,
+        status === 'cancelled'
+          ? 'Only outstanding orders can be cancelled'
+          : 'Only completed sales can be refunded'
+      )
+    }
     const summary = computePaymentSummary(ctx.totalKobo, ctx.payments)
     if (summary.netPaidKobo > 0 || summary.awaitingKobo > 0 || summary.pendingKobo > 0) {
       throw new PaymentServiceError(

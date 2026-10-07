@@ -139,6 +139,8 @@ export default defineNuxtConfig({
         process.env.NUXT_PUBLIC_ALLOW_DEV_PLAN_SWITCHER === '1' ||
         process.env.NUXT_PUBLIC_ALLOW_DEV_PLAN_SWITCHER === 'true',
       paystackPublicKey: process.env.NUXT_PUBLIC_PAYSTACK_PUBLIC_KEY || '',
+      /** Payments V2 screens. The server gate (PAYMENTS_V2_ENABLED) still decides; routes 404 when off. */
+      paymentsV2: process.env.NUXT_PUBLIC_PAYMENTS_V2 === '1',
       /** Optional: base URL for a separate API server when using a static frontend. Staff creation is client-side and does not require a server. */
       apiBase: process.env.NUXT_PUBLIC_API_BASE || '',
       /** Optional Sentry DSN for client error reporting (https://sentry.io) */

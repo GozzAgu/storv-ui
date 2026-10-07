@@ -292,4 +292,49 @@ describe('firestore.rules: Payments V2', () => {
       )
     })
   })
+
+  describe('payment notifications are server-only', () => {
+    const base = {
+      title: 'x',
+      message: 'x',
+      userId: 'owner1',
+      read: false,
+      createdAt: new Date(),
+    }
+
+    it.each(['payment_awaiting_confirmation', 'payment_rejected', 'till_count_difference'])(
+      'a member cannot forge a %s notification',
+      async (type) => {
+        await assertFails(
+          setDoc(doc(as('cashier1'), `${STORE}/notifications/n-${type}`), { ...base, type })
+        )
+      }
+    )
+
+    it('clients cannot claim the payments source or target recipients', async () => {
+      await assertFails(
+        setDoc(doc(as('cashier1'), `${STORE}/notifications/n1`), {
+          ...base,
+          type: 'receipt_created',
+          source: 'payments_v2',
+        })
+      )
+      await assertFails(
+        setDoc(doc(as('owner1'), `${STORE}/notifications/n2`), {
+          ...base,
+          type: 'receipt_created',
+          recipientUids: ['owner1'],
+        })
+      )
+    })
+
+    it('ordinary notifications still work', async () => {
+      await assertSucceeds(
+        setDoc(doc(as('cashier1'), `${STORE}/notifications/n3`), {
+          ...base,
+          type: 'receipt_created',
+        })
+      )
+    })
+  })
 })

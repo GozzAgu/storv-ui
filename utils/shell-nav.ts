@@ -50,6 +50,7 @@ const SHELL_SECTIONS: ReadonlyArray<{ id: string; label: string | null; items: r
       'Sales leads',
       'Storefront',
       'Payment links',
+      'Awaiting payments',
     ],
   },
   {
@@ -68,6 +69,7 @@ const ROUTE_TITLES: Record<string, string> = {
   branches: 'Branches',
   customers: 'Customers',
   notifications: 'Notifications',
+  payments: 'Payments',
   returns: 'Returns',
   'storefront-inquiries': 'Storefront inquiries',
   'experience-unavailable': 'Unavailable',

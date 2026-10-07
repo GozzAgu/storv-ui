@@ -33,8 +33,14 @@
           <ReceiptTableLineItems :items="receipt.items" :items-count-fallback="receipt.itemsCount" />
         </section>
 
+        <PaymentTimeline
+          v-if="v2Sale"
+          :receipt="receipt"
+          @record-payment="emit('record-payment', receipt!)"
+        />
+
         <!-- Balance-due: paid/balance summary + payment history -->
-        <div v-if="isOutstanding" class="s-record-summary s-record-summary--warning">
+        <div v-else-if="isOutstanding" class="s-record-summary s-record-summary--warning">
           <dl class="s-record-totals">
             <div>
               <dt class="s-record-totals__label">Total</dt>
@@ -65,7 +71,7 @@
         </div>
 
         <!-- Completed/other: simple total + payment method -->
-        <dl v-else class="s-record-summary s-record-summary--stack">
+        <dl v-if="!isOutstanding || v2Sale" class="s-record-summary s-record-summary--stack">
           <div class="s-record-row">
             <dt>Payment</dt>
             <dd class="s-record-row__value">{{ receipt.paymentMethod }}</dd>
@@ -95,7 +101,7 @@
           </div>
         </dl>
 
-        <p v-if="isOutstanding && receipt.notes" class="s-form-meta">
+        <p v-if="isOutstanding && !v2Sale && receipt.notes" class="s-form-meta">
           <strong>Note:</strong> {{ receipt.notes }}
         </p>
       </div>
@@ -117,20 +123,20 @@
         </SButton>
       </div>
       <SButton
-        v-if="isOutstanding && canEditReceipts"
+        v-if="isOutstanding && canClose"
         variant="danger"
         @click="emit('cancel', receipt!)"
       >
         Cancel order
       </SButton>
       <SButton
-        v-if="receipt?.status === 'completed' && canEditReceipts"
+        v-if="receipt?.status === 'completed' && canClose"
         @click="emit('refund', receipt!)"
       >
         Refund
       </SButton>
       <SButton
-        v-if="isOutstanding"
+        v-if="isOutstanding && !v2Sale"
         variant="primary"
         @click="emit('record-payment', receipt!)"
       >
@@ -153,6 +159,8 @@ import { receiptAmountPaid, receiptBalanceDue } from '~/utils/receipt-balance'
 import { getReceiptStatusLabel, getReceiptStatusTone } from '~/utils/receipt-status'
 import { usePermissions } from '~/composables/usePermissions'
 import { usePreferences } from '~/composables/usePreferences'
+import PaymentTimeline from '~/components/payments/PaymentTimeline.vue'
+import { isV2Sale } from '~/utils/payments-v2-tenders'
 
 const props = defineProps<{
   modelValue: boolean
@@ -174,6 +182,15 @@ const showCommission = computed(
   () => canViewProfitAndCost.value && (props.receipt?.commissionAmount ?? 0) > 0
 )
 const { formatCurrency } = usePreferences()
+const { access: paymentsAccess } = usePaymentsV2()
+
+const v2Sale = computed(
+  () => !!props.receipt && paymentsAccess.value.enabled && isV2Sale(props.receipt)
+)
+/** V2 sales close through the server, which allows the owner or payments.refund holders. */
+const canClose = computed(() =>
+  v2Sale.value ? paymentsAccess.value.canRefund : canEditReceipts.value
+)
 
 const isOutstanding = computed(() => props.receipt?.status === 'balance_due')
 const amountPaid = computed(() => (props.receipt ? receiptAmountPaid(props.receipt) : 0))
