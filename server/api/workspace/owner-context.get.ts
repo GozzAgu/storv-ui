@@ -2,6 +2,7 @@ import { createError, defineEventHandler } from 'h3'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
 import { rethrowFirebaseAdminSetupError } from '~/server/utils/firebase-admin-errors'
 import { requireAuth } from '~/server/utils/store-auth'
+import { resolveStaffWorkspaceOwnerId } from '~/server/utils/staff-workspace'
 import type { SubscriptionPlan } from '~/types/subscription'
 import type { SubscriptionBillingCycle } from '~/types/subscription-billing'
 
@@ -39,15 +40,13 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // users/{ownerId}/stores/{storeId}/departments/{deptId}/staff/{staffId}
-  const pathParts = activeStaffDoc.ref.path.split('/')
-  const ownerIdFromPath = pathParts[0] === 'users' ? pathParts[1] : undefined
-  const createdBy = String(activeStaffDoc.data()?.createdBy || '').trim()
-  const ownerId = createdBy || ownerIdFromPath
-
+  // The owner comes only from the path (only the owner can create docs under users/{ownerId});
+  // `createdBy` is a plain field and must never decide which workspace a staff member joins.
+  const ownerId = resolveStaffWorkspaceOwnerId(activeStaffDoc.ref.path)
   if (!ownerId) {
     throw createError({ statusCode: 404, message: 'Workspace owner not found' })
   }
+  const pathParts = activeStaffDoc.ref.path.split('/')
 
   const ownerSnap = await adminDb.collection('users').doc(ownerId).get()
   if (!ownerSnap.exists) {

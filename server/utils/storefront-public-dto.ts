@@ -1,4 +1,5 @@
 import type { StorefrontPublicListing, StorefrontPublicProfile } from '~/types/storefront'
+import { legacyPaymentLinksEnabled } from '~/server/utils/legacy-payment-links'
 
 export function publicStorefrontProfileDto(profile: StorefrontPublicProfile) {
   return {
@@ -17,7 +18,7 @@ export function publicStorefrontProfileDto(profile: StorefrontPublicProfile) {
     warrantyInfo: profile.warrantyInfo || null,
     currency: profile.currency || null,
     allowReservations: profile.allowReservations !== false,
-    allowOnlineCheckout: profile.allowOnlineCheckout === true,
+    allowOnlineCheckout: profile.allowOnlineCheckout === true && legacyPaymentLinksEnabled(),
     acceptsPayments: false, // filled by handlers that check payout
   }
 }

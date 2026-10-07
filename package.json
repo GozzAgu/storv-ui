@@ -19,6 +19,8 @@
     "test:debug": "playwright test --debug",
     "marketing:screenshots": "node scripts/capture-marketing-screenshots.mjs",
     "test:rules": "node scripts/run-rules-tests.mjs",
+    "lint": "node scripts/lint-changed.mjs",
+    "lint:all": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "cap:build": "nuxt generate && npx cap sync",
@@ -64,6 +66,7 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.5",
     "@firebase/rules-unit-testing": "^5.0.0",
     "@playwright/test": "^1.48.0",
     "@tailwindcss/vite": "^4.3.3",
@@ -72,12 +75,16 @@
     "@vitejs/plugin-vue": "^6.0.5",
     "@vue/test-utils": "^2.4.6",
     "autoprefixer": "^10.4.22",
+    "eslint": "^9.39.5",
+    "eslint-plugin-vue": "^10.11.1",
+    "globals": "^17.13.0",
     "happy-dom": "^15.11.7",
     "playwright": "^1.48.0",
     "postcss": "^8.5.6",
     "prettier": "^2.8.8",
     "prettier-plugin-vue": "^1.1.6",
     "tailwindcss": "^4.3.3",
+    "typescript-eslint": "^8.71.1",
     "vitest": "^3.2.4"
   }
 }

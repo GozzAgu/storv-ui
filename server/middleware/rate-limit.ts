@@ -10,7 +10,12 @@ export default defineEventHandler(async (event) => {
   if (!path.startsWith('/api/')) return
 
   if (path.startsWith('/api/pay/')) {
-    await assertRateLimit(event, { id: 'pay-public', limit: 30, windowMs: ONE_MINUTE })
+    await assertRateLimit(event, {
+      id: 'pay-public',
+      limit: 30,
+      windowMs: ONE_MINUTE,
+      requireDistributed: true,
+    })
     return
   }
 
@@ -48,7 +53,12 @@ export default defineEventHandler(async (event) => {
     path.endsWith('/checkout') &&
     event.method === 'POST'
   ) {
-    await assertRateLimit(event, { id: 'storefront-checkout-ip', limit: 20, windowMs: ONE_MINUTE })
+    await assertRateLimit(event, {
+      id: 'storefront-checkout-ip',
+      limit: 20,
+      windowMs: ONE_MINUTE,
+      requireDistributed: true,
+    })
     return
   }
 

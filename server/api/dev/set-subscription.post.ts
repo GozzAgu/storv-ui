@@ -8,18 +8,12 @@ import type { SubscriptionPlan } from '~/types/subscription'
 import { normalizeSubscriptionPlan } from '~/types/subscription'
 import type { SubscriptionBillingCycle } from '~/types/subscription-billing'
 import { isSubscriptionBillingCycle } from '~/types/subscription-billing'
-
-function isDevPlanSwitcherAllowed(): boolean {
-  if (process.env.NODE_ENV === 'development') return true
-  const flag = String(process.env.NUXT_PUBLIC_ALLOW_DEV_PLAN_SWITCHER || '')
-    .trim()
-    .toLowerCase()
-  return flag === '1' || flag === 'true'
-}
+import { isDevPlanSwitcherAllowed } from '~/server/utils/dev-plan-switcher'
 
 /**
  * Dev/QA only: set the account owner’s plan without Paystack.
- * Enabled in NODE_ENV=development or when NUXT_PUBLIC_ALLOW_DEV_PLAN_SWITCHER=1.
+ * Enabled in NODE_ENV=development or when NUXT_PUBLIC_ALLOW_DEV_PLAN_SWITCHER=1,
+ * and never when a live Paystack key is configured.
  */
 export default defineEventHandler(async (event) => {
   if (!isDevPlanSwitcherAllowed()) {

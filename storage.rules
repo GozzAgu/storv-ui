@@ -22,17 +22,27 @@ service firebase.storage {
       return ownsStore(userId, storeId) || hasActiveStoreMembership(userId, storeId);
     }
 
+    // Matches the client checks in composables/useFirebaseStorage.ts (5 MB, common image types).
+    function isAllowedImageUpload() {
+      return request.resource.size > 0
+        && request.resource.size <= 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|gif|webp)');
+    }
+
     // Images: images/{userId}/profile/filename or images/{userId}/{folder}/filename
     // Authenticated users can read/write only their own images
     match /images/{userId}/{allPaths=**} {
-      allow read, write: if isAuthenticated()
-        && request.auth.uid == userId;
+      allow read, delete: if isAuthenticated() && request.auth.uid == userId;
+      allow create, update: if isAuthenticated()
+        && request.auth.uid == userId
+        && isAllowedImageUpload();
     }
 
     // Store images (for store-scoped uploads)
     // Path format: stores/{userId}/{storeId}/...
     match /stores/{userId}/{storeId}/{allPaths=**} {
-      allow read, write: if canAccessStoreAssets(userId, storeId);
+      allow read, delete: if canAccessStoreAssets(userId, storeId);
+      allow create, update: if canAccessStoreAssets(userId, storeId) && isAllowedImageUpload();
     }
 
     // Deny all other paths
