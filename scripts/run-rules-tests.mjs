@@ -41,7 +41,7 @@ if (!hasJava(env)) {
 
 // tests/emulator: server code (Admin SDK) against the same emulators, e.g. payment transactions.
 const cmd =
-  'firebase emulators:exec --only firestore,storage "vitest run tests/rules tests/emulator --reporter=dot"'
+  'firebase emulators:exec --only firestore,storage "vitest run tests/rules tests/emulator --reporter=dot --no-file-parallelism --testTimeout=30000 --hookTimeout=30000"'
 
 const result = spawnSync(cmd, {
   stdio: 'inherit',

@@ -86,4 +86,76 @@ describe('storage.rules', () => {
         .putString('pdf', 'raw', { contentType: 'application/pdf' }) as unknown as Promise<unknown>
     )
   })
+
+  describe('payment proofs', () => {
+    const PROOFS = 'paymentProofs/u1/s1'
+    const put = (uid: string, path: string, contentType = 'image/png', body = 'proof-bytes') =>
+      testEnv
+        .authenticatedContext(uid)
+        .storage()
+        .ref(path)
+        .putString(body, 'raw', { contentType }) as unknown as Promise<unknown>
+
+    beforeAll(async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        const db = context.firestore()
+        await setDoc(doc(db, 'users/u1/stores/s1/members/cashier'), {
+          authUid: 'cashier',
+          status: 'active',
+        })
+        await setDoc(doc(db, 'users/u1/stores/s1/members/checker'), {
+          authUid: 'checker',
+          status: 'active',
+        })
+        await setDoc(doc(db, 'users/u1/stores/s1/payments/p-await'), {
+          recordedBy: 'cashier',
+          status: 'awaiting_confirmation',
+        })
+        await setDoc(doc(db, 'users/u1/stores/s1/payments/p-done'), {
+          recordedBy: 'cashier',
+          status: 'confirmed',
+        })
+      })
+    })
+
+    it('the recorder uploads a proof while the payment awaits confirmation', async () => {
+      await assertSucceeds(put('cashier', `${PROOFS}/p-await/proof.png`))
+      await assertSucceeds(put('cashier', `${PROOFS}/p-await/proof.pdf`, 'application/pdf'))
+    })
+
+    it('nobody else uploads, and not after the decision', async () => {
+      await assertFails(put('checker', `${PROOFS}/p-await/proof.jpg`, 'image/jpeg'))
+      await assertFails(put('u1', `${PROOFS}/p-await/proof.jpg`, 'image/jpeg'))
+      await assertFails(put('stranger', `${PROOFS}/p-await/proof.jpg`, 'image/jpeg'))
+      await assertFails(put('cashier', `${PROOFS}/p-done/proof.png`))
+      await assertFails(put('cashier', `${PROOFS}/p-missing/proof.png`))
+    })
+
+    it('fixed file names only', async () => {
+      await assertFails(put('cashier', `${PROOFS}/p-await/evil.html`, 'text/html'))
+      await assertFails(put('cashier', `${PROOFS}/p-await/evil.png`))
+    })
+
+    it('allowed types only', async () => {
+      await assertFails(put('cashier', `${PROOFS}/p-await/proof.webp`, 'image/svg+xml'))
+    })
+
+    it('5 MB at most', async () => {
+      await assertFails(
+        put('cashier', `${PROOFS}/p-await/proof.jpg`, 'image/jpeg', 'a'.repeat(5 * 1024 * 1024 + 1))
+      )
+    })
+
+    it('no overwrite of an existing proof', async () => {
+      await assertFails(put('cashier', `${PROOFS}/p-await/proof.png`))
+    })
+
+    it('no client reads or deletes, even for the owner and the recorder', async () => {
+      for (const uid of ['u1', 'cashier', 'checker']) {
+        const ref = testEnv.authenticatedContext(uid).storage().ref(`${PROOFS}/p-await/proof.png`)
+        await assertFails(ref.getDownloadURL() as unknown as Promise<unknown>)
+        await assertFails(ref.delete() as unknown as Promise<unknown>)
+      }
+    })
+  })
 })

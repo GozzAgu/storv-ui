@@ -24,6 +24,7 @@ export const AUDIT_BODY_KEYS = [
   'reason',
   'flags',
   'at',
+  'subjectUid',
 ] as const
 
 export interface AuditEventBody {
@@ -42,6 +43,8 @@ export interface AuditEventBody {
   flags: string[]
   /** ISO time set by the server before hashing (not a serverTimestamp sentinel). */
   at: string
+  /** Member a permission change applies to; null for payment events. */
+  subjectUid?: string | null
 }
 
 export interface AuditEventRecord extends AuditEventBody {

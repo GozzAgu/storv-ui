@@ -94,6 +94,8 @@ describe('firestore.rules: Payments V2', () => {
       `${STORE}/payments/new`,
       `${STORE}/paymentEvents/000000000002`,
       `${STORE}/paymentAudit/head`,
+      `${STORE}/paymentConfig/settings`,
+      `${STORE}/tillCounts/t1`,
       'paymentLinksV2/l1',
       'paymentLinksV2/l1/attempts/stvp_1',
       'paymentLinkTokens/hash1',
@@ -148,6 +150,32 @@ describe('firestore.rules: Payments V2', () => {
       await assertSucceeds(getDoc(doc(as('owner1'), `${STORE}/paymentEvents/000000000001`)))
       await assertSucceeds(getDoc(doc(as('viewer1'), `${STORE}/paymentEvents/000000000001`)))
       await assertFails(getDoc(doc(as('cashier1'), `${STORE}/paymentEvents/000000000001`)))
+    })
+
+    it('payment settings: any active member reads (to pick the flow), nobody writes', async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await setDoc(doc(context.firestore(), `${STORE}/paymentConfig/settings`), {
+          cashConfirmation: 'each',
+        })
+      })
+      await assertSucceeds(getDoc(doc(as('cashier1'), `${STORE}/paymentConfig/settings`)))
+      await assertSucceeds(getDoc(doc(as('owner1'), `${STORE}/paymentConfig/settings`)))
+      await assertFails(getDoc(doc(as('stranger'), `${STORE}/paymentConfig/settings`)))
+      await assertFails(
+        updateDoc(doc(as('owner1'), `${STORE}/paymentConfig/settings`), {
+          cashConfirmation: 'end_of_day',
+        })
+      )
+    })
+
+    it('till counts: owner and payments viewers only', async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await setDoc(doc(context.firestore(), `${STORE}/tillCounts/t1`), { countedKobo: 100 })
+      })
+      await assertSucceeds(getDoc(doc(as('owner1'), `${STORE}/tillCounts/t1`)))
+      await assertSucceeds(getDoc(doc(as('confirmer1'), `${STORE}/tillCounts/t1`)))
+      await assertFails(getDoc(doc(as('cashier1'), `${STORE}/tillCounts/t1`)))
+      await assertFails(deleteDoc(doc(as('owner1'), `${STORE}/tillCounts/t1`)))
     })
 
     it('chain head: owner only', async () => {

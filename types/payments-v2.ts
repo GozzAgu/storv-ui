@@ -77,6 +77,54 @@ export interface PaymentRecord {
   createdAt: string
   updatedAt: string
   version: number
+  /** Storage path under paymentProofs/, set by the server once the recorder's upload checks out. */
+  proofPath?: string | null
+  proofUploadedAt?: string | null
+  /** Confirm or reject time. */
+  decidedAt?: string | null
+  /** Proofs are deleted 12 months after the decision (retention cron). */
+  proofDeleteAfter?: string | null
+  proofDeletedAt?: string | null
+}
+
+/** Audit events that are not a payment state change. */
+export type PaymentAdminEventType =
+  | 'permission_granted'
+  | 'permission_revoked'
+  | 'settings_changed'
+  | 'till_counted'
+  | 'proof_attached'
+  | 'proof_deleted'
+  | 'sale_cancelled'
+
+export type CashConfirmationMode = 'each' | 'end_of_day'
+
+/** Server-only: users/{owner}/stores/{store}/paymentConfig/settings */
+export interface PaymentSettings {
+  cashConfirmation: CashConfirmationMode
+  /** Tender label (lower-cased) → kind. Labels not listed fall back to a name-based guess. */
+  tenderKinds: Record<string, Exclude<PaymentKind, 'paystack_link'>>
+}
+
+export const PAYMENT_PERMISSION_ACTIONS = ['view', 'confirm', 'refund'] as const
+export type PaymentPermissionAction = (typeof PAYMENT_PERMISSION_ACTIONS)[number]
+export type PaymentPermissions = Record<PaymentPermissionAction, boolean>
+
+/** Server-only: users/{owner}/stores/{store}/tillCounts/{id} */
+export interface TillCountRecord {
+  businessDate: string
+  countedKobo: number
+  expectedKobo: number
+  confirmedKobo: number
+  rejectedKobo: number
+  /** countedKobo − confirmedKobo. Non-zero alerts the owner. */
+  differenceKobo: number
+  confirmedPaymentIds: string[]
+  rejectedPaymentIds: string[]
+  countedBy: string
+  countedByName: string
+  note: string | null
+  createdAt: string
 }
 
 /** Derived sale payment status, written by the server onto `receipts/{id}.paymentSummary`. */

@@ -670,6 +670,18 @@ service cloud.firestore {
           allow read: if isStoreOwnerForPath(userId);
           allow write: if false;
         }
+
+        // Payments V2 settings (cash confirmation mode, tender kinds): server writes, owner only.
+        match /paymentConfig/{docId} {
+          allow read: if isStoreOwnerForPath(userId) || isActiveStoreMember(userId, storeId);
+          allow write: if false;
+        }
+
+        // End-of-day cash counts.
+        match /tillCounts/{countId} {
+          allow read: if canViewPayments(userId, storeId);
+          allow write: if false;
+        }
         
         // Customers subcollection: users/{userId}/stores/{storeId}/customers/{customerId}
         // Loan inventory to external seller / retailer (tracked; not marked sold until receipt).

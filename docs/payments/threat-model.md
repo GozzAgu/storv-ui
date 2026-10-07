@@ -226,6 +226,35 @@ Behaviour change to note: once a receipt has V2 payments, the existing client re
 edit flows are blocked by rules for that receipt. Refunds of V2 money go through the server
 (Step 2/5). Legacy receipts are unchanged.
 
+## 6b. Delivered in Step 2a (maker and checker, server only)
+
+Routes under `/api/payments/*`, all through `definePaymentsRoute`: feature gate (404 when off,
+checked before auth) → Firebase ID token (401) → per-uid rate limit (KV, 503 in production
+without it) → store membership (404 for strangers, removed members and other stores) → handler.
+Client IDs must match `^[A-Za-z0-9_-]{1,128}$`, so no path walking.
+
+| Control | Where | Tests |
+|---|---|---|
+| Auth matrix per route: owner, confirmer, cashier, viewer, removed member, other store | `access.ts`, `service.ts` | S-AUTH-*, S-MC-* (`tests/emulator/payments-maker-checker.spec.ts`) |
+| Cross-store IDs → 404, nothing written in either store | `resolvePaymentsAccess`, store-scoped reads | S-IDOR-1 |
+| Gate before auth; 401 signed out; service errors keep status and code | `http.ts` | S-HTTP-* (`tests/server/payments-http.spec.ts`) |
+| Recorder ≠ checker, including in the till count (own entries excluded and listed apart) | state machine + `submitTillCount` | S-MC-1, S-TILL-1 |
+| Split tenders land in one transaction; balance-due sales complete once fully recorded (decision 2026-10-07) and a later rejection reopens V2 and alerts the owner | `recordPayments` | S-REC-*, S-BAL-1 |
+| End-of-day cash: every eligible payment confirmed or rejected in one transaction; stale lists refused; difference stored and alerted | `submitTillCount`, `tillCounts` | S-TILL-1..2 |
+| `payments.*` grants: owner only, fresh 2FA code when enabled, one audit event per change with `subjectUid` | `setMemberPaymentPermissions` | S-AUD-2, R-PERM-* |
+| Settings (cash mode, tender kinds): owner only, validated, audited; a wrong mapping can never skip confirmation | `settings.ts` | S-SET-* |
+| Manual refunds need the refund permission and a reason; a sale closes only when no money is held | `refundPayment`, `closeSale` | S-REF-* |
+| Proofs: separate Storage path (the `stores/**` rule would otherwise let any member read or delete them); recorder only, awaiting only, `proof.{jpg,png,webp,pdf}`, 5 MB, create once (`resource == null`), no client reads; 5-minute signed URLs; deleted 12 months after the decision by cron (L) | `storage.rules`, `proofs.ts`, cron `proof-retention` | R-ST-PROOF-*, S-PROOF-* |
+| Notifications carry no customer data; awaiting → owner and confirmers (not the recorder); rejection and till difference → owner | `notify.ts` | S-NOTIFY-* , L-LOG-1 |
+| Logs: no customer names, phones or proof paths | — | L-LOG-1 |
+
+Found while building 2a: the Storage emulator allowed a second upload to an existing proof
+path although `update` is denied, so the rule now checks `resource == null` itself. Emulator
+suites now run one file at a time (they timed out under parallel load).
+
+Still open for 2b: screens, the privacy notes for proof retention (L), client permission
+read-out via `/api/payments/access`.
+
 ## 7. Residual risks and open items
 
 | Risk | Status | Owner |
