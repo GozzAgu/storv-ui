@@ -1,4 +1,5 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import { fileURLToPath } from 'node:url'
 import tailwindcss from '@tailwindcss/vite'
 import { CAPACITOR_SHELL_INLINE_SCRIPT } from './utils/capacitor-shell-inline'
 
@@ -25,6 +26,14 @@ export default defineNuxtConfig({
       routes: ['/'],
       crawlLinks: true,
     },
+    // Payments V2 live gate reads docs/payments/paystack-decisions.md at runtime.
+    serverAssets: [
+      {
+        baseName: 'payments-docs',
+        dir: fileURLToPath(new URL('./docs/payments', import.meta.url)),
+        pattern: 'paystack-decisions.md',
+      },
+    ],
   },
   /**
    * Serves Firebase's sign-in handler from our own domain, so Google redirect sign-in works in

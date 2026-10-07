@@ -1,0 +1,108 @@
+import type { PaymentsCurrency } from '~/utils/money-kobo'
+
+/** Payments V2 record states. Only server code moves a payment between them. */
+export type PaymentStatus =
+  | 'pending'
+  | 'awaiting_confirmation'
+  | 'confirmed'
+  | 'failed'
+  | 'expired'
+  | 'rejected'
+  | 'partially_refunded'
+  | 'refunded'
+
+export const PAYMENT_STATUSES: readonly PaymentStatus[] = [
+  'pending',
+  'awaiting_confirmation',
+  'confirmed',
+  'failed',
+  'expired',
+  'rejected',
+  'partially_refunded',
+  'refunded',
+]
+
+export type PaymentKind = 'paystack_link' | 'manual_transfer' | 'pos' | 'cash'
+
+export type PaymentFlag =
+  | 'overpaid'
+  | 'paid_after_expiry'
+  | 'paid_after_revoke'
+  | 'duplicate_payment'
+  | 'oversold'
+
+export type PaymentEventType =
+  | 'created'
+  | 'claimed'
+  | 'paid'
+  | 'confirmed'
+  | 'rejected'
+  | 'failed'
+  | 'expired'
+  | 'revoked'
+  | 'refunded'
+
+export interface PaymentStatusChange {
+  from: PaymentStatus | null
+  to: PaymentStatus
+  at: string
+  by: string
+  reason: string | null
+}
+
+export interface PaymentRecord {
+  id: string
+  ownerId: string
+  storeId: string
+  receiptId: string
+  kind: PaymentKind
+  methodLabel: string
+  amountKobo: number
+  currency: PaymentsCurrency
+  status: PaymentStatus
+  refundedKobo: number
+  flags: PaymentFlag[]
+  recordedBy: string
+  recordedByName: string
+  /** Set when the owner recorded it and it auto-confirmed ("Recorded by owner"). */
+  autoConfirmedReason: 'recorded_by_owner' | null
+  confirmedBy: string | null
+  confirmedAt: string | null
+  rejectedBy: string | null
+  rejectedAt: string | null
+  rejectionReason: string | null
+  linkId: string | null
+  reference: string | null
+  statusHistory: PaymentStatusChange[]
+  createdAt: string
+  updatedAt: string
+  version: number
+}
+
+/** Derived sale payment status, written by the server onto `receipts/{id}.paymentSummary`. */
+export type SalePaymentStatus =
+  | 'unpaid'
+  | 'partially_paid'
+  | 'awaiting_confirmation'
+  | 'paid'
+  | 'overpaid'
+  | 'partially_refunded'
+  | 'refunded'
+
+export interface PaymentSummary {
+  status: SalePaymentStatus
+  currency: PaymentsCurrency
+  totalKobo: number
+  /** Confirmed money, before refunds. */
+  confirmedKobo: number
+  refundedKobo: number
+  /** confirmedKobo − refundedKobo */
+  netPaidKobo: number
+  awaitingKobo: number
+  pendingKobo: number
+  balanceKobo: number
+  overpaidKobo: number
+  paymentCount: number
+  lastPaymentAt: string | null
+  version: number
+}

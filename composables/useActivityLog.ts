@@ -2,17 +2,7 @@
  * Activity logs for security auditing: track who changed what in inventory (and future entities).
  */
 
-import {
-  collection,
-  doc,
-  setDoc,
-  getDocs,
-  query,
-  orderBy,
-  limit,
-  serverTimestamp,
-} from 'firebase/firestore'
-import type { Firestore } from 'firebase/firestore'
+import { doc, setDoc, getDocs, query, orderBy, limit, serverTimestamp } from 'firebase/firestore'
 import { useFirestore } from '~/composables/useFirestore'
 import { getActivityLogsCollection } from '~/composables/useFirestorePaths'
 import { getQueryUserId } from '~/composables/useFirestorePaths'
@@ -21,7 +11,7 @@ import { resolveEffectiveSubscriptionPlan, planHasFeature } from '~/types/subscr
 import type { SubscriptionPlan } from '~/types/subscription'
 
 export type ActivityAction = 'created' | 'updated' | 'deleted'
-export type ActivityEntityType = 'folder' | 'item' | 'items_batch' | 'lead'
+export type ActivityEntityType = 'folder' | 'item' | 'items_batch' | 'lead' | 'payment'
 
 export interface ActivityLog {
   id: string
@@ -62,6 +52,7 @@ export function activityEntityTypeLabel(type: ActivityEntityType): string {
   if (type === 'items_batch') return 'Batch'
   if (type === 'folder') return 'Folder'
   if (type === 'lead') return 'Lead'
+  if (type === 'payment') return 'Payment'
   return 'Item'
 }
 
@@ -106,6 +97,11 @@ export function activityLogDetailSubtitle(
   if (log.entityType === 'lead') {
     if (name && name !== '-') return null
     return 'Sales lead'
+  }
+
+  if (log.entityType === 'payment') {
+    if (name && name !== '-') return null
+    return 'Payment'
   }
 
   return null

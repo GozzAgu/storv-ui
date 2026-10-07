@@ -1,6 +1,6 @@
 # Payments V2 threat model
 
-Status: draft for review, written before Step 1. Update it at the end of every step.
+Status: draft for review, written before Step 1, updated at the end of Step 1. Update it at the end of every step.
 Scope: secure payment links (A) and payment confirmation with maker and checker (B).
 Method: STRIDE per component, then a map from each asset to its threats, controls and tests.
 
@@ -205,6 +205,26 @@ NGN stores only.
 | Spoofable rate-limit IP; memory fallback in production | Medium | Vercel platform header only; payments fail closed without KV | S-S0-RL |
 | Dev plan switcher could run with a live key | Medium | Refuses on `sk_live_` | S-S0-DEV |
 | Legacy payment links (plain tokens, no verify, stuck holds) | High | 410 Gone unless `LEGACY_PAYMENT_LINKS_ENABLED=1` (0 live links found) | S-S0-410 |
+
+## 6a. Delivered in Step 1 (records, no routes yet)
+
+| Control | Where | Tests |
+|---|---|---|
+| One kobo helper, NGN only (H) | `utils/money-kobo.ts` | U-KOBO-1 |
+| Pure state machine: maker ≠ checker, reject and manual refund need a reason, late money confirmed and flagged (M) | `server/utils/payments/state-machine.ts` | U-SM-* (exhaustive edge table) |
+| `paymentSummary` derived only from payment docs; partial refunds via `refundedKobo` (F) | `utils/payment-summary.ts` | P-SUM-* (fast-check) |
+| Overpayment cap in the receipt transaction; late overpayment confirmed + `overpaid` (E) | `server/utils/payments/records.ts` | C-CAP-1, C-LATE-1 |
+| Hash chain with per-store head in the same transaction; daily anchors to an append-only collection and to logs; verifier names the first broken link (B) | `audit-hash.ts`, `audit-log.ts`, `scripts/payments/verify-audit-chain.mjs`, cron `anchor-audit` | U-HASH-*, C-TAMPER-1, C-ANCHOR-1 |
+| Money fields locked once `paymentSummary` exists; clients can never write `paymentSummary`; V2 receipts cannot be deleted (G) | `firestore.rules` | R-RCPT-* |
+| Payment, event, audit and top-level link/token/webhook/anchor collections are server-write-only | `firestore.rules` | R-PAY-* |
+| `permissions.payments` grants are server-only, so granting confirm can be audit-logged (Step 2 route) | `firestore.rules` | R-PERM-* |
+| Feature gate: off by default; live keys refused unless `PAYMENTS_V2_ALLOW_LIVE=1` and the decisions doc says approved | `server/utils/payments/config.ts` | U-GATE-* |
+| Cron secret compared timing-safe, 401 with no detail (K) | `server/utils/cron-auth.ts` | U-CRON-* |
+| Concurrency | emulator | C-WH-1 (10 parallel confirms → 1), C-SUM-1, C-MC-1 |
+
+Behaviour change to note: once a receipt has V2 payments, the existing client refund and
+edit flows are blocked by rules for that receipt. Refunds of V2 money go through the server
+(Step 2/5). Legacy receipts are unchanged.
 
 ## 7. Residual risks and open items
 
