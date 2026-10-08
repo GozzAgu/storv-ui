@@ -19,6 +19,17 @@ export default defineEventHandler(async (event) => {
     return
   }
 
+  // Payments V2 public link endpoints also limit per route and per token inside the handler.
+  if (path.startsWith('/api/paylink/')) {
+    await assertRateLimit(event, {
+      id: 'paylink-public',
+      limit: 60,
+      windowMs: ONE_MINUTE,
+      requireDistributed: true,
+    })
+    return
+  }
+
   if (path.startsWith('/api/paystack/webhook')) {
     await assertRateLimit(event, { id: 'paystack-webhook', limit: 120, windowMs: ONE_MINUTE })
     return

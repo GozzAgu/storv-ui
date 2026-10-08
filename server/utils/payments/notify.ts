@@ -6,6 +6,8 @@ export type PaymentNotificationType =
   | 'payment_awaiting_confirmation'
   | 'payment_rejected'
   | 'till_count_difference'
+  | 'payout_changed'
+  | 'payment_link_sale_cancelled'
 
 interface NotifyInput {
   ownerId: string
@@ -123,4 +125,85 @@ export async function notifyTillDifference(
     recipientUids: [scope.ownerId],
     metadata: { tillCountId, businessDate, differenceKobo },
   })
+}
+
+/** A link sale's last link expired or was revoked with nothing paid: order closed, stock back. */
+export async function notifyLinkSaleCancelled(
+  db: Firestore,
+  scope: { ownerId: string; storeId: string; actorUid: string },
+  receiptId: string,
+  receiptNumber: string,
+  mode: 'expired' | 'revoked'
+): Promise<void> {
+  const label = receiptNumber ? `Order ${receiptNumber}` : 'An order'
+  await writeNotification(db, {
+    ...scope,
+    type: 'payment_link_sale_cancelled',
+    title: mode === 'expired' ? 'Payment link expired' : 'Payment link revoked',
+    message: `${label} was not paid, so it was cancelled and its items are back in stock.`,
+    recipientUids: [scope.ownerId],
+    metadata: { receiptId },
+  })
+}
+
+export type EmailSender = (params: { toEmail: string; subject: string; html: string }) => Promise<void>
+
+/**
+ * Owner-only alert for a payout account change: an in-app entry plus an email to the owner's
+ * sign-in address. Only the bank name and last 4 digits are included. Email failure is logged
+ * with a dedicated tag (the change has already committed and is in the audit chain).
+ */
+export async function alertPayoutChanged(
+  db: Firestore,
+  sendEmail: EmailSender,
+  input: {
+    ownerId: string
+    storeId: string
+    ownerEmail: string | undefined
+    bankName: string
+    last4: string
+    previousLast4: string
+    replaced: boolean
+  }
+): Promise<{ emailed: boolean }> {
+  const target = `${input.bankName || 'your bank'} ending ${input.last4}`
+  const message = input.replaced
+    ? `Payouts now go to ${target}${input.previousLast4 ? ` (was ending ${input.previousLast4})` : ''}.`
+    : `Payouts now go to ${target}.`
+  await writeNotification(db, {
+    ownerId: input.ownerId,
+    storeId: input.storeId,
+    actorUid: input.ownerId,
+    type: 'payout_changed',
+    title: input.replaced ? 'Payout account changed' : 'Payout account connected',
+    message,
+    recipientUids: [input.ownerId],
+    metadata: { last4: input.last4 },
+  })
+
+  const logFailure = (reason: string) =>
+    console.error(
+      JSON.stringify({
+        tag: 'payments-payout-alert-failed',
+        ownerId: input.ownerId,
+        storeId: input.storeId,
+        reason,
+      })
+    )
+  if (!input.ownerEmail) {
+    logFailure('owner has no email')
+    return { emailed: false }
+  }
+  const safe = message.replace(/[<>&"']/g, '')
+  try {
+    await sendEmail({
+      toEmail: input.ownerEmail,
+      subject: input.replaced ? 'Your Storvv payout account was changed' : 'Payout account connected',
+      html: `<p>${safe}</p><p>If you did not make this change, sign in to Storvv, change your password and reconnect your own bank account straight away.</p>`,
+    })
+    return { emailed: true }
+  } catch (err) {
+    logFailure(err instanceof Error ? err.message.slice(0, 200) : 'unknown')
+    return { emailed: false }
+  }
 }

@@ -96,6 +96,70 @@ export type PaymentAdminEventType =
   | 'proof_attached'
   | 'proof_deleted'
   | 'sale_cancelled'
+  | 'payout_changed'
+  | 'link_token_issued'
+  | 'link_token_revoked'
+
+export type PaymentLinkStatus = 'active' | 'paid' | 'expired' | 'revoked'
+
+/** Server-only: paymentLinksV2/{linkId}. One pending payment record per link. */
+export interface PaymentLinkV2 {
+  ownerId: string
+  storeId: string
+  receiptId: string
+  paymentId: string
+  amountKobo: number
+  currency: PaymentsCurrency
+  status: PaymentLinkStatus
+  /** Paystack subaccount at creation; checkout always settles here. */
+  subaccountCode: string
+  /** Shown on the public page: the store's name and receipt number, nothing about the customer. */
+  storeName: string
+  receiptNumber: string
+  /**
+   * The order was opened for this link with nothing paid. When its last link dies with no money
+   * recorded, the server cancels the order and releases the reserved stock.
+   */
+  linkSale: boolean
+  expiresAt: string
+  createdAt: string
+  createdBy: string
+  updatedAt: string
+  paidAt: string | null
+  endedAt: string | null
+  endedBy: string | null
+  endReason: string | null
+  /** Set when the expiry or revoke cancelled the order and released its stock. */
+  holdReleasedAt: string | null
+  checkoutAttempts: number
+  version: number
+}
+
+export type PaymentLinkTokenStatus = 'active' | 'revoked' | 'dead'
+
+/** Server-only: paymentLinkTokens/{sha256(token)}. The token itself is never stored. */
+export interface PaymentLinkTokenEntry {
+  linkId: string
+  ownerId: string
+  storeId: string
+  status: PaymentLinkTokenStatus
+  createdAt: string
+  createdBy: string
+  expiresAt: string
+  revokedAt: string | null
+  revokedBy: string | null
+}
+
+/** Server-only: paymentLinksV2/{linkId}/attempts/{reference}. No customer email is kept. */
+export interface PaymentLinkAttempt {
+  reference: string
+  amountKobo: number
+  currency: PaymentsCurrency
+  subaccountCode: string
+  status: 'initializing' | 'initialized' | 'failed'
+  createdAt: string
+  ipHash: string
+}
 
 export type CashConfirmationMode = 'each' | 'end_of_day'
 

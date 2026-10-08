@@ -25,7 +25,7 @@ function describeFetchFailure(err: unknown): string {
   return err.message || 'Network error talking to the email provider'
 }
 
-async function sendViaResend(params: {
+export async function sendViaResend(params: {
   toEmail: string
   subject: string
   html: string

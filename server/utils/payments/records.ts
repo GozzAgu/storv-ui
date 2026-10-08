@@ -160,6 +160,16 @@ export interface RecordPaymentsInput {
   reference?: string | null
   /** Late Paystack money only; everything else respects the overpayment cap. */
   allowOverpayment?: boolean
+  /** One tender only: its amount becomes whatever the sale has left to pay, read in the transaction. */
+  fillOutstanding?: boolean
+  /**
+   * Extra writes in the same transaction (e.g. the link and token docs), after every read and
+   * after the cap check. Must not read. Throwing aborts the whole transaction.
+   */
+  stage?: (
+    tx: Transaction,
+    staged: { ctx: ReceiptContext; before: PaymentSummary; added: PaymentRecord[]; now: string }
+  ) => void
 }
 
 export interface RecordPaymentsResult {
@@ -183,7 +193,11 @@ export async function recordPayments(
       `Record between 1 and ${MAX_TENDERS} payments`
     )
   }
+  if (input.fillOutstanding && input.tenders.length !== 1) {
+    throw new PaymentServiceError('INVALID_AMOUNT', 400, 'Only one payment can fill the balance')
+  }
   for (const t of input.tenders) {
+    if (input.fillOutstanding) continue
     if (!Number.isSafeInteger(t.amountKobo) || t.amountKobo <= 0) {
       throw new PaymentServiceError('INVALID_AMOUNT', 400, 'Amount must be more than zero')
     }
@@ -192,7 +206,6 @@ export async function recordPayments(
   for (const plan of plans) {
     if (!plan.ok) throw new PaymentServiceError(plan.code, 403, plan.message)
   }
-  const totalKobo = input.tenders.reduce((sum, t) => sum + t.amountKobo, 0)
 
   const store = storeDocRef(db, input.ownerId, input.storeId)
   return db.runTransaction(async (tx) => {
@@ -200,6 +213,13 @@ export async function recordPayments(
     const head = await readChainHead(tx, store)
 
     const before = computePaymentSummary(ctx.totalKobo, ctx.payments)
+    const tenders = input.fillOutstanding
+      ? [{ ...input.tenders[0]!, amountKobo: outstandingKobo(before) }]
+      : input.tenders
+    if (input.fillOutstanding && tenders[0]!.amountKobo <= 0) {
+      throw new PaymentServiceError('NOTHING_OUTSTANDING', 409, 'This sale has nothing left to pay')
+    }
+    const totalKobo = tenders.reduce((sum, t) => sum + t.amountKobo, 0)
     if (!input.allowOverpayment && totalKobo > outstandingKobo(before)) {
       throw new PaymentServiceError(
         'OVERPAYMENT',
@@ -211,7 +231,7 @@ export async function recordPayments(
     const now = new Date().toISOString()
     const added: PaymentRecord[] = []
     const events: AuditEventInput[] = []
-    input.tenders.forEach((tender, i) => {
+    tenders.forEach((tender, i) => {
       const plan = plans[i]!
       if (!plan.ok) return
       const ref = store.collection('payments').doc()
@@ -296,6 +316,7 @@ export async function recordPayments(
       : { update: {}, completed: false }
     tx.update(ctx.ref, { ...update, ...legacy.update })
     appendAuditEvents(tx, store, head, events)
+    input.stage?.(tx, { ctx, before, added, now })
 
     return {
       payments: added.map((p) => ({ paymentId: p.id, status: p.status, amountKobo: p.amountKobo })),

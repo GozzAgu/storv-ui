@@ -302,7 +302,13 @@ describe('firestore.rules: Payments V2', () => {
       createdAt: new Date(),
     }
 
-    it.each(['payment_awaiting_confirmation', 'payment_rejected', 'till_count_difference'])(
+    it.each([
+      'payment_awaiting_confirmation',
+      'payment_rejected',
+      'till_count_difference',
+      'payout_changed',
+      'payment_link_expired',
+    ])(
       'a member cannot forge a %s notification',
       async (type) => {
         await assertFails(
