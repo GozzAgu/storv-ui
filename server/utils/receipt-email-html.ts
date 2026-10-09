@@ -6,7 +6,16 @@ export function escapeHtml(text: string): string {
     .replace(/"/g, '&quot;')
 }
 
-export function generateReceiptEmailHTML(receiptData: Record<string, unknown>): string {
+const PAYMENT_STATUS_LABEL: Record<string, string> = {
+  confirmed: 'Confirmed',
+  awaiting_confirmation: 'Awaiting confirmation',
+  refunded: 'Refunded',
+}
+
+export function generateReceiptEmailHTML(
+  receiptData: Record<string, unknown>,
+  opts: { attached?: boolean } = {}
+): string {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-NG', {
       style: 'currency',
@@ -49,6 +58,49 @@ export function generateReceiptEmailHTML(receiptData: Record<string, unknown>): 
     })
     .join('')
 
+  const payments =
+    receiptData.v2 === true && Array.isArray(receiptData.payments)
+      ? (receiptData.payments as Record<string, unknown>[])
+      : []
+  const balanceKobo =
+    typeof receiptData.balanceDueKobo === 'number' ? receiptData.balanceDueKobo : null
+  const paymentsHtml =
+    receiptData.v2 === true
+      ? `
+ <h2 style="font-size: 16px; margin: 24px 0 8px;">Payments</h2>
+ <table style="width: 100%; border-collapse: collapse;">
+ <tbody>${
+   payments.length
+     ? payments
+         .map((p) => {
+           const refunded = Number(p.refundedKobo) || 0
+           const label = PAYMENT_STATUS_LABEL[String(p.status)] || ''
+           return `
+ <tr style="border-bottom: 1px solid #e5e7eb;">
+ <td style="padding: 6px 8px;">${escapeHtml(String(p.methodLabel || 'Payment'))}</td>
+ <td style="padding: 6px 8px;">${escapeHtml(label)}${
+             refunded > 0 && p.status !== 'refunded'
+               ? ` (${formatCurrency(refunded / 100)} refunded)`
+               : ''
+           }</td>
+ <td style="padding: 6px 8px; text-align: right;">${formatCurrency(
+   (Number(p.amountKobo) || 0) / 100
+ )}</td>
+ </tr>`
+         })
+         .join('')
+     : '<tr><td style="padding: 6px 8px;">No payments yet.</td></tr>'
+ }</tbody>
+ </table>
+ ${
+   balanceKobo !== null
+     ? `<p style="font-size: 14px; font-weight: bold; text-align: right;">${
+         balanceKobo > 0 ? `Balance due: ${formatCurrency(balanceKobo / 100)}` : 'Paid in full'
+       }</p>`
+     : ''
+ }`
+      : ''
+
   return `
  <!DOCTYPE html>
  <html>
@@ -71,7 +123,9 @@ export function generateReceiptEmailHTML(receiptData: Record<string, unknown>): 
  }
  </div>
  <p style="font-size: 14px;">Hi ${escapeHtml(String(receiptData.customerName || 'Customer'))},</p>
- <p style="font-size: 14px;">Please find your receipt attached.</p>
+ <p style="font-size: 14px;">${
+   opts.attached ? 'Please find your receipt attached.' : 'Here is your receipt.'
+ }</p>
  <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
  <thead>
  <tr style="border-bottom: 2px solid #333;">
@@ -85,7 +139,7 @@ export function generateReceiptEmailHTML(receiptData: Record<string, unknown>): 
  </table>
  <p style="font-size: 18px; font-weight: bold; text-align: right;">Total: ${formatCurrency(
    Number(receiptData.total) || 0
- )}</p>
+ )}</p>${paymentsHtml}
  <p style="font-size: 12px; color: #666;">Receipt #${escapeHtml(
    String(receiptData.receiptNumber || '')
  )} · ${formatDate(receiptData.date)}</p>

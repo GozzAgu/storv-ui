@@ -9,6 +9,7 @@ export type PaymentNotificationType =
   | 'payout_changed'
   | 'payment_link_sale_cancelled'
   | 'payment_link_problem'
+  | 'payment_received'
 
 interface NotifyInput {
   ownerId: string
@@ -163,6 +164,25 @@ export async function notifyLinkProblem(
     message,
     recipientUids: [scope.ownerId],
     metadata: { receiptId },
+  })
+}
+
+/** A verified link payment was confirmed: the owner and whoever created the link. */
+export async function notifyPaymentReceived(
+  db: Firestore,
+  scope: { ownerId: string; storeId: string },
+  input: { receiptId: string; receiptNumber: string; amountKobo: number; linkCreatorUid: string }
+): Promise<void> {
+  const recipients = [...new Set([scope.ownerId, input.linkCreatorUid].filter(Boolean))]
+  const label = input.receiptNumber ? `Sale ${input.receiptNumber}` : 'A sale'
+  await writeNotification(db, {
+    ...scope,
+    actorUid: 'system:paystack',
+    type: 'payment_received',
+    title: 'Payment received',
+    message: `${label}: ${formatNaira(input.amountKobo)} paid by payment link and confirmed by Paystack.`,
+    recipientUids: recipients,
+    metadata: { receiptId: input.receiptId },
   })
 }
 

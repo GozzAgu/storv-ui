@@ -52,6 +52,7 @@ export type NotificationType =
   | 'payment_rejected'
   | 'payment_link_sale_cancelled'
   | 'payment_link_problem'
+  | 'payment_received'
   | 'payout_changed'
   | 'till_count_difference'
 

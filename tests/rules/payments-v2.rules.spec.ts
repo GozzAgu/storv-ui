@@ -101,6 +101,7 @@ describe('firestore.rules: Payments V2', () => {
       'paymentLinkTokens/hash1',
       'paystackEvents/e1',
       'paymentAuditAnchors/a1',
+      'paymentsOpsAlerts/x1',
     ]
 
     it.each(serverOnlyDocs)('owner cannot write %s', async (path) => {
@@ -121,8 +122,10 @@ describe('firestore.rules: Payments V2', () => {
     it('top-level payment collections are unreadable from clients', async () => {
       await testEnv.withSecurityRulesDisabled(async (context) => {
         await setDoc(doc(context.firestore(), 'paymentLinkTokens/hash1'), { linkId: 'l1' })
+        await setDoc(doc(context.firestore(), 'paymentsOpsAlerts/x1'), { alert: 'a' })
       })
       await assertFails(getDoc(doc(as('owner1'), 'paymentLinkTokens/hash1')))
+      await assertFails(getDoc(doc(as('owner1'), 'paymentsOpsAlerts/x1')))
       await assertFails(
         getDoc(doc(testEnv.unauthenticatedContext().firestore(), 'paymentLinkTokens/hash1'))
       )

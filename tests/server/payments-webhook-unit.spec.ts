@@ -16,6 +16,7 @@ const ok = (over: Record<string, unknown> = {}) => ({
   paid_at: '2026-10-09T10:00:00.000Z',
   fees: 250,
   subaccount: { subaccount_code: 'ACCT_test1' },
+  customer: { email: 'Payer@Example.com' },
   ...over,
 })
 
@@ -30,8 +31,16 @@ describe('checkVerifiedCharge', () => {
         channel: 'card',
         paidAt: '2026-10-09T10:00:00.000Z',
         feesKobo: 250,
+        payerEmail: 'payer@example.com',
       },
     })
+  })
+
+  it('drops a payer email that does not look like an address', () => {
+    for (const customer of [{ email: 'x<script>@a.co' }, { email: 5 }, null, {}]) {
+      const res = checkVerifiedCharge(ok({ customer }), EXPECTED)
+      expect(res).toMatchObject({ ok: true, charge: { payerEmail: null } })
+    }
   })
 
   it.each([

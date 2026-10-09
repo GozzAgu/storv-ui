@@ -14,6 +14,17 @@ export interface VerifiedCharge {
   channel: string
   paidAt: string
   feesKobo: number | null
+  /** `customer.email` for the one payer receipt. Never stored or logged. */
+  payerEmail: string | null
+}
+
+const PAYER_EMAIL = /^[^\s@<>()[\]\\,;:"]{1,64}@[A-Za-z0-9.-]{1,190}\.[A-Za-z]{2,24}$/
+
+function payerEmailOf(customer: unknown): string | null {
+  const email = (customer as { email?: unknown } | null)?.email
+  if (typeof email !== 'string') return null
+  const trimmed = email.trim().toLowerCase()
+  return PAYER_EMAIL.test(trimmed) ? trimmed : null
 }
 
 export type VerifyFailure =
@@ -93,6 +104,7 @@ export function checkVerifiedCharge(raw: unknown, expected: ExpectedCharge): Ver
       channel: typeof data.channel === 'string' ? data.channel.slice(0, 40) : 'unknown',
       paidAt: paidAt && !Number.isNaN(Date.parse(paidAt)) ? new Date(paidAt).toISOString() : '',
       feesKobo: typeof fees === 'number' && Number.isSafeInteger(fees) ? fees : null,
+      payerEmail: payerEmailOf(data.customer),
     },
   }
 }

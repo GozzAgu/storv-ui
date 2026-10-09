@@ -11,6 +11,10 @@ import { legacyPaymentLinksEnabled } from '~/server/utils/legacy-payment-links'
 import { getPaymentsV2Gate } from '~/server/utils/payments/config'
 import { handleLinkCharge } from '~/server/utils/payments/link-webhook'
 import { isLinkReference, webhookIpAllowed } from '~/server/utils/payments/webhook-guard'
+import { opsAlertDepsFromEnv } from '~/server/utils/payments/ops-alert'
+import { isResendConfigured } from '~/server/utils/delivery-config'
+import { sendReceiptEmail } from '~/server/utils/receipt-delivery-email'
+import { sendViaResend } from '~/server/utils/staff-invite-email'
 import {
   applySubscriptionToUser,
   cancelAutoRenewForUser,
@@ -96,10 +100,16 @@ export default defineEventHandler(async (event) => {
       return { error: 'Not allowed' }
     }
     const gate = await getPaymentsV2Gate()
+    const emailReady = isResendConfigured()
     const result = await handleLinkCharge(adminDb, data.reference, {
       enabled: gate.enabled,
       paystack: (path, init) =>
         paystackRequest(path, { method: init.method, body: init.body, secretKey }),
+      sendPayerReceipt: emailReady
+        ? (toEmail, view) =>
+            sendReceiptEmail({ toEmail, view, caption: 'Thank you, your payment was received.' })
+        : undefined,
+      alerts: opsAlertDepsFromEnv(emailReady ? sendViaResend : undefined),
     })
     setResponseStatus(event, result.httpStatus)
     return { received: result.httpStatus === 200 }

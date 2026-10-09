@@ -1,6 +1,6 @@
 # Payments V2 rollback
 
-Status: Step 4 version (adds the payment-link webhook: verify, confirm and stock commit).
+Status: Step 5 version (adds payer receipts, "Payment received" notifications and ops alerts).
 Extend it at every step that adds routes, UI or jobs.
 
 ## Switch it off
@@ -31,6 +31,8 @@ Nothing else is needed. No data is deleted or rewritten by switching off.
 | Payment, event and audit documents                                | Kept, read-only to the owner (and `payments.view` holders)                                                                                                                                                                                |
 | Paystack subaccount money already settled                         | Unaffected: it sits in the merchant's bank account                                                                                                                                                                                        |
 | Legacy payment links                                              | Still 410 unless `LEGACY_PAYMENT_LINKS_ENABLED=1` (separate decision). Their webhook settlement also only runs with that flag; otherwise it logs `legacy-link-charge-ignored`                                                             |
+| Receipt email and WhatsApp sending                                | Not behind the flag: always built from the stored receipt with checked attachments (Step 5 security fix). V2 sales keep showing their server payment lines                                                                                |
+| Payer receipt emails and ops alert emails                         | Only sent by the link webhook and audit cron, which do nothing while off                                                                                                                                                                  |
 | Subscription billing                                              | Unaffected (separate code path; pinned tests run every step)                                                                                                                                                                              |
 | New sales while off                                               | Recorded the pre-V2 way (amounts on the receipt); no `paymentsV2` marker, so they never show V2 controls later                                                                                                                            |
 | V2 sales (`paymentsV2` marker or `paymentSummary`) while off      | Sale drawer shows the plain total. Refund and cancel on a sale with `paymentSummary` are refused up front (before any stock moves); wait for V2 or edit with the Admin SDK                                                                |

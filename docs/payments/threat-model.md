@@ -325,6 +325,27 @@ Closed in 2b (see 6c).
   otherwise it is logged and ignored. `scripts/payments/report-legacy-payment-links.mjs` is a
   read-only count (doc IDs are pay tokens, so it prints SHA-256 fingerprints only).
 
+## 6f. Delivered in Step 5 (receipts, notifications, alerts)
+
+- Receipt sending fix (found in Step 5, Medium): `/api/receipts/send-email` and `/deliver` no
+  longer use receipt content from the browser. The email body is built on the server from the
+  stored receipt (`buildReceiptView`); the sender caption is escaped and capped at 500
+  characters; attachments must be a real PDF or image by file signature (send-email: PDF only),
+  at most 12 MB, with a server-set filename. Applies to every receipt, not only V2.
+- V2 sales: emails carry server payment lines (confirmed, awaiting confirmation, refunded) and the
+  balance from `paymentSummary`, and the browser-made PDF is not attached. WhatsApp still needs a
+  file from the browser, so the server adds its own status line ("Balance due …" / "Paid in
+  full") to the caption.
+- Payer receipt: one email after a confirmed link payment, to `customer.email` from Paystack's
+  verify response. The address is used once and never stored or logged; the attempt records only
+  the outcome (`sent` / `failed` / `skipped` / `no_address`), claimed in a transaction so replays
+  and parallel deliveries send once. A cancelled sale gets none.
+- "Payment received" notification to the owner and the link's creator (no customer data); late,
+  repeated or stock-problem payments get the owner-only problem notice instead.
+- Ops alerts (`PAYMENTS_ALERT_EMAIL`): broken audit chain (daily, per store) and link verify
+  mismatches, unknown references, link/attempt mismatches and apply failures. Deduplicated in
+  `paymentsOpsAlerts` (rules deny all); always logged as `payments-alert`.
+
 ## 7. Residual risks and open items
 
 | Risk | Status | Owner |
@@ -334,6 +355,9 @@ Closed in 2b (see 6c).
 | Which verify-response field carries subaccount and split amount | Built expecting `data.subaccount.subaccount_code`; fails closed otherwise. Confirm with one test-mode payment before live | Eng |
 | A customer charged with fees passed on (`amount` above the link) is not confirmed | Accepted: goes to owner review; not used today | Product |
 | Refund and dispute webhooks are not handled | Open: later step | Eng |
+| Receipt email has no monthly quota (20 a minute per account); a free account can still email its own receipt (escaped text) to any address | Accepted for now; consider a daily cap | Product |
+| WhatsApp receipt file for a V2 sale is still made in the browser | Mitigated: server status line in the caption; a server-rendered file is a follow-up | Eng |
+| Ops alerts email only when `PAYMENTS_ALERT_EMAIL` and Resend are set | Open: set it before switching V2 on | Ops |
 | Sales are created in the browser; a malicious cashier can create a sale with a low total | Accepted for now; locked once a payment exists | Eng (follow-up) |
 | In-store stock decrement is not in a server transaction | Accepted; follow-up after Step 5 | Eng |
 | Direct Firestore access never requires two-factor | Accepted; follow-up | Eng |

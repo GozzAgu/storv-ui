@@ -11,14 +11,18 @@ import {
   createPaymentLink,
   expireDueLinks,
   LINKS_COLLECTION,
+  readReturnStatus,
   revokePaymentLink,
   startCheckout,
 } from '~/server/utils/payments/links'
+import { OPS_ALERTS_COLLECTION } from '~/server/utils/payments/ops-alert'
+import { buildReceiptView, type ReceiptView } from '~/server/utils/receipt-view'
 import { PAYOUTS_COLLECTION, payoutDocId, type PaystackCall } from '~/server/utils/payments/payout'
 
 const ORIGIN = 'https://app.example.test'
 const ENV = { PAYMENTS_V2_LINK_PLANS: 'all' } as NodeJS.ProcessEnv
 const SUBACCOUNT = 'ACCT_test1'
+const PAYER_EMAIL = 'payer.private@example.com'
 
 type VerifyOverride = Record<string, unknown> | ((ref: string) => unknown)
 
@@ -113,6 +117,7 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('Payments V2 webhook (emul
         paid_at: new Date().toISOString(),
         fees: 150,
         subaccount: { subaccount_code: SUBACCOUNT },
+        customer: { email: PAYER_EMAIL },
         ...override,
       }
     }) as unknown as PaystackCall & ReturnType<typeof vi.fn>
@@ -420,5 +425,216 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('Payments V2 webhook (emul
     expect((await item(s, 'i2')).quantity).toBe(3)
     expect((await notifications(s))[0]!.message).toContain('paid twice')
     await expectChainOk(s.ownerId)
+  })
+
+  describe('Step 5: receipts, notifications and alerts', () => {
+    const attemptData = async (linkId: string, ref: string) =>
+      (
+        await db.collection(LINKS_COLLECTION).doc(linkId).collection('attempts').doc(ref).get()
+      ).data()!
+    const received = async (s: { store: FirebaseFirestore.DocumentReference }) =>
+      (
+        await s.store.collection('notifications').where('type', '==', 'payment_received').get()
+      ).docs.map((d) => d.data())
+    /** Every server document this payment touched, to prove the payer's address was not kept. */
+    async function everythingFor(s: Awaited<ReturnType<typeof seed>>, linkId: string, ref: string) {
+      const docs = await Promise.all([
+        db.collection(LINKS_COLLECTION).doc(linkId).get(),
+        db.collection(LINKS_COLLECTION).doc(linkId).collection('attempts').get(),
+        db.collection(PAYSTACK_EVENTS_COLLECTION).doc(`charge.success_${ref}`).get(),
+        s.store.collection('payments').get(),
+        s.store.collection('receipts').get(),
+        s.store.collection('notifications').get(),
+        s.store.collection('paymentEvents').get(),
+        s.store.collection('activityLogs').get(),
+      ])
+      return JSON.stringify(docs.map((d) => ('docs' in d ? d.docs.map((x) => x.data()) : d.data())))
+    }
+
+    it('emails the payer one server-built receipt and never stores the address', async () => {
+      const s = await seed()
+      const { link, refs } = await linkWithCheckout(s)
+      const sendPayerReceipt = vi.fn(async (_to: string, _view: ReceiptView) => undefined)
+      const deps = { paystack: paystackMock(link.amountKobo), enabled: true, sendPayerReceipt }
+
+      await Promise.all(Array.from({ length: 5 }, () => handleLinkCharge(db, refs[0], deps)))
+      await handleLinkCharge(db, refs[0], deps)
+
+      expect(sendPayerReceipt).toHaveBeenCalledTimes(1)
+      const [to, view] = sendPayerReceipt.mock.calls[0]!
+      expect(to).toBe(PAYER_EMAIL)
+      expect(view).toMatchObject({
+        receiptNumber: 'R-1',
+        storeName: 'Main Shop',
+        v2: true,
+        balanceDueKobo: 0,
+        payments: [{ methodLabel: 'Payment link', amountKobo: 10_000, status: 'confirmed' }],
+      })
+      expect((await attemptData(link.linkId, refs[0]!)).payerReceipt).toMatchObject({
+        status: 'sent',
+      })
+      expect(await everythingFor(s, link.linkId, refs[0]!)).not.toContain('payer.private')
+    })
+
+    it('records a failed payer email without failing the payment', async () => {
+      const s = await seed()
+      const { link, refs } = await linkWithCheckout(s)
+      const sendPayerReceipt = vi.fn(async () => {
+        throw new Error(`Resend rejected ${PAYER_EMAIL}`)
+      })
+      const res = await handleLinkCharge(db, refs[0], {
+        paystack: paystackMock(link.amountKobo),
+        enabled: true,
+        sendPayerReceipt,
+      })
+      expect(res).toEqual({ httpStatus: 200, outcome: 'applied' })
+      expect((await attemptData(link.linkId, refs[0]!)).payerReceipt).toMatchObject({
+        status: 'failed',
+      })
+      const logged = (console.error as unknown as ReturnType<typeof vi.fn>).mock.calls
+        .flat()
+        .join(' ')
+      expect(logged).toContain('payments-payer-receipt-failed')
+      expect(logged).not.toContain('payer.private')
+    })
+
+    it('sends no receipt when Paystack has no address, or when the sale was cancelled', async () => {
+      const s1 = await seed()
+      const a = await linkWithCheckout(s1)
+      const send = vi.fn(async () => undefined)
+      await handleLinkCharge(db, a.refs[0], {
+        paystack: paystackMock(a.link.amountKobo, { customer: {} }),
+        enabled: true,
+        sendPayerReceipt: send,
+      })
+      expect((await attemptData(a.link.linkId, a.refs[0]!)).payerReceipt).toMatchObject({
+        status: 'no_address',
+      })
+
+      const s2 = await seed()
+      const b = await linkWithCheckout(s2)
+      await revokePaymentLink(db, s2.cashier, { linkId: b.link.linkId, reason: 'gone' })
+      await handleLinkCharge(db, b.refs[0], {
+        paystack: paystackMock(b.link.amountKobo),
+        enabled: true,
+        sendPayerReceipt: send,
+      })
+      expect((await attemptData(b.link.linkId, b.refs[0]!)).payerReceipt).toMatchObject({
+        status: 'skipped',
+      })
+      expect(send).not.toHaveBeenCalled()
+    })
+
+    it('tells the owner and the link creator a payment was received, with no customer details', async () => {
+      const s = await seed()
+      const { link, refs } = await linkWithCheckout(s)
+      await handleLinkCharge(db, refs[0], {
+        paystack: paystackMock(link.amountKobo),
+        enabled: true,
+      })
+      const notes = await received(s)
+      expect(notes).toHaveLength(1)
+      expect(notes[0]).toMatchObject({
+        title: 'Payment received',
+        recipientUids: [s.ownerId, 'cashier'],
+        metadata: { receiptId: 'r1' },
+      })
+      expect(notes[0]!.message).toContain('R-1')
+      expect(notes[0]!.message).toContain('₦100.00')
+    })
+
+    it('a late payment gets the problem notice, not "Payment received"', async () => {
+      const s = await seed()
+      const { link, refs } = await linkWithCheckout(s)
+      await revokePaymentLink(db, s.cashier, { linkId: link.linkId, reason: 'gone' })
+      await handleLinkCharge(db, refs[0], {
+        paystack: paystackMock(link.amountKobo),
+        enabled: true,
+      })
+      expect(await received(s)).toEqual([])
+      expect(await notifications(s)).toHaveLength(1)
+    })
+
+    it('webhook before the redirect: the return page already shows paid', async () => {
+      const s = await seed()
+      const { link, refs } = await linkWithCheckout(s)
+      expect((await readReturnStatus(db, refs[0])).status).toBe('pending')
+      await handleLinkCharge(db, refs[0], {
+        paystack: paystackMock(link.amountKobo),
+        enabled: true,
+      })
+      expect(await readReturnStatus(db, refs[0])).toEqual({
+        status: 'paid',
+        storeName: 'Main Shop',
+      })
+    })
+
+    it('the server receipt shows only payments a customer should see', async () => {
+      const s = await seed()
+      const pay = (id: string, status: string, amountKobo: number) =>
+        s.store
+          .collection('payments')
+          .doc(id)
+          .set({
+            receiptId: 'r1',
+            kind: 'manual_transfer',
+            methodLabel: `Transfer ${id}`,
+            amountKobo,
+            status,
+            refundedKobo: 0,
+          })
+      await Promise.all([
+        pay('p1', 'confirmed', 4_000),
+        pay('p2', 'awaiting_confirmation', 3_000),
+        pay('p3', 'pending', 3_000),
+        pay('p4', 'rejected', 9_000),
+      ])
+      await s.store
+        .collection('receipts')
+        .doc('r1')
+        .update({
+          paymentSummary: { balanceKobo: 3_000 },
+          payments: [{ amount: 999, method: 'Forged by browser' }],
+        })
+      const receipt = (await s.store.collection('receipts').doc('r1').get()).data()!
+      const view = await buildReceiptView(db, s.ownerId, 's1', 'r1', receipt)
+      expect(view.v2).toBe(true)
+      expect(view.payments.map((p) => [p.methodLabel, p.status])).toEqual(
+        expect.arrayContaining([
+          ['Transfer p1', 'confirmed'],
+          ['Transfer p2', 'awaiting_confirmation'],
+        ])
+      )
+      expect(view.payments).toHaveLength(2)
+      expect(view.balanceDueKobo).toBe(3_000)
+      expect(JSON.stringify(view)).not.toContain('Forged')
+
+      await s.store.collection('receipts').doc('r1').update({ paymentSummary: null })
+      const legacy = await buildReceiptView(db, s.ownerId, 's1', 'r1', {
+        ...receipt,
+        paymentSummary: null,
+      })
+      expect(legacy).toMatchObject({ v2: false, payments: [], balanceDueKobo: null })
+    })
+
+    it('emails ops once per problem, with no customer data', async () => {
+      const s = await seed()
+      const { link, refs } = await linkWithCheckout(s)
+      const sendEmail = vi.fn(async () => undefined)
+      const deps = {
+        paystack: paystackMock(link.amountKobo, { amount: 1 }),
+        enabled: true,
+        alerts: { to: 'ops@storvv.test', sendEmail },
+      }
+      await handleLinkCharge(db, refs[0], deps)
+      await handleLinkCharge(db, refs[0], deps)
+      expect(sendEmail).toHaveBeenCalledTimes(1)
+      const mail = (sendEmail.mock.calls[0] as unknown as [{ subject: string; html: string }])[0]
+      expect(mail.subject).toBe('[Storvv payments] link-verify-failed')
+      expect(mail.html).toContain('AMOUNT_MISMATCH')
+      expect(mail.html).not.toContain('payer.private')
+      const records = await db.collection(OPS_ALERTS_COLLECTION).where('key', '==', refs[0]).get()
+      expect(records.size).toBe(1)
+    })
   })
 })

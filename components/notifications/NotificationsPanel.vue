@@ -196,6 +196,7 @@ function getTone(notification: Notification): Tone {
   )
     return 'warning'
   if (type === 'payment_awaiting_confirmation') return 'accent'
+  if (type === 'payment_received') return 'success'
   if (type.endsWith('_deleted') || type === 'receipt_refunded') return 'warning'
   if (type.startsWith('receipt') || type === 'lead_converted') return 'success'
   if (type.startsWith('lead') || type === 'storefront_inquiry') return 'accent'
@@ -251,6 +252,7 @@ async function handleNotificationClick(notification: Notification) {
       (notification.type === 'payment_awaiting_confirmation' ||
         notification.type === 'payment_rejected' ||
         notification.type === 'payment_link_problem' ||
+        notification.type === 'payment_received' ||
         notification.type === 'payment_link_sale_cancelled') &&
       meta.receiptId
     ) {

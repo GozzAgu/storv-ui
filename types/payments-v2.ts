@@ -167,6 +167,11 @@ export interface PaymentLinkAttempt {
   paidAt?: string
   feesKobo?: number | null
   verifiedAt?: string
+  /** One automatic receipt email to the payer; the address itself is never stored. */
+  payerReceipt?: {
+    status: 'sending' | 'sent' | 'failed' | 'skipped' | 'no_address'
+    at: string
+  }
 }
 
 export type PaystackEventState = 'received' | 'processed' | 'failed_retryable' | 'failed_permanent'

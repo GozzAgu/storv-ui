@@ -2,11 +2,18 @@ import { defineEventHandler } from 'h3'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
 import { requireCronAuth } from '~/server/utils/cron-auth'
 import { getPaymentsV2Gate } from '~/server/utils/payments/config'
-import { createDailyAnchor, verifyStoreAuditChain } from '~/server/utils/payments/audit-log'
+import {
+  createDailyAnchor,
+  utcDateKey,
+  verifyStoreAuditChain,
+} from '~/server/utils/payments/audit-log'
+import { opsAlert, opsAlertDepsFromEnv } from '~/server/utils/payments/ops-alert'
+import { sendViaResend } from '~/server/utils/staff-invite-email'
 
 /**
  * Daily (Vercel Cron): verify each store's payment audit chain, then anchor its head.
- * A broken chain is logged as `payments-audit-verify-failed` and not anchored.
+ * A broken chain is logged as `payments-audit-verify-failed`, alerted to ops once a day per
+ * store, and not anchored.
  */
 export default defineEventHandler(async (event) => {
   requireCronAuth(event)
@@ -14,6 +21,7 @@ export default defineEventHandler(async (event) => {
   if (!gate.enabled) return { skipped: true }
 
   const db = getAdminFirestore()
+  const alertDeps = opsAlertDepsFromEnv(sendViaResend)
   const heads = await db.collectionGroup('paymentAudit').get()
   let anchored = 0
   let broken = 0
@@ -35,6 +43,18 @@ export default defineEventHandler(async (event) => {
           storeId,
           firstBreak: result.firstBreak,
         })
+      )
+      await opsAlert(
+        db,
+        'audit-chain-broken',
+        `${ownerId}_${storeId}_${utcDateKey()}`,
+        {
+          ownerId,
+          storeId,
+          breakSeq: result.firstBreak.seq,
+          breakReason: result.firstBreak.reason,
+        },
+        alertDeps
       )
       continue
     }

@@ -10,7 +10,17 @@ export interface ReceiptAccessParams {
   receiptNumber?: string
 }
 
-export async function assertReceiptDeliveryAccess(params: ReceiptAccessParams): Promise<void> {
+export interface ReceiptAccess {
+  ownerUserId: string
+  storeId: string
+  receiptId: string
+  /** The stored receipt; delivery content is built from this, never from the request. */
+  receipt: Record<string, unknown>
+}
+
+export async function assertReceiptDeliveryAccess(
+  params: ReceiptAccessParams
+): Promise<ReceiptAccess> {
   const ownerUserId = params.ownerUserId.trim()
   const storeId = params.storeId.trim()
   const receiptId = params.receiptId.trim()
@@ -38,7 +48,10 @@ export async function assertReceiptDeliveryAccess(params: ReceiptAccessParams): 
     throw createError({ statusCode: 404, message: 'Receipt not found' })
   }
 
-  const receipt = receiptSnap.data() as { storeId?: string; receiptNumber?: string }
+  const receipt = receiptSnap.data() as Record<string, unknown> & {
+    storeId?: string
+    receiptNumber?: string
+  }
   if (receipt.storeId && receipt.storeId !== storeId) {
     throw createError({ statusCode: 409, message: 'Receipt store mismatch' })
   }
@@ -51,4 +64,6 @@ export async function assertReceiptDeliveryAccess(params: ReceiptAccessParams): 
   ) {
     throw createError({ statusCode: 409, message: 'Receipt number mismatch' })
   }
+
+  return { ownerUserId, storeId, receiptId, receipt }
 }

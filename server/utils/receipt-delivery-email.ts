@@ -1,12 +1,32 @@
-import { generateReceiptEmailHTML } from '~/server/utils/receipt-email-html'
+import { escapeHtml, generateReceiptEmailHTML } from '~/server/utils/receipt-email-html'
 import { getResendConfig, isResendConfigured } from '~/server/utils/delivery-config'
+import type { ReceiptView } from '~/server/utils/receipt-view'
 
 export { isResendConfigured }
 
+const MAX_CAPTION = 500
+
+/** Plain text only: the caption is typed by the sender and lands in an email from Storvv's domain. */
+export function safeCaptionHtml(caption: string | undefined, fallback: string): string {
+  const text = (caption ?? '').trim().slice(0, MAX_CAPTION) || fallback
+  return escapeHtml(text).replace(/'/g, '&#39;')
+}
+
+function safeShareLink(url: string | undefined): string {
+  if (!url) return ''
+  try {
+    const parsed = new URL(url)
+    if (parsed.protocol !== 'https:') return ''
+    return `<p><a href="${escapeHtml(parsed.toString())}">View your receipt online</a></p>`
+  } catch {
+    return ''
+  }
+}
+
 export async function sendReceiptEmail(params: {
   toEmail: string
-  receiptNumber: string
-  receiptData: Record<string, unknown>
+  /** Built on the server from stored data (buildReceiptView); never the browser's copy. */
+  view: ReceiptView
   attachmentBuffer?: Buffer
   attachmentFilename?: string
   attachmentMimeType?: string
@@ -20,32 +40,31 @@ export async function sendReceiptEmail(params: {
     )
   }
 
-  const storeName = String(
-    params.receiptData.businessName ||
-      params.receiptData.storeName ||
-      params.receiptData.name ||
-      'Store'
+  const attached = Boolean(params.attachmentBuffer && params.attachmentFilename)
+  const view = params.view
+  const html = generateReceiptEmailHTML(view as unknown as Record<string, unknown>, { attached })
+  const subject = `Your receipt #${view.receiptNumber || 'receipt'} from ${view.storeName}`.replace(
+    /[\r\n]+/g,
+    ' '
   )
-  const html = generateReceiptEmailHTML(params.receiptData)
-  const subject = `Your receipt #${params.receiptNumber} from ${storeName}`
 
-  const intro = params.caption?.trim() || 'Please find your receipt below.'
-  const linkBlock = params.shareUrl
-    ? `<p><a href="${params.shareUrl}">View your receipt online</a></p>`
-    : ''
+  const intro = safeCaptionHtml(
+    params.caption,
+    attached ? 'Please find your receipt attached.' : 'Here is your receipt.'
+  )
 
   const body: Record<string, unknown> = {
     from,
     to: [params.toEmail.trim().toLowerCase()],
     subject,
-    html: `<p>${intro}</p>${linkBlock}${html}`,
+    html: `<p>${intro}</p>${safeShareLink(params.shareUrl)}${html}`,
   }
 
-  if (params.attachmentBuffer && params.attachmentFilename) {
+  if (attached) {
     body.attachments = [
       {
         filename: params.attachmentFilename,
-        content: params.attachmentBuffer.toString('base64'),
+        content: params.attachmentBuffer!.toString('base64'),
       },
     ]
   }
@@ -63,26 +82,4 @@ export async function sendReceiptEmail(params: {
     const err = (await response.json().catch(() => ({}))) as { message?: string }
     throw new Error(err.message || `Email send failed (${response.status})`)
   }
-}
-
-export async function sendReceiptAttachmentEmail(params: {
-  toEmail: string
-  receiptNumber: string
-  receiptData: Record<string, unknown>
-  attachmentBuffer: Buffer
-  attachmentFilename: string
-  attachmentMimeType: string
-  caption?: string
-  shareUrl?: string
-}): Promise<void> {
-  await sendReceiptEmail({
-    toEmail: params.toEmail,
-    receiptNumber: params.receiptNumber,
-    receiptData: params.receiptData,
-    attachmentBuffer: params.attachmentBuffer,
-    attachmentFilename: params.attachmentFilename,
-    attachmentMimeType: params.attachmentMimeType,
-    caption: params.caption,
-    shareUrl: params.shareUrl,
-  })
 }

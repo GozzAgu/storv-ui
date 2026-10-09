@@ -8,11 +8,13 @@ import type {
 } from '~/types/payments-v2'
 import { PAYMENTS_V2_CURRENCY } from '~/utils/money-kobo'
 import { computePaymentSummary } from '~/utils/payment-summary'
-import type { AuditEventInput } from './audit-log'
+import { buildReceiptView, type ReceiptView } from '~/server/utils/receipt-view'
+import { storeDocRef, type AuditEventInput } from './audit-log'
 import { parseCheckoutReference } from './link-token'
 import { LINKS_COLLECTION } from './links'
 import { isOversold, planStockCommit, type StockIssue } from './link-stock'
-import { notifyLinkProblem } from './notify'
+import { notifyLinkProblem, notifyPaymentReceived } from './notify'
+import { opsAlert, type OpsAlertDeps } from './ops-alert'
 import type { PaystackCall } from './payout'
 import { checkVerifiedCharge, type VerifiedCharge, type VerifyFailure } from './paystack-verify'
 import {
@@ -55,6 +57,10 @@ export interface LinkChargeDeps {
   /** Payments V2 gate; when off the event is kept retryable so nothing is lost. */
   enabled: boolean
   now?: () => Date
+  /** Sends the payer's receipt; omitted when email delivery is not configured. */
+  sendPayerReceipt?: (toEmail: string, view: ReceiptView) => Promise<void>
+  /** Ops email for problems a person must check; without it they are logged only. */
+  alerts?: OpsAlertDeps
 }
 
 const eventDocId = (type: string, reference: string) => `${type}_${reference}`
@@ -319,6 +325,57 @@ async function markAttemptPaid(db: Firestore, linkId: string, charge: VerifiedCh
     )
 }
 
+type PayerReceiptStatus = NonNullable<PaymentLinkAttempt['payerReceipt']>['status']
+
+/**
+ * One receipt email to the payer, built from stored data, to the address in Paystack's verify
+ * response. The address is used here and dropped: only the outcome is stored on the attempt,
+ * which is claimed first so a second run never sends again. A cancelled sale gets none.
+ * Never throws: the payment is already applied.
+ */
+async function sendPayerReceiptOnce(
+  db: Firestore,
+  link: PaymentLinkV2,
+  linkId: string,
+  charge: VerifiedCharge,
+  deps: LinkChargeDeps
+): Promise<void> {
+  if (!deps.sendPayerReceipt) return
+  const attemptRef = db
+    .collection(LINKS_COLLECTION)
+    .doc(linkId)
+    .collection('attempts')
+    .doc(charge.reference)
+  const stamp = () => (deps.now ? deps.now() : new Date()).toISOString()
+  const finish = (status: PayerReceiptStatus) =>
+    attemptRef.update({ payerReceipt: { status, at: stamp() } })
+  try {
+    const claimed = await db.runTransaction(async (tx) => {
+      const attempt = (await tx.get(attemptRef)).data() as PaymentLinkAttempt | undefined
+      if (!attempt || attempt.payerReceipt) return false
+      tx.update(attemptRef, { payerReceipt: { status: 'sending', at: stamp() } })
+      return true
+    })
+    if (!claimed) return
+    if (!charge.payerEmail) return void (await finish('no_address'))
+    const receipt = (
+      await storeDocRef(db, link.ownerId, link.storeId)
+        .collection('receipts')
+        .doc(link.receiptId)
+        .get()
+    ).data()
+    if (!receipt || receipt.status === 'cancelled') return void (await finish('skipped'))
+    const view = await buildReceiptView(db, link.ownerId, link.storeId, link.receiptId, receipt)
+    await deps.sendPayerReceipt(charge.payerEmail, view)
+    await finish('sent')
+  } catch {
+    console.error(
+      JSON.stringify({ tag: 'payments-payer-receipt-failed', reference: charge.reference })
+    )
+    await finish('failed').catch(() => undefined)
+  }
+}
+
 const VERIFY_PROBLEM_TEXT: Partial<Record<VerifyFailure, string>> = {
   AMOUNT_MISMATCH: 'the amount paid did not match the link',
   CURRENCY_MISMATCH: 'the currency was not NGN',
@@ -343,6 +400,8 @@ export async function handleLinkCharge(
   const parsed = parseCheckoutReference(rawReference)
   if (!parsed) return { httpStatus: 200, outcome: 'unknown_reference' }
   const { linkId, reference } = parsed
+  const alert = (name: string, fields: Record<string, string | number | null> = {}) =>
+    opsAlert(db, name, reference, { reference, ...fields }, deps.alerts)
   const eventRef = db
     .collection(PAYSTACK_EVENTS_COLLECTION)
     .doc(eventDocId('charge.success', reference))
@@ -365,7 +424,7 @@ export async function handleLinkCharge(
   const attempt = attemptSnap.data() as PaymentLinkAttempt | undefined
   if (!link || !attempt) {
     await finishEvent(eventRef, 'failed_permanent', 'unknown_reference', now())
-    alertLog({ alert: 'link-charge-unknown-reference', reference })
+    await alert('link-charge-unknown-reference')
     return { httpStatus: 200, outcome: 'unknown_reference' }
   }
 
@@ -388,12 +447,12 @@ export async function handleLinkCharge(
   if (!check.ok) {
     const state = check.retryable ? 'failed_retryable' : 'failed_permanent'
     await finishEvent(eventRef, state, `verify_failed:${check.code}`, now())
-    alertLog({
-      alert: 'link-verify-failed',
-      reference,
-      code: check.code,
-      paystackStatus: check.paystackStatus,
-    })
+    const fields = { code: check.code, paystackStatus: check.paystackStatus }
+    if (check.retryable || check.code === 'NOT_SUCCESSFUL') {
+      alertLog({ alert: 'link-verify-failed', reference, ...fields })
+    } else {
+      await alert('link-verify-failed', fields)
+    }
     if (!check.retryable) {
       if (check.code === 'NOT_SUCCESSFUL') {
         await linkRef
@@ -417,7 +476,7 @@ export async function handleLinkCharge(
   // The stored attempt is what checkout sent; the link must still agree with it.
   if (attempt.subaccountCode !== link.subaccountCode || attempt.amountKobo !== link.amountKobo) {
     await finishEvent(eventRef, 'failed_permanent', 'verify_failed:LINK_MISMATCH', now())
-    alertLog({ alert: 'link-attempt-mismatch', reference })
+    await alert('link-attempt-mismatch')
     return { httpStatus: 200, outcome: 'verify_failed' }
   }
 
@@ -431,7 +490,19 @@ export async function handleLinkCharge(
         link.receiptNumber,
         lateMessage(applied)
       )
+    } else {
+      await notifyPaymentReceived(
+        db,
+        { ownerId: link.ownerId, storeId: link.storeId },
+        {
+          receiptId: link.receiptId,
+          receiptNumber: link.receiptNumber,
+          amountKobo: check.charge.amountKobo,
+          linkCreatorUid: link.createdBy,
+        }
+      )
     }
+    await sendPayerReceiptOnce(db, link, linkId, check.charge, deps)
     return { httpStatus: 200, outcome: applied.late ? 'applied_late' : 'applied' }
   } catch (err) {
     if (err instanceof ApplyRedirect && err.kind === 'already') {
@@ -462,7 +533,7 @@ export async function handleLinkCharge(
         `apply_failed:${code}`,
         now()
       )
-      alertLog({ alert: 'link-apply-failed', reference, code })
+      await alert('link-apply-failed', { code })
       if (permanent) {
         await notifyLinkProblem(
           db,

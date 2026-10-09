@@ -952,6 +952,10 @@ service cloud.firestore {
     match /paymentAuditAnchors/{anchorId} {
       allow read, write: if false;
     }
+
+    match /paymentsOpsAlerts/{alertId} {
+      allow read, write: if false;
+    }
     
     // Deny all other access by default
     match /{document=**} {

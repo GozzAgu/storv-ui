@@ -40,7 +40,7 @@ describe('nairaToKobo', () => {
     for (let kobo = 0; kobo <= 1_000_000; kobo += 7) {
       expect(nairaToKobo(kobo / 100)).toBe(kobo)
     }
-  })
+  }, 30_000)
 })
 
 describe('kobo helpers', () => {

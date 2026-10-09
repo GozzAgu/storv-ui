@@ -2,11 +2,15 @@ import { createError, defineEventHandler, readBody } from 'h3'
 import { requireAuth } from '~/server/utils/store-auth'
 import { detectContactChannel, isValidContactEmail } from '~/utils/contact-detect'
 import { normalizeWhatsAppPhone } from '~/utils/whatsapp'
-import { sendReceiptAttachmentEmail } from '~/server/utils/receipt-delivery-email'
+import { sendReceiptEmail } from '~/server/utils/receipt-delivery-email'
 import { isResendConfigured } from '~/server/utils/delivery-config'
+import { getAdminFirestore } from '~/server/utils/firebase-admin'
 import { isWhatsAppCloudConfigured, sendWhatsAppCloudMedia } from '~/server/utils/whatsapp-cloud'
 import { assertWhatsAppSendAllowed, incrementWhatsAppUsage } from '~/server/utils/whatsapp-usage'
 import { assertReceiptDeliveryAccess } from '~/server/utils/receipt-access'
+import { checkReceiptAttachment } from '~/server/utils/receipt-attachment'
+import { buildReceiptView, type ReceiptView } from '~/server/utils/receipt-view'
+import { formatNaira } from '~/server/utils/payments/records'
 import { assertRateLimit } from '~/server/utils/rate-limit'
 
 interface DeliverBody {
@@ -19,7 +23,18 @@ interface DeliverBody {
   attachmentFilename?: string
   caption?: string
   receiptNumber?: string
+  /** Ignored: content is built from the stored receipt. Kept for older clients. */
   receiptData?: Record<string, unknown>
+}
+
+const MAX_CAPTION = 500
+
+/** Server-written status for a Payments V2 sale, so a sent file cannot be the only word on it. */
+function v2StatusLine(view: ReceiptView): string {
+  if (!view.v2 || view.balanceDueKobo === null) return ''
+  const awaiting = view.payments.some((p) => p.status === 'awaiting_confirmation')
+  if (view.balanceDueKobo > 0) return `Balance due: ${formatNaira(view.balanceDueKobo)}`
+  return awaiting ? 'Paid (some payments awaiting confirmation)' : 'Paid in full'
 }
 
 export default defineEventHandler(async (event) => {
@@ -34,25 +49,14 @@ export default defineEventHandler(async (event) => {
   const body = await readBody<DeliverBody>(event)
 
   const contact = body.contact?.trim()
-  const attachmentBase64 = body.attachmentBase64
-  const attachmentMimeType = body.attachmentMimeType?.trim()
-  const attachmentFilename = body.attachmentFilename?.trim()
-  const receiptNumber = body.receiptNumber?.trim() || 'receipt'
-
   if (!contact) {
     throw createError({ statusCode: 400, message: 'contact (phone or email) is required' })
   }
-  if (!attachmentBase64 || typeof attachmentBase64 !== 'string') {
+  if (!body.attachmentBase64 || typeof body.attachmentBase64 !== 'string') {
     throw createError({ statusCode: 400, message: 'attachmentBase64 is required' })
   }
-  if (!attachmentMimeType || !attachmentFilename) {
-    throw createError({
-      statusCode: 400,
-      message: 'attachmentMimeType and attachmentFilename are required',
-    })
-  }
 
-  await assertReceiptDeliveryAccess({
+  const access = await assertReceiptDeliveryAccess({
     authUid: auth.uid,
     ownerUserId: body.ownerUserId || '',
     storeId: body.storeId || '',
@@ -65,16 +69,17 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'Enter a valid email address or phone number' })
   }
 
-  const buffer = Buffer.from(attachmentBase64, 'base64')
-  if (buffer.length === 0) {
-    throw createError({ statusCode: 400, message: 'Attachment is empty' })
-  }
-  if (buffer.length > 12 * 1024 * 1024) {
-    throw createError({ statusCode: 400, message: 'Attachment is too large (max 12MB)' })
-  }
-
-  const caption = body.caption?.trim()
-  const receiptData = body.receiptData || {}
+  const view = await buildReceiptView(
+    getAdminFirestore(),
+    access.ownerUserId,
+    access.storeId,
+    access.receiptId,
+    access.receipt
+  )
+  const attachment = checkReceiptAttachment(body.attachmentBase64, view.receiptNumber)
+  const statusLine = v2StatusLine(view)
+  const userCaption = (body.caption ?? '').trim().slice(0, MAX_CAPTION)
+  const caption = [userCaption, statusLine].filter(Boolean).join('\n') || undefined
 
   await assertWhatsAppSendAllowed(auth.uid)
 
@@ -89,14 +94,15 @@ export default defineEventHandler(async (event) => {
           'Email sending is not configured on the server. Add RESEND_API_KEY and RESEND_FROM_EMAIL, or send to a WhatsApp number instead.',
       })
     }
-    await sendReceiptAttachmentEmail({
+    // A V2 sale's email carries the server-built payments section instead of the browser's file.
+    const sendFile = !view.v2
+    await sendReceiptEmail({
       toEmail: contact,
-      receiptNumber,
-      receiptData,
-      attachmentBuffer: buffer,
-      attachmentFilename,
-      attachmentMimeType,
-      caption,
+      view,
+      attachmentBuffer: sendFile ? attachment.buffer : undefined,
+      attachmentFilename: sendFile ? attachment.filename : undefined,
+      attachmentMimeType: sendFile ? attachment.mimeType : undefined,
+      caption: userCaption || undefined,
     })
     await incrementWhatsAppUsage(auth.uid)
     return {
@@ -115,9 +121,9 @@ export default defineEventHandler(async (event) => {
   if (isWhatsAppCloudConfigured()) {
     await sendWhatsAppCloudMedia({
       toPhone: contact,
-      buffer,
-      mimeType: attachmentMimeType,
-      filename: attachmentFilename,
+      buffer: attachment.buffer,
+      mimeType: attachment.mimeType,
+      filename: attachment.filename,
       caption,
     })
     await incrementWhatsAppUsage(auth.uid)
