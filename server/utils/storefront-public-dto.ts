@@ -1,7 +1,14 @@
-import type { StorefrontPublicListing, StorefrontPublicProfile } from '~/types/storefront'
+import type {
+  StorefrontPublicItemView,
+  StorefrontPublicListing,
+  StorefrontPublicProfile,
+  StorefrontPublicStoreView,
+} from '~/types/storefront'
 import { legacyPaymentLinksEnabled } from '~/server/utils/legacy-payment-links'
 
-export function publicStorefrontProfileDto(profile: StorefrontPublicProfile) {
+export function publicStorefrontProfileDto(
+  profile: StorefrontPublicProfile
+): StorefrontPublicStoreView {
   return {
     slug: profile.slug,
     displayName: profile.displayName,
@@ -23,7 +30,9 @@ export function publicStorefrontProfileDto(profile: StorefrontPublicProfile) {
   }
 }
 
-export function publicStorefrontListingDto(item: StorefrontPublicListing) {
+export function publicStorefrontListingDto(
+  item: StorefrontPublicListing
+): StorefrontPublicItemView {
   const toMs = (v: unknown): number | null => {
     if (!v) return null
     if (typeof v === 'number' && Number.isFinite(v)) return v

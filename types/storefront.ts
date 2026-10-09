@@ -108,6 +108,43 @@ export interface StorefrontPublicListing {
   updatedAt?: unknown
 }
 
+/** Shop profile as returned by the public storefront API. */
+export interface StorefrontPublicStoreView {
+  slug: string
+  displayName: string
+  tagline: string | null
+  description: string | null
+  logoUrl: string | null
+  city: string | null
+  addressPublic: string | null
+  phonePublic: string | null
+  whatsappE164: string | null
+  emailPublic: string | null
+  social: StorefrontSocialLinks
+  collectionInfo: string | null
+  warrantyInfo: string | null
+  currency: string | null
+  allowReservations: boolean
+  allowOnlineCheckout: boolean
+  acceptsPayments: boolean
+}
+
+/** Listing as returned by the public storefront API. */
+export interface StorefrontPublicItemView {
+  id: string
+  title: string
+  price: number
+  currency: string | null
+  availability: StorefrontPublicAvailability
+  categoryPath: string
+  categoryName: string
+  attributes: StorefrontPublicAttribute[]
+  description: string | null
+  imageUrl: string | null
+  firstListedAtMs: number | null
+  updatedAtMs: number | null
+}
+
 /**
  * Private guest inquiry / reservation.
  * users/{owner}/stores/{storeId}/storefrontInquiries/{id}. Admin SDK writes only.

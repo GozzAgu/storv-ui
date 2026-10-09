@@ -7,6 +7,13 @@ export type StorefrontUtmParams = {
   content?: string
 }
 
+/** Server message from a failed public storefront request, or the fallback. */
+export function fetchErrorMessage(error: unknown, fallback: string): string {
+  const err = error as { data?: { message?: unknown } } | null
+  const message = err?.data?.message
+  return typeof message === 'string' && message.trim() ? message : fallback
+}
+
 export function withStorefrontUtm(url: string, utm: StorefrontUtmParams = {}): string {
   const base = String(url || '').trim()
   if (!base) return ''
