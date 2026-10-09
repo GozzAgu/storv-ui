@@ -111,7 +111,7 @@ function summaryUpdate(ctx: ReceiptContext, payments: PaymentRecord[]) {
  * counter flow does today. Legacy fields mirror the V2 money so existing screens stay right; a
  * later rejection reopens the V2 status (and alerts) but leaves the legacy status completed.
  */
-function legacyBalanceMirror(
+export function legacyBalanceMirror(
   ctx: ReceiptContext,
   summary: PaymentSummary,
   added: readonly PaymentRecord[],

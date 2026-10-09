@@ -50,6 +50,9 @@ export type NotificationType =
   | 'storefront_inquiry'
   | 'payment_awaiting_confirmation'
   | 'payment_rejected'
+  | 'payment_link_sale_cancelled'
+  | 'payment_link_problem'
+  | 'payout_changed'
   | 'till_count_difference'
 
 export interface Notification {

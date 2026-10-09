@@ -8,6 +8,7 @@ export type PaymentNotificationType =
   | 'till_count_difference'
   | 'payout_changed'
   | 'payment_link_sale_cancelled'
+  | 'payment_link_problem'
 
 interface NotifyInput {
   ownerId: string
@@ -141,6 +142,25 @@ export async function notifyLinkSaleCancelled(
     type: 'payment_link_sale_cancelled',
     title: mode === 'expired' ? 'Payment link expired' : 'Payment link revoked',
     message: `${label} was not paid, so it was cancelled and its items are back in stock.`,
+    recipientUids: [scope.ownerId],
+    metadata: { receiptId },
+  })
+}
+
+/** Owner-only: a link payment that was late, repeated, unverifiable or left stock to check. */
+export async function notifyLinkProblem(
+  db: Firestore,
+  scope: { ownerId: string; storeId: string },
+  receiptId: string,
+  receiptNumber: string,
+  message: string
+): Promise<void> {
+  await writeNotification(db, {
+    ...scope,
+    actorUid: 'system:paystack',
+    type: 'payment_link_problem',
+    title: receiptNumber ? `Check sale ${receiptNumber}` : 'Check a link payment',
+    message,
     recipientUids: [scope.ownerId],
     metadata: { receiptId },
   })

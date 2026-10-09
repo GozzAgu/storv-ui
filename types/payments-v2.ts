@@ -133,6 +133,8 @@ export interface PaymentLinkV2 {
   holdReleasedAt: string | null
   checkoutAttempts: number
   version: number
+  /** Paystack reference whose verified charge paid this link. */
+  paidReference?: string | null
 }
 
 export type PaymentLinkTokenStatus = 'active' | 'revoked' | 'dead'
@@ -156,9 +158,35 @@ export interface PaymentLinkAttempt {
   amountKobo: number
   currency: PaymentsCurrency
   subaccountCode: string
-  status: 'initializing' | 'initialized' | 'failed'
+  status: 'initializing' | 'initialized' | 'failed' | 'paid'
   createdAt: string
   ipHash: string
+  /** Set from the server-side verify response once the charge is applied. */
+  paystackTransactionId?: string
+  channel?: string
+  paidAt?: string
+  feesKobo?: number | null
+  verifiedAt?: string
+}
+
+export type PaystackEventState = 'received' | 'processed' | 'failed_retryable' | 'failed_permanent'
+
+/**
+ * Server-only: paystackEvents/{type}_{reference}. One per delivered event; only `processed` is
+ * skipped on redelivery, so a failed apply is retried by Paystack.
+ */
+export interface PaystackEventRecord {
+  type: string
+  reference: string
+  linkId: string | null
+  state: PaystackEventState
+  outcome: string | null
+  deliveries: number
+  firstReceivedAt: string
+  lastReceivedAt: string
+  processedAt: string | null
+  /** Second charge on an already-paid link: the extra payment recorded for it. */
+  duplicatePaymentId?: string | null
 }
 
 export type CashConfirmationMode = 'each' | 'end_of_day'

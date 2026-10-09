@@ -299,13 +299,41 @@ Closed in 2b (see 6c).
 - Not in this step: webhook, verify and apply (Step 4). Until then a paid link stays `active`
   and the return page says payment is being confirmed.
 
+## 6e. Delivered in Step 4 (webhook, verify and apply)
+
+- `charge.success` with a `stvp_` reference goes to `handleLinkCharge` after the HMAC check;
+  billing events keep their existing path unchanged. Optional `PAYSTACK_WEBHOOK_IPS` allowlist
+  for link events, read from the Vercel platform header only (correction J).
+- Every delivery is recorded in `paystackEvents/charge.success_{ref}` (rules deny all) with state
+  `received` / `processed` / `failed_retryable` / `failed_permanent`; only `processed` is skipped
+  (correction A). Replays and 10 parallel deliveries confirm exactly once.
+- Nothing is confirmed from the webhook body. The server calls `GET /transaction/verify/{ref}`
+  and checks status, reference, NGN, `amount` equal to the link amount exactly, and
+  `subaccount.subaccount_code` equal to the stored attempt (correction I). Any mismatch or
+  missing field fails closed: not confirmed, owner alerted, logged `payments-alert`. Verify
+  outages, in-flight statuses and V2-off return 500 so Paystack retries.
+- Apply is one transaction with an audit event: payment confirmed (system actor), link and
+  attempt marked paid, receipt legacy fields mirrored, a balance-due sale completed when covered,
+  held stock committed server-side (serial rows sold, bulk quantity reduced, never below zero),
+  event marked processed.
+- Late payment (link expired or revoked): confirmed and flagged `paid_after_expiry` /
+  `paid_after_revoke`; a cancelled sale stays cancelled and its stock is only checked. Stock sold
+  elsewhere is flagged `oversold` (correction M). A second paid checkout on one link is recorded
+  once as its own payment flagged `duplicate_payment` + `overpaid`. The owner is alerted in all
+  three cases.
+- Legacy token settlement in the webhook only runs with `LEGACY_PAYMENT_LINKS_ENABLED=1`;
+  otherwise it is logged and ignored. `scripts/payments/report-legacy-payment-links.mjs` is a
+  read-only count (doc IDs are pay tokens, so it prints SHA-256 fingerprints only).
+
 ## 7. Residual risks and open items
 
 | Risk | Status | Owner |
 |---|---|---|
 | Refund and chargeback liability on subaccount transactions falls on Storvv's integration | Open: ask Paystack; record in `paystack-decisions.md` | Product |
 | Paystack may need merchant KYC (BVN or CAC) from Storvv at volume | Open: ask Paystack | Product |
-| Which verify-response field carries subaccount and split amount | Open: confirm from current Paystack docs before Step 4; fail closed meanwhile | Eng |
+| Which verify-response field carries subaccount and split amount | Built expecting `data.subaccount.subaccount_code`; fails closed otherwise. Confirm with one test-mode payment before live | Eng |
+| A customer charged with fees passed on (`amount` above the link) is not confirmed | Accepted: goes to owner review; not used today | Product |
+| Refund and dispute webhooks are not handled | Open: later step | Eng |
 | Sales are created in the browser; a malicious cashier can create a sale with a low total | Accepted for now; locked once a payment exists | Eng (follow-up) |
 | In-store stock decrement is not in a server transaction | Accepted; follow-up after Step 5 | Eng |
 | Direct Firestore access never requires two-factor | Accepted; follow-up | Eng |
