@@ -273,6 +273,32 @@ Closed in 2b (see 6c).
   2FA (server enforces).
 - Proof retention is shown in the timeline and in the public privacy policy (section 8).
 
+## 6d. Delivered in Step 3 (links, pay page, Paystack checkout)
+
+- Link tokens: 32 random bytes, only the SHA-256 stored; up to 10 active copies per link, each
+  revocable; unknown, revoked and dead tokens all return the same 404 (correction D).
+- Link money is a pending payment created in the same transaction as the link and its first
+  token, so active links + confirmed + awaiting never exceed the total (correction E).
+- Checkout: amount, currency and subaccount come from the link; email goes to Paystack only;
+  `callback_url` is `/pay/return?ref=` and never carries the token (correction C); a non-Paystack
+  checkout URL fails closed. Attempts are capped (10 per hour, 30 per link) and store a salted IP
+  hash; checkout returns 503 if `PAYMENTS_IP_HASH_SALT` is missing or short.
+- `/pay/**` pages and `/api/paylink/*` send `no-store`, `no-referrer`, `DENY`, `nosniff`.
+  Tokens are scrubbed from Sentry events, transactions and breadcrumbs, and Firebase Analytics
+  is not started on `/pay` pages (its automatic page view would send the full URL). Platform
+  access logs (Vercel) still record request paths; that is accepted and not under app control.
+- Expiry cron (`*/15`, timing-safe `CRON_SECRET`, correction K) ends links in their own
+  transaction, cancels link sales with nothing paid and releases held stock; composite index
+  `paymentLinksV2 (status, expiresAt)` is in `firestore.indexes.json`.
+- Payout account: owner only, verified email, 2FA on and a fresh code; name from Paystack; last
+  4 digits stored; audited; in-app and email alert. If Paystack accepts the change but the
+  Firestore save fails, the owner is still alerted, `payments-payout-desync` is logged and the
+  request fails so it can be retried (the Paystack update is idempotent).
+- Payout routes outside the V2 flag (`banks`, `resolve-account`, `connect-bank`, `settlements`)
+  refuse live keys until `PAYMENTS_V2_ALLOW_LIVE=1` and the decisions doc is approved.
+- Not in this step: webhook, verify and apply (Step 4). Until then a paid link stays `active`
+  and the return page says payment is being confirmed.
+
 ## 7. Residual risks and open items
 
 | Risk | Status | Owner |
@@ -286,6 +312,8 @@ Closed in 2b (see 6c).
 | Every active member can fully edit stock loans on Enterprise | Accepted (by design today); review later | Product |
 | npm audit: high and critical advisories in `nuxt`/`nitropack`/`h3`, `@capacitor/*`, `jspdf`, `xlsx` | Open: separate dependency PR | Eng |
 | Late payment after expiry, revoke or hold release | Mitigated: confirm, flag, alert | Eng |
+| `bearer: 'subaccount'` (merchant pays Paystack fees) | Open: confirm fees in `paystack-decisions.md` before live | Product |
+| Payout routes return 503 in production while live keys are set and decisions are unapproved | Accepted until approval; owners cannot change payout accounts meanwhile | Product |
 | Admin SDK can still rewrite Firestore | Mitigated: tamper-evident chain + external anchors, not prevented | Eng |
 
 ## 8. Per-step security checklist

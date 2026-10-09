@@ -48,15 +48,18 @@ export function parseCheckoutReference(raw: unknown): { linkId: string; referenc
   return m ? { linkId: m[1]!, reference: raw } : null
 }
 
+/**
+ * PAYMENTS_IP_HASH_SALT, at least 16 characters. A known or missing salt would let anyone with
+ * the data recover IPv4 addresses by trying all of them, so callers fail closed on null.
+ */
+export function ipHashSalt(env: NodeJS.ProcessEnv = process.env): string | null {
+  const salt = String(env.PAYMENTS_IP_HASH_SALT || '').trim()
+  return salt.length >= 16 ? salt : null
+}
+
 /** One-way hash of the client IP for attempt records (never the raw address). */
 export function hashIp(ip: string, salt: string): string {
   return createHash('sha256').update(`${salt}:${ip}`).digest('hex').slice(0, 32)
 }
 
-/** Replaces any /pay/{token} segment, for logs, analytics and error reports. */
-export function scrubPayPath(value: string): string {
-  return value.replace(/\/pay\/(?!return\b)[A-Za-z0-9_-]{16,}/g, '/pay/[token]').replace(
-    /\/api\/paylink\/(?!return\b)[A-Za-z0-9_-]{16,}/g,
-    '/api/paylink/[token]'
-  )
-}
+export { scrubPayPath } from '../../../utils/pay-path'

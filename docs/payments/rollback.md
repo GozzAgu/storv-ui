@@ -1,7 +1,7 @@
 # Payments V2 rollback
 
-Status: Step 2b version (server routes and screens for maker and checker). Extend it at every
-step that adds routes, UI or jobs.
+Status: Step 3 version (adds payment links, the public pay page and the link expiry cron).
+Extend it at every step that adds routes, UI or jobs.
 
 ## Switch it off
 
@@ -19,6 +19,9 @@ Nothing else is needed. No data is deleted or rewritten by switching off.
 | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Payments V2 server routes (`/api/payments/*`)                     | 404 for everyone, checked before auth (`definePaymentsRoute` → `requirePaymentsV2`)                                                                                        |
 | Audit anchor and proof retention crons                            | Return `{ skipped: true }`; no reads or writes                                                                                                                             |
+| Public pay routes (`/api/paylink/*`) and V2 `/pay/{token}` links  | 404 ("Link not found" on the page). Links already sent stop working until V2 is back on; any payer who already paid at Paystack is handled by the Step 4 webhook           |
+| Link expiry cron                                                  | Returns `{ skipped: true }`. Links past expiry stay `active` in Firestore but checkout refuses them; the cron expires them and releases held stock once V2 is back on      |
+| Payout account routes (`/api/payment-links/connect-bank` etc.)    | Not behind the V2 flag. With a live key they return 503 until `PAYMENTS_V2_ALLOW_LIVE=1` and the decisions doc is approved; test keys work                                 |
 | Payments awaiting confirmation                                    | Stay awaiting. Nobody can confirm or reject them until V2 is back on; nothing is lost.                                                                                     |
 | Till counts, payment settings, permission grants                  | Kept as they are (server-only documents); they apply again when V2 is back on                                                                                              |
 | Proof files                                                       | Kept, unreadable from clients. Retention is paused; if V2 stays off for months, run the retention job by hand on re-enable                                                 |

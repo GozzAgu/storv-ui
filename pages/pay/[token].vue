@@ -6,7 +6,9 @@
         <span class="s-pay__brand-name">Storvv Checkout</span>
       </div>
 
-      <div v-if="loading" class="s-pay__card s-pay__card--padded" aria-busy="true">
+      <SecurePayLink v-if="isV2" :token="token" />
+
+      <div v-else-if="loading" class="s-pay__card s-pay__card--padded" aria-busy="true">
         <div class="s-pay__loading">
           <SSkeleton width="50%" height="20px" />
           <SSkeleton height="80px" />
@@ -108,7 +110,9 @@ import SEmptyState from '~/components/s/SEmptyState.vue'
 import SInput from '~/components/s/SInput.vue'
 import SSkeleton from '~/components/s/SSkeleton.vue'
 import SSpinner from '~/components/s/SSpinner.vue'
+import SecurePayLink from '~/components/pay/SecurePayLink.vue'
 import { formatNaira } from '~/utils/naira'
+import { isV2LinkToken } from '~/utils/pay-path'
 
 definePageMeta({ layout: false })
 
@@ -126,6 +130,7 @@ interface PublicInvoice {
 
 const route = useRoute()
 const token = computed(() => String(route.params.token || ''))
+const isV2 = computed(() => isV2LinkToken(token.value))
 
 const loading = ref(true)
 const verifying = ref(false)
@@ -164,6 +169,7 @@ const pay = async () => {
 }
 
 onMounted(async () => {
+  if (isV2.value) return
   const reference = String(route.query.reference || route.query.trxref || '')
   if (reference) {
     // Returning from Paystack - confirm before showing status.
@@ -186,5 +192,8 @@ onMounted(async () => {
   loading.value = false
 })
 
-useHead({ title: 'Pay securely · Storvv' })
+useHead({
+  title: 'Pay securely · Storvv',
+  meta: [{ name: 'referrer', content: 'no-referrer' }],
+})
 </script>

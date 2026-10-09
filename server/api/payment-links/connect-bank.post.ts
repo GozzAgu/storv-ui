@@ -4,6 +4,7 @@ import { assertRateLimit } from '~/server/utils/rate-limit'
 import { requireAuth, requireFreshTotp } from '~/server/utils/store-auth'
 import { getPaystackSecret, paystackRequest } from '~/server/utils/payment-links'
 import { assertDocId } from '~/server/utils/payments/access'
+import { requirePaystackLiveAllowed } from '~/server/utils/payments/config'
 import { toHttpError } from '~/server/utils/payments/http'
 import { alertPayoutChanged } from '~/server/utils/payments/notify'
 import {
@@ -62,6 +63,7 @@ export default defineEventHandler(async (event) => {
     const db = getAdminFirestore()
     const storeSnap = await db.collection('users').doc(ownerId).collection('stores').doc(storeId).get()
     if (!storeSnap.exists) throw createError({ statusCode: 404, message: 'Not found' })
+    await requirePaystackLiveAllowed()
 
     const secretKey = getPaystackSecret(useRuntimeConfig())
     const paystack: PaystackCall = (path, init) =>
@@ -86,6 +88,13 @@ export default defineEventHandler(async (event) => {
       previousLast4: result.previousLast4,
       replaced: result.replaced,
     })
+    if (!result.saved) {
+      throw createError({
+        statusCode: 500,
+        message: 'Paystack accepted the new account but Storvv could not save it. Please try again.',
+        data: { code: 'PAYOUT_SAVE_FAILED' },
+      })
+    }
 
     return { success: true, payout: result.payout }
   } catch (err) {

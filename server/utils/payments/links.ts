@@ -1,9 +1,7 @@
 import {
   FieldValue,
-  type DocumentReference,
   type DocumentSnapshot,
   type Firestore,
-  type Transaction,
 } from 'firebase-admin/firestore'
 import type {
   PaymentLinkAttempt,
@@ -481,7 +479,7 @@ export async function revokePaymentLink(
   )
 }
 
-export interface ExpiryRunResult {
+export type ExpiryRunResult = {
   checked: number
   expired: number
   salesCancelled: number

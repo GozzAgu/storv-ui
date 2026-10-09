@@ -33,11 +33,10 @@
           <ReceiptTableLineItems :items="receipt.items" :items-count-fallback="receipt.itemsCount" />
         </section>
 
-        <PaymentTimeline
-          v-if="v2Sale"
-          :receipt="receipt"
-          @record-payment="emit('record-payment', receipt!)"
-        />
+        <template v-if="v2Sale">
+          <PaymentTimeline :receipt="receipt" @record-payment="emit('record-payment', receipt!)" />
+          <PaymentLinksPanel :receipt="receipt" />
+        </template>
 
         <!-- Balance-due: paid/balance summary + payment history -->
         <div v-else-if="isOutstanding" class="s-record-summary s-record-summary--warning">
@@ -160,6 +159,7 @@ import { getReceiptStatusLabel, getReceiptStatusTone } from '~/utils/receipt-sta
 import { usePermissions } from '~/composables/usePermissions'
 import { usePreferences } from '~/composables/usePreferences'
 import PaymentTimeline from '~/components/payments/PaymentTimeline.vue'
+import PaymentLinksPanel from '~/components/payments/PaymentLinksPanel.vue'
 import { isV2Sale } from '~/utils/payments-v2-tenders'
 
 const props = defineProps<{

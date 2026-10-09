@@ -3,6 +3,7 @@ import { assertRateLimit } from '~/server/utils/rate-limit'
 import { requireAuth, requireStoreManageAccess } from '~/server/utils/store-auth'
 import { getPaystackSecret, paystackRequest } from '~/server/utils/payment-links'
 import { assertDocId } from '~/server/utils/payments/access'
+import { requirePaystackLiveAllowed } from '~/server/utils/payments/config'
 import { toHttpError } from '~/server/utils/payments/http'
 import {
   normalizeAccountInput,
@@ -39,6 +40,7 @@ export default defineEventHandler(async (event) => {
       assertDocId(body.storeId, 'storeId')
     )
     const { bankCode, accountNumber } = normalizeAccountInput(body)
+    await requirePaystackLiveAllowed()
     const secretKey = getPaystackSecret(useRuntimeConfig())
     const paystack: PaystackCall = (path, init) =>
       paystackRequest(path, { method: init.method, body: init.body, secretKey })

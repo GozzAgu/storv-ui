@@ -107,6 +107,11 @@ export interface ConnectPayoutResult {
   payout: PayoutView
   replaced: boolean
   previousLast4: string
+  /**
+   * False when Paystack took the change but the Firestore save failed: payouts already go to
+   * the new account, so the caller must still alert the owner, then report the failure.
+   */
+  saved: boolean
 }
 
 /**
@@ -159,6 +164,7 @@ export async function connectPayout(
 
   const last4 = input.accountNumber.slice(-4)
   const store = storeDocRef(db, input.ownerId, input.storeId)
+  let saved = true
   await db.runTransaction(async (tx) => {
     const head = await readChainHead(tx, store)
     const now = new Date().toISOString()
@@ -199,9 +205,21 @@ export async function connectPayout(
         subjectUid: null,
       },
     ])
-  }, TX_OPTIONS)
+  }, TX_OPTIONS).catch((err: unknown) => {
+    saved = false
+    console.error(
+      JSON.stringify({
+        tag: 'payments-payout-desync',
+        ownerId: input.ownerId,
+        storeId: input.storeId,
+        subaccountCode,
+        reason: err instanceof Error ? err.message.slice(0, 200) : 'unknown',
+      })
+    )
+  })
 
   return {
+    saved,
     payout: toPayoutView({
       connected: true,
       bankName: input.bankName.trim().slice(0, 100),

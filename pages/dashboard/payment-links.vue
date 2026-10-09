@@ -480,8 +480,6 @@ const connect = async () => {
   }
 }
 
-const refresh = () => loadAll()
-
 const onCreated = async (link: ShareableLink) => {
   activeLink.value = link
   autoShareAfterCreate.value = isNativeShell.value

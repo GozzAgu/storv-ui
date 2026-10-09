@@ -40,16 +40,27 @@ export default defineNuxtConfig({
    * browsers that block third-party storage (Safari, Firefox). Takes effect once
    * NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN is set to the app host (e.g. app.storvv.com).
    */
-  routeRules: process.env.NUXT_PUBLIC_FIREBASE_PROJECT_ID
-    ? {
-        '/__/auth/**': {
-          proxy: `https://${process.env.NUXT_PUBLIC_FIREBASE_PROJECT_ID}.firebaseapp.com/__/auth/**`,
-        },
-        '/__/firebase/**': {
-          proxy: `https://${process.env.NUXT_PUBLIC_FIREBASE_PROJECT_ID}.firebaseapp.com/__/firebase/**`,
-        },
-      }
-    : {},
+  routeRules: {
+    // Payer pages carry a bearer token in the path: never cached, framed or sent as a referrer.
+    '/pay/**': {
+      headers: {
+        'Cache-Control': 'no-store',
+        'Referrer-Policy': 'no-referrer',
+        'X-Frame-Options': 'DENY',
+        'X-Content-Type-Options': 'nosniff',
+      },
+    },
+    ...(process.env.NUXT_PUBLIC_FIREBASE_PROJECT_ID
+      ? {
+          '/__/auth/**': {
+            proxy: `https://${process.env.NUXT_PUBLIC_FIREBASE_PROJECT_ID}.firebaseapp.com/__/auth/**`,
+          },
+          '/__/firebase/**': {
+            proxy: `https://${process.env.NUXT_PUBLIC_FIREBASE_PROJECT_ID}.firebaseapp.com/__/firebase/**`,
+          },
+        }
+      : {}),
+  },
   vite: {
     plugins: [tailwindcss()],
     css: {

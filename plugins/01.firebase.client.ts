@@ -7,6 +7,7 @@ import {
 } from 'firebase/firestore'
 import { getFirebaseConfig } from '~/config/firebase.config'
 import { isCapacitorNative } from '~/utils/firebase-client-auth'
+import { isPublicPayPath } from '~/utils/pay-path'
 
 /**
  * Turn on Firestore's on-device cache so reads can be served from disk instead of
@@ -96,8 +97,13 @@ export default defineNuxtPlugin(() => {
         app = getApps()[0]
       }
 
-      // Analytics can hang or fail in Capacitor WKWebView - skip on native shells
-      if (typeof window !== 'undefined' && !isCapacitorNative()) {
+      // Analytics can hang or fail in Capacitor WKWebView - skip on native shells.
+      // Its automatic page_view would send the /pay/{token} URL, so payer pages skip it too.
+      if (
+        typeof window !== 'undefined' &&
+        !isCapacitorNative() &&
+        !isPublicPayPath(window.location.pathname)
+      ) {
         try {
           analytics = getAnalytics(app)
         } catch (error) {

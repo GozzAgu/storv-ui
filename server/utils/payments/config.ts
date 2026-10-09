@@ -69,6 +69,30 @@ export async function getPaymentsV2Gate(
   return evaluatePaymentsV2Gate(env, live ? await loadPaystackDecisions() : null)
 }
 
+/**
+ * Payout routes outside the V2 flag still call Paystack. With a live key they need the same
+ * allow flag and approved decisions doc as V2; test keys pass.
+ */
+export async function requirePaystackLiveAllowed(
+  env: NodeJS.ProcessEnv = process.env
+): Promise<void> {
+  const live = String(env.PAYSTACK_SECRET_KEY || '')
+    .trim()
+    .startsWith('sk_live_')
+  if (!live) return
+  if (
+    env.PAYMENTS_V2_ALLOW_LIVE === '1' &&
+    isPaystackDecisionsApproved(await loadPaystackDecisions())
+  ) {
+    return
+  }
+  throw createError({
+    statusCode: 503,
+    message: 'Payout setup is temporarily unavailable',
+    data: { code: 'PAYSTACK_LIVE_BLOCKED' },
+  })
+}
+
 /** Payments V2 routes 404 when the feature is off, so they look absent rather than broken. */
 export async function requirePaymentsV2(): Promise<void> {
   const gate = await getPaymentsV2Gate()

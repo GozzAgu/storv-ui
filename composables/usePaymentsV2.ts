@@ -58,6 +58,33 @@ export interface RecordResult {
   saleCompleted: boolean
 }
 
+export interface PaymentLinkCopy {
+  tokenId: string
+  status: 'active' | 'revoked' | 'dead'
+  createdAt: string
+  createdBy: string
+}
+
+export interface ReceiptPaymentLink {
+  id: string
+  receiptId: string
+  amountKobo: number
+  status: 'active' | 'paid' | 'expired' | 'revoked'
+  expiresAt: string
+  createdAt: string
+  createdBy: string
+  linkSale: boolean
+  endedAt?: string | null
+  endReason?: string | null
+  tokens: PaymentLinkCopy[]
+}
+
+/** The URL is shown once; only its hash is stored, so it cannot be fetched again. */
+export interface SharedLinkUrl {
+  url: string
+  expiresAt: string
+}
+
 const DISABLED: PaymentsV2Access = {
   enabled: false,
   isOwner: false,
@@ -210,6 +237,19 @@ export function usePaymentsV2() {
         return null
       }
     },
+    listLinks: (receiptId: string) =>
+      get<ReceiptPaymentLink[]>('/api/payments/links', { receiptId }),
+    createLink: (receiptId: string, input: { amountKobo?: number; expiresInHours?: number }) =>
+      post<SharedLinkUrl & { linkId: string; amountKobo: number; linkSale: boolean }>(
+        '/api/payments/links/create',
+        { receiptId, ...input }
+      ),
+    shareLink: (linkId: string) =>
+      post<SharedLinkUrl & { tokenId: string }>(`/api/payments/links/${enc(linkId)}/share`),
+    revokeLink: (linkId: string, reason: string) =>
+      post(`/api/payments/links/${enc(linkId)}/revoke`, { reason }),
+    revokeLinkCopy: (linkId: string, tokenId: string) =>
+      post(`/api/payments/links/${enc(linkId)}/tokens/${enc(tokenId)}/revoke`),
     proofUrl: (paymentId: string) =>
       post<{ url: string; expiresAt: string }>(`/api/payments/${enc(paymentId)}/proof-url`),
 
