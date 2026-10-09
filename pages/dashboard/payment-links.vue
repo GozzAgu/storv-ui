@@ -13,6 +13,17 @@
       </template>
       <template v-if="!showPaymentLinksComingSoon" #actions>
         <SButton
+          v-if="!canCreateStandaloneLinks"
+          variant="primary"
+          to="/dashboard/receipts"
+          :disabled="!payout.connected"
+          :title="payout.connected ? 'Open a sale, then choose Payment links' : 'Connect a payout account first'"
+        >
+          <template #leading><Receipt :size="16" :stroke-width="1.75" aria-hidden="true" /></template>
+          Create from a sale
+        </SButton>
+        <SButton
+          v-else
           variant="primary"
           :disabled="!payout.connected"
           :title="payout.connected ? '' : 'Connect a payout account first'"
@@ -167,10 +178,21 @@
       </SCard>
 
       <SCard v-else-if="links.length === 0">
-        <SEmptyState title="No payment links yet" description="Create your first link to start collecting.">
+        <SEmptyState
+          title="No payment links yet"
+          :description="
+            canCreateStandaloneLinks
+              ? 'Create your first link to start collecting.'
+              : 'Open a sale and choose Payment links to send the customer a secure link.'
+          "
+        >
           <template #icon><CreditCard :size="24" :stroke-width="1.75" /></template>
           <template v-if="payout.connected" #actions>
-            <SButton variant="primary" @click="showCreate = true">
+            <SButton v-if="!canCreateStandaloneLinks" variant="primary" to="/dashboard/receipts">
+              <template #leading><Receipt :size="16" :stroke-width="1.75" aria-hidden="true" /></template>
+              Go to sales
+            </SButton>
+            <SButton v-else variant="primary" @click="showCreate = true">
               <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
               New payment link
             </SButton>
@@ -317,6 +339,7 @@ import {
   ExternalLink,
   Landmark,
   Plus,
+  Receipt,
   SearchX,
   Share2,
   ShieldCheck,
@@ -365,7 +388,7 @@ definePageMeta({
 const PAGE_SIZE = 50
 
 const route = useRoute()
-const { showPaymentLinksComingSoon } = usePaymentLinksLaunch()
+const { showPaymentLinksComingSoon, canCreateStandaloneLinks } = usePaymentLinksLaunch()
 const isNativeShell = computed(() => isCapacitorNative())
 const userStore = useUserStore()
 const {
@@ -597,7 +620,7 @@ onMounted(async () => {
   if (showPaymentLinksComingSoon.value) return
   await loadAll()
   if (!payout.value.connected) await loadBanks()
-  if (route.query.create === '1' && payout.value.connected) {
+  if (route.query.create === '1' && payout.value.connected && canCreateStandaloneLinks.value) {
     showCreate.value = true
   }
 })
