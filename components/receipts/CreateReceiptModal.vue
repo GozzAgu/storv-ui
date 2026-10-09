@@ -889,6 +889,7 @@ import { useStaffStore } from '~/stores/staff'
 import { usePreferences } from '~/composables/usePreferences'
 import { getReceiptProductDetails } from '~/composables/useReceiptProductDetails'
 import { computeBalanceDue, roundMoney } from '~/utils/receipt-balance'
+import { buildSaleTenders } from '~/utils/payments-v2-tenders'
 import {
   getInventoryItemDisplayName as getItemDisplayName,
   getInventoryItemField as getItemField,
@@ -922,6 +923,7 @@ const userStore = useUserStore()
 const staffStore = useStaffStore()
 const { formatCurrency, preferences } = usePreferences()
 const haptics = useHaptics()
+const paymentsV2 = usePaymentsV2()
 const { confirm: confirmSensitive } = useSensitiveAction()
 const isAtLeastSm = useMinWidthQuery(640)
 const isPhone = computed(() => !isAtLeastSm.value)
@@ -1935,6 +1937,8 @@ const handleCreateReceipt = async () => {
       createdByUserName = userStore.userData.name || userStore.userData.email || 'Super Admin'
     }
 
+    const v2 = (await paymentsV2.loadAccess()).enabled
+
     // Create receipt in Firestore
     const receiptData: any = {
       receiptNumber,
@@ -1950,17 +1954,20 @@ const handleCreateReceipt = async () => {
       status: isBalanceDue ? 'balance_due' : 'completed',
       notes: receiptForm.value.notes || '',
       hasSerialNumbers: receiptHasSerialNumbers,
-      ...(isBalanceDue && {
-        amountPaid: deposit,
-        balanceDue: computeBalanceDue(total, deposit),
-        payments: [
-          {
-            amount: deposit,
-            method: receiptForm.value.paymentMethod,
-            paidAt: new Date(),
-          },
-        ],
-      }),
+      ...(isBalanceDue &&
+        (v2
+          ? { amountPaid: 0, balanceDue: total, payments: [] }
+          : {
+              amountPaid: deposit,
+              balanceDue: computeBalanceDue(total, deposit),
+              payments: [
+                {
+                  amount: deposit,
+                  method: receiptForm.value.paymentMethod,
+                  paidAt: new Date(),
+                },
+              ],
+            })),
       folderId: primaryFolderId,
       folderIds: folderIds.length > 0 ? folderIds : primaryFolderId ? [primaryFolderId] : [],
       itemIds,
@@ -1969,6 +1976,7 @@ const handleCreateReceipt = async () => {
       storeLogoUrl: storesStore.currentStore?.logoUrl || userStore.userData?.storeLogoUrl || '', // Account logo - empty string if none (Firestore rejects undefined)
       createdByUserName, // User who created the receipt
     }
+    if (v2) receiptData.paymentsV2 = true
 
     // Add split payments if enabled
     if (useSplitPayment.value && splitPayments.value.length > 0) {
@@ -1995,6 +2003,19 @@ const handleCreateReceipt = async () => {
 
     if (isBalanceDue && itemIds.length > 0) {
       await inventoryStore.reserveInventoryForBalanceDue(receiptId, itemIds)
+    }
+
+    if (v2) {
+      await paymentsV2.recordSaleTenders(
+        receiptId,
+        buildSaleTenders({
+          total,
+          isBalanceDue,
+          deposit,
+          method: receiptForm.value.paymentMethod,
+          split: useSplitPayment.value ? splitPayments.value : undefined,
+        })
+      )
     }
 
     // Update swap-in item to link it to the receipt (if created)

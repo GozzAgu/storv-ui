@@ -47,6 +47,8 @@ export function usePaymentLinks() {
   const { authFetch } = useAuthenticatedFetch()
 
   const payout = ref<PayoutStatus>({ connected: false })
+  /** Only the store owner can connect or change the payout bank. */
+  const canChangePayout = ref(true)
   const links = ref<PaymentLinkListItem[]>([])
   const stats = ref<PaymentLinkStats>({ collected: 0, paid: 0, unpaid: 0, failed: 0 })
   const settlements = ref<SettlementItem[]>([])
@@ -81,12 +83,13 @@ export function usePaymentLinks() {
       return
     }
     const { ownerUserId, storeId } = await resolveScope()
-    const res = await authFetch<{ payout: PayoutStatus }>(
+    const res = await authFetch<{ payout: PayoutStatus; canChange?: boolean }>(
       `/api/payment-links/payout?ownerUserId=${encodeURIComponent(
         ownerUserId
       )}&storeId=${encodeURIComponent(storeId)}`
     )
     payout.value = res.payout
+    canChangePayout.value = res.canChange === true
   }
 
   async function loadLinks() {
@@ -168,13 +171,15 @@ export function usePaymentLinks() {
       const { resolveDemoAccount } = await import('~/utils/demo-payment-links')
       return resolveDemoAccount()
     }
+    const { ownerUserId, storeId } = await resolveScope()
     const res = await authFetch<{ accountName: string }>('/api/payment-links/resolve-account', {
       method: 'POST',
-      body: { accountNumber, bankCode },
+      body: { ownerUserId, storeId, accountNumber, bankCode },
     })
     return res.accountName
   }
 
+  /** The server looks the account name up itself; `accountName` here is only for demo mode. */
   async function connectBank(input: {
     bankCode: string
     bankName: string
@@ -189,9 +194,10 @@ export function usePaymentLinks() {
       return payout.value
     }
     const { ownerUserId, storeId } = await resolveScope()
+    const { accountName: _ignored, ...body } = input
     const res = await authFetch<{ payout: PayoutStatus }>('/api/payment-links/connect-bank', {
       method: 'POST',
-      body: { ownerUserId, storeId, ...input },
+      body: { ownerUserId, storeId, ...body },
     })
     payout.value = res.payout
     return res.payout
@@ -223,6 +229,7 @@ export function usePaymentLinks() {
 
   return {
     payout,
+    canChangePayout,
     links,
     stats,
     settlements,

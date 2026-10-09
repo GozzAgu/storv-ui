@@ -8,6 +8,7 @@ import {
   payoutDocId,
   type MerchantPayoutDoc,
 } from '~/server/utils/payment-links'
+import { requirePaystackLiveAllowed } from '~/server/utils/payments/config'
 
 interface PaystackSettlement {
   id: number
@@ -46,6 +47,7 @@ export default defineEventHandler(async (event) => {
     return { success: true, settlements: [], pendingTotal: 0, settledTotal: 0, lastSettledAtMs: 0 }
   }
 
+  await requirePaystackLiveAllowed()
   const config = useRuntimeConfig()
   const secretKey = getPaystackSecret(config)
 

@@ -555,6 +555,7 @@ import {
 } from '~/utils/menuAnchor'
 import { EMPTY_CELL } from '~/utils/ui-empty'
 import BalanceDuePaymentModal from '~/components/receipts/BalanceDuePaymentModal.vue'
+import { isV2Sale } from '~/utils/payments-v2-tenders'
 import { useDashboardPageRefreshRegister } from '~/composables/useDashboardPageRefresh'
 import { receiptAmountPaid, receiptBalanceDue } from '~/utils/receipt-balance'
 import { maskPhone } from '~/utils/mask-phone'
@@ -573,6 +574,8 @@ const receiptsStore = useReceiptsStore()
 const storesStore = useStoresStore()
 const toast = useAppToast()
 const { confirm: confirmSensitive } = useSensitiveAction()
+const paymentsV2 = usePaymentsV2()
+onMounted(() => void paymentsV2.loadAccess())
 const authStore = useAuthStore()
 const { canManage, canCreate, canEditReceipts, canDeleteReceipts } = usePermissions()
 const { getUserDocument } = useUser()
@@ -955,12 +958,26 @@ async function cancelOutstandingReceipt(receipt: Receipt) {
   ) {
     return
   }
+  const v2 = paymentsV2.access.value.enabled && isV2Sale(receipt)
+  if (!v2 && receipt.paymentSummary) {
+    toast.error('This order has Payments V2 records, which are switched off. Nothing was changed.')
+    return
+  }
+  let reason = ''
+  if (v2) {
+    reason = (window.prompt('Reason for cancelling (required)') || '').trim()
+    if (!reason) {
+      toast.error('A reason is required to cancel this order.')
+      return
+    }
+  }
   if (!(await confirmSensitive('void'))) return
   try {
-    await receiptsStore.cancelBalanceDueReceipt(receipt.id)
+    if (v2) await receiptsStore.cancelBalanceDueReceiptV2(receipt.id, reason)
+    else await receiptsStore.cancelBalanceDueReceipt(receipt.id)
     toast.success('Order cancelled and stock released.')
   } catch (e: unknown) {
-    toast.error(e instanceof Error ? e.message : 'Could not cancel order')
+    toast.error(paymentsErrorMessage(e, 'Could not cancel order'))
   }
 }
 

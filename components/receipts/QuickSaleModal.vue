@@ -554,6 +554,7 @@ import { usePreferences } from '~/composables/usePreferences'
 import { useAppToast } from '~/composables/useAppToast'
 import { getReceiptProductDetails } from '~/composables/useReceiptProductDetails'
 import { resolveBulkStockFieldAndValue } from '~/utils/inventory-bulk-quantity'
+import { buildSaleTenders } from '~/utils/payments-v2-tenders'
 import { useReceiptCategoryPicker } from '~/composables/useReceiptCategoryPicker'
 import { useDashboardDrawerChrome } from '~/composables/useDashboardDrawerChrome'
 import { getInventoryItemDisplayName as getItemDisplayName, getInventoryItemField as getItemField } from '~/composables/useInventoryItemDisplay'
@@ -572,6 +573,7 @@ const emit = defineEmits<{
 const inventoryStore = useInventoryStore()
 const sellerLoanOutsStore = useSellerLoanOutsStore()
 const receiptsStore = useReceiptsStore()
+const paymentsV2 = usePaymentsV2()
 const storesStore = useStoresStore()
 const authStore = useAuthStore()
 const userStore = useUserStore()
@@ -1147,6 +1149,8 @@ const completeSale = async () => {
       createdByUserName = userStore.userData.name || userStore.userData.email || 'Super Admin'
     }
 
+    const v2 = (await paymentsV2.loadAccess()).enabled
+
     // Create receipt
     const receiptData: any = {
       receiptNumber,
@@ -1167,6 +1171,7 @@ const completeSale = async () => {
       storeLogoUrl: storesStore.currentStore?.logoUrl || userStore.userData?.storeLogoUrl || '', // Account logo - empty string if none (Firestore rejects undefined)
       createdByUserName, // User who created the receipt
     }
+    if (v2) receiptData.paymentsV2 = true
 
     if (hasAnyDiscount.value) {
       receiptData.discountReason = discountReason.value.trim()
@@ -1186,7 +1191,20 @@ const completeSale = async () => {
       }))
     }
 
-    await receiptsStore.createReceipt(receiptData)
+    const receiptId = await receiptsStore.createReceipt(receiptData)
+
+    if (v2) {
+      await paymentsV2.recordSaleTenders(
+        receiptId,
+        buildSaleTenders({
+          total: receiptData.total,
+          isBalanceDue: false,
+          deposit: 0,
+          method: paymentMethod.value || 'Cash',
+          split: useSplitPayment.value ? splitPayments.value : undefined,
+        })
+      )
+    }
 
     showSuccessToast('Sale completed successfully!')
     resetForm()

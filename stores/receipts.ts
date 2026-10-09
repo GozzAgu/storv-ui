@@ -28,6 +28,8 @@ import { logActivity, getCurrentUserDisplayName } from '~/composables/useActivit
 import { useNotificationsStore } from './notifications'
 import { usePreferences } from '~/composables/usePreferences'
 import { normalizeEntityName } from '~/utils/capitalize-text'
+import type { PaymentSummary } from '~/types/payments-v2'
+import { usePaymentsV2 } from '~/composables/usePaymentsV2'
 import {
   computeBalanceDue,
   isBalanceFullyPaid,
@@ -98,6 +100,10 @@ export interface Receipt {
   amountPaid?: number
   /** Remaining amount owed; cleared when status becomes completed. */
   balanceDue?: number
+  /** Payments V2 rollup, written only by the server. Its presence locks the money fields. */
+  paymentSummary?: PaymentSummary
+  /** Created while Payments V2 was on: money is recorded through the server, not on the receipt. */
+  paymentsV2?: boolean
   /** Payment history for balance-due receipts. */
   payments?: ReceiptPayment[]
   /** Folder used serial-number flow (needed when completing a balance-due sale). */
@@ -319,6 +325,8 @@ export const useReceiptsStore = defineStore('receipts', {
               amountPaid: typeof data.amountPaid === 'number' ? data.amountPaid : undefined,
               balanceDue: typeof data.balanceDue === 'number' ? data.balanceDue : undefined,
               payments: data.payments || undefined,
+              paymentSummary: data.paymentSummary || undefined,
+              paymentsV2: data.paymentsV2 === true,
               hasSerialNumbers: data.hasSerialNumbers === true,
               source: typeof data.source === 'string' ? data.source : undefined,
               storefrontInquiryId:
@@ -664,6 +672,119 @@ export const useReceiptsStore = defineStore('receipts', {
       }
     },
 
+    /** Balance-due sale is fully paid: commit reserved stock as sold and log it. */
+    async finalizeBalanceDueStock(
+      receiptId: string,
+      data: Record<string, unknown>,
+      opts: { stock?: boolean; log?: boolean } = {}
+    ): Promise<void> {
+      const authStore = useAuthStore()
+      if (!authStore.currentUser) throw new Error('User must be authenticated')
+      const { getCurrentStoreId } = await import('~/composables/useCurrentStore')
+      const storeId = await getCurrentStoreId()
+      if (!storeId) throw new Error('No store selected')
+      const inventoryStore = useInventoryStore()
+
+      const items = (data.items as ReceiptItem[]) || []
+      const fallbackFolderId = String(data.folderId || '')
+      const folderIdsFromReceipt = Array.isArray(data.folderIds)
+        ? (data.folderIds as string[]).filter(Boolean)
+        : fallbackFolderId
+          ? [fallbackFolderId]
+          : []
+
+      if (opts.stock !== false) {
+        const { groupReceiptItemsByFolder } = await import('~/utils/receipt-multi-folder')
+        const grouped =
+          groupReceiptItemsByFolder(items, fallbackFolderId).size > 0
+            ? groupReceiptItemsByFolder(items, fallbackFolderId)
+            : new Map(
+                folderIdsFromReceipt.map((fid) => [
+                  fid,
+                  items.filter((line) => line.folderId === fid || !line.folderId),
+                ])
+              )
+
+        for (const [folderId, folderItems] of grouped) {
+          if (!folderId || folderItems.length === 0) continue
+          let folder = inventoryStore.getFolderById(folderId)
+          if (!folder) {
+            folder = (await inventoryStore.fetchFolder(folderId)) ?? undefined
+          }
+          let hasSerialNumbers = folder?.hasSerialNumbers === true
+          if (!hasSerialNumbers && folderId) {
+            const { folderHasSerialNumbers } = await import('~/utils/receipt-multi-folder')
+            hasSerialNumbers = folderHasSerialNumbers(folder)
+          }
+          const saleLines = folderItems
+            .filter((i) => i?.itemId)
+            .map((i) => ({
+              itemId: i.itemId,
+              quantitySold: hasSerialNumbers ? 1 : Number(i.quantity) || 1,
+            }))
+          if (saleLines.length > 0) {
+            await inventoryStore.finalizeBalanceDueInventorySale(folderId, receiptId, saleLines, {
+              hasSerialNumbers,
+              skipActivityLog: true,
+            })
+          }
+        }
+      }
+
+      if (opts.log !== false) {
+        const receiptLabel = String(data.receiptNumber || receiptId)
+        const allSaleLines = items.filter((i) => i?.itemId)
+        const soldCount = allSaleLines.reduce((n, line) => n + (Number(line.quantity) || 1), 0)
+        if (allSaleLines.length > 0) {
+          const userDisplayName = await getCurrentUserDisplayName().catch(() => 'Unknown')
+          const entityId = folderIdsFromReceipt[0] || fallbackFolderId || receiptId
+          await logActivity({
+            action: 'updated',
+            entityType: 'items_batch',
+            entityId,
+            entityName: `${soldCount} item${
+              soldCount !== 1 ? 's' : ''
+            } marked as sold · ${receiptLabel}`,
+            storeId,
+            userId: authStore.currentUser.uid,
+            userDisplayName,
+          }).catch((e) => console.warn('[receipts] Activity log write failed:', e))
+        }
+      }
+    },
+
+    /**
+     * Payments V2: the server has recorded money and may have completed the sale. Re-read the
+     * receipt (server-written) and commit the reserved stock when it says completed.
+     */
+    async syncV2Receipt(receiptId: string, saleCompleted = false): Promise<void> {
+      const db = useFirestore().getFirestoreInstance()
+      if (!db) throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
+      const userId = await getQueryUserId()
+      const { getCurrentStoreId } = await import('~/composables/useCurrentStore')
+      const storeId = await getCurrentStoreId()
+      if (!userId || !storeId) throw new Error('No store selected')
+      const snap = await getDoc(getReceiptDocument(db, userId, storeId, receiptId))
+      if (!snap.exists()) return
+      const data = snap.data() as Record<string, unknown>
+      if (saleCompleted && data.status === 'completed') {
+        await this.finalizeBalanceDueStock(receiptId, data)
+      }
+      const index = this.receipts.findIndex((r) => r.id === receiptId)
+      if (index > -1) {
+        const existing = this.receipts[index]!
+        this.receipts[index] = {
+          ...existing,
+          amountPaid: typeof data.amountPaid === 'number' ? data.amountPaid : existing.amountPaid,
+          balanceDue: typeof data.balanceDue === 'number' ? data.balanceDue : existing.balanceDue,
+          status: (data.status as Receipt['status']) || existing.status,
+          paymentMethod: (data.paymentMethod as string) || existing.paymentMethod,
+          paymentSummary: data.paymentSummary as Receipt['paymentSummary'],
+          updatedAt: new Date(),
+        }
+      }
+    },
+
     async recordBalancePayment(
       receiptId: string,
       payment: { amount: number; method: string }
@@ -713,53 +834,10 @@ export const useReceiptsStore = defineStore('receipts', {
       })
       const paymentsPayload = paymentsForFirestore(payments)
 
-      const inventoryStore = useInventoryStore()
       let completed = false
 
       if (isBalanceFullyPaid(total, newPaid)) {
-        const items = (data.items as ReceiptItem[]) || []
-        const fallbackFolderId = String(data.folderId || '')
-        const folderIdsFromReceipt = Array.isArray(data.folderIds)
-          ? (data.folderIds as string[]).filter(Boolean)
-          : fallbackFolderId
-            ? [fallbackFolderId]
-            : []
-
-        const { groupReceiptItemsByFolder } = await import('~/utils/receipt-multi-folder')
-        const grouped =
-          groupReceiptItemsByFolder(items, fallbackFolderId).size > 0
-            ? groupReceiptItemsByFolder(items, fallbackFolderId)
-            : new Map(
-                folderIdsFromReceipt.map((fid) => [
-                  fid,
-                  items.filter((line) => line.folderId === fid || !line.folderId),
-                ])
-              )
-
-        for (const [folderId, folderItems] of grouped) {
-          if (!folderId || folderItems.length === 0) continue
-          let folder = inventoryStore.getFolderById(folderId)
-          if (!folder) {
-            folder = (await inventoryStore.fetchFolder(folderId)) ?? undefined
-          }
-          let hasSerialNumbers = folder?.hasSerialNumbers === true
-          if (!hasSerialNumbers && folderId) {
-            const { folderHasSerialNumbers } = await import('~/utils/receipt-multi-folder')
-            hasSerialNumbers = folderHasSerialNumbers(folder)
-          }
-          const saleLines = folderItems
-            .filter((i) => i?.itemId)
-            .map((i) => ({
-              itemId: i.itemId,
-              quantitySold: hasSerialNumbers ? 1 : Number(i.quantity) || 1,
-            }))
-          if (saleLines.length > 0) {
-            await inventoryStore.finalizeBalanceDueInventorySale(folderId, receiptId, saleLines, {
-              hasSerialNumbers,
-              skipActivityLog: true,
-            })
-          }
-        }
+        await this.finalizeBalanceDueStock(receiptId, data, { log: false })
 
         const paymentMethod =
           payment.method.trim() || String(data.paymentMethod || '').trim() || 'Cash'
@@ -774,27 +852,7 @@ export const useReceiptsStore = defineStore('receipts', {
         })
         completed = true
 
-        const receiptLabel = String(data.receiptNumber || receiptId)
-        const allSaleLines = items.filter((i) => i?.itemId)
-        const soldCount = allSaleLines.reduce(
-          (n, line) => n + (Number(line.quantity) || 1),
-          0
-        )
-        if (allSaleLines.length > 0) {
-          const userDisplayName = await getCurrentUserDisplayName().catch(() => 'Unknown')
-          const entityId = folderIdsFromReceipt[0] || fallbackFolderId || receiptId
-          await logActivity({
-            action: 'updated',
-            entityType: 'items_batch',
-            entityId,
-            entityName: `${soldCount} item${
-              soldCount !== 1 ? 's' : ''
-            } marked as sold · ${receiptLabel}`,
-            storeId,
-            userId: authStore.currentUser!.uid,
-            userDisplayName,
-          }).catch((e) => console.warn('[receipts] Activity log write failed:', e))
-        }
+        await this.finalizeBalanceDueStock(receiptId, data, { stock: false })
       } else {
         await updateDoc(receiptRef, {
           amountPaid: newPaid,
@@ -821,6 +879,31 @@ export const useReceiptsStore = defineStore('receipts', {
       }
 
       return { completed }
+    },
+
+    /**
+     * Payments V2: the server closes the sale (and refuses while money is held or if it is
+     * already closed); only then is the reserved stock released.
+     */
+    async cancelBalanceDueReceiptV2(receiptId: string, reason: string): Promise<void> {
+      const db = useFirestore().getFirestoreInstance()
+      if (!db) throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
+      const userId = await getQueryUserId()
+      const { getCurrentStoreId } = await import('~/composables/useCurrentStore')
+      const storeId = await getCurrentStoreId()
+      if (!userId || !storeId) throw new Error('No store selected')
+
+      await usePaymentsV2().closeSale(receiptId, 'cancel', reason)
+      const snap = await getDoc(getReceiptDocument(db, userId, storeId, receiptId))
+      const data = (snap.data() ?? {}) as Record<string, unknown>
+      const itemIds = Array.isArray(data.itemIds) ? (data.itemIds as string[]) : []
+      if (itemIds.length > 0) {
+        await useInventoryStore().releaseInventoryReservation(receiptId, itemIds)
+      }
+      const index = this.receipts.findIndex((r) => r.id === receiptId)
+      if (index > -1) {
+        this.receipts[index] = { ...this.receipts[index]!, status: 'cancelled', updatedAt: new Date() }
+      }
     },
 
     async cancelBalanceDueReceipt(receiptId: string): Promise<void> {

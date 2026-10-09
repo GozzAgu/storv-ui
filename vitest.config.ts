@@ -17,6 +17,7 @@ export default defineConfig({
       'tests/integration/**/*.spec.ts',
       'tests/unit/**/*.spec.ts',
       'tests/rules/**/*.spec.ts',
+      'tests/emulator/**/*.spec.ts',
     ],
     globals: true,
     restoreMocks: true,

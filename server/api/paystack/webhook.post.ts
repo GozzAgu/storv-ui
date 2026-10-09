@@ -1,8 +1,20 @@
 import { defineEventHandler, getHeader, readRawBody, setResponseStatus } from 'h3'
 import type { SubscriptionPlan } from '~/types/subscription'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
-import { getPaystackSecret, isValidPaystackSignature } from '~/server/utils/payment-links'
+import {
+  getPaystackSecret,
+  isValidPaystackSignature,
+  paystackRequest,
+} from '~/server/utils/payment-links'
 import { settlePaymentLink } from '~/server/utils/payment-link-settle'
+import { legacyPaymentLinksEnabled } from '~/server/utils/legacy-payment-links'
+import { getPaymentsV2Gate } from '~/server/utils/payments/config'
+import { handleLinkCharge } from '~/server/utils/payments/link-webhook'
+import { isLinkReference, webhookIpAllowed } from '~/server/utils/payments/webhook-guard'
+import { opsAlertDepsFromEnv } from '~/server/utils/payments/ops-alert'
+import { isResendConfigured } from '~/server/utils/delivery-config'
+import { sendReceiptEmail } from '~/server/utils/receipt-delivery-email'
+import { sendViaResend } from '~/server/utils/staff-invite-email'
 import {
   applySubscriptionToUser,
   cancelAutoRenewForUser,
@@ -46,7 +58,8 @@ type PaystackWebhookPayload = {
 
 /**
  * Public Paystack webhook (authoritative settlement).
- * - Payment links: charge.success with metadata.token
+ * - Payments V2 links: charge.success with a `stvp_` reference → verify and apply (link-webhook.ts)
+ * - Legacy payment links: charge.success with metadata.token, only with LEGACY_PAYMENT_LINKS_ENABLED=1
  * - Subscriptions: charge.success renewals + subscription.disable / invoice.payment_failed
  */
 export default defineEventHandler(async (event) => {
@@ -55,6 +68,7 @@ export default defineEventHandler(async (event) => {
   try {
     secretKey = getPaystackSecret(config)
   } catch {
+    console.error(JSON.stringify({ tag: 'payments-alert', alert: 'webhook-without-secret-key' }))
     setResponseStatus(event, 200)
     return { received: true }
   }
@@ -79,11 +93,33 @@ export default defineEventHandler(async (event) => {
   const eventName = payload.event || ''
   const data = payload.data
 
+  if (eventName === 'charge.success' && data && isLinkReference(data.reference)) {
+    if (!webhookIpAllowed(event)) {
+      console.error(JSON.stringify({ tag: 'payments-alert', alert: 'webhook-ip-not-allowed' }))
+      setResponseStatus(event, 401)
+      return { error: 'Not allowed' }
+    }
+    const gate = await getPaymentsV2Gate()
+    const emailReady = isResendConfigured()
+    const result = await handleLinkCharge(adminDb, data.reference, {
+      enabled: gate.enabled,
+      paystack: (path, init) =>
+        paystackRequest(path, { method: init.method, body: init.body, secretKey }),
+      sendPayerReceipt: emailReady
+        ? (toEmail, view) =>
+            sendReceiptEmail({ toEmail, view, caption: 'Thank you, your payment was received.' })
+        : undefined,
+      alerts: opsAlertDepsFromEnv(emailReady ? sendViaResend : undefined),
+    })
+    setResponseStatus(event, result.httpStatus)
+    return { received: result.httpStatus === 200 }
+  }
+
   if (eventName === 'charge.success' && data) {
     const token = data.metadata?.token
     const reference = data.reference
 
-    if (token && reference) {
+    if (token && reference && legacyPaymentLinksEnabled()) {
       try {
         await settlePaymentLink(adminDb, token, {
           paidAmountKobo: Number(data.amount),
@@ -93,6 +129,10 @@ export default defineEventHandler(async (event) => {
       } catch (err) {
         console.error('[paystack/webhook] payment link settle failed', err)
       }
+    } else if (token && reference) {
+      console.error(
+        JSON.stringify({ tag: 'payments-alert', alert: 'legacy-link-charge-ignored', reference })
+      )
     }
 
     const extracted = extractSubscriptionFromChargePayload(data)

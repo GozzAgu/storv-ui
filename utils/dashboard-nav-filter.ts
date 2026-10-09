@@ -14,6 +14,8 @@ export type DashboardNavDefinition = {
   subscriptionFeature?: SubscriptionFeature
   /** Solo experience hides admin-complexity routes (subscription + role gates still apply). */
   businessCapability?: BusinessCapability
+  /** Payments V2 confirmers only (owner or payments.confirm, as reported by the server). */
+  requiresPaymentsConfirm?: boolean
 }
 
 /** Canonical sidebar / native bottom-nav routes (web + iOS/Android Capacitor). */
@@ -79,6 +81,12 @@ export const DASHBOARD_NAV_DEFINITIONS: DashboardNavDefinition[] = [
     businessCapability: 'paymentLinks',
   },
   {
+    name: 'Awaiting payments',
+    segment: '/payments/awaiting',
+    iconKey: 'payments-awaiting',
+    requiresPaymentsConfirm: true,
+  },
+  {
     name: 'Departments',
     segment: '/departments',
     iconKey: 'departments',
@@ -123,6 +131,7 @@ const NATIVE_MORE_PRIORITY = [
   'Departments',
   'Multi-Store Sync',
   'Payment links',
+  'Awaiting payments',
   'Activity Logs',
   'Help center',
   'Settings',
@@ -139,6 +148,7 @@ export function filterDashboardNavItems(
     canUseBusinessCapability?: (capability: BusinessCapability) => boolean
     hidePaymentLinks?: boolean
     hideStorefront?: boolean
+    canConfirmPayments?: boolean
   }
 ): DashboardNavDefinition[] {
   const canSeeManagerOnlyFeatures = options.isSuperAdmin || options.isManager
@@ -146,6 +156,7 @@ export function filterDashboardNavItems(
   return items.filter((item) => {
     if (item.segment === '/payment-links' && options.hidePaymentLinks) return false
     if (item.segment === '/storefront' && options.hideStorefront) return false
+    if (item.requiresPaymentsConfirm && !options.canConfirmPayments) return false
     if (item.requiresSuperAdmin && !options.isSuperAdmin) return false
     if (item.requiresManagerOrSuperAdmin && !canSeeManagerOnlyFeatures) return false
     if (item.permissionModule) {

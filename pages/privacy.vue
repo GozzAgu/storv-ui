@@ -161,6 +161,13 @@
             purposes outlined in this Privacy Policy, unless a longer retention period is required
             or permitted by law.
           </p>
+          <p>
+            <strong>Payment proofs.</strong> If your staff attach a proof of payment (such as a
+            transfer screenshot) to a sale, it is visible only to the store owner and staff allowed
+            to view or confirm payments, and is deleted automatically 12 months after the payment is
+            confirmed or rejected. Payment records themselves (amount, method, who recorded and
+            confirmed them) are kept with the sale as financial records.
+          </p>
         </section>
 
         <section>

@@ -227,7 +227,7 @@ service cloud.firestore {
     // Sale / return-to-stock: only dateOut + updatedAt may change (not full item edits).
     // Stock loan handshake: optionally set/clear sellerLoan* + updatedAt, or combine with sale (dateOut + clear loan).
     function inventoryItemOnlySaleOrReturnFieldChange() {
-      let changed = request.resource.data.diff(resource.data).changedKeys();
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
       return changed.hasOnly(['dateOut', 'updatedAt'])
              || changed.hasOnly(['pendingSaleReceiptId', 'pendingSaleAt', 'updatedAt'])
              || changed.hasOnly(['sellerLoanOutId', 'sellerLoanPartyName', 'sellerLoanPartyPhone', 'sellerLoanOutAt', 'updatedAt'])
@@ -240,13 +240,13 @@ service cloud.firestore {
     function inventoryItemSwapInReceiptLink() {
       return resource.data.get('swapIn', false) == true
              && resource.data.get('swapInReceiptId', null) == null
-             && request.resource.data.diff(resource.data).changedKeys().hasOnly(['swapInReceiptId', 'updatedAt']);
+             && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['swapInReceiptId', 'updatedAt']);
     }
 
     function receiptBalanceDuePaymentUpdate() {
       return resource.data.status == 'balance_due'
         && request.resource.data.status in ['balance_due', 'completed', 'cancelled']
-        && request.resource.data.diff(resource.data).changedKeys().hasOnly(
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(
           ['amountPaid', 'balanceDue', 'payments', 'status', 'paymentMethod', 'updatedAt', 'completedAt']
         );
     }
@@ -255,17 +255,40 @@ service cloud.firestore {
     function receiptStaffRefundUpdate() {
       return resource.data.status == 'completed'
         && request.resource.data.status == 'refunded'
-        && request.resource.data.diff(resource.data).changedKeys().hasOnly(
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(
           ['status', 'refundReason', 'notes', 'updatedAt']
         );
     }
 
     // Staff POS: remove sold lines from stock-loan docs after a receipt sale (no other loan edits).
     function sellerLoanSaleReconcileUpdate() {
-      let changed = request.resource.data.diff(resource.data).changedKeys();
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
       return changed.hasOnly(['lines', 'updatedAt'])
         || changed.hasOnly(['lines', 'status', 'returnedAt', 'updatedAt'])
-        || changed.hasOnly(['status', 'returnedAt', 'updatedAt']);
+        || changed.hasOnly(['status', 'returnedAt', 'updatedAt'])
+        || changed.hasOnly(['status', 'soldAt', 'updatedAt']);
+    }
+
+    // Payments V2: money fields on a receipt freeze once the server has written paymentSummary
+    // (i.e. any V2 payment exists). After that only server routes change what is owed or paid.
+    function receiptMoneyLockedKeys() {
+      return ['total', 'items', 'itemIds', 'itemsCount', 'discountReason', 'discountAmount',
+              'swapInCredit', 'commissionAmount', 'splitPayments', 'currency', 'taxAmount',
+              'taxRate', 'deliveryFee', 'customerName', 'customerEmail', 'customerPhone',
+              'customerAddress', 'customerId', 'amountPaid', 'balanceDue', 'payments',
+              'paymentMethod', 'status'];
+    }
+
+    function receiptClientUpdateKeepsPaymentsSafe() {
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      return !changed.hasAny(['paymentSummary'])
+        && (!('paymentSummary' in resource.data) || !changed.hasAny(receiptMoneyLockedKeys()));
+    }
+
+    function canViewPayments(userId, storeId) {
+      return isStoreOwnerForPath(userId)
+        || memberHasPermission(userId, storeId, 'payments', 'view')
+        || memberHasPermission(userId, storeId, 'payments', 'confirm');
     }
 
     // Legacy name kept for a few rules; prefer the helpers above.
@@ -292,9 +315,6 @@ service cloud.firestore {
         'preferences',
         'hasCompletedOnboarding',
         'hasCompletedTutorial',
-        'twoFactorEnabled',
-        'twoFactorMethod',
-        'twoFactorEnabledAt',
         'updatedAt',
         'activationFunnel',
         'growthFeedback',
@@ -306,8 +326,15 @@ service cloud.firestore {
       return userSelfServiceUpdateKeys().concat(['uid', 'role', 'subscription', 'createdAt']);
     }
 
+    // A new account may only start as an owner on the free plan; paid plans come from the server.
+    function userSelfServiceCreateValuesAllowed() {
+      let data = request.resource.data;
+      return data.get('role', 'superAdmin') == 'superAdmin'
+        && data.get('subscription', 'storvv_micro') == 'storvv_micro';
+    }
+
     function userSelfServiceUpdateAllowed() {
-      let changed = request.resource.data.diff(resource.data).changedKeys();
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
       return changed.hasOnly(userSelfServiceUpdateKeys())
         && !changed.hasAny([
           'role',
@@ -322,6 +349,9 @@ service cloud.firestore {
           'paystackCustomerCode',
           'lastPaystackReference',
           'twoFactorSecret',
+          'twoFactorEnabled',
+          'twoFactorMethod',
+          'twoFactorEnabledAt',
           'uid',
           'createdAt',
           'mustChangePassword',
@@ -341,7 +371,8 @@ service cloud.firestore {
       allow read: if isOwner(userId) || isActiveWorkspaceMember(userId);
       
       allow create: if isOwner(userId)
-        && request.resource.data.keys().hasOnly(userSelfServiceCreateKeys());
+        && request.resource.data.keys().hasOnly(userSelfServiceCreateKeys())
+        && userSelfServiceCreateValuesAllowed();
       
       allow update: if isOwner(userId) && userSelfServiceUpdateAllowed();
       
@@ -453,7 +484,13 @@ service cloud.firestore {
         match /members/{memberUid} {
           // Store owner can read/write all members. A member can read their own membership doc.
           allow read: if ownsStore(userId, storeId) || (isAuthenticated() && request.auth.uid == memberUid);
-          allow create, update, delete: if ownsStore(userId, storeId);
+          // Payments grants (permissions.payments) are server-only so every grant is audit-logged.
+          allow create: if ownsStore(userId, storeId) &&
+                         !request.resource.data.get('permissions', {}).keys().hasAny(['payments']);
+          allow update: if ownsStore(userId, storeId) &&
+                         !request.resource.data.get('permissions', {})
+                           .diff(resource.data.get('permissions', {})).affectedKeys().hasAny(['payments']);
+          allow delete: if ownsStore(userId, storeId);
         }
         
         // Departments subcollection: users/{userId}/stores/{storeId}/departments/{departmentId}
@@ -498,21 +535,25 @@ service cloud.firestore {
             // When a staff member queries with where('authUid', '==', request.auth.uid), Firestore
             // will only return documents where isOwnStaffDocument() is true, even if userId doesn't match.
             // The OR condition allows the query to proceed, and Firestore filters results automatically.
-            allow read: if isAuthenticated() && 
-                         (userId == request.auth.uid || 
-                          resource.data.createdBy == request.auth.uid || 
-                          isOwnStaffDocument());
-            
+            // Ownership comes from the path, never from `createdBy`: staff must not be able to
+            // point their record at another workspace (owner-context trusted it).
+            allow read: if isAuthenticated() &&
+                         (userId == request.auth.uid || isOwnStaffDocument());
+
             // Allow create if user is the super admin (userId in path) creating staff in their store
-            allow create: if isAuthenticated() && 
-                           userId == request.auth.uid && 
+            allow create: if isAuthenticated() &&
+                           userId == request.auth.uid &&
                            request.resource.data.createdBy == request.auth.uid;
-            
-            // Allow update if user is the super admin (userId in path) OR staff member updating their own document
-            allow update: if isAuthenticated() && 
-                           (userId == request.auth.uid || 
-                            resource.data.createdBy == request.auth.uid ||
-                            resource.data.authUid == request.auth.uid);
+
+            // Owner: any field. Staff on their own record: photo, and clearing mustChangePassword.
+            allow update: if isAuthenticated() &&
+                           (userId == request.auth.uid ||
+                            (isOwnStaffDocument() &&
+                             request.resource.data.diff(resource.data).affectedKeys()
+                               .hasOnly(['photoURL', 'mustChangePassword', 'updatedAt']) &&
+                             (!request.resource.data.diff(resource.data).affectedKeys()
+                                 .hasAny(['mustChangePassword']) ||
+                              request.resource.data.get('mustChangePassword', false) == false)));
             
             // Allow delete if user is the super admin (userId in path) who created the staff member
             allow delete: if isAuthenticated() && 
@@ -588,9 +629,11 @@ service cloud.firestore {
           // Create: owner or any active member (add receipt, POS). Full update: owner or
           // receipts.edit grant. Balance-due payment and refund/cancel: narrower carve-outs below.
           allow create: if canCreateReceipt(userId, storeId) &&
-                         request.resource.data.storeId == storeId;
+                         request.resource.data.storeId == storeId &&
+                         !('paymentSummary' in request.resource.data);
 
-          allow update: if ((isStoreOwnerForPath(userId) || memberHasPermission(userId, storeId, 'receipts', 'edit')) &&
+          allow update: if receiptClientUpdateKeepsPaymentsSafe() && (
+                        ((isStoreOwnerForPath(userId) || memberHasPermission(userId, storeId, 'receipts', 'edit')) &&
                          resourceMatchesStore(storeId) &&
                          requestMatchesStore(storeId))
                         || (canCreateReceipt(userId, storeId) &&
@@ -601,10 +644,43 @@ service cloud.firestore {
                          memberHasReceiptsEditorAccess(userId, storeId) &&
                          receiptStaffRefundUpdate() &&
                          resourceMatchesStore(storeId) &&
-                         requestMatchesStore(storeId));
+                         requestMatchesStore(storeId)));
 
           allow delete: if ownsStore(userId, storeId) &&
-                         resourceMatchesStore(storeId);
+                         resourceMatchesStore(storeId) &&
+                         !('paymentSummary' in resource.data);
+        }
+
+        // Payments V2 records: written only by server routes (Admin SDK). The recorder may read
+        // their own entries; owners and payments.view/confirm holders read all.
+        match /payments/{paymentId} {
+          allow read: if canViewPayments(userId, storeId) ||
+                       (isActiveStoreMember(userId, storeId) &&
+                        resource.data.recordedBy == request.auth.uid);
+          allow write: if false;
+        }
+
+        // Append-only payment audit events (tamper-evident hash chain) and its chain head.
+        match /paymentEvents/{eventId} {
+          allow read: if canViewPayments(userId, storeId);
+          allow write: if false;
+        }
+
+        match /paymentAudit/{docId} {
+          allow read: if isStoreOwnerForPath(userId);
+          allow write: if false;
+        }
+
+        // Payments V2 settings (cash confirmation mode, tender kinds): server writes, owner only.
+        match /paymentConfig/{docId} {
+          allow read: if isStoreOwnerForPath(userId) || isActiveStoreMember(userId, storeId);
+          allow write: if false;
+        }
+
+        // End-of-day cash counts.
+        match /tillCounts/{countId} {
+          allow read: if canViewPayments(userId, storeId);
+          allow write: if false;
         }
         
         // Customers subcollection: users/{userId}/stores/{storeId}/customers/{customerId}
@@ -719,7 +795,11 @@ service cloud.firestore {
         match /notifications/{notificationId} {
           allow read: if canAccessStoreData(userId, storeId);
           
-          allow create: if canCreateReceipt(userId, storeId);
+          // Payments V2 notifications are server-written; a client must not forge them.
+          allow create: if canCreateReceipt(userId, storeId)
+            && request.resource.data.get('source', '') != 'payments_v2'
+            && !request.resource.data.get('type', '').matches('^(payment_|payout_|till_count_).*')
+            && !('recipientUids' in request.resource.data);
           allow update: if canManageNonInventoryOps(userId, storeId)
             || (canAccessStoreData(userId, storeId)
                 && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read'])
@@ -854,6 +934,27 @@ service cloud.firestore {
     
     match /notifications/{notificationId} {
       allow read, write: if false; // Deny all access to legacy notifications collection
+    }
+
+    // Payments V2 server-only collections (Admin SDK). Listed explicitly so tests pin them.
+    match /paymentLinksV2/{document=**} {
+      allow read, write: if false;
+    }
+
+    match /paymentLinkTokens/{tokenHash} {
+      allow read, write: if false;
+    }
+
+    match /paystackEvents/{eventId} {
+      allow read, write: if false;
+    }
+
+    match /paymentAuditAnchors/{anchorId} {
+      allow read, write: if false;
+    }
+
+    match /paymentsOpsAlerts/{alertId} {
+      allow read, write: if false;
     }
     
     // Deny all other access by default

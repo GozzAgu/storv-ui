@@ -29,9 +29,15 @@
 
     <template v-else>
       <SCard
-        v-if="!payout.connected || editingBank"
+        v-if="!payout.connected && !canChangePayout"
+        title="No payout account yet"
+        description="Only the store owner can connect the bank account that payments settle to."
+      />
+
+      <SCard
+        v-else-if="!payout.connected || editingBank"
         title="Connect your payout account"
-        description="Enter your bank details. Payments settle straight to this account."
+        description="Enter your bank details. Payments settle straight to this account. You need two-factor authentication turned on."
       >
         <div class="s-form">
           <div class="s-form-pair">
@@ -89,7 +95,7 @@
           </p>
         </div>
         <SBadge tone="success" dot>Connected</SBadge>
-        <SButton size="sm" @click="startEditBank">Change</SButton>
+        <SButton v-if="canChangePayout" size="sm" @click="startEditBank">Change</SButton>
       </section>
 
       <div v-if="!loading || links.length > 0" class="s-paylinks__stats" aria-label="Payment links summary">
@@ -364,6 +370,7 @@ const isNativeShell = computed(() => isCapacitorNative())
 const userStore = useUserStore()
 const {
   payout,
+  canChangePayout,
   links,
   stats,
   settlements,
@@ -472,8 +479,6 @@ const connect = async () => {
     connecting.value = false
   }
 }
-
-const refresh = () => loadAll()
 
 const onCreated = async (link: ShareableLink) => {
   activeLink.value = link

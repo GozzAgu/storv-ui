@@ -143,6 +143,7 @@
         v-if="canEditStaffPermissions"
         v-model="formData.permissions"
       />
+      <StaffPaymentPermissions v-if="props.staff?.authUid" :member-uid="props.staff.authUid" />
 
       <p v-if="errorMessage" class="s-field__error" role="alert">{{ errorMessage }}</p>
     </SForm>
@@ -203,6 +204,7 @@ import { getApiErrorMessage } from '~/utils/api-error-message'
 import { staffLimitReachedMessage } from '~/types/subscription'
 import { useProductAnalytics } from '~/composables/useProductAnalytics'
 import StaffPermissionsPanel from '~/components/departments/StaffPermissionsPanel.vue'
+import StaffPaymentPermissions from '~/components/payments/StaffPaymentPermissions.vue'
 import type { StaffPermissions } from '~/types/staff-permissions'
 import { deriveDefaultPermissions, resolveStaffPermissions } from '~/utils/staff-permissions'
 

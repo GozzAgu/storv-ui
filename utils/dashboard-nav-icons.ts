@@ -1,5 +1,6 @@
 import type { Component } from 'vue'
 import {
+  BadgeCheck,
   Building2,
   ChartNoAxesColumnIncreasing,
   CircleUserRound,
@@ -30,6 +31,7 @@ export type DashboardNavIconKey =
   | 'loans'
   | 'receipts'
   | 'payment-links'
+  | 'payments-awaiting'
   | 'storefront'
   | 'sales-leads'
   | 'customers'
@@ -55,6 +57,7 @@ export const DASHBOARD_NAV_ICONS: Record<DashboardNavIconKey, Component> = {
   loans: Handshake,
   receipts: ReceiptText,
   'payment-links': Link2,
+  'payments-awaiting': BadgeCheck,
   storefront: ShoppingBag,
   // Distinct from `profile` below - a prospective customer, not the signed-in user.
   'sales-leads': UserPlus,

@@ -53,7 +53,9 @@ export interface MerchantPayoutDoc {
   connected: boolean
   bankName: string
   bankCode: string
-  accountNumber: string
+  accountNumberLast4?: string
+  /** Full number on docs written before payments Step 3; new connections store last 4 only. */
+  accountNumber?: string
   accountName: string
   subaccountCode: string
   percentageCharge: number // platform fee % retained by the platform

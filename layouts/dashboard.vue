@@ -314,6 +314,14 @@ const navigation = DASHBOARD_NAV_DEFINITIONS
 
 // Filter navigation based on user access and subscription plan (web sidebar + iOS/Android bottom nav)
 const { hasAnyManageAccess, can } = usePermissions()
+const { access: paymentsAccess, loadAccess: loadPaymentsAccess } = usePaymentsV2()
+if (import.meta.client) {
+  watch(
+    () => storesStore.currentStoreId,
+    () => void loadPaymentsAccess(),
+    { immediate: true }
+  )
+}
 
 function navFilterOptions(launchGates: boolean) {
   return {
@@ -326,6 +334,7 @@ function navFilterOptions(launchGates: boolean) {
     canUseBusinessCapability,
     hidePaymentLinks: launchGates && isPaymentLinksComingSoon(),
     hideStorefront: launchGates && isStorefrontDashboardHidden(),
+    canConfirmPayments: paymentsAccess.value.enabled && paymentsAccess.value.canConfirm,
   }
 }
 

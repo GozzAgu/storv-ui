@@ -1,35 +1,52 @@
-import { createError, defineEventHandler, readBody } from 'h3'
-import { requireAuth } from '~/server/utils/store-auth'
+import { defineEventHandler, readBody } from 'h3'
+import { assertRateLimit } from '~/server/utils/rate-limit'
+import { requireAuth, requireStoreManageAccess } from '~/server/utils/store-auth'
 import { getPaystackSecret, paystackRequest } from '~/server/utils/payment-links'
+import { assertDocId } from '~/server/utils/payments/access'
+import { requirePaystackLiveAllowed } from '~/server/utils/payments/config'
+import { toHttpError } from '~/server/utils/payments/http'
+import {
+  normalizeAccountInput,
+  resolveAccountName,
+  type PaystackCall,
+} from '~/server/utils/payments/payout'
 
 interface Body {
-  accountNumber?: string
-  bankCode?: string
+  ownerUserId?: unknown
+  storeId?: unknown
+  accountNumber?: unknown
+  bankCode?: unknown
 }
 
-/** Authenticated: resolve a bank account name via Paystack (so the merchant can confirm before connecting). */
+/**
+ * Owner or manager of the named store: look up an account holder's name before connecting it
+ * for payouts. This is a bank-name lookup, so it is store-scoped and rate limited.
+ */
 export default defineEventHandler(async (event) => {
-  await requireAuth(event)
-  const body = await readBody<Body>(event)
-  const accountNumber = (body.accountNumber || '').replace(/\D/g, '')
-  const bankCode = (body.bankCode || '').trim()
+  const auth = await requireAuth(event, { requireVerifiedEmail: true })
+  await assertRateLimit(event, {
+    id: 'payout:resolve-account',
+    limit: 10,
+    windowMs: 10 * 60_000,
+    uid: auth.uid,
+    requireDistributed: true,
+  })
+  const body = ((await readBody<Body>(event).catch(() => null)) ?? {}) as Body
 
-  if (accountNumber.length !== 10 || !bankCode) {
-    throw createError({
-      statusCode: 400,
-      message: 'A 10-digit account number and bank are required',
-    })
+  try {
+    await requireStoreManageAccess(
+      auth.uid,
+      assertDocId(body.ownerUserId, 'ownerUserId'),
+      assertDocId(body.storeId, 'storeId')
+    )
+    const { bankCode, accountNumber } = normalizeAccountInput(body)
+    await requirePaystackLiveAllowed()
+    const secretKey = getPaystackSecret(useRuntimeConfig())
+    const paystack: PaystackCall = (path, init) =>
+      paystackRequest(path, { method: init.method, body: init.body, secretKey })
+    const accountName = await resolveAccountName(paystack, bankCode, accountNumber)
+    return { success: true, accountName }
+  } catch (err) {
+    throw toHttpError(err)
   }
-
-  const config = useRuntimeConfig()
-  const secretKey = getPaystackSecret(config)
-
-  const data = await paystackRequest<{ account_name?: string; account_number?: string }>(
-    `/bank/resolve?account_number=${encodeURIComponent(
-      accountNumber
-    )}&bank_code=${encodeURIComponent(bankCode)}`,
-    { method: 'GET', secretKey }
-  )
-
-  return { success: true, accountName: data?.account_name || '' }
 })

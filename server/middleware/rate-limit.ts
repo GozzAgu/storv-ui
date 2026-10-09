@@ -10,7 +10,23 @@ export default defineEventHandler(async (event) => {
   if (!path.startsWith('/api/')) return
 
   if (path.startsWith('/api/pay/')) {
-    await assertRateLimit(event, { id: 'pay-public', limit: 30, windowMs: ONE_MINUTE })
+    await assertRateLimit(event, {
+      id: 'pay-public',
+      limit: 30,
+      windowMs: ONE_MINUTE,
+      requireDistributed: true,
+    })
+    return
+  }
+
+  // Payments V2 public link endpoints also limit per route and per token inside the handler.
+  if (path.startsWith('/api/paylink/')) {
+    await assertRateLimit(event, {
+      id: 'paylink-public',
+      limit: 60,
+      windowMs: ONE_MINUTE,
+      requireDistributed: true,
+    })
     return
   }
 
@@ -48,7 +64,12 @@ export default defineEventHandler(async (event) => {
     path.endsWith('/checkout') &&
     event.method === 'POST'
   ) {
-    await assertRateLimit(event, { id: 'storefront-checkout-ip', limit: 20, windowMs: ONE_MINUTE })
+    await assertRateLimit(event, {
+      id: 'storefront-checkout-ip',
+      limit: 20,
+      windowMs: ONE_MINUTE,
+      requireDistributed: true,
+    })
     return
   }
 

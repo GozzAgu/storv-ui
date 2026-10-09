@@ -39,8 +39,9 @@ if (!hasJava(env)) {
   process.exit(process.env.SKIP_FIREBASE_RULES === '1' ? 0 : 1)
 }
 
+// tests/emulator: server code (Admin SDK) against the same emulators, e.g. payment transactions.
 const cmd =
-  'firebase emulators:exec --only firestore,storage "vitest run tests/rules --reporter=dot"'
+  'firebase emulators:exec --only firestore,storage "vitest run tests/rules tests/emulator --reporter=dot --no-file-parallelism --testTimeout=30000 --hookTimeout=30000"'
 
 const result = spawnSync(cmd, {
   stdio: 'inherit',

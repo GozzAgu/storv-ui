@@ -269,37 +269,39 @@
       :can-edit="canEditSettings && userStore.isSuperAdmin"
     />
 
-    <SCard
-      v-else-if="activeSettingsTab === 'payments'"
-      title="Checkout payments"
-      description="Payment methods staff can pick on new sales and balance payments."
-    >
-      <ul class="s-settings__chips" aria-label="Payment methods">
-        <li v-for="(tender, index) in paymentTenders" :key="`${tender}-${index}`" class="s-settings__chip">
-          {{ tender }}
-          <button
-            v-if="canEditSettings"
-            type="button"
-            class="s-settings__chip-remove"
-            :aria-label="`Remove ${tender}`"
-            @click="removePaymentTender(index)"
-          >
-            <X :size="14" :stroke-width="2" aria-hidden="true" />
-          </button>
-        </li>
-      </ul>
-      <form v-if="canEditSettings" class="s-settings__add" @submit.prevent="addPaymentTender">
-        <SInput v-model="newPaymentTender" label="Add a method" placeholder="For example, OPay or Moniepoint" />
-        <SButton type="submit" variant="secondary" :disabled="!newPaymentTender.trim()">
-          <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
-          Add
-        </SButton>
-      </form>
-      <template v-if="canEditSettings" #footer>
-        <SButton variant="ghost" @click="resetPaymentTendersToDefault">Reset to defaults</SButton>
-        <SButton variant="primary" @click="savePaymentSettings">Save payment methods</SButton>
-      </template>
-    </SCard>
+    <template v-else-if="activeSettingsTab === 'payments'">
+      <SCard
+        title="Checkout payments"
+        description="Payment methods staff can pick on new sales and balance payments."
+      >
+        <ul class="s-settings__chips" aria-label="Payment methods">
+          <li v-for="(tender, index) in paymentTenders" :key="`${tender}-${index}`" class="s-settings__chip">
+            {{ tender }}
+            <button
+              v-if="canEditSettings"
+              type="button"
+              class="s-settings__chip-remove"
+              :aria-label="`Remove ${tender}`"
+              @click="removePaymentTender(index)"
+            >
+              <X :size="14" :stroke-width="2" aria-hidden="true" />
+            </button>
+          </li>
+        </ul>
+        <form v-if="canEditSettings" class="s-settings__add" @submit.prevent="addPaymentTender">
+          <SInput v-model="newPaymentTender" label="Add a method" placeholder="For example, OPay or Moniepoint" />
+          <SButton type="submit" variant="secondary" :disabled="!newPaymentTender.trim()">
+            <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
+            Add
+          </SButton>
+        </form>
+        <template v-if="canEditSettings" #footer>
+          <SButton variant="ghost" @click="resetPaymentTendersToDefault">Reset to defaults</SButton>
+          <SButton variant="primary" @click="savePaymentSettings">Save payment methods</SButton>
+        </template>
+      </SCard>
+      <PaymentsV2SettingsCard :tenders="paymentTenders" />
+    </template>
 
     <SCard
       v-else-if="activeSettingsTab === 'sales-receipts'"
@@ -414,6 +416,7 @@ import { useStoresStore } from '~/stores/stores'
 import { useInventoryStore } from '~/stores/inventory'
 import { useAppToast } from '~/composables/useAppToast'
 import StorefrontSettingsPanel from '~/components/dashboard/StorefrontSettingsPanel.vue'
+import PaymentsV2SettingsCard from '~/components/payments/PaymentsV2SettingsCard.vue'
 import { Download, FileSpreadsheet, Pencil, Plus, Store, Upload, X } from '@lucide/vue'
 import SBadge from '~/components/s/SBadge.vue'
 import SButton from '~/components/s/SButton.vue'

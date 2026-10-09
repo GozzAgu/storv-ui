@@ -42,7 +42,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const store = publicStorefrontProfileDto(profile)
-  if (profile.allowOnlineCheckout === true && profile.ownerUid && profile.storeId) {
+  if (store.allowOnlineCheckout && profile.ownerUid && profile.storeId) {
     store.acceptsPayments = await merchantPayoutIsConnected(
       adminDb,
       profile.ownerUid,

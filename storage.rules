@@ -22,17 +22,52 @@ service firebase.storage {
       return ownsStore(userId, storeId) || hasActiveStoreMembership(userId, storeId);
     }
 
+    // Matches the client checks in composables/useFirebaseStorage.ts (5 MB, common image types).
+    function isAllowedImageUpload() {
+      return request.resource.size > 0
+        && request.resource.size <= 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|gif|webp)');
+    }
+
     // Images: images/{userId}/profile/filename or images/{userId}/{folder}/filename
     // Authenticated users can read/write only their own images
     match /images/{userId}/{allPaths=**} {
-      allow read, write: if isAuthenticated()
-        && request.auth.uid == userId;
+      allow read, delete: if isAuthenticated() && request.auth.uid == userId;
+      allow create, update: if isAuthenticated()
+        && request.auth.uid == userId
+        && isAllowedImageUpload();
     }
 
     // Store images (for store-scoped uploads)
     // Path format: stores/{userId}/{storeId}/...
     match /stores/{userId}/{storeId}/{allPaths=**} {
-      allow read, write: if canAccessStoreAssets(userId, storeId);
+      allow read, delete: if canAccessStoreAssets(userId, storeId);
+      allow create, update: if canAccessStoreAssets(userId, storeId) && isAllowedImageUpload();
+    }
+
+    // Payment proofs (transfer screenshots). Kept outside stores/ so the store-wide asset rule
+    // above cannot grant read or delete. Reads go through short-lived signed URLs issued by the
+    // server; only the recorder may upload, once, while the payment awaits confirmation.
+    function paymentDoc(userId, storeId, paymentId) {
+      return /databases/(default)/documents/users/$(userId)/stores/$(storeId)/payments/$(paymentId);
+    }
+
+    function isAllowedProofUpload() {
+      return request.resource.size > 0
+        && request.resource.size <= 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|webp)|application/pdf');
+    }
+
+    match /paymentProofs/{userId}/{storeId}/{paymentId}/{fileName} {
+      allow read, update, delete: if false;
+      allow create: if isAuthenticated()
+        && resource == null
+        && fileName.matches('proof[.](jpg|jpeg|png|webp|pdf)')
+        && isAllowedProofUpload()
+        && canAccessStoreAssets(userId, storeId)
+        && firestore.exists(paymentDoc(userId, storeId, paymentId))
+        && firestore.get(paymentDoc(userId, storeId, paymentId)).data.recordedBy == request.auth.uid
+        && firestore.get(paymentDoc(userId, storeId, paymentId)).data.status == 'awaiting_confirmation';
     }
 
     // Deny all other paths

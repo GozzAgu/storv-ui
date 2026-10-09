@@ -110,6 +110,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, type Component } from 'vue'
 import {
+  BadgeCheck,
   Bell,
   Building2,
   CheckCheck,
@@ -167,6 +168,12 @@ type Tone = 'accent' | 'success' | 'warning' | 'info' | 'neutral'
 
 function getIcon(notification: Notification): Component {
   const type = notification.type || ''
+  if (
+    type.startsWith('payment_') ||
+    type === 'till_count_difference' ||
+    type === 'payout_changed'
+  )
+    return BadgeCheck
   if (type.startsWith('receipt')) return Receipt
   if (type.startsWith('item') || type.startsWith('folder')) return Package
   if (type.startsWith('staff')) return UserRound
@@ -180,6 +187,16 @@ function getIcon(notification: Notification): Component {
 
 function getTone(notification: Notification): Tone {
   const type = notification.type || ''
+  if (
+    type === 'payment_rejected' ||
+    type === 'till_count_difference' ||
+    type === 'payment_link_problem' ||
+    type === 'payment_link_sale_cancelled' ||
+    type === 'payout_changed'
+  )
+    return 'warning'
+  if (type === 'payment_awaiting_confirmation') return 'accent'
+  if (type === 'payment_received') return 'success'
   if (type.endsWith('_deleted') || type === 'receipt_refunded') return 'warning'
   if (type.startsWith('receipt') || type === 'lead_converted') return 'success'
   if (type.startsWith('lead') || type === 'storefront_inquiry') return 'accent'
@@ -227,7 +244,20 @@ async function handleNotificationClick(notification: Notification) {
 
   const meta = notification.metadata
   if (meta) {
-    if (meta.receiptId) {
+    if (notification.type === 'till_count_difference') {
+      router.push('/dashboard/payments/till')
+    } else if (notification.type === 'payout_changed') {
+      router.push('/dashboard/payment-links')
+    } else if (
+      (notification.type === 'payment_awaiting_confirmation' ||
+        notification.type === 'payment_rejected' ||
+        notification.type === 'payment_link_problem' ||
+        notification.type === 'payment_received' ||
+        notification.type === 'payment_link_sale_cancelled') &&
+      meta.receiptId
+    ) {
+      router.push(`/dashboard/receipts?receipt=${encodeURIComponent(meta.receiptId)}`)
+    } else if (meta.receiptId) {
       router.push(`/dashboard/receipts?highlight=${encodeURIComponent(meta.receiptId)}`)
     } else if (meta.leadId) {
       router.push(`/dashboard/leads/${meta.leadId}`)

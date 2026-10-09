@@ -39,11 +39,14 @@ function getBearerToken(event: H3Event): string {
   return token
 }
 
-async function resolveTwoFactorEnabled(
+/**
+ * Enabled if either the claim or the user doc says so. A `false` claim must not short-circuit:
+ * accounts enabled before claims existed rely on the server-written doc field.
+ */
+export async function resolveTwoFactorEnabled(
   decoded: DecodedIdToken
 ): Promise<boolean> {
   if (decoded[TFA_ENABLED_CLAIM] === true) return true
-  if (decoded[TFA_ENABLED_CLAIM] === false) return false
 
   const userSnap = await getAdminFirestore().collection('users').doc(decoded.uid).get()
   return userSnap.data()?.twoFactorEnabled === true

@@ -64,7 +64,16 @@
         </div>
       </section>
 
-      <SField label="Return reason" hint="Optional">
+      <div v-if="v2 && moneyHeldKobo > 0" class="s-receipt-callout s-receipt-callout--warning">
+        <p class="s-receipt-callout__title">Refund the payments first</p>
+        <p>
+          {{ formatCurrency(koboToNaira(moneyHeldKobo)) }} is still held on this sale (confirmed,
+          awaiting confirmation or pending). Refund or reject each payment in the sale's Payments
+          section, then return the items here.
+        </p>
+      </div>
+
+      <SField label="Return reason" :hint="v2 ? 'Required' : 'Optional'">
         <STextarea
           v-model="returnReason"
           :rows="2"
@@ -83,7 +92,7 @@
         :primary-label="isProcessing ? 'Processing…' : 'Confirm return / refund'"
         :primary-icon="ArrowPathIcon"
         :primary-loading="isProcessing"
-        :primary-disabled="!confirmed || isProcessing"
+        :primary-disabled="!canSubmit"
         @cancel="handleCancel"
         @primary="handleConfirmReturn"
       />
@@ -98,7 +107,7 @@ import SField from '~/components/s/SField.vue'
 import STextarea from '~/components/s/STextarea.vue'
 import SCheckbox from '~/components/s/SCheckbox.vue'
 import SSpinner from '~/components/s/SSpinner.vue'
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { ArrowPathIcon } from '~/utils/app-icons'
 import { useReceiptsStore, type Receipt } from '~/stores/receipts'
 import { useInventoryStore } from '~/stores/inventory'
@@ -106,6 +115,8 @@ import { usePreferences } from '~/composables/usePreferences'
 import { useSensitiveAction } from '~/composables/useSensitiveAction'
 import { useHaptics } from '~/composables/useHaptics'
 import { groupReceiptItemsByFolder, folderHasSerialNumbers } from '~/utils/receipt-multi-folder'
+import { koboToNaira } from '~/utils/money-kobo'
+import { isV2Sale } from '~/utils/payments-v2-tenders'
 
 interface Props {
   modelValue: boolean
@@ -127,6 +138,21 @@ const haptics = useHaptics()
 const returnReason = ref('')
 const confirmed = ref(false)
 const isProcessing = ref(false)
+
+const paymentsV2 = usePaymentsV2()
+const v2 = computed(
+  () => !!props.receipt && paymentsV2.access.value.enabled && isV2Sale(props.receipt)
+)
+const moneyHeldKobo = computed(() => {
+  const s = props.receipt?.paymentSummary
+  return s ? s.netPaidKobo + s.awaitingKobo + s.pendingKobo : 0
+})
+const canSubmit = computed(
+  () =>
+    confirmed.value &&
+    !isProcessing.value &&
+    (!v2.value || (moneyHeldKobo.value === 0 && returnReason.value.trim().length >= 3))
+)
 
 const formatDate = (date: Date | string | any) => {
   if (!date) return 'N/A'
@@ -151,7 +177,7 @@ const handleCancel = () => {
 }
 
 const handleConfirmReturn = async () => {
-  if (!props.receipt || !confirmed.value || isProcessing.value) return
+  if (!props.receipt || !canSubmit.value) return
 
   isProcessing.value = true
   if (!(await confirmSensitive('refund'))) {
@@ -161,6 +187,20 @@ const handleConfirmReturn = async () => {
 
   try {
     const receipt = props.receipt
+    if (!v2.value && receipt.paymentSummary) {
+      throw new Error(
+        'This sale has Payments V2 records, which are switched off. Nothing was changed; try again once payments are back on.'
+      )
+    }
+    // V2: the server closes the sale first (it refuses if money is held or it is already
+    // closed), so stock is never returned twice. Money fields are locked to the client.
+    if (v2.value) {
+      try {
+        await paymentsV2.closeSale(receipt.id, 'refund', returnReason.value.trim())
+      } catch (err) {
+        throw new Error(paymentsErrorMessage(err, 'Could not close the sale'))
+      }
+    }
     const receiptItems = receipt.items || []
     const grouped = groupReceiptItemsByFolder(receiptItems, receipt.folderId)
 
@@ -194,18 +234,24 @@ const handleConfirmReturn = async () => {
         }
       } catch (error: any) {
         console.error('[ReturnReceiptModal] Error returning items to stock:', error)
-        throw new Error('Failed to return items to inventory. Please try again.')
+        throw new Error(
+          v2.value
+            ? 'The sale is refunded, but the items could not be returned to inventory. Return them to stock manually.'
+            : 'Failed to return items to inventory. Please try again.'
+        )
       }
     } else if (receipt.itemIds?.length) {
       await inventoryStore.returnItemsToStock(receipt.itemIds)
     }
 
     // 2. Update receipt status to refunded and store reason
-    await receiptsStore.updateReceipt(receipt.id, {
-      status: 'refunded',
-      notes: returnReason.value ? `Returned: ${returnReason.value}` : 'Returned',
-      refundReason: returnReason.value || undefined,
-    })
+    if (!v2.value) {
+      await receiptsStore.updateReceipt(receipt.id, {
+        status: 'refunded',
+        notes: returnReason.value ? `Returned: ${returnReason.value}` : 'Returned',
+        refundReason: returnReason.value || undefined,
+      })
+    }
 
     // 3. Update customer (if needed - this might be handled elsewhere)
     // The receipt status change should be sufficient
@@ -228,6 +274,7 @@ watch(
       returnReason.value = ''
       confirmed.value = false
       isProcessing.value = false
+      void paymentsV2.loadAccess()
     }
   }
 )

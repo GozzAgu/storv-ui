@@ -1,4 +1,18 @@
 {
+  "crons": [
+    {
+      "path": "/api/cron/payments/anchor-audit",
+      "schedule": "15 0 * * *"
+    },
+    {
+      "path": "/api/cron/payments/proof-retention",
+      "schedule": "45 1 * * *"
+    },
+    {
+      "path": "/api/cron/payments/expire-links",
+      "schedule": "*/15 * * * *"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",

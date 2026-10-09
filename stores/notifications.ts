@@ -48,6 +48,13 @@ export type NotificationType =
   | 'lead_created'
   | 'lead_converted'
   | 'storefront_inquiry'
+  | 'payment_awaiting_confirmation'
+  | 'payment_rejected'
+  | 'payment_link_sale_cancelled'
+  | 'payment_link_problem'
+  | 'payment_received'
+  | 'payout_changed'
+  | 'till_count_difference'
 
 export interface Notification {
   id: string
@@ -56,6 +63,8 @@ export interface Notification {
   message: string
   userId: string // Super admin UID (for data isolation)
   actorId?: string // The user who performed the action
+  /** Payments V2: only these users are meant to see it (server-written). */
+  recipientUids?: string[]
   read: boolean
   metadata?: {
     receiptId?: string
@@ -66,6 +75,12 @@ export interface Notification {
     [key: string]: any
   }
   createdAt: Date | any
+}
+
+/** Untargeted notifications go to everyone in the store; targeted ones only to their recipients. */
+export function isNotificationForUser(recipientUids: unknown, uid: string | undefined): boolean {
+  if (!Array.isArray(recipientUids)) return true
+  return !!uid && recipientUids.includes(uid)
 }
 
 export const useNotificationsStore = defineStore('notifications', {
@@ -329,8 +344,10 @@ export const useNotificationsStore = defineStore('notifications', {
         }
 
         const notifications: Notification[] = []
+        const myUid = authStore.currentUser?.uid
         snapshot.forEach((doc) => {
           const data = doc.data()
+          if (!isNotificationForUser(data.recipientUids, myUid)) return
           notifications.push({
             id: doc.id,
             ...data,

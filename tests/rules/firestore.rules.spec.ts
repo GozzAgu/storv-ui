@@ -7,7 +7,7 @@ import {
   assertSucceeds,
   type RulesTestEnvironment,
 } from '@firebase/rules-unit-testing'
-import { deleteDoc, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
+import { deleteDoc, deleteField, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
 
 describe('firestore.rules', () => {
   let testEnv: RulesTestEnvironment
@@ -929,5 +929,112 @@ describe('firestore.rules', () => {
 
     const anon = testEnv.unauthenticatedContext().firestore()
     await assertFails(getDoc(doc(anon, 'users/u1/stores/s1/storefrontAnalytics/summary')))
+  })
+
+  // Field allowlists must also cover fields being added or removed (affectedKeys, not changedKeys).
+  describe('narrow update carve-outs reject added and removed fields', () => {
+    it('inventory sale: plain staff cannot add a discount while marking sold', async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await seedOwner(context, 'u1', 'storvv_medium')
+        await seedStore(context, 'u1', 's1')
+        await seedMember(context, 'u1', 's1', 'staff1', 'staff', false)
+        await setDoc(doc(context.firestore(), 'users/u1/stores/s1/inventoryItems/i1'), {
+          storeId: 's1',
+          folderId: 'f1',
+          name: 'iPhone 13',
+          price: 500,
+        })
+      })
+
+      const db = testEnv.authenticatedContext('staff1').firestore()
+      const ref = doc(db, 'users/u1/stores/s1/inventoryItems/i1')
+      await assertFails(updateDoc(ref, { dateOut: new Date(), discountAmount: 400 }))
+      await assertFails(updateDoc(ref, { dateOut: new Date(), price: deleteField() }))
+      await assertSucceeds(updateDoc(ref, { dateOut: new Date(), updatedAt: new Date() }))
+    })
+
+    it('swap-in link: plain staff cannot add other fields with the receipt link', async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await seedOwner(context, 'u1', 'storvv_medium')
+        await seedStore(context, 'u1', 's1')
+        await seedMember(context, 'u1', 's1', 'staff1', 'staff', false)
+        await setDoc(doc(context.firestore(), 'users/u1/stores/s1/inventoryItems/swap1'), {
+          storeId: 's1',
+          folderId: 'f1',
+          name: 'iPhone 13',
+          swapIn: true,
+        })
+      })
+
+      const db = testEnv.authenticatedContext('staff1').firestore()
+      const ref = doc(db, 'users/u1/stores/s1/inventoryItems/swap1')
+      await assertFails(updateDoc(ref, { swapInReceiptId: 'r1', discountAmount: 10 }))
+    })
+
+    it('staff refund: cannot add new fields while refunding', async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await seedOwner(context, 'u1', 'storvv_medium')
+        await seedStore(context, 'u1', 's1')
+        await seedMember(context, 'u1', 's1', 'staff1', 'staff', false, true)
+        await seedCompletedReceipt(context, 'u1', 's1', 'r1')
+      })
+
+      const db = testEnv.authenticatedContext('staff1').firestore()
+      await assertFails(
+        updateDoc(doc(db, 'users/u1/stores/s1/receipts/r1'), {
+          status: 'refunded',
+          refundReason: 'Changed mind',
+          refundedAmount: 100000,
+        })
+      )
+    })
+
+    it('balance payment: staff cannot add or remove fields beyond the payment keys', async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await seedOwner(context, 'u1', 'storvv_medium')
+        await seedStore(context, 'u1', 's1')
+        await seedMember(context, 'u1', 's1', 'staff1', 'staff', false)
+        await setDoc(doc(context.firestore(), 'users/u1/stores/s1/receipts/r2'), {
+          storeId: 's1',
+          status: 'balance_due',
+          total: 1000,
+          amountPaid: 400,
+          balanceDue: 600,
+          payments: [],
+          customerName: 'Jane',
+        })
+      })
+
+      const db = testEnv.authenticatedContext('staff1').firestore()
+      const ref = doc(db, 'users/u1/stores/s1/receipts/r2')
+      await assertFails(updateDoc(ref, { amountPaid: 1000, balanceDue: 0, discount: 600 }))
+      await assertFails(updateDoc(ref, { amountPaid: 1000, balanceDue: 0, total: deleteField() }))
+      await assertSucceeds(
+        updateDoc(ref, {
+          amountPaid: 1000,
+          balanceDue: 0,
+          status: 'completed',
+          completedAt: new Date(),
+          updatedAt: new Date(),
+        })
+      )
+    })
+
+    it('stock loan: POS staff can still mark a loan sold (adds soldAt)', async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await seedOwner(context, 'u1', 'storvv_enterprise')
+        await seedStore(context, 'u1', 's1')
+        await seedMember(context, 'u1', 's1', 'staff1', 'staff', false)
+        await setDoc(doc(context.firestore(), 'users/u1/stores/s1/sellerLoanOuts/l1'), {
+          storeId: 's1',
+          status: 'active',
+          lines: [{ inventoryItemId: 'i1', folderId: 'f1' }],
+        })
+      })
+
+      const db = testEnv.authenticatedContext('staff1').firestore()
+      const ref = doc(db, 'users/u1/stores/s1/sellerLoanOuts/l1')
+      await assertSucceeds(updateDoc(ref, { status: 'sold', soldAt: new Date(), updatedAt: new Date() }))
+    })
   })
 })

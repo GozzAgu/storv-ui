@@ -1,4 +1,5 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import { fileURLToPath } from 'node:url'
 import tailwindcss from '@tailwindcss/vite'
 import { CAPACITOR_SHELL_INLINE_SCRIPT } from './utils/capacitor-shell-inline'
 
@@ -25,22 +26,41 @@ export default defineNuxtConfig({
       routes: ['/'],
       crawlLinks: true,
     },
+    // Payments V2 live gate reads docs/payments/paystack-decisions.md at runtime.
+    serverAssets: [
+      {
+        baseName: 'payments-docs',
+        dir: fileURLToPath(new URL('./docs/payments', import.meta.url)),
+        pattern: 'paystack-decisions.md',
+      },
+    ],
   },
   /**
    * Serves Firebase's sign-in handler from our own domain, so Google redirect sign-in works in
    * browsers that block third-party storage (Safari, Firefox). Takes effect once
    * NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN is set to the app host (e.g. app.storvv.com).
    */
-  routeRules: process.env.NUXT_PUBLIC_FIREBASE_PROJECT_ID
-    ? {
-        '/__/auth/**': {
-          proxy: `https://${process.env.NUXT_PUBLIC_FIREBASE_PROJECT_ID}.firebaseapp.com/__/auth/**`,
-        },
-        '/__/firebase/**': {
-          proxy: `https://${process.env.NUXT_PUBLIC_FIREBASE_PROJECT_ID}.firebaseapp.com/__/firebase/**`,
-        },
-      }
-    : {},
+  routeRules: {
+    // Payer pages carry a bearer token in the path: never cached, framed or sent as a referrer.
+    '/pay/**': {
+      headers: {
+        'Cache-Control': 'no-store',
+        'Referrer-Policy': 'no-referrer',
+        'X-Frame-Options': 'DENY',
+        'X-Content-Type-Options': 'nosniff',
+      },
+    },
+    ...(process.env.NUXT_PUBLIC_FIREBASE_PROJECT_ID
+      ? {
+          '/__/auth/**': {
+            proxy: `https://${process.env.NUXT_PUBLIC_FIREBASE_PROJECT_ID}.firebaseapp.com/__/auth/**`,
+          },
+          '/__/firebase/**': {
+            proxy: `https://${process.env.NUXT_PUBLIC_FIREBASE_PROJECT_ID}.firebaseapp.com/__/firebase/**`,
+          },
+        }
+      : {}),
+  },
   vite: {
     plugins: [tailwindcss()],
     css: {
@@ -130,6 +150,8 @@ export default defineNuxtConfig({
         process.env.NUXT_PUBLIC_ALLOW_DEV_PLAN_SWITCHER === '1' ||
         process.env.NUXT_PUBLIC_ALLOW_DEV_PLAN_SWITCHER === 'true',
       paystackPublicKey: process.env.NUXT_PUBLIC_PAYSTACK_PUBLIC_KEY || '',
+      /** Payments V2 screens. The server gate (PAYMENTS_V2_ENABLED) still decides; routes 404 when off. */
+      paymentsV2: process.env.NUXT_PUBLIC_PAYMENTS_V2 === '1',
       /** Optional: base URL for a separate API server when using a static frontend. Staff creation is client-side and does not require a server. */
       apiBase: process.env.NUXT_PUBLIC_API_BASE || '',
       /** Optional Sentry DSN for client error reporting (https://sentry.io) */
