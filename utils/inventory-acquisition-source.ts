@@ -28,7 +28,7 @@ export function inventorySourceBadgeForSwapIn(receiptNumber?: string): Inventory
 export function inventorySourceBadgeForBuyback(paidLabel?: string): InventorySourceBadge {
   return {
     source: 'buyback',
-    label: 'Buyback',
+    label: 'Trade-in',
     meta: paidLabel,
   }
 }

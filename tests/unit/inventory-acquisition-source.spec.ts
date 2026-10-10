@@ -31,7 +31,7 @@ describe('getInventorySourceBadge', () => {
       { formatPrice: (n) => `₦${n}` }
     )
     expect(badge?.source).toBe('buyback')
-    expect(badge?.label).toBe('Buyback')
+    expect(badge?.label).toBe('Trade-in')
     expect(badge?.meta).toBe('₦25000')
   })
 

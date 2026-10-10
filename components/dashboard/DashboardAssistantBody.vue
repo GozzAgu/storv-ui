@@ -46,7 +46,7 @@
       <div v-else-if="!assistantStore.hasConversation" class="s-assistant__intro">
         <p class="s-assistant__privacy">
           <template v-if="isDemoAssistant">
-            Demo assistant uses canned tips about the iOS app, sales leads, buybacks,
+            Demo assistant uses canned tips about the iOS app, sales leads, trade-ins,
             analytics, Quick Sale, stock loans, and more. Sample numbers in charts are not your real store.
           </template>
           <template v-else>

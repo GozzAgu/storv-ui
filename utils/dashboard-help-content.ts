@@ -73,7 +73,7 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
           'Category cards on the main Inventory list show a subcategory count when a parent already has children. Add subcategories from the parent hub with Add subcategory; each subcategory inherits columns, serial vs quantity mode, profit tracking, and department access from the parent.',
         ],
         bullets: [
-          'Sales, Quick Sale, and buybacks only use leaf categories: subcategories or top-level categories without subcategories enabled.',
+          'Sales, Quick Sale, and trade-ins only use leaf categories: subcategories or top-level categories without subcategories enabled.',
           'Editing a parent and changing columns or tracking prompts you to apply the same settings to existing subcategories or keep changes on the parent only.',
         ],
       },
@@ -102,21 +102,21 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
         ],
       },
       {
-        title: 'Customer buybacks',
+        title: 'Trade-ins',
         body: [
-          'Super admins can record customer buybacks from Inventory → Customer buybacks (/dashboard/buybacks). Use this when someone sells an item to your store: you pay them, a new inventory row is created in the leaf category you pick, and the buyback appears in the list with customer, item, amount paid, and payment method.',
-          'Record buyback opens a side drawer: pick a leaf category (parent · subcategory labels when applicable), fill the item fields for that template, enter amount paid to the customer and payment method, then save. That amount becomes the item unit cost in inventory.',
-          'On Create New Sale, super admins can add swap-in / buyback credit lines when trade-in value applies to a sale. Buybacks are scoped to the active store in the header switcher.',
+          'Super admins can record trade-ins from Inventory → Trade-ins (/dashboard/buybacks). Use this when someone sells an item to your store: you pay them, a new inventory row is created in the leaf category you pick, and the trade-in appears in the list with customer, item, amount paid, and payment method.',
+          'Record trade-in opens a side drawer: pick a leaf category (parent · subcategory labels when applicable), fill the item fields for that template, enter amount paid to the customer and payment method, then save. That amount becomes the item unit cost in inventory.',
+          'On Create New Sale, super admins can add swap-in / trade-in credit lines when trade-in value applies to a sale. Trade-ins are scoped to the active store in the header switcher.',
         ],
         bullets: [
-          'Only store owners (super admins) can record buybacks; managers and staff do not see this screen.',
+          'Only store owners (super admins) can record trade-ins; managers and staff do not see this screen.',
           'Use leaf categories only. The same rule applies when adding products or creating a sale.',
         ],
       },
       {
         title: 'Reports feature insights',
         body: [
-          'Reports (/dashboard/analytics) on Storvv Medium and Enterprise includes a Feature insights grid alongside charts and exports. After you pick a period, cards summarize sales, returns, outstanding balances, inventory health, customers, profit and cost (super admin), operations, buybacks, customer balance ledger, stock loans, and payment links where your plan includes them.',
+          'Reports (/dashboard/analytics) on Storvv Medium and Enterprise includes a Feature insights grid alongside charts and exports. After you pick a period, cards summarize sales, returns, outstanding balances, inventory health, customers, profit and cost (super admin), operations, trade-ins, customer balance ledger, stock loans, and payment links where your plan includes them.',
           'Inventory health shows available vs sold units, low-stock lines, and book value with the same progress bar as Overview. Peak hours, sales by hour, day-of-week charts, and the traffic heatmap help you spot busy periods.',
         ],
         bullets: [
@@ -178,7 +178,7 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
         title: 'Bottom bar and More menu',
         body: [
           'The app uses the same design as the web. On phones, the bottom bar holds Overview, Inventory, Sales, Customers and More. On tablets the sidebar is always visible instead.',
-          'Tap More to open the full menu with every section your plan and role include, such as Reports, Transfers, Stock loans, Buybacks, Sales leads, Storefront, Payment links, Team, Branches, Activity, Help and Settings.',
+          'Tap More to open the full menu with every section your plan and role include, such as Reports, Transfers, Stock loans, Trade-ins, Sales leads, Storefront, Payment links, Team, Branches, Activity, Help and Settings.',
           'Super admins switch branches from the branch switcher in that menu. Managers and staff stay on their assigned store.',
         ],
       },
@@ -239,7 +239,7 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
           'Storvv is your operational workspace: inventory lives in folders and items, sales are recorded as receipts, customers have their own page, and optional areas include Reports, Activity, Team, and Transfers depending on your subscription.',
           'Nearly all data is tied to the store that is active for your session. Super admins switch stores from the branch switcher in the sidebar; managers and staff work inside the store they have been assigned.',
           'Use the web dashboard in a browser or the Capacitor iOS/Android app - the same account, stores, permissions, and design apply everywhere. On phones, a bottom bar and More menu replace the always-visible sidebar.',
-          'The sidebar lists Overview, Inventory, Sales, Customers, Reports, Transfers, Stock loans, Buybacks (super admins), Sales leads, Storefront, Payment links, Team, Branches, Activity, Help, and Settings. Items such as Reports, Stock loans, Payment links, Sales leads, or Transfers only appear when your plan and role include them.',
+          'The sidebar lists Overview, Inventory, Sales, Customers, Reports, Transfers, Stock loans, Trade-ins (super admins), Sales leads, Storefront, Payment links, Team, Branches, Activity, Help, and Settings. Items such as Reports, Stock loans, Payment links, Sales leads, or Transfers only appear when your plan and role include them.',
         ],
       },
       {
@@ -355,13 +355,13 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
         ],
       },
       {
-        title: 'Customer buybacks (/dashboard/buybacks)',
+        title: 'Trade-ins (/dashboard/buybacks)',
         body: [
-          'Buybacks is under Operations in the menu for super admins only. Record when a customer sells stock to your branch: you capture item details in a leaf category, pay the customer, and Storvv adds the unit to inventory with that purchase price as unit cost.',
-          'The buybacks table lists customer, item summary, amount paid, payment method, and date. Open View in stock to jump to the inventory row. Swap-in credit on Create New Sale can apply buyback value toward a purchase when your workflow uses trade-ins.',
+          'Trade-ins is under Operations in the menu for super admins only. Record when a customer sells stock to your branch: you capture item details in a leaf category, pay the customer, and Storvv adds the unit to inventory with that purchase price as unit cost.',
+          'The trade-ins table lists customer, item summary, amount paid, payment method, and date. Open View in stock to jump to the inventory row. Swap-in credit on Create New Sale can apply trade-in value toward a purchase when your workflow uses trade-ins.',
         ],
         bullets: [
-          'Managers and staff cannot open Customer buybacks; only the store owner account can.',
+          'Managers and staff cannot open Trade-ins; only the store owner account can.',
           'Pick the correct leaf category before recording so columns and serial vs quantity mode match the item.',
         ],
       },
@@ -473,7 +473,7 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
           'Reports (/dashboard/analytics, formerly Analytics) appears when your subscription exposes it in the sidebar (Storvv Medium and Enterprise include Reports; Storvv Micro focuses on core sales and inventory).',
           'You must select a store first; the page shows a centered prompt with a link to Settings if nothing is selected.',
           'Pick the period from the dropdown at the top: Daily (last 30 days), Weekly (last 12 weeks), or Monthly (last 12 months). Header metrics summarize total revenue, completed revenue, orders, average order value, customers in period, low stock count, refunds, and gross profit / COGS when the owner can view cost data.',
-          'A period summary paragraph and Inventory health bar mirror Overview. Feature insights cards break down sales, returns, outstanding balances, inventory, customers, profit, operations, buybacks, customer balance, and stock loans depending on role and plan.',
+          'A period summary paragraph and Inventory health bar mirror Overview. Feature insights cards break down sales, returns, outstanding balances, inventory, customers, profit, operations, trade-ins, customer balance, and stock loans depending on role and plan.',
         ],
       },
       {
@@ -561,7 +561,7 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
         body: [
           'Storvv Micro (free): one store, one department, up to 2 staff. Full inventory and sales (Quick Sale, Create New Sale, receipts, returns, customers), Paystack payment links, dashboard, notifications, help center, Storvv Assistant, and web + iOS/Android apps. WhatsApp receipt sharing capped at 10 per month. No Reports, sales leads, activity logs, customer balance ledger, duplicate category, or multi-store tools.',
           'Storvv Medium (₦15,000/month) adds up to 2 stores, 10 departments and 5 staff per store, Reports with PDF/Excel export, activity logs, sales leads, customer balance ledger, unlimited WhatsApp, and duplicate categories within the same branch.',
-          'Storvv Enterprise covers up to 5 stores with 10 staff each and unlimited departments. Need more? Add a store for ₦5,000/month (10 staff seats included) or a staff seat on any store for ₦2,000/month in Settings → Plan & billing. It also adds Multi-Store Sync and stock transfers; Copy from branch (category templates across stores); stock loans for serial inventory; and priority support. Customer buybacks are available to super admins on all plans (role-based, not plan-gated).',
+          'Storvv Enterprise covers up to 5 stores with 10 staff each and unlimited departments. Need more? Add a store for ₦5,000/month (10 staff seats included) or a staff seat on any store for ₦2,000/month in Settings → Plan & billing. It also adds Multi-Store Sync and stock transfers; Copy from branch (category templates across stores); stock loans for serial inventory; and priority support. Trade-ins are available to super admins on all plans (role-based, not plan-gated).',
         ],
       },
     ],
@@ -627,7 +627,7 @@ export function buildAssistantSystemPrompt(knowledgeBase: string): string {
     '- Explain role and plan limits in general terms; remind users that missing controls may mean their role or plan does not include a feature.',
     '- Inventory uses top-level categories plus optional one-level subcategories (not unlimited nesting). When creating a category, Organize with subcategories is optional (off by default). When users ask about subfolders or subcategories, describe the parent hub, leaf-only products, inheritance rules, and the optional toggle from the knowledge base - do not say folders are strictly flat.',
     '- Copy from branch (Enterprise, /dashboard/inventory): select top-level templates from another branch; optionally include subcategories with a checkbox. Branch creation (Branches page): city picker from account region plus optional area suffix.',
-    '- Customer buybacks (/dashboard/buybacks) are super-admin only. Quick Sale and Create New Sale use parent → subcategory → items → checkout. Reports (formerly Analytics) includes feature insight cards for sales, inventory, buybacks, loans, and balances when applicable.',
+    '- Trade-ins (/dashboard/buybacks) are super-admin only. Quick Sale and Create New Sale use parent → subcategory → items → checkout. Reports (formerly Analytics) includes feature insight cards for sales, inventory, trade-ins, loans, and balances when applicable.',
     '- Sales leads (/dashboard/leads) on Medium and Enterprise: track enquiries before receipts; Create sale in the lead page header prefills the sale. Native iOS and Android use the same design as the web: on phones a bottom bar (Overview, Inventory, Sales, Customers, More), More opens the full menu, pull down to refresh, and a ⋯ menu on each list row for actions.',
     '- Mobile app: same data and same design as web; assistant on device uses hosted API + GEMINI on server. Do not describe swipe actions, floating action buttons, long-press menus, or iOS segmented controls - they do not exist.',
     '',

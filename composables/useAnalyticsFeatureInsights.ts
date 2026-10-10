@@ -402,18 +402,18 @@ export function useAnalyticsFeatureInsights(
     insightsWithProfit.push({
       id: 'buybacks',
       icon: InboxArrowDownIcon,
-      title: 'Customer buybacks',
+      title: 'Trade-ins',
       description: `Trade-ins recorded · ${periodText.value.toLowerCase()}`,
       highlight:
         buybacksInPeriod.value.length > 0
           ? formatCurrency(buybackPaidInPeriod.value)
-          : 'No buybacks',
+          : 'No trade-ins',
       metrics: [
-        { label: 'Buybacks', value: String(buybacksInPeriod.value.length) },
+        { label: 'Trade-ins', value: String(buybacksInPeriod.value.length) },
         { label: 'Total paid', value: formatCurrency(buybackPaidInPeriod.value) },
       ],
       href: dashPath('/buybacks'),
-      linkLabel: 'View buybacks',
+      linkLabel: 'View trade-ins',
     })
 
     if (canUseSubscriptionFeature('customer_balance')) {

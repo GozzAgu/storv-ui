@@ -144,9 +144,9 @@ const modules: Array<{
   },
   {
     key: 'buybacks',
-    title: 'Customer buybacks',
-    viewHint: 'Customer sell-ins and buyback history.',
-    manageHint: 'Record and update customer buybacks.',
+    title: 'Trade-ins',
+    viewHint: 'Items bought from customers, and trade-in history.',
+    manageHint: 'Record and update trade-ins.',
   },
   {
     key: 'sellerLoans',

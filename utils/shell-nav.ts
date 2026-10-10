@@ -29,7 +29,8 @@ const SHELL_LABELS: Record<string, string> = {
   Analytics: 'Reports',
   Departments: 'Team',
   'Multi-Store Sync': 'Transfers',
-  'Customer buybacks': 'Buybacks',
+  'Customer buybacks': 'Trade-ins',
+  Partners: 'Trade with shops',
   'Activity Logs': 'Activity',
   'Help center': 'Help',
 }

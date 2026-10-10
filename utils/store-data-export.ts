@@ -518,7 +518,7 @@ export async function buildBuybacksWorkbook(buybacks: CustomerBuyback[], meta?: 
   ws['!cols'] = header.map((col) => ({ wch: Math.max(col.length + 2, 14) }))
 
   const wb = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(wb, ws, 'Buybacks')
+  XLSX.utils.book_append_sheet(wb, ws, 'Trade-ins')
   appendInfoSheet(wb, meta, XLSX)
   return wb
 }

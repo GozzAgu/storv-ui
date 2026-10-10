@@ -576,7 +576,7 @@ const dataExportItems = [
   },
   {
     key: 'buybacks',
-    label: 'Customer buybacks',
+    label: 'Trade-ins',
     description: 'Items bought from customers, prices, and payment method.',
   },
   {

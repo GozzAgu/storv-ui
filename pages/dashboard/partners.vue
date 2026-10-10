@@ -1,6 +1,6 @@
 <template>
   <div class="ds-root s-c s-page s-partners">
-    <SPageHeader title="Partners">
+    <SPageHeader title="Trade with shops">
       <template #eyebrow>
         <p class="s-page-header__eyebrow">Operations</p>
       </template>
@@ -499,7 +499,7 @@ definePageMeta({
   layout: 'dashboard',
 })
 
-useHead({ title: 'Partners - Storvv' })
+useHead({ title: 'Trade with shops - Storvv' })
 
 if (!useRuntimeConfig().public.trade) {
   await navigateTo('/dashboard', { replace: true })

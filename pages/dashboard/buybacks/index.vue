@@ -1,21 +1,21 @@
 <template>
   <div class="ds-root s-c s-page">
-    <SPageHeader title="Buybacks">
+    <SPageHeader title="Trade-ins">
       <template #description>
         Items you've bought back from customers. Each one goes into stock at what you paid.
       </template>
       <template v-if="canAccess && storesStore.currentStoreId" #actions>
         <SButton variant="primary" @click="showCreateModal = true">
           <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
-          Record buyback
+          Record trade-in
         </SButton>
       </template>
     </SPageHeader>
 
     <SCard v-if="!canAccess">
       <SEmptyState
-        title="You don't have access to buybacks"
-        description="Ask the account owner to give you access to customer buybacks."
+        title="You don't have access to trade-ins"
+        description="Ask the account owner to give you access to trade-ins."
       >
         <template #icon><Lock :size="24" :stroke-width="1.75" /></template>
       </SEmptyState>
@@ -24,14 +24,14 @@
     <SCard v-else-if="!storesStore.currentStoreId && !buybacksStore.loading">
       <SEmptyState
         title="Choose a branch"
-        description="Buybacks are kept per branch. Pick one from the branch switcher to see its buybacks."
+        description="Trade-ins are kept per branch. Pick one from the branch switcher to see its trade-ins."
       >
         <template #icon><Store :size="24" :stroke-width="1.75" /></template>
       </SEmptyState>
     </SCard>
 
     <SCard v-else-if="buybacksStore.loading && buybacksStore.buybacks.length === 0" flush aria-busy="true">
-      <ul class="s-list" aria-label="Loading buybacks">
+      <ul class="s-list" aria-label="Loading trade-ins">
         <li v-for="i in 6" :key="i" class="s-list__item" aria-hidden="true">
           <div class="s-list__main">
             <SSkeleton width="40%" height="14px" />
@@ -43,7 +43,7 @@
     </SCard>
 
     <SCard v-else-if="buybacksStore.error">
-      <SEmptyState title="Couldn't load buybacks" :description="buybacksStore.error">
+      <SEmptyState title="Couldn't load trade-ins" :description="buybacksStore.error">
         <template #icon><TriangleAlert :size="24" :stroke-width="1.75" /></template>
         <template #actions>
           <SButton @click="buybacksStore.fetchCustomerBuybacks(true)">Try again</SButton>
@@ -53,14 +53,14 @@
 
     <SCard v-else-if="buybacksStore.buybacks.length === 0">
       <SEmptyState
-        title="No buybacks yet"
+        title="No trade-ins yet"
         description="When a customer sells you an item, record it here. It's added to stock in the category you choose, at the price you paid."
       >
         <template #icon><Undo2 :size="24" :stroke-width="1.75" /></template>
         <template #actions>
           <SButton variant="primary" @click="showCreateModal = true">
             <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
-            Record buyback
+            Record trade-in
           </SButton>
         </template>
       </SEmptyState>
@@ -69,7 +69,7 @@
     <template v-else>
       <dl class="s-metrics">
         <div class="s-metrics__item">
-          <dt class="s-metrics__label">Buybacks</dt>
+          <dt class="s-metrics__label">Trade-ins</dt>
           <dd class="s-metrics__value">{{ buybacksStore.buybacks.length }}</dd>
         </div>
         <div class="s-metrics__item">
@@ -82,13 +82,13 @@
         <SSearch
           v-model="searchQuery"
           class="s-toolbar__search"
-          placeholder="Search buybacks"
-          label="Search buybacks by customer, phone or item"
+          placeholder="Search trade-ins"
+          label="Search trade-ins by customer, phone or item"
         />
       </div>
 
       <SCard v-if="filteredBuybacks.length === 0">
-        <SEmptyState title="No buybacks found" description="Try another customer name, phone number or item.">
+        <SEmptyState title="No trade-ins found" description="Try another customer name, phone number or item.">
           <template #icon><SearchX :size="24" :stroke-width="1.75" /></template>
           <template #actions>
             <SButton @click="searchQuery = ''">Clear search</SButton>
@@ -150,7 +150,7 @@
           :current-page="currentPage"
           :page-size="PAGE_SIZE"
           :total="filteredBuybacks.length"
-          label="Buybacks pagination"
+          label="Trade-ins pagination"
           @page-change="(page) => (currentPage = page)"
         />
       </template>

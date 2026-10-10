@@ -2,7 +2,7 @@
   <SDialog
       placement="right"
     :open="modelValue"
-    title="Record customer buyback"
+    title="Record a trade-in"
     size="md"
     @update:open="(value: boolean) => emit('update:modelValue', value)"
   >
@@ -105,7 +105,7 @@
 
     <template #footer>
       <SDialogActions
-        primary-label="Record buyback"
+        primary-label="Record trade-in"
         :primary-loading="submitting"
         :primary-disabled="!canSubmit"
         :cancel-disabled="submitting"
@@ -218,12 +218,12 @@ async function submit() {
       paymentMethod: paymentMethod.value,
       notes: notes.value,
     })
-    toast.success('Buyback recorded', 'Item added to inventory and ready to sell.')
+    toast.success('Trade-in recorded', 'Item added to inventory and ready to sell.')
     emit('created', buybackId)
     emit('update:modelValue', false)
   } catch (e: unknown) {
-    const msg = e instanceof Error ? e.message : 'Could not record buyback'
-    toast.error('Buyback failed', msg)
+    const msg = e instanceof Error ? e.message : 'Could not record trade-in'
+    toast.error('Trade-in failed', msg)
   } finally {
     submitting.value = false
   }

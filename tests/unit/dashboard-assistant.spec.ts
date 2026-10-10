@@ -25,7 +25,7 @@ describe('dashboard help content', () => {
     expect(kb).toContain('Copy from branch: optional subcategories')
     expect(kb).toContain('Branch names from your region')
     expect(kb).toContain('Create New Sale')
-    expect(kb).toContain('Customer buybacks')
+    expect(kb).toContain('Trade-ins')
     expect(kb).toContain('Feature insights')
     expect(kb).toContain('Pull to refresh')
   })
