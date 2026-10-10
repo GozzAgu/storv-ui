@@ -36,6 +36,60 @@ export interface TradeOverview {
   connections: TradeConnectionView[]
   /** Only the owner connects, removes or blocks partners and edits the handle. */
   canManage: boolean
+  /** Owner, or staff who can make sales: may ask partners for stock and reply. */
+  canTrade: boolean
+}
+
+export type TradeReplyStatus = 'have' | 'dont_have'
+
+export interface TradeReplyInput {
+  status: TradeReplyStatus
+  /** Unit price in kobo; only with `have`. */
+  priceKobo: number | null
+  /** How many they can supply; only with `have`. */
+  quantity: number | null
+  note: string
+}
+
+export interface TradeReplyView extends TradeReplyInput {
+  partner: TradePartnerCard
+  atMs: number
+}
+
+export type TradeRequestState = 'open' | 'closed' | 'expired'
+
+export interface TradeRequestView {
+  id: string
+  direction: 'incoming' | 'outgoing'
+  item: string
+  quantity: number
+  note: string
+  categoryKind: string
+  state: TradeRequestState
+  createdAtMs: number
+  expiresAtMs: number
+  /** Incoming: who is asking. Outgoing: your own store. */
+  from: TradePartnerCard
+  recipientCount: number
+  haveCount: number
+  replyCount: number
+  /** Incoming only: your reply, if any. */
+  myReply: TradeReplyInput | null
+  /** Outgoing only: every reply, `have` first. */
+  replies: TradeReplyView[]
+}
+
+export interface TradeRequestsList {
+  incoming: TradeRequestView[]
+  outgoing: TradeRequestView[]
+}
+
+export interface NewTradeRequestInput {
+  item: string
+  quantity: number
+  note: string
+  /** Partner handles, or empty for every active partner. */
+  to: string[]
 }
 
 export interface TradeLookupResult {

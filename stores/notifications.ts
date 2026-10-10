@@ -57,6 +57,8 @@ export type NotificationType =
   | 'till_count_difference'
   | 'trade_invite'
   | 'trade_accepted'
+  | 'trade_request'
+  | 'trade_reply'
 
 export interface Notification {
   id: string

@@ -3,6 +3,7 @@ import type { Firestore } from 'firebase-admin/firestore'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
 import { assertRateLimit } from '~/server/utils/rate-limit'
 import { requireAuth, type AuthContext } from '~/server/utils/store-auth'
+import { resolveStaffPermissions, type LegacyStaffAccessFields } from '~/utils/staff-permissions'
 import { assertDocId } from '../payments/access'
 import { storeDocRef } from '../payments/audit-log'
 import { PaymentServiceError } from '../payments/records'
@@ -10,6 +11,8 @@ import { TradeError, type TradeScope } from './partners'
 
 export interface TradeAccess extends TradeScope {
   isOwner: boolean
+  /** Owner, or active staff who can make sales: asks partners for stock and replies. */
+  canTrade: boolean
 }
 
 export interface TradeRouteContext {
@@ -25,6 +28,8 @@ export interface TradeRouteOptions {
   rateLimit: { id: string; limit: number; windowMs: number }
   /** Connecting, removing, blocking and the handle are the owner's decisions. */
   ownerOnly?: boolean
+  /** Stock requests and replies: owner or staff who can make sales. */
+  tradeOnly?: boolean
   requireVerifiedEmail?: boolean
 }
 
@@ -45,10 +50,12 @@ export async function resolveTradeAccess(
   }
   const store = storeDocRef(db, scope.ownerId, scope.storeId)
   if (!(await store.get()).exists) throw new TradeError('NOT_FOUND', 404, 'Not found')
-  if (uid === scope.ownerId) return { ...scope, isOwner: true }
-  const member = (await store.collection('members').doc(uid).get()).data()
+  if (uid === scope.ownerId) return { ...scope, isOwner: true, canTrade: true }
+  const member = (await store.collection('members').doc(uid).get()).data() as
+    | (LegacyStaffAccessFields & { status?: string })
+    | undefined
   if (member?.status !== 'active') throw new TradeError('NOT_FOUND', 404, 'Not found')
-  return { ...scope, isOwner: false }
+  return { ...scope, isOwner: false, canTrade: resolveStaffPermissions(member).receipts.create }
 }
 
 function toHttpError(err: unknown): unknown {
@@ -79,6 +86,9 @@ export function defineTradeRoute<T>(
       const access = await resolveTradeAccess(db, auth.uid, input.ownerUserId, input.storeId)
       if (options.ownerOnly && !access.isOwner) {
         throw new TradeError('OWNER_ONLY', 403, 'Only the business owner can manage partners.')
+      }
+      if (options.tradeOnly && !access.canTrade) {
+        throw new TradeError('NO_ACCESS', 403, 'You need permission to make sales to do this.')
       }
       return await run({ event, db, auth, access, input })
     } catch (err) {

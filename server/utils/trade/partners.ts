@@ -68,7 +68,7 @@ function otherParty(conn: StoredConnection, me: string): string {
   return conn.parties[0] === me ? conn.parties[1] : conn.parties[0]
 }
 
-function millis(value: unknown): number {
+export function millis(value: unknown): number {
   return value instanceof Timestamp ? value.toMillis() : 0
 }
 
@@ -92,13 +92,13 @@ async function storeNameAndSlug(db: Firestore, scope: TradeScope) {
   }
 }
 
-async function bankVerifiedKeys(db: Firestore, keys: string[]): Promise<Set<string>> {
+export async function bankVerifiedKeys(db: Firestore, keys: string[]): Promise<Set<string>> {
   if (!keys.length) return new Set()
   const snaps = await db.getAll(...keys.map((k) => db.collection(PAYOUTS_COLLECTION).doc(k)))
   return new Set(snaps.filter((s) => s.data()?.connected === true).map((s) => s.id))
 }
 
-async function readProfiles(db: Firestore, keys: string[]) {
+export async function readProfiles(db: Firestore, keys: string[]) {
   const map = new Map<string, StoredTradeProfile>()
   if (!keys.length) return map
   const snaps = await db.getAll(...keys.map((k) => db.collection(TRADE_PROFILES).doc(k)))
@@ -106,7 +106,7 @@ async function readProfiles(db: Firestore, keys: string[]) {
   return map
 }
 
-function toCard(profile: StoredTradeProfile | undefined, verified: boolean): TradePartnerCard {
+export function toCard(profile: StoredTradeProfile | undefined, verified: boolean): TradePartnerCard {
   return {
     handle: profile?.handle || '',
     displayName: profile?.displayName || 'Business',

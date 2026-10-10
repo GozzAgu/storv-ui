@@ -1,16 +1,25 @@
 import { computed, ref } from 'vue'
-import type { TradeAction, TradeLookupResult, TradeOverview } from '~/types/trade'
+import type {
+  NewTradeRequestInput,
+  TradeAction,
+  TradeLookupResult,
+  TradeOverview,
+  TradeReplyInput,
+  TradeRequestsList,
+} from '~/types/trade'
 
 const EMPTY: TradeOverview = {
   profile: { handle: null, displayName: '', suggestedHandle: '', bankVerified: false },
   connections: [],
   canManage: false,
+  canTrade: false,
 }
 
 /** Client wrapper around /api/trade. Every rule (who may connect, blocks, limits) is server-side. */
 export function useTradePartners() {
   const { authFetch } = useAuthenticatedFetch()
   const overview = ref<TradeOverview>(EMPTY)
+  const requests = ref<TradeRequestsList>({ incoming: [], outgoing: [] })
   const loading = ref(false)
   const loaded = ref(false)
 
@@ -85,6 +94,44 @@ export function useTradePartners() {
     await load()
   }
 
+  async function loadRequests() {
+    const d = await demo()
+    requests.value = d
+      ? d.getDemoTradeRequests()
+      : await authFetch<TradeRequestsList>(`/api/trade/requests?${await query()}`)
+  }
+
+  async function ask(input: NewTradeRequestInput) {
+    const d = await demo()
+    if (d) d.askDemoPartners(input)
+    else await authFetch('/api/trade/requests', { method: 'POST', body: { ...(await scope()), ...input } })
+    await loadRequests()
+  }
+
+  async function reply(requestId: string, input: TradeReplyInput) {
+    const d = await demo()
+    if (d) d.replyDemoTradeRequest(requestId, input)
+    else {
+      await authFetch('/api/trade/requests/reply', {
+        method: 'POST',
+        body: { ...(await scope()), requestId, ...input },
+      })
+    }
+    await loadRequests()
+  }
+
+  async function closeRequest(requestId: string) {
+    const d = await demo()
+    if (d) d.closeDemoTradeRequest(requestId)
+    else {
+      await authFetch('/api/trade/requests/close', {
+        method: 'POST',
+        body: { ...(await scope()), requestId },
+      })
+    }
+    await loadRequests()
+  }
+
   const incoming = computed(() => overview.value.connections.filter((c) => c.state === 'incoming'))
   const outgoing = computed(() => overview.value.connections.filter((c) => c.state === 'outgoing'))
   const partners = computed(() => overview.value.connections.filter((c) => c.state === 'active'))
@@ -98,7 +145,12 @@ export function useTradePartners() {
     outgoing,
     partners,
     blocked,
+    requests,
     load,
+    loadRequests,
+    ask,
+    reply,
+    closeRequest,
     saveProfile,
     lookup,
     invite,

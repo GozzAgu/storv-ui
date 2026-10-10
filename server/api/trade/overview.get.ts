@@ -9,6 +9,6 @@ export default defineTradeRoute(
       getTradeProfile(db, access),
       listTradeConnections(db, access),
     ])
-    return { profile, connections, canManage: access.isOwner }
+    return { profile, connections, canManage: access.isOwner, canTrade: access.canTrade }
   }
 )

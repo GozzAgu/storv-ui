@@ -141,3 +141,120 @@
     padding-inline: var(--s-space-1);
   }
 }
+
+/* ── Stock requests between partners ──────────────────────────────────── */
+
+.s-partners__panel,
+.s-trade-reqs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-space-3);
+}
+
+.s-trade-reqs__pending {
+  color: var(--s-accent);
+  font: var(--s-text-small);
+  font-weight: 600;
+}
+
+.s-trade-req {
+  align-items: flex-start;
+  padding-block: var(--s-space-2);
+}
+
+.s-trade-req--done {
+  opacity: 0.6;
+}
+
+.s-trade-req__icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--s-radius);
+  background: var(--s-accent-soft, var(--s-surface-2));
+  color: var(--s-accent);
+}
+
+.s-trade-req__note {
+  overflow: hidden;
+  color: var(--s-text-muted);
+  font: var(--s-text-small);
+  font-style: italic;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.s-trade-req__end {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  align-self: center;
+  gap: var(--s-space-1);
+}
+
+.s-trade-req > .s-badge,
+.s-trade-req > .s-partners__chevron {
+  align-self: center;
+}
+
+.s-trade-reqs__qty {
+  max-width: 160px;
+}
+
+.s-trade-reqs__to {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-space-1);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.s-trade-reqs__legend {
+  margin-bottom: var(--s-space-1);
+  padding: 0;
+  color: var(--s-text);
+  font: var(--s-text-small);
+  font-weight: 600;
+}
+
+.s-trade-reqs__choose {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-space-1);
+  max-height: 220px;
+  overflow-y: auto;
+  padding: var(--s-space-1) var(--s-space-2);
+  border: 1px solid var(--s-border);
+  border-radius: var(--s-radius);
+}
+
+.s-trade-reqs__view-note {
+  display: block;
+  margin: 0 0 var(--s-space-2);
+  white-space: normal;
+}
+
+.s-trade-reqs__replies {
+  margin-inline: calc(-1 * var(--s-space-3));
+}
+
+.s-trade-reqs__each {
+  color: var(--s-text-muted);
+  font: var(--s-text-small);
+  font-weight: 400;
+}
+
+@media (max-width: 640px) {
+  .s-trade-req {
+    flex-wrap: wrap;
+  }
+
+  .s-trade-req__end {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

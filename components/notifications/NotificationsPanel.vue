@@ -198,8 +198,8 @@ function getTone(notification: Notification): Tone {
   )
     return 'warning'
   if (type === 'payment_awaiting_confirmation') return 'accent'
-  if (type === 'payment_received' || type === 'trade_accepted') return 'success'
-  if (type === 'trade_invite') return 'accent'
+  if (type === 'payment_received' || type === 'trade_accepted' || type === 'trade_reply') return 'success'
+  if (type === 'trade_invite' || type === 'trade_request') return 'accent'
   if (type.endsWith('_deleted') || type === 'receipt_refunded') return 'warning'
   if (type.startsWith('receipt') || type === 'lead_converted') return 'success'
   if (type.startsWith('lead') || type === 'storefront_inquiry') return 'accent'
@@ -251,6 +251,8 @@ async function handleNotificationClick(notification: Notification) {
       router.push('/dashboard/payments/till')
     } else if (notification.type === 'payout_changed') {
       router.push('/dashboard/payment-links')
+    } else if (notification.type === 'trade_request' || notification.type === 'trade_reply') {
+      router.push('/dashboard/partners?tab=requests')
     } else if (notification.type.startsWith('trade_')) {
       router.push('/dashboard/partners')
     } else if (

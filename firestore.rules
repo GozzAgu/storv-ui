@@ -969,6 +969,10 @@ service cloud.firestore {
     match /tradeConnections/{connectionId} {
       allow read, write: if false;
     }
+
+    match /tradeRequests/{requestId} {
+      allow read, write: if false;
+    }
     
     // Deny all other access by default
     match /{document=**} {

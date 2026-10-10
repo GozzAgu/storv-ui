@@ -105,6 +105,7 @@ describe('firestore.rules: Payments V2', () => {
       'tradeProfiles/owner1__s1',
       'tradeHandles/main-shop',
       'tradeConnections/a__1~b__2',
+      'tradeRequests/r1',
     ]
 
     it.each(serverOnlyDocs)('owner cannot write %s', async (path) => {
@@ -147,6 +148,10 @@ describe('firestore.rules: Payments V2', () => {
       await assertFails(getDoc(doc(as('owner1'), 'tradeProfiles/owner1__s1')))
       await assertFails(getDoc(doc(as('owner1'), 'tradeHandles/main')))
       await assertFails(getDoc(doc(as('owner1'), 'tradeConnections/owner1__s1~x__y')))
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await setDoc(doc(context.firestore(), 'tradeRequests/r1'), { fromKey: 'owner1__s1' })
+      })
+      await assertFails(getDoc(doc(as('owner1'), 'tradeRequests/r1')))
     })
   })
 
@@ -331,6 +336,8 @@ describe('firestore.rules: Payments V2', () => {
       'payment_link_expired',
       'trade_invite',
       'trade_accepted',
+      'trade_request',
+      'trade_reply',
     ])(
       'a member cannot forge a %s notification',
       async (type) => {
