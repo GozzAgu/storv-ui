@@ -43,7 +43,7 @@ interface StoredReply extends TradeReplyInput {
   byUid: string
 }
 
-interface StoredRequest {
+export interface StoredRequest {
   fromKey: string
   fromOwnerUid: string
   fromStoreId: string
@@ -98,10 +98,17 @@ export async function tradeTeamUids(db: Firestore, scope: TradeScope): Promise<s
   return [scope.ownerId, ...staff.filter((u) => u !== scope.ownerId)]
 }
 
-async function notifyTeam(
+export async function notifyTeam(
   db: Firestore,
   target: TradeScope,
-  input: { type: 'trade_request' | 'trade_reply'; title: string; message: string; actorUid: string; requestId: string }
+  input: {
+    type: 'trade_request' | 'trade_reply' | 'trade_sale' | 'trade_paid'
+    title: string
+    message: string
+    actorUid: string
+    requestId: string
+    saleId?: string
+  }
 ): Promise<void> {
   try {
     const recipientUids = (await tradeTeamUids(db, target)).filter((u) => u !== input.actorUid)
@@ -114,7 +121,7 @@ async function notifyTeam(
       actorId: input.actorUid,
       recipientUids,
       read: false,
-      metadata: { requestId: input.requestId },
+      metadata: { requestId: input.requestId, ...(input.saleId ? { saleId: input.saleId } : {}) },
       source: 'trade',
       createdAt: FieldValue.serverTimestamp(),
     })

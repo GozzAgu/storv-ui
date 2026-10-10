@@ -82,13 +82,26 @@
         panel-id="partners-panel"
       />
 
-      <div v-if="overview.canTrade && tab === 'requests'" id="partners-panel" role="tabpanel">
+      <div
+        v-if="overview.canTrade && tab === 'requests'"
+        id="partners-panel"
+        class="s-partners__panel"
+        role="tabpanel"
+      >
         <TradeRequestsPanel
           :requests="requests"
           :partners="partners"
           :on-ask="api.ask"
           :on-reply="api.reply"
           :on-close="api.closeRequest"
+          :on-bill="canBill ? startBill : undefined"
+        />
+        <TradeSalesCard
+          :sales="sales"
+          :on-pay="api.payUrl"
+          :on-receipt="api.saleReceipt"
+          :on-claim-stock="api.claimSaleStock"
+          :on-changed="api.loadSales"
         />
       </div>
 
@@ -376,6 +389,32 @@
         />
       </template>
     </SDialog>
+
+    <CreateReceiptModal
+      v-model="showSaleModal"
+      :prefill="salePrefill"
+      @receipt-created="onBillSaleCreated"
+    />
+
+    <SDialog
+      :open="!!billLink"
+      title="Bill sent"
+      :description="
+        billing ? `${billing.from.displayName} can pay it from their Partners page.` : ''
+      "
+      @update:open="(v) => !v && closeBill()"
+    >
+      <div class="s-partners__share">
+        <p class="s-partners__note">
+          You can also send them this payment link. It works for 48 hours and is shown only once.
+        </p>
+        <SInput :model-value="billLink" label="Payment link" readonly />
+        <SButton size="sm" variant="secondary" @click="copyToClipboard(billLink, 'Payment link')">
+          <template #leading><Copy :size="14" :stroke-width="1.75" aria-hidden="true" /></template>
+          Copy link
+        </SButton>
+      </div>
+    </SDialog>
   </div>
 </template>
 
@@ -394,11 +433,19 @@ import SInput from '~/components/s/SInput.vue'
 import SPageHeader from '~/components/s/SPageHeader.vue'
 import SSkeleton from '~/components/s/SSkeleton.vue'
 import STabs from '~/components/s/STabs.vue'
+import CreateReceiptModal from '~/components/receipts/CreateReceiptModal.vue'
 import TradeRequestsPanel from '~/components/trade/TradeRequestsPanel.vue'
+import TradeSalesCard from '~/components/trade/TradeSalesCard.vue'
 import { useAppToast } from '~/composables/useAppToast'
 import { useCopy } from '~/composables/useCopy'
 import { tradeErrorMessage, useTradePartners } from '~/composables/useTradePartners'
-import type { TradeAction, TradeConnectionView, TradeLookupResult } from '~/types/trade'
+import type { ReceiptCreationPrefill } from '~/types/receipt-prefill'
+import type {
+  TradeAction,
+  TradeConnectionView,
+  TradeLookupResult,
+  TradeRequestView,
+} from '~/types/trade'
 import { normalizeTradeHandle, tradeHandleProblem, tradeInvitePath } from '~/utils/trade-handle'
 
 definePageMeta({
@@ -414,8 +461,19 @@ if (!useRuntimeConfig().public.trade) {
 const route = useRoute()
 const toast = useAppToast()
 const { copyToClipboard } = useCopy()
-const { overview, loading, loaded, incoming, outgoing, partners, blocked, requests, load, ...api } =
-  useTradePartners()
+const {
+  overview,
+  loading,
+  loaded,
+  incoming,
+  outgoing,
+  partners,
+  blocked,
+  requests,
+  sales,
+  load,
+  ...api
+} = useTradePartners()
 
 const tab = ref(route.query.tab === 'partners' ? 'partners' : 'requests')
 const tabs = computed(() => {
@@ -478,10 +536,60 @@ async function reload() {
   try {
     await load()
     fillDrafts()
-    if (overview.value.canTrade && profile.value.handle) await api.loadRequests()
+    if (overview.value.canTrade && profile.value.handle) {
+      await Promise.all([api.loadRequests(), api.loadSales()])
+    }
   } catch (e) {
     loadError.value = tradeErrorMessage(e, 'Check your connection and try again.')
   }
+}
+
+const canBill = computed(
+  () => overview.value.sellBlocker === null || overview.value.sellBlocker === 'no_payout'
+)
+const billing = ref<TradeRequestView | null>(null)
+const showSaleModal = ref(false)
+const billLink = ref('')
+const salePrefill = computed<ReceiptCreationPrefill | null>(() =>
+  billing.value
+    ? {
+        customerName: billing.value.from.displayName,
+        itemSearchQuery: billing.value.item,
+        notes: `Partner sale to @${billing.value.from.handle}`,
+        paymentSettlement: 'balance_due',
+      }
+    : null
+)
+
+function startBill(r: TradeRequestView) {
+  if (overview.value.sellBlocker === 'no_payout') {
+    toast.error('Connect your payout account under Payment links before billing partners.')
+    return
+  }
+  billing.value = r
+  showSaleModal.value = true
+}
+
+async function onBillSaleCreated(receipt: { id: string; status?: string }) {
+  const r = billing.value
+  if (!r) return
+  if (receipt.status !== 'balance_due') {
+    toast.error('That sale was recorded as paid, so it was not sent to your partner.')
+    billing.value = null
+    return
+  }
+  try {
+    const { url } = await api.billPartner(r.id, receipt.id)
+    billLink.value = url
+  } catch (e) {
+    toast.error(tradeErrorMessage(e, 'The sale was saved but could not be sent to your partner'))
+    billing.value = null
+  }
+}
+
+function closeBill() {
+  billLink.value = ''
+  billing.value = null
 }
 
 function openEditProfile() {

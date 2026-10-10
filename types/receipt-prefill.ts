@@ -8,4 +8,6 @@ export interface ReceiptCreationPrefill {
   inventoryItemId?: string
   /** Seed the item search field on the items step. */
   itemSearchQuery?: string
+  /** Start the sale as unpaid (stock held until paid), e.g. when billing a trade partner. */
+  paymentSettlement?: 'balance_due'
 }

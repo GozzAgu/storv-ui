@@ -38,6 +38,49 @@ export interface TradeOverview {
   canManage: boolean
   /** Owner, or staff who can make sales: may ask partners for stock and reply. */
   canTrade: boolean
+  /** Why this caller cannot bill a partner yet; null when they can. */
+  sellBlocker: TradeSellBlocker | null
+}
+
+export type TradeSellBlocker = 'no_access' | 'payments_off' | 'no_payout'
+
+/** One line of a partner sale, copied from the seller's receipt. Prices in kobo. */
+export interface TradeSaleLine {
+  name: string
+  quantity: number
+  unitPriceKobo: number
+  brand: string
+  model: string
+  /** Serial number or IMEI, for one-per-unit stock. */
+  serial: string
+}
+
+export type TradeSaleState = 'awaiting_payment' | 'paid' | 'expired' | 'cancelled'
+
+export interface TradeSaleView {
+  id: string
+  /** `selling`: you billed a partner. `buying`: a partner billed you. */
+  direction: 'selling' | 'buying'
+  partner: TradePartnerCard
+  requestId: string
+  receiptNumber: string
+  amountKobo: number
+  lines: TradeSaleLine[]
+  state: TradeSaleState
+  createdAtMs: number
+  expiresAtMs: number
+  paidAtMs: number
+  /** Buying only: the items were already added to inventory. */
+  stockAdded: boolean
+}
+
+export interface TradeReceiptView {
+  receiptNumber: string
+  sellerName: string
+  date: string | null
+  items: { itemName: string; quantity: number; price: number }[]
+  /** Naira, as stored on the seller's receipt. */
+  total: number
 }
 
 export type TradeReplyStatus = 'have' | 'dont_have'

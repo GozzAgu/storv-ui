@@ -4,8 +4,11 @@ import type {
   TradeAction,
   TradeLookupResult,
   TradeOverview,
+  TradeReceiptView,
   TradeReplyInput,
   TradeRequestsList,
+  TradeSaleLine,
+  TradeSaleView,
 } from '~/types/trade'
 
 const EMPTY: TradeOverview = {
@@ -13,6 +16,7 @@ const EMPTY: TradeOverview = {
   connections: [],
   canManage: false,
   canTrade: false,
+  sellBlocker: 'no_access',
 }
 
 /** Client wrapper around /api/trade. Every rule (who may connect, blocks, limits) is server-side. */
@@ -20,6 +24,7 @@ export function useTradePartners() {
   const { authFetch } = useAuthenticatedFetch()
   const overview = ref<TradeOverview>(EMPTY)
   const requests = ref<TradeRequestsList>({ incoming: [], outgoing: [] })
+  const sales = ref<TradeSaleView[]>([])
   const loading = ref(false)
   const loaded = ref(false)
 
@@ -104,7 +109,11 @@ export function useTradePartners() {
   async function ask(input: NewTradeRequestInput) {
     const d = await demo()
     if (d) d.askDemoPartners(input)
-    else await authFetch('/api/trade/requests', { method: 'POST', body: { ...(await scope()), ...input } })
+    else
+      await authFetch('/api/trade/requests', {
+        method: 'POST',
+        body: { ...(await scope()), ...input },
+      })
     await loadRequests()
   }
 
@@ -132,6 +141,60 @@ export function useTradePartners() {
     await loadRequests()
   }
 
+  async function loadSales() {
+    const d = await demo()
+    sales.value = d
+      ? d.getDemoTradeSales()
+      : (await authFetch<{ sales: TradeSaleView[] }>(`/api/trade/sales?${await query()}`)).sales
+  }
+
+  /** Bill the partner who asked, using an unpaid sale. Returns the shareable payment link. */
+  async function billPartner(requestId: string, receiptId: string): Promise<{ url: string }> {
+    const d = await demo()
+    const res = d
+      ? d.billDemoPartner(requestId, receiptId)
+      : await authFetch<{ id: string; url: string }>('/api/trade/sales', {
+          method: 'POST',
+          body: { ...(await scope()), requestId, receiptId },
+        })
+    await loadSales()
+    return { url: res.url }
+  }
+
+  /** Paystack checkout URL for a partner's bill. In demo mode the bill is simply marked paid. */
+  async function payUrl(saleId: string): Promise<string | null> {
+    const d = await demo()
+    if (d) {
+      d.payDemoTradeSale(saleId)
+      await loadSales()
+      return null
+    }
+    const res = await authFetch<{ authorizationUrl: string }>('/api/trade/sales/pay', {
+      method: 'POST',
+      body: { ...(await scope()), saleId },
+    })
+    return res.authorizationUrl
+  }
+
+  async function saleReceipt(saleId: string): Promise<TradeReceiptView> {
+    const d = await demo()
+    if (d) return d.getDemoTradeReceipt(saleId)
+    const res = await authFetch<{ receipt: TradeReceiptView }>(
+      `/api/trade/sales/receipt?${await query({ saleId })}`
+    )
+    return res.receipt
+  }
+
+  /** Claims the one-time "add to inventory"; release it if nothing could be added. */
+  async function claimSaleStock(saleId: string, action: 'claim' | 'release' = 'claim') {
+    const d = await demo()
+    if (d) return { lines: d.claimDemoTradeStock(saleId, action) }
+    return authFetch<{ lines: TradeSaleLine[] }>('/api/trade/sales/stock', {
+      method: 'POST',
+      body: { ...(await scope()), saleId, action },
+    })
+  }
+
   const incoming = computed(() => overview.value.connections.filter((c) => c.state === 'incoming'))
   const outgoing = computed(() => overview.value.connections.filter((c) => c.state === 'outgoing'))
   const partners = computed(() => overview.value.connections.filter((c) => c.state === 'active'))
@@ -146,8 +209,14 @@ export function useTradePartners() {
     partners,
     blocked,
     requests,
+    sales,
     load,
     loadRequests,
+    loadSales,
+    billPartner,
+    payUrl,
+    saleReceipt,
+    claimSaleStock,
     ask,
     reply,
     closeRequest,

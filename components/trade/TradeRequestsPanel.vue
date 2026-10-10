@@ -32,6 +32,14 @@
               <SButton v-if="r.state === 'open'" size="sm" variant="ghost" @click="openReply(r)">
                 Change
               </SButton>
+              <SButton
+                v-if="onBill && r.myReply.status === 'have' && r.state !== 'closed'"
+                size="sm"
+                variant="primary"
+                @click="onBill(r)"
+              >
+                Bill them
+              </SButton>
             </template>
             <SBadge v-else-if="r.state !== 'open'">{{ stateLabel(r) }}</SBadge>
             <template v-else>
@@ -299,6 +307,8 @@ const props = defineProps<{
   onAsk: (input: NewTradeRequestInput) => Promise<void>
   onReply: (requestId: string, input: TradeReplyInput) => Promise<void>
   onClose: (requestId: string) => Promise<void>
+  /** Present when this person can bill partners: turns a "have" reply into a sale. */
+  onBill?: (request: TradeRequestView) => void
 }>()
 
 const toast = useAppToast()

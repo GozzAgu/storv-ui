@@ -1345,6 +1345,10 @@ async function applyReceiptCreationPrefill(prefill: ReceiptCreationPrefill) {
   if (prefill.customerPhone) receiptForm.value.customerPhone = prefill.customerPhone
   if (prefill.customerEmail) receiptForm.value.customerEmail = prefill.customerEmail
   if (prefill.notes) receiptForm.value.notes = prefill.notes
+  if (prefill.paymentSettlement) {
+    paymentSettlement.value = prefill.paymentSettlement
+    depositAmount.value = 0
+  }
 
   const itemId = prefill.inventoryItemId?.trim()
   if (itemId) {

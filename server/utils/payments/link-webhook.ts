@@ -27,6 +27,7 @@ import {
   TX_OPTIONS,
 } from './records'
 import type { PaymentActor } from './state-machine'
+import { notifyTradeSalePaid } from '../trade/sales'
 
 export const PAYSTACK_EVENTS_COLLECTION = 'paystackEvents'
 export const SYSTEM_PAYSTACK_ACTOR: PaymentActor = {
@@ -503,6 +504,7 @@ export async function handleLinkCharge(
       )
     }
     await sendPayerReceiptOnce(db, link, linkId, check.charge, deps)
+    await notifyTradeSalePaid(db, linkId)
     return { httpStatus: 200, outcome: applied.late ? 'applied_late' : 'applied' }
   } catch (err) {
     if (err instanceof ApplyRedirect && err.kind === 'already') {

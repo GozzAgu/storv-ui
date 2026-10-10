@@ -5,9 +5,12 @@ import type {
   TradeLookupResult,
   TradeOverview,
   TradePartnerCard,
+  TradeReceiptView,
   TradeReplyInput,
   TradeRequestView,
   TradeRequestsList,
+  TradeSaleLine,
+  TradeSaleView,
 } from '~/types/trade'
 import { DEFAULT_CATEGORY_KIND, inferCategoryKind } from '~/utils/category-kinds'
 import { normalizeTradeHandle, tradeHandleProblem } from '~/utils/trade-handle'
@@ -35,6 +38,7 @@ function seed(): TradeOverview {
     },
     canManage: true,
     canTrade: true,
+    sellBlocker: null,
     connections: [
       { id: 'demo~abuja', state: 'incoming', partner: card('abuja-accessories'), sinceMs: now - DAY / 4 },
       { id: 'demo~ph', state: 'outgoing', partner: card('ph-electronics'), sinceMs: now - 2 * DAY },
@@ -207,4 +211,121 @@ export function replyDemoTradeRequest(id: string, input: TradeReplyInput): void 
 export function closeDemoTradeRequest(id: string): void {
   const req = currentRequests().outgoing.find((r) => r.id === id)
   if (req) req.state = 'closed'
+}
+
+let sales: TradeSaleView[] | null = null
+
+function line(name: string, quantity: number, unitPriceKobo: number, serial = ''): TradeSaleLine {
+  return { name, quantity, unitPriceKobo, brand: '', model: '', serial }
+}
+
+function seedSales(): TradeSaleView[] {
+  const card = (handle: string) => DIRECTORY.find((d) => d.handle === handle)!
+  const now = Date.now()
+  return [
+    {
+      id: 'demo-s1',
+      direction: 'buying',
+      partner: card('ikeja-phone-hub'),
+      requestId: 'demo-r1',
+      receiptNumber: 'REC-204118',
+      amountKobo: 2_900_000_00,
+      lines: [
+        line('iPhone 15 Pro Max 256GB', 1, 1_450_000_00, '356938035643809'),
+        line('iPhone 15 Pro Max 256GB', 1, 1_450_000_00, '356938035643817'),
+      ],
+      state: 'awaiting_payment',
+      createdAtMs: now - HOUR,
+      expiresAtMs: now + 47 * HOUR,
+      paidAtMs: 0,
+      stockAdded: false,
+    },
+    {
+      id: 'demo-s2',
+      direction: 'selling',
+      partner: card('ikeja-phone-hub'),
+      requestId: 'demo-r3',
+      receiptNumber: 'REC-203977',
+      amountKobo: 185_000_00,
+      lines: [line('AirPods Pro (2nd gen)', 1, 185_000_00)],
+      state: 'paid',
+      createdAtMs: now - 20 * HOUR,
+      expiresAtMs: now + 28 * HOUR,
+      paidAtMs: now - 18 * HOUR,
+      stockAdded: false,
+    },
+  ]
+}
+
+function currentSales(): TradeSaleView[] {
+  sales ??= seedSales()
+  return sales
+}
+
+export function getDemoTradeSales(): TradeSaleView[] {
+  return clone(currentSales())
+}
+
+export function billDemoPartner(requestId: string, receiptId: string): { id: string; url: string } {
+  const req = currentRequests().incoming.find((r) => r.id === requestId)
+  if (!req) throw new Error('Not found')
+  if (req.myReply?.status !== 'have') throw new Error('Reply that you have it before billing them.')
+  const quantity = req.myReply.quantity || req.quantity
+  const unit = req.myReply.priceKobo ?? 0
+  const id = `demo-s${Date.now()}`
+  currentSales().unshift({
+    id,
+    direction: 'selling',
+    partner: req.from,
+    requestId,
+    receiptNumber: `REC-${receiptId.slice(-6).toUpperCase()}`,
+    amountKobo: unit * quantity,
+    lines: [line(req.item, quantity, unit)],
+    state: 'awaiting_payment',
+    createdAtMs: Date.now(),
+    expiresAtMs: Date.now() + 48 * HOUR,
+    paidAtMs: 0,
+    stockAdded: false,
+  })
+  return { id, url: `https://storvv.com/pay/demo-${id}` }
+}
+
+function buyingSale(id: string): TradeSaleView {
+  const sale = currentSales().find((s) => s.id === id && s.direction === 'buying')
+  if (!sale) throw new Error('Not found')
+  return sale
+}
+
+export function payDemoTradeSale(id: string): void {
+  const sale = buyingSale(id)
+  if (sale.state !== 'awaiting_payment') throw new Error('This bill can no longer be paid.')
+  Object.assign(sale, { state: 'paid', paidAtMs: Date.now() })
+}
+
+export function getDemoTradeReceipt(id: string): TradeReceiptView {
+  const sale = buyingSale(id)
+  if (sale.state !== 'paid') throw new Error('This bill has not been paid yet.')
+  return {
+    receiptNumber: sale.receiptNumber,
+    sellerName: sale.partner.displayName,
+    date: new Date(sale.paidAtMs).toISOString(),
+    items: sale.lines.map((l) => ({
+      itemName: l.name,
+      quantity: l.quantity,
+      price: l.unitPriceKobo / 100,
+    })),
+    total: sale.amountKobo / 100,
+  }
+}
+
+export function claimDemoTradeStock(id: string, action: 'claim' | 'release'): TradeSaleLine[] {
+  const sale = buyingSale(id)
+  if (action === 'release') {
+    sale.stockAdded = false
+    return []
+  }
+  if (sale.state !== 'paid') throw new Error('This bill has not been paid yet.')
+  if (sale.stockAdded) throw new Error('These items were already added.')
+  sale.stockAdded = true
+  return clone(sale.lines)
 }
