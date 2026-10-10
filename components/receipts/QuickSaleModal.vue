@@ -559,6 +559,7 @@ import { useReceiptCategoryPicker } from '~/composables/useReceiptCategoryPicker
 import { useDashboardDrawerChrome } from '~/composables/useDashboardDrawerChrome'
 import { getInventoryItemDisplayName as getItemDisplayName, getInventoryItemField as getItemField } from '~/composables/useInventoryItemDisplay'
 import type { InventoryFolderDisplayRow } from '~/utils/inventory-folder-tree'
+import { isItemOnPartnerLoan } from '~/utils/inventory-availability'
 
 interface Props {
   modelValue: boolean
@@ -910,7 +911,9 @@ const loadFolderItems = async (): Promise<InventoryItem[]> => {
 }
 
 const availableFolderItems = computed(() => {
-  let items = folderItems.value.filter((item) => !item.dateOut && !item.pendingSaleReceiptId)
+  let items = folderItems.value.filter(
+    (item) => !item.dateOut && !item.pendingSaleReceiptId && !isItemOnPartnerLoan(item)
+  )
   const query = itemSearchQuery.value.trim().toLowerCase()
   if (!query) return items
   return items.filter((item) => {
@@ -953,6 +956,7 @@ function isItemInCart(itemId: string): boolean {
 function canAddItemToCart(item: InventoryItem): boolean {
   const folder = selectedFolder.value
   if (!folder) return false
+  if (isItemOnPartnerLoan(item)) return false
   if (folder.hasSerialNumbers) {
     if (item.dateOut || item.pendingSaleReceiptId) return false
     return !isItemInCart(item.id)
@@ -967,6 +971,11 @@ function canAddItemToCart(item: InventoryItem): boolean {
 function addItemToCart(foundItem: InventoryItem): boolean {
   const folder = selectedFolder.value
   if (!folder) return false
+
+  if (isItemOnPartnerLoan(foundItem)) {
+    showErrorToast('This product is lent to a partner')
+    return false
+  }
 
   const existingIndex = cartItems.value.findIndex((ci) => ci.id === foundItem.id)
   if (existingIndex >= 0 && cartItems.value[existingIndex]) {

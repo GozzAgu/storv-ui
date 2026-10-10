@@ -236,6 +236,22 @@ service cloud.firestore {
              || changed.hasOnly(['dateOut', 'pendingSaleReceiptId', 'pendingSaleAt', 'sellerLoanOutId', 'sellerLoanPartyName', 'sellerLoanPartyPhone', 'sellerLoanOutAt', 'updatedAt']);
     }
 
+    // Partner loans (server-written): `sellerLoanOutId: trade~<loan>`. While a row is lent to a
+    // partner the client may edit its details but not lend, sell, hold or free it, and may never
+    // set the flag itself. Only the server settles partner loans.
+    function onPartnerLoan(data) {
+      return data.get('sellerLoanOutId', '') is string
+        && data.get('sellerLoanOutId', '').matches('trade~.*');
+    }
+
+    function partnerLoanUntouched() {
+      return (!onPartnerLoan(resource.data) && !onPartnerLoan(request.resource.data))
+        || (onPartnerLoan(resource.data)
+            && request.resource.data.get('sellerLoanOutId', null) == resource.data.get('sellerLoanOutId', null)
+            && request.resource.data.get('dateOut', null) == resource.data.get('dateOut', null)
+            && request.resource.data.get('pendingSaleReceiptId', null) == resource.data.get('pendingSaleReceiptId', null));
+    }
+
     // Swap-in sale: link the trade-in item to its receipt, once.
     function inventoryItemSwapInReceiptLink() {
       return resource.data.get('swapIn', false) == true
@@ -599,12 +615,14 @@ service cloud.firestore {
                            request.resource.data.get('swapIn', false) == true &&
                            request.resource.data.get('buyback', false) != true &&
                            !request.resource.data.keys().hasAny(['swapInReceiptId']))) &&
-                         request.resource.data.storeId == storeId;
+                         request.resource.data.storeId == storeId &&
+                         !onPartnerLoan(request.resource.data);
 
           // Full update: owner or products.edit grant. Any other active member: only
           // dateOut/updatedAt (sale or return-to-stock). access to mark a sale doesn't require a
           // products grant, it's the POS flow every active member can perform.
-          allow update: if (canManageProducts(userId, storeId, 'edit') &&
+          allow update: if partnerLoanUntouched() && (
+                        (canManageProducts(userId, storeId, 'edit') &&
                          resourceMatchesStore(storeId) &&
                          requestMatchesStore(storeId)) ||
                         (isActiveStoreMember(userId, storeId) &&
@@ -614,10 +632,11 @@ service cloud.firestore {
                         (isActiveStoreMember(userId, storeId) &&
                          inventoryItemSwapInReceiptLink() &&
                          resourceMatchesStore(storeId) &&
-                         requestMatchesStore(storeId));
+                         requestMatchesStore(storeId)));
 
           allow delete: if canManageProducts(userId, storeId, 'delete') &&
-                         resourceMatchesStore(storeId);
+                         resourceMatchesStore(storeId) &&
+                         !onPartnerLoan(resource.data);
         }
         
         // Receipts subcollection: users/{userId}/stores/{storeId}/receipts/{receiptId}
@@ -628,11 +647,14 @@ service cloud.firestore {
           
           // Create: owner or any active member (add receipt, POS). Full update: owner or
           // receipts.edit grant. Balance-due payment and refund/cancel: narrower carve-outs below.
+          // `tradeLoanId` marks a partner-loan sale; only the server writes those.
           allow create: if canCreateReceipt(userId, storeId) &&
                          request.resource.data.storeId == storeId &&
-                         !('paymentSummary' in request.resource.data);
+                         !('paymentSummary' in request.resource.data) &&
+                         !('tradeLoanId' in request.resource.data);
 
-          allow update: if receiptClientUpdateKeepsPaymentsSafe() && (
+          allow update: if receiptClientUpdateKeepsPaymentsSafe() &&
+                        request.resource.data.get('tradeLoanId', null) == resource.data.get('tradeLoanId', null) && (
                         ((isStoreOwnerForPath(userId) || memberHasPermission(userId, storeId, 'receipts', 'edit')) &&
                          resourceMatchesStore(storeId) &&
                          requestMatchesStore(storeId))
@@ -975,6 +997,10 @@ service cloud.firestore {
     }
 
     match /tradeSales/{saleId} {
+      allow read, write: if false;
+    }
+
+    match /tradeLoans/{loanId} {
       allow read, write: if false;
     }
     

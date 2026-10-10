@@ -107,6 +107,7 @@ describe('firestore.rules: Payments V2', () => {
       'tradeConnections/a__1~b__2',
       'tradeRequests/r1',
       'tradeSales/owner1__s1~rec1',
+      'tradeLoans/owner1__s1~loan1',
     ]
 
     it.each(serverOnlyDocs)('owner cannot write %s', async (path) => {
@@ -158,6 +159,97 @@ describe('firestore.rules: Payments V2', () => {
       })
       await assertFails(getDoc(doc(as('owner1'), 'tradeRequests/r1')))
       await assertFails(getDoc(doc(as('owner1'), 'tradeSales/owner1__s1~rec1')))
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await setDoc(doc(context.firestore(), 'tradeLoans/owner1__s1~loan1'), {
+          lenderKey: 'owner1__s1',
+          borrowerKey: 'x__y',
+        })
+      })
+      await assertFails(getDoc(doc(as('owner1'), 'tradeLoans/owner1__s1~loan1')))
+    })
+  })
+
+  describe('partner loans', () => {
+    const LENT = `${STORE}/inventoryItems/lent`
+    const FREE = `${STORE}/inventoryItems/free`
+    const FLAG = 'trade~owner1__s1~loan1'
+
+    beforeEach(async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        const db = context.firestore()
+        await setDoc(doc(db, LENT), {
+          storeId: 's1',
+          name: 'iPhone 15',
+          price: 100,
+          sellerLoanOutId: FLAG,
+          sellerLoanPartyName: 'Ikeja Phone Hub',
+        })
+        await setDoc(doc(db, FREE), { storeId: 's1', name: 'iPhone 14', price: 90 })
+      })
+    })
+
+    it('staff cannot sell, hold or free an item lent to a partner', async () => {
+      for (const uid of ['owner1', 'cashier1']) {
+        await assertFails(updateDoc(doc(as(uid), LENT), { dateOut: new Date() }))
+        await assertFails(
+          updateDoc(doc(as(uid), LENT), { pendingSaleReceiptId: 'r9', pendingSaleAt: new Date() })
+        )
+        await assertFails(
+          updateDoc(doc(as(uid), LENT), {
+            sellerLoanOutId: null,
+            sellerLoanPartyName: null,
+            sellerLoanPartyPhone: null,
+            sellerLoanOutAt: null,
+          })
+        )
+      }
+      await assertFails(deleteDoc(doc(as('owner1'), LENT)))
+    })
+
+    it('the owner can still edit its details', async () => {
+      await assertSucceeds(updateDoc(doc(as('owner1'), LENT), { price: 120 }))
+    })
+
+    it('clients cannot put an item on a partner loan themselves', async () => {
+      await assertFails(
+        updateDoc(doc(as('owner1'), FREE), {
+          sellerLoanOutId: FLAG,
+          sellerLoanPartyName: 'Someone',
+          sellerLoanPartyPhone: '',
+          sellerLoanOutAt: new Date(),
+        })
+      )
+      await assertFails(
+        setDoc(doc(as('owner1'), `${STORE}/inventoryItems/forged`), {
+          storeId: 's1',
+          name: 'x',
+          sellerLoanOutId: FLAG,
+        })
+      )
+      // Ordinary stock loans keep working.
+      await assertSucceeds(
+        updateDoc(doc(as('cashier1'), FREE), {
+          sellerLoanOutId: 'loan42',
+          sellerLoanPartyName: 'Walk-in reseller',
+          sellerLoanPartyPhone: '',
+          sellerLoanOutAt: new Date(),
+        })
+      )
+    })
+
+    it('clients cannot create or relabel a partner-loan sale', async () => {
+      await assertFails(
+        setDoc(doc(as('owner1'), `${STORE}/receipts/fake`), {
+          storeId: 's1',
+          total: 10,
+          tradeLoanId: 'owner1__s1~loan1',
+        })
+      )
+      await assertFails(
+        updateDoc(doc(as('owner1'), `${STORE}/receipts/legacy`), {
+          tradeLoanId: 'owner1__s1~loan1',
+        })
+      )
     })
   })
 
@@ -346,6 +438,8 @@ describe('firestore.rules: Payments V2', () => {
       'trade_reply',
       'trade_sale',
       'trade_paid',
+      'trade_loan',
+      'trade_loan_due',
     ])(
       'a member cannot forge a %s notification',
       async (type) => {

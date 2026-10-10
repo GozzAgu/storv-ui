@@ -74,16 +74,52 @@
     </template>
 
     <template v-else>
-      <STabs
-        v-if="overview.canTrade"
-        v-model="tab"
-        :tabs="tabs"
-        label="Partners sections"
-        panel-id="partners-panel"
-      />
+      <STabs v-model="tab" :tabs="tabs" label="Partners sections" panel-id="partners-panel" />
 
       <div
-        v-if="overview.canTrade && tab === 'requests'"
+        v-if="tab === 'loans'"
+        id="partners-panel"
+        class="s-partners__panel"
+        role="tabpanel"
+      >
+        <SCard
+          v-if="overview.lendBlocker"
+          title="Lend stock to partners"
+          description="Lending to partners is on the Enterprise plan. You can still borrow from partners on any plan."
+        >
+          <SButton v-if="overview.canManage" variant="secondary" to="/dashboard/settings?tab=subscription">
+            See plans
+          </SButton>
+        </SCard>
+        <SCard
+          v-else
+          title="Lend stock to partners"
+          description="Lend serial items at an agreed price. They return them or pay you for the ones they sell."
+        >
+          <SButton variant="primary" :disabled="!partners.length" @click="startLend(null)">
+            Lend stock
+          </SButton>
+        </SCard>
+        <TradeLoansCard
+          :loans="loans"
+          :can-pay="overview.canTrade"
+          :on-return="api.returnLoanItems"
+          :on-pay="api.payLoan"
+        />
+        <SCard v-if="!loans.length">
+          <SEmptyState
+            title="No partner loans"
+            description="Stock you lend to partners, or borrow from them, shows here with its due date."
+          >
+            <template #icon
+              ><Handshake :size="24" :stroke-width="1.75" aria-hidden="true"
+            /></template>
+          </SEmptyState>
+        </SCard>
+      </div>
+
+      <div
+        v-else-if="overview.canTrade && tab === 'requests'"
         id="partners-panel"
         class="s-partners__panel"
         role="tabpanel"
@@ -95,6 +131,7 @@
           :on-reply="api.reply"
           :on-close="api.closeRequest"
           :on-bill="canBill ? startBill : undefined"
+          :on-lend="overview.lendBlocker ? undefined : startLend"
         />
         <TradeSalesCard
           :sales="sales"
@@ -109,7 +146,7 @@
         v-else
         id="partners-panel"
         class="s-partners__panel"
-        :role="overview.canTrade ? 'tabpanel' : undefined"
+        role="tabpanel"
       >
         <SCard>
           <div class="s-partners__me">
@@ -390,6 +427,14 @@
       </template>
     </SDialog>
 
+    <TradeLendDialog
+      v-model:open="showLend"
+      :partners="partners"
+      :request="lendFor"
+      :on-lend="api.lend"
+      @lent="tab = 'loans'"
+    />
+
     <CreateReceiptModal
       v-model="showSaleModal"
       :prefill="salePrefill"
@@ -421,7 +466,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import QRCode from 'qrcode'
-import { BadgeCheck, ChevronRight, Copy, Network, QrCode } from '@lucide/vue'
+import { BadgeCheck, ChevronRight, Copy, Handshake, Network, QrCode } from '@lucide/vue'
 import SAvatar from '~/components/s/SAvatar.vue'
 import SBadge from '~/components/s/SBadge.vue'
 import SButton from '~/components/s/SButton.vue'
@@ -434,6 +479,8 @@ import SPageHeader from '~/components/s/SPageHeader.vue'
 import SSkeleton from '~/components/s/SSkeleton.vue'
 import STabs from '~/components/s/STabs.vue'
 import CreateReceiptModal from '~/components/receipts/CreateReceiptModal.vue'
+import TradeLendDialog from '~/components/trade/TradeLendDialog.vue'
+import TradeLoansCard from '~/components/trade/TradeLoansCard.vue'
 import TradeRequestsPanel from '~/components/trade/TradeRequestsPanel.vue'
 import TradeSalesCard from '~/components/trade/TradeSalesCard.vue'
 import { useAppToast } from '~/composables/useAppToast'
@@ -471,15 +518,26 @@ const {
   blocked,
   requests,
   sales,
+  loans,
   load,
   ...api
 } = useTradePartners()
 
-const tab = ref(route.query.tab === 'partners' ? 'partners' : 'requests')
+const tab = ref<string>(
+  route.query.tab === 'partners' || route.query.tab === 'loans' ? route.query.tab : 'requests'
+)
 const tabs = computed(() => {
   const waiting = requests.value.incoming.filter((r) => r.state === 'open' && !r.myReply).length
+  const needsMe = loans.value.filter(
+    (l) =>
+      !l.settled &&
+      (l.overdue || (l.direction === 'lent' && l.lines.some((x) => x.state === 'return_marked')))
+  ).length
   return [
-    { value: 'requests', label: 'Stock requests', ...(waiting ? { count: waiting } : {}) },
+    ...(overview.value.canTrade
+      ? [{ value: 'requests', label: 'Stock requests', ...(waiting ? { count: waiting } : {}) }]
+      : []),
+    { value: 'loans', label: 'Loans', ...(needsMe ? { count: needsMe } : {}) },
     {
       value: 'partners',
       label: 'Partners',
@@ -536,8 +594,12 @@ async function reload() {
   try {
     await load()
     fillDrafts()
-    if (overview.value.canTrade && profile.value.handle) {
-      await Promise.all([api.loadRequests(), api.loadSales()])
+    if (!overview.value.canTrade && tab.value === 'requests') tab.value = 'loans'
+    if (profile.value.handle) {
+      await Promise.all([
+        api.loadLoans(),
+        ...(overview.value.canTrade ? [api.loadRequests(), api.loadSales()] : []),
+      ])
     }
   } catch (e) {
     loadError.value = tradeErrorMessage(e, 'Check your connection and try again.')
@@ -585,6 +647,14 @@ async function onBillSaleCreated(receipt: { id: string; status?: string }) {
     toast.error(tradeErrorMessage(e, 'The sale was saved but could not be sent to your partner'))
     billing.value = null
   }
+}
+
+const showLend = ref(false)
+const lendFor = ref<TradeRequestView | null>(null)
+
+function startLend(r: TradeRequestView | null) {
+  lendFor.value = r
+  showLend.value = true
 }
 
 function closeBill() {
@@ -684,6 +754,16 @@ async function findInviteFromLink() {
   findQuery.value = connect
   await findPartner()
 }
+
+watch(
+  () => route.query.tab,
+  (t) => {
+    if (t === 'loans' || t === 'partners' || (t === 'requests' && overview.value.canTrade)) {
+      tab.value = t
+      if (t === 'loans') api.loadLoans().catch(() => undefined)
+    }
+  }
+)
 
 onMounted(async () => {
   await reload()

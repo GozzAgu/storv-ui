@@ -187,7 +187,7 @@ export async function saveTradeProfile(
   return getTradeProfile(db, scope)
 }
 
-async function keyForHandle(db: Firestore, rawHandle: unknown): Promise<string> {
+export async function keyForHandle(db: Firestore, rawHandle: unknown): Promise<string> {
   const handle = normalizeTradeHandle(rawHandle)
   const snap = tradeHandleProblem(handle) ? null : await db.collection(TRADE_HANDLES).doc(handle).get()
   const key = snap?.data()?.key

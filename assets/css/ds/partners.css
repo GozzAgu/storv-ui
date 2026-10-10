@@ -248,6 +248,53 @@
   font-weight: 400;
 }
 
+.s-trade-lend__items {
+  max-height: 320px;
+  overflow-y: auto;
+  border: 1px solid var(--s-border);
+  border-radius: var(--s-radius);
+}
+
+.s-trade-lend__item {
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.s-trade-lend__price {
+  width: 168px;
+  margin-left: auto;
+}
+
+.s-trade-loan__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-space-2);
+  padding: var(--s-space-3) var(--s-space-4) 0;
+  color: var(--s-text-muted);
+  font: var(--s-text-small);
+}
+
+.s-trade-loan__history {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.s-trade-loan__history li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s-space-3);
+  padding: var(--s-space-2) 0;
+  border-bottom: 1px solid var(--s-border);
+  font: var(--s-text-small);
+}
+
+.s-trade-loan__history time {
+  color: var(--s-text-muted);
+  white-space: nowrap;
+}
+
 @media (max-width: 640px) {
   .s-trade-req {
     flex-wrap: wrap;

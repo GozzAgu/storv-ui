@@ -40,6 +40,14 @@
               >
                 Bill them
               </SButton>
+              <SButton
+                v-if="onLend && r.myReply.status === 'have' && r.state !== 'closed'"
+                size="sm"
+                variant="secondary"
+                @click="onLend(r)"
+              >
+                Lend
+              </SButton>
             </template>
             <SBadge v-else-if="r.state !== 'open'">{{ stateLabel(r) }}</SBadge>
             <template v-else>
@@ -309,6 +317,8 @@ const props = defineProps<{
   onClose: (requestId: string) => Promise<void>
   /** Present when this person can bill partners: turns a "have" reply into a sale. */
   onBill?: (request: TradeRequestView) => void
+  /** Present when this store can lend: lends serial items against a "have" reply. */
+  onLend?: (request: TradeRequestView) => void
 }>()
 
 const toast = useAppToast()

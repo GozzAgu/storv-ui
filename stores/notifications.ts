@@ -61,6 +61,8 @@ export type NotificationType =
   | 'trade_reply'
   | 'trade_sale'
   | 'trade_paid'
+  | 'trade_loan'
+  | 'trade_loan_due'
 
 export interface Notification {
   id: string

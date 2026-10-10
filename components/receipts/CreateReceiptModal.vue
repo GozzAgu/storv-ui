@@ -900,6 +900,7 @@ import {
   groupSelectedSaleLinesByFolder,
 } from '~/utils/receipt-multi-folder'
 import { resolveBulkStockFieldAndValue } from '~/utils/inventory-bulk-quantity'
+import { isItemOnPartnerLoan } from '~/utils/inventory-availability'
 import type { ReceiptCreationPrefill } from '~/types/receipt-prefill'
 
 interface Props {
@@ -1569,7 +1570,9 @@ const loadItems = async () => {
       force: true,
     })
     // Only show items that haven't been sold yet (no dateOut)
-    availableItems.value = items.filter((item) => !item.dateOut && !item.pendingSaleReceiptId)
+    availableItems.value = items.filter(
+      (item) => !item.dateOut && !item.pendingSaleReceiptId && !isItemOnPartnerLoan(item)
+    )
 
     // Only drop selections from the category being refreshed that are no longer available
     const currentFolderId = selectedFolder.value.id

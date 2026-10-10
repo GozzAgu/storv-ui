@@ -31,6 +31,11 @@ export function isItemOnStockLoan(item: InventoryItem): boolean {
   return id != null && String(id).trim() !== ''
 }
 
+/** Lent to a trade partner. Only the partner loan settles it, so it cannot be sold here. */
+export function isItemOnPartnerLoan(item: InventoryItem): boolean {
+  return isItemOnStockLoan(item) && String(item.sellerLoanOutId).startsWith('trade~')
+}
+
 /** Reserved on an outstanding (balance-due) receipt - not sold until paid in full. */
 export function isItemAwaitingPayment(item: InventoryItem): boolean {
   return !!getPendingSaleReceiptId(item) && !isItemSold(item)

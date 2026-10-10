@@ -2,7 +2,10 @@ import type {
   NewTradeRequestInput,
   TradeAction,
   TradeConnectionView,
+  TradeLoanLineView,
+  TradeLoanView,
   TradeLookupResult,
+  NewTradeLoanInput,
   TradeOverview,
   TradePartnerCard,
   TradeReceiptView,
@@ -39,6 +42,7 @@ function seed(): TradeOverview {
     canManage: true,
     canTrade: true,
     sellBlocker: null,
+    lendBlocker: null,
     connections: [
       { id: 'demo~abuja', state: 'incoming', partner: card('abuja-accessories'), sinceMs: now - DAY / 4 },
       { id: 'demo~ph', state: 'outgoing', partner: card('ph-electronics'), sinceMs: now - 2 * DAY },
@@ -328,4 +332,163 @@ export function claimDemoTradeStock(id: string, action: 'claim' | 'release'): Tr
   if (sale.stockAdded) throw new Error('These items were already added.')
   sale.stockAdded = true
   return clone(sale.lines)
+}
+
+let loans: TradeLoanView[] | null = null
+
+function loanLine(
+  id: string,
+  name: string,
+  serial: string,
+  priceKobo: number,
+  state: TradeLoanLineView['state'] = 'out'
+): TradeLoanLineView {
+  return { id, name, serial, priceKobo, state }
+}
+
+function seedLoans(): TradeLoanView[] {
+  const card = (handle: string) => DIRECTORY.find((d) => d.handle === handle)!
+  const now = Date.now()
+  return [
+    refreshLoan({
+      id: 'demo-l1',
+      direction: 'borrowed',
+      partner: card('ikeja-phone-hub'),
+      requestId: null,
+      createdAtMs: now - 3 * DAY,
+      dueAtMs: now + 4 * DAY,
+      settled: false,
+      overdue: false,
+      outstandingKobo: 0,
+      lines: [
+        loanLine('l1', 'iPhone 14 Pro 128GB', '353918107425961', 820_000_00),
+        loanLine('l2', 'iPhone 14 Pro 128GB', '353918107425979', 820_000_00),
+      ],
+      events: [{ atMs: now - 3 * DAY, by: 'lender', action: 'lent', lineIds: ['l1', 'l2'] }],
+    }),
+    refreshLoan({
+      id: 'demo-l2',
+      direction: 'lent',
+      partner: card('kano-wholesale'),
+      requestId: null,
+      createdAtMs: now - 9 * DAY,
+      dueAtMs: now - 2 * DAY,
+      settled: false,
+      overdue: true,
+      outstandingKobo: 0,
+      lines: [
+        loanLine('l1', 'Samsung Galaxy S24 Ultra', 'R5CX10ABCDE', 1_150_000_00, 'return_marked'),
+        loanLine('l2', 'Samsung Galaxy A55', 'R5CX20FGHIJ', 420_000_00, 'paid'),
+      ],
+      events: [
+        { atMs: now - 9 * DAY, by: 'lender', action: 'lent', lineIds: ['l1', 'l2'] },
+        { atMs: now - 4 * DAY, by: 'system', action: 'paid', lineIds: ['l2'] },
+        { atMs: now - HOUR, by: 'borrower', action: 'return_marked', lineIds: ['l1'] },
+      ],
+    }),
+  ]
+}
+
+function refreshLoan(loan: TradeLoanView): TradeLoanView {
+  const open = loan.lines.filter((l) => l.state !== 'returned' && l.state !== 'paid')
+  loan.settled = !open.length
+  loan.overdue = !loan.settled && loan.dueAtMs < Date.now()
+  loan.outstandingKobo = open.reduce((n, l) => n + l.priceKobo, 0)
+  return loan
+}
+
+function currentLoans(): TradeLoanView[] {
+  loans ??= seedLoans()
+  return loans
+}
+
+export function getDemoTradeLoans(): TradeLoanView[] {
+  return clone(
+    [...currentLoans()].sort(
+      (a, b) => Number(a.settled) - Number(b.settled) || a.dueAtMs - b.dueAtMs
+    )
+  )
+}
+
+/** Demo lending: item names come from the demo inventory the dialog already loaded. */
+export function lendDemoStock(
+  input: NewTradeLoanInput,
+  labels: Record<string, { name: string; serial: string }>
+): void {
+  const conn = current().connections.find(
+    (c) => c.state === 'active' && c.partner.handle === input.to
+  )
+  if (!conn) throw new Error('You can only lend to an active partner.')
+  if (!input.lines.length) throw new Error('Choose the items first.')
+  const dueAtMs = Date.parse(`${input.dueDate}T23:59:59+01:00`)
+  if (!Number.isFinite(dueAtMs) || dueAtMs < Date.now()) {
+    throw new Error('Choose a due date between today and 90 days from now.')
+  }
+  const lent = new Set(
+    currentLoans()
+      .filter((l) => l.direction === 'lent' && !l.settled)
+      .flatMap((l) => l.lines.filter((x) => x.state !== 'returned').map((x) => x.serial))
+  )
+  const lines = input.lines.map((l, i) => {
+    const label = labels[l.itemId] ?? { name: 'Item', serial: '' }
+    if (label.serial && lent.has(label.serial)) {
+      throw new Error(`${label.name} is already out on a loan.`)
+    }
+    return loanLine(`l${i + 1}`, label.name, label.serial, l.priceKobo)
+  })
+  const now = Date.now()
+  currentLoans().unshift(
+    refreshLoan({
+      id: `demo-l${now}`,
+      direction: 'lent',
+      partner: conn.partner,
+      requestId: input.requestId,
+      createdAtMs: now,
+      dueAtMs,
+      settled: false,
+      overdue: false,
+      outstandingKobo: 0,
+      lines,
+      events: [{ atMs: now, by: 'lender', action: 'lent', lineIds: lines.map((l) => l.id) }],
+    })
+  )
+}
+
+function demoLoan(id: string): TradeLoanView {
+  const loan = currentLoans().find((l) => l.id === id)
+  if (!loan) throw new Error('Not found')
+  return loan
+}
+
+export function returnDemoLoanItems(id: string, lineIds: string[]): void {
+  const loan = demoLoan(id)
+  const lender = loan.direction === 'lent'
+  const allowed = lender ? ['out', 'return_marked'] : ['out']
+  const chosen = loan.lines.filter((l) => lineIds.includes(l.id))
+  if (!chosen.length) throw new Error('Choose the items first.')
+  for (const l of chosen) {
+    if (!allowed.includes(l.state)) throw new Error(`${l.name} is already settled.`)
+  }
+  for (const l of chosen) l.state = lender ? 'returned' : 'return_marked'
+  loan.events.push({
+    atMs: Date.now(),
+    by: lender ? 'lender' : 'borrower',
+    action: lender ? 'returned' : 'return_marked',
+    lineIds,
+  })
+  refreshLoan(loan)
+}
+
+/** Demo payment: the lines are simply marked paid. */
+export function payDemoLoan(id: string, lineIds: string[]): void {
+  const loan = demoLoan(id)
+  if (loan.direction !== 'borrowed') throw new Error('Not found')
+  const chosen = loan.lines.filter((l) => lineIds.includes(l.id))
+  if (!chosen.length) throw new Error('Choose the items first.')
+  for (const l of chosen) {
+    if (l.state !== 'out') throw new Error(`${l.name} is already settled.`)
+  }
+  for (const l of chosen) l.state = 'paid'
+  loan.events.push({ atMs: Date.now(), by: 'system', action: 'paid', lineIds })
+  refreshLoan(loan)
 }

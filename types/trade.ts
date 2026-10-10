@@ -40,9 +40,65 @@ export interface TradeOverview {
   canTrade: boolean
   /** Why this caller cannot bill a partner yet; null when they can. */
   sellBlocker: TradeSellBlocker | null
+  /** Why this store cannot lend to partners; null when it can. */
+  lendBlocker: TradeLendBlocker | null
 }
 
 export type TradeSellBlocker = 'no_access' | 'payments_off' | 'no_payout'
+
+/** Lending to partners is on the Enterprise plan, like Stock loans. */
+export type TradeLendBlocker = 'no_plan'
+
+/**
+ * One unit on a partner loan. `paying`: a payment for it has started and not finished.
+ * `return_marked`: the borrower says it is back; the lender has not confirmed yet.
+ */
+export type TradeLoanLineState = 'out' | 'return_marked' | 'paying' | 'returned' | 'paid'
+
+export interface TradeLoanLineView {
+  id: string
+  name: string
+  serial: string
+  priceKobo: number
+  state: TradeLoanLineState
+}
+
+export type TradeLoanEventAction = 'lent' | 'return_marked' | 'returned' | 'pay_started' | 'paid'
+
+export interface TradeLoanEventView {
+  atMs: number
+  /** Which business acted; `system` for payments confirmed by Paystack. */
+  by: 'lender' | 'borrower' | 'system'
+  action: TradeLoanEventAction
+  lineIds: string[]
+}
+
+export interface TradeLoanView {
+  id: string
+  /** `lent`: your stock is with the partner. `borrowed`: their stock is with you. */
+  direction: 'lent' | 'borrowed'
+  partner: TradePartnerCard
+  requestId: string | null
+  createdAtMs: number
+  dueAtMs: number
+  /** Every line is returned or paid for. */
+  settled: boolean
+  overdue: boolean
+  /** What is still out (not returned or paid), at the agreed prices. */
+  outstandingKobo: number
+  lines: TradeLoanLineView[]
+  events: TradeLoanEventView[]
+}
+
+export interface NewTradeLoanInput {
+  /** Partner handle. */
+  to: string
+  /** The stock request this answers, if any. */
+  requestId: string | null
+  /** Local date, YYYY-MM-DD. */
+  dueDate: string
+  lines: { itemId: string; folderId: string; priceKobo: number }[]
+}
 
 /** One line of a partner sale, copied from the seller's receipt. Prices in kobo. */
 export interface TradeSaleLine {

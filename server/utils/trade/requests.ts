@@ -102,12 +102,13 @@ export async function notifyTeam(
   db: Firestore,
   target: TradeScope,
   input: {
-    type: 'trade_request' | 'trade_reply' | 'trade_sale' | 'trade_paid'
+    type: 'trade_request' | 'trade_reply' | 'trade_sale' | 'trade_paid' | 'trade_loan' | 'trade_loan_due'
     title: string
     message: string
     actorUid: string
-    requestId: string
+    requestId?: string | null
     saleId?: string
+    loanId?: string
   }
 ): Promise<void> {
   try {
@@ -121,7 +122,11 @@ export async function notifyTeam(
       actorId: input.actorUid,
       recipientUids,
       read: false,
-      metadata: { requestId: input.requestId, ...(input.saleId ? { saleId: input.saleId } : {}) },
+      metadata: {
+        ...(input.requestId ? { requestId: input.requestId } : {}),
+        ...(input.saleId ? { saleId: input.saleId } : {}),
+        ...(input.loanId ? { loanId: input.loanId } : {}),
+      },
       source: 'trade',
       createdAt: FieldValue.serverTimestamp(),
     })

@@ -194,7 +194,8 @@ function getTone(notification: Notification): Tone {
     type === 'till_count_difference' ||
     type === 'payment_link_problem' ||
     type === 'payment_link_sale_cancelled' ||
-    type === 'payout_changed'
+    type === 'payout_changed' ||
+    type === 'trade_loan_due'
   )
     return 'warning'
   if (type === 'payment_awaiting_confirmation') return 'accent'
@@ -205,7 +206,13 @@ function getTone(notification: Notification): Tone {
     type === 'trade_paid'
   )
     return 'success'
-  if (type === 'trade_invite' || type === 'trade_request' || type === 'trade_sale') return 'accent'
+  if (
+    type === 'trade_invite' ||
+    type === 'trade_request' ||
+    type === 'trade_sale' ||
+    type === 'trade_loan'
+  )
+    return 'accent'
   if (type.endsWith('_deleted') || type === 'receipt_refunded') return 'warning'
   if (type.startsWith('receipt') || type === 'lead_converted') return 'success'
   if (type.startsWith('lead') || type === 'storefront_inquiry') return 'accent'
@@ -264,6 +271,8 @@ async function handleNotificationClick(notification: Notification) {
       notification.type === 'trade_paid'
     ) {
       router.push('/dashboard/partners?tab=requests')
+    } else if (notification.type === 'trade_loan' || notification.type === 'trade_loan_due') {
+      router.push('/dashboard/partners?tab=loans')
     } else if (notification.type.startsWith('trade_')) {
       router.push('/dashboard/partners')
     } else if (

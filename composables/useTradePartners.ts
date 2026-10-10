@@ -1,7 +1,9 @@
 import { computed, ref } from 'vue'
 import type {
+  NewTradeLoanInput,
   NewTradeRequestInput,
   TradeAction,
+  TradeLoanView,
   TradeLookupResult,
   TradeOverview,
   TradeReceiptView,
@@ -17,7 +19,11 @@ const EMPTY: TradeOverview = {
   canManage: false,
   canTrade: false,
   sellBlocker: 'no_access',
+  lendBlocker: 'no_plan',
 }
+
+/** Display names for items being lent; only the demo needs them (the server reads its own). */
+export type TradeLoanLabels = Record<string, { name: string; serial: string }>
 
 /** Client wrapper around /api/trade. Every rule (who may connect, blocks, limits) is server-side. */
 export function useTradePartners() {
@@ -25,6 +31,7 @@ export function useTradePartners() {
   const overview = ref<TradeOverview>(EMPTY)
   const requests = ref<TradeRequestsList>({ incoming: [], outgoing: [] })
   const sales = ref<TradeSaleView[]>([])
+  const loans = ref<TradeLoanView[]>([])
   const loading = ref(false)
   const loaded = ref(false)
 
@@ -195,6 +202,48 @@ export function useTradePartners() {
     })
   }
 
+  async function loadLoans() {
+    const d = await demo()
+    loans.value = d
+      ? d.getDemoTradeLoans()
+      : (await authFetch<{ loans: TradeLoanView[] }>(`/api/trade/loans?${await query()}`)).loans
+  }
+
+  async function lend(input: NewTradeLoanInput, labels: TradeLoanLabels) {
+    const d = await demo()
+    if (d) d.lendDemoStock(input, labels)
+    else
+      await authFetch('/api/trade/loans', { method: 'POST', body: { ...(await scope()), ...input } })
+    await loadLoans()
+  }
+
+  /** Borrower: mark items returned. Lender: confirm they are back in stock. */
+  async function returnLoanItems(loanId: string, lineIds: string[]) {
+    const d = await demo()
+    if (d) d.returnDemoLoanItems(loanId, lineIds)
+    else
+      await authFetch('/api/trade/loans/return', {
+        method: 'POST',
+        body: { ...(await scope()), loanId, lineIds },
+      })
+    await loadLoans()
+  }
+
+  /** Paystack checkout URL for borrowed items that were sold. In demo mode they are marked paid. */
+  async function payLoan(loanId: string, lineIds: string[]): Promise<string | null> {
+    const d = await demo()
+    if (d) {
+      d.payDemoLoan(loanId, lineIds)
+      await loadLoans()
+      return null
+    }
+    const res = await authFetch<{ authorizationUrl: string }>('/api/trade/loans/pay', {
+      method: 'POST',
+      body: { ...(await scope()), loanId, lineIds },
+    })
+    return res.authorizationUrl
+  }
+
   const incoming = computed(() => overview.value.connections.filter((c) => c.state === 'incoming'))
   const outgoing = computed(() => overview.value.connections.filter((c) => c.state === 'outgoing'))
   const partners = computed(() => overview.value.connections.filter((c) => c.state === 'active'))
@@ -210,9 +259,14 @@ export function useTradePartners() {
     blocked,
     requests,
     sales,
+    loans,
     load,
     loadRequests,
     loadSales,
+    loadLoans,
+    lend,
+    returnLoanItems,
+    payLoan,
     billPartner,
     payUrl,
     saleReceipt,

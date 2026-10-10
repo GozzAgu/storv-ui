@@ -75,7 +75,8 @@ function saleLines(receipt: Record<string, unknown>): Line[] {
  * Reads what a held sale needs and plans committing it: serial rows get `dateOut`, bulk rows
  * lose the sold quantity, and this sale's hold is cleared. Rows already sold, held by another
  * sale, short of stock, missing or out on a stock loan are not touched and come back as issues
- * (the payment is still confirmed; the owner is alerted). Never drives stock below zero.
+ * (the payment is still confirmed; the owner is alerted). Never drives stock below zero. A
+ * partner-loan sale (`tradeLoanId`) may sell rows on that loan and clears their loan fields.
  */
 export async function planStockCommit(
   tx: Transaction,
@@ -123,6 +124,17 @@ export async function planStockCommit(
     pendingSaleAt: FieldValue.delete(),
     updatedAt: FieldValue.serverTimestamp(),
   }
+  // A partner-loan sale (server-written) sells the very items on that loan, ending it for them.
+  const partnerLoan =
+    typeof receipt.tradeLoanId === 'string' && receipt.tradeLoanId
+      ? `trade~${receipt.tradeLoanId}`
+      : null
+  const clearLoan = {
+    sellerLoanOutId: FieldValue.delete(),
+    sellerLoanPartyName: FieldValue.delete(),
+    sellerLoanPartyPhone: FieldValue.delete(),
+    sellerLoanOutAt: FieldValue.delete(),
+  }
 
   for (const [itemId, need] of needed) {
     const snap = items.get(itemId)
@@ -138,18 +150,21 @@ export async function planStockCommit(
       continue
     }
     const loan = data.sellerLoanOutId
-    if (loan !== undefined && loan !== null && `${loan}`.trim() !== '') {
+    const onLoan = loan !== undefined && loan !== null && `${loan}`.trim() !== ''
+    const onThisLoan = onLoan && partnerLoan !== null && loan === partnerLoan
+    if (onLoan && !onThisLoan) {
       issues.push({ itemId, reason: 'on_loan' })
       if (ours) writes.push({ ref: snap.ref, data: clearHold })
       continue
     }
+    const sold = onThisLoan ? { ...clearHold, ...clearLoan } : clearHold
     if (need.serial) {
       if (data.dateOut) {
         issues.push({ itemId, reason: 'already_sold' })
         if (ours) writes.push({ ref: snap.ref, data: clearHold })
         continue
       }
-      writes.push({ ref: snap.ref, data: { ...clearHold, dateOut: FieldValue.serverTimestamp() } })
+      writes.push({ ref: snap.ref, data: { ...sold, dateOut: FieldValue.serverTimestamp() } })
       continue
     }
     const stock = resolveBulkStockFieldAndValueFromMap(data, need.folder?.template?.fields)
@@ -161,7 +176,7 @@ export async function planStockCommit(
     writes.push({
       ref: snap.ref,
       data: {
-        ...clearHold,
+        ...sold,
         [stock.fieldKey]: stock.value - need.quantity,
         dateOut: FieldValue.delete(),
       },
