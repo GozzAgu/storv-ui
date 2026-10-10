@@ -14,6 +14,7 @@ import {
   LifeBuoy,
   Link2,
   LogOut,
+  Network,
   Package,
   ReceiptText,
   RefreshCcwDot,
@@ -32,6 +33,7 @@ export type DashboardNavIconKey =
   | 'receipts'
   | 'payment-links'
   | 'payments-awaiting'
+  | 'partners'
   | 'storefront'
   | 'sales-leads'
   | 'customers'
@@ -58,6 +60,8 @@ export const DASHBOARD_NAV_ICONS: Record<DashboardNavIconKey, Component> = {
   receipts: ReceiptText,
   'payment-links': Link2,
   'payments-awaiting': BadgeCheck,
+  // Other businesses you trade with; `loans` already uses the handshake.
+  partners: Network,
   storefront: ShoppingBag,
   // Distinct from `profile` below - a prospective customer, not the signed-in user.
   'sales-leads': UserPlus,

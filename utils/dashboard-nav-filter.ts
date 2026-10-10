@@ -16,6 +16,8 @@ export type DashboardNavDefinition = {
   businessCapability?: BusinessCapability
   /** Payments V2 confirmers only (owner or payments.confirm, as reported by the server). */
   requiresPaymentsConfirm?: boolean
+  /** Trade partners feature switch (NUXT_PUBLIC_TRADE). */
+  requiresTrade?: boolean
 }
 
 /** Canonical sidebar / native bottom-nav routes (web + iOS/Android Capacitor). */
@@ -81,6 +83,12 @@ export const DASHBOARD_NAV_DEFINITIONS: DashboardNavDefinition[] = [
     businessCapability: 'paymentLinks',
   },
   {
+    name: 'Partners',
+    segment: '/partners',
+    iconKey: 'partners',
+    requiresTrade: true,
+  },
+  {
     name: 'Awaiting payments',
     segment: '/payments/awaiting',
     iconKey: 'payments-awaiting',
@@ -131,6 +139,7 @@ const NATIVE_MORE_PRIORITY = [
   'Departments',
   'Multi-Store Sync',
   'Payment links',
+  'Partners',
   'Awaiting payments',
   'Activity Logs',
   'Help center',
@@ -149,6 +158,7 @@ export function filterDashboardNavItems(
     hidePaymentLinks?: boolean
     hideStorefront?: boolean
     canConfirmPayments?: boolean
+    tradeEnabled?: boolean
   }
 ): DashboardNavDefinition[] {
   const canSeeManagerOnlyFeatures = options.isSuperAdmin || options.isManager
@@ -157,6 +167,7 @@ export function filterDashboardNavItems(
     if (item.segment === '/payment-links' && options.hidePaymentLinks) return false
     if (item.segment === '/storefront' && options.hideStorefront) return false
     if (item.requiresPaymentsConfirm && !options.canConfirmPayments) return false
+    if (item.requiresTrade && !options.tradeEnabled) return false
     if (item.requiresSuperAdmin && !options.isSuperAdmin) return false
     if (item.requiresManagerOrSuperAdmin && !canSeeManagerOnlyFeatures) return false
     if (item.permissionModule) {

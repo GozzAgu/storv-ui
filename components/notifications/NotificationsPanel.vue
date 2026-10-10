@@ -115,6 +115,7 @@ import {
   Building2,
   CheckCheck,
   FileDown,
+  Network,
   Package,
   Receipt,
   Repeat,
@@ -180,6 +181,7 @@ function getIcon(notification: Notification): Component {
   if (type.startsWith('department')) return Building2
   if (type.startsWith('lead')) return Target
   if (type === 'storefront_inquiry') return Store
+  if (type.startsWith('trade_')) return Network
   if (type === 'swap_in_completed') return Repeat
   if (type === 'import_completed' || type === 'export_completed') return FileDown
   return Bell
@@ -196,7 +198,8 @@ function getTone(notification: Notification): Tone {
   )
     return 'warning'
   if (type === 'payment_awaiting_confirmation') return 'accent'
-  if (type === 'payment_received') return 'success'
+  if (type === 'payment_received' || type === 'trade_accepted') return 'success'
+  if (type === 'trade_invite') return 'accent'
   if (type.endsWith('_deleted') || type === 'receipt_refunded') return 'warning'
   if (type.startsWith('receipt') || type === 'lead_converted') return 'success'
   if (type.startsWith('lead') || type === 'storefront_inquiry') return 'accent'
@@ -248,6 +251,8 @@ async function handleNotificationClick(notification: Notification) {
       router.push('/dashboard/payments/till')
     } else if (notification.type === 'payout_changed') {
       router.push('/dashboard/payment-links')
+    } else if (notification.type.startsWith('trade_')) {
+      router.push('/dashboard/partners')
     } else if (
       (notification.type === 'payment_awaiting_confirmation' ||
         notification.type === 'payment_rejected' ||

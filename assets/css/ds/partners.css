@@ -1,0 +1,143 @@
+/* ── Partners (trade connections between businesses) ───────────────────── */
+
+.s-partners__handle-form {
+  max-width: 440px;
+}
+
+.s-partners__me {
+  display: flex;
+  align-items: center;
+  gap: var(--s-space-2);
+}
+
+.s-partners__me-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.s-partners__me-name {
+  margin: 0;
+  overflow: hidden;
+  color: var(--s-text);
+  font: var(--s-text-title);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.s-partners__handle {
+  margin: 0;
+  color: var(--s-text-muted);
+  font: var(--s-text-body);
+}
+
+.s-partners__me .s-badge,
+.s-partners__result .s-badge,
+.s-list__item .s-badge {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 4px;
+}
+
+.s-partners__find {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-space-1);
+  max-width: 520px;
+}
+
+.s-partners__find > :first-child {
+  flex: 1;
+}
+
+/* Lines the button up with the input, below the field label. */
+.s-partners__find > .s-btn {
+  margin-top: 26px;
+}
+
+.s-partners__result {
+  display: flex;
+  align-items: center;
+  gap: var(--s-space-2);
+  max-width: 520px;
+  margin-top: var(--s-space-2);
+  padding: var(--s-space-1) var(--s-space-2);
+  border: 1px solid var(--s-border);
+  border-radius: var(--s-radius);
+  background: var(--s-surface-2);
+}
+
+.s-partners__row-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: var(--s-space-1);
+}
+
+.s-partners__count {
+  margin-left: 6px;
+  color: var(--s-text-muted);
+  font-weight: 500;
+}
+
+.s-partners__chevron {
+  flex-shrink: 0;
+  color: var(--s-text-muted);
+}
+
+.s-partners__note {
+  margin: 0;
+  color: var(--s-text-muted);
+  font: var(--s-text-body);
+}
+
+.s-partners__share {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  gap: var(--s-space-2);
+  text-align: center;
+}
+
+.s-partners__qr {
+  width: 224px;
+  height: 224px;
+  border-radius: var(--s-radius);
+  background: #fff;
+}
+
+.s-partners__share .s-partners__note strong {
+  color: var(--s-text);
+  font-weight: 600;
+}
+
+.s-partners__link {
+  display: flex;
+  align-items: center;
+  gap: var(--s-space-1);
+  width: 100%;
+  padding: 6px 6px 6px var(--s-space-1);
+  border: 1px solid var(--s-border);
+  border-radius: var(--s-radius);
+  background: var(--s-surface-2);
+}
+
+.s-partners__link code {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--s-text-muted);
+  font: var(--s-text-small);
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .s-partners__me {
+    flex-wrap: wrap;
+  }
+
+  .s-partners__row-actions .s-btn {
+    padding-inline: var(--s-space-1);
+  }
+}

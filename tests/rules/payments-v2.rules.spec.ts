@@ -102,6 +102,9 @@ describe('firestore.rules: Payments V2', () => {
       'paystackEvents/e1',
       'paymentAuditAnchors/a1',
       'paymentsOpsAlerts/x1',
+      'tradeProfiles/owner1__s1',
+      'tradeHandles/main-shop',
+      'tradeConnections/a__1~b__2',
     ]
 
     it.each(serverOnlyDocs)('owner cannot write %s', async (path) => {
@@ -129,6 +132,21 @@ describe('firestore.rules: Payments V2', () => {
       await assertFails(
         getDoc(doc(testEnv.unauthenticatedContext().firestore(), 'paymentLinkTokens/hash1'))
       )
+    })
+
+    it('trade partner collections are unreadable from clients, even by a party', async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        const db = context.firestore()
+        await setDoc(doc(db, 'tradeProfiles/owner1__s1'), { ownerUid: 'owner1', handle: 'main' })
+        await setDoc(doc(db, 'tradeHandles/main'), { key: 'owner1__s1' })
+        await setDoc(doc(db, 'tradeConnections/owner1__s1~x__y'), {
+          parties: ['owner1__s1', 'x__y'],
+          status: 'active',
+        })
+      })
+      await assertFails(getDoc(doc(as('owner1'), 'tradeProfiles/owner1__s1')))
+      await assertFails(getDoc(doc(as('owner1'), 'tradeHandles/main')))
+      await assertFails(getDoc(doc(as('owner1'), 'tradeConnections/owner1__s1~x__y')))
     })
   })
 
@@ -311,6 +329,8 @@ describe('firestore.rules: Payments V2', () => {
       'till_count_difference',
       'payout_changed',
       'payment_link_expired',
+      'trade_invite',
+      'trade_accepted',
     ])(
       'a member cannot forge a %s notification',
       async (type) => {
@@ -326,6 +346,13 @@ describe('firestore.rules: Payments V2', () => {
           ...base,
           type: 'receipt_created',
           source: 'payments_v2',
+        })
+      )
+      await assertFails(
+        setDoc(doc(as('owner1'), `${STORE}/notifications/n1t`), {
+          ...base,
+          type: 'receipt_created',
+          source: 'trade',
         })
       )
       await assertFails(

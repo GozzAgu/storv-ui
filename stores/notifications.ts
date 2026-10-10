@@ -55,6 +55,8 @@ export type NotificationType =
   | 'payment_received'
   | 'payout_changed'
   | 'till_count_difference'
+  | 'trade_invite'
+  | 'trade_accepted'
 
 export interface Notification {
   id: string

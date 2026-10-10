@@ -158,6 +158,8 @@ export default defineNuxtConfig({
       paymentsV2: process.env.NUXT_PUBLIC_PAYMENTS_V2 === '1',
       /** Storvv Assistant ("Ask AI"). Off unless set; the chat route 404s when off. */
       assistant: process.env.NUXT_PUBLIC_ASSISTANT === '1',
+      /** Trade partners between businesses. Off unless set; /api/trade routes 404 when off. */
+      trade: process.env.NUXT_PUBLIC_TRADE === '1',
       /** Mirrors the server's LEGACY_PAYMENT_LINKS_ENABLED so the UI hides create actions that would 410. */
       legacyPaymentLinks: process.env.LEGACY_PAYMENT_LINKS_ENABLED === '1',
       /** Optional: base URL for a separate API server when using a static frontend. Staff creation is client-side and does not require a server. */

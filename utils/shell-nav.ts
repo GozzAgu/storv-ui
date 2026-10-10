@@ -51,6 +51,7 @@ const SHELL_SECTIONS: ReadonlyArray<{ id: string; label: string | null; items: r
       'Storefront',
       'Payment links',
       'Awaiting payments',
+      'Partners',
     ],
   },
   {

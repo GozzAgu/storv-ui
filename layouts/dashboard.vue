@@ -324,6 +324,8 @@ if (import.meta.client) {
   )
 }
 
+const tradeEnabled = Boolean(useRuntimeConfig().public.trade)
+
 function navFilterOptions(launchGates: boolean) {
   return {
     isSuperAdmin: userStore.isSuperAdmin,
@@ -336,6 +338,7 @@ function navFilterOptions(launchGates: boolean) {
     hidePaymentLinks: launchGates && isPaymentLinksComingSoon(),
     hideStorefront: launchGates && isStorefrontDashboardHidden(),
     canConfirmPayments: paymentsAccess.value.enabled && paymentsAccess.value.canConfirm,
+    tradeEnabled,
   }
 }
 

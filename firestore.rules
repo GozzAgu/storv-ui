@@ -795,10 +795,10 @@ service cloud.firestore {
         match /notifications/{notificationId} {
           allow read: if canAccessStoreData(userId, storeId);
           
-          // Payments V2 notifications are server-written; a client must not forge them.
+          // Payments V2 and trade notifications are server-written; a client must not forge them.
           allow create: if canCreateReceipt(userId, storeId)
-            && request.resource.data.get('source', '') != 'payments_v2'
-            && !request.resource.data.get('type', '').matches('^(payment_|payout_|till_count_).*')
+            && !(request.resource.data.get('source', '') in ['payments_v2', 'trade'])
+            && !request.resource.data.get('type', '').matches('^(payment_|payout_|till_count_|trade_).*')
             && !('recipientUids' in request.resource.data);
           allow update: if canManageNonInventoryOps(userId, storeId)
             || (canAccessStoreData(userId, storeId)
@@ -954,6 +954,19 @@ service cloud.firestore {
     }
 
     match /paymentsOpsAlerts/{alertId} {
+      allow read, write: if false;
+    }
+
+    // Trade partners: server-only (Admin SDK); each side reads its view through /api/trade.
+    match /tradeProfiles/{storeKey} {
+      allow read, write: if false;
+    }
+
+    match /tradeHandles/{handle} {
+      allow read, write: if false;
+    }
+
+    match /tradeConnections/{connectionId} {
       allow read, write: if false;
     }
     
