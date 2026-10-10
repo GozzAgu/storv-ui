@@ -201,23 +201,20 @@ describe('storefront-inquiry', () => {
 })
 
 describe('storefront-media', () => {
-  it('builds stable palettes without images', async () => {
-    const { storefrontPlaceholderPalette } = await import('~/utils/storefront-media')
-    const a = storefrontPlaceholderPalette('item-1::Opulent Dubai')
-    const b = storefrontPlaceholderPalette('item-1::Opulent Dubai')
-    const c = storefrontPlaceholderPalette('item-2::Rage Red Intense')
-    expect(a).toEqual(b)
-    expect(a.from).not.toBe(c.from)
+  it('picks an icon from the category, then the title', async () => {
+    const { storefrontIconKey } = await import('~/utils/storefront-media')
+    expect(storefrontIconKey('Phones / iPhone', 'iPhone', 'iPhone 17 Pro')).toBe('phone')
+    expect(storefrontIconKey('Fragrance / Eau de Parfum')).toBe('fragrance')
+    expect(storefrontIconKey('', null, 'Sony WH-1000XM5 Headphones')).toBe('audio')
+    expect(storefrontIconKey('Misc', 'Misc', 'Something')).toBe('package')
   })
 
-  it('prefers subcategory (leaf) over parent category path', async () => {
-    const { storefrontCategoryLabel } = await import('~/utils/storefront-media')
-    expect(storefrontCategoryLabel('Eau de Parfum', 'Fragrance / Eau de Parfum')).toBe(
-      'Eau de Parfum'
-    )
-    expect(storefrontCategoryLabel('', 'Fragrance / Eau de Parfum')).toBe('Eau de Parfum')
-    expect(storefrontCategoryLabel('Fragrance', 'Fragrance')).toBe('Fragrance')
-    expect(storefrontCategoryLabel(null, null)).toBe('')
+  it('matches keywords at word starts only', async () => {
+    const { storefrontIconKey } = await import('~/utils/storefront-media')
+    expect(storefrontIconKey('Spring collection')).toBe('package')
+    expect(storefrontIconKey('Scarves')).toBe('package')
+    expect(storefrontIconKey('Gold rings')).toBe('jewelry')
+    expect(storefrontIconKey('Car parts')).toBe('car')
   })
 })
 
@@ -253,6 +250,21 @@ describe('storefront-catalogue', () => {
       '1',
       '2',
     ])
+  })
+
+  it('filters a category including its subcategories', async () => {
+    const { filterStorefrontItemsUnderPath } = await import('~/utils/storefront-catalogue')
+    const items = [
+      { id: '1', categoryPath: 'Perfumes / Lattafa', categoryName: 'Lattafa' },
+      { id: '2', categoryPath: 'Perfumes / Khadlaj', categoryName: 'Khadlaj' },
+      { id: '3', categoryPath: 'Perfumes', categoryName: 'Perfumes' },
+      { id: '4', categoryPath: 'Perfumery', categoryName: 'Perfumery' },
+      { id: '5', categoryPath: 'Accessories', categoryName: 'Accessories' },
+    ]
+    const ids = (path: string) => filterStorefrontItemsUnderPath(items, path).map((i) => i.id)
+    expect(ids('perfumes')).toEqual(['1', '2', '3'])
+    expect(ids('Perfumes / Lattafa')).toEqual(['1'])
+    expect(ids('')).toEqual(['1', '2', '3', '4', '5'])
   })
 })
 

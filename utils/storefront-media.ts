@@ -1,57 +1,74 @@
-/** Deterministic visual identity for storefront items without photos. */
+/** Icons for storefront items without photos. */
 
-const PLACEHOLDER_PALETTES = [
-  { from: '#1a1523', to: '#3d3550', ink: '#f4f1ea' },
-  { from: '#143f8d', to: '#2a5fad', ink: '#eef3fb' },
-  { from: '#0f5c4c', to: '#1a7a66', ink: '#e8f6f1' },
-  { from: '#7a3e12', to: '#a85a22', ink: '#fff4e8' },
-  { from: '#4a1d4e', to: '#6e3a72', ink: '#f8eef9' },
-  { from: '#1e3a4c', to: '#2f5a6e', ink: '#eaf3f7' },
-  { from: '#5c1f2e', to: '#8a3348', ink: '#fceef1' },
-  { from: '#2f3d1f', to: '#4d6433', ink: '#f0f5e8' },
-] as const
+export type StorefrontIconKey =
+  | 'phone'
+  | 'laptop'
+  | 'tablet'
+  | 'watch'
+  | 'audio'
+  | 'tv'
+  | 'camera'
+  | 'gaming'
+  | 'charger'
+  | 'fragrance'
+  | 'beauty'
+  | 'clothing'
+  | 'shoes'
+  | 'bag'
+  | 'jewelry'
+  | 'food'
+  | 'drink'
+  | 'book'
+  | 'home'
+  | 'baby'
+  | 'car'
+  | 'tools'
+  | 'health'
+  | 'package'
 
-export type StorefrontPlaceholderPalette = (typeof PLACEHOLDER_PALETTES)[number]
+const ICON_KEYWORDS: Array<[StorefrontIconKey, string[]]> = [
+  [
+    'phone',
+    ['phone', 'iphone', 'android', 'samsung', 'pixel', 'tecno', 'infinix', 'mobile', 'smartphone'],
+  ],
+  ['laptop', ['laptop', 'macbook', 'notebook', 'computer', 'pcs?\\b', 'desktop']],
+  ['tablet', ['tablet', 'ipad']],
+  ['watch', ['watch', 'smartwatch']],
+  ['audio', ['audio', 'headphone', 'earbud', 'airpod', 'speaker', 'earphone', 'sound']],
+  ['tv', ['tvs?\\b', 'television', 'monitor']],
+  ['camera', ['camera', 'lens', 'photo']],
+  ['gaming', ['game', 'gaming', 'playstation', 'ps5', 'xbox', 'nintendo', 'console']],
+  ['charger', ['charger', 'cable', 'power bank', 'powerbank', 'battery', 'adapter', 'accessor']],
+  ['fragrance', ['perfume', 'fragrance', 'cologne', 'scent', 'oud']],
+  ['beauty', ['beauty', 'makeup', 'cosmetic', 'skin', 'hair', 'lotion', 'cream']],
+  ['clothing', ['cloth', 'shirt', 'dress', 'wear', 'fashion', 'gown', 'trouser', 'jean', 'kaftan']],
+  ['shoes', ['shoe', 'sneaker', 'sandal', 'slipper', 'boot', 'heel']],
+  ['bag', ['bag', 'purse', 'wallet', 'luggage', 'backpack']],
+  ['jewelry', ['jewel', 'rings?\\b', 'necklace', 'bracelet', 'earring', 'gold\\b']],
+  ['food', ['food', 'snack', 'grocer', 'rice', 'spice', 'provision']],
+  ['drink', ['drink', 'wine', 'juice', 'beverage', 'water', 'beer']],
+  ['book', ['book', 'stationer', 'novel']],
+  ['home', ['home', 'furniture', 'kitchen', 'decor', 'appliance']],
+  ['baby', ['baby', 'kid', 'toy', 'child']],
+  ['car', ['cars?\\b', 'auto\\b', 'automotive', 'vehicle', 'tyre', 'tire\\b', 'tires\\b']],
+  ['tools', ['tool', 'hardware', 'electrical']],
+  ['health', ['health', 'pharma', 'drug', 'medic', 'supplement', 'vitamin']],
+]
 
-function hashString(input: string): number {
-  let hash = 0
-  const s = String(input || '')
-  for (let i = 0; i < s.length; i++) {
-    hash = (hash * 31 + s.charCodeAt(i)) >>> 0
+/** Keywords match at a word start; entries are regex sources so short words can require a word end. */
+const ICON_PATTERNS: Array<[StorefrontIconKey, RegExp]> = ICON_KEYWORDS.map(([key, words]) => [
+  key,
+  new RegExp(`\\b(?:${words.join('|')})`, 'i'),
+])
+
+/** Icon for an item without a photo, picked from its category (then title) keywords. */
+export function storefrontIconKey(...labels: Array<string | null | undefined>): StorefrontIconKey {
+  for (const label of labels) {
+    const text = String(label || '')
+    if (!text) continue
+    for (const [key, pattern] of ICON_PATTERNS) {
+      if (pattern.test(text)) return key
+    }
   }
-  return hash
-}
-
-/**
- * Leaf category for placeholders: subcategory when nested, else top-level category.
- * Prefers `categoryName`; falls back to the last segment of `categoryPath`.
- */
-export function storefrontCategoryLabel(
-  categoryName?: string | null,
-  categoryPath?: string | null
-): string {
-  const name = String(categoryName || '').trim()
-  if (name) return name
-  const path = String(categoryPath || '').trim()
-  if (!path) return ''
-  const parts = path
-    .split('/')
-    .map((p) => p.trim())
-    .filter(Boolean)
-  return parts[parts.length - 1] || parts[0] || ''
-}
-
-export function storefrontPlaceholderPalette(
-  seed: string
-): StorefrontPlaceholderPalette {
-  const idx = hashString(seed || 'item') % PLACEHOLDER_PALETTES.length
-  return PLACEHOLDER_PALETTES[idx]
-}
-
-export function storefrontPlaceholderStyle(seed: string): Record<string, string> {
-  const palette = storefrontPlaceholderPalette(seed)
-  return {
-    backgroundImage: `linear-gradient(145deg, ${palette.from} 0%, ${palette.to} 100%)`,
-    color: palette.ink,
-  }
+  return 'package'
 }

@@ -24,7 +24,10 @@ export function parseStorefrontCategoryPath(path: string | null | undefined): st
 }
 
 export function joinStorefrontCategoryPath(parts: string[]): string {
-  return parts.map((p) => p.trim()).filter(Boolean).join(' / ')
+  return parts
+    .map((p) => p.trim())
+    .filter(Boolean)
+    .join(' / ')
 }
 
 function pathKey(path: string): string {
@@ -124,6 +127,21 @@ export function storefrontFolderParentPath(path: string): string {
   const parts = parseStorefrontCategoryPath(path)
   if (parts.length <= 1) return ''
   return joinStorefrontCategoryPath(parts.slice(0, -1))
+}
+
+/** Products in a category or any of its subcategories ("Phones" includes "Phones / iPhone"). */
+export function filterStorefrontItemsUnderPath<T extends StorefrontCatalogueItemLike>(
+  items: T[],
+  path: string
+): T[] {
+  const target = parseStorefrontCategoryPath(path).map(pathKey)
+  if (!target.length) return items
+  return items.filter((item) => {
+    const parts = parseStorefrontCategoryPath(item.categoryPath || item.categoryName || '').map(
+      pathKey
+    )
+    return target.every((segment, i) => parts[i] === segment)
+  })
 }
 
 /** Products that belong in a leaf folder (exact path / name match). */

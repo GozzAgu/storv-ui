@@ -44,7 +44,6 @@
           <StorefrontMedia
             :src="item.imageUrl"
             :title="item.title"
-            :seed="item.id"
             :category-name="item.categoryName"
             :category-path="item.categoryPath"
             :alt="item.title"
