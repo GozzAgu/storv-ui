@@ -38,6 +38,9 @@ export default defineEventHandler(async (event) => {
   if (link.status === 'paid') {
     throw createError({ statusCode: 409, message: 'This invoice has already been paid' })
   }
+  if ((link.status as string) === 'cancelled') {
+    throw createError({ statusCode: 410, message: 'This payment link was cancelled by the shop' })
+  }
   if (link.reference && link.status === 'unpaid') {
     throw createError({
       statusCode: 409,

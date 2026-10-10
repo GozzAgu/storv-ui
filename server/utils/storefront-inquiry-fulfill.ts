@@ -63,6 +63,21 @@ export async function readInquiryFulfillInventory(
   const usesSerial = !!folder?.hasSerialNumbers
   const itemData = itemSnap.data() as Record<string, unknown>
 
+  if (String(itemData.sellerLoanOutId ?? '').trim()) {
+    throw createError({
+      statusCode: 409,
+      message: 'This item is out on a stock loan. Settle the loan before selling it.',
+    })
+  }
+  const heldBy = String(itemData.pendingSaleReceiptId ?? '').trim()
+  const paymentToken = String(inquiry.paymentLinkToken || '').trim()
+  if (heldBy && !(paymentToken && heldBy === `paylink:${paymentToken}`)) {
+    throw createError({
+      statusCode: 409,
+      message: 'This item is held for another sale awaiting payment.',
+    })
+  }
+
   if (usesSerial) {
     if (itemData.dateOut) {
       throw createError({
@@ -118,10 +133,15 @@ export function writeInquiryFulfillSale(
     inquiryId: string
     inquiry: StorefrontInquiry
     inventory: InquiryFulfillReads
+    /** How the customer paid, when the business took payment outside a payment link. */
+    paymentMethod?: string
+    /** Store uses Payments V2: the payment is recorded as a tender after the sale is written. */
+    paymentsV2?: boolean
   }
 ): InquiryFulfillWriteResult {
   const { storeRef, storeId, ownerUserId, createdByUid, inquiryId, inquiry, inventory } =
     params
+  const paymentMethod = params.paymentMethod?.trim() || 'Storefront'
   const quantity = 1
   const unitPrice =
     inquiry.listingPrice != null && Number.isFinite(Number(inquiry.listingPrice))
@@ -190,8 +210,9 @@ export function writeInquiryFulfillSale(
     ],
     itemsCount: quantity,
     total: unitPrice * quantity,
-    paymentMethod: 'Storefront',
+    paymentMethod,
     status: 'completed',
+    ...(params.paymentsV2 ? { paymentsV2: true } : {}),
     notes: noteParts.join(' · '),
     folderId: inventory.folderId,
     itemIds: [inventory.itemRef.id],
@@ -209,6 +230,5 @@ export function writeInquiryFulfillSale(
     receiptId: receiptRef.id,
     receiptNumber,
     total: unitPrice * quantity,
-    folderId: inventory.folderId,
   }
 }

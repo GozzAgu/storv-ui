@@ -101,6 +101,23 @@ export async function settlePaymentLink(
       }
     }
 
+    // The shop recorded this sale another way (paid in person); never sell it twice.
+    if ((link.status as string) === 'cancelled') {
+      console.error(
+        JSON.stringify({
+          tag: 'payments-alert',
+          alert: 'cancelled-link-charged',
+          token,
+          reference: opts.reference,
+        })
+      )
+      tx.update(linkRef, {
+        chargedAfterCancel: { reference: opts.reference, amountKobo: Number(opts.paidAmountKobo) },
+        updatedAt: FieldValue.serverTimestamp(),
+      })
+      return { settled: false, alreadyProcessed: true, settleError: 'cancelled' }
+    }
+
     // Amount must match what was locked at link creation.
     if (Number(opts.paidAmountKobo) !== Number(link.amount)) {
       tx.update(linkRef, {

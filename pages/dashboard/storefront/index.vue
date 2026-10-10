@@ -208,6 +208,42 @@
 
     <SharePaymentLinkModal v-model="showShareModal" :link="shareLink" />
 
+    <SDialog
+      :open="!!completing"
+      title="How did they pay?"
+      :description="
+        completing
+          ? `${completing.listingTitle || 'Item'}${
+              completing.listingPrice ? ` · ${formatMoney(completing.listingPrice)}` : ''
+            } for ${completing.customerName || 'the customer'}`
+          : ''
+      "
+      size="sm"
+      :dismissible="!actingId"
+      @update:open="(v) => !v && (completing = null)"
+    >
+      <form id="storefront-complete-form" class="s-form" @submit.prevent="confirmComplete">
+        <SSelect
+          v-model="completeMethod"
+          label="Payment method"
+          :options="paymentTenderOptions.map((m) => ({ label: m, value: m }))"
+          required
+        />
+        <p class="s-form-meta">
+          This records the sale in Sales and marks the item sold in your inventory.
+        </p>
+      </form>
+      <template #footer>
+        <SDialogActions
+          primary-label="Record sale"
+          :primary-loading="!!actingId"
+          :primary-disabled="!completeMethod"
+          @cancel="completing = null"
+          @primary="confirmComplete"
+        />
+      </template>
+    </SDialog>
+
     <SMenu
       :open="Boolean(openInquiryMenuId && inquiryForOpenMenu && inquiryMenuFixedStyle)"
       :style="inquiryMenuFixedStyle"
@@ -286,6 +322,8 @@ import {
 import SBadge from '~/components/s/SBadge.vue'
 import SButton from '~/components/s/SButton.vue'
 import SCard from '~/components/s/SCard.vue'
+import SDialog from '~/components/s/SDialog.vue'
+import SDialogActions from '~/components/s/SDialogActions.vue'
 import SEmptyState from '~/components/s/SEmptyState.vue'
 import SIconButton from '~/components/s/SIconButton.vue'
 import SMenu from '~/components/s/SMenu.vue'
@@ -293,6 +331,7 @@ import SMenuItem from '~/components/s/SMenuItem.vue'
 import SPageHeader from '~/components/s/SPageHeader.vue'
 import SPagination from '~/components/s/SPagination.vue'
 import SSearch from '~/components/s/SSearch.vue'
+import SSelect from '~/components/s/SSelect.vue'
 import SSkeleton from '~/components/s/SSkeleton.vue'
 import STabs from '~/components/s/STabs.vue'
 import type { ShareableLink } from '~/components/payments/SharePaymentLinkModal.vue'
@@ -305,6 +344,8 @@ import { getCurrentStoreId } from '~/composables/useCurrentStore'
 import { useAuthenticatedFetch } from '~/composables/useAuthenticatedFetch'
 import { useAnchoredRowMenu } from '~/composables/useAnchoredRowMenu'
 import { usePaymentLinksLaunch } from '~/composables/usePaymentLinksLaunch'
+import { usePaymentTenders } from '~/composables/usePaymentTenders'
+import { useAppToast } from '~/composables/useAppToast'
 import { useDashboardPageRefreshRegister } from '~/composables/useDashboardPageRefresh'
 import { useStoresStore } from '~/stores/stores'
 import { CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
@@ -497,9 +538,9 @@ function canSendPaymentLink(row: InquiryRow) {
 }
 
 function canComplete(row: InquiryRow) {
-  // After the customer pays, settle may already create the sale receipt while
-  // leaving the inquiry confirmed. Mark complete still closes the request.
-  return row.status === 'confirmed' && isPaid(row)
+  // Paid by link: closes the request (settle may already have made the sale).
+  // Not paid by link: the business says how the customer paid.
+  return row.status === 'confirmed'
 }
 
 function canCreateSale(row: InquiryRow) {
@@ -575,12 +616,24 @@ async function runMenuAction(status: StorefrontInquiryStatus) {
   const id = row?.id
   closeInquiryMenu()
   if (!id) return
-  if (status === 'completed' && row && !isPaid(row) && !row.receiptId) {
-    loadError.value =
-      'Send a payment link and wait for the customer to pay before marking complete.'
+  if (status === 'completed' && row && row.status === 'confirmed' && !isPaid(row)) {
+    completeMethod.value = defaultPaymentMethod.value
+    completing.value = row
     return
   }
   await updateStatus(id, status)
+}
+
+const toast = useAppToast()
+const { paymentTenderOptions, defaultPaymentMethod } = usePaymentTenders()
+const completing = ref<InquiryRow | null>(null)
+const completeMethod = ref('')
+
+async function confirmComplete() {
+  const row = completing.value
+  if (!row || !completeMethod.value || actingId.value) return
+  const ok = await updateStatus(row.id, 'completed', completeMethod.value)
+  if (ok) completing.value = null
 }
 
 async function sendPaymentLink() {
@@ -667,7 +720,11 @@ async function load() {
   }
 }
 
-async function updateStatus(id: string, status: StorefrontInquiryStatus) {
+async function updateStatus(
+  id: string,
+  status: StorefrontInquiryStatus,
+  paymentMethod?: string
+): Promise<boolean> {
   actingId.value = id
   loadError.value = ''
   try {
@@ -679,10 +736,20 @@ async function updateStatus(id: string, status: StorefrontInquiryStatus) {
       receiptId?: string
       receiptNumber?: string
       folderId?: string
+      paymentRecorded?: boolean
     }>(`/api/storefront/inquiries/${id}`, {
       method: 'PATCH',
-      body: { ownerUserId, storeId, status },
+      body: { ownerUserId, storeId, status, ...(paymentMethod ? { paymentMethod } : {}) },
     })
+    if (status === 'completed' && res?.receiptNumber) {
+      toast.success(`Sale ${res.receiptNumber} recorded in Sales`)
+    }
+    if (res?.paymentRecorded === false) {
+      toast.warning(
+        'The sale was saved, but the payment was not recorded. Open the sale and use Record payment.',
+        10000
+      )
+    }
     if (status === 'completed' && res?.receiptId) {
       const { resetReceiptsFetchStamp, useReceiptsStore } = await import('~/stores/receipts')
       const { resetInventoryFetchStamps } = await import('~/stores/inventory')
@@ -693,8 +760,12 @@ async function updateStatus(id: string, status: StorefrontInquiryStatus) {
       await useReceiptsStore().fetchReceipts({ force: true })
     }
     await load()
+    return true
   } catch (e: any) {
-    loadError.value = e?.data?.message || e?.message || 'Update failed'
+    const message = e?.data?.message || e?.message || 'Update failed'
+    if (paymentMethod) toast.error(message)
+    else loadError.value = message
+    return false
   } finally {
     actingId.value = ''
   }
