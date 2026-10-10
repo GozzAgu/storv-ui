@@ -16,6 +16,10 @@ export function getGeminiModel(): string {
   return (process.env.GEMINI_MODEL || DEFAULT_GEMINI_ASSISTANT_MODEL).trim()
 }
 
+export function isAssistantEnabled(): boolean {
+  return Boolean(useRuntimeConfig().public.assistant)
+}
+
 export function isGeminiAssistantConfigured(): boolean {
-  return Boolean(getGeminiApiKey())
+  return isAssistantEnabled() && Boolean(getGeminiApiKey())
 }

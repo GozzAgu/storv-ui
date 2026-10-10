@@ -399,7 +399,7 @@
                 <span class="s-list__action">Open</span>
               </NuxtLink>
             </li>
-            <li>
+            <li v-if="assistantEnabled">
               <button
                 type="button"
                 class="s-list__item s-list__item--interactive s-profile__row"
@@ -1116,7 +1116,7 @@ const isLoadingStats = ref(true)
 const { currentUser, loading: authLoading } = useFirebaseAuth()
 const { getUserDocument, updateUserDocument, resetTutorial } = useUser()
 const authStore = useAuthStore()
-const { openAssistant } = useDashboardAssistant()
+const { openAssistant, enabled: assistantEnabled } = useDashboardAssistant()
 const isReplayingTour = ref(false)
 const receiptsStore = useReceiptsStore()
 const inventoryStore = useInventoryStore()

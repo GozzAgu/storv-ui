@@ -36,6 +36,7 @@
         </template>
         <template #actions>
           <SButton
+            v-if="assistantEnabled"
             class="s-topbar__ai"
             aria-label="Open Storvv Assistant"
             :aria-expanded="assistantStore.isOpen"
@@ -107,7 +108,7 @@
     <!-- Global Search (deferred; especially on native to keep first paint lean) -->
     <GlobalSearch v-if="searchShellReady" />
 
-    <DashboardAssistant v-if="assistantShellReady" />
+    <DashboardAssistant v-if="assistantEnabled && assistantShellReady" />
   </div>
 </template>
 
@@ -190,7 +191,7 @@ function mountShellWidgets() {
   mountAssistantShell()
 }
 
-const { openAssistant: openAssistantPanel } = useDashboardAssistant()
+const { openAssistant: openAssistantPanel, enabled: assistantEnabled } = useDashboardAssistant()
 
 function openAssistant(draft?: string) {
   mountAssistantShell()

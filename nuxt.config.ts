@@ -156,6 +156,8 @@ export default defineNuxtConfig({
       paystackPublicKey: process.env.NUXT_PUBLIC_PAYSTACK_PUBLIC_KEY || '',
       /** Payments V2 screens. The server gate (PAYMENTS_V2_ENABLED) still decides; routes 404 when off. */
       paymentsV2: process.env.NUXT_PUBLIC_PAYMENTS_V2 === '1',
+      /** Storvv Assistant ("Ask AI"). Off unless set; the chat route 404s when off. */
+      assistant: process.env.NUXT_PUBLIC_ASSISTANT === '1',
       /** Mirrors the server's LEGACY_PAYMENT_LINKS_ENABLED so the UI hides create actions that would 410. */
       legacyPaymentLinks: process.env.LEGACY_PAYMENT_LINKS_ENABLED === '1',
       /** Optional: base URL for a separate API server when using a static frontend. Staff creation is client-side and does not require a server. */

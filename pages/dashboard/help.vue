@@ -8,7 +8,7 @@
         <SButton variant="secondary" :loading="isReplayingTour" @click="replayDashboardTour">
           Replay tour
         </SButton>
-        <SButton @click="openAssistant()">
+        <SButton v-if="assistantEnabled" @click="openAssistant()">
           <template #leading><Sparkles :size="16" :stroke-width="2" aria-hidden="true" /></template>
           Ask assistant
         </SButton>
@@ -34,12 +34,18 @@
     <SCard v-if="filteredCategories.length === 0">
       <SEmptyState
         title="No help topics found"
-        :description="`Nothing matches “${trimmedSearch}”. Try another word, or ask the assistant.`"
+        :description="
+          assistantEnabled
+            ? `Nothing matches “${trimmedSearch}”. Try another word, or ask the assistant.`
+            : `Nothing matches “${trimmedSearch}”. Try another word.`
+        "
       >
         <template #icon><SearchX :size="24" :stroke-width="1.75" aria-hidden="true" /></template>
         <template #actions>
           <SButton variant="secondary" @click="searchQuery = ''">Clear search</SButton>
-          <SButton @click="openAssistant(buildAssistantTopicPrompt(trimmedSearch))">Ask assistant</SButton>
+          <SButton v-if="assistantEnabled" @click="openAssistant(buildAssistantTopicPrompt(trimmedSearch))">
+            Ask assistant
+          </SButton>
         </template>
       </SEmptyState>
     </SCard>
@@ -66,7 +72,9 @@
               <h2 class="s-help__section-title" v-html="highlightText(cat.title, trimmedSearch, WEB_MARK_CLASS)" />
               <p class="s-help__section-blurb" v-html="highlightText(cat.blurb, trimmedSearch, WEB_MARK_CLASS)" />
             </div>
-            <SButton variant="ghost" size="sm" @click="askAboutCategory(cat.title)">Ask assistant</SButton>
+            <SButton v-if="assistantEnabled" variant="ghost" size="sm" @click="askAboutCategory(cat.title)">
+              Ask assistant
+            </SButton>
           </header>
 
           <article v-for="(article, idx) in cat.articles" :key="idx" class="s-help__article">
@@ -133,7 +141,7 @@ useHead({
   title: 'Help center - Storvv',
 })
 
-const { openAssistant } = useDashboardAssistant()
+const { openAssistant, enabled: assistantEnabled } = useDashboardAssistant()
 const { resetTutorial } = useUser()
 const authStore = useAuthStore()
 const userStore = useUserStore()

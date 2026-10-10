@@ -8,6 +8,7 @@ export function useDashboardAssistant() {
   const statusLoaded = useState('storvv-assistant-status-loaded', () => false)
   const statusReachable = useState('storvv-assistant-status-reachable', () => true)
   const assistantStore = useAssistantStore()
+  const enabled = computed(() => Boolean(useRuntimeConfig().public.assistant))
   const isDemoAssistant = computed(() => import.meta.client && isDemoModeActive())
   let statusRequest: Promise<void> | null = null
 
@@ -51,11 +52,13 @@ export function useDashboardAssistant() {
   }
 
   function openAssistant(draft?: string) {
+    if (!enabled.value) return
     assistantStore.open(draft)
     void refreshStatus()
   }
 
   return {
+    enabled,
     configured,
     statusLoaded,
     statusReachable,

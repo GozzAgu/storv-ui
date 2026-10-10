@@ -5,10 +5,11 @@ import {
   buildDashboardHelpKnowledgeBase,
 } from '~/utils/dashboard-help-content'
 import { generateGeminiAssistantReply } from '~/server/utils/gemini-assistant'
-import { getGeminiApiKey, getGeminiModel } from '~/server/utils/gemini-config'
+import { getGeminiApiKey, getGeminiModel, isAssistantEnabled } from '~/server/utils/gemini-config'
 import { requireAuth } from '~/server/utils/store-auth'
 
 export default defineEventHandler(async (event) => {
+  if (!isAssistantEnabled()) throw createError({ statusCode: 404, message: 'Not found' })
   await requireAuth(event)
 
   const apiKey = getGeminiApiKey()

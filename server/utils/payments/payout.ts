@@ -80,7 +80,16 @@ export async function resolveAccountName(
       { method: 'GET' }
     )
     name = String(data?.account_name || '').trim()
-  } catch {
+  } catch (err) {
+    const reason = err instanceof Error ? err.message.slice(0, 200) : 'unknown'
+    console.warn(JSON.stringify({ tag: 'payments-resolve-failed', bankCode, reason }))
+    if (/limit/i.test(reason)) {
+      throw new PaymentServiceError(
+        'ACCOUNT_NOT_RESOLVED',
+        429,
+        'Paystack test mode allows only a few account checks per day. Try again tomorrow or use live keys.'
+      )
+    }
     name = ''
   }
   if (!name) {
