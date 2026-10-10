@@ -99,6 +99,13 @@
               :aria-pressed="activeRoot === cat.path"
               @click="selectCategory(cat.path)"
             >
+              <component
+                :is="categoryKindIcon(rootKinds.get(cat.path))"
+                class="s-sf-chip__icon"
+                :size="15"
+                :stroke-width="1.75"
+                aria-hidden="true"
+              />
               {{ cat.name }}
             </button>
           </nav>
@@ -153,6 +160,7 @@
               <StorefrontMedia
                 :src="item.imageUrl"
                 :title="item.title"
+                :kind="item.categoryKind"
                 :category-name="item.categoryName"
                 :category-path="item.categoryPath"
               >
@@ -263,6 +271,7 @@ import SSearch from '~/components/s/SSearch.vue'
 import SSkeleton from '~/components/s/SSkeleton.vue'
 import StorefrontMedia from '~/components/storefront/StorefrontMedia.vue'
 import StorefrontThemeButton from '~/components/storefront/StorefrontThemeButton.vue'
+import { categoryKindIcon } from '~/utils/category-kind-icons'
 import {
   buildStorefrontFolderTree,
   filterStorefrontItemsUnderPath,
@@ -315,6 +324,17 @@ const storeInitial = computed(() =>
 
 /** Top-level categories become chips; their subcategories show as a second row once picked. */
 const categories = computed(() => buildStorefrontFolderTree(items.value))
+
+/** Chip icon: the inventory category kind of the products under each top-level category. */
+const rootKinds = computed(
+  () =>
+    new Map(
+      categories.value.map((c) => [
+        c.path,
+        filterStorefrontItemsUnderPath(items.value, c.path)[0]?.categoryKind,
+      ])
+    )
+)
 
 const activeRoot = computed(() => parseStorefrontCategoryPath(category.value)[0] || '')
 

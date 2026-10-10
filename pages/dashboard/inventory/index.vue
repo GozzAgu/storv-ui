@@ -243,13 +243,7 @@
               <td>
                 <div class="s-category-cell">
                   <span class="s-category-cell__mark" aria-hidden="true">
-                    <component
-                      :is="getChildFolders(folders, folder.id).length > 0 ? FolderTree : FolderClosed"
-                      :size="16"
-                      :stroke-width="1.75"
-                      fill="currentColor"
-                      fill-opacity="0.14"
-                    />
+                    <component :is="folderKindIcon(folder)" :size="16" :stroke-width="1.75" />
                   </span>
                   <div class="s-category-cell__text">
                     <span class="s-table__primary">{{ folder.name }}</span>
@@ -260,7 +254,7 @@
                 </div>
               </td>
               <td class="s-hide-sm">
-                <SBadge>{{ formatFolderTypeLabel(folder.type) }}</SBadge>
+                <SBadge>{{ formatFolderTypeLabel(folder) }}</SBadge>
               </td>
               <td class="s-table__num">
                 <span class="s-table__primary">{{ folderDisplayStats(folder).itemCount }}</span>
@@ -374,18 +368,6 @@
           <SField label="Category name" required>
             <SInput v-model="folderForm.name" required placeholder="e.g. Chairs" />
           </SField>
-          <SField label="Type" required>
-            <SSelect v-model="folderForm.type" required>
-              <option value="">Select type</option>
-              <option value="general">General</option>
-              <option value="electronics">Electronics</option>
-              <option value="clothing">Clothing & Apparel</option>
-              <option value="automotive">Automotive</option>
-              <option value="food">Food & Beverage</option>
-              <option value="office">Office Supplies</option>
-              <option value="other">Other</option>
-            </SSelect>
-          </SField>
           <p v-if="editingFolder && isSubfolder(editingFolder)" class="s-form-meta">
             Subcategory of
             {{
@@ -400,6 +382,15 @@
               placeholder="Optional: purpose of this category"
             />
           </SField>
+        </SFormSection>
+
+        <SFormSection title="What does it sell?">
+          <CategoryKindPicker
+            v-if="showCreateFolderModal"
+            :model-value="folderForm.type"
+            :suggested="folderTypeSuggested"
+            @update:model-value="chooseFolderType"
+          />
         </SFormSection>
 
         <SFormSection
@@ -907,9 +898,7 @@ import {
   Copy,
   Download,
   EllipsisVertical,
-  FolderClosed,
   FolderPlus,
-  FolderTree,
   LayoutGrid,
   List,
   Pencil,
@@ -936,6 +925,9 @@ import SSpinner from '~/components/s/SSpinner.vue'
 import STabs from '~/components/s/STabs.vue'
 import DeleteFolderModal from '~/components/inventory/DeleteFolderModal.vue'
 import InventoryCategoryCard from '~/components/inventory/InventoryCategoryCard.vue'
+import CategoryKindPicker from '~/components/inventory/CategoryKindPicker.vue'
+import { categoryKindLabel, inferCategoryKind, resolveCategoryKind } from '~/utils/category-kinds'
+import { folderKindIcon } from '~/utils/category-kind-icons'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { resolveEffectiveSubscriptionPlan } from '~/types/subscription'
@@ -1603,10 +1595,30 @@ const selectedTemplate = computed(() => {
   }
 })
 
+/** True while the type was picked from the name; typing a new name updates it until the user chooses. */
+const folderTypeSuggested = ref(false)
+
+function chooseFolderType(id: string) {
+  folderForm.type = id
+  folderTypeSuggested.value = false
+}
+
+watch(
+  () => folderForm.name,
+  (name) => {
+    if (editingFolder.value) return
+    if (folderForm.type && !folderTypeSuggested.value) return
+    const guess = inferCategoryKind(name)
+    folderForm.type = guess ?? ''
+    folderTypeSuggested.value = Boolean(guess)
+  }
+)
+
 function resetNewFolderFormDefaults() {
   folderForm.name = ''
   folderForm.description = ''
   folderForm.type = ''
+  folderTypeSuggested.value = false
   folderForm.color = '#3B82F6'
   folderForm.hasSerialNumbers = false
   folderForm.trackProfit = false
@@ -2023,13 +2035,9 @@ const getDepartmentName = (deptId: string) => {
   return dept?.name
 }
 
-const formatFolderTypeLabel = (type: string | undefined) => {
-  if (!type || !String(type).trim()) {
-    return '-'
-  }
-  const t = String(type).replace(/_/g, ' ')
-  return t.charAt(0).toUpperCase() + t.slice(1)
-}
+/** Same kind as the row icon, so the label and icon never disagree. */
+const formatFolderTypeLabel = (folder: Pick<InventoryFolder, 'type' | 'name'>) =>
+  categoryKindLabel(resolveCategoryKind(folder.type, folder.name)) || '-'
 
 const folderDepartmentsSummary = (folder: InventoryFolder) => {
   const allowed = folder.allowedDepartments
@@ -2197,6 +2205,7 @@ const handleEditFolder = (folder: InventoryFolder) => {
   folderForm.name = folder.name
   folderForm.description = folder.description || ''
   folderForm.type = folder.type || ''
+  folderTypeSuggested.value = false
   folderForm.color = folder.color || '#3B82F6'
   folderForm.hasSerialNumbers = folder.hasSerialNumbers || false
   folderForm.trackProfit = folder.trackProfit === true
@@ -2362,7 +2371,7 @@ const handleSaveFolder = async () => {
   }
 
   if (!folderForm.type) {
-    alert('Please select a folder type')
+    alert('Please choose what this category sells')
     return
   }
 

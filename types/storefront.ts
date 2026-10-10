@@ -93,6 +93,8 @@ export interface StorefrontPublicListing {
   availability: StorefrontPublicAvailability
   categoryPath: string
   categoryName: string
+  /** Category kind id (utils/category-kinds.ts); sets the product icon when there is no photo. */
+  categoryKind?: string
   attributes: StorefrontPublicAttribute[]
   description?: string
   imageUrl?: string
@@ -138,6 +140,7 @@ export interface StorefrontPublicItemView {
   availability: StorefrontPublicAvailability
   categoryPath: string
   categoryName: string
+  categoryKind: string
   attributes: StorefrontPublicAttribute[]
   description: string | null
   imageUrl: string | null

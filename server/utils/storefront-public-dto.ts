@@ -5,6 +5,7 @@ import type {
   StorefrontPublicStoreView,
 } from '~/types/storefront'
 import { legacyPaymentLinksEnabled } from '~/server/utils/legacy-payment-links'
+import { resolveCategoryKind } from '~/utils/category-kinds'
 
 export function publicStorefrontProfileDto(
   profile: StorefrontPublicProfile
@@ -51,6 +52,13 @@ export function publicStorefrontListingDto(
     availability: item.availability,
     categoryPath: item.categoryPath,
     categoryName: item.categoryName,
+    // Listings saved before kinds existed have none; guess from the names until they resync.
+    categoryKind: resolveCategoryKind(
+      item.categoryKind,
+      item.categoryName,
+      item.categoryPath,
+      item.title
+    ),
     attributes: item.attributes || [],
     description: item.description || null,
     imageUrl: item.imageUrl || null,

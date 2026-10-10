@@ -292,7 +292,7 @@ function buildInventoryForStore(store: DemoStoreRecord) {
       id: f.id,
       name: f.name,
       description: '',
-      type: 'products',
+      type: f.type || 'products',
       color: '#143f8d',
       hasSerialNumbers: false,
       template: DEMO_PRODUCT_TEMPLATE,
@@ -557,6 +557,7 @@ export async function applyDemoCreateFolder(
     name: normalizeEntityName(folderData.name) || folderData.name.trim(),
     parentId: folderData.parentId ?? null,
     usesSubcategories: folderData.usesSubcategories,
+    type: folderData.type,
   })
   await syncDemoToPinia()
   return id
@@ -724,6 +725,7 @@ export async function applyDemoDuplicateFolderTemplatesBetweenStores(
       storeId: targetStoreId,
       parentId: parentId ?? null,
       ...(src.usesSubcategories === true && !parentId ? { usesSubcategories: true } : {}),
+      ...(src.type ? { type: src.type } : {}),
     })
     createdCount += 1
   }

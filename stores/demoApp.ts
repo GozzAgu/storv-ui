@@ -250,7 +250,12 @@ export const useDemoAppStore = defineStore('demoApp', {
       return customer
     },
 
-    addFolder(payload: { name: string; parentId?: string | null; usesSubcategories?: boolean }) {
+    addFolder(payload: {
+      name: string
+      parentId?: string | null
+      usesSubcategories?: boolean
+      type?: string
+    }) {
       const parentId = payload.parentId?.trim() ? payload.parentId.trim() : null
       if (parentId) {
         const parent = this.currentStore.folders.find((f) => f.id === parentId)
@@ -274,6 +279,7 @@ export const useDemoAppStore = defineStore('demoApp', {
         storeId: this.state.currentStoreId,
         parentId,
         ...(payload.usesSubcategories === true && !parentId ? { usesSubcategories: true } : {}),
+        ...(payload.type ? { type: payload.type } : {}),
       }
       this.currentStore.folders.push(folder)
       this.persist()

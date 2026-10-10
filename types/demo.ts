@@ -4,6 +4,7 @@ export interface DemoFolder {
   storeId: string
   parentId?: string | null
   usesSubcategories?: boolean
+  type?: string
 }
 
 export interface DemoItem {

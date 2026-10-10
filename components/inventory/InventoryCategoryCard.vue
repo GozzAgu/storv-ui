@@ -2,13 +2,7 @@
   <article class="s-c s-category-card" :class="{ 's-category-card--selected': selected }">
     <div class="s-category-card__head">
       <span class="s-category-card__mark" aria-hidden="true">
-        <component
-          :is="childCount > 0 ? FolderTree : FolderClosed"
-          :size="16"
-          :stroke-width="1.75"
-          fill="currentColor"
-          fill-opacity="0.14"
-        />
+        <component :is="kindIcon" :size="16" :stroke-width="1.75" />
       </span>
       <div v-if="hasOverlays" class="s-category-card__controls">
         <slot name="checkbox" />
@@ -40,8 +34,8 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { FolderClosed, FolderTree } from '@lucide/vue'
 import SBadge from '~/components/s/SBadge.vue'
+import { folderKindIcon } from '~/utils/category-kind-icons'
 import { formatCategoryDisplayName } from '~/utils/inventory-category-format'
 import type { FolderAvailabilityStats } from '~/utils/inventory-folder-availability'
 
@@ -94,6 +88,7 @@ defineEmits<{
 }>()
 
 const displayName = computed(() => formatCategoryDisplayName(props.name))
+const kindIcon = computed(() => folderKindIcon({ type: props.type, name: props.name }))
 
 const metaLabel = computed(() => {
   if ((props.childCount ?? 0) > 0) {

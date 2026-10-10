@@ -1,5 +1,6 @@
 import type { InventoryFolder, InventoryItem, TemplateField } from '~/stores/inventory'
 import { getItemSellPrice } from '~/utils/inventory-item-cost'
+import { isSpecificCategoryKind, resolveCategoryKind } from '~/utils/category-kinds'
 import {
   getInventoryAvailabilityStatus,
   type InventoryAvailabilityStatus,
@@ -150,6 +151,13 @@ export function buildStorefrontListing(params: {
   const attributes = buildAttributes(item, fields, publicFieldIds)
 
   const title = String(item.name || item.brand || item.model || 'Product').trim() || 'Product'
+  const parent = folder.parentId ? folders.find((f) => f.id === String(folder.parentId)) : undefined
+  const categoryKind = resolveCategoryKind(
+    isSpecificCategoryKind(folder.type) ? folder.type : parent?.type || folder.type,
+    folder.name,
+    parent?.name,
+    title
+  )
   const price = getItemSellPrice(item)
   const descriptionField = fields.find(
     (f) =>
@@ -179,6 +187,7 @@ export function buildStorefrontListing(params: {
     availability,
     categoryPath,
     categoryName,
+    categoryKind,
     attributes: attributes.filter((a) => a.key !== descriptionField?.name),
     description,
     imageUrl:

@@ -119,6 +119,31 @@ describe('storefront-projection', () => {
     expect(JSON.stringify(listing)).not.toContain('356789')
   })
 
+  it('carries the inventory category kind for the storefront icon', () => {
+    const base = { item, config, ownerUid: 'u1' }
+    const typed = { ...folder, type: 'fragrance' }
+    expect(buildStorefrontListing({ ...base, folder: typed, folders: [typed] })!.categoryKind).toBe(
+      'fragrance'
+    )
+    // No specific kind: guessed from the category name.
+    const untyped = { ...folder, type: 'general' }
+    expect(
+      buildStorefrontListing({ ...base, folder: untyped, folders: [untyped] })!.categoryKind
+    ).toBe('phones')
+    // A vague subcategory uses its parent's kind.
+    const parent = { ...folder, id: 'p1', name: 'Shop', type: 'wearables' }
+    const child = { ...folder, name: 'Series 9', type: 'general', parentId: 'p1' }
+    expect(
+      buildStorefrontListing({
+        ...base,
+        item: { ...item, name: 'Series 9 45mm' },
+        folder: child,
+        folders: [parent, child],
+        config: { ...config, folderPublish: { p1: { enabled: true, publicFieldIds: [] } } },
+      })!.categoryKind
+    ).toBe('wearables')
+  })
+
   it('marks sold items unavailable / unlist when listAvailableOnly', () => {
     const sold = { ...item, dateOut: new Date().toISOString() }
     const listing = buildStorefrontListing({
@@ -200,31 +225,10 @@ describe('storefront-inquiry', () => {
   })
 })
 
-describe('storefront-media', () => {
-  it('picks an icon from the category, then the title', async () => {
-    const { storefrontIconKey } = await import('~/utils/storefront-media')
-    expect(storefrontIconKey('Phones / iPhone', 'iPhone', 'iPhone 17 Pro')).toBe('phone')
-    expect(storefrontIconKey('Fragrance / Eau de Parfum')).toBe('fragrance')
-    expect(storefrontIconKey('', null, 'Sony WH-1000XM5 Headphones')).toBe('audio')
-    expect(storefrontIconKey('Misc', 'Misc', 'Something')).toBe('package')
-  })
-
-  it('matches keywords at word starts only', async () => {
-    const { storefrontIconKey } = await import('~/utils/storefront-media')
-    expect(storefrontIconKey('Spring collection')).toBe('package')
-    expect(storefrontIconKey('Scarves')).toBe('package')
-    expect(storefrontIconKey('Gold rings')).toBe('jewelry')
-    expect(storefrontIconKey('Car parts')).toBe('car')
-  })
-})
-
 describe('storefront-catalogue', () => {
   it('builds parent hubs and leaf folders from category paths', async () => {
-    const {
-      buildStorefrontFolderTree,
-      filterStorefrontItemsByFolderPath,
-      findStorefrontFolder,
-    } = await import('~/utils/storefront-catalogue')
+    const { buildStorefrontFolderTree, filterStorefrontItemsByFolderPath, findStorefrontFolder } =
+      await import('~/utils/storefront-catalogue')
 
     const items = [
       { id: '1', categoryPath: 'Perfumes / Lattafa', categoryName: 'Lattafa' },
@@ -246,10 +250,9 @@ describe('storefront-catalogue', () => {
     expect(accessories?.isLeaf).toBe(true)
     expect(accessories?.itemCount).toBe(1)
 
-    expect(filterStorefrontItemsByFolderPath(items, 'Perfumes / Lattafa').map((i) => i.id)).toEqual([
-      '1',
-      '2',
-    ])
+    expect(filterStorefrontItemsByFolderPath(items, 'Perfumes / Lattafa').map((i) => i.id)).toEqual(
+      ['1', '2']
+    )
   })
 
   it('filters a category including its subcategories', async () => {
@@ -280,9 +283,9 @@ describe('storefront-share', () => {
     expect(withStorefrontUtm('/store/demo', { source: 'whatsapp', medium: 'social' })).toBe(
       '/store/demo?utm_source=whatsapp&utm_medium=social'
     )
-    expect(
-      storefrontAbsoluteUrl('https://storvv.com', '/store/demo', { source: 'qr' })
-    ).toBe('https://storvv.com/store/demo?utm_source=qr')
+    expect(storefrontAbsoluteUrl('https://storvv.com', '/store/demo', { source: 'qr' })).toBe(
+      'https://storvv.com/store/demo?utm_source=qr'
+    )
 
     expect(
       buildStorefrontShareMessage({
@@ -300,10 +303,9 @@ describe('storefront-share', () => {
 
 describe('payment-link-create helpers', () => {
   it('resolves sell price and name from inventory maps', async () => {
-    const {
-      resolvePaymentLinkItemName,
-      resolvePaymentLinkItemPrice,
-    } = await import('~/server/utils/payment-link-create')
+    const { resolvePaymentLinkItemName, resolvePaymentLinkItemPrice } = await import(
+      '~/server/utils/payment-link-create'
+    )
 
     expect(resolvePaymentLinkItemPrice({ price: 120000 })).toBe(120000)
     expect(resolvePaymentLinkItemPrice({ Price: '99.5' })).toBe(99.5)

@@ -201,7 +201,10 @@
 }
 
 .s-sf-chip {
+  display: inline-flex;
   flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
   height: 36px;
   padding: 0 var(--s-space-2);
   border: 0;
@@ -219,6 +222,16 @@
 .s-sf-chip:hover {
   color: var(--s-text);
   background: var(--s-surface-hover);
+}
+
+.s-sf-chip__icon {
+  flex: none;
+  margin-left: -2px;
+  color: var(--s-accent);
+}
+
+.s-sf-chip[aria-pressed='true'] .s-sf-chip__icon {
+  color: inherit;
 }
 
 .s-sf-chip[aria-pressed='true'] {
