@@ -30,6 +30,11 @@ export function usePaymentLinksLaunch() {
 
   const showPaymentLinksComingSoon = computed(() => isPaymentLinksComingSoon())
 
+  /** Standalone links (`/api/payment-links/create`, inquiry links) only work while legacy links are on. */
+  const canCreateStandaloneLinks = computed(
+    () => useRuntimeConfig().public.legacyPaymentLinks === true
+  )
+
   const showNativeComingSoon = computed(() =>
     shouldShowNativePaymentLinksTeaser({
       canUsePaymentLinksExperience: canUsePaymentLinksExperience.value,
@@ -50,6 +55,7 @@ export function usePaymentLinksLaunch() {
     canShowPaymentLinksFeature,
     canShowPaymentLinksSummary,
     showPaymentLinksComingSoon,
+    canCreateStandaloneLinks,
     showNativeComingSoon,
     marketingStatus: PAYMENT_LINKS_MARKETING_STATUS,
   }

@@ -2,7 +2,11 @@
   <div class="ds-root s-c s-page s-storefront">
     <SPageHeader title="Storefront">
       <template #description>
-        Confirm requests, send a payment link, then mark complete after the customer pays.
+        {{
+          canCreateStandaloneLinks
+            ? 'Confirm requests, send a payment link, then mark complete after the customer pays.'
+            : 'Confirm requests, then contact the customer to arrange payment and pickup.'
+        }}
       </template>
       <template #actions>
         <SButton to="/dashboard/settings?tab=storefront">
@@ -64,9 +68,13 @@
       >
         <template #icon><ShoppingBag :size="24" :stroke-width="1.75" /></template>
         <template #actions>
-          <ol class="s-storefront__tips">
+          <ol v-if="canCreateStandaloneLinks" class="s-storefront__tips">
             <li>Confirm the request, then send a payment link</li>
             <li>Mark complete only after the customer pays</li>
+          </ol>
+          <ol v-else class="s-storefront__tips">
+            <li>Confirm the request so the item stays on hold</li>
+            <li>Call or message the customer to arrange payment</li>
           </ol>
         </template>
       </SEmptyState>
@@ -296,6 +304,7 @@ import {
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
 import { useAuthenticatedFetch } from '~/composables/useAuthenticatedFetch'
 import { useAnchoredRowMenu } from '~/composables/useAnchoredRowMenu'
+import { usePaymentLinksLaunch } from '~/composables/usePaymentLinksLaunch'
 import { useDashboardPageRefreshRegister } from '~/composables/useDashboardPageRefresh'
 import { useStoresStore } from '~/stores/stores'
 import { CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
@@ -347,6 +356,7 @@ const EMPTY_PAYMENT = '—'
 
 const { authFetch } = useAuthenticatedFetch()
 const storesStore = useStoresStore()
+const { canCreateStandaloneLinks } = usePaymentLinksLaunch()
 
 const loading = ref(true)
 const loadError = ref('')
@@ -479,6 +489,7 @@ function isPaid(row: InquiryRow) {
 }
 
 function canSendPaymentLink(row: InquiryRow) {
+  if (!canCreateStandaloneLinks.value) return false
   if (!canAct(row.status)) return false
   if (isPaid(row)) return false
   if (row.listingPrice == null || row.listingPrice <= 0) return false
