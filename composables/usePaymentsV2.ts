@@ -9,6 +9,7 @@ import type {
   PaymentSummary,
 } from '~/types/payments-v2'
 import { isDemoModeActive } from '~/utils/demo-mode'
+import { IMAGE_UPLOAD_MAX_BYTES, IMAGE_UPLOAD_TYPE } from '~/utils/image-upload-rules'
 import { useFirebase } from '~/composables/useFirebase'
 import { useFirestore } from '~/composables/useFirestore'
 import { useAppToast } from '~/composables/useAppToast'
@@ -95,18 +96,12 @@ const DISABLED: PaymentsV2Access = {
   settings: { cashConfirmation: 'each' },
 }
 
-const PROOF_TYPES: Record<string, string> = {
-  'image/jpeg': 'jpg',
-  'image/png': 'png',
-  'image/webp': 'webp',
-  'application/pdf': 'pdf',
-}
 /** Client-only (loadAccess never runs on the server), so module scope is per browser tab. */
 const access = ref<PaymentsV2Access>({ ...DISABLED })
 const accessScope = ref('')
 
-export const PROOF_MAX_BYTES = 5 * 1024 * 1024
-export const PROOF_ACCEPT = Object.keys(PROOF_TYPES).join(',')
+export const PROOF_PDF_MAX_BYTES = 5 * 1024 * 1024
+export const PROOF_ACCEPT = 'image/*,application/pdf'
 
 /** The flag only shows the screens; the server gate decides (routes 404 when off). */
 export function paymentsV2UiFlag(): boolean {
@@ -254,15 +249,19 @@ export function usePaymentsV2() {
       post<{ url: string; expiresAt: string }>(`/api/payments/${enc(paymentId)}/proof-url`),
 
     /** Upload straight to Storage (rules: recorder only, create once), then let the server link it. */
+    /** Photos must already be shrunk with prepareImageUpload (WebP, 30 KB). */
     async uploadProof(paymentId: string, file: File): Promise<void> {
-      const ext = PROOF_TYPES[file.type]
-      if (!ext) throw new Error('Proof must be a JPEG, PNG, WebP or PDF')
-      if (file.size <= 0 || file.size > PROOF_MAX_BYTES)
-        throw new Error('Proof must be 5 MB or smaller')
+      const isPdf = file.type === 'application/pdf'
+      const maxBytes = isPdf ? PROOF_PDF_MAX_BYTES : IMAGE_UPLOAD_MAX_BYTES
+      if (!isPdf && file.type !== IMAGE_UPLOAD_TYPE) throw new Error('Proof must be a photo or PDF')
+      if (file.size <= 0 || file.size > maxBytes)
+        throw new Error(
+          isPdf ? 'PDF proof must be 5 MB or smaller' : 'Photo must be 30 KB or smaller'
+        )
       const s = await scope()
       const app = useFirebase().getApp()
       if (!app) throw new Error('Storage unavailable')
-      const fileName = `proof.${ext}`
+      const fileName = isPdf ? 'proof.pdf' : 'proof.webp'
       await uploadBytes(
         storageRef(
           getStorage(app),

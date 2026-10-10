@@ -40,7 +40,7 @@
             <input
               ref="accountLogoInput"
               type="file"
-              accept="image/jpeg,image/png,image/gif,image/webp"
+              accept="image/*"
               class="ds-sr-only"
               tabindex="-1"
               aria-hidden="true"
@@ -483,6 +483,7 @@ import {
   isBillingDelinquentMessage,
 } from '~/utils/storage-billing-errors'
 import { isCloudinaryUrl, optimizeCloudinaryLogo } from '~/utils/cloudinary'
+import { prepareImageUpload } from '~/utils/image-upload'
 import {
   resolveStaffWorkspaceContext,
   applyWorkspaceToSettingsStoreInfo,
@@ -1175,7 +1176,8 @@ const handleAccountLogoUpload = async (event: Event) => {
 
   try {
     const userId = authStore.currentUser.uid
-    const { url } = await uploadAccountLogoWithFallback(file, userId)
+    const logo = await prepareImageUpload(file, { maxEdge: 512, name: 'logo' })
+    const { url } = await uploadAccountLogoWithFallback(logo, userId)
 
     await updateUserDocument(userId, { storeLogoUrl: url })
     userStore.$patch((state) => {

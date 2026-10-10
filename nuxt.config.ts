@@ -63,6 +63,10 @@ export default defineNuxtConfig({
   },
   vite: {
     plugins: [tailwindcss()],
+    // Pre-bundling breaks the WASM URL that @jsquash/webp resolves next to its own module.
+    optimizeDeps: {
+      exclude: ['@jsquash/webp'],
+    },
     css: {
       devSourcemap: false,
     },

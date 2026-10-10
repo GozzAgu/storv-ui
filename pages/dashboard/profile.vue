@@ -45,7 +45,7 @@
               <input
                 ref="profilePhotoInput"
                 type="file"
-                accept="image/jpeg,image/png,image/gif,image/webp"
+                accept="image/*"
                 class="ds-sr-only"
                 tabindex="-1"
                 aria-hidden="true"
@@ -1011,6 +1011,7 @@ import TwoFactorSetup from '~/components/auth/TwoFactorSetup.vue'
 import { EMPTY_CELL } from '~/utils/ui-empty'
 import { SUBSCRIPTION_PLANS, resolveEffectiveSubscriptionPlan } from '~/types/subscription'
 import { isCloudinaryUrl } from '~/utils/cloudinary'
+import { prepareImageUpload } from '~/utils/image-upload'
 import {
   BILLING_BLOCKED_USER_MESSAGE,
   extractUploadFailureMessage,
@@ -1693,8 +1694,9 @@ async function handleProfilePhotoUpload(event: Event) {
   input.value = ''
 
   try {
+    const photo = await prepareImageUpload(file, { maxEdge: 512, name: 'avatar' })
     if (isDemoModeActive()) {
-      const objectUrl = URL.createObjectURL(file)
+      const objectUrl = URL.createObjectURL(photo)
       const { applyDemoUserDocumentUpdate } = await import('~/utils/demo-bridge')
       applyDemoUserDocumentUpdate({ photoURL: objectUrl })
       toast.success('Profile photo updated')
@@ -1702,7 +1704,7 @@ async function handleProfilePhotoUpload(event: Event) {
     }
 
     const userId = authStore.currentUser.uid
-    const { url } = await uploadProfilePhotoWithFallback(file, userId)
+    const { url } = await uploadProfilePhotoWithFallback(photo, userId)
     await savePersonalPhotoURL(userId, url)
     userStore.$patch((state) => {
       if (state.userData) state.userData = { ...state.userData, photoURL: url }

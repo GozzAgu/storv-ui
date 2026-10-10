@@ -5,26 +5,12 @@ import {
   BILLING_BLOCKED_USER_MESSAGE,
   isBillingDelinquentMessage,
 } from '~/utils/storage-billing-errors'
-
-const ALLOWED = new Set(['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'])
-const MAX_BYTES = 5 * 1024 * 1024
-
-function extFromMime(mime: string, filename?: string): string {
-  const m = (mime || '').toLowerCase()
-  if (m === 'image/jpeg' || m === 'image/jpg') return 'jpg'
-  if (m === 'image/png') return 'png'
-  if (m === 'image/gif') return 'gif'
-  if (m === 'image/webp') return 'webp'
-  const dot = filename?.lastIndexOf('.')
-  if (dot && dot > 0 && filename) {
-    const e = filename
-      .slice(dot + 1)
-      .toLowerCase()
-      .replace(/[^a-z0-9]/g, '')
-    if (e) return e.slice(0, 8)
-  }
-  return 'jpg'
-}
+import {
+  IMAGE_CACHE_CONTROL,
+  IMAGE_UPLOAD_MAX_BYTES,
+  IMAGE_UPLOAD_TYPE,
+  isWebpBytes,
+} from '~/utils/image-upload-rules'
 
 /**
  * Server-side personal profile photo upload (Firebase Admin).
@@ -51,15 +37,15 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'Expected multipart field "file"' })
   }
 
-  const contentType = (part.type || 'application/octet-stream').toLowerCase()
-  if (!ALLOWED.has(contentType)) {
-    throw createError({ statusCode: 400, message: 'Invalid image type' })
+  // The client converts every image to WebP of at most 30 KB before upload.
+  if (part.data.length > IMAGE_UPLOAD_MAX_BYTES) {
+    throw createError({ statusCode: 400, message: 'Image too large (max 30 KB)' })
   }
-  if (part.data.length > MAX_BYTES) {
-    throw createError({ statusCode: 400, message: 'File too large (max 5MB)' })
+  if (!isWebpBytes(part.data)) {
+    throw createError({ statusCode: 400, message: 'Image must be WebP' })
   }
 
-  const filename = `${Date.now()}-avatar.${extFromMime(contentType, part.filename)}`
+  const filename = `${Date.now()}-avatar.webp`
   const objectPath = `images/${uid}/profile/${filename}`
   const downloadToken = randomUUID()
 
@@ -69,7 +55,8 @@ export default defineEventHandler(async (event) => {
   try {
     await file.save(part.data, {
       metadata: {
-        contentType,
+        contentType: IMAGE_UPLOAD_TYPE,
+        cacheControl: IMAGE_CACHE_CONTROL,
         metadata: {
           firebaseStorageDownloadTokens: downloadToken,
         },
@@ -80,8 +67,8 @@ export default defineEventHandler(async (event) => {
       saveErr instanceof Error
         ? saveErr.message
         : typeof saveErr === 'object' && saveErr !== null && 'message' in saveErr
-          ? String((saveErr as { message: unknown }).message)
-          : String(saveErr)
+        ? String((saveErr as { message: unknown }).message)
+        : String(saveErr)
     if (isBillingDelinquentMessage(message)) {
       throw createError({
         statusCode: 402,

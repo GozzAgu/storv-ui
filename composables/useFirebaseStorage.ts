@@ -12,12 +12,13 @@ import { FirebaseError } from 'firebase/app'
 import { getFirebaseClientAuth } from '~/utils/firebase-client-auth'
 import { useFirebase } from './useFirebase'
 import { UPLOAD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
-
-/** Allowed image MIME types */
-const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
-
-/** Max file size: 5MB */
-const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024
+import {
+  IMAGE_CACHE_CONTROL,
+  IMAGE_UPLOAD_MAX_BYTES,
+  IMAGE_UPLOAD_TYPE,
+  ensureImageUpload,
+  type PrepareImageOptions,
+} from '~/utils/image-upload'
 
 /**
  * Human-readable message for Firebase Storage failures (storage/unknown is often config/network).
@@ -70,6 +71,8 @@ export interface UploadOptions {
   filename?: string
   /** Called with progress 0-100 */
   onProgress?: (progress: number) => void
+  /** How large the image may be before it is shrunk to fit 30 KB. */
+  image?: PrepareImageOptions
 }
 
 /**
@@ -97,7 +100,7 @@ export const useFirebaseStorage = () => {
    * Path format: images/{userId}/{folder}/{filename}
    */
   const uploadImage = async (
-    file: File,
+    picked: File,
     userId: string,
     options: UploadOptions = {}
   ): Promise<UploadResult> => {
@@ -112,27 +115,19 @@ export const useFirebaseStorage = () => {
       await auth.currentUser.getIdToken(true)
     }
 
-    // Validate file type
-    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-      throw new Error(`Invalid file type. Allowed: ${ALLOWED_IMAGE_TYPES.join(', ')}`)
-    }
-
-    // Validate file size
-    if (file.size > MAX_FILE_SIZE_BYTES) {
-      throw new Error(`File too large. Max size: ${MAX_FILE_SIZE_BYTES / 1024 / 1024}MB`)
-    }
+    const file = await ensureImageUpload(picked, options.image)
 
     const folder = options.folder || 'uploads'
     const filename =
       options.filename || `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
     const path = `images/${userId}/${folder}/${filename}`
     const storageRef = ref(storage, path)
+    // Paths are never reused (timestamped), so browsers may keep the image for a year.
+    const metadata = { contentType: file.type, cacheControl: IMAGE_CACHE_CONTROL }
 
     if (options.onProgress) {
       return new Promise((resolve, reject) => {
-        const uploadTask = uploadBytesResumable(storageRef, file, {
-          contentType: file.type,
-        })
+        const uploadTask = uploadBytesResumable(storageRef, file, metadata)
 
         uploadTask.on(
           'state_changed',
@@ -155,7 +150,7 @@ export const useFirebaseStorage = () => {
       })
     }
 
-    await uploadBytes(storageRef, file, { contentType: file.type })
+    await uploadBytes(storageRef, file, metadata)
     const url = await getDownloadURL(storageRef)
     return { url, path }
   }
@@ -217,7 +212,7 @@ export const useFirebaseStorage = () => {
     buildPath,
     getStorageInstance,
     getFirebaseStorageErrorMessage,
-    allowedImageTypes: ALLOWED_IMAGE_TYPES,
-    maxFileSizeBytes: MAX_FILE_SIZE_BYTES,
+    allowedImageTypes: [IMAGE_UPLOAD_TYPE],
+    maxFileSizeBytes: IMAGE_UPLOAD_MAX_BYTES,
   }
 }

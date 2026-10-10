@@ -1,15 +1,10 @@
 import { computed } from 'vue'
-
-/** Match app image rules (see useFirebaseStorage) */
-const ALLOWED_IMAGE_TYPES = [
-  'image/jpeg',
-  'image/jpg',
-  'image/png',
-  'image/gif',
-  'image/webp',
-] as const
-
-const MAX_FILE_BYTES = 5 * 1024 * 1024
+import {
+  IMAGE_UPLOAD_MAX_BYTES,
+  IMAGE_UPLOAD_TYPE,
+  ensureImageUpload,
+  type PrepareImageOptions,
+} from '~/utils/image-upload'
 
 type CloudinaryUploadJson = {
   secure_url?: string
@@ -30,7 +25,8 @@ export const useCloudinary = () => {
    * Unsigned upload via upload preset (preset must be "Unsigned" in Cloudinary dashboard).
    */
   const uploadImage = async (
-    file: File
+    picked: File,
+    image?: PrepareImageOptions
   ): Promise<{ url: string; publicId: string | undefined }> => {
     const cloudName = String(config.public.cloudinaryCloudName || '').trim()
     const preset = String(config.public.cloudinaryUploadPreset || '').trim()
@@ -40,12 +36,7 @@ export const useCloudinary = () => {
       )
     }
 
-    if (!ALLOWED_IMAGE_TYPES.includes(file.type as (typeof ALLOWED_IMAGE_TYPES)[number])) {
-      throw new Error(`Invalid file type. Allowed: ${ALLOWED_IMAGE_TYPES.join(', ')}`)
-    }
-    if (file.size > MAX_FILE_BYTES) {
-      throw new Error(`File too large. Max ${MAX_FILE_BYTES / 1024 / 1024}MB`)
-    }
+    const file = await ensureImageUpload(picked, image)
 
     const formData = new FormData()
     formData.append('file', file)
@@ -71,7 +62,7 @@ export const useCloudinary = () => {
   return {
     isConfigured,
     uploadImage,
-    allowedImageTypes: ALLOWED_IMAGE_TYPES,
-    maxFileBytes: MAX_FILE_BYTES,
+    allowedImageTypes: [IMAGE_UPLOAD_TYPE],
+    maxFileBytes: IMAGE_UPLOAD_MAX_BYTES,
   }
 }

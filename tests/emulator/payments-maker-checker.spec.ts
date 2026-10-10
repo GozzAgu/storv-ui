@@ -750,10 +750,10 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)(
         })
         const paymentId = rec.payments[0]!.paymentId
         const storage = fakeStorage()
-        const path = `paymentProofs/${ownerId}/s1/${paymentId}/proof.png`
+        const path = `paymentProofs/${ownerId}/s1/${paymentId}/proof.webp`
 
         await expectCode(
-          attachProof(db, storage, cashier, { paymentId, fileName: 'proof.png' }),
+          attachProof(db, storage, cashier, { paymentId, fileName: 'proof.webp' }),
           'PROOF_MISSING',
           409
         )
@@ -762,25 +762,36 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)(
           'INVALID_INPUT',
           400
         )
-        storage.files.set(path, { size: 6 * 1024 * 1024, contentType: 'image/png' })
         await expectCode(
           attachProof(db, storage, cashier, { paymentId, fileName: 'proof.png' }),
-          'PROOF_INVALID',
+          'INVALID_INPUT',
           400
         )
         storage.files.set(path, { size: 2048, contentType: 'image/png' })
         await expectCode(
-          attachProof(db, storage, await as('checker'), { paymentId, fileName: 'proof.png' }),
+          attachProof(db, storage, cashier, { paymentId, fileName: 'proof.webp' }),
+          'PROOF_INVALID',
+          400
+        )
+        storage.files.set(path, { size: 30 * 1024 + 1, contentType: 'image/webp' })
+        await expectCode(
+          attachProof(db, storage, cashier, { paymentId, fileName: 'proof.webp' }),
+          'PROOF_INVALID',
+          400
+        )
+        storage.files.set(path, { size: 2048, contentType: 'image/webp' })
+        await expectCode(
+          attachProof(db, storage, await as('checker'), { paymentId, fileName: 'proof.webp' }),
           'FORBIDDEN',
           403
         )
         await expect(
-          attachProof(db, storage, cashier, { paymentId, fileName: 'proof.png' })
+          attachProof(db, storage, cashier, { paymentId, fileName: 'proof.webp' })
         ).resolves.toEqual({
           proofPath: path,
         })
         await expectCode(
-          attachProof(db, storage, cashier, { paymentId, fileName: 'proof.png' }),
+          attachProof(db, storage, cashier, { paymentId, fileName: 'proof.webp' }),
           'PROOF_EXISTS',
           409
         )

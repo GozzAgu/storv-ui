@@ -103,8 +103,8 @@
     />
 
     <p v-if="payments.some(canAttachProof)" class="s-form-meta">
-      Proofs (JPEG, PNG, WebP or PDF, up to 5 MB) are visible only to people who can view or confirm
-      payments, and are deleted 12 months after the payment is confirmed or rejected.
+      Proofs (a photo, shrunk to 30 KB, or a PDF up to 5 MB) are visible only to people who can view
+      or confirm payments, and are deleted 12 months after the payment is confirmed or rejected.
     </p>
 
     <SButton v-if="canRecordMore" size="sm" variant="primary" @click="emit('record-payment')">
@@ -182,6 +182,7 @@ import { koboToNaira, nairaToKobo } from '~/utils/money-kobo'
 import { salePaymentStatusLabel } from '~/utils/payment-summary'
 import { isV2Sale, saleOutstandingKobo } from '~/utils/payments-v2-tenders'
 import { PROOF_ACCEPT, paymentsErrorMessage } from '~/composables/usePaymentsV2'
+import { prepareImageUpload } from '~/utils/image-upload'
 import { usePreferences } from '~/composables/usePreferences'
 import { useAppToast } from '~/composables/useAppToast'
 import { useSensitiveAction } from '~/composables/useSensitiveAction'
@@ -366,7 +367,17 @@ async function onProofPicked(e: Event) {
   const p = proofTarget.value
   input.value = ''
   if (!file || !p) return
-  await run(p, () => paymentsV2.uploadProof(p.id, file), 'Proof attached')
+  await run(
+    p,
+    async () => {
+      const proof =
+        file.type === 'application/pdf'
+          ? file
+          : await prepareImageUpload(file, { maxEdge: 1280, name: 'proof' })
+      await paymentsV2.uploadProof(p.id, proof)
+    },
+    'Proof attached'
+  )
 }
 
 async function viewProof(p: PaymentRecord) {

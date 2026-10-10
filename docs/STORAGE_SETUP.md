@@ -75,6 +75,8 @@ await deleteImage('images/user123/products/photo.jpg')
 
 ## Limits
 
-- Allowed types: JPEG, PNG, GIF, WebP
-- Max file size: 5MB (configurable in composable)
+- Every image is converted on the device to WebP of at most 30 KB before upload
+  (`utils/image-upload.ts`); storage rules and the server reject anything else.
+  Safari cannot encode WebP from a canvas, so `@jsquash/webp` (WASM) is loaded there.
+- Payment proofs: photos follow the same rule; PDFs up to 5 MB.
 - Paths are scoped by `userId` for security

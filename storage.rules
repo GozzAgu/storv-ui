@@ -22,11 +22,11 @@ service firebase.storage {
       return ownsStore(userId, storeId) || hasActiveStoreMembership(userId, storeId);
     }
 
-    // Matches the client checks in composables/useFirebaseStorage.ts (5 MB, common image types).
+    // Every image is converted to WebP of at most 30 KB on the device (utils/image-upload.ts).
     function isAllowedImageUpload() {
       return request.resource.size > 0
-        && request.resource.size <= 5 * 1024 * 1024
-        && request.resource.contentType.matches('image/(jpeg|png|gif|webp)');
+        && request.resource.size <= 30 * 1024
+        && request.resource.contentType == 'image/webp';
     }
 
     // Images: images/{userId}/profile/filename or images/{userId}/{folder}/filename
@@ -52,18 +52,24 @@ service firebase.storage {
       return /databases/(default)/documents/users/$(userId)/stores/$(storeId)/payments/$(paymentId);
     }
 
-    function isAllowedProofUpload() {
+    // Photos: WebP up to 30 KB, like every other image. PDFs are not images and keep 5 MB.
+    function isAllowedProofUpload(fileName) {
       return request.resource.size > 0
-        && request.resource.size <= 5 * 1024 * 1024
-        && request.resource.contentType.matches('image/(jpeg|png|webp)|application/pdf');
+        && (
+          (fileName == 'proof.webp'
+            && request.resource.contentType == 'image/webp'
+            && request.resource.size <= 30 * 1024)
+          || (fileName == 'proof.pdf'
+            && request.resource.contentType == 'application/pdf'
+            && request.resource.size <= 5 * 1024 * 1024)
+        );
     }
 
     match /paymentProofs/{userId}/{storeId}/{paymentId}/{fileName} {
       allow read, update, delete: if false;
       allow create: if isAuthenticated()
         && resource == null
-        && fileName.matches('proof[.](jpg|jpeg|png|webp|pdf)')
-        && isAllowedProofUpload()
+        && isAllowedProofUpload(fileName)
         && canAccessStoreAssets(userId, storeId)
         && firestore.exists(paymentDoc(userId, storeId, paymentId))
         && firestore.get(paymentDoc(userId, storeId, paymentId)).data.recordedBy == request.auth.uid

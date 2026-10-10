@@ -3,12 +3,16 @@ import type { PaymentRecord } from '~/types/payments-v2'
 import { appendAuditEvents, readChainHead, storeDocRef } from './audit-log'
 import { assertDocId, type PaymentsAccess } from './access'
 import { PaymentServiceError, TX_OPTIONS } from './records'
+import { IMAGE_UPLOAD_MAX_BYTES, IMAGE_UPLOAD_TYPE } from '~/utils/image-upload-rules'
 
 export const PROOF_URL_TTL_MS = 5 * 60 * 1000
-export const PROOF_MAX_BYTES = 5 * 1024 * 1024
 const PROOF_RETENTION_MONTHS = 12
-const PROOF_FILE_PATTERN = /^proof\.(jpg|jpeg|png|webp|pdf)$/
-const PROOF_CONTENT_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'application/pdf'])
+const PROOF_FILE_PATTERN = /^proof\.(webp|pdf)$/
+/** Photos are converted to WebP of at most 30 KB on the device; PDFs are not images. */
+const PROOF_LIMITS: Record<string, { contentType: string; maxBytes: number }> = {
+  'proof.webp': { contentType: IMAGE_UPLOAD_TYPE, maxBytes: IMAGE_UPLOAD_MAX_BYTES },
+  'proof.pdf': { contentType: 'application/pdf', maxBytes: 5 * 1024 * 1024 },
+}
 
 export interface ProofStorage {
   stat(path: string): Promise<{ exists: boolean; size?: number; contentType?: string }>
@@ -27,7 +31,7 @@ export function proofPathFor(
 
 /**
  * The recorder uploads straight to Storage (rules: recorder only, awaiting only, create once,
- * 5 MB, JPEG/PNG/WebP/PDF), then calls this so the server checks the object and links it.
+ * WebP up to 30 KB or PDF up to 5 MB), then calls this so the server checks the object and links it.
  */
 export async function attachProof(
   db: Firestore,
@@ -37,24 +41,17 @@ export async function attachProof(
 ): Promise<{ proofPath: string }> {
   const paymentId = assertDocId(input.paymentId, 'paymentId')
   if (typeof input.fileName !== 'string' || !PROOF_FILE_PATTERN.test(input.fileName)) {
-    throw new PaymentServiceError(
-      'INVALID_INPUT',
-      400,
-      'fileName must be proof.jpg, proof.png, proof.webp or proof.pdf'
-    )
+    throw new PaymentServiceError('INVALID_INPUT', 400, 'fileName must be proof.webp or proof.pdf')
   }
+  const limits = PROOF_LIMITS[input.fileName]!
   const path = proofPathFor(access.ownerId, access.storeId, paymentId, input.fileName)
   const object = await storage.stat(path)
   if (!object.exists) throw new PaymentServiceError('PROOF_MISSING', 409, 'Upload the file first')
-  if (
-    !object.size ||
-    object.size > PROOF_MAX_BYTES ||
-    !PROOF_CONTENT_TYPES.has(String(object.contentType))
-  ) {
+  if (!object.size || object.size > limits.maxBytes || object.contentType !== limits.contentType) {
     throw new PaymentServiceError(
       'PROOF_INVALID',
       400,
-      'Proof must be a JPEG, PNG, WebP or PDF up to 5 MB'
+      'Proof must be a WebP photo up to 30 KB or a PDF up to 5 MB'
     )
   }
 
