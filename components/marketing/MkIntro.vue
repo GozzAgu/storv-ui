@@ -3,7 +3,7 @@
     <div class="mk-container">
       <div class="mk-intro mk-reveal">
         <header class="mk-intro__title">
-          <p class="mk-eyebrow mk-intro__eyebrow">Who it's for</p>
+          <p class="mk-eyebrow">Who it's for</p>
           <h2 id="mk-intro-title" class="mk-h2">
             One workspace,
             <em class="mk-serif">however you sell.</em>

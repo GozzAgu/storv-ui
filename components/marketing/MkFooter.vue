@@ -41,6 +41,8 @@
         </nav>
       </div>
 
+      <p class="mk-footer__word" aria-hidden="true">Storvv</p>
+
       <div class="mk-footer__bar">
         <p>&copy; {{ year }} Storvv. All rights reserved.</p>
         <div class="mk-footer__social">

@@ -687,18 +687,35 @@ html.dark .mk {
   gap: var(--s-space-3);
   min-width: 0;
   padding: var(--s-space-3);
-  border: 1px solid var(--s-border);
-  border-radius: var(--s-radius-2xl);
-  background: var(--mk-page);
-  box-shadow: 0 1px 2px rgb(16 24 40 / 0.04);
-  transition: transform 500ms var(--mk-spring), box-shadow 500ms var(--mk-spring),
-    border-color var(--s-duration) var(--s-ease-out);
+  border: 1px solid var(--mk-edge);
+  border-radius: var(--mk-radius);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--s-accent) 4%, var(--mk-page)),
+    var(--mk-page) 45%
+  );
+  transition: transform 500ms var(--mk-spring), border-color var(--s-duration) var(--s-ease-out);
+}
+
+.mkb__card::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 12%;
+  right: 12%;
+  height: 1px;
+  background: var(--mk-lit);
+  opacity: 0;
+  transition: opacity 500ms var(--s-ease-out);
 }
 
 .mkb__card:hover {
-  transform: translateY(-3px);
-  border-color: var(--s-border-strong);
-  box-shadow: var(--mkh-card-shadow);
+  transform: translateY(-2px);
+  border-color: var(--mk-edge-hi);
+}
+
+.mkb__card:hover::before {
+  opacity: 1;
 }
 
 .mkb__card--inventory {
@@ -734,16 +751,14 @@ html.dark .mk {
   flex: none;
   width: 36px;
   height: 36px;
-  border: 1px solid var(--s-border);
+  border: 1px solid var(--mk-edge-hi);
   border-radius: var(--s-radius-lg);
-  background: var(--s-surface-2);
-  color: var(--s-text);
+  background: color-mix(in srgb, var(--s-accent) 8%, var(--mk-page));
+  color: var(--s-accent);
 }
 
 .mkb__icon--accent {
-  border-color: transparent;
   background: var(--s-accent-soft);
-  color: var(--s-accent-soft-text);
 }
 
 .mkb__title {
@@ -765,9 +780,14 @@ html.dark .mk {
   margin-top: auto;
   padding: var(--s-space-2);
   overflow: hidden;
-  border: 1px solid var(--s-border);
-  border-radius: var(--s-radius-xl);
-  background: var(--s-surface-2);
+  border: 1px solid var(--mk-edge);
+  border-radius: calc(var(--mk-radius) - 8px);
+  background: radial-gradient(
+      90% 70% at 50% 0%,
+      color-mix(in srgb, var(--s-accent) 7%, transparent),
+      transparent 70%
+    ),
+    var(--s-surface-2);
   font-size: 0.8125rem;
 }
 
@@ -1349,7 +1369,7 @@ html.dark .mkb-staff__avatar {
   }
 
   .mk .mkb__card.mk-reveal[data-revealed]:hover {
-    transform: translateY(-3px);
+    transform: translateY(-2px);
     transition-delay: 0s;
   }
 }
@@ -1378,18 +1398,35 @@ html.dark .mkb-staff__avatar {
 }
 
 .mkp__question {
+  position: relative;
   display: flex;
   gap: var(--s-space-1-5);
   padding: var(--s-space-1-5);
-  border-radius: var(--s-radius-lg);
+  border-radius: var(--s-radius-xl);
   border: 1px solid transparent;
   transition: background-color 500ms var(--mk-spring), border-color 500ms var(--mk-spring);
 }
 
+.mkp__question::before {
+  content: '';
+  position: absolute;
+  top: 14px;
+  bottom: 14px;
+  left: -1px;
+  width: 2px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--s-accent), #8ea2ff);
+  opacity: 0;
+  transition: opacity 500ms var(--s-ease-out);
+}
+
 .mkp__question.is-active {
-  border-color: var(--s-border);
+  border-color: var(--mk-edge);
   background: var(--mk-page);
-  box-shadow: 0 1px 2px rgb(16 24 40 / 0.04);
+}
+
+.mkp__question.is-active::before {
+  opacity: 1;
 }
 
 .mkp__q-icon {
@@ -1406,7 +1443,7 @@ html.dark .mkb-staff__avatar {
 
 .mkp__question.is-active .mkp__q-icon {
   background: var(--s-accent-soft);
-  color: var(--s-accent-soft-text);
+  color: var(--s-accent);
 }
 
 .mkp__q-title {
@@ -1424,12 +1461,39 @@ html.dark .mkb-staff__avatar {
 .mkp__stage {
   position: relative;
   aspect-ratio: 560 / 480;
-  border: 1px solid var(--s-border);
-  border-radius: var(--s-radius-2xl);
-  background-color: var(--mk-page);
-  background-image: radial-gradient(var(--mk-dots) 1px, transparent 1px);
-  background-size: 18px 18px;
+  border: 1px solid var(--mk-edge);
+  border-radius: var(--mk-radius);
+  background: radial-gradient(
+      closest-side,
+      color-mix(in srgb, var(--s-accent) 12%, transparent),
+      transparent
+    ),
+    var(--mk-page);
   overflow: hidden;
+}
+
+.mkp__stage::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 15%;
+  right: 15%;
+  height: 1px;
+  background: var(--mk-lit);
+}
+
+/* A faint orbit ring around the sale */
+.mkp__stage::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 58%;
+  aspect-ratio: 1;
+  border: 1px dashed color-mix(in srgb, var(--s-accent) 16%, transparent);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
 }
 
 .mkp__wires {
@@ -1441,7 +1505,7 @@ html.dark .mkb-staff__avatar {
 
 .mkp__wire {
   fill: none;
-  stroke: var(--s-border-strong);
+  stroke: var(--mk-edge-hi);
   stroke-width: 1.5;
   stroke-dasharray: 4 6;
   vector-effect: non-scaling-stroke;
@@ -1464,17 +1528,12 @@ html.dark .mkb-staff__avatar {
   gap: var(--s-space-1);
   width: min(46%, 240px);
   padding: var(--s-space-2);
+  border: 1px solid rgb(142 162 255 / 0.3);
   border-radius: var(--s-radius-xl);
-  background: var(--s-brand-ink, #0b1020);
+  background: var(--mk-navy);
   color: #fff;
-  box-shadow: 0 0 0 6px color-mix(in srgb, var(--s-accent) 12%, transparent),
-    var(--mkh-stage-shadow);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--s-accent) 10%, transparent), var(--mk-lift);
   transform: translate(-50%, -50%);
-}
-
-html.dark .mkp__sale {
-  border: 1px solid rgb(255 255 255 / 0.1);
-  background: var(--s-surface-2);
 }
 
 .mkp__sale.is-pop {
@@ -1559,10 +1618,11 @@ html.dark .mkp__sale {
   gap: var(--s-space-1);
   width: min(38%, 210px);
   padding: var(--s-space-1) var(--s-space-1-5);
-  border: 1px solid var(--s-border);
+  border: 1px solid var(--mk-edge);
   border-radius: var(--s-radius-lg);
-  background: var(--mk-page);
-  box-shadow: var(--s-shadow-sm);
+  background: color-mix(in srgb, var(--mk-page) 82%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   opacity: 0.6;
   transform: translate(-50%, -50%) scale(0.97);
   transition: opacity 500ms var(--mk-spring), transform 600ms var(--mk-spring),
@@ -1571,8 +1631,8 @@ html.dark .mkp__sale {
 
 .mkp__node.is-lit {
   opacity: 1;
-  border-color: color-mix(in srgb, var(--s-accent) 45%, var(--s-border));
-  box-shadow: var(--mkh-card-shadow);
+  border-color: var(--mk-edge-hi);
+  box-shadow: var(--mk-lift);
   transform: translate(-50%, -50%) scale(1);
 }
 
@@ -1610,7 +1670,7 @@ html.dark .mkp__sale {
 
 .mkp__node.is-lit .mkp__node-icon {
   background: var(--s-accent-soft);
-  color: var(--s-accent-soft-text);
+  color: var(--s-accent);
 }
 
 .mkp__node-body {
@@ -1639,7 +1699,7 @@ html.dark .mkp__sale {
 
 .mkp__node-check {
   flex: none;
-  color: var(--s-success);
+  color: var(--s-accent);
   opacity: 0;
   transform: scale(0.5);
   transition: opacity 300ms var(--s-ease-out), transform 500ms var(--mk-spring);
@@ -1741,9 +1801,8 @@ html.dark .mkp__sale {
 }
 
 .mks__step.is-active {
-  border-color: var(--s-border);
-  background: var(--s-surface);
-  box-shadow: var(--mkh-card-shadow);
+  border-color: var(--mk-edge);
+  background: var(--mk-page);
 }
 
 .mks__step:focus-visible {
@@ -1773,9 +1832,9 @@ html.dark .mkp__sale {
 }
 
 .mks__step.is-done .mks__num {
-  border-color: transparent;
-  background: var(--s-success-soft);
-  color: var(--s-success);
+  border-color: var(--mk-edge-hi);
+  background: var(--s-accent-soft);
+  color: var(--s-accent);
 }
 
 .mks__step-body {
@@ -1834,7 +1893,7 @@ html.dark .mkp__sale {
 .mks__fill {
   position: absolute;
   inset: 0;
-  background: var(--s-accent);
+  background: linear-gradient(90deg, var(--s-accent), #8ea2ff);
   transform-origin: left;
   animation: mks-fill 5.5s linear forwards;
 }
@@ -1869,21 +1928,33 @@ html.dark .mkp__sale {
 
 .mks__window {
   position: relative;
-  border: 1px solid var(--s-border);
+  border: 1px solid var(--mk-edge);
   border-radius: var(--s-radius-xl);
   background: var(--s-surface);
-  box-shadow: var(--mkh-stage-shadow);
+  box-shadow: 0 0 0 8px color-mix(in srgb, var(--s-accent) 5%, transparent),
+    0 40px 80px -40px rgb(61 99 242 / 0.35);
+}
+
+.mks__window::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 15%;
+  right: 15%;
+  z-index: 1;
+  height: 1px;
+  background: var(--mk-lit);
 }
 
 .mks__bar {
   display: flex;
   align-items: center;
   gap: var(--s-space-1-5);
-  height: 40px;
+  height: 36px;
   padding-inline: var(--s-space-1-5);
-  border-bottom: 1px solid var(--s-border);
+  border-bottom: 1px solid var(--mk-edge);
   border-radius: var(--s-radius-xl) var(--s-radius-xl) 0 0;
-  background: var(--s-surface-2);
+  background: var(--s-surface);
 }
 
 .mks__url {
@@ -1918,7 +1989,7 @@ html.dark .mkp__sale {
   height: 22px;
   margin: 0 var(--s-space-1) var(--s-space-1-5);
   border-radius: 7px;
-  background: var(--s-accent);
+  background: linear-gradient(135deg, var(--s-accent), #8ea2ff);
 }
 
 .mks__nav {
@@ -2112,10 +2183,11 @@ html.dark .mkp__sale {
   gap: var(--s-space-1-5);
   min-width: 220px;
   padding: var(--s-space-1-5) var(--s-space-2);
+  border: 1px solid rgb(142 162 255 / 0.3);
   border-radius: var(--s-radius-xl);
-  background: var(--s-brand-ink, #0b1020);
+  background: var(--mk-navy);
   color: #fff;
-  box-shadow: var(--mkh-card-shadow);
+  box-shadow: var(--mk-lift);
 }
 
 html.dark .mks__toast {
@@ -2130,8 +2202,9 @@ html.dark .mks__toast {
   width: 32px;
   height: 32px;
   border-radius: var(--s-radius);
-  background: color-mix(in srgb, var(--s-success) 22%, transparent);
-  color: #3ddc97;
+  border: 1px solid rgb(142 162 255 / 0.35);
+  background: rgb(61 99 242 / 0.25);
+  color: #b3c1ff;
 }
 
 .mks__toast-title {

@@ -97,7 +97,8 @@
 
     <MkCta
       class="mk-section--tight-top"
-      title="Your first store is on us."
+      title="Your first store is"
+      accent="on us."
       lede="Set up Micro in minutes, right in your browser."
       :primary="{ label: 'Start free', to: appUrl }"
       :secondary="{ label: 'Try the live demo', to: '/demo/dashboard' }"
