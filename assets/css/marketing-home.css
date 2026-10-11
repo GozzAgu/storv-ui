@@ -4,12 +4,11 @@
  */
 
 .mk {
-  --mkh-title: 650 clamp(2.75rem, 7.2vw, 5.5rem) / 1.02 var(--s-font-sans);
+  --mkh-title: 600 clamp(2.75rem, 6.6vw, 5.25rem) / 1.04 var(--s-font-sans);
   --mk-spring: cubic-bezier(0.16, 1, 0.3, 1);
   --mkh-beam: rgb(61 99 242 / 0.14);
   --mkh-rim: rgb(61 99 242 / 0.55);
   --mkh-grain-opacity: 0.035;
-  --mkh-title-fade: color-mix(in srgb, var(--s-text) 72%, var(--s-accent));
   --mkh-card-shadow: 0 1px 2px rgb(16 24 40 / 0.06), 0 12px 32px -8px rgb(16 24 40 / 0.16);
   --mkh-stage-shadow: 0 2px 4px rgb(16 24 40 / 0.04), 0 40px 80px -24px rgb(16 24 40 / 0.28);
 }
@@ -18,7 +17,6 @@ html.dark .mk {
   --mkh-beam: rgb(120 150 255 / 0.2);
   --mkh-rim: rgb(140 165 255 / 0.85);
   --mkh-grain-opacity: 0.06;
-  --mkh-title-fade: color-mix(in srgb, var(--s-text) 62%, var(--s-accent));
   --mkh-card-shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 16px 40px -8px rgb(0 0 0 / 0.6);
   --mkh-stage-shadow: 0 2px 4px rgb(0 0 0 / 0.3), 0 40px 100px -24px rgb(0 0 0 / 0.75);
 }
@@ -189,24 +187,20 @@ html.dark .mk {
   margin-top: var(--s-space-3);
   max-width: 15ch;
   font: var(--mkh-title);
-  letter-spacing: -0.045em;
+  letter-spacing: -0.04em;
   color: var(--s-text);
   text-wrap: balance;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 .mkh__line {
   display: block;
-  padding-bottom: 0.06em;
-  background: linear-gradient(180deg, var(--s-text) 35%, var(--mkh-title-fade));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
 }
 
 .mkh__line--muted {
-  background: linear-gradient(180deg, var(--s-text-muted) 0%, var(--mkh-title-fade) 140%);
-  -webkit-background-clip: text;
-  background-clip: text;
+  color: var(--s-text-muted);
 }
 
 .mkh__rotator {
@@ -216,7 +210,7 @@ html.dark .mk {
   color: var(--s-accent);
   white-space: nowrap;
   text-align: left;
-  transition: width 650ms var(--mk-spring);
+  transition: width 800ms var(--mk-spring);
 }
 
 .mkh__sizer {
@@ -229,43 +223,33 @@ html.dark .mk {
 
 .mkh__word {
   display: inline-block;
-  padding-bottom: 0.06em;
-  background: linear-gradient(
-    100deg,
-    var(--s-accent) 10%,
-    color-mix(in srgb, var(--s-accent) 55%, #38bdf8) 90%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
 }
 
 .mkh__rotator .mkh-word-leave-active {
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-
-.mkh-word-enter-active {
-  transition: opacity 500ms var(--mk-spring) 140ms, transform 650ms var(--mk-spring) 140ms,
-    filter 500ms var(--mk-spring) 140ms;
-}
-
-.mkh-word-leave-active {
   transition: opacity 220ms var(--s-ease-out), transform 260ms var(--s-ease-out),
     filter 220ms var(--s-ease-out);
 }
 
+.mkh-word-enter-active {
+  transition: opacity 600ms var(--mk-spring) 120ms, transform 800ms var(--mk-spring) 120ms,
+    filter 600ms var(--mk-spring) 120ms;
+}
+
+.mkh-word-leave-active {
+  transition: opacity 300ms var(--s-ease-out), transform 350ms var(--s-ease-out),
+    filter 300ms var(--s-ease-out);
+}
+
 .mkh-word-enter-from {
   opacity: 0;
-  transform: translateY(0.45em);
-  filter: blur(8px);
+  transform: translateY(0.25em);
+  filter: blur(4px);
 }
 
 .mkh-word-leave-to {
   opacity: 0;
-  transform: translateY(-0.3em);
-  filter: blur(8px);
+  transform: translateY(-0.18em);
+  filter: blur(4px);
 }
 
 .mkh__lede {
@@ -327,8 +311,12 @@ html.dark .mk {
   aspect-ratio: 2.2;
   transform: translateX(-50%);
   pointer-events: none;
-  mask-image: linear-gradient(to bottom, #000 30%, transparent 58%);
-  -webkit-mask-image: linear-gradient(to bottom, #000 30%, transparent 58%);
+  mask-image: linear-gradient(to right, transparent 8%, #000 30%, #000 70%, transparent 92%),
+    linear-gradient(to bottom, #000 30%, transparent 55%);
+  mask-composite: intersect;
+  -webkit-mask-image: linear-gradient(to right, transparent 8%, #000 30%, #000 70%, transparent 92%),
+    linear-gradient(to bottom, #000 30%, transparent 55%);
+  -webkit-mask-composite: source-in;
 }
 
 .mkh__horizon::before {
@@ -342,39 +330,7 @@ html.dark .mk {
   border-radius: 50%;
   background: radial-gradient(ellipse 60% 50% at 50% 0%, var(--mk-glow), transparent 70%),
     var(--mk-page);
-  box-shadow: 0 -24px 80px -24px var(--mk-glow), inset 0 24px 60px -30px var(--mk-glow);
-}
-
-.mkh__horizon::after {
-  content: '';
-  position: absolute;
-  top: calc(var(--mkh-room) - 1px);
-  left: 50%;
-  width: 20%;
-  height: 2px;
-  border-radius: 2px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    var(--mkh-rim),
-    #fff,
-    var(--mkh-rim),
-    transparent
-  );
-  filter: blur(0.5px);
-  transform: translateX(-50%);
-  animation: mkh-shimmer 6s ease-in-out infinite alternate;
-}
-
-@keyframes mkh-shimmer {
-  from {
-    opacity: 0.5;
-    transform: translateX(-80%);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(-20%);
-  }
+  box-shadow: 0 -16px 48px -20px var(--mk-glow), inset 0 16px 40px -28px var(--mk-glow);
 }
 
 .mkh__stage {
@@ -683,7 +639,6 @@ html.dark .mk {
   .mkh__aura,
   .mkh__beam,
   .mkh__announce,
-  .mkh__horizon::after,
   .mkh__card,
   .mkh__live-dot {
     animation: none;
