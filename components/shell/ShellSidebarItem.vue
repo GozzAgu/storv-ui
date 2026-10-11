@@ -6,6 +6,7 @@
     :aria-current="active ? 'page' : undefined"
     :aria-label="collapsed ? item.label : undefined"
     :data-tutorial="item.name.toLowerCase().replace(/\s+/g, '-')"
+    :data-nav-name="item.name"
     @mouseenter="emit('tip', $event, item.label)"
     @focus="emit('tip', $event, item.label)"
     @mouseleave="emit('untip')"
@@ -15,7 +16,7 @@
       :is="icon"
       class="s-nav-item__icon"
       :size="20"
-      :stroke-width="active ? 2 : 1.75"
+      :stroke-width="1.85"
       aria-hidden="true"
     />
     <span v-if="!collapsed" class="s-nav-item__label">{{ item.label }}</span>
