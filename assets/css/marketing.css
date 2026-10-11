@@ -135,6 +135,17 @@ html.dark .mk {
   color: var(--s-accent);
 }
 
+/* Italic serif accent word, as in the home hero */
+.mk-serif {
+  font-family: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.1em;
+  line-height: 0.9;
+  letter-spacing: -0.01em;
+  color: var(--s-accent);
+}
+
 .mk-eyebrow {
   display: inline-flex;
   align-items: center;
@@ -1817,6 +1828,26 @@ html.dark .mk-marquee__item:hover {
   color: var(--s-text-2);
 }
 
+/* Hairline pill with a glowing dot, matching the hero's glass details */
+.mk-intro__eyebrow {
+  justify-self: start;
+  gap: 8px;
+  padding: 4px 12px 4px 10px;
+  border: 1px solid color-mix(in srgb, var(--s-accent) 28%, transparent);
+  border-radius: var(--s-radius-full);
+  background: color-mix(in srgb, var(--s-accent) 6%, transparent);
+  font-size: 0.6875rem;
+}
+
+.mk-intro__eyebrow::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--s-accent);
+  box-shadow: 0 0 8px var(--s-accent);
+}
+
 .mk-trades {
   display: grid;
   grid-auto-flow: column;
@@ -1840,8 +1871,8 @@ html.dark .mk-marquee__item:hover {
   isolation: isolate;
   overflow: hidden;
   aspect-ratio: 3 / 4;
-  border-radius: var(--s-radius-lg);
-  background: var(--s-brand-ink);
+  border-radius: clamp(18px, 2vw, 24px);
+  background: #0f1d4a;
   scroll-snap-align: start;
   outline: none;
 }
@@ -1850,17 +1881,24 @@ html.dark .mk-marquee__item:hover {
   box-shadow: 0 0 0 2px var(--s-bg), 0 0 0 4px var(--s-accent);
 }
 
+/* Navy wash from the bottom, a glass hairline and, on the active card, a lit top edge */
 .mk-trade::after {
   content: '';
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: linear-gradient(
-    to top,
-    color-mix(in srgb, var(--s-brand-ink) 92%, transparent) 0%,
-    color-mix(in srgb, var(--s-brand-ink) 55%, transparent) 30%,
-    transparent 60%
-  );
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent 15%, rgb(142 162 255 / 0.9) 50%, transparent 85%)
+      top / 100% 1px no-repeat,
+    linear-gradient(to top, rgb(10 18 48 / 0.94) 0%, rgb(15 29 74 / 0.6) 32%, rgb(15 29 74 / 0) 62%);
+  background-size: 0% 1px, 100% 100%;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.1);
+  transition: background-size 700ms var(--mk-spring, var(--s-ease));
+}
+
+.mk-trade--active::after {
+  background-size: 100% 1px, 100% 100%;
+  box-shadow: inset 0 0 0 1px rgb(142 162 255 / 0.35);
 }
 
 .mk-trade__img {
@@ -1870,7 +1908,25 @@ html.dark .mk-marquee__item:hover {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform var(--s-duration-slow) var(--s-ease);
+  transition: transform var(--s-duration-slow) var(--s-ease),
+    filter var(--s-duration-slow) var(--s-ease);
+}
+
+.mk-trade__index {
+  position: absolute;
+  top: var(--s-space-2);
+  left: var(--s-space-2);
+  padding: 3px 8px;
+  border: 1px solid rgb(255 255 255 / 0.16);
+  border-radius: var(--s-radius-full);
+  background: rgb(10 18 48 / 0.35);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font: 500 0.625rem / 1rem 'JetBrains Mono', ui-monospace, monospace;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  color: rgb(255 255 255 / 0.8);
+  transition: opacity var(--s-duration-slow) var(--s-ease);
 }
 
 .mk-trade__body {
@@ -1891,11 +1947,12 @@ html.dark .mk-marquee__item:hover {
   width: var(--s-space-5);
   height: var(--s-space-5);
   margin-bottom: var(--s-space-half);
-  border: 1px solid color-mix(in srgb, var(--s-on-brand) 22%, transparent);
+  border: 1px solid rgb(142 162 255 / 0.35);
   border-radius: var(--s-radius-lg);
-  background: color-mix(in srgb, var(--s-on-brand) 12%, transparent);
+  background: rgb(61 99 242 / 0.22);
   backdrop-filter: blur(var(--mk-blur));
   -webkit-backdrop-filter: blur(var(--mk-blur));
+  color: #dfe5ff;
 }
 
 .mk-trade__title {
@@ -1915,8 +1972,11 @@ html.dark .mk-marquee__item:hover {
 
 .mk-trade__tag {
   padding: var(--s-space-quarter) var(--s-space-1);
-  border: 1px solid color-mix(in srgb, var(--s-on-brand) 22%, transparent);
+  border: 1px solid rgb(255 255 255 / 0.16);
   border-radius: var(--s-radius-full);
+  background: rgb(255 255 255 / 0.08);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   font: var(--s-text-caption);
   white-space: nowrap;
   color: color-mix(in srgb, var(--s-on-brand) 88%, transparent);
@@ -1949,8 +2009,17 @@ html.dark .mk-marquee__item:hover {
     flex-grow: 3;
   }
 
+  .mk-trade__img {
+    filter: saturate(0.75) brightness(0.88);
+  }
+
   .mk-trade--active .mk-trade__img {
+    filter: none;
     transform: scale(1.02);
+  }
+
+  .mk-trade:not(.mk-trade--active) .mk-trade__index {
+    opacity: 0;
   }
 
   .mk-trade__title {

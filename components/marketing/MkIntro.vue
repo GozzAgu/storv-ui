@@ -3,10 +3,10 @@
     <div class="mk-container">
       <div class="mk-intro mk-reveal">
         <header class="mk-intro__title">
-          <p class="mk-eyebrow">Who it's for</p>
+          <p class="mk-eyebrow mk-intro__eyebrow">Who it's for</p>
           <h2 id="mk-intro-title" class="mk-h2">
             One workspace,
-            <span class="mk-accent">however you sell.</span>
+            <em class="mk-serif">however you sell.</em>
           </h2>
         </header>
         <div class="mk-intro__aside">
@@ -41,6 +41,9 @@
           loading="lazy"
           decoding="async"
         />
+        <span class="mk-trade__index" aria-hidden="true">
+          {{ String(i + 1).padStart(2, '0') }} / {{ String(trades.length).padStart(2, '0') }}
+        </span>
         <div class="mk-trade__body">
           <span class="mk-trade__icon" aria-hidden="true">
             <component :is="trade.icon" :size="18" />
