@@ -2,7 +2,7 @@
   <section class="mk-section" :aria-labelledby="titleId">
     <div class="mk-container">
       <div class="mk-cta mk-reveal">
-        <img src="/brand/storvv-symbol.png" alt="" class="mk-cta__symbol" width="48" height="48" />
+        <img src="/brand/storvv-symbol.png" alt="" class="mk-cta__symbol" width="40" height="40" />
         <h2 :id="titleId" class="mk-h2">{{ title }}</h2>
         <p v-if="lede" class="mk-lede">{{ lede }}</p>
         <div class="mk-actions mk-actions--center">

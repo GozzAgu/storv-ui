@@ -12,7 +12,7 @@
           fetchpriority="high"
         />
         <a href="https://www.storvv.com" class="s-auth__brand-logo" aria-label="Storvv home">
-          <img src="/brand/storvv-logo-reversed.png" alt="" width="140" height="32" />
+          <img src="/brand/storvv-logo-reversed.png" alt="" width="105" height="24" />
         </a>
 
         <div class="s-auth__brand-body">
@@ -42,15 +42,15 @@
               class="s-auth__mobile-logo-light"
               src="/brand/storvv-logo.png"
               alt=""
-              width="122"
-              height="28"
+              width="96"
+              height="22"
             />
             <img
               class="s-auth__mobile-logo-dark"
               src="/brand/storvv-logo-reversed.png"
               alt=""
-              width="122"
-              height="28"
+              width="96"
+              height="22"
             />
           </a>
           <slot />

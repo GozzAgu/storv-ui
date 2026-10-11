@@ -5,7 +5,7 @@
       <div class="mk-footer__top">
         <div class="mk-footer__brand">
           <NuxtLink to="/" class="mk-header__brand" aria-label="Storvv home">
-            <img :src="logoSrc" alt="" class="mk-header__logo" width="104" height="28" />
+            <img :src="logoSrc" alt="" class="mk-header__logo" width="82" height="22" />
           </NuxtLink>
           <p class="mk-card__text">
             The retail operating system for shops that want every sale, item, and branch in one

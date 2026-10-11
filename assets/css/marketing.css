@@ -28,7 +28,7 @@
   --mk-nav-h: calc(var(--s-space-1) * 7);
   --mk-nav-gap: var(--s-space-1-5);
   --mk-header-h: calc(var(--mk-nav-h) + var(--mk-nav-gap));
-  --mk-logo-h: 28px;
+  --mk-logo-h: 22px;
   --mk-dot: 10px;
   --mk-blur: 12px;
   --mk-glass-blur: var(--s-space-2);
@@ -227,6 +227,25 @@ html.dark .mk {
   min-height: var(--s-btn-h);
   padding-inline: var(--s-space-2);
   font-size: 0.875rem;
+}
+
+/* Phones: tighter buttons so calls to action don't dominate a narrow screen */
+@media (max-width: 639px) {
+  .mk .mk-btn {
+    height: 40px;
+    min-height: 40px;
+    padding-inline: 18px;
+    border-radius: 10px;
+    font-size: 0.875rem;
+  }
+
+  .mk .mk-btn--compact {
+    height: 34px;
+    min-height: 34px;
+    padding-inline: 14px;
+    border-radius: 9px;
+    font-size: 0.8125rem;
+  }
 }
 
 .mk-link {
@@ -620,10 +639,11 @@ html.dark .mk {
   gap: var(--s-space-1);
 }
 
-.mk-menu__cta {
+.mk .mk-menu__cta {
   width: 100%;
-  height: 48px;
-  font-size: 1rem;
+  height: 44px;
+  min-height: 44px;
+  font-size: 0.9375rem;
 }
 
 .mk-menu__note {
@@ -3131,8 +3151,8 @@ html.dark .mk-marquee__item {
 }
 
 .mk-cta__symbol {
-  width: var(--s-space-6);
-  height: var(--s-space-6);
+  width: var(--s-space-5);
+  height: var(--s-space-5);
 }
 
 .mk-cta .mk-h2 {

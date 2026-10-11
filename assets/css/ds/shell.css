@@ -204,7 +204,7 @@ html:has(.s-shell.ds-root) body {
 
 .s-sidebar__logo {
   display: block;
-  height: 28px;
+  height: 22px;
   width: auto;
   max-width: 140px;
   object-fit: contain;
@@ -213,8 +213,8 @@ html:has(.s-shell.ds-root) body {
 
 .s-sidebar__mark {
   display: block;
-  width: 32px;
-  height: 32px;
+  width: 26px;
+  height: 26px;
   object-fit: contain;
 }
 

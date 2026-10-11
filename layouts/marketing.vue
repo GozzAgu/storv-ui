@@ -12,7 +12,7 @@
             aria-label="Storvv home"
             @click="menuOpen = false"
           >
-            <img :src="logoSrc" alt="" class="mk-header__logo" width="104" height="28" />
+            <img :src="logoSrc" alt="" class="mk-header__logo" width="82" height="22" />
           </NuxtLink>
 
           <nav class="mk-header__nav" aria-label="Primary">
