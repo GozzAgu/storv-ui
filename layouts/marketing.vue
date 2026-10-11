@@ -25,60 +25,117 @@
           </nav>
 
           <div class="mk-header__actions">
-            <SIconButton :label="themeLabel" @click="toggleTheme">
+            <SIconButton class="mk-header__theme" :label="themeLabel" @click="toggleTheme">
               <Moon v-if="isDark" :size="18" aria-hidden="true" />
               <Sun v-else :size="18" aria-hidden="true" />
             </SIconButton>
             <SButton variant="ghost" class="mk-btn mk-btn--compact mk-header__signin" :to="appUrl">
               Sign in
             </SButton>
-            <SButton variant="primary" class="mk-btn mk-btn--compact" :to="appUrl"
+            <SButton variant="primary" class="mk-btn mk-btn--compact mk-header__cta" :to="appUrl"
               >Start free</SButton
             >
-            <SIconButton
-              class="mk-header__menu"
-              :label="menuOpen ? 'Close menu' : 'Open menu'"
+            <button
+              ref="burgerEl"
+              type="button"
+              class="mk-burger"
+              :class="{ 'mk-burger--open': menuOpen }"
+              :aria-label="menuOpen ? 'Close menu' : 'Open menu'"
               :aria-expanded="menuOpen"
               aria-controls="mk-menu"
               @click="menuOpen = !menuOpen"
+              @keydown="onBurgerKeydown"
             >
-              <X v-if="menuOpen" :size="20" aria-hidden="true" />
-              <Menu v-else :size="20" aria-hidden="true" />
-            </SIconButton>
+              <span class="mk-burger__line" aria-hidden="true" />
+              <span class="mk-burger__line" aria-hidden="true" />
+            </button>
           </div>
         </div>
       </div>
     </header>
 
-    <Transition name="mk-menu">
-      <div v-if="menuOpen" class="mk-menu">
-        <button
-          type="button"
-          class="mk-menu__scrim"
-          aria-label="Close menu"
-          @click="menuOpen = false"
-        />
-        <div id="mk-menu" class="mk-menu__panel">
-          <nav class="mk-menu__nav" aria-label="Site menu">
-            <a href="/#product" class="mk-menu__link" @click.prevent="openSection('product')"
-              >Product</a
-            >
-            <NuxtLink
-              v-for="link in pageLinks"
-              :key="link.to"
-              :to="link.to"
-              class="mk-menu__link"
-              @click="menuOpen = false"
-            >
-              {{ link.label }}
-            </NuxtLink>
-            <NuxtLink to="/demo/dashboard" class="mk-menu__link" @click="menuOpen = false">
-              Live demo
-            </NuxtLink>
+    <Transition name="mk-menu" @after-enter="focusFirstMenuItem">
+      <div
+        v-if="menuOpen"
+        id="mk-menu"
+        ref="menuEl"
+        class="mk-menu"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Site menu"
+        @keydown="onMenuKeydown"
+      >
+        <div class="mk-menu__body">
+          <nav aria-label="Site menu">
+            <ul class="mk-menu__list" role="list">
+              <li class="mk-menu__item mk-menu__stagger" style="--i: 0">
+                <a href="/#product" class="mk-menu__link" @click.prevent="openSection('product')">
+                  <span>Product</span>
+                  <ChevronRight class="mk-menu__chevron" :size="18" aria-hidden="true" />
+                </a>
+              </li>
+              <li
+                v-for="(link, index) in pageLinks"
+                :key="link.to"
+                class="mk-menu__item mk-menu__stagger"
+                :style="{ '--i': index + 1 }"
+              >
+                <NuxtLink
+                  :to="link.to"
+                  class="mk-menu__link"
+                  :aria-current="route.path === link.to ? 'page' : undefined"
+                  @click="menuOpen = false"
+                >
+                  <span>{{ link.label }}</span>
+                  <ChevronRight class="mk-menu__chevron" :size="18" aria-hidden="true" />
+                </NuxtLink>
+              </li>
+            </ul>
           </nav>
-          <div class="mk-menu__actions">
-            <SButton variant="secondary" class="mk-btn" :to="appUrl">Sign in</SButton>
-            <SButton variant="primary" class="mk-btn" :to="appUrl">Start free</SButton>
+
+          <NuxtLink
+            to="/demo/dashboard"
+            class="mk-menu__demo mk-menu__stagger"
+            :style="{ '--i': pageLinks.length + 1 }"
+            @click="menuOpen = false"
+          >
+            <span class="mk-menu__demo-icon" aria-hidden="true">
+              <MonitorPlay :size="20" :stroke-width="1.75" />
+            </span>
+            <span class="mk-menu__demo-text">
+              <span class="mk-menu__demo-title">Try the live demo</span>
+              <span class="mk-menu__demo-sub">Sample data, no sign-up needed.</span>
+            </span>
+            <ArrowRight class="mk-menu__demo-arrow" :size="18" aria-hidden="true" />
+          </NuxtLink>
+
+          <div class="mk-menu__foot mk-menu__stagger" :style="{ '--i': pageLinks.length + 2 }">
+            <div class="mk-menu__appearance">
+              <span :id="appearanceLabelId" class="mk-menu__appearance-label">Appearance</span>
+              <div class="mk-segmented" role="radiogroup" :aria-labelledby="appearanceLabelId">
+                <button
+                  v-for="option in themeOptions"
+                  :key="option.value"
+                  type="button"
+                  role="radio"
+                  class="mk-segmented__option"
+                  :aria-checked="theme === option.value"
+                  :aria-label="option.label"
+                  @click="setTheme(option.value)"
+                >
+                  <component :is="option.icon" :size="16" :stroke-width="1.75" aria-hidden="true" />
+                </button>
+              </div>
+            </div>
+            <div class="mk-menu__actions">
+              <SButton variant="primary" class="mk-btn mk-menu__cta" :to="appUrl"
+                >Start free</SButton
+              >
+              <SButton variant="secondary" class="mk-btn mk-menu__cta" :to="appUrl"
+                >Sign in</SButton
+              >
+            </div>
+            <p class="mk-menu__note">Free forever for one store. No card needed.</p>
           </div>
         </div>
       </div>
@@ -90,7 +147,12 @@
 
     <MkFooter />
 
-    <div v-if="!cookiesAccepted" class="mk-cookie" role="region" aria-label="Cookie notice">
+    <div
+      v-if="!cookiesAccepted && !menuOpen"
+      class="mk-cookie"
+      role="region"
+      aria-label="Cookie notice"
+    >
       <p>
         We use cookies to give you the best browsing experience. By continuing to use the site you
         agree to their use.
@@ -113,8 +175,8 @@
 
 <script setup lang="ts">
 import '~/assets/css/marketing.css'
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
-import { ArrowUp, Menu, Moon, Sun, X } from '@lucide/vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, useId, watch } from 'vue'
+import { ArrowRight, ArrowUp, ChevronRight, Monitor, MonitorPlay, Moon, Sun } from '@lucide/vue'
 import SButton from '~/components/s/SButton.vue'
 import SIconButton from '~/components/s/SIconButton.vue'
 import MkFooter from '~/components/marketing/MkFooter.vue'
@@ -130,7 +192,7 @@ const route = useRoute()
 const appUrl = useMarketingAppUrl()
 const logoSrc = useMarketingLogo()
 const { scrollToSection, scrollToTop, goToSection } = useSectionScroll()
-const { actualTheme, setTheme, initTheme, applyTheme } = useTheme()
+const { theme, actualTheme, setTheme, initTheme, applyTheme } = useTheme()
 useMarketingReveal()
 
 const pageLinks = [
@@ -151,8 +213,50 @@ function syncThemeColor() {
   if (meta) meta.setAttribute('content', getComputedStyle(document.body).backgroundColor)
 }
 
+const themeOptions = [
+  { value: 'light', label: 'Light', icon: Sun },
+  { value: 'dark', label: 'Dark', icon: Moon },
+  { value: 'system', label: 'System', icon: Monitor },
+] as const
+
+const appearanceLabelId = useId()
 const menuOpen = ref(false)
+const menuEl = ref<HTMLElement | null>(null)
+const burgerEl = ref<HTMLButtonElement | null>(null)
 const headerScrolled = ref(false)
+
+const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+
+function focusFirstMenuItem() {
+  menuEl.value?.querySelector<HTMLElement>('.mk-menu__link')?.focus({ preventScroll: true })
+}
+
+/* The burger stays above the sheet, so it is part of the focus loop and Tab never leaves the menu */
+function onMenuKeydown(event: KeyboardEvent) {
+  if (event.key !== 'Tab' || !menuEl.value || !burgerEl.value) return
+  const items = [burgerEl.value, ...menuEl.value.querySelectorAll<HTMLElement>(FOCUSABLE)]
+  const first = items[0]!
+  const last = items[items.length - 1]!
+  if (event.shiftKey && document.activeElement === menuEl.value.querySelector(FOCUSABLE)) {
+    event.preventDefault()
+    first.focus()
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault()
+    first.focus()
+  }
+}
+
+function onBurgerKeydown(event: KeyboardEvent) {
+  if (!menuOpen.value || event.key !== 'Tab') return
+  const items = menuEl.value ? [...menuEl.value.querySelectorAll<HTMLElement>(FOCUSABLE)] : []
+  if (!items.length) return
+  event.preventDefault()
+  ;(event.shiftKey ? items[items.length - 1]! : items[0]!).focus()
+}
+
+function onDocumentKeydown(event: KeyboardEvent) {
+  if (event.key === 'Escape' && menuOpen.value) menuOpen.value = false
+}
 const showBackToTop = ref(false)
 const cookiesAccepted = ref(true)
 
@@ -195,8 +299,11 @@ watch(
   }
 )
 
-watch(menuOpen, (open) => {
+watch(menuOpen, (open, wasOpen) => {
   document.body.style.overflow = open ? 'hidden' : ''
+  if (!open && wasOpen && menuEl.value?.contains(document.activeElement)) {
+    void nextTick(() => burgerEl.value?.focus({ preventScroll: true }))
+  }
 })
 
 onMounted(() => {
@@ -211,6 +318,7 @@ onMounted(() => {
     setTimeout(() => scrollToSection(id), 100)
   }
   window.addEventListener('scroll', onScroll, { passive: true })
+  document.addEventListener('keydown', onDocumentKeydown)
   onScroll()
 })
 
@@ -218,5 +326,6 @@ onUnmounted(() => {
   document.body.style.overflow = ''
   desktopQuery?.removeEventListener('change', closeMenuOnDesktop)
   window.removeEventListener('scroll', onScroll)
+  document.removeEventListener('keydown', onDocumentKeydown)
 })
 </script>

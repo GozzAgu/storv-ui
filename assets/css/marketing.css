@@ -339,8 +339,75 @@ html.dark .mk {
   display: none;
 }
 
-.mk-header__menu {
+.mk-header__theme {
+  display: none;
+}
+
+.mk-header__cta {
+  transition: opacity var(--s-duration) var(--s-ease), visibility var(--s-duration);
+}
+
+/* The sheet has its own full-width call to action */
+@media (max-width: 899px) {
+  .mk-header--open .mk-header__cta {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* Two lines that fold into a cross; stays above the sheet so it doubles as the close button */
+.mk-burger {
+  --mk-burger-spring: cubic-bezier(0.32, 0.72, 0, 1);
+  position: relative;
   display: inline-flex;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--s-radius-full);
+  background: transparent;
+  color: var(--s-text);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color var(--s-duration-fast) var(--s-ease);
+}
+
+.mk-burger:hover {
+  background: var(--s-surface-2);
+}
+
+.mk-burger:focus-visible {
+  outline: none;
+  box-shadow: var(--s-focus-ring);
+}
+
+.mk-burger__line {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  width: 16px;
+  height: 1.5px;
+  margin-top: -0.75px;
+  border-radius: 1px;
+  background: currentColor;
+  transition: transform 360ms var(--mk-burger-spring);
+}
+
+.mk-burger__line:first-child {
+  transform: translateY(-3.5px);
+}
+
+.mk-burger__line:last-child {
+  transform: translateY(3.5px);
+}
+
+.mk-burger--open .mk-burger__line:first-child {
+  transform: rotate(45deg);
+}
+
+.mk-burger--open .mk-burger__line:last-child {
+  transform: rotate(-45deg);
 }
 
 @media (min-width: 900px) {
@@ -356,73 +423,220 @@ html.dark .mk {
     display: inline-flex;
   }
 
-  .mk-header__menu {
+  .mk-header__theme {
+    display: inline-flex;
+  }
+
+  .mk-burger {
     display: none;
   }
 }
 
-/* Mobile menu: a sheet that drops from the header */
+/*
+ * Mobile menu: a full-height frosted sheet under the floating header. Large rows, a demo card and
+ * a footer pinned to the bottom with appearance and the two calls to action.
+ */
 .mk-menu {
   position: fixed;
-  inset: var(--mk-header-h) 0 0;
-  z-index: var(--s-z-overlay);
+  inset: 0;
+  z-index: calc(var(--s-z-nav) - 1);
   display: flex;
   flex-direction: column;
+  padding-top: var(--mk-header-h);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: color-mix(in srgb, var(--s-bg) 84%, transparent);
+  -webkit-backdrop-filter: saturate(1.8) blur(28px);
+  backdrop-filter: saturate(1.8) blur(28px);
 }
 
-.mk-menu__scrim {
-  position: absolute;
-  inset: 0;
-  border: 0;
-  background: var(--s-scrim);
-}
-
-.mk-menu__panel {
-  position: relative;
-  display: grid;
+.mk-menu__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   gap: var(--s-space-3);
-  margin: var(--s-space-1) var(--mk-gutter) 0;
-  padding: var(--s-space-2);
-  border: 1px solid var(--s-border);
-  border-radius: var(--s-radius-xl);
-  background: color-mix(in srgb, var(--s-surface) 92%, transparent);
-  backdrop-filter: saturate(1.8) blur(var(--mk-glass-blur));
-  -webkit-backdrop-filter: saturate(1.8) blur(var(--mk-glass-blur));
-  box-shadow: inset 0 1px 0 var(--mk-glass-edge), var(--s-shadow-lg);
+  width: 100%;
+  max-width: 560px;
+  margin-inline: auto;
+  padding: var(--s-space-3) var(--mk-gutter)
+    calc(var(--s-space-2) + env(safe-area-inset-bottom, 0px));
 }
 
-.mk-menu__nav {
-  display: grid;
+.mk-menu__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mk-menu__item + .mk-menu__item {
+  border-top: 0.5px solid var(--s-border);
 }
 
 .mk-menu__link {
   display: flex;
   align-items: center;
-  min-height: var(--s-touch);
-  padding-inline: var(--s-space-1);
+  justify-content: space-between;
+  min-height: 56px;
+  padding-inline: var(--s-space-half);
   border-radius: var(--s-radius);
-  font: 500 1rem / 1.5rem var(--s-font-sans);
   color: var(--s-text);
+  font: 600 1.25rem / 1.75rem var(--s-font-sans);
+  letter-spacing: -0.015em;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: color var(--s-duration-fast) var(--s-ease);
 }
 
-.mk-menu__link:hover {
+.mk-menu__chevron {
+  color: var(--s-text-3);
+  transition: transform var(--s-duration) var(--s-ease), color var(--s-duration) var(--s-ease);
+}
+
+.mk-menu__link:hover .mk-menu__chevron,
+.mk-menu__link:focus-visible .mk-menu__chevron {
+  color: var(--s-text);
+  transform: translateX(2px);
+}
+
+.mk-menu__link[aria-current='page'] {
+  color: var(--s-accent);
+}
+
+.mk-menu__link[aria-current='page'] .mk-menu__chevron {
+  color: var(--s-accent);
+}
+
+.mk-menu__link:focus-visible,
+.mk-menu__demo:focus-visible,
+.mk-segmented__option:focus-visible {
+  outline: none;
+  box-shadow: var(--s-focus-ring);
+}
+
+.mk-menu__link:active,
+.mk-menu__demo:active {
+  opacity: 0.7;
+}
+
+.mk-menu__demo {
+  display: flex;
+  align-items: center;
+  gap: var(--s-space-1-5);
+  padding: 14px var(--s-space-2);
+  border: 0.5px solid var(--s-glass-hairline, var(--s-border));
+  border-radius: 18px;
+  background: var(--s-glass-strong, var(--s-surface));
+  box-shadow: var(--s-glass-highlight, none), var(--s-shadow-sm);
+  color: var(--s-text);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity var(--s-duration-fast) var(--s-ease);
+}
+
+.mk-menu__demo-icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--s-accent-soft);
+  color: var(--s-accent-soft-text);
+}
+
+.mk-menu__demo-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.mk-menu__demo-title {
+  font: 600 0.9375rem / 1.25rem var(--s-font-sans);
+}
+
+.mk-menu__demo-sub {
+  color: var(--s-text-2);
+  font: 400 0.8125rem / 1.125rem var(--s-font-sans);
+}
+
+.mk-menu__demo-arrow {
+  flex: none;
+  color: var(--s-text-3);
+}
+
+.mk-menu__foot {
+  display: grid;
+  gap: var(--s-space-2);
+  margin-top: auto;
+  padding-top: var(--s-space-2);
+  border-top: 0.5px solid var(--s-border);
+}
+
+.mk-menu__appearance {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mk-menu__appearance-label {
+  color: var(--s-text-2);
+  font: 500 0.875rem / 1.25rem var(--s-font-sans);
+}
+
+.mk-segmented {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--s-radius-full);
   background: var(--s-surface-2);
+}
+
+.mk-segmented__option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--s-radius-full);
+  background: transparent;
+  color: var(--s-text-3);
+  cursor: pointer;
+  transition: background-color var(--s-duration-fast) var(--s-ease),
+    color var(--s-duration-fast) var(--s-ease);
+}
+
+.mk-segmented__option[aria-checked='true'] {
+  background: var(--s-surface);
+  box-shadow: var(--s-shadow-sm);
+  color: var(--s-text);
 }
 
 .mk-menu__actions {
   display: grid;
-  grid-template-columns: 1fr 1fr;
   gap: var(--s-space-1);
 }
 
-.mk-menu-enter-active,
-.mk-menu-leave-active {
-  transition: opacity var(--s-duration) var(--s-ease);
+.mk-menu__cta {
+  width: 100%;
+  height: 48px;
+  font-size: 1rem;
 }
 
-.mk-menu-enter-active .mk-menu__panel,
-.mk-menu-leave-active .mk-menu__panel {
-  transition: transform var(--s-duration) var(--s-ease);
+.mk-menu__note {
+  margin: 0;
+  color: var(--s-text-3);
+  font: 400 0.75rem / 1rem var(--s-font-sans);
+  text-align: center;
+}
+
+/* The sheet fades; its rows rise in one after another */
+.mk-menu-enter-active,
+.mk-menu-leave-active {
+  transition: opacity 220ms var(--s-ease);
 }
 
 .mk-menu-enter-from,
@@ -430,9 +644,32 @@ html.dark .mk {
   opacity: 0;
 }
 
-.mk-menu-enter-from .mk-menu__panel,
-.mk-menu-leave-to .mk-menu__panel {
-  transform: translateY(calc(var(--s-space-1) * -1));
+.mk-menu__stagger {
+  animation: mk-menu-rise 480ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  animation-delay: calc(var(--i, 0) * 35ms + 40ms);
+}
+
+@keyframes mk-menu-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mk-menu__stagger {
+    animation: none;
+  }
+
+  .mk-burger__line {
+    transition: none;
+  }
+}
+
+@media (min-width: 900px) {
+  .mk-menu {
+    display: none;
+  }
 }
 
 /* ── Hero ───────────────────────────────────────────────────────────────── */
