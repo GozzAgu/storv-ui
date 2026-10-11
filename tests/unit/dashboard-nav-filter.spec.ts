@@ -156,30 +156,40 @@ describe('filterDashboardNavItems', () => {
 })
 
 describe('phone "More" menu (iOS and narrow web)', () => {
-  it('lists Storefront and Payment links once both are launched', async () => {
+  it('lists Storefront, Payment links and Trade with shops only when each is switched on', async () => {
     const { buildShellMoreNav } = await import('~/utils/shell-nav')
+    const context = buildBusinessCapabilityContext({ experienceMode: 'business' })
+    const moreLabels = (off: boolean) => {
+      const items = filterDashboardNavItems(DASHBOARD_NAV_DEFINITIONS, {
+        isSuperAdmin: true,
+        isManager: false,
+        canUseFeature: () => true,
+        canUseBusinessCapability: (capability) => canUseBusinessCapability(capability, context),
+        hidePaymentLinks: off,
+        hideStorefront: off,
+        tradeEnabled: !off,
+      }).map((item) => ({
+        name: item.name,
+        iconKey: item.iconKey,
+        href: `/dashboard${item.segment}`,
+      }))
+      return buildShellMoreNav(items).map((item) => item.label)
+    }
+
+    expect(moreLabels(false)).toEqual(
+      expect.arrayContaining(['Storefront', 'Payment links', 'Trade with shops'])
+    )
+    const off = moreLabels(true)
+    expect(off).not.toContain('Storefront')
+    expect(off).not.toContain('Payment links')
+    expect(off).not.toContain('Trade with shops')
+  })
+
+  it('currently has Storefront and Payment links switched off', async () => {
     const { isPaymentLinksComingSoon } = await import('~/utils/payment-links-launch')
     const { isStorefrontDashboardHidden } = await import('~/utils/storefront-launch')
-    expect(isPaymentLinksComingSoon()).toBe(false)
-    expect(isStorefrontDashboardHidden()).toBe(false)
-
-    const context = buildBusinessCapabilityContext({ experienceMode: 'business' })
-    const items = filterDashboardNavItems(DASHBOARD_NAV_DEFINITIONS, {
-      isSuperAdmin: true,
-      isManager: false,
-      canUseFeature: () => true,
-      canUseBusinessCapability: (capability) => canUseBusinessCapability(capability, context),
-      hidePaymentLinks: isPaymentLinksComingSoon(),
-      hideStorefront: isStorefrontDashboardHidden(),
-    }).map((item) => ({
-      name: item.name,
-      iconKey: item.iconKey,
-      href: `/dashboard${item.segment}`,
-    }))
-
-    const more = buildShellMoreNav(items).map((item) => item.label)
-    expect(more).toContain('Storefront')
-    expect(more).toContain('Payment links')
+    expect(isPaymentLinksComingSoon()).toBe(true)
+    expect(isStorefrontDashboardHidden()).toBe(true)
   })
 
   it('groups the grid like the sidebar, with general items first and nothing from the bar', async () => {

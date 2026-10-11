@@ -306,6 +306,7 @@ import SEmptyState from '~/components/s/SEmptyState.vue'
 import SInput from '~/components/s/SInput.vue'
 import SSpinner from '~/components/s/SSpinner.vue'
 import { isCapacitorNative } from '~/utils/capacitor-env'
+import { isPaymentLinksComingSoon } from '~/utils/payment-links-launch'
 
 const router = useRouter()
 const searchStore = useSearchStore()
@@ -373,12 +374,14 @@ const suggestedActions = computed(() => {
       href: '/dashboard/analytics',
       icon: ChartBarIcon,
     },
-    {
+  ]
+  if (!isPaymentLinksComingSoon()) {
+    actions.push({
       label: 'Payment links',
       href: '/dashboard/payment-links',
       icon: CreditCardIcon,
-    },
-  ]
+    })
+  }
   return actions
 })
 

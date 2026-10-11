@@ -5,6 +5,7 @@ import { useDepartmentsStore } from '~/stores/departments'
 import { useUserStore } from '~/stores/user'
 import { useStorefrontStore } from '~/stores/storefront'
 import { usePreferences } from '~/composables/usePreferences'
+import { isStorefrontDashboardHidden } from '~/utils/storefront-launch'
 import type { InventoryItem } from '~/stores/inventory'
 import type { Receipt } from '~/stores/receipts'
 
@@ -639,7 +640,7 @@ export function useDashboardInsights(folderItems: Ref<Record<string, InventoryIt
       })
     }
     const pendingInquiries = storefrontStore.pendingInquiryCount
-    if (pendingInquiries > 0) {
+    if (pendingInquiries > 0 && !isStorefrontDashboardHidden()) {
       items.push({
         id: 'storefront-inquiries',
         level: 'warning',
@@ -710,11 +711,15 @@ export function useDashboardInsights(folderItems: Ref<Record<string, InventoryIt
       description: 'Folders, SKUs, serial units, and stock levels',
       href: '/dashboard/inventory',
     },
-    {
-      label: 'Storefront',
-      description: 'Guest inquiries and public showroom requests',
-      href: '/dashboard/storefront',
-    },
+    ...(isStorefrontDashboardHidden()
+      ? []
+      : [
+          {
+            label: 'Storefront',
+            description: 'Guest inquiries and public showroom requests',
+            href: '/dashboard/storefront',
+          },
+        ]),
     {
       label: 'Analytics',
       description: 'Trends, exports, and period comparisons',

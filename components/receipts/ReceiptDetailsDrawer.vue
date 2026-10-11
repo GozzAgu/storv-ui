@@ -35,7 +35,7 @@
 
         <template v-if="v2Sale">
           <PaymentTimeline :receipt="receipt" @record-payment="emit('record-payment', receipt!)" />
-          <PaymentLinksPanel :receipt="receipt" />
+          <PaymentLinksPanel v-if="!paymentLinksOff" :receipt="receipt" />
         </template>
 
         <!-- Balance-due: paid/balance summary + payment history -->
@@ -160,7 +160,10 @@ import { usePermissions } from '~/composables/usePermissions'
 import { usePreferences } from '~/composables/usePreferences'
 import PaymentTimeline from '~/components/payments/PaymentTimeline.vue'
 import PaymentLinksPanel from '~/components/payments/PaymentLinksPanel.vue'
+import { isPaymentLinksComingSoon } from '~/utils/payment-links-launch'
 import { isV2Sale } from '~/utils/payments-v2-tenders'
+
+const paymentLinksOff = isPaymentLinksComingSoon()
 
 const props = defineProps<{
   modelValue: boolean

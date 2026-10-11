@@ -361,7 +361,11 @@
           </SCard>
         </div>
 
-        <PaymentLinksSummaryCard v-if="canShowPaymentLinksFeature" card-class="s-card" :limit="6" />
+        <PaymentLinksSummaryCard
+          v-if="canShowPaymentLinksFeature && !isPaymentLinksComingSoon()"
+          card-class="s-card"
+          :limit="6"
+        />
       </template>
     </template>
   </div>
@@ -414,6 +418,7 @@ import { useCustomerBuybacksStore } from '~/stores/customerBuybacks'
 import { useSellerLoanOutsStore } from '~/stores/sellerLoanOuts'
 import { useStorefrontStore } from '~/stores/storefront'
 import { isStorefrontDashboardHidden } from '~/utils/storefront-launch'
+import { isPaymentLinksComingSoon } from '~/utils/payment-links-launch'
 import { useCustomerAccountsStore } from '~/stores/customerAccounts'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
