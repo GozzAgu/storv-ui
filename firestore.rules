@@ -913,6 +913,19 @@ service cloud.firestore {
       allow delete: if canWriteStorefrontProjection(resource.data.ownerUid, resource.data.storeId);
     }
 
+    // A listing may only sit under a storefront owned by the same owner and store.
+    function storefrontIsFor(slug, ownerUid, storeId) {
+      let path = /databases/$(database)/documents/storefronts/$(slug);
+      return exists(path)
+             && get(path).data.ownerUid == ownerUid
+             && get(path).data.storeId == storeId;
+    }
+    function canWriteStorefrontSlug(slug) {
+      let path = /databases/$(database)/documents/storefronts/$(slug);
+      return exists(path)
+             && canWriteStorefrontProjection(get(path).data.ownerUid, get(path).data.storeId);
+    }
+
     match /storefrontListings/{slug}/items/{itemId} {
       allow read: if (resource.data.isListed == true
                       && exists(/databases/$(database)/documents/storefronts/$(slug))
@@ -922,11 +935,15 @@ service cloud.firestore {
                       && resource.data.storeId is string
                       && canWriteStorefrontProjection(resource.data.ownerUid, resource.data.storeId));
       allow create: if canWriteStorefrontProjection(requestStorefrontOwnerUid(), requestStorefrontStoreId())
+                    && storefrontIsFor(slug, requestStorefrontOwnerUid(), requestStorefrontStoreId())
                     && request.resource.data.id == itemId;
       allow update: if canWriteStorefrontProjection(resource.data.ownerUid, resource.data.storeId)
+                    && storefrontIsFor(slug, resource.data.ownerUid, resource.data.storeId)
                     && request.resource.data.ownerUid == resource.data.ownerUid
                     && request.resource.data.storeId == resource.data.storeId;
-      allow delete: if canWriteStorefrontProjection(resource.data.ownerUid, resource.data.storeId);
+      // The listing's writer, or the storefront's owner (to clear items placed by anyone else).
+      allow delete: if canWriteStorefrontProjection(resource.data.ownerUid, resource.data.storeId)
+                    || canWriteStorefrontSlug(slug);
     }
     
     // Legacy collections - keep for backward compatibility during migration

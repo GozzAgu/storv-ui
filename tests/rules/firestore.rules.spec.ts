@@ -870,6 +870,57 @@ describe('firestore.rules', () => {
     )
   })
 
+  it('denies listings under a storefront owned by someone else', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await seedOwner(context, 'u1', 'storvv_micro')
+      await seedStore(context, 'u1', 's1')
+      await seedOwner(context, 'u2', 'storvv_micro')
+      await seedStore(context, 'u2', 's2')
+      await setDoc(doc(context.firestore(), 'storefronts/victim-shop'), {
+        slug: 'victim-shop',
+        isPublished: true,
+        ownerUid: 'u1',
+        storeId: 's1',
+        displayName: 'Victim',
+      })
+      await setDoc(doc(context.firestore(), 'storefrontListings/victim-shop/items/planted'), {
+        id: 'planted',
+        isListed: true,
+        ownerUid: 'u2',
+        storeId: 's2',
+      })
+    })
+    const listing = (ownerUid: string, storeId: string, id: string) => ({
+      id,
+      isListed: true,
+      title: 'Item',
+      price: 10,
+      availability: 'available',
+      ownerUid,
+      storeId,
+    })
+
+    const attacker = testEnv.authenticatedContext('u2').firestore()
+    await assertFails(
+      setDoc(doc(attacker, 'storefrontListings/victim-shop/items/fake'), listing('u2', 's2', 'fake'))
+    )
+    await assertFails(
+      setDoc(doc(attacker, 'storefrontListings/no-such-shop/items/fake'), listing('u2', 's2', 'fake'))
+    )
+    await assertFails(
+      setDoc(doc(attacker, 'storefrontListings/victim-shop/items/planted'), {
+        ...listing('u2', 's2', 'planted'),
+        title: 'Changed',
+      })
+    )
+
+    const owner = testEnv.authenticatedContext('u1').firestore()
+    await assertSucceeds(
+      setDoc(doc(owner, 'storefrontListings/victim-shop/items/mine'), listing('u1', 's1', 'mine'))
+    )
+    await assertSucceeds(deleteDoc(doc(owner, 'storefrontListings/victim-shop/items/planted')))
+  })
+
   it('allows store members to read storefront inquiries but denies client writes', async () => {
     await testEnv.withSecurityRulesDisabled(async (context) => {
       await seedOwner(context, 'u1', 'storvv_micro')

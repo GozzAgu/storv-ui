@@ -8,6 +8,7 @@ import {
   sendStaffResetLinkInviteEmail,
 } from '~/server/utils/staff-invite-email'
 import { requireAuth } from '~/server/utils/store-auth'
+import { assertStaffLoginTarget } from '~/server/utils/staff-login-target'
 
 type InviteMode = 'credentials' | 'reset_link'
 
@@ -155,7 +156,10 @@ export default defineEventHandler(async (event) => {
     const authUid = staff.authUid?.trim()
     if (authUid) {
       try {
-        await getAdminAuth().updateUser(authUid, { emailVerified: true })
+        const adminAuth = getAdminAuth()
+        if (await assertStaffLoginTarget(adminDb, adminAuth, authUid, staff.email)) {
+          await adminAuth.updateUser(authUid, { emailVerified: true })
+        }
       } catch (err) {
         console.warn('[staff invite email] Could not mark staff email verified:', err)
       }

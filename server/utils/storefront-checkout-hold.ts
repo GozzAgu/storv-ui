@@ -18,6 +18,7 @@ import {
   resolvePaymentLinkItemPrice,
 } from '~/server/utils/payment-link-create'
 import type { StorefrontInquiry, StorefrontPublicListing } from '~/types/storefront'
+import { isListingOfStore } from '~/server/utils/storefront-public-dto'
 
 export { paymentLinkPendingId, storefrontCheckoutReservationId } from '~/server/utils/payment-links'
 
@@ -69,7 +70,7 @@ export async function createStorefrontCheckoutPaymentLink(params: {
       throw createError({ statusCode: 404, message: 'Product not found' })
     }
     const listing = listingSnap.data() as StorefrontPublicListing
-    if (!listing.isListed) {
+    if (!listing.isListed || !isListingOfStore(listing, params.ownerUserId, params.storeId)) {
       throw createError({ statusCode: 404, message: 'Product not found' })
     }
     if (listing.availability !== 'available') {

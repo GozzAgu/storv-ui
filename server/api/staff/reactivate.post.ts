@@ -3,6 +3,7 @@ import { FieldValue } from 'firebase-admin/firestore'
 import { getAdminAuth, getAdminFirestore } from '~/server/utils/firebase-admin'
 import { rethrowFirebaseAdminSetupError } from '~/server/utils/firebase-admin-errors'
 import { requireAuth, requireFreshTotp } from '~/server/utils/store-auth'
+import { assertStaffLoginTarget } from '~/server/utils/staff-login-target'
 
 interface ReactivateStaffBody {
   ownerUserId?: string
@@ -62,6 +63,7 @@ export default defineEventHandler(async (event) => {
 
   const staff = staffSnap.data() as {
     authUid?: string
+    email?: string
     status?: string
     createdBy?: string
     role?: string
@@ -86,13 +88,16 @@ export default defineEventHandler(async (event) => {
 
   const authUid = staff.authUid?.trim()
   if (authUid) {
-    try {
-      await getAdminAuth().updateUser(authUid, { disabled: false })
-    } catch (err: unknown) {
-      const code = (err as { code?: string })?.code
-      if (code !== 'auth/user-not-found') {
-        const message = err instanceof Error ? err.message : 'Failed to enable staff login'
-        throw createError({ statusCode: 502, message: `Failed to enable staff login: ${message}` })
+    const adminAuth = getAdminAuth()
+    if (await assertStaffLoginTarget(adminDb, adminAuth, authUid, staff.email)) {
+      try {
+        await adminAuth.updateUser(authUid, { disabled: false })
+      } catch (err: unknown) {
+        const code = (err as { code?: string })?.code
+        if (code !== 'auth/user-not-found') {
+          const message = err instanceof Error ? err.message : 'Failed to enable staff login'
+          throw createError({ statusCode: 502, message: `Failed to enable staff login: ${message}` })
+        }
       }
     }
 

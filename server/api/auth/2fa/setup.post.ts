@@ -1,6 +1,6 @@
 import { createError, defineEventHandler, readBody } from 'h3'
 import { requireAuth } from '~/server/utils/store-auth'
-import { saveTwoFactorSecret } from '~/server/utils/two-factor'
+import { getTwoFactorSecret, saveTwoFactorSecret } from '~/server/utils/two-factor'
 import { assertRateLimit } from '~/server/utils/rate-limit'
 
 interface SetupBody {
@@ -26,6 +26,17 @@ export default defineEventHandler(async (event) => {
   }
   if (!code || code.length !== 6) {
     throw createError({ statusCode: 400, message: 'A 6-digit verification code is required' })
+  }
+
+  // Setup runs before the 2FA step of sign-in, so it must never replace an existing secret:
+  // a password alone would otherwise swap in a new authenticator and pass 2FA. Changing it
+  // goes through disable, which needs a verified session and a code from the current one.
+  if (await getTwoFactorSecret(auth.uid)) {
+    throw createError({
+      statusCode: 409,
+      message: 'Two-factor authentication is already on. Turn it off first to set up a new app.',
+      data: { code: 'TFA_ALREADY_ENABLED' },
+    })
   }
 
   const { TOTP } = await import('otpauth')

@@ -1,6 +1,7 @@
 import { defineEventHandler, getHeader, getRequestURL, setHeader } from 'h3'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
 import { renderStorefrontOgHtml } from '~/server/utils/storefront-og-html'
+import { isListingOfStore } from '~/server/utils/storefront-public-dto'
 import {
   formatStorefrontMoney,
   isLinkPreviewBot,
@@ -43,7 +44,7 @@ export default defineEventHandler(async (event) => {
         .get()
       if (!itemSnap.exists) return
       const item = itemSnap.data() as StorefrontPublicListing
-      if (!item.isListed) return
+      if (!item.isListed || !isListingOfStore(item, profile.ownerUid, profile.storeId)) return
 
       const price = formatStorefrontMoney(item.price, item.currency || profile.currency)
       const avail =

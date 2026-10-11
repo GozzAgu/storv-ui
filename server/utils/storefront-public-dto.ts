@@ -7,6 +7,15 @@ import type {
 import { legacyPaymentLinksEnabled } from '~/server/utils/legacy-payment-links'
 import { resolveCategoryKind } from '~/utils/category-kinds'
 
+/** Listings carry their writer's owner and store; only the storefront owner's own items count. */
+export function isListingOfStore(
+  listing: Pick<StorefrontPublicListing, 'ownerUid' | 'storeId'>,
+  ownerUid: string | undefined,
+  storeId: string | undefined
+): boolean {
+  return Boolean(ownerUid && storeId && listing.ownerUid === ownerUid && listing.storeId === storeId)
+}
+
 export function publicStorefrontProfileDto(
   profile: StorefrontPublicProfile
 ): StorefrontPublicStoreView {

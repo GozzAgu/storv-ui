@@ -2,6 +2,7 @@ import { createError, defineEventHandler, getRouterParam } from 'h3'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
 import { merchantPayoutIsConnected } from '~/server/utils/payment-link-create'
 import {
+  isListingOfStore,
   publicStorefrontListingDto,
   publicStorefrontProfileDto,
 } from '~/server/utils/storefront-public-dto'
@@ -37,7 +38,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, message: 'Product not found' })
   }
   const item = itemSnap.data() as StorefrontPublicListing
-  if (!item.isListed) {
+  if (!item.isListed || !isListingOfStore(item, profile.ownerUid, profile.storeId)) {
     throw createError({ statusCode: 404, message: 'Product not found' })
   }
 

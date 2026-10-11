@@ -1,6 +1,7 @@
 import { createError, defineEventHandler, getQuery, getRouterParam } from 'h3'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
 import {
+  isListingOfStore,
   publicStorefrontListingDto,
   publicStorefrontProfileDto,
 } from '~/server/utils/storefront-public-dto'
@@ -42,7 +43,9 @@ export default defineEventHandler(async (event) => {
     .limit(200)
     .get()
 
-  let items = itemsSnap.docs.map((d) => d.data() as StorefrontPublicListing)
+  let items = itemsSnap.docs
+    .map((d) => d.data() as StorefrontPublicListing)
+    .filter((i) => isListingOfStore(i, profile.ownerUid, profile.storeId))
 
   if (search) {
     items = items.filter((i) => (i.searchText || '').includes(search))

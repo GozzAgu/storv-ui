@@ -2,6 +2,7 @@ import { createError, defineEventHandler, getRouterParam, readBody } from 'h3'
 import { FieldValue } from 'firebase-admin/firestore'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
 import { assertRateLimit } from '~/server/utils/rate-limit'
+import { isListingOfStore } from '~/server/utils/storefront-public-dto'
 import { validateInquiryPayload } from '~/utils/storefront-inquiry'
 import type {
   StorefrontInquiry,
@@ -69,7 +70,7 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 404, message: 'Product not found' })
     }
     const listing = listingSnap.data() as StorefrontPublicListing
-    if (!listing.isListed) {
+    if (!listing.isListed || !isListingOfStore(listing, ownerUid, storeId)) {
       throw createError({ statusCode: 404, message: 'Product not found' })
     }
 
