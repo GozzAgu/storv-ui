@@ -1,9 +1,10 @@
 <template>
   <section ref="heroRef" class="mkh" aria-labelledby="home-title">
     <div class="mkh__bg" aria-hidden="true">
-      <span class="mkh__grid" />
+      <span class="mkh__beam" />
       <span class="mkh__aura mkh__aura--a" />
       <span class="mkh__aura mkh__aura--b" />
+      <span class="mkh__grain" />
     </div>
 
     <div class="mk-container mkh__copy">
@@ -55,6 +56,7 @@
     </div>
 
     <div class="mk-container mkh__stage-wrap mkh-in" style="--i: 5">
+      <span class="mkh__horizon" aria-hidden="true" />
       <div
         class="mkh__stage"
         :style="{ '--tilt': tilt.toFixed(4), '--px': px.toFixed(4), '--py': py.toFixed(4) }"

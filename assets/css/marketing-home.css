@@ -6,13 +6,19 @@
 .mk {
   --mkh-title: 650 clamp(2.75rem, 7.2vw, 5.5rem) / 1.02 var(--s-font-sans);
   --mk-spring: cubic-bezier(0.16, 1, 0.3, 1);
-  --mkh-grid: rgb(16 24 40 / 0.06);
+  --mkh-beam: rgb(61 99 242 / 0.14);
+  --mkh-rim: rgb(61 99 242 / 0.55);
+  --mkh-grain-opacity: 0.035;
+  --mkh-title-fade: color-mix(in srgb, var(--s-text) 72%, var(--s-accent));
   --mkh-card-shadow: 0 1px 2px rgb(16 24 40 / 0.06), 0 12px 32px -8px rgb(16 24 40 / 0.16);
   --mkh-stage-shadow: 0 2px 4px rgb(16 24 40 / 0.04), 0 40px 80px -24px rgb(16 24 40 / 0.28);
 }
 
 html.dark .mk {
-  --mkh-grid: rgb(255 255 255 / 0.05);
+  --mkh-beam: rgb(120 150 255 / 0.2);
+  --mkh-rim: rgb(140 165 255 / 0.85);
+  --mkh-grain-opacity: 0.06;
+  --mkh-title-fade: color-mix(in srgb, var(--s-text) 62%, var(--s-accent));
   --mkh-card-shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 16px 40px -8px rgb(0 0 0 / 0.6);
   --mkh-stage-shadow: 0 2px 4px rgb(0 0 0 / 0.3), 0 40px 100px -24px rgb(0 0 0 / 0.75);
 }
@@ -34,15 +40,41 @@ html.dark .mk {
   pointer-events: none;
 }
 
-.mkh__grid {
+/* A soft cone of light falling from the top edge */
+.mkh__beam {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: min(1400px, 140vw);
+  height: 900px;
+  background: conic-gradient(
+    from 155deg at 50% 0%,
+    transparent 0deg,
+    var(--mkh-beam) 25deg,
+    transparent 50deg
+  );
+  filter: blur(30px);
+  transform: translateX(-50%);
+  mask-image: linear-gradient(to bottom, #000 20%, transparent 85%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 20%, transparent 85%);
+  animation: mkh-beam 9s ease-in-out infinite alternate;
+}
+
+@keyframes mkh-beam {
+  from {
+    opacity: 0.75;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.mkh__grain {
   position: absolute;
   inset: 0;
-  background-image: linear-gradient(var(--mkh-grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--mkh-grid) 1px, transparent 1px);
-  background-size: 64px 64px;
-  background-position: center top;
-  mask-image: radial-gradient(ellipse 70% 55% at 50% 0%, #000 30%, transparent 100%);
-  -webkit-mask-image: radial-gradient(ellipse 70% 55% at 50% 0%, #000 30%, transparent 100%);
+  opacity: var(--mkh-grain-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
 }
 
 .mkh__aura {
@@ -51,7 +83,8 @@ html.dark .mk {
   max-width: 640px;
   aspect-ratio: 1;
   border-radius: 50%;
-  filter: blur(90px);
+  filter: blur(110px);
+  opacity: 0.8;
   will-change: transform;
 }
 
@@ -79,20 +112,39 @@ html.dark .mk {
 }
 
 .mkh__copy {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
 }
 
+@property --mkh-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
 .mkh__announce {
+  --mkh-angle: 0deg;
   display: inline-flex;
   align-items: center;
   gap: var(--s-space-1);
   padding: var(--s-space-half) var(--s-space-1-5) var(--s-space-half) var(--s-space-half);
-  border: 1px solid var(--s-border);
+  border: 1px solid transparent;
   border-radius: var(--s-radius-full);
-  background: var(--mk-glass);
+  background: linear-gradient(var(--s-surface), var(--s-surface)) padding-box,
+    conic-gradient(
+        from var(--mkh-angle),
+        var(--s-border) 0deg,
+        var(--s-border) 250deg,
+        var(--s-accent) 300deg,
+        var(--s-border) 350deg
+      )
+      border-box;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--s-accent) 6%, transparent);
+  animation: mkh-orbit 5s linear infinite;
   backdrop-filter: blur(var(--mk-blur));
   -webkit-backdrop-filter: blur(var(--mk-blur));
   font: var(--s-text-small);
@@ -104,8 +156,13 @@ html.dark .mk {
 }
 
 .mkh__announce:hover {
-  border-color: var(--s-border-strong);
-  box-shadow: var(--s-shadow-sm);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--s-accent) 12%, transparent);
+}
+
+@keyframes mkh-orbit {
+  to {
+    --mkh-angle: 360deg;
+  }
 }
 
 .mkh__announce-tag {
@@ -139,10 +196,17 @@ html.dark .mk {
 
 .mkh__line {
   display: block;
+  padding-bottom: 0.06em;
+  background: linear-gradient(180deg, var(--s-text) 35%, var(--mkh-title-fade));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .mkh__line--muted {
-  color: var(--s-text-muted);
+  background: linear-gradient(180deg, var(--s-text-muted) 0%, var(--mkh-title-fade) 140%);
+  -webkit-background-clip: text;
+  background-clip: text;
 }
 
 .mkh__rotator {
@@ -165,6 +229,15 @@ html.dark .mk {
 
 .mkh__word {
   display: inline-block;
+  padding-bottom: 0.06em;
+  background: linear-gradient(
+    100deg,
+    var(--s-accent) 10%,
+    color-mix(in srgb, var(--s-accent) 55%, #38bdf8) 90%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .mkh__rotator .mkh-word-leave-active {
@@ -238,8 +311,70 @@ html.dark .mk {
 /* Product stage: tilts back at the top of the page and settles flat as you scroll */
 
 .mkh__stage-wrap {
+  position: relative;
   margin-top: clamp(var(--s-space-6), 7vw, 88px);
   perspective: 1800px;
+}
+
+/* A glowing planet-edge arc rising behind the product. The wrapper leaves room above the arc for
+   its glow, since the fade-out mask clips anything outside the wrapper's box. */
+.mkh__horizon {
+  --mkh-room: 90px;
+  position: absolute;
+  top: calc(clamp(-72px, -4.5vw, -28px) - var(--mkh-room));
+  left: 50%;
+  width: min(1700px, 165vw);
+  aspect-ratio: 2.2;
+  transform: translateX(-50%);
+  pointer-events: none;
+  mask-image: linear-gradient(to bottom, #000 30%, transparent 58%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 30%, transparent 58%);
+}
+
+.mkh__horizon::before {
+  content: '';
+  position: absolute;
+  top: var(--mkh-room);
+  left: 0;
+  width: 100%;
+  aspect-ratio: 2.6;
+  border-top: 1px solid var(--mkh-rim);
+  border-radius: 50%;
+  background: radial-gradient(ellipse 60% 50% at 50% 0%, var(--mk-glow), transparent 70%),
+    var(--mk-page);
+  box-shadow: 0 -24px 80px -24px var(--mk-glow), inset 0 24px 60px -30px var(--mk-glow);
+}
+
+.mkh__horizon::after {
+  content: '';
+  position: absolute;
+  top: calc(var(--mkh-room) - 1px);
+  left: 50%;
+  width: 20%;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--mkh-rim),
+    #fff,
+    var(--mkh-rim),
+    transparent
+  );
+  filter: blur(0.5px);
+  transform: translateX(-50%);
+  animation: mkh-shimmer 6s ease-in-out infinite alternate;
+}
+
+@keyframes mkh-shimmer {
+  from {
+    opacity: 0.5;
+    transform: translateX(-80%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-20%);
+  }
 }
 
 .mkh__stage {
@@ -247,6 +382,7 @@ html.dark .mk {
   --px: 0;
   --py: 0;
   position: relative;
+  z-index: 1;
   max-width: 1080px;
   margin-inline: auto;
 }
@@ -545,6 +681,9 @@ html.dark .mk {
 
 @media (prefers-reduced-motion: reduce) {
   .mkh__aura,
+  .mkh__beam,
+  .mkh__announce,
+  .mkh__horizon::after,
   .mkh__card,
   .mkh__live-dot {
     animation: none;
