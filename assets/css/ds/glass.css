@@ -1,8 +1,8 @@
 /*
- * Glass layer (web and iOS). A fixed blue/violet glow sits behind the page; surfaces are
- * translucent with a light top edge. Only chrome and overlays (sidebar, top bar, menus, dialogs,
- * toasts) blur what is behind them: cards sit on the smooth glow, where a blur looks the same and
- * would only cost scrolling performance on phones. Loaded last so it wins over component rules.
+ * Glass layer (web and iOS). Flat canvas, no gradients; surfaces are translucent with a light top
+ * edge. Only chrome and overlays (sidebar, top bar, menus, dialogs, toasts) blur what is behind
+ * them: cards sit on a flat canvas, where a blur looks the same and would only cost scrolling
+ * performance on phones. Loaded last so it wins over component rules.
  */
 
 /* ── Canvas ────────────────────────────────────────────────────────────── */
@@ -19,15 +19,6 @@ html:has(.s-shell.ds-root) body,
   background: transparent;
 }
 
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background: var(--s-canvas-glow);
-  pointer-events: none;
-}
-
 /* ── Resting surfaces: translucent, no blur ────────────────────────────── */
 
 .s-card,
@@ -41,23 +32,11 @@ body::before {
   box-shadow: var(--s-glass-highlight), 0 0 0 1px var(--s-glass-hairline), var(--s-shadow-sm);
 }
 
-/* ── Primary buttons: glossy logo blue ─────────────────────────────────── */
+/* ── Primary buttons: solid logo blue with a soft lift ─────────────────── */
 
 .s-btn--primary {
-  background: var(--s-btn-primary-gloss);
   box-shadow: var(--s-btn-primary-glow);
 }
-
-.s-btn--primary:hover:not(:disabled, [aria-disabled='true']) {
-  background: var(--s-btn-primary-gloss);
-  filter: brightness(1.06);
-}
-
-.s-btn--primary:active:not(:disabled) {
-  background: var(--s-btn-primary-active);
-  filter: none;
-}
-
 /* ── Frosted chrome and overlays ───────────────────────────────────────── */
 
 .s-sidebar,
@@ -113,9 +92,5 @@ html.dark .s-bottomnav {
     --s-glass: var(--s-surface);
     --s-glass-strong: var(--s-surface);
     --s-glass-frost: none;
-  }
-
-  body::before {
-    display: none;
   }
 }

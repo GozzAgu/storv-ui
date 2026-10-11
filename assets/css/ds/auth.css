@@ -28,7 +28,7 @@
   gap: var(--s-space-5);
   height: 100dvh;
   padding: var(--s-space-5);
-  background: var(--s-brand-gradient);
+  background: var(--s-brand-surface);
   color: var(--s-on-brand);
   overflow: hidden;
   isolation: isolate;

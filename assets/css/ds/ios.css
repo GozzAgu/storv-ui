@@ -1,6 +1,6 @@
 /*
  * iOS layer for phones (the Capacitor iOS app and mobile web). Restyles the shared design
- * system to the Storvv iOS spec: glow canvas, glass cards, a solid top bar, a floating
+ * system to the Storvv iOS spec: flat canvas, glass cards, a solid top bar, a floating
  * tab bar, bottom sheets with a grab handle, 44pt controls and large titles.
  * Tablet and desktop layouts are untouched.
  */

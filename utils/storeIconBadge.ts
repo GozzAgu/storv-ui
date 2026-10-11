@@ -21,7 +21,7 @@ export function iconSurfaceStyleFor(store: StoreBadgeTarget): Record<string, str
   const key = store.id || store.name || 'default'
   const hue = hueFromString(key)
   return {
-    background: `linear-gradient(145deg, hsl(${hue} 58% 50%) 0%, hsl(${hue} 62% 40%) 100%)`,
+    background: `hsl(${hue} 60% 45%)`,
     boxShadow: 'inset 0 1px 0 rgb(255 255 255 / 0.18), inset 0 -1px 0 rgb(0 0 0 / 0.08)',
   }
 }

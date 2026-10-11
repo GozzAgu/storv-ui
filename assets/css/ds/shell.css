@@ -413,7 +413,7 @@ html:has(.s-shell.ds-root) body {
   width: 32px;
   height: 32px;
   border-radius: var(--s-radius);
-  background: linear-gradient(135deg, var(--s-btn-primary), var(--s-btn-primary-active));
+  background: var(--s-btn-primary);
   box-shadow: var(--s-shadow-sm);
   color: var(--s-on-btn-primary);
   font: 600 0.875rem/1 var(--s-font-sans);

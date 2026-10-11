@@ -1358,7 +1358,7 @@ html.dark .mk-marquee__item {
   align-items: center;
   padding: var(--s-space-4) var(--s-space-3);
   border-radius: var(--s-radius-2xl);
-  background: var(--s-brand-gradient);
+  background: var(--s-brand-surface);
   color: var(--s-on-brand);
 }
 
@@ -2875,7 +2875,7 @@ html.dark .mk-marquee__item {
   gap: var(--s-space-3);
   padding: clamp(var(--s-space-6), 8vw, 96px) var(--s-space-3);
   border-radius: var(--s-radius-2xl);
-  background: var(--s-brand-gradient);
+  background: var(--s-brand-surface);
   color: var(--s-on-brand);
   text-align: center;
   isolation: isolate;

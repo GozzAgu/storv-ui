@@ -1255,10 +1255,7 @@ function compactCurrency(value: number) {
 const overviewRevenueChartOptions = computed(() => ({
   ...revenueChartOptions.value,
   chart: { ...revenueChartOptions.value.chart, type: 'area' },
-  fill: {
-    type: 'gradient',
-    gradient: { shadeIntensity: 1, opacityFrom: 0.24, opacityTo: 0, stops: [0, 100] },
-  },
+  fill: { type: 'solid', opacity: 0.08 },
   xaxis: {
     ...revenueChartOptions.value.xaxis,
     axisBorder: { show: false },

@@ -519,8 +519,7 @@
 }
 
 .s-sf-media--placeholder {
-  background: radial-gradient(80% 80% at 50% 40%, var(--s-accent-soft) 0%, transparent 70%),
-    var(--s-surface-2);
+  background: var(--s-surface-2);
 }
 
 .s-sf-media__img {

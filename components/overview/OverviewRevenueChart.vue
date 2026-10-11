@@ -128,16 +128,7 @@ const options = computed(() => {
     },
     dataLabels: { enabled: false },
     stroke: { curve: 'smooth', width: 2, colors: [line] },
-    fill: {
-      type: 'gradient',
-      gradient: {
-        shadeIntensity: 0,
-        colorStops: [
-          { offset: 0, color: line, opacity: 0.2 },
-          { offset: 100, color: line, opacity: 0 },
-        ],
-      },
-    },
+    fill: { type: 'solid', colors: [line], opacity: 0.08 },
     xaxis: {
       categories: categories.value,
       labels: { style: axisLabel, rotate: 0, hideOverlappingLabels: true, offsetY: 4 },

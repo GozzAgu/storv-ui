@@ -42,9 +42,7 @@
   --s-field-bg-focus: #ffffff;
 
   /* Brand panel (auth) */
-  --s-brand-gradient: radial-gradient(80% 60% at 100% 0%, rgb(61 99 242 / 0.35) 0%, rgb(61 99 242 / 0) 70%),
-    radial-gradient(70% 50% at 0% 100%, rgb(142 162 255 / 0.14) 0%, rgb(142 162 255 / 0) 70%),
-    linear-gradient(160deg, #12234b 0%, #0c1938 60%, #09132c 100%);
+  --s-brand-surface: #0c1938;
   /* Content on the brand panel stays the same in both themes */
   --s-on-brand: #ffffff;
   --s-brand-ink: #0f1728;
@@ -54,14 +52,10 @@
   --s-btn-primary-hover: var(--s-accent-hover);
   --s-btn-primary-active: var(--s-accent-active);
   --s-on-btn-primary: #ffffff;
-  --s-btn-primary-gloss: linear-gradient(180deg, #5f80ff 0%, #3d63f2 52%, #3156e0 100%);
-  --s-btn-primary-glow: inset 0 1px 0 rgb(255 255 255 / 0.28), 0 1px 2px rgb(30 50 140 / 0.25),
-    0 6px 16px -6px rgb(61 99 242 / 0.55);
+  --s-btn-primary-glow: inset 0 1px 0 rgb(255 255 255 / 0.2), 0 1px 2px rgb(30 50 140 / 0.25),
+    0 6px 16px -6px rgb(61 99 242 / 0.5);
 
-  /* Glass (glass.css): a soft blue/violet glow behind translucent, frosted surfaces */
-  --s-canvas-glow: radial-gradient(55% 45% at 0% 0%, rgb(61 99 242 / 0.16) 0%, rgb(61 99 242 / 0) 70%),
-    radial-gradient(45% 40% at 100% 8%, rgb(124 92 255 / 0.12) 0%, rgb(124 92 255 / 0) 70%),
-    radial-gradient(55% 45% at 85% 100%, rgb(34 184 240 / 0.1) 0%, rgb(34 184 240 / 0) 70%);
+  /* Glass (glass.css): translucent, frosted surfaces on a flat canvas */
   --s-glass: rgb(255 255 255 / 0.62);
   --s-glass-strong: rgb(255 255 255 / 0.74);
   --s-glass-hairline: rgb(15 23 42 / 0.07);
@@ -161,9 +155,6 @@ html.dark {
   --s-border: #1a2033;
   --s-border-strong: #262e45;
 
-  --s-canvas-glow: radial-gradient(55% 45% at 0% 0%, rgb(61 99 242 / 0.22) 0%, rgb(61 99 242 / 0) 70%),
-    radial-gradient(45% 40% at 100% 8%, rgb(124 92 255 / 0.13) 0%, rgb(124 92 255 / 0) 70%),
-    radial-gradient(55% 45% at 85% 100%, rgb(34 184 240 / 0.07) 0%, rgb(34 184 240 / 0) 70%);
   --s-glass: rgb(16 21 37 / 0.58);
   --s-glass-strong: rgb(14 19 34 / 0.76);
   --s-glass-hairline: rgb(255 255 255 / 0.07);
