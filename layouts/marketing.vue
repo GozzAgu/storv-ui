@@ -175,6 +175,7 @@
 
 <script setup lang="ts">
 import '~/assets/css/marketing.css'
+import '~/assets/css/marketing-home.css'
 import { computed, nextTick, onMounted, onUnmounted, ref, useId, watch } from 'vue'
 import { ArrowRight, ArrowUp, ChevronRight, Monitor, MonitorPlay, Moon, Sun } from '@lucide/vue'
 import SButton from '~/components/s/SButton.vue'
