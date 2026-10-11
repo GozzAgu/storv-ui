@@ -39,8 +39,6 @@ html:has(.s-shell.ds-root) body,
 }
 /* ── Frosted chrome and overlays ───────────────────────────────────────── */
 
-.s-sidebar,
-.s-popover,
 .s-dialog,
 .s-toast {
   background: var(--s-glass-strong);
@@ -48,15 +46,39 @@ html:has(.s-shell.ds-root) body,
   backdrop-filter: var(--s-glass-frost);
 }
 
+/* Menus get a heavier frost so text stays crisp over whatever page sits behind them */
+.s-popover {
+  background: var(--s-glass-strong);
+  -webkit-backdrop-filter: var(--s-glass-frost-heavy);
+  backdrop-filter: var(--s-glass-frost-heavy);
+}
+
+/*
+ * The sidebar and top bar hold menus. An element with backdrop-filter limits what its children
+ * can blur to itself, which leaves those menus see-through instead of frosted, so the bars carry
+ * their frost on a pseudo-element behind their content instead.
+ */
 .s-sidebar {
   border-right-color: var(--s-glass-hairline);
+  background: transparent;
   box-shadow: var(--s-glass-highlight);
+}
+
+.s-sidebar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--s-glass-strong);
+  -webkit-backdrop-filter: var(--s-glass-frost);
+  backdrop-filter: var(--s-glass-frost);
+  pointer-events: none;
 }
 
 .s-popover,
 .s-toast {
   border-color: var(--s-glass-hairline);
-  box-shadow: var(--s-glass-shadow-float);
+  box-shadow: var(--s-glass-highlight), var(--s-glass-shadow-float);
 }
 
 .s-dialog {
@@ -73,9 +95,18 @@ html:has(.s-shell.ds-root) body,
 @media (min-width: 640px) {
   .s-topbar {
     border-bottom-color: var(--s-glass-hairline);
+    background: transparent;
+  }
+
+  .s-topbar::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
     background: var(--s-glass-strong);
     -webkit-backdrop-filter: var(--s-glass-frost);
     backdrop-filter: var(--s-glass-frost);
+    pointer-events: none;
   }
 }
 
@@ -87,5 +118,6 @@ html:has(.s-shell.ds-root) body,
     --s-glass: var(--s-surface);
     --s-glass-strong: var(--s-surface);
     --s-glass-frost: none;
+    --s-glass-frost-heavy: none;
   }
 }
