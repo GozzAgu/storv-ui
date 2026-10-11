@@ -779,6 +779,9 @@ html:has(.s-shell.ds-root) body {
   --s-bottomnav-inactive: var(--s-text-2);
   --s-bottomnav-tint: var(--s-accent);
   --s-bottomnav-spring: cubic-bezier(0.32, 0.72, 0, 1);
+  /* Damped spring (ratio 0.86): eases in, glides, settles with a barely visible overshoot */
+  --s-bottomnav-glide: cubic-bezier(0.25, 0.9, 0.3, 1);
+  --s-bottomnav-glide-ms: 560ms;
   position: fixed;
   inset-inline: var(--s-space-2);
   bottom: var(--s-bottomnav-offset);
@@ -859,10 +862,48 @@ html.dark .s-bottomnav__backdrop {
   border-radius: var(--s-radius-full);
   background: var(--s-bottomnav-lens);
   box-shadow: var(--s-bottomnav-lens-rim);
-  transform: translateX(calc(var(--s-bottomnav-index, 0) * 100%));
-  transition: transform 420ms var(--s-bottomnav-spring),
-    opacity var(--s-duration-fast) var(--s-ease);
+  transform: translate3d(calc(var(--s-bottomnav-index, 0) * 100%), 0, 0);
+  transition: transform var(--s-bottomnav-glide-ms) var(--s-bottomnav-glide),
+    opacity var(--s-duration) var(--s-ease);
+  will-change: transform;
+  backface-visibility: hidden;
   pointer-events: none;
+}
+
+@supports (transition-timing-function: linear(0, 1)) {
+  .s-bottomnav {
+    --s-bottomnav-glide: linear(
+      0,
+      0.0499,
+      0.1634,
+      0.3016,
+      0.4407,
+      0.5677,
+      0.6766,
+      0.7657,
+      0.8358,
+      0.8892,
+      0.9285,
+      0.9565,
+      0.9759,
+      0.9887,
+      0.9967,
+      1.0014,
+      1.0039,
+      1.0049,
+      1.005,
+      1.0046,
+      1.004,
+      1.0032,
+      1.0026,
+      1.002,
+      1.0014,
+      1.001,
+      1.0007,
+      1.0005,
+      1
+    );
+  }
 }
 
 .s-bottomnav__lens--hidden {
@@ -881,8 +922,7 @@ html.dark .s-bottomnav__backdrop {
   border-radius: var(--s-radius-full);
   color: var(--s-bottomnav-inactive);
   -webkit-tap-highlight-color: transparent;
-  transition: color var(--s-duration-fast) var(--s-ease),
-    transform var(--s-duration) var(--s-bottomnav-spring);
+  transition: color 280ms var(--s-ease), transform var(--s-duration) var(--s-bottomnav-spring);
 }
 
 .s-bottomnav__item--active {

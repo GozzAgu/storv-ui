@@ -45,26 +45,27 @@
           aria-label="Primary"
           :style="{
             '--s-bottomnav-count': String(items.length),
-            '--s-bottomnav-index': String(Math.max(activeIndex, 0)),
+            '--s-bottomnav-index': String(lensIndex),
           }"
         >
           <span
             class="s-bottomnav__lens"
-            :class="{ 's-bottomnav__lens--hidden': activeIndex < 0 }"
+            :class="{ 's-bottomnav__lens--hidden': shownIndex < 0 }"
             aria-hidden="true"
           />
           <NuxtLink
-            v-for="item in items"
+            v-for="(item, index) in items"
             :key="item.name"
             :to="item.href"
             class="s-bottomnav__item"
-            :class="{ 's-bottomnav__item--active': isActive(item) }"
+            :class="{ 's-bottomnav__item--active': shownIndex === index }"
             :aria-current="isActive(item) ? 'page' : undefined"
+            @click="onTabClick($event, index)"
           >
             <component
               :is="DASHBOARD_NAV_ICONS[item.iconKey]"
               :size="22"
-              :stroke-width="isActive(item) ? 2 : 1.75"
+              :stroke-width="1.85"
               aria-hidden="true"
             />
             <span class="s-bottomnav__label">{{ item.label }}</span>
@@ -92,7 +93,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { Plus } from '@lucide/vue'
 import { useHaptics } from '~/composables/useHaptics'
 import { DASHBOARD_NAV_ICONS } from '~/utils/dashboard-nav-icons'
@@ -111,10 +112,29 @@ const props = defineProps<{
 
 const haptics = useHaptics()
 const route = useRoute()
+const router = useRouter()
 const expanded = ref(false)
 
 const activeIndex = computed(() => props.items.findIndex((item) => props.isActive(item)))
 const moreActive = computed(() => activeIndex.value < 0)
+
+/* The lens moves on tap rather than when the next page has loaded, so it never lags the finger */
+const pendingIndex = ref<number | null>(null)
+const shownIndex = computed(() => pendingIndex.value ?? activeIndex.value)
+/* Hidden on "More" pages, it stays where it was so it fades back in place instead of sliding from the left */
+const lensIndex = ref(Math.max(activeIndex.value, 0))
+watch(shownIndex, (index) => {
+  if (index >= 0) lensIndex.value = index
+})
+
+function onTabClick(event: MouseEvent, index: number) {
+  if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+  pendingIndex.value = index
+}
+
+const removeAfterEach = router.afterEach(() => {
+  pendingIndex.value = null
+})
 
 function toggle() {
   expanded.value = !expanded.value
@@ -133,5 +153,8 @@ watch(
 )
 
 onMounted(() => document.addEventListener('keydown', onKeydown))
-onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown))
+onBeforeUnmount(() => {
+  document.removeEventListener('keydown', onKeydown)
+  removeAfterEach()
+})
 </script>
