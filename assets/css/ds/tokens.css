@@ -52,8 +52,7 @@
   --s-btn-primary-hover: var(--s-accent-hover);
   --s-btn-primary-active: var(--s-accent-active);
   --s-on-btn-primary: #ffffff;
-  --s-btn-primary-glow: inset 0 1px 0 rgb(255 255 255 / 0.2), 0 1px 2px rgb(30 50 140 / 0.25),
-    0 6px 16px -6px rgb(61 99 242 / 0.5);
+  --s-btn-primary-glow: none;
 
   /* Glass (glass.css): translucent, frosted surfaces on a flat canvas */
   --s-glass: rgb(255 255 255 / 0.62);
@@ -71,8 +70,8 @@
   --s-focus-ring: 0 0 0 3px rgb(61 99 242 / 0.28);
 
   /* Typography */
-  --s-font-sans: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-    'Helvetica Neue', Arial, sans-serif;
+  --s-font-sans: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', -apple-system,
+    BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --s-font-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
 
   --s-text-display: 600 1.75rem/2.25rem var(--s-font-sans);
@@ -168,8 +167,7 @@ html.dark {
     0 10px 28px -14px rgb(0 0 0 / 0.6);
   --s-glass-shadow-float: var(--s-glass-highlight), 0 0 0 1px var(--s-glass-hairline),
     0 24px 56px -16px rgb(0 0 0 / 0.7), 0 6px 14px -6px rgb(0 0 0 / 0.4);
-  --s-btn-primary-glow: inset 0 1px 0 rgb(255 255 255 / 0.18), 0 1px 2px rgb(0 0 0 / 0.4),
-    0 6px 18px -6px rgb(61 99 242 / 0.6);
+  --s-btn-primary-glow: none;
 
   --s-text: #f2f4f7;
   --s-text-2: #b4bccb;

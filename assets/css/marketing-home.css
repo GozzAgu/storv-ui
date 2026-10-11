@@ -49,7 +49,7 @@ html.dark .mk {
 
 .mkh {
   position: relative;
-  padding-top: calc(var(--mk-header-h) + var(--s-space-1-5));
+  padding-top: var(--mk-nav-gap);
   padding-bottom: var(--mk-section-y);
   isolation: isolate;
 }
@@ -224,10 +224,10 @@ html.dark .mk {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  height: 40px;
-  padding: 0 18px;
-  border-radius: var(--s-radius-full);
-  font: 600 0.8125rem / 1 var(--s-font-sans);
+  min-height: var(--s-touch);
+  padding-inline: var(--s-space-3);
+  border-radius: var(--s-radius-lg);
+  font: 600 0.9375rem / 1.25rem var(--s-font-sans);
   text-decoration: none;
   transition: background var(--s-duration) var(--s-ease-out),
     transform var(--s-duration) var(--mk-spring);
@@ -245,7 +245,6 @@ html.dark .mk {
 .mkh__btn--primary {
   background: #fff;
   color: #101828;
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.1), 0 8px 24px -8px rgb(0 0 0 / 0.35);
 }
 
 .mkh__btn--primary:hover {
@@ -530,6 +529,15 @@ html.dark .mk {
 
   .mkh__card--stock {
     left: 2%;
+  }
+}
+
+@media (max-width: 639px) {
+  .mkh__btn {
+    min-height: 40px;
+    padding-inline: 18px;
+    border-radius: 10px;
+    font-size: 0.875rem;
   }
 }
 

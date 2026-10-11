@@ -294,16 +294,41 @@ html.dark .mk {
   background: var(--mk-glass);
   backdrop-filter: saturate(1.8) blur(var(--mk-glass-blur));
   -webkit-backdrop-filter: saturate(1.8) blur(var(--mk-glass-blur));
-  box-shadow: inset 0 1px 0 var(--mk-glass-edge), var(--s-shadow-sm);
+  box-shadow: inset 0 1px 0 var(--mk-glass-edge);
   pointer-events: auto;
-  transition: box-shadow var(--s-duration) var(--s-ease),
-    border-color var(--s-duration) var(--s-ease);
+  transition: background-color 400ms var(--s-ease), border-color 400ms var(--s-ease),
+    padding 500ms var(--mk-spring, var(--s-ease)), translate 500ms var(--mk-spring, var(--s-ease));
 }
 
 .mk-header--scrolled .mk-header__bar,
 .mk-header--open .mk-header__bar {
   border-color: var(--s-border);
-  box-shadow: inset 0 1px 0 var(--mk-glass-edge), var(--s-shadow-md);
+}
+
+.mk-header .mk-container {
+  transition: max-width 500ms var(--mk-spring, var(--s-ease)),
+    padding 500ms var(--mk-spring, var(--s-ease));
+}
+
+/* Home page, at the top: the bar sits inside the hero panel, flush with its edges and copy */
+.mk-header--overlay .mk-container {
+  --mk-panel-inset: clamp(var(--s-space-1), 1.5vw, var(--s-space-2));
+  max-width: calc(1400px + var(--mk-panel-inset) * 2);
+  padding-inline: var(--mk-panel-inset);
+}
+
+.mk-header--overlay .mk-header__bar {
+  padding-inline: clamp(28px, 5vw, 72px) clamp(16px, 3vw, 40px);
+  translate: 0 var(--s-space-1);
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.mk-header--overlay .mk-nav-link:hover {
+  background: color-mix(in srgb, var(--s-text) 6%, transparent);
 }
 
 .mk-header__brand {
@@ -3009,7 +3034,6 @@ html.dark .mk-marquee__item:hover {
   border: 0;
   border-radius: var(--s-radius-full);
   background: var(--s-btn-primary);
-  box-shadow: var(--s-shadow-md);
   color: var(--s-on-btn-primary);
 }
 
