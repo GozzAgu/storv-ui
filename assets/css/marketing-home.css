@@ -673,9 +673,10 @@ html.dark .mk {
 
 /* ── Live feature bento ─────────────────────────────────────────────────── */
 
+/* An even grid: every card is a preview on top, then a tag, title and one line */
 .mkb__grid {
   display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--s-space-2);
   margin-top: clamp(var(--s-space-5), 5vw, var(--s-space-8));
 }
@@ -684,16 +685,11 @@ html.dark .mk {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: var(--s-space-3);
   min-width: 0;
-  padding: var(--s-space-3);
+  padding: 6px;
   border: 1px solid var(--mk-edge);
   border-radius: var(--mk-radius);
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--s-accent) 4%, var(--mk-page)),
-    var(--mk-page) 45%
-  );
+  background: var(--mk-page);
   transition: transform 500ms var(--mk-spring), border-color var(--s-duration) var(--s-ease-out);
 }
 
@@ -718,47 +714,22 @@ html.dark .mk {
   opacity: 1;
 }
 
-.mkb__card--inventory {
-  grid-column: span 7;
-}
-
-.mkb__card--receipts {
-  grid-column: span 5;
-}
-
-.mkb__card--branches,
-.mkb__card--buybacks,
-.mkb__card--staff {
-  grid-column: span 4;
-}
-
-.mkb__card--analytics {
-  grid-column: span 5;
-}
-
-.mkb__card--customers {
-  grid-column: span 7;
-}
-
-.mkb__head {
+.mkb__body {
   display: flex;
-  gap: var(--s-space-1-5);
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--s-space-2) var(--s-space-1-5) var(--s-space-1-5);
 }
 
-.mkb__icon {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 36px;
-  height: 36px;
-  border: 1px solid var(--mk-edge-hi);
-  border-radius: var(--s-radius-lg);
-  background: color-mix(in srgb, var(--s-accent) 8%, var(--mk-page));
+.mkb__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+  font: 500 0.6875rem / 1 var(--s-font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--s-accent);
-}
-
-.mkb__icon--accent {
-  background: var(--s-accent-soft);
 }
 
 .mkb__title {
@@ -767,21 +738,55 @@ html.dark .mk {
 }
 
 .mkb__text {
-  margin-top: 2px;
   font: var(--mk-small);
   color: var(--s-text-muted);
   text-wrap: pretty;
 }
 
+/* The last tile links to the full features page */
+.mkb__card--more {
+  justify-content: space-between;
+  min-height: 100%;
+  background: radial-gradient(
+      90% 70% at 100% 0%,
+      color-mix(in srgb, var(--s-accent) 12%, transparent),
+      transparent 70%
+    ),
+    var(--mk-page);
+  color: inherit;
+  text-decoration: none;
+}
+
+.mkb__more-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin: var(--s-space-1-5);
+  border: 1px solid var(--mk-edge-hi);
+  border-radius: var(--s-radius-lg);
+  color: var(--s-accent);
+  transition: background-color var(--s-duration) var(--s-ease-out),
+    color var(--s-duration) var(--s-ease-out);
+}
+
+.mkb__card--more:hover .mkb__more-icon {
+  background: var(--s-accent);
+  color: #fff;
+}
+
+.mkb__card--more:focus-visible {
+  outline: none;
+  box-shadow: var(--s-focus-ring);
+}
+
 .mkb__ui {
   position: relative;
-  flex: 1;
-  min-height: 180px;
-  margin-top: auto;
-  padding: var(--s-space-2);
+  flex: none;
+  height: 196px;
+  padding: var(--s-space-1-5);
   overflow: hidden;
-  border: 1px solid var(--mk-edge);
-  border-radius: calc(var(--mk-radius) - 8px);
+  border-radius: calc(var(--mk-radius) - 6px);
   background: radial-gradient(
       90% 70% at 50% 0%,
       color-mix(in srgb, var(--s-accent) 7%, transparent),
@@ -822,28 +827,18 @@ html.dark .mk {
 .mkb-inv {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: var(--s-space-1);
+  gap: 4px;
 }
 
 .mkb-inv__row {
-  display: grid;
-  grid-template-columns: 1.6fr 1fr 1fr;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: var(--s-space-1);
-  padding: 9px var(--s-space-1-5);
+  padding: 7px 10px;
   border-radius: var(--s-radius);
   background: var(--mk-page);
   transition: background-color 600ms var(--s-ease-out), box-shadow 600ms var(--s-ease-out);
-}
-
-.mkb-inv__row--head {
-  background: transparent;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: var(--s-tracking-caps);
-  text-transform: uppercase;
-  color: var(--s-text-muted);
 }
 
 .mkb-inv__row.is-hit {
@@ -853,6 +848,7 @@ html.dark .mk {
 
 .mkb-inv__name {
   display: flex;
+  min-width: 0;
   align-items: center;
   gap: var(--s-space-1);
   font-weight: 500;
@@ -874,10 +870,6 @@ html.dark .mk {
 html.dark .mkb-inv__thumb {
   background: hsl(var(--hue) 40% 22%);
   box-shadow: inset 0 0 0 1px hsl(var(--hue) 40% 32%);
-}
-
-.mkb-inv__branch {
-  color: var(--s-text-muted);
 }
 
 .mkb-inv__qty {
@@ -1211,12 +1203,6 @@ html.dark .mkb-staff__avatar {
   text-overflow: ellipsis;
 }
 
-.mkb-staff__perm {
-  font-size: 0.75rem;
-  color: var(--s-text-2);
-  white-space: nowrap;
-}
-
 .mkb-toggle {
   position: relative;
   flex: none;
@@ -1306,38 +1292,15 @@ html.dark .mkb-staff__avatar {
   height: calc(var(--h) * 100%);
 }
 
-@media (max-width: 1000px) {
+@media (max-width: 1100px) {
   .mkb__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-
-  .mkb__card {
-    grid-column: span 1;
-  }
-
-  .mkb__card--inventory,
-  .mkb__card--customers {
-    grid-column: span 2;
-  }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 600px) {
   .mkb__grid {
     grid-template-columns: minmax(0, 1fr);
-  }
-
-  .mkb__card,
-  .mkb__card--inventory,
-  .mkb__card--customers {
-    grid-column: auto;
-  }
-
-  .mkb__card {
-    padding: var(--s-space-2);
-  }
-
-  .mkb-staff__perm {
-    display: none;
   }
 }
 
