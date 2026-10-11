@@ -19,17 +19,25 @@ export async function resolveTotpForSensitiveAction(
   return code
 }
 
+/**
+ * Code from a server `createError({ data: { code } })`. Through $fetch the response body is
+ * `error.data`, so the code sits at `error.data.data.code`; errors built in-app put it at
+ * `error.data.code`.
+ */
+export function apiErrorCode(error: unknown): string | undefined {
+  const data = (error as { data?: { code?: unknown; data?: { code?: unknown } } })?.data
+  const code = data?.data?.code ?? data?.code
+  return typeof code === 'string' ? code : undefined
+}
+
 export function isEmailVerificationRequiredError(error: unknown): boolean {
-  const data = (error as { data?: { code?: string } })?.data
-  return data?.code === 'EMAIL_VERIFICATION_REQUIRED'
+  return apiErrorCode(error) === 'EMAIL_VERIFICATION_REQUIRED'
 }
 
 export function isTwoFactorRequiredError(error: unknown): boolean {
-  const data = (error as { data?: { code?: string } })?.data
-  return data?.code === 'TFA_REQUIRED'
+  return apiErrorCode(error) === 'TFA_REQUIRED'
 }
 
 export function isTotpCodeRequiredError(error: unknown): boolean {
-  const data = (error as { data?: { code?: string } })?.data
-  return data?.code === 'TFA_CODE_REQUIRED'
+  return apiErrorCode(error) === 'TFA_CODE_REQUIRED'
 }
