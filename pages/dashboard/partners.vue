@@ -94,7 +94,7 @@
         <SCard
           v-else
           title="Lend stock to partners"
-          description="Lend serial items at an agreed price. They return them or pay you for the ones they sell."
+          description="Lend items or a number of units at an agreed price. They return them or pay you for the ones they sell."
         >
           <SButton variant="primary" :disabled="!partners.length" @click="startLend(null)">
             Lend stock

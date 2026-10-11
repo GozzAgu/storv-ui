@@ -3,6 +3,7 @@ import {
   Timestamp,
   type DocumentReference,
   type Firestore,
+  type Transaction,
 } from 'firebase-admin/firestore'
 import type {
   NewTradeLoanInput,
@@ -13,6 +14,7 @@ import type {
 } from '~/types/trade'
 import type { PaymentLinkV2 } from '~/types/payments-v2'
 import type { InventoryFolder } from '~/stores/inventory'
+import { resolveBulkStockFieldAndValueFromMap } from '~/utils/inventory-bulk-quantity'
 import { folderHasSerialNumbers } from '~/utils/receipt-multi-folder'
 import { assertDocId, type PaymentsAccess } from '../payments/access'
 import { storeDocRef } from '../payments/audit-log'
@@ -43,6 +45,9 @@ export const TRADE_LOANS = 'tradeLoans'
 /** Inventory rows lent to a partner carry `sellerLoanOutId: trade~<loan id>`. */
 export const PARTNER_LOAN_FLAG_PREFIX = 'trade~'
 export const MAX_LOAN_LINES = 50
+/** Partial returns and payments split lines, so a loan can grow past what was lent at first. */
+const MAX_STORED_LINES = 200
+const MAX_LINE_QUANTITY = 100_000
 export const MAX_LOAN_DAYS = 90
 /** A started payment stays open this long; the borrower can resume it until then. */
 export const LOAN_PAY_LINK_HOURS = 24
@@ -61,11 +66,20 @@ type StoredLineState = 'out' | 'return_marked' | 'returned' | 'paid'
 
 interface StoredLoanLine {
   id: string
+  /** The inventory record holding these units while they are out. */
   itemId: string
   folderId: string
   name: string
   serial: string
+  /** Per unit. */
   priceKobo: number
+  /** Units on this line; absent on serial lines (always 1). */
+  quantity?: number
+  /**
+   * Quantity lines: the record the units were split from. They merge back into it on return;
+   * `itemId` is then the split-off record that carries the loan flag.
+   */
+  sourceItemId?: string | null
   state: StoredLineState
   /** Lender-side sale created when the borrower started paying for this line. */
   payReceiptId: string | null
@@ -109,6 +123,167 @@ const DUE_DATE = /^\d{4}-\d{2}-\d{2}$/
 
 const SETTLED: ReadonlySet<StoredLineState> = new Set(['returned', 'paid'])
 const isSettled = (loan: Pick<StoredLoan, 'lines'>) => loan.lines.every((l) => SETTLED.has(l.state))
+
+const qtyOf = (l: { quantity?: number }) => Math.max(1, Math.floor(Number(l.quantity) || 1))
+const lineKobo = (l: { quantity?: number; priceKobo: number }) => l.priceKobo * qtyOf(l)
+const unitCount = (lines: { quantity?: number }[]) => lines.reduce((n, l) => n + qtyOf(l), 0)
+
+/** Bookkeeping fields that belong to one record and are not copied when units are split off. */
+const SPLIT_SKIP = new Set([
+  'id',
+  'dateOut',
+  'pendingSaleReceiptId',
+  'pendingSaleAt',
+  'sellerLoanOutId',
+  'sellerLoanPartyName',
+  'sellerLoanPartyPhone',
+  'sellerLoanOutAt',
+  'tradeLoanSourceItemId',
+  'createdAt',
+  'updatedAt',
+])
+
+/** A copy of a quantity record holding `quantity` units, for units leaving it on a loan. */
+function splitRecordData(
+  source: Record<string, unknown>,
+  fieldKey: string,
+  quantity: number,
+  sourceItemId: string,
+  extra: Record<string, unknown>
+): Record<string, unknown> {
+  const copy: Record<string, unknown> = {}
+  for (const [k, v] of Object.entries(source)) if (!SPLIT_SKIP.has(k)) copy[k] = v
+  return {
+    ...copy,
+    [fieldKey]: quantity,
+    tradeLoanSourceItemId: sourceItemId,
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    ...extra,
+  }
+}
+
+function nextLineId(lines: { id: string }[]): string {
+  const max = lines.reduce((n, l) => Math.max(n, Number(l.id.replace(/^l/, '')) || 0), 0)
+  return `l${max + 1}`
+}
+
+function parseQuantity(raw: unknown): number | null {
+  if (raw === undefined || raw === null || raw === '') return null
+  const n = Number(raw)
+  if (!Number.isSafeInteger(n) || n < 1 || n > MAX_LINE_QUANTITY) {
+    throw new TradeError('INVALID_QUANTITY', 400, 'Enter how many units.')
+  }
+  return n
+}
+
+interface CarvePlan {
+  /** The new line holding the carved-off units; the source line keeps the rest. */
+  line: StoredLoanLine
+  lines: StoredLoanLine[]
+  recordRef: DocumentReference
+  /** Where `apply` puts the carved-off units. */
+  newRef: DocumentReference
+  record: Record<string, unknown>
+  fieldKey: string
+  value: number
+  folderFields: Array<{ name?: string }> | undefined
+  /** Writes for the split into a new flagged record; call after every read in the transaction. */
+  apply: (tx: Transaction, extra?: Record<string, unknown>) => void
+}
+
+/**
+ * Reads for taking `take` units off a quantity line into a line (and record) of their own, so a
+ * partial return or payment acts on just those. Must run in the read phase of the transaction.
+ */
+async function planCarve(
+  tx: Transaction,
+  store: DocumentReference,
+  lines: StoredLoanLine[],
+  line: StoredLoanLine,
+  take: number,
+  flag: string
+): Promise<CarvePlan> {
+  if (lines.length >= MAX_STORED_LINES) {
+    throw new TradeError('INVALID_LINES', 409, 'This loan has too many parts. Settle whole lines.')
+  }
+  const recordRef = store.collection('inventoryItems').doc(line.itemId)
+  const [recordSnap, folderSnap] = await Promise.all([
+    tx.get(recordRef),
+    tx.get(store.collection('inventoryFolders').doc(line.folderId)),
+  ])
+  const data = (recordSnap.data() ?? {}) as Record<string, unknown>
+  const folder = folderSnap.data() as InventoryFolder | undefined
+  const stock = resolveBulkStockFieldAndValueFromMap(data, folder?.template?.fields)
+  if (!recordSnap.exists || data.sellerLoanOutId !== flag || !stock || stock.value < take) {
+    throw new TradeError(
+      'LENDER_RECORD_CHANGED',
+      409,
+      `The lender's record for ${line.name} has changed. Ask them to check the loan.`
+    )
+  }
+  const newRef = store.collection('inventoryItems').doc()
+  const carved: StoredLoanLine = {
+    ...line,
+    id: nextLineId(lines),
+    itemId: newRef.id,
+    quantity: take,
+    payReceiptId: null,
+    payLinkId: null,
+    payTokenHash: null,
+    settledAt: null,
+  }
+  return {
+    line: carved,
+    lines: [
+      ...lines.map((l) => (l.id === line.id ? { ...l, quantity: qtyOf(l) - take } : l)),
+      carved,
+    ],
+    recordRef,
+    newRef,
+    record: data,
+    fieldKey: stock.fieldKey,
+    value: stock.value,
+    folderFields: folder?.template?.fields,
+    apply: (w, extra = {}) => {
+      w.set(
+        newRef,
+        splitRecordData(data, stock.fieldKey, take, line.sourceItemId || line.itemId, {
+          sellerLoanOutId: flag,
+          sellerLoanPartyName: data.sellerLoanPartyName ?? '',
+          sellerLoanPartyPhone: '',
+          sellerLoanOutAt: data.sellerLoanOutAt ?? FieldValue.serverTimestamp(),
+          ...extra,
+        })
+      )
+      w.update(recordRef, {
+        [stock.fieldKey]: stock.value - take,
+        updatedAt: FieldValue.serverTimestamp(),
+      })
+    },
+  }
+}
+
+/** The line to act on: the whole line, or `quantity` of its units split off first. */
+function wantsCarve(loan: StoredLoan, lineIds: string[], quantity: number | null) {
+  if (quantity === null) return null
+  if (lineIds.length !== 1) {
+    throw new TradeError('INVALID_QUANTITY', 400, 'Choose one item to give a number of units.')
+  }
+  const line = loan.lines.find((l) => l.id === lineIds[0])!
+  if (quantity > qtyOf(line)) {
+    throw new TradeError(
+      'INVALID_QUANTITY',
+      400,
+      `Only ${qtyOf(line)} of ${line.name} are on this loan.`
+    )
+  }
+  if (quantity === qtyOf(line)) return null
+  if (!line.sourceItemId) {
+    throw new TradeError('INVALID_QUANTITY', 400, 'Choose one item to give a number of units.')
+  }
+  return line
+}
 
 function text(v: unknown, max: number): string {
   return typeof v === 'string' ? v.replace(/\s+/g, ' ').trim().slice(0, max) : ''
@@ -251,7 +426,9 @@ function parseDueDate(raw: unknown, now: Date): Timestamp {
   return Timestamp.fromMillis(ms)
 }
 
-function parseLines(raw: unknown): { itemId: string; folderId: string; priceKobo: number }[] {
+function parseLines(
+  raw: unknown
+): { itemId: string; folderId: string; priceKobo: number; quantity: number }[] {
   if (!Array.isArray(raw) || !raw.length || raw.length > MAX_LOAN_LINES) {
     throw new TradeError('INVALID_LINES', 400, `Choose between 1 and ${MAX_LOAN_LINES} items.`)
   }
@@ -266,14 +443,15 @@ function parseLines(raw: unknown): { itemId: string; folderId: string; priceKobo
     }
     if (seen.has(itemId)) throw new TradeError('INVALID_LINES', 400, 'An item is listed twice.')
     seen.add(itemId)
-    return { itemId, folderId, priceKobo }
+    return { itemId, folderId, priceKobo, quantity: parseQuantity(line.quantity) ?? 1 }
   })
 }
 
 /**
- * Lends serial items to an active partner at agreed prices until a due date. The items stay in
- * the lender's inventory, flagged `trade~<loan id>` so they cannot be sold or lent again, and the
- * loan is shown to both businesses.
+ * Lends items to an active partner at agreed prices until a due date. The items stay in the
+ * lender's inventory, flagged `trade~<loan id>` so they cannot be sold or lent again, and the
+ * loan is shown to both businesses. Serial items are flagged as they are; units of a quantity
+ * record move into a record of their own (the rest stays sellable) and merge back on return.
  */
 export async function createTradeLoan(
   db: Firestore,
@@ -321,6 +499,9 @@ export async function createTradeLoan(
       tx.getAll(...wanted.map((l) => store.collection('inventoryItems').doc(l.itemId))),
     ])
     const folders = new Map(folderSnaps.map((s) => [s.id, s.data() as InventoryFolder | undefined]))
+    const splits: { ref: DocumentReference; data: Record<string, unknown> }[] = []
+    const flagged: DocumentReference[] = []
+    const reduced: { ref: DocumentReference; data: Record<string, unknown> }[] = []
     const lines: StoredLoanLine[] = wanted.map((w, i) => {
       const snap = itemSnaps[i]!
       const data = (snap.data() ?? {}) as Record<string, unknown>
@@ -332,15 +513,11 @@ export async function createTradeLoan(
           'One of these items is no longer in your inventory.'
         )
       }
-      if (!folderHasSerialNumbers(folder)) {
-        throw new TradeError(
-          'NOT_SERIAL',
-          409,
-          'Only items from serial-number categories can be lent to partners.'
-        )
-      }
+      const serial = folderHasSerialNumbers(folder)
       const name = itemName(data)
-      if (data.dateOut) throw new TradeError('ITEM_UNAVAILABLE', 409, `${name} is already sold.`)
+      if (serial && data.dateOut) {
+        throw new TradeError('ITEM_UNAVAILABLE', 409, `${name} is already sold.`)
+      }
       if (text(data.pendingSaleReceiptId, 200)) {
         throw new TradeError(
           'ITEM_UNAVAILABLE',
@@ -351,18 +528,62 @@ export async function createTradeLoan(
       if (text(data.sellerLoanOutId, 300)) {
         throw new TradeError('ITEM_UNAVAILABLE', 409, `${name} is already out on a loan.`)
       }
-      return {
+      const base = {
         id: `l${i + 1}`,
-        itemId: w.itemId,
         folderId: w.folderId,
         name,
-        serial: itemSerial(data),
         priceKobo: w.priceKobo,
-        state: 'out',
+        state: 'out' as const,
         payReceiptId: null,
         payLinkId: null,
         payTokenHash: null,
         settledAt: null,
+      }
+      if (serial) {
+        if (w.quantity !== 1) {
+          throw new TradeError(
+            'INVALID_QUANTITY',
+            400,
+            `${name} has a serial number: lend it as one item.`
+          )
+        }
+        flagged.push(snap.ref)
+        return { ...base, itemId: w.itemId, serial: itemSerial(data) }
+      }
+      const stock = resolveBulkStockFieldAndValueFromMap(data, folder.template?.fields)
+      if (!stock) {
+        throw new TradeError('ITEM_UNAVAILABLE', 409, `Could not read the stock count for ${name}.`)
+      }
+      if (stock.value < w.quantity) {
+        throw new TradeError(
+          'ITEM_UNAVAILABLE',
+          409,
+          stock.value > 0 ? `Only ${stock.value} of ${name} in stock.` : `${name} is out of stock.`
+        )
+      }
+      const splitRef = store.collection('inventoryItems').doc()
+      splits.push({
+        ref: splitRef,
+        data: splitRecordData(data, stock.fieldKey, w.quantity, w.itemId, {
+          sellerLoanOutId: flag,
+          sellerLoanPartyName: borrowerName,
+          sellerLoanPartyPhone: '',
+          sellerLoanOutAt: FieldValue.serverTimestamp(),
+        }),
+      })
+      reduced.push({
+        ref: snap.ref,
+        data: {
+          [stock.fieldKey]: stock.value - w.quantity,
+          updatedAt: FieldValue.serverTimestamp(),
+        },
+      })
+      return {
+        ...base,
+        itemId: splitRef.id,
+        serial: '',
+        quantity: w.quantity,
+        sourceItemId: w.itemId,
       }
     })
     const loan: StoredLoan = {
@@ -391,8 +612,8 @@ export async function createTradeLoan(
       lastRemindedAt: null,
     }
     tx.create(ref, loan)
-    for (const snap of itemSnaps) {
-      tx.update(snap.ref, {
+    for (const itemRef of flagged) {
+      tx.update(itemRef, {
         sellerLoanOutId: flag,
         sellerLoanPartyName: borrowerName,
         sellerLoanPartyPhone: '',
@@ -400,10 +621,13 @@ export async function createTradeLoan(
         updatedAt: FieldValue.serverTimestamp(),
       })
     }
+    for (const s of splits) tx.create(s.ref, s.data)
+    for (const r of reduced) tx.update(r.ref, r.data)
   })
 
   const lenderName = profiles.get(me)?.displayName || 'A partner'
   const due = dueLabel(dueAt.toMillis())
+  const lentUnits = unitCount(wanted)
   await Promise.all([
     notifyTeam(
       db,
@@ -411,7 +635,7 @@ export async function createTradeLoan(
       {
         type: 'trade_loan',
         title: 'Stock lent to you',
-        message: `${lenderName} lent you ${units(wanted.length)}, due back ${due}.`,
+        message: `${lenderName} lent you ${units(lentUnits)}, due back ${due}.`,
         actorUid,
         requestId,
         loanId: ref.id,
@@ -422,7 +646,7 @@ export async function createTradeLoan(
       userDisplayName: await actorName(db, actorUid),
       action: 'created',
       loanId: ref.id,
-      text: `Lent ${units(wanted.length)} to partner ${borrowerName}, due ${due}`,
+      text: `Lent ${units(lentUnits)} to partner ${borrowerName}, due ${due}`,
     }),
     logActivity(
       db,
@@ -432,7 +656,7 @@ export async function createTradeLoan(
         userDisplayName: `${lenderName} (partner)`,
         action: 'created',
         loanId: ref.id,
-        text: `Borrowed ${units(wanted.length)} from partner ${lenderName}, due ${due}`,
+        text: `Borrowed ${units(lentUnits)} from partner ${lenderName}, due ${due}`,
       }
     ),
   ])
@@ -459,6 +683,7 @@ function toView(
     name: l.name,
     serial: l.serial,
     priceKobo: l.priceKobo,
+    quantity: qtyOf(l),
     state: lineState(l, links, nowMs),
   }))
   const settled = lines.every((l) => l.state === 'returned' || l.state === 'paid')
@@ -474,7 +699,7 @@ function toView(
     overdue: !settled && dueAtMs < nowMs,
     outstandingKobo: lines
       .filter((l) => l.state !== 'returned' && l.state !== 'paid')
-      .reduce((n, l) => n + l.priceKobo, 0),
+      .reduce((n, l) => n + l.priceKobo * l.quantity, 0),
     lines,
     events: loan.events.map((e) => ({
       atMs: millis(e.at),
@@ -558,25 +783,28 @@ export async function returnTradeLoanItems(
   db: Firestore,
   scope: TradeScope,
   actorUid: string,
-  raw: { loanId: unknown; lineIds: unknown },
+  raw: { loanId: unknown; lineIds: unknown; quantity?: unknown },
   now = new Date()
 ): Promise<{ side: 'lender' | 'borrower' }> {
   const { ref, loan: first, side } = await loanFor(db, scope, raw.loanId)
   const lineIds = pickLineIds(first, raw.lineIds)
+  const quantity = parseQuantity(raw.quantity)
   const nowMs = now.getTime()
+  const flag = partnerLoanFlag(ref.id)
   let settledNow = false
+  let movedUnits = 0
 
   await db.runTransaction(async (tx) => {
     const loan = (await tx.get(ref)).data() as StoredLoan
-    const chosen = loan.lines.filter((l) => lineIds.includes(l.id))
+    const picked = loan.lines.filter((l) => lineIds.includes(l.id))
     const linkSnaps = await Promise.all(
-      chosen
+      picked
         .filter((l) => l.payLinkId)
         .map((l) => tx.get(db.collection(LINKS_COLLECTION).doc(l.payLinkId!)))
     )
     const links = new Map(linkSnaps.map((s) => [s.id, s.data() as PaymentLinkV2 | undefined]))
     const allowed: StoredLineState[] = side === 'lender' ? ['out', 'return_marked'] : ['out']
-    for (const line of chosen) {
+    for (const line of picked) {
       const state = lineState(line, links, nowMs)
       if (state === 'paying') {
         throw new TradeError('PAYING', 409, `A payment for ${line.name} is in progress.`)
@@ -587,14 +815,107 @@ export async function returnTradeLoanItems(
     }
 
     const store = storeDocRef(db, loan.lenderOwnerUid, loan.lenderStoreId)
-    const itemSnaps =
-      side === 'lender'
-        ? await tx.getAll(...chosen.map((l) => store.collection('inventoryItems').doc(l.itemId)))
-        : []
+    const items = store.collection('inventoryItems')
+    const carveFrom = wantsCarve(loan, lineIds, quantity)
+    const carve = carveFrom
+      ? await planCarve(tx, store, loan.lines, carveFrom, quantity!, flag)
+      : null
+    let lines = carve ? carve.lines : loan.lines
+    const chosen = carve ? [carve.line] : picked
+    const chosenIds = chosen.map((l) => l.id)
+    movedUnits = unitCount(chosen)
+
+    // Lender confirms: serial records are unflagged; quantity units merge back into their source.
+    const records =
+      side === 'lender' && !carve ? await tx.getAll(...chosen.map((l) => items.doc(l.itemId))) : []
+    const sourceIds = side === 'lender' ? chosen.map((l) => l.sourceItemId || '') : []
+    const sources = new Map(
+      (
+        await Promise.all(
+          [...new Set(sourceIds.filter(Boolean))].map((id) => tx.get(items.doc(id)))
+        )
+      ).map((s) => [s.id, s])
+    )
+    const bulkFolders = new Map(
+      (
+        await Promise.all(
+          [...new Set(chosen.filter((l) => l.sourceItemId).map((l) => l.folderId))].map((id) =>
+            tx.get(store.collection('inventoryFolders').doc(id))
+          )
+        )
+      ).map((s) => [s.id, (s.data() as InventoryFolder | undefined)?.template?.fields])
+    )
+
+    // --- writes ---
+    const unflag = {
+      sellerLoanOutId: FieldValue.delete(),
+      sellerLoanPartyName: FieldValue.delete(),
+      sellerLoanPartyPhone: FieldValue.delete(),
+      sellerLoanOutAt: FieldValue.delete(),
+      tradeLoanSourceItemId: FieldValue.delete(),
+      updatedAt: FieldValue.serverTimestamp(),
+    }
+    /** Adds units back to the record they came from; false when it can no longer take them. */
+    const mergeInto = (sourceId: string | null | undefined, folderId: string, n: number) => {
+      const source = sourceId ? sources.get(sourceId) : undefined
+      if (!source?.exists || n <= 0) return false
+      const stock = resolveBulkStockFieldAndValueFromMap(
+        (source.data() ?? {}) as Record<string, unknown>,
+        bulkFolders.get(folderId)
+      )
+      if (!stock) return false
+      tx.update(source.ref, {
+        [stock.fieldKey]: stock.value + n,
+        dateOut: FieldValue.delete(),
+        updatedAt: FieldValue.serverTimestamp(),
+      })
+      return true
+    }
+
+    if (carve && side === 'lender') {
+      // Part of a line is back: move those units straight into the source record.
+      const take = quantity!
+      tx.update(carve.recordRef, {
+        [carve.fieldKey]: carve.value - take,
+        updatedAt: FieldValue.serverTimestamp(),
+      })
+      if (mergeInto(carve.line.sourceItemId, carve.line.folderId, take)) {
+        carve.line.itemId = carve.line.sourceItemId!
+      } else {
+        // The original record is gone: the returned units become a record of their own.
+        tx.set(
+          carve.newRef,
+          splitRecordData(carve.record, carve.fieldKey, take, carve.line.sourceItemId || '', {})
+        )
+      }
+      lines = lines.map((l) => (l.id === carve.line.id ? carve.line : l))
+    } else if (carve) {
+      carve.apply(tx)
+    }
+
+    records.forEach((snap, i) => {
+      const data = snap.data()
+      const line = chosen[i]!
+      if (!snap.exists || data?.sellerLoanOutId !== flag) return
+      if (line.sourceItemId) {
+        const stock = resolveBulkStockFieldAndValueFromMap(data, bulkFolders.get(line.folderId))
+        if (stock && mergeInto(line.sourceItemId, line.folderId, stock.value)) {
+          tx.delete(snap.ref)
+          return
+        }
+      }
+      const update: Record<string, unknown> = { ...unflag }
+      const payReceiptId = line.payReceiptId
+      if (payReceiptId && data.pendingSaleReceiptId === payReceiptId) {
+        update.pendingSaleReceiptId = FieldValue.delete()
+        update.pendingSaleAt = FieldValue.delete()
+      }
+      tx.update(snap.ref, update)
+    })
 
     const target: StoredLineState = side === 'lender' ? 'returned' : 'return_marked'
-    const lines = loan.lines.map((l) =>
-      lineIds.includes(l.id)
+    lines = lines.map((l) =>
+      chosenIds.includes(l.id)
         ? { ...l, state: target, settledAt: target === 'returned' ? Timestamp.fromDate(now) : null }
         : l
     )
@@ -603,42 +924,23 @@ export async function returnTradeLoanItems(
       lines,
       events: withEvent(
         loan,
-        event(side, actorUid, side === 'lender' ? 'returned' : 'return_marked', lineIds, now)
+        event(side, actorUid, side === 'lender' ? 'returned' : 'return_marked', chosenIds, now)
       ),
       ...(settledNow ? { status: 'settled' } : {}),
-    })
-
-    const flag = partnerLoanFlag(ref.id)
-    itemSnaps.forEach((snap, i) => {
-      const data = snap.data()
-      if (!snap.exists || data?.sellerLoanOutId !== flag) return
-      const update: Record<string, unknown> = {
-        sellerLoanOutId: FieldValue.delete(),
-        sellerLoanPartyName: FieldValue.delete(),
-        sellerLoanPartyPhone: FieldValue.delete(),
-        sellerLoanOutAt: FieldValue.delete(),
-        updatedAt: FieldValue.serverTimestamp(),
-      }
-      const payReceiptId = chosen[i]!.payReceiptId
-      if (payReceiptId && data.pendingSaleReceiptId === payReceiptId) {
-        update.pendingSaleReceiptId = FieldValue.delete()
-        update.pendingSaleAt = FieldValue.delete()
-      }
-      tx.update(snap.ref, update)
     })
   })
 
   const profiles = await readProfiles(db, [first.lenderKey, first.borrowerKey])
   const lenderName = profiles.get(first.lenderKey)?.displayName || 'Your partner'
   const borrowerName = profiles.get(first.borrowerKey)?.displayName || 'Your partner'
-  const count = units(lineIds.length)
+  const count = units(movedUnits)
   if (side === 'borrower') {
     await notifyTeam(db, lenderScope(first), {
       type: 'trade_loan',
       title: 'Items coming back',
       message: `${borrowerName} says ${count} you lent them ${
-        lineIds.length === 1 ? 'is' : 'are'
-      } back. Confirm when you have ${lineIds.length === 1 ? 'it' : 'them'}.`,
+        movedUnits === 1 ? 'is' : 'are'
+      } back. Confirm when you have ${movedUnits === 1 ? 'it' : 'them'}.`,
       actorUid,
       requestId: first.requestId,
       loanId: ref.id,
@@ -655,7 +957,7 @@ export async function returnTradeLoanItems(
       notifyTeam(db, borrowerScope(first), {
         type: 'trade_loan',
         title: settledNow ? 'Loan settled' : 'Return confirmed',
-        message: `${lenderName} confirmed ${count} ${lineIds.length === 1 ? 'is' : 'are'} back.${
+        message: `${lenderName} confirmed ${count} ${movedUnits === 1 ? 'is' : 'are'} back.${
           settledNow ? ' Nothing more is owed on this loan.' : ''
         }`,
         actorUid,
@@ -713,13 +1015,14 @@ export async function startTradeLoanPayment(
   scope: TradeScope,
   actorUid: string,
   email: string | undefined,
-  raw: { loanId: unknown; lineIds: unknown },
+  raw: { loanId: unknown; lineIds: unknown; quantity?: unknown },
   deps: StartCheckoutDeps & { env: NodeJS.ProcessEnv; now?: Date }
 ): Promise<{ authorizationUrl: string }> {
   const { ref, loan: first, side } = await loanFor(db, scope, raw.loanId)
   if (side !== 'borrower') throw new TradeError('NOT_FOUND', 404, 'Not found')
   if (!email) throw new TradeError('NO_EMAIL', 409, 'Your account needs an email address to pay.')
   const lineIds = pickLineIds(first, raw.lineIds)
+  const quantity = parseQuantity(raw.quantity)
   const now = deps.now ?? new Date()
   const nowMs = now.getTime()
 
@@ -730,7 +1033,7 @@ export async function startTradeLoanPayment(
     chosenFirst.map((l) => l.payLinkId ?? '')
   )
   const live = chosenFirst.filter((l) => lineState(l, firstLinks, nowMs) === 'paying')
-  if (live.length) {
+  if (live.length && !wantsCarve(first, lineIds, quantity)) {
     const linkId = live[0]!.payLinkId
     const sameLink = live.length === chosenFirst.length && live.every((l) => l.payLinkId === linkId)
     const hash = live[0]!.payTokenHash
@@ -745,24 +1048,32 @@ export async function startTradeLoanPayment(
   const receiptRef = store.collection('receipts').doc()
   const flag = partnerLoanFlag(ref.id)
   const borrower = (await readProfiles(db, [first.borrowerKey])).get(first.borrowerKey)
+  /** The lines this payment is for: the chosen ones, or the units split off for it. */
+  let payIds = lineIds
 
   await db.runTransaction(async (tx) => {
     const loan = (await tx.get(ref)).data() as StoredLoan
-    const chosen = loan.lines.filter((l) => lineIds.includes(l.id))
+    const picked = loan.lines.filter((l) => lineIds.includes(l.id))
     const linkSnaps = await Promise.all(
-      chosen
+      picked
         .filter((l) => l.payLinkId)
         .map((l) => tx.get(db.collection(LINKS_COLLECTION).doc(l.payLinkId!)))
     )
     const links = new Map(linkSnaps.map((s) => [s.id, s.data() as PaymentLinkV2 | undefined]))
-    for (const line of chosen) {
+    for (const line of picked) {
       if (line.state !== 'out' || lineState(line, links, nowMs) !== 'out') {
         throw new TradeError('LINE_SETTLED', 409, `${line.name} is already settled or being paid.`)
       }
     }
-    const itemSnaps = await tx.getAll(
-      ...chosen.map((l) => store.collection('inventoryItems').doc(l.itemId))
-    )
+    const carveFrom = wantsCarve(loan, lineIds, quantity)
+    const carve = carveFrom
+      ? await planCarve(tx, store, loan.lines, carveFrom, quantity!, flag)
+      : null
+    const chosen = carve ? [carve.line] : picked
+    payIds = chosen.map((l) => l.id)
+    const itemSnaps = carve
+      ? []
+      : await tx.getAll(...chosen.map((l) => store.collection('inventoryItems').doc(l.itemId)))
     itemSnaps.forEach((snap, i) => {
       const data = snap.data() ?? {}
       const line = chosen[i]!
@@ -770,7 +1081,7 @@ export async function startTradeLoanPayment(
       if (
         !snap.exists ||
         data.sellerLoanOutId !== flag ||
-        data.dateOut ||
+        (!line.sourceItemId && data.dateOut) ||
         (pending && pending !== line.payReceiptId)
       ) {
         throw new TradeError(
@@ -781,7 +1092,7 @@ export async function startTradeLoanPayment(
       }
     })
 
-    const total = chosen.reduce((n, l) => n + l.priceKobo, 0) / 100
+    const total = chosen.reduce((n, l) => n + lineKobo(l), 0) / 100
     const folderIds = [...new Set(chosen.map((l) => l.folderId))]
     tx.create(receiptRef, {
       receiptNumber: payReceiptNumber(now),
@@ -791,12 +1102,12 @@ export async function startTradeLoanPayment(
       items: chosen.map((l) => ({
         itemId: l.itemId,
         folderId: l.folderId,
-        quantity: 1,
+        quantity: qtyOf(l),
         price: l.priceKobo / 100,
         itemName: l.name,
         ...(l.serial ? { serialNo: l.serial } : {}),
       })),
-      itemsCount: chosen.length,
+      itemsCount: unitCount(chosen),
       total,
       paymentMethod: 'Payment link',
       status: 'balance_due',
@@ -805,7 +1116,7 @@ export async function startTradeLoanPayment(
       payments: [],
       paymentsV2: true,
       notes: `Partner loan: sold by @${borrower?.handle || 'partner'}`,
-      hasSerialNumbers: true,
+      hasSerialNumbers: chosen.every((l) => !l.sourceItemId),
       folderId: folderIds.length === 1 ? folderIds[0] : '',
       folderIds,
       itemIds: chosen.map((l) => l.itemId),
@@ -817,16 +1128,16 @@ export async function startTradeLoanPayment(
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
     })
-    for (const snap of itemSnaps) {
-      tx.update(snap.ref, {
-        pendingSaleReceiptId: receiptRef.id,
-        pendingSaleAt: FieldValue.serverTimestamp(),
-        updatedAt: FieldValue.serverTimestamp(),
-      })
+    const hold = {
+      pendingSaleReceiptId: receiptRef.id,
+      pendingSaleAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
     }
+    if (carve) carve.apply(tx, hold)
+    for (const snap of itemSnaps) tx.update(snap.ref, hold)
     tx.update(ref, {
-      lines: loan.lines.map((l) =>
-        lineIds.includes(l.id)
+      lines: (carve ? carve.lines : loan.lines).map((l) =>
+        payIds.includes(l.id)
           ? { ...l, payReceiptId: receiptRef.id, payLinkId: null, payTokenHash: null }
           : l
       ),
@@ -842,7 +1153,7 @@ export async function startTradeLoanPayment(
       { env: deps.env, appOrigin: deps.appOrigin, now }
     )
   } catch (err) {
-    await undoPayStart(db, ref, receiptRef.id, lineIds).catch((undoErr) =>
+    await undoPayStart(db, ref, receiptRef.id, payIds).catch((undoErr) =>
       console.error(
         JSON.stringify({
           tag: 'trade-loan-pay-undo-failed',
@@ -859,12 +1170,12 @@ export async function startTradeLoanPayment(
     const loan = (await tx.get(ref)).data() as StoredLoan
     tx.update(ref, {
       lines: loan.lines.map((l) =>
-        lineIds.includes(l.id) && l.payReceiptId === receiptRef.id
+        payIds.includes(l.id) && l.payReceiptId === receiptRef.id
           ? { ...l, payLinkId: link.linkId, payTokenHash: tokenHash }
           : l
       ),
       payLinkIds: FieldValue.arrayUnion(link.linkId),
-      events: withEvent(loan, event('borrower', actorUid, 'pay_started', lineIds, now)),
+      events: withEvent(loan, event('borrower', actorUid, 'pay_started', payIds, now)),
     })
   })
 
@@ -923,6 +1234,7 @@ export async function settleTradeLoanPayment(
     const doc = snap.docs[0]
     if (!doc) return
     let paidIds: string[] = []
+    let paidUnits = 0
     let settledNow = false
     let amountKobo = 0
     await db.runTransaction(async (tx) => {
@@ -936,9 +1248,35 @@ export async function settleTradeLoanPayment(
         .filter((l) => l.payLinkId === linkId && l.state !== 'paid')
         .map((l) => l.id)
       if (!paidIds.length) return
-      amountKobo = loan.lines
-        .filter((l) => paidIds.includes(l.id))
-        .reduce((n, l) => n + l.priceKobo, 0)
+      const paid = loan.lines.filter((l) => paidIds.includes(l.id))
+      amountKobo = paid.reduce((n, l) => n + lineKobo(l), 0)
+      paidUnits = unitCount(paid)
+
+      // Split-off quantity records were sold down to 0 by the stock commit: close them as sold.
+      const store = storeDocRef(db, loan.lenderOwnerUid, loan.lenderStoreId)
+      const bulk = paid.filter((l) => l.sourceItemId)
+      const [records, folders] = await Promise.all([
+        Promise.all(bulk.map((l) => tx.get(store.collection('inventoryItems').doc(l.itemId)))),
+        Promise.all(
+          [...new Set(bulk.map((l) => l.folderId))].map((id) =>
+            tx.get(store.collection('inventoryFolders').doc(id))
+          )
+        ),
+      ])
+      const fields = new Map(
+        folders.map((s) => [s.id, (s.data() as InventoryFolder | undefined)?.template?.fields])
+      )
+      records.forEach((snap, i) => {
+        const data = snap.data()
+        if (!data || data.sellerLoanOutId || data.dateOut) return
+        const stock = resolveBulkStockFieldAndValueFromMap(data, fields.get(bulk[i]!.folderId))
+        if (stock?.value === 0) {
+          tx.update(snap.ref, {
+            dateOut: FieldValue.serverTimestamp(),
+            updatedAt: FieldValue.serverTimestamp(),
+          })
+        }
+      })
       const lines = loan.lines.map((l) =>
         paidIds.includes(l.id)
           ? { ...l, state: 'paid' as const, settledAt: Timestamp.fromDate(now) }
@@ -957,7 +1295,7 @@ export async function settleTradeLoanPayment(
     const profiles = await readProfiles(db, [loan.lenderKey, loan.borrowerKey])
     const lenderName = profiles.get(loan.lenderKey)?.displayName || 'your partner'
     const borrowerName = profiles.get(loan.borrowerKey)?.displayName || 'Your partner'
-    const count = units(paidIds.length)
+    const count = units(paidUnits)
     const done = settledNow ? ' The loan is settled.' : ''
     await Promise.all([
       notifyTeam(db, lenderScope(loan), {
@@ -1045,7 +1383,7 @@ export async function remindDueTradeLoans(
 
       const dueMs = millis(loan.dueAt)
       const open = loan.lines.filter((l) => !SETTLED.has(l.state))
-      const owed = formatNaira(open.reduce((n, l) => n + l.priceKobo, 0))
+      const owed = formatNaira(open.reduce((n, l) => n + lineKobo(l), 0))
       const when = dueMs >= nowMs ? 'due back today' : `overdue since ${dueLabel(dueMs)}`
       const profiles = await readProfiles(db, [loan.lenderKey, loan.borrowerKey])
       const lenderName = profiles.get(loan.lenderKey)?.displayName || 'your partner'
@@ -1054,7 +1392,9 @@ export async function remindDueTradeLoans(
         notifyTeam(db, lenderScope(loan), {
           type: 'trade_loan_due',
           title: dueMs >= nowMs ? 'Loan due today' : 'Loan overdue',
-          message: `${borrowerName} still has ${units(open.length)} of yours, ${when} (${owed}).`,
+          message: `${borrowerName} still has ${units(
+            unitCount(open)
+          )} of yours, ${when} (${owed}).`,
           actorUid: 'system:cron',
           requestId: loan.requestId,
           loanId: doc.id,
@@ -1062,8 +1402,8 @@ export async function remindDueTradeLoans(
         notifyTeam(db, borrowerScope(loan), {
           type: 'trade_loan_due',
           title: dueMs >= nowMs ? 'Loan due today' : 'Loan overdue',
-          message: `${units(open.length)} from ${lenderName} ${
-            open.length === 1 ? 'is' : 'are'
+          message: `${units(unitCount(open))} from ${lenderName} ${
+            unitCount(open) === 1 ? 'is' : 'are'
           } ${when}. Return them or pay ${owed}.`,
           actorUid: 'system:cron',
           requestId: loan.requestId,

@@ -8,5 +8,9 @@ export default defineTradeRoute(
     rateLimit: { id: 'trade:loan-return', limit: 60, windowMs: 60 * 60_000 },
   },
   async ({ db, auth, access, input }) =>
-    returnTradeLoanItems(db, access, auth.uid, { loanId: input.loanId, lineIds: input.lineIds })
+    returnTradeLoanItems(db, access, auth.uid, {
+      loanId: input.loanId,
+      lineIds: input.lineIds,
+      quantity: input.quantity,
+    })
 )

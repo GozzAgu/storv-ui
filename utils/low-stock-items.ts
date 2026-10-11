@@ -1,4 +1,5 @@
 import type { InventoryFolder, InventoryItem } from '~/stores/inventory'
+import { isItemOnStockLoan } from '~/utils/inventory-availability'
 
 export interface LowStockRow {
   id: string
@@ -33,7 +34,7 @@ export function collectLowStockRows(
       for (const item of items) {
         const dateOut = item.dateOut
         const hasDateOut = dateOut !== null && dateOut !== undefined && dateOut !== ''
-        if (!hasDateOut) availableCount++
+        if (!hasDateOut && !isItemOnStockLoan(item)) availableCount++
       }
       if (availableCount > 0 && availableCount <= threshold) {
         list.push({
@@ -74,7 +75,7 @@ export function collectLowStockRows(
     for (const item of items) {
       const dateOut = item.dateOut
       const hasDateOut = dateOut !== null && dateOut !== undefined && dateOut !== ''
-      if (hasDateOut) continue
+      if (hasDateOut || isItemOnStockLoan(item)) continue
       if (item[quantityField] === undefined) continue
 
       const quantity =

@@ -50,8 +50,9 @@ export type TradeSellBlocker = 'no_access' | 'payments_off' | 'no_payout'
 export type TradeLendBlocker = 'no_plan'
 
 /**
- * One unit on a partner loan. `paying`: a payment for it has started and not finished.
- * `return_marked`: the borrower says it is back; the lender has not confirmed yet.
+ * One item (or a number of units of one) on a partner loan. `paying`: a payment for it has
+ * started and not finished. `return_marked`: the borrower says it is back; the lender has not
+ * confirmed yet.
  */
 export type TradeLoanLineState = 'out' | 'return_marked' | 'paying' | 'returned' | 'paid'
 
@@ -59,7 +60,10 @@ export interface TradeLoanLineView {
   id: string
   name: string
   serial: string
+  /** Per unit. */
   priceKobo: number
+  /** Always 1 for serial items. */
+  quantity: number
   state: TradeLoanLineState
 }
 
@@ -97,7 +101,8 @@ export interface NewTradeLoanInput {
   requestId: string | null
   /** Local date, YYYY-MM-DD. */
   dueDate: string
-  lines: { itemId: string; folderId: string; priceKobo: number }[]
+  /** `priceKobo` is per unit; `quantity` only for categories without serial numbers. */
+  lines: { itemId: string; folderId: string; priceKobo: number; quantity?: number }[]
 }
 
 /** One line of a partner sale, copied from the seller's receipt. Prices in kobo. */

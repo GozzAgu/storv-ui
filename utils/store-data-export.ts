@@ -27,6 +27,7 @@ const ITEM_META_KEYS = new Set([
   'sellerLoanPartyName',
   'sellerLoanPartyPhone',
   'sellerLoanOutAt',
+  'tradeLoanSourceItemId',
   'swapIn',
   'swapInReceiptId',
   'buyback',

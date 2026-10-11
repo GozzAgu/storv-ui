@@ -24,33 +24,46 @@
         label="Category"
         placeholder="Choose a category"
         :options="folderOptions"
-        hint="Only items with serial numbers or IMEIs can be lent."
         required
       />
 
       <p v-if="foldersLoaded && !folderOptions.length" class="s-partners__note">
-        None of your categories track serial numbers or IMEIs yet. Turn that on for a category to
-        lend its items.
+        Add some inventory first. Your categories will show here.
       </p>
       <SSkeleton v-if="loadingItems" :lines="3" />
       <p v-else-if="folderId && !available.length" class="s-partners__note">
-        Nothing in this category is free to lend. Sold items, items held for a sale and items
-        already on loan are not shown.
+        Nothing in this category is free to lend. Sold or out-of-stock items, items held for a sale
+        and items already on loan are not shown.
       </p>
       <ul v-else-if="available.length" class="s-list s-trade-lend__items">
         <li v-for="item in available" :key="item.id" class="s-list__item s-trade-lend__item">
           <SCheckbox
             :model-value="!!picked[item.id]"
             :label="labelOf(item).name"
-            :description="labelOf(item).serial || 'No serial number'"
+            :description="
+              serialFolder
+                ? labelOf(item).serial || 'No serial number'
+                : `${stockOf(item)} in stock`
+            "
             @update:model-value="(v: boolean) => toggle(item, v)"
           />
           <div v-if="picked[item.id]" class="s-trade-lend__price">
             <SInput
+              v-if="!serialFolder"
+              v-model="picked[item.id]!.quantity"
+              type="number"
+              inputmode="numeric"
+              label="How many"
+              :min="1"
+              :max="stockOf(item)"
+              :aria-label="`How many ${labelOf(item).name}`"
+              required
+            />
+            <SInput
               v-model="picked[item.id]!.price"
               type="number"
               inputmode="decimal"
-              label="Agreed price"
+              :label="serialFolder ? 'Agreed price' : 'Agreed price each'"
               :aria-label="`Agreed price for ${labelOf(item).name}`"
               required
             >
@@ -76,7 +89,7 @@
     <template #footer>
       <SDialogActions
         :primary-label="
-          pickedCount ? `Lend ${pickedCount} item${pickedCount === 1 ? '' : 's'}` : 'Lend'
+          pickedUnits ? `Lend ${pickedUnits} item${pickedUnits === 1 ? '' : 's'}` : 'Lend'
         "
         :primary-loading="saving"
         :primary-disabled="!canSubmit"
@@ -108,6 +121,7 @@ import {
   isItemOnStockLoan,
   isItemSold,
 } from '~/utils/inventory-availability'
+import { resolveBulkStockFieldAndValueFromMap } from '~/utils/inventory-bulk-quantity'
 import { folderHasChildren } from '~/utils/inventory-folder-tree'
 import { folderHasSerialNumbers } from '~/utils/receipt-multi-folder'
 
@@ -135,7 +149,9 @@ const dueDate = ref('')
 const items = ref<InventoryItem[]>([])
 const loadingItems = ref(false)
 const foldersLoaded = ref(false)
-const picked = ref<Record<string, { price: number | null; folderId: string }>>({})
+const picked = ref<
+  Record<string, { price: number | null; folderId: string; quantity: number | null }>
+>({})
 const saving = ref(false)
 
 const partnerOptions = computed(() =>
@@ -148,12 +164,30 @@ const partnerName = computed(
 )
 const folderOptions = computed(() =>
   inventory.folders
-    .filter((f) => folderHasSerialNumbers(f) && !folderHasChildren(inventory.folders, f.id))
+    .filter((f) => !folderHasChildren(inventory.folders, f.id))
     .map((f) => ({ label: f.name, value: f.id }))
     .sort((a, b) => a.label.localeCompare(b.label))
 )
+const folder = computed(() => inventory.folders.find((f) => f.id === folderId.value))
+/** Serial items are lent one by one; other categories lend a number of units. */
+const serialFolder = computed(() => folderHasSerialNumbers(folder.value))
+
+function stockOf(item: InventoryItem): number {
+  return (
+    resolveBulkStockFieldAndValueFromMap(
+      item as unknown as Record<string, unknown>,
+      folder.value?.template?.fields
+    )?.value ?? 0
+  )
+}
+
 const available = computed(() =>
-  items.value.filter((i) => !isItemSold(i) && !isItemAwaitingPayment(i) && !isItemOnStockLoan(i))
+  items.value.filter(
+    (i) =>
+      !isItemAwaitingPayment(i) &&
+      !isItemOnStockLoan(i) &&
+      (serialFolder.value ? !isItemSold(i) : stockOf(i) > 0)
+  )
 )
 
 function labelOf(item: InventoryItem) {
@@ -176,19 +210,35 @@ function defaultPrice(item: InventoryItem): number | null {
 
 function toggle(item: InventoryItem, on: boolean) {
   const next = { ...picked.value }
-  if (on) next[item.id] = { price: defaultPrice(item), folderId: item.folderId || folderId.value }
-  else delete next[item.id]
+  if (on) {
+    next[item.id] = {
+      price: defaultPrice(item),
+      folderId: item.folderId || folderId.value,
+      quantity: serialFolder.value ? null : 1,
+    }
+  } else delete next[item.id]
   picked.value = next
 }
 
+/** Units for a picked item: 1 for serial items, else the number entered when it is in stock. */
+function unitsOf(itemId: string): number {
+  const p = picked.value[itemId]
+  if (!p) return 0
+  if (p.quantity === null) return 1
+  const item = items.value.find((i) => i.id === itemId)
+  const n = Number(p.quantity)
+  return item && Number.isInteger(n) && n >= 1 && n <= stockOf(item) ? n : 0
+}
+
 const pickedCount = computed(() => Object.keys(picked.value).length)
+const pickedUnits = computed(() => Object.keys(picked.value).reduce((n, id) => n + unitsOf(id), 0))
 const canSubmit = computed(
   () =>
     !saving.value &&
     !!partnerHandle.value &&
     !!dueDate.value &&
     pickedCount.value > 0 &&
-    Object.values(picked.value).every((p) => !!p.price && p.price > 0)
+    Object.entries(picked.value).every(([id, p]) => !!p.price && p.price > 0 && unitsOf(id) > 0)
 )
 
 watch(
@@ -209,6 +259,7 @@ watch(
 
 watch(folderId, async (id) => {
   items.value = []
+  picked.value = {}
   if (!id) return
   loadingItems.value = true
   try {
@@ -236,6 +287,7 @@ async function submit() {
           itemId,
           folderId: p.folderId,
           priceKobo: Math.round((p.price ?? 0) * 100),
+          ...(p.quantity === null ? {} : { quantity: unitsOf(itemId) }),
         })),
       },
       labels

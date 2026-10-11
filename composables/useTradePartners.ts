@@ -218,28 +218,32 @@ export function useTradePartners() {
   }
 
   /** Borrower: mark items returned. Lender: confirm they are back in stock. */
-  async function returnLoanItems(loanId: string, lineIds: string[]) {
+  async function returnLoanItems(loanId: string, lineIds: string[], quantity?: number) {
     const d = await demo()
-    if (d) d.returnDemoLoanItems(loanId, lineIds)
+    if (d) d.returnDemoLoanItems(loanId, lineIds, quantity)
     else
       await authFetch('/api/trade/loans/return', {
         method: 'POST',
-        body: { ...(await scope()), loanId, lineIds },
+        body: { ...(await scope()), loanId, lineIds, ...(quantity ? { quantity } : {}) },
       })
     await loadLoans()
   }
 
   /** Paystack checkout URL for borrowed items that were sold. In demo mode they are marked paid. */
-  async function payLoan(loanId: string, lineIds: string[]): Promise<string | null> {
+  async function payLoan(
+    loanId: string,
+    lineIds: string[],
+    quantity?: number
+  ): Promise<string | null> {
     const d = await demo()
     if (d) {
-      d.payDemoLoan(loanId, lineIds)
+      d.payDemoLoan(loanId, lineIds, quantity)
       await loadLoans()
       return null
     }
     const res = await authFetch<{ authorizationUrl: string }>('/api/trade/loans/pay', {
       method: 'POST',
-      body: { ...(await scope()), loanId, lineIds },
+      body: { ...(await scope()), loanId, lineIds, ...(quantity ? { quantity } : {}) },
     })
     return res.authorizationUrl
   }

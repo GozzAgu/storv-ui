@@ -261,8 +261,17 @@
 }
 
 .s-trade-lend__price {
-  width: 168px;
+  display: flex;
+  gap: var(--s-space-2, 8px);
   margin-left: auto;
+}
+
+.s-trade-lend__price > * {
+  width: 168px;
+}
+
+.s-trade-lend__price > :first-child:not(:last-child) {
+  width: 96px;
 }
 
 .s-trade-loan__meta {

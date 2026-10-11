@@ -341,9 +341,10 @@ function loanLine(
   name: string,
   serial: string,
   priceKobo: number,
-  state: TradeLoanLineView['state'] = 'out'
+  state: TradeLoanLineView['state'] = 'out',
+  quantity = 1
 ): TradeLoanLineView {
-  return { id, name, serial, priceKobo, state }
+  return { id, name, serial, priceKobo, quantity, state }
 }
 
 function seedLoans(): TradeLoanView[] {
@@ -363,8 +364,11 @@ function seedLoans(): TradeLoanView[] {
       lines: [
         loanLine('l1', 'iPhone 14 Pro 128GB', '353918107425961', 820_000_00),
         loanLine('l2', 'iPhone 14 Pro 128GB', '353918107425979', 820_000_00),
+        loanLine('l3', 'MagSafe case, iPhone 14 Pro', '', 8_000_00, 'out', 10),
       ],
-      events: [{ atMs: now - 3 * DAY, by: 'lender', action: 'lent', lineIds: ['l1', 'l2'] }],
+      events: [
+        { atMs: now - 3 * DAY, by: 'lender', action: 'lent', lineIds: ['l1', 'l2', 'l3'] },
+      ],
     }),
     refreshLoan({
       id: 'demo-l2',
@@ -393,8 +397,25 @@ function refreshLoan(loan: TradeLoanView): TradeLoanView {
   const open = loan.lines.filter((l) => l.state !== 'returned' && l.state !== 'paid')
   loan.settled = !open.length
   loan.overdue = !loan.settled && loan.dueAtMs < Date.now()
-  loan.outstandingKobo = open.reduce((n, l) => n + l.priceKobo, 0)
+  loan.outstandingKobo = open.reduce((n, l) => n + l.priceKobo * l.quantity, 0)
   return loan
+}
+
+/** The lines to act on: the chosen ones, or `quantity` units split off one of them. */
+function demoActOn(loan: TradeLoanView, lineIds: string[], quantity?: number) {
+  const chosen = loan.lines.filter((l) => lineIds.includes(l.id))
+  if (!chosen.length) throw new Error('Choose the items first.')
+  if (!quantity) return chosen
+  const line = chosen[0]!
+  if (chosen.length !== 1 || quantity < 1 || quantity > line.quantity) {
+    throw new Error(`Only ${line.quantity} of ${line.name} are on this loan.`)
+  }
+  if (quantity === line.quantity) return chosen
+  const next = Math.max(...loan.lines.map((l) => Number(l.id.slice(1)) || 0)) + 1
+  const carved = { ...line, id: `l${next}`, quantity }
+  line.quantity -= quantity
+  loan.lines.push(carved)
+  return [carved]
 }
 
 function currentLoans(): TradeLoanView[] {
@@ -434,7 +455,7 @@ export function lendDemoStock(
     if (label.serial && lent.has(label.serial)) {
       throw new Error(`${label.name} is already out on a loan.`)
     }
-    return loanLine(`l${i + 1}`, label.name, label.serial, l.priceKobo)
+    return loanLine(`l${i + 1}`, label.name, label.serial, l.priceKobo, 'out', l.quantity ?? 1)
   })
   const now = Date.now()
   currentLoans().unshift(
@@ -460,35 +481,33 @@ function demoLoan(id: string): TradeLoanView {
   return loan
 }
 
-export function returnDemoLoanItems(id: string, lineIds: string[]): void {
+export function returnDemoLoanItems(id: string, lineIds: string[], quantity?: number): void {
   const loan = demoLoan(id)
   const lender = loan.direction === 'lent'
   const allowed = lender ? ['out', 'return_marked'] : ['out']
-  const chosen = loan.lines.filter((l) => lineIds.includes(l.id))
-  if (!chosen.length) throw new Error('Choose the items first.')
-  for (const l of chosen) {
+  for (const l of loan.lines.filter((x) => lineIds.includes(x.id))) {
     if (!allowed.includes(l.state)) throw new Error(`${l.name} is already settled.`)
   }
+  const chosen = demoActOn(loan, lineIds, quantity)
   for (const l of chosen) l.state = lender ? 'returned' : 'return_marked'
   loan.events.push({
     atMs: Date.now(),
     by: lender ? 'lender' : 'borrower',
     action: lender ? 'returned' : 'return_marked',
-    lineIds,
+    lineIds: chosen.map((l) => l.id),
   })
   refreshLoan(loan)
 }
 
 /** Demo payment: the lines are simply marked paid. */
-export function payDemoLoan(id: string, lineIds: string[]): void {
+export function payDemoLoan(id: string, lineIds: string[], quantity?: number): void {
   const loan = demoLoan(id)
   if (loan.direction !== 'borrowed') throw new Error('Not found')
-  const chosen = loan.lines.filter((l) => lineIds.includes(l.id))
-  if (!chosen.length) throw new Error('Choose the items first.')
-  for (const l of chosen) {
+  for (const l of loan.lines.filter((x) => lineIds.includes(x.id))) {
     if (l.state !== 'out') throw new Error(`${l.name} is already settled.`)
   }
+  const chosen = demoActOn(loan, lineIds, quantity)
   for (const l of chosen) l.state = 'paid'
-  loan.events.push({ atMs: Date.now(), by: 'system', action: 'paid', lineIds })
+  loan.events.push({ atMs: Date.now(), by: 'system', action: 'paid', lineIds: chosen.map((l) => l.id) })
   refreshLoan(loan)
 }

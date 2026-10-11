@@ -3189,6 +3189,7 @@ const handleEditItem = (item: InventoryItem) => {
     'sellerLoanPartyName',
     'sellerLoanPartyPhone',
     'sellerLoanOutAt',
+    'tradeLoanSourceItemId',
     'discountPercentage',
     'discountAmount',
     'originalPrice',
@@ -3261,6 +3262,7 @@ const handleDuplicateItem = (item: InventoryItem) => {
       'sellerLoanPartyName',
       'sellerLoanPartyPhone',
       'sellerLoanOutAt',
+      'tradeLoanSourceItemId',
     ]
     Object.keys(item).forEach((key) => {
       if (!systemFields.includes(key)) {
@@ -3341,6 +3343,7 @@ const handleConfirmDuplicate = async () => {
       'sellerLoanPartyName',
       'sellerLoanPartyPhone',
       'sellerLoanOutAt',
+      'tradeLoanSourceItemId',
     ]
     const baseData: Record<string, any> = {}
     Object.keys(source).forEach((key) => {

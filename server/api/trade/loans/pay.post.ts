@@ -37,7 +37,7 @@ export default defineTradeRoute(
       access,
       auth.uid,
       auth.email,
-      { loanId: input.loanId, lineIds: input.lineIds },
+      { loanId: input.loanId, lineIds: input.lineIds, quantity: input.quantity },
       {
         env: process.env,
         paystack,

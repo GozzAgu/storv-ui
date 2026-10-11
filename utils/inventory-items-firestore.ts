@@ -64,6 +64,7 @@ export function docToInventoryItem(
     'sellerLoanPartyName',
     'sellerLoanPartyPhone',
     'sellerLoanOutAt',
+    'tradeLoanSourceItemId',
     'swapIn',
     'swapInReceiptId',
     'buyback',

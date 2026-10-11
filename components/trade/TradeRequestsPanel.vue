@@ -317,7 +317,7 @@ const props = defineProps<{
   onClose: (requestId: string) => Promise<void>
   /** Present when this person can bill partners: turns a "have" reply into a sale. */
   onBill?: (request: TradeRequestView) => void
-  /** Present when this store can lend: lends serial items against a "have" reply. */
+  /** Present when this store can lend: lends stock against a "have" reply. */
   onLend?: (request: TradeRequestView) => void
 }>()
 

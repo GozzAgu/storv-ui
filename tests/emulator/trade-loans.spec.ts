@@ -173,9 +173,12 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('Trade partner loans (emul
       await expectCode(lend(p, { dueDate: lagosDate(-1) }), 'INVALID_DUE_DATE')
       await expectCode(lend(p, { dueDate: lagosDate(120) }), 'INVALID_DUE_DATE')
       await expectCode(
-        lend(p, { lines: [{ itemId: 'c1', folderId: 'chargers', priceKobo: 450_000 }] }),
-        'NOT_SERIAL'
+        lend(p, {
+          lines: [{ itemId: 'c1', folderId: 'chargers', priceKobo: 450_000, quantity: 21 }],
+        }),
+        'ITEM_UNAVAILABLE'
       )
+      await expectCode(lend(p, { lines: [{ ...PHONES[0], quantity: 2 }] }), 'INVALID_QUANTITY')
       await item(p.lender.scope, 'p2').update({ dateOut: new Date() })
       await expectCode(lend(p), 'ITEM_UNAVAILABLE')
       await item(p.lender.scope, 'p2').update({ dateOut: null })
@@ -440,6 +443,192 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('Trade partner loans (emul
       expect(loan.lines.map((l: { payReceiptId: unknown }) => l.payReceiptId)).toEqual([null, null])
       expect((await store(p.lender.scope).collection('receipts').get()).size).toBe(0)
       expect((await item(p.lender.scope, 'p1').get()).data()!.pendingSaleReceiptId).toBeUndefined()
+    })
+  })
+
+  describe('quantity items', () => {
+    const CHARGERS = (quantity: number) => [
+      { itemId: 'c1', folderId: 'chargers', priceKobo: 450_000, quantity },
+    ]
+    const qty = async (scope: TradeScope, id: string) =>
+      (await item(scope, id).get()).data()?.quantity as number | undefined
+
+    async function lendChargers(p: Awaited<ReturnType<typeof partners>>, n = 5) {
+      const { id } = await lend(p, { lines: CHARGERS(n) })
+      const line = (await db.collection(TRADE_LOANS).doc(id).get()).data()!.lines[0]
+      return { id, splitId: line.itemId as string, line }
+    }
+
+    it('lending 5 of 20 splits them into their own flagged record; 15 stay sellable', async () => {
+      const p = await partners()
+      const { id, splitId, line } = await lendChargers(p)
+      expect(line).toMatchObject({ quantity: 5, sourceItemId: 'c1', serial: '' })
+      expect(splitId).not.toBe('c1')
+
+      expect(await qty(p.lender.scope, 'c1')).toBe(15)
+      const c1 = (await item(p.lender.scope, 'c1').get()).data()!
+      expect(c1.sellerLoanOutId).toBeUndefined()
+      expect(c1.dateOut).toBeUndefined()
+      const split = (await item(p.lender.scope, splitId).get()).data()!
+      expect(split).toMatchObject({
+        name: 'Charger',
+        folderId: 'chargers',
+        quantity: 5,
+        sellerLoanOutId: partnerLoanFlag(id),
+        tradeLoanSourceItemId: 'c1',
+      })
+
+      const [borrowed] = await listTradeLoans(db, p.borrower.scope)
+      expect(borrowed!.lines[0]).toMatchObject({ quantity: 5, priceKobo: 450_000, state: 'out' })
+      expect(borrowed!.outstandingKobo).toBe(2_250_000)
+      const [note] = await notes(p.borrower.scope, 'trade_loan')
+      expect(note!.message).toContain('5 items')
+
+      // The rest can still be lent; more than is left cannot.
+      await expectCode(lend(p, { lines: CHARGERS(16) }), 'ITEM_UNAVAILABLE')
+      await lend(p, { lines: CHARGERS(15) })
+      expect(await qty(p.lender.scope, 'c1')).toBe(0)
+    })
+
+    it('a partial return merges those units back; the full return deletes the split record', async () => {
+      const p = await partners()
+      const { id, splitId } = await lendChargers(p)
+
+      await expectCode(
+        returnTradeLoanItems(db, p.borrower.scope, p.borrower.uid, {
+          loanId: id,
+          lineIds: ['l1'],
+          quantity: 6,
+        }),
+        'INVALID_QUANTITY'
+      )
+
+      // Borrower marks 2 returned: they move to a line and record of their own.
+      await returnTradeLoanItems(db, p.borrower.scope, p.borrower.uid, {
+        loanId: id,
+        lineIds: ['l1'],
+        quantity: 2,
+      })
+      let stored = (await db.collection(TRADE_LOANS).doc(id).get()).data()!
+      expect(
+        stored.lines.map((l: { id: string; quantity: number; state: string }) => [
+          l.id,
+          l.quantity,
+          l.state,
+        ])
+      ).toEqual([
+        ['l1', 3, 'out'],
+        ['l2', 2, 'return_marked'],
+      ])
+      const marked = stored.lines[1].itemId as string
+      expect(await qty(p.lender.scope, splitId)).toBe(3)
+      expect((await item(p.lender.scope, marked).get()).data()).toMatchObject({
+        quantity: 2,
+        sellerLoanOutId: partnerLoanFlag(id),
+      })
+      expect(await qty(p.lender.scope, 'c1')).toBe(15)
+
+      // Lender confirms those 2: merged into c1 and their record removed.
+      await returnTradeLoanItems(db, p.lender.scope, p.lender.uid, { loanId: id, lineIds: ['l2'] })
+      expect(await qty(p.lender.scope, 'c1')).toBe(17)
+      expect((await item(p.lender.scope, marked).get()).exists).toBe(false)
+
+      // Lender confirms 1 more straight from the open line.
+      await returnTradeLoanItems(db, p.lender.scope, p.lender.uid, {
+        loanId: id,
+        lineIds: ['l1'],
+        quantity: 1,
+      })
+      expect(await qty(p.lender.scope, 'c1')).toBe(18)
+      expect(await qty(p.lender.scope, splitId)).toBe(2)
+
+      // The rest: split record deleted, everything back, loan settled.
+      await returnTradeLoanItems(db, p.lender.scope, p.lender.uid, { loanId: id, lineIds: ['l1'] })
+      expect(await qty(p.lender.scope, 'c1')).toBe(20)
+      expect((await item(p.lender.scope, splitId).get()).exists).toBe(false)
+      stored = (await db.collection(TRADE_LOANS).doc(id).get()).data()!
+      expect(stored.status).toBe('settled')
+      const [loan] = await listTradeLoans(db, p.lender.scope)
+      expect(loan!.lines.map((l) => [l.quantity, l.state])).toEqual([
+        [2, 'returned'],
+        [2, 'returned'],
+        [1, 'returned'],
+      ])
+    })
+
+    it('returns go to a record of their own when the original was deleted', async () => {
+      const p = await partners()
+      const { id, splitId } = await lendChargers(p)
+      await item(p.lender.scope, 'c1').delete()
+      await returnTradeLoanItems(db, p.lender.scope, p.lender.uid, { loanId: id, lineIds: ['l1'] })
+      const kept = (await item(p.lender.scope, splitId).get()).data()!
+      expect(kept.quantity).toBe(5)
+      expect(kept.sellerLoanOutId).toBeUndefined()
+      expect(kept.tradeLoanSourceItemId).toBeUndefined()
+    })
+
+    it('paying for 3 of 5 sells those 3; their record closes as sold; 2 stay on loan', async () => {
+      const p = await partners()
+      const { id, splitId } = await lendChargers(p)
+      await startTradeLoanPayment(
+        db,
+        p.borrower.scope,
+        p.borrower.uid,
+        'borrower@example.com',
+        { loanId: id, lineIds: ['l1'], quantity: 3 },
+        payDeps(1_350_000)
+      )
+      const stored = (await db.collection(TRADE_LOANS).doc(id).get()).data()!
+      const paying = stored.lines[1]
+      expect(stored.lines[0]).toMatchObject({ quantity: 2, payReceiptId: null })
+      expect(paying).toMatchObject({ id: 'l2', quantity: 3 })
+      const receipt = (
+        await store(p.lender.scope).collection('receipts').doc(paying.payReceiptId).get()
+      ).data()!
+      expect(receipt).toMatchObject({
+        total: 13_500,
+        itemsCount: 3,
+        hasSerialNumbers: false,
+        items: [{ itemId: paying.itemId, quantity: 3, price: 4_500 }],
+      })
+      expect((await item(p.lender.scope, paying.itemId).get()).data()).toMatchObject({
+        quantity: 3,
+        pendingSaleReceiptId: paying.payReceiptId,
+        sellerLoanOutId: partnerLoanFlag(id),
+      })
+      expect(await qty(p.lender.scope, splitId)).toBe(2)
+
+      const attempts = await db
+        .collection(LINKS_COLLECTION)
+        .doc(paying.payLinkId)
+        .collection('attempts')
+        .get()
+      const res = await handleLinkCharge(db, attempts.docs[0]!.id, {
+        paystack: paystackMock(1_350_000),
+        enabled: true,
+      })
+      expect(res.outcome).toBe('applied')
+
+      const sold = (await item(p.lender.scope, paying.itemId).get()).data()!
+      expect(sold.quantity).toBe(0)
+      expect(sold.dateOut).toBeTruthy()
+      expect(sold.sellerLoanOutId).toBeUndefined()
+      expect(await qty(p.lender.scope, 'c1')).toBe(15)
+      expect((await item(p.lender.scope, splitId).get()).data()!.sellerLoanOutId).toBe(
+        partnerLoanFlag(id)
+      )
+      expect(await notes(p.lender.scope, 'payment_link_problem')).toHaveLength(0)
+
+      const [loan] = await listTradeLoans(db, p.lender.scope)
+      expect(loan!.lines.map((l) => [l.quantity, l.state])).toEqual([
+        [2, 'out'],
+        [3, 'paid'],
+      ])
+      expect(loan!.outstandingKobo).toBe(900_000)
+      const paidNote = (await notes(p.lender.scope, 'trade_loan')).find(
+        (n) => n.title === 'Loan payment received'
+      )
+      expect(paidNote!.message).toContain('₦13,500.00 for 3 items')
     })
   })
 
