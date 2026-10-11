@@ -75,6 +75,8 @@
         :add-on-prices="addOnPriceLabels"
         :add-on-store-options="addOnStoreOptions"
         :add-on-busy="addOnBusy"
+        :manage-on-web="Boolean(billingOnWebUrl)"
+        @manage-on-web="openWebBilling"
         @upgrade="handleUpgradeSubscription"
         @cancel="openCancelConfirm"
         @qa-set-plan="handleQaSetPlan"
@@ -474,6 +476,8 @@ import { scrollDashboardToElement } from '~/utils/native-dashboard-scroll'
 import type { ExperienceMode } from '~/types/business-experience'
 import { normalizeExperienceMode } from '~/types/business-experience'
 import { getEffectiveApiBase } from '~/utils/capacitor-api-base'
+import { isCapacitorNative } from '~/utils/capacitor-env'
+import { webBillingUrl } from '~/utils/web-billing'
 import TotpConfirmModal from '~/components/security/TotpConfirmModal.vue'
 import { useTotpConfirmModal } from '~/composables/useTotpConfirmModal'
 import { resolveTotpForSensitiveAction } from '~/utils/security-api-errors'
@@ -774,7 +778,18 @@ const { trackEvent } = useProductAnalytics()
 const { recordMilestone } = useFunnelAnalytics()
 const { markBackupExported } = useBackupPreferences()
 
+const billingOnWebUrl = computed(() =>
+  import.meta.client && isCapacitorNative()
+    ? webBillingUrl(String(useRuntimeConfig().public.appOrigin || ''))
+    : null
+)
+
+function openWebBilling() {
+  if (billingOnWebUrl.value) window.open(billingOnWebUrl.value, '_blank', 'noopener,noreferrer')
+}
+
 const handleUpgradeSubscription = async () => {
+  if (billingOnWebUrl.value) return openWebBilling()
   if (!canEditSettings.value) {
     toast.error('Only super admins can change subscription')
     return
@@ -898,6 +913,7 @@ function apiErrorMessage(err: unknown, fallback: string): string {
 }
 
 async function handleBuyAddOn(kind: SubscriptionAddOnKind, storeId?: string) {
+  if (billingOnWebUrl.value) return openWebBilling()
   if (!addOnsAvailable.value || !currentUser.value) return
   totpModalTitle.value = kind === 'store' ? 'Add a store' : 'Add a staff seat'
   totpModalDescription.value = `Enter your authenticator code to continue to Paystack. ${addOnPriceLabels.value[kind]} / month, billed separately from your plan.`

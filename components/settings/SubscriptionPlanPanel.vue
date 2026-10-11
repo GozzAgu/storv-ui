@@ -11,7 +11,21 @@
         <p v-if="subscriptionRenewalLabel" class="s-plan__meta">{{ subscriptionRenewalLabel }}</p>
       </div>
 
-      <section v-if="changePlanOptions.length > 0" class="s-plan__section" aria-labelledby="plan-switch-heading">
+      <section v-if="manageOnWeb" class="s-plan__section" aria-labelledby="plan-web-heading">
+        <h3 id="plan-web-heading" class="s-plan__heading">Change plan</h3>
+        <p class="s-plan__meta s-plan__lede">
+          Plan changes and add-ons are handled on the Storvv website. Your plan updates here once
+          you're done.
+        </p>
+        <div>
+          <SButton variant="secondary" :disabled="disabled" @click="emit('manage-on-web')">
+            <template #leading><ExternalLink :size="16" :stroke-width="2" aria-hidden="true" /></template>
+            Open Storvv website
+          </SButton>
+        </div>
+      </section>
+
+      <section v-else-if="changePlanOptions.length > 0" class="s-plan__section" aria-labelledby="plan-switch-heading">
         <h3 id="plan-switch-heading" class="s-plan__heading">Switch plan</h3>
         <div class="s-plan__switch">
           <SSelect
@@ -42,13 +56,17 @@
         <p v-else-if="pricingLoading" class="s-plan__meta">Loading price…</p>
       </section>
 
-      <section v-if="addOnsAvailable" class="s-plan__section" aria-labelledby="plan-addons-heading">
+      <section
+        v-if="addOnsAvailable && (!manageOnWeb || addOnRows.length)"
+        class="s-plan__section"
+        aria-labelledby="plan-addons-heading"
+      >
         <h3 id="plan-addons-heading" class="s-plan__heading">Add-ons</h3>
-        <p class="s-plan__meta s-plan__lede">
+        <p v-if="!manageOnWeb" class="s-plan__meta s-plan__lede">
           Enterprise includes {{ enterpriseLimits.maxStores }} stores with
           {{ enterpriseLimits.maxStaffPerStore }} staff each. Grow past that anytime, billed monthly.
         </p>
-        <div class="s-plan__addons">
+        <div v-if="!manageOnWeb" class="s-plan__addons">
           <div class="s-plan__addon">
             <div>
               <p class="s-plan__addon-title">Extra store</p>
@@ -186,7 +204,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { ChevronRight, Store, UserPlus } from '@lucide/vue'
+import { ChevronRight, ExternalLink, Store, UserPlus } from '@lucide/vue'
 import SBadge from '~/components/s/SBadge.vue'
 import SButton from '~/components/s/SButton.vue'
 import SCard from '~/components/s/SCard.vue'
@@ -238,6 +256,8 @@ const props = defineProps<{
   addOnStoreOptions?: Array<{ value: string; label: string }>
   /** 'store' | 'staff' while starting checkout, or an add-on id while removing it. */
   addOnBusy?: string | null
+  /** iOS app: plan changes and add-on purchases happen on the website, not in the app. */
+  manageOnWeb?: boolean
 }>()
 
 const addOnRows = computed(() => props.addOns ?? [])
@@ -271,6 +291,7 @@ const emit = defineEmits<{
   'update:selectedBillingCycle': [SubscriptionBillingCycle]
   'update:selectedUpgradePlan': [SubscriptionPlan | '']
   'qa-set-plan': [SubscriptionPlan]
+  'manage-on-web': []
 }>()
 
 const { formatCurrency } = usePreferences()
