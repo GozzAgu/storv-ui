@@ -34,18 +34,33 @@ export function useAuthenticatedFetch() {
     options: Parameters<typeof $fetch>[1] = {}
   ): Promise<T> {
     const headers = await getAuthHeaders()
+    let result: unknown
     try {
-      return (await $fetch(resolveApiPath(path) as string, {
+      result = await $fetch(resolveApiPath(path) as string, {
         ...options,
         headers: {
           ...(options.headers as Record<string, string> | undefined),
           ...headers,
         },
-      })) as T
+      })
     } catch (error) {
       return handleSecurityError(error)
     }
+    // A host without this route serves the app shell (HTML, status 200) instead of JSON.
+    if (!options.responseType && isHtmlDocument(result)) {
+      throw Object.assign(new Error('Endpoint not available'), {
+        statusCode: 404,
+        data: {
+          message: 'This feature is not available on the server yet. Please try again later.',
+        },
+      })
+    }
+    return result as T
   }
 
   return { getAuthHeaders, authFetch, resolveApiPath }
+}
+
+function isHtmlDocument(value: unknown): boolean {
+  return typeof value === 'string' && /^\s*<(!doctype|html)/i.test(value)
 }

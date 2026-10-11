@@ -400,12 +400,12 @@
 
 @media (max-width: 1023px) {
   body:has(.s-bottomnav) .s-assistant-panel {
-    bottom: calc(var(--s-bottomnav-h) + var(--s-space-1) + env(safe-area-inset-bottom, 0px));
+    bottom: calc(var(--s-bottomnav-h) + var(--s-bottomnav-offset) + var(--s-space-1));
     height: min(
       576px,
       calc(
         100dvh - var(--s-bottomnav-h) - var(--s-space-3) - env(safe-area-inset-top, 0px) -
-          env(safe-area-inset-bottom, 0px)
+          var(--s-bottomnav-offset)
       )
     );
   }
@@ -797,7 +797,7 @@
 
 @media (max-width: 1023px) {
   body:has(.s-bottomnav) .s-toast-stack {
-    bottom: calc(var(--s-bottomnav-h) + var(--s-space-1) + env(safe-area-inset-bottom, 0px));
+    bottom: calc(var(--s-bottomnav-h) + var(--s-bottomnav-offset) + var(--s-space-1));
   }
 }
 
