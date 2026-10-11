@@ -79,11 +79,6 @@ html:has(.s-shell.ds-root) body,
   }
 }
 
-html.dark .s-bottomnav {
-  --s-bottomnav-glass: rgb(16 21 37 / 0.58);
-  --s-bottomnav-panel: rgb(14 19 34 / 0.78);
-}
-
 /* ── Accessibility: solid surfaces when the user asks for less transparency ── */
 
 @media (prefers-reduced-transparency: reduce) {

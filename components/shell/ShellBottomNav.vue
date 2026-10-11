@@ -38,7 +38,21 @@
           </NuxtLink>
         </div>
 
-        <nav v-else key="bar" class="s-bottomnav__bar" aria-label="Primary">
+        <nav
+          v-else
+          key="bar"
+          class="s-bottomnav__bar"
+          aria-label="Primary"
+          :style="{
+            '--s-bottomnav-count': String(items.length),
+            '--s-bottomnav-index': String(Math.max(activeIndex, 0)),
+          }"
+        >
+          <span
+            class="s-bottomnav__lens"
+            :class="{ 's-bottomnav__lens--hidden': activeIndex < 0 }"
+            aria-hidden="true"
+          />
           <NuxtLink
             v-for="item in items"
             :key="item.name"
@@ -46,7 +60,6 @@
             class="s-bottomnav__item"
             :class="{ 's-bottomnav__item--active': isActive(item) }"
             :aria-current="isActive(item) ? 'page' : undefined"
-            :aria-label="item.label"
           >
             <component
               :is="DASHBOARD_NAV_ICONS[item.iconKey]"
@@ -54,6 +67,7 @@
               :stroke-width="isActive(item) ? 2 : 1.75"
               aria-hidden="true"
             />
+            <span class="s-bottomnav__label">{{ item.label }}</span>
           </NuxtLink>
         </nav>
       </Transition>
@@ -61,14 +75,16 @@
       <button
         type="button"
         class="s-bottomnav__toggle"
-        :class="{ 's-bottomnav__toggle--dot': !expanded && moreActive }"
+        :class="{
+          's-bottomnav__toggle--open': expanded,
+          's-bottomnav__toggle--dot': !expanded && moreActive,
+        }"
         :aria-label="expanded ? 'Close more destinations' : 'More destinations'"
         :aria-expanded="expanded"
         aria-controls="shell-bottomnav-more"
         @click="toggle"
       >
-        <X v-if="expanded" :size="22" :stroke-width="2" aria-hidden="true" />
-        <Plus v-else :size="22" :stroke-width="2" aria-hidden="true" />
+        <Plus class="s-bottomnav__toggle-icon" :size="22" :stroke-width="2" aria-hidden="true" />
       </button>
     </div>
   </div>
@@ -77,13 +93,14 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { Plus, X } from '@lucide/vue'
+import { Plus } from '@lucide/vue'
 import { useHaptics } from '~/composables/useHaptics'
 import { DASHBOARD_NAV_ICONS } from '~/utils/dashboard-nav-icons'
 import type { ShellNavItem } from '~/utils/shell-nav'
 
 /**
- * Phone tab bar: an icon-only glass capsule for the main destinations plus a round button
+ * Phone tab bar: a glass capsule for the main destinations (a lens slides behind the current one)
+ * plus a round button
  * that expands into a grid of every other destination.
  */
 const props = defineProps<{
@@ -96,7 +113,8 @@ const haptics = useHaptics()
 const route = useRoute()
 const expanded = ref(false)
 
-const moreActive = computed(() => !props.items.some((item) => props.isActive(item)))
+const activeIndex = computed(() => props.items.findIndex((item) => props.isActive(item)))
+const moreActive = computed(() => activeIndex.value < 0)
 
 function toggle() {
   expanded.value = !expanded.value

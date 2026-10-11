@@ -135,7 +135,7 @@
   --s-rail-w-collapsed: 64px;
   --s-topbar-h: 56px;
   /* Phone tab bar: capsule height, and its distance from the screen edge (clear of the home indicator) */
-  --s-bottomnav-h: calc(var(--s-touch) + var(--s-space-1-5));
+  --s-bottomnav-h: calc(var(--s-touch) + var(--s-space-2));
   --s-bottomnav-offset: max(var(--s-space-2), env(safe-area-inset-bottom, 0px));
   --s-content-max: 1280px;
 
