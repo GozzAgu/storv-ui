@@ -22,7 +22,7 @@ import {
   isLegacyPaymentLinkRoute,
   legacyPaymentLinksEnabled,
 } from '~/server/utils/legacy-payment-links'
-import { assertRateLimit, trustedClientIp } from '~/server/utils/rate-limit'
+import { assertRateLimit, kvConfigured, trustedClientIp } from '~/server/utils/rate-limit'
 
 function fakeEvent(headers: Record<string, string>, remoteAddress = '10.0.0.9'): H3Event {
   return {
@@ -184,6 +184,15 @@ describe('rate limit fail-closed', () => {
         requireDistributed: true,
       })
     ).resolves.toBeUndefined()
+  })
+
+  it('accepts either the KV or the Upstash variable names', () => {
+    expect(kvConfigured({})).toBe(false)
+    expect(kvConfigured({ KV_REST_API_URL: 'https://k', KV_REST_API_TOKEN: 't' })).toBe(true)
+    expect(
+      kvConfigured({ UPSTASH_REDIS_REST_URL: 'https://u', UPSTASH_REDIS_REST_TOKEN: 't' })
+    ).toBe(true)
+    expect(kvConfigured({ UPSTASH_REDIS_REST_URL: 'https://u' })).toBe(false)
   })
 
   it('returns 429 once the memory limit is hit', async () => {

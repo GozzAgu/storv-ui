@@ -1,14 +1,14 @@
+import { kvCredentials } from './rate-limit-env'
+
 /**
- * Vercel KV-backed rate limiting. Enable by linking a KV store and setting:
- * KV_REST_API_URL, KV_REST_API_TOKEN (auto-injected on Vercel).
+ * Redis-backed rate limiting over the Upstash REST API. Enable by connecting Upstash for Redis
+ * on Vercel, which sets KV_REST_API_URL/KV_REST_API_TOKEN or UPSTASH_REDIS_REST_URL/_TOKEN.
  */
 export const kv = {
   async checkLimit(key: string, limit: number, windowMs: number): Promise<boolean> {
     const { createClient } = await import('@vercel/kv')
-    const client = createClient({
-      url: process.env.KV_REST_API_URL!,
-      token: process.env.KV_REST_API_TOKEN!,
-    })
+    const { url, token } = kvCredentials()!
+    const client = createClient({ url, token })
 
     const bucket = Math.floor(Date.now() / windowMs)
     const redisKey = `ratelimit:${key}:${bucket}`

@@ -1,4 +1,5 @@
 import { createError, getHeader, type H3Event } from 'h3'
+import { kvCredentials } from './rate-limit-env'
 
 export interface RateLimitOptions {
   /** Logical scope, e.g. `receipts:send-email` */
@@ -63,7 +64,7 @@ async function assertRateLimitKv(key: string, opts: RateLimitOptions): Promise<v
 }
 
 export function kvConfigured(env: NodeJS.ProcessEnv = process.env): boolean {
-  return Boolean(env.KV_REST_API_URL && env.KV_REST_API_TOKEN)
+  return kvCredentials(env) !== null
 }
 
 function isProduction(env: NodeJS.ProcessEnv = process.env): boolean {
