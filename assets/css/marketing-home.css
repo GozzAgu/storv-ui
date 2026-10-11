@@ -21,8 +21,14 @@
   --mkh-ring-glow: rgb(142 162 255 / 0.4);
   --mkh-serif-ink: #b3c1ff;
   --mkh-grain-opacity: 0.05;
-  --mkh-card-shadow: 0 1px 2px rgb(16 24 40 / 0.06), 0 12px 32px -8px rgb(16 24 40 / 0.16);
+  --mkh-card-shadow: 0 16px 40px -16px rgb(30 52 140 / 0.22);
   --mkh-stage-shadow: 0 2px 4px rgb(16 24 40 / 0.04), 0 40px 80px -24px rgb(16 24 40 / 0.28);
+  --mkh-card-bg: rgb(255 255 255 / 0.78);
+  --mkh-bezel: linear-gradient(180deg, rgb(255 255 255 / 0.75), rgb(234 240 255 / 0.4));
+  --mkh-bezel-edge: rgb(142 162 255 / 0.32);
+  --mkh-bezel-lit: rgb(61 99 242 / 0.7);
+  --mkh-stage-glow: rgb(142 162 255 / 0.45);
+  --mkh-stage-glow-2: rgb(61 99 242 / 0.12);
 }
 
 html.dark .mk {
@@ -41,8 +47,14 @@ html.dark .mk {
   --mkh-ring-glow: rgb(61 99 242 / 0.3);
   --mkh-serif-ink: #8ea2ff;
   --mkh-grain-opacity: 0.07;
-  --mkh-card-shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 16px 40px -8px rgb(0 0 0 / 0.6);
+  --mkh-card-shadow: 0 16px 40px -16px rgb(0 0 0 / 0.6);
   --mkh-stage-shadow: 0 2px 4px rgb(0 0 0 / 0.3), 0 40px 100px -24px rgb(0 0 0 / 0.75);
+  --mkh-card-bg: rgb(16 24 52 / 0.72);
+  --mkh-bezel: linear-gradient(180deg, rgb(142 162 255 / 0.1), rgb(61 99 242 / 0.03));
+  --mkh-bezel-edge: rgb(142 162 255 / 0.18);
+  --mkh-bezel-lit: rgb(142 162 255 / 0.9);
+  --mkh-stage-glow: rgb(61 99 242 / 0.35);
+  --mkh-stage-glow-2: rgb(29 52 150 / 0.15);
 }
 
 /* ── Hero ───────────────────────────────────────────────────────────────── */
@@ -271,6 +283,26 @@ html.dark .mk {
   perspective: 1800px;
 }
 
+/* Logo-blue light pooling behind the product */
+.mkh__stage-wrap::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: min(1320px, 110%);
+  height: 80%;
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    var(--mkh-stage-glow),
+    var(--mkh-stage-glow-2) 55%,
+    transparent
+  );
+  filter: blur(40px);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
 .mkh__stage {
   --tilt: 1;
   --px: 0;
@@ -281,14 +313,55 @@ html.dark .mk {
   margin-inline: auto;
 }
 
+/* Frosted glass bezel with a lit top edge; the product fades out toward the bottom */
 .mkh__screen {
+  position: relative;
+  padding: clamp(6px, 0.8vw, 10px);
+  border: 1px solid var(--mkh-bezel-edge);
+  border-radius: clamp(16px, 1.8vw, 24px);
+  background: var(--mkh-bezel);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
   transform-origin: 50% 0;
   transform: rotateX(calc(var(--tilt) * 14deg)) scale(calc(1 - var(--tilt) * 0.05));
   will-change: transform;
+  mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
+}
+
+.mkh__screen::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 15%;
+  right: 15%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--mkh-bezel-lit), transparent);
 }
 
 .mkh__screen .mk-frame {
-  box-shadow: var(--mkh-stage-shadow);
+  border-color: var(--mkh-bezel-edge);
+  border-radius: clamp(10px, 1.1vw, 16px);
+  box-shadow: none;
+}
+
+.mkh__screen .mk-frame__bar {
+  height: 32px;
+  border-bottom-color: var(--mkh-bezel-edge);
+  background: var(--s-surface);
+}
+
+.mkh__screen .mk-frame__dots span {
+  width: 8px;
+  height: 8px;
+  background: color-mix(in srgb, var(--s-text) 14%, transparent);
+}
+
+.mkh__screen .mk-frame__url {
+  max-width: 260px;
+  border-radius: var(--s-radius-full);
+  background: var(--s-surface-2);
+  font-size: 0.6875rem;
 }
 
 .mkh__screen .mk-frame__img {
@@ -305,11 +378,11 @@ html.dark .mk {
   align-items: center;
   gap: var(--s-space-1-5);
   padding: var(--s-space-1-5) var(--s-space-2);
-  border: 1px solid var(--s-glass-hairline, var(--s-border));
+  border: 1px solid var(--mkh-bezel-edge);
   border-radius: var(--s-radius-xl);
-  background: color-mix(in srgb, var(--s-surface) 86%, transparent);
-  backdrop-filter: blur(16px) saturate(1.4);
-  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  background: var(--mkh-card-bg);
+  backdrop-filter: blur(20px) saturate(1.6);
+  -webkit-backdrop-filter: blur(20px) saturate(1.6);
   box-shadow: var(--mkh-card-shadow);
   translate: calc(var(--px) * var(--d) * 14px) calc(var(--py) * var(--d) * 10px);
   animation: mkh-float 7s ease-in-out infinite;
@@ -360,19 +433,11 @@ html.dark .mk {
   border-radius: var(--s-radius);
 }
 
-.mkh__card-icon--success {
-  background: var(--s-success-soft);
-  color: var(--s-success);
-}
-
-.mkh__card-icon--accent {
-  background: var(--s-accent-soft);
-  color: var(--s-accent-soft-text);
-}
-
+.mkh__card-icon--success,
+.mkh__card-icon--accent,
 .mkh__card-icon--warning {
-  background: var(--s-warning-soft);
-  color: var(--s-warning);
+  background: var(--s-accent-soft);
+  color: var(--s-accent);
 }
 
 .mkh__card-body {
