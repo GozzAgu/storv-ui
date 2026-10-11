@@ -171,11 +171,23 @@ export async function connectPayout(
       })
       subaccountCode = String(created?.subaccount_code || '')
     }
-  } catch {
+  } catch (err) {
+    const reason = (err instanceof Error ? err.message : '')
+      .replace(/^Paystack:\s*/i, '')
+      .replace(/\.+$/, '')
+      .slice(0, 160)
+    console.warn(
+      JSON.stringify({
+        tag: 'payments-subaccount-failed',
+        bankCode: input.bankCode,
+        update: Boolean(existingCode),
+        reason: reason || 'unknown',
+      })
+    )
     throw new PaymentServiceError(
       'PAYSTACK_UNAVAILABLE',
       502,
-      'Paystack could not save this payout account. Nothing was changed.'
+      `Paystack could not save this payout account${reason ? `: ${reason}` : ''}. Nothing was changed.`
     )
   }
   if (!subaccountCode) {
