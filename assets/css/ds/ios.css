@@ -1,19 +1,17 @@
 /*
  * iOS layer for phones (the Capacitor iOS app and mobile web). Restyles the shared design
- * system to the Storvv iOS spec: blue-white canvas, hairline cards, a solid top bar, a floating
+ * system to the Storvv iOS spec: glow canvas, glass cards, a solid top bar, a floating
  * tab bar, bottom sheets with a grab handle, 44pt controls and large titles.
  * Tablet and desktop layouts are untouched.
  */
 
 @media (max-width: 639px) {
   :root {
-    --s-bg: #f5f7ff;
+    --s-bg: #eef2fa;
     --s-surface-2: #eef1fa;
     --s-surface-hover: #e7ebf8;
     --s-border: rgb(15 23 42 / 0.08);
     --s-border-strong: rgb(15 23 42 / 0.14);
-    --s-field-bg: #eef1fa;
-    --s-field-bg-hover: #e7ebf8;
 
     --s-btn-h: var(--s-touch);
     --s-btn-h-lg: calc(var(--s-touch) + var(--s-space-half));
@@ -25,15 +23,12 @@
   }
 
   html.dark {
-    --s-bg: #0f1221;
-    --s-surface: #171b2e;
-    --s-surface-2: #1f2440;
-    --s-surface-hover: #252b4a;
+    --s-bg: #04060b;
+    --s-surface: #0a0e18;
+    --s-surface-2: #0f1422;
+    --s-surface-hover: #151b2c;
     --s-border: rgb(255 255 255 / 0.08);
     --s-border-strong: rgb(255 255 255 / 0.14);
-    --s-field-bg: #1f2440;
-    --s-field-bg-hover: #252b4a;
-    --s-field-bg-focus: #171b2e;
 
     --s-ios-hairline: rgb(255 255 255 / 0.08);
     --s-ios-float-shadow: 0 12px 32px -8px rgb(0 0 0 / 0.6), 0 2px 6px rgb(0 0 0 / 0.3);

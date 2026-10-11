@@ -77,8 +77,8 @@ class AppBridgeViewController: CAPBridgeViewController {
     override func capacitorDidLoad() {
         let canvas = UIColor { traits in
             traits.userInterfaceStyle == .dark
-                ? UIColor(red: 15 / 255, green: 18 / 255, blue: 33 / 255, alpha: 1)
-                : UIColor(red: 245 / 255, green: 247 / 255, blue: 1, alpha: 1)
+                ? UIColor(red: 4 / 255, green: 6 / 255, blue: 11 / 255, alpha: 1)
+                : UIColor(red: 238 / 255, green: 242 / 255, blue: 250 / 255, alpha: 1)
         }
         view.backgroundColor = canvas
         webView?.backgroundColor = canvas

@@ -1,0 +1,121 @@
+/*
+ * Glass layer (web and iOS). A fixed blue/violet glow sits behind the page; surfaces are
+ * translucent with a light top edge. Only chrome and overlays (sidebar, top bar, menus, dialogs,
+ * toasts) blur what is behind them: cards sit on the smooth glow, where a blur looks the same and
+ * would only cost scrolling performance on phones. Loaded last so it wins over component rules.
+ */
+
+/* ── Canvas ────────────────────────────────────────────────────────────── */
+
+html,
+html.capacitor-native {
+  background-color: var(--s-bg);
+}
+
+body,
+html:has(.s-shell.ds-root) body,
+.ds-root,
+.s-shell {
+  background: transparent;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: var(--s-canvas-glow);
+  pointer-events: none;
+}
+
+/* ── Resting surfaces: translucent, no blur ────────────────────────────── */
+
+.s-card,
+.s-stat {
+  background: var(--s-glass);
+  box-shadow: var(--s-glass-shadow);
+}
+
+.s-btn--secondary {
+  background: var(--s-glass-strong);
+  box-shadow: var(--s-glass-highlight), 0 0 0 1px var(--s-glass-hairline), var(--s-shadow-sm);
+}
+
+/* ── Primary buttons: glossy logo blue ─────────────────────────────────── */
+
+.s-btn--primary {
+  background: var(--s-btn-primary-gloss);
+  box-shadow: var(--s-btn-primary-glow);
+}
+
+.s-btn--primary:hover:not(:disabled, [aria-disabled='true']) {
+  background: var(--s-btn-primary-gloss);
+  filter: brightness(1.06);
+}
+
+.s-btn--primary:active:not(:disabled) {
+  background: var(--s-btn-primary-active);
+  filter: none;
+}
+
+/* ── Frosted chrome and overlays ───────────────────────────────────────── */
+
+.s-sidebar,
+.s-popover,
+.s-dialog,
+.s-toast {
+  background: var(--s-glass-strong);
+  -webkit-backdrop-filter: var(--s-glass-frost);
+  backdrop-filter: var(--s-glass-frost);
+}
+
+.s-sidebar {
+  border-right-color: var(--s-glass-hairline);
+  box-shadow: var(--s-glass-highlight);
+}
+
+.s-popover,
+.s-toast {
+  border-color: var(--s-glass-hairline);
+  box-shadow: var(--s-glass-shadow-float);
+}
+
+.s-dialog {
+  border-color: var(--s-glass-hairline);
+  box-shadow: var(--s-glass-shadow-float);
+}
+
+.s-dialog__scrim {
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+/* Phones keep a solid top bar (a blurred one samples the web view edge under the status bar). */
+@media (min-width: 640px) {
+  .s-topbar {
+    border-bottom-color: var(--s-glass-hairline);
+    background: var(--s-glass-strong);
+    -webkit-backdrop-filter: var(--s-glass-frost);
+    backdrop-filter: var(--s-glass-frost);
+  }
+}
+
+html.dark .s-bottomnav {
+  --s-bottomnav-glass: rgb(16 21 37 / 0.58);
+  --s-bottomnav-panel: rgb(14 19 34 / 0.78);
+}
+
+/* ── Accessibility: solid surfaces when the user asks for less transparency ── */
+
+@media (prefers-reduced-transparency: reduce) {
+  :root,
+  html.dark {
+    --s-glass: var(--s-surface);
+    --s-glass-strong: var(--s-surface);
+    --s-glass-frost: none;
+  }
+
+  body::before {
+    display: none;
+  }
+}

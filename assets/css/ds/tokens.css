@@ -6,7 +6,7 @@
 
 :root {
   /* Color: neutrals */
-  --s-bg: #f7f8fa;
+  --s-bg: #eef2fa;
   --s-surface: #ffffff;
   --s-surface-2: #f2f4f7;
   --s-surface-hover: #eef1f5;
@@ -37,8 +37,8 @@
   --s-info-soft: #eff8ff;
 
   /* Fields: filled and borderless at rest; the border only appears on focus or error */
-  --s-field-bg: #f2f4f7;
-  --s-field-bg-hover: #eaecf0;
+  --s-field-bg: rgb(15 23 42 / 0.045);
+  --s-field-bg-hover: rgb(15 23 42 / 0.07);
   --s-field-bg-focus: #ffffff;
 
   /* Brand panel (auth) */
@@ -54,6 +54,23 @@
   --s-btn-primary-hover: var(--s-accent-hover);
   --s-btn-primary-active: var(--s-accent-active);
   --s-on-btn-primary: #ffffff;
+  --s-btn-primary-gloss: linear-gradient(180deg, #5f80ff 0%, #3d63f2 52%, #3156e0 100%);
+  --s-btn-primary-glow: inset 0 1px 0 rgb(255 255 255 / 0.28), 0 1px 2px rgb(30 50 140 / 0.25),
+    0 6px 16px -6px rgb(61 99 242 / 0.55);
+
+  /* Glass (glass.css): a soft blue/violet glow behind translucent, frosted surfaces */
+  --s-canvas-glow: radial-gradient(55% 45% at 0% 0%, rgb(61 99 242 / 0.16) 0%, rgb(61 99 242 / 0) 70%),
+    radial-gradient(45% 40% at 100% 8%, rgb(124 92 255 / 0.12) 0%, rgb(124 92 255 / 0) 70%),
+    radial-gradient(55% 45% at 85% 100%, rgb(34 184 240 / 0.1) 0%, rgb(34 184 240 / 0) 70%);
+  --s-glass: rgb(255 255 255 / 0.62);
+  --s-glass-strong: rgb(255 255 255 / 0.74);
+  --s-glass-hairline: rgb(15 23 42 / 0.07);
+  --s-glass-highlight: inset 0 1px 0 rgb(255 255 255 / 0.9);
+  --s-glass-frost: saturate(1.8) blur(24px);
+  --s-glass-shadow: var(--s-glass-highlight), 0 0 0 1px var(--s-glass-hairline),
+    0 1px 2px rgb(15 23 42 / 0.04), 0 10px 28px -14px rgb(30 45 100 / 0.22);
+  --s-glass-shadow-float: var(--s-glass-highlight), 0 0 0 1px var(--s-glass-hairline),
+    0 24px 56px -16px rgb(20 30 70 / 0.28), 0 6px 14px -6px rgb(20 30 70 / 0.12);
 
   /* Focus */
   --s-focus-ring: 0 0 0 3px rgb(61 99 242 / 0.28);
@@ -137,12 +154,26 @@
 }
 
 html.dark {
-  --s-bg: #0b0d12;
-  --s-surface: #12151c;
-  --s-surface-2: #181c25;
-  --s-surface-hover: #1d2230;
-  --s-border: #242a37;
-  --s-border-strong: #313848;
+  --s-bg: #04060b;
+  --s-surface: #0a0e18;
+  --s-surface-2: #0f1422;
+  --s-surface-hover: #151b2c;
+  --s-border: #1a2033;
+  --s-border-strong: #262e45;
+
+  --s-canvas-glow: radial-gradient(55% 45% at 0% 0%, rgb(61 99 242 / 0.22) 0%, rgb(61 99 242 / 0) 70%),
+    radial-gradient(45% 40% at 100% 8%, rgb(124 92 255 / 0.13) 0%, rgb(124 92 255 / 0) 70%),
+    radial-gradient(55% 45% at 85% 100%, rgb(34 184 240 / 0.07) 0%, rgb(34 184 240 / 0) 70%);
+  --s-glass: rgb(16 21 37 / 0.58);
+  --s-glass-strong: rgb(14 19 34 / 0.76);
+  --s-glass-hairline: rgb(255 255 255 / 0.07);
+  --s-glass-highlight: inset 0 1px 0 rgb(255 255 255 / 0.06);
+  --s-glass-shadow: var(--s-glass-highlight), 0 0 0 1px var(--s-glass-hairline),
+    0 10px 28px -14px rgb(0 0 0 / 0.6);
+  --s-glass-shadow-float: var(--s-glass-highlight), 0 0 0 1px var(--s-glass-hairline),
+    0 24px 56px -16px rgb(0 0 0 / 0.7), 0 6px 14px -6px rgb(0 0 0 / 0.4);
+  --s-btn-primary-glow: inset 0 1px 0 rgb(255 255 255 / 0.18), 0 1px 2px rgb(0 0 0 / 0.4),
+    0 6px 18px -6px rgb(61 99 242 / 0.6);
 
   --s-text: #f2f4f7;
   --s-text-2: #b4bccb;
@@ -170,9 +201,9 @@ html.dark {
 
   --s-focus-ring: 0 0 0 3px rgb(142 162 255 / 0.35);
 
-  --s-field-bg: #1b1f2a;
-  --s-field-bg-hover: #212634;
-  --s-field-bg-focus: #12151c;
+  --s-field-bg: rgb(255 255 255 / 0.05);
+  --s-field-bg-hover: rgb(255 255 255 / 0.08);
+  --s-field-bg-focus: #0a0e18;
 
   --s-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3);
   --s-shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.45);
