@@ -1,20 +1,72 @@
 <template>
-  <section
-    id="product"
-    ref="sectionRef"
-    class="mk-section mk-section--alt mkp"
-    aria-labelledby="mk-platform-title"
-  >
-    <div class="mk-container mkp__grid">
-      <div class="mkp__copy">
-        <MkSectionHead
-          title-id="mk-platform-title"
-          align="start"
-          eyebrow="The platform"
-          title="Everything the counter needs."
-          accent="Nothing it doesn't."
-          lede="Ring up one sale and Storvv does the rest. Stock, the customer's balance, the receipt and today's numbers all update on their own."
-        />
+  <section id="product" ref="sectionRef" class="mk-section mkp" aria-labelledby="mk-platform-title">
+    <div class="mk-container">
+      <div class="mkp__panel">
+        <div class="mkp__grid">
+          <div class="mkp__copy">
+            <MkSectionHead
+              title-id="mk-platform-title"
+              align="start"
+              eyebrow="The platform"
+              title="Everything the counter needs."
+              accent="Nothing it doesn't."
+              lede="Ring up one sale and Storvv does the rest. Stock, the customer's balance, the receipt and today's numbers all update on their own."
+            />
+
+            <NuxtLink to="/features" class="mkp__link">
+              See every feature
+              <ArrowRight :size="16" aria-hidden="true" />
+            </NuxtLink>
+          </div>
+
+          <div class="mkp__stage mk-reveal" aria-hidden="true">
+            <span class="mkp__orbit" />
+            <svg
+              class="mkp__wires"
+              viewBox="0 0 560 480"
+              preserveAspectRatio="none"
+              focusable="false"
+            >
+              <path
+                v-for="(node, i) in nodes"
+                :key="node.id"
+                class="mkp__wire"
+                :class="{ 'is-lit': phase > i }"
+                :d="node.wire"
+              />
+            </svg>
+
+            <div class="mkp__sale" :class="{ 'is-pop': phase === 0 }">
+              <span class="mkp__sale-head">
+                <span class="mkp__sale-icon"><ReceiptText :size="14" /></span>
+                New sale
+                <span class="mkp__chip">Paid</span>
+              </span>
+              <span class="mkh__stack">
+                <Transition name="mkh-swap">
+                  <span :key="sale.amount" class="mkp__sale-body">
+                    <span class="mkp__sale-amount">{{ sale.amount }}</span>
+                    <span class="mkp__sale-item">{{ sale.item }}</span>
+                  </span>
+                </Transition>
+              </span>
+            </div>
+
+            <div
+              v-for="(node, i) in nodes"
+              :key="node.id"
+              class="mkp__node"
+              :class="[`mkp__node--${node.id}`, { 'is-lit': phase > i }]"
+            >
+              <span class="mkp__node-icon"><component :is="node.icon" :size="15" /></span>
+              <span class="mkp__node-body">
+                <span class="mkp__node-label">{{ node.label }}</span>
+                <span class="mkp__node-value">{{ node.value(sale) }}</span>
+              </span>
+              <Check :size="14" class="mkp__node-check" />
+            </div>
+          </div>
+        </div>
 
         <ul class="mkp__questions">
           <li
@@ -24,62 +76,16 @@
             :class="{ 'is-active': litIndex === i }"
             :style="{ '--i': i }"
           >
-            <span class="mkp__q-icon"
-              ><component :is="node.icon" :size="16" aria-hidden="true"
-            /></span>
-            <span>
-              <span class="mkp__q-title">{{ node.q }}</span>
-              <span class="mkp__q-text">{{ node.a }}</span>
+            <span class="mkp__q-top">
+              <span class="mkp__q-icon"
+                ><component :is="node.icon" :size="16" :stroke-width="1.75" aria-hidden="true"
+              /></span>
+              <span class="mkp__q-index">0{{ i + 1 }}</span>
             </span>
+            <span class="mkp__q-title">{{ node.q }}</span>
+            <span class="mkp__q-text">{{ node.a }}</span>
           </li>
         </ul>
-
-        <NuxtLink to="/features" class="mk-link">
-          See every feature
-          <ArrowRight :size="16" aria-hidden="true" />
-        </NuxtLink>
-      </div>
-
-      <div class="mkp__stage mk-reveal" aria-hidden="true">
-        <svg class="mkp__wires" viewBox="0 0 560 480" preserveAspectRatio="none" focusable="false">
-          <path
-            v-for="(node, i) in nodes"
-            :key="node.id"
-            class="mkp__wire"
-            :class="{ 'is-lit': phase > i }"
-            :d="node.wire"
-          />
-        </svg>
-
-        <div class="mkp__sale" :class="{ 'is-pop': phase === 0 }">
-          <span class="mkp__sale-head">
-            <span class="mkp__sale-icon"><ReceiptText :size="16" /></span>
-            New sale
-            <span class="mkp__chip mkp__chip--success">Paid</span>
-          </span>
-          <span class="mkh__stack">
-            <Transition name="mkh-swap">
-              <span :key="sale.amount" class="mkp__sale-body">
-                <span class="mkp__sale-amount">{{ sale.amount }}</span>
-                <span class="mkp__sale-item">{{ sale.item }}</span>
-              </span>
-            </Transition>
-          </span>
-        </div>
-
-        <div
-          v-for="(node, i) in nodes"
-          :key="node.id"
-          class="mkp__node"
-          :class="[`mkp__node--${node.id}`, { 'is-lit': phase > i }]"
-        >
-          <span class="mkp__node-icon"><component :is="node.icon" :size="16" /></span>
-          <span class="mkp__node-body">
-            <span class="mkp__node-label">{{ node.label }}</span>
-            <span class="mkp__node-value">{{ node.value(sale) }}</span>
-          </span>
-          <Check :size="14" class="mkp__node-check" />
-        </div>
       </div>
     </div>
   </section>
