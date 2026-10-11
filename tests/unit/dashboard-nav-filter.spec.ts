@@ -155,6 +155,30 @@ describe('filterDashboardNavItems', () => {
   })
 })
 
+describe('phone "More" menu (iOS and narrow web)', () => {
+  it('lists Storefront and Payment links once both are launched', async () => {
+    const { buildShellMoreNav } = await import('~/utils/shell-nav')
+    const { isPaymentLinksComingSoon } = await import('~/utils/payment-links-launch')
+    const { isStorefrontDashboardHidden } = await import('~/utils/storefront-launch')
+    expect(isPaymentLinksComingSoon()).toBe(false)
+    expect(isStorefrontDashboardHidden()).toBe(false)
+
+    const context = buildBusinessCapabilityContext({ experienceMode: 'business' })
+    const items = filterDashboardNavItems(DASHBOARD_NAV_DEFINITIONS, {
+      isSuperAdmin: true,
+      isManager: false,
+      canUseFeature: () => true,
+      canUseBusinessCapability: (capability) => canUseBusinessCapability(capability, context),
+      hidePaymentLinks: isPaymentLinksComingSoon(),
+      hideStorefront: isStorefrontDashboardHidden(),
+    }).map((item) => ({ name: item.name, iconKey: item.iconKey, href: `/dashboard${item.segment}` }))
+
+    const more = buildShellMoreNav(items).map((item) => item.label)
+    expect(more).toContain('Storefront')
+    expect(more).toContain('Payment links')
+  })
+})
+
 describe('orderNativeMoreNavItems', () => {
   it('puts buybacks and stock loans first in the iOS More sheet', () => {
     const ordered = orderNativeMoreNavItems([

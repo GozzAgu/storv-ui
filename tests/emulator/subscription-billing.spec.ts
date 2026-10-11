@@ -260,12 +260,38 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)(
       return { reference, sub }
     }
 
-    async function webhook(payload: unknown, signWith = SECRET) {
+    async function webhook(payload: unknown, signWith = SECRET, fromIp = '52.31.139.75') {
       m.raw = JSON.stringify(payload)
       m.signature = createHmac('sha512', signWith).update(m.raw).digest('hex')
       m.status = 200
-      const out = await (await route('webhook.post'))({})
+      const out = await (await route('webhook.post'))({
+        node: { req: { socket: { remoteAddress: fromIp } } },
+      })
       return { status: m.status, out }
+    }
+
+    /** A first-charge webhook as Paystack sends it for a checkout started through initialize. */
+    function firstCharge(
+      reference: string,
+      overrides: { amount?: number; planCode?: string; metadata?: Record<string, unknown> } = {}
+    ) {
+      const tx = paystack.transactions.get(reference)!
+      return {
+        event: 'charge.success',
+        data: {
+          reference,
+          amount: overrides.amount ?? PAYSTACK_PLANS[tx.plan]!.amount,
+          currency: 'NGN',
+          metadata: overrides.metadata ?? tx.metadata,
+          plan: { plan_code: overrides.planCode ?? tx.plan },
+          subscription: {
+            subscription_code: `SUB_${randomUUID().slice(0, 8)}`,
+            email_token: 'tok_first',
+            next_payment_date: new Date(Date.now() + 31 * DAY).toISOString(),
+          },
+          customer: { customer_code: tx.customer },
+        },
+      }
     }
 
     describe('first payment', () => {
@@ -411,6 +437,7 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)(
           data: {
             reference: `renewal_${randomUUID()}`,
             amount: 1_000_000,
+            currency: 'NGN',
             subscription: {
               subscription_code: sub.subscription_code,
               next_payment_date: new Date(Date.now() + 31 * DAY).toISOString(),
@@ -450,6 +477,144 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)(
         expect(u).toMatchObject({ subscription: 'storvv_medium', subscriptionStatus: 'canceled' })
         expect(u.paystackSubscriptionCode).toBeUndefined()
         expect(monthsFromNow(u.subscriptionCurrentPeriodEnd)).toBeCloseTo(12, 0)
+      })
+    })
+
+    describe('webhook plan checks', () => {
+      it('applies the plan Paystack charged for, not the plan written in metadata', async () => {
+        const uid = await newOwner()
+        const { reference } = await startCheckout(uid, 'storvv_medium', 'monthly')
+        paystack.pay(reference)
+
+        const res = await webhook(
+          firstCharge(reference, {
+            metadata: { userId: uid, planId: 'storvv_enterprise', billingCycle: 'yearly' },
+          })
+        )
+
+        expect(res.status).toBe(200)
+        expect(await user(uid)).toMatchObject({
+          subscription: 'storvv_medium',
+          subscriptionBillingCycle: 'monthly',
+        })
+      })
+
+      it('refuses a cheap plan charge that claims to be Enterprise', async () => {
+        const uid = await newOwner()
+        const { reference } = await startCheckout(uid, 'storvv_enterprise', 'yearly')
+
+        await webhook(firstCharge(reference, { planCode: 'PLN_medium_monthly', amount: 1_000_000 }))
+
+        const u = await user(uid)
+        expect(u.subscription).toBe('storvv_micro')
+        expect(u.subscriptionPaymentIssue).toMatchObject({ reference, problem: 'plan-mismatch' })
+      })
+
+      it('refuses a charge for the right plan at the wrong amount and tells the owner', async () => {
+        const uid = await newOwner()
+        const { reference } = await startCheckout(uid, 'storvv_enterprise', 'monthly')
+
+        await webhook(firstCharge(reference, { amount: 100 }))
+
+        const u = await user(uid)
+        expect(u.subscription).toBe('storvv_micro')
+        expect(u.subscriptionPaymentIssue).toMatchObject({
+          reference,
+          amountKobo: 100,
+          problem: 'amount-mismatch',
+        })
+      })
+
+      it('ignores a charge whose reference has no checkout started on Storvv', async () => {
+        const uid = await newOwner()
+        const res = await webhook({
+          event: 'charge.success',
+          data: {
+            reference: `forged_${randomUUID()}`,
+            amount: 25_500_000,
+            currency: 'NGN',
+            metadata: { userId: uid, planId: 'storvv_enterprise', billingCycle: 'yearly' },
+            plan: { plan_code: 'PLN_enterprise_yearly' },
+            subscription: { subscription_code: `SUB_${randomUUID().slice(0, 8)}` },
+          },
+        })
+
+        expect(res.status).toBe(200)
+        const u = await user(uid)
+        expect(u.subscription).toBe('storvv_micro')
+        expect(u.subscriptionPaymentIssue).toBeUndefined()
+      })
+
+      it('applies a renewal once even when Paystack or an attacker replays it', async () => {
+        const uid = await newOwner()
+        const { sub } = await subscribe(uid, 'storvv_medium', 'monthly')
+        const renewal = (reference: string, next: string) => ({
+          event: 'charge.success',
+          data: {
+            reference,
+            amount: 1_000_000,
+            currency: 'NGN',
+            plan: { plan_code: 'PLN_medium_monthly' },
+            subscription: { subscription_code: sub.subscription_code, next_payment_date: next },
+          },
+        })
+        const first = `renewal_${randomUUID()}`
+        const later = new Date(Date.now() + 62 * DAY).toISOString()
+
+        await webhook(renewal(first, new Date(Date.now() + 31 * DAY).toISOString()))
+        await webhook(renewal(`renewal_${randomUUID()}`, later))
+        await webhook(renewal(first, new Date(Date.now() + 31 * DAY).toISOString()))
+
+        expect((await user(uid)).subscriptionCurrentPeriodEnd).toBe(later)
+      })
+
+      it('clears the owner notice once a good charge applies', async () => {
+        const uid = await newOwner()
+        const { sub } = await subscribe(uid, 'storvv_medium', 'monthly')
+        const charge = (amount: number) => ({
+          event: 'charge.success',
+          data: {
+            reference: `renewal_${randomUUID()}`,
+            amount,
+            currency: 'NGN',
+            subscription: {
+              subscription_code: sub.subscription_code,
+              next_payment_date: new Date(Date.now() + 31 * DAY).toISOString(),
+            },
+          },
+        })
+
+        await webhook(charge(500_000))
+        expect((await user(uid)).subscriptionPaymentIssue).toMatchObject({
+          problem: 'amount-mismatch',
+        })
+        await webhook(charge(1_000_000))
+        expect((await user(uid)).subscriptionPaymentIssue).toBeUndefined()
+      })
+
+      it('refuses subscription events from outside the Paystack IP list when one is set', async () => {
+        const uid = await newOwner()
+        const { sub } = await subscribe(uid, 'storvv_medium', 'yearly')
+        vi.stubEnv('PAYSTACK_WEBHOOK_IPS', '52.31.139.75,52.49.173.169,52.214.14.220')
+        try {
+          const blocked = await webhook(
+            { event: 'subscription.disable', data: { subscription_code: sub.subscription_code } },
+            SECRET,
+            '203.0.113.9'
+          )
+          expect(blocked.status).toBe(401)
+          expect((await user(uid)).subscriptionStatus).toBe('active')
+
+          const allowed = await webhook(
+            { event: 'subscription.disable', data: { subscription_code: sub.subscription_code } },
+            SECRET,
+            '52.49.173.169'
+          )
+          expect(allowed.status).toBe(200)
+          expect((await user(uid)).subscriptionStatus).toBe('canceled')
+        } finally {
+          vi.unstubAllEnvs()
+        }
       })
     })
 

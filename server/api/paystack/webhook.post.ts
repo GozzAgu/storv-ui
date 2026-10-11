@@ -1,5 +1,4 @@
 import { defineEventHandler, getHeader, readRawBody, setResponseStatus } from 'h3'
-import type { SubscriptionPlan } from '~/types/subscription'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
 import {
   getPaystackSecret,
@@ -11,18 +10,21 @@ import { legacyPaymentLinksEnabled } from '~/server/utils/legacy-payment-links'
 import { getPaymentsV2Gate } from '~/server/utils/payments/config'
 import { handleLinkCharge } from '~/server/utils/payments/link-webhook'
 import { isLinkReference, webhookIpAllowed } from '~/server/utils/payments/webhook-guard'
-import { opsAlertDepsFromEnv } from '~/server/utils/payments/ops-alert'
+import { opsAlert, opsAlertDepsFromEnv } from '~/server/utils/payments/ops-alert'
 import { isResendConfigured } from '~/server/utils/delivery-config'
 import { sendReceiptEmail } from '~/server/utils/receipt-delivery-email'
 import { sendViaResend } from '~/server/utils/staff-invite-email'
 import {
-  applySubscriptionToUser,
   cancelAutoRenewForUser,
   extractSubscriptionFromChargePayload,
   findUserIdByPaystackSubscriptionCode,
   maybeDowngradeExpiredSubscription,
 } from '~/server/utils/paystack-subscription'
-import { VALID_PLANS } from '~/server/utils/paystack-validation'
+import {
+  applySubscriptionChargeOnce,
+  recordSubscriptionPaymentIssue,
+  resolveSubscriptionCharge,
+} from '~/server/utils/paystack-subscription-charge'
 import {
   attachSubscriptionFromWebhook,
   cancelAllAddOns,
@@ -61,6 +63,8 @@ type PaystackWebhookPayload = {
  * - Payments V2 links: charge.success with a `stvp_` reference → verify and apply (link-webhook.ts)
  * - Legacy payment links: charge.success with metadata.token, only with LEGACY_PAYMENT_LINKS_ENABLED=1
  * - Subscriptions: charge.success renewals + subscription.disable / invoice.payment_failed
+ *   (plan from Paystack's plan code and a checked amount, never from metadata; once per reference)
+ * PAYSTACK_WEBHOOK_IPS, when set, applies to every event.
  */
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
@@ -93,14 +97,16 @@ export default defineEventHandler(async (event) => {
   const eventName = payload.event || ''
   const data = payload.data
 
+  if (!webhookIpAllowed(event)) {
+    console.error(JSON.stringify({ tag: 'payments-alert', alert: 'webhook-ip-not-allowed' }))
+    setResponseStatus(event, 401)
+    return { error: 'Not allowed' }
+  }
+
+  const emailReady = isResendConfigured()
+
   if (eventName === 'charge.success' && data && isLinkReference(data.reference)) {
-    if (!webhookIpAllowed(event)) {
-      console.error(JSON.stringify({ tag: 'payments-alert', alert: 'webhook-ip-not-allowed' }))
-      setResponseStatus(event, 401)
-      return { error: 'Not allowed' }
-    }
     const gate = await getPaymentsV2Gate()
-    const emailReady = isResendConfigured()
     const result = await handleLinkCharge(adminDb, data.reference, {
       enabled: gate.enabled,
       paystack: (path, init) =>
@@ -137,9 +143,7 @@ export default defineEventHandler(async (event) => {
 
     const extracted = extractSubscriptionFromChargePayload(data)
     const subscriptionCode = extracted.subscriptionCode
-    let userId = extracted.userId
-    let planId = extracted.planId
-    let billingCycle = extracted.billingCycle
+    const userId = extracted.userId
 
     const isAddOnCharge =
       data.metadata?.kind === 'addon' ||
@@ -164,33 +168,54 @@ export default defineEventHandler(async (event) => {
       } catch (err) {
         logServerError('paystack/webhook.addon_charge', err)
       }
-    } else if (!userId && subscriptionCode) {
-      userId = (await findUserIdByPaystackSubscriptionCode(adminDb, subscriptionCode)) || undefined
     }
 
-    if (!isAddOnCharge && userId && subscriptionCode) {
+    if (!isAddOnCharge && subscriptionCode) {
       try {
-        const userSnap = await adminDb.collection('users').doc(userId).get()
-        const userData = userSnap.data()
-        if (!planId && typeof userData?.subscription === 'string') {
-          planId = userData.subscription as SubscriptionPlan
-        }
-        if (!billingCycle && userData?.subscriptionBillingCycle) {
-          billingCycle = userData.subscriptionBillingCycle as typeof billingCycle
-        }
-
-        if (planId && VALID_PLANS.includes(planId) && billingCycle) {
-          await applySubscriptionToUser(adminDb, {
-            userId,
-            planId,
-            billingCycle,
+        const resolved = await resolveSubscriptionCharge(
+          adminDb,
+          data,
+          config as Record<string, unknown>
+        )
+        if (resolved?.ok) {
+          const applied = await applySubscriptionChargeOnce(adminDb, {
+            userId: resolved.userId,
+            planId: resolved.planId,
+            billingCycle: resolved.billingCycle,
             reference,
-            paystackSubscriptionCode: subscriptionCode,
+            amountKobo: Number(data.amount),
+            paystackSubscriptionCode: resolved.subscriptionCode,
             paystackSubscriptionEmailToken: extracted.emailToken,
             paystackCustomerCode: extracted.customerCode,
             subscriptionStatus: 'active',
             subscriptionCurrentPeriodEnd: extracted.nextPaymentDate,
           })
+          if (!applied) {
+            console.warn(
+              JSON.stringify({ tag: 'paystack-webhook', event: 'duplicate-subscription-charge' })
+            )
+          }
+        } else if (resolved) {
+          if (resolved.userId) {
+            await recordSubscriptionPaymentIssue(adminDb, resolved.userId, {
+              reference,
+              amountKobo: Number(data.amount),
+              problem: resolved.problem,
+            })
+          }
+          await opsAlert(
+            adminDb,
+            'subscription-charge-not-applied',
+            reference || subscriptionCode,
+            {
+              problem: resolved.problem,
+              reference: reference ?? null,
+              amountKobo: Number(data.amount) || 0,
+              currency: data.currency ?? null,
+              userId: resolved.userId ?? null,
+            },
+            opsAlertDepsFromEnv(emailReady ? sendViaResend : undefined)
+          )
         }
       } catch (err) {
         console.error('[paystack/webhook] subscription renewal failed', err)

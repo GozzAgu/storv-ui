@@ -61,6 +61,8 @@ export interface UserData {
   subscriptionCurrentPeriodEnd?: string
   /** Enterprise extra stores / staff seats, written by the billing server. */
   subscriptionAddOns?: SubscriptionAddOnEntry[]
+  /** A Paystack charge the billing server received but could not apply (cleared by the next good charge). */
+  subscriptionPaymentIssue?: { reference: string | null; amountKobo: number; problem: string; at: string }
   paystackSubscriptionCode?: string
   paystackCustomerCode?: string
   photoURL?: string

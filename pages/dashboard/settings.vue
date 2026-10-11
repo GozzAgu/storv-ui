@@ -665,7 +665,7 @@ const subscriptionStatusBadgeLabel = computed(() =>
 
 const subscriptionStatusTone = computed(() => {
   const status = userStore.userData?.subscriptionStatus
-  if (status === 'past_due') return 'error'
+  if (status === 'past_due' || userStore.userData?.subscriptionPaymentIssue) return 'error'
   if (status === 'canceled') return 'warning'
   if (currentSubscription.value === 'storvv_micro') return 'neutral'
   return 'success'
@@ -720,6 +720,9 @@ const subscriptionRenewalLabel = computed(() => {
   const status = userStore.userData?.subscriptionStatus
   const cycle = userStore.userData?.subscriptionBillingCycle
   const periodEnd = userStore.userData?.subscriptionCurrentPeriodEnd
+  if (userStore.userData?.subscriptionPaymentIssue) {
+    return "We received a payment we couldn't match to your plan. Our team has been alerted and will sort it out."
+  }
   if (!cycle || currentSubscription.value === 'storvv_micro') return null
 
   const cycleLabel = BILLING_CYCLE_LABELS[cycle].toLowerCase()

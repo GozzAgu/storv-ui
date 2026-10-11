@@ -407,6 +407,11 @@ service cloud.firestore {
         allow read, write: if false;
       }
 
+      // Billing server only: one doc per applied Paystack charge reference (replay guard).
+      match /subscriptionCharges/{reference} {
+        allow read, write: if false;
+      }
+
       // Billing server only; the owner reads the summary on users/{userId}.subscriptionAddOns.
       match /subscriptionAddOns/{addOnId} {
         allow read, write: if false;
