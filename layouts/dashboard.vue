@@ -66,7 +66,13 @@
         </template>
       </ShellTopBar>
 
-      <main id="main-content" ref="dashboardMainRef" data-dashboard-main class="s-shell__content" tabindex="-1">
+      <main
+        id="main-content"
+        ref="dashboardMainRef"
+        data-dashboard-main
+        class="s-shell__content"
+        tabindex="-1"
+      >
         <ShellPullToRefresh v-if="isNativeApp" />
         <div :key="route.path" class="s-shell__page">
           <DemoModeBanner v-if="isDemoDashboard" />
@@ -81,7 +87,7 @@
 
     <ShellBottomNav
       :items="shellBottomNav"
-      :more-items="shellMoreNav"
+      :more-sections="shellMoreSections"
       :is-active="isShellNavActive"
     />
 
@@ -129,7 +135,7 @@ import {
   SHELL_BRANCHES_NAV_NAME,
   SHELL_CUSTOMERS_NAV_NAME,
   buildShellBottomNav,
-  buildShellMoreNav,
+  buildShellMoreSections,
   buildShellFooterNav,
   buildShellNavSections,
   shellNavLabel,
@@ -387,7 +393,7 @@ const shellNavSource = computed<ShellNavSourceItem[]>(() => {
 const shellNavSections = computed(() => buildShellNavSections(shellNavSource.value))
 const shellFooterNav = computed(() => buildShellFooterNav(shellNavSource.value))
 const shellBottomNav = computed(() => buildShellBottomNav(shellNavSource.value))
-const shellMoreNav = computed(() => buildShellMoreNav(shellNavSource.value))
+const shellMoreSections = computed(() => buildShellMoreSections(shellNavSource.value))
 
 const route = useRoute()
 const { basePath, dashPath, isDemoDashboard, matchesDashboardPath } = useDashboardPaths()

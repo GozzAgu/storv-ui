@@ -15,27 +15,44 @@
           key="more"
           class="s-bottomnav__panel"
           role="group"
-          aria-label="More destinations"
+          aria-labelledby="shell-bottomnav-more-title"
         >
-          <NuxtLink
-            v-for="item in moreItems"
-            :key="item.name"
-            :to="item.href"
-            class="s-bottomnav__tile"
-            :class="{ 's-bottomnav__tile--active': isActive(item) }"
-            :aria-current="isActive(item) ? 'page' : undefined"
-            @click="expanded = false"
+          <p id="shell-bottomnav-more-title" class="s-bottomnav__panel-title">More</p>
+          <section
+            v-for="section in moreSections"
+            :key="section.id"
+            class="s-bottomnav__section"
+            :aria-labelledby="section.label ? `shell-bottomnav-more-${section.id}` : undefined"
           >
-            <span class="s-bottomnav__tile-icon">
-              <component
-                :is="DASHBOARD_NAV_ICONS[item.iconKey]"
-                :size="22"
-                :stroke-width="1.75"
-                aria-hidden="true"
-              />
-            </span>
-            <span class="s-bottomnav__tile-label">{{ item.label }}</span>
-          </NuxtLink>
+            <h2
+              v-if="section.label"
+              :id="`shell-bottomnav-more-${section.id}`"
+              class="s-bottomnav__section-label"
+            >
+              {{ section.label }}
+            </h2>
+            <div class="s-bottomnav__grid">
+              <NuxtLink
+                v-for="item in section.items"
+                :key="item.name"
+                :to="item.href"
+                class="s-bottomnav__tile"
+                :class="{ 's-bottomnav__tile--active': isActive(item) }"
+                :aria-current="isActive(item) ? 'page' : undefined"
+                @click="expanded = false"
+              >
+                <span class="s-bottomnav__tile-icon">
+                  <component
+                    :is="DASHBOARD_NAV_ICONS[item.iconKey]"
+                    :size="22"
+                    :stroke-width="1.75"
+                    aria-hidden="true"
+                  />
+                </span>
+                <span class="s-bottomnav__tile-label">{{ item.label }}</span>
+              </NuxtLink>
+            </div>
+          </section>
         </div>
 
         <nav
@@ -97,7 +114,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { Plus } from '@lucide/vue'
 import { useHaptics } from '~/composables/useHaptics'
 import { DASHBOARD_NAV_ICONS } from '~/utils/dashboard-nav-icons'
-import type { ShellNavItem } from '~/utils/shell-nav'
+import type { ShellNavItem, ShellNavSection } from '~/utils/shell-nav'
 
 /**
  * Phone tab bar: a glass capsule for the main destinations (a lens slides behind the current one)
@@ -106,7 +123,7 @@ import type { ShellNavItem } from '~/utils/shell-nav'
  */
 const props = defineProps<{
   items: ShellNavItem[]
-  moreItems: ShellNavItem[]
+  moreSections: ShellNavSection[]
   isActive: (item: ShellNavItem) => boolean
 }>()
 

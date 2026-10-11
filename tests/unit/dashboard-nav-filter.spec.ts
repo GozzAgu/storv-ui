@@ -171,11 +171,38 @@ describe('phone "More" menu (iOS and narrow web)', () => {
       canUseBusinessCapability: (capability) => canUseBusinessCapability(capability, context),
       hidePaymentLinks: isPaymentLinksComingSoon(),
       hideStorefront: isStorefrontDashboardHidden(),
-    }).map((item) => ({ name: item.name, iconKey: item.iconKey, href: `/dashboard${item.segment}` }))
+    }).map((item) => ({
+      name: item.name,
+      iconKey: item.iconKey,
+      href: `/dashboard${item.segment}`,
+    }))
 
     const more = buildShellMoreNav(items).map((item) => item.label)
     expect(more).toContain('Storefront')
     expect(more).toContain('Payment links')
+  })
+
+  it('groups the grid like the sidebar, with general items first and nothing from the bar', async () => {
+    const { buildShellMoreNav, buildShellMoreSections } = await import('~/utils/shell-nav')
+    const items = DASHBOARD_NAV_DEFINITIONS.map((item) => ({
+      name: item.name,
+      iconKey: item.iconKey,
+      href: `/dashboard${item.segment}`,
+    }))
+
+    const sections = buildShellMoreSections(items)
+    expect(sections.map((section) => section.label)).toEqual([
+      'General',
+      'Operations',
+      'Organization',
+    ])
+    expect(sections[0]!.items.map((item) => item.label)).toEqual(['Reports', 'Help', 'Settings'])
+
+    const grouped = sections.flatMap((section) => section.items.map((item) => item.name)).sort()
+    const flat = buildShellMoreNav(items)
+      .map((item) => item.name)
+      .sort()
+    expect(grouped).toEqual(flat)
   })
 })
 

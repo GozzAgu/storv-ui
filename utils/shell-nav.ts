@@ -35,7 +35,11 @@ const SHELL_LABELS: Record<string, string> = {
   'Help center': 'Help',
 }
 
-const SHELL_SECTIONS: ReadonlyArray<{ id: string; label: string | null; items: readonly string[] }> = [
+const SHELL_SECTIONS: ReadonlyArray<{
+  id: string
+  label: string | null
+  items: readonly string[]
+}> = [
   {
     id: 'primary',
     label: null,
@@ -65,7 +69,12 @@ const SHELL_SECTIONS: ReadonlyArray<{ id: string; label: string | null; items: r
 const SHELL_FOOTER = ['Help center', 'Settings'] as const
 
 /** Phone bottom bar destinations; everything else lives behind "More". */
-export const SHELL_BOTTOM_NAV = ['Dashboard', 'Inventory', 'Sales', SHELL_CUSTOMERS_NAV_NAME] as const
+export const SHELL_BOTTOM_NAV = [
+  'Dashboard',
+  'Inventory',
+  'Sales',
+  SHELL_CUSTOMERS_NAV_NAME,
+] as const
 
 const ROUTE_TITLES: Record<string, string> = {
   branches: 'Branches',
@@ -121,6 +130,27 @@ export function buildShellMoreNav(items: ShellNavSourceItem[]): ShellNavItem[] {
     (name) => !(SHELL_BOTTOM_NAV as readonly string[]).includes(name)
   )
   return pick(items, names)
+}
+
+/** The "More" grid, grouped: primary leftovers with help and settings first, then sidebar sections. */
+export function buildShellMoreSections(items: ShellNavSourceItem[]): ShellNavSection[] {
+  const inBottomNav = (name: string) => (SHELL_BOTTOM_NAV as readonly string[]).includes(name)
+  const [primary, ...rest] = SHELL_SECTIONS
+  const general = {
+    id: 'general',
+    label: 'General',
+    items: [...(primary?.items ?? []), ...SHELL_FOOTER],
+  }
+  return [general, ...rest]
+    .map((section) => ({
+      id: section.id,
+      label: section.label,
+      items: pick(
+        items,
+        section.items.filter((name) => !inBottomNav(name))
+      ),
+    }))
+    .filter((section) => section.items.length > 0)
 }
 
 export function isDashboardNavActive(currentPath: string, href: string, visibleHrefs: string[]) {

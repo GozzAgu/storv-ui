@@ -776,6 +776,9 @@ html:has(.s-shell.ds-root) body {
   --s-bottomnav-lens: rgb(15 23 42 / 0.065);
   --s-bottomnav-lens-rim: inset 0 0 0 0.5px rgb(15 23 42 / 0.04);
   --s-bottomnav-tile: rgb(15 23 42 / 0.045);
+  --s-bottomnav-tile-rim: inset 0 0 0 0.5px rgb(15 23 42 / 0.06),
+    inset 0 1px 0 rgb(255 255 255 / 0.7);
+  --s-bottomnav-divider: rgb(15 23 42 / 0.08);
   --s-bottomnav-inactive: var(--s-text-2);
   --s-bottomnav-tint: var(--s-accent);
   --s-bottomnav-spring: cubic-bezier(0.32, 0.72, 0, 1);
@@ -799,6 +802,9 @@ html.dark .s-bottomnav {
   --s-bottomnav-lens: rgb(255 255 255 / 0.1);
   --s-bottomnav-lens-rim: inset 0 0 0 0.5px rgb(255 255 255 / 0.06);
   --s-bottomnav-tile: rgb(255 255 255 / 0.06);
+  --s-bottomnav-tile-rim: inset 0 0 0 0.5px rgb(255 255 255 / 0.08),
+    inset 0 1px 0 rgb(255 255 255 / 0.06);
+  --s-bottomnav-divider: rgb(255 255 255 / 0.08);
 }
 
 @media (min-width: 1024px) {
@@ -987,13 +993,14 @@ html.dark .s-bottomnav__backdrop {
 }
 
 .s-bottomnav__panel {
-  display: grid;
+  display: flex;
   flex: 1;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--s-space-2) var(--s-space-1);
-  max-height: min(60dvh, 420px);
-  padding: var(--s-space-2) var(--s-space-1-5);
+  flex-direction: column;
+  max-height: min(68dvh, 520px);
+  padding: var(--s-space-2) var(--s-space-1-5) var(--s-space-1-5);
   overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
   border-radius: 28px;
   background: var(--s-bottomnav-panel);
   /* Heavier frost so labels stay readable over busy pages */
@@ -1002,44 +1009,85 @@ html.dark .s-bottomnav__backdrop {
   transform-origin: bottom right;
 }
 
+.s-bottomnav__panel::-webkit-scrollbar {
+  display: none;
+}
+
+.s-bottomnav__panel-title {
+  margin: 0 0 var(--s-space-1-5);
+  padding-inline: var(--s-space-1);
+  color: var(--s-text);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 22px;
+  letter-spacing: -0.01em;
+}
+
+.s-bottomnav__section + .s-bottomnav__section {
+  margin-top: var(--s-space-1-5);
+  padding-top: var(--s-space-1-5);
+  border-top: 0.5px solid var(--s-bottomnav-divider);
+}
+
+.s-bottomnav__section-label {
+  margin: 0 0 var(--s-space-1);
+  padding-inline: var(--s-space-1);
+  color: var(--s-text-3);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 14px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.s-bottomnav__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--s-space-1-5) var(--s-space-half);
+}
+
 .s-bottomnav__tile {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--s-space-half);
+  gap: 6px;
   min-width: 0;
-  padding: 0;
-  border: 0;
-  background: none;
+  padding: var(--s-space-half) 0;
+  border-radius: var(--s-radius-lg);
   color: var(--s-text-2);
-  cursor: pointer;
+  text-decoration: none;
   -webkit-tap-highlight-color: transparent;
-  transition: transform var(--s-duration) var(--s-bottomnav-spring);
+  transition: transform var(--s-duration) var(--s-bottomnav-spring),
+    color var(--s-duration-fast) var(--s-ease);
 }
 
 .s-bottomnav__tile-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: calc(var(--s-touch) + var(--s-space-1));
-  height: calc(var(--s-touch) + var(--s-space-1));
-  border-radius: 16px;
+  width: 52px;
+  height: 52px;
+  border-radius: 15px;
   background: var(--s-bottomnav-tile);
-  box-shadow: var(--s-bottomnav-lens-rim);
+  box-shadow: var(--s-bottomnav-tile-rim);
   color: var(--s-text);
+  transition: background-color var(--s-duration-fast) var(--s-ease),
+    color var(--s-duration-fast) var(--s-ease);
 }
 
 .s-bottomnav__tile--active .s-bottomnav__tile-icon {
-  background: var(--s-accent-soft);
-  color: var(--s-accent-soft-text);
+  background: var(--s-accent);
+  box-shadow: var(--s-btn-primary-glow);
+  color: var(--s-text-on-accent);
 }
 
 .s-bottomnav__tile-label {
   display: -webkit-box;
   max-width: 100%;
   overflow: hidden;
-  font: var(--s-text-caption);
-  line-height: 1.25;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 14px;
   text-align: center;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -1047,7 +1095,7 @@ html.dark .s-bottomnav__backdrop {
 }
 
 .s-bottomnav__tile--active .s-bottomnav__tile-label {
-  color: var(--s-text);
+  color: var(--s-bottomnav-tint);
   font-weight: 600;
 }
 
