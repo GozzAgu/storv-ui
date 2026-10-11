@@ -4,54 +4,31 @@ import MkIntro from '~/components/marketing/MkIntro.vue'
 
 function mountIntro() {
   return mount(MkIntro, {
-    attachTo: document.body,
     global: { stubs: { NuxtLink: { template: '<a><slot /></a>' } } },
   })
 }
 
 describe('MkIntro', () => {
-  it('opens gadget stores first and switches the photo when a trade is chosen', async () => {
+  it('opens gadget stores first and expands the hovered or focused trade', async () => {
     const wrapper = mountIntro()
-    const tabs = wrapper.findAll('[role="tab"]')
-    const imgs = wrapper.findAll('.mk-show__img')
-    expect(tabs[1]!.attributes('aria-selected')).toBe('true')
-    expect(imgs[1]!.classes()).toContain('mk-show__img--active')
+    const trades = wrapper.findAll('.mk-trade')
+    expect(trades[1]!.classes()).toContain('mk-trade--active')
 
-    await tabs[3]!.trigger('click')
-    expect(tabs[3]!.attributes('aria-selected')).toBe('true')
-    expect(tabs[1]!.attributes('aria-selected')).toBe('false')
-    expect(imgs[3]!.classes()).toContain('mk-show__img--active')
-    expect(wrapper.find('.mk-show__hud-title').text()).toBe('Supermarkets')
-    wrapper.unmount()
+    await trades[3]!.trigger('mouseenter')
+    expect(trades[3]!.classes()).toContain('mk-trade--active')
+    expect(trades[1]!.classes()).not.toContain('mk-trade--active')
+
+    await trades[0]!.trigger('focus')
+    expect(trades[0]!.classes()).toContain('mk-trade--active')
   })
 
-  it('advances to the next trade when the progress line fills, wrapping at the end', async () => {
+  it('keeps the photo row revealed while the active trade changes', async () => {
     const wrapper = mountIntro()
-    await wrapper.find('.mk-show__fill').trigger('animationend')
-    expect(wrapper.findAll('[role="tab"]')[2]!.attributes('aria-selected')).toBe('true')
+    const row = wrapper.find('.mk-trades')
+    row.element.setAttribute('data-revealed', '')
 
-    await wrapper.findAll('[role="tab"]')[4]!.trigger('click')
-    await wrapper.find('.mk-show__fill').trigger('animationend')
-    expect(wrapper.findAll('[role="tab"]')[0]!.attributes('aria-selected')).toBe('true')
-    wrapper.unmount()
-  })
-
-  it('moves between trades with the arrow keys', async () => {
-    const wrapper = mountIntro()
-    const tabs = wrapper.findAll('[role="tab"]')
-    await tabs[1]!.trigger('keydown', { key: 'ArrowDown' })
-    expect(tabs[2]!.attributes('aria-selected')).toBe('true')
-    await tabs[2]!.trigger('keydown', { key: 'ArrowUp' })
-    await tabs[1]!.trigger('keydown', { key: 'ArrowUp' })
-    expect(tabs[0]!.attributes('aria-selected')).toBe('true')
-    wrapper.unmount()
-  })
-
-  it('keeps only the active photo exposed to screen readers', () => {
-    const wrapper = mountIntro()
-    const visible = wrapper.findAll('.mk-show__img').filter((img) => img.attributes('alt'))
-    expect(visible).toHaveLength(1)
-    expect(visible[0]!.attributes('alt')).toContain('gadget store')
-    wrapper.unmount()
+    await wrapper.findAll('.mk-trade')[4]!.trigger('mouseenter')
+    expect(row.attributes()).toHaveProperty('data-revealed')
+    expect(wrapper.findAll('.mk-trade.mk-reveal')).toHaveLength(0)
   })
 })
