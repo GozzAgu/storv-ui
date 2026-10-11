@@ -20,8 +20,11 @@
 
       <ul class="mk-stats mk-reveal">
         <li v-for="(stat, i) in stats" :key="stat.id" class="mk-stat">
-          <span class="mk-stat__icon" aria-hidden="true">
-            <component :is="stat.icon" :size="20" :stroke-width="1.75" />
+          <span class="mk-stat__top" aria-hidden="true">
+            <span class="mk-stat__icon">
+              <component :is="stat.icon" :size="18" :stroke-width="1.75" />
+            </span>
+            <span class="mk-stat__kicker">{{ stat.kicker }}</span>
           </span>
           <p class="mk-stat__value">
             <span class="ds-sr-only">{{ stat.end }}{{ stat.suffix }}</span>
@@ -57,6 +60,7 @@ type Chip = { label: string; live?: boolean }
 const stats: {
   id: string
   icon: Component
+  kicker: string
   end: number
   suffix: string
   label: string
@@ -65,6 +69,7 @@ const stats: {
   {
     id: 'workflows',
     icon: Layers,
+    kicker: 'Workflows',
     end: 8,
     suffix: '+',
     label: 'Core retail workflows in one workspace',
@@ -82,6 +87,7 @@ const stats: {
   {
     id: 'plans',
     icon: Sparkles,
+    kicker: 'Plans',
     end: 3,
     suffix: '',
     label: 'Plans, from free Micro to Enterprise',
@@ -90,6 +96,7 @@ const stats: {
   {
     id: 'platforms',
     icon: MonitorSmartphone,
+    kicker: 'Platforms',
     end: 3,
     suffix: '',
     label: 'Platforms, live on the web today',
