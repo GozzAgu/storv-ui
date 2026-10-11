@@ -6,7 +6,8 @@ import { expireDueLinks } from '~/server/utils/payments/links'
 import { writeCronHeartbeat } from '~/server/utils/payments/cron-heartbeat'
 
 /**
- * Every 15 minutes (Vercel Cron): end links past their expiry and release link-sale holds. Each
+ * Daily (Vercel Cron; the Hobby plan allows no more often): end links past their expiry and release
+ * link-sale holds. Paying an expired link is refused at initialize regardless. Each
  * link is rechecked in its own transaction, so one paid a moment ago is skipped.
  */
 export default defineEventHandler(async (event) => {

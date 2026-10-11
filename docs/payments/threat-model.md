@@ -287,7 +287,8 @@ Closed in 2b (see 6c).
   Tokens are scrubbed from Sentry events, transactions and breadcrumbs, and Firebase Analytics
   is not started on `/pay` pages (its automatic page view would send the full URL). Platform
   access logs (Vercel) still record request paths; that is accepted and not under app control.
-- Expiry cron (`*/15`, timing-safe `CRON_SECRET`, correction K) ends links in their own
+- Expiry cron (daily, as Vercel Hobby allows; held stock can stay reserved up to a day after
+  expiry, but `initialize` refuses expired links; timing-safe `CRON_SECRET`, correction K) ends links in their own
   transaction, cancels link sales with nothing paid and releases held stock; composite index
   `paymentLinksV2 (status, expiresAt)` is in `firestore.indexes.json`.
 - Payout account: owner only, verified email, 2FA on and a fresh code; name from Paystack; last
