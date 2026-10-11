@@ -67,6 +67,19 @@ export function normalizeAccountInput(input: { bankCode?: unknown; accountNumber
   return { bankCode, accountNumber }
 }
 
+/** Paystack's test-mode bank: account checks against it do not count toward the daily limit. */
+export const PAYSTACK_TEST_BANK = { name: 'Paystack test bank (001)', code: '001' } as const
+
+/** Bank list for the connect dropdown; the test bank is offered only with a test secret key. */
+export function withPaystackTestBank<T extends { name: string; code: string }>(
+  banks: T[],
+  secretKey: string
+): Array<T | typeof PAYSTACK_TEST_BANK> {
+  if (!secretKey.trim().startsWith('sk_test_')) return banks
+  if (banks.some((b) => b.code === PAYSTACK_TEST_BANK.code)) return banks
+  return [PAYSTACK_TEST_BANK, ...banks]
+}
+
 /** Account holder name as Paystack reports it; the client's copy is never trusted. */
 export async function resolveAccountName(
   paystack: PaystackCall,
@@ -87,7 +100,9 @@ export async function resolveAccountName(
       throw new PaymentServiceError(
         'ACCOUNT_NOT_RESOLVED',
         429,
-        'Paystack test mode allows only a few account checks per day. Try again tomorrow or use live keys.'
+        /test mode/i.test(reason)
+          ? `Paystack test mode allows only a few real bank checks a day. Choose "${PAYSTACK_TEST_BANK.name}" to keep testing, or try again tomorrow.`
+          : 'Paystack is limiting account checks right now. Try again in a few minutes.'
       )
     }
     name = ''

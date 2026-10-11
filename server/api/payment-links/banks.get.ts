@@ -3,6 +3,7 @@ import { assertRateLimit } from '~/server/utils/rate-limit'
 import { requireAuth } from '~/server/utils/store-auth'
 import { getPaystackSecret, paystackRequest } from '~/server/utils/payment-links'
 import { requirePaystackLiveAllowed } from '~/server/utils/payments/config'
+import { withPaystackTestBank } from '~/server/utils/payments/payout'
 
 interface PaystackBank {
   name: string
@@ -28,5 +29,5 @@ export default defineEventHandler(async (event) => {
     .map((b) => ({ name: b.name, code: b.code }))
     .sort((a, b) => a.name.localeCompare(b.name))
 
-  return { success: true, banks: list }
+  return { success: true, banks: withPaystackTestBank(list, secretKey) }
 })
