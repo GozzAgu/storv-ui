@@ -7,6 +7,12 @@ import {
 } from 'firebase/firestore'
 import { getFirebaseConfig } from '~/config/firebase.config'
 import { isCapacitorNative } from '~/utils/firebase-client-auth'
+import { isFirebaseEmulatorMode } from '~/utils/firebase-emulator-config'
+import {
+  firebaseEmulatorsEnabled,
+  setFirebaseEmulators,
+  withFirestoreEmulator,
+} from '~/utils/firebase-emulators'
 import { isPublicPayPath } from '~/utils/pay-path'
 
 /**
@@ -22,6 +28,11 @@ import { isPublicPayPath } from '~/utils/pay-path'
  * the app still works, it just won't benefit from the on-device cache.
  */
 function initializeFirestorePersistence(app: FirebaseApp) {
+  // Memory cache only: against the emulator the on-device cache denies queries made right after sign-in.
+  if (firebaseEmulatorsEnabled()) {
+    withFirestoreEmulator(initializeFirestore(app, {}))
+    return
+  }
   try {
     initializeFirestore(app, {
       localCache: persistentLocalCache({
@@ -40,6 +51,7 @@ export default defineNuxtPlugin(() => {
   // Only run on client side
   if (import.meta.client) {
     try {
+      setFirebaseEmulators(isFirebaseEmulatorMode(useRuntimeConfig().public.firebaseEmulators))
       // Get Firebase config from environment variables
       const firebaseConfig = getFirebaseConfig()
 
@@ -102,6 +114,7 @@ export default defineNuxtPlugin(() => {
       if (
         typeof window !== 'undefined' &&
         !isCapacitorNative() &&
+        !firebaseEmulatorsEnabled() &&
         !isPublicPayPath(window.location.pathname)
       ) {
         try {

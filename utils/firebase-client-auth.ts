@@ -10,6 +10,7 @@ import {
 let primaryAuth: Auth | null = null
 
 import { isCapacitorNative } from '~/utils/capacitor-env'
+import { withAuthEmulator } from '~/utils/firebase-emulators'
 
 export { isCapacitorNative }
 
@@ -20,14 +21,14 @@ function initAuthForApp(app: FirebaseApp): Auth {
     : [indexedDBLocalPersistence, browserLocalPersistence]
 
   try {
-    return initializeAuth(app, { persistence })
+    return withAuthEmulator(initializeAuth(app, { persistence }))
   } catch (error: unknown) {
     const code = (error as { code?: string })?.code
     if (code === 'auth/already-initialized') {
-      return getAuth(app)
+      return withAuthEmulator(getAuth(app))
     }
     console.warn('[Firebase Auth] initializeAuth failed, falling back to getAuth:', error)
-    return getAuth(app)
+    return withAuthEmulator(getAuth(app))
   }
 }
 
@@ -51,14 +52,16 @@ export function getFirebaseClientAuth(): Auth | null {
 /** Secondary app auth (e.g. staff creation) - separate FirebaseApp instance. */
 export function getFirebaseClientAuthForApp(app: FirebaseApp): Auth {
   try {
-    return initializeAuth(app, {
-      persistence: browserLocalPersistence,
-    })
+    return withAuthEmulator(
+      initializeAuth(app, {
+        persistence: browserLocalPersistence,
+      })
+    )
   } catch (error: unknown) {
     const code = (error as { code?: string })?.code
     if (code === 'auth/already-initialized') {
-      return getAuth(app)
+      return withAuthEmulator(getAuth(app))
     }
-    return getAuth(app)
+    return withAuthEmulator(getAuth(app))
   }
 }

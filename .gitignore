@@ -47,3 +47,9 @@ tests/.auth/
 # Test reports
 playwright-report/
 test-results/
+
+# Local Firebase emulator data (npm run dev:emulators)
+.emulator-data/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log

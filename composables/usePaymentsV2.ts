@@ -1,6 +1,7 @@
 import { ref } from 'vue'
 import { collection, onSnapshot, query, where, type Unsubscribe } from 'firebase/firestore'
 import { getStorage, ref as storageRef, uploadBytes } from 'firebase/storage'
+import { withStorageEmulator } from '~/utils/firebase-emulators'
 import type {
   CashConfirmationMode,
   PaymentKind,
@@ -264,7 +265,7 @@ export function usePaymentsV2() {
       const fileName = isPdf ? 'proof.pdf' : 'proof.webp'
       await uploadBytes(
         storageRef(
-          getStorage(app),
+          withStorageEmulator(getStorage(app)),
           `paymentProofs/${s.ownerUserId}/${s.storeId}/${paymentId}/${fileName}`
         ),
         file,

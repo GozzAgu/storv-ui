@@ -10,6 +10,7 @@ import {
 } from 'firebase/storage'
 import { FirebaseError } from 'firebase/app'
 import { getFirebaseClientAuth } from '~/utils/firebase-client-auth'
+import { withStorageEmulator } from '~/utils/firebase-emulators'
 import { useFirebase } from './useFirebase'
 import { UPLOAD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import {
@@ -92,7 +93,7 @@ export const useFirebaseStorage = () => {
 
     // Use the default bucket from initializeApp(storageBucket). A second gs:// argument can
     // mismatch some Firebase / bucket combinations and surface as storage/unknown.
-    return getStorage(app)
+    return withStorageEmulator(getStorage(app))
   }
 
   /**

@@ -3,9 +3,16 @@
 // This composable can be used in Nuxt context (plugins, components, etc.)
 
 import { resolveFirebaseStorageBucket } from '~/utils/firebase-storage-bucket'
+import {
+  FIREBASE_EMULATOR_WEB_CONFIG,
+  isFirebaseEmulatorMode,
+} from '~/utils/firebase-emulator-config'
 
 export const getFirebaseConfig = () => {
   const config = useRuntimeConfig()
+  if (isFirebaseEmulatorMode(config.public.firebaseEmulators)) {
+    return { ...FIREBASE_EMULATOR_WEB_CONFIG }
+  }
 
   const projectId = config.public.firebase.projectId || ''
   const storageBucket = resolveFirebaseStorageBucket(

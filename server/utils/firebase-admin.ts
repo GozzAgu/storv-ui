@@ -3,6 +3,13 @@ import { getAuth } from 'firebase-admin/auth'
 import { getFirestore } from 'firebase-admin/firestore'
 import { getStorage } from 'firebase-admin/storage'
 import { resolveFirebaseStorageBucket } from '~/utils/firebase-storage-bucket'
+import {
+  FIREBASE_EMULATOR_HOST,
+  FIREBASE_EMULATOR_PORTS,
+  FIREBASE_EMULATOR_PROJECT_ID,
+  FIREBASE_EMULATOR_WEB_CONFIG,
+  isFirebaseEmulatorMode,
+} from '~/utils/firebase-emulator-config'
 import { readFileSync } from 'node:fs'
 import { isAbsolute, resolve } from 'node:path'
 
@@ -91,9 +98,29 @@ function normalizeServiceAccountForCert(account: { private_key?: string }) {
   }
 }
 
+function emulatorMode(config: { public?: { firebaseEmulators?: unknown } }): boolean {
+  return isFirebaseEmulatorMode(config.public?.firebaseEmulators)
+}
+
+/** No credentials: the Admin SDK talks only to the local emulators for the offline demo project. */
+function initEmulatorAdminApp(): App {
+  if (isServerlessRuntime()) {
+    throw new Error('NUXT_PUBLIC_FIREBASE_EMULATORS is for local development only. Remove it.')
+  }
+  const host = FIREBASE_EMULATOR_HOST
+  process.env.FIRESTORE_EMULATOR_HOST ||= `${host}:${FIREBASE_EMULATOR_PORTS.firestore}`
+  process.env.FIREBASE_AUTH_EMULATOR_HOST ||= `${host}:${FIREBASE_EMULATOR_PORTS.auth}`
+  process.env.FIREBASE_STORAGE_EMULATOR_HOST ||= `${host}:${FIREBASE_EMULATOR_PORTS.storage}`
+  return initializeApp({ projectId: FIREBASE_EMULATOR_PROJECT_ID })
+}
+
 function getAdminApp(): App {
   if (adminApp) return adminApp
   const config = useRuntimeConfig()
+  if (emulatorMode(config)) {
+    adminApp = initEmulatorAdminApp()
+    return adminApp
+  }
   const jsonRaw = resolveServiceAccountJsonString(config)
   const credentialsPath = resolveCredentialPath(config)
 
@@ -159,7 +186,9 @@ export function getAdminFirestore() {
  */
 export function getAdminStorageBucket() {
   const config = useRuntimeConfig()
-  const pub = config.public.firebase as {
+  const pub = (
+    emulatorMode(config) ? FIREBASE_EMULATOR_WEB_CONFIG : config.public.firebase
+  ) as {
     projectId?: string
     storageBucket?: string
   }

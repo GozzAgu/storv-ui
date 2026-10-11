@@ -1,5 +1,6 @@
 import { getApps, type FirebaseApp } from 'firebase/app'
 import { getAnalytics, type Analytics } from 'firebase/analytics'
+import { firebaseEmulatorsEnabled } from '~/utils/firebase-emulators'
 
 /**
  * Composable to access Firebase app and services
@@ -24,7 +25,7 @@ export const useFirebase = () => {
 
     try {
       const app = getApp()
-      if (!app) return null
+      if (!app || firebaseEmulatorsEnabled()) return null
 
       return getAnalytics(app)
     } catch (error) {

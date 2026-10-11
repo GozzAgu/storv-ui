@@ -2,7 +2,6 @@
 import { fileURLToPath } from 'node:url'
 import tailwindcss from '@tailwindcss/vite'
 import { CAPACITOR_SHELL_INLINE_SCRIPT } from './utils/capacitor-shell-inline'
-
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   // Off by default so the Nuxt badge never shows on screen; run with NUXT_DEVTOOLS=true to use it.
@@ -166,6 +165,8 @@ export default defineNuxtConfig({
       apiBase: process.env.NUXT_PUBLIC_API_BASE || '',
       /** Optional Sentry DSN for client error reporting (https://sentry.io) */
       sentryDsn: process.env.NUXT_PUBLIC_SENTRY_DSN || '',
+      /** Local-only: use the Firebase emulators (`npm run dev:emulators`). Refused on Vercel. */
+      firebaseEmulators: process.env.NUXT_PUBLIC_FIREBASE_EMULATORS === '1',
       firebase: {
         apiKey: process.env.NUXT_PUBLIC_FIREBASE_API_KEY || '',
         authDomain: process.env.NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN || '',
