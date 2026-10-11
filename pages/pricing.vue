@@ -362,7 +362,6 @@ const compareGroups = computed<
       { label: 'Quick Sale and Create New Sale', values: [true, true, true] },
       { label: 'Receipts, returns, and customers', values: [true, true, true] },
       { label: 'Low-stock alerts', values: [true, true, true] },
-      { label: 'Storvv Assistant', values: [true, true, true] },
     ],
   },
   {

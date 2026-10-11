@@ -108,25 +108,30 @@
           </div>
         </article>
 
-        <!-- Assistant -->
-        <article class="mkb__card mkb__card--assistant mk-reveal" style="--i: 3">
+        <!-- Buybacks -->
+        <article class="mkb__card mkb__card--buybacks mk-reveal" style="--i: 3">
           <header class="mkb__head">
-            <span class="mkb__icon mkb__icon--accent"
-              ><Sparkles :size="18" aria-hidden="true"
-            /></span>
+            <span class="mkb__icon"><Repeat :size="18" aria-hidden="true" /></span>
             <div>
-              <h3 class="mkb__title">Storvv Assistant</h3>
+              <h3 class="mkb__title">Buybacks and stock loans</h3>
               <p class="mkb__text">
-                Ask about your shop in plain words. Get answers from your real numbers.
+                Take trade-ins, lend stock to other shops, and keep every unit accounted for.
               </p>
             </div>
           </header>
-          <div class="mkb__ui mkb-ai" aria-hidden="true">
-            <span class="mkb-ai__q">{{ chat.q }}</span>
-            <span class="mkb-ai__a">
-              <Sparkles :size="12" class="mkb-ai__spark" />
-              <span>{{ typed }}<span class="mkb-ai__caret" /></span>
-            </span>
+          <div class="mkb__ui mkb-flow" aria-hidden="true">
+            <div
+              v-for="(s, i) in buybackSteps"
+              :key="s.title"
+              class="mkb-flow__step"
+              :class="{ 'is-done': i < buybackStep, 'is-active': i === buybackStep }"
+            >
+              <span class="mkb-flow__dot"><Check :size="12" /></span>
+              <span class="mkb-staff__who">
+                <span class="mkb-staff__name">{{ s.title }}</span>
+                <span class="mkb-staff__role">{{ s.text }}</span>
+              </span>
+            </div>
           </div>
         </article>
 
@@ -222,15 +227,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import {
   Boxes,
+  Check,
   ChartColumn,
   CheckCheck,
   GitBranch,
   MessageCircle,
   ShieldCheck,
-  Sparkles,
+  Repeat,
   Store,
   TrendingUp,
   Users,
@@ -249,16 +255,12 @@ const stock = ref([
 ])
 const hitIndex = ref(-1)
 
-const chats = [
-  { q: 'What sold best this week?', a: 'iPhone 13 cases: 64 sold, up 22% on last week.' },
-  {
-    q: 'Which items should I restock?',
-    a: 'AirPods Pro and Samsung A15. Both run out within 4 days.',
-  },
-  { q: 'How did Lekki do today?', a: '₦412,000 from 19 sales. Your best Tuesday this month.' },
+const buybackSteps = [
+  { title: 'iPhone 11 · 128GB traded in', text: 'From Chidi Okeke' },
+  { title: 'Checked and priced', text: 'Grade B · ₦180,000' },
+  { title: 'Back on the shelf', text: 'Added to Ikeja stock' },
 ]
-const chat = computed(() => chats[tick.value % chats.length]!)
-const typed = ref('')
+const buybackStep = computed(() => (live.value ? tick.value % (buybackSteps.length + 1) : 0))
 
 const staff = [
   { name: 'Amaka', role: 'Manager', perm: 'Edit stock', on: true, hue: 330 },
@@ -276,25 +278,8 @@ const paidIndex = computed(() => (live.value ? tick.value % customers.length : -
 const chart = [0.38, 0.52, 0.46, 0.64, 0.58, 0.72, 0.68, 0.84, 0.78, 1]
 
 let ticker: ReturnType<typeof setInterval> | undefined
-let typer: ReturnType<typeof setInterval> | undefined
 let observer: IntersectionObserver | null = null
 let reduced = false
-
-function typeAnswer() {
-  clearInterval(typer)
-  const full = chat.value.a
-  if (reduced) {
-    typed.value = full
-    return
-  }
-  typed.value = ''
-  let n = 0
-  typer = setInterval(() => {
-    n += 1
-    typed.value = full.slice(0, n)
-    if (n >= full.length) clearInterval(typer)
-  }, 28)
-}
 
 function step() {
   if (document.hidden) return
@@ -315,11 +300,8 @@ function stop() {
   ticker = undefined
 }
 
-watch(chat, typeAnswer)
-
 onMounted(() => {
   reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  typeAnswer()
   if (reduced) {
     live.value = true
     return
@@ -337,7 +319,6 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   stop()
-  clearInterval(typer)
   observer?.disconnect()
 })
 </script>

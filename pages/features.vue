@@ -109,10 +109,8 @@
       </div>
     </section>
 
-    <MkAssistant />
-
     <!-- Coming soon -->
-    <section id="soon" class="mk-section mk-section--alt" aria-labelledby="soon-title">
+    <section id="soon" class="mk-section" aria-labelledby="soon-title">
       <div class="mk-container">
         <MkSectionHead
           title-id="soon-title"
@@ -177,7 +175,6 @@ import {
 } from '@lucide/vue'
 import SButton from '~/components/s/SButton.vue'
 import STabs from '~/components/s/STabs.vue'
-import MkAssistant from '~/components/marketing/MkAssistant.vue'
 import MkCta from '~/components/marketing/MkCta.vue'
 import MkFrame from '~/components/marketing/MkFrame.vue'
 import MkSectionHead from '~/components/marketing/MkSectionHead.vue'
@@ -295,7 +292,7 @@ const ladder = [
   {
     name: 'Micro',
     scope: 'Free forever · 1 store',
-    unlocks: ['Inventory, sales, and receipts', 'Up to 2 staff', 'Storvv Assistant'],
+    unlocks: ['Inventory, sales, and receipts', 'Up to 2 staff', 'Low-stock alerts'],
     featured: false,
   },
   {

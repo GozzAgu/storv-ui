@@ -115,7 +115,6 @@ const columns: { title: string; links: FooterLink[] }[] = [
     title: 'Product',
     links: [
       { label: 'Overview', section: 'product' },
-      { label: 'Storvv Assistant', section: 'assistant' },
       { label: 'All features', to: '/features' },
       { label: 'Live demo', to: '/demo/dashboard' },
       { label: 'Storefront', to: '/features#soon', soon: true },

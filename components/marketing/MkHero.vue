@@ -7,11 +7,11 @@
     </div>
 
     <div class="mk-container mkh__copy">
-      <NuxtLink to="/#assistant" class="mkh__announce mkh-in" style="--i: 0">
+      <NuxtLink to="/features" class="mkh__announce mkh-in" style="--i: 0">
         <span class="mkh__announce-tag"><Sparkles :size="12" aria-hidden="true" />New</span>
         <span
-          >Meet Storvv Assistant<span class="mkh__announce-more"
-            >, your shop's AI analyst</span
+          >Receipts straight to WhatsApp<span class="mkh__announce-more"
+            >, no printer needed</span
           ></span
         >
         <ArrowRight :size="14" aria-hidden="true" class="mkh__announce-arrow" />
@@ -99,10 +99,11 @@
           </span>
         </div>
 
-        <div class="mkh__card mkh__card--assistant" style="--d: -1.3" aria-hidden="true">
-          <span class="mkh__ai-q"><Sparkles :size="12" />What sold best this week?</span>
-          <span class="mkh__ai-a">
-            iPhone 13 cases. <strong>64 sold</strong>, up 22% on last week.
+        <div class="mkh__card mkh__card--transfer" style="--d: -1.3" aria-hidden="true">
+          <span class="mkh__card-icon mkh__card-icon--accent"><ArrowLeftRight :size="16" /></span>
+          <span class="mkh__card-body">
+            <span class="mkh__card-title">Transfer received · 12 units</span>
+            <span class="mkh__card-text">Ikeja → Lekki · stock updated</span>
           </span>
         </div>
       </div>
@@ -115,6 +116,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import {
+  ArrowLeftRight,
   ArrowRight,
   Check,
   PackageMinus,

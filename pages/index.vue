@@ -14,8 +14,6 @@
 
     <MkSetup />
 
-    <MkAssistant />
-
     <!-- Pricing teaser -->
     <section id="pricing" class="mk-section mk-section--alt" aria-labelledby="home-pricing-title">
       <div class="mk-container">
@@ -123,7 +121,6 @@ import SButton from '~/components/s/SButton.vue'
 import SDialog from '~/components/s/SDialog.vue'
 import MkBento from '~/components/marketing/MkBento.vue'
 import MkHero from '~/components/marketing/MkHero.vue'
-import MkAssistant from '~/components/marketing/MkAssistant.vue'
 import MkCta from '~/components/marketing/MkCta.vue'
 import MkFaq, { type MkFaqItem } from '~/components/marketing/MkFaq.vue'
 import MkTour from '~/components/marketing/MkTour.vue'

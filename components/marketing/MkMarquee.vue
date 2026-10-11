@@ -24,7 +24,6 @@ import {
   ReceiptText,
   Repeat,
   ShieldCheck,
-  Sparkles,
   UserCog,
   UserPlus,
 } from '@lucide/vue'
@@ -42,7 +41,6 @@ const items = [
   { icon: UserPlus, label: 'Sales leads' },
   { icon: UserCog, label: 'Team roles' },
   { icon: BarChart3, label: 'Analytics' },
-  { icon: Sparkles, label: 'Storvv Assistant' },
   { icon: ShieldCheck, label: 'Activity log' },
 ]
 </script>
