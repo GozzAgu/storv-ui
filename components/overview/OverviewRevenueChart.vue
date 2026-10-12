@@ -10,6 +10,11 @@
       <STabs v-model="period" :tabs="periodTabs" label="Chart period" />
     </template>
 
+    <p v-if="points.length > 0" class="s-overview-chart__summary">
+      <span class="s-overview-chart__total">{{ totalLabel }}</span>
+      <span class="s-overview-chart__period">{{ totalCaption }}</span>
+    </p>
+
     <div class="s-overview-chart__plot">
       <SEmptyState
         v-if="points.length === 0"
@@ -31,15 +36,27 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import {
+  computed,
+  defineAsyncComponent,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+} from 'vue'
 import { ChartArea } from '@lucide/vue'
 import SCard from '~/components/s/SCard.vue'
 import STabs from '~/components/s/STabs.vue'
 import SEmptyState from '~/components/s/SEmptyState.vue'
 import SSkeleton from '~/components/s/SSkeleton.vue'
 import { useThemeStore } from '~/stores/theme'
-import { DS_CHART_PALETTE_FALLBACK, readDsChartPalette, type DsChartPalette } from '~/utils/ds-apex-chart'
-import { formatAxisCurrency } from '~/utils/format-compact-currency'
+import {
+  DS_CHART_PALETTE_FALLBACK,
+  readDsChartPalette,
+  type DsChartPalette,
+} from '~/utils/ds-apex-chart'
+import { formatAxisCurrency, formatCompactCurrency } from '~/utils/format-compact-currency'
 
 const LazyApexChart = defineAsyncComponent(
   () => import('~/components/charts/LazyApexChart.client.vue')
@@ -74,6 +91,20 @@ const points = computed(() => {
   return props.daily
 })
 
+const total = computed(() => points.value.reduce((sum, point) => sum + point.revenue, 0))
+
+const totalLabel = computed(
+  () =>
+    formatCompactCurrency(total.value, props.currencySymbol) ??
+    `${props.currencySymbol}${Math.round(total.value).toLocaleString('en-US')}`
+)
+
+const totalCaption = computed(() => {
+  if (period.value === 'weekly') return 'in the last 12 weeks'
+  if (period.value === 'monthly') return 'in the last 12 months'
+  return 'in the last 30 days'
+})
+
 const series = computed(() => [
   { name: 'Revenue', data: points.value.map((point) => point.revenue) },
 ])
@@ -81,7 +112,8 @@ const series = computed(() => [
 const categories = computed(() =>
   points.value.map((point, index) => {
     if (period.value === 'weekly') return `W${index + 1}`
-    if (period.value === 'monthly') return point.date.toLocaleDateString('en-US', { month: 'short' })
+    if (period.value === 'monthly')
+      return point.date.toLocaleDateString('en-US', { month: 'short' })
     return point.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
   })
 )
@@ -114,7 +146,7 @@ onBeforeUnmount(() => {
 })
 
 const options = computed(() => {
-  const { accent: line, grid, muted: label, font } = palette.value
+  const { ink: line, grid, muted: label, font } = palette.value
   const axisLabel = { colors: label, fontSize: '11px', fontWeight: 400 }
   return {
     chart: {

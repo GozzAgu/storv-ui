@@ -4,6 +4,8 @@
  */
 export interface DsChartPalette {
   accent: string
+  /** Body text colour, for monochrome series. */
+  ink: string
   success: string
   warning: string
   info: string
@@ -15,6 +17,7 @@ export interface DsChartPalette {
 
 export const DS_CHART_PALETTE_FALLBACK: DsChartPalette = {
   accent: '#3d63f2',
+  ink: '#0a0a0a',
   success: '#067647',
   warning: '#b54708',
   info: '#175cd3',
@@ -24,12 +27,15 @@ export const DS_CHART_PALETTE_FALLBACK: DsChartPalette = {
   font: "'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', sans-serif",
 }
 
-export function readDsChartPalette(fallback: DsChartPalette = DS_CHART_PALETTE_FALLBACK): DsChartPalette {
+export function readDsChartPalette(
+  fallback: DsChartPalette = DS_CHART_PALETTE_FALLBACK
+): DsChartPalette {
   if (typeof document === 'undefined') return fallback
   const style = getComputedStyle(document.documentElement)
   const read = (name: string, value: string) => style.getPropertyValue(name).trim() || value
   return {
     accent: read('--s-accent', fallback.accent),
+    ink: read('--s-text', fallback.ink),
     success: read('--s-success', fallback.success),
     warning: read('--s-warning', fallback.warning),
     info: read('--s-info', fallback.info),
@@ -76,7 +82,11 @@ export function mergeDsApexChartTheme<T extends Record<string, unknown>>(
 ): T {
   const merged: Record<string, unknown> = { ...options }
 
-  merged.chart = { ...((merged.chart as Record<string, unknown>) ?? {}), fontFamily: palette.font, foreColor: palette.muted }
+  merged.chart = {
+    ...((merged.chart as Record<string, unknown>) ?? {}),
+    fontFamily: palette.font,
+    foreColor: palette.muted,
+  }
   merged.colors = seriesColors(merged.colors, palette)
   merged.grid = { ...((merged.grid as Record<string, unknown>) ?? {}), borderColor: palette.grid }
   merged.xaxis = withLabelColor(merged.xaxis, palette.muted)
@@ -94,7 +104,10 @@ export function mergeDsApexChartTheme<T extends Record<string, unknown>>(
           ...plotOptions!.heatmap.colorScale,
           ranges: ranges.map((range: Record<string, unknown>, index: number) => ({
             ...range,
-            color: index === 0 ? palette.surface : withAlpha(palette.accent, steps > 0 ? index / steps : 1),
+            color:
+              index === 0
+                ? palette.surface
+                : withAlpha(palette.accent, steps > 0 ? index / steps : 1),
           })),
         },
       },

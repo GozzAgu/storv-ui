@@ -57,13 +57,15 @@
           <SSkeleton width="40%" height="16px" />
         </div>
       </div>
-      <div class="s-overview__row s-overview__row--main">
-        <SCard><SSkeleton height="260px" /></SCard>
-        <SCard><SSkeleton :lines="4" height="40px" /></SCard>
-      </div>
-      <div class="s-overview__row s-overview__row--main">
-        <SCard><SSkeleton :lines="5" height="40px" /></SCard>
-        <SCard><SSkeleton :lines="5" height="40px" /></SCard>
+      <div class="s-overview__grid">
+        <div class="s-overview__col">
+          <SCard><SSkeleton height="260px" /></SCard>
+          <SCard><SSkeleton :lines="5" height="40px" /></SCard>
+        </div>
+        <div class="s-overview__col">
+          <SCard><SSkeleton height="180px" /></SCard>
+          <SCard><SSkeleton height="180px" /></SCard>
+        </div>
       </div>
     </template>
 
@@ -86,7 +88,12 @@
                 <span class="s-list__main">
                   <span class="s-list__primary">{{ link.label }}</span>
                 </span>
-                <ChevronRight class="s-list__lead" :size="16" :stroke-width="2" aria-hidden="true" />
+                <ChevronRight
+                  class="s-list__lead"
+                  :size="16"
+                  :stroke-width="2"
+                  aria-hidden="true"
+                />
               </NuxtLink>
             </li>
           </ul>
@@ -132,96 +139,107 @@
           </SStat>
         </div>
 
-        <div class="s-overview__row s-overview__row--main">
-          <OverviewRevenueChart
-            :daily="dailyRevenueData"
-            :weekly="weeklyRevenueData"
-            :monthly="monthlyRevenueData"
-            :currency-symbol="currencySymbol"
-          />
-          <OverviewAttention :items="homeAttentionItems" />
-        </div>
-
-        <div class="s-overview__row s-overview__row--main">
-          <SCard title="Recent sales" flush>
-            <template #actions>
-              <SButton variant="ghost" size="sm" to="/dashboard/receipts">View all</SButton>
-            </template>
-            <SEmptyState
-              v-if="recentReceipts.length === 0"
-              title="No sales yet"
-              description="Your latest sales will show up here."
-            >
+        <div class="s-overview__grid">
+          <div class="s-overview__col">
+            <OverviewRevenueChart
+              :daily="dailyRevenueData"
+              :weekly="weeklyRevenueData"
+              :monthly="monthlyRevenueData"
+              :currency-symbol="currencySymbol"
+            />
+            <OverviewTopProducts :items="topSellingItemsTop" :format-currency="formatCurrency" />
+            <SCard title="Recent sales" flush>
               <template #actions>
-                <SButton variant="primary" size="sm" to="/dashboard/receipts?new=1">
-                  New sale
+                <SButton variant="ghost" size="sm" to="/dashboard/receipts">View all</SButton>
+              </template>
+              <SEmptyState
+                v-if="recentReceipts.length === 0"
+                title="No sales yet"
+                description="Your latest sales will show up here."
+              >
+                <template #actions>
+                  <SButton variant="primary" size="sm" to="/dashboard/receipts?new=1">
+                    New sale
+                  </SButton>
+                </template>
+              </SEmptyState>
+              <ul v-else class="s-list">
+                <li v-for="tx in recentReceiptsTop" :key="tx.id">
+                  <button
+                    type="button"
+                    class="s-list__item s-list__item--interactive"
+                    @click="openHomeReceipt(tx.id)"
+                  >
+                    <SAvatar :name="tx.customerName" />
+                    <span class="s-list__main">
+                      <span class="s-list__primary">{{ tx.customerName }}</span>
+                      <span class="s-list__secondary">
+                        #{{ tx.receiptNumber }} · {{ tx.paymentMethod }} · {{ tx.time }}
+                      </span>
+                    </span>
+                    <span class="s-list__end">
+                      <span class="s-list__value">{{ tx.amount }}</span>
+                      <SBadge
+                        v-if="tx.status !== 'completed'"
+                        :tone="getReceiptStatusTone(tx.status)"
+                      >
+                        {{ tx.statusLabel }}
+                      </SBadge>
+                      <ReceiptProfitHint
+                        v-else-if="getRecentReceiptById(tx.id)"
+                        :receipt="getRecentReceiptById(tx.id)!"
+                      />
+                    </span>
+                  </button>
+                </li>
+              </ul>
+            </SCard>
+          </div>
+
+          <div class="s-overview__col">
+            <OverviewActiveDays :days="weekdayActivity" />
+            <OverviewRepeatRate
+              :rate="repeatCustomers.rate"
+              :returning="repeatCustomers.returning"
+              :total="repeatCustomers.total"
+            />
+            <OverviewAttention :items="homeAttentionItems" />
+            <SCard title="Low stock" flush>
+              <template #actions>
+                <SButton
+                  v-if="lowStockItems.length > 0"
+                  variant="ghost"
+                  size="sm"
+                  :loading="reorderExporting"
+                  @click="handleExportReorderList"
+                >
+                  <template v-if="!reorderExporting" #leading>
+                    <Download :size="16" :stroke-width="1.75" aria-hidden="true" />
+                  </template>
+                  Export
                 </SButton>
               </template>
-            </SEmptyState>
-            <ul v-else class="s-list">
-              <li v-for="tx in recentReceiptsTop" :key="tx.id">
-                <button
-                  type="button"
-                  class="s-list__item s-list__item--interactive"
-                  @click="openHomeReceipt(tx.id)"
-                >
-                  <SAvatar :name="tx.customerName" />
-                  <span class="s-list__main">
-                    <span class="s-list__primary">{{ tx.customerName }}</span>
-                    <span class="s-list__secondary">
-                      #{{ tx.receiptNumber }} · {{ tx.paymentMethod }} · {{ tx.time }}
+              <p v-if="lowStockItems.length === 0" class="s-list__empty">
+                Everything is above its reorder level.
+              </p>
+              <ul v-else class="s-list">
+                <li v-for="item in lowStockItemsTop" :key="item.id">
+                  <NuxtLink
+                    :to="`/dashboard/inventory/${item.folderId}`"
+                    class="s-list__item s-list__item--interactive"
+                  >
+                    <span class="s-list__main">
+                      <span class="s-list__primary">{{ item.name }}</span>
+                      <span class="s-list__secondary">{{ lowStockMeta(item) }}</span>
                     </span>
-                  </span>
-                  <span class="s-list__end">
-                    <span class="s-list__value">{{ tx.amount }}</span>
-                    <SBadge v-if="tx.status !== 'completed'" :tone="getReceiptStatusTone(tx.status)">
-                      {{ tx.statusLabel }}
-                    </SBadge>
-                    <ReceiptProfitHint
-                      v-else-if="getRecentReceiptById(tx.id)"
-                      :receipt="getRecentReceiptById(tx.id)!"
-                    />
-                  </span>
-                </button>
-              </li>
-            </ul>
-          </SCard>
-
-          <SCard title="Low stock" flush>
-            <template #actions>
-              <SButton
-                v-if="lowStockItems.length > 0"
-                variant="ghost"
-                size="sm"
-                :loading="reorderExporting"
-                @click="handleExportReorderList"
-              >
-                <template v-if="!reorderExporting" #leading>
-                  <Download :size="16" :stroke-width="1.75" aria-hidden="true" />
-                </template>
-                Export
-              </SButton>
-            </template>
-            <p v-if="lowStockItems.length === 0" class="s-list__empty">
-              Everything is above its reorder level.
-            </p>
-            <ul v-else class="s-list">
-              <li v-for="item in lowStockItemsTop" :key="item.id">
-                <NuxtLink
-                  :to="`/dashboard/inventory/${item.folderId}`"
-                  class="s-list__item s-list__item--interactive"
-                >
-                  <span class="s-list__main">
-                    <span class="s-list__primary">{{ item.name }}</span>
-                    <span class="s-list__secondary">{{ lowStockMeta(item) }}</span>
-                  </span>
-                  <span class="s-list__value s-list__value--warning">
-                    {{ item.isSerialNumber ? 'Serial' : `${item.quantity} left` }}
-                  </span>
-                </NuxtLink>
-              </li>
-            </ul>
-          </SCard>
+                    <span class="s-list__value s-list__value--warning">
+                      {{ item.isSerialNumber ? 'Serial' : `${item.quantity} left` }}
+                    </span>
+                  </NuxtLink>
+                </li>
+              </ul>
+            </SCard>
+          </div>
         </div>
       </template>
     </template>
@@ -235,10 +253,7 @@
       @refund="goReceiptAction()"
       @print="printHomeReceipt"
     />
-    <ViewReceiptModal
-      v-model="showHomeReceiptPreview"
-      :receipt="homeSelectedReceipt"
-    />
+    <ViewReceiptModal v-model="showHomeReceiptPreview" :receipt="homeSelectedReceipt" />
     <div
       v-if="homePrintReceipt"
       class="pointer-events-none fixed left-[-10000px] top-0 opacity-0"
@@ -255,7 +270,17 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, defineAsyncComponent, nextTick } from 'vue'
-import { Banknote, ChevronRight, Clock, Download, PackagePlus, Plus, ShoppingBag, Store, TriangleAlert } from '@lucide/vue'
+import {
+  Banknote,
+  ChevronRight,
+  Clock,
+  Download,
+  PackagePlus,
+  Plus,
+  ShoppingBag,
+  Store,
+  TriangleAlert,
+} from '@lucide/vue'
 
 const Tutorial = defineAsyncComponent(() => import('~/components/Tutorial.vue'))
 const GettingStartedChecklist = defineAsyncComponent(
@@ -271,7 +296,10 @@ import SEmptyState from '~/components/s/SEmptyState.vue'
 import SPageHeader from '~/components/s/SPageHeader.vue'
 import SSkeleton from '~/components/s/SSkeleton.vue'
 import SStat from '~/components/s/SStat.vue'
+import OverviewActiveDays from '~/components/overview/OverviewActiveDays.vue'
 import OverviewAttention from '~/components/overview/OverviewAttention.vue'
+import OverviewRepeatRate from '~/components/overview/OverviewRepeatRate.vue'
+import OverviewTopProducts from '~/components/overview/OverviewTopProducts.vue'
 import OverviewRevenueChart from '~/components/overview/OverviewRevenueChart.vue'
 import InlineStorePicker from '~/components/dashboard/InlineStorePicker.vue'
 import ReceiptProfitHint from '~/components/receipts/ReceiptProfitHint.vue'
@@ -371,8 +399,7 @@ const staffTutorialSteps: TutorialStep[] = [
   },
   {
     title: 'Record sales',
-    description:
-      'Create receipts, take payments, and look up past sales for customers you serve.',
+    description: 'Create receipts, take payments, and look up past sales for customers you serve.',
     icon: MARKETING_FEATURE_ICONS.receipts,
     targetSelector: '[data-tutorial="sales"]',
     fallbackTargetSelector: '[data-tutorial="receipts"]',
@@ -449,6 +476,9 @@ const {
   recentReceipts,
   dayStory,
   attentionItems,
+  topSellingItems,
+  weekdayActivity,
+  repeatCustomers,
 } = insights
 
 const revenueDelta = computed(() => {
@@ -525,8 +555,8 @@ function goReceiptAction(tab?: string) {
     tab
       ? `/dashboard/receipts?tab=${tab}${id ? `&receipt=${id}` : ''}`
       : id
-        ? `/dashboard/receipts?receipt=${id}`
-        : '/dashboard/receipts'
+      ? `/dashboard/receipts?receipt=${id}`
+      : '/dashboard/receipts'
   )
 }
 
@@ -558,14 +588,15 @@ async function printHomeReceipt(receipt: Receipt) {
 
 const recentReceiptsTop = computed(() => topN(recentReceipts.value))
 const lowStockItemsTop = computed(() => topN(lowStockItems.value))
+const topSellingItemsTop = computed(() => topN(topSellingItems.value))
 
-const hasInitialDashboardData = receiptsStore.receipts.length > 0 || inventoryStore.folders.length > 0
+const hasInitialDashboardData =
+  receiptsStore.receipts.length > 0 || inventoryStore.folders.length > 0
 const isLoading = ref(!hasInitialDashboardData)
 
 const needsStoreSelection = computed(() => !storesStore.currentStoreId)
 
-const { visible: gettingStartedVisible, nextStep: gettingStartedNextStep } =
-  useGettingStartedPath()
+const { visible: gettingStartedVisible, nextStep: gettingStartedNextStep } = useGettingStartedPath()
 
 /** New / empty workspace: compress chrome to a today strip + one CTA. */
 const isQuietDashboard = computed(() => {
@@ -649,7 +680,9 @@ const loadDashboardData = async (options?: { force?: boolean }) => {
 
     await Promise.all([
       receiptsStore.fetchReceipts(options),
-      canAccessLeadsPlan.value ? salesLeadsStore.fetchSalesLeads(options?.force === true) : Promise.resolve(),
+      canAccessLeadsPlan.value
+        ? salesLeadsStore.fetchSalesLeads(options?.force === true)
+        : Promise.resolve(),
       storefrontStore.fetchAnalytics(options).catch(() => undefined),
     ])
 
@@ -681,7 +714,9 @@ const refreshDashboardAfterStoreSwitch = async () => {
         })
       }, 600)
     } else {
-      dashboardFolderItems.value = await inventoryStore.fetchFolderAvailabilityStats({ force: true })
+      dashboardFolderItems.value = await inventoryStore.fetchFolderAvailabilityStats({
+        force: true,
+      })
     }
   } catch (error) {
     console.error('Error refreshing dashboard after store switch:', error)

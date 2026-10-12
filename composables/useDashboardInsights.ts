@@ -64,6 +64,15 @@ export interface DashboardQuickLink {
   href: string
 }
 
+export interface DashboardWeekdayActivity {
+  /** 0 = Sunday, matching `Date#getDay`. */
+  day: number
+  label: string
+  count: number
+}
+
+const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+
 function receiptDate(receipt: Receipt): Date {
   return receipt.date?.toDate ? receipt.date.toDate() : new Date(receipt.date)
 }
@@ -202,6 +211,40 @@ export function useDashboardInsights(folderItems: Ref<Record<string, InventoryIt
   })
 
   const totalCustomers = computed(() => uniqueCustomers.value.length)
+
+  /** Sales that went through (refunds and cancellations don't count as activity). */
+  const activeReceipts = computed(() =>
+    receiptsStore.receipts.filter((r) => r.status !== 'cancelled' && r.status !== 'refunded')
+  )
+
+  /** Sales per weekday over the last 30 days, Sunday first. */
+  const weekdayActivity = computed((): DashboardWeekdayActivity[] => {
+    const counts = [0, 0, 0, 0, 0, 0, 0]
+    const since = Date.now() - 30 * 24 * 60 * 60 * 1000
+    activeReceipts.value.forEach((receipt) => {
+      const d = receiptDate(receipt)
+      if (d.getTime() < since) return
+      const day = d.getDay()
+      counts[day] = (counts[day] ?? 0) + 1
+    })
+    return WEEKDAY_LABELS.map((label, day) => ({ day, label, count: counts[day] ?? 0 }))
+  })
+
+  /** Share of identified customers (email or phone) with two or more sales. */
+  const repeatCustomers = computed(() => {
+    const perCustomer = new Map<string, number>()
+    activeReceipts.value.forEach((receipt) => {
+      const key = receipt.customerEmail?.trim() || receipt.customerPhone?.trim()
+      if (!key) return
+      perCustomer.set(key, (perCustomer.get(key) ?? 0) + 1)
+    })
+    const total = perCustomer.size
+    let returning = 0
+    perCustomer.forEach((n) => {
+      if (n > 1) returning += 1
+    })
+    return { total, returning, rate: total > 0 ? Math.round((returning / total) * 100) : null }
+  })
   const newCustomersToday = computed(() => {
     const today = new Date().toDateString()
     return uniqueCustomers.value.filter((c) => c.lastOrder.toDateString() === today).length
@@ -565,20 +608,18 @@ export function useDashboardInsights(folderItems: Ref<Record<string, InventoryIt
     const parts: string[] = []
     if (todayReceiptsCount.value > 0) {
       parts.push(
-        `${todayReceiptsCount.value} sale${todayReceiptsCount.value === 1 ? '' : 's'} · ${formatCurrency(todaySales.value)} today`
+        `${todayReceiptsCount.value} sale${
+          todayReceiptsCount.value === 1 ? '' : 's'
+        } · ${formatCurrency(todaySales.value)} today`
       )
     } else {
       parts.push('No sales yet today')
     }
     if (outstandingCount.value > 0) {
-      parts.push(
-        `${outstandingCount.value} balance${outstandingCount.value === 1 ? '' : 's'} open`
-      )
+      parts.push(`${outstandingCount.value} balance${outstandingCount.value === 1 ? '' : 's'} open`)
     }
     if (lowStockItems.value.length > 0) {
-      parts.push(
-        `${lowStockItems.value.length} low stock`
-      )
+      parts.push(`${lowStockItems.value.length} low stock`)
     }
     return parts.join(' · ')
   })
@@ -777,6 +818,8 @@ export function useDashboardInsights(folderItems: Ref<Record<string, InventoryIt
     outstandingBalanceTotal,
     itemsSoldCount,
     totalCustomers,
+    weekdayActivity,
+    repeatCustomers,
     newCustomersToday,
     totalInventoryItems,
     totalFolders,
