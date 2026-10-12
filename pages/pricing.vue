@@ -245,7 +245,8 @@
     </section>
 
     <MkCta
-      title="Your first store is on us."
+      title="Your first store is"
+      accent="on us."
       :primary="{ label: 'Start free', to: appUrl }"
       :secondary="{ label: 'Try the demo', to: '/demo/dashboard' }"
     />

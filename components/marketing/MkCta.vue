@@ -2,6 +2,7 @@
   <section class="mk-section" :aria-labelledby="titleId">
     <div class="mk-container">
       <div class="mk-cta mk-reveal">
+        <span class="mk-cta__ring" aria-hidden="true" />
         <span class="mk-cta__mark">
           <img
             src="/brand/storvv-symbol.png"
@@ -11,16 +12,19 @@
             height="40"
           />
         </span>
-        <h2 :id="titleId" class="mk-h2">{{ title }}</h2>
+        <h2 :id="titleId" class="mk-h2">
+          {{ title }}
+          <span v-if="accent" class="mk-accent">{{ accent }}</span>
+        </h2>
         <p v-if="lede" class="mk-lede">{{ lede }}</p>
         <div class="mk-actions mk-actions--center">
-          <SButton variant="primary" size="lg" class="mk-btn" :to="primary.to">
+          <NuxtLink :to="primary.to" class="mk-cta__btn mk-cta__btn--primary">
             {{ primary.label }}
-            <template #trailing><ArrowRight :size="16" aria-hidden="true" /></template>
-          </SButton>
-          <SButton v-if="secondary" variant="secondary" size="lg" class="mk-btn" :to="secondary.to">
+            <ArrowRight :size="16" aria-hidden="true" />
+          </NuxtLink>
+          <NuxtLink v-if="secondary" :to="secondary.to" class="mk-cta__btn mk-cta__btn--glass">
             {{ secondary.label }}
-          </SButton>
+          </NuxtLink>
         </div>
         <ul class="mk-cta__notes" aria-label="Good to know">
           <li><Check :size="14" aria-hidden="true" />Free forever for one store</li>
@@ -35,10 +39,11 @@
 <script setup lang="ts">
 import { useId } from 'vue'
 import { ArrowRight, Check } from '@lucide/vue'
-import SButton from '~/components/s/SButton.vue'
 
 defineProps<{
   title: string
+  /** Last words of the title, set in the italic serif accent. */
+  accent?: string
   lede?: string
   primary: { label: string; to: string }
   secondary?: { label: string; to: string }

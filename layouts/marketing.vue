@@ -2,7 +2,11 @@
   <div class="ds-root s-c mk">
     <header
       class="mk-header"
-      :class="{ 'mk-header--scrolled': headerScrolled, 'mk-header--open': menuOpen }"
+      :class="{
+        'mk-header--scrolled': headerScrolled,
+        'mk-header--open': menuOpen,
+        'mk-header--overlay': route.path === '/' && !headerScrolled && !menuOpen,
+      }"
     >
       <div class="mk-container">
         <div class="mk-header__bar">

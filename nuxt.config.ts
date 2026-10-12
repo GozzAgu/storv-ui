@@ -230,7 +230,7 @@ export default defineNuxtConfig({
         },
         {
           rel: 'stylesheet',
-          href: 'https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Pixelify+Sans:wght@400;600&display=swap',
+          href: 'https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@1&family=JetBrains+Mono:wght@400;500&family=Pixelify+Sans:wght@400;600&display=swap',
           media: 'print',
           onload: 'this.media="all"',
         },

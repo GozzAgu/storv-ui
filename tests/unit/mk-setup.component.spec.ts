@@ -25,11 +25,11 @@ const finishStep = (wrapper: ReturnType<typeof mountSetup>) =>
   wrapper.find('.mks__fill').trigger('animationend')
 
 describe('MkSetup', () => {
-  it('starts on step one with the store form', () => {
+  it('starts on step one with the store details', () => {
     const wrapper = mountSetup()
     expect(current(wrapper)).toEqual(['step', undefined, undefined])
+    expect(wrapper.find('.mks__title').text()).toBe('Create your store')
     expect(wrapper.find('.mks__main').text()).toContain("Ada's Gadgets")
-    expect(wrapper.find('.mks__toast').text()).toContain('Your store is live')
   })
 
   it('advances when the progress bar finishes, marks earlier steps done and loops', async () => {
@@ -37,8 +37,8 @@ describe('MkSetup', () => {
 
     await finishStep(wrapper)
     expect(current(wrapper)).toEqual([undefined, 'step', undefined])
+    expect(wrapper.find('.mks__title').text()).toBe('Add your stock')
     expect(wrapper.find('.mks__main').text()).toContain('AirPods Pro')
-    expect(wrapper.find('.mks__url').text()).toContain('inventory')
     expect(wrapper.findAll('.mks__step')[0]!.classes()).toContain('is-done')
 
     await finishStep(wrapper)
@@ -48,16 +48,16 @@ describe('MkSetup', () => {
     expect(current(wrapper)).toEqual(['step', undefined, undefined])
   })
 
-  it('jumps to a step when it is clicked', async () => {
+  it('jumps to a step when its tab is clicked', async () => {
     const wrapper = mountSetup()
 
     await wrapper.findAll('.mks__step')[2]!.trigger('click')
     expect(current(wrapper)).toEqual([undefined, undefined, 'step'])
-    expect(wrapper.find('.mks__main').text()).toContain('Receipt sent')
+    expect(wrapper.find('.mks__title').text()).toBe('Start selling')
     expect(wrapper.findAll('.mks__fill')).toHaveLength(1)
   })
 
-  it('keeps the reveal marker while the steps change', async () => {
+  it('pauses on hover and keeps the reveal marker while the steps change', async () => {
     const wrapper = mountSetup()
     const reveal = wrapper.find('.mks__window')
     reveal.element.setAttribute('data-revealed', '')

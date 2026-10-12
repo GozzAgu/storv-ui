@@ -29,13 +29,7 @@ html:has(.s-shell.ds-root) body,
 
 .s-btn--secondary {
   background: var(--s-glass-strong);
-  box-shadow: var(--s-glass-highlight), 0 0 0 1px var(--s-glass-hairline), var(--s-shadow-sm);
-}
-
-/* ── Primary buttons: solid logo blue with a soft lift ─────────────────── */
-
-.s-btn--primary {
-  box-shadow: var(--s-btn-primary-glow);
+  box-shadow: 0 0 0 1px var(--s-glass-hairline);
 }
 /* ── Frosted chrome and overlays ───────────────────────────────────────── */
 

@@ -6,7 +6,7 @@
           <p class="mk-eyebrow">Who it's for</p>
           <h2 id="mk-intro-title" class="mk-h2">
             One workspace,
-            <span class="mk-accent">however you sell.</span>
+            <em class="mk-serif">however you sell.</em>
           </h2>
         </header>
         <div class="mk-intro__aside">
@@ -43,7 +43,7 @@
         />
         <div class="mk-trade__body">
           <span class="mk-trade__icon" aria-hidden="true">
-            <component :is="trade.icon" :size="18" />
+            <component :is="trade.icon" :size="16" :stroke-width="1.75" />
           </span>
           <h3 class="mk-trade__title">{{ trade.label }}</h3>
           <ul class="mk-trade__tags">

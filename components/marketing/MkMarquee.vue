@@ -3,7 +3,9 @@
     <div class="mk-marquee__track">
       <ul v-for="copy in 2" :key="copy" class="mk-marquee__list" :aria-hidden="copy === 2">
         <li v-for="item in items" :key="item.label" class="mk-marquee__item">
-          <span class="mk-marquee__icon"><component :is="item.icon" :size="14" /></span>
+          <span class="mk-marquee__icon"
+            ><component :is="item.icon" :size="16" :stroke-width="1.75"
+          /></span>
           {{ item.label }}
         </li>
       </ul>

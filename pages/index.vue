@@ -12,6 +12,8 @@
 
     <MkTour />
 
+    <MkImpact />
+
     <MkSetup />
 
     <!-- Pricing teaser -->
@@ -97,7 +99,8 @@
 
     <MkCta
       class="mk-section--tight-top"
-      title="Your first store is on us."
+      title="Your first store is"
+      accent="on us."
       lede="Set up Micro in minutes, right in your browser."
       :primary="{ label: 'Start free', to: appUrl }"
       :secondary="{ label: 'Try the live demo', to: '/demo/dashboard' }"
@@ -125,6 +128,7 @@ import MkCta from '~/components/marketing/MkCta.vue'
 import MkFaq, { type MkFaqItem } from '~/components/marketing/MkFaq.vue'
 import MkTour from '~/components/marketing/MkTour.vue'
 import MkSectionHead from '~/components/marketing/MkSectionHead.vue'
+import MkImpact from '~/components/marketing/MkImpact.vue'
 import MkIntro from '~/components/marketing/MkIntro.vue'
 import MkPlatform from '~/components/marketing/MkPlatform.vue'
 import MkSetup from '~/components/marketing/MkSetup.vue'

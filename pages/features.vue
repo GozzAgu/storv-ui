@@ -132,7 +132,8 @@
     </section>
 
     <MkCta
-      title="Ready to run the shop from one place?"
+      title="Ready to run the shop"
+      accent="from one place?"
       :primary="{ label: 'Get started free', to: appUrl }"
       :secondary="{ label: 'See pricing', to: '/pricing' }"
     />

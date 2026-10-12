@@ -1,62 +1,42 @@
 <template>
   <section ref="heroRef" class="mkh" aria-labelledby="home-title">
-    <div class="mkh__bg" aria-hidden="true">
-      <span class="mkh__beam" />
-      <span class="mkh__aura mkh__aura--a" />
-      <span class="mkh__aura mkh__aura--b" />
-      <span class="mkh__grain" />
-    </div>
-
-    <div class="mk-container mkh__copy">
-      <NuxtLink to="/features" class="mkh__announce mkh-in" style="--i: 0">
-        <span class="mkh__announce-tag"><Sparkles :size="12" aria-hidden="true" />New</span>
-        <span
-          >Receipts straight to WhatsApp<span class="mkh__announce-more"
-            >, no printer needed</span
-          ></span
-        >
-        <ArrowRight :size="14" aria-hidden="true" class="mkh__announce-arrow" />
-      </NuxtLink>
-
-      <h1 id="home-title" class="mkh__title mkh-in" style="--i: 1">
-        <span class="ds-sr-only">Run your shop without the guesswork.</span>
-        <span aria-hidden="true" class="mkh__line">
-          Run your
-          <span class="mkh__rotator" :style="wordWidth ? { width: `${wordWidth}px` } : undefined">
-            <span ref="sizerRef" class="mkh__sizer">{{ shopWord }}</span>
-            <Transition name="mkh-word">
-              <span :key="shopWord" class="mkh__word">{{ shopWord }}</span>
-            </Transition>
-          </span>
-        </span>
-        <span aria-hidden="true" class="mkh__line mkh__line--muted">without the guesswork.</span>
-      </h1>
-
-      <p class="mkh__lede mkh-in" style="--i: 2">
-        Inventory, sales, receipts, customers and staff in one fast workspace. Know what's on every
-        shelf and what came through the till, in real time, from any device.
-      </p>
-
-      <div class="mkh__actions mkh-in" style="--i: 3">
-        <SButton variant="primary" size="lg" class="mk-btn mkh__cta" :to="appUrl">
-          Start free
-          <template #trailing><ArrowRight :size="16" aria-hidden="true" /></template>
-        </SButton>
-        <SButton variant="secondary" size="lg" class="mk-btn" to="/demo/dashboard">
-          <template #leading><Play :size="14" aria-hidden="true" /></template>
-          Try the live demo
-        </SButton>
+    <div class="mkh__panel mkh-in" style="--i: 0">
+      <div class="mkh__bg" aria-hidden="true">
+        <span class="mkh__wash" />
+        <span class="mkh__ring" />
+        <span class="mkh__grain" />
       </div>
 
-      <ul class="mkh__proof mkh-in" style="--i: 4" aria-label="Good to know">
-        <li><Check :size="14" aria-hidden="true" />Free forever for one store</li>
-        <li><Check :size="14" aria-hidden="true" />No card needed</li>
-        <li><Check :size="14" aria-hidden="true" />Set up in minutes</li>
-      </ul>
+      <div class="mkh__copy">
+        <NuxtLink to="/features" class="mkh__announce mkh-in" style="--i: 1">
+          <Sparkles :size="12" aria-hidden="true" />
+          <span
+            >Receipts straight to WhatsApp<span class="mkh__announce-more"
+              >, no printer needed</span
+            ></span
+          >
+        </NuxtLink>
+
+        <h1 id="home-title" class="mkh__title mkh-in" style="--i: 2">
+          <span class="mkh__line">Run your shop smarter.</span>
+          <span class="mkh__line">Sell <em class="mkh__serif">faster.</em></span>
+        </h1>
+
+        <p class="mkh__lede mkh-in" style="--i: 3">
+          Inventory, sales, receipts and customers in one fast workspace, so your team can spend
+          less time counting and more time selling.
+        </p>
+
+        <div class="mkh__actions mkh-in" style="--i: 4">
+          <NuxtLink :to="appUrl" class="mkh__btn mkh__btn--primary">Start free</NuxtLink>
+          <NuxtLink to="/demo/dashboard" class="mkh__btn mkh__btn--glass">
+            Try the live demo <Play :size="12" aria-hidden="true" />
+          </NuxtLink>
+        </div>
+      </div>
     </div>
 
     <div class="mk-container mkh__stage-wrap mkh-in" style="--i: 5">
-      <span class="mkh__horizon" aria-hidden="true" />
       <div
         class="mkh__stage"
         :style="{ '--tilt': tilt.toFixed(4), '--px': px.toFixed(4), '--py': py.toFixed(4) }"
@@ -116,25 +96,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import {
-  ArrowLeftRight,
-  ArrowRight,
-  Check,
-  PackageMinus,
-  Play,
-  ReceiptText,
-  Sparkles,
-  TrendingUp,
-} from '@lucide/vue'
-import SButton from '~/components/s/SButton.vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { ArrowLeftRight, PackageMinus, Play, ReceiptText, Sparkles, TrendingUp } from '@lucide/vue'
 import MkFrame from '~/components/marketing/MkFrame.vue'
 import MkMarquee from '~/components/marketing/MkMarquee.vue'
 import { useMarketingAppUrl } from '~/composables/useMarketingSite'
 
 const appUrl = useMarketingAppUrl()
 
-const shopWords = ['boutique', 'phone shop', 'mini-mart', 'pharmacy', 'supermarket', 'gadget store']
 const sales = [
   { amount: '₦25,000', detail: 'Receipt sent on WhatsApp', add: 25000 },
   { amount: '₦485,000', detail: 'iPhone 13 · Paid by transfer', add: 485000 },
@@ -147,7 +116,6 @@ const barSets = [
 ]
 
 const tick = ref(0)
-const shopWord = computed(() => shopWords[tick.value % shopWords.length]!)
 const sale = computed(() => sales[tick.value % sales.length]!)
 const bars = computed(() => barSets[tick.value % barSets.length]!)
 const revenue = computed(() => {
@@ -161,14 +129,6 @@ const tilt = ref(1)
 const px = ref(0)
 const py = ref(0)
 const heroRef = ref<HTMLElement | null>(null)
-const sizerRef = ref<HTMLElement | null>(null)
-const wordWidth = ref(0)
-
-function measureWord() {
-  if (sizerRef.value) wordWidth.value = sizerRef.value.getBoundingClientRect().width
-}
-
-watch(shopWord, () => nextTick(measureWord))
 
 let ticker: ReturnType<typeof setInterval> | undefined
 let frame = 0
@@ -210,8 +170,6 @@ onMounted(() => {
   }
   onScroll()
   tilt.value = targetTilt
-  document.fonts?.ready.then(measureWord)
-  window.addEventListener('resize', measureWord, { passive: true })
   window.addEventListener('scroll', onScroll, { passive: true })
   heroRef.value?.addEventListener('pointermove', onPointer, { passive: true })
   ticker = setInterval(() => {
@@ -223,7 +181,6 @@ onBeforeUnmount(() => {
   clearInterval(ticker)
   cancelAnimationFrame(frame)
   window.removeEventListener('scroll', onScroll)
-  window.removeEventListener('resize', measureWord)
   heroRef.value?.removeEventListener('pointermove', onPointer)
 })
 </script>

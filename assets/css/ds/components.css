@@ -85,7 +85,6 @@
 
 .s-btn--primary {
   background: var(--s-btn-primary);
-  box-shadow: var(--s-shadow-sm);
   color: var(--s-on-btn-primary);
 }
 
@@ -100,7 +99,7 @@
 /* Hairline drawn as a shadow so it never shifts layout */
 .s-btn--secondary {
   background: var(--s-surface);
-  box-shadow: 0 0 0 1px var(--s-border), var(--s-shadow-sm);
+  box-shadow: 0 0 0 1px var(--s-border);
   color: var(--s-text);
 }
 
@@ -125,7 +124,6 @@
 
 .s-btn--danger {
   background: var(--s-error);
-  box-shadow: var(--s-shadow-sm);
   color: var(--s-surface);
 }
 
@@ -205,7 +203,7 @@
 
 .s-icon-btn--secondary {
   background: var(--s-surface);
-  box-shadow: 0 0 0 1px var(--s-border), var(--s-shadow-sm);
+  box-shadow: 0 0 0 1px var(--s-border);
 }
 
 .s-icon-btn--secondary:focus-visible {
