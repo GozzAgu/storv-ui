@@ -2038,7 +2038,7 @@ html.dark .mk-marquee__item:hover {
   gap: var(--s-space-1-5);
 }
 
-/* Three equal cards, in the same family as the feature grid above */
+/* Three equal cards: a picture of the number on top, the number and one line below */
 .mk-stats {
   display: grid;
   gap: var(--s-space-2);
@@ -2049,18 +2049,12 @@ html.dark .mk-marquee__item:hover {
 
 .mk-stat {
   position: relative;
-  display: grid;
-  grid-template-rows: auto auto auto 1fr;
-  gap: var(--s-space-1);
-  padding: clamp(var(--s-space-3), 3vw, var(--s-space-4));
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
   border: 1px solid var(--mk-edge);
   border-radius: var(--mk-radius);
-  background: radial-gradient(
-      80% 60% at 0% 0%,
-      color-mix(in srgb, var(--s-accent) 7%, transparent),
-      transparent 70%
-    ),
-    var(--mk-page);
+  background: var(--mk-page);
   transition: border-color var(--s-duration) var(--s-ease-out);
 }
 
@@ -2084,35 +2078,34 @@ html.dark .mk-marquee__item:hover {
   opacity: 1;
 }
 
-.mk-stat__top {
+.mk-stat__viz {
+  position: relative;
+  height: 216px;
+  margin: 0;
+  padding: var(--s-space-2);
+  overflow: hidden;
+  border-radius: calc(var(--mk-radius) - 6px);
+  background: radial-gradient(
+      90% 70% at 50% 0%,
+      color-mix(in srgb, var(--s-accent) 9%, transparent),
+      transparent 70%
+    ),
+    var(--s-surface-2);
+  list-style: none;
+}
+
+.mk-stat__foot {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--s-space-2);
-}
-
-.mk-stat__icon {
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  border: 1px solid var(--mk-edge-hi);
-  border-radius: var(--s-radius-lg);
-  background: color-mix(in srgb, var(--s-accent) 8%, var(--mk-page));
-  color: var(--s-accent);
-}
-
-.mk-stat__kicker {
-  font: 500 0.6875rem / 1 var(--s-font-mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--s-text-muted);
+  gap: var(--s-space-2);
+  padding: var(--s-space-2) var(--s-space-1-5) var(--s-space-1-5);
 }
 
 .mk-stat__value {
   display: flex;
+  flex: none;
   align-items: flex-start;
-  font: 600 clamp(3rem, 5.5vw, 4.25rem) / 1 var(--s-font-sans);
+  font: 600 clamp(2.75rem, 4.5vw, 3.5rem) / 1 var(--s-font-sans);
   letter-spacing: var(--mk-tracking-display);
   font-variant-numeric: tabular-nums;
   color: var(--s-text);
@@ -2125,32 +2118,186 @@ html.dark .mk-marquee__item:hover {
 }
 
 .mk-stat__label {
+  display: grid;
+  gap: 4px;
+  padding-left: var(--s-space-2);
+  border-left: 1px solid var(--mk-edge);
   font: var(--mk-h4);
   color: var(--s-text);
 }
 
-.mk-stat__chips {
+.mk-stat__kicker {
+  font: 500 0.6875rem / 1 var(--s-font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--s-accent);
+}
+
+/* Workflows: a 2×4 grid of labelled tiles that light up in turn */
+.mk-stat-flows {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: center;
+  gap: 6px;
+}
+
+.mk-stat-flows__item {
   display: flex;
-  flex-wrap: wrap;
-  align-content: flex-start;
-  gap: 6px;
-  margin: var(--s-space-1) 0 0;
-  padding: var(--s-space-2) 0 0;
-  border-top: 1px solid var(--mk-edge);
-  list-style: none;
-}
-
-.mk-stat__chips .mk-tag {
-  gap: 6px;
-  min-height: 26px;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 8px 10px;
   border: 1px solid var(--mk-edge);
-  background: transparent;
-  color: var(--s-text-2);
+  border-radius: var(--s-radius);
+  background: var(--mk-page);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--s-text);
+  white-space: nowrap;
 }
 
-.mk-stat__chips .mk-tag--accent {
-  border-color: color-mix(in srgb, var(--s-success) 35%, transparent);
-  background: var(--s-success-soft);
+.mk-stat-flows__item svg {
+  flex: none;
+  color: var(--s-accent);
+}
+
+[data-live] .mk-stat-flows__item {
+  animation: mk-flow-lit 8s var(--s-ease-out) infinite;
+  animation-delay: calc(var(--f) * 1s);
+}
+
+@keyframes mk-flow-lit {
+  0%,
+  14% {
+    border-color: var(--mk-edge-hi);
+    background: color-mix(in srgb, var(--s-accent) 8%, var(--mk-page));
+  }
+  22%,
+  100% {
+    border-color: var(--mk-edge);
+    background: var(--mk-page);
+  }
+}
+
+/* Plans: bars sized by how many stores each plan covers */
+.mk-stat-plans {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: end;
+  gap: var(--s-space-1-5);
+  padding-bottom: var(--s-space-1-5);
+}
+
+.mk-stat-plans__item {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+}
+
+.mk-stat-plans__bar {
+  display: grid;
+  place-items: start center;
+  width: 100%;
+  height: 22px;
+  margin-bottom: 8px;
+  padding-top: 8px;
+  border: 1px solid var(--mk-edge-hi);
+  border-radius: 10px 10px 4px 4px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--s-accent) 22%, var(--mk-page)),
+    color-mix(in srgb, var(--s-accent) 6%, var(--mk-page))
+  );
+  transition: height 1100ms var(--mk-spring);
+  transition-delay: calc(var(--p) * 120ms);
+}
+
+.mk-stat-plans__item:last-child .mk-stat-plans__bar {
+  border-color: transparent;
+  background: linear-gradient(180deg, var(--s-accent), #8ea2ff);
+}
+
+[data-live] .mk-stat-plans__bar {
+  height: calc(34px + var(--h) * 96px);
+}
+
+.mk-stat-plans__stores {
+  font: 600 0.8125rem / 1 var(--s-font-sans);
+  font-variant-numeric: tabular-nums;
+  color: var(--s-accent);
+}
+
+.mk-stat-plans__item:last-child .mk-stat-plans__stores {
+  color: #fff;
+}
+
+.mk-stat-plans__name {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--s-text);
+}
+
+.mk-stat-plans__note {
+  font: 500 0.625rem / 1.2 var(--s-font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--s-text-muted);
+}
+
+/* Platforms: three device tiles, live or coming soon */
+.mk-stat-devices {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-content: center;
+  gap: var(--s-space-1);
+}
+
+.mk-stat-devices__item {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: var(--s-space-2) 6px;
+  border: 1px dashed var(--mk-edge-hi);
+  border-radius: var(--s-radius-lg);
+  color: var(--s-text-muted);
+}
+
+.mk-stat-devices__item.is-live {
+  border: 1px solid color-mix(in srgb, var(--s-success) 40%, transparent);
+  background: var(--mk-page);
+  color: var(--s-text);
+}
+
+.mk-stat-devices__icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--s-accent) 6%, transparent);
+  color: var(--s-text-muted);
+}
+
+.is-live .mk-stat-devices__icon {
+  background: color-mix(in srgb, var(--s-accent) 12%, transparent);
+  color: var(--s-accent);
+}
+
+.mk-stat-devices__name {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.mk-stat-devices__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: 500 0.625rem / 1 var(--s-font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.is-live .mk-stat-devices__status {
   color: var(--s-success);
 }
 
@@ -2171,8 +2318,13 @@ html.dark .mk-marquee__item:hover {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mk-stat__live {
+  .mk-stat__live,
+  [data-live] .mk-stat-flows__item {
     animation: none;
+  }
+
+  .mk-stat-plans__bar {
+    transition: none;
   }
 }
 
