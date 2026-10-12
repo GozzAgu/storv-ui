@@ -26,6 +26,7 @@ import {
 import { clearCachedUserProfile, markSignOutPending } from '~/utils/auth-sign-out'
 import { resolveApiPath } from '~/utils/api-url'
 import { getApiErrorMessage } from '~/utils/api-error-message'
+import { useUserStore } from '~/stores/user'
 
 /**
  * Composable for Firebase Authentication
@@ -466,7 +467,14 @@ export const useFirebaseAuth = () => {
         body: { totpCode: totpCode.trim() },
       })
       await user.getIdToken(true)
+      // The dashboard guard reads twoFactorEnabled from this profile (and its device cache);
+      // left stale, it sends the user to the 2FA prompt once the session flag is cleared.
+      const userStore = useUserStore()
+      if (userStore.userData?.uid === user.uid) {
+        userStore.userData = { ...userStore.userData, twoFactorEnabled: false }
+      }
       clearTwoFactorSessionVerified(user.uid)
+      await userStore.fetchUserData(user.uid).catch(() => {})
     } catch (error: any) {
       if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
         throw new Error('Incorrect password')

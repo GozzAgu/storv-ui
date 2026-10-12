@@ -301,7 +301,10 @@ async function resumePendingTwoFactorSignIn() {
   ) {
     awaitingTwoFactor.value = true
     form.value.email = authStore.currentUser.email || form.value.email
+    return
   }
+  // Sent here by a stale profile (e.g. 2FA was just turned off): no code is needed, so carry on.
+  await finishAuthenticatedSession(null)
 }
 
 const { signIn, signOut } = useFirebaseAuth()
