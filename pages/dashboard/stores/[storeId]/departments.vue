@@ -4,11 +4,14 @@
       <template #eyebrow>
         <span class="s-page-header__eyebrow s-team__branch">
           {{ store?.name || 'Branch' }}
-          <SBadge v-if="store && currentStore?.id === store.id" tone="success" size="sm">Current branch</SBadge>
+          <SBadge v-if="store && currentStore?.id === store.id" tone="success" size="sm"
+            >Current branch</SBadge
+          >
         </span>
       </template>
       <template #description>
-        Departments group your staff and decide which inventory they can see. Open one to manage its people and roles.
+        Departments group your staff and decide which inventory they can see. Open one to manage its
+        people and roles.
       </template>
       <template v-if="canManageDepartments" #actions>
         <SButton
@@ -23,7 +26,10 @@
       </template>
     </SPageHeader>
 
-    <p v-if="canManageDepartments && !canAddDepartmentForStore && departmentLimitMessage" class="s-notice">
+    <p
+      v-if="canManageDepartments && !canAddDepartmentForStore && departmentLimitMessage"
+      class="s-notice"
+    >
       {{ departmentLimitMessage }}
     </p>
 
@@ -32,7 +38,9 @@
         <template #icon><TriangleAlert :size="24" :stroke-width="1.75" /></template>
         <template #actions>
           <SButton @click="handleRetryFetch">
-            <template #leading><RotateCw :size="16" :stroke-width="1.75" aria-hidden="true" /></template>
+            <template #leading
+              ><RotateCw :size="16" :stroke-width="1.75" aria-hidden="true"
+            /></template>
             Try again
           </SButton>
         </template>
@@ -59,7 +67,11 @@
       >
         <template #icon><Building2 :size="24" :stroke-width="1.75" /></template>
         <template v-if="canManageDepartments" #actions>
-          <SButton variant="primary" :disabled="!canAddDepartmentForStore" @click="openCreateDepartmentModal">
+          <SButton
+            variant="primary"
+            :disabled="!canAddDepartmentForStore"
+            @click="openCreateDepartmentModal"
+          >
             <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
             New department
           </SButton>
@@ -77,158 +89,92 @@
         </div>
       </dl>
 
-      <STabs
-        v-if="inactiveDepartmentsCount > 0"
-        v-model="departmentFilter"
-        :tabs="departmentFilterTabs"
-        label="Department status"
-      />
+      <section class="s-table-card" aria-label="Departments">
+        <div class="s-table-card__head">
+          <STabs
+            v-if="inactiveDepartmentsCount > 0"
+            v-model="departmentFilter"
+            :tabs="departmentFilterTabs"
+            label="Department status"
+          />
 
-      <div
-        v-if="canManageDepartments && selectedDepartmentsForBulk.length > 0"
-        class="s-toolbar s-toolbar--selection"
-        role="region"
-        aria-label="Bulk actions"
-      >
-        <SCheckbox
-          :model-value="allDepartmentsOnPageSelected"
-          :label="`${selectedDepartmentsForBulk.length} selected`"
-          @update:model-value="setSelectAllDepartmentsBulk"
-        />
-        <div class="s-toolbar__end">
-          <SButton variant="ghost" size="sm" @click="selectedDepartmentsForBulk = []">Clear</SButton>
-          <SButton variant="danger" size="sm" @click="openBulkDeleteDepartmentsModal">
-            <template #leading><Trash2 :size="14" :stroke-width="2" aria-hidden="true" /></template>
-            Delete
-          </SButton>
+          <div
+            v-if="canManageDepartments && selectedDepartmentsForBulk.length > 0"
+            class="s-toolbar s-toolbar--selection"
+            role="region"
+            aria-label="Bulk actions"
+          >
+            <SCheckbox
+              :model-value="allDepartmentsOnPageSelected"
+              :label="`${selectedDepartmentsForBulk.length} selected`"
+              @update:model-value="setSelectAllDepartmentsBulk"
+            />
+            <div class="s-toolbar__end">
+              <SButton variant="ghost" size="sm" @click="selectedDepartmentsForBulk = []"
+                >Clear</SButton
+              >
+              <SButton variant="danger" size="sm" @click="openBulkDeleteDepartmentsModal">
+                <template #leading
+                  ><Trash2 :size="14" :stroke-width="2" aria-hidden="true"
+                /></template>
+                Delete
+              </SButton>
+            </div>
+          </div>
+          <div v-else class="s-toolbar">
+            <SSearch
+              v-model="searchQuery"
+              class="s-toolbar__search"
+              placeholder="Search departments"
+              label="Search departments by name, type or manager"
+            />
+          </div>
         </div>
-      </div>
-      <div v-else class="s-toolbar">
-        <SSearch
-          v-model="searchQuery"
-          class="s-toolbar__search"
-          placeholder="Search departments"
-          label="Search departments by name, type or manager"
-        />
-      </div>
 
-      <SCard v-if="paginatedDepartments.length === 0">
-        <SEmptyState
-          :title="searchQuery ? 'No departments found' : `No ${departmentFilter} departments`"
-          :description="searchQuery ? 'Try a different name, type or manager.' : 'Try another status.'"
-        >
-          <template #icon><SearchX :size="24" :stroke-width="1.75" /></template>
-          <template #actions>
-            <SButton @click="resetFilters">Show all departments</SButton>
-          </template>
-        </SEmptyState>
-      </SCard>
-
-      <template v-else>
-        <!-- Phone -->
-        <SCard flush class="s-only-sm">
-          <ul class="s-list">
-            <li v-for="department in paginatedDepartments" :key="department.id">
-              <div class="s-list__item">
-                <SCheckbox
-                  v-if="canManageDepartments"
-                  :model-value="isDepartmentSelected(department)"
-                  :aria-label="`Select ${department.name}`"
-                  @update:model-value="(checked) => toggleDepartmentSelection(department, checked)"
-                />
-                <button type="button" class="s-list__main s-list__hit" @click="navigateToDepartment(department.id)">
-                  <span class="s-list__primary">{{ department.name }}</span>
-                  <span class="s-list__secondary">{{ departmentSummary(department) }}</span>
-                </button>
-                <span class="s-list__end">
-                  <span class="s-list__value">{{ staffLabel(department) }}</span>
-                  <SBadge v-if="department.isActive === false" tone="warning" size="sm">Inactive</SBadge>
-                </span>
-                <SIconButton
-                  v-if="canManageDepartments"
-                  label="Department actions"
-                  size="sm"
-                  :data-department-actions-anchor="department.id"
-                  aria-haspopup="menu"
-                  :aria-expanded="openDepartmentMenuId === department.id"
-                  @click="toggleDepartmentMenu(department.id)"
-                >
-                  <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
-                </SIconButton>
-              </div>
-            </li>
-          </ul>
+        <SCard v-if="paginatedDepartments.length === 0">
+          <SEmptyState
+            :title="searchQuery ? 'No departments found' : `No ${departmentFilter} departments`"
+            :description="
+              searchQuery ? 'Try a different name, type or manager.' : 'Try another status.'
+            "
+          >
+            <template #icon><SearchX :size="24" :stroke-width="1.75" /></template>
+            <template #actions>
+              <SButton @click="resetFilters">Show all departments</SButton>
+            </template>
+          </SEmptyState>
         </SCard>
 
-        <!-- Tablet and desktop -->
-        <div class="s-table-wrap s-hide-sm">
-          <table class="s-table">
-            <thead>
-              <tr>
-                <th v-if="canManageDepartments" scope="col" class="s-table__check">
+        <template v-else>
+          <!-- Phone -->
+          <SCard flush class="s-only-sm">
+            <ul class="s-list">
+              <li v-for="department in paginatedDepartments" :key="department.id">
+                <div class="s-list__item">
                   <SCheckbox
-                    :model-value="allDepartmentsOnPageSelected"
-                    aria-label="Select all departments"
-                    @update:model-value="setSelectAllDepartmentsBulk"
-                  />
-                </th>
-                <th scope="col">Department</th>
-                <th scope="col" class="s-hide-md">Type</th>
-                <th scope="col" class="s-table__num">Staff</th>
-                <th scope="col" class="s-hide-md">Manager</th>
-                <th scope="col">Status</th>
-                <th scope="col" class="s-hide-lg">Updated</th>
-                <th v-if="canManageDepartments" scope="col" class="s-table__actions">
-                  <span class="ds-sr-only">Actions</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="department in paginatedDepartments"
-                :key="department.id"
-                class="s-table__row--interactive"
-                :class="{ 's-table__row--selected': isDepartmentSelected(department) }"
-                tabindex="0"
-                @click="navigateToDepartment(department.id)"
-                @keydown.enter.self="navigateToDepartment(department.id)"
-              >
-                <td v-if="canManageDepartments" class="s-table__check" @click.stop>
-                  <SCheckbox
+                    v-if="canManageDepartments"
                     :model-value="isDepartmentSelected(department)"
                     :aria-label="`Select ${department.name}`"
-                    @update:model-value="(checked) => toggleDepartmentSelection(department, checked)"
+                    @update:model-value="
+                      (checked) => toggleDepartmentSelection(department, checked)
+                    "
                   />
-                </td>
-                <td>
-                  <div class="s-team__cell">
-                    <span class="s-team__mark" aria-hidden="true">
-                      <Building2 :size="16" :stroke-width="1.75" />
-                    </span>
-                    <span class="s-team__cell-text">
-                      <span class="s-table__primary">{{ department.name }}</span>
-                      <span v-if="department.description?.trim()" class="s-table__secondary">
-                        {{ department.description }}
-                      </span>
-                    </span>
-                  </div>
-                </td>
-                <td class="s-hide-md">{{ formatDepartmentTypeLabel(department.departmentType) }}</td>
-                <td class="s-table__num">{{ department.staffCount || 0 }}</td>
-                <td class="s-hide-md">
-                  <span v-if="department.manager?.trim()">{{ department.manager }}</span>
-                  <span v-else class="s-table__muted">Not assigned</span>
-                </td>
-                <td>
-                  <SBadge :tone="department.isActive === false ? 'warning' : 'success'" dot>
-                    {{ department.isActive === false ? 'Inactive' : 'Active' }}
-                  </SBadge>
-                </td>
-                <td class="s-hide-lg s-table__muted">
-                  {{ formatCategoryDate(department.updatedAt) ?? formatCategoryDate(department.createdAt) ?? EMPTY_CELL }}
-                </td>
-                <td v-if="canManageDepartments" class="s-table__actions" @click.stop>
+                  <button
+                    type="button"
+                    class="s-list__main s-list__hit"
+                    @click="navigateToDepartment(department.id)"
+                  >
+                    <span class="s-list__primary">{{ department.name }}</span>
+                    <span class="s-list__secondary">{{ departmentSummary(department) }}</span>
+                  </button>
+                  <span class="s-list__end">
+                    <span class="s-list__value">{{ staffLabel(department) }}</span>
+                    <SBadge v-if="department.isActive === false" tone="warning" size="sm"
+                      >Inactive</SBadge
+                    >
+                  </span>
                   <SIconButton
+                    v-if="canManageDepartments"
                     label="Department actions"
                     size="sm"
                     :data-department-actions-anchor="department.id"
@@ -238,20 +184,112 @@
                   >
                     <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
                   </SIconButton>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                </div>
+              </li>
+            </ul>
+          </SCard>
 
-        <SPagination
-          :current-page="currentPage"
-          :page-size="itemsPerPage"
-          :total="filteredDepartments.length"
-          label="Departments pagination"
-          @page-change="handlePageChange"
-        />
-      </template>
+          <!-- Tablet and desktop -->
+          <div class="s-table-wrap s-hide-sm">
+            <table class="s-table">
+              <thead>
+                <tr>
+                  <th v-if="canManageDepartments" scope="col" class="s-table__check">
+                    <SCheckbox
+                      :model-value="allDepartmentsOnPageSelected"
+                      aria-label="Select all departments"
+                      @update:model-value="setSelectAllDepartmentsBulk"
+                    />
+                  </th>
+                  <th scope="col">Department</th>
+                  <th scope="col" class="s-hide-md">Type</th>
+                  <th scope="col" class="s-table__num">Staff</th>
+                  <th scope="col" class="s-hide-md">Manager</th>
+                  <th scope="col">Status</th>
+                  <th scope="col" class="s-hide-lg">Updated</th>
+                  <th v-if="canManageDepartments" scope="col" class="s-table__actions">
+                    <span class="ds-sr-only">Actions</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="department in paginatedDepartments"
+                  :key="department.id"
+                  class="s-table__row--interactive"
+                  :class="{ 's-table__row--selected': isDepartmentSelected(department) }"
+                  tabindex="0"
+                  @click="navigateToDepartment(department.id)"
+                  @keydown.enter.self="navigateToDepartment(department.id)"
+                >
+                  <td v-if="canManageDepartments" class="s-table__check" @click.stop>
+                    <SCheckbox
+                      :model-value="isDepartmentSelected(department)"
+                      :aria-label="`Select ${department.name}`"
+                      @update:model-value="
+                        (checked) => toggleDepartmentSelection(department, checked)
+                      "
+                    />
+                  </td>
+                  <td>
+                    <div class="s-team__cell">
+                      <span class="s-team__mark" aria-hidden="true">
+                        <Building2 :size="16" :stroke-width="1.75" />
+                      </span>
+                      <span class="s-team__cell-text">
+                        <span class="s-table__primary">{{ department.name }}</span>
+                        <span v-if="department.description?.trim()" class="s-table__secondary">
+                          {{ department.description }}
+                        </span>
+                      </span>
+                    </div>
+                  </td>
+                  <td class="s-hide-md">
+                    {{ formatDepartmentTypeLabel(department.departmentType) }}
+                  </td>
+                  <td class="s-table__num">{{ department.staffCount || 0 }}</td>
+                  <td class="s-hide-md">
+                    <span v-if="department.manager?.trim()">{{ department.manager }}</span>
+                    <span v-else class="s-table__muted">Not assigned</span>
+                  </td>
+                  <td>
+                    <SBadge :tone="department.isActive === false ? 'warning' : 'success'" dot>
+                      {{ department.isActive === false ? 'Inactive' : 'Active' }}
+                    </SBadge>
+                  </td>
+                  <td class="s-hide-lg s-table__muted">
+                    {{
+                      formatCategoryDate(department.updatedAt) ??
+                      formatCategoryDate(department.createdAt) ??
+                      EMPTY_CELL
+                    }}
+                  </td>
+                  <td v-if="canManageDepartments" class="s-table__actions" @click.stop>
+                    <SIconButton
+                      label="Department actions"
+                      size="sm"
+                      :data-department-actions-anchor="department.id"
+                      aria-haspopup="menu"
+                      :aria-expanded="openDepartmentMenuId === department.id"
+                      @click="toggleDepartmentMenu(department.id)"
+                    >
+                      <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
+                    </SIconButton>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <SPagination
+            :current-page="currentPage"
+            :page-size="itemsPerPage"
+            :total="filteredDepartments.length"
+            label="Departments pagination"
+            @page-change="handlePageChange"
+          />
+        </template>
+      </section>
     </template>
 
     <SMenu
@@ -261,9 +299,22 @@
       label="Department actions"
       @close="closeDepartmentMenu"
     >
-      <SMenuItem label="Open" :icon="ArrowRight" @select="runDepartmentMenuAction((d) => navigateToDepartment(d.id))" />
-      <SMenuItem label="Edit" :icon="Pencil" @select="runDepartmentMenuAction(handleEditDepartment)" />
-      <SMenuItem label="Delete" :icon="Trash2" danger @select="runDepartmentMenuAction(askDeleteDepartment)" />
+      <SMenuItem
+        label="Open"
+        :icon="ArrowRight"
+        @select="runDepartmentMenuAction((d) => navigateToDepartment(d.id))"
+      />
+      <SMenuItem
+        label="Edit"
+        :icon="Pencil"
+        @select="runDepartmentMenuAction(handleEditDepartment)"
+      />
+      <SMenuItem
+        label="Delete"
+        :icon="Trash2"
+        danger
+        @select="runDepartmentMenuAction(askDeleteDepartment)"
+      />
     </SMenu>
 
     <SDialog
@@ -275,8 +326,16 @@
       :dismissible="!deletingDepartmentId"
     >
       <template #footer>
-        <SButton :disabled="Boolean(deletingDepartmentId)" @click="showDeleteDepartmentDialog = false">Cancel</SButton>
-        <SButton variant="danger" :loading="Boolean(deletingDepartmentId)" @click="confirmDeleteDepartment">
+        <SButton
+          :disabled="Boolean(deletingDepartmentId)"
+          @click="showDeleteDepartmentDialog = false"
+          >Cancel</SButton
+        >
+        <SButton
+          variant="danger"
+          :loading="Boolean(deletingDepartmentId)"
+          @click="confirmDeleteDepartment"
+        >
           Delete department
         </SButton>
       </template>
@@ -293,7 +352,11 @@
       warning="This permanently deletes the selected departments and their staff associations. This cannot be undone."
       confirm-label="I understand these departments will be permanently deleted."
       :loading="isBulkDeletingDepartments"
-      @update:model-value="(v) => { if (!v) bulkDeleteDepartmentsConfirmed = false }"
+      @update:model-value="
+        (v) => {
+          if (!v) bulkDeleteDepartmentsConfirmed = false
+        }
+      "
       @confirm="handleConfirmBulkDeleteDepartments"
     />
 

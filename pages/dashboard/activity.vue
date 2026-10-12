@@ -45,7 +45,9 @@
 
     <SCard v-else-if="fetchError">
       <SEmptyState title="Couldn't load activity" :description="fetchError">
-        <template #icon><TriangleAlert :size="24" :stroke-width="1.75" aria-hidden="true" /></template>
+        <template #icon
+          ><TriangleAlert :size="24" :stroke-width="1.75" aria-hidden="true"
+        /></template>
         <template #actions>
           <SButton @click="loadLogs(true)">Try again</SButton>
         </template>
@@ -62,110 +64,120 @@
     </SCard>
 
     <template v-else>
-      <STabs v-model="actionFilter" :tabs="webActionTabs" label="Filter by action" />
-
-      <div class="s-toolbar">
-        <SSearch
-          v-model="searchQuery"
-          class="s-toolbar__search"
-          placeholder="Search activity"
-          label="Search activity by person, item or record ID"
-        />
-      </div>
-
       <p v-if="reachedFetchCap" class="s-notice">
         Showing the newest {{ fetchLimit }} events. Search to find older ones.
       </p>
 
-      <SCard v-if="filteredLogs.length === 0">
-        <SEmptyState title="No matching activity" description="Try another tab, or clear the search.">
-          <template #icon><SearchX :size="24" :stroke-width="1.75" aria-hidden="true" /></template>
-          <template #actions>
-            <SButton @click="resetFilters()">Show all activity</SButton>
-          </template>
-        </SEmptyState>
-      </SCard>
-
-      <template v-else>
-        <!-- Phone -->
-        <SCard flush class="s-only-sm">
-          <ul class="s-list">
-            <li v-for="log in paginatedLogs" :key="log.id" class="s-list__item">
-              <SAvatar :name="log.userDisplayName" size="sm" />
-              <div class="s-list__main">
-                <span class="s-list__primary">{{ displayEntityName(log) }}</span>
-                <span class="s-list__secondary">
-                  {{ log.userDisplayName }} · {{ relativeTime(log.createdAt) }}
-                </span>
-              </div>
-              <div class="s-list__end">
-                <SBadge :tone="activityActionTone(log.action)" size="sm">
-                  {{ activityActionLabel(log.action) }}
-                </SBadge>
-              </div>
-            </li>
-          </ul>
-        </SCard>
-
-        <!-- Tablet and desktop -->
-        <div class="s-table-wrap s-hide-sm">
-          <table class="s-table">
-            <thead>
-              <tr>
-                <th scope="col">Person</th>
-                <th scope="col">Action</th>
-                <th scope="col">What changed</th>
-                <th scope="col">When</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="log in paginatedLogs" :key="log.id">
-                <td>
-                  <span class="s-table__inline">
-                    <SAvatar :name="log.userDisplayName" size="sm" />
-                    <span class="s-table__primary">{{ log.userDisplayName }}</span>
-                  </span>
-                </td>
-                <td>
-                  <SBadge :tone="activityActionTone(log.action)" size="sm" dot>
-                    {{ activityActionLabel(log.action) }}
-                  </SBadge>
-                </td>
-                <td>
-                  <span class="s-table__primary">{{ displayEntityName(log) }}</span>
-                  <span class="s-table__secondary s-activity__meta">
-                    <component
-                      :is="entityTypeIcon(log.entityType)"
-                      :size="14"
-                      :stroke-width="2"
-                      aria-hidden="true"
-                    />
-                    {{ activityEntityTypeLabel(log.entityType) }}
-                    <template v-if="logDetailSubtitle(log)"> · {{ logDetailSubtitle(log) }}</template>
-                  </span>
-                </td>
-                <td class="s-table__nowrap">
-                  <span class="s-table__primary">{{ relativeTime(log.createdAt) }}</span>
-                  <span
-                    v-if="relativeTime(log.createdAt) !== formatDate(log.createdAt)"
-                    class="s-table__secondary"
-                  >
-                    {{ formatDate(log.createdAt) }}
-                  </span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+      <section class="s-table-card" aria-label="Activity">
+        <div class="s-table-card__head">
+          <STabs v-model="actionFilter" :tabs="webActionTabs" label="Filter by action" />
+          <div class="s-toolbar">
+            <SSearch
+              v-model="searchQuery"
+              class="s-toolbar__search"
+              placeholder="Search activity"
+              label="Search activity by person, item or record ID"
+            />
+          </div>
         </div>
 
-        <SPagination
-          :current-page="currentPage"
-          :page-size="itemsPerPage"
-          :total="filteredLogs.length"
-          label="Activity pagination"
-          @page-change="handlePageChange"
-        />
-      </template>
+        <SCard v-if="filteredLogs.length === 0">
+          <SEmptyState
+            title="No matching activity"
+            description="Try another tab, or clear the search."
+          >
+            <template #icon
+              ><SearchX :size="24" :stroke-width="1.75" aria-hidden="true"
+            /></template>
+            <template #actions>
+              <SButton @click="resetFilters()">Show all activity</SButton>
+            </template>
+          </SEmptyState>
+        </SCard>
+
+        <template v-else>
+          <!-- Phone -->
+          <SCard flush class="s-only-sm">
+            <ul class="s-list">
+              <li v-for="log in paginatedLogs" :key="log.id" class="s-list__item">
+                <SAvatar :name="log.userDisplayName" size="sm" />
+                <div class="s-list__main">
+                  <span class="s-list__primary">{{ displayEntityName(log) }}</span>
+                  <span class="s-list__secondary">
+                    {{ log.userDisplayName }} · {{ relativeTime(log.createdAt) }}
+                  </span>
+                </div>
+                <div class="s-list__end">
+                  <SBadge :tone="activityActionTone(log.action)" size="sm">
+                    {{ activityActionLabel(log.action) }}
+                  </SBadge>
+                </div>
+              </li>
+            </ul>
+          </SCard>
+
+          <!-- Tablet and desktop -->
+          <div class="s-table-wrap s-hide-sm">
+            <table class="s-table">
+              <thead>
+                <tr>
+                  <th scope="col">Person</th>
+                  <th scope="col">Action</th>
+                  <th scope="col">What changed</th>
+                  <th scope="col">When</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="log in paginatedLogs" :key="log.id">
+                  <td>
+                    <span class="s-table__inline">
+                      <SAvatar :name="log.userDisplayName" size="sm" />
+                      <span class="s-table__primary">{{ log.userDisplayName }}</span>
+                    </span>
+                  </td>
+                  <td>
+                    <SBadge :tone="activityActionTone(log.action)" size="sm" dot>
+                      {{ activityActionLabel(log.action) }}
+                    </SBadge>
+                  </td>
+                  <td>
+                    <span class="s-table__primary">{{ displayEntityName(log) }}</span>
+                    <span class="s-table__secondary s-activity__meta">
+                      <component
+                        :is="entityTypeIcon(log.entityType)"
+                        :size="14"
+                        :stroke-width="2"
+                        aria-hidden="true"
+                      />
+                      {{ activityEntityTypeLabel(log.entityType) }}
+                      <template v-if="logDetailSubtitle(log)">
+                        · {{ logDetailSubtitle(log) }}</template
+                      >
+                    </span>
+                  </td>
+                  <td class="s-table__nowrap">
+                    <span class="s-table__primary">{{ relativeTime(log.createdAt) }}</span>
+                    <span
+                      v-if="relativeTime(log.createdAt) !== formatDate(log.createdAt)"
+                      class="s-table__secondary"
+                    >
+                      {{ formatDate(log.createdAt) }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <SPagination
+            :current-page="currentPage"
+            :page-size="itemsPerPage"
+            :total="filteredLogs.length"
+            label="Activity pagination"
+            @page-change="handlePageChange"
+          />
+        </template>
+      </section>
     </template>
   </div>
 </template>

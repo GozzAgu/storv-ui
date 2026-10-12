@@ -10,7 +10,9 @@
       </template>
       <template #actions>
         <SButton to="/dashboard/settings?tab=storefront">
-          <template #leading><Settings :size="16" :stroke-width="1.75" aria-hidden="true" /></template>
+          <template #leading
+            ><Settings :size="16" :stroke-width="1.75" aria-hidden="true"
+          /></template>
           Storefront settings
         </SButton>
       </template>
@@ -33,178 +35,196 @@
       </div>
     </dl>
 
-    <STabs v-model="statusFilter" :tabs="statusTabs" label="Inquiry filters" />
-
     <p v-if="loadError" class="s-storefront__error" role="alert">
       <TriangleAlert :size="16" :stroke-width="1.75" aria-hidden="true" />
       {{ loadError }}
     </p>
 
-    <div v-if="!loading && inquiries.length > 0" class="s-toolbar">
-      <SSearch
-        v-model="searchQuery"
-        class="s-toolbar__search"
-        placeholder="Search inquiries"
-        label="Search inquiries by customer, phone or product"
-      />
-    </div>
+    <section class="s-table-card" aria-label="Inquiries">
+      <div class="s-table-card__head">
+        <STabs v-model="statusFilter" :tabs="statusTabs" label="Inquiry filters" />
+        <div v-if="!loading && inquiries.length > 0" class="s-toolbar">
+          <SSearch
+            v-model="searchQuery"
+            class="s-toolbar__search"
+            placeholder="Search inquiries"
+            label="Search inquiries by customer, phone or product"
+          />
+        </div>
+      </div>
 
-    <SCard v-if="loading && !inquiries.length" flush aria-busy="true" data-storefront-inquiries>
-      <ul class="s-list" aria-label="Loading inquiries">
-        <li v-for="i in 6" :key="i" class="s-list__item" aria-hidden="true">
-          <div class="s-list__main">
-            <SSkeleton width="40%" height="14px" />
-            <SSkeleton width="25%" height="12px" />
-          </div>
-          <SSkeleton width="72px" height="20px" />
-        </li>
-      </ul>
-    </SCard>
-
-    <SCard v-else-if="!inquiries.length" data-storefront-inquiries>
-      <SEmptyState
-        title="No inquiries yet"
-        description="When guests contact or reserve from your storefront, they appear here."
-      >
-        <template #icon><ShoppingBag :size="24" :stroke-width="1.75" /></template>
-        <template #actions>
-          <ol v-if="canCreateStandaloneLinks" class="s-storefront__tips">
-            <li>Confirm the request, then send a payment link</li>
-            <li>Mark complete only after the customer pays</li>
-          </ol>
-          <ol v-else class="s-storefront__tips">
-            <li>Confirm the request so the item stays on hold</li>
-            <li>Call or message the customer to arrange payment</li>
-          </ol>
-        </template>
-      </SEmptyState>
-    </SCard>
-
-    <SCard v-else-if="!filtered.length" data-storefront-inquiries>
-      <SEmptyState
-        title="No matching inquiries"
-        :description="searchQuery ? 'Try another name, phone number or product.' : 'Try another status filter: All, Pending, or Confirmed.'"
-      >
-        <template #icon><SearchX :size="24" :stroke-width="1.75" /></template>
-        <template #actions>
-          <SButton @click="clearFilters">Show all inquiries</SButton>
-        </template>
-      </SEmptyState>
-    </SCard>
-
-    <template v-else>
-      <!-- Phone -->
-      <SCard flush class="s-only-sm" data-storefront-inquiries>
-        <ul class="s-list">
-          <li v-for="row in paginated" :key="row.id" class="s-list__item">
-            <span class="s-list__main">
-              <span class="s-list__primary">{{ row.customerName }}</span>
-              <span class="s-list__secondary">{{ row.listingTitle }}</span>
-              <span class="s-storefront__badges">
-                <SBadge :tone="statusTone(row.status)">{{ statusLabel(row.status) }}</SBadge>
-                <SBadge v-if="paymentLabel(row) !== EMPTY_PAYMENT" :tone="paymentTone(row)">
-                  {{ paymentLabel(row) }}
-                </SBadge>
-              </span>
-            </span>
-            <span class="s-list__end">
-              <span v-if="row.listingPrice != null" class="s-list__value">{{ formatMoney(row.listingPrice) }}</span>
-              <span class="s-list__secondary">{{ formatWhenShort(row.createdAtMs) }}</span>
-            </span>
-            <SIconButton
-              label="Inquiry actions"
-              size="sm"
-              :data-inquiry-actions-anchor="row.id"
-              aria-haspopup="menu"
-              :aria-expanded="openInquiryMenuId === row.id"
-              :loading="actingId === row.id"
-              @click="toggleInquiryMenu(row.id)"
-            >
-              <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
-            </SIconButton>
+      <SCard v-if="loading && !inquiries.length" flush aria-busy="true" data-storefront-inquiries>
+        <ul class="s-list" aria-label="Loading inquiries">
+          <li v-for="i in 6" :key="i" class="s-list__item" aria-hidden="true">
+            <div class="s-list__main">
+              <SSkeleton width="40%" height="14px" />
+              <SSkeleton width="25%" height="12px" />
+            </div>
+            <SSkeleton width="72px" height="20px" />
           </li>
         </ul>
       </SCard>
 
-      <!-- Tablet and desktop -->
-      <div class="s-table-wrap s-hide-sm" data-storefront-inquiries>
-        <table class="s-table">
-          <thead>
-            <tr>
-              <th scope="col">Customer</th>
-              <th scope="col">Product</th>
-              <th scope="col" class="s-hide-md">Type</th>
-              <th scope="col" class="s-table__num">Price</th>
-              <th scope="col">Status</th>
-              <th scope="col">Payment</th>
-              <th scope="col" class="s-hide-lg">Received</th>
-              <th scope="col" class="s-table__actions"><span class="ds-sr-only">Actions</span></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="row in paginated" :key="row.id">
-              <td>
-                <span class="s-table__primary s-storefront__cell">{{ row.customerName }}</span>
-                <span v-if="row.customerPhone" class="s-table__secondary">{{ row.customerPhone }}</span>
-              </td>
-              <td>
-                <span class="s-table__primary s-storefront__cell" :title="row.customerNote || row.listingTitle">
-                  {{ row.listingTitle }}
-                </span>
-                <NuxtLink
-                  v-if="row.receiptNumber"
-                  :to="
-                    row.receiptId
-                      ? `/dashboard/receipts?receipt=${encodeURIComponent(row.receiptId)}`
-                      : '/dashboard/receipts'
-                  "
-                  class="s-link s-storefront__sale"
-                >
-                  Sale #{{ row.receiptNumber }}
-                </NuxtLink>
-              </td>
-              <td class="s-hide-md">
-                <SBadge :tone="row.type === 'reserve' ? 'warning' : 'info'">
-                  {{ row.type === 'reserve' ? 'Reserve' : 'Contact' }}
-                </SBadge>
-              </td>
-              <td class="s-table__num">
-                <span v-if="row.listingPrice != null">{{ formatMoney(row.listingPrice) }}</span>
-                <span v-else class="s-table__muted">{{ EMPTY_PAYMENT }}</span>
-              </td>
-              <td>
-                <SBadge :tone="statusTone(row.status)" dot>{{ statusLabel(row.status) }}</SBadge>
-              </td>
-              <td>
-                <SBadge :tone="paymentTone(row)">{{ paymentLabel(row) }}</SBadge>
-              </td>
-              <td class="s-hide-lg s-table__nowrap s-table__muted">{{ formatWhenShort(row.createdAtMs) }}</td>
-              <td class="s-table__actions">
-                <SIconButton
-                  label="Inquiry actions"
-                  size="sm"
-                  :data-inquiry-actions-anchor="row.id"
-                  aria-haspopup="menu"
-                  :aria-expanded="openInquiryMenuId === row.id"
-                  :loading="actingId === row.id"
-                  @click="toggleInquiryMenu(row.id)"
-                >
-                  <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
-                </SIconButton>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <SCard v-else-if="!inquiries.length" data-storefront-inquiries>
+        <SEmptyState
+          title="No inquiries yet"
+          description="When guests contact or reserve from your storefront, they appear here."
+        >
+          <template #icon><ShoppingBag :size="24" :stroke-width="1.75" /></template>
+          <template #actions>
+            <ol v-if="canCreateStandaloneLinks" class="s-storefront__tips">
+              <li>Confirm the request, then send a payment link</li>
+              <li>Mark complete only after the customer pays</li>
+            </ol>
+            <ol v-else class="s-storefront__tips">
+              <li>Confirm the request so the item stays on hold</li>
+              <li>Call or message the customer to arrange payment</li>
+            </ol>
+          </template>
+        </SEmptyState>
+      </SCard>
 
-      <SPagination
-        :current-page="currentPage"
-        :page-size="PAGE_SIZE"
-        :total="filtered.length"
-        label="Inquiries pagination"
-        @page-change="onPageChange"
-      />
-    </template>
+      <SCard v-else-if="!filtered.length" data-storefront-inquiries>
+        <SEmptyState
+          title="No matching inquiries"
+          :description="
+            searchQuery
+              ? 'Try another name, phone number or product.'
+              : 'Try another status filter: All, Pending, or Confirmed.'
+          "
+        >
+          <template #icon><SearchX :size="24" :stroke-width="1.75" /></template>
+          <template #actions>
+            <SButton @click="clearFilters">Show all inquiries</SButton>
+          </template>
+        </SEmptyState>
+      </SCard>
+
+      <template v-else>
+        <!-- Phone -->
+        <SCard flush class="s-only-sm" data-storefront-inquiries>
+          <ul class="s-list">
+            <li v-for="row in paginated" :key="row.id" class="s-list__item">
+              <span class="s-list__main">
+                <span class="s-list__primary">{{ row.customerName }}</span>
+                <span class="s-list__secondary">{{ row.listingTitle }}</span>
+                <span class="s-storefront__badges">
+                  <SBadge :tone="statusTone(row.status)">{{ statusLabel(row.status) }}</SBadge>
+                  <SBadge v-if="paymentLabel(row) !== EMPTY_PAYMENT" :tone="paymentTone(row)">
+                    {{ paymentLabel(row) }}
+                  </SBadge>
+                </span>
+              </span>
+              <span class="s-list__end">
+                <span v-if="row.listingPrice != null" class="s-list__value">{{
+                  formatMoney(row.listingPrice)
+                }}</span>
+                <span class="s-list__secondary">{{ formatWhenShort(row.createdAtMs) }}</span>
+              </span>
+              <SIconButton
+                label="Inquiry actions"
+                size="sm"
+                :data-inquiry-actions-anchor="row.id"
+                aria-haspopup="menu"
+                :aria-expanded="openInquiryMenuId === row.id"
+                :loading="actingId === row.id"
+                @click="toggleInquiryMenu(row.id)"
+              >
+                <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
+              </SIconButton>
+            </li>
+          </ul>
+        </SCard>
+
+        <!-- Tablet and desktop -->
+        <div class="s-table-wrap s-hide-sm" data-storefront-inquiries>
+          <table class="s-table">
+            <thead>
+              <tr>
+                <th scope="col">Customer</th>
+                <th scope="col">Product</th>
+                <th scope="col" class="s-hide-md">Type</th>
+                <th scope="col" class="s-table__num">Price</th>
+                <th scope="col">Status</th>
+                <th scope="col">Payment</th>
+                <th scope="col" class="s-hide-lg">Received</th>
+                <th scope="col" class="s-table__actions">
+                  <span class="ds-sr-only">Actions</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="row in paginated" :key="row.id">
+                <td>
+                  <span class="s-table__primary s-storefront__cell">{{ row.customerName }}</span>
+                  <span v-if="row.customerPhone" class="s-table__secondary">{{
+                    row.customerPhone
+                  }}</span>
+                </td>
+                <td>
+                  <span
+                    class="s-table__primary s-storefront__cell"
+                    :title="row.customerNote || row.listingTitle"
+                  >
+                    {{ row.listingTitle }}
+                  </span>
+                  <NuxtLink
+                    v-if="row.receiptNumber"
+                    :to="
+                      row.receiptId
+                        ? `/dashboard/receipts?receipt=${encodeURIComponent(row.receiptId)}`
+                        : '/dashboard/receipts'
+                    "
+                    class="s-link s-storefront__sale"
+                  >
+                    Sale #{{ row.receiptNumber }}
+                  </NuxtLink>
+                </td>
+                <td class="s-hide-md">
+                  <SBadge :tone="row.type === 'reserve' ? 'warning' : 'info'">
+                    {{ row.type === 'reserve' ? 'Reserve' : 'Contact' }}
+                  </SBadge>
+                </td>
+                <td class="s-table__num">
+                  <span v-if="row.listingPrice != null">{{ formatMoney(row.listingPrice) }}</span>
+                  <span v-else class="s-table__muted">{{ EMPTY_PAYMENT }}</span>
+                </td>
+                <td>
+                  <SBadge :tone="statusTone(row.status)" dot>{{ statusLabel(row.status) }}</SBadge>
+                </td>
+                <td>
+                  <SBadge :tone="paymentTone(row)">{{ paymentLabel(row) }}</SBadge>
+                </td>
+                <td class="s-hide-lg s-table__nowrap s-table__muted">
+                  {{ formatWhenShort(row.createdAtMs) }}
+                </td>
+                <td class="s-table__actions">
+                  <SIconButton
+                    label="Inquiry actions"
+                    size="sm"
+                    :data-inquiry-actions-anchor="row.id"
+                    aria-haspopup="menu"
+                    :aria-expanded="openInquiryMenuId === row.id"
+                    :loading="actingId === row.id"
+                    @click="toggleInquiryMenu(row.id)"
+                  >
+                    <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
+                  </SIconButton>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <SPagination
+          :current-page="currentPage"
+          :page-size="PAGE_SIZE"
+          :total="filtered.length"
+          label="Inquiries pagination"
+          @page-change="onPageChange"
+        />
+      </template>
+    </section>
 
     <SharePaymentLinkModal v-model="showShareModal" :link="shareLink" />
 
@@ -336,10 +356,7 @@ import SSkeleton from '~/components/s/SSkeleton.vue'
 import STabs from '~/components/s/STabs.vue'
 import type { ShareableLink } from '~/components/payments/SharePaymentLinkModal.vue'
 import { useFirestore } from '~/composables/useFirestore'
-import {
-  getQueryUserId,
-  getStorefrontInquiriesCollection,
-} from '~/composables/useFirestorePaths'
+import { getQueryUserId, getStorefrontInquiriesCollection } from '~/composables/useFirestorePaths'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
 import { useAuthenticatedFetch } from '~/composables/useAuthenticatedFetch'
 import { useAnchoredRowMenu } from '~/composables/useAnchoredRowMenu'

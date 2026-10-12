@@ -30,7 +30,11 @@
       </SEmptyState>
     </SCard>
 
-    <SCard v-else-if="buybacksStore.loading && buybacksStore.buybacks.length === 0" flush aria-busy="true">
+    <SCard
+      v-else-if="buybacksStore.loading && buybacksStore.buybacks.length === 0"
+      flush
+      aria-busy="true"
+    >
       <ul class="s-list" aria-label="Loading trade-ins">
         <li v-for="i in 6" :key="i" class="s-list__item" aria-hidden="true">
           <div class="s-list__main">
@@ -78,82 +82,96 @@
         </div>
       </dl>
 
-      <div class="s-toolbar">
-        <SSearch
-          v-model="searchQuery"
-          class="s-toolbar__search"
-          placeholder="Search trade-ins"
-          label="Search trade-ins by customer, phone or item"
-        />
-      </div>
-
-      <SCard v-if="filteredBuybacks.length === 0">
-        <SEmptyState title="No trade-ins found" description="Try another customer name, phone number or item.">
-          <template #icon><SearchX :size="24" :stroke-width="1.75" /></template>
-          <template #actions>
-            <SButton @click="searchQuery = ''">Clear search</SButton>
-          </template>
-        </SEmptyState>
-      </SCard>
-
-      <template v-else>
-        <!-- Phone -->
-        <SCard flush class="s-only-sm">
-          <ul class="s-list">
-            <li v-for="row in paginatedBuybacks" :key="row.id">
-              <NuxtLink :to="inventoryItemLink(row)" class="s-list__item s-list__item--interactive">
-                <span class="s-list__main">
-                  <span class="s-list__primary">{{ row.itemSummary }}</span>
-                  <span class="s-list__secondary">{{ row.customerName }} · {{ formatDay(row.createdAt) }}</span>
-                </span>
-                <span class="s-list__end">
-                  <span class="s-list__value">{{ formatCurrency(row.purchasePrice) }}</span>
-                </span>
-              </NuxtLink>
-            </li>
-          </ul>
-        </SCard>
-
-        <!-- Tablet and desktop -->
-        <div class="s-table-wrap s-hide-sm">
-          <table class="s-table">
-            <thead>
-              <tr>
-                <th scope="col">Item</th>
-                <th scope="col">Customer</th>
-                <th scope="col" class="s-table__num">Paid</th>
-                <th scope="col" class="s-hide-md">Method</th>
-                <th scope="col">Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="row in paginatedBuybacks" :key="row.id">
-                <td>
-                  <NuxtLink :to="inventoryItemLink(row)" class="s-table__primary s-link">
-                    {{ row.itemSummary }}
-                  </NuxtLink>
-                  <span class="s-table__secondary">{{ folderName(row.folderId) }}</span>
-                </td>
-                <td>
-                  <span class="s-table__primary">{{ row.customerName }}</span>
-                  <span v-if="row.customerPhone" class="s-table__secondary">{{ row.customerPhone }}</span>
-                </td>
-                <td class="s-table__num">{{ formatCurrency(row.purchasePrice) }}</td>
-                <td class="s-hide-md">{{ row.paymentMethod || EMPTY_CELL }}</td>
-                <td class="s-table__nowrap">{{ formatDay(row.createdAt) }}</td>
-              </tr>
-            </tbody>
-          </table>
+      <section class="s-table-card" aria-label="Trade-ins">
+        <div class="s-table-card__head">
+          <div class="s-toolbar">
+            <SSearch
+              v-model="searchQuery"
+              class="s-toolbar__search"
+              placeholder="Search trade-ins"
+              label="Search trade-ins by customer, phone or item"
+            />
+          </div>
         </div>
 
-        <SPagination
-          :current-page="currentPage"
-          :page-size="PAGE_SIZE"
-          :total="filteredBuybacks.length"
-          label="Trade-ins pagination"
-          @page-change="(page) => (currentPage = page)"
-        />
-      </template>
+        <SCard v-if="filteredBuybacks.length === 0">
+          <SEmptyState
+            title="No trade-ins found"
+            description="Try another customer name, phone number or item."
+          >
+            <template #icon><SearchX :size="24" :stroke-width="1.75" /></template>
+            <template #actions>
+              <SButton @click="searchQuery = ''">Clear search</SButton>
+            </template>
+          </SEmptyState>
+        </SCard>
+
+        <template v-else>
+          <!-- Phone -->
+          <SCard flush class="s-only-sm">
+            <ul class="s-list">
+              <li v-for="row in paginatedBuybacks" :key="row.id">
+                <NuxtLink
+                  :to="inventoryItemLink(row)"
+                  class="s-list__item s-list__item--interactive"
+                >
+                  <span class="s-list__main">
+                    <span class="s-list__primary">{{ row.itemSummary }}</span>
+                    <span class="s-list__secondary"
+                      >{{ row.customerName }} · {{ formatDay(row.createdAt) }}</span
+                    >
+                  </span>
+                  <span class="s-list__end">
+                    <span class="s-list__value">{{ formatCurrency(row.purchasePrice) }}</span>
+                  </span>
+                </NuxtLink>
+              </li>
+            </ul>
+          </SCard>
+
+          <!-- Tablet and desktop -->
+          <div class="s-table-wrap s-hide-sm">
+            <table class="s-table">
+              <thead>
+                <tr>
+                  <th scope="col">Item</th>
+                  <th scope="col">Customer</th>
+                  <th scope="col" class="s-table__num">Paid</th>
+                  <th scope="col" class="s-hide-md">Method</th>
+                  <th scope="col">Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="row in paginatedBuybacks" :key="row.id">
+                  <td>
+                    <NuxtLink :to="inventoryItemLink(row)" class="s-table__primary s-link">
+                      {{ row.itemSummary }}
+                    </NuxtLink>
+                    <span class="s-table__secondary">{{ folderName(row.folderId) }}</span>
+                  </td>
+                  <td>
+                    <span class="s-table__primary">{{ row.customerName }}</span>
+                    <span v-if="row.customerPhone" class="s-table__secondary">{{
+                      row.customerPhone
+                    }}</span>
+                  </td>
+                  <td class="s-table__num">{{ formatCurrency(row.purchasePrice) }}</td>
+                  <td class="s-hide-md">{{ row.paymentMethod || EMPTY_CELL }}</td>
+                  <td class="s-table__nowrap">{{ formatDay(row.createdAt) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <SPagination
+            :current-page="currentPage"
+            :page-size="PAGE_SIZE"
+            :total="filteredBuybacks.length"
+            label="Trade-ins pagination"
+            @page-change="(page) => (currentPage = page)"
+          />
+        </template>
+      </section>
     </template>
 
     <CreateBuybackModal v-model="showCreateModal" />

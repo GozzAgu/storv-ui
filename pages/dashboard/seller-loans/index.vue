@@ -2,7 +2,8 @@
   <div class="ds-root s-c s-page">
     <SPageHeader title="Stock loans">
       <template #description>
-        Serial-numbered stock you've lent to resellers. Mark each loan sold or returned when they're done.
+        Serial-numbered stock you've lent to resellers. Mark each loan sold or returned when they're
+        done.
       </template>
     </SPageHeader>
 
@@ -30,7 +31,11 @@
       </SEmptyState>
     </SCard>
 
-    <SCard v-else-if="sellerLoansStore.loading && sellerLoansStore.loans.length === 0" flush aria-busy="true">
+    <SCard
+      v-else-if="sellerLoansStore.loading && sellerLoansStore.loans.length === 0"
+      flush
+      aria-busy="true"
+    >
       <ul class="s-list" aria-label="Loading stock loans">
         <li v-for="i in 6" :key="i" class="s-list__item" aria-hidden="true">
           <div class="s-list__main">
@@ -83,143 +88,157 @@
         </div>
       </dl>
 
-      <STabs v-model="statusFilter" :tabs="webLoanTabs" label="Loan status" />
-
-      <SCard v-if="filteredLoans.length === 0">
-        <SEmptyState
-          :title="`No ${statusFilter === 'sold' ? 'sold' : statusFilter} loans`"
-          description="Loans move between these tabs as you mark them sold or returned."
-        >
-          <template #icon><Handshake :size="24" :stroke-width="1.75" /></template>
-          <template #actions>
-            <SButton @click="statusFilter = 'all'">Show all loans</SButton>
-          </template>
-        </SEmptyState>
-      </SCard>
-
-      <template v-else>
-        <!-- Phone -->
-        <SCard flush class="s-only-sm">
-          <ul class="s-list">
-            <li v-for="loan in paginatedLoans" :key="loan.id">
-              <div class="s-list__item">
-                <button
-                  type="button"
-                  class="s-list__main s-list__hit"
-                  :aria-expanded="expandedLoanIds.has(loan.id)"
-                  @click="toggleLoanLines(loan.id)"
-                >
-                  <span class="s-list__primary">{{ loan.partyName }}</span>
-                  <span class="s-list__secondary">{{ unitLabel(loan) }} · {{ formatDay(loan.createdAt) }}</span>
-                </button>
-                <span class="s-list__end">
-                  <SBadge :tone="loanTone(loan.status)" size="sm">{{ formatSellerLoanStatusLabel(loan.status) }}</SBadge>
-                </span>
-                <SIconButton
-                  v-if="loan.status === 'active'"
-                  :label="`Actions for loan to ${loan.partyName}`"
-                  size="sm"
-                  :data-stock-loan-actions-anchor="loan.id"
-                  :disabled="loanActionBusyId === loan.id"
-                  aria-haspopup="menu"
-                  :aria-expanded="openLoanMenuId === loan.id"
-                  @click="toggleLoanMenu(loan.id)"
-                >
-                  <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
-                </SIconButton>
-              </div>
-              <ul v-if="expandedLoanIds.has(loan.id)" class="s-loan__lines">
-                <li v-for="(line, index) in loan.lines" :key="index">{{ line.itemSummary }}</li>
-              </ul>
-            </li>
-          </ul>
-        </SCard>
-
-        <!-- Tablet and desktop -->
-        <div class="s-table-wrap s-hide-sm">
-          <table class="s-table">
-            <thead>
-              <tr>
-                <th scope="col">Borrower</th>
-                <th scope="col" class="s-table__num">Units</th>
-                <th scope="col">Lent</th>
-                <th scope="col" class="s-hide-md">Closed</th>
-                <th scope="col">Status</th>
-                <th scope="col" class="s-table__actions"><span class="ds-sr-only">Actions</span></th>
-              </tr>
-            </thead>
-            <tbody>
-              <template v-for="loan in paginatedLoans" :key="loan.id">
-                <tr :class="{ 's-table__row--expanded': expandedLoanIds.has(loan.id) }">
-                  <td>
-                    <span class="s-table__primary">{{ loan.partyName }}</span>
-                    <span v-if="loan.partyPhone || loan.partyNotes" class="s-table__secondary">
-                      {{ loan.partyPhone || loan.partyNotes }}
-                    </span>
-                  </td>
-                  <td class="s-table__num">
-                    <button
-                      type="button"
-                      class="s-loan__toggle"
-                      :aria-expanded="expandedLoanIds.has(loan.id)"
-                      :aria-label="`${expandedLoanIds.has(loan.id) ? 'Hide' : 'Show'} the ${unitLabel(loan)} lent to ${loan.partyName}`"
-                      @click="toggleLoanLines(loan.id)"
-                    >
-                      {{ loan.lines.length }}
-                      <ChevronDown
-                        :size="14"
-                        :stroke-width="2"
-                        class="s-loan__chevron"
-                        :class="{ 's-loan__chevron--open': expandedLoanIds.has(loan.id) }"
-                        aria-hidden="true"
-                      />
-                    </button>
-                  </td>
-                  <td class="s-table__nowrap">{{ formatDay(loan.createdAt) }}</td>
-                  <td class="s-hide-md s-table__nowrap">
-                    <span v-if="loanClosedAt(loan)">{{ formatDay(loanClosedAt(loan)) }}</span>
-                    <span v-else class="s-table__muted">{{ EMPTY_CELL }}</span>
-                  </td>
-                  <td>
-                    <SBadge :tone="loanTone(loan.status)" dot>{{ formatSellerLoanStatusLabel(loan.status) }}</SBadge>
-                  </td>
-                  <td class="s-table__actions">
-                    <SIconButton
-                      v-if="loan.status === 'active'"
-                      :label="`Actions for loan to ${loan.partyName}`"
-                      size="sm"
-                      :data-stock-loan-actions-anchor="loan.id"
-                      :disabled="loanActionBusyId === loan.id"
-                      aria-haspopup="menu"
-                      :aria-expanded="openLoanMenuId === loan.id"
-                      @click="toggleLoanMenu(loan.id)"
-                    >
-                      <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
-                    </SIconButton>
-                  </td>
-                </tr>
-                <tr v-if="expandedLoanIds.has(loan.id)">
-                  <td colspan="6" class="s-table__nested">
-                    <ul class="s-list" :aria-label="`Units lent to ${loan.partyName}`">
-                      <li v-for="(line, index) in loan.lines" :key="index" class="s-list__item">
-                        <span class="s-list__main">{{ line.itemSummary }}</span>
-                      </li>
-                    </ul>
-                  </td>
-                </tr>
-              </template>
-            </tbody>
-          </table>
+      <section class="s-table-card" aria-label="Stock loans">
+        <div class="s-table-card__head">
+          <STabs v-model="statusFilter" :tabs="webLoanTabs" label="Loan status" />
         </div>
 
-        <SPagination
-          :current-page="currentPage"
-          :page-size="itemsPerPage"
-          :total="filteredLoans.length"
-          label="Stock loans pagination"
-          @page-change="handlePageChange"
-        />
-      </template>
+        <SCard v-if="filteredLoans.length === 0">
+          <SEmptyState
+            :title="`No ${statusFilter === 'sold' ? 'sold' : statusFilter} loans`"
+            description="Loans move between these tabs as you mark them sold or returned."
+          >
+            <template #icon><Handshake :size="24" :stroke-width="1.75" /></template>
+            <template #actions>
+              <SButton @click="statusFilter = 'all'">Show all loans</SButton>
+            </template>
+          </SEmptyState>
+        </SCard>
+
+        <template v-else>
+          <!-- Phone -->
+          <SCard flush class="s-only-sm">
+            <ul class="s-list">
+              <li v-for="loan in paginatedLoans" :key="loan.id">
+                <div class="s-list__item">
+                  <button
+                    type="button"
+                    class="s-list__main s-list__hit"
+                    :aria-expanded="expandedLoanIds.has(loan.id)"
+                    @click="toggleLoanLines(loan.id)"
+                  >
+                    <span class="s-list__primary">{{ loan.partyName }}</span>
+                    <span class="s-list__secondary"
+                      >{{ unitLabel(loan) }} · {{ formatDay(loan.createdAt) }}</span
+                    >
+                  </button>
+                  <span class="s-list__end">
+                    <SBadge :tone="loanTone(loan.status)" size="sm">{{
+                      formatSellerLoanStatusLabel(loan.status)
+                    }}</SBadge>
+                  </span>
+                  <SIconButton
+                    v-if="loan.status === 'active'"
+                    :label="`Actions for loan to ${loan.partyName}`"
+                    size="sm"
+                    :data-stock-loan-actions-anchor="loan.id"
+                    :disabled="loanActionBusyId === loan.id"
+                    aria-haspopup="menu"
+                    :aria-expanded="openLoanMenuId === loan.id"
+                    @click="toggleLoanMenu(loan.id)"
+                  >
+                    <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
+                  </SIconButton>
+                </div>
+                <ul v-if="expandedLoanIds.has(loan.id)" class="s-loan__lines">
+                  <li v-for="(line, index) in loan.lines" :key="index">{{ line.itemSummary }}</li>
+                </ul>
+              </li>
+            </ul>
+          </SCard>
+
+          <!-- Tablet and desktop -->
+          <div class="s-table-wrap s-hide-sm">
+            <table class="s-table">
+              <thead>
+                <tr>
+                  <th scope="col">Borrower</th>
+                  <th scope="col" class="s-table__num">Units</th>
+                  <th scope="col">Lent</th>
+                  <th scope="col" class="s-hide-md">Closed</th>
+                  <th scope="col">Status</th>
+                  <th scope="col" class="s-table__actions">
+                    <span class="ds-sr-only">Actions</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <template v-for="loan in paginatedLoans" :key="loan.id">
+                  <tr :class="{ 's-table__row--expanded': expandedLoanIds.has(loan.id) }">
+                    <td>
+                      <span class="s-table__primary">{{ loan.partyName }}</span>
+                      <span v-if="loan.partyPhone || loan.partyNotes" class="s-table__secondary">
+                        {{ loan.partyPhone || loan.partyNotes }}
+                      </span>
+                    </td>
+                    <td class="s-table__num">
+                      <button
+                        type="button"
+                        class="s-loan__toggle"
+                        :aria-expanded="expandedLoanIds.has(loan.id)"
+                        :aria-label="`${
+                          expandedLoanIds.has(loan.id) ? 'Hide' : 'Show'
+                        } the ${unitLabel(loan)} lent to ${loan.partyName}`"
+                        @click="toggleLoanLines(loan.id)"
+                      >
+                        {{ loan.lines.length }}
+                        <ChevronDown
+                          :size="14"
+                          :stroke-width="2"
+                          class="s-loan__chevron"
+                          :class="{ 's-loan__chevron--open': expandedLoanIds.has(loan.id) }"
+                          aria-hidden="true"
+                        />
+                      </button>
+                    </td>
+                    <td class="s-table__nowrap">{{ formatDay(loan.createdAt) }}</td>
+                    <td class="s-hide-md s-table__nowrap">
+                      <span v-if="loanClosedAt(loan)">{{ formatDay(loanClosedAt(loan)) }}</span>
+                      <span v-else class="s-table__muted">{{ EMPTY_CELL }}</span>
+                    </td>
+                    <td>
+                      <SBadge :tone="loanTone(loan.status)" dot>{{
+                        formatSellerLoanStatusLabel(loan.status)
+                      }}</SBadge>
+                    </td>
+                    <td class="s-table__actions">
+                      <SIconButton
+                        v-if="loan.status === 'active'"
+                        :label="`Actions for loan to ${loan.partyName}`"
+                        size="sm"
+                        :data-stock-loan-actions-anchor="loan.id"
+                        :disabled="loanActionBusyId === loan.id"
+                        aria-haspopup="menu"
+                        :aria-expanded="openLoanMenuId === loan.id"
+                        @click="toggleLoanMenu(loan.id)"
+                      >
+                        <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
+                      </SIconButton>
+                    </td>
+                  </tr>
+                  <tr v-if="expandedLoanIds.has(loan.id)">
+                    <td colspan="6" class="s-table__nested">
+                      <ul class="s-list" :aria-label="`Units lent to ${loan.partyName}`">
+                        <li v-for="(line, index) in loan.lines" :key="index" class="s-list__item">
+                          <span class="s-list__main">{{ line.itemSummary }}</span>
+                        </li>
+                      </ul>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+
+          <SPagination
+            :current-page="currentPage"
+            :page-size="itemsPerPage"
+            :total="filteredLoans.length"
+            label="Stock loans pagination"
+            @page-change="handlePageChange"
+          />
+        </template>
+      </section>
     </template>
 
     <SMenu
@@ -229,7 +248,11 @@
       label="Stock loan actions"
       @close="closeLoanMenu"
     >
-      <SMenuItem label="Mark sold by borrower" :icon="CircleCheck" @select="handleLoanMenuMarkSold" />
+      <SMenuItem
+        label="Mark sold by borrower"
+        :icon="CircleCheck"
+        @select="handleLoanMenuMarkSold"
+      />
       <SMenuItem label="Return to stock" :icon="Undo2" @select="handleLoanMenuReturnToStore" />
     </SMenu>
 
@@ -238,13 +261,23 @@
       role="alertdialog"
       size="sm"
       title="Return this stock?"
-      :description="loanPendingReturn ? `${unitLabel(loanPendingReturn)} from ${loanPendingReturn.partyName} go back on your shelf as available.` : undefined"
+      :description="
+        loanPendingReturn
+          ? `${unitLabel(loanPendingReturn)} from ${
+              loanPendingReturn.partyName
+            } go back on your shelf as available.`
+          : undefined
+      "
       :dismissible="!confirmReturnLoading"
     >
-      <p v-if="loanPendingReturn?.partyNotes" class="s-loan__note">Notes: {{ loanPendingReturn.partyNotes }}</p>
+      <p v-if="loanPendingReturn?.partyNotes" class="s-loan__note">
+        Notes: {{ loanPendingReturn.partyNotes }}
+      </p>
       <template #footer>
         <SButton :disabled="confirmReturnLoading" @click="closeReturnModal">Cancel</SButton>
-        <SButton variant="primary" :loading="confirmReturnLoading" @click="confirmReturn">Return to stock</SButton>
+        <SButton variant="primary" :loading="confirmReturnLoading" @click="confirmReturn"
+          >Return to stock</SButton
+        >
       </template>
     </SDialog>
 
@@ -253,13 +286,23 @@
       role="alertdialog"
       size="sm"
       title="Mark as sold by the borrower?"
-      :description="loanPendingSold ? `${unitLabel(loanPendingSold)} from ${loanPendingSold.partyName} will show as sold in your inventory. You can't undo this here.` : undefined"
+      :description="
+        loanPendingSold
+          ? `${unitLabel(loanPendingSold)} from ${
+              loanPendingSold.partyName
+            } will show as sold in your inventory. You can't undo this here.`
+          : undefined
+      "
       :dismissible="!confirmSoldLoading"
     >
-      <p v-if="loanPendingSold?.partyNotes" class="s-loan__note">Notes: {{ loanPendingSold.partyNotes }}</p>
+      <p v-if="loanPendingSold?.partyNotes" class="s-loan__note">
+        Notes: {{ loanPendingSold.partyNotes }}
+      </p>
       <template #footer>
         <SButton :disabled="confirmSoldLoading" @click="closeSoldModal">Cancel</SButton>
-        <SButton variant="primary" :loading="confirmSoldLoading" @click="confirmMarkSold">Mark sold</SButton>
+        <SButton variant="primary" :loading="confirmSoldLoading" @click="confirmMarkSold"
+          >Mark sold</SButton
+        >
       </template>
     </SDialog>
   </div>

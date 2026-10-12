@@ -1,8 +1,5 @@
 <template>
-  <div
-    data-inventory-categories
-    class="ds-root s-c s-page s-inventory"
-  >
+  <div data-inventory-categories class="ds-root s-c s-page s-inventory">
     <SPageHeader :title="branchPageTitle('Categories')">
       <template #eyebrow>
         <p class="s-page-header__eyebrow">Inventory</p>
@@ -13,7 +10,9 @@
           :loading="reorderExporting"
           @click="handleExportReorderList"
         >
-          <template #leading><Download :size="16" :stroke-width="1.75" aria-hidden="true" /></template>
+          <template #leading
+            ><Download :size="16" :stroke-width="1.75" aria-hidden="true"
+          /></template>
           Export reorder list
         </SButton>
         <template v-if="canCreateInventoryFolders">
@@ -21,7 +20,9 @@
             v-if="canShowCopyFolderTemplatesFromBranch"
             @click="openCopyFolderTemplatesFromBranchModal"
           >
-            <template #leading><ArrowLeftRight :size="16" :stroke-width="1.75" aria-hidden="true" /></template>
+            <template #leading
+              ><ArrowLeftRight :size="16" :stroke-width="1.75" aria-hidden="true"
+            /></template>
             Copy from branch
           </SButton>
           <SButton variant="primary" @click="openCreateFolderModal">
@@ -49,81 +50,11 @@
     >
       <div v-for="metric in categoryHeaderMetrics" :key="metric.key" class="s-metrics__item">
         <dt class="s-metrics__label">{{ metric.label }}</dt>
-        <dd
-          class="s-metrics__value"
-          :class="metric.tone && `s-metrics__value--${metric.tone}`"
-        >
+        <dd class="s-metrics__value" :class="metric.tone && `s-metrics__value--${metric.tone}`">
           {{ metric.value }}
         </dd>
       </div>
     </dl>
-
-    <template v-if="!inventoryStore.loading && inventoryStore.folders.length > 0">
-      <STabs
-        v-model="categoryFilter"
-        :tabs="categoryFilterTabs"
-        label="Filter categories"
-      />
-
-      <div
-        v-if="canCreateInventoryFolders && selectedFoldersForBulk.length > 0"
-        class="s-toolbar s-toolbar--selection"
-        role="region"
-        aria-label="Bulk actions"
-      >
-        <SCheckbox
-          :model-value="allFoldersOnPageSelected"
-          :label="`${selectedFoldersForBulk.length} selected`"
-          @update:model-value="toggleSelectAllFolders"
-        />
-        <div class="s-toolbar__end">
-          <SButton variant="ghost" size="sm" @click="selectedFoldersForBulk = []">Clear</SButton>
-          <SButton variant="danger" size="sm" @click="openBulkDeleteFoldersModal">
-            <template #leading><Trash2 :size="14" :stroke-width="2" aria-hidden="true" /></template>
-            Delete
-          </SButton>
-        </div>
-      </div>
-      <div v-else class="s-toolbar">
-        <SSearch
-          v-model="searchQuery"
-          class="s-toolbar__search"
-          placeholder="Search categories"
-        />
-        <div v-if="!isStaff" class="s-toolbar__filter">
-          <SSelect
-            v-model="selectedDepartmentId"
-            :options="departmentFilterOptions"
-            aria-label="Department"
-          />
-        </div>
-        <div class="s-toolbar__filter">
-          <SSelect v-model="sortBy" :options="categorySortSelectOptions" aria-label="Sort by" />
-        </div>
-        <div class="s-toolbar__end">
-          <div class="s-toggle-group" role="group" aria-label="Layout">
-            <button
-              type="button"
-              class="s-toggle-group__btn"
-              :aria-pressed="foldersViewMode === 'grid'"
-              aria-label="Grid view"
-              @click="foldersViewMode = 'grid'"
-            >
-              <LayoutGrid :size="16" :stroke-width="1.75" aria-hidden="true" />
-            </button>
-            <button
-              type="button"
-              class="s-toggle-group__btn"
-              :aria-pressed="foldersViewMode === 'table'"
-              aria-label="Table view"
-              @click="foldersViewMode = 'table'"
-            >
-              <List :size="16" :stroke-width="1.75" aria-hidden="true" />
-            </button>
-          </div>
-        </div>
-      </div>
-    </template>
 
     <template v-if="inventoryStore.loading && inventoryStore.folders.length === 0">
       <div class="s-category-grid" role="status" aria-label="Loading categories">
@@ -135,12 +66,76 @@
       </div>
     </template>
 
-
     <section
       v-if="!inventoryStore.loading && inventoryStore.folders.length > 0"
-      class="s-inventory__section"
+      class="s-table-card s-inventory__section"
       aria-label="Categories"
     >
+      <div class="s-table-card__head">
+        <STabs v-model="categoryFilter" :tabs="categoryFilterTabs" label="Filter categories" />
+
+        <div
+          v-if="canCreateInventoryFolders && selectedFoldersForBulk.length > 0"
+          class="s-toolbar s-toolbar--selection"
+          role="region"
+          aria-label="Bulk actions"
+        >
+          <SCheckbox
+            :model-value="allFoldersOnPageSelected"
+            :label="`${selectedFoldersForBulk.length} selected`"
+            @update:model-value="toggleSelectAllFolders"
+          />
+          <div class="s-toolbar__end">
+            <SButton variant="ghost" size="sm" @click="selectedFoldersForBulk = []">Clear</SButton>
+            <SButton variant="danger" size="sm" @click="openBulkDeleteFoldersModal">
+              <template #leading
+                ><Trash2 :size="14" :stroke-width="2" aria-hidden="true"
+              /></template>
+              Delete
+            </SButton>
+          </div>
+        </div>
+        <div v-else class="s-toolbar">
+          <SSearch
+            v-model="searchQuery"
+            class="s-toolbar__search"
+            placeholder="Search categories"
+          />
+          <div v-if="!isStaff" class="s-toolbar__filter">
+            <SSelect
+              v-model="selectedDepartmentId"
+              :options="departmentFilterOptions"
+              aria-label="Department"
+            />
+          </div>
+          <div class="s-toolbar__filter">
+            <SSelect v-model="sortBy" :options="categorySortSelectOptions" aria-label="Sort by" />
+          </div>
+          <div class="s-toolbar__end">
+            <div class="s-toggle-group" role="group" aria-label="Layout">
+              <button
+                type="button"
+                class="s-toggle-group__btn"
+                :aria-pressed="foldersViewMode === 'grid'"
+                aria-label="Grid view"
+                @click="foldersViewMode = 'grid'"
+              >
+                <LayoutGrid :size="16" :stroke-width="1.75" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                class="s-toggle-group__btn"
+                :aria-pressed="foldersViewMode === 'table'"
+                aria-label="Table view"
+                @click="foldersViewMode = 'table'"
+              >
+                <List :size="16" :stroke-width="1.75" aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <SCard v-if="paginatedFolders.length === 0">
         <SEmptyState
           :title="filteredCategoriesEmptyTitle"
@@ -313,7 +308,10 @@
       <SEmptyState :title="noCategoriesTitle" :description="noCategoriesDescription">
         <template #icon><FolderPlus :size="24" :stroke-width="1.75" /></template>
         <template
-          v-if="(canCreateInventoryFolders && !selectedDepartmentId && !searchQuery) || selectedDepartmentId"
+          v-if="
+            (canCreateInventoryFolders && !selectedDepartmentId && !searchQuery) ||
+            selectedDepartmentId
+          "
           #actions
         >
           <SButton
@@ -339,14 +337,16 @@
       :count="selectedFoldersForBulk.length"
       :item-names="selectedFoldersForBulk.map((f) => f.name)"
       warning="This permanently deletes the selected categories and every product inside them. This cannot be undone."
-      :impact-summary="
-        `Delete ${selectedFoldersForBulk.length} ${
-          selectedFoldersForBulk.length === 1 ? 'category' : 'categories'
-        } and all products inside`
-      "
+      :impact-summary="`Delete ${selectedFoldersForBulk.length} ${
+        selectedFoldersForBulk.length === 1 ? 'category' : 'categories'
+      } and all products inside`"
       confirm-label="I understand these categories and their products will be permanently deleted."
       :loading="isBulkDeletingFolders"
-      @update:model-value="(v) => { if (!v) bulkDeleteFoldersConfirmed = false }"
+      @update:model-value="
+        (v) => {
+          if (!v) bulkDeleteFoldersConfirmed = false
+        }
+      "
       @confirm="handleConfirmBulkDeleteFolders"
     />
     <!-- Delete Folder Modal -->
@@ -393,9 +393,7 @@
           />
         </SFormSection>
 
-        <SFormSection
-          v-if="showUsesSubcategoriesOption && !isSubfolderDrawer"
-        >
+        <SFormSection v-if="showUsesSubcategoriesOption && !isSubfolderDrawer">
           <SCheckbox
             v-model="folderForm.usesSubcategories"
             label="Organize with subcategories"
@@ -404,9 +402,7 @@
           />
         </SFormSection>
 
-        <SFormSection
-          v-if="!(editingFolder && isSubfolder(editingFolder))"
-        >
+        <SFormSection v-if="!(editingFolder && isSubfolder(editingFolder))">
           <SCheckbox
             v-model="folderForm.hasSerialNumbers"
             label="Use serial numbers"
@@ -414,9 +410,7 @@
           />
         </SFormSection>
 
-        <SFormSection
-          v-if="canViewProfitAndCost && !isSubfolderDrawer"
-        >
+        <SFormSection v-if="canViewProfitAndCost && !isSubfolderDrawer">
           <SCheckbox
             v-model="folderForm.trackProfit"
             label="Track profit"
@@ -478,11 +472,7 @@
               <span>Type</span>
               <span class="s-inv-fields__head-end">Options</span>
             </div>
-            <div
-              v-for="(field, index) in editableFields"
-              :key="field.id"
-              class="s-inv-fields__row"
-            >
+            <div v-for="(field, index) in editableFields" :key="field.id" class="s-inv-fields__row">
               <SInput
                 v-model="field.label"
                 required
@@ -558,13 +548,13 @@
       <div class="s-inventory__dialog-copy">
         <p>
           <strong>Track profit</strong>
-          adds a <strong>Cost price</strong> column to this category and
-          calculates gross profit (unit price minus cost) for each product.
+          adds a <strong>Cost price</strong> column to this category and calculates gross profit
+          (unit price minus cost) for each product.
         </p>
         <p>
           You'll see per-category profit on category cards, a store-wide
-          <strong>Total profit</strong> summary, and margin on item rows -
-          visible only to super admins.
+          <strong>Total profit</strong> summary, and margin on item rows - visible only to super
+          admins.
         </p>
         <p>
           Without it, you can still record selling prices, but Storvv won't calculate margins or
@@ -599,9 +589,7 @@
       <div class="s-inventory__dialog-copy">
         <p>
           You changed columns, tracking, or access settings on
-          <strong>{{
-            editingFolder?.name || 'this category'
-          }}</strong
+          <strong>{{ editingFolder?.name || 'this category' }}</strong
           >.
         </p>
         <p>
@@ -647,11 +635,7 @@
           <p v-if="duplicateFolderNames.length === 0" :class="emptyStateClass">
             Select “Add name” to enter one or more category names.
           </p>
-          <div
-            v-for="(name, index) in duplicateFolderNames"
-            :key="index"
-            class="s-inline-field"
-          >
+          <div v-for="(name, index) in duplicateFolderNames" :key="index" class="s-inline-field">
             <div class="s-inline-field__grow">
               <SInput
                 v-model="duplicateFolderNames[index]"
@@ -754,8 +738,8 @@
               "
             >
               The category tiles behind this panel are from
-              <strong>{{ inventoryViewBranchLabel }}</strong>.
-              Switch &ldquo;Source branch&rdquo; to that branch if those are the categories you
+              <strong>{{ inventoryViewBranchLabel }}</strong
+              >. Switch &ldquo;Source branch&rdquo; to that branch if those are the categories you
               want to copy, or create categories first on {{ copyTemplatesSourceBranchLabel }}.
             </p>
           </div>
@@ -1246,9 +1230,13 @@ watch(
   }
 )
 
-watch(isStaff, (staff) => {
-  if (staff) selectedDepartmentId.value = ''
-}, { immediate: true })
+watch(
+  isStaff,
+  (staff) => {
+    if (staff) selectedDepartmentId.value = ''
+  },
+  { immediate: true }
+)
 
 const { formatCurrency, preferences } = usePreferences()
 const currencySymbol = computed(() => preferences.value?.currencySymbol || '$')
@@ -1631,9 +1619,7 @@ function resetNewFolderFormDefaults() {
   ensureBulkQuantityTemplateField(editableFields.value)
 }
 
-const isSubfolderDrawer = computed(
-  () => !!editingFolder.value && isSubfolder(editingFolder.value)
-)
+const isSubfolderDrawer = computed(() => !!editingFolder.value && isSubfolder(editingFolder.value))
 
 const showUsesSubcategoriesOption = computed(() => {
   if (isSubfolderDrawer.value) return false
@@ -1882,7 +1868,6 @@ function formatFolderProfit(folderId: string): string {
   return formatCurrency(profit)
 }
 
-
 function folderProfitToneClass(folderId: string): string {
   const profit = folderGrossProfitOnHand(folderId)
   if (profit === null || profit === 0) return ''
@@ -1931,7 +1916,8 @@ function isFolderSelected(folder: InventoryFolder): boolean {
 }
 
 const hasActiveCategoryFilters = computed(
-  () => Boolean(selectedDepartmentId.value || searchQuery.value) || categoryFilter.value === 'low-stock'
+  () =>
+    Boolean(selectedDepartmentId.value || searchQuery.value) || categoryFilter.value === 'low-stock'
 )
 
 function clearCategoryFilters() {
@@ -1951,7 +1937,8 @@ const filteredCategoriesEmptyTitle = computed(() => {
 
 const filteredCategoriesEmptyDescription = computed(() => {
   if (selectedDepartmentId.value) return 'Try another department or clear the filter.'
-  if (categoryFilter.value === 'low-stock') return 'All categories are above your low-stock threshold.'
+  if (categoryFilter.value === 'low-stock')
+    return 'All categories are above your low-stock threshold.'
   if (searchQuery.value) return 'Try a different search term.'
   return 'Adjust filters or go to another page.'
 })
@@ -2212,8 +2199,7 @@ const handleEditFolder = (folder: InventoryFolder) => {
   folderForm.allowedDepartments = folder.allowedDepartments ? [...folder.allowedDepartments] : []
   folderForm.parentId = folder.parentId || ''
   folderForm.usesSubcategories =
-    folder.usesSubcategories === true ||
-    getChildFolders(folders.value, folder.id).length > 0
+    folder.usesSubcategories === true || getChildFolders(folders.value, folder.id).length > 0
   if (folder.template) {
     editableFields.value = folder.template.fields.map((f) => ({ ...f }))
   } else {
@@ -2472,10 +2458,7 @@ const handleSaveFolder = async () => {
       }
 
       const childCount = getChildFolders(folders.value, editingFolder.value.id).length
-      if (
-        childCount > 0 &&
-        inheritableFolderSettingsChanged(editingFolder.value, inheritable)
-      ) {
+      if (childCount > 0 && inheritableFolderSettingsChanged(editingFolder.value, inheritable)) {
         pendingParentFolderSave.value = {
           name: folderForm.name.trim(),
           description: folderForm.description.trim(),

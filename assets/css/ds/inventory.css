@@ -3,7 +3,11 @@
 .s-inventory__section {
   display: flex;
   flex-direction: column;
-  gap: var(--s-space-2);
+}
+
+.s-table-card > .s-category-grid,
+.s-table-card > .s-product-grid {
+  padding: var(--s-space-2);
 }
 
 .s-inventory__dialog-copy {

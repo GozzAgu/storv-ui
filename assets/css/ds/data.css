@@ -233,7 +233,6 @@
   height: 40px;
   padding: 0 var(--s-space-2);
   border-bottom: 1px solid var(--s-divider);
-  background: var(--s-surface-2);
   color: var(--s-text-muted);
   font: var(--s-text-caption);
   letter-spacing: var(--s-tracking-caps);
@@ -243,7 +242,7 @@
 }
 
 .s-table td {
-  height: 56px;
+  height: 52px;
   padding: var(--s-space-1) var(--s-space-2);
   border-bottom: 1px solid var(--s-divider);
   vertical-align: middle;
@@ -375,11 +374,21 @@
   align-items: center;
   gap: var(--s-space-1-5);
   padding: var(--s-space-2) var(--s-space-2) var(--s-space-1-5);
+  border-bottom: 1px solid var(--s-divider);
+}
+
+.s-table-card__head:empty {
+  display: none;
 }
 
 .s-table-card__head > .s-toolbar {
   flex: 1 1 360px;
   justify-content: flex-end;
+}
+
+/* With no tabs beside it, the toolbar starts on the left like the rows below */
+.s-table-card__head > .s-toolbar:first-child {
+  justify-content: flex-start;
 }
 
 .s-table-card__head .s-toolbar__search {
@@ -396,15 +405,6 @@
   border-radius: 0;
   background: none;
   box-shadow: none;
-}
-
-.s-table-card .s-table th {
-  border-top: 1px solid var(--s-divider);
-  background: none;
-}
-
-.s-table-card .s-table td {
-  height: 52px;
 }
 
 .s-table-card .s-pagination {

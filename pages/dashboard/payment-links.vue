@@ -17,9 +17,15 @@
           variant="primary"
           to="/dashboard/receipts"
           :disabled="!payout.connected"
-          :title="payout.connected ? 'Open a sale, then choose Payment links' : 'Connect a payout account first'"
+          :title="
+            payout.connected
+              ? 'Open a sale, then choose Payment links'
+              : 'Connect a payout account first'
+          "
         >
-          <template #leading><Receipt :size="16" :stroke-width="1.75" aria-hidden="true" /></template>
+          <template #leading
+            ><Receipt :size="16" :stroke-width="1.75" aria-hidden="true"
+          /></template>
           Create from a sale
         </SButton>
         <SButton
@@ -83,12 +89,7 @@
 
         <template #footer>
           <SButton v-if="editingBank" @click="editingBank = false">Cancel</SButton>
-          <SButton
-            variant="primary"
-            :loading="connecting"
-            :disabled="!canConnect"
-            @click="connect"
-          >
+          <SButton variant="primary" :loading="connecting" :disabled="!canConnect" @click="connect">
             Connect account
           </SButton>
         </template>
@@ -109,7 +110,11 @@
         <SButton v-if="canChangePayout" size="sm" @click="startEditBank">Change</SButton>
       </section>
 
-      <div v-if="!loading || links.length > 0" class="s-paylinks__stats" aria-label="Payment links summary">
+      <div
+        v-if="!loading || links.length > 0"
+        class="s-paylinks__stats"
+        aria-label="Payment links summary"
+      >
         <SStat label="Collected" :value="formatNaira(stats.collected)" />
         <SStat label="Paid" :value="stats.paid" />
         <SStat
@@ -128,7 +133,9 @@
 
       <p v-if="stats.paid > 0" class="s-callout s-paylinks__callout">
         <ShieldCheck :size="16" :stroke-width="1.75" aria-hidden="true" />
-        <span>Paid funds are secured by Paystack and settle to your bank the next business day.</span>
+        <span
+          >Paid funds are secured by Paystack and settle to your bank the next business day.</span
+        >
       </p>
 
       <SCard v-if="payout.connected && settlements.length > 0" title="Payouts to your bank" flush>
@@ -153,143 +160,166 @@
         </ul>
       </SCard>
 
-      <div v-if="links.length > 0" class="s-toolbar">
-        <SSearch
-          v-model="searchQuery"
-          class="s-toolbar__search"
-          placeholder="Search links"
-          label="Search payment links by invoice, customer or phone"
-        />
-        <div class="s-toolbar__filter">
-          <SSelect v-model="statusFilter" :options="statusOptions" aria-label="Filter by status" />
-        </div>
-      </div>
-
-      <SCard v-if="loading && links.length === 0" flush aria-busy="true">
-        <ul class="s-list" aria-label="Loading payment links">
-          <li v-for="i in 6" :key="i" class="s-list__item" aria-hidden="true">
-            <div class="s-list__main">
-              <SSkeleton width="40%" height="14px" />
-              <SSkeleton width="25%" height="12px" />
+      <section class="s-table-card" aria-label="Payment links">
+        <div class="s-table-card__head">
+          <div v-if="links.length > 0" class="s-toolbar">
+            <SSearch
+              v-model="searchQuery"
+              class="s-toolbar__search"
+              placeholder="Search links"
+              label="Search payment links by invoice, customer or phone"
+            />
+            <div class="s-toolbar__filter">
+              <SSelect
+                v-model="statusFilter"
+                :options="statusOptions"
+                aria-label="Filter by status"
+              />
             </div>
-            <SSkeleton width="72px" height="20px" />
-          </li>
-        </ul>
-      </SCard>
+          </div>
+        </div>
 
-      <SCard v-else-if="links.length === 0">
-        <SEmptyState
-          title="No payment links yet"
-          :description="
-            canCreateStandaloneLinks
-              ? 'Create your first link to start collecting.'
-              : 'Open a sale and choose Payment links to send the customer a secure link.'
-          "
-        >
-          <template #icon><CreditCard :size="24" :stroke-width="1.75" /></template>
-          <template v-if="payout.connected" #actions>
-            <SButton v-if="!canCreateStandaloneLinks" variant="primary" to="/dashboard/receipts">
-              <template #leading><Receipt :size="16" :stroke-width="1.75" aria-hidden="true" /></template>
-              Go to sales
-            </SButton>
-            <SButton v-else variant="primary" @click="showCreate = true">
-              <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
-              New payment link
-            </SButton>
-          </template>
-        </SEmptyState>
-      </SCard>
-
-      <SCard v-else-if="visibleLinks.length === 0">
-        <SEmptyState title="No links found" description="Try another status, or clear the search.">
-          <template #icon><SearchX :size="24" :stroke-width="1.75" /></template>
-          <template #actions>
-            <SButton @click="clearFilters">Show all links</SButton>
-          </template>
-        </SEmptyState>
-      </SCard>
-
-      <template v-else>
-        <!-- Phone -->
-        <SCard flush class="s-only-sm">
-          <ul class="s-list">
-            <li v-for="inv in paginatedLinks" :key="inv.token" class="s-list__item">
-              <span class="s-list__main">
-                <span class="s-list__primary">{{ inv.customerName }}</span>
-                <span class="s-list__secondary">
-                  #{{ inv.invoiceNumber }} · {{ itemsLabel(inv.itemsCount) }}
-                </span>
-              </span>
-              <span class="s-list__end">
-                <span class="s-list__value">{{ formatNaira(inv.total) }}</span>
-                <SBadge :tone="statusTone(inv.status)">{{ statusLabel(inv.status) }}</SBadge>
-              </span>
-              <SIconButton
-                label="Payment link actions"
-                size="sm"
-                :data-payment-link-actions-anchor="inv.token"
-                aria-haspopup="menu"
-                :aria-expanded="openPaymentLinkMenuId === inv.token"
-                @click="togglePaymentLinkMenu(inv.token)"
-              >
-                <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
-              </SIconButton>
+        <SCard v-if="loading && links.length === 0" flush aria-busy="true">
+          <ul class="s-list" aria-label="Loading payment links">
+            <li v-for="i in 6" :key="i" class="s-list__item" aria-hidden="true">
+              <div class="s-list__main">
+                <SSkeleton width="40%" height="14px" />
+                <SSkeleton width="25%" height="12px" />
+              </div>
+              <SSkeleton width="72px" height="20px" />
             </li>
           </ul>
         </SCard>
 
-        <!-- Tablet and desktop -->
-        <div class="s-table-wrap s-hide-sm">
-          <table class="s-table">
-            <thead>
-              <tr>
-                <th scope="col">Invoice</th>
-                <th scope="col">Customer</th>
-                <th scope="col" class="s-table__num">Total</th>
-                <th scope="col">Status</th>
-                <th scope="col" class="s-table__actions"><span class="ds-sr-only">Actions</span></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="inv in paginatedLinks" :key="inv.token">
-                <td>
-                  <span class="s-table__primary">{{ inv.invoiceNumber }}</span>
-                  <span class="s-table__secondary">{{ itemsLabel(inv.itemsCount) }}</span>
-                </td>
-                <td>
-                  <span class="s-table__primary">{{ inv.customerName }}</span>
-                  <span v-if="inv.customerPhone" class="s-table__secondary">{{ inv.customerPhone }}</span>
-                </td>
-                <td class="s-table__num">{{ formatNaira(inv.total) }}</td>
-                <td>
-                  <SBadge :tone="statusTone(inv.status)" dot>{{ statusLabel(inv.status) }}</SBadge>
-                  <span v-if="inv.status === 'paid'" class="s-table__secondary">{{ settlementNote(inv) }}</span>
-                </td>
-                <td class="s-table__actions">
-                  <SIconButton
-                    label="Payment link actions"
-                    size="sm"
-                    :data-payment-link-actions-anchor="inv.token"
-                    aria-haspopup="menu"
-                    :aria-expanded="openPaymentLinkMenuId === inv.token"
-                    @click="togglePaymentLinkMenu(inv.token)"
-                  >
-                    <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
-                  </SIconButton>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <SCard v-else-if="links.length === 0">
+          <SEmptyState
+            title="No payment links yet"
+            :description="
+              canCreateStandaloneLinks
+                ? 'Create your first link to start collecting.'
+                : 'Open a sale and choose Payment links to send the customer a secure link.'
+            "
+          >
+            <template #icon><CreditCard :size="24" :stroke-width="1.75" /></template>
+            <template v-if="payout.connected" #actions>
+              <SButton v-if="!canCreateStandaloneLinks" variant="primary" to="/dashboard/receipts">
+                <template #leading
+                  ><Receipt :size="16" :stroke-width="1.75" aria-hidden="true"
+                /></template>
+                Go to sales
+              </SButton>
+              <SButton v-else variant="primary" @click="showCreate = true">
+                <template #leading
+                  ><Plus :size="16" :stroke-width="2" aria-hidden="true"
+                /></template>
+                New payment link
+              </SButton>
+            </template>
+          </SEmptyState>
+        </SCard>
 
-        <SPagination
-          :current-page="currentPage"
-          :page-size="PAGE_SIZE"
-          :total="visibleLinks.length"
-          label="Payment links pagination"
-          @page-change="onPageChange"
-        />
-      </template>
+        <SCard v-else-if="visibleLinks.length === 0">
+          <SEmptyState
+            title="No links found"
+            description="Try another status, or clear the search."
+          >
+            <template #icon><SearchX :size="24" :stroke-width="1.75" /></template>
+            <template #actions>
+              <SButton @click="clearFilters">Show all links</SButton>
+            </template>
+          </SEmptyState>
+        </SCard>
+
+        <template v-else>
+          <!-- Phone -->
+          <SCard flush class="s-only-sm">
+            <ul class="s-list">
+              <li v-for="inv in paginatedLinks" :key="inv.token" class="s-list__item">
+                <span class="s-list__main">
+                  <span class="s-list__primary">{{ inv.customerName }}</span>
+                  <span class="s-list__secondary">
+                    #{{ inv.invoiceNumber }} · {{ itemsLabel(inv.itemsCount) }}
+                  </span>
+                </span>
+                <span class="s-list__end">
+                  <span class="s-list__value">{{ formatNaira(inv.total) }}</span>
+                  <SBadge :tone="statusTone(inv.status)">{{ statusLabel(inv.status) }}</SBadge>
+                </span>
+                <SIconButton
+                  label="Payment link actions"
+                  size="sm"
+                  :data-payment-link-actions-anchor="inv.token"
+                  aria-haspopup="menu"
+                  :aria-expanded="openPaymentLinkMenuId === inv.token"
+                  @click="togglePaymentLinkMenu(inv.token)"
+                >
+                  <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
+                </SIconButton>
+              </li>
+            </ul>
+          </SCard>
+
+          <!-- Tablet and desktop -->
+          <div class="s-table-wrap s-hide-sm">
+            <table class="s-table">
+              <thead>
+                <tr>
+                  <th scope="col">Invoice</th>
+                  <th scope="col">Customer</th>
+                  <th scope="col" class="s-table__num">Total</th>
+                  <th scope="col">Status</th>
+                  <th scope="col" class="s-table__actions">
+                    <span class="ds-sr-only">Actions</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="inv in paginatedLinks" :key="inv.token">
+                  <td>
+                    <span class="s-table__primary">{{ inv.invoiceNumber }}</span>
+                    <span class="s-table__secondary">{{ itemsLabel(inv.itemsCount) }}</span>
+                  </td>
+                  <td>
+                    <span class="s-table__primary">{{ inv.customerName }}</span>
+                    <span v-if="inv.customerPhone" class="s-table__secondary">{{
+                      inv.customerPhone
+                    }}</span>
+                  </td>
+                  <td class="s-table__num">{{ formatNaira(inv.total) }}</td>
+                  <td>
+                    <SBadge :tone="statusTone(inv.status)" dot>{{
+                      statusLabel(inv.status)
+                    }}</SBadge>
+                    <span v-if="inv.status === 'paid'" class="s-table__secondary">{{
+                      settlementNote(inv)
+                    }}</span>
+                  </td>
+                  <td class="s-table__actions">
+                    <SIconButton
+                      label="Payment link actions"
+                      size="sm"
+                      :data-payment-link-actions-anchor="inv.token"
+                      aria-haspopup="menu"
+                      :aria-expanded="openPaymentLinkMenuId === inv.token"
+                      @click="togglePaymentLinkMenu(inv.token)"
+                    >
+                      <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
+                    </SIconButton>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <SPagination
+            :current-page="currentPage"
+            :page-size="PAGE_SIZE"
+            :total="visibleLinks.length"
+            label="Payment links pagination"
+            @page-change="onPageChange"
+          />
+        </template>
+      </section>
 
       <CreatePaymentLinkModal v-model="showCreate" @created="onCreated" />
       <SharePaymentLinkModal
@@ -436,7 +466,9 @@ const canConnect = computed(() =>
 
 let resolveTimer: ReturnType<typeof setTimeout> | null = null
 const onAccountInput = () => {
-  accountNumber.value = String(accountNumber.value ?? '').replace(/\D/g, '').slice(0, 10)
+  accountNumber.value = String(accountNumber.value ?? '')
+    .replace(/\D/g, '')
+    .slice(0, 10)
   resolvedName.value = ''
   connectError.value = ''
   if (resolveTimer) clearTimeout(resolveTimer)
@@ -597,7 +629,7 @@ const statusLabel = (s: PaymentLinkListItem['status']) =>
   ({ unpaid: 'Unpaid', paid: 'Paid', failed: 'Failed', expired: 'Expired' }[s])
 
 const statusTone = (s: PaymentLinkListItem['status']) =>
-  ({ unpaid: 'neutral', paid: 'success', failed: 'error', expired: 'warning' } as const)[s]
+  (({ unpaid: 'neutral', paid: 'success', failed: 'error', expired: 'warning' } as const)[s])
 
 // Real status: a payment is settled once Paystack has run a payout dated after it was captured.
 const settlementNote = (inv: PaymentLinkListItem) => {

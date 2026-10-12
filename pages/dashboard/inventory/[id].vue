@@ -3,7 +3,6 @@
     :data-inventory-subcategory-hub="showCategoryHub ? '' : undefined"
     class="ds-root s-c s-page s-inventory"
   >
-
     <!-- Loading -->
     <template v-if="isLoadingFolder">
       <SPageHeader :title="folder?.name || 'Category'" :back="inventoryBack">
@@ -13,7 +12,12 @@
           </nav>
         </template>
       </SPageHeader>
-      <div v-if="loadingShowsCategoryHub" class="s-category-grid" role="status" aria-label="Loading subcategories">
+      <div
+        v-if="loadingShowsCategoryHub"
+        class="s-category-grid"
+        role="status"
+        aria-label="Loading subcategories"
+      >
         <div v-for="i in 6" :key="i" class="s-category-card" aria-hidden="true">
           <SSkeleton width="40px" height="40px" />
           <SSkeleton width="70%" height="16px" />
@@ -39,7 +43,13 @@
         <template #eyebrow>
           <nav class="s-breadcrumb" aria-label="Breadcrumb">
             <template v-for="(crumb, index) in inventoryParentCrumbs" :key="crumb.href">
-              <ChevronRight v-if="index > 0" class="s-breadcrumb__sep" :size="14" :stroke-width="2" aria-hidden="true" />
+              <ChevronRight
+                v-if="index > 0"
+                class="s-breadcrumb__sep"
+                :size="14"
+                :stroke-width="2"
+                aria-hidden="true"
+              />
               <NuxtLink :to="crumb.href" class="s-breadcrumb__link">{{ crumb.label }}</NuxtLink>
             </template>
           </nav>
@@ -155,21 +165,29 @@
         <template #eyebrow>
           <nav class="s-breadcrumb" aria-label="Breadcrumb">
             <template v-for="(crumb, index) in inventoryParentCrumbs" :key="crumb.href">
-              <ChevronRight v-if="index > 0" class="s-breadcrumb__sep" :size="14" :stroke-width="2" aria-hidden="true" />
+              <ChevronRight
+                v-if="index > 0"
+                class="s-breadcrumb__sep"
+                :size="14"
+                :stroke-width="2"
+                aria-hidden="true"
+              />
               <NuxtLink :to="crumb.href" class="s-breadcrumb__link">{{ crumb.label }}</NuxtLink>
             </template>
           </nav>
         </template>
         <template #description>
-          {{ folder?.itemCount ?? 0 }} {{ (folder?.itemCount ?? 0) === 1 ? 'item' : 'items' }}
-          · {{ formatCurrency(totalInventoryValue) }} total value
+          {{ folder?.itemCount ?? 0 }} {{ (folder?.itemCount ?? 0) === 1 ? 'item' : 'items' }} ·
+          {{ formatCurrency(totalInventoryValue) }} total value
           <template v-if="isSearchActive && sortedFilteredItems.length !== baseItems.length">
             · {{ sortedFilteredItems.length }} shown
           </template>
         </template>
         <template v-if="canManageInventoryItems" #actions>
           <SButton :loading="isImporting" :disabled="isExporting" @click="fileInputRef?.click()">
-            <template #leading><Upload :size="16" :stroke-width="1.75" aria-hidden="true" /></template>
+            <template #leading
+              ><Upload :size="16" :stroke-width="1.75" aria-hidden="true"
+            /></template>
             Import
           </SButton>
           <SButton
@@ -177,7 +195,9 @@
             :disabled="isImporting || (folder?.itemCount ?? 0) === 0"
             @click="handleExportToExcel"
           >
-            <template #leading><Download :size="16" :stroke-width="1.75" aria-hidden="true" /></template>
+            <template #leading
+              ><Download :size="16" :stroke-width="1.75" aria-hidden="true"
+            /></template>
             Export
           </SButton>
           <SButton variant="primary" @click="openAddItemModal">
@@ -187,338 +207,159 @@
         </template>
       </SPageHeader>
 
-      <div
-        v-if="showBulkRowSelection && selectedItemsForBulk.length > 0"
-        class="s-toolbar s-toolbar--selection"
-        role="region"
-        aria-label="Bulk actions"
-      >
-        <SCheckbox
-          :model-value="allSelectableItemsSelected"
-          :label="`${selectedItemsForBulk.length} selected`"
-          @update:model-value="(checked) => toggleSelectAll(checked)"
-        />
-        <div class="s-toolbar__end">
-          <SButton variant="ghost" size="sm" @click="selectedItemsForBulk = []">Clear</SButton>
-          <SButton
-            v-if="canLoanToSellerUi"
-            size="sm"
-            :disabled="selectedItemsEligibleForSellerLoan.length === 0"
-            :title="sellerLoanButtonTitle || undefined"
-            @click="openCreateSellerLoanModal"
+      <section class="s-table-card" aria-label="Products">
+        <div class="s-table-card__head">
+          <div
+            v-if="showBulkRowSelection && selectedItemsForBulk.length > 0"
+            class="s-toolbar s-toolbar--selection"
+            role="region"
+            aria-label="Bulk actions"
           >
-            <template #leading><HandCoins :size="14" :stroke-width="2" aria-hidden="true" /></template>
-            Stock loan
-          </SButton>
-          <template v-if="canManageInventoryItems">
-            <SButton size="sm" @click="openBulkDiscountModal">
-              <template #leading><Tag :size="14" :stroke-width="2" aria-hidden="true" /></template>
-              Discount
-            </SButton>
-            <SButton variant="danger" size="sm" @click="openBulkDeleteModal">
-              <template #leading><Trash2 :size="14" :stroke-width="2" aria-hidden="true" /></template>
-              Delete
-            </SButton>
-          </template>
-        </div>
-      </div>
-      <div v-else class="s-toolbar">
-        <SSearch
-          v-model="searchQuery"
-          class="s-toolbar__search"
-          placeholder="Search products"
-          label="Search by name, SKU or serial number"
-        />
-        <div class="s-toolbar__filter">
-          <SSelect
-            :model-value="sortBy"
-            :options="itemSortSelectOptions"
-            aria-label="Sort by"
-            @update:model-value="onItemSortSelect"
-          />
-        </div>
-        <div class="s-toolbar__end s-hide-sm">
-          <div class="s-toggle-group" role="group" aria-label="Layout">
-            <button
-              type="button"
-              class="s-toggle-group__btn"
-              :aria-pressed="itemsViewMode === 'table'"
-              aria-label="Table view"
-              @click="itemsViewMode = 'table'"
-            >
-              <List :size="16" :stroke-width="1.75" aria-hidden="true" />
-            </button>
-            <button
-              type="button"
-              class="s-toggle-group__btn"
-              :aria-pressed="itemsViewMode === 'shelf'"
-              aria-label="Shelf view"
-              @click="itemsViewMode = 'shelf'"
-            >
-              <LayoutGrid :size="16" :stroke-width="1.75" aria-hidden="true" />
-            </button>
+            <SCheckbox
+              :model-value="allSelectableItemsSelected"
+              :label="`${selectedItemsForBulk.length} selected`"
+              @update:model-value="(checked) => toggleSelectAll(checked)"
+            />
+            <div class="s-toolbar__end">
+              <SButton variant="ghost" size="sm" @click="selectedItemsForBulk = []">Clear</SButton>
+              <SButton
+                v-if="canLoanToSellerUi"
+                size="sm"
+                :disabled="selectedItemsEligibleForSellerLoan.length === 0"
+                :title="sellerLoanButtonTitle || undefined"
+                @click="openCreateSellerLoanModal"
+              >
+                <template #leading
+                  ><HandCoins :size="14" :stroke-width="2" aria-hidden="true"
+                /></template>
+                Stock loan
+              </SButton>
+              <template v-if="canManageInventoryItems">
+                <SButton size="sm" @click="openBulkDiscountModal">
+                  <template #leading
+                    ><Tag :size="14" :stroke-width="2" aria-hidden="true"
+                  /></template>
+                  Discount
+                </SButton>
+                <SButton variant="danger" size="sm" @click="openBulkDeleteModal">
+                  <template #leading
+                    ><Trash2 :size="14" :stroke-width="2" aria-hidden="true"
+                  /></template>
+                  Delete
+                </SButton>
+              </template>
+            </div>
+          </div>
+          <div v-else class="s-toolbar">
+            <SSearch
+              v-model="searchQuery"
+              class="s-toolbar__search"
+              placeholder="Search products"
+              label="Search by name, SKU or serial number"
+            />
+            <div class="s-toolbar__filter">
+              <SSelect
+                :model-value="sortBy"
+                :options="itemSortSelectOptions"
+                aria-label="Sort by"
+                @update:model-value="onItemSortSelect"
+              />
+            </div>
+            <div class="s-toolbar__end s-hide-sm">
+              <div class="s-toggle-group" role="group" aria-label="Layout">
+                <button
+                  type="button"
+                  class="s-toggle-group__btn"
+                  :aria-pressed="itemsViewMode === 'table'"
+                  aria-label="Table view"
+                  @click="itemsViewMode = 'table'"
+                >
+                  <List :size="16" :stroke-width="1.75" aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  class="s-toggle-group__btn"
+                  :aria-pressed="itemsViewMode === 'shelf'"
+                  aria-label="Shelf view"
+                  @click="itemsViewMode = 'shelf'"
+                >
+                  <LayoutGrid :size="16" :stroke-width="1.75" aria-hidden="true" />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <SCard v-if="sortedFilteredItems.length === 0">
-        <SEmptyState
-          :title="searchQuery ? 'No products found' : 'No products yet'"
-          :description="
-            searchQuery
-              ? 'Try a different name, SKU or serial number.'
-              : 'Add your first product to track stock, pricing and serial numbers here, or import a spreadsheet.'
-          "
-        >
-          <template #icon>
-            <SearchX v-if="searchQuery" :size="24" :stroke-width="1.75" />
-            <PackagePlus v-else :size="24" :stroke-width="1.75" />
-          </template>
-          <template v-if="searchQuery || canManageInventoryItems" #actions>
-            <SButton v-if="searchQuery" @click="searchQuery = ''">Clear search</SButton>
-            <template v-else>
-              <SButton :loading="isImporting" @click="fileInputRef?.click()">
-                <template #leading><Upload :size="16" :stroke-width="1.75" aria-hidden="true" /></template>
-                Import
-              </SButton>
-              <SButton variant="primary" @click="openAddItemModal">
-                <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
-                Add product
-              </SButton>
+        <SCard v-if="sortedFilteredItems.length === 0">
+          <SEmptyState
+            :title="searchQuery ? 'No products found' : 'No products yet'"
+            :description="
+              searchQuery
+                ? 'Try a different name, SKU or serial number.'
+                : 'Add your first product to track stock, pricing and serial numbers here, or import a spreadsheet.'
+            "
+          >
+            <template #icon>
+              <SearchX v-if="searchQuery" :size="24" :stroke-width="1.75" />
+              <PackagePlus v-else :size="24" :stroke-width="1.75" />
             </template>
-          </template>
-        </SEmptyState>
-      </SCard>
-
-      <template v-else>
-        <!-- Phone: one row per product -->
-        <SCard flush class="s-only-sm">
-          <ul class="s-list">
-            <li v-for="item in paginatedItems" :key="item.id">
-              <div
-                :data-item-row="item.id"
-                class="s-list__item s-product-row"
-                :class="{ 's-list__item--flash': flashItemId === item.id }"
-              >
-                <SCheckbox
-                  v-if="showBulkRowSelection && !isInventoryItemLocked(item)"
-                  :model-value="isItemSelected(item)"
-                  :aria-label="`Select ${getItemPrimaryLabel(item)}`"
-                  @update:model-value="(checked) => toggleItemSelection(item, checked)"
-                />
-                <button type="button" class="s-list__main s-list__hit" @click="openMobileItemDetail(item)">
-                  <span class="s-list__primary">{{ getItemPrimaryLabel(item) }}</span>
-                  <span class="s-list__secondary">
-                    {{ [item.sku || item.serialNumber || item.serialNo, getItemSourceBadge(item)?.label].filter(Boolean).join(' · ') || folder?.name }}
-                  </span>
-                </button>
-                <div class="s-list__end">
-                  <span class="s-list__value">{{ getItemDisplayPrice(item) }}</span>
-                  <InventoryStatusBadge :badge="getItemAvailability(item)" :inline-meta="false" />
-                </div>
-                <SIconButton
-                  label="Product actions"
-                  size="sm"
-                  :disabled="isInventoryItemLocked(item)"
-                  :data-item-actions-anchor="item.id"
-                  aria-haspopup="menu"
-                  :aria-expanded="openItemMenuId === item.id"
-                  @click="toggleItemMenu(item.id)"
-                >
-                  <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
-                </SIconButton>
-              </div>
-            </li>
-          </ul>
+            <template v-if="searchQuery || canManageInventoryItems" #actions>
+              <SButton v-if="searchQuery" @click="searchQuery = ''">Clear search</SButton>
+              <template v-else>
+                <SButton :loading="isImporting" @click="fileInputRef?.click()">
+                  <template #leading
+                    ><Upload :size="16" :stroke-width="1.75" aria-hidden="true"
+                  /></template>
+                  Import
+                </SButton>
+                <SButton variant="primary" @click="openAddItemModal">
+                  <template #leading
+                    ><Plus :size="16" :stroke-width="2" aria-hidden="true"
+                  /></template>
+                  Add product
+                </SButton>
+              </template>
+            </template>
+          </SEmptyState>
         </SCard>
 
-        <!-- Tablet and desktop: shelf -->
-        <div v-if="itemsViewMode === 'shelf'" class="s-product-grid s-hide-sm">
-          <button
-            v-for="item in paginatedItems"
-            :key="item.id"
-            type="button"
-            class="s-product-card"
-            :class="{ 's-product-card--flash': flashItemId === item.id }"
-            @click="openMobileItemDetail(item)"
-          >
-            <span class="s-product-card__name">{{ getItemPrimaryLabel(item) }}</span>
-            <span class="s-product-card__price">{{ getItemDisplayPrice(item) }}</span>
-            <span class="s-product-card__foot">
-              <InventoryStatusBadge :badge="getItemAvailability(item)" :inline-meta="false" />
-              <span v-if="item.sku || item.serialNumber || item.serialNo" class="s-product-card__ref">
-                {{ item.sku || item.serialNumber || item.serialNo }}
-              </span>
-            </span>
-          </button>
-        </div>
-
-        <!-- Tablet and desktop: table -->
-        <div v-else class="s-table-wrap s-hide-sm">
-          <table class="s-table">
-            <thead>
-              <tr>
-                <th v-if="showBulkRowSelection" scope="col" class="s-table__check">
-                  <SCheckbox
-                    :model-value="allSelectableItemsSelected"
-                    aria-label="Select all products"
-                    @update:model-value="(checked) => toggleSelectAll(checked)"
-                  />
-                </th>
-                <th
-                  v-for="column in columns"
-                  :key="column.key"
-                  scope="col"
-                  :class="{ 's-table__num': isNumericItemColumn(column) }"
-                  :aria-sort="column.sortable ? itemAriaSort(column.key) : undefined"
+        <template v-else>
+          <!-- Phone: one row per product -->
+          <SCard flush class="s-only-sm">
+            <ul class="s-list">
+              <li v-for="item in paginatedItems" :key="item.id">
+                <div
+                  :data-item-row="item.id"
+                  class="s-list__item s-product-row"
+                  :class="{ 's-list__item--flash': flashItemId === item.id }"
                 >
-                  <SSortHeader
-                    v-if="column.sortable"
-                    :label="column.label"
-                    :direction="itemSortDirection(column.key)"
-                    :align="isNumericItemColumn(column) ? 'end' : 'start'"
-                    @sort="toggleSort(column.key)"
-                  />
-                  <template v-else>{{ column.label }}</template>
-                </th>
-                <th v-if="canManageInventoryItems" scope="col" class="s-table__actions">
-                  <span class="ds-sr-only">Actions</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="item in paginatedItems"
-                :key="item.id"
-                :data-item-row="item.id"
-                :class="{
-                  's-table__row--flash': flashItemId === item.id,
-                  's-table__row--selected': isItemSelected(item),
-                }"
-              >
-                <td v-if="showBulkRowSelection" class="s-table__check">
                   <SCheckbox
+                    v-if="showBulkRowSelection && !isInventoryItemLocked(item)"
                     :model-value="isItemSelected(item)"
-                    :disabled="isInventoryItemLocked(item)"
                     :aria-label="`Select ${getItemPrimaryLabel(item)}`"
                     @update:model-value="(checked) => toggleItemSelection(item, checked)"
                   />
-                </td>
-                <td
-                  v-for="(column, colIndex) in columns"
-                  :key="column.key"
-                  :class="{ 's-table__num': isNumericItemColumn(column) }"
-                >
-                  <!-- Inline edit (large screens); blur or Enter saves, Escape cancels -->
-                  <div
-                    v-if="
-                      isLargeScreen &&
-                      canManageInventoryItems &&
-                      !isInventoryItemLocked(item) &&
-                      isColumnEditable(column) &&
-                      isEditingCell(item, column.key)
-                    "
-                    ref="inlineEditCellRef"
-                    class="s-inline-edit"
+                  <button
+                    type="button"
+                    class="s-list__main s-list__hit"
+                    @click="openMobileItemDetail(item)"
                   >
-                    <input
-                      ref="inlineEditInputRef"
-                      v-model="inlineEditValue"
-                      type="text"
-                      class="s-inline-edit__input"
-                      :aria-label="`${column.label} for ${getItemPrimaryLabel(item)}`"
-                      :inputmode="
-                        column.type === 'currency' ||
-                        column.type === 'number' ||
-                        column.key.toLowerCase().includes('price')
-                          ? 'decimal'
-                          : 'text'
-                      "
-                      @blur="saveInlineEdit"
-                      @keydown.enter="saveInlineEdit"
-                      @keydown.esc="cancelInlineEdit"
-                      @click.stop
-                    />
-                  </div>
-                  <div
-                    v-else
-                    class="s-cell"
-                    :class="{
-                      's-cell--editable':
-                        isLargeScreen &&
-                        canManageInventoryItems &&
-                        !isInventoryItemLocked(item) &&
-                        isColumnEditable(column),
-                    }"
-                    @click="startInlineEdit(item, column)"
-                  >
-                    <template v-if="colIndex === 0">
-                      <span class="s-table__primary s-cell__name" :title="getItemPrimaryLabel(item)">
-                        {{ getItemPrimaryLabel(item) }}
-                      </span>
-                    </template>
-                    <template v-else-if="isInventoryUnitCostColumn(column)">
-                      <template v-if="getItemCostForDisplay(item) !== undefined">
-                        {{ formatCurrency(getItemCostForDisplay(item)!) }}
-                      </template>
-                      <span v-else class="s-table__muted">{{ EMPTY_CELL }}</span>
-                    </template>
-                    <template v-else-if="isInventorySellPriceColumn(column)">
-                      <span v-if="item.discountedPrice !== undefined" class="s-price">
-                        <span class="s-price__now">{{ formatCurrency(item.discountedPrice) }}</span>
-                        <span v-if="getItemDiscountLabel(item)" class="s-price__off">
-                          {{ getItemDiscountLabel(item) }}
-                        </span>
-                        <s class="s-price__was">
-                          {{ formatCurrency(item.originalPrice || item[column.key] || 0) }}
-                        </s>
-                      </span>
-                      <template v-else>{{ formatCurrency(item[column.key] || 0) }}</template>
-                    </template>
-                    <template v-else-if="'type' in column && column.type === 'number'">
-                      {{ formatNumber(item[column.key]) }}
-                    </template>
-                    <template
-                      v-else-if="
-                        ('type' in column && column.type === 'date') ||
-                        column.key === 'dateIn' ||
-                        column.key === 'dateOut'
-                      "
-                    >
-                      <template v-if="item[column.key]">{{ formatItemDate(item[column.key]) }}</template>
-                      <span v-else class="s-table__muted">{{ EMPTY_CELL }}</span>
-                    </template>
-                    <template v-else-if="column.key === 'margin'">
-                      <span
-                        v-if="getItemGrossProfit(item) !== null"
-                        :class="getItemGrossProfit(item)! < 0 ? 's-table__error' : 's-table__muted'"
-                      >
-                        {{ getItemProfitLabel(item) }} · {{ formatMarginPercent(getItemMarginPercent(item)) }}
-                      </span>
-                      <span v-else class="s-table__muted">{{ EMPTY_CELL }}</span>
-                    </template>
-                    <template v-else-if="column.key === 'source'">
-                      <InventorySourceBadge v-if="getItemSourceBadge(item)" :badge="getItemSourceBadge(item)!" />
-                      <span v-else class="s-table__muted">Stock</span>
-                    </template>
-                    <template v-else-if="column.key === 'availability'">
-                      <InventoryStatusBadge :badge="getItemAvailability(item)" />
-                    </template>
-                    <template v-else-if="'type' in column && column.type === 'boolean'">
-                      <SBadge :tone="item[column.key] ? 'success' : 'neutral'">
-                        {{ item[column.key] ? 'Yes' : 'No' }}
-                      </SBadge>
-                    </template>
-                    <span
-                      v-else
-                      class="s-cell__text"
-                      :title="String(getItemDisplayValue(item[column.key]) ?? '')"
-                    >
-                      {{ getItemDisplayValue(item[column.key]) }}
+                    <span class="s-list__primary">{{ getItemPrimaryLabel(item) }}</span>
+                    <span class="s-list__secondary">
+                      {{
+                        [
+                          item.sku || item.serialNumber || item.serialNo,
+                          getItemSourceBadge(item)?.label,
+                        ]
+                          .filter(Boolean)
+                          .join(' · ') || folder?.name
+                      }}
                     </span>
+                  </button>
+                  <div class="s-list__end">
+                    <span class="s-list__value">{{ getItemDisplayPrice(item) }}</span>
+                    <InventoryStatusBadge :badge="getItemAvailability(item)" :inline-meta="false" />
                   </div>
-                </td>
-                <td v-if="canManageInventoryItems" class="s-table__actions">
                   <SIconButton
                     label="Product actions"
                     size="sm"
@@ -530,20 +371,238 @@
                   >
                     <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
                   </SIconButton>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                </div>
+              </li>
+            </ul>
+          </SCard>
 
-        <SPagination
-          :current-page="currentPage"
-          :page-size="itemsPerPage"
-          :total="paginationTotal"
-          label="Products pagination"
-          @page-change="handlePageChange"
-        />
-      </template>
+          <!-- Tablet and desktop: shelf -->
+          <div v-if="itemsViewMode === 'shelf'" class="s-product-grid s-hide-sm">
+            <button
+              v-for="item in paginatedItems"
+              :key="item.id"
+              type="button"
+              class="s-product-card"
+              :class="{ 's-product-card--flash': flashItemId === item.id }"
+              @click="openMobileItemDetail(item)"
+            >
+              <span class="s-product-card__name">{{ getItemPrimaryLabel(item) }}</span>
+              <span class="s-product-card__price">{{ getItemDisplayPrice(item) }}</span>
+              <span class="s-product-card__foot">
+                <InventoryStatusBadge :badge="getItemAvailability(item)" :inline-meta="false" />
+                <span
+                  v-if="item.sku || item.serialNumber || item.serialNo"
+                  class="s-product-card__ref"
+                >
+                  {{ item.sku || item.serialNumber || item.serialNo }}
+                </span>
+              </span>
+            </button>
+          </div>
+
+          <!-- Tablet and desktop: table -->
+          <div v-else class="s-table-wrap s-hide-sm">
+            <table class="s-table">
+              <thead>
+                <tr>
+                  <th v-if="showBulkRowSelection" scope="col" class="s-table__check">
+                    <SCheckbox
+                      :model-value="allSelectableItemsSelected"
+                      aria-label="Select all products"
+                      @update:model-value="(checked) => toggleSelectAll(checked)"
+                    />
+                  </th>
+                  <th
+                    v-for="column in columns"
+                    :key="column.key"
+                    scope="col"
+                    :class="{ 's-table__num': isNumericItemColumn(column) }"
+                    :aria-sort="column.sortable ? itemAriaSort(column.key) : undefined"
+                  >
+                    <SSortHeader
+                      v-if="column.sortable"
+                      :label="column.label"
+                      :direction="itemSortDirection(column.key)"
+                      :align="isNumericItemColumn(column) ? 'end' : 'start'"
+                      @sort="toggleSort(column.key)"
+                    />
+                    <template v-else>{{ column.label }}</template>
+                  </th>
+                  <th v-if="canManageInventoryItems" scope="col" class="s-table__actions">
+                    <span class="ds-sr-only">Actions</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="item in paginatedItems"
+                  :key="item.id"
+                  :data-item-row="item.id"
+                  :class="{
+                    's-table__row--flash': flashItemId === item.id,
+                    's-table__row--selected': isItemSelected(item),
+                  }"
+                >
+                  <td v-if="showBulkRowSelection" class="s-table__check">
+                    <SCheckbox
+                      :model-value="isItemSelected(item)"
+                      :disabled="isInventoryItemLocked(item)"
+                      :aria-label="`Select ${getItemPrimaryLabel(item)}`"
+                      @update:model-value="(checked) => toggleItemSelection(item, checked)"
+                    />
+                  </td>
+                  <td
+                    v-for="(column, colIndex) in columns"
+                    :key="column.key"
+                    :class="{ 's-table__num': isNumericItemColumn(column) }"
+                  >
+                    <!-- Inline edit (large screens); blur or Enter saves, Escape cancels -->
+                    <div
+                      v-if="
+                        isLargeScreen &&
+                        canManageInventoryItems &&
+                        !isInventoryItemLocked(item) &&
+                        isColumnEditable(column) &&
+                        isEditingCell(item, column.key)
+                      "
+                      ref="inlineEditCellRef"
+                      class="s-inline-edit"
+                    >
+                      <input
+                        ref="inlineEditInputRef"
+                        v-model="inlineEditValue"
+                        type="text"
+                        class="s-inline-edit__input"
+                        :aria-label="`${column.label} for ${getItemPrimaryLabel(item)}`"
+                        :inputmode="
+                          column.type === 'currency' ||
+                          column.type === 'number' ||
+                          column.key.toLowerCase().includes('price')
+                            ? 'decimal'
+                            : 'text'
+                        "
+                        @blur="saveInlineEdit"
+                        @keydown.enter="saveInlineEdit"
+                        @keydown.esc="cancelInlineEdit"
+                        @click.stop
+                      />
+                    </div>
+                    <div
+                      v-else
+                      class="s-cell"
+                      :class="{
+                        's-cell--editable':
+                          isLargeScreen &&
+                          canManageInventoryItems &&
+                          !isInventoryItemLocked(item) &&
+                          isColumnEditable(column),
+                      }"
+                      @click="startInlineEdit(item, column)"
+                    >
+                      <template v-if="colIndex === 0">
+                        <span
+                          class="s-table__primary s-cell__name"
+                          :title="getItemPrimaryLabel(item)"
+                        >
+                          {{ getItemPrimaryLabel(item) }}
+                        </span>
+                      </template>
+                      <template v-else-if="isInventoryUnitCostColumn(column)">
+                        <template v-if="getItemCostForDisplay(item) !== undefined">
+                          {{ formatCurrency(getItemCostForDisplay(item)!) }}
+                        </template>
+                        <span v-else class="s-table__muted">{{ EMPTY_CELL }}</span>
+                      </template>
+                      <template v-else-if="isInventorySellPriceColumn(column)">
+                        <span v-if="item.discountedPrice !== undefined" class="s-price">
+                          <span class="s-price__now">{{
+                            formatCurrency(item.discountedPrice)
+                          }}</span>
+                          <span v-if="getItemDiscountLabel(item)" class="s-price__off">
+                            {{ getItemDiscountLabel(item) }}
+                          </span>
+                          <s class="s-price__was">
+                            {{ formatCurrency(item.originalPrice || item[column.key] || 0) }}
+                          </s>
+                        </span>
+                        <template v-else>{{ formatCurrency(item[column.key] || 0) }}</template>
+                      </template>
+                      <template v-else-if="'type' in column && column.type === 'number'">
+                        {{ formatNumber(item[column.key]) }}
+                      </template>
+                      <template
+                        v-else-if="
+                          ('type' in column && column.type === 'date') ||
+                          column.key === 'dateIn' ||
+                          column.key === 'dateOut'
+                        "
+                      >
+                        <template v-if="item[column.key]">{{
+                          formatItemDate(item[column.key])
+                        }}</template>
+                        <span v-else class="s-table__muted">{{ EMPTY_CELL }}</span>
+                      </template>
+                      <template v-else-if="column.key === 'margin'">
+                        <span
+                          v-if="getItemGrossProfit(item) !== null"
+                          :class="getItemGrossProfit(item)! < 0 ? 's-table__error' : 's-table__muted'"
+                        >
+                          {{ getItemProfitLabel(item) }} ·
+                          {{ formatMarginPercent(getItemMarginPercent(item)) }}
+                        </span>
+                        <span v-else class="s-table__muted">{{ EMPTY_CELL }}</span>
+                      </template>
+                      <template v-else-if="column.key === 'source'">
+                        <InventorySourceBadge
+                          v-if="getItemSourceBadge(item)"
+                          :badge="getItemSourceBadge(item)!"
+                        />
+                        <span v-else class="s-table__muted">Stock</span>
+                      </template>
+                      <template v-else-if="column.key === 'availability'">
+                        <InventoryStatusBadge :badge="getItemAvailability(item)" />
+                      </template>
+                      <template v-else-if="'type' in column && column.type === 'boolean'">
+                        <SBadge :tone="item[column.key] ? 'success' : 'neutral'">
+                          {{ item[column.key] ? 'Yes' : 'No' }}
+                        </SBadge>
+                      </template>
+                      <span
+                        v-else
+                        class="s-cell__text"
+                        :title="String(getItemDisplayValue(item[column.key]) ?? '')"
+                      >
+                        {{ getItemDisplayValue(item[column.key]) }}
+                      </span>
+                    </div>
+                  </td>
+                  <td v-if="canManageInventoryItems" class="s-table__actions">
+                    <SIconButton
+                      label="Product actions"
+                      size="sm"
+                      :disabled="isInventoryItemLocked(item)"
+                      :data-item-actions-anchor="item.id"
+                      aria-haspopup="menu"
+                      :aria-expanded="openItemMenuId === item.id"
+                      @click="toggleItemMenu(item.id)"
+                    >
+                      <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
+                    </SIconButton>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <SPagination
+            :current-page="currentPage"
+            :page-size="itemsPerPage"
+            :total="paginationTotal"
+            label="Products pagination"
+            @page-change="handlePageChange"
+          />
+        </template>
+      </section>
     </template>
 
     <!-- Hidden file input for import -->
@@ -581,17 +640,15 @@
           </p>
         </div>
         <dl class="s-inv-detail">
-          <div
-            v-for="(column, colIndex) in columns"
-            :key="column.key"
-            class="s-inv-detail__row"
-          >
+          <div v-for="(column, colIndex) in columns" :key="column.key" class="s-inv-detail__row">
             <dt>
               {{ column.label }}
             </dt>
             <dd>
               <template v-if="colIndex === 0">
-                <span class="s-inv-detail__strong">{{ getItemPrimaryLabel(mobileDetailItem) }}</span>
+                <span class="s-inv-detail__strong">{{
+                  getItemPrimaryLabel(mobileDetailItem)
+                }}</span>
               </template>
               <template v-else>
                 <div v-if="isInventoryUnitCostColumn(column)">
@@ -804,11 +861,7 @@
               No serial numbers yet. Select “Add serial number” to start.
             </p>
             <div v-else :class="[drawerFillScrollClass, 's-inv-stack']">
-              <div
-                v-for="(serial, index) in serialNumbers"
-                :key="index"
-                class="s-inline-field"
-              >
+              <div v-for="(serial, index) in serialNumbers" :key="index" class="s-inline-field">
                 <div class="s-inline-field__grow">
                   <SInput
                     v-model="serialNumbers[index]"
@@ -978,7 +1031,11 @@
       warning="This permanently deletes the selected products from inventory. This cannot be undone."
       confirm-label="I understand these products will be permanently deleted."
       :loading="isBulkDeleting"
-      @update:model-value="(v) => { if (!v) bulkDeleteConfirmed = false }"
+      @update:model-value="
+        (v) => {
+          if (!v) bulkDeleteConfirmed = false
+        }
+      "
       @confirm="handleConfirmBulkDelete"
     />
 
@@ -1066,12 +1123,22 @@
       label="Product actions"
       @close="closeItemMenu"
     >
-      <SMenuItem label="View details" :icon="Eye" @select="runItemMenuAction(openMobileItemDetail)" />
-      <SMenuItem label="History" :icon="HistoryIcon" @select="runItemMenuAction(handleViewTimeline)" />
+      <SMenuItem
+        label="View details"
+        :icon="Eye"
+        @select="runItemMenuAction(openMobileItemDetail)"
+      />
+      <SMenuItem
+        label="History"
+        :icon="HistoryIcon"
+        @select="runItemMenuAction(handleViewTimeline)"
+      />
       <template v-if="itemForOpenMenu && !isInventoryItemLocked(itemForOpenMenu)">
         <SMenuItem label="Edit" :icon="Pencil" @select="runItemMenuAction(handleEditItem)" />
         <SMenuItem
-          :label="itemForOpenMenu.discountedPrice !== undefined ? 'Change discount' : 'Add discount'"
+          :label="
+            itemForOpenMenu.discountedPrice !== undefined ? 'Change discount' : 'Add discount'
+          "
           :icon="Tag"
           @select="runItemMenuAction(handleApplyDiscount)"
         />
@@ -1087,7 +1154,12 @@
           :icon="Copy"
           @select="runItemMenuAction(handleDuplicateItem)"
         />
-        <SMenuItem label="Delete" :icon="Trash2" danger @select="runItemMenuAction(handleDeleteItem)" />
+        <SMenuItem
+          label="Delete"
+          :icon="Trash2"
+          danger
+          @select="runItemMenuAction(handleDeleteItem)"
+        />
       </template>
     </SMenu>
 
@@ -1117,14 +1189,16 @@
       :count="selectedSubfoldersForBulk.length"
       :item-names="selectedSubfoldersForBulk.map((f) => f.name)"
       warning="This permanently deletes the selected subcategories and every product inside them. This cannot be undone."
-      :impact-summary="
-        `Delete ${selectedSubfoldersForBulk.length} ${
-          selectedSubfoldersForBulk.length === 1 ? 'subcategory' : 'subcategories'
-        } and all products inside`
-      "
+      :impact-summary="`Delete ${selectedSubfoldersForBulk.length} ${
+        selectedSubfoldersForBulk.length === 1 ? 'subcategory' : 'subcategories'
+      } and all products inside`"
       confirm-label="I understand these subcategories and their products will be permanently deleted."
       :loading="isBulkDeletingSubfolders"
-      @update:model-value="(v) => { if (!v) bulkDeleteSubfoldersConfirmed = false }"
+      @update:model-value="
+        (v) => {
+          if (!v) bulkDeleteSubfoldersConfirmed = false
+        }
+      "
       @confirm="handleConfirmBulkDeleteSubfolders"
     />
 
@@ -1134,24 +1208,13 @@
       size="md"
       :title="editingSubfolder ? 'Edit subcategory' : 'Add subcategory'"
     >
-      <SForm
-        id="subcategory-drawer-form"
-        @submit="handleSaveSubcategory"
-      >
+      <SForm id="subcategory-drawer-form" @submit="handleSaveSubcategory">
         <SFormSection>
           <SField label="Subcategory name" required>
-            <SInput
-              v-model="subcategoryForm.name"
-              required
-              placeholder="e.g. Corolla"
-            />
+            <SInput v-model="subcategoryForm.name" required placeholder="e.g. Corolla" />
           </SField>
           <SField label="Description">
-            <STextarea
-              v-model="subcategoryForm.description"
-              :rows="2"
-              placeholder="Optional"
-            />
+            <STextarea v-model="subcategoryForm.description" :rows="2" placeholder="Optional" />
           </SField>
         </SFormSection>
       </SForm>
@@ -1181,7 +1244,16 @@ import SForm from '~/components/s/SForm.vue'
 import SFormSection from '~/components/s/SFormSection.vue'
 import STextarea from '~/components/s/STextarea.vue'
 import BulkDeleteConfirmModal from '~/components/dashboard/BulkDeleteConfirmModal.vue'
-import { ref, computed, reactive, onMounted, onBeforeUnmount, onActivated, watch, nextTick } from 'vue'
+import {
+  ref,
+  computed,
+  reactive,
+  onMounted,
+  onBeforeUnmount,
+  onActivated,
+  watch,
+  nextTick,
+} from 'vue'
 import { CubeIcon, FolderIcon } from '~/utils/app-icons'
 import {
   useInventoryStore,
@@ -1311,8 +1383,14 @@ watch(
 const userStore = useUserStore()
 const storesStore = useStoresStore()
 const departmentsStore = useDepartmentsStore()
-const { canManageInventoryItems, canManage, can, canViewProfitAndCost, canCreateInventoryFolders, isStaff } =
-  usePermissions()
+const {
+  canManageInventoryItems,
+  canManage,
+  can,
+  canViewProfitAndCost,
+  canCreateInventoryFolders,
+  isStaff,
+} = usePermissions()
 const canShowProfitAndCost = computed(
   () => canViewProfitAndCost.value && folder.value?.trackProfit === true
 )
@@ -1338,7 +1416,9 @@ function itemSelectFieldOptions(field: TemplateField) {
     ...(field.options ?? []).map((option) => ({ value: option, label: option })),
   ]
 }
-const initialExistingFolder = folderId.value ? inventoryStore.getFolderById(folderId.value) ?? null : null
+const initialExistingFolder = folderId.value
+  ? inventoryStore.getFolderById(folderId.value) ?? null
+  : null
 const folder = ref<InventoryFolder | null>(initialExistingFolder)
 const isLoadingFolder = ref(!initialExistingFolder)
 const isLoadingItems = ref(false)
@@ -1365,7 +1445,9 @@ const inventoryParentCrumbs = computed(() => inventoryBreadcrumbs.value.slice(0,
 
 const inventoryBack = computed(() => {
   const parent = inventoryParentCrumbs.value.at(-1)
-  return parent ? { to: parent.href, label: parent.label } : { to: '/dashboard/inventory', label: 'Inventory' }
+  return parent
+    ? { to: parent.href, label: parent.label }
+    : { to: '/dashboard/inventory', label: 'Inventory' }
 })
 
 const EMPTY_CELL = '—'
@@ -1588,8 +1670,7 @@ const subfolderForOpenMenu = computed(() => {
 })
 
 const toggleSubfolderMenu = (subfolderId: string) => {
-  openSubfolderMenuId.value =
-    openSubfolderMenuId.value === subfolderId ? null : subfolderId
+  openSubfolderMenuId.value = openSubfolderMenuId.value === subfolderId ? null : subfolderId
 }
 
 function closeSubfolderMenu() {
@@ -1751,8 +1832,8 @@ async function handleSaveSubcategory() {
       error instanceof Error
         ? error.message
         : editingSubfolder.value
-          ? 'Failed to update subcategory'
-          : 'Failed to create subcategory'
+        ? 'Failed to update subcategory'
+        : 'Failed to create subcategory'
     toast.error(message)
   } finally {
     isSavingSubcategory.value = false
@@ -1907,8 +1988,7 @@ const itemDrawerClosingViaCancel = ref(false)
 watch(showAddItemModal, (isOpen) => {
   if (isOpen) return
   if (itemDrawerClosingViaCancel.value) return
-  preserveItemDrawerDraft.value =
-    Object.keys(itemForm).length > 0 || serialNumbers.value.length > 0
+  preserveItemDrawerDraft.value = Object.keys(itemForm).length > 0 || serialNumbers.value.length > 0
 })
 
 /** Mobile list: slide-over with the same fields as the desktop table */
@@ -2505,9 +2585,12 @@ const columns = computed(() => {
   )
   if (canShowProfitAndCost.value) {
     if (!templateHasCostPriceField(fieldSource)) {
-      templateColumns.push(
-        { key: 'unitCost', label: 'Unit cost', sortable: true, type: 'currency' }
-      )
+      templateColumns.push({
+        key: 'unitCost',
+        label: 'Unit cost',
+        sortable: true,
+        type: 'currency',
+      })
     }
     templateColumns.push({ key: 'margin', label: 'Margin', sortable: false, type: 'margin' })
   }
@@ -2698,9 +2781,7 @@ function isInventorySellPriceColumn(column: { key: string; type?: string }): boo
   if (isInventoryUnitCostColumn(column) || column.key === 'margin') return false
   const key = column.key.toLowerCase()
   return (
-    column.type === 'currency' ||
-    key === 'price' ||
-    (key.includes('price') && key !== 'unitcost')
+    column.type === 'currency' || key === 'price' || (key.includes('price') && key !== 'unitcost')
   )
 }
 
@@ -2742,9 +2823,7 @@ const filteredItems = computed(() => {
   let result = [...baseItems.value]
 
   if (availabilityFilter.value !== 'all') {
-    result = result.filter(
-      (item) => getItemAvailability(item).status === availabilityFilter.value
-    )
+    result = result.filter((item) => getItemAvailability(item).status === availabilityFilter.value)
   }
 
   // Filter by search query - search across all template fields
@@ -2766,7 +2845,7 @@ function getItemDisplayPrice(item: InventoryItem): string {
   const amount =
     item.discountedPrice !== undefined
       ? item.discountedPrice
-      : (item.price ?? item.originalPrice ?? 0)
+      : item.price ?? item.originalPrice ?? 0
   return formatCurrency(amount)
 }
 

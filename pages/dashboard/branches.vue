@@ -28,7 +28,9 @@
       >
         <template #icon><Store :size="24" :stroke-width="1.75" /></template>
         <template #actions>
-          <SButton variant="primary" :to="dashPath('/settings#advanced-features')">Open Settings</SButton>
+          <SButton variant="primary" :to="dashPath('/settings#advanced-features')"
+            >Open Settings</SButton
+          >
         </template>
       </SEmptyState>
     </SCard>
@@ -36,13 +38,18 @@
     <template v-else>
       <p v-if="eligibleStores.length > 0 && !canAddStore" class="s-notice">
         {{ storeLimitMessage }}
-        <NuxtLink :to="dashPath('/settings?upgrade=1')" class="s-link">Open Plan &amp; billing</NuxtLink>
+        <NuxtLink :to="dashPath('/settings?upgrade=1')" class="s-link"
+          >Open Plan &amp; billing</NuxtLink
+        >
       </p>
       <p v-if="hiddenStoreCount > 0" class="s-notice">
         {{ hiddenStoreCount }} {{ hiddenStoreCount === 1 ? 'branch is' : 'branches are' }} on your
         account but not on your current plan<template v-if="hiddenStoreNames.length">
-          ({{ hiddenStoreNames.join(', ') }})</template>. Your oldest branches stay available first.
-        <NuxtLink :to="dashPath('/settings?upgrade=1')" class="s-link">Upgrade to restore them</NuxtLink>.
+          ({{ hiddenStoreNames.join(', ') }})</template
+        >. Your oldest branches stay available first.
+        <NuxtLink :to="dashPath('/settings?upgrade=1')" class="s-link"
+          >Upgrade to restore them</NuxtLink
+        >.
       </p>
 
       <SCard v-if="storesLoading && eligibleStores.length === 0" flush aria-busy="true">
@@ -98,76 +105,24 @@
           </div>
         </dl>
 
-        <!-- Phone -->
-        <SCard flush class="s-only-sm">
-          <ul class="s-list">
-            <li v-for="store in eligibleStores" :key="store.id">
-              <div class="s-list__item">
-                <span class="s-team__mark" aria-hidden="true">
-                  <Store :size="16" :stroke-width="1.75" />
-                </span>
-                <span class="s-list__main">
-                  <span class="s-list__primary">{{ store.name }}</span>
-                  <span class="s-list__secondary">{{ branchSummary(store) }}</span>
-                </span>
-                <span class="s-list__end">
-                  <SBadge :tone="branchStatus(store).tone" size="sm">{{ branchStatus(store).label }}</SBadge>
-                </span>
-                <SIconButton
-                  :label="`Actions for ${store.name}`"
-                  size="sm"
-                  :data-branch-actions-anchor="store.id"
-                  aria-haspopup="menu"
-                  :aria-expanded="openMenuId === store.id"
-                  @click="toggleMenu(store.id)"
-                >
-                  <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
-                </SIconButton>
-              </div>
-            </li>
-          </ul>
-        </SCard>
-
-        <!-- Tablet and desktop -->
-        <div class="s-table-wrap s-hide-sm">
-          <table class="s-table">
-            <thead>
-              <tr>
-                <th scope="col">Branch</th>
-                <th scope="col" class="s-hide-md">Address</th>
-                <th scope="col" class="s-hide-lg">Contact</th>
-                <th scope="col">Status</th>
-                <th scope="col" class="s-table__actions"><span class="ds-sr-only">Actions</span></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="store in eligibleStores" :key="store.id">
-                <td>
-                  <div class="s-team__cell">
-                    <span class="s-team__mark" aria-hidden="true">
-                      <Store :size="16" :stroke-width="1.75" />
-                    </span>
-                    <span class="s-team__cell-text">
-                      <span class="s-table__primary">{{ store.name }}</span>
-                      <span v-if="store.description" class="s-table__secondary">{{ store.description }}</span>
-                    </span>
-                  </div>
-                </td>
-                <td class="s-hide-md">
-                  <span v-if="store.address" class="s-table__secondary">{{ store.address }}</span>
-                  <span v-else class="s-table__muted">{{ EMPTY_CELL }}</span>
-                </td>
-                <td class="s-hide-lg">
-                  <span v-if="store.phone || store.email" class="s-team__cell-text">
-                    <span v-if="store.phone" class="s-table__secondary">{{ store.phone }}</span>
-                    <span v-if="store.email" class="s-table__secondary">{{ store.email }}</span>
+        <section class="s-table-card" aria-label="Branches">
+          <!-- Phone -->
+          <SCard flush class="s-only-sm">
+            <ul class="s-list">
+              <li v-for="store in eligibleStores" :key="store.id">
+                <div class="s-list__item">
+                  <span class="s-team__mark" aria-hidden="true">
+                    <Store :size="16" :stroke-width="1.75" />
                   </span>
-                  <span v-else class="s-table__muted">{{ EMPTY_CELL }}</span>
-                </td>
-                <td>
-                  <SBadge :tone="branchStatus(store).tone" dot>{{ branchStatus(store).label }}</SBadge>
-                </td>
-                <td class="s-table__actions">
+                  <span class="s-list__main">
+                    <span class="s-list__primary">{{ store.name }}</span>
+                    <span class="s-list__secondary">{{ branchSummary(store) }}</span>
+                  </span>
+                  <span class="s-list__end">
+                    <SBadge :tone="branchStatus(store).tone" size="sm">{{
+                      branchStatus(store).label
+                    }}</SBadge>
+                  </span>
                   <SIconButton
                     :label="`Actions for ${store.name}`"
                     size="sm"
@@ -178,11 +133,73 @@
                   >
                     <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
                   </SIconButton>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                </div>
+              </li>
+            </ul>
+          </SCard>
+
+          <!-- Tablet and desktop -->
+          <div class="s-table-wrap s-hide-sm">
+            <table class="s-table">
+              <thead>
+                <tr>
+                  <th scope="col">Branch</th>
+                  <th scope="col" class="s-hide-md">Address</th>
+                  <th scope="col" class="s-hide-lg">Contact</th>
+                  <th scope="col">Status</th>
+                  <th scope="col" class="s-table__actions">
+                    <span class="ds-sr-only">Actions</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="store in eligibleStores" :key="store.id">
+                  <td>
+                    <div class="s-team__cell">
+                      <span class="s-team__mark" aria-hidden="true">
+                        <Store :size="16" :stroke-width="1.75" />
+                      </span>
+                      <span class="s-team__cell-text">
+                        <span class="s-table__primary">{{ store.name }}</span>
+                        <span v-if="store.description" class="s-table__secondary">{{
+                          store.description
+                        }}</span>
+                      </span>
+                    </div>
+                  </td>
+                  <td class="s-hide-md">
+                    <span v-if="store.address" class="s-table__secondary">{{ store.address }}</span>
+                    <span v-else class="s-table__muted">{{ EMPTY_CELL }}</span>
+                  </td>
+                  <td class="s-hide-lg">
+                    <span v-if="store.phone || store.email" class="s-team__cell-text">
+                      <span v-if="store.phone" class="s-table__secondary">{{ store.phone }}</span>
+                      <span v-if="store.email" class="s-table__secondary">{{ store.email }}</span>
+                    </span>
+                    <span v-else class="s-table__muted">{{ EMPTY_CELL }}</span>
+                  </td>
+                  <td>
+                    <SBadge :tone="branchStatus(store).tone" dot>{{
+                      branchStatus(store).label
+                    }}</SBadge>
+                  </td>
+                  <td class="s-table__actions">
+                    <SIconButton
+                      :label="`Actions for ${store.name}`"
+                      size="sm"
+                      :data-branch-actions-anchor="store.id"
+                      aria-haspopup="menu"
+                      :aria-expanded="openMenuId === store.id"
+                      @click="toggleMenu(store.id)"
+                    >
+                      <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
+                    </SIconButton>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
       </template>
     </template>
 
@@ -213,7 +230,9 @@
       v-model:open="branchFormOpen"
       placement="right"
       :title="editingStore ? 'Edit branch' : 'Add branch'"
-      :description="editingStore ? undefined : 'Name the branch and add the details customers see on receipts.'"
+      :description="
+        editingStore ? undefined : 'Name the branch and add the details customers see on receipts.'
+      "
       :dismissible="!isSubmittingStore"
     >
       <form id="branch-form" class="s-form" @submit.prevent="handleStoreSubmit">
@@ -226,9 +245,20 @@
             :hint="`Cities in ${branchRegionLabel}, based on your account region.`"
             required
           />
-          <SInput v-model="branchLocality" label="Area" placeholder="e.g. Lekki or GRA" hint="Optional. Helps tell apart two branches in the same city." />
+          <SInput
+            v-model="branchLocality"
+            label="Area"
+            placeholder="e.g. Lekki or GRA"
+            hint="Optional. Helps tell apart two branches in the same city."
+          />
         </template>
-        <SInput v-else v-model="storeForm.name" label="Branch name" placeholder="e.g. Main shop" required />
+        <SInput
+          v-else
+          v-model="storeForm.name"
+          label="Branch name"
+          placeholder="e.g. Main shop"
+          required
+        />
 
         <STextarea v-model="storeForm.description" label="Description" :rows="2" />
         <STextarea
@@ -241,11 +271,7 @@
         <SInput v-model="storeForm.address" label="Address" autocomplete="street-address" />
         <SInput v-model="storeForm.phone" label="Phone" type="tel" autocomplete="tel" />
         <SInput v-model="storeForm.email" label="Email" type="email" autocomplete="email" />
-        <SCheckbox
-          v-if="editingStore"
-          v-model="storeForm.isActive"
-          label="Branch is active"
-        />
+        <SCheckbox v-if="editingStore" v-model="storeForm.isActive" label="Branch is active" />
       </form>
       <template #footer>
         <SButton :disabled="isSubmittingStore" @click="closeStoreModal">Cancel</SButton>
@@ -286,7 +312,11 @@
     >
       <ul class="s-list" aria-label="Your branches">
         <li v-for="store in storesStore.stores" :key="store.id">
-          <button type="button" class="s-list__item s-list__hit" @click="handleStoreSelection(store.id)">
+          <button
+            type="button"
+            class="s-list__item s-list__hit"
+            @click="handleStoreSelection(store.id)"
+          >
             <span class="s-list__main">
               <span class="s-list__primary">{{ store.name }}</span>
               <span v-if="store.address" class="s-list__secondary">{{ store.address }}</span>
@@ -370,7 +400,9 @@ const {
 /** A workspace without multi-location can still create its very first branch. */
 const canManage = computed(() => canManageBranches.value || storesStore.stores.length === 0)
 
-const activeBranchCount = computed(() => eligibleStores.value.filter((store) => store.isActive).length)
+const activeBranchCount = computed(
+  () => eligibleStores.value.filter((store) => store.isActive).length
+)
 
 const branchCityOptions = computed(() =>
   availableBranchCities.value.map((city) => ({ label: city, value: city }))
