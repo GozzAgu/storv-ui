@@ -1,5 +1,5 @@
 <template>
-  <div class="ds-root s-c s-page">
+  <div class="ds-root s-c s-page s-settings-page">
     <SPageHeader title="Settings">
       <template #description>
         Business details, plan, inventory defaults, and how sales are recorded.
@@ -160,25 +160,30 @@
           </template>
 
           <SSkeleton v-if="isLoadingStoreInfo" :lines="4" />
+          <dl v-else-if="!isEditingStore" class="s-settings__details">
+            <div v-for="detail in storeInfoDetails" :key="detail.label" class="s-settings__detail">
+              <dt>{{ detail.label }}</dt>
+              <dd :class="{ 's-settings__detail-empty': !detail.value }">
+                {{ detail.value || 'Not set' }}
+              </dd>
+            </div>
+          </dl>
           <form
             v-else
             id="settings-store-form"
             class="s-settings__grid"
-            :class="{ 's-settings__grid--readonly': !isEditingStore }"
             @submit.prevent="saveStoreInfo"
           >
             <SInput
               v-model="storeInfo.name"
               label="Branch name"
               placeholder="Enter branch name"
-              :readonly="!isEditingStore"
               :disabled="!canEditSettings"
             />
             <SInput
               v-model="storeInfo.businessType"
               label="Business type"
               placeholder="For example, perfume shop"
-              :readonly="!isEditingStore"
               :disabled="!canEditSettings"
             />
             <SInput
@@ -187,7 +192,6 @@
               label="Email"
               placeholder="store@example.com"
               autocomplete="email"
-              :readonly="!isEditingStore"
               :disabled="!canEditSettings"
             />
             <SInput
@@ -196,7 +200,6 @@
               label="Phone"
               placeholder="Enter phone number"
               autocomplete="tel"
-              :readonly="!isEditingStore"
               :disabled="!canEditSettings"
             />
             <div class="s-settings__span">
@@ -205,7 +208,6 @@
                 label="Address"
                 placeholder="Enter store address"
                 :rows="2"
-                :readonly="!isEditingStore"
                 :disabled="!canEditSettings"
               />
             </div>
@@ -540,6 +542,15 @@ const storeInfo = reactive({
 const backupStoreInfo = reactive({ ...storeInfo })
 const isEditingStore = ref(false)
 const isLoadingStoreInfo = ref(true)
+const storeInfoDetails = computed(() =>
+  [
+    { label: 'Branch name', value: storeInfo.name },
+    { label: 'Business type', value: storeInfo.businessType },
+    { label: 'Email', value: storeInfo.email },
+    { label: 'Phone', value: storeInfo.phone },
+    { label: 'Address', value: storeInfo.address },
+  ].map((detail) => ({ ...detail, value: String(detail.value ?? '').trim() }))
+)
 
 // Get user data and load store info
 const { currentUser } = useFirebaseAuth()
