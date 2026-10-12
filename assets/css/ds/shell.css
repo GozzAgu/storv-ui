@@ -50,7 +50,9 @@ html:has(.s-shell.ds-root) body {
 }
 
 .s-shell__content {
+  display: flex;
   flex: 1;
+  flex-direction: column;
   width: 100%;
   min-width: 0;
   padding: var(--s-space-2) var(--s-space-2)
@@ -105,8 +107,21 @@ html:has(.s-shell.ds-root) body {
 }
 
 .s-shell__page {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   min-width: 0;
   animation: s-page-in var(--s-duration) var(--s-ease-out);
+}
+
+.s-shell__page > :is(.s-page, .ds-root),
+.s-shell__page > .ds-root > .s-page {
+  flex: 1;
+}
+
+.s-shell__page > .ds-root:not(.s-page) {
+  display: flex;
+  flex-direction: column;
 }
 
 @keyframes s-page-in {

@@ -435,7 +435,22 @@
   box-shadow: none;
 }
 
+/* The page's last card runs to the bottom of the screen, so a short or empty list doesn't leave
+   it hanging half-way down; the empty state centres in the space and pagination sits at the foot. */
+.s-page > :is(.s-table-card, .s-tab-panel):not(:has(~ :is(.s-card, .s-table-card, .s-tab-panel))) {
+  flex: 1 0 auto;
+}
+
+.s-table-card > .s-card:has(.s-empty),
+.s-table-card > .s-empty {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+}
+
 .s-table-card .s-pagination {
+  margin-top: auto;
   padding: var(--s-space-1-5) var(--s-space-2);
   border-top: 1px solid var(--s-divider);
 }
@@ -492,6 +507,7 @@
 
 .s-tab-panel__body {
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: var(--s-space-2);
   min-width: 0;
