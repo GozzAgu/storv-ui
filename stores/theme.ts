@@ -105,7 +105,7 @@ export const useThemeStore = defineStore('theme', {
           html.style.colorScheme = isDark ? 'dark' : 'light'
           syncThemeColorMeta(isDark)
           if (html.classList.contains('capacitor-native')) {
-            body.style.backgroundColor = isDark ? '#07080c' : '#f3f4f6'
+            body.style.backgroundColor = isDark ? '#050505' : '#f3f4f6'
           } else {
             body.style.backgroundColor = ''
           }

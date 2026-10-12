@@ -159,18 +159,19 @@
 }
 
 html.dark {
-  --s-bg: #04060b;
+  /* Neutral greys, no blue cast; the accent is the only colour */
+  --s-bg: #050505;
   /* Lifted further from the canvas than in light mode so borderless cards still read */
-  --s-surface: #0e1320;
-  --s-surface-2: #141a2b;
-  --s-surface-hover: #192036;
+  --s-surface: #161616;
+  --s-surface-2: #1e1e1e;
+  --s-surface-hover: #232323;
   --s-border: transparent;
-  --s-line: #1a2033;
-  --s-divider: rgb(255 255 255 / 0.05);
-  --s-border-strong: #262e45;
+  --s-line: #262626;
+  --s-divider: rgb(255 255 255 / 0.06);
+  --s-border-strong: #363636;
 
-  --s-glass: rgb(16 21 37 / 0.58);
-  --s-glass-strong: rgb(14 19 34 / 0.76);
+  --s-glass: rgb(24 24 24 / 0.62);
+  --s-glass-strong: rgb(20 20 20 / 0.8);
   --s-glass-hairline: transparent;
   --s-glass-highlight: inset 0 0 0 transparent;
   --s-glass-shadow: var(--s-glass-highlight), 0 0 0 1px var(--s-glass-hairline),
@@ -179,10 +180,10 @@ html.dark {
     0 24px 56px -16px rgb(0 0 0 / 0.7), 0 6px 14px -6px rgb(0 0 0 / 0.4);
   --s-btn-primary-glow: none;
 
-  --s-text: #f2f4f7;
-  --s-text-2: #b4bccb;
-  --s-text-muted: #8a93a6;
-  --s-text-on-accent: #0b0d12;
+  --s-text: #f5f5f5;
+  --s-text-2: #bababa;
+  --s-text-muted: #8f8f8f;
+  --s-text-on-accent: #0a0a0a;
 
   --s-accent: #8ea2ff;
   --s-accent-hover: #a3b3ff;
@@ -207,7 +208,7 @@ html.dark {
 
   --s-field-bg: rgb(255 255 255 / 0.05);
   --s-field-bg-hover: rgb(255 255 255 / 0.08);
-  --s-field-bg-focus: #0e1320;
+  --s-field-bg-focus: #161616;
 
   --s-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3);
   --s-shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.45);

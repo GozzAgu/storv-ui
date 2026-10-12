@@ -27,10 +27,10 @@
   }
 
   html.dark {
-    --s-bg: #04060b;
-    --s-surface: #0e1320;
-    --s-surface-2: #141a2b;
-    --s-surface-hover: #192036;
+    --s-bg: #050505;
+    --s-surface: #161616;
+    --s-surface-2: #1e1e1e;
+    --s-surface-hover: #232323;
     --s-border: transparent;
     --s-line: rgb(255 255 255 / 0.08);
     --s-divider: rgb(255 255 255 / 0.05);
