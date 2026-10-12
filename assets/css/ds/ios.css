@@ -15,8 +15,10 @@
     --s-divider: rgb(15 23 42 / 0.05);
     --s-border-strong: rgb(15 23 42 / 0.14);
 
-    --s-btn-h: var(--s-touch);
-    --s-btn-h-lg: calc(var(--s-touch) + var(--s-space-half));
+    --s-btn-h: var(--s-space-5);
+    --s-btn-h-sm: calc(var(--s-space-3) + var(--s-space-half));
+    --s-btn-h-lg: var(--s-touch);
+    --s-tab-h: var(--s-space-4);
     --s-control-h: var(--s-touch);
     --s-control-h-sm: calc(var(--s-space-4) + var(--s-space-half));
 

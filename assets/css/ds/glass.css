@@ -75,9 +75,22 @@ html:has(.s-shell.ds-root) body,
   box-shadow: var(--s-glass-highlight), var(--s-glass-shadow-float);
 }
 
+/* Inside a frosted sheet every fill (fields, cards, tiles, secondary buttons) is the same tint,
+   so the sheet reads as one material rather than a patchwork of white and grey panels. */
 .s-dialog {
+  --s-surface-2: var(--s-field-bg);
+  --s-surface-hover: var(--s-field-bg-hover);
   border-color: var(--s-glass-hairline);
   box-shadow: var(--s-glass-shadow-float);
+}
+
+.s-dialog .s-btn--secondary {
+  background: var(--s-field-bg);
+  box-shadow: none;
+}
+
+.s-dialog .s-btn--secondary:hover:not(:disabled) {
+  background: var(--s-field-bg-hover);
 }
 
 .s-dialog__scrim {

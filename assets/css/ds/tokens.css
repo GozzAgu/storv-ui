@@ -134,9 +134,10 @@
   --s-drawer-w: 480px;
   --s-control-h: 40px;
   --s-control-h-sm: 32px;
-  --s-btn-h: 36px;
-  --s-btn-h-sm: 28px;
-  --s-btn-h-lg: 40px;
+  --s-btn-h: 32px;
+  --s-btn-h-sm: 26px;
+  --s-btn-h-lg: 36px;
+  --s-tab-h: 28px;
   --s-rail-w: 232px;
   --s-rail-w-collapsed: 64px;
   --s-topbar-h: 56px;

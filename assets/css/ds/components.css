@@ -1033,7 +1033,7 @@ textarea.s-control__input {
   justify-content: center;
   gap: var(--s-space-1);
   flex-shrink: 0;
-  height: var(--s-control-h-sm);
+  height: var(--s-tab-h);
   padding: 0 var(--s-space-1-5);
   border: 0;
   border-radius: var(--s-radius-sm);

@@ -572,12 +572,8 @@
 }
 
 .s-kind-picker__group-title {
-  position: sticky;
-  top: calc(var(--s-space-half) * -1);
-  z-index: 1;
   margin: 0 0 var(--s-space-1);
   padding: var(--s-space-half) 0;
-  background: var(--s-surface);
   color: var(--s-text-muted);
   font: var(--s-text-caption);
   letter-spacing: 0.04em;
