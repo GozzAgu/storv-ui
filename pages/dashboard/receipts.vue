@@ -37,11 +37,15 @@
             </template>
             <template v-if="canCreate" #actions>
               <SButton @click="openQuickSaleModal">
-                <template #leading><QrCode :size="16" :stroke-width="1.75" aria-hidden="true" /></template>
+                <template #leading
+                  ><QrCode :size="16" :stroke-width="1.75" aria-hidden="true"
+                /></template>
                 Quick sale
               </SButton>
               <SButton variant="primary" @click="openCreateReceiptModal">
-                <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
+                <template #leading
+                  ><Plus :size="16" :stroke-width="2" aria-hidden="true"
+                /></template>
                 New sale
               </SButton>
             </template>
@@ -59,229 +63,148 @@
             </div>
           </dl>
 
-          <STabs v-model="activeTab" :tabs="salesTabs" label="Sales views" />
-
-          <!-- Sales -->
-          <section v-if="activeTab === 'receipts'" class="s-sales__section" aria-label="Sales">
-            <div
-              v-if="canDeleteReceipts && selectedReceiptsForBulk.length > 0"
-              class="s-toolbar s-toolbar--selection"
-              role="region"
-              aria-label="Bulk actions"
-            >
-              <SCheckbox
-                :model-value="allReceiptsOnPageSelected"
-                :label="`${selectedReceiptsForBulk.length} selected`"
-                @update:model-value="toggleSelectAllReceipts"
-              />
-              <div class="s-toolbar__end">
-                <SButton variant="ghost" size="sm" @click="selectedReceiptsForBulk = []">Clear</SButton>
-                <SButton variant="danger" size="sm" @click="openBulkDeleteReceiptsModal">
-                  <template #leading><Trash2 :size="14" :stroke-width="2" aria-hidden="true" /></template>
-                  Delete
-                </SButton>
-              </div>
-            </div>
-            <div v-else-if="!receiptsStore.loading" class="s-toolbar">
-              <SSearch
-                v-model="searchQuery"
-                class="s-toolbar__search"
-                placeholder="Search sales"
-                label="Search by receipt number, customer or item"
-              />
-              <div class="s-toolbar__filter">
-                <SSelect v-model="statusFilter" :options="receiptStatusFilterOptions" aria-label="Status" />
-              </div>
-              <div class="s-toolbar__filter">
-                <SSelect v-model="dateFilter" :options="receiptDateFilterSelectOptions" aria-label="Date range" />
-              </div>
-            </div>
-
-            <SCard v-if="receiptsStore.loading" flush aria-busy="true">
-              <ul class="s-list" aria-label="Loading sales">
-                <li v-for="i in 8" :key="i" class="s-list__item" aria-hidden="true">
-                  <div class="s-list__main">
-                    <SSkeleton width="40%" height="14px" />
-                    <SSkeleton width="25%" height="12px" />
-                  </div>
-                  <SSkeleton width="72px" height="14px" />
-                </li>
-              </ul>
-            </SCard>
-
-            <SCard v-else-if="sortedFilteredReceipts.length === 0">
-              <SEmptyState
-                :title="hasReceiptFilters ? 'No sales found' : 'No sales yet'"
-                :description="
-                  hasReceiptFilters
-                    ? 'Try adjusting your search, status, or date filters.'
-                    : 'Record your first sale to track revenue and payments.'
-                "
-              >
-                <template #icon>
-                  <SearchX v-if="hasReceiptFilters" :size="24" :stroke-width="1.75" />
-                  <ReceiptText v-else :size="24" :stroke-width="1.75" />
-                </template>
-                <template v-if="hasReceiptFilters || canCreate" #actions>
-                  <SButton v-if="hasReceiptFilters" @click="clearReceiptFilters">Clear filters</SButton>
-                  <SButton v-else variant="primary" @click="openCreateReceiptModal">
-                    <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
-                    New sale
-                  </SButton>
-                </template>
-              </SEmptyState>
-            </SCard>
-
-            <template v-else>
-              <!-- Phone: one row per sale -->
-              <SCard flush class="s-only-sm">
-                <ul class="s-list">
-                  <li v-for="receipt in paginatedReceipts" :key="receipt.id">
-                    <div
-                      :data-receipt-row="receipt.id"
-                      class="s-list__item"
-                      :class="{ 's-list__item--flash': flashReceiptId === receipt.id }"
+          <div class="s-table-card">
+            <div class="s-table-card__head">
+              <STabs v-model="activeTab" :tabs="salesTabs" label="Sales views" />
+              <template v-if="activeTab === 'receipts'">
+                <div
+                  v-if="canDeleteReceipts && selectedReceiptsForBulk.length > 0"
+                  class="s-toolbar s-toolbar--selection"
+                  role="region"
+                  aria-label="Bulk actions"
+                >
+                  <SCheckbox
+                    :model-value="allReceiptsOnPageSelected"
+                    :label="`${selectedReceiptsForBulk.length} selected`"
+                    @update:model-value="toggleSelectAllReceipts"
+                  />
+                  <div class="s-toolbar__end">
+                    <SButton variant="ghost" size="sm" @click="selectedReceiptsForBulk = []"
+                      >Clear</SButton
                     >
-                      <SCheckbox
-                        v-if="canDeleteReceipts"
-                        :model-value="isReceiptSelected(receipt)"
-                        :aria-label="`Select sale ${receipt.receiptNumber}`"
-                        @update:model-value="(checked) => toggleReceiptSelection(receipt, checked)"
-                      />
-                      <button
-                        type="button"
-                        class="s-list__main s-list__hit"
-                        @click="handleViewReceipt(receipt)"
-                      >
-                        <span class="s-list__primary">{{ receipt.customerName || 'Walk-in customer' }}</span>
-                        <span class="s-list__secondary">
-                          #{{ receipt.receiptNumber }} · {{ formatDate(receipt.date) }}
-                        </span>
-                      </button>
-                      <div class="s-list__end">
-                        <span class="s-list__value">{{ formatCurrency(receipt.total) }}</span>
-                        <SBadge v-if="receipt.status !== 'completed'" :tone="getReceiptStatusTone(receipt.status)">
-                          {{ getReceiptStatusLabel(receipt.status) }}
-                        </SBadge>
-                      </div>
-                      <SIconButton
-                        label="Sale actions"
-                        size="sm"
-                        :data-receipt-actions-anchor="receipt.id"
-                        aria-haspopup="menu"
-                        :aria-expanded="openReceiptMenuId === receipt.id"
-                        @click="toggleReceiptMenu(receipt.id)"
-                      >
-                        <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
-                      </SIconButton>
+                    <SButton variant="danger" size="sm" @click="openBulkDeleteReceiptsModal">
+                      <template #leading
+                        ><Trash2 :size="14" :stroke-width="2" aria-hidden="true"
+                      /></template>
+                      Delete
+                    </SButton>
+                  </div>
+                </div>
+                <div v-else-if="!receiptsStore.loading" class="s-toolbar">
+                  <SSearch
+                    v-model="searchQuery"
+                    class="s-toolbar__search"
+                    placeholder="Search sales"
+                    label="Search by receipt number, customer or item"
+                  />
+                  <div class="s-toolbar__filter">
+                    <SSelect
+                      v-model="statusFilter"
+                      :options="receiptStatusFilterOptions"
+                      aria-label="Status"
+                    />
+                  </div>
+                  <div class="s-toolbar__filter">
+                    <SSelect
+                      v-model="dateFilter"
+                      :options="receiptDateFilterSelectOptions"
+                      aria-label="Date range"
+                    />
+                  </div>
+                </div>
+              </template>
+              <div
+                v-else-if="activeTab === 'outstanding' && !receiptsStore.loading"
+                class="s-toolbar"
+              >
+                <SSearch
+                  v-model="outstandingSearchQuery"
+                  class="s-toolbar__search"
+                  placeholder="Search customer or receipt #"
+                />
+              </div>
+            </div>
+
+            <!-- Sales -->
+            <section v-if="activeTab === 'receipts'" class="s-sales__section" aria-label="Sales">
+              <SCard v-if="receiptsStore.loading" flush aria-busy="true">
+                <ul class="s-list" aria-label="Loading sales">
+                  <li v-for="i in 8" :key="i" class="s-list__item" aria-hidden="true">
+                    <div class="s-list__main">
+                      <SSkeleton width="40%" height="14px" />
+                      <SSkeleton width="25%" height="12px" />
                     </div>
+                    <SSkeleton width="72px" height="14px" />
                   </li>
                 </ul>
               </SCard>
 
-              <!-- Tablet and desktop: table -->
-              <div class="s-table-wrap s-hide-sm">
-                <table class="s-table">
-                  <thead>
-                    <tr>
-                      <th v-if="canDeleteReceipts" scope="col" class="s-table__check">
-                        <SCheckbox
-                          :model-value="allReceiptsOnPageSelected"
-                          aria-label="Select all sales on this page"
-                          @update:model-value="toggleSelectAllReceipts"
-                        />
-                      </th>
-                      <th
-                        v-for="column in receiptTableColumns"
-                        :key="column.key"
-                        scope="col"
-                        :class="column.class"
-                        :aria-sort="ariaSort(column.key)"
-                      >
-                        <SSortHeader
-                          :label="column.label"
-                          :direction="sortDirection(column.key)"
-                          :align="column.align"
-                          @sort="toggleSort(column.key)"
-                        />
-                      </th>
-                      <th scope="col" class="s-table__actions">
-                        <span class="ds-sr-only">Actions</span>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr
-                      v-for="receipt in paginatedReceipts"
-                      :key="receipt.id"
-                      :data-receipt-row="receipt.id"
-                      class="s-table__row--interactive"
-                      :class="{
-                        's-table__row--flash': flashReceiptId === receipt.id,
-                        's-table__row--selected': isReceiptSelected(receipt),
-                      }"
-                      tabindex="0"
-                      @click="handleViewReceipt(receipt)"
-                      @keydown.enter.self="handleViewReceipt(receipt)"
+              <SCard v-else-if="sortedFilteredReceipts.length === 0">
+                <SEmptyState
+                  :title="hasReceiptFilters ? 'No sales found' : 'No sales yet'"
+                  :description="
+                    hasReceiptFilters
+                      ? 'Try adjusting your search, status, or date filters.'
+                      : 'Record your first sale to track revenue and payments.'
+                  "
+                >
+                  <template #icon>
+                    <SearchX v-if="hasReceiptFilters" :size="24" :stroke-width="1.75" />
+                    <ReceiptText v-else :size="24" :stroke-width="1.75" />
+                  </template>
+                  <template v-if="hasReceiptFilters || canCreate" #actions>
+                    <SButton v-if="hasReceiptFilters" @click="clearReceiptFilters"
+                      >Clear filters</SButton
                     >
-                      <td v-if="canDeleteReceipts" class="s-table__check" @click.stop>
+                    <SButton v-else variant="primary" @click="openCreateReceiptModal">
+                      <template #leading
+                        ><Plus :size="16" :stroke-width="2" aria-hidden="true"
+                      /></template>
+                      New sale
+                    </SButton>
+                  </template>
+                </SEmptyState>
+              </SCard>
+
+              <template v-else>
+                <!-- Phone: one row per sale -->
+                <SCard flush class="s-only-sm">
+                  <ul class="s-list">
+                    <li v-for="receipt in paginatedReceipts" :key="receipt.id">
+                      <div
+                        :data-receipt-row="receipt.id"
+                        class="s-list__item"
+                        :class="{ 's-list__item--flash': flashReceiptId === receipt.id }"
+                      >
                         <SCheckbox
+                          v-if="canDeleteReceipts"
                           :model-value="isReceiptSelected(receipt)"
                           :aria-label="`Select sale ${receipt.receiptNumber}`"
-                          @update:model-value="(checked) => toggleReceiptSelection(receipt, checked)"
+                          @update:model-value="
+                            (checked) => toggleReceiptSelection(receipt, checked)
+                          "
                         />
-                      </td>
-                      <td>
-                        <span class="s-table__inline">
-                          <span class="s-table__primary">#{{ receipt.receiptNumber }}</span>
-                          <SIconButton
-                            label="Copy receipt number"
-                            size="sm"
-                            @click.stop="copyReceiptNumber(receipt.receiptNumber)"
-                          >
-                            <CopyIcon :size="14" :stroke-width="1.75" aria-hidden="true" />
-                          </SIconButton>
-                          <SBadge v-if="receipt.isSwapIn" tone="info">Swap</SBadge>
-                        </span>
-                      </td>
-                      <td>
-                        <span class="s-table__primary">{{ receipt.customerName || 'Walk-in customer' }}</span>
-                        <span
-                          v-if="receipt.customerPhone || receipt.customerEmail"
-                          class="s-table__secondary"
+                        <button
+                          type="button"
+                          class="s-list__main s-list__hit"
+                          @click="handleViewReceipt(receipt)"
                         >
-                          {{
-                            receipt.customerPhone
-                              ? maskPhone(receipt.customerPhone)
-                              : receipt.customerEmail
-                          }}
-                        </span>
-                      </td>
-                      <td class="s-hide-md">{{ formatDate(receipt.date) }}</td>
-                      <td class="s-hide-lg">
-                        <span class="s-table__secondary">
-                          {{ getReceiptLineItemsPreview(receipt) || EMPTY_CELL }}
-                        </span>
-                      </td>
-                      <td class="s-table__num">
-                        <span class="s-table__primary">{{ formatCurrency(receipt.total) }}</span>
-                        <ReceiptProfitHint :receipt="receipt" />
-                      </td>
-                      <td class="s-hide-lg">{{ formatPaymentMethod(receipt.paymentMethod) }}</td>
-                      <td>
-                        <SBadge :tone="getReceiptStatusTone(receipt.status)" dot>
-                          {{ getReceiptStatusLabel(receipt.status) }}
-                        </SBadge>
-                      </td>
-                      <td class="s-hide-lg">
-                        <span class="s-table__secondary">
-                          {{
-                            receipt.createdByUserName ||
-                            getCreatorName(receipt.actualCreator || receipt.createdBy)
-                          }}
-                        </span>
-                      </td>
-                      <td class="s-table__actions" @click.stop>
+                          <span class="s-list__primary">{{
+                            receipt.customerName || 'Walk-in customer'
+                          }}</span>
+                          <span class="s-list__secondary">
+                            #{{ receipt.receiptNumber }} · {{ formatDate(receipt.date) }}
+                          </span>
+                        </button>
+                        <div class="s-list__end">
+                          <span class="s-list__value">{{ formatCurrency(receipt.total) }}</span>
+                          <SBadge
+                            v-if="receipt.status !== 'completed'"
+                            :tone="getReceiptStatusTone(receipt.status)"
+                          >
+                            {{ getReceiptStatusLabel(receipt.status) }}
+                          </SBadge>
+                        </div>
                         <SIconButton
                           label="Sale actions"
                           size="sm"
@@ -292,115 +215,244 @@
                         >
                           <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
                         </SIconButton>
+                      </div>
+                    </li>
+                  </ul>
+                </SCard>
+
+                <!-- Tablet and desktop: table -->
+                <div class="s-table-wrap s-hide-sm">
+                  <table class="s-table">
+                    <thead>
+                      <tr>
+                        <th v-if="canDeleteReceipts" scope="col" class="s-table__check">
+                          <SCheckbox
+                            :model-value="allReceiptsOnPageSelected"
+                            aria-label="Select all sales on this page"
+                            @update:model-value="toggleSelectAllReceipts"
+                          />
+                        </th>
+                        <th
+                          v-for="column in receiptTableColumns"
+                          :key="column.key"
+                          scope="col"
+                          :class="column.class"
+                          :aria-sort="ariaSort(column.key)"
+                        >
+                          <SSortHeader
+                            :label="column.label"
+                            :direction="sortDirection(column.key)"
+                            :align="column.align"
+                            @sort="toggleSort(column.key)"
+                          />
+                        </th>
+                        <th scope="col" class="s-table__actions">
+                          <span class="ds-sr-only">Actions</span>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr
+                        v-for="receipt in paginatedReceipts"
+                        :key="receipt.id"
+                        :data-receipt-row="receipt.id"
+                        class="s-table__row--interactive"
+                        :class="{
+                          's-table__row--flash': flashReceiptId === receipt.id,
+                          's-table__row--selected': isReceiptSelected(receipt),
+                        }"
+                        tabindex="0"
+                        @click="handleViewReceipt(receipt)"
+                        @keydown.enter.self="handleViewReceipt(receipt)"
+                      >
+                        <td v-if="canDeleteReceipts" class="s-table__check" @click.stop>
+                          <SCheckbox
+                            :model-value="isReceiptSelected(receipt)"
+                            :aria-label="`Select sale ${receipt.receiptNumber}`"
+                            @update:model-value="
+                              (checked) => toggleReceiptSelection(receipt, checked)
+                            "
+                          />
+                        </td>
+                        <td>
+                          <span class="s-table__inline">
+                            <span class="s-table__primary">#{{ receipt.receiptNumber }}</span>
+                            <SIconButton
+                              label="Copy receipt number"
+                              size="sm"
+                              @click.stop="copyReceiptNumber(receipt.receiptNumber)"
+                            >
+                              <CopyIcon :size="14" :stroke-width="1.75" aria-hidden="true" />
+                            </SIconButton>
+                            <SBadge v-if="receipt.isSwapIn" tone="info">Swap</SBadge>
+                          </span>
+                        </td>
+                        <td>
+                          <span class="s-table__primary">{{
+                            receipt.customerName || 'Walk-in customer'
+                          }}</span>
+                          <span
+                            v-if="receipt.customerPhone || receipt.customerEmail"
+                            class="s-table__secondary"
+                          >
+                            {{
+                              receipt.customerPhone
+                                ? maskPhone(receipt.customerPhone)
+                                : receipt.customerEmail
+                            }}
+                          </span>
+                        </td>
+                        <td class="s-hide-md">{{ formatDate(receipt.date) }}</td>
+                        <td class="s-hide-lg">
+                          <span class="s-table__secondary">
+                            {{ getReceiptLineItemsPreview(receipt) || EMPTY_CELL }}
+                          </span>
+                        </td>
+                        <td class="s-table__num">
+                          <span class="s-table__primary">{{ formatCurrency(receipt.total) }}</span>
+                          <ReceiptProfitHint :receipt="receipt" />
+                        </td>
+                        <td class="s-hide-lg">{{ formatPaymentMethod(receipt.paymentMethod) }}</td>
+                        <td>
+                          <SBadge :tone="getReceiptStatusTone(receipt.status)" dot>
+                            {{ getReceiptStatusLabel(receipt.status) }}
+                          </SBadge>
+                        </td>
+                        <td class="s-hide-lg">
+                          <span class="s-table__secondary">
+                            {{
+                              receipt.createdByUserName ||
+                              getCreatorName(receipt.actualCreator || receipt.createdBy)
+                            }}
+                          </span>
+                        </td>
+                        <td class="s-table__actions" @click.stop>
+                          <SIconButton
+                            label="Sale actions"
+                            size="sm"
+                            :data-receipt-actions-anchor="receipt.id"
+                            aria-haspopup="menu"
+                            :aria-expanded="openReceiptMenuId === receipt.id"
+                            @click="toggleReceiptMenu(receipt.id)"
+                          >
+                            <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
+                          </SIconButton>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <SPagination
+                  :current-page="currentPage"
+                  :page-size="itemsPerPage"
+                  :total="sortedFilteredReceipts.length"
+                  label="Sales pagination"
+                  @page-change="handlePageChange"
+                />
+              </template>
+            </section>
+
+            <!-- Outstanding (balance due) -->
+            <section
+              v-else-if="activeTab === 'outstanding'"
+              class="s-sales__section"
+              aria-label="Outstanding"
+            >
+              <SCard v-if="receiptsStore.loading" flush aria-busy="true">
+                <ul class="s-list" aria-label="Loading outstanding payments">
+                  <li v-for="i in 6" :key="i" class="s-list__item" aria-hidden="true">
+                    <div class="s-list__main">
+                      <SSkeleton width="40%" height="14px" />
+                      <SSkeleton width="25%" height="12px" />
+                    </div>
+                    <SSkeleton width="72px" height="14px" />
+                  </li>
+                </ul>
+              </SCard>
+
+              <SCard v-else-if="filteredOutstandingReceipts.length === 0">
+                <SEmptyState
+                  title="No outstanding payments"
+                  description="Sales recorded with a balance due appear here until they're paid in full."
+                >
+                  <template #icon><CircleCheck :size="24" :stroke-width="1.75" /></template>
+                </SEmptyState>
+              </SCard>
+
+              <div v-else class="s-table-wrap">
+                <table class="s-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Customer</th>
+                      <th scope="col" class="s-hide-sm">Sale</th>
+                      <th scope="col" class="s-hide-md">Items</th>
+                      <th scope="col" class="s-table__num s-hide-sm">Total</th>
+                      <th scope="col" class="s-table__num s-hide-sm">Paid</th>
+                      <th scope="col" class="s-table__num">Balance</th>
+                      <th scope="col"><span class="ds-sr-only">Actions</span></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr
+                      v-for="row in filteredOutstandingReceipts"
+                      :key="row.id"
+                      class="s-table__row--interactive"
+                      tabindex="0"
+                      @click="viewOutstandingReceipt(row)"
+                      @keydown.enter.self="viewOutstandingReceipt(row)"
+                    >
+                      <td>
+                        <span class="s-table__primary">{{
+                          row.customerName || 'Walk-in customer'
+                        }}</span>
+                        <span
+                          v-if="row.customerPhone || row.customerEmail"
+                          class="s-table__secondary"
+                        >
+                          {{ row.customerPhone ? maskPhone(row.customerPhone) : row.customerEmail }}
+                        </span>
+                      </td>
+                      <td class="s-hide-sm">
+                        <span class="s-table__primary">#{{ row.receiptNumber }}</span>
+                        <span class="s-table__secondary">{{ formatDate(row.date) }}</span>
+                      </td>
+                      <td class="s-hide-md">
+                        <span class="s-table__secondary">{{
+                          getReceiptLineItemsPreview(row) || EMPTY_CELL
+                        }}</span>
+                      </td>
+                      <td class="s-table__num s-hide-sm">{{ formatCurrency(row.total) }}</td>
+                      <td class="s-table__num s-hide-sm">
+                        {{ formatCurrency(outstandingAmountPaid(row)) }}
+                      </td>
+                      <td class="s-table__num s-table__warning">
+                        <span class="s-table__primary">{{
+                          formatCurrency(outstandingBalanceDue(row))
+                        }}</span>
+                      </td>
+                      <td @click.stop>
+                        <div class="s-table__row-actions">
+                          <SButton size="sm" variant="primary" @click="openRecordPayment(row)">
+                            Record payment
+                          </SButton>
+                          <SButton
+                            v-if="canEditReceipts"
+                            size="sm"
+                            variant="ghost"
+                            class="s-hide-sm"
+                            @click="cancelOutstandingReceipt(row)"
+                          >
+                            Cancel sale
+                          </SButton>
+                        </div>
                       </td>
                     </tr>
                   </tbody>
                 </table>
               </div>
-
-              <SPagination
-                :current-page="currentPage"
-                :page-size="itemsPerPage"
-                :total="sortedFilteredReceipts.length"
-                label="Sales pagination"
-                @page-change="handlePageChange"
-              />
-            </template>
-          </section>
-
-          <!-- Outstanding (balance due) -->
-          <section v-else-if="activeTab === 'outstanding'" class="s-sales__section" aria-label="Outstanding">
-            <div v-if="!receiptsStore.loading" class="s-toolbar">
-              <SSearch
-                v-model="outstandingSearchQuery"
-                class="s-toolbar__search"
-                placeholder="Search customer or receipt #"
-              />
-            </div>
-
-            <SCard v-if="receiptsStore.loading" flush aria-busy="true">
-              <ul class="s-list" aria-label="Loading outstanding payments">
-                <li v-for="i in 6" :key="i" class="s-list__item" aria-hidden="true">
-                  <div class="s-list__main">
-                    <SSkeleton width="40%" height="14px" />
-                    <SSkeleton width="25%" height="12px" />
-                  </div>
-                  <SSkeleton width="72px" height="14px" />
-                </li>
-              </ul>
-            </SCard>
-
-            <SCard v-else-if="filteredOutstandingReceipts.length === 0">
-              <SEmptyState
-                title="No outstanding payments"
-                description="Sales recorded with a balance due appear here until they're paid in full."
-              >
-                <template #icon><CircleCheck :size="24" :stroke-width="1.75" /></template>
-              </SEmptyState>
-            </SCard>
-
-            <div v-else class="s-table-wrap">
-              <table class="s-table">
-                <thead>
-                  <tr>
-                    <th scope="col">Customer</th>
-                    <th scope="col" class="s-hide-sm">Sale</th>
-                    <th scope="col" class="s-hide-md">Items</th>
-                    <th scope="col" class="s-table__num s-hide-sm">Total</th>
-                    <th scope="col" class="s-table__num s-hide-sm">Paid</th>
-                    <th scope="col" class="s-table__num">Balance</th>
-                    <th scope="col"><span class="ds-sr-only">Actions</span></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr
-                    v-for="row in filteredOutstandingReceipts"
-                    :key="row.id"
-                    class="s-table__row--interactive"
-                    tabindex="0"
-                    @click="viewOutstandingReceipt(row)"
-                    @keydown.enter.self="viewOutstandingReceipt(row)"
-                  >
-                    <td>
-                      <span class="s-table__primary">{{ row.customerName || 'Walk-in customer' }}</span>
-                      <span v-if="row.customerPhone || row.customerEmail" class="s-table__secondary">
-                        {{ row.customerPhone ? maskPhone(row.customerPhone) : row.customerEmail }}
-                      </span>
-                    </td>
-                    <td class="s-hide-sm">
-                      <span class="s-table__primary">#{{ row.receiptNumber }}</span>
-                      <span class="s-table__secondary">{{ formatDate(row.date) }}</span>
-                    </td>
-                    <td class="s-hide-md">
-                      <span class="s-table__secondary">{{ getReceiptLineItemsPreview(row) || EMPTY_CELL }}</span>
-                    </td>
-                    <td class="s-table__num s-hide-sm">{{ formatCurrency(row.total) }}</td>
-                    <td class="s-table__num s-hide-sm">{{ formatCurrency(outstandingAmountPaid(row)) }}</td>
-                    <td class="s-table__num s-table__warning">
-                      <span class="s-table__primary">{{ formatCurrency(outstandingBalanceDue(row)) }}</span>
-                    </td>
-                    <td @click.stop>
-                      <div class="s-table__row-actions">
-                        <SButton size="sm" variant="primary" @click="openRecordPayment(row)">
-                          Record payment
-                        </SButton>
-                        <SButton
-                          v-if="canEditReceipts"
-                          size="sm"
-                          variant="ghost"
-                          class="s-hide-sm"
-                          @click="cancelOutstandingReceipt(row)"
-                        >
-                          Cancel sale
-                        </SButton>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </section>
-
+            </section>
+          </div>
 
           <CreateReceiptModal
             v-model="showCreateReceiptModal"
@@ -428,11 +480,17 @@
             title="Delete selected sales"
             entity-label="sale"
             :count="selectedReceiptsForBulk.length"
-            :item-names="selectedReceiptsForBulk.map((r) => r.receiptNumber || r.customerName || r.id)"
+            :item-names="
+              selectedReceiptsForBulk.map((r) => r.receiptNumber || r.customerName || r.id)
+            "
             warning="This permanently deletes the selected sales. Associated customer balances may be affected. This cannot be undone."
             confirm-label="I understand these sales will be permanently deleted."
             :loading="isBulkDeletingReceipts"
-            @update:model-value="(v) => { if (!v) bulkDeleteReceiptsConfirmed = false }"
+            @update:model-value="
+              (v) => {
+                if (!v) bulkDeleteReceiptsConfirmed = false
+              }
+            "
             @confirm="handleConfirmBulkDeleteReceipts"
           />
           <DeleteReceiptModal
@@ -462,7 +520,11 @@
     @close="closeReceiptMenu"
   >
     <SMenuItem label="View sale" :icon="Eye" @select="runReceiptMenuAction(handleViewReceipt)" />
-    <SMenuItem label="History" :icon="History" @select="runReceiptMenuAction(handleViewReceiptTimeline)" />
+    <SMenuItem
+      label="History"
+      :icon="History"
+      @select="runReceiptMenuAction(handleViewReceiptTimeline)"
+    />
     <SMenuItem
       v-if="receiptForOpenMenu?.status === 'completed' && canEditReceipts"
       label="Refund"
@@ -489,10 +551,7 @@
 import ReceiptProfitHint from '~/components/receipts/ReceiptProfitHint.vue'
 import BulkDeleteConfirmModal from '~/components/dashboard/BulkDeleteConfirmModal.vue'
 import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
-import {
-  PencilSquareIcon,
-  ChevronRightIcon,
-} from '~/utils/app-icons'
+import { PencilSquareIcon, ChevronRightIcon } from '~/utils/app-icons'
 import {
   CircleCheck,
   Copy as CopyIcon,
@@ -688,9 +747,9 @@ watch(activeTab, (newTab) => {
 watch(
   () => route.query.tab,
   (tab) => {
-    const next = (['receipts', 'outstanding', 'customers'].includes(String(tab))
-      ? tab
-      : 'receipts') as typeof activeTab.value
+    const next = (
+      ['receipts', 'outstanding', 'customers'].includes(String(tab)) ? tab : 'receipts'
+    ) as typeof activeTab.value
     if (next !== activeTab.value) activeTab.value = next
   }
 )
@@ -851,7 +910,11 @@ const receiptTableColumns: Array<{
 
 const salesTabs = computed(() => [
   { value: 'receipts', label: 'Sales' },
-  { value: 'outstanding', label: 'Outstanding', count: outstandingReceipts.value.length || undefined },
+  {
+    value: 'outstanding',
+    label: 'Outstanding',
+    count: outstandingReceipts.value.length || undefined,
+  },
 ])
 
 const hasReceiptFilters = computed(

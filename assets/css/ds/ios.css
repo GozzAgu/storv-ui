@@ -99,32 +99,7 @@
     padding: var(--s-space-1-5) var(--s-space-2);
   }
 
-  /* ── Stats ──
-   * Header metric strips become a two-column ruled grid: one card, hairline dividers from the
-   * 1px gap, label on top and value on the bottom of every cell so rows line up. An odd last
-   * metric spans the full width instead of leaving an empty cell. Long values shrink to fit
-   * (plugins/05.fit-stat-values.client.ts) rather than truncating. */
-
-  .s-metrics:not(.s-metrics--inline) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1px;
-    border-radius: var(--s-radius-xl);
-    background: var(--s-surface);
-    box-shadow: 0 0 0 1px var(--s-ios-hairline), var(--s-shadow-sm);
-  }
-
-  .s-metrics:not(.s-metrics--inline) .s-metrics__item {
-    justify-content: space-between;
-    gap: var(--s-space-1);
-    min-height: calc(var(--s-space-8) + var(--s-space-2));
-    padding: var(--s-space-1-5) var(--s-space-2);
-    background: var(--s-surface);
-    box-shadow: none;
-  }
-
-  .s-metrics:not(.s-metrics--inline) .s-metrics__item:last-child:nth-child(odd) {
-    grid-column: 1 / -1;
-  }
+  /* ── Stats: header metric strips stay a slim sideways-scrolling row (see data.css) ── */
 
   .s-metrics__label {
     font: 600 0.6875rem/1rem var(--s-font-sans);
@@ -132,8 +107,8 @@
   }
 
   .s-metrics:not(.s-metrics--inline) .s-metrics__value {
-    font: 700 1.375rem/1.75rem var(--s-font-sans);
-    letter-spacing: -0.02em;
+    font: 700 1.0625rem/1.5rem var(--s-font-sans);
+    letter-spacing: -0.01em;
     text-overflow: clip;
   }
 

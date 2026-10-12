@@ -122,24 +122,32 @@
 }
 
 /* ── Header metrics strip ────────────────────────────────── */
-/* One borderless card split into equal columns; dividers come from inset shadows so wrapped rows stay ruled. */
+/* A slim row of figures on the canvas, no card: faint rules between figures, and on narrow
+   screens the row scrolls sideways instead of stacking. */
 .s-metrics {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
+  display: flex;
   margin: 0;
-  overflow: hidden;
-  border-radius: var(--s-radius-lg);
-  background: var(--s-surface);
-  box-shadow: var(--s-shadow-sm);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.s-metrics::-webkit-scrollbar {
+  display: none;
 }
 
 .s-metrics__item {
   display: flex;
+  flex: none;
   flex-direction: column;
-  gap: var(--s-space-half);
+  gap: var(--s-space-quarter);
   min-width: 0;
-  padding: var(--s-space-1-5) var(--s-space-2);
-  box-shadow: -1px 0 0 var(--s-border), 0 -1px 0 var(--s-border);
+  padding: 0 var(--s-space-3);
+  box-shadow: inset 1px 0 0 var(--s-line);
+}
+
+.s-metrics__item:first-child {
+  padding-left: 0;
+  box-shadow: none;
 }
 
 .s-metrics__label {
@@ -156,7 +164,7 @@
   margin: 0;
   overflow: hidden;
   color: var(--s-text);
-  font: var(--s-text-title);
+  font: var(--s-text-heading);
   font-variant-numeric: tabular-nums;
   letter-spacing: var(--s-tracking-tight);
   text-overflow: ellipsis;
@@ -191,17 +199,15 @@
   box-shadow: none;
 }
 
-.s-metrics--inline .s-metrics__value {
-  font: var(--s-text-heading);
-}
-
 @media (max-width: 639px) {
-  .s-metrics__item {
-    padding: var(--s-space-1-5);
+  /* Runs to the screen edges so a row wider than the phone visibly scrolls */
+  .s-metrics:not(.s-metrics--inline) {
+    margin-inline: calc(var(--s-space-2) * -1);
+    padding-inline: var(--s-space-2);
   }
 
-  .s-metrics__value {
-    font: var(--s-text-heading);
+  .s-metrics__item {
+    padding: 0 var(--s-space-2);
   }
 }
 
@@ -347,6 +353,87 @@
   display: flex;
   justify-content: flex-end;
   gap: var(--s-space-1);
+}
+
+/* ── Table card ──────────────────────────────────────────── */
+/* One surface for a list page: tabs and filters on top, the rows, then pagination. Anything that
+   would bring its own surface (table wrap, loading or empty card, phone list) sits flat inside. */
+.s-table-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border-radius: var(--s-radius-lg);
+  background: var(--s-surface);
+  box-shadow: var(--s-shadow-sm);
+}
+
+.s-table-card__head {
+  --s-control-h: calc(var(--s-tab-h) + var(--s-space-1));
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-space-1-5);
+  padding: var(--s-space-2) var(--s-space-2) var(--s-space-1-5);
+}
+
+.s-table-card__head > .s-toolbar {
+  flex: 1 1 360px;
+  justify-content: flex-end;
+}
+
+.s-table-card__head .s-toolbar__search {
+  max-width: 280px;
+}
+
+.s-table-card__head .s-toolbar__filter {
+  flex: 0 1 168px;
+  min-width: 140px;
+}
+
+.s-table-card .s-table-wrap,
+.s-table-card .s-card {
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.s-table-card .s-table th {
+  border-top: 1px solid var(--s-divider);
+  background: none;
+}
+
+.s-table-card .s-table td {
+  height: 52px;
+}
+
+.s-table-card .s-pagination {
+  padding: var(--s-space-1-5) var(--s-space-2);
+  border-top: 1px solid var(--s-divider);
+}
+
+@media (max-width: 639px) {
+  .s-table-card__head {
+    padding: var(--s-space-1-5);
+  }
+
+  .s-table-card__head > .s-tabs,
+  .s-table-card__head > .s-toolbar {
+    flex-basis: 100%;
+  }
+
+  .s-table-card__head .s-toolbar__search {
+    max-width: none;
+  }
+
+  .s-table-card__head .s-toolbar__filter {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .s-table-card .s-pagination {
+    padding: var(--s-space-1-5);
+  }
 }
 
 /* Sortable column header */

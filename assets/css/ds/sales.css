@@ -3,7 +3,6 @@
 .s-sales__section {
   display: flex;
   flex-direction: column;
-  gap: var(--s-space-2);
 }
 
 .s-sales--fallback {

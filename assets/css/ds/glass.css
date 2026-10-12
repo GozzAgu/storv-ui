@@ -22,6 +22,7 @@ html:has(.s-shell.ds-root) body,
 /* ── Resting surfaces: translucent, no blur ────────────────────────────── */
 
 .s-card,
+.s-table-card,
 .s-stat {
   background: var(--s-glass);
   box-shadow: var(--s-glass-shadow);

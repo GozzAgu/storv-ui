@@ -1,6 +1,6 @@
 /**
- * On phones, shrinks stat values that don't fit their cell (e.g. ₦12,450,000.00 in a
- * two-column metric grid) instead of truncating them. Values never go below 60% of the
+ * On phones, shrinks stat values that don't fit their cell (e.g. ₦12,450,000.00 on a
+ * stat card) instead of truncating them. Values never go below 60% of the
  * design size; at that point the cell clips as before.
  */
 const SELECTOR = '.s-metrics:not(.s-metrics--inline) .s-metrics__value, .s-stat__value'

@@ -21,158 +21,162 @@
       </div>
     </dl>
 
-    <STabs
-      v-if="!isLoading && customers.length > 0"
-      v-model="segment"
-      :tabs="segmentTabs"
-      label="Customer groups"
-    />
-
-    <div v-if="!isLoading && customers.length > 0" class="s-toolbar">
-      <SSearch
-        v-model="searchQuery"
-        class="s-toolbar__search"
-        placeholder="Search customers"
-        label="Search customers by name, phone or email"
-      />
-      <div class="s-toolbar__filter">
-        <SSelect v-model="sortBy" :options="sortOptions" aria-label="Sort by" />
-      </div>
-    </div>
-
-    <SCard v-if="isLoading" flush aria-busy="true">
-      <ul class="s-list" aria-label="Loading customers">
-        <li v-for="i in 6" :key="i" class="s-list__item" aria-hidden="true">
-          <SSkeleton circle width="32px" height="32px" />
-          <div class="s-list__main">
-            <SSkeleton width="40%" height="14px" />
-            <SSkeleton width="25%" height="12px" />
+    <section class="s-table-card" aria-label="Customers">
+      <div v-if="!isLoading && customers.length > 0" class="s-table-card__head">
+        <STabs v-model="segment" :tabs="segmentTabs" label="Customer groups" />
+        <div class="s-toolbar">
+          <SSearch
+            v-model="searchQuery"
+            class="s-toolbar__search"
+            placeholder="Search customers"
+            label="Search customers by name, phone or email"
+          />
+          <div class="s-toolbar__filter">
+            <SSelect v-model="sortBy" :options="sortOptions" aria-label="Sort by" />
           </div>
-          <SSkeleton width="72px" height="14px" />
-        </li>
-      </ul>
-    </SCard>
+        </div>
+      </div>
 
-    <SCard v-else-if="visibleCustomers.length === 0">
-      <SEmptyState
-        v-if="customers.length === 0"
-        title="No customers yet"
-        description="Customers are added automatically when you put a name, phone number or email on a sale."
-      >
-        <template #icon><Users :size="24" :stroke-width="1.75" /></template>
-        <template #actions>
-          <SButton variant="primary" :to="dashPath('/receipts?new=1')">
-            <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
-            New sale
-          </SButton>
-        </template>
-      </SEmptyState>
-      <SEmptyState
-        v-else
-        title="No customers found"
-        :description="searchQuery ? 'Try another name, phone number or email.' : 'No customers in this group yet.'"
-      >
-        <template #icon><SearchX :size="24" :stroke-width="1.75" /></template>
-        <template #actions>
-          <SButton @click="clearFilters">Show all customers</SButton>
-        </template>
-      </SEmptyState>
-    </SCard>
-
-    <template v-else>
-      <!-- Phone -->
-      <SCard flush class="s-only-sm">
-        <ul class="s-list">
-          <li v-for="customer in paginatedCustomers" :key="customer.id">
-            <button
-              type="button"
-              class="s-list__item s-list__item--interactive"
-              @click="openCustomer(customer)"
-            >
-              <SAvatar :name="customer.name" size="sm" />
-              <span class="s-list__main">
-                <span class="s-list__primary">{{ customer.name }}</span>
-                <span class="s-list__secondary">{{ customerSubtitle(customer) }}</span>
-              </span>
-              <span class="s-list__end">
-                <span class="s-list__value">{{ formatCurrency(customer.totalSpent) }}</span>
-                <SBadge v-if="balanceOf(customer) > 0" tone="warning">
-                  Owes {{ formatCurrency(balanceOf(customer)) }}
-                </SBadge>
-              </span>
-            </button>
+      <SCard v-if="isLoading" flush aria-busy="true">
+        <ul class="s-list" aria-label="Loading customers">
+          <li v-for="i in 6" :key="i" class="s-list__item" aria-hidden="true">
+            <SSkeleton circle width="32px" height="32px" />
+            <div class="s-list__main">
+              <SSkeleton width="40%" height="14px" />
+              <SSkeleton width="25%" height="12px" />
+            </div>
+            <SSkeleton width="72px" height="14px" />
           </li>
         </ul>
       </SCard>
 
-      <!-- Tablet and desktop -->
-      <div class="s-table-wrap s-hide-sm">
-        <table class="s-table">
-          <thead>
-            <tr>
-              <th scope="col">Customer</th>
-              <th scope="col" class="s-hide-md">Contact</th>
-              <th scope="col" class="s-table__num">Orders</th>
-              <th scope="col" class="s-table__num">Total spent</th>
-              <th v-if="hasBalanceFeature" scope="col" class="s-table__num">Balance</th>
-              <th scope="col" class="s-hide-md">Last order</th>
-              <th scope="col" class="s-table__actions"><span class="ds-sr-only">Actions</span></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="customer in paginatedCustomers"
-              :key="customer.id"
-              class="s-table__row--interactive"
-              tabindex="0"
-              @click="openCustomer(customer)"
-              @keydown.enter.self="openCustomer(customer)"
-            >
-              <td>
-                <div class="s-table__inline">
-                  <SAvatar :name="customer.name" size="sm" />
-                  <span class="s-table__primary">{{ customer.name }}</span>
-                </div>
-              </td>
-              <td class="s-hide-md">
-                <span class="s-table__secondary">{{
-                  customer.phone ? maskPhone(customer.phone) : customer.email || EMPTY_CELL
-                }}</span>
-              </td>
-              <td class="s-table__num">{{ customer.receipts.length }}</td>
-              <td class="s-table__num">{{ formatCurrency(customer.totalSpent) }}</td>
-              <td v-if="hasBalanceFeature" class="s-table__num">
-                <span v-if="balanceOf(customer) > 0" class="s-table__warning">
-                  {{ formatCurrency(balanceOf(customer)) }}
-                </span>
-                <span v-else class="s-table__muted">{{ EMPTY_CELL }}</span>
-              </td>
-              <td class="s-hide-md">{{ formatDate(customer.lastOrderDate) }}</td>
-              <td class="s-table__actions" @click.stop>
-                <SIconButton
-                  label="Customer actions"
-                  size="sm"
-                  :data-customer-actions-anchor="customer.id"
-                  aria-haspopup="menu"
-                  :aria-expanded="openMenuId === customer.id"
-                  @click="toggleMenu(customer.id)"
-                >
-                  <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
-                </SIconButton>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <SCard v-else-if="visibleCustomers.length === 0">
+        <SEmptyState
+          v-if="customers.length === 0"
+          title="No customers yet"
+          description="Customers are added automatically when you put a name, phone number or email on a sale."
+        >
+          <template #icon><Users :size="24" :stroke-width="1.75" /></template>
+          <template #actions>
+            <SButton variant="primary" :to="dashPath('/receipts?new=1')">
+              <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
+              New sale
+            </SButton>
+          </template>
+        </SEmptyState>
+        <SEmptyState
+          v-else
+          title="No customers found"
+          :description="
+            searchQuery
+              ? 'Try another name, phone number or email.'
+              : 'No customers in this group yet.'
+          "
+        >
+          <template #icon><SearchX :size="24" :stroke-width="1.75" /></template>
+          <template #actions>
+            <SButton @click="clearFilters">Show all customers</SButton>
+          </template>
+        </SEmptyState>
+      </SCard>
 
-      <SPagination
-        :current-page="currentPage"
-        :page-size="PAGE_SIZE"
-        :total="visibleCustomers.length"
-        label="Customers pagination"
-        @page-change="onPageChange"
-      />
-    </template>
+      <template v-else>
+        <!-- Phone -->
+        <SCard flush class="s-only-sm">
+          <ul class="s-list">
+            <li v-for="customer in paginatedCustomers" :key="customer.id">
+              <button
+                type="button"
+                class="s-list__item s-list__item--interactive"
+                @click="openCustomer(customer)"
+              >
+                <SAvatar :name="customer.name" size="sm" />
+                <span class="s-list__main">
+                  <span class="s-list__primary">{{ customer.name }}</span>
+                  <span class="s-list__secondary">{{ customerSubtitle(customer) }}</span>
+                </span>
+                <span class="s-list__end">
+                  <span class="s-list__value">{{ formatCurrency(customer.totalSpent) }}</span>
+                  <SBadge v-if="balanceOf(customer) > 0" tone="warning">
+                    Owes {{ formatCurrency(balanceOf(customer)) }}
+                  </SBadge>
+                </span>
+              </button>
+            </li>
+          </ul>
+        </SCard>
+
+        <!-- Tablet and desktop -->
+        <div class="s-table-wrap s-hide-sm">
+          <table class="s-table">
+            <thead>
+              <tr>
+                <th scope="col">Customer</th>
+                <th scope="col" class="s-hide-md">Contact</th>
+                <th scope="col" class="s-table__num">Orders</th>
+                <th scope="col" class="s-table__num">Total spent</th>
+                <th v-if="hasBalanceFeature" scope="col" class="s-table__num">Balance</th>
+                <th scope="col" class="s-hide-md">Last order</th>
+                <th scope="col" class="s-table__actions">
+                  <span class="ds-sr-only">Actions</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="customer in paginatedCustomers"
+                :key="customer.id"
+                class="s-table__row--interactive"
+                tabindex="0"
+                @click="openCustomer(customer)"
+                @keydown.enter.self="openCustomer(customer)"
+              >
+                <td>
+                  <div class="s-table__inline">
+                    <SAvatar :name="customer.name" size="sm" />
+                    <span class="s-table__primary">{{ customer.name }}</span>
+                  </div>
+                </td>
+                <td class="s-hide-md">
+                  <span class="s-table__secondary">{{
+                    customer.phone ? maskPhone(customer.phone) : customer.email || EMPTY_CELL
+                  }}</span>
+                </td>
+                <td class="s-table__num">{{ customer.receipts.length }}</td>
+                <td class="s-table__num">{{ formatCurrency(customer.totalSpent) }}</td>
+                <td v-if="hasBalanceFeature" class="s-table__num">
+                  <span v-if="balanceOf(customer) > 0" class="s-table__warning">
+                    {{ formatCurrency(balanceOf(customer)) }}
+                  </span>
+                  <span v-else class="s-table__muted">{{ EMPTY_CELL }}</span>
+                </td>
+                <td class="s-hide-md">{{ formatDate(customer.lastOrderDate) }}</td>
+                <td class="s-table__actions" @click.stop>
+                  <SIconButton
+                    label="Customer actions"
+                    size="sm"
+                    :data-customer-actions-anchor="customer.id"
+                    aria-haspopup="menu"
+                    :aria-expanded="openMenuId === customer.id"
+                    @click="toggleMenu(customer.id)"
+                  >
+                    <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
+                  </SIconButton>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <SPagination
+          :current-page="currentPage"
+          :page-size="PAGE_SIZE"
+          :total="visibleCustomers.length"
+          label="Customers pagination"
+          @page-change="onPageChange"
+        />
+      </template>
+    </section>
 
     <SMenu
       :open="Boolean(openMenuId && customerForMenu && menuFixedStyle)"
@@ -193,15 +197,25 @@
     <SDialog
       v-model:open="showDetail"
       :title="selectedCustomer?.name || 'Customer'"
-      :description="selectedCustomer ? `Customer since ${formatDate(selectedCustomer.firstOrderDate)}` : undefined"
+      :description="
+        selectedCustomer
+          ? `Customer since ${formatDate(selectedCustomer.firstOrderDate)}`
+          : undefined
+      "
       placement="right"
     >
       <div v-if="selectedCustomer" class="s-customer">
         <dl class="s-customer__contact">
           <div v-if="selectedCustomer.phone" class="s-customer__row">
-            <dt><Phone :size="16" :stroke-width="1.75" aria-hidden="true" /><span class="ds-sr-only">Phone</span></dt>
+            <dt>
+              <Phone :size="16" :stroke-width="1.75" aria-hidden="true" /><span class="ds-sr-only"
+                >Phone</span
+              >
+            </dt>
             <dd v-if="phoneRevealed">
-              <a :href="`tel:${selectedCustomer.phone}`" class="s-link">{{ selectedCustomer.phone }}</a>
+              <a :href="`tel:${selectedCustomer.phone}`" class="s-link">{{
+                selectedCustomer.phone
+              }}</a>
             </dd>
             <dd v-else class="s-customer__masked">
               <span>{{ maskPhone(selectedCustomer.phone) }}</span>
@@ -209,11 +223,23 @@
             </dd>
           </div>
           <div v-if="selectedCustomer.email" class="s-customer__row">
-            <dt><Mail :size="16" :stroke-width="1.75" aria-hidden="true" /><span class="ds-sr-only">Email</span></dt>
-            <dd><a :href="`mailto:${selectedCustomer.email}`" class="s-link">{{ selectedCustomer.email }}</a></dd>
+            <dt>
+              <Mail :size="16" :stroke-width="1.75" aria-hidden="true" /><span class="ds-sr-only"
+                >Email</span
+              >
+            </dt>
+            <dd>
+              <a :href="`mailto:${selectedCustomer.email}`" class="s-link">{{
+                selectedCustomer.email
+              }}</a>
+            </dd>
           </div>
           <div v-if="selectedCustomer.address" class="s-customer__row">
-            <dt><MapPin :size="16" :stroke-width="1.75" aria-hidden="true" /><span class="ds-sr-only">Address</span></dt>
+            <dt>
+              <MapPin :size="16" :stroke-width="1.75" aria-hidden="true" /><span class="ds-sr-only"
+                >Address</span
+              >
+            </dt>
             <dd>{{ selectedCustomer.address }}</dd>
           </div>
           <p
@@ -267,7 +293,9 @@
                   @click="goToReceipt(receipt)"
                 >
                   <span class="s-list__main">
-                    <span class="s-list__primary">#{{ receipt.receiptNumber }} · {{ formatDate(receipt.date) }}</span>
+                    <span class="s-list__primary"
+                      >#{{ receipt.receiptNumber }} · {{ formatDate(receipt.date) }}</span
+                    >
                     <span class="s-list__secondary">{{ receiptSummary(receipt) }}</span>
                   </span>
                   <span class="s-list__end">
@@ -449,8 +477,8 @@ const visibleCustomers = computed(() => {
     segment.value === 'repeat'
       ? repeatCustomers.value
       : segment.value === 'owing'
-        ? owingCustomers.value
-        : customers.value
+      ? owingCustomers.value
+      : customers.value
   return sortCustomerDirectory(filterCustomerDirectory(pool, searchQuery.value), sortBy.value)
 })
 
@@ -479,7 +507,10 @@ function customerSubtitle(customer: CustomerDirectoryEntry) {
 }
 
 function formatDate(date: unknown) {
-  const value = date instanceof Date ? date : new Date((date as { toDate?: () => Date })?.toDate?.() ?? (date as string))
+  const value =
+    date instanceof Date
+      ? date
+      : new Date((date as { toDate?: () => Date })?.toDate?.() ?? (date as string))
   return value.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
 }
 
@@ -529,7 +560,10 @@ async function revealPhone() {
 
 function goToReceipt(receipt: Receipt) {
   showDetail.value = false
-  void router.push({ path: dashPath('/receipts'), query: { tab: 'receipts', highlight: receipt.id } })
+  void router.push({
+    path: dashPath('/receipts'),
+    query: { tab: 'receipts', highlight: receipt.id },
+  })
 }
 
 // Deep links (`?customer=<id>`) open that customer's sheet.
