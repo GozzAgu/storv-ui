@@ -79,8 +79,10 @@
             :aria-current="isActive(item) ? 'page' : undefined"
             @click="onTabClick($event, index)"
           >
+            <StorvvMark v-if="item.iconKey === 'dashboard'" :size="22" />
             <component
               :is="DASHBOARD_NAV_ICONS[item.iconKey]"
+              v-else
               :size="22"
               :stroke-width="1.85"
               aria-hidden="true"
@@ -114,6 +116,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { Plus } from '@lucide/vue'
 import { useHaptics } from '~/composables/useHaptics'
 import { DASHBOARD_NAV_ICONS } from '~/utils/dashboard-nav-icons'
+import StorvvMark from '~/components/shell/StorvvMark.vue'
 import type { ShellNavItem, ShellNavSection } from '~/utils/shell-nav'
 
 /**
