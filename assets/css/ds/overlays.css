@@ -48,16 +48,14 @@
   padding: 0 var(--s-space-1-5);
   border: 1px solid var(--s-border);
   border-radius: var(--s-radius-full);
-  background: var(--s-surface);
+  background: var(--s-field-bg);
   color: var(--s-text-2);
   font: var(--s-text-small);
   font-weight: 500;
   white-space: nowrap;
   cursor: pointer;
-  transition:
-    background-color var(--s-duration-fast) var(--s-ease),
-    border-color var(--s-duration-fast) var(--s-ease),
-    color var(--s-duration-fast) var(--s-ease);
+  transition: background-color var(--s-duration-fast) var(--s-ease),
+    border-color var(--s-duration-fast) var(--s-ease), color var(--s-duration-fast) var(--s-ease);
 }
 
 .s-palette__chip:hover {
@@ -386,8 +384,7 @@
 
 .s-assistant-panel-enter-active,
 .s-assistant-panel-leave-active {
-  transition:
-    opacity var(--s-duration) var(--s-ease-out),
+  transition: opacity var(--s-duration) var(--s-ease-out),
     transform var(--s-duration) var(--s-ease-out);
   transform-origin: bottom right;
 }
@@ -649,11 +646,8 @@
   border-radius: var(--s-radius-lg);
   box-shadow: var(--s-focus-ring);
   pointer-events: none;
-  transition:
-    top var(--s-duration-slow) var(--s-ease),
-    left var(--s-duration-slow) var(--s-ease),
-    width var(--s-duration-slow) var(--s-ease),
-    height var(--s-duration-slow) var(--s-ease);
+  transition: top var(--s-duration-slow) var(--s-ease), left var(--s-duration-slow) var(--s-ease),
+    width var(--s-duration-slow) var(--s-ease), height var(--s-duration-slow) var(--s-ease);
 }
 
 .s-tour__ring--locked {
@@ -672,9 +666,7 @@
   font: var(--s-text-body);
   font-family: var(--s-font-sans);
   opacity: 0;
-  transition:
-    top var(--s-duration-slow) var(--s-ease),
-    left var(--s-duration-slow) var(--s-ease),
+  transition: top var(--s-duration-slow) var(--s-ease), left var(--s-duration-slow) var(--s-ease),
     opacity var(--s-duration-slow) var(--s-ease);
 }
 
@@ -917,8 +909,7 @@
 .s-toast-enter-active,
 .s-toast-leave-active,
 .s-toast-move {
-  transition:
-    opacity var(--s-duration) var(--s-ease-out),
+  transition: opacity var(--s-duration) var(--s-ease-out),
     transform var(--s-duration) var(--s-ease-out);
 }
 

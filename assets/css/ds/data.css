@@ -102,8 +102,7 @@
   background: transparent;
   color: var(--s-text-muted);
   cursor: pointer;
-  transition:
-    background-color var(--s-duration-fast) var(--s-ease),
+  transition: background-color var(--s-duration-fast) var(--s-ease),
     color var(--s-duration-fast) var(--s-ease);
 }
 
@@ -140,9 +139,7 @@
   gap: var(--s-space-half);
   min-width: 0;
   padding: var(--s-space-1-5) var(--s-space-2);
-  box-shadow:
-    -1px 0 0 var(--s-border),
-    0 -1px 0 var(--s-border);
+  box-shadow: -1px 0 0 var(--s-border), 0 -1px 0 var(--s-border);
 }
 
 .s-metrics__label {
@@ -229,7 +226,7 @@
 .s-table th {
   height: 40px;
   padding: 0 var(--s-space-2);
-  border-bottom: 1px solid var(--s-border);
+  border-bottom: 1px solid var(--s-divider);
   background: var(--s-surface-2);
   color: var(--s-text-muted);
   font: var(--s-text-caption);
@@ -242,7 +239,7 @@
 .s-table td {
   height: 56px;
   padding: var(--s-space-1) var(--s-space-2);
-  border-bottom: 1px solid var(--s-border);
+  border-bottom: 1px solid var(--s-divider);
   vertical-align: middle;
 }
 

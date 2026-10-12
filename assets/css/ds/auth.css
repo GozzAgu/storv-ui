@@ -87,7 +87,7 @@
 .s-auth__pill {
   margin: 0 0 var(--s-space-2);
   padding: var(--s-space-half) var(--s-space-1-5);
-  border: 1px solid color-mix(in srgb, var(--s-on-brand) 18%, transparent);
+  background: color-mix(in srgb, var(--s-on-brand) 12%, transparent);
   border-radius: var(--s-radius-full);
   color: color-mix(in srgb, var(--s-on-brand) 85%, transparent);
   font: var(--s-text-caption);
@@ -113,7 +113,6 @@
   width: 100%;
   margin: var(--s-space-4) 0 0;
   padding: var(--s-space-3) 0 0;
-  border-top: 1px solid color-mix(in srgb, var(--s-on-brand) 14%, transparent);
   list-style: none;
 }
 
@@ -132,7 +131,7 @@
   justify-content: center;
   width: 24px;
   height: 24px;
-  border: 1px solid color-mix(in srgb, var(--s-on-brand) 24%, transparent);
+  background: color-mix(in srgb, var(--s-on-brand) 14%, transparent);
   border-radius: var(--s-radius-full);
   color: var(--s-on-brand);
   font: var(--s-text-caption);
@@ -263,9 +262,9 @@ html.dark .s-auth__mobile-logo-dark {
   gap: var(--s-space-1-5);
   width: 100%;
   height: var(--s-touch);
-  border: 1px solid var(--s-border-strong);
+  border: 1px solid transparent;
   border-radius: var(--s-radius-lg);
-  background: var(--s-surface);
+  background: var(--s-field-bg);
   color: var(--s-text);
   font: var(--s-text-body);
   font-weight: 600;
@@ -275,8 +274,7 @@ html.dark .s-auth__mobile-logo-dark {
 }
 
 .s-auth-oauth__btn:hover:not(:disabled) {
-  border-color: var(--s-text-muted);
-  background: var(--s-surface-2);
+  background: var(--s-field-bg-hover);
 }
 
 .s-auth-oauth__btn:focus-visible {
@@ -318,7 +316,7 @@ html.dark .s-auth__mobile-logo-dark {
   content: '';
   flex: 1;
   height: 1px;
-  background: var(--s-border);
+  background: var(--s-divider);
 }
 
 .s-auth-oauth__terms {
@@ -580,7 +578,7 @@ html.dark .s-auth__mobile-logo-dark {
 .s-auth-strength__bar {
   height: var(--s-space-half);
   border-radius: var(--s-radius-full);
-  background: var(--s-border);
+  background: var(--s-line);
   transition: background-color var(--s-duration) var(--s-ease);
 }
 
@@ -616,7 +614,7 @@ html.dark .s-auth__mobile-logo-dark {
   height: var(--s-space-half);
   overflow: hidden;
   border-radius: var(--s-radius-full);
-  background: var(--s-border);
+  background: var(--s-line);
 }
 
 .s-onboarding__fill {

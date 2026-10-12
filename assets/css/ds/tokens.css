@@ -10,7 +10,13 @@
   --s-surface: #ffffff;
   --s-surface-2: #f2f4f7;
   --s-surface-hover: #eef1f5;
-  --s-border: #e4e7ec;
+  /* Surfaces separate by tone, not outlines: boxes have no visible border. */
+  --s-border: transparent;
+  /* Lines that carry meaning (timeline rails, progress tracks) */
+  --s-line: #e4e7ec;
+  /* The faintest rule, for dense table rows and section breaks */
+  --s-divider: rgb(15 23 42 / 0.05);
+  /* Edges of small controls that must stay findable (checkboxes, dashed drop zones) */
   --s-border-strong: #d0d5dd;
 
   /* Color: text */
@@ -57,7 +63,7 @@
   /* Glass (glass.css): translucent, frosted surfaces on a flat canvas */
   --s-glass: rgb(255 255 255 / 0.62);
   --s-glass-strong: rgb(255 255 255 / 0.74);
-  --s-glass-hairline: rgb(15 23 42 / 0.07);
+  --s-glass-hairline: transparent;
   --s-glass-highlight: inset 0 1px 0 rgb(255 255 255 / 0.9);
   --s-glass-frost: saturate(1.8) blur(24px);
   --s-glass-frost-heavy: saturate(1.8) blur(40px);
@@ -153,16 +159,19 @@
 
 html.dark {
   --s-bg: #04060b;
-  --s-surface: #0a0e18;
-  --s-surface-2: #0f1422;
-  --s-surface-hover: #151b2c;
-  --s-border: #1a2033;
+  /* Lifted further from the canvas than in light mode so borderless cards still read */
+  --s-surface: #0e1320;
+  --s-surface-2: #141a2b;
+  --s-surface-hover: #192036;
+  --s-border: transparent;
+  --s-line: #1a2033;
+  --s-divider: rgb(255 255 255 / 0.05);
   --s-border-strong: #262e45;
 
   --s-glass: rgb(16 21 37 / 0.58);
   --s-glass-strong: rgb(14 19 34 / 0.76);
-  --s-glass-hairline: rgb(255 255 255 / 0.07);
-  --s-glass-highlight: inset 0 1px 0 rgb(255 255 255 / 0.06);
+  --s-glass-hairline: transparent;
+  --s-glass-highlight: inset 0 0 0 transparent;
   --s-glass-shadow: var(--s-glass-highlight), 0 0 0 1px var(--s-glass-hairline),
     0 10px 28px -14px rgb(0 0 0 / 0.6);
   --s-glass-shadow-float: var(--s-glass-highlight), 0 0 0 1px var(--s-glass-hairline),
@@ -197,7 +206,7 @@ html.dark {
 
   --s-field-bg: rgb(255 255 255 / 0.05);
   --s-field-bg-hover: rgb(255 255 255 / 0.08);
-  --s-field-bg-focus: #0a0e18;
+  --s-field-bg-focus: #0e1320;
 
   --s-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3);
   --s-shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.45);

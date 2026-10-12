@@ -354,7 +354,7 @@
   padding: 0 var(--s-space-1);
   border: 1px solid var(--s-border);
   border-radius: var(--s-radius-sm);
-  background: var(--s-surface);
+  background: var(--s-field-bg);
   color: var(--s-text-muted);
   font: var(--s-text-caption);
   font-family: var(--s-font-sans);
@@ -1747,7 +1747,7 @@ a.s-stat:hover {
   overflow: hidden;
   border: 1px solid var(--s-border);
   border-radius: var(--s-radius);
-  background: var(--s-surface);
+  background: var(--s-field-bg);
 }
 
 .s-pick__scroll {

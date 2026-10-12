@@ -10,7 +10,9 @@
     --s-bg: #eef2fa;
     --s-surface-2: #eef1fa;
     --s-surface-hover: #e7ebf8;
-    --s-border: rgb(15 23 42 / 0.08);
+    --s-border: transparent;
+    --s-line: rgb(15 23 42 / 0.08);
+    --s-divider: rgb(15 23 42 / 0.05);
     --s-border-strong: rgb(15 23 42 / 0.14);
 
     --s-btn-h: var(--s-touch);
@@ -18,19 +20,21 @@
     --s-control-h: var(--s-touch);
     --s-control-h-sm: calc(var(--s-space-4) + var(--s-space-half));
 
-    --s-ios-hairline: rgb(15 23 42 / 0.06);
+    --s-ios-hairline: transparent;
     --s-ios-float-shadow: 0 12px 32px -8px rgb(15 23 42 / 0.18), 0 2px 6px rgb(15 23 42 / 0.06);
   }
 
   html.dark {
     --s-bg: #04060b;
-    --s-surface: #0a0e18;
-    --s-surface-2: #0f1422;
-    --s-surface-hover: #151b2c;
-    --s-border: rgb(255 255 255 / 0.08);
+    --s-surface: #0e1320;
+    --s-surface-2: #141a2b;
+    --s-surface-hover: #192036;
+    --s-border: transparent;
+    --s-line: rgb(255 255 255 / 0.08);
+    --s-divider: rgb(255 255 255 / 0.05);
     --s-border-strong: rgb(255 255 255 / 0.14);
 
-    --s-ios-hairline: rgb(255 255 255 / 0.08);
+    --s-ios-hairline: transparent;
     --s-ios-float-shadow: 0 12px 32px -8px rgb(0 0 0 / 0.6), 0 2px 6px rgb(0 0 0 / 0.3);
   }
 
@@ -103,7 +107,7 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1px;
     border-radius: var(--s-radius-xl);
-    background: var(--s-border);
+    background: var(--s-surface);
     box-shadow: 0 0 0 1px var(--s-ios-hairline), var(--s-shadow-sm);
   }
 

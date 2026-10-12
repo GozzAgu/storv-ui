@@ -42,6 +42,7 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   border: 1px solid var(--s-border);
+  background: var(--s-field-bg);
   border-radius: var(--s-radius);
   list-style: none;
 }
@@ -113,7 +114,7 @@
   bottom: 0;
   left: calc(var(--s-space-3) / 2);
   width: 1px;
-  background: var(--s-border);
+  background: var(--s-line);
 }
 
 .s-timeline__marker {
@@ -203,14 +204,13 @@
   padding: 0;
   border: 1px solid var(--s-border);
   border-radius: var(--s-radius-sm);
-  background: var(--s-surface);
+  background: var(--s-field-bg);
   color: var(--s-text);
   font: var(--s-text-small);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   cursor: pointer;
-  transition:
-    background-color var(--s-duration-fast) var(--s-ease),
+  transition: background-color var(--s-duration-fast) var(--s-ease),
     border-color var(--s-duration-fast) var(--s-ease);
 }
 
@@ -259,12 +259,11 @@
   padding: var(--s-space-1) var(--s-space-2);
   border: 1px solid var(--s-border);
   border-radius: var(--s-radius);
-  background: var(--s-surface);
+  background: var(--s-field-bg);
   color: var(--s-text);
   font: var(--s-text-body);
   cursor: pointer;
-  transition:
-    background-color var(--s-duration-fast) var(--s-ease),
+  transition: background-color var(--s-duration-fast) var(--s-ease),
     border-color var(--s-duration-fast) var(--s-ease);
 }
 

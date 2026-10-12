@@ -496,26 +496,23 @@
   gap: var(--s-space-half);
   height: var(--s-control-h-sm);
   padding: 0 var(--s-space-1-5);
-  border: 1px solid var(--s-border-strong);
+  border: 1px solid transparent;
   border-radius: var(--s-radius-full);
-  background: var(--s-surface);
+  background: var(--s-field-bg);
   color: var(--s-text-2);
   font: var(--s-text-small);
   font-weight: 500;
   cursor: pointer;
-  transition:
-    background-color var(--s-duration-fast) var(--s-ease),
-    border-color var(--s-duration-fast) var(--s-ease),
-    color var(--s-duration-fast) var(--s-ease);
+  transition: background-color var(--s-duration-fast) var(--s-ease),
+    border-color var(--s-duration-fast) var(--s-ease), color var(--s-duration-fast) var(--s-ease);
 }
 
 .s-perm__chip:hover:not(:disabled) {
-  border-color: var(--s-text-muted);
+  background: var(--s-field-bg-hover);
   color: var(--s-text);
 }
 
 .s-perm__chip[aria-pressed='true'] {
-  border-color: var(--s-accent);
   background: var(--s-accent-soft);
   color: var(--s-accent-soft-text);
 }
@@ -583,7 +580,7 @@
   overflow: hidden;
   border: 1px solid var(--s-border);
   border-radius: var(--s-radius);
-  background: var(--s-surface);
+  background: var(--s-field-bg);
 }
 
 .s-inv-fields__head {
@@ -778,6 +775,7 @@
 
 .s-qs__selected {
   border: 1px solid var(--s-border);
+  background: var(--s-field-bg);
   border-radius: var(--s-radius);
   cursor: default;
 }
@@ -917,6 +915,7 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   border: 1px solid var(--s-border);
+  background: var(--s-field-bg);
   border-radius: var(--s-radius);
   list-style: none;
 }
@@ -1059,19 +1058,17 @@
   padding: 0 var(--s-space-2);
   border: 1px solid var(--s-border);
   border-radius: var(--s-radius-full);
-  background: var(--s-surface);
+  background: var(--s-field-bg);
   color: var(--s-text-2);
   font: var(--s-text-small);
   font-weight: 500;
   cursor: pointer;
-  transition:
-    background-color var(--s-duration-fast) var(--s-ease),
-    border-color var(--s-duration-fast) var(--s-ease),
-    color var(--s-duration-fast) var(--s-ease);
+  transition: background-color var(--s-duration-fast) var(--s-ease),
+    border-color var(--s-duration-fast) var(--s-ease), color var(--s-duration-fast) var(--s-ease);
 }
 
 .s-qs-tender:hover {
-  border-color: var(--s-border-strong);
+  background: var(--s-field-bg-hover);
   color: var(--s-text);
 }
 
@@ -1521,7 +1518,7 @@
   padding: var(--s-space-1) var(--s-space-1-5);
   border: 1px solid var(--s-border);
   border-radius: var(--s-radius-sm);
-  background: var(--s-surface);
+  background: var(--s-field-bg);
 }
 
 .s-new-sale__group-title {

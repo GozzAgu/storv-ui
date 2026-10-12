@@ -200,10 +200,8 @@
   color: var(--s-text-2);
   font: var(--s-text-small);
   cursor: pointer;
-  transition:
-    background-color var(--s-duration-fast) var(--s-ease),
-    color var(--s-duration-fast) var(--s-ease),
-    border-color var(--s-duration-fast) var(--s-ease);
+  transition: background-color var(--s-duration-fast) var(--s-ease),
+    color var(--s-duration-fast) var(--s-ease), border-color var(--s-duration-fast) var(--s-ease);
 }
 
 .s-help__topic:hover {
@@ -261,8 +259,7 @@
   color: var(--s-text-2);
   font: var(--s-text-small);
   text-decoration: none;
-  transition:
-    background-color var(--s-duration-fast) var(--s-ease),
+  transition: background-color var(--s-duration-fast) var(--s-ease),
     color var(--s-duration-fast) var(--s-ease);
 }
 
@@ -856,7 +853,8 @@
   background: transparent;
   color: var(--s-text-muted);
   cursor: pointer;
-  transition: background var(--s-duration-fast) var(--s-ease), color var(--s-duration-fast) var(--s-ease);
+  transition: background var(--s-duration-fast) var(--s-ease),
+    color var(--s-duration-fast) var(--s-ease);
 }
 
 /* Enlarge the hit area to the 44px touch target without growing the chip */
@@ -922,16 +920,17 @@
   padding: var(--s-space-2);
   border: 1px solid var(--s-border);
   border-radius: var(--s-radius-lg);
-  background: var(--s-surface);
+  background: var(--s-field-bg);
   color: var(--s-text);
   font-family: var(--s-font-sans);
   text-align: left;
   cursor: pointer;
-  transition: border-color var(--s-duration-fast) var(--s-ease), background var(--s-duration-fast) var(--s-ease);
+  transition: border-color var(--s-duration-fast) var(--s-ease),
+    background var(--s-duration-fast) var(--s-ease);
 }
 
 .s-choice:hover {
-  border-color: var(--s-border-strong);
+  background: var(--s-field-bg-hover);
 }
 
 .s-choice:focus-visible {
@@ -1116,6 +1115,7 @@
   gap: var(--s-space-2);
   padding: var(--s-space-2);
   border: 1px solid var(--s-border);
+  background: var(--s-field-bg);
   border-radius: var(--s-radius-lg);
 }
 

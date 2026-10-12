@@ -159,10 +159,8 @@
   border-radius: var(--s-radius-lg);
   background: var(--s-surface);
   box-shadow: var(--s-shadow-sm);
-  transition:
-    background-color var(--s-duration) var(--s-ease),
-    box-shadow var(--s-duration) var(--s-ease),
-    transform var(--s-duration) var(--s-ease);
+  transition: background-color var(--s-duration) var(--s-ease),
+    box-shadow var(--s-duration) var(--s-ease), transform var(--s-duration) var(--s-ease);
 }
 
 .s-category-card:hover {
@@ -602,18 +600,16 @@
   padding-right: calc(var(--s-space-1) * 3);
   border: 1px solid var(--s-border);
   border-radius: var(--s-radius);
-  background: var(--s-surface);
+  background: var(--s-field-bg);
   color: var(--s-text);
   font: var(--s-text-body);
   text-align: left;
   cursor: pointer;
-  transition:
-    border-color var(--s-duration-fast) var(--s-ease),
+  transition: border-color var(--s-duration-fast) var(--s-ease),
     background-color var(--s-duration-fast) var(--s-ease);
 }
 
 .s-kind:hover {
-  border-color: var(--s-border-strong);
   background: var(--s-surface-hover);
 }
 

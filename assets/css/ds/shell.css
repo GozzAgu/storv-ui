@@ -253,7 +253,7 @@ html:has(.s-shell.ds-root) body {
 .s-sidebar__divider {
   height: 1px;
   margin: 0 var(--s-space-1) var(--s-space-1);
-  background: var(--s-border);
+  background: var(--s-divider);
 }
 
 .s-sidebar__list {

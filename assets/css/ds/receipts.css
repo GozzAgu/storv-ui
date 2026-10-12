@@ -430,7 +430,7 @@
   bottom: var(--s-space-1);
   left: calc(var(--s-space-3) / 2);
   width: 1px;
-  background: var(--s-border);
+  background: var(--s-line);
   content: '';
 }
 
@@ -449,7 +449,7 @@
   height: var(--s-space-3);
   border: 1px solid var(--s-border);
   border-radius: var(--s-radius-full);
-  background: var(--s-surface);
+  background: var(--s-surface-2);
   color: var(--s-text-2);
 }
 
@@ -514,14 +514,11 @@
   font: var(--s-text-caption);
   font-family: var(--s-font-sans);
   cursor: pointer;
-  transition:
-    background-color var(--s-duration-fast) var(--s-ease),
-    border-color var(--s-duration-fast) var(--s-ease),
-    color var(--s-duration-fast) var(--s-ease);
+  transition: background-color var(--s-duration-fast) var(--s-ease),
+    border-color var(--s-duration-fast) var(--s-ease), color var(--s-duration-fast) var(--s-ease);
 }
 
 .s-receipt-toggle:hover {
-  border-color: var(--s-border-strong);
   background: var(--s-surface-hover);
   color: var(--s-text);
 }
@@ -556,7 +553,7 @@
   overflow: hidden;
   border: 1px solid var(--s-border);
   border-radius: var(--s-radius);
-  background: var(--s-surface);
+  background: var(--s-field-bg);
 }
 
 .s-receipt-lines-panel--compact {

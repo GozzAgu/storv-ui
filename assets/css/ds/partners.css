@@ -229,6 +229,7 @@
   overflow-y: auto;
   padding: var(--s-space-1) var(--s-space-2);
   border: 1px solid var(--s-border);
+  background: var(--s-field-bg);
   border-radius: var(--s-radius);
 }
 
@@ -252,6 +253,7 @@
   max-height: 320px;
   overflow-y: auto;
   border: 1px solid var(--s-border);
+  background: var(--s-field-bg);
   border-radius: var(--s-radius);
 }
 

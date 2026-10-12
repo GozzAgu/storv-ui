@@ -47,6 +47,7 @@
   --s-shadow-sm: none;
   --s-shadow-md: none;
   --s-shadow-lg: none;
+  --s-border: var(--s-line);
 
   /* Hero backdrop */
   --mk-dots: rgb(16 24 40 / 0.11);
@@ -61,6 +62,9 @@
 }
 
 html.dark .mk {
+  --s-surface: #0a0e18;
+  --s-surface-2: #0f1422;
+  --s-surface-hover: #151b2c;
   --mk-page: var(--s-bg);
   --mk-alt: var(--s-surface);
   --mk-dots: rgb(255 255 255 / 0.08);
