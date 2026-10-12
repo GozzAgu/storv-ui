@@ -9,375 +9,381 @@
       </template>
     </SPageHeader>
 
-    <STabs
-      :model-value="activeSettingsTab"
-      :tabs="settingsTabs"
-      label="Settings sections"
-      @update:model-value="onSettingsTabChange"
-    />
-
-    <div v-if="activeSettingsTab === 'account' && userStore.isSuperAdmin" class="s-settings">
-      <SCard title="Company logo" description="Shown on receipts and branch cards. Your personal photo is on Profile.">
-        <div class="s-settings__logo">
-          <div class="s-settings__logo-frame">
-            <img v-if="accountLogoUrl" :src="displayAccountLogoSrc" alt="Company logo" />
-            <Store v-else :size="24" :stroke-width="1.75" aria-hidden="true" />
-          </div>
-          <div class="s-settings__logo-actions">
-            <SButton
-              variant="secondary"
-              size="sm"
-              :loading="isUploadingAccountLogo"
-              :disabled="isUploadingAccountLogo"
-              @click="accountLogoInput?.click()"
-            >
-              <template #leading><Upload :size="16" :stroke-width="2" aria-hidden="true" /></template>
-              {{ accountLogoUrl ? 'Replace logo' : 'Upload logo' }}
-            </SButton>
-            <SButton v-if="accountLogoUrl" variant="ghost" size="sm" @click="removeAccountLogo">
-              Remove
-            </SButton>
-            <input
-              ref="accountLogoInput"
-              type="file"
-              accept="image/*"
-              class="ds-sr-only"
-              tabindex="-1"
-              aria-hidden="true"
-              @change="handleAccountLogoUpload"
-            />
-          </div>
-        </div>
-      </SCard>
-
-      <SubscriptionPlanPanel
-        :current-subscription-label="currentSubscriptionLabel"
-        :billing-cycle-label="currentBillingCycleLabel"
-        :current-price-label="currentPlanPriceLabel"
-        :status-label="subscriptionStatusBadgeLabel"
-        :status-tone="subscriptionStatusTone"
-        :subscription-renewal-label="subscriptionRenewalLabel"
-        v-model:selected-billing-cycle="selectedBillingCycle"
-        v-model:selected-upgrade-plan="selectedUpgradePlan"
-        :change-plan-options="changePlanOptions"
-        :upgrade-price-preview="upgradePricePreview"
-        :pricing-loading="pricingLoading"
-        :can-cancel="canCancelSubscription"
-        :disabled="!canEditSettings"
-        :is-upgrading="isUpgradingSubscription"
-        :is-canceling="isCancelingSubscription"
-        :billing-history="billingHistory"
-        :show-qa-plan-switcher="showQaPlanSwitcher"
-        :qa-current-plan-id="storedSubscriptionPlan"
-        :qa-switching="isQaSwitchingPlan"
-        :add-ons-available="addOnsAvailable"
-        :add-ons="addOnRows"
-        :add-on-prices="addOnPriceLabels"
-        :add-on-store-options="addOnStoreOptions"
-        :add-on-busy="addOnBusy"
-        :manage-on-web="Boolean(billingOnWebUrl)"
-        @manage-on-web="openWebBilling"
-        @upgrade="handleUpgradeSubscription"
-        @cancel="openCancelConfirm"
-        @qa-set-plan="handleQaSetPlan"
-        @buy-add-on="handleBuyAddOn"
-        @cancel-add-on="handleCancelAddOn"
-      />
-
-      <SCard title="Workspace style" description="How much of the app to show. This doesn't change what you pay.">
-        <ExperienceModePicker
-          :model-value="selectedExperienceMode"
-          :disabled="!canEditSettings || isSavingExperienceMode"
-          @update:model-value="onExperienceModeChange"
+    <section class="s-tab-panel">
+      <div class="s-tab-panel__head">
+        <STabs
+          :model-value="activeSettingsTab"
+          :tabs="settingsTabs"
+          label="Settings sections"
+          @update:model-value="onSettingsTabChange"
         />
-      </SCard>
+      </div>
+      <div class="s-tab-panel__body">
 
-      <SCard
-        v-if="showProgressiveUnlockPanel"
-        id="advanced-features"
-        title="Advanced features"
-        description="You chose a simple setup. Turn on team and multi-location tools when you need them. Your plan and role permissions still apply."
-      >
-        <div class="s-settings__rows">
-          <div v-for="option in soloProgressiveUnlockOptions" :key="option.capability" class="s-settings__row">
-            <SCheckbox
-              :model-value="isProgressiveCapabilityEnabled(option.capability, enabledCapabilities)"
-              variant="switch"
-              :label="option.label"
-              :description="option.description"
-              :disabled="!canEditSettings || togglingProgressiveCapability === option.capability"
-              @update:model-value="(checked: boolean) => onProgressiveCapabilityToggle(option.capability, checked)"
-            />
-          </div>
-        </div>
-      </SCard>
+        <div v-if="activeSettingsTab === 'account' && userStore.isSuperAdmin" class="s-settings">
+          <SCard title="Company logo" description="Shown on receipts and branch cards. Your personal photo is on Profile.">
+            <div class="s-settings__logo">
+              <div class="s-settings__logo-frame">
+                <img v-if="accountLogoUrl" :src="displayAccountLogoSrc" alt="Company logo" />
+                <Store v-else :size="24" :stroke-width="1.75" aria-hidden="true" />
+              </div>
+              <div class="s-settings__logo-actions">
+                <SButton
+                  variant="secondary"
+                  size="sm"
+                  :loading="isUploadingAccountLogo"
+                  :disabled="isUploadingAccountLogo"
+                  @click="accountLogoInput?.click()"
+                >
+                  <template #leading><Upload :size="16" :stroke-width="2" aria-hidden="true" /></template>
+                  {{ accountLogoUrl ? 'Replace logo' : 'Upload logo' }}
+                </SButton>
+                <SButton v-if="accountLogoUrl" variant="ghost" size="sm" @click="removeAccountLogo">
+                  Remove
+                </SButton>
+                <input
+                  ref="accountLogoInput"
+                  type="file"
+                  accept="image/*"
+                  class="ds-sr-only"
+                  tabindex="-1"
+                  aria-hidden="true"
+                  @change="handleAccountLogoUpload"
+                />
+              </div>
+            </div>
+          </SCard>
 
-      <ScheduledBackupPanel />
-      <CancelDataPolicyPanel />
-      <InventoryAuditPanel />
-    </div>
-
-    <SCard
-      v-else-if="activeSettingsTab === 'assignment' && isStaff"
-      title="Your assignment"
-      description="The branch and department linked to your account."
-    >
-      <SSkeleton v-if="isLoadingStoreInfo" :lines="3" />
-      <dl v-else class="s-settings__facts">
-        <div>
-          <dt>Branch</dt>
-          <dd>{{ storeInfo.name || EMPTY_CELL }}</dd>
-        </div>
-        <div>
-          <dt>Department</dt>
-          <dd>{{ staffWorkspace.departmentName || EMPTY_CELL }}</dd>
-        </div>
-        <div v-if="staffWorkspace.position">
-          <dt>Position</dt>
-          <dd>{{ staffWorkspace.position }}</dd>
-        </div>
-        <div v-if="staffWorkspace.staffRole">
-          <dt>Team role</dt>
-          <dd class="s-settings__capitalize">{{ staffWorkspace.staffRole }}</dd>
-        </div>
-      </dl>
-    </SCard>
-
-    <SCard
-      v-else-if="activeSettingsTab === 'store-info'"
-      :title="isStaff ? 'Branch details' : 'Store information'"
-      :description="isStaff ? 'Contact details for your branch.' : 'Business details shown on receipts and invoices.'"
-    >
-      <template v-if="canEditSettings && !isEditingStore && !isLoadingStoreInfo" #actions>
-        <SButton variant="secondary" size="sm" @click="enableEditing('store')">
-          <template #leading><Pencil :size="16" :stroke-width="2" aria-hidden="true" /></template>
-          Edit
-        </SButton>
-      </template>
-
-      <SSkeleton v-if="isLoadingStoreInfo" :lines="4" />
-      <form
-        v-else
-        id="settings-store-form"
-        class="s-settings__grid"
-        :class="{ 's-settings__grid--readonly': !isEditingStore }"
-        @submit.prevent="saveStoreInfo"
-      >
-        <SInput
-          v-model="storeInfo.name"
-          label="Branch name"
-          placeholder="Enter branch name"
-          :readonly="!isEditingStore"
-          :disabled="!canEditSettings"
-        />
-        <SInput
-          v-model="storeInfo.businessType"
-          label="Business type"
-          placeholder="For example, perfume shop"
-          :readonly="!isEditingStore"
-          :disabled="!canEditSettings"
-        />
-        <SInput
-          v-model="storeInfo.email"
-          type="email"
-          label="Email"
-          placeholder="store@example.com"
-          autocomplete="email"
-          :readonly="!isEditingStore"
-          :disabled="!canEditSettings"
-        />
-        <SInput
-          v-model="storeInfo.phone"
-          type="tel"
-          label="Phone"
-          placeholder="Enter phone number"
-          autocomplete="tel"
-          :readonly="!isEditingStore"
-          :disabled="!canEditSettings"
-        />
-        <div class="s-settings__span">
-          <STextarea
-            v-model="storeInfo.address"
-            label="Address"
-            placeholder="Enter store address"
-            :rows="2"
-            :readonly="!isEditingStore"
+          <SubscriptionPlanPanel
+            :current-subscription-label="currentSubscriptionLabel"
+            :billing-cycle-label="currentBillingCycleLabel"
+            :current-price-label="currentPlanPriceLabel"
+            :status-label="subscriptionStatusBadgeLabel"
+            :status-tone="subscriptionStatusTone"
+            :subscription-renewal-label="subscriptionRenewalLabel"
+            v-model:selected-billing-cycle="selectedBillingCycle"
+            v-model:selected-upgrade-plan="selectedUpgradePlan"
+            :change-plan-options="changePlanOptions"
+            :upgrade-price-preview="upgradePricePreview"
+            :pricing-loading="pricingLoading"
+            :can-cancel="canCancelSubscription"
             :disabled="!canEditSettings"
+            :is-upgrading="isUpgradingSubscription"
+            :is-canceling="isCancelingSubscription"
+            :billing-history="billingHistory"
+            :show-qa-plan-switcher="showQaPlanSwitcher"
+            :qa-current-plan-id="storedSubscriptionPlan"
+            :qa-switching="isQaSwitchingPlan"
+            :add-ons-available="addOnsAvailable"
+            :add-ons="addOnRows"
+            :add-on-prices="addOnPriceLabels"
+            :add-on-store-options="addOnStoreOptions"
+            :add-on-busy="addOnBusy"
+            :manage-on-web="Boolean(billingOnWebUrl)"
+            @manage-on-web="openWebBilling"
+            @upgrade="handleUpgradeSubscription"
+            @cancel="openCancelConfirm"
+            @qa-set-plan="handleQaSetPlan"
+            @buy-add-on="handleBuyAddOn"
+            @cancel-add-on="handleCancelAddOn"
           />
+
+          <SCard title="Workspace style" description="How much of the app to show. This doesn't change what you pay.">
+            <ExperienceModePicker
+              :model-value="selectedExperienceMode"
+              :disabled="!canEditSettings || isSavingExperienceMode"
+              @update:model-value="onExperienceModeChange"
+            />
+          </SCard>
+
+          <SCard
+            v-if="showProgressiveUnlockPanel"
+            id="advanced-features"
+            title="Advanced features"
+            description="You chose a simple setup. Turn on team and multi-location tools when you need them. Your plan and role permissions still apply."
+          >
+            <div class="s-settings__rows">
+              <div v-for="option in soloProgressiveUnlockOptions" :key="option.capability" class="s-settings__row">
+                <SCheckbox
+                  :model-value="isProgressiveCapabilityEnabled(option.capability, enabledCapabilities)"
+                  variant="switch"
+                  :label="option.label"
+                  :description="option.description"
+                  :disabled="!canEditSettings || togglingProgressiveCapability === option.capability"
+                  @update:model-value="(checked: boolean) => onProgressiveCapabilityToggle(option.capability, checked)"
+                />
+              </div>
+            </div>
+          </SCard>
+
+          <ScheduledBackupPanel />
+          <CancelDataPolicyPanel />
+          <InventoryAuditPanel />
         </div>
-      </form>
 
-      <template v-if="isEditingStore" #footer>
-        <SButton variant="secondary" @click="cancelEditing('store')">Cancel</SButton>
-        <SButton variant="primary" type="submit" form="settings-store-form">Save changes</SButton>
-      </template>
-    </SCard>
+        <SCard
+          v-else-if="activeSettingsTab === 'assignment' && isStaff"
+          title="Your assignment"
+          description="The branch and department linked to your account."
+        >
+          <SSkeleton v-if="isLoadingStoreInfo" :lines="3" />
+          <dl v-else class="s-settings__facts">
+            <div>
+              <dt>Branch</dt>
+              <dd>{{ storeInfo.name || EMPTY_CELL }}</dd>
+            </div>
+            <div>
+              <dt>Department</dt>
+              <dd>{{ staffWorkspace.departmentName || EMPTY_CELL }}</dd>
+            </div>
+            <div v-if="staffWorkspace.position">
+              <dt>Position</dt>
+              <dd>{{ staffWorkspace.position }}</dd>
+            </div>
+            <div v-if="staffWorkspace.staffRole">
+              <dt>Team role</dt>
+              <dd class="s-settings__capitalize">{{ staffWorkspace.staffRole }}</dd>
+            </div>
+          </dl>
+        </SCard>
 
-    <SCard
-      v-else-if="activeSettingsTab === 'inventory'"
-      title="Inventory"
-      description="Stock alerts and defaults for new products."
-    >
-      <form id="settings-inventory-form" class="s-settings__rows" @submit.prevent="saveInventorySettings">
-        <div class="s-settings__row">
-          <div class="s-settings__row-text">
-            <label class="s-settings__row-label" for="settings-low-stock">Low stock alert</label>
-            <p class="s-settings__row-hint">Flag a product when its stock falls below this quantity.</p>
-          </div>
-          <div class="s-settings__control s-settings__control--narrow">
+        <SCard
+          v-else-if="activeSettingsTab === 'store-info'"
+          :title="isStaff ? 'Branch details' : 'Store information'"
+          :description="isStaff ? 'Contact details for your branch.' : 'Business details shown on receipts and invoices.'"
+        >
+          <template v-if="canEditSettings && !isEditingStore && !isLoadingStoreInfo" #actions>
+            <SButton variant="secondary" size="sm" @click="enableEditing('store')">
+              <template #leading><Pencil :size="16" :stroke-width="2" aria-hidden="true" /></template>
+              Edit
+            </SButton>
+          </template>
+
+          <SSkeleton v-if="isLoadingStoreInfo" :lines="4" />
+          <form
+            v-else
+            id="settings-store-form"
+            class="s-settings__grid"
+            :class="{ 's-settings__grid--readonly': !isEditingStore }"
+            @submit.prevent="saveStoreInfo"
+          >
             <SInput
-              id="settings-low-stock"
-              v-model="inventorySettings.lowStockThreshold"
-              type="number"
-              inputmode="numeric"
-              min="1"
-              :disabled="!canEditSettings"
-            >
-              <template #suffix>units</template>
-            </SInput>
-          </div>
-        </div>
-        <div class="s-settings__row">
-          <SCheckbox
-            v-model="inventorySettings.autoReorder"
-            variant="switch"
-            label="Auto-reorder"
-            description="Create purchase orders when stock is low."
-            :disabled="!canEditSettings"
-          />
-        </div>
-        <div class="s-settings__row">
-          <div class="s-settings__row-text">
-            <label class="s-settings__row-label" for="settings-default-category">Default category</label>
-            <p class="s-settings__row-hint">Used for new products when no category is picked.</p>
-          </div>
-          <div class="s-settings__control">
-            <SSelect
-              id="settings-default-category"
-              v-model="inventorySettings.defaultCategory"
-              :options="defaultCategoryOptions"
+              v-model="storeInfo.name"
+              label="Branch name"
+              placeholder="Enter branch name"
+              :readonly="!isEditingStore"
               :disabled="!canEditSettings"
             />
-          </div>
-        </div>
-      </form>
-      <template v-if="canEditSettings" #footer>
-        <SButton variant="primary" type="submit" form="settings-inventory-form">Save inventory settings</SButton>
-      </template>
-    </SCard>
+            <SInput
+              v-model="storeInfo.businessType"
+              label="Business type"
+              placeholder="For example, perfume shop"
+              :readonly="!isEditingStore"
+              :disabled="!canEditSettings"
+            />
+            <SInput
+              v-model="storeInfo.email"
+              type="email"
+              label="Email"
+              placeholder="store@example.com"
+              autocomplete="email"
+              :readonly="!isEditingStore"
+              :disabled="!canEditSettings"
+            />
+            <SInput
+              v-model="storeInfo.phone"
+              type="tel"
+              label="Phone"
+              placeholder="Enter phone number"
+              autocomplete="tel"
+              :readonly="!isEditingStore"
+              :disabled="!canEditSettings"
+            />
+            <div class="s-settings__span">
+              <STextarea
+                v-model="storeInfo.address"
+                label="Address"
+                placeholder="Enter store address"
+                :rows="2"
+                :readonly="!isEditingStore"
+                :disabled="!canEditSettings"
+              />
+            </div>
+          </form>
 
-    <StorefrontSettingsPanel
-      v-else-if="activeSettingsTab === 'storefront'"
-      :can-edit="canEditSettings && userStore.isSuperAdmin"
-    />
+          <template v-if="isEditingStore" #footer>
+            <SButton variant="secondary" @click="cancelEditing('store')">Cancel</SButton>
+            <SButton variant="primary" type="submit" form="settings-store-form">Save changes</SButton>
+          </template>
+        </SCard>
 
-    <template v-else-if="activeSettingsTab === 'payments'">
-      <SCard
-        title="Checkout payments"
-        description="Payment methods staff can pick on new sales and balance payments."
-      >
-        <ul class="s-settings__chips" aria-label="Payment methods">
-          <li v-for="(tender, index) in paymentTenders" :key="`${tender}-${index}`" class="s-settings__chip">
-            {{ tender }}
-            <button
-              v-if="canEditSettings"
-              type="button"
-              class="s-settings__chip-remove"
-              :aria-label="`Remove ${tender}`"
-              @click="removePaymentTender(index)"
-            >
-              <X :size="14" :stroke-width="2" aria-hidden="true" />
-            </button>
-          </li>
-        </ul>
-        <form v-if="canEditSettings" class="s-settings__add" @submit.prevent="addPaymentTender">
-          <SInput v-model="newPaymentTender" label="Add a method" placeholder="For example, OPay or Moniepoint" />
-          <SButton type="submit" variant="secondary" :disabled="!newPaymentTender.trim()">
-            <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
-            Add
-          </SButton>
-        </form>
-        <template v-if="canEditSettings" #footer>
-          <SButton variant="ghost" @click="resetPaymentTendersToDefault">Reset to defaults</SButton>
-          <SButton variant="primary" @click="savePaymentSettings">Save payment methods</SButton>
+        <SCard
+          v-else-if="activeSettingsTab === 'inventory'"
+          title="Inventory"
+          description="Stock alerts and defaults for new products."
+        >
+          <form id="settings-inventory-form" class="s-settings__rows" @submit.prevent="saveInventorySettings">
+            <div class="s-settings__row">
+              <div class="s-settings__row-text">
+                <label class="s-settings__row-label" for="settings-low-stock">Low stock alert</label>
+                <p class="s-settings__row-hint">Flag a product when its stock falls below this quantity.</p>
+              </div>
+              <div class="s-settings__control s-settings__control--narrow">
+                <SInput
+                  id="settings-low-stock"
+                  v-model="inventorySettings.lowStockThreshold"
+                  type="number"
+                  inputmode="numeric"
+                  min="1"
+                  :disabled="!canEditSettings"
+                >
+                  <template #suffix>units</template>
+                </SInput>
+              </div>
+            </div>
+            <div class="s-settings__row">
+              <SCheckbox
+                v-model="inventorySettings.autoReorder"
+                variant="switch"
+                label="Auto-reorder"
+                description="Create purchase orders when stock is low."
+                :disabled="!canEditSettings"
+              />
+            </div>
+            <div class="s-settings__row">
+              <div class="s-settings__row-text">
+                <label class="s-settings__row-label" for="settings-default-category">Default category</label>
+                <p class="s-settings__row-hint">Used for new products when no category is picked.</p>
+              </div>
+              <div class="s-settings__control">
+                <SSelect
+                  id="settings-default-category"
+                  v-model="inventorySettings.defaultCategory"
+                  :options="defaultCategoryOptions"
+                  :disabled="!canEditSettings"
+                />
+              </div>
+            </div>
+          </form>
+          <template v-if="canEditSettings" #footer>
+            <SButton variant="primary" type="submit" form="settings-inventory-form">Save inventory settings</SButton>
+          </template>
+        </SCard>
+
+        <StorefrontSettingsPanel
+          v-else-if="activeSettingsTab === 'storefront'"
+          :can-edit="canEditSettings && userStore.isSuperAdmin"
+        />
+
+        <template v-else-if="activeSettingsTab === 'payments'">
+          <SCard
+            title="Checkout payments"
+            description="Payment methods staff can pick on new sales and balance payments."
+          >
+            <ul class="s-settings__chips" aria-label="Payment methods">
+              <li v-for="(tender, index) in paymentTenders" :key="`${tender}-${index}`" class="s-settings__chip">
+                {{ tender }}
+                <button
+                  v-if="canEditSettings"
+                  type="button"
+                  class="s-settings__chip-remove"
+                  :aria-label="`Remove ${tender}`"
+                  @click="removePaymentTender(index)"
+                >
+                  <X :size="14" :stroke-width="2" aria-hidden="true" />
+                </button>
+              </li>
+            </ul>
+            <form v-if="canEditSettings" class="s-settings__add" @submit.prevent="addPaymentTender">
+              <SInput v-model="newPaymentTender" label="Add a method" placeholder="For example, OPay or Moniepoint" />
+              <SButton type="submit" variant="secondary" :disabled="!newPaymentTender.trim()">
+                <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
+                Add
+              </SButton>
+            </form>
+            <template v-if="canEditSettings" #footer>
+              <SButton variant="ghost" @click="resetPaymentTendersToDefault">Reset to defaults</SButton>
+              <SButton variant="primary" @click="savePaymentSettings">Save payment methods</SButton>
+            </template>
+          </SCard>
+          <PaymentsV2SettingsCard :tenders="paymentTenders" />
         </template>
-      </SCard>
-      <PaymentsV2SettingsCard :tenders="paymentTenders" />
-    </template>
 
-    <SCard
-      v-else-if="activeSettingsTab === 'sales-receipts'"
-      title="Sales & receipts"
-      description="Receipt numbering and printing."
-    >
-      <form id="settings-receipt-form" class="s-settings__rows" @submit.prevent="saveReceiptSettings">
-        <div class="s-settings__row">
-          <div class="s-settings__row-text">
-            <label class="s-settings__row-label" for="settings-receipt-prefix">Receipt prefix</label>
-            <p class="s-settings__row-hint">Added before every receipt number, for example REC-.</p>
-          </div>
-          <div class="s-settings__control s-settings__control--narrow">
-            <SInput
-              id="settings-receipt-prefix"
-              v-model="receiptSettings.prefix"
-              placeholder="REC-"
-              :disabled="!canEditSettings"
-            />
-          </div>
-        </div>
-        <div class="s-settings__row">
-          <div class="s-settings__row-text">
-            <label class="s-settings__row-label" for="settings-receipt-next">Next receipt number</label>
-            <p class="s-settings__row-hint">The number the next sale will use.</p>
-          </div>
-          <div class="s-settings__control s-settings__control--narrow">
-            <SInput
-              id="settings-receipt-next"
-              v-model="receiptSettings.nextNumber"
-              type="number"
-              inputmode="numeric"
-              min="1"
-              :disabled="!canEditSettings"
-            />
-          </div>
-        </div>
-        <div class="s-settings__row">
-          <SCheckbox
-            v-model="receiptSettings.autoPrint"
-            variant="switch"
-            label="Print receipts automatically"
-            description="Open the print dialog as soon as a sale is completed."
-            :disabled="!canEditSettings"
-          />
-        </div>
-      </form>
-      <template v-if="canEditSettings" #footer>
-        <SButton variant="primary" type="submit" form="settings-receipt-form">Save receipt settings</SButton>
-      </template>
-    </SCard>
+        <SCard
+          v-else-if="activeSettingsTab === 'sales-receipts'"
+          title="Sales & receipts"
+          description="Receipt numbering and printing."
+        >
+          <form id="settings-receipt-form" class="s-settings__rows" @submit.prevent="saveReceiptSettings">
+            <div class="s-settings__row">
+              <div class="s-settings__row-text">
+                <label class="s-settings__row-label" for="settings-receipt-prefix">Receipt prefix</label>
+                <p class="s-settings__row-hint">Added before every receipt number, for example REC-.</p>
+              </div>
+              <div class="s-settings__control s-settings__control--narrow">
+                <SInput
+                  id="settings-receipt-prefix"
+                  v-model="receiptSettings.prefix"
+                  placeholder="REC-"
+                  :disabled="!canEditSettings"
+                />
+              </div>
+            </div>
+            <div class="s-settings__row">
+              <div class="s-settings__row-text">
+                <label class="s-settings__row-label" for="settings-receipt-next">Next receipt number</label>
+                <p class="s-settings__row-hint">The number the next sale will use.</p>
+              </div>
+              <div class="s-settings__control s-settings__control--narrow">
+                <SInput
+                  id="settings-receipt-next"
+                  v-model="receiptSettings.nextNumber"
+                  type="number"
+                  inputmode="numeric"
+                  min="1"
+                  :disabled="!canEditSettings"
+                />
+              </div>
+            </div>
+            <div class="s-settings__row">
+              <SCheckbox
+                v-model="receiptSettings.autoPrint"
+                variant="switch"
+                label="Print receipts automatically"
+                description="Open the print dialog as soon as a sale is completed."
+                :disabled="!canEditSettings"
+              />
+            </div>
+          </form>
+          <template v-if="canEditSettings" #footer>
+            <SButton variant="primary" type="submit" form="settings-receipt-form">Save receipt settings</SButton>
+          </template>
+        </SCard>
 
-    <SCard
-      v-else-if="activeSettingsTab === 'data-export' && !isStaff"
-      title="Data export"
-      description="Download Excel backups of this branch. Large stores may take a moment to gather."
-    >
-      <ul class="s-settings__exports">
-        <li v-for="item in dataExportItems" :key="item.key">
-          <FileSpreadsheet :size="20" :stroke-width="1.75" aria-hidden="true" />
-          <div>
-            <p class="s-settings__row-label">{{ item.label }}</p>
-            <p class="s-settings__row-hint">{{ item.description }}</p>
-          </div>
-        </li>
-      </ul>
-      <template #footer>
-        <p v-if="dataExportStatus" class="s-settings__status" role="status">{{ dataExportStatus }}</p>
-        <SButton variant="primary" :loading="dataExporting" :disabled="dataExporting" @click="handleExportAllStoreData">
-          <template #leading><Download :size="16" :stroke-width="2" aria-hidden="true" /></template>
-          {{ dataExporting ? 'Exporting…' : 'Export all to Excel' }}
-        </SButton>
-      </template>
-    </SCard>
+        <SCard
+          v-else-if="activeSettingsTab === 'data-export' && !isStaff"
+          title="Data export"
+          description="Download Excel backups of this branch. Large stores may take a moment to gather."
+        >
+          <ul class="s-settings__exports">
+            <li v-for="item in dataExportItems" :key="item.key">
+              <FileSpreadsheet :size="20" :stroke-width="1.75" aria-hidden="true" />
+              <div>
+                <p class="s-settings__row-label">{{ item.label }}</p>
+                <p class="s-settings__row-hint">{{ item.description }}</p>
+              </div>
+            </li>
+          </ul>
+          <template #footer>
+            <p v-if="dataExportStatus" class="s-settings__status" role="status">{{ dataExportStatus }}</p>
+            <SButton variant="primary" :loading="dataExporting" :disabled="dataExporting" @click="handleExportAllStoreData">
+              <template #leading><Download :size="16" :stroke-width="2" aria-hidden="true" /></template>
+              {{ dataExporting ? 'Exporting…' : 'Export all to Excel' }}
+            </SButton>
+          </template>
+        </SCard>
+      </div>
+    </section>
 
     <SDialog
       v-model:open="cancelConfirmOpen"

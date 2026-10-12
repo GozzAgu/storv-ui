@@ -74,269 +74,277 @@
     </template>
 
     <template v-else>
-      <STabs v-model="tab" :tabs="tabs" label="Partners sections" panel-id="partners-panel" />
+      <section class="s-tab-panel">
+        <div class="s-tab-panel__head">
+          <STabs v-model="tab" :tabs="tabs" label="Partners sections" panel-id="partners-panel" />
+        </div>
+        <div class="s-tab-panel__body">
 
-      <div
-        v-if="tab === 'loans'"
-        id="partners-panel"
-        class="s-partners__panel"
-        role="tabpanel"
-      >
-        <SCard
-          v-if="overview.lendBlocker"
-          title="Lend stock to partners"
-          description="Lending to partners is on the Enterprise plan. You can still borrow from partners on any plan."
-        >
-          <SButton v-if="overview.canManage" variant="secondary" to="/dashboard/settings?tab=subscription">
-            See plans
-          </SButton>
-        </SCard>
-        <SCard
-          v-else
-          title="Lend stock to partners"
-          description="Lend items or a number of units at an agreed price. They return them or pay you for the ones they sell."
-        >
-          <SButton variant="primary" :disabled="!partners.length" @click="startLend(null)">
-            Lend stock
-          </SButton>
-        </SCard>
-        <TradeLoansCard
-          :loans="loans"
-          :can-pay="overview.canTrade"
-          :on-return="api.returnLoanItems"
-          :on-pay="api.payLoan"
-        />
-        <SCard v-if="!loans.length">
-          <SEmptyState
-            title="No partner loans"
-            description="Stock you lend to partners, or borrow from them, shows here with its due date."
+          <div
+            v-if="tab === 'loans'"
+            id="partners-panel"
+            class="s-partners__panel"
+            role="tabpanel"
           >
-            <template #icon
-              ><Handshake :size="24" :stroke-width="1.75" aria-hidden="true"
-            /></template>
-          </SEmptyState>
-        </SCard>
-      </div>
-
-      <div
-        v-else-if="overview.canTrade && tab === 'requests'"
-        id="partners-panel"
-        class="s-partners__panel"
-        role="tabpanel"
-      >
-        <TradeRequestsPanel
-          :requests="requests"
-          :partners="partners"
-          :on-ask="api.ask"
-          :on-reply="api.reply"
-          :on-close="api.closeRequest"
-          :on-bill="canBill ? startBill : undefined"
-          :on-lend="overview.lendBlocker ? undefined : startLend"
-        />
-        <TradeSalesCard
-          :sales="sales"
-          :on-pay="api.payUrl"
-          :on-receipt="api.saleReceipt"
-          :on-claim-stock="api.claimSaleStock"
-          :on-changed="api.loadSales"
-        />
-      </div>
-
-      <div
-        v-else
-        id="partners-panel"
-        class="s-partners__panel"
-        role="tabpanel"
-      >
-        <SCard>
-          <div class="s-partners__me">
-            <SAvatar :name="profile.displayName" size="lg" />
-            <div class="s-partners__me-text">
-              <p class="s-partners__me-name">{{ profile.displayName }}</p>
-              <p class="s-partners__handle">@{{ profile.handle }}</p>
-            </div>
-            <SBadge v-if="profile.bankVerified" tone="success">
-              <BadgeCheck :size="12" :stroke-width="2" aria-hidden="true" />
-              Bank verified
-            </SBadge>
-            <SButton v-if="overview.canManage" variant="ghost" size="sm" @click="openEditProfile">
-              Edit
-            </SButton>
+            <SCard
+              v-if="overview.lendBlocker"
+              title="Lend stock to partners"
+              description="Lending to partners is on the Enterprise plan. You can still borrow from partners on any plan."
+            >
+              <SButton v-if="overview.canManage" variant="secondary" to="/dashboard/settings?tab=subscription">
+                See plans
+              </SButton>
+            </SCard>
+            <SCard
+              v-else
+              title="Lend stock to partners"
+              description="Lend items or a number of units at an agreed price. They return them or pay you for the ones they sell."
+            >
+              <SButton variant="primary" :disabled="!partners.length" @click="startLend(null)">
+                Lend stock
+              </SButton>
+            </SCard>
+            <TradeLoansCard
+              :loans="loans"
+              :can-pay="overview.canTrade"
+              :on-return="api.returnLoanItems"
+              :on-pay="api.payLoan"
+            />
+            <SCard v-if="!loans.length">
+              <SEmptyState
+                title="No partner loans"
+                description="Stock you lend to partners, or borrow from them, shows here with its due date."
+              >
+                <template #icon
+                  ><Handshake :size="24" :stroke-width="1.75" aria-hidden="true"
+                /></template>
+              </SEmptyState>
+            </SCard>
           </div>
-        </SCard>
 
-        <SCard
-          v-if="overview.canManage"
-          title="Add a partner"
-          description="Enter their trade handle. They get a request to accept."
-        >
-          <form class="s-partners__find" @submit.prevent="findPartner">
-            <SInput
-              v-model="findQuery"
-              label="Their trade handle"
-              placeholder="their-business"
-              autocomplete="off"
-              :error="findError"
-            >
-              <template #prefix>@</template>
-            </SInput>
-            <SButton
-              type="submit"
-              variant="secondary"
-              :loading="finding"
-              :disabled="!findQuery.trim()"
-            >
-              Find
-            </SButton>
-          </form>
-
-          <div v-if="found" class="s-partners__result" aria-live="polite">
-            <SAvatar :name="found.partner.displayName" />
-            <div class="s-list__main">
-              <span class="s-list__primary">{{ found.partner.displayName }}</span>
-              <span class="s-list__secondary">@{{ found.partner.handle }}</span>
-            </div>
-            <SBadge v-if="found.partner.bankVerified" tone="success">Bank verified</SBadge>
-            <SButton
-              v-if="found.relation === 'none'"
-              variant="primary"
-              size="sm"
-              :loading="busyId === 'invite'"
-              @click="sendRequest(found.partner.handle)"
-            >
-              Send request
-            </SButton>
-            <SButton
-              v-else-if="found.relation === 'incoming'"
-              variant="primary"
-              size="sm"
-              :loading="busyId === 'invite'"
-              @click="sendRequest(found.partner.handle)"
-            >
-              Accept their request
-            </SButton>
-            <SBadge v-else-if="found.relation === 'outgoing'">Request sent</SBadge>
-            <SBadge v-else-if="found.relation === 'active'" tone="success">Partners</SBadge>
-            <SBadge v-else>This is you</SBadge>
+          <div
+            v-else-if="overview.canTrade && tab === 'requests'"
+            id="partners-panel"
+            class="s-partners__panel"
+            role="tabpanel"
+          >
+            <TradeRequestsPanel
+              :requests="requests"
+              :partners="partners"
+              :on-ask="api.ask"
+              :on-reply="api.reply"
+              :on-close="api.closeRequest"
+              :on-bill="canBill ? startBill : undefined"
+              :on-lend="overview.lendBlocker ? undefined : startLend"
+            />
+            <TradeSalesCard
+              :sales="sales"
+              :on-pay="api.payUrl"
+              :on-receipt="api.saleReceipt"
+              :on-claim-stock="api.claimSaleStock"
+              :on-changed="api.loadSales"
+            />
           </div>
-        </SCard>
 
-        <SCard v-if="incoming.length || outgoing.length" title="Partner requests" flush>
-          <ul class="s-list">
-            <li v-for="c in incoming" :key="c.id" class="s-list__item">
-              <SAvatar :name="c.partner.displayName" />
-              <div class="s-list__main">
-                <span class="s-list__primary">{{ c.partner.displayName }}</span>
-                <span class="s-list__secondary">@{{ c.partner.handle }} · wants to connect</span>
+          <div
+            v-else
+            id="partners-panel"
+            class="s-partners__panel"
+            role="tabpanel"
+          >
+            <SCard>
+              <div class="s-partners__me">
+                <SAvatar :name="profile.displayName" size="lg" />
+                <div class="s-partners__me-text">
+                  <p class="s-partners__me-name">{{ profile.displayName }}</p>
+                  <p class="s-partners__handle">@{{ profile.handle }}</p>
+                </div>
+                <SBadge v-if="profile.bankVerified" tone="success">
+                  <BadgeCheck :size="12" :stroke-width="2" aria-hidden="true" />
+                  Bank verified
+                </SBadge>
+                <SButton v-if="overview.canManage" variant="ghost" size="sm" @click="openEditProfile">
+                  Edit
+                </SButton>
               </div>
-              <div v-if="overview.canManage" class="s-partners__row-actions">
+            </SCard>
+
+            <SCard
+              v-if="overview.canManage"
+              title="Add a partner"
+              description="Enter their trade handle. They get a request to accept."
+            >
+              <form class="s-partners__find" @submit.prevent="findPartner">
+                <SInput
+                  v-model="findQuery"
+                  label="Their trade handle"
+                  placeholder="their-business"
+                  autocomplete="off"
+                  :error="findError"
+                >
+                  <template #prefix>@</template>
+                </SInput>
                 <SButton
-                  size="sm"
+                  type="submit"
                   variant="secondary"
-                  :disabled="!!busyId"
-                  @click="act(c, 'decline')"
+                  :loading="finding"
+                  :disabled="!findQuery.trim()"
                 >
-                  Decline
+                  Find
+                </SButton>
+              </form>
+
+              <div v-if="found" class="s-partners__result" aria-live="polite">
+                <SAvatar :name="found.partner.displayName" />
+                <div class="s-list__main">
+                  <span class="s-list__primary">{{ found.partner.displayName }}</span>
+                  <span class="s-list__secondary">@{{ found.partner.handle }}</span>
+                </div>
+                <SBadge v-if="found.partner.bankVerified" tone="success">Bank verified</SBadge>
+                <SButton
+                  v-if="found.relation === 'none'"
+                  variant="primary"
+                  size="sm"
+                  :loading="busyId === 'invite'"
+                  @click="sendRequest(found.partner.handle)"
+                >
+                  Send request
                 </SButton>
                 <SButton
-                  size="sm"
+                  v-else-if="found.relation === 'incoming'"
                   variant="primary"
-                  :loading="busyId === c.id"
-                  @click="act(c, 'accept')"
+                  size="sm"
+                  :loading="busyId === 'invite'"
+                  @click="sendRequest(found.partner.handle)"
                 >
-                  Accept
+                  Accept their request
                 </SButton>
+                <SBadge v-else-if="found.relation === 'outgoing'">Request sent</SBadge>
+                <SBadge v-else-if="found.relation === 'active'" tone="success">Partners</SBadge>
+                <SBadge v-else>This is you</SBadge>
               </div>
-            </li>
-            <li v-for="c in outgoing" :key="c.id" class="s-list__item">
-              <SAvatar :name="c.partner.displayName" />
-              <div class="s-list__main">
-                <span class="s-list__primary">{{ c.partner.displayName }}</span>
-                <span class="s-list__secondary">@{{ c.partner.handle }} · waiting for them</span>
-              </div>
-              <SButton
-                v-if="overview.canManage"
-                size="sm"
-                variant="ghost"
-                :loading="busyId === c.id"
-                @click="act(c, 'cancel')"
-              >
-                Cancel
-              </SButton>
-            </li>
-          </ul>
-        </SCard>
+            </SCard>
 
-        <SCard flush>
-          <template #header>
-            <h2 class="s-card__title">
-              Partners <span class="s-partners__count">{{ partners.length }}</span>
-            </h2>
-          </template>
-          <SEmptyState
-            v-if="!partners.length"
-            title="No partners yet"
-            description="Share your handle or invite link with businesses you trade with."
-          >
-            <template #icon
-              ><Network :size="24" :stroke-width="1.75" aria-hidden="true"
-            /></template>
-            <template v-if="overview.canManage" #actions>
-              <SButton variant="secondary" @click="showShare = true">Share invite</SButton>
-            </template>
-          </SEmptyState>
-          <ul v-else class="s-list">
-            <li v-for="c in partners" :key="c.id">
-              <component
-                :is="overview.canManage ? 'button' : 'div'"
-                :type="overview.canManage ? 'button' : undefined"
-                class="s-list__item"
-                :class="{ 's-list__item--interactive': overview.canManage }"
-                :aria-label="overview.canManage ? `Manage ${c.partner.displayName}` : undefined"
-                @click="overview.canManage && (managing = c)"
-              >
-                <SAvatar :name="c.partner.displayName" />
-                <span class="s-list__main">
-                  <span class="s-list__primary">{{ c.partner.displayName }}</span>
-                  <span class="s-list__secondary">
-                    @{{ c.partner.handle }} · partners since {{ formatSince(c.sinceMs) }}
-                  </span>
-                </span>
-                <SBadge v-if="c.partner.bankVerified" tone="success">Bank verified</SBadge>
-                <ChevronRight
-                  v-if="overview.canManage"
-                  class="s-partners__chevron"
-                  :size="16"
-                  :stroke-width="1.75"
-                  aria-hidden="true"
-                />
-              </component>
-            </li>
-          </ul>
-        </SCard>
+            <SCard v-if="incoming.length || outgoing.length" title="Partner requests" flush>
+              <ul class="s-list">
+                <li v-for="c in incoming" :key="c.id" class="s-list__item">
+                  <SAvatar :name="c.partner.displayName" />
+                  <div class="s-list__main">
+                    <span class="s-list__primary">{{ c.partner.displayName }}</span>
+                    <span class="s-list__secondary">@{{ c.partner.handle }} · wants to connect</span>
+                  </div>
+                  <div v-if="overview.canManage" class="s-partners__row-actions">
+                    <SButton
+                      size="sm"
+                      variant="secondary"
+                      :disabled="!!busyId"
+                      @click="act(c, 'decline')"
+                    >
+                      Decline
+                    </SButton>
+                    <SButton
+                      size="sm"
+                      variant="primary"
+                      :loading="busyId === c.id"
+                      @click="act(c, 'accept')"
+                    >
+                      Accept
+                    </SButton>
+                  </div>
+                </li>
+                <li v-for="c in outgoing" :key="c.id" class="s-list__item">
+                  <SAvatar :name="c.partner.displayName" />
+                  <div class="s-list__main">
+                    <span class="s-list__primary">{{ c.partner.displayName }}</span>
+                    <span class="s-list__secondary">@{{ c.partner.handle }} · waiting for them</span>
+                  </div>
+                  <SButton
+                    v-if="overview.canManage"
+                    size="sm"
+                    variant="ghost"
+                    :loading="busyId === c.id"
+                    @click="act(c, 'cancel')"
+                  >
+                    Cancel
+                  </SButton>
+                </li>
+              </ul>
+            </SCard>
 
-        <SCard v-if="overview.canManage && blocked.length" title="Blocked" flush>
-          <ul class="s-list">
-            <li v-for="c in blocked" :key="c.id" class="s-list__item">
-              <SAvatar :name="c.partner.displayName" />
-              <div class="s-list__main">
-                <span class="s-list__primary">{{ c.partner.displayName }}</span>
-                <span class="s-list__secondary"
-                  >@{{ c.partner.handle }} · cannot send you requests</span
-                >
-              </div>
-              <SButton
-                size="sm"
-                variant="ghost"
-                :loading="busyId === c.id"
-                @click="act(c, 'unblock')"
+            <SCard flush>
+              <template #header>
+                <h2 class="s-card__title">
+                  Partners <span class="s-partners__count">{{ partners.length }}</span>
+                </h2>
+              </template>
+              <SEmptyState
+                v-if="!partners.length"
+                title="No partners yet"
+                description="Share your handle or invite link with businesses you trade with."
               >
-                Unblock
-              </SButton>
-            </li>
-          </ul>
-        </SCard>
-      </div>
+                <template #icon
+                  ><Network :size="24" :stroke-width="1.75" aria-hidden="true"
+                /></template>
+                <template v-if="overview.canManage" #actions>
+                  <SButton variant="secondary" @click="showShare = true">Share invite</SButton>
+                </template>
+              </SEmptyState>
+              <ul v-else class="s-list">
+                <li v-for="c in partners" :key="c.id">
+                  <component
+                    :is="overview.canManage ? 'button' : 'div'"
+                    :type="overview.canManage ? 'button' : undefined"
+                    class="s-list__item"
+                    :class="{ 's-list__item--interactive': overview.canManage }"
+                    :aria-label="overview.canManage ? `Manage ${c.partner.displayName}` : undefined"
+                    @click="overview.canManage && (managing = c)"
+                  >
+                    <SAvatar :name="c.partner.displayName" />
+                    <span class="s-list__main">
+                      <span class="s-list__primary">{{ c.partner.displayName }}</span>
+                      <span class="s-list__secondary">
+                        @{{ c.partner.handle }} · partners since {{ formatSince(c.sinceMs) }}
+                      </span>
+                    </span>
+                    <SBadge v-if="c.partner.bankVerified" tone="success">Bank verified</SBadge>
+                    <ChevronRight
+                      v-if="overview.canManage"
+                      class="s-partners__chevron"
+                      :size="16"
+                      :stroke-width="1.75"
+                      aria-hidden="true"
+                    />
+                  </component>
+                </li>
+              </ul>
+            </SCard>
+
+            <SCard v-if="overview.canManage && blocked.length" title="Blocked" flush>
+              <ul class="s-list">
+                <li v-for="c in blocked" :key="c.id" class="s-list__item">
+                  <SAvatar :name="c.partner.displayName" />
+                  <div class="s-list__main">
+                    <span class="s-list__primary">{{ c.partner.displayName }}</span>
+                    <span class="s-list__secondary"
+                      >@{{ c.partner.handle }} · cannot send you requests</span
+                    >
+                  </div>
+                  <SButton
+                    size="sm"
+                    variant="ghost"
+                    :loading="busyId === c.id"
+                    @click="act(c, 'unblock')"
+                  >
+                    Unblock
+                  </SButton>
+                </li>
+              </ul>
+            </SCard>
+          </div>
+        </div>
+      </section>
+
+      
     </template>
 
     <SDialog

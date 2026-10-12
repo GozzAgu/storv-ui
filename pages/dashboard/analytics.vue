@@ -53,320 +53,328 @@
     </div>
 
     <template v-else>
-      <STabs v-model="activeAnalyticsTab" :tabs="webAnalyticsTabs" label="Report sections" />
-
-      <!-- Overview -->
-      <template v-if="activeAnalyticsTab === 'overview'">
-        <div class="s-overview__stats">
-          <SStat
-            v-for="card in heroKpiCards"
-            :key="card.key"
-            :label="card.label"
-            :value="card.value"
-            :delta="card.key === 'revenue' && Number.isFinite(revenueChange) && Math.round(revenueChange) !== 0 ? revenueChange : undefined"
-            :hint="card.sparkline || card.progress != null ? undefined : card.secondary"
-            :tone="kpiTone(card.tone)"
-          >
-            <template #icon><component :is="card.icon" :size="16" :stroke-width="2" /></template>
-            <template v-if="card.sparkline && card.sparkline.length > 1" #visual>
-              <SSparkline :values="card.sparkline" :label="`${card.label} trend, ${periodLabel.toLowerCase()}`" />
-            </template>
-            <template v-else-if="card.progress != null" #visual>
-              <span class="s-report__meter-wrap" :class="`s-report__meter-wrap--${card.tone ?? 'default'}`">
-                <span class="s-report__meter-label">{{ card.progressLabel }}</span>
-                <span class="s-meter" role="img" :aria-label="card.progressLabel">
-                  <span class="s-meter__fill" :style="{ width: `${Math.min(100, Math.max(0, card.progress))}%` }" />
-                </span>
-              </span>
-            </template>
-          </SStat>
+      <section class="s-tab-panel">
+        <div class="s-tab-panel__head">
+          <STabs v-model="activeAnalyticsTab" :tabs="webAnalyticsTabs" label="Report sections" />
         </div>
+        <div class="s-tab-panel__body">
 
-        <dl class="s-metrics s-report__metrics">
-          <div v-for="card in secondaryKpiCards" :key="card.key" class="s-metrics__item">
-            <dt class="s-metrics__label">{{ card.label }}</dt>
-            <dd class="s-metrics__value" :class="kpiTone(card.tone) ? `s-metrics__value--${kpiTone(card.tone)}` : undefined">
-              {{ card.value }}
-            </dd>
-          </div>
-        </dl>
-
-        <SCard title="Revenue" :description="periodLabel">
-          <template #actions>
-            <SButton variant="ghost" size="sm" @click="activeAnalyticsTab = 'revenue'">Details</SButton>
-          </template>
-          <p v-if="totalRevenue === 0" class="s-report__empty">No sales in this period yet.</p>
-          <LazyApexChart
-            v-else
-            type="area"
-            :height="240"
-            :options="dsChart(overviewRevenueChartOptions)"
-            :series="revenueChartSeries"
-          />
-        </SCard>
-
-        <div class="s-report__donuts">
-          <SCard title="Stock health">
-            <template #actions>
-              <NuxtLink :to="dashPath('/inventory')" class="s-link">Inventory</NuxtLink>
-            </template>
-            <p v-if="inventoryHealthSeries.every((v) => v === 0)" class="s-report__empty">No stock tracked yet.</p>
-            <LazyApexChart v-else type="donut" :height="240" :options="inventoryHealthChartOptions" :series="inventoryHealthSeries" />
-          </SCard>
-          <SCard title="Payment methods">
-            <p v-if="paymentMethodBreakdown.length === 0" class="s-report__empty">No completed sales in this period.</p>
-            <LazyApexChart v-else type="donut" :height="240" :options="paymentMethodsChartOptions" :series="paymentMethodsChartSeries" />
-          </SCard>
-          <SCard title="Top products">
-            <p v-if="topProductsChartSeries.length === 0" class="s-report__empty">No product sales in this period.</p>
-            <LazyApexChart v-else type="donut" :height="240" :options="overviewTopProductsChartOptions" :series="topProductsChartSeries" />
-          </SCard>
-        </div>
-
-        <nav class="s-report__tiles" aria-label="More reports">
-          <NuxtLink
-            v-for="insight in insightTiles"
-            :key="insight.id"
-            :to="insight.href!"
-            class="s-report__tile"
-            :aria-label="`${insight.title}: ${insight.value}. ${insight.linkLabel}`"
-          >
-            <span class="s-report__tile-icon" aria-hidden="true">
-              <component :is="insight.icon" :size="16" :stroke-width="2" />
-            </span>
-            <span class="s-report__tile-main">
-              <span class="s-report__tile-label">{{ insight.title }}</span>
-              <span class="s-report__tile-value">{{ insight.value }}</span>
-            </span>
-            <ChevronRight class="s-report__tile-arrow" :size="16" :stroke-width="2" aria-hidden="true" />
-          </NuxtLink>
-        </nav>
-      </template>
-
-      <!-- Revenue -->
-      <template v-else-if="activeAnalyticsTab === 'revenue'">
-        <div class="s-report__split s-report__split--wide">
-          <SCard title="Revenue" :description="`${periodLabel}`">
-            <LazyApexChart type="line" :height="300" :options="dsChart(revenueChartOptions)" :series="revenueChartSeries" />
-          </SCard>
-          <SCard title="Top products" description="Share of revenue, top 5">
-            <LazyApexChart type="donut" :height="300" :options="dsChart(topProductsChartOptions)" :series="topProductsChartSeries" />
-          </SCard>
-        </div>
-        <SCard v-if="canViewProfitAndCost" title="Discounts" :description="`${periodLabel}`">
-          <LazyApexChart type="line" :height="300" :options="dsChart(discountChartOptions)" :series="discountChartSeries" />
-        </SCard>
-      </template>
-
-      <!-- Products & customers -->
-      <div v-else-if="activeAnalyticsTab === 'products-customers'" class="s-report__split">
-        <SCard title="Sales by category" :description="`Top 8 categories, ${periodLabel.toLowerCase()}`">
-          <template #actions>
-            <NuxtLink :to="dashPath('/inventory')" class="s-link">Inventory</NuxtLink>
-          </template>
-          <p v-if="topFoldersBySales.length === 0" class="s-report__empty">No category sales in this period.</p>
-          <LazyApexChart
-            v-else
-            type="bar"
-            :height="Math.max(240, topFoldersBySales.length * 40)"
-            :options="dsChart(categorySalesChartOptions)"
-            :series="categorySalesChartSeries"
-          />
-        </SCard>
-        <SCard title="Top customers" :description="`By spend · ${repeatPurchaseRate.toFixed(0)}% bought again`">
-          <p v-if="customerChartCustomers.length === 0" class="s-report__empty">
-            No sales with a customer email in this period.
-          </p>
-          <LazyApexChart
-            v-else
-            type="bar"
-            :height="Math.max(220, customerChartCustomers.length * 44)"
-            :options="dsChart(customerChartOptions)"
-            :series="customerChartSeries"
-          />
-        </SCard>
-      </div>
-
-      <!-- Payments & busy times -->
-      <template v-else-if="activeAnalyticsTab === 'payments-traffic'">
-        <div class="s-report__split">
-          <SCard title="Busiest times">
-            <dl class="s-report__peaks">
-              <div class="s-report__peak">
-                <dt class="s-report__peak-label">
-                  <span class="s-report__tile-icon" aria-hidden="true"><CalendarDays :size="16" :stroke-width="2" /></span>
-                  Best day
-                </dt>
-                <dd class="s-report__peak-value">{{ busiestDayName ?? EMPTY_CELL }}</dd>
-                <dd class="s-report__peak-sub">{{ formatCurrency(peakDayRevenue) }}</dd>
-              </div>
-              <div class="s-report__peak">
-                <dt class="s-report__peak-label">
-                  <span class="s-report__tile-icon" aria-hidden="true"><Clock :size="16" :stroke-width="2" /></span>
-                  Best hour
-                </dt>
-                <dd class="s-report__peak-value">{{ busiestHourLabel ?? EMPTY_CELL }}</dd>
-                <dd class="s-report__peak-sub">{{ formatCurrency(peakHourRevenue) }}</dd>
-              </div>
-            </dl>
-          </SCard>
-
-          <SCard
-            v-if="paymentMethodBreakdown.length > 0"
-            title="Payment methods"
-            description="Completed sales by how customers paid"
-          >
-            <ul class="s-report__bars">
-              <li v-for="row in paymentMethodBreakdown.slice(0, 6)" :key="row.label">
-                <div class="s-report__bar-head">
-                  <span>{{ row.label }}</span>
-                  <span class="s-report__bar-meta">{{ row.share }}% · {{ formatCurrency(row.revenue) }}</span>
-                </div>
-                <div class="s-report__bar-track">
-                  <span class="s-report__bar-fill" :style="{ width: `${Math.max(row.share, 3)}%` }" />
-                </div>
-              </li>
-            </ul>
-          </SCard>
-
-          <SCard v-if="!storefrontDashboardHidden" title="Storefront traffic">
-            <template #actions>
-              <NuxtLink :to="dashPath('/storefront')" class="s-link">Open storefront</NuxtLink>
-            </template>
-            <dl class="s-report__cells">
-              <div><dt>Store views</dt><dd>{{ storefrontStore.analyticsSummary.storeViews }}</dd></div>
-              <div><dt>Product views</dt><dd>{{ storefrontStore.analyticsSummary.productViews }}</dd></div>
-              <div><dt>Views, last 7 days</dt><dd>{{ storefrontStore.viewsLast7Days }}</dd></div>
-              <div><dt>Waiting requests</dt><dd>{{ storefrontStore.pendingInquiryCount }}</dd></div>
-            </dl>
-          </SCard>
-        </div>
-
-        <SCard title="Sales by hour" description="Revenue by hour of day. Hover a bar for the number of sales.">
-          <LazyApexChart type="bar" :height="260" :options="dsChart(peakHoursChartOptions)" :series="peakHoursChartSeries" />
-        </SCard>
-
-        <div class="s-report__split">
-          <SCard title="Sales by day of week">
-            <LazyApexChart type="bar" :height="260" :options="dsChart(salesByDayChartOptions)" :series="salesByDayChartSeries" />
-          </SCard>
-          <SCard title="Day and hour" description="Darker squares had more revenue.">
-            <LazyApexChart type="heatmap" :height="280" :options="dsChart(heatmapChartOptions)" :series="heatmapSeries" />
-          </SCard>
-        </div>
-      </template>
-
-      <!-- Top lists -->
-      <template v-else-if="activeAnalyticsTab === 'reports'">
-        <div class="s-report__split">
-          <SCard title="Top products" flush>
-            <p v-if="topProducts.length === 0" class="s-report__empty s-report__empty--pad">No product sales in this period.</p>
-            <table v-else class="s-table">
-              <thead>
-                <tr>
-                  <th scope="col">Product</th>
-                  <th scope="col" class="s-table__num">Sold</th>
-                  <th scope="col" class="s-table__num">Revenue</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="product in topProducts" :key="product.id">
-                  <td><span class="s-table__primary">{{ product.name }}</span></td>
-                  <td class="s-table__num">{{ product.quantity }}</td>
-                  <td class="s-table__num">{{ formatCurrency(product.revenue) }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </SCard>
-
-          <SCard title="Top customers" flush>
-            <p v-if="topCustomers.length === 0" class="s-report__empty s-report__empty--pad">No customers in this period.</p>
-            <table v-else class="s-table">
-              <thead>
-                <tr>
-                  <th scope="col">Customer</th>
-                  <th scope="col" class="s-table__num">Sales</th>
-                  <th scope="col" class="s-table__num">Spent</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="customer in topCustomers" :key="customer.email">
-                  <td>
-                    <span class="s-table__primary">{{ customer.name }}</span>
-                    <span class="s-table__secondary">{{ customer.email }}</span>
-                  </td>
-                  <td class="s-table__num">{{ customer.orders }}</td>
-                  <td class="s-table__num">{{ formatCurrency(customer.totalSpent) }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </SCard>
-        </div>
-
-        <div class="s-report__split">
-          <SCard title="Recent returns" flush>
-            <p v-if="recentReturns.length === 0" class="s-report__empty s-report__empty--pad">No returns in this period.</p>
-            <table v-else class="s-table">
-              <thead>
-                <tr>
-                  <th scope="col">Sale</th>
-                  <th scope="col">Reason</th>
-                  <th scope="col" class="s-table__num">Refunded</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="ret in recentReturns" :key="ret.id">
-                  <td>
-                    <span class="s-table__primary">{{ ret.receiptNumber }}</span>
-                    <span class="s-table__secondary">{{ formatReturnDate(ret.date) }}</span>
-                  </td>
-                  <td>{{ ret.reason }}</td>
-                  <td class="s-table__num">−{{ formatCurrency(ret.amount) }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </SCard>
-
-          <SCard title="Low stock" flush>
-            <template #actions>
-              <SButton
-                v-if="lowStockItems.length > 0"
-                variant="ghost"
-                size="sm"
-                :loading="reorderExporting"
-                @click="handleExportReorderList"
+          <!-- Overview -->
+          <template v-if="activeAnalyticsTab === 'overview'">
+            <div class="s-overview__stats">
+              <SStat
+                v-for="card in heroKpiCards"
+                :key="card.key"
+                :label="card.label"
+                :value="card.value"
+                :delta="card.key === 'revenue' && Number.isFinite(revenueChange) && Math.round(revenueChange) !== 0 ? revenueChange : undefined"
+                :hint="card.sparkline || card.progress != null ? undefined : card.secondary"
+                :tone="kpiTone(card.tone)"
               >
-                Export reorder list
-              </SButton>
-            </template>
-            <ul v-if="lowStockItems.length > 0" class="s-list">
-              <li v-for="item in lowStockItems" :key="item.id">
-                <NuxtLink
-                  :to="item.folderId ? dashPath(`/inventory/${item.folderId}`) : dashPath('/inventory')"
-                  class="s-list__item s-list__item--interactive"
-                >
-                  <span class="s-list__main">
-                    <span class="s-list__primary">{{ item.name }}</span>
-                    <span class="s-list__secondary">
-                      {{ item.folderName }}<template v-if="item.itemCount > 1"> · {{ item.itemCount }} items</template>
+                <template #icon><component :is="card.icon" :size="16" :stroke-width="2" /></template>
+                <template v-if="card.sparkline && card.sparkline.length > 1" #visual>
+                  <SSparkline :values="card.sparkline" :label="`${card.label} trend, ${periodLabel.toLowerCase()}`" />
+                </template>
+                <template v-else-if="card.progress != null" #visual>
+                  <span class="s-report__meter-wrap" :class="`s-report__meter-wrap--${card.tone ?? 'default'}`">
+                    <span class="s-report__meter-label">{{ card.progressLabel }}</span>
+                    <span class="s-meter" role="img" :aria-label="card.progressLabel">
+                      <span class="s-meter__fill" :style="{ width: `${Math.min(100, Math.max(0, card.progress))}%` }" />
                     </span>
                   </span>
-                  <span class="s-list__end">
-                    <SBadge tone="warning" size="sm">{{ item.quantity }} of {{ item.threshold }}</SBadge>
-                  </span>
-                </NuxtLink>
-              </li>
-            </ul>
-            <p v-else class="s-report__empty s-report__empty--pad">Everything is above its low-stock level.</p>
-          </SCard>
-        </div>
+                </template>
+              </SStat>
+            </div>
 
-        <PaymentLinksSummaryCard
-          v-if="canShowPaymentLinksFeature && !isPaymentLinksComingSoon()"
-          card-class="s-card"
-          :limit="6"
-        />
-      </template>
+            <dl class="s-metrics s-report__metrics">
+              <div v-for="card in secondaryKpiCards" :key="card.key" class="s-metrics__item">
+                <dt class="s-metrics__label">{{ card.label }}</dt>
+                <dd class="s-metrics__value" :class="kpiTone(card.tone) ? `s-metrics__value--${kpiTone(card.tone)}` : undefined">
+                  {{ card.value }}
+                </dd>
+              </div>
+            </dl>
+
+            <SCard title="Revenue" :description="periodLabel">
+              <template #actions>
+                <SButton variant="ghost" size="sm" @click="activeAnalyticsTab = 'revenue'">Details</SButton>
+              </template>
+              <p v-if="totalRevenue === 0" class="s-report__empty">No sales in this period yet.</p>
+              <LazyApexChart
+                v-else
+                type="area"
+                :height="240"
+                :options="dsChart(overviewRevenueChartOptions)"
+                :series="revenueChartSeries"
+              />
+            </SCard>
+
+            <div class="s-report__donuts">
+              <SCard title="Stock health">
+                <template #actions>
+                  <NuxtLink :to="dashPath('/inventory')" class="s-link">Inventory</NuxtLink>
+                </template>
+                <p v-if="inventoryHealthSeries.every((v) => v === 0)" class="s-report__empty">No stock tracked yet.</p>
+                <LazyApexChart v-else type="donut" :height="240" :options="inventoryHealthChartOptions" :series="inventoryHealthSeries" />
+              </SCard>
+              <SCard title="Payment methods">
+                <p v-if="paymentMethodBreakdown.length === 0" class="s-report__empty">No completed sales in this period.</p>
+                <LazyApexChart v-else type="donut" :height="240" :options="paymentMethodsChartOptions" :series="paymentMethodsChartSeries" />
+              </SCard>
+              <SCard title="Top products">
+                <p v-if="topProductsChartSeries.length === 0" class="s-report__empty">No product sales in this period.</p>
+                <LazyApexChart v-else type="donut" :height="240" :options="overviewTopProductsChartOptions" :series="topProductsChartSeries" />
+              </SCard>
+            </div>
+
+            <nav class="s-report__tiles" aria-label="More reports">
+              <NuxtLink
+                v-for="insight in insightTiles"
+                :key="insight.id"
+                :to="insight.href!"
+                class="s-report__tile"
+                :aria-label="`${insight.title}: ${insight.value}. ${insight.linkLabel}`"
+              >
+                <span class="s-report__tile-icon" aria-hidden="true">
+                  <component :is="insight.icon" :size="16" :stroke-width="2" />
+                </span>
+                <span class="s-report__tile-main">
+                  <span class="s-report__tile-label">{{ insight.title }}</span>
+                  <span class="s-report__tile-value">{{ insight.value }}</span>
+                </span>
+                <ChevronRight class="s-report__tile-arrow" :size="16" :stroke-width="2" aria-hidden="true" />
+              </NuxtLink>
+            </nav>
+          </template>
+
+          <!-- Revenue -->
+          <template v-else-if="activeAnalyticsTab === 'revenue'">
+            <div class="s-report__split s-report__split--wide">
+              <SCard title="Revenue" :description="`${periodLabel}`">
+                <LazyApexChart type="line" :height="300" :options="dsChart(revenueChartOptions)" :series="revenueChartSeries" />
+              </SCard>
+              <SCard title="Top products" description="Share of revenue, top 5">
+                <LazyApexChart type="donut" :height="300" :options="dsChart(topProductsChartOptions)" :series="topProductsChartSeries" />
+              </SCard>
+            </div>
+            <SCard v-if="canViewProfitAndCost" title="Discounts" :description="`${periodLabel}`">
+              <LazyApexChart type="line" :height="300" :options="dsChart(discountChartOptions)" :series="discountChartSeries" />
+            </SCard>
+          </template>
+
+          <!-- Products & customers -->
+          <div v-else-if="activeAnalyticsTab === 'products-customers'" class="s-report__split">
+            <SCard title="Sales by category" :description="`Top 8 categories, ${periodLabel.toLowerCase()}`">
+              <template #actions>
+                <NuxtLink :to="dashPath('/inventory')" class="s-link">Inventory</NuxtLink>
+              </template>
+              <p v-if="topFoldersBySales.length === 0" class="s-report__empty">No category sales in this period.</p>
+              <LazyApexChart
+                v-else
+                type="bar"
+                :height="Math.max(240, topFoldersBySales.length * 40)"
+                :options="dsChart(categorySalesChartOptions)"
+                :series="categorySalesChartSeries"
+              />
+            </SCard>
+            <SCard title="Top customers" :description="`By spend · ${repeatPurchaseRate.toFixed(0)}% bought again`">
+              <p v-if="customerChartCustomers.length === 0" class="s-report__empty">
+                No sales with a customer email in this period.
+              </p>
+              <LazyApexChart
+                v-else
+                type="bar"
+                :height="Math.max(220, customerChartCustomers.length * 44)"
+                :options="dsChart(customerChartOptions)"
+                :series="customerChartSeries"
+              />
+            </SCard>
+          </div>
+
+          <!-- Payments & busy times -->
+          <template v-else-if="activeAnalyticsTab === 'payments-traffic'">
+            <div class="s-report__split">
+              <SCard title="Busiest times">
+                <dl class="s-report__peaks">
+                  <div class="s-report__peak">
+                    <dt class="s-report__peak-label">
+                      <span class="s-report__tile-icon" aria-hidden="true"><CalendarDays :size="16" :stroke-width="2" /></span>
+                      Best day
+                    </dt>
+                    <dd class="s-report__peak-value">{{ busiestDayName ?? EMPTY_CELL }}</dd>
+                    <dd class="s-report__peak-sub">{{ formatCurrency(peakDayRevenue) }}</dd>
+                  </div>
+                  <div class="s-report__peak">
+                    <dt class="s-report__peak-label">
+                      <span class="s-report__tile-icon" aria-hidden="true"><Clock :size="16" :stroke-width="2" /></span>
+                      Best hour
+                    </dt>
+                    <dd class="s-report__peak-value">{{ busiestHourLabel ?? EMPTY_CELL }}</dd>
+                    <dd class="s-report__peak-sub">{{ formatCurrency(peakHourRevenue) }}</dd>
+                  </div>
+                </dl>
+              </SCard>
+
+              <SCard
+                v-if="paymentMethodBreakdown.length > 0"
+                title="Payment methods"
+                description="Completed sales by how customers paid"
+              >
+                <ul class="s-report__bars">
+                  <li v-for="row in paymentMethodBreakdown.slice(0, 6)" :key="row.label">
+                    <div class="s-report__bar-head">
+                      <span>{{ row.label }}</span>
+                      <span class="s-report__bar-meta">{{ row.share }}% · {{ formatCurrency(row.revenue) }}</span>
+                    </div>
+                    <div class="s-report__bar-track">
+                      <span class="s-report__bar-fill" :style="{ width: `${Math.max(row.share, 3)}%` }" />
+                    </div>
+                  </li>
+                </ul>
+              </SCard>
+
+              <SCard v-if="!storefrontDashboardHidden" title="Storefront traffic">
+                <template #actions>
+                  <NuxtLink :to="dashPath('/storefront')" class="s-link">Open storefront</NuxtLink>
+                </template>
+                <dl class="s-report__cells">
+                  <div><dt>Store views</dt><dd>{{ storefrontStore.analyticsSummary.storeViews }}</dd></div>
+                  <div><dt>Product views</dt><dd>{{ storefrontStore.analyticsSummary.productViews }}</dd></div>
+                  <div><dt>Views, last 7 days</dt><dd>{{ storefrontStore.viewsLast7Days }}</dd></div>
+                  <div><dt>Waiting requests</dt><dd>{{ storefrontStore.pendingInquiryCount }}</dd></div>
+                </dl>
+              </SCard>
+            </div>
+
+            <SCard title="Sales by hour" description="Revenue by hour of day. Hover a bar for the number of sales.">
+              <LazyApexChart type="bar" :height="260" :options="dsChart(peakHoursChartOptions)" :series="peakHoursChartSeries" />
+            </SCard>
+
+            <div class="s-report__split">
+              <SCard title="Sales by day of week">
+                <LazyApexChart type="bar" :height="260" :options="dsChart(salesByDayChartOptions)" :series="salesByDayChartSeries" />
+              </SCard>
+              <SCard title="Day and hour" description="Darker squares had more revenue.">
+                <LazyApexChart type="heatmap" :height="280" :options="dsChart(heatmapChartOptions)" :series="heatmapSeries" />
+              </SCard>
+            </div>
+          </template>
+
+          <!-- Top lists -->
+          <template v-else-if="activeAnalyticsTab === 'reports'">
+            <div class="s-report__split">
+              <SCard title="Top products" flush>
+                <p v-if="topProducts.length === 0" class="s-report__empty s-report__empty--pad">No product sales in this period.</p>
+                <table v-else class="s-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Product</th>
+                      <th scope="col" class="s-table__num">Sold</th>
+                      <th scope="col" class="s-table__num">Revenue</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="product in topProducts" :key="product.id">
+                      <td><span class="s-table__primary">{{ product.name }}</span></td>
+                      <td class="s-table__num">{{ product.quantity }}</td>
+                      <td class="s-table__num">{{ formatCurrency(product.revenue) }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </SCard>
+
+              <SCard title="Top customers" flush>
+                <p v-if="topCustomers.length === 0" class="s-report__empty s-report__empty--pad">No customers in this period.</p>
+                <table v-else class="s-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Customer</th>
+                      <th scope="col" class="s-table__num">Sales</th>
+                      <th scope="col" class="s-table__num">Spent</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="customer in topCustomers" :key="customer.email">
+                      <td>
+                        <span class="s-table__primary">{{ customer.name }}</span>
+                        <span class="s-table__secondary">{{ customer.email }}</span>
+                      </td>
+                      <td class="s-table__num">{{ customer.orders }}</td>
+                      <td class="s-table__num">{{ formatCurrency(customer.totalSpent) }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </SCard>
+            </div>
+
+            <div class="s-report__split">
+              <SCard title="Recent returns" flush>
+                <p v-if="recentReturns.length === 0" class="s-report__empty s-report__empty--pad">No returns in this period.</p>
+                <table v-else class="s-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Sale</th>
+                      <th scope="col">Reason</th>
+                      <th scope="col" class="s-table__num">Refunded</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="ret in recentReturns" :key="ret.id">
+                      <td>
+                        <span class="s-table__primary">{{ ret.receiptNumber }}</span>
+                        <span class="s-table__secondary">{{ formatReturnDate(ret.date) }}</span>
+                      </td>
+                      <td>{{ ret.reason }}</td>
+                      <td class="s-table__num">−{{ formatCurrency(ret.amount) }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </SCard>
+
+              <SCard title="Low stock" flush>
+                <template #actions>
+                  <SButton
+                    v-if="lowStockItems.length > 0"
+                    variant="ghost"
+                    size="sm"
+                    :loading="reorderExporting"
+                    @click="handleExportReorderList"
+                  >
+                    Export reorder list
+                  </SButton>
+                </template>
+                <ul v-if="lowStockItems.length > 0" class="s-list">
+                  <li v-for="item in lowStockItems" :key="item.id">
+                    <NuxtLink
+                      :to="item.folderId ? dashPath(`/inventory/${item.folderId}`) : dashPath('/inventory')"
+                      class="s-list__item s-list__item--interactive"
+                    >
+                      <span class="s-list__main">
+                        <span class="s-list__primary">{{ item.name }}</span>
+                        <span class="s-list__secondary">
+                          {{ item.folderName }}<template v-if="item.itemCount > 1"> · {{ item.itemCount }} items</template>
+                        </span>
+                      </span>
+                      <span class="s-list__end">
+                        <SBadge tone="warning" size="sm">{{ item.quantity }} of {{ item.threshold }}</SBadge>
+                      </span>
+                    </NuxtLink>
+                  </li>
+                </ul>
+                <p v-else class="s-report__empty s-report__empty--pad">Everything is above its low-stock level.</p>
+              </SCard>
+            </div>
+
+            <PaymentLinksSummaryCard
+              v-if="canShowPaymentLinksFeature && !isPaymentLinksComingSoon()"
+              card-class="s-card"
+              :limit="6"
+            />
+          </template>
+        </div>
+      </section>
+
+      
     </template>
   </div>
 </template>

@@ -22,394 +22,407 @@
     </SCard>
 
     <template v-else>
-      <STabs v-model="activeTab" :tabs="webTabs" label="Transfer views" />
+      <section class="s-tab-panel">
+        <div class="s-tab-panel__head">
+          <STabs v-model="activeTab" :tabs="webTabs" label="Transfer views" />
+        </div>
+        <div class="s-tab-panel__body">
+          <!-- New transfer -->
+          <SCard v-if="activeTab === 'transfer'" title="New transfer" class="s-transfer">
+            <form class="s-form" @submit.prevent="requestTransfer">
+              <p class="s-transfer__intro">
+                A transfer goes from requested, to approved and in transit, to complete. Stock only
+                moves when you complete it.
+              </p>
 
-      <!-- New transfer -->
-      <SCard v-if="activeTab === 'transfer'" title="New transfer" class="s-transfer">
-        <form class="s-form" @submit.prevent="requestTransfer">
-          <p class="s-transfer__intro">
-            A transfer goes from requested, to approved and in transit, to complete. Stock only
-            moves when you complete it.
-          </p>
-
-          <div class="s-transfer__grid">
-            <SSelect
-              :model-value="transferForm.sourceStoreId"
-              label="From branch"
-              placeholder="Choose a branch"
-              :options="storeOptions"
-              required
-              @update:model-value="onWebSourceStoreChange"
-            />
-            <SSelect
-              :model-value="transferForm.destinationStoreId"
-              label="To branch"
-              placeholder="Choose a branch"
-              :options="destinationStoreOptions"
-              :disabled="!transferForm.sourceStoreId"
-              required
-              @update:model-value="onWebDestinationStoreChange"
-            />
-          </div>
-
-          <div
-            v-if="transferForm.sourceStoreId || transferForm.destinationStoreId"
-            class="s-transfer__grid"
-          >
-            <SField
-              v-if="transferForm.sourceStoreId"
-              v-slot="{ labelId }"
-              label="Take items from category"
-            >
-              <DashboardFolderDrillPicker
-                :aria-labelledby="labelId"
-                :key="`src-${transferForm.sourceStoreId}`"
-                v-model="transferForm.folderId"
-                :folders="sourceFolders"
-                empty-label="This branch has no categories yet."
-                @change="onSourceFolderChange"
-              />
-            </SField>
-            <SField
-              v-if="transferForm.destinationStoreId"
-              label="Put items in category"
-              v-slot="{ labelId, describedBy }"
-              hint="If the category has subcategories, open it and pick where items should go."
-            >
-              <DashboardFolderDrillPicker
-                :aria-labelledby="labelId"
-                :aria-describedby="describedBy"
-                :key="`dest-${transferForm.destinationStoreId}`"
-                v-model="transferForm.destinationFolderId"
-                :folders="destinationFolders"
-                empty-label="This branch has no categories yet."
-              />
-            </SField>
-          </div>
-
-          <template v-if="transferForm.folderId">
-            <ul
-              v-if="isLoadingItems && availableItems.length === 0"
-              class="s-list"
-              aria-label="Loading items"
-            >
-              <li v-for="i in 4" :key="i" class="s-list__item" aria-hidden="true">
-                <div class="s-list__main">
-                  <SSkeleton width="40%" height="14px" />
-                  <SSkeleton width="25%" height="12px" />
-                </div>
-              </li>
-            </ul>
-            <p v-else-if="availableItems.length === 0" class="s-notice">
-              Nothing in this category can be moved right now. Items that are sold, on loan or
-              already in a transfer are left out.
-            </p>
-            <div v-else class="s-table-wrap s-transfer__items">
-              <table class="s-table">
-                <caption class="ds-sr-only">
-                  Items to transfer
-                </caption>
-                <thead>
-                  <tr>
-                    <th v-if="currentFolderHasSerialNumbers" scope="col" class="s-table__check">
-                      <span class="ds-sr-only">Select</span>
-                    </th>
-                    <th scope="col">Item</th>
-                    <th v-if="!currentFolderHasSerialNumbers" scope="col" class="s-table__num">
-                      In stock
-                    </th>
-                    <th v-if="!currentFolderHasSerialNumbers" scope="col" class="s-table__num">
-                      Move
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr
-                    v-for="item in availableItems"
-                    :key="item.id"
-                    :class="{ 's-table__row--selected': (transferForm.items[item.id] ?? 0) > 0 }"
-                  >
-                    <td v-if="currentFolderHasSerialNumbers" class="s-table__check">
-                      <SCheckbox
-                        :model-value="transferForm.items[item.id] === 1"
-                        :aria-label="`Move ${transferItemName(item)}`"
-                        @update:model-value="
-                          (checked) => (transferForm.items[item.id] = checked ? 1 : 0)
-                        "
-                      />
-                    </td>
-                    <td>
-                      <span class="s-table__primary">{{ transferItemName(item) }}</span>
-                      <span v-if="transferItemMeta(item)" class="s-table__secondary">
-                        {{ transferItemMeta(item) }}
-                      </span>
-                    </td>
-                    <td v-if="!currentFolderHasSerialNumbers" class="s-table__num">
-                      {{ getAvailableQuantity(item) }}
-                    </td>
-                    <td v-if="!currentFolderHasSerialNumbers" class="s-table__num">
-                      <SInput
-                        class="s-transfer__qty"
-                        type="number"
-                        inputmode="numeric"
-                        :model-value="transferForm.items[item.id] ?? null"
-                        :aria-label="`Quantity of ${transferItemName(item)} to move`"
-                        :min="0"
-                        :max="getAvailableQuantity(item)"
-                        placeholder="0"
-                        @update:model-value="(value) => setTransferQuantity(item.id, value)"
-                      />
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </template>
-
-          <STextarea
-            v-model="transferForm.notes"
-            label="Notes (optional)"
-            :rows="2"
-            placeholder="Anything the other branch should know"
-          />
-
-          <div class="s-transfer__actions">
-            <SButton
-              variant="primary"
-              type="submit"
-              :disabled="!canTransfer"
-              :loading="isTransferring"
-            >
-              <template #leading
-                ><ArrowLeftRight :size="16" :stroke-width="2" aria-hidden="true"
-              /></template>
-              Request transfer
-            </SButton>
-          </div>
-        </form>
-      </SCard>
-
-      <!-- History -->
-      <template v-else-if="activeTab === 'history'">
-        <SCard v-if="isLoadingHistory && transferHistory.length === 0" flush aria-busy="true">
-          <ul class="s-list" aria-label="Loading transfers">
-            <li v-for="i in 5" :key="i" class="s-list__item" aria-hidden="true">
-              <div class="s-list__main">
-                <SSkeleton width="40%" height="14px" />
-                <SSkeleton width="25%" height="12px" />
+              <div class="s-transfer__grid">
+                <SSelect
+                  :model-value="transferForm.sourceStoreId"
+                  label="From branch"
+                  placeholder="Choose a branch"
+                  :options="storeOptions"
+                  required
+                  @update:model-value="onWebSourceStoreChange"
+                />
+                <SSelect
+                  :model-value="transferForm.destinationStoreId"
+                  label="To branch"
+                  placeholder="Choose a branch"
+                  :options="destinationStoreOptions"
+                  :disabled="!transferForm.sourceStoreId"
+                  required
+                  @update:model-value="onWebDestinationStoreChange"
+                />
               </div>
-              <SSkeleton width="72px" height="14px" />
-            </li>
-          </ul>
-        </SCard>
-        <SCard v-else-if="transferHistory.length === 0">
-          <SEmptyState
-            title="No transfers yet"
-            description="Transfers between your branches will show here, with their status and tracking."
-          >
-            <template #icon
-              ><ArrowLeftRight :size="24" :stroke-width="1.75" aria-hidden="true"
-            /></template>
-            <template #actions>
-              <SButton @click="activeTab = 'transfer'">New transfer</SButton>
-            </template>
-          </SEmptyState>
-        </SCard>
 
-        <section v-else class="s-table-card" aria-label="Transfer history">
-          <!-- Phone -->
-          <SCard flush class="s-only-sm">
-            <ul class="s-list">
-              <li v-for="transfer in transferHistory" :key="transfer.id" class="s-list__item">
-                <div class="s-list__main">
-                  <span class="s-list__primary">{{ transferRoute(transfer) }}</span>
-                  <span class="s-list__secondary">
-                    {{ formatTransferProductSummary(transfer) }} ·
-                    {{ formatDateShort(transfer.createdAt) }}
-                  </span>
+              <div
+                v-if="transferForm.sourceStoreId || transferForm.destinationStoreId"
+                class="s-transfer__grid"
+              >
+                <SField
+                  v-if="transferForm.sourceStoreId"
+                  v-slot="{ labelId }"
+                  label="Take items from category"
+                >
+                  <DashboardFolderDrillPicker
+                    :aria-labelledby="labelId"
+                    :key="`src-${transferForm.sourceStoreId}`"
+                    v-model="transferForm.folderId"
+                    :folders="sourceFolders"
+                    empty-label="This branch has no categories yet."
+                    @change="onSourceFolderChange"
+                  />
+                </SField>
+                <SField
+                  v-if="transferForm.destinationStoreId"
+                  label="Put items in category"
+                  v-slot="{ labelId, describedBy }"
+                  hint="If the category has subcategories, open it and pick where items should go."
+                >
+                  <DashboardFolderDrillPicker
+                    :aria-labelledby="labelId"
+                    :aria-describedby="describedBy"
+                    :key="`dest-${transferForm.destinationStoreId}`"
+                    v-model="transferForm.destinationFolderId"
+                    :folders="destinationFolders"
+                    empty-label="This branch has no categories yet."
+                  />
+                </SField>
+              </div>
+
+              <template v-if="transferForm.folderId">
+                <ul
+                  v-if="isLoadingItems && availableItems.length === 0"
+                  class="s-list"
+                  aria-label="Loading items"
+                >
+                  <li v-for="i in 4" :key="i" class="s-list__item" aria-hidden="true">
+                    <div class="s-list__main">
+                      <SSkeleton width="40%" height="14px" />
+                      <SSkeleton width="25%" height="12px" />
+                    </div>
+                  </li>
+                </ul>
+                <p v-else-if="availableItems.length === 0" class="s-notice">
+                  Nothing in this category can be moved right now. Items that are sold, on loan or
+                  already in a transfer are left out.
+                </p>
+                <div v-else class="s-table-wrap s-transfer__items">
+                  <table class="s-table">
+                    <caption class="ds-sr-only">
+                      Items to transfer
+                    </caption>
+                    <thead>
+                      <tr>
+                        <th v-if="currentFolderHasSerialNumbers" scope="col" class="s-table__check">
+                          <span class="ds-sr-only">Select</span>
+                        </th>
+                        <th scope="col">Item</th>
+                        <th v-if="!currentFolderHasSerialNumbers" scope="col" class="s-table__num">
+                          In stock
+                        </th>
+                        <th v-if="!currentFolderHasSerialNumbers" scope="col" class="s-table__num">
+                          Move
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr
+                        v-for="item in availableItems"
+                        :key="item.id"
+                        :class="{
+                          's-table__row--selected': (transferForm.items[item.id] ?? 0) > 0,
+                        }"
+                      >
+                        <td v-if="currentFolderHasSerialNumbers" class="s-table__check">
+                          <SCheckbox
+                            :model-value="transferForm.items[item.id] === 1"
+                            :aria-label="`Move ${transferItemName(item)}`"
+                            @update:model-value="
+                              (checked) => (transferForm.items[item.id] = checked ? 1 : 0)
+                            "
+                          />
+                        </td>
+                        <td>
+                          <span class="s-table__primary">{{ transferItemName(item) }}</span>
+                          <span v-if="transferItemMeta(item)" class="s-table__secondary">
+                            {{ transferItemMeta(item) }}
+                          </span>
+                        </td>
+                        <td v-if="!currentFolderHasSerialNumbers" class="s-table__num">
+                          {{ getAvailableQuantity(item) }}
+                        </td>
+                        <td v-if="!currentFolderHasSerialNumbers" class="s-table__num">
+                          <SInput
+                            class="s-transfer__qty"
+                            type="number"
+                            inputmode="numeric"
+                            :model-value="transferForm.items[item.id] ?? null"
+                            :aria-label="`Quantity of ${transferItemName(item)} to move`"
+                            :min="0"
+                            :max="getAvailableQuantity(item)"
+                            placeholder="0"
+                            @update:model-value="(value) => setTransferQuantity(item.id, value)"
+                          />
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
-                <div class="s-list__end">
-                  <SBadge :tone="transferStatusTone(transfer.status)" size="sm">
-                    {{ getTransferStatusLabel(transfer.status) }}
-                  </SBadge>
-                  <SIconButton
-                    v-if="isTransferActionable(transfer)"
-                    label="Transfer actions"
-                    size="sm"
-                    :data-transfer-actions-anchor="transfer.id"
-                    aria-haspopup="menu"
-                    :aria-expanded="openTransferMenuId === transfer.id"
-                    @click="toggleTransferMenu(transfer.id)"
-                  >
-                    <EllipsisVertical :size="16" :stroke-width="2" />
-                  </SIconButton>
-                </div>
-              </li>
-            </ul>
-          </SCard>
+              </template>
 
-          <!-- Tablet and desktop -->
-          <div class="s-table-wrap s-hide-sm">
-            <table class="s-table">
-              <thead>
-                <tr>
-                  <th scope="col">Route</th>
-                  <th scope="col">Items</th>
-                  <th scope="col">Status</th>
-                  <th scope="col" class="s-hide-md">Requested</th>
-                  <th scope="col" class="s-table__actions">
-                    <span class="ds-sr-only">Actions</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="transfer in transferHistory" :key="transfer.id">
-                  <td>
-                    <span class="s-table__primary">{{ transferRoute(transfer) }}</span>
-                    <span v-if="transfer.notes" class="s-table__secondary">{{
-                      transfer.notes
-                    }}</span>
-                  </td>
-                  <td>
-                    <span class="s-table__primary">{{
-                      formatTransferProductSummary(transfer)
-                    }}</span>
-                    <span v-if="transferItemsPreview(transfer)" class="s-table__secondary">
-                      {{ transferItemsPreview(transfer) }}
-                    </span>
-                  </td>
-                  <td>
-                    <SBadge :tone="transferStatusTone(transfer.status)" size="sm">
-                      {{ getTransferStatusLabel(transfer.status) }}
-                    </SBadge>
-                    <span
-                      v-if="transfer.carrier || transfer.trackingNumber"
-                      class="s-table__secondary s-transfer__tracking"
-                    >
-                      <Truck :size="14" :stroke-width="2" aria-hidden="true" />
-                      {{ [transfer.carrier, transfer.trackingNumber].filter(Boolean).join(' · ') }}
-                    </span>
-                  </td>
-                  <td class="s-hide-md s-table__nowrap">
-                    {{ formatDateShort(transfer.createdAt) }}
-                  </td>
-                  <td class="s-table__actions">
-                    <SIconButton
-                      v-if="isTransferActionable(transfer)"
-                      label="Transfer actions"
-                      size="sm"
-                      :data-transfer-actions-anchor="transfer.id"
-                      aria-haspopup="menu"
-                      :aria-expanded="openTransferMenuId === transfer.id"
-                      @click="toggleTransferMenu(transfer.id)"
-                    >
-                      <EllipsisVertical :size="16" :stroke-width="2" />
-                    </SIconButton>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-      </template>
-
-      <!-- Branch reports -->
-      <template v-else-if="activeTab === 'reports'">
-        <dl class="s-metrics">
-          <div class="s-metrics__item">
-            <dt class="s-metrics__label">Revenue</dt>
-            <dd class="s-metrics__value">{{ formatCurrency(consolidatedReport.totalRevenue) }}</dd>
-          </div>
-          <div class="s-metrics__item">
-            <dt class="s-metrics__label">Sales</dt>
-            <dd class="s-metrics__value">{{ consolidatedReport.totalSales }}</dd>
-          </div>
-          <div class="s-metrics__item">
-            <dt class="s-metrics__label">Items sold</dt>
-            <dd class="s-metrics__value">{{ consolidatedReport.totalItems }}</dd>
-          </div>
-          <div class="s-metrics__item">
-            <dt class="s-metrics__label">Average sale</dt>
-            <dd class="s-metrics__value">{{ formatCurrency(consolidatedReport.avgOrderValue) }}</dd>
-          </div>
-        </dl>
-
-        <section class="s-table-card" aria-label="Sales by branch">
-          <div class="s-table-card__head">
-            <div class="s-toolbar">
-              <SSelect
-                v-model="reportFilters.dateRange"
-                class="s-toolbar__filter"
-                aria-label="Date range"
-                :options="reportRangeOptions"
-                @update:model-value="loadConsolidatedReports"
+              <STextarea
+                v-model="transferForm.notes"
+                label="Notes (optional)"
+                :rows="2"
+                placeholder="Anything the other branch should know"
               />
-              <SSelect
-                v-model="reportFilters.storeIds"
-                class="s-toolbar__filter"
-                aria-label="Branch"
-                :options="reportStoreOptions"
-                @update:model-value="loadConsolidatedReports"
-              />
-              <div class="s-toolbar__end">
-                <SButton variant="secondary" @click="exportConsolidatedReport">
+
+              <div class="s-transfer__actions">
+                <SButton
+                  variant="primary"
+                  type="submit"
+                  :disabled="!canTransfer"
+                  :loading="isTransferring"
+                >
                   <template #leading
-                    ><Download :size="16" :stroke-width="2" aria-hidden="true"
+                    ><ArrowLeftRight :size="16" :stroke-width="2" aria-hidden="true"
                   /></template>
-                  Export
+                  Request transfer
                 </SButton>
               </div>
-            </div>
-          </div>
+            </form>
+          </SCard>
 
-          <SCard
-            v-if="isLoadingReports && consolidatedReport.storeBreakdown.length === 0"
-            flush
-            aria-busy="true"
-          >
-            <ul class="s-list" aria-label="Loading branch sales">
-              <li v-for="i in 3" :key="i" class="s-list__item" aria-hidden="true">
-                <div class="s-list__main">
-                  <SSkeleton width="40%" height="14px" />
+          <!-- History -->
+          <template v-else-if="activeTab === 'history'">
+            <SCard v-if="isLoadingHistory && transferHistory.length === 0" flush aria-busy="true">
+              <ul class="s-list" aria-label="Loading transfers">
+                <li v-for="i in 5" :key="i" class="s-list__item" aria-hidden="true">
+                  <div class="s-list__main">
+                    <SSkeleton width="40%" height="14px" />
+                    <SSkeleton width="25%" height="12px" />
+                  </div>
+                  <SSkeleton width="72px" height="14px" />
+                </li>
+              </ul>
+            </SCard>
+            <SCard v-else-if="transferHistory.length === 0">
+              <SEmptyState
+                title="No transfers yet"
+                description="Transfers between your branches will show here, with their status and tracking."
+              >
+                <template #icon
+                  ><ArrowLeftRight :size="24" :stroke-width="1.75" aria-hidden="true"
+                /></template>
+                <template #actions>
+                  <SButton @click="activeTab = 'transfer'">New transfer</SButton>
+                </template>
+              </SEmptyState>
+            </SCard>
+
+            <section v-else class="s-table-card" aria-label="Transfer history">
+              <!-- Phone -->
+              <SCard flush class="s-only-sm">
+                <ul class="s-list">
+                  <li v-for="transfer in transferHistory" :key="transfer.id" class="s-list__item">
+                    <div class="s-list__main">
+                      <span class="s-list__primary">{{ transferRoute(transfer) }}</span>
+                      <span class="s-list__secondary">
+                        {{ formatTransferProductSummary(transfer) }} ·
+                        {{ formatDateShort(transfer.createdAt) }}
+                      </span>
+                    </div>
+                    <div class="s-list__end">
+                      <SBadge :tone="transferStatusTone(transfer.status)" size="sm">
+                        {{ getTransferStatusLabel(transfer.status) }}
+                      </SBadge>
+                      <SIconButton
+                        v-if="isTransferActionable(transfer)"
+                        label="Transfer actions"
+                        size="sm"
+                        :data-transfer-actions-anchor="transfer.id"
+                        aria-haspopup="menu"
+                        :aria-expanded="openTransferMenuId === transfer.id"
+                        @click="toggleTransferMenu(transfer.id)"
+                      >
+                        <EllipsisVertical :size="16" :stroke-width="2" />
+                      </SIconButton>
+                    </div>
+                  </li>
+                </ul>
+              </SCard>
+
+              <!-- Tablet and desktop -->
+              <div class="s-table-wrap s-hide-sm">
+                <table class="s-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Route</th>
+                      <th scope="col">Items</th>
+                      <th scope="col">Status</th>
+                      <th scope="col" class="s-hide-md">Requested</th>
+                      <th scope="col" class="s-table__actions">
+                        <span class="ds-sr-only">Actions</span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="transfer in transferHistory" :key="transfer.id">
+                      <td>
+                        <span class="s-table__primary">{{ transferRoute(transfer) }}</span>
+                        <span v-if="transfer.notes" class="s-table__secondary">{{
+                          transfer.notes
+                        }}</span>
+                      </td>
+                      <td>
+                        <span class="s-table__primary">{{
+                          formatTransferProductSummary(transfer)
+                        }}</span>
+                        <span v-if="transferItemsPreview(transfer)" class="s-table__secondary">
+                          {{ transferItemsPreview(transfer) }}
+                        </span>
+                      </td>
+                      <td>
+                        <SBadge :tone="transferStatusTone(transfer.status)" size="sm">
+                          {{ getTransferStatusLabel(transfer.status) }}
+                        </SBadge>
+                        <span
+                          v-if="transfer.carrier || transfer.trackingNumber"
+                          class="s-table__secondary s-transfer__tracking"
+                        >
+                          <Truck :size="14" :stroke-width="2" aria-hidden="true" />
+                          {{
+                            [transfer.carrier, transfer.trackingNumber].filter(Boolean).join(' · ')
+                          }}
+                        </span>
+                      </td>
+                      <td class="s-hide-md s-table__nowrap">
+                        {{ formatDateShort(transfer.createdAt) }}
+                      </td>
+                      <td class="s-table__actions">
+                        <SIconButton
+                          v-if="isTransferActionable(transfer)"
+                          label="Transfer actions"
+                          size="sm"
+                          :data-transfer-actions-anchor="transfer.id"
+                          aria-haspopup="menu"
+                          :aria-expanded="openTransferMenuId === transfer.id"
+                          @click="toggleTransferMenu(transfer.id)"
+                        >
+                          <EllipsisVertical :size="16" :stroke-width="2" />
+                        </SIconButton>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </template>
+
+          <!-- Branch reports -->
+          <template v-else-if="activeTab === 'reports'">
+            <dl class="s-metrics">
+              <div class="s-metrics__item">
+                <dt class="s-metrics__label">Revenue</dt>
+                <dd class="s-metrics__value">
+                  {{ formatCurrency(consolidatedReport.totalRevenue) }}
+                </dd>
+              </div>
+              <div class="s-metrics__item">
+                <dt class="s-metrics__label">Sales</dt>
+                <dd class="s-metrics__value">{{ consolidatedReport.totalSales }}</dd>
+              </div>
+              <div class="s-metrics__item">
+                <dt class="s-metrics__label">Items sold</dt>
+                <dd class="s-metrics__value">{{ consolidatedReport.totalItems }}</dd>
+              </div>
+              <div class="s-metrics__item">
+                <dt class="s-metrics__label">Average sale</dt>
+                <dd class="s-metrics__value">
+                  {{ formatCurrency(consolidatedReport.avgOrderValue) }}
+                </dd>
+              </div>
+            </dl>
+
+            <section class="s-table-card" aria-label="Sales by branch">
+              <div class="s-table-card__head">
+                <div class="s-toolbar">
+                  <SSelect
+                    v-model="reportFilters.dateRange"
+                    class="s-toolbar__filter"
+                    aria-label="Date range"
+                    :options="reportRangeOptions"
+                    @update:model-value="loadConsolidatedReports"
+                  />
+                  <SSelect
+                    v-model="reportFilters.storeIds"
+                    class="s-toolbar__filter"
+                    aria-label="Branch"
+                    :options="reportStoreOptions"
+                    @update:model-value="loadConsolidatedReports"
+                  />
+                  <div class="s-toolbar__end">
+                    <SButton variant="secondary" @click="exportConsolidatedReport">
+                      <template #leading
+                        ><Download :size="16" :stroke-width="2" aria-hidden="true"
+                      /></template>
+                      Export
+                    </SButton>
+                  </div>
                 </div>
-                <SSkeleton width="72px" height="14px" />
-              </li>
-            </ul>
-          </SCard>
-          <SCard v-else-if="consolidatedReport.storeBreakdown.length === 0">
-            <SEmptyState title="No sales in this period" description="Try a longer date range.">
-              <template #icon
-                ><BarChart3 :size="24" :stroke-width="1.75" aria-hidden="true"
-              /></template>
-            </SEmptyState>
-          </SCard>
-          <div v-else class="s-table-wrap">
-            <table class="s-table">
-              <caption class="ds-sr-only">
-                Sales by branch
-              </caption>
-              <thead>
-                <tr>
-                  <th scope="col">Branch</th>
-                  <th scope="col" class="s-table__num">Revenue</th>
-                  <th scope="col" class="s-table__num">Sales</th>
-                  <th scope="col" class="s-table__num">Items sold</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="store in consolidatedReport.storeBreakdown" :key="store.id">
-                  <td>
-                    <span class="s-table__primary">{{ store.name }}</span>
-                  </td>
-                  <td class="s-table__num">{{ formatCurrency(store.revenue) }}</td>
-                  <td class="s-table__num">{{ store.sales }}</td>
-                  <td class="s-table__num">{{ store.items }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-      </template>
+              </div>
+
+              <SCard
+                v-if="isLoadingReports && consolidatedReport.storeBreakdown.length === 0"
+                flush
+                aria-busy="true"
+              >
+                <ul class="s-list" aria-label="Loading branch sales">
+                  <li v-for="i in 3" :key="i" class="s-list__item" aria-hidden="true">
+                    <div class="s-list__main">
+                      <SSkeleton width="40%" height="14px" />
+                    </div>
+                    <SSkeleton width="72px" height="14px" />
+                  </li>
+                </ul>
+              </SCard>
+              <SCard v-else-if="consolidatedReport.storeBreakdown.length === 0">
+                <SEmptyState title="No sales in this period" description="Try a longer date range.">
+                  <template #icon
+                    ><BarChart3 :size="24" :stroke-width="1.75" aria-hidden="true"
+                  /></template>
+                </SEmptyState>
+              </SCard>
+              <div v-else class="s-table-wrap">
+                <table class="s-table">
+                  <caption class="ds-sr-only">
+                    Sales by branch
+                  </caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">Branch</th>
+                      <th scope="col" class="s-table__num">Revenue</th>
+                      <th scope="col" class="s-table__num">Sales</th>
+                      <th scope="col" class="s-table__num">Items sold</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="store in consolidatedReport.storeBreakdown" :key="store.id">
+                      <td>
+                        <span class="s-table__primary">{{ store.name }}</span>
+                      </td>
+                      <td class="s-table__num">{{ formatCurrency(store.revenue) }}</td>
+                      <td class="s-table__num">{{ store.sales }}</td>
+                      <td class="s-table__num">{{ store.items }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </template>
+        </div>
+      </section>
 
       <SMenu
         :open="Boolean(openTransferMenuId && transferForOpenMenu && transferMenuFixedStyle)"
