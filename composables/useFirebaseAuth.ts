@@ -18,9 +18,14 @@ import { AUTH_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import { getFirebaseClientAuth } from '~/utils/firebase-client-auth'
 import { sendUserEmailVerification } from '~/utils/emailVerification'
 import { sendUserPasswordResetEmail } from '~/utils/passwordResetEmail'
-import { clearAllTwoFactorSessionFlags, clearTwoFactorSessionVerified, markTwoFactorSessionVerified } from '~/utils/two-factor-session'
+import {
+  clearAllTwoFactorSessionFlags,
+  clearTwoFactorSessionVerified,
+  markTwoFactorSessionVerified,
+} from '~/utils/two-factor-session'
 import { clearCachedUserProfile, markSignOutPending } from '~/utils/auth-sign-out'
 import { resolveApiPath } from '~/utils/api-url'
+import { getApiErrorMessage } from '~/utils/api-error-message'
 
 /**
  * Composable for Firebase Authentication
@@ -463,13 +468,13 @@ export const useFirebaseAuth = () => {
       await user.getIdToken(true)
       clearTwoFactorSessionVerified(user.uid)
     } catch (error: any) {
-      if (error.code === 'auth/wrong-password') {
+      if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
         throw new Error('Incorrect password')
       }
       if (error.code === 'auth/requires-recent-login') {
         throw new Error('Please sign out and sign back in before disabling 2FA')
       }
-      throw new Error(error.message || 'Failed to disable 2FA')
+      throw new Error(getApiErrorMessage(error, 'Failed to disable 2FA'))
     }
   }
 
