@@ -178,7 +178,7 @@
   box-shadow: 0 0 0 1.5px var(--s-text);
 }
 
-.s-category-card:focus-within:not(:has(.s-category-card__controls :focus-visible)) {
+.s-category-card:has(.s-category-card__link:focus-visible) {
   box-shadow: var(--s-focus-ring);
 }
 

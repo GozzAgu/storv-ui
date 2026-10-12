@@ -953,9 +953,9 @@ textarea.s-control__input {
 }
 
 .s-check__input:checked + .s-check__box {
-  border-color: var(--s-accent);
-  background: var(--s-accent);
-  color: var(--s-text-on-accent);
+  border-color: var(--s-btn-primary);
+  background: var(--s-btn-primary);
+  color: var(--s-on-btn-primary);
 }
 
 .s-check__input:focus-visible + .s-check__box,
@@ -1003,7 +1003,7 @@ textarea.s-control__input {
 }
 
 .s-check__input:checked + .s-switch__track {
-  background: var(--s-accent);
+  background: var(--s-btn-primary);
 }
 
 .s-check__input:checked + .s-switch__track::after {

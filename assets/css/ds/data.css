@@ -26,14 +26,43 @@
   margin-left: auto;
 }
 
+/* Bulk selection: takes the place of the search row in the same quiet grey, actions on the right */
 .s-toolbar--selection {
+  flex-wrap: nowrap;
   min-height: var(--s-control-h);
-  padding: 0 var(--s-space-1) 0 var(--s-space-2);
+  padding: 0 var(--s-space-half) 0 var(--s-space-1-5);
   border-radius: var(--s-radius);
-  background: var(--s-accent-soft);
-  color: var(--s-accent-soft-text);
-  font: var(--s-text-body);
-  font-weight: 500;
+  background: var(--s-field-bg);
+  color: var(--s-text);
+  font: var(--s-text-small);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.s-toolbar--selection .s-check__label {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.s-toolbar--selection .s-toolbar__end {
+  gap: var(--s-space-half);
+  margin-left: auto;
+}
+
+.s-toolbar--selection .s-btn--ghost:hover:not(:disabled, [aria-disabled='true']) {
+  background: var(--s-field-bg-hover);
+}
+
+/* Destructive actions read as red text here; the confirm dialog carries the solid red button */
+.s-toolbar--selection .s-btn--danger {
+  background: transparent;
+  box-shadow: none;
+  color: var(--s-error);
+}
+
+.s-toolbar--selection .s-btn--danger:hover:not(:disabled, [aria-disabled='true']) {
+  background: var(--s-error-soft);
+  filter: none;
 }
 
 @media (max-width: 639px) {
