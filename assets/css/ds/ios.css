@@ -50,7 +50,7 @@
 
   .s-topbar__title {
     font-weight: 600;
-    font-size: 1.0625rem;
+    font-size: 1rem;
   }
 
   /* ── Large titles ── */
@@ -60,7 +60,7 @@
   }
 
   .s-page-header__title {
-    font: 700 1.75rem/2.25rem var(--s-font-sans);
+    font: 700 1.5rem/2rem var(--s-font-sans);
     letter-spacing: -0.025em;
   }
 
@@ -107,7 +107,7 @@
   }
 
   .s-metrics:not(.s-metrics--inline, .s-metrics--line) .s-metrics__value {
-    font: 700 1.0625rem/1.5rem var(--s-font-sans);
+    font: 700 1rem/1.5rem var(--s-font-sans);
     letter-spacing: -0.01em;
     text-overflow: clip;
   }
@@ -141,7 +141,7 @@
   .s-overview__stats .s-stat__value {
     overflow: hidden;
     margin-top: var(--s-space-half);
-    font: 700 1.5rem/2rem var(--s-font-sans);
+    font: 700 1.25rem/1.75rem var(--s-font-sans);
     letter-spacing: -0.02em;
     white-space: nowrap;
     overflow-wrap: normal;
@@ -233,7 +233,7 @@
   }
 
   .s-dialog__title {
-    font-size: 1.0625rem;
+    font-size: 1rem;
   }
 
   .s-dialog__body {

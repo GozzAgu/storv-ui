@@ -10,6 +10,8 @@
   --s-btn-primary-hover: #3156e0;
   --s-btn-primary-active: #2849c4;
   --s-on-btn-primary: #ffffff;
+  --s-text-display: 600 1.75rem/2.25rem var(--s-font-sans);
+  --s-text-subheading: 600 0.9375rem/1.375rem var(--s-font-sans);
   --s-btn-secondary: var(--s-glass-strong);
   --s-btn-secondary-hover: var(--s-surface-hover);
 

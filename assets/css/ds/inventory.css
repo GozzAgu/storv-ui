@@ -252,7 +252,7 @@
 .s-category-card__title {
   margin: 0;
   min-width: 0;
-  font: 600 1.0625rem/1.4 var(--s-font-sans);
+  font: 600 0.9375rem/1.4 var(--s-font-sans);
   letter-spacing: -0.015em;
 }
 

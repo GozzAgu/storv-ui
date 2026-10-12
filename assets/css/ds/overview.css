@@ -173,7 +173,7 @@
 
 .s-overview-repeat__value {
   color: var(--s-text);
-  font: 700 1.75rem/1 var(--s-font-sans);
+  font: 700 1.5rem/1 var(--s-font-sans);
   font-variant-numeric: tabular-nums;
   letter-spacing: var(--s-tracking-tight);
 }
@@ -339,7 +339,7 @@
 
 .s-overview-chart__total {
   color: var(--s-text);
-  font: 700 1.75rem/1.2 var(--s-font-sans);
+  font: 700 1.5rem/1.2 var(--s-font-sans);
   font-variant-numeric: tabular-nums;
   letter-spacing: var(--s-tracking-tight);
 }
