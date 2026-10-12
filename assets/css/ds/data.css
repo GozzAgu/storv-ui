@@ -282,7 +282,7 @@
   width: 100%;
   border-collapse: collapse;
   color: var(--s-text);
-  font: var(--s-text-body);
+  font: var(--s-text-small);
   font-variant-numeric: tabular-nums;
 }
 
@@ -291,7 +291,7 @@
   padding: 0 var(--s-space-2);
   border-bottom: 1px solid var(--s-divider);
   color: var(--s-text-muted);
-  font: var(--s-text-caption);
+  font: 500 0.65625rem/1rem var(--s-font-sans);
   letter-spacing: var(--s-tracking-caps);
   text-align: left;
   text-transform: uppercase;
@@ -353,7 +353,7 @@
   overflow: hidden;
   max-width: 320px;
   color: var(--s-text-muted);
-  font: var(--s-text-small);
+  font: 400 0.6875rem/1rem var(--s-font-sans);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
