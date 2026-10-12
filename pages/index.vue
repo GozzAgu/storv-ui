@@ -12,6 +12,8 @@
 
     <MkTour />
 
+    <MkImpact />
+
     <MkSetup />
 
     <!-- Pricing teaser -->
@@ -126,6 +128,7 @@ import MkCta from '~/components/marketing/MkCta.vue'
 import MkFaq, { type MkFaqItem } from '~/components/marketing/MkFaq.vue'
 import MkTour from '~/components/marketing/MkTour.vue'
 import MkSectionHead from '~/components/marketing/MkSectionHead.vue'
+import MkImpact from '~/components/marketing/MkImpact.vue'
 import MkIntro from '~/components/marketing/MkIntro.vue'
 import MkPlatform from '~/components/marketing/MkPlatform.vue'
 import MkSetup from '~/components/marketing/MkSetup.vue'
