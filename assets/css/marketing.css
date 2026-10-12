@@ -5,6 +5,14 @@
  */
 
 .mk {
+  /* Landing pages keep blue calls to action; the app's buttons are monochrome */
+  --s-btn-primary: var(--s-brand-fill);
+  --s-btn-primary-hover: #3156e0;
+  --s-btn-primary-active: #2849c4;
+  --s-on-btn-primary: #ffffff;
+  --s-btn-secondary: var(--s-glass-strong);
+  --s-btn-secondary-hover: var(--s-surface-hover);
+
   /* Surfaces: the page sits one step lighter than the alternate band in both themes */
   --mk-page: var(--s-surface);
   --mk-alt: var(--s-bg);

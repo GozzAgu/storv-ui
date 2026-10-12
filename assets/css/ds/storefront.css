@@ -98,8 +98,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--s-btn-primary);
-  color: var(--s-on-btn-primary);
+  background: var(--s-brand-fill);
+  color: var(--s-on-brand);
   font-weight: 700;
   box-shadow: none;
 }

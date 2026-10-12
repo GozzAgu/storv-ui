@@ -510,9 +510,9 @@ html:has(.s-shell.ds-root) body {
   width: 32px;
   height: 32px;
   border-radius: var(--s-radius);
-  background: var(--s-btn-primary);
+  background: var(--s-brand-fill);
   box-shadow: var(--s-shadow-sm);
-  color: var(--s-on-btn-primary);
+  color: var(--s-on-brand);
   font: 600 0.875rem/1 var(--s-font-sans);
 }
 
@@ -585,8 +585,8 @@ html:has(.s-shell.ds-root) body {
 }
 
 .s-branch__list .s-menu-row[aria-selected='true'] .s-branch__mark--sm {
-  background: var(--s-btn-primary);
-  color: var(--s-on-btn-primary);
+  background: var(--s-brand-fill);
+  color: var(--s-on-brand);
 }
 
 .s-branch__list .s-menu-row[aria-selected='true'] .s-menu-row__label {

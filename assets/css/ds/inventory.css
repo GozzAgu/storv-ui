@@ -223,7 +223,7 @@
   width: calc(var(--s-space-2) + var(--s-space-half));
   height: calc(var(--s-space-2) + var(--s-space-half));
   border-radius: var(--s-radius-sm);
-  background: var(--s-btn-primary);
+  background: var(--s-brand-fill);
   color: var(--s-on-brand);
 }
 

@@ -53,12 +53,19 @@
   --s-on-brand: #ffffff;
   --s-brand-ink: #0f1728;
 
-  /* Primary buttons use the logo blue in both themes */
-  --s-btn-primary: var(--s-accent);
-  --s-btn-primary-hover: var(--s-accent-hover);
-  --s-btn-primary-active: var(--s-accent-active);
+  /* Logo blue for brand marks (branch avatar, folder badge), the same in both themes */
+  --s-brand-fill: #3d63f2;
+
+  /* Primary buttons are monochrome: ink on light, white on dark. Blue is kept for brand marks,
+     links, selection and focus so it still means something. */
+  --s-btn-primary: #111111;
+  --s-btn-primary-hover: #2a2a2a;
+  --s-btn-primary-active: #000000;
   --s-on-btn-primary: #ffffff;
   --s-btn-primary-glow: none;
+  /* Secondary buttons: a grey tint that reads on the canvas, on cards and inside sheets */
+  --s-btn-secondary: rgb(15 23 42 / 0.06);
+  --s-btn-secondary-hover: rgb(15 23 42 / 0.1);
 
   /* Glass (glass.css): translucent, frosted surfaces on a flat canvas */
   --s-glass: rgb(255 255 255 / 0.62);
@@ -191,9 +198,12 @@ html.dark {
   --s-accent-soft: rgb(142 162 255 / 0.14);
   --s-accent-soft-text: #a3b3ff;
 
-  --s-btn-primary: #3d63f2;
-  --s-btn-primary-hover: #3156e0;
-  --s-btn-primary-active: #2849c4;
+  --s-btn-primary: #f2f2f2;
+  --s-btn-primary-hover: #ffffff;
+  --s-btn-primary-active: #d9d9d9;
+  --s-on-btn-primary: #0a0a0a;
+  --s-btn-secondary: rgb(255 255 255 / 0.08);
+  --s-btn-secondary-hover: rgb(255 255 255 / 0.13);
 
   --s-success: #47cd89;
   --s-success-soft: rgb(71 205 137 / 0.12);
