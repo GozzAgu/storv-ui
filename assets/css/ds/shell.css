@@ -710,7 +710,7 @@ html:has(.s-shell.ds-root) body {
   height: var(--s-touch);
   padding: 0;
   border: 0;
-  border-radius: var(--s-radius-full);
+  border-radius: var(--s-radius);
   background: transparent;
   color: var(--s-text-2);
   cursor: pointer;

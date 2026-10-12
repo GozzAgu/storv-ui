@@ -177,7 +177,12 @@
 
   /* ── Segmented control ── */
 
+  .s-tabs {
+    border-radius: calc(var(--s-radius) + var(--s-space-half));
+  }
+
   .s-tabs__tab {
+    border-radius: var(--s-radius);
     font: var(--s-text-body);
     font-weight: 600;
   }
@@ -190,12 +195,12 @@
   }
 
   .s-btn {
-    border-radius: var(--s-radius-btn);
+    border-radius: var(--s-radius-lg);
     font-weight: 600;
   }
 
   .s-btn--sm {
-    border-radius: var(--s-radius-btn);
+    border-radius: var(--s-radius);
   }
 
   /* ── Money and counts always line up ── */

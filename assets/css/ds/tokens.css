@@ -112,9 +112,6 @@
   --s-radius-xl: 16px;
   --s-radius-2xl: 24px;
   --s-radius-full: 9999px;
-  /* Buttons are pills; single-line fields match the cards, search stays a pill */
-  --s-radius-btn: var(--s-radius-full);
-  --s-radius-field: var(--s-radius-lg);
 
   /* Elevation: `sm` separates borderless cards from the page; `md`/`lg` are for overlays */
   --s-shadow-sm: 0 1px 2px rgb(16 24 40 / 0.05);

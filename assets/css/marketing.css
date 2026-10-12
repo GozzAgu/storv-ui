@@ -48,8 +48,6 @@
   --s-shadow-md: none;
   --s-shadow-lg: none;
   --s-border: var(--s-line);
-  --s-radius-btn: var(--s-radius);
-  --s-radius-field: var(--s-radius);
 
   /* Hero backdrop */
   --mk-dots: rgb(16 24 40 / 0.11);

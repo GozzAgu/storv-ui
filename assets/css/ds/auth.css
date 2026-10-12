@@ -243,7 +243,7 @@ html.dark .s-auth__mobile-logo-dark {
 
 .s-auth .s-btn--lg {
   height: var(--s-touch);
-  border-radius: var(--s-radius-btn);
+  border-radius: var(--s-radius-lg);
 }
 
 /* ── Continue with Google ──────────────────────────────────────────────── */
@@ -263,7 +263,7 @@ html.dark .s-auth__mobile-logo-dark {
   width: 100%;
   height: var(--s-touch);
   border: 1px solid transparent;
-  border-radius: var(--s-radius-btn);
+  border-radius: var(--s-radius-lg);
   background: var(--s-field-bg);
   color: var(--s-text);
   font: var(--s-text-body);
