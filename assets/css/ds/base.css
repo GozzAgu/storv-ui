@@ -59,7 +59,16 @@
   }
 
   :where(.ds-root, .s-c)
-    :where(button, [role='button'], a, input, select, textarea, summary, [tabindex]:not([tabindex='-1'])):focus-visible {
+    :where(
+      button,
+      [role='button'],
+      a,
+      input,
+      select,
+      textarea,
+      summary,
+      [tabindex]:not([tabindex='-1'])
+    ):focus-visible {
     outline: none;
     box-shadow: var(--s-focus-ring);
   }
@@ -114,7 +123,7 @@ html.theme-transitioning :is(body, aside, header, main, nav, [data-dashboard-tel
   display: none !important;
 }
 
-/* Capacitor launch splash, shown for a moment while the shell boots */
+/* Full-screen holding state (the dashboard's auth check) */
 .s-boot {
   position: fixed;
   inset: 0;
@@ -126,13 +135,6 @@ html.theme-transitioning :is(body, aside, header, main, nav, [data-dashboard-tel
   gap: var(--s-space-2);
   background: var(--s-bg);
   color: var(--s-accent);
-}
-
-.s-boot__label {
-  margin: 0;
-  color: var(--s-text-2);
-  font: var(--s-text-body);
-  font-family: var(--s-font-sans);
 }
 
 @layer utilities {

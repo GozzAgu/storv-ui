@@ -1,8 +1,4 @@
 <template>
-  <div v-if="capacitorBooting" class="s-c s-boot" aria-busy="true" aria-label="Loading Storvv">
-    <SSpinner :size="32" />
-    <p class="s-boot__label">Loading Storvv…</p>
-  </div>
   <NuxtRouteAnnouncer />
   <NuxtLayout>
     <NuxtPage />
@@ -13,23 +9,30 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import SSpinner from '~/components/s/SSpinner.vue'
+import { onMounted } from 'vue'
 import ToastContainer from '~/components/ui/ToastContainer.vue'
 import { isCapacitorNative, markCapacitorDocument } from '~/utils/capacitor-env'
+import { dismissNativeBootSplash, hasNativeBootSplash } from '~/utils/native-boot-splash'
 import { captureException } from '~/utils/observability'
 
-const capacitorBooting = ref(false)
+/* Never leave the launch logo up if the first page fails to finish. */
+const NATIVE_BOOT_SPLASH_MAX_MS = 12_000
+
+if (import.meta.client && hasNativeBootSplash()) {
+  const route = useRoute()
+  // The logo stays until the first real page (sign in, sign up, or the dashboard when signed in)
+  // has rendered; `/` only ever redirects on native.
+  const stopWatching = useNuxtApp().hook('page:finish', () => {
+    if (route.path === '/') return
+    stopWatching()
+    requestAnimationFrame(() => requestAnimationFrame(dismissNativeBootSplash))
+  })
+  setTimeout(dismissNativeBootSplash, NATIVE_BOOT_SPLASH_MAX_MS)
+}
 
 onMounted(() => {
   if (!isCapacitorNative()) return
   markCapacitorDocument()
-  capacitorBooting.value = true
-  const hide = () => {
-    capacitorBooting.value = false
-  }
-  requestAnimationFrame(hide)
-  setTimeout(hide, 400)
 })
 
 // Global error handler for unhandled promise rejections

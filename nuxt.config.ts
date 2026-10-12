@@ -1,7 +1,10 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import { fileURLToPath } from 'node:url'
 import tailwindcss from '@tailwindcss/vite'
-import { CAPACITOR_SHELL_INLINE_SCRIPT } from './utils/capacitor-shell-inline'
+import {
+  CAPACITOR_BOOT_SPLASH_SCRIPT,
+  CAPACITOR_SHELL_INLINE_SCRIPT,
+} from './utils/capacitor-shell-inline'
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   // Off by default so the Nuxt badge never shows on screen; run with NUXT_DEVTOOLS=true to use it.
@@ -202,6 +205,11 @@ export default defineNuxtConfig({
           key: 'capacitor-native-mark',
           innerHTML: CAPACITOR_SHELL_INLINE_SCRIPT,
           tagPosition: 'head',
+        },
+        {
+          key: 'capacitor-boot-splash',
+          innerHTML: CAPACITOR_BOOT_SPLASH_SCRIPT,
+          tagPosition: 'bodyOpen',
         },
       ],
       link: [
