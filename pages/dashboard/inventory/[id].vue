@@ -64,10 +64,7 @@
             </template>
           </nav>
         </template>
-        <template #description>
-          <template v-if="childFolders.length > 0">
-            {{ childFolders.length }} subcategor{{ childFolders.length === 1 ? 'y' : 'ies' }}.
-          </template>
+        <template v-if="childFolders.length === 0" #description>
           Products live inside subcategories. Open one to add or manage stock.
         </template>
         <template v-if="canAddSubcategories" #actions>
@@ -78,25 +75,18 @@
         </template>
       </SPageHeader>
 
-      <div
-        v-if="canCreateInventoryFolders && selectedSubfoldersForBulk.length > 0"
-        class="s-toolbar s-toolbar--selection"
-        role="region"
-        aria-label="Bulk actions"
+      <dl
+        v-if="childFolders.length > 0"
+        class="s-metrics s-metrics--line"
+        aria-label="Subcategory summary"
       >
-        <SCheckbox
-          :model-value="allSubfoldersOnPageSelected"
-          :label="`${selectedSubfoldersForBulk.length} selected`"
-          @update:model-value="toggleSelectAllSubfolders()"
-        />
-        <div class="s-toolbar__end">
-          <SButton variant="ghost" size="sm" @click="selectedSubfoldersForBulk = []">Clear</SButton>
-          <SButton variant="danger" size="sm" @click="openBulkDeleteSubfoldersModal">
-            <template #leading><Trash2 :size="14" :stroke-width="2" aria-hidden="true" /></template>
-            Delete
-          </SButton>
+        <div v-for="metric in hubHeaderMetrics" :key="metric.key" class="s-metrics__item">
+          <dt class="s-metrics__label">{{ metric.label }}</dt>
+          <dd class="s-metrics__value" :class="metric.tone && `s-metrics__value--${metric.tone}`">
+            {{ metric.value }}
+          </dd>
         </div>
-      </div>
+      </dl>
 
       <SCard v-if="childFolders.length === 0">
         <SEmptyState
@@ -113,8 +103,57 @@
         </SEmptyState>
       </SCard>
 
-      <template v-else>
-        <div class="s-category-grid">
+      <section v-else class="s-table-card s-inventory__section" aria-label="Subcategories">
+        <div class="s-table-card__head">
+          <STabs v-model="hubFilter" :tabs="hubFilterTabs" label="Filter subcategories" />
+
+          <div
+            v-if="canCreateInventoryFolders && selectedSubfoldersForBulk.length > 0"
+            class="s-toolbar s-toolbar--selection"
+            role="region"
+            aria-label="Bulk actions"
+          >
+            <SCheckbox
+              :model-value="allSubfoldersOnPageSelected"
+              :label="`${selectedSubfoldersForBulk.length} selected`"
+              @update:model-value="toggleSelectAllSubfolders()"
+            />
+            <div class="s-toolbar__end">
+              <SButton variant="ghost" size="sm" @click="selectedSubfoldersForBulk = []">
+                Clear
+              </SButton>
+              <SButton variant="danger" size="sm" @click="openBulkDeleteSubfoldersModal">
+                <template #leading
+                  ><Trash2 :size="14" :stroke-width="2" aria-hidden="true"
+                /></template>
+                Delete
+              </SButton>
+            </div>
+          </div>
+          <div v-else class="s-toolbar">
+            <SSearch
+              v-model="hubSearch"
+              class="s-toolbar__search"
+              placeholder="Search subcategories"
+            />
+            <div class="s-toolbar__filter">
+              <SSelect v-model="hubSortBy" :options="hubSortOptions" aria-label="Sort by" />
+            </div>
+          </div>
+        </div>
+
+        <SEmptyState
+          v-if="paginatedChildFolders.length === 0"
+          title="No subcategories match"
+          description="Try a different search or show all subcategories."
+        >
+          <template #icon><SearchX :size="24" :stroke-width="1.75" /></template>
+          <template #actions>
+            <SButton @click="clearHubFilters">Clear filters</SButton>
+          </template>
+        </SEmptyState>
+
+        <div v-else class="s-category-grid">
           <InventoryCategoryCard
             v-for="child in paginatedChildFolders"
             :key="child.id"
@@ -162,11 +201,11 @@
         <SPagination
           :current-page="hubCurrentPage"
           :page-size="hubItemsPerPage"
-          :total="childFolders.length"
+          :total="filteredChildFolders.length"
           label="Subcategories pagination"
           @page-change="handleHubPageChange"
         />
-      </template>
+      </section>
     </template>
 
     <!-- Products -->
@@ -1370,6 +1409,7 @@ import SSearch from '~/components/s/SSearch.vue'
 import SSelect from '~/components/s/SSelect.vue'
 import SSkeleton from '~/components/s/SSkeleton.vue'
 import SSortHeader from '~/components/s/SSortHeader.vue'
+import STabs from '~/components/s/STabs.vue'
 import { useDepartmentsStore } from '~/stores/departments'
 
 definePageMeta({
@@ -1466,14 +1506,82 @@ const childFolders = computed(() =>
   folder.value ? getChildFolders(inventoryStore.folders, folder.value.id) : []
 )
 
-const hubSortBy = ref<'name' | 'items'>('name')
+const hubSortBy = ref<'name' | 'items' | 'value'>('name')
+const hubSearch = ref('')
+const hubFilter = ref<'all' | 'low-stock'>('all')
+
+const hubSortOptions = [
+  { value: 'name', label: 'Sort: Name' },
+  { value: 'items', label: 'Sort: Most items' },
+  { value: 'value', label: 'Sort: Highest value' },
+]
+
+const hubLowStockCount = computed(
+  () => childFolders.value.filter((c) => (subfolderDisplayStats(c).lowStockCount ?? 0) > 0).length
+)
+
+const hubFilterTabs = computed(() => [
+  { value: 'all', label: 'All subcategories' },
+  { value: 'low-stock', label: 'Low stock', count: hubLowStockCount.value },
+])
+
+const filteredChildFolders = computed(() => {
+  const query = hubSearch.value.trim().toLowerCase()
+  return childFolders.value.filter((c) => {
+    if (hubFilter.value === 'low-stock' && (subfolderDisplayStats(c).lowStockCount ?? 0) === 0)
+      return false
+    return !query || c.name.toLowerCase().includes(query)
+  })
+})
 
 const sortedChildFolders = computed(() => {
-  const list = [...childFolders.value]
+  const list = [...filteredChildFolders.value]
   if (hubSortBy.value === 'items') {
-    return list.sort((a, b) => (b.itemCount ?? 0) - (a.itemCount ?? 0))
+    return list.sort(
+      (a, b) =>
+        (subfolderDisplayStats(b).itemCount ?? 0) - (subfolderDisplayStats(a).itemCount ?? 0)
+    )
+  }
+  if (hubSortBy.value === 'value') {
+    return list.sort(
+      (a, b) =>
+        (subfolderDisplayStats(b).totalValue ?? 0) - (subfolderDisplayStats(a).totalValue ?? 0)
+    )
   }
   return list.sort((a, b) => a.name.localeCompare(b.name))
+})
+
+const hubHeaderMetrics = computed(() => {
+  const totals = childFolders.value.reduce(
+    (sum, c) => {
+      const stats = subfolderDisplayStats(c)
+      sum.items += stats.itemCount ?? 0
+      sum.value += stats.totalValue ?? 0
+      sum.low += stats.lowStockCount ?? 0
+      return sum
+    },
+    { items: 0, value: 0, low: 0 }
+  )
+  return [
+    { key: 'subcategories', label: 'Subcategories', value: String(childFolders.value.length) },
+    { key: 'products', label: 'Products', value: String(totals.items) },
+    { key: 'value', label: 'Total value', value: formatCurrency(totals.value) },
+    {
+      key: 'low',
+      label: 'Low stock',
+      value: String(totals.low),
+      tone: totals.low > 0 ? 'warning' : undefined,
+    },
+  ]
+})
+
+function clearHubFilters() {
+  hubSearch.value = ''
+  hubFilter.value = 'all'
+}
+
+watch([hubSearch, hubFilter], () => {
+  hubCurrentPage.value = 1
 })
 
 const HUB_SUBFOLDERS_PER_PAGE = 24
@@ -1544,8 +1652,11 @@ watch(folderId, () => {
   hubCurrentPage.value = getInitialHubPage()
 })
 
-watch(childFolders, () => {
-  const totalPages = Math.max(1, Math.ceil(childFolders.value.length / hubItemsPerPage.value))
+watch(filteredChildFolders, () => {
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredChildFolders.value.length / hubItemsPerPage.value)
+  )
   if (hubCurrentPage.value > totalPages) {
     hubCurrentPage.value = totalPages
   }
