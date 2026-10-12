@@ -411,6 +411,16 @@
   color: var(--s-info);
 }
 
+.s-banner--neutral {
+  background: var(--s-surface);
+  box-shadow: 0 0 0 1px var(--s-line);
+  color: var(--s-text-2);
+}
+
+.s-banner--neutral strong {
+  color: var(--s-text);
+}
+
 .s-banner--warning {
   background: var(--s-warning-soft);
   color: var(--s-warning);

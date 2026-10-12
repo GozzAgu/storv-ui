@@ -334,8 +334,9 @@ html:has(.s-shell.ds-root) body {
 
 .s-nav-item--active,
 .s-nav-item--active:hover {
-  background: var(--s-accent-soft);
-  color: var(--s-accent-soft-text);
+  background: var(--s-surface);
+  box-shadow: 0 0 0 1px var(--s-line), 0 1px 2px rgb(0 0 0 / 0.05);
+  color: var(--s-text);
   font-weight: 600;
 }
 
@@ -396,8 +397,8 @@ html:has(.s-shell.ds-root) body {
   inset-inline: var(--s-space-1);
   z-index: 0;
   border-radius: var(--s-radius);
-  background: var(--s-accent-soft);
-  box-shadow: inset 0 0 0 0.5px color-mix(in srgb, var(--s-accent) 18%, transparent);
+  background: var(--s-surface);
+  box-shadow: 0 0 0 1px var(--s-line), 0 1px 2px rgb(0 0 0 / 0.05);
   will-change: transform;
   backface-visibility: hidden;
   pointer-events: none;
@@ -433,6 +434,7 @@ html:has(.s-shell.ds-root) body {
 .s-sidebar--lens .s-nav-item--active,
 .s-sidebar--lens .s-nav-item--active:hover {
   background: transparent;
+  box-shadow: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -510,9 +512,9 @@ html:has(.s-shell.ds-root) body {
   width: 32px;
   height: 32px;
   border-radius: var(--s-radius);
-  background: var(--s-brand-fill);
+  background: var(--s-btn-primary);
   box-shadow: var(--s-shadow-sm);
-  color: var(--s-on-brand);
+  color: var(--s-on-btn-primary);
   font: 600 0.875rem/1 var(--s-font-sans);
 }
 
@@ -581,16 +583,16 @@ html:has(.s-shell.ds-root) body {
 }
 
 .s-branch__list .s-menu-row[aria-selected='true'] {
-  background: var(--s-accent-soft);
+  background: var(--s-surface-hover);
 }
 
 .s-branch__list .s-menu-row[aria-selected='true'] .s-branch__mark--sm {
-  background: var(--s-brand-fill);
-  color: var(--s-on-brand);
+  background: var(--s-btn-primary);
+  color: var(--s-on-btn-primary);
 }
 
 .s-branch__list .s-menu-row[aria-selected='true'] .s-menu-row__label {
-  color: var(--s-accent-soft-text);
+  color: var(--s-text);
   font-weight: 600;
 }
 
@@ -879,7 +881,7 @@ html:has(.s-shell.ds-root) body {
     inset 0 1px 0 rgb(255 255 255 / 0.7);
   --s-bottomnav-divider: rgb(15 23 42 / 0.08);
   --s-bottomnav-inactive: var(--s-text-2);
-  --s-bottomnav-tint: var(--s-accent);
+  --s-bottomnav-tint: var(--s-text);
   --s-bottomnav-spring: cubic-bezier(0.32, 0.72, 0, 1);
   /* Damped spring (ratio 0.86): eases in, glides, settles with a barely visible overshoot */
   --s-bottomnav-glide: cubic-bezier(0.25, 0.9, 0.3, 1);
@@ -1175,9 +1177,9 @@ html.dark .s-bottomnav__backdrop {
 }
 
 .s-bottomnav__tile--active .s-bottomnav__tile-icon {
-  background: var(--s-accent);
-  box-shadow: var(--s-btn-primary-glow);
-  color: var(--s-text-on-accent);
+  background: var(--s-btn-primary);
+  box-shadow: var(--s-shadow-sm);
+  color: var(--s-on-btn-primary);
 }
 
 .s-bottomnav__tile-label {

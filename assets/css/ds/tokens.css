@@ -5,24 +5,24 @@
  */
 
 :root {
-  /* Color: neutrals */
-  --s-bg: #eef2fa;
+  /* Color: neutrals (pure greys, no blue cast; blue is reserved for the accent) */
+  --s-bg: #f4f4f5;
   --s-surface: #ffffff;
-  --s-surface-2: #f2f4f7;
-  --s-surface-hover: #eef1f5;
+  --s-surface-2: #f4f4f5;
+  --s-surface-hover: #efeff0;
   /* Surfaces separate by tone, not outlines: boxes have no visible border. */
   --s-border: transparent;
   /* Lines that carry meaning (timeline rails, progress tracks) */
-  --s-line: #e4e7ec;
+  --s-line: #e5e5e7;
   /* The faintest rule, for dense table rows and section breaks */
-  --s-divider: rgb(15 23 42 / 0.05);
+  --s-divider: rgb(0 0 0 / 0.06);
   /* Edges of small controls that must stay findable (checkboxes, dashed drop zones) */
-  --s-border-strong: #d0d5dd;
+  --s-border-strong: #d4d4d8;
 
   /* Color: text */
-  --s-text: #0f1728;
-  --s-text-2: #475467;
-  --s-text-muted: #5f6b7e;
+  --s-text: #0a0a0a;
+  --s-text-2: #4a4a4f;
+  --s-text-muted: #6b6b72;
   --s-text-on-accent: #ffffff;
 
   /* Color: accent (Storvv logo blue) */
@@ -43,8 +43,8 @@
   --s-info-soft: #eff8ff;
 
   /* Fields: filled and borderless at rest; the border only appears on focus or error */
-  --s-field-bg: rgb(15 23 42 / 0.045);
-  --s-field-bg-hover: rgb(15 23 42 / 0.07);
+  --s-field-bg: rgb(0 0 0 / 0.04);
+  --s-field-bg-hover: rgb(0 0 0 / 0.065);
   --s-field-bg-focus: #ffffff;
 
   /* Brand panel (auth) */
@@ -64,8 +64,8 @@
   --s-on-btn-primary: #ffffff;
   --s-btn-primary-glow: none;
   /* Secondary buttons: a grey tint that reads on the canvas, on cards and inside sheets */
-  --s-btn-secondary: rgb(15 23 42 / 0.06);
-  --s-btn-secondary-hover: rgb(15 23 42 / 0.1);
+  --s-btn-secondary: rgb(0 0 0 / 0.055);
+  --s-btn-secondary-hover: rgb(0 0 0 / 0.09);
 
   /* Glass (glass.css): translucent, frosted surfaces on a flat canvas */
   --s-glass: rgb(255 255 255 / 0.62);
@@ -75,9 +75,9 @@
   --s-glass-frost: saturate(1.8) blur(24px);
   --s-glass-frost-heavy: saturate(1.8) blur(40px);
   --s-glass-shadow: var(--s-glass-highlight), 0 0 0 1px var(--s-glass-hairline),
-    0 1px 2px rgb(15 23 42 / 0.04), 0 10px 28px -14px rgb(30 45 100 / 0.22);
+    0 1px 2px rgb(0 0 0 / 0.04), 0 10px 28px -14px rgb(0 0 0 / 0.16);
   --s-glass-shadow-float: var(--s-glass-highlight), 0 0 0 1px var(--s-glass-hairline),
-    0 24px 56px -16px rgb(20 30 70 / 0.28), 0 6px 14px -6px rgb(20 30 70 / 0.12);
+    0 24px 56px -16px rgb(0 0 0 / 0.22), 0 6px 14px -6px rgb(0 0 0 / 0.08);
 
   /* Focus */
   --s-focus-ring: 0 0 0 3px rgb(61 99 242 / 0.28);

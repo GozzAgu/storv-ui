@@ -341,8 +341,8 @@
   height: 20px;
   padding: 0 var(--s-space-1);
   border-radius: var(--s-radius-full);
-  background: var(--s-accent-soft);
-  color: var(--s-accent-soft-text);
+  background: var(--s-btn-secondary);
+  color: var(--s-text-2);
   font: 600 0.75rem/20px var(--s-font-sans);
   text-align: center;
 }
@@ -371,8 +371,8 @@
   height: 32px;
   overflow: hidden;
   border-radius: var(--s-radius-full);
-  background: var(--s-accent);
-  color: var(--s-text-on-accent);
+  background: var(--s-btn-primary);
+  color: var(--s-on-btn-primary);
   font: 600 0.75rem/1 var(--s-font-sans);
 }
 

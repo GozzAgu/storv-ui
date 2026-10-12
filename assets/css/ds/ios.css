@@ -7,13 +7,13 @@
 
 @media (max-width: 639px) {
   :root {
-    --s-bg: #eef2fa;
-    --s-surface-2: #eef1fa;
-    --s-surface-hover: #e7ebf8;
+    --s-bg: #f4f4f5;
+    --s-surface-2: #f2f2f3;
+    --s-surface-hover: #ebebec;
     --s-border: transparent;
-    --s-line: rgb(15 23 42 / 0.08);
-    --s-divider: rgb(15 23 42 / 0.05);
-    --s-border-strong: rgb(15 23 42 / 0.14);
+    --s-line: rgb(0 0 0 / 0.08);
+    --s-divider: rgb(0 0 0 / 0.06);
+    --s-border-strong: rgb(0 0 0 / 0.14);
 
     --s-btn-h: var(--s-space-5);
     --s-btn-h-sm: calc(var(--s-space-3) + var(--s-space-half));

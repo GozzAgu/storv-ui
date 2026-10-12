@@ -1,5 +1,5 @@
 <template>
-  <div class="s-c s-banner s-banner--info" role="status">
+  <div class="s-c s-banner s-banner--neutral" role="status">
     <div class="s-banner__lead">
       <FlaskConical class="s-banner__icon" :size="16" :stroke-width="2" aria-hidden="true" />
       <p class="s-banner__text">

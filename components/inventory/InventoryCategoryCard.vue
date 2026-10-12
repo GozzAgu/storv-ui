@@ -3,38 +3,50 @@
     class="s-c s-category-card"
     :class="{ 's-category-card--selected': selected, 's-category-card--empty': isEmpty }"
   >
-    <div class="s-category-card__head">
-      <span class="s-category-card__mark" aria-hidden="true">
-        <component :is="kindIcon" :size="12" :stroke-width="2" />
-      </span>
-      <span v-if="hasSerialNumbers" class="s-category-card__tag">Serial</span>
-      <div v-if="hasOverlays" class="s-category-card__controls">
-        <slot name="checkbox" />
-        <slot name="menu" />
+    <div class="s-category-card__panel">
+      <div class="s-category-card__head">
+        <span class="s-category-card__mark" aria-hidden="true">
+          <component :is="kindIcon" :size="14" :stroke-width="2" />
+        </span>
+        <div v-if="hasOverlays" class="s-category-card__controls">
+          <slot name="checkbox" />
+          <slot name="menu" />
+        </div>
       </div>
-    </div>
 
-    <div class="s-category-card__body">
       <h3 class="s-category-card__title">
         <button type="button" class="s-category-card__link" @click="$emit('click')">
           {{ displayName }}
         </button>
       </h3>
-      <p class="s-category-card__meta">{{ metaLabel }}</p>
+      <p v-if="description" class="s-category-card__desc">{{ description }}</p>
+
+      <ul class="s-category-card__chips">
+        <li class="s-category-card__chip">{{ metaLabel }}</li>
+        <li v-if="hasSerialNumbers" class="s-category-card__chip">Serial</li>
+        <li v-if="lowStockCount > 0" class="s-category-card__chip s-category-card__chip--warn">
+          {{ lowStockCount }} low
+        </li>
+      </ul>
     </div>
 
     <div class="s-category-card__foot">
-      <span v-if="valueLabel" class="s-category-card__value">
-        <span class="ds-sr-only">Stock value </span>{{ valueLabel }}
+      <span class="s-category-card__value">
+        <template v-if="valueLabel">
+          <span class="ds-sr-only">Stock value </span>{{ valueLabel }}
+        </template>
+        <template v-else>Open</template>
       </span>
-      <SBadge v-if="lowStockCount > 0" tone="warning" size="sm" dot>{{ lowStockCount }} low</SBadge>
+      <span class="s-category-card__go" aria-hidden="true">
+        <ArrowUpRight :size="14" :stroke-width="2" />
+      </span>
     </div>
   </article>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import SBadge from '~/components/s/SBadge.vue'
+import { ArrowUpRight } from '@lucide/vue'
 import { folderKindIcon } from '~/utils/category-kind-icons'
 import { formatCategoryDisplayName } from '~/utils/inventory-category-format'
 import type { FolderAvailabilityStats } from '~/utils/inventory-folder-availability'

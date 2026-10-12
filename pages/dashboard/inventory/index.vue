@@ -60,12 +60,17 @@
         <div
           v-for="i in 8"
           :key="i"
-          class="s-category-card s-category-card--empty"
+          class="s-category-card s-category-card--skeleton"
           aria-hidden="true"
         >
-          <SSkeleton width="20px" height="20px" />
-          <SSkeleton width="70%" height="16px" />
-          <SSkeleton width="45%" height="12px" />
+          <div class="s-category-card__panel">
+            <SSkeleton width="24px" height="24px" />
+            <SSkeleton width="70%" height="18px" />
+            <SSkeleton width="45%" height="12px" />
+          </div>
+          <div class="s-category-card__foot">
+            <SSkeleton width="40%" height="14px" />
+          </div>
         </div>
       </div>
     </template>
@@ -157,7 +162,7 @@
           v-for="folder in paginatedFolders"
           :key="folder.id"
           :name="folder.name"
-          :description="folderCategoryDescription(folder)"
+          :description="folder.description"
           :type="folder.type"
           :item-count="folderDisplayStats(folder).itemCount"
           :child-count="getChildFolders(folders, folder.id).length"
