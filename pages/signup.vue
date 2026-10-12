@@ -29,9 +29,8 @@
       subtitle="We need you to confirm your address before you sign in."
     />
 
-    <AuthSegmentToggle v-if="!registrationComplete" mode="signup" />
-
     <AuthCard>
+      <AuthSegmentToggle v-if="!registrationComplete" mode="signup" />
       <div v-if="registrationComplete" class="s-auth-body" role="status">
         <AuthSuccessPanel :icon="EnvelopeIcon">
           <template #title>

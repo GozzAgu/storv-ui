@@ -160,6 +160,7 @@
   justify-content: center;
   min-width: 0;
   padding: var(--s-space-6) var(--s-space-4);
+  background: var(--s-bg);
 }
 
 .s-auth__content {
@@ -230,9 +231,45 @@ html.dark .s-auth__mobile-logo-dark {
   gap: var(--s-space-3);
 }
 
+.s-auth-body {
+  --s-auth-card-pad: var(--s-space-3);
+  padding: var(--s-auth-card-pad);
+  border-radius: calc(var(--s-radius-xl) + var(--s-space-half));
+  background: var(--s-surface);
+  box-shadow: 0 0 0 1px var(--s-line), 0 1px 2px rgb(0 0 0 / 0.04),
+    0 24px 48px -32px rgb(0 0 0 / 0.22);
+}
+
+.s-auth-body .s-auth-body {
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+/* Last footer line becomes an inset grey band at the bottom of the card. */
+.s-auth-body__footer,
+.s-auth-body > .auth-auth-footer-link:last-child,
+.s-auth-body > :last-child > .auth-auth-footer-link:last-child {
+  margin: 0 calc(var(--s-space-half) - var(--s-auth-card-pad))
+    calc(var(--s-space-half) - var(--s-auth-card-pad));
+  padding: var(--s-space-1-5) var(--s-space-2);
+  border-radius: var(--s-radius-xl);
+  background: color-mix(in srgb, var(--s-text) 5%, var(--s-surface));
+}
+
 .s-auth-body__footer {
+  color: var(--s-text-muted);
   text-align: center;
   font: var(--s-text-small);
+}
+
+.s-auth-body .s-auth-segment {
+  width: 100%;
+}
+
+.s-auth-body .s-auth-oauth {
+  margin-bottom: 0;
 }
 
 .s-auth .auth-form {
@@ -262,9 +299,10 @@ html.dark .s-auth__mobile-logo-dark {
   gap: var(--s-space-1-5);
   width: 100%;
   height: var(--s-touch);
-  border: 1px solid transparent;
+  border: 1px solid var(--s-line);
   border-radius: var(--s-radius-lg);
-  background: var(--s-field-bg);
+  background: var(--s-surface);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
   color: var(--s-text);
   font: var(--s-text-body);
   font-weight: 600;
@@ -274,7 +312,8 @@ html.dark .s-auth__mobile-logo-dark {
 }
 
 .s-auth-oauth__btn:hover:not(:disabled) {
-  background: var(--s-field-bg-hover);
+  border-color: var(--s-border-strong);
+  background: var(--s-surface-hover);
 }
 
 .s-auth-oauth__btn:focus-visible {
@@ -297,7 +336,7 @@ html.dark .s-auth__mobile-logo-dark {
   width: var(--s-space-2);
   height: var(--s-space-2);
   border: 2px solid var(--s-border-strong);
-  border-top-color: var(--s-accent);
+  border-top-color: var(--s-text);
   border-radius: var(--s-radius-full);
   animation: s-spin 0.8s linear infinite;
 }
@@ -392,17 +431,20 @@ html.dark .s-auth__mobile-logo-dark {
   padding: 0;
   border: 0;
   background: none;
-  color: var(--s-accent);
+  color: var(--s-text);
   font: inherit;
-  font-weight: 500;
-  text-decoration: none;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--s-border-strong);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
   cursor: pointer;
+  transition: text-decoration-color var(--s-duration-fast) var(--s-ease);
 }
 
 .s-auth .auth-link:hover,
 .s-auth .auth-auth-footer-link a:hover {
-  text-decoration: underline;
-  text-underline-offset: 2px;
+  text-decoration-color: currentColor;
 }
 
 .s-auth .auth-auth-footer-link {
@@ -720,7 +762,7 @@ html.dark .s-auth__mobile-logo-dark {
   width: calc(var(--s-space-8) + var(--s-space-1));
   height: calc(var(--s-space-8) + var(--s-space-1));
   border-radius: var(--s-radius-full);
-  box-shadow: 0 0 0 var(--s-space-half) var(--s-surface);
+  box-shadow: 0 0 0 var(--s-space-half) var(--s-bg);
 }
 
 .s-buddies__face--left {
@@ -741,7 +783,7 @@ html.dark .s-auth__mobile-logo-dark {
   background: var(--s-surface);
   box-shadow: var(--s-shadow-sm);
   font: var(--s-text-small);
-  color: var(--s-accent-soft-text);
+  color: var(--s-text-2);
   text-wrap: balance;
 }
 
@@ -779,14 +821,14 @@ html.dark .s-auth__mobile-logo-dark {
 
 .s-buddy--ada {
   --buddy-skin: #8a5a3c;
-  --buddy-shirt: #f4a340;
-  --buddy-bg: var(--s-accent-soft);
+  --buddy-shirt: var(--s-border-strong);
+  --buddy-bg: var(--s-surface);
 }
 
 .s-buddy--tunde {
   --buddy-skin: #6e4630;
-  --buddy-shirt: var(--s-accent);
-  --buddy-bg: color-mix(in srgb, var(--s-accent) 22%, var(--s-surface));
+  --buddy-shirt: var(--s-btn-primary);
+  --buddy-bg: color-mix(in srgb, var(--s-text) 9%, var(--s-surface));
 }
 
 .s-buddy__bg {
@@ -936,5 +978,11 @@ html.dark .s-auth__mobile-logo-dark {
 
   .s-auth__brand-title {
     font: var(--s-text-display);
+  }
+}
+
+@media (max-width: 599px) {
+  .s-auth-body {
+    --s-auth-card-pad: var(--s-space-2);
   }
 }

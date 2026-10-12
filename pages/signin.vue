@@ -21,9 +21,8 @@
       subtitle="Sign in to manage inventory, sales, and every branch from one workspace."
     />
 
-    <AuthSegmentToggle mode="signin" />
-
     <AuthCard>
+      <AuthSegmentToggle mode="signin" />
       <div class="auth-form-panel" @focusin="trackFocus" @focusout="trackFocus">
         <AuthGoogleButton
           v-if="googleAvailable && !awaitingTwoFactor"
