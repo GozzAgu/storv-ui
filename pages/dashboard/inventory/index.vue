@@ -35,17 +35,16 @@
 
     <div
       v-if="inventoryStore.loading && inventoryStore.folders.length === 0"
-      class="s-metrics"
+      class="s-metrics s-metrics--line"
       aria-hidden="true"
     >
       <div v-for="i in 4" :key="i" class="s-metrics__item">
-        <SSkeleton width="64px" height="12px" />
-        <SSkeleton width="96px" height="24px" />
+        <SSkeleton width="96px" height="14px" />
       </div>
     </div>
     <dl
       v-else-if="!inventoryStore.loading && inventoryStore.folders.length > 0"
-      class="s-metrics"
+      class="s-metrics s-metrics--line"
       aria-label="Category summary"
     >
       <div v-for="metric in categoryHeaderMetrics" :key="metric.key" class="s-metrics__item">
@@ -58,8 +57,13 @@
 
     <template v-if="inventoryStore.loading && inventoryStore.folders.length === 0">
       <div class="s-category-grid" role="status" aria-label="Loading categories">
-        <div v-for="i in 8" :key="i" class="s-category-card" aria-hidden="true">
-          <SSkeleton width="40px" height="40px" />
+        <div
+          v-for="i in 8"
+          :key="i"
+          class="s-category-card s-category-card--empty"
+          aria-hidden="true"
+        >
+          <SSkeleton width="20px" height="20px" />
           <SSkeleton width="70%" height="16px" />
           <SSkeleton width="45%" height="12px" />
         </div>

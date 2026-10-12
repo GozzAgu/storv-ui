@@ -183,6 +183,34 @@
   color: var(--s-error);
 }
 
+/* One line under the page title: "Folders 6 | Products 16 | ..." */
+.s-page-header + .s-metrics--line {
+  margin-top: calc(var(--s-space-1-5) * -1);
+}
+
+.s-metrics--line .s-metrics__item {
+  flex-direction: row;
+  align-items: baseline;
+  gap: var(--s-space-half);
+  padding: 0 var(--s-space-1-5);
+}
+
+.s-metrics--line .s-metrics__item:first-child {
+  padding-left: 0;
+}
+
+.s-metrics--line .s-metrics__label {
+  font: var(--s-text-small);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.s-metrics.s-metrics--line .s-metrics__value {
+  font: var(--s-text-body);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
 /* Inside a card, sheet or panel: same type, no surface of its own */
 .s-metrics--inline {
   display: flex;

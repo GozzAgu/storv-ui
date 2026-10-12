@@ -1,9 +1,13 @@
 <template>
-  <article class="s-c s-category-card" :class="{ 's-category-card--selected': selected }">
+  <article
+    class="s-c s-category-card"
+    :class="{ 's-category-card--selected': selected, 's-category-card--empty': isEmpty }"
+  >
     <div class="s-category-card__head">
       <span class="s-category-card__mark" aria-hidden="true">
-        <component :is="kindIcon" :size="16" :stroke-width="1.75" />
+        <component :is="kindIcon" :size="12" :stroke-width="2" />
       </span>
+      <span v-if="hasSerialNumbers" class="s-category-card__tag">Serial</span>
       <div v-if="hasOverlays" class="s-category-card__controls">
         <slot name="checkbox" />
         <slot name="menu" />
@@ -20,14 +24,10 @@
     </div>
 
     <div class="s-category-card__foot">
-      <div v-if="valueLabel" class="s-category-card__stat">
-        <span class="s-category-card__stat-label">Stock value</span>
-        <span class="s-category-card__value">{{ valueLabel }}</span>
-      </div>
-      <div v-if="lowStockCount > 0 || hasSerialNumbers" class="s-category-card__badges">
-        <SBadge v-if="lowStockCount > 0" tone="warning" size="sm" dot>{{ lowStockCount }} low</SBadge>
-        <SBadge v-if="hasSerialNumbers" size="sm">Serial</SBadge>
-      </div>
+      <span v-if="valueLabel" class="s-category-card__value">
+        <span class="ds-sr-only">Stock value </span>{{ valueLabel }}
+      </span>
+      <SBadge v-if="lowStockCount > 0" tone="warning" size="sm" dot>{{ lowStockCount }} low</SBadge>
     </div>
   </article>
 </template>
@@ -90,11 +90,14 @@ defineEmits<{
 const displayName = computed(() => formatCategoryDisplayName(props.name))
 const kindIcon = computed(() => folderKindIcon({ type: props.type, name: props.name }))
 
+const isEmpty = computed(() => (props.childCount ?? 0) === 0 && props.itemCount === 0)
+
 const metaLabel = computed(() => {
   if ((props.childCount ?? 0) > 0) {
     const n = props.childCount ?? 0
     return `${n} subcategor${n === 1 ? 'y' : 'ies'}`
   }
+  if (isEmpty.value) return 'Empty'
   const n = props.itemCount
   return `${n} ${n === 1 ? 'item' : 'items'}`
 })

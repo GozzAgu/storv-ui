@@ -18,8 +18,13 @@
         role="status"
         aria-label="Loading subcategories"
       >
-        <div v-for="i in 6" :key="i" class="s-category-card" aria-hidden="true">
-          <SSkeleton width="40px" height="40px" />
+        <div
+          v-for="i in 6"
+          :key="i"
+          class="s-category-card s-category-card--empty"
+          aria-hidden="true"
+        >
+          <SSkeleton width="20px" height="20px" />
           <SSkeleton width="70%" height="16px" />
           <SSkeleton width="45%" height="12px" />
         </div>
