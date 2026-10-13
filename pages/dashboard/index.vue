@@ -185,10 +185,6 @@
                       >
                         {{ tx.statusLabel }}
                       </SBadge>
-                      <ReceiptProfitHint
-                        v-else-if="getRecentReceiptById(tx.id)"
-                        :receipt="getRecentReceiptById(tx.id)!"
-                      />
                     </span>
                   </button>
                 </li>
@@ -302,7 +298,6 @@ import OverviewRepeatRate from '~/components/overview/OverviewRepeatRate.vue'
 import OverviewTopProducts from '~/components/overview/OverviewTopProducts.vue'
 import OverviewRevenueChart from '~/components/overview/OverviewRevenueChart.vue'
 import InlineStorePicker from '~/components/dashboard/InlineStorePicker.vue'
-import ReceiptProfitHint from '~/components/receipts/ReceiptProfitHint.vue'
 import ReceiptDetailsDrawer from '~/components/receipts/ReceiptDetailsDrawer.vue'
 import ViewReceiptModal from '~/components/receipts/ViewReceiptModal.vue'
 import ReceiptShareSurface from '~/components/receipts/ReceiptShareSurface.vue'
