@@ -7,7 +7,7 @@
     <div class="mk-container">
       <div class="mk-stats-head mk-reveal">
         <div class="mk-stats-head__title">
-          <p class="mk-eyebrow">Trusted by modern retailers</p>
+          <p class="mk-eyebrow">Grows with you</p>
           <h2 id="mk-stats-title" class="mk-h2">
             Built for businesses that <span class="mk-accent">outgrow spreadsheets.</span>
           </h2>

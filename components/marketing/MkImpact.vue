@@ -7,7 +7,7 @@
           eyebrow="Why it matters"
           title="Running a shop should feel"
           accent="simpler."
-          lede="Storvv brings stock, sales, customers and reports into one place, so you spend less time counting and more time selling."
+          lede="Fewer stock surprises, fewer unpaid balances and a day that closes itself, so you spend less time counting and more time selling."
         />
 
         <div class="mki__stage">

@@ -37,9 +37,9 @@
         </h1>
 
         <p class="mkh__lede mkh-in" style="--i: 3">
-          Inventory, sales, receipts and customers in one fast, always-on workspace that keeps every
-          branch in sync around the clock, so your team spends less time counting and more time
-          selling.
+          The always-on point of sale and inventory system for gadget stores, electronics shops,
+          supermarkets and dealers. Every sale updates stock, receipts and customer balances across
+          every branch, even when your internet drops.
         </p>
 
         <div class="mkh__actions mkh-in" style="--i: 4">
@@ -134,7 +134,7 @@ const barSets = [
 const liveLines = [
   'Running 24/7',
   'Syncing every branch',
-  'Backed up in real time',
+  'Saving every sale',
   'Watching your stock',
 ]
 

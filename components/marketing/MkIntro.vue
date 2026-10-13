@@ -11,8 +11,8 @@
         </header>
         <div class="mk-intro__aside">
           <p class="mk-intro__text">
-            Stock, sales, receipts and customers in one dashboard, built for the way your trade
-            actually works.
+            Serial and IMEI tracking, deposits, trade-ins and part payments come built in, so Storvv
+            fits the way your trade actually works.
           </p>
           <NuxtLink to="/demo/dashboard" class="mk-link">
             Try the live demo

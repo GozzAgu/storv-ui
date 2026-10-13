@@ -157,6 +157,26 @@ const faq: MkFaqItem[] = [
     a: 'Yes, in your phone browser at app.storvv.com. iOS and Android apps are coming soon.',
   },
   {
+    q: 'What happens if my internet goes off?',
+    a: "Keep selling. Storvv shows that you're offline, saves your sales and stock changes on the device, and syncs them automatically when you're back online.",
+  },
+  {
+    q: 'Do I need special hardware?',
+    a: 'No. Storvv runs in the browser on the phone, tablet or computer you already have. Quick sale scans barcodes and QR codes with your camera, and receipts go out on WhatsApp or as a PDF you can print.',
+  },
+  {
+    q: 'Can I bring in my existing stock list?',
+    a: 'Yes. Import products from an Excel file (.xlsx or .xls) into any category. Storvv tells you how many rows were added and which were skipped.',
+  },
+  {
+    q: 'Which payment methods can I record?',
+    a: 'Cash, card (POS), bank transfer, OPay, Moniepoint, Palmpay, Kuda, USSD and mobile money, and you can split one sale across several. You can edit the list in Settings.',
+  },
+  {
+    q: 'Is my data safe?',
+    a: 'Every sale is saved to the cloud as you work, staff only see what their role allows, and you can turn on two-step sign-in. Owners can download everything to Excel at any time from Settings.',
+  },
+  {
     q: 'Can I try before signing up?',
     a: 'Yes. Open the <a href="/demo/dashboard">live demo</a> with sample data. No account needed.',
     html: true,

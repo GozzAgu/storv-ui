@@ -42,7 +42,8 @@
             <span class="mkb__tag"><Boxes :size="14" aria-hidden="true" />Stock</span>
             <h3 class="mkb__title">Real-time inventory</h3>
             <p class="mkb__text">
-              Counts drop the second a sale goes through, with low-stock alerts.
+              Track by quantity, or by serial and IMEI for phones and electronics. Counts drop the
+              second a sale goes through.
             </p>
           </div>
         </article>
