@@ -25,8 +25,8 @@
         <NuxtLink to="/features" class="mkh__announce mkh-in" style="--i: 1">
           <Sparkles :size="12" aria-hidden="true" />
           <span
-            >Receipts straight to WhatsApp<span class="mkh__announce-more"
-              >, no printer needed</span
+            >Keeps selling offline<span class="mkh__announce-more"
+              >, syncs the moment you're back</span
             ></span
           >
         </NuxtLink>
@@ -39,7 +39,7 @@
         <p class="mkh__lede mkh-in" style="--i: 3">
           The always-on point of sale and inventory system for gadget stores, electronics shops,
           supermarkets and dealers. Every sale updates stock, receipts and customer balances across
-          every branch, even when your internet drops.
+          every branch, the moment it happens.
         </p>
 
         <div class="mkh__actions mkh-in" style="--i: 4">
