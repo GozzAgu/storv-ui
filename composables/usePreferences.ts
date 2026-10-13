@@ -5,6 +5,7 @@ import { useUser } from '~/composables/useUser'
 import { useFirestore } from '~/composables/useFirestore'
 import { doc, getDoc } from 'firebase/firestore'
 import { formatCompactCurrency } from '~/utils/format-compact-currency'
+import { fetchOwnerWorkspaceContext } from '~/utils/owner-workspace-context'
 
 export interface UserPreferences {
   currency: string // Currency code (e.g., 'USD', 'NGN', 'EUR')
@@ -167,16 +168,21 @@ export const usePreferences = () => {
         return
       }
 
-      // For staff/manager accounts, this points to super admin user doc.
-      const db = useFirestore().getFirestoreInstance()
-      if (!db) {
-        loadFromLocalStorage()
-        return
+      // Staff read the owner's preferences through the server (users/{ownerId} is owner-only).
+      let firestorePrefs: Partial<UserPreferences> | null = null
+      if (ownerUserId !== authStore.currentUser.uid) {
+        const context = await fetchOwnerWorkspaceContext()
+        firestorePrefs = (context?.preferences || null) as Partial<UserPreferences> | null
+      } else {
+        const db = useFirestore().getFirestoreInstance()
+        if (!db) {
+          loadFromLocalStorage()
+          return
+        }
+        const ownerSnap = await getDoc(doc(db, 'users', ownerUserId))
+        const ownerData = ownerSnap.exists() ? (ownerSnap.data() as any) : null
+        firestorePrefs = (ownerData?.preferences || null) as Partial<UserPreferences> | null
       }
-
-      const ownerSnap = await getDoc(doc(db, 'users', ownerUserId))
-      const ownerData = ownerSnap.exists() ? (ownerSnap.data() as any) : null
-      const firestorePrefs = (ownerData?.preferences || null) as Partial<UserPreferences> | null
 
       if (firestorePrefs) {
         preferences.value = { ...defaultPreferences, ...firestorePrefs }

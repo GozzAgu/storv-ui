@@ -14,7 +14,10 @@ vi.mock('~/server/utils/firebase-admin', () => ({
   }),
 }))
 
-import { resolveStaffWorkspaceOwnerId } from '~/server/utils/staff-workspace'
+import {
+  pickOwnerWorkspaceFields,
+  resolveStaffWorkspaceOwnerId,
+} from '~/server/utils/staff-workspace'
 import { resolveTwoFactorEnabled } from '~/server/utils/store-auth'
 import { TFA_ENABLED_CLAIM } from '~/server/utils/two-factor-claims'
 import { isDevPlanSwitcherAllowed } from '~/server/utils/dev-plan-switcher'
@@ -41,6 +44,35 @@ describe('resolveStaffWorkspaceOwnerId', () => {
     expect(resolveStaffWorkspaceOwnerId('users/owner1/stores/s1')).toBeNull()
     expect(resolveStaffWorkspaceOwnerId('workspaceMembers/x/staff/a/b/c/d/e')).toBeNull()
     expect(resolveStaffWorkspaceOwnerId('')).toBeNull()
+  })
+})
+
+describe('pickOwnerWorkspaceFields', () => {
+  it('passes only the inherited fields, never secrets or billing references', () => {
+    const picked = pickOwnerWorkspaceFields({
+      name: 'Kano Phones',
+      email: 'owner@example.com',
+      subscription: 'storvv_enterprise',
+      subscriptionStatus: 'active',
+      preferences: { currency: 'NGN' },
+      storeDetails: { storeName: 'Kano Phones' },
+      twoFactorSecret: 'LEGACYSECRET',
+      paystackCustomerCode: 'CUS_x',
+      paystackSubscriptionCode: 'SUB_x',
+      paystackSubscriptionEmailToken: 'EMAILTOKEN',
+      lastPaystackReference: 'ref',
+    })
+    expect(Object.keys(picked).sort()).toEqual([
+      'name',
+      'preferences',
+      'storeDetails',
+      'storeLogoUrl',
+      'subscription',
+      'subscriptionBillingCycle',
+      'subscriptionCurrentPeriodEnd',
+      'subscriptionStatus',
+    ])
+    expect(JSON.stringify(picked)).not.toMatch(/LEGACYSECRET|CUS_x|SUB_x|EMAILTOKEN|owner@example/)
   })
 })
 

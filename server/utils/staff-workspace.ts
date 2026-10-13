@@ -17,3 +17,24 @@ export function resolveStaffWorkspaceOwnerId(staffDocPath: string): string | nul
   }
   return parts[1]
 }
+
+function optionalString(value: unknown): string | undefined {
+  return typeof value === 'string' ? value : undefined
+}
+
+/**
+ * The only owner-doc fields staff may inherit. Allowlist: the owner doc also holds billing
+ * references and (on older accounts) a legacy 2FA secret, which must never reach staff.
+ */
+export function pickOwnerWorkspaceFields(data: Record<string, unknown>) {
+  return {
+    name: optionalString(data.name),
+    subscription: optionalString(data.subscription) || 'storvv_micro',
+    subscriptionBillingCycle: optionalString(data.subscriptionBillingCycle),
+    subscriptionStatus: optionalString(data.subscriptionStatus),
+    subscriptionCurrentPeriodEnd: optionalString(data.subscriptionCurrentPeriodEnd),
+    preferences: data.preferences ?? undefined,
+    storeDetails: data.storeDetails ?? undefined,
+    storeLogoUrl: optionalString(data.storeLogoUrl),
+  }
+}

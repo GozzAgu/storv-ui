@@ -1,16 +1,12 @@
-import { collectionGroup, doc, getDoc, getDocs, query, where, type Firestore } from 'firebase/firestore'
+import { collectionGroup, getDocs, query, where, type Firestore } from 'firebase/firestore'
 import type { Staff } from '~/composables/useStaff'
 import type { UserData } from '~/composables/useUser'
 import type { SubscriptionPlan } from '~/types/subscription'
-import { resolveApiPath } from '~/utils/api-url'
-import { getFirebaseClientAuth } from '~/utils/firebase-client-auth'
-import { sanitizeUserData } from '~/utils/sanitize-user-data'
+import {
+  fetchOwnerWorkspaceContext,
+  type OwnerWorkspaceContext,
+} from '~/utils/owner-workspace-context'
 import { resolveStaffPermissions } from '~/utils/staff-permissions'
-
-type OwnerWorkspaceContext = Pick<
-  UserData,
-  'subscription' | 'subscriptionBillingCycle' | 'preferences' | 'storeDetails' | 'storeLogoUrl'
->
 
 export type StaffOwnerContextResult = {
   userData: UserData
@@ -23,29 +19,13 @@ function applyOwnerContext(base: UserData, owner: OwnerWorkspaceContext): UserDa
     ...base,
     subscription: owner.subscription ?? base.subscription,
     subscriptionBillingCycle: owner.subscriptionBillingCycle,
+    subscriptionStatus: owner.subscriptionStatus,
+    subscriptionCurrentPeriodEnd: owner.subscriptionCurrentPeriodEnd,
     preferences: owner.preferences,
     storeDetails: owner.storeDetails,
     storeLogoUrl: owner.storeLogoUrl,
     hasCompletedOnboarding: true,
     hasCompletedTutorial: true,
-  }
-}
-
-/**
- * users/{ownerId} is owner-only in Firestore rules, so staff getDoc often fails.
- * Admin-backed API returns the plan/prefs staff need for nav feature gates.
- */
-async function fetchOwnerWorkspaceContextFromApi(): Promise<OwnerWorkspaceContext | null> {
-  try {
-    const auth = getFirebaseClientAuth()
-    const user = auth?.currentUser
-    if (!user) return null
-    const token = await user.getIdToken()
-    return await $fetch<OwnerWorkspaceContext>(resolveApiPath('/api/workspace/owner-context'), {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-  } catch {
-    return null
   }
 }
 
@@ -133,44 +113,27 @@ export function buildStaffUserData(
   }
 }
 
-/** Staff inherit currency, subscription, and store settings from the owning super admin. */
+/**
+ * Staff inherit currency, subscription, and store settings from the owning super admin, via the
+ * server (users/{ownerId} is owner-only in Firestore rules).
+ */
 export async function buildStaffUserDataWithOwnerContext(
-  db: Firestore,
+  _db: Firestore,
   staff: Staff,
   authUid: string,
   prior?: UserData | null
 ): Promise<StaffOwnerContextResult> {
   const base = buildStaffUserData(staff, authUid, prior?.uid === authUid ? prior : null)
-  const ownerId = staff.createdBy?.trim()
-  if (!ownerId) {
+  if (!staff.createdBy?.trim()) {
     return { userData: base, inheritedOwnerContext: false }
   }
 
-  // Prefer admin API (works regardless of owner-doc rules); fall back to client getDoc.
-  const fromApi = await fetchOwnerWorkspaceContextFromApi()
-  if (fromApi?.subscription || fromApi?.preferences || fromApi?.storeDetails) {
-    return {
-      userData: applyOwnerContext(base, fromApi),
-      inheritedOwnerContext: true,
-    }
+  const owner = await fetchOwnerWorkspaceContext({ force: true })
+  if (owner?.subscription || owner?.preferences || owner?.storeDetails) {
+    return { userData: applyOwnerContext(base, owner), inheritedOwnerContext: true }
   }
 
-  try {
-    const ownerSnap = await getDoc(doc(db, 'users', ownerId))
-    if (ownerSnap.exists()) {
-      const owner = sanitizeUserData({
-        uid: ownerSnap.id,
-        ...ownerSnap.data(),
-      } as UserData)
-      return {
-        userData: applyOwnerContext(base, owner),
-        inheritedOwnerContext: true,
-      }
-    }
-  } catch {
-    // Permission denied / offline, keep prior plan on base.
-  }
-
+  // Offline / server unavailable: keep the prior cached plan on base.
   return { userData: base, inheritedOwnerContext: false }
 }
 

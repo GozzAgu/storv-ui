@@ -12,6 +12,11 @@ import type {
   ExperienceMode,
 } from '~/types/business-experience'
 import { sanitizeUserData } from '~/utils/sanitize-user-data'
+import { getFirebaseClientAuth } from '~/utils/firebase-client-auth'
+import {
+  fetchOwnerWorkspaceContext,
+  ownerContextToUserData,
+} from '~/utils/owner-workspace-context'
 
 export interface StoreSettings {
   inventory?: {
@@ -168,6 +173,12 @@ export const useUser = () => {
     if (isDemoModeActive()) {
       const { getDemoUserDocument } = await import('~/utils/demo-bridge')
       return getDemoUserDocument(uid)
+    }
+
+    const signedInUid = getFirebaseClientAuth()?.currentUser?.uid
+    if (signedInUid && signedInUid !== uid) {
+      const context = await fetchOwnerWorkspaceContext()
+      return context?.ownerId === uid ? ownerContextToUserData(context) : null
     }
 
     const db = getFirestoreInstance()

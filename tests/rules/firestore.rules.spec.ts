@@ -130,7 +130,7 @@ describe('firestore.rules', () => {
     await assertFails(getDoc(doc(db, 'users/u1')))
   })
 
-  it('allows active workspace members to read owner user doc', async () => {
+  it('denies even active staff from reading the owner user doc (legacy 2FA secret, billing refs)', async () => {
     await testEnv.withSecurityRulesDisabled(async (context) => {
       await setDoc(doc(context.firestore(), 'users/u1'), {
         uid: 'u1',
@@ -138,6 +138,7 @@ describe('firestore.rules', () => {
         name: 'Owner',
         role: 'superAdmin',
         subscription: 'storvv_enterprise',
+        twoFactorSecret: 'LEGACYSECRET',
         hasCompletedOnboarding: true,
         hasCompletedTutorial: false,
       })
@@ -146,10 +147,14 @@ describe('firestore.rules', () => {
         storeId: 's1',
         status: 'active',
       })
+      await setDoc(doc(context.firestore(), 'users/u1/stores/s1/members/staff1'), {
+        status: 'active',
+        role: 'manager',
+      })
     })
 
     const db = testEnv.authenticatedContext('staff1').firestore()
-    await assertSucceeds(getDoc(doc(db, 'users/u1')))
+    await assertFails(getDoc(doc(db, 'users/u1')))
   })
 
   it('denies inactive workspace members from reading owner user doc', async () => {

@@ -2,7 +2,10 @@ import { createError, defineEventHandler } from 'h3'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
 import { rethrowFirebaseAdminSetupError } from '~/server/utils/firebase-admin-errors'
 import { requireAuth } from '~/server/utils/store-auth'
-import { resolveStaffWorkspaceOwnerId } from '~/server/utils/staff-workspace'
+import {
+  pickOwnerWorkspaceFields,
+  resolveStaffWorkspaceOwnerId,
+} from '~/server/utils/staff-workspace'
 import type { SubscriptionPlan } from '~/types/subscription'
 import type { SubscriptionBillingCycle } from '~/types/subscription-billing'
 
@@ -12,8 +15,8 @@ function isActiveStaffStatus(status: unknown): boolean {
 
 /**
  * Staff accounts do not have a top-level users/{uid} doc and cannot read the
- * employer's users/{ownerId} doc (owner-only rules). This endpoint returns the
- * workspace fields staff need to inherit (plan, currency, store branding) after
+ * employer's users/{ownerId} doc (owner-only rules). This endpoint returns only the
+ * allowlisted workspace fields staff inherit (plan, currency, store branding) after
  * verifying the caller is an active staff member under that owner.
  */
 export default defineEventHandler(async (event) => {
@@ -57,7 +60,7 @@ export default defineEventHandler(async (event) => {
   const storeIdFromPath = pathParts[2] === 'stores' ? pathParts[3] : undefined
   const storeId = String(activeStaffDoc.data()?.storeId || storeIdFromPath || '').trim()
 
-  // Index so client rules can eventually allow a direct owner-doc read for this staff uid.
+  // Roster index of active staff per owner. It grants no read access to users/{ownerId}.
   if (storeId) {
     await adminDb
       .collection('users')
@@ -75,14 +78,13 @@ export default defineEventHandler(async (event) => {
       )
   }
 
+  const fields = pickOwnerWorkspaceFields(data)
   return {
     ownerId,
-    subscription: (data.subscription as SubscriptionPlan) || 'storvv_micro',
-    subscriptionBillingCycle: data.subscriptionBillingCycle as
+    ...fields,
+    subscription: fields.subscription as SubscriptionPlan,
+    subscriptionBillingCycle: fields.subscriptionBillingCycle as
       | SubscriptionBillingCycle
       | undefined,
-    preferences: data.preferences ?? undefined,
-    storeDetails: data.storeDetails ?? undefined,
-    storeLogoUrl: typeof data.storeLogoUrl === 'string' ? data.storeLogoUrl : undefined,
   }
 })

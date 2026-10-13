@@ -374,17 +374,11 @@ service cloud.firestore {
         ]);
     }
     
-    // Active staff indexed at users/{ownerId}/workspaceMembers/{staffAuthUid} (written by
-    // admin owner-context API and owner staff sync) so staff can inherit plan/prefs.
-    function isActiveWorkspaceMember(userId) {
-      return isAuthenticated() &&
-             exists(/databases/$(database)/documents/users/$(userId)/workspaceMembers/$(request.auth.uid)) &&
-             get(/databases/$(database)/documents/users/$(userId)/workspaceMembers/$(request.auth.uid)).data.get('status', '') == 'active';
-    }
-
-    // Users collection - owner read, or active workspace staff (plan inheritance); self-service updates
+    // Users collection - owner only. The doc holds billing references (and, on accounts that
+    // enabled 2FA before the security/ subcollection, a legacy twoFactorSecret), so staff get the
+    // fields they inherit (plan, preferences, store details) from /api/workspace/owner-context.
     match /users/{userId} {
-      allow read: if isOwner(userId) || isActiveWorkspaceMember(userId);
+      allow read: if isOwner(userId);
       
       allow create: if isOwner(userId)
         && request.resource.data.keys().hasOnly(userSelfServiceCreateKeys())

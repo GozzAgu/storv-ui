@@ -124,11 +124,10 @@ async function resolveAccountSubscriptionPlan(): Promise<SubscriptionPlan> {
     return resolveEffectiveSubscriptionPlan(userStore.userData)
   }
 
-  const db = useFirestore().getFirestoreInstance()
-  if (!db) return 'storvv_micro'
-  const { getDoc, doc } = await import('firebase/firestore')
-  const ownerSnap = await getDoc(doc(db, 'users', ownerUserId))
-  return resolveEffectiveSubscriptionPlan(ownerSnap.data())
+  // Staff: the owner's plan comes from the server (users/{ownerId} is owner-only).
+  const { fetchOwnerWorkspaceContext } = await import('~/utils/owner-workspace-context')
+  const context = await fetchOwnerWorkspaceContext()
+  return resolveEffectiveSubscriptionPlan(context?.ownerId === ownerUserId ? context : null)
 }
 
 /** Write an activity log (fire-and-forget; does not throw). */
