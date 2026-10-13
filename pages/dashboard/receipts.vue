@@ -35,19 +35,22 @@
             <template #eyebrow>
               <p class="s-page-header__eyebrow">Sales</p>
             </template>
-            <template v-if="canCreate" #actions>
-              <SButton @click="openQuickSaleModal">
-                <template #leading
-                  ><QrCode :size="16" :stroke-width="1.75" aria-hidden="true"
-                /></template>
-                Quick sale
-              </SButton>
-              <SButton variant="primary" @click="openCreateReceiptModal">
-                <template #leading
-                  ><Plus :size="16" :stroke-width="2" aria-hidden="true"
-                /></template>
-                New sale
-              </SButton>
+            <template #actions>
+              <HideFiguresToggle />
+              <template v-if="canCreate">
+                <SButton @click="openQuickSaleModal">
+                  <template #leading
+                    ><QrCode :size="16" :stroke-width="1.75" aria-hidden="true"
+                  /></template>
+                  Quick sale
+                </SButton>
+                <SButton variant="primary" @click="openCreateReceiptModal">
+                  <template #leading
+                    ><Plus :size="16" :stroke-width="2" aria-hidden="true"
+                  /></template>
+                  New sale
+                </SButton>
+              </template>
             </template>
           </SPageHeader>
 
@@ -567,6 +570,7 @@ import SIconButton from '~/components/s/SIconButton.vue'
 import SMenu from '~/components/s/SMenu.vue'
 import SMenuItem from '~/components/s/SMenuItem.vue'
 import SPageHeader from '~/components/s/SPageHeader.vue'
+import HideFiguresToggle from '~/components/shell/HideFiguresToggle.vue'
 import SPagination from '~/components/s/SPagination.vue'
 import SSearch from '~/components/s/SSearch.vue'
 import SSelect from '~/components/s/SSelect.vue'
@@ -629,7 +633,8 @@ const { confirm: confirmSensitive } = useSensitiveAction()
 const paymentsV2 = usePaymentsV2()
 onMounted(() => void paymentsV2.loadAccess())
 const authStore = useAuthStore()
-const { canManage, canCreate, canEditReceipts, canDeleteReceipts } = usePermissions()
+const { canManage, canCreate, canEditReceipts, canDeleteReceipts, canViewFinancials } =
+  usePermissions()
 const { getUserDocument } = useUser()
 const { getFirestoreInstance } = useFirestore()
 const staffStore = useStaffStore()
@@ -1192,27 +1197,22 @@ const receiptsHeaderMetrics = computed(() => {
   const inStore = receipts.value.length
   const shown = sortedFilteredReceipts.value.length
 
+  const totals: Array<{ key: string; label: string; value: string; tone?: 'warning' }> =
+    canViewFinancials.value
+    ? [
+        { key: 'completed', label: 'Completed', value: formatCurrency(totalSales.value) },
+        { key: 'today', label: 'Today', value: formatCurrency(todaySales.value) },
+        { key: 'month', label: 'This month', value: formatCurrency(monthSales.value) },
+      ]
+    : []
+
   return [
     {
       key: 'in-store',
       label: shown !== inStore ? 'Receipts shown' : 'In store',
       value: shown !== inStore ? `${shown} / ${inStore}` : String(inStore),
     },
-    {
-      key: 'completed',
-      label: 'Completed',
-      value: formatCurrency(totalSales.value),
-    },
-    {
-      key: 'today',
-      label: 'Today',
-      value: formatCurrency(todaySales.value),
-    },
-    {
-      key: 'month',
-      label: 'This month',
-      value: formatCurrency(monthSales.value),
-    },
+    ...totals,
     {
       key: 'outstanding',
       label: 'Outstanding',

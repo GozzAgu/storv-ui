@@ -5,6 +5,7 @@ import { useDepartmentsStore } from '~/stores/departments'
 import { useUserStore } from '~/stores/user'
 import { useStorefrontStore } from '~/stores/storefront'
 import { usePreferences } from '~/composables/usePreferences'
+import { usePermissions } from '~/composables/usePermissions'
 import { isStorefrontDashboardHidden } from '~/utils/storefront-launch'
 import type { InventoryItem } from '~/stores/inventory'
 import type { Receipt } from '~/stores/receipts'
@@ -127,6 +128,7 @@ export function useDashboardInsights(folderItems: Ref<Record<string, InventoryIt
   const departmentsStore = useDepartmentsStore()
   const userStore = useUserStore()
   const { formatCurrency: formatCurrencyFromPrefs } = usePreferences()
+  const { canViewFinancials } = usePermissions()
   const formatCurrency = formatCurrencyFromPrefs
 
   const completedReceipts = computed(() =>
@@ -607,10 +609,11 @@ export function useDashboardInsights(folderItems: Ref<Record<string, InventoryIt
   const dayStory = computed(() => {
     const parts: string[] = []
     if (todayReceiptsCount.value > 0) {
+      const count = `${todayReceiptsCount.value} sale${todayReceiptsCount.value === 1 ? '' : 's'}`
       parts.push(
-        `${todayReceiptsCount.value} sale${
-          todayReceiptsCount.value === 1 ? '' : 's'
-        } · ${formatCurrency(todaySales.value)} today`
+        canViewFinancials.value
+          ? `${count} · ${formatCurrency(todaySales.value)} today`
+          : `${count} today`
       )
     } else {
       parts.push('No sales yet today')

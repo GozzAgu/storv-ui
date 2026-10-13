@@ -20,6 +20,7 @@ export const FULL_STAFF_PERMISSIONS: StaffPermissions = {
   buybacks: { view: true, create: true, edit: true, delete: true },
   sellerLoans: { view: true, create: true, edit: true, delete: true },
   multiStoreSync: { view: true, create: true, edit: true, delete: true },
+  financials: { view: true, create: false, edit: false, delete: false },
 }
 
 export const EMPTY_STAFF_PERMISSIONS: StaffPermissions = {
@@ -29,6 +30,7 @@ export const EMPTY_STAFF_PERMISSIONS: StaffPermissions = {
   buybacks: emptyModule(),
   sellerLoans: emptyModule(),
   multiStoreSync: emptyModule(),
+  financials: emptyModule(),
 }
 
 /** The subset of a legacy `Staff`/`members` doc needed to derive default permissions. */
@@ -56,6 +58,7 @@ export interface LegacyStaffAccessFields {
  * - `sellerLoans`: baseline for every staff member (view/create/edit), same idea as leads /
  *   receipts.create. Delete stays elevated-only.
  * - `multiStoreSync`: owner-only historically; staff never inherit it by migration.
+ * - `financials`: owner-only until the owner grants it; staff never inherit it by migration.
  */
 export function deriveDefaultPermissions(staff: LegacyStaffAccessFields): StaffPermissions {
   const isManager = staff.role === 'manager'
@@ -101,7 +104,15 @@ export function deriveDefaultPermissions(staff: LegacyStaffAccessFields): StaffP
 
   const multiStoreSync: ModulePermission = emptyModule()
 
-  return { products, receipts, leads, buybacks, sellerLoans, multiStoreSync }
+  return {
+    products,
+    receipts,
+    leads,
+    buybacks,
+    sellerLoans,
+    multiStoreSync,
+    financials: emptyModule(),
+  }
 }
 
 /** Fill any modules missing from a stored (partial) matrix using migration defaults. */
@@ -117,6 +128,7 @@ export function normalizeStaffPermissions(
     buybacks: permissions.buybacks ?? derived.buybacks,
     sellerLoans: permissions.sellerLoans ?? derived.sellerLoans,
     multiStoreSync: permissions.multiStoreSync ?? derived.multiStoreSync,
+    financials: permissions.financials ?? derived.financials,
   }
 }
 
@@ -172,11 +184,16 @@ export function getPermissionAction(
   return modulePermissions[action] === true
 }
 
-/** Compact roster-badge summary. "Full access" / "View only" / "Custom". never a stored label. */
+/**
+ * Compact roster-badge summary. "Full access" / "View only" / "Custom". never a stored label.
+ * Financial figures are a visibility grant, not an action, so they don't affect the badge.
+ */
 export function summarizeStaffPermissions(
   permissions: StaffPermissions
 ): 'full' | 'view-only' | 'custom' {
-  if (JSON.stringify(permissions) === JSON.stringify(FULL_STAFF_PERMISSIONS)) {
+  const { financials: _financials, ...actions } = permissions
+  const { financials: _fullFinancials, ...fullActions } = FULL_STAFF_PERMISSIONS
+  if (JSON.stringify(actions) === JSON.stringify(fullActions)) {
     return 'full'
   }
   const isViewOnly =

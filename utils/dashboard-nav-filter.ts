@@ -107,7 +107,7 @@ export const DASHBOARD_NAV_DEFINITIONS: DashboardNavDefinition[] = [
     segment: '/analytics',
     iconKey: 'analytics',
     subscriptionFeature: 'analytics',
-    requiresManagerOrSuperAdmin: true,
+    permissionModule: 'financials',
   },
   {
     name: 'Activity Logs',

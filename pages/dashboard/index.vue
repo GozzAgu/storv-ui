@@ -14,9 +14,10 @@
         </p>
       </template>
       <template v-if="!needsStoreSelection && !isLoading && dayStory" #description>
-        {{ dayStory }}
+        <span data-figure>{{ dayStory }}</span>
       </template>
       <template v-if="!needsStoreSelection" #actions>
+        <HideFiguresToggle v-if="!isQuietDashboard" />
         <SButton v-if="canManageInventoryItems" to="/dashboard/inventory">
           <template #leading>
             <PackagePlus :size="16" :stroke-width="1.75" aria-hidden="true" />
@@ -76,7 +77,9 @@
         <SCard class="s-overview-quiet__hero">
           <p class="s-overview-quiet__eyebrow">Today</p>
           <h2 class="s-overview-quiet__title">{{ quietHeadline }}</h2>
-          <p class="s-overview-quiet__meta">{{ formatCurrency(0) }} revenue · 0 sales so far</p>
+          <p class="s-overview-quiet__meta">
+            <template v-if="canViewFinancials">{{ formatCurrency(0) }} revenue · </template>0 sales so far
+          </p>
           <SButton v-if="quietPrimaryCta" variant="primary" :to="quietPrimaryCta.href">
             {{ quietPrimaryCta.label }}
           </SButton>
@@ -101,8 +104,9 @@
       </div>
 
       <template v-else-if="!isQuietDashboard">
-        <div class="s-overview__stats">
+        <div class="s-overview__stats" :class="{ 's-overview__stats--3': !canViewFinancials }">
           <SStat
+            v-if="canViewFinancials"
             label="Revenue"
             :value="formatCurrency(totalRevenue)"
             :delta="revenueDelta"
@@ -114,7 +118,7 @@
           <SStat
             label="Sales today"
             :value="todayReceiptsCount"
-            :hint="`${formatCurrency(todaySales)} revenue`"
+            :hint="canViewFinancials ? `${formatCurrency(todaySales)} revenue` : 'Sales recorded today'"
             to="/dashboard/receipts"
           >
             <template #icon><ShoppingBag :size="16" :stroke-width="2" /></template>
@@ -142,12 +146,17 @@
         <div class="s-overview__grid">
           <div class="s-overview__col">
             <OverviewRevenueChart
+              v-if="canViewFinancials"
               :daily="dailyRevenueData"
               :weekly="weeklyRevenueData"
               :monthly="monthlyRevenueData"
               :currency-symbol="currencySymbol"
             />
-            <OverviewTopProducts :items="topSellingItemsTop" :format-currency="formatCurrency" />
+            <OverviewTopProducts
+              :items="topSellingItemsTop"
+              :format-currency="formatCurrency"
+              :show-revenue="canViewFinancials"
+            />
             <SCard title="Recent sales" flush>
               <template #actions>
                 <SButton variant="ghost" size="sm" to="/dashboard/receipts">View all</SButton>
@@ -298,6 +307,7 @@ import OverviewRepeatRate from '~/components/overview/OverviewRepeatRate.vue'
 import OverviewTopProducts from '~/components/overview/OverviewTopProducts.vue'
 import OverviewRevenueChart from '~/components/overview/OverviewRevenueChart.vue'
 import InlineStorePicker from '~/components/dashboard/InlineStorePicker.vue'
+import HideFiguresToggle from '~/components/shell/HideFiguresToggle.vue'
 import ReceiptDetailsDrawer from '~/components/receipts/ReceiptDetailsDrawer.vue'
 import ViewReceiptModal from '~/components/receipts/ViewReceiptModal.vue'
 import ReceiptShareSurface from '~/components/receipts/ReceiptShareSurface.vue'
@@ -430,7 +440,7 @@ const paymentLinksLive = computed(
   () => canShowPaymentLinksSummary.value && !showPaymentLinksComingSoon.value
 )
 const { canManageBranches } = useBusinessCapabilities()
-const { canManageInventoryItems, hasAnyManageAccess } = usePermissions()
+const { canManageInventoryItems, canViewFinancials, hasAnyManageAccess } = usePermissions()
 const { isNativeApp } = useCapacitorNativeApp()
 const { formatGreeting } = useTimeGreeting()
 useDashboardPageRefreshRegister(async () => {

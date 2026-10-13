@@ -67,6 +67,18 @@ describe('filterDashboardNavItems', () => {
     expect(names).toContain('Sales leads')
     expect(names).not.toContain('Multi-Store Sync')
     expect(names).not.toContain('Departments')
+    expect(names).not.toContain('Analytics')
+  })
+
+  it('shows Reports to staff only with the financial figures grant', () => {
+    const names = filterDashboardNavItems(DASHBOARD_NAV_DEFINITIONS, {
+      isSuperAdmin: false,
+      isManager: false,
+      canUseFeature: canUseEnterprise,
+      canViewModule: canViewGranted(['financials']),
+    }).map((item) => item.name)
+
+    expect(names).toContain('Analytics')
   })
 
   it('lets super admin on Micro see departments but not analytics', () => {

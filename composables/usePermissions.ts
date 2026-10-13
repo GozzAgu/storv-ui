@@ -82,10 +82,17 @@ export const usePermissions = () => {
   /** Whether the calling user may edit another staff member's permission matrix at all. */
   const canEditStaffPermissions = computed(() => userStore.isSuperAdmin)
 
-  /** Unit cost, margin, COGS, gross profit, and P&L. Store owner (super admin) only; never staff. */
-  const canViewProfitAndCost = computed(
-    () => !isStaff.value && userStore.userData?.role === 'superAdmin'
-  )
+  /**
+   * Revenue, sales totals, stock value, cost and profit: the store owner, plus staff the owner has
+   * granted "Financial figures". Hides UI only; staff can still read individual sales they can see.
+   */
+  const canViewFinancials = computed(() => {
+    if (!isStaff.value) return userStore.userData?.role === 'superAdmin'
+    return permissions.value.financials.view === true
+  })
+
+  /** Unit cost, margin, COGS, gross profit, and P&L. Same audience as `canViewFinancials`. */
+  const canViewProfitAndCost = canViewFinancials
 
   /** Paystack upgrades, plan banners, and billing. Super admin (account owner) only. */
   const canManageBilling = computed(() => userStore.isSuperAdmin)
@@ -114,6 +121,7 @@ export const usePermissions = () => {
     canRemoveStaff,
     canMoveStaff,
     canEditStaffPermissions,
+    canViewFinancials,
     canViewProfitAndCost,
     canManageBilling,
     canManageCommissions,

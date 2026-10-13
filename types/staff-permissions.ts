@@ -14,6 +14,7 @@ export type PermissionModule =
   | 'buybacks'
   | 'sellerLoans'
   | 'multiStoreSync'
+  | 'financials'
 
 export interface ModulePermission {
   view: boolean
@@ -39,6 +40,11 @@ export interface StaffPermissions {
   buybacks: ModulePermission
   sellerLoans: ModulePermission
   multiStoreSync: ModulePermission
+  /**
+   * Revenue, sales totals, stock value, cost and profit. Only `view` is meaningful; the owner
+   * always has it, staff only when the owner grants it.
+   */
+  financials: ModulePermission
 }
 
 export type PermissionAction = keyof ReceiptsPermission

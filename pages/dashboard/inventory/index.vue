@@ -5,6 +5,7 @@
         <p class="s-page-header__eyebrow">Inventory</p>
       </template>
       <template #actions>
+        <HideFiguresToggle />
         <SButton
           v-if="inventoryStore.lowStockFolders.length > 0"
           :loading="reorderExporting"
@@ -168,7 +169,9 @@
           :child-count="getChildFolders(folders, folder.id).length"
           :low-stock-count="folderDisplayStats(folder).lowStockCount"
           :total-value="folderDisplayStats(folder).totalValue"
-          :value-label="formatCurrency(folderDisplayStats(folder).totalValue ?? 0)"
+          :value-label="
+            canViewFinancials ? formatCurrency(folderDisplayStats(folder).totalValue ?? 0) : ''
+          "
           :selected="isFolderSelected(folder)"
           :has-serial-numbers="folder.hasSerialNumbers"
           :allowed-department-ids="folder.allowedDepartments"
@@ -218,7 +221,7 @@
               <th scope="col">Category</th>
               <th scope="col" class="s-hide-sm">Type</th>
               <th scope="col" class="s-table__num">Products</th>
-              <th scope="col" class="s-table__num s-hide-sm">Value</th>
+              <th v-if="canViewFinancials" scope="col" class="s-table__num s-hide-sm">Value</th>
               <th v-if="canViewProfitAndCost" scope="col" class="s-table__num s-hide-md">Profit</th>
               <th scope="col" class="s-hide-md">Tracking</th>
               <th v-if="!isStaff" scope="col" class="s-hide-lg">Departments</th>
@@ -269,7 +272,7 @@
                   {{ folderDisplayStats(folder).lowStockCount }} low stock
                 </span>
               </td>
-              <td class="s-table__num s-hide-sm">
+              <td v-if="canViewFinancials" class="s-table__num s-hide-sm">
                 {{ formatCurrency(folderDisplayStats(folder).totalValue ?? 0) }}
               </td>
               <td v-if="canViewProfitAndCost" class="s-table__num s-hide-md">
@@ -910,6 +913,7 @@ import SInput from '~/components/s/SInput.vue'
 import SMenu from '~/components/s/SMenu.vue'
 import SMenuItem from '~/components/s/SMenuItem.vue'
 import SPageHeader from '~/components/s/SPageHeader.vue'
+import HideFiguresToggle from '~/components/shell/HideFiguresToggle.vue'
 import SPagination from '~/components/s/SPagination.vue'
 import SSearch from '~/components/s/SSearch.vue'
 import SSelect from '~/components/s/SSelect.vue'
@@ -1229,7 +1233,8 @@ async function handleExportReorderList() {
     toast.error(message)
   }
 }
-const { canCreateInventoryFolders, canViewProfitAndCost, isStaff } = usePermissions()
+const { canCreateInventoryFolders, canViewFinancials, canViewProfitAndCost, isStaff } =
+  usePermissions()
 const { branchPageTitle } = useCurrentStoreLabel()
 
 watch(
@@ -1837,12 +1842,15 @@ const categoryHeaderMetrics = computed(() => {
       label: 'Products',
       value: String(inventoryStore.totalItems),
     },
-    {
+  ]
+
+  if (canViewFinancials.value) {
+    metrics.push({
       key: 'value',
       label: 'Total value',
       value: formatCurrency(filteredFoldersTotalValue.value),
-    },
-  ]
+    })
+  }
 
   if (canViewProfitAndCost.value) {
     metrics.push({

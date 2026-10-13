@@ -5,6 +5,7 @@
         Sales, products, customers and stock for this branch.
       </template>
       <template v-if="!needsStoreSelection && canUseSubscriptionFeature('analytics')" #actions>
+        <HideFiguresToggle />
         <SSelect
           :model-value="selectedPeriod"
           class="s-report__period"
@@ -387,6 +388,7 @@ import SButton from '~/components/s/SButton.vue'
 import SCard from '~/components/s/SCard.vue'
 import SEmptyState from '~/components/s/SEmptyState.vue'
 import SPageHeader from '~/components/s/SPageHeader.vue'
+import HideFiguresToggle from '~/components/shell/HideFiguresToggle.vue'
 import SSelect from '~/components/s/SSelect.vue'
 import SSkeleton from '~/components/s/SSkeleton.vue'
 import SSparkline from '~/components/s/SSparkline.vue'
@@ -464,7 +466,7 @@ import {
   type AnalyticsReportSnapshot,
 } from '~/utils/analytics-report-export'
 
-const { canViewProfitAndCost, isStaff, isManager } = usePermissions()
+const { canViewFinancials, canViewProfitAndCost, isStaff } = usePermissions()
 const staffStore = useStaffStore()
 
 definePageMeta({
@@ -2229,9 +2231,9 @@ onMounted(() => {
     if (!userStore.userData) {
       await userStore.fetchUserData(uid)
     }
-    if (isStaff.value && !isManager.value) {
+    if (isStaff.value && !canViewFinancials.value) {
       await staffStore.fetchCurrentStaffMember().catch(() => null)
-      if (isStaff.value && !isManager.value) {
+      if (isStaff.value && !canViewFinancials.value) {
         await navigateTo('/dashboard')
         return
       }

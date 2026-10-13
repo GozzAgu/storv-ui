@@ -67,8 +67,13 @@
         <template v-if="childFolders.length === 0" #description>
           Products live inside subcategories. Open one to add or manage stock.
         </template>
-        <template v-if="canAddSubcategories" #actions>
-          <SButton variant="primary" @click="openCreateSubcategoryModal">
+        <template #actions>
+          <HideFiguresToggle v-if="childFolders.length > 0" />
+          <SButton
+            v-if="canAddSubcategories"
+            variant="primary"
+            @click="openCreateSubcategoryModal"
+          >
             <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
             Add subcategory
           </SButton>
@@ -163,7 +168,9 @@
             :item-count="subfolderDisplayStats(child).itemCount"
             :low-stock-count="subfolderDisplayStats(child).lowStockCount"
             :total-value="subfolderDisplayStats(child).totalValue"
-            :value-label="formatCurrency(subfolderDisplayStats(child).totalValue ?? 0)"
+            :value-label="
+              canViewFinancials ? formatCurrency(subfolderDisplayStats(child).totalValue ?? 0) : ''
+            "
             :selected="selectedSubfoldersForBulk.some((f) => f.id === child.id)"
             :has-serial-numbers="child.hasSerialNumbers"
             :allowed-department-ids="child.allowedDepartments"
@@ -226,8 +233,10 @@
           </nav>
         </template>
         <template #description>
-          {{ folder?.itemCount ?? 0 }} {{ (folder?.itemCount ?? 0) === 1 ? 'item' : 'items' }} ·
-          {{ formatCurrency(totalInventoryValue) }} total value
+          {{ folder?.itemCount ?? 0 }} {{ (folder?.itemCount ?? 0) === 1 ? 'item' : 'items' }}
+          <template v-if="canViewFinancials">
+            · {{ formatCurrency(totalInventoryValue) }} total value
+          </template>
           <template v-if="isSearchActive && sortedFilteredItems.length !== baseItems.length">
             · {{ sortedFilteredItems.length }} shown
           </template>
@@ -1404,6 +1413,7 @@ import SInput from '~/components/s/SInput.vue'
 import SMenu from '~/components/s/SMenu.vue'
 import SMenuItem from '~/components/s/SMenuItem.vue'
 import SPageHeader from '~/components/s/SPageHeader.vue'
+import HideFiguresToggle from '~/components/shell/HideFiguresToggle.vue'
 import SPagination from '~/components/s/SPagination.vue'
 import SSearch from '~/components/s/SSearch.vue'
 import SSelect from '~/components/s/SSelect.vue'
@@ -1437,6 +1447,7 @@ const {
   canManageInventoryItems,
   canManage,
   can,
+  canViewFinancials,
   canViewProfitAndCost,
   canCreateInventoryFolders,
   isStaff,
@@ -1510,11 +1521,11 @@ const hubSortBy = ref<'name' | 'items' | 'value'>('name')
 const hubSearch = ref('')
 const hubFilter = ref<'all' | 'low-stock'>('all')
 
-const hubSortOptions = [
+const hubSortOptions = computed(() => [
   { value: 'name', label: 'Sort: Name' },
   { value: 'items', label: 'Sort: Most items' },
-  { value: 'value', label: 'Sort: Highest value' },
-]
+  ...(canViewFinancials.value ? [{ value: 'value', label: 'Sort: Highest value' }] : []),
+])
 
 const hubLowStockCount = computed(
   () => childFolders.value.filter((c) => (subfolderDisplayStats(c).lowStockCount ?? 0) > 0).length
@@ -1542,7 +1553,7 @@ const sortedChildFolders = computed(() => {
         (subfolderDisplayStats(b).itemCount ?? 0) - (subfolderDisplayStats(a).itemCount ?? 0)
     )
   }
-  if (hubSortBy.value === 'value') {
+  if (hubSortBy.value === 'value' && canViewFinancials.value) {
     return list.sort(
       (a, b) =>
         (subfolderDisplayStats(b).totalValue ?? 0) - (subfolderDisplayStats(a).totalValue ?? 0)
@@ -1565,7 +1576,9 @@ const hubHeaderMetrics = computed(() => {
   return [
     { key: 'subcategories', label: 'Subcategories', value: String(childFolders.value.length) },
     { key: 'products', label: 'Products', value: String(totals.items) },
-    { key: 'value', label: 'Total value', value: formatCurrency(totals.value) },
+    ...(canViewFinancials.value
+      ? [{ key: 'value', label: 'Total value', value: formatCurrency(totals.value) }]
+      : []),
     {
       key: 'low',
       label: 'Low stock',

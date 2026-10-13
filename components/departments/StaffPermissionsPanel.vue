@@ -18,7 +18,7 @@
           @keydown="onLevelKeydown(module.key, $event)"
         >
           <button
-            v-for="option in LEVELS"
+            v-for="option in levelsFor(module.key)"
             :key="option.value"
             type="button"
             role="radio"
@@ -110,6 +110,15 @@ const LEVELS: Array<{ value: Level; label: string }> = [
   { value: 'custom', label: 'Custom' },
 ]
 
+const VISIBILITY_LEVELS: Array<{ value: Level; label: string }> = [
+  { value: 'none', label: 'Hidden' },
+  { value: 'view', label: 'Visible' },
+]
+
+function levelsFor(key: PermissionModule) {
+  return key === 'financials' ? VISIBILITY_LEVELS : LEVELS
+}
+
 const CRUD_ACTIONS: Array<{ key: 'create' | 'edit' | 'delete'; label: string }> = [
   { key: 'create', label: 'Create' },
   { key: 'edit', label: 'Edit' },
@@ -160,6 +169,12 @@ const modules: Array<{
     viewHint: 'Branch transfers and consolidated reports.',
     manageHint: 'Request, approve, and complete transfers.',
   },
+  {
+    key: 'financials',
+    title: 'Financial figures',
+    viewHint: 'Revenue, sales totals, stock value, cost, profit, and Reports.',
+    manageHint: 'Revenue, sales totals, stock value, cost, profit, and Reports.',
+  },
 ]
 
 /** Modules where the user picked Custom but hasn't granted a mix of actions yet. */
@@ -183,7 +198,11 @@ function showChips(key: PermissionModule): boolean {
 function levelHint(module: (typeof modules)[number]): string {
   if (module.key === 'sellerLoans') return module.viewHint
   const level = levelOf(module.key)
-  if (level === 'none') return 'No access.'
+  if (level === 'none') {
+    return module.key === 'financials'
+      ? 'Money totals, cost, and profit are hidden. Reports is hidden.'
+      : 'No access.'
+  }
   if (level === 'view') return module.viewHint
   if (level === 'manage') return module.manageHint
   return 'Pick the actions this person can take.'
@@ -222,8 +241,9 @@ function onLevelKeydown(key: PermissionModule, event: KeyboardEvent) {
   const back = event.key === 'ArrowLeft' || event.key === 'ArrowUp'
   if (!forward && !back) return
   event.preventDefault()
-  const index = LEVELS.findIndex((l) => l.value === levelOf(key))
-  const next = LEVELS[(index + (forward ? 1 : -1) + LEVELS.length) % LEVELS.length]!.value
+  const levels = levelsFor(key)
+  const index = levels.findIndex((l) => l.value === levelOf(key))
+  const next = levels[(index + (forward ? 1 : -1) + levels.length) % levels.length]!.value
   setLevel(key, next)
   const group = event.currentTarget as HTMLElement
   requestAnimationFrame(() => group.querySelector<HTMLElement>(`[data-level="${next}"]`)?.focus())

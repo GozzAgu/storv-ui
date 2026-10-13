@@ -11,7 +11,7 @@
     </template>
 
     <p v-if="points.length > 0" class="s-overview-chart__summary">
-      <span class="s-overview-chart__total">{{ totalLabel }}</span>
+      <span class="s-overview-chart__total" data-figure>{{ totalLabel }}</span>
       <span class="s-overview-chart__period">{{ totalCaption }}</span>
     </p>
 

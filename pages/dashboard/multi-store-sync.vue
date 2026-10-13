@@ -321,7 +321,7 @@
           </template>
 
           <!-- Branch reports -->
-          <template v-else-if="activeTab === 'reports'">
+          <template v-else-if="activeTab === 'reports' && canViewFinancials">
             <dl class="s-metrics">
               <div class="s-metrics__item">
                 <dt class="s-metrics__label">Revenue</dt>
@@ -558,7 +558,7 @@ const toast = useAppToast()
 const storesStore = useStoresStore()
 const inventoryStore = useInventoryStore()
 const userStore = useUserStore()
-const { can } = usePermissions()
+const { can, canViewFinancials } = usePermissions()
 const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
 
 // Security: Enterprise plan + multi-store view grant (owners always have full grants)
@@ -1803,7 +1803,7 @@ const transferForOpenMenu = computed(() => {
 const webTabs = computed(() => [
   { value: 'transfer', label: 'New transfer' },
   { value: 'history', label: 'History', count: transferHistory.value.length },
-  { value: 'reports', label: 'Branch reports' },
+  ...(canViewFinancials.value ? [{ value: 'reports', label: 'Branch reports' }] : []),
 ])
 
 const storeLabel = (store: any) => store.name || store.branchName || store.id

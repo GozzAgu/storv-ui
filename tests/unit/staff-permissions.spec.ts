@@ -104,6 +104,27 @@ describe('resolveStaffPermissions', () => {
     const result = resolveStaffPermissions({ role: 'manager', canManageInventory: true })
     expect(result.products.edit).toBe(true)
   })
+
+  it('never grants financial figures by migration, even to managers', () => {
+    expect(resolveStaffPermissions({ role: 'manager', canManageInventory: true }).financials.view).toBe(
+      false
+    )
+    const { financials: _omit, ...storedBeforeFinancials } = FULL_STAFF_PERMISSIONS
+    expect(
+      resolveStaffPermissions({ role: 'manager', permissions: storedBeforeFinancials }).financials.view
+    ).toBe(false)
+  })
+
+  it('keeps an owner-granted financial figures view', () => {
+    const result = resolveStaffPermissions({
+      role: 'staff',
+      permissions: {
+        ...EMPTY_STAFF_PERMISSIONS,
+        financials: { view: true, create: false, edit: false, delete: false },
+      },
+    })
+    expect(result.financials.view).toBe(true)
+  })
 })
 
 describe('hasAnyModuleManageAccess', () => {
@@ -128,6 +149,14 @@ describe('summarizeStaffPermissions', () => {
 
   it('labels the empty matrix "view-only"', () => {
     expect(summarizeStaffPermissions(EMPTY_STAFF_PERMISSIONS)).toBe('view-only')
+  })
+
+  it('keeps "full" for full action access with or without financial figures', () => {
+    const withoutFinancials = {
+      ...FULL_STAFF_PERMISSIONS,
+      financials: { view: false, create: false, edit: false, delete: false },
+    }
+    expect(summarizeStaffPermissions(withoutFinancials)).toBe('full')
   })
 
   it('labels a partial grant "custom"', () => {
