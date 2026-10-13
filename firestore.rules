@@ -416,6 +416,21 @@ service cloud.firestore {
       match /subscriptionAddOns/{addOnId} {
         allow read, write: if false;
       }
+
+      // Customer rewards: written and read only by the server (/api/loyalty/*), so points
+      // cannot be granted or edited from the app.
+      match /loyalty/{docId} {
+        allow read, write: if false;
+      }
+      match /loyaltyMembers/{customerKey} {
+        allow read, write: if false;
+      }
+      match /loyaltyAwards/{awardId} {
+        allow read, write: if false;
+      }
+      match /loyaltyLedger/{entryId} {
+        allow read, write: if false;
+      }
       
       // Store transfers subcollection: users/{userId}/storeTransfers/{transferId}
       // This collection stores transfer history for multi-store operations

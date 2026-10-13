@@ -21,6 +21,8 @@
       </div>
     </dl>
 
+    <LoyaltyTopCustomers v-if="!isLoading && customers.length > 0" />
+
     <section class="s-table-card" aria-label="Customers">
       <div v-if="!isLoading && customers.length > 0" class="s-table-card__head">
         <STabs v-model="segment" :tabs="segmentTabs" label="Customer groups" />
@@ -265,6 +267,8 @@
           </div>
         </dl>
 
+        <LoyaltyCustomerRewards :phone="selectedCustomer.phone" :email="selectedCustomer.email" />
+
         <section v-if="hasBalanceFeature" class="s-customer__balance" aria-label="Balance">
           <div>
             <p class="s-customer__balance-label">Balance</p>
@@ -338,6 +342,8 @@ import {
   Wallet,
 } from '@lucide/vue'
 import SAvatar from '~/components/s/SAvatar.vue'
+import LoyaltyCustomerRewards from '~/components/loyalty/LoyaltyCustomerRewards.vue'
+import LoyaltyTopCustomers from '~/components/loyalty/LoyaltyTopCustomers.vue'
 import SBadge from '~/components/s/SBadge.vue'
 import SButton from '~/components/s/SButton.vue'
 import SCard from '~/components/s/SCard.vue'

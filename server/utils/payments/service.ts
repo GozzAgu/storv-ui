@@ -17,6 +17,7 @@ import {
   type RecordPaymentsResult,
 } from './records'
 import { kindForTender, readPaymentSettings } from './settings'
+import { syncLoyaltyBestEffort } from '~/server/utils/loyalty/sync'
 
 const LAGOS_OFFSET = '+01:00'
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/
@@ -249,6 +250,7 @@ export async function closeSale(
       },
     ])
   }, TX_OPTIONS)
+  await syncLoyaltyBestEffort(db, scopeOf(access), [receiptId])
   return { status }
 }
 

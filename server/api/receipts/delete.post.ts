@@ -3,6 +3,7 @@ import { FieldValue } from 'firebase-admin/firestore'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
 import { requireAuth, requireStoreManageAccess } from '~/server/utils/store-auth'
 import { computeCustomerAfterReceiptDelete } from '~/server/utils/receipt-delete'
+import { syncLoyaltyBestEffort } from '~/server/utils/loyalty/sync'
 import { resolveBulkStockFieldAndValueFromMap } from '~/utils/inventory-bulk-quantity'
 
 interface DeleteReceiptBody {
@@ -176,6 +177,9 @@ export default defineEventHandler(async (event) => {
 
     return { deleted: true, itemCount: itemIds.length }
   })
+  await syncLoyaltyBestEffort(adminDb, { ownerId: ownerUserId, storeId, actorUid: auth.uid }, [
+    receiptId,
+  ])
 
   return {
     success: true,

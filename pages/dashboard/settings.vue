@@ -362,6 +362,8 @@
           </template>
         </SCard>
 
+        <LoyaltySettingsCard v-else-if="activeSettingsTab === 'rewards'" />
+
         <SCard
           v-else-if="activeSettingsTab === 'data-export' && !isStaff"
           title="Data export"
@@ -427,6 +429,8 @@ import { useInventoryStore } from '~/stores/inventory'
 import { useAppToast } from '~/composables/useAppToast'
 import StorefrontSettingsPanel from '~/components/dashboard/StorefrontSettingsPanel.vue'
 import PaymentsV2SettingsCard from '~/components/payments/PaymentsV2SettingsCard.vue'
+import LoyaltySettingsCard from '~/components/loyalty/LoyaltySettingsCard.vue'
+import { loyaltyUiFlag } from '~/composables/useLoyalty'
 import { Download, FileSpreadsheet, Pencil, Plus, Store, Upload, X } from '@lucide/vue'
 import SBadge from '~/components/s/SBadge.vue'
 import SButton from '~/components/s/SButton.vue'
@@ -1105,6 +1109,9 @@ const settingsTabs = computed(() => {
   }
   tabs.push({ value: 'payments', label: 'Checkout payments' })
   tabs.push({ value: 'sales-receipts', label: 'Sales & receipts' })
+  if (userStore.isSuperAdmin && loyaltyUiFlag()) {
+    tabs.push({ value: 'rewards', label: 'Customer rewards' })
+  }
   if (!isStaff.value) tabs.push({ value: 'data-export', label: 'Data export' })
   return tabs
 })

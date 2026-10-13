@@ -30,6 +30,7 @@ import { usePreferences } from '~/composables/usePreferences'
 import { normalizeEntityName } from '~/utils/capitalize-text'
 import type { PaymentSummary } from '~/types/payments-v2'
 import { usePaymentsV2 } from '~/composables/usePaymentsV2'
+import { useLoyalty } from '~/composables/useLoyalty'
 import {
   computeBalanceDue,
   isBalanceFullyPaid,
@@ -564,6 +565,8 @@ export const useReceiptsStore = defineStore('receipts', {
           // Don't fail receipt creation if notification fails
         }
 
+        if (writeResult !== 'queued') void useLoyalty().syncSale(newReceiptRef.id)
+
         return newReceiptRef.id
       } catch (error: any) {
         console.error('Error creating receipt:', error)
@@ -666,6 +669,7 @@ export const useReceiptsStore = defineStore('receipts', {
             updatedAt: new Date(),
           } as Receipt
         }
+        void useLoyalty().syncSale(receiptId)
       } catch (error: any) {
         console.error('Error updating receipt:', error)
         throw new Error(error.message || 'Failed to update receipt')
@@ -877,6 +881,7 @@ export const useReceiptsStore = defineStore('receipts', {
           updatedAt: new Date(),
         }
       }
+      void useLoyalty().syncSale(receiptId)
 
       return { completed }
     },

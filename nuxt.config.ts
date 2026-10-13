@@ -162,6 +162,8 @@ export default defineNuxtConfig({
       assistant: process.env.NUXT_PUBLIC_ASSISTANT === '1',
       /** Trade partners between businesses. Off unless NUXT_PUBLIC_TRADE=1; /api/trade routes 404 when off. */
       trade: process.env.NUXT_PUBLIC_TRADE === '1',
+      /** Customer rewards screens. The server gate (LOYALTY_ENABLED) still decides; /api/loyalty routes 404 when off. */
+      loyalty: process.env.NUXT_PUBLIC_LOYALTY === '1',
       /** Mirrors the server's LEGACY_PAYMENT_LINKS_ENABLED so the UI hides create actions that would 410. */
       legacyPaymentLinks: process.env.LEGACY_PAYMENT_LINKS_ENABLED === '1',
       /** Optional: base URL for a separate API server when using a static frontend. Staff creation is client-side and does not require a server. */

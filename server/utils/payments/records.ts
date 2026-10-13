@@ -22,6 +22,7 @@ import {
   type AuditEventInput,
 } from './audit-log'
 import type { ChainHead } from './audit-hash'
+import { syncLoyaltyBestEffort } from '~/server/utils/loyalty/sync'
 import {
   checkTransition,
   planCreation,
@@ -208,7 +209,7 @@ export async function recordPayments(
   }
 
   const store = storeDocRef(db, input.ownerId, input.storeId)
-  return db.runTransaction(async (tx) => {
+  const result = await db.runTransaction(async (tx) => {
     const ctx = await readReceiptContext(tx, store, input.receiptId)
     const head = await readChainHead(tx, store)
 
@@ -324,6 +325,12 @@ export async function recordPayments(
       saleCompleted: legacy.completed,
     }
   }, TX_OPTIONS)
+  await syncLoyaltyBestEffort(
+    db,
+    { ownerId: input.ownerId, storeId: input.storeId, actorUid: input.actor.uid },
+    [input.receiptId]
+  )
+  return result
 }
 
 export interface RecordPaymentInput extends Omit<RecordPaymentsInput, 'tenders'> {
@@ -391,7 +398,7 @@ export async function transitionPaymentsBatch(
   const { actor } = scope
   const store = storeDocRef(db, scope.ownerId, scope.storeId)
 
-  return db.runTransaction(async (tx) => {
+  const result = await db.runTransaction(async (tx) => {
     const plan = await prepare(tx, store)
     if (!plan.items.length)
       throw new PaymentServiceError('NOTHING_TO_DO', 400, 'No payments selected')
@@ -538,6 +545,12 @@ export async function transitionPaymentsBatch(
 
     return { items: results, summaries }
   }, TX_OPTIONS)
+  await syncLoyaltyBestEffort(
+    db,
+    { ownerId: scope.ownerId, storeId: scope.storeId, actorUid: actor.uid },
+    Object.keys(result.summaries)
+  )
+  return result
 }
 
 export interface TransitionPaymentInput extends TransitionItem {
