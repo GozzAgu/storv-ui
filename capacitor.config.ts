@@ -14,7 +14,7 @@ const config: CapacitorConfig = {
      */
     contentInset: 'never',
     /** Light canvas; AppBridgeViewController switches it for dark mode. */
-    backgroundColor: '#eef2fa',
+    backgroundColor: '#f4f4f5',
   },
   plugins: {
     Keyboard: {
