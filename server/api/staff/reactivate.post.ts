@@ -4,6 +4,7 @@ import { getAdminAuth, getAdminFirestore } from '~/server/utils/firebase-admin'
 import { rethrowFirebaseAdminSetupError } from '~/server/utils/firebase-admin-errors'
 import { requireAuth, requireFreshTotp } from '~/server/utils/store-auth'
 import { assertStaffLoginTarget } from '~/server/utils/staff-login-target'
+import { assertCanManageTarget, resolveStaffManager } from '~/server/utils/staff-admin'
 
 interface ReactivateStaffBody {
   ownerUserId?: string
@@ -16,7 +17,7 @@ interface ReactivateStaffBody {
 export default defineEventHandler(async (event) => {
   let auth: Awaited<ReturnType<typeof requireAuth>>
   try {
-    auth = await requireAuth(event, { requireVerifiedEmail: true })
+    auth = await requireAuth(event)
   } catch (err) {
     rethrowFirebaseAdminSetupError(err, 'reactivate')
   }
@@ -35,16 +36,13 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  if (auth.uid !== ownerUserId) {
-    throw createError({ statusCode: 403, message: 'Only the store owner can reactivate staff' })
-  }
-
   let adminDb: ReturnType<typeof getAdminFirestore>
   try {
     adminDb = getAdminFirestore()
   } catch (err) {
     rethrowFirebaseAdminSetupError(err, 'reactivate')
   }
+  const manager = await resolveStaffManager(adminDb, auth, ownerUserId, storeId)
 
   const staffRef = adminDb
     .collection('users')
@@ -69,11 +67,23 @@ export default defineEventHandler(async (event) => {
     role?: string
     firstName?: string
     lastName?: string
+    admin?: boolean
   }
 
-  if (staff.createdBy !== ownerUserId) {
-    throw createError({ statusCode: 403, message: 'Access denied' })
-  }
+  const authUid = staff.authUid?.trim()
+  const member = authUid
+    ? (
+        await adminDb
+          .collection('users')
+          .doc(ownerUserId)
+          .collection('stores')
+          .doc(storeId)
+          .collection('members')
+          .doc(authUid)
+          .get()
+      ).data()
+    : undefined
+  assertCanManageTarget(manager, ownerUserId, staff, member)
 
   if ((staff.status || 'active') === 'active') {
     return { ok: true, alreadyActive: true }
@@ -86,7 +96,6 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const authUid = staff.authUid?.trim()
   if (authUid) {
     const adminAuth = getAdminAuth()
     if (await assertStaffLoginTarget(adminDb, adminAuth, authUid, staff.email)) {

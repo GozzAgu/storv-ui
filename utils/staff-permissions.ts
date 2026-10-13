@@ -3,8 +3,10 @@ import type {
   PermissionAction,
   PermissionModule,
   ReceiptsPermission,
+  StaffAdminGrants,
   StaffPermissions,
 } from '~/types/staff-permissions'
+import { STAFF_ADMIN_GRANT_KEYS } from '~/types/staff-permissions'
 
 const emptyModule = (): ModulePermission => ({
   view: false,
@@ -39,6 +41,8 @@ export interface LegacyStaffAccessFields {
   canManageInventory?: boolean
   canManageReceipts?: boolean
   permissions?: Partial<StaffPermissions> | StaffPermissions
+  /** Branch admin (owner-set). Every module action; financials still follow the stored grant. */
+  admin?: boolean
 }
 
 /**
@@ -138,12 +142,17 @@ export function normalizeStaffPermissions(
  * firestore.rules. Returns the stored grant if present, else derives it from legacy fields.
  *
  * Stock loans view/create/edit are always granted (baseline for every active staff member), even
- * when an older stored matrix left them off.
+ * when an older stored matrix left them off. A branch admin gets every module action; their
+ * financial-figures grant stays whatever the owner stored.
  */
 export function resolveStaffPermissions(staff: LegacyStaffAccessFields): StaffPermissions {
   const base = staff.permissions
     ? normalizeStaffPermissions(staff.permissions, staff)
     : deriveDefaultPermissions(staff)
+
+  if (staff.admin === true) {
+    return { ...FULL_STAFF_PERMISSIONS, financials: base.financials }
+  }
 
   return {
     ...base,
@@ -182,6 +191,30 @@ export function getPermissionAction(
 ): boolean {
   const modulePermissions = permissions[module] as Record<string, boolean>
   return modulePermissions[action] === true
+}
+
+/** Owner-set admin extras from a stored (possibly partial or malformed) map; all false if absent. */
+export function normalizeStaffAdminGrants(raw: unknown): StaffAdminGrants {
+  const source = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {}
+  return Object.fromEntries(
+    STAFF_ADMIN_GRANT_KEYS.map((key) => [key, source[key] === true])
+  ) as unknown as StaffAdminGrants
+}
+
+/** Coerce an untrusted permissions payload to a full matrix of booleans (unknown keys dropped). */
+export function coerceStaffPermissions(raw: unknown): StaffPermissions {
+  const source = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {}
+  const result: Record<string, Record<string, boolean>> = {}
+  for (const [module, template] of Object.entries(EMPTY_STAFF_PERMISSIONS)) {
+    const given =
+      source[module] && typeof source[module] === 'object'
+        ? (source[module] as Record<string, unknown>)
+        : {}
+    result[module] = Object.fromEntries(
+      Object.keys(template).map((action) => [action, given[action] === true])
+    )
+  }
+  return result as unknown as StaffPermissions
 }
 
 /**

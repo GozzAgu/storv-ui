@@ -48,3 +48,29 @@ export interface StaffPermissions {
 }
 
 export type PermissionAction = keyof ReceiptsPermission
+
+/**
+ * Branch admin extras. An admin (member doc `admin: true`) already has every module action and
+ * can manage regular staff and departments; these are the high-risk owner powers the owner turns
+ * on one by one. Only the owner can change `admin`, `adminGrants` or anyone's `financials`.
+ */
+export interface StaffAdminGrants {
+  /** Create, edit and delete branches. */
+  branches: boolean
+  /** Give staff the "confirm payments" grant. */
+  paymentsConfirm: boolean
+  /** Delete sales and settle commissions. */
+  deleteSales: boolean
+  /** Business details, tax, receipt settings. */
+  storeSettings: boolean
+  /** Export all store data. */
+  dataExport: boolean
+}
+
+export const STAFF_ADMIN_GRANT_KEYS = [
+  'branches',
+  'paymentsConfirm',
+  'deleteSales',
+  'storeSettings',
+  'dataExport',
+] as const satisfies ReadonlyArray<keyof StaffAdminGrants>

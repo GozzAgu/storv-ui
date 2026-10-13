@@ -1093,4 +1093,175 @@ describe('firestore.rules', () => {
       await assertSucceeds(updateDoc(ref, { status: 'sold', soldAt: new Date(), updatedAt: new Date() }))
     })
   })
+
+  describe('branch admins', () => {
+    type Ctx = Parameters<Parameters<RulesTestEnvironment['withSecurityRulesDisabled']>[0]>[0]
+
+    async function seedBranches(
+      context: Ctx,
+      opts: { adminGrants?: Record<string, boolean>; status?: string } = {}
+    ) {
+      const fs = context.firestore()
+      await seedOwner(context, 'u1', 'storvv_enterprise')
+      await seedStore(context, 'u1', 's1')
+      await seedStore(context, 'u1', 's2')
+      await setDoc(doc(fs, 'users/u1/stores/s1/members/admin1'), {
+        authUid: 'admin1',
+        status: opts.status ?? 'active',
+        admin: true,
+        ...(opts.adminGrants ? { adminGrants: opts.adminGrants } : {}),
+        permissions: { products: EMPTY_PRODUCTS, receipts: EMPTY_RECEIPTS },
+      })
+      await setDoc(doc(fs, 'users/u1/stores/s1/members/staff1'), {
+        authUid: 'staff1',
+        status: 'active',
+        permissions: { products: EMPTY_PRODUCTS, receipts: EMPTY_RECEIPTS },
+      })
+      for (const storeId of ['s1', 's2']) {
+        await setDoc(doc(fs, `users/u1/stores/${storeId}/departments/d1`), {
+          name: 'Sales',
+          storeId,
+          createdBy: 'u1',
+          staffCount: 1,
+        })
+        await setDoc(doc(fs, `users/u1/stores/${storeId}/departments/d1/staff/st1`), {
+          authUid: 'staff1',
+          email: 'staff1@example.com',
+          createdBy: 'u1',
+          status: 'active',
+        })
+      }
+      await setDoc(doc(fs, 'users/u1/stores/s1/receipts/r1'), { storeId: 's1', total: 100 })
+    }
+
+    it('holds every module action in their branch without a stored grant', async () => {
+      await testEnv.withSecurityRulesDisabled((context) => seedBranches(context))
+      const db = testEnv.authenticatedContext('admin1').firestore()
+      await assertSucceeds(
+        setDoc(doc(db, 'users/u1/stores/s1/inventoryFolders/f1'), {
+          storeId: 's1',
+          name: 'Phones',
+          createdBy: 'admin1',
+        })
+      )
+    })
+
+    it('does not get payment records from the admin flag', async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await seedBranches(context)
+        await setDoc(doc(context.firestore(), 'users/u1/stores/s1/payments/p1'), {
+          storeId: 's1',
+          recordedBy: 'someone-else',
+        })
+      })
+      const db = testEnv.authenticatedContext('admin1').firestore()
+      await assertFails(getDoc(doc(db, 'users/u1/stores/s1/payments/p1')))
+    })
+
+    it('reads the branch roster: members, departments and staff', async () => {
+      await testEnv.withSecurityRulesDisabled((context) => seedBranches(context))
+      const db = testEnv.authenticatedContext('admin1').firestore()
+      await assertSucceeds(getDoc(doc(db, 'users/u1/stores/s1/members/staff1')))
+      await assertSucceeds(getDoc(doc(db, 'users/u1/stores/s1/departments/d1')))
+      await assertSucceeds(getDoc(doc(db, 'users/u1/stores/s1/departments/d1/staff/st1')))
+    })
+
+    it('a regular member still cannot read other members', async () => {
+      await testEnv.withSecurityRulesDisabled((context) => seedBranches(context))
+      const db = testEnv.authenticatedContext('staff1').firestore()
+      await assertFails(getDoc(doc(db, 'users/u1/stores/s1/members/admin1')))
+    })
+
+    it('has no access to another branch', async () => {
+      await testEnv.withSecurityRulesDisabled((context) => seedBranches(context))
+      const db = testEnv.authenticatedContext('admin1').firestore()
+      await assertFails(getDoc(doc(db, 'users/u1/stores/s2/departments/d1')))
+      await assertFails(getDoc(doc(db, 'users/u1/stores/s2/departments/d1/staff/st1')))
+      await assertFails(
+        setDoc(doc(db, 'users/u1/stores/s2/departments/d2'), { name: 'X', createdBy: 'u1' })
+      )
+    })
+
+    it('manages departments, which stay owned by the store owner', async () => {
+      await testEnv.withSecurityRulesDisabled((context) => seedBranches(context))
+      const db = testEnv.authenticatedContext('admin1').firestore()
+      await assertSucceeds(
+        setDoc(doc(db, 'users/u1/stores/s1/departments/d2'), {
+          name: 'Repairs',
+          storeId: 's1',
+          createdBy: 'u1',
+          staffCount: 0,
+        })
+      )
+      await assertSucceeds(updateDoc(doc(db, 'users/u1/stores/s1/departments/d2'), { name: 'Fixes' }))
+      await assertFails(
+        setDoc(doc(db, 'users/u1/stores/s1/departments/d3'), { name: 'Mine', createdBy: 'admin1' })
+      )
+      await assertFails(
+        updateDoc(doc(db, 'users/u1/stores/s1/departments/d2'), { createdBy: 'admin1' })
+      )
+      await assertSucceeds(deleteDoc(doc(db, 'users/u1/stores/s1/departments/d2')))
+    })
+
+    it('cannot write member or staff records directly (server routes only)', async () => {
+      await testEnv.withSecurityRulesDisabled((context) => seedBranches(context))
+      const db = testEnv.authenticatedContext('admin1').firestore()
+      await assertFails(
+        updateDoc(doc(db, 'users/u1/stores/s1/members/staff1'), { admin: true })
+      )
+      await assertFails(
+        updateDoc(doc(db, 'users/u1/stores/s1/members/staff1'), {
+          'permissions.financials': { view: true },
+        })
+      )
+      await assertFails(
+        updateDoc(doc(db, 'users/u1/stores/s1/members/admin1'), {
+          'adminGrants.deleteSales': true,
+        })
+      )
+      await assertFails(
+        updateDoc(doc(db, 'users/u1/stores/s1/departments/d1/staff/st1'), { position: 'Boss' })
+      )
+      await assertFails(
+        setDoc(doc(db, 'users/u1/stores/s1/departments/d1/staff/new1'), {
+          authUid: 'x',
+          createdBy: 'u1',
+        })
+      )
+    })
+
+    it('cannot delete sales without the owner’s delete-sales grant', async () => {
+      await testEnv.withSecurityRulesDisabled((context) => seedBranches(context))
+      const db = testEnv.authenticatedContext('admin1').firestore()
+      await assertFails(deleteDoc(doc(db, 'users/u1/stores/s1/receipts/r1')))
+    })
+
+    it('deletes sales once the owner grants it, but never payment-backed ones', async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await seedBranches(context, { adminGrants: { deleteSales: true } })
+        await setDoc(doc(context.firestore(), 'users/u1/stores/s1/receipts/r2'), {
+          storeId: 's1',
+          paymentSummary: { paid: 100 },
+        })
+      })
+      const db = testEnv.authenticatedContext('admin1').firestore()
+      await assertSucceeds(deleteDoc(doc(db, 'users/u1/stores/s1/receipts/r1')))
+      await assertFails(deleteDoc(doc(db, 'users/u1/stores/s1/receipts/r2')))
+    })
+
+    it('loses everything once deactivated', async () => {
+      await testEnv.withSecurityRulesDisabled((context) =>
+        seedBranches(context, { status: 'inactive', adminGrants: { deleteSales: true } })
+      )
+      const db = testEnv.authenticatedContext('admin1').firestore()
+      await assertFails(getDoc(doc(db, 'users/u1/stores/s1/members/staff1')))
+      await assertFails(deleteDoc(doc(db, 'users/u1/stores/s1/receipts/r1')))
+    })
+
+    it('cannot read the owner’s account doc', async () => {
+      await testEnv.withSecurityRulesDisabled((context) => seedBranches(context))
+      const db = testEnv.authenticatedContext('admin1').firestore()
+      await assertFails(getDoc(doc(db, 'users/u1')))
+    })
+  })
 })

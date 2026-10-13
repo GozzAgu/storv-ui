@@ -104,13 +104,29 @@ service cloud.firestore {
     // Single source of truth for "can this member do <action> on <moduleName>". checks the new
     // `permissions` map when present (falling back to legacy for modules not yet stored), else
     // falls back to the legacy role/grant fields entirely.
+    // A branch admin holds every module action except payments and financial figures, which keep
+    // their own owner-controlled grants. Mirrors utils/staff-permissions.ts#resolveStaffPermissions.
     function memberHasPermission(userId, storeId, moduleName, action) {
       return isActiveStoreMember(userId, storeId) &&
+        ((memberData(userId, storeId).get('admin', false) == true &&
+          !(moduleName in ['payments', 'financials'])) ||
         (memberData(userId, storeId).keys().hasAny(['permissions'])
           ? (memberData(userId, storeId).permissions.keys().hasAny([moduleName])
               ? memberData(userId, storeId).permissions.get(moduleName, {}).get(action, false) == true
               : legacyHasPermission(memberData(userId, storeId), moduleName, action))
-          : legacyHasPermission(memberData(userId, storeId), moduleName, action));
+          : legacyHasPermission(memberData(userId, storeId), moduleName, action)));
+    }
+
+    // Branch admin (owner-set `admin: true` on the member doc). Reads the store's roster and
+    // manages departments directly; staff and member records change only through server routes.
+    function isStoreAdmin(userId, storeId) {
+      return isActiveStoreMember(userId, storeId) &&
+        memberData(userId, storeId).get('admin', false) == true;
+    }
+
+    function storeAdminHasGrant(userId, storeId, grant) {
+      return isStoreAdmin(userId, storeId) &&
+        memberData(userId, storeId).get('adminGrants', {}).get(grant, false) == true;
     }
 
     function memberHasAnyProductsManage(userId, storeId) {
@@ -512,8 +528,10 @@ service cloud.firestore {
         // Store members subcollection: users/{userId}/stores/{storeId}/members/{memberUid}
         // This is the canonical access-control index for rule checks.
         match /members/{memberUid} {
-          // Store owner can read/write all members. A member can read their own membership doc.
-          allow read: if ownsStore(userId, storeId) || (isAuthenticated() && request.auth.uid == memberUid);
+          // Store owner can read/write all members; a branch admin reads them. A member can read
+          // their own membership doc. `admin` / `adminGrants` are owner-only like everything here.
+          allow read: if ownsStore(userId, storeId) || isStoreAdmin(userId, storeId) ||
+                       (isAuthenticated() && request.auth.uid == memberUid);
           // Payments grants (permissions.payments) are server-only so every grant is audit-logged.
           allow create: if ownsStore(userId, storeId) &&
                          !request.resource.data.get('permissions', {}).keys().hasAny(['payments']);
@@ -532,22 +550,25 @@ service cloud.firestore {
           allow read: if isAuthenticated() && 
                        (userId == request.auth.uid || 
                         resource.data.createdBy == request.auth.uid || 
+                        isStoreAdmin(userId, storeId) ||
                         exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/$(departmentId)/staff/$(request.auth.uid)));
           
-          // Allow create if user is the super admin (userId in path) creating department in their store
+          // Create/update/delete: the owner, or a branch admin. Departments always stay
+          // owned by the store owner (`userId` / `createdBy`), whoever writes them.
           allow create: if isAuthenticated() && 
-                         userId == request.auth.uid && 
-                         request.resource.data.createdBy == request.auth.uid;
+                         (userId == request.auth.uid || isStoreAdmin(userId, storeId)) &&
+                         request.resource.data.createdBy == userId &&
+                         request.resource.data.get('userId', userId) == userId;
           
-          // Allow update if user is the super admin (userId in path) who created the department
           allow update: if isAuthenticated() && 
-                         userId == request.auth.uid && 
-                         resource.data.createdBy == request.auth.uid;
+                         (userId == request.auth.uid || isStoreAdmin(userId, storeId)) &&
+                         resource.data.createdBy == userId &&
+                         request.resource.data.createdBy == userId &&
+                         request.resource.data.get('userId', userId) == userId;
           
-          // Allow delete if user is the super admin (userId in path) who created the department
           allow delete: if isAuthenticated() && 
-                         userId == request.auth.uid && 
-                         resource.data.createdBy == request.auth.uid;
+                         (userId == request.auth.uid || isStoreAdmin(userId, storeId)) &&
+                         resource.data.createdBy == userId;
           
           // Staff subcollection: users/{userId}/stores/{storeId}/departments/{departmentId}/staff/{staffId}
           match /staff/{staffId} {
@@ -568,7 +589,8 @@ service cloud.firestore {
             // Ownership comes from the path, never from `createdBy`: staff must not be able to
             // point their record at another workspace (owner-context trusted it).
             allow read: if isAuthenticated() &&
-                         (userId == request.auth.uid || isOwnStaffDocument());
+                         (userId == request.auth.uid || isOwnStaffDocument() ||
+                          isStoreAdmin(userId, storeId));
 
             // Allow create if user is the super admin (userId in path) creating staff in their store
             allow create: if isAuthenticated() &&
@@ -682,7 +704,8 @@ service cloud.firestore {
                          resourceMatchesStore(storeId) &&
                          requestMatchesStore(storeId)));
 
-          allow delete: if ownsStore(userId, storeId) &&
+          allow delete: if (ownsStore(userId, storeId) ||
+                          storeAdminHasGrant(userId, storeId, 'deleteSales')) &&
                          resourceMatchesStore(storeId) &&
                          !('paymentSummary' in resource.data);
         }

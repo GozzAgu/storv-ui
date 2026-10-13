@@ -4,6 +4,7 @@ import { getAdminAuth, getAdminFirestore } from '~/server/utils/firebase-admin'
 import { rethrowFirebaseAdminSetupError } from '~/server/utils/firebase-admin-errors'
 import { requireAuth, requireFreshTotp } from '~/server/utils/store-auth'
 import { assertStaffLoginTarget } from '~/server/utils/staff-login-target'
+import { assertCanManageTarget, resolveStaffManager } from '~/server/utils/staff-admin'
 
 interface DeactivateStaffBody {
   ownerUserId?: string
@@ -16,7 +17,7 @@ interface DeactivateStaffBody {
 export default defineEventHandler(async (event) => {
   let auth: Awaited<ReturnType<typeof requireAuth>>
   try {
-    auth = await requireAuth(event, { requireVerifiedEmail: true })
+    auth = await requireAuth(event)
   } catch (err) {
     rethrowFirebaseAdminSetupError(err, 'remove')
   }
@@ -34,16 +35,13 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  if (auth.uid !== ownerUserId) {
-    throw createError({ statusCode: 403, message: 'Only the store owner can remove staff' })
-  }
-
   let adminDb: ReturnType<typeof getAdminFirestore>
   try {
     adminDb = getAdminFirestore()
   } catch (err) {
     rethrowFirebaseAdminSetupError(err, 'remove')
   }
+  const manager = await resolveStaffManager(adminDb, auth, ownerUserId, storeId)
   const staffRef = adminDb
     .collection('users')
     .doc(ownerUserId)
@@ -65,17 +63,26 @@ export default defineEventHandler(async (event) => {
     status?: string
     createdBy?: string
     role?: string
+    admin?: boolean
   }
 
-  if (staff.createdBy !== ownerUserId) {
-    throw createError({ statusCode: 403, message: 'Access denied' })
-  }
+  const authUid = staff.authUid?.trim()
+  const memberRef = authUid
+    ? adminDb
+        .collection('users')
+        .doc(ownerUserId)
+        .collection('stores')
+        .doc(storeId)
+        .collection('members')
+        .doc(authUid)
+    : null
+  const member = memberRef ? (await memberRef.get()).data() : undefined
+  assertCanManageTarget(manager, ownerUserId, staff, member)
 
   if (staff.status === 'inactive') {
     return { ok: true, alreadyInactive: true }
   }
 
-  const authUid = staff.authUid?.trim()
   if (authUid) {
     const adminAuth = getAdminAuth()
     if (await assertStaffLoginTarget(adminDb, adminAuth, authUid, staff.email)) {
@@ -100,6 +107,8 @@ export default defineEventHandler(async (event) => {
       .set(
         {
           status: 'inactive',
+          admin: false,
+          adminGrants: FieldValue.delete(),
           updatedAt: FieldValue.serverTimestamp(),
         },
         { merge: true }
@@ -121,8 +130,10 @@ export default defineEventHandler(async (event) => {
 
   await staffRef.update({
     status: 'inactive',
+    admin: false,
+    adminGrants: FieldValue.delete(),
     removedAt: FieldValue.serverTimestamp(),
-    removedBy: ownerUserId,
+    removedBy: auth.uid,
     updatedAt: FieldValue.serverTimestamp(),
   })
 

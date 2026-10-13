@@ -9,6 +9,7 @@ import {
 } from '~/server/utils/staff-invite-email'
 import { requireAuth } from '~/server/utils/store-auth'
 import { assertStaffLoginTarget } from '~/server/utils/staff-login-target'
+import { assertCanManageTarget, resolveStaffManager } from '~/server/utils/staff-admin'
 
 type InviteMode = 'credentials' | 'reset_link'
 
@@ -29,7 +30,7 @@ export default defineEventHandler(async (event) => {
   try {
     let auth: Awaited<ReturnType<typeof requireAuth>>
     try {
-      auth = await requireAuth(event, { requireVerifiedEmail: true })
+      auth = await requireAuth(event)
     } catch (err) {
       rethrowFirebaseAdminSetupError(err, 'invite')
     }
@@ -53,10 +54,6 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    if (auth.uid !== ownerUserId) {
-      throw createError({ statusCode: 403, message: 'Only the store owner can email staff invites' })
-    }
-
     if (mode === 'credentials' && (!temporaryPassword || temporaryPassword.length < 6)) {
       throw createError({
         statusCode: 400,
@@ -70,6 +67,7 @@ export default defineEventHandler(async (event) => {
     } catch (err) {
       rethrowFirebaseAdminSetupError(err, 'invite')
     }
+    const manager = await resolveStaffManager(adminDb, auth, ownerUserId, storeId)
 
     const staffRef = adminDb
       .collection('users')
@@ -91,10 +89,21 @@ export default defineEventHandler(async (event) => {
       authUid?: string
       createdBy?: string
       status?: string
+      admin?: boolean
     }
-    if (staff.createdBy !== ownerUserId) {
-      throw createError({ statusCode: 403, message: 'Access denied' })
-    }
+    const member = staff.authUid?.trim()
+      ? (
+          await adminDb
+            .collection('users')
+            .doc(ownerUserId)
+            .collection('stores')
+            .doc(storeId)
+            .collection('members')
+            .doc(staff.authUid.trim())
+            .get()
+        ).data()
+      : undefined
+    assertCanManageTarget(manager, ownerUserId, staff, member)
 
     const storedEmail = staff.email?.trim().toLowerCase()
     if (storedEmail && storedEmail !== staffEmail) {
