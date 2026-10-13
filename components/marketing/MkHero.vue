@@ -10,6 +10,12 @@
             <span class="mkh__emblem-wave" style="--wave: 2" />
             <StorvvMark :size="56" />
             <span class="mkh__emblem-status" />
+            <span class="mkh__live-tag">
+              <span class="mkh__live-tag-title">Always on</span>
+              <Transition name="mkh-live" mode="out-in">
+                <span :key="liveLine" class="mkh__live-tag-line">{{ liveLine }}</span>
+              </Transition>
+            </span>
           </span>
         </span>
         <span class="mkh__grain" />
@@ -31,8 +37,9 @@
         </h1>
 
         <p class="mkh__lede mkh-in" style="--i: 3">
-          Inventory, sales, receipts and customers in one fast workspace, so your team can spend
-          less time counting and more time selling.
+          Inventory, sales, receipts and customers in one fast, always-on workspace that keeps every
+          branch in sync around the clock, so your team spends less time counting and more time
+          selling.
         </p>
 
         <div class="mkh__actions mkh-in" style="--i: 4">
@@ -124,7 +131,15 @@ const barSets = [
   [0.38, 0.6, 0.52, 0.74, 0.68, 0.78, 1],
 ]
 
+const liveLines = [
+  'Running 24/7',
+  'Syncing every branch',
+  'Backed up in real time',
+  'Watching your stock',
+]
+
 const tick = ref(0)
+const liveLine = computed(() => liveLines[tick.value % liveLines.length]!)
 const sale = computed(() => sales[tick.value % sales.length]!)
 const bars = computed(() => barSets[tick.value % barSets.length]!)
 const revenue = computed(() => {
