@@ -42,7 +42,7 @@
   --mk-dot: 10px;
   --mk-blur: 12px;
   --mk-glass-blur: var(--s-space-2);
-  --mk-glass: color-mix(in srgb, var(--s-surface) 42%, transparent);
+  --mk-glass: color-mix(in srgb, var(--s-surface) 55%, transparent);
   --mk-glass-edge: rgb(255 255 255 / 0.6);
   /* The floating nav has no border: a lit top edge and a wide, faint shadow lift it instead */
   --mk-nav-shadow: inset 0 1px 0 var(--mk-glass-edge), 0 1px 2px rgb(16 24 40 / 0.04),
@@ -83,7 +83,7 @@ html.dark .mk {
   --mk-dots: rgb(255 255 255 / 0.08);
   --mk-glow: rgb(61 99 242 / 0.28);
   --mk-glow-2: rgb(110 148 255 / 0.16);
-  --mk-glass: color-mix(in srgb, var(--s-surface) 40%, transparent);
+  --mk-glass: color-mix(in srgb, var(--s-surface) 55%, transparent);
   --mk-glass-edge: rgb(255 255 255 / 0.06);
   --mk-nav-shadow: inset 0 1px 0 var(--mk-glass-edge), 0 12px 32px -12px rgb(0 0 0 / 0.6);
 }
@@ -286,7 +286,7 @@ html.dark .mk {
 .mk .mk-btn {
   min-height: var(--s-touch);
   padding-inline: var(--s-space-3);
-  border-radius: var(--s-radius-lg);
+  border-radius: var(--s-radius-full);
   font: 600 0.9375rem / 1.25rem var(--s-font-sans);
 }
 
@@ -302,7 +302,6 @@ html.dark .mk {
     height: 40px;
     min-height: 40px;
     padding-inline: 18px;
-    border-radius: 10px;
     font-size: 0.875rem;
   }
 
@@ -310,7 +309,6 @@ html.dark .mk {
     height: 34px;
     min-height: 34px;
     padding-inline: 14px;
-    border-radius: 9px;
     font-size: 0.8125rem;
   }
 }
@@ -367,10 +365,6 @@ html.dark .mk {
     padding 500ms var(--mk-spring, var(--s-ease)), translate 500ms var(--mk-spring, var(--s-ease));
 }
 
-.mk-header .mk-btn {
-  border-radius: var(--s-radius-full);
-}
-
 .mk-header .mk-container {
   transition: max-width 500ms var(--mk-spring, var(--s-ease)),
     padding 500ms var(--mk-spring, var(--s-ease));
@@ -424,7 +418,7 @@ html.dark .mk {
   border-radius: var(--s-radius-full);
   font: 500 0.875rem / 1.25rem var(--s-font-sans);
   letter-spacing: -0.005em;
-  color: var(--s-text-2);
+  color: var(--s-text);
   transition: color var(--s-duration-fast) var(--s-ease),
     background-color var(--s-duration-fast) var(--s-ease);
 }
@@ -447,6 +441,12 @@ html.dark .mk {
 
 .mk-header__signin {
   display: none;
+}
+
+/* Full-strength text everywhere in the bar: it is see-through, so grey text would fade on dark
+   sections passing underneath */
+.mk-header :is(.mk-header__signin, .mk-header__theme) {
+  color: var(--s-text);
 }
 
 .mk-header__theme {
@@ -2710,7 +2710,7 @@ html.dark .mk-marquee__item:hover {
   gap: 8px;
   min-height: var(--s-touch);
   padding-inline: var(--s-space-3);
-  border-radius: var(--s-radius-lg);
+  border-radius: var(--s-radius-full);
   font: 600 0.9375rem / 1.25rem var(--s-font-sans);
   text-decoration: none;
   transition: background var(--s-duration) var(--s-ease-out),
@@ -2751,7 +2751,6 @@ html.dark .mk-marquee__item:hover {
   .mk-cta__btn {
     min-height: 40px;
     padding-inline: 18px;
-    border-radius: 10px;
     font-size: 0.875rem;
   }
 }

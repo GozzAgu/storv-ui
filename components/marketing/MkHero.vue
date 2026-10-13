@@ -3,7 +3,11 @@
     <div class="mkh__panel mkh-in" style="--i: 0">
       <div class="mkh__bg" aria-hidden="true">
         <span class="mkh__wash" />
-        <span class="mkh__ring" />
+        <span class="mkh__ring">
+          <span class="mkh__emblem">
+            <StorvvMark :size="56" />
+          </span>
+        </span>
         <span class="mkh__grain" />
       </div>
 
@@ -100,6 +104,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { ArrowLeftRight, PackageMinus, Play, ReceiptText, Sparkles, TrendingUp } from '@lucide/vue'
 import MkFrame from '~/components/marketing/MkFrame.vue'
 import MkMarquee from '~/components/marketing/MkMarquee.vue'
+import StorvvMark from '~/components/shell/StorvvMark.vue'
 import { useMarketingAppUrl } from '~/composables/useMarketingSite'
 
 const appUrl = useMarketingAppUrl()

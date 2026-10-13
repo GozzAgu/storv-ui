@@ -280,7 +280,7 @@ html.dark .s-auth__mobile-logo-dark {
 
 .s-auth .s-btn--lg {
   height: var(--s-touch);
-  border-radius: var(--s-radius-lg);
+  border-radius: var(--s-radius-full);
 }
 
 /* ── Continue with Google ──────────────────────────────────────────────── */
@@ -300,7 +300,7 @@ html.dark .s-auth__mobile-logo-dark {
   width: 100%;
   height: var(--s-touch);
   border: 1px solid var(--s-line);
-  border-radius: var(--s-radius-lg);
+  border-radius: var(--s-radius-full);
   background: var(--s-surface);
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
   color: var(--s-text);

@@ -19,6 +19,7 @@
   --mkh-band-out: rgb(240 244 255 / 0.4);
   --mkh-tick: rgb(61 99 242 / 0.28);
   --mkh-ring-glow: rgb(142 162 255 / 0.4);
+  --mkh-emblem-shadow: rgb(29 52 150 / 0.35);
   --mkh-serif-ink: #b3c1ff;
   --mkh-grain-opacity: 0.05;
   --mkh-card-shadow: none;
@@ -45,6 +46,7 @@ html.dark .mk {
   --mkh-band-out: rgb(61 99 242 / 0.06);
   --mkh-tick: rgb(142 162 255 / 0.3);
   --mkh-ring-glow: rgb(61 99 242 / 0.3);
+  --mkh-emblem-shadow: rgb(0 0 0 / 0.5);
   --mkh-serif-ink: #8ea2ff;
   --mkh-grain-opacity: 0.07;
   --mkh-card-shadow: none;
@@ -92,6 +94,7 @@ html.dark .mk {
   position: absolute;
   inset: 0;
   z-index: -1;
+  container: mkh-bg / size;
   pointer-events: none;
 }
 
@@ -147,6 +150,71 @@ html.dark .mk {
 @keyframes mkh-turn {
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* The Storvv symbol set in a glass lens inside the disc, with a thin arc orbiting it. Only the top
+   of the disc shows above the panel's bottom edge, and how much depends on the panel's shape, so
+   the lens is placed halfway down that visible part (from the ring geometry above, in panel
+   units) and hidden when too little of the disc shows to hold it. */
+.mkh__emblem {
+  position: absolute;
+  top: clamp(12cqw, 36cqw - 29cqh, 33cqw);
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: clamp(84px, 17%, 140px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 32% 24%,
+    rgb(255 255 255 / 0.55),
+    rgb(255 255 255 / 0.14) 62%,
+    rgb(255 255 255 / 0.08)
+  );
+  -webkit-backdrop-filter: blur(14px) saturate(1.6);
+  backdrop-filter: blur(14px) saturate(1.6);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.8), inset 0 0 0 1px rgb(255 255 255 / 0.4),
+    0 0 0 10px rgb(255 255 255 / 0.07), 0 0 0 11px rgb(255 255 255 / 0.22),
+    0 24px 56px -16px var(--mkh-emblem-shadow);
+  color: #fff;
+  transform: translate(-50%, -50%);
+}
+
+.mkh__emblem svg {
+  width: 52%;
+  height: 52%;
+  filter: drop-shadow(0 4px 10px var(--mkh-emblem-shadow));
+}
+
+.mkh__emblem::before {
+  content: '';
+  position: absolute;
+  inset: -34%;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    rgb(255 255 255 / 0.85) 50deg,
+    transparent 110deg,
+    transparent 360deg
+  );
+  mask-image: radial-gradient(closest-side, transparent calc(100% - 1.5px), #000 100%);
+  -webkit-mask-image: radial-gradient(closest-side, transparent calc(100% - 1.5px), #000 100%);
+  animation: mkh-turn 9s linear infinite;
+}
+
+.mkh__emblem::after {
+  content: '';
+  position: absolute;
+  inset: -34%;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.18);
+}
+
+@container mkh-bg (max-aspect-ratio: 1.45) {
+  .mkh__emblem {
+    display: none;
   }
 }
 
@@ -238,7 +306,7 @@ html.dark .mk {
   gap: 8px;
   min-height: var(--s-touch);
   padding-inline: var(--s-space-3);
-  border-radius: var(--s-radius-lg);
+  border-radius: var(--s-radius-full);
   font: 600 0.9375rem / 1.25rem var(--s-font-sans);
   text-decoration: none;
   transition: background var(--s-duration) var(--s-ease-out),
@@ -601,7 +669,6 @@ html.dark .mk {
   .mkh__btn {
     min-height: 40px;
     padding-inline: 18px;
-    border-radius: 10px;
     font-size: 0.875rem;
   }
 }
@@ -616,6 +683,12 @@ html.dark .mk {
     right: -40%;
     bottom: auto;
     width: 110%;
+  }
+
+  .mkh__emblem {
+    top: 60%;
+    left: 36%;
+    display: grid;
   }
 
   .mkh__wash {
@@ -665,6 +738,7 @@ html.dark .mk {
 
 @media (prefers-reduced-motion: reduce) {
   .mkh__ring::before,
+  .mkh__emblem::before,
   .mkh__card,
   .mkh__live-dot {
     animation: none;
