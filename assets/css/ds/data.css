@@ -381,6 +381,26 @@
   color: var(--s-text-muted);
 }
 
+.s-table__clip {
+  display: block;
+  overflow: hidden;
+  max-width: 220px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Row tools that only appear on hover or keyboard focus; always shown on touch screens */
+@media (hover: hover) {
+  .s-table__reveal {
+    opacity: 0;
+    transition: opacity var(--s-duration-fast) var(--s-ease);
+  }
+
+  .s-table tr:is(:hover, :focus-within) .s-table__reveal {
+    opacity: 1;
+  }
+}
+
 .s-table__nowrap {
   white-space: nowrap;
 }

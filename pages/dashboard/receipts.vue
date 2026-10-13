@@ -280,6 +280,7 @@
                             <SIconButton
                               label="Copy receipt number"
                               size="sm"
+                              class="s-table__reveal"
                               @click.stop="copyReceiptNumber(receipt.receiptNumber)"
                             >
                               <CopyIcon :size="14" :stroke-width="1.75" aria-hidden="true" />
@@ -288,37 +289,31 @@
                           </span>
                         </td>
                         <td>
-                          <span class="s-table__primary">{{
+                          <span class="s-table__primary s-table__clip">{{
                             receipt.customerName || 'Walk-in customer'
                           }}</span>
-                          <span
-                            v-if="receipt.customerPhone || receipt.customerEmail"
-                            class="s-table__secondary"
-                          >
-                            {{
-                              receipt.customerPhone
-                                ? maskPhone(receipt.customerPhone)
-                                : receipt.customerEmail
-                            }}
-                          </span>
                         </td>
-                        <td class="s-hide-md">{{ formatDate(receipt.date) }}</td>
-                        <td class="s-hide-lg">
-                          <span class="s-table__secondary">
+                        <td class="s-hide-md s-table__muted s-table__nowrap">
+                          {{ formatDate(receipt.date) }}
+                        </td>
+                        <td class="s-hide-lg s-table__muted">
+                          <span class="s-table__clip">
                             {{ getReceiptLineItemsPreview(receipt) || EMPTY_CELL }}
                           </span>
                         </td>
                         <td class="s-table__num">
                           <span class="s-table__primary">{{ formatCurrency(receipt.total) }}</span>
                         </td>
-                        <td class="s-hide-lg">{{ formatPaymentMethod(receipt.paymentMethod) }}</td>
+                        <td class="s-hide-lg s-table__muted">
+                          {{ formatPaymentMethod(receipt.paymentMethod) }}
+                        </td>
                         <td>
                           <SBadge :tone="getReceiptStatusTone(receipt.status)" dot>
                             {{ getReceiptStatusLabel(receipt.status) }}
                           </SBadge>
                         </td>
-                        <td class="s-hide-lg">
-                          <span class="s-table__secondary">
+                        <td class="s-hide-lg s-table__muted">
+                          <span class="s-table__clip">
                             {{
                               receipt.createdByUserName ||
                               getCreatorName(receipt.actualCreator || receipt.createdBy)
