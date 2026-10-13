@@ -894,16 +894,15 @@ html.dark .mk {
   flex-direction: column;
   min-width: 0;
   padding: 6px;
-  border: 1px solid var(--mk-edge);
   border-radius: var(--mk-radius);
-  background: var(--mk-page);
-  transition: transform 500ms var(--mk-spring), border-color var(--s-duration) var(--s-ease-out);
+  background: var(--mk-well);
+  transition: transform 500ms var(--mk-spring), box-shadow var(--s-duration) var(--s-ease-out);
 }
 
 .mkb__card::before {
   content: '';
   position: absolute;
-  top: -1px;
+  top: 0;
   left: 12%;
   right: 12%;
   height: 1px;
@@ -914,7 +913,7 @@ html.dark .mk {
 
 .mkb__card:hover {
   transform: translateY(-2px);
-  border-color: var(--mk-edge-hi);
+  box-shadow: var(--mk-lift);
 }
 
 .mkb__card:hover::before {
@@ -970,8 +969,8 @@ html.dark .mk {
   width: 44px;
   height: 44px;
   margin: var(--s-space-1-5);
-  border: 1px solid var(--mk-edge-hi);
   border-radius: var(--s-radius-lg);
+  background: var(--mk-page);
   color: var(--s-accent);
   transition: background-color var(--s-duration) var(--s-ease-out),
     color var(--s-duration) var(--s-ease-out);
@@ -999,7 +998,7 @@ html.dark .mk {
       color-mix(in srgb, var(--s-accent) 7%, transparent),
       transparent 70%
     ),
-    var(--s-surface-2);
+    var(--mk-page);
   font-size: 0.8125rem;
 }
 
@@ -1272,13 +1271,12 @@ html.dark .mkb-wa__store {
 .mkb-net__node {
   position: absolute;
   padding: 4px 10px;
-  border: 1px solid var(--s-border);
   border-radius: var(--s-radius-full);
   background: var(--mk-page);
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--s-text);
-  box-shadow: var(--s-shadow-sm);
+  box-shadow: var(--mk-lift);
   transform: translate(-50%, -50%);
 }
 
@@ -1550,8 +1548,8 @@ html.dark .mkb-staff__avatar {
   position: relative;
   overflow: hidden;
   padding: clamp(var(--s-space-4), 5vw, 72px) clamp(var(--s-space-3), 5vw, 72px) 0;
-  border: 1px solid rgb(142 162 255 / 0.18);
   border-radius: clamp(20px, 2.4vw, 32px);
+  box-shadow: var(--mk-sheen);
   background: radial-gradient(ellipse 55% 70% at 72% 38%, rgb(61 99 242 / 0.32), transparent 70%),
     linear-gradient(180deg, #0f1d4a 0%, #0a1230 100%);
   color: #fff;
@@ -1584,7 +1582,6 @@ html.dark .mkb-staff__avatar {
 }
 
 .mkp .mk-eyebrow {
-  border-color: rgb(142 162 255 / 0.3);
   background: rgb(255 255 255 / 0.04);
   color: #b3c1ff;
 }
@@ -1612,20 +1609,18 @@ html.dark .mkb-staff__avatar {
   gap: var(--s-space-1);
   min-height: var(--s-touch);
   padding-inline: var(--s-space-2);
-  border: 1px solid rgb(142 162 255 / 0.28);
   border-radius: var(--s-radius-lg);
-  background: rgb(255 255 255 / 0.06);
+  background: rgb(255 255 255 / 0.08);
+  box-shadow: var(--mk-sheen);
   font: 600 0.9375rem / 1 var(--s-font-sans);
   color: #fff;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  transition: background-color var(--s-duration-fast) var(--s-ease),
-    border-color var(--s-duration-fast) var(--s-ease);
+  transition: background-color var(--s-duration-fast) var(--s-ease);
 }
 
 .mkp__link:hover {
-  border-color: rgb(179 193 255 / 0.5);
-  background: rgb(255 255 255 / 0.1);
+  background: rgb(255 255 255 / 0.14);
 }
 
 .mkp__link svg {
@@ -1715,8 +1710,8 @@ html.dark .mkb-staff__avatar {
   gap: var(--s-space-1);
   width: min(44%, 232px);
   padding: var(--s-space-2);
-  border: 1px solid rgb(179 193 255 / 0.32);
   border-radius: var(--s-radius-xl);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.14), 0 24px 48px -24px rgb(0 0 0 / 0.6);
   background: linear-gradient(160deg, rgb(255 255 255 / 0.12), rgb(255 255 255 / 0.03)),
     rgb(10 18 48 / 0.6);
   backdrop-filter: blur(16px);
@@ -1789,7 +1784,6 @@ html.dark .mkb-staff__avatar {
 
 .mkp__sale .mkp__chip {
   margin-left: auto;
-  border: 1px solid rgb(74 222 128 / 0.35);
   background: rgb(74 222 128 / 0.12);
   color: #86efac;
 }
@@ -1820,21 +1814,20 @@ html.dark .mkb-staff__avatar {
   gap: var(--s-space-1);
   width: min(38%, 204px);
   padding: 8px var(--s-space-1-5) 8px 8px;
-  border: 1px solid rgb(142 162 255 / 0.16);
   border-radius: var(--s-radius-lg);
-  background: rgb(255 255 255 / 0.04);
+  background: rgb(255 255 255 / 0.05);
+  box-shadow: var(--mk-sheen);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   opacity: 0.55;
   transform: translate(-50%, -50%) scale(0.97);
   transition: opacity 500ms var(--mk-spring), transform 600ms var(--mk-spring),
-    border-color 400ms var(--s-ease-out), background-color 400ms var(--s-ease-out);
+    background-color 400ms var(--s-ease-out);
 }
 
 .mkp__node.is-lit {
   opacity: 1;
-  border-color: rgb(179 193 255 / 0.4);
-  background: rgb(255 255 255 / 0.08);
+  background: rgb(255 255 255 / 0.1);
   transform: translate(-50%, -50%) scale(1);
 }
 
@@ -1964,16 +1957,14 @@ html.dark .mkb-staff__avatar {
   place-items: center;
   width: 32px;
   height: 32px;
-  border: 1px solid rgb(142 162 255 / 0.18);
   border-radius: 9px;
-  background: rgb(255 255 255 / 0.04);
+  background: rgb(255 255 255 / 0.06);
+  box-shadow: var(--mk-sheen);
   color: rgb(255 255 255 / 0.6);
-  transition: background-color 400ms var(--s-ease-out), color 400ms var(--s-ease-out),
-    border-color 400ms var(--s-ease-out);
+  transition: background-color 400ms var(--s-ease-out), color 400ms var(--s-ease-out);
 }
 
 .mkp__question.is-active .mkp__q-icon {
-  border-color: rgb(179 193 255 / 0.45);
   background: rgb(61 99 242 / 0.45);
   color: #fff;
 }
@@ -2083,7 +2074,6 @@ html.dark .mkb-staff__avatar {
   isolation: isolate;
   overflow: hidden;
   padding: clamp(var(--s-space-5), 6vw, 88px) clamp(var(--s-space-2), 5vw, 72px);
-  border: 1px solid var(--mk-edge);
   border-radius: clamp(20px, 2.4vw, 32px);
   background: radial-gradient(60% 50% at 50% 100%, rgb(142 162 255 / 0.45), transparent 70%),
     linear-gradient(180deg, #f3f5ff 0%, #e6ebff 100%);
@@ -2130,8 +2120,8 @@ html.dark .mks__panel {
   max-width: 100%;
   margin: var(--s-space-4) auto var(--s-space-3);
   padding: 5px;
-  border: 1px solid var(--mk-edge);
   border-radius: var(--s-radius-xl);
+  box-shadow: var(--mk-lift);
   background: color-mix(in srgb, var(--mk-page) 70%, transparent);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -2146,14 +2136,14 @@ html.dark .mks__panel {
   min-height: 40px;
   padding: 0 var(--s-space-2);
   overflow: hidden;
-  border: 1px solid transparent;
+  border: 0;
   border-radius: var(--s-radius-lg);
   background: transparent;
   font: 500 0.875rem / 1 var(--s-font-sans);
   color: var(--s-text-muted);
   cursor: pointer;
   transition: background-color var(--s-duration) var(--s-ease-out),
-    border-color var(--s-duration) var(--s-ease-out), color var(--s-duration) var(--s-ease-out);
+    box-shadow var(--s-duration) var(--s-ease-out), color var(--s-duration) var(--s-ease-out);
 }
 
 .mks__step:hover {
@@ -2161,8 +2151,8 @@ html.dark .mks__panel {
 }
 
 .mks__step.is-active {
-  border-color: var(--mk-edge);
   background: var(--mk-page);
+  box-shadow: 0 1px 2px rgb(16 24 40 / 0.06), 0 4px 12px -6px rgb(16 24 40 / 0.16);
   font-weight: 600;
   color: var(--s-text);
 }
@@ -2217,9 +2207,9 @@ html.dark .mks__panel {
   max-width: 1000px;
   margin-inline: auto;
   padding: clamp(var(--s-space-2), 2.4vw, var(--s-space-3));
-  border: 1px solid var(--mk-edge);
   border-radius: var(--mk-radius);
   background: var(--mk-page);
+  box-shadow: var(--mk-lift);
 }
 
 .mks__info {
@@ -2338,16 +2328,14 @@ html.dark .mks__btn {
 
 .mks__chip {
   padding: 7px 12px;
-  border: 1px solid var(--mk-edge);
   border-radius: var(--s-radius);
-  background: var(--mk-page);
+  background: var(--mk-well);
   font: 500 0.75rem / 1 var(--s-font-mono);
   color: var(--s-text-2);
   white-space: nowrap;
 }
 
 .mks__chip.is-on {
-  border-color: var(--mk-edge-hi);
   background: color-mix(in srgb, var(--s-accent) 8%, var(--mk-page));
   color: var(--s-accent);
 }
@@ -2421,8 +2409,8 @@ html.dark .mks__btn {
   overflow: hidden;
   padding: clamp(var(--s-space-5), 6vw, 88px) clamp(var(--s-space-2), 4vw, 56px)
     clamp(var(--s-space-4), 4vw, 56px);
-  border: 1px solid rgb(142 162 255 / 0.14);
   border-radius: clamp(20px, 2.4vw, 32px);
+  box-shadow: var(--mk-sheen);
   background: radial-gradient(50% 45% at 50% 100%, rgb(61 99 242 / 0.35), transparent 70%),
     linear-gradient(180deg, #0b1020 0%, #070a14 100%);
   color: #fff;
@@ -2440,7 +2428,6 @@ html.dark .mks__btn {
 }
 
 .mki .mk-eyebrow {
-  border-color: rgb(142 162 255 / 0.3);
   background: rgb(255 255 255 / 0.04);
   color: #b3c1ff;
 }
@@ -2593,9 +2580,9 @@ html.dark .mks__btn {
   gap: 6px;
   width: 26%;
   padding: var(--s-space-1-5) var(--s-space-2);
-  border: 1px solid rgb(142 162 255 / 0.35);
   border-radius: var(--s-radius-lg);
   background: rgb(15 23 50 / 0.72);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.1), 0 20px 40px -24px rgb(0 0 0 / 0.7);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
