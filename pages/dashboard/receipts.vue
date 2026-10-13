@@ -310,7 +310,6 @@
                         </td>
                         <td class="s-table__num">
                           <span class="s-table__primary">{{ formatCurrency(receipt.total) }}</span>
-                          <ReceiptProfitHint :receipt="receipt" />
                         </td>
                         <td class="s-hide-lg">{{ formatPaymentMethod(receipt.paymentMethod) }}</td>
                         <td>
@@ -548,7 +547,6 @@
 </template>
 
 <script setup lang="ts">
-import ReceiptProfitHint from '~/components/receipts/ReceiptProfitHint.vue'
 import BulkDeleteConfirmModal from '~/components/dashboard/BulkDeleteConfirmModal.vue'
 import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { PencilSquareIcon, ChevronRightIcon } from '~/utils/app-icons'
