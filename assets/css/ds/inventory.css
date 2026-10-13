@@ -391,8 +391,9 @@
   width: var(--s-space-4);
   height: var(--s-space-4);
   border-radius: var(--s-radius);
-  background: var(--s-accent-soft);
-  color: var(--s-accent);
+  background: var(--s-surface-2);
+  box-shadow: inset 0 0 0 1px var(--s-line);
+  color: var(--s-text-2);
 }
 
 .s-category-cell__text {
