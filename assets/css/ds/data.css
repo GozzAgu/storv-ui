@@ -150,13 +150,20 @@
   box-shadow: var(--s-focus-ring);
 }
 
-/* ── Header metrics strip ────────────────────────────────── */
-/* A slim row of figures on the canvas, no card: faint rules between figures, and on narrow
-   screens the row scrolls sideways instead of stacking. */
-.s-metrics {
-  display: flex;
+/* ── Header metrics panel ────────────────────────────────── */
+/* One rounded panel split into equal cells by hairlines (the panel background shows through a 1px
+   grid gap). Each cell: a status pip and quiet label, then a large tabular figure. On narrow
+   screens the cells keep a minimum width and the panel scrolls sideways. */
+.s-metrics:not(.s-metrics--inline) {
+  display: grid;
+  grid-auto-columns: minmax(148px, 1fr);
+  grid-auto-flow: column;
+  gap: 1px;
   margin: 0;
   overflow-x: auto;
+  border-radius: calc(var(--s-radius-xl) + var(--s-space-half));
+  background: var(--s-line);
+  box-shadow: 0 0 0 1px var(--s-line), 0 1px 2px rgb(0 0 0 / 0.04);
   scrollbar-width: none;
 }
 
@@ -164,29 +171,54 @@
   display: none;
 }
 
-.s-metrics__item {
+.s-metrics:not(.s-metrics--inline) .s-metrics__item {
+  --s-metrics-pip: var(--s-border-strong);
   display: flex;
-  flex: none;
   flex-direction: column;
-  gap: var(--s-space-quarter);
+  gap: var(--s-space-1);
   min-width: 0;
-  padding: 0 var(--s-space-3);
-  box-shadow: inset 1px 0 0 var(--s-line);
+  padding: var(--s-space-2) calc(var(--s-space-2) + var(--s-space-half));
+  background: linear-gradient(
+    180deg,
+    var(--s-surface) 0%,
+    color-mix(in srgb, var(--s-text) 1.5%, var(--s-surface)) 100%
+  );
 }
 
-.s-metrics__item:first-child {
-  padding-left: 0;
-  box-shadow: none;
+.s-metrics:not(.s-metrics--inline) .s-metrics__item:has(.s-metrics__value--warning) {
+  --s-metrics-pip: var(--s-warning);
+}
+
+.s-metrics:not(.s-metrics--inline) .s-metrics__item:has(.s-metrics__value--success) {
+  --s-metrics-pip: var(--s-success);
+}
+
+.s-metrics:not(.s-metrics--inline) .s-metrics__item:has(.s-metrics__value--error) {
+  --s-metrics-pip: var(--s-error);
 }
 
 .s-metrics__label {
   overflow: hidden;
   color: var(--s-text-muted);
-  font: var(--s-text-caption);
-  letter-spacing: var(--s-tracking-caps);
+  font: var(--s-text-small);
+  font-weight: 500;
   text-overflow: ellipsis;
-  text-transform: uppercase;
   white-space: nowrap;
+}
+
+.s-metrics:not(.s-metrics--inline) .s-metrics__label {
+  display: flex;
+  align-items: center;
+  gap: var(--s-space-1);
+}
+
+.s-metrics:not(.s-metrics--inline) .s-metrics__label::before {
+  content: '';
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 2px;
+  background: var(--s-metrics-pip);
 }
 
 .s-metrics__value {
@@ -198,6 +230,11 @@
   letter-spacing: var(--s-tracking-tight);
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.s-metrics:not(.s-metrics--inline) .s-metrics__value {
+  font: 600 1.375rem/1.75rem var(--s-font-sans);
+  letter-spacing: -0.025em;
 }
 
 .s-metrics__value--warning {
@@ -212,59 +249,35 @@
   color: var(--s-error);
 }
 
-/* One line under the page title: "Folders 6 | Products 16 | ..." */
-.s-page-header + .s-metrics--line {
-  margin-top: calc(var(--s-space-1-5) * -1);
-}
-
-.s-metrics--line .s-metrics__item {
-  flex-direction: row;
-  align-items: baseline;
-  gap: var(--s-space-half);
-  padding: 0 var(--s-space-1-5);
-}
-
-.s-metrics--line .s-metrics__item:first-child {
-  padding-left: 0;
-}
-
-.s-metrics--line .s-metrics__label {
-  font: var(--s-text-small);
-  letter-spacing: 0;
-  text-transform: none;
-}
-
-.s-metrics.s-metrics--line .s-metrics__value {
-  font: var(--s-text-body);
-  font-weight: 600;
-  letter-spacing: 0;
-}
-
 /* Inside a card, sheet or panel: same type, no surface of its own */
 .s-metrics--inline {
   display: flex;
   flex-wrap: wrap;
   gap: var(--s-space-1) var(--s-space-4);
+  margin: 0;
   overflow: visible;
-  border-radius: 0;
-  background: none;
-  box-shadow: none;
 }
 
 .s-metrics--inline .s-metrics__item {
-  padding: 0;
-  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-space-quarter);
+  min-width: 0;
+}
+
+.s-metrics--inline .s-metrics__label {
+  font: var(--s-text-caption);
+  letter-spacing: var(--s-tracking-caps);
+  text-transform: uppercase;
 }
 
 @media (max-width: 639px) {
-  /* Runs to the screen edges so a row wider than the phone visibly scrolls */
   .s-metrics:not(.s-metrics--inline) {
-    margin-inline: calc(var(--s-space-2) * -1);
-    padding-inline: var(--s-space-2);
+    grid-auto-columns: minmax(128px, 1fr);
   }
 
-  .s-metrics__item {
-    padding: 0 var(--s-space-2);
+  .s-metrics:not(.s-metrics--inline) .s-metrics__item {
+    padding: var(--s-space-1-5) var(--s-space-2);
   }
 }
 

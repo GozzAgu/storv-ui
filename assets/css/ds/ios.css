@@ -101,14 +101,8 @@
 
   /* ── Stats: header metric strips stay a slim sideways-scrolling row (see data.css) ── */
 
-  .s-metrics__label {
-    font: 600 0.6875rem/1rem var(--s-font-sans);
-    letter-spacing: 0.06em;
-  }
-
-  .s-metrics:not(.s-metrics--inline, .s-metrics--line) .s-metrics__value {
-    font: 700 1rem/1.5rem var(--s-font-sans);
-    letter-spacing: -0.01em;
+  .s-metrics:not(.s-metrics--inline) .s-metrics__value {
+    font: 600 1.125rem/1.5rem var(--s-font-sans);
     text-overflow: clip;
   }
 
