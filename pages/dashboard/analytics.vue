@@ -2115,16 +2115,20 @@ const loadAnalytics = async (options?: { force?: boolean }) => {
       departmentsStore.fetchDepartments(options),
     ]
 
+    // Side data only feeds insight tiles; a failure here must not blank the sales figures.
+    const optional = (task: Promise<unknown>, label: string) =>
+      task.catch((error) => console.warn(`Reports: ${label} unavailable`, error))
+
     if (userStore.userData) {
-      tasks.push(buybacksStore.fetchCustomerBuybacks(options?.force === true))
+      tasks.push(optional(buybacksStore.fetchCustomerBuybacks(options?.force === true), 'trade-ins'))
     }
     if (canUseSubscriptionFeature('seller_loans')) {
-      tasks.push(sellerLoansStore.fetchSellerLoanOuts(options?.force === true))
+      tasks.push(optional(sellerLoansStore.fetchSellerLoanOuts(options?.force === true), 'stock loans'))
     }
     if (canUseSubscriptionFeature('customer_balance')) {
-      tasks.push(customerAccountsStore.fetchAccountsForStore())
+      tasks.push(optional(customerAccountsStore.fetchAccountsForStore(), 'customer balances'))
     }
-    tasks.push(storefrontStore.fetchAnalytics(options))
+    tasks.push(optional(storefrontStore.fetchAnalytics(options), 'storefront views'))
 
     await Promise.all(tasks)
     receipts.value = receiptsStore.receipts
