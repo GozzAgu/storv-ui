@@ -18,9 +18,9 @@
   gap: var(--s-space-1);
   flex-shrink: 0;
   height: var(--s-btn-h);
-  padding: 0 calc(var(--s-space-1-5) + 2px);
+  padding: 0 var(--s-space-1-5);
   border: 0;
-  border-radius: var(--s-radius-full);
+  border-radius: var(--s-radius);
   font: var(--s-text-body);
   font-family: var(--s-font-sans);
   font-weight: 500;
@@ -61,8 +61,8 @@
 .s-btn--sm {
   gap: var(--s-space-half);
   height: var(--s-btn-h-sm);
-  padding: 0 calc(var(--s-space-1) + 2px);
-  border-radius: var(--s-radius-full);
+  padding: 0 var(--s-space-1);
+  border-radius: var(--s-radius-sm);
   font: var(--s-text-small);
   font-weight: 500;
 }
@@ -74,7 +74,7 @@
 
 .s-btn--lg {
   height: var(--s-btn-h-lg);
-  padding: 0 calc(var(--s-space-2) + var(--s-space-half));
+  padding: 0 var(--s-space-2);
   font: var(--s-text-body);
   font-weight: 500;
 }
@@ -157,7 +157,7 @@
   height: var(--s-btn-h);
   padding: 0;
   border: 0;
-  border-radius: var(--s-radius-full);
+  border-radius: var(--s-radius);
   background: transparent;
   color: var(--s-text-2);
   cursor: pointer;
@@ -193,7 +193,7 @@
 .s-icon-btn--sm {
   width: var(--s-btn-h-sm);
   height: var(--s-btn-h-sm);
-  border-radius: var(--s-radius-full);
+  border-radius: var(--s-radius-sm);
 }
 
 .s-icon-btn--sm svg {
@@ -1337,7 +1337,7 @@ textarea.s-control__input {
   width: 28px;
   height: 28px;
   margin: -2px -4px 0 0;
-  border-radius: var(--s-radius-full);
+  border-radius: var(--s-radius);
   color: var(--s-text-muted);
   box-shadow: inset 0 0 0 1px var(--s-divider);
 }

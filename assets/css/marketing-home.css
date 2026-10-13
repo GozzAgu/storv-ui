@@ -306,7 +306,7 @@ html.dark .mk {
   gap: 8px;
   min-height: var(--s-touch);
   padding-inline: var(--s-space-3);
-  border-radius: var(--s-radius-full);
+  border-radius: var(--s-radius-lg);
   font: 600 0.9375rem / 1.25rem var(--s-font-sans);
   text-decoration: none;
   transition: background var(--s-duration) var(--s-ease-out),
@@ -669,6 +669,7 @@ html.dark .mk {
   .mkh__btn {
     min-height: 40px;
     padding-inline: 18px;
+    border-radius: 10px;
     font-size: 0.875rem;
   }
 }
