@@ -158,7 +158,7 @@ const faq: MkFaqItem[] = [
   },
   {
     q: 'What happens if my internet goes off?',
-    a: "Keep selling. Storvv shows that you're offline, saves your sales and stock changes on the device, and syncs them automatically when you're back online.",
+    a: 'Storvv needs a connection to complete a sale, but it works on mobile data, so a phone hotspot is enough to keep selling. If your connection drops, Storvv tells you straight away, and everything already saved stays safe in the cloud.',
   },
   {
     q: 'Do I need special hardware?',

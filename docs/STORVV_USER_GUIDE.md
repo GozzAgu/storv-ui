@@ -1035,7 +1035,7 @@ Open **Notifications** from the account menu or the bell's **View all**. Use **I
 
 ### 20.3 Working offline
 
-If your connection drops, Storvv shows **"You're offline"**. Sales and inventory changes you make are saved and sync automatically when you're back online, and the banner shows how many are waiting.
+If your connection drops, Storvv shows **"You're offline"**. You can still view stock and sales already loaded on this device, but you need a connection to complete a sale. Some changes, such as adding a product, are saved on the device and sync automatically when you're back online, and the banner shows how many are waiting. If your shop's internet is unreliable, a phone hotspot is enough to keep selling.
 
 ### 20.4 Billing messages (owner)
 

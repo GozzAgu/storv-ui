@@ -3,7 +3,8 @@
     <div class="s-banner__lead">
       <Zap class="s-banner__icon" :size="16" :stroke-width="2" aria-hidden="true" />
       <p class="s-banner__text">
-        <strong>Offline Mode</strong> — Sales queued locally and sync when you’re back online.
+        <strong>You’re offline.</strong> Reconnect to complete sales. Anything waiting will sync
+        when you’re back online.
       </p>
     </div>
     <SBadge v-if="hasPendingSync" tone="warning">{{ pendingCount }} queued</SBadge>

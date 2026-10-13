@@ -25,8 +25,8 @@
         <NuxtLink to="/features" class="mkh__announce mkh-in" style="--i: 1">
           <Sparkles :size="12" aria-hidden="true" />
           <span
-            >Keeps selling offline<span class="mkh__announce-more"
-              >, syncs the moment you're back</span
+            >Know what's left and who owes you<span class="mkh__announce-more"
+              >, in every branch</span
             ></span
           >
         </NuxtLink>
