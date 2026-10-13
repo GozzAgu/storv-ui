@@ -18,7 +18,9 @@ export interface LoyaltyMemberView {
 /** The flag only shows the screens; the server gate decides (routes 404 when off). */
 export function loyaltyUiFlag(): boolean {
   if (import.meta.server || isDemoModeActive()) return false
-  return useRuntimeConfig().public.loyalty === true
+  // NUXT_PUBLIC_LOYALTY=1 overrides the config at runtime and arrives as the number 1.
+  const flag: unknown = useRuntimeConfig().public.loyalty
+  return flag === true || flag === 1 || flag === '1' || flag === 'true'
 }
 
 /** Client for /api/loyalty/*. Points are only ever changed by the server. */
