@@ -202,7 +202,7 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
     border-width: 0;
     border-radius: var(--s-radius-2xl) var(--s-radius-2xl) 0 0;
-    box-shadow: 0 -8px 32px -8px rgb(15 23 42 / 0.2);
+    box-shadow: var(--s-overlay-ring), 0 -8px 32px -8px rgb(0 0 0 / 0.2);
   }
 
   /* Side drawers are full flows (new sale, item details): open them at the large detent */
@@ -223,7 +223,7 @@
   }
 
   .s-dialog__head {
-    padding: var(--s-space-2) var(--s-space-2) 0;
+    padding: var(--s-space-2) var(--s-space-2) var(--s-space-1-5);
   }
 
   .s-dialog__title {
@@ -237,6 +237,7 @@
   .s-dialog__foot {
     padding: var(--s-space-1-5) var(--s-space-2);
     border-top-color: var(--s-ios-hairline);
+    border-radius: 0;
   }
 
   .s-dialog__foot > .s-btn {

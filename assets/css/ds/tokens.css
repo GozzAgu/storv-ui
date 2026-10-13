@@ -79,6 +79,15 @@
   --s-glass-shadow-float: var(--s-glass-highlight), 0 0 0 1px var(--s-glass-hairline),
     0 24px 56px -16px rgb(0 0 0 / 0.22), 0 6px 14px -6px rgb(0 0 0 / 0.08);
 
+  /* Overlays (menus, dialogs, drawers): a near-solid panel, a hairline ring and a deep soft shadow */
+  --s-overlay-bg: rgb(255 255 255 / 0.92);
+  --s-overlay-ring: 0 0 0 1px rgb(0 0 0 / 0.07);
+  --s-overlay-shadow: var(--s-overlay-ring), 0 1px 1px rgb(0 0 0 / 0.02),
+    0 12px 28px -10px rgb(0 0 0 / 0.16), 0 32px 72px -24px rgb(0 0 0 / 0.22);
+  --s-overlay-band: rgb(0 0 0 / 0.025);
+  --s-overlay-tint: rgb(0 0 0 / 0.04);
+  --s-overlay-thumb: #ffffff;
+
   /* Focus */
   --s-focus-ring: 0 0 0 3px rgb(61 99 242 / 0.28);
 
@@ -124,7 +133,7 @@
   --s-shadow-sm: 0 1px 2px rgb(16 24 40 / 0.05);
   --s-shadow-md: 0 4px 12px -2px rgb(16 24 40 / 0.08), 0 2px 4px -2px rgb(16 24 40 / 0.04);
   --s-shadow-lg: 0 16px 40px -8px rgb(16 24 40 / 0.16), 0 4px 8px -4px rgb(16 24 40 / 0.06);
-  --s-scrim: rgb(16 24 40 / 0.45);
+  --s-scrim: rgb(12 12 14 / 0.32);
 
   /* Icons */
   --s-icon-stroke: 1.5;
@@ -187,6 +196,14 @@ html.dark {
     0 24px 56px -16px rgb(0 0 0 / 0.7), 0 6px 14px -6px rgb(0 0 0 / 0.4);
   --s-btn-primary-glow: none;
 
+  --s-overlay-bg: rgb(22 22 22 / 0.94);
+  --s-overlay-ring: 0 0 0 1px rgb(255 255 255 / 0.08);
+  --s-overlay-shadow: var(--s-overlay-ring), inset 0 1px 0 rgb(255 255 255 / 0.04),
+    0 12px 28px -10px rgb(0 0 0 / 0.6), 0 32px 72px -24px rgb(0 0 0 / 0.75);
+  --s-overlay-band: rgb(255 255 255 / 0.025);
+  --s-overlay-tint: rgb(255 255 255 / 0.05);
+  --s-overlay-thumb: rgb(255 255 255 / 0.1);
+
   --s-text: #f5f5f5;
   --s-text-2: #bababa;
   --s-text-muted: #8f8f8f;
@@ -223,7 +240,7 @@ html.dark {
   --s-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3);
   --s-shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.45);
   --s-shadow-lg: 0 16px 40px -8px rgb(0 0 0 / 0.6);
-  --s-scrim: rgb(0 0 0 / 0.65);
+  --s-scrim: rgb(0 0 0 / 0.6);
 }
 
 @media (prefers-reduced-motion: reduce) {

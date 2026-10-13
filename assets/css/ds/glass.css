@@ -38,16 +38,17 @@ html:has(.s-shell.ds-root) body,
 }
 /* ── Frosted chrome and overlays ───────────────────────────────────────── */
 
-.s-dialog,
 .s-toast {
   background: var(--s-glass-strong);
   -webkit-backdrop-filter: var(--s-glass-frost);
   backdrop-filter: var(--s-glass-frost);
 }
 
-/* Menus get a heavier frost so text stays crisp over whatever page sits behind them */
+/* Menus, dialogs and drawers are near-solid with a heavy frost, so their text stays crisp over
+   whatever page sits behind them and only a faint impression of it shows through. */
+.s-dialog,
 .s-popover {
-  background: var(--s-glass-strong);
+  background: var(--s-overlay-bg);
   -webkit-backdrop-filter: var(--s-glass-frost-heavy);
   backdrop-filter: var(--s-glass-frost-heavy);
 }
@@ -74,7 +75,6 @@ html:has(.s-shell.ds-root) body,
   pointer-events: none;
 }
 
-.s-popover,
 .s-toast {
   border-color: var(--s-glass-hairline);
   box-shadow: var(--s-glass-highlight), var(--s-glass-shadow-float);
@@ -85,13 +85,11 @@ html:has(.s-shell.ds-root) body,
 .s-dialog {
   --s-surface-2: var(--s-field-bg);
   --s-surface-hover: var(--s-field-bg-hover);
-  border-color: var(--s-glass-hairline);
-  box-shadow: var(--s-glass-shadow-float);
 }
 
 .s-dialog__scrim {
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
 }
 
 /* Phones keep a solid top bar (a blurred one samples the web view edge under the status bar). */
@@ -120,6 +118,7 @@ html:has(.s-shell.ds-root) body,
   html.dark {
     --s-glass: var(--s-surface);
     --s-glass-strong: var(--s-surface);
+    --s-overlay-bg: var(--s-surface);
     --s-glass-frost: none;
     --s-glass-frost-heavy: none;
   }

@@ -1091,28 +1091,29 @@ textarea.s-control__input {
 .s-popover--start {
   left: 0;
   right: auto;
+  transform-origin: top left;
 }
 
+/* Rows sit 6px inside a 16px panel, so their 10px corners run parallel to the panel's. */
 .s-popover {
   width: 280px;
   max-width: calc(100vw - var(--s-space-2) * 2);
-  padding: var(--s-space-1);
-  border: 1px solid var(--s-border);
-  border-radius: var(--s-radius-lg);
-  background: var(--s-surface);
-  box-shadow: var(--s-shadow-lg);
+  padding: 6px;
+  border: 0;
+  border-radius: var(--s-radius-xl);
+  background: var(--s-overlay-bg);
+  box-shadow: var(--s-overlay-shadow);
   color: var(--s-text);
   font: var(--s-text-body);
   font-family: var(--s-font-sans);
+  transform-origin: top right;
 }
 
 .s-popover__label {
-  padding: var(--s-space-1) var(--s-space-1) var(--s-space-half);
+  padding: var(--s-space-1) 10px var(--s-space-half);
   color: var(--s-text-muted);
   font: var(--s-text-caption);
-  font-weight: 600;
-  letter-spacing: var(--s-tracking-caps);
-  text-transform: uppercase;
+  font-weight: 500;
 }
 
 .s-popover__empty {
@@ -1123,20 +1124,20 @@ textarea.s-control__input {
 
 .s-popover__group,
 .s-popover__foot {
-  margin-top: var(--s-space-1);
-  padding-top: var(--s-space-1);
-  border-top: 1px solid var(--s-border);
+  margin: 6px -6px 0;
+  padding: 6px 6px 0;
+  border-top: 1px solid var(--s-divider);
 }
 
 .s-menu-row {
   display: flex;
   align-items: center;
-  gap: var(--s-space-1);
+  gap: 10px;
   width: 100%;
-  min-height: 40px;
-  padding: var(--s-space-1);
+  min-height: 36px;
+  padding: 6px 10px;
   border: 0;
-  border-radius: var(--s-radius);
+  border-radius: 10px;
   background: transparent;
   color: var(--s-text);
   font: var(--s-text-body);
@@ -1144,18 +1145,24 @@ textarea.s-control__input {
   text-align: left;
   text-decoration: none;
   cursor: pointer;
-  transition: background-color var(--s-duration-fast) var(--s-ease);
+  transition: background-color var(--s-duration-fast) var(--s-ease),
+    color var(--s-duration-fast) var(--s-ease);
 }
 
 .s-menu-row:hover,
 .s-menu-row:focus-visible {
   outline: none;
-  background: var(--s-surface-hover);
+  background: var(--s-overlay-tint);
 }
 
 .s-menu-row--active,
 .s-menu-row[aria-selected='true'] {
-  background: var(--s-accent-soft);
+  background: var(--s-overlay-tint);
+}
+
+.s-menu-row--active .s-menu-row__icon,
+.s-menu-row[aria-selected='true'] .s-menu-row__icon {
+  color: var(--s-text);
 }
 
 .s-menu-row--danger {
@@ -1170,9 +1177,15 @@ textarea.s-control__input {
 .s-menu-row__icon {
   flex-shrink: 0;
   color: var(--s-text-muted);
+  transition: color var(--s-duration-fast) var(--s-ease);
 }
 
-.s-menu-row--danger .s-menu-row__icon {
+.s-menu-row:hover .s-menu-row__icon {
+  color: var(--s-text-2);
+}
+
+.s-menu-row--danger .s-menu-row__icon,
+.s-menu-row--danger:hover .s-menu-row__icon {
   color: currentColor;
 }
 
@@ -1202,7 +1215,7 @@ textarea.s-control__input {
 
 .s-menu-row__check {
   flex-shrink: 0;
-  color: var(--s-accent);
+  color: var(--s-text);
 }
 
 .s-pop-enter-active,
@@ -1214,7 +1227,7 @@ textarea.s-control__input {
 .s-pop-enter-from,
 .s-pop-leave-to {
   opacity: 0;
-  transform: translateY(-4px);
+  transform: translateY(-4px) scale(0.98);
 }
 
 /* ── Dialog / sheet ────────────────────────────────────────────────────── */
@@ -1253,10 +1266,10 @@ textarea.s-control__input {
   flex-direction: column;
   width: 100%;
   max-height: 100%;
-  border: 1px solid var(--s-border);
-  border-radius: var(--s-radius-lg);
-  background: var(--s-surface);
-  box-shadow: var(--s-shadow-lg);
+  border: 0;
+  border-radius: var(--s-radius-xl);
+  background: var(--s-overlay-bg);
+  box-shadow: var(--s-overlay-shadow);
   color: var(--s-text);
   font: var(--s-text-body);
   font-family: var(--s-font-sans);
@@ -1275,22 +1288,23 @@ textarea.s-control__input {
   max-width: 800px;
 }
 
-/* Every side drawer shares one width, whatever size it was given */
+/* Every side drawer shares one width, whatever size it was given. On wider screens it floats a
+   few pixels in from the edges as a full-height panel rather than a slab glued to the window. */
+.s-dialog-layer--right {
+  padding: calc(var(--s-space-1) + env(safe-area-inset-top, 0px)) var(--s-space-1)
+    calc(var(--s-space-1) + env(safe-area-inset-bottom, 0px));
+}
+
 .s-dialog-layer--right .s-dialog {
   max-width: var(--s-drawer-w);
   height: 100%;
   max-height: none;
-  border-radius: 0;
-  border-width: 0 0 0 1px;
-  padding-top: env(safe-area-inset-top, 0px);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 .s-dialog-layer--bottom .s-dialog {
   max-width: none;
   max-height: 90%;
-  border-width: 1px 0 0;
-  border-radius: var(--s-radius-lg) var(--s-radius-lg) 0 0;
+  border-radius: var(--s-radius-xl) var(--s-radius-xl) 0 0;
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
@@ -1298,7 +1312,8 @@ textarea.s-control__input {
   display: flex;
   align-items: flex-start;
   gap: var(--s-space-2);
-  padding: var(--s-space-3) var(--s-space-3) 0;
+  padding: 20px var(--s-space-3) var(--s-space-2);
+  border-bottom: 1px solid var(--s-divider);
 }
 
 .s-dialog__titles {
@@ -1308,23 +1323,35 @@ textarea.s-control__input {
 
 .s-dialog__title {
   font: var(--s-text-heading);
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .s-dialog__description {
   margin-top: var(--s-space-half);
-  color: var(--s-text-2);
-  font: var(--s-text-body);
+  color: var(--s-text-muted);
+  font: var(--s-text-small);
 }
 
-.s-dialog__close {
-  margin: calc(var(--s-space-1) * -1) calc(var(--s-space-1) * -1) 0 0;
+.s-dialog__close.s-icon-btn {
+  width: 28px;
+  height: 28px;
+  margin: -2px -4px 0 0;
+  border-radius: var(--s-radius);
+  color: var(--s-text-muted);
+  box-shadow: inset 0 0 0 1px var(--s-divider);
+}
+
+.s-dialog__close.s-icon-btn:hover:not(:disabled) {
+  background: var(--s-overlay-tint);
+  color: var(--s-text);
 }
 
 .s-dialog__body {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: var(--s-space-2) var(--s-space-3) var(--s-space-3);
+  padding: 20px var(--s-space-3) var(--s-space-3);
 }
 
 .s-dialog__foot {
@@ -1332,8 +1359,10 @@ textarea.s-control__input {
   flex-wrap: wrap-reverse;
   justify-content: flex-end;
   gap: var(--s-space-1);
-  padding: var(--s-space-2) var(--s-space-3);
-  border-top: 1px solid var(--s-border);
+  padding: 14px var(--s-space-3);
+  border-top: 1px solid var(--s-divider);
+  border-radius: 0 0 var(--s-radius-xl) var(--s-radius-xl);
+  background: var(--s-overlay-band);
 }
 
 .s-dialog__foot-start {
@@ -1356,7 +1385,7 @@ textarea.s-control__input {
 
 .s-dialog-enter-active .s-dialog,
 .s-dialog-leave-active .s-dialog {
-  transition: transform var(--s-duration) var(--s-ease-out);
+  transition: transform var(--s-duration-slow) cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .s-dialog-enter-from,
@@ -1366,12 +1395,12 @@ textarea.s-control__input {
 
 .s-dialog-enter-from .s-dialog,
 .s-dialog-leave-to .s-dialog {
-  transform: translateY(8px) scale(0.98);
+  transform: translateY(6px) scale(0.97);
 }
 
 .s-dialog-enter-from.s-dialog-layer--right .s-dialog,
 .s-dialog-leave-to.s-dialog-layer--right .s-dialog {
-  transform: translateX(32px);
+  transform: translateX(24px);
 }
 
 .s-dialog-enter-from.s-dialog-layer--bottom .s-dialog,
