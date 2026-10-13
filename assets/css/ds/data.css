@@ -470,6 +470,21 @@
   flex: 1 0 auto;
 }
 
+/* A page whose only content is an empty-state card (no data yet, plan gate) fills the same way. */
+.s-page
+  > .s-card:has(> .s-card__body > .s-empty):not(:has(~ :is(.s-card, .s-table-card, .s-tab-panel))) {
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+}
+
+.s-page > .s-card > .s-card__body:has(> .s-empty) {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+}
+
 .s-table-card > .s-card:has(.s-empty),
 .s-table-card > .s-empty {
   display: flex;
