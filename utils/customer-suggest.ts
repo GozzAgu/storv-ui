@@ -1,3 +1,4 @@
+import { buildCustomerDirectory } from '~/utils/customer-directory'
 import { normalizeWhatsAppPhone } from '~/utils/whatsapp'
 
 export type CustomerSuggestField = 'name' | 'email' | 'phone'
@@ -6,6 +7,64 @@ export interface SuggestableCustomer {
   name: string
   email?: string
   phone?: string
+}
+
+export interface CustomerOption {
+  id: string
+  name: string
+  email?: string
+  phone?: string
+  address?: string
+  totalOrders: number
+}
+
+type SavedCustomer = Omit<CustomerOption, 'totalOrders'> & { totalOrders?: number }
+
+const WALK_IN = /^walk[\s-]?in(\s+customer)?$/i
+
+function optionKey(c: { name?: string; email?: string; phone?: string }): string {
+  const email = c.email?.toLowerCase().trim()
+  if (email) return `e:${email}`
+  const phone = c.phone ? normalizeWhatsAppPhone(c.phone) : ''
+  if (phone.length >= 7) return `p:${phone}`
+  return `n:${c.name?.toLowerCase().trim() ?? ''}`
+}
+
+/**
+ * Everyone the store has sold to (as on the Customers page) plus saved customer records,
+ * one entry per email, phone or name.
+ */
+export function buildCustomerOptions(
+  saved: readonly SavedCustomer[],
+  receipts: Parameters<typeof buildCustomerDirectory>[0]
+): CustomerOption[] {
+  const fromSales: CustomerOption[] = buildCustomerDirectory(receipts).map((entry) => ({
+    id: entry.id,
+    name: entry.name,
+    email: entry.email,
+    phone: entry.phone,
+    address: entry.address,
+    totalOrders: entry.receipts.length,
+  }))
+  const fromSaved: CustomerOption[] = saved.map((c) => ({ ...c, totalOrders: c.totalOrders ?? 0 }))
+
+  const byKey = new Map<string, CustomerOption>()
+  for (const option of [...fromSaved, ...fromSales]) {
+    const name = option.name?.trim()
+    if (!name) continue
+    if (WALK_IN.test(name) && !option.email && !option.phone) continue
+    const key = optionKey(option)
+    const existing = byKey.get(key)
+    if (!existing) {
+      byKey.set(key, { ...option, name })
+      continue
+    }
+    existing.email ||= option.email
+    existing.phone ||= option.phone
+    existing.address ||= option.address
+    existing.totalOrders = Math.max(existing.totalOrders, option.totalOrders)
+  }
+  return Array.from(byKey.values()).sort((a, b) => b.totalOrders - a.totalOrders)
 }
 
 const MIN_QUERY: Record<CustomerSuggestField, number> = { name: 1, email: 2, phone: 3 }

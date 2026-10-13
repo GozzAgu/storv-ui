@@ -574,7 +574,11 @@ import { useSellerLoanOutsStore } from '~/stores/sellerLoanOuts'
 import { useReceiptsStore } from '~/stores/receipts'
 import { useStoresStore } from '~/stores/stores'
 import { useCustomersStore } from '~/stores/customers'
-import { suggestCustomers, type CustomerSuggestField } from '~/utils/customer-suggest'
+import {
+  buildCustomerOptions,
+  suggestCustomers,
+  type CustomerSuggestField,
+} from '~/utils/customer-suggest'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useStaffStore } from '~/stores/staff'
@@ -755,8 +759,11 @@ const matchingCustomers = computed(() => {
   const field = customerSuggestField.value
   if (!field || field === 'email') return []
   const query = field === 'name' ? customerName.value : customerPhone.value
-  return suggestCustomers(customersStore.customers, field, query)
+  return suggestCustomers(customerOptions.value, field, query)
 })
+const customerOptions = computed(() =>
+  buildCustomerOptions(customersStore.customers, receiptsStore.receipts)
+)
 
 const selectCustomer = (customer: { name: string; phone?: string }) => {
   customerName.value = customer.name
@@ -765,14 +772,16 @@ const selectCustomer = (customer: { name: string; phone?: string }) => {
 }
 
 watch(showCustomerInfo, async (open) => {
-  if (!open || customersStore.customers.length > 0) return
-  try {
-    if (userStore.userData?.role === 'staff') {
-      await staffStore.fetchCurrentStaffMember().catch(() => {})
-    }
-    await customersStore.fetchCustomers()
-  } catch (error) {
-    console.error('Error loading customers:', error)
+  if (!open) return
+  if (userStore.userData?.role === 'staff') {
+    await staffStore.fetchCurrentStaffMember().catch(() => {})
+  }
+  const results = await Promise.allSettled([
+    customersStore.customers.length === 0 ? customersStore.fetchCustomers() : Promise.resolve(),
+    receiptsStore.receipts.length === 0 ? receiptsStore.fetchReceipts() : Promise.resolve(),
+  ])
+  for (const result of results) {
+    if (result.status === 'rejected') console.error('Error loading customers:', result.reason)
   }
 })
 const discountReason = ref('')

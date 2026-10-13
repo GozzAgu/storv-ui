@@ -873,7 +873,11 @@ import { useReceiptsStore, type ReceiptItem } from '~/stores/receipts'
 import { useSellerLoanOutsStore } from '~/stores/sellerLoanOuts'
 import { resolveItemUnitCost } from '~/utils/inventory-item-cost'
 import { useCustomersStore } from '~/stores/customers'
-import { suggestCustomers, type CustomerSuggestField } from '~/utils/customer-suggest'
+import {
+  buildCustomerOptions,
+  suggestCustomers,
+  type CustomerSuggestField,
+} from '~/utils/customer-suggest'
 import { useStoresStore } from '~/stores/stores'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
@@ -996,16 +1000,9 @@ const hasAnyCheckoutDiscount = computed(() =>
 const availableItems = ref<InventoryItem[]>([])
 const itemSearchQuery = ref('')
 const customerSuggestField = ref<CustomerSuggestField | null>(null)
-const allCustomers = ref<
-  Array<{
-    id: string
-    name: string
-    email?: string
-    phone?: string
-    address?: string
-    totalOrders: number
-  }>
->([])
+const allCustomers = computed(() =>
+  buildCustomerOptions(customersStore.customers, receiptsStore.receipts)
+)
 
 const receiptForm = ref({
   customerName: '',
@@ -1424,7 +1421,7 @@ watch(
     if (isOpen) {
       resetForm()
       await loadFolders()
-      await loadCustomers()
+      void loadCustomers()
       if (props.prefill) {
         await applyReceiptCreationPrefill(props.prefill)
       }
@@ -1498,16 +1495,13 @@ const loadCustomers = async () => {
     if (userStore.userData?.role === 'staff') {
       await staffStore.fetchCurrentStaffMember().catch(() => {})
     }
-    await customersStore.fetchCustomers()
-
-    allCustomers.value = customersStore.customers.map((customer) => ({
-      id: customer.id,
-      name: customer.name,
-      email: customer.email,
-      phone: customer.phone,
-      address: customer.address,
-      totalOrders: customer.totalOrders,
-    }))
+    const results = await Promise.allSettled([
+      customersStore.fetchCustomers(),
+      receiptsStore.receipts.length === 0 ? receiptsStore.fetchReceipts() : Promise.resolve(),
+    ])
+    for (const result of results) {
+      if (result.status === 'rejected') console.error('Error loading customers:', result.reason)
+    }
   } catch (error) {
     console.error('Error loading customers:', error)
   }
