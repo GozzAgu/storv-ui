@@ -182,9 +182,69 @@ html.dark .mk {
 }
 
 .mkh__emblem svg {
+  position: relative;
   width: 52%;
   height: 52%;
   filter: drop-shadow(0 4px 10px var(--mkh-emblem-shadow));
+  animation: mkh-breathe 3.6s ease-in-out infinite;
+}
+
+/* Always running: the symbol breathes, signal waves leave the lens on a steady beat, and an
+   online dot pulses on its rim. */
+@keyframes mkh-breathe {
+  50% {
+    filter: drop-shadow(0 4px 10px var(--mkh-emblem-shadow))
+      drop-shadow(0 0 14px rgb(255 255 255 / 0.65));
+  }
+}
+
+.mkh__emblem-wave {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.55), 0 0 18px rgb(255 255 255 / 0.12);
+  opacity: 0;
+  animation: mkh-wave 5.4s cubic-bezier(0.2, 0.6, 0.35, 1) infinite;
+  animation-delay: calc(var(--wave, 0) * 1.8s);
+}
+
+@keyframes mkh-wave {
+  0% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.6);
+  }
+}
+
+.mkh__emblem-status {
+  position: absolute;
+  right: 9%;
+  bottom: 9%;
+  width: 13%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 2px rgb(255 255 255 / 0.9), 0 0 10px rgb(34 197 94 / 0.6);
+}
+
+.mkh__emblem-status::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgb(34 197 94 / 0.55);
+  animation: mkh-online 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes mkh-online {
+  75%,
+  100% {
+    opacity: 0;
+    transform: scale(2.6);
+  }
 }
 
 .mkh__emblem::before {
@@ -740,6 +800,9 @@ html.dark .mk {
 @media (prefers-reduced-motion: reduce) {
   .mkh__ring::before,
   .mkh__emblem::before,
+  .mkh__emblem svg,
+  .mkh__emblem-wave,
+  .mkh__emblem-status::after,
   .mkh__card,
   .mkh__live-dot {
     animation: none;

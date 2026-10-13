@@ -5,7 +5,11 @@
         <span class="mkh__wash" />
         <span class="mkh__ring">
           <span class="mkh__emblem">
+            <span class="mkh__emblem-wave" />
+            <span class="mkh__emblem-wave" style="--wave: 1" />
+            <span class="mkh__emblem-wave" style="--wave: 2" />
             <StorvvMark :size="56" />
+            <span class="mkh__emblem-status" />
           </span>
         </span>
         <span class="mkh__grain" />
