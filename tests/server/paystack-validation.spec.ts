@@ -76,4 +76,10 @@ describe('paystack validation utils', () => {
   it('throws when Paystack plan code env is missing', () => {
     expect(() => getPaystackPlanCode('storvv_medium', 'monthly', {})).toThrow(/Missing Paystack plan code/)
   })
+
+  it('names the real env variable when a plan code is missing', () => {
+    expect(() => getPaystackPlanCode('storvv_enterprise', 'monthly', {})).toThrow(
+      /Set PAYSTACK_PLAN_CODE_ENTERPRISE_MONTHLY in env\./
+    )
+  })
 })

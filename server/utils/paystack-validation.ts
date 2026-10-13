@@ -104,7 +104,7 @@ export function getPaystackPlanCode(
   const code = typeof config[key] === 'string' ? (config[key] as string).trim() : ''
   if (!code) {
     throw new Error(
-      `Missing Paystack plan code for ${planId} (${billingCycle}). Set ${key.toUpperCase()} in env.`
+      `Missing Paystack plan code for ${planId} (${billingCycle}). Set ${key.replace(/([a-z])([A-Z])/g, '$1_$2').toUpperCase()} in env.`
     )
   }
   return code
