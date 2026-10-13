@@ -44,6 +44,9 @@
   --mk-glass-blur: var(--s-space-2);
   --mk-glass: color-mix(in srgb, var(--s-surface) 42%, transparent);
   --mk-glass-edge: rgb(255 255 255 / 0.6);
+  /* The floating nav has no border: a lit top edge and a wide, faint shadow lift it instead */
+  --mk-nav-shadow: inset 0 1px 0 var(--mk-glass-edge), 0 1px 2px rgb(16 24 40 / 0.04),
+    0 12px 32px -12px rgb(16 24 40 / 0.14);
 
   /* Hairlines, radius and lit edges shared by the home sections and footer */
   --mk-edge: color-mix(in srgb, var(--s-accent) 16%, var(--s-border));
@@ -82,6 +85,7 @@ html.dark .mk {
   --mk-glow-2: rgb(110 148 255 / 0.16);
   --mk-glass: color-mix(in srgb, var(--s-surface) 40%, transparent);
   --mk-glass-edge: rgb(255 255 255 / 0.06);
+  --mk-nav-shadow: inset 0 1px 0 var(--mk-glass-edge), 0 12px 32px -12px rgb(0 0 0 / 0.6);
 }
 
 .mk :where(h1, h2, h3, h4, p, ul, ol, figure, dl, dd) {
@@ -351,21 +355,20 @@ html.dark .mk {
   align-items: center;
   gap: var(--s-space-3);
   height: var(--mk-nav-h);
-  padding-inline: var(--s-space-2) var(--s-space-1);
-  border: 1px solid color-mix(in srgb, var(--s-border) 50%, transparent);
-  border-radius: var(--s-radius-xl);
+  padding-inline: 20px 8px;
+  border: 0;
+  border-radius: var(--s-radius-full);
   background: var(--mk-glass);
   backdrop-filter: saturate(2) blur(28px);
   -webkit-backdrop-filter: saturate(2) blur(28px);
-  box-shadow: inset 0 1px 0 var(--mk-glass-edge);
+  box-shadow: var(--mk-nav-shadow);
   pointer-events: auto;
-  transition: background-color 400ms var(--s-ease), border-color 400ms var(--s-ease),
+  transition: background-color 400ms var(--s-ease), box-shadow 400ms var(--s-ease),
     padding 500ms var(--mk-spring, var(--s-ease)), translate 500ms var(--mk-spring, var(--s-ease));
 }
 
-.mk-header--scrolled .mk-header__bar,
-.mk-header--open .mk-header__bar {
-  border-color: var(--s-border);
+.mk-header .mk-btn {
+  border-radius: var(--s-radius-full);
 }
 
 .mk-header .mk-container {
@@ -383,7 +386,6 @@ html.dark .mk {
 .mk-header--overlay .mk-header__bar {
   padding-inline: clamp(28px, 5vw, 72px) clamp(16px, 3vw, 40px);
   translate: 0 var(--s-space-1);
-  border-color: transparent;
   background: transparent;
   box-shadow: none;
   backdrop-filter: none;
@@ -418,9 +420,10 @@ html.dark .mk {
   display: inline-flex;
   align-items: center;
   height: var(--s-btn-h);
-  padding-inline: var(--s-space-1-5);
-  border-radius: var(--s-radius);
+  padding-inline: 14px;
+  border-radius: var(--s-radius-full);
   font: 500 0.875rem / 1.25rem var(--s-font-sans);
+  letter-spacing: -0.005em;
   color: var(--s-text-2);
   transition: color var(--s-duration-fast) var(--s-ease),
     background-color var(--s-duration-fast) var(--s-ease);
@@ -428,7 +431,7 @@ html.dark .mk {
 
 .mk-nav-link:hover {
   color: var(--s-text);
-  background: var(--s-surface-2);
+  background: color-mix(in srgb, var(--s-text) 6%, transparent);
 }
 
 .mk-nav-link.router-link-exact-active {
