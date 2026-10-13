@@ -908,7 +908,7 @@ textarea.s-control__input {
 
 .s-country-select__check {
   flex-shrink: 0;
-  color: var(--s-accent);
+  color: var(--s-text);
 }
 
 .s-check {
@@ -1820,7 +1820,7 @@ a.s-stat:hover {
 
 .s-pick__row--selected,
 .s-pick__row--selected:hover {
-  background: var(--s-accent-soft);
+  background: var(--s-surface-hover);
 }
 
 .s-pick__row:disabled {

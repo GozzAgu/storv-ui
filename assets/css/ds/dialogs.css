@@ -277,14 +277,15 @@
 
 .s-choice--selected,
 .s-choice--selected:hover {
-  border-color: var(--s-accent);
-  background: var(--s-accent-soft);
+  border-color: var(--s-text);
+  background: var(--s-surface);
+  box-shadow: 0 0 0 1px var(--s-text);
 }
 
 .s-choice__input {
   flex-shrink: 0;
   margin: 0;
-  accent-color: var(--s-accent);
+  accent-color: var(--s-text);
 }
 
 .s-choice__input:focus-visible {

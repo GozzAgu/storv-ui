@@ -229,7 +229,7 @@
                     </span>
                   </span>
                 </span>
-                <SBadge v-if="isItemInCart(item.id)" tone="accent">In cart</SBadge>
+                <SBadge v-if="isItemInCart(item.id)">In cart</SBadge>
                 <PlusIcon
                   v-if="canAddItemToCart(item)"
                   class="s-qs__row-add"
@@ -354,10 +354,36 @@
           </button>
           <div v-if="showCustomerInfo" id="quick-sale-customer" class="s-form">
             <SField label="Customer name">
-              <SInput v-model="customerName" placeholder="Walk-in customer" autocomplete="name" />
+              <div class="s-pop-anchor">
+                <SInput
+                  v-model="customerName"
+                  placeholder="Walk-in customer"
+                  autocomplete="off"
+                  @input="customerSuggestField = 'name'"
+                  @blur="customerSuggestField = null"
+                />
+                <CustomerSuggestions
+                  v-if="customerSuggestField === 'name'"
+                  :customers="matchingCustomers"
+                  @pick="selectCustomer"
+                />
+              </div>
             </SField>
             <SField label="Phone" hint="Optional">
-              <SInput v-model="customerPhone" type="tel" autocomplete="tel" />
+              <div class="s-pop-anchor">
+                <SInput
+                  v-model="customerPhone"
+                  type="tel"
+                  autocomplete="off"
+                  @input="customerSuggestField = 'phone'"
+                  @blur="customerSuggestField = null"
+                />
+                <CustomerSuggestions
+                  v-if="customerSuggestField === 'phone'"
+                  :customers="matchingCustomers"
+                  @pick="selectCustomer"
+                />
+              </div>
             </SField>
           </div>
         </section>
@@ -534,6 +560,7 @@ import {
 } from '~/utils/app-icons'
 import SellScreenNoteBanner from '~/components/receipts/SellScreenNoteBanner.vue'
 import PaymentMethodSelect from '~/components/receipts/PaymentMethodSelect.vue'
+import CustomerSuggestions from '~/components/receipts/CustomerSuggestions.vue'
 import SBadge from '~/components/s/SBadge.vue'
 import SButton from '~/components/s/SButton.vue'
 import SCheckbox from '~/components/s/SCheckbox.vue'
@@ -546,6 +573,8 @@ import { useInventoryStore, type InventoryFolder, type InventoryItem } from '~/s
 import { useSellerLoanOutsStore } from '~/stores/sellerLoanOuts'
 import { useReceiptsStore } from '~/stores/receipts'
 import { useStoresStore } from '~/stores/stores'
+import { useCustomersStore } from '~/stores/customers'
+import { suggestCustomers, type CustomerSuggestField } from '~/utils/customer-suggest'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useStaffStore } from '~/stores/staff'
@@ -576,6 +605,7 @@ const sellerLoanOutsStore = useSellerLoanOutsStore()
 const receiptsStore = useReceiptsStore()
 const paymentsV2 = usePaymentsV2()
 const storesStore = useStoresStore()
+const customersStore = useCustomersStore()
 const authStore = useAuthStore()
 const userStore = useUserStore()
 const staffStore = useStaffStore()
@@ -720,6 +750,31 @@ const cartItems = ref<
 const showCustomerInfo = ref(false)
 const customerName = ref('')
 const customerPhone = ref('')
+const customerSuggestField = ref<CustomerSuggestField | null>(null)
+const matchingCustomers = computed(() => {
+  const field = customerSuggestField.value
+  if (!field || field === 'email') return []
+  const query = field === 'name' ? customerName.value : customerPhone.value
+  return suggestCustomers(customersStore.customers, field, query)
+})
+
+const selectCustomer = (customer: { name: string; phone?: string }) => {
+  customerName.value = customer.name
+  if (customer.phone) customerPhone.value = customer.phone
+  customerSuggestField.value = null
+}
+
+watch(showCustomerInfo, async (open) => {
+  if (!open || customersStore.customers.length > 0) return
+  try {
+    if (userStore.userData?.role === 'staff') {
+      await staffStore.fetchCurrentStaffMember().catch(() => {})
+    }
+    await customersStore.fetchCustomers()
+  } catch (error) {
+    console.error('Error loading customers:', error)
+  }
+})
 const discountReason = ref('')
 const hasAnyDiscount = computed(() =>
   cartItems.value.some((ci) => (ci.discountAmount || 0) > 0)

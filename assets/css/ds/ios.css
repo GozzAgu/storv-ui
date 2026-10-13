@@ -360,8 +360,8 @@
 .s-cart-summary__count {
   padding: var(--s-space-half) var(--s-space-1);
   border-radius: var(--s-radius-full);
-  background: var(--s-accent-soft);
-  color: var(--s-accent-soft-text);
+  background: var(--s-surface-2);
+  color: var(--s-text);
   font: var(--s-text-small);
   font-weight: 600;
   font-variant-numeric: tabular-nums;

@@ -36,7 +36,7 @@
         </div>
         <div class="s-pay-timeline__chips">
           <SBadge :tone="paymentTone(p.status)">{{ paymentStatusLabel(p.status) }}</SBadge>
-          <SBadge v-if="p.autoConfirmedReason === 'recorded_by_owner'" tone="info">
+          <SBadge v-if="p.autoConfirmedReason === 'recorded_by_owner'">
             Recorded by owner
           </SBadge>
           <SBadge v-for="f in p.flags" :key="f" tone="error">{{ flagLabel(f) }}</SBadge>

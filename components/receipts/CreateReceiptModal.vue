@@ -432,60 +432,51 @@
                   v-model="receiptForm.customerName"
                   required
                   autocomplete="off"
-                  @input="handleCustomerNameInput"
-                  @focus="showCustomerSuggestions = true"
-                  @blur="handleCustomerNameBlur"
+                  @input="customerSuggestField = 'name'"
+                  @blur="hideCustomerSuggestions"
                   placeholder="John Doe"
-                >
-                  <template v-if="receiptForm.customerName && matchingCustomers.length > 0" #suffix>
-                    <MagnifyingGlassIcon :size="16" :stroke-width="1.75" aria-hidden="true" />
-                  </template>
-                </SInput>
-                <ul
-                  v-if="
-                    showCustomerSuggestions &&
-                    receiptForm.customerName &&
-                    matchingCustomers.length > 0
-                  "
-                  class="s-popover s-popover--start s-new-sale__suggest"
-                  role="listbox"
-                  aria-label="Matching customers"
-                >
-                  <li
-                    v-for="customer in matchingCustomers"
-                    :key="customer.id"
-                    class="s-menu-row"
-                    role="option"
-                    aria-selected="false"
-                    @mousedown.prevent="selectCustomer(customer)"
-                  >
-                    <span class="s-menu-row__text">
-                      <span class="s-menu-row__label">{{ customer.name }}</span>
-                      <span v-if="customer.email || customer.phone" class="s-menu-row__meta">
-                        {{ [customer.email, customer.phone].filter(Boolean).join(' · ') }}
-                      </span>
-                    </span>
-                    <span class="s-new-sale__suggest-count">
-                      {{ customer.totalOrders }} order{{ customer.totalOrders !== 1 ? 's' : '' }}
-                    </span>
-                  </li>
-                </ul>
+                />
+                <CustomerSuggestions
+                  v-if="customerSuggestField === 'name'"
+                  :customers="matchingCustomers"
+                  @pick="selectCustomer"
+                />
               </div>
             </SField>
             <div class="s-form-pair">
               <SField label="Customer email">
-                <SInput
-                  v-model="receiptForm.customerEmail"
-                  type="email"
-                  placeholder="john@example.com"
-                />
+                <div class="s-pop-anchor">
+                  <SInput
+                    v-model="receiptForm.customerEmail"
+                    type="email"
+                    autocomplete="off"
+                    placeholder="john@example.com"
+                    @input="customerSuggestField = 'email'"
+                    @blur="hideCustomerSuggestions"
+                  />
+                  <CustomerSuggestions
+                    v-if="customerSuggestField === 'email'"
+                    :customers="matchingCustomers"
+                    @pick="selectCustomer"
+                  />
+                </div>
               </SField>
               <SField label="Customer phone">
-                <SInput
-                  v-model="receiptForm.customerPhone"
-                  type="tel"
-                  placeholder="+1 234 567 8900"
-                />
+                <div class="s-pop-anchor">
+                  <SInput
+                    v-model="receiptForm.customerPhone"
+                    type="tel"
+                    autocomplete="off"
+                    placeholder="+1 234 567 8900"
+                    @input="customerSuggestField = 'phone'"
+                    @blur="hideCustomerSuggestions"
+                  />
+                  <CustomerSuggestions
+                    v-if="customerSuggestField === 'phone'"
+                    :customers="matchingCustomers"
+                    @pick="selectCustomer"
+                  />
+                </div>
               </SField>
             </div>
             <SField label="Customer address">
@@ -862,7 +853,6 @@ import {
   CubeIcon,
   CheckCircleIcon,
   CheckIcon,
-  MagnifyingGlassIcon,
   XMarkIcon,
   PlusCircleIcon,
   PlusIcon,
@@ -870,6 +860,7 @@ import {
   ChevronRightIcon,
 } from '~/utils/app-icons'
 import SellScreenNoteBanner from '~/components/receipts/SellScreenNoteBanner.vue'
+import CustomerSuggestions from '~/components/receipts/CustomerSuggestions.vue'
 import SBadge from '~/components/s/SBadge.vue'
 import SButton from '~/components/s/SButton.vue'
 import SCheckbox from '~/components/s/SCheckbox.vue'
@@ -882,6 +873,7 @@ import { useReceiptsStore, type ReceiptItem } from '~/stores/receipts'
 import { useSellerLoanOutsStore } from '~/stores/sellerLoanOuts'
 import { resolveItemUnitCost } from '~/utils/inventory-item-cost'
 import { useCustomersStore } from '~/stores/customers'
+import { suggestCustomers, type CustomerSuggestField } from '~/utils/customer-suggest'
 import { useStoresStore } from '~/stores/stores'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
@@ -1003,7 +995,7 @@ const hasAnyCheckoutDiscount = computed(() =>
 )
 const availableItems = ref<InventoryItem[]>([])
 const itemSearchQuery = ref('')
-const showCustomerSuggestions = ref(false)
+const customerSuggestField = ref<CustomerSuggestField | null>(null)
 const allCustomers = ref<
   Array<{
     id: string
@@ -1063,18 +1055,14 @@ const splitPayments = ref<Array<{ method: string; amount: number }>>([{ method: 
 const leafFolders = computed(() => inventoryStore.leafFolders)
 
 const matchingCustomers = computed(() => {
-  if (!receiptForm.value.customerName || receiptForm.value.customerName.trim().length < 1) {
-    return []
-  }
-  const query = receiptForm.value.customerName.toLowerCase().trim()
-  return allCustomers.value
-    .filter(
-      (customer) =>
-        customer.name.toLowerCase().includes(query) ||
-        customer.email?.toLowerCase().includes(query) ||
-        customer.phone?.includes(query)
-    )
-    .slice(0, 5) // Limit to 5 suggestions
+  const field = customerSuggestField.value
+  if (!field) return []
+  const query = {
+    name: receiptForm.value.customerName,
+    email: receiptForm.value.customerEmail,
+    phone: receiptForm.value.customerPhone,
+  }[field]
+  return suggestCustomers(allCustomers.value, field, query || '')
 })
 
 const canProceed = computed(() => {
@@ -1525,15 +1513,8 @@ const loadCustomers = async () => {
   }
 }
 
-const handleCustomerNameInput = () => {
-  showCustomerSuggestions.value = true
-}
-
-const handleCustomerNameBlur = () => {
-  // Delay hiding suggestions to allow click events to fire
-  setTimeout(() => {
-    showCustomerSuggestions.value = false
-  }, 200)
+const hideCustomerSuggestions = () => {
+  customerSuggestField.value = null
 }
 
 const selectCustomer = (customer: {
@@ -1553,7 +1534,7 @@ const selectCustomer = (customer: {
   if (customer.address) {
     receiptForm.value.customerAddress = customer.address
   }
-  showCustomerSuggestions.value = false
+  customerSuggestField.value = null
 }
 
 const selectFolder = async (folder: InventoryFolder) => {
@@ -1805,7 +1786,7 @@ const resetForm = () => {
   useSplitPayment.value = false
   splitPayments.value = [{ method: '', amount: 0 }]
   // Reset customer suggestions
-  showCustomerSuggestions.value = false
+  customerSuggestField.value = null
 }
 
 const handleCancel = () => {
