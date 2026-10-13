@@ -474,8 +474,8 @@ const staffStore = useStaffStore()
 const storesStore = useStoresStore()
 const toast = useAppToast()
 
-const isStaff = computed(() => userStore.userData?.role === 'staff')
-const canManageDepartments = computed(() => !isStaff.value) // Only non-staff can manage
+const { canManageStaff } = usePermissions()
+const canManageDepartments = canManageStaff
 
 const storesLoading = computed(() => storesStore.loading)
 const store = computed(() => storesStore.getStoreById(storeId.value))
@@ -651,11 +651,17 @@ onMounted(async () => {
     attempts++
   }
 
-  // Check if user is staff/intern and redirect
+  // Staff: only a branch admin may open this page, and only for their own branch
   if (userStore.userData?.role === 'staff') {
-    // console.log('[StoreDepartmentsPage] Staff user detected - redirecting to dashboard')
-    await navigateTo('/dashboard')
-    return
+    const member = await staffStore.fetchCurrentStaffMember()
+    if (member?.admin !== true || !member.storeId) {
+      await navigateTo('/dashboard')
+      return
+    }
+    if (member.storeId !== storeId.value) {
+      await navigateTo(`/dashboard/stores/${member.storeId}/departments`, { replace: true })
+      return
+    }
   }
 
   // console.log('[StoreDepartmentsPage] onMounted - Starting load process')

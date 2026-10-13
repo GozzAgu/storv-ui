@@ -1,8 +1,5 @@
 import { defineStore } from 'pinia'
 import { CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
-import { initializeApp, getApps, type FirebaseApp } from 'firebase/app'
-import { createUserWithEmailAndPassword, signOut } from 'firebase/auth'
-import { getFirebaseClientAuthForApp } from '~/utils/firebase-client-auth'
 import {
   collection,
   doc,
@@ -10,7 +7,6 @@ import {
   getDoc,
   getDocs,
   updateDoc,
-  deleteDoc,
   query,
   where,
   orderBy,
@@ -26,7 +22,6 @@ import { useDepartmentsStore } from './departments'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
 import { getStaffCollection,
   getStaffDocument,
-  getDepartmentDocument,
   getQueryUserId,
 } from '~/composables/useFirestorePaths'
 import { normalizeEntityName } from '~/utils/capitalize-text'
@@ -38,7 +33,6 @@ import {
 } from '~/types/subscription'
 import type { Staff } from '~/composables/useStaff'
 import type { Department } from '~/composables/useDepartments'
-import { getFirebaseConfig } from '~/config/firebase.config'
 import { resolveApiPath } from '~/utils/api-url'
 import { deriveDefaultPermissions, resolveStaffPermissions } from '~/utils/staff-permissions'
 
@@ -630,9 +624,6 @@ export const useStaffStore = defineStore('staff', {
         return { staffId, temporaryPassword: staffData.password }
       }
 
-      const { setStaffCreationInProgress } = await import('~/utils/staff-creation-session')
-      setStaffCreationInProgress(true)
-      try {
       if (!staffData.email?.trim()) {
         throw new Error('Staff email is required')
       }
@@ -641,11 +632,16 @@ export const useStaffStore = defineStore('staff', {
         throw new Error('Password is required (at least 6 characters)')
       }
 
+      const ownerUserId = await getQueryUserId()
+      if (!ownerUserId) {
+        throw new Error('User ID not available')
+      }
+
       const departmentsStore = useDepartmentsStore()
       const department =
         departmentsStore.getDepartmentById(staffData.departmentId) ||
         (await departmentsStore.fetchDepartment(staffData.departmentId))
-      if (!department || department.createdBy !== authStore.currentUser.uid) {
+      if (!department || department.createdBy !== ownerUserId) {
         throw new Error('Department not found or access denied')
       }
       const storeId = department.storeId
@@ -672,108 +668,62 @@ export const useStaffStore = defineStore('staff', {
         throw new Error(staffLimitReachedMessage(plan, maxStaff))
       }
 
-      const normalizedEmail = staffData.email.trim().toLowerCase()
-
-      // Use a secondary Firebase app so creating the staff user does not sign out the admin
-      const config = getFirebaseConfig()
-      const apps = getApps()
-      let staffApp: FirebaseApp = apps.find(
-        (a: FirebaseApp) => a.name === 'StaffCreation'
-      ) as FirebaseApp
-      if (!staffApp) {
-        staffApp = initializeApp(config, 'StaffCreation')
-      }
-      const authSecondary = getFirebaseClientAuthForApp(staffApp)
-      const userCred = await createUserWithEmailAndPassword(
-        authSecondary,
-        normalizedEmail,
-        password
-      )
-      const staffAuthUid = userCred.user.uid
-      await signOut(authSecondary)
-
-      const db = useFirestore().getFirestoreInstance()
-      if (!db) {
-        throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
-      }
-
-      const superAdminUid = authStore.currentUser.uid
-      const staffRef = doc(getStaffCollection(db, superAdminUid, storeId, staffData.departmentId))
-      const staffId = staffRef.id
-
-      const normalizedFirstName = normalizeEntityName(staffData.firstName)
-      const normalizedLastName = normalizeEntityName(staffData.lastName)
-
       // Per-module permission matrix is the source of truth going forward. `role` is no longer
       // written for new staff (see composables/useStaff.ts#Staff.role). pass `permissions`
       // explicitly (StaffPermissionsPanel does), or a view-only baseline is derived.
       const permissions = staffData.permissions ?? deriveDefaultPermissions({})
+      const status = staffData.status === 'on_leave' ? 'on_leave' : 'active'
 
-      const newStaff = {
-        firstName: normalizedFirstName,
-        lastName: normalizedLastName,
-        email: normalizedEmail,
-        ...(staffData.phone !== undefined &&
-          staffData.phone !== '' && { phone: String(staffData.phone).trim() }),
-        departmentId: staffData.departmentId,
-        storeId,
-        position: staffData.position.trim(),
-        permissions,
-        hireDate: staffData.hireDate || new Date().toISOString().split('T')[0],
-        ...(staffData.salary !== undefined && { salary: Number(staffData.salary) }),
-        status:
-          staffData.status === 'inactive' || staffData.status === 'on_leave'
-            ? staffData.status
-            : 'active',
-        authUid: staffAuthUid,
-        mustChangePassword: true, // Staff must set a new password on first login
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-        createdBy: superAdminUid,
+      // The server creates the login and records, so an admin can add staff without ever
+      // writing the owner's membership records directly.
+      let raw: unknown
+      try {
+        const token = await authStore.currentUser.getIdToken()
+        raw = await $fetch(resolveApiPath('/api/staff/create'), {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+          body: {
+            ownerUserId,
+            storeId,
+            departmentId: staffData.departmentId,
+            email: staffData.email.trim().toLowerCase(),
+            password,
+            firstName: staffData.firstName,
+            lastName: staffData.lastName,
+            phone: staffData.phone !== undefined && staffData.phone !== '' ? String(staffData.phone) : undefined,
+            position: staffData.position,
+            hireDate: staffData.hireDate || undefined,
+            salary: staffData.salary,
+            status,
+            permissions,
+          },
+        })
+      } catch (error: unknown) {
+        throw parseStaffLifecycleApiError(error, 'Failed to create staff')
       }
-      await setDoc(staffRef, newStaff)
-      await setDoc(
-        getStoreMemberDoc(db, superAdminUid, storeId, staffAuthUid),
-        {
-          authUid: staffAuthUid,
-          staffId,
-          storeId,
-          departmentId: staffData.departmentId,
-          status: newStaff.status,
-          permissions,
-          createdBy: superAdminUid,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-        },
-        { merge: true }
-      )
-      await syncWorkspaceMemberIndex(db, superAdminUid, staffAuthUid, {
-        storeId,
-        status: newStaff.status,
-      })
-
-      await departmentsStore.updateStaffCount(
-        staffData.departmentId,
-        department.staffCount + 1,
-        storeId
-      )
+      const result = raw as { staffId: string; authUid: string; temporaryPassword: string }
 
       const now = new Date()
       const { password: _pw, ...staffFields } = staffData
       const staffWithDept: Staff = {
-        id: staffId,
+        id: result.staffId,
         ...staffFields,
-        firstName: normalizedFirstName,
-        lastName: normalizedLastName,
+        firstName: normalizeEntityName(staffData.firstName),
+        lastName: normalizeEntityName(staffData.lastName),
         storeId,
-        authUid: staffAuthUid,
+        status,
+        authUid: result.authUid,
         mustChangePassword: true,
         createdAt: now,
         updatedAt: now,
-        createdBy: superAdminUid,
+        createdBy: ownerUserId,
         departmentName: department.name,
       }
       this.staff.unshift(staffWithDept)
+      const deptIndex = departmentsStore.departments.findIndex((d) => d.id === department.id)
+      if (deptIndex > -1 && departmentsStore.departments[deptIndex]) {
+        departmentsStore.departments[deptIndex].staffCount = (department.staffCount || 0) + 1
+      }
 
       if (import.meta.client) {
         setTimeout(() => {
@@ -784,10 +734,7 @@ export const useStaffStore = defineStore('staff', {
         }, 500)
       }
 
-      return { staffId, temporaryPassword: password }
-      } finally {
-        setStaffCreationInProgress(false)
-      }
+      return { staffId: result.staffId, temporaryPassword: result.temporaryPassword }
     },
 
     // Clear mustChangePassword for the currently signed-in staff (after they set a new password)
@@ -853,127 +800,67 @@ export const useStaffStore = defineStore('staff', {
           Omit<Staff, 'id' | 'createdAt' | 'createdBy' | 'departmentName'>
         >
 
-        // If department is being changed, verify new department belongs to user and update counts
-        if (normalizedUpdates.departmentId && normalizedUpdates.departmentId !== departmentId) {
-          const departmentsStore = useDepartmentsStore()
+        const departmentsStore = useDepartmentsStore()
+        const moving =
+          !!normalizedUpdates.departmentId && normalizedUpdates.departmentId !== departmentId
+        const oldDept = moving ? departmentsStore.getDepartmentById(departmentId) : undefined
+        const newDept = moving
+          ? departmentsStore.getDepartmentById(normalizedUpdates.departmentId!) ||
+            (await departmentsStore.fetchDepartment(normalizedUpdates.departmentId!))
+          : undefined
+        if (moving && (!newDept || newDept.createdBy !== userId)) {
+          throw new Error('Department not found or access denied')
+        }
 
-          // Verify new department belongs to this user
-          const newDept =
-            departmentsStore.getDepartmentById(normalizedUpdates.departmentId) ||
-            (await departmentsStore.fetchDepartment(normalizedUpdates.departmentId))
-          if (!newDept || newDept.createdBy !== userId) {
-            throw new Error('Department not found or access denied')
-          }
-
-          // Decrease old department count (verify it belongs to user)
-          const oldDept = departmentsStore.getDepartmentById(departmentId)
-          if (oldDept && oldDept.createdBy === userId) {
-            // Pass storeId from old department
-            await departmentsStore.updateStaffCount(
+        // The server writes the staff record, membership and roster index together and
+        // enforces who may change what (admins: regular staff only, never financial figures).
+        const token = await authStore.currentUser.getIdToken()
+        try {
+          await $fetch(resolveApiPath('/api/staff/update'), {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` },
+            body: {
+              ownerUserId: userId,
+              storeId,
               departmentId,
-              Math.max(0, oldDept.staffCount - 1),
-              oldDept.storeId
-            )
-          }
+              staffId,
+              updates: {
+                firstName: updates.firstName,
+                lastName: updates.lastName,
+                phone: updates.phone,
+                position: updates.position,
+                hireDate: updates.hireDate,
+                salary: updates.salary === undefined ? undefined : (updates.salary ?? null),
+                status: updates.status,
+                permissions: updates.permissions,
+                departmentId: updates.departmentId,
+              },
+            },
+          })
+        } catch (error: unknown) {
+          throw parseStaffLifecycleApiError(error, 'Failed to update staff')
+        }
 
-          // Increase new department count - pass storeId from new department
-          await departmentsStore.updateStaffCount(
-            normalizedUpdates.departmentId,
-            newDept.staffCount + 1,
-            newDept.storeId
-          )
-
-          // If department changed, we need to move the staff document to the new department
-          // Delete from old department and create in new department
-          const oldStaffRef = getStaffDocument(db, userId, storeId, departmentId, staffId)
-          const newStaffRef = getStaffDocument(
-            db,
-            userId,
-            storeId,
-            normalizedUpdates.departmentId,
-            staffId
-          )
-
-          // Get current staff data
-          const currentStaffData = (await getDoc(oldStaffRef)).data()
-          if (currentStaffData) {
-            // Create in new department
-            await setDoc(newStaffRef, {
-              ...currentStaffData,
-              ...normalizedUpdates,
-              departmentId: normalizedUpdates.departmentId,
-              updatedAt: serverTimestamp(),
-            })
-            // Delete from old department
-            await deleteDoc(oldStaffRef)
-          }
-
-          // No longer manage the department they left
-          if (oldDept?.managerId === staffId) {
-            const departmentRef = getDepartmentDocument(db, userId, storeId, departmentId)
-            await updateDoc(departmentRef, {
-              manager: deleteField(),
-              managerId: deleteField(),
-              updatedAt: serverTimestamp(),
-            })
-            const deptIndex = departmentsStore.departments.findIndex((d) => d.id === departmentId)
-            if (deptIndex > -1) {
-              departmentsStore.departments[deptIndex] = {
-                ...departmentsStore.departments[deptIndex],
-                manager: undefined,
-                managerId: undefined,
+        if (moving && newDept) {
+          const patchDept = (id: string, patch: Partial<Department>) => {
+            const i = departmentsStore.departments.findIndex((d) => d.id === id)
+            if (i > -1) {
+              departmentsStore.departments[i] = {
+                ...departmentsStore.departments[i],
+                ...patch,
               } as Department
             }
           }
-        } else {
-          // Use hierarchical path: users/{userId}/stores/{storeId}/departments/{departmentId}/staff/{staffId}
-          const staffRef = getStaffDocument(db, userId, storeId, departmentId, staffId)
-          // Writing a fresh permission matrix supersedes the legacy role/grant fields. clear
-          // them so the doc doesn't carry stale, contradictory data (resolveStaffPermissions
-          // already prefers `permissions` when present, but a clean doc is easier to reason about).
-          const legacyFieldClears =
-            normalizedUpdates.permissions !== undefined
-              ? { role: deleteField(), canManageInventory: deleteField(), canManageReceipts: deleteField() }
-              : {}
-          await updateDoc(staffRef, {
-            ...normalizedUpdates,
-            ...legacyFieldClears,
-            updatedAt: serverTimestamp(),
-          })
+          if (oldDept) {
+            patchDept(departmentId, {
+              staffCount: Math.max(0, (oldDept.staffCount || 0) - 1),
+              ...(oldDept.managerId === staffId ? { manager: undefined, managerId: undefined } : {}),
+            })
+          }
+          patchDept(newDept.id, { staffCount: (newDept.staffCount || 0) + 1 })
         }
 
-        // Keep store membership index in sync for security rules.
-        const mergedStatus = normalizedUpdates.status ?? staffMember.status
         const mergedDepartmentId = normalizedUpdates.departmentId ?? staffMember.departmentId
-        const mergedPermissions = normalizedUpdates.permissions ?? staffMember.permissions
-        if (!staffMember.authUid) {
-          throw new Error('Staff member is missing auth UID')
-        }
-        await setDoc(
-          getStoreMemberDoc(db, userId, storeId, staffMember.authUid),
-          {
-            authUid: staffMember.authUid,
-            staffId,
-            storeId,
-            departmentId: mergedDepartmentId,
-            status: mergedStatus,
-            ...(mergedPermissions
-              ? {
-                  permissions: mergedPermissions,
-                  role: deleteField(),
-                  canManageInventory: deleteField(),
-                  canManageReceipts: deleteField(),
-                }
-              : {}),
-            createdBy: userId,
-            updatedAt: serverTimestamp(),
-          },
-          { merge: true }
-        )
-        await syncWorkspaceMemberIndex(db, userId, staffMember.authUid, {
-          storeId,
-          status: String(mergedStatus || 'active'),
-        })
 
         // Update in local state
         const departmentsStoreForName = useDepartmentsStore()
@@ -1028,12 +915,12 @@ export const useStaffStore = defineStore('staff', {
       }
 
       try {
+        const ownerUserId = await getQueryUserId()
         const staffMember = this.getStaffMember(staffId) || (await this.fetchStaffMember(staffId))
-        if (!staffMember || staffMember.createdBy !== authStore.currentUser.uid) {
+        if (!ownerUserId || !staffMember || staffMember.createdBy !== ownerUserId) {
           throw new Error('Staff member not found or access denied')
         }
 
-        const ownerUserId = authStore.currentUser.uid
         const storeId = staffMember.storeId || (await getCurrentStoreId())
         if (!storeId) {
           throw new Error('No store selected')
@@ -1109,15 +996,15 @@ export const useStaffStore = defineStore('staff', {
       }
 
       try {
+        const ownerUserId = await getQueryUserId()
         const staffMember = await this.fetchStaffMember(staffId)
-        if (!staffMember || staffMember.createdBy !== authStore.currentUser.uid) {
+        if (!ownerUserId || !staffMember || staffMember.createdBy !== ownerUserId) {
           throw new Error('Staff member not found or access denied')
         }
         if (!isRemovedStaffStatus(staffMember.status)) {
           throw new Error('Only removed staff can be reactivated')
         }
 
-        const ownerUserId = authStore.currentUser.uid
         const storeId = staffMember.storeId || (await getCurrentStoreId())
         if (!storeId) {
           throw new Error('No store selected')

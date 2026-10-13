@@ -11,6 +11,23 @@ export interface CustomerTotalsResult {
   totalSpent: number
 }
 
+/**
+ * Why a sale can't be deleted, or null if it can. Matches firestore.rules: a sale with payments
+ * recorded against it keeps its audit trail, and a partner-loan sale belongs to the loan.
+ */
+export function receiptDeleteBlockReason(receipt: {
+  paymentSummary?: unknown
+  tradeLoanId?: unknown
+}): string | null {
+  if (receipt.paymentSummary !== undefined && receipt.paymentSummary !== null) {
+    return 'This sale has payments recorded against it, so it can’t be deleted. Refund or cancel it instead.'
+  }
+  if (receipt.tradeLoanId !== undefined && receipt.tradeLoanId !== null) {
+    return 'This sale is part of a partner stock loan, so it can’t be deleted.'
+  }
+  return null
+}
+
 export function computeCustomerAfterReceiptDelete(
   customer: CustomerTotalsInput,
   receiptId: string,

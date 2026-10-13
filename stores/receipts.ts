@@ -22,6 +22,7 @@ import {
   getQueryUserId,
 } from '~/composables/useFirestorePaths'
 import { useStaffStore } from './staff'
+import { usePermissions } from '~/composables/usePermissions'
 import { useCustomersStore } from './customers'
 import { useInventoryStore } from './inventory'
 import { logActivity, getCurrentUserDisplayName } from '~/composables/useActivityLog'
@@ -956,9 +957,8 @@ export const useReceiptsStore = defineStore('receipts', {
       }
     },
 
-    // Mark a receipt's commission payable as settled. Admin/owner or manager only (matches
-    // Firestore's general receipts update rule - commission fields aren't part of the narrower
-    // staff-grant allowlists).
+    // Mark a receipt's commission payable as settled: the owner, or a branch admin with the
+    // delete-sales extra (commission fields aren't part of the narrower staff-grant allowlists).
     async markCommissionPaid(receiptId: string): Promise<void> {
       const db = useFirestore().getFirestoreInstance()
       if (!db) throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
@@ -971,10 +971,9 @@ export const useReceiptsStore = defineStore('receipts', {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
       if (userStore.userData?.role === 'staff') {
-        const staffStore = useStaffStore()
-        const member = await staffStore.fetchCurrentStaffMember()
-        if (member?.role !== 'manager') {
-          throw new Error('Only managers and super admins can settle a commission payable.')
+        await useStaffStore().fetchCurrentStaffMember()
+        if (!usePermissions().canManageCommissions.value) {
+          throw new Error('The store owner has not given you permission to settle commissions.')
         }
       }
 
@@ -1026,14 +1025,16 @@ export const useReceiptsStore = defineStore('receipts', {
         throw new Error('User must be authenticated')
       }
 
-      // Check permissions - only super admins can delete
+      // The owner, or a branch admin with the delete-sales extra (the server re-checks)
       const userStore = useUserStore()
       if (!userStore.userData) {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
-
-      if (userStore.userData?.role !== 'superAdmin') {
-        throw new Error('Only super admins can delete receipts.')
+      if (userStore.userData?.role === 'staff') {
+        await useStaffStore().fetchCurrentStaffMember()
+      }
+      if (!usePermissions().canDeleteReceipts.value) {
+        throw new Error('The store owner has not given you permission to delete sales.')
       }
 
       // Get userId and storeId for hierarchical path

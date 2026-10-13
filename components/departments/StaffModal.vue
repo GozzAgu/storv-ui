@@ -73,11 +73,16 @@
             <SInput v-model="formData.lastName" required placeholder="Last name" />
           </SField>
         </div>
-        <SField label="Email" required>
+        <SField
+          label="Email"
+          required
+          :hint="isEdit ? 'This is their sign-in email, so it can’t be changed here.' : undefined"
+        >
           <SInput
             v-model="formData.email"
             type="email"
             required
+            :disabled="isEdit"
             placeholder="email@example.com"
           />
         </SField>
@@ -131,9 +136,9 @@
           </SField>
         </div>
         <SField label="Status" required>
-          <SSelect v-model="formData.status" required>
+          <SSelect v-model="formData.status" required :disabled="isRemovedStaff">
             <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
+            <option v-if="isRemovedStaff" value="inactive">Removed</option>
             <option value="on_leave">On leave</option>
           </SSelect>
         </SField>
@@ -142,6 +147,7 @@
       <StaffPermissionsPanel
         v-if="canEditStaffPermissions"
         v-model="formData.permissions"
+        :locked-modules="isStoreOwner ? [] : ['financials']"
       />
       <StaffPaymentPermissions v-if="props.staff?.authUid" :member-uid="props.staff.authUid" />
 
@@ -230,7 +236,9 @@ const authStore = useAuthStore()
 const userStore = useUserStore()
 const toast = useAppToast()
 const { plan, canAddStaff, staffLimitForStore } = useSubscriptionFeatures()
-const { canEditStaffPermissions } = usePermissions()
+const { canEditStaffPermissions, isStoreOwner } = usePermissions()
+
+const isRemovedStaff = computed(() => props.staff?.status === 'inactive')
 
 const formData = ref({
   firstName: '',
@@ -504,13 +512,12 @@ const handleSubmit = async () => {
       await staffStore.updateStaff(props.staff.id, {
         firstName: formData.value.firstName,
         lastName: formData.value.lastName,
-        email: formData.value.email,
         phone: formData.value.phone.trim(),
         position: formData.value.position,
         ...(canEditStaffPermissions.value ? { permissions: formData.value.permissions } : {}),
         hireDate: formData.value.hireDate,
         salary: formData.value.salary,
-        status: formData.value.status,
+        ...(formData.value.status !== props.staff.status ? { status: formData.value.status } : {}),
       })
     } else {
       const result = await staffStore.createStaff({

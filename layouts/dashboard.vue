@@ -320,7 +320,7 @@ if (import.meta.client) {
 const navigation = DASHBOARD_NAV_DEFINITIONS
 
 // Filter navigation based on user access and subscription plan (web sidebar + iOS/Android bottom nav)
-const { hasAnyManageAccess, can } = usePermissions()
+const { hasAnyManageAccess, can, isAdmin } = usePermissions()
 const { access: paymentsAccess, loadAccess: loadPaymentsAccess } = usePaymentsV2()
 if (import.meta.client) {
   watch(
@@ -338,6 +338,7 @@ function navFilterOptions(launchGates: boolean) {
     // "Manager-only" nav items now gate on any manage grant across the permission matrix,
     // rather than the retired manager/staff/intern role tier.
     isManager: hasAnyManageAccess.value,
+    isAdmin: isAdmin.value,
     canViewModule: (module: Parameters<typeof can>[0]) => can(module, 'view'),
     canUseFeature: canUseSubscriptionFeature,
     canUseBusinessCapability,

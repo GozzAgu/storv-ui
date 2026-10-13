@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { computeCustomerAfterReceiptDelete } from '~/server/utils/receipt-delete'
+import {
+  computeCustomerAfterReceiptDelete,
+  receiptDeleteBlockReason,
+} from '~/server/utils/receipt-delete'
 
 describe('receipt delete customer consistency', () => {
   it('marks customer for deletion when deleting last receipt', () => {
@@ -23,5 +26,19 @@ describe('receipt delete customer consistency', () => {
     expect(result.receipts).toEqual(['r1'])
     expect(result.totalOrders).toBe(1)
     expect(result.totalSpent).toBe(5000)
+  })
+})
+
+describe('receiptDeleteBlockReason', () => {
+  it('allows a plain sale', () => {
+    expect(receiptDeleteBlockReason({})).toBeNull()
+  })
+
+  it('refuses a sale with payments recorded against it', () => {
+    expect(receiptDeleteBlockReason({ paymentSummary: { version: 1 } })).toMatch(/payments/)
+  })
+
+  it('refuses a partner stock-loan sale', () => {
+    expect(receiptDeleteBlockReason({ tradeLoanId: 'loan1' })).toMatch(/partner/)
   })
 })

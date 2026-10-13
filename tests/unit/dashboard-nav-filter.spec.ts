@@ -70,6 +70,21 @@ describe('filterDashboardNavItems', () => {
     expect(names).not.toContain('Analytics')
   })
 
+  it('shows Departments to a branch admin but not to a manager', () => {
+    const base = {
+      isSuperAdmin: false,
+      isManager: true,
+      canUseFeature: canUseEnterprise,
+      canViewModule: canViewGranted(['products', 'receipts']),
+    }
+    expect(
+      filterDashboardNavItems(DASHBOARD_NAV_DEFINITIONS, { ...base, isAdmin: true }).map((i) => i.name)
+    ).toContain('Departments')
+    expect(
+      filterDashboardNavItems(DASHBOARD_NAV_DEFINITIONS, base).map((i) => i.name)
+    ).not.toContain('Departments')
+  })
+
   it('shows Reports to staff only with the financial figures grant', () => {
     const names = filterDashboardNavItems(DASHBOARD_NAV_DEFINITIONS, {
       isSuperAdmin: false,

@@ -1,8 +1,12 @@
 import { createError, defineEventHandler, readBody } from 'h3'
 import { FieldValue } from 'firebase-admin/firestore'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
-import { requireAuth, requireStoreManageAccess } from '~/server/utils/store-auth'
-import { computeCustomerAfterReceiptDelete } from '~/server/utils/receipt-delete'
+import { requireAuth } from '~/server/utils/store-auth'
+import { requireStoreAdminGrant } from '~/server/utils/staff-admin'
+import {
+  computeCustomerAfterReceiptDelete,
+  receiptDeleteBlockReason,
+} from '~/server/utils/receipt-delete'
 import { syncLoyaltyBestEffort } from '~/server/utils/loyalty/sync'
 import { resolveBulkStockFieldAndValueFromMap } from '~/utils/inventory-bulk-quantity'
 
@@ -26,14 +30,8 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Keep delete strict: only owner can delete receipts.
-  if (auth.uid !== ownerUserId) {
-    throw createError({ statusCode: 403, message: 'Only super admins can delete receipts' })
-  }
-
-  await requireStoreManageAccess(auth.uid, ownerUserId, storeId, (p) => p.receipts.delete)
-
   const adminDb = getAdminFirestore()
+  await requireStoreAdminGrant(adminDb, auth.uid, ownerUserId, storeId, 'deleteSales')
   const receiptRef = adminDb
     .collection('users')
     .doc(ownerUserId)
@@ -55,11 +53,15 @@ export default defineEventHandler(async (event) => {
       total?: number
       createdBy?: string
       storeId?: string
+      paymentSummary?: unknown
+      tradeLoanId?: unknown
     }
 
     if (receipt.storeId && receipt.storeId !== storeId) {
       throw createError({ statusCode: 409, message: 'Receipt store mismatch' })
     }
+    const blocked = receiptDeleteBlockReason(receipt)
+    if (blocked) throw createError({ statusCode: 409, message: blocked })
 
     const itemIds = Array.isArray(receipt.itemIds) ? receipt.itemIds : []
     const receiptLines = Array.isArray(receipt.items) ? receipt.items : []

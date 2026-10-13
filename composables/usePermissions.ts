@@ -2,12 +2,18 @@ import { computed } from 'vue'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useStaffStore } from '~/stores/staff'
-import type { PermissionAction, PermissionModule, StaffPermissions } from '~/types/staff-permissions'
+import type {
+  PermissionAction,
+  PermissionModule,
+  StaffAdminGrants,
+  StaffPermissions,
+} from '~/types/staff-permissions'
 import {
   EMPTY_STAFF_PERMISSIONS,
   FULL_STAFF_PERMISSIONS,
   getPermissionAction,
   hasAnyModuleManageAccess,
+  normalizeStaffAdminGrants,
   resolveStaffPermissions,
 } from '~/utils/staff-permissions'
 
@@ -67,20 +73,51 @@ export const usePermissions = () => {
 
   const canEditReceipts = computed(() => hasReceiptsEditorAccess.value)
 
-  const canDeleteReceipts = computed(() => can('receipts', 'delete'))
+  /** Deleting sales goes through the server: the owner, or an admin with the delete-sales extra. */
+  const canDeleteReceipts = computed(() => hasAdminGrant('deleteSales'))
 
   const canManageInventoryItems = computed(() => can('products', 'edit'))
 
   const canCreateInventoryFolders = computed(() => can('products', 'create'))
 
-  const canCreateStaff = computed(() => !isStaff.value)
+  /** Branch admin of the store their staff record belongs to (owner-set). */
+  const isAdmin = computed(
+    () => isStaff.value && staffStore.getCurrentStaffMember?.admin === true
+  )
 
-  const canRemoveStaff = computed(() => userStore.isSuperAdmin)
+  const adminGrants = computed<StaffAdminGrants>(() =>
+    normalizeStaffAdminGrants(isAdmin.value ? staffStore.getCurrentStaffMember?.adminGrants : null)
+  )
 
-  const canMoveStaff = computed(() => userStore.isSuperAdmin)
+  /** Owner, or an admin the owner gave this extra. */
+  function hasAdminGrant(grant: keyof StaffAdminGrants): boolean {
+    if (userStore.isSuperAdmin) return true
+    return adminGrants.value[grant] === true
+  }
+
+  /** Add, edit, move and remove regular staff, and manage departments: owner or admin. */
+  const canManageStaff = computed(() => userStore.isSuperAdmin || isAdmin.value)
+
+  const canCreateStaff = canManageStaff
+
+  const canRemoveStaff = canManageStaff
+
+  const canMoveStaff = canManageStaff
 
   /** Whether the calling user may edit another staff member's permission matrix at all. */
-  const canEditStaffPermissions = computed(() => userStore.isSuperAdmin)
+  const canEditStaffPermissions = canManageStaff
+
+  /** Financial figures, making admins, and editing admins: the owner only. */
+  const isStoreOwner = computed(() => userStore.isSuperAdmin)
+
+  /** Admins can't act on themselves or on other admins; the owner can act on anyone. */
+  function canManageStaffMember(member: { admin?: boolean; authUid?: string } | null | undefined) {
+    if (!member) return false
+    if (userStore.isSuperAdmin) return true
+    if (!isAdmin.value) return false
+    if (member.admin === true) return false
+    return !member.authUid || member.authUid !== authStore.currentUser?.uid
+  }
 
   /**
    * Revenue, sales totals, stock value, cost and profit: the store owner, plus staff the owner has
@@ -97,10 +134,8 @@ export const usePermissions = () => {
   /** Paystack upgrades, plan banners, and billing. Super admin (account owner) only. */
   const canManageBilling = computed(() => userStore.isSuperAdmin)
 
-  /** Adding/settling a sale commission. Owner-only for now; not part of the v1 permission matrix
-   *  (staff management, billing, and commissions are deliberately out of scope. see the staff
-   *  permission matrix plan). */
-  const canManageCommissions = computed(() => userStore.isSuperAdmin)
+  /** Adding/settling a sale commission: the owner, or an admin with the delete-sales extra. */
+  const canManageCommissions = computed(() => hasAdminGrant('deleteSales'))
 
   return {
     isStaff,
@@ -108,6 +143,12 @@ export const usePermissions = () => {
     can,
     hasAnyManageAccess,
     isManager,
+    isAdmin,
+    adminGrants,
+    hasAdminGrant,
+    isStoreOwner,
+    canManageStaff,
+    canManageStaffMember,
     hasInventoryEditorAccess,
     hasReceiptsEditorAccess,
     canManage,

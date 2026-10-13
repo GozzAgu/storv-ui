@@ -159,7 +159,7 @@
               <li v-for="member in rosterPage" :key="member.id">
                 <div class="s-list__item">
                   <SCheckbox
-                    v-if="canRemoveStaff && rosterTab === 'active'"
+                    v-if="canRemoveStaff && rosterTab === 'active' && canManageStaffMember(member)"
                     :model-value="isStaffSelected(member)"
                     :aria-label="`Select ${staffName(member)}`"
                     @update:model-value="(checked) => toggleStaffSelection(member, checked)"
@@ -175,7 +175,10 @@
                     }}</SBadge>
                   </span>
                   <SIconButton
-                    v-if="rosterTab === 'active' ? canManageDepartments : canRemoveStaff"
+                    v-if="
+                      (rosterTab === 'active' ? canManageDepartments : canRemoveStaff) &&
+                      canManageStaffMember(member)
+                    "
                     :label="`Actions for ${staffName(member)}`"
                     size="sm"
                     :data-staff-actions-anchor="member.id"
@@ -224,6 +227,7 @@
                 >
                   <td v-if="canRemoveStaff && rosterTab === 'active'" class="s-table__check">
                     <SCheckbox
+                      v-if="canManageStaffMember(member)"
                       :model-value="isStaffSelected(member)"
                       :aria-label="`Select ${staffName(member)}`"
                       @update:model-value="(checked) => toggleStaffSelection(member, checked)"
@@ -241,7 +245,11 @@
                   </td>
                   <td>
                     <SBadge
-                      :tone="getStaffAccessLabel(member) === 'Full access' ? 'accent' : 'neutral'"
+                      :tone="
+                        member.admin === true || getStaffAccessLabel(member) === 'Full access'
+                          ? 'accent'
+                          : 'neutral'
+                      "
                     >
                       {{ getStaffAccessLabel(member) }}
                     </SBadge>
@@ -256,7 +264,10 @@
                   </td>
                   <td class="s-table__actions">
                     <SIconButton
-                      v-if="rosterTab === 'active' ? canManageDepartments : canRemoveStaff"
+                      v-if="
+                        (rosterTab === 'active' ? canManageDepartments : canRemoveStaff) &&
+                        canManageStaffMember(member)
+                      "
                       :label="`Actions for ${staffName(member)}`"
                       size="sm"
                       :data-staff-actions-anchor="member.id"
@@ -475,6 +486,7 @@ function getStaffRowSubtitle(member: Staff): string {
 }
 
 function getStaffAccessLabel(member: Staff): string {
+  if (member.admin === true) return 'Admin'
   return staffAccessLabel(summarizeStaffPermissions(resolveStaffPermissions(member)))
 }
 
@@ -645,10 +657,21 @@ function runStaffMenuAction(action: (member: Staff) => void) {
 // Check if current user is staff (limited permissions)
 const isStaff = computed(() => userStore.userData?.role === 'staff')
 // Get permissions
-const { canCreateStaff, canManage, canRemoveStaff, canMoveStaff } = usePermissions()
-// Only super admins can create or remove staff (managers can edit roles/details)
-const canManageDepartments = computed(() => canManage.value)
+const {
+  canCreateStaff,
+  canManageStaff,
+  canManageStaffMember,
+  canRemoveStaff,
+  canMoveStaff,
+  isAdmin,
+} = usePermissions()
+// Owner or branch admin; admins can't act on themselves or other admins (per row below)
+const canManageDepartments = canManageStaff
 const canCreateNewStaff = computed(() => canCreateStaff.value)
+
+const selectableStaffOnPage = computed(() =>
+  paginatedStaff.value.filter((m) => canManageStaffMember(m))
+)
 
 // Current staff member (for staff users and to check manager status)
 const currentStaffMember = ref<Staff | null>(null)
@@ -684,7 +707,9 @@ function isStaffSelected(member: Staff): boolean {
 }
 
 const allStaffOnPageSelected = computed(
-  () => paginatedStaff.value.length > 0 && paginatedStaff.value.every((m) => isStaffSelected(m))
+  () =>
+    selectableStaffOnPage.value.length > 0 &&
+    selectableStaffOnPage.value.every((m) => isStaffSelected(m))
 )
 
 watch(staffSearchQuery, () => {
@@ -759,7 +784,7 @@ const toggleStaffSelection = (member: Staff, checked: boolean) => {
   else if (!checked && idx !== -1) selectedStaffForBulk.value.splice(idx, 1)
 }
 const toggleSelectAllStaff = (checked: boolean) => {
-  if (checked) selectedStaffForBulk.value = [...paginatedStaff.value]
+  if (checked) selectedStaffForBulk.value = [...selectableStaffOnPage.value]
   else selectedStaffForBulk.value = []
 }
 function openDeactivateStaffModal(target: Staff | Staff[]) {
@@ -890,8 +915,8 @@ const loadDepartmentData = async () => {
     return
   }
 
-  // Staff may only open their own department
-  if (userStore.userData?.role === 'staff') {
+  // Staff may only open their own department; a branch admin opens any in their branch
+  if (userStore.userData?.role === 'staff' && !isAdmin.value) {
     try {
       const member = await staffStore.fetchCurrentStaffMember()
       if (!member?.departmentId) {
@@ -1102,11 +1127,13 @@ onMounted(async () => {
     attempts++
   }
 
-  // Check if user is staff/intern and redirect
+  // Staff other than a branch admin don't manage departments
   if (userStore.userData?.role === 'staff') {
-    // console.log('[DepartmentDetailPage] Staff user detected - redirecting to dashboard')
-    await navigateTo('/dashboard')
-    return
+    const member = await staffStore.fetchCurrentStaffMember().catch(() => null)
+    if (member?.admin !== true) {
+      await navigateTo('/dashboard')
+      return
+    }
   }
 
   // Load data immediately

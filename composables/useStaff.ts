@@ -15,7 +15,7 @@ import { useFirestore } from './useFirestore'
 import { useFirebaseAuth } from './useFirebaseAuth'
 import { useDepartments } from './useDepartments'
 import { useStaffStore } from '~/stores/staff'
-import type { StaffPermissions } from '~/types/staff-permissions'
+import type { StaffAdminGrants, StaffPermissions } from '~/types/staff-permissions'
 
 export interface Staff {
   id: string
@@ -39,6 +39,10 @@ export interface Staff {
   /** Per-module grant matrix. the source of truth for what this staff member can do.
    *  Falls back to `deriveDefaultPermissions(this)` when absent (not-yet-migrated docs). */
   permissions?: StaffPermissions
+  /** Branch admin of `storeId`. Owner-set through the server; mirrors the member doc. */
+  admin?: boolean
+  /** Owner-chosen admin extras. Meaningful only when `admin` is true. */
+  adminGrants?: Partial<StaffAdminGrants>
   hireDate: string
   salary?: number
   status: 'active' | 'inactive' | 'on_leave'

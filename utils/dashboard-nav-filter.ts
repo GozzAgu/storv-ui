@@ -8,6 +8,8 @@ export type DashboardNavDefinition = {
   segment: string
   iconKey: DashboardNavIconKey
   requiresSuperAdmin?: boolean
+  /** Store owner or a branch admin. */
+  requiresStaffManager?: boolean
   requiresManagerOrSuperAdmin?: boolean
   /** Staff need `view` on this module (super admins always pass). */
   permissionModule?: PermissionModule
@@ -98,7 +100,7 @@ export const DASHBOARD_NAV_DEFINITIONS: DashboardNavDefinition[] = [
     name: 'Departments',
     segment: '/departments',
     iconKey: 'departments',
-    requiresSuperAdmin: true,
+    requiresStaffManager: true,
     subscriptionFeature: 'departments',
     businessCapability: 'staffManagement',
   },
@@ -152,6 +154,8 @@ export function filterDashboardNavItems(
   options: {
     isSuperAdmin: boolean
     isManager: boolean
+    /** Branch admin of the current store (owners pass via `isSuperAdmin`). */
+    isAdmin?: boolean
     canUseFeature: (feature: SubscriptionFeature) => boolean
     canViewModule?: (module: PermissionModule) => boolean
     canUseBusinessCapability?: (capability: BusinessCapability) => boolean
@@ -169,6 +173,7 @@ export function filterDashboardNavItems(
     if (item.requiresPaymentsConfirm && !options.canConfirmPayments) return false
     if (item.requiresTrade && !options.tradeEnabled) return false
     if (item.requiresSuperAdmin && !options.isSuperAdmin) return false
+    if (item.requiresStaffManager && !options.isSuperAdmin && !options.isAdmin) return false
     if (item.requiresManagerOrSuperAdmin && !canSeeManagerOnlyFeatures) return false
     if (item.permissionModule) {
       const canView =

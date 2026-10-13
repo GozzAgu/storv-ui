@@ -36,6 +36,15 @@ export function resetDepartmentsFetchStamp(): void {
   departmentsFetchStamp = null
 }
 
+/** Owner, or a branch admin (who manages every department in their branch). */
+async function callerManagesDepartments(): Promise<boolean> {
+  const userStore = useUserStore()
+  if (userStore.userData?.role !== 'staff') return true
+  const { useStaffStore } = await import('./staff')
+  const member = await useStaffStore().fetchCurrentStaffMember()
+  return member?.admin === true
+}
+
 export const useDepartmentsStore = defineStore('departments', {
   state: () => ({
     departments: [] as Department[],
@@ -185,9 +194,9 @@ export const useDepartmentsStore = defineStore('departments', {
           })
         }
 
-        // Staff: only list the department they belong to (not every department in the store)
+        // Staff: only list the department they belong to (admins see the whole branch)
         let visibleDepartments = departments
-        if (userStore.userData?.role === 'staff') {
+        if (!(await callerManagesDepartments())) {
           try {
             const { useStaffStore } = await import('./staff')
             const staffStore = useStaffStore()
@@ -281,7 +290,7 @@ export const useDepartmentsStore = defineStore('departments', {
         if (!userStore.userData) {
           await userStore.fetchUserData(authStore.currentUser.uid)
         }
-        if (userStore.userData?.role === 'staff') {
+        if (!(await callerManagesDepartments())) {
           const { useStaffStore } = await import('./staff')
           const staffStore = useStaffStore()
           const staffMember = await staffStore.fetchCurrentStaffMember()
@@ -368,9 +377,14 @@ export const useDepartmentsStore = defineStore('departments', {
         throw new Error(msg)
       }
 
+      if (!(await callerManagesDepartments())) {
+        throw new Error('Only the store owner or an admin can add departments')
+      }
+
       try {
-        // Get userId for hierarchical path
-        const userId = authStore.currentUser.uid
+        // Departments always belong to the store owner, even when an admin adds them
+        const userId = await getQueryUserId()
+        if (!userId) throw new Error('User ID not available')
 
         // Use hierarchical path: users/{userId}/stores/{storeId}/departments
         const departmentsRef = getDepartmentsCollection(db, userId, storeId)
@@ -383,7 +397,7 @@ export const useDepartmentsStore = defineStore('departments', {
           staffCount: 0,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
-          createdBy: authStore.currentUser.uid,
+          createdBy: userId,
         }
 
         await setDoc(newDepartmentRef, newDepartment)
@@ -398,7 +412,7 @@ export const useDepartmentsStore = defineStore('departments', {
           staffCount: 0,
           createdAt: now,
           updatedAt: now,
-          createdBy: authStore.currentUser.uid,
+          createdBy: userId,
         }
         this.departments.unshift(departmentForState)
         departmentsFetchStamp = null
@@ -445,19 +459,20 @@ export const useDepartmentsStore = defineStore('departments', {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
 
-      if (userStore.userData?.role === 'staff') {
+      if (!(await callerManagesDepartments())) {
         throw new Error('Staff members do not have permission to update departments')
       }
 
       try {
-        // First verify the department belongs to this user and store
+        const userId = await getQueryUserId()
+        if (!userId) throw new Error('User ID not available')
+
+        // First verify the department belongs to the store owner
         const department = await this.fetchDepartment(departmentId)
-        if (!department || department.createdBy !== authStore.currentUser.uid) {
+        if (!department || department.createdBy !== userId) {
           throw new Error('Department not found or access denied')
         }
 
-        // Get userId and storeId for hierarchical path
-        const userId = authStore.currentUser.uid
         const storeId = await getCurrentStoreId()
         if (!storeId) {
           throw new Error('No store selected')
@@ -515,7 +530,7 @@ export const useDepartmentsStore = defineStore('departments', {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
 
-      if (userStore.userData?.role === 'staff') {
+      if (!(await callerManagesDepartments())) {
         throw new Error('Staff members do not have permission to delete departments')
       }
 
@@ -536,7 +551,7 @@ export const useDepartmentsStore = defineStore('departments', {
 
         // First verify the department belongs to this user and store
         const department = await this.fetchDepartment(departmentId)
-        if (!department || department.createdBy !== authStore.currentUser.uid) {
+        if (!department || department.createdBy !== userId) {
           throw new Error('Department not found or access denied')
         }
 

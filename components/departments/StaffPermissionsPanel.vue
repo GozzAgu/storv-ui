@@ -7,6 +7,7 @@
         <div class="s-perm__head">
           <span :id="`${baseId}-${module.key}`" class="s-perm__title">{{ module.title }}</span>
           <SBadge v-if="module.key === 'sellerLoans'" size="sm">Always on</SBadge>
+          <SBadge v-else-if="lockedModules.includes(module.key)" size="sm">Owner only</SBadge>
         </div>
         <p class="s-perm__hint">{{ levelHint(module) }}</p>
 
@@ -26,7 +27,7 @@
             :data-level="option.value"
             :aria-checked="levelOf(module.key) === option.value"
             :tabindex="levelOf(module.key) === option.value ? 0 : -1"
-            :disabled="disabled"
+            :disabled="isLocked(module.key)"
             @click="setLevel(module.key, option.value)"
           >
             {{ option.label }}
@@ -46,7 +47,7 @@
               type="button"
               class="s-perm__chip"
               :aria-pressed="modelValue[module.key][action.key]"
-              :disabled="disabled"
+              :disabled="isLocked(module.key)"
               @click="updateModule(module.key, { [action.key]: !modelValue[module.key][action.key] })"
             >
               <Check v-if="modelValue[module.key][action.key]" :size="14" :stroke-width="2.5" aria-hidden="true" />
@@ -96,9 +97,15 @@ import type {
 interface Props {
   modelValue: StaffPermissions
   disabled?: boolean
+  /** Shown but not editable by this viewer (e.g. Financial figures for a branch admin). */
+  lockedModules?: PermissionModule[]
 }
 
-const props = withDefaults(defineProps<Props>(), { disabled: false })
+const props = withDefaults(defineProps<Props>(), { disabled: false, lockedModules: () => [] })
+
+function isLocked(key: PermissionModule): boolean {
+  return props.disabled || props.lockedModules.includes(key)
+}
 const emit = defineEmits<{ 'update:modelValue': [StaffPermissions] }>()
 
 type Level = 'none' | 'view' | 'manage' | 'custom'
@@ -241,6 +248,7 @@ function onLevelKeydown(key: PermissionModule, event: KeyboardEvent) {
   const back = event.key === 'ArrowLeft' || event.key === 'ArrowUp'
   if (!forward && !back) return
   event.preventDefault()
+  if (isLocked(key)) return
   const levels = levelsFor(key)
   const index = levels.findIndex((l) => l.value === levelOf(key))
   const next = levels[(index + (forward ? 1 : -1) + levels.length) % levels.length]!.value

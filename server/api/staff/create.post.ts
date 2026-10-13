@@ -2,7 +2,7 @@ import { randomBytes } from 'node:crypto'
 import { createError, defineEventHandler, readBody } from 'h3'
 import { getAdminAuth, getAdminFirestore } from '~/server/utils/firebase-admin'
 import { rethrowFirebaseAdminSetupError } from '~/server/utils/firebase-admin-errors'
-import { requireAuth, requireFreshTotp } from '~/server/utils/store-auth'
+import { requireAuth } from '~/server/utils/store-auth'
 import {
   assertStaffCapacity,
   parseNewStaff,
@@ -17,7 +17,6 @@ interface CreateStaffBody extends Partial<NewStaffInput> {
   storeId?: string
   departmentId?: string
   password?: string
-  totpCode?: string
 }
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -36,7 +35,6 @@ export default defineEventHandler(async (event) => {
   }
 
   const body = (await readBody<CreateStaffBody>(event)) || {}
-  await requireFreshTotp(auth, body.totpCode)
   const ownerUserId = body.ownerUserId?.trim()
   const storeId = body.storeId?.trim()
   const departmentId = body.departmentId?.trim()
