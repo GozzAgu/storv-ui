@@ -111,6 +111,7 @@
             <ul class="s-list">
               <li v-for="loan in paginatedLoans" :key="loan.id">
                 <div class="s-list__item">
+                  <SAvatar :name="loan.partyName" size="sm" />
                   <button
                     type="button"
                     class="s-list__main s-list__hit"
@@ -166,10 +167,18 @@
                 <template v-for="loan in paginatedLoans" :key="loan.id">
                   <tr :class="{ 's-table__row--expanded': expandedLoanIds.has(loan.id) }">
                     <td>
-                      <span class="s-table__primary">{{ loan.partyName }}</span>
-                      <span v-if="loan.partyPhone || loan.partyNotes" class="s-table__secondary">
-                        {{ loan.partyPhone || loan.partyNotes }}
-                      </span>
+                      <div class="s-table__inline">
+                        <SAvatar :name="loan.partyName" size="sm" />
+                        <span>
+                          <span class="s-table__primary">{{ loan.partyName }}</span>
+                          <span
+                            v-if="loan.partyPhone || loan.partyNotes"
+                            class="s-table__secondary"
+                          >
+                            {{ loan.partyPhone || loan.partyNotes }}
+                          </span>
+                        </span>
+                      </div>
                     </td>
                     <td class="s-table__num">
                       <button
@@ -320,6 +329,7 @@ import {
   TriangleAlert,
   Undo2,
 } from '@lucide/vue'
+import SAvatar from '~/components/s/SAvatar.vue'
 import SBadge from '~/components/s/SBadge.vue'
 import SButton from '~/components/s/SButton.vue'
 import SCard from '~/components/s/SCard.vue'
