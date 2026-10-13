@@ -749,7 +749,6 @@
 
 .s-settings-page .s-tab-panel__body .s-card:not(.s-card .s-card) {
   overflow: hidden;
-  border-radius: calc(var(--s-radius-lg) + var(--s-space-half));
 }
 
 .s-settings-page .s-tab-panel__body .s-card:not(.s-card .s-card) > .s-card__head {

@@ -161,7 +161,7 @@
   gap: 1px;
   margin: 0;
   overflow-x: auto;
-  border-radius: calc(var(--s-radius-xl) + var(--s-space-half));
+  border-radius: var(--s-radius-lg);
   background: var(--s-line);
   box-shadow: 0 0 0 1px var(--s-line), 0 1px 2px rgb(0 0 0 / 0.04);
   scrollbar-width: none;
