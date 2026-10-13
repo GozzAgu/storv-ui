@@ -426,15 +426,14 @@
         <!-- Step 4: Sale Details -->
         <SForm v-if="currentStep === 3">
           <SFormSection>
-            <SField label="Customer name" required>
+            <SField label="Customer name" hint="Leave blank for a walk-in customer">
               <div class="s-pop-anchor">
                 <SInput
                   v-model="receiptForm.customerName"
-                  required
                   autocomplete="off"
                   @input="customerSuggestField = 'name'"
                   @blur="hideCustomerSuggestions"
-                  placeholder="John Doe"
+                  placeholder="Walk-in customer"
                 />
                 <CustomerSuggestions
                   v-if="customerSuggestField === 'name'"
@@ -746,6 +745,9 @@
               <dd>{{ formatCurrency(receiptTotal) }}</dd>
             </div>
           </dl>
+          <p v-if="createBlockedReason" class="s-new-sale__blocked" role="status">
+            {{ createBlockedReason }}
+          </p>
         </SForm>
       </div>
     </template>
@@ -1187,31 +1189,43 @@ function swapInFieldPlaceholder(field: {
   return field.placeholder || `Enter ${swapInFieldLabel(field)}`
 }
 
-const isFormValid = computed(() => {
-  const baseValid =
-    receiptForm.value.customerName.trim() !== '' &&
-    selectedItems.value.length > 0 &&
-    !hasInvalidSelectedQuantities.value
+const resolvedCustomerName = computed(
+  () => receiptForm.value.customerName.trim() || 'Walk-in Customer'
+)
+const hasCustomerDetails = computed(() =>
+  Boolean(
+    receiptForm.value.customerName.trim() ||
+      receiptForm.value.customerEmail.trim() ||
+      receiptForm.value.customerPhone.trim()
+  )
+)
 
-  // Payment validation
+/** Why the sale can't be created yet, shown above the button; null when ready. */
+const createBlockedReason = computed((): string | null => {
+  if (selectedItems.value.length === 0) return 'Add at least one product.'
+  if (hasInvalidSelectedQuantities.value) return 'Check the product quantities.'
+
   if (paymentSettlement.value === 'balance_due') {
     const deposit = roundMoney(Number(depositAmount.value) || 0)
-    if (deposit <= 0 || deposit >= receiptTotal.value) return false
-    if (!receiptForm.value.paymentMethod) return false
+    if (deposit <= 0) return 'Enter the amount paid now.'
+    if (deposit >= receiptTotal.value) return 'Amount paid now must be less than the total.'
+    if (!receiptForm.value.paymentMethod) return 'Choose a payment method.'
   } else if (useSplitPayment.value) {
-    if (splitPayments.value.length === 0) return false
-    if (splitPayments.value.some((p) => !p.method || p.amount <= 0)) return false
-    if (Math.abs(splitPaymentsTotal.value - receiptTotal.value) > 0.01) return false
-  } else {
-    if (!receiptForm.value.paymentMethod) return false
+    if (splitPayments.value.length === 0 || splitPayments.value.some((p) => !p.method)) {
+      return 'Choose a method for each split payment.'
+    }
+    if (splitPayments.value.some((p) => p.amount <= 0)) return 'Enter an amount for each split payment.'
+    if (Math.abs(splitPaymentsTotal.value - receiptTotal.value) > 0.01) {
+      return 'Split payments must add up to the total.'
+    }
+  } else if (!receiptForm.value.paymentMethod) {
+    return 'Choose a payment method.'
   }
 
-  // If swap-in is enabled, validate swap-in fields (only those we display, aligned with inventory)
+  // Only the swap-in fields we display, aligned with inventory
   if (isSwapIn.value) {
-    if (!swapInFolderId.value) return false
-    if (!swapInFolder.value) return false
-    const displayFields = swapInDisplayFields.value
-    const requiredFields = displayFields.filter((f: { required?: boolean }) => f.required)
+    if (!swapInFolderId.value || !swapInFolder.value) return 'Choose a category for the swap-in item.'
+    const requiredFields = swapInDisplayFields.value.filter((f: { required?: boolean }) => f.required)
     for (const field of requiredFields) {
       const value = swapInItemForm.value[field.name]
       if (
@@ -1219,15 +1233,19 @@ const isFormValid = computed(() => {
         value === null ||
         (typeof value === 'string' && value.trim() === '')
       ) {
-        return false
+        return 'Fill in the required swap-in details.'
       }
     }
   }
 
-  if (hasAnyCheckoutDiscount.value && !discountReason.value.trim()) return false
+  if (hasAnyCheckoutDiscount.value && !discountReason.value.trim()) {
+    return 'Add a reason for the discount.'
+  }
 
-  return baseValid
+  return null
 })
+
+const isFormValid = computed(() => createBlockedReason.value === null)
 
 const totalSelectedQuantity = computed(() => {
   return selectedItems.value.reduce((sum, si) => sum + si.quantity, 0)
@@ -1924,7 +1942,7 @@ const handleCreateReceipt = async () => {
     // Create receipt in Firestore
     const receiptData: any = {
       receiptNumber,
-      customerName: receiptForm.value.customerName,
+      customerName: resolvedCustomerName.value,
       customerEmail: receiptForm.value.customerEmail || '',
       customerPhone: receiptForm.value.customerPhone || undefined,
       customerAddress: receiptForm.value.customerAddress || undefined,
@@ -2011,18 +2029,20 @@ const handleCreateReceipt = async () => {
     }
 
     // Create or update customer automatically
-    try {
-      await customersStore.createOrUpdateCustomerFromReceipt(receiptId, {
-        customerName: receiptForm.value.customerName,
-        customerEmail: receiptForm.value.customerEmail || undefined,
-        customerPhone: receiptForm.value.customerPhone || undefined,
-        customerAddress: receiptForm.value.customerAddress || undefined,
-        total: calculateTotal(),
-        date: new Date(),
-      })
-    } catch (error: any) {
-      console.error('Error creating/updating customer:', error)
-      // Don't fail the receipt creation if customer creation fails
+    if (hasCustomerDetails.value) {
+      try {
+        await customersStore.createOrUpdateCustomerFromReceipt(receiptId, {
+          customerName: resolvedCustomerName.value,
+          customerEmail: receiptForm.value.customerEmail || undefined,
+          customerPhone: receiptForm.value.customerPhone || undefined,
+          customerAddress: receiptForm.value.customerAddress || undefined,
+          total: calculateTotal(),
+          date: new Date(),
+        })
+      } catch (error: any) {
+        console.error('Error creating/updating customer:', error)
+        // Don't fail the receipt creation if customer creation fails
+      }
     }
 
     void haptics.notify('success')

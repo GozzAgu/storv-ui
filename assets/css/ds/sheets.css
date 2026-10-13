@@ -1401,6 +1401,13 @@
   color: var(--s-text);
 }
 
+.s-new-sale__blocked {
+  margin: 0;
+  color: var(--s-warning);
+  font: var(--s-text-small);
+  font-weight: 500;
+}
+
 .s-new-sale__empty-title {
   color: var(--s-text);
   font-weight: 500;
