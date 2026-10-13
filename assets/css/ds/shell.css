@@ -347,11 +347,12 @@ html:has(.s-shell.ds-root) body {
   box-shadow: var(--s-focus-ring);
 }
 
+/* The selected route is a solid pill in the primary button colour, so it reads at a glance */
 .s-nav-item--active,
 .s-nav-item--active:hover {
-  background: var(--s-surface);
+  background: var(--s-btn-primary);
   box-shadow: var(--s-card-shadow);
-  color: var(--s-text);
+  color: var(--s-on-btn-primary);
   font-weight: 600;
 }
 
@@ -412,7 +413,7 @@ html:has(.s-shell.ds-root) body {
   inset-inline: var(--s-space-1);
   z-index: 0;
   border-radius: var(--s-radius);
-  background: var(--s-surface);
+  background: var(--s-btn-primary);
   box-shadow: var(--s-card-shadow);
   will-change: transform;
   backface-visibility: hidden;
@@ -446,10 +447,20 @@ html:has(.s-shell.ds-root) body {
   transition: background-color var(--s-duration-fast) var(--s-ease), color 280ms var(--s-ease);
 }
 
+/* With the lens, the light text follows the lens (which moves on click), not the route */
 .s-sidebar--lens .s-nav-item--active,
 .s-sidebar--lens .s-nav-item--active:hover {
   background: transparent;
   box-shadow: none;
+  color: var(--s-text);
+}
+
+.s-sidebar--lens .s-nav-item--lensed,
+.s-sidebar--lens .s-nav-item--lensed:hover {
+  background: transparent;
+  color: var(--s-on-btn-primary);
+  font-weight: 600;
+  transition-delay: 120ms;
 }
 
 @media (prefers-reduced-motion: reduce) {

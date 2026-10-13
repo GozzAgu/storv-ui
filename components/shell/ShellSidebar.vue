@@ -39,6 +39,7 @@
         <ul class="s-sidebar__list" role="list">
           <li v-for="item in section.items" :key="item.name">
             <ShellSidebarItem
+              :class="{ 's-nav-item--lensed': lensReady && item.name === targetName }"
               :item="item"
               :active="isActive(item)"
               :collapsed="collapsed"
@@ -61,6 +62,7 @@
         <ul class="s-sidebar__list" role="list">
           <li v-for="item in footerItems" :key="item.name">
             <ShellSidebarItem
+              :class="{ 's-nav-item--lensed': lensReady && item.name === targetName }"
               :item="item"
               :active="isActive(item)"
               :collapsed="collapsed"
