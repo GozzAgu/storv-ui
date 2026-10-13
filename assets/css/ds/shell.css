@@ -350,7 +350,7 @@ html:has(.s-shell.ds-root) body {
 .s-nav-item--active,
 .s-nav-item--active:hover {
   background: var(--s-surface);
-  box-shadow: 0 0 0 1px var(--s-line), 0 1px 2px rgb(0 0 0 / 0.05);
+  box-shadow: var(--s-card-shadow);
   color: var(--s-text);
   font-weight: 600;
 }
@@ -413,7 +413,7 @@ html:has(.s-shell.ds-root) body {
   z-index: 0;
   border-radius: var(--s-radius);
   background: var(--s-surface);
-  box-shadow: 0 0 0 1px var(--s-line), 0 1px 2px rgb(0 0 0 / 0.05);
+  box-shadow: var(--s-card-shadow);
   will-change: transform;
   backface-visibility: hidden;
   pointer-events: none;

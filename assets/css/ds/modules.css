@@ -992,7 +992,7 @@
   gap: var(--s-space-1-5);
   padding: var(--s-space-2);
   border-radius: var(--s-radius-lg);
-  box-shadow: 0 0 0 1px var(--s-line);
+  background: var(--s-surface-2);
   color: var(--s-text-muted);
 }
 
@@ -1224,8 +1224,7 @@
   gap: var(--s-space-2);
   padding: var(--s-space-2);
   border-radius: var(--s-radius-xl);
-  background: var(--s-surface);
-  box-shadow: 0 0 0 1px var(--s-line), 0 1px 2px rgb(0 0 0 / 0.04);
+  background: var(--s-surface-2);
 }
 
 .s-plan__addon-title {

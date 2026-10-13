@@ -164,12 +164,12 @@
   padding: var(--s-space-half);
   border-radius: calc(var(--s-radius-lg) + var(--s-space-half));
   background: var(--s-surface);
-  box-shadow: 0 0 0 1px var(--s-line), 0 1px 2px rgb(0 0 0 / 0.04);
+  box-shadow: var(--s-card-shadow);
   transition: box-shadow var(--s-duration) var(--s-ease), transform var(--s-duration) var(--s-ease);
 }
 
 .s-category-card:hover {
-  box-shadow: 0 0 0 1px var(--s-border-strong), 0 12px 28px -16px rgb(0 0 0 / 0.28);
+  box-shadow: var(--s-shadow-md);
   transform: translateY(calc(var(--s-space-quarter) * -1));
 }
 

@@ -162,8 +162,8 @@
   margin: 0;
   overflow-x: auto;
   border-radius: var(--s-radius-lg);
-  background: var(--s-line);
-  box-shadow: 0 0 0 1px var(--s-line), 0 1px 2px rgb(0 0 0 / 0.04);
+  background: var(--s-divider);
+  box-shadow: var(--s-card-shadow);
   scrollbar-width: none;
 }
 
@@ -563,24 +563,20 @@
 }
 
 /* ── Tab panel ───────────────────────────────────────────── */
-/* Section pages (Reports, Settings, Transfers, Partners): tabs sit in the head of one surface and
-   the cards for the chosen tab sit inside it as outlined panels. */
+/* Section pages (Reports, Settings, Transfers, Partners): the tabs sit on the canvas and the cards
+   for the chosen tab follow as ordinary cards, so nothing is nested or outlined. */
 .s-tab-panel {
   display: flex;
   flex-direction: column;
+  gap: var(--s-space-2);
   min-width: 0;
-  border-radius: var(--s-radius-lg);
-  background: var(--s-surface);
-  box-shadow: var(--s-shadow-sm);
 }
 
 .s-tab-panel__head {
   display: flex;
   align-items: center;
   min-width: 0;
-  padding: var(--s-space-2) var(--s-space-2) var(--s-space-1-5);
   overflow-x: auto;
-  border-bottom: 1px solid var(--s-divider);
   scrollbar-width: none;
 }
 
@@ -594,24 +590,12 @@
   flex-direction: column;
   gap: var(--s-space-2);
   min-width: 0;
-  padding: var(--s-space-2);
-}
-
-.s-tab-panel__body .s-card:not(.s-table-card .s-card, .s-card .s-card),
-.s-tab-panel__body .s-stat,
-.s-tab-panel__body .s-table-card {
-  background: transparent;
-  box-shadow: 0 0 0 1px var(--s-line);
 }
 
 @media (max-width: 639px) {
-  .s-tab-panel__head {
-    padding: var(--s-space-1-5);
-  }
-
+  .s-tab-panel,
   .s-tab-panel__body {
     gap: var(--s-space-1-5);
-    padding: var(--s-space-1-5);
   }
 }
 

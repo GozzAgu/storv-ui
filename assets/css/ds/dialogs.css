@@ -414,7 +414,7 @@
 
 .s-banner--neutral {
   background: var(--s-surface);
-  box-shadow: 0 0 0 1px var(--s-line);
+  box-shadow: var(--s-card-shadow);
   color: var(--s-text-2);
 }
 
