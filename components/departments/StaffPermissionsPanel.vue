@@ -7,7 +7,7 @@
         <div class="s-perm__head">
           <span :id="`${baseId}-${module.key}`" class="s-perm__title">{{ module.title }}</span>
           <SBadge v-if="module.key === 'sellerLoans'" size="sm">Always on</SBadge>
-          <SBadge v-else-if="lockedModules.includes(module.key)" size="sm">Owner only</SBadge>
+          <SBadge v-else-if="lockedModules.includes(module.key)" size="sm">{{ lockedBadge }}</SBadge>
         </div>
         <p class="s-perm__hint">{{ levelHint(module) }}</p>
 
@@ -59,7 +59,7 @@
             type="button"
             class="s-perm__chip"
             :aria-pressed="modelValue.sellerLoans.delete"
-            :disabled="disabled"
+            :disabled="isLocked('sellerLoans')"
             @click="updateModule('sellerLoans', { delete: !modelValue.sellerLoans.delete })"
           >
             <Check v-if="modelValue.sellerLoans.delete" :size="14" :stroke-width="2.5" aria-hidden="true" />
@@ -70,7 +70,7 @@
             type="button"
             class="s-perm__chip"
             :aria-pressed="modelValue.receipts.refund"
-            :disabled="disabled"
+            :disabled="isLocked('receipts')"
             @click="updateModule('receipts', { refund: !modelValue.receipts.refund })"
           >
             <Check v-if="modelValue.receipts.refund" :size="14" :stroke-width="2.5" aria-hidden="true" />
@@ -99,9 +99,14 @@ interface Props {
   disabled?: boolean
   /** Shown but not editable by this viewer (e.g. Financial figures for a branch admin). */
   lockedModules?: PermissionModule[]
+  lockedBadge?: string
 }
 
-const props = withDefaults(defineProps<Props>(), { disabled: false, lockedModules: () => [] })
+const props = withDefaults(defineProps<Props>(), {
+  disabled: false,
+  lockedModules: () => [],
+  lockedBadge: 'Owner only',
+})
 
 function isLocked(key: PermissionModule): boolean {
   return props.disabled || props.lockedModules.includes(key)

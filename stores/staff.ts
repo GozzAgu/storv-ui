@@ -32,6 +32,7 @@ import {
   summarizeSubscriptionAddOns,
 } from '~/types/subscription'
 import type { Staff } from '~/composables/useStaff'
+import type { StaffAdminGrants } from '~/types/staff-permissions'
 import type { Department } from '~/composables/useDepartments'
 import { resolveApiPath } from '~/utils/api-url'
 import { deriveDefaultPermissions, resolveStaffPermissions } from '~/utils/staff-permissions'
@@ -1059,6 +1060,51 @@ export const useStaffStore = defineStore('staff', {
         console.error('Error reactivating staff:', error)
         throw parseStaffLifecycleApiError(error, 'Failed to reactivate staff')
       }
+    },
+
+    /** Owner-only: make a staff member admin of their branch (or remove it) and set extras. */
+    async setStaffAdminAccess(
+      staffId: string,
+      access: { admin: boolean; grants: StaffAdminGrants },
+      totpCode?: string
+    ): Promise<{ admin: boolean; adminGrants: StaffAdminGrants }> {
+      const authStore = useAuthStore()
+      if (!authStore.currentUser) throw new Error('User must be authenticated')
+
+      const ownerUserId = await getQueryUserId()
+      const member = this.getStaffMember(staffId) || (await this.fetchStaffMember(staffId))
+      if (!ownerUserId || !member || member.createdBy !== ownerUserId) {
+        throw new Error('Staff member not found or access denied')
+      }
+      const storeId = member.storeId || (await getCurrentStoreId())
+      if (!storeId) throw new Error('No store selected')
+
+      let raw: unknown
+      try {
+        const token = await authStore.currentUser.getIdToken()
+        raw = await $fetch(resolveApiPath('/api/staff/admin-access'), {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+          body: {
+            ownerUserId,
+            storeId,
+            departmentId: member.departmentId,
+            staffId,
+            admin: access.admin,
+            grants: access.grants,
+            totpCode,
+          },
+        })
+      } catch (error: unknown) {
+        throw parseStaffLifecycleApiError(error, 'Failed to update admin access')
+      }
+      const result = raw as { admin: boolean; adminGrants: StaffAdminGrants }
+
+      for (const s of this.staff) {
+        if (s.id === staffId) Object.assign(s, { admin: result.admin, adminGrants: result.adminGrants })
+      }
+      Object.assign(member, { admin: result.admin, adminGrants: result.adminGrants })
+      return result
     },
 
     /** Staff self-service: persist personal photo on the roster doc (staff have no users/{uid}). */
