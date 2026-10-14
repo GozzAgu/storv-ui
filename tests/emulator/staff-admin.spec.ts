@@ -180,6 +180,17 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('Branch admin staff manage
     expect(await statusOf(assertStaffCapacity(db, ownerId, 's2'))).toBeUndefined()
   })
 
+  it('remove, hire a replacement, then reactivate: the reactivation no longer fits the plan', async () => {
+    const { ownerId, s1 } = await workspace()
+    const staff = s1.collection('departments').doc('d1').collection('staff')
+    // Micro allows 2 per store: st1 and stAdmin fill it.
+    expect(await statusOf(assertStaffCapacity(db, ownerId, 's1'))).toBe(403)
+    await staff.doc('st1').update({ status: 'inactive' })
+    expect(await statusOf(assertStaffCapacity(db, ownerId, 's1'))).toBeUndefined()
+    await staff.doc('replacement').set({ createdBy: ownerId, status: 'active' })
+    expect(await statusOf(assertStaffCapacity(db, ownerId, 's1'))).toBe(403)
+  })
+
   it('admin edits a regular staff member but cannot change their financials or payments', async () => {
     const { ownerId, s1 } = await workspace()
     const manager: StaffManager = { kind: 'admin', uid: 'admin1' }

@@ -4,7 +4,11 @@ import { getAdminAuth, getAdminFirestore } from '~/server/utils/firebase-admin'
 import { rethrowFirebaseAdminSetupError } from '~/server/utils/firebase-admin-errors'
 import { requireAuth, requireFreshTotp } from '~/server/utils/store-auth'
 import { assertStaffLoginTarget } from '~/server/utils/staff-login-target'
-import { assertCanManageTarget, resolveStaffManager } from '~/server/utils/staff-admin'
+import {
+  assertCanManageTarget,
+  assertStaffCapacity,
+  resolveStaffManager,
+} from '~/server/utils/staff-admin'
 
 interface ReactivateStaffBody {
   ownerUserId?: string
@@ -95,6 +99,9 @@ export default defineEventHandler(async (event) => {
       message: 'Only removed (inactive) staff can be reactivated from this action',
     })
   }
+
+  // Removed staff don't count toward the plan, so bringing one back must fit like a new hire.
+  await assertStaffCapacity(adminDb, ownerUserId, storeId)
 
   if (authUid) {
     const adminAuth = getAdminAuth()
