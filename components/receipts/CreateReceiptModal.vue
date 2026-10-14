@@ -646,9 +646,22 @@
                 </div>
                 <SSelect v-else v-model="swapInFolderId" required>
                   <option value="">Select category for swapped-in device</option>
-                  <option v-for="folder in leafFolders" :key="folder.id" :value="folder.id">
+                  <option
+                    v-for="folder in swapInFolderOptions.standalone"
+                    :key="folder.id"
+                    :value="folder.id"
+                  >
                     {{ folder.name }}
                   </option>
+                  <optgroup
+                    v-for="group in swapInFolderOptions.groups"
+                    :key="group.parent.id"
+                    :label="group.parent.name"
+                  >
+                    <option v-for="folder in group.children" :key="folder.id" :value="folder.id">
+                      {{ folder.name }}
+                    </option>
+                  </optgroup>
                 </SSelect>
               </SField>
 
@@ -874,6 +887,7 @@ import { useInventoryStore, type InventoryFolder, type InventoryItem } from '~/s
 import { useReceiptsStore, type ReceiptItem } from '~/stores/receipts'
 import { useSellerLoanOutsStore } from '~/stores/sellerLoanOuts'
 import { resolveItemUnitCost } from '~/utils/inventory-item-cost'
+import { groupLeafFoldersForPicker } from '~/utils/inventory-folder-tree'
 import { useCustomersStore } from '~/stores/customers'
 import {
   buildCustomerOptions,
@@ -1052,6 +1066,7 @@ const useSplitPayment = ref(false)
 const splitPayments = ref<Array<{ method: string; amount: number }>>([{ method: '', amount: 0 }])
 
 const leafFolders = computed(() => inventoryStore.leafFolders)
+const swapInFolderOptions = computed(() => groupLeafFoldersForPicker(inventoryStore.folders))
 
 const matchingCustomers = computed(() => {
   const field = customerSuggestField.value

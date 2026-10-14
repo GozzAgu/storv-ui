@@ -55,10 +55,12 @@
       <section class="s-form-section">
         <h3 class="s-form-section__title">Tiers</h3>
         <p class="s-form-meta">
-          Based on what a customer paid across all branches in the last 12 months. Higher tiers earn
-          points faster.
+          Based on what a customer paid across all branches in the last 12 months. A customer moves
+          up as soon as their spend reaches a tier, and drops back if it falls below. Higher tiers
+          earn points faster.
         </p>
         <div v-for="(tier, index) in form.tiers" :key="tier.id" class="s-loyalty-tier">
+          <LoyaltyTierBadge class="s-loyalty-tier__badge" :tier="tier.id" :size="20" />
           <SInput
             v-model="tier.name"
             :label="index === 0 ? 'Name' : undefined"
@@ -105,6 +107,7 @@ import SCheckbox from '~/components/s/SCheckbox.vue'
 import SInput from '~/components/s/SInput.vue'
 import SSelect from '~/components/s/SSelect.vue'
 import SSkeleton from '~/components/s/SSkeleton.vue'
+import LoyaltyTierBadge from '~/components/loyalty/LoyaltyTierBadge.vue'
 import { paymentsV2UiFlag, paymentsErrorMessage } from '~/composables/usePaymentsV2'
 import { useLoyalty } from '~/composables/useLoyalty'
 import { LOYALTY_DEFAULT_SETTINGS, type LoyaltySettings } from '~/utils/loyalty'
@@ -162,8 +165,13 @@ async function save() {
 <style scoped>
 .s-loyalty-tier {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 0.8fr);
+  grid-template-columns: auto minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 0.8fr);
   gap: var(--s-space-1-5);
   align-items: end;
+}
+
+.s-loyalty-tier__badge {
+  align-self: end;
+  margin-bottom: 0.375rem;
 }
 </style>

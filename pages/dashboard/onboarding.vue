@@ -179,6 +179,8 @@ import { getCitiesForRegion, isCityInRegion } from '~/utils/region-cities'
 import type { ExperienceMode } from '~/types/business-experience'
 import { withOnboardingExperienceChoice } from '~/utils/onboarding-experience'
 import { useFunnelAnalytics } from '~/composables/useFunnelAnalytics'
+import { writeUserProfileCache } from '~/utils/user-profile-cache'
+import { markOnboardingCompleteForSession } from '~/utils/onboarding-session'
 
 definePageMeta({
   layout: false,
@@ -388,6 +390,19 @@ const completeOnboarding = async () => {
       selectedExperienceMode.value
     )
     await updateStoreDetails(currentUser.value.uid, detailsToSave)
+
+    // The auth middleware reads the in-memory profile: without this, the first navigation to the
+    // dashboard still sees hasCompletedOnboarding: false and bounces back here.
+    const uid = currentUser.value.uid
+    if (userStore.userData?.uid === uid) {
+      userStore.userData = {
+        ...userStore.userData,
+        storeDetails: detailsToSave,
+        hasCompletedOnboarding: true,
+      }
+      writeUserProfileCache(uid, userStore.userData)
+    }
+    markOnboardingCompleteForSession(uid)
 
     // Create the first store during onboarding and set it as the current/default store.
     // Existing users who already have stores keep their existing list.

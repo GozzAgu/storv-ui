@@ -832,7 +832,8 @@
                     f.name !== 'serialNo' &&
                     f.name !== 'serialNumber' &&
                     f.name !== 'brand' &&
-                    f.name !== 'model'
+                    f.name !== 'model' &&
+                    !bulkUniqueFieldNames.has(f.name)
                 )"
                 :key="field.id"
               >
@@ -915,26 +916,20 @@
                 Add serial number
               </SButton>
             </div>
+            <p v-if="bulkUniqueFields.length > 0" :class="drawerHintClass">
+              Each product needs its own {{ bulkUniqueFieldLabels }}.
+            </p>
             <p v-if="serialNumbers.length === 0" :class="emptyStateClass">
               No serial numbers yet. Select “Add serial number” to start.
             </p>
-            <div v-else :class="[drawerFillScrollClass, 's-inv-stack']">
-              <div v-for="(serial, index) in serialNumbers" :key="index" class="s-inline-field">
-                <div class="s-inline-field__grow">
-                  <SInput
-                    v-model="serialNumbers[index]"
-                    :placeholder="`Serial ${index + 1}`"
-                    :aria-label="`Serial number ${index + 1}`"
-                  />
-                </div>
-                <SIconButton
-                  :label="`Remove serial number ${index + 1}`"
-                  @click="removeSerialNumber(index)"
-                >
-                  <Trash2 :size="16" :stroke-width="1.75" aria-hidden="true" />
-                </SIconButton>
-              </div>
-            </div>
+            <SerialUniqueRows
+              v-else
+              v-model:serials="serialNumbers"
+              v-model:values="serialUniqueValues"
+              :class="drawerFillScrollClass"
+              :unique-fields="bulkUniqueFields"
+              @remove="removeSerialNumber"
+            />
           </section>
         </template>
 
@@ -1118,27 +1113,13 @@
         <p v-if="duplicateSerialNumbers.length === 0" :class="emptyStateClass">
           No serial numbers. Select “Add” to enter one or more.
         </p>
-        <div v-else class="s-inv-stack">
-          <div
-            v-for="(serial, index) in duplicateSerialNumbers"
-            :key="index"
-            class="s-inline-field"
-          >
-            <div class="s-inline-field__grow">
-              <SInput
-                v-model="duplicateSerialNumbers[index]"
-                :placeholder="`Serial ${index + 1}`"
-                :aria-label="`Serial number ${index + 1}`"
-              />
-            </div>
-            <SIconButton
-              :label="`Remove serial number ${index + 1}`"
-              @click="removeDuplicateSerialNumber(index)"
-            >
-              <Trash2 :size="16" :stroke-width="1.75" aria-hidden="true" />
-            </SIconButton>
-          </div>
-        </div>
+        <SerialUniqueRows
+          v-else
+          v-model:serials="duplicateSerialNumbers"
+          v-model:values="duplicateUniqueValues"
+          :unique-fields="bulkUniqueFields"
+          @remove="removeDuplicateSerialNumber"
+        />
       </form>
 
       <template #footer>
@@ -1410,6 +1391,11 @@ import SEmptyState from '~/components/s/SEmptyState.vue'
 import SField from '~/components/s/SField.vue'
 import SIconButton from '~/components/s/SIconButton.vue'
 import SInput from '~/components/s/SInput.vue'
+import SerialUniqueRows from '~/components/inventory/SerialUniqueRows.vue'
+import {
+  findUniqueValueClashInBatch,
+  uniqueTemplateFields,
+} from '~/utils/inventory-unique-fields'
 import SMenu from '~/components/s/SMenu.vue'
 import SMenuItem from '~/components/s/SMenuItem.vue'
 import SPageHeader from '~/components/s/SPageHeader.vue'
@@ -1468,7 +1454,8 @@ const canDuplicateByPlan = computed(() => {
   return sub === 'storvv_medium' || sub === 'storvv_enterprise'
 })
 const { formatCurrency, preferences } = usePreferences()
-const { drawerFillClass, drawerFillScrollClass, emptyStateClass } = useDashboardDrawerChrome()
+const { drawerFillClass, drawerFillScrollClass, emptyStateClass, drawerHintClass } =
+  useDashboardDrawerChrome()
 const currencySymbol = computed(() => preferences.value?.currencySymbol || '$')
 
 function itemSelectFieldOptions(field: TemplateField) {
@@ -2330,6 +2317,8 @@ const handleKeyDown = (e: KeyboardEvent) => {
 
 const itemForm = reactive<Record<string, any>>({})
 const serialNumbers = ref<string[]>([])
+/** Per-serial values for unique columns, index-aligned with `serialNumbers`. */
+const serialUniqueValues = ref<Record<string, string>[]>([])
 const isSavingItem = ref(false)
 
 const validBulkSerialNumbers = computed(() =>
@@ -2403,6 +2392,7 @@ const sellerLoanModalItemsOverride = ref<InventoryItem[] | null>(null)
 const showDuplicateModal = ref(false)
 const duplicateSourceItem = ref<InventoryItem | null>(null)
 const duplicateSerialNumbers = ref<string[]>([''])
+const duplicateUniqueValues = ref<Record<string, string>[]>([{}])
 const isDuplicating = ref(false)
 
 watch([showAddItemModal, showDuplicateModal], async ([addOpen, dupOpen]) => {
@@ -3339,8 +3329,10 @@ function initializeItemForm() {
     itemForm.brand = ''
     itemForm.model = ''
     serialNumbers.value = ['']
+    serialUniqueValues.value = [{}]
   } else {
     serialNumbers.value = []
+    serialUniqueValues.value = []
   }
 
   const fields = effectiveTemplateFields.value.length
@@ -3387,6 +3379,7 @@ const handleEditItem = (item: InventoryItem) => {
   cancelInlineEdit()
   editingItem.value = item
   serialNumbers.value = []
+  serialUniqueValues.value = []
   // Copy all item data to form; dates (dateIn, dateOut) are not editable
   const systemFields = [
     'id',
@@ -3455,11 +3448,13 @@ const handleDuplicateItem = (item: InventoryItem) => {
   if (folder.value?.hasSerialNumbers) {
     duplicateSourceItem.value = item
     duplicateSerialNumbers.value = ['']
+    duplicateUniqueValues.value = [{}]
     showDuplicateModal.value = true
   } else {
     // No serial numbers: open add form with prefilled data so user can save as new item
     editingItem.value = null
     serialNumbers.value = []
+    serialUniqueValues.value = []
     Object.keys(itemForm).forEach((key) => delete itemForm[key])
     const systemFields = [
       'id',
@@ -3489,6 +3484,7 @@ const handleDuplicateItem = (item: InventoryItem) => {
 const clearDuplicateModal = () => {
   duplicateSourceItem.value = null
   duplicateSerialNumbers.value = []
+  duplicateUniqueValues.value = []
 }
 
 const validDuplicateSerials = computed(() => {
@@ -3502,10 +3498,12 @@ const hasValidDuplicateSerials = computed(() => validDuplicateSerialsCount.value
 
 const addDuplicateSerialNumber = () => {
   duplicateSerialNumbers.value.push('')
+  duplicateUniqueValues.value.push({})
 }
 
 const removeDuplicateSerialNumber = (index: number) => {
   duplicateSerialNumbers.value.splice(index, 1)
+  duplicateUniqueValues.value.splice(index, 1)
 }
 
 const handleConfirmDuplicate = async () => {
@@ -3530,6 +3528,15 @@ const handleConfirmDuplicate = async () => {
   const alreadyExist = serials.filter((sn) =>
     existing.has(getSerialProductKey(sn, source.brand, source.model, source.name))
   )
+  const duplicateRows = serialRowsWithValues(
+    duplicateSerialNumbers.value,
+    duplicateUniqueValues.value
+  )
+  const uniqueProblem = serialUniqueValuesProblem(duplicateRows)
+  if (uniqueProblem) {
+    toast.error(uniqueProblem)
+    return
+  }
   if (alreadyExist.length > 0) {
     toast.error(
       alreadyExist.length === 1
@@ -3565,7 +3572,15 @@ const handleConfirmDuplicate = async () => {
       }
     })
     delete baseData.serialNo
-    const itemsToCreate = serials.map((serialNo) => ({ ...baseData, serialNo }))
+    for (const field of bulkUniqueFields.value) delete baseData[field.name]
+    const valuesBySerial = new Map(
+      duplicateRows.map((row) => [row.serialNo, uniqueValuesForItem(row.values)])
+    )
+    const itemsToCreate = serials.map((serialNo) => ({
+      ...baseData,
+      ...valuesBySerial.get(serialNo),
+      serialNo,
+    }))
     await inventoryStore.createItemsBatch(folderId.value, itemsToCreate)
     if (folder.value) {
       folder.value.itemCount = (folder.value.itemCount || 0) + serials.length
@@ -3650,10 +3665,66 @@ const handleConfirmBulkDelete = async () => {
 
 const addSerialNumber = () => {
   serialNumbers.value.push('')
+  serialUniqueValues.value.push({})
 }
 
 const removeSerialNumber = (index: number) => {
   serialNumbers.value.splice(index, 1)
+  serialUniqueValues.value.splice(index, 1)
+}
+
+/** Serial folders: columns every product needs its own value for (engine number, IMEI). */
+const bulkUniqueFields = computed((): TemplateField[] =>
+  folder.value?.hasSerialNumbers ? uniqueTemplateFields(effectiveTemplateFields.value) : []
+)
+const bulkUniqueFieldNames = computed(() => new Set(bulkUniqueFields.value.map((f) => f.name)))
+const bulkUniqueFieldLabels = computed(() =>
+  bulkUniqueFields.value.map((f) => f.label || f.name).join(', ')
+)
+
+type SerialRowDraft = { serialNo: string; values: Record<string, string> }
+
+/** Rows with a serial number, each with its trimmed unique values. */
+function serialRowsWithValues(
+  serials: string[],
+  values: Record<string, string>[]
+): SerialRowDraft[] {
+  return serials
+    .map((sn, i) => ({
+      serialNo: String(sn ?? '').trim(),
+      values: Object.fromEntries(
+        bulkUniqueFields.value.map((f) => [f.name, String(values[i]?.[f.name] ?? '').trim()])
+      ),
+    }))
+    .filter((row) => row.serialNo)
+}
+
+/** Unique values as stored on the product: numbers for number columns, blanks left out. */
+function uniqueValuesForItem(values: Record<string, string>): Record<string, string | number> {
+  const out: Record<string, string | number> = {}
+  for (const field of bulkUniqueFields.value) {
+    const raw = values[field.name]
+    if (!raw) continue
+    const n = Number(raw)
+    out[field.name] = field.type === 'number' && Number.isFinite(n) ? n : raw
+  }
+  return out
+}
+
+/** Message for the first problem with per-serial unique values, or null when they are fine. */
+function serialUniqueValuesProblem(rows: SerialRowDraft[]): string | null {
+  for (const field of bulkUniqueFields.value) {
+    if (!field.required) continue
+    const missing = rows.find((row) => !row.values[field.name])
+    if (missing) return `Enter the ${field.label || field.name} for serial ${missing.serialNo}.`
+  }
+  const clash = findUniqueValueClashInBatch(
+    rows.map((row) => row.values),
+    bulkUniqueFields.value
+  )
+  return clash
+    ? `${clash.fieldLabel} "${clash.value}" is entered more than once. Each product needs its own.`
+    : null
 }
 
 const handleSaveItem = async () => {
@@ -3750,17 +3821,26 @@ const handleSaveItem = async () => {
           return
         }
 
+        const serialRows = serialRowsWithValues(serialNumbers.value, serialUniqueValues.value)
+        const uniqueProblem = serialUniqueValuesProblem(serialRows)
+        if (uniqueProblem) {
+          toast.error(uniqueProblem)
+          return
+        }
+
         // Create multiple items with different serial numbers
         const baseItemData = { ...itemForm }
         // Remove serialNo from base data if it exists (we'll add it per item)
         delete baseItemData.serialNo
+        for (const field of bulkUniqueFields.value) delete baseItemData[field.name]
         normalizeSerialItemPayload(baseItemData)
         normalizeUnitCostPayload(baseItemData)
 
         // Create items in batch for much better performance
-        const itemsToCreate = validSerialNumbers.map((serialNo) => ({
+        const itemsToCreate = serialRows.map((row) => ({
           ...baseItemData,
-          serialNo: serialNo.trim(),
+          ...uniqueValuesForItem(row.values),
+          serialNo: row.serialNo,
         }))
 
         await inventoryStore.createItemsBatch(folderId.value, itemsToCreate)
@@ -3819,6 +3899,7 @@ const handleCancelItem = () => {
   showAddItemModal.value = false
   editingItem.value = null
   serialNumbers.value = []
+  serialUniqueValues.value = []
   Object.keys(itemForm).forEach((key) => delete itemForm[key])
   nextTick(() => {
     itemDrawerClosingViaCancel.value = false

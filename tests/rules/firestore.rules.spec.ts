@@ -1172,6 +1172,12 @@ describe('firestore.rules', () => {
       await assertFails(getDoc(doc(db, 'users/u1/stores/s1/members/admin1')))
     })
 
+    it('a regular member can read their own staff record, so admin changes reach them live', async () => {
+      await testEnv.withSecurityRulesDisabled((context) => seedBranches(context))
+      const db = testEnv.authenticatedContext('staff1').firestore()
+      await assertSucceeds(getDoc(doc(db, 'users/u1/stores/s1/departments/d1/staff/st1')))
+    })
+
     it('has no access to another branch', async () => {
       await testEnv.withSecurityRulesDisabled((context) => seedBranches(context))
       const db = testEnv.authenticatedContext('admin1').firestore()

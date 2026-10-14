@@ -115,6 +115,8 @@ describe('points and tiers', () => {
     expect(loyaltyTierFor(550_000, ON.tiers).id).toBe('silver')
     expect(loyaltyTierFor(0, ON.tiers).id).toBe('bronze')
     expect(loyaltyTierFor(2_000_000, ON.tiers).id).toBe('gold')
+    expect(loyaltyTierFor(5_000_000, ON.tiers).id).toBe('platinum')
+    expect(loyaltyTierFor(12_000_000, ON.tiers).id).toBe('diamond')
   })
 })
 
@@ -210,8 +212,11 @@ describe('parseLoyaltySettings', () => {
       { name: 'Regular', minSpend: 123, multiplier: 1 },
       { name: 'VIP', minSpend: 100_000, multiplier: 1.333 },
       { name: 'Elite', minSpend: 1_000_000, multiplier: 2 },
+      { name: 'Prestige', minSpend: 3_000_000, multiplier: 2.5 },
+      { name: 'Icon', minSpend: 8_000_000, multiplier: 3 },
     ],
   }
+  const rest = valid.tiers.slice(3)
 
   it('accepts the owner’s own rules, fixing the first tier at zero', () => {
     const s = parseLoyaltySettings(valid)
@@ -219,6 +224,8 @@ describe('parseLoyaltySettings', () => {
       ['bronze', 'Regular', 0, 1],
       ['silver', 'VIP', 100_000, 1.33],
       ['gold', 'Elite', 1_000_000, 2],
+      ['platinum', 'Prestige', 3_000_000, 2.5],
+      ['diamond', 'Icon', 8_000_000, 3],
     ])
   })
 
@@ -226,14 +233,14 @@ describe('parseLoyaltySettings', () => {
     [{ ...valid, enabled: 'yes' }, /enabled/],
     [{ ...valid, spendPerPoint: 0 }, /at least 1/],
     [{ ...valid, earnFrom: 'some' }, /which sales/],
-    [{ ...valid, tiers: valid.tiers.slice(0, 2) }, /all 3 tiers/],
+    [{ ...valid, tiers: valid.tiers.slice(0, 2) }, /all 5 tiers/],
     [
-      { ...valid, tiers: [valid.tiers[0], { ...valid.tiers[1], name: '' }, valid.tiers[2]] },
+      { ...valid, tiers: [valid.tiers[0], { ...valid.tiers[1], name: '' }, valid.tiers[2], ...rest] },
       /name/,
     ],
-    [{ ...valid, tiers: [valid.tiers[0], valid.tiers[2], valid.tiers[1]] }, /more spend/],
+    [{ ...valid, tiers: [valid.tiers[0], valid.tiers[2], valid.tiers[1], ...rest] }, /more spend/],
     [
-      { ...valid, tiers: [valid.tiers[0], { ...valid.tiers[1], multiplier: 9 }, valid.tiers[2]] },
+      { ...valid, tiers: [valid.tiers[0], { ...valid.tiers[1], multiplier: 9 }, valid.tiers[2], ...rest] },
       /1× and 5×/,
     ],
   ])('rejects bad input %#', (input, message) => {
@@ -243,5 +250,28 @@ describe('parseLoyaltySettings', () => {
   it('falls back to defaults (off) for missing or damaged stored settings', () => {
     expect(readLoyaltySettings(undefined).enabled).toBe(false)
     expect(readLoyaltySettings({ enabled: true, spendPerPoint: -1 }).enabled).toBe(false)
+  })
+
+  it('keeps settings saved with three tiers, adding Platinum and Diamond at Gold’s rate', () => {
+    const s = readLoyaltySettings({ ...valid, tiers: valid.tiers.slice(0, 3) })
+    expect(s.enabled).toBe(true)
+    expect(s.spendPerPoint).toBe(500)
+    expect(s.tiers.map((t) => [t.id, t.name, t.minSpend, t.multiplier])).toEqual([
+      ['bronze', 'Regular', 0, 1],
+      ['silver', 'VIP', 100_000, 1.33],
+      ['gold', 'Elite', 1_000_000, 2],
+      ['platinum', 'Platinum', 5_000_000, 2],
+      ['diamond', 'Diamond', 10_000_000, 2],
+    ])
+  })
+
+  it('puts the added tiers above a high Gold threshold', () => {
+    const tiers = [
+      valid.tiers[0],
+      valid.tiers[1],
+      { name: 'Gold', minSpend: 8_000_000, multiplier: 1.5 },
+    ]
+    const s = readLoyaltySettings({ ...valid, tiers })
+    expect(s.tiers.slice(3).map((t) => t.minSpend)).toEqual([20_000_000, 40_000_000])
   })
 })

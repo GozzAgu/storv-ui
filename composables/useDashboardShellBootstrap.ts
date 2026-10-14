@@ -79,6 +79,7 @@ export function runDashboardShellBootstrap(options?: { force?: boolean }): Promi
     if (userData.role === 'staff') {
       try {
         await staffStore.fetchCurrentStaffMember()
+        void staffStore.watchCurrentStaffMember()
       } catch {
         /* non-fatal; pages may retry */
       }

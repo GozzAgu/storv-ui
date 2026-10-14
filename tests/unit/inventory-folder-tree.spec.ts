@@ -7,6 +7,7 @@ import {
   folderUsesSubcategoryHub,
   getLeafFolders,
   getRootFolders,
+  groupLeafFoldersForPicker,
   inheritableFolderSettingsChanged,
   pickInheritableFolderUpdates,
   validateFolderParentId,
@@ -36,6 +37,20 @@ describe('inventory-folder-tree', () => {
     folder('samsung', 'Samsung', 'phones'),
     folder('chairs', 'Chairs'),
   ]
+
+  it('groups pickable categories under their main category, sorted by name', () => {
+    const { standalone, groups } = groupLeafFoldersForPicker([
+      ...folders,
+      folder('cars', 'Cars'),
+      folder('tesla', 'Tesla', 'cars'),
+      folder('audi', 'Audi', 'cars'),
+    ])
+    expect(standalone.map((f) => f.id)).toEqual(['chairs'])
+    expect(groups.map((g) => [g.parent.id, g.children.map((c) => c.id)])).toEqual([
+      ['cars', ['audi', 'tesla']],
+      ['phones', ['iphone', 'samsung']],
+    ])
+  })
 
   it('returns roots and leaf folders', () => {
     expect(getRootFolders(folders).map((entry) => entry.name)).toEqual(['Phones', 'Chairs'])

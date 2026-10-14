@@ -586,7 +586,7 @@
 
 .s-inv-fields__head {
   display: none;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 3fr) minmax(0, 4fr);
+  grid-template-columns: minmax(0, 1fr) 9.5rem;
   gap: var(--s-space-1);
   padding: var(--s-space-1) var(--s-space-2);
   border-bottom: 1px solid var(--s-border);
@@ -594,10 +594,6 @@
   color: var(--s-text-muted);
   font: var(--s-text-caption);
   font-weight: 600;
-}
-
-.s-inv-fields__head-end {
-  text-align: right;
 }
 
 .s-inv-fields__row {
@@ -609,7 +605,7 @@
 }
 
 .s-inv-fields__row + .s-inv-fields__row {
-  border-top: 1px solid var(--s-border);
+  border-top: 1px solid var(--s-divider);
 }
 
 .s-inv-fields__end {
@@ -619,19 +615,27 @@
   gap: var(--s-space-1);
 }
 
-.s-inv-fields__end > .s-check {
+.s-inv-fields__flags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-space-1) var(--s-space-2);
+}
+
+.s-inv-fields__flags > .s-check {
   align-items: center;
   padding: 0;
 }
 
-.s-inv-fields__end > .s-check .s-check__box {
+.s-inv-fields__flags > .s-check .s-check__box {
   margin-top: 0;
 }
 
+/* The drawer is too narrow for label, type and options side by side: options get their own line. */
 @media (min-width: 640px) {
   .s-inv-fields__head,
   .s-inv-fields__row {
-    grid-template-columns: minmax(0, 5fr) minmax(0, 3fr) minmax(0, 4fr);
+    grid-template-columns: minmax(0, 1fr) 9.5rem;
   }
 
   .s-inv-fields__head {
@@ -639,8 +643,28 @@
   }
 
   .s-inv-fields__end {
-    justify-content: flex-end;
+    grid-column: 1 / -1;
   }
+}
+
+/* A serial with its own unique values (engine number, IMEI): inputs wrap, the remove button stays put */
+.s-inv-serial-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-space-1);
+}
+
+.s-inv-serial-row + .s-inv-serial-row {
+  padding-top: var(--s-space-1);
+  border-top: 1px solid var(--s-divider);
+}
+
+.s-inv-serial-row__fields {
+  display: grid;
+  flex: 1;
+  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+  gap: var(--s-space-1);
+  min-width: 0;
 }
 
 /* Stock-loan note in product details */

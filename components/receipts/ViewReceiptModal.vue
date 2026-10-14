@@ -29,23 +29,22 @@
           </p>
         </header>
 
-        <section class="s-receipt-doc__section">
-          <div class="s-receipt-doc__split">
-            <div>
-              <p class="s-receipt-doc__label">Receipt</p>
-              <p class="s-receipt-doc__value s-receipt-doc__value--strong">
-                {{ receipt.receiptNumber }}
-                <span v-if="receipt.isSwapIn" class="s-receipt-doc__muted"> · Swap-in</span>
-              </p>
-            </div>
-            <div class="s-receipt-doc__end">
-              <p class="s-receipt-doc__label">Date & time</p>
-              <p class="s-receipt-doc__value">{{ formatReceiptDate(receipt.date) }}</p>
-              <p class="s-receipt-doc__fine">{{ formatReceiptTime(receipt.date) }}</p>
-            </div>
+        <section class="s-receipt-doc__section s-receipt-doc__meta">
+          <div>
+            <p class="s-receipt-doc__label">Receipt no.</p>
+            <p class="s-receipt-doc__value s-receipt-doc__value--strong">
+              {{ receipt.receiptNumber }}
+            </p>
           </div>
-          <div class="s-receipt-doc__party">
-            <p class="s-receipt-doc__label">Customer</p>
+          <div>
+            <p class="s-receipt-doc__label">Date</p>
+            <p class="s-receipt-doc__value">
+              {{ formatReceiptDate(receipt.date) }}
+              <span class="s-receipt-doc__muted">· {{ formatReceiptTime(receipt.date) }}</span>
+            </p>
+          </div>
+          <div>
+            <p class="s-receipt-doc__label">Billed to</p>
             <p class="s-receipt-doc__value s-receipt-doc__value--strong">
               {{ receipt.customerName }}
             </p>
@@ -53,70 +52,67 @@
               {{ receipt.customerEmail }}
             </p>
           </div>
+          <div class="s-receipt-doc__meta-status">
+            <span class="s-receipt-doc__status" :class="`s-receipt-doc__status--${receipt.status}`">
+              {{ receiptStatusLabel }}
+            </span>
+            <span v-if="receipt.isSwapIn" class="s-receipt-doc__status">Swap-in</span>
+          </div>
         </section>
 
         <section class="s-receipt-doc__section">
-          <p class="s-receipt-doc__label">Items</p>
           <div class="s-receipt-doc__table-wrap">
             <table class="s-receipt-doc__table">
               <thead>
                 <tr>
-                  <th scope="col">Product</th>
+                  <th scope="col">Item</th>
                   <th scope="col" class="s-receipt-doc__center">Qty</th>
                   <th scope="col" class="s-receipt-doc__num">Price</th>
-                  <th v-if="canViewProfitAndCost" scope="col" class="s-receipt-doc__num">Cost</th>
-                  <th scope="col" class="s-receipt-doc__num">Total</th>
+                  <th scope="col" class="s-receipt-doc__num">Amount</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="(item, index) in receipt.items" :key="index">
                   <td>
                     <p class="s-receipt-doc__item-name">{{ item.itemName }}</p>
-                    <p
-                      v-for="(line, detailIndex) in receiptItemDetailLines(item)"
-                      :key="`${index}-detail-${detailIndex}`"
-                      class="s-receipt-doc__detail"
+                    <dl
+                      v-if="receiptItemSpecs(item).length"
+                      class="s-receipt-doc__specs"
                     >
-                      {{ line }}
-                    </p>
-                    <p v-if="item.hasDiscount" class="s-receipt-doc__detail">
+                      <template
+                        v-for="(spec, specIndex) in receiptItemSpecs(item)"
+                        :key="`${index}-spec-${specIndex}`"
+                      >
+                        <dt>{{ spec.label }}</dt>
+                        <dd>{{ spec.value }}</dd>
+                      </template>
+                    </dl>
+                    <p v-if="item.hasDiscount" class="s-receipt-doc__discount">
                       {{
                         item.discountPercentage
                           ? `${item.discountPercentage}% off`
-                          : `-${formatCurrency(item.discountAmount || 0)}`
+                          : `${formatCurrency(item.discountAmount || 0)} off`
                       }}
                     </p>
                   </td>
                   <td class="s-receipt-doc__center">{{ item.quantity }}</td>
                   <td class="s-receipt-doc__num">
-                    <template v-if="item.hasDiscount && item.originalPrice">
-                      <span class="s-receipt-doc__was">{{ formatCurrency(item.originalPrice) }}</span>
-                      <span>{{ formatCurrency(item.price) }}</span>
-                    </template>
-                    <span v-else>{{ formatCurrency(item.price) }}</span>
-                  </td>
-                  <td v-if="canViewProfitAndCost" class="s-receipt-doc__num">
-                    <span v-if="receiptLineUnitCost(item) > 0">
-                      {{ formatCurrency(receiptLineUnitCost(item)) }}
+                    <span v-if="item.hasDiscount && item.originalPrice" class="s-receipt-doc__was">
+                      {{ formatCurrency(item.originalPrice) }}
                     </span>
-                    <span v-else class="s-receipt-doc__muted">-</span>
+                    {{ formatCurrency(item.price) }}
                   </td>
                   <td class="s-receipt-doc__num s-receipt-doc__strong">
-                    <template v-if="item.hasDiscount && item.originalPrice">
-                      <span class="s-receipt-doc__was">{{
-                        formatCurrency((item.originalPrice || 0) * item.quantity)
-                      }}</span>
-                      <span>{{ formatCurrency(item.price * item.quantity) }}</span>
-                    </template>
-                    <span v-else>{{ formatCurrency(item.price * item.quantity) }}</span>
+                    <span v-if="item.hasDiscount && item.originalPrice" class="s-receipt-doc__was">
+                      {{ formatCurrency((item.originalPrice || 0) * item.quantity) }}
+                    </span>
+                    {{ formatCurrency(item.price * item.quantity) }}
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
-        </section>
 
-        <section class="s-receipt-doc__section">
           <div class="s-receipt-doc__totals">
             <template v-if="hasAnyDiscount">
               <div class="s-receipt-doc__row">
@@ -133,67 +129,22 @@
               <span>{{ formatCurrency(lineItemsNetTotal) }}</span>
             </div>
             <div v-if="showSwapCreditLine" class="s-receipt-doc__row">
-              <span>Swap credit (trade-in)</span>
+              <span>Trade-in credit</span>
               <span>-{{ formatCurrency(swapCreditAmount) }}</span>
             </div>
-            <template v-if="canViewProfitAndCost && receipt.status === 'completed'">
-              <div class="s-receipt-doc__row">
-                <span>Cost of goods sold</span>
-                <span>{{ formatCurrency(receiptCogs) }}</span>
-              </div>
-              <div class="s-receipt-doc__row">
-                <span>Gross profit</span>
-                <span class="s-receipt-doc__value--strong">
-                  {{ formatCurrency(receiptGrossProfitAmount) }}
-                </span>
-              </div>
-            </template>
-            <div
-              v-if="canManageCommissions && (receipt.commissionAmount || 0) > 0"
-              class="s-receipt-doc__group"
-            >
-              <div class="s-receipt-doc__row">
-                <span>Commission</span>
-                <span>{{ formatCurrency(receipt.commissionAmount || 0) }}</span>
-              </div>
-              <div v-if="receipt.commissionOwedToName" class="s-receipt-doc__row">
-                <span>Owed to</span>
-                <span>{{ receipt.commissionOwedToName }}</span>
-              </div>
-              <div class="s-receipt-doc__row">
-                <span
-                  class="s-receipt-doc__pill"
-                  :class="{ 's-receipt-doc__pill--muted': receipt.commissionStatus === 'paid' }"
-                >
-                  {{ receipt.commissionStatus === 'paid' ? 'Paid' : 'Owed' }}
-                </span>
-                <button
-                  v-if="receipt.commissionStatus !== 'paid'"
-                  type="button"
-                  class="s-receipt-doc__link"
-                  :disabled="isMarkingCommissionPaid"
-                  @click="markCommissionAsPaid"
-                >
-                  Mark as paid
-                </button>
-              </div>
-            </div>
-            <div v-if="receipt.splitPayments?.length" class="s-receipt-doc__group">
-              <span class="s-receipt-doc__muted">Payment</span>
+            <template v-if="receipt.splitPayments?.length">
               <div
                 v-for="(sp, spIdx) in receipt.splitPayments"
                 :key="spIdx"
                 class="s-receipt-doc__row"
               >
-                <span class="s-receipt-doc__capitalize">{{ sp.method }}</span>
+                <span>Paid by <span class="s-receipt-doc__capitalize">{{ sp.method }}</span></span>
                 <span>{{ formatCurrency(sp.amount) }}</span>
               </div>
-            </div>
-            <div v-else class="s-receipt-doc__group">
-              <div class="s-receipt-doc__row">
-                <span>Payment</span>
-                <span class="s-receipt-doc__capitalize">{{ receipt.paymentMethod }}</span>
-              </div>
+            </template>
+            <div v-else class="s-receipt-doc__row">
+              <span>Payment</span>
+              <span class="s-receipt-doc__capitalize">{{ receipt.paymentMethod }}</span>
             </div>
             <div class="s-receipt-doc__grand">
               <span>{{ receiptTotalLabel }}</span>
@@ -202,40 +153,26 @@
           </div>
         </section>
 
-        <section class="s-receipt-doc__section s-receipt-doc__section--plain">
-          <span
-            class="s-receipt-doc__pill"
-            :class="{ 's-receipt-doc__pill--muted': receipt.status === 'cancelled' }"
-          >
-            {{ receipt.status.charAt(0).toUpperCase() + receipt.status.slice(1) }}
-          </span>
-        </section>
-
-        <section v-if="receipt.notes" class="s-receipt-doc__section s-receipt-doc__section--plain">
+        <section v-if="receipt.notes" class="s-receipt-doc__section">
           <p class="s-receipt-doc__label">Notes</p>
           <p class="s-receipt-doc__note">{{ receipt.notes }}</p>
         </section>
 
-        <section
-          v-if="receipt.isSwapIn"
-          class="s-receipt-doc__section s-receipt-doc__section--plain"
-        >
-          <p class="s-receipt-doc__label">Swap-in</p>
-          <p v-if="swapInFolderName" class="s-receipt-doc__fine">Folder: {{ swapInFolderName }}</p>
+        <section v-if="receipt.isSwapIn" class="s-receipt-doc__section">
+          <p class="s-receipt-doc__label">Trade-in received</p>
           <p v-if="swapInItemLoading" class="s-receipt-doc__muted">Loading trade-in details…</p>
           <p v-else-if="swapInItemError" class="s-receipt-doc__note">{{ swapInItemError }}</p>
           <template v-else-if="swapInPrimaryLabel">
             <p class="s-receipt-doc__item-name">{{ swapInPrimaryLabel }}</p>
-            <p
-              v-for="(line, i) in swapInDetailLines"
-              :key="`swap-in-detail-${i}`"
-              class="s-receipt-doc__detail"
-            >
-              {{ line }}
-            </p>
+            <dl v-if="swapInSpecs.length" class="s-receipt-doc__specs">
+              <template v-for="(spec, i) in swapInSpecs" :key="`swap-in-spec-${i}`">
+                <dt>{{ spec.label }}</dt>
+                <dd>{{ spec.value }}</dd>
+              </template>
+            </dl>
           </template>
           <p v-else-if="swapInFolderName" class="s-receipt-doc__note">
-            Device added to {{ swapInFolderName }}
+            Added to {{ swapInFolderName }}
           </p>
           <p v-else-if="receipt.swapInItemId" class="s-receipt-doc__muted">
             Trade-in recorded; details unavailable.
@@ -243,18 +180,11 @@
         </section>
 
         <section
-          v-if="receipt.createdByUserName"
-          class="s-receipt-doc__section s-receipt-doc__section--ruled"
-        >
-          <p class="s-receipt-doc__fine">Generated by {{ receipt.createdByUserName }}</p>
-        </section>
-
-        <section
           v-if="hasReceiptPolicyContent"
-          class="s-receipt-doc__section s-receipt-doc__section--ruled s-receipt-doc__policies"
+          class="s-receipt-doc__section s-receipt-doc__policies"
         >
           <div v-if="receiptPolicies.salesTerms">
-            <p class="s-receipt-doc__label">Terms & conditions (sales)</p>
+            <p class="s-receipt-doc__label">Terms & conditions</p>
             <p class="s-receipt-doc__note s-receipt-doc__note--fine">
               {{ receiptPolicies.salesTerms }}
             </p>
@@ -274,10 +204,56 @@
         </section>
 
         <footer class="s-receipt-doc__footer">
-          <p>Thank you for your business</p>
-          <p class="s-receipt-doc__fine">Computer-generated receipt · Generated by storvv</p>
+          <p class="s-receipt-doc__thanks">Thank you for your business</p>
+          <p class="s-receipt-doc__fine">
+            <span v-if="receipt.createdByUserName">Issued by {{ receipt.createdByUserName }} · </span
+            >Generated by Storvv
+          </p>
         </footer>
       </div>
+
+      <section
+        v-if="showInternalPanel"
+        class="s-receipt-internal"
+        aria-label="Only visible to you"
+      >
+        <p class="s-receipt-internal__title">Only visible to you · not on the customer's copy</p>
+        <dl class="s-receipt-internal__grid">
+          <template v-if="showProfitRows">
+            <div>
+              <dt>Cost of goods</dt>
+              <dd>{{ formatCurrency(receiptCogs) }}</dd>
+            </div>
+            <div>
+              <dt>Gross profit</dt>
+              <dd class="s-receipt-internal__strong">
+                {{ formatCurrency(receiptGrossProfitAmount) }}
+                <span v-if="receiptMarginPercent !== null" class="s-receipt-internal__muted">
+                  · {{ receiptMarginPercent }}%
+                </span>
+              </dd>
+            </div>
+          </template>
+          <div v-if="showCommissionRows">
+            <dt>Commission{{ receipt.commissionOwedToName ? ` · ${receipt.commissionOwedToName}` : '' }}</dt>
+            <dd>
+              {{ formatCurrency(receipt.commissionAmount || 0) }}
+              <span v-if="receipt.commissionStatus === 'paid'" class="s-receipt-internal__muted">
+                · Paid
+              </span>
+              <button
+                v-else
+                type="button"
+                class="s-receipt-internal__link"
+                :disabled="isMarkingCommissionPaid"
+                @click="markCommissionAsPaid"
+              >
+                Mark as paid
+              </button>
+            </dd>
+          </div>
+        </dl>
+      </section>
     </div>
 
     <template #footer>
@@ -367,11 +343,7 @@ import { useReceiptPaperHeader } from '~/composables/useReceiptPaperHeader'
 import { usePermissions } from '~/composables/usePermissions'
 import { useAuthenticatedFetch } from '~/composables/useAuthenticatedFetch'
 import { fetchProxiedImageDataUrl } from '~/utils/proxy-image-fetch'
-import {
-  receiptGrossProfit,
-  receiptLineCogs,
-  resolveReceiptLineUnitCost,
-} from '~/utils/inventory-item-cost'
+import { receiptGrossProfit, receiptLineCogs } from '~/utils/inventory-item-cost'
 
 interface Props {
   modelValue: boolean
@@ -457,10 +429,6 @@ function lookupInventoryItemForReceipt(itemId: string): InventoryItem | null {
   return null
 }
 
-function receiptLineUnitCost(line: ReceiptItem): number {
-  return resolveReceiptLineUnitCost(line, lookupInventoryItemForReceipt(line.itemId))
-}
-
 const receiptCogs = computed(() => {
   if (!props.receipt || !canViewProfitAndCost.value) return 0
   return receiptLineCogs(props.receipt, lookupInventoryItemForReceipt)
@@ -471,11 +439,47 @@ const receiptGrossProfitAmount = computed(() => {
   return receiptGrossProfit(props.receipt, lookupInventoryItemForReceipt)
 })
 
-function receiptItemDetailLines(item: ReceiptItem) {
-  return getProductDetailLines(item, {
-    formatMoney: (n) => formatCurrency(n),
-    omitLineItemFields: true,
+const receiptMarginPercent = computed(() => {
+  const total = props.receipt?.total ?? 0
+  if (!total || total <= 0) return null
+  return Math.round((receiptGrossProfitAmount.value / total) * 100)
+})
+
+const showProfitRows = computed(
+  () => canViewProfitAndCost.value && props.receipt?.status === 'completed'
+)
+const showCommissionRows = computed(
+  () => canManageCommissions.value && (props.receipt?.commissionAmount || 0) > 0
+)
+const showInternalPanel = computed(() => showProfitRows.value || showCommissionRows.value)
+
+const RECEIPT_STATUS_LABELS: Record<Receipt['status'], string> = {
+  completed: 'Completed',
+  pending: 'Pending',
+  refunded: 'Refunded',
+  balance_due: 'Balance due',
+  cancelled: 'Cancelled',
+}
+const receiptStatusLabel = computed(() =>
+  props.receipt ? RECEIPT_STATUS_LABELS[props.receipt.status] ?? props.receipt.status : ''
+)
+
+function toSpecs(lines: string[]): { label: string; value: string }[] {
+  return lines.map((line) => {
+    const at = line.indexOf(': ')
+    return at > 0
+      ? { label: line.slice(0, at), value: line.slice(at + 2) }
+      : { label: '', value: line }
   })
+}
+
+function receiptItemSpecs(item: ReceiptItem) {
+  return toSpecs(
+    getProductDetailLines(item, {
+      formatMoney: (n) => formatCurrency(n),
+      omitLineItemFields: true,
+    })
+  )
 }
 
 const receiptRef = computed(() => props.receipt)
@@ -534,6 +538,8 @@ const swapInDetailLines = computed(() => {
     formatMoney: (n) => formatCurrency(n),
   })
 })
+
+const swapInSpecs = computed(() => toSpecs(swapInDetailLines.value))
 
 const authStore = useAuthStore()
 
@@ -973,7 +979,7 @@ async function receiptElementToJsPdf(el: HTMLElement) {
     writeTotalRow('Subtotal', formatPdfCurrency(lineItemsNetTotal.value))
   }
   if (showSwapCreditLine.value) {
-    writeTotalRow('Swap credit (trade-in)', `-${formatPdfCurrency(swapCreditAmount.value)}`)
+    writeTotalRow('Trade-in credit', `-${formatPdfCurrency(swapCreditAmount.value)}`)
   }
   // Cost/gross-profit are intentionally never printed on the PDF - this is the customer-facing
   // document (downloaded, printed, or emailed), unlike the on-screen view which stays
@@ -997,7 +1003,7 @@ async function receiptElementToJsPdf(el: HTMLElement) {
     balance_due: [180, 83, 9],
     cancelled: [107, 114, 128],
   }
-  writeTextLines(receipt.status.charAt(0).toUpperCase() + receipt.status.slice(1), contentWidth, {
+  writeTextLines(receiptStatusLabel.value, contentWidth, {
     bold: true,
     color: statusColor[receipt.status] || [55, 65, 81],
   })

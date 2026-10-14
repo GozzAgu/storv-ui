@@ -819,7 +819,7 @@ Departments group your staff (for example Sales or Warehouse). Each staff member
 ### 15.1 Create a department
 
 1. Open **Team** and select **New department**.
-2. Choose a **Department type** (Sales, Marketing, Customer Service, Inventory, Warehouse, Finance, Accounting, Human Resources, Operations, IT or Other).
+2. Choose a **Department type** (for example Sales, Cashier & Checkout, Inventory, Warehouse, Delivery & Logistics, Repairs & Servicing, Finance or Human Resources; choose **Other** if none fits).
 3. Enter a **Department name** and optional **Description**.
 4. Select **Create department**.
 

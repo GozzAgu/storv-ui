@@ -36,6 +36,39 @@ export function getLeafFolders(folders: InventoryFolder[]): InventoryFolder[] {
   })
 }
 
+export type LeafFolderPickerOptions = {
+  /** Top-level categories that hold products themselves. */
+  standalone: InventoryFolder[]
+  /** Subcategories under their main category, for `<optgroup>`. */
+  groups: { parent: InventoryFolder; children: InventoryFolder[] }[]
+}
+
+const byName = (a: InventoryFolder, b: InventoryFolder) =>
+  (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' })
+
+/** Categories a product can go in, grouped under their main category for pickers. */
+export function groupLeafFoldersForPicker(folders: InventoryFolder[]): LeafFolderPickerOptions {
+  const standalone: InventoryFolder[] = []
+  const byParent = new Map<string, InventoryFolder[]>()
+  for (const folder of getLeafFolders(folders)) {
+    const parent = getFolderParent(folders, folder)
+    if (!parent) {
+      standalone.push(folder)
+      continue
+    }
+    const list = byParent.get(parent.id) ?? []
+    list.push(folder)
+    byParent.set(parent.id, list)
+  }
+  const groups = [...byParent.entries()]
+    .map(([parentId, children]) => ({
+      parent: folders.find((f) => f.id === parentId)!,
+      children: children.sort(byName),
+    }))
+    .sort((a, b) => byName(a.parent, b.parent))
+  return { standalone: standalone.sort(byName), groups }
+}
+
 /** Top-level category organized as a subcategory hub (opt-in or already has children). */
 export function folderUsesSubcategoryHub(
   folder: InventoryFolder,

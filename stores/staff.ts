@@ -13,9 +13,11 @@ import {
   serverTimestamp,
   deleteField,
   collectionGroup,
+  onSnapshot,
   type Firestore,
 } from 'firebase/firestore'
 import { useFirestore } from '~/composables/useFirestore'
+import { useAppToast } from '~/composables/useAppToast'
 import { useAuthStore } from './auth'
 import { useUserStore } from './user'
 import { useDepartmentsStore } from './departments'
@@ -43,6 +45,21 @@ function isActiveStaffStatus(status: Staff['status'] | undefined): boolean {
 
 function isRemovedStaffStatus(status: Staff['status'] | undefined): boolean {
   return status === 'inactive'
+}
+
+let ownStaffUnsubscribe: (() => void) | null = null
+let ownStaffWatchPath = ''
+
+function stopWatchingOwnStaff() {
+  ownStaffUnsubscribe?.()
+  ownStaffUnsubscribe = null
+  ownStaffWatchPath = ''
+}
+
+function adminAccessKey(staff: Pick<Staff, 'admin' | 'adminGrants'> | undefined): string {
+  if (staff?.admin !== true) return ''
+  const grants = staff.adminGrants ?? {}
+  return JSON.stringify(Object.keys(grants).sort().map((k) => [k, grants[k as keyof typeof grants]]))
 }
 
 /** Firestore rejects `undefined`. Normalize optional staff fields before writes. */
@@ -1193,6 +1210,63 @@ export const useStaffStore = defineStore('staff', {
         }
         return null
       }
+    },
+
+    /**
+     * Keep the signed-in staff member's own record live, so admin rights and permission changes
+     * from the owner apply straight away instead of after the next sign-in.
+     */
+    async watchCurrentStaffMember(): Promise<void> {
+      const { isDemoModeActive } = await import('~/utils/demo-mode')
+      if (isDemoModeActive()) return
+
+      const db = useFirestore().getFirestoreInstance()
+      const uid = useAuthStore().currentUser?.uid
+      const member = this.getCurrentStaffMember
+      if (!db || !uid || !member?.createdBy || !member.storeId || !member.departmentId) return
+
+      const ref = getStaffDocument(db, member.createdBy, member.storeId, member.departmentId, member.id)
+      if (ownStaffUnsubscribe && ownStaffWatchPath === ref.path) return
+      stopWatchingOwnStaff()
+      ownStaffWatchPath = ref.path
+
+      const { mapStaffDoc } = await import('~/utils/staff-user-bootstrap')
+      ownStaffUnsubscribe = onSnapshot(
+        ref,
+        (snap) => {
+          if (useAuthStore().currentUser?.uid !== uid) {
+            stopWatchingOwnStaff()
+            return
+          }
+
+          if (!snap.exists()) {
+            // Moved to another department (the record is re-created under it) or removed.
+            stopWatchingOwnStaff()
+            this.staff = this.staff.filter((s) => s.id !== snap.id)
+            void this.fetchCurrentStaffMember().then((found) => {
+              if (found) void this.watchCurrentStaffMember()
+            })
+            return
+          }
+
+          const next = mapStaffDoc(snap)
+          if (next.authUid !== uid) return
+          const index = this.staff.findIndex((s) => s.id === next.id)
+          const previous = index > -1 ? this.staff[index] : undefined
+          const updated = { ...next, departmentName: previous?.departmentName }
+          if (index > -1) this.staff[index] = updated
+          else this.staff.push(updated)
+
+          if (previous && adminAccessKey(previous) !== adminAccessKey(next)) {
+            const toast = useAppToast()
+            if (next.admin && !previous.admin) toast.info('You are now an admin of this branch.')
+            else if (!next.admin && previous.admin) toast.info('Your admin access was removed.')
+            else toast.info('Your admin access was updated.')
+            void useDepartmentsStore().fetchDepartments()
+          }
+        },
+        () => stopWatchingOwnStaff()
+      )
     },
   },
 })

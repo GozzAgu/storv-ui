@@ -465,7 +465,11 @@
         </SFormSection>
 
         <SFormSection v-if="!isSubfolderDrawer" title="Table template">
-          <p :class="drawerHintClass">Columns for products in this category.</p>
+          <p :class="drawerHintClass">
+            Columns for products in this category. Mark a column <strong>Unique</strong> when no two
+            products, in any branch, may share its value, such as an engine number, chassis
+            number or IMEI.
+          </p>
           <input
             v-if="selectedTemplate"
             ref="folderTemplateExcelInput"
@@ -482,7 +486,6 @@
             <div class="s-inv-fields__head" aria-hidden="true">
               <span>Label</span>
               <span>Type</span>
-              <span class="s-inv-fields__head-end">Options</span>
             </div>
             <div v-for="(field, index) in editableFields" :key="field.id" class="s-inv-fields__row">
               <SInput
@@ -499,7 +502,14 @@
                 :options="templateFieldTypeOptions"
               />
               <div class="s-inv-fields__end">
-                <SCheckbox v-model="field.required" label="Required" />
+                <div class="s-inv-fields__flags">
+                  <SCheckbox v-model="field.required" label="Required" />
+                  <SCheckbox
+                    v-if="canFieldBeUnique(field)"
+                    v-model="field.unique"
+                    label="Unique"
+                  />
+                </div>
                 <SIconButton
                   v-if="!isLockedTemplateField(field)"
                   :label="`Remove column ${field.label || index + 1}`"
@@ -957,6 +967,7 @@ import {
   isInsideAnchoredMenu,
 } from '~/utils/menuAnchor'
 import { parseTemplateFieldsFromExcelArrayBuffer } from '~/utils/inventory-template-from-excel'
+import { canFieldBeUnique } from '~/utils/inventory-unique-fields'
 import {
   COST_PRICE_FIELD_NAME,
   ensureCostPriceTemplateField,

@@ -33,8 +33,12 @@ function isActiveStaffStatus(status: Staff['status'] | undefined): boolean {
   return (status || 'active') === 'active'
 }
 
-function mapStaffDoc(staffDoc: { id: string; ref: { path: string }; data: () => Record<string, unknown> }): Staff {
-  const staffData = staffDoc.data()
+export function mapStaffDoc(staffDoc: {
+  id: string
+  ref: { path: string }
+  data: () => Record<string, unknown> | undefined
+}): Staff {
+  const staffData = staffDoc.data() ?? {}
   const pathParts = staffDoc.ref.path.split('/')
   let extractedStoreId: string | undefined
   let extractedDepartmentId: string | undefined
@@ -50,6 +54,7 @@ function mapStaffDoc(staffDoc: { id: string; ref: { path: string }; data: () => 
     staffData.canManageInventory === true ? true : undefined
   const canManageReceipts =
     staffData.canManageReceipts === true ? true : undefined
+  const admin = staffData.admin === true
 
   return {
     id: staffDoc.id,
@@ -67,8 +72,11 @@ function mapStaffDoc(staffDoc: { id: string; ref: { path: string }; data: () => 
       role,
       canManageInventory,
       canManageReceipts,
+      admin,
       permissions: staffData.permissions as Staff['permissions'],
     }),
+    admin,
+    adminGrants: admin ? (staffData.adminGrants as Staff['adminGrants']) : undefined,
     hireDate: String(staffData.hireDate || ''),
     salary: typeof staffData.salary === 'number' ? staffData.salary : undefined,
     status:

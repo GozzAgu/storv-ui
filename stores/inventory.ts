@@ -202,6 +202,8 @@ export interface TemplateField {
   label: string
   type: 'text' | 'number' | 'date' | 'select' | 'boolean' | 'currency'
   required: boolean
+  /** No two products may share this value (e.g. engine number, chassis number, IMEI). */
+  unique?: boolean
   options?: string[]
   placeholder?: string
 }

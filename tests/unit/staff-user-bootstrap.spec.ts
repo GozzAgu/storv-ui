@@ -26,6 +26,31 @@ vi.mock('~/utils/api-url', () => ({
   resolveApiPath: (path: string) => path,
 }))
 
+describe('mapStaffDoc', () => {
+  const docFor = (data: Record<string, unknown>) => ({
+    id: 'staff1',
+    ref: { path: 'users/owner/stores/store1/departments/dept1/staff/staff1' },
+    data: () => data,
+  })
+
+  it('carries branch admin rights and extras onto the signed-in staff profile', async () => {
+    const { mapStaffDoc } = await import('~/utils/staff-user-bootstrap')
+    const staff = mapStaffDoc(
+      docFor({ authUid: 'u1', admin: true, adminGrants: { deleteSales: true }, permissions: {} })
+    )
+    expect(staff.admin).toBe(true)
+    expect(staff.adminGrants).toEqual({ deleteSales: true })
+    expect(staff.permissions?.products.delete).toBe(true)
+  })
+
+  it('ignores extras when the staff member is not an admin', async () => {
+    const { mapStaffDoc } = await import('~/utils/staff-user-bootstrap')
+    const staff = mapStaffDoc(docFor({ authUid: 'u1', admin: false, adminGrants: { deleteSales: true } }))
+    expect(staff.admin).toBe(false)
+    expect(staff.adminGrants).toBeUndefined()
+  })
+})
+
 describe('buildStaffUserDataWithOwnerContext', () => {
   beforeEach(() => {
     getDoc.mockReset()

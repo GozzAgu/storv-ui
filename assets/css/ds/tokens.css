@@ -46,6 +46,8 @@
   --s-field-bg: rgb(0 0 0 / 0.04);
   --s-field-bg-hover: rgb(0 0 0 / 0.065);
   --s-field-bg-focus: #ffffff;
+  --s-field-border: transparent;
+  --s-field-border-focus: transparent;
 
   /* Brand panel (auth) */
   --s-brand-surface: #0c1938;
@@ -181,17 +183,18 @@ html.dark {
   /* Neutral greys, no blue cast; the accent is the only colour */
   --s-bg: #050505;
   /* Lifted further from the canvas than in light mode so borderless cards still read */
-  --s-surface: #161616;
-  --s-surface-2: #1e1e1e;
-  --s-surface-hover: #232323;
+  --s-surface: #171717;
+  --s-surface-2: #222222;
+  --s-surface-hover: #2a2a2a;
   --s-border: transparent;
-  --s-line: #262626;
-  --s-divider: rgb(255 255 255 / 0.06);
-  --s-border-strong: #363636;
+  --s-line: #333333;
+  --s-divider: rgb(255 255 255 / 0.09);
+  --s-border-strong: #4d4d4d;
 
   --s-glass: rgb(24 24 24 / 0.62);
   --s-glass-strong: rgb(20 20 20 / 0.8);
-  --s-glass-hairline: transparent;
+  /* Tone alone barely separates dark surfaces, so chrome and cards carry a faint light edge */
+  --s-glass-hairline: rgb(255 255 255 / 0.09);
   --s-glass-highlight: inset 0 0 0 transparent;
   --s-glass-shadow: var(--s-glass-highlight), 0 0 0 1px var(--s-glass-hairline),
     0 10px 28px -14px rgb(0 0 0 / 0.6);
@@ -208,8 +211,8 @@ html.dark {
   --s-overlay-thumb: rgb(255 255 255 / 0.1);
 
   --s-text: #f5f5f5;
-  --s-text-2: #bababa;
-  --s-text-muted: #8f8f8f;
+  --s-text-2: #c8c8c8;
+  --s-text-muted: #a3a3a3;
   --s-text-on-accent: #0a0a0a;
 
   --s-accent: #8ea2ff;
@@ -236,11 +239,13 @@ html.dark {
 
   --s-focus-ring: 0 0 0 3px rgb(142 162 255 / 0.35);
 
-  --s-field-bg: rgb(255 255 255 / 0.05);
-  --s-field-bg-hover: rgb(255 255 255 / 0.08);
-  --s-field-bg-focus: #161616;
+  --s-field-bg: rgb(255 255 255 / 0.07);
+  --s-field-bg-hover: rgb(255 255 255 / 0.1);
+  --s-field-bg-focus: #171717;
+  --s-field-border: rgb(255 255 255 / 0.22);
+  --s-field-border-focus: rgb(255 255 255 / 0.36);
 
-  --s-card-shadow: 0 1px 2px rgb(0 0 0 / 0.3);
+  --s-card-shadow: 0 0 0 1px rgb(255 255 255 / 0.09), 0 1px 2px rgb(0 0 0 / 0.4);
   --s-shadow-sm: var(--s-card-shadow);
   --s-shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.45);
   --s-shadow-lg: 0 16px 40px -8px rgb(0 0 0 / 0.6);

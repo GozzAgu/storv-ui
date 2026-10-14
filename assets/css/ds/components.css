@@ -732,7 +732,7 @@
   gap: var(--s-space-1);
   min-height: var(--s-control-h);
   padding: 0 var(--s-space-1-5);
-  border: 1px solid transparent;
+  border: 1px solid var(--s-field-border);
   border-radius: var(--s-radius);
   background: var(--s-field-bg);
   color: var(--s-text);
@@ -746,6 +746,7 @@
 }
 
 .s-control:focus-within {
+  border-color: var(--s-field-border-focus);
   background: var(--s-field-bg-hover);
 }
 

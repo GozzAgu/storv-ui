@@ -16,13 +16,17 @@
         {{ formatCurrency(member.next.remaining) }} more this year to reach {{ member.next.name }}
       </p>
     </div>
-    <SBadge v-if="member" :tone="tierTone(member.tier.id)">{{ member.tier.name }}</SBadge>
+    <span v-if="member" class="s-customer__tier">
+      <LoyaltyTierBadge :tier="member.tier.id" :size="18" />
+      <SBadge :tone="tierTone(member.tier.id)">{{ member.tier.name }}</SBadge>
+    </span>
   </section>
 </template>
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import SBadge from '~/components/s/SBadge.vue'
+import LoyaltyTierBadge from '~/components/loyalty/LoyaltyTierBadge.vue'
 import { loyaltyUiFlag, useLoyalty, type LoyaltyMemberView } from '~/composables/useLoyalty'
 import { loyaltyTierTone as tierTone } from '~/utils/loyalty'
 
@@ -59,3 +63,12 @@ watch(
   { immediate: true }
 )
 </script>
+
+<style scoped>
+.s-customer__tier {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--s-space-1);
+}
+</style>

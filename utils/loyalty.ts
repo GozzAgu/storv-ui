@@ -34,10 +34,34 @@ export const LOYALTY_DEFAULT_SETTINGS: LoyaltySettings = {
     { id: 'bronze', name: 'Bronze', minSpend: 0, multiplier: 1 },
     { id: 'silver', name: 'Silver', minSpend: 500_000, multiplier: 1.25 },
     { id: 'gold', name: 'Gold', minSpend: 2_000_000, multiplier: 1.5 },
+    { id: 'platinum', name: 'Platinum', minSpend: 5_000_000, multiplier: 1.75 },
+    { id: 'diamond', name: 'Diamond', minSpend: 10_000_000, multiplier: 2 },
   ],
 }
 
-export const LOYALTY_TIER_IDS = ['bronze', 'silver', 'gold'] as const
+export const LOYALTY_TIER_IDS = ['bronze', 'silver', 'gold', 'platinum', 'diamond'] as const
+
+/**
+ * Settings saved before Platinum and Diamond existed have three tiers. Add the two above Gold
+ * at Gold's points rate, so nobody earns differently until the owner changes the rates.
+ */
+function withUpperTiers(raw: unknown): unknown {
+  const input = raw as Record<string, unknown> | null
+  if (!input || !Array.isArray(input.tiers) || input.tiers.length !== 3) return raw
+  const gold = input.tiers[2] as Record<string, unknown> | undefined
+  const goldSpend = Number(gold?.minSpend)
+  const goldRate = Number(gold?.multiplier)
+  if (!Number.isFinite(goldSpend) || !Number.isFinite(goldRate)) return raw
+  const platinumSpend = Math.max(5_000_000, goldSpend * 2.5)
+  return {
+    ...input,
+    tiers: [
+      ...input.tiers,
+      { id: 'platinum', name: 'Platinum', minSpend: platinumSpend, multiplier: goldRate },
+      { id: 'diamond', name: 'Diamond', minSpend: Math.max(10_000_000, platinumSpend * 2), multiplier: goldRate },
+    ],
+  }
+}
 
 /** One award per sale. Rate and multiplier are fixed when the sale first earns. */
 export interface LoyaltyAward {
@@ -168,7 +192,7 @@ export function loyaltyTierFor(spend: number, tiers: LoyaltyTier[]): LoyaltyTier
 
 export function loyaltyTierTone(tierId: string): 'neutral' | 'info' | 'warning' {
   if (tierId === 'gold') return 'warning'
-  if (tierId === 'silver') return 'info'
+  if (tierId === 'silver' || tierId === 'platinum' || tierId === 'diamond') return 'info'
   return 'neutral'
 }
 
@@ -309,7 +333,7 @@ export function parseLoyaltySettings(raw: unknown): LoyaltySettings {
 export function readLoyaltySettings(raw: unknown): LoyaltySettings {
   if (!raw) return { ...LOYALTY_DEFAULT_SETTINGS }
   try {
-    return parseLoyaltySettings(raw)
+    return parseLoyaltySettings(withUpperTiers(raw))
   } catch {
     return { ...LOYALTY_DEFAULT_SETTINGS }
   }

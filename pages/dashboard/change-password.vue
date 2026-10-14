@@ -157,7 +157,10 @@ const handleSubmit = async () => {
     await navigateTo('/dashboard')
   } catch (e: unknown) {
     const err = e as Error
-    errorMessage.value = err?.message || 'Failed to update password. Please try again.'
+    errorMessage.value =
+      err?.message === 'Current password is incorrect'
+        ? 'That temporary password is not right. Type the one your manager gave you; your browser may have filled in a different saved password.'
+        : err?.message || 'Failed to update password. Please try again.'
   } finally {
     isSubmitting.value = false
   }

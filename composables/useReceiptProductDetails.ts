@@ -149,6 +149,17 @@ export interface ReceiptDetailLinesOptions {
   omitLineItemFields?: boolean
 }
 
+/** `engine_number`, `engine-number` and `engineNumber` all read "Engine Number". */
+export function humanizeDetailKey(key: string): string {
+  return key
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .replace(/[_-]+/g, ' ')
+    .trim()
+    .split(/\s+/)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+}
+
 function normalizeMoneyDetailKey(key: string): string {
   return key.toLowerCase().replace(/[\s_-]/g, '')
 }
@@ -208,8 +219,7 @@ export function getProductDetailLines(
     if (value === undefined || value === null) continue
     const text = String(value).trim()
     if (!text) continue
-    const label =
-      DETAIL_LABELS[key] || key.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase())
+    const label = DETAIL_LABELS[key] || humanizeDetailKey(key)
     const normalized = `${label}:${text.toLowerCase()}`
     if (seen.has(normalized)) continue
     seen.add(normalized)
@@ -245,8 +255,7 @@ export function getInventoryItemDetailLines(
     if (value === undefined || value === null) continue
     const text = String(value).trim()
     if (!text) continue
-    const label =
-      DETAIL_LABELS[key] || key.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase())
+    const label = DETAIL_LABELS[key] || humanizeDetailKey(key)
     const normalized = `${label}:${text.toLowerCase()}`
     if (seen.has(normalized)) continue
     seen.add(normalized)

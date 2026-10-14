@@ -342,7 +342,7 @@ export const useFirebaseAuth = () => {
       // Update password
       await updatePassword(user, newPassword)
     } catch (error: any) {
-      if (error.code === 'auth/wrong-password') {
+      if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
         throw new Error('Current password is incorrect')
       }
       if (error.code === 'auth/weak-password') {
