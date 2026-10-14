@@ -55,12 +55,34 @@ import type { StaffAdminGrants } from '~/types/staff-permissions'
 const props = defineProps<{ staff?: Staff | null; branchName?: string }>()
 const emit = defineEmits<{ saved: [{ admin: boolean; adminGrants: StaffAdminGrants }] }>()
 
-/** Extras the app enforces end to end; the rest stay off until their screens are wired. */
 const ADMIN_EXTRAS: Array<{ key: keyof StaffAdminGrants; label: string; description: string }> = [
+  {
+    key: 'branches',
+    label: 'Edit this branch’s details',
+    description:
+      'Name, address, contact details and the note for cashiers. Adding, deleting or deactivating branches stays with you.',
+  },
+  {
+    key: 'storeSettings',
+    label: 'Change store settings',
+    description:
+      'Business details, inventory, receipt and checkout settings. These apply to every branch.',
+  },
+  {
+    key: 'paymentsConfirm',
+    label: 'Let staff confirm payments',
+    description:
+      'Turn Confirm payments on or off for regular staff. Seeing all payments and refunds stay with you.',
+  },
   {
     key: 'deleteSales',
     label: 'Delete sales and settle commissions',
     description: 'Sales with payments recorded against them can never be deleted.',
+  },
+  {
+    key: 'dataExport',
+    label: 'Export store data',
+    description: 'Download Excel backups of this branch.',
   },
 ]
 

@@ -4,7 +4,7 @@
       <template #description>
         Each branch keeps its own stock, team and sales. Switch between them from the top bar.
       </template>
-      <template v-if="canManage && eligibleStores.length > 0" #actions>
+      <template v-if="userStore.isSuperAdmin && canManage && eligibleStores.length > 0" #actions>
         <SButton variant="primary" :disabled="!canAddStore" @click="openCreateStoreModal">
           <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
           Add branch
@@ -12,7 +12,7 @@
       </template>
     </SPageHeader>
 
-    <SCard v-if="!userStore.isSuperAdmin">
+    <SCard v-if="!userStore.isSuperAdmin && !isBranchAdmin">
       <SEmptyState
         title="Only the account owner can manage branches"
         description="Ask the owner of this account to add or change branches."
@@ -36,13 +36,17 @@
     </SCard>
 
     <template v-else>
-      <p v-if="eligibleStores.length > 0 && !canAddStore" class="s-notice">
+      <p v-if="isBranchAdmin" class="s-notice">
+        You can edit your branch's details. Only the account owner can add, delete or deactivate
+        branches.
+      </p>
+      <p v-if="userStore.isSuperAdmin && eligibleStores.length > 0 && !canAddStore" class="s-notice">
         {{ storeLimitMessage }}
         <NuxtLink :to="dashPath('/settings?upgrade=1')" class="s-link"
           >Open Plan &amp; billing</NuxtLink
         >
       </p>
-      <p v-if="hiddenStoreCount > 0" class="s-notice">
+      <p v-if="userStore.isSuperAdmin && hiddenStoreCount > 0" class="s-notice">
         {{ hiddenStoreCount }} {{ hiddenStoreCount === 1 ? 'branch is' : 'branches are' }} on your
         account but not on your current plan<template v-if="hiddenStoreNames.length">
           ({{ hiddenStoreNames.join(', ') }})</template
@@ -74,7 +78,7 @@
         </SEmptyState>
       </SCard>
 
-      <SCard v-else-if="eligibleStores.length === 0">
+      <SCard v-else-if="userStore.isSuperAdmin && eligibleStores.length === 0">
         <SEmptyState
           title="Add your first branch"
           description="A branch is a shop or location. Your stock, staff and sales are kept separate for each one."
@@ -93,13 +97,13 @@
         <dl class="s-metrics">
           <div class="s-metrics__item">
             <dt class="s-metrics__label">Branches</dt>
-            <dd class="s-metrics__value">{{ eligibleStores.length }}</dd>
+            <dd class="s-metrics__value">{{ visibleStores.length }}</dd>
           </div>
           <div class="s-metrics__item">
             <dt class="s-metrics__label">Active</dt>
             <dd class="s-metrics__value">{{ activeBranchCount }}</dd>
           </div>
-          <div v-if="maxStores >= 0" class="s-metrics__item">
+          <div v-if="userStore.isSuperAdmin && maxStores >= 0" class="s-metrics__item">
             <dt class="s-metrics__label">Plan allows</dt>
             <dd class="s-metrics__value">{{ maxStores }}</dd>
           </div>
@@ -109,7 +113,7 @@
           <!-- Phone -->
           <SCard flush class="s-only-sm">
             <ul class="s-list">
-              <li v-for="store in eligibleStores" :key="store.id">
+              <li v-for="store in visibleStores" :key="store.id">
                 <div class="s-list__item">
                   <span class="s-team__mark" aria-hidden="true">
                     <Store :size="16" :stroke-width="1.75" />
@@ -153,7 +157,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="store in eligibleStores" :key="store.id">
+                <tr v-for="store in visibleStores" :key="store.id">
                   <td>
                     <div class="s-team__cell">
                       <span class="s-team__mark" aria-hidden="true">
@@ -211,14 +215,14 @@
       @close="closeBranchMenu"
     >
       <SMenuItem
-        v-if="branchForMenu && branchForMenu.id !== currentStore?.id"
+        v-if="userStore.isSuperAdmin && branchForMenu && branchForMenu.id !== currentStore?.id"
         label="Switch to this branch"
         :icon="ArrowLeftRight"
         @select="runBranchMenuAction((store) => switchStore(store.id))"
       />
       <SMenuItem label="Edit details" :icon="Pencil" @select="runBranchMenuAction(editStore)" />
       <SMenuItem
-        v-if="branchForMenu && branchForMenu.id !== currentStore?.id"
+        v-if="userStore.isSuperAdmin && branchForMenu && branchForMenu.id !== currentStore?.id"
         label="Delete branch"
         :icon="Trash2"
         danger
@@ -271,7 +275,11 @@
         <SInput v-model="storeForm.address" label="Address" autocomplete="street-address" />
         <SInput v-model="storeForm.phone" label="Phone" type="tel" autocomplete="tel" />
         <SInput v-model="storeForm.email" label="Email" type="email" autocomplete="email" />
-        <SCheckbox v-if="editingStore" v-model="storeForm.isActive" label="Branch is active" />
+        <SCheckbox
+          v-if="editingStore && userStore.isSuperAdmin"
+          v-model="storeForm.isActive"
+          label="Branch is active"
+        />
       </form>
       <template #footer>
         <SButton :disabled="isSubmittingStore" @click="closeStoreModal">Cancel</SButton>
@@ -397,11 +405,25 @@ const {
   handleStoreDelete,
 } = useBranchManagement()
 
+const { isAdmin, hasAdminGrant } = usePermissions()
+/** Branch admin with the "branches" extra: edits their own branch only. */
+const isBranchAdmin = computed(
+  () => !userStore.isSuperAdmin && isAdmin.value && hasAdminGrant('branches')
+)
+
 /** A workspace without multi-location can still create its very first branch. */
-const canManage = computed(() => canManageBranches.value || storesStore.stores.length === 0)
+const canManage = computed(
+  () => isBranchAdmin.value || canManageBranches.value || storesStore.stores.length === 0
+)
+
+const visibleStores = computed(() =>
+  isBranchAdmin.value
+    ? eligibleStores.value.filter((store) => store.id === currentStore.value?.id)
+    : eligibleStores.value
+)
 
 const activeBranchCount = computed(
-  () => eligibleStores.value.filter((store) => store.isActive).length
+  () => visibleStores.value.filter((store) => store.isActive).length
 )
 
 const branchCityOptions = computed(() =>
@@ -431,7 +453,7 @@ const { openMenuId, menuFixedStyle, toggleMenu } = useAnchoredRowMenu({
 })
 
 const branchForMenu = computed(
-  () => eligibleStores.value.find((store) => store.id === openMenuId.value) ?? null
+  () => visibleStores.value.find((store) => store.id === openMenuId.value) ?? null
 )
 
 function runBranchMenuAction(action: (store: Branch) => unknown) {

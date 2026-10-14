@@ -25,6 +25,8 @@ export interface PaymentsV2Access {
   canView: boolean
   canConfirm: boolean
   canRefund: boolean
+  /** Owner, or a branch admin allowed to turn "confirm payments" on or off for regular staff. */
+  canGrantConfirm: boolean
   settings: {
     cashConfirmation: CashConfirmationMode
     tenderKinds?: Record<string, Exclude<PaymentKind, 'paystack_link'>>
@@ -94,6 +96,7 @@ const DISABLED: PaymentsV2Access = {
   canView: false,
   canConfirm: false,
   canRefund: false,
+  canGrantConfirm: false,
   settings: { cashConfirmation: 'each' },
 }
 

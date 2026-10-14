@@ -152,7 +152,11 @@
         :locked-modules="lockedPermissionModules"
         :locked-badge="isStoreOwner ? 'Included with admin' : 'Owner only'"
       />
-      <StaffPaymentPermissions v-if="props.staff?.authUid" :member-uid="props.staff.authUid" />
+      <StaffPaymentPermissions
+        v-if="props.staff?.authUid"
+        :member-uid="props.staff.authUid"
+        :member-is-admin="targetIsAdmin"
+      />
 
       <p v-if="errorMessage" class="s-field__error" role="alert">{{ errorMessage }}</p>
     </SForm>

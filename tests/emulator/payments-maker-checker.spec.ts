@@ -573,6 +573,53 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)(
         await expectChainOk(ownerId)
       })
 
+      it('a branch admin with the extra turns only confirm on or off, for regular staff', async () => {
+        const { as, store, ownerId } = await seed()
+        const member = (uid: string, extra: Record<string, unknown>) =>
+          store
+            .collection('members')
+            .doc(uid)
+            .set({ authUid: uid, status: 'active', admin: true, ...extra })
+        await member('admin-plain', { adminGrants: {} })
+        await member('admin-pay', { adminGrants: { paymentsConfirm: true } })
+        await member('admin-other', { adminGrants: {} })
+
+        expect((await as(ownerId)).canGrantConfirm).toBe(true)
+        expect((await as('checker')).canGrantConfirm).toBe(false)
+        expect((await as('admin-plain')).canGrantConfirm).toBe(false)
+        const admin = await as('admin-pay')
+        expect(admin).toMatchObject({ canGrantConfirm: true, canView: false, canConfirm: false })
+
+        const set = (who: Awaited<ReturnType<typeof as>>, memberUid: string, permissions: unknown) =>
+          setMemberPaymentPermissions(db, who, { memberUid, permissions })
+        const none = { view: false, confirm: false, refund: false }
+
+        await expectCode(set(await as('admin-plain'), 'cashier', { ...none, confirm: true }), 'FORBIDDEN', 403)
+        await expectCode(set(admin, 'cashier', { ...none, view: true }), 'FORBIDDEN', 403)
+        await expectCode(set(admin, 'cashier', { ...none, confirm: true, refund: true }), 'FORBIDDEN', 403)
+        await expectCode(set(admin, 'admin-pay', { ...none, confirm: true }), 'FORBIDDEN', 403)
+        await expectCode(set(admin, 'admin-other', { ...none, confirm: true }), 'FORBIDDEN', 403)
+        await expectCode(set(admin, ownerId, { ...none, confirm: true }), 'INVALID_INPUT', 400)
+
+        await set(admin, 'cashier', { ...none, confirm: true })
+        expect(
+          (await store.collection('members').doc('cashier').get()).data()?.permissions?.payments
+        ).toEqual({ view: false, confirm: true, refund: false })
+        await set(admin, 'checker', { view: true, confirm: false, refund: false })
+        expect(
+          (await store.collection('members').doc('checker').get()).data()?.permissions?.payments
+        ).toEqual({ view: true, confirm: false, refund: false })
+
+        const events = (await store.collection('paymentEvents').orderBy('seq').get()).docs.map(
+          (d) => d.data()
+        )
+        expect(events.map((e) => [e.type, e.reason, e.subjectUid, e.actorUid])).toEqual([
+          ['permission_granted', 'payments.confirm', 'cashier', 'admin-pay'],
+          ['permission_revoked', 'payments.confirm', 'checker', 'admin-pay'],
+        ])
+        await expectChainOk(ownerId)
+      })
+
       it('only the owner changes settings; values are validated and audited', async () => {
         const { as, ownerId, store } = await seed()
         await expectCode(

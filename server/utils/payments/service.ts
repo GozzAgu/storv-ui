@@ -302,15 +302,26 @@ export async function listAwaiting(
 
 // ---------------------------------------------------------------- permissions
 
-/** Owner only (the route also asks for a fresh 2FA code). Every change is an audit event. */
+/**
+ * The owner sets any payment grant; a branch admin with the "confirm payments" extra may turn
+ * only `confirm` on or off, for regular staff other than themselves. The route asks for a fresh
+ * 2FA code. Every change is an audit event.
+ */
 export async function setMemberPaymentPermissions(
   db: Firestore,
   access: PaymentsAccess,
   input: { memberUid: unknown; permissions: unknown }
 ): Promise<PaymentPermissions> {
-  if (!access.isOwner)
+  if (!access.isOwner && !access.canGrantConfirm)
     throw new PaymentServiceError('FORBIDDEN', 403, 'Only the owner can change payment permissions')
   const memberUid = assertDocId(input.memberUid, 'memberUid')
+  if (!access.isOwner && memberUid === access.actor.uid) {
+    throw new PaymentServiceError(
+      'FORBIDDEN',
+      403,
+      'Admins cannot change their own access. Ask the store owner.'
+    )
+  }
   if (memberUid === access.ownerId) {
     throw new PaymentServiceError(
       'INVALID_INPUT',
@@ -339,6 +350,22 @@ export async function setMemberPaymentPermissions(
     const before = readPaymentPermissions(memberSnap.data()?.permissions?.payments)
     const now = new Date().toISOString()
     const changes = PAYMENT_PERMISSION_ACTIONS.filter((a) => before[a] !== next[a])
+    if (!access.isOwner) {
+      if (memberSnap.data()?.admin === true) {
+        throw new PaymentServiceError(
+          'FORBIDDEN',
+          403,
+          'Only the store owner can manage another admin'
+        )
+      }
+      if (changes.some((a) => a !== 'confirm')) {
+        throw new PaymentServiceError(
+          'FORBIDDEN',
+          403,
+          'Admins can only turn confirm payments on or off'
+        )
+      }
+    }
     if (!changes.length) return
     tx.update(memberRef, { 'permissions.payments': next, updatedAt: new Date(now) })
     appendAuditEvents(

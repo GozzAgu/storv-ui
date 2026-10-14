@@ -14,6 +14,7 @@ export default definePaymentsRoute(
       canView: access.canView,
       canConfirm: access.canConfirm,
       canRefund: access.canRefund,
+      canGrantConfirm: access.canGrantConfirm,
       settings: access.isOwner ? settings : { cashConfirmation: settings.cashConfirmation },
     }
   }

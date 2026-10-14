@@ -1,6 +1,11 @@
 import type { Firestore } from 'firebase-admin/firestore'
 import type { PaymentPermissions } from '~/types/payments-v2'
-import { resolveStaffPermissions, type LegacyStaffAccessFields } from '~/utils/staff-permissions'
+import type { StaffAdminGrants } from '~/types/staff-permissions'
+import {
+  normalizeStaffAdminGrants,
+  resolveStaffPermissions,
+  type LegacyStaffAccessFields,
+} from '~/utils/staff-permissions'
 import { storeDocRef } from './audit-log'
 import { PaymentServiceError } from './records'
 import type { PaymentActor } from './state-machine'
@@ -14,6 +19,8 @@ export interface PaymentsAccess {
   canView: boolean
   canConfirm: boolean
   canRefund: boolean
+  /** Owner, or a branch admin the owner gave the "confirm payments" extra. */
+  canGrantConfirm: boolean
 }
 
 const ID_PATTERN = /^[A-Za-z0-9_-]{1,128}$/
@@ -74,6 +81,7 @@ export async function resolvePaymentsAccess(
       canView: true,
       canConfirm: true,
       canRefund: true,
+      canGrantConfirm: true,
     }
   }
 
@@ -84,6 +92,7 @@ export async function resolvePaymentsAccess(
         staffId?: string
         departmentId?: string
         permissions?: { payments?: unknown }
+        adminGrants?: Partial<StaffAdminGrants>
       })
     | undefined
   if (!member || member.status !== 'active') {
@@ -119,6 +128,8 @@ export async function resolvePaymentsAccess(
     canView: payments.view || payments.confirm,
     canConfirm: payments.confirm,
     canRefund: payments.refund,
+    canGrantConfirm:
+      member.admin === true && normalizeStaffAdminGrants(member.adminGrants).paymentsConfirm,
   }
 }
 

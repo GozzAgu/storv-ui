@@ -1,11 +1,14 @@
 <template>
-  <section v-if="access.enabled && access.isOwner && memberUid" class="s-form-section">
+  <section v-if="canEdit && memberUid" class="s-form-section">
     <h3 class="s-form-section__title">Payments</h3>
     <p class="s-form-meta">
       Saved separately and recorded in the payments audit log. Confirming means checking money
       against your bank app or till before a sale counts as paid.
+      <template v-if="!access.isOwner">Only the store owner can change the other payment
+        permissions.</template>
     </p>
     <SCheckbox
+      v-if="access.isOwner"
       v-model="perms.view"
       variant="switch"
       label="See all payments"
@@ -20,6 +23,7 @@
       :disabled="loading"
     />
     <SCheckbox
+      v-if="access.isOwner"
       v-model="perms.refund"
       variant="switch"
       label="Refund payments"
@@ -52,10 +56,15 @@ import { useTotpConfirmModal } from '~/composables/useTotpConfirmModal'
 import { resolveTotpForSensitiveAction } from '~/utils/security-api-errors'
 import type { PaymentPermissions } from '~/types/payments-v2'
 
-const props = defineProps<{ memberUid?: string | null }>()
+const props = defineProps<{ memberUid?: string | null; memberIsAdmin?: boolean }>()
 
 const paymentsV2 = usePaymentsV2()
 const access = paymentsV2.access
+const canEdit = computed(
+  () =>
+    access.value.enabled &&
+    (access.value.isOwner || (access.value.canGrantConfirm && !props.memberIsAdmin))
+)
 const toast = useAppToast()
 const totp = useTotpConfirmModal()
 
@@ -76,7 +85,7 @@ async function load() {
   perms.value = empty()
   saved.value = empty()
   await paymentsV2.loadAccess()
-  if (!props.memberUid || !access.value.enabled || !access.value.isOwner) return
+  if (!props.memberUid || !canEdit.value) return
   loading.value = true
   try {
     const db = useFirestore().getFirestoreInstance()
@@ -106,7 +115,10 @@ async function save() {
   saving.value = true
   try {
     const code = await resolveTotpForSensitiveAction(totp.prompt)
-    const res = await paymentsV2.setMemberPermissions(props.memberUid, { ...perms.value }, code)
+    const next = access.value.isOwner
+      ? { ...perms.value }
+      : { ...saved.value, confirm: perms.value.confirm }
+    const res = await paymentsV2.setMemberPermissions(props.memberUid, next, code)
     saved.value = { ...res.permissions }
     perms.value = { ...res.permissions }
     toast.success('Payment permissions saved')

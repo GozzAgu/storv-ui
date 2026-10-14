@@ -74,3 +74,6 @@ export const STAFF_ADMIN_GRANT_KEYS = [
   'storeSettings',
   'dataExport',
 ] as const satisfies ReadonlyArray<keyof StaffAdminGrants>
+
+/** Shared settings sections a branch admin with the "store settings" extra may save. */
+export type SharedSettingsSection = 'business' | 'inventory' | 'receipt' | 'payment'

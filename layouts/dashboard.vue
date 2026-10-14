@@ -320,7 +320,7 @@ if (import.meta.client) {
 const navigation = DASHBOARD_NAV_DEFINITIONS
 
 // Filter navigation based on user access and subscription plan (web sidebar + iOS/Android bottom nav)
-const { hasAnyManageAccess, can, isAdmin } = usePermissions()
+const { hasAnyManageAccess, can, isAdmin, hasAdminGrant } = usePermissions()
 const { access: paymentsAccess, loadAccess: loadPaymentsAccess } = usePaymentsV2()
 if (import.meta.client) {
   watch(
@@ -385,7 +385,10 @@ const shellNavSource = computed<ShellNavSourceItem[]>(() => {
       href: dashPath('/customers'),
     })
   }
-  if (userStore.isSuperAdmin && canManageBranches.value) {
+  if (
+    (userStore.isSuperAdmin && canManageBranches.value) ||
+    (isAdmin.value && hasAdminGrant('branches'))
+  ) {
     items.push({ name: SHELL_BRANCHES_NAV_NAME, iconKey: 'branch', href: dashPath('/branches') })
   }
   return items

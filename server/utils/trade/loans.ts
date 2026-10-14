@@ -994,6 +994,7 @@ function lenderLinkAccess(loan: StoredLoan): PaymentsAccess {
     canView: false,
     canConfirm: false,
     canRefund: false,
+    canGrantConfirm: false,
   }
 }
 

@@ -4,7 +4,7 @@
       <template #description>
         Business details, plan, inventory defaults, and how sales are recorded.
       </template>
-      <template v-if="!canEditSettings" #actions>
+      <template v-if="!canEditSharedSettings" #actions>
         <SBadge tone="warning" dot>View only</SBadge>
       </template>
     </SPageHeader>
@@ -149,10 +149,10 @@
 
         <SCard
           v-else-if="activeSettingsTab === 'store-info'"
-          :title="isStaff ? 'Branch details' : 'Store information'"
-          :description="isStaff ? 'Contact details for your branch.' : 'Business details shown on receipts and invoices.'"
+          :title="showBranchDetails ? 'Branch details' : 'Store information'"
+          :description="showBranchDetails ? 'Contact details for your branch.' : 'Business details shown on receipts and invoices.'"
         >
-          <template v-if="canEditSettings && !isEditingStore && !isLoadingStoreInfo" #actions>
+          <template v-if="canEditSharedSettings && !isEditingStore && !isLoadingStoreInfo" #actions>
             <SButton variant="secondary" size="sm" @click="enableEditing('store')">
               <template #leading><Pencil :size="16" :stroke-width="2" aria-hidden="true" /></template>
               Edit
@@ -178,13 +178,13 @@
               v-model="storeInfo.name"
               label="Branch name"
               placeholder="Enter branch name"
-              :disabled="!canEditSettings"
+              :disabled="!canEditSharedSettings"
             />
             <SInput
               v-model="storeInfo.businessType"
               label="Business type"
               placeholder="For example, perfume shop"
-              :disabled="!canEditSettings"
+              :disabled="!canEditSharedSettings"
             />
             <SInput
               v-model="storeInfo.email"
@@ -192,7 +192,7 @@
               label="Email"
               placeholder="store@example.com"
               autocomplete="email"
-              :disabled="!canEditSettings"
+              :disabled="!canEditSharedSettings"
             />
             <SInput
               v-model="storeInfo.phone"
@@ -200,7 +200,7 @@
               label="Phone"
               placeholder="Enter phone number"
               autocomplete="tel"
-              :disabled="!canEditSettings"
+              :disabled="!canEditSharedSettings"
             />
             <div class="s-settings__span">
               <STextarea
@@ -208,7 +208,7 @@
                 label="Address"
                 placeholder="Enter store address"
                 :rows="2"
-                :disabled="!canEditSettings"
+                :disabled="!canEditSharedSettings"
               />
             </div>
           </form>
@@ -237,7 +237,7 @@
                   type="number"
                   inputmode="numeric"
                   min="1"
-                  :disabled="!canEditSettings"
+                  :disabled="!canEditSharedSettings"
                 >
                   <template #suffix>units</template>
                 </SInput>
@@ -249,7 +249,7 @@
                 variant="switch"
                 label="Auto-reorder"
                 description="Create purchase orders when stock is low."
-                :disabled="!canEditSettings"
+                :disabled="!canEditSharedSettings"
               />
             </div>
             <div class="s-settings__row">
@@ -262,12 +262,12 @@
                   id="settings-default-category"
                   v-model="inventorySettings.defaultCategory"
                   :options="defaultCategoryOptions"
-                  :disabled="!canEditSettings"
+                  :disabled="!canEditSharedSettings"
                 />
               </div>
             </div>
           </form>
-          <template v-if="canEditSettings" #footer>
+          <template v-if="canEditSharedSettings" #footer>
             <SButton variant="primary" type="submit" form="settings-inventory-form">Save inventory settings</SButton>
           </template>
         </SCard>
@@ -286,7 +286,7 @@
               <li v-for="(tender, index) in paymentTenders" :key="`${tender}-${index}`" class="s-settings__chip">
                 {{ tender }}
                 <button
-                  v-if="canEditSettings"
+                  v-if="canEditSharedSettings"
                   type="button"
                   class="s-settings__chip-remove"
                   :aria-label="`Remove ${tender}`"
@@ -296,14 +296,14 @@
                 </button>
               </li>
             </ul>
-            <form v-if="canEditSettings" class="s-settings__add" @submit.prevent="addPaymentTender">
+            <form v-if="canEditSharedSettings" class="s-settings__add" @submit.prevent="addPaymentTender">
               <SInput v-model="newPaymentTender" label="Add a method" placeholder="For example, OPay or Moniepoint" />
               <SButton type="submit" variant="secondary" :disabled="!newPaymentTender.trim()">
                 <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
                 Add
               </SButton>
             </form>
-            <template v-if="canEditSettings" #footer>
+            <template v-if="canEditSharedSettings" #footer>
               <SButton variant="ghost" @click="resetPaymentTendersToDefault">Reset to defaults</SButton>
               <SButton variant="primary" @click="savePaymentSettings">Save payment methods</SButton>
             </template>
@@ -327,7 +327,7 @@
                   id="settings-receipt-prefix"
                   v-model="receiptSettings.prefix"
                   placeholder="REC-"
-                  :disabled="!canEditSettings"
+                  :disabled="!canEditSharedSettings"
                 />
               </div>
             </div>
@@ -343,7 +343,7 @@
                   type="number"
                   inputmode="numeric"
                   min="1"
-                  :disabled="!canEditSettings"
+                  :disabled="!canEditSharedSettings"
                 />
               </div>
             </div>
@@ -353,11 +353,11 @@
                 variant="switch"
                 label="Print receipts automatically"
                 description="Open the print dialog as soon as a sale is completed."
-                :disabled="!canEditSettings"
+                :disabled="!canEditSharedSettings"
               />
             </div>
           </form>
-          <template v-if="canEditSettings" #footer>
+          <template v-if="canEditSharedSettings" #footer>
             <SButton variant="primary" type="submit" form="settings-receipt-form">Save receipt settings</SButton>
           </template>
         </SCard>
@@ -365,7 +365,7 @@
         <LoyaltySettingsCard v-else-if="activeSettingsTab === 'rewards'" />
 
         <SCard
-          v-else-if="activeSettingsTab === 'data-export' && !isStaff"
+          v-else-if="activeSettingsTab === 'data-export' && canExportData"
           title="Data export"
           description="Download Excel backups of this branch. Large stores may take a moment to gather."
         >
@@ -448,7 +448,6 @@ import InventoryAuditPanel from '~/components/growth/InventoryAuditPanel.vue'
 import ScheduledBackupPanel from '~/components/growth/ScheduledBackupPanel.vue'
 import { EMPTY_CELL } from '~/utils/ui-empty'
 import { isStorefrontDashboardHidden } from '~/utils/storefront-launch'
-import { collection, query, where, getDocs } from 'firebase/firestore'
 import {
   ADD_ON_ELIGIBLE_PLAN,
   formatNaira,
@@ -507,6 +506,10 @@ import {
   type StaffWorkspaceContext,
 } from '~/composables/useStaffWorkspaceContext'
 import { DEFAULT_PAYMENT_TENDERS, normalizePaymentTenderList } from '~/utils/payment-tenders'
+import { saveSharedSettingsAsAdmin } from '~/utils/admin-settings-api'
+import { clearOwnerWorkspaceContextCache } from '~/utils/owner-workspace-context'
+import { getQueryUserId } from '~/composables/useFirestorePaths'
+import type { SharedSettingsSection } from '~/types/staff-permissions'
 import { useStoreDataExport } from '~/composables/useStoreDataExport'
 import { useProductAnalytics } from '~/composables/useProductAnalytics'
 import { useFunnelAnalytics } from '~/composables/useFunnelAnalytics'
@@ -559,7 +562,6 @@ const storeInfoDetails = computed(() =>
 // Get user data and load store info
 const { currentUser } = useFirebaseAuth()
 const { getUserDocument, updateStoreDetails, updateUserDocument } = useUser()
-const { getFirestoreInstance } = useFirestore()
 const userStore = useUserStore()
 const storesStore = useStoresStore()
 const authStore = useAuthStore()
@@ -620,7 +622,7 @@ async function handleExportAllStoreData() {
     toast.success(
       `Exported: inventory ZIP (${summary.inventory.folders} categories, ${summary.inventory.items} product(s)), ${summary.receipts.count} sale(s), ${summary.buybacks.count} buyback(s), ${summary.stockLoans.count} stock loan(s).`
     )
-    await markBackupExported()
+    if (userStore.isSuperAdmin) await markBackupExported()
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Export failed'
     toast.error(message)
@@ -640,6 +642,39 @@ const route = useRoute()
 const canEditSettings = computed(() => {
   return userStore.isSuperAdmin
 })
+
+const { isAdmin, hasAdminGrant } = usePermissions()
+/** Business details, inventory, receipt and checkout settings: owner, or admin with the extra. */
+const canEditSharedSettings = computed(
+  () => userStore.isSuperAdmin || (isAdmin.value && hasAdminGrant('storeSettings'))
+)
+/** Admins save through the server; the owner's own saves are unchanged. */
+const savesAsAdmin = computed(() => !userStore.isSuperAdmin && canEditSharedSettings.value)
+const canExportData = computed(
+  () => !isStaff.value || (isAdmin.value && hasAdminGrant('dataExport'))
+)
+const showBranchDetails = computed(() => isStaff.value && !canEditSharedSettings.value)
+
+async function saveSharedSection(
+  section: SharedSettingsSection,
+  values: Record<string, unknown>
+): Promise<boolean> {
+  const ownerUserId = await getQueryUserId()
+  const storeId = storesStore.currentStoreId
+  if (!ownerUserId || !storeId) {
+    toast.error('Unable to determine your workspace. Please try again.')
+    return false
+  }
+  try {
+    await saveSharedSettingsAsAdmin({ ownerUserId, storeId }, section, values)
+    clearOwnerWorkspaceContextCache()
+    toast.success('Settings saved successfully!')
+    return true
+  } catch (error: unknown) {
+    toast.error(error instanceof Error ? error.message : 'Failed to save settings.')
+    return false
+  }
+}
 
 // Subscription
 const currentSubscription = computed<SubscriptionPlan>(() => {
@@ -1102,7 +1137,10 @@ const settingsTabs = computed(() => {
   const tabs: Array<{ value: string; label: string }> = []
   if (userStore.isSuperAdmin) tabs.push({ value: 'account', label: 'Account & workspace' })
   if (isStaff.value) tabs.push({ value: 'assignment', label: 'Your assignment' })
-  tabs.push({ value: 'store-info', label: isStaff.value ? 'Branch details' : 'Store information' })
+  tabs.push({
+    value: 'store-info',
+    label: showBranchDetails.value ? 'Branch details' : 'Store information',
+  })
   tabs.push({ value: 'inventory', label: 'Inventory' })
   if (userStore.isSuperAdmin && !isStorefrontDashboardHidden()) {
     tabs.push({ value: 'storefront', label: 'Storefront' })
@@ -1112,7 +1150,7 @@ const settingsTabs = computed(() => {
   if (userStore.isSuperAdmin && loyaltyUiFlag()) {
     tabs.push({ value: 'rewards', label: 'Customer rewards' })
   }
-  if (!isStaff.value) tabs.push({ value: 'data-export', label: 'Data export' })
+  if (canExportData.value) tabs.push({ value: 'data-export', label: 'Data export' })
   return tabs
 })
 
@@ -1310,42 +1348,7 @@ const getTargetUserId = async (): Promise<string | null> => {
     await userStore.fetchUserData(currentUser.value.uid)
   }
 
-  let userId = currentUser.value.uid
-
-  // If the current user is staff, get the super admin UID from the staff document
-  if (userStore.userData?.role === 'staff') {
-    try {
-      const db = getFirestoreInstance()
-      if (!db) {
-        console.warn('[Settings] Firestore not initialized')
-        return userId
-      }
-
-      // Find the staff document for this user
-      const staffRef = collection(db, 'staff')
-      const staffQuery = query(staffRef, where('authUid', '==', userId))
-      const staffSnapshot = await getDocs(staffQuery)
-
-      if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
-        const staffDoc = staffSnapshot.docs[0]
-        if (staffDoc) {
-          const staffData = staffDoc.data()
-          // Use the super admin's UID who created this staff member
-          if (staffData.createdBy) {
-            userId = staffData.createdBy
-            // console.log('[Settings] Staff user detected, using super admin UID:', userId)
-          }
-        }
-      }
-    } catch (error: any) {
-      console.warn(
-        '[Settings] Could not fetch staff document, using current user UID:',
-        error.message
-      )
-    }
-  }
-
-  return userId
+  return (await getQueryUserId()) ?? currentUser.value.uid
 }
 
 async function loadSettingsFromFirestore() {
@@ -1408,7 +1411,7 @@ async function loadSettingsFromFirestore() {
     if (!targetUserId) return
     const userData = await getUserDocument(targetUserId)
     if (userData?.storeDetails) {
-      if (!isStaff.value) {
+      if (!showBranchDetails.value) {
         storeInfo.name = userData.storeDetails.storeName || ''
         storeInfo.email = userData.storeDetails.storeEmail || ''
         storeInfo.phone = userData.storeDetails.storePhone || ''
@@ -1446,6 +1449,10 @@ async function loadSettingsFromFirestore() {
     isLoadingStoreInfo.value = false
   }
 }
+
+watch(showBranchDetails, () => {
+  if (currentUser.value) void loadSettingsFromFirestore()
+})
 
 // Load store information and settings from Firestore
 onMounted(async () => {
@@ -1542,7 +1549,7 @@ onMounted(async () => {
 
 // Functions
 const enableEditing = (section: string) => {
-  if (!canEditSettings.value) {
+  if (!canEditSharedSettings.value) {
     toast.error('Only super admins can edit settings')
     return
   }
@@ -1563,6 +1570,13 @@ const cancelEditing = (section: string) => {
 const updateStoreSettings = async (settings: any) => {
   if (!currentUser.value) {
     toast.error('You must be signed in to save settings')
+    return
+  }
+
+  if (savesAsAdmin.value) {
+    for (const section of ['inventory', 'receipt', 'payment'] as const) {
+      if (settings[section] && !(await saveSharedSection(section, settings[section]))) return
+    }
     return
   }
 
@@ -1668,8 +1682,23 @@ const saveStoreInfo = async () => {
     return
   }
 
-  if (!canEditSettings.value) {
+  if (!canEditSharedSettings.value) {
     toast.error('Only super admins can edit store settings')
+    return
+  }
+
+  if (savesAsAdmin.value) {
+    const saved = await saveSharedSection('business', {
+      storeName: storeInfo.name,
+      storeEmail: storeInfo.email,
+      storePhone: storeInfo.phone,
+      storeAddress: storeInfo.address,
+      storeDescription: storeInfo.businessType,
+    })
+    if (saved) {
+      isEditingStore.value = false
+      Object.assign(backupStoreInfo, { ...storeInfo })
+    }
     return
   }
 
@@ -1699,7 +1728,7 @@ const saveStoreInfo = async () => {
 
 // Save inventory settings
 const saveInventorySettings = async () => {
-  if (!canEditSettings.value) {
+  if (!canEditSharedSettings.value) {
     toast.error('Only super admins can edit settings')
     return
   }
@@ -1731,7 +1760,7 @@ const saveInventorySettings = async () => {
 }
 
 const savePaymentSettings = async () => {
-  if (!canEditSettings.value) {
+  if (!canEditSharedSettings.value) {
     toast.error('Only super admins can edit settings')
     return
   }
@@ -1744,7 +1773,7 @@ const savePaymentSettings = async () => {
 
 // Save receipt settings
 const saveReceiptSettings = async () => {
-  if (!canEditSettings.value) {
+  if (!canEditSharedSettings.value) {
     toast.error('Only super admins can edit settings')
     return
   }

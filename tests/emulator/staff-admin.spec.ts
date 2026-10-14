@@ -15,6 +15,12 @@ import {
   writeNewStaff,
   type StaffManager,
 } from '~/server/utils/staff-admin'
+import {
+  applyBranchDetails,
+  applySharedSettings,
+  branchDetailsUpdate,
+  sharedSettingsUpdate,
+} from '~/server/utils/admin-settings'
 
 async function statusOf(promise: Promise<unknown>): Promise<number | undefined> {
   return promise.then(
@@ -284,5 +290,47 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('Branch admin staff manage
     expect(await statusOf(requireStoreAdminGrant(db, 'admin1', ownerId, 's1', 'branches'))).toBe(403)
     expect(await statusOf(requireStoreAdminGrant(db, 'staff1', ownerId, 's1', 'dataExport'))).toBe(403)
     expect(await statusOf(requireStoreAdminGrant(db, ownerId, ownerId, 's1', 'branches'))).toBeUndefined()
+  })
+
+  it('shared settings saves touch only their section; plan and features are untouched', async () => {
+    const { ownerId } = await workspace()
+    const owner = db.collection('users').doc(ownerId)
+    await owner.update({
+      storeDetails: {
+        storeName: 'Old',
+        experienceMode: 'team',
+        enabledCapabilities: ['staffManagement'],
+        settings: { inventory: { lowStockThreshold: 5, autoReorder: false, defaultCategory: 'general' } },
+      },
+    })
+
+    await applySharedSettings(db, ownerId, sharedSettingsUpdate('receipt', {
+      prefix: 'INV-',
+      nextNumber: 2000,
+      autoPrint: true,
+    }))
+    await applySharedSettings(db, ownerId, sharedSettingsUpdate('business', { storeName: 'new name' }))
+
+    const data = (await owner.get()).data()!
+    expect(data.subscription).toBe('storvv_micro')
+    expect(data.storeDetails.experienceMode).toBe('team')
+    expect(data.storeDetails.enabledCapabilities).toEqual(['staffManagement'])
+    expect(data.storeDetails.settings.inventory.lowStockThreshold).toBe(5)
+    expect(data.storeDetails.settings.receipt).toEqual({ prefix: 'INV-', nextNumber: 2000, autoPrint: true })
+    expect(data.storeDetails.storeName).toBe('New Name')
+  })
+
+  it('branch details: only that branch, only the detail fields, and only under this owner', async () => {
+    const { ownerId, s1 } = await workspace()
+    await s1.update({ isActive: true })
+    await applyBranchDetails(db, ownerId, 's1', branchDetailsUpdate({ name: 'lekki', phone: '0800' }))
+    const branch = (await s1.get()).data()!
+    expect(branch).toMatchObject({ name: 'Lekki', phone: '0800', isActive: true, ownerId })
+    expect((await storeRef(db, ownerId, 's2').get()).data()!.name).toBe('s2')
+
+    const stranger = `owner-${randomUUID()}`
+    expect(
+      await statusOf(applyBranchDetails(db, stranger, 's1', branchDetailsUpdate({ name: 'X' })))
+    ).toBe(404)
   })
 })

@@ -52,7 +52,7 @@ describe('StaffAdminAccess', () => {
     expect(mountSection({ status: 'inactive' }).find('section').exists()).toBe(false)
   })
 
-  it('shows extras only once admin is on, and only the ones the app enforces', async () => {
+  it('shows the extras only once admin is on', async () => {
     const wrapper = mountSection({})
     expect(labels(wrapper)).toEqual(['Make admin of this branch'])
     expect(wrapper.find('button').attributes('disabled')).toBeDefined()
@@ -60,7 +60,11 @@ describe('StaffAdminAccess', () => {
     await wrapper.find('input').setValue(true)
     expect(labels(wrapper)).toEqual([
       'Make admin of this branch',
+      'Edit this branch’s details',
+      'Change store settings',
+      'Let staff confirm payments',
       'Delete sales and settle commissions',
+      'Export store data',
     ])
     expect(wrapper.find('button').attributes('disabled')).toBeUndefined()
   })
@@ -77,7 +81,7 @@ describe('StaffAdminAccess', () => {
     const wrapper = mountSection({})
     const inputs = () => wrapper.findAll('input')
     await inputs()[0]!.setValue(true)
-    await inputs()[1]!.setValue(true)
+    await inputs()[4]!.setValue(true)
     await wrapper.find('button').trigger('click')
     await flushPromises()
 

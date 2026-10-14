@@ -9,6 +9,8 @@ import type { Store } from '~/composables/useStores'
 import { resolveEffectiveSubscriptionPlan, storeLimitReachedMessage } from '~/types/subscription'
 import { getCitiesForRegion, isCityInRegion } from '~/utils/region-cities'
 import { formatBranchDisplayName, parseBranchDisplayName } from '~/utils/branch-name'
+import { getQueryUserId } from '~/composables/useFirestorePaths'
+import { saveBranchDetailsAsAdmin } from '~/utils/admin-settings-api'
 
 type BranchForm = {
   name: string
@@ -185,7 +187,19 @@ export function useBranchManagement() {
         email: storeForm.value.email,
         isActive: storeForm.value.isActive,
       }
-      if (editingStore.value) {
+      if (editingStore.value && !userStore.isSuperAdmin) {
+        const { isActive: _ownerOnly, ...details } = storePayload
+        const ownerUserId = await getQueryUserId()
+        if (!ownerUserId) throw new Error('Could not find this workspace')
+        const saved = await saveBranchDetailsAsAdmin(
+          { ownerUserId, storeId: editingStore.value.id },
+          details
+        )
+        const local = storesStore.stores.find((s) => s.id === editingStore.value?.id)
+        if (local) Object.assign(local, saved)
+        toast.success('Branch details saved')
+        closeStoreModal()
+      } else if (editingStore.value) {
         await storesStore.updateStore(editingStore.value.id, storePayload)
         toast.success('Store updated successfully')
         closeStoreModal()
