@@ -507,6 +507,7 @@ import {
 } from '~/composables/useStaffWorkspaceContext'
 import { DEFAULT_PAYMENT_TENDERS, normalizePaymentTenderList } from '~/utils/payment-tenders'
 import { saveSharedSettingsAsAdmin } from '~/utils/admin-settings-api'
+import { mergeStoreInfoIntoDetails } from '~/utils/store-details-merge'
 import { clearOwnerWorkspaceContextCache } from '~/utils/owner-workspace-context'
 import { getQueryUserId } from '~/composables/useFirestorePaths'
 import type { SharedSettingsSection } from '~/types/staff-permissions'
@@ -1709,13 +1710,21 @@ const saveStoreInfo = async () => {
       return
     }
 
-    await updateStoreDetails(targetUserId, {
-      storeName: storeInfo.name,
-      storeEmail: storeInfo.email,
-      storePhone: storeInfo.phone,
-      storeAddress: storeInfo.address,
-      storeDescription: storeInfo.businessType,
-    })
+    const userData = await getUserDocument(targetUserId)
+    if (!userData) {
+      toast.error('Could not load your current settings, so nothing was saved. Please try again.')
+      return
+    }
+    await updateStoreDetails(
+      targetUserId,
+      mergeStoreInfoIntoDetails(userData?.storeDetails, {
+        storeName: storeInfo.name,
+        storeEmail: storeInfo.email,
+        storePhone: storeInfo.phone,
+        storeAddress: storeInfo.address,
+        storeDescription: storeInfo.businessType,
+      })
+    )
 
     isEditingStore.value = false
     Object.assign(backupStoreInfo, { ...storeInfo })
