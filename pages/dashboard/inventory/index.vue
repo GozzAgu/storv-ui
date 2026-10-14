@@ -163,7 +163,6 @@
           v-for="folder in paginatedFolders"
           :key="folder.id"
           :name="folder.name"
-          :description="folder.description"
           :type="folder.type"
           :item-count="folderDisplayStats(folder).itemCount"
           :child-count="getChildFolders(folders, folder.id).length"

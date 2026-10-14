@@ -19,10 +19,18 @@
           {{ displayName }}
         </button>
       </h3>
-      <p v-if="description" class="s-category-card__desc">{{ description }}</p>
 
       <ul class="s-category-card__chips">
-        <li class="s-category-card__chip">{{ metaLabel }}</li>
+        <li
+          v-if="childCount > 0"
+          class="s-category-card__chip"
+          :title="metaLabel"
+          :aria-label="metaLabel"
+        >
+          <FolderTree :size="12" :stroke-width="2" aria-hidden="true" />
+          <span aria-hidden="true">{{ childCount }}</span>
+        </li>
+        <li v-else class="s-category-card__chip">{{ metaLabel }}</li>
         <li v-if="hasSerialNumbers" class="s-category-card__chip">Serial</li>
         <li v-if="lowStockCount > 0" class="s-category-card__chip s-category-card__chip--warn">
           {{ lowStockCount }} low
@@ -46,7 +54,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { ArrowUpRight } from '@lucide/vue'
+import { ArrowUpRight, FolderTree } from '@lucide/vue'
 import { folderKindIcon } from '~/utils/category-kind-icons'
 import { formatCategoryDisplayName } from '~/utils/inventory-category-format'
 import type { FolderAvailabilityStats } from '~/utils/inventory-folder-availability'
@@ -54,7 +62,6 @@ import type { FolderAvailabilityStats } from '~/utils/inventory-folder-availabil
 const props = withDefaults(
   defineProps<{
     name: string
-    description?: string
     type?: string
     itemCount: number
     childCount?: number
@@ -75,7 +82,6 @@ const props = withDefaults(
     showDepartments?: boolean
   }>(),
   {
-    description: '',
     type: undefined,
     childCount: 0,
     lowStockCount: 0,

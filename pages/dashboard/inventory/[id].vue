@@ -163,7 +163,6 @@
             v-for="child in paginatedChildFolders"
             :key="child.id"
             :name="child.name"
-            :description="child.description"
             :type="child.type"
             :item-count="subfolderDisplayStats(child).itemCount"
             :low-stock-count="subfolderDisplayStats(child).lowStockCount"
