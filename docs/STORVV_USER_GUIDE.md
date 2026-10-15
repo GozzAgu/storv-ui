@@ -53,23 +53,23 @@ Storvv works in a web browser on a computer, tablet or phone, and as an app on i
 
 ## 2. Words you will see
 
-| Word | What it means |
-| ---- | ------------- |
-| **Owner** | The person who created the Storvv account. Shown in the app as "Admin" or "Super admin". The owner can do everything. |
-| **Staff** | A team member the owner has added. Staff only see and do what the owner allows. |
-| **Branch** | One shop or location. Stock, staff and sales are kept separately for each branch. Almost every screen shows data for the branch currently selected. |
-| **Category** | A group of products, such as "Phones" or "Perfumes". Each category has its own columns (for example Brand, Colour, Serial number). |
-| **Subcategory** | A category inside another category, for example "Corolla" and "Camry" inside "Toyota". |
-| **Product** | One row of stock inside a category. |
-| **Serial-tracked** | A category where every unit has its own serial number and its own row. Used for phones, laptops, cars and similar items. |
-| **Quantity-tracked** | A category where one row holds a stock count, for example "24 bottles". |
-| **Sale / Receipt** | A record of something sold. Each sale gets a receipt number like REC-123456. |
-| **Balance due** | A sale where the customer paid a deposit and still owes the rest. The goods are held for them until they pay in full. |
-| **Swap-in** | A trade-in: the customer gives you an item as part payment for a sale. |
-| **Buyback** | You buy an item from a customer and put it into your stock. |
-| **Stock loan** | You lend serial-tracked items to a reseller until they sell them or bring them back. |
-| **Transfer** | Moving stock from one branch to another. |
-| **Low stock** | Items whose quantity is at or below your low-stock alert level (10 by default). |
+| Word                 | What it means                                                                                                                                       |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Owner**            | The person who created the Storvv account. Shown in the app as "Admin" or "Super admin". The owner can do everything.                               |
+| **Staff**            | A team member the owner has added. Staff only see and do what the owner allows.                                                                     |
+| **Branch**           | One shop or location. Stock, staff and sales are kept separately for each branch. Almost every screen shows data for the branch currently selected. |
+| **Category**         | A group of products, such as "Phones" or "Perfumes". Each category has its own columns (for example Brand, Colour, Serial number).                  |
+| **Subcategory**      | A category inside another category, for example "Corolla" and "Camry" inside "Toyota".                                                              |
+| **Product**          | One row of stock inside a category.                                                                                                                 |
+| **Serial-tracked**   | A category where every unit has its own serial number and its own row. Used for phones, laptops, cars and similar items.                            |
+| **Quantity-tracked** | A category where one row holds a stock count, for example "24 bottles".                                                                             |
+| **Sale / Receipt**   | A record of something sold. Each sale gets a receipt number like REC-123456.                                                                        |
+| **Balance due**      | A sale where the customer paid a deposit and still owes the rest. The goods are held for them until they pay in full.                               |
+| **Swap-in**          | A trade-in: the customer gives you an item as part payment for a sale.                                                                              |
+| **Buyback**          | You buy an item from a customer and put it into your stock.                                                                                         |
+| **Stock loan**       | You lend serial-tracked items to a reseller until they sell them or bring them back.                                                                |
+| **Transfer**         | Moving stock from one branch to another.                                                                                                            |
+| **Low stock**        | Items whose quantity is at or below your low-stock alert level (10 by default).                                                                     |
 
 ---
 
@@ -77,23 +77,23 @@ Storvv works in a web browser on a computer, tablet or phone, and as an app on i
 
 Storvv has three plans. You can change plan at any time from **Settings → Account & workspace → Plan & billing**.
 
-| | Storvv Micro | Storvv Medium | Storvv Enterprise |
-| --- | :---: | :---: | :---: |
-| Branches | 1 | 2 | Unlimited |
-| Departments per branch | 1 | 10 | Unlimited |
-| Staff per branch | 2 | 25 | Unlimited |
-| Inventory, sales, refunds, customers | ✓ | ✓ | ✓ |
-| Quick sale and barcode scanning | ✓ | ✓ | ✓ |
-| Buybacks | ✓ | ✓ | ✓ |
-| Team and staff permissions | ✓ | ✓ | ✓ |
-| Reports and exports | – | ✓ | ✓ |
-| Activity history | – | ✓ | ✓ |
-| Sales leads | – | ✓ | ✓ |
-| Customer balance (credit ledger) | – | ✓ | ✓ |
-| Duplicate a category or product | – | ✓ | ✓ |
-| Transfers between branches | – | – | ✓ |
-| Copy categories from another branch | – | – | ✓ |
-| Stock loans | – | – | ✓ |
+|                                      | Storvv Micro | Storvv Medium | Storvv Enterprise |
+| ------------------------------------ | :----------: | :-----------: | :---------------: |
+| Branches                             |      1       |       2       |     Unlimited     |
+| Departments per branch               |      1       |      10       |     Unlimited     |
+| Staff per branch                     |      2       |      25       |     Unlimited     |
+| Inventory, sales, refunds, customers |      ✓       |       ✓       |         ✓         |
+| Quick sale and barcode scanning      |      ✓       |       ✓       |         ✓         |
+| Buybacks                             |      ✓       |       ✓       |         ✓         |
+| Team and staff permissions           |      ✓       |       ✓       |         ✓         |
+| Reports and exports                  |      –       |       ✓       |         ✓         |
+| Activity history                     |      –       |       ✓       |         ✓         |
+| Sales leads                          |      –       |       ✓       |         ✓         |
+| Customer balance (credit ledger)     |      –       |       ✓       |         ✓         |
+| Duplicate a category or product      |      –       |       ✓       |         ✓         |
+| Transfers between branches           |      –       |       –       |         ✓         |
+| Copy categories from another branch  |      –       |       –       |         ✓         |
+| Stock loans                          |      –       |       –       |         ✓         |
 
 **If you cancel a paid plan,** you keep it until the end of the period you paid for, then the account moves to Storvv Micro. Your data is kept. If you have more branches than Micro allows, your oldest branch stays available and the others are hidden until you upgrade again.
 
@@ -195,6 +195,7 @@ If your manager has added you as staff:
 On a computer, the menu is on the left. On a tablet or phone, tap the menu button (or **More** in the bottom bar) to open it.
 
 **Main**
+
 - **Overview**: today's numbers and what needs attention.
 - **Inventory**: your categories and products.
 - **Sales**: every sale, plus balances still owed.
@@ -202,17 +203,20 @@ On a computer, the menu is on the left. On a tablet or phone, tap the menu butto
 - **Reports**: charts and exports (Medium and Enterprise).
 
 **Operations**
+
 - **Transfers**: move stock between branches (Enterprise).
 - **Stock loans**: items lent to resellers (Enterprise).
 - **Buybacks**: items bought from customers.
 - **Sales leads**: people who might buy (Medium and Enterprise).
 
 **Organization**
+
 - **Team**: departments and staff (owner only).
 - **Branches**: your locations (owner only).
 - **Activity**: who changed what (Medium and Enterprise).
 
 **Bottom**
+
 - **Help** and **Settings**.
 
 To make the sidebar narrower on a computer, select **Collapse sidebar** at the bottom. It shrinks to icons; hover an icon to see its name. Select **Expand sidebar** to bring it back.
@@ -272,11 +276,13 @@ Select your initials or photo in the top right to:
 The Overview shows how the selected branch is doing today.
 
 **At the top**
+
 - A greeting with your name, the branch and your role.
 - A one-line summary, for example "3 sales · ₦45,000 today · 2 balances open".
 - **Add product** and **New sale** buttons.
 
 **Four number cards** (select any card to go to the related page)
+
 - **Revenue**: all completed sales, with the change over the last 15 days.
 - **Sales today**: number of sales today and their value.
 - **Outstanding**: total money still owed on balance-due sales.
@@ -383,11 +389,13 @@ Storvv won't let you add the same serial number twice in a category.
 ### 7.7 Import and export products with Excel
 
 **Import**
+
 1. Inside a category, select **Import** and choose an Excel file (.xlsx or .xls).
 2. The first row must contain column headings that match your category's columns.
 3. Storvv adds the rows and tells you how many were imported and how many were skipped (for example duplicates or invalid values).
 
 **Export**
+
 - Select **Export** to download all products in the category as an Excel file.
 
 ### 7.8 Working with products
@@ -415,13 +423,13 @@ To act on several products at once, tick them and use **Discount**, **Stock loan
 
 Each product shows its status:
 
-| Status | Meaning |
-| ------ | ------- |
-| **Available** | In stock and ready to sell. |
-| **On stock loan** | Lent to a reseller. |
+| Status               | Meaning                                     |
+| -------------------- | ------------------------------------------- |
+| **Available**        | In stock and ready to sell.                 |
+| **On stock loan**    | Lent to a reseller.                         |
 | **Awaiting payment** | Held for a customer who has paid a deposit. |
-| **Sold** | Sold on a receipt. |
-| **Returned** | Came back through a refund. |
+| **Sold**             | Sold on a receipt.                          |
+| **Returned**         | Came back through a refund.                 |
 
 Products that are sold, on loan or awaiting payment are **locked**: they can't be edited, discounted, duplicated or deleted. This keeps your sales records accurate.
 
@@ -522,13 +530,13 @@ Select a sale to open its details. Select **⋮** on a row for **View sale**, **
 
 **Sale statuses**
 
-| Status | Meaning |
-| ------ | ------- |
-| **Completed** | Paid in full. Stock is marked sold. |
+| Status          | Meaning                                                                   |
+| --------------- | ------------------------------------------------------------------------- |
+| **Completed**   | Paid in full. Stock is marked sold.                                       |
 | **Balance due** | Deposit paid, balance still owed. Stock is held. Shown under Outstanding. |
-| **Refunded** | Returned. Items went back into stock. |
-| **Cancelled** | An outstanding order was cancelled and its stock released. |
-| **Pending** | Used by older sales only. |
+| **Refunded**    | Returned. Items went back into stock.                                     |
+| **Cancelled**   | An outstanding order was cancelled and its stock released.                |
+| **Pending**     | Used by older sales only.                                                 |
 
 ### 8.5 View, print and email a receipt
 
@@ -642,7 +650,7 @@ Shows the number of buybacks and total paid. Each row shows the item, customer, 
 
 ## 11. Sales leads
 
-*Medium and Enterprise.*
+_Medium and Enterprise._
 
 A lead is someone who asked about a product but hasn't bought yet: a walk-in, a phone call or a WhatsApp message. Leads help you follow up and turn interest into sales.
 
@@ -690,7 +698,7 @@ Lost leads stay visible under the **Lost** tab.
 
 ## 12. Stock loans
 
-*Enterprise. Serial-tracked categories only.*
+_Enterprise. Serial-tracked categories only._
 
 A stock loan is when you give serial-numbered items to a reseller or partner to sell for you. The items stay yours until the reseller sells them or brings them back.
 
@@ -722,7 +730,7 @@ If you sell a loaned item yourself through a sale, the loan is updated automatic
 
 ## 13. Transfers between branches
 
-*Enterprise, owner.*
+_Enterprise, owner._
 
 Move stock from one branch to another, with an approval step and optional shipment tracking. Stock only moves when you mark the transfer complete.
 
@@ -735,7 +743,7 @@ Move stock from one branch to another, with an approval step and optional shipme
 5. Choose the items:
    - Serial items: tick each unit.
    - Quantity items: type how many to **Move**.
-   Items that are sold, on loan or already in another transfer aren't shown.
+     Items that are sold, on loan or already in another transfer aren't shown.
 6. Add **Notes** for the other branch if needed.
 7. Select **Request transfer**.
 
@@ -755,13 +763,13 @@ To stop a transfer, select **Cancel transfer**. No stock moves.
 
 ### 13.3 Transfer statuses
 
-| Status | Meaning |
-| ------ | ------- |
-| **Pending approval** | Requested. Items reserved. Nothing has moved. |
-| **In transit** | Approved and on its way. |
-| **Completed** | Stock has moved to the receiving branch. |
-| **Completed (partial)** | Some items moved; others couldn't. |
-| **Cancelled** | Stopped. No stock moved. |
+| Status                  | Meaning                                       |
+| ----------------------- | --------------------------------------------- |
+| **Pending approval**    | Requested. Items reserved. Nothing has moved. |
+| **In transit**          | Approved and on its way.                      |
+| **Completed**           | Stock has moved to the receiving branch.      |
+| **Completed (partial)** | Some items moved; others couldn't.            |
+| **Cancelled**           | Stopped. No stock moved.                      |
 
 ### 13.4 Branch reports
 
@@ -775,7 +783,7 @@ The **Branch reports** tab compares sales across all your branches.
 
 ## 14. Reports
 
-*Medium and Enterprise. Owner and managers.*
+_Medium and Enterprise. Owner and managers._
 
 Reports show how the selected branch is performing.
 
@@ -786,6 +794,7 @@ Use the period menu at the top: **Last 30 days**, **Last 12 weeks** or **Last 12
 ### 14.2 Report tabs
 
 **Overview**
+
 - Four headline cards: **Total revenue** (with trend line), **Orders**, **Gross profit** with margin (owner) or **Customers** (staff), and **Low stock**.
 - Smaller numbers: completed sales, average order, customers and repeat rate, refunds and refund rate, and (owner) cost of goods and discounts.
 - Charts: **Revenue**, **Stock health**, **Payment methods** and **Top products**.
@@ -796,6 +805,7 @@ Use the period menu at the top: **Last 30 days**, **Last 12 weeks** or **Last 12
 **Products & customers**: sales by category and your top customers.
 
 **Payments & busy times**
+
 - Your **Best day** and **Best hour**.
 - How customers pay.
 - Sales by hour of day and day of week.
@@ -812,7 +822,7 @@ Use the period menu at the top: **Last 30 days**, **Last 12 weeks** or **Last 12
 
 ## 15. Team: departments, staff and permissions
 
-*Owner only.*
+_Owner only._
 
 Departments group your staff (for example Sales or Warehouse). Each staff member belongs to one department in a branch, and you decide exactly what they can do.
 
@@ -845,11 +855,11 @@ You'll see **Invite emailed**, or **Account created** with the password to copy 
 
 For each area, choose how much the person can do:
 
-| Level | What it allows |
-| ----- | -------------- |
-| **None** | No access to this area. |
-| **View** | Can look but not change anything. |
-| **Manage** | Can add, edit and delete. |
+| Level      | What it allows                                                |
+| ---------- | ------------------------------------------------------------- |
+| **None**   | No access to this area.                                       |
+| **View**   | Can look but not change anything.                             |
+| **Manage** | Can add, edit and delete.                                     |
 | **Custom** | Pick exactly which actions: **Create**, **Edit**, **Delete**. |
 
 The areas are:
@@ -881,7 +891,7 @@ If you have two-factor authentication on, Storvv asks for your code before remov
 
 ## 16. Branches
 
-*Owner only.*
+_Owner only._
 
 Each branch is a separate shop or location with its own stock, team and sales.
 
@@ -909,7 +919,7 @@ If you're in "Just me" mode and don't see Branches, turn on **Multi-location adm
 
 ## 17. Activity
 
-*Medium and Enterprise. Owner and managers.*
+_Medium and Enterprise. Owner and managers._
 
 Activity shows who added, changed or deleted inventory and leads in the branch, and when.
 
@@ -1003,6 +1013,7 @@ Turn **Email**, **Push**, **SMS** and **In-app** notifications on or off, then *
 Two-factor authentication asks for a code from your phone each time you sign in, so nobody can get in with just your password.
 
 **Turn it on**
+
 1. Under **Security**, select **Enable** next to Two-factor authentication.
 2. Choose **Authenticator app** (recommended) and select **Continue**.
 3. Scan the QR code with an app such as Google Authenticator or Authy (or enter the code shown).
@@ -1057,26 +1068,26 @@ After you've used Storvv for about a week, you may be asked **"How likely are yo
 
 ## 21. Who can do what
 
-| Task | Owner | Staff |
-| ---- | :---: | :---: |
-| View inventory | ✓ | With Inventory **View** or higher |
-| Add or edit products | ✓ | With Inventory **Edit** (or Manage) |
-| Create, edit or delete categories | ✓ | With Inventory **Create** (or Manage) |
-| See costs, profit and margins | ✓ | – |
-| Copy categories from another branch | ✓ | – |
-| Make sales (New sale and Quick sale) | ✓ | ✓ |
-| Record a balance payment | ✓ | ✓ |
-| Refund sales and cancel outstanding orders | ✓ | With **Refund & cancel orders** |
-| Delete sales | ✓ | – |
-| Add commission on Quick sale | ✓ | – |
-| Buybacks | ✓ | With Customer buybacks **View** or higher |
-| Sales leads | ✓ | With Sales leads **View** or higher |
-| Stock loans | ✓ | ✓ |
-| Transfers | ✓ | – |
-| Reports | ✓ | Managers |
-| Activity | ✓ | Managers |
-| Team, Branches and Settings changes | ✓ | – |
-| Data export | ✓ | – |
+| Task                                       | Owner |                   Staff                   |
+| ------------------------------------------ | :---: | :---------------------------------------: |
+| View inventory                             |   ✓   |     With Inventory **View** or higher     |
+| Add or edit products                       |   ✓   |    With Inventory **Edit** (or Manage)    |
+| Create, edit or delete categories          |   ✓   |   With Inventory **Create** (or Manage)   |
+| See costs, profit and margins              |   ✓   |                     –                     |
+| Copy categories from another branch        |   ✓   |                     –                     |
+| Make sales (New sale and Quick sale)       |   ✓   |                     ✓                     |
+| Record a balance payment                   |   ✓   |                     ✓                     |
+| Refund sales and cancel outstanding orders |   ✓   |      With **Refund & cancel orders**      |
+| Delete sales                               |   ✓   |                     –                     |
+| Add commission on Quick sale               |   ✓   |                     –                     |
+| Buybacks                                   |   ✓   | With Customer buybacks **View** or higher |
+| Sales leads                                |   ✓   |    With Sales leads **View** or higher    |
+| Stock loans                                |   ✓   |                     ✓                     |
+| Transfers                                  |   ✓   |                     –                     |
+| Reports                                    |   ✓   |                 Managers                  |
+| Activity                                   |   ✓   |                 Managers                  |
+| Team, Branches and Settings changes        |   ✓   |                     –                     |
+| Data export                                |   ✓   |                     –                     |
 
 "Managers" means staff with at least one **Manage** permission.
 
@@ -1084,39 +1095,39 @@ After you've used Storvv for about a week, you may be asked **"How likely are yo
 
 ## 22. Quick answers: "How do I…?"
 
-| I want to… | Go to |
-| ---------- | ----- |
-| Add a new product | **Inventory** → open a category → **Add product** |
+| I want to…                                  | Go to                                                                      |
+| ------------------------------------------- | -------------------------------------------------------------------------- |
+| Add a new product                           | **Inventory** → open a category → **Add product**                          |
 | Add many phones with serial numbers at once | Serial-tracked category → **Add product** → **Add serial number** for each |
-| Load products from a spreadsheet | Inventory → open a category → **Import** |
-| Put an item on discount | Inventory → product **⋯** → **Add discount** |
-| See what's running low | **Overview → Low stock**, or **Inventory → Low stock** tab |
-| Get a list to send my supplier | **Inventory → Export reorder list** |
-| Sell to a walk-in customer quickly | **Sales → Quick sale** |
-| Sell with a deposit | **New sale** → Checkout → **Balance due** |
-| Take the rest of a customer's payment | **Sales → Outstanding → Record payment** |
-| Accept a trade-in | **New sale** → Checkout → **This is a swap-in transaction** |
-| Buy an item from a customer | **Buybacks → Record buyback** |
-| Refund a sale | Open the sale → **Refund** |
-| Email a receipt | Open the sale → **Preview receipt** → **Email** |
-| Print a receipt | Open the sale → **Preview receipt** → **Print / PDF** |
-| Find a customer's purchase history | **Customers** → select the customer |
-| Record what a customer owes on account | **Customers** → customer → **Manage balance** |
-| Follow up someone who's interested | **Sales leads → Add lead** |
-| Give a reseller stock to sell | Inventory → serial category → tick items → **Stock loan** |
-| Move stock to another branch | **Transfers → New transfer** |
-| Add a staff member | **Team** → department → **Add staff** |
-| Stop a staff member signing in | Team → department → **⋮ → Remove from department** |
-| Open a new branch | **Branches → Add branch** |
-| Show a message to cashiers | **Branches** → **⋮ → Edit details** → **Note for cashiers** |
-| Add my logo to receipts | **Settings → Account & workspace → Company logo** |
-| Add my refund policy to receipts | **Profile → Receipt terms & policies** |
-| Change the payment methods at checkout | **Settings → Checkout payments** |
-| Change my low-stock level | **Settings → Inventory → Low stock alert** |
-| Back up all my data | **Settings → Data export → Export all to Excel** |
-| Upgrade my plan | **Settings → Account & workspace → Plan & billing → Switch plan** |
-| Secure my account | **Profile → Security → Two-factor authentication → Enable** |
-| Switch to dark mode | Account menu → **Appearance → Dark** |
+| Load products from a spreadsheet            | Inventory → open a category → **Import**                                   |
+| Put an item on discount                     | Inventory → product **⋯** → **Add discount**                               |
+| See what's running low                      | **Overview → Low stock**, or **Inventory → Low stock** tab                 |
+| Get a list to send my supplier              | **Inventory → Export reorder list**                                        |
+| Sell to a walk-in customer quickly          | **Sales → Quick sale**                                                     |
+| Sell with a deposit                         | **New sale** → Checkout → **Balance due**                                  |
+| Take the rest of a customer's payment       | **Sales → Outstanding → Record payment**                                   |
+| Accept a trade-in                           | **New sale** → Checkout → **This is a swap-in transaction**                |
+| Buy an item from a customer                 | **Buybacks → Record buyback**                                              |
+| Refund a sale                               | Open the sale → **Refund**                                                 |
+| Email a receipt                             | Open the sale → **Preview receipt** → **Email**                            |
+| Print a receipt                             | Open the sale → **Preview receipt** → **Print / PDF**                      |
+| Find a customer's purchase history          | **Customers** → select the customer                                        |
+| Record what a customer owes on account      | **Customers** → customer → **Manage balance**                              |
+| Follow up someone who's interested          | **Sales leads → Add lead**                                                 |
+| Give a reseller stock to sell               | Inventory → serial category → tick items → **Stock loan**                  |
+| Move stock to another branch                | **Transfers → New transfer**                                               |
+| Add a staff member                          | **Team** → department → **Add staff**                                      |
+| Stop a staff member signing in              | Team → department → **⋮ → Remove from department**                         |
+| Open a new branch                           | **Branches → Add branch**                                                  |
+| Show a message to cashiers                  | **Branches** → **⋮ → Edit details** → **Note for cashiers**                |
+| Add my logo to receipts                     | **Settings → Account & workspace → Company logo**                          |
+| Add my refund policy to receipts            | **Profile → Receipt terms & policies**                                     |
+| Change the payment methods at checkout      | **Settings → Checkout payments**                                           |
+| Change my low-stock level                   | **Settings → Inventory → Low stock alert**                                 |
+| Back up all my data                         | **Settings → Data export → Export all to Excel**                           |
+| Upgrade my plan                             | **Settings → Account & workspace → Plan & billing → Switch plan**          |
+| Secure my account                           | **Profile → Security → Two-factor authentication → Enable**                |
+| Switch to dark mode                         | Account menu → **Appearance → Dark**                                       |
 
 ---
 
@@ -1134,6 +1145,7 @@ These features are being built and are not available in the app yet:
 While writing this guide, these differences between what the app says and what it does were found in the current code. The guide above only describes behaviour that works. These are worth fixing or hiding:
 
 **Sales and receipts**
+
 1. **Settings → Sales & receipts** (**Receipt prefix**, **Next receipt number**, **Print receipts automatically**) is saved but not used. Receipt numbers are always "REC-" plus 6 digits, and Print / PDF always downloads a PDF.
 2. Receipts have no WhatsApp or share-link button, although the server supports both. The public receipt page (`/r/[token]`) also always shows amounts in naira.
 3. Refunds are full refunds only. The refund overwrites the sale's notes. The confirmation says the customer will be notified, but no notification is sent.
@@ -1146,25 +1158,10 @@ While writing this guide, these differences between what the app says and what i
 10. The **Create** chip for Receipts isn't enforced: anyone signed in can make sales, and the Sales menu shows even when Receipts is set to None.
 11. After **Create sale** there's no success message, and errors use a browser alert.
 
-**Customers**
-12. A balance-due sale doesn't add to the customer's balance ledger, and recording a ledger payment doesn't settle an outstanding sale. Users may expect these to be linked.
-13. Customers can't be edited or deleted directly.
+**Customers** 12. A balance-due sale doesn't add to the customer's balance ledger, and recording a ledger payment doesn't settle an outstanding sale. Users may expect these to be linked. 13. Customers can't be edited or deleted directly.
 
-**Inventory**
-14. The **Select** column type has no way to enter its options in the category drawer, so it behaves like a text field unless created from an Excel import.
-15. There's no way to remove a discount once applied.
-16. Inventory **Delete** permission is not checked anywhere. Deleting categories follows **Create**, deleting products follows **Edit**.
-17. The Inventory menu item isn't hidden for staff with Inventory set to None.
+**Inventory** 14. The **Select** column type has no way to enter its options in the category drawer, so it behaves like a text field unless created from an Excel import. 15. There's no way to remove a discount once applied. 16. Inventory **Delete** permission is not checked anywhere. Deleting categories follows **Create**, deleting products follows **Edit**. 17. The Inventory menu item isn't hidden for staff with Inventory set to None.
 
-**Access and navigation**
-18. **Transfers**: the permission panel offers Multi-store sync to staff, but only the owner can request transfers or see history.
-19. **Reports**: the menu shows Reports to any staff member with a Manage permission, but the page only lets in legacy "manager" staff.
-20. In Growing business mode, **Branches** shows on Micro even though Micro allows only one branch. The plan-limit message always says "Storvv Micro allows 1 store", even on Medium.
-21. The account menu shows **Activity logs** to staff on Medium/Enterprise based on plan alone.
+**Access and navigation** 18. **Transfers**: the permission panel offers Multi-store sync to staff, but only the owner can request transfers or see history. 19. **Reports**: the menu shows Reports to any staff member with a Manage permission, but the page only lets in legacy "manager" staff. 20. In Growing business mode, **Branches** shows on Micro even though Micro allows only one branch. The plan-limit message always says "Storvv Micro allows 1 store", even on Medium. 21. The account menu shows **Activity logs** to staff on Medium/Enterprise based on plan alone.
 
-**Other**
-22. The password reset page accepts 6-character passwords; sign-up and change password require 12.
-23. **Active sessions → Revoke** only removes the device from the list; it doesn't sign that device out.
-24. **Notification channels** are saved on the device only.
-25. The Reports **Excel** button downloads a CSV file, not an .xlsx.
-26. **Search → Suggested** shows Payment links even though it's coming soon.
+**Other** 22. The password reset page accepts 6-character passwords; sign-up and change password require 12. 23. **Active sessions → Revoke** only removes the device from the list; it doesn't sign that device out. 24. **Notification channels** are saved on the device only. 25. The Reports **Excel** button downloads a CSV file, not an .xlsx. 26. **Search → Suggested** shows Payment links even though it's coming soon.

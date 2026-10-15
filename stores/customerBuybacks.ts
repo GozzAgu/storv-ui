@@ -1,5 +1,13 @@
 import { defineStore } from 'pinia'
-import { doc, getDocs, query, orderBy, limit, serverTimestamp, writeBatch } from 'firebase/firestore'
+import {
+  doc,
+  getDocs,
+  query,
+  orderBy,
+  limit,
+  serverTimestamp,
+  writeBatch,
+} from 'firebase/firestore'
 
 import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from '~/stores/auth'

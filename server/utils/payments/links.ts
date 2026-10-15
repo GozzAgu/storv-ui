@@ -1,8 +1,4 @@
-import {
-  FieldValue,
-  type DocumentSnapshot,
-  type Firestore,
-} from 'firebase-admin/firestore'
+import { FieldValue, type DocumentSnapshot, type Firestore } from 'firebase-admin/firestore'
 import type {
   PaymentLinkAttempt,
   PaymentLinkStatus,
@@ -41,7 +37,11 @@ export const MAX_ATTEMPTS_TOTAL = 30
 export const CHECKOUT_MIN_REMAINING_MS = 2 * 60_000
 const MAX_HOLD_ITEMS = 200
 
-export const SYSTEM_CRON_ACTOR: PaymentActor = { uid: 'system:cron', name: 'Storvv', role: 'system' }
+export const SYSTEM_CRON_ACTOR: PaymentActor = {
+  uid: 'system:cron',
+  name: 'Storvv',
+  role: 'system',
+}
 
 const linkRef = (db: Firestore, linkId: string) => db.collection(LINKS_COLLECTION).doc(linkId)
 const tokenRef = (db: Firestore, hash: string) => db.collection(LINK_TOKENS_COLLECTION).doc(hash)
@@ -93,8 +93,7 @@ function ownedLink(
 const isExpired = (link: Pick<PaymentLinkV2, 'expiresAt'>, nowMs: number) =>
   Date.parse(link.expiresAt) <= nowMs
 
-const payUrl = (appOrigin: string, token: string) =>
-  `${appOrigin.replace(/\/$/, '')}/pay/${token}`
+const payUrl = (appOrigin: string, token: string) => `${appOrigin.replace(/\/$/, '')}/pay/${token}`
 
 // ---------------------------------------------------------------- create
 
@@ -292,7 +291,13 @@ export async function issueLinkToken(
     }
     tx.create(tokenRef(db, hash), entry)
     appendAuditEvents(tx, store, head, [
-      linkEvent('link_token_issued', { id: linkId, receiptId: link.receiptId }, access.actor, now, null),
+      linkEvent(
+        'link_token_issued',
+        { id: linkId, receiptId: link.receiptId },
+        access.actor,
+        now,
+        null
+      ),
     ])
   }, TX_OPTIONS)
 
@@ -318,12 +323,19 @@ export async function revokeLinkToken(
     const tRef = tokenRef(db, tokenId)
     const entry = (await tx.get(tRef)).data() as PaymentLinkTokenEntry | undefined
     const head = await readChainHead(tx, store)
-    if (!entry || entry.linkId !== linkId) throw new PaymentServiceError('NOT_FOUND', 404, 'Not found')
+    if (!entry || entry.linkId !== linkId)
+      throw new PaymentServiceError('NOT_FOUND', 404, 'Not found')
     if (entry.status !== 'active') return
     const now = new Date().toISOString()
     tx.update(tRef, { status: 'revoked', revokedAt: now, revokedBy: access.actor.uid })
     appendAuditEvents(tx, store, head, [
-      linkEvent('link_token_revoked', { id: linkId, receiptId: link.receiptId }, access.actor, now, null),
+      linkEvent(
+        'link_token_revoked',
+        { id: linkId, receiptId: link.receiptId },
+        access.actor,
+        now,
+        null
+      ),
     ])
   }, TX_OPTIONS)
 }
@@ -386,7 +398,8 @@ async function endLink(
       const itemIds = [
         ...new Set(
           (Array.isArray(receipt.itemIds) ? receipt.itemIds : []).filter(
-            (id: unknown): id is string => typeof id === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(id)
+            (id: unknown): id is string =>
+              typeof id === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(id)
           )
         ),
       ].slice(0, MAX_HOLD_ITEMS)
@@ -436,7 +449,13 @@ async function endLink(
         cancel
           ? [
               {
-                ...linkEvent('sale_cancelled', { id: linkId, receiptId: link.receiptId }, scope.actor, at, reason),
+                ...linkEvent(
+                  'sale_cancelled',
+                  { id: linkId, receiptId: link.receiptId },
+                  scope.actor,
+                  at,
+                  reason
+                ),
                 fromStatus: ctx.legacyStatus,
                 toStatus: 'cancelled',
               },
@@ -500,7 +519,13 @@ export async function expireDueLinks(
     .orderBy('expiresAt')
     .limit(opts.limit ?? 200)
     .get()
-  const result: ExpiryRunResult = { checked: snap.size, expired: 0, salesCancelled: 0, skipped: 0, failed: 0 }
+  const result: ExpiryRunResult = {
+    checked: snap.size,
+    expired: 0,
+    salesCancelled: 0,
+    skipped: 0,
+    failed: 0,
+  }
   for (const doc of snap.docs) {
     const link = doc.data() as PaymentLinkV2
     try {
@@ -595,7 +620,12 @@ export async function listReceiptLinks(
         tokens: tokens.docs
           .map((t) => {
             const e = t.data() as PaymentLinkTokenEntry
-            return { tokenId: t.id, status: e.status, createdAt: e.createdAt, createdBy: e.createdBy }
+            return {
+              tokenId: t.id,
+              status: e.status,
+              createdAt: e.createdAt,
+              createdBy: e.createdBy,
+            }
           })
           .sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
       }
@@ -691,7 +721,9 @@ export async function startCheckout(
       throw new PaymentServiceError('LINK_EXPIRED', 410, 'This link has expired')
     }
     const payment = (
-      await tx.get(storeDocRef(db, link.ownerId, link.storeId).collection('payments').doc(link.paymentId))
+      await tx.get(
+        storeDocRef(db, link.ownerId, link.storeId).collection('payments').doc(link.paymentId)
+      )
     ).data()
     if (!payment || payment.status !== 'pending') {
       throw new PaymentServiceError('LINK_PAID', 409, 'This link has already been paid')
@@ -699,7 +731,10 @@ export async function startCheckout(
     const recent = await tx.get(
       ref.collection('attempts').where('createdAt', '>=', new Date(nowMs - 3_600_000).toISOString())
     )
-    if (recent.size >= MAX_ATTEMPTS_PER_HOUR || (link.checkoutAttempts || 0) >= MAX_ATTEMPTS_TOTAL) {
+    if (
+      recent.size >= MAX_ATTEMPTS_PER_HOUR ||
+      (link.checkoutAttempts || 0) >= MAX_ATTEMPTS_TOTAL
+    ) {
       throw new PaymentServiceError(
         'TOO_MANY_ATTEMPTS',
         429,
@@ -734,7 +769,11 @@ export async function startCheckout(
         subaccount: prepared.link.subaccountCode,
         bearer: 'subaccount',
         callback_url: `${deps.appOrigin.replace(/\/$/, '')}/pay/return?ref=${prepared.reference}`,
-        metadata: { linkId: prepared.linkId, paymentId: prepared.link.paymentId, source: 'storvv_link_v2' },
+        metadata: {
+          linkId: prepared.linkId,
+          paymentId: prepared.link.paymentId,
+          source: 'storvv_link_v2',
+        },
       },
     })
     authorizationUrl = String(data?.authorization_url || '')
@@ -773,9 +812,9 @@ export async function readReturnStatus(
     link.status === 'paid'
       ? 'paid'
       : link.status === 'active'
-        ? 'pending'
-        : link.status === 'expired'
-          ? 'expired'
-          : 'unavailable'
+      ? 'pending'
+      : link.status === 'expired'
+      ? 'expired'
+      : 'unavailable'
   return { status, storeName: link.storeName }
 }

@@ -9,12 +9,7 @@ import type { SellerLoanOut } from '~/stores/sellerLoanOuts'
 import type { Staff } from '~/composables/useStaff'
 import type { UserData } from '~/composables/useUser'
 import type { SalesLead, SalesLeadSource, SalesLeadStatus } from '~/types/leads'
-import {
-  DEMO_STORE_ABUJA,
-  DEMO_STORE_LAGOS,
-  DEMO_STORE_PH,
-  DEMO_USER_UID,
-} from '~/utils/demo-mode'
+import { DEMO_STORE_ABUJA, DEMO_STORE_LAGOS, DEMO_STORE_PH, DEMO_USER_UID } from '~/utils/demo-mode'
 
 export const DEMO_EXTRAS_KEY = 'storvv-demo-extras-v1'
 
@@ -503,8 +498,8 @@ function serializeStaff(row: Staff): IsoStaff {
       typeof row.hireDate === 'string'
         ? row.hireDate
         : row.hireDate
-          ? new Date(row.hireDate as Date).toISOString().slice(0, 10)
-          : '2025-01-15',
+        ? new Date(row.hireDate as Date).toISOString().slice(0, 10)
+        : '2025-01-15',
     createdAt: new Date(row.createdAt as Date).toISOString(),
     updatedAt: new Date(row.updatedAt as Date).toISOString(),
     removedAt: row.removedAt ? new Date(row.removedAt as Date).toISOString() : undefined,
@@ -600,7 +595,10 @@ export function appendDemoActivityLog(
   saveDemoExtras(extras)
 }
 
-export function getDemoExtrasStaff(storeId: string, status: 'active' | 'inactive' | 'all' = 'active'): Staff[] {
+export function getDemoExtrasStaff(
+  storeId: string,
+  status: 'active' | 'inactive' | 'all' = 'active'
+): Staff[] {
   const extras = loadDemoExtras()
   if (!extras.staffByStore[storeId]) {
     extras.staffByStore[storeId] = seedStaff(storeId)
@@ -734,9 +732,7 @@ export function updateDemoSalesLead(
 
 export function deleteDemoSalesLead(storeId: string, leadId: string) {
   const extras = loadDemoExtras()
-  extras.salesLeads = extras.salesLeads.filter(
-    (l) => !(l.id === leadId && l.storeId === storeId)
-  )
+  extras.salesLeads = extras.salesLeads.filter((l) => !(l.id === leadId && l.storeId === storeId))
   saveDemoExtras(extras)
 }
 

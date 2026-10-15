@@ -7,7 +7,9 @@
         <div class="s-perm__head">
           <span :id="`${baseId}-${module.key}`" class="s-perm__title">{{ module.title }}</span>
           <SBadge v-if="module.key === 'sellerLoans'" size="sm">Always on</SBadge>
-          <SBadge v-else-if="lockedModules.includes(module.key)" size="sm">{{ lockedBadge }}</SBadge>
+          <SBadge v-else-if="lockedModules.includes(module.key)" size="sm">{{
+            lockedBadge
+          }}</SBadge>
         </div>
         <p class="s-perm__hint">{{ levelHint(module) }}</p>
 
@@ -48,9 +50,16 @@
               class="s-perm__chip"
               :aria-pressed="modelValue[module.key][action.key]"
               :disabled="isLocked(module.key)"
-              @click="updateModule(module.key, { [action.key]: !modelValue[module.key][action.key] })"
+              @click="
+                updateModule(module.key, { [action.key]: !modelValue[module.key][action.key] })
+              "
             >
-              <Check v-if="modelValue[module.key][action.key]" :size="14" :stroke-width="2.5" aria-hidden="true" />
+              <Check
+                v-if="modelValue[module.key][action.key]"
+                :size="14"
+                :stroke-width="2.5"
+                aria-hidden="true"
+              />
               {{ action.label }}
             </button>
           </template>
@@ -62,7 +71,12 @@
             :disabled="isLocked('sellerLoans')"
             @click="updateModule('sellerLoans', { delete: !modelValue.sellerLoans.delete })"
           >
-            <Check v-if="modelValue.sellerLoans.delete" :size="14" :stroke-width="2.5" aria-hidden="true" />
+            <Check
+              v-if="modelValue.sellerLoans.delete"
+              :size="14"
+              :stroke-width="2.5"
+              aria-hidden="true"
+            />
             Can delete
           </button>
           <button
@@ -73,7 +87,12 @@
             :disabled="isLocked('receipts')"
             @click="updateModule('receipts', { refund: !modelValue.receipts.refund })"
           >
-            <Check v-if="modelValue.receipts.refund" :size="14" :stroke-width="2.5" aria-hidden="true" />
+            <Check
+              v-if="modelValue.receipts.refund"
+              :size="14"
+              :stroke-width="2.5"
+              aria-hidden="true"
+            />
             Refund &amp; cancel orders
           </button>
         </div>

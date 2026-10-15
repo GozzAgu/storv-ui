@@ -4,7 +4,12 @@
     :class="[attrs.class, { 's-search--filled': !!model }]"
     :style="attrs.style as StyleValue"
   >
-    <Search class="s-control__affix s-search__icon" :size="16" :stroke-width="1.75" aria-hidden="true" />
+    <Search
+      class="s-control__affix s-search__icon"
+      :size="16"
+      :stroke-width="1.75"
+      aria-hidden="true"
+    />
     <input
       v-model="model"
       class="s-control__input"

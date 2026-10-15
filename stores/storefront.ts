@@ -86,10 +86,7 @@ export const useStorefrontStore = defineStore('storefront', {
     isEnabled: (s) => Boolean(s.config.enabled && s.config.slug),
     publicPath: (s) => (s.config.slug ? `/store/${s.config.slug}` : ''),
     viewsLast7Days: (s) =>
-      s.analyticsLast7Days.reduce(
-        (sum, d) => sum + (d.storeViews || 0) + (d.productViews || 0),
-        0
-      ),
+      s.analyticsLast7Days.reduce((sum, d) => sum + (d.storeViews || 0) + (d.productViews || 0), 0),
     pendingInquiryCount: (s) => s.inquiryCounts.pending || 0,
   },
 
@@ -180,10 +177,9 @@ export const useStorefrontStore = defineStore('storefront', {
         ...this.config.folderPublish,
         [folder.id]: {
           enabled: true,
-          publicFieldIds:
-            this.config.folderPublish[folder.id]?.publicFieldIds?.length
-              ? this.config.folderPublish[folder.id]!.publicFieldIds
-              : suggested,
+          publicFieldIds: this.config.folderPublish[folder.id]?.publicFieldIds?.length
+            ? this.config.folderPublish[folder.id]!.publicFieldIds
+            : suggested,
         },
       }
     },
@@ -207,9 +203,7 @@ export const useStorefrontStore = defineStore('storefront', {
           if (folder.usesSubcategories) continue
           const folderPub =
             config.folderPublish[folder.id]?.enabled ||
-            (folder.parentId
-              ? config.folderPublish[String(folder.parentId)]?.enabled
-              : false)
+            (folder.parentId ? config.folderPublish[String(folder.parentId)]?.enabled : false)
           if (!folderPub) continue
 
           const items = await inventory.fetchItemsAllChunked(folder.id)
@@ -276,7 +270,9 @@ export const useStorefrontStore = defineStore('storefront', {
           inquiries?: StorefrontInquiryCounts
           last7Days: StorefrontAnalyticsDay[]
         }>(
-          `/api/storefront/analytics?ownerUserId=${encodeURIComponent(ownerUid)}&storeId=${encodeURIComponent(storeId)}`
+          `/api/storefront/analytics?ownerUserId=${encodeURIComponent(
+            ownerUid
+          )}&storeId=${encodeURIComponent(storeId)}`
         )
         this.analyticsSummary = {
           storeViews: Number(res.summary?.storeViews) || 0,
@@ -305,10 +301,7 @@ export const useStorefrontStore = defineStore('storefront', {
 })
 
 /** Authenticated slug check via Admin API (avoids leaking unpublished profiles). */
-export async function isStorefrontSlugTaken(
-  slug: string,
-  ownerUid: string
-): Promise<boolean> {
+export async function isStorefrontSlugTaken(slug: string, ownerUid: string): Promise<boolean> {
   const res = await $fetch<{ available: boolean }>('/api/storefront/slug-available', {
     query: { slug, ownerUid },
   })

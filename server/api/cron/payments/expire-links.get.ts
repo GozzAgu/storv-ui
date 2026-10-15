@@ -19,7 +19,9 @@ export default defineEventHandler(async (event) => {
   await writeCronHeartbeat(db, 'expire-links', result)
   console.info(JSON.stringify({ tag: 'payments-link-expiry', ...result }))
   if (result.failed > 0) {
-    console.error(JSON.stringify({ tag: 'payments-alert', alert: 'link-expiry-failures', ...result }))
+    console.error(
+      JSON.stringify({ tag: 'payments-alert', alert: 'link-expiry-failures', ...result })
+    )
   }
   return result
 })

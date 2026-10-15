@@ -8,9 +8,7 @@
     <template #default>
       <div v-if="receipt" class="s-form">
         <div class="s-record-summary s-record-summary--warning">
-          <p class="s-receipt-pay__ref">
-            {{ receipt.receiptNumber }} · {{ receipt.customerName }}
-          </p>
+          <p class="s-receipt-pay__ref">{{ receipt.receiptNumber }} · {{ receipt.customerName }}</p>
           <dl class="s-record-totals">
             <div>
               <dt class="s-record-totals__label">Total</dt>
@@ -210,7 +208,10 @@ async function submit() {
 
 async function submitV2(receiptId: string) {
   const res = await paymentsV2.record(receiptId, [
-    { methodLabel: paymentMethod.value.trim() || 'Cash', amountKobo: nairaToKobo(paymentAmount.value) },
+    {
+      methodLabel: paymentMethod.value.trim() || 'Cash',
+      amountKobo: nairaToKobo(paymentAmount.value),
+    },
   ])
   await receiptsStore.syncV2Receipt(receiptId, res.saleCompleted)
   const awaiting = res.payments.some((p) => p.status === 'awaiting_confirmation')
@@ -220,8 +221,8 @@ async function submitV2(receiptId: string) {
         ? 'Payment recorded and awaiting confirmation. The sale is complete and stock is marked sold.'
         : 'Payment complete. Receipt is now in your sales list and stock is marked sold.'
       : awaiting
-        ? 'Payment recorded. It is awaiting confirmation.'
-        : 'Payment recorded.'
+      ? 'Payment recorded. It is awaiting confirmation.'
+      : 'Payment recorded.'
   )
   emit('completed', receiptId)
   emit('update:modelValue', false)

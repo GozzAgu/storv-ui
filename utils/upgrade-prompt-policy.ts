@@ -17,10 +17,7 @@ import {
 } from '~/types/subscription'
 
 /** Short copy when a gated action is attempted (prefer toast over header banners). */
-export function planGatedActionMessage(
-  feature: SubscriptionFeature,
-  actionLabel: string
-): string {
+export function planGatedActionMessage(feature: SubscriptionFeature, actionLabel: string): string {
   const plan = getMinimumPlanForFeature(feature)
   if (!plan) return `${actionLabel} is not available on your plan.`
   return `${actionLabel} is available on ${getPlanDisplayName(plan)}.`

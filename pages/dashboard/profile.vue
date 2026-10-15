@@ -1,6 +1,9 @@
 <template>
   <div class="ds-root s-c s-page s-profile">
-    <SPageHeader title="Profile" description="Your photo, business details, preferences, and security." />
+    <SPageHeader
+      title="Profile"
+      description="Your photo, business details, preferences, and security."
+    />
 
     <div class="s-profile__layout">
       <aside class="s-profile__aside">
@@ -28,7 +31,9 @@
           <div class="s-profile__controls">
             <div class="s-profile__actions">
               <SButton variant="primary" @click="openEditProfileModal">
-                <template #leading><Pencil :size="16" :stroke-width="2" aria-hidden="true" /></template>
+                <template #leading
+                  ><Pencil :size="16" :stroke-width="2" aria-hidden="true"
+                /></template>
                 Edit profile
               </SButton>
               <SButton
@@ -36,7 +41,9 @@
                 :disabled="isUploadingProfilePhoto"
                 @click="profilePhotoInput?.click()"
               >
-                <template #leading><Camera :size="16" :stroke-width="2" aria-hidden="true" /></template>
+                <template #leading
+                  ><Camera :size="16" :stroke-width="2" aria-hidden="true"
+                /></template>
                 {{ profilePhotoUrl ? 'Change photo' : 'Add photo' }}
               </SButton>
               <SButton v-if="profilePhotoUrl" variant="ghost" @click="removeProfilePhoto">
@@ -84,11 +91,15 @@
       <div class="s-profile__main">
         <SCard
           :title="isStaff ? 'Staff profile' : 'Business profile'"
-          :description="isStaff ? 'Your details as a team member' : 'Update your business contact information'"
+          :description="
+            isStaff ? 'Your details as a team member' : 'Update your business contact information'
+          "
         >
           <template #actions>
             <SButton size="sm" @click="openEditProfileModal">
-              <template #leading><Pencil :size="16" :stroke-width="2" aria-hidden="true" /></template>
+              <template #leading
+                ><Pencil :size="16" :stroke-width="2" aria-hidden="true"
+              /></template>
               Edit
             </SButton>
           </template>
@@ -128,7 +139,9 @@
         <SCard
           v-if="showBusinessProfilePanel"
           :title="isStaff ? 'Business profile' : 'Store information'"
-          :description="isStaff ? 'Your assigned branch and department' : 'Branch details from onboarding.'"
+          :description="
+            isStaff ? 'Your assigned branch and department' : 'Branch details from onboarding.'
+          "
         >
           <SSkeleton v-if="isLoadingProfile" :lines="isStaff ? 6 : 4" />
           <dl v-else-if="hasBusinessProfileContent" class="s-settings__facts">
@@ -169,7 +182,11 @@
           </dl>
           <SEmptyState
             v-else
-            :title="isStaff ? 'Your branch details are not available yet' : 'No store information available'"
+            :title="
+              isStaff
+                ? 'Your branch details are not available yet'
+                : 'No store information available'
+            "
             :description="isStaff ? 'Contact your administrator.' : undefined"
           >
             <template #icon><Store :size="24" :stroke-width="1.75" /></template>
@@ -180,7 +197,9 @@
           <template v-if="!isStaff && !isLoadingProfile && hasBusinessProfileContent" #footer>
             <SButton variant="ghost" size="sm" to="/dashboard/settings">
               Manage store settings
-              <template #trailing><ChevronRight :size="16" :stroke-width="2" aria-hidden="true" /></template>
+              <template #trailing
+                ><ChevronRight :size="16" :stroke-width="2" aria-hidden="true"
+              /></template>
             </SButton>
           </template>
         </SCard>
@@ -198,7 +217,9 @@
                 to="/dashboard/settings#settings-subscription"
                 class="s-list__item s-list__item--interactive s-profile__row"
               >
-                <span class="s-list__lead"><CreditCard :size="20" :stroke-width="1.75" aria-hidden="true" /></span>
+                <span class="s-list__lead"
+                  ><CreditCard :size="20" :stroke-width="1.75" aria-hidden="true"
+                /></span>
                 <span class="s-list__main">
                   <span class="s-list__primary">Subscription & billing</span>
                   <span class="s-list__secondary">{{ subscriptionLabel }}</span>
@@ -216,7 +237,9 @@
         >
           <template #actions>
             <SButton size="sm" @click="openReceiptPoliciesModal">
-              <template #leading><Pencil :size="16" :stroke-width="2" aria-hidden="true" /></template>
+              <template #leading
+                ><Pencil :size="16" :stroke-width="2" aria-hidden="true"
+              /></template>
               Edit
             </SButton>
           </template>
@@ -274,7 +297,9 @@
                 aria-haspopup="dialog"
                 @click="pref.action"
               >
-                <span class="s-list__lead"><component :is="pref.icon" :size="20" :stroke-width="1.75" aria-hidden="true" /></span>
+                <span class="s-list__lead"
+                  ><component :is="pref.icon" :size="20" :stroke-width="1.75" aria-hidden="true"
+                /></span>
                 <span class="s-list__main">
                   <span class="s-list__primary">{{ pref.label }}</span>
                   <span class="s-list__secondary">{{ pref.value }}</span>
@@ -299,7 +324,9 @@
                 aria-haspopup="dialog"
                 @click="showNotificationsModal = true"
               >
-                <span class="s-list__lead"><Bell :size="20" :stroke-width="1.75" aria-hidden="true" /></span>
+                <span class="s-list__lead"
+                  ><Bell :size="20" :stroke-width="1.75" aria-hidden="true"
+                /></span>
                 <span class="s-list__main">
                   <span class="s-list__primary">Notification channels</span>
                   <span class="s-list__secondary">{{ accountSettings.notifications }}</span>
@@ -324,7 +351,9 @@
                 aria-haspopup="dialog"
                 @click="showPasswordModal = true"
               >
-                <span class="s-list__lead"><KeyRound :size="20" :stroke-width="1.75" aria-hidden="true" /></span>
+                <span class="s-list__lead"
+                  ><KeyRound :size="20" :stroke-width="1.75" aria-hidden="true"
+                /></span>
                 <span class="s-list__main">
                   <span class="s-list__primary">Password</span>
                   <span class="s-list__secondary">Update your sign-in password</span>
@@ -339,12 +368,19 @@
                 aria-haspopup="dialog"
                 @click="handle2FAToggle"
               >
-                <span class="s-list__lead"><ShieldCheck :size="20" :stroke-width="1.75" aria-hidden="true" /></span>
+                <span class="s-list__lead"
+                  ><ShieldCheck :size="20" :stroke-width="1.75" aria-hidden="true"
+                /></span>
                 <span class="s-list__main">
                   <span class="s-list__primary">Two-factor authentication</span>
-                  <span class="s-list__secondary">{{ securitySettings.twoFactor ? 'Enabled' : 'Not enabled' }}</span>
+                  <span class="s-list__secondary">{{
+                    securitySettings.twoFactor ? 'Enabled' : 'Not enabled'
+                  }}</span>
                 </span>
-                <span class="s-list__action" :class="{ 's-profile__action--danger': securitySettings.twoFactor }">
+                <span
+                  class="s-list__action"
+                  :class="{ 's-profile__action--danger': securitySettings.twoFactor }"
+                >
                   {{ securitySettings.twoFactor ? 'Disable' : 'Enable' }}
                 </span>
               </button>
@@ -356,10 +392,14 @@
                 aria-haspopup="dialog"
                 @click="showSessionsModal = true"
               >
-                <span class="s-list__lead"><Smartphone :size="20" :stroke-width="1.75" aria-hidden="true" /></span>
+                <span class="s-list__lead"
+                  ><Smartphone :size="20" :stroke-width="1.75" aria-hidden="true"
+                /></span>
                 <span class="s-list__main">
                   <span class="s-list__primary">Active sessions</span>
-                  <span class="s-list__secondary">{{ securitySettings.activeSessions }} devices</span>
+                  <span class="s-list__secondary"
+                    >{{ securitySettings.activeSessions }} devices</span
+                  >
                 </span>
                 <span class="s-list__action">View all</span>
               </button>
@@ -381,17 +421,26 @@
                 :disabled="isReplayingTour"
                 @click="replayDashboardTour"
               >
-                <span class="s-list__lead"><Sparkles :size="20" :stroke-width="1.75" aria-hidden="true" /></span>
+                <span class="s-list__lead"
+                  ><Sparkles :size="20" :stroke-width="1.75" aria-hidden="true"
+                /></span>
                 <span class="s-list__main">
                   <span class="s-list__primary">Dashboard tour</span>
-                  <span class="s-list__secondary">Walk through navigation and key screens again.</span>
+                  <span class="s-list__secondary"
+                    >Walk through navigation and key screens again.</span
+                  >
                 </span>
                 <span class="s-list__action">{{ isReplayingTour ? 'Starting…' : 'Replay' }}</span>
               </button>
             </li>
             <li>
-              <NuxtLink to="/dashboard/help" class="s-list__item s-list__item--interactive s-profile__row">
-                <span class="s-list__lead"><Info :size="20" :stroke-width="1.75" aria-hidden="true" /></span>
+              <NuxtLink
+                to="/dashboard/help"
+                class="s-list__item s-list__item--interactive s-profile__row"
+              >
+                <span class="s-list__lead"
+                  ><Info :size="20" :stroke-width="1.75" aria-hidden="true"
+                /></span>
                 <span class="s-list__main">
                   <span class="s-list__primary">Help center</span>
                   <span class="s-list__secondary">Permissions, workflows, and plan limits.</span>
@@ -405,10 +454,14 @@
                 class="s-list__item s-list__item--interactive s-profile__row"
                 @click="openAssistant()"
               >
-                <span class="s-list__lead"><MessageCircle :size="20" :stroke-width="1.75" aria-hidden="true" /></span>
+                <span class="s-list__lead"
+                  ><MessageCircle :size="20" :stroke-width="1.75" aria-hidden="true"
+                /></span>
                 <span class="s-list__main">
                   <span class="s-list__primary">Ask assistant</span>
-                  <span class="s-list__secondary">Get answers about Storvv features in plain language.</span>
+                  <span class="s-list__secondary"
+                    >Get answers about Storvv features in plain language.</span
+                  >
                 </span>
                 <span class="s-list__action">Ask</span>
               </button>
@@ -516,7 +569,11 @@
     size="lg"
     @update:open="(open: boolean) => !open && cancelEditingReceiptPolicies()"
   >
-    <form id="profile-receipt-form" class="s-form" @submit.prevent="saveReceiptPoliciesAndCloseModal">
+    <form
+      id="profile-receipt-form"
+      class="s-form"
+      @submit.prevent="saveReceiptPoliciesAndCloseModal"
+    >
       <STextarea
         v-model="receiptPoliciesForm.salesTerms"
         label="Sales terms & conditions"
@@ -545,7 +602,12 @@
     </template>
   </SDialog>
 
-  <SDialog v-model:open="showRolesModal" title="Roles & permissions" :description="roleCardTitle" size="lg">
+  <SDialog
+    v-model:open="showRolesModal"
+    title="Roles & permissions"
+    :description="roleCardTitle"
+    size="lg"
+  >
     <div class="s-form">
       <p v-if="userPermissions.length === 0" class="s-list__empty">Loading your access list…</p>
       <div v-else class="s-profile-perms">
@@ -556,7 +618,12 @@
           </h3>
           <ul class="s-profile-perms__list">
             <li v-for="item in group.items" :key="item.id" class="s-profile-perms__item">
-              <Check class="s-profile-perms__check" :size="16" :stroke-width="2.5" aria-hidden="true" />
+              <Check
+                class="s-profile-perms__check"
+                :size="16"
+                :stroke-width="2.5"
+                aria-hidden="true"
+              />
               <span>{{ item.label }}</span>
             </li>
           </ul>
@@ -568,9 +635,7 @@
           <template v-if="isStaff">
             Contact your super admin in Settings if you need a different role or department.
           </template>
-          <template v-else>
-            Manage team access under Settings → Departments and staff.
-          </template>
+          <template v-else> Manage team access under Settings → Departments and staff. </template>
         </span>
       </p>
     </div>
@@ -579,7 +644,12 @@
     </template>
   </SDialog>
 
-  <SDialog v-model:open="showThemeModal" title="Change theme" description="Select your preferred theme" size="md">
+  <SDialog
+    v-model:open="showThemeModal"
+    title="Change theme"
+    description="Select your preferred theme"
+    size="md"
+  >
     <div class="s-pick">
       <div class="s-pick__scroll" role="radiogroup" aria-label="Theme">
         <button
@@ -611,7 +681,12 @@
     </template>
   </SDialog>
 
-  <SDialog v-model:open="showLanguageModal" title="Change language" description="Select your preferred language" size="md">
+  <SDialog
+    v-model:open="showLanguageModal"
+    title="Change language"
+    description="Select your preferred language"
+    size="md"
+  >
     <div class="s-pick">
       <div class="s-pick__scroll" role="radiogroup" aria-label="Language">
         <button
@@ -789,8 +864,14 @@
     </ul>
     <p v-else-if="activeSessions.length === 0" class="s-list__empty">No active sessions found</p>
     <ul v-else class="s-list" aria-label="Signed-in devices">
-      <li v-for="(session, index) in activeSessions" :key="index" class="s-list__item s-profile-session">
-        <span class="s-list__lead"><Smartphone :size="20" :stroke-width="1.75" aria-hidden="true" /></span>
+      <li
+        v-for="(session, index) in activeSessions"
+        :key="index"
+        class="s-list__item s-profile-session"
+      >
+        <span class="s-list__lead"
+          ><Smartphone :size="20" :stroke-width="1.75" aria-hidden="true"
+        /></span>
         <span class="s-list__main">
           <span class="s-profile-session__head">
             <span class="s-list__primary">{{ session.device }}</span>
@@ -812,7 +893,12 @@
     </template>
   </SDialog>
 
-  <SDialog v-model:open="showRegionModal" title="Change region" description="Select your region" size="md">
+  <SDialog
+    v-model:open="showRegionModal"
+    title="Change region"
+    description="Select your region"
+    size="md"
+  >
     <div class="s-pick">
       <div class="s-pick__scroll" role="radiogroup" aria-label="Region">
         <button
@@ -845,7 +931,12 @@
     </template>
   </SDialog>
 
-  <SDialog v-model:open="showCurrencyModal" title="Change currency" description="Select your currency" size="md">
+  <SDialog
+    v-model:open="showCurrencyModal"
+    title="Change currency"
+    description="Select your currency"
+    size="md"
+  >
     <div class="s-pick">
       <div class="s-pick__scroll" role="radiogroup" aria-label="Currency">
         <button
@@ -877,7 +968,12 @@
     </template>
   </SDialog>
 
-  <SDialog v-model:open="showTimezoneModal" title="Change timezone" description="Select your timezone" size="md">
+  <SDialog
+    v-model:open="showTimezoneModal"
+    title="Change timezone"
+    description="Select your timezone"
+    size="md"
+  >
     <SSelect v-model="selectedTimezone" label="Timezone" :options="timezones" />
     <template #footer>
       <SButton @click="showTimezoneModal = false">Cancel</SButton>

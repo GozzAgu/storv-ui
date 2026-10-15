@@ -1,5 +1,10 @@
 <template>
-  <SDialog v-model:open="open" title="How likely are you to recommend Storvv?" description="Your feedback helps us improve for shop owners like you." size="sm">
+  <SDialog
+    v-model:open="open"
+    title="How likely are you to recommend Storvv?"
+    description="Your feedback helps us improve for shop owners like you."
+    size="sm"
+  >
     <SForm>
       <SFormSection>
         <fieldset class="s-nps" aria-label="Score from 0, not likely, to 10, very likely">

@@ -69,11 +69,7 @@
         </template>
         <template #actions>
           <HideFiguresToggle v-if="childFolders.length > 0" />
-          <SButton
-            v-if="canAddSubcategories"
-            variant="primary"
-            @click="openCreateSubcategoryModal"
-          >
+          <SButton v-if="canAddSubcategories" variant="primary" @click="openCreateSubcategoryModal">
             <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
             Add subcategory
           </SButton>
@@ -1391,10 +1387,7 @@ import SField from '~/components/s/SField.vue'
 import SIconButton from '~/components/s/SIconButton.vue'
 import SInput from '~/components/s/SInput.vue'
 import SerialUniqueRows from '~/components/inventory/SerialUniqueRows.vue'
-import {
-  findUniqueValueClashInBatch,
-  uniqueTemplateFields,
-} from '~/utils/inventory-unique-fields'
+import { findUniqueValueClashInBatch, uniqueTemplateFields } from '~/utils/inventory-unique-fields'
 import SMenu from '~/components/s/SMenu.vue'
 import SMenuItem from '~/components/s/SMenuItem.vue'
 import SPageHeader from '~/components/s/SPageHeader.vue'

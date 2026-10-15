@@ -6,9 +6,7 @@
         <h2 id="getting-started-heading" class="s-card__title">
           {{ nextStep ? nextStep.title : `Set up your store in ${steps.length} steps` }}
         </h2>
-        <p class="s-card__description">
-          {{ completedCount }} of {{ steps.length }} complete
-        </p>
+        <p class="s-card__description">{{ completedCount }} of {{ steps.length }} complete</p>
       </div>
     </template>
     <template #actions>

@@ -56,9 +56,7 @@ export function normalizeExperienceMode(raw: unknown): ExperienceMode {
   return DEFAULT_EXPERIENCE_MODE
 }
 
-export function resolveExperienceMode(
-  config?: BusinessExperienceConfig | null
-): ExperienceMode {
+export function resolveExperienceMode(config?: BusinessExperienceConfig | null): ExperienceMode {
   return normalizeExperienceMode(config?.experienceMode)
 }
 

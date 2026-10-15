@@ -26,7 +26,12 @@ function mountRows(props: {
 }) {
   return mount(SerialUniqueRows, {
     props,
-    global: { stubs: { SInput, SIconButton: { template: '<button @click="$emit(\'click\')"><slot /></button>' } } },
+    global: {
+      stubs: {
+        SInput,
+        SIconButton: { template: '<button @click="$emit(\'click\')"><slot /></button>' },
+      },
+    },
   })
 }
 

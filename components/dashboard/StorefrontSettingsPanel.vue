@@ -5,7 +5,9 @@
       description="Share a digital showroom of selected stock. Customers browse as guests. No accounts."
     >
       <div class="s-storefront-settings__body">
-        <p v-if="!canEdit" class="s-callout">Only the account owner can publish or change the storefront.</p>
+        <p v-if="!canEdit" class="s-callout">
+          Only the account owner can publish or change the storefront.
+        </p>
 
         <div v-if="loading" class="s-storefront-settings__loading" aria-busy="true">
           <SSkeleton height="40px" />
@@ -217,7 +219,12 @@
               <div class="s-storefront-share__actions">
                 <SButton size="sm" @click="copyTrackedLink">
                   <template #leading>
-                    <component :is="copiedLink ? Check : Copy" :size="14" :stroke-width="2" aria-hidden="true" />
+                    <component
+                      :is="copiedLink ? Check : Copy"
+                      :size="14"
+                      :stroke-width="2"
+                      aria-hidden="true"
+                    />
                   </template>
                   {{ copiedLink ? 'Copied' : 'Copy tracked link' }}
                 </SButton>
@@ -231,7 +238,10 @@
                   <span>Share on WhatsApp</span>
                 </a>
               </div>
-              <dl v-if="analyticsSummary" class="s-metrics s-metrics--inline s-storefront-share__metrics">
+              <dl
+                v-if="analyticsSummary"
+                class="s-metrics s-metrics--inline s-storefront-share__metrics"
+              >
                 <div class="s-metrics__item">
                   <dt class="s-metrics__label">Store views</dt>
                   <dd class="s-metrics__value">{{ analyticsSummary.storeViews }}</dd>
@@ -248,7 +258,9 @@
               <SBadge v-if="analyticsSummary && pendingInquiryCount" tone="warning" dot>
                 {{ pendingInquiryCount }} pending
               </SBadge>
-              <p v-else-if="!analyticsSummary && analyticsError" class="s-form-meta">{{ analyticsError }}</p>
+              <p v-else-if="!analyticsSummary && analyticsError" class="s-form-meta">
+                {{ analyticsError }}
+              </p>
             </div>
           </section>
         </template>
@@ -266,7 +278,9 @@
             Open public page
             <ExternalLink :size="14" :stroke-width="2" aria-hidden="true" />
           </a>
-          <NuxtLink to="/dashboard/storefront" class="s-link s-storefront-settings__link">View inquiries</NuxtLink>
+          <NuxtLink to="/dashboard/storefront" class="s-link s-storefront-settings__link"
+            >View inquiries</NuxtLink
+          >
         </span>
         <SButton
           :loading="syncing"
@@ -306,7 +320,9 @@
                   v-for="field in allowlistableFields(folder)"
                   :key="field.id"
                   :label="field.label"
-                  :model-value="Boolean(draft.folderPublish[folder.id]?.publicFieldIds?.includes(field.id))"
+                  :model-value="
+                    Boolean(draft.folderPublish[folder.id]?.publicFieldIds?.includes(field.id))
+                  "
                   :disabled="!canEdit || saving"
                   @update:model-value="(on: boolean) => toggleField(folder.id, field.id, on)"
                 />
@@ -339,17 +355,17 @@ import { useStorefrontStore, isStorefrontSlugTaken } from '~/stores/storefront'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { getQueryUserId } from '~/composables/useFirestorePaths'
-import { canAllowlistStorefrontField, suggestDefaultPublicFieldIds } from '~/utils/storefront-fields'
+import {
+  canAllowlistStorefrontField,
+  suggestDefaultPublicFieldIds,
+} from '~/utils/storefront-fields'
 import { slugifyStorefrontName, storefrontPublicPath } from '~/utils/storefront-slug'
 import {
   buildStorefrontShareMessage,
   buildStorefrontWhatsAppShareHref,
   storefrontAbsoluteUrl,
 } from '~/utils/storefront-share'
-import {
-  EMPTY_STOREFRONT_CONFIG,
-  type StorefrontConfig,
-} from '~/types/storefront'
+import { EMPTY_STOREFRONT_CONFIG, type StorefrontConfig } from '~/types/storefront'
 
 const props = defineProps<{ canEdit: boolean }>()
 
@@ -445,9 +461,7 @@ function folderLabel(folder: InventoryFolder) {
 }
 
 function allowlistableFields(folder: InventoryFolder) {
-  return (folder.template?.fields || []).filter((f) =>
-    canAllowlistStorefrontField(f.name, f.label)
-  )
+  return (folder.template?.fields || []).filter((f) => canAllowlistStorefrontField(f.name, f.label))
 }
 
 function toggleFolder(folder: InventoryFolder, enabled: boolean) {
@@ -506,9 +520,7 @@ async function onSave() {
     }
     if (!draft.value.displayName.trim()) {
       draft.value.displayName =
-        userStore.userData?.storeDetails?.storeName ||
-        userStore.userData?.name ||
-        'My store'
+        userStore.userData?.storeDetails?.storeName || userStore.userData?.name || 'My store'
     }
     if (!draft.value.social) draft.value.social = {}
     await storefront.saveConfig({ ...draft.value })
@@ -548,9 +560,7 @@ onMounted(async () => {
     }
     if (!draft.value.displayName) {
       draft.value.displayName =
-        userStore.userData?.storeDetails?.storeName ||
-        userStore.userData?.name ||
-        ''
+        userStore.userData?.storeDetails?.storeName || userStore.userData?.name || ''
     }
     if (!draft.value.slug && draft.value.displayName) {
       draft.value.slug = slugifyStorefrontName(draft.value.displayName)

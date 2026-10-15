@@ -30,12 +30,7 @@
         :style="cardPosition"
         @click.stop
       >
-        <span
-          v-if="arrowStyle"
-          class="s-tour__arrow"
-          :style="arrowStyle"
-          aria-hidden="true"
-        />
+        <span v-if="arrowStyle" class="s-tour__arrow" :style="arrowStyle" aria-hidden="true" />
 
         <div class="s-tour__head">
           <p class="s-tour__step">Step {{ currentStep }} of {{ totalSteps }}</p>
@@ -192,7 +187,11 @@ function clamp(value: number, min: number, max: number) {
 }
 
 function resolveTargetElement(step: TutorialStep) {
-  if (step.subscriptionFeature && !canUse(step.subscriptionFeature) && step.fallbackTargetSelector) {
+  if (
+    step.subscriptionFeature &&
+    !canUse(step.subscriptionFeature) &&
+    step.fallbackTargetSelector
+  ) {
     const fallback = document.querySelector(step.fallbackTargetSelector)
     if (fallback) return fallback
   }
@@ -364,11 +363,14 @@ async function checkTutorialStatus() {
       router.replace({ path: route.path, query: nextQuery, hash: route.hash })
     }
 
-    window.setTimeout(() => {
-      currentStep.value = 1
-      showTutorial.value = true
-      updateSpotlightLayout()
-    }, forceReplay ? 300 : 1000)
+    window.setTimeout(
+      () => {
+        currentStep.value = 1
+        showTutorial.value = true
+        updateSpotlightLayout()
+      },
+      forceReplay ? 300 : 1000
+    )
   }
 }
 

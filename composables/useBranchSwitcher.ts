@@ -3,10 +3,7 @@ import { useStoresStore } from '~/stores/stores'
 import { useUserStore } from '~/stores/user'
 import { useAppToast } from '~/composables/useAppToast'
 import { getStoreBranchShortLabel } from '~/utils/store-branch-label'
-import {
-  getStoreSwitcherPrimaryLabel,
-  getStoreSwitcherSecondaryLabel,
-} from '~/utils/branch-name'
+import { getStoreSwitcherPrimaryLabel, getStoreSwitcherSecondaryLabel } from '~/utils/branch-name'
 
 type BranchLike = {
   id?: string

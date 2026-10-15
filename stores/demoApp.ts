@@ -383,7 +383,8 @@ export const useDemoAppStore = defineStore('demoApp', {
         id: demoId('rcpt'),
         storeId: receiptData.storeId || this.state.currentStoreId,
         receiptNumber: receiptData.receiptNumber,
-        customerName: normalizeEntityName(receiptData.customerName) || receiptData.customerName.trim(),
+        customerName:
+          normalizeEntityName(receiptData.customerName) || receiptData.customerName.trim(),
         customerPhone: receiptData.customerPhone,
         date: new Date(receiptData.date || Date.now()).toISOString(),
         items: receiptData.items.map((line) => ({

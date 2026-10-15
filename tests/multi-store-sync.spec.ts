@@ -16,7 +16,11 @@ test.describe('Multi-Store Sync', () => {
     await expect(page.getByRole('heading', { name: 'Multi-Store Sync', exact: true })).toBeVisible({
       timeout: 20_000,
     })
-    await expect(page.getByRole('button', { name: /transfer items/i }).or(page.getByText(/move stock between branches/i))).toBeVisible({
+    await expect(
+      page
+        .getByRole('button', { name: /transfer items/i })
+        .or(page.getByText(/move stock between branches/i))
+    ).toBeVisible({
       timeout: 10_000,
     })
   })
@@ -29,7 +33,11 @@ test.describe('Multi-Store Sync', () => {
     await expect(page.getByRole('heading', { name: 'Multi-Store Sync', exact: true })).toBeVisible({
       timeout: 20_000,
     })
-    await expect(page.getByRole('button', { name: /transfer items/i }).or(page.getByText(/move stock between branches/i))).toBeVisible({
+    await expect(
+      page
+        .getByRole('button', { name: /transfer items/i })
+        .or(page.getByText(/move stock between branches/i))
+    ).toBeVisible({
       timeout: 10_000,
     })
   })
@@ -63,7 +71,9 @@ test.describe('Multi-Store Sync', () => {
 
     const accessHeading = page.getByRole('heading', { name: 'Access restricted', exact: true })
     await expect(
-      accessHeading.or(page.getByText('Stores', { exact: true })).or(page.getByText('Total stores', { exact: true }))
+      accessHeading
+        .or(page.getByText('Stores', { exact: true }))
+        .or(page.getByText('Total stores', { exact: true }))
     ).toBeVisible({
       timeout: 20_000,
     })
@@ -72,7 +82,13 @@ test.describe('Multi-Store Sync', () => {
       test.skip(true, 'Multi-store sync locked for this user')
     }
 
-    await expect(page.getByText('Stores', { exact: true }).or(page.getByText('Total stores', { exact: true }))).toBeVisible()
-    await expect(page.getByText('Transfers', { exact: true }).or(page.getByText('Total transfers', { exact: true }))).toBeVisible()
+    await expect(
+      page.getByText('Stores', { exact: true }).or(page.getByText('Total stores', { exact: true }))
+    ).toBeVisible()
+    await expect(
+      page
+        .getByText('Transfers', { exact: true })
+        .or(page.getByText('Total transfers', { exact: true }))
+    ).toBeVisible()
   })
 })

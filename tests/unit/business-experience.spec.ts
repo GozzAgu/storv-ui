@@ -60,15 +60,11 @@ describe('business experience (Phase 1)', () => {
 
   describe('canUseBusinessCapability', () => {
     it('allows everything in business mode without progressive unlock', () => {
-      expect(
-        canUseBusinessCapability('staffManagement', { experienceMode: 'business' })
-      ).toBe(true)
+      expect(canUseBusinessCapability('staffManagement', { experienceMode: 'business' })).toBe(true)
     })
 
     it('blocks admin capabilities in solo until progressively enabled', () => {
-      expect(
-        canUseBusinessCapability('staffManagement', { experienceMode: 'solo' })
-      ).toBe(false)
+      expect(canUseBusinessCapability('staffManagement', { experienceMode: 'solo' })).toBe(false)
       expect(
         canUseBusinessCapability('staffManagement', {
           experienceMode: 'solo',
@@ -79,7 +75,11 @@ describe('business experience (Phase 1)', () => {
 
     it('ignores unknown strings in enabledCapabilities', () => {
       expect(
-        normalizeEnabledCapabilities(['staffManagement', 'not-a-capability', 42 as unknown as string])
+        normalizeEnabledCapabilities([
+          'staffManagement',
+          'not-a-capability',
+          42 as unknown as string,
+        ])
       ).toEqual(['staffManagement'])
     })
   })

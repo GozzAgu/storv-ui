@@ -172,29 +172,32 @@ export async function writeLockedPaymentLink(
   const invoiceNumber = makePaymentLinkInvoiceNumber()
   const expiresAt = new Date(Date.now() + PAYMENT_LINK_TTL_MINUTES * 60 * 1000)
 
-  await params.adminDb.collection('paymentLinks').doc(token).set({
-    token,
-    ownerUserId: params.ownerUserId,
-    storeId: params.storeId,
-    businessName: params.businessName,
-    invoiceNumber,
-    customerName: params.customerName,
-    customerPhone: params.customerPhone || '',
-    customerEmail: params.customerEmail || '',
-    items: params.lockedItems,
-    amount: params.amountKobo,
-    currency: PAYMENT_LINK_CURRENCY,
-    status: 'unpaid',
-    inventoryApplied: false,
-    expiresAt,
-    createdAt: FieldValue.serverTimestamp(),
-    updatedAt: FieldValue.serverTimestamp(),
-    createdBy: params.createdBy,
-    source: params.source || 'dashboard',
-    ...(params.storefrontSlug ? { storefrontSlug: params.storefrontSlug } : {}),
-    ...(params.storefrontListingId ? { storefrontListingId: params.storefrontListingId } : {}),
-    ...(params.storefrontInquiryId ? { storefrontInquiryId: params.storefrontInquiryId } : {}),
-  })
+  await params.adminDb
+    .collection('paymentLinks')
+    .doc(token)
+    .set({
+      token,
+      ownerUserId: params.ownerUserId,
+      storeId: params.storeId,
+      businessName: params.businessName,
+      invoiceNumber,
+      customerName: params.customerName,
+      customerPhone: params.customerPhone || '',
+      customerEmail: params.customerEmail || '',
+      items: params.lockedItems,
+      amount: params.amountKobo,
+      currency: PAYMENT_LINK_CURRENCY,
+      status: 'unpaid',
+      inventoryApplied: false,
+      expiresAt,
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+      createdBy: params.createdBy,
+      source: params.source || 'dashboard',
+      ...(params.storefrontSlug ? { storefrontSlug: params.storefrontSlug } : {}),
+      ...(params.storefrontListingId ? { storefrontListingId: params.storefrontListingId } : {}),
+      ...(params.storefrontInquiryId ? { storefrontInquiryId: params.storefrontInquiryId } : {}),
+    })
 
   return { token, invoiceNumber, amountKobo: params.amountKobo }
 }

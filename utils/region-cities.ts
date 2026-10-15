@@ -183,7 +183,7 @@ export const citiesByRegion: Record<string, readonly string[]> = {
     'Chengdu',
     'Hangzhou',
     'Wuhan',
-    'Xi\'an',
+    "Xi'an",
     'Nanjing',
     'Tianjin',
     'Chongqing',

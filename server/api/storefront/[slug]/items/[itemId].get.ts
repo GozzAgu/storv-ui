@@ -57,4 +57,3 @@ export default defineEventHandler(async (event) => {
     item: publicStorefrontListingDto(item),
   }
 })
-

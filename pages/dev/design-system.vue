@@ -76,7 +76,9 @@
         <template #actions>
           <SButton>Export</SButton>
           <SButton variant="primary">
-            <template #leading><Plus :size="16" :stroke-width="1.75" aria-hidden="true" /></template>
+            <template #leading
+              ><Plus :size="16" :stroke-width="1.75" aria-hidden="true"
+            /></template>
             Add product
           </SButton>
         </template>
@@ -128,9 +130,17 @@
       </div>
 
       <div class="dsx__cards">
-        <SCard title="Form controls" description="Labels, hints and errors are wired for screen readers.">
+        <SCard
+          title="Form controls"
+          description="Labels, hints and errors are wired for screen readers."
+        >
           <div class="dsx__form">
-            <SInput v-model="form.name" label="Product name" placeholder="e.g. iPhone 15 Pro" required />
+            <SInput
+              v-model="form.name"
+              label="Product name"
+              placeholder="e.g. iPhone 15 Pro"
+              required
+            />
             <SInput
               v-model="form.price"
               label="Selling price"
@@ -140,10 +150,24 @@
             >
               <template #prefix>₦</template>
             </SInput>
-            <SInput v-model="form.email" label="Supplier email" type="email" error="Enter a valid email address." />
-            <SSelect v-model="form.category" label="Category" :options="categories" placeholder="Choose a category" />
+            <SInput
+              v-model="form.email"
+              label="Supplier email"
+              type="email"
+              error="Enter a valid email address."
+            />
+            <SSelect
+              v-model="form.category"
+              label="Category"
+              :options="categories"
+              placeholder="Choose a category"
+            />
             <STextarea v-model="form.notes" label="Notes" :maxlength="200" />
-            <SCheckbox v-model="form.track" label="Track stock" description="Warn me when stock runs low." />
+            <SCheckbox
+              v-model="form.track"
+              label="Track stock"
+              description="Warn me when stock runs low."
+            />
             <SCheckbox v-model="form.publish" variant="switch" label="Show on storefront" />
           </div>
           <template #footer>
@@ -166,7 +190,9 @@
               title="No products yet"
               description="Add your first product to start tracking stock and sales."
             >
-              <template #icon><Package :size="24" :stroke-width="1.75" aria-hidden="true" /></template>
+              <template #icon
+                ><Package :size="24" :stroke-width="1.75" aria-hidden="true"
+              /></template>
               <template #actions><SButton variant="primary">Add product</SButton></template>
             </SEmptyState>
           </SCard>
@@ -177,17 +203,34 @@
                 <template #trigger="{ open, toggle }">
                   <SButton aria-haspopup="menu" :aria-expanded="open" @click.stop="toggle">
                     Actions
-                    <template #trailing><ChevronDown :size="16" :stroke-width="1.75" aria-hidden="true" /></template>
+                    <template #trailing
+                      ><ChevronDown :size="16" :stroke-width="1.75" aria-hidden="true"
+                    /></template>
                   </SButton>
                 </template>
                 <template #default="{ close }">
                   <div class="s-popover__group">
                     <button type="button" role="menuitem" class="s-menu-row" @click="close">
-                      <Pencil class="s-menu-row__icon" :size="16" :stroke-width="1.75" aria-hidden="true" />
+                      <Pencil
+                        class="s-menu-row__icon"
+                        :size="16"
+                        :stroke-width="1.75"
+                        aria-hidden="true"
+                      />
                       <span class="s-menu-row__label">Edit</span>
                     </button>
-                    <button type="button" role="menuitem" class="s-menu-row s-menu-row--danger" @click="close">
-                      <Trash2 class="s-menu-row__icon" :size="16" :stroke-width="1.75" aria-hidden="true" />
+                    <button
+                      type="button"
+                      role="menuitem"
+                      class="s-menu-row s-menu-row--danger"
+                      @click="close"
+                    >
+                      <Trash2
+                        class="s-menu-row__icon"
+                        :size="16"
+                        :stroke-width="1.75"
+                        aria-hidden="true"
+                      />
                       <span class="s-menu-row__label">Delete</span>
                     </button>
                   </div>
@@ -216,7 +259,12 @@
 
     <SDialog v-model:open="sheetOpen" title="Filters" placement="right">
       <div class="dsx__form">
-        <SSelect v-model="form.category" label="Category" :options="categories" placeholder="Any category" />
+        <SSelect
+          v-model="form.category"
+          label="Category"
+          :options="categories"
+          placeholder="Any category"
+        />
         <SCheckbox v-model="form.track" label="Only tracked items" />
       </div>
       <template #footer>
@@ -229,15 +277,7 @@
 
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
-import {
-  Bell,
-  ChevronDown,
-  Package,
-  Pencil,
-  Plus,
-  SlidersHorizontal,
-  Trash2,
-} from '@lucide/vue'
+import { Bell, ChevronDown, Package, Pencil, Plus, SlidersHorizontal, Trash2 } from '@lucide/vue'
 import { useThemeStore } from '~/stores/theme'
 import SAvatar from '~/components/s/SAvatar.vue'
 import SBadge from '~/components/s/SBadge.vue'
@@ -272,7 +312,14 @@ const toggleDark = () => themeStore.setTheme(isDark.value ? 'light' : 'dark')
 const colorGroups = [
   {
     label: 'Neutrals',
-    tokens: ['--s-bg', '--s-surface', '--s-surface-2', '--s-surface-hover', '--s-border', '--s-border-strong'],
+    tokens: [
+      '--s-bg',
+      '--s-surface',
+      '--s-surface-2',
+      '--s-surface-hover',
+      '--s-border',
+      '--s-border-strong',
+    ],
   },
   { label: 'Text', tokens: ['--s-text', '--s-text-2', '--s-text-muted'] },
   {
@@ -298,8 +345,16 @@ const typeScale = [
   { label: 'Display', cls: 'ds-display', sample: 'How is the business doing?' },
   { label: 'Page title', cls: 'ds-title', sample: 'Inventory' },
   { label: 'Section heading', cls: 'ds-heading', sample: 'Low stock' },
-  { label: 'Body large', cls: 'ds-body-lg', sample: 'Stock, sales, receipts, and your team in one workspace.' },
-  { label: 'Body', cls: 'ds-body', sample: 'Products live inside subcategories. Open one to manage stock.' },
+  {
+    label: 'Body large',
+    cls: 'ds-body-lg',
+    sample: 'Stock, sales, receipts, and your team in one workspace.',
+  },
+  {
+    label: 'Body',
+    cls: 'ds-body',
+    sample: 'Products live inside subcategories. Open one to manage stock.',
+  },
   { label: 'Small', cls: 'ds-small ds-text-2', sample: '7 items · ₦11.2m total value' },
   { label: 'Caption', cls: 'ds-caption ds-text-muted', sample: 'Updated 2 minutes ago' },
   { label: 'Overline', cls: 'ds-overline', sample: 'Operations' },

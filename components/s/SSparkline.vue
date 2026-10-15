@@ -27,7 +27,9 @@ const paths = computed(() => {
   const min = Math.min(...values)
   const range = max - min || 1
   const step = 100 / (values.length - 1)
-  const points = values.map((v, i) => `${(i * step).toFixed(2)},${(30 - ((v - min) / range) * 28).toFixed(2)}`)
+  const points = values.map(
+    (v, i) => `${(i * step).toFixed(2)},${(30 - ((v - min) / range) * 28).toFixed(2)}`
+  )
   const line = `M${points.join('L')}`
   return { line, area: `${line}L100,32L0,32Z` }
 })

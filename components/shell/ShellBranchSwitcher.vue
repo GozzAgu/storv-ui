@@ -70,7 +70,12 @@
         </ul>
         <div v-if="!isStaff" class="s-popover__foot">
           <NuxtLink :to="manageTo" class="s-menu-row" @click="close">
-            <Settings2 class="s-menu-row__icon" :size="16" :stroke-width="1.75" aria-hidden="true" />
+            <Settings2
+              class="s-menu-row__icon"
+              :size="16"
+              :stroke-width="1.75"
+              aria-hidden="true"
+            />
             <span class="s-menu-row__label">Manage branches</span>
           </NuxtLink>
         </div>

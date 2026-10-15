@@ -28,12 +28,7 @@
             </p>
           </div>
 
-          <STabs
-            v-model="actionTab"
-            :tabs="actionTabs"
-            label="Balance action"
-            block
-          />
+          <STabs v-model="actionTab" :tabs="actionTabs" label="Balance action" block />
 
           <SField label="Amount">
             <SInput v-model="amountInput" type="number" inputmode="decimal" min="0" step="0.01" />

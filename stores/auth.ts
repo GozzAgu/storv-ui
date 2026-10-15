@@ -121,10 +121,14 @@ export const useAuthStore = defineStore('auth', {
       try {
         const uid = auth.currentUser?.uid
         if (import.meta.client) {
-          const { markSignOutPending, clearCachedUserProfile } = await import('~/utils/auth-sign-out')
+          const { markSignOutPending, clearCachedUserProfile } = await import(
+            '~/utils/auth-sign-out'
+          )
           markSignOutPending()
           clearCachedUserProfile()
-          const { clearNativeBiometricLogin } = await import('~/composables/useNativeBiometricLogin')
+          const { clearNativeBiometricLogin } = await import(
+            '~/composables/useNativeBiometricLogin'
+          )
           await clearNativeBiometricLogin()
         }
         this.currentUser = null
@@ -151,11 +155,7 @@ export const useAuthStore = defineStore('auth', {
 
       try {
         const rc = useRuntimeConfig()
-        await sendUserPasswordResetEmail(
-          auth,
-          email,
-          (rc.public.appOrigin as string) || ''
-        )
+        await sendUserPasswordResetEmail(auth, email, (rc.public.appOrigin as string) || '')
       } catch (error: any) {
         throw new Error(error.message || 'Password reset failed')
       }

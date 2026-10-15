@@ -7,7 +7,13 @@
     :aria-label="bannerContent.title"
   >
     <div class="s-banner__lead">
-      <component :is="toneIcon" class="s-banner__icon" :size="16" :stroke-width="2" aria-hidden="true" />
+      <component
+        :is="toneIcon"
+        class="s-banner__icon"
+        :size="16"
+        :stroke-width="2"
+        aria-hidden="true"
+      />
       <p class="s-banner__text">
         <strong>{{ bannerContent.title }}.</strong> {{ bannerContent.message }}
       </p>

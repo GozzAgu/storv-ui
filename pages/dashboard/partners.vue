@@ -79,19 +79,17 @@
           <STabs v-model="tab" :tabs="tabs" label="Partners sections" panel-id="partners-panel" />
         </div>
         <div class="s-tab-panel__body">
-
-          <div
-            v-if="tab === 'loans'"
-            id="partners-panel"
-            class="s-partners__panel"
-            role="tabpanel"
-          >
+          <div v-if="tab === 'loans'" id="partners-panel" class="s-partners__panel" role="tabpanel">
             <SCard
               v-if="overview.lendBlocker"
               title="Lend stock to partners"
               description="Lending to partners is on the Enterprise plan. You can still borrow from partners on any plan."
             >
-              <SButton v-if="overview.canManage" variant="secondary" to="/dashboard/settings?tab=subscription">
+              <SButton
+                v-if="overview.canManage"
+                variant="secondary"
+                to="/dashboard/settings?tab=subscription"
+              >
                 See plans
               </SButton>
             </SCard>
@@ -146,12 +144,7 @@
             />
           </div>
 
-          <div
-            v-else
-            id="partners-panel"
-            class="s-partners__panel"
-            role="tabpanel"
-          >
+          <div v-else id="partners-panel" class="s-partners__panel" role="tabpanel">
             <SCard>
               <div class="s-partners__me">
                 <SAvatar :name="profile.displayName" size="lg" />
@@ -163,7 +156,12 @@
                   <BadgeCheck :size="12" :stroke-width="2" aria-hidden="true" />
                   Bank verified
                 </SBadge>
-                <SButton v-if="overview.canManage" variant="ghost" size="sm" @click="openEditProfile">
+                <SButton
+                  v-if="overview.canManage"
+                  variant="ghost"
+                  size="sm"
+                  @click="openEditProfile"
+                >
                   Edit
                 </SButton>
               </div>
@@ -231,7 +229,9 @@
                   <SAvatar :name="c.partner.displayName" />
                   <div class="s-list__main">
                     <span class="s-list__primary">{{ c.partner.displayName }}</span>
-                    <span class="s-list__secondary">@{{ c.partner.handle }} · wants to connect</span>
+                    <span class="s-list__secondary"
+                      >@{{ c.partner.handle }} · wants to connect</span
+                    >
                   </div>
                   <div v-if="overview.canManage" class="s-partners__row-actions">
                     <SButton
@@ -256,7 +256,9 @@
                   <SAvatar :name="c.partner.displayName" />
                   <div class="s-list__main">
                     <span class="s-list__primary">{{ c.partner.displayName }}</span>
-                    <span class="s-list__secondary">@{{ c.partner.handle }} · waiting for them</span>
+                    <span class="s-list__secondary"
+                      >@{{ c.partner.handle }} · waiting for them</span
+                    >
                   </div>
                   <SButton
                     v-if="overview.canManage"
@@ -343,8 +345,6 @@
           </div>
         </div>
       </section>
-
-      
     </template>
 
     <SDialog

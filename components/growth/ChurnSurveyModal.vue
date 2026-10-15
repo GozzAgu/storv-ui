@@ -1,5 +1,10 @@
 <template>
-  <SDialog v-model:open="open" title="Before you go" description="Help us understand what we could do better." size="sm">
+  <SDialog
+    v-model:open="open"
+    title="Before you go"
+    description="Help us understand what we could do better."
+    size="sm"
+  >
     <SForm>
       <SFormSection>
         <fieldset class="s-choices" aria-label="Main reason for leaving">
@@ -20,11 +25,7 @@
           </label>
         </fieldset>
         <SField label="Comment" hint="Optional">
-          <STextarea
-            v-model="comment"
-            :rows="3"
-            placeholder="Anything else we should know?"
-          />
+          <STextarea v-model="comment" :rows="3" placeholder="Anything else we should know?" />
         </SField>
       </SFormSection>
     </SForm>

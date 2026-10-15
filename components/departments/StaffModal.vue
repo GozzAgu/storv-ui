@@ -1,6 +1,6 @@
 <template>
   <SDialog
-      placement="right"
+    placement="right"
     :open="props.modelValue"
     :title="isEdit ? 'Edit staff' : 'Add staff'"
     size="md"
@@ -17,8 +17,8 @@
       <h3 class="s-auth-status__title">Invite emailed</h3>
       <p class="s-auth-status__body">
         We emailed sign-in details to
-        <strong>{{ formData.email }}</strong>. They can change the password after
-        signing in.
+        <strong>{{ formData.email }}</strong
+        >. They can change the password after signing in.
       </p>
     </div>
 
@@ -33,7 +33,8 @@
       <h3 class="s-auth-status__title">Account created</h3>
       <p class="s-auth-status__body">
         Share this one-time password with
-        <strong>{{ formData.email }}</strong>. They can change it in Profile after signing in.
+        <strong>{{ formData.email }}</strong
+        >. They can change it in Profile after signing in.
       </p>
       <div class="s-record-secret">
         <code class="s-record-secret__code">{{ temporaryPasswordToShow }}</code>
@@ -91,11 +92,7 @@
             <SInput v-model="formData.phone" type="tel" placeholder="+1234567890" />
           </SField>
           <SField label="Position" required>
-            <SInput
-              v-model="formData.position"
-              required
-              placeholder="e.g. Sales associate"
-            />
+            <SInput v-model="formData.position" required placeholder="e.g. Sales associate" />
           </SField>
         </div>
       </SFormSection>
@@ -199,11 +196,7 @@ import SFormSection from '~/components/s/SFormSection.vue'
 import SInput from '~/components/s/SInput.vue'
 import SSelect from '~/components/s/SSelect.vue'
 import { ref, watch, computed, onMounted } from 'vue'
-import {
-  CheckCircleIcon,
-  ClipboardDocumentIcon,
-  ArrowPathIcon,
-} from '~/utils/app-icons'
+import { CheckCircleIcon, ClipboardDocumentIcon, ArrowPathIcon } from '~/utils/app-icons'
 import SButton from '~/components/s/SButton.vue'
 import type { Staff } from '~/composables/useStaff'
 import { useStaffStore } from '~/stores/staff'
@@ -435,9 +428,7 @@ async function emailStaffCredentials(params: {
     staffName: `${formData.value.firstName} ${formData.value.lastName}`.trim(),
     departmentName: params.departmentName,
     businessName:
-      userStore.userData?.storeDetails?.storeName ||
-      userStore.userData?.name ||
-      'Storvv',
+      userStore.userData?.storeDetails?.storeName || userStore.userData?.name || 'Storvv',
     temporaryPassword: params.temporaryPassword,
     // Match the created temporary password (and StaffInvitePasswordsPanel). reset_link is for
     // re-invites without a known password and needs Firebase Admin password-reset generation.
@@ -449,7 +440,9 @@ async function emailStaffCredentials(params: {
 
 function inviteSignInUrl() {
   const config = useRuntimeConfig()
-  const origin = String(config.public.appOrigin || '').trim().replace(/\/$/, '')
+  const origin = String(config.public.appOrigin || '')
+    .trim()
+    .replace(/\/$/, '')
   return origin ? `${origin}/signin` : 'https://app.storvv.com/signin'
 }
 

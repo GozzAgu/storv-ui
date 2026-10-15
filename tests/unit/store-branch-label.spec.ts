@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  getStoreBranchCodeLabel,
-  getStoreBranchShortLabel,
-} from '~/utils/store-branch-label'
+import { getStoreBranchCodeLabel, getStoreBranchShortLabel } from '~/utils/store-branch-label'
 
 describe('getStoreBranchShortLabel', () => {
   it('returns known city when branch name equals city', () => {

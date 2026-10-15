@@ -7,8 +7,7 @@
       >
         The mobile app could not reach the Storvv server. Set
         <code>NUXT_PUBLIC_API_BASE=https://app.storvv.com</code>
-        in <code>.env</code> and rebuild with
-        <code>npm run cap:build</code>.
+        in <code>.env</code> and rebuild with <code>npm run cap:build</code>.
       </div>
 
       <div
@@ -16,10 +15,9 @@
         class="s-notice s-assistant__setup"
       >
         Could not reach Storvv at
-        <code>app.storvv.com</code>.
-        Rebuild the mobile app after pulling the latest code
-        (<code>npm run cap:build</code>),
-        then redeploy Vercel so Capacitor API access is enabled.
+        <code>app.storvv.com</code>. Rebuild the mobile app after pulling the latest code (<code
+          >npm run cap:build</code
+        >), then redeploy Vercel so Capacitor API access is enabled.
       </div>
 
       <div
@@ -31,23 +29,21 @@
           <code>GEMINI_API_KEY</code>
           and
           <code>GEMINI_MODEL=gemini-3.1-flash-lite</code>
-          on Vercel for <code>app.storvv.com</code>,
-          then redeploy.
+          on Vercel for <code>app.storvv.com</code>, then redeploy.
         </template>
         <template v-else>
           Storvv Assistant needs a Gemini API key on the server. Add
           <code>GEMINI_API_KEY</code>
-          to your <code>.env</code>,
-          then restart the dev server (<code>npm run dev</code>),
-          or set it on Vercel for production.
+          to your <code>.env</code>, then restart the dev server (<code>npm run dev</code>), or set
+          it on Vercel for production.
         </template>
       </div>
 
       <div v-else-if="!assistantStore.hasConversation" class="s-assistant__intro">
         <p class="s-assistant__privacy">
           <template v-if="isDemoAssistant">
-            Demo assistant uses canned tips about the iOS app, sales leads, trade-ins,
-            analytics, Quick Sale, stock loans, and more. Sample numbers in charts are not your real store.
+            Demo assistant uses canned tips about the iOS app, sales leads, trade-ins, analytics,
+            Quick Sale, stock loans, and more. Sample numbers in charts are not your real store.
           </template>
           <template v-else>
             I can explain Storvv screens, permissions, and workflows. I do not see your live stock,
@@ -90,7 +86,8 @@
             class="s-assistant__avatar"
             size="sm"
             aria-hidden="true"
-          >S</SAvatar>
+            >S</SAvatar
+          >
           <div class="s-assistant__bubble">
             <span class="ds-sr-only">{{ message.role === 'user' ? 'You:' : 'Assistant:' }}</span>
             {{ message.content }}
@@ -117,7 +114,9 @@
           v-model="draft"
           class="s-assistant__input"
           :rows="1"
-          :placeholder="variant === 'float' ? 'Ask anything' : 'Ask about sales, inventory, staff roles…'"
+          :placeholder="
+            variant === 'float' ? 'Ask anything' : 'Ask about sales, inventory, staff roles…'
+          "
           aria-label="Message Storvv Assistant"
           autocomplete="off"
           :disabled="assistantStore.sending"
@@ -168,8 +167,16 @@ withDefaults(
   { variant: 'sheet' }
 )
 
-const { configured, statusLoaded, statusReachable, apiBaseConfigured, isNativeApp, isDemoAssistant, assistantStore, refreshStatus } =
-  useDashboardAssistant()
+const {
+  configured,
+  statusLoaded,
+  statusReachable,
+  apiBaseConfigured,
+  isNativeApp,
+  isDemoAssistant,
+  assistantStore,
+  refreshStatus,
+} = useDashboardAssistant()
 const { dashPath } = useDashboardPaths()
 
 const draft = ref('')
@@ -187,7 +194,8 @@ const suggestedPrompts = [
 
 const canSend = computed(
   () =>
-    (isDemoAssistant.value || (apiBaseConfigured.value && statusLoaded.value && configured.value)) &&
+    (isDemoAssistant.value ||
+      (apiBaseConfigured.value && statusLoaded.value && configured.value)) &&
     draft.value.trim().length > 0 &&
     !assistantStore.sending
 )

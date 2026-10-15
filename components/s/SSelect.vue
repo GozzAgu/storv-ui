@@ -26,7 +26,12 @@
           </option>
           <slot />
         </select>
-        <ChevronDown class="s-control__chevron" :size="16" :stroke-width="1.75" aria-hidden="true" />
+        <ChevronDown
+          class="s-control__chevron"
+          :size="16"
+          :stroke-width="1.75"
+          aria-hidden="true"
+        />
       </div>
     </template>
   </SField>

@@ -89,15 +89,12 @@ const impactSummary = computed(() => {
 
 const countLabel = computed(() => {
   const n = props.count
-  const word =
-    n === 1 ? props.entityLabel : props.entityLabelPlural || `${props.entityLabel}s`
+  const word = n === 1 ? props.entityLabel : props.entityLabelPlural || `${props.entityLabel}s`
   return `${n} ${word} selected`
 })
 
 const visibleNames = computed(() => props.itemNames.slice(0, props.maxVisibleNames))
-const hiddenCount = computed(() =>
-  Math.max(0, props.itemNames.length - props.maxVisibleNames)
-)
+const hiddenCount = computed(() => Math.max(0, props.itemNames.length - props.maxVisibleNames))
 
 const primaryLabel = computed(() => {
   if (props.loading) return 'Deleting…'

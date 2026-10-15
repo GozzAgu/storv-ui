@@ -12,8 +12,8 @@
         </span>
         <h1 class="s-auth-status__title">Verify your email</h1>
         <p class="s-auth-status__body">
-          We sent a verification link to <strong>{{ email }}</strong>. Open it to use billing, staff actions
-          and the full dashboard.
+          We sent a verification link to <strong>{{ email }}</strong
+          >. Open it to use billing, staff actions and the full dashboard.
         </p>
       </div>
 
@@ -69,8 +69,7 @@ async function resendVerification() {
     message.value = 'Verification email sent. Check your inbox and spam folder.'
     messageTone.value = 'success'
   } catch (error: unknown) {
-    message.value =
-      (error as { message?: string })?.message || 'Could not send verification email.'
+    message.value = (error as { message?: string })?.message || 'Could not send verification email.'
     messageTone.value = 'error'
   } finally {
     sending.value = false
@@ -108,4 +107,3 @@ onMounted(async () => {
   }
 })
 </script>
-

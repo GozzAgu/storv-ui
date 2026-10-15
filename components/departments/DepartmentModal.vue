@@ -1,6 +1,6 @@
 <template>
   <SDialog
-      placement="right"
+    placement="right"
     :open="props.modelValue"
     @update:open="(value: boolean) => emit('update:modelValue', value)"
     :title="isEdit ? 'Edit department' : 'Create department'"
@@ -19,11 +19,7 @@
         </SField>
 
         <SField label="Department name" required>
-          <SInput
-            v-model="formData.name"
-            required
-            placeholder="Enter department name"
-          />
+          <SInput v-model="formData.name" required placeholder="Enter department name" />
         </SField>
 
         <SField label="Description" hint="Optional">

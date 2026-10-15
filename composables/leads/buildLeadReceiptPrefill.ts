@@ -2,10 +2,7 @@ import type { ReceiptCreationPrefill } from '~/types/receipt-prefill'
 import type { SalesLead } from '~/types/leads'
 
 export function buildLeadReceiptPrefill(lead: SalesLead): ReceiptCreationPrefill {
-  const notes = [
-    lead.notes?.trim(),
-    lead.productName ? `Interest: ${lead.productName}` : '',
-  ]
+  const notes = [lead.notes?.trim(), lead.productName ? `Interest: ${lead.productName}` : '']
     .filter(Boolean)
     .join('\n')
 

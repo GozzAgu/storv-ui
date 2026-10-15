@@ -50,10 +50,8 @@ export function mapStaffDoc(staffDoc: {
 
   const role: Staff['role'] =
     staffData.role === 'manager' || staffData.role === 'intern' ? staffData.role : 'staff'
-  const canManageInventory =
-    staffData.canManageInventory === true ? true : undefined
-  const canManageReceipts =
-    staffData.canManageReceipts === true ? true : undefined
+  const canManageInventory = staffData.canManageInventory === true ? true : undefined
+  const canManageReceipts = staffData.canManageReceipts === true ? true : undefined
   const admin = staffData.admin === true
 
   return {
@@ -100,7 +98,10 @@ export function mapStaffDoc(staffDoc: {
 export function buildStaffUserData(
   staff: Staff,
   authUid: string,
-  prior?: Pick<UserData, 'subscription' | 'subscriptionBillingCycle' | 'preferences' | 'storeDetails' | 'storeLogoUrl'> | null
+  prior?: Pick<
+    UserData,
+    'subscription' | 'subscriptionBillingCycle' | 'preferences' | 'storeDetails' | 'storeLogoUrl'
+  > | null
 ): UserData {
   const priorPlan = prior?.subscription
   return {

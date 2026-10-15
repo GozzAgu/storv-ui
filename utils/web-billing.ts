@@ -5,7 +5,9 @@ const DEFAULT_APP_ORIGIN = 'https://app.storvv.com'
  * (App Store rules on digital subscriptions); owners change them here instead.
  */
 export function webBillingUrl(appOrigin?: string | null): string {
-  const raw = String(appOrigin || '').trim().replace(/\/+$/, '')
+  const raw = String(appOrigin || '')
+    .trim()
+    .replace(/\/+$/, '')
   const origin = raw.startsWith('https://') ? raw : DEFAULT_APP_ORIGIN
   return `${origin}/dashboard/settings?tab=account#settings-subscription`
 }

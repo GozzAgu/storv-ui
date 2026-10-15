@@ -17,7 +17,9 @@
           :disabled="notificationsStore.loading"
           @click="handleMarkAllAsRead"
         >
-          <template #leading><CheckCheck :size="16" :stroke-width="2" aria-hidden="true" /></template>
+          <template #leading
+            ><CheckCheck :size="16" :stroke-width="2" aria-hidden="true"
+          /></template>
           Mark all read
         </SButton>
         <NuxtLink
@@ -72,7 +74,11 @@
             :class="{ 's-notify__item--unread': !notification.read }"
             @click="handleNotificationClick(notification)"
           >
-            <span class="s-notify__icon" :class="`s-notify__icon--${getTone(notification)}`" aria-hidden="true">
+            <span
+              class="s-notify__icon"
+              :class="`s-notify__icon--${getTone(notification)}`"
+              aria-hidden="true"
+            >
               <component :is="getIcon(notification)" :size="16" :stroke-width="1.75" />
             </span>
             <span class="s-notify__content">
@@ -169,11 +175,7 @@ type Tone = 'accent' | 'success' | 'warning' | 'info' | 'neutral'
 
 function getIcon(notification: Notification): Component {
   const type = notification.type || ''
-  if (
-    type.startsWith('payment_') ||
-    type === 'till_count_difference' ||
-    type === 'payout_changed'
-  )
+  if (type.startsWith('payment_') || type === 'till_count_difference' || type === 'payout_changed')
     return BadgeCheck
   if (type.startsWith('receipt')) return Receipt
   if (type.startsWith('item') || type.startsWith('folder')) return Package

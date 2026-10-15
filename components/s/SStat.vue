@@ -1,7 +1,11 @@
 <template>
   <component :is="to ? NuxtLink : 'div'" :to="to" class="s-c s-stat">
     <span v-if="$slots.icon" class="s-stat__head">
-      <span class="s-stat__icon" :class="tone ? `s-stat__icon--${tone}` : undefined" aria-hidden="true">
+      <span
+        class="s-stat__icon"
+        :class="tone ? `s-stat__icon--${tone}` : undefined"
+        aria-hidden="true"
+      >
         <slot name="icon" />
       </span>
       <span class="s-stat__label">{{ label }}</span>

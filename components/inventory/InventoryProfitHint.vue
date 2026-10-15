@@ -11,7 +11,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { InventoryItem } from '~/stores/inventory'
-import { getItemGrossProfit, getItemMarginPercent, formatMarginPercent } from '~/utils/inventory-item-cost'
+import {
+  getItemGrossProfit,
+  getItemMarginPercent,
+  formatMarginPercent,
+} from '~/utils/inventory-item-cost'
 import { usePermissions } from '~/composables/usePermissions'
 import { usePreferences } from '~/composables/usePreferences'
 

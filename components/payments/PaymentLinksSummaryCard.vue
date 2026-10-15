@@ -9,7 +9,11 @@
       <NuxtLink to="/dashboard/payment-links" class="s-link s-paylinks-card__open">Open</NuxtLink>
     </template>
 
-    <dl v-if="loading && links.length === 0" class="s-metrics s-metrics--inline s-paylinks-card__metrics" aria-busy="true">
+    <dl
+      v-if="loading && links.length === 0"
+      class="s-metrics s-metrics--inline s-paylinks-card__metrics"
+      aria-busy="true"
+    >
       <div v-for="i in 4" :key="i" class="s-metrics__item" aria-hidden="true">
         <SSkeleton width="56px" height="12px" />
         <SSkeleton width="72px" height="20px" />
@@ -53,7 +57,9 @@
         </template>
       </p>
 
-      <p v-if="recentLinks.length === 0" class="s-list__empty s-paylinks-card__empty">No payment links yet.</p>
+      <p v-if="recentLinks.length === 0" class="s-list__empty s-paylinks-card__empty">
+        No payment links yet.
+      </p>
       <ul v-else class="s-list s-paylinks-card__list">
         <li v-for="inv in recentLinks" :key="inv.token" class="s-list__item">
           <span class="s-list__main">
@@ -93,7 +99,7 @@ const statusLabel = (s: PaymentLinkListItem['status']) =>
   ({ unpaid: 'Unpaid', paid: 'Paid', failed: 'Failed', expired: 'Expired' }[s])
 
 const statusTone = (s: PaymentLinkListItem['status']) =>
-  ({ unpaid: 'neutral', paid: 'success', failed: 'error', expired: 'warning' } as const)[s]
+  (({ unpaid: 'neutral', paid: 'success', failed: 'error', expired: 'warning' } as const)[s])
 
 const load = () => {
   loadAll().catch(() => {})

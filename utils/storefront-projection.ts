@@ -5,10 +5,7 @@ import {
   getInventoryAvailabilityStatus,
   type InventoryAvailabilityStatus,
 } from '~/utils/inventory-availability'
-import {
-  quantityFieldName,
-  unitsForItem,
-} from '~/utils/inventory-folder-availability'
+import { quantityFieldName, unitsForItem } from '~/utils/inventory-folder-availability'
 import {
   canAllowlistStorefrontField,
   filterAllowlistedFieldIds,
@@ -22,9 +19,7 @@ import type {
   StorefrontPublicProfile,
 } from '~/types/storefront'
 
-function mapPublicAvailability(
-  status: InventoryAvailabilityStatus
-): StorefrontPublicAvailability {
+function mapPublicAvailability(status: InventoryAvailabilityStatus): StorefrontPublicAvailability {
   return status === 'available' ? 'available' : 'unavailable'
 }
 
@@ -35,11 +30,7 @@ function resolveStorefrontAvailability(
 ): StorefrontPublicAvailability {
   const fromStatus = mapPublicAvailability(getInventoryAvailabilityStatus(item))
   if (fromStatus !== 'available') return fromStatus
-  const units = unitsForItem(
-    item,
-    Boolean(folder.hasSerialNumbers),
-    quantityFieldName(folder)
-  )
+  const units = unitsForItem(item, Boolean(folder.hasSerialNumbers), quantityFieldName(folder))
   return units >= 1 ? 'available' : 'unavailable'
 }
 
@@ -92,10 +83,7 @@ export function isItemListedOnStorefront(
   return true
 }
 
-function resolvePublicFieldIds(
-  folder: InventoryFolder,
-  config: StorefrontConfig
-): string[] {
+function resolvePublicFieldIds(folder: InventoryFolder, config: StorefrontConfig): string[] {
   const fields = folder.template?.fields ?? []
   const folderPub = config.folderPublish[folder.id]
   const parentId = folder.parentId ? String(folder.parentId) : ''
@@ -103,8 +91,8 @@ function resolvePublicFieldIds(
   const rawIds = folderPub?.publicFieldIds?.length
     ? folderPub.publicFieldIds
     : parentPub?.publicFieldIds?.length
-      ? parentPub.publicFieldIds
-      : []
+    ? parentPub.publicFieldIds
+    : []
   return filterAllowlistedFieldIds(rawIds, fields)
 }
 
@@ -191,9 +179,7 @@ export function buildStorefrontListing(params: {
     attributes: attributes.filter((a) => a.key !== descriptionField?.name),
     description,
     imageUrl:
-      typeof item.imageUrl === 'string' && item.imageUrl.trim()
-        ? item.imageUrl.trim()
-        : undefined,
+      typeof item.imageUrl === 'string' && item.imageUrl.trim() ? item.imageUrl.trim() : undefined,
     searchText: searchParts.join(' ').toLowerCase().replace(/\s+/g, ' ').trim(),
     sortPrice: price,
     sourceItemId: item.id,

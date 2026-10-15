@@ -2,9 +2,9 @@
   <section v-if="visible" class="s-form-section">
     <h3 class="s-form-section__title">Admin</h3>
     <p class="s-form-meta">
-      An admin can do everything in this branch that you can, including adding, editing and
-      removing regular staff. They see financial figures only if you turn on Financial figures
-      for them below. Only you can make or remove admins and manage billing. Saved separately.
+      An admin can do everything in this branch that you can, including adding, editing and removing
+      regular staff. They see financial figures only if you turn on Financial figures for them
+      below. Only you can make or remove admins and manage billing. Saved separately.
     </p>
     <SCheckbox
       v-model="admin"
@@ -111,8 +111,7 @@ const saving = ref(false)
 const dirty = computed(
   () =>
     admin.value !== savedAdmin.value ||
-    (admin.value &&
-      ADMIN_EXTRAS.some((e) => grants.value[e.key] !== savedGrants.value[e.key]))
+    (admin.value && ADMIN_EXTRAS.some((e) => grants.value[e.key] !== savedGrants.value[e.key]))
 )
 
 function reset() {
@@ -129,7 +128,10 @@ async function save() {
     const code = await resolveTotpForSensitiveAction(totp.prompt)
     const result = await staffStore.setStaffAdminAccess(
       props.staff.id,
-      { admin: admin.value, grants: admin.value ? { ...grants.value } : normalizeStaffAdminGrants(null) },
+      {
+        admin: admin.value,
+        grants: admin.value ? { ...grants.value } : normalizeStaffAdminGrants(null),
+      },
       code
     )
     savedAdmin.value = result.admin

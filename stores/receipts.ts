@@ -304,8 +304,8 @@ export const useReceiptsStore = defineStore('receipts', {
               folderIds: Array.isArray(data.folderIds)
                 ? (data.folderIds as string[])
                 : data.folderId
-                  ? [data.folderId]
-                  : [],
+                ? [data.folderId]
+                : [],
               itemIds: data.itemIds || [],
               storeId: data.storeId || '',
               storeBranchName: data.storeBranchName || '',
@@ -332,9 +332,7 @@ export const useReceiptsStore = defineStore('receipts', {
               hasSerialNumbers: data.hasSerialNumbers === true,
               source: typeof data.source === 'string' ? data.source : undefined,
               storefrontInquiryId:
-                typeof data.storefrontInquiryId === 'string'
-                  ? data.storefrontInquiryId
-                  : undefined,
+                typeof data.storefrontInquiryId === 'string' ? data.storefrontInquiryId : undefined,
             } as Receipt
           })
 
@@ -432,7 +430,8 @@ export const useReceiptsStore = defineStore('receipts', {
     ) {
       let normalizedReceiptData = {
         ...receiptData,
-        customerName: normalizeEntityName(receiptData.customerName) || receiptData.customerName.trim(),
+        customerName:
+          normalizeEntityName(receiptData.customerName) || receiptData.customerName.trim(),
       }
 
       const { isDemoModeActive } = await import('~/utils/demo-mode')
@@ -544,7 +543,9 @@ export const useReceiptsStore = defineStore('receipts', {
           const notificationsStore = useNotificationsStore()
           const preferences = usePreferences()
           await preferences.initialize()
-          const notificationType = normalizedReceiptData.isSwapIn ? 'swap_in_completed' : 'receipt_created'
+          const notificationType = normalizedReceiptData.isSwapIn
+            ? 'swap_in_completed'
+            : 'receipt_created'
           const notificationTitle = normalizedReceiptData.isSwapIn
             ? 'Swap-in Completed'
             : 'New Receipt Created'
@@ -695,8 +696,8 @@ export const useReceiptsStore = defineStore('receipts', {
       const folderIdsFromReceipt = Array.isArray(data.folderIds)
         ? (data.folderIds as string[]).filter(Boolean)
         : fallbackFolderId
-          ? [fallbackFolderId]
-          : []
+        ? [fallbackFolderId]
+        : []
 
       if (opts.stock !== false) {
         const { groupReceiptItemsByFolder } = await import('~/utils/receipt-multi-folder')
@@ -908,7 +909,11 @@ export const useReceiptsStore = defineStore('receipts', {
       }
       const index = this.receipts.findIndex((r) => r.id === receiptId)
       if (index > -1) {
-        this.receipts[index] = { ...this.receipts[index]!, status: 'cancelled', updatedAt: new Date() }
+        this.receipts[index] = {
+          ...this.receipts[index]!,
+          status: 'cancelled',
+          updatedAt: new Date(),
+        }
       }
     },
 

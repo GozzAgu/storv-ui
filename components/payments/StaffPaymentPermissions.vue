@@ -4,8 +4,9 @@
     <p class="s-form-meta">
       Saved separately and recorded in the payments audit log. Confirming means checking money
       against your bank app or till before a sale counts as paid.
-      <template v-if="!access.isOwner">Only the store owner can change the other payment
-        permissions.</template>
+      <template v-if="!access.isOwner"
+        >Only the store owner can change the other payment permissions.</template
+      >
     </p>
     <SCheckbox
       v-if="access.isOwner"

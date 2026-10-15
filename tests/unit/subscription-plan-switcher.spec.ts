@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  canShowDevPlanSwitcher,
-  getChangeablePaidPlans,
-} from '~/utils/subscription-plan-switcher'
+import { canShowDevPlanSwitcher, getChangeablePaidPlans } from '~/utils/subscription-plan-switcher'
 
 describe('subscription-plan-switcher', () => {
   it('lists Medium as a downgrade from Enterprise', () => {

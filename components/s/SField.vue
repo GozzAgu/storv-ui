@@ -1,11 +1,22 @@
 <template>
-  <slot v-if="parent" :id="controlId" :label-id="parent.labelId.value" :described-by="describedBy" :invalid="invalid" />
+  <slot
+    v-if="parent"
+    :id="controlId"
+    :label-id="parent.labelId.value"
+    :described-by="describedBy"
+    :invalid="invalid"
+  />
   <div v-else class="s-c s-field">
     <label v-if="label" :id="labelId" class="s-field__label" :for="controlId">
       {{ label }}<span v-if="required" class="s-field__required" aria-hidden="true">*</span
       ><span v-else-if="isOptionalHint" class="s-field__optional">Optional</span>
     </label>
-    <slot :id="controlId" :label-id="label ? labelId : undefined" :described-by="describedBy" :invalid="invalid" />
+    <slot
+      :id="controlId"
+      :label-id="label ? labelId : undefined"
+      :described-by="describedBy"
+      :invalid="invalid"
+    />
     <p v-if="error" :id="errorId" class="s-field__error" role="alert">{{ error }}</p>
     <p v-else-if="hint && !isOptionalHint" :id="hintId" class="s-field__hint">{{ hint }}</p>
   </div>

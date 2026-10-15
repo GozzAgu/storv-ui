@@ -87,7 +87,14 @@
             placeholder="you@example.com"
             autocomplete="email"
           />
-          <SButton type="submit" variant="primary" size="lg" block :loading="processing" :disabled="!canPay">
+          <SButton
+            type="submit"
+            variant="primary"
+            size="lg"
+            block
+            :loading="processing"
+            :disabled="!canPay"
+          >
             {{ processing ? 'Redirecting…' : `Pay ${formatNaira(invoice.total)}` }}
           </SButton>
           <p v-if="payError" class="s-pay__error" role="alert">{{ payError }}</p>

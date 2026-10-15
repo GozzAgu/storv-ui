@@ -42,7 +42,13 @@ export function payoutLast4(data: Partial<StoredPayout> | undefined): string {
 
 export function toPayoutView(data: Partial<StoredPayout> | undefined): PayoutView {
   if (!data?.connected) {
-    return { connected: false, bankName: '', accountName: '', accountNumberLast4: '', percentageCharge: 0 }
+    return {
+      connected: false,
+      bankName: '',
+      accountName: '',
+      accountNumberLast4: '',
+      percentageCharge: 0,
+    }
   }
   return {
     connected: true,
@@ -89,7 +95,9 @@ export async function resolveAccountName(
   let name = ''
   try {
     const data = await paystack<{ account_name?: string }>(
-      `/bank/resolve?account_number=${encodeURIComponent(accountNumber)}&bank_code=${encodeURIComponent(bankCode)}`,
+      `/bank/resolve?account_number=${encodeURIComponent(
+        accountNumber
+      )}&bank_code=${encodeURIComponent(bankCode)}`,
       { method: 'GET' }
     )
     name = String(data?.account_name || '').trim()
@@ -187,7 +195,9 @@ export async function connectPayout(
     throw new PaymentServiceError(
       'PAYSTACK_UNAVAILABLE',
       502,
-      `Paystack could not save this payout account${reason ? `: ${reason}` : ''}. Nothing was changed.`
+      `Paystack could not save this payout account${
+        reason ? `: ${reason}` : ''
+      }. Nothing was changed.`
     )
   }
   if (!subaccountCode) {
@@ -201,58 +211,60 @@ export async function connectPayout(
   const last4 = input.accountNumber.slice(-4)
   const store = storeDocRef(db, input.ownerId, input.storeId)
   let saved = true
-  await db.runTransaction(async (tx) => {
-    const head = await readChainHead(tx, store)
-    const now = new Date().toISOString()
-    tx.set(
-      ref,
-      {
-        ownerUserId: input.ownerId,
-        storeId: input.storeId,
-        connected: true,
-        bankName: input.bankName.trim().slice(0, 100),
-        bankCode: input.bankCode,
-        accountNumberLast4: last4,
-        accountNumber: FieldValue.delete(),
-        accountName,
-        subaccountCode,
-        percentageCharge: PAYOUT_PERCENTAGE_CHARGE,
-        updatedBy: input.actorUid,
-        updatedAt: FieldValue.serverTimestamp(),
-        ...(existing ? {} : { createdAt: FieldValue.serverTimestamp() }),
-      },
-      { merge: true }
-    )
-    appendAuditEvents(tx, store, head, [
-      {
-        type: 'payout_changed',
-        paymentId: null,
-        receiptId: null,
-        linkId: null,
-        actorUid: input.actorUid,
-        actorKind: 'owner',
-        amountKobo: null,
-        currency: null,
-        fromStatus: existing?.connected ? 'connected' : null,
-        toStatus: 'connected',
-        reason: existing?.connected ? 'payout account replaced' : 'payout account connected',
-        flags: [],
-        at: now,
-        subjectUid: null,
-      },
-    ])
-  }, TX_OPTIONS).catch((err: unknown) => {
-    saved = false
-    console.error(
-      JSON.stringify({
-        tag: 'payments-payout-desync',
-        ownerId: input.ownerId,
-        storeId: input.storeId,
-        subaccountCode,
-        reason: err instanceof Error ? err.message.slice(0, 200) : 'unknown',
-      })
-    )
-  })
+  await db
+    .runTransaction(async (tx) => {
+      const head = await readChainHead(tx, store)
+      const now = new Date().toISOString()
+      tx.set(
+        ref,
+        {
+          ownerUserId: input.ownerId,
+          storeId: input.storeId,
+          connected: true,
+          bankName: input.bankName.trim().slice(0, 100),
+          bankCode: input.bankCode,
+          accountNumberLast4: last4,
+          accountNumber: FieldValue.delete(),
+          accountName,
+          subaccountCode,
+          percentageCharge: PAYOUT_PERCENTAGE_CHARGE,
+          updatedBy: input.actorUid,
+          updatedAt: FieldValue.serverTimestamp(),
+          ...(existing ? {} : { createdAt: FieldValue.serverTimestamp() }),
+        },
+        { merge: true }
+      )
+      appendAuditEvents(tx, store, head, [
+        {
+          type: 'payout_changed',
+          paymentId: null,
+          receiptId: null,
+          linkId: null,
+          actorUid: input.actorUid,
+          actorKind: 'owner',
+          amountKobo: null,
+          currency: null,
+          fromStatus: existing?.connected ? 'connected' : null,
+          toStatus: 'connected',
+          reason: existing?.connected ? 'payout account replaced' : 'payout account connected',
+          flags: [],
+          at: now,
+          subjectUid: null,
+        },
+      ])
+    }, TX_OPTIONS)
+    .catch((err: unknown) => {
+      saved = false
+      console.error(
+        JSON.stringify({
+          tag: 'payments-payout-desync',
+          ownerId: input.ownerId,
+          storeId: input.storeId,
+          subaccountCode,
+          reason: err instanceof Error ? err.message.slice(0, 200) : 'unknown',
+        })
+      )
+    })
 
   return {
     saved,

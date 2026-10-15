@@ -42,7 +42,11 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     return navigateTo({ path: '/auth/action', query: to.query, hash: to.hash || undefined })
   }
 
-  if (to.path === '/signin' && to.hash && (to.hash.includes('oobCode') || to.hash.includes('mode='))) {
+  if (
+    to.path === '/signin' &&
+    to.hash &&
+    (to.hash.includes('oobCode') || to.hash.includes('mode='))
+  ) {
     return navigateTo({ path: '/auth/action', hash: to.hash })
   }
 
@@ -78,10 +82,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
         return navigateTo('/dashboard/verify-email')
       }
 
-      if (
-        userStore.userData?.twoFactorEnabled &&
-        !isTwoFactorSessionVerified(userId)
-      ) {
+      if (userStore.userData?.twoFactorEnabled && !isTwoFactorSessionVerified(userId)) {
         return navigateTo('/signin?verify2fa=1')
       }
 
@@ -91,20 +92,12 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
       const onboardingIncomplete =
         profileLoaded && userStore.userData?.hasCompletedOnboarding === false
 
-      if (
-        onboardingIncomplete &&
-        !isStaffAccount &&
-        !isOnboardingExemptDashboardPath(to.path)
-      ) {
+      if (onboardingIncomplete && !isStaffAccount && !isOnboardingExemptDashboardPath(to.path)) {
         return navigateTo('/dashboard/onboarding')
       }
 
       // Already completed setup in this session - skip onboarding while profile reloads.
-      if (
-        !profileLoaded &&
-        sessionOnboardingComplete &&
-        to.path === '/dashboard/onboarding'
-      ) {
+      if (!profileLoaded && sessionOnboardingComplete && to.path === '/dashboard/onboarding') {
         return navigateTo('/dashboard')
       }
     }

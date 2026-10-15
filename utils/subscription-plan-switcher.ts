@@ -8,16 +8,16 @@ export function getChangeablePaidPlans(
 ): Array<{ id: SubscriptionPlan; name: string; direction: 'upgrade' | 'downgrade' | 'same' }> {
   const order: SubscriptionPlan[] = ['storvv_micro', 'storvv_medium', 'storvv_enterprise']
   const currentIdx = order.indexOf(normalizeSubscriptionPlan(currentStoredPlan))
-  return SUBSCRIPTION_PLANS.filter((p) => p.id !== 'storvv_micro' && p.id !== currentStoredPlan).map(
-    (p) => {
-      const idx = order.indexOf(p.id)
-      return {
-        id: p.id,
-        name: p.name,
-        direction: idx > currentIdx ? ('upgrade' as const) : ('downgrade' as const),
-      }
+  return SUBSCRIPTION_PLANS.filter(
+    (p) => p.id !== 'storvv_micro' && p.id !== currentStoredPlan
+  ).map((p) => {
+    const idx = order.indexOf(p.id)
+    return {
+      id: p.id,
+      name: p.name,
+      direction: idx > currentIdx ? ('upgrade' as const) : ('downgrade' as const),
     }
-  )
+  })
 }
 
 export type DevPlanSwitcherPayload = {

@@ -12,7 +12,11 @@ export interface SettleResult {
   settleError?: string
 }
 
-export type InventorySettleBlockReason = 'already_sold' | 'held_by_other' | 'insufficient_stock' | 'missing_item'
+export type InventorySettleBlockReason =
+  | 'already_sold'
+  | 'held_by_other'
+  | 'insufficient_stock'
+  | 'missing_item'
 
 /**
  * Pure guard used by settle + tests: can this payment-link line deduct stock?
@@ -25,10 +29,12 @@ export function evaluatePaymentLinkItemStock(params: {
     | { hasSerialNumbers?: boolean; template?: { fields?: Array<{ name?: string }> } }
     | null
     | undefined
-}): { ok: true; usesSerial: boolean; fieldKey?: string; newQty?: number } | {
-  ok: false
-  reason: InventorySettleBlockReason
-} {
+}):
+  | { ok: true; usesSerial: boolean; fieldKey?: string; newQty?: number }
+  | {
+      ok: false
+      reason: InventorySettleBlockReason
+    } {
   const { token, item, itemData, folder } = params
   if (!itemData) return { ok: false, reason: 'missing_item' }
 

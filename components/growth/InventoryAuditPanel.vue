@@ -15,7 +15,10 @@
             {{ log.userDisplayName }} · {{ formatWhen(log.createdAt) }}
           </p>
         </div>
-        <p v-if="log.previousValue != null || log.newValue != null" class="s-list__end s-settings__change">
+        <p
+          v-if="log.previousValue != null || log.newValue != null"
+          class="s-list__end s-settings__change"
+        >
           {{ log.previousValue ?? EMPTY_CELL }}
           <ArrowRight :size="14" :stroke-width="2" aria-hidden="true" />
           <span class="ds-sr-only">changed to</span>
@@ -43,7 +46,12 @@ const logs = ref<InventoryAuditLog[]>([])
 const loading = ref(true)
 
 function formatWhen(date: Date) {
-  return date.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+  return date.toLocaleString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }
 
 onMounted(async () => {

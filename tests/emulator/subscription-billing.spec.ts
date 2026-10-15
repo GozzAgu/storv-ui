@@ -264,7 +264,9 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)(
       m.raw = JSON.stringify(payload)
       m.signature = createHmac('sha512', signWith).update(m.raw).digest('hex')
       m.status = 200
-      const out = await (await route('webhook.post'))({
+      const out = await (
+        await route('webhook.post')
+      )({
         node: { req: { socket: { remoteAddress: fromIp } } },
       })
       return { status: m.status, out }

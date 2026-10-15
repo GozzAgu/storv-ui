@@ -1,6 +1,6 @@
 # Storvv Marketing - Premium Landing Design System
 
-**North star:** *"Apple launched an operating system for modern retailers."*
+**North star:** _"Apple launched an operating system for modern retailers."_
 
 **Scope:** Marketing site visual/UX only - no product or route changes.
 
@@ -22,14 +22,14 @@
 
 ## Visual system
 
-| Token | Value | Use |
-|-------|-------|-----|
-| Canvas | `#050508` | Page background |
-| Glass bg | `rgb(255 255 255 / 0.06)` | Cards, nav pill |
-| Glass border | `rgb(255 255 255 / 0.12)` | Hairlines |
-| Accent | `#9ab5e3` / `#143f8d` | Headlines, CTAs |
-| Ink | `#f8fafc` | Primary text |
-| Muted | `#94a3b8` | Body |
+| Token        | Value                     | Use             |
+| ------------ | ------------------------- | --------------- |
+| Canvas       | `#050508`                 | Page background |
+| Glass bg     | `rgb(255 255 255 / 0.06)` | Cards, nav pill |
+| Glass border | `rgb(255 255 255 / 0.12)` | Hairlines       |
+| Accent       | `#9ab5e3` / `#143f8d`     | Headlines, CTAs |
+| Ink          | `#f8fafc`                 | Primary text    |
+| Muted        | `#94a3b8`                 | Body            |
 
 **Typography:** Large display headlines (`clamp(2.5rem, 6vw, 4.5rem)`), generous line-height, tabular nums on metrics.
 
@@ -55,13 +55,13 @@
 
 ## Components
 
-| Component | Path |
-|-----------|------|
-| `LandingProductStories` | Feature storytelling |
-| `LandingAiShowcase` | AI section |
-| `LandingFinalCta` | Closing conversion |
-| `LandingShowcase` | Hero + problems + core |
-| `LandingProof` | Social proof |
+| Component               | Path                   |
+| ----------------------- | ---------------------- |
+| `LandingProductStories` | Feature storytelling   |
+| `LandingAiShowcase`     | AI section             |
+| `LandingFinalCta`       | Closing conversion     |
+| `LandingShowcase`       | Hero + problems + core |
+| `LandingProof`          | Social proof           |
 
 CSS: `assets/css/landing-premium.css`
 

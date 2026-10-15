@@ -47,7 +47,10 @@ export default defineEventHandler(async (event) => {
   }
 
   if (type === 'reserve' && profile.allowReservations === false) {
-    throw createError({ statusCode: 400, message: 'Reservations are not available for this store.' })
+    throw createError({
+      statusCode: 400,
+      message: 'Reservations are not available for this store.',
+    })
   }
 
   const ownerUid = String(profile.ownerUid || '')

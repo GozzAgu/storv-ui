@@ -35,17 +35,13 @@
         <AuthSuccessPanel :icon="CheckCircleIcon">
           <template #title>Check your email</template>
           We've sent a password reset link to
-          <strong>{{ form.email }}</strong>.
+          <strong>{{ form.email }}</strong
+          >.
         </AuthSuccessPanel>
 
         <p class="auth-auth-footer-link">
           Didn't receive it? Check spam or
-          <button
-            type="button"
-            class="auth-link"
-            :disabled="isResending"
-            @click="resendEmail"
-          >
+          <button type="button" class="auth-link" :disabled="isResending" @click="resendEmail">
             {{ isResending ? 'Resending…' : 'Resend email' }}
           </button>
         </p>

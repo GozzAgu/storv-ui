@@ -1,11 +1,6 @@
 import type { Component } from 'vue'
 
-export type DashboardPageMetricTone =
-  | 'default'
-  | 'success'
-  | 'warning'
-  | 'danger'
-  | 'info'
+export type DashboardPageMetricTone = 'default' | 'success' | 'warning' | 'danger' | 'info'
 
 export interface DashboardPageMetric {
   key: string

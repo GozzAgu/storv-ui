@@ -42,7 +42,13 @@ export default defineEventHandler(async (event) => {
   }
   for (const doc of inquiriesSnap.docs) {
     const status = String(doc.data()?.status || '') as StorefrontInquiryStatus
-    if (status === 'pending' || status === 'confirmed' || status === 'rejected' || status === 'cancelled' || status === 'completed') {
+    if (
+      status === 'pending' ||
+      status === 'confirmed' ||
+      status === 'rejected' ||
+      status === 'cancelled' ||
+      status === 'completed'
+    ) {
       inquiryCounts[status] += 1
     }
   }

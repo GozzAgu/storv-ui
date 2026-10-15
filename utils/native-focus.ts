@@ -3,8 +3,7 @@ import { isCapacitorNative } from '~/utils/capacitor-env'
 const KEYBOARD_FOCUS_SELECTOR =
   'input, textarea, select, [contenteditable=""], [contenteditable="true"]'
 
-const TAP_DISMISS_SKIP_SELECTOR =
-  `${KEYBOARD_FOCUS_SELECTOR}, button, a, label, [role="button"], [role="link"], [role="checkbox"]`
+const TAP_DISMISS_SKIP_SELECTOR = `${KEYBOARD_FOCUS_SELECTOR}, button, a, label, [role="button"], [role="link"], [role="checkbox"]`
 
 /** Dismiss the keyboard when closing native overlays. */
 export function blurActiveElementIfNative(native: boolean): void {

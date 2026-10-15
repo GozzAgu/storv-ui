@@ -78,7 +78,8 @@
           <p class="s-overview-quiet__eyebrow">Today</p>
           <h2 class="s-overview-quiet__title">{{ quietHeadline }}</h2>
           <p class="s-overview-quiet__meta">
-            <template v-if="canViewFinancials">{{ formatCurrency(0) }} revenue · </template>0 sales so far
+            <template v-if="canViewFinancials">{{ formatCurrency(0) }} revenue · </template>0 sales
+            so far
           </p>
           <SButton v-if="quietPrimaryCta" variant="primary" :to="quietPrimaryCta.href">
             {{ quietPrimaryCta.label }}
@@ -118,7 +119,9 @@
           <SStat
             label="Sales today"
             :value="todayReceiptsCount"
-            :hint="canViewFinancials ? `${formatCurrency(todaySales)} revenue` : 'Sales recorded today'"
+            :hint="
+              canViewFinancials ? `${formatCurrency(todaySales)} revenue` : 'Sales recorded today'
+            "
             to="/dashboard/receipts"
           >
             <template #icon><ShoppingBag :size="16" :stroke-width="2" /></template>

@@ -1,10 +1,16 @@
 <template>
   <SCard>
-    <SEmptyState v-if="userStore.isSuperAdmin" :title="resolvedTitle" :description="resolvedDescription">
+    <SEmptyState
+      v-if="userStore.isSuperAdmin"
+      :title="resolvedTitle"
+      :description="resolvedDescription"
+    >
       <template #icon><Sparkles :size="24" :stroke-width="1.75" /></template>
       <template #actions>
         <SButton variant="primary" :to="dashPath('/settings?upgrade=1')">View plans</SButton>
-        <SButton variant="ghost" :to="dashPath('/help#settings-subscription')">Compare plans</SButton>
+        <SButton variant="ghost" :to="dashPath('/help#settings-subscription')"
+          >Compare plans</SButton
+        >
       </template>
     </SEmptyState>
     <SEmptyState v-else title="Not available on this workspace" :description="staffDescription">
@@ -35,7 +41,8 @@ const props = withDefaults(
   }>(),
   {
     description: undefined,
-    staffDescription: "Ask the account owner if you need this. It isn't turned on for your workspace.",
+    staffDescription:
+      "Ask the account owner if you need this. It isn't turned on for your workspace.",
   }
 )
 

@@ -1,6 +1,6 @@
 <template>
   <SDialog
-      placement="right"
+    placement="right"
     :open="props.modelValue"
     title="New sale"
     size="md"
@@ -30,21 +30,14 @@
           </ol>
         </nav>
 
-        <div
-          v-if="prefillItemMatchFailed"
-          :class="drawerCalloutClass"
-          role="status"
-        >
+        <div v-if="prefillItemMatchFailed" :class="drawerCalloutClass" role="status">
           No matching in-stock product. Pick a category and items manually.
         </div>
 
         <SellScreenNoteBanner v-if="currentStep >= 2" />
 
         <!-- Step 1: Parent category -->
-        <div
-          v-if="currentStep === 0"
-          :class="drawerFillStepClass"
-        >
+        <div v-if="currentStep === 0" :class="drawerFillStepClass">
           <p :class="sectionLabelClass">Parent category</p>
           <SSearch v-model="folderSearchQuery" placeholder="Search categories…" />
 
@@ -125,14 +118,9 @@
         </div>
 
         <!-- Step 2: Subcategory -->
-        <div
-          v-if="currentStep === 1"
-          :class="drawerFillStepClass"
-        >
+        <div v-if="currentStep === 1" :class="drawerFillStepClass">
           <div class="s-new-sale__head">
-            <p :class="sectionLabelClass">
-              Subcategory · {{ selectedParentFolder?.name }}
-            </p>
+            <p :class="sectionLabelClass">Subcategory · {{ selectedParentFolder?.name }}</p>
             <SButton variant="ghost" size="sm" @click="goBackToParentCategories">
               Change parent
             </SButton>
@@ -183,10 +171,7 @@
         </div>
 
         <!-- Step 3: Select Items -->
-        <div
-          v-if="currentStep === 2"
-          :class="drawerFillStepClass"
-        >
+        <div v-if="currentStep === 2" :class="drawerFillStepClass">
           <div class="s-new-sale__head">
             <p :class="sectionLabelClass">Items · {{ selectedFolder?.name }}</p>
             <div class="s-new-sale__head-actions">
@@ -210,11 +195,7 @@
               selectedFolder?.hasSerialNumbers ? 'Search name or serial…' : 'Search products…'
             "
           />
-          <div
-            v-if="loadingItems"
-            :class="pickListClass"
-            aria-busy="true"
-          >
+          <div v-if="loadingItems" :class="pickListClass" aria-busy="true">
             <span class="ds-sr-only">Loading items…</span>
             <div :class="pickListScrollClass">
               <div v-for="i in 6" :key="i" :class="pickRowClass">
@@ -276,7 +257,9 @@
                         Serial:
                         {{ getItemField(item, 'serialNo') || getItemField(item, 'serialNumber') }}
                       </span>
-                      <span v-if="getItemField(item, 'sku')">SKU: {{ getItemField(item, 'sku') }}</span>
+                      <span v-if="getItemField(item, 'sku')"
+                        >SKU: {{ getItemField(item, 'sku') }}</span
+                      >
                       <span v-if="getItemField(item, 'price')">
                         <span
                           v-if="item.discountedPrice !== undefined && item.discountedPrice !== null"
@@ -302,9 +285,7 @@
                         </span>
                       </span>
                       <span
-                        v-if="
-                          !itemUsesSerialNumbers(item) && getItemAvailableStock(item) !== null
-                        "
+                        v-if="!itemUsesSerialNumbers(item) && getItemAvailableStock(item) !== null"
                       >
                         Stock: {{ getItemAvailableStock(item) }}
                       </span>
@@ -313,13 +294,15 @@
                 </div>
                 <div
                   v-if="
-                    selectedItems.find((si) => si.id === item.id) &&
-                    !itemUsesSerialNumbers(item)
+                    selectedItems.find((si) => si.id === item.id) && !itemUsesSerialNumbers(item)
                   "
                   class="s-new-sale__item-extra"
                   @click.stop
                 >
-                  <SField label="Quantity" :error="getSelectedItemQuantityError(item.id) || undefined">
+                  <SField
+                    label="Quantity"
+                    :error="getSelectedItemQuantityError(item.id) || undefined"
+                  >
                     <SInput
                       class="s-new-sale__narrow"
                       type="number"
@@ -339,7 +322,7 @@
                   <template
                     v-if="
                       !selectedItems.find((si) => si.id === item.id)?.showDiscountInput &&
-                      !(selectedItems.find((si) => si.id === item.id)?.discountAmount)
+                      !selectedItems.find((si) => si.id === item.id)?.discountAmount
                     "
                   >
                     <SButton variant="ghost" size="sm" @click="toggleItemDiscountInput(item.id)">
@@ -541,7 +524,9 @@
                 >
                   <div class="s-new-sale__balance-head">
                     <span class="s-new-sale__balance-label">Balance</span>
-                    <span class="s-new-sale__balance-value">{{ splitPaymentBalanceUi.headline }}</span>
+                    <span class="s-new-sale__balance-value">{{
+                      splitPaymentBalanceUi.headline
+                    }}</span>
                   </div>
                   <p class="s-new-sale__balance-sub">{{ splitPaymentBalanceUi.sub }}</p>
                   <p class="s-new-sale__balance-foot">
@@ -616,11 +601,7 @@
           </SFormSection>
           <SFormSection>
             <SField label="Notes" hint="Optional">
-              <STextarea
-                v-model="receiptForm.notes"
-                :rows="2"
-                placeholder="Additional notes..."
-              />
+              <STextarea v-model="receiptForm.notes" :rows="2" placeholder="Additional notes..." />
             </SField>
             <SField v-if="hasAnyCheckoutDiscount" label="Discount reason" required>
               <STextarea
@@ -1229,7 +1210,8 @@ const createBlockedReason = computed((): string | null => {
     if (splitPayments.value.length === 0 || splitPayments.value.some((p) => !p.method)) {
       return 'Choose a method for each split payment.'
     }
-    if (splitPayments.value.some((p) => p.amount <= 0)) return 'Enter an amount for each split payment.'
+    if (splitPayments.value.some((p) => p.amount <= 0))
+      return 'Enter an amount for each split payment.'
     if (Math.abs(splitPaymentsTotal.value - receiptTotal.value) > 0.01) {
       return 'Split payments must add up to the total.'
     }
@@ -1239,8 +1221,11 @@ const createBlockedReason = computed((): string | null => {
 
   // Only the swap-in fields we display, aligned with inventory
   if (isSwapIn.value) {
-    if (!swapInFolderId.value || !swapInFolder.value) return 'Choose a category for the swap-in item.'
-    const requiredFields = swapInDisplayFields.value.filter((f: { required?: boolean }) => f.required)
+    if (!swapInFolderId.value || !swapInFolder.value)
+      return 'Choose a category for the swap-in item.'
+    const requiredFields = swapInDisplayFields.value.filter(
+      (f: { required?: boolean }) => f.required
+    )
     for (const field of requiredFields) {
       const value = swapInItemForm.value[field.name]
       if (
@@ -1383,8 +1368,7 @@ async function applyReceiptCreationPrefill(prefill: ReceiptCreationPrefill) {
         selectLeafCategory(folder)
         await loadItems()
 
-        const match =
-          availableItems.value.find((row) => row.id === itemId) ?? item
+        const match = availableItems.value.find((row) => row.id === itemId) ?? item
         if (match && !match.dateOut && !match.pendingSaleReceiptId) {
           toggleItemSelection(match, true)
           if (!receiptForm.value.paymentMethod) {
@@ -1415,8 +1399,7 @@ async function applyReceiptCreationPrefill(prefill: ReceiptCreationPrefill) {
   selectLeafCategory(resolved.folder)
   await loadItems()
 
-  const match =
-    availableItems.value.find((row) => row.id === resolved.item.id) ?? resolved.item
+  const match = availableItems.value.find((row) => row.id === resolved.item.id) ?? resolved.item
   toggleItemSelection(match, true)
   if (!receiptForm.value.paymentMethod) {
     receiptForm.value.paymentMethod = defaultPaymentMethod.value

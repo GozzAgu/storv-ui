@@ -62,10 +62,7 @@ export function runDashboardShellBootstrap(options?: { force?: boolean }): Promi
     if (userData.role === 'superAdmin') {
       await storesStore.fetchStores()
       await storesStore.initializeCurrentStore()
-      await Promise.all([
-        departmentsStore.fetchDepartments(),
-        inventoryStore.fetchFolders(),
-      ])
+      await Promise.all([departmentsStore.fetchDepartments(), inventoryStore.fetchFolders()])
       if (isNativePerfContext()) {
         scheduleNativeIdleWork(() => {
           void import('~/stores/receipts').then(({ useReceiptsStore }) => {
@@ -84,10 +81,7 @@ export function runDashboardShellBootstrap(options?: { force?: boolean }): Promi
         /* non-fatal; pages may retry */
       }
       await storesStore.initializeCurrentStore()
-      await Promise.all([
-        departmentsStore.fetchDepartments(),
-        inventoryStore.fetchFolders(),
-      ])
+      await Promise.all([departmentsStore.fetchDepartments(), inventoryStore.fetchFolders()])
       if (isNativePerfContext()) {
         scheduleNativeIdleWork(() => {
           void import('~/stores/receipts').then(({ useReceiptsStore }) => {

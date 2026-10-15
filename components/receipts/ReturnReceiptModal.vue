@@ -17,8 +17,8 @@
       <div class="s-receipt-callout s-receipt-callout--warning">
         <p class="s-receipt-callout__title">Confirm return / refund</p>
         <p>
-          This marks the sale as refunded and returns all items to inventory. The customer will
-          be notified and the transaction will be recorded.
+          This marks the sale as refunded and returns all items to inventory. The customer will be
+          notified and the transaction will be recorded.
         </p>
       </div>
 

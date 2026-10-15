@@ -88,145 +88,145 @@ export const useDepartmentsStore = defineStore('departments', {
       }
 
       const run = (async () => {
-      if (this.departments.length === 0) {
-        this.loading = true
-      }
-      this.error = null
-
-      // console.log('[DepartmentsStore] Starting fetchDepartments')
-
-      const db = useFirestore().getFirestoreInstance()
-      if (!db) {
-        console.error('[DepartmentsStore] Firestore not initialized')
-        this.error = CLOUD_UNAVAILABLE_MESSAGE
-        this.loading = false
-        return
-      }
-
-      const authStore = useAuthStore()
-      if (!authStore.currentUser) {
-        console.error('[DepartmentsStore] User not authenticated')
-        this.error = 'User must be authenticated'
-        this.loading = false
-        return
-      }
-
-      // Get current store ID
-      const storeId = await getCurrentStoreId()
-      if (!storeId) {
-        this.error = 'No store selected. Please select a store first.'
-        this.loading = false
-        return
-      }
-
-      // Check if user is staff to determine which departments to show
-      const userStore = useUserStore()
-
-      // If user data is not loaded, fetch it first
-      if (!userStore.userData) {
-        await userStore.fetchUserData(authStore.currentUser.uid)
-      }
-
-      const resolvedOwner = await getQueryUserId()
-      const userId = resolvedOwner ?? authStore.currentUser.uid
-
-      try {
-        // Use hierarchical path: users/{userId}/stores/{storeId}/departments
-        const departmentsRef = getDepartmentsCollection(db, userId, storeId)
-        let querySnapshot
-
-        try {
-          // Filter by createdBy to only get departments for this user
-          const q = query(
-            departmentsRef,
-            where('createdBy', '==', userId),
-            orderBy('createdAt', 'desc')
-          )
-          querySnapshot = await getDocs(q)
-        } catch (orderByError: any) {
-          // If orderBy fails (missing index), try without orderBy
-          if (
-            orderByError.code === 'failed-precondition' ||
-            orderByError.message?.includes('index')
-          ) {
-            // Extract index creation URL from error if available
-            const indexUrlMatch = orderByError.message?.match(
-              /https:\/\/console\.firebase\.google\.com[^\s]+/
-            )
-            const indexUrl = indexUrlMatch ? indexUrlMatch[0] : null
-
-            // Only log index warning once per session to reduce console noise
-            if (typeof window !== 'undefined' && !(window as any).__firestoreIndexWarned) {
-              console.warn(
-                '📊 Firestore index missing for optimized queries. ' +
-                  'Create it here for better performance: ' +
-                  (indexUrl || 'Firebase Console > Firestore > Indexes')
-              )
-              ;(window as any).__firestoreIndexWarned = true
-            }
-
-            // Retry query without orderBy - this works but is less efficient
-            const q = query(departmentsRef, where('createdBy', '==', userId))
-            querySnapshot = await getDocs(q)
-          } else {
-            throw orderByError
-          }
+        if (this.departments.length === 0) {
+          this.loading = true
         }
+        this.error = null
 
-        const departments: Department[] = []
-        querySnapshot.forEach((docSnapshot) => {
-          const data = docSnapshot.data()
-          // Double-check that the department belongs to this user
-          if (data.createdBy === userId) {
-            departments.push({
-              id: docSnapshot.id,
-              ...data,
-            } as Department)
-          }
-        })
+        // console.log('[DepartmentsStore] Starting fetchDepartments')
 
-        // Sort manually if fetched without orderBy
-        if (departments.length > 0 && departments[0]?.createdAt) {
-          departments.sort((a, b) => {
-            const aTime = a.createdAt?.toMillis?.() || a.createdAt || 0
-            const bTime = b.createdAt?.toMillis?.() || b.createdAt || 0
-            return bTime - aTime
-          })
-        }
-
-        // Staff: only list the department they belong to (admins see the whole branch)
-        let visibleDepartments = departments
-        if (!(await callerManagesDepartments())) {
-          try {
-            const { useStaffStore } = await import('./staff')
-            const staffStore = useStaffStore()
-            const staffMember = await staffStore.fetchCurrentStaffMember()
-            const myDeptId = staffMember?.departmentId
-            visibleDepartments = myDeptId ? departments.filter((d) => d.id === myDeptId) : []
-          } catch (e) {
-            console.warn('[DepartmentsStore] Could not filter departments for staff:', e)
-            visibleDepartments = []
-          }
-        }
-
-        const storeIdNow = await getCurrentStoreId()
-        if (storeIdNow !== storeId) {
+        const db = useFirestore().getFirestoreInstance()
+        if (!db) {
+          console.error('[DepartmentsStore] Firestore not initialized')
+          this.error = CLOUD_UNAVAILABLE_MESSAGE
           this.loading = false
           return
         }
 
-        this.departments = visibleDepartments
-        departmentsFetchStamp = { storeId, fetchedAt: Date.now() }
-      } catch (error: any) {
-        console.error('[DepartmentsStore] Error fetching departments:', error.message || error)
-        this.error = error.message || 'Failed to fetch departments'
-
-        if (error.code === 'permission-denied' || error.message?.includes('permission')) {
-          this.error = PERMISSION_DENIED_MESSAGE
+        const authStore = useAuthStore()
+        if (!authStore.currentUser) {
+          console.error('[DepartmentsStore] User not authenticated')
+          this.error = 'User must be authenticated'
+          this.loading = false
+          return
         }
-      } finally {
-        this.loading = false
-      }
+
+        // Get current store ID
+        const storeId = await getCurrentStoreId()
+        if (!storeId) {
+          this.error = 'No store selected. Please select a store first.'
+          this.loading = false
+          return
+        }
+
+        // Check if user is staff to determine which departments to show
+        const userStore = useUserStore()
+
+        // If user data is not loaded, fetch it first
+        if (!userStore.userData) {
+          await userStore.fetchUserData(authStore.currentUser.uid)
+        }
+
+        const resolvedOwner = await getQueryUserId()
+        const userId = resolvedOwner ?? authStore.currentUser.uid
+
+        try {
+          // Use hierarchical path: users/{userId}/stores/{storeId}/departments
+          const departmentsRef = getDepartmentsCollection(db, userId, storeId)
+          let querySnapshot
+
+          try {
+            // Filter by createdBy to only get departments for this user
+            const q = query(
+              departmentsRef,
+              where('createdBy', '==', userId),
+              orderBy('createdAt', 'desc')
+            )
+            querySnapshot = await getDocs(q)
+          } catch (orderByError: any) {
+            // If orderBy fails (missing index), try without orderBy
+            if (
+              orderByError.code === 'failed-precondition' ||
+              orderByError.message?.includes('index')
+            ) {
+              // Extract index creation URL from error if available
+              const indexUrlMatch = orderByError.message?.match(
+                /https:\/\/console\.firebase\.google\.com[^\s]+/
+              )
+              const indexUrl = indexUrlMatch ? indexUrlMatch[0] : null
+
+              // Only log index warning once per session to reduce console noise
+              if (typeof window !== 'undefined' && !(window as any).__firestoreIndexWarned) {
+                console.warn(
+                  '📊 Firestore index missing for optimized queries. ' +
+                    'Create it here for better performance: ' +
+                    (indexUrl || 'Firebase Console > Firestore > Indexes')
+                )
+                ;(window as any).__firestoreIndexWarned = true
+              }
+
+              // Retry query without orderBy - this works but is less efficient
+              const q = query(departmentsRef, where('createdBy', '==', userId))
+              querySnapshot = await getDocs(q)
+            } else {
+              throw orderByError
+            }
+          }
+
+          const departments: Department[] = []
+          querySnapshot.forEach((docSnapshot) => {
+            const data = docSnapshot.data()
+            // Double-check that the department belongs to this user
+            if (data.createdBy === userId) {
+              departments.push({
+                id: docSnapshot.id,
+                ...data,
+              } as Department)
+            }
+          })
+
+          // Sort manually if fetched without orderBy
+          if (departments.length > 0 && departments[0]?.createdAt) {
+            departments.sort((a, b) => {
+              const aTime = a.createdAt?.toMillis?.() || a.createdAt || 0
+              const bTime = b.createdAt?.toMillis?.() || b.createdAt || 0
+              return bTime - aTime
+            })
+          }
+
+          // Staff: only list the department they belong to (admins see the whole branch)
+          let visibleDepartments = departments
+          if (!(await callerManagesDepartments())) {
+            try {
+              const { useStaffStore } = await import('./staff')
+              const staffStore = useStaffStore()
+              const staffMember = await staffStore.fetchCurrentStaffMember()
+              const myDeptId = staffMember?.departmentId
+              visibleDepartments = myDeptId ? departments.filter((d) => d.id === myDeptId) : []
+            } catch (e) {
+              console.warn('[DepartmentsStore] Could not filter departments for staff:', e)
+              visibleDepartments = []
+            }
+          }
+
+          const storeIdNow = await getCurrentStoreId()
+          if (storeIdNow !== storeId) {
+            this.loading = false
+            return
+          }
+
+          this.departments = visibleDepartments
+          departmentsFetchStamp = { storeId, fetchedAt: Date.now() }
+        } catch (error: any) {
+          console.error('[DepartmentsStore] Error fetching departments:', error.message || error)
+          this.error = error.message || 'Failed to fetch departments'
+
+          if (error.code === 'permission-denied' || error.message?.includes('permission')) {
+            this.error = PERMISSION_DENIED_MESSAGE
+          }
+        } finally {
+          this.loading = false
+        }
       })()
 
       fetchDepartmentsInflight = {

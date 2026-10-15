@@ -6,9 +6,28 @@ import {
 } from '~/utils/customer-directory'
 
 const receipts = [
-  { id: 'r1', customerName: 'Ada Obi', customerEmail: 'ADA@x.com', total: 100, date: new Date('2026-01-02') },
-  { id: 'r2', customerName: 'Ada O.', customerEmail: 'ada@x.com', customerPhone: '0803', total: 50, date: new Date('2026-03-01') },
-  { id: 'r3', customerName: 'Tunde', customerPhone: '0812', total: 300, date: { toDate: () => new Date('2026-02-01') } },
+  {
+    id: 'r1',
+    customerName: 'Ada Obi',
+    customerEmail: 'ADA@x.com',
+    total: 100,
+    date: new Date('2026-01-02'),
+  },
+  {
+    id: 'r2',
+    customerName: 'Ada O.',
+    customerEmail: 'ada@x.com',
+    customerPhone: '0803',
+    total: 50,
+    date: new Date('2026-03-01'),
+  },
+  {
+    id: 'r3',
+    customerName: 'Tunde',
+    customerPhone: '0812',
+    total: 300,
+    date: { toDate: () => new Date('2026-02-01') },
+  },
   { id: 'r4', customerName: '', total: 10, date: new Date() },
 ]
 

@@ -84,7 +84,13 @@ describe('staff own-record live updates', () => {
     expect(listeners.map((l) => l.path)).toEqual([PATH])
 
     listeners[0]!.onNext(
-      snapshot({ authUid: 'u1', status: 'active', createdBy: 'owner', admin: true, adminGrants: { branches: true } })
+      snapshot({
+        authUid: 'u1',
+        status: 'active',
+        createdBy: 'owner',
+        admin: true,
+        adminGrants: { branches: true },
+      })
     )
 
     expect(store.getCurrentStaffMember?.admin).toBe(true)
@@ -96,7 +102,9 @@ describe('staff own-record live updates', () => {
 
   it('stays quiet when nothing about admin access changed', async () => {
     await signedInStaffStore()
-    listeners[0]!.onNext(snapshot({ authUid: 'u1', status: 'active', createdBy: 'owner', admin: false }))
+    listeners[0]!.onNext(
+      snapshot({ authUid: 'u1', status: 'active', createdBy: 'owner', admin: false })
+    )
     expect(toastInfo).not.toHaveBeenCalled()
     expect(fetchDepartments).not.toHaveBeenCalled()
   })

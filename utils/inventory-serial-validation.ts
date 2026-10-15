@@ -1,7 +1,4 @@
-export function resolveSerialProductLine(
-  model?: string | null,
-  name?: string | null
-): string {
+export function resolveSerialProductLine(model?: string | null, name?: string | null): string {
   const trimmedModel = String(model ?? '').trim()
   if (trimmedModel) return trimmedModel
   return String(name ?? '').trim()
@@ -13,7 +10,10 @@ export function serialProductCompositeKey(
   model?: string | null,
   name?: string | null
 ): string {
-  return `${String(serialNo).trim()}|${String(brand ?? '').trim()}|${resolveSerialProductLine(model, name)}`
+  return `${String(serialNo).trim()}|${String(brand ?? '').trim()}|${resolveSerialProductLine(
+    model,
+    name
+  )}`
 }
 
 /**

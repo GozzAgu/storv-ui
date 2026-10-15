@@ -1,22 +1,13 @@
 import { collection, doc, setDoc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { useFirestore } from './useFirestore'
-import {
-  PERMISSION_DENIED_MESSAGE,
-  CLOUD_UNAVAILABLE_MESSAGE,
-} from '~/utils/cloud-user-messages'
+import { PERMISSION_DENIED_MESSAGE, CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import type { SubscriptionAddOnEntry, SubscriptionPlan } from '~/types/subscription'
 import type { SubscriptionBillingCycle } from '~/types/subscription-billing'
 import type { UserPreferences } from '~/composables/usePreferences'
-import type {
-  BusinessCapability,
-  ExperienceMode,
-} from '~/types/business-experience'
+import type { BusinessCapability, ExperienceMode } from '~/types/business-experience'
 import { sanitizeUserData } from '~/utils/sanitize-user-data'
 import { getFirebaseClientAuth } from '~/utils/firebase-client-auth'
-import {
-  fetchOwnerWorkspaceContext,
-  ownerContextToUserData,
-} from '~/utils/owner-workspace-context'
+import { fetchOwnerWorkspaceContext, ownerContextToUserData } from '~/utils/owner-workspace-context'
 
 export interface StoreSettings {
   inventory?: {
@@ -67,7 +58,12 @@ export interface UserData {
   /** Enterprise extra stores / staff seats, written by the billing server. */
   subscriptionAddOns?: SubscriptionAddOnEntry[]
   /** A Paystack charge the billing server received but could not apply (cleared by the next good charge). */
-  subscriptionPaymentIssue?: { reference: string | null; amountKobo: number; problem: string; at: string }
+  subscriptionPaymentIssue?: {
+    reference: string | null
+    amountKobo: number
+    problem: string
+    at: string
+  }
   paystackSubscriptionCode?: string
   paystackCustomerCode?: string
   photoURL?: string

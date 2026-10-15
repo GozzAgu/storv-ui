@@ -54,7 +54,11 @@
           </template>
         </AuthField>
 
-        <AuthAlert v-if="errorMessage" title="Couldn't update your password" :message="errorMessage" />
+        <AuthAlert
+          v-if="errorMessage"
+          title="Couldn't update your password"
+          :message="errorMessage"
+        />
 
         <AuthPrimaryButton
           :label="isSubmitting ? 'Updating…' : 'Update password'"

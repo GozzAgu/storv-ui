@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  greetingPeriod,
-  skyConditionForDate,
-  useTimeGreeting,
-} from '~/composables/useTimeGreeting'
+import { greetingPeriod, skyConditionForDate, useTimeGreeting } from '~/composables/useTimeGreeting'
 
 describe('useTimeGreeting', () => {
   it('formats greeting with name', () => {

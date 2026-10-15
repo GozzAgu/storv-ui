@@ -13,13 +13,17 @@ const hrefs = [
 
 describe('isDashboardNavActive', () => {
   it('prefers longer nav match', () => {
-    expect(isDashboardNavActive('/dashboard/inventory/abc', '/dashboard/inventory', hrefs)).toBe(true)
+    expect(isDashboardNavActive('/dashboard/inventory/abc', '/dashboard/inventory', hrefs)).toBe(
+      true
+    )
     expect(isDashboardNavActive('/dashboard/inventory/abc', '/dashboard', hrefs)).toBe(false)
   })
 
   it('highlights departments on store list and department detail routes', () => {
     const deptHref = '/dashboard/stores/store-1/departments'
-    expect(isDashboardNavActive('/dashboard/stores/store-1/departments', deptHref, hrefs)).toBe(true)
+    expect(isDashboardNavActive('/dashboard/stores/store-1/departments', deptHref, hrefs)).toBe(
+      true
+    )
     expect(isDashboardNavActive('/dashboard/departments/dept-9', deptHref, hrefs)).toBe(true)
     expect(isDashboardNavActive('/dashboard/receipts', deptHref, hrefs)).toBe(false)
   })

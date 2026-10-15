@@ -85,17 +85,17 @@ This document is the source of truth for **marketing**, **Help center**, and **`
 
 Includes **everything in Micro**, plus:
 
-| Area                   | What's included                                         |
-| ---------------------- | ------------------------------------------------------- |
-| **Stores**             | Up to **2**                                             |
-| **Departments**        | Up to **10** per store                                  |
-| **Staff**              | Up to **25** per store                                  |
-| **Analytics**          | Feature insights, charts, peak hours, PDF/Excel export    |
-| **Activity logs**      | Who changed what, dated audit trail                     |
-| **Sales leads**        | Enquiry pipeline with convert-to-sale                   |
-| **Customer balance**   | Credit ledger & payment reminders tied to balance       |
-| **WhatsApp**           | **Unlimited** receipt sharing & payment nudges          |
-| **Duplicate category** | Clone folder templates **within the same branch**       |
+| Area                   | What's included                                        |
+| ---------------------- | ------------------------------------------------------ |
+| **Stores**             | Up to **2**                                            |
+| **Departments**        | Up to **10** per store                                 |
+| **Staff**              | Up to **25** per store                                 |
+| **Analytics**          | Feature insights, charts, peak hours, PDF/Excel export |
+| **Activity logs**      | Who changed what, dated audit trail                    |
+| **Sales leads**        | Enquiry pipeline with convert-to-sale                  |
+| **Customer balance**   | Credit ledger & payment reminders tied to balance      |
+| **WhatsApp**           | **Unlimited** receipt sharing & payment nudges         |
+| **Duplicate category** | Clone folder templates **within the same branch**      |
 
 ### Not included
 
@@ -141,20 +141,20 @@ These build trust and word-of-mouth; keep them on every tier:
 
 ## Plan-specific gates (implementation notes)
 
-| User action                           | Minimum plan        | Code / UI                                          |
-| ------------------------------------- | ------------------- | -------------------------------------------------- |
-| Open Analytics                        | Medium              | `canUse('analytics')`, route guard                 |
-| View Activity logs                    | Medium              | `canUse('activity_logs')`                          |
-| Open Sales leads                      | Medium              | `canUse('sales_leads')`                            |
-| Add 2nd+ department (beyond cap)      | Medium              | `canAddDepartment()`, `maxDepartmentsPerStore`     |
-| Customer balance screens              | Medium              | `canUse('customer_balance')`                       |
-| Duplicate category                    | Medium              | `canDuplicateByPlan` in inventory pages            |
-| WhatsApp beyond cap                   | Medium              | `maxWhatsAppMessagesPerMonth` in limits            |
-| Multi-Store Sync                      | Enterprise          | `canUse('multi_store_sync')`                       |
+| User action                           | Minimum plan        | Code / UI                                             |
+| ------------------------------------- | ------------------- | ----------------------------------------------------- |
+| Open Analytics                        | Medium              | `canUse('analytics')`, route guard                    |
+| View Activity logs                    | Medium              | `canUse('activity_logs')`                             |
+| Open Sales leads                      | Medium              | `canUse('sales_leads')`                               |
+| Add 2nd+ department (beyond cap)      | Medium              | `canAddDepartment()`, `maxDepartmentsPerStore`        |
+| Customer balance screens              | Medium              | `canUse('customer_balance')`                          |
+| Duplicate category                    | Medium              | `canDuplicateByPlan` in inventory pages               |
+| WhatsApp beyond cap                   | Medium              | `maxWhatsAppMessagesPerMonth` in limits               |
+| Multi-Store Sync                      | Enterprise          | `canUse('multi_store_sync')`                          |
 | Copy from branch                      | Enterprise          | `canCopyFolderTemplatesFromBranchByPlan`, super admin |
-| Stock loans                           | Enterprise          | `canUse('seller_loans')`                           |
-| Add 2nd store (Micro) / 3rd+ (Medium) | Medium / Enterprise | `getEligibleStoresForPlan`, store creation         |
-| Payment links                         | All plans           | `canUse('payment_links')`                          |
+| Stock loans                           | Enterprise          | `canUse('seller_loans')`                              |
+| Add 2nd store (Micro) / 3rd+ (Medium) | Medium / Enterprise | `getEligibleStoresForPlan`, store creation            |
+| Payment links                         | All plans           | `canUse('payment_links')`                             |
 
 ---
 
@@ -162,15 +162,15 @@ These build trust and word-of-mouth; keep them on every tier:
 
 Show upgrade prompts when users **hit a limit**, not at random:
 
-| Moment                     | Suggested message                                     |
-| -------------------------- | ----------------------------------------------------- |
-| Analytics nav (Micro)      | "See revenue trends and busiest hours on Medium"      |
+| Moment                     | Suggested message                                       |
+| -------------------------- | ------------------------------------------------------- |
+| Analytics nav (Micro)      | "See revenue trends and busiest hours on Medium"        |
 | Sales leads nav (Micro)    | "Track enquiries before they become receipts on Medium" |
-| 3rd staff invite (Micro)   | "Medium supports up to 25 staff per store"            |
-| 2nd store creation (Micro) | "Add a second branch on Medium"                       |
-| WhatsApp cap (Micro)       | "Unlimited WhatsApp receipts on Medium"               |
-| Copy from branch           | "Enterprise: copy category templates across branches" |
-| Stock loans nav            | "Enterprise: track inventory lent to borrowers"       |
+| 3rd staff invite (Micro)   | "Medium supports up to 25 staff per store"              |
+| 2nd store creation (Micro) | "Add a second branch on Medium"                         |
+| WhatsApp cap (Micro)       | "Unlimited WhatsApp receipts on Medium"                 |
+| Copy from branch           | "Enterprise: copy category templates across branches"   |
+| Stock loans nav            | "Enterprise: track inventory lent to borrowers"         |
 
 ---
 

@@ -45,7 +45,9 @@ describe('mapStaffDoc', () => {
 
   it('ignores extras when the staff member is not an admin', async () => {
     const { mapStaffDoc } = await import('~/utils/staff-user-bootstrap')
-    const staff = mapStaffDoc(docFor({ authUid: 'u1', admin: false, adminGrants: { deleteSales: true } }))
+    const staff = mapStaffDoc(
+      docFor({ authUid: 'u1', admin: false, adminGrants: { deleteSales: true } })
+    )
     expect(staff.admin).toBe(false)
     expect(staff.adminGrants).toBeUndefined()
   })

@@ -24,16 +24,24 @@ describe('paystack validation utils', () => {
   })
 
   it('derives quarterly amount when env override is unset', () => {
-    const amount = getExpectedPlanAmount('storvv_medium', {
-      paystackPlanMediumAmount: 500000,
-    }, 'quarterly')
+    const amount = getExpectedPlanAmount(
+      'storvv_medium',
+      {
+        paystackPlanMediumAmount: 500000,
+      },
+      'quarterly'
+    )
     expect(amount).toBe(1350000)
   })
 
   it('derives yearly amount when env override is unset', () => {
-    const amount = getExpectedPlanAmount('storvv_medium', {
-      paystackPlanMediumAmount: 500000,
-    }, 'yearly')
+    const amount = getExpectedPlanAmount(
+      'storvv_medium',
+      {
+        paystackPlanMediumAmount: 500000,
+      },
+      'yearly'
+    )
     expect(amount).toBe(5100000)
   })
 
@@ -74,7 +82,9 @@ describe('paystack validation utils', () => {
   })
 
   it('throws when Paystack plan code env is missing', () => {
-    expect(() => getPaystackPlanCode('storvv_medium', 'monthly', {})).toThrow(/Missing Paystack plan code/)
+    expect(() => getPaystackPlanCode('storvv_medium', 'monthly', {})).toThrow(
+      /Missing Paystack plan code/
+    )
   })
 
   it('names the real env variable when a plan code is missing', () => {

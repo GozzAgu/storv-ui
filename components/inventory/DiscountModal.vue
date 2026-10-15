@@ -1,6 +1,6 @@
 <template>
   <SDialog
-      placement="right"
+    placement="right"
     :open="props.modelValue"
     title="Apply discount"
     size="md"
@@ -74,10 +74,7 @@
         </SField>
       </SFormSection>
 
-      <SFormSection
-        v-if="discountValue != null && discountValue > 0 && isValid"
-        fixed
-      >
+      <SFormSection v-if="discountValue != null && discountValue > 0 && isValid" fixed>
         <h3 class="s-form-section__title">Preview</h3>
         <dl class="s-sheet-summary">
           <div class="s-sheet-summary__row">

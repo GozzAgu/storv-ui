@@ -1,5 +1,10 @@
 <template>
-  <span class="s-c s-avatar" :class="size !== 'md' && `s-avatar--${size}`" :aria-label="name" :role="name ? 'img' : undefined">
+  <span
+    class="s-c s-avatar"
+    :class="size !== 'md' && `s-avatar--${size}`"
+    :aria-label="name"
+    :role="name ? 'img' : undefined"
+  >
     <img v-if="src && !failed" :src="src" alt="" @error="failed = true" />
     <slot v-else>{{ initials }}</slot>
   </span>

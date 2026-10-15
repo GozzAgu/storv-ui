@@ -52,8 +52,7 @@ export function useAnchoredRowMenu(options: UseAnchoredRowMenuOptions) {
       menuFixedStyle.value = null
       return
     }
-    const padding =
-      typeof viewportPadding === 'number' ? viewportPadding : viewportPadding.value
+    const padding = typeof viewportPadding === 'number' ? viewportPadding : viewportPadding.value
     const r = el.getBoundingClientRect()
     menuFixedStyle.value = computeFixedAnchoredMenuStyle(r, {
       estimatedMenuHeight,

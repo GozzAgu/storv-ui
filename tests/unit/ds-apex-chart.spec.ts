@@ -12,12 +12,20 @@ describe('mergeDsApexChartTheme', () => {
       palette
     )
     expect(merged.colors).toEqual([palette.accent])
-    expect(merged.chart).toMatchObject({ type: 'line', toolbar: { show: false }, fontFamily: palette.font })
+    expect(merged.chart).toMatchObject({
+      type: 'line',
+      toolbar: { show: false },
+      fontFamily: palette.font,
+    })
   })
 
   it('keeps green and amber series semantic', () => {
-    expect(mergeDsApexChartTheme({ colors: ['#059669'] }, palette).colors).toEqual([palette.success])
-    expect(mergeDsApexChartTheme({ colors: ['#fbbf24'] }, palette).colors).toEqual([palette.warning])
+    expect(mergeDsApexChartTheme({ colors: ['#059669'] }, palette).colors).toEqual([
+      palette.success,
+    ])
+    expect(mergeDsApexChartTheme({ colors: ['#fbbf24'] }, palette).colors).toEqual([
+      palette.warning,
+    ])
   })
 
   it('gives multi-series charts the full palette', () => {
@@ -30,7 +38,14 @@ describe('mergeDsApexChartTheme', () => {
     const merged = mergeDsApexChartTheme(
       {
         plotOptions: {
-          heatmap: { colorScale: { ranges: [{ from: 0, to: 0, color: '#eee' }, { from: 1, to: 5, color: '#333' }] } },
+          heatmap: {
+            colorScale: {
+              ranges: [
+                { from: 0, to: 0, color: '#eee' },
+                { from: 1, to: 5, color: '#333' },
+              ],
+            },
+          },
         },
       },
       palette

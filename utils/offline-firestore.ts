@@ -20,9 +20,7 @@ export interface QueuedFirestoreWrite {
 export const OFFLINE_QUEUE_STORAGE_KEY = 'storv_pending_operations'
 
 /** Strip Firestore field helpers before persisting queued writes. */
-export function serializeFirestorePayload(
-  value: Record<string, unknown>
-): Record<string, unknown> {
+export function serializeFirestorePayload(value: Record<string, unknown>): Record<string, unknown> {
   const out: Record<string, unknown> = {}
   for (const [key, entry] of Object.entries(value)) {
     if (entry === undefined) continue

@@ -16,7 +16,12 @@
         <span class="s-paylink-share__url">{{ link.url }}</span>
         <SButton size="sm" variant="primary" @click="copyLink">
           <template #leading>
-            <component :is="copied ? Check : Copy" :size="14" :stroke-width="2" aria-hidden="true" />
+            <component
+              :is="copied ? Check : Copy"
+              :size="14"
+              :stroke-width="2"
+              aria-hidden="true"
+            />
           </template>
           {{ copied ? 'Copied' : 'Copy' }}
         </SButton>
@@ -47,7 +52,9 @@
 
       <div class="s-paylink-share__channels">
         <SButton @click="shareWhatsApp">
-          <template #leading><MessageCircle :size="16" :stroke-width="1.75" aria-hidden="true" /></template>
+          <template #leading
+            ><MessageCircle :size="16" :stroke-width="1.75" aria-hidden="true"
+          /></template>
           WhatsApp
         </SButton>
         <a :href="telegramUrl" target="_blank" rel="noopener" class="s-c s-btn s-btn--secondary">
@@ -73,7 +80,9 @@
     <template #footer>
       <SButton @click="emit('update:modelValue', false)">Close</SButton>
       <SButton v-if="link" variant="primary" @click="openCheckout">
-        <template #leading><ExternalLink :size="16" :stroke-width="2" aria-hidden="true" /></template>
+        <template #leading
+          ><ExternalLink :size="16" :stroke-width="2" aria-hidden="true"
+        /></template>
         Open checkout page
       </SButton>
     </template>
@@ -104,7 +113,10 @@ const props = defineProps<{
   link: ShareableLink | null
   autoShare?: boolean
 }>()
-const emit = defineEmits<{ 'update:modelValue': [boolean]; shared: ['system' | 'whatsapp' | 'clipboard'] }>()
+const emit = defineEmits<{
+  'update:modelValue': [boolean]
+  shared: ['system' | 'whatsapp' | 'clipboard']
+}>()
 
 const copied = ref(false)
 const { sharing, share, shareWhatsApp: openWhatsAppShare } = usePaymentLinkShare()

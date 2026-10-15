@@ -11,7 +11,12 @@ vi.mock('~/utils/security-api-errors', () => ({
   resolveTotpForSensitiveAction: vi.fn(async () => '123456'),
 }))
 vi.mock('~/composables/useTotpConfirmModal', () => ({
-  useTotpConfirmModal: () => ({ open: ref(false), prompt: vi.fn(), confirm: vi.fn(), cancel: vi.fn() }),
+  useTotpConfirmModal: () => ({
+    open: ref(false),
+    prompt: vi.fn(),
+    confirm: vi.fn(),
+    cancel: vi.fn(),
+  }),
 }))
 vi.stubGlobal('usePermissions', () => ({ isStoreOwner }))
 vi.stubGlobal('useAppToast', () => ({ success: vi.fn(), error: vi.fn() }))
@@ -29,7 +34,10 @@ function mountSection(staff: Record<string, unknown>) {
     global: {
       stubs: {
         SCheckbox,
-        SButton: { props: ['disabled'], template: '<button :disabled="disabled"><slot /></button>' },
+        SButton: {
+          props: ['disabled'],
+          template: '<button :disabled="disabled"><slot /></button>',
+        },
         TotpConfirmModal: true,
       },
     },

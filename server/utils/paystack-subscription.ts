@@ -37,11 +37,12 @@ function normalizePaystackDate(value: unknown): string | undefined {
 }
 
 /** Build user doc fields for an active Paystack subscription. */
-export function buildSubscriptionUserPatch(params: ApplySubscriptionParams): Record<string, unknown> {
+export function buildSubscriptionUserPatch(
+  params: ApplySubscriptionParams
+): Record<string, unknown> {
   const now = new Date()
   const periodEnd =
-    params.subscriptionCurrentPeriodEnd ||
-    computeSubscriptionPeriodEnd(now, params.billingCycle)
+    params.subscriptionCurrentPeriodEnd || computeSubscriptionPeriodEnd(now, params.billingCycle)
 
   const patch: Record<string, unknown> = {
     subscription: params.planId,
@@ -52,7 +53,8 @@ export function buildSubscriptionUserPatch(params: ApplySubscriptionParams): Rec
   }
 
   if (params.reference) patch.lastPaystackReference = params.reference
-  if (params.paystackSubscriptionCode) patch.paystackSubscriptionCode = params.paystackSubscriptionCode
+  if (params.paystackSubscriptionCode)
+    patch.paystackSubscriptionCode = params.paystackSubscriptionCode
   if (params.paystackSubscriptionEmailToken) {
     patch.paystackSubscriptionEmailToken = params.paystackSubscriptionEmailToken
   }
@@ -144,7 +146,8 @@ export function extractSubscriptionFromChargePayload(data: {
 } {
   const metadata = data.metadata || {}
   const userId = typeof metadata.userId === 'string' ? metadata.userId : undefined
-  const planId = typeof metadata.planId === 'string' ? (metadata.planId as SubscriptionPlan) : undefined
+  const planId =
+    typeof metadata.planId === 'string' ? (metadata.planId as SubscriptionPlan) : undefined
   const billingCycle = isSubscriptionBillingCycle(metadata.billingCycle)
     ? metadata.billingCycle
     : undefined

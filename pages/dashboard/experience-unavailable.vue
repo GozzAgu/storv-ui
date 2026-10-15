@@ -101,7 +101,9 @@ const planGateDescription = computed(() => {
   if (!planFeature.value) return ''
   const plan = getMinimumPlanForFeature(planFeature.value)
   if (!plan) return 'Upgrade your subscription to open this screen.'
-  return `${getPlanDisplayName(plan)} includes this feature. Upgrade in Settings to unlock it for your team.`
+  return `${getPlanDisplayName(
+    plan
+  )} includes this feature. Upgrade in Settings to unlock it for your team.`
 })
 
 const emptyDescription = computed(() => {

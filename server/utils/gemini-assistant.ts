@@ -22,7 +22,9 @@ export async function generateGeminiAssistantReply(
     parts: [{ text: message.content }],
   }))
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
+    model
+  )}:generateContent?key=${encodeURIComponent(apiKey)}`
 
   let response: Response
   try {

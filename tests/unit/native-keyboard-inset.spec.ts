@@ -1,8 +1,5 @@
 import { describe, it, expect, afterEach } from 'vitest'
-import {
-  applyNativeKeyboardInset,
-  clearNativeKeyboardInset,
-} from '~/utils/native-keyboard-inset'
+import { applyNativeKeyboardInset, clearNativeKeyboardInset } from '~/utils/native-keyboard-inset'
 
 describe('native keyboard inset', () => {
   afterEach(() => {

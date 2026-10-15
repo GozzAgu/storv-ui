@@ -44,7 +44,8 @@ export default defineEventHandler(async (event) => {
   if (link.reference && link.status === 'unpaid') {
     throw createError({
       statusCode: 409,
-      message: 'A payment is already in progress for this invoice. Complete or wait for it to expire.',
+      message:
+        'A payment is already in progress for this invoice. Complete or wait for it to expire.',
     })
   }
   const expiresAtMs = (link.expiresAt as { toMillis?: () => number })?.toMillis?.() ?? 0

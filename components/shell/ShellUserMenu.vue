@@ -37,7 +37,13 @@
           :class="{ 's-menu-row--active': isLinkActive(link.match) }"
           @click="close"
         >
-          <component :is="link.icon" class="s-menu-row__icon" :size="16" :stroke-width="1.75" aria-hidden="true" />
+          <component
+            :is="link.icon"
+            class="s-menu-row__icon"
+            :size="16"
+            :stroke-width="1.75"
+            aria-hidden="true"
+          />
           <span class="s-menu-row__label">{{ link.label }}</span>
           <span v-if="link.badge && link.badge > 0" class="s-count">
             {{ link.badge > 9 ? '9+' : link.badge }}

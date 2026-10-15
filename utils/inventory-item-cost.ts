@@ -40,10 +40,7 @@ export function getItemMarginPercent(item: InventoryItem | null | undefined): nu
   return (profit / sell) * 100
 }
 
-export function resolveReceiptLineUnitCost(
-  line: ReceiptItem,
-  item?: InventoryItem | null
-): number {
+export function resolveReceiptLineUnitCost(line: ReceiptItem, item?: InventoryItem | null): number {
   if (typeof line.unitCost === 'number' && line.unitCost >= 0) return line.unitCost
   return resolveItemUnitCost(item) ?? 0
 }

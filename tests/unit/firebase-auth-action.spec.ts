@@ -45,7 +45,9 @@ describe('firebase-auth-action', () => {
 
   it('parses search params', () => {
     expect(
-      parseFirebaseAuthActionFromSearch('?mode=verifyEmail&oobCode=abc123&continueUrl=https%3A%2F%2Fexample.com')
+      parseFirebaseAuthActionFromSearch(
+        '?mode=verifyEmail&oobCode=abc123&continueUrl=https%3A%2F%2Fexample.com'
+      )
     ).toEqual({
       mode: 'verifyEmail',
       oobCode: 'abc123',
@@ -56,9 +58,7 @@ describe('firebase-auth-action', () => {
   })
 
   it('parses hash fallback from location', () => {
-    expect(
-      parseFirebaseAuthActionFromLocation({}, '#mode=resetPassword&oobCode=xyz789')
-    ).toEqual({
+    expect(parseFirebaseAuthActionFromLocation({}, '#mode=resetPassword&oobCode=xyz789')).toEqual({
       mode: 'resetPassword',
       oobCode: 'xyz789',
       continueUrl: '',

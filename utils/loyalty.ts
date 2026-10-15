@@ -58,7 +58,12 @@ function withUpperTiers(raw: unknown): unknown {
     tiers: [
       ...input.tiers,
       { id: 'platinum', name: 'Platinum', minSpend: platinumSpend, multiplier: goldRate },
-      { id: 'diamond', name: 'Diamond', minSpend: Math.max(10_000_000, platinumSpend * 2), multiplier: goldRate },
+      {
+        id: 'diamond',
+        name: 'Diamond',
+        minSpend: Math.max(10_000_000, platinumSpend * 2),
+        multiplier: goldRate,
+      },
     ],
   }
 }

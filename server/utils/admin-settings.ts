@@ -70,7 +70,12 @@ export function sharedSettingsUpdate(
       }
       return {
         'storeDetails.settings.inventory': {
-          lowStockThreshold: wholeNumber(values.lowStockThreshold, 'lowStockThreshold', 1, 1_000_000),
+          lowStockThreshold: wholeNumber(
+            values.lowStockThreshold,
+            'lowStockThreshold',
+            1,
+            1_000_000
+          ),
           autoReorder: flag(values.autoReorder, 'autoReorder'),
           defaultCategory: category,
         },

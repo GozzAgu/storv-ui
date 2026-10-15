@@ -6,18 +6,15 @@ describe('analytics-report-export', () => {
     const click = vi.fn()
     const appendChild = vi.fn()
     const removeChild = vi.fn()
-    vi.stubGlobal(
-      'document',
-      {
-        createElement: () =>
-          ({
-            setAttribute: vi.fn(),
-            click,
-            style: {},
-          }) as unknown as HTMLAnchorElement,
-        body: { appendChild, removeChild } as unknown as HTMLBodyElement,
-      } as unknown as Document
-    )
+    vi.stubGlobal('document', {
+      createElement: () =>
+        ({
+          setAttribute: vi.fn(),
+          click,
+          style: {},
+        } as unknown as HTMLAnchorElement),
+      body: { appendChild, removeChild } as unknown as HTMLBodyElement,
+    } as unknown as Document)
     vi.stubGlobal('URL', {
       createObjectURL: vi.fn(() => 'blob:mock'),
       revokeObjectURL: vi.fn(),

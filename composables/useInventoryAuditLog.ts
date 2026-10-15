@@ -64,9 +64,7 @@ export async function logInventoryAudit(params: {
   }
 }
 
-export async function fetchInventoryAuditLogs(
-  limitCount = 50
-): Promise<InventoryAuditLog[]> {
+export async function fetchInventoryAuditLogs(limitCount = 50): Promise<InventoryAuditLog[]> {
   const db = useFirestore().getFirestoreInstance()
   if (!db) return []
   const userId = await getQueryUserId()

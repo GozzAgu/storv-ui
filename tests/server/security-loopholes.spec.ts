@@ -57,7 +57,8 @@ function fakeDb(userDocs: Record<string, boolean>) {
 function fakeAuth(users: Record<string, string>) {
   return {
     getUser: async (uid: string) => {
-      if (!(uid in users)) throw Object.assign(new Error('missing'), { code: 'auth/user-not-found' })
+      if (!(uid in users))
+        throw Object.assign(new Error('missing'), { code: 'auth/user-not-found' })
       return { email: users[uid] }
     },
   } as never
@@ -82,9 +83,9 @@ describe('staff routes only act on the owner’s staff logins', () => {
     await expect(
       assertStaffLoginTarget(fakeDb({}), auth, 'staff1', 'someone@else.com')
     ).rejects.toMatchObject({ statusCode: 403 })
-    await expect(assertStaffLoginTarget(fakeDb({}), auth, 'staff1', undefined)).rejects.toMatchObject(
-      { statusCode: 403 }
-    )
+    await expect(
+      assertStaffLoginTarget(fakeDb({}), auth, 'staff1', undefined)
+    ).rejects.toMatchObject({ statusCode: 403 })
   })
 
   it('reports a login that no longer exists', async () => {

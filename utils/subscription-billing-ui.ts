@@ -61,7 +61,9 @@ export function getSubscriptionBillingBanner(
       id: 'billing-canceled-grace',
       variant: 'canceled_grace',
       title: 'Auto-renew is off',
-      message: `Your ${getPlanDisplayName(storedPlan)} plan stays active until ${periodEndLabel}. After that you will move to Storvv Micro.`,
+      message: `Your ${getPlanDisplayName(
+        storedPlan
+      )} plan stays active until ${periodEndLabel}. After that you will move to Storvv Micro.`,
       actionLabel: 'View subscription',
       actionHref: '/dashboard/settings',
     }
@@ -98,8 +100,7 @@ export function formatBillingCyclePriceLabel(
   currencySymbol = '₦'
 ): string {
   const price = formatPlanPriceKobo(amountKobo, currencySymbol)
-  const suffix =
-    cycle === 'yearly' ? '/ year' : cycle === 'quarterly' ? '/ quarter' : '/ month'
+  const suffix = cycle === 'yearly' ? '/ year' : cycle === 'quarterly' ? '/ quarter' : '/ month'
   return `${price} ${suffix}`
 }
 

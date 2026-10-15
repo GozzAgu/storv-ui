@@ -62,7 +62,9 @@ function drawHairline(doc: PdfDoc, x1: number, y: number, x2: number) {
   doc.line(x1, y, x2, y)
 }
 
-async function tryLoadImageDataUrl(url: string): Promise<{ dataUrl: string; format: 'PNG' | 'JPEG' } | null> {
+async function tryLoadImageDataUrl(
+  url: string
+): Promise<{ dataUrl: string; format: 'PNG' | 'JPEG' } | null> {
   try {
     const res = await fetch(url)
     if (!res.ok) return null
@@ -123,10 +125,7 @@ export function downloadAnalyticsCsv(snapshot: AnalyticsReportSnapshot) {
   const link = document.createElement('a')
   const url = URL.createObjectURL(blob)
   link.setAttribute('href', url)
-  link.setAttribute(
-    'download',
-    `analytics-report-${snapshot.selectedPeriod}-${Date.now()}.csv`
-  )
+  link.setAttribute('download', `analytics-report-${snapshot.selectedPeriod}-${Date.now()}.csv`)
   link.style.visibility = 'hidden'
   document.body.appendChild(link)
   link.click()
@@ -153,9 +152,7 @@ export async function downloadAnalyticsPdf(snapshot: AnalyticsReportSnapshot) {
   })
 
   const businessName = (snapshot.businessName || '').trim() || 'Storvv'
-  const logo = snapshot.companyLogoUrl
-    ? await tryLoadImageDataUrl(snapshot.companyLogoUrl)
-    : null
+  const logo = snapshot.companyLogoUrl ? await tryLoadImageDataUrl(snapshot.companyLogoUrl) : null
 
   const paintFooter = () => {
     drawHairline(doc, marginX, pageHeight - 12, pageWidth - marginX)
@@ -283,11 +280,7 @@ export async function downloadAnalyticsPdf(snapshot: AnalyticsReportSnapshot) {
     align?: 'left' | 'right'
   }
 
-  const drawTable = (
-    title: string,
-    columns: TableColumn[],
-    rows: Record<string, string>[]
-  ) => {
+  const drawTable = (title: string, columns: TableColumn[], rows: Record<string, string>[]) => {
     if (rows.length === 0) return
 
     ensureSpace(20)

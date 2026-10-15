@@ -1,8 +1,5 @@
 <template>
-  <SCard
-    title="If you cancel"
-    description="What happens to your data when auto-renew stops."
-  >
+  <SCard title="If you cancel" description="What happens to your data when auto-renew stops.">
     <dl class="s-settings__policy">
       <div v-for="item in policy" :key="item.term">
         <dt>{{ item.term }}</dt>

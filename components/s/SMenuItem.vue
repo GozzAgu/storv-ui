@@ -7,7 +7,14 @@
     :disabled="disabled"
     @click="$emit('select')"
   >
-    <component :is="icon" v-if="icon" class="s-menu-row__icon" :size="16" :stroke-width="1.75" aria-hidden="true" />
+    <component
+      :is="icon"
+      v-if="icon"
+      class="s-menu-row__icon"
+      :size="16"
+      :stroke-width="1.75"
+      aria-hidden="true"
+    />
     <span class="s-menu-row__label">{{ label }}</span>
   </button>
 </template>

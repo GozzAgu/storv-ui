@@ -118,7 +118,8 @@ export function getAuthActionErrorCopy(error: unknown): { title: string; message
     case 'auth/user-disabled':
       return {
         title: 'Account unavailable',
-        message: 'This account has been disabled. Contact your workspace admin or Storvv support for help.',
+        message:
+          'This account has been disabled. Contact your workspace admin or Storvv support for help.',
       }
     case 'auth/weak-password':
       return {

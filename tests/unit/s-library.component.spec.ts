@@ -73,11 +73,15 @@ describe('SInput', () => {
     const label = wrapper.find('label')
 
     expect(label.attributes('for')).toBe(input.attributes('id'))
-    expect(input.attributes('aria-describedby')).toBe(wrapper.find('.s-field__hint').attributes('id'))
+    expect(input.attributes('aria-describedby')).toBe(
+      wrapper.find('.s-field__hint').attributes('id')
+    )
 
     await wrapper.setProps({ error: 'Enter a valid email' })
     expect(input.attributes('aria-invalid')).toBe('true')
-    expect(input.attributes('aria-describedby')).toBe(wrapper.find('[role="alert"]').attributes('id'))
+    expect(input.attributes('aria-describedby')).toBe(
+      wrapper.find('[role="alert"]').attributes('id')
+    )
   })
 
   it('updates v-model on input', async () => {

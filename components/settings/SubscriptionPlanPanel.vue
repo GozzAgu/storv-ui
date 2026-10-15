@@ -19,13 +19,19 @@
         </p>
         <div>
           <SButton variant="secondary" :disabled="disabled" @click="emit('manage-on-web')">
-            <template #leading><ExternalLink :size="16" :stroke-width="2" aria-hidden="true" /></template>
+            <template #leading
+              ><ExternalLink :size="16" :stroke-width="2" aria-hidden="true"
+            /></template>
             Open Storvv website
           </SButton>
         </div>
       </section>
 
-      <section v-else-if="changePlanOptions.length > 0" class="s-plan__section" aria-labelledby="plan-switch-heading">
+      <section
+        v-else-if="changePlanOptions.length > 0"
+        class="s-plan__section"
+        aria-labelledby="plan-switch-heading"
+      >
         <h3 id="plan-switch-heading" class="s-plan__heading">Switch plan</h3>
         <div class="s-plan__switch">
           <SSelect
@@ -64,14 +70,17 @@
         <h3 id="plan-addons-heading" class="s-plan__heading">Add-ons</h3>
         <p v-if="!manageOnWeb" class="s-plan__meta s-plan__lede">
           Enterprise includes {{ enterpriseLimits.maxStores }} stores with
-          {{ enterpriseLimits.maxStaffPerStore }} staff each. Grow past that anytime, billed monthly.
+          {{ enterpriseLimits.maxStaffPerStore }} staff each. Grow past that anytime, billed
+          monthly.
         </p>
         <div v-if="!manageOnWeb" class="s-plan__addons">
           <div class="s-plan__addon">
             <div>
               <p class="s-plan__addon-title">Extra store</p>
               <p class="s-plan__addon-price">{{ addOnPriceLabels.store }} / month</p>
-              <p class="s-plan__meta">Comes with {{ enterpriseLimits.maxStaffPerStore }} staff seats.</p>
+              <p class="s-plan__meta">
+                Comes with {{ enterpriseLimits.maxStaffPerStore }} staff seats.
+              </p>
             </div>
             <div class="s-plan__addon-actions">
               <SButton
@@ -80,7 +89,9 @@
                 :loading="addOnPending === 'store'"
                 @click="emit('buy-add-on', 'store')"
               >
-                <template #leading><Store :size="16" :stroke-width="2" aria-hidden="true" /></template>
+                <template #leading
+                  ><Store :size="16" :stroke-width="2" aria-hidden="true"
+                /></template>
                 Add a store
               </SButton>
             </div>
@@ -105,7 +116,9 @@
                 :loading="addOnPending === 'staff'"
                 @click="emit('buy-add-on', 'staff', seatStoreId)"
               >
-                <template #leading><UserPlus :size="16" :stroke-width="2" aria-hidden="true" /></template>
+                <template #leading
+                  ><UserPlus :size="16" :stroke-width="2" aria-hidden="true"
+                /></template>
                 Add seat
               </SButton>
             </div>
@@ -167,7 +180,11 @@
         </div>
       </section>
 
-      <section v-if="billingHistory.length" class="s-plan__section" aria-labelledby="plan-history-heading">
+      <section
+        v-if="billingHistory.length"
+        class="s-plan__section"
+        aria-labelledby="plan-history-heading"
+      >
         <h3 id="plan-history-heading" class="s-plan__heading">Billing history</h3>
         <ul class="s-list">
           <li v-for="entry in billingHistory" :key="entry.reference" class="s-list__item">
@@ -318,10 +335,7 @@ const changePlanButtonLabel = computed(() => {
   return 'Continue'
 })
 
-function planOptionLabel(plan: {
-  name: string
-  direction: 'upgrade' | 'downgrade' | 'same'
-}) {
+function planOptionLabel(plan: { name: string; direction: 'upgrade' | 'downgrade' | 'same' }) {
   if (plan.direction === 'downgrade') return `${plan.name} · lower plan`
   if (plan.direction === 'upgrade') return `${plan.name} · higher plan`
   return plan.name

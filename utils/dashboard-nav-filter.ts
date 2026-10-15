@@ -194,9 +194,7 @@ export function filterDashboardNavItems(
 
 /** Surface stock ops first in the iOS/Android “More” sheet. */
 export function orderNativeMoreNavItems<T extends { name: string }>(items: T[]): T[] {
-  const priority = new Map<string, number>(
-    NATIVE_MORE_PRIORITY.map((name, index) => [name, index])
-  )
+  const priority = new Map<string, number>(NATIVE_MORE_PRIORITY.map((name, index) => [name, index]))
   return [...items].sort((a, b) => {
     const ai = priority.get(a.name) ?? 999
     const bi = priority.get(b.name) ?? 999

@@ -119,7 +119,12 @@
 
       <template v-if="step === 4">
         <div class="s-profile-2fa__intro">
-          <CircleCheck class="s-profile-2fa__done" :size="48" :stroke-width="1.75" aria-hidden="true" />
+          <CircleCheck
+            class="s-profile-2fa__done"
+            :size="48"
+            :stroke-width="1.75"
+            aria-hidden="true"
+          />
           <h3 class="s-form-section__title">Two-factor authentication enabled!</h3>
           <p class="s-settings__dialog-text">
             Save these backup codes in a safe place. You can use them if you lose access to your
@@ -137,7 +142,9 @@
             Copy codes
           </SButton>
           <SButton block @click="downloadBackupCodes">
-            <template #leading><Download :size="16" :stroke-width="2" aria-hidden="true" /></template>
+            <template #leading
+              ><Download :size="16" :stroke-width="2" aria-hidden="true"
+            /></template>
             Download
           </SButton>
         </div>

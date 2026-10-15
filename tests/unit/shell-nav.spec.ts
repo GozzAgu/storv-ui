@@ -16,7 +16,11 @@ describe('shell-nav', () => {
       item('Departments', '/dashboard/departments'),
     ])
     const organization = sections.find((section) => section.id === 'organization')
-    expect(organization?.items.map((entry) => entry.label)).toEqual(['Team', 'Branches', 'Activity'])
+    expect(organization?.items.map((entry) => entry.label)).toEqual([
+      'Team',
+      'Branches',
+      'Activity',
+    ])
   })
 
   it('drops Organization when none of its pages are available', () => {

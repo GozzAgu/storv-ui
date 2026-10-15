@@ -1,6 +1,6 @@
 <template>
   <SDialog
-      placement="right"
+    placement="right"
     :open="modelValue"
     size="md"
     title="New payment link"

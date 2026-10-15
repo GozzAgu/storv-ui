@@ -235,12 +235,18 @@ describe('parseLoyaltySettings', () => {
     [{ ...valid, earnFrom: 'some' }, /which sales/],
     [{ ...valid, tiers: valid.tiers.slice(0, 2) }, /all 5 tiers/],
     [
-      { ...valid, tiers: [valid.tiers[0], { ...valid.tiers[1], name: '' }, valid.tiers[2], ...rest] },
+      {
+        ...valid,
+        tiers: [valid.tiers[0], { ...valid.tiers[1], name: '' }, valid.tiers[2], ...rest],
+      },
       /name/,
     ],
     [{ ...valid, tiers: [valid.tiers[0], valid.tiers[2], valid.tiers[1], ...rest] }, /more spend/],
     [
-      { ...valid, tiers: [valid.tiers[0], { ...valid.tiers[1], multiplier: 9 }, valid.tiers[2], ...rest] },
+      {
+        ...valid,
+        tiers: [valid.tiers[0], { ...valid.tiers[1], multiplier: 9 }, valid.tiers[2], ...rest],
+      },
       /1× and 5×/,
     ],
   ])('rejects bad input %#', (input, message) => {

@@ -4,10 +4,7 @@ import { rethrowFirebaseAdminSetupError } from '~/server/utils/firebase-admin-er
 import { requireAuth } from '~/server/utils/store-auth'
 import { resolveStaffWorkspaceOwnerId } from '~/server/utils/staff-workspace'
 import { normalizeStaffAdminGrants } from '~/utils/staff-permissions'
-import {
-  resolveEffectiveSubscriptionPlan,
-  type SubscriptionPlan,
-} from '~/types/subscription'
+import { resolveEffectiveSubscriptionPlan, type SubscriptionPlan } from '~/types/subscription'
 
 function isActiveStaffStatus(status: unknown): boolean {
   return (status || 'active') === 'active'
@@ -76,21 +73,16 @@ export default defineEventHandler(async (event) => {
       })
     }
     // Keep the workspace index current so client rules reads keep working too.
-    await adminDb
-      .collection('users')
-      .doc(ownerId)
-      .collection('workspaceMembers')
-      .doc(auth.uid)
-      .set(
-        {
-          authUid: auth.uid,
-          storeId,
-          status: 'active',
-          admin: true,
-          updatedAt: new Date().toISOString(),
-        },
-        { merge: true }
-      )
+    await adminDb.collection('users').doc(ownerId).collection('workspaceMembers').doc(auth.uid).set(
+      {
+        authUid: auth.uid,
+        storeId,
+        status: 'active',
+        admin: true,
+        updatedAt: new Date().toISOString(),
+      },
+      { merge: true }
+    )
   }
 
   const ownerData = callerIsOwner

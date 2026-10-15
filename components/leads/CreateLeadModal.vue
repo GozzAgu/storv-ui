@@ -1,6 +1,6 @@
 <template>
   <SDialog
-      placement="right"
+    placement="right"
     :open="modelValue"
     title="Add sales lead"
     size="md"
@@ -56,11 +56,7 @@
 
       <SFormSection>
         <SField label="Product interest" required>
-          <SInput
-            v-model="productName"
-            maxlength="160"
-            placeholder="What are they looking for?"
-          />
+          <SInput v-model="productName" maxlength="160" placeholder="What are they looking for?" />
         </SField>
 
         <SField label="Link inventory item" hint="Optional">

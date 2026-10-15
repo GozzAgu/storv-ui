@@ -180,13 +180,19 @@ export async function notifyPaymentReceived(
     actorUid: 'system:paystack',
     type: 'payment_received',
     title: 'Payment received',
-    message: `${label}: ${formatNaira(input.amountKobo)} paid by payment link and confirmed by Paystack.`,
+    message: `${label}: ${formatNaira(
+      input.amountKobo
+    )} paid by payment link and confirmed by Paystack.`,
     recipientUids: recipients,
     metadata: { receiptId: input.receiptId },
   })
 }
 
-export type EmailSender = (params: { toEmail: string; subject: string; html: string }) => Promise<void>
+export type EmailSender = (params: {
+  toEmail: string
+  subject: string
+  html: string
+}) => Promise<void>
 
 /**
  * Owner-only alert for a payout account change: an in-app entry plus an email to the owner's
@@ -208,7 +214,9 @@ export async function alertPayoutChanged(
 ): Promise<{ emailed: boolean }> {
   const target = `${input.bankName || 'your bank'} ending ${input.last4}`
   const message = input.replaced
-    ? `Payouts now go to ${target}${input.previousLast4 ? ` (was ending ${input.previousLast4})` : ''}.`
+    ? `Payouts now go to ${target}${
+        input.previousLast4 ? ` (was ending ${input.previousLast4})` : ''
+      }.`
     : `Payouts now go to ${target}.`
   await writeNotification(db, {
     ownerId: input.ownerId,
@@ -238,7 +246,9 @@ export async function alertPayoutChanged(
   try {
     await sendEmail({
       toEmail: input.ownerEmail,
-      subject: input.replaced ? 'Your Storvv payout account was changed' : 'Payout account connected',
+      subject: input.replaced
+        ? 'Your Storvv payout account was changed'
+        : 'Payout account connected',
       html: `<p>${safe}</p><p>If you did not make this change, sign in to Storvv, change your password and reconnect your own bank account straight away.</p>`,
     })
     return { emailed: true }

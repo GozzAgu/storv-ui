@@ -51,9 +51,7 @@ export default defineEventHandler(async (event) => {
     items = items.filter((i) => (i.searchText || '').includes(search))
   }
   if (category) {
-    items = items.filter(
-      (i) => i.categoryName === category || i.categoryPath === category
-    )
+    items = items.filter((i) => i.categoryName === category || i.categoryPath === category)
   }
   if (
     availability === 'available' ||
@@ -96,9 +94,7 @@ export default defineEventHandler(async (event) => {
     .slice(0, 8)
     .map(publicStorefrontListingDto)
 
-  const categories = Array.from(
-    new Set(items.map((i) => i.categoryName).filter(Boolean))
-  ).sort()
+  const categories = Array.from(new Set(items.map((i) => i.categoryName).filter(Boolean))).sort()
 
   return {
     success: true,
@@ -108,4 +104,3 @@ export default defineEventHandler(async (event) => {
     items: items.map(publicStorefrontListingDto),
   }
 })
-

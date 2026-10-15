@@ -1,6 +1,6 @@
 <template>
   <SDialog
-      placement="right"
+    placement="right"
     :open="modelValue"
     title="Edit lead"
     size="md"
@@ -10,12 +10,7 @@
       <SFormSection>
         <div class="s-form-pair">
           <SField label="Phone">
-            <SInput
-              v-model="customerPhone"
-              type="tel"
-              maxlength="40"
-              autocomplete="tel"
-            />
+            <SInput v-model="customerPhone" type="tel" maxlength="40" autocomplete="tel" />
           </SField>
 
           <SField label="Estimated value" hint="Optional">

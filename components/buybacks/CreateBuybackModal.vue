@@ -1,6 +1,6 @@
 <template>
   <SDialog
-      placement="right"
+    placement="right"
     :open="modelValue"
     title="Record a trade-in"
     size="md"
@@ -73,21 +73,25 @@
       <SFormSection>
         <div class="s-form-pair">
           <SField label="Amount paid to customer" required>
-            <SInput
-              v-model="purchasePrice"
-              type="number"
-              min="0"
-              step="0.01"
-              placeholder="0.00"
-            >
+            <SInput v-model="purchasePrice" type="number" min="0" step="0.01" placeholder="0.00">
               <template #prefix>{{ currencySymbol }}</template>
             </SInput>
           </SField>
 
           <SField v-slot="{ id }" label="Payment method" required>
             <div class="s-control s-control--select">
-              <PaymentMethodSelect :id="id" v-model="paymentMethod" required select-class="s-control__input" />
-              <ChevronDown class="s-control__chevron" :size="16" :stroke-width="1.75" aria-hidden="true" />
+              <PaymentMethodSelect
+                :id="id"
+                v-model="paymentMethod"
+                required
+                select-class="s-control__input"
+              />
+              <ChevronDown
+                class="s-control__chevron"
+                :size="16"
+                :stroke-width="1.75"
+                aria-hidden="true"
+              />
             </div>
           </SField>
         </div>

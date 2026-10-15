@@ -100,10 +100,8 @@ export function useWhatsAppMessaging() {
       (await import('~/composables/useFirestorePaths').then((m) => m.getQueryUserId())) ||
       authStore.currentUser?.uid ||
       ''
-    const storeId =
-      params.storeId || (params.receiptData?.storeId as string | undefined) || ''
-    const receiptId =
-      params.receiptId || (params.receiptData?.id as string | undefined) || ''
+    const storeId = params.storeId || (params.receiptData?.storeId as string | undefined) || ''
+    const receiptId = params.receiptId || (params.receiptData?.id as string | undefined) || ''
 
     let data: DeliverReceiptApiResponse
 
@@ -125,9 +123,7 @@ export function useWhatsAppMessaging() {
         },
       })) as DeliverReceiptApiResponse
     } catch (e: unknown) {
-      throw new Error(
-        sanitizePlanGateErrorForStaff(fetchErrorMessage(e), isStaff.value)
-      )
+      throw new Error(sanitizePlanGateErrorForStaff(fetchErrorMessage(e), isStaff.value))
     }
 
     await refreshUsage()

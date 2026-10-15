@@ -18,17 +18,13 @@ export function useBusinessCapabilities() {
 
   const storeDetails = computed(() => userStore.userData?.storeDetails)
 
-  const experienceMode = computed<ExperienceMode>(() =>
-    resolveExperienceMode(storeDetails.value)
-  )
+  const experienceMode = computed<ExperienceMode>(() => resolveExperienceMode(storeDetails.value))
 
   const enabledCapabilities = computed(() =>
     normalizeEnabledCapabilities(storeDetails.value?.enabledCapabilities)
   )
 
-  const capabilityContext = computed(() =>
-    buildBusinessCapabilityContext(storeDetails.value)
-  )
+  const capabilityContext = computed(() => buildBusinessCapabilityContext(storeDetails.value))
 
   const canUse = (capability: BusinessCapability): boolean => {
     if (!canUseBusinessCapability(capability, capabilityContext.value)) return false

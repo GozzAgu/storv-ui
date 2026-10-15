@@ -15,11 +15,7 @@
     </div>
 
     <p v-if="visibleFolders.length === 0" class="s-pick__empty">
-      {{
-        browseParent
-          ? 'No subcategories in this category.'
-          : emptyLabel
-      }}
+      {{ browseParent ? 'No subcategories in this category.' : emptyLabel }}
     </p>
 
     <div v-else :class="pickListClass">
@@ -28,10 +24,7 @@
           v-for="folder in visibleFolders"
           :key="folder.id"
           type="button"
-          :class="[
-            pickRowClass,
-            modelValue === folder.id ? pickRowSelectedClass : '',
-          ]"
+          :class="[pickRowClass, modelValue === folder.id ? pickRowSelectedClass : '']"
           @click="onPick(folder)"
         >
           <div class="s-folder-drill__text">
@@ -129,8 +122,7 @@ const selectedPathLabel = computed(() => {
 
 function hasChildren(folder: InventoryFolder) {
   return (
-    folderHasChildren(props.folders, folder.id) ||
-    folderUsesSubcategoryHub(folder, props.folders)
+    folderHasChildren(props.folders, folder.id) || folderUsesSubcategoryHub(folder, props.folders)
   )
 }
 
@@ -162,7 +154,10 @@ function clearSelection() {
 watch(
   () => props.folders,
   () => {
-    if (browseParentId.value && !props.folders.some((folder) => folder.id === browseParentId.value)) {
+    if (
+      browseParentId.value &&
+      !props.folders.some((folder) => folder.id === browseParentId.value)
+    ) {
       browseParentId.value = null
     }
   }

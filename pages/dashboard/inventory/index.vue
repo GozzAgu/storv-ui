@@ -466,8 +466,8 @@
         <SFormSection v-if="!isSubfolderDrawer" title="Table template">
           <p :class="drawerHintClass">
             Columns for products in this category. Mark a column <strong>Unique</strong> when no two
-            products, in any branch, may share its value, such as an engine number, chassis
-            number or IMEI.
+            products, in any branch, may share its value, such as an engine number, chassis number
+            or IMEI.
           </p>
           <input
             v-if="selectedTemplate"
@@ -503,11 +503,7 @@
               <div class="s-inv-fields__end">
                 <div class="s-inv-fields__flags">
                   <SCheckbox v-model="field.required" label="Required" />
-                  <SCheckbox
-                    v-if="canFieldBeUnique(field)"
-                    v-model="field.unique"
-                    label="Unique"
-                  />
+                  <SCheckbox v-if="canFieldBeUnique(field)" v-model="field.unique" label="Unique" />
                 </div>
                 <SIconButton
                   v-if="!isLockedTemplateField(field)"

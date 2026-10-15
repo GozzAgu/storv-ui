@@ -1,6 +1,6 @@
 <template>
   <SDialog
-      placement="right"
+    placement="right"
     :open="modelValue"
     title="Stock loan"
     size="md"
@@ -19,18 +19,12 @@
         <h3 class="s-form-section__title">Products</h3>
         <div :class="pickListClass">
           <ul :class="pickListScrollClass">
-            <li
-              v-for="it in items"
-              :key="it.id"
-              :class="[pickRowClass, 's-pick__row--static']"
-            >
+            <li v-for="it in items" :key="it.id" :class="[pickRowClass, 's-pick__row--static']">
               <span :class="pickRowTitleClass">{{ getInventoryItemDisplayName(it) }}</span>
             </li>
           </ul>
         </div>
-        <p class="s-form-meta">
-          {{ items.length }} item{{ items.length !== 1 ? 's' : '' }}
-        </p>
+        <p class="s-form-meta">{{ items.length }} item{{ items.length !== 1 ? 's' : '' }}</p>
       </SFormSection>
 
       <SFormSection>
@@ -97,12 +91,8 @@ const emit = defineEmits<{
 
 const sellerLoansStore = useSellerLoanOutsStore()
 const toast = useAppToast()
-const {
-  pickListClass,
-  pickListScrollClass,
-  pickRowClass,
-  pickRowTitleClass,
-} = useDashboardDrawerChrome()
+const { pickListClass, pickListScrollClass, pickRowClass, pickRowTitleClass } =
+  useDashboardDrawerChrome()
 
 const partyName = ref('')
 const partyPhone = ref('')

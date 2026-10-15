@@ -37,11 +37,7 @@
 import SDialog from '~/components/s/SDialog.vue'
 import SEmptyState from '~/components/s/SEmptyState.vue'
 import { computed } from 'vue'
-import {
-  ClockIcon,
-  PlusCircleIcon,
-  ArrowPathIcon,
-} from '~/utils/app-icons'
+import { ClockIcon, PlusCircleIcon, ArrowPathIcon } from '~/utils/app-icons'
 import { useReceiptTimeline, type ReceiptTimelineEventType } from '~/composables/useReceiptTimeline'
 import type { Receipt } from '~/stores/receipts'
 import { usePreferences } from '~/composables/usePreferences'

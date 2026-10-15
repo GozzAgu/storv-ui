@@ -39,7 +39,13 @@ async function main() {
   const db = getFirestore()
 
   const users = await db.collection('users').get()
-  const report = { mode: APPLY ? 'apply' : 'dry-run', scannedUsers: users.size, move: [], drop: [], failed: [] }
+  const report = {
+    mode: APPLY ? 'apply' : 'dry-run',
+    scannedUsers: users.size,
+    move: [],
+    drop: [],
+    failed: [],
+  }
 
   for (const snap of users.docs) {
     const data = snap.data()
@@ -49,7 +55,9 @@ async function main() {
     const securityRef = snap.ref.collection('security').doc('twoFactor')
     const security = await securityRef.get()
     const hasCurrent =
-      security.exists && typeof security.data()?.secret === 'string' && security.data().secret.length > 0
+      security.exists &&
+      typeof security.data()?.secret === 'string' &&
+      security.data().secret.length > 0
     const action = !hasCurrent && typeof legacy === 'string' && legacy.length > 0 ? 'move' : 'drop'
     report[action].push(snap.id)
 
@@ -71,7 +79,11 @@ async function main() {
     }
   }
 
-  report.counts = { move: report.move.length, drop: report.drop.length, failed: report.failed.length }
+  report.counts = {
+    move: report.move.length,
+    drop: report.drop.length,
+    failed: report.failed.length,
+  }
   console.log(JSON.stringify(report, null, 2))
 }
 

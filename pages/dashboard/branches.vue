@@ -40,7 +40,10 @@
         You can edit your branch's details. Only the account owner can add, delete or deactivate
         branches.
       </p>
-      <p v-if="userStore.isSuperAdmin && eligibleStores.length > 0 && !canAddStore" class="s-notice">
+      <p
+        v-if="userStore.isSuperAdmin && eligibleStores.length > 0 && !canAddStore"
+        class="s-notice"
+      >
         {{ storeLimitMessage }}
         <NuxtLink :to="dashPath('/settings?upgrade=1')" class="s-link"
           >Open Plan &amp; billing</NuxtLink

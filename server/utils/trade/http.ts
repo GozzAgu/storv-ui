@@ -60,7 +60,11 @@ export async function resolveTradeAccess(
 
 function toHttpError(err: unknown): unknown {
   if (err instanceof TradeError || err instanceof PaymentServiceError) {
-    return createError({ statusCode: err.statusCode, message: err.message, data: { code: err.code } })
+    return createError({
+      statusCode: err.statusCode,
+      message: err.message,
+      data: { code: err.code },
+    })
   }
   return err
 }

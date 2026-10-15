@@ -78,7 +78,9 @@ describe('filterDashboardNavItems', () => {
       canViewModule: canViewGranted(['products', 'receipts']),
     }
     expect(
-      filterDashboardNavItems(DASHBOARD_NAV_DEFINITIONS, { ...base, isAdmin: true }).map((i) => i.name)
+      filterDashboardNavItems(DASHBOARD_NAV_DEFINITIONS, { ...base, isAdmin: true }).map(
+        (i) => i.name
+      )
     ).toContain('Departments')
     expect(
       filterDashboardNavItems(DASHBOARD_NAV_DEFINITIONS, base).map((i) => i.name)

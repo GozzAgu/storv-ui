@@ -89,10 +89,12 @@ export default defineEventHandler(async (event) => {
 
     const adminDb = getAdminFirestore()
     const userSnap = await adminDb.collection('users').doc(userId).get()
-    const existing = userSnap.data() as {
-      paystackSubscriptionCode?: string
-      paystackSubscriptionEmailToken?: string
-    } | undefined
+    const existing = userSnap.data() as
+      | {
+          paystackSubscriptionCode?: string
+          paystackSubscriptionEmailToken?: string
+        }
+      | undefined
 
     if (existing?.paystackSubscriptionCode && existing?.paystackSubscriptionEmailToken) {
       try {

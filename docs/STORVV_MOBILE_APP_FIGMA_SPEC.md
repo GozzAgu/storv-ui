@@ -16,17 +16,18 @@ Then paste the section for the screen you want (for example "7.3 Home").
 
 ### 0.2 Frames to create
 
-| Platform | Frame | Size (pt/dp) | Notes |
-| --- | --- | --- | --- |
-| iOS | iPhone 16 / 15 | 393 × 852 | Primary design size |
-| iOS | iPhone SE | 375 × 667 | Check density, no home indicator inset |
-| iOS | iPhone 16 Pro Max | 440 × 956 | Check stretch |
-| iOS | iPad (optional) | 820 × 1180 | Two-column split view later |
-| Android | Pixel 8 / medium phone | 412 × 915 | Primary design size |
-| Android | Compact phone | 360 × 800 | Check density |
-| Android | Tablet (optional) | 800 × 1280 | Navigation rail instead of bottom bar |
+| Platform | Frame                  | Size (pt/dp) | Notes                                  |
+| -------- | ---------------------- | ------------ | -------------------------------------- |
+| iOS      | iPhone 16 / 15         | 393 × 852    | Primary design size                    |
+| iOS      | iPhone SE              | 375 × 667    | Check density, no home indicator inset |
+| iOS      | iPhone 16 Pro Max      | 440 × 956    | Check stretch                          |
+| iOS      | iPad (optional)        | 820 × 1180   | Two-column split view later            |
+| Android  | Pixel 8 / medium phone | 412 × 915    | Primary design size                    |
+| Android  | Compact phone          | 360 × 800    | Check density                          |
+| Android  | Tablet (optional)      | 800 × 1280   | Navigation rail instead of bottom bar  |
 
 Safe areas:
+
 - iOS: status bar 54pt (Dynamic Island devices), home indicator 34pt.
 - Android: status bar 24 to 32dp, gesture navigation bar 24dp (or 48dp for 3-button navigation).
 
@@ -68,6 +69,7 @@ Storvv is a retail operating system. A shop owner (and their team) uses it to:
 Typical user: a phone, perfume, electronics, fashion or general retail business in Nigeria or similar markets. Currency examples use the Naira (₦), but the app supports any currency chosen during onboarding.
 
 Product facts the design must respect:
+
 - The **web dashboard is live**. The **iOS and Android apps are what you are designing** (marketing labels them "coming soon").
 - **Storefront** and **Payment links** are **not live yet**. Show them only as "Coming soon" entries (see section 7.16).
 - No prices appear inside the app except on the Subscription screen (regional pricing).
@@ -88,74 +90,74 @@ Storvv uses **one accent** (navy) plus neutral surfaces. Semantic colors are onl
 
 **Brand palette**
 
-| Token | Hex | Use |
-| --- | --- | --- |
-| `brand/navy` | #143F8D | Primary buttons, active tab, links, selected states (light mode) |
-| `brand/deep-navy` | #1B2A6B | Hero backgrounds, splash gradient end |
-| `brand/periwinkle-500` | #5B7FE0 | Secondary accent, charts series 2 |
-| `brand/periwinkle-400` | #7090F0 | Accent in dark mode (buttons, active tab) |
-| `brand/periwinkle-200` | #A9BCF5 | Subtle highlights, chart fills, dark-mode tints |
+| Token                  | Hex     | Use                                                              |
+| ---------------------- | ------- | ---------------------------------------------------------------- |
+| `brand/navy`           | #143F8D | Primary buttons, active tab, links, selected states (light mode) |
+| `brand/deep-navy`      | #1B2A6B | Hero backgrounds, splash gradient end                            |
+| `brand/periwinkle-500` | #5B7FE0 | Secondary accent, charts series 2                                |
+| `brand/periwinkle-400` | #7090F0 | Accent in dark mode (buttons, active tab)                        |
+| `brand/periwinkle-200` | #A9BCF5 | Subtle highlights, chart fills, dark-mode tints                  |
 
 **Light mode surfaces**
 
-| Token | iOS | Android (M3 role) |
-| --- | --- | --- |
-| Canvas / background | #F2F2F7 | `surface` #F7F8FC |
-| Card / grouped cell | #FFFFFF | `surfaceContainerLowest` #FFFFFF |
-| Elevated card | #FFFFFF + shadow | `surfaceContainerLow` #F1F3FA |
-| Separator | rgba(60,60,67,0.12) | `outlineVariant` #DDE1EC |
-| Primary text | #0B1220 | `onSurface` #111827 |
-| Secondary text | rgba(60,60,67,0.60) | `onSurfaceVariant` #5B6475 |
-| Tertiary text | rgba(60,60,67,0.30) | #9AA3B2 |
-| Accent | #143F8D | `primary` #143F8D, `onPrimary` #FFFFFF |
-| Accent container | rgba(20,63,141,0.10) | `primaryContainer` #DCE4FA, `onPrimaryContainer` #0D2A5E |
+| Token               | iOS                  | Android (M3 role)                                        |
+| ------------------- | -------------------- | -------------------------------------------------------- |
+| Canvas / background | #F2F2F7              | `surface` #F7F8FC                                        |
+| Card / grouped cell | #FFFFFF              | `surfaceContainerLowest` #FFFFFF                         |
+| Elevated card       | #FFFFFF + shadow     | `surfaceContainerLow` #F1F3FA                            |
+| Separator           | rgba(60,60,67,0.12)  | `outlineVariant` #DDE1EC                                 |
+| Primary text        | #0B1220              | `onSurface` #111827                                      |
+| Secondary text      | rgba(60,60,67,0.60)  | `onSurfaceVariant` #5B6475                               |
+| Tertiary text       | rgba(60,60,67,0.30)  | #9AA3B2                                                  |
+| Accent              | #143F8D              | `primary` #143F8D, `onPrimary` #FFFFFF                   |
+| Accent container    | rgba(20,63,141,0.10) | `primaryContainer` #DCE4FA, `onPrimaryContainer` #0D2A5E |
 
 **Dark mode surfaces**
 
-| Token | iOS | Android (M3 role) |
-| --- | --- | --- |
-| Canvas | #000000 | `surface` #0E1016 |
-| Card / grouped cell | #1C1C1E | `surfaceContainer` #171A22 |
-| Elevated card | #2C2C2E | `surfaceContainerHigh` #1F2330 |
-| Separator | rgba(84,84,88,0.65) | `outlineVariant` #2C3140 |
-| Primary text | #FFFFFF | #F1F3F9 |
-| Secondary text | rgba(235,235,245,0.60) | #A6AEC0 |
-| Accent | #7090F0 | `primary` #A9BCF5, `onPrimary` #0D2A5E |
-| Accent container | rgba(154,181,227,0.24) | `primaryContainer` #233F82 |
+| Token               | iOS                    | Android (M3 role)                      |
+| ------------------- | ---------------------- | -------------------------------------- |
+| Canvas              | #000000                | `surface` #0E1016                      |
+| Card / grouped cell | #1C1C1E                | `surfaceContainer` #171A22             |
+| Elevated card       | #2C2C2E                | `surfaceContainerHigh` #1F2330         |
+| Separator           | rgba(84,84,88,0.65)    | `outlineVariant` #2C3140               |
+| Primary text        | #FFFFFF                | #F1F3F9                                |
+| Secondary text      | rgba(235,235,245,0.60) | #A6AEC0                                |
+| Accent              | #7090F0                | `primary` #A9BCF5, `onPrimary` #0D2A5E |
+| Accent container    | rgba(154,181,227,0.24) | `primaryContainer` #233F82             |
 
 **Semantic**
 
-| Meaning | Light | Dark | Where |
-| --- | --- | --- | --- |
-| Success / money in / Available | #059669 (text), #34C759 (iOS dot) | #34D399 | Completed status, profit, positive delta, "Available" |
-| Warning / low stock / balance due / pending | #B45309 (text), #FF9500 (dot) | #FCD34D | Pending, Balance due, Low stock, Awaiting payment |
-| Danger / refund / loss | #DC2626 | #F87171 | Refunded, Cancelled, negative margin, destructive buttons |
-| Info / swap-in | #0369A1 | #7DD3FC | "Swap" badge, Swap-in source badge |
-| Neutral | secondary text | secondary text | Counts, labels |
+| Meaning                                     | Light                             | Dark           | Where                                                     |
+| ------------------------------------------- | --------------------------------- | -------------- | --------------------------------------------------------- |
+| Success / money in / Available              | #059669 (text), #34C759 (iOS dot) | #34D399        | Completed status, profit, positive delta, "Available"     |
+| Warning / low stock / balance due / pending | #B45309 (text), #FF9500 (dot)     | #FCD34D        | Pending, Balance due, Low stock, Awaiting payment         |
+| Danger / refund / loss                      | #DC2626                           | #F87171        | Refunded, Cancelled, negative margin, destructive buttons |
+| Info / swap-in                              | #0369A1                           | #7DD3FC        | "Swap" badge, Swap-in source badge                        |
+| Neutral                                     | secondary text                    | secondary text | Counts, labels                                            |
 
 Rule: never fill a whole card with a semantic color. Use a small pill, a dot, or a 3 to 4pt leading stripe.
 
 ### 2.3 Typography
 
-| | iOS | Android |
-| --- | --- | --- |
-| Family | Montserrat (current iOS build) with SF Pro as fallback. Alternative: SF Pro throughout. | Montserrat or Roboto Flex. Keep the same family as iOS if brand consistency matters more than platform feel. |
-| Numbers | Tabular figures everywhere money or counts appear | Same |
+|         | iOS                                                                                     | Android                                                                                                      |
+| ------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Family  | Montserrat (current iOS build) with SF Pro as fallback. Alternative: SF Pro throughout. | Montserrat or Roboto Flex. Keep the same family as iOS if brand consistency matters more than platform feel. |
+| Numbers | Tabular figures everywhere money or counts appear                                       | Same                                                                                                         |
 
 Type scale (iOS name / Android M3 name):
 
-| Role | Size / line | Weight | Use |
-| --- | --- | --- | --- |
-| Large Title / Display Small | 34/41 | Bold | Home greeting, big screen titles on scroll top |
-| Title 1 / Headline Medium | 28/34 | Bold | Screen titles |
-| Title 2 / Headline Small | 22/28 | Semibold | Section headers |
-| Title 3 / Title Large | 20/25 | Semibold | Card titles, sheet titles |
-| Headline / Title Medium | 17/22 | Semibold | List row primary text |
-| Body / Body Large | 17/22 | Regular | Body copy, inputs |
-| Callout / Body Medium | 16/21 | Regular | Secondary body |
-| Subhead / Label Large | 15/20 | Medium | Metadata, button labels |
-| Footnote / Body Small | 13/18 | Regular | Captions, helper text |
-| Caption / Label Small | 12/16 | Medium | Tab labels, badges, table headers (uppercase, +0.08em tracking) |
+| Role                        | Size / line | Weight   | Use                                                             |
+| --------------------------- | ----------- | -------- | --------------------------------------------------------------- |
+| Large Title / Display Small | 34/41       | Bold     | Home greeting, big screen titles on scroll top                  |
+| Title 1 / Headline Medium   | 28/34       | Bold     | Screen titles                                                   |
+| Title 2 / Headline Small    | 22/28       | Semibold | Section headers                                                 |
+| Title 3 / Title Large       | 20/25       | Semibold | Card titles, sheet titles                                       |
+| Headline / Title Medium     | 17/22       | Semibold | List row primary text                                           |
+| Body / Body Large           | 17/22       | Regular  | Body copy, inputs                                               |
+| Callout / Body Medium       | 16/21       | Regular  | Secondary body                                                  |
+| Subhead / Label Large       | 15/20       | Medium   | Metadata, button labels                                         |
+| Footnote / Body Small       | 13/18       | Regular  | Captions, helper text                                           |
+| Caption / Label Small       | 12/16       | Medium   | Tab labels, badges, table headers (uppercase, +0.08em tracking) |
 
 Stat numerals: hero 32 to 34 Bold, compact 20 Semibold, letter-spacing -0.02em, tabular.
 
@@ -189,22 +191,22 @@ Money format: currency symbol + grouped thousands + 2 decimals: `₦35,000.00`. 
 
 ## 3. iOS vs Android: how the same screen should differ
 
-| Element | iOS (HIG) | Android (Material 3) |
-| --- | --- | --- |
-| Primary navigation | Bottom tab bar, 5 items, optional floating glass pill | Bottom Navigation Bar, 5 items with pill active indicator |
-| Screen title | Large title that collapses into inline title on scroll | Top App Bar (medium or large), collapses to small on scroll |
-| Back | Chevron + previous title, edge swipe | Arrow back in top app bar, system back gesture |
-| Primary action on a list | Toolbar "+" button top right or circular FAB bottom right above tab bar | Extended FAB ("New sale") bottom right, collapses to FAB on scroll |
-| Forms | Full-height sheet with "Cancel" left, title center, "Save" right | Full-screen dialog with close X left, title, "Save" text button right |
-| Pickers | Menus, wheel pickers, inline date picker | Exposed dropdown menus, M3 date picker dialog |
-| Segmented filters | Segmented control | Segmented buttons or filter chips |
-| Row actions | Swipe actions + long-press context menu | Long press to select + overflow menu (three dots) |
-| Confirmations | Action sheet (destructive in red) or alert | M3 dialog with text buttons |
-| Toasts | Small banner from top or HUD | Snackbar at the bottom (above nav bar) |
-| Toggles | iOS switch | M3 switch |
-| Checkboxes | Circular check in lists (Select mode) | Square checkbox |
-| Search | Search field under the large title | Search bar (M3) at top, expands to full-screen search view |
-| Haptics | Light impact on tab change, success on sale saved | Same via HapticFeedback |
+| Element                  | iOS (HIG)                                                               | Android (Material 3)                                                  |
+| ------------------------ | ----------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| Primary navigation       | Bottom tab bar, 5 items, optional floating glass pill                   | Bottom Navigation Bar, 5 items with pill active indicator             |
+| Screen title             | Large title that collapses into inline title on scroll                  | Top App Bar (medium or large), collapses to small on scroll           |
+| Back                     | Chevron + previous title, edge swipe                                    | Arrow back in top app bar, system back gesture                        |
+| Primary action on a list | Toolbar "+" button top right or circular FAB bottom right above tab bar | Extended FAB ("New sale") bottom right, collapses to FAB on scroll    |
+| Forms                    | Full-height sheet with "Cancel" left, title center, "Save" right        | Full-screen dialog with close X left, title, "Save" text button right |
+| Pickers                  | Menus, wheel pickers, inline date picker                                | Exposed dropdown menus, M3 date picker dialog                         |
+| Segmented filters        | Segmented control                                                       | Segmented buttons or filter chips                                     |
+| Row actions              | Swipe actions + long-press context menu                                 | Long press to select + overflow menu (three dots)                     |
+| Confirmations            | Action sheet (destructive in red) or alert                              | M3 dialog with text buttons                                           |
+| Toasts                   | Small banner from top or HUD                                            | Snackbar at the bottom (above nav bar)                                |
+| Toggles                  | iOS switch                                                              | M3 switch                                                             |
+| Checkboxes               | Circular check in lists (Select mode)                                   | Square checkbox                                                       |
+| Search                   | Search field under the large title                                      | Search bar (M3) at top, expands to full-screen search view            |
+| Haptics                  | Light impact on tab change, success on sale saved                       | Same via HapticFeedback                                               |
 
 ---
 
@@ -214,32 +216,32 @@ Design every screen once, then mark the variants needed for role and plan.
 
 ### 4.1 Roles
 
-| Role | Who | Key differences in UI |
-| --- | --- | --- |
+| Role                    | Who                              | Key differences in UI                                                                                                                                       |
+| ----------------------- | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Owner (Super admin)** | Person who created the workspace | Sees everything allowed by the plan. Branch switcher. Creates categories, branches, departments, staff. Settings editable. Customer buybacks. Delete sales. |
-| **Manager** | Staff with role "manager" | Can edit sales and refund. Product create/edit/delete only if granted. Sees Activity logs. |
-| **Staff** | Standard team member | Sees products, creates sales (including swap-in), Quick sale, customers. No structural edits unless granted. No branch switcher (fixed to assigned branch). |
+| **Manager**             | Staff with role "manager"        | Can edit sales and refund. Product create/edit/delete only if granted. Sees Activity logs.                                                                  |
+| **Staff**               | Standard team member             | Sees products, creates sales (including swap-in), Quick sale, customers. No structural edits unless granted. No branch switcher (fixed to assigned branch). |
 
 Per-module permission matrix (configured by the owner per staff member): **Products** (view, create, edit, delete), **Receipts/Sales** (view, create, edit, delete, refund), **Leads**, **Buybacks**, **Stock loans**, **Multi-Store Sync** (each view, create, edit, delete). Hidden or disabled buttons follow these switches.
 
 ### 4.2 Plans
 
-| Feature | Micro | Medium | Enterprise |
-| --- | :-: | :-: | :-: |
-| Stores (branches) | 1 | 2 | Unlimited |
-| Departments per store | 1 | 10 | Unlimited |
-| Staff per store | 2 | 25 | Unlimited |
-| Home, Inventory, Sales, Customers, Returns, Quick sale, Notifications, Settings, Help, Assistant | ✓ | ✓ | ✓ |
-| WhatsApp receipt sharing | 10 / month | Unlimited | Unlimited |
-| Analytics and reports (PDF/Excel export) | Locked | ✓ | ✓ |
-| Activity logs | Locked | ✓ | ✓ |
-| Sales leads | Locked | ✓ | ✓ |
-| Customer balance (credit ledger, Outstanding) | Locked | ✓ | ✓ |
-| Duplicate category (same branch) | Locked | ✓ | ✓ |
-| Multi-Store Sync | Locked | Locked | ✓ |
-| Copy categories from another branch | Locked | Locked | ✓ |
-| Stock loans | Locked | Locked | ✓ |
-| Customer buybacks | Owner only, any plan | | |
+| Feature                                                                                          |        Micro         |  Medium   | Enterprise |
+| ------------------------------------------------------------------------------------------------ | :------------------: | :-------: | :--------: |
+| Stores (branches)                                                                                |          1           |     2     | Unlimited  |
+| Departments per store                                                                            |          1           |    10     | Unlimited  |
+| Staff per store                                                                                  |          2           |    25     | Unlimited  |
+| Home, Inventory, Sales, Customers, Returns, Quick sale, Notifications, Settings, Help, Assistant |          ✓           |     ✓     |     ✓      |
+| WhatsApp receipt sharing                                                                         |      10 / month      | Unlimited | Unlimited  |
+| Analytics and reports (PDF/Excel export)                                                         |        Locked        |     ✓     |     ✓      |
+| Activity logs                                                                                    |        Locked        |     ✓     |     ✓      |
+| Sales leads                                                                                      |        Locked        |     ✓     |     ✓      |
+| Customer balance (credit ledger, Outstanding)                                                    |        Locked        |     ✓     |     ✓      |
+| Duplicate category (same branch)                                                                 |        Locked        |     ✓     |     ✓      |
+| Multi-Store Sync                                                                                 |        Locked        |  Locked   |     ✓      |
+| Copy categories from another branch                                                              |        Locked        |  Locked   |     ✓      |
+| Stock loans                                                                                      |        Locked        |  Locked   |     ✓      |
+| Customer buybacks                                                                                | Owner only, any plan |           |            |
 
 Locked features: show them with a small lock glyph and open the **Upgrade sheet** (section 7.15) on tap. Never hide core selling features.
 
@@ -256,13 +258,13 @@ Design the **More** menu in both variants.
 
 ### 5.1 Bottom navigation (both platforms)
 
-| Position | Label | Icon | Destination |
-| --- | --- | --- | --- |
-| 1 | Home | house | Home dashboard |
-| 2 | Stock | package | Inventory categories |
-| 3 | Sales | receipt | Sales list |
-| 4 | Analytics | bar chart (lock badge on Micro) | Analytics |
-| 5 | More | grid / ellipsis | More menu |
+| Position | Label     | Icon                            | Destination          |
+| -------- | --------- | ------------------------------- | -------------------- |
+| 1        | Home      | house                           | Home dashboard       |
+| 2        | Stock     | package                         | Inventory categories |
+| 3        | Sales     | receipt                         | Sales list           |
+| 4        | Analytics | bar chart (lock badge on Micro) | Analytics            |
+| 5        | More      | grid / ellipsis                 | More menu            |
 
 Badge rules: Sales tab can show a count dot for pending sales; More shows a dot if there are unread notifications not surfaced elsewhere.
 
@@ -295,6 +297,7 @@ ACCOUNT
 ### 5.3 Global top bar (on Home, Stock, Sales, Analytics)
 
 Left to right:
+
 1. **Branch pill** (owner with 2+ branches): store icon + branch short name (for example "PHC") + green dot if active + chevron. Tap opens the Branch picker sheet.
 2. Spacer.
 3. **Ask AI** button (sparkles icon + "Ask AI") opens Storvv Assistant.
@@ -367,6 +370,7 @@ Each subsection lists: purpose, entry points, layout top to bottom, exact copy, 
 #### Screen A2: Welcome (first launch, signed out)
 
 Layout:
+
 1. Top 55%: hero illustration area with the clean retail line-icon pattern (package, receipt, bag, bar chart, barcode, tag, store, coins) in navy at ~11% opacity, fading toward the bottom. Centered logo.
 2. Headline (Title 1): "The retail operating system for modern businesses."
 3. Body: "Stock, sales, receipts, and your team in one workspace."
@@ -377,6 +381,7 @@ Layout:
 #### Screen A3: Log in
 
 Layout:
+
 1. Back button.
 2. Title: "Welcome back".
 3. Subtitle: "Log in to your Storvv workspace."
@@ -449,14 +454,14 @@ Header on all steps: small label "Account Setup", progress indicator "Step 1 of 
 4. Two large selectable cards (radio behavior):
    - **Just me**: "A focused setup for running the business yourself. Enable team and multi-location tools later."
    - **Growing business**: "The full Storvv workspace with team, branches, and advanced tools as your plan allows."
-   Selected card: navy 2pt border + check circle.
+     Selected card: navy 2pt border + check circle.
 
 #### B3: Store information
 
 1. Round navy icon (storefront).
 2. Title: "Store Information".
 3. Body: "Tell us about your store. This information will be used on receipts and reports."
-4. "Head store branch *": city picker based on the country (placeholder "Choose a city..."). Helper: "Cities in 🇳🇬 Nigeria based on your country selection."
+4. "Head store branch \*": city picker based on the country (placeholder "Choose a city..."). Helper: "Cities in 🇳🇬 Nigeria based on your country selection."
 5. "Store Address" (multi-line, placeholder "123 Main Street, City, State 12345").
 6. "Store Phone" (placeholder "+234 801 234 5678").
 7. "Store Email" (placeholder "store@example.com").
@@ -466,10 +471,11 @@ Header on all steps: small label "Account Setup", progress indicator "Step 1 of 
 #### B4: First-win checklist (shown on Home after onboarding)
 
 A dismissible card at the top of Home titled "Get set up" with 3 checklist rows:
+
 1. "Add your first category" (Stock icon) > Add category.
 2. "Add a product" > Add product.
 3. "Record your first sale" > New sale.
-Each row turns into a green check when done. When all are done, a toast: "First sale recorded. Nice work!"
+   Each row turns into a green check when done. When all are done, a toast: "First sale recorded. Nice work!"
 
 Optional **dashboard tour** (coach marks, 4 steps): "Your dashboard", "Find inventory", "Record sales", "Your profile". Buttons "Next", "Skip".
 
@@ -488,7 +494,7 @@ Layout top to bottom (scroll, pull to refresh):
    - "3 products low on stock" (amber)
    - "2 sales with balance due" (amber)
    - "1 pending sale" (amber)
-   Tap goes to the filtered list.
+     Tap goes to the filtered list.
 5. **Hero revenue card**:
    - Label: "Total revenue" with period segmented control "Daily | Weekly | Monthly".
    - Value: "₦1,240,000.00".
@@ -507,6 +513,7 @@ Layout top to bottom (scroll, pull to refresh):
 9. Bottom spacing for the tab bar.
 
 Primary action:
+
 - iOS: circular FAB (+) above the tab bar, or a toolbar "+". Tap opens a small action sheet: "New sale", "Quick sale", "Add product".
 - Android: Extended FAB "New sale"; long press or a secondary small FAB for "Quick sale".
 
@@ -535,6 +542,7 @@ Inventory is two levels: **Categories** (with optional **Subcategories**) and **
 #### Screen C1: Categories
 
 Layout:
+
 1. Large title "Inventory", breadcrumb-style subtitle "Port Harcourt · Categories".
 2. Summary strip (horizontal scroll of compact stats): "Categories 3", "Products 14", "Total value ₦34.2m", "Total profit ₦12.2m" (only if user can see cost/profit), "Low stock 0".
 3. Search field "Search categories…".
@@ -551,6 +559,7 @@ Layout:
 Selection mode: checkboxes appear on cards; bottom toolbar shows "0 selected", "Select all", "Delete" (red).
 
 States:
+
 - Empty: icon box, "No categories yet", "Categories hold your products and their fields, like Brand or Serial number.", button "Create category".
 - Staff without create: same empty but body "Ask your admin to add categories." and no button.
 - Loading: 6 card skeletons.
@@ -603,17 +612,19 @@ Empty: "No products in this category", "Add your first product to start selling 
 #### Screen C5: Product timeline (sheet)
 
 Vertical timeline with dots and lines, newest first:
+
 - "Sold on REC-493257 · 30 Sep, 2:14 PM · by Ada"
 - "Discount applied (-10%) · 12 Sep"
 - "Swapped in on REC-493100 · 10 Sep"
 - "Added to stock · 8 Sep 2026 · by Scoz"
-Each sale entry taps through to the sale.
+  Each sale entry taps through to the sale.
 
 #### Screen C6: Add / Edit category (full-screen form)
 
 Header: "Cancel" | "New category" | "Save".
 
 Sections:
+
 1. **Basics**: "Category name" (placeholder "e.g. Perfumes"), "Description" (optional), "Category color" (8 swatches), "Type" (select: General, Electronics, Clothing & Apparel, Food & Beverage, Automotive, Office Supplies, Other).
 2. **Tracking**: segmented "Bulk quantity | Serial numbers". Helper: "Serial numbers create one row per unit, ideal for phones and devices."
 3. **Profit**: toggle "Track profit" (adds Cost price field). If off, confirmation "Continue without profit".
@@ -662,7 +673,7 @@ Header: "Cancel" | "Add product" | "Save".
 #### Screen C10: Delete confirmations
 
 - Category: "Delete "Perfumes"?" / "This removes the category, its subcategories and all products in them. This can't be undone." / buttons "Cancel", "Delete" (red).
-- Product: "Delete "Opulent Dubai"?" / "This can't be undone." 
+- Product: "Delete "Opulent Dubai"?" / "This can't be undone."
 
 ---
 
@@ -688,6 +699,7 @@ Header: "Cancel" | "Add product" | "Save".
    - Owner: "Delete" (red, with confirmation).
 
 States:
+
 - Empty: receipt icon, "No sales yet", "Create your first sale to record revenue and track payments.", hint chips "Add line items from inventory categories" and "Use Outstanding for deposits and balance due", button "Create sale".
 - Filter empty: "No sales match these filters" + "Clear filters".
 
@@ -696,17 +708,20 @@ States:
 Opens as a large sheet (iOS) / full-screen dialog (Android). Header shows step label and progress: **Category > Subcategory > Items > Sale details**. The Subcategory step is skipped when the category has none. A **sell screen note** banner may show at the top (set per branch in Settings, e.g. "Check serial number with customer before handing over").
 
 **Step 1: Category**
+
 - Section label "Parent category".
 - Search "Search categories…".
 - Grid of category tiles (name, available count). Tap to continue.
 - Empty: "No categories found".
 
 **Step 2: Subcategory**
+
 - Back chevron to step 1, breadcrumb "Perfumes".
 - Search "Search subcategories…".
 - Grid of subcategories with available counts. Empty: "No subcategories found".
 
 **Step 3: Items**
+
 - Search "Search products…" + scan button (barcode / serial).
 - Product list with only sellable items (Available). Each row: name, key fields (serial, color), price, and a trailing "+" / stepper for bulk items or a checkbox for serial items.
 - Selected rows highlight with a navy tint.
@@ -717,21 +732,22 @@ Opens as a large sheet (iOS) / full-screen dialog (Android). Header shows step l
 
 **Step 4: Sale details (checkout)**
 Sections in order:
+
 1. **Customer**
-   - "Customer Name *" (placeholder "John Doe") with live suggestions dropdown from existing customers (name, email/phone, "3 orders").
+   - "Customer Name \*" (placeholder "John Doe") with live suggestions dropdown from existing customers (name, email/phone, "3 orders").
    - "Customer Email" (placeholder "john@example.com").
    - "Customer Phone" (placeholder "+234 801 234 5678").
    - "Customer Address" (placeholder "123 Main St, City, State").
 2. **Payment**
-   - "Payment Method *" picker with tenders: Cash, Card (POS), Bank Transfer, OPay, Moniepoint, Palmpay, Kuda, USSD, Mobile Money (list is editable in Settings).
+   - "Payment Method \*" picker with tenders: Cash, Card (POS), Bank Transfer, OPay, Moniepoint, Palmpay, Kuda, USSD, Mobile Money (list is editable in Settings).
    - Toggle "Split Payment": shows rows of [method picker][amount] with remove (×), button "Add payment method", and a **Balance** card colored by state: green "Fully allocated", amber "₦5,000.00 left to allocate", red "₦2,000.00 over total"; footer line "Allocated ₦90,000.00 of ₦95,000.00".
    - **Part payment / Balance due** (Medium+): "Amount paid now" field; the rest becomes "Balance due" and the sale is reserved (items become "Awaiting payment").
-3. **Status**: "Status *" segmented "Completed | Pending".
+3. **Status**: "Status \*" segmented "Completed | Pending".
 4. **Notes (Optional)**: "Additional notes...".
 5. **Discount reason** (only if any discount): "Why is a discount being applied to this sale?" (required).
 6. **Commission** (owner/manager, optional): "Commission amount" (hint "Folded into the total the customer pays."), "Owed to" (placeholder "e.g. referral agent's name"), "Attribute to staff (optional)" picker.
 7. **Swap-in** (available to everyone who can make sales): checkbox "This is a swap-in transaction". When on:
-   - "Select Folder for Swapped-In Device *" picker (placeholder "Select folder for swapped-in device"; empty "No inventory folders found").
+   - "Select Folder for Swapped-In Device \*" picker (placeholder "Select folder for swapped-in device"; empty "No inventory folders found").
    - "Swapped-In Device Details": the selected category's fields (e.g. Brand, Model, Serial Number, Condition, Value).
    - Totals show "Swap credit (trade-in) −₦120,000.00".
 8. **Totals card** (sticky footer): "Products 3", "Subtotal (items) ₦95,000.00", "Discount −₦5,000.00", "Commission ₦2,000.00", "Swap credit (trade-in) −₦0.00", big "Total" (or "Amount due" for swap-ins) "₦92,000.00".
@@ -740,6 +756,7 @@ Sections in order:
 Validation errors inline in red; disabled primary until required fields are valid.
 
 **Step 5: Success**
+
 - Animated check (green), title "Sale recorded", sale number "REC-493258" with copy icon.
 - Summary: customer, items count, total, payment method, status pill.
 - Actions (large buttons/list): "Share on WhatsApp", "Email receipt", "Download PDF", "Print", "View sale".
@@ -818,6 +835,7 @@ Dialog: "Cancel REC-493257? Reserved stock will be released. This cannot be undo
 Micro: full-screen locked state with a blurred preview of charts behind, lock icon, title "Analytics is on Medium", body "See revenue trends and busiest hours on Medium", primary "View plans", secondary "Not now".
 
 Layout (Medium+):
+
 1. Large title "Analytics", subtitle "Analytics & Reports".
 2. Period segmented: "Daily | Weekly | Monthly" (+ custom range in a menu).
 3. Hero card: "Revenue" big number, delta pill, area chart.
@@ -843,6 +861,7 @@ Charts: muted grid, navy primary series, periwinkle secondary, no heavy legends.
 ### 7.7 Sales leads (Medium+)
 
 #### Screen E1: Leads list
+
 - Title "Sales leads".
 - Summary: "Open leads 5", "Est. pipeline ₦640,000.00".
 - Search "Search customer, phone, or product…".
@@ -852,9 +871,11 @@ Charts: muted grid, navy primary series, periwinkle secondary, no heavy legends.
 - Empty: "No leads yet", "Track enquiries before they become receipts."
 
 #### Screen E2: Add lead (form)
+
 Customer name, phone, email, product of interest (picker from inventory or free text), estimated value, source, notes, "Assigned to" (staff picker). Save.
 
 #### Screen E3: Lead detail
+
 - Header: customer, status pill, "Assigned to" (or "Unassigned").
 - "Commerce" section: product, est. value, primary button "Convert to sale" (opens New sale prefilled).
 - "Activity" timeline with "Add note" (placeholder "Follow-up details").
@@ -865,6 +886,7 @@ Customer name, phone, email, product of interest (picker from inventory or free 
 ### 7.8 Customer buybacks (owner only)
 
 #### Screen F1: Buybacks list
+
 - Title "Customer buybacks".
 - Summary: "Buybacks 6", "Total paid ₦480,000.00".
 - Rows: item name, customer, "Paid ₦80,000.00", method, date, action "View in stock".
@@ -872,6 +894,7 @@ Customer name, phone, email, product of interest (picker from inventory or free 
 - Empty: "No buybacks yet", "Record items you buy back from customers. They go straight into stock."
 
 #### Screen F2: Record customer buyback (form)
+
 Title "Record customer buyback". Fields: "Customer name" (placeholder "Who sold this item?"), "Phone" ("Contact number"), "Email" ("Email address"), "Inventory category" ("Select category"), then the category's product fields, "Amount paid to customer", "Payment method", "Notes" ("Condition, ID check, reference…"). Primary "Record buyback". Result: product appears with "Buyback · ₦80,000.00" source badge.
 
 ---
@@ -879,6 +902,7 @@ Title "Record customer buyback". Fields: "Customer name" (placeholder "Who sold 
 ### 7.9 Stock loans (Enterprise)
 
 #### Screen G1: Stock loans list
+
 - Title "Stock loans".
 - Summary: "On loan 3", "Units 5".
 - Chips: "All | Active | Sold | Returned".
@@ -904,12 +928,14 @@ Locked state (Micro/Medium): "Enterprise: move stock between branches" + "View p
 ### 7.11 Team: Departments and Staff (Growing business)
 
 #### Screen H1: Departments
+
 - Title "Departments".
 - List rows: department name (for example "Sales"), staff count ("1 staff"), chevron.
 - Primary "Add department" (cap per plan; at the cap show Upgrade sheet "Medium supports up to 10 departments").
 - Empty: "No departments yet".
 
 #### Screen H2: Department detail (Staff roster)
+
 - Nav: back "Departments", title "Sales", overflow ("Edit", "Move department", "Delete").
 - Search "Search staff…".
 - Segmented: "Active | Removed".
@@ -918,16 +944,18 @@ Locked state (Micro/Medium): "Enterprise: move stock between branches" + "View p
 - Empty: "No staff members yet". Removed empty: "No removed staff".
 
 #### Screen H3: Add / Edit staff (form)
+
 Fields: "First name", "Last name", "Email", "Phone", "Position", "Status" (Active / Inactive / On Leave), "Hire date", "Salary" (optional), Role (Staff / Manager).
 
 Section **Permissions** (matrix of toggles):
+
 - Products: View, Create, Edit, Delete
 - Sales: View, Create, Edit, Delete, Refund
 - Sales leads: View, Create, Edit, Delete
 - Buybacks: View, Create, Edit, Delete
 - Stock loans: View, Create, Edit, Delete
 - Multi-Store Sync: View, Create, Edit, Delete
-Preset buttons: "Cashier", "Supervisor", "Full access".
+  Preset buttons: "Cashier", "Supervisor", "Full access".
 
 Delivery: primary "Email sign-in details" or "Email to staff instead". Success state: "Account created" / "Invite emailed" with temporary password reveal + copy, button "Done". Sensitive actions may require "Confirm with authenticator" (6-digit code sheet).
 
@@ -971,6 +999,7 @@ Push notification designs (lock screen): "New sale · ₦35,000.00 from Chinedu 
 Header card: large avatar (photo or initials), name, email, role chip ("Owner" / "Manager" / "Staff"), branch.
 
 Grouped sections (exact labels):
+
 - **Account details**: "Profile", "Change profile photo".
 - **Business**: "Store information", "Branch & store details", "Store settings".
 - **General**: "Light / dark mode" (System / Light / Dark), "Language", "Region", "Currency", "Timezone", "Notifications".
@@ -988,6 +1017,7 @@ Change password: "Current password", "New password" (strength meter), "Confirm n
 #### Screen I2: Settings (owner)
 
 Grouped sections (titles and subtitles):
+
 1. **Account**: "Company logo and billing for your whole account." Rows: logo (with "Upload logo"), business name, "Subscription" (current plan + renewal date).
 2. **Workspace style**: "How much of the app to show. Does not change what you pay for." Same 2 cards as onboarding.
 3. **Advanced features** (Just me only): "You chose a simple setup. Turn on team and multi-location tools when you need them." Toggles: "Team & staff management", "Multi-location administration", "Roles & permissions administration", "Approval workflows", "Payment links" (Coming soon).
@@ -998,13 +1028,14 @@ Grouped sections (titles and subtitles):
 8. **Sales & receipts**: "Numbering, prefixes, and print behavior." Prefix (e.g. "REC"), next number, "Print receipt automatically" toggle, receipt footer text.
 9. **Data export**: "Download Excel backups of inventory (by category folder), sales, buybacks, and stock loans for this branch." Buttons per dataset.
 
-Branch form (sheet): "Branch Name *", "Description", "Sell screen note", "Address", "Phone", "Email", toggle "Active". Delete branch dialog: "Delete Store" / "This action cannot be undone."
+Branch form (sheet): "Branch Name \*", "Description", "Sell screen note", "Address", "Phone", "Email", toggle "Active". Delete branch dialog: "Delete Store" / "This action cannot be undone."
 
 ---
 
 ### 7.15 Plans, subscription and upgrade sheet
 
 #### Upgrade sheet (shown when tapping any locked feature)
+
 - Plan badge ("Medium" or "Enterprise").
 - Title from the trigger, for example:
   - Analytics: "See revenue trends and busiest hours on Medium"
@@ -1018,6 +1049,7 @@ Branch form (sheet): "Branch Name *", "Description", "Sell screen note", "Addres
 - Primary "View plans", secondary "Not now".
 
 #### Subscription screen (owner)
+
 1. Current plan card: plan name, status ("Active", "Past due" amber), "Renews on 30 Oct 2026" or "Ends on ...", buttons "Change plan", "Cancel auto-renew".
 2. Billing cycle segmented: "Monthly | Quarterly (Save 10%) | Yearly (Save 15%)".
 3. Plan cards: Micro, Medium (badge "Recommended"), Enterprise, each with regional price, cycle, and the feature list from section 4.2. Primary "Upgrade to Medium". Payment handled by Paystack (opens a secure web sheet).
@@ -1028,6 +1060,7 @@ Branch form (sheet): "Branch Name *", "Description", "Sell screen note", "Addres
 ### 7.16 Help center and Storvv Assistant
 
 #### Help center
+
 - Title "Help center", search "Search help topics…".
 - "Popular topics" chips: Getting started, Inventory, Sales, Sales & refunds, Sales leads, Stock loans, Staff & roles, Analytics, Plans & billing, Mobile app, Settings, Profile.
 - "Common screens" list (Dashboard, Inventory, Sales, ...), each opening an article.
@@ -1035,6 +1068,7 @@ Branch form (sheet): "Branch Name *", "Description", "Sell screen note", "Addres
 - Bottom card: "Ask assistant".
 
 #### Storvv Assistant (chat)
+
 - Opened from "Ask AI" in the top bar or More.
 - Header: sparkles icon, "Storvv Assistant", close.
 - Empty state: greeting "Hi Ada, what do you need?" + suggestion chips: "What sold best this week?", "Which products are low on stock?", "How do I refund a sale?", "Add a new staff member".
@@ -1056,18 +1090,18 @@ Do not design checkout, payout or storefront management screens yet.
 
 ## 8. Global states to design for every list or form
 
-| State | Design |
-| --- | --- |
-| Loading | Skeleton rows/cards matching the final layout; no spinners over content |
-| Empty | Section 6 empty-state component with screen-specific copy (given above) |
-| Filter / search empty | "No results for "…"" + "Clear filters" |
-| Error | Card with alert icon, "Couldn't load sales", "Check your connection and try again.", "Try again" button |
-| Offline | Top banner "You're offline. Changes will sync when you're back online." (amber); sales can still be recorded and show a small "Pending sync" cloud icon |
-| No store selected | "Select a store" empty state + "Choose branch" button |
-| Permission denied | Lock icon, "You don't have access to this", "Ask your admin to update your permissions." |
-| Plan locked | Upgrade sheet (7.15) or inline locked card |
-| Success | Toast/snackbar (e.g. "Product added", "Sale refunded", "Receipt number copied") |
-| Destructive confirm | Action sheet (iOS) / dialog (Android) with red primary |
+| State                 | Design                                                                                                                                                  |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Loading               | Skeleton rows/cards matching the final layout; no spinners over content                                                                                 |
+| Empty                 | Section 6 empty-state component with screen-specific copy (given above)                                                                                 |
+| Filter / search empty | "No results for "…"" + "Clear filters"                                                                                                                  |
+| Error                 | Card with alert icon, "Couldn't load sales", "Check your connection and try again.", "Try again" button                                                 |
+| Offline               | Top banner "You're offline. Changes will sync when you're back online." (amber); sales can still be recorded and show a small "Pending sync" cloud icon |
+| No store selected     | "Select a store" empty state + "Choose branch" button                                                                                                   |
+| Permission denied     | Lock icon, "You don't have access to this", "Ask your admin to update your permissions."                                                                |
+| Plan locked           | Upgrade sheet (7.15) or inline locked card                                                                                                              |
+| Success               | Toast/snackbar (e.g. "Product added", "Sale refunded", "Receipt number copied")                                                                         |
+| Destructive confirm   | Action sheet (iOS) / dialog (Android) with red primary                                                                                                  |
 
 Accessibility for all states: minimum touch target 44pt / 48dp, contrast WCAG AA, Dynamic Type / font scaling up to 200% without clipping (cards grow vertically), VoiceOver/TalkBack labels for icon-only buttons (for example "Copy receipt number", "Sale actions").
 
@@ -1081,25 +1115,25 @@ Categories: Perfumes (16 subcategories), Body Sprays (0 items), Scented Candles 
 
 Lattafa products:
 
-| Product | Unit price | Qty | Cost | Date in | Margin | Availability |
-| --- | --- | --- | --- | --- | --- | --- |
-| Fire On Ice | ₦35,000.00 | 20 | ₦27,000.00 | 8 Sep 2026 | +₦8,000.00 · 23% | Available |
-| Hayatii Gold Elixir | ₦23,000.00 | 40 | ₦13,000.00 | 8 Sep 2026 | +₦10,000.00 · 43% | Available |
-| Musamam Black Intense | ₦35,000.00 | 20 | ₦27,000.00 | 8 Sep 2026 | +₦8,000.00 · 23% | Available |
-| Musamam White Intense | ₦35,000.00 | 20 | ₦27,000.00 | 8 Sep 2026 | +₦8,000.00 · 23% | Available |
-| Opulent Dubai | ₦30,000.00 | 87 | ₦17,000.00 | 8 Sep 2026 | +₦13,000.00 · 43% | Available |
-| Opulent Musk Blue | ₦30,000.00 | 93 | ₦17,000.00 | 8 Sep 2026 | +₦13,000.00 · 43% | Available |
-| Opulent Musk Red | ₦30,000.00 | 93 | ₦17,000.00 | 8 Sep 2026 | +₦13,000.00 · 43% | Available |
+| Product               | Unit price | Qty | Cost       | Date in    | Margin            | Availability |
+| --------------------- | ---------- | --- | ---------- | ---------- | ----------------- | ------------ |
+| Fire On Ice           | ₦35,000.00 | 20  | ₦27,000.00 | 8 Sep 2026 | +₦8,000.00 · 23%  | Available    |
+| Hayatii Gold Elixir   | ₦23,000.00 | 40  | ₦13,000.00 | 8 Sep 2026 | +₦10,000.00 · 43% | Available    |
+| Musamam Black Intense | ₦35,000.00 | 20  | ₦27,000.00 | 8 Sep 2026 | +₦8,000.00 · 23%  | Available    |
+| Musamam White Intense | ₦35,000.00 | 20  | ₦27,000.00 | 8 Sep 2026 | +₦8,000.00 · 23%  | Available    |
+| Opulent Dubai         | ₦30,000.00 | 87  | ₦17,000.00 | 8 Sep 2026 | +₦13,000.00 · 43% | Available    |
+| Opulent Musk Blue     | ₦30,000.00 | 93  | ₦17,000.00 | 8 Sep 2026 | +₦13,000.00 · 43% | Available    |
+| Opulent Musk Red      | ₦30,000.00 | 93  | ₦17,000.00 | 8 Sep 2026 | +₦13,000.00 · 43% | Available    |
 
 Sales:
 
-| Sale # | Customer | Items | Total | Payment | Status |
-| --- | --- | --- | --- | --- | --- |
-| REC-493257 | Chinedu Okafor (0803 555 0192) | Fire On Ice ×1 | ₦35,000.00 | Bank Transfer | Completed |
-| REC-493258 | Tolu Adeyemi | iPhone 13 swap + Opulent Dubai | ₦30,000.00 | Split Payment | Completed (Swap) |
-| REC-493259 | Amaka Nwosu | Opulent Musk Blue ×2 | ₦60,000.00 | Cash | Balance due (Paid ₦40,000.00) |
-| REC-493260 | Walk-in customer | Hayatii Gold Elixir ×1 | ₦23,000.00 | Card (POS) | Pending |
-| REC-493201 | Ibrahim Musa | Musamam Black Intense ×1 | ₦35,000.00 | OPay | Refunded |
+| Sale #     | Customer                       | Items                          | Total      | Payment       | Status                        |
+| ---------- | ------------------------------ | ------------------------------ | ---------- | ------------- | ----------------------------- |
+| REC-493257 | Chinedu Okafor (0803 555 0192) | Fire On Ice ×1                 | ₦35,000.00 | Bank Transfer | Completed                     |
+| REC-493258 | Tolu Adeyemi                   | iPhone 13 swap + Opulent Dubai | ₦30,000.00 | Split Payment | Completed (Swap)              |
+| REC-493259 | Amaka Nwosu                    | Opulent Musk Blue ×2           | ₦60,000.00 | Cash          | Balance due (Paid ₦40,000.00) |
+| REC-493260 | Walk-in customer               | Hayatii Gold Elixir ×1         | ₦23,000.00 | Card (POS)    | Pending                       |
+| REC-493201 | Ibrahim Musa                   | Musamam Black Intense ×1       | ₦35,000.00 | OPay          | Refunded                      |
 
 Home metrics: Total revenue ₦1,240,000.00 (+12.4%), Orders today 14, Active customers 86, Low stock signals 3, Outstanding balances ₦120,000.00, Open leads 5, Products 14, Total value ₦34.2m, Total profit ₦12.2m.
 
@@ -1110,6 +1144,7 @@ Home metrics: Total revenue ₦1,240,000.00 (+12.4%), Orders today 14, Active cu
 For each item: iOS light, iOS dark, Android light, Android dark.
 
 **Auth and onboarding**
+
 - [ ] Splash
 - [ ] Welcome
 - [ ] Log in (default, error, biometric)
@@ -1121,12 +1156,14 @@ For each item: iOS light, iOS dark, Android light, Android dark.
 - [ ] Home with "Get set up" checklist + tour coach mark
 
 **Home**
+
 - [ ] Home (populated, empty workspace, staff, Micro)
 - [ ] New action sheet (New sale / Quick sale / Add product)
 - [ ] Global search (empty, results, no results)
 - [ ] Branch picker sheet
 
 **Inventory**
+
 - [ ] Categories (grid, list, empty, loading, selection mode)
 - [ ] Category hub (subcategories)
 - [ ] Product list (filters, discounted row, swap-in row, empty)
@@ -1139,6 +1176,7 @@ For each item: iOS light, iOS dark, Android light, Android dark.
 - [ ] Delete confirmations
 
 **Sales**
+
 - [ ] Sales list (populated, empty, filtered empty)
 - [ ] New sale: Category, Subcategory, Items, Sale details (single payment, split payment states, part payment, swap-in on), Success
 - [ ] Quick sale (scan, selected items, success)
@@ -1151,22 +1189,26 @@ For each item: iOS light, iOS dark, Android light, Android dark.
 - [ ] Customers list + Customer detail
 
 **Analytics**
+
 - [ ] Analytics (populated) + export state
 - [ ] Analytics locked (Micro)
 
 **Operations**
+
 - [ ] Sales leads list, Add lead, Lead detail, Mark lost
 - [ ] Buybacks list, Record buyback
 - [ ] Stock loans list, New loan, Mark sold / Return
 - [ ] Multi-Store Sync: Transfer, History (+ tracking sheet), Reports, Locked
 
 **Team and audit**
+
 - [ ] Departments
 - [ ] Department roster (Active, Removed, empty)
 - [ ] Add/Edit staff + Permissions matrix + Invite success
 - [ ] Activity logs (+ detail sheet, locked)
 
 **Account**
+
 - [ ] Notifications (all, unread, empty) + push notification mockups
 - [ ] Profile
 - [ ] 2FA setup flow, Change password
@@ -1178,6 +1220,7 @@ For each item: iOS light, iOS dark, Android light, Android dark.
 - [ ] More menu (Growing business, Just me, Staff)
 
 **Global states**
+
 - [ ] Loading skeletons, Error card, Offline banner, Permission denied, No store selected, Toast/Snackbar variants
 
 ---
@@ -1197,4 +1240,4 @@ For each item: iOS light, iOS dark, Android light, Android dark.
 
 ---
 
-*End of specification.*
+_End of specification._

@@ -79,7 +79,10 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('Trade partners (emulator)
       expect((await getTradeProfile(db, a)).handle).toBeNull()
 
       const first = `first-${uniq()}`
-      const saved = await saveTradeProfile(db, a, { handle: `@${first}`, displayName: '  Ikeja  Hub ' })
+      const saved = await saveTradeProfile(db, a, {
+        handle: `@${first}`,
+        displayName: '  Ikeja  Hub ',
+      })
       expect(saved).toMatchObject({ handle: first, displayName: 'Ikeja Hub' })
 
       const b = await store('Other')
@@ -96,7 +99,10 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('Trade partners (emulator)
       const slug = `shop-${uniq()}`
       const owner = await store('Shop', { slug })
       const other = await store('Copycat')
-      await expectCode(saveTradeProfile(db, other, { handle: slug, displayName: '' }), 'HANDLE_TAKEN')
+      await expectCode(
+        saveTradeProfile(db, other, { handle: slug, displayName: '' }),
+        'HANDLE_TAKEN'
+      )
       await saveTradeProfile(db, owner, { handle: slug, displayName: '' })
       expect((await getTradeProfile(db, owner)).handle).toBe(slug)
     })
@@ -104,7 +110,10 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('Trade partners (emulator)
     it('rejects invalid and reserved handles', async () => {
       const a = await store('A')
       await expectCode(saveTradeProfile(db, a, { handle: 'x', displayName: '' }), 'INVALID_HANDLE')
-      await expectCode(saveTradeProfile(db, a, { handle: 'storvv', displayName: '' }), 'INVALID_HANDLE')
+      await expectCode(
+        saveTradeProfile(db, a, { handle: 'storvv', displayName: '' }),
+        'INVALID_HANDLE'
+      )
     })
   })
 
@@ -124,7 +133,11 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('Trade partners (emulator)
 
       const sent = await inviteTradePartner(db, a.scope, b.handle)
       expect(sent).toMatchObject({ relation: 'outgoing', changed: true })
-      expect(sent.partner).toEqual({ handle: b.handle, displayName: 'Kano Depot', bankVerified: true })
+      expect(sent.partner).toEqual({
+        handle: b.handle,
+        displayName: 'Kano Depot',
+        bankVerified: true,
+      })
       expect(sent.partnerScope).toEqual(b.scope)
       expect(await inviteTradePartner(db, a.scope, b.handle)).toMatchObject({ changed: false })
 
@@ -132,13 +145,19 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('Trade partners (emulator)
       expect((await lookupTradeHandle(db, b.scope, a.handle)).relation).toBe('incoming')
       expect((await listTradeConnections(db, b.scope)).map((c) => c.state)).toEqual(['incoming'])
 
-      await expectCode(respondToConnection(db, a.scope, sent.connectionId, 'accept'), 'INVALID_STATE')
+      await expectCode(
+        respondToConnection(db, a.scope, sent.connectionId, 'accept'),
+        'INVALID_STATE'
+      )
       const accepted = await respondToConnection(db, b.scope, sent.connectionId, 'accept')
       expect(accepted.status).toBe('active')
       expect(accepted.partnerScope).toEqual(a.scope)
 
       const [mine] = await listTradeConnections(db, a.scope)
-      expect(mine).toMatchObject({ state: 'active', partner: { handle: b.handle, bankVerified: true } })
+      expect(mine).toMatchObject({
+        state: 'active',
+        partner: { handle: b.handle, bankVerified: true },
+      })
       expect(mine!.sinceMs).toBeGreaterThan(0)
     })
 
@@ -158,7 +177,9 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('Trade partners (emulator)
       expect(await listTradeConnections(db, a.scope)).toEqual([])
       await expectCode(inviteTradePartner(db, a.scope, b.handle), 'NOT_ACCEPTING')
       const later = Date.now() + DECLINE_COOLDOWN_MS + 60_000
-      expect(await inviteTradePartner(db, a.scope, b.handle, later)).toMatchObject({ relation: 'outgoing' })
+      expect(await inviteTradePartner(db, a.scope, b.handle, later)).toMatchObject({
+        relation: 'outgoing',
+      })
     })
 
     it('the requester can cancel; either side can remove', async () => {
@@ -189,7 +210,9 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('Trade partners (emulator)
       await expectCode(respondToConnection(db, a.scope, connectionId, 'unblock'), 'INVALID_STATE')
 
       await respondToConnection(db, b.scope, connectionId, 'unblock')
-      expect(await inviteTradePartner(db, a.scope, b.handle)).toMatchObject({ relation: 'outgoing' })
+      expect(await inviteTradePartner(db, a.scope, b.handle)).toMatchObject({
+        relation: 'outgoing',
+      })
     })
 
     it('outsiders cannot act on a connection', async () => {
@@ -210,7 +233,9 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('Trade partners (emulator)
         actorUid: 'someone',
         connectionId: 'c1',
       })
-      const snap = await storeDocRef(db, b.scope.ownerId, b.scope.storeId).collection('notifications').get()
+      const snap = await storeDocRef(db, b.scope.ownerId, b.scope.storeId)
+        .collection('notifications')
+        .get()
       expect(snap.docs[0]!.data()).toMatchObject({
         type: 'trade_invite',
         source: 'trade',

@@ -1,8 +1,4 @@
-import {
-  getChildFolders,
-  getRootFolders,
-  normalizeParentId,
-} from '~/utils/inventory-folder-tree'
+import { getChildFolders, getRootFolders, normalizeParentId } from '~/utils/inventory-folder-tree'
 import type { InventoryFolder, InventoryItem, TemplateField } from '~/stores/inventory'
 import type { Receipt } from '~/stores/receipts'
 import type { SellerLoanOut } from '~/stores/sellerLoanOuts'
@@ -50,8 +46,8 @@ function formatExportDate(value: unknown): string {
     value instanceof Date
       ? value
       : typeof value === 'object' && value !== null && 'toDate' in value
-        ? (value as { toDate: () => Date }).toDate()
-        : new Date(value as string)
+      ? (value as { toDate: () => Date }).toDate()
+      : new Date(value as string)
   if (Number.isNaN(date.getTime())) return String(value)
   return date.toLocaleString('en-US', {
     year: 'numeric',
@@ -118,7 +114,10 @@ function getItemFieldValue(item: InventoryItem, field: TemplateField): unknown {
   return ''
 }
 
-function getExportFieldsForFolder(folder: InventoryFolder, items: InventoryItem[]): TemplateField[] {
+function getExportFieldsForFolder(
+  folder: InventoryFolder,
+  items: InventoryItem[]
+): TemplateField[] {
   const templateFields = folder.template?.fields ?? []
   if (templateFields.length > 0) return templateFields
 
@@ -166,7 +165,12 @@ function buildFolderInventoryRows(
 
 /** Safe folder name for ZIP archives (one folder per inventory category). */
 export function sanitizeFolderPath(value: string): string {
-  return value.replace(/[\\/:*?"<>|]+/g, '_').replace(/\s+/g, ' ').trim() || 'Category'
+  return (
+    value
+      .replace(/[\\/:*?"<>|]+/g, '_')
+      .replace(/\s+/g, ' ')
+      .trim() || 'Category'
+  )
 }
 
 export function uniqueFolderPath(base: string, used: Set<string>): string {
@@ -189,7 +193,11 @@ export function uniqueFolderPath(base: string, used: Set<string>): string {
   return fallback
 }
 
-function buildExportInfoText(meta: StoreExportMeta | undefined, folders: number, items: number): string {
+function buildExportInfoText(
+  meta: StoreExportMeta | undefined,
+  folders: number,
+  items: number
+): string {
   return [
     'Storvv inventory export',
     '=======================',
@@ -205,16 +213,15 @@ function buildExportInfoText(meta: StoreExportMeta | undefined, folders: number,
   ].join('\n')
 }
 
-export async function buildFolderItemsWorkbook(
-  folder: InventoryFolder,
-  items: InventoryItem[]
-) {
+export async function buildFolderItemsWorkbook(folder: InventoryFolder, items: InventoryItem[]) {
   const XLSX = await import('xlsx')
   const fields = getExportFieldsForFolder(folder, items)
   const headers = fields.map((field) => field.label || field.name)
   const rows = buildFolderItemRows(items, fields)
   const ws = XLSX.utils.aoa_to_sheet(
-    headers.length > 0 ? [headers, ...rows] : [['Note'], ['No template fields defined for this category.']]
+    headers.length > 0
+      ? [headers, ...rows]
+      : [['Note'], ['No template fields defined for this category.']]
   )
   ws['!cols'] = (headers.length > 0 ? headers : ['Note']).map((header) => ({
     wch: Math.max(String(header).length, 14),
@@ -231,7 +238,14 @@ export async function buildCategoriesIndexWorkbook(
   meta?: StoreExportMeta
 ) {
   const XLSX = await import('xlsx')
-  const header = ['Category', 'Parent category', 'Description', 'Item count', 'Serial tracking', 'Fields']
+  const header = [
+    'Category',
+    'Parent category',
+    'Description',
+    'Item count',
+    'Serial tracking',
+    'Fields',
+  ]
   const rows = folders.map((folder) => {
     const items = itemsByFolderId[folder.id] || []
     const fields = getExportFieldsForFolder(folder, items)
@@ -319,7 +333,11 @@ export async function buildInventoryZip(
 
   root.file('README.txt', buildExportInfoText(meta, folders.length, itemCount))
 
-  const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } })
+  const blob = await zip.generateAsync({
+    type: 'blob',
+    compression: 'DEFLATE',
+    compressionOptions: { level: 6 },
+  })
   return { blob, rootName, folderCount: folders.length, itemCount }
 }
 
@@ -360,14 +378,52 @@ export async function buildInventoryWorkbook(
     for (const item of items) {
       allProductRows.push([
         folder.name,
-        String(getItemFieldValue(item, { id: 'name', name: 'name', label: 'Name', type: 'text', required: false }) || ''),
+        String(
+          getItemFieldValue(item, {
+            id: 'name',
+            name: 'name',
+            label: 'Name',
+            type: 'text',
+            required: false,
+          }) || ''
+        ),
         formatInventoryFieldValue(
           { id: 'price', name: 'price', label: 'Price', type: 'currency', required: false },
-          getItemFieldValue(item, { id: 'price', name: 'price', label: 'Price', type: 'currency', required: false })
+          getItemFieldValue(item, {
+            id: 'price',
+            name: 'price',
+            label: 'Price',
+            type: 'currency',
+            required: false,
+          })
         ),
-        String(getItemFieldValue(item, { id: 'serialNo', name: 'serialNo', label: 'Serial', type: 'text', required: false }) || ''),
-        String(getItemFieldValue(item, { id: 'brand', name: 'brand', label: 'Brand', type: 'text', required: false }) || ''),
-        String(getItemFieldValue(item, { id: 'model', name: 'model', label: 'Model', type: 'text', required: false }) || ''),
+        String(
+          getItemFieldValue(item, {
+            id: 'serialNo',
+            name: 'serialNo',
+            label: 'Serial',
+            type: 'text',
+            required: false,
+          }) || ''
+        ),
+        String(
+          getItemFieldValue(item, {
+            id: 'brand',
+            name: 'brand',
+            label: 'Brand',
+            type: 'text',
+            required: false,
+          }) || ''
+        ),
+        String(
+          getItemFieldValue(item, {
+            id: 'model',
+            name: 'model',
+            label: 'Model',
+            type: 'text',
+            required: false,
+          }) || ''
+        ),
       ])
     }
 

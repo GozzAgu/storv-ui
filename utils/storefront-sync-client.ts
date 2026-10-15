@@ -18,10 +18,7 @@ import {
   getStorefrontListingDocument,
   getStorefrontPublicProfileDocument,
 } from '~/composables/useFirestorePaths'
-import {
-  buildStorefrontListing,
-  buildStorefrontPublicProfile,
-} from '~/utils/storefront-projection'
+import { buildStorefrontListing, buildStorefrontPublicProfile } from '~/utils/storefront-projection'
 import { isValidStorefrontSlug } from '~/utils/storefront-slug'
 import {
   EMPTY_STOREFRONT_CONFIG,
@@ -62,7 +59,9 @@ export function parseStorefrontConfig(raw: Record<string, unknown> | undefined):
   return {
     ...base,
     enabled: Boolean(raw.enabled),
-    slug: String(raw.slug || '').trim().toLowerCase(),
+    slug: String(raw.slug || '')
+      .trim()
+      .toLowerCase(),
     displayName: String(raw.displayName || '').trim(),
     tagline: raw.tagline != null ? String(raw.tagline) : undefined,
     description: raw.description != null ? String(raw.description) : undefined,

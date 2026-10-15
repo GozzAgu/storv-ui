@@ -59,7 +59,10 @@ export function isValidTradeHandle(handle: string): boolean {
 }
 
 /** A starting suggestion: the storefront slug if valid, else the business name. */
-export function suggestTradeHandle(storefrontSlug: string | null | undefined, name: string): string {
+export function suggestTradeHandle(
+  storefrontSlug: string | null | undefined,
+  name: string
+): string {
   const fromSlug = normalizeTradeHandle(storefrontSlug)
   if (isValidTradeHandle(fromSlug)) return fromSlug
   const fromName = normalizeTradeHandle(name)

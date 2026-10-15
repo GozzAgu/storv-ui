@@ -20,20 +20,20 @@
 
 ## 2. Tech stack
 
-| Layer | Technology |
-|-------|------------|
-| Frontend | Nuxt 4, Vue 3, Pinia, Tailwind CSS 4, @nuxt/ui |
-| Rendering | SPA (`ssr: false`) - static export for Capacitor |
-| Mobile | Capacitor 8 (iOS primary), biometric auth, secure storage, keyboard handling |
-| Backend | Nitro server routes (`server/api/*`) |
-| Database | Firebase Firestore |
-| Auth | Firebase Auth (email, OAuth), TOTP 2FA |
-| Storage | Firebase Storage + Cloudinary (logos/images) |
-| Payments | Paystack (subscriptions + payment links infrastructure) |
-| Messaging | WhatsApp Cloud API, Resend (email receipts) |
-| AI assistant | Google Gemini (`/api/assistant/chat`) |
-| Charts / export | ApexCharts, jsPDF, xlsx, JSZip |
-| Testing | Playwright (E2E), Vitest (unit), Firebase rules tests |
+| Layer           | Technology                                                                   |
+| --------------- | ---------------------------------------------------------------------------- |
+| Frontend        | Nuxt 4, Vue 3, Pinia, Tailwind CSS 4, @nuxt/ui                               |
+| Rendering       | SPA (`ssr: false`) - static export for Capacitor                             |
+| Mobile          | Capacitor 8 (iOS primary), biometric auth, secure storage, keyboard handling |
+| Backend         | Nitro server routes (`server/api/*`)                                         |
+| Database        | Firebase Firestore                                                           |
+| Auth            | Firebase Auth (email, OAuth), TOTP 2FA                                       |
+| Storage         | Firebase Storage + Cloudinary (logos/images)                                 |
+| Payments        | Paystack (subscriptions + payment links infrastructure)                      |
+| Messaging       | WhatsApp Cloud API, Resend (email receipts)                                  |
+| AI assistant    | Google Gemini (`/api/assistant/chat`)                                        |
+| Charts / export | ApexCharts, jsPDF, xlsx, JSZip                                               |
+| Testing         | Playwright (E2E), Vitest (unit), Firebase rules tests                        |
 
 ---
 
@@ -41,21 +41,21 @@
 
 Three plans: **Storvv Micro**, **Storvv Medium**, **Storvv Enterprise**.
 
-| Capability | Micro | Medium | Enterprise |
-|------------|:-----:|:------:|:------------:|
-| Dashboard, inventory, sales, customers | ✓ | ✓ | ✓ |
-| Settings, profile, notifications | ✓ | ✓ | ✓ |
-| WhatsApp messaging | ✓ (10/mo) | ✓ unlimited | ✓ unlimited |
-| Payment links (infra) | ✓ | ✓ | ✓ |
-| Analytics & reports | - | ✓ | ✓ |
-| Activity logs | - | ✓ | ✓ |
-| Departments & staff (limits) | 1 dept, 2 staff | 10 depts, 25 staff | unlimited |
-| Customer balance ledger | - | ✓ | ✓ |
-| Duplicate category (same branch) | - | ✓ | ✓ |
-| Copy category templates across branches | - | - | ✓ |
-| Stock loans | - | - | ✓ |
-| Multi-store sync & transfers | - | - | ✓ |
-| Max branches | 1 | 2 | unlimited |
+| Capability                              |      Micro      |       Medium       | Enterprise  |
+| --------------------------------------- | :-------------: | :----------------: | :---------: |
+| Dashboard, inventory, sales, customers  |        ✓        |         ✓          |      ✓      |
+| Settings, profile, notifications        |        ✓        |         ✓          |      ✓      |
+| WhatsApp messaging                      |    ✓ (10/mo)    |    ✓ unlimited     | ✓ unlimited |
+| Payment links (infra)                   |        ✓        |         ✓          |      ✓      |
+| Analytics & reports                     |        -        |         ✓          |      ✓      |
+| Activity logs                           |        -        |         ✓          |      ✓      |
+| Departments & staff (limits)            | 1 dept, 2 staff | 10 depts, 25 staff |  unlimited  |
+| Customer balance ledger                 |        -        |         ✓          |      ✓      |
+| Duplicate category (same branch)        |        -        |         ✓          |      ✓      |
+| Copy category templates across branches |        -        |         -          |      ✓      |
+| Stock loans                             |        -        |         -          |      ✓      |
+| Multi-store sync & transfers            |        -        |         -          |      ✓      |
+| Max branches                            |        1        |         2          |  unlimited  |
 
 Billing: Paystack, monthly / quarterly / yearly cycles.
 
@@ -64,14 +64,17 @@ Billing: Paystack, monthly / quarterly / yearly cycles.
 ## 4. Roles & permissions
 
 ### Account roles
+
 - **Super admin (owner):** Full access; creates branches, staff, inventory structure; sees profit/cost; edits settings.
 - **Staff:** Separate login; data scoped to assigned store/department.
 
 ### Store roles (staff members)
+
 - **Manager:** Edit receipts/refunds; may edit inventory if granted `canManageInventory`.
 - **Staff / intern:** Read-heavy; can create sales depending on config.
 
 ### Key permission rules (UI)
+
 - Create/edit **inventory categories & products:** super admin, or manager with inventory flag.
 - **Profit & cost columns:** super admin only.
 - **Customer buybacks:** super admin only.
@@ -86,25 +89,25 @@ Firestore rules enforce stricter server-side limits (e.g. folder CRUD often owne
 
 ## 5. App routes (dashboard)
 
-| Route | Feature |
-|-------|---------|
-| `/dashboard` | Home metrics, charts, low stock, payment link summary |
-| `/dashboard/inventory` | Category list (grid/table) |
-| `/dashboard/inventory/[id]` | Category detail: products OR subcategory hub |
-| `/dashboard/receipts` | Sales hub: Receipts, Returns, Customers tabs |
-| `/dashboard/buybacks` | Customer buybacks (trade-ins) |
-| `/dashboard/seller-loans` | Stock loans (Enterprise) |
-| `/dashboard/payment-links` | Paystack payment links (web + native) |
-| `/dashboard/analytics` | Charts, feature insights, PDF/Excel export |
-| `/dashboard/activity` | Activity logs (Medium+) |
-| `/dashboard/multi-store-sync` | Transfers, consolidated reports (Enterprise) |
-| `/dashboard/stores/[id]/departments` | Departments per branch |
-| `/dashboard/departments/[id]` | Department detail + staff |
-| `/dashboard/settings` | Account, branches, subscription, data export |
-| `/dashboard/profile` | Profile, 2FA, receipt terms |
-| `/dashboard/help` | Searchable help center + assistant entry |
-| `/dashboard/onboarding` | Currency, country, head store setup |
-| `/dashboard/notifications` | Notification center |
+| Route                                | Feature                                               |
+| ------------------------------------ | ----------------------------------------------------- |
+| `/dashboard`                         | Home metrics, charts, low stock, payment link summary |
+| `/dashboard/inventory`               | Category list (grid/table)                            |
+| `/dashboard/inventory/[id]`          | Category detail: products OR subcategory hub          |
+| `/dashboard/receipts`                | Sales hub: Receipts, Returns, Customers tabs          |
+| `/dashboard/buybacks`                | Customer buybacks (trade-ins)                         |
+| `/dashboard/seller-loans`            | Stock loans (Enterprise)                              |
+| `/dashboard/payment-links`           | Paystack payment links (web + native)                 |
+| `/dashboard/analytics`               | Charts, feature insights, PDF/Excel export            |
+| `/dashboard/activity`                | Activity logs (Medium+)                               |
+| `/dashboard/multi-store-sync`        | Transfers, consolidated reports (Enterprise)          |
+| `/dashboard/stores/[id]/departments` | Departments per branch                                |
+| `/dashboard/departments/[id]`        | Department detail + staff                             |
+| `/dashboard/settings`                | Account, branches, subscription, data export          |
+| `/dashboard/profile`                 | Profile, 2FA, receipt terms                           |
+| `/dashboard/help`                    | Searchable help center + assistant entry              |
+| `/dashboard/onboarding`              | Currency, country, head store setup                   |
+| `/dashboard/notifications`           | Notification center                                   |
 
 **Demo mirror:** All dashboard routes also exist under `/demo/dashboard/*` with local seed data (no Firebase).
 
@@ -274,15 +277,15 @@ Firestore rules enforce stricter server-side limits (e.g. folder CRUD often owne
 
 ## 9. External integrations
 
-| Service | Use |
-|---------|-----|
-| Firebase | Auth, Firestore, Storage, Analytics |
-| Paystack | Subscriptions, payment links, webhooks |
-| Cloudinary | Account/store logos (unsigned upload preset) |
-| WhatsApp Cloud API | Receipt delivery, balance nudges |
-| Resend | Email receipts (partial - some UI still “coming soon”) |
-| Google Gemini | Dashboard assistant |
-| Vercel | Hosting preset, KV rate limits |
+| Service            | Use                                                    |
+| ------------------ | ------------------------------------------------------ |
+| Firebase           | Auth, Firestore, Storage, Analytics                    |
+| Paystack           | Subscriptions, payment links, webhooks                 |
+| Cloudinary         | Account/store logos (unsigned upload preset)           |
+| WhatsApp Cloud API | Receipt delivery, balance nudges                       |
+| Resend             | Email receipts (partial - some UI still “coming soon”) |
+| Google Gemini      | Dashboard assistant                                    |
+| Vercel             | Hosting preset, KV rate limits                         |
 
 ---
 
@@ -309,31 +312,31 @@ All operational data is **scoped to active branch** (`storeId`) except Enterpris
 
 ## 11. Key codebase locations
 
-| Area | Path |
-|------|------|
-| Dashboard pages | `pages/dashboard/` |
-| Pinia stores | `stores/` |
-| Subscription gates | `composables/useSubscriptionFeatures.ts`, `types/subscription.ts` |
-| Permissions | `composables/usePermissions.ts` |
-| Region cities (branches) | `utils/region-cities.ts`, `utils/branch-name.ts` |
-| Category tree | `utils/inventory-folder-tree.ts` |
-| Help & assistant KB | `utils/dashboard-help-content.ts` |
-| Demo seed | `utils/demo-seed.ts`, `stores/demoApp.ts`, `utils/demo-bridge.ts` |
-| Server APIs | `server/api/` |
-| Firestore rules | `firestore.rules` |
-| Sidebar layout | `layouts/dashboard.vue` |
-| Side panels / drawers | `components/ui/SidePanel.vue` |
+| Area                     | Path                                                              |
+| ------------------------ | ----------------------------------------------------------------- |
+| Dashboard pages          | `pages/dashboard/`                                                |
+| Pinia stores             | `stores/`                                                         |
+| Subscription gates       | `composables/useSubscriptionFeatures.ts`, `types/subscription.ts` |
+| Permissions              | `composables/usePermissions.ts`                                   |
+| Region cities (branches) | `utils/region-cities.ts`, `utils/branch-name.ts`                  |
+| Category tree            | `utils/inventory-folder-tree.ts`                                  |
+| Help & assistant KB      | `utils/dashboard-help-content.ts`                                 |
+| Demo seed                | `utils/demo-seed.ts`, `stores/demoApp.ts`, `utils/demo-bridge.ts` |
+| Server APIs              | `server/api/`                                                     |
+| Firestore rules          | `firestore.rules`                                                 |
+| Sidebar layout           | `layouts/dashboard.vue`                                           |
+| Side panels / drawers    | `components/ui/SidePanel.vue`                                     |
 
 ---
 
 ## 12. Testing & quality
 
-| Type | Command | Coverage |
-|------|---------|----------|
-| E2E | `npm test` (Playwright) | Dashboard, inventory, receipts, analytics, landing |
-| Unit | `npx vitest run` | Assistant, demo seed, folder tree, branch names, region cities, etc. |
-| Firestore rules | `npm run test:rules` | Security rules (needs Java/emulator) |
-| Format | `npm run format:check` | Prettier |
+| Type            | Command                 | Coverage                                                             |
+| --------------- | ----------------------- | -------------------------------------------------------------------- |
+| E2E             | `npm test` (Playwright) | Dashboard, inventory, receipts, analytics, landing                   |
+| Unit            | `npx vitest run`        | Assistant, demo seed, folder tree, branch names, region cities, etc. |
+| Firestore rules | `npm run test:rules`    | Security rules (needs Java/emulator)                                 |
+| Format          | `npm run format:check`  | Prettier                                                             |
 
 ---
 
@@ -352,18 +355,18 @@ All operational data is **scoped to active branch** (`storeId`) except Enterpris
 
 Use this section to gauge “how far we’ve gone” in the latest iteration:
 
-| Area | What shipped |
-|------|----------------|
-| Inventory | Optional **Organize with subcategories** on create (default off); parent hub only when opted in |
+| Area      | What shipped                                                                                         |
+| --------- | ---------------------------------------------------------------------------------------------------- |
+| Inventory | Optional **Organize with subcategories** on create (default off); parent hub only when opted in      |
 | Inventory | **Copy from branch:** top-level picker + optional subcategory copy + parent `usesSubcategories` flag |
-| Settings | **Create branch:** city dropdown from account region + optional area/neighborhood |
-| Buybacks | Empty state aligned with stock loans layout |
-| Analytics | Feature insights grid (sales, returns, inventory, buybacks, loans, balances, etc.) |
-| Assistant | Expanded KB; no `**` bold in replies; demo canned answers |
-| Demo | Seed v7 with subcategory hierarchies; copy-from-branch works locally; iOS build path |
-| UX | Category drawer scrollable; checkboxes styled consistently; faster theme toggle |
-| Content | Help center + assistant updated for subcategories, copy-from-branch, branch cities |
-| Polish | Em dash (` - `) removed app-wide (regex fix on profile page) |
+| Settings  | **Create branch:** city dropdown from account region + optional area/neighborhood                    |
+| Buybacks  | Empty state aligned with stock loans layout                                                          |
+| Analytics | Feature insights grid (sales, returns, inventory, buybacks, loans, balances, etc.)                   |
+| Assistant | Expanded KB; no `**` bold in replies; demo canned answers                                            |
+| Demo      | Seed v7 with subcategory hierarchies; copy-from-branch works locally; iOS build path                 |
+| UX        | Category drawer scrollable; checkboxes styled consistently; faster theme toggle                      |
+| Content   | Help center + assistant updated for subcategories, copy-from-branch, branch cities                   |
+| Polish    | Em dash (`-`) removed app-wide (regex fix on profile page)                                           |
 
 ---
 
@@ -384,4 +387,4 @@ Storvv is a Firebase-backed, Paystack-billed retail OS for multi-location shops:
 
 ---
 
-*End of snapshot. For file-level journeys and API catalogs, see [STORVV_COMPLETE_GUIDE.md](./STORVV_COMPLETE_GUIDE.md) and [STORVV_APP_FLOW.md](./STORVV_APP_FLOW.md).*
+_End of snapshot. For file-level journeys and API catalogs, see [STORVV_COMPLETE_GUIDE.md](./STORVV_COMPLETE_GUIDE.md) and [STORVV_APP_FLOW.md](./STORVV_APP_FLOW.md)._

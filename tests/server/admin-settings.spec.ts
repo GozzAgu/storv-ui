@@ -37,15 +37,17 @@ describe('sharedSettingsUpdate', () => {
         defaultCategory: 'food',
       },
     })
-    expect(
-      sharedSettingsUpdate('payment', { paymentMethods: [' Cash ', 'cash', 'OPay'] })
-    ).toEqual({ 'storeDetails.settings.payment': { paymentMethods: ['Cash', 'OPay'] } })
+    expect(sharedSettingsUpdate('payment', { paymentMethods: [' Cash ', 'cash', 'OPay'] })).toEqual(
+      { 'storeDetails.settings.payment': { paymentMethods: ['Cash', 'OPay'] } }
+    )
   })
 
   it('rejects unknown sections and bad values', () => {
     expect(statusOf(() => sharedSettingsUpdate('subscription', { plan: 'x' }))).toBe(400)
     expect(statusOf(() => sharedSettingsUpdate('business', {}))).toBe(400)
-    expect(statusOf(() => sharedSettingsUpdate('business', { storeName: 'x'.repeat(121) }))).toBe(400)
+    expect(statusOf(() => sharedSettingsUpdate('business', { storeName: 'x'.repeat(121) }))).toBe(
+      400
+    )
     expect(
       statusOf(() =>
         sharedSettingsUpdate('inventory', {
@@ -65,10 +67,14 @@ describe('sharedSettingsUpdate', () => {
       )
     ).toBe(400)
     expect(
-      statusOf(() => sharedSettingsUpdate('receipt', { prefix: 'R', nextNumber: 1.5, autoPrint: true }))
+      statusOf(() =>
+        sharedSettingsUpdate('receipt', { prefix: 'R', nextNumber: 1.5, autoPrint: true })
+      )
     ).toBe(400)
     expect(
-      statusOf(() => sharedSettingsUpdate('receipt', { prefix: 'R', nextNumber: 5, autoPrint: 'yes' }))
+      statusOf(() =>
+        sharedSettingsUpdate('receipt', { prefix: 'R', nextNumber: 5, autoPrint: 'yes' })
+      )
     ).toBe(400)
     expect(
       statusOf(() => sharedSettingsUpdate('payment', { paymentMethods: Array(31).fill('Cash') }))

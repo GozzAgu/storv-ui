@@ -26,7 +26,11 @@
 
 <script setup lang="ts">
 import { computed, useId } from 'vue'
-import { formatMarginPercent, getItemGrossProfit, getItemSellPrice } from '~/utils/inventory-item-cost'
+import {
+  formatMarginPercent,
+  getItemGrossProfit,
+  getItemSellPrice,
+} from '~/utils/inventory-item-cost'
 import type { InventoryItem } from '~/stores/inventory'
 import { usePermissions } from '~/composables/usePermissions'
 
@@ -59,9 +63,7 @@ const marginPreview = computed(() => {
   const cost = props.modelValue
   if (cost === null || cost === undefined || !Number.isFinite(cost)) return null
   const sell =
-    props.sellPrice ??
-    (props.previewItem ? getItemSellPrice(props.previewItem) : null) ??
-    null
+    props.sellPrice ?? (props.previewItem ? getItemSellPrice(props.previewItem) : null) ?? null
   if (sell === null || sell <= 0) return null
   const profit = sell - cost
   const margin = sell > 0 ? (profit / sell) * 100 : null

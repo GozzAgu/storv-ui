@@ -1,6 +1,6 @@
 <template>
   <SDialog
-      placement="right"
+    placement="right"
     :open="modelValue"
     :title="receipt ? `Sale #${receipt.receiptNumber}` : 'Sale details'"
     size="md"
@@ -30,7 +30,10 @@
           <h3 class="s-form-section__title">
             Items <span class="s-form-section__count">{{ itemCount }}</span>
           </h3>
-          <ReceiptTableLineItems :items="receipt.items" :items-count-fallback="receipt.itemsCount" />
+          <ReceiptTableLineItems
+            :items="receipt.items"
+            :items-count-fallback="receipt.itemsCount"
+          />
         </section>
 
         <template v-if="v2Sale">
@@ -85,9 +88,12 @@
             <div class="s-record-row">
               <dt>
                 Commission<template v-if="receipt.commissionOwedToName">
-                  · {{ receipt.commissionOwedToName }}</template>
+                  · {{ receipt.commissionOwedToName }}</template
+                >
               </dt>
-              <dd class="s-record-row__value">{{ formatCurrency(receipt.commissionAmount ?? 0) }}</dd>
+              <dd class="s-record-row__value">
+                {{ formatCurrency(receipt.commissionAmount ?? 0) }}
+              </dd>
             </div>
           </template>
           <div v-if="receipt.notes" class="s-record-row">
@@ -121,17 +127,10 @@
           Print / PDF
         </SButton>
       </div>
-      <SButton
-        v-if="isOutstanding && canClose"
-        variant="danger"
-        @click="emit('cancel', receipt!)"
-      >
+      <SButton v-if="isOutstanding && canClose" variant="danger" @click="emit('cancel', receipt!)">
         Cancel order
       </SButton>
-      <SButton
-        v-if="receipt?.status === 'completed' && canClose"
-        @click="emit('refund', receipt!)"
-      >
+      <SButton v-if="receipt?.status === 'completed' && canClose" @click="emit('refund', receipt!)">
         Refund
       </SButton>
       <SButton
@@ -199,7 +198,9 @@ const isOutstanding = computed(() => props.receipt?.status === 'balance_due')
 const amountPaid = computed(() => (props.receipt ? receiptAmountPaid(props.receipt) : 0))
 const balanceDue = computed(() => (props.receipt ? receiptBalanceDue(props.receipt) : 0))
 
-const statusLabel = computed(() => (props.receipt ? getReceiptStatusLabel(props.receipt.status) : ''))
+const statusLabel = computed(() =>
+  props.receipt ? getReceiptStatusLabel(props.receipt.status) : ''
+)
 const itemCount = computed(() =>
   props.receipt
     ? (props.receipt.items ?? []).reduce((sum, item) => sum + (item.quantity || 0), 0) ||

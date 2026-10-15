@@ -36,9 +36,7 @@ export async function readInquiryFulfillInventory(
     })
   }
 
-  const folderId = String(
-    inquiry.sourceFolderId || listingSourceFolderId || ''
-  ).trim()
+  const folderId = String(inquiry.sourceFolderId || listingSourceFolderId || '').trim()
   if (!folderId) {
     throw createError({
       statusCode: 400,
@@ -57,9 +55,10 @@ export async function readInquiryFulfillInventory(
     })
   }
 
-  const folder = (folderSnap.exists ? folderSnap.data() : null) as
-    | { hasSerialNumbers?: boolean; template?: { fields?: Array<{ name?: string }> } }
-    | null
+  const folder = (folderSnap.exists ? folderSnap.data() : null) as {
+    hasSerialNumbers?: boolean
+    template?: { fields?: Array<{ name?: string }> }
+  } | null
   const usesSerial = !!folder?.hasSerialNumbers
   const itemData = itemSnap.data() as Record<string, unknown>
 
@@ -86,10 +85,7 @@ export async function readInquiryFulfillInventory(
       })
     }
   } else {
-    const resolved = resolveBulkStockFieldAndValueFromMap(
-      itemData,
-      folder?.template?.fields
-    )
+    const resolved = resolveBulkStockFieldAndValueFromMap(itemData, folder?.template?.fields)
     if (!resolved) {
       throw createError({
         statusCode: 409,
@@ -139,8 +135,7 @@ export function writeInquiryFulfillSale(
     paymentsV2?: boolean
   }
 ): InquiryFulfillWriteResult {
-  const { storeRef, storeId, ownerUserId, createdByUid, inquiryId, inquiry, inventory } =
-    params
+  const { storeRef, storeId, ownerUserId, createdByUid, inquiryId, inquiry, inventory } = params
   const paymentMethod = params.paymentMethod?.trim() || 'Storefront'
   const quantity = 1
   const unitPrice =

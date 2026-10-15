@@ -65,7 +65,10 @@ describe('SStat', () => {
   })
 
   it('announces the direction of a negative delta', () => {
-    const wrapper = mount(SStat, { props: { label: 'Revenue', value: '₦10', delta: -12.4 }, global })
+    const wrapper = mount(SStat, {
+      props: { label: 'Revenue', value: '₦10', delta: -12.4 },
+      global,
+    })
 
     expect(wrapper.find('.s-stat__delta--down').text()).toContain('Down')
     expect(wrapper.find('.s-stat__delta--down').text()).toContain('-12%')

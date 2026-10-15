@@ -3,7 +3,9 @@ import type { StorefrontInquiryType } from '~/types/storefront'
 const PHONE_RE = /^[+]?[\d\s()-]{7,20}$/
 
 export function normalizeInquiryPhone(raw: string): string {
-  return String(raw || '').trim().replace(/\s+/g, ' ')
+  return String(raw || '')
+    .trim()
+    .replace(/\s+/g, ' ')
 }
 
 export function isValidInquiryPhone(raw: string): boolean {

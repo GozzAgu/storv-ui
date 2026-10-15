@@ -2,12 +2,12 @@
 
 ## Commands
 
-| Script | What runs |
-|--------|-----------|
-| `npm run test:unit` | Vitest: `tests/unit/**` + `tests/server/**` |
-| `npm run test:integration` | Vitest: `tests/integration/**` |
-| `npm run test:rules` | Firebase emulators + Vitest `tests/rules/**` (requires Java 21+) |
-| `npm run test:e2e` | Playwright: root `tests/*.spec.ts` (see `playwright.config.ts`) |
+| Script                     | What runs                                                        |
+| -------------------------- | ---------------------------------------------------------------- |
+| `npm run test:unit`        | Vitest: `tests/unit/**` + `tests/server/**`                      |
+| `npm run test:integration` | Vitest: `tests/integration/**`                                   |
+| `npm run test:rules`       | Firebase emulators + Vitest `tests/rules/**` (requires Java 21+) |
+| `npm run test:e2e`         | Playwright: root `tests/*.spec.ts` (see `playwright.config.ts`)  |
 
 CI runs all of the above on every PR (see `.github/workflows/ci.yml`).
 

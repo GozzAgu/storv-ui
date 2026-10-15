@@ -32,7 +32,10 @@ export function countDiscountedReceipts(receipts: Receipt[]): number {
  * i.e. what fraction of gross list-price sales was given away. Null when there's no revenue
  * to compute a rate against.
  */
-export function discountRatePercent(discountTotal: number, postDiscountRevenue: number): number | null {
+export function discountRatePercent(
+  discountTotal: number,
+  postDiscountRevenue: number
+): number | null {
   const grossBeforeDiscount = postDiscountRevenue + discountTotal
   if (grossBeforeDiscount <= 0) return null
   return (discountTotal / grossBeforeDiscount) * 100

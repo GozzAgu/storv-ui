@@ -37,9 +37,12 @@ async function waitForCaptureReady(page, slug) {
         .filter({ hasText: /Good (morning|afternoon|evening)|Overview/i })
         .first()
         .waitFor({ timeout: 60_000 })
-      await main.getByText(/Total sales|Inventory health|Recent activity/i).first().waitFor({
-        timeout: 60_000,
-      })
+      await main
+        .getByText(/Total sales|Inventory health|Recent activity/i)
+        .first()
+        .waitFor({
+          timeout: 60_000,
+        })
       return
     case 'inventory':
       await waitForPageTitle(main, 'Categories')
@@ -56,11 +59,17 @@ async function waitForCaptureReady(page, slug) {
       return
     case 'receipts-outstanding':
       await main.getByRole('tab', { name: /Outstanding/i }).click({ timeout: 60_000 })
-      await main.getByText(/Outstanding|No outstanding payments/i).first().waitFor({ timeout: 60_000 })
+      await main
+        .getByText(/Outstanding|No outstanding payments/i)
+        .first()
+        .waitFor({ timeout: 60_000 })
       return
     case 'receipts-customers':
       await main.getByRole('tab', { name: 'Customers', exact: true }).click({ timeout: 60_000 })
-      await main.getByText(/Customers|No customers/i).first().waitFor({ timeout: 60_000 })
+      await main
+        .getByText(/Customers|No customers/i)
+        .first()
+        .waitFor({ timeout: 60_000 })
       return
     case 'payment-links':
       await waitForPageTitle(main, 'Payment links')
@@ -74,10 +83,18 @@ async function waitForCaptureReady(page, slug) {
       await waitForPageTitle(main, 'Sales leads')
       return
     case 'departments':
-      await main.locator('h1').filter({ hasText: /^Departments$/i }).first().waitFor({ timeout: 60_000 })
+      await main
+        .locator('h1')
+        .filter({ hasText: /^Departments$/i })
+        .first()
+        .waitFor({ timeout: 60_000 })
       return
     case 'analytics':
-      await main.locator('h1').filter({ hasText: /Analytics/i }).first().waitFor({ timeout: 60_000 })
+      await main
+        .locator('h1')
+        .filter({ hasText: /Analytics/i })
+        .first()
+        .waitFor({ timeout: 60_000 })
       return
     case 'activity':
       await waitForPageTitle(main, 'Activity Logs')

@@ -47,5 +47,9 @@ export async function assertTokenRateLimit(
   opts: { id: string; limit: number; windowMs: number }
 ): Promise<void> {
   if (!tokenHash) return
-  await assertRateLimit(event, { ...opts, uid: `tok:${tokenHash.slice(0, 32)}`, requireDistributed: true })
+  await assertRateLimit(event, {
+    ...opts,
+    uid: `tok:${tokenHash.slice(0, 32)}`,
+    requireDistributed: true,
+  })
 }

@@ -25,8 +25,7 @@ export type DashboardHelpCategory = {
   articles: DashboardHelpArticle[]
 }
 
-export const dashboardHelpCategories: DashboardHelpCategory[] =
-[
+export const dashboardHelpCategories: DashboardHelpCategory[] = [
   {
     id: 'recent-updates',
     title: 'Recent updates',
@@ -311,7 +310,8 @@ export const dashboardHelpCategories: DashboardHelpCategory[] =
   {
     id: 'inventory',
     title: 'Inventory',
-    blurb: 'Categories page (grid or table), subcategories, category detail, items, and permissions.',
+    blurb:
+      'Categories page (grid or table), subcategories, category detail, items, and permissions.',
     articles: [
       {
         title: 'Categories list (/dashboard/inventory)',

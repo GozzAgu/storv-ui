@@ -4,7 +4,11 @@
     <Transition name="s-pop">
       <div
         v-if="open"
-        :class="[bare ? 's-popover-host' : 's-popover', align === 'start' && 's-popover--start', panelClass]"
+        :class="[
+          bare ? 's-popover-host' : 's-popover',
+          align === 'start' && 's-popover--start',
+          panelClass,
+        ]"
         :role="role"
         :aria-label="label"
         @click.stop

@@ -62,9 +62,9 @@ describe('assistant chat validation', () => {
   })
 
   it('requires the last turn to be from the user', () => {
-    expect(() =>
-      normalizeAssistantChatTurns([{ role: 'assistant', content: 'Hello' }])
-    ).toThrow(/last message must be from the user/)
+    expect(() => normalizeAssistantChatTurns([{ role: 'assistant', content: 'Hello' }])).toThrow(
+      /last message must be from the user/
+    )
   })
 })
 

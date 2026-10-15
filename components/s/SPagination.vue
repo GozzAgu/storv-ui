@@ -1,8 +1,10 @@
 <template>
-  <nav v-if="total > 0 && (totalPages > 1 || !hideWhenSinglePage)" class="s-c s-pagination" :aria-label="label">
-    <p class="s-pagination__summary">
-      {{ rangeStart }}–{{ rangeEnd }} of {{ total }}
-    </p>
+  <nav
+    v-if="total > 0 && (totalPages > 1 || !hideWhenSinglePage)"
+    class="s-c s-pagination"
+    :aria-label="label"
+  >
+    <p class="s-pagination__summary">{{ rangeStart }}–{{ rangeEnd }} of {{ total }}</p>
     <div class="s-pagination__controls">
       <SIconButton
         label="Previous page"
@@ -48,7 +50,9 @@ const props = withDefaults(
 const emit = defineEmits<{ 'page-change': [page: number] }>()
 
 const totalPages = computed(() => Math.max(1, Math.ceil(props.total / props.pageSize)))
-const rangeStart = computed(() => Math.min(props.total, (props.currentPage - 1) * props.pageSize + 1))
+const rangeStart = computed(() =>
+  Math.min(props.total, (props.currentPage - 1) * props.pageSize + 1)
+)
 const rangeEnd = computed(() => Math.min(props.total, props.currentPage * props.pageSize))
 
 function go(page: number) {

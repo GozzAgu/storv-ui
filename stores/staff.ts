@@ -22,7 +22,8 @@ import { useAuthStore } from './auth'
 import { useUserStore } from './user'
 import { useDepartmentsStore } from './departments'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
-import { getStaffCollection,
+import {
+  getStaffCollection,
   getStaffDocument,
   getQueryUserId,
 } from '~/composables/useFirestorePaths'
@@ -59,13 +60,15 @@ function stopWatchingOwnStaff() {
 function adminAccessKey(staff: Pick<Staff, 'admin' | 'adminGrants'> | undefined): string {
   if (staff?.admin !== true) return ''
   const grants = staff.adminGrants ?? {}
-  return JSON.stringify(Object.keys(grants).sort().map((k) => [k, grants[k as keyof typeof grants]]))
+  return JSON.stringify(
+    Object.keys(grants)
+      .sort()
+      .map((k) => [k, grants[k as keyof typeof grants]])
+  )
 }
 
 /** Firestore rejects `undefined`. Normalize optional staff fields before writes. */
-function prepareStaffFirestoreUpdates(
-  updates: Record<string, unknown>
-): Record<string, unknown> {
+function prepareStaffFirestoreUpdates(updates: Record<string, unknown>): Record<string, unknown> {
   const prepared: Record<string, unknown> = {}
   for (const [key, value] of Object.entries(updates)) {
     if (value === undefined) continue
@@ -708,7 +711,10 @@ export const useStaffStore = defineStore('staff', {
             password,
             firstName: staffData.firstName,
             lastName: staffData.lastName,
-            phone: staffData.phone !== undefined && staffData.phone !== '' ? String(staffData.phone) : undefined,
+            phone:
+              staffData.phone !== undefined && staffData.phone !== ''
+                ? String(staffData.phone)
+                : undefined,
             position: staffData.position,
             hireDate: staffData.hireDate || undefined,
             salary: staffData.salary,
@@ -848,7 +854,7 @@ export const useStaffStore = defineStore('staff', {
                 phone: updates.phone,
                 position: updates.position,
                 hireDate: updates.hireDate,
-                salary: updates.salary === undefined ? undefined : (updates.salary ?? null),
+                salary: updates.salary === undefined ? undefined : updates.salary ?? null,
                 status: updates.status,
                 permissions: updates.permissions,
                 departmentId: updates.departmentId,
@@ -872,7 +878,9 @@ export const useStaffStore = defineStore('staff', {
           if (oldDept) {
             patchDept(departmentId, {
               staffCount: Math.max(0, (oldDept.staffCount || 0) - 1),
-              ...(oldDept.managerId === staffId ? { manager: undefined, managerId: undefined } : {}),
+              ...(oldDept.managerId === staffId
+                ? { manager: undefined, managerId: undefined }
+                : {}),
             })
           }
           patchDept(newDept.id, { staffCount: (newDept.staffCount || 0) + 1 })
@@ -1118,7 +1126,8 @@ export const useStaffStore = defineStore('staff', {
       const result = raw as { admin: boolean; adminGrants: StaffAdminGrants }
 
       for (const s of this.staff) {
-        if (s.id === staffId) Object.assign(s, { admin: result.admin, adminGrants: result.adminGrants })
+        if (s.id === staffId)
+          Object.assign(s, { admin: result.admin, adminGrants: result.adminGrants })
       }
       Object.assign(member, { admin: result.admin, adminGrants: result.adminGrants })
       return result
@@ -1174,7 +1183,10 @@ export const useStaffStore = defineStore('staff', {
       }
 
       const cachedStaff = this.getCurrentStaffMember
-      if (cachedStaff?.authUid === authStore.currentUser.uid && isActiveStaffStatus(cachedStaff.status)) {
+      if (
+        cachedStaff?.authUid === authStore.currentUser.uid &&
+        isActiveStaffStatus(cachedStaff.status)
+      ) {
         return cachedStaff
       }
 
@@ -1225,7 +1237,13 @@ export const useStaffStore = defineStore('staff', {
       const member = this.getCurrentStaffMember
       if (!db || !uid || !member?.createdBy || !member.storeId || !member.departmentId) return
 
-      const ref = getStaffDocument(db, member.createdBy, member.storeId, member.departmentId, member.id)
+      const ref = getStaffDocument(
+        db,
+        member.createdBy,
+        member.storeId,
+        member.departmentId,
+        member.id
+      )
       if (ownStaffUnsubscribe && ownStaffWatchPath === ref.path) return
       stopWatchingOwnStaff()
       ownStaffWatchPath = ref.path

@@ -14,7 +14,9 @@ type UniqueCapableField = {
 const NEVER_UNIQUE_FIELD_NAMES = new Set(['serialNo', 'serialNumber', 'brand', 'model', 'name'])
 
 export function canFieldBeUnique(field: Pick<UniqueCapableField, 'name' | 'type'>): boolean {
-  return (field.type === 'text' || field.type === 'number') && !NEVER_UNIQUE_FIELD_NAMES.has(field.name)
+  return (
+    (field.type === 'text' || field.type === 'number') && !NEVER_UNIQUE_FIELD_NAMES.has(field.name)
+  )
 }
 
 export function uniqueTemplateFields<T extends UniqueCapableField>(fields: readonly T[]): T[] {
@@ -24,7 +26,10 @@ export function uniqueTemplateFields<T extends UniqueCapableField>(fields: reado
 /** Case, spaces and dashes are ignored, so "GHS-1847 3829" and "ghs18473829" are the same number. */
 export function normalizeUniqueValue(value: unknown): string {
   if (value === undefined || value === null) return ''
-  return String(value).trim().toUpperCase().replace(/[\s-]+/g, '')
+  return String(value)
+    .trim()
+    .toUpperCase()
+    .replace(/[\s-]+/g, '')
 }
 
 export type UniqueValueClash = {

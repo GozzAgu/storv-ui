@@ -102,7 +102,13 @@ export async function notifyTeam(
   db: Firestore,
   target: TradeScope,
   input: {
-    type: 'trade_request' | 'trade_reply' | 'trade_sale' | 'trade_paid' | 'trade_loan' | 'trade_loan_due'
+    type:
+      | 'trade_request'
+      | 'trade_reply'
+      | 'trade_sale'
+      | 'trade_paid'
+      | 'trade_loan'
+      | 'trade_loan_due'
     title: string
     message: string
     actorUid: string
@@ -114,22 +120,24 @@ export async function notifyTeam(
   try {
     const recipientUids = (await tradeTeamUids(db, target)).filter((u) => u !== input.actorUid)
     if (!recipientUids.length) return
-    await storeDocRef(db, target.ownerId, target.storeId).collection('notifications').add({
-      type: input.type,
-      title: input.title,
-      message: input.message,
-      userId: target.ownerId,
-      actorId: input.actorUid,
-      recipientUids,
-      read: false,
-      metadata: {
-        ...(input.requestId ? { requestId: input.requestId } : {}),
-        ...(input.saleId ? { saleId: input.saleId } : {}),
-        ...(input.loanId ? { loanId: input.loanId } : {}),
-      },
-      source: 'trade',
-      createdAt: FieldValue.serverTimestamp(),
-    })
+    await storeDocRef(db, target.ownerId, target.storeId)
+      .collection('notifications')
+      .add({
+        type: input.type,
+        title: input.title,
+        message: input.message,
+        userId: target.ownerId,
+        actorId: input.actorUid,
+        recipientUids,
+        read: false,
+        metadata: {
+          ...(input.requestId ? { requestId: input.requestId } : {}),
+          ...(input.saleId ? { saleId: input.saleId } : {}),
+          ...(input.loanId ? { loanId: input.loanId } : {}),
+        },
+        source: 'trade',
+        createdAt: FieldValue.serverTimestamp(),
+      })
   } catch (err) {
     console.error(
       JSON.stringify({
@@ -158,7 +166,11 @@ export async function createTradeRequest(
     | StoredTradeProfile
     | undefined
   if (!myProfile?.handle) {
-    throw new TradeError('NO_HANDLE', 409, 'Your business needs a trade handle before asking partners.')
+    throw new TradeError(
+      'NO_HANDLE',
+      409,
+      'Your business needs a trade handle before asking partners.'
+    )
   }
 
   const item = cleanText(raw.item, ITEM_MAX)
@@ -175,7 +187,11 @@ export async function createTradeRequest(
     const byHandle = new Map([...profiles].map(([key, p]) => [p.handle, key]))
     recipients = [...new Set(wanted.map((h) => byHandle.get(h)).filter((k): k is string => !!k))]
     if (recipients.length !== new Set(wanted).size) {
-      throw new TradeError('NOT_PARTNER', 400, 'You can only ask businesses that are your partners.')
+      throw new TradeError(
+        'NOT_PARTNER',
+        400,
+        'You can only ask businesses that are your partners.'
+      )
     }
   }
   if (!recipients.length) {
@@ -211,13 +227,17 @@ export async function createTradeRequest(
   const profiles = await readProfiles(db, recipients)
   await Promise.all(
     [...profiles.values()].map((p) =>
-      notifyTeam(db, { ownerId: p.ownerUid, storeId: p.storeId }, {
-        type: 'trade_request',
-        title: 'Stock request',
-        message: `${label} is looking for ${quantityLabel(item, quantity)}.`,
-        actorUid,
-        requestId: ref.id,
-      })
+      notifyTeam(
+        db,
+        { ownerId: p.ownerUid, storeId: p.storeId },
+        {
+          type: 'trade_request',
+          title: 'Stock request',
+          message: `${label} is looking for ${quantityLabel(item, quantity)}.`,
+          actorUid,
+          requestId: ref.id,
+        }
+      )
     )
   )
   return { id: ref.id }
@@ -232,7 +252,8 @@ function parseReply(raw: Partial<Record<keyof TradeReplyInput, unknown>>): Trade
   const priceKobo = intInRange(raw.priceKobo, 0, PRICE_MAX_KOBO)
   const quantity = intInRange(raw.quantity, 1, QTY_MAX)
   if (Number.isNaN(priceKobo)) throw new TradeError('INVALID_INPUT', 400, 'Enter a valid price.')
-  if (Number.isNaN(quantity)) throw new TradeError('INVALID_INPUT', 400, `Quantity must be 1 to ${QTY_MAX}.`)
+  if (Number.isNaN(quantity))
+    throw new TradeError('INVALID_INPUT', 400, `Quantity must be 1 to ${QTY_MAX}.`)
   return { status, priceKobo, quantity, note: cleanText(raw.note, REPLY_NOTE_MAX) }
 }
 
@@ -254,7 +275,9 @@ export async function replyToTradeRequest(
     if (stateOf(req, now) !== 'open') {
       throw new TradeError('CLOSED', 409, 'This request has closed.')
     }
-    const conn = (await tx.get(db.collection(TRADE_CONNECTIONS).doc(connectionId(me, req.fromKey)))).data()
+    const conn = (
+      await tx.get(db.collection(TRADE_CONNECTIONS).doc(connectionId(me, req.fromKey)))
+    ).data()
     if (conn?.status !== 'active') throw new TradeError('NOT_FOUND', 404, 'Not found')
     const before = req.replies?.[me]?.status
     tx.update(ref, {
@@ -264,15 +287,23 @@ export async function replyToTradeRequest(
   })
 
   if (firstHave) {
-    const mine = (await db.collection(TRADE_PROFILES).doc(me).get()).data() as StoredTradeProfile | undefined
+    const mine = (await db.collection(TRADE_PROFILES).doc(me).get()).data() as
+      | StoredTradeProfile
+      | undefined
     const price = reply.priceKobo !== null ? ` at ${formatNaira(reply.priceKobo)} each` : ''
-    await notifyTeam(db, { ownerId: req.fromOwnerUid, storeId: req.fromStoreId }, {
-      type: 'trade_reply',
-      title: 'A partner has it',
-      message: `${mine?.displayName || 'A partner'} (@${mine?.handle || ''}) has ${req.item}${price}.`,
-      actorUid,
-      requestId,
-    })
+    await notifyTeam(
+      db,
+      { ownerId: req.fromOwnerUid, storeId: req.fromStoreId },
+      {
+        type: 'trade_reply',
+        title: 'A partner has it',
+        message: `${mine?.displayName || 'A partner'} (@${mine?.handle || ''}) has ${
+          req.item
+        }${price}.`,
+        actorUid,
+        requestId,
+      }
+    )
   }
   return reply
 }

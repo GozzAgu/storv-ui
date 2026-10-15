@@ -35,7 +35,12 @@
           </SButton>
         </div>
 
-        <SIconButton class="s-toast__close" label="Dismiss" size="sm" @click="removeToast(toast.id)">
+        <SIconButton
+          class="s-toast__close"
+          label="Dismiss"
+          size="sm"
+          @click="removeToast(toast.id)"
+        >
           <X :size="16" :stroke-width="1.75" aria-hidden="true" />
         </SIconButton>
 

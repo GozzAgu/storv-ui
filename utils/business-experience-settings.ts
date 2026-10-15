@@ -5,11 +5,7 @@ import {
   normalizeEnabledCapabilities,
   type BusinessCapability,
 } from '~/types/business-experience'
-import {
-  getPlanLimits,
-  planHasFeature,
-  type SubscriptionPlan,
-} from '~/types/subscription'
+import { getPlanLimits, planHasFeature, type SubscriptionPlan } from '~/types/subscription'
 
 export type SoloProgressiveUnlockOption = {
   capability: BusinessCapability

@@ -111,7 +111,9 @@ export function validateFolderParentId(
   }
 
   if (isSubfolder(parent)) {
-    throw new Error('Subcategories cannot be nested further. Choose a top-level category as parent.')
+    throw new Error(
+      'Subcategories cannot be nested further. Choose a top-level category as parent.'
+    )
   }
 
   if (options?.editingFolderId && normalized === options.editingFolderId) {
@@ -128,8 +130,7 @@ export function validateFolderParentId(
 function matchesFolderSearch(folder: InventoryFolder, query: string): boolean {
   const q = query.toLowerCase()
   return (
-    folder.name.toLowerCase().includes(q) ||
-    (folder.description || '').toLowerCase().includes(q)
+    folder.name.toLowerCase().includes(q) || (folder.description || '').toLowerCase().includes(q)
   )
 }
 
@@ -166,7 +167,10 @@ export function buildFolderDisplayRows(
   return rows
 }
 
-export function filterRootFolders(folders: InventoryFolder[], searchQuery?: string): InventoryFolder[] {
+export function filterRootFolders(
+  folders: InventoryFolder[],
+  searchQuery?: string
+): InventoryFolder[] {
   const query = searchQuery?.trim()
   if (!query) return getRootFolders(folders)
 

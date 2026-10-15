@@ -95,7 +95,11 @@ function discountLabel(item: ReceiptItem): string | null {
           </span>
         </p>
         <ul v-if="detailSpecs(item).length" class="s-line-item__specs">
-          <li v-for="spec in detailSpecs(item)" :key="spec.label + spec.value" class="s-line-item__spec">
+          <li
+            v-for="spec in detailSpecs(item)"
+            :key="spec.label + spec.value"
+            class="s-line-item__spec"
+          >
             <span v-if="spec.label" class="s-line-item__spec-label">{{ spec.label }}</span>
             {{ spec.value }}
           </li>

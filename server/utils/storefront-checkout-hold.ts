@@ -139,7 +139,10 @@ export async function createStorefrontCheckoutPaymentLink(params: {
     const name = resolvePaymentLinkItemName(itemData)
     amountKobo = nairaToKobo(unitPrice)
     if (amountKobo <= 0) {
-      throw createError({ statusCode: 400, message: 'This product has no valid price for checkout.' })
+      throw createError({
+        statusCode: 400,
+        message: 'This product has no valid price for checkout.',
+      })
     }
 
     lockedItems = [
@@ -216,7 +219,11 @@ export async function createInquiryPaymentLink(params: {
     throw createError({ statusCode: 404, message: 'Inquiry not found' })
   }
   const inquiry = { ...(inquirySnap.data() as StorefrontInquiry), id: params.inquiryId }
-  if (inquiry.status === 'completed' || inquiry.status === 'rejected' || inquiry.status === 'cancelled') {
+  if (
+    inquiry.status === 'completed' ||
+    inquiry.status === 'rejected' ||
+    inquiry.status === 'cancelled'
+  ) {
     throw createError({
       statusCode: 409,
       message: 'Cannot send a payment link for a closed inquiry.',
@@ -230,11 +237,12 @@ export async function createInquiryPaymentLink(params: {
     if (existingSnap.exists) {
       const existing = existingSnap.data() as PaymentLinkDoc
       const expiresAt =
-        existing.expiresAt && typeof (existing.expiresAt as { toMillis?: () => number }).toMillis === 'function'
+        existing.expiresAt &&
+        typeof (existing.expiresAt as { toMillis?: () => number }).toMillis === 'function'
           ? (existing.expiresAt as { toMillis: () => number }).toMillis()
           : existing.expiresAt instanceof Date
-            ? existing.expiresAt.getTime()
-            : 0
+          ? existing.expiresAt.getTime()
+          : 0
       if (existing.status === 'unpaid' && (!expiresAt || expiresAt > Date.now())) {
         return {
           token: existingToken,
@@ -298,11 +306,7 @@ export async function createInquiryPaymentLink(params: {
       throw createError({ statusCode: 409, message: 'This listing is no longer available.' })
     }
     const holdId = String(listing.reservationInquiryId || '')
-    if (
-      listing.availability === 'reserved' &&
-      holdId &&
-      holdId !== params.inquiryId
-    ) {
+    if (listing.availability === 'reserved' && holdId && holdId !== params.inquiryId) {
       throw createError({
         statusCode: 409,
         message: 'This listing is reserved for another request.',
@@ -334,7 +338,10 @@ export async function createInquiryPaymentLink(params: {
       if (itemData.dateOut || itemData.sellerLoanOutId) {
         throw createError({ statusCode: 409, message: 'This item is no longer available.' })
       }
-      if (existingPending && existingPending !== paymentLinkPendingId(String(liveInquiry.paymentLinkToken || ''))) {
+      if (
+        existingPending &&
+        existingPending !== paymentLinkPendingId(String(liveInquiry.paymentLinkToken || ''))
+      ) {
         throw createError({
           statusCode: 409,
           message: 'This item is reserved for another checkout.',
@@ -345,7 +352,10 @@ export async function createInquiryPaymentLink(params: {
       if ((resolved?.value ?? 0) < 1) {
         throw createError({ statusCode: 409, message: 'This item is out of stock.' })
       }
-      if (existingPending && existingPending !== paymentLinkPendingId(String(liveInquiry.paymentLinkToken || ''))) {
+      if (
+        existingPending &&
+        existingPending !== paymentLinkPendingId(String(liveInquiry.paymentLinkToken || ''))
+      ) {
         throw createError({
           statusCode: 409,
           message: 'This item is reserved for another checkout.',
@@ -356,7 +366,10 @@ export async function createInquiryPaymentLink(params: {
     const unitPrice = resolvePaymentLinkItemPrice(itemData)
     amountKobo = nairaToKobo(unitPrice)
     if (amountKobo <= 0) {
-      throw createError({ statusCode: 400, message: 'This product has no valid price for checkout.' })
+      throw createError({
+        statusCode: 400,
+        message: 'This product has no valid price for checkout.',
+      })
     }
 
     const lockedItems: PaymentLinkItem[] = [

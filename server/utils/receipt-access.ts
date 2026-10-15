@@ -57,11 +57,7 @@ export async function assertReceiptDeliveryAccess(
   }
 
   const expectedNumber = params.receiptNumber?.trim()
-  if (
-    expectedNumber &&
-    receipt.receiptNumber &&
-    receipt.receiptNumber !== expectedNumber
-  ) {
+  if (expectedNumber && receipt.receiptNumber && receipt.receiptNumber !== expectedNumber) {
     throw createError({ statusCode: 409, message: 'Receipt number mismatch' })
   }
 

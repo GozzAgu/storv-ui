@@ -9,11 +9,17 @@ export default defineTradeRoute(
     tradeOnly: true,
   },
   async ({ db, auth, access, input }) => ({
-    reply: await replyToTradeRequest(db, access, auth.uid, assertDocId(input.requestId, 'requestId'), {
-      status: input.status,
-      priceKobo: input.priceKobo,
-      quantity: input.quantity,
-      note: input.note,
-    }),
+    reply: await replyToTradeRequest(
+      db,
+      access,
+      auth.uid,
+      assertDocId(input.requestId, 'requestId'),
+      {
+        status: input.status,
+        priceKobo: input.priceKobo,
+        quantity: input.quantity,
+        note: input.note,
+      }
+    ),
   })
 )

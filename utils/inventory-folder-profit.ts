@@ -5,10 +5,7 @@ import {
   isItemSold,
 } from '~/utils/inventory-availability'
 import { getItemSellPrice, resolveItemUnitCost } from '~/utils/inventory-item-cost'
-import {
-  quantityFieldName,
-  unitsForItem,
-} from '~/utils/inventory-folder-availability'
+import { quantityFieldName, unitsForItem } from '~/utils/inventory-folder-availability'
 
 export const COST_PRICE_FIELD_NAME = 'unitCost'
 export const COST_PRICE_FIELD_LABEL = 'Cost price'

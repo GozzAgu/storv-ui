@@ -44,10 +44,25 @@ function seed(): TradeOverview {
     sellBlocker: null,
     lendBlocker: null,
     connections: [
-      { id: 'demo~abuja', state: 'incoming', partner: card('abuja-accessories'), sinceMs: now - DAY / 4 },
+      {
+        id: 'demo~abuja',
+        state: 'incoming',
+        partner: card('abuja-accessories'),
+        sinceMs: now - DAY / 4,
+      },
       { id: 'demo~ph', state: 'outgoing', partner: card('ph-electronics'), sinceMs: now - 2 * DAY },
-      { id: 'demo~ikeja', state: 'active', partner: card('ikeja-phone-hub'), sinceMs: now - 40 * DAY },
-      { id: 'demo~kano', state: 'active', partner: card('kano-wholesale'), sinceMs: now - 12 * DAY },
+      {
+        id: 'demo~ikeja',
+        state: 'active',
+        partner: card('ikeja-phone-hub'),
+        sinceMs: now - 40 * DAY,
+      },
+      {
+        id: 'demo~kano',
+        state: 'active',
+        partner: card('kano-wholesale'),
+        sinceMs: now - 12 * DAY,
+      },
     ],
   }
 }
@@ -69,9 +84,15 @@ export function saveDemoTradeProfile(handle: string, displayName: string): Trade
   const clean = normalizeTradeHandle(handle)
   const problem = tradeHandleProblem(clean)
   if (problem) throw new Error(problem)
-  if (DIRECTORY.some((d) => d.handle === clean)) throw new Error('That handle is taken. Try another.')
+  if (DIRECTORY.some((d) => d.handle === clean))
+    throw new Error('That handle is taken. Try another.')
   const s = current()
-  s.profile = { ...s.profile, handle: clean, suggestedHandle: clean, displayName: displayName.trim() || s.profile.displayName }
+  s.profile = {
+    ...s.profile,
+    handle: clean,
+    suggestedHandle: clean,
+    displayName: displayName.trim() || s.profile.displayName,
+  }
   return clone(s)
 }
 
@@ -81,7 +102,11 @@ export function lookupDemoTradeHandle(handle: string): TradeLookupResult {
   if (clean === s.profile.handle) {
     return {
       relation: 'self',
-      partner: { handle: clean, displayName: s.profile.displayName, bankVerified: s.profile.bankVerified },
+      partner: {
+        handle: clean,
+        displayName: s.profile.displayName,
+        bankVerified: s.profile.bankVerified,
+      },
     }
   }
   const partner = DIRECTORY.find((d) => d.handle === clean)
@@ -95,10 +120,19 @@ export function inviteDemoTradePartner(handle: string): TradeOverview {
   const { partner, relation } = lookupDemoTradeHandle(handle)
   const s = current()
   if (relation === 'self') throw new Error('That is your own handle.')
-  if (relation === 'incoming') return respondDemoTrade(s.connections.find((c) => c.partner.handle === partner.handle)!.id, 'accept')
+  if (relation === 'incoming')
+    return respondDemoTrade(
+      s.connections.find((c) => c.partner.handle === partner.handle)!.id,
+      'accept'
+    )
   if (relation === 'none') {
     s.connections = s.connections.filter((c) => c.partner.handle !== partner.handle)
-    s.connections.push({ id: `demo~${partner.handle}`, state: 'outgoing', partner, sinceMs: Date.now() })
+    s.connections.push({
+      id: `demo~${partner.handle}`,
+      state: 'outgoing',
+      partner,
+      sinceMs: Date.now(),
+    })
   }
   return clone(s)
 }
@@ -155,7 +189,11 @@ function requestBase(
 function seedRequests(): TradeRequestsList {
   const card = (handle: string) => DIRECTORY.find((d) => d.handle === handle)!
   const me = current().profile
-  const self = { handle: me.handle || '', displayName: me.displayName, bankVerified: me.bankVerified }
+  const self = {
+    handle: me.handle || '',
+    displayName: me.displayName,
+    bankVerified: me.bankVerified,
+  }
   const asked = requestBase('demo-r1', 'outgoing', 'iPhone 15 Pro Max 256GB', 2, 3, self)
   asked.note = 'Natural titanium if possible'
   asked.replies = [
@@ -167,13 +205,34 @@ function seedRequests(): TradeRequestsList {
       note: 'Sealed, can deliver today',
       atMs: Date.now() - 2 * HOUR,
     },
-    { partner: card('kano-wholesale'), status: 'dont_have', priceKobo: null, quantity: null, note: '', atMs: Date.now() - HOUR },
+    {
+      partner: card('kano-wholesale'),
+      status: 'dont_have',
+      priceKobo: null,
+      quantity: null,
+      note: '',
+      atMs: Date.now() - HOUR,
+    },
   ]
   asked.haveCount = 1
   asked.replyCount = 2
-  const incoming = requestBase('demo-r2', 'incoming', 'Samsung 25W chargers', 20, 5, card('kano-wholesale'))
+  const incoming = requestBase(
+    'demo-r2',
+    'incoming',
+    'Samsung 25W chargers',
+    20,
+    5,
+    card('kano-wholesale')
+  )
   incoming.note = 'Original only'
-  const older = requestBase('demo-r3', 'incoming', 'AirPods Pro (2nd gen)', 1, 30, card('ikeja-phone-hub'))
+  const older = requestBase(
+    'demo-r3',
+    'incoming',
+    'AirPods Pro (2nd gen)',
+    1,
+    30,
+    card('ikeja-phone-hub')
+  )
   older.myReply = { status: 'have', priceKobo: 185_000_00, quantity: 1, note: '' }
   return { incoming: [incoming, older], outgoing: [asked] }
 }
@@ -193,14 +252,11 @@ export function askDemoPartners(input: NewTradeRequestInput): void {
   const partners = current().connections.filter((c) => c.state === 'active')
   if (!partners.length) throw new Error('Add a partner before asking for stock.')
   const me = current().profile
-  const req = requestBase(
-    `demo-r${Date.now()}`,
-    'outgoing',
-    item,
-    input.quantity || 1,
-    0,
-    { handle: me.handle || '', displayName: me.displayName, bankVerified: me.bankVerified }
-  )
+  const req = requestBase(`demo-r${Date.now()}`, 'outgoing', item, input.quantity || 1, 0, {
+    handle: me.handle || '',
+    displayName: me.displayName,
+    bankVerified: me.bankVerified,
+  })
   req.note = input.note.trim()
   req.recipientCount = input.to.length || partners.length
   currentRequests().outgoing.unshift(req)
@@ -366,9 +422,7 @@ function seedLoans(): TradeLoanView[] {
         loanLine('l2', 'iPhone 14 Pro 128GB', '353918107425979', 820_000_00),
         loanLine('l3', 'MagSafe case, iPhone 14 Pro', '', 8_000_00, 'out', 10),
       ],
-      events: [
-        { atMs: now - 3 * DAY, by: 'lender', action: 'lent', lineIds: ['l1', 'l2', 'l3'] },
-      ],
+      events: [{ atMs: now - 3 * DAY, by: 'lender', action: 'lent', lineIds: ['l1', 'l2', 'l3'] }],
     }),
     refreshLoan({
       id: 'demo-l2',
@@ -508,6 +562,11 @@ export function payDemoLoan(id: string, lineIds: string[], quantity?: number): v
   }
   const chosen = demoActOn(loan, lineIds, quantity)
   for (const l of chosen) l.state = 'paid'
-  loan.events.push({ atMs: Date.now(), by: 'system', action: 'paid', lineIds: chosen.map((l) => l.id) })
+  loan.events.push({
+    atMs: Date.now(),
+    by: 'system',
+    action: 'paid',
+    lineIds: chosen.map((l) => l.id),
+  })
   refreshLoan(loan)
 }

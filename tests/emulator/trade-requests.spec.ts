@@ -61,16 +61,24 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('Trade stock requests (emu
   }
 
   async function notifications(scope: TradeScope) {
-    const snap = await storeDocRef(db, scope.ownerId, scope.storeId).collection('notifications').get()
+    const snap = await storeDocRef(db, scope.ownerId, scope.storeId)
+      .collection('notifications')
+      .get()
     return snap.docs.map((d) => d.data())
   }
 
   describe('asking', () => {
     it('needs a handle and at least one partner', async () => {
       const bare = await shop('No Handle', false)
-      await expectCode(createTradeRequest(db, bare.scope, bare.uid, { item: 'iPhone 15' }), 'NO_HANDLE')
+      await expectCode(
+        createTradeRequest(db, bare.scope, bare.uid, { item: 'iPhone 15' }),
+        'NO_HANDLE'
+      )
       const lonely = await shop('Lonely Shop')
-      await expectCode(createTradeRequest(db, lonely.scope, lonely.uid, { item: 'iPhone 15' }), 'NO_PARTNERS')
+      await expectCode(
+        createTradeRequest(db, lonely.scope, lonely.uid, { item: 'iPhone 15' }),
+        'NO_PARTNERS'
+      )
     })
 
     it('validates the item and quantity', async () => {
@@ -78,8 +86,14 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('Trade stock requests (emu
       const b = await shop('Kano Depot')
       await partner(a, b)
       await expectCode(createTradeRequest(db, a.scope, a.uid, { item: ' x ' }), 'INVALID_INPUT')
-      await expectCode(createTradeRequest(db, a.scope, a.uid, { item: 'Chargers', quantity: 0 }), 'INVALID_INPUT')
-      await expectCode(createTradeRequest(db, a.scope, a.uid, { item: 'Chargers', quantity: 1.5 }), 'INVALID_INPUT')
+      await expectCode(
+        createTradeRequest(db, a.scope, a.uid, { item: 'Chargers', quantity: 0 }),
+        'INVALID_INPUT'
+      )
+      await expectCode(
+        createTradeRequest(db, a.scope, a.uid, { item: 'Chargers', quantity: 1.5 }),
+        'INVALID_INPUT'
+      )
       await expectCode(
         createTradeRequest(db, a.scope, a.uid, { item: 'Chargers', quantity: 100_001 }),
         'INVALID_INPUT'
@@ -94,22 +108,37 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('Trade stock requests (emu
       await partner(a, b)
       await partner(c, a)
 
-      const all = await createTradeRequest(db, a.scope, a.uid, { item: 'iPhone 15 Pro Max', quantity: 2 })
+      const all = await createTradeRequest(db, a.scope, a.uid, {
+        item: 'iPhone 15 Pro Max',
+        quantity: 2,
+      })
       const stored = (await db.collection(TRADE_REQUESTS).doc(all.id).get()).data()!
       expect(stored.recipients).toHaveLength(2)
       expect(stored).toMatchObject({ status: 'open', quantity: 2, createdByUid: a.uid })
       expect(stored.categoryKind).toBeTruthy()
 
-      const one = await createTradeRequest(db, a.scope, a.uid, { item: 'AirPods', to: [`@${c.handle}`] })
-      expect((await db.collection(TRADE_REQUESTS).doc(one.id).get()).data()!.recipients).toHaveLength(1)
+      const one = await createTradeRequest(db, a.scope, a.uid, {
+        item: 'AirPods',
+        to: [`@${c.handle}`],
+      })
+      expect(
+        (await db.collection(TRADE_REQUESTS).doc(one.id).get()).data()!.recipients
+      ).toHaveLength(1)
 
       await expectCode(
-        createTradeRequest(db, a.scope, a.uid, { item: 'AirPods', to: [b.handle, stranger.handle] }),
+        createTradeRequest(db, a.scope, a.uid, {
+          item: 'AirPods',
+          to: [b.handle, stranger.handle],
+        }),
         'NOT_PARTNER'
       )
 
       const note = (await notifications(c.scope)).find((n) => n.metadata?.requestId === all.id)
-      expect(note).toMatchObject({ source: 'trade', recipientUids: [c.uid], metadata: { requestId: all.id } })
+      expect(note).toMatchObject({
+        source: 'trade',
+        recipientUids: [c.uid],
+        metadata: { requestId: all.id },
+      })
       expect(note!.message).toContain('2 × iPhone 15 Pro Max')
     })
   })
@@ -120,13 +149,19 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('Trade stock requests (emu
       const b = await shop('Kano Depot')
       const outsider = await shop('Nosy Shop')
       await partner(a, b)
-      const { id } = await createTradeRequest(db, a.scope, a.uid, { item: 'Samsung chargers', quantity: 20 })
+      const { id } = await createTradeRequest(db, a.scope, a.uid, {
+        item: 'Samsung chargers',
+        quantity: 20,
+      })
 
       await expectCode(
         replyToTradeRequest(db, outsider.scope, outsider.uid, id, { status: 'have' }),
         'NOT_FOUND'
       )
-      await expectCode(replyToTradeRequest(db, b.scope, b.uid, id, { status: 'maybe' }), 'INVALID_INPUT')
+      await expectCode(
+        replyToTradeRequest(db, b.scope, b.uid, id, { status: 'maybe' }),
+        'INVALID_INPUT'
+      )
       await expectCode(
         replyToTradeRequest(db, b.scope, b.uid, id, { status: 'have', priceKobo: -1 }),
         'INVALID_INPUT'
@@ -142,7 +177,11 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('Trade stock requests (emu
         note: '  sealed  ',
       })
       expect(saved).toEqual({ status: 'have', priceKobo: 450_000, quantity: 20, note: 'sealed' })
-      await replyToTradeRequest(db, b.scope, b.uid, id, { status: 'have', priceKobo: 400_000, quantity: 20 })
+      await replyToTradeRequest(db, b.scope, b.uid, id, {
+        status: 'have',
+        priceKobo: 400_000,
+        quantity: 20,
+      })
 
       const replies = (await notifications(a.scope)).filter((n) => n.type === 'trade_reply')
       expect(replies).toHaveLength(1)
@@ -159,18 +198,31 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('Trade stock requests (emu
       await expectCode(closeTradeRequest(db, b.scope, closed.id), 'NOT_FOUND')
       await closeTradeRequest(db, a.scope, closed.id)
       await closeTradeRequest(db, a.scope, closed.id)
-      await expectCode(replyToTradeRequest(db, b.scope, b.uid, closed.id, { status: 'have' }), 'CLOSED')
+      await expectCode(
+        replyToTradeRequest(db, b.scope, b.uid, closed.id, { status: 'have' }),
+        'CLOSED'
+      )
 
       const now = Date.now()
       const old = await createTradeRequest(db, a.scope, a.uid, { item: 'Pixel 7' }, now)
       await expectCode(
-        replyToTradeRequest(db, b.scope, b.uid, old.id, { status: 'have' }, now + REQUEST_TTL_MS + 1),
+        replyToTradeRequest(
+          db,
+          b.scope,
+          b.uid,
+          old.id,
+          { status: 'have' },
+          now + REQUEST_TTL_MS + 1
+        ),
         'CLOSED'
       )
 
       const open = await createTradeRequest(db, a.scope, a.uid, { item: 'Pixel 6' })
       await respondToConnection(db, a.scope, connectionId, 'remove')
-      await expectCode(replyToTradeRequest(db, b.scope, b.uid, open.id, { status: 'have' }), 'NOT_FOUND')
+      await expectCode(
+        replyToTradeRequest(db, b.scope, b.uid, open.id, { status: 'have' }),
+        'NOT_FOUND'
+      )
     })
   })
 
@@ -182,9 +234,22 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('Trade stock requests (emu
       await partner(a, b)
       await partner(a, c)
       const now = Date.now()
-      const { id } = await createTradeRequest(db, a.scope, a.uid, { item: 'iPhone 15', quantity: 2 }, now)
+      const { id } = await createTradeRequest(
+        db,
+        a.scope,
+        a.uid,
+        { item: 'iPhone 15', quantity: 2 },
+        now
+      )
       await replyToTradeRequest(db, c.scope, c.uid, id, { status: 'dont_have' }, now)
-      await replyToTradeRequest(db, b.scope, b.uid, id, { status: 'have', priceKobo: 145_000_000 }, now)
+      await replyToTradeRequest(
+        db,
+        b.scope,
+        b.uid,
+        id,
+        { status: 'have', priceKobo: 145_000_000 },
+        now
+      )
 
       const mine = await listTradeRequests(db, a.scope, now)
       expect(mine.incoming).toEqual([])
@@ -212,7 +277,9 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('Trade stock requests (emu
         replyCount: 0,
       })
 
-      expect((await listTradeRequests(db, a.scope, now + REQUEST_TTL_MS + 1)).outgoing[0]!.state).toBe('expired')
+      expect(
+        (await listTradeRequests(db, a.scope, now + REQUEST_TTL_MS + 1)).outgoing[0]!.state
+      ).toBe('expired')
       const gone = now + REQUEST_TTL_MS + REQUEST_HISTORY_MS + 1
       expect((await listTradeRequests(db, a.scope, gone)).outgoing).toEqual([])
     })
@@ -236,7 +303,9 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('Trade stock requests (emu
     await members.doc('viewer').set({
       status: 'active',
       role: 'staff',
-      permissions: { receipts: { view: true, create: false, edit: false, refund: false, delete: false } },
+      permissions: {
+        receipts: { view: true, create: false, edit: false, refund: false, delete: false },
+      },
     })
     expect(await tradeTeamUids(db, a.scope)).toEqual([a.uid, 'seller'])
   })

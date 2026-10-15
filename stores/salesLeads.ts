@@ -29,10 +29,7 @@ import type {
   SalesLeadSource,
   SalesLeadStatus,
 } from '~/types/leads'
-import {
-  SALES_LEAD_SOURCE_LABELS,
-  SALES_LEAD_STATUS_LABELS,
-} from '~/types/leads'
+import { SALES_LEAD_SOURCE_LABELS, SALES_LEAD_STATUS_LABELS } from '~/types/leads'
 import { findDuplicateOpenLead } from '~/composables/leads/findDuplicateOpenLead'
 import { logActivity } from '~/composables/useActivityLog'
 
@@ -76,9 +73,9 @@ function mapLeadDoc(id: string, data: Record<string, unknown>): SalesLead {
     : 'new'
 
   const rawSource = typeof data.source === 'string' ? data.source : 'other'
-  const source = (
-    ['walk_in', 'phone', 'whatsapp', 'referral', 'other'] as const
-  ).includes(rawSource as SalesLeadSource)
+  const source = (['walk_in', 'phone', 'whatsapp', 'referral', 'other'] as const).includes(
+    rawSource as SalesLeadSource
+  )
     ? (rawSource as SalesLeadSource)
     : 'other'
 
@@ -90,8 +87,7 @@ function mapLeadDoc(id: string, data: Record<string, unknown>): SalesLead {
     customerEmail: (data.customerEmail as string) || undefined,
     productName: (data.productName as string) || '',
     inventoryItemId: (data.inventoryItemId as string) || undefined,
-    estimatedValue:
-      typeof data.estimatedValue === 'number' ? data.estimatedValue : undefined,
+    estimatedValue: typeof data.estimatedValue === 'number' ? data.estimatedValue : undefined,
     status,
     source,
     notes: (data.notes as string) || undefined,
@@ -175,9 +171,7 @@ export const useSalesLeadsStore = defineStore('salesLeads', {
         authStore.currentUser?.displayName?.trim() ||
         authStore.currentUser?.email?.split('@')[0] ||
         'User'
-      const entityName = detail
-        ? `${lead.customerName} - ${detail}`
-        : `Lead: ${lead.customerName}`
+      const entityName = detail ? `${lead.customerName} - ${detail}` : `Lead: ${lead.customerName}`
 
       await logActivity({
         action,
@@ -328,12 +322,7 @@ export const useSalesLeadsStore = defineStore('salesLeads', {
       const eventsCol = getLeadEventsCollection(db, ownerId, branchId)
       try {
         const eventsSnap = await getDocs(
-          query(
-            eventsCol,
-            where('leadId', '==', leadId),
-            orderBy('createdAt', 'desc'),
-            limit(100)
-          )
+          query(eventsCol, where('leadId', '==', leadId), orderBy('createdAt', 'desc'), limit(100))
         )
         this.events = eventsSnap.docs.map((d) =>
           mapEventDoc(d.id, d.data() as Record<string, unknown>)
@@ -466,8 +455,7 @@ export const useSalesLeadsStore = defineStore('salesLeads', {
       )
 
       await this.fetchSalesLeads(true)
-      this.currentLead =
-        this.leads.find((l) => l.id === ref.id) ?? leadSnapshot
+      this.currentLead = this.leads.find((l) => l.id === ref.id) ?? leadSnapshot
       return ref.id
     },
 
@@ -614,7 +602,13 @@ export const useSalesLeadsStore = defineStore('salesLeads', {
       })
 
       const label = SALES_LEAD_STATUS_LABELS[status]
-      await this.appendLeadEvent(leadId, 'status_change', `Status changed to ${label}`, userId, storeId)
+      await this.appendLeadEvent(
+        leadId,
+        'status_change',
+        `Status changed to ${label}`,
+        userId,
+        storeId
+      )
       await this.fetchLeadById(leadId)
     },
 

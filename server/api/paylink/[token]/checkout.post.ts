@@ -10,10 +10,16 @@ export default definePublicPayRoute(
   { rateLimit: { id: 'paylink:checkout', limit: 10, windowMs: 60_000 } },
   async ({ event, db, ip }) => {
     const hash = tokenHashFromParam(getRouterParam(event, 'token'))
-    await assertTokenRateLimit(event, hash, { id: 'paylink:checkout-token', limit: 10, windowMs: 10 * 60_000 })
+    await assertTokenRateLimit(event, hash, {
+      id: 'paylink:checkout-token',
+      limit: 10,
+      windowMs: 10 * 60_000,
+    })
     const salt = ipHashSalt()
     if (!salt) {
-      console.error(JSON.stringify({ tag: 'payments-config-missing', key: 'PAYMENTS_IP_HASH_SALT' }))
+      console.error(
+        JSON.stringify({ tag: 'payments-config-missing', key: 'PAYMENTS_IP_HASH_SALT' })
+      )
       throw createError({
         statusCode: 503,
         message: 'Payment is temporarily unavailable',
@@ -27,10 +33,15 @@ export default definePublicPayRoute(
     const secretKey = getPaystackSecret(config)
     const paystack: PaystackCall = (path, init) =>
       paystackRequest(path, { method: init.method, body: init.body, secretKey })
-    return startCheckout(db, hash, { email: body.email }, {
-      paystack,
-      appOrigin: config.public.appOrigin,
-      ipHash: hashIp(ip, salt),
-    })
+    return startCheckout(
+      db,
+      hash,
+      { email: body.email },
+      {
+        paystack,
+        appOrigin: config.public.appOrigin,
+        ipHash: hashIp(ip, salt),
+      }
+    )
   }
 )

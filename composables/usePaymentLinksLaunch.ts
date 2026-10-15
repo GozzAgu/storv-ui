@@ -19,13 +19,10 @@ export function usePaymentLinksLaunch() {
   const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
   const { canUse: canUseBusinessCapability } = useBusinessCapabilities()
 
-  const canUsePaymentLinksExperience = computed(() =>
-    canUseBusinessCapability('paymentLinks')
-  )
+  const canUsePaymentLinksExperience = computed(() => canUseBusinessCapability('paymentLinks'))
 
   const canShowPaymentLinksFeature = computed(
-    () =>
-      canUsePaymentLinksExperience.value && canUseSubscriptionFeature('payment_links')
+    () => canUsePaymentLinksExperience.value && canUseSubscriptionFeature('payment_links')
   )
 
   const showPaymentLinksComingSoon = computed(() => isPaymentLinksComingSoon())

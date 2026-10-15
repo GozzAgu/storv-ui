@@ -7,11 +7,7 @@
     :steps-label="shellCopy.stepsLabel"
     :active-step="shellCopy.activeStep"
   >
-    <AuthPageHeader
-      v-if="showPageHeader"
-      :title="headerCopy.title"
-      :subtitle="headerCopy.lede"
-    />
+    <AuthPageHeader v-if="showPageHeader" :title="headerCopy.title" :subtitle="headerCopy.lede" />
 
     <AuthCard>
       <div v-if="phase === 'loading'" class="s-auth-status" role="status">
@@ -26,7 +22,8 @@
         @submit.prevent="submitPasswordReset"
       >
         <p v-if="resetEmail" class="s-auth-note">
-          Set a new password for <strong>{{ resetEmail }}</strong>.
+          Set a new password for <strong>{{ resetEmail }}</strong
+          >.
         </p>
 
         <AuthField
@@ -53,11 +50,17 @@
 
         <SButton type="submit" variant="primary" size="lg" block :loading="submitting">
           Update password
-          <template #trailing><ArrowRightIcon :size="16" :stroke-width="1.75" aria-hidden="true" /></template>
+          <template #trailing
+            ><ArrowRightIcon :size="16" :stroke-width="1.75" aria-hidden="true"
+          /></template>
         </SButton>
       </form>
 
-      <div v-else-if="phase === 'success'" class="s-auth-status s-auth-status--success" role="status">
+      <div
+        v-else-if="phase === 'success'"
+        class="s-auth-status s-auth-status--success"
+        role="status"
+      >
         <span class="s-auth-status__icon">
           <CheckCircleIcon :size="24" :stroke-width="1.75" aria-hidden="true" />
         </span>
@@ -66,7 +69,9 @@
         <div class="s-auth-status__actions">
           <SButton variant="primary" size="lg" block @click="goToSignInAfterSuccess">
             {{ successCtaLabel }}
-            <template #trailing><ArrowRightIcon :size="16" :stroke-width="1.75" aria-hidden="true" /></template>
+            <template #trailing
+              ><ArrowRightIcon :size="16" :stroke-width="1.75" aria-hidden="true"
+            /></template>
           </SButton>
         </div>
       </div>
@@ -108,16 +113,8 @@
 
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
-import {
-  applyActionCode,
-  confirmPasswordReset,
-  verifyPasswordResetCode,
-} from 'firebase/auth'
-import {
-  ArrowRightIcon,
-  CheckCircleIcon,
-  ExclamationTriangleIcon,
-} from '~/utils/app-icons'
+import { applyActionCode, confirmPasswordReset, verifyPasswordResetCode } from 'firebase/auth'
+import { ArrowRightIcon, CheckCircleIcon, ExclamationTriangleIcon } from '~/utils/app-icons'
 import AuthShell from '~/components/auth/AuthShell.vue'
 import AuthPageHeader from '~/components/auth/AuthPageHeader.vue'
 import AuthCard from '~/components/auth/AuthCard.vue'
@@ -161,9 +158,7 @@ const passwordForm = reactive({
 
 const showPageHeader = computed(() => phase.value === 'loading' || phase.value === 'reset-form')
 
-const showResendHint = computed(
-  () => actionMode.value === 'verifyEmail' && phase.value === 'error'
-)
+const showResendHint = computed(() => actionMode.value === 'verifyEmail' && phase.value === 'error')
 
 const successCtaLabel = computed(() =>
   actionMode.value === 'resetPassword' ? 'Continue to sign in' : 'Continue to sign in'
@@ -189,7 +184,8 @@ const shellCopy = computed(() => {
   return {
     eyebrow: 'Join Storvv',
     panelTitle: 'Start your journey',
-    panelDescription: 'Verified accounts keep receipts, billing, and team invites reaching the right inbox.',
+    panelDescription:
+      'Verified accounts keep receipts, billing, and team invites reaching the right inbox.',
     steps: undefined,
     stepsLabel: undefined,
     activeStep: phase.value === 'success' ? 1 : 0,

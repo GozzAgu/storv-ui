@@ -143,13 +143,17 @@ describe('assertCanManageTarget', () => {
 
   it('admin cannot change their own record', () => {
     expect(
-      statusOf(() => assertCanManageTarget(admin, 'owner1', { ...staff, authUid: 'admin1' }, undefined))
+      statusOf(() =>
+        assertCanManageTarget(admin, 'owner1', { ...staff, authUid: 'admin1' }, undefined)
+      )
     ).toBe(403)
   })
 
   it('nobody manages a record from another workspace', () => {
     expect(
-      statusOf(() => assertCanManageTarget(owner, 'owner1', { ...staff, createdBy: 'x' }, undefined))
+      statusOf(() =>
+        assertCanManageTarget(owner, 'owner1', { ...staff, createdBy: 'x' }, undefined)
+      )
     ).toBe(403)
   })
 })
@@ -166,11 +170,11 @@ describe('parseNewStaff', () => {
     expect(
       parseNewStaff({ firstName: 'A', lastName: 'B', email: 'a@b.co', status: 'inactive' }).status
     ).toBe('active')
-    expect(statusOf(() => parseNewStaff({ firstName: '', lastName: 'B', email: 'a@b.co' }))).toBe(400)
+    expect(statusOf(() => parseNewStaff({ firstName: '', lastName: 'B', email: 'a@b.co' }))).toBe(
+      400
+    )
     expect(
-      statusOf(() =>
-        parseNewStaff({ firstName: 'A', lastName: 'B', email: 'a@b.co', salary: -5 })
-      )
+      statusOf(() => parseNewStaff({ firstName: 'A', lastName: 'B', email: 'a@b.co', salary: -5 }))
     ).toBe(400)
   })
 })

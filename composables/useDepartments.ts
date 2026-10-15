@@ -130,9 +130,7 @@ export const useDepartments = () => {
 
       // Provide helpful error messages
       if (error.code === 'permission-denied' || error.message?.includes('permission')) {
-        throw new Error(
-          PERMISSION_DENIED_MESSAGE
-        )
+        throw new Error(PERMISSION_DENIED_MESSAGE)
       }
 
       throw new Error(error.message || 'Failed to fetch departments')

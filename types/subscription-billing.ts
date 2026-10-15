@@ -24,9 +24,7 @@ export const BILLING_CYCLE_PERIOD_SUFFIX: Record<SubscriptionBillingCycle, strin
 }
 
 export function isSubscriptionBillingCycle(value: unknown): value is SubscriptionBillingCycle {
-  return (
-    value === 'monthly' || value === 'quarterly' || value === 'yearly'
-  )
+  return value === 'monthly' || value === 'quarterly' || value === 'yearly'
 }
 
 /** Display pricing: quarterly ≈ 3 months at 10% off; yearly ≈ 12 months at 15% off. */
@@ -59,10 +57,7 @@ export function billingCycleToPaystackInterval(
 }
 
 /** Estimate current period end from payment time (fallback when Paystack omits next_payment_date). */
-export function computeSubscriptionPeriodEnd(
-  from: Date,
-  cycle: SubscriptionBillingCycle
-): string {
+export function computeSubscriptionPeriodEnd(from: Date, cycle: SubscriptionBillingCycle): string {
   const end = new Date(from)
   if (cycle === 'quarterly') {
     end.setMonth(end.getMonth() + 3)

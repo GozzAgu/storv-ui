@@ -213,7 +213,10 @@ export function useTradePartners() {
     const d = await demo()
     if (d) d.lendDemoStock(input, labels)
     else
-      await authFetch('/api/trade/loans', { method: 'POST', body: { ...(await scope()), ...input } })
+      await authFetch('/api/trade/loans', {
+        method: 'POST',
+        body: { ...(await scope()), ...input },
+      })
     await loadLoans()
   }
 

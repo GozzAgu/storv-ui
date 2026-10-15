@@ -590,13 +590,24 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)(
         const admin = await as('admin-pay')
         expect(admin).toMatchObject({ canGrantConfirm: true, canView: false, canConfirm: false })
 
-        const set = (who: Awaited<ReturnType<typeof as>>, memberUid: string, permissions: unknown) =>
-          setMemberPaymentPermissions(db, who, { memberUid, permissions })
+        const set = (
+          who: Awaited<ReturnType<typeof as>>,
+          memberUid: string,
+          permissions: unknown
+        ) => setMemberPaymentPermissions(db, who, { memberUid, permissions })
         const none = { view: false, confirm: false, refund: false }
 
-        await expectCode(set(await as('admin-plain'), 'cashier', { ...none, confirm: true }), 'FORBIDDEN', 403)
+        await expectCode(
+          set(await as('admin-plain'), 'cashier', { ...none, confirm: true }),
+          'FORBIDDEN',
+          403
+        )
         await expectCode(set(admin, 'cashier', { ...none, view: true }), 'FORBIDDEN', 403)
-        await expectCode(set(admin, 'cashier', { ...none, confirm: true, refund: true }), 'FORBIDDEN', 403)
+        await expectCode(
+          set(admin, 'cashier', { ...none, confirm: true, refund: true }),
+          'FORBIDDEN',
+          403
+        )
         await expectCode(set(admin, 'admin-pay', { ...none, confirm: true }), 'FORBIDDEN', 403)
         await expectCode(set(admin, 'admin-other', { ...none, confirm: true }), 'FORBIDDEN', 403)
         await expectCode(set(admin, ownerId, { ...none, confirm: true }), 'INVALID_INPUT', 400)

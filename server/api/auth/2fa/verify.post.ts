@@ -10,7 +10,12 @@ interface VerifyBody {
 
 export default defineEventHandler(async (event) => {
   const auth = await requireAuth(event, { allowPendingTwoFactor: true })
-  await assertRateLimit(event, { id: 'auth-2fa-verify', limit: 20, windowMs: 60_000, uid: auth.uid })
+  await assertRateLimit(event, {
+    id: 'auth-2fa-verify',
+    limit: 20,
+    windowMs: 60_000,
+    uid: auth.uid,
+  })
 
   const body = await readBody<VerifyBody>(event)
   const code = body.code?.trim()

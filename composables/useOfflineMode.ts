@@ -1,11 +1,7 @@
 import { ref, computed } from 'vue'
 import { CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import { useFirestore } from './useFirestore'
-import {
-  collection,
-  doc,
-  setDoc,
-} from 'firebase/firestore'
+import { collection, doc, setDoc } from 'firebase/firestore'
 import {
   applyQueuedWrite,
   documentRefFromPath,
@@ -157,7 +153,11 @@ export const useOfflineMode = () => {
 
   const syncPendingOperations = () => syncPendingOperationsGlobal()
 
-  const createDoc = async (collectionName: string, data: Record<string, unknown>, docId?: string) => {
+  const createDoc = async (
+    collectionName: string,
+    data: Record<string, unknown>,
+    docId?: string
+  ) => {
     if (!db) {
       throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
     }
@@ -183,7 +183,11 @@ export const useOfflineMode = () => {
     }
   }
 
-  const updateDoc = async (collectionName: string, docId: string, data: Record<string, unknown>) => {
+  const updateDoc = async (
+    collectionName: string,
+    docId: string,
+    data: Record<string, unknown>
+  ) => {
     if (!db) {
       throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
     }

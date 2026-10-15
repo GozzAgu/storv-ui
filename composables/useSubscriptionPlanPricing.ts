@@ -31,8 +31,7 @@ export function useSubscriptionPlanPricing() {
       addOnPricingCache.value = data.addOns || {}
       return pricingCache.value
     } catch (err: unknown) {
-      pricingError.value =
-        err instanceof Error ? err.message : 'Could not load plan pricing'
+      pricingError.value = err instanceof Error ? err.message : 'Could not load plan pricing'
       return null
     } finally {
       pricingLoading.value = false
@@ -59,12 +58,14 @@ export function useSubscriptionPlanPricing() {
   }
 
   /** Prefer user currency formatting when amount is loaded. */
-  function formatUpgradePrice(planId: SubscriptionPlan, cycle: SubscriptionBillingCycle): string | null {
+  function formatUpgradePrice(
+    planId: SubscriptionPlan,
+    cycle: SubscriptionBillingCycle
+  ): string | null {
     const kobo = getPlanAmountKobo(planId, cycle)
     if (kobo == null) return null
     const formatted = formatCurrency(kobo / 100)
-    const suffix =
-      cycle === 'yearly' ? '/ year' : cycle === 'quarterly' ? '/ quarter' : '/ month'
+    const suffix = cycle === 'yearly' ? '/ year' : cycle === 'quarterly' ? '/ quarter' : '/ month'
     return `${formatted} ${suffix}, auto-renews`
   }
 

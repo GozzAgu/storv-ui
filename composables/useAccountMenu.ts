@@ -53,8 +53,18 @@ export function useAccountMenu() {
   })
 
   const accountLinks = computed<AccountMenuLink[]>(() => [
-    { to: dashPath('/profile'), label: 'Profile', icon: UserCircleIcon, match: dashPath('/profile') },
-    { to: dashPath('/settings'), label: 'Settings', icon: Cog6ToothIcon, match: dashPath('/settings') },
+    {
+      to: dashPath('/profile'),
+      label: 'Profile',
+      icon: UserCircleIcon,
+      match: dashPath('/profile'),
+    },
+    {
+      to: dashPath('/settings'),
+      label: 'Settings',
+      icon: Cog6ToothIcon,
+      match: dashPath('/settings'),
+    },
     {
       to: dashPath('/notifications'),
       label: 'Notifications',

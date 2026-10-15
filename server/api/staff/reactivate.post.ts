@@ -112,7 +112,10 @@ export default defineEventHandler(async (event) => {
         const code = (err as { code?: string })?.code
         if (code !== 'auth/user-not-found') {
           const message = err instanceof Error ? err.message : 'Failed to enable staff login'
-          throw createError({ statusCode: 502, message: `Failed to enable staff login: ${message}` })
+          throw createError({
+            statusCode: 502,
+            message: `Failed to enable staff login: ${message}`,
+          })
         }
       }
     }

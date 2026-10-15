@@ -19,9 +19,11 @@
         />
       </div>
       <div class="s-tab-panel__body">
-
         <div v-if="activeSettingsTab === 'account' && userStore.isSuperAdmin" class="s-settings">
-          <SCard title="Company logo" description="Shown on receipts and branch cards. Your personal photo is on Profile.">
+          <SCard
+            title="Company logo"
+            description="Shown on receipts and branch cards. Your personal photo is on Profile."
+          >
             <div class="s-settings__logo">
               <div class="s-settings__logo-frame">
                 <img v-if="accountLogoUrl" :src="displayAccountLogoSrc" alt="Company logo" />
@@ -35,7 +37,9 @@
                   :disabled="isUploadingAccountLogo"
                   @click="accountLogoInput?.click()"
                 >
-                  <template #leading><Upload :size="16" :stroke-width="2" aria-hidden="true" /></template>
+                  <template #leading
+                    ><Upload :size="16" :stroke-width="2" aria-hidden="true"
+                  /></template>
                   {{ accountLogoUrl ? 'Replace logo' : 'Upload logo' }}
                 </SButton>
                 <SButton v-if="accountLogoUrl" variant="ghost" size="sm" @click="removeAccountLogo">
@@ -88,7 +92,10 @@
             @cancel-add-on="handleCancelAddOn"
           />
 
-          <SCard title="Workspace style" description="How much of the app to show. This doesn't change what you pay.">
+          <SCard
+            title="Workspace style"
+            description="How much of the app to show. This doesn't change what you pay."
+          >
             <ExperienceModePicker
               :model-value="selectedExperienceMode"
               :disabled="!canEditSettings || isSavingExperienceMode"
@@ -103,13 +110,21 @@
             description="You chose a simple setup. Turn on team and multi-location tools when you need them. Your plan and role permissions still apply."
           >
             <div class="s-settings__rows">
-              <div v-for="option in soloProgressiveUnlockOptions" :key="option.capability" class="s-settings__row">
+              <div
+                v-for="option in soloProgressiveUnlockOptions"
+                :key="option.capability"
+                class="s-settings__row"
+              >
                 <SCheckbox
-                  :model-value="isProgressiveCapabilityEnabled(option.capability, enabledCapabilities)"
+                  :model-value="
+                    isProgressiveCapabilityEnabled(option.capability, enabledCapabilities)
+                  "
                   variant="switch"
                   :label="option.label"
                   :description="option.description"
-                  :disabled="!canEditSettings || togglingProgressiveCapability === option.capability"
+                  :disabled="
+                    !canEditSettings || togglingProgressiveCapability === option.capability
+                  "
                   @update:model-value="(checked: boolean) => onProgressiveCapabilityToggle(option.capability, checked)"
                 />
               </div>
@@ -150,11 +165,17 @@
         <SCard
           v-else-if="activeSettingsTab === 'store-info'"
           :title="showBranchDetails ? 'Branch details' : 'Store information'"
-          :description="showBranchDetails ? 'Contact details for your branch.' : 'Business details shown on receipts and invoices.'"
+          :description="
+            showBranchDetails
+              ? 'Contact details for your branch.'
+              : 'Business details shown on receipts and invoices.'
+          "
         >
           <template v-if="canEditSharedSettings && !isEditingStore && !isLoadingStoreInfo" #actions>
             <SButton variant="secondary" size="sm" @click="enableEditing('store')">
-              <template #leading><Pencil :size="16" :stroke-width="2" aria-hidden="true" /></template>
+              <template #leading
+                ><Pencil :size="16" :stroke-width="2" aria-hidden="true"
+              /></template>
               Edit
             </SButton>
           </template>
@@ -215,7 +236,9 @@
 
           <template v-if="isEditingStore" #footer>
             <SButton variant="secondary" @click="cancelEditing('store')">Cancel</SButton>
-            <SButton variant="primary" type="submit" form="settings-store-form">Save changes</SButton>
+            <SButton variant="primary" type="submit" form="settings-store-form"
+              >Save changes</SButton
+            >
           </template>
         </SCard>
 
@@ -224,11 +247,19 @@
           title="Inventory"
           description="Stock alerts and defaults for new products."
         >
-          <form id="settings-inventory-form" class="s-settings__rows" @submit.prevent="saveInventorySettings">
+          <form
+            id="settings-inventory-form"
+            class="s-settings__rows"
+            @submit.prevent="saveInventorySettings"
+          >
             <div class="s-settings__row">
               <div class="s-settings__row-text">
-                <label class="s-settings__row-label" for="settings-low-stock">Low stock alert</label>
-                <p class="s-settings__row-hint">Flag a product when its stock falls below this quantity.</p>
+                <label class="s-settings__row-label" for="settings-low-stock"
+                  >Low stock alert</label
+                >
+                <p class="s-settings__row-hint">
+                  Flag a product when its stock falls below this quantity.
+                </p>
               </div>
               <div class="s-settings__control s-settings__control--narrow">
                 <SInput
@@ -254,8 +285,12 @@
             </div>
             <div class="s-settings__row">
               <div class="s-settings__row-text">
-                <label class="s-settings__row-label" for="settings-default-category">Default category</label>
-                <p class="s-settings__row-hint">Used for new products when no category is picked.</p>
+                <label class="s-settings__row-label" for="settings-default-category"
+                  >Default category</label
+                >
+                <p class="s-settings__row-hint">
+                  Used for new products when no category is picked.
+                </p>
               </div>
               <div class="s-settings__control">
                 <SSelect
@@ -268,7 +303,9 @@
             </div>
           </form>
           <template v-if="canEditSharedSettings" #footer>
-            <SButton variant="primary" type="submit" form="settings-inventory-form">Save inventory settings</SButton>
+            <SButton variant="primary" type="submit" form="settings-inventory-form"
+              >Save inventory settings</SButton
+            >
           </template>
         </SCard>
 
@@ -283,7 +320,11 @@
             description="Payment methods staff can pick on new sales and balance payments."
           >
             <ul class="s-settings__chips" aria-label="Payment methods">
-              <li v-for="(tender, index) in paymentTenders" :key="`${tender}-${index}`" class="s-settings__chip">
+              <li
+                v-for="(tender, index) in paymentTenders"
+                :key="`${tender}-${index}`"
+                class="s-settings__chip"
+              >
                 {{ tender }}
                 <button
                   v-if="canEditSharedSettings"
@@ -296,15 +337,27 @@
                 </button>
               </li>
             </ul>
-            <form v-if="canEditSharedSettings" class="s-settings__add" @submit.prevent="addPaymentTender">
-              <SInput v-model="newPaymentTender" label="Add a method" placeholder="For example, OPay or Moniepoint" />
+            <form
+              v-if="canEditSharedSettings"
+              class="s-settings__add"
+              @submit.prevent="addPaymentTender"
+            >
+              <SInput
+                v-model="newPaymentTender"
+                label="Add a method"
+                placeholder="For example, OPay or Moniepoint"
+              />
               <SButton type="submit" variant="secondary" :disabled="!newPaymentTender.trim()">
-                <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
+                <template #leading
+                  ><Plus :size="16" :stroke-width="2" aria-hidden="true"
+                /></template>
                 Add
               </SButton>
             </form>
             <template v-if="canEditSharedSettings" #footer>
-              <SButton variant="ghost" @click="resetPaymentTendersToDefault">Reset to defaults</SButton>
+              <SButton variant="ghost" @click="resetPaymentTendersToDefault"
+                >Reset to defaults</SButton
+              >
               <SButton variant="primary" @click="savePaymentSettings">Save payment methods</SButton>
             </template>
           </SCard>
@@ -316,11 +369,19 @@
           title="Sales & receipts"
           description="Receipt numbering and printing."
         >
-          <form id="settings-receipt-form" class="s-settings__rows" @submit.prevent="saveReceiptSettings">
+          <form
+            id="settings-receipt-form"
+            class="s-settings__rows"
+            @submit.prevent="saveReceiptSettings"
+          >
             <div class="s-settings__row">
               <div class="s-settings__row-text">
-                <label class="s-settings__row-label" for="settings-receipt-prefix">Receipt prefix</label>
-                <p class="s-settings__row-hint">Added before every receipt number, for example REC-.</p>
+                <label class="s-settings__row-label" for="settings-receipt-prefix"
+                  >Receipt prefix</label
+                >
+                <p class="s-settings__row-hint">
+                  Added before every receipt number, for example REC-.
+                </p>
               </div>
               <div class="s-settings__control s-settings__control--narrow">
                 <SInput
@@ -333,7 +394,9 @@
             </div>
             <div class="s-settings__row">
               <div class="s-settings__row-text">
-                <label class="s-settings__row-label" for="settings-receipt-next">Next receipt number</label>
+                <label class="s-settings__row-label" for="settings-receipt-next"
+                  >Next receipt number</label
+                >
                 <p class="s-settings__row-hint">The number the next sale will use.</p>
               </div>
               <div class="s-settings__control s-settings__control--narrow">
@@ -358,7 +421,9 @@
             </div>
           </form>
           <template v-if="canEditSharedSettings" #footer>
-            <SButton variant="primary" type="submit" form="settings-receipt-form">Save receipt settings</SButton>
+            <SButton variant="primary" type="submit" form="settings-receipt-form"
+              >Save receipt settings</SButton
+            >
           </template>
         </SCard>
 
@@ -379,9 +444,18 @@
             </li>
           </ul>
           <template #footer>
-            <p v-if="dataExportStatus" class="s-settings__status" role="status">{{ dataExportStatus }}</p>
-            <SButton variant="primary" :loading="dataExporting" :disabled="dataExporting" @click="handleExportAllStoreData">
-              <template #leading><Download :size="16" :stroke-width="2" aria-hidden="true" /></template>
+            <p v-if="dataExportStatus" class="s-settings__status" role="status">
+              {{ dataExportStatus }}
+            </p>
+            <SButton
+              variant="primary"
+              :loading="dataExporting"
+              :disabled="dataExporting"
+              @click="handleExportAllStoreData"
+            >
+              <template #leading
+                ><Download :size="16" :stroke-width="2" aria-hidden="true"
+              /></template>
               {{ dataExporting ? 'Exporting…' : 'Export all to Excel' }}
             </SButton>
           </template>
@@ -396,9 +470,10 @@
       :description="cancelConfirmSubtitle"
     >
       <p class="s-settings__dialog-text">
-        Paystack will stop charging on your next billing date. You keep {{ currentSubscriptionLabel }} until
-        {{ cancelGraceEndLabel || 'the end of your current billing period' }}, then your account moves to
-        Storvv Micro.
+        Paystack will stop charging on your next billing date. You keep
+        {{ currentSubscriptionLabel }} until
+        {{ cancelGraceEndLabel || 'the end of your current billing period' }}, then your account
+        moves to Storvv Micro.
       </p>
       <template #footer>
         <SButton variant="secondary" @click="cancelConfirmOpen = false">Keep auto-renew</SButton>
@@ -459,10 +534,7 @@ import {
   resolveEffectiveSubscriptionPlan,
   normalizeSubscriptionPlan,
 } from '~/types/subscription'
-import {
-  BILLING_CYCLE_LABELS,
-  type SubscriptionBillingCycle,
-} from '~/types/subscription-billing'
+import { BILLING_CYCLE_LABELS, type SubscriptionBillingCycle } from '~/types/subscription-billing'
 import {
   initializePaystackSubscription,
   type PaystackInitializeFetcher,
@@ -471,17 +543,12 @@ import {
   cancelPaystackSubscription,
   type PaystackCancelFetcher,
 } from '~/utils/paystack-cancel-subscription'
-import {
-  canShowDevPlanSwitcher,
-  getChangeablePaidPlans,
-} from '~/utils/subscription-plan-switcher'
+import { canShowDevPlanSwitcher, getChangeablePaidPlans } from '~/utils/subscription-plan-switcher'
 import { isDemoModeActive } from '~/utils/demo-mode'
 import SubscriptionPlanPanel from '~/components/settings/SubscriptionPlanPanel.vue'
 import ExperienceModePicker from '~/components/settings/ExperienceModePicker.vue'
 import type { BillingHistoryEntry } from '~/server/api/paystack/billing-history.get'
-import {
-  subscriptionStatusLabel,
-} from '~/utils/subscription-billing-ui'
+import { subscriptionStatusLabel } from '~/utils/subscription-billing-ui'
 import { formatUpgradeSuccessMessage } from '~/utils/subscription-upgrade-unlocks'
 import { scrollDashboardToElement } from '~/utils/native-dashboard-scroll'
 import type { ExperienceMode } from '~/types/business-experience'
@@ -536,7 +603,6 @@ useHead({
 })
 
 const { dashPath } = useDashboardPaths()
-
 
 // Store information
 const storeInfo = reactive({
@@ -629,13 +695,8 @@ async function handleExportAllStoreData() {
     toast.error(message)
   }
 }
-const {
-  loadPricing,
-  formatUpgradePrice,
-  formatPlanPrice,
-  getAddOnAmountKobo,
-  pricingLoading,
-} = useSubscriptionPlanPricing()
+const { loadPricing, formatUpgradePrice, formatPlanPrice, getAddOnAmountKobo, pricingLoading } =
+  useSubscriptionPlanPricing()
 const { syncSubscriptionStatus } = useSubscriptionBillingUi()
 const route = useRoute()
 
@@ -1015,7 +1076,10 @@ async function handleCancelAddOn(addOnId: string) {
     await userStore.fetchUserData(currentUser.value.uid)
     toast.success(
       result.endsAt
-        ? `Add-on removed. You can keep using it until ${new Date(result.endsAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}.`
+        ? `Add-on removed. You can keep using it until ${new Date(result.endsAt).toLocaleDateString(
+            undefined,
+            { month: 'short', day: 'numeric' }
+          )}.`
         : 'Add-on removed.'
     )
   } catch (err: unknown) {
@@ -1075,7 +1139,9 @@ async function onExperienceModeChange(mode: ExperienceMode) {
     toast.success(mode === 'solo' ? 'Switched to simple workspace' : 'Switched to full workspace')
   } catch (error: unknown) {
     toast.error(error instanceof Error ? error.message : 'Could not update workspace style')
-    selectedExperienceMode.value = normalizeExperienceMode(userStore.userData?.storeDetails?.experienceMode)
+    selectedExperienceMode.value = normalizeExperienceMode(
+      userStore.userData?.storeDetails?.experienceMode
+    )
   } finally {
     isSavingExperienceMode.value = false
   }
@@ -1460,7 +1526,8 @@ onMounted(async () => {
   // Deep links (#settings-subscription, #advanced-features) both land in the "account" tab.
   if (
     import.meta.client &&
-    (window.location.hash === '#settings-subscription' || window.location.hash === '#advanced-features') &&
+    (window.location.hash === '#settings-subscription' ||
+      window.location.hash === '#advanced-features') &&
     settingsTabs.value.some((tab) => tab.value === 'account')
   ) {
     activeSettingsTab.value = 'account'
@@ -1508,9 +1575,7 @@ onMounted(async () => {
       } else if (verify.paid && verify.userId === currentUser.value.uid && verify.planId) {
         const previousPlan = currentSubscription.value
         await userStore.fetchUserData(currentUser.value.uid)
-        toast.success(
-          formatUpgradeSuccessMessage(verify.planId as SubscriptionPlan, previousPlan)
-        )
+        toast.success(formatUpgradeSuccessMessage(verify.planId as SubscriptionPlan, previousPlan))
         await recordMilestone('firstUpgradeSuccessAt', {
           plan: verify.planId,
           previous_plan: previousPlan,
@@ -1619,10 +1684,7 @@ const updateStoreSettings = async (settings: any) => {
   }
 }
 
-const onProgressiveCapabilityToggle = async (
-  capability: BusinessCapability,
-  enabled: boolean
-) => {
+const onProgressiveCapabilityToggle = async (capability: BusinessCapability, enabled: boolean) => {
   if (!currentUser.value) {
     toast.error('You must be signed in to save settings')
     return
@@ -1661,10 +1723,7 @@ const onProgressiveCapabilityToggle = async (
     )
 
     await updateUserDocument(targetUserId, {
-      storeDetails: applyEnabledCapabilitiesToStoreDetails(
-        currentStoreDetails,
-        nextEnabled
-      ),
+      storeDetails: applyEnabledCapabilitiesToStoreDetails(currentStoreDetails, nextEnabled),
     })
 
     await userStore.fetchUserData(currentUser.value.uid)

@@ -116,9 +116,7 @@ describe('inventory-folder-tree', () => {
     const withProducts = folders.map((entry) =>
       entry.id === 'phones' ? { ...entry, itemCount: 3 } : entry
     )
-    expect(() => validateFolderParentId(withProducts, 'phones')).toThrow(
-      'already has products'
-    )
+    expect(() => validateFolderParentId(withProducts, 'phones')).toThrow('already has products')
   })
 
   it('detects inheritable folder setting changes', () => {

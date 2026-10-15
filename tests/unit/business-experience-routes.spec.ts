@@ -12,12 +12,12 @@ describe('business-experience-routes', () => {
     expect(getRequiredBusinessCapabilityForPath('/dashboard/departments/dept-1')).toBe(
       'staffManagement'
     )
-    expect(
-      getRequiredBusinessCapabilityForPath('/dashboard/stores/store-1/departments')
-    ).toBe('staffManagement')
-    expect(
-      getRequiredBusinessCapabilityForPath('/demo/dashboard/stores/store-1/departments')
-    ).toBe('staffManagement')
+    expect(getRequiredBusinessCapabilityForPath('/dashboard/stores/store-1/departments')).toBe(
+      'staffManagement'
+    )
+    expect(getRequiredBusinessCapabilityForPath('/demo/dashboard/stores/store-1/departments')).toBe(
+      'staffManagement'
+    )
   })
 
   it('maps multi-store sync to multiLocationAdmin', () => {

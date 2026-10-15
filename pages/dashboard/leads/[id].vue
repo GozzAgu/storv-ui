@@ -8,7 +8,12 @@
         <nav class="s-breadcrumb" aria-label="Breadcrumb">
           <NuxtLink :to="dashPath('/leads')" class="s-breadcrumb__link">Sales leads</NuxtLink>
           <template v-if="lead">
-            <ChevronRight class="s-breadcrumb__sep" :size="14" :stroke-width="2" aria-hidden="true" />
+            <ChevronRight
+              class="s-breadcrumb__sep"
+              :size="14"
+              :stroke-width="2"
+              aria-hidden="true"
+            />
             <span>{{ lead.customerName }}</span>
           </template>
         </nav>
@@ -158,7 +163,12 @@
               placeholder="What did you talk about? When should you follow up?"
             />
             <div class="s-lead__form-end">
-              <SButton variant="primary" type="submit" :loading="noteSaving" :disabled="!noteDraft.trim()">
+              <SButton
+                variant="primary"
+                type="submit"
+                :loading="noteSaving"
+                :disabled="!noteDraft.trim()"
+              >
                 Save note
               </SButton>
             </div>
@@ -202,7 +212,9 @@
       </form>
       <template #footer>
         <SButton variant="secondary" @click="showLostModal = false">Cancel</SButton>
-        <SButton variant="primary" type="submit" form="lead-lost-form" :loading="statusSaving">Mark as lost</SButton>
+        <SButton variant="primary" type="submit" form="lead-lost-form" :loading="statusSaving"
+          >Mark as lost</SButton
+        >
       </template>
     </SDialog>
 
@@ -210,11 +222,15 @@
       v-model:open="showDeleteConfirm"
       role="alertdialog"
       title="Delete this lead?"
-      :description="`This removes ${lead?.customerName ?? 'this lead'} from your leads. This can't be undone.`"
+      :description="`This removes ${
+        lead?.customerName ?? 'this lead'
+      } from your leads. This can't be undone.`"
     >
       <template #footer>
         <SButton variant="secondary" @click="showDeleteConfirm = false">Cancel</SButton>
-        <SButton variant="danger" :loading="deleteSaving" @click="confirmDelete">Delete lead</SButton>
+        <SButton variant="danger" :loading="deleteSaving" @click="confirmDelete"
+          >Delete lead</SButton
+        >
       </template>
     </SDialog>
   </div>

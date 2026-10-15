@@ -440,14 +440,11 @@ describe('firestore.rules: Payments V2', () => {
       'trade_paid',
       'trade_loan',
       'trade_loan_due',
-    ])(
-      'a member cannot forge a %s notification',
-      async (type) => {
-        await assertFails(
-          setDoc(doc(as('cashier1'), `${STORE}/notifications/n-${type}`), { ...base, type })
-        )
-      }
-    )
+    ])('a member cannot forge a %s notification', async (type) => {
+      await assertFails(
+        setDoc(doc(as('cashier1'), `${STORE}/notifications/n-${type}`), { ...base, type })
+      )
+    })
 
     it('clients cannot claim the payments source or target recipients', async () => {
       await assertFails(

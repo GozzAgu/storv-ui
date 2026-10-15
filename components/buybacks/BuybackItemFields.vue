@@ -1,5 +1,10 @@
 <template>
-  <SField v-for="field in fields" :key="field.name" :label="fieldLabel(field)" :required="field.required">
+  <SField
+    v-for="field in fields"
+    :key="field.name"
+    :label="fieldLabel(field)"
+    :required="field.required"
+  >
     <SInput
       v-if="field.type === 'text'"
       :model-value="String(modelValue[field.name] ?? '')"

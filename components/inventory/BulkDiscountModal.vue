@@ -1,6 +1,6 @@
 <template>
   <SDialog
-      placement="right"
+    placement="right"
     :open="props.modelValue"
     title="Apply bulk discount"
     size="md"
@@ -72,10 +72,7 @@
         </SField>
       </SFormSection>
 
-      <SFormSection
-        v-if="discountValue && discountValue > 0 && previewItems.length > 0"
-        fixed
-      >
+      <SFormSection v-if="discountValue && discountValue > 0 && previewItems.length > 0" fixed>
         <h3 class="s-form-section__title">
           Preview (first {{ Math.min(3, previewItems.length) }})
         </h3>
@@ -104,7 +101,9 @@
                 </div>
                 <div class="s-sheet-summary__row s-sheet-summary__row--total">
                   <dt>New price</dt>
-                  <dd>{{ currencySymbol }}{{ formatCurrency(calculateItemDiscountedPrice(item)) }}</dd>
+                  <dd>
+                    {{ currencySymbol }}{{ formatCurrency(calculateItemDiscountedPrice(item)) }}
+                  </dd>
                 </div>
               </dl>
             </div>
@@ -118,9 +117,7 @@
       </SFormSection>
 
       <SFormSection v-if="discountValue && discountValue > 0" fixed>
-        <p class="s-form-meta">
-          Items without a valid price will be skipped automatically.
-        </p>
+        <p class="s-form-meta">Items without a valid price will be skipped automatically.</p>
       </SFormSection>
     </SForm>
 
@@ -163,12 +160,8 @@ const inventoryStore = useInventoryStore()
 const toast = useAppToast()
 const { preferences } = usePreferences()
 const currencySymbol = computed(() => preferences.value?.currencySymbol ?? '$')
-const {
-  pickListClass,
-  pickListScrollClass,
-  pickRowClass,
-  pickRowTitleClass,
-} = useDashboardDrawerChrome()
+const { pickListClass, pickListScrollClass, pickRowClass, pickRowTitleClass } =
+  useDashboardDrawerChrome()
 
 const discountTypeLabelId = `bulk-discount-type-${useId()}`
 

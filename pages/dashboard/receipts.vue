@@ -1199,12 +1199,12 @@ const receiptsHeaderMetrics = computed(() => {
 
   const totals: Array<{ key: string; label: string; value: string; tone?: 'warning' }> =
     canViewFinancials.value
-    ? [
-        { key: 'completed', label: 'Completed', value: formatCurrency(totalSales.value) },
-        { key: 'today', label: 'Today', value: formatCurrency(todaySales.value) },
-        { key: 'month', label: 'This month', value: formatCurrency(monthSales.value) },
-      ]
-    : []
+      ? [
+          { key: 'completed', label: 'Completed', value: formatCurrency(totalSales.value) },
+          { key: 'today', label: 'Today', value: formatCurrency(todaySales.value) },
+          { key: 'month', label: 'This month', value: formatCurrency(monthSales.value) },
+        ]
+      : []
 
   return [
     {

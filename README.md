@@ -14,17 +14,17 @@ App: `http://localhost:3000` · Dashboard: `/dashboard`
 
 ## Scripts
 
-| Command | Purpose |
-|---------|---------|
-| `npm run dev` | Local development server |
-| `npm run build` | Production build (Vercel/server) |
-| `npm run generate` | Static export (Capacitor shell) |
-| `npm run test:unit` | Vitest unit + server helper tests |
-| `npm run test:integration` | Vitest integration tests |
-| `npm run test:rules` | Firestore rules (requires Java 21+) |
-| `npm run test:e2e` | Playwright E2E |
-| `npm run format:check` | Prettier check |
-| `npm run cap:build:ios` | Static build + Capacitor iOS sync |
+| Command                    | Purpose                             |
+| -------------------------- | ----------------------------------- |
+| `npm run dev`              | Local development server            |
+| `npm run build`            | Production build (Vercel/server)    |
+| `npm run generate`         | Static export (Capacitor shell)     |
+| `npm run test:unit`        | Vitest unit + server helper tests   |
+| `npm run test:integration` | Vitest integration tests            |
+| `npm run test:rules`       | Firestore rules (requires Java 21+) |
+| `npm run test:e2e`         | Playwright E2E                      |
+| `npm run format:check`     | Prettier check                      |
+| `npm run cap:build:ios`    | Static build + Capacitor iOS sync   |
 
 ## Testing
 

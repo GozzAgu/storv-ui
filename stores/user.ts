@@ -69,7 +69,9 @@ export const useUserStore = defineStore('user', {
 
       // Check if staff creation is in progress - don't update userData during staff creation
       // This prevents the profile card from showing staff name instead of super admin name
-      const isStaffCreationInProgress = (await import('~/utils/staff-creation-session')).isStaffCreationInProgress()
+      const isStaffCreationInProgress = (
+        await import('~/utils/staff-creation-session')
+      ).isStaffCreationInProgress()
 
       // If staff creation is in progress and we already have super admin data, preserve it
       // Don't fetch staff data during creation process
@@ -103,12 +105,7 @@ export const useUserStore = defineStore('user', {
               '~/utils/staff-user-bootstrap'
             )
             const prior = this.userData?.uid === userId ? this.userData : null
-            const result = await buildStaffUserDataWithOwnerContext(
-              db,
-              cachedStaff,
-              userId,
-              prior
-            )
+            const result = await buildStaffUserDataWithOwnerContext(db, cachedStaff, userId, prior)
             this.userData = result.userData
             // Only cache after owner plan inheritance so we never poison Micro over Enterprise.
             if (result.inheritedOwnerContext) {
@@ -117,8 +114,9 @@ export const useUserStore = defineStore('user', {
             return
           }
 
-          const { lookupStaffMemberByAuthUid, buildStaffUserDataWithOwnerContext } =
-            await import('~/utils/staff-user-bootstrap')
+          const { lookupStaffMemberByAuthUid, buildStaffUserDataWithOwnerContext } = await import(
+            '~/utils/staff-user-bootstrap'
+          )
           const lookup = await lookupStaffMemberByAuthUid(db, userId)
 
           if (lookup.kind === 'active') {
@@ -131,12 +129,7 @@ export const useUserStore = defineStore('user', {
               staffStore.staff[existingIndex] = lookup.staff
             }
             const prior = this.userData?.uid === userId ? this.userData : null
-            const result = await buildStaffUserDataWithOwnerContext(
-              db,
-              lookup.staff,
-              userId,
-              prior
-            )
+            const result = await buildStaffUserDataWithOwnerContext(db, lookup.staff, userId, prior)
             this.userData = result.userData
             if (result.inheritedOwnerContext) {
               writeUserProfileCache(userId, this.userData)
@@ -186,10 +179,7 @@ export const useUserStore = defineStore('user', {
         }
       } catch (staffError: any) {
         console.warn('[UserStore] Could not resolve user for sign-in:', staffError.message)
-        if (
-          staffError.message?.includes('permission') ||
-          staffError.code === 'permission-denied'
-        ) {
+        if (staffError.message?.includes('permission') || staffError.code === 'permission-denied') {
           this.error =
             'Could not load your staff profile. Ask your admin to confirm Firestore rules and indexes are deployed.'
         } else if (staffError.code === 'failed-precondition') {

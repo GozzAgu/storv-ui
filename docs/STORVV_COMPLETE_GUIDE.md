@@ -6,14 +6,14 @@ This is the **master reference** for Storvv: what the product is, who it serves,
 
 **Companion docs (deeper or specialized):**
 
-| Document | Focus |
-| -------- | ----- |
-| [STORVV_USER_GUIDE.md](./STORVV_USER_GUIDE.md) | Step-by-step guide for everyday users (current UI) |
-| [HOW_STORVV_WORKS.md](./HOW_STORVV_WORKS.md) | Short architecture overview |
-| [STORVV_APP_FLOW.md](./STORVV_APP_FLOW.md) | User journeys with file references |
-| [SUBSCRIPTION_FEATURES.md](./SUBSCRIPTION_FEATURES.md) | Plan matrix (kept in sync with code) |
-| [DEPLOYMENT.md](../DEPLOYMENT.md) | Hosting and environment variables |
-| [STORAGE_SETUP.md](./STORAGE_SETUP.md) | Firebase Storage for uploads |
+| Document                                               | Focus                                              |
+| ------------------------------------------------------ | -------------------------------------------------- |
+| [STORVV_USER_GUIDE.md](./STORVV_USER_GUIDE.md)         | Step-by-step guide for everyday users (current UI) |
+| [HOW_STORVV_WORKS.md](./HOW_STORVV_WORKS.md)           | Short architecture overview                        |
+| [STORVV_APP_FLOW.md](./STORVV_APP_FLOW.md)             | User journeys with file references                 |
+| [SUBSCRIPTION_FEATURES.md](./SUBSCRIPTION_FEATURES.md) | Plan matrix (kept in sync with code)               |
+| [DEPLOYMENT.md](../DEPLOYMENT.md)                      | Hosting and environment variables                  |
+| [STORAGE_SETUP.md](./STORAGE_SETUP.md)                 | Firebase Storage for uploads                       |
 
 ---
 
@@ -68,47 +68,47 @@ It is aimed at store owners, managers, and front-line staff. A single **account 
 
 ### What problems it solves
 
-| Problem | Storvv answer |
-| ------- | ------------- |
-| Spreadsheets for stock | Folder templates + item tables per category |
-| Lost sales history | Receipts tied to items and customers |
-| No audit trail | Activity logs (Medium+) and immutable log rules |
-| Multiple branches | Store switcher, copy templates, transfers (Enterprise) |
-| Serial inventory on loan | Stock loans module (Enterprise) |
-| Staff with limited access | Roles, departments, inventory flags |
+| Problem                   | Storvv answer                                          |
+| ------------------------- | ------------------------------------------------------ |
+| Spreadsheets for stock    | Folder templates + item tables per category            |
+| Lost sales history        | Receipts tied to items and customers                   |
+| No audit trail            | Activity logs (Medium+) and immutable log rules        |
+| Multiple branches         | Store switcher, copy templates, transfers (Enterprise) |
+| Serial inventory on loan  | Stock loans module (Enterprise)                        |
+| Staff with limited access | Roles, departments, inventory flags                    |
 
 ### Technology summary
 
-| Layer | Stack |
-| ----- | ----- |
-| Frontend | Nuxt 4, Vue 3, Pinia, Tailwind CSS |
-| Delivery | Static SPA (no SSR); Capacitor for iOS/Android |
-| Auth | Firebase Authentication |
-| Database | Cloud Firestore |
-| Files | Firebase Storage (+ optional Cloudinary for logos) |
-| Server | Nuxt Nitro server routes + Firebase Admin SDK |
-| Billing | Paystack (NGN) |
-| Email | Resend |
-| WhatsApp | Meta Cloud API (optional) or device share sheet |
-| Hosting | Vercel (web + serverless API) |
+| Layer    | Stack                                              |
+| -------- | -------------------------------------------------- |
+| Frontend | Nuxt 4, Vue 3, Pinia, Tailwind CSS                 |
+| Delivery | Static SPA (no SSR); Capacitor for iOS/Android     |
+| Auth     | Firebase Authentication                            |
+| Database | Cloud Firestore                                    |
+| Files    | Firebase Storage (+ optional Cloudinary for logos) |
+| Server   | Nuxt Nitro server routes + Firebase Admin SDK      |
+| Billing  | Paystack (NGN)                                     |
+| Email    | Resend                                             |
+| WhatsApp | Meta Cloud API (optional) or device share sheet    |
+| Hosting  | Vercel (web + serverless API)                      |
 
 ---
 
 ## 2. Brand, URLs, and naming
 
-| Name | Meaning |
-| ---- | ------- |
-| **Storvv** | Product and brand (`storvv.com`) |
-| **storv-ui** | This repository and npm package name |
+| Name              | Meaning                                       |
+| ----------------- | --------------------------------------------- |
+| **Storvv**        | Product and brand (`storvv.com`)              |
+| **storv-ui**      | This repository and npm package name          |
 | **com.storv.app** | Native iOS/Android app identifier (Capacitor) |
 
 **Typical hosts:**
 
-| Host | Purpose |
-| ---- | ------- |
-| `www.storvv.com` / marketing hosts | Landing, pricing, legal pages |
-| `app.storvv.com` | Authenticated dashboard application |
-| `localhost:3000` | Local development |
+| Host                               | Purpose                             |
+| ---------------------------------- | ----------------------------------- |
+| `www.storvv.com` / marketing hosts | Landing, pricing, legal pages       |
+| `app.storvv.com`                   | Authenticated dashboard application |
+| `localhost:3000`                   | Local development                   |
 
 Subdomain routing is handled in `middleware/00-subdomain.global.ts` (marketing vs app).
 
@@ -120,40 +120,40 @@ Plans unlock **features** and **numeric caps**. Source of truth: `types/subscrip
 
 ### Plan IDs
 
-| Plan ID | Display name |
-| ------- | ------------ |
-| `storvv_micro` | Storvv Micro |
-| `storvv_medium` | Storvv Medium |
+| Plan ID             | Display name      |
+| ------------------- | ----------------- |
+| `storvv_micro`      | Storvv Micro      |
+| `storvv_medium`     | Storvv Medium     |
 | `storvv_enterprise` | Storvv Enterprise |
 
 ### Numeric limits
 
-| Limit | Micro | Medium | Enterprise |
-| ----- | ----- | ------ | ---------- |
-| Stores | 1 | 2 | Unlimited (`-1`) |
-| Departments per store | 1 | 10 | Unlimited |
-| Staff per store | 2 | 25 | Unlimited |
-| WhatsApp sends / month | 10 | Unlimited | Unlimited |
+| Limit                  | Micro | Medium    | Enterprise       |
+| ---------------------- | ----- | --------- | ---------------- |
+| Stores                 | 1     | 2         | Unlimited (`-1`) |
+| Departments per store  | 1     | 10        | Unlimited        |
+| Staff per store        | 2     | 25        | Unlimited        |
+| WhatsApp sends / month | 10    | Unlimited | Unlimited        |
 
 **Downgrade behavior:** when a plan allows fewer stores than exist, `getEligibleStoresForPlan()` keeps the **oldest** stores (by `createdAt`); others are hidden from the switcher until upgrade.
 
 ### Feature matrix
 
-| Feature | Micro | Medium | Enterprise |
-| ------- | :---: | :----: | :--------: |
-| Dashboard, inventory, receipts, returns, customers | ✓ | ✓ | ✓ |
-| Settings, profile, notifications, help, onboarding | ✓ | ✓ | ✓ |
-| WhatsApp messaging | ✓ (capped) | ✓ | ✓ |
-| Payment links (nav; see §18 for launch status) | ✓ | ✓ | ✓ |
-| Analytics & exports | - | ✓ | ✓ |
-| Activity logs | - | ✓ | ✓ |
-| Departments (multi-dept teams) | - | ✓ | ✓ |
-| Customer balance / credit ledger | - | ✓ | ✓ |
-| Duplicate category (same branch) | - | ✓ | ✓ |
-| Multi-store sync & transfers | - | - | ✓ |
-| Copy from branch (templates) | - | - | ✓ |
-| Stock loans | - | - | ✓ |
-| Priority support | - | - | ✓ |
+| Feature                                            |   Micro    | Medium | Enterprise |
+| -------------------------------------------------- | :--------: | :----: | :--------: |
+| Dashboard, inventory, receipts, returns, customers |     ✓      |   ✓    |     ✓      |
+| Settings, profile, notifications, help, onboarding |     ✓      |   ✓    |     ✓      |
+| WhatsApp messaging                                 | ✓ (capped) |   ✓    |     ✓      |
+| Payment links (nav; see §18 for launch status)     |     ✓      |   ✓    |     ✓      |
+| Analytics & exports                                |     -      |   ✓    |     ✓      |
+| Activity logs                                      |     -      |   ✓    |     ✓      |
+| Departments (multi-dept teams)                     |     -      |   ✓    |     ✓      |
+| Customer balance / credit ledger                   |     -      |   ✓    |     ✓      |
+| Duplicate category (same branch)                   |     -      |   ✓    |     ✓      |
+| Multi-store sync & transfers                       |     -      |   -    |     ✓      |
+| Copy from branch (templates)                       |     -      |   -    |     ✓      |
+| Stock loans                                        |     -      |   -    |     ✓      |
+| Priority support                                   |     -      |   -    |     ✓      |
 
 ### Never paywalled (all plans)
 
@@ -178,14 +178,14 @@ Plan amounts are validated server-side in `server/utils/paystack-validation.ts` 
 
 Show upgrade prompts when users **hit a limit**, not randomly:
 
-| Moment | Message direction |
-| ------ | ----------------- |
-| Analytics nav (Micro) | Revenue trends on Medium |
-| 3rd staff invite (Micro) | Medium supports up to 25 staff |
-| 2nd store (Micro) | Second branch on Medium |
-| WhatsApp cap (Micro) | Unlimited on Medium |
-| Copy from branch | Enterprise cross-branch templates |
-| Stock loans nav | Enterprise serial lending |
+| Moment                   | Message direction                 |
+| ------------------------ | --------------------------------- |
+| Analytics nav (Micro)    | Revenue trends on Medium          |
+| 3rd staff invite (Micro) | Medium supports up to 25 staff    |
+| 2nd store (Micro)        | Second branch on Medium           |
+| WhatsApp cap (Micro)     | Unlimited on Medium               |
+| Copy from branch         | Enterprise cross-branch templates |
+| Stock loans nav          | Enterprise serial lending         |
 
 ---
 
@@ -195,48 +195,48 @@ Access is a function of **role**, **subscription plan**, and **active store**.
 
 ### Account roles (`UserData.role`)
 
-| Role | Typical user |
-| ---- | ------------ |
+| Role         | Typical user                |
+| ------------ | --------------------------- |
 | `superAdmin` | Account owner who signed up |
-| `staff` | Invited team member |
+| `staff`      | Invited team member         |
 
 (Legacy types `admin` / `user` may exist in types but primary flows use the above.)
 
 ### Staff roles (`Staff.role`)
 
-| Role | Description |
-| ---- | ----------- |
+| Role      | Description                          |
+| --------- | ------------------------------------ |
 | `manager` | Broader edit on sales and operations |
-| `staff` | Day-to-day selling and viewing |
-| `intern` | Limited staff tier |
+| `staff`   | Day-to-day selling and viewing       |
+| `intern`  | Limited staff tier                   |
 
 **Special flag:** `canManageInventory: boolean` - owner-granted full inventory edit without super-admin login.
 
 ### Client permissions (`usePermissions.ts`)
 
-| Capability | Super admin | Manager | Staff (no inventory flag) |
-| ---------- | :---------: | :-----: | :-----------------------: |
-| Structural manage (`canManage`) | ✓ | ✓ | ✗ |
-| Create receipts | ✓ | ✓ | ✓ |
-| Edit receipts | ✓ | ✓ | ✗ |
-| Delete receipts | ✓ | ✗ | ✗ |
-| Manage inventory items | ✓ | if flag | if flag |
-| Create inventory folders | ✓ | if flag | if flag |
-| Create / remove / move staff | ✓ | ✗ | ✗ |
-| Grant inventory access | ✓ | ✗ | ✗ |
-| Read-only mode | ✗ | ✗ | ✓ (unless manager or flag) |
+| Capability                      | Super admin | Manager | Staff (no inventory flag)  |
+| ------------------------------- | :---------: | :-----: | :------------------------: |
+| Structural manage (`canManage`) |      ✓      |    ✓    |             ✗              |
+| Create receipts                 |      ✓      |    ✓    |             ✓              |
+| Edit receipts                   |      ✓      |    ✓    |             ✗              |
+| Delete receipts                 |      ✓      |    ✗    |             ✗              |
+| Manage inventory items          |      ✓      | if flag |          if flag           |
+| Create inventory folders        |      ✓      | if flag |          if flag           |
+| Create / remove / move staff    |      ✓      |    ✗    |             ✗              |
+| Grant inventory access          |      ✓      |    ✗    |             ✗              |
+| Read-only mode                  |      ✗      |    ✗    | ✓ (unless manager or flag) |
 
 ### Navigation gating (`layouts/dashboard.vue`)
 
-| Nav item | Plan feature | Extra role gate |
-| -------- | ------------ | --------------- |
-| Dashboard, Inventory, Receipts, Help, Settings, Profile | respective feature | - |
-| Payment links | `payment_links` | - |
-| Stock loans | `seller_loans` | Manager or super admin |
-| Departments | `departments` | Manager or super admin |
-| Analytics | `analytics` | - |
-| Activity logs | `activity_logs` | Manager or super admin |
-| Multi-Store Sync | `multi_store_sync` | Super admin only |
+| Nav item                                                | Plan feature       | Extra role gate        |
+| ------------------------------------------------------- | ------------------ | ---------------------- |
+| Dashboard, Inventory, Receipts, Help, Settings, Profile | respective feature | -                      |
+| Payment links                                           | `payment_links`    | -                      |
+| Stock loans                                             | `seller_loans`     | Manager or super admin |
+| Departments                                             | `departments`      | Manager or super admin |
+| Analytics                                               | `analytics`        | -                      |
+| Activity logs                                           | `activity_logs`    | Manager or super admin |
+| Multi-Store Sync                                        | `multi_store_sync` | Super admin only       |
 
 ---
 
@@ -268,13 +268,13 @@ Stock is driven primarily by **sales, returns, balance-due completion, loans, an
 
 A **receipt** records line items, totals, optional customer, payment method, and **status**:
 
-| Status | Meaning |
-| ------ | ------- |
-| `completed` | Sale finalized; stock updated |
-| `pending` | Sale recorded but not finalized |
+| Status        | Meaning                          |
+| ------------- | -------------------------------- |
+| `completed`   | Sale finalized; stock updated    |
+| `pending`     | Sale recorded but not finalized  |
 | `balance_due` | Partial payment; balance remains |
-| `refunded` | Return processed |
-| `cancelled` | Voided sale |
+| `refunded`    | Return processed                 |
+| `cancelled`   | Voided sale                      |
 
 ### Data ownership (owner tree)
 
@@ -371,9 +371,9 @@ On completion:
 
 ### Routes
 
-| Route | Purpose |
-| ----- | ------- |
-| `/dashboard/inventory` | Folder grid/table |
+| Route                       | Purpose                 |
+| --------------------------- | ----------------------- |
+| `/dashboard/inventory`      | Folder grid/table       |
 | `/dashboard/inventory/[id]` | Items inside one folder |
 
 ### Folder list (`inventory/index.vue`)
@@ -446,14 +446,14 @@ Shared `SidePanel` for add and edit:
 
 ### Stock movement triggers
 
-| Event | Effect |
-| ----- | ------ |
-| Receipt completed | Items marked sold (`dateOut`); serial lines unavailable |
-| Return / refund | Items restored via `returnItemsToStock()` |
-| Balance due paid | Pending sale fields cleared; stock finalized |
-| Stock loan created | Loan flags on serial items |
-| Loan sold / returned | Loan doc updated; item flags cleared |
-| Multi-store transfer complete | Source decremented; destination items created/updated |
+| Event                         | Effect                                                  |
+| ----------------------------- | ------------------------------------------------------- |
+| Receipt completed             | Items marked sold (`dateOut`); serial lines unavailable |
+| Return / refund               | Items restored via `returnItemsToStock()`               |
+| Balance due paid              | Pending sale fields cleared; stock finalized            |
+| Stock loan created            | Loan flags on serial items                              |
+| Loan sold / returned          | Loan doc updated; item flags cleared                    |
+| Multi-store transfer complete | Source decremented; destination items created/updated   |
 
 ---
 
@@ -479,11 +479,11 @@ Legacy `/dashboard/customers` may redirect or mirror customer views.
 
 **Component:** `components/receipts/CreateReceiptModal.vue` (uses `SidePanel` side drawer).
 
-| Step | Content |
-| ---- | ------- |
-| 1 | Select inventory **category** (folder); search categories |
-| 2 | Select **items** and quantities; serial lines individually |
-| 3 | **Receipt details** - customer, payment method, status, notes, swap-in, split payments |
+| Step | Content                                                                                |
+| ---- | -------------------------------------------------------------------------------------- |
+| 1    | Select inventory **category** (folder); search categories                              |
+| 2    | Select **items** and quantities; serial lines individually                             |
+| 3    | **Receipt details** - customer, payment method, status, notes, swap-in, split payments |
 
 **Sell screen note:** branch-level banner from store settings (`sellScreenNote`) shown on steps 2-3 and Quick Sale.
 
@@ -599,11 +599,11 @@ Written via `logActivity()` from inventory and operational actions.
 
 ### Routes
 
-| Route | Purpose |
-| ----- | ------- |
-| `/dashboard/departments` | Department list |
-| `/dashboard/departments/[id]` | Department detail + staff |
-| `/dashboard/stores/[storeId]/departments` | Branch departments admin |
+| Route                                     | Purpose                   |
+| ----------------------------------------- | ------------------------- |
+| `/dashboard/departments`                  | Department list           |
+| `/dashboard/departments/[id]`             | Department detail + staff |
+| `/dashboard/stores/[storeId]/departments` | Branch departments admin  |
 
 ### Department modal
 
@@ -675,22 +675,22 @@ Multi-store transfer warns/blocks loaned serial lines.
 
 ### Tabs
 
-| Tab | Purpose |
-| --- | ------- |
-| Transfer items | Request and approve stock moves between branches |
-| Consolidated reports | Cross-branch performance |
-| Transfer history | Audit of past transfers |
+| Tab                  | Purpose                                          |
+| -------------------- | ------------------------------------------------ |
+| Transfer items       | Request and approve stock moves between branches |
+| Consolidated reports | Cross-branch performance                         |
+| Transfer history     | Audit of past transfers                          |
 
 ### Transfer workflow
 
-| Status | Meaning |
-| ------ | ------- |
-| `pending_approval` | Awaiting approver |
-| `approved` | Approved, not shipped |
-| `in_transit` | Optional carrier/tracking |
+| Status                            | Meaning                      |
+| --------------------------------- | ---------------------------- |
+| `pending_approval`                | Awaiting approver            |
+| `approved`                        | Approved, not shipped        |
+| `in_transit`                      | Optional carrier/tracking    |
 | `completed` / `completed_partial` | Stock applied at destination |
-| `partial` | Partial fulfillment |
-| `rejected` / `cancelled` | Not completed |
+| `partial`                         | Partial fulfillment          |
+| `rejected` / `cancelled`          | Not completed                |
 
 **Storage:** `users/{ownerUid}/storeTransfers/{transferId}`
 
@@ -708,7 +708,7 @@ Multi-store transfer warns/blocks loaned serial lines.
 
 ```ts
 // utils/payment-links-launch.ts
-PAYMENT_LINKS_COMING_SOON = true        // dashboard page shows Coming Soon
+PAYMENT_LINKS_COMING_SOON = true // dashboard page shows Coming Soon
 PAYMENT_LINKS_NATIVE_COMING_SOON = true // native nav badges
 PAYMENT_LINKS_MARKETING_STATUS = 'In progress'
 ```
@@ -772,10 +772,10 @@ Receipt PDF capture forces light theme for readable output.
 
 ## 21. Public pages - shared receipts and payment checkout
 
-| Route | Auth | Purpose |
-| ----- | ---- | ------- |
-| `/r/[token]` | None | Public shared receipt view |
-| `/pay/[token]` | None | Payment link checkout |
+| Route          | Auth | Purpose                    |
+| -------------- | ---- | -------------------------- |
+| `/r/[token]`   | None | Public shared receipt view |
+| `/pay/[token]` | None | Payment link checkout      |
 
 **Receipt share:** token generated server-side; payload via `/api/receipts/share/[token].get.ts`.
 
@@ -882,16 +882,16 @@ Fields: `status: 'active'`, `role: manager|staff|intern`
 
 ### Summary table
 
-| Resource | Read | Create | Update | Delete |
-| -------- | ---- | ------ | ------ | ------ |
-| User profile | authenticated | owner | owner | owner |
-| Stores | owner or member | owner | owner | owner |
-| Inventory folders | store access | **owner only** | owner | owner |
-| Inventory items | store access | owner | owner or narrow staff sale fields | owner |
-| Receipts | store access | owner/manager/staff | role-dependent | **owner only** |
-| Seller loan outs | store access | owner/manager | owner/manager/POS reconcile | **never** |
-| Activity logs | store access | POS + managers | **never** | **never** |
-| Store transfers | owner only | owner | owner | owner |
+| Resource          | Read            | Create              | Update                            | Delete         |
+| ----------------- | --------------- | ------------------- | --------------------------------- | -------------- |
+| User profile      | authenticated   | owner               | owner                             | owner          |
+| Stores            | owner or member | owner               | owner                             | owner          |
+| Inventory folders | store access    | **owner only**      | owner                             | owner          |
+| Inventory items   | store access    | owner               | owner or narrow staff sale fields | owner          |
+| Receipts          | store access    | owner/manager/staff | role-dependent                    | **owner only** |
+| Seller loan outs  | store access    | owner/manager       | owner/manager/POS reconcile       | **never**      |
+| Activity logs     | store access    | POS + managers      | **never**                         | **never**      |
+| Store transfers   | owner only      | owner               | owner                             | owner          |
 
 **Client gates** (`usePermissions`, `useSubscriptionFeatures`) hide UI; **Firestore rules** are the source of truth for writes.
 
@@ -949,11 +949,11 @@ flowchart TB
 
 ### Three layers
 
-| Layer | Responsibility | Location |
-| ----- | -------------- | -------- |
-| UI | Pages, layouts, components | `pages/`, `layouts/`, `components/` |
-| State | Cache, loading, client permissions | `stores/`, `composables/` |
-| Data | Persistence, security | Firestore, `firestore.rules`, `server/api/` |
+| Layer | Responsibility                     | Location                                    |
+| ----- | ---------------------------------- | ------------------------------------------- |
+| UI    | Pages, layouts, components         | `pages/`, `layouts/`, `components/`         |
+| State | Cache, loading, client permissions | `stores/`, `composables/`                   |
+| Data  | Persistence, security              | Firestore, `firestore.rules`, `server/api/` |
 
 ### Typical write path
 
@@ -971,18 +971,18 @@ Capacitor builds set `NUXT_PUBLIC_API_BASE` to hosted origin (e.g. `https://app.
 
 ## 27. Server APIs (`/api/*`)
 
-| Area | Endpoints |
-| ---- | --------- |
-| Paystack | `initialize.post`, `verify.get`, `webhook.post` |
-| Receipts | `send-email.post`, `share-link.post`, `share/[token].get`, `deliver.post`, `delete.post` |
-| Payment links | `create.post`, `list.get`, `banks.get`, `connect-bank.post`, `resolve-account.post`, `payout.get`, `settlements.get` |
-| Public pay | `pay/[token].get`, `pay/[token]/initialize.post`, `pay/[token]/verify.get` |
-| Stores | `transfer-items.post`, `sync-inventory.post`, `export-report.post`, `consolidated-report.post`, `transfer-history.get` |
-| Staff | `deactivate.post`, `reactivate.post` |
-| WhatsApp | `usage.get`, `record-send.post` |
-| Inventory | `validate-serial.post` |
-| Storage | `upload-account-logo.post` |
-| Utility | `proxy-image.get`, `proxy-image.post` |
+| Area          | Endpoints                                                                                                              |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Paystack      | `initialize.post`, `verify.get`, `webhook.post`                                                                        |
+| Receipts      | `send-email.post`, `share-link.post`, `share/[token].get`, `deliver.post`, `delete.post`                               |
+| Payment links | `create.post`, `list.get`, `banks.get`, `connect-bank.post`, `resolve-account.post`, `payout.get`, `settlements.get`   |
+| Public pay    | `pay/[token].get`, `pay/[token]/initialize.post`, `pay/[token]/verify.get`                                             |
+| Stores        | `transfer-items.post`, `sync-inventory.post`, `export-report.post`, `consolidated-report.post`, `transfer-history.get` |
+| Staff         | `deactivate.post`, `reactivate.post`                                                                                   |
+| WhatsApp      | `usage.get`, `record-send.post`                                                                                        |
+| Inventory     | `validate-serial.post`                                                                                                 |
+| Storage       | `upload-account-logo.post`                                                                                             |
+| Utility       | `proxy-image.get`, `proxy-image.post`                                                                                  |
 
 **Auth:** `server/utils/store-auth.ts` - `requireAuth`, `requireStoreManageAccess` with Firebase ID token verification.
 
@@ -990,13 +990,13 @@ Capacitor builds set `NUXT_PUBLIC_API_BASE` to hosted origin (e.g. `https://app.
 
 ## 28. Middleware and routing
 
-| File | Purpose |
-| ---- | ------- |
-| `00-subdomain.global.ts` | Marketing vs app host routing |
-| `01.capacitor-root.global.ts` | Native: `/` → `/signin` |
-| `auth.global.ts` | Dashboard requires auth |
-| `auth.ts` | Per-page auth + demo init |
-| `guest.ts` | Signed-in users leave guest routes |
+| File                          | Purpose                            |
+| ----------------------------- | ---------------------------------- |
+| `00-subdomain.global.ts`      | Marketing vs app host routing      |
+| `01.capacitor-root.global.ts` | Native: `/` → `/signin`            |
+| `auth.global.ts`              | Dashboard requires auth            |
+| `auth.ts`                     | Per-page auth + demo init          |
+| `guest.ts`                    | Signed-in users leave guest routes |
 
 ---
 
@@ -1004,15 +1004,15 @@ Capacitor builds set `NUXT_PUBLIC_API_BASE` to hosted origin (e.g. `https://app.
 
 Dashboard SaaS styling lives in imported CSS modules (`assets/css/main.css`):
 
-| File | Purpose |
-| ---- | ------- |
-| `dashboard-shell.css` | Sidebar, topnav, profile |
-| `dashboard-cards.css` | Cards, KPI grids, analytics |
-| `dashboard-pages.css` | Profile, settings, help |
-| `dashboard-tables.css` | Unified tables, hairline dividers |
-| `dashboard-overlays.css` | Modals, **side drawers**, toasts |
-| `app-buttons.css` | Pill buttons (Storvv navy) |
-| `capacitor-native-saas.css` | iOS/Android parity |
+| File                        | Purpose                           |
+| --------------------------- | --------------------------------- |
+| `dashboard-shell.css`       | Sidebar, topnav, profile          |
+| `dashboard-cards.css`       | Cards, KPI grids, analytics       |
+| `dashboard-pages.css`       | Profile, settings, help           |
+| `dashboard-tables.css`      | Unified tables, hairline dividers |
+| `dashboard-overlays.css`    | Modals, **side drawers**, toasts  |
+| `app-buttons.css`           | Pill buttons (Storvv navy)        |
+| `capacitor-native-saas.css` | iOS/Android parity                |
 
 ### Side drawer (`SidePanel.vue`)
 
@@ -1036,10 +1036,10 @@ Dashboard SaaS styling lives in imported CSS modules (`assets/css/main.css`):
 
 ### Web
 
-| Surface | Routes |
-| ------- | ------ |
+| Surface   | Routes                             |
+| --------- | ---------------------------------- |
 | Marketing | `/`, `/privacy`, `/terms`, pricing |
-| App | `/dashboard/*`, auth pages |
+| App       | `/dashboard/*`, auth pages         |
 
 ### Mobile (Capacitor)
 
@@ -1057,41 +1057,41 @@ Dashboard SaaS styling lives in imported CSS modules (`assets/css/main.css`):
 
 ## 31. Repository map
 
-| Topic | Path |
-| ----- | ---- |
-| Routes | `pages/` |
-| Dashboard shell | `layouts/dashboard.vue` |
-| Pinia stores | `stores/` |
-| Firestore paths | `composables/useFirestorePaths.ts` |
+| Topic            | Path                                                              |
+| ---------------- | ----------------------------------------------------------------- |
+| Routes           | `pages/`                                                          |
+| Dashboard shell  | `layouts/dashboard.vue`                                           |
+| Pinia stores     | `stores/`                                                         |
+| Firestore paths  | `composables/useFirestorePaths.ts`                                |
 | Plans & features | `types/subscription.ts`, `composables/useSubscriptionFeatures.ts` |
-| Permissions | `composables/usePermissions.ts` |
-| Auth | `stores/auth.ts`, `middleware/auth.global.ts` |
-| Security rules | `firestore.rules`, `storage.rules` |
-| Server APIs | `server/api/` |
-| Receipts UI | `components/receipts/` |
-| Inventory UI | `components/inventory/`, `pages/dashboard/inventory/` |
-| Capacitor | `capacitor.config.ts`, `plugins/00.capacitor.client.ts` |
-| Tests | `tests/README.md` |
+| Permissions      | `composables/usePermissions.ts`                                   |
+| Auth             | `stores/auth.ts`, `middleware/auth.global.ts`                     |
+| Security rules   | `firestore.rules`, `storage.rules`                                |
+| Server APIs      | `server/api/`                                                     |
+| Receipts UI      | `components/receipts/`                                            |
+| Inventory UI     | `components/inventory/`, `pages/dashboard/inventory/`             |
+| Capacitor        | `capacitor.config.ts`, `plugins/00.capacitor.client.ts`           |
+| Tests            | `tests/README.md`                                                 |
 
 ---
 
 ## 32. Glossary
 
-| Term | Definition |
-| ---- | ---------- |
-| **Active store** | Currently selected branch; scopes almost all data |
-| **Folder / category** | Inventory container with column template |
-| **Item** | Product row inside a folder |
-| **Receipt** | Sales record |
-| **Serial mode** | One Firestore row per serial number |
-| **Quantity mode** | Single row with quantity field |
-| **Super admin** | Account owner |
-| **Owner tree** | Firestore path under owner's UID |
-| **Side drawer** | `SidePanel` overlay sliding from right |
-| **Copy from branch** | Enterprise template clone across stores |
-| **Stock loan** | Enterprise serial lend-out tracking |
-| **Balance due** | Partial payment receipt status |
-| **Swap-in** | Trade-in credit applied to a sale |
+| Term                  | Definition                                        |
+| --------------------- | ------------------------------------------------- |
+| **Active store**      | Currently selected branch; scopes almost all data |
+| **Folder / category** | Inventory container with column template          |
+| **Item**              | Product row inside a folder                       |
+| **Receipt**           | Sales record                                      |
+| **Serial mode**       | One Firestore row per serial number               |
+| **Quantity mode**     | Single row with quantity field                    |
+| **Super admin**       | Account owner                                     |
+| **Owner tree**        | Firestore path under owner's UID                  |
+| **Side drawer**       | `SidePanel` overlay sliding from right            |
+| **Copy from branch**  | Enterprise template clone across stores           |
+| **Stock loan**        | Enterprise serial lend-out tracking               |
+| **Balance due**       | Partial payment receipt status                    |
+| **Swap-in**           | Trade-in credit applied to a sale                 |
 
 ---
 
@@ -1107,4 +1107,4 @@ When shipping a feature:
 
 ---
 
-*Last expanded: June 2026 - reflects `storv-ui` codebase including side drawer overlay system, unified drawer width, and payment links coming-soon flags.*
+_Last expanded: June 2026 - reflects `storv-ui` codebase including side drawer overlay system, unified drawer width, and payment links coming-soon flags._

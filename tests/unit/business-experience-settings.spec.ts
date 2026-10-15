@@ -27,12 +27,7 @@ describe('business-experience-settings', () => {
 
     expect(
       getProgressiveUnlockOptionsForPlan('storvv_medium').map((option) => option.capability)
-    ).toEqual([
-      'staffManagement',
-      'multiLocationAdmin',
-      'rolesPermissionsAdmin',
-      'paymentLinks',
-    ])
+    ).toEqual(['staffManagement', 'multiLocationAdmin', 'rolesPermissionsAdmin', 'paymentLinks'])
 
     expect(
       getProgressiveUnlockOptionsForPlan('storvv_enterprise').map((option) => option.capability)
@@ -50,9 +45,7 @@ describe('business-experience-settings', () => {
     expect(isProgressiveUnlockAvailableForPlan('multiLocationAdmin', 'storvv_micro')).toBe(false)
     expect(isProgressiveUnlockAvailableForPlan('multiLocationAdmin', 'storvv_medium')).toBe(true)
     expect(isProgressiveUnlockAvailableForPlan('approvalWorkflows', 'storvv_medium')).toBe(false)
-    expect(isProgressiveUnlockAvailableForPlan('approvalWorkflows', 'storvv_enterprise')).toBe(
-      true
-    )
+    expect(isProgressiveUnlockAvailableForPlan('approvalWorkflows', 'storvv_enterprise')).toBe(true)
     expect(isProgressiveUnlockAvailableForPlan('paymentLinks', 'storvv_micro')).toBe(true)
   })
 
@@ -66,13 +59,13 @@ describe('business-experience-settings', () => {
   })
 
   it('toggles capabilities without duplicates or unknown keys', () => {
-    expect(
-      setProgressiveCapabilityEnabled([], 'staffManagement', true)
-    ).toEqual(['staffManagement'])
+    expect(setProgressiveCapabilityEnabled([], 'staffManagement', true)).toEqual([
+      'staffManagement',
+    ])
 
-    expect(
-      setProgressiveCapabilityEnabled(['staffManagement'], 'staffManagement', true)
-    ).toEqual(['staffManagement'])
+    expect(setProgressiveCapabilityEnabled(['staffManagement'], 'staffManagement', true)).toEqual([
+      'staffManagement',
+    ])
 
     expect(
       setProgressiveCapabilityEnabled(['staffManagement'], 'multiLocationAdmin', true)
@@ -87,7 +80,11 @@ describe('business-experience-settings', () => {
     ).toEqual(['multiLocationAdmin'])
 
     expect(
-      setProgressiveCapabilityEnabled(['not-a-capability' as 'staffManagement'], 'staffManagement', true)
+      setProgressiveCapabilityEnabled(
+        ['not-a-capability' as 'staffManagement'],
+        'staffManagement',
+        true
+      )
     ).toEqual(['staffManagement'])
   })
 

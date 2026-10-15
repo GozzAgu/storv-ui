@@ -186,9 +186,7 @@ export function getAdminFirestore() {
  */
 export function getAdminStorageBucket() {
   const config = useRuntimeConfig()
-  const pub = (
-    emulatorMode(config) ? FIREBASE_EMULATOR_WEB_CONFIG : config.public.firebase
-  ) as {
+  const pub = (emulatorMode(config) ? FIREBASE_EMULATOR_WEB_CONFIG : config.public.firebase) as {
     projectId?: string
     storageBucket?: string
   }

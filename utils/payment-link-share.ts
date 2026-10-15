@@ -19,7 +19,9 @@ export function buildPaymentLinkShareMessage(link: PaymentLinkShareInput): strin
 }
 
 function canUseWebShare(): boolean {
-  return import.meta.client && typeof navigator !== 'undefined' && typeof navigator.share === 'function'
+  return (
+    import.meta.client && typeof navigator !== 'undefined' && typeof navigator.share === 'function'
+  )
 }
 
 async function copyToClipboard(text: string): Promise<boolean> {
@@ -36,7 +38,9 @@ async function copyToClipboard(text: string): Promise<boolean> {
  * Share a payment link using the OS share sheet when available (iOS/Android),
  * otherwise WhatsApp to the customer phone, then clipboard.
  */
-export async function sharePaymentLink(link: PaymentLinkShareInput): Promise<PaymentLinkShareResult> {
+export async function sharePaymentLink(
+  link: PaymentLinkShareInput
+): Promise<PaymentLinkShareResult> {
   const message = buildPaymentLinkShareMessage(link)
   const title = `Invoice ${link.invoiceNumber}`
 

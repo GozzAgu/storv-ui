@@ -40,10 +40,7 @@ export default defineEventHandler(async (event) => {
     return
   }
 
-  if (
-    path.startsWith('/api/receipts/send-email') ||
-    path.startsWith('/api/receipts/deliver')
-  ) {
+  if (path.startsWith('/api/receipts/send-email') || path.startsWith('/api/receipts/deliver')) {
     await assertRateLimit(event, { id: 'receipt-delivery-ip', limit: 15, windowMs: ONE_MINUTE })
     return
   }
@@ -80,4 +77,3 @@ export default defineEventHandler(async (event) => {
 
   await assertRateLimit(event, { id: 'api-default', limit: 120, windowMs: ONE_MINUTE })
 })
-

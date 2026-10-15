@@ -65,7 +65,8 @@ export function planFromPaystackPlanCode(
   for (const planId of PAID_PLANS) {
     for (const billingCycle of SUBSCRIPTION_BILLING_CYCLES) {
       const key = getPaystackPlanCodeConfigKey(planId, billingCycle)
-      const configured = key && typeof config[key] === 'string' ? (config[key] as string).trim() : ''
+      const configured =
+        key && typeof config[key] === 'string' ? (config[key] as string).trim() : ''
       if (configured && configured === planCode) return { planId, billingCycle }
     }
   }
@@ -122,7 +123,8 @@ export async function resolveSubscriptionCharge(
     userId = claimedUserId
     planId = pending.planId
     billingCycle = pending.billingCycle || 'monthly'
-    const planCodeDiffers = planCode && pending.paystackPlanCode && planCode !== pending.paystackPlanCode
+    const planCodeDiffers =
+      planCode && pending.paystackPlanCode && planCode !== pending.paystackPlanCode
     const tierDiffers =
       fromCode && (fromCode.planId !== planId || fromCode.billingCycle !== billingCycle)
     if (planCodeDiffers || tierDiffers) return { ok: false, problem: 'plan-mismatch', userId }

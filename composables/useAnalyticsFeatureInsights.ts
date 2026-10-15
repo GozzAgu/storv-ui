@@ -150,9 +150,7 @@ export function useAnalyticsFeatureInsights(
   const periodOrders = computed(() => filteredReceipts.value.length)
 
   const periodAov = computed(() =>
-    completedInPeriod.value.length > 0
-      ? periodRevenue.value / completedInPeriod.value.length
-      : 0
+    completedInPeriod.value.length > 0 ? periodRevenue.value / completedInPeriod.value.length : 0
   )
 
   const itemsSoldInPeriod = computed(() => {
@@ -206,9 +204,7 @@ export function useAnalyticsFeatureInsights(
     sumReceiptGrossProfit(completedInPeriod.value, lookupInventoryItem)
   )
 
-  const periodCogs = computed(() =>
-    sumReceiptCogs(completedInPeriod.value, lookupInventoryItem)
-  )
+  const periodCogs = computed(() => sumReceiptCogs(completedInPeriod.value, lookupInventoryItem))
 
   const grossMarginPercent = computed(() => {
     const revenue = completedInPeriod.value.reduce(
@@ -249,9 +245,7 @@ export function useAnalyticsFeatureInsights(
     )
   )
 
-  const customerAccounts = computed(() =>
-    Object.values(customerAccountsStore.accountsByContactKey)
-  )
+  const customerAccounts = computed(() => Object.values(customerAccountsStore.accountsByContactKey))
 
   const accountsWithBalance = computed(() =>
     customerAccounts.value.filter((a) => (a.accountBalance || 0) > 0)
@@ -389,9 +383,7 @@ export function useAnalyticsFeatureInsights(
           {
             label: 'Gross margin',
             value:
-              grossMarginPercent.value !== null
-                ? `${grossMarginPercent.value.toFixed(1)}%`
-                : '-',
+              grossMarginPercent.value !== null ? `${grossMarginPercent.value.toFixed(1)}%` : '-',
           },
         ],
         href: dashPath('/inventory'),
@@ -467,10 +459,10 @@ export function useAnalyticsFeatureInsights(
         storefrontRevenueInPeriod.value > 0
           ? formatCurrency(storefrontRevenueInPeriod.value)
           : views7d > 0
-            ? `${views7d} views (7d)`
-            : pendingInquiries > 0
-              ? `${pendingInquiries} pending`
-              : 'No traffic yet',
+          ? `${views7d} views (7d)`
+          : pendingInquiries > 0
+          ? `${pendingInquiries} pending`
+          : 'No traffic yet',
       metrics: [
         { label: 'Store views', value: String(storeViews) },
         { label: 'Product views', value: String(productViews) },

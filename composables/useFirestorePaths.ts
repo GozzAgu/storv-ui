@@ -461,18 +461,12 @@ export function getStorefrontConfigDocument(
 }
 
 /** Public profile: storefronts/{slug} */
-export function getStorefrontPublicProfileDocument(
-  db: Firestore,
-  slug: string
-): DocumentReference {
+export function getStorefrontPublicProfileDocument(db: Firestore, slug: string): DocumentReference {
   return doc(db, 'storefronts', slug)
 }
 
 /** Public listings collection: storefrontListings/{slug}/items */
-export function getStorefrontListingsCollection(
-  db: Firestore,
-  slug: string
-): CollectionReference {
+export function getStorefrontListingsCollection(db: Firestore, slug: string): CollectionReference {
   return collection(db, 'storefrontListings', slug, 'items')
 }
 
@@ -501,4 +495,3 @@ export function getStorefrontInquiryDocument(
 ): DocumentReference {
   return doc(db, 'users', userId, 'stores', storeId, 'storefrontInquiries', inquiryId)
 }
-

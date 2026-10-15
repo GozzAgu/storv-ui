@@ -221,10 +221,10 @@ export function demoReceiptToReceipt(r: DemoReceipt): Receipt {
     r.status === 'refunded'
       ? 'refunded'
       : r.status === 'balance_due'
-        ? 'balance_due'
-        : r.status === 'pending'
-          ? 'pending'
-          : 'completed'
+      ? 'balance_due'
+      : r.status === 'pending'
+      ? 'pending'
+      : 'completed'
   return {
     id: r.id,
     receiptNumber: r.receiptNumber,
@@ -517,8 +517,7 @@ export async function applyDemoReceiptUpdate(receiptId: string, updates: Partial
   const receipt = demo.currentStore.receipts.find((r) => r.id === receiptId)
   if (!receipt) throw new Error('Receipt not found')
   if (updates.customerName !== undefined) {
-    receipt.customerName =
-      normalizeEntityName(updates.customerName) || updates.customerName.trim()
+    receipt.customerName = normalizeEntityName(updates.customerName) || updates.customerName.trim()
   }
   if (updates.status === 'refunded') {
     demo.refundReceipt(receiptId)
@@ -654,8 +653,9 @@ export async function applyDemoDuplicateFolderTemplatesBetweenStores(
   const target = demo.getStore(targetStoreId)
   if (!source || !target) throw new Error('Branch not found.')
 
-  const { expandFolderTemplatesToCopy, normalizeParentId, partitionFoldersForCopy } =
-    await import('~/utils/inventory-folder-tree')
+  const { expandFolderTemplatesToCopy, normalizeParentId, partitionFoldersForCopy } = await import(
+    '~/utils/inventory-folder-tree'
+  )
 
   const onExistingName = options.onExistingName ?? 'skip'
   const includeSubfolders = options.includeSubfolders ?? false

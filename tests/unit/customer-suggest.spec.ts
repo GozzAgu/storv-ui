@@ -48,10 +48,13 @@ describe('buildCustomerOptions', () => {
   })
 
   it('includes customers who only appear on sales', () => {
-    const options = buildCustomerOptions([], [
-      sale('r1', { customerName: 'Lukman', customerPhone: '08031112222' }),
-      sale('r2', { customerName: 'Lukman', customerPhone: '08031112222' }),
-    ])
+    const options = buildCustomerOptions(
+      [],
+      [
+        sale('r1', { customerName: 'Lukman', customerPhone: '08031112222' }),
+        sale('r2', { customerName: 'Lukman', customerPhone: '08031112222' }),
+      ]
+    )
     expect(options).toEqual([
       expect.objectContaining({ name: 'Lukman', phone: '08031112222', totalOrders: 2 }),
     ])
@@ -61,7 +64,13 @@ describe('buildCustomerOptions', () => {
   it('merges a saved record with the same customer on sales, across phone formats', () => {
     const options = buildCustomerOptions(
       [{ id: 'c1', name: 'Ada', phone: '+234 803 111 2233', totalOrders: 1 }],
-      [sale('r1', { customerName: 'Ada', customerPhone: '0803 111 2233', customerAddress: 'Ikeja' })]
+      [
+        sale('r1', {
+          customerName: 'Ada',
+          customerPhone: '0803 111 2233',
+          customerAddress: 'Ikeja',
+        }),
+      ]
     )
     expect(options).toHaveLength(1)
     expect(options[0]).toMatchObject({ id: 'c1', address: 'Ikeja', totalOrders: 1 })

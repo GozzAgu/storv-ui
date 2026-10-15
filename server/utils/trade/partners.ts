@@ -31,7 +31,11 @@ export class TradeError extends Error {
 
 /** Same wording whether the other side blocked, declined recently or is at capacity. */
 const NOT_ACCEPTING = () =>
-  new TradeError('NOT_ACCEPTING', 409, 'This business is not accepting a request from you right now.')
+  new TradeError(
+    'NOT_ACCEPTING',
+    409,
+    'This business is not accepting a request from you right now.'
+  )
 
 export interface TradeScope {
   ownerId: string
@@ -106,7 +110,10 @@ export async function readProfiles(db: Firestore, keys: string[]) {
   return map
 }
 
-export function toCard(profile: StoredTradeProfile | undefined, verified: boolean): TradePartnerCard {
+export function toCard(
+  profile: StoredTradeProfile | undefined,
+  verified: boolean
+): TradePartnerCard {
   return {
     handle: profile?.handle || '',
     displayName: profile?.displayName || 'Business',
@@ -189,7 +196,9 @@ export async function saveTradeProfile(
 
 export async function keyForHandle(db: Firestore, rawHandle: unknown): Promise<string> {
   const handle = normalizeTradeHandle(rawHandle)
-  const snap = tradeHandleProblem(handle) ? null : await db.collection(TRADE_HANDLES).doc(handle).get()
+  const snap = tradeHandleProblem(handle)
+    ? null
+    : await db.collection(TRADE_HANDLES).doc(handle).get()
   const key = snap?.data()?.key
   if (typeof key !== 'string' || !key) {
     throw new TradeError('HANDLE_NOT_FOUND', 404, 'No business uses that handle.')
@@ -197,7 +206,10 @@ export async function keyForHandle(db: Firestore, rawHandle: unknown): Promise<s
   return key
 }
 
-function relationFor(conn: StoredConnection | undefined, me: string): TradeLookupResult['relation'] {
+function relationFor(
+  conn: StoredConnection | undefined,
+  me: string
+): TradeLookupResult['relation'] {
   if (!conn) return 'none'
   if (conn.status === 'active') return 'active'
   if (conn.status === 'pending') return conn.requestedBy === me ? 'outgoing' : 'incoming'
@@ -218,7 +230,8 @@ export async function lookupTradeHandle(
   ])
   return {
     partner: toCard(profiles.get(them), verified.has(them)),
-    relation: them === me ? 'self' : relationFor(connSnap?.data() as StoredConnection | undefined, me),
+    relation:
+      them === me ? 'self' : relationFor(connSnap?.data() as StoredConnection | undefined, me),
   }
 }
 
@@ -322,13 +335,21 @@ export async function inviteTradePartner(
 
 const TRANSITIONS: Record<
   TradeAction,
-  { from: TradeConnectionStatus[]; who: 'requester' | 'recipient' | 'either' | 'blocker'; to: TradeConnectionStatus }
+  {
+    from: TradeConnectionStatus[]
+    who: 'requester' | 'recipient' | 'either' | 'blocker'
+    to: TradeConnectionStatus
+  }
 > = {
   accept: { from: ['pending'], who: 'recipient', to: 'active' },
   decline: { from: ['pending'], who: 'recipient', to: 'declined' },
   cancel: { from: ['pending'], who: 'requester', to: 'cancelled' },
   remove: { from: ['active'], who: 'either', to: 'removed' },
-  block: { from: ['pending', 'active', 'declined', 'cancelled', 'removed'], who: 'either', to: 'blocked' },
+  block: {
+    from: ['pending', 'active', 'declined', 'cancelled', 'removed'],
+    who: 'either',
+    to: 'blocked',
+  },
   unblock: { from: ['blocked'], who: 'blocker', to: 'removed' },
 }
 
@@ -361,7 +382,11 @@ export async function respondToConnection(
         (rule.who === 'recipient' && data.requestedBy !== me) ||
         (rule.who === 'blocker' && data.blockedBy === me))
     if (!allowed) {
-      throw new TradeError('INVALID_STATE', 409, 'This request has already changed. Refresh and try again.')
+      throw new TradeError(
+        'INVALID_STATE',
+        409,
+        'This request has already changed. Refresh and try again.'
+      )
     }
     tx.update(ref, {
       status: rule.to,
@@ -408,7 +433,10 @@ export async function listTradeConnections(
     if (state) rows.push({ id: doc.id, conn, state })
   }
   const keys = rows.map((r) => otherParty(r.conn, me))
-  const [profiles, verified] = await Promise.all([readProfiles(db, keys), bankVerifiedKeys(db, keys)])
+  const [profiles, verified] = await Promise.all([
+    readProfiles(db, keys),
+    bankVerifiedKeys(db, keys),
+  ])
   return rows
     .map(({ id, conn, state }) => {
       const them = otherParty(conn, me)
@@ -439,21 +467,29 @@ export async function tradeLabel(db: Firestore, scope: TradeScope): Promise<stri
 export async function notifyTradeOwner(
   db: Firestore,
   target: TradeScope,
-  input: { type: 'trade_invite' | 'trade_accepted'; title: string; message: string; actorUid: string; connectionId: string }
+  input: {
+    type: 'trade_invite' | 'trade_accepted'
+    title: string
+    message: string
+    actorUid: string
+    connectionId: string
+  }
 ): Promise<void> {
   try {
-    await storeDocRef(db, target.ownerId, target.storeId).collection('notifications').add({
-      type: input.type,
-      title: input.title,
-      message: input.message,
-      userId: target.ownerId,
-      actorId: input.actorUid,
-      recipientUids: [target.ownerId],
-      read: false,
-      metadata: { connectionId: input.connectionId },
-      source: 'trade',
-      createdAt: FieldValue.serverTimestamp(),
-    })
+    await storeDocRef(db, target.ownerId, target.storeId)
+      .collection('notifications')
+      .add({
+        type: input.type,
+        title: input.title,
+        message: input.message,
+        userId: target.ownerId,
+        actorId: input.actorUid,
+        recipientUids: [target.ownerId],
+        read: false,
+        metadata: { connectionId: input.connectionId },
+        source: 'trade',
+        createdAt: FieldValue.serverTimestamp(),
+      })
   } catch (err) {
     console.error(
       JSON.stringify({

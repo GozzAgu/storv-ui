@@ -178,7 +178,9 @@ async function getOnePageOrdered(
     return await getDocs(q)
   } catch {
     if (after) {
-      throw new Error('A database index is required for inventory pagination. Please contact Storvv support.')
+      throw new Error(
+        'A database index is required for inventory pagination. Please contact Storvv support.'
+      )
     }
     return getDocs(buildUnorderedPageQuery(itemsRef, folderId, queryUserId, isStaff, pageSize))
   }

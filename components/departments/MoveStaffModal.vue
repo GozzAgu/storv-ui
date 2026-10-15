@@ -1,6 +1,6 @@
 <template>
   <SDialog
-      placement="right"
+    placement="right"
     :open="modelValue"
     title="Move to another department"
     size="md"
@@ -13,8 +13,8 @@
           <strong>{{ staffName }}</strong>
           from
           <strong>{{ currentDepartmentName }}</strong>
-          to another department. Their role stays the same; inventory and department access update to
-          match the new department on their next action (or immediately if they refresh).
+          to another department. Their role stays the same; inventory and department access update
+          to match the new department on their next action (or immediately if they refresh).
         </p>
       </SFormSection>
 

@@ -21,7 +21,13 @@
       @click="select(tab.value)"
     >
       <slot name="tab" :tab="tab">
-        <component :is="tab.icon" v-if="tab.icon" :size="16" :stroke-width="1.75" aria-hidden="true" />
+        <component
+          :is="tab.icon"
+          v-if="tab.icon"
+          :size="16"
+          :stroke-width="1.75"
+          aria-hidden="true"
+        />
         {{ tab.label }}
         <span v-if="tab.count !== undefined" class="s-count">{{ tab.count }}</span>
       </slot>

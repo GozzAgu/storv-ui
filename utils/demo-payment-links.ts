@@ -192,7 +192,8 @@ export function createDemoPaymentLink(input: {
   const link: PaymentLinkListItem = {
     token,
     invoiceNumber,
-    customerName: normalizeEntityName(input.customerName) || input.customerName || 'Walk-in Customer',
+    customerName:
+      normalizeEntityName(input.customerName) || input.customerName || 'Walk-in Customer',
     customerPhone: input.customerPhone ?? '',
     itemsCount,
     total,

@@ -81,9 +81,7 @@ export const usePermissions = () => {
   const canCreateInventoryFolders = computed(() => can('products', 'create'))
 
   /** Branch admin of the store their staff record belongs to (owner-set). */
-  const isAdmin = computed(
-    () => isStaff.value && staffStore.getCurrentStaffMember?.admin === true
-  )
+  const isAdmin = computed(() => isStaff.value && staffStore.getCurrentStaffMember?.admin === true)
 
   const adminGrants = computed<StaffAdminGrants>(() =>
     normalizeStaffAdminGrants(isAdmin.value ? staffStore.getCurrentStaffMember?.adminGrants : null)

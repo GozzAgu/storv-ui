@@ -13,7 +13,9 @@ export function isListingOfStore(
   ownerUid: string | undefined,
   storeId: string | undefined
 ): boolean {
-  return Boolean(ownerUid && storeId && listing.ownerUid === ownerUid && listing.storeId === storeId)
+  return Boolean(
+    ownerUid && storeId && listing.ownerUid === ownerUid && listing.storeId === storeId
+  )
 }
 
 export function publicStorefrontProfileDto(

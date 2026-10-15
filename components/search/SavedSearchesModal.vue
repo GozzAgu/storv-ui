@@ -1,5 +1,10 @@
 <template>
-  <SDialog v-model:open="isOpen" title="Saved searches" description="Load or save search filters." size="md">
+  <SDialog
+    v-model:open="isOpen"
+    title="Saved searches"
+    description="Load or save search filters."
+    size="md"
+  >
     <div v-if="searchStore.loading" class="s-saved__loading">
       <SSpinner :size="24" label="Loading saved searches" />
       <span>Loading…</span>
@@ -70,7 +75,9 @@
             />
           </SField>
           <div class="s-callout s-saved__query">
-            <span>Query: <strong>{{ searchStore.query || '(empty)' }}</strong></span>
+            <span
+              >Query: <strong>{{ searchStore.query || '(empty)' }}</strong></span
+            >
             <span v-if="searchStore.hasActiveFilters">Filters: {{ getFiltersSummary() }}</span>
           </div>
         </SFormSection>

@@ -101,8 +101,18 @@ function abujaStore(): DemoStoreRecord {
     name: 'Abuja, Wuse',
     address: '22 Adetokunbo Ademola Crescent, Wuse II',
     folders: [
-      { id: folderElectronics, name: 'Electronics', storeId: DEMO_STORE_ABUJA, usesSubcategories: true },
-      { id: folderLaptops, name: 'Laptops', storeId: DEMO_STORE_ABUJA, parentId: folderElectronics },
+      {
+        id: folderElectronics,
+        name: 'Electronics',
+        storeId: DEMO_STORE_ABUJA,
+        usesSubcategories: true,
+      },
+      {
+        id: folderLaptops,
+        name: 'Laptops',
+        storeId: DEMO_STORE_ABUJA,
+        parentId: folderElectronics,
+      },
       {
         id: folderAccessories,
         name: 'Accessories',
@@ -319,7 +329,12 @@ function seedReceipts(state: DemoState) {
       customerPhone: '0807 222 3344',
       date: new Date(now - day).toISOString(),
       items: [
-        { itemId: 'item_ph_powerbank', itemName: 'Power bank 20,000mAh', quantity: 1, price: 22000 },
+        {
+          itemId: 'item_ph_powerbank',
+          itemName: 'Power bank 20,000mAh',
+          quantity: 1,
+          price: 22000,
+        },
       ],
       total: 22000,
       paymentMethod: 'Transfer',
@@ -332,9 +347,7 @@ function seedReceipts(state: DemoState) {
       receiptNumber: 'DEMO-3002',
       customerName: 'Walk-in customer',
       date: new Date(now - day * 0.4).toISOString(),
-      items: [
-        { itemId: 'item_ph_cable', itemName: 'USB-C cable 2m', quantity: 3, price: 4500 },
-      ],
+      items: [{ itemId: 'item_ph_cable', itemName: 'USB-C cable 2m', quantity: 3, price: 4500 }],
       total: 13500,
       paymentMethod: 'Cash',
       status: 'completed',

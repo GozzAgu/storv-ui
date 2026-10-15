@@ -61,7 +61,12 @@ export default defineEventHandler(async (event) => {
     const { bankCode, accountNumber } = normalizeAccountInput(body)
 
     const db = getAdminFirestore()
-    const storeSnap = await db.collection('users').doc(ownerId).collection('stores').doc(storeId).get()
+    const storeSnap = await db
+      .collection('users')
+      .doc(ownerId)
+      .collection('stores')
+      .doc(storeId)
+      .get()
     if (!storeSnap.exists) throw createError({ statusCode: 404, message: 'Not found' })
     await requirePaystackLiveAllowed()
 
@@ -91,7 +96,8 @@ export default defineEventHandler(async (event) => {
     if (!result.saved) {
       throw createError({
         statusCode: 500,
-        message: 'Paystack accepted the new account but Storvv could not save it. Please try again.',
+        message:
+          'Paystack accepted the new account but Storvv could not save it. Please try again.',
         data: { code: 'PAYOUT_SAVE_FAILED' },
       })
     }

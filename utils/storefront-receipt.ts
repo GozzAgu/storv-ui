@@ -5,5 +5,9 @@ export function isStorefrontSourcedReceipt(receipt: {
 }): boolean {
   const source = String(receipt.source || '')
   if (source === 'storefront' || source === 'storefront_inquiry') return true
-  return String(receipt.paymentMethod || '').trim().toLowerCase() === 'storefront'
+  return (
+    String(receipt.paymentMethod || '')
+      .trim()
+      .toLowerCase() === 'storefront'
+  )
 }

@@ -43,7 +43,10 @@
         <template #icon><SearchX :size="24" :stroke-width="1.75" aria-hidden="true" /></template>
         <template #actions>
           <SButton variant="secondary" @click="searchQuery = ''">Clear search</SButton>
-          <SButton v-if="assistantEnabled" @click="openAssistant(buildAssistantTopicPrompt(trimmedSearch))">
+          <SButton
+            v-if="assistantEnabled"
+            @click="openAssistant(buildAssistantTopicPrompt(trimmedSearch))"
+          >
             Ask assistant
           </SButton>
         </template>
@@ -55,7 +58,11 @@
         <p class="s-help__toc-label">Topics</p>
         <ul>
           <li v-for="cat in filteredCategories" :key="cat.id">
-            <a :href="`#${cat.id}`" class="s-help__toc-link" @click.prevent="scrollToSection(cat.id)">
+            <a
+              :href="`#${cat.id}`"
+              class="s-help__toc-link"
+              @click.prevent="scrollToSection(cat.id)"
+            >
               {{ cat.title }}
             </a>
           </li>
@@ -69,16 +76,30 @@
               <component :is="cat.webIcon" :size="20" :stroke-width="1.75" />
             </span>
             <div class="s-help__section-text">
-              <h2 class="s-help__section-title" v-html="highlightText(cat.title, trimmedSearch, WEB_MARK_CLASS)" />
-              <p class="s-help__section-blurb" v-html="highlightText(cat.blurb, trimmedSearch, WEB_MARK_CLASS)" />
+              <h2
+                class="s-help__section-title"
+                v-html="highlightText(cat.title, trimmedSearch, WEB_MARK_CLASS)"
+              />
+              <p
+                class="s-help__section-blurb"
+                v-html="highlightText(cat.blurb, trimmedSearch, WEB_MARK_CLASS)"
+              />
             </div>
-            <SButton v-if="assistantEnabled" variant="ghost" size="sm" @click="askAboutCategory(cat.title)">
+            <SButton
+              v-if="assistantEnabled"
+              variant="ghost"
+              size="sm"
+              @click="askAboutCategory(cat.title)"
+            >
               Ask assistant
             </SButton>
           </header>
 
           <article v-for="(article, idx) in cat.articles" :key="idx" class="s-help__article">
-            <h3 class="s-help__article-title" v-html="highlightText(article.title, trimmedSearch, WEB_MARK_CLASS)" />
+            <h3
+              class="s-help__article-title"
+              v-html="highlightText(article.title, trimmedSearch, WEB_MARK_CLASS)"
+            />
             <p
               v-for="(para, pIdx) in article.body"
               :key="pIdx"
@@ -238,11 +259,7 @@ function highlightText(text: string, needle: string, markClass = WEB_MARK_CLASS)
   }
   const qEscaped = escapeHtml(q)
   const re = new RegExp(escapeRegExp(qEscaped), 'gi')
-  return escaped.replace(
-    re,
-    (m) =>
-      `<mark class="${markClass}">${m}</mark>`
-  )
+  return escaped.replace(re, (m) => `<mark class="${markClass}">${m}</mark>`)
 }
 
 function textMatches(haystack: string, needle: string): boolean {

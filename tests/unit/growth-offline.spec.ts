@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  documentRefFromPath,
-  serializeFirestorePayload,
-} from '~/utils/offline-firestore'
+import { documentRefFromPath, serializeFirestorePayload } from '~/utils/offline-firestore'
 import { resolveUserCreatedAtIso } from '~/utils/growth-dates'
 
 describe('offline-firestore', () => {
@@ -24,9 +21,9 @@ describe('offline-firestore', () => {
 
 describe('growth-dates', () => {
   it('prefers activation funnel signup timestamp', () => {
-    expect(
-      resolveUserCreatedAtIso(new Date('2020-01-01'), '2026-02-01T00:00:00.000Z')
-    ).toBe('2026-02-01T00:00:00.000Z')
+    expect(resolveUserCreatedAtIso(new Date('2020-01-01'), '2026-02-01T00:00:00.000Z')).toBe(
+      '2026-02-01T00:00:00.000Z'
+    )
   })
 
   it('normalizes Firestore-like timestamps', () => {

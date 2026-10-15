@@ -48,11 +48,7 @@
                 />
                 <kbd class="s-kbd s-palette__esc" aria-hidden="true">Esc</kbd>
               </div>
-              <SButton
-                class="s-palette__cancel"
-                variant="ghost"
-                @click="searchStore.closeSearch()"
-              >
+              <SButton class="s-palette__cancel" variant="ghost" @click="searchStore.closeSearch()">
                 Cancel
               </SButton>
             </div>
@@ -66,7 +62,12 @@
                 :aria-pressed="isEntityTypeSelected(entityType.value)"
                 @click="toggleEntityType(entityType.value)"
               >
-                <component :is="entityType.icon" :size="14" :stroke-width="1.75" aria-hidden="true" />
+                <component
+                  :is="entityType.icon"
+                  :size="14"
+                  :stroke-width="1.75"
+                  aria-hidden="true"
+                />
                 {{ entityType.label }}
               </button>
               <button
@@ -99,18 +100,8 @@
 
           <div v-if="showAdvancedFilters" id="global-search-filters" class="s-palette__filters">
             <div class="s-form-pair">
-              <SInput
-                v-model="startDate"
-                label="Start"
-                type="date"
-                @change="updateDateRange"
-              />
-              <SInput
-                v-model="endDate"
-                label="End"
-                type="date"
-                @change="updateDateRange"
-              />
+              <SInput v-model="startDate" label="Start" type="date" @change="updateDateRange" />
+              <SInput v-model="endDate" label="End" type="date" @change="updateDateRange" />
             </div>
 
             <div
@@ -171,7 +162,12 @@
                   <span class="s-palette__text">
                     <span class="s-palette__title">{{ action.label }}</span>
                   </span>
-                  <ArrowRightIcon class="s-palette__go" :size="16" :stroke-width="1.75" aria-hidden="true" />
+                  <ArrowRightIcon
+                    class="s-palette__go"
+                    :size="16"
+                    :stroke-width="1.75"
+                    aria-hidden="true"
+                  />
                 </button>
               </section>
 
@@ -203,7 +199,12 @@
                   <span class="s-palette__text">
                     <span class="s-palette__title">{{ saved.name }}</span>
                   </span>
-                  <ArrowRightIcon class="s-palette__go" :size="16" :stroke-width="1.75" aria-hidden="true" />
+                  <ArrowRightIcon
+                    class="s-palette__go"
+                    :size="16"
+                    :stroke-width="1.75"
+                    aria-hidden="true"
+                  />
                 </button>
               </section>
             </template>
@@ -236,7 +237,11 @@
                     :class="`s-palette__icon--${getEntityTone(entry.result.type)}`"
                     aria-hidden="true"
                   >
-                    <component :is="getEntityIcon(entry.result.icon)" :size="16" :stroke-width="1.75" />
+                    <component
+                      :is="getEntityIcon(entry.result.icon)"
+                      :size="16"
+                      :stroke-width="1.75"
+                    />
                   </span>
                   <span class="s-palette__text">
                     <span class="s-palette__title">{{ entry.result.title }}</span>
@@ -247,7 +252,12 @@
                       {{ entry.result.description }}
                     </span>
                   </span>
-                  <ArrowRightIcon class="s-palette__go" :size="16" :stroke-width="1.75" aria-hidden="true" />
+                  <ArrowRightIcon
+                    class="s-palette__go"
+                    :size="16"
+                    :stroke-width="1.75"
+                    aria-hidden="true"
+                  />
                 </button>
               </section>
             </div>

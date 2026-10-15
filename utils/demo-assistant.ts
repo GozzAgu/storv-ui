@@ -7,7 +7,17 @@ type DemoAssistantRule = {
 
 const DEMO_ASSISTANT_RULES: DemoAssistantRule[] = [
   {
-    keywords: ['ios', 'iphone', 'ipad', 'android', 'mobile app', 'native app', 'capacitor', 'tab bar', 'more menu'],
+    keywords: [
+      'ios',
+      'iphone',
+      'ipad',
+      'android',
+      'mobile app',
+      'native app',
+      'capacitor',
+      'tab bar',
+      'more menu',
+    ],
     reply: [
       'The Storvv mobile app uses the same data as the web dashboard with native navigation.',
       '',

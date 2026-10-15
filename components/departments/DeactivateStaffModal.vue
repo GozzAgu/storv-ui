@@ -67,9 +67,7 @@ const isBulk = computed(() => staffList.value.length > 1)
 const subtitle = computed(() => {
   if (!staffList.value.length) return ''
   if (isBulk.value) {
-    return `${staffList.value.length} staff member${
-      staffList.value.length !== 1 ? 's' : ''
-    }`
+    return `${staffList.value.length} staff member${staffList.value.length !== 1 ? 's' : ''}`
   }
   const member = staffList.value[0]!
   return `${member.firstName} ${member.lastName}`.trim()

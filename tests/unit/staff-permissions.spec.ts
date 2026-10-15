@@ -12,7 +12,13 @@ describe('deriveDefaultPermissions', () => {
   it('manager with inventory grant: full products manage + receipts edit + refund', () => {
     const p = deriveDefaultPermissions({ role: 'manager', canManageInventory: true })
     expect(p.products).toEqual({ view: true, create: true, edit: true, delete: true })
-    expect(p.receipts).toEqual({ view: true, create: true, edit: true, delete: false, refund: true })
+    expect(p.receipts).toEqual({
+      view: true,
+      create: true,
+      edit: true,
+      delete: false,
+      refund: true,
+    })
     expect(p.buybacks).toEqual({ view: true, create: true, edit: true, delete: false })
     expect(p.sellerLoans.view).toBe(true)
     expect(p.leads.delete).toBe(true)
@@ -22,7 +28,13 @@ describe('deriveDefaultPermissions', () => {
   it('manager without inventory grant: view-only products, receipts edit + refund still implicit', () => {
     const p = deriveDefaultPermissions({ role: 'manager' })
     expect(p.products).toEqual({ view: true, create: false, edit: false, delete: false })
-    expect(p.receipts).toEqual({ view: true, create: true, edit: true, delete: false, refund: true })
+    expect(p.receipts).toEqual({
+      view: true,
+      create: true,
+      edit: true,
+      delete: false,
+      refund: true,
+    })
     expect(p.buybacks.view).toBe(false)
     expect(p.sellerLoans.view).toBe(true)
   })
@@ -30,14 +42,26 @@ describe('deriveDefaultPermissions', () => {
   it('staff with receipts grant: no products manage, no receipts edit, but refund granted', () => {
     const p = deriveDefaultPermissions({ role: 'staff', canManageReceipts: true })
     expect(p.products).toEqual({ view: true, create: false, edit: false, delete: false })
-    expect(p.receipts).toEqual({ view: true, create: true, edit: false, delete: false, refund: true })
+    expect(p.receipts).toEqual({
+      view: true,
+      create: true,
+      edit: false,
+      delete: false,
+      refund: true,
+    })
     expect(p.sellerLoans.view).toBe(true)
     expect(p.leads.delete).toBe(true)
   })
 
   it('staff without receipts grant: view + create receipts only (POS), stock loans baseline on', () => {
     const p = deriveDefaultPermissions({ role: 'staff' })
-    expect(p.receipts).toEqual({ view: true, create: true, edit: false, delete: false, refund: false })
+    expect(p.receipts).toEqual({
+      view: true,
+      create: true,
+      edit: false,
+      delete: false,
+      refund: false,
+    })
     expect(p.leads).toEqual({ view: true, create: true, edit: true, delete: false })
     expect(p.buybacks.view).toBe(false)
     expect(p.sellerLoans).toEqual({ view: true, create: true, edit: true, delete: false })
@@ -52,7 +76,13 @@ describe('deriveDefaultPermissions', () => {
 
   it('intern without receipts grant: baseline view/create only', () => {
     const p = deriveDefaultPermissions({ role: 'intern' })
-    expect(p.receipts).toEqual({ view: true, create: true, edit: false, delete: false, refund: false })
+    expect(p.receipts).toEqual({
+      view: true,
+      create: true,
+      edit: false,
+      delete: false,
+      refund: false,
+    })
     expect(p.products).toEqual({ view: true, create: false, edit: false, delete: false })
   })
 
@@ -62,9 +92,9 @@ describe('deriveDefaultPermissions', () => {
   })
 
   it('receipts.delete is never granted by migration', () => {
-    expect(deriveDefaultPermissions({ role: 'manager', canManageInventory: true }).receipts.delete).toBe(
-      false
-    )
+    expect(
+      deriveDefaultPermissions({ role: 'manager', canManageInventory: true }).receipts.delete
+    ).toBe(false)
   })
 })
 
@@ -106,12 +136,13 @@ describe('resolveStaffPermissions', () => {
   })
 
   it('never grants financial figures by migration, even to managers', () => {
-    expect(resolveStaffPermissions({ role: 'manager', canManageInventory: true }).financials.view).toBe(
-      false
-    )
+    expect(
+      resolveStaffPermissions({ role: 'manager', canManageInventory: true }).financials.view
+    ).toBe(false)
     const { financials: _omit, ...storedBeforeFinancials } = FULL_STAFF_PERMISSIONS
     expect(
-      resolveStaffPermissions({ role: 'manager', permissions: storedBeforeFinancials }).financials.view
+      resolveStaffPermissions({ role: 'manager', permissions: storedBeforeFinancials }).financials
+        .view
     ).toBe(false)
   })
 

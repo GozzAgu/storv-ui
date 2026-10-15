@@ -27,7 +27,11 @@
   </ul>
 </template>
 
-<script setup lang="ts" generic="T extends { id: string; name: string; email?: string; phone?: string; totalOrders: number }">
+<script
+  setup
+  lang="ts"
+  generic="T extends { id: string; name: string; email?: string; phone?: string; totalOrders: number }"
+>
 import SAvatar from '~/components/s/SAvatar.vue'
 
 defineProps<{ customers: T[] }>()

@@ -1,5 +1,11 @@
 <template>
-  <span v-if="lines <= 1" class="s-skeleton" :class="{ 's-skeleton--circle': circle }" :style="style" aria-hidden="true" />
+  <span
+    v-if="lines <= 1"
+    class="s-skeleton"
+    :class="{ 's-skeleton--circle': circle }"
+    :style="style"
+    aria-hidden="true"
+  />
   <span v-else class="s-skeleton-stack" aria-hidden="true">
     <span
       v-for="n in lines"

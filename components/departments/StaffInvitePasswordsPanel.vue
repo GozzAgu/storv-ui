@@ -17,7 +17,9 @@
       <li v-for="entry in filteredEntries" :key="entry.id" class="s-list__item s-invites__item">
         <span class="s-list__main">
           <span class="s-list__primary">{{ entry.staffName || 'Staff' }}</span>
-          <span class="s-list__secondary">{{ entry.staffEmail }} · {{ formatTime(entry.createdAt) }}</span>
+          <span class="s-list__secondary"
+            >{{ entry.staffEmail }} · {{ formatTime(entry.createdAt) }}</span
+          >
           <span class="s-invites__password">
             <span class="ds-sr-only">Temporary password:</span>
             <code>{{ entry.password }}</code>
@@ -37,7 +39,9 @@
             {{ copyInviteId === entry.id ? 'Copied' : 'Copy invite' }}
           </SButton>
           <SIconButton
-            :label="copyId === entry.id ? 'Password copied' : `Copy password for ${entry.staffEmail}`"
+            :label="
+              copyId === entry.id ? 'Password copied' : `Copy password for ${entry.staffEmail}`
+            "
             size="sm"
             @click="copyPassword(entry)"
           >
@@ -176,9 +180,7 @@ async function emailEntryToStaff(entry: StaffInvitePasswordEntry) {
       staffName: entry.staffName,
       departmentName: entry.departmentName,
       businessName:
-        userStore.userData?.storeDetails?.storeName ||
-        userStore.userData?.name ||
-        'Storvv',
+        userStore.userData?.storeDetails?.storeName || userStore.userData?.name || 'Storvv',
       temporaryPassword: entry.password,
       mode: 'credentials',
     })
