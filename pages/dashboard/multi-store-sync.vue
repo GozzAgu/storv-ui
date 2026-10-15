@@ -40,20 +40,30 @@
                   :model-value="transferForm.sourceStoreId"
                   label="From branch"
                   placeholder="Choose a branch"
-                  :options="storeOptions"
+                  :options="sourceStoreOptions"
+                  :disabled="sourceStoreLocked"
                   required
                   @update:model-value="onWebSourceStoreChange"
                 />
                 <SSelect
                   :model-value="transferForm.destinationStoreId"
                   label="To branch"
-                  placeholder="Choose a branch"
+                  :placeholder="
+                    destinationStoreOptions.length ? 'Choose a branch' : 'No other branch available'
+                  "
                   :options="destinationStoreOptions"
-                  :disabled="!transferForm.sourceStoreId"
+                  :disabled="!transferForm.sourceStoreId || destinationStoreOptions.length === 0"
                   required
                   @update:model-value="onWebDestinationStoreChange"
                 />
               </div>
+              <p
+                v-if="transferForm.sourceStoreId && destinationStoreOptions.length === 0"
+                class="s-notice"
+              >
+                No other active branch is available to send stock to. Add another branch, or ask the
+                account owner to turn on Transfer stock to other branches for your admin login.
+              </p>
 
               <div
                 v-if="transferForm.sourceStoreId || transferForm.destinationStoreId"
@@ -558,13 +568,20 @@ const toast = useAppToast()
 const storesStore = useStoresStore()
 const inventoryStore = useInventoryStore()
 const userStore = useUserStore()
-const { can, canViewFinancials } = usePermissions()
+const { can, canViewFinancials, isAdmin, hasAdminGrant } = usePermissions()
+const staffStore = useStaffStore()
 const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
 
-// Security: Enterprise plan + multi-store view grant (owners always have full grants)
-const canAccess = computed(
-  () => can('multiStoreSync', 'view') && canUseSubscriptionFeature('multi_store_sync')
-)
+// Security: Enterprise plan + multi-store view (branch admins also need the stock-transfers extra)
+const canAccess = computed(() => {
+  if (!canUseSubscriptionFeature('multi_store_sync')) return false
+  if (userStore.isSuperAdmin) return true
+  return can('multiStoreSync', 'view') && hasAdminGrant('stockTransfers')
+})
+
+/** Branch admins send only from their assigned branch; the owner can pick any source. */
+const homeStoreId = computed(() => staffStore.getCurrentStaffMember?.storeId || '')
+const sourceStoreLocked = computed(() => isAdmin.value && !userStore.isSuperAdmin)
 
 function formatDateShort(date: unknown) {
   if (!date) return ''
@@ -706,8 +723,12 @@ function resetTransferSelection(opts?: { keepStores?: boolean; keepDestination?:
 // Methods
 const loadStores = async () => {
   try {
-    await storesStore.fetchStores()
+    // Always reload: branch admins often have a one-branch cache from login.
+    await storesStore.fetchStores({ force: true })
     stores.value = storesStore.stores
+    if (storesStore.error && destinationStoreOptions.value.length === 0) {
+      toast.error(storesStore.error)
+    }
   } catch (error: any) {
     toast.error('Failed to load stores: ' + error.message)
   }
@@ -870,8 +891,12 @@ const requestTransfer = async () => {
     const authStore = useAuthStore()
     const userId = authStore.currentUser?.uid
     if (!userId) throw new Error('User not authenticated')
-    if (userStore.userData?.role !== 'superAdmin')
-      throw new Error('Only super admins can transfer items')
+    if (!can('multiStoreSync', 'create')) {
+      throw new Error('You do not have permission to request transfers')
+    }
+    if (sourceStoreLocked.value && transferForm.value.sourceStoreId !== homeStoreId.value) {
+      throw new Error('You can only send stock from your own branch')
+    }
 
     const db = useFirestore().getFirestoreInstance()
     if (!db) throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
@@ -1313,11 +1338,7 @@ const fetchTransferHistory = async () => {
       await userStore.fetchUserData(userId)
     }
 
-    // Verify user is super admin
-    if (userStore.userData?.role !== 'superAdmin') {
-      // console.log('[TransferHistory] User is not super admin, role:', userStore.userData?.role)
-      return
-    }
+    if (!can('multiStoreSync', 'view')) return
 
     // Get Firestore instance
     const db = useFirestore().getFirestoreInstance()
@@ -1344,22 +1365,29 @@ const fetchTransferHistory = async () => {
     const transfersRef = collection(db, 'users', pathUserId, 'storeTransfers')
 
     try {
-      // Try with orderBy first, if it fails due to missing index, try without
-      let transfersQuery
-      try {
-        transfersQuery = query(transfersRef, orderBy('createdAt', 'desc'))
-      } catch (queryError: any) {
-        // If orderBy fails, try without it (might be missing index)
-        console.warn('[TransferHistory] orderBy failed, trying without:', queryError.message)
-        transfersQuery = query(transfersRef)
+      // Branch admins may only read transfers that touch their store; a full collection
+      // query fails rules when other branches have transfers they cannot see.
+      const homeId = sourceStoreLocked.value ? homeStoreId.value : ''
+      let transferDocs: Awaited<ReturnType<typeof getDocs>>['docs'] = []
+      if (homeId) {
+        const [asSource, asDest] = await Promise.all([
+          getDocs(query(transfersRef, firestoreWhere('sourceStoreId', '==', homeId))),
+          getDocs(query(transfersRef, firestoreWhere('destinationStoreId', '==', homeId))),
+        ])
+        const byId = new Map<string, (typeof asSource.docs)[number]>()
+        for (const d of [...asSource.docs, ...asDest.docs]) byId.set(d.id, d)
+        transferDocs = [...byId.values()]
+      } else {
+        try {
+          transferDocs = (await getDocs(query(transfersRef, orderBy('createdAt', 'desc')))).docs
+        } catch (queryError: any) {
+          console.warn('[TransferHistory] orderBy failed, trying without:', queryError.message)
+          transferDocs = (await getDocs(query(transfersRef))).docs
+        }
       }
 
-      const transfersSnap = await getDocs(transfersQuery)
-
-      // console.log('[TransferHistory] Successfully loaded', transfersSnap.docs.length, 'transfers')
-
       // Sort manually if orderBy didn't work
-      const transfers = transfersSnap.docs.map((doc) => {
+      const transfers = transferDocs.map((doc) => {
         const data = doc.data()
         return {
           id: doc.id,
@@ -1583,10 +1611,8 @@ const fetchConsolidatedReports = async () => {
 
     if (!userId) return
 
-    // Verify user is super admin
-    if (userStore.userData?.role !== 'superAdmin') {
-      return
-    }
+    // Branch reports include revenue; keep them on the owner (or financials grant).
+    if (!canViewFinancials.value) return
 
     // Get Firestore instance
     const db = useFirestore().getFirestoreInstance()
@@ -1812,6 +1838,11 @@ const storeOptions = computed(() =>
   stores.value.map((store) => ({ label: storeLabel(store), value: store.id }))
 )
 
+const sourceStoreOptions = computed(() => {
+  if (!sourceStoreLocked.value || !homeStoreId.value) return storeOptions.value
+  return storeOptions.value.filter((option) => option.value === homeStoreId.value)
+})
+
 const destinationStoreOptions = computed(() =>
   storeOptions.value.filter((option) => option.value !== transferForm.value.sourceStoreId)
 )
@@ -1918,13 +1949,31 @@ onMounted(async () => {
     }
   }
   if (!canAccess.value) return
+  await prepareBranchAdminWorkspace()
   await loadStores()
+  await ensureBranchAdminSourceStore()
   await Promise.all([loadTransferHistory(), loadConsolidatedReports()])
 })
 
+/** Keeps workspaceMembers.admin in sync so cross-branch category reads pass rules. */
+async function prepareBranchAdminWorkspace() {
+  if (!sourceStoreLocked.value) return
+  const { fetchOwnerWorkspaceContext } = await import('~/utils/owner-workspace-context')
+  await fetchOwnerWorkspaceContext({ force: true })
+}
+
+async function ensureBranchAdminSourceStore() {
+  if (!sourceStoreLocked.value || !homeStoreId.value) return
+  if (transferForm.value.sourceStoreId === homeStoreId.value) return
+  transferForm.value.sourceStoreId = homeStoreId.value
+  await onSourceStoreChange()
+}
+
 async function reloadMultiStorePage() {
   if (!canAccess.value) return
+  await prepareBranchAdminWorkspace()
   await loadStores()
+  await ensureBranchAdminSourceStore()
   await Promise.all([loadTransferHistory(), loadConsolidatedReports()])
 }
 

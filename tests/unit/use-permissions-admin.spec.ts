@@ -52,7 +52,22 @@ describe('usePermissions for branch admins', () => {
     expect(p.canCreateStaff.value).toBe(true)
     expect(p.canEditStaffPermissions.value).toBe(true)
     expect(p.can('products', 'delete')).toBe(true)
-    expect(p.can('multiStoreSync', 'edit')).toBe(true)
+    expect(p.can('multiStoreSync', 'edit')).toBe(false)
+  })
+
+  it('unlocks transfers only when the owner turns on the stock-transfers extra', async () => {
+    let p = await perms()
+    expect(p.can('multiStoreSync', 'view')).toBe(false)
+    expect(p.hasAdminGrant('stockTransfers')).toBe(false)
+
+    staffMember.value = {
+      authUid: 'admin1',
+      admin: true,
+      adminGrants: { stockTransfers: true },
+    }
+    p = await perms()
+    expect(p.hasAdminGrant('stockTransfers')).toBe(true)
+    expect(p.can('multiStoreSync', 'create')).toBe(true)
   })
 
   it('keeps owner-only things away from an admin', async () => {

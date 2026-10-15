@@ -194,11 +194,7 @@ describe('firestore.rules', () => {
 
     const db = testEnv.authenticatedContext('u1').firestore()
     await assertFails(
-      setDoc(
-        doc(db, 'users/u1'),
-        { subscription: 'storvv_enterprise' },
-        { merge: true }
-      )
+      setDoc(doc(db, 'users/u1'), { subscription: 'storvv_enterprise' }, { merge: true })
     )
   })
 
@@ -307,13 +303,16 @@ describe('firestore.rules', () => {
     canManageInventory = false,
     canManageReceipts = false
   ) {
-    await setDoc(doc(context.firestore(), `users/${ownerId}/stores/${storeId}/members/${memberUid}`), {
-      authUid: memberUid,
-      role,
-      status: 'active',
-      ...(canManageInventory ? { canManageInventory: true } : {}),
-      ...(canManageReceipts ? { canManageReceipts: true } : {}),
-    })
+    await setDoc(
+      doc(context.firestore(), `users/${ownerId}/stores/${storeId}/members/${memberUid}`),
+      {
+        authUid: memberUid,
+        role,
+        status: 'active',
+        ...(canManageInventory ? { canManageInventory: true } : {}),
+        ...(canManageReceipts ? { canManageReceipts: true } : {}),
+      }
+    )
   }
 
   it('allows Enterprise plan owner to create store transfers', async () => {
@@ -513,20 +512,23 @@ describe('firestore.rules', () => {
     storeId: string,
     receiptId: string
   ) {
-    await setDoc(doc(context.firestore(), `users/${ownerId}/stores/${storeId}/receipts/${receiptId}`), {
-      receiptNumber: 'R-1',
-      customerName: 'Jane Doe',
-      customerEmail: 'jane@example.com',
-      items: [{ itemId: 'i1', quantity: 1, price: 100, itemName: 'Widget' }],
-      itemsCount: 1,
-      total: 100,
-      paymentMethod: 'cash',
-      status: 'completed',
-      folderId: 'f1',
-      itemIds: ['i1'],
-      storeId,
-      createdBy: ownerId,
-    })
+    await setDoc(
+      doc(context.firestore(), `users/${ownerId}/stores/${storeId}/receipts/${receiptId}`),
+      {
+        receiptNumber: 'R-1',
+        customerName: 'Jane Doe',
+        customerEmail: 'jane@example.com',
+        items: [{ itemId: 'i1', quantity: 1, price: 100, itemName: 'Widget' }],
+        itemsCount: 1,
+        total: 100,
+        paymentMethod: 'cash',
+        status: 'completed',
+        folderId: 'f1',
+        itemIds: ['i1'],
+        storeId,
+        createdBy: ownerId,
+      }
+    )
   }
 
   it('allows staff granted canManageReceipts to refund a completed receipt', async () => {
@@ -600,11 +602,14 @@ describe('firestore.rules', () => {
     memberUid: string,
     permissions: Record<string, Record<string, boolean>>
   ) {
-    await setDoc(doc(context.firestore(), `users/${ownerId}/stores/${storeId}/members/${memberUid}`), {
-      authUid: memberUid,
-      status: 'active',
-      permissions,
-    })
+    await setDoc(
+      doc(context.firestore(), `users/${ownerId}/stores/${storeId}/members/${memberUid}`),
+      {
+        authUid: memberUid,
+        status: 'active',
+        permissions,
+      }
+    )
   }
 
   const FULL_PRODUCTS = { view: true, create: true, edit: true, delete: true }
@@ -907,10 +912,16 @@ describe('firestore.rules', () => {
 
     const attacker = testEnv.authenticatedContext('u2').firestore()
     await assertFails(
-      setDoc(doc(attacker, 'storefrontListings/victim-shop/items/fake'), listing('u2', 's2', 'fake'))
+      setDoc(
+        doc(attacker, 'storefrontListings/victim-shop/items/fake'),
+        listing('u2', 's2', 'fake')
+      )
     )
     await assertFails(
-      setDoc(doc(attacker, 'storefrontListings/no-such-shop/items/fake'), listing('u2', 's2', 'fake'))
+      setDoc(
+        doc(attacker, 'storefrontListings/no-such-shop/items/fake'),
+        listing('u2', 's2', 'fake')
+      )
     )
     await assertFails(
       setDoc(doc(attacker, 'storefrontListings/victim-shop/items/planted'), {
@@ -980,7 +991,11 @@ describe('firestore.rules', () => {
     const owner = testEnv.authenticatedContext('u1').firestore()
     await assertSucceeds(getDoc(doc(owner, 'users/u1/stores/s1/storefrontAnalytics/summary')))
     await assertFails(
-      setDoc(doc(owner, 'users/u1/stores/s1/storefrontAnalytics/summary'), { storeViews: 99 }, { merge: true })
+      setDoc(
+        doc(owner, 'users/u1/stores/s1/storefrontAnalytics/summary'),
+        { storeViews: 99 },
+        { merge: true }
+      )
     )
 
     const anon = testEnv.unauthenticatedContext().firestore()
@@ -1090,7 +1105,9 @@ describe('firestore.rules', () => {
 
       const db = testEnv.authenticatedContext('staff1').firestore()
       const ref = doc(db, 'users/u1/stores/s1/sellerLoanOuts/l1')
-      await assertSucceeds(updateDoc(ref, { status: 'sold', soldAt: new Date(), updatedAt: new Date() }))
+      await assertSucceeds(
+        updateDoc(ref, { status: 'sold', soldAt: new Date(), updatedAt: new Date() })
+      )
     })
   })
 
@@ -1117,6 +1134,12 @@ describe('firestore.rules', () => {
         status: 'active',
         permissions: { products: EMPTY_PRODUCTS, receipts: EMPTY_RECEIPTS },
       })
+      await setDoc(doc(fs, 'users/u1/workspaceMembers/admin1'), {
+        authUid: 'admin1',
+        storeId: 's1',
+        status: opts.status ?? 'active',
+        admin: true,
+      })
       for (const storeId of ['s1', 's2']) {
         await setDoc(doc(fs, `users/u1/stores/${storeId}/departments/d1`), {
           name: 'Sales',
@@ -1129,6 +1152,11 @@ describe('firestore.rules', () => {
           email: 'staff1@example.com',
           createdBy: 'u1',
           status: 'active',
+        })
+        await setDoc(doc(fs, `users/u1/stores/${storeId}/inventoryFolders/f1`), {
+          storeId,
+          name: 'Phones',
+          createdBy: 'u1',
         })
       }
       await setDoc(doc(fs, 'users/u1/stores/s1/receipts/r1'), { storeId: 's1', total: 100 })
@@ -1199,7 +1227,9 @@ describe('firestore.rules', () => {
           staffCount: 0,
         })
       )
-      await assertSucceeds(updateDoc(doc(db, 'users/u1/stores/s1/departments/d2'), { name: 'Fixes' }))
+      await assertSucceeds(
+        updateDoc(doc(db, 'users/u1/stores/s1/departments/d2'), { name: 'Fixes' })
+      )
       await assertFails(
         setDoc(doc(db, 'users/u1/stores/s1/departments/d3'), { name: 'Mine', createdBy: 'admin1' })
       )
@@ -1212,9 +1242,7 @@ describe('firestore.rules', () => {
     it('cannot write member or staff records directly (server routes only)', async () => {
       await testEnv.withSecurityRulesDisabled((context) => seedBranches(context))
       const db = testEnv.authenticatedContext('admin1').firestore()
-      await assertFails(
-        updateDoc(doc(db, 'users/u1/stores/s1/members/staff1'), { admin: true })
-      )
+      await assertFails(updateDoc(doc(db, 'users/u1/stores/s1/members/staff1'), { admin: true }))
       await assertFails(
         updateDoc(doc(db, 'users/u1/stores/s1/members/staff1'), {
           'permissions.financials': { view: true },
@@ -1268,6 +1296,39 @@ describe('firestore.rules', () => {
       await testEnv.withSecurityRulesDisabled((context) => seedBranches(context))
       const db = testEnv.authenticatedContext('admin1').firestore()
       await assertFails(getDoc(doc(db, 'users/u1')))
+    })
+
+    it('reads other branches’ names and categories when given the stock-transfers extra', async () => {
+      await testEnv.withSecurityRulesDisabled((context) =>
+        seedBranches(context, { adminGrants: { stockTransfers: true } })
+      )
+      const db = testEnv.authenticatedContext('admin1').firestore()
+      await assertSucceeds(getDoc(doc(db, 'users/u1/stores/s2')))
+      await assertSucceeds(getDoc(doc(db, 'users/u1/stores/s2/inventoryFolders/f1')))
+      await assertSucceeds(
+        setDoc(doc(db, 'users/u1/storeTransfers/t1'), {
+          sourceStoreId: 's1',
+          destinationStoreId: 's2',
+          folderId: 'f1',
+          destinationFolderId: 'f1',
+          createdBy: 'admin1',
+          status: 'pending_approval',
+          items: [],
+        })
+      )
+    })
+
+    it('cannot read another branch’s categories without the stock-transfers extra', async () => {
+      await testEnv.withSecurityRulesDisabled((context) => seedBranches(context))
+      const db = testEnv.authenticatedContext('admin1').firestore()
+      await assertFails(getDoc(doc(db, 'users/u1/stores/s2')))
+      await assertFails(getDoc(doc(db, 'users/u1/stores/s2/inventoryFolders/f1')))
+    })
+
+    it('a regular staff member still cannot read another branch’s categories', async () => {
+      await testEnv.withSecurityRulesDisabled((context) => seedBranches(context))
+      const db = testEnv.authenticatedContext('staff1').firestore()
+      await assertFails(getDoc(doc(db, 'users/u1/stores/s2/inventoryFolders/f1')))
     })
   })
 })

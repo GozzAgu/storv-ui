@@ -12,10 +12,7 @@ import {
   staffLimitReachedMessage,
   summarizeSubscriptionAddOns,
 } from '~/types/subscription'
-import {
-  coerceStaffPermissions,
-  normalizeStaffAdminGrants,
-} from '~/utils/staff-permissions'
+import { coerceStaffPermissions, normalizeStaffAdminGrants } from '~/utils/staff-permissions'
 import { normalizeEntityName } from '~/utils/capitalize-text'
 
 /**
@@ -529,6 +526,11 @@ export async function setStaffAdminAccess(
   batch.set(
     memberRef(db, ownerUserId, storeId, authUid),
     { admin, adminGrants, updatedAt: now },
+    { merge: true }
+  )
+  batch.set(
+    workspaceMemberRef(db, ownerUserId, authUid),
+    { authUid, storeId, status: staff.status || 'active', admin, updatedAt: now },
     { merge: true }
   )
   await batch.commit()

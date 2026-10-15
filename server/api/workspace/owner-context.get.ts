@@ -61,21 +61,27 @@ export default defineEventHandler(async (event) => {
   const storeId = String(activeStaffDoc.data()?.storeId || storeIdFromPath || '').trim()
 
   // Roster index of active staff per owner. It grants no read access to users/{ownerId}.
+  // `admin` mirrors the store member flag so transfer rules can recognise branch admins.
   if (storeId) {
-    await adminDb
+    const memberSnap = await adminDb
       .collection('users')
       .doc(ownerId)
-      .collection('workspaceMembers')
+      .collection('stores')
+      .doc(storeId)
+      .collection('members')
       .doc(auth.uid)
-      .set(
-        {
-          authUid: auth.uid,
-          storeId,
-          status: 'active',
-          updatedAt: new Date().toISOString(),
-        },
-        { merge: true }
-      )
+      .get()
+    const isBranchAdmin = memberSnap.data()?.admin === true
+    await adminDb.collection('users').doc(ownerId).collection('workspaceMembers').doc(auth.uid).set(
+      {
+        authUid: auth.uid,
+        storeId,
+        status: 'active',
+        admin: isBranchAdmin,
+        updatedAt: new Date().toISOString(),
+      },
+      { merge: true }
+    )
   }
 
   const fields = pickOwnerWorkspaceFields(data)

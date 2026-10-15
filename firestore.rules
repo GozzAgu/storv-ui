@@ -104,12 +104,16 @@ service cloud.firestore {
     // Single source of truth for "can this member do <action> on <moduleName>". checks the new
     // `permissions` map when present (falling back to legacy for modules not yet stored), else
     // falls back to the legacy role/grant fields entirely.
-    // A branch admin holds every module action except payments and financial figures, which keep
-    // their own owner-controlled grants. Mirrors utils/staff-permissions.ts#resolveStaffPermissions.
+    // A branch admin holds every module action except payments, financial figures, and stock
+    // transfers. Transfers need the owner-set adminGrants.stockTransfers extra.
+    // Mirrors utils/staff-permissions.ts#resolveStaffPermissions.
     function memberHasPermission(userId, storeId, moduleName, action) {
       return isActiveStoreMember(userId, storeId) &&
         ((memberData(userId, storeId).get('admin', false) == true &&
-          !(moduleName in ['payments', 'financials'])) ||
+          !(moduleName in ['payments', 'financials', 'multiStoreSync'])) ||
+        (memberData(userId, storeId).get('admin', false) == true &&
+          moduleName == 'multiStoreSync' &&
+          memberData(userId, storeId).get('adminGrants', {}).get('stockTransfers', false) == true) ||
         (memberData(userId, storeId).keys().hasAny(['permissions'])
           ? (memberData(userId, storeId).permissions.keys().hasAny([moduleName])
               ? memberData(userId, storeId).permissions.get(moduleName, {}).get(action, false) == true
@@ -127,6 +131,19 @@ service cloud.firestore {
     function storeAdminHasGrant(userId, storeId, grant) {
       return isStoreAdmin(userId, storeId) &&
         memberData(userId, storeId).get('adminGrants', {}).get(grant, false) == true;
+    }
+
+    // Branch admin of their home store with the stock-transfers extra. Used so they can see other
+    // branches' names and category lists when requesting a stock transfer on Enterprise.
+    function workspaceMemberPath(userId) {
+      return /databases/$(database)/documents/users/$(userId)/workspaceMembers/$(request.auth.uid);
+    }
+
+    function isActiveWorkspaceAdmin(userId) {
+      return isAuthenticated() &&
+        exists(workspaceMemberPath(userId)) &&
+        get(workspaceMemberPath(userId)).data.status == 'active' &&
+        storeAdminHasGrant(userId, get(workspaceMemberPath(userId)).data.storeId, 'stockTransfers');
     }
 
     function memberHasAnyProductsManage(userId, storeId) {
@@ -515,7 +532,8 @@ service cloud.firestore {
         // 2. User owns the store (ownerId matches auth.uid)
         // 3. Staff member belongs to this store
         // Note: The exists() check allows staff to query stores to find where they belong
-        allow read: if canAccessStoreData(userId, storeId);
+        allow read: if canAccessStoreData(userId, storeId) ||
+                     (planIsEnterprise(userId) && isActiveWorkspaceAdmin(userId));
         
         // Allow create if user is the super admin (userId in path) creating store in their account
         allow create: if isAuthenticated() && 
@@ -620,8 +638,10 @@ service cloud.firestore {
           // 1. User is the super admin (userId in path matches auth.uid) - allows collection queries
           // 2. User created the folder (createdBy matches auth.uid)
           // 3. Staff member accessing their superadmin's store (userId != auth.uid means staff, and getQueryUserId ensures correct store)
+          // 4. Enterprise branch admin picking a destination category on another branch
           // Note: For staff, the userId in path is their superadmin's UID (via getQueryUserId), so staff can read their store's inventory
-          allow read: if canAccessStoreData(userId, storeId);
+          allow read: if canAccessStoreData(userId, storeId) ||
+                       (planIsEnterprise(userId) && isActiveWorkspaceAdmin(userId));
           
           // Create/update/delete: owner, or a member granted the matching products action.
           allow create: if canManageProducts(userId, storeId, 'create') &&
@@ -641,12 +661,16 @@ service cloud.firestore {
           // 1. User is the super admin (userId in path matches auth.uid) - allows collection queries
           // 2. User created the item (createdBy matches auth.uid)
           // 3. Staff member accessing their superadmin's store (userId != auth.uid means staff, and getQueryUserId ensures correct store)
+          // 4. Enterprise branch admin completing a transfer that touches another branch
           // Note: For staff, the userId in path is their superadmin's UID (via getQueryUserId), so staff can read their store's inventory
-          allow read: if canAccessStoreData(userId, storeId);
+          allow read: if canAccessStoreData(userId, storeId) ||
+                       (planIsEnterprise(userId) && isActiveWorkspaceAdmin(userId));
           
           // Full create/delete: owner, or a member granted the matching products action.
           // Any active member may also add a trade-in item while recording a swap-in sale.
+          // Enterprise branch admins may also create/update/delete items when completing a transfer.
           allow create: if (canManageProducts(userId, storeId, 'create') ||
+                          (planIsEnterprise(userId) && isActiveWorkspaceAdmin(userId)) ||
                           (isActiveStoreMember(userId, storeId) &&
                            request.resource.data.get('swapIn', false) == true &&
                            request.resource.data.get('buyback', false) != true &&
@@ -661,6 +685,9 @@ service cloud.firestore {
                         (canManageProducts(userId, storeId, 'edit') &&
                          resourceMatchesStore(storeId) &&
                          requestMatchesStore(storeId)) ||
+                        (planIsEnterprise(userId) && isActiveWorkspaceAdmin(userId) &&
+                         resourceMatchesStore(storeId) &&
+                         requestMatchesStore(storeId)) ||
                         (isActiveStoreMember(userId, storeId) &&
                          inventoryItemOnlySaleOrReturnFieldChange() &&
                          resourceMatchesStore(storeId) &&
@@ -670,7 +697,8 @@ service cloud.firestore {
                          resourceMatchesStore(storeId) &&
                          requestMatchesStore(storeId)));
 
-          allow delete: if canManageProducts(userId, storeId, 'delete') &&
+          allow delete: if (canManageProducts(userId, storeId, 'delete') ||
+                          (planIsEnterprise(userId) && isActiveWorkspaceAdmin(userId))) &&
                          resourceMatchesStore(storeId) &&
                          !onPartnerLoan(resource.data);
         }

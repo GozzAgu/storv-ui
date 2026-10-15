@@ -386,3 +386,18 @@
   font: var(--s-text-subheading);
   font-variant-numeric: tabular-nums;
 }
+
+/* Native app: a swipe on a table moves one way only (set by `utils/native-scroll-axis-lock.ts`). */
+html.capacitor-native .s-table-wrap,
+html.capacitor-native .s-receipt-doc__table-wrap {
+  overscroll-behavior-x: none;
+}
+
+html.capacitor-native [data-scroll-axis-lock='y'] {
+  overflow-x: hidden;
+}
+
+html.capacitor-native[data-scroll-axis-lock='x'],
+html.capacitor-native[data-scroll-axis-lock='x'] body {
+  overflow: hidden;
+}

@@ -73,6 +73,7 @@ export function mapStaffDoc(staffDoc: {
       canManageInventory,
       canManageReceipts,
       admin,
+      adminGrants: admin ? (staffData.adminGrants as Staff['adminGrants']) : undefined,
       permissions: staffData.permissions as Staff['permissions'],
     }),
     admin,

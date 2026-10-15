@@ -65,6 +65,7 @@ describe('StaffAdminAccess', () => {
       'Let staff confirm payments',
       'Delete sales and settle commissions',
       'Export store data',
+      'Transfer stock to other branches',
     ])
     expect(wrapper.find('button').attributes('disabled')).toBeUndefined()
   })
@@ -76,6 +77,7 @@ describe('StaffAdminAccess', () => {
       deleteSales: true,
       storeSettings: false,
       dataExport: false,
+      stockTransfers: false,
     }
     setStaffAdminAccess.mockResolvedValue({ admin: true, adminGrants })
     const wrapper = mountSection({})
@@ -97,16 +99,31 @@ describe('StaffAdminAccess', () => {
   it('removing admin clears the extras', async () => {
     setStaffAdminAccess.mockResolvedValue({
       admin: false,
-      adminGrants: { branches: false, paymentsConfirm: false, deleteSales: false, storeSettings: false, dataExport: false },
+      adminGrants: {
+        branches: false,
+        paymentsConfirm: false,
+        deleteSales: false,
+        storeSettings: false,
+        dataExport: false,
+        stockTransfers: false,
+      },
     })
     const wrapper = mountSection({ admin: true, adminGrants: { deleteSales: true } })
     expect(labels(wrapper)).toContain('Delete sales and settle commissions')
+    expect(labels(wrapper)).toContain('Transfer stock to other branches')
     await wrapper.find('input').setValue(false)
     await wrapper.find('button').trigger('click')
     await flushPromises()
     expect(setStaffAdminAccess.mock.calls[0]![1]).toEqual({
       admin: false,
-      grants: { branches: false, paymentsConfirm: false, deleteSales: false, storeSettings: false, dataExport: false },
+      grants: {
+        branches: false,
+        paymentsConfirm: false,
+        deleteSales: false,
+        storeSettings: false,
+        dataExport: false,
+        stockTransfers: false,
+      },
     })
   })
 })

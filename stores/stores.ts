@@ -360,7 +360,9 @@ export const useStoresStore = defineStore('stores', {
         const { resetDepartmentsFetchStamp } = await import('./departments')
         resetDepartmentsFetchStamp()
 
-        const { resetDashboardShellBootstrap } = await import('~/composables/useDashboardShellBootstrap')
+        const { resetDashboardShellBootstrap } = await import(
+          '~/composables/useDashboardShellBootstrap'
+        )
         resetDashboardShellBootstrap()
 
         customersStore.customers = []
@@ -474,7 +476,36 @@ export const useStoresStore = defineStore('stores', {
         return
       }
 
-      if (!options?.force && this.stores.length > 0) {
+      const authStore = useAuthStore()
+      if (!authStore.currentUser) {
+        this.error = 'User must be authenticated'
+        this.loading = false
+        return
+      }
+
+      const { useUserStore } = await import('./user')
+      const userStore = useUserStore()
+      if (!userStore.userData) {
+        await userStore.fetchUserData(authStore.currentUser.uid)
+      }
+
+      // Branch admins with transfer rights may still hold a one-branch list from login.
+      // Refresh that stale cache instead of returning early.
+      let forceRefresh = options?.force === true
+      if (!forceRefresh && this.stores.length > 0 && userStore.userData?.role === 'staff') {
+        const { useStaffStore } = await import('./staff')
+        const { normalizeStaffAdminGrants } = await import('~/utils/staff-permissions')
+        const staffMember = useStaffStore().getCurrentStaffMember
+        if (
+          staffMember?.admin === true &&
+          normalizeStaffAdminGrants(staffMember.adminGrants).stockTransfers === true &&
+          this.stores.length < 2
+        ) {
+          forceRefresh = true
+        }
+      }
+
+      if (!forceRefresh && this.stores.length > 0) {
         return
       }
 
@@ -490,20 +521,6 @@ export const useStoresStore = defineStore('stores', {
         return
       }
 
-      const authStore = useAuthStore()
-      if (!authStore.currentUser) {
-        this.error = 'User must be authenticated'
-        this.loading = false
-        return
-      }
-
-      // Check if user is staff or super admin
-      const { useUserStore } = await import('./user')
-      const userStore = useUserStore()
-      if (!userStore.userData) {
-        await userStore.fetchUserData(authStore.currentUser.uid)
-      }
-
       let ownerId = authStore.currentUser.uid
 
       // Get userId for hierarchical path (superadmin's UID)
@@ -514,13 +531,17 @@ export const useStoresStore = defineStore('stores', {
         return
       }
 
-      // If staff, get their store
+      // Regular staff: only their branch. Branch admins: every branch (for transfers).
       if (userStore.userData?.role === 'staff') {
         const { useStaffStore } = await import('./staff')
         const staffStore = useStaffStore()
         const staffMember = await staffStore.fetchCurrentStaffMember()
-        if (staffMember?.storeId) {
-          // Staff can only see their own store - use hierarchical path
+        if (!staffMember?.storeId) {
+          this.stores = []
+          this.loading = false
+          return
+        }
+        if (staffMember.admin !== true) {
           try {
             const storeRef = getStoreDocument(db, userId, staffMember.storeId)
             const storeSnap = await getDoc(storeRef)
@@ -542,11 +563,41 @@ export const useStoresStore = defineStore('stores', {
             this.loading = false
           }
           return
-        } else {
-          this.stores = []
-          this.loading = false
-          return
         }
+        // Branch admin: load every branch via the server (client rules often block the list query).
+        try {
+          const token = await authStore.currentUser.getIdToken()
+          const { resolveApiPath } = await import('~/utils/api-url')
+          const result = await $fetch<{ stores: Store[] }>(
+            resolveApiPath('/api/workspace/stores'),
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          )
+          this.stores = Array.isArray(result.stores) ? result.stores : []
+          if (!this.currentStoreId && this.stores.length > 0) {
+            await this.initializeCurrentStore()
+          }
+        } catch (error: any) {
+          // Fall back to their home branch so the app still works without the transfers extra.
+          console.error('Error fetching workspace stores for branch admin:', error)
+          try {
+            const storeRef = getStoreDocument(db, userId, staffMember.storeId)
+            const storeSnap = await getDoc(storeRef)
+            this.stores = storeSnap.exists()
+              ? [{ id: storeSnap.id, ...storeSnap.data() } as Store]
+              : []
+          } catch {
+            this.stores = []
+          }
+          this.error =
+            error?.data?.message ||
+            error?.message ||
+            'Could not load other branches. Ask the owner to turn on Transfer stock to other branches.'
+        } finally {
+          this.loading = false
+        }
+        return
       }
 
       try {
@@ -707,7 +758,10 @@ export const useStoresStore = defineStore('stores', {
       }
 
       const plan = resolveEffectiveSubscriptionPlan(userStore.userData)
-      const limits = getPlanLimits(plan, summarizeSubscriptionAddOns(userStore.userData?.subscriptionAddOns))
+      const limits = getPlanLimits(
+        plan,
+        summarizeSubscriptionAddOns(userStore.userData?.subscriptionAddOns)
+      )
       if (limits.maxStores >= 0 && this.stores.length >= limits.maxStores) {
         throw new Error(storeLimitReachedMessage(plan, limits.maxStores))
       }

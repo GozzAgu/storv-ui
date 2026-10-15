@@ -43,6 +43,8 @@ export interface LegacyStaffAccessFields {
   permissions?: Partial<StaffPermissions> | StaffPermissions
   /** Branch admin (owner-set). Every module action; financials still follow the stored grant. */
   admin?: boolean
+  /** High-risk extras the owner turns on for an admin (e.g. stock transfers). */
+  adminGrants?: Partial<StaffAdminGrants> | StaffAdminGrants | null
 }
 
 /**
@@ -151,7 +153,15 @@ export function resolveStaffPermissions(staff: LegacyStaffAccessFields): StaffPe
     : deriveDefaultPermissions(staff)
 
   if (staff.admin === true) {
-    return { ...FULL_STAFF_PERMISSIONS, financials: base.financials }
+    const grants = normalizeStaffAdminGrants(staff.adminGrants)
+    return {
+      ...FULL_STAFF_PERMISSIONS,
+      financials: base.financials,
+      // Transfers stay off until the owner turns on the stock-transfers extra.
+      multiStoreSync: grants.stockTransfers
+        ? FULL_STAFF_PERMISSIONS.multiStoreSync
+        : EMPTY_STAFF_PERMISSIONS.multiStoreSync,
+    }
   }
 
   return {

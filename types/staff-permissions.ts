@@ -65,6 +65,8 @@ export interface StaffAdminGrants {
   storeSettings: boolean
   /** Export all store data. */
   dataExport: boolean
+  /** Request and complete stock transfers to other branches. */
+  stockTransfers: boolean
 }
 
 export const STAFF_ADMIN_GRANT_KEYS = [
@@ -73,6 +75,7 @@ export const STAFF_ADMIN_GRANT_KEYS = [
   'deleteSales',
   'storeSettings',
   'dataExport',
+  'stockTransfers',
 ] as const satisfies ReadonlyArray<keyof StaffAdminGrants>
 
 /** Shared settings sections a branch admin with the "store settings" extra may save. */

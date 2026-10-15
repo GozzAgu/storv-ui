@@ -38,7 +38,10 @@ import {
   getSellerLoanOutDocument,
 } from '~/composables/useFirestorePaths'
 import { logActivity, getCurrentUserDisplayName } from '~/composables/useActivityLog'
-import { duplicateSerialExistsViaApi, resolveSerialProductLine } from '~/utils/inventory-serial-validation'
+import {
+  duplicateSerialExistsViaApi,
+  resolveSerialProductLine,
+} from '~/utils/inventory-serial-validation'
 import {
   INVENTORY_FIRESTORE_PAGE_SIZE,
   INVENTORY_FIRESTORE_ALL_CHUNK_SIZE,
@@ -322,203 +325,206 @@ export const useInventoryStore = defineStore('inventory', {
       }
 
       const run = (async () => {
-      if (this.folders.length === 0) {
-        this.loading = true
-      }
-      this.error = null
-
-      const db = useFirestore().getFirestoreInstance()
-      if (!db) {
-        this.error = CLOUD_UNAVAILABLE_MESSAGE
-        this.loading = false
-        return
-      }
-
-      const authStore = useAuthStore()
-      if (!authStore.currentUser) {
-        this.error = 'User must be authenticated'
-        this.loading = false
-        return
-      }
-
-      // Check if user is staff to determine which folders to show
-      const userStore = useUserStore()
-      if (!userStore.userData) {
-        await userStore.fetchUserData(authStore.currentUser.uid)
-      }
-
-      // Use getQueryUserId to get the correct userId (superadmin's UID for staff)
-      const userId = await getQueryUserId()
-      if (!userId) {
-        this.error = 'User ID not available'
-        this.loading = false
-        return
-      }
-
-      // Get current store ID to filter folders
-      const currentStoreId = await getCurrentStoreId()
-
-      if (!currentStoreId) {
-        this.error = 'No store selected. Please select a store first.'
-        this.loading = false
-        return
-      }
-
-      // console.log('[InventoryStore] fetchFolders - userId:', userId, 'currentStoreId:', currentStoreId, 'isStaff:', userStore.userData?.role === 'staff')
-
-      // Get staff departmentId if user is staff
-      let staffDepartmentId: string | undefined
-      if (userStore.userData?.role === 'staff') {
-        try {
-          const { useStaffStore } = await import('./staff')
-          const staffStore = useStaffStore()
-          const staffMember = await staffStore.fetchCurrentStaffMember()
-          staffDepartmentId = staffMember?.departmentId
-          // console.log('[InventoryStore] Staff departmentId:', staffDepartmentId)
-        } catch (e) {
-          console.warn('[InventoryStore] Could not fetch staff member:', e)
+        if (this.folders.length === 0) {
+          this.loading = true
         }
-      }
+        this.error = null
 
-      try {
-        // Use hierarchical path: users/{userId}/stores/{storeId}/inventoryFolders
-        const foldersRef = getInventoryFoldersCollection(db, userId, currentStoreId)
-        let querySnapshot
-
-        try {
-          // For staff: Get all folders in store (no createdBy filter)
-          // For superadmin: Filter by createdBy
-          let q
-          if (userStore.userData?.role === 'staff') {
-            // Staff sees all folders in their store
-            q = query(foldersRef, orderBy('createdAt', 'desc'))
-          } else {
-            // Superadmin sees only their folders
-            q = query(foldersRef, where('createdBy', '==', userId), orderBy('createdAt', 'desc'))
-          }
-          querySnapshot = await getDocs(q)
-        } catch (orderByError: any) {
-          // If orderBy fails (missing index), try without orderBy
-          if (
-            orderByError.code === 'failed-precondition' ||
-            orderByError.message?.includes('index')
-          ) {
-            let q
-            if (userStore.userData?.role === 'staff') {
-              // Staff sees all folders in their store
-              q = query(foldersRef)
-            } else {
-              // Superadmin sees only their folders
-              q = query(foldersRef, where('createdBy', '==', userId))
-            }
-            querySnapshot = await getDocs(q)
-          } else {
-            throw orderByError
-          }
-        }
-
-        const allFolders = querySnapshot.docs
-        // console.log('[InventoryStore] Found', allFolders.length, 'folders in store (userId:', userId, 'storeId:', currentStoreId, 'isStaff:', userStore.userData?.role === 'staff' + ')')
-
-        // Process the results
-        let folders = allFolders.map((doc) => mapFirestoreDocToInventoryFolder(doc, userId))
-
-        // For staff: Filter folders by department access
-        if (userStore.userData?.role === 'staff' && staffDepartmentId) {
-          folders = folders.filter((folder) => {
-            // If folder has allowedDepartments, check if staff's department has access
-            if (folder.allowedDepartments && folder.allowedDepartments.length > 0) {
-              return folder.allowedDepartments.includes(staffDepartmentId)
-            }
-            // If no allowedDepartments specified, staff can see it (folder is accessible to all departments)
-            return true
-          })
-          // console.log('[InventoryStore] Filtered folders by department access:', folders.length, 'folders visible to staff')
-        }
-
-        // No need to filter by storeId since we're already querying from the store's subcollection
-        // All folders returned are already in the correct store
-
-        // If user is staff, filter folders by department access
-        if (userStore.userData?.role === 'staff') {
-          try {
-            const staffStore = useStaffStore()
-            let currentStaffMember = staffStore.getCurrentStaffMember
-
-            // If current staff member not found in store, fetch it directly
-            if (!currentStaffMember) {
-              try {
-                const staffRef = collection(db, 'staff')
-                const staffQuery = query(
-                  staffRef,
-                  where('authUid', '==', authStore.currentUser.uid)
-                )
-                const staffSnapshot = await getDocs(staffQuery)
-
-                if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
-                  const staffDoc = staffSnapshot.docs[0]
-                  if (staffDoc) {
-                    const staffData = staffDoc.data()
-                    currentStaffMember = {
-                      id: staffDoc.id,
-                      ...staffData,
-                    } as any
-                  }
-                }
-              } catch (fetchError: any) {
-                console.warn('[InventoryStore] Could not fetch staff document:', fetchError.message)
-              }
-            }
-
-            const staffDepartmentId = currentStaffMember?.departmentId
-
-            if (staffDepartmentId) {
-              // Filter folders: show if no allowedDepartments (accessible to all) OR if staff's department is in allowedDepartments
-              folders = folders.filter((folder) => {
-                // If folder has no allowedDepartments, it's accessible to all
-                if (!folder.allowedDepartments || folder.allowedDepartments.length === 0) {
-                  return true
-                }
-                // Otherwise, check if staff's department is in the allowed list
-                return folder.allowedDepartments.includes(staffDepartmentId)
-              })
-            } else {
-              // If staff member has no department, only show folders with no restrictions
-              folders = folders.filter(
-                (folder) => !folder.allowedDepartments || folder.allowedDepartments.length === 0
-              )
-            }
-          } catch (error: any) {
-            console.warn(
-              '[InventoryStore] Could not filter by department, showing all folders:',
-              error.message
-            )
-          }
-        }
-
-        const storeIdNow = await getCurrentStoreId()
-        if (storeIdNow !== currentStoreId) {
+        const db = useFirestore().getFirestoreInstance()
+        if (!db) {
+          this.error = CLOUD_UNAVAILABLE_MESSAGE
           this.loading = false
           return
         }
 
-        this.folders = folders
+        const authStore = useAuthStore()
+        if (!authStore.currentUser) {
+          this.error = 'User must be authenticated'
+          this.loading = false
+          return
+        }
 
-        // Sort by createdAt if orderBy failed
-        this.folders.sort((a, b) => {
-          const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt)
-          const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt)
-          return dateB.getTime() - dateA.getTime()
-        })
+        // Check if user is staff to determine which folders to show
+        const userStore = useUserStore()
+        if (!userStore.userData) {
+          await userStore.fetchUserData(authStore.currentUser.uid)
+        }
 
-        foldersFetchStamp = { storeId: currentStoreId, fetchedAt: Date.now() }
-        this.loading = false
-      } catch (error: any) {
-        console.error('Error fetching inventory folders:', error)
-        this.error = error.message || 'Failed to fetch inventory folders'
-        this.loading = false
-        throw new Error(error.message || 'Failed to fetch inventory folders')
-      }
+        // Use getQueryUserId to get the correct userId (superadmin's UID for staff)
+        const userId = await getQueryUserId()
+        if (!userId) {
+          this.error = 'User ID not available'
+          this.loading = false
+          return
+        }
+
+        // Get current store ID to filter folders
+        const currentStoreId = await getCurrentStoreId()
+
+        if (!currentStoreId) {
+          this.error = 'No store selected. Please select a store first.'
+          this.loading = false
+          return
+        }
+
+        // console.log('[InventoryStore] fetchFolders - userId:', userId, 'currentStoreId:', currentStoreId, 'isStaff:', userStore.userData?.role === 'staff')
+
+        // Get staff departmentId if user is staff
+        let staffDepartmentId: string | undefined
+        if (userStore.userData?.role === 'staff') {
+          try {
+            const { useStaffStore } = await import('./staff')
+            const staffStore = useStaffStore()
+            const staffMember = await staffStore.fetchCurrentStaffMember()
+            staffDepartmentId = staffMember?.departmentId
+            // console.log('[InventoryStore] Staff departmentId:', staffDepartmentId)
+          } catch (e) {
+            console.warn('[InventoryStore] Could not fetch staff member:', e)
+          }
+        }
+
+        try {
+          // Use hierarchical path: users/{userId}/stores/{storeId}/inventoryFolders
+          const foldersRef = getInventoryFoldersCollection(db, userId, currentStoreId)
+          let querySnapshot
+
+          try {
+            // For staff: Get all folders in store (no createdBy filter)
+            // For superadmin: Filter by createdBy
+            let q
+            if (userStore.userData?.role === 'staff') {
+              // Staff sees all folders in their store
+              q = query(foldersRef, orderBy('createdAt', 'desc'))
+            } else {
+              // Superadmin sees only their folders
+              q = query(foldersRef, where('createdBy', '==', userId), orderBy('createdAt', 'desc'))
+            }
+            querySnapshot = await getDocs(q)
+          } catch (orderByError: any) {
+            // If orderBy fails (missing index), try without orderBy
+            if (
+              orderByError.code === 'failed-precondition' ||
+              orderByError.message?.includes('index')
+            ) {
+              let q
+              if (userStore.userData?.role === 'staff') {
+                // Staff sees all folders in their store
+                q = query(foldersRef)
+              } else {
+                // Superadmin sees only their folders
+                q = query(foldersRef, where('createdBy', '==', userId))
+              }
+              querySnapshot = await getDocs(q)
+            } else {
+              throw orderByError
+            }
+          }
+
+          const allFolders = querySnapshot.docs
+          // console.log('[InventoryStore] Found', allFolders.length, 'folders in store (userId:', userId, 'storeId:', currentStoreId, 'isStaff:', userStore.userData?.role === 'staff' + ')')
+
+          // Process the results
+          let folders = allFolders.map((doc) => mapFirestoreDocToInventoryFolder(doc, userId))
+
+          // For staff: Filter folders by department access
+          if (userStore.userData?.role === 'staff' && staffDepartmentId) {
+            folders = folders.filter((folder) => {
+              // If folder has allowedDepartments, check if staff's department has access
+              if (folder.allowedDepartments && folder.allowedDepartments.length > 0) {
+                return folder.allowedDepartments.includes(staffDepartmentId)
+              }
+              // If no allowedDepartments specified, staff can see it (folder is accessible to all departments)
+              return true
+            })
+            // console.log('[InventoryStore] Filtered folders by department access:', folders.length, 'folders visible to staff')
+          }
+
+          // No need to filter by storeId since we're already querying from the store's subcollection
+          // All folders returned are already in the correct store
+
+          // If user is staff, filter folders by department access
+          if (userStore.userData?.role === 'staff') {
+            try {
+              const staffStore = useStaffStore()
+              let currentStaffMember = staffStore.getCurrentStaffMember
+
+              // If current staff member not found in store, fetch it directly
+              if (!currentStaffMember) {
+                try {
+                  const staffRef = collection(db, 'staff')
+                  const staffQuery = query(
+                    staffRef,
+                    where('authUid', '==', authStore.currentUser.uid)
+                  )
+                  const staffSnapshot = await getDocs(staffQuery)
+
+                  if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
+                    const staffDoc = staffSnapshot.docs[0]
+                    if (staffDoc) {
+                      const staffData = staffDoc.data()
+                      currentStaffMember = {
+                        id: staffDoc.id,
+                        ...staffData,
+                      } as any
+                    }
+                  }
+                } catch (fetchError: any) {
+                  console.warn(
+                    '[InventoryStore] Could not fetch staff document:',
+                    fetchError.message
+                  )
+                }
+              }
+
+              const staffDepartmentId = currentStaffMember?.departmentId
+
+              if (staffDepartmentId) {
+                // Filter folders: show if no allowedDepartments (accessible to all) OR if staff's department is in allowedDepartments
+                folders = folders.filter((folder) => {
+                  // If folder has no allowedDepartments, it's accessible to all
+                  if (!folder.allowedDepartments || folder.allowedDepartments.length === 0) {
+                    return true
+                  }
+                  // Otherwise, check if staff's department is in the allowed list
+                  return folder.allowedDepartments.includes(staffDepartmentId)
+                })
+              } else {
+                // If staff member has no department, only show folders with no restrictions
+                folders = folders.filter(
+                  (folder) => !folder.allowedDepartments || folder.allowedDepartments.length === 0
+                )
+              }
+            } catch (error: any) {
+              console.warn(
+                '[InventoryStore] Could not filter by department, showing all folders:',
+                error.message
+              )
+            }
+          }
+
+          const storeIdNow = await getCurrentStoreId()
+          if (storeIdNow !== currentStoreId) {
+            this.loading = false
+            return
+          }
+
+          this.folders = folders
+
+          // Sort by createdAt if orderBy failed
+          this.folders.sort((a, b) => {
+            const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt)
+            const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt)
+            return dateB.getTime() - dateA.getTime()
+          })
+
+          foldersFetchStamp = { storeId: currentStoreId, fetchedAt: Date.now() }
+          this.loading = false
+        } catch (error: any) {
+          console.error('Error fetching inventory folders:', error)
+          this.error = error.message || 'Failed to fetch inventory folders'
+          this.loading = false
+          throw new Error(error.message || 'Failed to fetch inventory folders')
+        }
       })()
 
       fetchFoldersInflight = {
@@ -545,9 +551,7 @@ export const useInventoryStore = defineStore('inventory', {
       const storeId = (await getCurrentStoreId()) ?? ''
       const hasStats = Object.keys(this.folderAvailabilityStats).length > 0
 
-      if (
-        isStoreListFetchFresh(availabilityStatsStamp, storeId, hasStats, options?.force)
-      ) {
+      if (isStoreListFetchFresh(availabilityStatsStamp, storeId, hasStats, options?.force)) {
         const grouped: Record<string, InventoryItem[]> = {}
         for (const folder of this.folders) {
           grouped[folder.id] = this.items[folder.id] ?? []
@@ -563,102 +567,100 @@ export const useInventoryStore = defineStore('inventory', {
       }
 
       const run = (async (): Promise<Record<string, InventoryItem[]>> => {
+        const { isDemoModeActive } = await import('~/utils/demo-mode')
+        if (isDemoModeActive()) {
+          this.availabilityStatsLoading = true
+          try {
+            const next: Record<string, FolderAvailabilityStats> = {}
+            const profitNext: Record<string, FolderProfitStats> = {}
+            const grouped: Record<string, InventoryItem[]> = {}
 
-      const { isDemoModeActive } = await import('~/utils/demo-mode')
-      if (isDemoModeActive()) {
-        this.availabilityStatsLoading = true
-        try {
-          const next: Record<string, FolderAvailabilityStats> = {}
-          const profitNext: Record<string, FolderProfitStats> = {}
-          const grouped: Record<string, InventoryItem[]> = {}
-
-          for (const folder of this.folders) {
-            const items = this.items[folder.id] ?? []
-            grouped[folder.id] = items
-            next[folder.id] = computeFolderAvailabilityStats(items, folder)
-            const totalValue = computeFolderTotalValue(items, folder)
-            if (folderTracksProfit(folder)) {
-              profitNext[folder.id] =
-                computeFolderGrossProfitOnHand(items, folder) ?? {
+            for (const folder of this.folders) {
+              const items = this.items[folder.id] ?? []
+              grouped[folder.id] = items
+              next[folder.id] = computeFolderAvailabilityStats(items, folder)
+              const totalValue = computeFolderTotalValue(items, folder)
+              if (folderTracksProfit(folder)) {
+                profitNext[folder.id] = computeFolderGrossProfitOnHand(items, folder) ?? {
                   grossProfitOnHand: 0,
                   unitsWithCost: 0,
                 }
+              }
+              const folderIndex = this.folders.findIndex((f) => f.id === folder.id)
+              if (folderIndex > -1 && this.folders[folderIndex]) {
+                this.folders[folderIndex].totalValue = totalValue
+              }
+            }
+
+            this.folderAvailabilityStats = { ...next }
+            this.folderProfitStats = { ...profitNext }
+            return grouped
+          } finally {
+            this.availabilityStatsLoading = false
+          }
+        }
+
+        const authStore = useAuthStore()
+        if (!authStore.currentUser) return {}
+
+        this.availabilityStatsLoading = true
+        try {
+          const ctx = await this._prepareStoreInventoryItemsContext()
+          const itemsQuery = ctx.isStaff
+            ? query(ctx.itemsRef)
+            : query(ctx.itemsRef, where('createdBy', '==', ctx.queryUserId))
+
+          const snapshot = await getDocs(itemsQuery)
+          const itemsByFolder = new Map<string, InventoryItem[]>()
+
+          for (const docSnap of snapshot.docs) {
+            const data = docSnap.data()
+            const folderId = String(data.folderId || '')
+            if (!folderId) continue
+            const item = docToInventoryItem(docSnap, folderId, ctx.queryUserId)
+            const list = itemsByFolder.get(folderId) ?? []
+            list.push(item)
+            itemsByFolder.set(folderId, list)
+          }
+
+          const next: Record<string, FolderAvailabilityStats> = {}
+          const profitNext: Record<string, FolderProfitStats> = {}
+          for (const folder of this.folders) {
+            const queried = itemsByFolder.get(folder.id) ?? []
+            const cached = this.items[folder.id] ?? []
+            const items =
+              queried.length >= cached.length ? queried : cached.length ? cached : queried
+            next[folder.id] = computeFolderAvailabilityStats(items, folder)
+            const totalValue = computeFolderTotalValue(items, folder)
+            if (folderTracksProfit(folder)) {
+              profitNext[folder.id] = computeFolderGrossProfitOnHand(items, folder) ?? {
+                grossProfitOnHand: 0,
+                unitsWithCost: 0,
+              }
             }
             const folderIndex = this.folders.findIndex((f) => f.id === folder.id)
             if (folderIndex > -1 && this.folders[folderIndex]) {
               this.folders[folderIndex].totalValue = totalValue
             }
           }
-
           this.folderAvailabilityStats = { ...next }
           this.folderProfitStats = { ...profitNext }
+
+          const grouped: Record<string, InventoryItem[]> = {}
+          for (const folder of this.folders) {
+            grouped[folder.id] = itemsByFolder.get(folder.id) ?? []
+          }
+          if (storeId) {
+            availabilityStatsStamp = { storeId, fetchedAt: Date.now() }
+          }
           return grouped
+        } catch (error: unknown) {
+          const message = error instanceof Error ? error.message : String(error)
+          console.warn('[InventoryStore] fetchFolderAvailabilityStats failed:', message)
+          return {}
         } finally {
           this.availabilityStatsLoading = false
         }
-      }
-
-      const authStore = useAuthStore()
-      if (!authStore.currentUser) return {}
-
-      this.availabilityStatsLoading = true
-      try {
-        const ctx = await this._prepareStoreInventoryItemsContext()
-        const itemsQuery = ctx.isStaff
-          ? query(ctx.itemsRef)
-          : query(ctx.itemsRef, where('createdBy', '==', ctx.queryUserId))
-
-        const snapshot = await getDocs(itemsQuery)
-        const itemsByFolder = new Map<string, InventoryItem[]>()
-
-        for (const docSnap of snapshot.docs) {
-          const data = docSnap.data()
-          const folderId = String(data.folderId || '')
-          if (!folderId) continue
-          const item = docToInventoryItem(docSnap, folderId, ctx.queryUserId)
-          const list = itemsByFolder.get(folderId) ?? []
-          list.push(item)
-          itemsByFolder.set(folderId, list)
-        }
-
-        const next: Record<string, FolderAvailabilityStats> = {}
-        const profitNext: Record<string, FolderProfitStats> = {}
-        for (const folder of this.folders) {
-          const queried = itemsByFolder.get(folder.id) ?? []
-          const cached = this.items[folder.id] ?? []
-          const items = queried.length >= cached.length ? queried : cached.length ? cached : queried
-          next[folder.id] = computeFolderAvailabilityStats(items, folder)
-          const totalValue = computeFolderTotalValue(items, folder)
-          if (folderTracksProfit(folder)) {
-            profitNext[folder.id] =
-              computeFolderGrossProfitOnHand(items, folder) ?? {
-                grossProfitOnHand: 0,
-                unitsWithCost: 0,
-              }
-          }
-          const folderIndex = this.folders.findIndex((f) => f.id === folder.id)
-          if (folderIndex > -1 && this.folders[folderIndex]) {
-            this.folders[folderIndex].totalValue = totalValue
-          }
-        }
-        this.folderAvailabilityStats = { ...next }
-        this.folderProfitStats = { ...profitNext }
-
-        const grouped: Record<string, InventoryItem[]> = {}
-        for (const folder of this.folders) {
-          grouped[folder.id] = itemsByFolder.get(folder.id) ?? []
-        }
-        if (storeId) {
-          availabilityStatsStamp = { storeId, fetchedAt: Date.now() }
-        }
-        return grouped
-      } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : String(error)
-        console.warn('[InventoryStore] fetchFolderAvailabilityStats failed:', message)
-        return {}
-      } finally {
-        this.availabilityStatsLoading = false
-      }
       })()
 
       availabilityStatsInflight = run.finally(() => {
@@ -758,7 +760,7 @@ export const useInventoryStore = defineStore('inventory', {
 
     /**
      * Load folder definitions for a branch without overwriting Pinia `folders`.
-     * Super admin only. Lists every document under `users/{owner}/stores/{storeId}/inventoryFolders`
+     * Owner or branch admin. Lists every document under `users/{owner}/stores/{storeId}/inventoryFolders`
      * (same store subcollection shown in Inventory for that branch). No `createdBy` filter so older
      * folders missing that field, or synced/migrated folders, still appear for copying.
      */
@@ -777,8 +779,13 @@ export const useInventoryStore = defineStore('inventory', {
       if (!userStore.userData) {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
-      if (userStore.userData?.role !== 'superAdmin') {
-        throw new Error('Only super admins can load folder templates across branches.')
+      const { usePermissions } = await import('~/composables/usePermissions')
+      const { isAdmin, can } = usePermissions()
+      const isOwner = userStore.userData?.role === 'superAdmin'
+      if (!isOwner && !(isAdmin.value && can('multiStoreSync', 'view'))) {
+        throw new Error(
+          'Only the store owner or a branch admin can load categories across branches.'
+        )
       }
       const plan = resolveEffectiveSubscriptionPlan(userStore.userData)
       if (plan !== 'storvv_enterprise') {
@@ -831,7 +838,9 @@ export const useInventoryStore = defineStore('inventory', {
         if (options?.folderIds === undefined || options.folderIds.length === 0) {
           throw new Error('Select at least one folder to copy.')
         }
-        const { applyDemoDuplicateFolderTemplatesBetweenStores } = await import('~/utils/demo-bridge')
+        const { applyDemoDuplicateFolderTemplatesBetweenStores } = await import(
+          '~/utils/demo-bridge'
+        )
         return applyDemoDuplicateFolderTemplatesBetweenStores(sourceStoreId, targetStoreId, {
           folderIds: options.folderIds,
           includeSubfolders,
@@ -1014,7 +1023,10 @@ export const useInventoryStore = defineStore('inventory', {
     },
 
     // Get a single folder
-    async fetchFolder(folderId: string, options?: { force?: boolean }): Promise<InventoryFolder | null> {
+    async fetchFolder(
+      folderId: string,
+      options?: { force?: boolean }
+    ): Promise<InventoryFolder | null> {
       const { isDemoModeActive } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) {
         await this.fetchFolders()
@@ -1108,10 +1120,7 @@ export const useInventoryStore = defineStore('inventory', {
           throw new Error('Folder not found')
         }
 
-        const folder = mapFirestoreDocToInventoryFolder(
-          folderSnap as QueryDocumentSnapshot,
-          userId
-        )
+        const folder = mapFirestoreDocToInventoryFolder(folderSnap as QueryDocumentSnapshot, userId)
         this.upsertFolderInState(folder)
         return folder
       } catch (error: any) {
@@ -1697,8 +1706,20 @@ export const useInventoryStore = defineStore('inventory', {
       if (!userStore.userData) {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
-      if (userStore.userData?.role !== 'superAdmin') {
-        throw new Error('Only super admins can load inventory across branches.')
+      const { usePermissions } = await import('~/composables/usePermissions')
+      const { useStaffStore } = await import('~/stores/staff')
+      const { isAdmin, can } = usePermissions()
+      const isOwner = userStore.userData?.role === 'superAdmin'
+      if (!isOwner && !(isAdmin.value && can('multiStoreSync', 'view'))) {
+        throw new Error(
+          'Only the store owner or a branch admin can load inventory across branches.'
+        )
+      }
+      if (!isOwner) {
+        const homeStoreId = useStaffStore().getCurrentStaffMember?.storeId
+        if (!homeStoreId || storeId !== homeStoreId) {
+          throw new Error('You can only take items from your own branch.')
+        }
       }
       const plan = resolveEffectiveSubscriptionPlan(userStore.userData)
       if (plan !== 'storvv_enterprise') {
@@ -2292,7 +2313,10 @@ export const useInventoryStore = defineStore('inventory', {
           userDisplayName,
         }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
 
-        const auditFields: Array<{ key: keyof InventoryItem; field: 'price' | 'name' | 'cost' | 'quantity' }> = [
+        const auditFields: Array<{
+          key: keyof InventoryItem
+          field: 'price' | 'name' | 'cost' | 'quantity'
+        }> = [
           { key: 'price', field: 'price' },
           { key: 'cost', field: 'cost' },
           { key: 'name', field: 'name' },

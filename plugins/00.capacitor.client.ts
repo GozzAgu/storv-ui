@@ -7,6 +7,7 @@ import {
 } from '~/utils/capacitor-root-path'
 import { startNativeKeyboardHandling } from '~/composables/useNativeKeyboardInset'
 import { stripNativeWebFontLinks } from '~/utils/capacitor-native-perf'
+import { startTableScrollAxisLock } from '~/utils/native-scroll-axis-lock'
 function detectNativeShell(): boolean {
   if (import.meta.server) return false
   try {
@@ -34,6 +35,7 @@ export default defineNuxtPlugin({
     markCapacitorDocument()
     stripNativeWebFontLinks()
     void startNativeKeyboardHandling()
+    startTableScrollAxisLock()
 
     if (redirectCapacitorRootToSignIn()) return
 

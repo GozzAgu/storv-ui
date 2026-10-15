@@ -84,6 +84,12 @@ const ADMIN_EXTRAS: Array<{ key: keyof StaffAdminGrants; label: string; descript
     label: 'Export store data',
     description: 'Download Excel backups of this branch.',
   },
+  {
+    key: 'stockTransfers',
+    label: 'Transfer stock to other branches',
+    description:
+      'Request transfers from this branch to another, approve them, and complete them when stock arrives.',
+  },
 ]
 
 const { isStoreOwner } = usePermissions()

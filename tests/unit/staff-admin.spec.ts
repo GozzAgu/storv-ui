@@ -30,6 +30,15 @@ describe('resolveStaffPermissions for branch admins', () => {
     const p = resolveStaffPermissions({ admin: true, permissions: EMPTY_STAFF_PERMISSIONS })
     expect(p.products).toEqual(FULL_STAFF_PERMISSIONS.products)
     expect(p.receipts).toEqual(FULL_STAFF_PERMISSIONS.receipts)
+    expect(p.multiStoreSync).toEqual(EMPTY_STAFF_PERMISSIONS.multiStoreSync)
+  })
+
+  it('unlocks transfers when the stock-transfers extra is on', () => {
+    const p = resolveStaffPermissions({
+      admin: true,
+      adminGrants: { stockTransfers: true },
+      permissions: EMPTY_STAFF_PERMISSIONS,
+    })
     expect(p.multiStoreSync).toEqual(FULL_STAFF_PERMISSIONS.multiStoreSync)
   })
 
@@ -74,6 +83,7 @@ describe('normalizeStaffAdminGrants', () => {
       deleteSales: false,
       storeSettings: false,
       dataExport: false,
+      stockTransfers: false,
     })
     const g = normalizeStaffAdminGrants({ deleteSales: true, branches: 'true', owner: true })
     expect(g.deleteSales).toBe(true)
