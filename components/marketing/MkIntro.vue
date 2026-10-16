@@ -10,10 +10,7 @@
           </h2>
         </header>
         <div class="mk-intro__aside">
-          <p class="mk-intro__text">
-            Serial and IMEI tracking, deposits, trade-ins and part payments come built in, so Storvv
-            fits the way your trade actually works.
-          </p>
+          <p class="mk-intro__text">IMEI, deposits, trade-ins and part payments, built in.</p>
           <NuxtLink to="/demo/dashboard" class="mk-link">
             Try the live demo
             <ArrowRight :size="16" aria-hidden="true" />

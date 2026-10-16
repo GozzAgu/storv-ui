@@ -1,16 +1,16 @@
 <template>
   <section id="product" ref="sectionRef" class="mk-section mkp" aria-labelledby="mk-platform-title">
     <div class="mk-container">
-      <div class="mkp__panel">
+      <div class="mkp__panel mkp__panel--tight">
         <div class="mkp__grid">
           <div class="mkp__copy">
             <MkSectionHead
               title-id="mk-platform-title"
               align="start"
               eyebrow="The platform"
-              title="Everything the counter needs."
-              accent="Nothing it doesn't."
-              lede="Ring up one sale and Storvv does the rest. Stock, the customer's balance, the receipt and today's numbers all update on their own."
+              title="One sale."
+              accent="Everything updates."
+              lede="Stock, balance, receipt and today's numbers, the moment you ring it up."
             />
 
             <NuxtLink to="/features" class="mkp__link">
@@ -67,25 +67,6 @@
             </div>
           </div>
         </div>
-
-        <ul class="mkp__questions">
-          <li
-            v-for="(node, i) in nodes"
-            :key="node.id"
-            class="mkp__question mk-reveal"
-            :class="{ 'is-active': litIndex === i }"
-            :style="{ '--i': i }"
-          >
-            <span class="mkp__q-top">
-              <span class="mkp__q-icon"
-                ><component :is="node.icon" :size="16" :stroke-width="1.75" aria-hidden="true"
-              /></span>
-              <span class="mkp__q-index">0{{ i + 1 }}</span>
-            </span>
-            <span class="mkp__q-title">{{ node.q }}</span>
-            <span class="mkp__q-text">{{ node.a }}</span>
-          </li>
-        </ul>
       </div>
     </div>
   </section>
@@ -123,8 +104,6 @@ const nodes = [
     icon: Boxes,
     label: 'Stock',
     value: (s: Sale) => `−1 · ${s.left} left`,
-    q: 'Where did that stock go?',
-    a: 'Every unit in every branch, counted the moment it sells.',
     wire: 'M280 240 C 200 240, 170 90, 110 90',
   },
   {
@@ -132,8 +111,6 @@ const nodes = [
     icon: HandCoins,
     label: 'Customer',
     value: (s: Sale) => `${s.customer.split(' ')[0]} · +1 visit`,
-    q: 'Who still owes me?',
-    a: 'Balances and part-payments on every customer, always current.',
     wire: 'M280 240 C 360 240, 390 90, 450 90',
   },
   {
@@ -141,8 +118,6 @@ const nodes = [
     icon: MessageCircle,
     label: 'Receipt',
     value: () => 'Sent on WhatsApp',
-    q: 'Did they get a receipt?',
-    a: 'Branded receipts on WhatsApp or print, sent in one tap.',
     wire: 'M280 240 C 200 240, 170 390, 110 390',
   },
   {
@@ -150,8 +125,6 @@ const nodes = [
     icon: BarChart3,
     label: 'Today',
     value: (s: Sale) => `+${s.amount}`,
-    q: 'How much did we make today?',
-    a: 'Revenue, profit and best sellers, live, per branch.',
     wire: 'M280 240 C 360 240, 390 390, 450 390',
   },
 ]
@@ -161,7 +134,6 @@ const sectionRef = ref<HTMLElement | null>(null)
 const phase = ref(nodes.length + 1)
 const round = ref(0)
 const sale = computed(() => sales[round.value % sales.length]!)
-const litIndex = computed(() => Math.min(phase.value, nodes.length) - 1)
 
 let timer: ReturnType<typeof setInterval> | undefined
 let observer: IntersectionObserver | null = null

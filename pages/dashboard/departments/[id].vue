@@ -166,7 +166,10 @@
                   />
                   <SAvatar :name="staffName(member)" :src="member.photoURL" size="sm" />
                   <span class="s-list__main">
-                    <span class="s-list__primary">{{ staffName(member) }}</span>
+                    <span class="s-list__primary">
+                      {{ staffName(member) }}
+                      <span v-if="isSignedInStaff(member)" class="s-table__muted"> · me</span>
+                    </span>
                     <span class="s-list__secondary">{{ getStaffRowSubtitle(member) }}</span>
                   </span>
                   <span class="s-list__end">
@@ -236,7 +239,10 @@
                   <td>
                     <div class="s-table__inline">
                       <SAvatar :name="staffName(member)" :src="member.photoURL" size="sm" />
-                      <span class="s-table__primary">{{ staffName(member) }}</span>
+                      <span class="s-table__primary">
+                        {{ staffName(member) }}
+                        <span v-if="isSignedInStaff(member)" class="s-table__muted"> · me</span>
+                      </span>
                     </div>
                   </td>
                   <td class="s-hide-md">
@@ -492,6 +498,12 @@ function getStaffAccessLabel(member: Staff): string {
 
 function staffName(member: Staff): string {
   return `${member.firstName} ${member.lastName}`.trim() || member.email
+}
+
+/** True when this roster row is the person currently signed in. */
+function isSignedInStaff(member: Staff): boolean {
+  const uid = authStore.currentUser?.uid
+  return !!uid && !!member.authUid && member.authUid === uid
 }
 
 function staffStatusTone(member: Staff): 'success' | 'warning' | 'error' {

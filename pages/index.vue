@@ -23,8 +23,8 @@
           title-id="home-pricing-title"
           eyebrow="Pricing"
           title="Start free."
-          accent="Upgrade when you grow."
-          :lede="`Prices in ${currency} for your region.`"
+          accent="Grow when ready."
+          :lede="`Prices in ${currency}.`"
         />
         <div class="mk-plans">
           <article
@@ -74,13 +74,13 @@
           <MkSectionHead
             title-id="home-faq-title"
             eyebrow="FAQ"
-            title="Questions,"
-            accent="answered."
+            title="Quick"
+            accent="answers."
             align="start"
           />
           <div id="contact" class="mk-contact-card">
-            <h3 class="mk-h3">Still have a question?</h3>
-            <p class="mk-card__text">We usually reply the same day.</p>
+            <h3 class="mk-h3">Still stuck?</h3>
+            <p class="mk-card__text">We reply the same day.</p>
             <div class="mk-actions">
               <SButton
                 variant="secondary"
@@ -101,7 +101,7 @@
       class="mk-section--tight-top"
       title="Your first store is"
       accent="on us."
-      lede="Set up Micro in minutes, right in your browser."
+      lede="Micro in minutes, in your browser."
       :primary="{ label: 'Start free', to: appUrl }"
       :secondary="{ label: 'Try the live demo', to: '/demo/dashboard' }"
     />
@@ -145,40 +145,40 @@ const contactOpen = ref(false)
 const faq: MkFaqItem[] = [
   {
     q: 'Is Micro really free?',
-    a: 'Yes. Micro is free forever for one store with up to 2 staff, including inventory, sales, receipts and customers. No card needed.',
+    a: 'Yes. One store, up to 2 staff, inventory, sales, receipts and customers. No card.',
   },
   {
     q: 'What do Medium and Enterprise add?',
-    a: 'Medium adds a second store, analytics, sales leads and unlimited WhatsApp receipts. Enterprise covers 5 stores with 10 staff each plus stock transfers, and you can add more stores or staff seats any time. See the <a href="/pricing">full comparison</a>.',
+    a: 'Medium: second store, analytics, leads, unlimited WhatsApp receipts. Enterprise: 5 stores, 10 staff each, transfers. Add more any time. <a href="/pricing">Compare plans</a>.',
     html: true,
   },
   {
     q: 'Can I use Storvv on my phone?',
-    a: 'Yes, in your phone browser at app.storvv.com. iOS and Android apps are coming soon.',
+    a: 'Yes. app.storvv.com in your browser. iOS and Android apps are coming.',
   },
   {
-    q: 'What happens if my internet goes off?',
-    a: 'Storvv needs a connection to complete a sale, but it works on mobile data, so a phone hotspot is enough to keep selling. If your connection drops, Storvv tells you straight away, and everything already saved stays safe in the cloud.',
+    q: 'What if my internet drops?',
+    a: 'You need a connection to complete a sale. Mobile data or a hotspot is enough. Saved work stays in the cloud.',
   },
   {
     q: 'Do I need special hardware?',
-    a: 'No. Storvv runs in the browser on the phone, tablet or computer you already have. Quick sale scans barcodes and QR codes with your camera, and receipts go out on WhatsApp or as a PDF you can print.',
+    a: 'No. Use the phone, tablet or laptop you already have. Camera barcode scan, WhatsApp or PDF receipts.',
   },
   {
-    q: 'Can I bring in my existing stock list?',
-    a: 'Yes. Import products from an Excel file (.xlsx or .xls) into any category. Storvv tells you how many rows were added and which were skipped.',
+    q: 'Can I import my stock list?',
+    a: 'Yes. Excel (.xlsx / .xls) into any category. Storvv reports what was added or skipped.',
   },
   {
-    q: 'Which payment methods can I record?',
-    a: 'Cash, card (POS), bank transfer, OPay, Moniepoint, Palmpay, Kuda, USSD and mobile money, and you can split one sale across several. You can edit the list in Settings.',
+    q: 'Which payments can I record?',
+    a: 'Cash, card, transfer, OPay, Moniepoint, Palmpay, Kuda, USSD, mobile money, and splits. Edit the list in Settings.',
   },
   {
     q: 'Is my data safe?',
-    a: 'Every sale is saved to the cloud as you work, staff only see what their role allows, and you can turn on two-step sign-in. Owners can download everything to Excel at any time from Settings.',
+    a: 'Sales save to the cloud as you work. Roles limit what staff see. Optional two-step sign-in. Export to Excel any time.',
   },
   {
     q: 'Can I try before signing up?',
-    a: 'Yes. Open the <a href="/demo/dashboard">live demo</a> with sample data. No account needed.',
+    a: 'Yes. The <a href="/demo/dashboard">live demo</a>. No account needed.',
     html: true,
   },
   {

@@ -277,7 +277,7 @@ html.dark .mk {
 
 .mkh__live-tag-line {
   display: inline-block;
-  min-width: 8.5em;
+  min-width: 10em;
   color: rgb(255 255 255 / 0.85);
 }
 
@@ -794,6 +794,12 @@ html.dark .mk {
 @media (max-width: 760px) {
   .mkh__panel {
     min-height: min(640px, 88svh);
+    /* Clear the overlay nav so the announce sits cleanly under the logo */
+    padding-top: calc(var(--mk-header-h) + var(--s-space-2));
+  }
+
+  .mkh__announce {
+    gap: 8px;
   }
 
   .mkh__ring {
@@ -923,8 +929,8 @@ html.dark .mk {
 .mkb__body {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: var(--s-space-2) var(--s-space-1-5) var(--s-space-1-5);
+  gap: 2px;
+  padding: var(--s-space-1-5) var(--s-space-1-5) var(--s-space-2);
 }
 
 .mkb__tag {
@@ -1554,6 +1560,10 @@ html.dark .mkb-staff__avatar {
     linear-gradient(180deg, #0f1d4a 0%, #0a1230 100%);
   color: #fff;
   isolation: isolate;
+}
+
+.mkp__panel--tight {
+  padding-bottom: clamp(var(--s-space-4), 5vw, 72px);
 }
 
 .mkp__panel::before {
@@ -2296,6 +2306,22 @@ html.dark .mks__btn {
     var(--s-surface-2);
 }
 
+.mks__main--shot {
+  align-items: stretch;
+  padding: var(--s-space-1-5);
+  background: var(--s-surface-2);
+}
+
+.mks__frame {
+  width: 100%;
+  height: 100%;
+  box-shadow: none;
+}
+
+.mks__frame .mk-frame__img {
+  aspect-ratio: 16 / 10;
+}
+
 .mks__rows {
   mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
@@ -2401,7 +2427,7 @@ html.dark .mks__btn {
   margin-bottom: 0;
 }
 
-/* ── Impact: four outcomes wired into one glowing hub ───────────────────── */
+/* ── Impact: product screens you live in ─────────────────────────────────── */
 
 .mki__panel {
   position: relative;
@@ -2445,233 +2471,46 @@ html.dark .mks__btn {
   color: #b3c1ff;
 }
 
-.mki .mk-lede {
-  max-width: 56ch;
-  margin-inline: auto;
-  color: rgb(255 255 255 / 0.62);
-}
-
-.mki__stage {
-  position: relative;
-  max-width: 1040px;
-  aspect-ratio: 1000 / 480;
-  margin: var(--s-space-3) auto 0;
-}
-
-.mki__wires {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.mki__wire,
-.mki__pulse {
-  fill: none;
-  vector-effect: non-scaling-stroke;
-}
-
-.mki__wire {
-  stroke: rgb(142 162 255 / 0.4);
-  stroke-width: 1.25;
-}
-
-.mki__pulse {
-  stroke: #b3c1ff;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-dasharray: 40 900;
-  stroke-dashoffset: 40;
-  opacity: 0;
-  filter: drop-shadow(0 0 4px rgb(142 162 255 / 0.9));
-  animation: mki-pulse 3.6s var(--s-ease-out) infinite;
-  animation-delay: var(--d);
-}
-
-@keyframes mki-pulse {
-  0% {
-    stroke-dashoffset: 40;
-    opacity: 0;
-  }
-  10% {
-    opacity: 1;
-  }
-  80% {
-    opacity: 1;
-  }
-  100% {
-    stroke-dashoffset: -420;
-    opacity: 0;
-  }
-}
-
-/* The hub: three stacked glowing discs with the Storvv mark on top */
-.mki__hub {
-  position: absolute;
-  left: 50%;
-  bottom: 0;
-  width: 42%;
-  aspect-ratio: 42 / 26;
-  transform: translateX(-50%);
-}
-
-.mki__disc {
-  position: absolute;
-  left: 50%;
-  border-radius: 50%;
-  transform: translateX(-50%);
-}
-
-.mki__disc--base {
-  bottom: 0;
-  width: 100%;
-  height: 46%;
-  background: radial-gradient(closest-side, #5b7dff 0%, #3d63f2 55%, #2341c9 100%);
-  box-shadow: 0 0 80px 10px rgb(61 99 242 / 0.45);
-}
-
-.mki__disc--mid {
-  bottom: 18%;
-  width: 74%;
-  height: 36%;
-  border: 1px solid rgb(179 193 255 / 0.6);
-  background: radial-gradient(closest-side, #8ea2ff 0%, #5b7dff 70%, #3d63f2 100%);
-}
-
-.mki__disc--top {
-  bottom: 33%;
-  width: 46%;
-  height: 26%;
-  border: 1px solid rgb(179 193 255 / 0.5);
-  background: radial-gradient(closest-side, #1d3496 0%, #15276a 70%, #0f1d4a 100%);
-}
-
-.mki__mark {
-  position: absolute;
-  left: 50%;
-  bottom: 44%;
+.mki__shots {
   display: grid;
-  place-items: center;
-  width: 56px;
-  height: 56px;
-  border: 1px solid rgb(255 255 255 / 0.6);
-  border-radius: 16px;
-  background: #fff;
-  transform: translateX(-50%);
-  animation: mki-float 5s ease-in-out infinite;
-}
-
-@keyframes mki-float {
-  50% {
-    transform: translate(-50%, -6px);
-  }
-}
-
-/* Outcome cards, placed where the wires start */
-.mki__cards {
-  margin: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(var(--s-space-2), 2.5vw, var(--s-space-3));
+  max-width: 1080px;
+  margin: var(--s-space-4) auto 0;
   padding: 0;
   list-style: none;
 }
 
-.mki__card {
-  position: absolute;
+.mki__shot {
   display: grid;
-  gap: 6px;
-  width: 26%;
-  padding: var(--s-space-1-5) var(--s-space-2);
-  border-radius: var(--s-radius-lg);
-  background: rgb(15 23 50 / 0.72);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.1), 0 20px 40px -24px rgb(0 0 0 / 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  gap: var(--s-space-1);
 }
 
-.mki__card--stock {
-  top: 4%;
-  left: 9%;
+.mki__shot .mk-frame {
+  border-color: rgb(255 255 255 / 0.1);
+  background: rgb(10 14 24 / 0.85);
+  box-shadow: 0 24px 48px -28px rgb(0 0 0 / 0.65);
 }
 
-.mki__card--paid {
-  top: 46%;
-  left: 4%;
+.mki__shot .mk-frame__bar {
+  border-bottom-color: rgb(255 255 255 / 0.08);
+  background: rgb(255 255 255 / 0.04);
 }
 
-.mki__card--close {
-  top: 4%;
-  left: 65%;
+.mki__shot .mk-frame__url {
+  background: rgb(255 255 255 / 0.06);
+  color: rgb(255 255 255 / 0.55);
 }
 
-.mki__card--trust {
-  top: 46%;
-  left: 70%;
+.mki__shot-label {
+  margin: 0;
+  font: 500 0.8125rem / 1.25 var(--s-font-sans);
+  color: rgb(255 255 255 / 0.72);
+  text-align: center;
 }
 
-.mki__card-head {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font: 600 0.9375rem / 1.3 var(--s-font-sans);
-  color: #fff;
-}
-
-.mki__card-head svg {
-  flex: none;
-  color: #8ea2ff;
-}
-
-.mki__card-text {
-  font: var(--mk-small);
-  color: rgb(255 255 255 / 0.6);
-  text-wrap: pretty;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .mki__pulse,
-  .mki__mark {
-    animation: none;
-  }
-}
-
-@media (max-width: 900px) {
-  .mki__panel {
-    padding-bottom: var(--s-space-4);
-  }
-
-  .mki__stage {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--s-space-3);
-    aspect-ratio: auto;
-  }
-
-  .mki__wires {
-    display: none;
-  }
-
-  .mki__hub {
-    position: relative;
-    order: -1;
-    width: min(320px, 80%);
-    transform: none;
-  }
-
-  .mki__cards {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--s-space-1-5);
-    width: 100%;
-  }
-
-  .mki__card {
-    position: static;
-    width: auto;
-  }
-}
-
-@media (max-width: 560px) {
-  .mki__cards {
+@media (max-width: 720px) {
+  .mki__shots {
     grid-template-columns: minmax(0, 1fr);
   }
 }

@@ -9,13 +9,9 @@
         <div class="mk-stats-head__title">
           <p class="mk-eyebrow">Grows with you</p>
           <h2 id="mk-stats-title" class="mk-h2">
-            Built for businesses that <span class="mk-accent">outgrow spreadsheets.</span>
+            From one counter to <span class="mk-accent">every branch.</span>
           </h2>
         </div>
-        <p class="mk-lede mk-muted">
-          From a solo counter on Micro to multi-branch teams on Enterprise. Pick the workspace that
-          fits, and scale when you're ready.
-        </p>
       </div>
 
       <div class="mk-band mk-reveal">
@@ -72,11 +68,7 @@
             <span class="ds-sr-only">8+</span>
             <span aria-hidden="true">{{ workflows }}+</span>
           </p>
-          <p class="mk-band__lead-title">Retail workflows in one place</p>
-          <p class="mk-band__lead-text">
-            Inventory, sales, customers, buybacks, stock loans, sales leads, transfers and
-            analytics.
-          </p>
+          <p class="mk-band__lead-title">Retail workflows, one login</p>
         </div>
 
         <ul class="mk-band__stats">
@@ -94,9 +86,9 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 
 const stats = [
-  { value: 'Free', text: 'Micro is free forever for one store. No card needed.' },
-  { value: '5 stores', text: 'On Enterprise, with up to 10 staff in each store.' },
-  { value: '3 platforms', text: 'Live on the web today. iOS and Android are on the way.' },
+  { value: 'Free', text: 'Micro forever. No card.' },
+  { value: '5 stores', text: 'Enterprise · 10 staff each.' },
+  { value: 'Web first', text: 'iOS & Android next.' },
 ]
 
 const sectionRef = ref<HTMLElement | null>(null)

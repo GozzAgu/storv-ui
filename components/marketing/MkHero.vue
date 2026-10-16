@@ -11,7 +11,7 @@
             <StorvvMark :size="56" />
             <span class="mkh__emblem-status" />
             <span class="mkh__live-tag">
-              <span class="mkh__live-tag-title">Always on</span>
+              <span class="mkh__live-tag-title">Always online</span>
               <Transition name="mkh-live" mode="out-in">
                 <span :key="liveLine" class="mkh__live-tag-line">{{ liveLine }}</span>
               </Transition>
@@ -132,7 +132,7 @@ const barSets = [
 ]
 
 const liveLines = [
-  'Running 24/7',
+  '24/7 across every branch',
   'Syncing every branch',
   'Saving every sale',
   'Watching your stock',

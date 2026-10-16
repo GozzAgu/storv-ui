@@ -11,12 +11,10 @@
         title-id="mkb-title"
         eyebrow="One workspace"
         title="Your whole shop."
-        accent="Live, in one place."
-        lede="Every sale updates stock, receipts, customers and reports the moment it happens, across every branch and every device."
+        accent="Live."
       />
 
       <div class="mkb__grid">
-        <!-- Inventory -->
         <article class="mkb__card mk-reveal" style="--i: 0">
           <div class="mkb__ui mkb-inv" aria-hidden="true">
             <div
@@ -41,14 +39,9 @@
           <div class="mkb__body">
             <span class="mkb__tag"><Boxes :size="14" aria-hidden="true" />Stock</span>
             <h3 class="mkb__title">Real-time inventory</h3>
-            <p class="mkb__text">
-              Track by quantity, or by serial and IMEI for phones and electronics. Counts drop the
-              second a sale goes through.
-            </p>
           </div>
         </article>
 
-        <!-- Branches -->
         <article class="mkb__card mk-reveal" style="--i: 1">
           <div class="mkb__ui mkb-net" aria-hidden="true">
             <svg viewBox="0 0 280 150" class="mkb-net__svg" focusable="false">
@@ -67,11 +60,9 @@
           <div class="mkb__body">
             <span class="mkb__tag"><GitBranch :size="14" aria-hidden="true" />Stock</span>
             <h3 class="mkb__title">Every branch, in sync</h3>
-            <p class="mkb__text">Move stock between stores and compare each branch side by side.</p>
           </div>
         </article>
 
-        <!-- Buybacks -->
         <article class="mkb__card mk-reveal" style="--i: 2">
           <div class="mkb__ui mkb-flow" aria-hidden="true">
             <div
@@ -89,14 +80,10 @@
           </div>
           <div class="mkb__body">
             <span class="mkb__tag"><Repeat :size="14" aria-hidden="true" />Stock</span>
-            <h3 class="mkb__title">Buybacks and stock loans</h3>
-            <p class="mkb__text">
-              Take trade-ins and lend stock to other shops, every unit tracked.
-            </p>
+            <h3 class="mkb__title">Buybacks and loans</h3>
           </div>
         </article>
 
-        <!-- WhatsApp receipts -->
         <article class="mkb__card mk-reveal" style="--i: 3">
           <div class="mkb__ui mkb-wa" aria-hidden="true">
             <div :key="tick" class="mkb-wa__bubble">
@@ -114,14 +101,10 @@
           </div>
           <div class="mkb__body">
             <span class="mkb__tag"><MessageCircle :size="14" aria-hidden="true" />Selling</span>
-            <h3 class="mkb__title">Receipts on WhatsApp</h3>
-            <p class="mkb__text">
-              Branded receipts land in your customer's chat. No printer needed.
-            </p>
+            <h3 class="mkb__title">WhatsApp receipts</h3>
           </div>
         </article>
 
-        <!-- Customers -->
         <article class="mkb__card mk-reveal" style="--i: 4">
           <div class="mkb__ui mkb-cust" aria-hidden="true">
             <div
@@ -140,12 +123,10 @@
           </div>
           <div class="mkb__body">
             <span class="mkb__tag"><Users :size="14" aria-hidden="true" />Selling</span>
-            <h3 class="mkb__title">Customers and balances</h3>
-            <p class="mkb__text">Know who owes what and record part-payments as they come in.</p>
+            <h3 class="mkb__title">Balances &amp; part-pay</h3>
           </div>
         </article>
 
-        <!-- Analytics -->
         <article class="mkb__card mk-reveal" style="--i: 5">
           <div class="mkb__ui mkb-chart" aria-hidden="true">
             <div class="mkb-chart__head">
@@ -163,12 +144,10 @@
           </div>
           <div class="mkb__body">
             <span class="mkb__tag"><ChartColumn :size="14" aria-hidden="true" />Reports</span>
-            <h3 class="mkb__title">Analytics that explain</h3>
-            <p class="mkb__text">Best sellers, slow movers, peak hours and profit at a glance.</p>
+            <h3 class="mkb__title">Live analytics</h3>
           </div>
         </article>
 
-        <!-- Staff -->
         <article class="mkb__card mk-reveal" style="--i: 6">
           <div class="mkb__ui mkb-staff" aria-hidden="true">
             <div v-for="(p, i) in staff" :key="p.name" class="mkb-staff__row">
@@ -182,19 +161,14 @@
           </div>
           <div class="mkb__body">
             <span class="mkb__tag"><ShieldCheck :size="14" aria-hidden="true" />Team</span>
-            <h3 class="mkb__title">Staff roles that fit</h3>
-            <p class="mkb__text">Choose what each person can do. Every action is logged.</p>
+            <h3 class="mkb__title">Staff roles</h3>
           </div>
         </article>
 
-        <!-- More -->
         <NuxtLink to="/features" class="mkb__card mkb__card--more mk-reveal" style="--i: 7">
           <span class="mkb__more-icon"><ArrowUpRight :size="20" aria-hidden="true" /></span>
           <div class="mkb__body">
             <h3 class="mkb__title">See every feature</h3>
-            <p class="mkb__text">
-              Explore everything Storvv does for your shop, one feature at a time.
-            </p>
           </div>
         </NuxtLink>
       </div>

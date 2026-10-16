@@ -5,9 +5,8 @@
         <MkSectionHead
           title-id="mk-setup-title"
           eyebrow="Get started"
-          title="Up and running"
-          accent="before your next customer."
-          lede="No installs, no hardware, no training day. Three steps and you're taking sales."
+          title="Ready before"
+          accent="your next customer."
         />
 
         <ol class="mks__steps" aria-label="Setup steps">
@@ -54,30 +53,19 @@
               <template #trailing><ArrowRight :size="16" aria-hidden="true" /></template>
             </SButton>
             <span class="mks__total"
-              ><Timer :size="16" aria-hidden="true" />Ready in about 10 minutes</span
+              ><Timer :size="16" aria-hidden="true" />About 10 minutes</span
             >
           </div>
 
-          <div class="mks__main" aria-hidden="true">
+          <div class="mks__main mks__main--shot">
             <Transition name="mks-swap" mode="out-in">
-              <div :key="current.id" class="mks__rows">
-                <div
-                  v-for="(row, r) in current.rows"
-                  :key="r"
-                  class="mks__row"
-                  :class="{ 'mks__row--rev': r % 2 === 1 }"
-                >
-                  <span class="mks__lane">
-                    <span
-                      v-for="(chip, c) in [...row, ...row]"
-                      :key="c"
-                      class="mks__chip"
-                      :class="{ 'is-on': c % row.length === r + 1 }"
-                      >{{ chip }}</span
-                    >
-                  </span>
-                </div>
-              </div>
+              <MkFrame
+                :key="current.id"
+                class="mks__frame"
+                :src="current.shot"
+                :alt="current.alt"
+                :url="current.url"
+              />
             </Transition>
           </div>
         </div>
@@ -90,6 +78,7 @@
 import { computed, ref } from 'vue'
 import { ArrowRight, Boxes, Check, Clock, ReceiptText, Store, Timer } from '@lucide/vue'
 import SButton from '~/components/s/SButton.vue'
+import MkFrame from '~/components/marketing/MkFrame.vue'
 import MkSectionHead from '~/components/marketing/MkSectionHead.vue'
 import { useMarketingAppUrl } from '~/composables/useMarketingSite'
 
@@ -101,36 +90,30 @@ const steps = [
     icon: Store,
     title: 'Create your store',
     time: '1 min',
-    text: 'Name it and pick what you sell. Micro is free forever, no card needed.',
-    rows: [
-      ["Ada's Gadgets", 'Gadgets', 'Fashion', 'Groceries', 'Pharmacy', 'Electronics'],
-      ['₦ Naira', 'Lagos', 'Micro · free', '1 store', '2 staff', 'No card'],
-      ['Store created', 'Branch: Ikeja', 'Owner', 'Invite staff', 'Receipt name', 'Ready to sell'],
-    ],
+    text: 'Name it. Micro is free forever, no card.',
+    shot: '/marketing/app/overview.webp',
+    url: 'app.storvv.com/dashboard',
+    alt: 'Storvv dashboard after creating a store',
   },
   {
     id: 'stock',
     icon: Boxes,
     title: 'Add your stock',
     time: '5 min',
-    text: 'Type it in or import a spreadsheet. Track by quantity or by serial number.',
-    rows: [
-      ['iPhone 13 128GB', 'AirPods Pro', 'Apple Watch SE', 'USB-C charger', 'Samsung A15'],
-      ['Import spreadsheet', 'Track by serial', 'Track by quantity', 'IMEI', 'Categories'],
-      ['6 in stock', '12 in stock', '2 left', 'Low-stock alert', '₦5.95m stock value'],
-    ],
+    text: 'Type it in or import a spreadsheet.',
+    shot: '/marketing/app/inventory.webp',
+    url: 'app.storvv.com/inventory',
+    alt: 'Storvv inventory with categories and stock counts',
   },
   {
     id: 'sell',
     icon: ReceiptText,
     title: 'Start selling',
     time: 'Instant',
-    text: 'Ring up a sale, send the receipt and watch your numbers move on their own.',
-    rows: [
-      ['New sale', '₦485,000', 'Cash', 'Bank transfer', 'Card', 'Part-payment'],
-      ['Receipt sent', 'WhatsApp', 'Print', 'Chioma Eze', 'Customer saved'],
-      ['Stock −1', '+₦485,000 today', 'Best seller', 'Report updated', 'Paid'],
-    ],
+    text: 'Ring one up. Stock and reports move with you.',
+    shot: '/marketing/app/sales.webp',
+    url: 'app.storvv.com/sales',
+    alt: 'Storvv sales screen with recent receipts',
   },
 ]
 

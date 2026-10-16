@@ -4,9 +4,8 @@
       <MkSectionHead
         title-id="mk-tour-title"
         eyebrow="Product tour"
-        title="A closer look"
-        accent="inside Storvv."
-        lede="The three jobs you do every day, each a few taps away."
+        title="See it"
+        accent="in the product."
       />
 
       <div class="mk-tour mk-reveal">
@@ -71,26 +70,11 @@
           </div>
 
           <div class="mk-tour__footer">
-            <ul class="mk-tour__points">
-              <li v-for="point in current.points" :key="point">
-                <Check :size="16" aria-hidden="true" />{{ point }}
-              </li>
-            </ul>
-            <NuxtLink to="/features#explore" class="mk-link">
-              Explore {{ current.title.toLowerCase() }}
+            <NuxtLink to="/demo/dashboard" class="mk-link">
+              Open the live demo
               <ArrowRight :size="16" aria-hidden="true" />
             </NuxtLink>
           </div>
-        </div>
-
-        <div class="mk-tour__cta">
-          <p class="mk-tour__cta-text">
-            <strong>See it with real data.</strong> Click around a sample shop, no sign-up needed.
-          </p>
-          <SButton variant="secondary" class="mk-btn mk-btn--compact" to="/demo/dashboard">
-            Try the live demo
-            <template #trailing><ArrowRight :size="16" aria-hidden="true" /></template>
-          </SButton>
         </div>
       </div>
     </div>
@@ -99,8 +83,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { ArrowLeftRight, ArrowRight, Boxes, Check, ReceiptText } from '@lucide/vue'
-import SButton from '~/components/s/SButton.vue'
+import { ArrowLeftRight, ArrowRight, Boxes, ReceiptText, Users, UsersRound } from '@lucide/vue'
 import MkFrame from '~/components/marketing/MkFrame.vue'
 import MkSectionHead from '~/components/marketing/MkSectionHead.vue'
 
@@ -109,8 +92,7 @@ const tabs = [
     id: 'inventory',
     icon: Boxes,
     title: 'Inventory',
-    lede: "Know exactly what's on your shelves.",
-    points: ['Low-stock alerts', 'Serial or quantity tracking', 'Stock value at a glance'],
+    lede: "What's on the shelf.",
     photo: '/marketing/tour-stockroom.webp',
     path: 'inventory',
     shot: '/marketing/app/inventory.webp',
@@ -120,19 +102,37 @@ const tabs = [
     id: 'sales',
     icon: ReceiptText,
     title: 'Sales',
-    lede: 'Ring up a sale in seconds.',
-    points: ['Cash, card, transfer or split', 'WhatsApp receipts', 'Stock updates instantly'],
+    lede: 'Ring up in seconds.',
     photo: '/marketing/tour-counter.webp',
     path: 'receipts',
     shot: '/marketing/app/sales.webp',
     alt: 'Storvv sales: receipts with customers, items, totals, profit and payment status',
   },
   {
+    id: 'customers',
+    icon: Users,
+    title: 'Customers',
+    lede: 'Who owes what.',
+    photo: '/marketing/tour-counter.webp',
+    path: 'customers',
+    shot: '/marketing/app/customers.webp',
+    alt: 'Storvv customers with open balances and recent purchases',
+  },
+  {
+    id: 'team',
+    icon: UsersRound,
+    title: 'Team',
+    lede: 'Roles that fit.',
+    photo: '/marketing/tour-stockroom.webp',
+    path: 'team',
+    shot: '/marketing/app/team.webp',
+    alt: 'Storvv team screen with staff roles and permissions',
+  },
+  {
     id: 'branches',
     icon: ArrowLeftRight,
     title: 'Branches',
-    lede: 'Every branch, one login.',
-    points: ['Switch stores in one tap', 'Approved stock transfers', 'One login for the team'],
+    lede: 'One login, every store.',
     photo: '/marketing/tour-stockroom.webp',
     path: 'multi-store-sync',
     shot: '/marketing/app/branches.webp',
