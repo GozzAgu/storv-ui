@@ -10,23 +10,79 @@ export function normalizeSubscriptionPlan(raw: unknown): SubscriptionPlan {
   return 'storvv_micro'
 }
 
-/** UI/rules plan after canceled subscriptions pass their paid period. */
+/**
+ * Free trial for new owner accounts: the full app for this many days from sign-up, then Micro
+ * unless they pay. Set to 0 to stop giving new sign-ups a trial; trials already running finish.
+ */
+export const NEW_ACCOUNT_TRIAL_DAYS = 90
+
+/** What a trial unlocks. */
+export const TRIAL_PLAN: SubscriptionPlan = 'storvv_enterprise'
+
+/**
+ * `trialEndsAt` on the owner doc, as epoch ms. The server writes it (owners cannot); it arrives
+ * as a Firestore Timestamp, a serialised one ({ seconds } / { _seconds }), an ISO string or ms.
+ */
+export function trialEndsAtMs(value: unknown): number | null {
+  if (value == null) return null
+  if (typeof value === 'number') return Number.isFinite(value) ? value : null
+  if (typeof value === 'string') {
+    const ms = new Date(value).getTime()
+    return Number.isFinite(ms) ? ms : null
+  }
+  if (value instanceof Date) return Number.isFinite(value.getTime()) ? value.getTime() : null
+  const ts = value as { toMillis?: () => number; seconds?: number; _seconds?: number }
+  if (typeof ts.toMillis === 'function') return ts.toMillis()
+  const seconds = typeof ts.seconds === 'number' ? ts.seconds : ts._seconds
+  return typeof seconds === 'number' ? seconds * 1000 : null
+}
+
+/** How `trialEndsAt` is held in the app: a Firestore Timestamp, or an ISO string for staff. */
+export type TrialEndsAt = string | { toMillis: () => number } | null
+
+export interface TrialFields {
+  subscription?: unknown
+  trialEndsAt?: unknown
+}
+
+/** On a trial right now: free plan stored, trial end still ahead. Paid plans are never "trial". */
+export function isTrialActive(userData: TrialFields | null | undefined, now = Date.now()): boolean {
+  if (normalizeSubscriptionPlan(userData?.subscription) !== 'storvv_micro') return false
+  const endMs = trialEndsAtMs(userData?.trialEndsAt)
+  return endMs !== null && endMs > now
+}
+
+/** Whole days left on the trial, rounded up; 0 when there is no running trial. */
+export function trialDaysLeft(userData: TrialFields | null | undefined, now = Date.now()): number {
+  if (!isTrialActive(userData, now)) return 0
+  const endMs = trialEndsAtMs(userData?.trialEndsAt)!
+  return Math.max(1, Math.ceil((endMs - now) / 86_400_000))
+}
+
+/**
+ * The plan the app, the server and the rules act on: a running trial unlocks TRIAL_PLAN, and a
+ * canceled paid plan drops to Micro once its paid period is over.
+ * Keep in step with `normalizedOwnerPlan` in firestore.rules.
+ */
 export function resolveEffectiveSubscriptionPlan(
   userData:
     | {
         subscription?: unknown
         subscriptionStatus?: string
         subscriptionCurrentPeriodEnd?: string
+        trialEndsAt?: unknown
       }
     | null
-    | undefined
+    | undefined,
+  now = Date.now()
 ): SubscriptionPlan {
+  if (isTrialActive(userData, now)) return TRIAL_PLAN
   const stored = normalizeSubscriptionPlan(userData?.subscription)
   if (userData?.subscriptionStatus !== 'canceled') return stored
   const periodEnd = userData.subscriptionCurrentPeriodEnd
   if (!periodEnd) return stored
   const endMs = new Date(periodEnd).getTime()
-  if (Number.isFinite(endMs) && Date.now() > endMs) {
+  if (Number.isFinite(endMs) && now > endMs) {
     return 'storvv_micro'
   }
   return stored

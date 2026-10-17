@@ -23,6 +23,7 @@ import {
   writeUserProfileCache,
   clearUserProfileCache,
 } from '~/utils/user-profile-cache'
+import { requestTrialStart, shouldRequestTrial } from '~/utils/account-trial-client'
 
 /** Dedupe parallel fetchUserData(uid) from middleware, layout, and sign-in. */
 const fetchUserDataInflight = new Map<string, Promise<void>>()
@@ -42,6 +43,15 @@ export const useUserStore = defineStore('user', {
   },
 
   actions: {
+    /** New owner accounts get their free trial once; the server ignores repeat calls. */
+    async startTrialIfDue(userId: string) {
+      if (this.userData?.uid !== userId || !shouldRequestTrial(this.userData)) return
+      const trialEndsAt = await requestTrialStart()
+      if (!trialEndsAt || this.userData?.uid !== userId) return
+      this.userData = { ...this.userData, trialEndsAt } as UserData
+      writeUserProfileCache(userId, this.userData)
+    },
+
     // Fetch user data from Firestore
     async fetchUserData(userId: string) {
       const existing = fetchUserDataInflight.get(userId)
@@ -167,6 +177,7 @@ export const useUserStore = defineStore('user', {
           if (this.userData) {
             writeUserProfileCache(userId, this.userData)
           }
+          void this.startTrialIfDue(userId)
           return
         }
 

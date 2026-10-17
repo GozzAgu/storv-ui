@@ -1,7 +1,7 @@
 import { collection, doc, setDoc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { useFirestore } from './useFirestore'
 import { PERMISSION_DENIED_MESSAGE, CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
-import type { SubscriptionAddOnEntry, SubscriptionPlan } from '~/types/subscription'
+import type { SubscriptionAddOnEntry, SubscriptionPlan, TrialEndsAt } from '~/types/subscription'
 import type { SubscriptionBillingCycle } from '~/types/subscription-billing'
 import type { UserPreferences } from '~/composables/usePreferences'
 import type { BusinessCapability, ExperienceMode } from '~/types/business-experience'
@@ -57,6 +57,11 @@ export interface UserData {
   subscriptionCurrentPeriodEnd?: string
   /** Enterprise extra stores / staff seats, written by the billing server. */
   subscriptionAddOns?: SubscriptionAddOnEntry[]
+  /**
+   * End of the free trial, written by the server only. A Firestore Timestamp on the owner's own
+   * doc; an ISO string when it reaches staff through the owner context.
+   */
+  trialEndsAt?: TrialEndsAt
   /** A Paystack charge the billing server received but could not apply (cleared by the next good charge). */
   subscriptionPaymentIssue?: {
     reference: string | null
@@ -139,7 +144,9 @@ export const useUser = () => {
         }
 
         await setDoc(userRef, newUserData)
-        return newUserData
+        const { requestTrialStart } = await import('~/utils/account-trial-client')
+        const trialEndsAt = await requestTrialStart()
+        return trialEndsAt ? { ...newUserData, trialEndsAt } : newUserData
       } else {
         // Update existing user document
         await updateDoc(userRef, {

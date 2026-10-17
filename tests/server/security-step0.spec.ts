@@ -71,6 +71,7 @@ describe('pickOwnerWorkspaceFields', () => {
       'subscriptionBillingCycle',
       'subscriptionCurrentPeriodEnd',
       'subscriptionStatus',
+      'trialEndsAt',
     ])
     expect(JSON.stringify(picked)).not.toMatch(/LEGACYSECRET|CUS_x|SUB_x|EMAILTOKEN|owner@example/)
   })

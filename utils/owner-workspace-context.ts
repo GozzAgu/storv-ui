@@ -13,6 +13,7 @@ export type OwnerWorkspaceContext = Pick<
   | 'subscriptionBillingCycle'
   | 'subscriptionStatus'
   | 'subscriptionCurrentPeriodEnd'
+  | 'trialEndsAt'
   | 'preferences'
   | 'storeDetails'
   | 'storeLogoUrl'
@@ -65,6 +66,7 @@ export function ownerContextToUserData(context: OwnerWorkspaceContext): UserData
     subscriptionBillingCycle: context.subscriptionBillingCycle,
     subscriptionStatus: context.subscriptionStatus,
     subscriptionCurrentPeriodEnd: context.subscriptionCurrentPeriodEnd,
+    trialEndsAt: context.trialEndsAt,
     preferences: context.preferences,
     storeDetails: context.storeDetails,
     storeLogoUrl: context.storeLogoUrl,

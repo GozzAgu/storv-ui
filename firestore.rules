@@ -185,11 +185,20 @@ service cloud.firestore {
         : 'storvv_micro';
     }
 
+    // Free trial: the server stamps trialEndsAt (a timestamp) on the owner doc; owners cannot
+    // write it. Mirrors isTrialActive / TRIAL_PLAN in types/subscription.ts.
+    function ownerTrialActive(userId) {
+      return exists(/databases/$(database)/documents/users/$(userId))
+        && get(/databases/$(database)/documents/users/$(userId)).data.get('trialEndsAt', null) is timestamp
+        && get(/databases/$(database)/documents/users/$(userId)).data.trialEndsAt > request.time;
+    }
+
     function normalizedOwnerPlan(userId) {
       let raw = ownerSubscriptionRaw(userId);
-      return raw == 'storvv_medium' || raw == 'medium'
+      let stored = raw == 'storvv_medium' || raw == 'medium'
         ? 'storvv_medium'
         : (raw == 'storvv_enterprise' || raw == 'enterprise' ? 'storvv_enterprise' : 'storvv_micro');
+      return stored == 'storvv_micro' && ownerTrialActive(userId) ? 'storvv_enterprise' : stored;
     }
 
     function planAtLeastMedium(userId) {
@@ -434,6 +443,7 @@ service cloud.firestore {
           'uid',
           'createdAt',
           'mustChangePassword',
+          'trialEndsAt',
         ]);
     }
     
