@@ -12,9 +12,23 @@
   color: var(--s-text-muted);
 }
 
+/* Phone list uses the web table's type scale (data.css .s-table) and row height, kept at 44pt. */
 .s-sales .s-only-sm .s-list__item {
+  min-height: var(--s-touch);
   gap: var(--s-space-1);
-  padding: var(--s-space-1) var(--s-space-1) var(--s-space-1) var(--s-space-2);
+  padding: var(--s-space-half) var(--s-space-1) var(--s-space-half) var(--s-space-2);
+}
+
+.s-sales .s-only-sm .s-list__primary {
+  font: 500 0.71875rem/1rem var(--s-font-sans);
+}
+
+.s-sales .s-only-sm .s-list__secondary {
+  font: 400 0.65625rem/0.875rem var(--s-font-sans);
+}
+
+.s-sales .s-only-sm .s-list__value {
+  font: 600 0.71875rem/1rem var(--s-font-sans);
 }
 
 .s-sales .s-list__end {
