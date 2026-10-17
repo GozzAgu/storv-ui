@@ -7,6 +7,8 @@
  *
  * Skipped on localhost and Vercel preview (*.vercel.app) so dev/preview behave normally.
  */
+import { isMarketingPath } from '~/utils/marketing-paths'
+
 export default defineNuxtRouteMiddleware((to) => {
   const host = getHostname()
 
@@ -72,13 +74,4 @@ function getAppOrigin(config: ReturnType<typeof useRuntimeConfig>): string {
     return fromConfig.replace(/\/$/, '')
   }
   return 'https://app.storvv.com'
-}
-
-/** Paths that stay on the marketing site (www). */
-function isMarketingPath(path: string): boolean {
-  if (['/', '/privacy', '/terms', '/subscribe', '/pricing'].includes(path)) return true
-  if (path === '/store' || path.startsWith('/store/')) return true
-  // Guest Paystack checkout (storefront Phase 4 may land here from www).
-  if (path === '/pay' || path.startsWith('/pay/')) return true
-  return false
 }
