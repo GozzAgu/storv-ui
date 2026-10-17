@@ -21,6 +21,8 @@ function applyOwnerContext(base: UserData, owner: OwnerWorkspaceContext): UserDa
     subscriptionBillingCycle: owner.subscriptionBillingCycle,
     subscriptionStatus: owner.subscriptionStatus,
     subscriptionCurrentPeriodEnd: owner.subscriptionCurrentPeriodEnd,
+    trialEndsAt: owner.trialEndsAt,
+    planViewOnly: owner.planViewOnly ?? null,
     preferences: owner.preferences,
     storeDetails: owner.storeDetails,
     storeLogoUrl: owner.storeLogoUrl,
@@ -100,7 +102,13 @@ export function buildStaffUserData(
   authUid: string,
   prior?: Pick<
     UserData,
-    'subscription' | 'subscriptionBillingCycle' | 'preferences' | 'storeDetails' | 'storeLogoUrl'
+    | 'subscription'
+    | 'subscriptionBillingCycle'
+    | 'trialEndsAt'
+    | 'planViewOnly'
+    | 'preferences'
+    | 'storeDetails'
+    | 'storeLogoUrl'
   > | null
 ): UserData {
   const priorPlan = prior?.subscription
@@ -112,6 +120,8 @@ export function buildStaffUserData(
     role: 'staff',
     subscription: (priorPlan as SubscriptionPlan) || 'storvv_micro',
     subscriptionBillingCycle: prior?.subscriptionBillingCycle,
+    trialEndsAt: prior?.trialEndsAt,
+    planViewOnly: prior?.planViewOnly ?? null,
     preferences: prior?.preferences,
     storeDetails: prior?.storeDetails,
     storeLogoUrl: prior?.storeLogoUrl,

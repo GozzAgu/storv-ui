@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { assertPlanWritable } from '~/utils/plan-view-only'
 import {
   doc,
   getDoc,
@@ -343,6 +344,7 @@ export const useSalesLeadsStore = defineStore('salesLeads', {
     },
 
     async createSalesLead(params: CreateSalesLeadParams) {
+      assertPlanWritable()
       const { isDemoModeActive } = await import('~/utils/demo-mode')
       const authStore = useAuthStore()
       if (!authStore.currentUser) {
@@ -460,6 +462,7 @@ export const useSalesLeadsStore = defineStore('salesLeads', {
     },
 
     async updateSalesLead(leadId: string, params: UpdateSalesLeadParams) {
+      assertPlanWritable()
       const authStore = useAuthStore()
       if (!authStore.currentUser) {
         throw new Error('Sign in to update this lead.')
@@ -544,6 +547,7 @@ export const useSalesLeadsStore = defineStore('salesLeads', {
     },
 
     async deleteSalesLead(leadId: string) {
+      assertPlanWritable()
       const authStore = useAuthStore()
       if (!authStore.currentUser) {
         throw new Error('Sign in to delete this lead.')
@@ -583,6 +587,7 @@ export const useSalesLeadsStore = defineStore('salesLeads', {
     },
 
     async updateLeadStatus(leadId: string, status: SalesLeadStatus) {
+      assertPlanWritable()
       const db = useFirestore().getFirestoreInstance()
       const authStore = useAuthStore()
       if (!db || !authStore.currentUser) {
@@ -613,6 +618,7 @@ export const useSalesLeadsStore = defineStore('salesLeads', {
     },
 
     async addLeadNote(leadId: string, note: string) {
+      assertPlanWritable()
       const trimmed = note.trim()
       if (!trimmed) return
 

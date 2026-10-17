@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { assertPlanWritable } from '~/utils/plan-view-only'
 import {
   doc,
   getDoc,
@@ -150,6 +151,7 @@ export const useSellerLoanOutsStore = defineStore('sellerLoanOuts', {
       partyNotes?: string
       lines: SellerLoanLineSnapshot[]
     }) {
+      assertPlanWritable()
       const { isDemoModeActive, DEMO_USER_UID } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) {
         const demoStoreId = (await getCurrentStoreId()) || ''

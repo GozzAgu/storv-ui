@@ -14,6 +14,7 @@ export type OwnerWorkspaceContext = Pick<
   | 'subscriptionStatus'
   | 'subscriptionCurrentPeriodEnd'
   | 'trialEndsAt'
+  | 'planViewOnly'
   | 'preferences'
   | 'storeDetails'
   | 'storeLogoUrl'

@@ -7,6 +7,7 @@
     @update:open="(value: boolean) => emit('update:modelValue', value)"
   >
     <div class="s-form s-qs">
+      <p v-if="isPlanViewOnly" class="s-notice">{{ PLAN_VIEW_ONLY_SALE_NOTICE }}</p>
       <SellScreenNoteBanner />
 
       <!-- Folder Selection -->
@@ -590,6 +591,8 @@ import { usePreferences } from '~/composables/usePreferences'
 import { useAppToast } from '~/composables/useAppToast'
 import { getReceiptProductDetails } from '~/composables/useReceiptProductDetails'
 import { resolveBulkStockFieldAndValue } from '~/utils/inventory-bulk-quantity'
+import { PLAN_VIEW_ONLY_SALE_NOTICE } from '~/utils/plan-access'
+import { usePlanViewOnly } from '~/composables/usePlanViewOnly'
 import { buildSaleTenders } from '~/utils/payments-v2-tenders'
 import { useReceiptCategoryPicker } from '~/composables/useReceiptCategoryPicker'
 import { useDashboardDrawerChrome } from '~/composables/useDashboardDrawerChrome'
@@ -867,7 +870,10 @@ const removeSplitPayment = (index: number) => {
   }
 }
 
+const { isViewOnly: isPlanViewOnly } = usePlanViewOnly()
+
 const canCompleteQuickSale = computed(() => {
+  if (isPlanViewOnly.value) return false
   if (cartItems.value.length === 0 || !selectedFolderId.value) return false
   if (hasAnyDiscount.value && !discountReason.value.trim()) return false
   if (useSplitPayment.value) {

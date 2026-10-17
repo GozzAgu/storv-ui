@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { assertPlanWritable } from '~/utils/plan-view-only'
 import {
   doc,
   getDocs,
@@ -150,6 +151,7 @@ export const useCustomerBuybacksStore = defineStore('customerBuybacks', {
       paymentMethod: string
       notes?: string
     }) {
+      assertPlanWritable()
       const name = normalizeEntityName(params.customerName) || params.customerName.trim()
       if (!name) throw new Error('Customer name is required')
 

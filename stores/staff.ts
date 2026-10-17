@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { assertPlanWritable } from '~/utils/plan-view-only'
 import { CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import {
   collection,
@@ -613,6 +614,7 @@ export const useStaffStore = defineStore('staff', {
         'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'departmentName' | 'storeId'
       > & { password: string }
     ) {
+      assertPlanWritable()
       const authStore = useAuthStore()
       if (!authStore.currentUser) {
         throw new Error('User must be authenticated to create staff')
@@ -784,6 +786,7 @@ export const useStaffStore = defineStore('staff', {
       staffId: string,
       updates: Partial<Omit<Staff, 'id' | 'createdAt' | 'createdBy' | 'departmentName'>>
     ) {
+      assertPlanWritable()
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
         throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
@@ -916,6 +919,7 @@ export const useStaffStore = defineStore('staff', {
 
     // Deactivate staff (soft-delete roster + disable Firebase Auth login)
     async deleteStaff(staffId: string, totpCode?: string): Promise<Staff> {
+      assertPlanWritable()
       const { isDemoModeActive } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) {
         const { DEMO_USER_UID } = await import('~/utils/demo-mode')
@@ -997,6 +1001,7 @@ export const useStaffStore = defineStore('staff', {
 
     // Reactivate removed staff (restore Firestore + enable Auth)
     async reactivateStaff(staffId: string, totpCode?: string): Promise<Staff> {
+      assertPlanWritable()
       const { isDemoModeActive } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) {
         const storeId = (await getCurrentStoreId()) || ''

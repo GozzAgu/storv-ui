@@ -33,6 +33,8 @@
       {{ departmentLimitMessage }}
     </p>
 
+    <FullAccessStaffCard v-if="userStore.isSuperAdmin" :store-id="storeId" />
+
     <SCard v-if="departmentsStore.error && !departmentsStore.loading">
       <SEmptyState title="Couldn't load departments" :description="departmentsStore.error">
         <template #icon><TriangleAlert :size="24" :stroke-width="1.75" /></template>
@@ -400,11 +402,7 @@ import SSkeleton from '~/components/s/SSkeleton.vue'
 import STabs from '~/components/s/STabs.vue'
 import DepartmentModal from '~/components/departments/DepartmentModal.vue'
 import type { Department } from '~/composables/useDepartments'
-import {
-  getEligibleStoresForPlan,
-  resolveEffectiveSubscriptionPlan,
-  summarizeSubscriptionAddOns,
-} from '~/types/subscription'
+import FullAccessStaffCard from '~/components/departments/FullAccessStaffCard.vue'
 
 definePageMeta({
   layout: 'dashboard',
@@ -708,26 +706,6 @@ onMounted(async () => {
         await storesStore.fetchStores()
       } catch (error) {
         console.error('[StoreDepartmentsPage] Error fetching stores:', error)
-      }
-    }
-
-    if (userStore.userData?.role === 'superAdmin' && storesStore.stores.length > 0) {
-      const plan = resolveEffectiveSubscriptionPlan(userStore.userData)
-      const eligible = getEligibleStoresForPlan(
-        storesStore.stores,
-        plan,
-        summarizeSubscriptionAddOns(userStore.userData.subscriptionAddOns)
-      )
-      const eligibleIds = new Set(eligible.map((s) => s.id))
-      if (!eligibleIds.has(storeId.value)) {
-        const fallback = eligible[0]
-        if (fallback) {
-          toast.info('This branch is not on your current plan. Opening an available branch.')
-          await navigateTo(`/dashboard/stores/${fallback.id}/departments`, { replace: true })
-          return
-        }
-        await navigateTo('/dashboard/settings', { replace: true })
-        return
       }
     }
 

@@ -34,6 +34,11 @@ vi.mock('~/stores/staff', () => ({
   }),
 }))
 
+const planViewOnly = ref(false)
+vi.mock('~/composables/usePlanViewOnly', () => ({
+  usePlanViewOnly: () => ({ isViewOnly: planViewOnly }),
+}))
+
 async function perms() {
   const { usePermissions } = await import('~/composables/usePermissions')
   return usePermissions()
@@ -43,6 +48,7 @@ describe('usePermissions for branch admins', () => {
   beforeEach(() => {
     userData.value = { role: 'staff' }
     staffMember.value = { authUid: 'admin1', admin: true }
+    planViewOnly.value = false
   })
 
   it('treats an admin as able to manage staff and every module', async () => {
@@ -111,5 +117,24 @@ describe('usePermissions for branch admins', () => {
     expect(p.canManageStaffMember({ authUid: 'admin2', admin: true })).toBe(true)
     expect(p.hasAdminGrant('dataExport')).toBe(true)
     expect(p.canDeleteReceipts.value).toBe(true)
+  })
+
+  it('leaves only viewing when the plan makes the store view only, owner included', async () => {
+    planViewOnly.value = true
+    let p = await perms()
+    expect(p.can('products', 'view')).toBe(true)
+    expect(p.can('products', 'edit')).toBe(false)
+    expect(p.canManageStaff.value).toBe(false)
+    expect(p.hasAdminGrant('stockTransfers')).toBe(false)
+    expect(p.isReadOnly.value).toBe(true)
+
+    userData.value = { role: 'superAdmin' }
+    staffMember.value = null
+    p = await perms()
+    expect(p.can('receipts', 'view')).toBe(true)
+    expect(p.can('receipts', 'create')).toBe(false)
+    expect(p.permissions.value.receipts.refund).toBe(false)
+    expect(p.canManageStaffMember({ authUid: 'staff1' })).toBe(false)
+    expect(p.canViewFinancials.value).toBe(true)
   })
 })

@@ -2,6 +2,7 @@ import { collection, doc, setDoc, getDoc, updateDoc, serverTimestamp } from 'fir
 import { useFirestore } from './useFirestore'
 import { PERMISSION_DENIED_MESSAGE, CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import type { SubscriptionAddOnEntry, SubscriptionPlan, TrialEndsAt } from '~/types/subscription'
+import type { PlanViewOnlyReason } from '~/utils/plan-access'
 import type { SubscriptionBillingCycle } from '~/types/subscription-billing'
 import type { UserPreferences } from '~/composables/usePreferences'
 import type { BusinessCapability, ExperienceMode } from '~/types/business-experience'
@@ -62,6 +63,8 @@ export interface UserData {
    * doc; an ISO string when it reaches staff through the owner context.
    */
   trialEndsAt?: TrialEndsAt
+  /** Staff only, from the owner context: set when the plan leaves this account view only. */
+  planViewOnly?: PlanViewOnlyReason | null
   /** A Paystack charge the billing server received but could not apply (cleared by the next good charge). */
   subscriptionPaymentIssue?: {
     reference: string | null

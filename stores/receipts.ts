@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { assertPlanWritable } from '~/utils/plan-view-only'
 import { CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import {
   collection,
@@ -479,6 +480,7 @@ export const useReceiptsStore = defineStore('receipts', {
     async createReceipt(
       receiptData: Omit<Receipt, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'>
     ) {
+      assertPlanWritable()
       let normalizedReceiptData = {
         ...receiptData,
         customerName:
@@ -632,6 +634,7 @@ export const useReceiptsStore = defineStore('receipts', {
       receiptId: string,
       updates: Partial<Omit<Receipt, 'id' | 'createdAt' | 'createdBy'>>
     ) {
+      assertPlanWritable()
       const normalizedUpdates = {
         ...updates,
         ...(updates.customerName !== undefined
@@ -846,6 +849,7 @@ export const useReceiptsStore = defineStore('receipts', {
       receiptId: string,
       payment: { amount: number; method: string }
     ): Promise<{ completed: boolean }> {
+      assertPlanWritable()
       const db = useFirestore().getFirestoreInstance()
       if (!db) throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
 
@@ -969,6 +973,7 @@ export const useReceiptsStore = defineStore('receipts', {
     },
 
     async cancelBalanceDueReceipt(receiptId: string): Promise<void> {
+      assertPlanWritable()
       const db = useFirestore().getFirestoreInstance()
       if (!db) throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
 
@@ -1076,6 +1081,7 @@ export const useReceiptsStore = defineStore('receipts', {
 
     // Delete a receipt
     async deleteReceipt(receiptId: string) {
+      assertPlanWritable()
       const authStore = useAuthStore()
       if (!authStore.currentUser) {
         throw new Error('User must be authenticated')

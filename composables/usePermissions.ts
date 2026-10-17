@@ -2,6 +2,7 @@ import { computed } from 'vue'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useStaffStore } from '~/stores/staff'
+import { usePlanViewOnly } from '~/composables/usePlanViewOnly'
 import type {
   PermissionAction,
   PermissionModule,
@@ -27,22 +28,42 @@ import {
  * `resolveStaffPermissions`. see utils/staff-permissions.ts) and should not be read directly
  * anywhere new.
  */
+/** Keeps each module's `view`; everything else off. */
+function viewOnlyPermissions(granted: StaffPermissions): StaffPermissions {
+  const result = { ...EMPTY_STAFF_PERMISSIONS } as unknown as Record<
+    string,
+    Record<string, boolean>
+  >
+  for (const [module, actions] of Object.entries(granted)) {
+    const off = Object.fromEntries(Object.keys(actions).map((action) => [action, false]))
+    result[module] = { ...off, view: (actions as { view: boolean }).view }
+  }
+  return result as unknown as StaffPermissions
+}
+
 export const usePermissions = () => {
   const authStore = useAuthStore()
   const userStore = useUserStore()
   const staffStore = useStaffStore()
 
   const isStaff = computed(() => userStore.userData?.role === 'staff')
+  /** Over the plan's limits: look, but no create/edit/delete for anyone, the owner included. */
+  const { isViewOnly: isPlanViewOnly } = usePlanViewOnly()
 
   /** The calling account's effective grant matrix. full access for the store owner. */
   const permissions = computed<StaffPermissions>(() => {
-    if (userStore.isSuperAdmin) return FULL_STAFF_PERMISSIONS
     const member = staffStore.getCurrentStaffMember
-    return member ? resolveStaffPermissions(member) : EMPTY_STAFF_PERMISSIONS
+    const granted = userStore.isSuperAdmin
+      ? FULL_STAFF_PERMISSIONS
+      : member
+      ? resolveStaffPermissions(member)
+      : EMPTY_STAFF_PERMISSIONS
+    return isPlanViewOnly.value ? viewOnlyPermissions(granted) : granted
   })
 
   /** Generic per-module, per-action check. prefer this over the specific flags below in new code. */
   function can(module: PermissionModule, action: PermissionAction): boolean {
+    if (isPlanViewOnly.value && action !== 'view') return false
     if (userStore.isSuperAdmin) return true
     return getPermissionAction(permissions.value, module, action)
   }
@@ -60,13 +81,16 @@ export const usePermissions = () => {
   const hasInventoryEditorAccess = computed(() => can('products', 'edit'))
 
   const canManage = computed(() => {
+    if (isPlanViewOnly.value) return false
     if (!isStaff.value) return true
     return hasAnyManageAccess.value
   })
 
-  const isReadOnly = computed(() => isStaff.value && !hasAnyManageAccess.value)
+  const isReadOnly = computed(
+    () => isPlanViewOnly.value || (isStaff.value && !hasAnyManageAccess.value)
+  )
 
-  const canCreate = computed(() => !!authStore.currentUser)
+  const canCreate = computed(() => !!authStore.currentUser && !isPlanViewOnly.value)
 
   /** Owner-granted receipts access (cancel/refund) for a staff member (not everyone by default). */
   const hasReceiptsEditorAccess = computed(() => can('receipts', 'refund'))
@@ -89,12 +113,15 @@ export const usePermissions = () => {
 
   /** Owner, or an admin the owner gave this extra. */
   function hasAdminGrant(grant: keyof StaffAdminGrants): boolean {
+    if (isPlanViewOnly.value) return false
     if (userStore.isSuperAdmin) return true
     return adminGrants.value[grant] === true
   }
 
   /** Add, edit, move and remove regular staff, and manage departments: owner or admin. */
-  const canManageStaff = computed(() => userStore.isSuperAdmin || isAdmin.value)
+  const canManageStaff = computed(
+    () => !isPlanViewOnly.value && (userStore.isSuperAdmin || isAdmin.value)
+  )
 
   const canCreateStaff = canManageStaff
 
@@ -110,7 +137,7 @@ export const usePermissions = () => {
 
   /** Admins can't act on themselves or on other admins; the owner can act on anyone. */
   function canManageStaffMember(member: { admin?: boolean; authUid?: string } | null | undefined) {
-    if (!member) return false
+    if (!member || isPlanViewOnly.value) return false
     if (userStore.isSuperAdmin) return true
     if (!isAdmin.value) return false
     if (member.admin === true) return false

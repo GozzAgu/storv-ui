@@ -44,7 +44,8 @@ export function useBranchManagement() {
   const userStore = useUserStore()
   const toast = useAppToast()
   const { limits } = useSubscriptionFeatures()
-  const { eligibleStores, hiddenStores, hiddenStoreCount } = usePlanEligibleStores()
+  const { eligibleStores, viewOnlyStores, viewOnlyStoreCount, isViewOnlyStore } =
+    usePlanEligibleStores()
   const { canManageBranches } = useBusinessCapabilities()
 
   const storesLoading = computed(() => storesStore.loading)
@@ -54,8 +55,8 @@ export function useBranchManagement() {
   const isMicroSubscription = computed(
     () => resolveEffectiveSubscriptionPlan(userStore.userData) === 'storvv_micro'
   )
-  const hiddenStoreNames = computed(() =>
-    hiddenStores.value.map((store) => store.name).filter(Boolean)
+  const viewOnlyStoreNames = computed(() =>
+    viewOnlyStores.value.map((store) => store.name).filter(Boolean)
   )
 
   /** Negative means unlimited. */
@@ -270,8 +271,9 @@ export function useBranchManagement() {
     storesError,
     currentStore,
     eligibleStores,
-    hiddenStoreCount,
-    hiddenStoreNames,
+    viewOnlyStoreCount,
+    viewOnlyStoreNames,
+    isViewOnlyStore,
     isMicroSubscription,
     maxStores,
     canAddStore,

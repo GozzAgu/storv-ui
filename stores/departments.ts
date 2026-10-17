@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { assertPlanWritable } from '~/utils/plan-view-only'
 import {
   collection,
   doc,
@@ -324,6 +325,7 @@ export const useDepartmentsStore = defineStore('departments', {
         'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'staffCount' | 'storeId'
       >
     ): Promise<string> {
+      assertPlanWritable()
       const { isDemoModeActive, DEMO_USER_UID } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) {
         const storeId = (await getCurrentStoreId()) ?? ''
@@ -429,6 +431,7 @@ export const useDepartmentsStore = defineStore('departments', {
       departmentId: string,
       updates: Partial<Omit<Department, 'id' | 'createdAt' | 'createdBy' | 'storeId'>>
     ) {
+      assertPlanWritable()
       const { isDemoModeActive } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) {
         const index = this.departments.findIndex((d) => d.id === departmentId)
@@ -508,6 +511,7 @@ export const useDepartmentsStore = defineStore('departments', {
     // Delete a department
     // When on a store's departments page, pass storeId so the correct path is used
     async deleteDepartment(departmentId: string, storeIdParam?: string) {
+      assertPlanWritable()
       const { isDemoModeActive } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) {
         this.departments = this.departments.filter((d) => d.id !== departmentId)

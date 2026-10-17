@@ -77,6 +77,7 @@
         <div :key="route.path" class="s-shell__page">
           <DemoModeBanner v-if="isDemoDashboard" />
           <SubscriptionBillingBanner />
+          <PlanViewOnlyBanner />
           <ClientOnly>
             <OfflineStatusBanner />
           </ClientOnly>
@@ -146,6 +147,7 @@ import {
 import { usePageRefreshAction } from '~/composables/usePageRefreshAction'
 import DemoModeBanner from '~/components/demo/DemoModeBanner.vue'
 import SubscriptionBillingBanner from '~/components/dashboard/SubscriptionBillingBanner.vue'
+import PlanViewOnlyBanner from '~/components/dashboard/PlanViewOnlyBanner.vue'
 import OfflineStatusBanner from '~/components/growth/OfflineStatusBanner.vue'
 import { isDashboardNavActive } from '~/utils/shell-nav'
 import { DASHBOARD_NAV_DEFINITIONS, filterDashboardNavItems } from '~/utils/dashboard-nav-filter'

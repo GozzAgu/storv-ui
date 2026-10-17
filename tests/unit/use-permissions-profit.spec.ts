@@ -27,6 +27,10 @@ vi.mock('~/stores/staff', () => ({
   }),
 }))
 
+vi.mock('~/composables/usePlanViewOnly', () => ({
+  usePlanViewOnly: () => ({ isViewOnly: ref(false) }),
+}))
+
 describe('usePermissions profit visibility', () => {
   beforeEach(() => {
     userData.value = { role: 'superAdmin' }

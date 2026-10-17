@@ -135,7 +135,7 @@ Plans unlock **features** and **numeric caps**. Source of truth: `types/subscrip
 | Staff per store        | 2     | 25        | Unlimited        |
 | WhatsApp sends / month | 10    | Unlimited | Unlimited        |
 
-**Downgrade behavior:** when a plan allows fewer stores than exist, `getEligibleStoresForPlan()` keeps the **oldest** stores (by `createdAt`); others are hidden from the switcher until upgrade.
+**Downgrade behavior** (a trial ending, a downgrade or a cancel): nothing is deleted. `getEligibleStoresForPlan()` keeps the **oldest** stores (by `createdAt`) fully usable; the others stay in the switcher marked **View only**. In a fully usable store with more staff than the plan includes, the owner picks who keeps full access (Team page, `fullAccessStaffIds` on the store doc, saved through `/api/workspace/full-access-staff`); open places go to the longest-serving staff. Everyone else is view only: they can look, but not sell or edit. See `utils/plan-access.ts`. Enforced in the app today; Firestore rules enforcement is a follow-up.
 
 ### Feature matrix
 

@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { assertPlanWritable } from '~/utils/plan-view-only'
 import type { Firestore } from 'firebase/firestore'
 import { useFirestore } from '~/composables/useFirestore'
 import { getQueryUserId } from '~/composables/useFirestorePaths'
@@ -126,6 +127,7 @@ export const useStorefrontStore = defineStore('storefront', {
     },
 
     async saveConfig(next: StorefrontConfig) {
+      assertPlanWritable()
       const { db, ownerUid, storeId } = await this.ensureContext()
       this.saving = true
       this.lastError = ''

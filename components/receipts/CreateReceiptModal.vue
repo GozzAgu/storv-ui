@@ -8,6 +8,7 @@
   >
     <template #default>
       <div :class="[drawerFillClass, 's-new-sale']">
+        <p v-if="isPlanViewOnly" class="s-notice">{{ PLAN_VIEW_ONLY_SALE_NOTICE }}</p>
         <nav aria-label="Sale progress">
           <ol class="s-steps">
             <li
@@ -775,7 +776,7 @@
           v-if="currentStep === 3"
           :label="`Slide to charge ${formatCurrency(receiptTotal)}`"
           loading-label="Creating sale…"
-          :disabled="!isFormValid"
+          :disabled="!isFormValid || isPlanViewOnly"
           :loading="isCreating"
           @confirm="handleCreateReceipt"
         />
@@ -868,6 +869,8 @@ import { useInventoryStore, type InventoryFolder, type InventoryItem } from '~/s
 import { useReceiptsStore, type ReceiptItem } from '~/stores/receipts'
 import { useSellerLoanOutsStore } from '~/stores/sellerLoanOuts'
 import { resolveItemUnitCost } from '~/utils/inventory-item-cost'
+import { PLAN_VIEW_ONLY_SALE_NOTICE } from '~/utils/plan-access'
+import { usePlanViewOnly } from '~/composables/usePlanViewOnly'
 import { groupLeafFoldersForPicker } from '~/utils/inventory-folder-tree'
 import { useCustomersStore } from '~/stores/customers'
 import {
@@ -1078,7 +1081,10 @@ const receiptFooterPrimaryLabel = computed(() => {
   return isCreating.value ? 'Creating…' : 'Create sale'
 })
 
+const { isViewOnly: isPlanViewOnly } = usePlanViewOnly()
+
 const receiptFooterPrimaryDisabled = computed(() => {
+  if (isPlanViewOnly.value) return true
   if (currentStep.value < 3) return !canProceed.value
   return !isFormValid.value || isCreating.value
 })

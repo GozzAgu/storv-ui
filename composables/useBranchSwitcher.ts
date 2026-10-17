@@ -18,7 +18,7 @@ export function useBranchSwitcher() {
   const userStore = useUserStore()
   const toast = useAppToast()
   const { canManageBranches } = useBusinessCapabilities()
-  const { eligibleStores } = usePlanEligibleStores()
+  const { eligibleStores, isViewOnlyStore } = usePlanEligibleStores()
 
   const switchingStore = ref(false)
   const loading = computed(() => storesStore.loading)
@@ -33,7 +33,9 @@ export function useBranchSwitcher() {
   }
 
   function storeSecondaryLabel(store: BranchLike) {
-    return getStoreSwitcherSecondaryLabel(store, stores.value)
+    const label = getStoreSwitcherSecondaryLabel(store, stores.value)
+    if (userStore.userData?.role !== 'superAdmin' || !isViewOnlyStore(store.id)) return label
+    return label ? `${label} · View only` : 'View only'
   }
 
   async function switchStore(storeId: string) {

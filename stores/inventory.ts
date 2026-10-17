@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { assertPlanWritable } from '~/utils/plan-view-only'
 import { CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import {
   doc,
@@ -1160,6 +1161,7 @@ export const useInventoryStore = defineStore('inventory', {
         | 'storeId'
       >
     ): Promise<string> {
+      assertPlanWritable()
       const { isDemoModeActive } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) {
         const { applyDemoCreateFolder } = await import('~/utils/demo-bridge')
@@ -1279,6 +1281,7 @@ export const useInventoryStore = defineStore('inventory', {
       folderId: string,
       updates: Partial<Omit<InventoryFolder, 'id' | 'createdAt' | 'createdBy'>>
     ) {
+      assertPlanWritable()
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
         throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
@@ -1365,6 +1368,7 @@ export const useInventoryStore = defineStore('inventory', {
 
     // Delete a folder
     async deleteFolder(folderId: string) {
+      assertPlanWritable()
       const { isDemoModeActive } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) {
         const { applyDemoDeleteFolder } = await import('~/utils/demo-bridge')
@@ -1775,6 +1779,7 @@ export const useInventoryStore = defineStore('inventory', {
       folderId: string,
       itemData: Omit<InventoryItem, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'folderId'>
     ) {
+      assertPlanWritable()
       const { isDemoModeActive } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) {
         const { applyDemoInventoryItemCreate } = await import('~/utils/demo-bridge')
@@ -1967,6 +1972,7 @@ export const useInventoryStore = defineStore('inventory', {
         Omit<InventoryItem, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'folderId'>
       >
     ) {
+      assertPlanWritable()
       const { isDemoModeActive } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) {
         const { applyDemoInventoryItemCreate } = await import('~/utils/demo-bridge')
@@ -2183,6 +2189,7 @@ export const useInventoryStore = defineStore('inventory', {
       itemId: string,
       updates: Partial<Omit<InventoryItem, 'id' | 'createdAt' | 'createdBy' | 'folderId'>>
     ) {
+      assertPlanWritable()
       const { isDemoModeActive } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) {
         const { applyDemoInventoryItemUpdate } = await import('~/utils/demo-bridge')
@@ -2341,6 +2348,7 @@ export const useInventoryStore = defineStore('inventory', {
 
     // Delete an item
     async deleteItem(folderId: string, itemId: string) {
+      assertPlanWritable()
       const { isDemoModeActive } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) {
         const { applyDemoDeleteItem } = await import('~/utils/demo-bridge')
@@ -2885,6 +2893,7 @@ export const useInventoryStore = defineStore('inventory', {
       loanIdByItemId: Map<string, string>,
       options?: { skipActivityLog?: boolean }
     ) {
+      assertPlanWritable()
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
         throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
@@ -3055,6 +3064,7 @@ export const useInventoryStore = defineStore('inventory', {
 
     // Update dateOut for items when receipt is generated
     async updateItemsDateOut(folderId: string, itemIds: string[]) {
+      assertPlanWritable()
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
         throw new Error(CLOUD_UNAVAILABLE_MESSAGE)

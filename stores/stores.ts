@@ -167,12 +167,11 @@ export const useStoresStore = defineStore('stores', {
         plan,
         summarizeSubscriptionAddOns(userStore.userData?.subscriptionAddOns)
       )
-      const eligibleIds = new Set(eligible.map((s) => s.id))
 
       let storeWasSet = false
       if (import.meta.client) {
         const savedStoreId = localStorage.getItem('currentStoreId')
-        if (savedStoreId && eligibleIds.has(savedStoreId) && this.getStoreById(savedStoreId)) {
+        if (savedStoreId && this.getStoreById(savedStoreId)) {
           this.currentStoreId = savedStoreId
           storeWasSet = true
         }
@@ -196,7 +195,10 @@ export const useStoresStore = defineStore('stores', {
       }
     },
 
-    /** After fetch or subscription change: keep super-admin on a plan-eligible branch. */
+    /**
+     * After fetch or subscription change: keep the owner on a branch that still exists. Branches
+     * past the plan's limit stay openable (view only); a fresh pick prefers a fully usable one.
+     */
     async applyPlanToCurrentStoreSelection() {
       if (import.meta.server) return
 
@@ -225,19 +227,18 @@ export const useStoresStore = defineStore('stores', {
         plan,
         summarizeSubscriptionAddOns(userStore.userData?.subscriptionAddOns)
       )
-      const eligibleIds = new Set(eligible.map((s) => s.id))
 
       // Full refresh resets Pinia while localStorage still has the user's branch; if we skip this,
       // the null currentStoreId path below calls setCurrentStore(fallback), which overwrites
       // localStorage with the first eligible store and the active branch appears to "switch".
       if (!this.currentStoreId && import.meta.client) {
         const savedStoreId = localStorage.getItem('currentStoreId')
-        if (savedStoreId && eligibleIds.has(savedStoreId) && this.getStoreById(savedStoreId)) {
+        if (savedStoreId && this.getStoreById(savedStoreId)) {
           this.currentStoreId = savedStoreId
         }
       }
 
-      if (this.currentStoreId && eligibleIds.has(this.currentStoreId)) return
+      if (this.currentStoreId && this.getStoreById(this.currentStoreId)) return
 
       const fallback = eligible.find((s) => s.isActive !== false) || eligible[0]
       if (fallback) {
@@ -264,26 +265,6 @@ export const useStoresStore = defineStore('stores', {
 
       if (storeId && !this.getStoreById(storeId)) {
         throw new Error('Store not found')
-      }
-
-      if (storeId) {
-        const { useUserStore } = await import('./user')
-        const u = useUserStore()
-        if (!u.userData && useAuthStore().currentUser) {
-          await u.fetchUserData(useAuthStore().currentUser!.uid)
-        }
-        if (u.userData?.role === 'superAdmin') {
-          const plan = resolveEffectiveSubscriptionPlan(u.userData)
-          const addOns = summarizeSubscriptionAddOns(u.userData.subscriptionAddOns)
-          const eligibleIds = new Set(
-            getEligibleStoresForPlan(this.stores, plan, addOns).map((s) => s.id)
-          )
-          if (!eligibleIds.has(storeId)) {
-            throw new Error(
-              'This branch is not available on your current plan. Upgrade in Settings to access it.'
-            )
-          }
-        }
       }
 
       // Clear all data from previous store before switching

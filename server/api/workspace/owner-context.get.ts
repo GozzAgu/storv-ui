@@ -6,7 +6,9 @@ import {
   pickOwnerWorkspaceFields,
   resolveStaffWorkspaceOwnerId,
 } from '~/server/utils/staff-workspace'
+import { resolveStaffPlanViewOnly } from '~/server/utils/plan-access'
 import type { SubscriptionPlan } from '~/types/subscription'
+import type { PlanViewOnlyReason } from '~/utils/plan-access'
 import type { SubscriptionBillingCycle } from '~/types/subscription-billing'
 
 function isActiveStaffStatus(status: unknown): boolean {
@@ -84,10 +86,26 @@ export default defineEventHandler(async (event) => {
     )
   }
 
+  let planViewOnly: PlanViewOnlyReason | null = null
+  if (storeId) {
+    try {
+      planViewOnly = await resolveStaffPlanViewOnly(
+        adminDb,
+        ownerId,
+        data,
+        storeId,
+        activeStaffDoc.id
+      )
+    } catch (err) {
+      console.error('[workspace/owner-context] plan access check failed:', err)
+    }
+  }
+
   const fields = pickOwnerWorkspaceFields(data)
   return {
     ownerId,
     ...fields,
+    planViewOnly,
     subscription: fields.subscription as SubscriptionPlan,
     subscriptionBillingCycle: fields.subscriptionBillingCycle as
       | SubscriptionBillingCycle

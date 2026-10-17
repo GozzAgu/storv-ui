@@ -49,13 +49,13 @@
           >Open Plan &amp; billing</NuxtLink
         >
       </p>
-      <p v-if="userStore.isSuperAdmin && hiddenStoreCount > 0" class="s-notice">
-        {{ hiddenStoreCount }} {{ hiddenStoreCount === 1 ? 'branch is' : 'branches are' }} on your
-        account but not on your current plan<template v-if="hiddenStoreNames.length">
-          ({{ hiddenStoreNames.join(', ') }})</template
-        >. Your oldest branches stay available first.
+      <p v-if="userStore.isSuperAdmin && viewOnlyStoreCount > 0" class="s-notice">
+        {{ viewOnlyStoreCount }} {{ viewOnlyStoreCount === 1 ? 'branch is' : 'branches are' }} view
+        only on your current plan<template v-if="viewOnlyStoreNames.length">
+          ({{ viewOnlyStoreNames.join(', ') }})</template
+        >. You can open them and look, but not sell or edit. Your oldest branches stay fully usable.
         <NuxtLink :to="dashPath('/settings?upgrade=1')" class="s-link"
-          >Upgrade to restore them</NuxtLink
+          >Upgrade to use them fully</NuxtLink
         >.
       </p>
 
@@ -378,8 +378,9 @@ const {
   storesError,
   currentStore,
   eligibleStores,
-  hiddenStoreCount,
-  hiddenStoreNames,
+  viewOnlyStoreCount,
+  viewOnlyStoreNames,
+  isViewOnlyStore,
   maxStores,
   canAddStore,
   storeLimitMessage,
@@ -441,8 +442,15 @@ const branchFormOpen = computed({
   },
 })
 
-function branchStatus(store: Branch): { label: string; tone: 'accent' | 'success' | 'neutral' } {
-  if (store.id === currentStore.value?.id) return { label: 'Current', tone: 'accent' }
+function branchStatus(store: Branch): {
+  label: string
+  tone: 'accent' | 'success' | 'neutral' | 'warning'
+} {
+  const isCurrent = store.id === currentStore.value?.id
+  if (userStore.isSuperAdmin && isViewOnlyStore(store.id)) {
+    return { label: isCurrent ? 'Current · View only' : 'View only', tone: 'warning' }
+  }
+  if (isCurrent) return { label: 'Current', tone: 'accent' }
   if (store.isActive) return { label: 'Active', tone: 'success' }
   return { label: 'Inactive', tone: 'neutral' }
 }
