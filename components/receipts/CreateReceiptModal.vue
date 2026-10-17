@@ -870,6 +870,7 @@ import { useReceiptsStore, type ReceiptItem } from '~/stores/receipts'
 import { useSellerLoanOutsStore } from '~/stores/sellerLoanOuts'
 import { resolveItemUnitCost } from '~/utils/inventory-item-cost'
 import { PLAN_VIEW_ONLY_SALE_NOTICE } from '~/utils/plan-access'
+import { receiptEmailErrorMessage } from '~/utils/receipt-email-error'
 import { usePlanViewOnly } from '~/composables/usePlanViewOnly'
 import { groupLeafFoldersForPicker } from '~/utils/inventory-folder-tree'
 import { useCustomersStore } from '~/stores/customers'
@@ -2108,7 +2109,7 @@ const sendReceiptEmail = async (receiptId: string, receiptData: any) => {
     emailToSend.value = ''
   } catch (error: any) {
     console.error('Error sending receipt email:', error)
-    throw error
+    alert(receiptEmailErrorMessage(error))
   } finally {
     isSendingEmail.value = false
   }

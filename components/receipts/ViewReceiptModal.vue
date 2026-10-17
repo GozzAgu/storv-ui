@@ -318,6 +318,7 @@ import SInput from '~/components/s/SInput.vue'
 import SSpinner from '~/components/s/SSpinner.vue'
 import { ref, reactive, computed, watch, onMounted, nextTick, shallowRef } from 'vue'
 import { PrinterIcon, EnvelopeIcon, ClipboardDocumentIcon } from '~/utils/app-icons'
+import { receiptEmailErrorMessage } from '~/utils/receipt-email-error'
 import { useReceiptsStore, type Receipt, type ReceiptItem } from '~/stores/receipts'
 import type { InventoryItem } from '~/stores/inventory'
 import { useUserStore } from '~/stores/user'
@@ -1159,7 +1160,7 @@ const handleSendEmail = async () => {
     emailToSend.value = ''
   } catch (error: any) {
     console.error('Error sending receipt email:', error)
-    alert(`Failed to send email: ${error.message || 'Unknown error'}`)
+    alert(receiptEmailErrorMessage(error))
   } finally {
     isSendingEmail.value = false
   }

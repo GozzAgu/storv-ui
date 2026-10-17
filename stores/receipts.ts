@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { assertPlanWritable } from '~/utils/plan-view-only'
+import { stripUndefinedDeep } from '~/utils/firestore-clean'
 import { CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import {
   collection,
@@ -553,9 +554,7 @@ export const useReceiptsStore = defineStore('receipts', {
           createdBy: createdByUid,
           ...(actualCreatorUid !== createdByUid && { actualCreator: actualCreatorUid }),
         }
-        const newReceipt = Object.fromEntries(
-          Object.entries(receiptPayload).filter(([, v]) => v !== undefined)
-        ) as Omit<Receipt, 'id'>
+        const newReceipt = stripUndefinedDeep(receiptPayload) as Omit<Receipt, 'id'>
 
         const { writeDocumentWithOfflineSupport } = await import('~/composables/useOfflineMode')
         const writeResult = await writeDocumentWithOfflineSupport(newReceiptRef, newReceipt)
