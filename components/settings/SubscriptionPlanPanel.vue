@@ -9,9 +9,30 @@
         <p class="s-plan__name">{{ currentSubscriptionLabel }}</p>
         <p v-if="billingSummary" class="s-plan__meta">{{ billingSummary }}</p>
         <p v-if="subscriptionRenewalLabel" class="s-plan__meta">{{ subscriptionRenewalLabel }}</p>
+        <template v-if="trialSummary">
+          <p class="s-plan__meta">{{ trialSummary.daysLeftLabel }}</p>
+          <p class="s-plan__meta">{{ trialSummary.endsLabel }}</p>
+          <button
+            v-if="!planChoiceOpen && (manageOnWeb || changePlanOptions.length > 0)"
+            type="button"
+            class="s-link s-plan__choose"
+            :disabled="disabled"
+            @click="planChoiceOpen = true"
+          >
+            Choose a plan
+          </button>
+        </template>
       </div>
 
-      <section v-if="manageOnWeb" class="s-plan__section" aria-labelledby="plan-web-heading">
+      <p v-if="trialSummary && planChoiceOpen" class="s-plan__meta">
+        A plan starts as soon as you pay and replaces the trial.
+      </p>
+
+      <section
+        v-if="!planChoiceHidden && manageOnWeb"
+        class="s-plan__section"
+        aria-labelledby="plan-web-heading"
+      >
         <h3 id="plan-web-heading" class="s-plan__heading">Change plan</h3>
         <p class="s-plan__meta s-plan__lede">
           Plan changes and add-ons are handled on the Storvv website. Your plan updates here once
@@ -28,7 +49,7 @@
       </section>
 
       <section
-        v-else-if="changePlanOptions.length > 0"
+        v-else-if="!planChoiceHidden && changePlanOptions.length > 0"
         class="s-plan__section"
         aria-labelledby="plan-switch-heading"
       >
@@ -242,6 +263,7 @@ import {
   type SubscriptionBillingCycle,
 } from '~/types/subscription-billing'
 import type { BillingHistoryEntry } from '~/server/api/paystack/billing-history.get'
+import type { TrialSummary } from '~/utils/subscription-billing-ui'
 
 const props = defineProps<{
   currentSubscriptionLabel: string
@@ -275,7 +297,12 @@ const props = defineProps<{
   addOnBusy?: string | null
   /** iOS app: plan changes and add-on purchases happen on the website, not in the app. */
   manageOnWeb?: boolean
+  /** Set while the free trial runs; plan choice stays folded behind one link. */
+  trialSummary?: TrialSummary | null
 }>()
+
+const planChoiceOpen = ref(false)
+const planChoiceHidden = computed(() => Boolean(props.trialSummary) && !planChoiceOpen.value)
 
 const addOnRows = computed(() => props.addOns ?? [])
 const addOnPriceLabels = computed(

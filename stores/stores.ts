@@ -23,6 +23,7 @@ import {
 import {
   getPlanLimits,
   getEligibleStoresForPlan,
+  isTrialActive,
   resolveEffectiveSubscriptionPlan,
   storeLimitReachedMessage,
   summarizeSubscriptionAddOns,
@@ -765,7 +766,9 @@ export const useStoresStore = defineStore('stores', {
         summarizeSubscriptionAddOns(userStore.userData?.subscriptionAddOns)
       )
       if (limits.maxStores >= 0 && this.stores.length >= limits.maxStores) {
-        throw new Error(storeLimitReachedMessage(plan, limits.maxStores))
+        throw new Error(
+          storeLimitReachedMessage(plan, limits.maxStores, isTrialActive(userStore.userData))
+        )
       }
 
       try {

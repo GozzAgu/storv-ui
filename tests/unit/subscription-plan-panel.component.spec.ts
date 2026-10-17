@@ -85,3 +85,59 @@ describe('webBillingUrl', () => {
     }
   })
 })
+
+describe('SubscriptionPlanPanel on a free trial', () => {
+  const trialSummary = {
+    daysLeftLabel: 'Free trial · 30 days left',
+    endsLabel: 'Ends Nov 16, 2026. Then Storvv Micro, free, unless you choose a plan.',
+  }
+  const trialProps = {
+    ...baseProps,
+    currentPriceLabel: null,
+    billingCycleLabel: null,
+    statusLabel: 'Free trial',
+    canCancel: false,
+    addOnsAvailable: false,
+    addOns: [],
+    changePlanOptions: [
+      { id: 'storvv_medium' as const, name: 'Medium', direction: 'upgrade' as const },
+    ],
+    trialSummary,
+  }
+  const mountTrial = (manageOnWeb = false) =>
+    mount(SubscriptionPlanPanel, {
+      props: { ...trialProps, manageOnWeb },
+      global: {
+        stubs: {
+          SCard: { template: '<section><slot /><slot name="footer" /></section>' },
+          SBadge: { template: '<span><slot /></span>' },
+          SSelect: { props: ['label'], template: '<label>{{ label }}</label>' },
+          SButton: { template: '<button><slot /></button>' },
+          GrowthSupportLink: { template: '<a />' },
+        },
+      },
+    })
+
+  it('shows the days left and keeps plan choice behind one link', async () => {
+    const wrapper = mountTrial()
+    expect(wrapper.text()).toContain('Free trial · 30 days left')
+    expect(wrapper.find('#plan-switch-heading').exists()).toBe(false)
+    expect(wrapper.text()).not.toContain('Cancel auto-renew')
+    expect(wrapper.text()).not.toContain('Add a store')
+
+    const link = wrapper.find('.s-plan__choose')
+    expect(link.text()).toBe('Choose a plan')
+    await link.trigger('click')
+
+    expect(wrapper.find('#plan-switch-heading').exists()).toBe(true)
+    expect(wrapper.find('.s-plan__choose').exists()).toBe(false)
+    expect(wrapper.text()).toContain('replaces the trial')
+  })
+
+  it('folds the iOS website link the same way', async () => {
+    const wrapper = mountTrial(true)
+    expect(wrapper.find('#plan-web-heading').exists()).toBe(false)
+    await wrapper.find('.s-plan__choose').trigger('click')
+    expect(wrapper.find('#plan-web-heading').exists()).toBe(true)
+  })
+})

@@ -60,7 +60,9 @@
       <SFormSection v-if="staffLimitReached && !isEdit">
         <p class="s-notice">
           Your plan staff limit is reached for this store.
-          <NuxtLink to="/dashboard/settings?upgrade=1" class="s-link">Upgrade</NuxtLink>
+          <NuxtLink v-if="!onTrial" to="/dashboard/settings?upgrade=1" class="s-link"
+            >Upgrade</NuxtLink
+          >
         </p>
         <p v-if="staffLimitMessage" class="s-field__hint">{{ staffLimitMessage }}</p>
       </SFormSection>
@@ -207,7 +209,7 @@ import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useAppToast } from '~/composables/useAppToast'
 import { getApiErrorMessage } from '~/utils/api-error-message'
-import { staffLimitReachedMessage } from '~/types/subscription'
+import { isTrialActive, staffLimitReachedMessage } from '~/types/subscription'
 import { useProductAnalytics } from '~/composables/useProductAnalytics'
 import StaffPermissionsPanel from '~/components/departments/StaffPermissionsPanel.vue'
 import StaffPaymentPermissions from '~/components/payments/StaffPaymentPermissions.vue'
@@ -242,6 +244,7 @@ const authStore = useAuthStore()
 const userStore = useUserStore()
 const toast = useAppToast()
 const { plan, canAddStaff, staffLimitForStore } = useSubscriptionFeatures()
+const onTrial = computed(() => isTrialActive(userStore.userData))
 const { canEditStaffPermissions, isStoreOwner } = usePermissions()
 
 const isRemovedStaff = computed(() => props.staff?.status === 'inactive')
@@ -352,7 +355,7 @@ const staffLimitReached = computed(
 const staffLimitMessage = computed(() => {
   const max = staffLimitForStore(staffStoreId.value)
   if (max < 0) return ''
-  return staffLimitReachedMessage(plan.value, max)
+  return staffLimitReachedMessage(plan.value, max, onTrial.value)
 })
 
 const isFormValid = computed(() => {

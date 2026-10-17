@@ -1,9 +1,13 @@
 import type { UserData } from '~/composables/useUser'
 import {
   getPlanDisplayName,
+  isTrialActive,
   normalizeSubscriptionPlan,
   resolveEffectiveSubscriptionPlan,
+  trialDaysLeft,
+  trialEndsAtMs,
   type SubscriptionPlan,
+  type TrialFields,
 } from '~/types/subscription'
 import type { SubscriptionBillingCycle } from '~/types/subscription-billing'
 import { BILLING_CYCLE_LABELS } from '~/types/subscription-billing'
@@ -102,6 +106,26 @@ export function formatBillingCyclePriceLabel(
   const price = formatPlanPriceKobo(amountKobo, currencySymbol)
   const suffix = cycle === 'yearly' ? '/ year' : cycle === 'quarterly' ? '/ quarter' : '/ month'
   return `${price} ${suffix}`
+}
+
+export type TrialSummary = { daysLeftLabel: string; endsLabel: string }
+
+/** Plan & billing copy while the free trial runs; null when there is no running trial. */
+export function getTrialSummary(
+  userData: TrialFields | null | undefined,
+  now = Date.now()
+): TrialSummary | null {
+  if (!isTrialActive(userData, now)) return null
+  const days = trialDaysLeft(userData, now)
+  const endDate = new Date(trialEndsAtMs(userData?.trialEndsAt)!).toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
+  return {
+    daysLeftLabel: `Free trial · ${days} ${days === 1 ? 'day' : 'days'} left`,
+    endsLabel: `Ends ${endDate}. Then Storvv Micro, free, unless you choose a plan.`,
+  }
 }
 
 export function subscriptionStatusLabel(

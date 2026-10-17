@@ -1106,6 +1106,7 @@ import STextarea from '~/components/s/STextarea.vue'
 import TwoFactorSetup from '~/components/auth/TwoFactorSetup.vue'
 import { EMPTY_CELL } from '~/utils/ui-empty'
 import { SUBSCRIPTION_PLANS, resolveEffectiveSubscriptionPlan } from '~/types/subscription'
+import { getTrialSummary } from '~/utils/subscription-billing-ui'
 import { isCloudinaryUrl } from '~/utils/cloudinary'
 import { prepareImageUpload } from '~/utils/image-upload'
 import {
@@ -1223,7 +1224,8 @@ const userStore = useUserStore()
 
 const subscriptionLabel = computed(() => {
   const plan = resolveEffectiveSubscriptionPlan(userStore.userData)
-  return SUBSCRIPTION_PLANS.find((p) => p.id === plan)?.name || 'Storvv Micro'
+  const name = SUBSCRIPTION_PLANS.find((p) => p.id === plan)?.name || 'Storvv Micro'
+  return getTrialSummary(userStore.userData)?.daysLeftLabel ?? name
 })
 
 /** Resolved staff record for signed-in staff (department, store, etc.) */

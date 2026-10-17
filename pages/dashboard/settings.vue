@@ -65,6 +65,7 @@
             :status-label="subscriptionStatusBadgeLabel"
             :status-tone="subscriptionStatusTone"
             :subscription-renewal-label="subscriptionRenewalLabel"
+            :trial-summary="trialSummary"
             v-model:selected-billing-cycle="selectedBillingCycle"
             v-model:selected-upgrade-plan="selectedUpgradePlan"
             :change-plan-options="changePlanOptions"
@@ -548,7 +549,7 @@ import { isDemoModeActive } from '~/utils/demo-mode'
 import SubscriptionPlanPanel from '~/components/settings/SubscriptionPlanPanel.vue'
 import ExperienceModePicker from '~/components/settings/ExperienceModePicker.vue'
 import type { BillingHistoryEntry } from '~/server/api/paystack/billing-history.get'
-import { subscriptionStatusLabel } from '~/utils/subscription-billing-ui'
+import { getTrialSummary, subscriptionStatusLabel } from '~/utils/subscription-billing-ui'
 import { formatUpgradeSuccessMessage } from '~/utils/subscription-upgrade-unlocks'
 import { scrollDashboardToElement } from '~/utils/native-dashboard-scroll'
 import type { ExperienceMode } from '~/types/business-experience'
@@ -767,22 +768,28 @@ watch(
   }
 )
 
+const trialSummary = computed(() => getTrialSummary(userStore.userData))
+
 const currentBillingCycleLabel = computed(() => {
+  if (trialSummary.value) return null
   const cycle = userStore.userData?.subscriptionBillingCycle
   return cycle ? BILLING_CYCLE_LABELS[cycle] : null
 })
 
 const currentPlanPriceLabel = computed(() => {
+  if (trialSummary.value) return null
   const cycle = userStore.userData?.subscriptionBillingCycle || 'monthly'
   return formatPlanPrice(currentSubscription.value, cycle)
 })
 
 const subscriptionStatusBadgeLabel = computed(() =>
-  subscriptionStatusLabel(
-    userStore.userData?.subscriptionStatus,
-    normalizeSubscriptionPlan(userStore.userData?.subscription),
-    resolveEffectiveSubscriptionPlan(userStore.userData)
-  )
+  trialSummary.value
+    ? 'Free trial'
+    : subscriptionStatusLabel(
+        userStore.userData?.subscriptionStatus,
+        normalizeSubscriptionPlan(userStore.userData?.subscription),
+        resolveEffectiveSubscriptionPlan(userStore.userData)
+      )
 )
 
 const subscriptionStatusTone = computed(() => {
@@ -845,7 +852,7 @@ const subscriptionRenewalLabel = computed(() => {
   if (userStore.userData?.subscriptionPaymentIssue) {
     return "We received a payment we couldn't match to your plan. Our team has been alerted and will sort it out."
   }
-  if (!cycle || currentSubscription.value === 'storvv_micro') return null
+  if (!cycle || currentSubscription.value === 'storvv_micro' || trialSummary.value) return null
 
   const cycleLabel = BILLING_CYCLE_LABELS[cycle].toLowerCase()
   if (status === 'past_due') {
@@ -878,7 +885,7 @@ const subscriptionRenewalLabel = computed(() => {
 
 const canCancelSubscription = computed(() => {
   if (!canEditSettings.value) return false
-  if (currentSubscription.value === 'storvv_micro') return false
+  if (currentSubscription.value === 'storvv_micro' || trialSummary.value) return false
   return userStore.userData?.subscriptionStatus !== 'canceled'
 })
 
@@ -993,7 +1000,10 @@ async function handleQaSetPlan(planId: SubscriptionPlan) {
 const addOnBusy = ref<string | null>(null)
 
 const addOnsAvailable = computed(
-  () => canEditSettings.value && currentSubscription.value === ADD_ON_ELIGIBLE_PLAN
+  () =>
+    canEditSettings.value &&
+    currentSubscription.value === ADD_ON_ELIGIBLE_PLAN &&
+    !trialSummary.value
 )
 
 const addOnPriceLabels = computed(() => ({

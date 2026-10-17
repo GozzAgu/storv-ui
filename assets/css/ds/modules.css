@@ -1113,6 +1113,23 @@
   font: var(--s-text-small);
 }
 
+.s-plan__choose {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--s-touch);
+  padding: 0;
+  border: 0;
+  background: none;
+  font: var(--s-text-small);
+  cursor: pointer;
+}
+
+.s-plan__choose:disabled {
+  color: var(--s-text-muted);
+  cursor: default;
+  text-decoration: none;
+}
+
 .s-plan__price {
   color: var(--s-text);
   font-weight: 500;

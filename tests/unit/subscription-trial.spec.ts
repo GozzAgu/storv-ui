@@ -3,10 +3,13 @@ import {
   NEW_ACCOUNT_TRIAL_DAYS,
   isTrialActive,
   resolveEffectiveSubscriptionPlan,
+  staffLimitReachedMessage,
+  storeLimitReachedMessage,
   trialDaysLeft,
   trialEndsAtMs,
 } from '~/types/subscription'
 import { shouldRequestTrial } from '~/utils/account-trial-client'
+import { getTrialSummary } from '~/utils/subscription-billing-ui'
 import { decideTrialStart } from '~/server/utils/account-trial'
 
 const DAY = 86_400_000
@@ -117,5 +120,50 @@ describe('shouldRequestTrial (app)', () => {
         now
       )
     ).toBe(false)
+  })
+})
+
+describe('getTrialSummary', () => {
+  it('shows days left and what happens after', () => {
+    const summary = getTrialSummary(
+      { subscription: 'storvv_micro', trialEndsAt: now + 30 * DAY },
+      now
+    )
+    expect(summary?.daysLeftLabel).toBe('Free trial · 30 days left')
+    expect(summary?.endsLabel).toContain('Then Storvv Micro, free, unless you choose a plan.')
+  })
+
+  it('says 1 day, not 1 days', () => {
+    const summary = getTrialSummary(
+      { subscription: 'storvv_micro', trialEndsAt: now + DAY / 2 },
+      now
+    )
+    expect(summary?.daysLeftLabel).toBe('Free trial · 1 day left')
+  })
+
+  it('is null once the trial ends or the account pays', () => {
+    expect(
+      getTrialSummary({ subscription: 'storvv_micro', trialEndsAt: now - DAY }, now)
+    ).toBeNull()
+    expect(
+      getTrialSummary({ subscription: 'storvv_medium', trialEndsAt: now + 30 * DAY }, now)
+    ).toBeNull()
+    expect(getTrialSummary(null, now)).toBeNull()
+  })
+})
+
+describe('limit messages on a trial', () => {
+  it('do not point to add-ons, which a trial cannot buy', () => {
+    expect(storeLimitReachedMessage('storvv_enterprise', 5, true)).toBe(
+      'Your free trial includes up to 5 stores.'
+    )
+    expect(staffLimitReachedMessage('storvv_enterprise', 10, true)).toBe(
+      'Your free trial includes up to 10 staff per store.'
+    )
+  })
+
+  it('stay the same for paid accounts', () => {
+    expect(storeLimitReachedMessage('storvv_enterprise', 5)).toContain('/month')
+    expect(staffLimitReachedMessage('storvv_enterprise', 10)).toContain('/month')
   })
 })

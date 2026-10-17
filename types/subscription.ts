@@ -307,7 +307,12 @@ export function getStaffLimitForStore(
   return base + (addOns.extraStaffByStore[storeId] || 0)
 }
 
-export function storeLimitReachedMessage(plan: SubscriptionPlan, maxStores: number): string {
+export function storeLimitReachedMessage(
+  plan: SubscriptionPlan,
+  maxStores: number,
+  onTrial = false
+): string {
+  if (onTrial) return `Your free trial includes up to ${maxStores} stores.`
   if (plan === 'storvv_micro') {
     return 'Storvv Micro allows 1 store. Upgrade to Medium or Enterprise to add more.'
   }
@@ -319,7 +324,12 @@ export function storeLimitReachedMessage(plan: SubscriptionPlan, maxStores: numb
   )}/month in Settings → Plan & billing.`
 }
 
-export function staffLimitReachedMessage(plan: SubscriptionPlan, maxStaff: number): string {
+export function staffLimitReachedMessage(
+  plan: SubscriptionPlan,
+  maxStaff: number,
+  onTrial = false
+): string {
+  if (onTrial) return `Your free trial includes up to ${maxStaff} staff per store.`
   if (plan === 'storvv_micro') {
     return `Storvv Micro allows up to ${maxStaff} staff per store. Upgrade to Medium or Enterprise for more.`
   }

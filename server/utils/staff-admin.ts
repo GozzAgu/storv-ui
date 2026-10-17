@@ -8,6 +8,7 @@ import {
 import type { StaffAdminGrants, StaffPermissions } from '~/types/staff-permissions'
 import {
   getStaffLimitForStore,
+  isTrialActive,
   resolveEffectiveSubscriptionPlan,
   staffLimitReachedMessage,
   summarizeSubscriptionAddOns,
@@ -182,7 +183,10 @@ export async function assertStaffCapacity(
     count += staff.docs.filter((d) => d.data().status !== 'inactive').length
   }
   if (count >= maxStaff) {
-    throw createError({ statusCode: 403, message: staffLimitReachedMessage(plan, maxStaff) })
+    throw createError({
+      statusCode: 403,
+      message: staffLimitReachedMessage(plan, maxStaff, isTrialActive(owner)),
+    })
   }
 }
 

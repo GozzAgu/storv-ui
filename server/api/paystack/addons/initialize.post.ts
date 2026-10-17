@@ -1,6 +1,7 @@
 import { createError, defineEventHandler, getRequestURL, readBody } from 'h3'
 import {
   ADD_ON_ELIGIBLE_PLAN,
+  isTrialActive,
   resolveEffectiveSubscriptionPlan,
   SUBSCRIPTION_ADD_ON_LABELS,
 } from '~/types/subscription'
@@ -52,6 +53,12 @@ export default defineEventHandler(async (event) => {
 
     if (resolveEffectiveSubscriptionPlan(userData) !== ADD_ON_ELIGIBLE_PLAN) {
       throw createError({ statusCode: 403, message: 'Add-ons are available on Storvv Enterprise.' })
+    }
+    if (isTrialActive(userData)) {
+      throw createError({
+        statusCode: 403,
+        message: 'Add-ons start once you are on a paid Enterprise plan.',
+      })
     }
     if (userData.subscriptionStatus === 'canceled' || userData.subscriptionStatus === 'past_due') {
       throw createError({

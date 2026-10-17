@@ -45,7 +45,7 @@
         class="s-notice"
       >
         {{ storeLimitMessage }}
-        <NuxtLink :to="dashPath('/settings?upgrade=1')" class="s-link"
+        <NuxtLink v-if="!onTrial" :to="dashPath('/settings?upgrade=1')" class="s-link"
           >Open Plan &amp; billing</NuxtLink
         >
       </p>
@@ -383,6 +383,7 @@ const {
   maxStores,
   canAddStore,
   storeLimitMessage,
+  onTrial,
   canManageBranches,
   showCreateModal,
   showDeleteModal,

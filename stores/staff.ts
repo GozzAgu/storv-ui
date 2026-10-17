@@ -30,6 +30,7 @@ import {
 import { normalizeEntityName } from '~/utils/capitalize-text'
 import {
   getStaffLimitForStore,
+  isTrialActive,
   resolveEffectiveSubscriptionPlan,
   staffLimitReachedMessage,
   summarizeSubscriptionAddOns,
@@ -123,7 +124,7 @@ async function assertStaffPlanCapacity(storeId: string): Promise<void> {
     .filter((d) => d.storeId === storeId)
     .reduce((sum, d) => sum + (d.staffCount || 0), 0)
   if (maxStaff >= 0 && staffCountInStore >= maxStaff) {
-    throw new Error(staffLimitReachedMessage(plan, maxStaff))
+    throw new Error(staffLimitReachedMessage(plan, maxStaff, isTrialActive(userStore.userData)))
   }
 }
 
@@ -686,7 +687,7 @@ export const useStaffStore = defineStore('staff', {
         .filter((d) => d.storeId === storeId)
         .reduce((sum, d) => sum + (d.staffCount || 0), 0)
       if (maxStaff >= 0 && staffCountInStore >= maxStaff) {
-        throw new Error(staffLimitReachedMessage(plan, maxStaff))
+        throw new Error(staffLimitReachedMessage(plan, maxStaff, isTrialActive(userStore.userData)))
       }
 
       // Per-module permission matrix is the source of truth going forward. `role` is no longer
