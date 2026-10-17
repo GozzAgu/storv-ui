@@ -26,6 +26,7 @@
           accent="Grow when ready."
           :lede="`Prices in ${currency}.`"
         />
+        <MkTrialOffer />
         <div class="mk-plans">
           <article
             v-for="plan in MARKETING_PLANS"
@@ -133,6 +134,7 @@ import MkIntro from '~/components/marketing/MkIntro.vue'
 import MkPlatform from '~/components/marketing/MkPlatform.vue'
 import MkSetup from '~/components/marketing/MkSetup.vue'
 import MkStats from '~/components/marketing/MkStats.vue'
+import MkTrialOffer from '~/components/marketing/MkTrialOffer.vue'
 import { MARKETING_PLANS, useMarketingPricing } from '~/composables/useMarketingPricing'
 import { useMarketingAppUrl } from '~/composables/useMarketingSite'
 

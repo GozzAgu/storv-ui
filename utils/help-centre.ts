@@ -1,5 +1,11 @@
 import type { Component } from 'vue'
 import { Boxes, Building2, ChartColumn, CreditCard, ReceiptText, Rocket, Users } from '@lucide/vue'
+import { getTrialOffer } from '~/utils/trial-offer'
+
+const trialOffer = getTrialOffer()
+const trialSentence = trialOffer
+  ? ` Every new account gets Enterprise free for ${trialOffer.length}, then moves to Micro.`
+  : ''
 
 export interface HelpAnswer {
   id: string
@@ -36,7 +42,7 @@ export const HELP_TOPICS: HelpTopic[] = [
       {
         id: 'free',
         q: 'Is Storvv really free?',
-        a: 'Yes. The Micro plan is free forever for one store and two staff. No card needed.',
+        a: `Yes.${trialSentence} The Micro plan is free forever for one store and two staff. No card needed.`,
       },
       {
         id: 'demo',
@@ -243,6 +249,15 @@ export const HELP_TOPICS: HelpTopic[] = [
         a: 'Micro is free. Medium is ₦15,000 a month. Enterprise is ₦25,000 a month.',
         link: { label: 'Compare every plan', to: '/pricing' },
       },
+      ...(trialOffer
+        ? [
+            {
+              id: 'trial',
+              q: 'Is there a free trial?',
+              a: `Yes. Every new account gets Enterprise free for ${trialOffer.length}. After that you are on Micro unless you choose a plan. Nothing is deleted.`,
+            },
+          ]
+        : []),
       {
         id: 'discounts',
         q: 'Do you offer discounts?',

@@ -3433,6 +3433,26 @@ html.dark .mk-marquee__item:hover {
   margin-top: var(--s-space-4);
 }
 
+.mk-trial-offer {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-space-1);
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto var(--s-space-4);
+  padding: var(--s-space-1) var(--s-space-2);
+  border-radius: var(--s-radius);
+  background: var(--s-accent-soft);
+  color: var(--s-accent-soft-text);
+  font: var(--mk-small);
+  text-align: left;
+}
+
+.mk-trial-offer svg {
+  flex: none;
+  margin-top: 2px;
+}
+
 .mk-contact-frame {
   display: block;
   width: 100%;

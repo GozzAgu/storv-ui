@@ -9,6 +9,7 @@
           <h1 id="pricing-title" class="mk-h1">
             Start free. <span class="mk-accent">Grow when you're ready.</span>
           </h1>
+          <MkTrialOffer />
           <STabs v-model="cycle" :tabs="cycleTabs" label="Billing cycle">
             <template #tab="{ tab }">
               {{ tab.label }}
@@ -265,6 +266,7 @@ import {
   LayoutGrid,
   Minus,
   ReceiptText,
+  Rocket,
   ShieldCheck,
   Store,
   UserCog,
@@ -279,6 +281,8 @@ import STabs from '~/components/s/STabs.vue'
 import MkCta from '~/components/marketing/MkCta.vue'
 import MkFaq, { type MkFaqItem } from '~/components/marketing/MkFaq.vue'
 import MkSectionHead from '~/components/marketing/MkSectionHead.vue'
+import MkTrialOffer from '~/components/marketing/MkTrialOffer.vue'
+import { getTrialOffer } from '~/utils/trial-offer'
 import {
   CYCLE_SAVINGS,
   MARKETING_PLANS,
@@ -327,7 +331,10 @@ const cycleTabs = SUBSCRIPTION_BILLING_CYCLES.map((value) => ({
   label: BILLING_CYCLE_LABELS[value],
 }))
 
+const trialOffer = getTrialOffer()
+
 const assurances: { icon: Component; label: string }[] = [
+  ...(trialOffer ? [{ icon: Rocket, label: `${trialOffer.headline} on new accounts` }] : []),
   { icon: Gift, label: 'Micro is free forever' },
   { icon: CalendarClock, label: 'Cancel any time in Settings' },
   { icon: ShieldCheck, label: 'Nothing deleted on downgrade' },
@@ -420,6 +427,14 @@ const workspaces: Workspace[] = [
 ]
 
 const billingFaq = computed<MkFaqItem[]>(() => [
+  ...(trialOffer
+    ? [
+        {
+          q: 'Is there a free trial?',
+          a: `Yes. Every new account gets Enterprise free for ${trialOffer.length}. No card needed. After that you are on Micro, free forever, unless you choose a plan. Nothing is deleted.`,
+        },
+      ]
+    : []),
   {
     q: 'Is Micro really free?',
     a: 'Yes. Free forever for one store. No card needed.',
@@ -460,6 +475,7 @@ useHead({
     {
       name: 'description',
       content:
+        (trialOffer ? `${trialOffer.headline} on every new account. ` : '') +
         'Storvv pricing: Micro is free forever for one store. Medium adds analytics, sales leads, and a second branch. Enterprise covers 5 stores with 10 staff each, plus stock transfers and stock loans, and you can add stores or staff seats any time. Cancel anytime.',
     },
   ],
