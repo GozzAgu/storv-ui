@@ -49,8 +49,15 @@ export interface MkFaqItem {
   soon?: boolean
 }
 
-defineProps<{ items: MkFaqItem[] }>()
+const props = withDefaults(
+  defineProps<{
+    items: MkFaqItem[]
+    /** Index open on first render; null starts with everything closed. */
+    initialOpen?: number | null
+  }>(),
+  { initialOpen: 0 }
+)
 
 const baseId = useId()
-const open = ref<number | null>(0)
+const open = ref<number | null>(props.initialOpen)
 </script>

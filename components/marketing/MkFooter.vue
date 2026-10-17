@@ -127,6 +127,7 @@ const columns: { title: string; links: FooterLink[] }[] = [
     links: [
       { label: 'Pricing', to: '/pricing' },
       { label: 'Security', to: '/security' },
+      { label: 'Help centre', to: '/help' },
       { label: 'FAQ', section: 'faq' },
       { label: 'Contact', section: 'contact' },
     ],

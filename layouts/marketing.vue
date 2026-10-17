@@ -204,6 +204,7 @@ const pageLinks = [
   { label: 'Features', to: '/features' },
   { label: 'Pricing', to: '/pricing' },
   { label: 'Security', to: '/security' },
+  { label: 'Help', to: '/help' },
 ]
 
 const isDark = computed(() => actualTheme.value === 'dark')
