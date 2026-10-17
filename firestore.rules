@@ -210,6 +210,37 @@ service cloud.firestore {
       return normalizedOwnerPlan(userId) == 'storvv_enterprise';
     }
 
+    // Over the plan's limits the extra stores, and the extra staff in a store, are view only.
+    // The server saves `planTier` on each store doc and member doc: the lowest plan that keeps it
+    // fully usable (0 Micro, 1 Medium, 2 Enterprise). Missing means no limit yet. Compared with the
+    // owner's plan here, so upgrades, downgrades and trial ends apply at once.
+    // Mirrors utils/plan-access.ts#planTierForPosition and server/utils/plan-tiers.ts.
+    function ownerPlanRank(userId) {
+      let plan = normalizedOwnerPlan(userId);
+      return plan == 'storvv_enterprise' ? 2 : (plan == 'storvv_medium' ? 1 : 0);
+    }
+
+    function storeWithinPlan(userId, storeId) {
+      return !exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)) ||
+        get(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)).data.get('planTier', 0)
+          <= ownerPlanRank(userId);
+    }
+
+    function callerWithinPlan(userId, storeId) {
+      return request.auth.uid == userId ||
+        !exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/members/$(request.auth.uid)) ||
+        get(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/members/$(request.auth.uid)).data.get('planTier', 0)
+          <= ownerPlanRank(userId);
+    }
+
+    function planAllowsStoreWrite(userId, storeId) {
+      return storeWithinPlan(userId, storeId) && callerWithinPlan(userId, storeId);
+    }
+
+    function planTierUnchanged() {
+      return request.resource.data.get('planTier', null) == resource.data.get('planTier', null);
+    }
+
     function canAccessStoreData(userId, storeId) {
       return (isAuthenticated() && userId == request.auth.uid) || isActiveStoreMember(userId, storeId);
     }
@@ -578,10 +609,13 @@ service cloud.firestore {
         // Allow create if user is the super admin (userId in path) creating store in their account
         allow create: if isAuthenticated() && 
                        userId == request.auth.uid && 
-                       request.resource.data.ownerId == request.auth.uid;
+                       request.resource.data.ownerId == request.auth.uid &&
+                       !('planTier' in request.resource.data);
         
-        // Allow update/delete if user is the super admin (userId in path) who owns the store
-        allow update, delete: if ownsStore(userId, storeId);
+        // Allow update/delete if user is the super admin (userId in path) who owns the store.
+        // `planTier` is server-written (see planAllowsStoreWrite).
+        allow update: if ownsStore(userId, storeId) && planTierUnchanged();
+        allow delete: if ownsStore(userId, storeId);
 
         // Store members subcollection: users/{userId}/stores/{storeId}/members/{memberUid}
         // This is the canonical access-control index for rule checks.
@@ -591,11 +625,14 @@ service cloud.firestore {
           allow read: if ownsStore(userId, storeId) || isStoreAdmin(userId, storeId) ||
                        (isAuthenticated() && request.auth.uid == memberUid);
           // Payments grants (permissions.payments) are server-only so every grant is audit-logged.
+          // `planTier` is server-written too (see planAllowsStoreWrite).
           allow create: if ownsStore(userId, storeId) &&
-                         !request.resource.data.get('permissions', {}).keys().hasAny(['payments']);
+                         !request.resource.data.get('permissions', {}).keys().hasAny(['payments']) &&
+                         !('planTier' in request.resource.data);
           allow update: if ownsStore(userId, storeId) &&
                          !request.resource.data.get('permissions', {})
-                           .diff(resource.data.get('permissions', {})).affectedKeys().hasAny(['payments']);
+                           .diff(resource.data.get('permissions', {})).affectedKeys().hasAny(['payments']) &&
+                         planTierUnchanged();
           allow delete: if ownsStore(userId, storeId);
         }
         
@@ -613,20 +650,20 @@ service cloud.firestore {
           
           // Create/update/delete: the owner, or a branch admin. Departments always stay
           // owned by the store owner (`userId` / `createdBy`), whoever writes them.
-          allow create: if isAuthenticated() && 
+          allow create: if planAllowsStoreWrite(userId, storeId) && (isAuthenticated() && 
                          (userId == request.auth.uid || isStoreAdmin(userId, storeId)) &&
                          request.resource.data.createdBy == userId &&
-                         request.resource.data.get('userId', userId) == userId;
+                         request.resource.data.get('userId', userId) == userId);
           
-          allow update: if isAuthenticated() && 
+          allow update: if planAllowsStoreWrite(userId, storeId) && (isAuthenticated() && 
                          (userId == request.auth.uid || isStoreAdmin(userId, storeId)) &&
                          resource.data.createdBy == userId &&
                          request.resource.data.createdBy == userId &&
-                         request.resource.data.get('userId', userId) == userId;
+                         request.resource.data.get('userId', userId) == userId);
           
-          allow delete: if isAuthenticated() && 
+          allow delete: if planAllowsStoreWrite(userId, storeId) && (isAuthenticated() && 
                          (userId == request.auth.uid || isStoreAdmin(userId, storeId)) &&
-                         resource.data.createdBy == userId;
+                         resource.data.createdBy == userId);
           
           // Staff subcollection: users/{userId}/stores/{storeId}/departments/{departmentId}/staff/{staffId}
           match /staff/{staffId} {
@@ -684,18 +721,18 @@ service cloud.firestore {
                        (planIsEnterprise(userId) && isActiveWorkspaceAdmin(userId));
           
           // Create/update/delete: owner, or a member granted the matching products action.
-          allow create: if canManageProducts(userId, storeId, 'create') &&
-                         request.resource.data.storeId == storeId;
+          allow create: if planAllowsStoreWrite(userId, storeId) && (canManageProducts(userId, storeId, 'create') &&
+                         request.resource.data.storeId == storeId);
 
           // Who can open a category is the owner's call: members with products.edit can change
           // everything else, but must leave allowedDepartments / allowedStaff as they were.
-          allow update: if canManageProducts(userId, storeId, 'edit') &&
+          allow update: if planAllowsStoreWrite(userId, storeId) && (canManageProducts(userId, storeId, 'edit') &&
                          resourceMatchesStore(storeId) &&
                          requestMatchesStore(storeId) &&
-                         (ownsStore(userId, storeId) || categoryAccessUnchanged());
+                         (ownsStore(userId, storeId) || categoryAccessUnchanged()));
 
-          allow delete: if canManageProducts(userId, storeId, 'delete') &&
-                         resourceMatchesStore(storeId);
+          allow delete: if planAllowsStoreWrite(userId, storeId) && (canManageProducts(userId, storeId, 'delete') &&
+                         resourceMatchesStore(storeId));
         }
         
         // Inventory items subcollection: users/{userId}/stores/{storeId}/inventoryItems/{itemId}
@@ -713,19 +750,19 @@ service cloud.firestore {
           // Full create/delete: owner, or a member granted the matching products action.
           // Any active member may also add a trade-in item while recording a swap-in sale.
           // Enterprise branch admins may also create/update/delete items when completing a transfer.
-          allow create: if (canManageProducts(userId, storeId, 'create') ||
+          allow create: if planAllowsStoreWrite(userId, storeId) && ((canManageProducts(userId, storeId, 'create') ||
                           (planIsEnterprise(userId) && isActiveWorkspaceAdmin(userId)) ||
                           (isActiveStoreMember(userId, storeId) &&
                            request.resource.data.get('swapIn', false) == true &&
                            request.resource.data.get('buyback', false) != true &&
                            !request.resource.data.keys().hasAny(['swapInReceiptId']))) &&
                          request.resource.data.storeId == storeId &&
-                         !onPartnerLoan(request.resource.data);
+                         !onPartnerLoan(request.resource.data));
 
           // Full update: owner or products.edit grant. Any other active member: only
           // dateOut/updatedAt (sale or return-to-stock). access to mark a sale doesn't require a
           // products grant, it's the POS flow every active member can perform.
-          allow update: if partnerLoanUntouched() && (
+          allow update: if planAllowsStoreWrite(userId, storeId) && (partnerLoanUntouched() && (
                         (canManageProducts(userId, storeId, 'edit') &&
                          resourceMatchesStore(storeId) &&
                          requestMatchesStore(storeId)) ||
@@ -739,12 +776,12 @@ service cloud.firestore {
                         (isActiveStoreMember(userId, storeId) &&
                          inventoryItemSwapInReceiptLink() &&
                          resourceMatchesStore(storeId) &&
-                         requestMatchesStore(storeId)));
+                         requestMatchesStore(storeId))));
 
-          allow delete: if (canManageProducts(userId, storeId, 'delete') ||
+          allow delete: if planAllowsStoreWrite(userId, storeId) && ((canManageProducts(userId, storeId, 'delete') ||
                           (planIsEnterprise(userId) && isActiveWorkspaceAdmin(userId))) &&
                          resourceMatchesStore(storeId) &&
-                         !onPartnerLoan(resource.data);
+                         !onPartnerLoan(resource.data));
         }
         
         // Receipts subcollection: users/{userId}/stores/{storeId}/receipts/{receiptId}
@@ -756,12 +793,12 @@ service cloud.firestore {
           // Create: owner or any active member (add receipt, POS). Full update: owner or
           // receipts.edit grant. Balance-due payment and refund/cancel: narrower carve-outs below.
           // `tradeLoanId` marks a partner-loan sale; only the server writes those.
-          allow create: if canCreateReceipt(userId, storeId) &&
+          allow create: if planAllowsStoreWrite(userId, storeId) && (canCreateReceipt(userId, storeId) &&
                          request.resource.data.storeId == storeId &&
                          !('paymentSummary' in request.resource.data) &&
-                         !('tradeLoanId' in request.resource.data);
+                         !('tradeLoanId' in request.resource.data));
 
-          allow update: if receiptClientUpdateKeepsPaymentsSafe() &&
+          allow update: if planAllowsStoreWrite(userId, storeId) && (receiptClientUpdateKeepsPaymentsSafe() &&
                         request.resource.data.get('tradeLoanId', null) == resource.data.get('tradeLoanId', null) && (
                         ((isStoreOwnerForPath(userId) || memberHasPermission(userId, storeId, 'receipts', 'edit')) &&
                          resourceMatchesStore(storeId) &&
@@ -774,12 +811,12 @@ service cloud.firestore {
                          memberHasReceiptsEditorAccess(userId, storeId) &&
                          receiptStaffRefundUpdate() &&
                          resourceMatchesStore(storeId) &&
-                         requestMatchesStore(storeId)));
+                         requestMatchesStore(storeId))));
 
-          allow delete: if (ownsStore(userId, storeId) ||
+          allow delete: if planAllowsStoreWrite(userId, storeId) && ((ownsStore(userId, storeId) ||
                           storeAdminHasGrant(userId, storeId, 'deleteSales')) &&
                          resourceMatchesStore(storeId) &&
-                         !('paymentSummary' in resource.data);
+                         !('paymentSummary' in resource.data));
         }
 
         // Payments V2 records: written only by server routes (Admin SDK). The recorder may read
@@ -821,22 +858,22 @@ service cloud.firestore {
                          canAccessSellerLoans(userId, storeId, 'view') &&
                          resourceMatchesStore(storeId);
 
-          allow create: if planIsEnterprise(userId) &&
+          allow create: if planAllowsStoreWrite(userId, storeId) && (planIsEnterprise(userId) &&
                            canAccessSellerLoans(userId, storeId, 'create') &&
                            request.resource.data.storeId == storeId &&
                            request.resource.data.createdBy == request.auth.uid &&
                            request.resource.data.status == 'active' &&
                            request.resource.data.lines is list &&
-                           request.resource.data.lines.size() > 0;
+                           request.resource.data.lines.size() > 0);
 
-          allow update: if planIsEnterprise(userId) &&
+          allow update: if planAllowsStoreWrite(userId, storeId) && (planIsEnterprise(userId) &&
                            ((canAccessSellerLoans(userId, storeId, 'edit') &&
                            resourceMatchesStore(storeId) &&
                            requestMatchesStore(storeId))
                         || (canCreateReceipt(userId, storeId) &&
                            sellerLoanSaleReconcileUpdate() &&
                            resourceMatchesStore(storeId) &&
-                           requestMatchesStore(storeId)));
+                           requestMatchesStore(storeId))));
 
           allow delete: if false;
         }
@@ -846,18 +883,18 @@ service cloud.firestore {
           allow read: if canAccessBuybacks(userId, storeId, 'view') &&
                          resourceMatchesStore(storeId);
 
-          allow create: if canAccessBuybacks(userId, storeId, 'create') &&
+          allow create: if planAllowsStoreWrite(userId, storeId) && (canAccessBuybacks(userId, storeId, 'create') &&
                            request.resource.data.storeId == storeId &&
                            request.resource.data.createdBy == request.auth.uid &&
                            request.resource.data.status == 'completed' &&
                            request.resource.data.inventoryItemId is string &&
                            request.resource.data.folderId is string &&
                            request.resource.data.purchasePrice is number &&
-                           request.resource.data.purchasePrice > 0;
+                           request.resource.data.purchasePrice > 0);
 
-          allow update: if canAccessBuybacks(userId, storeId, 'edit') &&
+          allow update: if planAllowsStoreWrite(userId, storeId) && (canAccessBuybacks(userId, storeId, 'edit') &&
                            resourceMatchesStore(storeId) &&
-                           requestMatchesStore(storeId);
+                           requestMatchesStore(storeId));
 
           allow delete: if false;
         }
@@ -868,23 +905,23 @@ service cloud.firestore {
                          canAccessLeads(userId, storeId, 'view') &&
                          resourceMatchesStore(storeId);
 
-          allow create: if planAtLeastMedium(userId) &&
+          allow create: if planAllowsStoreWrite(userId, storeId) && (planAtLeastMedium(userId) &&
                            canAccessLeads(userId, storeId, 'create') &&
                            request.resource.data.storeId == storeId &&
                            request.resource.data.createdBy == request.auth.uid &&
                            request.resource.data.status == 'new' &&
                            request.resource.data.customerName is string &&
                            request.resource.data.productName is string &&
-                           request.resource.data.source is string;
+                           request.resource.data.source is string);
 
-          allow update: if planAtLeastMedium(userId) &&
+          allow update: if planAllowsStoreWrite(userId, storeId) && (planAtLeastMedium(userId) &&
                            canAccessLeads(userId, storeId, 'edit') &&
                            resourceMatchesStore(storeId) &&
-                           requestMatchesStore(storeId);
+                           requestMatchesStore(storeId));
 
-          allow delete: if planAtLeastMedium(userId) &&
+          allow delete: if planAllowsStoreWrite(userId, storeId) && (planAtLeastMedium(userId) &&
                            canAccessLeads(userId, storeId, 'delete') &&
-                           resourceMatchesStore(storeId);
+                           resourceMatchesStore(storeId));
         }
 
         match /leadEvents/{eventId} {
@@ -892,13 +929,13 @@ service cloud.firestore {
                          canAccessStoreData(userId, storeId) &&
                          resourceMatchesStore(storeId);
 
-          allow create: if planAtLeastMedium(userId) &&
+          allow create: if planAllowsStoreWrite(userId, storeId) && (planAtLeastMedium(userId) &&
                            canCreateReceipt(userId, storeId) &&
                            request.resource.data.storeId == storeId &&
                            request.resource.data.createdBy == request.auth.uid &&
                            request.resource.data.leadId is string &&
                            request.resource.data.type is string &&
-                           request.resource.data.description is string;
+                           request.resource.data.description is string);
 
           allow update, delete: if false;
         }
@@ -907,19 +944,19 @@ service cloud.firestore {
           allow read: if canAccessStoreData(userId, storeId);
           
           // Any active member can upsert from POS; delete stays elevated-ops only.
-          allow create: if isStoreOwnerForPath(userId) || isActiveStoreMember(userId, storeId);
-          allow update: if isStoreOwnerForPath(userId) || isActiveStoreMember(userId, storeId);
-          allow delete: if canManageNonInventoryOps(userId, storeId);
+          allow create: if planAllowsStoreWrite(userId, storeId) && (isStoreOwnerForPath(userId) || isActiveStoreMember(userId, storeId));
+          allow update: if planAllowsStoreWrite(userId, storeId) && (isStoreOwnerForPath(userId) || isActiveStoreMember(userId, storeId));
+          allow delete: if planAllowsStoreWrite(userId, storeId) && (canManageNonInventoryOps(userId, storeId));
         }
 
         // Customer balance / credit ledger (Medium+ in product; rules allow all store roles to record payments).
         match /customerAccounts/{accountId} {
           allow read: if planAtLeastMedium(userId) && canAccessStoreData(userId, storeId);
-          allow create: if planAtLeastMedium(userId) &&
-                           (isStoreOwnerForPath(userId) || isActiveStoreMember(userId, storeId));
-          allow update: if planAtLeastMedium(userId) &&
-                           (isStoreOwnerForPath(userId) || isActiveStoreMember(userId, storeId));
-          allow delete: if planAtLeastMedium(userId) && canManageNonInventoryOps(userId, storeId);
+          allow create: if planAllowsStoreWrite(userId, storeId) && (planAtLeastMedium(userId) &&
+                           (isStoreOwnerForPath(userId) || isActiveStoreMember(userId, storeId)));
+          allow update: if planAllowsStoreWrite(userId, storeId) && (planAtLeastMedium(userId) &&
+                           (isStoreOwnerForPath(userId) || isActiveStoreMember(userId, storeId)));
+          allow delete: if planAllowsStoreWrite(userId, storeId) && (planAtLeastMedium(userId) && canManageNonInventoryOps(userId, storeId));
         }
         
         // Notifications subcollection: users/{userId}/stores/{storeId}/notifications/{notificationId}
@@ -927,10 +964,10 @@ service cloud.firestore {
           allow read: if canAccessStoreData(userId, storeId);
           
           // Payments V2 and trade notifications are server-written; a client must not forge them.
-          allow create: if canCreateReceipt(userId, storeId)
+          allow create: if planAllowsStoreWrite(userId, storeId) && (canCreateReceipt(userId, storeId)
             && !(request.resource.data.get('source', '') in ['payments_v2', 'trade'])
             && !request.resource.data.get('type', '').matches('^(payment_|payout_|till_count_|trade_).*')
-            && !('recipientUids' in request.resource.data);
+            && !('recipientUids' in request.resource.data));
           allow update: if canManageNonInventoryOps(userId, storeId)
             || (canAccessStoreData(userId, storeId)
                 && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read'])
@@ -962,9 +999,9 @@ service cloud.firestore {
         // Private storefront settings (business only). Public catalogue is top-level storefronts/*.
         match /storefrontConfig/{docId} {
           allow read: if canAccessStoreData(userId, storeId);
-          allow create, update: if isStoreOwnerForPath(userId) ||
-            memberHasAnyProductsManage(userId, storeId);
-          allow delete: if isStoreOwnerForPath(userId);
+          allow create, update: if planAllowsStoreWrite(userId, storeId) && (isStoreOwnerForPath(userId) ||
+            memberHasAnyProductsManage(userId, storeId));
+          allow delete: if planAllowsStoreWrite(userId, storeId) && (isStoreOwnerForPath(userId));
         }
 
         // Guest inquiries / reservations. client read for staff; writes via Admin SDK only.

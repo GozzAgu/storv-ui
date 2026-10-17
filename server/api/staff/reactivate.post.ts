@@ -3,6 +3,7 @@ import { FieldValue } from 'firebase-admin/firestore'
 import { getAdminAuth, getAdminFirestore } from '~/server/utils/firebase-admin'
 import { rethrowFirebaseAdminSetupError } from '~/server/utils/firebase-admin-errors'
 import { requireAuth, requireFreshTotp } from '~/server/utils/store-auth'
+import { syncPlanTiersQuietly } from '~/server/utils/plan-tiers'
 import { assertStaffLoginTarget } from '~/server/utils/staff-login-target'
 import {
   assertCanManageTarget,
@@ -188,5 +189,6 @@ export default defineEventHandler(async (event) => {
     }
   }
 
+  await syncPlanTiersQuietly(adminDb, ownerUserId)
   return { ok: true }
 })

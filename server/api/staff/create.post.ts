@@ -3,6 +3,7 @@ import { createError, defineEventHandler, readBody } from 'h3'
 import { getAdminAuth, getAdminFirestore } from '~/server/utils/firebase-admin'
 import { rethrowFirebaseAdminSetupError } from '~/server/utils/firebase-admin-errors'
 import { requireAuth } from '~/server/utils/store-auth'
+import { syncPlanTiersQuietly } from '~/server/utils/plan-tiers'
 import {
   assertStaffCapacity,
   parseNewStaff,
@@ -95,6 +96,7 @@ export default defineEventHandler(async (event) => {
       fields,
       permissions,
     })
+    await syncPlanTiersQuietly(adminDb, ownerUserId)
     return { ok: true, staffId, authUid, temporaryPassword: password }
   } catch (err) {
     await adminAuth.deleteUser(authUid).catch(() => {})

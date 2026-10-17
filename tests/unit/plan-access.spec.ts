@@ -3,8 +3,10 @@ import { createPinia, setActivePinia } from 'pinia'
 import {
   isStoreViewOnlyOnPlan,
   pickFullAccessStaff,
+  planTierForPosition,
   PLAN_VIEW_ONLY_ERROR,
 } from '~/utils/plan-access'
+import { syncPlanTiers } from '~/server/utils/plan-tiers'
 import { assertPlanWritable, currentPlanViewOnlyReason } from '~/utils/plan-view-only'
 import { resolveStaffPlanViewOnly } from '~/server/utils/plan-access'
 import { useStoresStore } from '~/stores/stores'
@@ -171,5 +173,99 @@ describe('resolveStaffPlanViewOnly (server)', () => {
     const enterprise = { subscription: 'storvv_enterprise' }
     expect(await resolveStaffPlanViewOnly(db, 'owner', enterprise, 'newer', 'n1')).toBeNull()
     expect(await resolveStaffPlanViewOnly(db, 'owner', enterprise, 'oldest', 's2')).toBeNull()
+  })
+})
+
+describe('planTierForPosition', () => {
+  it('matches each plan’s store count', () => {
+    expect([0, 1, 2, 4, 5, 9].map((i) => planTierForPosition(i, 'store'))).toEqual([
+      0, 1, 2, 2, 2, 2,
+    ])
+  })
+
+  it('matches each plan’s staff count', () => {
+    expect([0, 1, 2, 4, 5, 9, 10].map((i) => planTierForPosition(i, 'staff'))).toEqual([
+      0, 0, 1, 1, 2, 2, 2,
+    ])
+  })
+})
+
+describe('syncPlanTiers (server)', () => {
+  it('saves tiers on stores and members, writing only what changed', async () => {
+    const writes: Array<{ path: string; planTier: number }> = []
+    const member = (uid: string, planTier?: number) => ({
+      id: uid,
+      data: () => (planTier === undefined ? {} : { planTier }),
+      ref: { path: `members/${uid}` },
+    })
+    const staffDocs: Record<string, Array<Record<string, unknown>>> = {
+      a: [
+        { id: 'x1', authUid: 'ux1', createdAt: '2025-01-01T00:00:00Z' },
+        { id: 'x2', authUid: 'ux2', createdAt: '2025-02-01T00:00:00Z' },
+        { id: 'x3', authUid: 'ux3', createdAt: '2025-03-01T00:00:00Z' },
+      ],
+      b: [],
+    }
+    const membersByStore: Record<string, ReturnType<typeof member>[]> = {
+      a: [member('ux1', 0), member('ux2'), member('ux3', 0)],
+      b: [],
+    }
+    const store = (id: string, createdAt: string, extra: Record<string, unknown> = {}) => ({
+      id,
+      data: () => ({ ownerId: 'owner', createdAt, ...extra }),
+      ref: {
+        path: `stores/${id}`,
+        collection: (name: string) => {
+          if (name === 'members') return { get: async () => ({ docs: membersByStore[id] }) }
+          return {
+            where: () => ({
+              get: async () => ({
+                docs: [
+                  {
+                    id: 'dept',
+                    ref: {
+                      collection: () => ({
+                        get: async () => ({
+                          docs: staffDocs[id]!.map((s) => ({
+                            id: s.id,
+                            data: () => ({ ...s, createdBy: 'owner' }),
+                          })),
+                        }),
+                      }),
+                    },
+                  },
+                ],
+              }),
+            }),
+          }
+        },
+      },
+    })
+    const stores = [
+      store('b', '2026-01-01T00:00:00Z'),
+      store('a', '2025-01-01T00:00:00Z', { planTier: 0, fullAccessStaffIds: ['x3'] }),
+    ]
+    const storesCollection = {
+      where: () => ({ get: async () => ({ docs: stores }) }),
+      doc: (id: string) => stores.find((s) => s.id === id)!.ref,
+    }
+    const db = {
+      collection: () => ({ doc: () => ({ collection: () => storesCollection }) }),
+      batch: () => ({
+        update: (ref: { path: string }, data: { planTier: number }) =>
+          writes.push({ path: ref.path, planTier: data.planTier }),
+        commit: async () => {},
+      }),
+    } as never
+
+    const result = await syncPlanTiers(db, 'owner')
+
+    // Store b is second oldest: Medium. Store a's staff order is x3 (picked), x1, x2.
+    // Micro takes the first 2, so x2 (third) needs Medium; ux1 and ux3 already hold tier 0.
+    expect(writes).toEqual([
+      { path: 'members/ux2', planTier: 1 },
+      { path: 'stores/b', planTier: 1 },
+    ])
+    expect(result).toEqual({ storesUpdated: 1, membersUpdated: 1 })
   })
 })

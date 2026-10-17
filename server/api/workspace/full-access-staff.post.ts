@@ -3,6 +3,7 @@ import { getAdminFirestore } from '~/server/utils/firebase-admin'
 import { rethrowFirebaseAdminSetupError } from '~/server/utils/firebase-admin-errors'
 import { requireAuth } from '~/server/utils/store-auth'
 import { loadStorePlanAccess, type OwnerPlanFields } from '~/server/utils/plan-access'
+import { syncPlanTiers } from '~/server/utils/plan-tiers'
 
 /** Owner only: choose which staff keep full access in a store that is over its staff count. */
 export default defineEventHandler(async (event) => {
@@ -49,5 +50,6 @@ export default defineEventHandler(async (event) => {
   }
 
   await storeRef.set({ fullAccessStaffIds: staffIds }, { merge: true })
+  await syncPlanTiers(db, auth.uid)
   return { fullAccessStaffIds: staffIds }
 })

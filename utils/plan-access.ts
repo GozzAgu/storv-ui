@@ -1,5 +1,6 @@
 import {
   getEligibleStoresForPlan,
+  getPlanLimits,
   storeCreatedAtMillis,
   type SubscriptionAddOnTotals,
   type SubscriptionPlan,
@@ -29,6 +30,26 @@ export interface PlanAccessStaff {
   createdAt?: unknown
 }
 
+/** Everyone in a store, in the order they keep full access: the owner's picks, then by age. */
+export function fullAccessOrder(staff: PlanAccessStaff[], picked: unknown): string[] {
+  const known = new Set(staff.map((member) => member.id))
+  const order: string[] = []
+  if (Array.isArray(picked)) {
+    for (const id of picked) {
+      if (typeof id === 'string' && known.has(id) && !order.includes(id)) order.push(id)
+    }
+  }
+  const byAge = [...staff].sort(
+    (a, b) =>
+      storeCreatedAtMillis(a.createdAt) - storeCreatedAtMillis(b.createdAt) ||
+      a.id.localeCompare(b.id)
+  )
+  for (const member of byAge) {
+    if (!order.includes(member.id)) order.push(member.id)
+  }
+  return order
+}
+
 /**
  * Staff ids that keep full access in a store, or null when the store is within its staff count
  * (everyone keeps full access). The owner's picks come first; open places go to the
@@ -40,24 +61,25 @@ export function pickFullAccessStaff(
   picked: unknown
 ): string[] | null {
   if (maxStaff < 0 || staff.length <= maxStaff) return null
-  const known = new Set(staff.map((member) => member.id))
-  const chosen: string[] = []
-  if (Array.isArray(picked)) {
-    for (const id of picked) {
-      if (chosen.length >= maxStaff) break
-      if (typeof id === 'string' && known.has(id) && !chosen.includes(id)) chosen.push(id)
-    }
+  return fullAccessOrder(staff, picked).slice(0, maxStaff)
+}
+
+const PLANS_BY_RANK: SubscriptionPlan[] = ['storvv_micro', 'storvv_medium', 'storvv_enterprise']
+
+/**
+ * Plan tier (0 Micro, 1 Medium, 2 Enterprise) a store or staff member needs to stay fully usable,
+ * from its place in line (0 = oldest store, or first in fullAccessOrder). The server saves it as
+ * `planTier` on the store doc and on each member doc; Firestore rules compare it with the owner's
+ * plan, so upgrades, downgrades and trial ends apply at once. Add-ons are not counted here, so the
+ * rules are a little looser than the app past Enterprise's base limits.
+ */
+export function planTierForPosition(position: number, kind: 'store' | 'staff'): number {
+  for (let rank = 0; rank < PLANS_BY_RANK.length; rank++) {
+    const limits = getPlanLimits(PLANS_BY_RANK[rank]!)
+    const max = kind === 'store' ? limits.maxStores : limits.maxStaffPerStore
+    if (max < 0 || position < max) return rank
   }
-  const byAge = [...staff].sort(
-    (a, b) =>
-      storeCreatedAtMillis(a.createdAt) - storeCreatedAtMillis(b.createdAt) ||
-      a.id.localeCompare(b.id)
-  )
-  for (const member of byAge) {
-    if (chosen.length >= maxStaff) break
-    if (!chosen.includes(member.id)) chosen.push(member.id)
-  }
-  return chosen
+  return PLANS_BY_RANK.length - 1
 }
 
 export const PLAN_VIEW_ONLY_TITLE = 'View only'

@@ -21,6 +21,7 @@ export type OwnerPlanFields = TrialFields & {
 export interface StoreStaffMember extends PlanAccessStaff {
   name: string
   departmentId: string
+  authUid?: string
 }
 
 /** Active staff of a store (they are the ones who can sign in), with their department. */
@@ -46,6 +47,7 @@ export async function loadActiveStoreStaff(
             id: doc.id,
             name: name || String(data.email || 'Staff member'),
             departmentId: dept.id,
+            authUid: typeof data.authUid === 'string' ? data.authUid : undefined,
             createdAt: data.createdAt ?? null,
           }
         })

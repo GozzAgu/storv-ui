@@ -24,6 +24,7 @@ import {
   clearUserProfileCache,
 } from '~/utils/user-profile-cache'
 import { requestTrialStart, shouldRequestTrial } from '~/utils/account-trial-client'
+import { requestPlanTierSyncOnce } from '~/utils/plan-tier-sync-client'
 
 /** Dedupe parallel fetchUserData(uid) from middleware, layout, and sign-in. */
 const fetchUserDataInflight = new Map<string, Promise<void>>()
@@ -178,6 +179,7 @@ export const useUserStore = defineStore('user', {
             writeUserProfileCache(userId, this.userData)
           }
           void this.startTrialIfDue(userId)
+          if (this.userData?.role === 'superAdmin') requestPlanTierSyncOnce(userId)
           return
         }
 

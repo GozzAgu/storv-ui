@@ -37,6 +37,7 @@ import {
   markStoreRefreshWarm,
 } from '~/utils/store-data-cache'
 import { invalidateCurrentStoreIdCache } from '~/composables/useCurrentStore'
+import { requestPlanTierSync } from '~/utils/plan-tier-sync-client'
 
 export const useStoresStore = defineStore('stores', {
   state: () => ({
@@ -770,6 +771,7 @@ export const useStoresStore = defineStore('stores', {
         }
 
         await setDoc(newStoreRef, newStore)
+        void requestPlanTierSync()
 
         const storeWithId = {
           id: newStoreRef.id,
@@ -905,6 +907,7 @@ export const useStoresStore = defineStore('stores', {
         // Use hierarchical path: users/{userId}/stores/{storeId}
         const storeRef = getStoreDocument(db, userId, storeId)
         await deleteDoc(storeRef)
+        void requestPlanTierSync()
 
         // Remove from local state
         this.stores = this.stores.filter((s) => s.id !== storeId)

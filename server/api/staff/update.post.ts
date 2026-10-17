@@ -2,6 +2,7 @@ import { createError, defineEventHandler, readBody } from 'h3'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
 import { rethrowFirebaseAdminSetupError } from '~/server/utils/firebase-admin-errors'
 import { requireAuth } from '~/server/utils/store-auth'
+import { syncPlanTiersQuietly } from '~/server/utils/plan-tiers'
 import {
   applyStaffUpdate,
   resolveStaffManager,
@@ -52,5 +53,6 @@ export default defineEventHandler(async (event) => {
     staffId,
     updates: body.updates,
   })
+  await syncPlanTiersQuietly(adminDb, ownerUserId)
   return { ok: true, ...result }
 })
