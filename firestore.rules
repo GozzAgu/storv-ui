@@ -205,6 +205,36 @@ service cloud.firestore {
       return (isAuthenticated() && userId == request.auth.uid) || isActiveStoreMember(userId, storeId);
     }
 
+    // Mirrors utils/category-access.ts#canStaffAccessCategory. Open until the owner picks
+    // departments; then those departments, plus anyone named in `allowedStaff`.
+    function categoryOpenToMember(folder, departmentId) {
+      return folder.get('allowedDepartments', []).size() == 0 ||
+        departmentId in folder.get('allowedDepartments', []) ||
+        request.auth.uid in folder.get('allowedStaff', []);
+    }
+
+    function listOrEmpty(value) {
+      return value == null ? [] : value;
+    }
+
+    function categoryAccessUnchanged() {
+      return listOrEmpty(request.resource.data.get('allowedDepartments', [])) ==
+               listOrEmpty(resource.data.get('allowedDepartments', [])) &&
+             listOrEmpty(request.resource.data.get('allowedStaff', [])) ==
+               listOrEmpty(resource.data.get('allowedStaff', []));
+    }
+
+    // Products whose category is gone stay readable to every member. Callers must pass
+    // resource.data.folderId with no default: a default would let a query without a
+    // folderId == X filter through unchecked.
+    function memberCanOpenCategory(userId, storeId, folderId) {
+      return !exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/inventoryFolders/$(folderId)) ||
+        categoryOpenToMember(
+          get(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/inventoryFolders/$(folderId)).data,
+          memberData(userId, storeId).get('departmentId', '')
+        );
+    }
+
     // Elevated ops outside a dedicated permission module (customers, notifications): owner, or a
     // member with any manage grant. Dedicated modules (buybacks, seller loans, leads, multi-store)
     // use memberHasPermission() directly.
@@ -647,9 +677,12 @@ service cloud.firestore {
           allow create: if canManageProducts(userId, storeId, 'create') &&
                          request.resource.data.storeId == storeId;
 
+          // Who can open a category is the owner's call: members with products.edit can change
+          // everything else, but must leave allowedDepartments / allowedStaff as they were.
           allow update: if canManageProducts(userId, storeId, 'edit') &&
                          resourceMatchesStore(storeId) &&
-                         requestMatchesStore(storeId);
+                         requestMatchesStore(storeId) &&
+                         (ownsStore(userId, storeId) || categoryAccessUnchanged());
 
           allow delete: if canManageProducts(userId, storeId, 'delete') &&
                          resourceMatchesStore(storeId);
@@ -659,11 +692,12 @@ service cloud.firestore {
         match /inventoryItems/{itemId} {
           // Allow read if:
           // 1. User is the super admin (userId in path matches auth.uid) - allows collection queries
-          // 2. User created the item (createdBy matches auth.uid)
-          // 3. Staff member accessing their superadmin's store (userId != auth.uid means staff, and getQueryUserId ensures correct store)
-          // 4. Enterprise branch admin completing a transfer that touches another branch
-          // Note: For staff, the userId in path is their superadmin's UID (via getQueryUserId), so staff can read their store's inventory
-          allow read: if canAccessStoreData(userId, storeId) ||
+          // 2. Store member, for products in categories open to them (see memberCanOpenCategory).
+          //    Writes are not gated on the category so refunds and transfers of locked stock work.
+          // 3. Enterprise branch admin completing a transfer that touches another branch
+          allow read: if (isAuthenticated() && userId == request.auth.uid) ||
+                       (isActiveStoreMember(userId, storeId) &&
+                        memberCanOpenCategory(userId, storeId, resource.data.folderId)) ||
                        (planIsEnterprise(userId) && isActiveWorkspaceAdmin(userId));
           
           // Full create/delete: owner, or a member granted the matching products action.
