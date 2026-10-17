@@ -221,6 +221,7 @@ export type InheritableFolderSettings = {
   trackProfit: boolean
   template: Template
   allowedDepartments: string[]
+  allowedStaff: string[]
 }
 
 function templateFieldsSignature(fields: TemplateField[] | undefined): string {
@@ -256,6 +257,7 @@ export function getInheritableFolderSettingsFromFolder(
       fields: [],
     },
     allowedDepartments: folder.allowedDepartments ? [...folder.allowedDepartments] : [],
+    allowedStaff: folder.allowedStaff ? [...folder.allowedStaff] : [],
   }
 }
 
@@ -270,7 +272,8 @@ export function inheritableFolderSettingsChanged(
   if (previous.trackProfit !== next.trackProfit) return true
   if (
     departmentsSignature(previous.allowedDepartments) !==
-    departmentsSignature(next.allowedDepartments)
+      departmentsSignature(next.allowedDepartments) ||
+    departmentsSignature(previous.allowedStaff) !== departmentsSignature(next.allowedStaff)
   ) {
     return true
   }
@@ -293,6 +296,7 @@ export function pickInheritableFolderUpdates(
       fields: settings.template.fields.map((field) => ({ ...field })),
     },
     allowedDepartments: [...settings.allowedDepartments],
+    allowedStaff: [...settings.allowedStaff],
   }
 }
 

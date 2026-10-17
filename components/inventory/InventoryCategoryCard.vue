@@ -1,12 +1,17 @@
 <template>
   <article
     class="s-c s-category-card"
-    :class="{ 's-category-card--selected': selected, 's-category-card--empty': isEmpty }"
+    :class="{
+      's-category-card--selected': selected,
+      's-category-card--empty': isEmpty,
+      's-category-card--locked': locked,
+    }"
   >
     <div class="s-category-card__panel">
       <div class="s-category-card__head">
         <span class="s-category-card__mark" aria-hidden="true">
-          <component :is="kindIcon" :size="14" :stroke-width="2" />
+          <Lock v-if="locked" :size="14" :stroke-width="2" />
+          <component :is="kindIcon" v-else :size="14" :stroke-width="2" />
         </span>
         <div v-if="hasOverlays" class="s-category-card__controls">
           <slot name="checkbox" />
@@ -16,7 +21,7 @@
 
       <h3 class="s-category-card__title">
         <button type="button" class="s-category-card__link" @click="$emit('click')">
-          {{ displayName }}
+          {{ displayName }}<span v-if="locked" class="ds-sr-only">, no access</span>
         </button>
       </h3>
 
@@ -43,10 +48,11 @@
         <template v-if="valueLabel">
           <span class="ds-sr-only">Stock value </span>{{ valueLabel }}
         </template>
-        <template v-else>Open</template>
+        <template v-else>{{ locked ? 'No access' : 'Open' }}</template>
       </span>
       <span class="s-category-card__go" aria-hidden="true">
-        <ArrowUpRight :size="14" :stroke-width="2" />
+        <Lock v-if="locked" :size="14" :stroke-width="2" />
+        <ArrowUpRight v-else :size="14" :stroke-width="2" />
       </span>
     </div>
   </article>
@@ -54,7 +60,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { ArrowUpRight, FolderTree } from '@lucide/vue'
+import { ArrowUpRight, FolderTree, Lock } from '@lucide/vue'
 import { folderKindIcon } from '~/utils/category-kind-icons'
 import { formatCategoryDisplayName } from '~/utils/inventory-category-format'
 import type { FolderAvailabilityStats } from '~/utils/inventory-folder-availability'
@@ -80,6 +86,8 @@ const props = withDefaults(
     grossProfitOnHand?: number | null
     showProfit?: boolean
     showDepartments?: boolean
+    /** Visible for totals, but this staff member can't open it. */
+    locked?: boolean
   }>(),
   {
     type: undefined,
@@ -98,6 +106,7 @@ const props = withDefaults(
     grossProfitOnHand: null,
     showProfit: false,
     showDepartments: true,
+    locked: false,
   }
 )
 

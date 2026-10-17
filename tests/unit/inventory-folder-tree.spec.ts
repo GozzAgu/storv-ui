@@ -149,6 +149,7 @@ describe('inventory-folder-tree', () => {
       trackProfit: false,
       template: parent.template!,
       allowedDepartments: ['dept-a'],
+      allowedStaff: [],
     })
     expect(inheritableFolderSettingsChanged(parent, unchanged)).toBe(false)
 
@@ -156,6 +157,13 @@ describe('inventory-folder-tree', () => {
       inheritableFolderSettingsChanged(parent, {
         ...unchanged,
         hasSerialNumbers: true,
+      })
+    ).toBe(true)
+
+    expect(
+      inheritableFolderSettingsChanged(parent, {
+        ...unchanged,
+        allowedStaff: ['uid-tunde'],
       })
     ).toBe(true)
   })

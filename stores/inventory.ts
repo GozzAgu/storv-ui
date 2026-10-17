@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import {
-  collection,
   doc,
   setDoc,
   getDoc,
@@ -145,6 +144,7 @@ import {
   validateFolderParentId,
 } from '~/utils/inventory-folder-tree'
 import { getPermissionAction, resolveStaffPermissions } from '~/utils/staff-permissions'
+import { canStaffAccessCategory, splitCategoriesByAccess } from '~/utils/category-access'
 
 function mapFirestoreDocToInventoryFolder(
   snapshot: QueryDocumentSnapshot,
@@ -171,6 +171,7 @@ function mapFirestoreDocToInventoryFolder(
       : new Date(data.updatedAt) || undefined,
     createdBy: data.createdBy || fallbackUserId,
     allowedDepartments: data.allowedDepartments || undefined,
+    allowedStaff: Array.isArray(data.allowedStaff) ? data.allowedStaff : undefined,
     trackProfit: data.trackProfit === true,
     parentId: normalizeParentId(data.parentId as string | null | undefined),
     usesSubcategories: data.usesSubcategories === true,
@@ -192,6 +193,27 @@ let fetchFoldersInflight: { key: string; promise: Promise<void> } | null = null
 let foldersFetchStamp: StoreFetchStamp | null = null
 let availabilityStatsInflight: Promise<Record<string, InventoryItem[]>> | null = null
 let availabilityStatsStamp: StoreFetchStamp | null = null
+
+/**
+ * Staff product reads must filter on one category at a time: Firestore rules only check
+ * category access for queries scoped by `folderId ==`, and refuse store-wide member queries.
+ */
+async function getItemDocsPerFolder(
+  itemsRef: ReturnType<typeof getInventoryItemsCollection>,
+  folderIds: string[]
+): Promise<QueryDocumentSnapshot[]> {
+  const CONCURRENCY = 8
+  const docs: QueryDocumentSnapshot[] = []
+  for (let i = 0; i < folderIds.length; i += CONCURRENCY) {
+    const snaps = await Promise.all(
+      folderIds
+        .slice(i, i + CONCURRENCY)
+        .map((folderId) => getDocs(query(itemsRef, where('folderId', '==', folderId))))
+    )
+    for (const snap of snaps) docs.push(...snap.docs)
+  }
+  return docs
+}
 
 export function resetInventoryFetchStamps(): void {
   foldersFetchStamp = null
@@ -235,6 +257,8 @@ export interface InventoryFolder {
   updatedAt?: Date | any
   createdBy: string
   allowedDepartments?: string[] // Array of department IDs that have access to this folder
+  /** Auth UIDs let in on top of `allowedDepartments`. Ignored while no department is picked. */
+  allowedStaff?: string[]
   /** When true, category tracks cost price and gross profit (super admin only). */
   trackProfit?: boolean
   /** Top-level categories omit this; subcategories point to their parent folder. */
@@ -274,6 +298,12 @@ export interface InventoryItem {
 export const useInventoryStore = defineStore('inventory', {
   state: () => ({
     folders: [] as InventoryFolder[],
+    /**
+     * Staff only: categories in this store their department (or the owner's named list) does not
+     * include. Shown greyed on the categories page and counted in its totals; kept out of
+     * `folders` so pickers, search and quick sale never offer them.
+     */
+    lockedFolders: [] as InventoryFolder[],
     /** Current Firestore page only per folder (limit + startAfter). */
     items: {} as Record<string, InventoryItem[]>,
     itemsPagination: {} as Record<string, { page: number; pageSize: number; total: number }>,
@@ -423,83 +453,17 @@ export const useInventoryStore = defineStore('inventory', {
           const allFolders = querySnapshot.docs
           // console.log('[InventoryStore] Found', allFolders.length, 'folders in store (userId:', userId, 'storeId:', currentStoreId, 'isStaff:', userStore.userData?.role === 'staff' + ')')
 
-          // Process the results
           let folders = allFolders.map((doc) => mapFirestoreDocToInventoryFolder(doc, userId))
+          let lockedFolders: InventoryFolder[] = []
 
-          // For staff: Filter folders by department access
-          if (userStore.userData?.role === 'staff' && staffDepartmentId) {
-            folders = folders.filter((folder) => {
-              // If folder has allowedDepartments, check if staff's department has access
-              if (folder.allowedDepartments && folder.allowedDepartments.length > 0) {
-                return folder.allowedDepartments.includes(staffDepartmentId)
-              }
-              // If no allowedDepartments specified, staff can see it (folder is accessible to all departments)
-              return true
-            })
-            // console.log('[InventoryStore] Filtered folders by department access:', folders.length, 'folders visible to staff')
-          }
-
-          // No need to filter by storeId since we're already querying from the store's subcollection
-          // All folders returned are already in the correct store
-
-          // If user is staff, filter folders by department access
+          // Staff without a department only get categories open to everyone.
           if (userStore.userData?.role === 'staff') {
-            try {
-              const staffStore = useStaffStore()
-              let currentStaffMember = staffStore.getCurrentStaffMember
-
-              // If current staff member not found in store, fetch it directly
-              if (!currentStaffMember) {
-                try {
-                  const staffRef = collection(db, 'staff')
-                  const staffQuery = query(
-                    staffRef,
-                    where('authUid', '==', authStore.currentUser.uid)
-                  )
-                  const staffSnapshot = await getDocs(staffQuery)
-
-                  if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
-                    const staffDoc = staffSnapshot.docs[0]
-                    if (staffDoc) {
-                      const staffData = staffDoc.data()
-                      currentStaffMember = {
-                        id: staffDoc.id,
-                        ...staffData,
-                      } as any
-                    }
-                  }
-                } catch (fetchError: any) {
-                  console.warn(
-                    '[InventoryStore] Could not fetch staff document:',
-                    fetchError.message
-                  )
-                }
-              }
-
-              const staffDepartmentId = currentStaffMember?.departmentId
-
-              if (staffDepartmentId) {
-                // Filter folders: show if no allowedDepartments (accessible to all) OR if staff's department is in allowedDepartments
-                folders = folders.filter((folder) => {
-                  // If folder has no allowedDepartments, it's accessible to all
-                  if (!folder.allowedDepartments || folder.allowedDepartments.length === 0) {
-                    return true
-                  }
-                  // Otherwise, check if staff's department is in the allowed list
-                  return folder.allowedDepartments.includes(staffDepartmentId)
-                })
-              } else {
-                // If staff member has no department, only show folders with no restrictions
-                folders = folders.filter(
-                  (folder) => !folder.allowedDepartments || folder.allowedDepartments.length === 0
-                )
-              }
-            } catch (error: any) {
-              console.warn(
-                '[InventoryStore] Could not filter by department, showing all folders:',
-                error.message
-              )
-            }
+            const split = splitCategoriesByAccess(folders, {
+              departmentId: staffDepartmentId,
+              authUid: authStore.currentUser.uid,
+            })
+            folders = split.accessible
+            lockedFolders = split.locked
           }
 
           const storeIdNow = await getCurrentStoreId()
@@ -509,6 +473,7 @@ export const useInventoryStore = defineStore('inventory', {
           }
 
           this.folders = folders
+          this.lockedFolders = lockedFolders
 
           // Sort by createdAt if orderBy failed
           this.folders.sort((a, b) => {
@@ -606,14 +571,15 @@ export const useInventoryStore = defineStore('inventory', {
         this.availabilityStatsLoading = true
         try {
           const ctx = await this._prepareStoreInventoryItemsContext()
-          const itemsQuery = ctx.isStaff
-            ? query(ctx.itemsRef)
-            : query(ctx.itemsRef, where('createdBy', '==', ctx.queryUserId))
-
-          const snapshot = await getDocs(itemsQuery)
+          const itemDocs = ctx.isStaff
+            ? await getItemDocsPerFolder(
+                ctx.itemsRef,
+                this.folders.map((folder) => folder.id)
+              )
+            : (await getDocs(query(ctx.itemsRef, where('createdBy', '==', ctx.queryUserId)))).docs
           const itemsByFolder = new Map<string, InventoryItem[]>()
 
-          for (const docSnap of snapshot.docs) {
+          for (const docSnap of itemDocs) {
             const data = docSnap.data()
             const folderId = String(data.folderId || '')
             if (!folderId) continue
@@ -732,14 +698,19 @@ export const useInventoryStore = defineStore('inventory', {
       }
 
       const ctx = await this._prepareStoreInventoryItemsContext()
-      const snapshot = await getDocs(query(ctx.itemsRef))
+      const itemDocs = ctx.isStaff
+        ? await getItemDocsPerFolder(
+            ctx.itemsRef,
+            this.folders.map((folder) => folder.id)
+          )
+        : (await getDocs(query(ctx.itemsRef))).docs
       const grouped: Record<string, InventoryItem[]> = {}
 
       for (const folder of this.folders) {
         grouped[folder.id] = []
       }
 
-      for (const docSnap of snapshot.docs) {
+      for (const docSnap of itemDocs) {
         const data = docSnap.data()
         const folderId = String(data.folderId || '')
         if (!folderId || !(folderId in grouped)) continue
@@ -1106,15 +1077,13 @@ export const useInventoryStore = defineStore('inventory', {
             throw new Error('Folder not found')
           }
 
-          // Check department access if folder has allowedDepartments set
-          const allowedDepartments = data.allowedDepartments || []
-          if (allowedDepartments.length > 0) {
-            const staffDepartmentId = staffMember.departmentId
-            if (!staffDepartmentId || !allowedDepartments.includes(staffDepartmentId)) {
-              throw new Error('Access denied: Your department does not have access to this folder')
-            }
+          const canAccess = canStaffAccessCategory(
+            { allowedDepartments: data.allowedDepartments, allowedStaff: data.allowedStaff },
+            { departmentId: staffMember.departmentId, authUid: authStore.currentUser.uid }
+          )
+          if (!canAccess) {
+            throw new Error('Access denied: You do not have access to this category')
           }
-          // If allowedDepartments is empty, staff can access (folder is accessible to all departments in store)
         } else if (data.createdBy !== authStore.currentUser.uid) {
           // For superadmin, folder must be created by them
           throw new Error('Folder not found')
@@ -1496,7 +1465,7 @@ export const useInventoryStore = defineStore('inventory', {
       }
     },
 
-    /** Store-wide inventory items path (no per-folder access gate). */
+    /** Store-wide inventory items path. Staff must still query per category (see getItemDocsPerFolder). */
     async _prepareStoreInventoryItemsContext() {
       const db = useFirestore().getFirestoreInstance()
       if (!db) throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
@@ -1537,26 +1506,22 @@ export const useInventoryStore = defineStore('inventory', {
       if (!queryUserId) throw new Error('User ID not available')
 
       if (userStore.userData?.role === 'staff') {
-        let staffDepartmentId: string | undefined
         try {
           const { useStaffStore } = await import('./staff')
           const staffStore = useStaffStore()
           const staffMember = await staffStore.fetchCurrentStaffMember()
-          staffDepartmentId = staffMember?.departmentId
-          if (staffDepartmentId) {
-            const folder = this.getFolderById(folderId)
-            if (folder) {
-              if (folder.allowedDepartments && folder.allowedDepartments.length > 0) {
-                if (!folder.allowedDepartments.includes(staffDepartmentId)) {
-                  throw new Error(
-                    'Access denied: Your department does not have access to items in this folder'
-                  )
-                }
-              }
-            } else {
-              const folderData = await this.fetchFolder(folderId)
-              if (!folderData) throw new Error('Folder not found')
+          const folder = this.getFolderById(folderId)
+          if (folder) {
+            const canAccess = canStaffAccessCategory(folder, {
+              departmentId: staffMember?.departmentId,
+              authUid: authStore.currentUser.uid,
+            })
+            if (!canAccess) {
+              throw new Error('Access denied: You do not have access to items in this category')
             }
+          } else {
+            const folderData = await this.fetchFolder(folderId)
+            if (!folderData) throw new Error('Folder not found')
           }
         } catch (e: any) {
           if (e?.message?.includes('Access denied') || e?.message?.includes('Folder not found'))

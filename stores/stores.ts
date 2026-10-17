@@ -339,6 +339,7 @@ export const useStoresStore = defineStore('stores', {
         staffStore.error = null
 
         inventoryStore.folders = []
+        inventoryStore.lockedFolders = []
         inventoryStore.items = {}
         inventoryStore.itemsPagination = {}
         inventoryStore.itemsLoadedFully = {}
@@ -423,6 +424,7 @@ export const useStoresStore = defineStore('stores', {
         departmentsStore.departments = []
         staffStore.staff = []
         inventoryStore.folders = []
+        inventoryStore.lockedFolders = []
         inventoryStore.items = {} // Clear all inventory items
         inventoryStore.itemsPagination = {}
         inventoryStore.itemsLoadedFully = {}

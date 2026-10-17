@@ -1933,6 +1933,7 @@ async function handleSaveSubcategory() {
         hasSerialNumbers: parent.hasSerialNumbers || false,
         trackProfit: parent.trackProfit === true,
         allowedDepartments: parent.allowedDepartments ? [...parent.allowedDepartments] : [],
+        allowedStaff: parent.allowedStaff ? [...parent.allowedStaff] : [],
         template,
         parentId: parent.id,
       })

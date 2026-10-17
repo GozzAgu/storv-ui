@@ -35,7 +35,7 @@
     </SPageHeader>
 
     <div
-      v-if="inventoryStore.loading && inventoryStore.folders.length === 0"
+      v-if="inventoryStore.loading && folders.length === 0"
       class="s-metrics s-metrics--line"
       aria-hidden="true"
     >
@@ -44,7 +44,7 @@
       </div>
     </div>
     <dl
-      v-else-if="!inventoryStore.loading && inventoryStore.folders.length > 0"
+      v-else-if="!inventoryStore.loading && folders.length > 0"
       class="s-metrics s-metrics--line"
       aria-label="Category summary"
     >
@@ -56,7 +56,9 @@
       </div>
     </dl>
 
-    <template v-if="inventoryStore.loading && inventoryStore.folders.length === 0">
+    <MainStoreSummaryCard v-if="isStaff" />
+
+    <template v-if="inventoryStore.loading && folders.length === 0">
       <div class="s-category-grid" role="status" aria-label="Loading categories">
         <div
           v-for="i in 8"
@@ -77,7 +79,7 @@
     </template>
 
     <section
-      v-if="!inventoryStore.loading && inventoryStore.folders.length > 0"
+      v-if="!inventoryStore.loading && folders.length > 0"
       class="s-table-card s-inventory__section"
       aria-label="Categories"
     >
@@ -181,17 +183,18 @@
           :track-profit="folder.trackProfit === true"
           :gross-profit-on-hand="folderGrossProfitOnHand(folder.id)"
           :show-profit="canViewProfitAndCost && folder.trackProfit === true"
-          :has-overlays="canCreateInventoryFolders"
-          @click="navigateToFolder(folder.id)"
+          :has-overlays="canCreateInventoryFolders && !isFolderLocked(folder)"
+          :locked="isFolderLocked(folder)"
+          @click="openFolder(folder)"
         >
-          <template v-if="canCreateInventoryFolders" #checkbox>
+          <template v-if="canCreateInventoryFolders && !isFolderLocked(folder)" #checkbox>
             <SCheckbox
               :model-value="isFolderSelected(folder)"
               :aria-label="`Select ${folder.name}`"
               @update:model-value="(checked) => toggleFolderSelection(folder, checked)"
             />
           </template>
-          <template v-if="canCreateInventoryFolders" #menu>
+          <template v-if="canCreateInventoryFolders && !isFolderLocked(folder)" #menu>
             <SIconButton
               label="Category options"
               size="sm"
@@ -234,13 +237,17 @@
               v-for="folder in paginatedFolders"
               :key="folder.id"
               class="s-table__row--interactive"
-              :class="{ 's-table__row--selected': isFolderSelected(folder) }"
+              :class="{
+                's-table__row--selected': isFolderSelected(folder),
+                's-table__row--locked': isFolderLocked(folder),
+              }"
               tabindex="0"
-              @click="navigateToFolder(folder.id)"
-              @keydown.enter.self="navigateToFolder(folder.id)"
+              @click="openFolder(folder)"
+              @keydown.enter.self="openFolder(folder)"
             >
               <td v-if="canCreateInventoryFolders" class="s-table__check" @click.stop>
                 <SCheckbox
+                  v-if="!isFolderLocked(folder)"
                   :model-value="isFolderSelected(folder)"
                   :aria-label="`Select ${folder.name}`"
                   @update:model-value="(checked) => toggleFolderSelection(folder, checked)"
@@ -249,11 +256,18 @@
               <td>
                 <div class="s-category-cell">
                   <span class="s-category-cell__mark" aria-hidden="true">
-                    <component :is="folderKindIcon(folder)" :size="16" :stroke-width="1.75" />
+                    <Lock v-if="isFolderLocked(folder)" :size="16" :stroke-width="1.75" />
+                    <component
+                      :is="folderKindIcon(folder)"
+                      v-else
+                      :size="16"
+                      :stroke-width="1.75"
+                    />
                   </span>
                   <div class="s-category-cell__text">
                     <span class="s-table__primary">{{ folder.name }}</span>
-                    <span v-if="folderCategoryDescription(folder)" class="s-table__secondary">
+                    <span v-if="isFolderLocked(folder)" class="s-table__secondary">No access</span>
+                    <span v-else-if="folderCategoryDescription(folder)" class="s-table__secondary">
                       {{ folderCategoryDescription(folder) }}
                     </span>
                   </div>
@@ -290,6 +304,7 @@
               </td>
               <td v-if="canCreateInventoryFolders" class="s-table__actions" @click.stop>
                 <SIconButton
+                  v-if="!isFolderLocked(folder)"
                   label="Category options"
                   size="sm"
                   :data-folder-actions-anchor="folder.id"
@@ -315,7 +330,7 @@
     </section>
 
     <!-- Empty state (no categories at all) -->
-    <SCard v-if="!inventoryStore.loading && inventoryStore.folders.length === 0">
+    <SCard v-if="!inventoryStore.loading && folders.length === 0">
       <SEmptyState :title="noCategoriesTitle" :description="noCategoriesDescription">
         <template #icon><FolderPlus :size="24" :stroke-width="1.75" /></template>
         <template
@@ -463,6 +478,38 @@
           </div>
         </SFormSection>
 
+        <SFormSection
+          v-if="
+            canCreateInventoryFolders &&
+            !isSubfolderDrawer &&
+            !isStaff &&
+            folderForm.allowedDepartments.length > 0
+          "
+          title="Also allow these people"
+        >
+          <p :class="drawerHintClass">For staff outside the departments you picked.</p>
+          <p v-if="staffStore.loading" :class="drawerHintClass" role="status">Loading staff…</p>
+          <p v-else-if="staffOutsideChosenDepartments.length === 0" :class="drawerHintClass">
+            {{ staffPickerEmptyMessage }}
+          </p>
+          <div v-else :class="[pickListClass, 's-inv-pick']">
+            <ul :class="pickListScrollClass">
+              <li
+                v-for="member in staffOutsideChosenDepartments"
+                :key="member.authUid"
+                :class="pickRowClass"
+              >
+                <SCheckbox
+                  :model-value="folderForm.allowedStaff.includes(member.authUid!)"
+                  :label="`${member.firstName} ${member.lastName}`.trim()"
+                  :description="getDepartmentName(member.departmentId) || undefined"
+                  @update:model-value="(checked) => toggleStaffAccess(member.authUid!, !!checked)"
+                />
+              </li>
+            </ul>
+          </div>
+        </SFormSection>
+
         <SFormSection v-if="!isSubfolderDrawer" title="Table template">
           <p :class="drawerHintClass">
             Columns for products in this category. Mark a column <strong>Unique</strong> when no two
@@ -584,6 +631,22 @@
           primary-label="Continue without profit"
           @cancel="showProfitSkipConfirmModal = false"
           @primary="confirmCreateWithoutProfitTracking"
+        />
+      </template>
+    </SDialog>
+
+    <SDialog
+      :open="lockedFolderNotice !== null"
+      :title="`You don't have access to ${lockedFolderNotice?.name ?? 'this category'}`"
+      description="Ask the store owner to add your department to it, or to add you by name."
+      size="sm"
+      @update:open="onLockedNoticeOpenChange"
+    >
+      <template #footer>
+        <SDialogActions
+          cancel-label="Close"
+          :show-primary="false"
+          @cancel="lockedFolderNotice = null"
         />
       </template>
     </SDialog>
@@ -902,6 +965,7 @@ import {
   FolderPlus,
   LayoutGrid,
   List,
+  Lock,
   Pencil,
   Plus,
   SearchX,
@@ -927,6 +991,7 @@ import SSpinner from '~/components/s/SSpinner.vue'
 import STabs from '~/components/s/STabs.vue'
 import DeleteFolderModal from '~/components/inventory/DeleteFolderModal.vue'
 import InventoryCategoryCard from '~/components/inventory/InventoryCategoryCard.vue'
+import MainStoreSummaryCard from '~/components/inventory/MainStoreSummaryCard.vue'
 import CategoryKindPicker from '~/components/inventory/CategoryKindPicker.vue'
 import { categoryKindLabel, inferCategoryKind, resolveCategoryKind } from '~/utils/category-kinds'
 import { folderKindIcon } from '~/utils/category-kind-icons'
@@ -941,6 +1006,7 @@ import {
 } from '~/stores/inventory'
 import { useDepartmentsStore } from '~/stores/departments'
 import { useStoresStore } from '~/stores/stores'
+import { useStaffStore } from '~/stores/staff'
 import {
   expandFolderTemplatesToCopy,
   filterRootFolders,
@@ -1009,7 +1075,7 @@ const categoryFilterOptions = computed(() => [
   {
     value: 'low-stock',
     label: 'Low stock',
-    badge: inventoryStore.lowStockFolders.length || undefined,
+    badge: lowStockCategoryCount.value || undefined,
   },
 ])
 
@@ -1227,6 +1293,7 @@ const { canManageBranches } = useBusinessCapabilities()
 const inventoryStore = useInventoryStore()
 const departmentsStore = useDepartmentsStore()
 const storesStore = useStoresStore()
+const staffStore = useStaffStore()
 const toast = useAppToast()
 const { exporting: reorderExporting, exportReorderListExcel } = useReorderListExport()
 
@@ -1494,6 +1561,7 @@ const folderForm = reactive({
   hasSerialNumbers: false,
   trackProfit: false,
   allowedDepartments: [] as string[],
+  allowedStaff: [] as string[],
   parentId: '' as string,
   usesSubcategories: false,
 })
@@ -1631,6 +1699,7 @@ function resetNewFolderFormDefaults() {
   folderForm.hasSerialNumbers = false
   folderForm.trackProfit = false
   folderForm.allowedDepartments = []
+  folderForm.allowedStaff = []
   folderForm.parentId = ''
   folderForm.usesSubcategories = false
   profitSkipConfirmed.value = false
@@ -1721,7 +1790,29 @@ watch(
   }
 )
 
-const folders = computed(() => inventoryStore.folders)
+/** Everything this page lists and totals: for staff, open and locked categories together. */
+const folders = computed(() =>
+  inventoryStore.lockedFolders.length > 0
+    ? [...inventoryStore.folders, ...inventoryStore.lockedFolders]
+    : inventoryStore.folders
+)
+
+const lockedFolderIds = computed(() => new Set(inventoryStore.lockedFolders.map((f) => f.id)))
+const isFolderLocked = (folder: InventoryFolder) => lockedFolderIds.value.has(folder.id)
+
+const lockedFolderNotice = ref<InventoryFolder | null>(null)
+
+function openFolder(folder: InventoryFolder) {
+  if (isFolderLocked(folder)) {
+    lockedFolderNotice.value = folder
+    return
+  }
+  navigateToFolder(folder.id)
+}
+
+function onLockedNoticeOpenChange(open: boolean) {
+  if (!open) lockedFolderNotice.value = null
+}
 
 // Get departments for current store only
 const currentStoreDepartments = computed(() => {
@@ -1829,8 +1920,12 @@ const filteredFoldersTotalProfit = computed(() =>
   }, 0)
 )
 
+const lowStockCategoryCount = computed(
+  () => folders.value.filter((folder) => folder.lowStockCount > 0).length
+)
+
 const categoryHeaderMetrics = computed(() => {
-  const totalCategories = getRootFolders(inventoryStore.folders).length
+  const totalCategories = getRootFolders(folders.value).length
   const shownCategories = foldersForCategoryList.value.length
   const categoriesValue =
     shownCategories !== totalCategories
@@ -1846,7 +1941,7 @@ const categoryHeaderMetrics = computed(() => {
     {
       key: 'products',
       label: 'Products',
-      value: String(inventoryStore.totalItems),
+      value: String(folders.value.reduce((sum, folder) => sum + folder.itemCount, 0)),
     },
   ]
 
@@ -1869,8 +1964,8 @@ const categoryHeaderMetrics = computed(() => {
   metrics.push({
     key: 'low-stock',
     label: 'Low stock',
-    value: String(inventoryStore.lowStockFolders.length),
-    tone: inventoryStore.lowStockFolders.length > 0 ? 'warning' : undefined,
+    value: String(lowStockCategoryCount.value),
+    tone: lowStockCategoryCount.value > 0 ? 'warning' : undefined,
   })
 
   return metrics
@@ -2056,8 +2151,9 @@ const folderDepartmentsSummary = (folder: InventoryFolder) => {
     .map((id) => getDepartmentName(id)?.trim())
     .filter((name): name is string => Boolean(name))
   if (names.length === 0) return 'All departments'
-  if (names.length <= 2) return names.join(', ')
-  return `${names[0]}, +${names.length - 1} more`
+  const summary = names.length <= 2 ? names.join(', ') : `${names[0]}, +${names.length - 1} more`
+  const people = folder.allowedStaff?.length ?? 0
+  return people > 0 ? `${summary} + ${people} ${people === 1 ? 'person' : 'people'}` : summary
 }
 
 const formatFolderDate = (date: any) => {
@@ -2183,6 +2279,7 @@ const handleConfirmDuplicateFolder = async () => {
       source.allowedDepartments && source.allowedDepartments.length > 0
         ? [...source.allowedDepartments]
         : []
+    const allowedStaff = allowedDepartments.length > 0 ? [...(source.allowedStaff ?? [])] : []
     const template = source.template
       ? { ...source.template, fields: source.template.fields.map((f) => ({ ...f })) }
       : undefined
@@ -2197,6 +2294,7 @@ const handleConfirmDuplicateFolder = async () => {
         trackProfit: source.trackProfit === true,
         template: template as Template | undefined,
         allowedDepartments,
+        allowedStaff,
       })
     }
     showDuplicateFolderModal.value = false
@@ -2220,6 +2318,7 @@ const handleEditFolder = (folder: InventoryFolder) => {
   folderForm.hasSerialNumbers = folder.hasSerialNumbers || false
   folderForm.trackProfit = folder.trackProfit === true
   folderForm.allowedDepartments = folder.allowedDepartments ? [...folder.allowedDepartments] : []
+  folderForm.allowedStaff = folder.allowedStaff ? [...folder.allowedStaff] : []
   folderForm.parentId = folder.parentId || ''
   folderForm.usesSubcategories =
     folder.usesSubcategories === true || getChildFolders(folders.value, folder.id).length > 0
@@ -2310,16 +2409,19 @@ const toggleFolderSelection = (folder: InventoryFolder, checked: boolean) => {
   if (checked && idx === -1) selectedFoldersForBulk.value.push(folder)
   else if (!checked && idx !== -1) selectedFoldersForBulk.value.splice(idx, 1)
 }
+const selectableFoldersOnPage = computed(() =>
+  paginatedFolders.value.filter((folder) => !isFolderLocked(folder))
+)
 const allFoldersOnPageSelected = computed(
   () =>
-    paginatedFolders.value.length > 0 &&
-    selectedFoldersForBulk.value.length === paginatedFolders.value.length
+    selectableFoldersOnPage.value.length > 0 &&
+    selectedFoldersForBulk.value.length === selectableFoldersOnPage.value.length
 )
 const toggleSelectAllFolders = () => {
   if (allFoldersOnPageSelected.value) {
     selectedFoldersForBulk.value = []
   } else {
-    selectedFoldersForBulk.value = [...paginatedFolders.value]
+    selectedFoldersForBulk.value = [...selectableFoldersOnPage.value]
   }
 }
 const openBulkDeleteFoldersModal = () => {
@@ -2456,6 +2558,7 @@ const handleSaveFolder = async () => {
 
   const allowedDepartments =
     folderForm.allowedDepartments.length > 0 ? [...folderForm.allowedDepartments] : []
+  const allowedStaff = allowedDepartments.length > 0 ? [...folderForm.allowedStaff] : []
 
   try {
     if (editingFolder.value) {
@@ -2478,6 +2581,7 @@ const handleSaveFolder = async () => {
         trackProfit,
         template,
         allowedDepartments,
+        allowedStaff,
       }
 
       const childCount = getChildFolders(folders.value, editingFolder.value.id).length
@@ -2513,6 +2617,7 @@ const handleSaveFolder = async () => {
         trackProfit,
         template: template,
         allowedDepartments,
+        allowedStaff,
         parentId: null,
         usesSubcategories: folderForm.usesSubcategories,
       })
@@ -2675,8 +2780,52 @@ const toggleDepartmentAccess = (departmentId: string, checked: boolean) => {
     if (index > -1) {
       folderForm.allowedDepartments.splice(index, 1)
     }
+    // Back to open-to-everyone, so a named-people list would mean nothing.
+    if (folderForm.allowedDepartments.length === 0) folderForm.allowedStaff = []
   }
 }
+
+const toggleStaffAccess = (authUid: string, checked: boolean) => {
+  const index = folderForm.allowedStaff.indexOf(authUid)
+  if (checked && index === -1) folderForm.allowedStaff.push(authUid)
+  if (!checked && index > -1) folderForm.allowedStaff.splice(index, 1)
+}
+
+/** Active staff in this branch whose department is not already chosen for the category. */
+const staffOutsideChosenDepartmentsAll = computed(() =>
+  staffStore.staff
+    .filter(
+      (member) =>
+        (member.status || 'active') === 'active' &&
+        member.storeId === currentStoreId.value &&
+        !folderForm.allowedDepartments.includes(member.departmentId)
+    )
+    .sort((a, b) =>
+      `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`, undefined, {
+        sensitivity: 'base',
+      })
+    )
+)
+
+/** Access is matched on the login, so only staff with one can be named. */
+const staffOutsideChosenDepartments = computed(() =>
+  staffOutsideChosenDepartmentsAll.value.filter((member) => !!member.authUid)
+)
+
+const staffPickerEmptyMessage = computed(() =>
+  staffOutsideChosenDepartmentsAll.value.length > 0
+    ? 'The other staff here need their own Storvv login before you can add them.'
+    : 'Everyone in this branch is already in a chosen department.'
+)
+
+watch(
+  () => folderForm.allowedDepartments.length > 0,
+  (restricted) => {
+    if (restricted && !isStaff.value && staffStore.staff.length === 0 && !staffStore.loading) {
+      void staffStore.fetchStaff()
+    }
+  }
+)
 
 async function reloadInventoryCategories() {
   if (!authStore.currentUser) return

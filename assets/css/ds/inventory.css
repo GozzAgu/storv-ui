@@ -10,6 +10,30 @@
   padding: var(--s-space-2);
 }
 
+/* Branch staff: read-only totals from the main store */
+.s-main-store-summary .s-card__body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-space-2);
+}
+
+.s-main-store-summary .s-metrics {
+  width: 100%;
+}
+
+.s-main-store-summary .s-table-wrap {
+  width: 100%;
+}
+
+.s-main-store-summary__chevron {
+  transition: transform var(--s-duration) var(--s-ease-out);
+}
+
+.s-main-store-summary__chevron.is-open {
+  transform: rotate(180deg);
+}
+
 .s-inventory__dialog-copy {
   display: flex;
   flex-direction: column;
@@ -357,6 +381,32 @@
 .s-category-card:hover .s-category-card__go {
   background: var(--s-btn-primary);
   color: var(--s-on-btn-primary);
+}
+
+/* Staff can see it and count it, but not open it */
+.s-category-card--locked .s-category-card__panel,
+.s-category-card--locked .s-category-card__value {
+  opacity: 0.6;
+}
+
+.s-category-card--locked .s-category-card__mark {
+  background: var(--s-surface);
+  color: var(--s-text-muted);
+  box-shadow: inset 0 0 0 1px var(--s-line);
+}
+
+.s-category-card--locked:hover .s-category-card__go,
+.s-category-card--locked .s-category-card__go {
+  background: var(--s-surface-2);
+  color: var(--s-text-muted);
+}
+
+.s-table__row--locked > td {
+  color: var(--s-text-muted);
+}
+
+.s-table__row--locked .s-table__primary {
+  color: var(--s-text-2);
 }
 
 /* Loading placeholder */
