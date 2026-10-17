@@ -11,7 +11,9 @@ import {
   query,
   where,
   orderBy,
+  onSnapshot,
   serverTimestamp,
+  type QueryDocumentSnapshot,
 } from 'firebase/firestore'
 import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from './auth'
@@ -40,12 +42,66 @@ import {
   roundMoney,
 } from '~/utils/receipt-balance'
 import { resolveApiPath } from '~/utils/api-url'
+import { summarizeDaySales } from '~/utils/day-sales-summary'
 import { getPermissionAction, resolveStaffPermissions } from '~/utils/staff-permissions'
 import {
   isStoreListFetchFresh,
   isStoreFetchStampFresh,
   type StoreFetchStamp,
 } from '~/utils/store-data-cache'
+
+/** Firestore receipt doc to the store's Receipt shape. `fallbackUserId` fills legacy docs. */
+function mapReceiptDoc(doc: QueryDocumentSnapshot, fallbackUserId: string): Receipt {
+  const data = doc.data()
+  return {
+    id: doc.id,
+    receiptNumber: data.receiptNumber || '',
+    customerName: data.customerName || '',
+    customerEmail: data.customerEmail || '',
+    customerPhone: data.customerPhone || '',
+    customerAddress: data.customerAddress || '',
+    date: data.date?.toDate ? data.date.toDate() : new Date(data.date) || new Date(),
+    items: data.items || [],
+    itemsCount: data.itemsCount || 0,
+    total: data.total || 0,
+    paymentMethod: data.paymentMethod || '',
+    status: data.status || 'completed',
+    notes: data.notes || '',
+    folderId: data.folderId || '',
+    folderIds: Array.isArray(data.folderIds)
+      ? (data.folderIds as string[])
+      : data.folderId
+      ? [data.folderId]
+      : [],
+    itemIds: data.itemIds || [],
+    storeId: data.storeId || '',
+    storeBranchName: data.storeBranchName || '',
+    storeLogoUrl: data.storeLogoUrl || undefined,
+    createdByUserName: data.createdByUserName || '',
+    createdBy: data.createdBy || fallbackUserId,
+    actualCreator: data.actualCreator || data.createdBy,
+    createdAt: data.createdAt?.toDate
+      ? data.createdAt.toDate()
+      : new Date(data.createdAt) || new Date(),
+    updatedAt: data.updatedAt?.toDate
+      ? data.updatedAt.toDate()
+      : new Date(data.updatedAt) || undefined,
+    splitPayments: data.splitPayments || undefined,
+    isSwapIn: data.isSwapIn || false,
+    swapInFolderId: data.swapInFolderId || undefined,
+    swapInItemId: data.swapInItemId || undefined,
+    swapInCredit: typeof data.swapInCredit === 'number' ? data.swapInCredit : undefined,
+    amountPaid: typeof data.amountPaid === 'number' ? data.amountPaid : undefined,
+    balanceDue: typeof data.balanceDue === 'number' ? data.balanceDue : undefined,
+    payments: data.payments || undefined,
+    paymentSummary: data.paymentSummary || undefined,
+    paymentsV2: data.paymentsV2 === true,
+    hasSerialNumbers: data.hasSerialNumbers === true,
+    source: typeof data.source === 'string' ? data.source : undefined,
+    storefrontInquiryId:
+      typeof data.storefrontInquiryId === 'string' ? data.storefrontInquiryId : undefined,
+  } as Receipt
+}
 
 /** Avoid duplicate concurrent fetchReceipts() (layout + dashboard home + watchers). */
 let fetchReceiptsInflight: Promise<void> | null = null
@@ -158,11 +214,16 @@ export const useReceiptsStore = defineStore('receipts', {
     totalReceipts: (state) => state.receipts.length,
     totalSales: (state) =>
       state.receipts.filter((r) => r.status === 'completed').reduce((sum, r) => sum + r.total, 0),
+    /** Same "sold today" as the Today tab: completed and part-paid sales. */
     todaySales: (state) => {
-      const today = new Date().toDateString()
-      return state.receipts
-        .filter((r) => r.status === 'completed' && new Date(r.date).toDateString() === today)
-        .reduce((sum, r) => sum + r.total, 0)
+      const now = new Date()
+      return summarizeDaySales(state.receipts, {
+        day: now,
+        now,
+        viewerUid: '',
+        mode: 'everyone',
+        canViewStoreTotals: true,
+      }).sold
     },
     monthSales: (state) => {
       const now = new Date()
@@ -284,57 +345,7 @@ export const useReceiptsStore = defineStore('receipts', {
           // console.log('[ReceiptsStore] Found', allReceipts.length, 'receipts in store (userId:', userId, 'storeId:', storeId, 'isStaff:', userStore.userData?.role === 'staff' + ')')
 
           // Process and filter receipts by storeId client-side
-          let receipts = allReceipts.map((doc) => {
-            const data = doc.data()
-            return {
-              id: doc.id,
-              receiptNumber: data.receiptNumber || '',
-              customerName: data.customerName || '',
-              customerEmail: data.customerEmail || '',
-              customerPhone: data.customerPhone || '',
-              customerAddress: data.customerAddress || '',
-              date: data.date?.toDate ? data.date.toDate() : new Date(data.date) || new Date(),
-              items: data.items || [],
-              itemsCount: data.itemsCount || 0,
-              total: data.total || 0,
-              paymentMethod: data.paymentMethod || '',
-              status: data.status || 'completed',
-              notes: data.notes || '',
-              folderId: data.folderId || '',
-              folderIds: Array.isArray(data.folderIds)
-                ? (data.folderIds as string[])
-                : data.folderId
-                ? [data.folderId]
-                : [],
-              itemIds: data.itemIds || [],
-              storeId: data.storeId || '',
-              storeBranchName: data.storeBranchName || '',
-              storeLogoUrl: data.storeLogoUrl || undefined,
-              createdByUserName: data.createdByUserName || '',
-              createdBy: data.createdBy || userId,
-              actualCreator: data.actualCreator || data.createdBy,
-              createdAt: data.createdAt?.toDate
-                ? data.createdAt.toDate()
-                : new Date(data.createdAt) || new Date(),
-              updatedAt: data.updatedAt?.toDate
-                ? data.updatedAt.toDate()
-                : new Date(data.updatedAt) || undefined,
-              splitPayments: data.splitPayments || undefined,
-              isSwapIn: data.isSwapIn || false,
-              swapInFolderId: data.swapInFolderId || undefined,
-              swapInItemId: data.swapInItemId || undefined,
-              swapInCredit: typeof data.swapInCredit === 'number' ? data.swapInCredit : undefined,
-              amountPaid: typeof data.amountPaid === 'number' ? data.amountPaid : undefined,
-              balanceDue: typeof data.balanceDue === 'number' ? data.balanceDue : undefined,
-              payments: data.payments || undefined,
-              paymentSummary: data.paymentSummary || undefined,
-              paymentsV2: data.paymentsV2 === true,
-              hasSerialNumbers: data.hasSerialNumbers === true,
-              source: typeof data.source === 'string' ? data.source : undefined,
-              storefrontInquiryId:
-                typeof data.storefrontInquiryId === 'string' ? data.storefrontInquiryId : undefined,
-            } as Receipt
-          })
+          let receipts = allReceipts.map((doc) => mapReceiptDoc(doc, userId))
 
           // No need to filter by storeId since we're already querying from the store's subcollection
           // All receipts returned are already in the correct store
@@ -360,6 +371,46 @@ export const useReceiptsStore = defineStore('receipts', {
         if (fetchReceiptsInflight === run) fetchReceiptsInflight = null
       })
       return fetchReceiptsInflight
+    },
+
+    /**
+     * Live updates for sales created since `since` in the current store, merged into `receipts`.
+     * Listens to that slice only, so a busy store is not re-read in full. Returns a stop function.
+     */
+    async watchReceiptsSince(since: Date): Promise<() => void> {
+      const { isDemoModeActive } = await import('~/utils/demo-mode')
+      if (isDemoModeActive()) return () => {}
+
+      const db = useFirestore().getFirestoreInstance()
+      const authStore = useAuthStore()
+      const userId = await getQueryUserId()
+      const { getCurrentStoreId } = await import('~/composables/useCurrentStore')
+      const storeId = await getCurrentStoreId()
+      if (!db || !authStore.currentUser || !userId || !storeId) return () => {}
+
+      const q = query(
+        getReceiptsCollection(db, userId, storeId),
+        where('createdBy', '==', userId),
+        where('createdAt', '>=', since)
+      )
+      return onSnapshot(
+        q,
+        (snapshot) => {
+          const next = [...this.receipts]
+          for (const change of snapshot.docChanges()) {
+            const index = next.findIndex((r) => r.id === change.doc.id)
+            if (change.type === 'removed') {
+              if (index > -1) next.splice(index, 1)
+              continue
+            }
+            const receipt = mapReceiptDoc(change.doc, userId)
+            if (index > -1) next[index] = receipt
+            else next.unshift(receipt)
+          }
+          this.receipts = next
+        },
+        (error) => console.warn('[ReceiptsStore] Live sales updates stopped:', error.message)
+      )
     },
 
     // Fetch a single receipt

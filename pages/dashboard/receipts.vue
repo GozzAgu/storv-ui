@@ -350,6 +350,16 @@
               </template>
             </section>
 
+            <TodaySalesPanel
+              v-else-if="activeTab === 'today'"
+              :receipts="receipts"
+              :viewer-uid="authStore.currentUser?.uid ?? ''"
+              :can-view-store-totals="canViewFinancials"
+              :can-create="canCreate"
+              :resolve-seller-name="getCreatorName"
+              @new-sale="openCreateReceiptModal"
+            />
+
             <!-- Outstanding (balance due) -->
             <section
               v-else-if="activeTab === 'outstanding'"
@@ -585,6 +595,8 @@ import QuickSaleModal from '~/components/receipts/QuickSaleModal.vue'
 // @ts-ignore
 import ViewReceiptModal from '~/components/receipts/ViewReceiptModal.vue'
 import ReceiptDetailsDrawer from '~/components/receipts/ReceiptDetailsDrawer.vue'
+import TodaySalesPanel from '~/components/receipts/TodaySalesPanel.vue'
+import { summarizeDaySales } from '~/utils/day-sales-summary'
 import { getReceiptStatusLabel, getReceiptStatusTone } from '~/utils/receipt-status'
 // @ts-ignore
 import ReturnReceiptModal from '~/components/receipts/ReturnReceiptModal.vue'
@@ -709,10 +721,10 @@ function applyReceiptHighlight(receiptId: string) {
   }, 5000)
 }
 
-const activeTab = ref<'receipts' | 'outstanding' | 'customers'>(
-  (['receipts', 'outstanding', 'customers'].includes(String(route.query.tab))
+const activeTab = ref<'receipts' | 'today' | 'outstanding' | 'customers'>(
+  (['receipts', 'today', 'outstanding', 'customers'].includes(String(route.query.tab))
     ? route.query.tab
-    : 'receipts') as 'receipts' | 'outstanding' | 'customers'
+    : 'receipts') as 'receipts' | 'today' | 'outstanding' | 'customers'
 )
 const outstandingSearchQuery = ref('')
 const showBalancePaymentModal = ref(false)
@@ -746,7 +758,7 @@ watch(
   () => route.query.tab,
   (tab) => {
     const next = (
-      ['receipts', 'outstanding', 'customers'].includes(String(tab)) ? tab : 'receipts'
+      ['receipts', 'today', 'outstanding', 'customers'].includes(String(tab)) ? tab : 'receipts'
     ) as typeof activeTab.value
     if (next !== activeTab.value) activeTab.value = next
   }
@@ -832,13 +844,17 @@ const totalSales = computed(() => {
   return receipts.value.filter((r) => r.status === 'completed').reduce((sum, r) => sum + r.total, 0)
 })
 
+/** Same "sold today" as the Today tab: completed and part-paid sales. */
 const todaySales = computed(() => {
-  const today = new Date().toDateString()
-  const storeId = currentStoreId.value
-  if (!storeId) return 0
-  return receipts.value
-    .filter((r) => r.status === 'completed' && new Date(r.date).toDateString() === today)
-    .reduce((sum, r) => sum + r.total, 0)
+  if (!currentStoreId.value) return 0
+  const now = new Date()
+  return summarizeDaySales(receipts.value, {
+    day: now,
+    now,
+    viewerUid: authStore.currentUser?.uid ?? '',
+    mode: 'everyone',
+    canViewStoreTotals: true,
+  }).sold
 })
 
 const todayReceipts = computed(() => {
@@ -908,6 +924,7 @@ const receiptTableColumns: Array<{
 
 const salesTabs = computed(() => [
   { value: 'receipts', label: 'Sales' },
+  { value: 'today', label: 'Today' },
   {
     value: 'outstanding',
     label: 'Outstanding',

@@ -122,7 +122,7 @@
             :hint="
               canViewFinancials ? `${formatCurrency(todaySales)} revenue` : 'Sales recorded today'
             "
-            to="/dashboard/receipts"
+            to="/dashboard/receipts?tab=today"
           >
             <template #icon><ShoppingBag :size="16" :stroke-width="2" /></template>
           </SStat>

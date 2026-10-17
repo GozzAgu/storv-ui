@@ -7,6 +7,7 @@ import { useStorefrontStore } from '~/stores/storefront'
 import { usePreferences } from '~/composables/usePreferences'
 import { usePermissions } from '~/composables/usePermissions'
 import { isStorefrontDashboardHidden } from '~/utils/storefront-launch'
+import { summarizeDaySales } from '~/utils/day-sales-summary'
 import type { InventoryItem } from '~/stores/inventory'
 import type { Receipt } from '~/stores/receipts'
 
@@ -147,9 +148,16 @@ export function useDashboardInsights(folderItems: Ref<Record<string, InventoryIt
     return totalRevenue.value / n
   })
 
+  /** Completed and part-paid sales today, matching the Today tab. */
   const todayReceiptsCount = computed(() => {
-    const today = new Date().toDateString()
-    return receiptsStore.receipts.filter((r) => receiptDate(r).toDateString() === today).length
+    const now = new Date()
+    return summarizeDaySales(receiptsStore.receipts, {
+      day: now,
+      now,
+      viewerUid: '',
+      mode: 'everyone',
+      canViewStoreTotals: true,
+    }).count
   })
 
   const completedReceiptsCount = computed(() => completedReceipts.value.length)
@@ -633,7 +641,7 @@ export function useDashboardInsights(folderItems: Ref<Record<string, InventoryIt
       parts.push(
         `Today: ${todayReceiptsCount.value} order${
           todayReceiptsCount.value === 1 ? '' : 's'
-        } and ${formatCurrency(todaySales.value)} in completed sales.`
+        } and ${formatCurrency(todaySales.value)} in sales.`
       )
     } else {
       parts.push('No orders recorded today yet.')
