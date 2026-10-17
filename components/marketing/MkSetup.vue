@@ -52,9 +52,7 @@
               Start free
               <template #trailing><ArrowRight :size="16" aria-hidden="true" /></template>
             </SButton>
-            <span class="mks__total"
-              ><Timer :size="16" aria-hidden="true" />About 10 minutes</span
-            >
+            <span class="mks__total"><Timer :size="16" aria-hidden="true" />About 10 minutes</span>
           </div>
 
           <div class="mks__main mks__main--shot">

@@ -10,12 +10,13 @@
         />
 
         <ul class="mki__shots">
-          <li v-for="(shot, i) in shots" :key="shot.id" class="mki__shot mk-reveal" :style="{ '--i': i }">
-            <MkFrame
-              :src="shot.src"
-              :alt="shot.alt"
-              :url="shot.url"
-            />
+          <li
+            v-for="(shot, i) in shots"
+            :key="shot.id"
+            class="mki__shot mk-reveal"
+            :style="{ '--i': i }"
+          >
+            <MkFrame :src="shot.src" :alt="shot.alt" :url="shot.url" />
             <p class="mki__shot-label">{{ shot.label }}</p>
           </li>
         </ul>

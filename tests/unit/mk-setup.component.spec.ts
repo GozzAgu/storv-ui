@@ -13,6 +13,10 @@ function mountSetup() {
       stubs: {
         SButton: { template: '<a><slot /><slot name="trailing" /></a>' },
         Transition: { template: '<slot />' },
+        MkFrame: {
+          props: ['src', 'alt', 'url'],
+          template: '<img class="shot" :src="src" :alt="alt" />',
+        },
       },
     },
   })
@@ -20,6 +24,9 @@ function mountSetup() {
 
 const current = (wrapper: ReturnType<typeof mountSetup>) =>
   wrapper.findAll('.mks__step').map((step) => step.attributes('aria-current'))
+
+const shot = (wrapper: ReturnType<typeof mountSetup>) =>
+  wrapper.find('.mks__main .shot').attributes('src')
 
 const finishStep = (wrapper: ReturnType<typeof mountSetup>) =>
   wrapper.find('.mks__fill').trigger('animationend')
@@ -29,7 +36,7 @@ describe('MkSetup', () => {
     const wrapper = mountSetup()
     expect(current(wrapper)).toEqual(['step', undefined, undefined])
     expect(wrapper.find('.mks__title').text()).toBe('Create your store')
-    expect(wrapper.find('.mks__main').text()).toContain("Ada's Gadgets")
+    expect(shot(wrapper)).toBe('/marketing/app/overview.webp')
   })
 
   it('advances when the progress bar finishes, marks earlier steps done and loops', async () => {
@@ -38,11 +45,11 @@ describe('MkSetup', () => {
     await finishStep(wrapper)
     expect(current(wrapper)).toEqual([undefined, 'step', undefined])
     expect(wrapper.find('.mks__title').text()).toBe('Add your stock')
-    expect(wrapper.find('.mks__main').text()).toContain('AirPods Pro')
+    expect(shot(wrapper)).toBe('/marketing/app/inventory.webp')
     expect(wrapper.findAll('.mks__step')[0]!.classes()).toContain('is-done')
 
     await finishStep(wrapper)
-    expect(wrapper.find('.mks__main').text()).toContain('Receipt sent')
+    expect(shot(wrapper)).toBe('/marketing/app/sales.webp')
 
     await finishStep(wrapper)
     expect(current(wrapper)).toEqual(['step', undefined, undefined])
