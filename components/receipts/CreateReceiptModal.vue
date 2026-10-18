@@ -262,7 +262,7 @@
                       <span v-if="getItemField(item, 'sku')"
                         >SKU: {{ getItemField(item, 'sku') }}</span
                       >
-                      <span v-if="getItemField(item, 'price')">
+                      <span v-if="hasSaleUnitPrice(item) && getItemField(item, 'price')">
                         <span
                           v-if="item.discountedPrice !== undefined && item.discountedPrice !== null"
                           class="s-new-sale__price"
@@ -286,6 +286,7 @@
                           {{ formatCurrency(parseFloat(getItemField(item, 'price') || '0')) }}
                         </span>
                       </span>
+                      <SBadge v-if="!hasSaleUnitPrice(item)" tone="warning">No price</SBadge>
                       <span
                         v-if="!itemUsesSerialNumbers(item) && getItemAvailableStock(item) !== null"
                       >
@@ -659,7 +660,8 @@
                       field.type === 'boolean' || field.type === 'date' ? 's-new-sale__span' : ''
                     "
                     :label="field.type === 'boolean' ? undefined : swapInFieldLabel(field)"
-                    :required="field.type !== 'boolean' && field.required"
+                    :required="field.type !== 'boolean' && swapInFieldRequired(field)"
+                    :hint="isSwapInPriceField(field) ? 'Optional' : undefined"
                   >
                     <!-- Text Input -->
                     <SInput
@@ -683,8 +685,8 @@
                       type="number"
                       step="0.01"
                       :min="0"
-                      :required="field.required"
-                      placeholder="0.00"
+                      :required="swapInFieldRequired(field)"
+                      :placeholder="swapInFieldPlaceholder(field)"
                     >
                       <template #prefix>{{ currencySymbol }}</template>
                     </SInput>
@@ -713,6 +715,24 @@
                       :label="swapInFieldLabel(field)"
                     />
                   </SField>
+                  <!-- No cost field in this category: ask what the shop gives for the device -->
+                  <SField
+                    v-if="swapInNeedsSwapValue"
+                    label="Swap value"
+                    required
+                    hint="What you're giving the customer for this device. It's taken off the amount due."
+                  >
+                    <SInput
+                      v-model.number="swapInValue"
+                      type="number"
+                      step="0.01"
+                      :min="0"
+                      required
+                      placeholder="0.00"
+                    >
+                      <template #prefix>{{ currencySymbol }}</template>
+                    </SInput>
+                  </SField>
                 </div>
                 <p v-if="swapInDisplayFields.length === 0" class="s-form-meta">
                   No template fields defined for this folder.
@@ -733,7 +753,7 @@
               v-if="isSwapIn && swapInCreditAmount > 0"
               class="s-new-sale__total-row s-new-sale__total-row--credit"
             >
-              <dt>Swap credit (cost price)</dt>
+              <dt>Swap credit ({{ swapInNeedsSwapValue ? 'swap value' : 'cost price' }})</dt>
               <dd>−{{ formatCurrency(swapInCreditAmount) }}</dd>
             </div>
             <div class="s-new-sale__total-row s-new-sale__total-row--grand">
@@ -872,7 +892,8 @@ import { useSellerLoanOutsStore } from '~/stores/sellerLoanOuts'
 import { resolveItemUnitCost } from '~/utils/inventory-item-cost'
 import { PLAN_VIEW_ONLY_SALE_NOTICE } from '~/utils/plan-access'
 import { receiptEmailErrorMessage } from '~/utils/receipt-email-error'
-import { swapInCredit } from '~/utils/swap-in-credit'
+import { isSwapInPriceField, swapInCredit, swapInCreditField } from '~/utils/swap-in-credit'
+import { hasSaleUnitPrice } from '~/utils/inventory-item-price'
 import { usePlanViewOnly } from '~/composables/usePlanViewOnly'
 import { groupLeafFoldersForPicker } from '~/utils/inventory-folder-tree'
 import { useCustomersStore } from '~/stores/customers'
@@ -1039,6 +1060,8 @@ watch(paymentSettlement, (mode) => {
 const isSwapIn = ref(false)
 const swapInFolderId = ref<string>('')
 const swapInItemForm = ref<Record<string, any>>({})
+/** Credit for the device when its category has no cost field. */
+const swapInValue = ref<number | ''>('')
 
 watch(canUseSwapInReceipt, (ok) => {
   if (!ok) {
@@ -1176,6 +1199,21 @@ const swapInDisplayFields = computed(() => {
   return defaultTableColumnFields
 })
 
+/** Unit Price is optional on a swap-in: staff may not know what the device will resell for. */
+function swapInFieldRequired(field: {
+  name: string
+  label?: string
+  type?: string
+  required?: boolean
+}) {
+  return Boolean(field.required) && !isSwapInPriceField(field)
+}
+
+/** The category has no cost field to credit, so staff enter a swap value instead. */
+const swapInNeedsSwapValue = computed(
+  () => !!swapInFolder.value && swapInCreditField(swapInDisplayFields.value) === null
+)
+
 function swapInFieldLabel(field: { name: string; label?: string }) {
   if (field.name === 'brand') return 'Product model'
   if (field.name === 'name') return 'Product'
@@ -1190,6 +1228,7 @@ function swapInFieldPlaceholder(field: {
 }) {
   if (field.name === 'brand') return 'Enter product model'
   if (field.name === 'name') return 'Enter product'
+  if (isSwapInPriceField(field)) return 'Leave blank if unsure'
   if (field.type === 'currency') return '0.00'
   return field.placeholder || `Enter ${swapInFieldLabel(field)}`
 }
@@ -1209,6 +1248,10 @@ const hasCustomerDetails = computed(() =>
 const createBlockedReason = computed((): string | null => {
   if (selectedItems.value.length === 0) return 'Add at least one product.'
   if (hasInvalidSelectedQuantities.value) return 'Check the product quantities.'
+  const unpriced = selectedItems.value.find((si) => !hasSaleUnitPrice(si.item))
+  if (unpriced) {
+    return `${getItemDisplayName(unpriced.item)} has no Unit Price. Set one in Inventory first.`
+  }
 
   if (paymentSettlement.value === 'balance_due') {
     const deposit = roundMoney(Number(depositAmount.value) || 0)
@@ -1232,9 +1275,7 @@ const createBlockedReason = computed((): string | null => {
   if (isSwapIn.value) {
     if (!swapInFolderId.value || !swapInFolder.value)
       return 'Choose a category for the swap-in item.'
-    const requiredFields = swapInDisplayFields.value.filter(
-      (f: { required?: boolean }) => f.required
-    )
+    const requiredFields = swapInDisplayFields.value.filter(swapInFieldRequired)
     for (const field of requiredFields) {
       const value = swapInItemForm.value[field.name]
       if (
@@ -1245,6 +1286,8 @@ const createBlockedReason = computed((): string | null => {
         return 'Fill in the required swap-in details.'
       }
     }
+    if (swapInNeedsSwapValue.value && getSwapInCredit() <= 0)
+      return 'Enter the swap value for the swapped-in device.'
   }
 
   if (hasAnyCheckoutDiscount.value && !discountReason.value.trim()) {
@@ -1460,13 +1503,17 @@ watch(
   (folderId) => {
     if (!folderId) {
       swapInItemForm.value = {}
+      swapInValue.value = ''
       return
     }
     const folder = swapInFolder.value
     const fields = swapInDisplayFields.value
     swapInItemForm.value = {}
-    fields.forEach((field: { name: string; type?: string }) => {
-      if (field.type === 'number' || field.type === 'currency') {
+    swapInValue.value = ''
+    fields.forEach((field: { name: string; label?: string; type?: string }) => {
+      if (isSwapInPriceField(field)) {
+        swapInItemForm.value[field.name] = ''
+      } else if (field.type === 'number' || field.type === 'currency') {
         swapInItemForm.value[field.name] = 0
       } else if (field.type === 'boolean') {
         swapInItemForm.value[field.name] = false
@@ -1686,10 +1733,10 @@ const calculateItemsSubtotal = () => {
   }, 0)
 }
 
-/** Value credited for the swapped-in device: its cost price on the swap-in form. */
+/** Value credited for the swapped-in device: its cost price, or the swap value without one. */
 const getSwapInCredit = () => {
   if (!isSwapIn.value || !swapInFolder.value) return 0
-  return swapInCredit(swapInDisplayFields.value, swapInItemForm.value)
+  return swapInCredit(swapInDisplayFields.value, swapInItemForm.value, swapInValue.value)
 }
 
 /** Amount the customer pays: items subtotal minus swap credit (not below zero) */
@@ -1899,6 +1946,13 @@ const handleCreateReceipt = async () => {
           ...swapInItemForm.value,
           swapIn: true, // Mark as swap-in item
           unitCost: swapInCreditAmount.value > 0 ? swapInCreditAmount.value : undefined,
+        }
+        // Unit Price left blank: no selling price yet, the owner sets it later in Inventory.
+        for (const field of swapInDisplayFields.value) {
+          const value = swapInItemData[field.name]
+          if (isSwapInPriceField(field) && (value === '' || value === null)) {
+            delete swapInItemData[field.name]
+          }
         }
 
         // Create the swap-in inventory item

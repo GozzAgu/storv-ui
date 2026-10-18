@@ -578,6 +578,13 @@
                             {{ formatCurrency(item.originalPrice || item[column.key] || 0) }}
                           </s>
                         </span>
+                        <SBadge
+                          v-else-if="isItemMissingPrice(item, column)"
+                          tone="warning"
+                          title="Set a Unit Price before this product can be sold"
+                        >
+                          No price
+                        </SBadge>
                         <template v-else>{{ formatCurrency(item[column.key] || 0) }}</template>
                       </template>
                       <template v-else-if="'type' in column && column.type === 'number'">
@@ -731,6 +738,9 @@
                       }}
                     </span>
                   </template>
+                  <SBadge v-else-if="isItemMissingPrice(mobileDetailItem, column)" tone="warning">
+                    No price
+                  </SBadge>
                   <span v-else class="s-inv-detail__strong">{{
                     formatCurrency(mobileDetailItem[column.key] || 0)
                   }}</span>
@@ -1325,6 +1335,7 @@ import {
 import { isNativePerfContext, scheduleNativeIdleWork } from '~/utils/capacitor-native-perf'
 import { useDashboardPageRefreshRegister } from '~/composables/useDashboardPageRefresh'
 import { computeFolderTotalValue } from '~/utils/inventory-folder-availability'
+import { hasSaleUnitPrice } from '~/utils/inventory-item-price'
 import { getInventoryItemDisplayName } from '~/composables/useInventoryItemDisplay'
 import {
   AVAILABILITY_SORT_ORDER,
@@ -2900,6 +2911,11 @@ function isInventorySellPriceColumn(column: { key: string; type?: string }): boo
   return (
     column.type === 'currency' || key === 'price' || (key.includes('price') && key !== 'unitcost')
   )
+}
+
+/** Unsold product with no Unit Price yet (e.g. a swap-in taken without one); it can't be sold. */
+function isItemMissingPrice(item: InventoryItem, column: { key: string }): boolean {
+  return column.key === 'price' && !item.dateOut && !hasSaleUnitPrice(item)
 }
 
 function inventoryMarginClass(item: InventoryItem): string {

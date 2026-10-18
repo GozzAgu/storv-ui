@@ -227,7 +227,8 @@
                   <span v-if="getItemField(item, 'sku')"
                     >SKU: {{ getItemField(item, 'sku') }} ·
                   </span>
-                  <span v-if="getItemPriceLabel(item)">{{ getItemPriceLabel(item) }}</span>
+                  <span v-if="!hasSaleUnitPrice(item)">No price</span>
+                  <span v-else-if="getItemPriceLabel(item)">{{ getItemPriceLabel(item) }}</span>
                   <span
                     v-if="!selectedFolder?.hasSerialNumbers && getItemStockLabel(item) !== null"
                   >
@@ -603,6 +604,7 @@ import {
 } from '~/composables/useInventoryItemDisplay'
 import type { InventoryFolderDisplayRow } from '~/utils/inventory-folder-tree'
 import { isItemOnPartnerLoan } from '~/utils/inventory-availability'
+import { hasSaleUnitPrice, NO_PRICE_SALE_MESSAGE } from '~/utils/inventory-item-price'
 
 interface Props {
   modelValue: boolean
@@ -1081,6 +1083,11 @@ function addItemToCart(foundItem: InventoryItem): boolean {
       showErrorToast('This product is out of stock')
       return false
     }
+  }
+
+  if (!hasSaleUnitPrice(foundItem)) {
+    showErrorToast(NO_PRICE_SALE_MESSAGE)
+    return false
   }
 
   const price = parseFloat(String((foundItem as any).price || (foundItem as any).Price || '0'))

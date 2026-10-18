@@ -510,11 +510,11 @@ When a customer gives you an item as part payment:
 
 1. In New sale, at Checkout, tick **This is a swap-in transaction**.
 2. Choose the **Category for swapped-in device**.
-3. Fill in the device details. **Cost Price** is what you give the customer for it; **Unit Price** is what you will resell it for.
-4. The Cost Price is taken off the total as **Swap credit (cost price)**. The total is shown as **Amount due**.
+3. Fill in the device details. **Cost Price** is what you give the customer for it; **Unit Price** is what you will resell it for. Unit Price is optional here: leave it blank if you're not sure, and set it later in Inventory. If the category has no Cost Price field, enter what you're giving the customer in **Swap value**.
+4. The Cost Price (or Swap value) is taken off the total as **Swap credit**. The total is shown as **Amount due**.
 5. Select **Create sale**.
 
-The traded-in item is added to your stock in the chosen category, marked as a Swap-in.
+The traded-in item is added to your stock in the chosen category, marked as a Swap-in. If you left Unit Price blank, it shows a **No price** tag in Inventory and can't be sold until you edit it and set a Unit Price.
 
 ### 8.4 The Sales page
 
