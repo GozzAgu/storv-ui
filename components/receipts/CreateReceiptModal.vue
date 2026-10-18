@@ -733,7 +733,7 @@
               v-if="isSwapIn && swapInCreditAmount > 0"
               class="s-new-sale__total-row s-new-sale__total-row--credit"
             >
-              <dt>Swap credit (trade-in)</dt>
+              <dt>Swap credit (cost price)</dt>
               <dd>−{{ formatCurrency(swapInCreditAmount) }}</dd>
             </div>
             <div class="s-new-sale__total-row s-new-sale__total-row--grand">
@@ -872,6 +872,7 @@ import { useSellerLoanOutsStore } from '~/stores/sellerLoanOuts'
 import { resolveItemUnitCost } from '~/utils/inventory-item-cost'
 import { PLAN_VIEW_ONLY_SALE_NOTICE } from '~/utils/plan-access'
 import { receiptEmailErrorMessage } from '~/utils/receipt-email-error'
+import { swapInCredit } from '~/utils/swap-in-credit'
 import { usePlanViewOnly } from '~/composables/usePlanViewOnly'
 import { groupLeafFoldersForPicker } from '~/utils/inventory-folder-tree'
 import { useCustomersStore } from '~/stores/customers'
@@ -1685,12 +1686,10 @@ const calculateItemsSubtotal = () => {
   }, 0)
 }
 
-/** Value credited from swapped-in device (sum of currency fields on swap-in form) */
+/** Value credited for the swapped-in device: its cost price on the swap-in form. */
 const getSwapInCredit = () => {
   if (!isSwapIn.value || !swapInFolder.value) return 0
-  return swapInDisplayFields.value
-    .filter((f: { type?: string }) => f.type === 'currency')
-    .reduce((sum, f: { name: string }) => sum + (Number(swapInItemForm.value[f.name]) || 0), 0)
+  return swapInCredit(swapInDisplayFields.value, swapInItemForm.value)
 }
 
 /** Amount the customer pays: items subtotal minus swap credit (not below zero) */
@@ -1891,14 +1890,7 @@ const handleCreateReceipt = async () => {
     const total = calculateTotal()
     const deposit = roundMoney(Number(depositAmount.value) || 0)
 
-    if (!isBalanceDue && itemIds.length > 0) {
-      await applySelectedItemsToInventory()
-      await useSellerLoanOutsStore()
-        .fetchSellerLoanOuts(true)
-        .catch(() => {})
-    }
-
-    // Handle swap-in: Create inventory item for swapped-in device
+    // Swap-in first: if adding the traded-in device fails, nothing has been marked sold yet.
     let swapInItemId: string | undefined = undefined
     if (isSwapIn.value && swapInFolderId.value && swapInFolder.value) {
       try {
@@ -1915,6 +1907,13 @@ const handleCreateReceipt = async () => {
         console.error('Error creating swap-in item:', error)
         throw new Error(`Failed to create swap-in item: ${error.message}`)
       }
+    }
+
+    if (!isBalanceDue && itemIds.length > 0) {
+      await applySelectedItemsToInventory()
+      await useSellerLoanOutsStore()
+        .fetchSellerLoanOuts(true)
+        .catch(() => {})
     }
 
     // Get current store and user information

@@ -510,8 +510,8 @@ When a customer gives you an item as part payment:
 
 1. In New sale, at Checkout, tick **This is a swap-in transaction**.
 2. Choose the **Category for swapped-in device**.
-3. Fill in the device details, including its value.
-4. The value is taken off the total as **Swap credit (trade-in)**. The total is shown as **Amount due**.
+3. Fill in the device details. **Cost Price** is what you give the customer for it; **Unit Price** is what you will resell it for.
+4. The Cost Price is taken off the total as **Swap credit (cost price)**. The total is shown as **Amount due**.
 5. Select **Create sale**.
 
 The traded-in item is added to your stock in the chosen category, marked as a Swap-in.

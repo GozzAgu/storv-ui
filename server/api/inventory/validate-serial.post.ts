@@ -1,6 +1,6 @@
 import { createError, defineEventHandler, readBody } from 'h3'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
-import { requireAuth, requireStoreManageAccess } from '~/server/utils/store-auth'
+import { requireAuth, requireStoreReadAccess } from '~/server/utils/store-auth'
 
 interface ValidateSerialBody {
   ownerUserId?: string
@@ -32,7 +32,9 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  await requireStoreManageAccess(auth.uid, ownerUserId, storeId)
+  // Any active member: staff add swap-in items while selling (rules allow it), and this only
+  // answers whether a serial is already taken.
+  await requireStoreReadAccess(auth.uid, ownerUserId, storeId)
 
   const adminDb = getAdminFirestore()
   const itemsRef = adminDb
