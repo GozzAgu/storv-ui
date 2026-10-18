@@ -4,6 +4,7 @@
     :open="modelValue"
     title="Quick sale"
     size="md"
+    :dismissible="!isProcessing"
     @update:open="(value: boolean) => emit('update:modelValue', value)"
   >
     <div class="s-form s-qs">
@@ -702,6 +703,7 @@ const selectedFolderLabel = computed(() => {
 })
 
 function handleCancel() {
+  if (isProcessing.value) return
   stopScanner()
   emit('update:modelValue', false)
 }
@@ -1164,10 +1166,28 @@ const completeSale = async () => {
   if (!canCompleteQuickSale.value) return
 
   isProcessing.value = true
+  // Everything the receipt needs is read now: the awaits below can be slow on a bad connection,
+  // and the form must not change what this sale records while they run.
+  const cart = cartItems.value.map((ci) => ({ ...ci }))
+  const sale = {
+    customerName: customerName.value,
+    customerPhone: customerPhone.value,
+    paymentMethod: paymentMethod.value,
+    useSplitPayment: useSplitPayment.value,
+    splitPayments: splitPayments.value.map((p) => ({ method: p.method, amount: p.amount })),
+    itemsCount: cart.reduce((sum, ci) => sum + ci.quantity, 0),
+    cartTotal: cartTotal.value,
+    commission: canManageCommissions.value ? commissionAmount.value || 0 : 0,
+    commissionOwedToName: commissionOwedToName.value.trim(),
+    commissionOwedToUid: commissionOwedToUid.value,
+    discountReason: hasAnyDiscount.value ? discountReason.value.trim() : '',
+    folderId: selectedFolderId.value,
+    hasSerialNumbers: selectedFolder.value?.hasSerialNumbers ?? false,
+  }
   try {
     const receiptNumber = `REC-${Date.now().toString().slice(-6)}`
 
-    const receiptItems = cartItems.value.map((ci) => {
+    const receiptItems = cart.map((ci) => {
       const discountAmount = ci.discountAmount || 0
       const hasDiscount = discountAmount > 0
       return {
@@ -1189,15 +1209,15 @@ const completeSale = async () => {
       }
     })
 
-    const itemIds = cartItems.value.map((ci) => ci.id)
-    const hasSerialNumbers = selectedFolder.value?.hasSerialNumbers ?? false
+    const itemIds = cart.map((ci) => ci.id)
+    const hasSerialNumbers = sale.hasSerialNumbers
 
-    if (selectedFolderId.value && itemIds.length > 0) {
-      const saleLines = cartItems.value.map((ci) => ({
+    if (sale.folderId && itemIds.length > 0) {
+      const saleLines = cart.map((ci) => ({
         itemId: ci.id,
         quantitySold: hasSerialNumbers ? 1 : ci.quantity,
       }))
-      await inventoryStore.applyReceiptSaleToInventory(selectedFolderId.value, saleLines, {
+      await inventoryStore.applyReceiptSaleToInventory(sale.folderId, saleLines, {
         hasSerialNumbers,
       })
       await sellerLoanOutsStore.fetchSellerLoanOuts(true).catch(() => {})
@@ -1235,17 +1255,17 @@ const completeSale = async () => {
     // Create receipt
     const receiptData: any = {
       receiptNumber,
-      customerName: customerName.value || 'Walk-in Customer',
+      customerName: sale.customerName || 'Walk-in Customer',
       customerEmail: '',
-      customerPhone: customerPhone.value || '',
+      customerPhone: sale.customerPhone || '',
       date: new Date(),
       items: receiptItems,
-      itemsCount: cartItems.value.reduce((sum, ci) => sum + ci.quantity, 0),
-      total: cartTotal.value + (canManageCommissions.value ? commissionAmount.value || 0 : 0),
-      paymentMethod: useSplitPayment.value ? 'Split Payment' : paymentMethod.value || 'Cash',
+      itemsCount: sale.itemsCount,
+      total: sale.cartTotal + sale.commission,
+      paymentMethod: sale.useSplitPayment ? 'Split Payment' : sale.paymentMethod || 'Cash',
       status: 'completed' as const,
       notes: 'Quick Sale',
-      folderId: selectedFolderId.value || '',
+      folderId: sale.folderId || '',
       itemIds,
       storeId: currentStoreId, // Store ID where receipt was created
       storeBranchName, // Store branch name
@@ -1254,22 +1274,19 @@ const completeSale = async () => {
     }
     if (v2) receiptData.paymentsV2 = true
 
-    if (hasAnyDiscount.value) {
-      receiptData.discountReason = discountReason.value.trim()
+    if (sale.discountReason) {
+      receiptData.discountReason = sale.discountReason
     }
 
-    if (canManageCommissions.value && (commissionAmount.value || 0) > 0) {
-      receiptData.commissionAmount = commissionAmount.value
-      receiptData.commissionOwedToName = commissionOwedToName.value.trim() || undefined
-      receiptData.commissionOwedToUid = commissionOwedToUid.value || undefined
+    if (sale.commission > 0) {
+      receiptData.commissionAmount = sale.commission
+      receiptData.commissionOwedToName = sale.commissionOwedToName || undefined
+      receiptData.commissionOwedToUid = sale.commissionOwedToUid || undefined
       receiptData.commissionStatus = 'owed'
     }
 
-    if (useSplitPayment.value && splitPayments.value.length > 0) {
-      receiptData.splitPayments = splitPayments.value.map((p) => ({
-        method: p.method,
-        amount: p.amount,
-      }))
+    if (sale.useSplitPayment && sale.splitPayments.length > 0) {
+      receiptData.splitPayments = sale.splitPayments
     }
 
     const receiptId = await receiptsStore.createReceipt(receiptData)
@@ -1281,8 +1298,8 @@ const completeSale = async () => {
           total: receiptData.total,
           isBalanceDue: false,
           deposit: 0,
-          method: paymentMethod.value || 'Cash',
-          split: useSplitPayment.value ? splitPayments.value : undefined,
+          method: sale.paymentMethod || 'Cash',
+          split: sale.useSplitPayment ? sale.splitPayments : undefined,
         })
       )
     }

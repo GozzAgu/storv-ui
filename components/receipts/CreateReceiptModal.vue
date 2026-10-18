@@ -4,6 +4,7 @@
     :open="props.modelValue"
     title="New sale"
     size="md"
+    :dismissible="!isCreating"
     @update:open="(value: boolean) => emit('update:modelValue', value)"
   >
     <template #default>
@@ -1807,6 +1808,7 @@ const resetForm = () => {
 }
 
 const handleCancel = () => {
+  if (isCreating.value) return
   resetForm()
   emit('update:modelValue', false)
 }

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { assertPlanWritable } from '~/utils/plan-view-only'
 import { stripUndefinedDeep } from '~/utils/firestore-clean'
+import { assertReceiptConsistent } from '~/utils/receipt-consistency'
 import { CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import {
   collection,
@@ -482,6 +483,7 @@ export const useReceiptsStore = defineStore('receipts', {
       receiptData: Omit<Receipt, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'>
     ) {
       assertPlanWritable()
+      assertReceiptConsistent(receiptData)
       let normalizedReceiptData = {
         ...receiptData,
         customerName:
