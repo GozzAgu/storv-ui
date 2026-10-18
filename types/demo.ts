@@ -18,6 +18,8 @@ export interface DemoItem {
   sku?: string
   /** Unit cost for profit analytics in demo. */
   unitCost?: number
+  /** Taken in as a trade-in on a sale. */
+  swapIn?: boolean
 }
 
 export interface DemoCustomer {

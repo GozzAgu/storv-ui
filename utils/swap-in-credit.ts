@@ -1,5 +1,15 @@
 type SwapInField = { name: string; label?: string; type?: string }
 
+/** Status filter on the Inventory Swap-ins tab. */
+export type SwapInStatusFilter = 'in-stock' | 'no-price' | 'sold' | 'all'
+
+export const SWAP_IN_STATUS_OPTIONS: Array<{ value: SwapInStatusFilter; label: string }> = [
+  { value: 'in-stock', label: 'In stock' },
+  { value: 'no-price', label: 'No price' },
+  { value: 'sold', label: 'Sold' },
+  { value: 'all', label: 'All swap-ins' },
+]
+
 /** Fields that hold what the shop pays for an item, most specific first. */
 const COST_FIELD_NAMES = ['unitCost', 'costPrice', 'cost', 'buybackPrice'] as const
 

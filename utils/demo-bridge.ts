@@ -203,6 +203,7 @@ export function demoItemToInventoryItem(item: DemoItem): InventoryItem {
     unitCost,
     quantity: left,
     sku: item.sku ?? '',
+    ...(item.swapIn && { swapIn: true }),
     createdAt: new Date(),
     updatedAt: new Date(),
     createdBy: DEMO_USER_UID,
@@ -455,6 +456,8 @@ export async function applyDemoInventoryItemCreate(
     price: Number(itemData.price ?? 0),
     quantity: Number(itemData.quantity ?? 0),
     sku: itemData.sku ? String(itemData.sku) : undefined,
+    unitCost: typeof itemData.unitCost === 'number' ? itemData.unitCost : undefined,
+    swapIn: itemData.swapIn === true,
   })
   await syncDemoToPinia()
   return item.id

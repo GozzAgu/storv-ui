@@ -16,6 +16,7 @@ import {
   writeBatch,
   getCountFromServer,
   type Firestore,
+  type QueryConstraint,
   type QueryDocumentSnapshot,
 } from 'firebase/firestore'
 
@@ -201,7 +202,8 @@ let availabilityStatsStamp: StoreFetchStamp | null = null
  */
 async function getItemDocsPerFolder(
   itemsRef: ReturnType<typeof getInventoryItemsCollection>,
-  folderIds: string[]
+  folderIds: string[],
+  constraints: QueryConstraint[] = []
 ): Promise<QueryDocumentSnapshot[]> {
   const CONCURRENCY = 8
   const docs: QueryDocumentSnapshot[] = []
@@ -209,7 +211,9 @@ async function getItemDocsPerFolder(
     const snaps = await Promise.all(
       folderIds
         .slice(i, i + CONCURRENCY)
-        .map((folderId) => getDocs(query(itemsRef, where('folderId', '==', folderId))))
+        .map((folderId) =>
+          getDocs(query(itemsRef, where('folderId', '==', folderId), ...constraints))
+        )
     )
     for (const snap of snaps) docs.push(...snap.docs)
   }
@@ -728,6 +732,47 @@ export const useInventoryStore = defineStore('inventory', {
       }
 
       return grouped
+    },
+
+    /**
+     * Every swap-in (trade-in) item in the categories this user can see, newest first.
+     * Owners run one query; staff query per category, as their rules require.
+     */
+    async fetchSwapInItems(): Promise<InventoryItem[]> {
+      if (this.folders.length === 0) {
+        await this.fetchFolders()
+      }
+      const folderIds = new Set(this.folders.map((folder) => folder.id))
+      let items: InventoryItem[] = []
+
+      const { isDemoModeActive } = await import('~/utils/demo-mode')
+      if (isDemoModeActive()) {
+        for (const folderId of folderIds) {
+          const list = await this.fetchItemsAllChunked(folderId, { force: true })
+          items.push(...list.filter((item) => item.swapIn === true))
+        }
+      } else {
+        const ctx = await this._prepareStoreInventoryItemsContext()
+        const swapInOnly = where('swapIn', '==', true)
+        const itemDocs = ctx.isStaff
+          ? await getItemDocsPerFolder(ctx.itemsRef, [...folderIds], [swapInOnly])
+          : (await getDocs(query(ctx.itemsRef, swapInOnly))).docs
+        items = itemDocs
+          .map((docSnap) => {
+            const folderId = String(docSnap.data().folderId || '')
+            return folderIds.has(folderId)
+              ? docToInventoryItem(docSnap, folderId, ctx.queryUserId)
+              : null
+          })
+          .filter((item): item is InventoryItem => item !== null)
+      }
+
+      const time = (item: InventoryItem) => {
+        const value = item.dateIn ?? item.createdAt
+        const date = value instanceof Date ? value : new Date(value as string)
+        return Number.isFinite(date.getTime()) ? date.getTime() : 0
+      }
+      return items.sort((a, b) => time(b) - time(a))
     },
 
     /**

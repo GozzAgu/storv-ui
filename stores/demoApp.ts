@@ -312,6 +312,8 @@ export const useDemoAppStore = defineStore('demoApp', {
       price: number
       quantity: number
       sku?: string
+      unitCost?: number
+      swapIn?: boolean
     }) {
       const item: DemoItem = {
         id: demoId('item'),
@@ -322,6 +324,8 @@ export const useDemoAppStore = defineStore('demoApp', {
         quantity: Math.max(0, Math.floor(payload.quantity)),
         sold: 0,
         sku: payload.sku?.trim() || undefined,
+        ...(payload.unitCost !== undefined && { unitCost: payload.unitCost }),
+        ...(payload.swapIn && { swapIn: true }),
       }
       this.currentStore.items.push(item)
       this.persist()

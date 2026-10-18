@@ -87,7 +87,11 @@
         <STabs v-model="categoryFilter" :tabs="categoryFilterTabs" label="Filter categories" />
 
         <div
-          v-if="canCreateInventoryFolders && selectedFoldersForBulk.length > 0"
+          v-if="
+            categoryFilter !== 'swap-ins' &&
+            canCreateInventoryFolders &&
+            selectedFoldersForBulk.length > 0
+          "
           class="s-toolbar s-toolbar--selection"
           role="region"
           aria-label="Bulk actions"
@@ -105,6 +109,21 @@
               /></template>
               Delete
             </SButton>
+          </div>
+        </div>
+        <div v-else-if="categoryFilter === 'swap-ins'" class="s-toolbar">
+          <SSearch
+            v-model="swapInSearch"
+            class="s-toolbar__search"
+            placeholder="Search swap-ins"
+            label="Search swap-ins"
+          />
+          <div class="s-toolbar__filter">
+            <SSelect
+              v-model="swapInStatus"
+              :options="SWAP_IN_STATUS_OPTIONS"
+              aria-label="Swap-in status"
+            />
           </div>
         </div>
         <div v-else class="s-toolbar">
@@ -148,7 +167,14 @@
         </div>
       </div>
 
-      <SCard v-if="paginatedFolders.length === 0">
+      <InventorySwapInsPanel
+        v-if="categoryFilter === 'swap-ins'"
+        :search="swapInSearch"
+        :status="swapInStatus"
+        @count="(count: number) => (swapInCount = count)"
+      />
+
+      <SCard v-else-if="paginatedFolders.length === 0">
         <SEmptyState
           :title="filteredCategoriesEmptyTitle"
           :description="filteredCategoriesEmptyDescription"
@@ -321,6 +347,7 @@
       </div>
 
       <SPagination
+        v-if="categoryFilter !== 'swap-ins'"
         :current-page="currentPage"
         :page-size="itemsPerPage"
         :total="foldersForCategoryList.length"
@@ -992,6 +1019,8 @@ import STabs from '~/components/s/STabs.vue'
 import DeleteFolderModal from '~/components/inventory/DeleteFolderModal.vue'
 import InventoryCategoryCard from '~/components/inventory/InventoryCategoryCard.vue'
 import MainStoreSummaryCard from '~/components/inventory/MainStoreSummaryCard.vue'
+import InventorySwapInsPanel from '~/components/inventory/InventorySwapInsPanel.vue'
+import { SWAP_IN_STATUS_OPTIONS, type SwapInStatusFilter } from '~/utils/swap-in-credit'
 import CategoryKindPicker from '~/components/inventory/CategoryKindPicker.vue'
 import { categoryKindLabel, inferCategoryKind, resolveCategoryKind } from '~/utils/category-kinds'
 import { folderKindIcon } from '~/utils/category-kind-icons'
@@ -1068,7 +1097,27 @@ const templateFieldTypeOptions = [
 ]
 
 const searchQuery = ref('')
-const categoryFilter = ref<'all' | 'low-stock'>('all')
+type CategoryFilter = 'all' | 'low-stock' | 'swap-ins'
+const CATEGORY_FILTERS: CategoryFilter[] = ['all', 'low-stock', 'swap-ins']
+
+// Kept in the URL (?tab=swap-ins) so Back from editing a swap-in returns to the tab.
+const inventoryRoute = useRoute()
+const categoryFilter = ref<CategoryFilter>(
+  CATEGORY_FILTERS.includes(inventoryRoute.query.tab as CategoryFilter)
+    ? (inventoryRoute.query.tab as CategoryFilter)
+    : 'all'
+)
+watch(categoryFilter, (tab) => {
+  const query = { ...inventoryRoute.query }
+  if (tab === 'all') delete query.tab
+  else query.tab = tab
+  void navigateTo({ query }, { replace: true })
+})
+
+/** Unsold swap-ins, known once the Swap-ins tab has loaded. */
+const swapInCount = ref<number | null>(null)
+const swapInSearch = ref('')
+const swapInStatus = ref<SwapInStatusFilter>('in-stock')
 
 const categoryFilterOptions = computed(() => [
   { value: 'all', label: 'All categories' },
@@ -1077,6 +1126,7 @@ const categoryFilterOptions = computed(() => [
     label: 'Low stock',
     badge: lowStockCategoryCount.value || undefined,
   },
+  { value: 'swap-ins', label: 'Swap-ins', badge: swapInCount.value || undefined },
 ])
 
 const inventorySortOptions = [

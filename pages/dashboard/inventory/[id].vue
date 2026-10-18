@@ -2048,6 +2048,7 @@ function stripItemHighlightQuery() {
   if (route.query.item == null || route.query.item === '') return
   const q = { ...route.query }
   delete q.item
+  delete q.edit
   void router.replace({ query: q })
 }
 
@@ -2074,6 +2075,14 @@ async function applyItemHighlightFromRoute(itemId: string) {
   // Narrows the visible list to just this item (Object.values(item).some(...) in
   // filteredItems already matches on `id` since it stringifies every field).
   searchQuery.value = itemId
+
+  // ?edit=1 (e.g. Edit on the Swap-ins tab): open the edit form straight away.
+  if (route.query.edit === '1') {
+    const editable = folderSearchItems.value?.find((row) => row.id === itemId) ?? target
+    if (canManageInventoryItems.value && !isInventoryItemLocked(editable)) {
+      handleEditItem(editable)
+    }
+  }
 
   await nextTick()
   flashItemId.value = itemId

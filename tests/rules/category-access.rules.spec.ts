@@ -121,6 +121,19 @@ describe('firestore.rules: category access for store members', () => {
     await assertFails(getDocs(collection(as('amaka'), `${STORE}/inventoryItems`)))
   })
 
+  it('allows the Swap-ins tab queries: store-wide for the owner, per category for members', async () => {
+    const swapIns = (uid: string, folderId?: string) =>
+      query(
+        collection(as(uid), `${STORE}/inventoryItems`),
+        ...(folderId ? [where('folderId', '==', folderId)] : []),
+        where('swapIn', '==', true)
+      )
+    await assertSucceeds(getDocs(swapIns('owner')))
+    await assertSucceeds(getDocs(swapIns('amaka', 'phones')))
+    await assertFails(getDocs(swapIns('tunde', 'phones')))
+    await assertFails(getDocs(swapIns('amaka')))
+  })
+
   it('still lets a member return a locked product to stock', async () => {
     await testEnv.withSecurityRulesDisabled(async (context) => {
       await updateDoc(doc(context.firestore(), `${STORE}/inventoryItems/iphone`), {
