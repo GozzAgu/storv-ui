@@ -3,9 +3,13 @@ type SwapInField = { name: string; label?: string; type?: string }
 /** Status filter on the Inventory Swap-ins tab. */
 export type SwapInStatusFilter = 'in-stock' | 'no-price' | 'sold' | 'all'
 
+export function isSwapInStatusFilter(value: unknown): value is SwapInStatusFilter {
+  return value === 'in-stock' || value === 'no-price' || value === 'sold' || value === 'all'
+}
+
 export const SWAP_IN_STATUS_OPTIONS: Array<{ value: SwapInStatusFilter; label: string }> = [
+  { value: 'no-price', label: 'Needs a price' },
   { value: 'in-stock', label: 'In stock' },
-  { value: 'no-price', label: 'No price' },
   { value: 'sold', label: 'Sold' },
   { value: 'all', label: 'All swap-ins' },
 ]

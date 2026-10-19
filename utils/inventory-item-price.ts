@@ -16,3 +16,9 @@ export function hasSaleUnitPrice(item: object): boolean {
   }
   return false
 }
+
+/** An unsold swap-in taken in without a Unit Price: it can't be sold until someone prices it. */
+export function swapInNeedsPrice(item: object): boolean {
+  const record = item as Record<string, unknown>
+  return record.swapIn === true && !record.dateOut && !hasSaleUnitPrice(item)
+}

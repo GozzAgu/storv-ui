@@ -212,6 +212,34 @@
               :total="repeatCustomers.total"
             />
             <OverviewAttention :items="homeAttentionItems" />
+            <SCard v-if="swapInsNeedingPrice.length > 0" title="Needs a price" flush>
+              <template #actions>
+                <SButton
+                  variant="ghost"
+                  size="sm"
+                  to="/dashboard/inventory?tab=swap-ins&status=no-price"
+                >
+                  View all ({{ swapInsNeedingPrice.length }})
+                </SButton>
+              </template>
+              <p class="s-list__note">Swap-ins taken in without a Unit Price can't be sold yet.</p>
+              <ul class="s-list">
+                <li v-for="item in swapInsNeedingPriceTop" :key="item.id">
+                  <NuxtLink
+                    :to="swapInPriceLink(item)"
+                    class="s-list__item s-list__item--interactive"
+                  >
+                    <span class="s-list__main">
+                      <span class="s-list__primary">{{ getInventoryItemDisplayName(item) }}</span>
+                      <span class="s-list__secondary">{{ swapInPriceMeta(item) }}</span>
+                    </span>
+                    <span class="s-list__end">
+                      <SBadge tone="warning">No price</SBadge>
+                    </span>
+                  </NuxtLink>
+                </li>
+              </ul>
+            </SCard>
             <SCard title="Low stock" flush>
               <template #actions>
                 <SButton
@@ -338,6 +366,8 @@ import { usePermissions } from '~/composables/usePermissions'
 import { useCapacitorNativeApp } from '~/composables/useCapacitorNativeApp'
 import { useDashboardPageRefreshRegister } from '~/composables/useDashboardPageRefresh'
 import type { InventoryItem } from '~/stores/inventory'
+import { swapInNeedsPrice } from '~/utils/inventory-item-price'
+import { getInventoryItemDisplayName } from '~/composables/useInventoryItemDisplay'
 
 definePageMeta({
   layout: 'dashboard',
@@ -520,6 +550,42 @@ const homeAttentionItems = computed((): DashboardAlert[] => {
   }
   return topN(items)
 })
+
+// Overview already loads every item, so unpriced swap-ins come from that rather than a new query.
+const swapInsNeedingPrice = computed(() =>
+  Object.values(dashboardFolderItems.value)
+    .flat()
+    .filter(swapInNeedsPrice)
+    .sort((a, b) => itemTime(b.dateIn ?? b.createdAt) - itemTime(a.dateIn ?? a.createdAt))
+)
+const swapInsNeedingPriceTop = computed(() => topN(swapInsNeedingPrice.value))
+
+function itemTime(value: unknown): number {
+  const date =
+    value instanceof Date
+      ? value
+      : typeof (value as { toDate?: () => Date })?.toDate === 'function'
+      ? (value as { toDate: () => Date }).toDate()
+      : new Date(value as string)
+  return Number.isFinite(date.getTime()) ? date.getTime() : 0
+}
+
+function swapInPriceMeta(item: InventoryItem) {
+  const folder = inventoryStore.getFolderById(item.folderId)?.name
+  const time = itemTime(item.dateIn ?? item.createdAt)
+  const taken = time
+    ? `taken in ${new Date(time).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}`
+    : ''
+  return [folder, taken].filter(Boolean).join(' · ')
+}
+
+/** Opens the item's edit form so a manager can set the price; others just see the item. */
+function swapInPriceLink(item: InventoryItem) {
+  return {
+    path: `/dashboard/inventory/${item.folderId}`,
+    query: canManageInventoryItems.value ? { item: item.id, edit: '1' } : { item: item.id },
+  }
+}
 
 function lowStockMeta(item: { folderName?: string; isSerialNumber?: boolean; threshold?: number }) {
   const parts = [item.folderName?.trim()]

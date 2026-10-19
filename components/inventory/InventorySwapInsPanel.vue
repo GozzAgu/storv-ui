@@ -70,7 +70,16 @@
             </td>
             <td v-if="canManageInventoryItems" class="s-table__actions" @click.stop>
               <SButton
-                v-if="!item.dateOut"
+                v-if="swapInNeedsPrice(item)"
+                size="sm"
+                :aria-label="`Set a price for ${getInventoryItemDisplayName(item)}`"
+                @click="openSetPrice(item)"
+              >
+                Set price
+              </SButton>
+              <SButton
+                v-else-if="!item.dateOut"
+                variant="secondary"
                 size="sm"
                 :to="itemLink(item, true)"
                 :aria-label="`Edit ${getInventoryItemDisplayName(item)}`"
@@ -91,6 +100,43 @@
       label="Swap-ins pagination"
       @page-change="(page: number) => (currentPage = page)"
     />
+
+    <SDialog
+      v-model:open="setPriceOpen"
+      title="Set a price"
+      :description="
+        pricingItem
+          ? `${getInventoryItemDisplayName(pricingItem)} can be sold once it has a Unit Price.`
+          : undefined
+      "
+      size="sm"
+      :dismissible="!savingPrice"
+    >
+      <SForm @submit.prevent="savePrice">
+        <SField label="Unit price" required :hint="costHint">
+          <SInput
+            v-model.number="priceInput"
+            type="number"
+            step="0.01"
+            :min="0"
+            required
+            placeholder="0.00"
+          >
+            <template #prefix>{{ currencySymbol }}</template>
+          </SInput>
+        </SField>
+      </SForm>
+      <template #footer>
+        <SDialogActions
+          primary-label="Save price"
+          :primary-loading="savingPrice"
+          :primary-disabled="!priceIsValid"
+          :cancel-disabled="savingPrice"
+          @cancel="setPriceOpen = false"
+          @primary="savePrice"
+        />
+      </template>
+    </SDialog>
   </div>
 </template>
 
@@ -99,6 +145,11 @@ import { computed, onMounted, ref, watch } from 'vue'
 import SBadge from '~/components/s/SBadge.vue'
 import SButton from '~/components/s/SButton.vue'
 import SCard from '~/components/s/SCard.vue'
+import SDialog from '~/components/s/SDialog.vue'
+import SDialogActions from '~/components/s/SDialogActions.vue'
+import SField from '~/components/s/SField.vue'
+import SForm from '~/components/s/SForm.vue'
+import SInput from '~/components/s/SInput.vue'
 import SEmptyState from '~/components/s/SEmptyState.vue'
 import SPagination from '~/components/s/SPagination.vue'
 import SSkeleton from '~/components/s/SSkeleton.vue'
@@ -110,46 +161,86 @@ import {
 import { useDashboardPaths } from '~/composables/useDashboardPaths'
 import { usePreferences } from '~/composables/usePreferences'
 import { resolveItemUnitCost } from '~/utils/inventory-item-cost'
-import { hasSaleUnitPrice } from '~/utils/inventory-item-price'
+import { hasSaleUnitPrice, swapInNeedsPrice } from '~/utils/inventory-item-price'
 import type { SwapInStatusFilter } from '~/utils/swap-in-credit'
-
-const emit = defineEmits<{ count: [value: number] }>()
+import { useSwapInItems } from '~/composables/useSwapInItems'
+import { useAppToast } from '~/composables/useAppToast'
 
 const PAGE_SIZE = 20
 
 const inventoryStore = useInventoryStore()
 const { canManageInventoryItems, canViewFinancials, canViewProfitAndCost } = usePermissions()
-const { formatCurrency } = usePreferences()
+const { formatCurrency, preferences } = usePreferences()
+const currencySymbol = computed(() => preferences.value?.currencySymbol || '$')
+const toast = useAppToast()
 const { dashPath } = useDashboardPaths()
 
-const items = ref<InventoryItem[]>([])
-const loading = ref(true)
-const loadError = ref<string | null>(null)
 /** Search and status come from the toolbar in the page's card header. */
 const props = defineProps<{ search: string; status: SwapInStatusFilter }>()
 const searchQuery = computed(() => props.search)
 const statusFilter = computed(() => props.status)
 const currentPage = ref(1)
 
-async function load() {
-  loading.value = true
-  loadError.value = null
-  try {
-    items.value = await inventoryStore.fetchSwapInItems()
-  } catch (error) {
-    console.error('[inventory] Swap-ins load failed:', error)
-    loadError.value = error instanceof Error ? error.message : 'Please try again.'
-  } finally {
-    loading.value = false
-  }
+// Shared with the page, which loads it so the tab count shows before the tab is opened.
+const {
+  items,
+  loading: loadingItems,
+  loaded,
+  loadError,
+  load: loadItems,
+  patchItem,
+} = useSwapInItems()
+const loading = computed(() => loadingItems.value && !loaded.value)
+
+function load() {
+  return loadItems({ force: true })
 }
 
-onMounted(load)
-
-/** Unsold swap-ins: the number the tab badge shows. */
-watch(items, (list) => emit('count', list.filter((item) => !item.dateOut).length), {
-  immediate: true,
+onMounted(() => {
+  if (!loaded.value) void loadItems()
 })
+
+// ── Set price ─────────────────────────────────────────────
+const setPriceOpen = ref(false)
+const pricingItem = ref<InventoryItem | null>(null)
+const priceInput = ref<number | ''>('')
+const savingPrice = ref(false)
+
+const priceIsValid = computed(() => {
+  const n = Number(priceInput.value)
+  return priceInput.value !== '' && Number.isFinite(n) && n > 0
+})
+
+const costHint = computed(() => {
+  if (!pricingItem.value || !canViewProfitAndCost.value) return undefined
+  const cost = resolveItemUnitCost(pricingItem.value)
+  return cost !== undefined ? `You paid ${formatCurrency(cost)} for it.` : undefined
+})
+
+function openSetPrice(item: InventoryItem) {
+  pricingItem.value = item
+  priceInput.value = ''
+  setPriceOpen.value = true
+}
+
+async function savePrice() {
+  const item = pricingItem.value
+  if (!item || !priceIsValid.value || savingPrice.value) return
+  const price = Number(priceInput.value)
+  savingPrice.value = true
+  try {
+    await inventoryStore.updateItem(item.folderId, item.id, { price })
+    patchItem(item.id, { price })
+    setPriceOpen.value = false
+    toast.success(
+      `${getInventoryItemDisplayName(item)} is ready to sell at ${formatCurrency(price)}`
+    )
+  } catch (error) {
+    toast.error(error instanceof Error ? error.message : 'Could not save the price')
+  } finally {
+    savingPrice.value = false
+  }
+}
 
 const foldersById = computed(() => new Map(inventoryStore.folders.map((f) => [f.id, f])))
 
@@ -170,7 +261,7 @@ const filteredItems = computed(() => {
   return items.value.filter((item) => {
     if (statusFilter.value === 'in-stock' && item.dateOut) return false
     if (statusFilter.value === 'sold' && !item.dateOut) return false
-    if (statusFilter.value === 'no-price' && (item.dateOut || hasSaleUnitPrice(item))) return false
+    if (statusFilter.value === 'no-price' && !swapInNeedsPrice(item)) return false
     if (!q) return true
     return [getInventoryItemDisplayName(item), itemSerial(item), folderName(item.folderId)]
       .join(' ')
@@ -194,11 +285,13 @@ const emptyTitle = computed(() => {
   return 'No swap-ins here'
 })
 
-const emptyDescription = computed(() =>
-  items.value.length === 0
-    ? 'Devices you take in as part payment on a sale will show here.'
-    : 'Try another search or status.'
-)
+const emptyDescription = computed(() => {
+  if (items.value.length === 0)
+    return 'Devices you take in as part payment on a sale will show here.'
+  if (!searchQuery.value.trim() && statusFilter.value === 'no-price')
+    return 'Swap-ins taken in without a Unit Price show here until someone sets one.'
+  return 'Try another search or status.'
+})
 
 /** The item in its category; `edit` opens its edit form there. */
 function itemLink(item: InventoryItem, edit = false) {

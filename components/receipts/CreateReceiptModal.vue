@@ -903,6 +903,7 @@ import {
   type CustomerSuggestField,
 } from '~/utils/customer-suggest'
 import { useStoresStore } from '~/stores/stores'
+import { useNotificationsStore } from '~/stores/notifications'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useStaffStore } from '~/stores/staff'
@@ -1939,6 +1940,8 @@ const handleCreateReceipt = async () => {
 
     // Swap-in first: if adding the traded-in device fails, nothing has been marked sold yet.
     let swapInItemId: string | undefined = undefined
+    /** Name of a swap-in saved without a Unit Price, so the store can be told to price it. */
+    let unpricedSwapInName: string | null = null
     if (isSwapIn.value && swapInFolderId.value && swapInFolder.value) {
       try {
         // Prepare item data from form
@@ -1957,6 +1960,9 @@ const handleCreateReceipt = async () => {
 
         // Create the swap-in inventory item
         swapInItemId = await inventoryStore.createItem(swapInFolderId.value, swapInItemData)
+        if (!hasSaleUnitPrice(swapInItemData)) {
+          unpricedSwapInName = getItemDisplayName(swapInItemData as InventoryItem)
+        }
       } catch (error: any) {
         console.error('Error creating swap-in item:', error)
         throw new Error(`Failed to create swap-in item: ${error.message}`)
@@ -2086,6 +2092,19 @@ const handleCreateReceipt = async () => {
         console.error('Error updating swap-in item with receipt ID:', error)
         // Don't fail receipt creation if swap-in update fails
       }
+    }
+
+    if (swapInItemId && swapInFolderId.value && unpricedSwapInName) {
+      void useNotificationsStore()
+        .createNotification(
+          'swap_in_needs_price',
+          'Swap-in needs a price',
+          `${unpricedSwapInName} was taken in on receipt #${receiptNumber} without a Unit Price. Set one so it can be sold.`,
+          { itemId: swapInItemId, folderId: swapInFolderId.value, receiptId }
+        )
+        .catch((error: unknown) => {
+          console.warn('Failed to create swap-in price notification:', error)
+        })
     }
 
     // Create or update customer automatically

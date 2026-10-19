@@ -171,7 +171,6 @@
         v-if="categoryFilter === 'swap-ins'"
         :search="swapInSearch"
         :status="swapInStatus"
-        @count="(count: number) => (swapInCount = count)"
       />
 
       <SCard v-else-if="paginatedFolders.length === 0">
@@ -1020,7 +1019,12 @@ import DeleteFolderModal from '~/components/inventory/DeleteFolderModal.vue'
 import InventoryCategoryCard from '~/components/inventory/InventoryCategoryCard.vue'
 import MainStoreSummaryCard from '~/components/inventory/MainStoreSummaryCard.vue'
 import InventorySwapInsPanel from '~/components/inventory/InventorySwapInsPanel.vue'
-import { SWAP_IN_STATUS_OPTIONS, type SwapInStatusFilter } from '~/utils/swap-in-credit'
+import {
+  isSwapInStatusFilter,
+  SWAP_IN_STATUS_OPTIONS,
+  type SwapInStatusFilter,
+} from '~/utils/swap-in-credit'
+import { useSwapInItems } from '~/composables/useSwapInItems'
 import CategoryKindPicker from '~/components/inventory/CategoryKindPicker.vue'
 import { categoryKindLabel, inferCategoryKind, resolveCategoryKind } from '~/utils/category-kinds'
 import { folderKindIcon } from '~/utils/category-kind-icons'
@@ -1111,13 +1115,36 @@ watch(categoryFilter, (tab) => {
   const query = { ...inventoryRoute.query }
   if (tab === 'all') delete query.tab
   else query.tab = tab
+  if (tab === 'swap-ins') query.status = swapInStatus.value
+  else delete query.status
   void navigateTo({ query }, { replace: true })
 })
 
-/** Unsold swap-ins, known once the Swap-ins tab has loaded. */
-const swapInCount = ref<number | null>(null)
+// Loaded with the page (not just the tab) so the count of swap-ins waiting for a price is always visible.
+const swapIns = useSwapInItems()
+const swapInNeedsPriceCount = computed(() => swapIns.needsPrice.value.length)
 const swapInSearch = ref('')
-const swapInStatus = ref<SwapInStatusFilter>('in-stock')
+// ?status=no-price links straight to the items to price (Overview, notifications).
+const swapInStatusFromRoute = isSwapInStatusFilter(inventoryRoute.query.status)
+  ? inventoryRoute.query.status
+  : null
+const swapInStatus = ref<SwapInStatusFilter>(swapInStatusFromRoute ?? 'no-price')
+let swapInStatusTouched = swapInStatusFromRoute !== null
+// With nothing to price, open on In stock rather than an empty "Needs a price" list.
+watch(
+  () => swapIns.loaded.value,
+  (loaded) => {
+    if (loaded && !swapInStatusTouched && swapInNeedsPriceCount.value === 0) {
+      swapInStatus.value = 'in-stock'
+    }
+  },
+  { immediate: true }
+)
+watch(swapInStatus, (status) => {
+  swapInStatusTouched = true
+  if (categoryFilter.value !== 'swap-ins') return
+  void navigateTo({ query: { ...inventoryRoute.query, status } }, { replace: true })
+})
 
 const categoryFilterOptions = computed(() => [
   { value: 'all', label: 'All categories' },
@@ -1126,7 +1153,7 @@ const categoryFilterOptions = computed(() => [
     label: 'Low stock',
     badge: lowStockCategoryCount.value || undefined,
   },
-  { value: 'swap-ins', label: 'Swap-ins', badge: swapInCount.value || undefined },
+  { value: 'swap-ins', label: 'Swap-ins', badge: swapInNeedsPriceCount.value || undefined },
 ])
 
 const inventorySortOptions = [
@@ -1364,6 +1391,8 @@ watch(
   () => storesStore.currentStoreId,
   () => {
     selectedFoldersForBulk.value = []
+    swapIns.reset()
+    void swapIns.load()
   }
 )
 
@@ -2899,6 +2928,7 @@ onMounted(async () => {
     } else {
       await inventoryStore.fetchFolderAvailabilityStats()
     }
+    void swapIns.load({ force: true })
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error)
     console.error('[InventoryPage] Error loading data:', message)

@@ -45,6 +45,7 @@ export type NotificationType =
   | 'import_completed'
   | 'export_completed'
   | 'swap_in_completed'
+  | 'swap_in_needs_price'
   | 'lead_created'
   | 'lead_converted'
   | 'storefront_inquiry'

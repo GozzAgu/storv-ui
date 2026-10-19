@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { hasSaleUnitPrice } from '~/utils/inventory-item-price'
+import { hasSaleUnitPrice, swapInNeedsPrice } from '~/utils/inventory-item-price'
 
 describe('hasSaleUnitPrice', () => {
   it('is true for a product with a Unit Price', () => {
@@ -16,5 +16,17 @@ describe('hasSaleUnitPrice', () => {
 
   it('counts a discounted product as priced', () => {
     expect(hasSaleUnitPrice({ price: 0, originalPrice: 50_000, discountedPrice: 0 })).toBe(true)
+  })
+})
+
+describe('swapInNeedsPrice', () => {
+  it('flags an unsold swap-in with no Unit Price', () => {
+    expect(swapInNeedsPrice({ swapIn: true, unitCost: 150_000 })).toBe(true)
+  })
+
+  it('ignores priced, sold and non-swap-in items', () => {
+    expect(swapInNeedsPrice({ swapIn: true, price: 200_000 })).toBe(false)
+    expect(swapInNeedsPrice({ swapIn: true, dateOut: '2026-10-01' })).toBe(false)
+    expect(swapInNeedsPrice({ unitCost: 150_000 })).toBe(false)
   })
 })

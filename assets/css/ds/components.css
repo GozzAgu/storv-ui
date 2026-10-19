@@ -1531,6 +1531,13 @@ textarea.s-control__input {
   font-weight: 600;
 }
 
+.s-list__note {
+  margin: 0;
+  padding: 0 var(--s-space-3) var(--s-space-1);
+  color: var(--s-text-muted);
+  font: var(--s-text-small);
+}
+
 .s-list__empty {
   padding: var(--s-space-4) var(--s-space-3);
   color: var(--s-text-muted);

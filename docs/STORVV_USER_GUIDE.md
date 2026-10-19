@@ -516,7 +516,12 @@ When a customer gives you an item as part payment:
 
 The traded-in item is added to your stock in the chosen category, marked as a Swap-in. If you left Unit Price blank, it shows a **No price** tag in Inventory and can't be sold until you edit it and set a Unit Price.
 
-To see every trade-in in one place, open **Inventory** and choose the **Swap-ins** tab. Filter by **In stock**, **No price** or **Sold**, and select **Edit** to update an item (for example, to set its Unit Price).
+To see every trade-in in one place, open **Inventory** and choose the **Swap-ins** tab. The number on the tab is how many swap-ins still need a price, and the tab opens on **Needs a price** while there are any. Select **Set price** on a row to enter the Unit Price without leaving the list; filter by **In stock**, **Sold** or **All swap-ins** and select **Edit** for other changes.
+
+So unpriced items don't get forgotten:
+
+- When a sale saves a swap-in without a Unit Price, everyone in the store gets a **Swap-in needs a price** notification. Selecting it opens the list of items to price.
+- **Overview** shows a **Needs a price** card listing them until each one has a price.
 
 ### 8.4 The Sales page
 
