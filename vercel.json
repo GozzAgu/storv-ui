@@ -15,6 +15,10 @@
     {
       "path": "/api/cron/trade/loan-reminders",
       "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/cron/storefront/release-reservations",
+      "schedule": "0 3 * * *"
     }
   ],
   "headers": [

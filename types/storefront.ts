@@ -105,6 +105,8 @@ export interface StorefrontPublicListing {
   ownerUid: string
   storeId: string
   reservationInquiryId?: string | null
+  /** Guest reservation lapses at this time (Firestore Timestamp); null once confirmed or released. */
+  reservedUntil?: unknown
   /** When first published to the public catalogue (preserved across syncs). */
   firstListedAt?: unknown
   updatedAt?: unknown
@@ -158,6 +160,8 @@ export interface StorefrontInquiry {
   status: StorefrontInquiryStatus
   customerName: string
   customerPhone: string
+  /** Digits of customerPhone, for the per-customer reservation cap. */
+  customerPhoneKey?: string
   customerNote?: string
   listingId: string
   listingTitle: string
@@ -172,6 +176,8 @@ export interface StorefrontInquiry {
   resolvedAt?: unknown
   resolvedByUid?: string
   resolveNote?: string
+  /** Reserve requests: when the guest hold lapses (Firestore Timestamp). */
+  reservedUntil?: unknown
   /** Payment link sent for this inquiry (merchant → customer). */
   paymentLinkToken?: string
   paymentLinkStatus?: 'unpaid' | 'paid' | 'failed' | 'expired'

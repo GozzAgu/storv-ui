@@ -341,6 +341,20 @@
   ],
   "fieldOverrides": [
     {
+      "collectionGroup": "items",
+      "fieldPath": "reservedUntil",
+      "indexes": [
+        {
+          "order": "ASCENDING",
+          "queryScope": "COLLECTION"
+        },
+        {
+          "order": "ASCENDING",
+          "queryScope": "COLLECTION_GROUP"
+        }
+      ]
+    },
+    {
       "collectionGroup": "payments",
       "fieldPath": "proofDeleteAfter",
       "indexes": [

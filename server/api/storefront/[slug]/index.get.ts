@@ -5,6 +5,7 @@ import {
   publicStorefrontListingDto,
   publicStorefrontProfileDto,
 } from '~/server/utils/storefront-public-dto'
+import { effectiveListingAvailability } from '~/server/utils/storefront-reservation'
 import type { StorefrontPublicListing, StorefrontPublicProfile } from '~/types/storefront'
 
 /**
@@ -46,6 +47,7 @@ export default defineEventHandler(async (event) => {
   let items = itemsSnap.docs
     .map((d) => d.data() as StorefrontPublicListing)
     .filter((i) => isListingOfStore(i, profile.ownerUid, profile.storeId))
+    .map((i) => ({ ...i, availability: effectiveListingAvailability(i) }))
 
   if (search) {
     items = items.filter((i) => (i.searchText || '').includes(search))
