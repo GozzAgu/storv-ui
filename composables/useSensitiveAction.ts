@@ -1,8 +1,8 @@
 import { useHaptics } from '~/composables/useHaptics'
 import { isCapacitorNative } from '~/utils/capacitor-env'
 
-/** Checkout discounts above this percentage of the unit price need confirmation on the device. */
-export const STAFF_DISCOUNT_LIMIT_PERCENT = 10
+/** Checkout discounts above this percentage of the unit price need a manager's approval. */
+export { STAFF_DISCOUNT_LIMIT_PERCENT } from '~/utils/sale-pricing'
 
 export type SensitiveAction = 'refund' | 'void' | 'discount' | 'export-data' | 'reveal-customer'
 

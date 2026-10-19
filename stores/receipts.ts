@@ -29,21 +29,12 @@ import {
 import { useStaffStore } from './staff'
 import { usePermissions } from '~/composables/usePermissions'
 import { useCustomersStore } from './customers'
-import { useInventoryStore } from './inventory'
-import { logActivity, getCurrentUserDisplayName } from '~/composables/useActivityLog'
 import { useNotificationsStore } from './notifications'
 import { usePreferences } from '~/composables/usePreferences'
 import { normalizeEntityName } from '~/utils/capitalize-text'
 import type { PaymentSummary } from '~/types/payments-v2'
-import { usePaymentsV2 } from '~/composables/usePaymentsV2'
 import { useLoyalty } from '~/composables/useLoyalty'
-import {
-  computeBalanceDue,
-  isBalanceFullyPaid,
-  normalizePayments,
-  paymentsForFirestore,
-  roundMoney,
-} from '~/utils/receipt-balance'
+import { roundMoney } from '~/utils/receipt-balance'
 import { resolveApiPath } from '~/utils/api-url'
 import { summarizeDaySales } from '~/utils/day-sales-summary'
 import { getPermissionAction, resolveStaffPermissions } from '~/utils/staff-permissions'
@@ -55,9 +46,18 @@ import {
 
 /** Firestore receipt doc to the store's Receipt shape. `fallbackUserId` fills legacy docs. */
 function mapReceiptDoc(doc: QueryDocumentSnapshot, fallbackUserId: string): Receipt {
-  const data = doc.data()
+  return mapReceiptData(doc.id, doc.data(), fallbackUserId)
+}
+
+/** Receipt fields (from Firestore, or a server response with ISO dates) to a Receipt. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function mapReceiptData(
+  id: string,
+  data: Record<string, any>,
+  fallbackUserId: string
+): Receipt {
   return {
-    id: doc.id,
+    id,
     receiptNumber: data.receiptNumber || '',
     customerName: data.customerName || '',
     customerEmail: data.customerEmail || '',
@@ -478,7 +478,16 @@ export const useReceiptsStore = defineStore('receipts', {
       }
     },
 
-    // Create a new receipt
+    /** A sale the server recorded (see useSalesApi): show it straight away. */
+    addRecordedSale(receipt: Record<string, unknown> & { id: string }): Receipt {
+      const mapped = mapReceiptData(receipt.id, receipt, String(receipt.createdBy || ''))
+      const index = this.receipts.findIndex((r) => r.id === mapped.id)
+      if (index > -1) this.receipts[index] = mapped
+      else this.receipts.unshift(mapped)
+      return mapped
+    },
+
+    /** Demo mode only: real sales are recorded by the server (POST /api/sales/create). */
     async createReceipt(
       receiptData: Omit<Receipt, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'>
     ) {
@@ -733,92 +742,11 @@ export const useReceiptsStore = defineStore('receipts', {
       }
     },
 
-    /** Balance-due sale is fully paid: commit reserved stock as sold and log it. */
-    async finalizeBalanceDueStock(
-      receiptId: string,
-      data: Record<string, unknown>,
-      opts: { stock?: boolean; log?: boolean } = {}
-    ): Promise<void> {
-      const authStore = useAuthStore()
-      if (!authStore.currentUser) throw new Error('User must be authenticated')
-      const { getCurrentStoreId } = await import('~/composables/useCurrentStore')
-      const storeId = await getCurrentStoreId()
-      if (!storeId) throw new Error('No store selected')
-      const inventoryStore = useInventoryStore()
-
-      const items = (data.items as ReceiptItem[]) || []
-      const fallbackFolderId = String(data.folderId || '')
-      const folderIdsFromReceipt = Array.isArray(data.folderIds)
-        ? (data.folderIds as string[]).filter(Boolean)
-        : fallbackFolderId
-        ? [fallbackFolderId]
-        : []
-
-      if (opts.stock !== false) {
-        const { groupReceiptItemsByFolder } = await import('~/utils/receipt-multi-folder')
-        const grouped =
-          groupReceiptItemsByFolder(items, fallbackFolderId).size > 0
-            ? groupReceiptItemsByFolder(items, fallbackFolderId)
-            : new Map(
-                folderIdsFromReceipt.map((fid) => [
-                  fid,
-                  items.filter((line) => line.folderId === fid || !line.folderId),
-                ])
-              )
-
-        for (const [folderId, folderItems] of grouped) {
-          if (!folderId || folderItems.length === 0) continue
-          let folder = inventoryStore.getFolderById(folderId)
-          if (!folder) {
-            folder = (await inventoryStore.fetchFolder(folderId)) ?? undefined
-          }
-          let hasSerialNumbers = folder?.hasSerialNumbers === true
-          if (!hasSerialNumbers && folderId) {
-            const { folderHasSerialNumbers } = await import('~/utils/receipt-multi-folder')
-            hasSerialNumbers = folderHasSerialNumbers(folder)
-          }
-          const saleLines = folderItems
-            .filter((i) => i?.itemId)
-            .map((i) => ({
-              itemId: i.itemId,
-              quantitySold: hasSerialNumbers ? 1 : Number(i.quantity) || 1,
-            }))
-          if (saleLines.length > 0) {
-            await inventoryStore.finalizeBalanceDueInventorySale(folderId, receiptId, saleLines, {
-              hasSerialNumbers,
-              skipActivityLog: true,
-            })
-          }
-        }
-      }
-
-      if (opts.log !== false) {
-        const receiptLabel = String(data.receiptNumber || receiptId)
-        const allSaleLines = items.filter((i) => i?.itemId)
-        const soldCount = allSaleLines.reduce((n, line) => n + (Number(line.quantity) || 1), 0)
-        if (allSaleLines.length > 0) {
-          const userDisplayName = await getCurrentUserDisplayName().catch(() => 'Unknown')
-          const entityId = folderIdsFromReceipt[0] || fallbackFolderId || receiptId
-          await logActivity({
-            action: 'updated',
-            entityType: 'items_batch',
-            entityId,
-            entityName: `${soldCount} item${
-              soldCount !== 1 ? 's' : ''
-            } marked as sold · ${receiptLabel}`,
-            storeId,
-            userId: authStore.currentUser.uid,
-            userDisplayName,
-          }).catch((e) => console.warn('[receipts] Activity log write failed:', e))
-        }
-      }
-    },
-
     /**
-     * Payments V2: the server has recorded money and may have completed the sale. Re-read the
-     * receipt (server-written) and commit the reserved stock when it says completed.
+     * Payments V2: the server has recorded money and may have completed the sale (it also commits
+     * the held stock now). Re-read the receipt so this screen shows what the server wrote.
      */
-    async syncV2Receipt(receiptId: string, saleCompleted = false): Promise<void> {
+    async syncV2Receipt(receiptId: string, _saleCompleted = false): Promise<void> {
       const db = useFirestore().getFirestoreInstance()
       if (!db) throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
       const userId = await getQueryUserId()
@@ -828,9 +756,6 @@ export const useReceiptsStore = defineStore('receipts', {
       const snap = await getDoc(getReceiptDocument(db, userId, storeId, receiptId))
       if (!snap.exists()) return
       const data = snap.data() as Record<string, unknown>
-      if (saleCompleted && data.status === 'completed') {
-        await this.finalizeBalanceDueStock(receiptId, data)
-      }
       const index = this.receipts.findIndex((r) => r.id === receiptId)
       if (index > -1) {
         const existing = this.receipts[index]!
@@ -846,168 +771,51 @@ export const useReceiptsStore = defineStore('receipts', {
       }
     },
 
+    /**
+     * Records part of what is owed on a balance-due sale. The server checks the amount, appends
+     * the payment under the caller's name and, once it is paid off, releases the held stock.
+     */
     async recordBalancePayment(
       receiptId: string,
       payment: { amount: number; method: string }
     ): Promise<{ completed: boolean }> {
       assertPlanWritable()
-      const db = useFirestore().getFirestoreInstance()
-      if (!db) throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
-
-      const authStore = useAuthStore()
-      if (!authStore.currentUser) throw new Error('User must be authenticated')
-
       const amount = roundMoney(Number(payment.amount))
       if (amount <= 0) throw new Error('Payment amount must be greater than zero')
-
-      const userId = await getQueryUserId()
-      if (!userId) throw new Error('User ID not available')
-
-      const { getCurrentStoreId } = await import('~/composables/useCurrentStore')
-      const storeId = await getCurrentStoreId()
-      if (!storeId) throw new Error('No store selected')
-
-      const receiptRef = getReceiptDocument(db, userId, storeId, receiptId)
-      const snap = await getDoc(receiptRef)
-      if (!snap.exists()) throw new Error('Receipt not found')
-
-      const data = snap.data() as Record<string, unknown>
-      if (data.status === 'completed') {
-        return { completed: true }
-      }
-      if (data.status !== 'balance_due') {
-        throw new Error('This receipt is not awaiting payment')
-      }
-
-      const total = Number(data.total) || 0
-      const prevPaid = typeof data.amountPaid === 'number' ? data.amountPaid : 0
-      const newPaid = roundMoney(prevPaid + amount)
-      const balanceDue = computeBalanceDue(total, newPaid)
-      if (newPaid > total + 0.01) {
-        throw new Error('Payment exceeds the amount owed')
-      }
-
-      const payments = normalizePayments(data.payments)
-      payments.push({
-        amount,
-        method: payment.method.trim() || 'Cash',
-        paidAt: new Date(),
-        recordedBy: authStore.currentUser.uid,
-      })
-      const paymentsPayload = paymentsForFirestore(payments)
-
-      let completed = false
-
-      if (isBalanceFullyPaid(total, newPaid)) {
-        await this.finalizeBalanceDueStock(receiptId, data, { log: false })
-
-        const paymentMethod =
-          payment.method.trim() || String(data.paymentMethod || '').trim() || 'Cash'
-        await updateDoc(receiptRef, {
-          status: 'completed',
-          amountPaid: newPaid,
-          balanceDue: 0,
-          payments: paymentsPayload,
-          paymentMethod,
-          updatedAt: serverTimestamp(),
-          completedAt: serverTimestamp(),
-        })
-        completed = true
-
-        await this.finalizeBalanceDueStock(receiptId, data, { stock: false })
-      } else {
-        await updateDoc(receiptRef, {
-          amountPaid: newPaid,
-          balanceDue,
-          payments: paymentsPayload,
-          updatedAt: serverTimestamp(),
-        })
-      }
+      const method = payment.method.trim() || 'Cash'
+      const { useSalesApi } = await import('~/composables/useSalesApi')
+      const result = await useSalesApi().recordBalancePayment(receiptId, amount, method)
 
       const index = this.receipts.findIndex((r) => r.id === receiptId)
       if (index > -1) {
         const existing = this.receipts[index]!
         this.receipts[index] = {
           ...existing,
-          amountPaid: newPaid,
-          balanceDue,
-          payments,
-          status: completed ? 'completed' : 'balance_due',
-          paymentMethod: completed
-            ? payment.method.trim() || existing.paymentMethod
-            : existing.paymentMethod,
+          amountPaid: result.amountPaid,
+          balanceDue: result.balanceDue,
+          payments: [
+            ...(existing.payments ?? []),
+            { amount, method, paidAt: new Date(), recordedBy: useAuthStore().currentUser?.uid },
+          ],
+          status: result.completed ? 'completed' : 'balance_due',
+          paymentMethod: result.completed ? method : existing.paymentMethod,
           updatedAt: new Date(),
         }
       }
       void useLoyalty().syncSale(receiptId)
-
-      return { completed }
+      return { completed: result.completed }
     },
 
-    /**
-     * Payments V2: the server closes the sale (and refuses while money is held or if it is
-     * already closed); only then is the reserved stock released.
-     */
+    /** Payments V2 sale: the server closes it (refusing while money is held) and frees its items. */
     async cancelBalanceDueReceiptV2(receiptId: string, reason: string): Promise<void> {
-      const db = useFirestore().getFirestoreInstance()
-      if (!db) throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
-      const userId = await getQueryUserId()
-      const { getCurrentStoreId } = await import('~/composables/useCurrentStore')
-      const storeId = await getCurrentStoreId()
-      if (!userId || !storeId) throw new Error('No store selected')
-
-      await usePaymentsV2().closeSale(receiptId, 'cancel', reason)
-      const snap = await getDoc(getReceiptDocument(db, userId, storeId, receiptId))
-      const data = (snap.data() ?? {}) as Record<string, unknown>
-      const itemIds = Array.isArray(data.itemIds) ? (data.itemIds as string[]) : []
-      if (itemIds.length > 0) {
-        await useInventoryStore().releaseInventoryReservation(receiptId, itemIds)
-      }
-      const index = this.receipts.findIndex((r) => r.id === receiptId)
-      if (index > -1) {
-        this.receipts[index] = {
-          ...this.receipts[index]!,
-          status: 'cancelled',
-          updatedAt: new Date(),
-        }
-      }
+      await this.cancelBalanceDueReceipt(receiptId, reason)
     },
 
-    async cancelBalanceDueReceipt(receiptId: string): Promise<void> {
+    /** Cancels an outstanding order; the server frees the items it was holding. */
+    async cancelBalanceDueReceipt(receiptId: string, reason = ''): Promise<void> {
       assertPlanWritable()
-      const db = useFirestore().getFirestoreInstance()
-      if (!db) throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
-
-      const authStore = useAuthStore()
-      if (!authStore.currentUser) throw new Error('User must be authenticated')
-
-      const userId = await getQueryUserId()
-      if (!userId) throw new Error('User ID not available')
-
-      const { getCurrentStoreId } = await import('~/composables/useCurrentStore')
-      const storeId = await getCurrentStoreId()
-      if (!storeId) throw new Error('No store selected')
-
-      const receiptRef = getReceiptDocument(db, userId, storeId, receiptId)
-      const snap = await getDoc(receiptRef)
-      if (!snap.exists()) throw new Error('Receipt not found')
-
-      const data = snap.data() as Record<string, unknown>
-      if (data.status !== 'balance_due') {
-        throw new Error('Only outstanding orders can be cancelled')
-      }
-
-      const itemIds = Array.isArray(data.itemIds) ? (data.itemIds as string[]) : []
-      if (itemIds.length > 0) {
-        await useInventoryStore().releaseInventoryReservation(receiptId, itemIds)
-      }
-
-      await updateDoc(receiptRef, {
-        status: 'cancelled',
-        balanceDue: 0,
-        updatedAt: serverTimestamp(),
-      })
-
+      const { useSalesApi } = await import('~/composables/useSalesApi')
+      await useSalesApi().cancelSale(receiptId, reason)
       const index = this.receipts.findIndex((r) => r.id === receiptId)
       if (index > -1) {
         this.receipts[index] = {
@@ -1018,7 +826,6 @@ export const useReceiptsStore = defineStore('receipts', {
         }
       }
     },
-
     // Mark a receipt's commission payable as settled: the owner, or a branch admin with the
     // delete-sales extra (commission fields aren't part of the narrower staff-grant allowlists).
     async markCommissionPaid(receiptId: string): Promise<void> {

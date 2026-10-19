@@ -1,27 +1,11 @@
 import { defineStore } from 'pinia'
 import { assertPlanWritable } from '~/utils/plan-view-only'
-import {
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  orderBy,
-  limit,
-  writeBatch,
-  serverTimestamp,
-  deleteField,
-} from 'firebase/firestore'
+import { getDocs, query, orderBy, limit } from 'firebase/firestore'
 
 import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from '~/stores/auth'
-import {
-  getQueryUserId,
-  getSellerLoanOutDocument,
-  getSellerLoanOutsCollection,
-  getInventoryItemDocument,
-} from '~/composables/useFirestorePaths'
+import { getQueryUserId, getSellerLoanOutsCollection } from '~/composables/useFirestorePaths'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
-import { logActivity, getCurrentUserDisplayName } from '~/composables/useActivityLog'
 import { invalidateFolderItemCaches } from '~/utils/inventory-items-firestore'
 
 /** Max writes per Firestore batch (loan doc + item updates stay in one batch). */
@@ -177,78 +161,25 @@ export const useSellerLoanOutsStore = defineStore('sellerLoanOuts', {
         return loanId
       }
 
-      const db = useFirestore().getFirestoreInstance()
-      const authStore = useAuthStore()
-      if (!db || !authStore.currentUser) {
-        throw new Error('Not authenticated')
-      }
-
-      const userId = await getQueryUserId()
-      const storeId = await getCurrentStoreId()
-      if (!userId || !storeId) {
-        throw new Error('No store selected')
-      }
-
       const name = params.partyName.trim()
-      if (!name) {
-        throw new Error('Seller or reseller name is required')
-      }
-      const phone = params.partyPhone.trim()
+      if (!name) throw new Error('Seller or reseller name is required')
       const lines = params.lines.filter((l) => l.inventoryItemId && l.folderId)
-      if (lines.length === 0) {
-        throw new Error('Select at least one product')
-      }
+      if (lines.length === 0) throw new Error('Select at least one product')
       if (lines.length > SELLER_LOAN_OUT_BATCH_CAP) {
         throw new Error(
           `A stock loan can include at most ${SELLER_LOAN_OUT_BATCH_CAP} items at once. Split into multiple loans.`
         )
       }
 
-      const folderIds = new Set(lines.map((l) => l.folderId))
-      const loanRef = doc(getSellerLoanOutsCollection(db, userId, storeId))
-      const loanId = loanRef.id
-      const nowPartyPhone = phone
-      const createdByUid = authStore.currentUser.uid
-
-      const batch = writeBatch(db)
-      batch.set(loanRef, {
-        storeId,
-        status: 'active',
+      // The server checks each item is in stock and free, and writes the loan and items together.
+      const { useSalesApi } = await import('~/composables/useSalesApi')
+      const { loanId } = await useSalesApi().createStockLoan({
         partyName: name,
-        partyPhone: nowPartyPhone,
+        partyPhone: params.partyPhone.trim(),
         partyNotes: (params.partyNotes || '').trim(),
-        lines,
-        createdBy: createdByUid,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
+        itemIds: lines.map((l) => l.inventoryItemId),
       })
-
-      for (const line of lines) {
-        const itemRef = getInventoryItemDocument(db, userId, storeId, line.inventoryItemId)
-        batch.update(itemRef, {
-          sellerLoanOutId: loanId,
-          sellerLoanPartyName: name,
-          sellerLoanPartyPhone: nowPartyPhone,
-          sellerLoanOutAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-        })
-      }
-
-      await batch.commit()
-
-      folderIds.forEach((fid) => invalidateFolderItemCaches(fid))
-
-      const userDisplayName = await getCurrentUserDisplayName().catch(() => 'Unknown')
-      await logActivity({
-        action: 'created',
-        entityType: 'items_batch',
-        entityId: loanId,
-        entityName: `Loaned ${lines.length} item(s) to ${name}`,
-        storeId,
-        userId: createdByUid,
-        userDisplayName,
-      }).catch(() => {})
-
+      new Set(lines.map((l) => l.folderId)).forEach((fid) => invalidateFolderItemCaches(fid))
       await this.fetchSellerLoanOuts(true)
       return loanId
     },
@@ -268,76 +199,12 @@ export const useSellerLoanOutsStore = defineStore('sellerLoanOuts', {
         return
       }
 
-      const db = useFirestore().getFirestoreInstance()
-      const authStore = useAuthStore()
-      if (!db || !authStore.currentUser) {
-        throw new Error('Not authenticated')
-      }
-
-      const userId = await getQueryUserId()
-      const storeId = await getCurrentStoreId()
-      if (!userId || !storeId) {
-        throw new Error('No store selected')
-      }
-
-      const loanSnap = await getDoc(getSellerLoanOutDocument(db, userId, storeId, loanId))
-      if (!loanSnap.exists()) {
-        throw new Error('Loan not found')
-      }
-      const loanData = loanSnap.data() as Record<string, unknown>
-      const status = loanData.status
-      if (status === 'returned') {
-        throw new Error('This loan was already marked as returned')
-      }
-      if (status === 'sold') {
-        throw new Error('This loan was already marked as sold')
-      }
-      const rawLines = Array.isArray(loanData.lines)
-        ? (loanData.lines as SellerLoanLineSnapshot[])
-        : []
-      if (rawLines.length > SELLER_LOAN_OUT_BATCH_CAP) {
-        throw new Error(
-          'This loan lists too many items to return in one operation. Contact support.'
-        )
-      }
-
-      const folderIds = new Set(rawLines.map((l) => l.folderId))
-
-      const batch = writeBatch(db)
-      const loanRef = getSellerLoanOutDocument(db, userId, storeId, loanId)
-      batch.update(loanRef, {
-        status: 'returned',
-        returnedAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      })
-
-      for (const line of rawLines) {
-        const itemRef = getInventoryItemDocument(db, userId, storeId, line.inventoryItemId)
-        batch.update(itemRef, {
-          sellerLoanOutId: deleteField(),
-          sellerLoanPartyName: deleteField(),
-          sellerLoanPartyPhone: deleteField(),
-          sellerLoanOutAt: deleteField(),
-          updatedAt: serverTimestamp(),
-        })
-      }
-
-      await batch.commit()
-
-      folderIds.forEach((fid) => invalidateFolderItemCaches(fid))
-
-      const userDisplayName = await getCurrentUserDisplayName().catch(() => 'Unknown')
-      const partyNameStr = typeof loanData.partyName === 'string' ? loanData.partyName : 'borrower'
-      await logActivity({
-        action: 'updated',
-        entityType: 'items_batch',
-        entityId: loanId,
-        entityName: `Returned stock loan from ${partyNameStr} (${rawLines.length} item(s))`,
-        storeId,
-        userId: authStore.currentUser.uid,
-        userDisplayName,
-      }).catch(() => {})
-
+      const loan = this.loans.find((l) => l.id === loanId)
+      const { useSalesApi } = await import('~/composables/useSalesApi')
+      await useSalesApi().returnStockLoan(loanId)
+      new Set(loan?.lines.map((l) => l.folderId) ?? []).forEach((fid) =>
+        invalidateFolderItemCaches(fid)
+      )
       await this.fetchSellerLoanOuts(true)
     },
 
@@ -357,78 +224,13 @@ export const useSellerLoanOutsStore = defineStore('sellerLoanOuts', {
         return
       }
 
-      const db = useFirestore().getFirestoreInstance()
-      const authStore = useAuthStore()
-      if (!db || !authStore.currentUser) {
-        throw new Error('Not authenticated')
-      }
-
-      const userId = await getQueryUserId()
-      const storeId = await getCurrentStoreId()
-      if (!userId || !storeId) {
-        throw new Error('No store selected')
-      }
-
-      const loanSnap = await getDoc(getSellerLoanOutDocument(db, userId, storeId, loanId))
-      if (!loanSnap.exists()) {
-        throw new Error('Loan not found')
-      }
-      const loanData = loanSnap.data() as Record<string, unknown>
-      if (loanData.status === 'returned') {
-        throw new Error('This loan was already returned to the store')
-      }
-      if (loanData.status === 'sold') {
-        throw new Error('This loan was already marked as sold')
-      }
-
-      const rawLines = Array.isArray(loanData.lines)
-        ? (loanData.lines as SellerLoanLineSnapshot[])
-        : []
-      if (rawLines.length === 0) {
-        throw new Error('This loan has no items to mark sold')
-      }
-      if (rawLines.length > SELLER_LOAN_OUT_BATCH_CAP) {
-        throw new Error('This loan lists too many items to update in one step. Contact support.')
-      }
-
-      const folderIds = new Set(rawLines.map((l) => l.folderId))
-      const now = new Date()
-      const loanRef = getSellerLoanOutDocument(db, userId, storeId, loanId)
-
-      const batch = writeBatch(db)
-      for (const line of rawLines) {
-        const itemRef = getInventoryItemDocument(db, userId, storeId, line.inventoryItemId)
-        batch.update(itemRef, {
-          dateOut: now,
-          sellerLoanOutId: deleteField(),
-          sellerLoanPartyName: deleteField(),
-          sellerLoanPartyPhone: deleteField(),
-          sellerLoanOutAt: deleteField(),
-          updatedAt: serverTimestamp(),
-        })
-      }
-      batch.update(loanRef, {
-        status: 'sold',
-        soldAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      })
-
-      await batch.commit()
-
-      folderIds.forEach((fid) => invalidateFolderItemCaches(fid))
-
-      const userDisplayName = await getCurrentUserDisplayName().catch(() => 'Unknown')
-      const partyNameStr = typeof loanData.partyName === 'string' ? loanData.partyName : 'borrower'
-      await logActivity({
-        action: 'updated',
-        entityType: 'items_batch',
-        entityId: loanId,
-        entityName: `Stock loan (${partyNameStr}): marked ${rawLines.length} item(s) sold, inventory updated`,
-        storeId,
-        userId: authStore.currentUser.uid,
-        userDisplayName,
-      }).catch(() => {})
-
+      // Owner or managers only: the items leave stock with no sale recorded here.
+      const loan = this.loans.find((l) => l.id === loanId)
+      const { useSalesApi } = await import('~/composables/useSalesApi')
+      await useSalesApi().markStockLoanSold(loanId)
+      new Set(loan?.lines.map((l) => l.folderId) ?? []).forEach((fid) =>
+        invalidateFolderItemCaches(fid)
+      )
       await this.fetchSellerLoanOuts(true)
     },
   },

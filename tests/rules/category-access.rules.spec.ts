@@ -134,13 +134,14 @@ describe('firestore.rules: category access for store members', () => {
     await assertFails(getDocs(swapIns('amaka')))
   })
 
-  it('still lets a member return a locked product to stock', async () => {
+  it('does not let a member without products access mark stock sold or unsold directly', async () => {
+    // Returns go through the refund route (POST /api/sales/refund), which moves the stock.
     await testEnv.withSecurityRulesDisabled(async (context) => {
       await updateDoc(doc(context.firestore(), `${STORE}/inventoryItems/iphone`), {
         dateOut: new Date('2026-10-01'),
       })
     })
-    await assertSucceeds(
+    await assertFails(
       updateDoc(doc(as('tunde'), `${STORE}/inventoryItems/iphone`), {
         dateOut: null,
         updatedAt: new Date(),

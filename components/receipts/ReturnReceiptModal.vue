@@ -117,6 +117,9 @@ import { useHaptics } from '~/composables/useHaptics'
 import { groupReceiptItemsByFolder, folderHasSerialNumbers } from '~/utils/receipt-multi-folder'
 import { koboToNaira } from '~/utils/money-kobo'
 import { isV2Sale } from '~/utils/payments-v2-tenders'
+import { useSalesApi } from '~/composables/useSalesApi'
+import { isDemoModeActive } from '~/utils/demo-mode'
+import { invalidateFolderItemCaches } from '~/utils/inventory-items-firestore'
 
 interface Props {
   modelValue: boolean
@@ -140,6 +143,7 @@ const confirmed = ref(false)
 const isProcessing = ref(false)
 
 const paymentsV2 = usePaymentsV2()
+const salesApi = useSalesApi()
 const v2 = computed(
   () => !!props.receipt && paymentsV2.access.value.enabled && isV2Sale(props.receipt)
 )
@@ -176,6 +180,37 @@ const handleCancel = () => {
   emit('update:modelValue', false)
 }
 
+/** Demo mode: put the stock back and mark the sale refunded on this device only. */
+async function refundLocally(receipt: Receipt) {
+  const grouped = groupReceiptItemsByFolder(receipt.items || [], receipt.folderId)
+  for (const [folderId, lines] of grouped) {
+    const itemIds = lines.map((line) => line.itemId).filter(Boolean)
+    if (itemIds.length === 0) continue
+    const folder =
+      inventoryStore.getFolderById(folderId) ?? (await inventoryStore.fetchFolder(folderId))
+    if (folderHasSerialNumbers(folder ?? undefined)) {
+      await inventoryStore.returnItemsToStock(itemIds)
+    } else {
+      const restoreQuantities: Record<string, number> = {}
+      for (const line of lines) {
+        if (line.itemId)
+          restoreQuantities[line.itemId] =
+            (restoreQuantities[line.itemId] ?? 0) + (line.quantity ?? 0)
+      }
+      await inventoryStore.returnItemsToStock(itemIds, {
+        folderId,
+        hasSerialNumbers: false,
+        restoreQuantities,
+      })
+    }
+  }
+  await receiptsStore.updateReceipt(receipt.id, {
+    status: 'refunded',
+    notes: returnReason.value ? `Returned: ${returnReason.value}` : 'Returned',
+    refundReason: returnReason.value || undefined,
+  })
+}
+
 const handleConfirmReturn = async () => {
   if (!props.receipt || !canSubmit.value) return
 
@@ -187,70 +222,26 @@ const handleConfirmReturn = async () => {
 
   try {
     const receipt = props.receipt
-    if (!v2.value && receipt.paymentSummary) {
-      throw new Error(
-        'This sale has Payments V2 records, which are switched off. Nothing was changed; try again once payments are back on.'
-      )
-    }
-    // V2: the server closes the sale first (it refuses if money is held or it is already
-    // closed), so stock is never returned twice. Money fields are locked to the client.
-    if (v2.value) {
-      try {
-        await paymentsV2.closeSale(receipt.id, 'refund', returnReason.value.trim())
-      } catch (err) {
-        throw new Error(paymentsErrorMessage(err, 'Could not close the sale'))
-      }
-    }
-    const receiptItems = receipt.items || []
-    const grouped = groupReceiptItemsByFolder(receiptItems, receipt.folderId)
-
-    if (grouped.size > 0) {
-      try {
-        for (const [folderId, lines] of grouped) {
-          const itemIds = lines.map((line) => line.itemId).filter(Boolean)
-          if (itemIds.length === 0) continue
-
-          let folder = inventoryStore.getFolderById(folderId)
-          if (!folder) {
-            folder = (await inventoryStore.fetchFolder(folderId)) ?? undefined
-          }
-          const hasSerialNumbers = folderHasSerialNumbers(folder)
-
-          if (!hasSerialNumbers) {
-            const restoreQuantities: Record<string, number> = {}
-            for (const line of lines) {
-              if (!line.itemId) continue
-              restoreQuantities[line.itemId] =
-                (restoreQuantities[line.itemId] ?? 0) + (line.quantity ?? 0)
-            }
-            await inventoryStore.returnItemsToStock(itemIds, {
-              folderId,
-              hasSerialNumbers: false,
-              restoreQuantities,
-            })
-          } else {
-            await inventoryStore.returnItemsToStock(itemIds)
-          }
+    if (isDemoModeActive()) {
+      await refundLocally(receipt)
+    } else {
+      // The server closes the sale (Payments V2 refuses while money is held) and returns the
+      // stock in the same step, once.
+      await salesApi.refundSale(receipt.id, returnReason.value.trim())
+      const index = receiptsStore.receipts.findIndex((r) => r.id === receipt.id)
+      if (index > -1) {
+        receiptsStore.receipts[index] = {
+          ...receiptsStore.receipts[index]!,
+          status: 'refunded',
+          refundReason: returnReason.value.trim() || undefined,
+          updatedAt: new Date(),
         }
-      } catch (error: any) {
-        console.error('[ReturnReceiptModal] Error returning items to stock:', error)
-        throw new Error(
-          v2.value
-            ? 'The sale is refunded, but the items could not be returned to inventory. Return them to stock manually.'
-            : 'Failed to return items to inventory. Please try again.'
-        )
       }
-    } else if (receipt.itemIds?.length) {
-      await inventoryStore.returnItemsToStock(receipt.itemIds)
-    }
-
-    // 2. Update receipt status to refunded and store reason
-    if (!v2.value) {
-      await receiptsStore.updateReceipt(receipt.id, {
-        status: 'refunded',
-        notes: returnReason.value ? `Returned: ${returnReason.value}` : 'Returned',
-        refundReason: returnReason.value || undefined,
-      })
+      for (const folderId of receipt.folderIds?.length ? receipt.folderIds : [receipt.folderId]) {
+        if (!folderId) continue
+        invalidateFolderItemCaches(folderId)
+        delete inventoryStore.items[folderId]
+      }
     }
 
     // 3. Update customer (if needed - this might be handled elsewhere)

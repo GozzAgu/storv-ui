@@ -1,17 +1,8 @@
 import { defineStore } from 'pinia'
 import { CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
-import {
-  doc,
-  getDoc,
-  getDocs,
-  setDoc,
-  updateDoc,
-  serverTimestamp,
-  arrayUnion,
-} from 'firebase/firestore'
+import { getDoc, getDocs } from 'firebase/firestore'
 import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from './auth'
-import { useUserStore } from './user'
 import {
   getCustomerAccountsCollection,
   getCustomerAccountDocument,
@@ -273,13 +264,7 @@ export const useCustomerAccountsStore = defineStore('customerAccounts', {
         storeId,
       }
 
-      await setDoc(ref, {
-        ...account,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-        createdBy: userId,
-      })
-
+      // Not saved yet: the server creates the account with its first balance entry.
       const created: CustomerAccount = { ...account, id: accountId }
       this.accountsByContactKey[contactKey] = created
       return created
@@ -324,54 +309,39 @@ export const useCustomerAccountsStore = defineStore('customerAccounts', {
         return account
       }
 
-      const authStore = useAuthStore()
-      if (!authStore.currentUser) throw new Error('Not authenticated')
-
-      const userId = (await getQueryUserId()) ?? authStore.currentUser.uid
-      const storeId = await getCurrentStoreId()
-      if (!storeId) throw new Error('No store selected')
-
-      const account = await this.ensureAccount({
+      // The server works out the balance, records who made the entry and creates the account
+      // if it is new; staff can no longer write balances directly.
+      const { useSalesApi } = await import('~/composables/useSalesApi')
+      const result = await useSalesApi().applyLedgerEntry({
         customerName,
         email: params.email,
         phone: params.phone,
-      })
-
-      const db = useFirestore().getFirestoreInstance()
-      if (!db) throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
-
-      const entryId = `le_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
-      const createdAt = new Date()
-      const entry = {
-        id: entryId,
-        type: params.type,
+        type: params.type === 'receipt' ? 'charge' : params.type,
         amount: params.amount,
-        note: params.note?.trim() || undefined,
-        receiptId: params.receiptId,
-        createdAt,
-        createdBy: userId,
-      }
-
-      const newBalance = Math.max(0, (account.accountBalance || 0) + params.amount)
-      const ledger = [entry, ...account.balanceLedger].slice(0, MAX_LEDGER_ENTRIES)
-
-      const ref = getCustomerAccountDocument(db, userId, storeId, account.id)
-      await updateDoc(ref, {
-        accountBalance: newBalance,
-        balanceLedger: arrayUnion(entry),
-        customerName,
-        email: params.email?.toLowerCase().trim() || account.email,
-        phone: params.phone?.trim() || account.phone,
-        updatedAt: serverTimestamp(),
+        note: params.note,
       })
-
+      const storeId = (await getCurrentStoreId()) ?? ''
+      const existing = this.accountsByContactKey[result.contactKey]
+      const entry: BalanceLedgerEntry = {
+        id: result.entry.id,
+        type: result.entry.type as BalanceLedgerEntryType,
+        amount: result.entry.amount,
+        note: result.entry.note,
+        createdAt: new Date(result.entry.createdAt),
+        createdBy: result.entry.createdBy,
+      }
       const updated: CustomerAccount = {
-        ...account,
-        accountBalance: newBalance,
-        balanceLedger: ledger,
+        id: result.id,
+        contactKey: result.contactKey,
+        customerName,
+        email: params.email?.toLowerCase().trim() || existing?.email,
+        phone: params.phone?.trim() || existing?.phone,
+        accountBalance: result.accountBalance,
+        balanceLedger: [entry, ...(existing?.balanceLedger ?? [])].slice(0, MAX_LEDGER_ENTRIES),
+        storeId,
         updatedAt: new Date(),
       }
-      this.accountsByContactKey[account.contactKey] = updated
+      this.accountsByContactKey[result.contactKey] = updated
       return updated
     },
   },

@@ -283,6 +283,8 @@
           </div>
         </SCard>
 
+        <ApprovalPinCard />
+
         <SCard
           title="Preferences"
           description="Theme, language, region, currency, and timezone."
@@ -1104,6 +1106,7 @@ import SSelect from '~/components/s/SSelect.vue'
 import SSkeleton from '~/components/s/SSkeleton.vue'
 import STextarea from '~/components/s/STextarea.vue'
 import TwoFactorSetup from '~/components/auth/TwoFactorSetup.vue'
+import ApprovalPinCard from '~/components/settings/ApprovalPinCard.vue'
 import { EMPTY_CELL } from '~/utils/ui-empty'
 import { SUBSCRIPTION_PLANS, resolveEffectiveSubscriptionPlan } from '~/types/subscription'
 import { getTrialSummary } from '~/utils/subscription-billing-ui'
