@@ -142,7 +142,7 @@ describe('getProxiedImageForUrl', () => {
     const result = await getProxiedImageForUrl(FIREBASE_URL)
     expect(result.contentType).toBe('image/png')
     expect(result.buffer.equals(PNG)).toBe(true)
-    const init = fetchMock.mock.calls[0][1] as RequestInit
+    const init = fetchMock.mock.calls[0]![1] as RequestInit
     expect(init.redirect).toBe('manual')
     expect(init.signal).toBeInstanceOf(AbortSignal)
   })

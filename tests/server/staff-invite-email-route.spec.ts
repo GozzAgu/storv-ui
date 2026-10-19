@@ -82,7 +82,7 @@ describe('POST /api/staff/send-invite-email', () => {
   it('sends to the saved email with names from saved records, ignoring the body', async () => {
     await handler(event)
     expect(m.sendCredentials).toHaveBeenCalledTimes(1)
-    expect(m.sendCredentials.mock.calls[0][0]).toMatchObject({
+    expect(m.sendCredentials.mock.calls[0]![0]).toMatchObject({
       toEmail: 'staff@example.com',
       staffName: 'Tunde Bello',
       businessName: 'Ada Phones',
@@ -100,7 +100,7 @@ describe('POST /api/staff/send-invite-email', () => {
   it('falls back to the owner name when there is no store name', async () => {
     m.docs['users/owner1'] = { name: 'Ada' }
     await handler(event)
-    expect(m.sendCredentials.mock.calls[0][0].businessName).toBe('Ada')
+    expect(m.sendCredentials.mock.calls[0]![0].businessName).toBe('Ada')
   })
 
   it('applies a per-account daily cap', async () => {
