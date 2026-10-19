@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { readMultipartFormData } from 'h3'
 import { getAdminAuth, getAdminStorageBucket } from '~/server/utils/firebase-admin'
+import { logServerError } from '~/server/utils/log-server-error'
 import {
   BILLING_BLOCKED_USER_MESSAGE,
   isBillingDelinquentMessage,
@@ -76,10 +77,9 @@ export default defineEventHandler(async (event) => {
         message: BILLING_BLOCKED_USER_MESSAGE,
       })
     }
-    throw createError({
-      statusCode: 502,
-      message: raw.length > 600 ? `${raw.slice(0, 600)}…` : raw,
-    })
+    // Storage errors can name the bucket, project or service account; keep them in the logs.
+    logServerError('storage/upload-account-logo', saveErr, { objectPath })
+    throw createError({ statusCode: 502, message: 'Could not save the image. Please try again.' })
   }
 
   const bucketName = bucket.name

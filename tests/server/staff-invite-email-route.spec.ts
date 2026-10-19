@@ -110,4 +110,19 @@ describe('POST /api/staff/send-invite-email', () => {
       expect.objectContaining({ uid: 'owner1', limit: 30, windowMs: 86_400_000 })
     )
   })
+
+  it('does not return Firebase or email provider error text', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    m.body = { ...m.body, mode: 'reset_link' }
+    m.resetLink.mockRejectedValueOnce(new Error('project storvv-prod: TOO_MANY_ATTEMPTS'))
+    const resetErr = await handler(event).catch((err) => err)
+    expect(resetErr.statusCode).toBe(502)
+    expect(resetErr.message).not.toContain('storvv-prod')
+
+    m.body = { ...m.body, mode: 'credentials' }
+    m.sendCredentials.mockRejectedValueOnce(new Error('from: noreply@secret-domain.com'))
+    const sendErr = await handler(event).catch((err) => err)
+    expect(sendErr.statusCode).toBe(502)
+    expect(sendErr.message).not.toContain('secret-domain')
+  })
 })

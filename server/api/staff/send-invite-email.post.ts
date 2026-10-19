@@ -185,11 +185,11 @@ export default defineEventHandler(async (event) => {
       try {
         resetLink = await generateStaffPasswordResetLink(staffEmail, appOrigin)
       } catch (err) {
-        const detail = err instanceof Error ? err.message : 'Firebase could not create a reset link'
-        console.error('[staff invite email] reset link', detail, err)
+        console.error('[staff invite email] reset link', err)
         throw createError({
           statusCode: 502,
-          message: `Could not create a password setup link (${detail}). Try emailing the temporary password instead.`,
+          message:
+            'Could not create a password setup link. Try emailing the temporary password instead.',
         })
       }
       await sendStaffResetLinkInviteEmail({
@@ -223,8 +223,11 @@ export default defineEventHandler(async (event) => {
     }
   } catch (err) {
     if (typeof err === 'object' && err !== null && 'statusCode' in err) throw err
-    const message = err instanceof Error ? err.message : 'Failed to send staff invite email'
-    console.error('[staff invite email]', message, err)
-    throw createError({ statusCode: 502, message })
+    // Firebase and Resend errors can name the project, sender domain or API details.
+    console.error('[staff invite email]', err)
+    throw createError({
+      statusCode: 502,
+      message: 'Could not send the invite email. Please try again later.',
+    })
   }
 })
