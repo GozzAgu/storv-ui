@@ -61,22 +61,37 @@
             <a
               :href="`#${cat.id}`"
               class="s-help__toc-link"
+              :aria-current="activeSection === cat.id ? 'true' : undefined"
               @click.prevent="scrollToSection(cat.id)"
             >
-              {{ cat.title }}
+              <span class="s-help__toc-text">{{ cat.title }}</span>
+              <span class="s-help__toc-count">{{ cat.articles.length }}</span>
             </a>
           </li>
         </ul>
       </nav>
 
       <div class="s-help__sections">
-        <SCard v-for="cat in filteredCategories" :id="cat.id" :key="cat.id" class="s-help__section">
+        <p v-if="trimmedSearch" class="s-help__results" role="status">
+          {{ resultCount }} {{ resultCount === 1 ? 'article' : 'articles' }} for “{{
+            trimmedSearch
+          }}”
+        </p>
+
+        <section
+          v-for="cat in filteredCategories"
+          :id="cat.id"
+          :key="cat.id"
+          class="s-help__section"
+          :aria-labelledby="`${cat.id}-title`"
+        >
           <header class="s-help__section-head">
             <span class="s-help__section-icon" aria-hidden="true">
-              <component :is="cat.webIcon" :size="20" :stroke-width="1.75" />
+              <component :is="cat.webIcon" :size="18" :stroke-width="1.75" />
             </span>
             <div class="s-help__section-text">
               <h2
+                :id="`${cat.id}-title`"
                 class="s-help__section-title"
                 v-html="highlightText(cat.title, trimmedSearch, WEB_MARK_CLASS)"
               />
@@ -95,25 +110,60 @@
             </SButton>
           </header>
 
-          <article v-for="(article, idx) in cat.articles" :key="idx" class="s-help__article">
-            <h3
-              class="s-help__article-title"
-              v-html="highlightText(article.title, trimmedSearch, WEB_MARK_CLASS)"
-            />
-            <p
-              v-for="(para, pIdx) in article.body"
-              :key="pIdx"
-              v-html="highlightText(para, trimmedSearch, WEB_MARK_CLASS)"
-            />
-            <ul v-if="article.bullets?.length">
-              <li
-                v-for="(b, bIdx) in article.bullets"
-                :key="bIdx"
-                v-html="highlightText(b, trimmedSearch, WEB_MARK_CLASS)"
-              />
-            </ul>
-          </article>
-        </SCard>
+          <div class="s-help__articles">
+            <article
+              v-for="(article, idx) in cat.articles"
+              :key="article.title"
+              class="s-help__article"
+              :data-open="isOpen(cat.id, idx) || undefined"
+            >
+              <h3 class="s-help__article-heading">
+                <button
+                  :id="articleId(cat.id, idx) + '-btn'"
+                  type="button"
+                  class="s-help__article-toggle"
+                  :aria-expanded="isOpen(cat.id, idx)"
+                  :aria-controls="articleId(cat.id, idx)"
+                  @click="toggleArticle(cat.id, idx)"
+                >
+                  <span
+                    class="s-help__article-title"
+                    v-html="highlightText(article.title, trimmedSearch, WEB_MARK_CLASS)"
+                  />
+                  <ChevronDown
+                    class="s-help__article-chevron"
+                    :size="18"
+                    :stroke-width="1.75"
+                    aria-hidden="true"
+                  />
+                </button>
+              </h3>
+              <div
+                v-show="isOpen(cat.id, idx)"
+                :id="articleId(cat.id, idx)"
+                class="s-help__article-body"
+                role="region"
+                :aria-labelledby="articleId(cat.id, idx) + '-btn'"
+              >
+                <p
+                  v-for="(para, pIdx) in article.body"
+                  :key="pIdx"
+                  v-html="highlightText(para, trimmedSearch, WEB_MARK_CLASS)"
+                />
+                <div v-if="article.bullets?.length" class="s-help__note">
+                  <p class="s-help__note-label">Good to know</p>
+                  <ul>
+                    <li
+                      v-for="(b, bIdx) in article.bullets"
+                      :key="bIdx"
+                      v-html="highlightText(b, trimmedSearch, WEB_MARK_CLASS)"
+                    />
+                  </ul>
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
       </div>
     </div>
   </div>
@@ -125,6 +175,7 @@ import {
   ArrowLeftRight,
   BarChart3,
   Building2,
+  ChevronDown,
   LayoutGrid,
   Megaphone,
   Package,
@@ -293,8 +344,67 @@ const filteredCategories = computed(() => {
     .filter((c): c is Category => c !== null)
 })
 
+const resultCount = computed(() =>
+  filteredCategories.value.reduce((sum, cat) => sum + cat.articles.length, 0)
+)
+
+/** Articles the reader expanded. While searching every match starts expanded instead. */
+const openArticles = ref(new Set<string>())
+const collapsedMatches = ref(new Set<string>())
+
+watch(trimmedSearch, () => {
+  collapsedMatches.value = new Set()
+})
+
+function articleId(catId: string, idx: number) {
+  return `${catId}-article-${idx}`
+}
+
+function isOpen(catId: string, idx: number) {
+  const id = articleId(catId, idx)
+  return trimmedSearch.value ? !collapsedMatches.value.has(id) : openArticles.value.has(id)
+}
+
+function toggleArticle(catId: string, idx: number) {
+  const id = articleId(catId, idx)
+  const target = trimmedSearch.value ? collapsedMatches : openArticles
+  const next = new Set(target.value)
+  if (next.has(id)) next.delete(id)
+  else next.add(id)
+  target.value = next
+}
+
+const activeSection = ref<string>(categories[0]?.id ?? '')
+let sectionObserver: IntersectionObserver | null = null
+
+function observeSections() {
+  sectionObserver?.disconnect()
+  if (!import.meta.client || !('IntersectionObserver' in window)) return
+  sectionObserver = new IntersectionObserver(
+    (entries) => {
+      const visible = entries
+        .filter((e) => e.isIntersecting)
+        .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
+      if (visible[0]) activeSection.value = visible[0].target.id
+    },
+    { rootMargin: '-96px 0px -60% 0px' }
+  )
+  for (const cat of filteredCategories.value) {
+    const el = document.getElementById(cat.id)
+    if (el) sectionObserver.observe(el)
+  }
+}
+
+watch(filteredCategories, () => {
+  activeSection.value = filteredCategories.value[0]?.id ?? ''
+  nextTick(observeSections)
+})
+
+onBeforeUnmount(() => sectionObserver?.disconnect())
+
 function scrollToSection(id: string) {
   if (!import.meta.client) return
+  activeSection.value = id
   router.replace({ hash: `#${id}` })
   nextTick(() => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -303,6 +413,7 @@ function scrollToSection(id: string) {
 
 onMounted(() => {
   if (!import.meta.client) return
+  observeSections()
   const h = window.location.hash
   if (h.length > 1) {
     const id = h.slice(1)
