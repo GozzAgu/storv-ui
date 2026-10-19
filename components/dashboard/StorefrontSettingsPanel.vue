@@ -352,9 +352,7 @@ import SSkeleton from '~/components/s/SSkeleton.vue'
 import STextarea from '~/components/s/STextarea.vue'
 import { useInventoryStore, type InventoryFolder } from '~/stores/inventory'
 import { useStorefrontStore, isStorefrontSlugTaken } from '~/stores/storefront'
-import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
-import { getQueryUserId } from '~/composables/useFirestorePaths'
 import {
   canAllowlistStorefrontField,
   suggestDefaultPublicFieldIds,
@@ -371,7 +369,6 @@ const props = defineProps<{ canEdit: boolean }>()
 
 const storefront = useStorefrontStore()
 const inventory = useInventoryStore()
-const authStore = useAuthStore()
 const userStore = useUserStore()
 const { loading, saving, syncing, analyticsError, pendingInquiryCount, viewsLast7Days } =
   storeToRefs(storefront)
@@ -511,8 +508,7 @@ async function onSave() {
   normalizeSlug()
   try {
     if (draft.value.enabled && draft.value.slug) {
-      const ownerUid = (await getQueryUserId()) ?? authStore.currentUser?.uid ?? ''
-      const taken = await isStorefrontSlugTaken(draft.value.slug, ownerUid)
+      const taken = await isStorefrontSlugTaken(draft.value.slug)
       if (taken) {
         error.value = 'That URL slug is already in use. Pick another.'
         return

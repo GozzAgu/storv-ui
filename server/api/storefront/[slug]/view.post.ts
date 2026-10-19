@@ -2,7 +2,8 @@ import { createError, defineEventHandler, getRouterParam, readBody } from 'h3'
 import { FieldValue } from 'firebase-admin/firestore'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
 import { assertRateLimit } from '~/server/utils/rate-limit'
-import type { StorefrontPublicProfile } from '~/types/storefront'
+import { isListingOfStore } from '~/server/utils/storefront-public-dto'
+import type { StorefrontPublicListing, StorefrontPublicProfile } from '~/types/storefront'
 
 /**
  * Aggregate public view ping (no PII). Increments store / product counters.
@@ -42,7 +43,9 @@ export default defineEventHandler(async (event) => {
       .collection('items')
       .doc(listingId)
       .get()
-    if (!listingSnap.exists || listingSnap.data()?.isListed !== true) {
+    const listing = listingSnap.data() as StorefrontPublicListing | undefined
+    // Only the storefront owner's own listings count toward its views.
+    if (!listing || listing.isListed !== true || !isListingOfStore(listing, ownerUid, storeId)) {
       throw createError({ statusCode: 404, message: 'Product not found' })
     }
   }
