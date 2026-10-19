@@ -136,6 +136,35 @@ describe('isDevPlanSwitcherAllowed', () => {
   it('refuses in production without the flag', () => {
     expect(isDevPlanSwitcherAllowed({ NODE_ENV: 'production' } as never)).toBe(false)
   })
+
+  it('refuses when the runtime-config Paystack key is live, even if env has a test key', () => {
+    expect(
+      isDevPlanSwitcherAllowed(
+        { NODE_ENV: 'development', PAYSTACK_SECRET_KEY: 'sk_test_abc' } as never,
+        'sk_live_from_runtime_config'
+      )
+    ).toBe(false)
+    expect(isDevPlanSwitcherAllowed({ NODE_ENV: 'development' } as never, 'sk_test_x')).toBe(true)
+  })
+
+  it('always refuses on Vercel production, flag or not', () => {
+    expect(
+      isDevPlanSwitcherAllowed({
+        VERCEL_ENV: 'production',
+        NUXT_PUBLIC_ALLOW_DEV_PLAN_SWITCHER: '1',
+        PAYSTACK_SECRET_KEY: 'sk_test_abc',
+      } as never)
+    ).toBe(false)
+    expect(
+      isDevPlanSwitcherAllowed({ VERCEL_ENV: 'production', NODE_ENV: 'development' } as never)
+    ).toBe(false)
+    expect(
+      isDevPlanSwitcherAllowed({
+        VERCEL_ENV: 'preview',
+        NUXT_PUBLIC_ALLOW_DEV_PLAN_SWITCHER: '1',
+      } as never)
+    ).toBe(true)
+  })
 })
 
 describe('legacy payment link guard', () => {

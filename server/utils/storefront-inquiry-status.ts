@@ -215,6 +215,7 @@ export async function applyStorefrontInquiryStatus(
       tx.update(listingRef, {
         availability: 'unavailable',
         reservationInquiryId: null,
+        reservedUntil: null,
         updatedAt: FieldValue.serverTimestamp(),
       })
       return
@@ -227,21 +228,32 @@ export async function applyStorefrontInquiryStatus(
     if (!holdsThis && inquiry.type !== 'reserve') return
 
     if (status === 'confirmed') {
-      if (listing.availability !== 'reserved' || listing.reservationInquiryId !== inquiryId) {
+      // A confirmed hold is the merchant's call, so it no longer lapses on its own.
+      if (
+        listing.availability !== 'reserved' ||
+        listing.reservationInquiryId !== inquiryId ||
+        listing.reservedUntil != null
+      ) {
         tx.update(listingRef, {
           availability: 'reserved',
           reservationInquiryId: inquiryId,
+          reservedUntil: null,
           updatedAt: FieldValue.serverTimestamp(),
         })
       }
       return
     }
 
-    // reject / cancel. release soft hold
-    if (listing.reservationInquiryId === inquiryId || listing.availability === 'reserved') {
+    // reject / cancel. release soft hold, but never one a newer request took after this one lapsed
+    const heldByOther = !!listing.reservationInquiryId && listing.reservationInquiryId !== inquiryId
+    if (
+      listing.reservationInquiryId === inquiryId ||
+      (listing.availability === 'reserved' && !heldByOther)
+    ) {
       tx.update(listingRef, {
         availability: 'available',
         reservationInquiryId: null,
+        reservedUntil: null,
         updatedAt: FieldValue.serverTimestamp(),
       })
     }

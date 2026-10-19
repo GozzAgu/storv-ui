@@ -1,0 +1,24 @@
+# Never upload credentials to Vercel
+*-firebase-adminsdk-*.json
+firebase-service-account.json
+secrets/
+.env
+.env.*
+!.env.example
+
+# Test output and local auth state
+playwright-report/
+test-results/
+tests/.auth/
+coverage/
+
+# Local logs and emulator data
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+.emulator-data/
+
+# Build output and native projects (not part of the web deploy)
+dist
+ios
+android

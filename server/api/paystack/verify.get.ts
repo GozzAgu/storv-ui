@@ -275,9 +275,10 @@ export default defineEventHandler(async (event) => {
   } catch (err: any) {
     if (err.statusCode) throw err
     console.error('Paystack verify error:', err)
+    // The raw error can carry Paystack or Firestore internals; the detail stays in the logs.
     throw createError({
       statusCode: 500,
-      message: err.message || 'Failed to verify payment',
+      message: 'Failed to verify payment. Please try again or contact support.',
     })
   }
 })

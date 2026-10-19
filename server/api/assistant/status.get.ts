@@ -1,10 +1,9 @@
 import { defineEventHandler } from 'h3'
-import { getGeminiModel, isGeminiAssistantConfigured } from '~/server/utils/gemini-config'
+import { isGeminiAssistantConfigured } from '~/server/utils/gemini-config'
 
-/** Public sanity check - returns whether chat can run (no secrets exposed). */
+/** Public sanity check - returns whether chat can run (no secrets or model details exposed). */
 export default defineEventHandler(() => {
   return {
     configured: isGeminiAssistantConfigured(),
-    model: getGeminiModel(),
   }
 })

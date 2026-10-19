@@ -1,8 +1,15 @@
 import { createError, defineEventHandler, getRouterParam, readBody } from 'h3'
-import { FieldValue } from 'firebase-admin/firestore'
+import { FieldValue, Timestamp } from 'firebase-admin/firestore'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
 import { assertRateLimit } from '~/server/utils/rate-limit'
 import { isListingOfStore } from '~/server/utils/storefront-public-dto'
+import {
+  countOpenReservations,
+  effectiveListingAvailability,
+  inquiryPhoneKey,
+  STOREFRONT_MAX_OPEN_RESERVATIONS_PER_PHONE,
+  STOREFRONT_RESERVATION_HOLD_MS,
+} from '~/server/utils/storefront-reservation'
 import { validateInquiryPayload } from '~/utils/storefront-inquiry'
 import type {
   StorefrontInquiry,
@@ -11,7 +18,8 @@ import type {
 } from '~/types/storefront'
 
 /**
- * Public guest contact / reserve. Soft-holds listing on reserve only.
+ * Public guest contact / reserve. Soft-holds listing on reserve only, for
+ * STOREFRONT_RESERVATION_HOLD_MS; one phone may hold a few open reservations per store.
  * Never mutates private inventory.
  */
 export default defineEventHandler(async (event) => {
@@ -20,7 +28,13 @@ export default defineEventHandler(async (event) => {
     .toLowerCase()
   if (!slug) throw createError({ statusCode: 400, message: 'Missing store slug' })
 
-  await assertRateLimit(event, { id: 'storefront-inquiry', limit: 8, windowMs: 60_000 })
+  // Reservations hold stock, so the limit must hold across instances (as checkout does).
+  await assertRateLimit(event, {
+    id: 'storefront-inquiry',
+    limit: 8,
+    windowMs: 60_000,
+    requireDistributed: true,
+  })
 
   const body = (await readBody(event)) || {}
   const validated = validateInquiryPayload(body)
@@ -59,15 +73,18 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 500, message: 'Storefront is misconfigured' })
   }
 
-  const inquiryRef = adminDb
+  const inquiriesCol = adminDb
     .collection('users')
     .doc(ownerUid)
     .collection('stores')
     .doc(storeId)
     .collection('storefrontInquiries')
-    .doc()
+  const inquiryRef = inquiriesCol.doc()
+  const phoneKey = inquiryPhoneKey(customerPhone)
 
   await adminDb.runTransaction(async (tx) => {
+    const nowMs = Date.now()
+    const reservedUntil = Timestamp.fromMillis(nowMs + STOREFRONT_RESERVATION_HOLD_MS)
     const listingSnap = await tx.get(listingRef)
     if (!listingSnap.exists) {
       throw createError({ statusCode: 404, message: 'Product not found' })
@@ -78,13 +95,25 @@ export default defineEventHandler(async (event) => {
     }
 
     if (type === 'reserve') {
-      if (listing.availability !== 'available') {
+      const availability = effectiveListingAvailability(listing, nowMs)
+      if (availability !== 'available') {
         throw createError({
           statusCode: 409,
           message:
-            listing.availability === 'reserved'
+            availability === 'reserved'
               ? 'This item is already reserved.'
               : 'This item is not available to reserve.',
+        })
+      }
+      const mine = await tx.get(inquiriesCol.where('customerPhoneKey', '==', phoneKey).limit(100))
+      const open = countOpenReservations(
+        mine.docs.map((d) => d.data() as StorefrontInquiry),
+        nowMs
+      )
+      if (open >= STOREFRONT_MAX_OPEN_RESERVATIONS_PER_PHONE) {
+        throw createError({
+          statusCode: 429,
+          message: 'You already have several items reserved here. Contact the shop instead.',
         })
       }
     }
@@ -95,6 +124,7 @@ export default defineEventHandler(async (event) => {
       status: 'pending',
       customerName,
       customerPhone,
+      customerPhoneKey: phoneKey,
       customerNote,
       listingId: listing.id,
       listingTitle: listing.title,
@@ -104,6 +134,7 @@ export default defineEventHandler(async (event) => {
       storefrontSlug: slug,
       storeId,
       ownerUid,
+      ...(type === 'reserve' ? { reservedUntil } : {}),
       createdAt: FieldValue.serverTimestamp() as unknown as StorefrontInquiry['createdAt'],
       updatedAt: FieldValue.serverTimestamp() as unknown as StorefrontInquiry['updatedAt'],
     }
@@ -114,6 +145,7 @@ export default defineEventHandler(async (event) => {
       tx.update(listingRef, {
         availability: 'reserved',
         reservationInquiryId: inquiryRef.id,
+        reservedUntil,
         updatedAt: FieldValue.serverTimestamp(),
       })
     }
