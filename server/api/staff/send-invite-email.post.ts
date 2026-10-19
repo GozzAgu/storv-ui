@@ -109,6 +109,7 @@ export default defineEventHandler(async (event) => {
       name?: string
       authUid?: string
       createdBy?: string
+      createdAt?: unknown
       status?: string
       admin?: boolean
     }
@@ -205,7 +206,12 @@ export default defineEventHandler(async (event) => {
     if (authUid) {
       try {
         const adminAuth = getAdminAuth()
-        if (await assertStaffLoginTarget(adminDb, adminAuth, authUid, staff.email)) {
+        if (
+          await assertStaffLoginTarget(adminDb, adminAuth, authUid, staff.email, {
+            ownerUserId,
+            staffCreatedAt: staff.createdAt,
+          })
+        ) {
           await adminAuth.updateUser(authUid, { emailVerified: true })
         }
       } catch (err) {

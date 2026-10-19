@@ -3,6 +3,7 @@ import { getAdminFirestore } from '~/server/utils/firebase-admin'
 import { rethrowFirebaseAdminSetupError } from '~/server/utils/firebase-admin-errors'
 import { requireAuth } from '~/server/utils/store-auth'
 import {
+  findStaffDocForLogin,
   pickOwnerWorkspaceFields,
   resolveStaffWorkspaceOwnerId,
 } from '~/server/utils/staff-workspace'
@@ -10,10 +11,6 @@ import { resolveStaffPlanViewOnly } from '~/server/utils/plan-access'
 import type { SubscriptionPlan } from '~/types/subscription'
 import type { PlanViewOnlyReason } from '~/utils/plan-access'
 import type { SubscriptionBillingCycle } from '~/types/subscription-billing'
-
-function isActiveStaffStatus(status: unknown): boolean {
-  return (status || 'active') === 'active'
-}
 
 /**
  * Staff accounts do not have a top-level users/{uid} doc and cannot read the
@@ -31,13 +28,7 @@ export default defineEventHandler(async (event) => {
     rethrowFirebaseAdminSetupError(err, 'load')
   }
 
-  const staffSnap = await adminDb
-    .collectionGroup('staff')
-    .where('authUid', '==', auth.uid)
-    .limit(5)
-    .get()
-
-  const activeStaffDoc = staffSnap.docs.find((d) => isActiveStaffStatus(d.data()?.status))
+  const activeStaffDoc = await findStaffDocForLogin(adminDb, auth.decoded)
   if (!activeStaffDoc) {
     throw createError({
       statusCode: 403,

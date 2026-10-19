@@ -28,7 +28,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 401, message: 'Invalid verification code' })
   }
 
-  await setTwoFactorVerifiedClaim(auth.uid)
+  await setTwoFactorVerifiedClaim(auth.uid, auth.authTime)
 
   return { success: true }
 })

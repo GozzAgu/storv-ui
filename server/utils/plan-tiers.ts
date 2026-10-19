@@ -1,4 +1,4 @@
-import type { DocumentReference, Firestore } from 'firebase-admin/firestore'
+import { FieldValue, type DocumentReference, type Firestore } from 'firebase-admin/firestore'
 import { storeCreatedAtMillis } from '~/types/subscription'
 import { fullAccessOrder, planTierForPosition } from '~/utils/plan-access'
 import { loadActiveStoreStaff } from '~/server/utils/plan-access'
@@ -27,6 +27,7 @@ export async function syncPlanTiers(
   )
 
   const updates: Array<{ ref: DocumentReference; planTier: number }> = []
+  const creates: Array<{ ref: DocumentReference; data: Record<string, unknown> }> = []
   let storesUpdated = 0
   let membersUpdated = 0
 
@@ -47,15 +48,43 @@ export async function syncPlanTiers(
       staff,
       storeDoc.data().fullAccessStaffIds
     ).entries()) {
-      const authUid = staffById.get(staffId)?.authUid
+      const staffMember = staffById.get(staffId)
+      const authUid = staffMember?.authUid
       const memberDoc = authUid ? members.get(authUid) : undefined
-      if (!memberDoc) continue
       const tier = planTierForPosition(position, 'staff')
+      if (!memberDoc) {
+        // Active staff with a login but no membership: create it here (clients can't write
+        // memberships, so they can't add staff beyond the plan either).
+        if (authUid && staffMember) {
+          creates.push({
+            ref: storeDoc.ref.collection('members').doc(authUid),
+            data: await memberFromStaff(storeDoc.ref, ownerId, storeDoc.id, staffMember, tier),
+          })
+          creates.push({
+            ref: db.collection('users').doc(ownerId).collection('workspaceMembers').doc(authUid),
+            data: {
+              authUid,
+              storeId: storeDoc.id,
+              status: 'active',
+              updatedAt: FieldValue.serverTimestamp(),
+            },
+          })
+          membersUpdated++
+        }
+        continue
+      }
       if (memberDoc.data().planTier !== tier) {
         updates.push({ ref: memberDoc.ref, planTier: tier })
         membersUpdated++
       }
     }
+  }
+
+  for (let i = 0; i < creates.length; i += BATCH_LIMIT) {
+    const batch = db.batch()
+    for (const { ref, data } of creates.slice(i, i + BATCH_LIMIT))
+      batch.set(ref, data, { merge: true })
+    await batch.commit()
   }
 
   for (let i = 0; i < updates.length; i += BATCH_LIMIT) {
@@ -66,6 +95,40 @@ export async function syncPlanTiers(
     await batch.commit()
   }
   return { storesUpdated, membersUpdated }
+}
+
+/** Membership for an active staff login, from their staff record (as the staff routes write it). */
+async function memberFromStaff(
+  store: DocumentReference,
+  ownerId: string,
+  storeId: string,
+  staff: { id: string; departmentId: string; authUid?: string },
+  planTier: number
+): Promise<Record<string, unknown>> {
+  const snap = await store
+    .collection('departments')
+    .doc(staff.departmentId)
+    .collection('staff')
+    .doc(staff.id)
+    .get()
+  const data = snap.data() ?? {}
+  return {
+    authUid: staff.authUid,
+    staffId: staff.id,
+    storeId,
+    departmentId: staff.departmentId,
+    status: 'active',
+    ...(data.permissions
+      ? { permissions: data.permissions }
+      : {
+          role: data.role || 'staff',
+          ...(data.canManageInventory === true && { canManageInventory: true }),
+          ...(data.canManageReceipts === true && { canManageReceipts: true }),
+        }),
+    createdBy: ownerId,
+    planTier,
+    updatedAt: FieldValue.serverTimestamp(),
+  }
 }
 
 /** After a staff change: a failed refresh must not fail the change itself. */

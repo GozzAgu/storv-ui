@@ -54,42 +54,90 @@ function fakeDb(userDocs: Record<string, boolean>) {
   } as never
 }
 
-function fakeAuth(users: Record<string, string>) {
+const LOGIN_CREATED = '2026-10-01T10:00:00.000Z'
+
+function fakeAuth(users: Record<string, { email: string; owner?: string }>) {
+  const claims = new Map<string, Record<string, unknown>>()
   return {
+    stamped: claims,
     getUser: async (uid: string) => {
       if (!(uid in users))
         throw Object.assign(new Error('missing'), { code: 'auth/user-not-found' })
-      return { email: users[uid] }
+      const user = users[uid]!
+      return {
+        email: user.email,
+        customClaims: claims.get(uid) ?? (user.owner ? { staffOwner: user.owner } : {}),
+        metadata: { creationTime: LOGIN_CREATED },
+      }
     },
-  } as never
+    setCustomUserClaims: async (uid: string, value: Record<string, unknown>) => {
+      claims.set(uid, value)
+    },
+  }
 }
 
 describe('staff routes only act on the owner’s staff logins', () => {
-  const auth = fakeAuth({ staff1: 'Ada@Shop.com', owner2: 'boss@other.com' })
+  const sameTime = { ownerUserId: 'owner1', staffCreatedAt: new Date(LOGIN_CREATED) }
 
-  it('allows a staff login whose email matches the record', async () => {
+  it('allows a staff login created for this business', async () => {
+    const auth = fakeAuth({ staff1: { email: 'Ada@Shop.com', owner: 'owner1' } })
     await expect(
-      assertStaffLoginTarget(fakeDb({}), auth, 'staff1', ' ada@shop.com ')
+      assertStaffLoginTarget(fakeDb({}), auth as never, 'staff1', ' ada@shop.com ', sameTime)
     ).resolves.toBe(true)
   })
 
-  it('refuses a business owner account', async () => {
+  it('refuses another business’s staff login even when the email matches', async () => {
+    const auth = fakeAuth({ staff1: { email: 'ada@shop.com', owner: 'owner2' } })
     await expect(
-      assertStaffLoginTarget(fakeDb({ owner2: true }), auth, 'owner2', 'boss@other.com')
+      assertStaffLoginTarget(fakeDb({}), auth as never, 'staff1', 'ada@shop.com', sameTime)
+    ).rejects.toMatchObject({ statusCode: 403 })
+  })
+
+  it('accepts an older login made with this staff record, and records its business', async () => {
+    const auth = fakeAuth({ staff1: { email: 'ada@shop.com' } })
+    await expect(
+      assertStaffLoginTarget(fakeDb({}), auth as never, 'staff1', 'ada@shop.com', sameTime)
+    ).resolves.toBe(true)
+    expect(auth.stamped.get('staff1')).toMatchObject({ staffOwner: 'owner1' })
+  })
+
+  it('refuses an older login a staff record was pointed at later', async () => {
+    const auth = fakeAuth({ staff1: { email: 'ada@shop.com' } })
+    await expect(
+      assertStaffLoginTarget(fakeDb({}), auth as never, 'staff1', 'ada@shop.com', {
+        ownerUserId: 'owner1',
+        staffCreatedAt: new Date('2026-10-05T10:00:00.000Z'),
+      })
+    ).rejects.toMatchObject({ statusCode: 403 })
+  })
+
+  it('refuses a business owner account', async () => {
+    const auth = fakeAuth({ owner2: { email: 'boss@other.com' } })
+    await expect(
+      assertStaffLoginTarget(
+        fakeDb({ owner2: true }),
+        auth as never,
+        'owner2',
+        'boss@other.com',
+        sameTime
+      )
     ).rejects.toMatchObject({ statusCode: 403 })
   })
 
   it('refuses a login whose email differs from the staff record', async () => {
+    const auth = fakeAuth({ staff1: { email: 'ada@shop.com', owner: 'owner1' } })
     await expect(
-      assertStaffLoginTarget(fakeDb({}), auth, 'staff1', 'someone@else.com')
+      assertStaffLoginTarget(fakeDb({}), auth as never, 'staff1', 'someone@else.com', sameTime)
     ).rejects.toMatchObject({ statusCode: 403 })
     await expect(
-      assertStaffLoginTarget(fakeDb({}), auth, 'staff1', undefined)
+      assertStaffLoginTarget(fakeDb({}), auth as never, 'staff1', undefined, sameTime)
     ).rejects.toMatchObject({ statusCode: 403 })
   })
 
   it('reports a login that no longer exists', async () => {
-    await expect(assertStaffLoginTarget(fakeDb({}), auth, 'gone', 'x@y.com')).resolves.toBe(false)
+    await expect(
+      assertStaffLoginTarget(fakeDb({}), fakeAuth({}) as never, 'gone', 'x@y.com', sameTime)
+    ).resolves.toBe(false)
   })
 })
 
