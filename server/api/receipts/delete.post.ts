@@ -1,11 +1,12 @@
 import { createError, defineEventHandler, readBody } from 'h3'
-import { FieldValue } from 'firebase-admin/firestore'
+import { FieldValue, type DocumentReference } from 'firebase-admin/firestore'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
 import { requireAuth } from '~/server/utils/store-auth'
 import { requireStoreAdminGrant } from '~/server/utils/staff-admin'
 import {
   computeCustomerAfterReceiptDelete,
   receiptDeleteBlockReason,
+  receiptDeleteStockAction,
 } from '~/server/utils/receipt-delete'
 import { syncLoyaltyBestEffort } from '~/server/utils/loyalty/sync'
 import { resolveBulkStockFieldAndValueFromMap } from '~/utils/inventory-bulk-quantity'
@@ -53,6 +54,7 @@ export default defineEventHandler(async (event) => {
       total?: number
       createdBy?: string
       storeId?: string
+      status?: string
       paymentSummary?: unknown
       tradeLoanId?: unknown
     }
@@ -102,40 +104,58 @@ export default defineEventHandler(async (event) => {
         .doc(storeId)
         .collection('inventoryFolders')
 
-    for (const [folderId, lines] of linesByFolder) {
-      const folderSnap = await tx.get(foldersCol().doc(folderId))
-      const folderData = folderSnap.exists
-        ? (folderSnap.data() as Record<string, unknown>)
-        : undefined
-      const usesSerialNumbers = !!(folderData as { hasSerialNumbers?: boolean } | undefined)
-        ?.hasSerialNumbers
-      const templateFields = (
-        folderData as { template?: { fields?: Array<{ name?: string }> } } | undefined
-      )?.template?.fields
+    // Firestore transactions must do every read before the first write.
+    const stockAction = receiptDeleteStockAction(receipt.status)
+    const itemWrites: Array<{
+      ref: DocumentReference
+      data: Record<string, unknown>
+    }> = []
 
-      if (!usesSerialNumbers) {
+    if (stockAction !== 'none') {
+      for (const [folderId, lines] of linesByFolder) {
+        const folderSnap = await tx.get(foldersCol().doc(folderId))
+        const folderData = folderSnap.exists
+          ? (folderSnap.data() as {
+              hasSerialNumbers?: boolean
+              template?: { fields?: Array<{ name?: string }> }
+            })
+          : undefined
+        const usesSerialNumbers = !!folderData?.hasSerialNumbers
+        const templateFields = folderData?.template?.fields
+
         for (const line of lines) {
           const itemRef = inventoryItemsCol().doc(line.itemId)
           const itemSnap = await tx.get(itemRef)
           if (!itemSnap.exists) continue
           const raw = itemSnap.data() as Record<string, unknown>
-          const resolved = resolveBulkStockFieldAndValueFromMap(raw, templateFields)
-          if (!resolved) continue
-          tx.update(itemRef, {
-            [resolved.fieldKey]: resolved.value + line.quantity,
-            dateOut: FieldValue.delete(),
-            updatedAt: FieldValue.serverTimestamp(),
-          })
-        }
-      } else {
-        for (const line of lines) {
-          const itemRef = inventoryItemsCol().doc(line.itemId)
-          const itemSnap = await tx.get(itemRef)
-          if (!itemSnap.exists) continue
-          tx.update(itemRef, {
-            dateOut: FieldValue.delete(),
-            updatedAt: FieldValue.serverTimestamp(),
-          })
+
+          if (stockAction === 'release_hold') {
+            if (`${raw.pendingSaleReceiptId || ''}` !== receiptId) continue
+            itemWrites.push({
+              ref: itemRef,
+              data: {
+                pendingSaleReceiptId: FieldValue.delete(),
+                pendingSaleAt: FieldValue.delete(),
+                updatedAt: FieldValue.serverTimestamp(),
+              },
+            })
+          } else if (usesSerialNumbers) {
+            itemWrites.push({
+              ref: itemRef,
+              data: { dateOut: FieldValue.delete(), updatedAt: FieldValue.serverTimestamp() },
+            })
+          } else {
+            const resolved = resolveBulkStockFieldAndValueFromMap(raw, templateFields)
+            if (!resolved) continue
+            itemWrites.push({
+              ref: itemRef,
+              data: {
+                [resolved.fieldKey]: resolved.value + line.quantity,
+                dateOut: FieldValue.delete(),
+                updatedAt: FieldValue.serverTimestamp(),
+              },
+            })
+          }
         }
       }
     }
@@ -148,8 +168,10 @@ export default defineEventHandler(async (event) => {
       .collection('customers')
       .where('receipts', 'array-contains', receiptId)
       .limit(1)
-
     const customersSnap = await tx.get(customersQuery)
+
+    for (const write of itemWrites) tx.update(write.ref, write.data)
+
     if (!customersSnap.empty && customersSnap.docs[0]) {
       const customerDoc = customersSnap.docs[0]
       const customerData = customerDoc.data() as {

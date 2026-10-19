@@ -12,6 +12,22 @@ export interface CustomerTotalsResult {
 }
 
 /**
+ * What deleting a sale does to its stock. Only a completed sale took stock out, so only it puts
+ * stock back. A balance-due sale only holds its items (pendingSaleReceiptId), so the hold is
+ * released. Refunded and cancelled sales already returned their stock: restoring again would
+ * create units that don't exist.
+ */
+export type ReceiptDeleteStockAction = 'restore' | 'release_hold' | 'none'
+
+export function receiptDeleteStockAction(status: unknown): ReceiptDeleteStockAction {
+  if (status === undefined || status === null || status === '' || status === 'completed') {
+    return 'restore'
+  }
+  if (status === 'balance_due') return 'release_hold'
+  return 'none'
+}
+
+/**
  * Why a sale can't be deleted, or null if it can. Matches firestore.rules: a sale with payments
  * recorded against it keeps its audit trail, and a partner-loan sale belongs to the loan.
  */
