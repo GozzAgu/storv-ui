@@ -96,6 +96,27 @@ describe('decideTrialStart (server)', () => {
     expect(decideTrialStart({ ...owner, role: 'staff' }, now).start).toBe(false)
     expect(decideTrialStart(undefined, now).start).toBe(false)
   })
+
+  it('goes by the sign-up date, so recreating the account doc does not restart the trial', () => {
+    const recreated = { role: 'superAdmin', createdAt: new Date(now) }
+    expect(decideTrialStart(recreated, now, undefined, now - 120 * DAY)).toEqual({
+      start: false,
+      reason: 'too_old',
+    })
+  })
+
+  it('starts the trial when the login itself is new', () => {
+    expect(decideTrialStart(owner, now, undefined, now - DAY)).toEqual({
+      start: true,
+      trialEndsAtMs: now + 90 * DAY,
+    })
+  })
+
+  it('uses the sign-up date while the doc timestamp is still pending', () => {
+    const pending = { role: 'superAdmin', createdAt: null }
+    expect(decideTrialStart(pending, now, undefined, now - DAY).start).toBe(true)
+    expect(decideTrialStart(pending, now, undefined, now - 30 * DAY).start).toBe(false)
+  })
 })
 
 describe('shouldRequestTrial (app)', () => {

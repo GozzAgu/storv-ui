@@ -449,7 +449,9 @@ service cloud.firestore {
     function userSelfServiceCreateValuesAllowed() {
       let data = request.resource.data;
       return data.get('role', 'superAdmin') == 'superAdmin'
-        && data.get('subscription', 'storvv_micro') == 'storvv_micro';
+        && data.get('subscription', 'storvv_micro') == 'storvv_micro'
+        // createdAt must be the server's clock: the trial is offered to young accounts only.
+        && data.get('createdAt', request.time) == request.time;
     }
 
     function userSelfServiceUpdateAllowed() {
@@ -490,7 +492,9 @@ service cloud.firestore {
       
       allow update: if isOwner(userId) && userSelfServiceUpdateAllowed();
       
-      allow delete: if isOwner(userId);
+      // Never from the client: deleting and recreating the doc would clear trialEndsAt and
+      // reset createdAt, granting a fresh free trial. Account removal goes through the server.
+      allow delete: if false;
 
       match /workspaceMembers/{memberUid} {
         allow read: if isOwner(userId) || (isAuthenticated() && request.auth.uid == memberUid);

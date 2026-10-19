@@ -1,6 +1,6 @@
 import { defineEventHandler } from 'h3'
 import { Timestamp } from 'firebase-admin/firestore'
-import { getAdminFirestore } from '~/server/utils/firebase-admin'
+import { getAdminAuth, getAdminFirestore } from '~/server/utils/firebase-admin'
 import { rethrowFirebaseAdminSetupError } from '~/server/utils/firebase-admin-errors'
 import { decideTrialStart } from '~/server/utils/account-trial'
 import { requireAuth } from '~/server/utils/store-auth'
@@ -20,11 +20,23 @@ export default defineEventHandler(async (event) => {
     rethrowFirebaseAdminSetupError(err, 'load')
   }
 
+  // When the login was created, which the owner can't change (unlike their users/{uid} doc).
+  let signedUpAtMs: number | null = null
+  try {
+    const created = Date.parse((await getAdminAuth().getUser(auth.uid)).metadata.creationTime)
+    signedUpAtMs = Number.isFinite(created) ? created : null
+  } catch (err) {
+    rethrowFirebaseAdminSetupError(err, 'load')
+  }
+  if (signedUpAtMs === null) {
+    return { started: false, reason: 'too_old', trialEndsAt: null }
+  }
+
   const ref = db.collection('users').doc(auth.uid)
   return db.runTransaction(async (tx) => {
     const snap = await tx.get(ref)
     const data = snap.data()
-    const decision = decideTrialStart(data, Date.now())
+    const decision = decideTrialStart(data, Date.now(), undefined, signedUpAtMs)
     if (!decision.start) {
       const existing = trialEndsAtMs(data?.trialEndsAt)
       return {
