@@ -1,6 +1,6 @@
 <template>
   <section
-    id="features-live"
+    id="product"
     ref="sectionRef"
     class="mk-section mkb"
     :data-live="live ? '' : undefined"
@@ -9,82 +9,44 @@
     <div class="mk-container">
       <MkSectionHead
         title-id="mkb-title"
-        eyebrow="One workspace"
-        title="Your whole shop."
-        accent="Live."
-      />
+        eyebrow="Core capabilities"
+        title="Built for the way you sell."
+        accent="Trade-ins, part payments and all."
+      >
+        <NuxtLink to="/features" class="mk-link mkb__more">
+          See every feature
+          <ArrowRight :size="16" aria-hidden="true" />
+        </NuxtLink>
+      </MkSectionHead>
 
-      <div class="mkb__grid">
-        <article class="mkb__card mk-reveal" style="--i: 0">
-          <div class="mkb__ui mkb-inv" aria-hidden="true">
-            <div
-              v-for="(item, i) in stock"
-              :key="item.name"
-              class="mkb-inv__row"
-              :class="{ 'is-hit': hitIndex === i }"
-            >
-              <span class="mkb-inv__name">
-                <span class="mkb-inv__thumb" :style="{ '--hue': item.hue }" />{{ item.name }}
-              </span>
-              <span class="mkb-inv__qty">
-                <span v-if="item.qty <= 3" class="mkb__chip mkb__chip--warning">Low</span>
-                <span class="mkh__stack">
-                  <Transition name="mkb-num">
-                    <span :key="item.qty">{{ item.qty }}</span>
-                  </Transition>
-                </span>
-              </span>
+      <ul class="mkb__grid">
+        <li class="mkb__card mk-reveal" style="--i: 0">
+          <div class="mkb__ui mkb-off" aria-hidden="true">
+            <div class="mkb-off__status" :class="{ 'is-online': online }">
+              <component :is="online ? Wifi : WifiOff" :size="16" />
+              {{ online ? 'Back online · 3 sales synced' : 'Offline · 3 sales saved here' }}
             </div>
-          </div>
-          <div class="mkb__body">
-            <span class="mkb__tag"><Boxes :size="14" aria-hidden="true" />Stock</span>
-            <h3 class="mkb__title">Real-time inventory</h3>
-          </div>
-        </article>
-
-        <article class="mkb__card mk-reveal" style="--i: 1">
-          <div class="mkb__ui mkb-net" aria-hidden="true">
-            <svg viewBox="0 0 280 150" class="mkb-net__svg" focusable="false">
-              <path class="mkb-net__path" d="M140 75 L44 32" />
-              <path class="mkb-net__path" d="M140 75 L236 32" />
-              <path class="mkb-net__path" d="M140 75 L140 132" />
-              <path class="mkb-net__flow" d="M140 75 L44 32" />
-              <path class="mkb-net__flow mkb-net__flow--b" d="M236 32 L140 75" />
-              <path class="mkb-net__flow mkb-net__flow--c" d="M140 75 L140 132" />
-            </svg>
-            <span class="mkb-net__hub"><Store :size="16" /></span>
-            <span class="mkb-net__node mkb-net__node--a">Ikeja</span>
-            <span class="mkb-net__node mkb-net__node--b">Lekki</span>
-            <span class="mkb-net__node mkb-net__node--c">Abuja</span>
-          </div>
-          <div class="mkb__body">
-            <span class="mkb__tag"><GitBranch :size="14" aria-hidden="true" />Stock</span>
-            <h3 class="mkb__title">Every branch, in sync</h3>
-          </div>
-        </article>
-
-        <article class="mkb__card mk-reveal" style="--i: 2">
-          <div class="mkb__ui mkb-flow" aria-hidden="true">
-            <div
-              v-for="(s, i) in buybackSteps"
-              :key="s.title"
-              class="mkb-flow__step"
-              :class="{ 'is-done': i < buybackStep, 'is-active': i === buybackStep }"
-            >
-              <span class="mkb-flow__dot"><Check :size="12" /></span>
+            <div v-for="s in offlineSales" :key="s.id" class="mkb-off__row">
               <span class="mkb-staff__who">
-                <span class="mkb-staff__name">{{ s.title }}</span>
-                <span class="mkb-staff__role">{{ s.text }}</span>
+                <span class="mkb-staff__name">{{ s.id }}</span>
+                <span class="mkb-staff__role">{{ s.item }}</span>
+              </span>
+              <span class="mkb-off__state">
+                <CheckCheck v-if="online" :size="14" />
+                <Clock v-else :size="14" />
               </span>
             </div>
           </div>
           <div class="mkb__body">
-            <span class="mkb__tag"><Repeat :size="14" aria-hidden="true" />Stock</span>
-            <h3 class="mkb__title">Buybacks and loans</h3>
+            <h3 class="mkb__title">Keeps selling offline</h3>
+            <p class="mkb__text">
+              Sales made without internet are saved on the device and recorded when you're back
+              online.
+            </p>
           </div>
-        </article>
+        </li>
 
-        <article class="mkb__card mk-reveal" style="--i: 3">
+        <li class="mkb__card mk-reveal" style="--i: 1">
           <div class="mkb__ui mkb-wa" aria-hidden="true">
             <div :key="tick" class="mkb-wa__bubble">
               <p class="mkb-wa__store">Ade's Gadgets · #{{ 1042 + tick }}</p>
@@ -100,12 +62,12 @@
             </div>
           </div>
           <div class="mkb__body">
-            <span class="mkb__tag"><MessageCircle :size="14" aria-hidden="true" />Selling</span>
-            <h3 class="mkb__title">WhatsApp receipts</h3>
+            <h3 class="mkb__title">Receipts on WhatsApp</h3>
+            <p class="mkb__text">Send the receipt to the customer's WhatsApp, or share a PDF.</p>
           </div>
-        </article>
+        </li>
 
-        <article class="mkb__card mk-reveal" style="--i: 4">
+        <li class="mkb__card mk-reveal" style="--i: 2">
           <div class="mkb__ui mkb-cust" aria-hidden="true">
             <div
               v-for="(c, i) in customers"
@@ -122,33 +84,54 @@
             </div>
           </div>
           <div class="mkb__body">
-            <span class="mkb__tag"><Users :size="14" aria-hidden="true" />Selling</span>
-            <h3 class="mkb__title">Balances &amp; part-pay</h3>
+            <h3 class="mkb__title">Part payments and balances</h3>
+            <p class="mkb__text">See who owes what, take deposits and record each payment.</p>
           </div>
-        </article>
+        </li>
 
-        <article class="mkb__card mk-reveal" style="--i: 5">
-          <div class="mkb__ui mkb-chart" aria-hidden="true">
-            <div class="mkb-chart__head">
-              <span class="mkb-chart__value">₦8.4m</span>
-              <span class="mkb__chip mkb__chip--success"><TrendingUp :size="11" />+24%</span>
-            </div>
-            <div class="mkb-chart__bars">
-              <span
-                v-for="(h, i) in chart"
-                :key="i"
-                :style="{ '--h': h, '--bi': i }"
-                :class="{ 'is-peak': i === chart.length - 1 }"
-              />
+        <li class="mkb__card mk-reveal" style="--i: 3">
+          <div class="mkb__ui mkb-flow" aria-hidden="true">
+            <div
+              v-for="(s, i) in buybackSteps"
+              :key="s.title"
+              class="mkb-flow__step"
+              :class="{ 'is-done': i < buybackStep, 'is-active': i === buybackStep }"
+            >
+              <span class="mkb-flow__dot"><Check :size="12" /></span>
+              <span class="mkb-staff__who">
+                <span class="mkb-staff__name">{{ s.title }}</span>
+                <span class="mkb-staff__role">{{ s.text }}</span>
+              </span>
             </div>
           </div>
           <div class="mkb__body">
-            <span class="mkb__tag"><ChartColumn :size="14" aria-hidden="true" />Reports</span>
-            <h3 class="mkb__title">Live analytics</h3>
+            <h3 class="mkb__title">Trade-ins and buybacks</h3>
+            <p class="mkb__text">Take a device in, grade and price it, and put it back on sale.</p>
           </div>
-        </article>
+        </li>
 
-        <article class="mkb__card mk-reveal" style="--i: 6">
+        <li class="mkb__card mk-reveal" style="--i: 4">
+          <div class="mkb__ui mkb-net" aria-hidden="true">
+            <svg viewBox="0 0 280 150" class="mkb-net__svg" focusable="false">
+              <path class="mkb-net__path" d="M140 75 L44 32" />
+              <path class="mkb-net__path" d="M140 75 L236 32" />
+              <path class="mkb-net__path" d="M140 75 L140 132" />
+              <path class="mkb-net__flow" d="M140 75 L44 32" />
+              <path class="mkb-net__flow mkb-net__flow--b" d="M236 32 L140 75" />
+              <path class="mkb-net__flow mkb-net__flow--c" d="M140 75 L140 132" />
+            </svg>
+            <span class="mkb-net__hub"><Store :size="16" /></span>
+            <span class="mkb-net__node mkb-net__node--a">Ikeja</span>
+            <span class="mkb-net__node mkb-net__node--b">Lekki</span>
+            <span class="mkb-net__node mkb-net__node--c">Abuja</span>
+          </div>
+          <div class="mkb__body">
+            <h3 class="mkb__title">Every branch, one login</h3>
+            <p class="mkb__text">Switch branch in a tap and compare how each one is selling.</p>
+          </div>
+        </li>
+
+        <li class="mkb__card mk-reveal" style="--i: 5">
           <div class="mkb__ui mkb-staff" aria-hidden="true">
             <div v-for="(p, i) in staff" :key="p.name" class="mkb-staff__row">
               <span class="mkb-staff__avatar" :style="{ '--hue': p.hue }">{{ p.name[0] }}</span>
@@ -160,51 +143,30 @@
             </div>
           </div>
           <div class="mkb__body">
-            <span class="mkb__tag"><ShieldCheck :size="14" aria-hidden="true" />Team</span>
             <h3 class="mkb__title">Staff roles</h3>
+            <p class="mkb__text">Decide who can edit stock, give discounts or see reports.</p>
           </div>
-        </article>
-
-        <NuxtLink to="/features" class="mkb__card mkb__card--more mk-reveal" style="--i: 7">
-          <span class="mkb__more-icon"><ArrowUpRight :size="20" aria-hidden="true" /></span>
-          <div class="mkb__body">
-            <h3 class="mkb__title">See every feature</h3>
-          </div>
-        </NuxtLink>
-      </div>
+        </li>
+      </ul>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import {
-  ArrowUpRight,
-  Boxes,
-  Check,
-  ChartColumn,
-  CheckCheck,
-  GitBranch,
-  MessageCircle,
-  ShieldCheck,
-  Repeat,
-  Store,
-  TrendingUp,
-  Users,
-} from '@lucide/vue'
+import { ArrowRight, Check, CheckCheck, Clock, Store, Wifi, WifiOff } from '@lucide/vue'
 import MkSectionHead from '~/components/marketing/MkSectionHead.vue'
 
 const sectionRef = ref<HTMLElement | null>(null)
 const live = ref(false)
 const tick = ref(0)
 
-const stock = ref([
-  { name: 'AirPods Pro', qty: 6, hue: 210 },
-  { name: 'iPhone 13 case', qty: 48, hue: 160 },
-  { name: 'Samsung A15', qty: 12, hue: 260 },
-  { name: 'USB-C charger', qty: 31, hue: 30 },
-])
-const hitIndex = ref(-1)
+const offlineSales = [
+  { id: 'Sale #1041', item: 'AirPods Pro · Cash' },
+  { id: 'Sale #1042', item: 'USB-C charger · Transfer' },
+  { id: 'Sale #1043', item: 'iPhone 13 case · Cash' },
+]
+const online = computed(() => live.value && tick.value % 2 === 1)
 
 const buybackSteps = [
   { title: 'iPhone 11 · 128GB traded in', text: 'From Chidi Okeke' },
@@ -226,19 +188,12 @@ const customers = [
 ]
 const paidIndex = computed(() => (live.value ? tick.value % customers.length : -1))
 
-const chart = [0.38, 0.52, 0.46, 0.64, 0.58, 0.72, 0.68, 0.84, 0.78, 1]
-
 let ticker: ReturnType<typeof setInterval> | undefined
 let observer: IntersectionObserver | null = null
 let reduced = false
 
 function step() {
-  if (document.hidden) return
-  tick.value += 1
-  const i = Math.floor(Math.random() * stock.value.length)
-  const item = stock.value[i]!
-  item.qty = item.qty <= 2 ? item.qty + 24 : item.qty - 1 - Math.floor(Math.random() * 2)
-  hitIndex.value = i
+  if (!document.hidden) tick.value += 1
 }
 
 function start() {

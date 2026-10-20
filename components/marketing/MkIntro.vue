@@ -1,98 +1,146 @@
 <template>
-  <section class="mk-section mk-section--tight-top" aria-labelledby="mk-intro-title">
+  <section class="mk-section mk-section--alt mku" aria-labelledby="mku-title">
     <div class="mk-container">
-      <div class="mk-intro mk-reveal">
-        <header class="mk-intro__title">
-          <p class="mk-eyebrow">Who it's for</p>
-          <h2 id="mk-intro-title" class="mk-h2">
-            One workspace,
-            <em class="mk-serif">however you sell.</em>
-          </h2>
-        </header>
-        <div class="mk-intro__aside">
-          <p class="mk-intro__text">IMEI, deposits, trade-ins and part payments, built in.</p>
-          <NuxtLink to="/demo/dashboard" class="mk-link">
-            Try the live demo
-            <ArrowRight :size="16" aria-hidden="true" />
-          </NuxtLink>
+      <MkSectionHead
+        title-id="mku-title"
+        eyebrow="Who it's for"
+        title="One workspace,"
+        accent="however you sell."
+      />
+
+      <div class="mku__tabs-wrap mk-reveal">
+        <div class="mku__tabs" role="tablist" aria-label="Businesses" @keydown="onKeydown">
+          <button
+            v-for="(trade, i) in trades"
+            :id="`mku-tab-${trade.id}`"
+            :key="trade.id"
+            ref="tabEls"
+            type="button"
+            role="tab"
+            class="mku__tab"
+            :aria-selected="active === i"
+            aria-controls="mku-panel"
+            :tabindex="active === i ? 0 : -1"
+            @click="active = i"
+          >
+            <component :is="trade.icon" :size="16" :stroke-width="1.75" aria-hidden="true" />
+            {{ trade.label }}
+          </button>
         </div>
       </div>
-    </div>
 
-    <ul class="mk-trades mk-reveal" aria-label="Businesses that run on Storvv">
-      <li
-        v-for="(trade, i) in trades"
-        :key="trade.label"
-        class="mk-trade"
-        :class="{ 'mk-trade--active': active === i }"
-        tabindex="0"
-        @mouseenter="active = i"
-        @focus="active = i"
+      <div
+        id="mku-panel"
+        class="mku__panel mk-reveal"
+        role="tabpanel"
+        :aria-labelledby="`mku-tab-${current.id}`"
       >
-        <img
-          class="mk-trade__img"
-          :src="trade.src"
-          :alt="trade.alt"
-          width="864"
-          height="1152"
-          loading="lazy"
-          decoding="async"
-        />
-        <div class="mk-trade__body">
-          <span class="mk-trade__icon" aria-hidden="true">
-            <component :is="trade.icon" :size="16" :stroke-width="1.75" />
-          </span>
-          <h3 class="mk-trade__title">{{ trade.label }}</h3>
-          <ul class="mk-trade__tags">
-            <li v-for="tag in trade.tags" :key="tag" class="mk-trade__tag">{{ tag }}</li>
-          </ul>
-        </div>
-      </li>
-    </ul>
+        <Transition name="mk-fade" mode="out-in">
+          <div :key="current.id" class="mku__inner">
+            <div class="mku__copy">
+              <h3 class="mku__title">{{ current.title }}</h3>
+              <p class="mku__text">{{ current.text }}</p>
+              <ul class="mk-checks">
+                <li v-for="point in current.points" :key="point">
+                  <Check :size="16" aria-hidden="true" />
+                  <span>{{ point }}</span>
+                </li>
+              </ul>
+              <NuxtLink to="/demo/dashboard" class="mk-link mku__link">
+                Try it in the live demo
+                <ArrowRight :size="16" aria-hidden="true" />
+              </NuxtLink>
+            </div>
+            <img
+              class="mku__photo"
+              :src="current.src"
+              :alt="current.alt"
+              width="864"
+              height="1152"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+        </Transition>
+      </div>
+    </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { ArrowRight, Car, PackageCheck, ShoppingBasket, Smartphone, Tv } from '@lucide/vue'
+import { computed, ref } from 'vue'
+import { ArrowRight, Car, Check, PackageCheck, ShoppingBasket, Smartphone, Tv } from '@lucide/vue'
+import MkSectionHead from '~/components/marketing/MkSectionHead.vue'
 
 const trades = [
   {
-    src: '/marketing/people/car-dealer.webp',
-    label: 'Car dealers',
-    icon: Car,
-    tags: ['Deposits', 'Sales leads'],
-    alt: 'A smiling car dealer holding up a key fob and a tablet in front of a white SUV in his showroom',
-  },
-  {
-    src: '/marketing/people/gadget-store.webp',
+    id: 'gadgets',
     label: 'Gadget stores',
     icon: Smartphone,
-    tags: ['IMEI tracking', 'Buybacks'],
+    title: 'Every phone, by IMEI',
+    text: 'Track each device by IMEI or serial number, take trade-ins as part of the price, and send the receipt before the customer leaves the counter.',
+    points: ['IMEI and serial tracking', 'Trade-ins and buybacks', 'Deposits and part payments'],
+    src: '/marketing/people/gadget-store.webp',
     alt: 'A gadget store attendant showing a smartwatch to a customer across a table of phones',
   },
   {
-    src: '/marketing/people/electronics.webp',
+    id: 'electronics',
     label: 'Electronics',
     icon: Tv,
-    tags: ['Serial numbers', 'Part payments'],
+    title: 'Big tickets, paid in parts',
+    text: 'Sell TVs, speakers and appliances by serial number, let customers pay over time, and always know who still owes you.',
+    points: ['Serial numbers on every unit', 'Customer balances', 'Stock across showrooms'],
+    src: '/marketing/people/electronics.webp',
     alt: 'An electronics store owner holding a tablet beside shelves of TVs and boxed speakers',
   },
   {
-    src: '/marketing/people/supermarket.webp',
+    id: 'supermarkets',
     label: 'Supermarkets',
     icon: ShoppingBasket,
-    tags: ['Low-stock alerts', 'Fast checkout'],
+    title: 'Fast checkout, full shelves',
+    text: 'Scan items with a phone camera, ring up a basket in seconds, and get a heads-up before popular lines run out.',
+    points: ['Camera barcode scan', 'Low-stock alerts', 'Roles for every shift'],
+    src: '/marketing/people/supermarket.webp',
     alt: 'A supermarket manager scanning stock on a shelf of fresh produce',
   },
   {
-    src: '/marketing/people/procurement.webp',
+    id: 'dealers',
+    label: 'Car dealers',
+    icon: Car,
+    title: 'Deposits and leads in one place',
+    text: 'Record deposits against each car, follow up on interested buyers, and see the balance left on every deal.',
+    points: ['Deposits and balances', 'Sales leads', 'Each car tracked by serial number'],
+    src: '/marketing/people/car-dealer.webp',
+    alt: 'A smiling car dealer holding up a key fob and a tablet in front of a white SUV in his showroom',
+  },
+  {
+    id: 'procurement',
     label: 'Procurement',
     icon: PackageCheck,
-    tags: ['Transfers', 'Stock loans'],
+    title: 'Stock that moves between sites',
+    text: 'Move stock between locations with approvals, lend stock out and get it back, and keep one count across every site.',
+    points: ['Branch-to-branch transfers', 'Stock loans', 'Reorder list export'],
+    src: '/marketing/people/procurement.webp',
     alt: 'A procurement officer checking an order on a tablet beside pallets of cartons in a warehouse',
   },
 ]
 
-const active = ref(1)
+const active = ref(0)
+const current = computed(() => trades[active.value]!)
+const tabEls = ref<HTMLButtonElement[]>([])
+
+function onKeydown(event: KeyboardEvent) {
+  const last = trades.length - 1
+  const next: Record<string, number> = {
+    ArrowRight: active.value === last ? 0 : active.value + 1,
+    ArrowLeft: active.value === 0 ? last : active.value - 1,
+    Home: 0,
+    End: last,
+  }
+  const target = next[event.key]
+  if (target === undefined) return
+  event.preventDefault()
+  active.value = target
+  tabEls.value[target]?.focus()
+}
 </script>

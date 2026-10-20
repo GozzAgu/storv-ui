@@ -10,13 +10,13 @@
             Everything your shop runs on. <span class="mk-accent">In one place.</span>
           </h1>
           <div class="mk-actions mk-actions--center">
-            <SButton variant="primary" size="lg" class="mk-btn" :to="signupUrl">
-              Get started free
-              <template #trailing><ArrowRight :size="16" aria-hidden="true" /></template>
+            <SButton variant="primary" size="lg" class="mk-btn" :to="signupUrl" data-mk-primary>
+              Create your free store
             </SButton>
-            <SButton variant="secondary" size="lg" class="mk-btn" to="/demo/dashboard">
+            <NuxtLink to="/demo/dashboard" class="mk-link">
               Try the live demo
-            </SButton>
+              <ArrowRight :size="16" aria-hidden="true" />
+            </NuxtLink>
           </div>
           <ul class="mk-hero__note" aria-label="Availability">
             <li><Check :size="16" aria-hidden="true" />Web dashboard, live today</li>
@@ -134,7 +134,7 @@
     <MkCta
       title="Ready to run the shop"
       accent="from one place?"
-      :primary="{ label: 'Get started free', to: signupUrl }"
+      :primary="{ label: 'Create your free store', to: signupUrl }"
       :secondary="{ label: 'See pricing', to: '/pricing' }"
     />
   </div>

@@ -67,6 +67,7 @@
                 class="mk-btn"
                 block
                 :to="signupUrl"
+                :data-mk-primary="plan.featured ? '' : undefined"
               >
                 {{ plan.cta }}
               </SButton>
@@ -248,8 +249,8 @@
     <MkCta
       title="Your first store is"
       accent="on us."
-      :primary="{ label: 'Start free', to: signupUrl }"
-      :secondary="{ label: 'Try the demo', to: '/demo/dashboard' }"
+      :primary="{ label: 'Create your free store', to: signupUrl }"
+      :secondary="{ label: 'Try the live demo', to: '/demo/dashboard' }"
     />
   </div>
 </template>

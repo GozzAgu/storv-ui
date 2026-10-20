@@ -2,19 +2,13 @@
   <div>
     <MkHero />
 
-    <MkIntro />
+    <MkFlow />
 
     <MkBento />
 
-    <MkStats />
+    <MkIntro />
 
-    <MkPlatform />
-
-    <MkTour />
-
-    <MkImpact />
-
-    <MkSetup />
+    <MkCompare />
 
     <!-- Pricing teaser -->
     <section id="pricing" class="mk-section mk-section--alt" aria-labelledby="home-pricing-title">
@@ -23,8 +17,8 @@
           title-id="home-pricing-title"
           eyebrow="Pricing"
           title="Start free."
-          accent="Grow when ready."
-          :lede="`Prices in ${currency}.`"
+          accent="Grow when you're ready."
+          :lede="`Prices in ${currency}. Change or cancel your plan any time.`"
         />
         <MkTrialOffer />
         <div class="mk-plans">
@@ -98,7 +92,7 @@
       class="mk-section--tight-top"
       title="Your first store is"
       accent="on us."
-      lede="Micro in minutes, in your browser."
+      lede="Set up Micro in about ten minutes, in the browser on the phone or laptop you already have."
       :primary="{ label: 'Create your free store', to: signupUrl }"
       :secondary="{ label: 'Try the live demo', to: '/demo/dashboard' }"
     />
@@ -123,13 +117,10 @@ import MkBento from '~/components/marketing/MkBento.vue'
 import MkHero from '~/components/marketing/MkHero.vue'
 import MkCta from '~/components/marketing/MkCta.vue'
 import MkFaq, { type MkFaqItem } from '~/components/marketing/MkFaq.vue'
-import MkTour from '~/components/marketing/MkTour.vue'
-import MkSectionHead from '~/components/marketing/MkSectionHead.vue'
-import MkImpact from '~/components/marketing/MkImpact.vue'
+import MkCompare from '~/components/marketing/MkCompare.vue'
+import MkFlow from '~/components/marketing/MkFlow.vue'
 import MkIntro from '~/components/marketing/MkIntro.vue'
-import MkPlatform from '~/components/marketing/MkPlatform.vue'
-import MkSetup from '~/components/marketing/MkSetup.vue'
-import MkStats from '~/components/marketing/MkStats.vue'
+import MkSectionHead from '~/components/marketing/MkSectionHead.vue'
 import MkTrialOffer from '~/components/marketing/MkTrialOffer.vue'
 import { MARKETING_PLANS, useMarketingPricing } from '~/composables/useMarketingPricing'
 import { useMarketingSignupUrl } from '~/composables/useMarketingSite'

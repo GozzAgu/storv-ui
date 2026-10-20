@@ -6,6 +6,7 @@
         'mk-header--scrolled': headerScrolled,
         'mk-header--open': menuOpen,
         'mk-header--overlay': route.path === '/' && !headerScrolled && !menuOpen,
+        'mk-header--quiet': primaryInView && !menuOpen,
       }"
     >
       <div class="mk-container">
@@ -198,6 +199,7 @@ import { useSectionScroll } from '~/composables/useSectionScroll'
 import {
   useMarketingLogo,
   useMarketingReveal,
+  usePagePrimaryInView,
   useMarketingSigninUrl,
   useMarketingSignupUrl,
 } from '~/composables/useMarketingSite'
@@ -210,6 +212,7 @@ const logoSrc = useMarketingLogo()
 const { scrollToSection, scrollToTop, goToSection } = useSectionScroll()
 const { theme, actualTheme, setTheme, initTheme, applyTheme } = useTheme()
 useMarketingReveal()
+const primaryInView = usePagePrimaryInView()
 
 const pageLinks = [
   { label: 'Features', to: '/features' },
