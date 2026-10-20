@@ -24,7 +24,7 @@ describe('MkIntro', () => {
     const wrapper = mountIntro()
     expect(selected(wrapper)).toEqual(only(0))
     expect(wrapper.find('[role="tabpanel"]').attributes('aria-labelledby')).toBe('mku-tab-gadgets')
-    expect(wrapper.find('.mku__title').text()).toBe('Every phone, by IMEI')
+    expect(wrapper.find('.mku__title').text()).toBe('Track every phone by its IMEI')
     wrapper.unmount()
   })
 
@@ -32,7 +32,7 @@ describe('MkIntro', () => {
     const wrapper = mountIntro()
     await wrapper.find('#mku-tab-supermarkets').trigger('click')
     expect(selected(wrapper)).toEqual(only(2))
-    expect(wrapper.find('.mku__title').text()).toBe('Fast checkout, full shelves')
+    expect(wrapper.find('.mku__title').text()).toBe('Fast checkout and full shelves')
     expect(wrapper.find('.mku__photo').attributes('src')).toBe('/marketing/people/supermarket.webp')
     wrapper.unmount()
   })

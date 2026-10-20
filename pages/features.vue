@@ -22,6 +22,8 @@
       </div>
     </section>
 
+    <MkFeatureCarousel class="mk-section--tight-top" />
+
     <!-- Explorer -->
     <section id="explore" class="mk-section mk-section--tight-top" aria-labelledby="explore-title">
       <div class="mk-container">
@@ -140,7 +142,7 @@
 
 <script setup lang="ts">
 import type { Component } from 'vue'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import {
   ArrowLeftRight,
   ArrowRight,
@@ -173,6 +175,7 @@ import {
 } from '@lucide/vue'
 import STabs from '~/components/s/STabs.vue'
 import MkCta from '~/components/marketing/MkCta.vue'
+import MkFeatureCarousel from '~/components/marketing/MkFeatureCarousel.vue'
 import MkFrame from '~/components/marketing/MkFrame.vue'
 import MkSectionHead from '~/components/marketing/MkSectionHead.vue'
 import { useMarketingSignupUrl } from '~/composables/useMarketingSite'
@@ -282,7 +285,17 @@ const areas: Area[] = [
 ]
 
 const areaTabs = areas.map((area) => ({ value: area.id, label: area.label, icon: area.icon }))
-const activeArea = ref(areas[0]!.id)
+const route = useRoute()
+/** `?area=sales` (from the header's Features menu) opens that tab */
+const areaFromQuery = () => areas.find((area) => area.id === route.query.area)?.id
+const activeArea = ref(areaFromQuery() ?? areas[0]!.id)
+watch(
+  () => route.query.area,
+  () => {
+    const area = areaFromQuery()
+    if (area) activeArea.value = area
+  }
+)
 const currentArea = computed(() => areas.find((area) => area.id === activeArea.value) ?? areas[0]!)
 
 const ladder = [

@@ -4,9 +4,11 @@
 
     <MkFlow />
 
-    <MkBento />
+    <MkFeatureCarousel id="product" />
 
     <MkIntro />
+
+    <MkOnboarding />
 
     <MkCompare />
 
@@ -103,13 +105,14 @@ import { ref } from 'vue'
 import { ArrowRight } from '@lucide/vue'
 import SButton from '~/components/s/SButton.vue'
 import SDialog from '~/components/s/SDialog.vue'
-import MkBento from '~/components/marketing/MkBento.vue'
 import MkHero from '~/components/marketing/MkHero.vue'
 import MkCta from '~/components/marketing/MkCta.vue'
 import MkFaq, { type MkFaqItem } from '~/components/marketing/MkFaq.vue'
+import MkFeatureCarousel from '~/components/marketing/MkFeatureCarousel.vue'
 import MkCompare from '~/components/marketing/MkCompare.vue'
 import MkFlow from '~/components/marketing/MkFlow.vue'
 import MkIntro from '~/components/marketing/MkIntro.vue'
+import MkOnboarding from '~/components/marketing/MkOnboarding.vue'
 import MkSectionHead from '~/components/marketing/MkSectionHead.vue'
 import MkTrialOffer from '~/components/marketing/MkTrialOffer.vue'
 import { MARKETING_PLANS, useMarketingPricing } from '~/composables/useMarketingPricing'

@@ -353,82 +353,16 @@ html.dark .mkh__announce {
   }
 }
 
-/* ── Capabilities band ──────────────────────────────────────────────────── */
-
-.mkb__band {
-  padding: clamp(var(--s-space-6), 7vw, 104px) clamp(var(--s-space-3), 5vw, 80px);
-  border-radius: 32px;
-  background: var(--mk-band);
-}
-
-.mkb__grid {
-  display: grid;
-  gap: var(--s-space-5) var(--s-space-4);
-}
-
-@media (min-width: 640px) {
-  .mkb__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1024px) {
-  .mkb__grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--s-space-6) var(--s-space-5);
-  }
-}
-
-.mkb__item {
-  display: grid;
-  align-content: start;
-  justify-items: center;
-  gap: 8px;
-  text-align: center;
-}
-
-.mkb__icon {
-  display: grid;
-  place-items: center;
-  margin-bottom: 4px;
-  color: var(--s-text);
-}
-
-.mkb__title {
-  font: 700 1.125rem / 1.5rem var(--s-font-sans);
-  letter-spacing: -0.01em;
-  color: var(--s-text);
-}
-
-.mkb__text {
-  max-width: 320px;
-  font: var(--mk-body);
-  color: var(--s-text-2);
-  text-wrap: pretty;
-}
-
-.mkb__more {
-  display: flex;
-  justify-content: center;
-  margin-top: clamp(var(--s-space-5), 5vw, var(--s-space-6));
-}
-
 /* ── Use cases ──────────────────────────────────────────────────────────── */
 
-.mku__tabs-wrap {
-  display: flex;
-  justify-content: center;
-  margin-bottom: var(--s-space-4);
-}
-
+/* Underlined tabs across the full width, like a product site's use-case switcher */
 .mku__tabs {
-  display: flex;
-  gap: 4px;
-  max-width: 100%;
-  padding: 4px;
+  display: grid;
+  grid-auto-columns: minmax(150px, 1fr);
+  grid-auto-flow: column;
+  gap: var(--s-space-4);
+  margin-bottom: var(--s-space-5);
   overflow-x: auto;
-  border-radius: var(--s-radius-full);
-  background: var(--mk-card);
   scrollbar-width: none;
 }
 
@@ -437,20 +371,18 @@ html.dark .mkh__announce {
 }
 
 .mku__tab {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  gap: 8px;
   min-height: var(--s-touch);
-  padding-inline: 18px;
+  padding: 0 0 14px;
   border: 0;
-  border-radius: var(--s-radius-full);
-  background: transparent;
-  font: 600 0.875rem / 1.25rem var(--s-font-sans);
+  border-bottom: 3px solid var(--s-line);
+  border-radius: 0;
+  background: none;
+  font: 700 1.0625rem / 1.5rem var(--s-font-sans);
   color: var(--s-text-2);
+  text-align: left;
+  white-space: nowrap;
   cursor: pointer;
-  transition: background-color var(--s-duration-fast) var(--s-ease),
-    color var(--s-duration-fast) var(--s-ease);
+  transition: border-color var(--s-duration) var(--s-ease), color var(--s-duration) var(--s-ease);
 }
 
 .mku__tab:hover {
@@ -458,8 +390,8 @@ html.dark .mkh__announce {
 }
 
 .mku__tab[aria-selected='true'] {
-  background: var(--s-text);
-  color: var(--mk-page);
+  border-bottom-color: var(--s-text);
+  color: var(--s-text);
 }
 
 .mku__tab:focus-visible {
@@ -469,7 +401,7 @@ html.dark .mkh__announce {
 
 .mku__panel {
   overflow: hidden;
-  border-radius: var(--s-radius-xl);
+  border-radius: 24px 48px 24px 24px;
   background: var(--mk-card);
 }
 
@@ -479,65 +411,125 @@ html.dark .mkh__announce {
 
 .mku__copy {
   display: grid;
-  justify-items: center;
-  align-content: center;
+  align-content: start;
+  justify-items: start;
   gap: var(--s-space-2);
   padding: clamp(var(--s-space-4), 5vw, var(--s-space-8));
-  text-align: center;
+}
+
+.mku__icon {
+  margin-bottom: var(--s-space-3);
+  color: var(--s-text);
 }
 
 .mku__title {
-  font: 800 clamp(1.5rem, 2.4vw, 2rem) / 1.2 var(--s-font-sans);
+  max-width: 520px;
+  font: 800 clamp(1.625rem, 2.8vw, 2.5rem) / 1.15 var(--s-font-sans);
   letter-spacing: -0.025em;
   color: var(--s-text);
   text-wrap: balance;
 }
 
 .mku__text {
-  max-width: 440px;
-  font-size: 1rem;
-  line-height: 1.6;
+  max-width: 520px;
+  margin-top: var(--s-space-1);
+  font-size: 1.0625rem;
+  line-height: 1.65;
   color: var(--s-text-2);
   text-wrap: pretty;
 }
 
 .mku__points {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 4px;
+  display: grid;
+  gap: var(--s-space-2);
+  margin-top: var(--s-space-4);
 }
 
 .mku__points li {
-  padding: 6px 12px;
-  border-radius: var(--s-radius-full);
-  background: var(--mk-chip);
-  font: 600 0.8125rem / 1.25rem var(--s-font-sans);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font: 600 1rem / 1.5rem var(--s-font-sans);
   color: var(--s-text);
 }
 
-.mku__link {
-  margin-top: var(--s-space-1);
+.mku__media {
+  position: relative;
+  min-height: 320px;
 }
 
 .mku__photo {
   display: block;
   width: 100%;
   height: 100%;
-  max-height: 340px;
+  max-height: 380px;
   object-fit: cover;
   object-position: center 30%;
+}
+
+/* Two small notes resting on the photo, styled like cards from the app */
+.mku__notes {
+  position: absolute;
+  top: var(--s-space-4);
+  right: var(--s-space-3);
+  display: grid;
+  justify-items: end;
+  gap: var(--s-space-2);
+}
+
+.mku__note {
+  display: grid;
+  gap: 2px;
+  padding: 14px 18px;
+  border-radius: 16px;
+  background: var(--s-surface);
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.04), 0 12px 30px -12px rgb(0 0 0 / 0.3);
+}
+
+.mku__note:nth-child(2) {
+  margin-right: var(--s-space-4);
+}
+
+.mku__note-title {
+  font: 700 1rem / 1.375rem var(--s-font-sans);
+  color: var(--s-text);
+}
+
+.mku__note-text {
+  font: var(--mk-small);
+  color: var(--s-text-2);
 }
 
 @media (min-width: 900px) {
   .mku__inner {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    grid-template-rows: 480px;
+    grid-template-rows: 560px;
+  }
+
+  .mku__media {
+    min-height: 0;
   }
 
   .mku__photo {
     max-height: none;
+  }
+
+  .mku__copy {
+    align-content: center;
+  }
+}
+
+@media (max-width: 639px) {
+  .mku__notes {
+    top: auto;
+    right: 12px;
+    bottom: 12px;
+    left: 12px;
+    justify-items: start;
+  }
+
+  .mku__note:nth-child(2) {
+    margin-right: 0;
   }
 }
 
@@ -633,4 +625,307 @@ html.dark .mkh__announce {
   .mkf__card:last-child {
     grid-column: span 6;
   }
+}
+
+/* ── Getting started ────────────────────────────────────────────────────── */
+
+.mko {
+  background: var(--mk-alt);
+}
+
+.mko .mk-head .mk-pill-link {
+  margin-top: var(--s-space-1);
+}
+
+.mko__grid {
+  display: grid;
+  gap: var(--s-space-3);
+}
+
+@media (min-width: 1024px) {
+  .mko__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* White card: words on the left, a small picture of the step on the right */
+.mko__card {
+  display: grid;
+  overflow: hidden;
+  border-radius: 16px 56px 16px 16px;
+  background: var(--s-surface);
+  box-shadow: 0 0 0 1px var(--s-line);
+}
+
+@media (min-width: 640px) {
+  .mko__card {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    min-height: 300px;
+  }
+}
+
+.mko__copy {
+  display: grid;
+  align-content: start;
+  gap: var(--s-space-2);
+  padding: var(--s-space-5) var(--s-space-4);
+}
+
+.mko__title {
+  font: 800 1.5rem / 1.25 var(--s-font-sans);
+  letter-spacing: -0.02em;
+  color: var(--s-text);
+  text-wrap: balance;
+}
+
+.mko__text {
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--s-text-2);
+}
+
+.mko__visual {
+  display: grid;
+  align-content: center;
+  gap: 10px;
+  padding: var(--s-space-4) var(--s-space-3);
+  background: var(--mk-card);
+  font-size: 0.875rem;
+}
+
+.mko-file,
+.mko-row,
+.mko-person,
+.mko-bubble {
+  border-radius: 12px;
+  background: var(--s-surface);
+  box-shadow: 0 0 0 1px var(--s-line);
+}
+
+.mko-file {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  font-weight: 600;
+  color: var(--s-text);
+}
+
+.mko-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 14px;
+  color: var(--s-text-2);
+}
+
+.mko-row b {
+  color: var(--s-text);
+}
+
+.mko-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--s-radius-full);
+  background: var(--s-success-soft);
+  font-weight: 600;
+  color: var(--s-success);
+}
+
+.mko-person {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+}
+
+.mko-avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--s-text);
+  font-weight: 700;
+  color: var(--mk-page);
+}
+
+.mko-person__who {
+  display: grid;
+  color: var(--s-text-2);
+}
+
+.mko-person__who b {
+  color: var(--s-text);
+}
+
+.mko__visual--devices {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+
+.mko-device {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: var(--s-surface);
+  box-shadow: 0 0 0 1px var(--s-line);
+  color: var(--s-text);
+}
+
+.mko-device--main {
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
+}
+
+.mko-line {
+  width: 28px;
+  border-top: 1.5px dashed var(--s-border-strong);
+}
+
+.mko-bubble {
+  justify-self: start;
+  max-width: 88%;
+  padding: 10px 14px;
+  border-radius: 14px 14px 14px 4px;
+  line-height: 1.45;
+  color: var(--s-text);
+}
+
+.mko-bubble--reply {
+  justify-self: end;
+  border-radius: 14px 14px 4px 14px;
+  background: var(--s-text);
+  box-shadow: none;
+  color: var(--mk-page);
+}
+
+/* ── Feature cards carousel ─────────────────────────────────────────────── */
+
+.mkc {
+  overflow-x: clip;
+}
+
+.mkc__track {
+  display: grid;
+  grid-auto-columns: min(400px, 82vw);
+  grid-auto-flow: column;
+  gap: var(--s-space-3);
+  /* Runs past the container to the right edge of the screen */
+  margin-left: calc(var(--mk-gutter) * -1);
+  margin-right: calc((100vw - 100%) / -2);
+  padding: 4px var(--mk-gutter) var(--s-space-1);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-padding-inline: var(--mk-gutter);
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.mkc__track::-webkit-scrollbar {
+  display: none;
+}
+
+.mkc__card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 16px 16px 56px 16px;
+  background: var(--s-surface);
+  box-shadow: inset 0 0 0 1px var(--s-line);
+  scroll-snap-align: start;
+}
+
+/* A close crop of the real screen on a light grey well */
+.mkc__visual {
+  height: 230px;
+  padding: var(--s-space-3) 0 0 var(--s-space-3);
+  overflow: hidden;
+  background: var(--mk-card);
+}
+
+.mkc__visual img {
+  display: block;
+  width: 190%;
+  max-width: none;
+  height: auto;
+  border-radius: 10px 0 0 0;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.06), 0 10px 30px -12px rgb(0 0 0 / 0.25);
+}
+
+.mkc__body {
+  display: grid;
+  flex: 1;
+  align-content: start;
+  gap: var(--s-space-2);
+  padding: var(--s-space-4) var(--s-space-4) var(--s-space-3);
+}
+
+.mkc__title {
+  font: 800 1.5rem / 1.25 var(--s-font-sans);
+  letter-spacing: -0.02em;
+  color: var(--s-text);
+}
+
+.mkc__text {
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--s-text-2);
+}
+
+.mkc__link {
+  justify-self: start;
+  min-height: var(--s-touch);
+  margin-top: auto;
+}
+
+.mkc__controls {
+  display: flex;
+  gap: 8px;
+  margin-top: var(--s-space-3);
+}
+
+.mkc__arrow {
+  display: grid;
+  place-items: center;
+  width: var(--s-touch);
+  height: var(--s-touch);
+  border: 0;
+  border-radius: 12px;
+  background: var(--mk-card);
+  color: var(--s-text);
+  cursor: pointer;
+  transition: background-color var(--s-duration-fast) var(--s-ease);
+}
+
+.mkc__arrow:hover:not(:disabled) {
+  background: var(--s-surface-hover);
+}
+
+.mkc__arrow:disabled {
+  color: var(--s-text-muted);
+  cursor: default;
+  opacity: 0.6;
+}
+
+.mkc__arrow:focus-visible {
+  outline: none;
+  box-shadow: var(--s-focus-ring);
+}
+
+html.dark .mko {
+  background: #151514;
+}
+
+html.dark .mko__visual {
+  background: var(--s-surface-2);
 }

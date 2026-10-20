@@ -24,7 +24,13 @@
             <a href="/#product" class="mk-nav-link" @click.prevent="goToSection('product')"
               >Product</a
             >
-            <NuxtLink v-for="link in pageLinks" :key="link.to" :to="link.to" class="mk-nav-link">
+            <MkFeatureMenu />
+            <NuxtLink
+              v-for="link in pageLinks.filter((l) => l.to !== '/features')"
+              :key="link.to"
+              :to="link.to"
+              class="mk-nav-link"
+            >
               {{ link.label }}
             </NuxtLink>
           </nav>
@@ -193,6 +199,7 @@ import { computed, nextTick, onMounted, onUnmounted, ref, useId, watch } from 'v
 import { ArrowRight, ArrowUp, ChevronRight, Monitor, MonitorPlay, Moon, Sun } from '@lucide/vue'
 import SButton from '~/components/s/SButton.vue'
 import SIconButton from '~/components/s/SIconButton.vue'
+import MkFeatureMenu from '~/components/marketing/MkFeatureMenu.vue'
 import MkFooter from '~/components/marketing/MkFooter.vue'
 import { useTheme } from '~/composables/useTheme'
 import { useSectionScroll } from '~/composables/useSectionScroll'
