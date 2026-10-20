@@ -10,24 +10,19 @@
             Everything your shop runs on. <span class="mk-accent">In one place.</span>
           </h1>
           <div class="mk-actions mk-actions--center">
-            <SButton variant="primary" size="lg" class="mk-btn" :to="appUrl">
-              Get started free
-              <template #trailing><ArrowRight :size="16" aria-hidden="true" /></template>
-            </SButton>
-            <SButton variant="secondary" size="lg" class="mk-btn" to="/demo/dashboard">
-              Try the live demo
-            </SButton>
+            <NuxtLink :to="signupUrl" class="mk-cta-btn" data-mk-primary>
+              Create your free store
+            </NuxtLink>
+            <NuxtLink to="/demo/dashboard" class="mk-pill-link">or try the live demo</NuxtLink>
           </div>
-          <ul class="mk-hero__note" aria-label="Availability">
-            <li><Check :size="16" aria-hidden="true" />Web dashboard, live today</li>
-            <li><Check :size="16" aria-hidden="true" />Free forever on Micro</li>
-            <li class="mk-hero__note-soon">
-              <Clock :size="16" aria-hidden="true" />iOS &amp; Android coming soon
-            </li>
-          </ul>
+          <p class="mk-hero__note">
+            Web dashboard live today · Free forever on Micro · iOS and Android coming soon
+          </p>
         </div>
       </div>
     </section>
+
+    <MkFeatureCarousel class="mk-section--tight-top" />
 
     <!-- Explorer -->
     <section id="explore" class="mk-section mk-section--tight-top" aria-labelledby="explore-title">
@@ -44,7 +39,12 @@
         </div>
 
         <Transition name="mk-fade" mode="out-in">
-          <div id="features-panel" :key="currentArea.id" class="mk-panel" role="tabpanel">
+          <div
+            id="features-panel"
+            :key="currentArea.id"
+            class="mk-panel mk-panel--center"
+            role="tabpanel"
+          >
             <div>
               <h3 class="mk-h2 mk-panel__title">{{ currentArea.title }}</h3>
               <ul class="mk-feature-list mk-feature-list--compact">
@@ -82,7 +82,7 @@
           title="Start small."
           accent="Unlock more as you grow."
         />
-        <ol class="mk-grid mk-grid--3">
+        <ol class="mk-grid mk-grid--3 mk-grid--center">
           <li
             v-for="(step, i) in ladder"
             :key="step.name"
@@ -117,7 +117,7 @@
           eyebrow="On the roadmap"
           title="Coming soon to Storvv"
         />
-        <ul class="mk-grid mk-grid--4">
+        <ul class="mk-grid mk-grid--4 mk-grid--center">
           <li v-for="item in comingSoon" :key="item.title" class="mk-card mk-reveal">
             <span class="mk-card__icon"
               ><component :is="item.icon" :size="20" aria-hidden="true"
@@ -134,7 +134,7 @@
     <MkCta
       title="Ready to run the shop"
       accent="from one place?"
-      :primary="{ label: 'Get started free', to: appUrl }"
+      :primary="{ label: 'Create your free store', to: signupUrl }"
       :secondary="{ label: 'See pricing', to: '/pricing' }"
     />
   </div>
@@ -142,7 +142,7 @@
 
 <script setup lang="ts">
 import type { Component } from 'vue'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import {
   ArrowLeftRight,
   ArrowRight,
@@ -151,7 +151,6 @@ import {
   Boxes,
   Building2,
   Check,
-  Clock,
   Copy,
   CreditCard,
   FileSpreadsheet,
@@ -174,16 +173,16 @@ import {
   Wallet,
   Zap,
 } from '@lucide/vue'
-import SButton from '~/components/s/SButton.vue'
 import STabs from '~/components/s/STabs.vue'
 import MkCta from '~/components/marketing/MkCta.vue'
+import MkFeatureCarousel from '~/components/marketing/MkFeatureCarousel.vue'
 import MkFrame from '~/components/marketing/MkFrame.vue'
 import MkSectionHead from '~/components/marketing/MkSectionHead.vue'
-import { useMarketingAppUrl } from '~/composables/useMarketingSite'
+import { useMarketingSignupUrl } from '~/composables/useMarketingSite'
 
 definePageMeta({ layout: 'marketing' })
 
-const appUrl = useMarketingAppUrl()
+const signupUrl = useMarketingSignupUrl()
 
 type Plan = 'all' | 'medium' | 'enterprise'
 
@@ -286,7 +285,17 @@ const areas: Area[] = [
 ]
 
 const areaTabs = areas.map((area) => ({ value: area.id, label: area.label, icon: area.icon }))
-const activeArea = ref(areas[0]!.id)
+const route = useRoute()
+/** `?area=sales` (from the header's Features menu) opens that tab */
+const areaFromQuery = () => areas.find((area) => area.id === route.query.area)?.id
+const activeArea = ref(areaFromQuery() ?? areas[0]!.id)
+watch(
+  () => route.query.area,
+  () => {
+    const area = areaFromQuery()
+    if (area) activeArea.value = area
+  }
+)
 const currentArea = computed(() => areas.find((area) => area.id === activeArea.value) ?? areas[0]!)
 
 const ladder = [

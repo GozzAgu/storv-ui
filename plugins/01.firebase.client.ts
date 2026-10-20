@@ -1,5 +1,6 @@
 import { initializeApp, getApps, type FirebaseApp } from 'firebase/app'
-import { getAnalytics, type Analytics } from 'firebase/analytics'
+import { getAnalytics, setConsent, type Analytics } from 'firebase/analytics'
+import { analyticsConsent, readCookieChoice } from '~/utils/cookie-consent'
 import {
   initializeFirestore,
   persistentLocalCache,
@@ -118,6 +119,11 @@ export default defineNuxtPlugin(() => {
         !isPublicPayPath(window.location.pathname)
       ) {
         try {
+          // Analytics cookies only once the visitor accepts them on the cookie banner.
+          setConsent({
+            analytics_storage: analyticsConsent(readCookieChoice()),
+            ad_storage: 'denied',
+          })
           analytics = getAnalytics(app)
         } catch (error) {
           console.warn('Firebase Analytics initialization failed:', error)

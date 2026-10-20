@@ -66,7 +66,8 @@
                 :variant="plan.featured ? 'primary' : 'secondary'"
                 class="mk-btn"
                 block
-                :to="appUrl"
+                :to="signupUrl"
+                :data-mk-primary="plan.featured ? '' : undefined"
               >
                 {{ plan.cta }}
               </SButton>
@@ -248,8 +249,8 @@
     <MkCta
       title="Your first store is"
       accent="on us."
-      :primary="{ label: 'Start free', to: appUrl }"
-      :secondary="{ label: 'Try the demo', to: '/demo/dashboard' }"
+      :primary="{ label: 'Create your free store', to: signupUrl }"
+      :secondary="{ label: 'Try the live demo', to: '/demo/dashboard' }"
     />
   </div>
 </template>
@@ -288,7 +289,7 @@ import {
   MARKETING_PLANS,
   useMarketingPricing,
 } from '~/composables/useMarketingPricing'
-import { useMarketingAppUrl } from '~/composables/useMarketingSite'
+import { useMarketingSignupUrl } from '~/composables/useMarketingSite'
 import {
   BILLING_CYCLE_LABELS,
   SUBSCRIPTION_BILLING_CYCLES,
@@ -297,7 +298,7 @@ import {
 
 definePageMeta({ layout: 'marketing' })
 
-const appUrl = useMarketingAppUrl()
+const signupUrl = useMarketingSignupUrl()
 const { cycle, currency, planPrice, planListPrice, addOnPrice, periodSuffix, renewLabel } =
   useMarketingPricing()
 

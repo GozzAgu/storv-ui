@@ -2,29 +2,25 @@
   <div>
     <MkHero />
 
+    <MkFlow />
+
+    <MkFeatureCarousel id="product" />
+
     <MkIntro />
 
-    <MkBento />
+    <MkOnboarding />
 
-    <MkStats />
-
-    <MkPlatform />
-
-    <MkTour />
-
-    <MkImpact />
-
-    <MkSetup />
+    <MkCompare />
 
     <!-- Pricing teaser -->
-    <section id="pricing" class="mk-section mk-section--alt" aria-labelledby="home-pricing-title">
+    <section id="pricing" class="mk-section" aria-labelledby="home-pricing-title">
       <div class="mk-container">
         <MkSectionHead
           title-id="home-pricing-title"
           eyebrow="Pricing"
           title="Start free."
-          accent="Grow when ready."
-          :lede="`Prices in ${currency}.`"
+          accent="Grow when you're ready."
+          :lede="`Prices in ${currency}. Change or cancel your plan any time.`"
         />
         <MkTrialOffer />
         <div class="mk-plans">
@@ -49,12 +45,8 @@
                 <span class="mk-plan__period">{{ periodSuffix }}</span>
               </template>
             </p>
-            <SButton
-              :variant="plan.featured ? 'primary' : 'secondary'"
-              class="mk-btn"
-              block
-              :to="appUrl"
-            >
+            <!-- Outline only: the filled button on each screen is the free-store signup. -->
+            <SButton variant="secondary" class="mk-btn" block :to="signupUrl">
               {{ plan.cta }}
             </SButton>
           </article>
@@ -68,44 +60,34 @@
       </div>
     </section>
 
-    <!-- FAQ -->
-    <section id="faq" class="mk-section" aria-labelledby="home-faq-title">
-      <div class="mk-container mk-faq-layout">
-        <div class="mk-faq-layout__aside">
-          <MkSectionHead
-            title-id="home-faq-title"
-            eyebrow="FAQ"
-            title="Quick"
-            accent="answers."
-            align="start"
-          />
-          <div id="contact" class="mk-contact-card">
-            <h3 class="mk-h3">Still stuck?</h3>
-            <p class="mk-card__text">We reply the same day.</p>
-            <div class="mk-actions">
-              <SButton
-                variant="secondary"
-                class="mk-btn mk-btn--compact"
-                @click="contactOpen = true"
-              >
-                Contact us
-              </SButton>
-              <a href="mailto:hello@storvv.com" class="mk-link">hello@storvv.com</a>
-            </div>
-          </div>
-        </div>
-        <MkFaq :items="faq" />
-      </div>
-    </section>
-
     <MkCta
-      class="mk-section--tight-top"
       title="Your first store is"
       accent="on us."
-      lede="Micro in minutes, in your browser."
-      :primary="{ label: 'Start free', to: appUrl }"
+      lede="Set up Micro in about ten minutes, in the browser on the phone or laptop you already have."
+      :primary="{ label: 'Create your free store', to: signupUrl }"
       :secondary="{ label: 'Try the live demo', to: '/demo/dashboard' }"
     />
+
+    <!-- FAQ -->
+    <section id="faq" class="mk-section mk-section--tight-top" aria-labelledby="home-faq-title">
+      <div class="mk-container mk-container--narrow">
+        <MkSectionHead
+          title-id="home-faq-title"
+          eyebrow="FAQ"
+          title="Questions,"
+          accent="answered."
+        />
+        <MkFaq :items="faq" />
+        <p id="contact" class="mk-faq-contact">
+          Still stuck? We reply the same day.
+          <button type="button" class="mk-link mk-faq-contact__btn" @click="contactOpen = true">
+            Contact us
+          </button>
+          or email
+          <a href="mailto:hello@storvv.com" class="mk-link">hello@storvv.com</a>
+        </p>
+      </div>
+    </section>
 
     <SDialog v-model:open="contactOpen" title="Contact us" size="lg">
       <iframe
@@ -123,24 +105,22 @@ import { ref } from 'vue'
 import { ArrowRight } from '@lucide/vue'
 import SButton from '~/components/s/SButton.vue'
 import SDialog from '~/components/s/SDialog.vue'
-import MkBento from '~/components/marketing/MkBento.vue'
 import MkHero from '~/components/marketing/MkHero.vue'
 import MkCta from '~/components/marketing/MkCta.vue'
 import MkFaq, { type MkFaqItem } from '~/components/marketing/MkFaq.vue'
-import MkTour from '~/components/marketing/MkTour.vue'
-import MkSectionHead from '~/components/marketing/MkSectionHead.vue'
-import MkImpact from '~/components/marketing/MkImpact.vue'
+import MkFeatureCarousel from '~/components/marketing/MkFeatureCarousel.vue'
+import MkCompare from '~/components/marketing/MkCompare.vue'
+import MkFlow from '~/components/marketing/MkFlow.vue'
 import MkIntro from '~/components/marketing/MkIntro.vue'
-import MkPlatform from '~/components/marketing/MkPlatform.vue'
-import MkSetup from '~/components/marketing/MkSetup.vue'
-import MkStats from '~/components/marketing/MkStats.vue'
+import MkOnboarding from '~/components/marketing/MkOnboarding.vue'
+import MkSectionHead from '~/components/marketing/MkSectionHead.vue'
 import MkTrialOffer from '~/components/marketing/MkTrialOffer.vue'
 import { MARKETING_PLANS, useMarketingPricing } from '~/composables/useMarketingPricing'
-import { useMarketingAppUrl } from '~/composables/useMarketingSite'
+import { useMarketingSignupUrl } from '~/composables/useMarketingSite'
 
 definePageMeta({ layout: 'marketing' })
 
-const appUrl = useMarketingAppUrl()
+const signupUrl = useMarketingSignupUrl()
 const { currency, planPrice, periodSuffix } = useMarketingPricing()
 const contactOpen = ref(false)
 
@@ -160,7 +140,7 @@ const faq: MkFaqItem[] = [
   },
   {
     q: 'What if my internet drops?',
-    a: 'You need a connection to complete a sale. Mobile data or a hotspot is enough. Saved work stays in the cloud.',
+    a: 'Keep selling. Sales made offline are saved on the device and recorded as soon as you are back online. Anything that needs a manager to approve it waits for a connection.',
   },
   {
     q: 'Do I need special hardware?',

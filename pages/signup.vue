@@ -11,7 +11,6 @@
       :name="form.name"
       :email="form.email"
       :password="form.password"
-      :confirm-password="form.confirmPassword"
       :error="errorMessage"
       :loading="isLoading"
       :done="registrationComplete"
@@ -20,7 +19,7 @@
     <AuthPageHeader
       v-if="!registrationComplete"
       title="Create your account"
-      subtitle="Set up a workspace for stock, sales, and branches."
+      subtitle="Free forever for one store. No card needed. Takes under a minute."
     />
 
     <AuthPageHeader
@@ -113,29 +112,6 @@
             </template>
           </AuthField>
 
-          <AuthField
-            v-model="form.confirmPassword"
-            input-id="confirmPassword"
-            label="Confirm password"
-            autocomplete="new-password"
-            placeholder="Re-enter your password"
-            password-toggle
-            :icon="LockClosedIcon"
-            required
-          >
-            <template #hint>
-              <p
-                v-if="
-                  form.password && form.confirmPassword && form.password !== form.confirmPassword
-                "
-                class="s-field__error"
-                role="alert"
-              >
-                Passwords do not match
-              </p>
-            </template>
-          </AuthField>
-
           <AuthAlert v-if="errorMessage" :message="errorMessage">
             <template v-if="errorMessage.includes('PERMISSION_DENIED')" #actions>
               <SButton size="sm" @click="copyRulesToClipboard">
@@ -144,23 +120,18 @@
             </template>
           </AuthAlert>
 
-          <div class="auth-checkbox-options">
-            <AuthCheckbox v-model="form.acceptTerms">
-              I accept the
-              <NuxtLink to="/terms" class="auth-link">terms</NuxtLink>
-              and
-              <NuxtLink to="/privacy" class="auth-link">privacy policy</NuxtLink>
-            </AuthCheckbox>
-          </div>
-
           <AuthPrimaryButton
-            label="Create account"
+            label="Create your free store"
             :loading="isLoading"
-            :disabled="
-              isLoading ||
-              !!(form.password && form.confirmPassword && form.password !== form.confirmPassword)
-            "
+            :disabled="isLoading"
           />
+
+          <p class="s-auth-oauth__terms">
+            By creating an account you agree to our
+            <NuxtLink to="/terms" class="auth-link">terms</NuxtLink>
+            and
+            <NuxtLink to="/privacy" class="auth-link">privacy policy</NuxtLink>.
+          </p>
         </form>
 
         <p class="auth-auth-footer-link">
@@ -183,7 +154,6 @@ import AuthAlert from '~/components/auth/AuthAlert.vue'
 import AuthSuccessPanel from '~/components/auth/AuthSuccessPanel.vue'
 import AuthSegmentToggle from '~/components/auth/AuthSegmentToggle.vue'
 import AuthPrimaryButton from '~/components/auth/AuthPrimaryButton.vue'
-import AuthCheckbox from '~/components/auth/AuthCheckbox.vue'
 import AuthPasswordStrength from '~/components/auth/AuthPasswordStrength.vue'
 import SButton from '~/components/s/SButton.vue'
 import AuthBuddies from '~/components/auth/AuthBuddies.vue'
@@ -221,8 +191,6 @@ const form = ref({
   name: '',
   email: '',
   password: '',
-  confirmPassword: '',
-  acceptTerms: false,
 })
 
 const { focused, trackFocus } = useFocusedField()
@@ -319,22 +287,12 @@ const handleSignUp = async () => {
     return
   }
 
-  if (form.value.password !== form.value.confirmPassword) {
-    errorMessage.value = 'Passwords do not match'
-    return
-  }
-
   if (!isPasswordPolicyValid(form.value.password)) {
     const errs = getPasswordPolicyErrors(form.value.password)
     errorMessage.value =
       errs.length > 0
         ? `Password requirements: ${errs.join('; ')}.`
         : 'Please choose a stronger password.'
-    return
-  }
-
-  if (!form.value.acceptTerms) {
-    errorMessage.value = 'Please accept the terms and privacy policy'
     return
   }
 

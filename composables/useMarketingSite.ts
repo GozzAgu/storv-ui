@@ -1,4 +1,4 @@
-import { computed, nextTick, onBeforeUnmount, onMounted, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useThemeStore } from '~/stores/theme'
 
 /** Where "Sign in" and "Start free" send people. */
@@ -8,6 +8,17 @@ export function useMarketingAppUrl() {
     const origin = runtimeConfig.public.appOrigin
     return typeof origin === 'string' && origin.length > 0 ? origin : 'https://app.storvv.com'
   })
+}
+
+/** Where "Start free" goes: straight to account creation, not the sign-in screen. */
+export function useMarketingSignupUrl() {
+  const appUrl = useMarketingAppUrl()
+  return computed(() => `${appUrl.value.replace(/\/$/, '')}/signup`)
+}
+
+export function useMarketingSigninUrl() {
+  const appUrl = useMarketingAppUrl()
+  return computed(() => `${appUrl.value.replace(/\/$/, '')}/signin`)
 }
 
 /** Wordmark that contrasts the current theme. */
@@ -58,4 +69,40 @@ export function useMarketingReveal() {
     observer?.disconnect()
     observer = null
   })
+}
+
+/**
+ * True while a page's own filled call to action (marked `data-mk-primary`) is on screen, so the
+ * header can step its "Start free" button down to an outline and keep one filled button in view.
+ */
+export function usePagePrimaryInView() {
+  const inView = ref(false)
+
+  // A couple of marked elements at most, so a rect check per scroll is cheap
+  function check() {
+    const height = window.innerHeight
+    // Anything behind the sticky header is out of view
+    const top = document.querySelector('.mk-header')?.getBoundingClientRect().bottom ?? 0
+    inView.value = [...document.querySelectorAll('[data-mk-primary]')].some((el) => {
+      const rect = el.getBoundingClientRect()
+      return rect.width > 0 && rect.bottom > top && rect.top < height
+    })
+  }
+
+  // Recheck once the next page has mounted; a route watcher fires before it renders
+  const stopHook = useNuxtApp().hook('page:finish', () => nextTick(check))
+
+  onMounted(() => {
+    window.addEventListener('scroll', check, { passive: true })
+    window.addEventListener('resize', check, { passive: true })
+    check()
+  })
+
+  onBeforeUnmount(() => {
+    stopHook()
+    window.removeEventListener('scroll', check)
+    window.removeEventListener('resize', check)
+  })
+
+  return inView
 }
