@@ -9,7 +9,7 @@
           </h2>
           <p v-if="lede" class="mk-lede">{{ lede }}</p>
           <div class="mk-actions mk-actions--center">
-            <NuxtLink :to="primary.to" class="mk-cta-btn mk-cta-btn--light" data-mk-primary>
+            <NuxtLink :to="primary.to" class="mk-cta-btn" data-mk-primary>
               {{ primary.label }}
             </NuxtLink>
             <NuxtLink v-if="secondary" :to="secondary.to" class="mk-cta__link">

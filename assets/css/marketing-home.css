@@ -146,6 +146,7 @@ html.dark .mkh__announce {
   padding: 10px 16px;
   border-radius: var(--s-radius-lg);
   background: var(--s-surface);
+  box-shadow: inset 0 0 0 1px var(--s-line);
   font: 600 0.875rem / 1.25rem var(--s-font-sans);
   color: var(--s-text);
 }
@@ -389,11 +390,7 @@ html.dark .mkh__announce {
 .mkb__icon {
   display: grid;
   place-items: center;
-  width: 52px;
-  height: 52px;
-  margin-bottom: 8px;
-  border-radius: 14px;
-  background: var(--mk-chip);
+  margin-bottom: 4px;
   color: var(--s-text);
 }
 
@@ -550,6 +547,7 @@ html.dark .mkh__announce {
   overflow-x: auto;
   border-radius: var(--s-radius-xl);
   background: var(--s-surface);
+  box-shadow: inset 0 0 0 1px var(--s-line);
 }
 
 .mkx__table {
@@ -589,7 +587,7 @@ html.dark .mkh__announce {
 }
 
 .mkx__us {
-  background: color-mix(in srgb, var(--s-accent) 7%, var(--s-surface));
+  background: var(--mk-card);
 }
 
 .mkx__table td.mkx__us {
