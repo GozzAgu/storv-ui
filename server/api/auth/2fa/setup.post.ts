@@ -41,10 +41,10 @@ export default defineEventHandler(async (event) => {
 
   const { TOTP } = await import('otpauth')
   const totp = new TOTP({ secret, digits: 6, period: 30, algorithm: 'SHA1' })
-  if (totp.validate({ token: code, window: 2 }) === null) {
+  if (totp.validate({ token: code, window: 1 }) === null) {
     throw createError({ statusCode: 400, message: 'Invalid verification code' })
   }
 
-  await saveTwoFactorSecret(auth.uid, secret, 'totp')
+  await saveTwoFactorSecret(auth.uid, secret, 'totp', auth.authTime)
   return { success: true }
 })

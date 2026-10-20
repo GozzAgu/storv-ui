@@ -382,7 +382,7 @@ describe('firestore.rules', () => {
     )
   })
 
-  it('allows plain staff to create a swap-in inventory item', async () => {
+  it('denies plain staff creating a swap-in item directly (the sale route creates it)', async () => {
     await testEnv.withSecurityRulesDisabled(async (context) => {
       await seedOwner(context, 'u1', 'storvv_medium')
       await seedStore(context, 'u1', 's1')
@@ -390,7 +390,7 @@ describe('firestore.rules', () => {
     })
 
     const db = testEnv.authenticatedContext('staff1').firestore()
-    await assertSucceeds(
+    await assertFails(
       setDoc(doc(db, 'users/u1/stores/s1/inventoryItems/swap1'), {
         storeId: 's1',
         folderId: 'f1',
@@ -419,7 +419,7 @@ describe('firestore.rules', () => {
     )
   })
 
-  it('allows plain staff to link a swap-in item to its receipt once', async () => {
+  it('denies plain staff linking a swap-in item themselves (the sale route links it)', async () => {
     await testEnv.withSecurityRulesDisabled(async (context) => {
       await seedOwner(context, 'u1', 'storvv_medium')
       await seedStore(context, 'u1', 's1')
@@ -434,7 +434,7 @@ describe('firestore.rules', () => {
 
     const db = testEnv.authenticatedContext('staff1').firestore()
     const ref = doc(db, 'users/u1/stores/s1/inventoryItems/swap1')
-    await assertSucceeds(updateDoc(ref, { swapInReceiptId: 'r1' }))
+    await assertFails(updateDoc(ref, { swapInReceiptId: 'r1' }))
     await assertFails(updateDoc(ref, { swapInReceiptId: 'r2' }))
     await assertFails(updateDoc(ref, { name: 'Renamed' }))
   })
@@ -531,7 +531,7 @@ describe('firestore.rules', () => {
     )
   }
 
-  it('allows staff granted canManageReceipts to refund a completed receipt', async () => {
+  it('denies staff with the refund grant refunding directly (POST /api/sales/refund does it)', async () => {
     await testEnv.withSecurityRulesDisabled(async (context) => {
       await seedOwner(context, 'u1', 'storvv_medium')
       await seedStore(context, 'u1', 's1')
@@ -540,7 +540,7 @@ describe('firestore.rules', () => {
     })
 
     const db = testEnv.authenticatedContext('staff1').firestore()
-    await assertSucceeds(
+    await assertFails(
       updateDoc(doc(db, 'users/u1/stores/s1/receipts/r1'), {
         status: 'refunded',
         refundReason: 'Customer changed their mind',
@@ -682,7 +682,7 @@ describe('firestore.rules', () => {
     await assertFails(deleteDoc(doc(db, 'users/u1/stores/s1/inventoryFolders/f1')))
   })
 
-  it('permission-map: allows refund via receipts.refund grant (not tied to any role)', async () => {
+  it('permission-map: a receipts.refund grant no longer refunds with a client write', async () => {
     await testEnv.withSecurityRulesDisabled(async (context) => {
       await seedOwner(context, 'u1', 'storvv_medium')
       await seedStore(context, 'u1', 's1')
@@ -694,7 +694,7 @@ describe('firestore.rules', () => {
     })
 
     const db = testEnv.authenticatedContext('refunder1').firestore()
-    await assertSucceeds(
+    await assertFails(
       updateDoc(doc(db, 'users/u1/stores/s1/receipts/r1'), {
         status: 'refunded',
         refundReason: 'Customer changed their mind',
@@ -725,7 +725,7 @@ describe('firestore.rules', () => {
     )
   })
 
-  it('permission-map: any active member (even view-only) can still create a receipt via POS', async () => {
+  it('permission-map: no member can create a receipt directly (POST /api/sales/create records sales)', async () => {
     await testEnv.withSecurityRulesDisabled(async (context) => {
       await seedOwner(context, 'u1', 'storvv_medium')
       await seedStore(context, 'u1', 's1')
@@ -736,7 +736,7 @@ describe('firestore.rules', () => {
     })
 
     const db = testEnv.authenticatedContext('plain2').firestore()
-    await assertSucceeds(
+    await assertFails(
       setDoc(doc(db, 'users/u1/stores/s1/receipts/r2'), {
         receiptNumber: 'R-2',
         customerName: 'Jane Doe',
@@ -1004,7 +1004,7 @@ describe('firestore.rules', () => {
 
   // Field allowlists must also cover fields being added or removed (affectedKeys, not changedKeys).
   describe('narrow update carve-outs reject added and removed fields', () => {
-    it('inventory sale: plain staff cannot add a discount while marking sold', async () => {
+    it('inventory sale: plain staff cannot mark stock sold at all', async () => {
       await testEnv.withSecurityRulesDisabled(async (context) => {
         await seedOwner(context, 'u1', 'storvv_medium')
         await seedStore(context, 'u1', 's1')
@@ -1021,7 +1021,7 @@ describe('firestore.rules', () => {
       const ref = doc(db, 'users/u1/stores/s1/inventoryItems/i1')
       await assertFails(updateDoc(ref, { dateOut: new Date(), discountAmount: 400 }))
       await assertFails(updateDoc(ref, { dateOut: new Date(), price: deleteField() }))
-      await assertSucceeds(updateDoc(ref, { dateOut: new Date(), updatedAt: new Date() }))
+      await assertFails(updateDoc(ref, { dateOut: new Date(), updatedAt: new Date() }))
     })
 
     it('swap-in link: plain staff cannot add other fields with the receipt link', async () => {
@@ -1060,7 +1060,7 @@ describe('firestore.rules', () => {
       )
     })
 
-    it('balance payment: staff cannot add or remove fields beyond the payment keys', async () => {
+    it('balance payment: staff cannot record a payment with a client write', async () => {
       await testEnv.withSecurityRulesDisabled(async (context) => {
         await seedOwner(context, 'u1', 'storvv_medium')
         await seedStore(context, 'u1', 's1')
@@ -1080,7 +1080,7 @@ describe('firestore.rules', () => {
       const ref = doc(db, 'users/u1/stores/s1/receipts/r2')
       await assertFails(updateDoc(ref, { amountPaid: 1000, balanceDue: 0, discount: 600 }))
       await assertFails(updateDoc(ref, { amountPaid: 1000, balanceDue: 0, total: deleteField() }))
-      await assertSucceeds(
+      await assertFails(
         updateDoc(ref, {
           amountPaid: 1000,
           balanceDue: 0,
@@ -1091,7 +1091,7 @@ describe('firestore.rules', () => {
       )
     })
 
-    it('stock loan: POS staff can still mark a loan sold (adds soldAt)', async () => {
+    it('stock loan: POS staff cannot mark a loan sold (managers do it through the server)', async () => {
       await testEnv.withSecurityRulesDisabled(async (context) => {
         await seedOwner(context, 'u1', 'storvv_enterprise')
         await seedStore(context, 'u1', 's1')
@@ -1105,7 +1105,7 @@ describe('firestore.rules', () => {
 
       const db = testEnv.authenticatedContext('staff1').firestore()
       const ref = doc(db, 'users/u1/stores/s1/sellerLoanOuts/l1')
-      await assertSucceeds(
+      await assertFails(
         updateDoc(ref, { status: 'sold', soldAt: new Date(), updatedAt: new Date() })
       )
     })

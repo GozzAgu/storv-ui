@@ -6,6 +6,7 @@ import type {
 } from '~/types/storefront'
 import { legacyPaymentLinksEnabled } from '~/server/utils/legacy-payment-links'
 import { resolveCategoryKind } from '~/utils/category-kinds'
+import { effectiveListingAvailability } from '~/server/utils/storefront-reservation'
 
 /** Listings carry their writer's owner and store; only the storefront owner's own items count. */
 export function isListingOfStore(
@@ -60,7 +61,8 @@ export function publicStorefrontListingDto(
     title: item.title,
     price: item.price,
     currency: item.currency || null,
-    availability: item.availability,
+    // A lapsed guest hold shows as available before the cron releases it.
+    availability: effectiveListingAvailability(item),
     categoryPath: item.categoryPath,
     categoryName: item.categoryName,
     // Listings saved before kinds existed have none; guess from the names until they resync.

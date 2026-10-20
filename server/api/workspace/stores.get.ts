@@ -2,13 +2,9 @@ import { createError, defineEventHandler } from 'h3'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
 import { rethrowFirebaseAdminSetupError } from '~/server/utils/firebase-admin-errors'
 import { requireAuth } from '~/server/utils/store-auth'
-import { resolveStaffWorkspaceOwnerId } from '~/server/utils/staff-workspace'
+import { findStaffDocForLogin, resolveStaffWorkspaceOwnerId } from '~/server/utils/staff-workspace'
 import { normalizeStaffAdminGrants } from '~/utils/staff-permissions'
 import { resolveEffectiveSubscriptionPlan, type SubscriptionPlan } from '~/types/subscription'
-
-function isActiveStaffStatus(status: unknown): boolean {
-  return (status || 'active') === 'active'
-}
 
 /**
  * List every branch under the workspace for the owner, or for a branch admin the owner
@@ -31,12 +27,7 @@ export default defineEventHandler(async (event) => {
   const ownerSnap = await adminDb.collection('users').doc(auth.uid).get()
   if (!ownerSnap.exists || ownerSnap.data()?.role !== 'superAdmin') {
     callerIsOwner = false
-    const staffSnap = await adminDb
-      .collectionGroup('staff')
-      .where('authUid', '==', auth.uid)
-      .limit(5)
-      .get()
-    const activeStaffDoc = staffSnap.docs.find((d) => isActiveStaffStatus(d.data()?.status))
+    const activeStaffDoc = await findStaffDocForLogin(adminDb, auth.decoded)
     if (!activeStaffDoc) {
       throw createError({ statusCode: 403, message: 'Active staff membership required' })
     }

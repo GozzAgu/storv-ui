@@ -302,10 +302,15 @@ export const useStorefrontStore = defineStore('storefront', {
   },
 })
 
-/** Authenticated slug check via Admin API (avoids leaking unpublished profiles). */
-export async function isStorefrontSlugTaken(slug: string, ownerUid: string): Promise<boolean> {
+/**
+ * Authenticated slug check via Admin API (avoids leaking unpublished profiles). The server
+ * reads the caller from the ID token, so a slug this account's store already owns is not "taken".
+ */
+export async function isStorefrontSlugTaken(slug: string): Promise<boolean> {
+  const token = await useAuthStore().currentUser?.getIdToken()
   const res = await $fetch<{ available: boolean }>('/api/storefront/slug-available', {
-    query: { slug, ownerUid },
+    query: { slug },
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
   })
   return !res.available
 }

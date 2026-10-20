@@ -2,7 +2,7 @@ import { createError, defineEventHandler } from 'h3'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
 import { rethrowFirebaseAdminSetupError } from '~/server/utils/firebase-admin-errors'
 import { requireAuth } from '~/server/utils/store-auth'
-import { resolveStaffWorkspaceOwnerId } from '~/server/utils/staff-workspace'
+import { findStaffDocForLogin, resolveStaffWorkspaceOwnerId } from '~/server/utils/staff-workspace'
 import type { MainStoreSummaryResponse } from '~/types/main-store-summary'
 import { pickMainStore, summarizeStoreInventory } from '~/utils/main-store-summary'
 import { resolveStaffPermissions, type LegacyStaffAccessFields } from '~/utils/staff-permissions'
@@ -38,12 +38,7 @@ export default defineEventHandler(async (event): Promise<MainStoreSummaryRespons
     rethrowFirebaseAdminSetupError(err, 'load')
   }
 
-  const staffSnap = await adminDb
-    .collectionGroup('staff')
-    .where('authUid', '==', auth.uid)
-    .limit(5)
-    .get()
-  const staffDoc = staffSnap.docs.find((d) => (d.data()?.status || 'active') === 'active')
+  const staffDoc = await findStaffDocForLogin(adminDb, auth.decoded)
   if (!staffDoc) {
     throw createError({ statusCode: 403, message: 'Active staff membership required' })
   }

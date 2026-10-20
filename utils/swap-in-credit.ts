@@ -3,9 +3,13 @@ type SwapInField = { name: string; label?: string; type?: string }
 /** Status filter on the Inventory Swap-ins tab. */
 export type SwapInStatusFilter = 'in-stock' | 'no-price' | 'sold' | 'all'
 
+export function isSwapInStatusFilter(value: unknown): value is SwapInStatusFilter {
+  return value === 'in-stock' || value === 'no-price' || value === 'sold' || value === 'all'
+}
+
 export const SWAP_IN_STATUS_OPTIONS: Array<{ value: SwapInStatusFilter; label: string }> = [
+  { value: 'no-price', label: 'Needs a price' },
   { value: 'in-stock', label: 'In stock' },
-  { value: 'no-price', label: 'No price' },
   { value: 'sold', label: 'Sold' },
   { value: 'all', label: 'All swap-ins' },
 ]
@@ -52,4 +56,27 @@ export function swapInCredit(
 ): number {
   const field = swapInCreditField(fields)
   return toCredit(field ? form[field] : swapValue)
+}
+
+export type SwapInFormField = SwapInField & { required?: boolean; options?: string[] }
+
+/** Swap-in form for a category with no template: the default inventory table columns. */
+export const SWAP_IN_DEFAULT_FIELDS: SwapInFormField[] = [
+  { name: 'name', label: 'Product', type: 'text', required: true },
+  { name: 'sku', label: 'SKU', type: 'text', required: false },
+  { name: 'price', label: 'Price', type: 'currency', required: true },
+]
+
+/** Fields shown on the swap-in form: the category's template fields except model. */
+export function swapInFormFields(
+  folder:
+    | {
+        template?: { fields?: SwapInFormField[] }
+      }
+    | null
+    | undefined
+): SwapInFormField[] {
+  const fields = folder?.template?.fields
+  if (fields && fields.length > 0) return fields.filter((f) => f.name !== 'model')
+  return SWAP_IN_DEFAULT_FIELDS
 }

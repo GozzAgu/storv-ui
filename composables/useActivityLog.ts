@@ -166,8 +166,12 @@ export async function logActivity(params: LogActivityParams): Promise<void> {
     }
     const logsRef = getActivityLogsCollection(db, userId, params.storeId)
     const logRef = doc(logsRef)
+    // Always the person signed in: firestore.rules refuse logs written in someone else's name.
+    const { useAuthStore } = await import('~/stores/auth')
+    const actorUid = useAuthStore().currentUser?.uid
+    if (!actorUid) return
     await setDoc(logRef, {
-      userId: params.userId,
+      userId: actorUid,
       userDisplayName: params.userDisplayName,
       action: params.action,
       entityType: params.entityType,

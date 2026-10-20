@@ -1,4 +1,5 @@
 import { randomBytes } from 'node:crypto'
+import { STAFF_OWNER_CLAIM } from '~/server/utils/staff-login-target'
 import { createError, defineEventHandler, readBody } from 'h3'
 import { getAdminAuth, getAdminFirestore } from '~/server/utils/firebase-admin'
 import { rethrowFirebaseAdminSetupError } from '~/server/utils/firebase-admin-errors'
@@ -75,6 +76,8 @@ export default defineEventHandler(async (event) => {
       displayName: `${fields.firstName} ${fields.lastName}`.trim(),
     })
     authUid = user.uid
+    // The login belongs to this business; staff routes check this before touching it.
+    await adminAuth.setCustomUserClaims(authUid, { [STAFF_OWNER_CLAIM]: ownerUserId })
   } catch (err: unknown) {
     const code = (err as { code?: string })?.code
     if (code === 'auth/email-already-exists') {

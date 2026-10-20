@@ -52,7 +52,21 @@ export async function requireAuth(
   options: RequireAuthOptions = {}
 ): Promise<AuthContext> {
   const token = getBearerToken(event)
-  const decoded = await getAdminAuth().verifyIdToken(token)
+  // checkRevoked: a disabled staff login or signed-out session stops working at once, not when
+  // its ID token expires an hour later.
+  let decoded: DecodedIdToken
+  try {
+    decoded = await getAdminAuth().verifyIdToken(token, true)
+  } catch (err) {
+    const code = (err as { code?: string })?.code
+    if (code === 'auth/user-disabled' || code === 'auth/id-token-revoked') {
+      throw createError({
+        statusCode: 401,
+        message: 'This sign-in is no longer valid. Sign in again.',
+      })
+    }
+    throw err
+  }
   const twoFactorEnabled = await resolveTwoFactorEnabled(decoded)
   const twoFactorVerified = !twoFactorEnabled || isTwoFactorVerifiedForSession(decoded)
   const emailVerified = decoded.email_verified === true

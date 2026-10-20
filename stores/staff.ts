@@ -3,8 +3,6 @@ import { assertPlanWritable } from '~/utils/plan-view-only'
 import { CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import {
   collection,
-  doc,
-  setDoc,
   getDoc,
   getDocs,
   updateDoc,
@@ -15,7 +13,6 @@ import {
   deleteField,
   collectionGroup,
   onSnapshot,
-  type Firestore,
 } from 'firebase/firestore'
 import { useFirestore } from '~/composables/useFirestore'
 import { useAppToast } from '~/composables/useAppToast'
@@ -127,30 +124,6 @@ async function assertStaffPlanCapacity(storeId: string): Promise<void> {
   if (maxStaff >= 0 && staffCountInStore >= maxStaff) {
     throw new Error(staffLimitReachedMessage(plan, maxStaff, isTrialActive(userStore.userData)))
   }
-}
-
-const getStoreMemberDoc = (db: Firestore, userId: string, storeId: string, memberAuthUid: string) =>
-  doc(db, `users/${userId}/stores/${storeId}/members/${memberAuthUid}`)
-
-const getWorkspaceMemberDoc = (db: Firestore, ownerUserId: string, memberAuthUid: string) =>
-  doc(db, `users/${ownerUserId}/workspaceMembers/${memberAuthUid}`)
-
-async function syncWorkspaceMemberIndex(
-  db: Firestore,
-  ownerUserId: string,
-  memberAuthUid: string,
-  payload: { storeId: string; status: string }
-) {
-  await setDoc(
-    getWorkspaceMemberDoc(db, ownerUserId, memberAuthUid),
-    {
-      authUid: memberAuthUid,
-      storeId: payload.storeId,
-      status: payload.status || 'active',
-      updatedAt: serverTimestamp(),
-    },
-    { merge: true }
-  )
 }
 
 export const useStaffStore = defineStore('staff', {
@@ -282,45 +255,10 @@ export const useStaffStore = defineStore('staff', {
 
         const activeStaff = allStaff.filter((s) => isActiveStaffStatus(s.status))
 
-        // Security rules now rely on members docs for store-level authorization.
-        // Backfill missing membership docs when super admin fetches staff.
-        if (authStore.currentUser.uid === userId) {
-          await Promise.allSettled(
-            activeStaff
-              .filter((s) => s.authUid)
-              .map(async (s) => {
-                const authUid = s.authUid as string
-                await setDoc(
-                  getStoreMemberDoc(db, userId, storeId, authUid),
-                  {
-                    authUid,
-                    staffId: s.id,
-                    storeId,
-                    departmentId: s.departmentId,
-                    status: s.status || 'active',
-                    ...(s.permissions
-                      ? {
-                          permissions: s.permissions,
-                          role: deleteField(),
-                          canManageInventory: deleteField(),
-                          canManageReceipts: deleteField(),
-                        }
-                      : {
-                          role: s.role || 'staff',
-                          canManageInventory: s.canManageInventory === true ? true : deleteField(),
-                          canManageReceipts: s.canManageReceipts === true ? true : deleteField(),
-                        }),
-                    createdBy: userId,
-                    updatedAt: serverTimestamp(),
-                  },
-                  { merge: true }
-                )
-                await syncWorkspaceMemberIndex(db, userId, authUid, {
-                  storeId,
-                  status: s.status || 'active',
-                })
-              })
-          )
+        // Memberships are server-written: the plan-tier sync creates any that are missing.
+        if (authStore.currentUser.uid === userId && activeStaff.some((s) => s.authUid)) {
+          const { requestPlanTierSyncOnce } = await import('~/utils/plan-tier-sync-client')
+          requestPlanTierSyncOnce(userId)
         }
 
         // Populate department names

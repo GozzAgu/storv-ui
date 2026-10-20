@@ -110,6 +110,17 @@ export async function recordManualPayments(
   })
   const awaiting = result.payments.filter((p) => p.status === 'awaiting_confirmation').length
   if (awaiting) await notifyAwaitingConfirmation(db, scopeOf(access), receiptId, awaiting)
+  if (result.saleCompleted) {
+    // A held sale is now paid: commit its stock here (the client used to).
+    const { commitCompletedSaleStock } = await import('~/server/utils/sales/balance')
+    await commitCompletedSaleStock(db, access.ownerId, access.storeId, receiptId).catch((err) =>
+      console.error(
+        '[payments] stock commit failed',
+        receiptId,
+        err instanceof Error ? err.message : err
+      )
+    )
+  }
   return result
 }
 

@@ -2,6 +2,7 @@ import { defineEventHandler, getHeader, getRequestURL, setHeader } from 'h3'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
 import { renderStorefrontOgHtml } from '~/server/utils/storefront-og-html'
 import { isListingOfStore } from '~/server/utils/storefront-public-dto'
+import { effectiveListingAvailability } from '~/server/utils/storefront-reservation'
 import { formatStorefrontMoney, isLinkPreviewBot } from '~/utils/storefront-share'
 import type { StorefrontPublicListing, StorefrontPublicProfile } from '~/types/storefront'
 
@@ -44,10 +45,11 @@ export default defineEventHandler(async (event) => {
       if (!item.isListed || !isListingOfStore(item, profile.ownerUid, profile.storeId)) return
 
       const price = formatStorefrontMoney(item.price, item.currency || profile.currency)
+      const availability = effectiveListingAvailability(item)
       const avail =
-        item.availability === 'available'
+        availability === 'available'
           ? 'Available'
-          : item.availability === 'reserved'
+          : availability === 'reserved'
           ? 'Reserved'
           : 'Unavailable'
       const title = `${item.title} · ${profile.displayName}`

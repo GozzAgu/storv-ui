@@ -6,11 +6,31 @@ import {
 } from '~/utils/dashboard-help-content'
 import { generateGeminiAssistantReply } from '~/server/utils/gemini-assistant'
 import { getGeminiApiKey, getGeminiModel, isAssistantEnabled } from '~/server/utils/gemini-config'
+import { assertRateLimit } from '~/server/utils/rate-limit'
 import { requireAuth } from '~/server/utils/store-auth'
+
+/** Each message is a paid model call, so cap how fast and how much one account can send. */
+const ASSISTANT_PER_MINUTE_LIMIT = 20
+const ASSISTANT_DAILY_LIMIT = 200
 
 export default defineEventHandler(async (event) => {
   if (!isAssistantEnabled()) throw createError({ statusCode: 404, message: 'Not found' })
-  await requireAuth(event)
+  const { uid } = await requireAuth(event)
+
+  await assertRateLimit(event, {
+    id: 'assistant-chat-minute',
+    uid,
+    limit: ASSISTANT_PER_MINUTE_LIMIT,
+    windowMs: 60_000,
+  })
+  // A per-instance memory count is no daily cap, so production needs the shared limiter.
+  await assertRateLimit(event, {
+    id: 'assistant-chat-day',
+    uid,
+    limit: ASSISTANT_DAILY_LIMIT,
+    windowMs: 24 * 60 * 60 * 1000,
+    requireDistributed: true,
+  })
 
   const apiKey = getGeminiApiKey()
   if (!apiKey) {

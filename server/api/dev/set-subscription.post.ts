@@ -3,7 +3,7 @@ import { FieldValue } from 'firebase-admin/firestore'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
 import { requireAuth } from '~/server/utils/store-auth'
 import { applySubscriptionToUser } from '~/server/utils/paystack-subscription'
-import { VALID_PLANS } from '~/server/utils/paystack-validation'
+import { resolvePaystackSecretKey, VALID_PLANS } from '~/server/utils/paystack-validation'
 import type { SubscriptionPlan } from '~/types/subscription'
 import { normalizeSubscriptionPlan } from '~/types/subscription'
 import type { SubscriptionBillingCycle } from '~/types/subscription-billing'
@@ -13,10 +13,10 @@ import { isDevPlanSwitcherAllowed } from '~/server/utils/dev-plan-switcher'
 /**
  * Dev/QA only: set the account owner’s plan without Paystack.
  * Enabled in NODE_ENV=development or when NUXT_PUBLIC_ALLOW_DEV_PLAN_SWITCHER=1,
- * and never when a live Paystack key is configured.
+ * and never on Vercel production or when a live Paystack key is configured.
  */
 export default defineEventHandler(async (event) => {
-  if (!isDevPlanSwitcherAllowed()) {
+  if (!isDevPlanSwitcherAllowed(process.env, resolvePaystackSecretKey(useRuntimeConfig()))) {
     throw createError({ statusCode: 404, message: 'Not found' })
   }
 

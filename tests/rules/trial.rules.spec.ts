@@ -7,7 +7,7 @@ import {
   initializeTestEnvironment,
   type RulesTestEnvironment,
 } from '@firebase/rules-unit-testing'
-import { Timestamp, doc, setDoc, updateDoc } from 'firebase/firestore'
+import { Timestamp, deleteDoc, doc, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore'
 
 const DAY = 86_400_000
 
@@ -84,6 +84,26 @@ describe('firestore.rules: free trial', () => {
         trialEndsAt: Timestamp.fromMillis(Date.now() + 3650 * DAY),
       })
     )
+  })
+
+  it('does not let an owner delete their account doc to reset the trial', async () => {
+    await seedOwner('storvv_micro', Timestamp.fromMillis(Date.now() - DAY))
+    await assertFails(deleteDoc(doc(testEnv.authenticatedContext('u1').firestore(), 'users/u1')))
+  })
+
+  it('only accepts the server clock as the new account date', async () => {
+    const db = testEnv.authenticatedContext('u2').firestore()
+    const base = {
+      uid: 'u2',
+      role: 'superAdmin',
+      subscription: 'storvv_micro',
+      hasCompletedOnboarding: false,
+      hasCompletedTutorial: false,
+    }
+    await assertFails(
+      setDoc(doc(db, 'users/u2'), { ...base, createdAt: Timestamp.fromMillis(Date.now()) })
+    )
+    await assertSucceeds(setDoc(doc(db, 'users/u2'), { ...base, createdAt: serverTimestamp() }))
   })
 
   it('does not let an owner move their own trial date', async () => {

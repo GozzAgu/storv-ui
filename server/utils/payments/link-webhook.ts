@@ -197,7 +197,13 @@ async function applyCharge(
         items: [{ paymentId: link.paymentId, to: 'confirmed', flags }],
         extraWrites: (w, at) => {
           w.update(paymentRef, { reference: charge.reference })
-          if (Object.keys(mirror.update).length) w.update(ctx.ref, mirror.update)
+          if (Object.keys(mirror.update).length) {
+            // The stock is committed right here, so nothing commits it again later.
+            w.update(
+              ctx.ref,
+              mirror.completed ? { ...mirror.update, stockCommittedAt: at } : mirror.update
+            )
+          }
           stock?.apply(w)
           w.update(linkRef, {
             status: 'paid',

@@ -1,8 +1,11 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
+    // Signed in, and for accounts with 2FA on, this sign-in passed it (see firestore.rules).
     function isAuthenticated() {
-      return request.auth != null;
+      return request.auth != null &&
+        (request.auth.token.get('twoFactorEnabled', false) != true ||
+         request.auth.token.auth_time in request.auth.token.get('tfaSessions', []));
     }
 
     function ownsStore(userId, storeId) {
@@ -20,6 +23,25 @@ service firebase.storage {
 
     function canAccessStoreAssets(userId, storeId) {
       return ownsStore(userId, storeId) || hasActiveStoreMembership(userId, storeId);
+    }
+
+    // Replacing or deleting a store's images (logos, product photos): owner, branch admin, or a
+    // member who manages products. Other members may only add new files. The membership is read
+    // once: Storage rules allow only a few Firestore reads per request.
+    function memberManagesProducts(member) {
+      return member.get('status', '') == 'active' && (
+        member.get('admin', false) == true ||
+        member.get('permissions', {}).get('products', {}).get('edit', false) == true ||
+        member.get('canManageInventory', false) == true
+      );
+    }
+
+    function canManageStoreAssets(userId, storeId) {
+      return ownsStore(userId, storeId) || (
+        isAuthenticated() &&
+        firestore.exists(/databases/(default)/documents/users/$(userId)/stores/$(storeId)/members/$(request.auth.uid)) &&
+        memberManagesProducts(firestore.get(/databases/(default)/documents/users/$(userId)/stores/$(storeId)/members/$(request.auth.uid)).data)
+      );
     }
 
     // Every image is converted to WebP of at most 30 KB on the device (utils/image-upload.ts).
@@ -41,8 +63,12 @@ service firebase.storage {
     // Store images (for store-scoped uploads)
     // Path format: stores/{userId}/{storeId}/...
     match /stores/{userId}/{storeId}/{allPaths=**} {
-      allow read, delete: if canAccessStoreAssets(userId, storeId);
-      allow create, update: if canAccessStoreAssets(userId, storeId) && isAllowedImageUpload();
+      allow read: if canAccessStoreAssets(userId, storeId);
+      // Writing over an existing file needs a product manager, however the write is classed.
+      allow create: if canAccessStoreAssets(userId, storeId) && isAllowedImageUpload() &&
+        (resource == null || canManageStoreAssets(userId, storeId));
+      allow update: if canManageStoreAssets(userId, storeId) && isAllowedImageUpload();
+      allow delete: if canManageStoreAssets(userId, storeId);
     }
 
     // Payment proofs (transfer screenshots). Kept outside stores/ so the store-wide asset rule

@@ -29,9 +29,37 @@ function sniffImageMime(buffer: Buffer): string | null {
   return null
 }
 
+/** Largest image the proxy will pass through; logos and product photos are far smaller. */
+export const PROXY_IMAGE_MAX_BYTES = 2 * 1024 * 1024
+const PROXY_IMAGE_TIMEOUT_MS = 5000
+
+function tooLarge() {
+  return createError({ statusCode: 413, message: 'Image is too large' })
+}
+
+/** Reads the body but stops (and cancels the download) once it passes `maxBytes`. */
+export async function readBodyWithLimit(response: Response, maxBytes: number): Promise<Buffer> {
+  if (!response.body) return Buffer.alloc(0)
+  const reader = response.body.getReader()
+  const chunks: Uint8Array[] = []
+  let total = 0
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) break
+    total += value.byteLength
+    if (total > maxBytes) {
+      await reader.cancel().catch(() => undefined)
+      throw tooLarge()
+    }
+    chunks.push(value)
+  }
+  return Buffer.concat(chunks, total)
+}
+
 /**
  * Validates URL and fetches image bytes. Used by GET and POST /api/proxy-image.
  * Long URLs (e.g. Firebase with tokens) must use POST; GET query strings are often limited.
+ * Redirects are refused (a redirect could leave the allowed hosts), as are slow or large responses.
  */
 export async function getProxiedImageForUrl(
   url: string
@@ -42,13 +70,25 @@ export async function getProxiedImageForUrl(
     headers: {
       'User-Agent': 'StorvReceipt/1.0',
     },
+    redirect: 'manual',
+    signal: AbortSignal.timeout(PROXY_IMAGE_TIMEOUT_MS),
   }).catch(() => null)
 
+  // With `redirect: 'manual'` a 3xx comes back as-is (not ok), so it fails here unfollowed.
   if (!response?.ok) {
     throw createError({ statusCode: 502, message: 'Failed to fetch image' })
   }
 
-  const buffer = Buffer.from(await response.arrayBuffer())
+  const declaredLength = Number(response.headers.get('content-length'))
+  if (Number.isFinite(declaredLength) && declaredLength > PROXY_IMAGE_MAX_BYTES) {
+    await response.body?.cancel().catch(() => undefined)
+    throw tooLarge()
+  }
+
+  const buffer = await readBodyWithLimit(response, PROXY_IMAGE_MAX_BYTES).catch((err) => {
+    if ((err as { statusCode?: number })?.statusCode === 413) throw err
+    throw createError({ statusCode: 502, message: 'Failed to fetch image' })
+  })
   const contentTypeHeader = (response.headers.get('content-type') || '').split(';').shift() ?? ''
   let contentType = contentTypeHeader.trim().toLowerCase()
   if (!contentType.startsWith('image/')) {

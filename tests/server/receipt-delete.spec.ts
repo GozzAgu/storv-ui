@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   computeCustomerAfterReceiptDelete,
   receiptDeleteBlockReason,
+  receiptDeleteStockAction,
 } from '~/server/utils/receipt-delete'
 
 describe('receipt delete customer consistency', () => {
@@ -40,5 +41,22 @@ describe('receiptDeleteBlockReason', () => {
 
   it('refuses a partner stock-loan sale', () => {
     expect(receiptDeleteBlockReason({ tradeLoanId: 'loan1' })).toMatch(/partner/)
+  })
+})
+
+describe('receiptDeleteStockAction', () => {
+  it('puts stock back only for a completed sale', () => {
+    expect(receiptDeleteStockAction('completed')).toBe('restore')
+    expect(receiptDeleteStockAction(undefined)).toBe('restore')
+  })
+
+  it('releases the hold on a balance-due sale instead of adding stock', () => {
+    expect(receiptDeleteStockAction('balance_due')).toBe('release_hold')
+  })
+
+  it('never restores stock a refund or cancel already returned', () => {
+    expect(receiptDeleteStockAction('refunded')).toBe('none')
+    expect(receiptDeleteStockAction('cancelled')).toBe('none')
+    expect(receiptDeleteStockAction('pending')).toBe('none')
   })
 })

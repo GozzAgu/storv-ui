@@ -63,6 +63,7 @@ export default defineEventHandler(async (event) => {
     email?: string
     status?: string
     createdBy?: string
+    createdAt?: unknown
     role?: string
     admin?: boolean
   }
@@ -86,9 +87,16 @@ export default defineEventHandler(async (event) => {
 
   if (authUid) {
     const adminAuth = getAdminAuth()
-    if (await assertStaffLoginTarget(adminDb, adminAuth, authUid, staff.email)) {
+    if (
+      await assertStaffLoginTarget(adminDb, adminAuth, authUid, staff.email, {
+        ownerUserId,
+        staffCreatedAt: staff.createdAt,
+      })
+    ) {
       try {
         await adminAuth.updateUser(authUid, { disabled: true })
+        // End sessions already open on their devices too.
+        await adminAuth.revokeRefreshTokens(authUid)
       } catch (err: unknown) {
         const code = (err as { code?: string })?.code
         if (code !== 'auth/user-not-found') {

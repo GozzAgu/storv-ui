@@ -850,6 +850,14 @@
       />
     </template>
   </SDialog>
+
+  <ApprovalPinDialog
+    v-model:open="approvalOpen"
+    :reason="approvalReason"
+    :error="approvalError"
+    :busy="isCreating"
+    @approve="submitSale"
+  />
 </template>
 
 <script setup lang="ts">
@@ -859,6 +867,18 @@ import SSlideToConfirm from '~/components/s/SSlideToConfirm.vue'
 import { useHaptics } from '~/composables/useHaptics'
 import { useMinWidthQuery } from '~/composables/useMinWidthQuery'
 import { STAFF_DISCOUNT_LIMIT_PERCENT, useSensitiveAction } from '~/composables/useSensitiveAction'
+import ApprovalPinDialog from '~/components/receipts/ApprovalPinDialog.vue'
+import {
+  useSalesApi,
+  toSaleApiError,
+  type CreateSaleBody,
+  type SaleApproval,
+} from '~/composables/useSalesApi'
+import { usePermissions } from '~/composables/usePermissions'
+import { useAppToast } from '~/composables/useAppToast'
+import { isDemoModeActive } from '~/utils/demo-mode'
+import { newSaleId } from '~/utils/sales-outbox'
+import { invalidateFolderItemCaches } from '~/utils/inventory-items-firestore'
 import SField from '~/components/s/SField.vue'
 import SForm from '~/components/s/SForm.vue'
 import SFormSection from '~/components/s/SFormSection.vue'
@@ -903,6 +923,7 @@ import {
   type CustomerSuggestField,
 } from '~/utils/customer-suggest'
 import { useStoresStore } from '~/stores/stores'
+import { useNotificationsStore } from '~/stores/notifications'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useStaffStore } from '~/stores/staff'
@@ -946,6 +967,16 @@ const { formatCurrency, preferences } = usePreferences()
 const haptics = useHaptics()
 const paymentsV2 = usePaymentsV2()
 const { confirm: confirmSensitive } = useSensitiveAction()
+const salesApi = useSalesApi()
+const appToast = useAppToast()
+const { isStoreOwner, isAdmin, canEditReceipts } = usePermissions()
+/** Owner, branch admin or receipts editor: their own big discounts and trade-ins need no PIN. */
+const canApproveSales = computed(() => isStoreOwner.value || isAdmin.value || canEditReceipts.value)
+const approvalOpen = ref(false)
+const approvalReason = ref('')
+const approvalError = ref<string | null>(null)
+/** Kept across approval retries and offline queueing so one sale is recorded once. */
+const pendingSaleId = ref<string | null>(null)
 const isAtLeastSm = useMinWidthQuery(640)
 const isPhone = computed(() => !isAtLeastSm.value)
 const { defaultPaymentMethod, paymentTenderOptions } = usePaymentTenders()
@@ -1871,7 +1902,145 @@ const exceedsStaffDiscountLimit = () =>
 
 const handleCreateReceipt = async () => {
   if (!isFormValid.value || selectedItems.value.length === 0 || isCreating.value) return
+  if (isDemoModeActive()) return createReceiptLocally()
 
+  const reason = saleApprovalReason()
+  if (reason && !canApproveSales.value) {
+    if (import.meta.client && navigator.onLine === false) {
+      appToast.error('A sale that needs manager approval needs an internet connection.')
+      return
+    }
+    approvalReason.value = `${reason} A manager must approve it with their PIN.`
+    approvalError.value = null
+    approvalOpen.value = true
+    return
+  }
+  await submitSale()
+}
+
+/** Why this sale needs a manager's PIN, or null. The server checks the same rules. */
+function saleApprovalReason(): string | null {
+  if (exceedsStaffDiscountLimit()) return 'This sale has a discount above 10%.'
+  if (isSwapIn.value && swapInFolderId.value) return 'This sale takes a trade-in.'
+  return null
+}
+
+function buildSaleBody(): CreateSaleBody {
+  pendingSaleId.value ??= newSaleId()
+  const isBalanceDue = paymentSettlement.value === 'balance_due'
+  return {
+    saleId: pendingSaleId.value,
+    source: 'pos',
+    lines: selectedItems.value.map((si) => ({
+      itemId: si.id,
+      quantity: itemUsesSerialNumbers(si.item) ? 1 : si.quantity,
+      discountAmount: si.discountAmount || 0,
+    })),
+    customer: {
+      name: resolvedCustomerName.value,
+      email: receiptForm.value.customerEmail || '',
+      phone: receiptForm.value.customerPhone || '',
+      address: receiptForm.value.customerAddress || '',
+    },
+    payment: {
+      method: receiptForm.value.paymentMethod,
+      ...(useSplitPayment.value &&
+        splitPayments.value.length > 0 && {
+          split: splitPayments.value.map((p) => ({ method: p.method, amount: p.amount })),
+        }),
+    },
+    settlement: isBalanceDue ? 'balance_due' : 'paid_in_full',
+    deposit: isBalanceDue ? roundMoney(Number(depositAmount.value) || 0) : 0,
+    notes: receiptForm.value.notes || '',
+    ...(hasAnyCheckoutDiscount.value && { discountReason: discountReason.value.trim() }),
+    ...(isSwapIn.value &&
+      swapInFolderId.value && {
+        swapIn: {
+          folderId: swapInFolderId.value,
+          fields: { ...swapInItemForm.value },
+          swapValue: Number(swapInValue.value) || 0,
+        },
+      }),
+  }
+}
+
+/** Sends the sale to the server (or queues it offline); `approval` comes from the PIN dialog. */
+async function submitSale(approval?: SaleApproval) {
+  if (isCreating.value) return
+  isCreating.value = true
+  approvalError.value = null
+  try {
+    const body = buildSaleBody()
+    const units = body.lines.reduce((n, l) => n + l.quantity, 0)
+    const outcome = await salesApi.createSale(body, {
+      approval,
+      summary: `${units} item${units === 1 ? '' : 's'} · ${formatCurrency(receiptTotal.value)}`,
+    })
+    approvalOpen.value = false
+
+    if (outcome.status === 'queued') {
+      appToast.warning(
+        'No connection. The sale is saved on this device and will be recorded when you are back online.',
+        8000
+      )
+      void haptics.notify('success')
+      pendingSaleId.value = null
+      resetForm()
+      emit('update:modelValue', false)
+      return
+    }
+
+    const { result } = outcome
+    const receipt = receiptsStore.addRecordedSale(result.receipt)
+    if (result.paymentWarning) appToast.warning(result.paymentWarning, 10000)
+    for (const folderId of new Set([...(receipt.folderIds ?? []), receipt.swapInFolderId ?? ''])) {
+      if (!folderId) continue
+      invalidateFolderItemCaches(folderId)
+      delete inventoryStore.items[folderId]
+    }
+    void useSellerLoanOutsStore()
+      .fetchSellerLoanOuts(true)
+      .catch(() => {})
+
+    if (hasCustomerDetails.value) {
+      await customersStore
+        .createOrUpdateCustomerFromReceipt(receipt.id, {
+          customerName: receipt.customerName,
+          customerEmail: receipt.customerEmail || undefined,
+          customerPhone: receipt.customerPhone || undefined,
+          customerAddress: receipt.customerAddress || undefined,
+          total: receipt.total,
+          date: new Date(),
+        })
+        .catch((error: unknown) => console.error('Error creating/updating customer:', error))
+    }
+
+    void haptics.notify('success')
+    emit('receipt-created', receipt)
+    lastCreatedReceiptId.value = receipt.id
+    lastCreatedReceiptData.value = receipt
+    pendingSaleId.value = null
+    resetForm()
+    emit('update:modelValue', false)
+  } catch (err) {
+    const error = toSaleApiError(err)
+    if (error.code === 'APPROVAL_REQUIRED') {
+      approvalReason.value = error.message
+      approvalOpen.value = true
+    } else if (approval && error.code?.startsWith('APPROVAL_PIN')) {
+      approvalError.value = error.message
+    } else if (approvalOpen.value) {
+      approvalError.value = error.message
+    } else {
+      appToast.error(error.message, 9000)
+    }
+  } finally {
+    isCreating.value = false
+  }
+}
+
+/** Demo mode: the sale is recorded on this device only. */
+const createReceiptLocally = async () => {
   isCreating.value = true
   if (exceedsStaffDiscountLimit() && !(await confirmSensitive('discount'))) {
     isCreating.value = false
@@ -1939,6 +2108,8 @@ const handleCreateReceipt = async () => {
 
     // Swap-in first: if adding the traded-in device fails, nothing has been marked sold yet.
     let swapInItemId: string | undefined = undefined
+    /** Name of a swap-in saved without a Unit Price, so the store can be told to price it. */
+    let unpricedSwapInName: string | null = null
     if (isSwapIn.value && swapInFolderId.value && swapInFolder.value) {
       try {
         // Prepare item data from form
@@ -1957,6 +2128,9 @@ const handleCreateReceipt = async () => {
 
         // Create the swap-in inventory item
         swapInItemId = await inventoryStore.createItem(swapInFolderId.value, swapInItemData)
+        if (!hasSaleUnitPrice(swapInItemData)) {
+          unpricedSwapInName = getItemDisplayName(swapInItemData as InventoryItem)
+        }
       } catch (error: any) {
         console.error('Error creating swap-in item:', error)
         throw new Error(`Failed to create swap-in item: ${error.message}`)
@@ -2086,6 +2260,19 @@ const handleCreateReceipt = async () => {
         console.error('Error updating swap-in item with receipt ID:', error)
         // Don't fail receipt creation if swap-in update fails
       }
+    }
+
+    if (swapInItemId && swapInFolderId.value && unpricedSwapInName) {
+      void useNotificationsStore()
+        .createNotification(
+          'swap_in_needs_price',
+          'Swap-in needs a price',
+          `${unpricedSwapInName} was taken in on receipt #${receiptNumber} without a Unit Price. Set one so it can be sold.`,
+          { itemId: swapInItemId, folderId: swapInFolderId.value, receiptId }
+        )
+        .catch((error: unknown) => {
+          console.warn('Failed to create swap-in price notification:', error)
+        })
     }
 
     // Create or update customer automatically

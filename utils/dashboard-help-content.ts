@@ -106,6 +106,7 @@ export const dashboardHelpCategories: DashboardHelpCategory[] = [
           'Super admins can record trade-ins from Inventory → Trade-ins (/dashboard/buybacks). Use this when someone sells an item to your store: you pay them, a new inventory row is created in the leaf category you pick, and the trade-in appears in the list with customer, item, amount paid, and payment method.',
           'Record trade-in opens a side drawer: pick a leaf category (parent · subcategory labels when applicable), fill the item fields for that template, enter amount paid to the customer and payment method, then save. That amount becomes the item unit cost in inventory.',
           'On Create New Sale, super admins can add swap-in / trade-in credit lines when trade-in value applies to a sale. Trade-ins are scoped to the active store in the header switcher.',
+          'A swap-in can be taken in without a Unit Price when you are not sure what it will resell for. It cannot be sold until it has one: the Inventory → Swap-ins tab shows how many need a price and lists them under Needs a price, where Set price saves it in one step. The store also gets a Swap-in needs a price notification, and Overview lists them in a Needs a price card.',
         ],
         bullets: [
           'Only store owners (super admins) can record trade-ins; managers and staff do not see this screen.',

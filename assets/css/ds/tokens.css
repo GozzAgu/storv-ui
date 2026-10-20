@@ -177,6 +177,13 @@
   --s-z-overlay: 40;
   --s-z-modal: 50;
   --s-z-toast: 60;
+
+  /* Loyalty tiers: warm metals for the lower tiers, neutral greys to ink at the top; no blue. */
+  --s-tier-bronze: #9a5b2e;
+  --s-tier-silver: #71717a;
+  --s-tier-gold: #a26b00;
+  --s-tier-platinum: #4b5563;
+  --s-tier-diamond: #18181b;
 }
 
 html.dark {
@@ -250,6 +257,12 @@ html.dark {
   --s-shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.45);
   --s-shadow-lg: 0 16px 40px -8px rgb(0 0 0 / 0.6);
   --s-scrim: rgb(0 0 0 / 0.6);
+
+  --s-tier-bronze: #e0a070;
+  --s-tier-silver: #a1a1aa;
+  --s-tier-gold: #f2c14e;
+  --s-tier-platinum: #c4c9d1;
+  --s-tier-diamond: #f4f4f5;
 }
 
 @media (prefers-reduced-motion: reduce) {

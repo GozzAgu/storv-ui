@@ -226,8 +226,8 @@ describe('firestore.rules: Payments V2', () => {
           sellerLoanOutId: FLAG,
         })
       )
-      // Ordinary stock loans keep working.
-      await assertSucceeds(
+      // Ordinary stock loans are server-written too now (POST /api/stock-loans/create).
+      await assertFails(
         updateDoc(doc(as('cashier1'), FREE), {
           sellerLoanOutId: 'loan42',
           sellerLoanPartyName: 'Walk-in reseller',
@@ -317,7 +317,8 @@ describe('firestore.rules: Payments V2', () => {
           paymentSummary: SUMMARY,
         })
       )
-      await assertSucceeds(
+      // Every sale is server-recorded now (POST /api/sales/create).
+      await assertFails(
         setDoc(doc(as('owner1'), `${STORE}/receipts/new`), { storeId: 's1', total: 10 })
       )
     })
@@ -366,9 +367,9 @@ describe('firestore.rules: Payments V2', () => {
       await assertFails(deleteDoc(doc(as('owner1'), `${STORE}/receipts/locked`)))
     })
 
-    it('legacy receipts without V2 payments behave as before', async () => {
+    it('legacy receipts: the owner can still correct them; cashiers record payments on the server', async () => {
       await assertSucceeds(updateDoc(doc(as('owner1'), `${STORE}/receipts/legacy`), { total: 60 }))
-      await assertSucceeds(
+      await assertFails(
         updateDoc(doc(as('cashier1'), `${STORE}/receipts/legacy`), {
           amountPaid: 60,
           balanceDue: 0,
@@ -399,15 +400,15 @@ describe('firestore.rules: Payments V2', () => {
       )
     })
 
-    it('other permission edits still work when a payments grant exists', async () => {
-      await assertSucceeds(
+    it('memberships are server-written, so other permission edits go through the staff routes', async () => {
+      await assertFails(
         setDoc(
           doc(as('owner1'), `${STORE}/members/confirmer1`),
           { permissions: { products: { view: true, create: true, edit: true, delete: false } } },
           { merge: true }
         )
       )
-      await assertSucceeds(
+      await assertFails(
         setDoc(doc(as('owner1'), `${STORE}/members/newStaff`), {
           authUid: 'newStaff',
           status: 'active',
@@ -470,9 +471,15 @@ describe('firestore.rules: Payments V2', () => {
       )
     })
 
-    it('ordinary notifications still work', async () => {
+    it('ordinary notifications still work, but sale notifications come from the server', async () => {
       await assertSucceeds(
         setDoc(doc(as('cashier1'), `${STORE}/notifications/n3`), {
+          ...base,
+          type: 'item_created',
+        })
+      )
+      await assertFails(
+        setDoc(doc(as('cashier1'), `${STORE}/notifications/n4`), {
           ...base,
           type: 'receipt_created',
         })

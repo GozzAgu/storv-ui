@@ -541,6 +541,14 @@
       />
     </template>
   </SDialog>
+
+  <ApprovalPinDialog
+    v-model:open="approvalOpen"
+    :reason="approvalReason"
+    :error="approvalError"
+    :busy="isProcessing"
+    @approve="submitQuickSale"
+  />
 </template>
 
 <script setup lang="ts">
@@ -605,6 +613,12 @@ import {
 import type { InventoryFolderDisplayRow } from '~/utils/inventory-folder-tree'
 import { isItemOnPartnerLoan } from '~/utils/inventory-availability'
 import { hasSaleUnitPrice, NO_PRICE_SALE_MESSAGE } from '~/utils/inventory-item-price'
+import ApprovalPinDialog from '~/components/receipts/ApprovalPinDialog.vue'
+import { useSalesApi, toSaleApiError, type SaleApproval } from '~/composables/useSalesApi'
+import { discountNeedsApproval } from '~/utils/sale-pricing'
+import { isDemoModeActive } from '~/utils/demo-mode'
+import { newSaleId } from '~/utils/sales-outbox'
+import { invalidateFolderItemCaches } from '~/utils/inventory-items-firestore'
 
 interface Props {
   modelValue: boolean
@@ -803,7 +817,14 @@ watch(showCustomerInfo, async (open) => {
 })
 const discountReason = ref('')
 const hasAnyDiscount = computed(() => cartItems.value.some((ci) => (ci.discountAmount || 0) > 0))
-const { canManageCommissions } = usePermissions()
+const { canManageCommissions, isStoreOwner, isAdmin, canEditReceipts } = usePermissions()
+const salesApi = useSalesApi()
+const canApproveSales = computed(() => isStoreOwner.value || isAdmin.value || canEditReceipts.value)
+const approvalOpen = ref(false)
+const approvalReason = ref('')
+const approvalError = ref<string | null>(null)
+/** Kept across approval retries and offline queueing so one sale is recorded once. */
+const pendingSaleId = ref<string | null>(null)
 const showCommission = ref(false)
 const commissionAmount = ref<number | undefined>(undefined)
 const commissionOwedToName = ref('')
@@ -1170,8 +1191,105 @@ const removeItem = (index: number) => {
 }
 
 const completeSale = async () => {
-  if (!canCompleteQuickSale.value) return
+  if (!canCompleteQuickSale.value || isProcessing.value) return
+  if (isDemoModeActive()) return completeSaleLocally()
 
+  const needsApproval = cartItems.value.some((ci) =>
+    discountNeedsApproval(ci.price, ci.discountAmount || 0)
+  )
+  if (needsApproval && !canApproveSales.value) {
+    if (navigator.onLine === false) {
+      showErrorToast('A sale that needs manager approval needs an internet connection.')
+      return
+    }
+    approvalReason.value =
+      'This sale has a discount above 10%. A manager must approve it with their PIN.'
+    approvalError.value = null
+    approvalOpen.value = true
+    return
+  }
+  await submitQuickSale()
+}
+
+/** Sends the sale to the server (or queues it offline); `approval` comes from the PIN dialog. */
+async function submitQuickSale(approval?: SaleApproval) {
+  if (isProcessing.value) return
+  isProcessing.value = true
+  approvalError.value = null
+  try {
+    pendingSaleId.value ??= newSaleId()
+    const commission = canManageCommissions.value ? commissionAmount.value || 0 : 0
+    const units = cartItems.value.reduce((n, ci) => n + ci.quantity, 0)
+    const outcome = await salesApi.createSale(
+      {
+        saleId: pendingSaleId.value,
+        source: 'quick_sale',
+        lines: cartItems.value.map((ci) => ({
+          itemId: ci.id,
+          quantity: selectedFolder.value?.hasSerialNumbers ? 1 : ci.quantity,
+          discountAmount: ci.discountAmount || 0,
+        })),
+        customer: { name: customerName.value, phone: customerPhone.value },
+        payment: {
+          method: paymentMethod.value || 'Cash',
+          ...(useSplitPayment.value &&
+            splitPayments.value.length > 0 && {
+              split: splitPayments.value.map((p) => ({ method: p.method, amount: p.amount })),
+            }),
+        },
+        ...(hasAnyDiscount.value && { discountReason: discountReason.value.trim() }),
+        ...(commission > 0 && {
+          commission: {
+            amount: commission,
+            owedToName: commissionOwedToName.value.trim() || undefined,
+            owedToUid: commissionOwedToUid.value || undefined,
+          },
+        }),
+      },
+      {
+        approval,
+        summary: `${units} item${units === 1 ? '' : 's'} · ${formatCurrency(
+          cartTotal.value + commission
+        )}`,
+      }
+    )
+    approvalOpen.value = false
+
+    if (outcome.status === 'queued') {
+      showWarningToast(
+        'No connection. The sale is saved on this device and will be recorded when you are back online.'
+      )
+    } else {
+      const receipt = receiptsStore.addRecordedSale(outcome.result.receipt)
+      if (outcome.result.paymentWarning) showWarningToast(outcome.result.paymentWarning)
+      for (const folderId of receipt.folderIds ?? []) {
+        invalidateFolderItemCaches(folderId)
+        delete inventoryStore.items[folderId]
+      }
+      void sellerLoanOutsStore.fetchSellerLoanOuts(true).catch(() => {})
+      showSuccessToast('Sale completed successfully!')
+    }
+    pendingSaleId.value = null
+    resetForm()
+    emit('update:modelValue', false)
+    emit('sale-completed')
+  } catch (err) {
+    const error = toSaleApiError(err)
+    if (error.code === 'APPROVAL_REQUIRED') {
+      approvalReason.value = error.message
+      approvalOpen.value = true
+    } else if (approvalOpen.value) {
+      approvalError.value = error.message
+    } else {
+      showErrorToast(error.message || 'Failed to complete sale')
+    }
+  } finally {
+    isProcessing.value = false
+  }
+}
+
+/** Demo mode: the sale is recorded on this device only. */
+const completeSaleLocally = async () => {
   isProcessing.value = true
   // Everything the receipt needs is read now: the awaits below can be slow on a bad connection,
   // and the form must not change what this sale records while they run.

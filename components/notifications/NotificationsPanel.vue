@@ -126,6 +126,7 @@ import {
   Receipt,
   Repeat,
   Store,
+  Tag,
   Target,
   UserRound,
 } from '@lucide/vue'
@@ -185,6 +186,7 @@ function getIcon(notification: Notification): Component {
   if (type === 'storefront_inquiry') return Store
   if (type.startsWith('trade_')) return Network
   if (type === 'swap_in_completed') return Repeat
+  if (type === 'swap_in_needs_price') return Tag
   if (type === 'import_completed' || type === 'export_completed') return FileDown
   return Bell
 }
@@ -197,7 +199,8 @@ function getTone(notification: Notification): Tone {
     type === 'payment_link_problem' ||
     type === 'payment_link_sale_cancelled' ||
     type === 'payout_changed' ||
-    type === 'trade_loan_due'
+    type === 'trade_loan_due' ||
+    type === 'swap_in_needs_price'
   )
     return 'warning'
   if (type === 'payment_awaiting_confirmation') return 'accent'
@@ -262,7 +265,9 @@ async function handleNotificationClick(notification: Notification) {
 
   const meta = notification.metadata
   if (meta) {
-    if (notification.type === 'till_count_difference') {
+    if (notification.type === 'swap_in_needs_price') {
+      router.push('/dashboard/inventory?tab=swap-ins&status=no-price')
+    } else if (notification.type === 'till_count_difference') {
       router.push('/dashboard/payments/till')
     } else if (notification.type === 'payout_changed') {
       router.push('/dashboard/payment-links')

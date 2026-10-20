@@ -108,6 +108,55 @@ describe('storage.rules', () => {
     )
   })
 
+  describe('store images', () => {
+    const put = (uid: string, path: string) =>
+      testEnv
+        .authenticatedContext(uid)
+        .storage()
+        .ref(path)
+        .putString('img', 'raw', WEBP) as unknown as Promise<unknown>
+    const remove = (uid: string, path: string) =>
+      testEnv.authenticatedContext(uid).storage().ref(path).delete() as unknown as Promise<unknown>
+
+    beforeAll(async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        const db = context.firestore()
+        await setDoc(doc(db, 'users/u1/stores/s1/members/clerk'), {
+          authUid: 'clerk',
+          status: 'active',
+          permissions: { products: { view: true, create: false, edit: false, delete: false } },
+        })
+        await setDoc(doc(db, 'users/u1/stores/s1/members/stocker'), {
+          authUid: 'stocker',
+          status: 'active',
+          permissions: { products: { view: true, create: true, edit: true, delete: false } },
+        })
+      })
+    })
+
+    it('lets any member add a new image, but only product managers replace or delete one', async () => {
+      await assertSucceeds(put('u1', 'stores/u1/s1/items/logo.webp'))
+      await assertSucceeds(put('clerk', 'stores/u1/s1/items/clerk-new.webp'))
+      await assertFails(put('clerk', 'stores/u1/s1/items/logo.webp'))
+      await assertFails(remove('clerk', 'stores/u1/s1/items/logo.webp'))
+      await assertSucceeds(put('stocker', 'stores/u1/s1/items/logo.webp'))
+      await assertSucceeds(remove('stocker', 'stores/u1/s1/items/logo.webp'))
+    })
+
+    it('needs 2FA for an account that has it on', async () => {
+      const pending = testEnv.authenticatedContext('u1', {
+        twoFactorEnabled: true,
+        tfaSessions: [1],
+      })
+      await assertFails(
+        pending
+          .storage()
+          .ref('stores/u1/s1/items/blocked.webp')
+          .putString('img', 'raw', WEBP) as unknown as Promise<unknown>
+      )
+    })
+  })
+
   describe('payment proofs', () => {
     const PROOFS = 'paymentProofs/u1/s1'
     const put = (uid: string, path: string, contentType = 'image/webp', body = 'proof-bytes') =>

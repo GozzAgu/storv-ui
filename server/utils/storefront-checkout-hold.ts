@@ -17,6 +17,7 @@ import {
   resolvePaymentLinkItemName,
   resolvePaymentLinkItemPrice,
 } from '~/server/utils/payment-link-create'
+import { effectiveListingAvailability } from '~/server/utils/storefront-reservation'
 import type { StorefrontInquiry, StorefrontPublicListing } from '~/types/storefront'
 import { isListingOfStore } from '~/server/utils/storefront-public-dto'
 
@@ -73,11 +74,12 @@ export async function createStorefrontCheckoutPaymentLink(params: {
     if (!listing.isListed || !isListingOfStore(listing, params.ownerUserId, params.storeId)) {
       throw createError({ statusCode: 404, message: 'Product not found' })
     }
-    if (listing.availability !== 'available') {
+    const availability = effectiveListingAvailability(listing)
+    if (availability !== 'available') {
       throw createError({
         statusCode: 409,
         message:
-          listing.availability === 'reserved'
+          availability === 'reserved'
             ? 'This item is reserved. Contact the shop instead.'
             : 'This item is not available to buy online.',
       })
@@ -181,6 +183,8 @@ export async function createStorefrontCheckoutPaymentLink(params: {
     tx.update(listingRef, {
       availability: 'reserved',
       reservationInquiryId: reservationId,
+      // The payment link's own expiry releases this hold, not the guest reservation clock.
+      reservedUntil: null,
       updatedAt: FieldValue.serverTimestamp(),
     })
 
@@ -306,7 +310,11 @@ export async function createInquiryPaymentLink(params: {
       throw createError({ statusCode: 409, message: 'This listing is no longer available.' })
     }
     const holdId = String(listing.reservationInquiryId || '')
-    if (listing.availability === 'reserved' && holdId && holdId !== params.inquiryId) {
+    if (
+      effectiveListingAvailability(listing) === 'reserved' &&
+      holdId &&
+      holdId !== params.inquiryId
+    ) {
       throw createError({
         statusCode: 409,
         message: 'This listing is reserved for another request.',
@@ -415,6 +423,7 @@ export async function createInquiryPaymentLink(params: {
     tx.update(listingRef, {
       availability: 'reserved',
       reservationInquiryId: params.inquiryId,
+      reservedUntil: null,
       updatedAt: FieldValue.serverTimestamp(),
     })
 
@@ -481,6 +490,7 @@ export async function releaseStorefrontCheckoutHold(
         tx.update(listingRef, {
           availability: 'available',
           reservationInquiryId: null,
+          reservedUntil: null,
           updatedAt: FieldValue.serverTimestamp(),
         })
       }

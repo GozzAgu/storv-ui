@@ -7,7 +7,7 @@ import {
   initializeTestEnvironment,
   type RulesTestEnvironment,
 } from '@firebase/rules-unit-testing'
-import { Timestamp, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
+import { Timestamp, deleteDoc, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
 
 const DAY = 86_400_000
 
@@ -51,17 +51,14 @@ describe('firestore.rules: view only past the plan (planTier)', () => {
     })
   }
 
-  const sale = (uid: string, storeId: string, id = 'r1') =>
+  // A plan-gated client write (sales themselves are server-recorded now).
+  const sale = (uid: string, storeId: string, id = 'c1') =>
     setDoc(
       doc(
         testEnv.authenticatedContext(uid).firestore(),
-        `users/u1/stores/${storeId}/receipts/${id}`
+        `users/u1/stores/${storeId}/customers/${id}`
       ),
-      {
-        storeId,
-        total: 1000,
-        createdBy: uid,
-      }
+      { storeId, name: 'Ada', createdBy: uid }
     )
 
   it('lets the owner sell in a store the plan covers, not in one past it', async () => {
@@ -85,7 +82,7 @@ describe('firestore.rules: view only past the plan (planTier)', () => {
       subscription: 'storvv_micro',
       trialEndsAt: Timestamp.fromMillis(Date.now() - DAY),
     })
-    await assertFails(sale('u1', 's2', 'r2'))
+    await assertFails(sale('u1', 's2', 'c2'))
   })
 
   it('leaves stores without a saved tier alone', async () => {
@@ -96,9 +93,9 @@ describe('firestore.rules: view only past the plan (planTier)', () => {
   it('stops staff past the staff count, keeps the rest', async () => {
     await seed({ subscription: 'storvv_medium' })
     await assertSucceeds(sale('staff1', 's1'))
-    await assertFails(sale('staff3', 's1', 'r2'))
+    await assertFails(sale('staff3', 's1', 'c2'))
     await seed({ subscription: 'storvv_enterprise' })
-    await assertSucceeds(sale('staff3', 's1', 'r3'))
+    await assertSucceeds(sale('staff3', 's1', 'c3'))
   })
 
   it('still lets everyone look', async () => {
@@ -119,11 +116,17 @@ describe('firestore.rules: view only past the plan (planTier)', () => {
     const db = testEnv.authenticatedContext('u1').firestore()
     await assertFails(updateDoc(doc(db, 'users/u1/stores/s2'), { planTier: 0 }))
     await assertSucceeds(updateDoc(doc(db, 'users/u1/stores/s2'), { name: 'Lekki Phase 1' }))
-    await assertFails(updateDoc(doc(db, 'users/u1/stores/s1/members/staff3'), { planTier: 0 }))
-    await assertSucceeds(updateDoc(doc(db, 'users/u1/stores/s1/members/staff3'), { role: 'staff' }))
+  })
+
+  it('leaves branches and memberships to the server, which enforces the plan limits', async () => {
+    await seed()
+    const db = testEnv.authenticatedContext('u1').firestore()
+    // A client-made branch or membership has no tier and would count as within plan.
+    await assertFails(setDoc(doc(db, 'users/u1/stores/s5'), { ownerId: 'u1', name: 'New' }))
     await assertFails(
-      setDoc(doc(db, 'users/u1/stores/s4'), { ownerId: 'u1', name: 'New', planTier: 0 })
+      setDoc(doc(db, 'users/u1/stores/s1/members/extra'), { authUid: 'extra', status: 'active' })
     )
-    await assertSucceeds(setDoc(doc(db, 'users/u1/stores/s5'), { ownerId: 'u1', name: 'New' }))
+    await assertFails(updateDoc(doc(db, 'users/u1/stores/s1/members/staff3'), { status: 'active' }))
+    await assertFails(deleteDoc(doc(db, 'users/u1/stores/s1/members/staff3')))
   })
 })

@@ -2,8 +2,6 @@ import { defineStore } from 'pinia'
 import { CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import {
   collection,
-  doc,
-  setDoc,
   getDoc,
   getDocs,
   updateDoc,
@@ -757,25 +755,26 @@ export const useStoresStore = defineStore('stores', {
         // IMPORTANT: Stores are ONLY created in the hierarchical family tree structure
         // Path: users/{userId}/stores/{storeId}
         // This ensures stores belong to the superadmin's family tree, just like inventory
-        const userId = authStore.currentUser.uid
-        const storesRef = getStoresCollection(db, userId)
-        const newStoreRef = doc(storesRef)
-
-        const newStore: Omit<Store, 'id'> = {
-          ...storeData,
-          name: normalizeEntityName(storeData.name),
-          ownerId: authStore.currentUser.uid,
-          isActive: storeData.isActive ?? true,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-        }
-
-        await setDoc(newStoreRef, newStore)
-        void requestPlanTierSync()
-
+        // The server checks the plan's branch limit and stamps the branch's plan tier.
+        const { useAuthenticatedFetch } = await import('~/composables/useAuthenticatedFetch')
+        const { authFetch } = useAuthenticatedFetch()
+        const created = await authFetch<{ id: string; store: Record<string, unknown> }>(
+          '/api/workspace/stores/create',
+          {
+            method: 'POST',
+            body: {
+              ...storeData,
+              name: normalizeEntityName(storeData.name),
+              isActive: storeData.isActive ?? true,
+            },
+          }
+        )
+        const newStoreRef = { id: created.id }
         const storeWithId = {
-          id: newStoreRef.id,
-          ...newStore,
+          ...created.store,
+          id: created.id,
+          createdAt: new Date(String(created.store.createdAt)),
+          updatedAt: new Date(String(created.store.updatedAt)),
         } as Store
 
         this.stores.unshift(storeWithId)
@@ -786,7 +785,7 @@ export const useStoresStore = defineStore('stores', {
         return newStoreRef.id
       } catch (error: any) {
         console.error('Error creating store:', error)
-        throw new Error(error.message || 'Failed to create store')
+        throw new Error(error?.data?.message || error.message || 'Failed to create store')
       }
     },
 
