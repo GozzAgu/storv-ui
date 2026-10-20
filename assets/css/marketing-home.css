@@ -220,7 +220,7 @@ html.dark .mkh__announce {
 }
 
 .mkf__rail-link:hover .mkf__rail-num {
-  background: var(--s-text);
+  background: var(--tint-ink, var(--s-text));
   color: var(--mk-page);
 }
 
@@ -235,8 +235,8 @@ html.dark .mkh__announce {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: var(--s-surface);
-  box-shadow: 0 0 0 1px var(--s-border-strong);
+  background: var(--tint, var(--s-surface));
+  color: var(--tint-ink, var(--s-text));
   font: 700 0.8125rem / 1 var(--s-font-sans);
   transition: background-color var(--s-duration-fast) var(--s-ease),
     color var(--s-duration-fast) var(--s-ease);
@@ -273,7 +273,7 @@ html.dark .mkh__announce {
   flex-direction: column;
   overflow: hidden;
   border-radius: var(--s-radius-xl);
-  background: var(--mk-card);
+  background: var(--tint, var(--mk-card));
   scroll-margin-top: calc(var(--mk-header-h) + var(--s-space-3));
 }
 
@@ -689,7 +689,7 @@ html.dark .mkh__announce {
   align-content: center;
   gap: 10px;
   padding: var(--s-space-4) var(--s-space-3);
-  background: var(--mk-card);
+  background: var(--tint, var(--mk-card));
   font-size: 0.875rem;
 }
 
@@ -847,10 +847,10 @@ html.dark .mkh__announce {
 
 /* A close crop of the real screen on a light grey well */
 .mkc__visual {
-  height: 230px;
-  padding: var(--s-space-3) 0 0 var(--s-space-3);
+  height: 240px;
+  padding: var(--s-space-5) 0 0 var(--s-space-5);
   overflow: hidden;
-  background: var(--mk-card);
+  background: var(--tint, var(--mk-card));
 }
 
 .mkc__visual img {
@@ -926,6 +926,6 @@ html.dark .mko {
   background: #151514;
 }
 
-html.dark .mko__visual {
+html.dark .mko__visual:not([class*='mk-tint--']) {
   background: var(--s-surface-2);
 }

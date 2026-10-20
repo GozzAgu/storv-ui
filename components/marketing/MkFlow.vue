@@ -10,7 +10,12 @@
       />
 
       <ol class="mkf__rail" aria-label="Steps">
-        <li v-for="(step, i) in steps" :key="step.id" class="mkf__rail-item">
+        <li
+          v-for="(step, i) in steps"
+          :key="step.id"
+          class="mkf__rail-item"
+          :class="`mk-tint--${step.tint}`"
+        >
           <a :href="`#flow-${step.id}`" class="mkf__rail-link">
             <span class="mkf__rail-num">{{ i + 1 }}</span>
             {{ step.short }}
@@ -24,7 +29,7 @@
           :id="`flow-${step.id}`"
           :key="step.id"
           class="mkf__card mk-reveal"
-          :class="{ 'mkf__card--wide': i < 2 }"
+          :class="[`mk-tint--${step.tint}`, { 'mkf__card--wide': i < 2 }]"
           :style="{ '--i': i }"
         >
           <div class="mkf__body">
@@ -55,6 +60,7 @@ import MkSectionHead from '~/components/marketing/MkSectionHead.vue'
 const steps = [
   {
     id: 'stock',
+    tint: 'sand',
     short: 'Add stock',
     title: 'Add and organise your stock',
     text: 'Type products in, scan barcodes with your phone camera, or import an Excel list. Group them by category for each branch and set a low-stock level.',
@@ -63,6 +69,7 @@ const steps = [
   },
   {
     id: 'sell',
+    tint: 'peach',
     short: 'Sell',
     title: 'Ring it up at the till',
     text: "Take cash, transfer, card or a split and send the receipt on WhatsApp. If the internet drops, keep selling: sales sync when you're back online.",
@@ -71,6 +78,7 @@ const steps = [
   },
   {
     id: 'update',
+    tint: 'rose',
     short: 'Everything updates',
     title: 'Everything updates at once',
     text: "Stock drops, the receipt goes out and the customer's balance changes the moment you finish a sale.",
@@ -80,6 +88,7 @@ const steps = [
   },
   {
     id: 'move',
+    tint: 'sage',
     short: 'Transfer & reorder',
     title: 'Move stock where it sells',
     text: 'Send stock between branches with approvals, and export a reorder list of everything running low.',
@@ -89,6 +98,7 @@ const steps = [
   },
   {
     id: 'report',
+    tint: 'sky',
     short: 'Reports',
     title: 'See what is working',
     text: "Today's revenue, top products and low stock on every plan, with full reports by branch and staff on Medium.",

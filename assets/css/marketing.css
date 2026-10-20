@@ -30,6 +30,24 @@
   --mk-chip: #ffffff;
   --mk-band: #f5f5f6;
 
+  /*
+   * One soft tint per feature area, used only behind pictures (screenshot wells, card fills),
+   * never behind long text or on buttons. Same lightness and low saturation so no single colour
+   * shouts; the matching ink is for small icons on white.
+   */
+  --mk-tint-sand: #f4efe6;
+  --mk-tint-peach: #fbede3;
+  --mk-tint-rose: #f9e9ec;
+  --mk-tint-sage: #e8f2ea;
+  --mk-tint-sky: #e6eff9;
+  --mk-tint-lilac: #eeebf8;
+  --mk-ink-sand: #77592a;
+  --mk-ink-peach: #b04f22;
+  --mk-ink-rose: #b23450;
+  --mk-ink-sage: #2c7549;
+  --mk-ink-sky: #2a62b6;
+  --mk-ink-lilac: #6a4cc0;
+
   /* Display type */
   --mk-h1: 800 clamp(2.5rem, 5.6vw, 4.5rem) / 1.1 var(--s-font-sans);
   --mk-h2: 800 clamp(1.875rem, 3.4vw, 2.625rem) / 1.15 var(--s-font-sans);
@@ -99,6 +117,18 @@ html.dark .mk {
   --mk-card: #1b1b19;
   --mk-chip: #2a2a27;
   --mk-band: #1b1b19;
+  --mk-tint-sand: #25221d;
+  --mk-tint-peach: #2a211b;
+  --mk-tint-rose: #2a1f23;
+  --mk-tint-sage: #1d2620;
+  --mk-tint-sky: #1c2431;
+  --mk-tint-lilac: #23202e;
+  --mk-ink-sand: #d9bf8f;
+  --mk-ink-peach: #f0a37c;
+  --mk-ink-rose: #f09aad;
+  --mk-ink-sage: #86c99f;
+  --mk-ink-sky: #8fb6ee;
+  --mk-ink-lilac: #b8a6f2;
   --mk-dots: rgb(255 255 255 / 0.08);
   --mk-glow: rgb(61 99 242 / 0.28);
   --mk-glow-2: rgb(110 148 255 / 0.16);
@@ -3108,7 +3138,7 @@ html.dark .mkm__panel {
 }
 
 .mkm__item:hover {
-  background: var(--mk-card);
+  background: var(--tint, var(--mk-card));
 }
 
 .mkm__item:focus-visible,
@@ -3120,7 +3150,7 @@ html.dark .mkm__panel {
 
 .mkm__icon {
   margin-bottom: 8px;
-  color: var(--s-text);
+  color: var(--tint-ink, var(--s-text));
 }
 
 .mkm__title {
@@ -3190,4 +3220,36 @@ html.dark .mkm__panel {
   .mkm-leave-active {
     transition: none;
   }
+}
+
+/* ── Area tints ─────────────────────────────────────────────────────────── */
+
+.mk-tint--sand {
+  --tint: var(--mk-tint-sand);
+  --tint-ink: var(--mk-ink-sand);
+}
+
+.mk-tint--peach {
+  --tint: var(--mk-tint-peach);
+  --tint-ink: var(--mk-ink-peach);
+}
+
+.mk-tint--rose {
+  --tint: var(--mk-tint-rose);
+  --tint-ink: var(--mk-ink-rose);
+}
+
+.mk-tint--sage {
+  --tint: var(--mk-tint-sage);
+  --tint-ink: var(--mk-ink-sage);
+}
+
+.mk-tint--sky {
+  --tint: var(--mk-tint-sky);
+  --tint-ink: var(--mk-ink-sky);
+}
+
+.mk-tint--lilac {
+  --tint: var(--mk-tint-lilac);
+  --tint-ink: var(--mk-ink-lilac);
 }

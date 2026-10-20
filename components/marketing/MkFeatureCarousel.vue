@@ -12,7 +12,7 @@
 
       <ul ref="trackEl" class="mkc__track" @scroll.passive="update">
         <li v-for="card in cards" :key="card.title" class="mkc__card">
-          <div class="mkc__visual">
+          <div class="mkc__visual" :class="`mk-tint--${card.tint}`">
             <img
               :src="card.src"
               :alt="card.alt"
@@ -67,6 +67,7 @@ withDefaults(defineProps<{ level?: 'h1' | 'h2' }>(), { level: 'h2' })
 const cards = [
   {
     title: 'Inventory',
+    tint: 'sand',
     text: "See what's on every shelf, by category, serial or IMEI, with low-stock alerts.",
     to: '/features?area=inventory#explore',
     src: '/marketing/app/inventory.webp',
@@ -74,6 +75,7 @@ const cards = [
   },
   {
     title: 'Sales and receipts',
+    tint: 'peach',
     text: 'Ring up a sale in seconds, split the payment and send the receipt on WhatsApp.',
     to: '/features?area=sales#explore',
     src: '/marketing/app/sales.webp',
@@ -81,6 +83,7 @@ const cards = [
   },
   {
     title: 'Customers and balances',
+    tint: 'rose',
     text: 'Take deposits and part payments, and always know who still owes you.',
     to: '/features?area=sales#explore',
     src: '/marketing/app/customers.webp',
@@ -88,6 +91,7 @@ const cards = [
   },
   {
     title: 'Reports',
+    tint: 'sky',
     text: "Today's revenue, best sellers and stock value at a glance.",
     to: '/features?area=insights#explore',
     src: '/marketing/app/overview.webp',
@@ -95,6 +99,7 @@ const cards = [
   },
   {
     title: 'Team and roles',
+    tint: 'lilac',
     text: 'Group staff into departments and decide what each person can see and do.',
     to: '/features?area=team#explore',
     src: '/marketing/app/team.webp',
@@ -102,6 +107,7 @@ const cards = [
   },
   {
     title: 'Branches and transfers',
+    tint: 'sage',
     text: 'Run every branch from one login and move stock between them with approvals.',
     to: '/features?area=branches#explore',
     src: '/marketing/app/branches.webp',

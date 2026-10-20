@@ -20,7 +20,7 @@
               skipped, so nothing goes missing.
             </p>
           </div>
-          <div class="mko__visual" aria-hidden="true">
+          <div class="mk-tint--sand mko__visual" aria-hidden="true">
             <div class="mko-file">
               <FileSpreadsheet :size="20" :stroke-width="1.75" />
               <span>stock-list.xlsx</span>
@@ -39,7 +39,7 @@
               profit.
             </p>
           </div>
-          <div class="mko__visual" aria-hidden="true">
+          <div class="mk-tint--lilac mko__visual" aria-hidden="true">
             <div v-for="person in team" :key="person.name" class="mko-person">
               <span class="mko-avatar">{{ person.name[0] }}</span>
               <span class="mko-person__who">
@@ -58,7 +58,7 @@
               installation.
             </p>
           </div>
-          <div class="mko__visual mko__visual--devices" aria-hidden="true">
+          <div class="mk-tint--sky mko__visual mko__visual--devices" aria-hidden="true">
             <span class="mko-device"><Smartphone :size="22" :stroke-width="1.75" /></span>
             <span class="mko-line" />
             <span class="mko-device mko-device--main"><StorvvMark :size="28" /></span>
@@ -75,7 +75,7 @@
               centre.
             </p>
           </div>
-          <div class="mko__visual" aria-hidden="true">
+          <div class="mk-tint--sage mko__visual" aria-hidden="true">
             <p class="mko-bubble">How do I import my stock list?</p>
             <p class="mko-bubble mko-bubble--reply">
               Open the category in Inventory, then choose Import Excel.
