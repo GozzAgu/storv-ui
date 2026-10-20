@@ -8,20 +8,15 @@
             <span v-if="accent" class="mk-accent">{{ accent }}</span>
           </h2>
           <p v-if="lede" class="mk-lede">{{ lede }}</p>
-          <div class="mk-actions">
-            <NuxtLink :to="primary.to" class="mk-cta__btn mk-cta__btn--primary" data-mk-primary>
+          <div class="mk-actions mk-actions--center">
+            <NuxtLink :to="primary.to" class="mk-cta-btn mk-cta-btn--light" data-mk-primary>
               {{ primary.label }}
-              <ArrowRight :size="16" aria-hidden="true" />
             </NuxtLink>
             <NuxtLink v-if="secondary" :to="secondary.to" class="mk-cta__link">
               or {{ secondary.label.charAt(0).toLowerCase() + secondary.label.slice(1) }}
             </NuxtLink>
           </div>
-          <ul class="mk-cta__notes" aria-label="Good to know">
-            <li><Check :size="14" aria-hidden="true" />Free forever for one store</li>
-            <li><Check :size="14" aria-hidden="true" />No card needed</li>
-            <li><Check :size="14" aria-hidden="true" />Cancel any time</li>
-          </ul>
+          <p class="mk-cta__note">Free forever for one store · No card needed · Cancel any time</p>
         </div>
         <div class="mk-cta__shot" aria-hidden="true">
           <img
@@ -40,7 +35,6 @@
 
 <script setup lang="ts">
 import { useId } from 'vue'
-import { ArrowRight, Check } from '@lucide/vue'
 
 defineProps<{
   title: string

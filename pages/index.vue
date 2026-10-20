@@ -11,7 +11,7 @@
     <MkCompare />
 
     <!-- Pricing teaser -->
-    <section id="pricing" class="mk-section mk-section--alt" aria-labelledby="home-pricing-title">
+    <section id="pricing" class="mk-section" aria-labelledby="home-pricing-title">
       <div class="mk-container">
         <MkSectionHead
           title-id="home-pricing-title"
@@ -58,44 +58,34 @@
       </div>
     </section>
 
-    <!-- FAQ -->
-    <section id="faq" class="mk-section" aria-labelledby="home-faq-title">
-      <div class="mk-container mk-faq-layout">
-        <div class="mk-faq-layout__aside">
-          <MkSectionHead
-            title-id="home-faq-title"
-            eyebrow="FAQ"
-            title="Quick"
-            accent="answers."
-            align="start"
-          />
-          <div id="contact" class="mk-contact-card">
-            <h3 class="mk-h3">Still stuck?</h3>
-            <p class="mk-card__text">We reply the same day.</p>
-            <div class="mk-actions">
-              <SButton
-                variant="secondary"
-                class="mk-btn mk-btn--compact"
-                @click="contactOpen = true"
-              >
-                Contact us
-              </SButton>
-              <a href="mailto:hello@storvv.com" class="mk-link">hello@storvv.com</a>
-            </div>
-          </div>
-        </div>
-        <MkFaq :items="faq" />
-      </div>
-    </section>
-
     <MkCta
-      class="mk-section--tight-top"
       title="Your first store is"
       accent="on us."
       lede="Set up Micro in about ten minutes, in the browser on the phone or laptop you already have."
       :primary="{ label: 'Create your free store', to: signupUrl }"
       :secondary="{ label: 'Try the live demo', to: '/demo/dashboard' }"
     />
+
+    <!-- FAQ -->
+    <section id="faq" class="mk-section mk-section--tight-top" aria-labelledby="home-faq-title">
+      <div class="mk-container mk-container--narrow">
+        <MkSectionHead
+          title-id="home-faq-title"
+          eyebrow="FAQ"
+          title="Questions,"
+          accent="answered."
+        />
+        <MkFaq :items="faq" />
+        <p id="contact" class="mk-faq-contact">
+          Still stuck? We reply the same day.
+          <button type="button" class="mk-link mk-faq-contact__btn" @click="contactOpen = true">
+            Contact us
+          </button>
+          or email
+          <a href="mailto:hello@storvv.com" class="mk-link">hello@storvv.com</a>
+        </p>
+      </div>
+    </section>
 
     <SDialog v-model:open="contactOpen" title="Contact us" size="lg">
       <iframe

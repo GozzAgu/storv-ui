@@ -4,8 +4,8 @@
       <MkSectionHead
         title-id="mkx-title"
         eyebrow="Compare"
-        title="A better way"
-        accent="to run the shop."
+        title="Swap the notebook"
+        accent="for something that keeps up."
         lede="How Storvv compares with a notebook or spreadsheet, and with till software installed on one computer."
       />
 

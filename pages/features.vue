@@ -10,21 +10,14 @@
             Everything your shop runs on. <span class="mk-accent">In one place.</span>
           </h1>
           <div class="mk-actions mk-actions--center">
-            <SButton variant="primary" size="lg" class="mk-btn" :to="signupUrl" data-mk-primary>
+            <NuxtLink :to="signupUrl" class="mk-cta-btn" data-mk-primary>
               Create your free store
-            </SButton>
-            <NuxtLink to="/demo/dashboard" class="mk-link">
-              Try the live demo
-              <ArrowRight :size="16" aria-hidden="true" />
             </NuxtLink>
+            <NuxtLink to="/demo/dashboard" class="mk-pill-link">or try the live demo</NuxtLink>
           </div>
-          <ul class="mk-hero__note" aria-label="Availability">
-            <li><Check :size="16" aria-hidden="true" />Web dashboard, live today</li>
-            <li><Check :size="16" aria-hidden="true" />Free forever on Micro</li>
-            <li class="mk-hero__note-soon">
-              <Clock :size="16" aria-hidden="true" />iOS &amp; Android coming soon
-            </li>
-          </ul>
+          <p class="mk-hero__note">
+            Web dashboard live today · Free forever on Micro · iOS and Android coming soon
+          </p>
         </div>
       </div>
     </section>
@@ -44,7 +37,12 @@
         </div>
 
         <Transition name="mk-fade" mode="out-in">
-          <div id="features-panel" :key="currentArea.id" class="mk-panel" role="tabpanel">
+          <div
+            id="features-panel"
+            :key="currentArea.id"
+            class="mk-panel mk-panel--center"
+            role="tabpanel"
+          >
             <div>
               <h3 class="mk-h2 mk-panel__title">{{ currentArea.title }}</h3>
               <ul class="mk-feature-list mk-feature-list--compact">
@@ -82,7 +80,7 @@
           title="Start small."
           accent="Unlock more as you grow."
         />
-        <ol class="mk-grid mk-grid--3">
+        <ol class="mk-grid mk-grid--3 mk-grid--center">
           <li
             v-for="(step, i) in ladder"
             :key="step.name"
@@ -117,7 +115,7 @@
           eyebrow="On the roadmap"
           title="Coming soon to Storvv"
         />
-        <ul class="mk-grid mk-grid--4">
+        <ul class="mk-grid mk-grid--4 mk-grid--center">
           <li v-for="item in comingSoon" :key="item.title" class="mk-card mk-reveal">
             <span class="mk-card__icon"
               ><component :is="item.icon" :size="20" aria-hidden="true"
@@ -151,7 +149,6 @@ import {
   Boxes,
   Building2,
   Check,
-  Clock,
   Copy,
   CreditCard,
   FileSpreadsheet,
@@ -174,7 +171,6 @@ import {
   Wallet,
   Zap,
 } from '@lucide/vue'
-import SButton from '~/components/s/SButton.vue'
 import STabs from '~/components/s/STabs.vue'
 import MkCta from '~/components/marketing/MkCta.vue'
 import MkFrame from '~/components/marketing/MkFrame.vue'

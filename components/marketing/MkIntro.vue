@@ -1,5 +1,5 @@
 <template>
-  <section class="mk-section mk-section--alt mku" aria-labelledby="mku-title">
+  <section class="mk-section mku" aria-labelledby="mku-title">
     <div class="mk-container">
       <MkSectionHead
         title-id="mku-title"
@@ -40,11 +40,8 @@
             <div class="mku__copy">
               <h3 class="mku__title">{{ current.title }}</h3>
               <p class="mku__text">{{ current.text }}</p>
-              <ul class="mk-checks">
-                <li v-for="point in current.points" :key="point">
-                  <Check :size="16" aria-hidden="true" />
-                  <span>{{ point }}</span>
-                </li>
+              <ul class="mku__points">
+                <li v-for="point in current.points" :key="point">{{ point }}</li>
               </ul>
               <NuxtLink to="/demo/dashboard" class="mk-link mku__link">
                 Try it in the live demo
@@ -69,7 +66,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { ArrowRight, Car, Check, PackageCheck, ShoppingBasket, Smartphone, Tv } from '@lucide/vue'
+import { ArrowRight, Car, PackageCheck, ShoppingBasket, Smartphone, Tv } from '@lucide/vue'
 import MkSectionHead from '~/components/marketing/MkSectionHead.vue'
 
 const trades = [
