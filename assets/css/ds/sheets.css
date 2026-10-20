@@ -1316,6 +1316,11 @@
 .s-new-sale > .s-form > .s-pick > .s-pick__scroll {
   flex: 1;
   max-height: none;
+  /* The list grows to fit its rows and the drawer body scrolls. As its own scroll area (with
+     overscroll contained) it had nothing to scroll and swallowed the wheel, so long lists of
+     categories or products couldn't be scrolled from over the list. */
+  overflow: visible;
+  overscroll-behavior: auto;
 }
 
 /* Rows read as separate soft cards rather than a bordered table */
