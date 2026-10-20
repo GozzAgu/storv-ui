@@ -44,7 +44,13 @@ describe('LoyaltyTopCustomersList', () => {
       'Silver tier',
       'Bronze tier',
     ])
-    expect(badges.map((b) => b.text())).toEqual(['💎', '💠', '🥇', '🥈', '🥉'])
-    expect(badges[0]!.attributes('style')).toContain('font-size: 24px')
+    // A line icon in the tier's colour, not an emoji.
+    expect(badges.every((b) => b.find('svg').exists() && b.text() === '')).toBe(true)
+    expect(badges.map((b) => b.attributes('style'))).toEqual(
+      ['diamond', 'platinum', 'gold', 'silver', 'bronze'].map((t) =>
+        expect.stringContaining(`--tier: var(--s-tier-${t})`)
+      )
+    )
+    expect(badges[0]!.attributes('style')).toContain('width: 22px')
   })
 })

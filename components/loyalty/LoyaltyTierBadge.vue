@@ -1,40 +1,46 @@
 <template>
   <span
     class="s-tier-badge"
-    :style="{ fontSize: `${size}px` }"
+    :style="{ '--tier': `var(--s-tier-${tierKey})`, width: `${size}px`, height: `${size}px` }"
     :role="label ? 'img' : undefined"
     :aria-label="label"
     :aria-hidden="label ? undefined : 'true'"
-    >{{ emoji }}</span
   >
+    <component :is="icon" :size="Math.round(size * 0.55)" :stroke-width="2" aria-hidden="true" />
+  </span>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, type Component } from 'vue'
+import { Award, Crown, Gem, Medal, Shield } from '@lucide/vue'
 
 const props = withDefaults(defineProps<{ tier: string; size?: number; label?: string }>(), {
   size: 24,
   label: undefined,
 })
 
-const EMOJI: Record<string, string> = {
-  bronze: '🥉',
-  silver: '🥈',
-  gold: '🥇',
-  platinum: '💠',
-  diamond: '💎',
+/** One line icon per tier, rising in prestige; colours come from the --s-tier-* tokens. */
+const ICONS: Record<string, Component> = {
+  bronze: Shield,
+  silver: Medal,
+  gold: Award,
+  platinum: Crown,
+  diamond: Gem,
 }
 
-const emoji = computed(() => EMOJI[props.tier] ?? '🏅')
+const tierKey = computed(() => (props.tier in ICONS ? props.tier : 'silver'))
+const icon = computed(() => ICONS[tierKey.value] ?? Medal)
 </script>
 
 <style scoped>
 .s-tier-badge {
-  display: inline-block;
+  display: inline-flex;
   flex-shrink: 0;
-  width: 1em;
-  font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
-  line-height: 1;
-  text-align: center;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--tier) 22%, transparent);
+  border-radius: var(--s-radius-full);
+  background: color-mix(in srgb, var(--tier) 10%, transparent);
+  color: var(--tier);
 }
 </style>

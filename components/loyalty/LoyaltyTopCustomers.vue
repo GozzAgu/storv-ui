@@ -2,7 +2,7 @@
   <SCard
     v-if="members.length > 0"
     title="Top customers"
-    description="By reward points across all branches, with spend over the last 12 months."
+    description="By reward points across all branches."
   >
     <LoyaltyTopCustomersList :members="members" />
   </SCard>
