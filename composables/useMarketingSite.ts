@@ -30,18 +30,25 @@ export function useMarketingLogo() {
 }
 
 /**
- * Fades `.mk-reveal` blocks in as they scroll into view. Rescans after every route change
- * because the marketing layout stays mounted across pages.
+ * Fades `.mk-reveal` blocks in as they scroll into view. Also picks up blocks added later (a new
+ * page, a tab switch, a hot reload in development), since an unobserved block would stay hidden.
  */
 export function useMarketingReveal() {
   const route = useRoute()
   let observer: IntersectionObserver | null = null
+  let mutations: MutationObserver | null = null
+  let pending = 0
 
   function scan() {
+    pending = 0
     if (!observer) return
     document
       .querySelectorAll('.mk-reveal:not([data-revealed])')
       .forEach((el) => observer?.observe(el))
+  }
+
+  function scheduleScan() {
+    if (!pending) pending = requestAnimationFrame(scan)
   }
 
   onMounted(() => {
@@ -55,9 +62,13 @@ export function useMarketingReveal() {
           observer?.unobserve(entry.target)
         }
       },
-      { rootMargin: '0px 0px -10% 0px', threshold: 0.1 }
+      // Any part showing counts: a tall block (a table, a card grid) that only peeks in after a
+      // jump to its anchor must not sit there invisible
+      { rootMargin: '0px 0px -40px 0px', threshold: 0 }
     )
     scan()
+    mutations = new MutationObserver(scheduleScan)
+    mutations.observe(document.body, { childList: true, subtree: true })
   })
 
   watch(
@@ -65,7 +76,14 @@ export function useMarketingReveal() {
     () => nextTick(() => setTimeout(scan, 50))
   )
 
+  // The route watcher can fire before the next page has rendered; rescan once it has
+  const stopHook = useNuxtApp().hook('page:finish', () => nextTick(scan))
+
   onBeforeUnmount(() => {
+    stopHook()
+    cancelAnimationFrame(pending)
+    mutations?.disconnect()
+    mutations = null
     observer?.disconnect()
     observer = null
   })
