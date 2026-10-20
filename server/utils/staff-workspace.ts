@@ -2,7 +2,7 @@ import type { DecodedIdToken } from 'firebase-admin/auth'
 import type { Firestore, QueryDocumentSnapshot } from 'firebase-admin/firestore'
 import { getAdminAuth } from '~/server/utils/firebase-admin'
 import {
-  LEGACY_LINK_WINDOW_MS,
+  resolveLegacyStaffOwner,
   STAFF_OWNER_CLAIM,
   stampStaffOwner,
 } from '~/server/utils/staff-login-target'
@@ -77,12 +77,11 @@ export async function findStaffDocForLogin(
 
   const auth = getAdminAuth()
   const loginCreated = Date.parse((await auth.getUser(decoded.uid)).metadata.creationTime)
-  const match = active.find((d) => {
-    const created = d.data()?.createdAt as { toMillis?: () => number } | undefined
-    const ms = typeof created?.toMillis === 'function' ? created.toMillis() : NaN
-    return Number.isFinite(ms) && Math.abs(ms - loginCreated) <= LEGACY_LINK_WINDOW_MS
-  })
-  if (!match) return null
-  await stampStaffOwner(auth, decoded.uid, resolveStaffWorkspaceOwnerId(match.ref.path)!)
+  const owner = await resolveLegacyStaffOwner(db, decoded.uid, loginCreated)
+  const match = owner
+    ? active.find((d) => resolveStaffWorkspaceOwnerId(d.ref.path) === owner)
+    : undefined
+  if (!match || !owner) return null
+  await stampStaffOwner(auth, decoded.uid, owner)
   return match
 }

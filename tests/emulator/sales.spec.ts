@@ -400,6 +400,31 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('server sales (emulator)',
       expect(paid.accountBalance).toBe(0)
       expect(paid.entry.createdBy).toBe('cashier')
     })
+
+    it('keeps the whole history of a long-standing account', async () => {
+      const old = Array.from({ length: 60 }, (_, i) => ({
+        id: `old${i}`,
+        type: 'charge',
+        amount: 100,
+      }))
+      await store().collection('customerAccounts').doc('phone:08030000000').set({
+        contactKey: 'phone:08030000000',
+        customerName: 'Tolu',
+        accountBalance: 6_000,
+        balanceLedger: old,
+      })
+      await applyLedgerEntry(db, await actor('cashier'), {
+        customerName: 'Tolu',
+        phone: '08030000000',
+        type: 'payment',
+        amount: 1_000,
+      })
+      const ledger = (
+        await store().collection('customerAccounts').doc('phone:08030000000').get()
+      ).data()?.balanceLedger
+      expect(ledger).toHaveLength(61)
+      expect(ledger[0].id).toBe('old0')
+    })
   })
 
   describe('stock loans', () => {

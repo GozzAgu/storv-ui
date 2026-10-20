@@ -46,10 +46,23 @@ describe('2FA setup cannot replace an existing authenticator', () => {
   })
 })
 
-function fakeDb(userDocs: Record<string, boolean>) {
+/** `staff`: the staff records naming a login, as [owner, createdAt]. */
+function fakeDb(userDocs: Record<string, boolean>, staff: Array<[string, string]> = []) {
   return {
     collection: () => ({
       doc: (id: string) => ({ get: async () => ({ exists: Boolean(userDocs[id]) }) }),
+    }),
+    collectionGroup: () => ({
+      where: () => ({
+        limit: () => ({
+          get: async () => ({
+            docs: staff.map(([owner, createdAt], i) => ({
+              ref: { path: `users/${owner}/stores/s1/departments/d1/staff/st${i}` },
+              data: () => ({ createdAt: new Date(createdAt) }),
+            })),
+          }),
+        }),
+      }),
     }),
   } as never
 }
@@ -101,11 +114,28 @@ describe('staff routes only act on the owner’s staff logins', () => {
     expect(auth.stamped.get('staff1')).toMatchObject({ staffOwner: 'owner1' })
   })
 
-  it('refuses an older login a staff record was pointed at later', async () => {
+  it('accepts an existing staff member re-added later, when only this business has them', async () => {
     const auth = fakeAuth({ staff1: { email: 'ada@shop.com' } })
+    const db = fakeDb({}, [['owner1', '2026-10-05T10:00:00.000Z']])
     await expect(
-      assertStaffLoginTarget(fakeDb({}), auth as never, 'staff1', 'ada@shop.com', {
+      assertStaffLoginTarget(db, auth as never, 'staff1', 'ada@shop.com', {
         ownerUserId: 'owner1',
+        staffCreatedAt: new Date('2026-10-05T10:00:00.000Z'),
+      })
+    ).resolves.toBe(true)
+    expect(auth.stamped.get('staff1')).toMatchObject({ staffOwner: 'owner1' })
+  })
+
+  it('refuses a business that pointed its record at another business’s login later', async () => {
+    const auth = fakeAuth({ staff1: { email: 'ada@shop.com' } })
+    // The real employer created the record with the login; the other one added theirs days later.
+    const db = fakeDb({}, [
+      ['owner1', LOGIN_CREATED],
+      ['attacker', '2026-10-05T10:00:00.000Z'],
+    ])
+    await expect(
+      assertStaffLoginTarget(db, auth as never, 'staff1', 'ada@shop.com', {
+        ownerUserId: 'attacker',
         staffCreatedAt: new Date('2026-10-05T10:00:00.000Z'),
       })
     ).rejects.toMatchObject({ statusCode: 403 })

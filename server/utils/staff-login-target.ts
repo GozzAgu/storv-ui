@@ -23,6 +23,47 @@ function toMillis(value: unknown): number | null {
   return Number.isFinite(parsed) ? parsed : null
 }
 
+function ownerFromStaffPath(path: string): string | null {
+  const parts = path.split('/')
+  return parts.length === 8 &&
+    parts[0] === 'users' &&
+    parts[4] === 'departments' &&
+    parts[6] === 'staff'
+    ? parts[1] || null
+    : null
+}
+
+/**
+ * The business an older staff login (no `staffOwner` claim yet) belongs to: the only business
+ * with a staff record for it, which is every normal staff login. If several businesses name it,
+ * only the record created alongside the login (within 10 minutes) counts. Null when unclear.
+ */
+export async function resolveLegacyStaffOwner(
+  db: Firestore,
+  authUid: string,
+  loginCreatedMs: number
+): Promise<string | null> {
+  const snap = await db.collectionGroup('staff').where('authUid', '==', authUid).limit(20).get()
+  const owners = new Set(
+    snap.docs.map((d) => ownerFromStaffPath(d.ref.path)).filter((o): o is string => !!o)
+  )
+  if (owners.size === 1) return [...owners][0]!
+  const matches = new Set(
+    snap.docs
+      .filter((d) => {
+        const ms = toMillis(d.data()?.createdAt)
+        return (
+          ms !== null &&
+          Number.isFinite(loginCreatedMs) &&
+          Math.abs(ms - loginCreatedMs) <= LEGACY_LINK_WINDOW_MS
+        )
+      })
+      .map((d) => ownerFromStaffPath(d.ref.path))
+      .filter((o): o is string => !!o)
+  )
+  return matches.size === 1 ? [...matches][0]! : null
+}
+
 export async function stampStaffOwner(
   auth: Pick<Auth, 'getUser' | 'setCustomUserClaims'>,
   authUid: string,
@@ -76,14 +117,18 @@ export async function assertStaffLoginTarget(
     return true
   }
 
-  // Older login: accept it only if it was created alongside this business's staff record, then
-  // record the owner so the check is exact from now on.
+  // Older login: accept it when this business is the one it belongs to (created alongside this
+  // staff record, or the only business with a record for it), then record the owner so the check
+  // is exact from now on.
   const createdMs = Date.parse(user.metadata?.creationTime || '')
   const staffMs = toMillis(owner.staffCreatedAt)
+  const createdTogether =
+    Number.isFinite(createdMs) &&
+    staffMs !== null &&
+    Math.abs(createdMs - staffMs) <= LEGACY_LINK_WINDOW_MS
   if (
-    !Number.isFinite(createdMs) ||
-    staffMs === null ||
-    Math.abs(createdMs - staffMs) > LEGACY_LINK_WINDOW_MS
+    !createdTogether &&
+    (await resolveLegacyStaffOwner(db, authUid, createdMs)) !== owner.ownerUserId
   ) {
     throw createError({ statusCode: 403, message: 'This login was not created for this business' })
   }

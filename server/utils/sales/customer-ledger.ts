@@ -8,8 +8,6 @@ import { hasAnyModuleManageAccess } from '~/utils/staff-permissions'
 import { forbid, type StoreActor } from './actor'
 import { logSaleActivity } from './records'
 
-const MAX_LEDGER_ENTRIES = 50
-
 export type LedgerEntryType = 'charge' | 'payment' | 'adjustment'
 
 function bad(message: string): never {
@@ -26,7 +24,8 @@ export async function applyLedgerEntry(
   input: Record<string, unknown>
 ) {
   if (actor.plan === 'storvv_micro') forbid('Customer balances need the Medium plan or above.')
-  if (!actor.isOwner && !actor.permissions.receipts.create) forbid('You can’t change customer balances.')
+  if (!actor.isOwner && !actor.permissions.receipts.create)
+    forbid('You can’t change customer balances.')
 
   const type = input.type as LedgerEntryType
   if (type !== 'charge' && type !== 'payment' && type !== 'adjustment') bad('type is invalid')
@@ -40,8 +39,11 @@ export async function applyLedgerEntry(
 
   const customerName =
     normalizeEntityName(String(input.customerName ?? '')).slice(0, 120) ||
-    String(input.customerName ?? '').trim().slice(0, 120)
-  const email = typeof input.email === 'string' ? input.email.toLowerCase().trim().slice(0, 200) : ''
+    String(input.customerName ?? '')
+      .trim()
+      .slice(0, 120)
+  const email =
+    typeof input.email === 'string' ? input.email.toLowerCase().trim().slice(0, 200) : ''
   const phone = typeof input.phone === 'string' ? input.phone.trim().slice(0, 40) : ''
   if (!customerName && !email && !phone) bad('Choose a customer')
   const contactKey = getCustomerContactKey({ name: customerName, email, phone })
@@ -64,7 +66,6 @@ export async function applyLedgerEntry(
       createdBy: actor.uid,
       createdByName: actor.displayName,
     }
-    const ledger = Array.isArray(data.balanceLedger) ? data.balanceLedger : []
     const accountBalance = roundMoney(Math.max(0, balance + amount))
     const next = {
       contactKey,
@@ -73,7 +74,8 @@ export async function applyLedgerEntry(
       ...((phone || data.phone) && { phone: phone || data.phone }),
       storeId: actor.storeId,
       accountBalance,
-      balanceLedger: [...ledger, entry].slice(-MAX_LEDGER_ENTRIES),
+      // Appended, never trimmed: the full history stays as it always has.
+      balanceLedger: snap.exists ? FieldValue.arrayUnion(entry) : [entry],
       updatedAt: FieldValue.serverTimestamp(),
     }
     if (snap.exists) tx.update(ref, next)
@@ -83,11 +85,16 @@ export async function applyLedgerEntry(
         action: 'updated',
         entityType: 'customer_balance',
         entityId: ref.id,
-        entityName: `${type === 'charge' ? 'Charged' : type === 'payment' ? 'Payment from' : 'Adjusted'} ${
-          customerName || 'customer'
-        }: ${amount.toLocaleString()}`,
+        entityName: `${
+          type === 'charge' ? 'Charged' : type === 'payment' ? 'Payment from' : 'Adjusted'
+        } ${customerName || 'customer'}: ${amount.toLocaleString()}`,
       })
     }
-    return { id: ref.id, contactKey, accountBalance, entry: { ...entry, createdAt: entry.createdAt.toDate().toISOString() } }
+    return {
+      id: ref.id,
+      contactKey,
+      accountBalance,
+      entry: { ...entry, createdAt: entry.createdAt.toDate().toISOString() },
+    }
   })
 }
