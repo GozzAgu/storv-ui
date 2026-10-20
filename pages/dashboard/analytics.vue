@@ -1,5 +1,5 @@
 <template>
-  <div class="ds-root s-c s-page">
+  <div class="ds-root s-c s-page s-report-mono">
     <SPageHeader title="Reports">
       <template #description> Sales, products, customers and stock for this branch. </template>
       <template v-if="!needsStoreSelection && canUseSubscriptionFeature('analytics')" #actions>
@@ -713,6 +713,20 @@ function kpiTone(tone: AnalyticsKpiCardData['tone']): 'success' | 'warning' | 'e
 }
 
 const chartPalette = ref<DsChartPalette>(DS_CHART_PALETTE_FALLBACK)
+
+/** Ink to light grey, darkest first: series colours for the black-and-grey Reports page. */
+const monoRamp = computed<[string, string, string, string, string]>(() =>
+  chartIsDark.value
+    ? ['#fafafa', '#d4d4d8', '#a1a1aa', '#71717a', '#52525b']
+    : ['#18181b', '#52525b', '#a1a1aa', '#d4d4d8', '#e4e4e7']
+)
+
+/** Design-system chart colours with the accent, success and warning series turned to greys. */
+function monoChartPalette(): DsChartPalette {
+  const base = readDsChartPalette()
+  const [ink, dark, mid] = monoRamp.value
+  return { ...base, accent: ink, info: dark, success: dark, warning: mid }
+}
 
 function dsChart<T extends Record<string, unknown>>(options: T): T {
   return mergeDsApexChartTheme(options, chartPalette.value)
@@ -1479,6 +1493,9 @@ function donutChartOptions(config: {
     },
     tooltip: {
       theme: isDark ? 'dark' : 'light',
+      // Apex fills donut tooltips with the slice colour by default, which hides the text on the
+      // near-black and pale-grey slices; use the plain light/dark tooltip instead.
+      fillSeriesColor: false,
       y: { formatter: (val: number) => (config.formatTooltip ?? config.formatValue)(val) },
     },
     states: { hover: { filter: { type: 'none' } }, active: { filter: { type: 'none' } } },
@@ -1493,10 +1510,9 @@ const inventoryHealthSeries = computed(() => [
 
 const inventoryHealthChartOptions = computed(() => {
   void displayCurrencyDeps.value
-  const palette = chartPalette.value
   return donutChartOptions({
     labels: ['Available', 'Low stock', 'Sold'],
-    colors: [palette.success, palette.warning, palette.muted],
+    colors: [monoRamp.value[0], monoRamp.value[2], monoRamp.value[3]],
     totalLabel: 'Stock value',
     totalValue: compactCurrency(featureInventoryTotalValue.value),
     formatValue: (val) => `${Math.round(val)}%`,
@@ -1509,11 +1525,10 @@ const paymentMethodsChartSeries = computed(() =>
 
 const paymentMethodsChartOptions = computed(() => {
   void displayCurrencyDeps.value
-  const palette = chartPalette.value
   const rows = paymentMethodBreakdown.value.slice(0, 5)
   return donutChartOptions({
     labels: rows.map((row) => row.label),
-    colors: [palette.accent, palette.info, palette.success, palette.warning, palette.muted],
+    colors: monoRamp.value,
     totalLabel: `${completedReceiptsInPeriod.value.length} sales`,
     totalValue: compactCurrency(rows.reduce((sum, row) => sum + row.revenue, 0)),
     formatValue: compactCurrency,
@@ -1523,10 +1538,9 @@ const paymentMethodsChartOptions = computed(() => {
 
 const overviewTopProductsChartOptions = computed(() => {
   void displayCurrencyDeps.value
-  const palette = chartPalette.value
   return donutChartOptions({
     labels: topProducts.value.slice(0, 5).map((p) => truncateChartLabel(p.name, 18)),
-    colors: [palette.accent, palette.info, palette.success, palette.warning, palette.muted],
+    colors: monoRamp.value,
     totalLabel: 'Top 5',
     totalValue: compactCurrency(topProductsChartSeries.value.reduce((sum, v) => sum + v, 0)),
     formatValue: compactCurrency,
@@ -2365,12 +2379,12 @@ const exportReport = async (format: 'pdf' | 'excel' = 'pdf') => {
   }
 }
 
-watch(chartIsDark, () => nextTick(() => (chartPalette.value = readDsChartPalette())), {
+watch(chartIsDark, () => nextTick(() => (chartPalette.value = monoChartPalette())), {
   flush: 'post',
 })
 
 onMounted(() => {
-  chartPalette.value = readDsChartPalette()
+  chartPalette.value = monoChartPalette()
   const authStore = useAuthStore()
   if (!authStore.currentUser) {
     navigateTo('/signin')

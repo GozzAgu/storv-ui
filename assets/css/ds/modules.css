@@ -514,6 +514,22 @@
 }
 
 /* ── Reports ─────────────────────────────────────────────── */
+/* Reports is black and grey: accent and info colours resolve to ink and neutral greys here only.
+   Status colours (success, warning, error) are kept for real signals such as low stock. */
+.s-report-mono {
+  --s-accent: var(--s-text);
+  --s-accent-hover: var(--s-text-2);
+  --s-accent-active: var(--s-text);
+  --s-accent-soft: var(--s-surface-2);
+  --s-accent-soft-text: var(--s-text);
+  --s-info: #52525b;
+  --s-info-soft: var(--s-surface-2);
+}
+
+html.dark .s-report-mono {
+  --s-info: #a1a1aa;
+}
+
 .s-report__period {
   min-width: 168px;
 }
