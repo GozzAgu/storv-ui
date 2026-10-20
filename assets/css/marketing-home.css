@@ -361,22 +361,24 @@ html.dark .mk {
 
 .mkh__announce {
   display: inline-flex;
+  min-height: 32px;
   align-items: center;
   gap: var(--s-space-1);
   padding: 6px 12px;
-  border: 1px solid rgb(255 255 255 / 0.22);
+  border: 1px solid rgb(255 255 255 / 0.28);
   border-radius: var(--s-radius-full);
-  background: rgb(255 255 255 / 0.1);
+  /* Dark backing: the pill can sit on the pale top of the light hero */
+  background: rgb(15 29 74 / 0.55);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  font: 500 0.75rem / 1rem var(--s-font-sans);
-  color: rgb(255 255 255 / 0.9);
+  font: 500 0.8125rem / 1.125rem var(--s-font-sans);
+  color: #fff;
   text-decoration: none;
   transition: background var(--s-duration) var(--s-ease-out);
 }
 
 .mkh__announce:hover {
-  background: rgb(255 255 255 / 0.18);
+  background: rgb(15 29 74 / 0.7);
 }
 
 .mkh__title {
@@ -404,9 +406,9 @@ html.dark .mk {
 
 .mkh__lede {
   margin-top: var(--s-space-2);
-  max-width: 440px;
-  font: 400 0.9375rem / 1.5rem var(--s-font-sans);
-  color: rgb(255 255 255 / 0.74);
+  max-width: 460px;
+  font: 400 1.0625rem / 1.625rem var(--s-font-sans);
+  color: rgb(255 255 255 / 0.9);
   text-wrap: pretty;
 }
 
@@ -446,6 +448,29 @@ html.dark .mk {
 
 .mkh__btn--primary:hover {
   background: #f2f3f7;
+}
+
+.mkh__demo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: var(--s-touch);
+  padding-inline: var(--s-space-1);
+  border-radius: var(--s-radius);
+  font: 600 0.9375rem / 1.25rem var(--s-font-sans);
+  color: #fff;
+  text-decoration: underline;
+  text-decoration-color: rgb(255 255 255 / 0.45);
+  text-underline-offset: 4px;
+}
+
+.mkh__demo:hover {
+  text-decoration-color: #fff;
+}
+
+.mkh__demo:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
 }
 
 .mkh__btn--glass {
@@ -784,7 +809,7 @@ html.dark .mk {
 
 @media (max-width: 639px) {
   .mkh__btn {
-    min-height: 40px;
+    min-height: var(--s-touch);
     padding-inline: 18px;
     border-radius: 10px;
     font-size: 0.875rem;
@@ -941,7 +966,7 @@ html.dark .mk {
   font: 500 0.6875rem / 1 var(--s-font-mono);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--s-accent);
+  color: var(--mk-accent-text);
 }
 
 .mkb__title {
@@ -1150,7 +1175,7 @@ html.dark .mkb-inv__thumb {
   margin-bottom: var(--s-space-1);
   font-size: 0.75rem;
   font-weight: 600;
-  color: #128c7e;
+  color: #0b6b60;
 }
 
 html.dark .mkb-wa__store {

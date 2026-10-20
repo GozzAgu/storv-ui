@@ -10,6 +10,17 @@ export function useMarketingAppUrl() {
   })
 }
 
+/** Where "Start free" goes: straight to account creation, not the sign-in screen. */
+export function useMarketingSignupUrl() {
+  const appUrl = useMarketingAppUrl()
+  return computed(() => `${appUrl.value.replace(/\/$/, '')}/signup`)
+}
+
+export function useMarketingSigninUrl() {
+  const appUrl = useMarketingAppUrl()
+  return computed(() => `${appUrl.value.replace(/\/$/, '')}/signin`)
+}
+
 /** Wordmark that contrasts the current theme. */
 export function useMarketingLogo() {
   const themeStore = useThemeStore()

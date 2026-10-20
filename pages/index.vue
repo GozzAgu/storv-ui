@@ -49,12 +49,8 @@
                 <span class="mk-plan__period">{{ periodSuffix }}</span>
               </template>
             </p>
-            <SButton
-              :variant="plan.featured ? 'primary' : 'secondary'"
-              class="mk-btn"
-              block
-              :to="appUrl"
-            >
+            <!-- Outline only: the filled button on each screen is the free-store signup. -->
+            <SButton variant="secondary" class="mk-btn" block :to="signupUrl">
               {{ plan.cta }}
             </SButton>
           </article>
@@ -103,7 +99,7 @@
       title="Your first store is"
       accent="on us."
       lede="Micro in minutes, in your browser."
-      :primary="{ label: 'Start free', to: appUrl }"
+      :primary="{ label: 'Create your free store', to: signupUrl }"
       :secondary="{ label: 'Try the live demo', to: '/demo/dashboard' }"
     />
 
@@ -136,11 +132,11 @@ import MkSetup from '~/components/marketing/MkSetup.vue'
 import MkStats from '~/components/marketing/MkStats.vue'
 import MkTrialOffer from '~/components/marketing/MkTrialOffer.vue'
 import { MARKETING_PLANS, useMarketingPricing } from '~/composables/useMarketingPricing'
-import { useMarketingAppUrl } from '~/composables/useMarketingSite'
+import { useMarketingSignupUrl } from '~/composables/useMarketingSite'
 
 definePageMeta({ layout: 'marketing' })
 
-const appUrl = useMarketingAppUrl()
+const signupUrl = useMarketingSignupUrl()
 const { currency, planPrice, periodSuffix } = useMarketingPricing()
 const contactOpen = ref(false)
 
@@ -160,7 +156,7 @@ const faq: MkFaqItem[] = [
   },
   {
     q: 'What if my internet drops?',
-    a: 'You need a connection to complete a sale. Mobile data or a hotspot is enough. Saved work stays in the cloud.',
+    a: 'Keep selling. Sales made offline are saved on the device and recorded as soon as you are back online. Anything that needs a manager to approve it waits for a connection.',
   },
   {
     q: 'Do I need special hardware?',

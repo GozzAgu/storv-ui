@@ -10,6 +10,8 @@
   --s-btn-primary-hover: #3156e0;
   --s-btn-primary-active: #2849c4;
   --s-on-btn-primary: #ffffff;
+  /* Blue for text (links, labels): one step darker than the fill so it passes 4.5:1 on the page */
+  --mk-accent-text: var(--s-accent-soft-text);
   --s-text-display: 600 1.75rem/2.25rem var(--s-font-sans);
   --s-text-subheading: 600 0.9375rem/1.375rem var(--s-font-sans);
   --s-btn-secondary: var(--s-glass-strong);
@@ -198,7 +200,7 @@ html.dark .mk-section--alt {
   font: 600 0.6875rem / 1.125rem var(--s-font-sans);
   letter-spacing: var(--s-tracking-caps);
   text-transform: uppercase;
-  color: var(--s-accent);
+  color: var(--mk-accent-text);
 }
 
 .mk-eyebrow::before {
@@ -306,16 +308,16 @@ html.dark .mk-section--alt {
 /* Phones: tighter buttons so calls to action don't dominate a narrow screen */
 @media (max-width: 639px) {
   .mk .mk-btn {
-    height: 40px;
-    min-height: 40px;
+    height: var(--s-touch);
+    min-height: var(--s-touch);
     padding-inline: 18px;
     border-radius: 10px;
     font-size: 0.875rem;
   }
 
   .mk .mk-btn--compact {
-    height: 34px;
-    min-height: 34px;
+    height: 40px;
+    min-height: 40px;
     padding-inline: 14px;
     border-radius: 9px;
     font-size: 0.8125rem;
@@ -328,12 +330,25 @@ html.dark .mk-section--alt {
   gap: var(--s-space-half);
   border-radius: var(--s-radius-sm);
   font-weight: 600;
-  color: var(--s-accent);
+  color: var(--mk-accent-text);
   transition: color var(--s-duration-fast) var(--s-ease);
 }
 
 .mk-link:hover {
   color: var(--s-accent-hover);
+}
+
+/* Links that stand on their own (not inside a sentence) get a full-size tap target */
+.mk-intro__aside .mk-link,
+.mk-tour__footer .mk-link,
+.mk-pricing-more .mk-link,
+.mk-actions .mk-link,
+.mks__cta .mk-link {
+  min-height: var(--s-touch);
+}
+
+.mk-header__brand {
+  padding-block: 4px;
 }
 
 .mk-link svg {
@@ -467,7 +482,19 @@ html.dark .mk-section--alt {
 }
 
 .mk-header__cta {
-  transition: opacity var(--s-duration) var(--s-ease), visibility var(--s-duration);
+  transition: opacity var(--s-duration) var(--s-ease), visibility var(--s-duration),
+    background var(--s-duration) var(--s-ease);
+}
+
+/* Over the home hero the hero's own button is the one filled call to action in view */
+.mk-header--overlay .mk-header__cta.s-btn {
+  border: 1px solid color-mix(in srgb, var(--s-text) 40%, transparent);
+  background: transparent;
+  color: var(--s-text);
+}
+
+.mk-header--overlay .mk-header__cta.s-btn:hover {
+  background: color-mix(in srgb, var(--s-text) 8%, transparent);
 }
 
 /* The sheet has its own full-width call to action */
@@ -2915,6 +2942,28 @@ html.dark .mk-marquee__item:hover {
   background: #f2f3f7;
 }
 
+.mk-cta__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--s-touch);
+  padding-inline: var(--s-space-1);
+  border-radius: var(--s-radius);
+  font: 600 0.9375rem / 1.25rem var(--s-font-sans);
+  color: #fff;
+  text-decoration: underline;
+  text-decoration-color: rgb(255 255 255 / 0.45);
+  text-underline-offset: 4px;
+}
+
+.mk-cta__link:hover {
+  text-decoration-color: #fff;
+}
+
+.mk-cta__link:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
 .mk-cta__btn--glass {
   border: 1px solid rgb(255 255 255 / 0.22);
   background: rgb(255 255 255 / 0.08);
@@ -2929,7 +2978,7 @@ html.dark .mk-marquee__item:hover {
 
 @media (max-width: 639px) {
   .mk-cta__btn {
-    min-height: 40px;
+    min-height: var(--s-touch);
     padding-inline: 18px;
     border-radius: 10px;
     font-size: 0.875rem;
@@ -3377,9 +3426,26 @@ html.dark .mk-marquee__item:hover {
 
 .mk-cookie__actions {
   display: flex;
+  flex: 1 1 100%;
   align-items: center;
+  justify-content: flex-end;
   gap: var(--s-space-1);
-  margin-left: auto;
+}
+
+/* Neutral, full-size buttons: easy to tap, and not mistaken for the signup call to action */
+.mk-cookie .mk-cookie__btn {
+  min-height: var(--s-touch);
+  padding-inline: var(--s-space-2);
+}
+
+.mk-cookie .mk-cookie__btn.s-btn--secondary {
+  border: 1px solid var(--s-border-strong);
+  background: var(--s-surface-2);
+  color: var(--s-text);
+}
+
+.mk-cookie__more {
+  margin-left: 4px;
 }
 
 .mk-to-top {

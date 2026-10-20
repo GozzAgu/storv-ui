@@ -22,8 +22,8 @@
             {{ primary.label }}
             <ArrowRight :size="16" aria-hidden="true" />
           </NuxtLink>
-          <NuxtLink v-if="secondary" :to="secondary.to" class="mk-cta__btn mk-cta__btn--glass">
-            {{ secondary.label }}
+          <NuxtLink v-if="secondary" :to="secondary.to" class="mk-cta__link">
+            or {{ secondary.label.charAt(0).toLowerCase() + secondary.label.slice(1) }}
           </NuxtLink>
         </div>
         <ul class="mk-cta__notes" aria-label="Good to know">

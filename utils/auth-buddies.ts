@@ -108,7 +108,8 @@ export function getBuddyReaction(state: BuddyState): BuddyReaction {
     (mode === 'signin'
       ? state.password.length > 0
       : isPasswordPolicyValid(state.password) &&
-        state.password === state.confirmPassword &&
+        // Signup has no confirm field any more; older forms still pass one.
+        (state.confirmPassword === undefined || state.password === state.confirmPassword) &&
         Boolean(state.name?.trim()))
   if (ready) return pick([line('All set!', 'cheer'), line('Hit that button', 'cheer')])
 

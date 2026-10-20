@@ -25,27 +25,29 @@
         <NuxtLink to="/features" class="mkh__announce mkh-in" style="--i: 1">
           <Sparkles :size="12" aria-hidden="true" />
           <span
-            >Know what's left and who owes you<span class="mkh__announce-more"
-              >, in every branch</span
+            >New: keep selling when the internet drops<span class="mkh__announce-more"
+              >, it syncs when you're back</span
             ></span
           >
         </NuxtLink>
 
         <h1 id="home-title" class="mkh__title mkh-in" style="--i: 2">
-          <span class="mkh__line">Run your shop smarter.</span>
-          <span class="mkh__line">Sell <em class="mkh__serif">faster.</em></span>
+          <span class="mkh__line">Sell and track stock</span>
+          <span class="mkh__line">in every <em class="mkh__serif">branch.</em></span>
         </h1>
 
         <p class="mkh__lede mkh-in" style="--i: 3">
-          The always-on point of sale and inventory system for gadget stores, electronics shops,
-          supermarkets and dealers. Every sale updates stock, receipts and customer balances across
-          every branch, the moment it happens.
+          Storvv is the point of sale and inventory system for gadget stores, electronics shops,
+          supermarkets and dealers. Ring up a sale and your stock, receipts and customer balances
+          update at once.
         </p>
 
         <div class="mkh__actions mkh-in" style="--i: 4">
-          <NuxtLink :to="appUrl" class="mkh__btn mkh__btn--primary">Start free</NuxtLink>
-          <NuxtLink to="/demo/dashboard" class="mkh__btn mkh__btn--glass">
-            Try the live demo <Play :size="12" aria-hidden="true" />
+          <NuxtLink :to="signupUrl" class="mkh__btn mkh__btn--primary">
+            Create your free store
+          </NuxtLink>
+          <NuxtLink to="/demo/dashboard" class="mkh__demo">
+            or try the live demo <Play :size="12" aria-hidden="true" />
           </NuxtLink>
         </div>
       </div>
@@ -116,9 +118,9 @@ import { ArrowLeftRight, PackageMinus, Play, ReceiptText, Sparkles, TrendingUp }
 import MkFrame from '~/components/marketing/MkFrame.vue'
 import MkMarquee from '~/components/marketing/MkMarquee.vue'
 import StorvvMark from '~/components/shell/StorvvMark.vue'
-import { useMarketingAppUrl } from '~/composables/useMarketingSite'
+import { useMarketingSignupUrl } from '~/composables/useMarketingSite'
 
-const appUrl = useMarketingAppUrl()
+const signupUrl = useMarketingSignupUrl()
 
 const sales = [
   { amount: '₦25,000', detail: 'Receipt sent on WhatsApp', add: 25000 },

@@ -48,10 +48,10 @@
           </Transition>
 
           <div class="mks__cta">
-            <SButton variant="primary" class="mk-btn mks__btn" :to="appUrl">
-              Start free
-              <template #trailing><ArrowRight :size="16" aria-hidden="true" /></template>
-            </SButton>
+            <NuxtLink :to="signupUrl" class="mk-link mks__btn">
+              Create your store
+              <ArrowRight :size="16" aria-hidden="true" />
+            </NuxtLink>
             <span class="mks__total"><Timer :size="16" aria-hidden="true" />About 10 minutes</span>
           </div>
 
@@ -75,12 +75,11 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { ArrowRight, Boxes, Check, Clock, ReceiptText, Store, Timer } from '@lucide/vue'
-import SButton from '~/components/s/SButton.vue'
 import MkFrame from '~/components/marketing/MkFrame.vue'
 import MkSectionHead from '~/components/marketing/MkSectionHead.vue'
-import { useMarketingAppUrl } from '~/composables/useMarketingSite'
+import { useMarketingSignupUrl } from '~/composables/useMarketingSite'
 
-const appUrl = useMarketingAppUrl()
+const signupUrl = useMarketingSignupUrl()
 
 const steps = [
   {

@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest'
 import MkSetup from '~/components/marketing/MkSetup.vue'
 
 vi.mock('~/composables/useMarketingSite', () => ({
-  useMarketingAppUrl: () => computed(() => 'https://app.storvv.com'),
+  useMarketingSignupUrl: () => computed(() => 'https://app.storvv.com/signup'),
 }))
 
 function mountSetup() {

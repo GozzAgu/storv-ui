@@ -33,10 +33,14 @@
               <Moon v-if="isDark" :size="18" aria-hidden="true" />
               <Sun v-else :size="18" aria-hidden="true" />
             </SIconButton>
-            <SButton variant="ghost" class="mk-btn mk-btn--compact mk-header__signin" :to="appUrl">
+            <SButton
+              variant="ghost"
+              class="mk-btn mk-btn--compact mk-header__signin"
+              :to="signinUrl"
+            >
               Sign in
             </SButton>
-            <SButton variant="primary" class="mk-btn mk-btn--compact mk-header__cta" :to="appUrl"
+            <SButton variant="primary" class="mk-btn mk-btn--compact mk-header__cta" :to="signupUrl"
               >Start free</SButton
             >
             <button
@@ -132,10 +136,10 @@
               </div>
             </div>
             <div class="mk-menu__actions">
-              <SButton variant="primary" class="mk-btn mk-menu__cta" :to="appUrl"
+              <SButton variant="primary" class="mk-btn mk-menu__cta" :to="signupUrl"
                 >Start free</SButton
               >
-              <SButton variant="secondary" class="mk-btn mk-menu__cta" :to="appUrl"
+              <SButton variant="secondary" class="mk-btn mk-menu__cta" :to="signinUrl"
                 >Sign in</SButton
               >
             </div>
@@ -158,12 +162,16 @@
       aria-label="Cookie notice"
     >
       <p>
-        We use cookies to give you the best browsing experience. By continuing to use the site you
-        agree to their use.
+        We use essential cookies to keep you signed in, and analytics cookies to improve Storvv.
+        <NuxtLink to="/privacy" class="mk-link mk-cookie__more">Learn more</NuxtLink>
       </p>
       <div class="mk-cookie__actions">
-        <NuxtLink to="/privacy" class="mk-link">Learn more</NuxtLink>
-        <SButton variant="primary" size="sm" @click="acceptCookies">OK</SButton>
+        <SButton variant="ghost" class="mk-cookie__btn" @click="chooseCookies('essential')">
+          Essential only
+        </SButton>
+        <SButton variant="secondary" class="mk-cookie__btn" @click="chooseCookies('all')">
+          Accept all
+        </SButton>
       </div>
     </div>
 
@@ -188,13 +196,16 @@ import MkFooter from '~/components/marketing/MkFooter.vue'
 import { useTheme } from '~/composables/useTheme'
 import { useSectionScroll } from '~/composables/useSectionScroll'
 import {
-  useMarketingAppUrl,
   useMarketingLogo,
   useMarketingReveal,
+  useMarketingSigninUrl,
+  useMarketingSignupUrl,
 } from '~/composables/useMarketingSite'
+import { readCookieChoice, saveCookieChoice, type CookieChoice } from '~/utils/cookie-consent'
 
 const route = useRoute()
-const appUrl = useMarketingAppUrl()
+const signupUrl = useMarketingSignupUrl()
+const signinUrl = useMarketingSigninUrl()
 const logoSrc = useMarketingLogo()
 const { scrollToSection, scrollToTop, goToSection } = useSectionScroll()
 const { theme, actualTheme, setTheme, initTheme, applyTheme } = useTheme()
@@ -271,9 +282,10 @@ function openSection(id: string) {
   goToSection(id)
 }
 
-function acceptCookies() {
+/** Visitor's cookie choice; analytics stays off unless they accept all (see 01.firebase.client). */
+function chooseCookies(choice: CookieChoice) {
   cookiesAccepted.value = true
-  localStorage.setItem('storvv-cookies-accepted', 'true')
+  saveCookieChoice(choice)
 }
 
 function onScroll() {
@@ -318,7 +330,7 @@ onMounted(() => {
   syncThemeColor()
   desktopQuery = window.matchMedia('(min-width: 900px)')
   desktopQuery.addEventListener('change', closeMenuOnDesktop)
-  cookiesAccepted.value = !!localStorage.getItem('storvv-cookies-accepted')
+  cookiesAccepted.value = readCookieChoice() !== null
   if (window.location.hash) {
     const id = window.location.hash.slice(1)
     setTimeout(() => scrollToSection(id), 100)

@@ -10,7 +10,7 @@
             Everything your shop runs on. <span class="mk-accent">In one place.</span>
           </h1>
           <div class="mk-actions mk-actions--center">
-            <SButton variant="primary" size="lg" class="mk-btn" :to="appUrl">
+            <SButton variant="primary" size="lg" class="mk-btn" :to="signupUrl">
               Get started free
               <template #trailing><ArrowRight :size="16" aria-hidden="true" /></template>
             </SButton>
@@ -134,7 +134,7 @@
     <MkCta
       title="Ready to run the shop"
       accent="from one place?"
-      :primary="{ label: 'Get started free', to: appUrl }"
+      :primary="{ label: 'Get started free', to: signupUrl }"
       :secondary="{ label: 'See pricing', to: '/pricing' }"
     />
   </div>
@@ -179,11 +179,11 @@ import STabs from '~/components/s/STabs.vue'
 import MkCta from '~/components/marketing/MkCta.vue'
 import MkFrame from '~/components/marketing/MkFrame.vue'
 import MkSectionHead from '~/components/marketing/MkSectionHead.vue'
-import { useMarketingAppUrl } from '~/composables/useMarketingSite'
+import { useMarketingSignupUrl } from '~/composables/useMarketingSite'
 
 definePageMeta({ layout: 'marketing' })
 
-const appUrl = useMarketingAppUrl()
+const signupUrl = useMarketingSignupUrl()
 
 type Plan = 'all' | 'medium' | 'enterprise'
 
