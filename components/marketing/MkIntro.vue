@@ -1,5 +1,5 @@
 <template>
-  <section class="mk-section mku" aria-labelledby="mku-title">
+  <section id="use-cases" class="mk-section mku" aria-labelledby="mku-title">
     <div class="mk-container">
       <MkSectionHead
         title-id="mku-title"
@@ -77,7 +77,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import {
   ArrowLeftRight,
   BellRing,
@@ -185,7 +185,17 @@ const trades = [
   },
 ]
 
-const active = ref(0)
+const route = useRoute()
+/** `?trade=electronics` (from the header's Product menu) opens that tab */
+const tradeFromQuery = () => trades.findIndex((trade) => trade.id === route.query.trade)
+const active = ref(Math.max(0, tradeFromQuery()))
+watch(
+  () => route.query.trade,
+  () => {
+    const index = tradeFromQuery()
+    if (index >= 0) active.value = index
+  }
+)
 const current = computed(() => trades[active.value]!)
 const tabEls = ref<HTMLButtonElement[]>([])
 

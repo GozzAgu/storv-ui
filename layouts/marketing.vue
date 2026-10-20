@@ -21,9 +21,7 @@
           </NuxtLink>
 
           <nav class="mk-header__nav" aria-label="Primary">
-            <a href="/#product" class="mk-nav-link" @click.prevent="goToSection('product')"
-              >Product</a
-            >
+            <MkProductMenu />
             <MkFeatureMenu />
             <NuxtLink
               v-for="link in pageLinks.filter((l) => l.to !== '/features')"
@@ -201,6 +199,7 @@ import SButton from '~/components/s/SButton.vue'
 import SIconButton from '~/components/s/SIconButton.vue'
 import MkFeatureMenu from '~/components/marketing/MkFeatureMenu.vue'
 import MkFooter from '~/components/marketing/MkFooter.vue'
+import MkProductMenu from '~/components/marketing/MkProductMenu.vue'
 import { useTheme } from '~/composables/useTheme'
 import { useSectionScroll } from '~/composables/useSectionScroll'
 import {

@@ -1,6 +1,10 @@
 import { mount } from '@vue/test-utils'
-import { describe, expect, it } from 'vitest'
+import { nextTick, reactive } from 'vue'
+import { describe, expect, it, vi } from 'vitest'
 import MkIntro from '~/components/marketing/MkIntro.vue'
+
+const route = reactive<{ query: Record<string, string> }>({ query: {} })
+vi.stubGlobal('useRoute', () => route)
 
 function mountIntro() {
   return mount(MkIntro, {
@@ -62,6 +66,22 @@ describe('MkIntro', () => {
       '-1',
       '-1',
     ])
+    wrapper.unmount()
+  })
+
+  it('opens the trade named in ?trade= and follows later changes', async () => {
+    route.query = { trade: 'dealers' }
+    const wrapper = mountIntro()
+    expect(selected(wrapper)).toEqual(only(3))
+
+    route.query = { trade: 'procurement' }
+    await nextTick()
+    expect(selected(wrapper)).toEqual(only(4))
+
+    route.query = { trade: 'unknown' }
+    await nextTick()
+    expect(selected(wrapper)).toEqual(only(4))
+    route.query = {}
     wrapper.unmount()
   })
 })

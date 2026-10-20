@@ -1,5 +1,5 @@
 <template>
-  <section class="mk-section mkx" aria-labelledby="mkx-title">
+  <section id="compare" class="mk-section mkx" aria-labelledby="mkx-title">
     <div class="mk-container">
       <MkSectionHead
         title-id="mkx-title"

@@ -3183,6 +3183,23 @@ html.dark .mkm__panel {
   color: var(--s-text-2);
 }
 
+.mkm__list-link {
+  margin-inline: -10px;
+  padding-inline: 10px;
+  border-radius: var(--s-radius-lg);
+  text-decoration: none;
+  transition: background-color var(--s-duration-fast) var(--s-ease);
+}
+
+.mkm__list-link:hover {
+  background: var(--mk-card);
+}
+
+.mkm__list-link:focus-visible {
+  outline: none;
+  box-shadow: var(--s-focus-ring);
+}
+
 .mkm__demo {
   display: inline-flex;
   align-items: center;
