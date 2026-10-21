@@ -2,9 +2,9 @@
   <section class="mkh" :class="{ 'is-paused': paused }" aria-labelledby="home-title">
     <div class="mk-container">
       <div class="mkh__copy">
-        <NuxtLink to="/features" class="mkh__announce mkh-in" style="--i: 0">
+        <NuxtLink to="/features?area=inventory#explore" class="mkh__announce mkh-in" style="--i: 0">
           <span class="mkh__announce-dot" aria-hidden="true" />
-          Keep selling when the internet drops
+          Stock counts that finally add up
           <ChevronRight :size="14" aria-hidden="true" />
         </NuxtLink>
 
