@@ -105,8 +105,8 @@
           type="button"
           class="mkh__pause"
           :aria-pressed="paused"
-          :aria-label="paused ? 'Play the moving examples' : 'Pause the moving examples'"
-          @click="paused = !paused"
+          :aria-label="paused ? 'Play animations' : 'Pause animations'"
+          @click="toggle"
         >
           <Play v-if="paused" :size="14" aria-hidden="true" />
           <Pause v-else :size="14" aria-hidden="true" />
@@ -133,6 +133,7 @@ import {
   Tv,
 } from '@lucide/vue'
 import MkFrame from '~/components/marketing/MkFrame.vue'
+import { useMarketingMotion } from '~/composables/useMarketingMotion'
 import { useMarketingSignupUrl } from '~/composables/useMarketingSite'
 
 const signupUrl = useMarketingSignupUrl()
@@ -164,7 +165,7 @@ const sales = [
   { amount: '₦25,000', detail: 'Phone case and charger · Cash' },
   { amount: '₦210,000', detail: 'AirPods Pro · Card' },
 ]
-const paused = ref(false)
+const { paused, toggle } = useMarketingMotion()
 const tick = ref(0)
 const sale = computed(() => sales[tick.value % sales.length]!)
 let timer: ReturnType<typeof setInterval> | undefined

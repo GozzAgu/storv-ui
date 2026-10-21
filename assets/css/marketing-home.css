@@ -337,7 +337,9 @@ html.dark .mkh__note {
 .mkh__row {
   display: flex;
   flex: none;
+  justify-content: space-around;
   gap: var(--s-space-1);
+  min-width: 100%;
   padding: 4px var(--s-space-1) 4px 0;
 }
 
@@ -1204,4 +1206,203 @@ html.dark .mko {
 
 html.dark .mko__visual:not([class*='mk-tint--']) {
   background: var(--s-surface-2);
+}
+
+/* ── Interludes: moving illustrations in the gaps between sections ─────── */
+
+/* Sits in the space two sections leave between them, so it fills it rather than adding to it */
+.mkl {
+  position: relative;
+  max-width: calc(var(--mk-max) + var(--mk-gutter) * 2);
+  margin: calc(var(--mk-section-y) * -0.55) auto;
+  padding-inline: var(--mk-gutter);
+  pointer-events: none;
+  user-select: none;
+}
+
+.mkl--journey {
+  max-width: none;
+  padding-inline: 0;
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+.mkl--journey .mkl__svg {
+  max-width: 1600px;
+  margin-inline: auto;
+}
+
+.mkl__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.mkl__track {
+  fill: none;
+  stroke: var(--s-border-strong);
+  stroke-width: 1.5;
+  stroke-dasharray: 2 8;
+  stroke-linecap: round;
+  opacity: 0.8;
+}
+
+.mkl__pill {
+  fill: var(--tint);
+  stroke: color-mix(in srgb, var(--tint-ink) 18%, transparent);
+  stroke-width: 1;
+}
+
+.mkl__ink {
+  color: var(--tint-ink);
+}
+
+.mkl__label {
+  font: 700 17px / 1 var(--s-font-sans);
+  fill: var(--s-text);
+}
+
+/* A slow, gentle bob on top of the glide, so the tokens feel carried rather than dragged */
+@media (prefers-reduced-motion: no-preference) {
+  .mkl__bob {
+    animation: mkl-bob 3.2s ease-in-out infinite alternate;
+    animation-delay: var(--bob-delay, 0s);
+    will-change: transform;
+  }
+}
+
+@keyframes mkl-bob {
+  from {
+    transform: translateY(-5px);
+  }
+
+  to {
+    transform: translateY(5px);
+  }
+}
+
+/* Branches */
+.mkl__branch {
+  fill: var(--s-surface);
+  stroke: var(--s-line);
+  stroke-width: 1;
+  filter: drop-shadow(0 10px 18px rgb(0 0 0 / 0.08));
+}
+
+html.dark .mkl__branch {
+  filter: drop-shadow(0 10px 18px rgb(0 0 0 / 0.5));
+}
+
+.mkl__branch-icon {
+  color: var(--s-text);
+}
+
+.mkl__branch-name {
+  font: 700 17px / 1 var(--s-font-sans);
+  fill: var(--s-text);
+}
+
+.mkl__branch-meta {
+  font: 500 13px / 1 var(--s-font-sans);
+  fill: var(--s-text-2);
+}
+
+.mkl__ping {
+  fill: none;
+  stroke: var(--mk-ink-sage);
+  stroke-width: 1.5;
+}
+
+/* Notes: two lanes of small app cards drifting past each other */
+.mkl__notes {
+  display: grid;
+  gap: var(--s-space-2);
+  padding-block: var(--s-space-2);
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+
+.mkl__lane {
+  display: flex;
+  overflow: hidden;
+}
+
+.mkl__row {
+  display: flex;
+  flex: none;
+  justify-content: space-around;
+  gap: var(--s-space-2);
+  /* Each copy is at least as wide as the lane, so the loop never shows an empty stretch */
+  min-width: 100%;
+  margin: 0;
+  padding: 6px var(--s-space-2) 10px 0;
+  list-style: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .mkl__row {
+    animation: mkh-drift 70s linear infinite;
+    will-change: transform;
+  }
+
+  .mkl__lane--back .mkl__row {
+    animation-direction: reverse;
+    animation-duration: 84s;
+  }
+}
+
+.mkl.is-still .mkl__row,
+.mkl.is-still .mkl__bob {
+  animation-play-state: paused;
+}
+
+.mkl__note {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px 12px 12px;
+  border-radius: 16px;
+  background: var(--s-surface);
+  box-shadow: 0 0 0 1px var(--s-line), 0 12px 28px -18px rgb(0 0 0 / 0.25);
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.mkl__note-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--tint);
+  color: var(--tint-ink);
+}
+
+.mkl__note-body {
+  display: grid;
+}
+
+.mkl__note-title {
+  font-weight: 700;
+  color: var(--s-text);
+}
+
+.mkl__note-text {
+  color: var(--s-text-2);
+}
+
+/* Phones: keep the drifting notes, drop the wide drawings that would shrink too small to read */
+@media (max-width: 639px) {
+  .mkl--journey,
+  .mkl--branches {
+    display: none;
+  }
+
+  .mkl {
+    margin-block: calc(var(--mk-section-y) * -0.4);
+    padding-inline: 0;
+  }
 }
