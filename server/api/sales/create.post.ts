@@ -5,6 +5,7 @@ import { assertRateLimit } from '~/server/utils/rate-limit'
 import { syncLoyaltyBestEffort } from '~/server/utils/loyalty/sync'
 import { resolveStoreActor } from '~/server/utils/sales/actor'
 import { createSale, parseCreateSaleRequest } from '~/server/utils/sales/create-sale'
+import { recordRefusedOfflineSale } from '~/server/utils/sales/offline-refusal'
 import { notifyStore } from '~/server/utils/sales/records'
 import { serializeForClient } from '~/server/utils/sales/serialize'
 import { buildSaleTenders } from '~/utils/payments-v2-tenders'
@@ -21,21 +22,49 @@ export default defineEventHandler(async (event) => {
     unknown
   >
   const db = getAdminFirestore()
-  const actor = await resolveStoreActor(db, auth.uid, body.ownerUserId, body.storeId)
-  const input = parseCreateSaleRequest(body)
-  const sale = await createSale(db, actor, input)
+  let actor: Awaited<ReturnType<typeof resolveStoreActor>>
+  let input: ReturnType<typeof parseCreateSaleRequest>
+  let sale: Awaited<ReturnType<typeof createSale>>
+  try {
+    actor = await resolveStoreActor(db, auth.uid, body.ownerUserId, body.storeId)
+    input = parseCreateSaleRequest(body)
+    sale = await createSale(db, actor, input)
+  } catch (err) {
+    // A sale the till saved offline and the server now refuses: tell the store, not just the till.
+    const status = (err as { statusCode?: number })?.statusCode ?? 500
+    if (body.offlineReplay === true && status >= 400 && status < 500 && status !== 429) {
+      await recordRefusedOfflineSale(db, {
+        authUid: auth.uid,
+        ownerUserId: body.ownerUserId,
+        storeId: body.storeId,
+        saleId: body.saleId,
+        message: (err as { message?: string })?.message || 'The sale was refused.',
+        code: (err as { data?: { code?: string } })?.data?.code ?? null,
+        summary: body.offlineSummary,
+        clientCreatedAt: body.clientCreatedAt,
+      })
+    }
+    throw err
+  }
 
   let paymentWarning: string | null = null
   if (sale.created) {
     const receipt = sale.receipt
     if (receipt.paymentsV2 === true) {
-      paymentWarning = await recordV2Tenders(db, auth.uid, actor.ownerId, actor.storeId, sale.receiptId, {
-        total: Number(receipt.total) || 0,
-        isBalanceDue: receipt.status === 'balance_due',
-        deposit: input.deposit ?? 0,
-        method: input.payment?.method || 'Cash',
-        split: input.payment?.split,
-      })
+      paymentWarning = await recordV2Tenders(
+        db,
+        auth.uid,
+        actor.ownerId,
+        actor.storeId,
+        sale.receiptId,
+        {
+          total: Number(receipt.total) || 0,
+          isBalanceDue: receipt.status === 'balance_due',
+          deposit: input.deposit ?? 0,
+          method: input.payment?.method || 'Cash',
+          split: input.payment?.split,
+        }
+      )
     }
 
     await notifyStore(actor.store, {
@@ -43,7 +72,9 @@ export default defineEventHandler(async (event) => {
       actorUid: auth.uid,
       type: receipt.isSwapIn ? 'swap_in_completed' : 'receipt_created',
       title: receipt.isSwapIn ? 'Swap-in Completed' : 'New Receipt Created',
-      message: `${receipt.isSwapIn ? 'Swap-in receipt' : 'Receipt'} #${receipt.receiptNumber} was recorded by ${actor.displayName}`,
+      message: `${receipt.isSwapIn ? 'Swap-in receipt' : 'Receipt'} #${
+        receipt.receiptNumber
+      } was recorded by ${actor.displayName}`,
       metadata: { receiptId: sale.receiptId },
     })
     if (sale.unpricedSwapInName && sale.swapInItemId) {
@@ -98,4 +129,3 @@ async function recordV2Tenders(
     return 'Sale saved, but the payment was not recorded. Open the sale and use Record payment.'
   }
 }
-

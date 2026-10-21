@@ -45,7 +45,7 @@ const PLAN_RANK: Record<SubscriptionPlan, number> = {
   storvv_enterprise: 2,
 }
 
-function staffName(data: Record<string, unknown> | undefined): string | null {
+export function staffName(data: Record<string, unknown> | undefined): string | null {
   const name = [data?.firstName, data?.lastName]
     .filter((v) => typeof v === 'string' && v.trim())
     .join(' ')
