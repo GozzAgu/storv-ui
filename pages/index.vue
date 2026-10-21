@@ -4,13 +4,19 @@
 
     <MkFlow />
 
+    <MkInterlude variant="journey" />
+
     <MkFeatureCarousel id="product" />
+
+    <MkInterlude variant="notes" />
 
     <MkIntro />
 
     <MkOnboarding />
 
     <MkCompare />
+
+    <MkInterlude variant="branches" />
 
     <!-- Pricing teaser -->
     <section id="pricing" class="mk-section" aria-labelledby="home-pricing-title">
@@ -111,6 +117,7 @@ import MkFaq, { type MkFaqItem } from '~/components/marketing/MkFaq.vue'
 import MkFeatureCarousel from '~/components/marketing/MkFeatureCarousel.vue'
 import MkCompare from '~/components/marketing/MkCompare.vue'
 import MkFlow from '~/components/marketing/MkFlow.vue'
+import MkInterlude from '~/components/marketing/MkInterlude.vue'
 import MkIntro from '~/components/marketing/MkIntro.vue'
 import MkOnboarding from '~/components/marketing/MkOnboarding.vue'
 import MkSectionHead from '~/components/marketing/MkSectionHead.vue'

@@ -40,13 +40,15 @@ describe('MkHero', () => {
   })
 
   it('pauses and resumes everything that moves', async () => {
+    const { useMarketingMotion } = await import('~/composables/useMarketingMotion')
+    useMarketingMotion().paused.value = false
     const wrapper = mountHero()
     const button = wrapper.find('.mkh__pause')
     expect(button.attributes('aria-pressed')).toBe('false')
 
     await button.trigger('click')
     expect(button.attributes('aria-pressed')).toBe('true')
-    expect(button.attributes('aria-label')).toBe('Play the moving examples')
+    expect(button.attributes('aria-label')).toBe('Play animations')
     expect(wrapper.find('section').classes()).toContain('is-paused')
 
     await button.trigger('click')
