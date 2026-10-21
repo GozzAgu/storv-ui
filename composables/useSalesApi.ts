@@ -3,6 +3,7 @@ import { getQueryUserId } from '~/composables/useFirestorePaths'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
 import { useAuthStore } from '~/stores/auth'
 import {
+  canSellOffline,
   enqueueSale,
   listQueuedSales,
   markSaleFailed,
@@ -115,7 +116,12 @@ export function useSalesApi() {
    */
   async function createSale(
     body: CreateSaleBody,
-    opts: { approval?: SaleApproval; summary: string }
+    opts: {
+      approval?: SaleApproval
+      summary: string
+      /** The total shown to the customer; if prices change before an offline sale syncs, the sale is flagged. */
+      clientTotal?: number
+    }
   ): Promise<CreateSaleOutcome> {
     const s = await scope()
     const offline = import.meta.client && navigator.onLine === false
@@ -142,6 +148,13 @@ export function useSalesApi() {
 
     const uid = useAuthStore().currentUser?.uid
     if (!uid) throw new SaleApiError('Sign in required', null, 401)
+    if (!canSellOffline(uid)) {
+      throw new SaleApiError(
+        'This till hasn’t reached Storvv for more than 3 days, so it can’t save more sales offline. Connect to the internet to keep selling.',
+        'OFFLINE_TOO_LONG',
+        null
+      )
+    }
     enqueueSale(uid, {
       saleId: body.saleId,
       ownerUserId: s.ownerUserId,
@@ -149,6 +162,7 @@ export function useSalesApi() {
       body: { ...body },
       queuedAt: new Date().toISOString(),
       summary: opts.summary,
+      ...(Number.isFinite(opts.clientTotal) && { clientTotal: opts.clientTotal }),
       attempts: 0,
     })
     return { status: 'queued', saleId: body.saleId }
@@ -237,7 +251,11 @@ export function flushQueuedSales(authFetch: AuthFetch): Promise<FlushResult> {
             ...sale.body,
             ownerUserId: sale.ownerUserId,
             storeId: sale.storeId,
+            // Marks this as a replay: only then does the server keep the till's time and total.
+            offlineReplay: true,
             clientCreatedAt: sale.queuedAt,
+            ...(sale.clientTotal !== undefined && { clientTotal: sale.clientTotal }),
+            offlineSummary: sale.summary,
           },
         })
         removeQueuedSale(uid, sale.saleId)
@@ -247,7 +265,11 @@ export function flushQueuedSales(authFetch: AuthFetch): Promise<FlushResult> {
         if (isNetworkFailure(apiError)) {
           updateQueuedSale(uid, sale.saleId, {
             attempts: sale.attempts + 1,
-            lastError: apiError.message,
+            // No answer at all (offline, blocked): say so rather than show a technical error.
+            lastError:
+              apiError.status === null || apiError.status === 0
+                ? 'Couldn’t reach Storvv'
+                : apiError.message,
           })
           break
         }

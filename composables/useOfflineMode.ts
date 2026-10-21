@@ -1,6 +1,7 @@
 import { ref, computed } from 'vue'
 import { CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import { useFirestore } from './useFirestore'
+import { useAuthStore } from '~/stores/auth'
 import { collection, doc, setDoc } from 'firebase/firestore'
 import {
   applyQueuedWrite,
@@ -19,7 +20,28 @@ interface LegacyPendingOperation {
   timestamp: number
 }
 
-type PendingOperation = QueuedFirestoreWrite | LegacyPendingOperation
+type PendingOperation = (QueuedFirestoreWrite | LegacyPendingOperation) & {
+  /** Who made the change. Only replayed while that user is signed in on this device. */
+  uid?: string
+}
+
+function signedInUid(): string | null {
+  try {
+    return useAuthStore().currentUser?.uid ?? null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Whether `uid` may replay this queued change. Untagged entries come from before changes were
+ * tagged; they only replay for the account whose own data they touch.
+ */
+function belongsTo(op: PendingOperation, uid: string | null): boolean {
+  if (!uid) return false
+  if (op.uid) return op.uid === uid
+  return isQueuedWrite(op) && op.documentPath.startsWith(`users/${uid}/`)
+}
 
 function isQueuedWrite(op: PendingOperation): op is QueuedFirestoreWrite {
   return 'documentPath' in op && op.type === 'set'
@@ -50,8 +72,10 @@ function savePendingOperationsToStorage() {
 }
 
 function queueOperationGlobal(operation: Omit<QueuedFirestoreWrite, 'id' | 'timestamp'>) {
-  const pendingOp: QueuedFirestoreWrite = {
+  const uid = signedInUid()
+  const pendingOp: PendingOperation = {
     ...operation,
+    ...(uid && { uid }),
     timestamp: Date.now(),
     id: `set_${operation.documentPath}_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
   }
@@ -75,8 +99,10 @@ async function syncPendingOperationsGlobal() {
     return
   }
 
+  const uid = signedInUid()
+  const operations = pendingOperations.value.filter((op) => belongsTo(op, uid))
+  if (operations.length === 0) return
   isSyncing.value = true
-  const operations = [...pendingOperations.value]
   const failed: PendingOperation[] = []
 
   for (const op of operations) {
@@ -100,9 +126,21 @@ async function syncPendingOperationsGlobal() {
   savePendingOperationsToStorage()
   isSyncing.value = false
 
-  if (failed.length === 0 && isOnline.value && pendingOperations.value.length > 0) {
+  if (
+    failed.length === 0 &&
+    isOnline.value &&
+    pendingOperations.value.some((op) => belongsTo(op, signedInUid()))
+  ) {
     await syncPendingOperationsGlobal()
   }
+}
+
+/** Drop this user's queued changes from the device (sign-out on a shared till). */
+export function clearOfflineQueueForUser(uid: string) {
+  if (typeof window === 'undefined') return
+  loadPendingOperationsFromStorage()
+  pendingOperations.value = pendingOperations.value.filter((op) => !belongsTo(op, uid))
+  savePendingOperationsToStorage()
 }
 
 /** App-wide offline queue bootstrap (called from plugins/04.offline.client.ts). */
@@ -145,7 +183,9 @@ export async function writeDocumentWithOfflineSupport(
 
 export const useOfflineMode = () => {
   const db = useFirestore().getFirestoreInstance()
-  const pendingCount = computed(() => pendingOperations.value.length)
+  const pendingCount = computed(
+    () => pendingOperations.value.filter((op) => belongsTo(op, signedInUid())).length
+  )
 
   const queueOperation = (operation: Omit<QueuedFirestoreWrite, 'id' | 'timestamp'>) => {
     queueOperationGlobal(operation)

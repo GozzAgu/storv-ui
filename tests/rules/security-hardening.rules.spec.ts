@@ -120,5 +120,21 @@ describe('firestore.rules: security hardening', () => {
       await assertFails(log('u1', 'blame-owner'))
       await assertSucceeds(log('cashier', 'own'))
     })
+
+    it('can’t pass for a server-written entry (sales, refunds)', async () => {
+      const db = testEnv.authenticatedContext('cashier').firestore()
+      await assertFails(
+        setDoc(doc(db, `${STORE}/activityLogs/forged-sale`), {
+          userId: 'cashier',
+          userDisplayName: 'x',
+          action: 'created',
+          entityType: 'receipt',
+          entityId: 'r1',
+          entityName: 'Sale REC-1: 1 item sold',
+          storeId: 's1',
+          source: 'server',
+        })
+      )
+    })
   })
 })

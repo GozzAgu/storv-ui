@@ -8,8 +8,10 @@ import { setApprovalPin, MAX_PIN_ATTEMPTS } from '~/server/utils/sales/approval-
 import {
   createSale,
   parseCreateSaleRequest,
+  receiptNumberFor,
   MAX_OFFLINE_AGE_MS,
 } from '~/server/utils/sales/create-sale'
+import { recordRefusedOfflineSale } from '~/server/utils/sales/offline-refusal'
 import { cancelBalanceDue, recordBalancePayment, refundSale } from '~/server/utils/sales/balance'
 import { applyLedgerEntry } from '~/server/utils/sales/customer-ledger'
 import { closeStockLoan, createStockLoan } from '~/server/utils/sales/stock-loans'
@@ -284,16 +286,140 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('server sales (emulator)',
         createSale(
           db,
           cashier,
-          sale({ lines: [{ itemId: 'usb', quantity: 1 }], clientCreatedAt: old })
+          sale({
+            lines: [{ itemId: 'usb', quantity: 1 }],
+            offlineReplay: true,
+            clientCreatedAt: old,
+          })
         )
       ).rejects.toMatchObject({ data: { code: 'OFFLINE_SALE_TOO_OLD' } })
       const hourAgo = new Date(Date.now() - 3_600_000).toISOString()
       const result = await createSale(
         db,
         cashier,
-        sale({ lines: [{ itemId: 'usb', quantity: 1 }], clientCreatedAt: hourAgo })
+        sale({
+          lines: [{ itemId: 'usb', quantity: 1 }],
+          offlineReplay: true,
+          clientCreatedAt: hourAgo,
+        })
       )
       expect(result.receipt.recordedOffline).toBe(true)
+    })
+
+    it('dates a live sale now, whatever time the client sends', async () => {
+      const cashier = await actor('cashier')
+      const dayAgo = new Date(Date.now() - 24 * 3_600_000).toISOString()
+      const result = await createSale(
+        db,
+        cashier,
+        sale({ lines: [{ itemId: 'usb', quantity: 1 }], clientCreatedAt: dayAgo, clientTotal: 1 })
+      )
+      const date = (result.receipt.date as { toMillis(): number }).toMillis()
+      expect(Math.abs(date - Date.now())).toBeLessThan(60_000)
+      expect(result.receipt.recordedOffline).toBeUndefined()
+      expect(result.receipt.priceChangedOffline).toBeUndefined()
+    })
+
+    it('flags an offline sale whose price changed before it synced', async () => {
+      const cashier = await actor('cashier')
+      const hourAgo = new Date(Date.now() - 3_600_000).toISOString()
+      const same = await createSale(
+        db,
+        cashier,
+        sale({
+          lines: [{ itemId: 'usb', quantity: 1 }],
+          offlineReplay: true,
+          clientCreatedAt: hourAgo,
+          clientTotal: 5_000,
+        })
+      )
+      expect(same.receipt.priceChangedOffline).toBeUndefined()
+
+      await item('usb').update({ price: 6_000 })
+      const changed = await createSale(
+        db,
+        cashier,
+        sale({
+          lines: [{ itemId: 'usb', quantity: 1 }],
+          offlineReplay: true,
+          clientCreatedAt: hourAgo,
+          clientTotal: 5_000,
+        })
+      )
+      expect(changed.receipt.total).toBe(6_000)
+      expect(changed.receipt.priceChangedOffline).toBe(true)
+      expect(changed.receipt.clientTotal).toBe(5_000)
+    })
+
+    it('numbers receipts from the sale ID, so two sales in the same moment never share one', async () => {
+      const cashier = await actor('cashier')
+      const now = Date.now()
+      const a = await createSale(
+        db,
+        cashier,
+        sale({ lines: [{ itemId: 'usb', quantity: 1 }] }),
+        now
+      )
+      const b = await createSale(
+        db,
+        cashier,
+        sale({ lines: [{ itemId: 'usb', quantity: 1 }] }),
+        now
+      )
+      expect(a.receipt.receiptNumber).toBe(receiptNumberFor(a.receiptId))
+      expect(a.receipt.receiptNumber).toMatch(/^REC-[A-Z0-9]{8}$/)
+      expect(a.receipt.receiptNumber).not.toBe(b.receipt.receiptNumber)
+    })
+  })
+
+  describe('refused offline sales', () => {
+    const notes = () =>
+      store().collection('notifications').where('type', '==', 'offline_sale_refused').get()
+
+    it('leaves the store one note per refused sale, naming whether the seller is still active', async () => {
+      const refusal = {
+        ownerUserId: OWNER,
+        storeId: STORE,
+        saleId: 'sale-out-of-stock',
+        message: 'Not enough USB-C cable in stock.',
+        code: 'INSUFFICIENT_STOCK',
+        summary: '3 items · ₦15,000',
+        clientCreatedAt: new Date().toISOString(),
+      }
+      expect(await recordRefusedOfflineSale(db, { ...refusal, authUid: 'cashier' })).toBe(true)
+      expect(await recordRefusedOfflineSale(db, { ...refusal, authUid: 'cashier' })).toBe(false)
+      let snap = await notes()
+      expect(snap.size).toBe(1)
+      const note = snap.docs[0]!.data()
+      expect(note.userId).toBe(OWNER)
+      expect(note.source).toBe('server')
+      expect(note.message).toContain('3 items · ₦15,000')
+      expect(note.message).toContain('Not enough USB-C cable in stock.')
+      expect(note.metadata.code).toBe('INSUFFICIENT_STOCK')
+
+      await store().collection('members').doc('cashier').update({ status: 'removed' })
+      await recordRefusedOfflineSale(db, {
+        ...refusal,
+        saleId: 'sale-after-removal',
+        authUid: 'cashier',
+      })
+      snap = await notes()
+      expect(snap.size).toBe(2)
+      expect(snap.docs.map((d) => d.data().message).join(' ')).toContain('no longer active')
+    })
+
+    it('ignores someone who was never on the team', async () => {
+      expect(
+        await recordRefusedOfflineSale(db, {
+          authUid: 'stranger',
+          ownerUserId: OWNER,
+          storeId: STORE,
+          saleId: 'spam',
+          message: 'x',
+          code: null,
+        })
+      ).toBe(false)
+      expect((await notes()).size).toBe(0)
     })
   })
 

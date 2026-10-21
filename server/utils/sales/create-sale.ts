@@ -8,7 +8,10 @@ import {
 } from 'firebase-admin/firestore'
 import type { InventoryFolder, InventoryItem } from '~/stores/inventory'
 import { planHasFeature } from '~/types/subscription'
-import { getInventoryItemDisplayName, getInventoryItemField } from '~/composables/useInventoryItemDisplay'
+import {
+  getInventoryItemDisplayName,
+  getInventoryItemField,
+} from '~/composables/useInventoryItemDisplay'
 import { getReceiptProductDetails } from '~/composables/useReceiptProductDetails'
 import { normalizeEntityName, normalizeInventoryItemNamedFields } from '~/utils/capitalize-text'
 import { resolveBulkStockFieldAndValueFromMap } from '~/utils/inventory-bulk-quantity'
@@ -50,8 +53,12 @@ export interface SaleLineRequest {
 
 export interface CreateSaleRequest {
   saleId: string
-  /** When the till recorded the sale, for sales queued offline. */
+  /** True when a till is replaying a sale it saved while offline. */
+  offlineReplay?: boolean
+  /** When the till recorded the sale. Only honoured for an offline replay. */
   clientCreatedAt?: string
+  /** The total the till showed the customer, for an offline replay (prices may change meanwhile). */
+  clientTotal?: number
   source?: 'pos' | 'quick_sale'
   lines: SaleLineRequest[]
   customer?: { name?: string; email?: string; phone?: string; address?: string }
@@ -196,9 +203,18 @@ export function parseCreateSaleRequest(body: Record<string, unknown>): CreateSal
   const approvalRaw = body.approval as Record<string, unknown> | undefined
   const customer = (body.customer ?? {}) as Record<string, unknown>
 
+  // Only a sale replayed from a till's offline queue may carry its own time and total; an online
+  // sale is always dated now, so nobody can backdate a sale they are recording live.
+  const offlineReplay = body.offlineReplay === true
   return {
     saleId,
-    clientCreatedAt: typeof body.clientCreatedAt === 'string' ? body.clientCreatedAt : undefined,
+    offlineReplay,
+    clientCreatedAt:
+      offlineReplay && typeof body.clientCreatedAt === 'string' ? body.clientCreatedAt : undefined,
+    clientTotal:
+      offlineReplay && body.clientTotal !== undefined && body.clientTotal !== null
+        ? money(body.clientTotal, 'clientTotal')
+        : undefined,
     source: body.source === 'quick_sale' ? 'quick_sale' : 'pos',
     lines,
     customer: {
@@ -207,7 +223,10 @@ export function parseCreateSaleRequest(body: Record<string, unknown>): CreateSal
       phone: text(customer.phone, 40),
       address: text(customer.address, 300),
     },
-    payment: { method: text(payment.method, 60) || 'Cash', split: split?.length ? split : undefined },
+    payment: {
+      method: text(payment.method, 60) || 'Cash',
+      split: split?.length ? split : undefined,
+    },
     settlement,
     deposit: money(body.deposit, 'deposit'),
     notes: text(body.notes, 1000),
@@ -233,7 +252,10 @@ export function parseCreateSaleRequest(body: Record<string, unknown>): CreateSal
           }
         : undefined,
     approval: approvalRaw
-      ? { approverUid: assertId(approvalRaw.approverUid, 'approverUid'), pin: text(approvalRaw.pin, 6) }
+      ? {
+          approverUid: assertId(approvalRaw.approverUid, 'approverUid'),
+          pin: text(approvalRaw.pin, 6),
+        }
       : undefined,
   }
 }
@@ -448,7 +470,10 @@ export async function createSale(
       const formFields = swapInFormFields(folder)
       const fields = cleanSwapInFields(input.swapIn.fields, new Set(formFields.map((f) => f.name)))
       for (const field of formFields) {
-        if (isSwapInPriceField(field) && (fields[field.name] === undefined || fields[field.name] === '')) {
+        if (
+          isSwapInPriceField(field) &&
+          (fields[field.name] === undefined || fields[field.name] === '')
+        ) {
           delete fields[field.name]
         }
       }
@@ -465,7 +490,10 @@ export async function createSale(
             .limit(1)
         )
         if (!dup.empty) {
-          conflict(`An item with serial number "${serialNo}" is already in stock.`, 'SWAP_SERIAL_DUPLICATE')
+          conflict(
+            `An item with serial number "${serialNo}" is already in stock.`,
+            'SWAP_SERIAL_DUPLICATE'
+          )
         }
       }
 
@@ -513,9 +541,14 @@ export async function createSale(
     const customerName = normalizeEntityName(input.customer?.name || '') || 'Walk-in Customer'
     const folderList = [...new Set(lines.map((l) => String(l.item.folderId || '')).filter(Boolean))]
     const offline = input.clientCreatedAt !== undefined && saleDate.getTime() < now - 60_000
+    // A price can change while a till is offline: keep the server's total, but say so.
+    const priceChangedOffline =
+      input.offlineReplay === true &&
+      input.clientTotal !== undefined &&
+      Math.abs(input.clientTotal - totals.total) >= 0.01
 
     const receipt: Record<string, unknown> = {
-      receiptNumber: `REC-${String(saleDate.getTime()).slice(-6)}`,
+      receiptNumber: receiptNumberFor(input.saleId),
       customerName,
       customerEmail: input.customer?.email || '',
       ...(input.customer?.phone && { customerPhone: input.customer.phone }),
@@ -541,6 +574,7 @@ export async function createSale(
       updatedAt: FieldValue.serverTimestamp(),
       source: input.source === 'quick_sale' ? 'quick_sale' : 'pos',
       ...(offline && { recordedOffline: true }),
+      ...(priceChangedOffline && { priceChangedOffline: true, clientTotal: input.clientTotal }),
       ...(approvedBy && approvedBy !== actor.uid && { approvedBy }),
     }
     if (isBalanceDue) {
@@ -637,7 +671,9 @@ export async function createSale(
       if (!snap.exists || !data || data.status === 'returned' || data.status === 'sold') continue
       const sold = soldByLoan.get(snap.id)
       if (!sold) continue
-      const rawLines = Array.isArray(data.lines) ? (data.lines as Array<{ inventoryItemId: string }>) : []
+      const rawLines = Array.isArray(data.lines)
+        ? (data.lines as Array<{ inventoryItemId: string }>)
+        : []
       const kept = rawLines.filter((l) => !sold.has(l.inventoryItemId))
       if (kept.length === rawLines.length) continue
       tx.update(snap.ref, {
@@ -666,7 +702,9 @@ export async function createSale(
           isBalanceDue ? ' held (balance due)' : ' sold'
         }${swapIn ? `, trade-in ${swapIn.name}` : ''}${
           approvedBy && approvedBy !== actor.uid ? ' (manager approved)' : ''
-        }${offline ? ' (recorded offline)' : ''}`,
+        }${offline ? ' (recorded offline)' : ''}${
+          priceChangedOffline ? ' (price changed while offline)' : ''
+        }`,
       })
     }
 
@@ -682,6 +720,17 @@ export async function createSale(
   })
 
   return result.done
+}
+
+/**
+ * A short, readable receipt number from the sale's random ID, so two tills (or a till and its
+ * own offline replay) can't produce the same number the way a clock-based one could.
+ */
+export function receiptNumberFor(saleId: string): string {
+  return `REC-${saleId
+    .replace(/[^A-Za-z0-9]/g, '')
+    .slice(0, 8)
+    .toUpperCase()}`
 }
 
 function receiptLine(line: LoadedLine): Record<string, unknown> {
@@ -720,10 +769,14 @@ async function loadFolders(
   items: DocumentSnapshot[],
   swapFolderId?: string
 ): Promise<Map<string, InventoryFolder | undefined>> {
-  const ids = new Set(items.map((s) => String(s.data()?.folderId || '')).filter((id) => /^[\w-]+$/.test(id)))
+  const ids = new Set(
+    items.map((s) => String(s.data()?.folderId || '')).filter((id) => /^[\w-]+$/.test(id))
+  )
   if (swapFolderId) ids.add(swapFolderId)
   if (!ids.size) return new Map()
-  const snaps = await db.getAll(...[...ids].map((id) => store.collection('inventoryFolders').doc(id)))
+  const snaps = await db.getAll(
+    ...[...ids].map((id) => store.collection('inventoryFolders').doc(id))
+  )
   return new Map(snaps.map((s) => [s.id, s.exists ? (s.data() as InventoryFolder) : undefined]))
 }
 

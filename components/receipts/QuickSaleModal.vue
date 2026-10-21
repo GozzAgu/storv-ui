@@ -1251,6 +1251,7 @@ async function submitQuickSale(approval?: SaleApproval) {
         summary: `${units} item${units === 1 ? '' : 's'} · ${formatCurrency(
           cartTotal.value + commission
         )}`,
+        clientTotal: Math.round((cartTotal.value + commission) * 100) / 100,
       }
     )
     approvalOpen.value = false

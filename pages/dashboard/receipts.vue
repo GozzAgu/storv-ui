@@ -54,6 +54,8 @@
             </template>
           </SPageHeader>
 
+          <OfflineSalesCard @recorded="receiptsStore.fetchReceipts({ force: true })" />
+
           <dl v-if="!receiptsStore.loading" class="s-metrics" aria-label="Sales summary">
             <div v-for="metric in receiptsHeaderMetrics" :key="metric.key" class="s-metrics__item">
               <dt class="s-metrics__label">{{ metric.label }}</dt>
@@ -595,6 +597,7 @@ import QuickSaleModal from '~/components/receipts/QuickSaleModal.vue'
 // @ts-ignore
 import ViewReceiptModal from '~/components/receipts/ViewReceiptModal.vue'
 import ReceiptDetailsDrawer from '~/components/receipts/ReceiptDetailsDrawer.vue'
+import OfflineSalesCard from '~/components/receipts/OfflineSalesCard.vue'
 import TodaySalesPanel from '~/components/receipts/TodaySalesPanel.vue'
 import { summarizeDaySales } from '~/utils/day-sales-summary'
 import { getReceiptStatusLabel, getReceiptStatusTone } from '~/utils/receipt-status'

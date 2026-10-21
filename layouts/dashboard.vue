@@ -99,16 +99,20 @@
     <!-- Sign out confirmation -->
     <SDialog
       :open="showLogoutConfirm"
-      title="Sign out?"
-      description="You'll need to sign in again to access your dashboard."
+      :title="unsyncedOnDevice ? 'Sales not recorded yet' : 'Sign out?'"
+      :description="signOutDescription"
       size="sm"
       role="alertdialog"
       :dismissible="!loggingOut"
       @update:open="(value: boolean) => { if (!value) cancelSignOut() }"
     >
       <template #footer>
-        <SButton :disabled="loggingOut" data-autofocus @click="cancelSignOut">Cancel</SButton>
-        <SButton variant="danger" :loading="loggingOut" @click="confirmSignOut">Sign out</SButton>
+        <SButton :disabled="loggingOut" data-autofocus @click="cancelSignOut">
+          {{ unsyncedOnDevice ? 'Stay signed in' : 'Cancel' }}
+        </SButton>
+        <SButton variant="danger" :loading="loggingOut" @click="confirmSignOut">
+          {{ unsyncedOnDevice ? 'Delete them and sign out' : 'Sign out' }}
+        </SButton>
       </template>
     </SDialog>
 
@@ -149,6 +153,10 @@ import DemoModeBanner from '~/components/demo/DemoModeBanner.vue'
 import SubscriptionBillingBanner from '~/components/dashboard/SubscriptionBillingBanner.vue'
 import PlanViewOnlyBanner from '~/components/dashboard/PlanViewOnlyBanner.vue'
 import OfflineStatusBanner from '~/components/growth/OfflineStatusBanner.vue'
+import { useFirestore } from '~/composables/useFirestore'
+import { useNetworkStatus } from '~/composables/useNetworkStatus'
+import { useSalesApi } from '~/composables/useSalesApi'
+import { useSalesOutbox } from '~/composables/useSalesOutbox'
 import { isDashboardNavActive } from '~/utils/shell-nav'
 import { DASHBOARD_NAV_DEFINITIONS, filterDashboardNavItems } from '~/utils/dashboard-nav-filter'
 import { isPaymentLinksComingSoon } from '~/utils/payment-links-launch'
@@ -779,9 +787,32 @@ const userInitials = computed(() => {
 
 const showLogoutConfirm = ref(false)
 const loggingOut = ref(false)
+const salesOutbox = useSalesOutbox()
+const { pendingCount: queuedChangesCount } = useNetworkStatus()
 
-const handleSignOut = () => {
+/** Offline sales and changes on this device that the server hasn't seen. */
+const unsyncedOnDevice = computed(() => salesOutbox.queuedCount.value + queuedChangesCount.value)
+
+const signOutDescription = computed(() => {
+  const n = unsyncedOnDevice.value
+  if (!n) return "You'll need to sign in again to access your dashboard."
+  return `${n} sale${n === 1 ? '' : 's'} or change${
+    n === 1 ? '' : 's'
+  } made offline on this device ${n === 1 ? 'hasn’t' : 'haven’t'} reached Storvv yet${
+    typeof navigator !== 'undefined' && !navigator.onLine ? ' (you’re offline)' : ''
+  }. Signing out deletes ${n === 1 ? 'it' : 'them'} from this device, so stay signed in until ${
+    n === 1 ? 'it syncs' : 'they sync'
+  } unless you’ve written ${n === 1 ? 'it' : 'them'} down elsewhere.`
+})
+
+const handleSignOut = async () => {
   showLogoutConfirm.value = true
+  // Try to send anything waiting first, so the warning only shows when it's really needed.
+  if (salesOutbox.queuedCount.value && typeof navigator !== 'undefined' && navigator.onLine) {
+    await useSalesApi()
+      .flushQueued()
+      .catch(() => null)
+  }
 }
 
 const cancelSignOut = () => {
@@ -800,6 +831,7 @@ const confirmSignOut = async () => {
     return navigateTo('/')
   }
   const { signOut } = useFirebaseAuth()
+  const uid = authStore.currentUser?.uid ?? null
   try {
     userStore.clearUserData()
     clearCachedUser()
@@ -809,6 +841,19 @@ const confirmSignOut = async () => {
     authStore.currentUser = null
     authStore.loading = false
     await signOut()
+    if (uid) {
+      // Leave nothing of this user's on a shared till: offline sales, queued changes, cache.
+      const { clearDeviceDataForSignOut } = await import('~/utils/sign-out-device-data')
+      const { cacheCleared } = await clearDeviceDataForSignOut(uid, {
+        firestore: useFirestore().getFirestoreInstance(),
+        discardQueuedSales: true,
+      })
+      // The cleared cache took this tab's Firestore with it: start fresh.
+      if (cacheCleared) {
+        window.location.replace('/signin')
+        return
+      }
+    }
     await navigateTo('/signin', { replace: true })
   } catch (error) {
     console.error('Sign out error:', error)

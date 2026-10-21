@@ -441,6 +441,7 @@ describe('firestore.rules: Payments V2', () => {
       'trade_paid',
       'trade_loan',
       'trade_loan_due',
+      'offline_sale_refused',
     ])('a member cannot forge a %s notification', async (type) => {
       await assertFails(
         setDoc(doc(as('cashier1'), `${STORE}/notifications/n-${type}`), { ...base, type })

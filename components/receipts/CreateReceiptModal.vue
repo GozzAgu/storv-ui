@@ -1975,6 +1975,7 @@ async function submitSale(approval?: SaleApproval) {
     const outcome = await salesApi.createSale(body, {
       approval,
       summary: `${units} item${units === 1 ? '' : 's'} · ${formatCurrency(receiptTotal.value)}`,
+      clientTotal: roundMoney(receiptTotal.value),
     })
     approvalOpen.value = false
 

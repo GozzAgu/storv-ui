@@ -3,6 +3,7 @@ import {
   isEmailVerificationRequiredError,
   isTwoFactorRequiredError,
 } from '~/utils/security-api-errors'
+import { markServerReached } from '~/utils/sales-outbox'
 import { clearTwoFactorSessionVerified } from '~/utils/two-factor-session'
 
 export function useAuthenticatedFetch() {
@@ -46,6 +47,9 @@ export function useAuthenticatedFetch() {
     } catch (error) {
       return handleSecurityError(error)
     }
+    // The server accepted this user's token: lets the till keep selling offline for a while.
+    const uid = authStore.currentUser?.uid
+    if (uid) markServerReached(uid)
     // A host without this route serves the app shell (HTML, status 200) instead of JSON.
     if (!options.responseType && isHtmlDocument(result)) {
       throw Object.assign(new Error('Endpoint not available'), {

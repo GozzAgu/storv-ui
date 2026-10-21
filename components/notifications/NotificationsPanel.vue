@@ -129,6 +129,7 @@ import {
   Tag,
   Target,
   UserRound,
+  WifiOff,
 } from '@lucide/vue'
 import SButton from '~/components/s/SButton.vue'
 import SEmptyState from '~/components/s/SEmptyState.vue'
@@ -187,6 +188,7 @@ function getIcon(notification: Notification): Component {
   if (type.startsWith('trade_')) return Network
   if (type === 'swap_in_completed') return Repeat
   if (type === 'swap_in_needs_price') return Tag
+  if (type === 'offline_sale_refused') return WifiOff
   if (type === 'import_completed' || type === 'export_completed') return FileDown
   return Bell
 }
@@ -200,7 +202,8 @@ function getTone(notification: Notification): Tone {
     type === 'payment_link_sale_cancelled' ||
     type === 'payout_changed' ||
     type === 'trade_loan_due' ||
-    type === 'swap_in_needs_price'
+    type === 'swap_in_needs_price' ||
+    type === 'offline_sale_refused'
   )
     return 'warning'
   if (type === 'payment_awaiting_confirmation') return 'accent'
@@ -267,6 +270,8 @@ async function handleNotificationClick(notification: Notification) {
   if (meta) {
     if (notification.type === 'swap_in_needs_price') {
       router.push('/dashboard/inventory?tab=swap-ins&status=no-price')
+    } else if (notification.type === 'offline_sale_refused') {
+      router.push('/dashboard/receipts')
     } else if (notification.type === 'till_count_difference') {
       router.push('/dashboard/payments/till')
     } else if (notification.type === 'payout_changed') {

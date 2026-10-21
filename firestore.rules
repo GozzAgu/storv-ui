@@ -894,7 +894,7 @@ service cloud.firestore {
           // Payments V2, trade and sale notifications are server-written; a client must not forge them.
           allow create: if planAllowsStoreWrite(userId, storeId) && (canCreateReceipt(userId, storeId)
             && !(request.resource.data.get('source', '') in ['payments_v2', 'trade', 'server'])
-            && !request.resource.data.get('type', '').matches('^(payment_|payout_|till_count_|trade_|swap_in_).*')
+            && !request.resource.data.get('type', '').matches('^(payment_|payout_|till_count_|trade_|swap_in_|offline_sale_).*')
             && request.resource.data.get('type', '') != 'receipt_created'
             && !('recipientUids' in request.resource.data));
           allow update: if (planAllowsStoreWrite(userId, storeId) && canManageNonInventoryOps(userId, storeId))
@@ -908,10 +908,13 @@ service cloud.firestore {
         // Security audit trail (who changed what in inventory)
         match /activityLogs/{logId} {
           allow read: if planAtLeastMedium(userId) && canAccessStoreData(userId, storeId);
+          // Entries marked `source: 'server'` (sales, refunds) are written by the Admin SDK only, so
+          // a client can't forge one that looks like the system's own record.
           allow create: if planAtLeastMedium(userId) &&
                          (isStoreOwnerForPath(userId) || isActiveStoreMember(userId, storeId)) &&
                          request.resource.data.storeId == storeId &&
-                         request.resource.data.userId == request.auth.uid;
+                         request.resource.data.userId == request.auth.uid &&
+                         request.resource.data.get('source', '') != 'server';
           allow update, delete: if false;
         }
 
