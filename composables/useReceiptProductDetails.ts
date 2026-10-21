@@ -238,6 +238,7 @@ export function getInventoryItemDetailLines(
   const lines: string[] = []
   for (const key of DETAIL_ORDER) {
     if (isHiddenDetailKey(key) || INVENTORY_PRIMARY_NAME_KEYS.has(key)) continue
+    if (opts?.omitLineItemFields && LINE_ITEM_TABLE_HIDDEN_KEYS.has(key)) continue
     const value = raw[key]
     if (value === undefined || value === null) continue
     const text = String(value).trim()
@@ -252,6 +253,7 @@ export function getInventoryItemDetailLines(
   for (const [key, value] of Object.entries(raw)) {
     if ((DETAIL_ORDER as readonly string[]).includes(key)) continue
     if (isHiddenDetailKey(key) || INVENTORY_PRIMARY_NAME_KEYS.has(key)) continue
+    if (opts?.omitLineItemFields && LINE_ITEM_TABLE_HIDDEN_KEYS.has(key)) continue
     if (value === undefined || value === null) continue
     const text = String(value).trim()
     if (!text) continue
