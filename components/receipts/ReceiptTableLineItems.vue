@@ -39,7 +39,7 @@ function lineProfitHint(item: ReceiptItem): string | null {
   if (unitCost <= 0) return null
   const profit = lineTotal(item) - unitCost * item.quantity
   const prefix = profit >= 0 ? '+' : ''
-  return `${prefix}${formatCurrency(profit)} profit`
+  return `${prefix}${formatCurrency(profit, { exact: true })} profit`
 }
 
 function lineTotal(item: ReceiptItem) {
@@ -55,7 +55,10 @@ function lineSubtotalBeforeDiscount(item: ReceiptItem) {
 
 function detailSpecs(item: ReceiptItem): Array<{ label: string; value: string }> {
   const name = item.itemName?.trim().toLowerCase()
-  return getProductDetailLines(item, { omitLineItemFields: true, formatMoney: formatCurrency })
+  return getProductDetailLines(item, {
+    omitLineItemFields: true,
+    formatMoney: (n) => formatCurrency(n, { exact: true }),
+  })
     .map((line) => {
       const at = line.indexOf(': ')
       return at === -1
@@ -69,7 +72,7 @@ function discountLabel(item: ReceiptItem): string | null {
   const pct = formatDiscountPercent(item.discountPercentage)
   if (pct) return `${pct}% off`
   if (item.discountAmount != null && item.discountAmount > 0) {
-    return `${formatCurrency(item.discountAmount)} off`
+    return `${formatCurrency(item.discountAmount, { exact: true })} off`
   }
   return null
 }
@@ -87,9 +90,9 @@ function discountLabel(item: ReceiptItem): string | null {
         <p class="s-line-item__price">
           <span>{{ item.quantity }} ×</span>
           <s v-if="item.hasDiscount && item.originalPrice != null" class="s-line-item__was">
-            {{ formatCurrency(item.originalPrice) }}
+            {{ formatCurrency(item.originalPrice, { exact: true }) }}
           </s>
-          <span class="s-line-item__unit">{{ formatCurrency(item.price) }}</span>
+          <span class="s-line-item__unit">{{ formatCurrency(item.price, { exact: true }) }}</span>
           <span v-if="discountLabel(item)" class="s-line-item__discount">
             {{ discountLabel(item) }}
           </span>
@@ -106,12 +109,14 @@ function discountLabel(item: ReceiptItem): string | null {
         </ul>
       </div>
       <div class="s-line-item__amount">
-        <span class="s-line-item__total">{{ formatCurrency(lineTotal(item)) }}</span>
+        <span class="s-line-item__total">{{
+          formatCurrency(lineTotal(item), { exact: true })
+        }}</span>
         <s
           v-if="item.hasDiscount && item.originalPrice != null && item.quantity > 1"
           class="s-line-item__was"
         >
-          {{ formatCurrency(lineSubtotalBeforeDiscount(item)) }}
+          {{ formatCurrency(lineSubtotalBeforeDiscount(item), { exact: true }) }}
         </s>
         <span v-if="lineProfitHint(item)" class="s-profit-hint">{{ lineProfitHint(item) }}</span>
       </div>

@@ -88,22 +88,24 @@
                       {{
                         item.discountPercentage
                           ? `${item.discountPercentage}% off`
-                          : `${formatCurrency(item.discountAmount || 0)} off`
+                          : `${formatCurrency(item.discountAmount || 0, { exact: true })} off`
                       }}
                     </p>
                   </td>
                   <td class="s-receipt-doc__center">{{ item.quantity }}</td>
                   <td class="s-receipt-doc__num">
                     <span v-if="item.hasDiscount && item.originalPrice" class="s-receipt-doc__was">
-                      {{ formatCurrency(item.originalPrice) }}
+                      {{ formatCurrency(item.originalPrice, { exact: true }) }}
                     </span>
-                    {{ formatCurrency(item.price) }}
+                    {{ formatCurrency(item.price, { exact: true }) }}
                   </td>
                   <td class="s-receipt-doc__num s-receipt-doc__strong">
                     <span v-if="item.hasDiscount && item.originalPrice" class="s-receipt-doc__was">
-                      {{ formatCurrency((item.originalPrice || 0) * item.quantity) }}
+                      {{
+                        formatCurrency((item.originalPrice || 0) * item.quantity, { exact: true })
+                      }}
                     </span>
-                    {{ formatCurrency(item.price * item.quantity) }}
+                    {{ formatCurrency(item.price * item.quantity, { exact: true }) }}
                   </td>
                 </tr>
               </tbody>
@@ -114,20 +116,20 @@
             <template v-if="hasAnyDiscount">
               <div class="s-receipt-doc__row">
                 <span>Subtotal</span>
-                <span>{{ formatCurrency(calculateSubtotalBeforeDiscount) }}</span>
+                <span>{{ formatCurrency(calculateSubtotalBeforeDiscount, { exact: true }) }}</span>
               </div>
               <div class="s-receipt-doc__row">
                 <span>Discount</span>
-                <span>-{{ formatCurrency(calculateTotalDiscount) }}</span>
+                <span>-{{ formatCurrency(calculateTotalDiscount, { exact: true }) }}</span>
               </div>
             </template>
             <div v-else class="s-receipt-doc__row">
               <span>Subtotal</span>
-              <span>{{ formatCurrency(lineItemsNetTotal) }}</span>
+              <span>{{ formatCurrency(lineItemsNetTotal, { exact: true }) }}</span>
             </div>
             <div v-if="showSwapCreditLine" class="s-receipt-doc__row">
               <span>Trade-in credit</span>
-              <span>-{{ formatCurrency(swapCreditAmount) }}</span>
+              <span>-{{ formatCurrency(swapCreditAmount, { exact: true }) }}</span>
             </div>
             <template v-if="receipt.splitPayments?.length">
               <div
@@ -138,7 +140,7 @@
                 <span
                   >Paid by <span class="s-receipt-doc__capitalize">{{ sp.method }}</span></span
                 >
-                <span>{{ formatCurrency(sp.amount) }}</span>
+                <span>{{ formatCurrency(sp.amount, { exact: true }) }}</span>
               </div>
             </template>
             <div v-else class="s-receipt-doc__row">
@@ -147,7 +149,7 @@
             </div>
             <div class="s-receipt-doc__grand">
               <span>{{ receiptTotalLabel }}</span>
-              <span>{{ formatCurrency(receipt.total) }}</span>
+              <span>{{ formatCurrency(receipt.total, { exact: true }) }}</span>
             </div>
           </div>
         </section>
@@ -218,12 +220,12 @@
           <template v-if="showProfitRows">
             <div>
               <dt>Cost of goods</dt>
-              <dd>{{ formatCurrency(receiptCogs) }}</dd>
+              <dd>{{ formatCurrency(receiptCogs, { exact: true }) }}</dd>
             </div>
             <div>
               <dt>Gross profit</dt>
               <dd class="s-receipt-internal__strong">
-                {{ formatCurrency(receiptGrossProfitAmount) }}
+                {{ formatCurrency(receiptGrossProfitAmount, { exact: true }) }}
                 <span v-if="receiptMarginPercent !== null" class="s-receipt-internal__muted">
                   · {{ receiptMarginPercent }}%
                 </span>
@@ -237,7 +239,7 @@
               }}
             </dt>
             <dd>
-              {{ formatCurrency(receipt.commissionAmount || 0) }}
+              {{ formatCurrency(receipt.commissionAmount || 0, { exact: true }) }}
               <span v-if="receipt.commissionStatus === 'paid'" class="s-receipt-internal__muted">
                 · Paid
               </span>
@@ -335,7 +337,7 @@ import { useAppToast } from '~/composables/useAppToast'
 import { useProductAnalytics } from '~/composables/useProductAnalytics'
 import { useUser } from '~/composables/useUser'
 import { getQueryUserId } from '~/composables/useFirestorePaths'
-import { setReceiptPdfFont } from '~/utils/receipt-pdf-font'
+import { loadReceiptPdfFonts, renderReceiptPdf } from '~/utils/receipt-pdf'
 import { useReceiptPaperHeader } from '~/composables/useReceiptPaperHeader'
 import { usePermissions } from '~/composables/usePermissions'
 import { useAuthenticatedFetch } from '~/composables/useAuthenticatedFetch'
@@ -416,7 +418,7 @@ async function loadReceiptPoliciesForView() {
   }
 }
 const inventoryStore = useInventoryStore()
-const { formatCurrency } = usePreferences()
+const { formatCurrency, preferences } = usePreferences()
 
 function lookupInventoryItemForReceipt(itemId: string): InventoryItem | null {
   for (const list of Object.values(inventoryStore.items)) {
@@ -473,7 +475,7 @@ function toSpecs(lines: string[]): { label: string; value: string }[] {
 function receiptItemSpecs(item: ReceiptItem) {
   return toSpecs(
     getProductDetailLines(item, {
-      formatMoney: (n) => formatCurrency(n),
+      formatMoney: (n) => formatCurrency(n, { exact: true }),
       omitLineItemFields: true,
     })
   )
@@ -532,7 +534,9 @@ const swapInPrimaryLabel = computed(() => {
 const swapInDetailLines = computed(() => {
   if (!swapInInventoryItem.value) return []
   return getInventoryItemDetailLines(swapInInventoryItem.value, {
-    formatMoney: (n) => formatCurrency(n),
+    formatMoney: (n) => formatCurrency(n, { exact: true }),
+    // Customer-facing: never the trade-in's resale price, cost or buyback flags
+    omitLineItemFields: true,
   })
 })
 
@@ -659,11 +663,6 @@ const formatReceiptTime = (date: string | Date) => {
   })
 }
 
-// PDF uses built-in Helvetica; replace unsupported currency glyphs for clean output.
-const formatPdfCurrency = (value: number) => {
-  return formatCurrency(value).replace(/₦/g, 'NGN ')
-}
-
 /** 1×1 transparent GIF: swapped in for a receipt <img> when its proxy fetch fails, so a broken image never renders */
 const TRANSPARENT_1X1_GIF =
   'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
@@ -706,11 +705,6 @@ async function getReceiptLogoDataUrl(src: string): Promise<string | null> {
   }
 }
 
-function detectPdfImageFormatFromDataUrl(dataUrl: string): 'PNG' | 'JPEG' {
-  if (/^data:image\/jpe?g/i.test(dataUrl)) return 'JPEG'
-  return 'PNG'
-}
-
 async function injectDataUrlsForImages(el: HTMLElement): Promise<void> {
   const images = el.querySelectorAll<HTMLImageElement>('img')
   await Promise.all(
@@ -733,323 +727,101 @@ async function injectDataUrlsForImages(el: HTMLElement): Promise<void> {
   )
 }
 
-async function ensureReceiptFontsReady(): Promise<void> {
-  if (!import.meta.client || !document.fonts?.load) return
-  try {
-    await Promise.all([
-      document.fonts.load('600 1.05rem "Pixelify Sans"'),
-      document.fonts.load('400 11px "JetBrains Mono"'),
-    ])
-    await document.fonts.ready
-  } catch {
-    // Built-in fallbacks apply
-  }
-}
-
 async function receiptElementToJsPdf(el: HTMLElement) {
   await nextTick()
-  await ensureReceiptFontsReady()
   await injectDataUrlsForImages(el)
-  const { default: jsPDF } = await import('jspdf')
   if (!props.receipt) {
     throw new Error('Receipt data missing')
   }
+  const [{ default: jsPDF }, fonts, logoDataUrl] = await Promise.all([
+    import('jspdf'),
+    loadReceiptPdfFonts(),
+    storeLogoUrl.value ? getReceiptLogoDataUrl(storeLogoUrl.value) : Promise.resolve(null),
+  ])
 
   const receipt = props.receipt
+  // Every amount in full on a document the customer keeps: ₦7,000,000.00, never ₦7m.
+  const money = (n: number) => formatCurrency(n, { exact: true })
+  const isBalanceDue = receipt.status === 'balance_due'
+  const swapDetailsReady = receipt.isSwapIn && swapInInventoryItem.value && !swapInItemLoading.value
+
   const pdf = new jsPDF('p', 'mm', 'a4')
-  const pageWidth = pdf.internal.pageSize.getWidth()
-  const pageHeight = pdf.internal.pageSize.getHeight()
-  const margin = 14
-  const contentWidth = pageWidth - margin * 2
-  const rightEdge = pageWidth - margin
-  const rowGap = 4.6
-  let y = 16
-
-  const borderInset = 6
-  const drawPageBorder = () => {
-    pdf.setDrawColor(209, 213, 219)
-    pdf.setLineWidth(0.35)
-    pdf.roundedRect(
-      margin - borderInset,
-      borderInset,
-      contentWidth + borderInset * 2,
-      pageHeight - borderInset * 2,
-      2,
-      2
-    )
-  }
-  drawPageBorder()
-
-  const ensureSpace = (required = 8) => {
-    if (y + required > pageHeight - margin) {
-      pdf.addPage()
-      drawPageBorder()
-      y = margin
-    }
-  }
-
-  const writeLabel = (label: string) => {
-    setReceiptPdfFont(pdf, 'bold')
-    pdf.setFontSize(8)
-    pdf.setTextColor(107, 114, 128)
-    pdf.text(label.toUpperCase(), margin, y)
-    y += rowGap
-  }
-
-  const writeTextLines = (
-    text: string,
-    maxWidth = contentWidth,
-    opts?: {
-      bold?: boolean
-      align?: 'left' | 'right'
-      x?: number
-      color?: [number, number, number]
-    }
-  ) => {
-    const clean = String(text || '').trim()
-    if (!clean) return
-    const lines = pdf.splitTextToSize(clean, maxWidth) as string[]
-    setReceiptPdfFont(pdf, opts?.bold ? 'bold' : 'normal')
-    pdf.setFontSize(10)
-    const [tr, tg, tb] = opts?.color || [31, 41, 55]
-    pdf.setTextColor(tr, tg, tb)
-    for (const line of lines) {
-      ensureSpace(6)
-      if (opts?.align === 'right') {
-        pdf.text(line, opts?.x ?? rightEdge, y, { align: 'right' })
-      } else {
-        pdf.text(line, opts?.x ?? margin, y)
-      }
-      y += rowGap
-    }
-  }
-
-  // Header
-  const logoDataUrl = storeLogoUrl.value ? await getReceiptLogoDataUrl(storeLogoUrl.value) : null
-  if (logoDataUrl) {
-    try {
-      const logoSize = 13
-      const logoX = (pageWidth - logoSize) / 2
-      const logoFormat = detectPdfImageFormatFromDataUrl(logoDataUrl)
-      pdf.addImage(logoDataUrl, logoFormat, logoX, y, logoSize, logoSize, undefined, 'FAST')
-      y += logoSize + 3
-    } catch {
-      // Continue without logo if image decode/add fails.
-    }
-  }
-
-  setReceiptPdfFont(pdf, 'bold')
-  pdf.setFontSize(11)
-  pdf.setTextColor(17, 24, 39)
-  pdf.text(businessName.value || 'Store', pageWidth / 2, y, { align: 'center' })
-  y += 6
-  if (branchName.value) {
-    setReceiptPdfFont(pdf, 'normal')
-    pdf.setFontSize(9)
-    pdf.setTextColor(75, 85, 99)
-    const branchLines = pdf.splitTextToSize(branchName.value, contentWidth - 24) as string[]
-    branchLines.forEach((line) => {
-      ensureSpace(5)
-      pdf.text(line, pageWidth / 2, y, { align: 'center' })
-      y += rowGap
-    })
-  }
-  const contact = [storePhone.value, storeEmail.value].filter(Boolean).join(' · ')
-  if (contact) {
-    pdf.setFontSize(9)
-    pdf.text(contact, pageWidth / 2, y, { align: 'center' })
-    y += rowGap
-  }
-  y += 2
-
-  // Receipt/date row
-  ensureSpace(16)
-  writeLabel('Receipt')
-  writeTextLines(`${receipt.receiptNumber}${receipt.isSwapIn ? ' · Swap-in' : ''}`, 90, {
-    bold: true,
-  })
-  y -= rowGap * 2
-  const rightColX = rightEdge
-  const dateY = y
-  setReceiptPdfFont(pdf, 'bold')
-  pdf.setFontSize(8)
-  pdf.setTextColor(107, 114, 128)
-  pdf.text('DATE & TIME', rightColX, dateY, { align: 'right' })
-  setReceiptPdfFont(pdf, 'normal')
-  pdf.setFontSize(10)
-  pdf.setTextColor(31, 41, 55)
-  pdf.text(formatReceiptDate(receipt.date), rightColX, dateY + rowGap, { align: 'right' })
-  pdf.setFontSize(9)
-  pdf.setTextColor(75, 85, 99)
-  pdf.text(formatReceiptTime(receipt.date), rightColX, dateY + rowGap * 2, { align: 'right' })
-  y = dateY + rowGap * 3 + 2
-
-  // Customer
-  ensureSpace(14)
-  writeLabel('Customer')
-  writeTextLines(receipt.customerName, contentWidth, { bold: true })
-  if (receipt.customerEmail) writeTextLines(receipt.customerEmail, contentWidth)
-  y += 2
-
-  // Items table header
-  ensureSpace(16)
-  writeLabel('Items')
-  const productX = margin
-  const qtyX = margin + 92
-  const priceX = margin + 134
-  const totalX = rightEdge
-  setReceiptPdfFont(pdf, 'bold')
-  pdf.setFontSize(9)
-  pdf.setTextColor(55, 65, 81)
-  pdf.text('PRODUCT', productX, y)
-  pdf.text('QTY', qtyX, y, { align: 'right' })
-  pdf.text('PRICE', priceX, y, { align: 'right' })
-  pdf.text('TOTAL', totalX, y, { align: 'right' })
-  y += 2
-  pdf.setDrawColor(209, 213, 219)
-  pdf.setLineWidth(0.5)
-  pdf.line(margin, y, rightEdge, y)
-  pdf.setLineWidth(0.2)
-  y += 5
-
-  // Items rows
-  for (const item of receipt.items) {
-    const detailLines = getProductDetailLines(item, {
-      formatMoney: (n) => formatPdfCurrency(n),
-      omitLineItemFields: true,
-    })
-    const productLinesRaw = [item.itemName, ...detailLines]
-    if (item.hasDiscount) {
-      productLinesRaw.push(
-        item.discountPercentage
-          ? `${item.discountPercentage}% off`
-          : `-${formatPdfCurrency(item.discountAmount || 0)}`
-      )
-    }
-    const productLines = productLinesRaw.flatMap(
-      (line) => pdf.splitTextToSize(String(line), 78) as string[]
-    )
-    const itemBlockHeight = Math.max(6, productLines.length * rowGap)
-    ensureSpace(itemBlockHeight + 8)
-
-    setReceiptPdfFont(pdf, 'normal')
-    pdf.setFontSize(10)
-    pdf.setTextColor(31, 41, 55)
-    productLines.forEach((line, index) => {
-      pdf.text(line, productX, y + index * rowGap)
-    })
-
-    pdf.setTextColor(17, 24, 39)
-    pdf.text(String(item.quantity), qtyX, y, { align: 'right' })
-    pdf.text(formatPdfCurrency(item.price), priceX, y, { align: 'right' })
-    setReceiptPdfFont(pdf, 'bold')
-    pdf.text(formatPdfCurrency(item.price * item.quantity), totalX, y, { align: 'right' })
-
-    y += itemBlockHeight + 2.5
-    pdf.setDrawColor(243, 244, 246)
-    pdf.line(margin, y, rightEdge, y)
-    y += 4.5
-  }
-
-  // Totals
-  const totalsLeft = margin + 108
-  const writeTotalRow = (label: string, value: string, bold = false, highlight = false) => {
-    ensureSpace(highlight ? 10 : 7)
-    if (highlight) {
-      pdf.setFillColor(17, 24, 39)
-      pdf.rect(totalsLeft - 3, y - 4.6, rightEdge - totalsLeft + 3, 7.2, 'F')
-    }
-    setReceiptPdfFont(pdf, 'normal')
-    pdf.setFontSize(10)
-    pdf.setTextColor(highlight ? 255 : 75, highlight ? 255 : 85, highlight ? 255 : 99)
-    pdf.text(label, totalsLeft, y)
-    setReceiptPdfFont(pdf, bold ? 'bold' : 'normal')
-    pdf.setTextColor(highlight ? 255 : 17, highlight ? 255 : 24, highlight ? 255 : 39)
-    pdf.text(value, rightEdge, y, { align: 'right' })
-    y += rowGap + (highlight ? 2 : 0.5)
-  }
-
-  if (hasAnyDiscount.value) {
-    writeTotalRow('Subtotal', formatPdfCurrency(calculateSubtotalBeforeDiscount.value))
-    writeTotalRow('Discount', `-${formatPdfCurrency(calculateTotalDiscount.value)}`)
-  } else {
-    writeTotalRow('Subtotal', formatPdfCurrency(lineItemsNetTotal.value))
-  }
-  if (showSwapCreditLine.value) {
-    writeTotalRow('Trade-in credit', `-${formatPdfCurrency(swapCreditAmount.value)}`)
-  }
-  // Cost/gross-profit are intentionally never printed on the PDF - this is the customer-facing
-  // document (downloaded, printed, or emailed), unlike the on-screen view which stays
-  // owner-only behind canViewProfitAndCost.
-  if (receipt.splitPayments?.length) {
-    receipt.splitPayments.forEach((sp) => {
-      writeTotalRow(`Payment (${sp.method})`, formatPdfCurrency(sp.amount))
-    })
-  } else {
-    writeTotalRow('Payment', receipt.paymentMethod)
-  }
-  y += 1.5
-  writeTotalRow(receiptTotalLabel.value, formatPdfCurrency(receipt.total), true, true)
-
-  y += 3
-  ensureSpace(26)
-  writeLabel('Status')
-  const statusColor: Record<string, [number, number, number]> = {
-    completed: [4, 120, 87],
-    refunded: [185, 28, 28],
-    balance_due: [180, 83, 9],
-    cancelled: [107, 114, 128],
-  }
-  writeTextLines(receiptStatusLabel.value, contentWidth, {
-    bold: true,
-    color: statusColor[receipt.status] || [55, 65, 81],
-  })
-  if (receipt.notes) {
-    y += 1
-    writeLabel('Notes')
-    writeTextLines(receipt.notes, contentWidth)
-  }
-  if (receipt.isSwapIn) {
-    y += 1
-    writeLabel('Swap-in')
-    if (swapInFolderName.value) {
-      writeTextLines(`Folder: ${swapInFolderName.value}`, contentWidth)
-    }
-    if (swapInItemLoading.value) {
-      writeTextLines('Loading trade-in details...', contentWidth)
-    } else if (swapInItemError.value) {
-      writeTextLines(swapInItemError.value, contentWidth)
-    } else if (swapInInventoryItem.value && swapInPrimaryLabel.value) {
-      writeTextLines(swapInPrimaryLabel.value, contentWidth, { bold: true })
-      for (const line of swapInDetailLines.value) {
-        writeTextLines(line, contentWidth)
-      }
-    } else if (swapInFolderName.value) {
-      writeTextLines(`Device added to ${swapInFolderName.value}`, contentWidth)
-    } else if (receipt.swapInItemId) {
-      writeTextLines('Trade-in recorded; details unavailable.', contentWidth)
-    }
-  }
-  if (receipt.createdByUserName) {
-    y += 1
-    writeTextLines(`Generated by ${receipt.createdByUserName}`, contentWidth)
-  }
-
-  y += 5
-  ensureSpace(10)
-  setReceiptPdfFont(pdf, 'bold')
-  pdf.setFontSize(10)
-  pdf.setTextColor(31, 41, 55)
-  pdf.text('Thank you for your business', pageWidth / 2, y, { align: 'center' })
-  y += rowGap
-  setReceiptPdfFont(pdf, 'normal')
-  pdf.setFontSize(8)
-  pdf.setTextColor(107, 114, 128)
-  pdf.text('Computer-generated receipt - Generated by storvv', pageWidth / 2, y, {
-    align: 'center',
-  })
-
-  return pdf
+  // Cost and gross profit are never printed: this is the customer's copy (downloaded, printed
+  // or emailed), unlike the on-screen view which shows them to the owner.
+  return renderReceiptPdf(
+    pdf,
+    {
+      store: {
+        name: businessName.value || 'Store',
+        branch: branchName.value || undefined,
+        phone: storePhone.value || undefined,
+        email: storeEmail.value || undefined,
+        logoDataUrl,
+      },
+      receiptNumber: receipt.receiptNumber,
+      date: receipt.date instanceof Date ? receipt.date : new Date(receipt.date),
+      status: receipt.status,
+      customer: {
+        name: receipt.customerName,
+        phone: receipt.customerPhone || undefined,
+        email: receipt.customerEmail || undefined,
+        address: receipt.customerAddress || undefined,
+      },
+      servedBy: receipt.createdByUserName || undefined,
+      items: receipt.items.map((item) => ({
+        name: item.itemName,
+        details: getProductDetailLines(item, { formatMoney: money, omitLineItemFields: true }),
+        quantity: item.quantity,
+        unitPrice: item.price,
+        ...(item.hasDiscount &&
+          item.originalPrice &&
+          item.originalPrice > item.price && {
+            originalUnitPrice: item.originalPrice,
+            discountLabel: item.discountPercentage
+              ? `${item.discountPercentage}% off`
+              : `${money(item.originalPrice - item.price)} off each`,
+          }),
+        amount: item.price * item.quantity,
+      })),
+      totals: {
+        subtotal: hasAnyDiscount.value
+          ? calculateSubtotalBeforeDiscount.value
+          : lineItemsNetTotal.value,
+        ...(hasAnyDiscount.value && { discount: calculateTotalDiscount.value }),
+        ...(showSwapCreditLine.value && { tradeInCredit: swapCreditAmount.value }),
+        total: receipt.total,
+        totalLabel: receiptTotalLabel.value,
+        ...(isBalanceDue && {
+          amountPaid: receipt.amountPaid ?? 0,
+          balanceDue: receipt.balanceDue ?? Math.max(0, receipt.total - (receipt.amountPaid ?? 0)),
+        }),
+      },
+      payment: {
+        method: receipt.paymentMethod,
+        ...(receipt.splitPayments?.length && { split: receipt.splitPayments }),
+      },
+      ...(receipt.isSwapIn && {
+        tradeIn: {
+          name: swapDetailsReady
+            ? swapInPrimaryLabel.value || 'Trade-in item'
+            : swapInFolderName.value
+            ? `Item added to ${swapInFolderName.value}`
+            : 'Trade-in item',
+          category: swapInFolderName.value || undefined,
+          details: swapDetailsReady ? swapInDetailLines.value : [],
+        },
+      }),
+      notes: receipt.notes || undefined,
+      policies: [
+        { title: 'Terms of sale', text: receiptPolicies.salesTerms },
+        { title: 'Refund policy', text: receiptPolicies.refundPolicy },
+        { title: 'Warranty', text: receiptPolicies.warrantyPolicy },
+      ],
+      currency: (preferences.value.currency || 'NGN').toUpperCase(),
+      money,
+    },
+    fonts
+  )
 }
 
 const handlePrintPDF = async () => {

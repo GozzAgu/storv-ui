@@ -72,7 +72,12 @@ function currencySymbolForCode(currency: string): string {
   return currencies.find((c) => c.code === currency)?.symbol ?? currency
 }
 
-function formatCurrencyIntl(amount: number, locale: string, currency: string): string {
+function formatCurrencyIntl(
+  amount: number,
+  locale: string,
+  currency: string,
+  exact = false
+): string {
   const full: Intl.NumberFormatOptions = {
     style: 'currency',
     currency,
@@ -82,7 +87,7 @@ function formatCurrencyIntl(amount: number, locale: string, currency: string): s
   if (!Number.isFinite(amount)) {
     return new Intl.NumberFormat(locale, full).format(amount)
   }
-  if (Math.abs(amount) >= CURRENCY_COMPACT_THRESHOLD) {
+  if (!exact && Math.abs(amount) >= CURRENCY_COMPACT_THRESHOLD) {
     const compact = formatCompactCurrency(amount, currencySymbolForCode(currency))
     if (compact) return compact
   }
@@ -284,7 +289,12 @@ export const usePreferences = () => {
   // Format currency with conversion
   const formatCurrency = (
     value: number,
-    options?: { showSymbol?: boolean; fromCurrency?: string }
+    options?: {
+      showSymbol?: boolean
+      fromCurrency?: string
+      /** The full amount (₦7,000,000.00), never shortened to ₦7m: receipts and documents. */
+      exact?: boolean
+    }
   ) => {
     if (!import.meta.client) {
       // SSR fallback - just format without conversion
@@ -297,7 +307,7 @@ export const usePreferences = () => {
           ? 'de-DE'
           : 'en-US'
 
-      return formatCurrencyIntl(value, locale, preferences.value.currency)
+      return formatCurrencyIntl(value, locale, preferences.value.currency, options?.exact)
     }
 
     const { showSymbol = true, fromCurrency } = options || {}
@@ -337,7 +347,7 @@ export const usePreferences = () => {
         ? 'de-DE'
         : 'en-US'
 
-    return formatCurrencyIntl(convertedValue, locale, targetCurrency)
+    return formatCurrencyIntl(convertedValue, locale, targetCurrency, options?.exact)
   }
 
   // Format date
