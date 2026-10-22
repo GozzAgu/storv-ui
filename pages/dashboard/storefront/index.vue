@@ -768,13 +768,13 @@ async function updateStatus(
       )
     }
     if (status === 'completed' && res?.receiptId) {
-      const { resetReceiptsFetchStamp, useReceiptsStore } = await import('~/stores/receipts')
+      // The live receipts listener picks up the new sale; only stock caches need clearing.
+      const { useReceiptsStore } = await import('~/stores/receipts')
       const { resetInventoryFetchStamps } = await import('~/stores/inventory')
       const { invalidateFolderItemCaches } = await import('~/utils/inventory-items-firestore')
-      resetReceiptsFetchStamp()
       resetInventoryFetchStamps()
       if (res.folderId) invalidateFolderItemCaches(res.folderId)
-      await useReceiptsStore().fetchReceipts({ force: true })
+      await useReceiptsStore().fetchReceipts()
     }
     await load()
     return true

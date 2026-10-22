@@ -127,6 +127,11 @@ export const useFirebaseAuth = () => {
         await clearNativeBiometricLogin()
       }
 
+      // Stop the live receipts listener before the session ends (it would only error after)
+      const { stopLiveReceipts } = await import('~/stores/receipts')
+      stopLiveReceipts()
+      const { clearQueryUserIdCache } = await import('~/composables/useFirestorePaths')
+      clearQueryUserIdCache()
       await firebaseSignOut(auth)
 
       authStore.currentUser = null

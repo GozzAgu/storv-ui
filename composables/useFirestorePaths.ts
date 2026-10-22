@@ -304,6 +304,10 @@ export function getActivityLogsCollection(
   return collection(db, 'users', userId, 'stores', storeId, 'activityLogs')
 }
 
+// A staff member's owner never changes within a sign-in, so resolve it once instead of
+// querying the staff collection before every read
+let staffOwnerMemo: { uid: string; owner: string } | null = null
+
 /**
  * Helper to get userId for queries (superadmin's UID)
  * For staff, returns their superadmin's UID from staff document
@@ -311,6 +315,25 @@ export function getActivityLogsCollection(
 export async function getQueryUserId(): Promise<string | null> {
   if (import.meta.server) return null
 
+  const { isDemoModeActive } = await import('~/utils/demo-mode')
+  const { useAuthStore } = await import('~/stores/auth')
+  const uid = useAuthStore().currentUser?.uid
+  if (isDemoModeActive() || !uid) return resolveQueryUserId()
+  if (staffOwnerMemo?.uid === uid) return staffOwnerMemo.owner
+
+  const resolved = await resolveQueryUserId()
+  if (resolved && resolved !== uid && useAuthStore().currentUser?.uid === uid) {
+    staffOwnerMemo = { uid, owner: resolved }
+  }
+  return resolved
+}
+
+/** Forget the resolved owner, e.g. on sign-out or when a staff member is moved. */
+export function clearQueryUserIdCache(): void {
+  staffOwnerMemo = null
+}
+
+async function resolveQueryUserId(): Promise<string | null> {
   const { isDemoModeActive, DEMO_USER_UID } = await import('~/utils/demo-mode')
   if (isDemoModeActive()) return DEMO_USER_UID
 

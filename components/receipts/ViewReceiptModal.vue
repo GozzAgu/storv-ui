@@ -408,7 +408,11 @@ async function loadReceiptPoliciesForView() {
   try {
     const ownerId = await getQueryUserId()
     if (!ownerId) return
-    const ud = await getUserDocument(ownerId)
+    // The owner's own profile is already loaded; only staff need the owner's document
+    const ud =
+      ownerId === useAuthStore().currentUser?.uid && userStore.userData
+        ? userStore.userData
+        : await getUserDocument(ownerId)
     const r = ud?.storeDetails?.settings?.receipt
     receiptPolicies.salesTerms = (r?.salesTerms || '').trim()
     receiptPolicies.refundPolicy = (r?.refundPolicy || '').trim()

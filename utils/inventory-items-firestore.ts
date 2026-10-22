@@ -27,12 +27,25 @@ const ALL_CHUNK_CACHE_TTL_MS = 45_000
 const pageDataCache = new Map<string, { items: InventoryItem[]; fetchedAt: number }>()
 const allItemsCache = new Map<string, { items: InventoryItem[]; fetchedAt: number }>()
 
+let inventoryVersion = 0
+
+/** Bumps whenever this device changes stock, so longer-lived summaries know to reload. */
+export function noteInventoryChanged(): void {
+  inventoryVersion++
+}
+
+export function currentInventoryVersion(): number {
+  return inventoryVersion
+}
+
 export function clearInventoryItemQueryCaches() {
   pageDataCache.clear()
   allItemsCache.clear()
+  noteInventoryChanged()
 }
 
 export function invalidateFolderItemCaches(folderId: string) {
+  noteInventoryChanged()
   allItemsCache.delete(folderId)
   const prefix = `${folderId}:`
   for (const k of pageDataCache.keys()) {

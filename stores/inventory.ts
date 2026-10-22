@@ -49,7 +49,9 @@ import {
   getInventoryItemsPage,
   fetchAllInventoryItemsChunked,
   clearInventoryItemQueryCaches,
+  currentInventoryVersion,
   invalidateFolderItemCaches,
+  noteInventoryChanged,
   docToInventoryItem,
 } from '~/utils/inventory-items-firestore'
 import { resolveBulkStockFieldAndValue } from '~/utils/inventory-bulk-quantity'
@@ -70,6 +72,7 @@ import {
   normalizeInventoryItemNamedFields,
 } from '~/utils/capitalize-text'
 import {
+  INVENTORY_STATS_TTL_MS,
   isStoreFetchStampFresh,
   isStoreListFetchFresh,
   type StoreFetchStamp,
@@ -194,7 +197,7 @@ let createFolderInflight: { key: string; promise: Promise<string> } | null = nul
 let fetchFoldersInflight: { key: string; promise: Promise<void> } | null = null
 let foldersFetchStamp: StoreFetchStamp | null = null
 let availabilityStatsInflight: Promise<Record<string, InventoryItem[]>> | null = null
-let availabilityStatsStamp: StoreFetchStamp | null = null
+let availabilityStatsStamp: (StoreFetchStamp & { version: number }) | null = null
 
 /**
  * Staff product reads must filter on one category at a time: Firestore rules only check
@@ -521,7 +524,16 @@ export const useInventoryStore = defineStore('inventory', {
       const storeId = (await getCurrentStoreId()) ?? ''
       const hasStats = Object.keys(this.folderAvailabilityStats).length > 0
 
-      if (isStoreListFetchFresh(availabilityStatsStamp, storeId, hasStats, options?.force)) {
+      if (
+        availabilityStatsStamp?.version === currentInventoryVersion() &&
+        isStoreListFetchFresh(
+          availabilityStatsStamp,
+          storeId,
+          hasStats,
+          options?.force,
+          INVENTORY_STATS_TTL_MS
+        )
+      ) {
         const grouped: Record<string, InventoryItem[]> = {}
         for (const folder of this.folders) {
           grouped[folder.id] = this.items[folder.id] ?? []
@@ -575,6 +587,8 @@ export const useInventoryStore = defineStore('inventory', {
 
         this.availabilityStatsLoading = true
         try {
+          // Stamp with the version from before the read, so a change made mid-read still counts
+          const version = currentInventoryVersion()
           const ctx = await this._prepareStoreInventoryItemsContext()
           const itemDocs = ctx.isStaff
             ? await getItemDocsPerFolder(
@@ -622,7 +636,11 @@ export const useInventoryStore = defineStore('inventory', {
             grouped[folder.id] = itemsByFolder.get(folder.id) ?? []
           }
           if (storeId) {
-            availabilityStatsStamp = { storeId, fetchedAt: Date.now() }
+            availabilityStatsStamp = {
+              storeId,
+              fetchedAt: Date.now(),
+              version,
+            }
           }
           return grouped
         } catch (error: unknown) {
@@ -634,12 +652,15 @@ export const useInventoryStore = defineStore('inventory', {
         }
       })()
 
-      availabilityStatsInflight = run.finally(() => {
-        if (availabilityStatsInflight === run) {
+      // Compare against the tracked promise itself, or the slot never clears and every later
+      // call gets this finished run back
+      const tracked = run.finally(() => {
+        if (availabilityStatsInflight === tracked) {
           availabilityStatsInflight = null
         }
       })
-      return availabilityStatsInflight
+      availabilityStatsInflight = tracked
+      return tracked
     },
 
     /** Recompute and cache available stock value for one category (all items in folder). */
@@ -1644,7 +1665,7 @@ export const useInventoryStore = defineStore('inventory', {
           this.itemsPagination[folderId] = { page, pageSize, total }
           this.itemsLoadedFully[folderId] = false
           this.itemsLoading[folderId] = false
-          await this.updateItemCount(folderId)
+          await this.updateItemCount(folderId, { knownCount: total })
           return list
         } catch (err: any) {
           this.itemsLoading[folderId] = false
@@ -1824,6 +1845,7 @@ export const useInventoryStore = defineStore('inventory', {
       folderId: string,
       itemData: Omit<InventoryItem, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'folderId'>
     ) {
+      noteInventoryChanged()
       assertPlanWritable()
       const { isDemoModeActive } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) {
@@ -2017,6 +2039,7 @@ export const useInventoryStore = defineStore('inventory', {
         Omit<InventoryItem, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'folderId'>
       >
     ) {
+      noteInventoryChanged()
       assertPlanWritable()
       const { isDemoModeActive } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) {
@@ -2234,6 +2257,7 @@ export const useInventoryStore = defineStore('inventory', {
       itemId: string,
       updates: Partial<Omit<InventoryItem, 'id' | 'createdAt' | 'createdBy' | 'folderId'>>
     ) {
+      noteInventoryChanged()
       assertPlanWritable()
       const { isDemoModeActive } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) {
@@ -2393,6 +2417,7 @@ export const useInventoryStore = defineStore('inventory', {
 
     // Delete an item
     async deleteItem(folderId: string, itemId: string) {
+      noteInventoryChanged()
       assertPlanWritable()
       const { isDemoModeActive } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) {
@@ -2512,7 +2537,8 @@ export const useInventoryStore = defineStore('inventory', {
     },
 
     // Update item count for a folder
-    async updateItemCount(folderId: string) {
+    /** Pass knownCount when the caller has just counted, so the folder is not counted twice. */
+    async updateItemCount(folderId: string, options?: { knownCount?: number }) {
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
         throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
@@ -2531,14 +2557,19 @@ export const useInventoryStore = defineStore('inventory', {
 
       try {
         let actualCount: number
-        try {
-          actualCount = await this.getFolderItemCountFromServer(folderId)
-        } catch {
-          actualCount = this.items[folderId]?.length || 0
+        if (options?.knownCount !== undefined) {
+          actualCount = options.knownCount
+        } else {
+          try {
+            actualCount = await this.getFolderItemCountFromServer(folderId)
+          } catch {
+            actualCount = this.items[folderId]?.length || 0
+          }
         }
 
         // Always sync local folder row (sidebar / UI)
         const index = this.folders.findIndex((f) => f.id === folderId)
+        const storedCount = index > -1 ? this.folders[index]?.itemCount : undefined
         if (index > -1 && this.folders[index]) {
           this.folders[index].itemCount = actualCount
         }
@@ -2557,7 +2588,7 @@ export const useInventoryStore = defineStore('inventory', {
         }
 
         const storeId = await getCurrentStoreId()
-        if (storeId) {
+        if (storeId && storedCount !== actualCount) {
           const folderRef = getInventoryFolderDocument(db, userId, storeId, folderId)
           await updateDoc(folderRef, {
             itemCount: actualCount,
@@ -2610,7 +2641,11 @@ export const useInventoryStore = defineStore('inventory', {
           return
         }
 
-        const userData = await getUserDocument(userId)
+        // The owner's own profile is already loaded; only staff need the owner's document
+        const userData =
+          userId === authStore.currentUser.uid && userStore.userData
+            ? userStore.userData
+            : await getUserDocument(userId)
         const lowStockThreshold =
           userData?.storeDetails?.settings?.inventory?.lowStockThreshold || 10
 
@@ -2713,6 +2748,7 @@ export const useInventoryStore = defineStore('inventory', {
      * Hold inventory for a balance-due receipt (not sold until paid in full).
      */
     async reserveInventoryForBalanceDue(receiptId: string, itemIds: string[]) {
+      noteInventoryChanged()
       const db = useFirestore().getFirestoreInstance()
       if (!db) throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
 
@@ -2752,6 +2788,7 @@ export const useInventoryStore = defineStore('inventory', {
     },
 
     async releaseInventoryReservation(receiptId: string, itemIds: string[]) {
+      noteInventoryChanged()
       const db = useFirestore().getFirestoreInstance()
       if (!db) throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
 
@@ -2938,6 +2975,7 @@ export const useInventoryStore = defineStore('inventory', {
       loanIdByItemId: Map<string, string>,
       options?: { skipActivityLog?: boolean }
     ) {
+      noteInventoryChanged()
       assertPlanWritable()
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
@@ -3109,6 +3147,7 @@ export const useInventoryStore = defineStore('inventory', {
 
     // Update dateOut for items when receipt is generated
     async updateItemsDateOut(folderId: string, itemIds: string[]) {
+      noteInventoryChanged()
       assertPlanWritable()
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
@@ -3204,6 +3243,7 @@ export const useInventoryStore = defineStore('inventory', {
         restoreQuantities?: Record<string, number>
       }
     ) {
+      noteInventoryChanged()
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
         throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
