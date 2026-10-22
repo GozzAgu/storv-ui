@@ -8,7 +8,6 @@ import {
   doc,
   setDoc,
   getDoc,
-  getDocs,
   updateDoc,
   deleteDoc,
   query,
@@ -17,6 +16,7 @@ import {
   onSnapshot,
   serverTimestamp,
   type QueryDocumentSnapshot,
+  type Unsubscribe,
 } from 'firebase/firestore'
 import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from './auth'
@@ -38,11 +38,6 @@ import { roundMoney } from '~/utils/receipt-balance'
 import { resolveApiPath } from '~/utils/api-url'
 import { summarizeDaySales } from '~/utils/day-sales-summary'
 import { getPermissionAction, resolveStaffPermissions } from '~/utils/staff-permissions'
-import {
-  isStoreListFetchFresh,
-  isStoreFetchStampFresh,
-  type StoreFetchStamp,
-} from '~/utils/store-data-cache'
 
 /** Firestore receipt doc to the store's Receipt shape. `fallbackUserId` fills legacy docs. */
 function mapReceiptDoc(doc: QueryDocumentSnapshot, fallbackUserId: string): Receipt {
@@ -108,10 +103,39 @@ export function mapReceiptData(
 
 /** Avoid duplicate concurrent fetchReceipts() (layout + dashboard home + watchers). */
 let fetchReceiptsInflight: Promise<void> | null = null
-let receiptsFetchStamp: StoreFetchStamp | null = null
 
+/**
+ * One live listener per store keeps `receipts` current for the whole session. Firestore bills
+ * the full list once, then only the receipts that change (a sale, a refund, a payment), instead
+ * of every receipt each time a page asks for them. With the on-device cache, a reload within
+ * about half an hour is also billed for changes only.
+ */
+let liveReceipts: {
+  /** `${signed-in uid}/${owner uid}/${store id}` */
+  key: string
+  stop: Unsubscribe
+  /** Resolves with the first snapshot. */
+  ready: Promise<void>
+  /** The listener's latest list, to restore if something clears `receipts` (a store refresh). */
+  latest: Receipt[] | null
+} | null = null
+
+/** Stops the live receipts listener (store switch, sign-out). The next fetch starts a new one. */
+export function stopLiveReceipts(): void {
+  liveReceipts?.stop()
+  liveReceipts = null
+}
+
+/** @deprecated Kept for callers that reset caches on a store switch: stops the listener. */
 export function resetReceiptsFetchStamp(): void {
-  receiptsFetchStamp = null
+  stopLiveReceipts()
+}
+
+/** Newest first. */
+function sortByDateDesc(receipts: Receipt[]): Receipt[] {
+  const time = (r: Receipt) =>
+    r.date instanceof Date ? r.date.getTime() : new Date(r.date).getTime()
+  return receipts.sort((a, b) => time(b) - time(a))
 }
 
 export interface ReceiptPayment {
@@ -297,123 +321,88 @@ export const useReceiptsStore = defineStore('receipts', {
           return
         }
 
-        if (isStoreFetchStampFresh(receiptsFetchStamp, storeId, options?.force)) {
+        const key = `${authStore.currentUser.uid}/${userId}/${storeId}`
+        if (liveReceipts?.key === key) {
+          // The listener already has every change; `force` has nothing left to fetch.
+          await liveReceipts.ready
+          if (this.receipts.length === 0 && liveReceipts?.latest?.length) {
+            this.receipts = [...liveReceipts.latest]
+          }
+          this.loading = false
           return
         }
+        stopLiveReceipts()
 
         if (this.receipts.length === 0) {
           this.loading = true
         }
         this.error = null
 
-        try {
-          // Use hierarchical path: users/{userId}/stores/{storeId}/receipts
-          const receiptsRef = getReceiptsCollection(db, userId, storeId)
-          let querySnapshot
-
-          try {
-            // For staff: Get all receipts in store (filter by createdBy to match security rule)
-            // For superadmin: Filter by createdBy
-            // Note: All receipts in a store have createdBy == userId (super admin UID)
-            let q
-            if (userStore.userData?.role === 'staff') {
-              // Staff sees all receipts in their store (where createdBy matches the super admin UID)
-              q = query(receiptsRef, where('createdBy', '==', userId), orderBy('createdAt', 'desc'))
-            } else {
-              // Superadmin sees only their receipts
-              q = query(receiptsRef, where('createdBy', '==', userId), orderBy('createdAt', 'desc'))
-            }
-            querySnapshot = await getDocs(q)
-          } catch (orderByError: any) {
-            // If orderBy fails (missing index), try without orderBy
-            if (
-              orderByError.code === 'failed-precondition' ||
-              orderByError.message?.includes('index')
-            ) {
-              let q
-              if (userStore.userData?.role === 'staff') {
-                // Staff sees all receipts in their store (where createdBy matches the super admin UID)
-                q = query(receiptsRef, where('createdBy', '==', userId))
-              } else {
-                // Superadmin sees only their receipts
-                q = query(receiptsRef, where('createdBy', '==', userId))
+        const receiptsRef = getReceiptsCollection(db, userId, storeId)
+        const listen = (ordered: boolean) =>
+          new Promise<void>((resolve) => {
+            let first = true
+            const stop = onSnapshot(
+              ordered
+                ? query(receiptsRef, where('createdBy', '==', userId), orderBy('createdAt', 'desc'))
+                : query(receiptsRef, where('createdBy', '==', userId)),
+              (snapshot) => {
+                if (liveReceipts?.key !== key) return
+                const receipts = sortByDateDesc(
+                  snapshot.docs.map((doc) => mapReceiptDoc(doc, userId))
+                )
+                liveReceipts.latest = receipts
+                this.receipts = [...receipts]
+                this.loading = false
+                if (first) {
+                  first = false
+                  resolve()
+                }
+              },
+              (error) => {
+                const missingIndex =
+                  ordered &&
+                  (error.code === 'failed-precondition' || error.message?.includes('index'))
+                if (liveReceipts?.key === key) liveReceipts = null
+                if (missingIndex) {
+                  // No composite index yet: listen without the order and sort here instead.
+                  const fallback = listen(false)
+                  if (liveReceipts?.key === key) liveReceipts.ready = fallback
+                  void fallback.then(resolve)
+                  return
+                }
+                console.error('Error listening to receipts:', error)
+                this.error = error.message || 'Failed to fetch receipts'
+                this.loading = false
+                resolve()
               }
-              querySnapshot = await getDocs(q)
-            } else {
-              throw orderByError
-            }
-          }
-
-          const allReceipts = querySnapshot.docs
-          // console.log('[ReceiptsStore] Found', allReceipts.length, 'receipts in store (userId:', userId, 'storeId:', storeId, 'isStaff:', userStore.userData?.role === 'staff' + ')')
-
-          // Process and filter receipts by storeId client-side
-          let receipts = allReceipts.map((doc) => mapReceiptDoc(doc, userId))
-
-          // No need to filter by storeId since we're already querying from the store's subcollection
-          // All receipts returned are already in the correct store
-
-          // Sort receipts by date (newest first) if we didn't use orderBy
-          receipts.sort((a, b) => {
-            const dateA = a.date instanceof Date ? a.date.getTime() : new Date(a.date).getTime()
-            const dateB = b.date instanceof Date ? b.date.getTime() : new Date(b.date).getTime()
-            return dateB - dateA
+            )
+            liveReceipts = { key, stop, ready: Promise.resolve(), latest: null }
           })
 
-          this.receipts = receipts
-          receiptsFetchStamp = { storeId, fetchedAt: Date.now() }
-        } catch (error: any) {
-          console.error('Error fetching receipts:', error)
-          this.error = error.message || 'Failed to fetch receipts'
-        } finally {
-          this.loading = false
-        }
+        const ready = listen(true)
+        if (liveReceipts) liveReceipts.ready = ready
+        await ready
       })()
 
-      fetchReceiptsInflight = run.finally(() => {
-        if (fetchReceiptsInflight === run) fetchReceiptsInflight = null
+      // Compare against the tracked promise itself, or the slot never clears and a later call
+      // (e.g. after a store switch) would get this finished run back
+      const tracked: Promise<void> = run.finally(() => {
+        if (fetchReceiptsInflight === tracked) fetchReceiptsInflight = null
       })
-      return fetchReceiptsInflight
+      fetchReceiptsInflight = tracked
+      return tracked
     },
 
     /**
      * Live updates for sales created since `since` in the current store, merged into `receipts`.
      * Listens to that slice only, so a busy store is not re-read in full. Returns a stop function.
      */
-    async watchReceiptsSince(since: Date): Promise<() => void> {
-      const { isDemoModeActive } = await import('~/utils/demo-mode')
-      if (isDemoModeActive()) return () => {}
-
-      const db = useFirestore().getFirestoreInstance()
-      const authStore = useAuthStore()
-      const userId = await getQueryUserId()
-      const { getCurrentStoreId } = await import('~/composables/useCurrentStore')
-      const storeId = await getCurrentStoreId()
-      if (!db || !authStore.currentUser || !userId || !storeId) return () => {}
-
-      const q = query(
-        getReceiptsCollection(db, userId, storeId),
-        where('createdBy', '==', userId),
-        where('createdAt', '>=', since)
-      )
-      return onSnapshot(
-        q,
-        (snapshot) => {
-          const next = [...this.receipts]
-          for (const change of snapshot.docChanges()) {
-            const index = next.findIndex((r) => r.id === change.doc.id)
-            if (change.type === 'removed') {
-              if (index > -1) next.splice(index, 1)
-              continue
-            }
-            const receipt = mapReceiptDoc(change.doc, userId)
-            if (index > -1) next[index] = receipt
-            else next.unshift(receipt)
-          }
-          this.receipts = next
-        },
-        (error) => console.warn('[ReceiptsStore] Live sales updates stopped:', error.message)
-      )
+    async watchReceiptsSince(_since: Date): Promise<() => void> {
+      // The session listener already keeps every receipt live; a second listener would bill
+      // today's sales twice.
+      await this.fetchReceipts()
+      return () => {}
     },
 
     // Fetch a single receipt

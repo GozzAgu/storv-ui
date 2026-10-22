@@ -129,6 +129,12 @@ export const useSellerLoanOutsStore = defineStore('sellerLoanOuts', {
       }
     },
 
+    /** A sale can only change a loan that is still active, so skip the re-read when none are */
+    async refreshAfterSale() {
+      if (!this.loans.some((loan) => loan.status === 'active')) return
+      await this.fetchSellerLoanOuts(true)
+    },
+
     async createSellerLoanOut(params: {
       partyName: string
       partyPhone: string

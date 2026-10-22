@@ -1,6 +1,7 @@
 import { computed, ref } from 'vue'
 import { useInventoryStore, type InventoryItem } from '~/stores/inventory'
 import { swapInNeedsPrice } from '~/utils/inventory-item-price'
+import { currentInventoryVersion } from '~/utils/inventory-items-firestore'
 
 // Shared across the Inventory page and its Swap-ins tab so the tab count shows before the tab opens
 // and a price set from the tab clears it straight away.
@@ -9,6 +10,8 @@ const loading = ref(false)
 const loaded = ref(false)
 const loadError = ref<string | null>(null)
 let inflight: Promise<void> | null = null
+// Inventory version at the last load; a sale or stock edit bumps it, so a trade-in shows up
+let loadedVersion = -1
 
 /** Swap-in items for the active store, plus the unsold ones still waiting for a Unit Price. */
 export function useSwapInItems() {
@@ -16,13 +19,15 @@ export function useSwapInItems() {
 
   async function load(options?: { force?: boolean }) {
     if (inflight) return inflight
-    if (loaded.value && !options?.force) return
+    if (loaded.value && !options?.force && loadedVersion === currentInventoryVersion()) return
     loading.value = true
     loadError.value = null
     inflight = (async () => {
+      const version = currentInventoryVersion()
       try {
         items.value = await inventoryStore.fetchSwapInItems()
         loaded.value = true
+        loadedVersion = version
       } catch (error) {
         console.error('[inventory] Swap-ins load failed:', error)
         loadError.value = error instanceof Error ? error.message : 'Please try again.'

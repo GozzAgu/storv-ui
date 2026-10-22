@@ -1644,9 +1644,7 @@ const loadItems = async () => {
 
   loadingItems.value = true
   try {
-    const items = await inventoryStore.fetchItemsAllChunked(selectedFolder.value.id, {
-      force: true,
-    })
+    const items = await inventoryStore.fetchItemsAllChunked(selectedFolder.value.id)
     // Only show items that haven't been sold yet (no dateOut)
     availableItems.value = items.filter(
       (item) => !item.dateOut && !item.pendingSaleReceiptId && !isItemOnPartnerLoan(item)
@@ -2000,7 +1998,7 @@ async function submitSale(approval?: SaleApproval) {
       delete inventoryStore.items[folderId]
     }
     void useSellerLoanOutsStore()
-      .fetchSellerLoanOuts(true)
+      .refreshAfterSale()
       .catch(() => {})
 
     if (hasCustomerDetails.value) {
@@ -2141,7 +2139,7 @@ const createReceiptLocally = async () => {
     if (!isBalanceDue && itemIds.length > 0) {
       await applySelectedItemsToInventory()
       await useSellerLoanOutsStore()
-        .fetchSellerLoanOuts(true)
+        .refreshAfterSale()
         .catch(() => {})
     }
 

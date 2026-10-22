@@ -996,7 +996,7 @@ const loadFolderItems = async (): Promise<InventoryItem[]> => {
   }
   loadingFolderItems.value = true
   try {
-    const items = await inventoryStore.fetchItemsAllChunked(selectedFolderId.value, { force: true })
+    const items = await inventoryStore.fetchItemsAllChunked(selectedFolderId.value)
     folderItems.value = items
     return items
   } catch (error: any) {
@@ -1267,7 +1267,7 @@ async function submitQuickSale(approval?: SaleApproval) {
         invalidateFolderItemCaches(folderId)
         delete inventoryStore.items[folderId]
       }
-      void sellerLoanOutsStore.fetchSellerLoanOuts(true).catch(() => {})
+      void sellerLoanOutsStore.refreshAfterSale().catch(() => {})
       showSuccessToast('Sale completed successfully!')
     }
     pendingSaleId.value = null
@@ -1346,7 +1346,7 @@ const completeSaleLocally = async () => {
       await inventoryStore.applyReceiptSaleToInventory(sale.folderId, saleLines, {
         hasSerialNumbers,
       })
-      await sellerLoanOutsStore.fetchSellerLoanOuts(true).catch(() => {})
+      await sellerLoanOutsStore.refreshAfterSale().catch(() => {})
     }
 
     // Get current store and user information

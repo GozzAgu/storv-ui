@@ -13,6 +13,7 @@ import {
   orderBy,
   serverTimestamp,
   arrayUnion,
+  type Firestore,
 } from 'firebase/firestore'
 import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from './auth'
@@ -20,6 +21,11 @@ import { useUserStore } from './user'
 import { useStaffStore } from './staff'
 import { getCustomersCollection, getCustomerDocument } from '~/composables/useFirestorePaths'
 import { normalizeEntityName } from '~/utils/capitalize-text'
+import {
+  CUSTOMER_LIST_TTL_MS,
+  isStoreListFetchFresh,
+  type StoreFetchStamp,
+} from '~/utils/store-data-cache'
 
 export interface Customer {
   id: string
@@ -36,6 +42,14 @@ export interface Customer {
   createdAt: Date | any
   updatedAt?: Date | any
   createdBy: string
+}
+
+let customersStamp: StoreFetchStamp | null = null
+let customersInflight: { storeId: string; promise: Promise<void> } | null = null
+
+/** Make the next fetchCustomers read Firestore again. */
+export function resetCustomersFetchStamp(): void {
+  customersStamp = null
 }
 
 export const useCustomersStore = defineStore('customers', {
@@ -354,8 +368,8 @@ export const useCustomersStore = defineStore('customers', {
       }
     },
 
-    // Fetch all customers
-    async fetchCustomers() {
+    // Fetch all customers, reusing a recent list; sales on this device update it in place
+    async fetchCustomers(options?: { force?: boolean }) {
       const { isDemoModeActive } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) {
         const { syncDemoToPinia } = await import('~/utils/demo-bridge')
@@ -403,6 +417,34 @@ export const useCustomersStore = defineStore('customers', {
         return
       }
 
+      if (
+        isStoreListFetchFresh(
+          customersStamp,
+          storeId,
+          this.customers.length > 0,
+          options?.force,
+          CUSTOMER_LIST_TTL_MS
+        )
+      ) {
+        this.loading = false
+        return
+      }
+
+      // Share a read already running for this store. This waits only on the query itself, never on
+      // getCurrentStoreId, so a store refresh that calls back in here cannot deadlock.
+      if (customersInflight?.storeId === storeId) {
+        await customersInflight.promise
+        return
+      }
+      const run = this._readCustomers(db, userId, storeId).finally(() => {
+        if (customersInflight?.promise === run) customersInflight = null
+      })
+      customersInflight = { storeId, promise: run }
+      await run
+    },
+
+    async _readCustomers(db: Firestore, userId: string, storeId: string) {
+      const userStore = useUserStore()
       try {
         // Use hierarchical path: users/{userId}/stores/{storeId}/customers
         const customersRef = getCustomersCollection(db, userId, storeId)
@@ -494,6 +536,7 @@ export const useCustomersStore = defineStore('customers', {
         })
 
         this.customers = customers
+        customersStamp = { storeId, fetchedAt: Date.now() }
       } catch (error: any) {
         console.error('[CustomersStore] Error fetching customers:', error)
         this.error = error.message || 'Failed to fetch customers'

@@ -2928,7 +2928,7 @@ onMounted(async () => {
     } else {
       await inventoryStore.fetchFolderAvailabilityStats()
     }
-    void swapIns.load({ force: true })
+    void swapIns.load()
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error)
     console.error('[InventoryPage] Error loading data:', message)

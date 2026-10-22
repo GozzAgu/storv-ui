@@ -23,13 +23,24 @@ export function isStoreListFetchFresh(
   stamp: StoreFetchStamp | null,
   storeId: string,
   hasData: boolean,
-  force?: boolean
+  force?: boolean,
+  ttlMs = STORE_LIST_FETCH_TTL_MS
 ): boolean {
   if (force) return false
   if (!stamp || stamp.storeId !== storeId || !hasData) return false
   if (isCapacitorNative()) return true
-  return Date.now() - stamp.fetchedAt < STORE_LIST_FETCH_TTL_MS
+  return Date.now() - stamp.fetchedAt < ttlMs
 }
+
+/**
+ * How long the whole-store stock summary (every item, for Home, Inventory and Analytics) is
+ * reused. It is cleared at once when this device changes stock; changes made on another device
+ * show within this window, or straight away with a manual refresh.
+ */
+export const INVENTORY_STATS_TTL_MS = 10 * 60_000
+
+/** Customer list reuse; sales and edits on this device update the list in place. */
+export const CUSTOMER_LIST_TTL_MS = 5 * 60_000
 
 const storeRefreshWarm = new Map<string, number>()
 
