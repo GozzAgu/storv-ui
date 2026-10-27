@@ -243,6 +243,41 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('server sales (emulator)',
       expect(result.unpricedSwapInName).toMatch(/phone 12/i)
     })
 
+    it('credits a trade-in from a profit-tracking category’s "Cost price" (unitCost)', async () => {
+      await store()
+        .collection('inventoryFolders')
+        .doc('buses')
+        .set({
+          name: 'Coach Buses',
+          hasSerialNumbers: true,
+          trackProfit: true,
+          template: {
+            fields: [
+              { name: 'name', label: 'Product', type: 'text' },
+              { name: 'engineNumber', label: 'Engine Number', type: 'text' },
+              { name: 'price', label: 'Unit Price', type: 'currency' },
+              { name: 'unitCost', label: 'Cost price', type: 'currency' },
+            ],
+          },
+        })
+      const result = await createSale(
+        db,
+        await actor(OWNER),
+        sale({
+          lines: [{ itemId: 'iphone', quantity: 1 }],
+          swapIn: {
+            folderId: 'buses',
+            fields: { name: 'Coach Bus', engineNumber: '322', price: '', unitCost: '300000' },
+          },
+        })
+      )
+      expect(result.receipt.swapInCredit).toBe(300_000)
+      expect(result.receipt.total).toBe(600_000)
+      const swapped = (await item(result.swapInItemId!).get()).data()
+      expect(swapped).toMatchObject({ name: 'Coach Bus', engineNumber: '322', unitCost: 300_000 })
+      expect(swapped?.price).toBeUndefined()
+    })
+
     it('refuses a trade-in worth more than the sale', async () => {
       await expect(
         createSale(

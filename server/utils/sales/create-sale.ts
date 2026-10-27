@@ -26,7 +26,12 @@ import {
   splitPaymentsMatch,
   type PricedLine,
 } from '~/utils/sale-pricing'
-import { isSwapInPriceField, swapInCredit, swapInFormFields } from '~/utils/swap-in-credit'
+import {
+  isSwapInPriceField,
+  swapInCredit,
+  swapInCreditField,
+  swapInFormFields,
+} from '~/utils/swap-in-credit'
 import {
   actorCanApproveDiscounts,
   actorCanUseCategory,
@@ -477,7 +482,19 @@ export async function createSale(
           delete fields[field.name]
         }
       }
-      const credit = swapInCredit(formFields, fields, input.swapIn.swapValue)
+      // The credit field is often `unitCost` (a profit-tracking category's "Cost price"), which
+      // cleanSwapInFields drops because the server sets the new item's cost itself. Read the
+      // credit from what was entered, then store it as `unitCost` below.
+      const creditField = swapInCreditField(formFields)
+      const enteredCredit =
+        creditField && formFields.some((f) => f.name === creditField)
+          ? { [creditField]: input.swapIn.fields[creditField] }
+          : {}
+      const credit = swapInCredit(
+        formFields,
+        { ...fields, ...enteredCredit },
+        input.swapIn.swapValue
+      )
       if (credit <= 0) bad('Enter what you are giving the customer for the trade-in.')
 
       const serialNo = String(fields.serialNo ?? '').trim()
