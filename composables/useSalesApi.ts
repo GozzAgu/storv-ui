@@ -47,7 +47,17 @@ export interface CreateSaleResult {
 
 export type CreateSaleOutcome =
   | { status: 'recorded'; result: CreateSaleResult }
-  | { status: 'queued'; saleId: string }
+  | { status: 'queued'; saleId: string; reason: QueuedReason }
+
+/** Why a sale was saved on the device instead of recorded: no connection, or a server fault. */
+export type QueuedReason = 'offline' | 'server'
+
+/** What to tell the cashier when a sale is saved on the device to send later. */
+export function queuedSaleMessage(reason: QueuedReason): string {
+  return reason === 'server'
+    ? 'Storvv couldn’t record the sale just now. It’s saved on this device and will be sent again automatically.'
+    : 'No connection. The sale is saved on this device and will be recorded when you are back online.'
+}
 
 export class SaleApiError extends Error {
   constructor(message: string, readonly code: string | null, readonly status: number | null) {
@@ -125,6 +135,7 @@ export function useSalesApi() {
   ): Promise<CreateSaleOutcome> {
     const s = await scope()
     const offline = import.meta.client && navigator.onLine === false
+    let reason: QueuedReason = 'offline'
     if (!offline) {
       try {
         const result = await post<CreateSaleResult>(
@@ -137,6 +148,7 @@ export function useSalesApi() {
       } catch (err) {
         const apiError = err instanceof SaleApiError ? err : toSaleApiError(err)
         if (!isNetworkFailure(apiError) || opts.approval) throw apiError
+        if (apiError.status !== null && apiError.status !== 0) reason = 'server'
       }
     } else if (opts.approval) {
       throw new SaleApiError(
@@ -165,7 +177,7 @@ export function useSalesApi() {
       ...(Number.isFinite(opts.clientTotal) && { clientTotal: opts.clientTotal }),
       attempts: 0,
     })
-    return { status: 'queued', saleId: body.saleId }
+    return { status: 'queued', saleId: body.saleId, reason }
   }
 
   return {
@@ -230,7 +242,8 @@ export interface FlushResult {
 
 /**
  * Sends sales queued offline. A sale the server refuses (an item sold on another till, too old,
- * ...) moves to the failed list so the owner can re-enter it; network errors keep it queued.
+ * ...) moves to the failed list so the owner can re-enter it; network and server errors keep it
+ * queued for the next try (see plugins/07.sales-outbox.client.ts).
  */
 type AuthFetch = ReturnType<typeof useAuthenticatedFetch>['authFetch']
 
@@ -262,16 +275,19 @@ export function flushQueuedSales(authFetch: AuthFetch): Promise<FlushResult> {
         result.recorded.push(sale)
       } catch (err) {
         const apiError = toSaleApiError(err)
-        if (isNetworkFailure(apiError)) {
+        const noAnswer = apiError.status === null || apiError.status === 0
+        // Too many requests: the server is fine but wants a pause, so the sale isn't refused.
+        const busy = apiError.status === 429
+        if (noAnswer || busy || isNetworkFailure(apiError)) {
           updateQueuedSale(uid, sale.saleId, {
             attempts: sale.attempts + 1,
             // No answer at all (offline, blocked): say so rather than show a technical error.
-            lastError:
-              apiError.status === null || apiError.status === 0
-                ? 'Couldn’t reach Storvv'
-                : apiError.message,
+            lastError: noAnswer ? 'Couldn’t reach Storvv' : apiError.message,
           })
-          break
+          // Offline or rate limited: the rest would fail the same way, so stop until the next try.
+          // A server error may be about this sale only, so the sales behind it still go.
+          if (noAnswer || busy) break
+          continue
         }
         markSaleFailed(uid, sale, apiError.message)
         result.failed.push({ sale, message: apiError.message })
