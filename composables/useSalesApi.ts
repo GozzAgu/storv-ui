@@ -230,7 +230,8 @@ export interface FlushResult {
 
 /**
  * Sends sales queued offline. A sale the server refuses (an item sold on another till, too old,
- * ...) moves to the failed list so the owner can re-enter it; network errors keep it queued.
+ * ...) moves to the failed list so the owner can re-enter it; network and server errors keep it
+ * queued for the next try (see plugins/07.sales-outbox.client.ts).
  */
 type AuthFetch = ReturnType<typeof useAuthenticatedFetch>['authFetch']
 
@@ -262,16 +263,19 @@ export function flushQueuedSales(authFetch: AuthFetch): Promise<FlushResult> {
         result.recorded.push(sale)
       } catch (err) {
         const apiError = toSaleApiError(err)
-        if (isNetworkFailure(apiError)) {
+        const noAnswer = apiError.status === null || apiError.status === 0
+        // Too many requests: the server is fine but wants a pause, so the sale isn't refused.
+        const busy = apiError.status === 429
+        if (noAnswer || busy || isNetworkFailure(apiError)) {
           updateQueuedSale(uid, sale.saleId, {
             attempts: sale.attempts + 1,
             // No answer at all (offline, blocked): say so rather than show a technical error.
-            lastError:
-              apiError.status === null || apiError.status === 0
-                ? 'Couldn’t reach Storvv'
-                : apiError.message,
+            lastError: noAnswer ? 'Couldn’t reach Storvv' : apiError.message,
           })
-          break
+          // Offline or rate limited: the rest would fail the same way, so stop until the next try.
+          // A server error may be about this sale only, so the sales behind it still go.
+          if (noAnswer || busy) break
+          continue
         }
         markSaleFailed(uid, sale, apiError.message)
         result.failed.push({ sale, message: apiError.message })

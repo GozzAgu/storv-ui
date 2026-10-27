@@ -4,11 +4,13 @@ import { useSalesApi } from '~/composables/useSalesApi'
 import { useAppToast } from '~/composables/useAppToast'
 import { useAuthStore } from '~/stores/auth'
 import { isDemoModeActive } from '~/utils/demo-mode'
-import { markServerReached } from '~/utils/sales-outbox'
+import { listQueuedSales, markServerReached, outboxVersion } from '~/utils/sales-outbox'
+import { createOutboxRetry } from '~/utils/sales-outbox-retry'
 
 /**
- * Sends sales queued offline once the device is signed in and online, and whenever the
- * connection comes back. Tells the cashier what was recorded and what the server refused.
+ * Sends sales queued offline once the device is signed in and online, whenever the connection
+ * comes back or the app is brought back to the front, and on a timer while any are waiting.
+ * Tells the cashier what was recorded and what the server refused.
  *
  * Also notes when the server last issued this user a fresh sign-in token (it does so about
  * hourly while online, and refuses once the account is disabled or its sessions are revoked),
@@ -23,9 +25,9 @@ export default defineNuxtPlugin((nuxtApp) => {
 
   async function flush() {
     // The demo records sales on the device only; there is no server to send them to.
-    if (!authStore.currentUser || isDemoModeActive()) return
+    if (!authStore.currentUser || isDemoModeActive()) return null
     const result = await flushQueued().catch(() => null)
-    if (!result) return
+    if (!result) return null
     if (result.recorded.length) {
       const n = result.recorded.length
       toast.success(
@@ -38,7 +40,16 @@ export default defineNuxtPlugin((nuxtApp) => {
         12000
       )
     }
+    return result
   }
+
+  const retry = createOutboxRetry({
+    flush,
+    hasQueued: () => {
+      const uid = authStore.currentUser?.uid
+      return !!uid && !isDemoModeActive() && listQueuedSales(uid).length > 0
+    },
+  })
 
   const auth = authStore.getAuthInstance()
   if (auth) {
@@ -53,11 +64,17 @@ export default defineNuxtPlugin((nuxtApp) => {
     })
   }
 
-  window.addEventListener('online', () => void flush())
+  window.addEventListener('online', () => void retry.run())
+  window.addEventListener('focus', () => retry.nudge())
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') retry.nudge()
+  })
+  // A sale queued while the device still looked online (flaky connection) gets no `online` event.
+  watch(outboxVersion, () => retry.schedule())
   watch(
     () => authStore.currentUser?.uid,
     (uid) => {
-      if (uid) void flush()
+      if (uid) void retry.run()
     },
     { immediate: true }
   )

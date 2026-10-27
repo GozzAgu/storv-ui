@@ -111,4 +111,60 @@ describe('syncing offline sales', () => {
     expect(result.failed[0]!.message).toBe('Not enough USB-C in stock.')
     expect(outbox.listFailedSales('amaka')[0]!.saleId).toBe('sale2')
   })
+
+  function queue(saleId: string) {
+    outbox.enqueueSale('amaka', {
+      saleId,
+      ownerUserId: 'owner1',
+      storeId: 's1',
+      body: { ...body, saleId },
+      queuedAt: new Date().toISOString(),
+      summary: saleId,
+      attempts: 0,
+    })
+  }
+
+  function saleIdOf(call: unknown[]) {
+    return (call[1] as { body: { saleId: string } }).body.saleId
+  }
+
+  it('keeps a sale the server errored on and still sends the ones behind it', async () => {
+    queue('a')
+    queue('b')
+    authFetch.mockImplementation(async (_path: string, opts: { body: { saleId: string } }) => {
+      if (opts.body.saleId === 'a') throw { statusCode: 500, statusMessage: 'Server Error' }
+      return { created: true }
+    })
+    const result = await flushQueuedSales(authFetch)
+    expect(authFetch.mock.calls.map(saleIdOf)).toEqual(['a', 'b'])
+    expect(result.recorded.map((s) => s.saleId)).toEqual(['b'])
+    expect(result.failed).toHaveLength(0)
+    expect(outbox.listQueuedSales('amaka')).toMatchObject([
+      { saleId: 'a', attempts: 1, lastError: 'Server Error' },
+    ])
+    expect(outbox.listFailedSales('amaka')).toHaveLength(0)
+  })
+
+  it('stops the pass when the server can’t be reached, keeping every sale', async () => {
+    queue('a')
+    queue('b')
+    authFetch.mockRejectedValue(new TypeError('Failed to fetch'))
+    const result = await flushQueuedSales(authFetch)
+    expect(authFetch).toHaveBeenCalledTimes(1)
+    expect(result.remaining).toBe(2)
+    expect(outbox.listQueuedSales('amaka')[0]).toMatchObject({
+      lastError: 'Couldn’t reach Storvv',
+    })
+  })
+
+  it('treats too many requests as try later, not as a refusal', async () => {
+    queue('a')
+    queue('b')
+    authFetch.mockRejectedValue({ statusCode: 429, data: { message: 'Too many requests' } })
+    const result = await flushQueuedSales(authFetch)
+    expect(authFetch).toHaveBeenCalledTimes(1)
+    expect(result.failed).toHaveLength(0)
+    expect(outbox.listQueuedSales('amaka')).toHaveLength(2)
+    expect(outbox.listFailedSales('amaka')).toHaveLength(0)
+  })
 })
