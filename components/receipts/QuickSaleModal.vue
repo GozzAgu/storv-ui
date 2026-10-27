@@ -614,7 +614,12 @@ import type { InventoryFolderDisplayRow } from '~/utils/inventory-folder-tree'
 import { isItemOnPartnerLoan } from '~/utils/inventory-availability'
 import { hasSaleUnitPrice, NO_PRICE_SALE_MESSAGE } from '~/utils/inventory-item-price'
 import ApprovalPinDialog from '~/components/receipts/ApprovalPinDialog.vue'
-import { useSalesApi, toSaleApiError, type SaleApproval } from '~/composables/useSalesApi'
+import {
+  useSalesApi,
+  queuedSaleMessage,
+  toSaleApiError,
+  type SaleApproval,
+} from '~/composables/useSalesApi'
 import { discountNeedsApproval } from '~/utils/sale-pricing'
 import { isDemoModeActive } from '~/utils/demo-mode'
 import { newSaleId } from '~/utils/sales-outbox'
@@ -1257,9 +1262,7 @@ async function submitQuickSale(approval?: SaleApproval) {
     approvalOpen.value = false
 
     if (outcome.status === 'queued') {
-      showWarningToast(
-        'No connection. The sale is saved on this device and will be recorded when you are back online.'
-      )
+      showWarningToast(queuedSaleMessage(outcome.reason))
     } else {
       const receipt = receiptsStore.addRecordedSale(outcome.result.receipt)
       if (outcome.result.paymentWarning) showWarningToast(outcome.result.paymentWarning)

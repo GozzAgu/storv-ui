@@ -10,7 +10,9 @@ vi.mock('~/composables/useFirestorePaths', () => ({ getQueryUserId: async () => 
 vi.mock('~/composables/useCurrentStore', () => ({ getCurrentStoreId: async () => 's1' }))
 vi.mock('~/stores/auth', () => ({ useAuthStore: () => auth }))
 
-const { useSalesApi, flushQueuedSales } = await import('~/composables/useSalesApi')
+const { useSalesApi, flushQueuedSales, queuedSaleMessage } = await import(
+  '~/composables/useSalesApi'
+)
 const outbox = await import('~/utils/sales-outbox')
 
 const body = {
@@ -39,7 +41,7 @@ describe('selling offline', () => {
       summary: '2 items · ₦10,000',
       clientTotal: 10_000,
     })
-    expect(outcome).toEqual({ status: 'queued', saleId: 'sale1' })
+    expect(outcome).toEqual({ status: 'queued', saleId: 'sale1', reason: 'offline' })
     expect(outbox.listQueuedSales('amaka')[0]).toMatchObject({
       saleId: 'sale1',
       clientTotal: 10_000,
@@ -52,6 +54,28 @@ describe('selling offline', () => {
       useSalesApi().createSale(body, { summary: 'x', clientTotal: 10_000 })
     ).rejects.toMatchObject({ code: 'OFFLINE_TOO_LONG' })
     expect(outbox.listQueuedSales('amaka')).toHaveLength(0)
+  })
+})
+
+describe('a sale the server fails on while online', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    authFetch.mockReset()
+    auth.currentUser = { uid: 'amaka' }
+    goOffline(false)
+  })
+
+  it('is saved on the device and says Storvv failed, not that the connection dropped', async () => {
+    authFetch.mockRejectedValue({ statusCode: 500, statusMessage: 'Server Error' })
+    const outcome = await useSalesApi().createSale(body, { summary: 'x', clientTotal: 10_000 })
+    expect(outcome).toMatchObject({ status: 'queued', reason: 'server' })
+    expect(queuedSaleMessage('server')).not.toMatch(/No connection/)
+  })
+
+  it('says no connection when the server never answers', async () => {
+    authFetch.mockRejectedValue(new TypeError('Failed to fetch'))
+    const outcome = await useSalesApi().createSale(body, { summary: 'x', clientTotal: 10_000 })
+    expect(outcome).toMatchObject({ status: 'queued', reason: 'offline' })
   })
 })
 

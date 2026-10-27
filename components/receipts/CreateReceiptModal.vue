@@ -870,6 +870,7 @@ import { STAFF_DISCOUNT_LIMIT_PERCENT, useSensitiveAction } from '~/composables/
 import ApprovalPinDialog from '~/components/receipts/ApprovalPinDialog.vue'
 import {
   useSalesApi,
+  queuedSaleMessage,
   toSaleApiError,
   type CreateSaleBody,
   type SaleApproval,
@@ -1978,10 +1979,7 @@ async function submitSale(approval?: SaleApproval) {
     approvalOpen.value = false
 
     if (outcome.status === 'queued') {
-      appToast.warning(
-        'No connection. The sale is saved on this device and will be recorded when you are back online.',
-        8000
-      )
+      appToast.warning(queuedSaleMessage(outcome.reason), 8000)
       void haptics.notify('success')
       pendingSaleId.value = null
       resetForm()

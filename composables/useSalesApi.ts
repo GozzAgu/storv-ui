@@ -47,7 +47,17 @@ export interface CreateSaleResult {
 
 export type CreateSaleOutcome =
   | { status: 'recorded'; result: CreateSaleResult }
-  | { status: 'queued'; saleId: string }
+  | { status: 'queued'; saleId: string; reason: QueuedReason }
+
+/** Why a sale was saved on the device instead of recorded: no connection, or a server fault. */
+export type QueuedReason = 'offline' | 'server'
+
+/** What to tell the cashier when a sale is saved on the device to send later. */
+export function queuedSaleMessage(reason: QueuedReason): string {
+  return reason === 'server'
+    ? 'Storvv couldn’t record the sale just now. It’s saved on this device and will be sent again automatically.'
+    : 'No connection. The sale is saved on this device and will be recorded when you are back online.'
+}
 
 export class SaleApiError extends Error {
   constructor(message: string, readonly code: string | null, readonly status: number | null) {
@@ -125,6 +135,7 @@ export function useSalesApi() {
   ): Promise<CreateSaleOutcome> {
     const s = await scope()
     const offline = import.meta.client && navigator.onLine === false
+    let reason: QueuedReason = 'offline'
     if (!offline) {
       try {
         const result = await post<CreateSaleResult>(
@@ -137,6 +148,7 @@ export function useSalesApi() {
       } catch (err) {
         const apiError = err instanceof SaleApiError ? err : toSaleApiError(err)
         if (!isNetworkFailure(apiError) || opts.approval) throw apiError
+        if (apiError.status !== null && apiError.status !== 0) reason = 'server'
       }
     } else if (opts.approval) {
       throw new SaleApiError(
@@ -165,7 +177,7 @@ export function useSalesApi() {
       ...(Number.isFinite(opts.clientTotal) && { clientTotal: opts.clientTotal }),
       attempts: 0,
     })
-    return { status: 'queued', saleId: body.saleId }
+    return { status: 'queued', saleId: body.saleId, reason }
   }
 
   return {
