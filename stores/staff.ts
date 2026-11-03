@@ -34,7 +34,7 @@ import {
   summarizeSubscriptionAddOns,
 } from '~/types/subscription'
 import type { Staff } from '~/composables/useStaff'
-import type { StaffAdminGrants } from '~/types/staff-permissions'
+import type { StaffAdminAccessResult, StaffAdminGrants } from '~/types/staff-permissions'
 import type { Department } from '~/composables/useDepartments'
 import { resolveApiPath } from '~/utils/api-url'
 import { deriveDefaultPermissions, resolveStaffPermissions } from '~/utils/staff-permissions'
@@ -1036,7 +1036,7 @@ export const useStaffStore = defineStore('staff', {
       staffId: string,
       access: { admin: boolean; grants: StaffAdminGrants },
       totpCode?: string
-    ): Promise<{ admin: boolean; adminGrants: StaffAdminGrants }> {
+    ): Promise<StaffAdminAccessResult> {
       const authStore = useAuthStore()
       if (!authStore.currentUser) throw new Error('User must be authenticated')
 
@@ -1067,13 +1067,17 @@ export const useStaffStore = defineStore('staff', {
       } catch (error: unknown) {
         throw parseStaffLifecycleApiError(error, 'Failed to update admin access')
       }
-      const result = raw as { admin: boolean; adminGrants: StaffAdminGrants }
+      const result = raw as StaffAdminAccessResult
+      const changes = {
+        admin: result.admin,
+        adminGrants: result.adminGrants,
+        ...(result.permissions && { permissions: result.permissions }),
+      }
 
       for (const s of this.staff) {
-        if (s.id === staffId)
-          Object.assign(s, { admin: result.admin, adminGrants: result.adminGrants })
+        if (s.id === staffId) Object.assign(s, changes)
       }
-      Object.assign(member, { admin: result.admin, adminGrants: result.adminGrants })
+      Object.assign(member, changes)
       return result
     },
 

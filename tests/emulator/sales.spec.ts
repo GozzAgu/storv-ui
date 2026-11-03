@@ -207,7 +207,7 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('server sales (emulator)',
       ).rejects.toMatchObject({ statusCode: 403 })
     })
 
-    it('credits a trade-in from its cost price, creates the item, and needs approval from a cashier', async () => {
+    it('credits a trade-in from its cost price and creates the item, with no PIN from a cashier', async () => {
       const cashier = await actor('cashier')
       const tradeIn = () =>
         sale({
@@ -223,14 +223,8 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('server sales (emulator)',
             },
           },
         })
-      await expect(createSale(db, cashier, tradeIn())).rejects.toMatchObject({
-        data: { code: 'APPROVAL_REQUIRED' },
-      })
-      await setApprovalPin(db, OWNER, 'manager', '4826')
-      const result = await createSale(db, cashier, {
-        ...tradeIn(),
-        approval: { approverUid: 'manager', pin: '4826' },
-      })
+      const result = await createSale(db, cashier, tradeIn())
+      expect(result.receipt.approvedBy ?? null).toBeNull()
       expect(result.receipt.swapInCredit).toBe(300_000)
       expect(result.receipt.total).toBe(600_000)
       const swapped = (await item(result.swapInItemId!).get()).data()

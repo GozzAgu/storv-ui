@@ -36,7 +36,12 @@ describe('mapStaffDoc', () => {
   it('carries branch admin rights and extras onto the signed-in staff profile', async () => {
     const { mapStaffDoc } = await import('~/utils/staff-user-bootstrap')
     const staff = mapStaffDoc(
-      docFor({ authUid: 'u1', admin: true, adminGrants: { deleteSales: true }, permissions: {} })
+      docFor({
+        authUid: 'u1',
+        admin: true,
+        adminGrants: { deleteSales: true },
+        permissions: { products: { view: true, create: true, edit: true, delete: true } },
+      })
     )
     expect(staff.admin).toBe(true)
     expect(staff.adminGrants).toEqual({ deleteSales: true })

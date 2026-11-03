@@ -324,8 +324,8 @@ function priceLines(
 }
 
 /**
- * Approval is needed for a discount above the staff limit or a trade-in, unless the seller may
- * approve such things themselves. Checked before the transaction because a wrong PIN is recorded.
+ * Approval is needed for a discount above the staff limit, unless the seller may approve such
+ * discounts themselves. Checked before the transaction because a wrong PIN is recorded.
  */
 async function requireApproval(
   db: Firestore,
@@ -352,10 +352,8 @@ async function requireApproval(
   return approval.approverUid
 }
 
-function approvalReasonFor(lines: LoadedLine[], hasSwapIn: boolean): string | null {
-  if (lines.some((l) => l.priced.needsApproval)) return 'This sale has a discount above 10%.'
-  if (hasSwapIn) return 'This sale takes a trade-in.'
-  return null
+function approvalReasonFor(lines: LoadedLine[]): string | null {
+  return lines.some((l) => l.priced.needsApproval) ? 'This sale has a discount above 10%.' : null
 }
 
 /**
@@ -392,7 +390,7 @@ export async function createSale(
   const preItems = await db.getAll(...itemRefs)
   const preFolders = await loadFolders(db, store, preItems, input.swapIn?.folderId)
   const preLines = priceLines(actor, input, preItems, preFolders, input.saleId)
-  const reason = approvalReasonFor(preLines, !!input.swapIn)
+  const reason = approvalReasonFor(preLines)
   const approvedBy = reason ? await requireApproval(db, actor, input.approval, reason) : null
   const v2 = await paymentsV2On()
 
@@ -418,7 +416,7 @@ export async function createSale(
     )
 
     const lines = priceLines(actor, input, itemSnaps, folders, input.saleId)
-    const nowReason = approvalReasonFor(lines, !!input.swapIn)
+    const nowReason = approvalReasonFor(lines)
     if (nowReason && !approvedBy) {
       conflict('Prices changed while saving. Review the sale and try again.', 'PRICES_CHANGED')
     }

@@ -5,7 +5,11 @@ import {
   type DocumentSnapshot,
   type Firestore,
 } from 'firebase-admin/firestore'
-import type { StaffAdminGrants, StaffPermissions } from '~/types/staff-permissions'
+import type {
+  StaffAdminAccessResult,
+  StaffAdminGrants,
+  StaffPermissions,
+} from '~/types/staff-permissions'
 import {
   getStaffLimitForStore,
   isTrialActive,
@@ -13,7 +17,11 @@ import {
   staffLimitReachedMessage,
   summarizeSubscriptionAddOns,
 } from '~/types/subscription'
-import { coerceStaffPermissions, normalizeStaffAdminGrants } from '~/utils/staff-permissions'
+import {
+  coerceStaffPermissions,
+  normalizeStaffAdminGrants,
+  permissionsOnAdminChange,
+} from '~/utils/staff-permissions'
 import { normalizeEntityName } from '~/utils/capitalize-text'
 
 /**
@@ -503,7 +511,7 @@ export async function setStaffAdminAccess(
   db: Firestore,
   manager: StaffManager,
   params: AdminAccessParams
-): Promise<{ admin: boolean; adminGrants: StaffAdminGrants }> {
+): Promise<StaffAdminAccessResult> {
   if (manager.kind !== 'owner') forbidden('Only the store owner can make or remove admins')
 
   const { ownerUserId, storeId, departmentId, staffId } = params
@@ -524,12 +532,23 @@ export async function setStaffAdminAccess(
   const adminGrants = admin
     ? normalizeStaffAdminGrants(params.grants)
     : normalizeStaffAdminGrants(undefined)
+  // Becoming an admin starts from every action and losing it drops back to standard staff
+  // access; saving extras for an existing admin leaves the owner's tweaks alone.
+  const access =
+    admin !== (staff.admin === true)
+      ? {
+          permissions: permissionsOnAdminChange(admin, staff.permissions),
+          role: FieldValue.delete(),
+          canManageInventory: FieldValue.delete(),
+          canManageReceipts: FieldValue.delete(),
+        }
+      : {}
   const now = FieldValue.serverTimestamp()
   const batch = db.batch()
-  batch.update(ref, { admin, adminGrants, updatedAt: now })
+  batch.update(ref, { admin, adminGrants, ...access, updatedAt: now })
   batch.set(
     memberRef(db, ownerUserId, storeId, authUid),
-    { admin, adminGrants, updatedAt: now },
+    { admin, adminGrants, ...access, updatedAt: now },
     { merge: true }
   )
   batch.set(
@@ -538,5 +557,5 @@ export async function setStaffAdminAccess(
     { merge: true }
   )
   await batch.commit()
-  return { admin, adminGrants }
+  return { admin, adminGrants, ...(access.permissions && { permissions: access.permissions }) }
 }

@@ -970,9 +970,9 @@ const paymentsV2 = usePaymentsV2()
 const { confirm: confirmSensitive } = useSensitiveAction()
 const salesApi = useSalesApi()
 const appToast = useAppToast()
-const { isStoreOwner, isAdmin, canEditReceipts } = usePermissions()
-/** Owner, branch admin or receipts editor: their own big discounts and trade-ins need no PIN. */
-const canApproveSales = computed(() => isStoreOwner.value || isAdmin.value || canEditReceipts.value)
+const { isStoreOwner, canEditReceipts } = usePermissions()
+/** Owner or receipts editor (admins included): their own big discounts need no PIN. */
+const canApproveSales = computed(() => isStoreOwner.value || canEditReceipts.value)
 const approvalOpen = ref(false)
 const approvalReason = ref('')
 const approvalError = ref<string | null>(null)
@@ -1919,9 +1919,7 @@ const handleCreateReceipt = async () => {
 
 /** Why this sale needs a manager's PIN, or null. The server checks the same rules. */
 function saleApprovalReason(): string | null {
-  if (exceedsStaffDiscountLimit()) return 'This sale has a discount above 10%.'
-  if (isSwapIn.value && swapInFolderId.value) return 'This sale takes a trade-in.'
-  return null
+  return exceedsStaffDiscountLimit() ? 'This sale has a discount above 10%.' : null
 }
 
 function buildSaleBody(): CreateSaleBody {

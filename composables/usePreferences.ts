@@ -4,7 +4,6 @@ import { useAuthStore } from '~/stores/auth'
 import { useUser } from '~/composables/useUser'
 import { useFirestore } from '~/composables/useFirestore'
 import { doc, getDoc } from 'firebase/firestore'
-import { formatCompactCurrency } from '~/utils/format-compact-currency'
 import { fetchOwnerWorkspaceContext } from '~/utils/owner-workspace-context'
 
 export interface UserPreferences {
@@ -65,33 +64,14 @@ export const regions = [
 const PREFERENCES_KEY = 'userPreferences'
 const BASE_CURRENCY_KEY = 'baseCurrency'
 
-/** From this magnitude up, use compact currency (e.g. ₦1m, ₦1.3b). */
-const CURRENCY_COMPACT_THRESHOLD = 1_000_000
-
-function currencySymbolForCode(currency: string): string {
-  return currencies.find((c) => c.code === currency)?.symbol ?? currency
-}
-
-function formatCurrencyIntl(
-  amount: number,
-  locale: string,
-  currency: string,
-  exact = false
-): string {
-  const full: Intl.NumberFormatOptions = {
+/** Always the full amount (₦7,000,000.00): money is never shortened or rounded. */
+function formatCurrencyIntl(amount: number, locale: string, currency: string): string {
+  return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }
-  if (!Number.isFinite(amount)) {
-    return new Intl.NumberFormat(locale, full).format(amount)
-  }
-  if (!exact && Math.abs(amount) >= CURRENCY_COMPACT_THRESHOLD) {
-    const compact = formatCompactCurrency(amount, currencySymbolForCode(currency))
-    if (compact) return compact
-  }
-  return new Intl.NumberFormat(locale, full).format(amount)
+  }).format(amount)
 }
 
 // Reactive preferences (initialized from localStorage or defaults)
@@ -292,8 +272,6 @@ export const usePreferences = () => {
     options?: {
       showSymbol?: boolean
       fromCurrency?: string
-      /** The full amount (₦7,000,000.00), never shortened to ₦7m: receipts and documents. */
-      exact?: boolean
     }
   ) => {
     if (!import.meta.client) {
@@ -307,7 +285,7 @@ export const usePreferences = () => {
           ? 'de-DE'
           : 'en-US'
 
-      return formatCurrencyIntl(value, locale, preferences.value.currency, options?.exact)
+      return formatCurrencyIntl(value, locale, preferences.value.currency)
     }
 
     const { showSymbol = true, fromCurrency } = options || {}
@@ -347,7 +325,7 @@ export const usePreferences = () => {
         ? 'de-DE'
         : 'en-US'
 
-    return formatCurrencyIntl(convertedValue, locale, targetCurrency, options?.exact)
+    return formatCurrencyIntl(convertedValue, locale, targetCurrency)
   }
 
   // Format date

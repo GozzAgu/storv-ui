@@ -144,27 +144,15 @@ export function normalizeStaffPermissions(
  * firestore.rules. Returns the stored grant if present, else derives it from legacy fields.
  *
  * Stock loans view/create/edit are always granted (baseline for every active staff member), even
- * when an older stored matrix left them off. A branch admin gets every module action; their
- * financial-figures grant stays whatever the owner stored.
+ * when an older stored matrix left them off. A branch admin follows their stored matrix like
+ * anyone else (the owner can narrow it); only stock transfers follow the stock-transfers extra.
  */
 export function resolveStaffPermissions(staff: LegacyStaffAccessFields): StaffPermissions {
   const base = staff.permissions
     ? normalizeStaffPermissions(staff.permissions, staff)
     : deriveDefaultPermissions(staff)
 
-  if (staff.admin === true) {
-    const grants = normalizeStaffAdminGrants(staff.adminGrants)
-    return {
-      ...FULL_STAFF_PERMISSIONS,
-      financials: base.financials,
-      // Transfers stay off until the owner turns on the stock-transfers extra.
-      multiStoreSync: grants.stockTransfers
-        ? FULL_STAFF_PERMISSIONS.multiStoreSync
-        : EMPTY_STAFF_PERMISSIONS.multiStoreSync,
-    }
-  }
-
-  return {
+  const resolved: StaffPermissions = {
     ...base,
     sellerLoans: {
       view: true,
@@ -173,6 +161,28 @@ export function resolveStaffPermissions(staff: LegacyStaffAccessFields): StaffPe
       delete: base.sellerLoans.delete === true,
     },
   }
+  if (staff.admin !== true) return resolved
+
+  const grants = normalizeStaffAdminGrants(staff.adminGrants)
+  return {
+    ...resolved,
+    multiStoreSync: grants.stockTransfers
+      ? FULL_STAFF_PERMISSIONS.multiStoreSync
+      : EMPTY_STAFF_PERMISSIONS.multiStoreSync,
+  }
+}
+
+/**
+ * The matrix stored when someone becomes a branch admin (every action) or stops being one
+ * (standard staff access). The owner can narrow an admin's matrix afterwards. Financial figures
+ * stay as the owner set them either way.
+ */
+export function permissionsOnAdminChange(
+  admin: boolean,
+  current: Partial<StaffPermissions> | undefined
+): StaffPermissions {
+  const financials = coerceStaffPermissions({ financials: current?.financials }).financials
+  return { ...(admin ? FULL_STAFF_PERMISSIONS : deriveDefaultPermissions({})), financials }
 }
 
 export function isModuleManaging(module: ModulePermission): boolean {

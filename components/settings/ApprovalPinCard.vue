@@ -2,7 +2,7 @@
   <SCard
     v-if="status?.canApprove"
     title="Approval PIN"
-    description="Staff ask for this PIN at the till for discounts above 10% and trade-ins. Keep it private."
+    description="Staff ask for this PIN at the till for discounts above 10%. Keep it private."
   >
     <template #actions>
       <SBadge :tone="status.hasPin ? 'success' : 'warning'">
@@ -50,7 +50,7 @@ import { useSalesApi } from '~/composables/useSalesApi'
 import { useAppToast } from '~/composables/useAppToast'
 import { useUserStore } from '~/stores/user'
 
-/** Lets the owner and managers set the PIN that approves big discounts and trade-ins. */
+/** Lets the owner and managers set the PIN that approves big discounts. */
 const salesApi = useSalesApi()
 const toast = useAppToast()
 const userStore = useUserStore()

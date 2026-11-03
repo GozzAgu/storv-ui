@@ -116,21 +116,18 @@ service cloud.firestore {
     // Single source of truth for "can this member do <action> on <moduleName>". checks the new
     // `permissions` map when present (falling back to legacy for modules not yet stored), else
     // falls back to the legacy role/grant fields entirely.
-    // A branch admin holds every module action except payments, financial figures, and stock
-    // transfers. Transfers need the owner-set adminGrants.stockTransfers extra.
+    // A branch admin follows their stored matrix like anyone else, except stock transfers, which
+    // follow the owner-set adminGrants.stockTransfers extra.
     // Mirrors utils/staff-permissions.ts#resolveStaffPermissions.
     function memberHasPermission(userId, storeId, moduleName, action) {
       return isActiveStoreMember(userId, storeId) &&
-        ((memberData(userId, storeId).get('admin', false) == true &&
-          !(moduleName in ['payments', 'financials', 'multiStoreSync'])) ||
-        (memberData(userId, storeId).get('admin', false) == true &&
-          moduleName == 'multiStoreSync' &&
-          memberData(userId, storeId).get('adminGrants', {}).get('stockTransfers', false) == true) ||
-        (memberData(userId, storeId).keys().hasAny(['permissions'])
-          ? (memberData(userId, storeId).permissions.keys().hasAny([moduleName])
-              ? memberData(userId, storeId).permissions.get(moduleName, {}).get(action, false) == true
-              : legacyHasPermission(memberData(userId, storeId), moduleName, action))
-          : legacyHasPermission(memberData(userId, storeId), moduleName, action)));
+        (memberData(userId, storeId).get('admin', false) == true && moduleName == 'multiStoreSync'
+          ? memberData(userId, storeId).get('adminGrants', {}).get('stockTransfers', false) == true
+          : memberData(userId, storeId).keys().hasAny(['permissions'])
+            ? (memberData(userId, storeId).permissions.keys().hasAny([moduleName])
+                ? memberData(userId, storeId).permissions.get(moduleName, {}).get(action, false) == true
+                : legacyHasPermission(memberData(userId, storeId), moduleName, action))
+            : legacyHasPermission(memberData(userId, storeId), moduleName, action));
     }
 
     // Branch admin (owner-set `admin: true` on the member doc). Reads the store's roster and

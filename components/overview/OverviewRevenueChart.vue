@@ -56,7 +56,7 @@ import {
   readDsChartPalette,
   type DsChartPalette,
 } from '~/utils/ds-apex-chart'
-import { formatAxisCurrency, formatCompactCurrency } from '~/utils/format-compact-currency'
+import { formatFullMoney } from '~/utils/format-money'
 
 const LazyApexChart = defineAsyncComponent(
   () => import('~/components/charts/LazyApexChart.client.vue')
@@ -93,11 +93,7 @@ const points = computed(() => {
 
 const total = computed(() => points.value.reduce((sum, point) => sum + point.revenue, 0))
 
-const totalLabel = computed(
-  () =>
-    formatCompactCurrency(total.value, props.currencySymbol) ??
-    `${props.currencySymbol}${Math.round(total.value).toLocaleString('en-US')}`
-)
+const totalLabel = computed(() => formatFullMoney(total.value, props.currencySymbol))
 
 const totalCaption = computed(() => {
   if (period.value === 'weekly') return 'in the last 12 weeks'
@@ -172,7 +168,7 @@ const options = computed(() => {
     yaxis: {
       labels: {
         style: axisLabel,
-        formatter: (value: number) => formatAxisCurrency(value, props.currencySymbol),
+        formatter: (value: number) => formatFullMoney(value, props.currencySymbol),
       },
     },
     grid: {
@@ -185,8 +181,7 @@ const options = computed(() => {
     tooltip: {
       theme: isDark.value ? 'dark' : 'light',
       y: {
-        formatter: (value: number) =>
-          `${props.currencySymbol}${Math.round(value).toLocaleString('en-US')}`,
+        formatter: (value: number) => formatFullMoney(value, props.currencySymbol),
       },
     },
     colors: [line],
