@@ -91,10 +91,15 @@ describe('usePermissions for branch admins', () => {
       authUid: 'admin1',
       admin: true,
       adminGrants: { stockTransfers: true },
+      permissions: {
+        ...FULL_STAFF_PERMISSIONS,
+        multiStoreSync: { view: true, create: true, edit: false, delete: false },
+      },
     }
     p = await perms()
     expect(p.hasAdminGrant('stockTransfers')).toBe(true)
     expect(p.can('multiStoreSync', 'create')).toBe(true)
+    expect(p.can('multiStoreSync', 'delete')).toBe(false)
   })
 
   it('keeps owner-only things away from an admin', async () => {

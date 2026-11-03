@@ -21,6 +21,7 @@ import {
   coerceStaffPermissions,
   normalizeStaffAdminGrants,
   permissionsOnAdminChange,
+  permissionsOnTransfersGranted,
 } from '~/utils/staff-permissions'
 import { normalizeEntityName } from '~/utils/capitalize-text'
 
@@ -46,6 +47,7 @@ interface StoredStaff {
   role?: string
   permissions?: Partial<StaffPermissions>
   admin?: boolean
+  adminGrants?: Partial<StaffAdminGrants>
 }
 
 interface StoredMember {
@@ -533,16 +535,28 @@ export async function setStaffAdminAccess(
     ? normalizeStaffAdminGrants(params.grants)
     : normalizeStaffAdminGrants(undefined)
   // Becoming an admin starts from every action and losing it drops back to standard staff
-  // access; saving extras for an existing admin leaves the owner's tweaks alone.
-  const access =
-    admin !== (staff.admin === true)
-      ? {
-          permissions: permissionsOnAdminChange(admin, staff.permissions),
-          role: FieldValue.delete(),
-          canManageInventory: FieldValue.delete(),
-          canManageReceipts: FieldValue.delete(),
-        }
-      : {}
+  // access; turning on stock transfers starts with full transfer access. Other saves leave the
+  // owner's tweaks alone.
+  const wasAdmin = staff.admin === true
+  const transfersGranted =
+    admin &&
+    wasAdmin &&
+    adminGrants.stockTransfers &&
+    !normalizeStaffAdminGrants(staff.adminGrants).stockTransfers
+  const permissions =
+    admin !== wasAdmin
+      ? permissionsOnAdminChange(admin, staff.permissions)
+      : transfersGranted
+      ? permissionsOnTransfersGranted(staff)
+      : undefined
+  const access = permissions
+    ? {
+        permissions,
+        role: FieldValue.delete(),
+        canManageInventory: FieldValue.delete(),
+        canManageReceipts: FieldValue.delete(),
+      }
+    : {}
   const now = FieldValue.serverTimestamp()
   const batch = db.batch()
   batch.update(ref, { admin, adminGrants, ...access, updatedAt: now })

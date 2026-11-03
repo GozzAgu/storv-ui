@@ -149,7 +149,7 @@
         v-if="canEditStaffPermissions"
         v-model="formData.permissions"
         :locked-modules="lockedPermissionModules"
-        :locked-badge="isStoreOwner ? 'Set in admin access' : 'Owner only'"
+        :locked-badge="isStoreOwner ? 'Turn on Transfer stock' : 'Owner only'"
       />
       <StaffPaymentPermissions
         v-if="props.staff?.authUid"
@@ -219,7 +219,11 @@ import type {
   StaffAdminAccessResult,
   StaffPermissions,
 } from '~/types/staff-permissions'
-import { deriveDefaultPermissions, resolveStaffPermissions } from '~/utils/staff-permissions'
+import {
+  deriveDefaultPermissions,
+  normalizeStaffAdminGrants,
+  resolveStaffPermissions,
+} from '~/utils/staff-permissions'
 
 interface Props {
   modelValue: boolean
@@ -248,16 +252,18 @@ const { canEditStaffPermissions, isStoreOwner } = usePermissions()
 
 const isRemovedStaff = computed(() => props.staff?.status === 'inactive')
 
-/** An admin's transfers follow "Transfer stock to other branches"; every other module is tweakable. */
+/** An admin's transfers stay off until "Transfer stock to other branches" is on; then tweakable. */
 const targetIsAdmin = ref(false)
+const targetCanTransfer = ref(false)
 const lockedPermissionModules = computed<PermissionModule[]>(() => {
   if (!isStoreOwner.value) return ['financials']
-  return targetIsAdmin.value ? ['multiStoreSync'] : []
+  return targetIsAdmin.value && !targetCanTransfer.value ? ['multiStoreSync'] : []
 })
 
-/** Granting or removing admin resets the matrix on the server; show what it saved. */
+/** Admin and transfer changes reset parts of the matrix on the server; show what it saved. */
 function onAdminSaved(result: StaffAdminAccessResult) {
   targetIsAdmin.value = result.admin
+  targetCanTransfer.value = result.adminGrants.stockTransfers
   formData.value.permissions = resolveStaffPermissions({
     admin: result.admin,
     adminGrants: result.adminGrants,
@@ -494,6 +500,7 @@ watch(
     if (isOpen) {
       resetForm()
       targetIsAdmin.value = props.staff?.admin === true
+      targetCanTransfer.value = normalizeStaffAdminGrants(props.staff?.adminGrants).stockTransfers
       if (props.staff) {
         formData.value = {
           firstName: props.staff.firstName || '',

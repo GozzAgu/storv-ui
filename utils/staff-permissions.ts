@@ -145,7 +145,7 @@ export function normalizeStaffPermissions(
  *
  * Stock loans view/create/edit are always granted (baseline for every active staff member), even
  * when an older stored matrix left them off. A branch admin follows their stored matrix like
- * anyone else (the owner can narrow it); only stock transfers follow the stock-transfers extra.
+ * anyone else (the owner can narrow it); their transfers also need the stock-transfers extra.
  */
 export function resolveStaffPermissions(staff: LegacyStaffAccessFields): StaffPermissions {
   const base = staff.permissions
@@ -164,12 +164,9 @@ export function resolveStaffPermissions(staff: LegacyStaffAccessFields): StaffPe
   if (staff.admin !== true) return resolved
 
   const grants = normalizeStaffAdminGrants(staff.adminGrants)
-  return {
-    ...resolved,
-    multiStoreSync: grants.stockTransfers
-      ? FULL_STAFF_PERMISSIONS.multiStoreSync
-      : EMPTY_STAFF_PERMISSIONS.multiStoreSync,
-  }
+  return grants.stockTransfers
+    ? resolved
+    : { ...resolved, multiStoreSync: EMPTY_STAFF_PERMISSIONS.multiStoreSync }
 }
 
 /**
@@ -177,6 +174,14 @@ export function resolveStaffPermissions(staff: LegacyStaffAccessFields): StaffPe
  * (standard staff access). The owner can narrow an admin's matrix afterwards. Financial figures
  * stay as the owner set them either way.
  */
+/** An admin's matrix when the owner turns on stock transfers: full transfer access to start. */
+export function permissionsOnTransfersGranted(staff: LegacyStaffAccessFields): StaffPermissions {
+  return {
+    ...resolveStaffPermissions({ ...staff, admin: false }),
+    multiStoreSync: FULL_STAFF_PERMISSIONS.multiStoreSync,
+  }
+}
+
 export function permissionsOnAdminChange(
   admin: boolean,
   current: Partial<StaffPermissions> | undefined

@@ -89,7 +89,7 @@ const ADMIN_EXTRAS: Array<{ key: keyof StaffAdminGrants; label: string; descript
     key: 'stockTransfers',
     label: 'Transfer stock to other branches',
     description:
-      'Request transfers from this branch to another, approve them, and complete them when stock arrives.',
+      'Request, approve and complete transfers to other branches. Fine-tune it under Multi-store sync below.',
   },
 ]
 

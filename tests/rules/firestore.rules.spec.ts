@@ -1116,7 +1116,12 @@ describe('firestore.rules', () => {
 
     async function seedBranches(
       context: Ctx,
-      opts: { adminGrants?: Record<string, boolean>; status?: string } = {}
+      opts: {
+        adminGrants?: Record<string, boolean>
+        status?: string
+        products?: typeof FULL_PRODUCTS
+        multiStoreSync?: typeof FULL_PRODUCTS
+      } = {}
     ) {
       const fs = context.firestore()
       await seedOwner(context, 'u1', 'storvv_enterprise')
@@ -1127,7 +1132,11 @@ describe('firestore.rules', () => {
         status: opts.status ?? 'active',
         admin: true,
         ...(opts.adminGrants ? { adminGrants: opts.adminGrants } : {}),
-        permissions: { products: EMPTY_PRODUCTS, receipts: EMPTY_RECEIPTS },
+        permissions: {
+          products: opts.products ?? EMPTY_PRODUCTS,
+          receipts: EMPTY_RECEIPTS,
+          ...(opts.multiStoreSync ? { multiStoreSync: opts.multiStoreSync } : {}),
+        },
       })
       await setDoc(doc(fs, 'users/u1/stores/s1/members/staff1'), {
         authUid: 'staff1',
@@ -1162,10 +1171,24 @@ describe('firestore.rules', () => {
       await setDoc(doc(fs, 'users/u1/stores/s1/receipts/r1'), { storeId: 's1', total: 100 })
     }
 
-    it('holds every module action in their branch without a stored grant', async () => {
-      await testEnv.withSecurityRulesDisabled((context) => seedBranches(context))
+    it('uses the module actions their stored matrix grants', async () => {
+      await testEnv.withSecurityRulesDisabled((context) =>
+        seedBranches(context, { products: FULL_PRODUCTS })
+      )
       const db = testEnv.authenticatedContext('admin1').firestore()
       await assertSucceeds(
+        setDoc(doc(db, 'users/u1/stores/s1/inventoryFolders/f1'), {
+          storeId: 's1',
+          name: 'Phones',
+          createdBy: 'admin1',
+        })
+      )
+    })
+
+    it('loses a module action the owner turned off, despite the admin flag', async () => {
+      await testEnv.withSecurityRulesDisabled((context) => seedBranches(context))
+      const db = testEnv.authenticatedContext('admin1').firestore()
+      await assertFails(
         setDoc(doc(db, 'users/u1/stores/s1/inventoryFolders/f1'), {
           storeId: 's1',
           name: 'Phones',
@@ -1298,9 +1321,33 @@ describe('firestore.rules', () => {
       await assertFails(getDoc(doc(db, 'users/u1')))
     })
 
+    it('cannot request a transfer the owner left off, even with the stock-transfers extra', async () => {
+      await testEnv.withSecurityRulesDisabled((context) =>
+        seedBranches(context, {
+          adminGrants: { stockTransfers: true },
+          multiStoreSync: { view: true, create: false, edit: false, delete: false },
+        })
+      )
+      const db = testEnv.authenticatedContext('admin1').firestore()
+      await assertFails(
+        setDoc(doc(db, 'users/u1/storeTransfers/t1'), {
+          sourceStoreId: 's1',
+          destinationStoreId: 's2',
+          folderId: 'f1',
+          destinationFolderId: 'f1',
+          createdBy: 'admin1',
+          status: 'pending_approval',
+          items: [],
+        })
+      )
+    })
+
     it('reads other branches’ names and categories when given the stock-transfers extra', async () => {
       await testEnv.withSecurityRulesDisabled((context) =>
-        seedBranches(context, { adminGrants: { stockTransfers: true } })
+        seedBranches(context, {
+          adminGrants: { stockTransfers: true },
+          multiStoreSync: FULL_PRODUCTS,
+        })
       )
       const db = testEnv.authenticatedContext('admin1').firestore()
       await assertSucceeds(getDoc(doc(db, 'users/u1/stores/s2')))

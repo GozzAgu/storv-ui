@@ -5,6 +5,7 @@ import {
   coerceStaffPermissions,
   normalizeStaffAdminGrants,
   permissionsOnAdminChange,
+  permissionsOnTransfersGranted,
   resolveStaffPermissions,
 } from '~/utils/staff-permissions'
 import {
@@ -53,13 +54,25 @@ describe('resolveStaffPermissions for branch admins', () => {
     expect(removed.financials.view).toBe(true)
   })
 
-  it('unlocks transfers when the stock-transfers extra is on', () => {
-    const p = resolveStaffPermissions({
-      admin: true,
-      adminGrants: { stockTransfers: true },
-      permissions: EMPTY_STAFF_PERMISSIONS,
-    })
+  it('uses the stored transfer actions only when the stock-transfers extra is on', () => {
+    const viewOnly = { view: true, create: false, edit: false, delete: false }
+    const stored = { ...FULL_STAFF_PERMISSIONS, multiStoreSync: viewOnly }
+    expect(
+      resolveStaffPermissions({
+        admin: true,
+        adminGrants: { stockTransfers: true },
+        permissions: stored,
+      }).multiStoreSync
+    ).toEqual(viewOnly)
+    expect(
+      resolveStaffPermissions({ admin: true, permissions: FULL_STAFF_PERMISSIONS }).multiStoreSync
+    ).toEqual(EMPTY_STAFF_PERMISSIONS.multiStoreSync)
+  })
+
+  it('starts transfers at full access when the owner turns the extra on', () => {
+    const p = permissionsOnTransfersGranted({ admin: true, permissions: EMPTY_STAFF_PERMISSIONS })
     expect(p.multiStoreSync).toEqual(FULL_STAFF_PERMISSIONS.multiStoreSync)
+    expect(p.products.delete).toBe(false)
   })
 
   it('keeps financial figures at the owner’s stored grant', () => {
