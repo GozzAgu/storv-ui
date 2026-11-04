@@ -47,19 +47,19 @@
             <div>
               <dt class="s-record-totals__label">Total</dt>
               <dd class="s-record-totals__value">
-                {{ formatCurrency(receipt.total, { exact: true }) }}
+                {{ formatCurrency(receipt.total) }}
               </dd>
             </div>
             <div>
               <dt class="s-record-totals__label">Paid</dt>
               <dd class="s-record-totals__value s-record-totals__value--success">
-                {{ formatCurrency(amountPaid, { exact: true }) }}
+                {{ formatCurrency(amountPaid) }}
               </dd>
             </div>
             <div>
               <dt class="s-record-totals__label">Balance</dt>
               <dd class="s-record-totals__value s-record-totals__value--warning">
-                {{ formatCurrency(balanceDue, { exact: true }) }}
+                {{ formatCurrency(balanceDue) }}
               </dd>
             </div>
           </dl>
@@ -68,9 +68,7 @@
             <ul class="s-record-rows">
               <li v-for="(p, idx) in receipt.payments" :key="idx" class="s-record-row">
                 <span>{{ p.method }} · {{ formatDate(p.paidAt) }}</span>
-                <span class="s-record-row__value">{{
-                  formatCurrency(p.amount, { exact: true })
-                }}</span>
+                <span class="s-record-row__value">{{ formatCurrency(p.amount) }}</span>
               </li>
             </ul>
           </div>
@@ -86,9 +84,7 @@
             <div class="s-record-row">
               <dt>Items</dt>
               <dd class="s-record-row__value">
-                {{
-                  formatCurrency(receipt.total - (receipt.commissionAmount ?? 0), { exact: true })
-                }}
+                {{ formatCurrency(receipt.total - (receipt.commissionAmount ?? 0)) }}
               </dd>
             </div>
             <div class="s-record-row">
@@ -98,7 +94,7 @@
                 >
               </dt>
               <dd class="s-record-row__value">
-                {{ formatCurrency(receipt.commissionAmount ?? 0, { exact: true }) }}
+                {{ formatCurrency(receipt.commissionAmount ?? 0) }}
               </dd>
             </div>
           </template>
@@ -109,7 +105,7 @@
           <div class="s-record-row s-record-row--total">
             <dt>Total</dt>
             <dd class="s-record-row__value">
-              {{ formatCurrency(receipt.total, { exact: true }) }}
+              {{ formatCurrency(receipt.total) }}
             </dd>
           </div>
         </dl>

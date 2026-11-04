@@ -1,5 +1,7 @@
 /** Share URLs, UTM tags, and copy for public storefronts. */
 
+import { fullMoneyFractionDigits } from '~/utils/format-money'
+
 export type StorefrontUtmParams = {
   source?: string
   medium?: string
@@ -101,7 +103,7 @@ export function formatStorefrontMoney(amount: number, currency?: string | null):
     return new Intl.NumberFormat(undefined, {
       style: 'currency',
       currency: cur,
-      maximumFractionDigits: 0,
+      ...fullMoneyFractionDigits(Number(amount) || 0),
     }).format(Number(amount) || 0)
   } catch {
     return `${cur} ${Number(amount) || 0}`

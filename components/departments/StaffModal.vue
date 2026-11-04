@@ -149,7 +149,7 @@
         v-if="canEditStaffPermissions"
         v-model="formData.permissions"
         :locked-modules="lockedPermissionModules"
-        :locked-badge="isStoreOwner ? 'Included with admin' : 'Owner only'"
+        :locked-badge="isStoreOwner ? 'Turn on Transfer stock' : 'Owner only'"
       />
       <StaffPaymentPermissions
         v-if="props.staff?.authUid"
@@ -214,11 +214,14 @@ import { useProductAnalytics } from '~/composables/useProductAnalytics'
 import StaffPermissionsPanel from '~/components/departments/StaffPermissionsPanel.vue'
 import StaffPaymentPermissions from '~/components/payments/StaffPaymentPermissions.vue'
 import StaffAdminAccess from '~/components/departments/StaffAdminAccess.vue'
-import type { PermissionModule, StaffPermissions } from '~/types/staff-permissions'
+import type {
+  PermissionModule,
+  StaffAdminAccessResult,
+  StaffPermissions,
+} from '~/types/staff-permissions'
 import {
-  EMPTY_STAFF_PERMISSIONS,
-  FULL_STAFF_PERMISSIONS,
   deriveDefaultPermissions,
+  normalizeStaffAdminGrants,
   resolveStaffPermissions,
 } from '~/utils/staff-permissions'
 
@@ -249,34 +252,23 @@ const { canEditStaffPermissions, isStoreOwner } = usePermissions()
 
 const isRemovedStaff = computed(() => props.staff?.status === 'inactive')
 
-/** Admins hold every module action, so only Financial figures stays a real choice for them. */
+/** An admin's transfers stay off until "Transfer stock to other branches" is on; then tweakable. */
 const targetIsAdmin = ref(false)
-const ADMIN_INCLUDED_MODULES = (Object.keys(EMPTY_STAFF_PERMISSIONS) as PermissionModule[]).filter(
-  (key) => key !== 'financials'
-)
+const targetCanTransfer = ref(false)
 const lockedPermissionModules = computed<PermissionModule[]>(() => {
   if (!isStoreOwner.value) return ['financials']
-  return targetIsAdmin.value ? ADMIN_INCLUDED_MODULES : []
+  return targetIsAdmin.value && !targetCanTransfer.value ? ['multiStoreSync'] : []
 })
 
-/** The matrix this person keeps if admin is later removed. */
-function storedPermissions(): StaffPermissions {
-  return props.staff
-    ? resolveStaffPermissions({ ...props.staff, admin: false })
-    : deriveDefaultPermissions({})
-}
-
-function permissionsToSave(): StaffPermissions {
-  if (!targetIsAdmin.value) return formData.value.permissions
-  return { ...storedPermissions(), financials: formData.value.permissions.financials }
-}
-
-function onAdminSaved(result: { admin: boolean }) {
+/** Admin and transfer changes reset parts of the matrix on the server; show what it saved. */
+function onAdminSaved(result: StaffAdminAccessResult) {
   targetIsAdmin.value = result.admin
-  const financials = formData.value.permissions.financials
-  formData.value.permissions = result.admin
-    ? { ...FULL_STAFF_PERMISSIONS, financials }
-    : { ...storedPermissions(), financials }
+  targetCanTransfer.value = result.adminGrants.stockTransfers
+  formData.value.permissions = resolveStaffPermissions({
+    admin: result.admin,
+    adminGrants: result.adminGrants,
+    permissions: result.permissions ?? formData.value.permissions,
+  })
 }
 
 const formData = ref({
@@ -508,6 +500,7 @@ watch(
     if (isOpen) {
       resetForm()
       targetIsAdmin.value = props.staff?.admin === true
+      targetCanTransfer.value = normalizeStaffAdminGrants(props.staff?.adminGrants).stockTransfers
       if (props.staff) {
         formData.value = {
           firstName: props.staff.firstName || '',
@@ -554,7 +547,7 @@ const handleSubmit = async () => {
         lastName: formData.value.lastName,
         phone: formData.value.phone.trim(),
         position: formData.value.position,
-        ...(canEditStaffPermissions.value ? { permissions: permissionsToSave() } : {}),
+        ...(canEditStaffPermissions.value ? { permissions: formData.value.permissions } : {}),
         hireDate: formData.value.hireDate,
         salary: formData.value.salary,
         ...(formData.value.status !== props.staff.status ? { status: formData.value.status } : {}),

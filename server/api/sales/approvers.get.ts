@@ -1,7 +1,7 @@
 import { defineSalesRoute } from '~/server/utils/sales/http'
 import { resolveStaffPermissions, type LegacyStaffAccessFields } from '~/utils/staff-permissions'
 
-/** People who can approve a discount or trade-in at this branch and have set a PIN. */
+/** People who can approve a big discount at this branch and have set a PIN. */
 export default defineSalesRoute(
   { id: 'sales:approvers', limit: 60, method: 'GET', write: false },
   async ({ db, auth, actor }) => {
@@ -17,8 +17,11 @@ export default defineSalesRoute(
     const members = await actor.store.collection('members').where('status', '==', 'active').get()
     for (const doc of members.docs) {
       if (doc.id === actor.ownerId || !withPin.has(doc.id)) continue
-      const member = doc.data() as LegacyStaffAccessFields & { staffId?: string; departmentId?: string }
-      if (member.admin !== true && !resolveStaffPermissions(member).receipts.edit) continue
+      const member = doc.data() as LegacyStaffAccessFields & {
+        staffId?: string
+        departmentId?: string
+      }
+      if (!resolveStaffPermissions(member).receipts.edit) continue
       let name = 'Manager'
       if (member.staffId && member.departmentId) {
         const staff = await actor.store

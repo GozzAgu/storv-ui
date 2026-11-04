@@ -1,11 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { ref } from 'vue'
+import type { StaffPermissions } from '~/types/staff-permissions'
+import { FULL_STAFF_PERMISSIONS, permissionsOnAdminChange } from '~/utils/staff-permissions'
 
 type Member = {
   authUid?: string
   admin?: boolean
   adminGrants?: Record<string, boolean>
-  permissions?: Record<string, Record<string, boolean>>
+  permissions?: Partial<StaffPermissions>
 }
 
 const userData = ref<{ role?: string } | null>({ role: 'superAdmin' })
@@ -47,11 +49,15 @@ async function perms() {
 describe('usePermissions for branch admins', () => {
   beforeEach(() => {
     userData.value = { role: 'staff' }
-    staffMember.value = { authUid: 'admin1', admin: true }
+    staffMember.value = {
+      authUid: 'admin1',
+      admin: true,
+      permissions: permissionsOnAdminChange(true, undefined),
+    }
     planViewOnly.value = false
   })
 
-  it('treats an admin as able to manage staff and every module', async () => {
+  it('treats an admin as able to manage staff and use their granted modules', async () => {
     const p = await perms()
     expect(p.isAdmin.value).toBe(true)
     expect(p.canManageStaff.value).toBe(true)
@@ -59,6 +65,21 @@ describe('usePermissions for branch admins', () => {
     expect(p.canEditStaffPermissions.value).toBe(true)
     expect(p.can('products', 'delete')).toBe(true)
     expect(p.can('multiStoreSync', 'edit')).toBe(false)
+  })
+
+  it('respects modules the owner turned off for an admin', async () => {
+    staffMember.value = {
+      authUid: 'admin1',
+      admin: true,
+      permissions: {
+        ...FULL_STAFF_PERMISSIONS,
+        products: { view: true, create: false, edit: false, delete: false },
+      },
+    }
+    const p = await perms()
+    expect(p.isAdmin.value).toBe(true)
+    expect(p.can('products', 'delete')).toBe(false)
+    expect(p.can('receipts', 'refund')).toBe(true)
   })
 
   it('unlocks transfers only when the owner turns on the stock-transfers extra', async () => {
@@ -70,10 +91,15 @@ describe('usePermissions for branch admins', () => {
       authUid: 'admin1',
       admin: true,
       adminGrants: { stockTransfers: true },
+      permissions: {
+        ...FULL_STAFF_PERMISSIONS,
+        multiStoreSync: { view: true, create: true, edit: false, delete: false },
+      },
     }
     p = await perms()
     expect(p.hasAdminGrant('stockTransfers')).toBe(true)
     expect(p.can('multiStoreSync', 'create')).toBe(true)
+    expect(p.can('multiStoreSync', 'delete')).toBe(false)
   })
 
   it('keeps owner-only things away from an admin', async () => {

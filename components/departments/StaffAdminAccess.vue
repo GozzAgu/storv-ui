@@ -2,15 +2,16 @@
   <section v-if="visible" class="s-form-section">
     <h3 class="s-form-section__title">Admin</h3>
     <p class="s-form-meta">
-      An admin can do everything in this branch that you can, including adding, editing and removing
-      regular staff. They see financial figures only if you turn on Financial figures for them
-      below. Only you can make or remove admins and manage billing. Saved separately.
+      An admin can add, edit and remove regular staff in this branch. They start with every
+      permission below, and you can turn any of them off. They see financial figures only if you
+      turn on Financial figures for them. Only you can make or remove admins and manage billing.
+      Saved separately.
     </p>
     <SCheckbox
       v-model="admin"
       variant="switch"
       :label="`Make admin of ${branchLabel}`"
-      description="Everything in this branch, and managing regular staff."
+      description="Manages regular staff and starts with every permission below. You can still turn any of them off."
       :disabled="saving"
     />
     <template v-if="admin">
@@ -50,10 +51,10 @@ import { resolveTotpForSensitiveAction } from '~/utils/security-api-errors'
 import { normalizeStaffAdminGrants } from '~/utils/staff-permissions'
 import { useStaffStore } from '~/stores/staff'
 import type { Staff } from '~/composables/useStaff'
-import type { StaffAdminGrants } from '~/types/staff-permissions'
+import type { StaffAdminAccessResult, StaffAdminGrants } from '~/types/staff-permissions'
 
 const props = defineProps<{ staff?: Staff | null; branchName?: string }>()
-const emit = defineEmits<{ saved: [{ admin: boolean; adminGrants: StaffAdminGrants }] }>()
+const emit = defineEmits<{ saved: [StaffAdminAccessResult] }>()
 
 const ADMIN_EXTRAS: Array<{ key: keyof StaffAdminGrants; label: string; description: string }> = [
   {
@@ -88,7 +89,7 @@ const ADMIN_EXTRAS: Array<{ key: keyof StaffAdminGrants; label: string; descript
     key: 'stockTransfers',
     label: 'Transfer stock to other branches',
     description:
-      'Request transfers from this branch to another, approve them, and complete them when stock arrives.',
+      'Request, approve and complete transfers to other branches. Fine-tune it under Multi-store sync below.',
   },
 ]
 

@@ -1,4 +1,5 @@
 import type { UserData } from '~/composables/useUser'
+import { formatFullMoney } from '~/utils/format-money'
 import {
   getPlanDisplayName,
   isTrialActive,
@@ -95,7 +96,7 @@ export function getSubscriptionBillingBanner(
 export function formatPlanPriceKobo(kobo: number, currencySymbol = '₦'): string {
   if (!Number.isFinite(kobo) || kobo <= 0) return `${currencySymbol}0`
   const major = kobo / 100
-  return `${currencySymbol}${major.toLocaleString('en-NG', { maximumFractionDigits: 0 })}`
+  return formatFullMoney(major, currencySymbol)
 }
 
 export function formatBillingCyclePriceLabel(

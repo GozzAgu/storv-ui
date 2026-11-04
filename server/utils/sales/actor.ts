@@ -170,9 +170,9 @@ export function actorCanUseCategory(
 }
 
 /**
- * Who may approve a discount above the staff limit: the owner, a branch admin, or a member with
- * full receipts edit. The same people may give such a discount themselves.
+ * Who may approve a discount above the staff limit: the owner, or a member (branch admins
+ * included) with full receipts edit. The same people may give such a discount themselves.
  */
 export function actorCanApproveDiscounts(actor: StoreActor): boolean {
-  return actor.isOwner || actor.isAdmin || actor.permissions.receipts.edit === true
+  return actor.isOwner || actor.permissions.receipts.edit === true
 }

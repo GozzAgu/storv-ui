@@ -4,6 +4,8 @@ import {
   FULL_STAFF_PERMISSIONS,
   coerceStaffPermissions,
   normalizeStaffAdminGrants,
+  permissionsOnAdminChange,
+  permissionsOnTransfersGranted,
   resolveStaffPermissions,
 } from '~/utils/staff-permissions'
 import {
@@ -26,20 +28,51 @@ function statusOf(fn: () => unknown): number | undefined {
 }
 
 describe('resolveStaffPermissions for branch admins', () => {
-  it('grants every module action regardless of the stored matrix', () => {
-    const p = resolveStaffPermissions({ admin: true, permissions: EMPTY_STAFF_PERMISSIONS })
-    expect(p.products).toEqual(FULL_STAFF_PERMISSIONS.products)
-    expect(p.receipts).toEqual(FULL_STAFF_PERMISSIONS.receipts)
-    expect(p.multiStoreSync).toEqual(EMPTY_STAFF_PERMISSIONS.multiStoreSync)
+  it('follows the stored matrix, so the owner can narrow an admin', () => {
+    const full = resolveStaffPermissions({ admin: true, permissions: FULL_STAFF_PERMISSIONS })
+    expect(full.products).toEqual(FULL_STAFF_PERMISSIONS.products)
+    expect(full.receipts).toEqual(FULL_STAFF_PERMISSIONS.receipts)
+    expect(full.multiStoreSync).toEqual(EMPTY_STAFF_PERMISSIONS.multiStoreSync)
+
+    const narrowed = resolveStaffPermissions({
+      admin: true,
+      permissions: {
+        ...FULL_STAFF_PERMISSIONS,
+        products: { view: true, create: false, edit: false, delete: false },
+      },
+    })
+    expect(narrowed.products.delete).toBe(false)
+    expect(narrowed.receipts.refund).toBe(true)
   })
 
-  it('unlocks transfers when the stock-transfers extra is on', () => {
-    const p = resolveStaffPermissions({
-      admin: true,
-      adminGrants: { stockTransfers: true },
-      permissions: EMPTY_STAFF_PERMISSIONS,
-    })
+  it('starts a new admin with every action and drops a removed one to standard access', () => {
+    const financials = { view: true, create: false, edit: false, delete: false }
+    const granted = permissionsOnAdminChange(true, { financials })
+    expect(granted).toEqual({ ...FULL_STAFF_PERMISSIONS, financials })
+    const removed = permissionsOnAdminChange(false, FULL_STAFF_PERMISSIONS)
+    expect(removed.products.delete).toBe(false)
+    expect(removed.financials.view).toBe(true)
+  })
+
+  it('uses the stored transfer actions only when the stock-transfers extra is on', () => {
+    const viewOnly = { view: true, create: false, edit: false, delete: false }
+    const stored = { ...FULL_STAFF_PERMISSIONS, multiStoreSync: viewOnly }
+    expect(
+      resolveStaffPermissions({
+        admin: true,
+        adminGrants: { stockTransfers: true },
+        permissions: stored,
+      }).multiStoreSync
+    ).toEqual(viewOnly)
+    expect(
+      resolveStaffPermissions({ admin: true, permissions: FULL_STAFF_PERMISSIONS }).multiStoreSync
+    ).toEqual(EMPTY_STAFF_PERMISSIONS.multiStoreSync)
+  })
+
+  it('starts transfers at full access when the owner turns the extra on', () => {
+    const p = permissionsOnTransfersGranted({ admin: true, permissions: EMPTY_STAFF_PERMISSIONS })
     expect(p.multiStoreSync).toEqual(FULL_STAFF_PERMISSIONS.multiStoreSync)
+    expect(p.products.delete).toBe(false)
   })
 
   it('keeps financial figures at the owner’s stored grant', () => {

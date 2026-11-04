@@ -583,7 +583,7 @@ import {
   apexTheme,
   createChartCurrencyAxisFormatter,
 } from '~/utils/analytics-charts'
-import { formatAxisCurrency } from '~/utils/format-compact-currency'
+import { formatFullMoney } from '~/utils/format-money'
 import type { InventoryItem } from '~/stores/inventory'
 import {
   formatMarginPercent,
@@ -1416,8 +1416,8 @@ const insightTiles = computed(() =>
     })
 )
 
-function compactCurrency(value: number) {
-  return formatAxisCurrency(value, preferences.value.currencySymbol || '$')
+function chartCurrency(value: number) {
+  return formatFullMoney(value, preferences.value.currencySymbol || '$')
 }
 
 const overviewRevenueChartOptions = computed(() => ({
@@ -1432,7 +1432,7 @@ const overviewRevenueChartOptions = computed(() => ({
   },
   yaxis: {
     ...revenueChartOptions.value.yaxis,
-    labels: { ...revenueChartOptions.value.yaxis.labels, formatter: compactCurrency },
+    labels: { ...revenueChartOptions.value.yaxis.labels, formatter: chartCurrency },
   },
 }))
 
@@ -1514,7 +1514,7 @@ const inventoryHealthChartOptions = computed(() => {
     labels: ['Available', 'Low stock', 'Sold'],
     colors: [monoRamp.value[0], monoRamp.value[2], monoRamp.value[3]],
     totalLabel: 'Stock value',
-    totalValue: compactCurrency(featureInventoryTotalValue.value),
+    totalValue: chartCurrency(featureInventoryTotalValue.value),
     formatValue: (val) => `${Math.round(val)}%`,
   })
 })
@@ -1530,8 +1530,8 @@ const paymentMethodsChartOptions = computed(() => {
     labels: rows.map((row) => row.label),
     colors: monoRamp.value,
     totalLabel: `${completedReceiptsInPeriod.value.length} sales`,
-    totalValue: compactCurrency(rows.reduce((sum, row) => sum + row.revenue, 0)),
-    formatValue: compactCurrency,
+    totalValue: chartCurrency(rows.reduce((sum, row) => sum + row.revenue, 0)),
+    formatValue: chartCurrency,
     formatTooltip: (val) => formatCurrency(val),
   })
 })
@@ -1542,8 +1542,8 @@ const overviewTopProductsChartOptions = computed(() => {
     labels: topProducts.value.slice(0, 5).map((p) => truncateChartLabel(p.name, 18)),
     colors: monoRamp.value,
     totalLabel: 'Top 5',
-    totalValue: compactCurrency(topProductsChartSeries.value.reduce((sum, v) => sum + v, 0)),
-    formatValue: compactCurrency,
+    totalValue: chartCurrency(topProductsChartSeries.value.reduce((sum, v) => sum + v, 0)),
+    formatValue: chartCurrency,
     formatTooltip: (val) => formatCurrency(val),
   })
 })

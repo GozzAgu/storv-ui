@@ -367,6 +367,7 @@ import { useDashboardPageRefreshRegister } from '~/composables/useDashboardPageR
 import { useStoresStore } from '~/stores/stores'
 import { CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import { isStorefrontDashboardHidden } from '~/utils/storefront-launch'
+import { fullMoneyFractionDigits } from '~/utils/format-money'
 import type { StorefrontInquiryStatus, StorefrontInquiryType } from '~/types/storefront'
 
 const SharePaymentLinkModal = defineAsyncComponent(
@@ -621,7 +622,7 @@ function formatMoney(amount: number) {
     return new Intl.NumberFormat(undefined, {
       style: 'currency',
       currency: 'NGN',
-      maximumFractionDigits: 0,
+      ...fullMoneyFractionDigits(amount),
     }).format(amount)
   } catch {
     return String(amount)

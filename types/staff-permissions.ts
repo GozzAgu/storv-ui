@@ -69,6 +69,13 @@ export interface StaffAdminGrants {
   stockTransfers: boolean
 }
 
+/** What saving admin access returns. `permissions` is set when admin was granted or removed. */
+export interface StaffAdminAccessResult {
+  admin: boolean
+  adminGrants: StaffAdminGrants
+  permissions?: StaffPermissions
+}
+
 export const STAFF_ADMIN_GRANT_KEYS = [
   'branches',
   'paymentsConfirm',

@@ -4,7 +4,7 @@ import { actorCanApproveDiscounts } from '~/server/utils/sales/actor'
 import { setApprovalPin } from '~/server/utils/sales/approval-pin'
 import { requireFreshTotp, readTotpCodeFromRequest } from '~/server/utils/store-auth'
 
-/** Sets the caller's approval PIN for discounts and trade-ins in this business. */
+/** Sets the caller's approval PIN for big discounts in this business. */
 export default defineSalesRoute(
   { id: 'sales:approval-pin', limit: 10, write: false },
   async ({ event, db, auth, actor, input }) => {

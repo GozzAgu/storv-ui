@@ -22,7 +22,6 @@ function conflict(message: string, code: string): never {
 export function canCloseSales(actor: StoreActor): boolean {
   return (
     actor.isOwner ||
-    actor.isAdmin ||
     actor.permissions.receipts.refund === true ||
     actor.permissions.receipts.edit === true
   )

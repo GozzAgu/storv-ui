@@ -88,24 +88,22 @@
                       {{
                         item.discountPercentage
                           ? `${item.discountPercentage}% off`
-                          : `${formatCurrency(item.discountAmount || 0, { exact: true })} off`
+                          : `${formatCurrency(item.discountAmount || 0)} off`
                       }}
                     </p>
                   </td>
                   <td class="s-receipt-doc__center">{{ item.quantity }}</td>
                   <td class="s-receipt-doc__num">
                     <span v-if="item.hasDiscount && item.originalPrice" class="s-receipt-doc__was">
-                      {{ formatCurrency(item.originalPrice, { exact: true }) }}
+                      {{ formatCurrency(item.originalPrice) }}
                     </span>
-                    {{ formatCurrency(item.price, { exact: true }) }}
+                    {{ formatCurrency(item.price) }}
                   </td>
                   <td class="s-receipt-doc__num s-receipt-doc__strong">
                     <span v-if="item.hasDiscount && item.originalPrice" class="s-receipt-doc__was">
-                      {{
-                        formatCurrency((item.originalPrice || 0) * item.quantity, { exact: true })
-                      }}
+                      {{ formatCurrency((item.originalPrice || 0) * item.quantity) }}
                     </span>
-                    {{ formatCurrency(item.price * item.quantity, { exact: true }) }}
+                    {{ formatCurrency(item.price * item.quantity) }}
                   </td>
                 </tr>
               </tbody>
@@ -116,20 +114,20 @@
             <template v-if="hasAnyDiscount">
               <div class="s-receipt-doc__row">
                 <span>Subtotal</span>
-                <span>{{ formatCurrency(calculateSubtotalBeforeDiscount, { exact: true }) }}</span>
+                <span>{{ formatCurrency(calculateSubtotalBeforeDiscount) }}</span>
               </div>
               <div class="s-receipt-doc__row">
                 <span>Discount</span>
-                <span>-{{ formatCurrency(calculateTotalDiscount, { exact: true }) }}</span>
+                <span>-{{ formatCurrency(calculateTotalDiscount) }}</span>
               </div>
             </template>
             <div v-else class="s-receipt-doc__row">
               <span>Subtotal</span>
-              <span>{{ formatCurrency(lineItemsNetTotal, { exact: true }) }}</span>
+              <span>{{ formatCurrency(lineItemsNetTotal) }}</span>
             </div>
             <div v-if="showSwapCreditLine" class="s-receipt-doc__row">
               <span>Trade-in credit</span>
-              <span>-{{ formatCurrency(swapCreditAmount, { exact: true }) }}</span>
+              <span>-{{ formatCurrency(swapCreditAmount) }}</span>
             </div>
             <template v-if="receipt.splitPayments?.length">
               <div
@@ -140,7 +138,7 @@
                 <span
                   >Paid by <span class="s-receipt-doc__capitalize">{{ sp.method }}</span></span
                 >
-                <span>{{ formatCurrency(sp.amount, { exact: true }) }}</span>
+                <span>{{ formatCurrency(sp.amount) }}</span>
               </div>
             </template>
             <div v-else class="s-receipt-doc__row">
@@ -149,7 +147,7 @@
             </div>
             <div class="s-receipt-doc__grand">
               <span>{{ receiptTotalLabel }}</span>
-              <span>{{ formatCurrency(receipt.total, { exact: true }) }}</span>
+              <span>{{ formatCurrency(receipt.total) }}</span>
             </div>
           </div>
         </section>
@@ -220,12 +218,12 @@
           <template v-if="showProfitRows">
             <div>
               <dt>Cost of goods</dt>
-              <dd>{{ formatCurrency(receiptCogs, { exact: true }) }}</dd>
+              <dd>{{ formatCurrency(receiptCogs) }}</dd>
             </div>
             <div>
               <dt>Gross profit</dt>
               <dd class="s-receipt-internal__strong">
-                {{ formatCurrency(receiptGrossProfitAmount, { exact: true }) }}
+                {{ formatCurrency(receiptGrossProfitAmount) }}
                 <span v-if="receiptMarginPercent !== null" class="s-receipt-internal__muted">
                   · {{ receiptMarginPercent }}%
                 </span>
@@ -239,7 +237,7 @@
               }}
             </dt>
             <dd>
-              {{ formatCurrency(receipt.commissionAmount || 0, { exact: true }) }}
+              {{ formatCurrency(receipt.commissionAmount || 0) }}
               <span v-if="receipt.commissionStatus === 'paid'" class="s-receipt-internal__muted">
                 · Paid
               </span>
@@ -479,7 +477,7 @@ function toSpecs(lines: string[]): { label: string; value: string }[] {
 function receiptItemSpecs(item: ReceiptItem) {
   return toSpecs(
     getProductDetailLines(item, {
-      formatMoney: (n) => formatCurrency(n, { exact: true }),
+      formatMoney: (n) => formatCurrency(n),
       omitLineItemFields: true,
     })
   )
@@ -538,7 +536,7 @@ const swapInPrimaryLabel = computed(() => {
 const swapInDetailLines = computed(() => {
   if (!swapInInventoryItem.value) return []
   return getInventoryItemDetailLines(swapInInventoryItem.value, {
-    formatMoney: (n) => formatCurrency(n, { exact: true }),
+    formatMoney: (n) => formatCurrency(n),
     // Customer-facing: never the trade-in's resale price, cost or buyback flags
     omitLineItemFields: true,
   })
@@ -745,7 +743,7 @@ async function receiptElementToJsPdf(el: HTMLElement) {
 
   const receipt = props.receipt
   // Every amount in full on a document the customer keeps: ₦7,000,000.00, never ₦7m.
-  const money = (n: number) => formatCurrency(n, { exact: true })
+  const money = (n: number) => formatCurrency(n)
   const isBalanceDue = receipt.status === 'balance_due'
   const swapDetailsReady = receipt.isSwapIn && swapInInventoryItem.value && !swapInItemLoading.value
 

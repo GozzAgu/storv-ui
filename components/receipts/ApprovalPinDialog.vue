@@ -56,7 +56,7 @@ import SSelect from '~/components/s/SSelect.vue'
 import { useSalesApi, type SaleApproval } from '~/composables/useSalesApi'
 
 /**
- * Asks a manager to approve a discount above the staff limit or a trade-in with their PIN. The
+ * Asks a manager to approve a discount above the staff limit with their PIN. The
  * parent sends the approval with the sale; the server checks the PIN and who the manager is.
  */
 const props = defineProps<{

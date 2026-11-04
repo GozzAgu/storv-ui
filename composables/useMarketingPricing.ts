@@ -8,6 +8,7 @@ import {
   type SubscriptionBillingCycle,
 } from '~/utils/subscription-billing'
 import { SUBSCRIPTION_ADD_ON_PRICES_NGN, type SubscriptionAddOnKind } from '~/types/subscription'
+import { fullMoneyFractionDigits } from '~/utils/format-money'
 
 export type MarketingPlanId = 'micro' | 'medium' | 'enterprise'
 type PaidPlan = Exclude<MarketingPlanId, 'micro'>
@@ -179,7 +180,7 @@ export function useMarketingPricing() {
     return new Intl.NumberFormat(locale.value, {
       style: 'currency',
       currency: pricing.value.currency,
-      maximumFractionDigits: 0,
+      ...fullMoneyFractionDigits(amount),
     }).format(amount)
   }
 
