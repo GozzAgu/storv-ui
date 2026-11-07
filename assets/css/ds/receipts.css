@@ -178,6 +178,11 @@
   color: #a35a06;
 }
 
+.s-receipt-doc__status--edited {
+  background: #fff4e0;
+  color: #8a5300;
+}
+
 .s-receipt-doc__status--refunded {
   background: #fdecec;
   color: #b42323;

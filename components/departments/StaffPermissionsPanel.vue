@@ -44,7 +44,7 @@
         >
           <template v-if="module.key !== 'sellerLoans' && levelOf(module.key) === 'custom'">
             <button
-              v-for="action in CRUD_ACTIONS"
+              v-for="action in crudActionsFor(module.key)"
               :key="action.key"
               type="button"
               class="s-perm__chip"
@@ -94,6 +94,23 @@
               aria-hidden="true"
             />
             Refund &amp; cancel orders
+          </button>
+          <button
+            v-if="module.key === 'receipts'"
+            type="button"
+            class="s-perm__chip"
+            :aria-pressed="modelValue.receipts.edit"
+            :disabled="isLocked('receipts')"
+            title="Correct customer details and notes on a sale. Every edit is recorded."
+            @click="updateModule('receipts', { edit: !modelValue.receipts.edit })"
+          >
+            <Check
+              v-if="modelValue.receipts.edit"
+              :size="14"
+              :stroke-width="2.5"
+              aria-hidden="true"
+            />
+            Edit receipts
           </button>
         </div>
       </li>
@@ -156,6 +173,11 @@ const CRUD_ACTIONS: Array<{ key: 'create' | 'edit' | 'delete'; label: string }> 
   { key: 'delete', label: 'Delete' },
 ]
 
+/** Receipts edit has its own always-visible chip, so Custom only offers create and delete. */
+function crudActionsFor(key: PermissionModule) {
+  return key === 'receipts' ? CRUD_ACTIONS.filter((a) => a.key !== 'edit') : CRUD_ACTIONS
+}
+
 const baseId = useId()
 
 const modules: Array<{
@@ -174,7 +196,7 @@ const modules: Array<{
     key: 'receipts',
     title: 'Receipts',
     viewHint: 'Orders and transactions.',
-    manageHint: 'Create and fully edit receipts.',
+    manageHint: 'Create, edit, and delete receipts. Edits are recorded on the receipt.',
   },
   {
     key: 'leads',

@@ -32,7 +32,8 @@ describe('resolveStaffPermissions for branch admins', () => {
     const full = resolveStaffPermissions({ admin: true, permissions: FULL_STAFF_PERMISSIONS })
     expect(full.products).toEqual(FULL_STAFF_PERMISSIONS.products)
     expect(full.receipts).toEqual(FULL_STAFF_PERMISSIONS.receipts)
-    expect(full.multiStoreSync).toEqual(EMPTY_STAFF_PERMISSIONS.multiStoreSync)
+    // Without the stock-transfers extra an admin can still see transfers, but not change them.
+    expect(full.multiStoreSync).toEqual({ ...EMPTY_STAFF_PERMISSIONS.multiStoreSync, view: true })
 
     const narrowed = resolveStaffPermissions({
       admin: true,
@@ -54,7 +55,7 @@ describe('resolveStaffPermissions for branch admins', () => {
     expect(removed.financials.view).toBe(true)
   })
 
-  it('uses the stored transfer actions only when the stock-transfers extra is on', () => {
+  it('uses the stored transfer actions only when the stock-transfers extra is on; viewing is always allowed', () => {
     const viewOnly = { view: true, create: false, edit: false, delete: false }
     const stored = { ...FULL_STAFF_PERMISSIONS, multiStoreSync: viewOnly }
     expect(
@@ -66,7 +67,23 @@ describe('resolveStaffPermissions for branch admins', () => {
     ).toEqual(viewOnly)
     expect(
       resolveStaffPermissions({ admin: true, permissions: FULL_STAFF_PERMISSIONS }).multiStoreSync
-    ).toEqual(EMPTY_STAFF_PERMISSIONS.multiStoreSync)
+    ).toEqual({ ...EMPTY_STAFF_PERMISSIONS.multiStoreSync, view: true })
+    // Even if the owner's stored matrix hid transfers, an admin keeps read-only visibility.
+    expect(
+      resolveStaffPermissions({
+        admin: true,
+        adminGrants: { stockTransfers: true },
+        permissions: {
+          ...FULL_STAFF_PERMISSIONS,
+          multiStoreSync: EMPTY_STAFF_PERMISSIONS.multiStoreSync,
+        },
+      }).multiStoreSync
+    ).toEqual({ ...EMPTY_STAFF_PERMISSIONS.multiStoreSync, view: true })
+    // Regular staff get nothing from this.
+    expect(resolveStaffPermissions({ permissions: FULL_STAFF_PERMISSIONS }).multiStoreSync).toEqual(
+      FULL_STAFF_PERMISSIONS.multiStoreSync
+    )
+    expect(resolveStaffPermissions({ role: 'staff' }).multiStoreSync.view).toBe(false)
   })
 
   it('starts transfers at full access when the owner turns the extra on', () => {

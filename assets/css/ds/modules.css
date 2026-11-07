@@ -1857,3 +1857,11 @@ html.dark .s-report-mono {
     min-height: var(--s-touch);
   }
 }
+
+/* Stock loans and transfers: every item name, wrapped rather than cut off. */
+.s-loan__items {
+  display: block;
+  max-width: 40ch;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}

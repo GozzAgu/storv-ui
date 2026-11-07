@@ -27,6 +27,7 @@ import { getCurrentStoreId } from '~/composables/useCurrentStore'
 export type NotificationType =
   | 'receipt_created'
   | 'receipt_refunded'
+  | 'receipt_edited'
   | 'receipt_deleted'
   | 'item_created'
   | 'item_updated'

@@ -7,6 +7,7 @@ import { useAuthStore } from '~/stores/auth'
 import { getQueryUserId, getSellerLoanOutsCollection } from '~/composables/useFirestorePaths'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
 import { invalidateFolderItemCaches } from '~/utils/inventory-items-firestore'
+import type { StockItemDetails } from '~/utils/stock-item-details'
 
 /** Max writes per Firestore batch (loan doc + item updates stay in one batch). */
 export const SELLER_LOAN_OUT_BATCH_CAP = 450
@@ -15,6 +16,8 @@ export interface SellerLoanLineSnapshot {
   inventoryItemId: string
   folderId: string
   itemSummary: string
+  /** Serial, IMEI, colour, condition… captured when lent (loans from before this have none). */
+  details?: StockItemDetails
 }
 
 export interface SellerLoanOut {

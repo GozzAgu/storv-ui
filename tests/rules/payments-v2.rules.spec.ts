@@ -360,8 +360,9 @@ describe('firestore.rules: Payments V2', () => {
       )
     })
 
-    it('notes stay editable, and V2 receipts cannot be deleted', async () => {
-      await assertSucceeds(
+    it('notes change only through the audited edit route, and V2 receipts cannot be deleted', async () => {
+      // POST /api/sales/edit records who changed the note and why; a direct write would skip that.
+      await assertFails(
         updateDoc(doc(as('owner1'), `${STORE}/receipts/locked`), { notes: 'Called customer' })
       )
       await assertFails(deleteDoc(doc(as('owner1'), `${STORE}/receipts/locked`)))

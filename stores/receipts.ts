@@ -38,6 +38,7 @@ import { roundMoney } from '~/utils/receipt-balance'
 import { resolveApiPath } from '~/utils/api-url'
 import { summarizeDaySales } from '~/utils/day-sales-summary'
 import { getPermissionAction, resolveStaffPermissions } from '~/utils/staff-permissions'
+import type { ReceiptEditChange } from '~/utils/receipt-edit'
 
 /** Firestore receipt doc to the store's Receipt shape. `fallbackUserId` fills legacy docs. */
 function mapReceiptDoc(doc: QueryDocumentSnapshot, fallbackUserId: string): Receipt {
@@ -96,6 +97,15 @@ export function mapReceiptData(
     paymentsV2: data.paymentsV2 === true,
     hasSerialNumbers: data.hasSerialNumbers === true,
     source: typeof data.source === 'string' ? data.source : undefined,
+    edited: data.edited === true,
+    editCount: typeof data.editCount === 'number' ? data.editCount : undefined,
+    lastEditedAt: data.lastEditedAt?.toDate
+      ? data.lastEditedAt.toDate()
+      : data.lastEditedAt
+      ? new Date(data.lastEditedAt)
+      : undefined,
+    lastEditedByName: typeof data.lastEditedByName === 'string' ? data.lastEditedByName : undefined,
+    lastEditReason: typeof data.lastEditReason === 'string' ? data.lastEditReason : undefined,
     storefrontInquiryId:
       typeof data.storefrontInquiryId === 'string' ? data.storefrontInquiryId : undefined,
   } as Receipt
@@ -226,6 +236,12 @@ export interface Receipt {
   storefrontInquiryId?: string
   createdAt: Date | any
   updatedAt?: Date | any
+  /** Set by POST /api/sales/edit only. History lives in `receipts/{id}/edits`. */
+  edited?: boolean
+  editCount?: number
+  lastEditedAt?: Date
+  lastEditedByName?: string
+  lastEditReason?: string
   createdBy: string // Super admin UID (for fetching/ownership)
   actualCreator?: string // Actual creator's authUid (for display - staff member or super admin)
 }
@@ -729,6 +745,29 @@ export const useReceiptsStore = defineStore('receipts', {
         console.error('Error updating receipt:', error)
         throw new Error(error.message || 'Failed to update receipt')
       }
+    },
+
+    /** Reflect an edit the server just recorded (the live listener confirms it shortly). */
+    applyReceiptEdit(
+      receiptId: string,
+      changes: ReceiptEditChange[],
+      meta: { editCount: number; reason: string }
+    ) {
+      const index = this.receipts.findIndex((r) => r.id === receiptId)
+      if (index === -1) return
+      const patch = Object.fromEntries(changes.map((c) => [c.field, c.to]))
+      this.receipts[index] = {
+        ...this.receipts[index]!,
+        ...patch,
+        edited: true,
+        editCount: meta.editCount,
+        lastEditedAt: new Date(),
+        // The live listener replaces this with the name the server stored.
+        lastEditedByName: 'You',
+        lastEditReason: meta.reason,
+        updatedAt: new Date(),
+      }
+      void useLoyalty().syncSale(receiptId)
     },
 
     /**

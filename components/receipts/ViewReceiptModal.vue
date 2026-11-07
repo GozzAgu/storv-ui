@@ -57,6 +57,16 @@
               {{ receiptStatusLabel }}
             </span>
             <span v-if="receipt.isSwapIn" class="s-receipt-doc__status">Swap-in</span>
+            <span
+              v-if="receipt.edited"
+              class="s-receipt-doc__status s-receipt-doc__status--edited"
+              :title="
+                receipt.lastEditedAt
+                  ? `Edited ${formatReceiptDate(receipt.lastEditedAt)}`
+                  : 'Edited after it was recorded'
+              "
+              >Edited</span
+            >
           </div>
         </section>
 
@@ -770,6 +780,7 @@ async function receiptElementToJsPdf(el: HTMLElement) {
         address: receipt.customerAddress || undefined,
       },
       servedBy: receipt.createdByUserName || undefined,
+      ...(receipt.edited && { editedAt: receipt.lastEditedAt ?? new Date() }),
       items: receipt.items.map((item) => ({
         name: item.itemName,
         details: getProductDetailLines(item, { formatMoney: money, omitLineItemFields: true }),

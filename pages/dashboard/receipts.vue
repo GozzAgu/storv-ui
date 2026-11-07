@@ -199,6 +199,7 @@
                           }}</span>
                           <span class="s-list__secondary">
                             #{{ receipt.receiptNumber }} · {{ formatDate(receipt.date) }}
+                            <template v-if="receipt.edited"> · Edited</template>
                           </span>
                         </button>
                         <div class="s-list__end">
@@ -291,6 +292,12 @@
                               <CopyIcon :size="14" :stroke-width="1.75" aria-hidden="true" />
                             </SIconButton>
                             <SBadge v-if="receipt.isSwapIn" tone="info">Swap</SBadge>
+                            <SBadge
+                              v-if="receipt.edited"
+                              tone="warning"
+                              :title="editedTitle(receipt)"
+                              >Edited</SBadge
+                            >
                           </span>
                         </td>
                         <td>
@@ -477,6 +484,12 @@
             @record-payment="recordPaymentFromDrawer"
             @cancel="cancelFromDrawer"
             @refund="refundFromDrawer"
+            @edit="editFromDrawer"
+          />
+          <EditReceiptModal
+            v-model="showEditReceiptModal"
+            :receipt="selectedReceipt"
+            @edited="handleReceiptEdited"
           />
           <ReturnReceiptModal
             v-model="showReturnReceiptModal"
@@ -533,6 +546,12 @@
       label="History"
       :icon="History"
       @select="runReceiptMenuAction(handleViewReceiptTimeline)"
+    />
+    <SMenuItem
+      v-if="canEditSaleDetails"
+      label="Edit sale"
+      :icon="PencilSquareIcon"
+      @select="runReceiptMenuAction(handleEditReceipt)"
     />
     <SMenuItem
       v-if="receiptForOpenMenu?.status === 'completed' && canEditReceipts"
@@ -603,6 +622,7 @@ import { summarizeDaySales } from '~/utils/day-sales-summary'
 import { getReceiptStatusLabel, getReceiptStatusTone } from '~/utils/receipt-status'
 // @ts-ignore
 import ReturnReceiptModal from '~/components/receipts/ReturnReceiptModal.vue'
+import EditReceiptModal from '~/components/receipts/EditReceiptModal.vue'
 // @ts-ignore
 import DeleteReceiptModal from '~/components/receipts/DeleteReceiptModal.vue'
 // @ts-ignore
@@ -648,8 +668,14 @@ const { confirm: confirmSensitive } = useSensitiveAction()
 const paymentsV2 = usePaymentsV2()
 onMounted(() => void paymentsV2.loadAccess())
 const authStore = useAuthStore()
-const { canManage, canCreate, canEditReceipts, canDeleteReceipts, canViewFinancials } =
-  usePermissions()
+const {
+  canManage,
+  canCreate,
+  canEditReceipts,
+  canEditSaleDetails,
+  canDeleteReceipts,
+  canViewFinancials,
+} = usePermissions()
 const { getUserDocument } = useUser()
 const { getFirestoreInstance } = useFirestore()
 const staffStore = useStaffStore()
@@ -1024,6 +1050,32 @@ function recordPaymentFromDrawer(receipt: Receipt) {
 function cancelFromDrawer(receipt: Receipt) {
   showReceiptDetailsDrawer.value = false
   void cancelOutstandingReceipt(receipt)
+}
+
+function editFromDrawer(receipt: Receipt) {
+  showReceiptDetailsDrawer.value = false
+  handleEditReceipt(receipt)
+}
+
+const showEditReceiptModal = ref(false)
+
+function handleEditReceipt(receipt: Receipt) {
+  selectedReceipt.value = receipt
+  showEditReceiptModal.value = true
+}
+
+/** Reopen the sale so the person sees the change and its history entry. */
+function handleReceiptEdited(receiptId: string) {
+  const updated = receiptsStore.receipts.find((r) => r.id === receiptId)
+  if (!updated) return
+  selectedReceipt.value = updated
+  showReceiptDetailsDrawer.value = true
+}
+
+function editedTitle(receipt: Receipt): string {
+  const who = receipt.lastEditedByName ? ` by ${receipt.lastEditedByName}` : ''
+  const when = receipt.lastEditedAt ? ` on ${formatDate(receipt.lastEditedAt)}` : ''
+  return `Edited${who}${when}`
 }
 
 function refundFromDrawer(receipt: Receipt) {

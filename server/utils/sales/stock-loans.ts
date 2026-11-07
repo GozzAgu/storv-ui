@@ -4,6 +4,7 @@ import type { InventoryFolder, InventoryItem } from '~/stores/inventory'
 import { planHasFeature } from '~/types/subscription'
 import { getInventoryItemDisplayName } from '~/composables/useInventoryItemDisplay'
 import { folderHasSerialNumbers } from '~/utils/receipt-multi-folder'
+import { snapshotStockItemDetails } from '~/utils/stock-item-details'
 import { actorCanApproveDiscounts, actorCanUseCategory, assertId, forbid, type StoreActor } from './actor'
 import { logSaleActivity } from './records'
 
@@ -43,6 +44,8 @@ export async function createStockLoan(db: Firestore, actor: StoreActor, input: R
   }
 
   const loanRef = actor.store.collection('sellerLoanOuts').doc()
+  // Big loans keep fewer details per unit so the loan stays well inside one document.
+  const detailBudget = itemIds.length > 150 ? 6 : 16
   return db.runTransaction(async (tx) => {
     const snaps = await tx.getAll(...itemIds.map((id) => actor.store.collection('inventoryItems').doc(id)))
     const folderIds = [...new Set(snaps.map((s) => String(s.data()?.folderId || '')).filter(Boolean))]
@@ -60,7 +63,13 @@ export async function createStockLoan(db: Firestore, actor: StoreActor, input: R
       if (item.sellerLoanOutId) conflict(`${name} is already out on a loan.`)
       if (item.pendingSaleReceiptId) conflict(`${name} is held on an outstanding order.`)
       if (folderHasSerialNumbers(folder) && item.dateOut) conflict(`${name} has already been sold.`)
-      return { inventoryItemId: snap.id, folderId: String(item.folderId || ''), itemSummary: name.slice(0, 120) }
+      return {
+        inventoryItemId: snap.id,
+        folderId: String(item.folderId || ''),
+        itemSummary: name.slice(0, 120),
+        // Serial, IMEI, colour, condition… so the loan shows exactly which units went out.
+        details: snapshotStockItemDetails(item, { maxKeys: detailBudget }),
+      }
     })
 
     tx.create(loanRef, {

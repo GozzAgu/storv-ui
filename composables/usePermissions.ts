@@ -97,6 +97,9 @@ export const usePermissions = () => {
 
   const canEditReceipts = computed(() => hasReceiptsEditorAccess.value)
 
+  /** Correct a sale's customer details and notes (owner-granted `receipts.edit`). Audited. */
+  const canEditSaleDetails = computed(() => can('receipts', 'edit'))
+
   /** Deleting sales goes through the server: the owner, or an admin with the delete-sales extra. */
   const canDeleteReceipts = computed(() => hasAdminGrant('deleteSales'))
 
@@ -180,6 +183,7 @@ export const usePermissions = () => {
     isReadOnly,
     canCreate,
     canEditReceipts,
+    canEditSaleDetails,
     canDeleteReceipts,
     canManageInventoryItems,
     canCreateInventoryFolders,

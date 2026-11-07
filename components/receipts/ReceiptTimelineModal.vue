@@ -37,10 +37,12 @@
 import SDialog from '~/components/s/SDialog.vue'
 import SEmptyState from '~/components/s/SEmptyState.vue'
 import { computed } from 'vue'
-import { ClockIcon, PlusCircleIcon, ArrowPathIcon } from '~/utils/app-icons'
+import { ClockIcon, PlusCircleIcon, ArrowPathIcon, PencilSquareIcon } from '~/utils/app-icons'
 import { useReceiptTimeline, type ReceiptTimelineEventType } from '~/composables/useReceiptTimeline'
 import type { Receipt } from '~/stores/receipts'
 import { usePreferences } from '~/composables/usePreferences'
+import { useReceiptEdits } from '~/composables/useReceiptEdits'
+import { RECEIPT_EDIT_FIELD_LABELS, type ReceiptEditableField } from '~/utils/receipt-edit'
 
 const props = defineProps<{
   modelValue: boolean
@@ -54,12 +56,39 @@ const emit = defineEmits<{
 const { formatDate } = usePreferences()
 
 const receiptRef = computed(() => props.receipt)
-const { timeline } = useReceiptTimeline(receiptRef)
+const { timeline: baseTimeline } = useReceiptTimeline(receiptRef)
+const { edits } = useReceiptEdits(
+  computed(() => (props.modelValue && props.receipt?.edited ? props.receipt.id : null)),
+  computed(() => props.receipt?.editCount)
+)
 
-function getEventIcon(type: ReceiptTimelineEventType) {
-  const icons: Record<ReceiptTimelineEventType, any> = {
+/** Recorded edits slot into the sale's timeline by date. */
+const timeline = computed(() =>
+  [
+    ...baseTimeline.value,
+    ...edits.value
+      .filter((e) => e.editedAt)
+      .map((e) => ({
+        type: 'edited' as const,
+        label: `Edited by ${e.editedByName}`,
+        description: [
+          e.changes
+            .map((c) => RECEIPT_EDIT_FIELD_LABELS[c.field as ReceiptEditableField] ?? c.field)
+            .join(', '),
+          e.reason && `“${e.reason}”`,
+        ]
+          .filter(Boolean)
+          .join(' · '),
+        date: e.editedAt as Date,
+      })),
+  ].sort((a, b) => a.date.getTime() - b.date.getTime())
+)
+
+function getEventIcon(type: ReceiptTimelineEventType | 'edited') {
+  const icons: Record<ReceiptTimelineEventType | 'edited', any> = {
     created: PlusCircleIcon,
     refunded: ArrowPathIcon,
+    edited: PencilSquareIcon,
   }
   return icons[type] || ClockIcon
 }

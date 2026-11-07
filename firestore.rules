@@ -116,12 +116,19 @@ service cloud.firestore {
     // Single source of truth for "can this member do <action> on <moduleName>". checks the new
     // `permissions` map when present (falling back to legacy for modules not yet stored), else
     // falls back to the legacy role/grant fields entirely.
-    // A branch admin follows their stored matrix like anyone else; their stock transfers also
-    // need the owner-set adminGrants.stockTransfers extra.
+    // A branch admin follows their stored matrix like anyone else, except that they can always
+    // view transfers touching their branch; changing transfers also needs the owner-set
+    // adminGrants.stockTransfers extra.
     // Mirrors utils/staff-permissions.ts#resolveStaffPermissions.
     function memberHasPermission(userId, storeId, moduleName, action) {
-      return isActiveStoreMember(userId, storeId) &&
-        (memberData(userId, storeId).get('admin', false) != true ||
+      return isActiveStoreMember(userId, storeId) && (
+        (moduleName == 'multiStoreSync' && action == 'view' &&
+          memberData(userId, storeId).get('admin', false) == true) ||
+        memberMatrixAllows(userId, storeId, moduleName, action));
+    }
+
+    function memberMatrixAllows(userId, storeId, moduleName, action) {
+      return (memberData(userId, storeId).get('admin', false) != true ||
           moduleName != 'multiStoreSync' ||
           memberData(userId, storeId).get('adminGrants', {}).get('stockTransfers', false) == true) &&
         (memberData(userId, storeId).keys().hasAny(['permissions'])
@@ -364,9 +371,18 @@ service cloud.firestore {
               'paymentMethod', 'status'];
     }
 
+    // Sale edits (customer details, notes) go through POST /api/sales/edit, which records who
+    // changed what and why. The app may not change those fields, or the audit trail, directly.
+    function receiptEditAuditedKeys() {
+      return ['customerName', 'customerEmail', 'customerPhone', 'customerAddress', 'notes',
+              'edited', 'editCount', 'lastEditedAt', 'lastEditedBy', 'lastEditedByName',
+              'lastEditReason'];
+    }
+
     function receiptClientUpdateKeepsPaymentsSafe() {
       let changed = request.resource.data.diff(resource.data).affectedKeys();
       return !changed.hasAny(['paymentSummary'])
+        && !changed.hasAny(receiptEditAuditedKeys())
         && (!('paymentSummary' in resource.data) || !changed.hasAny(receiptMoneyLockedKeys()));
     }
 
@@ -757,6 +773,13 @@ service cloud.firestore {
                           storeAdminHasGrant(userId, storeId, 'deleteSales')) &&
                          resourceMatchesStore(storeId) &&
                          !('paymentSummary' in resource.data));
+
+          // Edit history: written only by POST /api/sales/edit. Anyone who can see the sale can
+          // see how it was changed; nobody can add, change or remove an entry from the app.
+          match /edits/{editId} {
+            allow read: if canAccessStoreData(userId, storeId);
+            allow write: if false;
+          }
         }
 
         // Payments V2 records: written only by server routes (Admin SDK). The recorder may read
@@ -893,7 +916,7 @@ service cloud.firestore {
           allow create: if planAllowsStoreWrite(userId, storeId) && (canCreateReceipt(userId, storeId)
             && !(request.resource.data.get('source', '') in ['payments_v2', 'trade', 'server'])
             && !request.resource.data.get('type', '').matches('^(payment_|payout_|till_count_|trade_|swap_in_|offline_sale_).*')
-            && request.resource.data.get('type', '') != 'receipt_created'
+            && !(request.resource.data.get('type', '') in ['receipt_created', 'receipt_edited'])
             && !('recipientUids' in request.resource.data));
           allow update: if (planAllowsStoreWrite(userId, storeId) && canManageNonInventoryOps(userId, storeId))
             || (canAccessStoreData(userId, storeId)

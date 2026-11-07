@@ -7,7 +7,18 @@ import {
   assertSucceeds,
   type RulesTestEnvironment,
 } from '@firebase/rules-unit-testing'
-import { deleteDoc, deleteField, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
+import {
+  collection,
+  deleteDoc,
+  deleteField,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  setDoc,
+  updateDoc,
+  where,
+} from 'firebase/firestore'
 
 describe('firestore.rules', () => {
   let testEnv: RulesTestEnvironment
@@ -725,6 +736,56 @@ describe('firestore.rules', () => {
     )
   })
 
+  it('sale edits: even receipts.edit holders and the owner cannot change customer details or the audit trail directly', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await seedOwner(context, 'u1', 'storvv_medium')
+      await seedStore(context, 'u1', 's1')
+      await seedMemberWithPermissions(context, 'u1', 's1', 'editor1', {
+        products: EMPTY_PRODUCTS,
+        receipts: { view: true, create: true, edit: true, delete: false, refund: false },
+      })
+      await seedCompletedReceipt(context, 'u1', 's1', 'r1')
+    })
+
+    for (const uid of ['editor1', 'u1']) {
+      const db = testEnv.authenticatedContext(uid).firestore()
+      const ref = doc(db, 'users/u1/stores/s1/receipts/r1')
+      await assertFails(updateDoc(ref, { customerName: 'Someone Else' }))
+      await assertFails(updateDoc(ref, { notes: 'quietly changed' }))
+      await assertFails(updateDoc(ref, { edited: false }))
+      await assertFails(updateDoc(ref, { lastEditedByName: 'Owner' }))
+    }
+  })
+
+  it('sale edits: the edit history is readable by store members and never writable from the app', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await seedOwner(context, 'u1', 'storvv_medium')
+      await seedStore(context, 'u1', 's1')
+      await seedMemberWithPermissions(context, 'u1', 's1', 'editor2', {
+        products: EMPTY_PRODUCTS,
+        receipts: { view: true, create: true, edit: true, delete: false, refund: false },
+      })
+      await seedCompletedReceipt(context, 'u1', 's1', 'r1')
+      await setDoc(doc(context.firestore(), 'users/u1/stores/s1/receipts/r1/edits/e1'), {
+        reason: 'Typo in name',
+        changes: [{ field: 'customerName', from: 'Jane Doe', to: 'Jane Dough' }],
+      })
+    })
+
+    for (const uid of ['editor2', 'u1']) {
+      const db = testEnv.authenticatedContext(uid).firestore()
+      const ref = doc(db, 'users/u1/stores/s1/receipts/r1/edits/e1')
+      await assertSucceeds(getDoc(ref))
+      await assertFails(updateDoc(ref, { reason: 'changed' }))
+      await assertFails(deleteDoc(ref))
+      await assertFails(
+        setDoc(doc(db, 'users/u1/stores/s1/receipts/r1/edits/e2'), { reason: 'forged' })
+      )
+    }
+    const outsider = testEnv.authenticatedContext('stranger').firestore()
+    await assertFails(getDoc(doc(outsider, 'users/u1/stores/s1/receipts/r1/edits/e1')))
+  })
+
   it('permission-map: no member can create a receipt directly (POST /api/sales/create records sales)', async () => {
     await testEnv.withSecurityRulesDisabled(async (context) => {
       await seedOwner(context, 'u1', 'storvv_medium')
@@ -1370,6 +1431,83 @@ describe('firestore.rules', () => {
       const db = testEnv.authenticatedContext('admin1').firestore()
       await assertFails(getDoc(doc(db, 'users/u1/stores/s2')))
       await assertFails(getDoc(doc(db, 'users/u1/stores/s2/inventoryFolders/f1')))
+    })
+
+    it('sees transfers into and out of their branch without the stock-transfers extra, read-only', async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await seedBranches(context)
+        const fs = context.firestore()
+        await seedStore(context, 'u1', 's3')
+        const base = { folderId: 'f1', destinationFolderId: 'f1', createdBy: 'u1', items: [] }
+        await setDoc(doc(fs, 'users/u1/storeTransfers/out1'), {
+          ...base,
+          sourceStoreId: 's1',
+          destinationStoreId: 's2',
+          status: 'in_transit',
+        })
+        await setDoc(doc(fs, 'users/u1/storeTransfers/in1'), {
+          ...base,
+          sourceStoreId: 's2',
+          destinationStoreId: 's1',
+          status: 'pending_approval',
+        })
+        await setDoc(doc(fs, 'users/u1/storeTransfers/other1'), {
+          ...base,
+          sourceStoreId: 's2',
+          destinationStoreId: 's3',
+          status: 'pending_approval',
+        })
+      })
+      const db = testEnv.authenticatedContext('admin1').firestore()
+      await assertSucceeds(getDoc(doc(db, 'users/u1/storeTransfers/out1')))
+      await assertSucceeds(getDoc(doc(db, 'users/u1/storeTransfers/in1')))
+      await assertSucceeds(
+        getDocs(
+          query(collection(db, 'users/u1/storeTransfers'), where('sourceStoreId', '==', 's1'))
+        )
+      )
+      await assertSucceeds(
+        getDocs(
+          query(collection(db, 'users/u1/storeTransfers'), where('destinationStoreId', '==', 's1'))
+        )
+      )
+      // Not a transfer touching their branch.
+      await assertFails(getDoc(doc(db, 'users/u1/storeTransfers/other1')))
+      // Seeing is not changing.
+      await assertFails(updateDoc(doc(db, 'users/u1/storeTransfers/in1'), { status: 'in_transit' }))
+      await assertFails(deleteDoc(doc(db, 'users/u1/storeTransfers/out1')))
+      await assertFails(
+        setDoc(doc(db, 'users/u1/storeTransfers/new1'), {
+          sourceStoreId: 's1',
+          destinationStoreId: 's2',
+          folderId: 'f1',
+          destinationFolderId: 'f1',
+          createdBy: 'admin1',
+          status: 'pending_approval',
+          items: [],
+        })
+      )
+      // Still no access to the other branch's own records.
+      await assertFails(getDoc(doc(db, 'users/u1/stores/s2')))
+
+      // Regular staff and deactivated admins see none of it.
+      const staff = testEnv.authenticatedContext('staff1').firestore()
+      await assertFails(getDoc(doc(staff, 'users/u1/storeTransfers/out1')))
+    })
+
+    it('a deactivated admin loses sight of transfers', async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await seedBranches(context, { status: 'inactive' })
+        await setDoc(doc(context.firestore(), 'users/u1/storeTransfers/out1'), {
+          sourceStoreId: 's1',
+          destinationStoreId: 's2',
+          createdBy: 'u1',
+          status: 'in_transit',
+          items: [],
+        })
+      })
+      const db = testEnv.authenticatedContext('admin1').firestore()
+      await assertFails(getDoc(doc(db, 'users/u1/storeTransfers/out1')))
     })
 
     it('a regular staff member still cannot read another branch’s categories', async () => {

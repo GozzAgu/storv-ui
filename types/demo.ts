@@ -54,6 +54,15 @@ export interface DemoReceipt {
   amountPaid?: number
   balanceDue?: number
   refundReason?: string
+  customerEmail?: string
+  customerAddress?: string
+  notes?: string
+  edited?: boolean
+  editCount?: number
+  /** ISO date. */
+  lastEditedAt?: string
+  lastEditedByName?: string
+  lastEditReason?: string
 }
 
 export interface DemoStoreRecord {
